@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="clasJlib" default="all" basedir=".">
+	
+	<property name="exportDir" value="../cedexport"/>
+	<property name="exportLib" value="${exportDir}/lib"/>
+
+	<target name = "all">
+		<antcall target="snrjar"></antcall>
+		<antcall target="swimmerjar"></antcall>
+		<antcall target="magfieldjar"></antcall>
+		<antcall target="splotjar"></antcall>
+		<antcall target="cedjar"></antcall>
+		<antcall target="bcnujar"></antcall>
+		<antcall target="bcnuimagesjar"></antcall>
+	</target>
+	
+	<!-- snr.jar -->
+	<target name="snrjar">
+		<echo>Building the snr jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="snr/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/snr.jar" basedir="../snr/bin"></jar>		
+	</target>
+	
+	<!-- swimmer.jar -->
+	<target name="swimmerjar">
+		<echo>Building the swimmer jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="swimmer/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/swimmer.jar" basedir="../swimmer/bin"></jar>		
+	</target>
+
+	<!-- magfield.jar -->
+	<target name="magfieldjar">
+		<echo>Building the magfield jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="magfield/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/magfield.jar" basedir="../magfield/bin"></jar>		
+	</target>
+
+	<!-- splot.jar -->
+	<target name="splotjar">
+		<echo>Building the splot jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="splot/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/splot.jar" basedir="../splot/bin"></jar>		
+	</target>
+	
+	<!-- ced.jar -->
+	<target name="cedjar">
+		<echo>Building the ced jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="ced/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/ced.jar" basedir="../ced/bin"></jar>		
+	</target>
+
+	<!-- bcnu.jar -->
+	<target name="bcnujar">
+		<echo>Building the bcnu jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="bcnu/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/bcnu.jar" basedir="../bcnu/bin"></jar>		
+	</target>
+
+	<!-- bcnuimages.jar -->
+	<target name="bcnuimagesjar">
+		<echo>Building the bcnu images jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="bcnu/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/bcnuimages.jar" 
+			includes="images/*.*" basedir="../bCNU">
+		</jar>		
+	</target>
+	
+
+</project>
+
