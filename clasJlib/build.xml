@@ -2,9 +2,6 @@
 
 <project name="clasJlib" default="all" basedir=".">
 	
-	<property name="exportDir" value="../cedexport"/>
-	<property name="exportLib" value="${exportDir}/lib"/>
-
 	<target name = "all">
 		<antcall target="snrjar"></antcall>
 		<antcall target="swimmerjar"></antcall>
@@ -21,7 +18,7 @@
 		<property name="version" value="v1.0"/>
 		<property name="vdir" value="snr/${version}/lib"/>
 		<mkdir dir="${vdir}" />
-		<jar destfile="${vdir}/snr.jar" basedir="../snr/bin"></jar>		
+		<jar destfile="${vdir}/snr.jar" basedir="../snr/src/main/java/cnuphys/bin"></jar>		
 	</target>
 	
 	<!-- swimmer.jar -->
@@ -30,7 +27,7 @@
 		<property name="version" value="v1.0"/>
 		<property name="vdir" value="swimmer/${version}/lib"/>
 		<mkdir dir="${vdir}" />
-		<jar destfile="${vdir}/swimmer.jar" basedir="../swimmer/bin"></jar>		
+		<jar destfile="${vdir}/swimmer.jar" basedir="../swimmer/src/main/java/cnuphys/bin"></jar>		
 	</target>
 
 	<!-- magfield.jar -->
@@ -39,7 +36,7 @@
 		<property name="version" value="v1.0"/>
 		<property name="vdir" value="magfield/${version}/lib"/>
 		<mkdir dir="${vdir}" />
-		<jar destfile="${vdir}/magfield.jar" basedir="../magfield/bin"></jar>		
+		<jar destfile="${vdir}/magfield.jar" basedir="../magfield/src/main/java/cnuphys/bin"></jar>		
 	</target>
 
 	<!-- splot.jar -->
@@ -57,7 +54,7 @@
 		<property name="version" value="v1.0"/>
 		<property name="vdir" value="ced/${version}/lib"/>
 		<mkdir dir="${vdir}" />
-		<jar destfile="${vdir}/ced.jar" basedir="../ced/bin"></jar>		
+		<jar destfile="${vdir}/ced.jar" basedir="../ced/src/main/java/cnuphys/bin"></jar>		
 	</target>
 
 	<!-- bcnu.jar -->
@@ -66,7 +63,7 @@
 		<property name="version" value="v1.0"/>
 		<property name="vdir" value="bcnu/${version}/lib"/>
 		<mkdir dir="${vdir}" />
-		<jar destfile="${vdir}/bcnu.jar" basedir="../bcnu/bin"></jar>		
+		<jar destfile="${vdir}/bcnu.jar" basedir="../bCNU/src/main/java/cnuphys/bin"></jar>		
 	</target>
 
 	<!-- bcnuimages.jar -->
@@ -76,7 +73,7 @@
 		<property name="vdir" value="bcnu/${version}/lib"/>
 		<mkdir dir="${vdir}" />
 		<jar destfile="${vdir}/bcnuimages.jar" 
-			includes="images/*.*" basedir="../bCNU">
+			includes="images/*.*" basedir="../bCNU/src/main/resources">
 		</jar>		
 	</target>
 	

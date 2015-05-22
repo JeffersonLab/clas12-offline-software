@@ -36,7 +36,7 @@ public class ReconstructedDisplayArray extends CheckBoxArray implements
     private static final String DC_TB_CROSS_LABEL = "DC TB Crosses";
 
     /** Label for bst reconstructed crosses button */
-    private static final String BSTRECONS_CROSS_LABEL = "BST Crosses";
+    private static final String BSTRECONS_CROSS_LABEL = "SVT Crosses";
 
     /** Label for ftof reconstructed hits button */
     private static final String FTOFRECONS_HIT_LABEL = "FTOF Hits";
