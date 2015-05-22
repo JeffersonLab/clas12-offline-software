@@ -8,5 +8,5 @@
 	<classpathentry kind="lib" path="/clasJlib/et/v14.0/lib/et-14.0.jar"/>
 	<classpathentry kind="lib" path="/clasJlib/jevio/v4.3.2/lib/jevio-4.3.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

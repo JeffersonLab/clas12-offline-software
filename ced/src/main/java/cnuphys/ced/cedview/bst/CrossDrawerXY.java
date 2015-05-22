@@ -130,7 +130,7 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 	    return;
 	}
 
-	// bst crosses?
+	// svt crosses?
 	BSTDataContainer bstData = _eventManager.getBSTData();
 
 	if (bstData == null) {

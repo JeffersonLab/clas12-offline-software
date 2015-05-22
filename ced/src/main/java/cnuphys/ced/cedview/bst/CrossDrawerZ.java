@@ -49,7 +49,7 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 	Stroke oldStroke = g2.getStroke();
 	g2.setStroke(THICKLINE);
 
-	// bst crosses?
+	// svt crosses?
 	BSTDataContainer bstData = _eventManager.getBSTData();
 	if (bstData.getCrossCount() == 0) {
 	    return;
@@ -148,7 +148,7 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 	    return;
 	}
 
-	// bst crosses?
+	// svt crosses?
 	BSTDataContainer bstData = _eventManager.getBSTData();
 
 	if (_fbRects == null) {

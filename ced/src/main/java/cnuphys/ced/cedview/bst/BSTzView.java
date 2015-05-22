@@ -124,7 +124,7 @@ public class BSTzView extends CedView implements ChangeListener {
 			& ~BaseToolBar.CONTROLPANELBUTTON
 			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
 		AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-		AttributeType.TITLE, "BST Z",
+		AttributeType.TITLE, "SVT Z",
 		AttributeType.STANDARDVIEWDECORATIONS, true);
 
 	view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY

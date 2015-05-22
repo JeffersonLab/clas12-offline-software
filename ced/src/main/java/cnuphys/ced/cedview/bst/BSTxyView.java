@@ -167,7 +167,7 @@ public class BSTxyView extends CedView {
 			& ~BaseToolBar.CONTROLPANELBUTTON
 			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
 		AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-		AttributeType.TITLE, "BST XY",
+		AttributeType.TITLE, "SVT XY",
 		AttributeType.STANDARDVIEWDECORATIONS, true);
 
 	view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
