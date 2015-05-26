@@ -1,5 +1,6 @@
 package cnuphys.ced.clasio;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -9,7 +10,9 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.data.io.DataEvent;
@@ -57,6 +60,9 @@ public class ClasIoEventManager {
 	FILE, ET
     }
 
+    private boolean _enabled = true;
+    
+    
     // flag that set set to <code>true</code> if we are accumulating events
     private boolean _accumulating = false;
 
@@ -264,11 +270,43 @@ public class ClasIoEventManager {
 	if (!file.canRead()) {
 	    throw (new FileNotFoundException("Evio file cannot be read"));
 	}
+	
+	threadedOpenEvioFile(file);
 
-	_evioSource.close();
-	_evioSource.open(file);
-	notifyListeners(file.getPath());
-	_currentEventFile = file;
+//	System.err.println("DUDE");
+//	_evioSource.close();
+//	_evioSource.open(file);
+//	notifyListeners(file.getPath());
+//	_currentEventFile = file;
+//	System.err.println("DONE!");
+    }
+
+    private void threadedOpenEvioFile(File file) {
+
+	final JProgressBar progressBar = Ced.getInstance().getProgressBar();
+	progressBar.setVisible(true);
+	progressBar.setString("Reading " + file.getPath());
+	progressBar.setIndeterminate(true);
+	setEnabled(false);
+
+	class MyWorker extends SwingWorker<String, Void> {
+	    protected String doInBackground() {
+		_evioSource.close();
+		_evioSource.open(file);
+		notifyListeners(file.getPath());
+		_currentEventFile = file;
+		return "Done.";
+	    }
+
+	    protected void done() {
+		progressBar.setString(file.getPath());
+		progressBar.setIndeterminate(false);
+		progressBar.setVisible(false);
+		setEnabled(true);
+	    }
+	}
+
+	new MyWorker().execute();
     }
 
     /**
@@ -465,6 +503,12 @@ public class ClasIoEventManager {
      * @return the next event, if possible
      */
     public EvioDataEvent getNextEvent() {
+	
+	if (!isEnabled()) {
+	    Toolkit.getDefaultToolkit().beep();
+	    return null;
+	}
+	
 	_currentEvent = (EvioDataEvent) _evioSource.getNextEvent();
 	notifyListeners();
 	return _currentEvent;
@@ -739,4 +783,13 @@ public class ClasIoEventManager {
 	int index = Arrays.binarySearch(allBanks, bankName);
 	return index >= 0;
     }
+    
+    public void setEnabled(boolean enabled) {
+	_enabled = enabled;
+    }
+    
+    public boolean isEnabled() {
+	return _enabled;
+    }
+
 }

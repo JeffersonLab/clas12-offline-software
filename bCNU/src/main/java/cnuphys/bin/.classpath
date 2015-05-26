@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/magfield"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
+	<classpathentry kind="lib" path="/clasJlib/bCNU/v1.0/lib/bcnuimages.jar"/>
+	<classpathentry kind="lib" path="/clasJlib/et/v14.0/lib/et-14.0.jar"/>
+	<classpathentry kind="lib" path="/clasJlib/jevio/v4.3.2/lib/jevio-4.3.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
+	<classpathentry kind="output" path="cnuphys/bin"/>
+</classpath>
