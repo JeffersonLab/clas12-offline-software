@@ -281,7 +281,7 @@ public class ClasIoEventManager {
 //	System.err.println("DONE!");
     }
 
-    private void threadedOpenEvioFile(File file) {
+    private void threadedOpenEvioFile(final File file) {
 
 	final JProgressBar progressBar = Ced.getInstance().getProgressBar();
 	progressBar.setVisible(true);
