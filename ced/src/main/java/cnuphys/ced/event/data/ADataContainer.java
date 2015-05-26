@@ -23,11 +23,22 @@ public abstract class ADataContainer implements IClasIoEventListener {
     // the all important event manager
     protected ClasIoEventManager _eventManager;
 
+    //bitwise constants for requesting feedback strings    
+    public static final int PRELIMINARY_FB      = 01;
+    public static final int TRUE_FB             = 02;
+    public static final int DGTZ_FB             = 04;
+    public static final int HITBASED_FB         = 010;
+    public static final int TIMEBASED_FB        = 020;
+    public static final int RECON_FB            = 040;
+    
+    public static final int ALL_FB              = 0xFFFFFFFF;
+        
+    
     // for uniform feedback colors
     public static final String prelimColor = "$orange$";
     public static final String trueColor = "$Alice Blue$";
     public static final String dgtxColor = "$Moccasin$";
-    public static final String reconColor = "$coral$";
+    public static final String reconColor = "$coral$";       
 
     // Common TRUE (simulated) arrays
 
@@ -79,8 +90,13 @@ public abstract class ADataContainer implements IClasIoEventListener {
 	// extractUniqueLundIds();
     }
 
+    /**
+     * Any final stage preparation can be done here.
+     * @param event
+     */
     public abstract void finalEventPrep(EvioDataEvent event);
 
+    //extract unique PIDs for the particles in the title bar
     protected void extractUniqueLundIds(int pid[]) {
 
 	if (pid != null) {
@@ -546,5 +562,85 @@ public abstract class ADataContainer implements IClasIoEventListener {
 	}
 	return array[index];
     }
+    
+    /**
+     * Add feedback strings to a list of strings
+     * @param fbs the list to add to
+     * @param bits bitwise control using the class constants
+     * @param index the index into the bank arrays
+     */
+   public void feedbackStrings(List<String> fbs, int bits, int index) {
+       
+       boolean all = (bits == ALL_FB);
+       
+       if (all || Bits.checkBit(bits, PRELIMINARY_FB)) {
+	   perliminaryFeedback(fbs, index);
+       }
+       if (all || Bits.checkBit(bits, TRUE_FB)) {
+	   trueFeedback(fbs, index);
+       }
+       if (all || Bits.checkBit(bits, DGTZ_FB)) {
+	   dgtzFeedback(fbs, index);	   
+       }
+       if (all || Bits.checkBit(bits, HITBASED_FB)) {
+	   hitBasedFeedback(fbs, index);
+       }
+       if (all || Bits.checkBit(bits, TIMEBASED_FB)) {
+	  timeBasedFeedback(fbs, index);
+       }
+       if (all || Bits.checkBit(bits, RECON_FB)) {
+	   reconFeedback(fbs, index);	   
+       }
+   }
+   
+   /**
+    * Get feedback for data. Default implementation does nothing.
+    * @param fbs the strings to add to.
+    * @param index the index into the arrays
+    */
+   protected void perliminaryFeedback(List<String> fbs, int index) { 
+   }
+    
+   /**
+    * Get feedback for data. Default implementation does nothing.
+    * @param fbs the strings to add to.
+    * @param index the index into the arrays
+    */
+   protected void trueFeedback(List<String> fbs, int index) {
+   }
+    
+   /**
+    * Get feedback for data. Default implementation does nothing.
+    * @param fbs the strings to add to.
+    * @param index the index into the arrays
+    */
+   protected void dgtzFeedback(List<String> fbs, int index) { 
+   }
+    
+   /**
+    * Get feedback for hit based dc data. Default implementation does nothing.
+    * @param fbs the strings to add to.
+    * @param index the index into the arrays
+    */
+   protected void hitBasedFeedback(List<String> fbs, int index) { 
+   }
+    
+   /**
+    * Get feedback for time based dc data. Default implementation does nothing.
+    * @param fbs the strings to add to.
+    * @param index the index into the arrays
+    */
+   protected void timeBasedFeedback(List<String> fbs, int index) {
+   }
+    
+   /**
+    * Get feedback for reconstructed data. Default implementation does nothing.
+    * @param fbs the strings to add to.
+    * @param index the index into the arrays
+    */
+   protected static void reconFeedback(List<String> fbs, int index) {
+   }
+    
+
 
 }

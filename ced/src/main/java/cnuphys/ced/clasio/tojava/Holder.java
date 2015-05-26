@@ -1,14 +1,9 @@
 package cnuphys.ced.clasio.tojava;
 
+
 import javax.swing.JTextArea;
 
-/**
- * Used to hold information during the converstion xml to java process
- * 
- * @author heddle
- *
- */
-public class Holder {
+public class Holder implements Comparable<Holder> {
     String bankName;
     String sectionName;
     String columnName;
@@ -16,6 +11,7 @@ public class Holder {
     String colType;
     String arrayname;
     String getname;
+    String banksectname;
     String javatype = "???[]";
     String getter = "event.get???";
 
@@ -25,14 +21,18 @@ public class Holder {
 	    String columnName, String colInfo, final String colType) {
 	super();
 	textArea = ta;
-	this.bankName = bankName;
-	this.sectionName = sectionName;
-	this.columnName = columnName;
-	this.colInfo = colInfo;
-	this.colType = colType;
+	this.bankName = bankName; // e.g., BST
+	this.sectionName = sectionName; // e.g., true
+	this.columnName = columnName; // e.g., pid
+	this.colInfo = colInfo; // comment
+	this.colType = colType; // type
 
-	arrayname = sectionName.toLowerCase() + "_" + columnName;
-	getname = bankName + "::" + sectionName + "." + columnName;
+	System.err.println("   new holder with bank name: " + bankName);
+
+	arrayname = bankName.toLowerCase() + "_" + sectionName.toLowerCase()
+		+ "_" + columnName;
+	banksectname = bankName + "::" + sectionName;
+	getname = banksectname + "." + columnName;
 
 	if (colType.equalsIgnoreCase("float64")) {
 	    javatype = "double[]";
@@ -65,10 +65,22 @@ public class Holder {
     }
 
     public void getter() {
-	// textArea.append("    if(event.hasBank(\"" + getname +"\")) " +
-	// arrayname + " = " + getter + "(\"" + getname + "\");\n");
+	// true_pid = event.getInt("DC::true.pid");
 	textArea.append("    " + arrayname + " = " + getter + "(\"" + getname
 		+ "\");\n");
+    }
+
+    @Override
+    public int compareTo(Holder o) {
+	int val = bankName.compareToIgnoreCase(o.bankName);
+	if (val == 0) {
+	    val = sectionName.compareToIgnoreCase(o.sectionName);
+	    if (val == 0) {
+		val = columnName.compareToIgnoreCase(o.columnName);
+	    }
+	}
+
+	return val;
     }
 
 }

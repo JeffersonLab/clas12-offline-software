@@ -388,5 +388,7 @@ public class RecEventDataContainer extends ADataContainer {
 
     @Override
     public void finalEventPrep(EvioDataEvent event) {
+	extractUniqueLundIds(eventhb_particle_pid);
+	extractUniqueLundIds(recevent_particle_pid);
     }
 }

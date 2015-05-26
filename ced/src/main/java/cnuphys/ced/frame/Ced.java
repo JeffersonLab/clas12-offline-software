@@ -1,8 +1,11 @@
 package cnuphys.ced.frame;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -18,6 +21,8 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
 import org.jlab.data.io.DataEvent;
@@ -55,6 +60,7 @@ import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.MiniShellView;
 import cnuphys.bCNU.view.PlotView;
@@ -95,6 +101,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     // event menu
     private ClasIoEventMenu _eventMenu;
 
+    //progress bar
+    private JProgressBar _progressBar;
+    private JLabel _progressLabel;
+
+    
     // event number label on menu bar
     private JLabel _eventNumberLabel;
 
@@ -478,6 +489,52 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 
     }
+    
+    private void createProgressBar() {
+	getJMenuBar().add(Box.createHorizontalStrut(20));
+	_progressLabel = new JLabel("             ");
+	_progressLabel.setOpaque(true);
+	_progressLabel.setBackground(Color.white);
+	_progressLabel.setForeground(Color.red);
+
+	_progressBar = new JProgressBar() {
+	    @Override
+	    public void setString(String s) {
+		_progressLabel.setText(s);
+	    }
+	};
+	
+	int mbh = getJMenuBar().getPreferredSize().height;
+	int pbh = 10;
+	final int vgap = Math.min(2, 1 + (mbh-pbh)/2);
+	
+	_progressBar.setVisible(false);
+	Dimension size = new Dimension(60, pbh);
+	_progressBar.setMinimumSize(size);
+	_progressBar.setMaximumSize(size);
+	_progressBar.setPreferredSize(size);
+	_progressBar.setOpaque(true);
+	_progressBar.setBackground(Color.white);
+
+	_progressLabel.setFont(Fonts.mediumFont);
+	
+	JPanel panel = new JPanel() {
+	    @Override
+	    public Insets getInsets() {
+		Insets def = super.getInsets();
+		return new Insets(vgap, def.left + 2, 0,
+			def.right + 2);
+	    }
+	};
+	
+	panel.setOpaque(true);
+	panel.setBackground(Color.white);
+	panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 0));
+	
+	panel.add(_progressLabel);
+	panel.add(_progressBar);
+	getJMenuBar().add(panel);
+   }
 
     private void createEventNumberLabel() {
 	_eventNumberLabel = new JLabel("  Event Number:    ");
@@ -561,6 +618,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	final Ced ced = getInstance();
 
+	ced.createProgressBar();
 	ced.createEventNumberLabel();
 	MagneticFields.addMagneticFieldChangeListener(ced);
 
@@ -580,6 +638,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     @Override
     public void magneticFieldChanged() {
 	fixTitle();
+    }
+    
+    public JProgressBar getProgressBar() {
+	return _progressBar;
     }
 
 }

@@ -20,11 +20,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.xml.sax.SAXException;
 
+
 public class ToJava extends JFrame {
 
     private JFileChooser chooser;
     String dataPath = System.getProperty("user.home")
-	    + "/git/coatjava/lib/bankdefs/clas12";
+	    + "/coatJava/etc/bankdefs/clas12";
 
     private JTextArea textArea;
 
@@ -109,6 +110,7 @@ public class ToJava extends JFrame {
 		e.printStackTrace();
 	    }
 	}
+
     }
 
     public static void main(String arg[]) {
