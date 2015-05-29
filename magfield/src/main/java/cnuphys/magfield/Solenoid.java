@@ -94,19 +94,9 @@ public class Solenoid extends MagneticField {
 	    result[Y] = (float) (brho * sin + bphi * cos);
 	}
 
-	// invert the polarity?
-	if (_invertField) {
-	    result[X] = -result[X];
-	    result[Y] = -result[Y];
-	    result[Z] = -result[Z];
-	}
-
-	// scale the field?
-	if (_scaleField && (_scaleFactor < 0.999)) {
-	    result[X] *= _scaleFactor;
-	    result[Y] *= _scaleFactor;
-	    result[Z] *= _scaleFactor;
-	}
+	result[X] *= _scaleFactor;
+	result[Y] *= _scaleFactor;
+	result[Z] *= _scaleFactor;
 
     }
 

@@ -5,12 +5,16 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.MouseEvent;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.rubberband.Rubberband;
+import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.item.ItemPopupManager;
 
 @SuppressWarnings("serial")
 public class ToolBarToggleButton extends CommonToolBarToggleButton {
@@ -167,4 +171,33 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 	    return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 	}
     }
+    
+    /**
+     * Handle a mouse button 3 event.
+     * 
+     * @param mouseEvent
+     *            the causal event
+     */
+    @Override
+    public void mouseButton3Click(MouseEvent mouseEvent) {
+	Vector<AItem> items = container.getItemsAtPoint(mouseEvent.getPoint());
+
+	boolean consumed = false;
+
+	if ((items != null) && (items.size() > 0)) {
+	    for (AItem item : items) {
+		if (item.isRightClickable()) {
+		    consumed = true;
+		    ItemPopupManager.prepareForPopup(item, container,
+			    mouseEvent.getPoint());
+		    break;
+		}
+	    }
+	}
+
+	if (!consumed) {
+	    container.getView().rightClicked(mouseEvent);
+	}
+    }
+
 }

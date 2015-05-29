@@ -15,10 +15,10 @@ public class ScaleFieldPanel extends JPanel {
 
     private JLabel _label;
     private final MagneticFields.FieldType _fieldType;
-    private JTextField _textField;
+    protected JTextField _textField;
 
     public ScaleFieldPanel(final MagneticFields.FieldType type,
-	    final String name) {
+	    final String name, double defaultVal) {
 	setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 	_fieldType = type;
 
@@ -26,7 +26,7 @@ public class ScaleFieldPanel extends JPanel {
 	_label = new JLabel("Scale " + name);
 
 	// textField
-	_textField = new JTextField("1.0", 5);
+	_textField = new JTextField(String.format("%7.3f", defaultVal), 5);
 
 	KeyAdapter ka = new KeyAdapter() {
 	    @Override
@@ -35,11 +35,11 @@ public class ScaleFieldPanel extends JPanel {
 		    MenuSelectionManager.defaultManager().clearSelectedPath();
 		    try {
 			double sf = Double.parseDouble(_textField.getText());
-			getField().setScaleFactor(sf);
+			getField()._scaleFactor = sf;
 		    } catch (Exception e) {
 			e.printStackTrace();
 		    }
-		    _textField.setText(String.format("%5.2f", getField()
+		    _textField.setText(String.format("%7.3f", getField()
 			    .getScaleFactor()));
 		    MagneticFields.notifyListeners();
 		}
@@ -47,27 +47,27 @@ public class ScaleFieldPanel extends JPanel {
 	};
 	_textField.addKeyListener(ka);
 
-	FocusListener fl = new FocusListener() {
-
-	    @Override
-	    public void focusGained(FocusEvent arg0) {
-	    }
-
-	    @Override
-	    public void focusLost(FocusEvent arg0) {
-		MenuSelectionManager.defaultManager().clearSelectedPath();
-		try {
-		    double sf = Double.parseDouble(_textField.getText());
-		    getField().setScaleFactor(sf);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		_textField.setText(String.format("%5.2f", getField()
-			.getScaleFactor()));
-		MagneticFields.notifyListeners();
-	    }
-	};
-	_textField.addFocusListener(fl);
+//	FocusListener fl = new FocusListener() {
+//
+//	    @Override
+//	    public void focusGained(FocusEvent arg0) {
+//	    }
+//
+//	    @Override
+//	    public void focusLost(FocusEvent arg0) {
+//		MenuSelectionManager.defaultManager().clearSelectedPath();
+//		try {
+//		    double sf = Double.parseDouble(_textField.getText());
+//		    getField().setScaleFactor(sf);
+//		} catch (Exception e) {
+//		    e.printStackTrace();
+//		}
+//		_textField.setText(String.format("%5.2f", getField()
+//			.getScaleFactor()));
+//		MagneticFields.notifyListeners();
+//	    }
+//	};
+//	_textField.addFocusListener(fl);
 
 	add(_label);
 	add(_textField);

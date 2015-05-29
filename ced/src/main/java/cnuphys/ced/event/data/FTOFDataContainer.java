@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jlab.evio.clas12.EvioDataEvent;
 
+import cnuphys.bCNU.log.Log;
 import cnuphys.ced.clasio.ClasIoEventManager;
 
 public class FTOFDataContainer extends ADataContainer {
@@ -980,6 +981,15 @@ public class FTOFDataContainer extends ADataContainer {
 	    sector = ftof2b_dgtz_sector;
 	    paddles = ftof2b_dgtz_paddle;
 	    break;
+	}
+	
+	if (sector == null) {
+	    return -1;
+	}
+	
+	if (paddles == null) {
+	    Log.getInstance().warning("null paddles array in FTOFDataContainer");
+	    return -1;
 	}
 
 	for (int i = 0; i < getHitCount(panelType); i++) {

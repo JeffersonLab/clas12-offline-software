@@ -14,6 +14,7 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
+import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.FTOFDataContainer;
@@ -137,6 +138,10 @@ public class FTOFPanelItem extends PolygonItem {
 	int sector[] = null;
 	int paddles[] = null;
 	int hitCount = ftofData.getHitCount(panelType);
+	
+	if (hitCount < 1) {
+	    return;
+	}
 
 	switch (panelType) {
 	case FTOFDataContainer.PANEL_1A:
@@ -154,6 +159,11 @@ public class FTOFPanelItem extends PolygonItem {
 	    sector = ftofData.ftof2b_dgtz_sector;
 	    paddles = ftofData.ftof2b_dgtz_paddle;
 	    break;
+	}
+	
+	if (paddles == null) {
+	    Log.getInstance().warning("null paddles array in FTOFPanelItem");
+	    return;
 	}
 
 	Color default_fc = Color.red;

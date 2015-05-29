@@ -28,6 +28,7 @@ import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.event.data.ECDataContainer;
 import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.GEMCMetaDataContainer;
 import cnuphys.ced.event.data.GenPartDataContainer;
 import cnuphys.ced.event.data.RecEventDataContainer;
 import cnuphys.ced.frame.Ced;
@@ -99,6 +100,7 @@ public class ClasIoEventManager {
     private BSTDataContainer _bstData;
     private GenPartDataContainer _genPartData;
     private RecEventDataContainer _recEventData;
+    private GEMCMetaDataContainer _gemcMetaData;
 
     // private constructor for singleton
     private ClasIoEventManager() {
@@ -109,6 +111,7 @@ public class ClasIoEventManager {
 	_bstData = new BSTDataContainer(this);
 	_genPartData = new GenPartDataContainer(this);
 	_recEventData = new RecEventDataContainer(this);
+	_gemcMetaData = new GEMCMetaDataContainer(this);
     }
 
     /**
@@ -146,6 +149,16 @@ public class ClasIoEventManager {
     public DCDataContainer getDCData() {
 	return _dcData;
     }
+
+    /**
+     * Get the GEMCMetaData data
+     * 
+     * @return the GEMCMetaData data container
+     */
+    public GEMCMetaDataContainer getGEMCMetaData() {
+	return _gemcMetaData;
+    }
+
 
     /**
      * Get the FTOF data
@@ -272,13 +285,6 @@ public class ClasIoEventManager {
 	}
 	
 	threadedOpenEvioFile(file);
-
-//	System.err.println("DUDE");
-//	_evioSource.close();
-//	_evioSource.open(file);
-//	notifyListeners(file.getPath());
-//	_currentEventFile = file;
-//	System.err.println("DONE!");
     }
 
     private void threadedOpenEvioFile(final File file) {
@@ -290,6 +296,7 @@ public class ClasIoEventManager {
 	setEnabled(false);
 
 	class MyWorker extends SwingWorker<String, Void> {
+	    @Override
 	    protected String doInBackground() {
 		_evioSource.close();
 		_evioSource.open(file);
@@ -298,11 +305,18 @@ public class ClasIoEventManager {
 		return "Done.";
 	    }
 
+	    @Override
 	    protected void done() {
 		progressBar.setString(file.getPath());
 		progressBar.setIndeterminate(false);
 		progressBar.setVisible(false);
 		setEnabled(true);
+		try {
+		    getNextEvent();
+		}
+		catch (Exception e) {
+		    e.printStackTrace();
+		}
 	    }
 	}
 
