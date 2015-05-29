@@ -25,6 +25,7 @@ public class Torus extends MagneticField {
      */
     private Torus() {
 	setCoordinateNames("phi", "rho", "z");
+	_scaleFactor = -1; //default
     }
 
     /**
@@ -121,20 +122,10 @@ public class Torus extends MagneticField {
 	    result[Y] = (float) (bx * sin + by * cos);
 	}
 
-	// invert the polarity?
-	if (_invertField) {
-	    result[X] = -result[X];
-	    result[Y] = -result[Y];
-	    result[Z] = -result[Z];
-	}
-
-	// scale the field?
-	if (_scaleField && (_scaleFactor < 0.999)) {
-	    result[X] *= _scaleFactor;
-	    result[Y] *= _scaleFactor;
-	    result[Z] *= _scaleFactor;
-	}
-    }
+	result[X] *= _scaleFactor;
+	result[Y] *= _scaleFactor;
+	result[Z] *= _scaleFactor;
+   }
 
     /**
      * Convert a array used as a vector to a readable string.

@@ -554,16 +554,18 @@ public class NodePanel extends JPanel implements ActionListener,
 
 	    case CHARSTAR8:
 		// if ((tag == 5) && (num == 1)) {
-		EvioDataEvent event = _eventManager.getCurrentEvent();
+		// EvioDataEvent event = _eventManager.getCurrentEvent();
 		byte bytes[] = node.getStructureBuffer(true).array();
 
 		if (bytes != null) {
 		    String ss = new String(bytes);
 
-		    String tokens[] = FileUtilities.tokens(ss, "\0");
-		    if (tokens != null) {
-			for (String tok : tokens) {
-			    _dataTextArea.append(tok + "\n");
+		    if (ss != null) {
+			String tokens[] = FileUtilities.tokens(ss, "\0");
+			if (tokens != null) {
+			    for (String tok : tokens) {
+				_dataTextArea.append(tok + "\n");
+			    }
 			}
 		    }
 		    // }

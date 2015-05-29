@@ -35,6 +35,7 @@ import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
+import cnuphys.ced.cedview.gemcview.GEMCView;
 import cnuphys.ced.cedview.sectorview.DisplaySectors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventMenu;
@@ -115,6 +116,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private ClasIoMonteCarloView _monteCarloView;
     private ClasIoReconEventView _reconEventView;
     private ClasIoEventView _eventView;
+    private GEMCView _gemcView;
     private BSTxyView _bstXyView;
     private BSTzView _bstZView;
     private DCXYView _dcXyView;
@@ -124,6 +126,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private XMLView _xmlView;
     private MiniShellView _shellView;
     private PlotView _plotView;
+    
 
     // the about string
     private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
@@ -177,7 +180,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    // reaarange some views in virtual space
 	    _virtualView.reconfigure();
 	    _virtualView.moveTo(_allDCView, 0, 4);
-	    _virtualView.moveTo(_eventView, 0, 5, VirtualView.BOTTOMRIGHT);
+	    _virtualView.moveTo(_eventView, 0, 5, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_gemcView, 0, 5, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_bstXyView, 0, 2, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstZView, 0, 2, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_dcXyView, 0, 3);
@@ -215,6 +219,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add event view
 	_eventView = ClasIoEventView.createEventView();
+	
+	//add GEMC data view
+	_gemcView  = new GEMCView();
 
 	// add monte carlo view
 	_monteCarloView = new ClasIoMonteCarloView();
@@ -643,5 +650,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     public JProgressBar getProgressBar() {
 	return _progressBar;
     }
+    
+    /**
+     * Get the GEMC view
+     * @return the GEMC view
+     */
+    public GEMCView getGEMCView() {
+	return _gemcView;
+    }
+
 
 }

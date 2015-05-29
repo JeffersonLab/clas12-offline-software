@@ -339,31 +339,28 @@ public final class Desktop extends JDesktopPane {
      */
 
     public void initializeLookAndFeel() {
-
+	
 	LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
 
 	String preferredLnF[] = { UIManager.getSystemLookAndFeelClassName(),
 		"Windows", UIManager.getCrossPlatformLookAndFeelClassName() };
 
 	if ((lnfinfo == null) || (lnfinfo.length < 1)) {
+		System.err.println("No installed look and feels");
 	    return;
 	}
 
 	for (String targetLnF : preferredLnF) {
 	    for (int i = 0; i < lnfinfo.length; i++) {
-		if (lnfinfo[i].getName().indexOf(targetLnF) >= 0) {
+		String linfoName = lnfinfo[i].getClassName();
+		if (linfoName.indexOf(targetLnF) >= 0) {
 		    try {
 			UIManager.setLookAndFeel(lnfinfo[i].getClassName());
 			UIDefaults defaults = UIManager.getDefaults();
 
-			// replace the horrible windows check icon
-			if ("Windows".equalsIgnoreCase(lnfinfo[i].getName())) {
-			    // defaults.put("RadioButtonMenuItem.checkIcon",
-			    // defaults.get("RadioButton.icon"));
 			    defaults.put("RadioButtonMenuItem.checkIcon",
 				    MetalIconFactory
 					    .getRadioButtonMenuItemIcon());
-			}
 			return;
 		    } catch (Exception e) {
 			e.printStackTrace();

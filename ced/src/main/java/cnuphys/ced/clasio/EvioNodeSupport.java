@@ -186,5 +186,40 @@ public class EvioNodeSupport {
 
 	return array;
     }
+    
+    /**
+     * Find a node with a specific tag and num
+     * @param event the event
+     * @param tag the target tag
+     * @param num the target num
+     * @return the node, or null if not found
+     */
+    public static EvioNode getNode(EvioDataEvent event, int tag, int num) {
+	
+	if (event != null) {
+	    //will rely on sorting see getNodes()
+	    EvioNode nodes[] = getNodes(event);
+	    if (nodes != null) {
+		for (EvioNode node : nodes) {
+		    int ntag = node.getTag();
+		    if (ntag > tag) {
+			return null;
+		    }
+		    else if (ntag == tag) {
+			int nnum = node.getNum();
+			if (nnum > num) {
+			    return null;
+			}
+			else if (nnum == num) {
+			    return node;
+			}
+		    }
+		}
+	    }
+	}
+	
+	
+	return null;
+    }
 
 }

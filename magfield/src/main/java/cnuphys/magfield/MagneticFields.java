@@ -102,10 +102,6 @@ public class MagneticFields {
     private static JRadioButtonMenuItem _perfectSolenoidItem;
     private static JRadioButtonMenuItem _uniformItem;
     private static JRadioButtonMenuItem _macTestItem;
-    private static JCheckBoxMenuItem _invertTorusItem;
-    private static JCheckBoxMenuItem _invertSolenoidItem;
-    private static JCheckBoxMenuItem _scaleTorusItem;
-    private static JCheckBoxMenuItem _scaleSolenoidItem;
 
     private static JRadioButtonMenuItem _interpolateItem;
     private static JRadioButtonMenuItem _nearestNeighborItem;
@@ -208,89 +204,6 @@ public class MagneticFields {
 	return _activeField;
     }
 
-    /**
-     * Set the invert flag (which is set by default) on the given field. Not
-     * relevant for composite or zero field.
-     * 
-     * @param ftype
-     *            one of the enum values
-     * @param invertField
-     *            the flag
-     */
-    public static void invertField(FieldType ftype, boolean invertField) {
-	switch (ftype) {
-	case TORUS:
-	    if (_torus != null) {
-		_torus.setInvertField(invertField);
-	    }
-	    break;
-	case SOLENOID:
-	    if (_solenoid != null) {
-		_solenoid.setInvertField(invertField);
-	    }
-	    break;
-	default:
-	    break;
-	}
-    }
-
-    /**
-     * Check the invert flag on the given field.
-     * 
-     * @param ftype
-     *            the field type
-     * @return <code>if the specified field is inverted. Not relevant for composite or zero field.
-     */
-    public static boolean isFieldInverted(FieldType ftype) {
-
-	boolean inverted = false;
-
-	switch (ftype) {
-	case TORUS:
-	    if (_torus != null) {
-		inverted = _torus.isInvertField();
-	    }
-	    break;
-	case SOLENOID:
-	    if (_solenoid != null) {
-		inverted = _solenoid.isInvertField();
-	    }
-	    break;
-	default:
-	    break;
-	}
-
-	return inverted;
-    }
-
-    /**
-     * Check the invert flag on the given field.
-     * 
-     * @param ftype
-     *            the field type
-     * @return <code>if the specified field is inverted. Not relevant for composite or zero field.
-     */
-    public static boolean isFieldScaled(FieldType ftype) {
-
-	boolean scaled = false;
-
-	switch (ftype) {
-	case TORUS:
-	    if (_torus != null) {
-		scaled = _torus.isScaleField();
-	    }
-	    break;
-	case SOLENOID:
-	    if (_solenoid != null) {
-		scaled = _solenoid.isScaleField();
-	    }
-	    break;
-	default:
-	    break;
-	}
-
-	return scaled;
-    }
 
     /**
      * Get a specific field map.
@@ -535,19 +448,6 @@ public class MagneticFields {
 	    _rotatedCompositeField.add(_solenoid);
 	}
 
-	if (_torus != null) {
-	    // by default change sign of torus field
-	    _torus.setInvertField(true);
-	    System.out.println("default TORUS inverted: "
-		    + _torus.isInvertField());
-	}
-
-	if (_solenoid != null) {
-	    // by default change sign of solenoid field
-	    // _solenoid.setInvertField(true);
-	    System.out.println("default SOLENOID inverted: "
-		    + _solenoid.isInvertField());
-	}
 
 	float result[] = new float[3];
 	_compositeField.field(27.16f, 0.f, 65.71f, result);
@@ -755,16 +655,6 @@ public class MagneticFields {
 	}
 	_zeroItem = createRadioMenuItem("No Field", menu, bg,
 		(_activeField == null), al);
-	_uniformItem = createRadioMenuItem("Constant 5 Tesla Field", menu, bg,
-		(_activeField != null) && (_activeField == _uniform), al);
-	_perfectSolenoidItem = createRadioMenuItem("Perfect 5 Tesla Solenoid",
-		menu, bg, (_activeField != null)
-			&& (_activeField == _perfectSolenoid), al);
-	menu.addSeparator();
-	_invertTorusItem = createCheckBoxMenuItem("Invert Torus", menu,
-		isFieldInverted(FieldType.TORUS), il);
-	_invertSolenoidItem = createCheckBoxMenuItem("Invert Solenoid", menu,
-		isFieldInverted(FieldType.SOLENOID), il);
 
 	// interpolation related
 	menu.addSeparator();
@@ -776,23 +666,25 @@ public class MagneticFields {
 
 	if (_torus != null) {
 	    menu.addSeparator();
-	    _scaleTorusItem = createCheckBoxMenuItem("Scale Torus", menu,
-		    isFieldScaled(FieldType.TORUS), il);
-	    _scaleTorusPanel = new ScaleFieldPanel(FieldType.TORUS, "Torus");
+	    _scaleTorusPanel = new ScaleFieldPanel(FieldType.TORUS, "Torus", 
+		    _torus.getScaleFactor());
 	    menu.add(_scaleTorusPanel);
 	}
 
 	if (_solenoid != null) {
 	    menu.addSeparator();
-	    _scaleSolenoidItem = createCheckBoxMenuItem("Scale Solenoid", menu,
-		    isFieldScaled(FieldType.SOLENOID), il);
 	    _scaleSolenoidPanel = new ScaleFieldPanel(FieldType.SOLENOID,
-		    "Solenoid");
+		    "Solenoid", _solenoid.getScaleFactor());
 	    menu.add(_scaleSolenoidPanel);
 	}
 
 	if (includeTestFields) {
 	    menu.addSeparator();
+		_uniformItem = createRadioMenuItem("Constant 5 Tesla Field", menu, bg,
+			(_activeField != null) && (_activeField == _uniform), al);
+		_perfectSolenoidItem = createRadioMenuItem("Perfect 5 Tesla Solenoid",
+			menu, bg, (_activeField != null)
+				&& (_activeField == _perfectSolenoid), al);
 	    _macTestItem = createRadioMenuItem("Mac's 1/r Test Field", menu,
 		    bg, (_activeField != null) && (_activeField == _macTest),
 		    al);
@@ -801,18 +693,7 @@ public class MagneticFields {
 	_torusItem.setEnabled(_torus != null);
 	_solenoidItem.setEnabled(_solenoid != null);
 	_bothItem.setEnabled((_torus != null) && (_solenoid != null));
-	_invertTorusItem.setEnabled(_torus != null);
-	_invertSolenoidItem.setEnabled(_solenoid != null);
 
-	if (_scaleTorusItem != null) {
-	    _scaleTorusItem.setEnabled(_torus != null);
-	    _scaleTorusPanel.setEnabled(_scaleTorusItem.isSelected());
-	}
-
-	if (_scaleSolenoidItem != null) {
-	    _scaleSolenoidItem.setEnabled(_solenoid != null);
-	    _scaleSolenoidPanel.setEnabled(_scaleSolenoidItem.isSelected());
-	}
 
 	if (_macTestItem != null) {
 	    _macTestItem.setEnabled(_macTest != null);
@@ -877,33 +758,23 @@ public class MagneticFields {
     private static void handleStateChange(ItemEvent iev) {
 	Object source = iev.getSource();
 
-	if (source == _invertTorusItem) {
-	    if (_torus != null) {
-		_torus.setInvertField(_invertTorusItem.isSelected());
-		System.err.println("Torus inverted: " + _torus.isInvertField());
-	    }
-	} else if (source == _invertSolenoidItem) {
-	    if (_solenoid != null) {
-		_solenoid.setInvertField(_invertSolenoidItem.isSelected());
-		System.err.println("Solenoid inverted: "
-			+ _solenoid.isInvertField());
-	    }
-	} else if (source == _scaleTorusItem) {
-	    if (_torus != null) {
-		_torus.setScaleField(_scaleTorusItem.isSelected());
-		_scaleTorusPanel.setEnabled(_scaleTorusItem.isSelected());
-		System.err.println("Torus scaled: " + _torus.isScaleField());
-	    }
-	} else if (source == _scaleSolenoidItem) {
-	    if (_solenoid != null) {
-		_solenoid.setScaleField(_scaleSolenoidItem.isSelected());
-		_scaleSolenoidPanel.setEnabled(_scaleSolenoidItem.isSelected());
-		System.err.println("Solenoid scaled: "
-			+ _solenoid.isScaleField());
-	    }
-	}
 
 	notifyListeners();
+    }
+    
+    protected static void changedScale(MagneticField field) {
+	if (field != null) {
+	    if (field == _torus) {
+		_scaleTorusPanel._textField.setText(String.format("%7.3f", 
+			    field.getScaleFactor()));
+		notifyListeners();
+	    }
+	    else if (field == _solenoid) {
+		_scaleSolenoidPanel._textField.setText(String.format("%7.3f", 
+			    field.getScaleFactor()));
+		notifyListeners();
+	    }
+	}
     }
 
     // notify listeners of a change in the magnetic field

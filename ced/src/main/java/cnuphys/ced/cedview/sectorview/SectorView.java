@@ -882,6 +882,7 @@ public class SectorView extends CedView implements ChangeListener {
 	}
 	// near a swum trajectory?
 	double mindist = _swimTrajectoryDrawer.closestApproach(wp);
+	
 	double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
 		* mindist;
 
@@ -1124,7 +1125,7 @@ public class SectorView extends CedView implements ChangeListener {
      */
     @Override
     public void rightClicked(MouseEvent mouseEvent) {
-
+	
 	JPopupMenu popup = null;
 
 	final DCDataContainer dcData = _eventManager.getDCData();
@@ -1188,6 +1189,7 @@ public class SectorView extends CedView implements ChangeListener {
 		return;
 	    }
 
+	    //get the phi from the trajectory
 	    final double desiredPhi = traj2D.getTrajectory3D().getOriginalPhi();
 
 	    if (popup == null) {

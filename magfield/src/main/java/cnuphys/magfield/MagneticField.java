@@ -112,12 +112,6 @@ public abstract class MagneticField implements IField {
     // set to the zero field?
     protected boolean _zeroField;
 
-    // switch the polarity
-    protected boolean _invertField;
-
-    // switch the polarity
-    protected boolean _scaleField;
-
     // scale factor always treated as positive
     protected double _scaleFactor = 1.0;
 
@@ -129,57 +123,16 @@ public abstract class MagneticField implements IField {
     protected static final int Y = 1;
     protected static final int Z = 2;
 
-    /**
-     * Checks whether the polarity was flipped from what was in the field
-     * map--switching outbenders and inbenders.
-     * 
-     * @return <code>true</code> if the field was inverted.
-     */
-    public boolean isInvertField() {
-	return _invertField;
-    }
 
     /**
-     * Sets whether the polarity is flipped from what was in the field
-     * map--switching outbenders and inbenders.
-     * 
-     * @param invertField
-     *            if set to <code>true</code> the field will be inverted.
-     */
-    public void setInvertField(boolean invertField) {
-	_invertField = invertField;
-    }
-
-    /**
-     * Checks whether the field is scaled by the scale factor
-     * 
-     * @return <code>true</code> if the field is scaled.
-     */
-    public boolean isScaleField() {
-	return _scaleField;
-    }
-
-    /**
-     * Sets whether the field should be scaled
-     * 
-     * @param scaleField
-     *            if set to <code>true</code> the field will be scaled by the
-     *            scaleFactor.
-     */
-    public void setScaleField(boolean scaleField) {
-	_scaleField = scaleField;
-    }
-
-    /**
-     * Scale the field. Only scale factors between 0 and 1 are permitted. For
-     * negative scale factors, use in combination with an inverted setting
+     * Scale the field. 
      * 
      * @param scale
-     *            the scale factor between 0 and 1
+     *            the scale factor 
      */
     public void setScaleFactor(double scale) {
-	_scaleFactor = Math.abs(scale);
-	_scaleFactor = Math.max(0, Math.min(1, _scaleFactor));
+	_scaleFactor = scale;
+	MagneticFields.changedScale(this);
     }
 
     /**
