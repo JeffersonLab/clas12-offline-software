@@ -38,6 +38,7 @@ public class ClasIoEventView extends BaseView {
 	fixSize();
     }
 
+    //a fixed fraction of the screen
     private void fixSize() {
 	Dimension d = GraphicsUtilities.screenFraction(0.80);
 	Dimension size = getSize();

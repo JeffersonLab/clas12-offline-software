@@ -180,8 +180,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    // reaarange some views in virtual space
 	    _virtualView.reconfigure();
 	    _virtualView.moveTo(_allDCView, 0, 4);
-	    _virtualView.moveTo(_eventView, 0, 5, VirtualView.BOTTOMLEFT);
-	    _virtualView.moveTo(_gemcView, 0, 5, VirtualView.BOTTOMRIGHT);
+	    _virtualView.moveTo(_eventView, 0, 5, VirtualView.BOTTOMRIGHT);
+	    _virtualView.moveTo(_gemcView, 0, 5, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstXyView, 0, 2, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstZView, 0, 2, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_dcXyView, 0, 3);
@@ -217,12 +217,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// add a virtual view
 	_virtualView = VirtualView.createVirtualView();
 
-	// add event view
-	_eventView = ClasIoEventView.createEventView();
-	
 	//add GEMC data view
 	_gemcView  = new GEMCView();
 
+	// add event view
+	_eventView = ClasIoEventView.createEventView();
+	
 	// add monte carlo view
 	_monteCarloView = new ClasIoMonteCarloView();
 

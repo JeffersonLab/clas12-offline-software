@@ -312,8 +312,17 @@ public class SectorSuperLayer extends PolygonItem {
 	    System.err.println(wmsg);
 	    return;
 	}
-	Point2D.Double doca[] = _view.getCenteredWorldCircle(_sector - 1,
-		_superLayer - 1, layer, wire, radius);
+	
+	
+	//center is the given wire projected locations
+	
+	Point2D.Double center = _wires[layer][wire];
+	Point2D.Double doca[] = _view.getCenteredWorldCircle(center, radius);
+	
+	
+	
+//	Point2D.Double doca[] = _view.getCenteredWorldCircle(_sector - 1,
+//		_superLayer - 1, layer, wire, radius);
 	Polygon docaPoly = new Polygon();
 	Point dp = new Point();
 	for (int i = 0; i < doca.length; i++) {
