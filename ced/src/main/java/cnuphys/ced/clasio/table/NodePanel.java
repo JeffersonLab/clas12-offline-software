@@ -106,7 +106,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	setLayout(new BorderLayout());
 	addCenter();
 	addEast();
-	addWest();
+//	addWest();
 
 	_isReady = true;
 	fixButtons();

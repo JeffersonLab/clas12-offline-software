@@ -14,8 +14,8 @@ public class ActionLabel extends JLabel {
 
     private static int id = 0;
 
-    private static Font enabledFont = new Font("SansSerif", Font.ITALIC, 9);
-    private static Font disabledFont = new Font("SansSerif", Font.BOLD, 9);
+    private static Font enabledFont = new Font("SansSerif", Font.ITALIC, 8);
+    private static Font disabledFont = new Font("SansSerif", Font.BOLD, 8);
 
     private static Color enabledFg = Color.red;
     private static Color disabledFg = Color.gray;

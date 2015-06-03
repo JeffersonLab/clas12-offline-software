@@ -23,6 +23,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
 import cnuphys.ced.cedview.CedView;
@@ -33,6 +35,7 @@ import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeoConstants;
@@ -559,7 +562,7 @@ public class SectorView extends CedView implements ChangeListener {
     }
 
     /**
-     * Compute the intersections of the guard wires with the current phi plane.
+     * Compute the intersections of the wires with the current phi plane.
      */
     private void computeWireIntersections() {
 	for (int superLayer = 0; superLayer < 6; superLayer++) {
@@ -605,38 +608,20 @@ public class SectorView extends CedView implements ChangeListener {
      * @param radius
      *            the radius in cm
      */
-    public Point2D.Double[] getCenteredWorldCircle(int sector, int superLayer,
-	    int layer, int wire, double radius) {
-
-	double xa = x0[superLayer][layer][wire];
-	double xb = x1[superLayer][layer][wire];
-	double ya = y0[superLayer][layer][wire];
-	double yb = y1[superLayer][layer][wire];
-	double za = z0[superLayer][layer][wire];
-	double zb = z1[superLayer][layer][wire];
-
-	double t = getPlaneIntersectionT(xa, ya, xb, yb);
-	double x = xa + t * (xb - xa);
-	double y = ya + t * (yb - ya);
-	x = Math.sqrt(x * x + y * y);
-	double z = za + t * (zb - za);
+    public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center, double radius) {
 
 	Point2D.Double circle[] = new Point2D.Double[NUMCIRCPNTS];
 	double deltheta = 2.0 * Math.PI / (NUMCIRCPNTS - 1);
 
 	for (int i = 0; i < NUMCIRCPNTS; i++) {
 	    double theta = i * deltheta;
-	    double zz = z + radius * Math.cos(theta);
-	    double xx = x + radius * Math.sin(theta);
-
-	    if (sector > 2) {
-		xx = -xx;
-	    }
-
+	    double zz = center.x + radius * Math.cos(theta);
+	    double xx = center.y + radius * Math.sin(theta);
 	    circle[i] = new Point2D.Double(zz, xx);
 	}
 
 	return circle;
+	
     }
 
     /**
@@ -653,6 +638,11 @@ public class SectorView extends CedView implements ChangeListener {
      */
     private void getIntersection(int superLayer, int layer, int wire,
 	    Point2D.Double wp) {
+	
+//	Point3D p3D = DCGeometry.getIntersection(superLayer, layer-1, wire-1,_transform3D);
+//	wp.x = p3D.x();
+//	wp.y = p3D.y();
+	
 	double xa = x0[superLayer][layer][wire];
 	double xb = x1[superLayer][layer][wire];
 	double ya = y0[superLayer][layer][wire];
@@ -661,11 +651,23 @@ public class SectorView extends CedView implements ChangeListener {
 	double zb = z1[superLayer][layer][wire];
 
 	double t = getPlaneIntersectionT(xa, ya, xb, yb);
+	
 	double x = xa + t * (xb - xa);
 	double y = ya + t * (yb - ya);
 	double z = za + t * (zb - za);
+	
+//	if ((superLayer == 0) && (layer == 4) && (wire == 41)) {
+//	    System.err.println("MY INTERSECTION: (" + x + ", " + y + ", " + z + ")");
+//	    
+//	    Point3D p3D = DCGeometry.getIntersection(superLayer, layer-1, wire-1,_transform3D);
+//	    if (p3D != null) {
+//		System.err.println("p3d: " + p3D);
+//	    }
+//	    
+//	}
 
-	// getWorldFromDetectorXYZ(x, y, z, wp);
+	
+//	 getWorldFromLabXYZ(x, y, z, wp);
 
 	wp.x = z;
 	// wp.y = x;
@@ -687,6 +689,13 @@ public class SectorView extends CedView implements ChangeListener {
     public void getWorldFromLabXYZ(double x, double y, double z,
 	    Point2D.Double wp) {
 	wp.x = z;
+//	
+//	int sector = GeometryManager.getSector(x, y);
+//	wp.y = Math.sqrt(x * x + y * y);
+//	if ((sector > 3)) {
+//	    wp.y = - wp.y;
+//	}
+	 	
 	double phiRotate = Math.toRadians(getPhiRotate());
 	// double beta = Math.atan2(y, x);
 	// double alpha = phiRotate-beta;
@@ -1328,22 +1337,6 @@ public class SectorView extends CedView implements ChangeListener {
 	labXYZ[2] = z;
     }
 
-    /**
-     * Convert clas global (lab) to world
-     * 
-     * @param wp
-     *            the world point
-     * @param labXYZ
-     *            the clas global coordinates
-     */
-    public void labXYZToWorld(Point2D.Double wp, double[] labXYZ) {
-	double x = labXYZ[0];
-	double y = labXYZ[1];
-	double z = labXYZ[2];
-	double perp = Math.sqrt(x * x + y * y);
-	wp.y = perp;
-	wp.x = z;
-    }
 
     /**
      * Convert world (not global, but graphical world) to sector
