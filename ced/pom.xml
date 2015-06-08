@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cnuphys</groupId>
     <artifactId>ced</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     
     <parent>
       <groupId>cnuphys</groupId>
       <artifactId>cnuphys-clas12</artifactId>
       <relativePath>../parent/pom.xml</relativePath>
-      <version>1.0-SNAPSHOT</version>
+      <version>2.0-SNAPSHOT</version>
     </parent>
     
 
@@ -19,13 +19,13 @@
 <dependency>
     <groupId>cnuphys</groupId>
     <artifactId>snr</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
 </dependency>
 
 <dependency>
     <groupId>cnuphys</groupId>
     <artifactId>bCNU</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
 </dependency>
 
 <dependency>
@@ -43,36 +43,36 @@
     <dependency>
         <groupId>cnuphys</groupId>
         <artifactId>splot</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
         <groupId>cnuphys</groupId>
         <artifactId>magfield</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </dependency>
  
  <dependency>
         <groupId>cnuphys</groupId>
         <artifactId>swimmer</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </dependency>
 
  <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clasrec-main</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
   </dependency>
 
 <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas-io</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
   </dependency>
   <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas-geometry</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
   </dependency>
   <dependency>
         <groupId>org.jlab.coda</groupId>
