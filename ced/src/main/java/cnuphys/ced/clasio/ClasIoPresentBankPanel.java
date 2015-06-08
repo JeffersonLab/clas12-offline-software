@@ -1,16 +1,22 @@
 package cnuphys.ced.clasio;
 
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import org.jlab.data.io.DataBank;
+import org.jlab.data.ui.DataBankPanel;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.component.ActionLabel;
+import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.ced.clasio.table.NodeTable;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
@@ -33,6 +39,8 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 
     // the node table
     private NodeTable _nodeTable;
+    
+    private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<String, ClasIoBankDialog>(193);
 
     /**
      * This panel holds all the known banks in a grid of buttons. Banks present
@@ -44,7 +52,7 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
     public ClasIoPresentBankPanel(NodeTable nodeTable) {
 	_nodeTable = nodeTable;
 	_eventManager.addPhysicsListener(this, 1);
-	setLayout(new GridLayout(25, 3, 0, 0));
+	setLayout(new GridLayout(40, 4, 2, 0));
 
 	// get all the known banks
 	String[] allBanks = _eventManager.getKnownBanks();
@@ -60,11 +68,11 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 
     // skip certain irrelevant banks
     private boolean skip(String s) {
-	if ("CLAS6EVENT::particle".equals(s)) {
-	    return true;
-	} else if ("SIMEVENT::particle".equals(s)) {
-	    return true;
-	}
+//	if ("CLAS6EVENT::particle".equals(s)) {
+//	    return true;
+//	} else if ("SIMEVENT::particle".equals(s)) {
+//	    return true;
+//	}
 	return false;
     }
 
@@ -75,23 +83,84 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	    ActionLabel alabel = _alabels.get(s);
 
 	    if (alabel != null) {
-		alabel.setEnabled(_eventManager.isBankInCurrentEvent(s));
+		boolean inCurrent = _eventManager.isBankInCurrentEvent(s);
+		alabel.setEnabled(inCurrent);
+
+		ClasIoBankDialog bd = _dataBanks.get(s);
+		if (bd != null) {
+		    if (inCurrent) {
+			bd.update();
+		    } else {
+			bd.setVisible(false);
+		    }
+		}
 	    }
 	}
     }
 
     // convenience method to make a button
-    private ActionLabel makeLabel(String label) {
-	ActionLabel alabel = new ActionLabel(label, false);
-	alabel.addActionListener(this);
+    private ActionLabel makeLabel(final String label) {
+	final ActionLabel alabel = new ActionLabel(label, false);
+	alabel.setOpaque(true);
+	
+	MouseListener ml = new MouseListener() {
+
+	    @Override
+	    public void mouseClicked(MouseEvent e) {
+		if (_eventManager.isBankInCurrentEvent(label)) {
+		    int clickCount = e.getClickCount();
+		    
+		    if (clickCount == 1) {
+			_nodeTable.makeNameVisible(label);			
+		    }
+		    else if (clickCount == 2) {
+			ClasIoBankDialog bd = _dataBanks.get(label);
+			
+			if (bd == null) {
+			    bd = new ClasIoBankDialog(label);
+			    _dataBanks.put(label, bd);
+			    bd.update();
+			}
+			
+			bd.setVisible(true);
+		    }
+		}
+	    }
+
+	    @Override
+	    public void mousePressed(MouseEvent e) {
+	    }
+
+	    @Override
+	    public void mouseReleased(MouseEvent e) {
+	    }
+
+	    @Override
+	    public void mouseEntered(MouseEvent e) {
+		if (_eventManager.isBankInCurrentEvent(label)) {
+		    alabel.setBackground(Color.yellow);
+		}
+		
+	    }
+
+	    @Override
+	    public void mouseExited(MouseEvent e) {
+		    alabel.setBackground(null);		
+	    }
+	    
+	};
+	
+	alabel.addMouseListener(ml);
+	
+//	alabel.addActionListener(this);
 	_alabels.put(label, alabel);
 	add(alabel);
 	return alabel;
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
-	_nodeTable.makeNameVisible(ae.getActionCommand());
+    public void actionPerformed(ActionEvent ae) {		
+//	_nodeTable.makeNameVisible(ae.getActionCommand());
     }
 
     @Override

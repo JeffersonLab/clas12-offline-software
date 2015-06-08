@@ -1,27 +1,43 @@
 package cnuphys.ced.geometry;
 
+import java.awt.geom.Point2D;
+import java.util.List;
+
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.component.DriftChamberWire;
+import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.dc.DCDetector;
 import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;
+import org.jlab.geom.detector.ftof.FTOFLayer;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 
 public class DCGeometry {
+    
+    private static ConstantProvider dcDataProvider;
+    private static DCDetector dcDetector;
+    private static DCSector sector0;
+    
+    static  {
+	dcDataProvider = DataBaseLoader
+		.getDriftChamberConstants();
+
+	dcDetector = (new DCFactory())
+		.createDetectorCLAS(dcDataProvider);
+
+	sector0 = dcDetector.getSector(0);
+	
+    }
 
     public static void loadArrays() {
 
-	ConstantProvider dcDataProvider = DataBaseLoader
-		.getDriftChamberConstants();
 
-	DCDetector dcDetector = (new DCFactory())
-		.createDetectorCLAS(dcDataProvider);
-
-	DCSector sector0 = dcDetector.getSector(0);
-
-	// get the senswires from the geometry provider
+	// get the sense wires from the geometry provider
 	for (int superlayerId = 0; superlayerId < 6; superlayerId++) {
 	    DCSuperlayer superlayer = sector0.getSuperlayer(superlayerId);
 	    for (int layer = 0; layer < 6; layer++) {
@@ -29,19 +45,36 @@ public class DCGeometry {
 		int numWire = dcLayer.getNumComponents();
 		for (int w = 0; w < numWire; w++) {
 		    Line3D wire = dcLayer.getComponent(w).getLine();
-
+		    
 		    GeometryManager.x0[superlayerId][layer + 1][w + 1] = wire
-			    .origin().x();
-		    GeometryManager.y0[superlayerId][layer + 1][w + 1] = wire
-			    .origin().y();
-		    GeometryManager.z0[superlayerId][layer + 1][w + 1] = wire
-			    .origin().z();
-		    GeometryManager.x1[superlayerId][layer + 1][w + 1] = wire
 			    .end().x();
-		    GeometryManager.y1[superlayerId][layer + 1][w + 1] = wire
+		    GeometryManager.y0[superlayerId][layer + 1][w + 1] = wire
 			    .end().y();
-		    GeometryManager.z1[superlayerId][layer + 1][w + 1] = wire
+		    GeometryManager.z0[superlayerId][layer + 1][w + 1] = wire
 			    .end().z();
+		    GeometryManager.x1[superlayerId][layer + 1][w + 1] = wire
+			    .origin().x();
+		    GeometryManager.y1[superlayerId][layer + 1][w + 1] = wire
+			    .origin().y();
+		    GeometryManager.z1[superlayerId][layer + 1][w + 1] = wire
+			    .origin().z();
+		    
+		    double len2 = wire.length();
+		    Point3D mid = wire.midpoint();
+		    
+		    
+		    if ((superlayerId < 2) && (layer == 3) && (w == 40)) {
+			System.err.println("---------");
+			System.err.println("Superlayer: " + (superlayerId+1) + "  layer: " + (layer+1) + "  wire: " + (w+1));
+			System.err.println("Mid: " + mid);
+			System.err.println("X: " + wire.end().x() + ", "
+				+ wire.origin().x());
+			System.err.println("Y: " + wire.end().y() + ", "
+				+ wire.origin().y());
+			System.err.println("Z: " + wire.end().z() + ", "
+				+ wire.origin().z());
+			System.err.println("dely/delx = " + ((wire.origin().y()-wire.end().y())/(wire.origin().x()-wire.end().x())));
+		    }
 		}
 	    }
 	}
@@ -168,4 +201,38 @@ public class DCGeometry {
 	}
 
     } // loadArrays
+    
+    
+    /**
+     * Get the intersections of a wire with a constant phi plane. If the wire does not
+     * intersect (happens as phi grows) return null;
+     * 
+     * @param superlayer
+     *            0..5
+     * @param layer
+     *            0..5
+     * @param w 0..111
+     * @param transform3D
+     *            the transformation to the constant phi
+     * @return the intersection points (z component will be 0).
+     */
+    public static Point3D getIntersection(int superlayer,
+	    int layer, int w, Transformation3D transform3D) {
+	
+	DCSuperlayer sl = sector0.getSuperlayer(superlayer);
+	DCLayer dcLayer = sl.getLayer(layer);
+	DriftChamberWire dcw = dcLayer.getComponent(w);
+	List<Line3D> lines = dcw.getVolumeCrossSection(transform3D);
+	// perhaps no intersection
+
+	if ((lines == null)  || (lines.size() < 1)) {
+	    return null;
+	}
+	
+//	System.err.println("number of lines: " + lines.size());
+	
+	Line3D line1 = lines.get(0);
+	return line1.end();
+    }
+
 }
