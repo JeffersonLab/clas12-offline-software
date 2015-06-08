@@ -320,7 +320,7 @@ public class ControlPanel extends JPanel {
 		phi_init);
 	if (!isBig) {
 	    _phiSlider.setMajorTickSpacing(10);
-	    _phiSlider.setMinorTickSpacing(1);
+	    _phiSlider.setMinorTickSpacing(2);
 	} else {
 	    _phiSlider.setMajorTickSpacing(60);
 	    _phiSlider.setMinorTickSpacing(10);
@@ -340,7 +340,7 @@ public class ControlPanel extends JPanel {
 	box.add(_phiSlider);
 
 	box.setBorder(new CommonBorder(UnicodeSupport.CAPITAL_DELTA
-		+ UnicodeSupport.SMALL_PHI + " relative to midPlane (deg)"));
+		+ UnicodeSupport.SMALL_PHI + " relative to midplane (deg)"));
 	return box;
     }
 
