@@ -49,7 +49,7 @@ public class BSTGeometry {
     public static void initialize() {
 
 	System.out.println("\n=======================================");
-	System.out.println("====  BST Geometry Inititialization ====");
+	System.out.println("====  BST Geometry Inititialization [BSTGeometry] ====");
 	System.out.println("=======================================");
 
 	// create a ring layer

@@ -1548,6 +1548,17 @@ public class WorldGraphicsUtilities {
     }
 
     /**
+     * Contains test
+     * @param poly the polygon
+     * @param wp the point to test
+     * @return <code>true</code> if the point is contained
+     */
+    public static boolean contains(Point2D.Double poly[], Point2D.Double wp) {
+	Path2D.Double path = worldPolygonToPath(poly);
+	return path.contains(wp);
+    }
+    
+    /**
      * @param poly
      *            array of world points
      * @return the centroid of the polygon. Essentially the center of mass

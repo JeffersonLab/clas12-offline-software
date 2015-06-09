@@ -1,2 +1,0 @@
-# cnuphys
-CNU physics Packages

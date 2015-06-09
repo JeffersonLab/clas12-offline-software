@@ -67,17 +67,20 @@ public class SwimAllRecon implements ISwimAll {
 
 	for (TrajectoryRowData trd : data) {
 	    LundId lid = LundSupport.getInstance().get(trd.getId());
-	    SwimTrajectory traj;
-	    try {
-		traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
-			trd.getYo() / 100, trd.getZo() / 100,
-			trd.getMomentum() / 1000, trd.getTheta(), trd.getPhi(),
-			stopper, PATHMAX, stepSize, Swimmer.CLAS_Tolerance,
-			null);
-		traj.setLundId(lid);
-		Swimming.addReconTrajectory(traj);
-	    } catch (RungeKuttaException e) {
-		e.printStackTrace();
+
+	    if (lid != null) {
+		SwimTrajectory traj;
+		try {
+		    traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
+			    trd.getYo() / 100, trd.getZo() / 100,
+			    trd.getMomentum() / 1000, trd.getTheta(),
+			    trd.getPhi(), stopper, PATHMAX, stepSize,
+			    Swimmer.CLAS_Tolerance, null);
+		    traj.setLundId(lid);
+		    Swimming.addReconTrajectory(traj);
+		} catch (RungeKuttaException e) {
+		    e.printStackTrace();
+		}
 	    }
 
 	}

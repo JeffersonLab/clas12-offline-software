@@ -40,32 +40,10 @@ public class GeometryManager {
     public static ECSector local_Cal_Sector0;
 
     /**
-     * The wire endpoints for sector 1. Other sectors will rotate. The indices
-     * are superlayer 0..5, layer 0..7, wire 0..113. Layers 0 and 7 are guard
-     * layers. Wires 0 and 113 are guard wires.
-     */
-    protected static double x0[][][];
-    protected static double y0[][][];
-    protected static double z0[][][];
-    protected static double x1[][][];
-    protected static double y1[][][];
-    protected static double z1[][][];
-    protected static double shortestWire;
-    protected static double longestWire;
-    protected static double minWireX;
-    protected static double maxWireX;
-    protected static double minWireY;
-    protected static double maxWireY;
-    protected static double minWireZ;
-    protected static double maxWireZ;
-
-    /**
      * Private constructor for the singleton.
      */
     private GeometryManager() {
-	// get the drift chamber wire endpoints
-	getWireEndpoints();
-	getWireLimits();
+	DCGeometry.init();
 
 	// get the FTOF geometry
 	FTOFGeometry.initialize();
@@ -107,11 +85,6 @@ public class GeometryManager {
 
     // read the bst geometry
     private void getBSTPanels() {
-	// TODO use the providers when ready
-
-	System.out.println("\n=======================================");
-	System.out.println("====  BST Geometry Inititialization ====");
-	System.out.println("=======================================");
 
 	// use the geometry service
 
@@ -134,238 +107,6 @@ public class GeometryManager {
 
     }
 
-    /**
-     * Get the driftchamber wire endpoints (units are cm)
-     */
-    private void getWireEndpoints() {
-
-	System.out.println("\n=======================================");
-	System.out.println("====  DC Geometry Inititialization ====");
-	System.out.println("=======================================");
-
-	// The wire endpoints for sector 1. Other sectors will rotate. The
-	// indices
-	// are superlayer 0..5, layer 0..7, wire 0..113. Layers 0 and 7 are
-	// guard layers. Wires 0 and 113 are guard wires.
-
-	int numSL = GeoConstants.NUM_SUPERLAYER;
-	int numLplus2 = GeoConstants.NUM_LAYER + 2; // plus 2 for guard
-	// layers
-	int numWplus2 = GeoConstants.NUM_WIRE + 2; // +2 for guard wires
-
-	x0 = new double[numSL][numLplus2][numWplus2];
-	y0 = new double[numSL][numLplus2][numWplus2];
-	z0 = new double[numSL][numLplus2][numWplus2];
-	x1 = new double[numSL][numLplus2][numWplus2];
-	y1 = new double[numSL][numLplus2][numWplus2];
-	z1 = new double[numSL][numLplus2][numWplus2];
-
-	// try common geometry first
-	if (getWireEndpointsFromClasGeometry()) {
-	    return;
-	}
-
-	// try from file
-	File file = FileUtilities.findFile(Ced.dataPath, "sector_1_wires.dat");
-
-	System.out.println("Attempting to read DC geomtery file: ["
-		+ (file == null ? "null" : file.getPath()) + "]\n");
-
-	if ((file != null) && file.exists()) {
-	    Log.getInstance().info(
-		    "Wire endpoint file found: " + file.getPath());
-
-	    try {
-		FileReader fileReader = new FileReader(file);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-		while (true) {
-		    String s = bufferedReader.readLine();
-		    if (s == null) {
-			break;
-		    } else {
-			if (!s.startsWith("!")) {
-			    String tokens[] = FileUtilities.tokens(s, " ");
-
-			    // -1 converts to zero based
-			    int superlayer = Integer.parseInt(tokens[0]) - 1;
-			    int layer = Integer.parseInt(tokens[1]) - 1;
-			    int wire = Integer.parseInt(tokens[2]) - 1;
-
-			    double xx0 = Double.parseDouble(tokens[3]);
-			    double yy0 = Double.parseDouble(tokens[4]);
-			    double zz0 = Double.parseDouble(tokens[5]);
-			    double xx1 = Double.parseDouble(tokens[6]);
-			    double yy1 = Double.parseDouble(tokens[7]);
-			    double zz1 = Double.parseDouble(tokens[8]);
-
-			    x0[superlayer][layer][wire] = xx0;
-			    y0[superlayer][layer][wire] = yy0;
-			    z0[superlayer][layer][wire] = zz0;
-			    x1[superlayer][layer][wire] = xx1;
-			    y1[superlayer][layer][wire] = yy1;
-			    z1[superlayer][layer][wire] = zz1;
-			}
-		    }
-		}
-		fileReader.close();
-	    } catch (FileNotFoundException e) {
-		Log.getInstance().exception(e);
-		e.printStackTrace();
-	    } catch (IOException e) {
-		Log.getInstance().exception(e);
-		e.printStackTrace();
-	    }
-
-	    Log.getInstance().info("Successfully read in wire endpoints.");
-
-	} else {
-	    Log.getInstance().warning(
-		    "Wire endpoint file not found at: "
-			    + ((file == null) ? "???" : file.getPath()));
-
-	    System.out.println("Wire endpoint file not found at: "
-		    + ((file == null) ? "???" : file.getPath()));
-	}
-
-    }
-
-    private void getWireLimits() {
-
-	shortestWire = Double.POSITIVE_INFINITY;
-	longestWire = Double.NEGATIVE_INFINITY;
-	minWireX = Double.POSITIVE_INFINITY;
-	maxWireX = Double.NEGATIVE_INFINITY;
-	minWireY = Double.POSITIVE_INFINITY;
-	maxWireY = Double.NEGATIVE_INFINITY;
-	minWireZ = Double.POSITIVE_INFINITY;
-	maxWireZ = Double.NEGATIVE_INFINITY;
-
-	for (int supl = 0; supl < 6; supl++) {
-	    for (int lay = 0; lay < 8; lay++) {
-		for (int w = 0; w < 114; w++) {
-		    double xx0 = x0[supl][lay][w];
-		    double yy0 = y0[supl][lay][w];
-		    double zz0 = z0[supl][lay][w];
-		    double xx1 = x1[supl][lay][w];
-		    double yy1 = y1[supl][lay][w];
-		    double zz1 = z1[supl][lay][w];
-
-		    double delX = xx1 - xx0;
-		    double delY = yy1 - yy0;
-		    double delZ = zz1 - zz0;
-		    double wireLen = Math.sqrt(delX * delX + delY * delY + delZ
-			    * delZ);
-
-		    shortestWire = Math.min(shortestWire, wireLen);
-		    longestWire = Math.max(longestWire, wireLen);
-		    minWireX = Math.min(minWireX, xx0);
-		    minWireX = Math.min(minWireX, xx1);
-		    maxWireX = Math.max(maxWireX, xx0);
-		    maxWireX = Math.max(maxWireX, xx1);
-		    minWireY = Math.min(minWireY, yy0);
-		    minWireY = Math.min(minWireY, yy1);
-		    maxWireY = Math.max(maxWireY, yy0);
-		    maxWireY = Math.max(maxWireY, yy1);
-		    minWireZ = Math.min(minWireZ, zz0);
-		    minWireZ = Math.min(minWireZ, zz1);
-		    maxWireZ = Math.max(maxWireZ, zz0);
-		    maxWireZ = Math.max(maxWireZ, zz1);
-		}
-	    }
-	}
-
-	Log.getInstance().info("Shortest Wire: " + shortestWire);
-	Log.getInstance().info("Longest Wire: " + longestWire);
-	// System.err.println("minX: " + minWireX);
-	// System.err.println("maxX: " + maxWireX);
-	// System.err.println("minY: " + minWireY);
-	// System.err.println("maxY: " + maxWireY);
-	// System.err.println("minZ: " + minWireZ);
-	// System.err.println("maxZ: " + maxWireZ);
-
-    } // getWireLimits
-
-    // try to get the endpoints from Gagik's package
-    private boolean getWireEndpointsFromClasGeometry() {
-	try {
-	    DCGeometry.loadArrays();
-	    String message = "Got wire endpoints from common geometry clas-geometry package.";
-	    Log.getInstance().config(message);
-	    System.out.println(message);
-	    return true;
-	} catch (Exception e) {
-	    System.err.println("Error getting DC geometry from clas-geometry.");
-	    e.printStackTrace();
-	    return false;
-	}
-    }
-
-    /**
-     * Get the wire endpoint coordinate for sector 1. Other sectors will rotate.
-     * The indices are superlayer 1..6, layer 1..8, wire 1..114. Superlayers 1
-     * and 8 are guard layers. Wires 1 and 114 are guard wires.
-     * 
-     * @return the y0 array
-     */
-    public double[][][] getX0() {
-	return x0;
-    }
-
-    /**
-     * Get the wire endpoint coordinate for sector 1. Other sectors will rotate.
-     * The indices are superlayer 1..6, layer 1..8, wire 1..114. Superlayers 1
-     * and 8 are guard layers. Wires 1 and 114 are guard wires.
-     * 
-     * @return the y0 array
-     */
-    public double[][][] getY0() {
-	return y0;
-    }
-
-    /**
-     * Get the wire endpoint coordinate for sector 1. Other sectors will rotate.
-     * The indices are superlayer 1..6, layer 1..8, wire 1..114. Superlayers 1
-     * and 8 are guard layers. Wires 1 and 114 are guard wires.
-     * 
-     * @return the z0 array
-     */
-    public double[][][] getZ0() {
-	return z0;
-    }
-
-    /**
-     * Get the wire endpoint coordinate for sector 1. Other sectors will rotate.
-     * The indices are superlayer 1..6, layer 1..8, wire 1..114. Superlayers 1
-     * and 8 are guard layers. Wires 1 and 114 are guard wires.
-     * 
-     * @return the x1 array
-     */
-    public double[][][] getX1() {
-	return x1;
-    }
-
-    /**
-     * Get the wire endpoint coordinate for sector 1. Other sectors will rotate.
-     * The indices are superlayer 1..6, layer 1..8, wire 1..114. Superlayers 1
-     * and 8 are guard layers. Wires 1 and 114 are guard wires.
-     * 
-     * @return the y1 array
-     */
-    public double[][][] getY1() {
-	return y1;
-    }
-
-    /**
-     * Get the wire endpoint coordinate for sector 1. Other sectors will rotate.
-     * The indices are superlayer 1..6, layer 1..8, wire 1..114. Superlayers 1
-     * and 8 are guard layers. Wires 1 and 114 are guard wires.
-     * 
-     * @return the z1 array
-     */
-    public double[][][] getZ1() {
-	return z1;
-    }
 
     /**
      * Get the sector [1..6] from the phi value
@@ -436,167 +177,87 @@ public class GeometryManager {
 	return absPhi;
     }
 
-    /**
-     * Get the intersection of the given line with RELATIVE phi plane. All
-     * coordinates are in the sector system.
-     * 
-     * @param xa
-     *            sector x coordinate of one end point
-     * @param ya
-     *            sector y coordinate of one end point
-     * @param za
-     *            sector z coordinate of one end point
-     * @param xb
-     *            sector x coordinate of other end point
-     * @param yb
-     *            sector y coordinate of other end point
-     * @param zb
-     *            sector z coordinate of other end point
-     * @param relativePhi
-     *            the relative phi (relative to the midplane) [-30..30]
-     * @param wp
-     *            will hold the intersection. wp.x will be the horizontal
-     *            coordinate (i.e., z in the usual sector system) and wp.y will
-     *            be the cylindrical r (or rho) in the sector system. wp.y is
-     *            positive definite, so should be negated for lower sectors
-     *            (4,5,6) in sector views
-     */
-    public static void getPlaneIntersection(double xa, double ya, double za,
-	    double xb, double yb, double zb, double relativePhi,
-	    Point2D.Double wp) {
+//    /**
+//     * Get the intersection of the given line with RELATIVE phi plane. All
+//     * coordinates are in the sector system.
+//     * 
+//     * @param xa
+//     *            sector x coordinate of one end point
+//     * @param ya
+//     *            sector y coordinate of one end point
+//     * @param za
+//     *            sector z coordinate of one end point
+//     * @param xb
+//     *            sector x coordinate of other end point
+//     * @param yb
+//     *            sector y coordinate of other end point
+//     * @param zb
+//     *            sector z coordinate of other end point
+//     * @param relativePhi
+//     *            the relative phi (relative to the midplane) [-30..30]
+//     * @param wp
+//     *            will hold the intersection. wp.x will be the horizontal
+//     *            coordinate (i.e., z in the usual sector system) and wp.y will
+//     *            be the cylindrical r (or rho) in the sector system. wp.y is
+//     *            positive definite, so should be negated for lower sectors
+//     *            (4,5,6) in sector views
+//     */
+//    public static void getPlaneIntersection(double xa, double ya, double za,
+//	    double xb, double yb, double zb, double relativePhi,
+//	    Point2D.Double wp) {
+//
+//	double tanphi = Math.tan(-Math.toRadians(relativePhi));
+//
+//	// not t value depends only on x and y, not z
+//	double t = getPlaneIntersectionT(xa, ya, xb, yb, tanphi);
+//
+//	// get intersection
+//	double x = xa + t * (xb - xa);
+//	double y = ya + t * (yb - ya);
+//	double z = za + t * (zb - za);
+//
+//	wp.x = z;
+//	wp.y = Math.hypot(x, y);
+//    }
 
-	double tanphi = Math.tan(-Math.toRadians(relativePhi));
-
-	// not t value depends only on x and y, not z
-	double t = getPlaneIntersectionT(xa, ya, xb, yb, tanphi);
-
-	// get intersection
-	double x = xa + t * (xb - xa);
-	double y = ya + t * (yb - ya);
-	double z = za + t * (zb - za);
-
-	wp.x = z;
-	wp.y = Math.hypot(x, y);
-    }
-
-    /**
-     * Gets the t for the line parameterization for the intersection of the
-     * given line with current relative phi. Note it only depends on the x and y
-     * values of the wire endpoints, not the z.This is to be used only primarily
-     * in sector views. After return, x = xa + T(xb-xa), etc.
-     * 
-     * @param xa
-     *            x coordinate of one end point
-     * @param ya
-     *            y coordinate of one end point
-     * @param xb
-     *            x coordinate of other end point
-     * @param yb
-     *            y coordinate of other end point
-     * @param tanphi
-     *            the tangent of the local phi, whith phi [-30, 30]
-     * @return the t value of the parameterization
-     */
-    public static double getPlaneIntersectionT(double xa, double ya, double xb,
-	    double yb, double tanphi) {
-
-	double delx = xb - xa;
-	double dely = yb - ya;
-	return (xa * tanphi - ya) / (dely - delx * tanphi);
-    }
-
-    public static void main(String arg[]) {
-	double phis[] = { -27, 27, 39, 67, 82, 119, 209, 212, 245, 270, 279,
-		337 };
-
-	for (double val : phis) {
-	    System.err.println("val: " + val + "  sect: " + getSector(val)
-		    + "  rel phi: " + getRelativePhi(val));
-	}
-    }
+//    /**
+//     * Gets the t for the line parameterization for the intersection of the
+//     * given line with current relative phi. Note it only depends on the x and y
+//     * values of the wire endpoints, not the z.This is to be used only primarily
+//     * in sector views. After return, x = xa + T(xb-xa), etc.
+//     * 
+//     * @param xa
+//     *            x coordinate of one end point
+//     * @param ya
+//     *            y coordinate of one end point
+//     * @param xb
+//     *            x coordinate of other end point
+//     * @param yb
+//     *            y coordinate of other end point
+//     * @param tanphi
+//     *            the tangent of the local phi, whith phi [-30, 30]
+//     * @return the t value of the parameterization
+//     */
+//    public static double getPlaneIntersectionT(double xa, double ya, double xb,
+//	    double yb, double tanphi) {
+//
+//	double delx = xb - xa;
+//	double dely = yb - ya;
+//	return (xa * tanphi - ya) / (dely - delx * tanphi);
+//    }
+//
+//    public static void main(String arg[]) {
+//	double phis[] = { -27, 27, 39, 67, 82, 119, 209, 212, 245, 270, 279,
+//		337 };
+//
+//	for (double val : phis) {
+//	    System.err.println("val: " + val + "  sect: " + getSector(val)
+//		    + "  rel phi: " + getRelativePhi(val));
+//	}
+//    }
 
     public static List<BSTxyPanel> getBSTxyPanels() {
 	return _bstXYpanels;
-    }
-
-    /**
-     * Get the length of the shortest wire in cm
-     * 
-     * @return the length of the shortest wire in cm
-     */
-    public static double getShortestWire() {
-	return shortestWire;
-    }
-
-    /**
-     * Get the length of the longest wire in cm
-     * 
-     * @return the length of the longest wire in cm
-     */
-    public static double getLongestWire() {
-	return longestWire;
-    }
-
-    /**
-     * Get the minimum x of a wire in the sector system (cm)
-     * 
-     * @return the minimum x of a wire in the sector system (cm)
-     */
-    public static double getMinWireX() {
-	return minWireX;
-    }
-
-    /**
-     * Get the maximum x coordinate of all the wires.
-     * 
-     * @return the max xin cm
-     */
-    public static double getMaxWireX() {
-	return maxWireX;
-    }
-
-    /**
-     * Get the minimum y coordinate of all the wires.
-     * 
-     * @return the min y in cm
-     */
-    public static double getMinWireY() {
-	return minWireY;
-    }
-
-    public static double getAbsMaxWireY() {
-	return Math.max(Math.abs(minWireY), maxWireY);
-    }
-
-    public static double getAbsMaxWireX() {
-	return Math.max(Math.abs(minWireX), maxWireX);
-    }
-
-    /**
-     * Get the maximum y coordinate of all the wires.
-     * 
-     * @return the max y in cm
-     */
-    public static double getMaxWireY() {
-	return maxWireY;
-    }
-
-    /**
-     * Get the minimum z coordinate of all the wires.
-     * 
-     * @return the min z in cm
-     */
-    public static double getMinWireZ() {
-	return minWireZ;
-    }
-
-    /**
-     * Get the maximum z coordinate of all the wires.
-     * 
-     * @return the max z in cm
-     */
-    public static double getMaxWireZ() {
-	return maxWireZ;
     }
 
     /**
@@ -864,5 +525,19 @@ public class GeometryManager {
 	transform3D.rotateZ(Math.toRadians(phi)); // phi rotation
 	return transform3D;
     }
+    
+    /**
+     * allocate an array of allocated points
+     * @param n the number of points
+     * @return an array of allocated points
+     */
+    public static Point2D.Double[] allocate(int n) {
+	Point2D.Double[] wp = new Point2D.Double[n];
+	for (int i = 0; i < n; i++) {
+	    wp[i] = new Point2D.Double();
+	}
+	return wp;
+    }
+
 
 }

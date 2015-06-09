@@ -29,7 +29,7 @@ import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.geometry.GeometryManager;
+import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.item.DCHexSectorItem;
 import cnuphys.ced.item.HexSectorItem;
 
@@ -54,7 +54,7 @@ public class DCXYView extends HexView {
     protected static Rectangle2D.Double _defaultWorld;
 
     static {
-	double _xsize = GeometryManager.getAbsMaxWireX();
+	double _xsize = DCGeometry.getAbsMaxWireX();
 	double _ysize = _xsize * 1.154734;
 
 	_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,

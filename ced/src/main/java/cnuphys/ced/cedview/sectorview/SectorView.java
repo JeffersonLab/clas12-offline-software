@@ -113,27 +113,6 @@ public class SectorView extends CedView implements ChangeListener {
     // plane
     private Transformation3D _transform3D = GeometryManager.toConstantPhi(0);
 
-    // the wire endpoints from the geometry manager. These include guard wires.
-    // The indices
-    // are superlayer, layer, wire. All sectors are assumed to be the same apart
-    // from rotation.
-    // The superlayer index 0..5. The layer index is 0..7 with 0 and 7 being
-    // guard layers.
-    // The wire index is 0..113 with 0 and 113 being guard wires. There is no
-    // sector index because apart from
-    // rotation it is assumed all sectors are the same.
-    private static final double x0[][][] = GeometryManager.getInstance()
-	    .getX0();
-    private static final double y0[][][] = GeometryManager.getInstance()
-	    .getY0();
-    private static final double z0[][][] = GeometryManager.getInstance()
-	    .getZ0();
-    private static final double x1[][][] = GeometryManager.getInstance()
-	    .getX1();
-    private static final double y1[][][] = GeometryManager.getInstance()
-	    .getY1();
-    private static final double z1[][][] = GeometryManager.getInstance()
-	    .getZ1();
 
     // superlayer (graphical) items. The first index [0..1] is for upper and
     // lower sectors.
@@ -143,10 +122,6 @@ public class SectorView extends CedView implements ChangeListener {
     // determines if the wire intersections must be recalculated. This is caused
     // by a change in phi using the phi slider.
     private Boolean _wiresDirty = true;
-
-    // Positions of intersection of wires with current phi plane. The indices
-    // are [upper or lower sector: 0-1][superLayer: 0-5][layer: 0-5]
-    private Point2D.Double _projectedWires[][][][];
 
     // small number test
     private static final double TINY = 1.0e-10;
@@ -169,9 +144,6 @@ public class SectorView extends CedView implements ChangeListener {
     // the value of phi in degrees (-30 to 30) relative to midplane.
     // Also some cached trig
     // private double _phiRelMidPlane = 0.0;
-
-    // the tangent of the relative phi
-    private double _tanphi = 0.0;
 
     // a scale drawer
     private ScaleDrawer _scaleDrawer = new ScaleDrawer("cm",
@@ -197,18 +169,6 @@ public class SectorView extends CedView implements ChangeListener {
 	addItems();
 	setBeforeDraw();
 	setAfterDraw();
-
-	// create storage for guard intersections for upper and lower sectors
-	_projectedWires = new Point2D.Double[2][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER + 2][GeoConstants.NUM_WIRE + 2];
-
-	for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
-	    for (int layer = 0; layer < GeoConstants.NUM_LAYER + 2; layer++) {
-		for (int wire = 0; wire < GeoConstants.NUM_WIRE + 2; wire++) {
-		    _projectedWires[UPPER_SECTOR][superLayer][layer][wire] = new Point2D.Double();
-		    _projectedWires[LOWER_SECTOR][superLayer][layer][wire] = new Point2D.Double();
-		}
-	    }
-	}
 
 	// draws any swum trajectories (in the after draw)
 	_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
@@ -440,13 +400,12 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// if the wires are dirty, recompute their projections
 		if (_wiresDirty) {
-		    computeWireIntersections();
 
 		    for (int superLayer = 0; superLayer < 6; superLayer++) {
 			_superLayers[UPPER_SECTOR][superLayer]
-				.setPoints(_projectedWires[UPPER_SECTOR][superLayer]);
+				.dirtyWires();
 			_superLayers[LOWER_SECTOR][superLayer]
-				.setPoints(_projectedWires[LOWER_SECTOR][superLayer]);
+				.dirtyWires();
 		    }
 		    _wiresDirty = false;
 
@@ -561,36 +520,6 @@ public class SectorView extends CedView implements ChangeListener {
 	return _displaySectors;
     }
 
-    /**
-     * Compute the intersections of the wires with the current phi plane.
-     */
-    private void computeWireIntersections() {
-	for (int superLayer = 0; superLayer < 6; superLayer++) {
-	    for (int layer = 0; layer < 8; layer++) {
-		for (int wire = 0; wire < 114; wire++) {
-		    getIntersection(
-			    superLayer,
-			    layer,
-			    wire,
-			    _projectedWires[UPPER_SECTOR][superLayer][layer][wire]);
-		    // getIntersection(
-		    // superLayer,
-		    // layer,
-		    // wire,
-		    // _projectedWires[LOWER_SECTOR][superLayer][layer][wire]);
-		    //
-		    // System.out.println("UPPR: " +
-		    // _projectedWires[UPPER_SECTOR][superLayer][layer][wire] +
-		    // "LOWER: " +
-		    // _projectedWires[LOWER_SECTOR][superLayer][layer][wire]);
-
-		    // simply invert for lower sector
-		    _projectedWires[LOWER_SECTOR][superLayer][layer][wire].x = _projectedWires[UPPER_SECTOR][superLayer][layer][wire].x;
-		    _projectedWires[LOWER_SECTOR][superLayer][layer][wire].y = -_projectedWires[UPPER_SECTOR][superLayer][layer][wire].y;
-		}
-	    }
-	}
-    }
 
     /**
      * Compute a world polygon for (roughly) a circle centered about a wire.
@@ -609,6 +538,10 @@ public class SectorView extends CedView implements ChangeListener {
      *            the radius in cm
      */
     public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center, double radius) {
+	
+	if (center == null) {
+	    return null;
+	}
 
 	Point2D.Double circle[] = new Point2D.Double[NUMCIRCPNTS];
 	double deltheta = 2.0 * Math.PI / (NUMCIRCPNTS - 1);
@@ -624,55 +557,6 @@ public class SectorView extends CedView implements ChangeListener {
 	
     }
 
-    /**
-     * Compute the intersection of a given wire with the current phi plane.
-     * 
-     * @param superLayer
-     *            layer 0..5
-     * @param layer
-     *            the layer 0..7 layers 0 and 7 are guard layers
-     * @param wire
-     *            the wire 0..113 wires 0 and 113 are guard wires
-     * @param wp
-     *            holds the projected point.
-     */
-    private void getIntersection(int superLayer, int layer, int wire,
-	    Point2D.Double wp) {
-	
-//	Point3D p3D = DCGeometry.getIntersection(superLayer, layer-1, wire-1,_transform3D);
-//	wp.x = p3D.x();
-//	wp.y = p3D.y();
-	
-	double xa = x0[superLayer][layer][wire];
-	double xb = x1[superLayer][layer][wire];
-	double ya = y0[superLayer][layer][wire];
-	double yb = y1[superLayer][layer][wire];
-	double za = z0[superLayer][layer][wire];
-	double zb = z1[superLayer][layer][wire];
-
-	double t = getPlaneIntersectionT(xa, ya, xb, yb);
-	
-	double x = xa + t * (xb - xa);
-	double y = ya + t * (yb - ya);
-	double z = za + t * (zb - za);
-	
-//	if ((superLayer == 0) && (layer == 4) && (wire == 41)) {
-//	    System.err.println("MY INTERSECTION: (" + x + ", " + y + ", " + z + ")");
-//	    
-//	    Point3D p3D = DCGeometry.getIntersection(superLayer, layer-1, wire-1,_transform3D);
-//	    if (p3D != null) {
-//		System.err.println("p3d: " + p3D);
-//	    }
-//	    
-//	}
-
-	
-//	 getWorldFromLabXYZ(x, y, z, wp);
-
-	wp.x = z;
-	// wp.y = x;
-	wp.y = Math.sqrt(x * x + y * y);
-    }
 
     /**
      * From detector xyz get the projected world point.
@@ -749,7 +633,6 @@ public class SectorView extends CedView implements ChangeListener {
 	    getContainer().refresh();
 	} else if (source == _controlPanel.getPhiSlider()) {
 	    _transform3D = GeometryManager.toConstantPhi(getSliderPhi());
-	    _tanphi = Math.tan(-Math.toRadians(getSliderPhi()));
 	    _wiresDirty = true;
 	    getContainer().setDirty(true);
 	    getContainer().refresh();
@@ -1066,27 +949,6 @@ public class SectorView extends CedView implements ChangeListener {
      */
     public double getTargetZ() {
 	return _targetZ;
-    }
-
-    /**
-     * Gets the t for the line parameterization for the intersection of the
-     * given line with current relative phi. Note it only depends on the x and y
-     * values of the wire endpoints, not the z.
-     * 
-     * @param xa
-     *            x coordinate of one end point
-     * @param ya
-     *            y coordinate of one end point
-     * @param xb
-     *            x coordinate of other end point
-     * @param yb
-     *            y coordinate of other end point
-     * @return the t value of the parameterization
-     */
-    private double getPlaneIntersectionT(double xa, double ya, double xb,
-	    double yb) {
-
-	return GeometryManager.getPlaneIntersectionT(xa, ya, xb, yb, _tanphi);
     }
 
     /**

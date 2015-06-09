@@ -111,7 +111,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
      */
     @Override
     public void clear() {
-	System.err.println("AccumMgr clear");
+//	System.err.println("AccumMgr clear");
 	// clear accumulated gemc dc data
 	for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 	    for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {

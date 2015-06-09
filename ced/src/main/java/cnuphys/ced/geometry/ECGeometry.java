@@ -15,7 +15,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
 /**
- * Holds the EC geometery from the geometry packages
+ * Holds the EC geometry from the geometry packages
  * 
  * @author heddle
  *

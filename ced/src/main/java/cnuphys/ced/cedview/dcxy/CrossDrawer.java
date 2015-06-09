@@ -16,7 +16,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DCDataContainer;
-import cnuphys.ced.geometry.GeometryManager;
+import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.item.HexSectorItem;
 
 public class CrossDrawer extends DCXYViewDrawer {
@@ -136,8 +136,11 @@ public class CrossDrawer extends DCXYViewDrawer {
 		Point pp2 = new Point();
 
 		int pixlen = ARROWLEN;
-		double r = GeometryManager.getAbsMaxWireX() * pixlen
+		double r = pixlen
 			/ WorldGraphicsUtilities.getMeanPixelDensity(container);
+		
+//		System.err.println("ARROWLEN r = " + r + "   absmaxx: " + DCGeometry.getAbsMaxWireX());
+//		System.err.println("PIX LEN: " + pixlen + "  density " + WorldGraphicsUtilities.getMeanPixelDensity(container) + " pix/len");
 
 		result[0] = tiltedx[i] + r * unitx[i];
 		result[1] = tiltedy[i] + r * unity[i];
