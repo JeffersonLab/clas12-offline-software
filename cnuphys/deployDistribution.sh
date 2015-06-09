@@ -4,10 +4,10 @@
 #  JEVIO
 REPO="/Users/gavalian/Work/MavenRepo"
 
-mvn3 org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/cnuphys-1.0-SNAPSHOT.jar \
+mvn3 org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/cnuphys-2.0-SNAPSHOT.jar \
     -DgroupId=cnuphys \
     -DartifactId=cnuphys \
-    -Dversion=1.0-SNAPSHOT \
+    -Dversion=2.0-SNAPSHOT \
     -Dpackaging=jar \
     -DlocalRepositoryPath=$REPO
 
