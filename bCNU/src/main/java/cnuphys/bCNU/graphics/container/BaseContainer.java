@@ -424,7 +424,15 @@ public class BaseContainer extends JComponent implements IContainer,
     @Override
     public void worldToLocal(Point pp, Point2D.Double wp) {
 	if (worldToLocal != null) {
-	    worldToLocal.transform(wp, pp);
+	    try {
+		worldToLocal.transform(wp, pp);
+	    } catch (NullPointerException npe) {
+
+		System.err
+			.println("Null pionter exception in BaseContainer worldToLocal pp = "
+				+ pp + "  wp = " + wp);
+		npe.printStackTrace();
+	    }
 	}
     }
 

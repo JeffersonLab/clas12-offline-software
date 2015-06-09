@@ -29,8 +29,6 @@ import cnuphys.ced.item.MagFieldItem;
  */
 public class ControlPanel extends JPanel {
 
-    private static Font smallFont = Fonts.commonFont(Font.PLAIN, 9);
-
     private static final int SLIDERWIDTH = 210;
     private static final int FEEDBACKWIDTH = 220;
 
@@ -166,7 +164,7 @@ public class ControlPanel extends JPanel {
     private JTabbedPane addTabbedPane(CedView view, int controlPanelBits,
 	    int displayArrayBits) {
 	JTabbedPane tabbedPane = new JTabbedPane();
-	tabbedPane.setFont(smallFont);
+	tabbedPane.setFont(Fonts.smallFont);
 
 	// recons display array
 	if (Bits.checkBit(controlPanelBits, RECONSARRAY)) {
@@ -284,7 +282,7 @@ public class ControlPanel extends JPanel {
 	_targetSlider.setMinorTickSpacing(10);
 	_targetSlider.setPaintTicks(true);
 	_targetSlider.setPaintLabels(true);
-	_targetSlider.setFont(smallFont);
+	_targetSlider.setFont(Fonts.tinyFont);
 	_targetSlider.setFocusable(false); // so ugly focus border not drawn
 
 	if (_view instanceof ChangeListener) {
@@ -308,8 +306,8 @@ public class ControlPanel extends JPanel {
     private Box createPhiSlider(boolean isBig) {
 	Box box = Box.createVerticalBox();
 
-	int phi_min = -30;
-	int phi_max = 30;
+	int phi_min = -25;
+	int phi_max = 25;
 	int phi_init = 0;
 	if (isBig) {
 	    phi_min = -180;
@@ -319,15 +317,15 @@ public class ControlPanel extends JPanel {
 	_phiSlider = new JSlider(SwingConstants.HORIZONTAL, phi_min, phi_max,
 		phi_init);
 	if (!isBig) {
-	    _phiSlider.setMajorTickSpacing(10);
-	    _phiSlider.setMinorTickSpacing(2);
+	    _phiSlider.setMajorTickSpacing(5);
+	    _phiSlider.setMinorTickSpacing(0);
 	} else {
 	    _phiSlider.setMajorTickSpacing(60);
 	    _phiSlider.setMinorTickSpacing(10);
 	}
 	_phiSlider.setPaintTicks(true);
 	_phiSlider.setPaintLabels(true);
-	_phiSlider.setFont(smallFont);
+	_phiSlider.setFont(Fonts.tinyFont);
 	_phiSlider.setFocusable(false); // so ugly focus border not drawn
 
 	if (_view instanceof ChangeListener) {

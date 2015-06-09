@@ -168,36 +168,41 @@ public class ReconDrawer extends SectorViewDrawer {
 		    } else {
 			upperOrLower = SectorView.LOWER_SECTOR;
 		    }
-		    Polygon poly = _view.getHexagon(container, upperOrLower,
+		    Polygon hexagon = _view.getHexagon(container, upperOrLower,
 			    superlayer[hitIndex], layer[hitIndex],
 			    wire[hitIndex]);
-		    Rectangle rr = poly.getBounds();
-		    drawDiag(g, rr, color, option, poly);
 
-		    // the data in the arrays are in tilted coordinates
-		    tiltedXYZ[0] = hX[hitIndex];
-		    tiltedXYZ[1] = 0;
-		    tiltedXYZ[2] = hZ[hitIndex];
+		    if (hexagon != null) {
 
-		    _view.tiltedToSector(tiltedXYZ, sectorXYZ);
-		    // _view.sectorToWorld(wp, sectorXYZ, sector[hitIndex]);
+			Rectangle rr = hexagon.getBounds();
+			drawDiag(g, rr, color, option, hexagon);
 
-		    GeometryManager.sectorXYZToLabXYZ(sector[hitIndex], labXYZ,
-			    sectorXYZ);
-		    _view.getWorldFromLabXYZ(labXYZ[0], labXYZ[1], labXYZ[2],
-			    wp);
+			// the data in the arrays are in tilted coordinates
+			tiltedXYZ[0] = hX[hitIndex];
+			tiltedXYZ[1] = 0;
+			tiltedXYZ[2] = hZ[hitIndex];
 
-		    String s = fbcolors[option]
-			    + prefix[option]
-			    + vecStr(" hit location", sectorXYZ[0],
-				    sectorXYZ[1], sectorXYZ[2]);
+			_view.tiltedToSector(tiltedXYZ, sectorXYZ);
+			// _view.sectorToWorld(wp, sectorXYZ, sector[hitIndex]);
 
-		    container.worldToLocal(pp, wp);
-		    FeedbackRect fbr = new FeedbackRect(pp.x - 4, pp.y - 4, 8,
-			    8, hitIndex, dcData, option, s);
-		    _fbRects.add(fbr);
+			GeometryManager.sectorXYZToLabXYZ(sector[hitIndex],
+				labXYZ, sectorXYZ);
+			_view.getWorldFromLabXYZ(labXYZ[0], labXYZ[1],
+				labXYZ[2], wp);
 
-		    DataDrawSupport.drawCircleCross(g, fbr, Color.gray, color);
+			String s = fbcolors[option]
+				+ prefix[option]
+				+ vecStr(" hit location", sectorXYZ[0],
+					sectorXYZ[1], sectorXYZ[2]);
+
+			container.worldToLocal(pp, wp);
+			FeedbackRect fbr = new FeedbackRect(pp.x - 4, pp.y - 4,
+				8, 8, hitIndex, dcData, option, s);
+			_fbRects.add(fbr);
+
+			DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
+				color);
+		    } // hexagon not null
 		} // sector on view
 	    } // end hit based for
 	} // end arrays not null

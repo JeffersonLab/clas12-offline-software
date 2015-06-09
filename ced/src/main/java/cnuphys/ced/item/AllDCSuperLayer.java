@@ -8,6 +8,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+import org.jlab.geom.prim.Point3D;
+
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -17,8 +19,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
-import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
@@ -66,27 +68,6 @@ public class AllDCSuperLayer extends RectangleItem {
     private static final Color defaultHitCellFill = Color.red;
     private static final Color defaultHitCellLine = X11Colors
 	    .getX11Color("Dark Red");
-
-    // the wire endpoints from the geometry manager. These include guard wires.
-    // The indices are superlayer, layer, wire. All sectors are assumed to
-    // be the same apart from rotation.
-    // The superlayer index0..5. The layer index is 0..7 with 0 and 7 being
-    // guard layers.The wire index is 0..113 with 0 and 113 being guard wires.
-    // There is no sector index because apart from
-    // rotation it is assumed all sectors are the same.
-    // These are used in this view only to get approximate coordinates.
-    private static final double x0[][][] = GeometryManager.getInstance()
-	    .getX0();
-    private static final double y0[][][] = GeometryManager.getInstance()
-	    .getY0();
-    private static final double z0[][][] = GeometryManager.getInstance()
-	    .getZ0();
-    private static final double x1[][][] = GeometryManager.getInstance()
-	    .getX1();
-    private static final double y1[][][] = GeometryManager.getInstance()
-	    .getY1();
-    private static final double z1[][][] = GeometryManager.getInstance()
-	    .getZ1();
 
     // this is the world rectangle that defines the super layer
     private Rectangle2D.Double _worldRectangle;
@@ -492,14 +473,17 @@ public class AllDCSuperLayer extends RectangleItem {
 
 	    int layer = getLayer(worldPoint); // 1-based
 
-	    int wire = getWire(worldPoint);
+	    int wire = getWire(worldPoint); // 1-based
 
 	    // report approximate position
 	    // for now nearest wire--could interpolate
-	    if ((wire >= 0) && (wire <= GeoConstants.NUM_WIRE + 1)) {
-		double x = 0.5 * (x0[_superLayer - 1][layer][wire] + x1[_superLayer - 1][layer][wire]);
-		double y = 0.5 * (y0[_superLayer - 1][layer][wire] + y1[_superLayer - 1][layer][wire]);
-		double z = 0.5 * (z0[_superLayer - 1][layer][wire] + z1[_superLayer - 1][layer][wire]);
+	    if ((wire > 0) && (wire <= 112)) {
+		Point3D midPoint = DCGeometry.getMidPoint(_superLayer, layer, wire);
+		
+		double x = midPoint.x();
+		double y = midPoint.y();
+		double z = midPoint.z();
+		
 		double rho = x * x + y * y;
 		double r = Math.sqrt(rho + z * z);
 		rho = Math.sqrt(rho);

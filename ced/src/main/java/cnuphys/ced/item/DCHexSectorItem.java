@@ -7,11 +7,14 @@ import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import org.jlab.geom.prim.Point3D;
+
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 
 public class DCHexSectorItem extends HexSectorItem {
@@ -20,13 +23,6 @@ public class DCHexSectorItem extends HexSectorItem {
     private Polygon polys[] = new Polygon[6];
     private static final Color suplColor = new Color(255, 0, 0, 8);
 
-    // The wire endpoints for sector 1. Other sectors will rotate. The indices
-    // are superlayer 0..5, layer 0..7, wire 0..113. Layers 0 and 7 are
-    // guard layers. Wires 0 and 113 are guard wires.
-    private static double x0[][][] = GeometryManager.getInstance().getX0();
-    private static double x1[][][] = GeometryManager.getInstance().getX1();
-    private static double y0[][][] = GeometryManager.getInstance().getY0();
-    private static double y1[][][] = GeometryManager.getInstance().getY1();
 
     /**
      * Get a hex sector item
@@ -76,17 +72,17 @@ public class DCHexSectorItem extends HexSectorItem {
 	Point pp = new Point();
 	Point2D.Double workPoint = new Point2D.Double();
 
-	for (int layer = 0; layer < 8; layer++) {
-	    wireToLocal(supl, layer, 0, 0, pp, workPoint);
+	for (int layer = 1; layer <= 6; layer++) {
+	    wireToLocal(supl, layer, 1, 0, pp, workPoint);
 	    poly.addPoint(pp.x, pp.y);
-	    wireToLocal(supl, layer, 113, 0, pp, workPoint);
+	    wireToLocal(supl, layer, 112, 0, pp, workPoint);
 	    poly.addPoint(pp.x, pp.y);
 	}
 
-	for (int layer = 7; layer >= 0; layer--) {
-	    wireToLocal(supl, layer, 113, 1, pp, workPoint);
+	for (int layer = 6; layer >= 1; layer--) {
+	    wireToLocal(supl, layer, 112, 1, pp, workPoint);
 	    poly.addPoint(pp.x, pp.y);
-	    wireToLocal(supl, layer, 0, 1, pp, workPoint);
+	    wireToLocal(supl, layer, 1, 1, pp, workPoint);
 	    poly.addPoint(pp.x, pp.y);
 	}
 
@@ -98,29 +94,27 @@ public class DCHexSectorItem extends HexSectorItem {
     /**
      * Wire endpoints
      * 
-     * @param supl
+     * @param superlayer
      *            the superlayer 1..6
-     * @param lay
-     *            the layer 0..7 where 0 and 7 are guards
+     * @param layer
+     *            the layer 1..6
      * @param wire
-     *            the wire 0..113 where 0 and 113 are guards
+     *            the wire 1..112
      * @param end
      *            0 or 1 for opposite ends of the wire
      */
-    private void wireToLocal(int supl, int lay, int wire, int end, Point pp,
-	    Point2D.Double workPoint) {
-	// supl must be converted to zero based, bot not lay and
-	// wire because there the zero index is for "guard"
-	supl--;
+    private void wireToLocal(int superlayer, int layer, int wire, 
+	    int end, Point pp, Point2D.Double workPoint) {
 
+	Point3D wireEnd = null;
 	if (end == 0) {
-	    workPoint.x = x0[supl][lay][wire];
-	    workPoint.y = y0[supl][lay][wire];
+	    wireEnd = DCGeometry.getOrigin(superlayer, layer, wire);
 	} else {
-	    workPoint.x = x1[supl][lay][wire];
-	    workPoint.y = y1[supl][lay][wire];
+	    wireEnd = DCGeometry.getEnd(superlayer, layer, wire);
 	}
 
+	workPoint.x = wireEnd.x();
+	workPoint.y = wireEnd.y();
 	sector2DToLocal(pp, workPoint);
 
     }

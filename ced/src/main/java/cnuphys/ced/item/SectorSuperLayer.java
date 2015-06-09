@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -13,7 +14,9 @@ import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
+import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
@@ -54,17 +57,12 @@ public class SectorSuperLayer extends PolygonItem {
     private static final Color defaultHitCellLine = X11Colors
 	    .getX11Color("Dark Red");
 
-    // used for making hexagons
-    // private static final double COS30 = Math.sqrt(3.0)/2.0;
-    // private static final double SIN30 = 0.5;
-    private static final double TAN30 = 1.0 / Math.sqrt(3.0);
-
     // pale color used to fill in layers
     private static final Color _layerFillColors[] = {
 	    X11Colors.getX11Color("cornsilk"), X11Colors.getX11Color("azure") };
 
+    //color for wires
     private static final Color senseWireColor = Color.cyan;
-    private static final Color guardWireColor = Color.yellow;
 
     // convenient access to the event manager
     ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -73,21 +71,15 @@ public class SectorSuperLayer extends PolygonItem {
     NoiseManager _noiseManager = NoiseManager.getInstance();
     // sector 1-based 1..6
     private int _sector;
-
-    // superlayer 1-based 1..6
+    
+   // superlayer 1-based 1..6
     private int _superLayer;
 
     // cache the outline
-    private Point2D.Double[] _cachedWorldPolygon;
+    private Point2D.Double[] _cachedWorldPolygon = GeometryManager.allocate(5);
 
     // cache the layer polygons. They must be recomputed if the item is dirty.
-    private Polygon layerPolygons[] = new Polygon[GeoConstants.NUM_LAYER];
-
-    // a set of wire positions with a border of guard wires. The first index is
-    // the layer, it runs 0..7 with 0 layers 0 and 7 being guard wires, and 1-6
-    // being the sense wires. The second index is the wire index. It runs 0-113
-    // with wire 0 and 113 being guard wires and 1-112 being sense wires.
-    private Point2D.Double _wires[][];
+    private Polygon _layerPolygons[] = new Polygon[6];
 
     // the view this item lives on.
     private SectorView _view;
@@ -132,17 +124,24 @@ public class SectorSuperLayer extends PolygonItem {
 
 	Graphics2D g2 = (Graphics2D) g;
 
+	getStyle().setFillColor(Color.white);
 	super.drawItem(g, container); // draws shell
+	
 
 	// are we really zoomed in?
 	boolean reallyClose = (WorldGraphicsUtilities.getMeanPixelDensity(_view
 		.getContainer()) > closeupThreshold[_superLayer]);
 
 	// draw layer outlines to guide the eye
+	
+	
+	Shape clip = g2.getClip();
+	g2.setClip(_lastDrawnPolygon);
 	for (int layer = 1; layer <= 6; layer++) {
 	    Polygon poly = getLayerPolygon(container, layer);
 	    g.setColor(_layerFillColors[layer % 2]);
 	    g.fillPolygon(poly);
+	    g.drawPolygon(poly);
 	}
 
 	// draw results of noise reduction? If so will need the parameters
@@ -211,6 +210,9 @@ public class SectorSuperLayer extends PolygonItem {
 			.getContainer()) > wireThreshold[_superLayer])) {
 	    drawWires(g, container, reallyClose);
 	}
+
+	g2.setClip(clip);
+   
     }
 
     /**
@@ -241,6 +243,9 @@ public class SectorSuperLayer extends PolygonItem {
 
 	// get the hexagon
 	Polygon hexagon = getHexagon(container, layer, wire);
+	if (hexagon == null) {
+	    return;
+	}
 
 	// are we to show mc (MonteCarlo simulation) truth?
 	boolean showTruth = _view.showMcTruth();
@@ -316,9 +321,12 @@ public class SectorSuperLayer extends PolygonItem {
 	
 	//center is the given wire projected locations
 	
-	Point2D.Double center = _wires[layer][wire];
+	Point2D.Double center = wire(layer, wire);
 	Point2D.Double doca[] = _view.getCenteredWorldCircle(center, radius);
 	
+	if (doca == null) {
+	    return;
+	}
 	
 	
 //	Point2D.Double doca[] = _view.getCenteredWorldCircle(_sector - 1,
@@ -333,6 +341,35 @@ public class SectorSuperLayer extends PolygonItem {
 	g.fillPolygon(docaPoly);
 	g.setColor(docaLine);
 	g.drawPolygon(docaPoly);
+    }
+    
+    /**
+     * Get the projected wire location
+     * 
+     * @param layer
+     *            the 1-based layer 1..6
+     * @param wire
+     *            the 1-based wire 1..112
+     * @return the point, which might have NaNs
+     */
+    public Point2D.Double wire(int layer, int wire) {
+	// the indices to all DCGeometry calls are 1-based
+
+	Point2D.Double wp = null;
+	try {
+	    wp = DCGeometry.getCenter(_superLayer, layer, wire,
+		    _view.getTransformation3D());
+	    
+	    if ((wp != null) && isLowerSector()) {
+		wp.y = -wp.y;
+	    }
+	} catch (Exception e) {
+	    String s = "Problem  in wire() [SectorSuperLayer] layer = " + layer + "  wire = " + wire;
+	    System.err.println(s);
+	    e.printStackTrace();
+//	    System.exit(1);
+	}
+	return wp;
     }
 
     /**
@@ -361,9 +398,11 @@ public class SectorSuperLayer extends PolygonItem {
 	    g.drawPolygon(hexagon);
 	} else {
 	    g.setColor(Color.gray);
-	    {
-		int x[] = hexagon.xpoints;
-		int y[] = hexagon.ypoints;
+	    int x[] = hexagon.xpoints;
+	    int y[] = hexagon.ypoints;
+
+	    //from projection may not be 6 points!
+	    if (hexagon.npoints > 5) {
 		g.drawLine(x[0], y[0], x[3], y[3]);
 		g.drawLine(x[1], y[1], x[4], y[4]);
 		g.drawLine(x[2], y[2], x[5], y[5]);
@@ -386,23 +425,21 @@ public class SectorSuperLayer extends PolygonItem {
      */
     private void drawWires(Graphics g, IContainer container, boolean reallyClose) {
 	Point pp = new Point(); // workspace
-	for (int layer = 0; layer <= 7; layer++) {
-	    for (int wire = 0; wire < GeoConstants.NUM_WIRE + 2; wire++) {
+	for (int layer = 1; layer <= 6; layer++) {
+	    for (int wire = 1; wire <= 112; wire++) {
 		// note: no conversion to 0-based because the wire array has
 		// a "border" of guard wires!
 
-		if ((layer == 0) || (layer == 7) || (wire == 0)
-			|| (wire > GeoConstants.NUM_WIRE)) {
-		    g.setColor(guardWireColor);
-		} else {
-		    g.setColor(senseWireColor);
-		}
-		Point2D.Double wp = _wires[layer][wire];
-		container.worldToLocal(pp, wp);
-		if (reallyClose) {
-		    g.fillRect(pp.x - 1, pp.y - 1, 2, 2);
-		} else {
-		    g.fillRect(pp.x, pp.y, 1, 1);
+		g.setColor(senseWireColor);
+		Point2D.Double wp = wire(layer, wire);
+
+		if (wp != null) {
+		    container.worldToLocal(pp, wp);
+		    if (reallyClose) {
+			g.fillRect(pp.x - 1, pp.y - 1, 2, 2);
+		    } else {
+			g.fillRect(pp.x, pp.y, 1, 1);
+		    }
 		}
 	    }
 	}
@@ -467,16 +504,21 @@ public class SectorSuperLayer extends PolygonItem {
 	for (int layer = 1; layer <= GeoConstants.NUM_LAYER; layer++) {
 
 	    Polygon hexagon = getHexagon(container, layer, wire);
-	    g.fillPolygon(hexagon);
-	    g.drawPolygon(hexagon);
+
+	    if (hexagon != null) {
+		g.fillPolygon(hexagon);
+		g.drawPolygon(hexagon);
+	    }
 
 	    // ugh -- shifts are 0-based
 	    for (int shift = 1; shift <= shifts[layer - 1]; shift++) {
 		int tempWire = wire + sign * shift;
 		if ((tempWire > 0) && (tempWire <= GeoConstants.NUM_WIRE)) {
 		    hexagon = getHexagon(container, layer, tempWire);
-		    g.fillPolygon(hexagon);
-		    g.drawPolygon(hexagon);
+		    if (hexagon != null) {
+			g.fillPolygon(hexagon);
+			g.drawPolygon(hexagon);
+		    }
 		}
 	    }
 	}
@@ -489,109 +531,121 @@ public class SectorSuperLayer extends PolygonItem {
      * @param container
      *            the container being rendered
      * @param layer
-     *            the layer in question--a sensewire layer [1..6]
+     *            the layer in question--a 1-based sensewire layer [1..6]
      * @return a layer outline
      */
     private Polygon getLayerPolygon(IContainer container, int layer) {
-	if ((layer < 1) || (layer > 6)) {
-	    return null;
+
+	if (_dirty) {
+	    Point2D.Double corners[] = GeometryManager.allocate(5);
+	    
+            //all indices in DCGeometry calls are 1-based
+	    DCGeometry.getLayerPolygon(_superLayer, layer,
+		    _view.getTransformation3D(), corners);
+	    
+	    if (isLowerSector()) {
+		flipPolyToLowerSector(corners);
+	    }
+
+	    Polygon poly = new Polygon();
+	    Point pp = new Point();
+
+	    for (Point2D.Double wp : corners) {
+		container.worldToLocal(pp, wp);
+		poly.addPoint(pp.x, pp.y);
+	    }
+
+	    _layerPolygons[layer - 1] = poly;
 	}
+	
 
-	// if we are not dirty use the cached polygons
-	if (!isDirty()) {
-	    return layerPolygons[layer - 1];
-	}
-
-	// max index (last wire == guard wire)
-	int n = GeoConstants.NUM_WIRE + 1;
-
-	// the first and last wires (i.e., the guard wires) on the layer
-	Point2D.Double wp0 = _wires[layer][0];
-	Point2D.Double wp1 = _wires[layer][n];
-
-	Point2D.Double wp[] = new Point2D.Double[7];
-
-	wp[0] = new Point2D.Double();
-	averagePoint(wp0, _wires[layer + 1][0], wp[0]);
-
-	wp[1] = wp0;
-
-	wp[2] = new Point2D.Double();
-	averagePoint(wp0, _wires[layer - 1][0], wp[2]);
-
-	wp[3] = new Point2D.Double();
-	averagePoint(wp1, _wires[layer - 1][n], wp[3]);
-
-	wp[4] = wp1;
-
-	wp[5] = new Point2D.Double();
-	averagePoint(wp1, _wires[layer + 1][n], wp[5]);
-
-	wp[6] = wp[0];
-
-	Polygon poly = new Polygon();
-	Point pp = new Point();
-
-	for (int i = 0; i < 7; i++) {
-	    container.worldToLocal(pp, wp[i]);
-	    poly.addPoint(pp.x, pp.y);
-	}
-
-	layerPolygons[layer - 1] = poly;
-	return poly;
-    }
-
-    // simple average of toe world points
-    private void averagePoint(Point2D.Double wp0, Point2D.Double wp1,
-	    Point2D.Double wpavg) {
-	wpavg.x = 0.5 * (wp0.x + wp1.x);
-	wpavg.y = 0.5 * (wp0.y + wp1.y);
+	return _layerPolygons[layer - 1];
     }
 
     /**
-     * Gets the layer from the world point. This only gives sensible results if
+     * Gets the layer from the screen point. This only gives sensible results if
+     * the world point has already passed the "inside" test.
+     * 
+     * @param pp
+     *            the screen point in question.
+     * @return the layer containing the given world point. It returns [1..6] or
+     *         -1 on failure
+     */
+    private int getLayer(IContainer container, Point pp) {
+
+	// first see if we are in the super layer
+	if (contains(container, pp)) {
+
+	    // now check the layers
+	    for (int layer = 1; layer <= 6; layer++) {
+		Polygon poly = _layerPolygons[layer-1];
+		if (poly.contains(pp)) {
+		    return layer;
+		}
+	    }
+	}
+	else {
+	    System.err.println("not in superlayer!");
+	}
+	return -1;
+    }
+    
+    /**
+     * Gets the layer from the screen point. This only gives sensible results if
      * the world point has already passed the "inside" test.
      * 
      * @param wp
      *            the world point in question.
-     * @return the layer containing the given world point. It returns [0..7]
-     *         with 0 and 7 meaning the guard "layers"
+     * @return the layer containing the given world point. It returns [1..6] or
+     *         -1 on failure
      */
-    private int getLayer(Point2D.Double wp) {
-	Point2D.Double pintersect = new Point2D.Double();
-	MathUtilities.perpendicularIntersection(_wires[0][0],
-		_wires[0][GeoConstants.NUM_WIRE + 1], wp, pintersect);
-
-	double d1 = wp.distance(pintersect);
-	MathUtilities.perpendicularIntersection(_wires[7][0],
-		_wires[7][GeoConstants.NUM_WIRE + 1], wp, pintersect);
-
-	double d2 = wp.distance(pintersect);
-	double fraction = d1 / (d1 + d2);
-	int layer = (1 + (int) (14 * fraction)) / 2;
-	return layer;
-    }
+//    private int getLayer(Point pp) {
+//	Point2D.Double corners[] = GeometryManager.allocate(5);
+//
+//	// first see if we are in the super layer
+//	corners = getWorldPolygon();
+//	if (WorldGraphicsUtilities.contains(corners, wp)) {
+//
+//	    // now check the layers
+//	    for (int layer = 1; layer <= 6; layer++) {
+//		// all indices in DCGeometry calls are 1-based
+//		DCGeometry.getLayerPolygon(_superLayer, layer,
+//			_view.getTransformation3D(), corners);
+//
+//		if (isLowerSector()) {
+//		    flipPolyToLowerSector(corners);
+//		}
+//
+//		if (WorldGraphicsUtilities.contains(corners, wp)) {
+//		    return layer;
+//		}
+//	    }
+//	}
+//	return -1;
+//    }
+   
 
     /**
      * Gets the wire from the world point. This only gives sensible results if
      * the world point has already passed the "inside" test and we used getLayer
      * on the same point to get the layer.
-     * 
+     * @param layer the one based layer [1..6]
      * @param wp
      *            the world point in question.
-     * @return the closest wire index on the given layer. It should return
-     *         [0..GeoConstants.NUM_WIRE+1] (e.g., 0..113) with 0 and
-     *         GeoConstants.NUM_WIRE+1 meaning a guard wire.
+     * @return the closest wire index on the given layer in range [1..112].
      */
     private int getWire(int layer, Point2D.Double wp) {
-	if ((layer < 0) || (layer > 7)) {
-	    return -1;
+	Point2D.Double ends[] = GeometryManager.allocate(2);
+	DCGeometry.getLayerExtendedPoints(_superLayer, layer, _view.getTransformation3D(), ends);
+	
+	if (isLowerSector()) {
+	    flipPolyToLowerSector(ends);
 	}
-
+	
 	double fract = MathUtilities.perpendicularIntersection(
-		_wires[layer][0], _wires[layer][GeoConstants.NUM_WIRE + 1], wp);
+		ends[0], ends[1], wp);
 	int wire = (int) Math.round(fract * (GeoConstants.NUM_WIRE + 1));
-	return wire;
+	return Math.max(1, Math.min(112, wire));
     }
 
     /**
@@ -625,11 +679,12 @@ public class SectorSuperLayer extends PolygonItem {
 			    100.0 * parameters.getNoiseReducedOccupancy(), 2)
 		    + "%");
 
-	    int layer = getLayer(worldPoint);
+	    //getLayer returns a 1 based index (-1 on failure)
+	    int layer = getLayer(container, screenPoint);
 
 	    DCDataContainer dcData = _eventManager.getDCData();
 
-	    if ((layer > 0) && (layer < 7)) {
+	    if (layer > 0) {
 		int wire = getWire(layer, worldPoint);
 		if ((wire > 0) && (wire <= GeoConstants.NUM_WIRE)) {
 
@@ -653,58 +708,33 @@ public class SectorSuperLayer extends PolygonItem {
     }
 
     /**
-     * Set the wires to a new set of points
+     * The wires are dirty, probably because of a phi rotation
      * 
      * @param wires
      *            the new wire projections.
      */
-    public void setPoints(Point2D.Double wires[][]) {
-	_wires = wires;
+    public void dirtyWires() {
 	setDirty(true);
 	setPath(getWorldPolygon());
     }
 
     // get the world polygon corresponding to the boundary of the superlayer
     private Point2D.Double[] getWorldPolygon() {
-	if (_wires == null) {
-	    _cachedWorldPolygon = null;
-	    return null;
-	}
 
 	if (_dirty) {
-	    // compute the total number of points
-
-	    int n0 = GeoConstants.NUM_WIRE + 2;
-	    int n1 = 6;
-	    int n = 2 * (n0 + n1);
-	    _cachedWorldPolygon = new Point2D.Double[n];
-
-	    int index = 0;
-
-	    // start with layer 0
-	    int layer = 0;
-	    for (int wire = 0; wire < n0; wire++) {
-		_cachedWorldPolygon[index++] = _wires[layer][wire];
+	    DCGeometry.getSuperLayerPolygon(_superLayer, _view.getTransformation3D(), _cachedWorldPolygon);
+	    if (isLowerSector()) {
+		flipPolyToLowerSector(_cachedWorldPolygon);
 	    }
-
-	    // last wire from each layer
-	    for (layer = 1; layer <= 6; layer++) {
-		_cachedWorldPolygon[index++] = _wires[layer][GeoConstants.NUM_WIRE + 1];
-	    }
-
-	    // layer 7 another guard layer
-	    layer = 7;
-	    for (int wire = (n0 - 1); wire >= 0; wire--) {
-		_cachedWorldPolygon[index++] = _wires[layer][wire];
-	    }
-
-	    // first wire from each layer
-	    for (layer = 6; layer >= 1; layer--) {
-		_cachedWorldPolygon[index++] = _wires[layer][0];
-	    }
-
 	} // end dirty
 	return _cachedWorldPolygon;
+    }
+    
+    //flip a poly created for the upper sector to the lower sector
+    private void flipPolyToLowerSector(Point2D.Double wpoly[]) {
+	for (Point2D.Double wp : wpoly) {
+	    wp.y = -wp.y;
+	}
     }
 
     /**
@@ -719,72 +749,41 @@ public class SectorSuperLayer extends PolygonItem {
      * @return the cell hexagon
      */
     public Polygon getHexagon(IContainer container, int layer, int wire) {
-
-	if ((layer < 1) || (layer > 6)) {
+	
+	
+	Point2D.Double wpoly[] = GeometryManager.allocate(6);
+	//note all indices in calls to DCGeometry are 1-based
+	int size = DCGeometry.worldPolygon(_superLayer, layer, wire, _view.getTransformation3D(), wpoly, null);
+	
+	if (isLowerSector()) {
+	    flipPolyToLowerSector(wpoly);
+	}
+	
+	if (size < 3) {
 	    return null;
 	}
 
-	if ((wire < 1) || (wire > GeoConstants.NUM_WIRE)) {
-	    return null;
-	}
 
-	// wire in question
-	Point2D.Double wirePoint = _wires[layer][wire];
-
-	Point2D.Double neighbors[] = new Point2D.Double[7];
-
-	// staggering makes finding neighbors layer dependent
-	if ((layer % 2) == 0) { // layers 2,4, 6
-	    neighbors[0] = _wires[layer + 1][wire];
-	    neighbors[1] = _wires[layer + 1][wire + 1];
-	    neighbors[2] = _wires[layer][wire + 1];
-	    neighbors[3] = _wires[layer - 1][wire + 1];
-	    neighbors[4] = _wires[layer - 1][wire];
-	    neighbors[5] = _wires[layer][wire - 1];
-	} else { // layers 1, 3, 5
-	    neighbors[0] = _wires[layer + 1][wire - 1];
-	    neighbors[1] = _wires[layer + 1][wire];
-	    neighbors[2] = _wires[layer][wire + 1];
-	    neighbors[3] = _wires[layer - 1][wire];
-	    neighbors[4] = _wires[layer - 1][wire - 1];
-	    neighbors[5] = _wires[layer][wire - 1];
-	}
-	neighbors[6] = neighbors[0]; // close it tight
-
-	Polygon poly = new Polygon();
-	Point2D.Double tp = new Point2D.Double();
 	Point pp = new Point();
-	for (int i = 0; i < 7; i++) {
-	    averagePoint(wirePoint, neighbors[i], tp);
-	    fastRotate30(tp, wirePoint);
-	    container.worldToLocal(pp, tp);
+	Polygon poly = new Polygon();
+	
+	for (int i = 0; i < size; i++) {
+	    Point2D.Double wp = wpoly[i];
+	    container.worldToLocal(pp, wp);
 	    poly.addPoint(pp.x, pp.y);
 	}
-
+	
 	return poly;
     }
 
+
     /**
-     * A fast rotation by 30 degrees for use by the hexagon finder
-     * 
-     * @param wp
-     *            the point being rotated
-     * @param anchor
-     *            the point being rotated about
+     * Test whether this is a lower sector
+     * @return <code>true</code> if this is a lower sector
      */
-    private void fastRotate30(Point2D.Double wp, Point2D.Double anchor) {
-	// scaling is necessary to enlarge hex from one created using half-way
-	// points
-	// double x = (wp.x - anchor.x)/COS30;
-	// double y = (wp.y - anchor.y)/COS30;
-	// wp.x = anchor.x + (x*COS30 - y*SIN30);
-	// wp.y = anchor.y + (x*SIN30 + y*COS30);
-
-	// use of the tangent combines rotation and the required scaling
-	double x = wp.x - anchor.x;
-	double y = wp.y - anchor.y;
-	wp.x = anchor.x + (x - y * TAN30);
-	wp.y = anchor.y + (x * TAN30 + y);
-
+    public boolean isLowerSector() {
+	return (_sector > 3);
     }
+
+ 
 }

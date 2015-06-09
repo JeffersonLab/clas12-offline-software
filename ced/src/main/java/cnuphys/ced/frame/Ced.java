@@ -47,6 +47,7 @@ import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.ced.event.PlotManager;
+import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
@@ -587,6 +588,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// create a console log listener
 	Log.getInstance().addLogListener(new ConsoleLogListener());
+	
+	//initialize geometry
+	GeometryManager.getInstance();
 
 	if ((arg != null) && (arg.length > 0)) {
 	    int len = arg.length;

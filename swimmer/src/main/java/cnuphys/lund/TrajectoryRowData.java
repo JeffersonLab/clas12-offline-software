@@ -51,6 +51,11 @@ public class TrajectoryRowData {
 	this.p = p;
 	this.theta = theta;
 	this.phi = phi;
+	
+	if (lundId == null) {
+	    (new Throwable()).printStackTrace();
+	    System.exit(1);
+	}
     }
 
     /**

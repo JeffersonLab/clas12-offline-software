@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import org.jlab.evio.clas12.EvioDataEvent;
 
+import cnuphys.bCNU.log.Log;
 import cnuphys.ced.event.data.RecEventDataContainer;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -58,23 +59,29 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			int pid = recData.eventhb_particle_pid[i];
 			LundId lid = LundSupport.getInstance().get(pid);
 
-			double xo = recData.eventhb_particle_vx[i]; // cm
-			double yo = recData.eventhb_particle_vy[i]; // cm
-			double zo = recData.eventhb_particle_vz[i]; // cm
+			if (lid != null) {
+			    double xo = recData.eventhb_particle_vx[i]; // cm
+			    double yo = recData.eventhb_particle_vy[i]; // cm
+			    double zo = recData.eventhb_particle_vz[i]; // cm
 
-			double px = recData.eventhb_particle_px[i]; // GeV/c
-			double py = recData.eventhb_particle_py[i];
-			double pz = recData.eventhb_particle_pz[i];
+			    double px = recData.eventhb_particle_px[i]; // GeV/c
+			    double py = recData.eventhb_particle_py[i];
+			    double pz = recData.eventhb_particle_pz[i];
 
-			double p = Math.sqrt(px * px + py * py + pz * pz); // GeV
-			double phi = Math.atan2(py, px);
-			double theta = Math.acos(pz / p);
+			    double p = Math.sqrt(px * px + py * py + pz * pz); // GeV
+			    double phi = Math.atan2(py, px);
+			    double theta = Math.acos(pz / p);
 
-			// note conversions to degrees and MeV
-			TrajectoryRowData row = new TrajectoryRowData(lid, xo,
-				yo, zo, 1000 * p, Math.toDegrees(theta),
-				Math.toDegrees(phi));
-			data.add(row);
+			    // note conversions to degrees and MeV
+			    TrajectoryRowData row = new TrajectoryRowData(lid,
+				    xo, yo, zo, 1000 * p,
+				    Math.toDegrees(theta), Math.toDegrees(phi));
+			    data.add(row);
+			} else {
+			    Log.getInstance().warning(
+				    "Bad pid: " + pid
+					    + " in ClasIoReconEventView");
+			}
 
 			// public TrajectoryRowData(LundId lundId, double xo,
 			// double yo, double zo,
