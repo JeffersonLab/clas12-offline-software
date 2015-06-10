@@ -29,6 +29,7 @@ import org.jlab.data.io.DataEvent;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.attributes.AttributeType;
+import cnuphys.ced.ced3d.CedView3D;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
@@ -92,7 +93,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
     // used for one time inits
     private int _firstTime = 0;
-
+    
+    //using 3D?
+    private static boolean _use3D;
+    
     // build (hopefully overwritten by property file
     // commented out because we are leaving svn
     // private static String build = "??";
@@ -127,7 +131,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private XMLView _xmlView;
     private MiniShellView _shellView;
     private PlotView _plotView;
-    
+    private CedView3D _ced3DView;
 
     // the about string
     private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
@@ -194,6 +198,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_monteCarloView, 0, 0, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_reconEventView, 0, 0, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_plotView, 0, 0, VirtualView.BOTTOMLEFT);
+	    
+	    if (_use3D) {
+		_virtualView.moveTo(_ced3DView, 0, 7, VirtualView.BOTTOMRIGHT);
+	    }
 	    Log.getInstance().config("reset views on virtual dekstop");
 	}
 	_firstTime++;
@@ -249,6 +257,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add an pcal view
 	_pcalView = PCALView.createPCALView();
+	
+	//3D view?
+	if (_use3D) {
+	    _ced3DView = new CedView3D();
+	}
 
 	// add three sector views
 	ViewManager.getInstance().getViewMenu().addSeparator();
@@ -511,6 +524,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_progressLabel.setText(s);
 	    }
 	};
+	_progressBar.setIndeterminate(true);
 	
 	int mbh = getJMenuBar().getPreferredSize().height;
 	int pbh = 10;
@@ -620,6 +634,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		    MagneticFields.setSolenoidFullPath(arg[i]);
 		    Log.getInstance().config("Solenoid Path: " + arg[i]);
 		    System.out.println("Solenoid Path: " + arg[i]);
+		} else if (arg[i].contains("3D")) {
+		    _use3D = true;
+		    System.err.println("Using 3D");
 		}
 
 		i++;
@@ -661,6 +678,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      */
     public GEMCView getGEMCView() {
 	return _gemcView;
+    }
+
+    /**
+     * Check whether we use 3D
+     * @return <code>true</code> if we use 3D
+     */
+    public static boolean use3D() {
+	return _use3D;
     }
 
 

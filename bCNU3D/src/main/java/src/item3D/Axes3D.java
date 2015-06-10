@@ -40,6 +40,8 @@ public class Axes3D extends Item3D {
 	
 	setColor(color);
 	setLineWidth(lineWidth);
+	setTextColor(textColor);
+	setFont(font);
     }
     
     /**

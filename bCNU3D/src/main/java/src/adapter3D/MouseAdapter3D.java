@@ -64,11 +64,9 @@ public class MouseAdapter3D implements MouseListener, MouseMotionListener, Mouse
 	prevMouseY = y;
 
 	if (e.isControlDown()) {
-	    System.err.println("dude 1");
 	    _panel3D.setRotationY(_panel3D.getRotationY() + theta1);
 	    _panel3D.setRotationZ(_panel3D.getRotationZ() + theta2);
 	} else if (e.isShiftDown()) {
-	    System.err.println("dude 2");
 	    _panel3D.setRotationZ(_panel3D.getRotationZ() + theta1);
 	    _panel3D.setRotationX(_panel3D.getRotationX() + theta2);
 	} else {
@@ -98,9 +96,8 @@ public class MouseAdapter3D implements MouseListener, MouseMotionListener, Mouse
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
 	int clicks = e.getWheelRotation();
-	System.err.println("clicks: " + clicks);
 	
-	float dz = 0.1f*clicks;
+	float dz = _panel3D.getZStep()*clicks;
 	_panel3D.deltaZ(dz);
 	_panel3D.refresh();
     }

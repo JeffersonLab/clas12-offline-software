@@ -322,6 +322,15 @@ public class CheckBoxArray extends JPanel {
 	    ab.setEnabled(enabled);
 	}
     }
+    
+    /**
+     * Get the corresponding abstract button
+     * @param label the label to match
+     * @return the correseponding button
+     */
+    public AbstractButton getButton(String label) {
+	return buttons.get(label);
+    }
 
     /**
      * Issue a warning that we tried to acess a non-existent button based on the

@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 
 import bCNU3D.Panel3D;
+import bCNU3D.Support3D;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -16,7 +17,8 @@ public class Axis3D extends Line3D {
     private AxisType _type;
 
     // length of major ticks
-    private static final float MAJTICKLEN = 0.02f;
+    private static final float MAJTICKLENFRAC = 0.01f;
+    private float _majTickLen;
 
     /** possible types of axes */
     public enum AxisType {
@@ -47,6 +49,7 @@ public class Axis3D extends Line3D {
 	    float lineWidth, int numMajorTicks, Color textColor, Font font) {
 	super(panel3D, getEndpoints(type, vmin, vmax), color, lineWidth);
 	_type = type;
+	_majTickLen = MAJTICKLENFRAC*(vmax-vmin);
 	addMajorTicks(vmin, vmax, color, lineWidth, numMajorTicks);
 	setTextColor(textColor);
 	setFont(font);
@@ -75,28 +78,28 @@ public class Axis3D extends Line3D {
 		Line3D line = null;
 		switch (_type) {
 		case X_AXIS:
-		    line = new Line3D(p3d, val, MAJTICKLEN, 0, val, -MAJTICKLEN, 0,
+		    line = new Line3D(p3d, val, _majTickLen, 0, val, -_majTickLen, 0,
 			    color, lineWidth);
 		    addChild(line);
-		    line = new Line3D(p3d, val, 0, MAJTICKLEN, val, 0, -MAJTICKLEN,
+		    line = new Line3D(p3d, val, 0, _majTickLen, val, 0, -_majTickLen,
 			    color, lineWidth);
 		    addChild(line);
 		    break;
 
 		case Y_AXIS:
-		    line = new Line3D(p3d, 0, val, MAJTICKLEN, 0, val, -MAJTICKLEN,
+		    line = new Line3D(p3d, 0, val, _majTickLen, 0, val, -_majTickLen,
 			    color, lineWidth);
 		    addChild(line);
-		    line = new Line3D(p3d, MAJTICKLEN, val, 0, -MAJTICKLEN, val, 0,
+		    line = new Line3D(p3d, _majTickLen, val, 0, -_majTickLen, val, 0,
 			    color, lineWidth);
 		    addChild(line);
 		    break;
 
 		case Z_AXIS:
-		    line = new Line3D(p3d, MAJTICKLEN, 0, val, -MAJTICKLEN, 0, val,
+		    line = new Line3D(p3d, _majTickLen, 0, val, -_majTickLen, 0, val,
 			    color, lineWidth);
 		    addChild(line);
-		    line = new Line3D(p3d, 0, MAJTICKLEN, val, 0, -MAJTICKLEN, val,
+		    line = new Line3D(p3d, 0, _majTickLen, val, 0, -_majTickLen, val,
 			    color, lineWidth);
 		    addChild(line);
 		    break;
@@ -131,14 +134,28 @@ public class Axis3D extends Line3D {
 	
 	FontMetrics fm = _panel3D.getFontMetrics(getFont());
 	float winPos[] = new float[3];
+	
+	
 	_panel3D.project(gl, getX1(), getY1(), getZ1(), winPos);
 	int x = (int)winPos[0] + 4;
 	int y = (int)winPos[1] - (fm.getHeight() + 4);
+	
 	_renderer.beginRendering(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+	_renderer.setColor(getTextColor());
 	_renderer.draw(s, x, y);
-	System.err.println("x = " + x + "  y = " + y);
-//	_renderer.draw3D(s, getX1(), getY1(), getZ1(), .01f);
 	_renderer.endRendering();
+	
+	
+	_panel3D.project(gl, getX0(), getY0(), getZ0(), winPos);
+	x = (int)winPos[0] + 4;
+	y = (int)winPos[1] - (fm.getHeight() + 4);
+	
+	_renderer.beginRendering(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+	_renderer.setColor(getTextColor());
+	_renderer.draw("-"+s, x, y);
+	_renderer.endRendering();
+	
+	
     }
 
     private static float[] getEndpoints(AxisType type, float vmin, float vmax) {

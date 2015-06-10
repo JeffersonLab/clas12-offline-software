@@ -38,6 +38,8 @@
 		<mkdir dir="${vdir}" />
 		<jar destfile="${vdir}/magfield.jar" basedir="../magfield/src/main/java/cnuphys/bin"></jar>		
 	</target>
+	
+	
 
 	<!-- splot.jar -->
 	<target name="splotjar">
@@ -45,8 +47,18 @@
 		<property name="version" value="v1.0"/>
 		<property name="vdir" value="splot/${version}/lib"/>
 		<mkdir dir="${vdir}" />
-		<jar destfile="${vdir}/splot.jar" basedir="../splot/bin"></jar>		
+		<jar destfile="${vdir}/splot.jar" basedir="../splot/src/main/java/bin"></jar>		
 	</target>
+	
+	<!-- bCNU3D.jar -->
+	<target name="bCNU3D">
+		<echo>Building the bCNU3D jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="bCNU3D/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<jar destfile="${vdir}/bCNU3D.jar" basedir="../bCNU3D/src/main/java/bin"></jar>		
+	</target>
+
 	
 	<!-- ced.jar -->
 	<target name="cedjar">

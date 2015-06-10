@@ -44,8 +44,6 @@ public class Cube extends Item3D {
 	float zm = _zc - _halfLength;
 	float zp = _zc + _halfLength;
 	
-	gl.glBegin(GL2.GL_QUADS);
-	
 	Support3D.setColor(gl, getColor());
 	gl.glBegin(GL2.GL_QUADS);
 	gl.glVertex3f(xm, ym, zp);
