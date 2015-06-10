@@ -13,10 +13,9 @@ import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Shape3D;
 import org.jlab.geom.prim.Transformation3D;
-
-import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
-import cnuphys.bCNU.log.Log;
+import org.jlab.geom.prim.Triangle3D;
 
 public class DCGeometry {
 
@@ -34,13 +33,16 @@ public class DCGeometry {
     private static double maxWireZ;
 
     public static boolean inited = false;
-
+    
     /**
      * These are the drift chamber wires from the geometry service. The indices
      * are 0-based: [superlayer 0:5][layer 0:5][wire 0:111]
      */
     private static DriftChamberWire wires[][][];
-
+    
+    
+    private static DCFactory dcFactory;
+    
     /**
      * Initialize the DC Geometry by loading all the wires
      */
@@ -55,8 +57,10 @@ public class DCGeometry {
 
 	dcDataProvider = DataBaseLoader.getDriftChamberConstants();
 
-	dcDetector = (new DCFactory()).createDetectorCLAS(dcDataProvider);
-
+	dcFactory = new DCFactory();
+	dcDetector = dcFactory.createDetectorCLAS(dcDataProvider);
+	
+		
 	sector0 = dcDetector.getSector(0);
 
 	shortestWire = Double.POSITIVE_INFINITY;
@@ -71,8 +75,18 @@ public class DCGeometry {
 	wires = new DriftChamberWire[6][6][112];
 	for (int suplay = 0; suplay < 6; suplay++) {
 	    DCSuperlayer sl = sector0.getSuperlayer(suplay);
+	    
 	    for (int lay = 0; lay < 6; lay++) {
 		DCLayer dcLayer = sl.getLayer(lay);
+		
+//		if (suplay == 5) {
+//		    Shape3D shape = dcLayer.getBoundary(); // 2 faces
+//		    for (int i = 0; i < 2; i++) {
+//			System.err.println("layer: " + (lay+1) + "  face: [" + (i + 1) + "] "
+//				+ shape.face(i));
+//		    }
+//		}
+		
 		for (int w = 0; w < 112; w++) {
 		    DriftChamberWire dcw = dcLayer.getComponent(w);
 		    wires[suplay][lay][w] = dcw;
@@ -120,6 +134,48 @@ public class DCGeometry {
 	//
 	// System.err.println("Done initing DC Geometry");
 
+    }
+    
+    /**
+     * Used by the 3D drawing
+     * @param sector the 1-based sector
+     * @param superlayer 1 based superlayer [1..6]
+     * @param coords holds 6*3 = 18 values [x1, y1, z1, ..., x6, y6, z6]
+     */
+    public static void superLayerVertices(int sector, int superlayer, float[] coords) {
+	
+	Point3D v[] = new Point3D[6];
+	
+	DCSuperlayer sl = sector0.getSuperlayer(superlayer-1);
+	DCLayer dcLayer1 = sl.getLayer(0);
+	DCLayer dcLayer6 = sl.getLayer(5);
+	Shape3D shape1 = dcLayer1.getBoundary();
+	Shape3D shape6 = dcLayer6.getBoundary();
+	
+	Triangle3D triangle1 = (Triangle3D) shape1.face(1);
+	Triangle3D triangle6 = (Triangle3D) shape6.face(1);
+	
+	for (int i = 0; i < 3; i++) {
+	    Point3D v1 = new Point3D(triangle1.point(i));
+	    Point3D v6 = new Point3D(triangle6.point(i));
+
+	    if (sector > 1) {
+		v1.rotateZ(Math.toRadians(60 * (sector - 1)));
+		v6.rotateZ(Math.toRadians(60 * (sector - 1)));
+	    }
+	    
+	    int j = 3*i;
+	    int k = j + 9;
+	    
+	    coords[j] = (float) v1.x();
+	    coords[j+1] = (float) v1.y();
+	    coords[j+2] = (float) v1.z();
+	    
+	    coords[k] = (float) v6.x();
+	    coords[k+1] = (float) v6.y();
+	    coords[k+2] = (float) v6.z();
+	}
+		    
     }
 
     /**
@@ -213,7 +269,7 @@ public class DCGeometry {
     }
 
     /**
-     * Get the midpoint of the untransformed wire in sector 0 NOTE: the indices
+     * Get the midpoint of the untransformed wire in sector 1 NOTE: the indices
      * are 1-based
      * 
      * @param superlayer
@@ -222,11 +278,34 @@ public class DCGeometry {
      *            the layer [1..6]
      * @param wire
      *            the wire [1..112]
-     * @return the mid point of the wire in sector 0
+     * @return the mid point of the wire in sector 1
      */
     public static Point3D getMidPoint(int superlayer, int layer, int wire) {
 	return wires[superlayer - 1][layer - 1][wire - 1].getLine().midpoint();
     }
+    
+    /**
+     * Get the wire in given sector NOTE: the indices are 1-based
+     * 
+     * @param sector the 1-based sector [1..6]
+     * @param superlayer
+     *            the superlayer [1..6]
+     * @param layer
+     *            the layer [1..6]
+     * @param wire
+     *            the wire [1..112]
+     * @return the wire transformed to the given sector
+     */
+    public static Line3D getWire(int sector, int superlayer, int layer, int wire) {
+	DriftChamberWire dcwire =  getWire(superlayer, layer, wire);
+	
+	Line3D line = new Line3D(dcwire.getLine());
+	if (sector > 1) {
+	    line.rotateZ(Math.toRadians(60*(sector-1)));
+	}
+	return line;
+    }
+
 
     /**
      * Get the wire in sector 0 NOTE: the indices are 1-based
@@ -619,6 +698,16 @@ public class DCGeometry {
 	// System.err.println();
 	// }
 	// }
+	
+	System.err.println("test rotations");
+	for (int sector = 1; sector <= 6; sector++) {
+	    System.err.println("\nSECTOR " + sector);
+		line = getWire(sector, superlayer, layer, wire);
+		System.err.println("MP from DC Line: " + line.midpoint());
+//		System.err.println("Len from DC Wire: " + dcw.getLength());
+//		System.err.println("Len from DC Line: " + dcw.getLine().length());
+		System.err.println("DC Line: " + line);
+	}
 
     }
 

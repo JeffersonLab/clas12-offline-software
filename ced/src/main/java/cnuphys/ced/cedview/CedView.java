@@ -111,13 +111,17 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 	_eventManager.addPhysicsListener(this, 2);
 
-	getContainer().getFeedbackControl().addFeedbackProvider(this);
+	IContainer container = getContainer();
+	
+	if (container != null) {
+	    container.getFeedbackControl().addFeedbackProvider(this);
 
-	// add the magnetic field layer--mostly unused.
-	getContainer().addLogicalLayer(_magneticFieldLayerName);
+	    // add the magnetic field layer--mostly unused.
+	    container.addLogicalLayer(_magneticFieldLayerName);
 
-	// add the detector drawing layer
-	getContainer().addLogicalLayer(_detectorLayerName);
+	    // add the detector drawing layer
+	    container.addLogicalLayer(_detectorLayerName);
+	}
 
 	// listen for trajectory changes
 	Swimming.addSwimTrajectoryListener(this);
@@ -162,6 +166,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
     // prepare hovering checker
     private void prepareForHovering() {
+	
+	IContainer container = getContainer();
+        if (container == null) {
+            return;
+        }
+	
 	MouseMotionListener mml = new MouseMotionListener() {
 
 	    @Override
@@ -204,8 +214,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 	};
 
-	getContainer().getComponent().addMouseMotionListener(mml);
-	getContainer().getComponent().addMouseListener(ml);
+	container.getComponent().addMouseMotionListener(mml);
+	container.getComponent().addMouseListener(ml);
     }
 
     private void closeHoverWindow() {

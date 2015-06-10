@@ -27,6 +27,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
     
     //the vertices
     private float[] coords = new float[18];
+    
 
     /**
      * The owner panel
@@ -43,6 +44,10 @@ public class DCSuperLayer3D extends DetectorItem3D {
 
     @Override
     public void drawShape(GLAutoDrawable drawable) {
+	if (!show()) {
+	    return;
+	}
+	
 	Support3D.drawTriangle(drawable, coords, 0, 1, 2, outlineColor, 1f, frame);
  	Support3D.drawQuad(drawable, coords, 1, 4, 3, 0, outlineColor, 1f, frame);
  	Support3D.drawQuad(drawable, coords, 0, 3, 5, 2, outlineColor, 1f, frame);
@@ -52,6 +57,10 @@ public class DCSuperLayer3D extends DetectorItem3D {
 
     @Override
     public void drawData(GLAutoDrawable drawable) {
+	if (!show()) {
+	    return;
+	}
+	
 	if (_eventManager.isAccumulating()) {
 	    return;
 	}
@@ -104,6 +113,11 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	coords[3] = (float) p1.x();
 	coords[4] = (float) p1.y();
 	coords[5] = (float) p1.z();
+    }
+    
+    //show DCs?
+    private boolean show() {
+	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_DC);
     }
 
 }

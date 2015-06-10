@@ -28,6 +28,8 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.FPSAnimator;
 
 @SuppressWarnings("serial")
 public class Panel3D extends JPanel implements GLEventListener {
@@ -45,6 +47,10 @@ public class Panel3D extends JPanel implements GLEventListener {
     
     //distance in front of the screen
     private float _zdist;
+    
+    //x and y translation
+    private float _xdist;
+    private float _ydist;
     
     //the list of 3D items to be drawn
     protected Vector<Item3D> _itemList = new Vector<Item3D>();
@@ -65,13 +71,19 @@ public class Panel3D extends JPanel implements GLEventListener {
      * @param angleX the initial x rotation angle in degrees
      * @param angleY the initial y rotation angle in degrees
      * @param angleZ the initial z rotation angle in degrees
+     * @param xdist move viewpoint left/right
+     * @param ydist move viewpoint up/down
      * @param zdist the initial viewer z distance should be negative
      */
-    public Panel3D(float angleX, float angleY, float angleZ, float zDist) {
+    public Panel3D(float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
 	_view_rotx = angleX;
 	_view_roty = angleY;
 	_view_rotz = angleZ;
+	_xdist = xDist;
+	_ydist = yDist;
 	_zdist = zDist;
+	
+	
 	setLayout(new BorderLayout(4, 4));
 	glprofile = GLProfile.getDefault();
 	glcapabilities = new GLCapabilities(glprofile);
@@ -82,6 +94,10 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 	gljpanel = new GLJPanel(glcapabilities);
 	gljpanel.addGLEventListener(this);
+	
+	// a one frame per sec animator just for maintenance
+	final FPSAnimator animator = new FPSAnimator(gljpanel, 1);
+	animator.start();
 
 	safeAdd(addNorth(), BorderLayout.NORTH);
 	safeAdd(addSouth(), BorderLayout.SOUTH);
@@ -100,9 +116,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gljpanel.addKeyListener(_keyAdapter);
 
 	createInitialItems();
-	
-	System.err.println("READY");
-
     }
 
     /**
@@ -140,13 +153,14 @@ public class Panel3D extends JPanel implements GLEventListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
+//	System.err.println("display");
 //	System.err.println("called display _view_rotx = " + _view_rotx + "  _view_roty = " + _view_roty);
 	GL2 gl = drawable.getGL().getGL2();
 	gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
 	gl.glLoadIdentity(); // reset the model-view matrix
 
-	gl.glTranslatef(0.0f, 0.0f, _zdist); // translate into the screen
+	gl.glTranslatef(_xdist, _ydist, _zdist); // translate into the screen
 //	 gl.glPolygonStipple(sd, 0);
 
 	gl.glPushMatrix();
@@ -221,7 +235,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	
 	// Global settings.
 	gl.glEnable(GL2.GL_POLYGON_STIPPLE);
-	gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // set background (clear) color
+	gl.glClearColor(0.9f, 0.9f, 0.9f, 1.0f); // set background (clear) color
 	gl.glClearDepth(1.0f); // set clear depth value to farthest
 	gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
 	gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
@@ -263,7 +277,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glLoadIdentity(); // reset projection matrix
 	
 	//arguments are fovy, aspect, znear, zFar
-	glu.gluPerspective(45.0, aspect, 0.1, 100.0);
+	glu.gluPerspective(45.0, aspect, 0.1, 10000.0);
 
 	// Enable the model-view transform
 	gl.glMatrixMode(GL2ES1.GL_MODELVIEW);
@@ -329,6 +343,22 @@ public class Panel3D extends JPanel implements GLEventListener {
     }
 
     /**
+     * Change the x distance to move in or out
+     * @param dx the change in x
+     */
+    public void deltaX(float dx) {
+	_xdist += dx;
+    }
+    
+    /**
+     * Change the y distance to move in or out
+     * @param dy the change in y
+     */
+    public void deltaY(float dy) {
+	_ydist += dy;
+    }
+    
+    /**
      * Change the z distance to move in or out
      * @param dz the change in z
      */
@@ -341,6 +371,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void refresh() {
 	if (gljpanel != null) {
+//	    System.err.println("refresh");
 	    gljpanel.display();
 	}
     }
@@ -369,6 +400,15 @@ public class Panel3D extends JPanel implements GLEventListener {
     }
 
     
+    /**
+     * Conver GL coordinates to screen coordinates
+     * @param gl graphics context
+     * @param objX GL x coordinate
+     * @param objY GL y coordinate
+     * @param objZ GL z coordinate
+     * @param winPos should be float[3]. Will hold screen coords as floats as [x, y, z].
+     * Not sure what z is--ignore.
+     */
     public void project(GL2 gl, float objX, float objY, float objZ,
 	    float winPos[]) {
 
@@ -383,7 +423,17 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 	glu.gluProject(objX, objY, objZ, model, 0, proj, 0, view, 0, winPos, 0);
 	
-	System.err.println("pos: (" + objX + ", " + objY + ", " + objZ + ") screen: (" + winPos[0] + ", " + winPos[1] + ", " + winPos[2] + ")");
+//	System.err.println("pos: (" + objX + ", " + objY + ", " + objZ + ") screen: (" + winPos[0] + ", " + winPos[1] + ", " + winPos[2] + ")");
+    }
+    
+    /**
+     * This gets the z step used by the mouse and key adapters, to see how
+     * fast we move in or in in response to mouse wheel or up/down arrows.
+     * It should be overridden to give something sensible. like the scale/100;
+     * @return the z step (changes to zDist) for moving in and out
+     */
+    public float getZStep() {
+	return 0.1f;
     }
     
     
@@ -394,27 +444,57 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public static void main(String arg[]) {
 	final JFrame testFrame = new JFrame("bCNU 3D Panel Test");
+	
+	int n = 10000;
+	if (arg.length > 0) {
+	    n = Integer.parseInt(arg[0]);
+	}
+	
+	final int num = n;
 
 	testFrame.setLayout(new BorderLayout(4, 4));
 	
-	Panel3D p3d = new Panel3D(0, 0, 0, -4) {
+	final float xymax = 600f;
+	final float zmax = 600f;
+	final float zmin = -100f;
+	final float xdist = -100f;
+	final float ydist = 0f;
+	final float zdist = -1600f;
+	
+	final float thetax = 0f;
+	final float thetay = 90f;
+	final float thetaz = 90f;
+
+	Panel3D p3d = new Panel3D(thetax, thetay, thetaz, xdist, ydist, zdist) {
 	    @Override
 	    public void createInitialItems() {
 		//coordinate axes 
 		
-//		float xymax = 600f;
-//		float zmax = 600f;
-//		Axes3D axes = new Axes3D(this, 0, 2f, 0, 2f, 0, 2f, Color.cyan, 1f, 11, Color.yellow, new Font("SansSerif", Font.PLAIN, 12));
-//		addItem(axes);
+		Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 11, 
+			Color.darkGray, new Font("SansSerif", Font.PLAIN, 12));
+		addItem(axes);
 		
 //		Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f, Color.yellow);
 //		addItem(cube);
 		
-		Line3D.lineItemTest(this, 40000);
+//		System.err.println("test with " + num + " lines.");
+//		Line3D.lineItemTest(this, num);
 		
 //		Cube.cubeTest(this, 40000);
 		
 	    }
+	    
+	    /**
+	     * This gets the z step used by the mouse and key adapters, to see how
+	     * fast we move in or in in response to mouse wheel or up/down arrows.
+	     * It should be overridden to give something sensible. like the scale/100;
+	     * @return the z step (changes to zDist) for moving in and out
+	     */
+	    @Override
+	    public float getZStep() {
+		return (zmax-zmin)/50f;
+	    }
+
 	};
 	
 	

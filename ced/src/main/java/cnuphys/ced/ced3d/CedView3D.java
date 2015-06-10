@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.AbstractButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -11,10 +12,12 @@ import javax.swing.JMenuItem;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.attributes.AttributeType;
+import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
 import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
+import cnuphys.ced.component.PIDLegend;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.lund.SwimTrajectoryListener;
@@ -29,9 +32,11 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
     private final float thetax = 0f;
     private final float thetay = 90f;
     private final float thetaz = 90f;
-
+    
+    
     //the menu bar
     private final JMenuBar _menuBar;
+    
 
     // the event manager
     private final ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -56,6 +61,8 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
 	_menuBar = new JMenuBar();
 	setJMenuBar(_menuBar);
  	addMenus();
+ 	
+ 	
 
 	setLayout(new BorderLayout(2, 2));
 	_panel3D = new CedPanel3D(thetax, thetay, thetaz, xdist, ydist, zdist);
@@ -81,7 +88,6 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
 //	    fixButtons();
 	    _panel3D.refresh();	
 	}
-	
     }
 
     @Override
@@ -110,7 +116,7 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
 	if (!_eventManager.isAccumulating()) {
 	    _panel3D.refresh();
 	}
-    }
+   }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -118,7 +124,6 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
 	Object source = e.getSource();
 	if (source == _printMenuItem) {
 		PrintUtilities.printComponent(_panel3D);
-	    
 	}
     }
 

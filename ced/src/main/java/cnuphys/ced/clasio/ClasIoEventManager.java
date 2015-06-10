@@ -290,7 +290,6 @@ public class ClasIoEventManager {
     private void threadedOpenEvioFile(final File file) {
 
 	final JProgressBar progressBar = Ced.getInstance().getProgressBar();
-	progressBar.setVisible(true);
 	progressBar.setString("Reading " + file.getPath());
 	progressBar.setIndeterminate(true);
 	setEnabled(false);
@@ -298,6 +297,7 @@ public class ClasIoEventManager {
 	class MyWorker extends SwingWorker<String, Void> {
 	    @Override
 	    protected String doInBackground() {
+		progressBar.setVisible(true);
 		_evioSource.close();
 		_evioSource.open(file);
 		notifyListeners(file.getPath());

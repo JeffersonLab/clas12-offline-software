@@ -2,11 +2,18 @@ package cnuphys.ced.ced3d;
 
 import item3D.Axes3D;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.AbstractButton;
+
+import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.ced.component.PIDLegend;
 import cnuphys.ced.geometry.FTOFGeometry;
 import bCNU3D.Panel3D;
 
@@ -15,6 +22,18 @@ public class CedPanel3D extends Panel3D {
     private final float xymax = 600f;
     private final float zmax = 600f;
     private final float zmin = -100f;
+
+    //Check box array
+    private CheckBoxArray _checkBoxArray; 
+    
+    //show what particles are present
+    private final PIDLegend _pidLegend;
+ 
+    //labels for the check box
+    public static final String SHOW_TRUTH = "Monte Carlo Truth";
+    public static final String SHOW_DC = "Drift Chambers (DC)";
+    public static final String SHOW_FTOF = "Forward Time of Flight (FTOF)";
+    private static final String _cbaLabels[] = {SHOW_TRUTH, SHOW_DC, SHOW_FTOF};
 
     /*
      * The panel that holds the 3D objects
@@ -27,7 +46,32 @@ public class CedPanel3D extends Panel3D {
      */
     public CedPanel3D(float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
 	super(angleX, angleY, angleZ, xDist, yDist, zDist);
+	_pidLegend = new PIDLegend(this);
+ 	add(_pidLegend, BorderLayout.NORTH);
+	
+	_checkBoxArray = new CheckBoxArray(1, 4, 4, _cbaLabels);
+	add(_checkBoxArray, BorderLayout.EAST);
+
+	ActionListener al = new ActionListener() {
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		refresh();
+	    }
+	    
+	};
+	for (String s : _cbaLabels) {
+	    AbstractButton ab = _checkBoxArray.getButton(s); 
+	    ab.setSelected(true);
+	    ab.addActionListener(al);
+	}
 	fixSize();
+    }
+    
+    @Override
+    public void refresh() {
+	super.refresh();
+        _pidLegend.repaint();
     }
 
     @Override
@@ -81,5 +125,14 @@ public class CedPanel3D extends Panel3D {
 	gljpanel.setPreferredSize(d);
     }
 
+    /**
+     * Check if a feature should be drawn
+     * @param label the label for the check box on the option array
+     * @return <code>true</code> if the feature should be drawn
+     */
+    public boolean show(String label) {
+	AbstractButton ab = _checkBoxArray.getButton(label);
+	return (ab == null) ? false : ab.isSelected();
+    }
 
 }

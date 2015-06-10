@@ -53,6 +53,9 @@ public class FTOFPaddle3D extends DetectorItem3D {
    }
     
     private void drawMe(GLAutoDrawable drawable, Color color) {
+	if (!show()) {
+	    return;
+	}
 	boolean frame = true;
  	Support3D.drawQuad(drawable, coords, 0, 1, 2, 3, color, 1f, frame);
  	Support3D.drawQuad(drawable, coords, 3, 7, 6, 2, color, 1f, frame);
@@ -64,6 +67,9 @@ public class FTOFPaddle3D extends DetectorItem3D {
 
     @Override
     public void drawData(GLAutoDrawable drawable) {
+	if (!show()) {
+	    return;
+	}
 	
 	// the overall container
 	FTOFDataContainer ftofData = _eventManager.getFTOFData();
@@ -107,5 +113,11 @@ public class FTOFPaddle3D extends DetectorItem3D {
 	}
 	
     }
+    
+    //show FTOFs?
+    private boolean show() {
+	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_FTOF);
+    }
+
 
 }
