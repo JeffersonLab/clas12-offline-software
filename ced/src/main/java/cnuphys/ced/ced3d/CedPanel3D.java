@@ -11,10 +11,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.AbstractButton;
 
+import com.jogamp.opengl.awt.GLJPanel;
+
 import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.ced.component.PIDLegend;
 import cnuphys.ced.geometry.FTOFGeometry;
+import cnuphys.lund.X11Colors;
 import bCNU3D.Panel3D;
 
 public class CedPanel3D extends Panel3D {
@@ -30,10 +33,11 @@ public class CedPanel3D extends Panel3D {
     private final PIDLegend _pidLegend;
  
     //labels for the check box
-    public static final String SHOW_TRUTH = "Monte Carlo Truth";
+    public static final String SHOW_VOLUMES = "Detector Volumes";
+    public static final String SHOW_TRUTH = "GEMC Truth";
     public static final String SHOW_DC = "Drift Chambers (DC)";
     public static final String SHOW_FTOF = "Forward Time of Flight (FTOF)";
-    private static final String _cbaLabels[] = {SHOW_TRUTH, SHOW_DC, SHOW_FTOF};
+    private static final String _cbaLabels[] = {SHOW_VOLUMES, SHOW_TRUTH, SHOW_DC, SHOW_FTOF};
 
     /*
      * The panel that holds the 3D objects
@@ -48,6 +52,9 @@ public class CedPanel3D extends Panel3D {
 	super(angleX, angleY, angleZ, xDist, yDist, zDist);
 	_pidLegend = new PIDLegend(this);
  	add(_pidLegend, BorderLayout.NORTH);
+ 	
+	
+ 	final GLJPanel gljp = this.gljpanel;
 	
 	_checkBoxArray = new CheckBoxArray(1, 4, 4, _cbaLabels);
 	add(_checkBoxArray, BorderLayout.EAST);
@@ -57,6 +64,7 @@ public class CedPanel3D extends Panel3D {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		refresh();
+		gljp.requestFocus();
 	    }
 	    
 	};
@@ -77,15 +85,15 @@ public class CedPanel3D extends Panel3D {
     @Override
     public void createInitialItems() {
 	//coordinate axes
-	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 11, 
-		Color.darkGray, new Font("SansSerif", Font.PLAIN, 12));
+	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 7, 7, 8, 
+		X11Colors.getX11Color("Dark Green"), new Font("SansSerif", Font.PLAIN, 12), 0);
 	addItem(axes);
 	
 	//trajectory drawer
 	TrajectoryDrawer3D trajDrawer = new TrajectoryDrawer3D(this);
 	addItem(trajDrawer);
 	
-	
+ 	
 	//dc super layers
 	for (int sector = 1; sector <= 61; sector++) {
 	    for (int superlayer = 1; superlayer <= 6; superlayer++) {
@@ -104,7 +112,12 @@ public class CedPanel3D extends Panel3D {
 		}
 	    }
 	}
-   }
+	
+	//mc hit drawer
+	MCHitDrawer3D mchd = new MCHitDrawer3D(this);
+	addItem(mchd);
+	
+  }
     
     /**
      * This gets the z step used by the mouse and key adapters, to see how

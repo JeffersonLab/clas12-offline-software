@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 
+import bCNU3D.DoubleFormat;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 
@@ -18,8 +19,21 @@ public class Axis3D extends Line3D {
 
     // length of major ticks
     private static final float MAJTICKLENFRAC = 0.01f;
-    private float _majTickLen;
-
+    private float _tickLen;
+    private int _numTick;
+    private Line3D _lines1[];
+    private Line3D _lines2[];
+    
+    //number of decimals for tick mark labels
+    //skip if negative
+    private int _numDec;
+    
+    //limits and step
+    private float _valMin;
+    private float _valMax;
+    private float _del;
+    private float _vals[];
+ 
     /** possible types of axes */
     public enum AxisType {
 	X_AXIS, Y_AXIS, Z_AXIS
@@ -42,68 +56,84 @@ public class Axis3D extends Line3D {
      *            the color
      * @param lineWidth
      *            the line width
-     * @param numMajorTicks
-     *            the number of major ticks
+     * @param numTicks
+     *            the number of ticks
+     * @param textColor the text color
+     * @param font the text font
+     * @param numdec the number of decimals to display
      */
     public Axis3D(Panel3D panel3D, AxisType type, float vmin, float vmax, Color color,
-	    float lineWidth, int numMajorTicks, Color textColor, Font font) {
+	    float lineWidth, int numTicks, Color textColor, Font font, int numDec) {
 	super(panel3D, getEndpoints(type, vmin, vmax), color, lineWidth);
 	_type = type;
-	_majTickLen = MAJTICKLENFRAC*(vmax-vmin);
-	addMajorTicks(vmin, vmax, color, lineWidth, numMajorTicks);
+	_numDec = numDec;
+	_tickLen = MAJTICKLENFRAC*(vmax-vmin);
+	_numTick = numTicks;
+	
+	_valMin = vmin;
+	_valMax = vmax;
+	if (numTicks > 1) {
+	    _del = (vmax - vmin) / (numTicks - 1);
+	    addMajorTicks(color, lineWidth);
+	}
+	
 	setTextColor(textColor);
 	setFont(font);
     }
 
     // add major tick marks as child items
-    private void addMajorTicks(float vmin, float vmax, Color color,
-	    float lineWidth, int numMajorTicks) {
-	if (numMajorTicks < 1) {
-	    return;
+    private void addMajorTicks(Color color,
+	    float lineWidth) {
+
+	_vals = new float[_numTick];
+	_lines1 = new Line3D[_numTick];
+	_lines2 = new Line3D[_numTick];
+	
+	_vals[0] = _valMin;
+	_vals[_numTick-1] = _valMax;
+	for (int i = 1; i < (_numTick-1); i++) {
+	    _vals[i] = _valMin + _del*i;
 	}
-
-	float del = (vmax - vmin) / (numMajorTicks - 1);
-
-	for (int i = 0; i <= numMajorTicks; i++) {
-	    float val = vmin;
-	    if (i == numMajorTicks) {
-		val = vmax;
-	    } else {
-		val += (i * del);
-	    }
-
-	    if (Math.abs(val) > 1.0e-4) {
+	
+	for (int i = 0; i < _numTick; i++) {
+	    
+	    _lines1[i] = null;
+	    _lines2[i] = null;
+	    
+	    if (Math.abs(_vals[i]) > 1.0e-4) {
 
 		Panel3D p3d = getPanel3D();
-		Line3D line = null;
 		switch (_type) {
 		case X_AXIS:
-		    line = new Line3D(p3d, val, _majTickLen, 0, val, -_majTickLen, 0,
+		    _lines1[i] = new Line3D(p3d, _vals[i], _tickLen, 0, _vals[i], -_tickLen, 0,
 			    color, lineWidth);
-		    addChild(line);
-		    line = new Line3D(p3d, val, 0, _majTickLen, val, 0, -_majTickLen,
+		    _lines2[i] = new Line3D(p3d, _vals[i], 0, _tickLen, _vals[i], 0, -_tickLen,
 			    color, lineWidth);
-		    addChild(line);
 		    break;
 
 		case Y_AXIS:
-		    line = new Line3D(p3d, 0, val, _majTickLen, 0, val, -_majTickLen,
+		    _lines1[i] = new Line3D(p3d, 0, _vals[i], _tickLen, 0, _vals[i], -_tickLen,
 			    color, lineWidth);
-		    addChild(line);
-		    line = new Line3D(p3d, _majTickLen, val, 0, -_majTickLen, val, 0,
+		    _lines2[i] = new Line3D(p3d, _tickLen, _vals[i], 0, -_tickLen, _vals[i], 0,
 			    color, lineWidth);
-		    addChild(line);
 		    break;
 
 		case Z_AXIS:
-		    line = new Line3D(p3d, _majTickLen, 0, val, -_majTickLen, 0, val,
+		    _lines1[i] = new Line3D(p3d, _tickLen, 0, _vals[i], -_tickLen, 0, _vals[i],
 			    color, lineWidth);
-		    addChild(line);
-		    line = new Line3D(p3d, 0, _majTickLen, val, 0, -_majTickLen, val,
+		    _lines2[i] = new Line3D(p3d, 0, _tickLen, _vals[i], 0, -_tickLen, _vals[i],
 			    color, lineWidth);
-		    addChild(line);
 		    break;
 		}
+	    } // > 1.0e-4
+	}
+	
+	for (int i = 0; i < _numTick; i++) {
+	    if (_lines1[i] != null) {
+		addChild(_lines1[i]);
+	    }
+	    if (_lines2[i] != null) {
+		addChild(_lines2[i]);
 	    }
 	}
     }
@@ -135,8 +165,16 @@ public class Axis3D extends Line3D {
 	FontMetrics fm = _panel3D.getFontMetrics(getFont());
 	float winPos[] = new float[3];
 	
+	float extend[] = new float[3];
 	
-	_panel3D.project(gl, getX1(), getY1(), getZ1(), winPos);
+	double extLen = Math.abs(Math.max(getX1(), Math.max(getY1(), getZ1())))/10;
+	extendedPoint(1, (float) extLen, extend);
+	
+//	System.err.println("extend: " + extend[0]+ ", " +  extend[1] + ", " + extend[2]);
+//	System.err.println("p1: " + getX1()+ ", " +  getY1() + ", " + getZ1());
+	
+	_panel3D.project(gl, extend[0], extend[1], extend[2], winPos);
+//	_panel3D.project(gl, getX1(), getY1(), getZ1(), winPos);
 	int x = (int)winPos[0] + 4;
 	int y = (int)winPos[1] - (fm.getHeight() + 4);
 	
@@ -146,15 +184,39 @@ public class Axis3D extends Line3D {
 	_renderer.endRendering();
 	
 	
-	_panel3D.project(gl, getX0(), getY0(), getZ0(), winPos);
-	x = (int)winPos[0] + 4;
-	y = (int)winPos[1] - (fm.getHeight() + 4);
+//	extLen = Math.abs(Math.max(getX0(), Math.max(getY0(), getZ0())))/10;
+//	extendedPoint(0, (float) extLen, extend);
+//	_panel3D.project(gl, extend[0], extend[1], extend[2], winPos);
+//	x = (int)winPos[0] + 4;
+//	y = (int)winPos[1] - (fm.getHeight() + 4);
+//	
+//	_renderer.beginRendering(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+//	_renderer.setColor(getTextColor());
+//	_renderer.draw("-"+s, x, y);
+//	_renderer.endRendering();
+
+	// axis values
+	if (_numDec >= 0) {
+	    for (int i = 0; i < _numTick; i++) {
+
+		if (_lines1[i] != null) {
+		    s = DoubleFormat.doubleFormat(_vals[i], _numDec);
+		    _panel3D.project(gl, _lines1[i].getX1(),
+			    _lines1[i].getY1(), _lines1[i].getZ1(), winPos);
+		    x = (int) winPos[0] + 4;
+		    y = (int) winPos[1] - (fm.getHeight() + 4);
+
+		    _renderer.beginRendering(drawable.getSurfaceWidth(),
+			    drawable.getSurfaceHeight());
+		    _renderer.setColor(getTextColor());
+		    _renderer.draw(s, x, y);
+		    _renderer.endRendering();
+		}
+	    }
+
+	}
 	
-	_renderer.beginRendering(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
-	_renderer.setColor(getTextColor());
-	_renderer.draw("-"+s, x, y);
-	_renderer.endRendering();
-	
+
 	
     }
 

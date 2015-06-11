@@ -6,8 +6,12 @@ import com.jogamp.graph.geom.SVertex;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 public class Support3D {
+    
+    private static GLUT glut = new GLUT();
+
 
     private static final byte byteA = (byte) 170;
     private static final byte byteB = (byte) 170;
@@ -58,13 +62,64 @@ public class Support3D {
 	    (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55 };
 
     /**
-     * 
+     * Draw a set of points
      * @param drawable
+     *            the OpenGL drawable
      * @param coords
-     * @param index1
-     * @param index2
-     * @param index3
-     * @param index4
+     *            the vertices as [x, y, z, x, y, z, ...]
+     * @param color
+     *            the color
+     * @param size
+     *            the points size
+     */
+    public static void drawPoints(GLAutoDrawable drawable, float coords[], Color color, float size) {
+	GL2 gl = drawable.getGL().getGL2();
+	gl.glPointSize(size);
+	
+	int np = coords.length / 3;
+
+	gl.glBegin(GL.GL_POINTS);
+	setColor(gl, color);
+
+	for (int i = 0; i < np; i++) {
+	    int j = i * 3;
+	    gl.glVertex3f(coords[j], coords[j + 1], coords[j + 2]);
+	}
+	gl.glEnd();
+    }
+    
+    
+    /**
+     * Draw a wire sphere
+     * @param drawable
+     * @param x
+     * @param y
+     * @param z
+     * @param radius
+     * @param slices
+     * @param stacks
+     * @param color
+     */
+    public static void wireSphere(GLAutoDrawable drawable, float x, float y,
+	    float z, float radius, int slices, int stacks, Color color) {
+	GL2 gl = drawable.getGL().getGL2();
+	 setColor(gl, color);
+	gl.glPushMatrix();
+	gl.glTranslatef(x, y,z);
+//	glut.glutSolidSphere(radius, 20, 10);
+	glut.glutWireSphere(radius, slices, stacks);
+	gl.glPopMatrix();
+
+    }
+    
+    /**
+     * 
+     * @param drawable the openGL drawable
+     * @param coords the coordinate array
+     * @param index1 index into first vertex
+     * @param index2 index into second vertex
+     * @param index3 index into third vertex
+     * @param index4 index into fourth vertex
      * @param color the color
      * @param lineWidth the line width
      * @param frame if <code>true</code> frame in slightly darker color

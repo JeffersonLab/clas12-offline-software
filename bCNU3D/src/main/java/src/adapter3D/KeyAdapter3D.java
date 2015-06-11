@@ -23,6 +23,7 @@ public class KeyAdapter3D implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
 
+//	System.err.println("key pressed");
 	int keyCode = e.getKeyCode();
 	boolean shifted = e.isShiftDown();
 
@@ -37,12 +38,12 @@ public class KeyAdapter3D implements KeyListener {
 	    _panel3D.refresh();
 	}
 	if (keyCode == KeyEvent.VK_L) {
-	    float dz = _panel3D.getZStep();
+	    float dz = -_panel3D.getZStep();
 	    _panel3D.deltaX(dz);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_R) {
-	    float dz = -_panel3D.getZStep();
+	    float dz = _panel3D.getZStep();
 	    _panel3D.deltaX(dz);
 	    _panel3D.refresh();
 	}
