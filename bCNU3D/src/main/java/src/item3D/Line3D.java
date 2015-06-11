@@ -11,8 +11,11 @@ import com.jogamp.opengl.GLAutoDrawable;
 public class Line3D extends Item3D {
 
     //p0 and p1 are the end points
-    protected float[] _p0;
-    protected float[] _p1;
+    protected final float[] _p0;
+    protected final float[] _p1;
+    protected final double[] _unitVector = new double[3];
+    public final double length;
+    
      /**
      * Create a simple 3D Line item for use on a Panel3D.
      * @param panel3D the owner 3D panel
@@ -25,6 +28,18 @@ public class Line3D extends Item3D {
 	super(panel3D);
 	_p0 = p0;
 	_p1 = p1;
+	
+	float delX = p1[0] - p0[0];
+	float delY = p1[1] - p0[1];
+	float delZ = p1[2] - p0[2];
+	
+	length = Math.sqrt(delX*delX + delY*delY + delZ*delZ);
+	if (length > 1.0e-12) {
+	    _unitVector[0] = delX/length;
+	    _unitVector[1] = delY/length;
+	    _unitVector[2] = delZ/length;
+	}
+	
 	setColor(color);
 	setLineWidth(lineWidth);
     }
@@ -136,5 +151,19 @@ public class Line3D extends Item3D {
 	    p3D.addItem(item);
 	}
     }
+    
+    public void extendedPoint(int whichEnd, float amount, float coords[]) {
+	if (whichEnd == 0) {
+	    for (int i = 0; i < 3; i++) {
+		coords[i] = (float) (_p0[i] - amount*_unitVector[i]);
+	    }
+	}
+	else {
+	    for (int i = 0; i < 3; i++) {
+		coords[i] = (float) (_p1[i] + amount*_unitVector[i]);
+	    }
+	}
+    }
+
 
 }

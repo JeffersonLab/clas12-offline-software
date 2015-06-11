@@ -10,7 +10,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public abstract class DetectorItem3D extends Item3D {
     
-    protected static final Color dgtzColor = new Color(255, 0, 0, 128);
+    protected static final Color dgtzColor = new Color(255, 0, 0);
 
     // the event manager
     ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -21,8 +21,11 @@ public abstract class DetectorItem3D extends Item3D {
 
     @Override
     public void draw(GLAutoDrawable drawable) {
+
+	if (showVolumes()) {
+	    drawShape(drawable);
+	}
 	drawData(drawable);
-	drawShape(drawable);
     }
     
     /**
@@ -42,5 +45,9 @@ public abstract class DetectorItem3D extends Item3D {
 	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_TRUTH);
     }
 
+    //show Volumes?
+    protected boolean showVolumes() {
+	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_VOLUMES);
+    }
 
 }
