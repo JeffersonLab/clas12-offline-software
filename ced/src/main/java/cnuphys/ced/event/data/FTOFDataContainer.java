@@ -891,7 +891,7 @@ public class FTOFDataContainer extends ADataContainer {
 
 	switch (option) {
 	case FTOFDataContainer.PANEL_1A:
-	    feedbackStrings.add(dgtxColor + "sector "
+	    feedbackStrings.add(dgtxColor + "panel_1A  sector "
 		    + ftof1a_dgtz_sector[hitIndex] + "  paddle "
 		    + ftof1a_dgtz_paddle[hitIndex]);
 
@@ -903,7 +903,7 @@ public class FTOFDataContainer extends ADataContainer {
 		    + ftof1a_dgtz_TDCR[hitIndex]);
 	    break;
 	case FTOFDataContainer.PANEL_1B:
-	    feedbackStrings.add(dgtxColor + "sector "
+	    feedbackStrings.add(dgtxColor + "panel_1B  sector "
 		    + ftof1b_dgtz_sector[hitIndex] + "  paddle "
 		    + ftof1b_dgtz_paddle[hitIndex]);
 
@@ -915,7 +915,7 @@ public class FTOFDataContainer extends ADataContainer {
 		    + ftof1b_dgtz_TDCR[hitIndex]);
 	    break;
 	case FTOFDataContainer.PANEL_2B:
-	    feedbackStrings.add(dgtxColor + "sector "
+	    feedbackStrings.add(dgtxColor + "panel_2  sector "
 		    + ftof2b_dgtz_sector[hitIndex] + "  paddle "
 		    + ftof2b_dgtz_paddle[hitIndex]);
 

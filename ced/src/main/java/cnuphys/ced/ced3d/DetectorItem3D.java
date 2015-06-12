@@ -41,13 +41,9 @@ public abstract class DetectorItem3D extends Item3D {
     public abstract void drawData(GLAutoDrawable drawable);
 
     //show MC Truth?
-    protected boolean showMCTruth() {
-	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_TRUTH);
-    }
+    protected abstract boolean showMCTruth();
 
     //show Volumes?
-    protected boolean showVolumes() {
-	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_VOLUMES);
-    }
+    protected abstract boolean showVolumes();
 
 }

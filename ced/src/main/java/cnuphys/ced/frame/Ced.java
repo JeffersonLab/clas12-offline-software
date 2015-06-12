@@ -29,7 +29,8 @@ import org.jlab.data.io.DataEvent;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.ced.ced3d.CedView3D;
+import cnuphys.ced.ced3d.CentralView3D;
+import cnuphys.ced.ced3d.ForwardView3D;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
@@ -89,7 +90,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private static final int majorRelease = 0;
 
     // subversion
-    private static final int minorRelease = 7;
+    private static final int minorRelease = 8;
 
     // used for one time inits
     private int _firstTime = 0;
@@ -131,7 +132,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private XMLView _xmlView;
     private MiniShellView _shellView;
     private PlotView _plotView;
-    private CedView3D _ced3DView;
+    private ForwardView3D _forward3DView;
+    private CentralView3D _central3DView;
 
     // the about string
     private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
@@ -200,7 +202,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_plotView, 0, 0, VirtualView.BOTTOMLEFT);
 	    
 	    if (_use3D) {
-		_virtualView.moveTo(_ced3DView, 0, 7, VirtualView.BOTTOMRIGHT);
+		_virtualView.moveTo(_forward3DView, 0, 7, VirtualView.BOTTOMRIGHT);
+		_virtualView.moveTo(_central3DView, 0, 7, VirtualView.BOTTOMLEFT);
 	    }
 	    Log.getInstance().config("reset views on virtual dekstop");
 	}
@@ -260,7 +263,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//3D view?
 	if (_use3D) {
-	    _ced3DView = new CedView3D();
+	    _forward3DView = new ForwardView3D();
+	    _central3DView = new CentralView3D();
 	}
 
 	// add three sector views

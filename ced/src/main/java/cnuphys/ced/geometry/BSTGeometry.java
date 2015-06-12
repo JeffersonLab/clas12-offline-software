@@ -1,5 +1,6 @@
 package cnuphys.ced.geometry;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import org.jlab.clasrec.utils.DataBaseLoader;
@@ -49,7 +50,7 @@ public class BSTGeometry {
     public static void initialize() {
 
 	System.out.println("\n=======================================");
-	System.out.println("====  BST Geometry Inititialization [BSTGeometry] ====");
+	System.out.println("====  BST Geometry Inititialization  ====");
 	System.out.println("=======================================");
 
 	// create a ring layer
@@ -63,7 +64,7 @@ public class BSTGeometry {
     /**
      * Get the strip as a line
      * 
-     * @param sector
+     * @param sector (0-based) 
      *            number of sectors are {10, 14, 18, 24} for superlayers {0, 1,
      *            2, 3} respectively.
      * @param superlayer
@@ -92,21 +93,108 @@ public class BSTGeometry {
 	t3d.apply(line);
 	return line;
     }
+  
 
+    /**
+     * Get the coordinates (a line) for a strip for 3D view
+     * @param sector the 1-based layer dependent sector
+     * @param layer the "big" layer 1..8
+     * @param strip the strip 1..256
+     * @param coords (dim = 6) will hold line as [x1,y1,z1,x2,y2,z2]
+     */
+    public static void getStrip(int sector, int layer, int strip, float coords[]) {
+	    // geom service uses 0-based superlayer and layer
+	    int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
+	    int lay = ((layer - 1) % 2); // 0, 1, 0, 1
+
+	    //note supl and lay just computed as zero based
+	    Line3D line = getStrip(sector-1, supl, lay, strip-1);
+	    
+	    if (line != null) {
+		coords[0] = (float) (line.origin().x());
+		coords[1] = (float) (line.origin().y());
+		coords[2] = (float) (line.origin().z());
+		coords[3] = (float) (line.end().x());
+		coords[4] = (float) (line.end().y());
+		coords[5] = (float) (line.end().z());
+
+	    }
+    }
+ 
+    /**
+     * Get the triplet quad coordinates for 3D view
+     * @param sector the 1-based layer dependent sector
+     * @param layer the "big" layer 1..8
+     * @param coords (dim = 26) will hold quads as
+     * [x1, y1, z1, ... x4, y4, z4] for quad 1 (12 numbers)
+     * [x1, y1, z1, ... x4, y4, z4] for quad 2 (12 numbers)
+     * [x1, y1, z1, ... x4, y4, z4] for quad 3 (12 numbers)
+     */
+
+    public static void getLayerQuads(int sector, int layer, float coords[]) {
+	// geom service uses 0-based superlayer and layer
+	int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
+	int lay = ((layer - 1) % 2); // 0, 1, 0, 1
+	
+	double vals[] = new double[10];
+	
+	
+	BSTGeometry.getLimitValues(sector-1, supl, lay, vals);
+	//covert to cm
+	for (int i = 0; i < 10; i++) {
+	    vals[i] /= 10;
+	}
+	
+	float x1 = (float) vals[0];
+	float y1 = (float) vals[1];
+	float x2 = (float) vals[2];
+	float y2 = (float) vals[3];
+
+	float z1 = (float) vals[4];
+	float z2 = (float) vals[5];
+	float z3 = (float) vals[6];
+	float z4 = (float) vals[7];
+	float z5 = (float) vals[8];
+	float z6 = (float) vals[9];
+	
+	fillCoords(0, coords, x1, y1, x2, y2, z1, z2);
+	fillCoords(12, coords, x1, y1, x2, y2, z3, z4);
+	fillCoords(24, coords, x1, y1, x2, y2, z5, z6);
+    }
+    
+    private static void fillCoords(int index, float coords[], float x1, float y1, 
+	    float x2, float y2, float zmin, float zmax) {
+
+	coords[index++] = x1;
+	coords[index++] = y1;
+	coords[index++] = zmin;
+	coords[index++] = x1;
+	coords[index++] = y1;
+	coords[index++] = zmax;
+	coords[index++] = x2;
+	coords[index++] = y2;
+	coords[index++] = zmax;
+	coords[index++] = x2;
+	coords[index++] = y2;
+	coords[index++] = zmin;
+
+    }
+    
+    
     /**
      * Get the points in the geometry service that were in the old file for
      * drawing in the BST views
      * 
      * @param sector
-     *            the sector
+     *            the 0-based sector
      * @param superlayer
      *            the superlayer [0..3]
      * @param layer
      *            the layer [0,1]
      * @param vals
      *            holds for (10) numbers. All are in mm. The first four are x,
-     *            y, x, y for drawing the xy view. The last siz are the six z
-     *            values athat define (in z) the three active regions
+     *            y, x, y for drawing the xy view. The last six are the six z
+     *            values that define (in z) the three active regions
      */
     public static void getLimitValues(int sector, int superlayer, int layer,
 	    double vals[]) {

@@ -1,10 +1,7 @@
 package bCNU3D;
 
 import item3D.Axes3D;
-import item3D.Cube;
 import item3D.Item3D;
-import item3D.Line3D;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -22,13 +19,16 @@ import adapter3D.MouseAdapter3D;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES1;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.fixedfunc.GLLightingFunc;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FPSAnimator;
 
 @SuppressWarnings("serial")
@@ -37,7 +37,7 @@ public class Panel3D extends JPanel implements GLEventListener {
     protected GLProfile glprofile;
     protected GLCapabilities glcapabilities;
     protected final GLJPanel gljpanel;
-    protected GLU glu; // glu utilities
+    public static GLU glu; // glu utilities
 
     // view rotation angles (degrees)
     private float _view_rotx;
@@ -64,8 +64,9 @@ public class Panel3D extends JPanel implements GLEventListener {
     protected String _versionStr;
     protected String _rendererStr;
 
-    // redrawing needed?
-    private boolean _dirty = true;
+    
+    private FPSAnimator animator;
+
 
     /*
      * The panel that holds the 3D objects
@@ -101,10 +102,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 	gljpanel = new GLJPanel(glcapabilities);
 	gljpanel.addGLEventListener(this);
-
-	// a one frame per sec animator just for maintenance
-	final FPSAnimator animator = new FPSAnimator(gljpanel, 24);
-	animator.start();
 
 	safeAdd(addNorth(), BorderLayout.NORTH);
 	safeAdd(addSouth(), BorderLayout.SOUTH);
@@ -161,11 +158,15 @@ public class Panel3D extends JPanel implements GLEventListener {
     @Override
     public void display(GLAutoDrawable drawable) {
 	
-	if (!_dirty) {
-//	    System.err.println("skipping display, should be clean");
-	    return;
+	if (animator == null) {
+	    animator = new FPSAnimator(gljpanel, 24);
+	    animator.start();
 	}
-	_dirty = false;
+	
+	//every time we draw we pause the animator.
+	//all "refresh" does is restart it!
+
+	animator.pause();
 	// System.err.println("display");
 	// System.err.println("called display _view_rotx = " + _view_rotx +
 	// "  _view_roty = " + _view_roty);
@@ -189,35 +190,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 		item3D.drawItem(drawable);
 	    }
 	}
-
-	//
-	// gl.glBegin(GL.GL_TRIANGLES); // draw using triangles
-	//
-	// // Right-face triangle
-	// gl.glColor4f(1.0f, 1.0f, 0.0f, 0.4f); // Red
-	// gl.glVertex3f(0.0f, 1.0f, 0.0f);
-	// gl.glVertex3f(1.0f, -1.0f, 1.0f);
-	// gl.glVertex3f(1.0f, -1.0f, -1.0f);
-	//
-	// // Back-face triangle
-	// gl.glColor4f(1.0f, 0.0f, 1.0f, 0.4f); // Red
-	// gl.glVertex3f(0.0f, 1.0f, 0.0f);
-	// gl.glVertex3f(1.0f, -1.0f, -1.0f);
-	// gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-	//
-	// // Left-face triangle
-	// gl.glColor4f(0.0f, 1.0f, 0.0f, 0.4f); // Red
-	// gl.glVertex3f(0.0f, 1.0f, 0.0f);
-	// gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-	// gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-	//
-	// // Font-face triangle
-	// gl.glColor4f(1.0f, 0.0f, 0.0f, 0.4f); // Red
-	// gl.glVertex3f(0.0f, 1.0f, 0.0f);
-	// gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-	// gl.glVertex3f(1.0f, -1.0f, 1.0f);
-
-	// gl.glEnd();
+	
+	
+	//test tubes
+//	Support3D.drawLine(drawable, 100f, 100f, 100f, 200f, -50f, 125, Color.red, 1f);
+//	Support3D.drawTube(drawable, 100f, 100f, 100f, 200f, -50f, 125f, 50f, new Color(255, 0, 0, 64));
+	
 	gl.glPopMatrix();
 
     }
@@ -229,7 +207,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 
     @Override
     public void init(GLAutoDrawable drawable) {
-	_dirty = true;
 	glu = GLU.createGLU();
 	GL2 gl = drawable.getGL().getGL2();
 
@@ -241,11 +218,11 @@ public class Panel3D extends JPanel implements GLEventListener {
 	System.err.println("OpenGL renderer: " + _rendererStr);
 
 	float values[] = new float[2];
-	gl.glGetFloatv(GL2.GL_LINE_WIDTH_GRANULARITY, values, 0);
+	gl.glGetFloatv(GL2GL3.GL_LINE_WIDTH_GRANULARITY, values, 0);
 	System.err
 		.println("GL.GL_LINE_WIDTH_GRANULARITY value is " + values[0]);
 
-	gl.glGetFloatv(GL2.GL_LINE_WIDTH_RANGE, values, 0);
+	gl.glGetFloatv(GL2GL3.GL_LINE_WIDTH_RANGE, values, 0);
 	System.err.println("GL.GL_LINE_WIDTH_RANGE values are " + values[0]
 		+ ", " + values[1]);
 
@@ -260,14 +237,14 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glHint(GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
 	// blends colors, smoothes lighting
 	// gl.glShadeModel(GL2ES1.GL_SMOOTH);
-	gl.glShadeModel(GL2.GL_FLAT);
+	gl.glShadeModel(GLLightingFunc.GL_FLAT);
 
-	gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+	gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	// gl.glDepthMask(false);
 	gl.glEnable(GL.GL_BLEND);
-	gl.glEnable(GL2.GL_COLOR);
-	gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL.GL_DONT_CARE);
-	gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
+	gl.glEnable(GL2ES3.GL_COLOR);
+	gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_DONT_CARE);
+	gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
 
 	// float pos[] = { 0.0f, 0.0f, 10.0f, 0.0f };
 
@@ -294,16 +271,15 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glViewport(0, 0, width, height);
 
 	// Setup perspective projection, with aspect ratio matches viewport
-	gl.glMatrixMode(GL2ES1.GL_PROJECTION); // choose projection matrix
+	gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION); // choose projection matrix
 	gl.glLoadIdentity(); // reset projection matrix
 
 	// arguments are fovy, aspect, znear, zFar
 	glu.gluPerspective(45.0, aspect, 0.1, 10000.0);
 
 	// Enable the model-view transform
-	gl.glMatrixMode(GL2ES1.GL_MODELVIEW);
+	gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 	gl.glLoadIdentity(); // reset
-	_dirty = true;
     }
 
     /**
@@ -314,7 +290,6 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void setRotationX(float angle) {
 	_view_rotx = angle;
-	_dirty = true;
     }
 
     /**
@@ -325,7 +300,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void setRotationY(float angle) {
 	_view_roty = angle;
-	_dirty = true;
+	refresh();
     }
 
     /**
@@ -336,7 +311,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void setRotationZ(float angle) {
 	_view_rotz = angle;
-	_dirty = true;
+	refresh();
     }
 
     /**
@@ -374,7 +349,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void deltaX(float dx) {
 	_xdist += dx;
-	_dirty = true;
+	refresh();
     }
 
     /**
@@ -385,7 +360,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void deltaY(float dy) {
 	_ydist += dy;
-	_dirty = true;
+	refresh();
     }
 
     /**
@@ -396,17 +371,16 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void deltaZ(float dz) {
 	_zdist += dz;
-	_dirty = true;
+	refresh();
     }
 
     /**
      * Refresh the drawing
      */
     public void refresh() {
-	setDirty(true);
-	// if (gljpanel != null) {
-	// gljpanel.display();
-	// }
+	if (animator != null) {
+	    animator.resume();
+	}
     }
 
     /**
@@ -419,7 +393,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	if (item != null) {
 	    _itemList.remove(item);
 	    _itemList.add(item);
-	    _dirty = true;
 	}
     }
 
@@ -432,7 +405,7 @@ public class Panel3D extends JPanel implements GLEventListener {
     public void removeItem(Item3D item) {
 	if (item != null) {
 	    _itemList.remove(item);
-	    _dirty = true;
+	    refresh();
 	}
     }
 
@@ -458,10 +431,10 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glGetIntegerv(GL.GL_VIEWPORT, view, 0);
 
 	float[] model = new float[16];
-	gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, model, 0);
+	gl.glGetFloatv(GLMatrixFunc.GL_MODELVIEW_MATRIX, model, 0);
 
 	float[] proj = new float[16];
-	gl.glGetFloatv(GL2.GL_PROJECTION_MATRIX, proj, 0);
+	gl.glGetFloatv(GLMatrixFunc.GL_PROJECTION_MATRIX, proj, 0);
 
 	glu.gluProject(objX, objY, objZ, model, 0, proj, 0, view, 0, winPos, 0);
 
@@ -566,16 +539,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	    }
 	});
 
-    }
-    
-
-    /**
-     * Controls whether redraw is needed
-     * 
-     * @param dirty
-     */
-    public void setDirty(boolean dirty) {
-	_dirty = dirty;
     }
 
 }

@@ -30,7 +30,6 @@ public class MCHitDrawer3D extends Item3D {
 
     public MCHitDrawer3D(Panel3D panel3d) {
 	super(panel3d);
-	// TODO Auto-generated constructor stub
     }
 
     @Override
@@ -57,7 +56,7 @@ public class MCHitDrawer3D extends Item3D {
 
     //show MC Truth?
     protected boolean showMCTruth() {
-	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_TRUTH);
+	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_TRUTH);
     }
     
     

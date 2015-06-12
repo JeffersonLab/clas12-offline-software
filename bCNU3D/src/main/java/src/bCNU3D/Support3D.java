@@ -5,16 +5,19 @@ import java.awt.Color;
 import com.jogamp.graph.geom.SVertex;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 public class Support3D {
     
-    private static GLUT glut = new GLUT();
-
+    public static GLUT glut = new GLUT();
 
     private static final byte byteA = (byte) 170;
     private static final byte byteB = (byte) 170;
+    
+    private static GLUquadric _quad;
 
     /* a stipple pattern */
     public byte sd[] = { byteB, byteA, byteB, byteA, byteB, byteA, byteB,
@@ -87,18 +90,18 @@ public class Support3D {
 	}
 	gl.glEnd();
     }
-    
-    
+       
     /**
      * Draw a wire sphere
      * @param drawable
-     * @param x
-     * @param y
-     * @param z
-     * @param radius
-     * @param slices
-     * @param stacks
-     * @param color
+     *            the OpenGL drawable
+     * @param x x center
+     * @param y y center
+     * @param z z enter
+     * @param radius radius in physical units
+     * @param slices number of slices
+     * @param stacks number of strips
+     * @param color color of wires
      */
     public static void wireSphere(GLAutoDrawable drawable, float x, float y,
 	    float z, float radius, int slices, int stacks, Color color) {
@@ -112,8 +115,55 @@ public class Support3D {
 
     }
     
+    
     /**
-     * 
+     * @param drawable the openGL drawable
+     * @param coords the coordinate array
+     * @param color the color
+     * @param lineWidth the line width
+     * @param frame if <code>true</code> frame in slightly darker color
+     */
+    public static void drawQuads(GLAutoDrawable drawable, float coords[],
+	    Color color,
+	    float lineWidth, boolean frame) {
+
+	GL2 gl = drawable.getGL().getGL2();
+	gl.glLineWidth(lineWidth);
+
+	gl.glBegin(GL2GL3.GL_QUADS);
+	setColor(gl, color);
+
+	int numPoints = coords.length / 3;
+
+	for (int i = 0; i < numPoints; i++) {
+	    int j = 3*i;
+	    gl.glVertex3f(coords[j], coords[j+1], coords[j+2]);
+	}
+
+	gl.glEnd();
+
+	if (frame) {
+	    int numQuad = coords.length / 12;
+	    for (int i = 0; i < numQuad; i++) {
+		gl.glBegin(GL.GL_LINE_STRIP);
+		setColor(gl, color.darker());
+		
+		int j = i*12;
+		
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+
+		gl.glEnd();
+	    }
+	}
+	
+
+    }
+   
+    
+    /**
      * @param drawable the openGL drawable
      * @param coords the coordinate array
      * @param index1 index into first vertex
@@ -136,7 +186,7 @@ public class Support3D {
 	GL2 gl = drawable.getGL().getGL2();
 	gl.glLineWidth(lineWidth);
 
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	setColor(gl, color);
 	gl.glVertex3f(coords[i1], coords[i1 + 1], coords[i1 + 2]);
 	gl.glVertex3f(coords[i2], coords[i2 + 1], coords[i2 + 2]);
@@ -153,9 +203,9 @@ public class Support3D {
 	    gl.glVertex3f(coords[i2], coords[i2 + 1], coords[i2 + 2]);
 	    gl.glVertex3f(coords[i3], coords[i3 + 1], coords[i3 + 2]);
 	    gl.glVertex3f(coords[i4], coords[i4 + 1], coords[i4 + 2]);
+	    gl.glEnd();
 	}
 	
-	gl.glEnd();
 
     }
 
@@ -198,12 +248,69 @@ public class Support3D {
 	    gl.glVertex3f(coords[i1], coords[i1 + 1], coords[i1 + 2]);
 	    gl.glVertex3f(coords[i2], coords[i2 + 1], coords[i2 + 2]);
 	    gl.glVertex3f(coords[i3], coords[i3 + 1], coords[i3 + 2]);
-
-	    // trick so i can draw triangles too
 	    gl.glEnd();
 	}
 
     }
+    
+    /**
+     * Draw a 3D tube
+     * 
+     * @param drawable
+     *            the OpenGL drawable
+     * @param gl
+     *            the gl context
+     * @param x1
+     *            x coordinate of one end
+     * @param y1
+     *            y coordinate of one end
+     * @param z1
+     *            z coordinate of one end
+     * @param x2
+     *            x coordinate of other end
+     * @param y2
+     *            y coordinate of other end
+     * @param z2
+     *            z coordinate of other end
+     @param radius the radius of the tube
+     * @param color
+     *            the color
+     */
+    public static void drawTube(GLAutoDrawable drawable, float x1, float y1,
+	    float z1, float x2, float y2, float z2, float radius, Color color) {
+
+	if (_quad == null) {
+	    _quad = Panel3D.glu.gluNewQuadric();
+	}
+	
+	float vx = x2-x1;
+	float vy = y2-y1;
+	float vz = z2-z1;
+	if (Math.abs(vz) < 1.0e-5) {
+	    vz = 0.0001f;
+	}
+
+	float v = (float) Math.sqrt( vx*vx + vy*vy + vz*vz );
+	float ax = (float) (57.2957795*Math.acos( vz/v ));
+	if ( vz < 0.0 )
+	    ax = -ax;
+	float rx = -vy*vz;
+	float ry = vx*vz;
+
+	GL2 gl = drawable.getGL().getGL2();
+	setColor(gl, color);
+
+	gl.glPushMatrix();
+	//draw the cylinder body
+	gl.glTranslatef( x1, y1, z1 );
+	gl.glRotatef(ax, rx, ry, 0f);
+//	gluQuadricOrientation(quadric,GLU_OUTSIDE);
+	Panel3D.glu.gluCylinder(_quad, radius, radius, v, 10, 1);
+	
+	
+	gl.glPopMatrix();
+    }
+    
     /**
      * Draw a 3D line
      * 

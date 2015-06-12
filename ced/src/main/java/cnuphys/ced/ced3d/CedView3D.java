@@ -23,17 +23,9 @@ import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.swim.Swimming;
 
-public class CedView3D extends BaseView implements IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener, ActionListener {
+public abstract class CedView3D extends BaseView implements IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener, ActionListener {
 
-    public static final float xdist = -100f;
-    public static final float ydist = 0f;
-    public static final float zdist = -1600f;
-    
-    private final float thetax = 0f;
-    private final float thetay = 90f;
-    private final float thetaz = 90f;
-    
-    
+   
     //the menu bar
     private final JMenuBar _menuBar;
     
@@ -48,8 +40,9 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
     //menu
     private JMenuItem _printMenuItem;
 
-    public CedView3D() {
-	super(AttributeType.TITLE, "3D View", AttributeType.ICONIFIABLE,
+    public CedView3D(String title, float angleX, float angleY, float angleZ,
+	    float xDist, float yDist, float zDist) {
+	super(AttributeType.TITLE, title, AttributeType.ICONIFIABLE,
 		true, AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE,
 		true, AttributeType.RESIZABLE, true, AttributeType.VISIBLE, true);
 	
@@ -65,13 +58,18 @@ public class CedView3D extends BaseView implements IClasIoEventListener, SwimTra
  	
 
 	setLayout(new BorderLayout(2, 2));
-	_panel3D = new CedPanel3D(thetax, thetay, thetaz, xdist, ydist, zdist);
+	_panel3D = make3DPanel(angleX, angleY, angleZ, xDist, 
+		yDist, zDist);
 	
 	add(_panel3D, BorderLayout.CENTER);
 	pack();
 	AccumulationManager.getInstance().addAccumulationListener(this);
     }
     
+    protected abstract CedPanel3D make3DPanel(float angleX, float angleY, float angleZ,
+	    float xDist, float yDist, float zDist);
+    
+    //add the menus
     private void addMenus() {
 	JMenu fileMenu = new JMenu("File");
 	_printMenuItem = new JMenuItem("Print...");

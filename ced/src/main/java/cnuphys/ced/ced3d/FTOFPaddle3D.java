@@ -116,8 +116,18 @@ public class FTOFPaddle3D extends DetectorItem3D {
     
     //show FTOFs?
     private boolean show() {
-	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_FTOF);
+	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_FTOF);
     }
 
+
+    //show MC Truth?
+    protected boolean showMCTruth() {
+	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_TRUTH);
+    }
+
+    //show Volumes?
+    protected boolean showVolumes() {
+	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_VOLUMES);
+    }
 
 }

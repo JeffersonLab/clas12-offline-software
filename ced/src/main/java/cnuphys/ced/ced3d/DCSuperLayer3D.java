@@ -18,32 +18,34 @@ import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class DCSuperLayer3D extends DetectorItem3D {
-    
-    protected static final Color outlineColor = new Color(0, 200, 200, 2);
+
+    protected static final Color outlineColor = new Color(0, 200, 200, 24);
+    protected static final Color docaColor = new Color(255, 0, 0, 64);
 
     private static final boolean frame = true;
 
-
-    
-    //one based sector [1..6]
+    // one based sector [1..6]
     private final int _sector;
-    
+
     // one based superlayer [1..6]
     private final int _superLayer;
-    
-    //the vertices
+
+    // the vertices
     private float[] coords = new float[18];
-    
 
     /**
      * The owner panel
+     * 
      * @param panel3d
-     * @param sector one based sector [1..6]
-     * @param superLayer one based superlayer [1..6]
+     * @param sector
+     *            one based sector [1..6]
+     * @param superLayer
+     *            one based superlayer [1..6]
      */
     public DCSuperLayer3D(Panel3D panel3d, int sector, int superLayer) {
 	super(panel3d);
@@ -57,29 +59,36 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	if (!show()) {
 	    return;
 	}
-	
-	Support3D.drawTriangle(drawable, coords, 0, 1, 2, outlineColor, 1f, frame);
- 	Support3D.drawQuad(drawable, coords, 1, 4, 3, 0, outlineColor, 1f, frame);
- 	Support3D.drawQuad(drawable, coords, 0, 3, 5, 2, outlineColor, 1f, frame);
- 	Support3D.drawQuad(drawable, coords, 1, 4, 5, 2, outlineColor, 1f, frame);
- 	Support3D.drawTriangle(drawable, coords, 3, 4, 5, outlineColor, 1f, frame);
- 	
-// 	if (_sector == 1) {
-// 	    Support3D.wireSphere(drawable, 100f, 0, 50f, 50f, 20, 10, Color.yellow);
-// 	}
-   }
+
+	Support3D.drawTriangle(drawable, coords, 0, 1, 2, outlineColor, 1f,
+		frame);
+	Support3D.drawQuad(drawable, coords, 1, 4, 3, 0, outlineColor, 1f,
+		frame);
+	Support3D.drawQuad(drawable, coords, 0, 3, 5, 2, outlineColor, 1f,
+		frame);
+	Support3D.drawQuad(drawable, coords, 1, 4, 5, 2, outlineColor, 1f,
+		frame);
+	Support3D.drawTriangle(drawable, coords, 3, 4, 5, outlineColor, 1f,
+		frame);
+
+	// if (_sector == 1) {
+	// Support3D.wireSphere(drawable, 100f, 0, 50f, 50f, 20, 10,
+	// Color.yellow);
+	// }
+    }
 
     @Override
     public void drawData(GLAutoDrawable drawable) {
 	if (!show()) {
 	    return;
 	}
-	
+
 	if (_eventManager.isAccumulating()) {
 	    return;
 	}
 
 	DCDataContainer dcData = _eventManager.getDCData();
+
 	float coords[] = new float[6];
 	for (int i = 0; i < dcData.getHitCount(0); i++) {
 	    try {
@@ -90,19 +99,28 @@ public class DCSuperLayer3D extends DetectorItem3D {
 			int lay1 = dcData.dc_dgtz_layer[i];
 			int wire1 = dcData.dc_dgtz_wire[i];
 			getWire(lay1, wire1, coords);
+
 			Support3D.drawLine(drawable, coords, dgtzColor, 1f);
+			//mm to cm
+			double doca = dcData.get(dcData.dc_dgtz_doca, i) / 10; 
+									      
+									       
+			if (showDOCA() && !Double.isNaN(doca) && (doca > .01)) {
+			    Support3D.drawTube(drawable, coords[0], coords[1],
+				    coords[2], coords[3], coords[4], coords[5],
+				    (float) doca, docaColor);
+			}
 		    }
 		}
-	    }
-	    catch (Exception e) {
+	    } catch (Exception e) {
 		e.printStackTrace();
 	    }
 	}
     }
-    
-    
+
     /**
      * Get the 1-based sector [1..6]
+     * 
      * @return the 1-based sector [1..6]
      */
     public int getSector() {
@@ -111,14 +129,16 @@ public class DCSuperLayer3D extends DetectorItem3D {
 
     /**
      * Get the 1-based super layer [1..6]
+     * 
      * @return the 1-based super layer [1..6]
      */
     public int getSuperLayer() {
 	return _superLayer;
     }
-    
+
     private void getWire(int layer, int wire, float coords[]) {
-	org.jlab.geom.prim.Line3D dcwire = DCGeometry.getWire(_sector, _superLayer, layer, wire);
+	org.jlab.geom.prim.Line3D dcwire = DCGeometry.getWire(_sector,
+		_superLayer, layer, wire);
 	org.jlab.geom.prim.Point3D p0 = dcwire.origin();
 	org.jlab.geom.prim.Point3D p1 = dcwire.end();
 	coords[0] = (float) p0.x();
@@ -128,10 +148,26 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	coords[4] = (float) p1.y();
 	coords[5] = (float) p1.z();
     }
-    
-    //show DCs?
+
+    // show DCs?
     private boolean show() {
-	return ((CedPanel3D)_panel3D).show(CedPanel3D.SHOW_DC);
+	return ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DC);
     }
+    // show DOCAs?
+    private boolean showDOCA() {
+	return ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DOCA);
+    }
+    
+
+    //show MC Truth?
+    protected boolean showMCTruth() {
+	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_TRUTH);
+    }
+
+    //show Volumes?
+    protected boolean showVolumes() {
+	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_VOLUMES);
+    }
+
 
 }
