@@ -33,7 +33,7 @@ public class ForwardPanel3D extends CedPanel3D {
     @Override
     public void createInitialItems() {
 	//coordinate axes
-	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 7, 7, 8, 
+	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 7, 7, 8, Color.black,
 		X11Colors.getX11Color("Dark Green"), new Font("SansSerif", Font.PLAIN, 12), 0);
 	addItem(axes);
 	

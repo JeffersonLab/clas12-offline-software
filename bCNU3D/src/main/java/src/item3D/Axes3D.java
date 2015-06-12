@@ -34,6 +34,7 @@ public class Axes3D extends Item3D {
      *            the number of major ticks in y
      * @param numTicksZ
      *            the number of major ticks in z
+     * @param tickColor the color of the ticks
      * @param textColor
      *            color of axis labels
      * @param font
@@ -43,19 +44,19 @@ public class Axes3D extends Item3D {
      */
     public Axes3D(Panel3D panel3D, float[] limits, Color color,
 	    float lineWidth, int numTicksX, int numTicksY, int numTicksZ,
-	    Color textColor, Font font, int numDec) {
+	    Color tickColor, Color textColor, Font font, int numDec) {
 
 	super(panel3D);
 
 	try {
 	    _xAxisItem = new Axis3D(panel3D, Axis3D.AxisType.X_AXIS, limits[0],
-		    limits[1], color, lineWidth, numTicksX, textColor, font,
+		    limits[1], color, lineWidth, numTicksX, tickColor, textColor, font,
 		    numDec);
 	    _yAxisItem = new Axis3D(panel3D, Axis3D.AxisType.Y_AXIS, limits[2],
-		    limits[3], color, lineWidth, numTicksY, textColor, font,
+		    limits[3], color, lineWidth, numTicksY, tickColor, textColor, font,
 		    numDec);
 	    _zAxisItem = new Axis3D(panel3D, Axis3D.AxisType.Z_AXIS, limits[4],
-		    limits[5], color, lineWidth, numTicksZ, textColor, font,
+		    limits[5], color, lineWidth, numTicksZ, tickColor, textColor, font,
 		    numDec);
 
 	    addChild(_xAxisItem);
@@ -98,6 +99,7 @@ public class Axes3D extends Item3D {
      *            the number of major ticks in y
      * @param numTicksZ
      *            the number of major ticks in z
+     * @param tickColor the color of the ticks
      * @param textColor
      *            color of axis labels
      * @param font
@@ -107,10 +109,10 @@ public class Axes3D extends Item3D {
      */
     public Axes3D(Panel3D panel3D, float xmin, float xmax, float ymin,
 	    float ymax, float zmin, float zmax, Color color, float lineWidth,
-	    int numTicksX, int numTicksY, int numTicksZ, Color textColor,
+	    int numTicksX, int numTicksY, int numTicksZ, Color tickColor, Color textColor,
 	    Font font, int numDec) {
 	this(panel3D, Support3D.toArray(xmin, xmax, ymin, ymax, zmin, zmax),
-		color, lineWidth, numTicksX, numTicksY, numTicksZ, textColor,
+		color, lineWidth, numTicksX, numTicksY, numTicksZ, tickColor, textColor,
 		font, numDec);
     }
 

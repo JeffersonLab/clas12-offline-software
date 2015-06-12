@@ -70,7 +70,7 @@ public class KeyboardLabel extends JComponent {
 	g.setFont(_font);
 
 	if (_what != null) {
-	    g.drawString(_what, x, (prefSize.height+fm.getAscent())/2);
+	    g.drawString(_what, x, (prefSize.height+fm.getAscent())/2 -3);
 	}
     }
 
@@ -82,7 +82,7 @@ public class KeyboardLabel extends JComponent {
 
 		int sw = fm.stringWidth(key);
 		int bw = sw + 12;
-		int bh = fm.getHeight() + 6;
+		int bh = fm.getHeight() + 4;
 		bw = Math.max(bw, bh);
 		
 //		GraphicsUtilities.drawSimple3DRect(g, x, 2, bw, bh, true);
@@ -91,7 +91,7 @@ public class KeyboardLabel extends JComponent {
 		g.fillRoundRect(x, 2, bw, bh, 3, 3);
 		g.setColor(Color.black);
 		g.drawRoundRect(x, 2, bw, bh, 3, 3);
-		g.drawString(key, x + (bw - sw)/2 - 2, (prefSize.height+fm.getAscent())/2 -1);
+		g.drawString(key, x + (bw - sw)/2 - 2, (prefSize.height+fm.getAscent())/2 - 2);
 		
 		x += (bw + 4);
 	    }

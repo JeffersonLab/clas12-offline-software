@@ -23,9 +23,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -35,6 +38,8 @@ import javax.swing.JInternalFrame;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.util.Environment;
+import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Snippet;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
@@ -47,6 +52,9 @@ import cnuphys.swim.SwimTrajectory2D;
  * 
  */
 public class GraphicsUtilities {
+    
+    private static String _dirname = null;
+
 
     /**
      * One default color for highlighted drawing.
@@ -1590,6 +1598,41 @@ public class GraphicsUtilities {
 	}
 
 	return null;
+    }
+    
+    public static void saveAsPng(Component component) {
+	try {
+
+	    File file = null;
+
+	    // try making a png
+	    if (Environment.getInstance().getPngWriter() != null) {
+
+		file = FileUtilities.saveFile(_dirname, "screencapture.png",
+			"PNG ImageFile", "png", "PNG");
+
+		if (file != null) {
+		    
+		    _dirname = file.getParent();
+
+		    
+		    // Buffered image object to be written to depending on the
+		    // view type
+		    BufferedImage bi;
+
+		    ImageOutputStream ios = ImageIO
+			    .createImageOutputStream(file);
+		    Environment.getInstance().getPngWriter().setOutput(ios);
+
+		    bi = GraphicsUtilities.getComponentImage(component);
+
+		    Environment.getInstance().getPngWriter().write(bi);
+		    ios.close();
+		}
+	    }
+	} catch (Exception e) {
+	    Log.getInstance().exception(e);
+	}
     }
 
     public static void main(String arg[]) {

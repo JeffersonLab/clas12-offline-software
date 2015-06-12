@@ -1,5 +1,6 @@
 package cnuphys.ced.frame;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -56,6 +57,7 @@ import cnuphys.ced.noise.NoiseManager;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimMenu;
+import cnuphys.bCNU.eliza.ElizaDialog;
 import cnuphys.bCNU.et.ETSupport;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.ConsoleLogListener;
@@ -191,7 +193,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_gemcView, 0, 5, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstXyView, 0, 2, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstZView, 0, 2, VirtualView.UPPERRIGHT);
+	    
+	    //note no constraint means "center"
 	    _virtualView.moveTo(_dcXyView, 0, 3);
+	    
 	    _virtualView.moveTo(_pcalView, 0, 1, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_ecView, 0, 1, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_logView, 0, 6, VirtualView.UPPERRIGHT);
@@ -228,6 +233,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add a virtual view
 	_virtualView = VirtualView.createVirtualView();
+	ViewManager.getInstance().getViewMenu().addSeparator();
 
 	//add GEMC data view
 	_gemcView  = new GEMCView();
@@ -336,6 +342,17 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	aboutItem.addActionListener(al0);
 
 	fmenu.add(aboutItem, 0);
+	
+	//eliza!
+	JMenuItem elizaItem = new JMenuItem("Eliza...");
+	ActionListener al1 = new ActionListener() {
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		ElizaDialog.showEliza(instance);
+	    }
+	};
+	elizaItem.addActionListener(al1);
+	fmenu.add(elizaItem, 0);
 
 	// add to the event menu
 	addToEventMenu();

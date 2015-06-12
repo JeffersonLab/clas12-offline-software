@@ -37,7 +37,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     // reserved view type for drawing view
     public static final int VIRTUALVIEWTYPE = -977821;
 
-    private static final String VVTITLE = " Desktop ";
+    private static final String VVTITLE = "Desktop";
 
     private Vector<BaseView> _views = new Vector<BaseView>();
 
@@ -61,6 +61,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     public static final int UPPERRIGHT = 1;
     public static final int BOTTOMLEFT = 2;
     public static final int BOTTOMRIGHT = 3;
+    public static final int CENTER = 4;
 
     /**
      * Create a drawing view
@@ -197,7 +198,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     }
 
     /**
-     * This adds the detector items.
+     * This adds the screen items.
      */
     private void addItems() {
 	// add items for all views except me
@@ -215,7 +216,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	VirtualView view = null;
 	Rectangle2D.Double world = getWorld();
-	int width = 350;
+	int width = 300;
 	int height = (int) ((width * world.height) / world.width);
 
 	// create the view
@@ -664,6 +665,11 @@ public class VirtualView extends BaseView implements InternalFrameListener,
      *            constraint constant
      */
     public void moveTo(BaseView view, int row, int col, int constraint) {
+	
+	if (constraint == CENTER) {
+	    moveTo(view, row, col);
+	    return;
+	}
 
 	row = Math.max(0, Math.min(row, (_numrow - 1)));
 	col = Math.max(0, Math.min(col, (_numcol - 1)));
@@ -685,8 +691,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	double dx = world.width / _numcol;
 	double dy = world.height / _numrow;
 
-	double x = col * dx;
-	double y = world.y + world.height - (row + 1) * dy;
+	double left = col * dx;
+	double top = world.y + world.height - (row + 1) * dy;
+	double right = left + dx;
+	double bottom = top + dy;
 
 	Rectangle bounds = view.getBounds();
 	int x0 = bounds.x;
@@ -697,26 +705,26 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	int slop = 10;
 
 	if (constraint == UPPERRIGHT) {
-	    int xf = (int) (x + dx - bounds.width - 2 * slop);
-	    int yf = (int) (y + slop);
+	    int xf = (int) (right - bounds.width - 2 * slop);
+	    int yf = (int) (top + slop);
 	    dh = xf - x0;
 	    dv = yf - y0;
 	} else if (constraint == UPPERLEFT) {
-	    int xf = (int) (x + slop);
-	    int yf = (int) (y + slop);
+	    int xf = (int) (left + slop);
+	    int yf = (int) (top + slop);
 	    dh = xf - x0;
 	    dv = yf - y0;
 	} else if (constraint == BOTTOMLEFT) {
-	    int xf = (int) (x + slop);
-	    int yf = (int) (y + dy - bounds.height - 7 * slop);
+	    int xf = (int) (left + slop);
+	    int yf = (int) (bottom - bounds.height - 7 * slop);
 	    dh = xf - x0;
 	    dv = yf - y0;
 	} else if (constraint == BOTTOMRIGHT) {
-	    int xf = (int) (x + dx - bounds.width - 2 * slop);
-	    int yf = (int) (y + dy - bounds.height - 7 * slop);
+	    int xf = (int) (right - bounds.width - 2 * slop);
+	    int yf = (int) (bottom - bounds.height - 7 * slop);
 	    dh = xf - x0;
 	    dv = yf - y0;
-	}
+	} 
 	view.offset(dh, dv);
     }
 

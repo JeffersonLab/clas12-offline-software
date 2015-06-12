@@ -29,7 +29,7 @@ public class CentralPanel3D extends CedPanel3D {
     public void createInitialItems() {
 	//coordinate axes
 	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 6, 6, 7, 
-		X11Colors.getX11Color("Dark Green"), new Font("SansSerif", Font.PLAIN, 12), 0);
+		Color.black, X11Colors.getX11Color("Dark Green"), new Font("SansSerif", Font.PLAIN, 12), 0);
 	addItem(axes);
 	
 	//trajectory drawer

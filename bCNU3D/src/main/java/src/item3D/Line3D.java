@@ -13,10 +13,12 @@ public class Line3D extends Item3D {
     //p0 and p1 are the end points
     protected final float[] _p0;
     protected final float[] _p1;
+    
+    //unit vector from P0 to P1
     protected final double[] _unitVector = new double[3];
     public final double length;
     
-     /**
+    /**
      * Create a simple 3D Line item for use on a Panel3D.
      * @param panel3D the owner 3D panel
      * @param p0 one end point as [x, y, z]

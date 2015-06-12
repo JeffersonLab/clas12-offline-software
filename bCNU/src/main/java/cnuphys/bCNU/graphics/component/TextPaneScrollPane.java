@@ -46,12 +46,16 @@ public class TextPaneScrollPane extends JScrollPane {
     public static SimpleAttributeSet BLUE_SS_12_B = createStyle(Color.blue,
 	    X11Colors.getX11Color("Alice Blue"), "sansserif", 12, false, true);
 
-    // red sans serif
+    // green sans serif
+    public static SimpleAttributeSet GREEN_SS_12_B = createStyle(X11Colors.getX11Color("Dark Green"),
+	    X11Colors.getX11Color("wheat"), "sansserif", 12, false, true);
+
+   // red sans serif
     public static SimpleAttributeSet RED_SS_12_P = createStyle(Color.red,
 	    "sansserif", 12, false, false);
 
     public static SimpleAttributeSet GREEN_SS_12_P = createStyle(
-	    X11Colors.getX11Color("Dark Green"), Color.yellow, "sansserif", 12,
+	    X11Colors.getX11Color("Dark Green"), X11Colors.getX11Color("wheat"), "sansserif", 12,
 	    false, false);
 
     public static SimpleAttributeSet BLACK_SS_12_P = createStyle(Color.black,

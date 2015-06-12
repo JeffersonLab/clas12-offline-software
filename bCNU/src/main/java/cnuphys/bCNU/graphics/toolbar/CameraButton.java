@@ -75,5 +75,6 @@ public class CameraButton extends ToolBarButton {
 	}
 	container.getToolBar().resetDefaultSelection();
     }
+    
 
 }
