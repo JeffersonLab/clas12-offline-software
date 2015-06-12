@@ -18,7 +18,8 @@ public class KeyAdapter3D implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-    }
+
+   }
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -106,12 +107,30 @@ public class KeyAdapter3D implements KeyListener {
 	    _panel3D.setRotationZ(0f);
 	    _panel3D.refresh();
 	}
-
+	else if (keyCode == KeyEvent.VK_4) { //z in
+	    _panel3D.setRotationX(0f);
+	    _panel3D.setRotationY(180f);
+	    _panel3D.setRotationZ(0f);
+	    _panel3D.refresh();
+	}
 
   }
 
     @Override
     public void keyReleased(KeyEvent e) {
+	int keyCode = e.getKeyCode();
+	
+	if (keyCode == KeyEvent.VK_F5) { 
+	    _panel3D.refresh();
+	}
+	
+	else if (keyCode == KeyEvent.VK_F6) { 
+	    _panel3D.print();
+	}
+
+	else if (keyCode == KeyEvent.VK_F7) { 
+	    _panel3D.snapshot();
+	}
     }
 
 }

@@ -2,6 +2,7 @@ package bCNU3D;
 
 import item3D.Axes3D;
 import item3D.Item3D;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -29,7 +30,9 @@ import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.Animator;
+
+//import com.jogamp.opengl.util.FPSAnimator;
 
 @SuppressWarnings("serial")
 public class Panel3D extends JPanel implements GLEventListener {
@@ -64,9 +67,9 @@ public class Panel3D extends JPanel implements GLEventListener {
     protected String _versionStr;
     protected String _rendererStr;
 
-    
-    private FPSAnimator animator;
+    // private FPSAnimator animator;
 
+    private Animator animator;
 
     /*
      * The panel that holds the 3D objects
@@ -157,21 +160,21 @@ public class Panel3D extends JPanel implements GLEventListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
-	
+
 	if (animator == null) {
-	    animator = new FPSAnimator(gljpanel, 24);
+	    // animator = new FPSAnimator(gljpanel, 24);
+
+	    animator = new Animator(gljpanel);
 	    animator.start();
 	}
-	
-	//every time we draw we pause the animator.
-	//all "refresh" does is restart it!
 
+	// every time we draw we pause the animator.
+	// all "refresh" does is restart it!
 	animator.pause();
-	// System.err.println("display");
-	// System.err.println("called display _view_rotx = " + _view_rotx +
-	// "  _view_roty = " + _view_roty);
+
 	GL2 gl = drawable.getGL().getGL2();
 	gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+	animator.pause();
 
 	gl.glLoadIdentity(); // reset the model-view matrix
 
@@ -182,6 +185,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glRotatef(_view_rotx, 1.0f, 0.0f, 0.0f);
 	gl.glRotatef(_view_roty, 0.0f, 1.0f, 0.0f);
 	gl.glRotatef(_view_rotz, 0.0f, 0.0f, 1.0f);
+	animator.pause();
 
 	// draw the items
 	for (Item3D item3D : _itemList) {
@@ -189,15 +193,18 @@ public class Panel3D extends JPanel implements GLEventListener {
 	    if (item3D.isVisible()) {
 		item3D.drawItem(drawable);
 	    }
-	}
-	
-	
-	//test tubes
-//	Support3D.drawLine(drawable, 100f, 100f, 100f, 200f, -50f, 125, Color.red, 1f);
-//	Support3D.drawTube(drawable, 100f, 100f, 100f, 200f, -50f, 125f, 50f, new Color(255, 0, 0, 64));
-	
-	gl.glPopMatrix();
+		animator.pause();
 
+	}
+
+	// test tubes
+	// Support3D.drawLine(drawable, 100f, 100f, 100f, 200f, -50f, 125,
+	// Color.red, 1f);
+	// Support3D.drawTube(drawable, 100f, 100f, 100f, 200f, -50f, 125f, 50f,
+	// new Color(255, 0, 0, 64));
+
+	animator.pause();
+	gl.glPopMatrix();
     }
 
     @Override
@@ -228,11 +235,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 	// Global settings.
 	gl.glEnable(GL2.GL_POLYGON_STIPPLE);
-	gl.glClearColor(0.9f, 0.9f, 0.9f, 1.0f); // set background (clear) color
+	// gl.glClearColor(0f, 0f,0f, 1.0f); // set background (clear) color
+	gl.glClearColor(1f, 1f, 1f, 1f); // set background (clear) color
 	gl.glClearDepth(1.0f); // set clear depth value to farthest
-	//gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
-	 gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
-	//gl.glDepthFunc(GL.GL_ALWAYS); // the type of depth test to do
+	// gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
+	gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
+	// gl.glDepthFunc(GL.GL_ALWAYS); // the type of depth test to do
 	// best perspective correction
 	gl.glHint(GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
 	// blends colors, smoothes lighting
@@ -378,7 +386,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      * Refresh the drawing
      */
     public void refresh() {
-	if (animator != null) {
+	if ((animator != null) && (animator.isPaused())) {
 	    animator.resume();
 	}
     }
@@ -488,8 +496,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 		// coordinate axes
 
 		Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax,
-			zmin, zmax, Color.darkGray, 1f, 7, 7, 8, Color.blue,
-			new Font("SansSerif", Font.PLAIN, 11), 0);
+			zmin, zmax, Color.darkGray, 1f, 7, 7, 8, Color.black,
+			Color.blue, new Font("SansSerif", Font.PLAIN, 11), 0);
 		addItem(axes);
 
 		// Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f,
@@ -540,5 +548,18 @@ public class Panel3D extends JPanel implements GLEventListener {
 	});
 
     }
+
+    /**
+     * Print the panel. No default implementation.
+     */
+    public void print() {
+    }
+    
+    /**
+     * Snapshot of the panel. No default implementation.
+     */
+    public void snapshot() {
+    }
+
 
 }

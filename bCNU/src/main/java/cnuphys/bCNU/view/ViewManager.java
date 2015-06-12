@@ -55,8 +55,8 @@ public class ViewManager extends Vector<BaseView> implements
 	boolean result = super.add(view);
 	notifyListeners(view, true);
 
-	// do not add virtual view to view menu
-	if (!(view instanceof VirtualView)) {
+	// do not add virtual view to view menu?
+//	if (!(view instanceof VirtualView)) {
 	    JMenuItem mi = new JMenuItem(view.getTitle());
 	    ActionListener al = new ActionListener() {
 
@@ -70,13 +70,16 @@ public class ViewManager extends Vector<BaseView> implements
 		    }
 		    view.setVisible(true);
 		    view.toFront();
+		    
+		    if (!(view instanceof VirtualView)) {
 		    makeViewVisibleInVirtualWorld(view);
+		    }
 		}
 
 	    };
 	    mi.addActionListener(al);
 	    _viewMenu.add(mi);
-	}
+//	}
 
 	view.addInternalFrameListener(this);
 	Log.getInstance().config("ViewManager: added view: " + view.getTitle());

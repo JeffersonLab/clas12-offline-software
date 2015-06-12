@@ -217,9 +217,10 @@ public class BaseView extends JInternalFrame {
 	// add to the desktop
 	if (_desktop != null) {
 
-	    if (this instanceof VirtualView) {
-		_desktop.setLayer(this, 1);
-	    }
+	    //keep virtual view on top?
+//	    if (this instanceof VirtualView) {
+//		_desktop.setLayer(this, 1);
+//	    }
 
 	    _desktop.add(this, 0);
 	}

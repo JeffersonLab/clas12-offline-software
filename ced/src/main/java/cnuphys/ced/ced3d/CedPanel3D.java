@@ -14,6 +14,7 @@ import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
 import cnuphys.bCNU.dialog.VerticalFlowLayout;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.ced.component.PIDLegend;
 import bCNU3D.Panel3D;
 
@@ -48,8 +49,8 @@ public class CedPanel3D extends Panel3D {
 	_pidLegend = new PIDLegend(this);
  	add(_pidLegend, BorderLayout.NORTH);
  	
-	
- 	final GLJPanel gljp = this.gljpanel;
+ 	gljpanel.setBorder(new CommonBorder());
+ 	final GLJPanel gljp = gljpanel;
 	
  	addEast();
 
@@ -91,7 +92,21 @@ public class CedPanel3D extends Panel3D {
     }
 
 
+    /**
+     * Print the panel.
+     */
+    @Override
+    public void print() {
+	PrintUtilities.printComponent(this);
+    }
 
+    /**
+     * Snapshot of the panel.
+     */
+    @Override
+    public void snapshot() {
+	GraphicsUtilities.saveAsPng(this);
+    }
 
     //a fixed fraction of the screen
     private void fixSize() {

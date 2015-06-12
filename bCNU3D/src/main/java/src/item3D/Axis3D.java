@@ -53,17 +53,18 @@ public class Axis3D extends Line3D {
      * @param vmax
      *            the maximum value
      * @param color
-     *            the color
+     *            the color of the axes
      * @param lineWidth
      *            the line width
      * @param numTicks
      *            the number of ticks
+     * @param tickColor the color of the ticks
      * @param textColor the text color
      * @param font the text font
      * @param numdec the number of decimals to display
      */
     public Axis3D(Panel3D panel3D, AxisType type, float vmin, float vmax, Color color,
-	    float lineWidth, int numTicks, Color textColor, Font font, int numDec) {
+	    float lineWidth, int numTicks, Color tickColor, Color textColor, Font font, int numDec) {
 	super(panel3D, getEndpoints(type, vmin, vmax), color, lineWidth);
 	_type = type;
 	_numDec = numDec;
@@ -74,7 +75,7 @@ public class Axis3D extends Line3D {
 	_valMax = vmax;
 	if (numTicks > 1) {
 	    _del = (vmax - vmin) / (numTicks - 1);
-	    addMajorTicks(color, lineWidth);
+	    addMajorTicks(color, tickColor, lineWidth);
 	}
 	
 	setTextColor(textColor);
@@ -82,7 +83,7 @@ public class Axis3D extends Line3D {
     }
 
     // add major tick marks as child items
-    private void addMajorTicks(Color color,
+    private void addMajorTicks(Color color, Color tickColor, 
 	    float lineWidth) {
 
 	_vals = new float[_numTick];
@@ -95,6 +96,37 @@ public class Axis3D extends Line3D {
 	    _vals[i] = _valMin + _del*i;
 	}
 	
+	Panel3D p3d = getPanel3D();
+
+//	//points as ticks
+//	float coords[] = new float[3 * _numTick];
+//	for (int i = 0; i < _numTick; i++) {
+//	    int j = i * 3;
+//
+//	    switch (_type) {
+//	    case X_AXIS:
+//		coords[j] = _vals[i];
+//		coords[j+1] = 0f;
+//		coords[j+2] = 0f;
+//		break;
+//
+//	    case Y_AXIS:
+//		coords[j] = 0f;
+//		coords[j+1] = _vals[i];
+//		coords[j+2] = 0f;
+//		break;
+//
+//	    case Z_AXIS:
+//		coords[j] = 0f;
+//		coords[j+1] = 0f;
+//		coords[j+2] = _vals[i];
+//		break;
+//	    }
+//	    
+//	    addChild(new PointSet3D(p3d, coords, tickColor, 4f));
+//	}
+	
+	//crosses at ticks
 	for (int i = 0; i < _numTick; i++) {
 	    
 	    _lines1[i] = null;
@@ -102,27 +134,26 @@ public class Axis3D extends Line3D {
 	    
 	    if (Math.abs(_vals[i]) > 1.0e-4) {
 
-		Panel3D p3d = getPanel3D();
 		switch (_type) {
 		case X_AXIS:
 		    _lines1[i] = new Line3D(p3d, _vals[i], _tickLen, 0, _vals[i], -_tickLen, 0,
-			    color, lineWidth);
+			    tickColor, lineWidth);
 		    _lines2[i] = new Line3D(p3d, _vals[i], 0, _tickLen, _vals[i], 0, -_tickLen,
-			    color, lineWidth);
+			    tickColor, lineWidth);
 		    break;
 
 		case Y_AXIS:
 		    _lines1[i] = new Line3D(p3d, 0, _vals[i], _tickLen, 0, _vals[i], -_tickLen,
-			    color, lineWidth);
+			    tickColor, lineWidth);
 		    _lines2[i] = new Line3D(p3d, _tickLen, _vals[i], 0, -_tickLen, _vals[i], 0,
-			    color, lineWidth);
+			    tickColor, lineWidth);
 		    break;
 
 		case Z_AXIS:
 		    _lines1[i] = new Line3D(p3d, _tickLen, 0, _vals[i], -_tickLen, 0, _vals[i],
-			    color, lineWidth);
+			    tickColor, lineWidth);
 		    _lines2[i] = new Line3D(p3d, 0, _tickLen, _vals[i], 0, -_tickLen, _vals[i],
-			    color, lineWidth);
+			    tickColor, lineWidth);
 		    break;
 		}
 	    } // > 1.0e-4
