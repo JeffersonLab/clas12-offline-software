@@ -231,7 +231,7 @@ public class SectorSuperLayer extends PolygonItem {
      * @param pid
      *            gemc id
      * @param doca
-     *            the distance of closest approach in microns
+     *            the distance of closest approach in mm
      */
     private void drawGemcDCHit(Graphics g, IContainer container, int layer,
 	    int wire, boolean noise, int pid, double doca) {

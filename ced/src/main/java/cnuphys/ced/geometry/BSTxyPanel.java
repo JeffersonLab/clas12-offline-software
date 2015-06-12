@@ -53,7 +53,7 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
     }
 
     /**
-     * Get the z index, 0..2 for the three sentive areas
+     * Get the z index, 0..2 for the three sensitive areas
      * 
      * @param z
      *            the z value

@@ -28,61 +28,85 @@ public class KeyAdapter3D implements KeyListener {
 	boolean shifted = e.isShiftDown();
 
 	if (keyCode == KeyEvent.VK_UP) {
+	    int factor = (shifted ? 3 : 1);
 	    float dz = _panel3D.getZStep();
-	    _panel3D.deltaZ(dz);
+	    _panel3D.deltaZ(factor*dz);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_DOWN) {
+	    int factor = (shifted ? 3 : 1);
 	    float dz = -_panel3D.getZStep();
-	    _panel3D.deltaZ(dz);
+	    _panel3D.deltaZ(factor*dz);
 	    _panel3D.refresh();
 	}
-	if (keyCode == KeyEvent.VK_L) {
+	else if (keyCode == KeyEvent.VK_L) {
+	    int factor = (shifted ? 3 : 1);
 	    float dz = -_panel3D.getZStep();
-	    _panel3D.deltaX(dz);
+	    _panel3D.deltaX(factor*dz);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_R) {
+	    int factor = (shifted ? 3 : 1);
 	    float dz = _panel3D.getZStep();
-	    _panel3D.deltaX(dz);
+	    _panel3D.deltaX(factor*dz);
 	    _panel3D.refresh();
 	}
-	if (keyCode == KeyEvent.VK_U) {
+	else if (keyCode == KeyEvent.VK_U) {
+	    int factor = (shifted ? 3 : 1);
 	    float dz = _panel3D.getZStep();
-	    _panel3D.deltaY(dz);
+	    _panel3D.deltaY(factor*dz);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_D) {
+	    int factor = (shifted ? 3 : 1);
 	    float dz = -_panel3D.getZStep();
-	    _panel3D.deltaY(dz);
+	    _panel3D.deltaY(factor*dz);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_LEFT) {
-	    _panel3D.setRotationZ(_panel3D.getRotationZ() - DTHETA);
+	    int factor = (shifted ? 3 : 1);
+	    _panel3D.setRotationZ(_panel3D.getRotationZ() - factor*DTHETA);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_RIGHT) {
-	    _panel3D.setRotationZ(_panel3D.getRotationZ() + DTHETA);
+	    int factor = (shifted ? 3 : 1);
+	    _panel3D.setRotationZ(_panel3D.getRotationZ() + factor*DTHETA);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_X) {
-	    System.err.println("rotate x");
 	    int factor = (shifted ? -1 : 1);
 	    _panel3D.setRotationX(_panel3D.getRotationX() + factor*DTHETA);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_Y) {
-	    System.err.println("rotate y");
 	    int factor = (shifted ? -1 : 1);
 	    _panel3D.setRotationY(_panel3D.getRotationY() + factor*DTHETA);
 	    _panel3D.refresh();
 	}
 	else if (keyCode == KeyEvent.VK_Z) {
-	    System.err.println("rotate z");
 	    int factor = (shifted ? -1 : 1);
 	    _panel3D.setRotationZ(_panel3D.getRotationZ() + factor*DTHETA);
 	    _panel3D.refresh();
 	}
+	else if (keyCode == KeyEvent.VK_1) {  //x out
+	    _panel3D.setRotationX(180f);
+	    _panel3D.setRotationY(90f);
+	    _panel3D.setRotationZ(0f);
+	    _panel3D.refresh();
+	}
+	else if (keyCode == KeyEvent.VK_2) { //y out3
+	    _panel3D.setRotationX(90f);
+	    _panel3D.setRotationY(90f);
+	    _panel3D.setRotationZ(0f);
+	    _panel3D.refresh();
+	}
+	else if (keyCode == KeyEvent.VK_3) { //z out
+	    _panel3D.setRotationX(0f);
+	    _panel3D.setRotationY(0f);
+	    _panel3D.setRotationZ(0f);
+	    _panel3D.refresh();
+	}
+
 
   }
 

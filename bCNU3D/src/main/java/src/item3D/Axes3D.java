@@ -32,7 +32,7 @@ public class Axes3D extends Item3D {
      *            the number of ticks in x
      * @param numTicksY
      *            the number of major ticks in y
-      * @param numTicksZ
+     * @param numTicksZ
      *            the number of major ticks in z
      * @param textColor
      *            color of axis labels
@@ -42,29 +42,33 @@ public class Axes3D extends Item3D {
      *            the number of decimals to display
      */
     public Axes3D(Panel3D panel3D, float[] limits, Color color,
-	    float lineWidth, int numTicksX, int numTicksY, int numTicksZ, Color textColor, Font font,
-	    int numDec) {
-	// public Axis3D(AxisType type, float vmin, float vmax, Color color,
-	// float lineWidth) {
+	    float lineWidth, int numTicksX, int numTicksY, int numTicksZ,
+	    Color textColor, Font font, int numDec) {
+
 	super(panel3D);
-	_xAxisItem = new Axis3D(panel3D, Axis3D.AxisType.X_AXIS, limits[0],
-		limits[1], color, lineWidth, numTicksX, textColor, font,
-		numDec);
-	_yAxisItem = new Axis3D(panel3D, Axis3D.AxisType.Y_AXIS, limits[2],
-		limits[3], color, lineWidth, numTicksY, textColor, font,
-		numDec);
-	_zAxisItem = new Axis3D(panel3D, Axis3D.AxisType.Z_AXIS, limits[4],
-		limits[5], color, lineWidth, numTicksZ, textColor, font,
-		numDec);
 
-	addChild(_xAxisItem);
-	addChild(_yAxisItem);
-	addChild(_zAxisItem);
+	try {
+	    _xAxisItem = new Axis3D(panel3D, Axis3D.AxisType.X_AXIS, limits[0],
+		    limits[1], color, lineWidth, numTicksX, textColor, font,
+		    numDec);
+	    _yAxisItem = new Axis3D(panel3D, Axis3D.AxisType.Y_AXIS, limits[2],
+		    limits[3], color, lineWidth, numTicksY, textColor, font,
+		    numDec);
+	    _zAxisItem = new Axis3D(panel3D, Axis3D.AxisType.Z_AXIS, limits[4],
+		    limits[5], color, lineWidth, numTicksZ, textColor, font,
+		    numDec);
 
-	setColor(color);
-	setLineWidth(lineWidth);
-	setTextColor(textColor);
-	setFont(font);
+	    addChild(_xAxisItem);
+	    addChild(_yAxisItem);
+	    addChild(_zAxisItem);
+
+	    setColor(color);
+	    setLineWidth(lineWidth);
+	    setTextColor(textColor);
+	    setFont(font);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
     }
 
     /**
@@ -92,9 +96,9 @@ public class Axes3D extends Item3D {
      *            the number of ticks in x
      * @param numTicksY
      *            the number of major ticks in y
-      * @param numTicksZ
+     * @param numTicksZ
      *            the number of major ticks in z
-    * @param textColor
+     * @param textColor
      *            color of axis labels
      * @param font
      *            the text font
@@ -103,9 +107,11 @@ public class Axes3D extends Item3D {
      */
     public Axes3D(Panel3D panel3D, float xmin, float xmax, float ymin,
 	    float ymax, float zmin, float zmax, Color color, float lineWidth,
-	    int numTicksX, int numTicksY, int numTicksZ, Color textColor, Font font, int numDec) {
+	    int numTicksX, int numTicksY, int numTicksZ, Color textColor,
+	    Font font, int numDec) {
 	this(panel3D, Support3D.toArray(xmin, xmax, ymin, ymax, zmin, zmax),
-		color, lineWidth, numTicksX, numTicksY, numTicksZ, textColor, font, numDec);
+		color, lineWidth, numTicksX, numTicksY, numTicksZ, textColor,
+		font, numDec);
     }
 
     @Override
