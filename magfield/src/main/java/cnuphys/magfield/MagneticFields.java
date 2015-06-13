@@ -52,8 +52,8 @@ public class MagneticFields {
     private static String _torusFullPath;
 
     // clasJlib default location
-    private static String _clasJLibLocation = System.getProperty("user.home")
-	    + "/git/cnuphys/clasJLib";
+    private static String _clasJlibLocation = System.getProperty("user.home")
+	    + "/git/cnuphys/clasJlib";
 
     // optional full path to torus set by command line argument in ced
     private static String _solenoidFullPath;
@@ -396,11 +396,11 @@ public class MagneticFields {
 
 	if ((_torus == null) || (_solenoid == null)) {
 	    // will read mag field assuming we are in a
-	    // location relative to clasJLib. This will
+	    // location relative to clasJlib. This will
 	    // have to be modified as appropriate.
 
-	    System.err.println("first try for clasJlib: " + _clasJLibLocation);
-	    File clasJlibDir = new File(_clasJLibLocation);
+	    System.err.println("first try for clasJlib: " + _clasJlibLocation);
+	    File clasJlibDir = new File(_clasJlibLocation);
 
 	    if ((clasJlibDir == null) || !clasJlibDir.exists()) {
 		System.err.println("[MagField] Could not find clasJlib");
