@@ -18,11 +18,13 @@ public class ForwardPanel3D extends CedPanel3D {
     public static final String SHOW_VOLUMES = "Volumes";
     public static final String SHOW_TRUTH = "GEMC Truth";
     public static final String SHOW_DC = "DC";
-    public static final String SHOW_EC = "EC";
+    public static final String SHOW_EC_IN = "EC Inner";
+    public static final String SHOW_EC_OUT = "EC Outer";
     public static final String SHOW_PCAL = "PCAL";
     public static final String SHOW_FTOF = "FTOF";
     public static final String SHOW_DOCA = "DC DOCA";
-    private static final String _cbaLabels[] = {SHOW_VOLUMES, SHOW_TRUTH, SHOW_DC, SHOW_EC, SHOW_PCAL, SHOW_FTOF, SHOW_DOCA};
+    private static final String _cbaLabels[] = {SHOW_VOLUMES, SHOW_TRUTH, SHOW_DC, 
+	SHOW_EC_IN, SHOW_EC_OUT, SHOW_PCAL, SHOW_FTOF, SHOW_DOCA};
 
 
     public ForwardPanel3D(float angleX, float angleY, float angleZ,
@@ -59,6 +61,24 @@ public class ForwardPanel3D extends CedPanel3D {
 		    addItem(ftofpad);
 		}
 	    }
+	}
+	
+	//EC planes
+	for (int sector = 1; sector <= 6; sector++) {
+	    for (int stack = 1; stack <= 2; stack++) {
+		for (int view = 1; view <= 3; view++) {
+		    ECViewPlane3D ecvp = new ECViewPlane3D(this, sector, stack, view);
+		    addItem(ecvp);
+		}
+	    }
+	}
+	
+	//pcal
+	for (int sector = 1; sector <= 6; sector++) {
+		for (int view = 1; view <= 3; view++) {
+		    PCALViewPlane3D pcalvp = new PCALViewPlane3D(this, sector, view);
+		    addItem(pcalvp);
+		}
 	}
 	
 	//mc hit drawer

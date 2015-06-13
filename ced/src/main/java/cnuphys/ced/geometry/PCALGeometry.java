@@ -244,6 +244,31 @@ public class PCALGeometry {
 	return z0 + (x - x0) / SLOPE;
     }
 
+
+    /**
+     * Get the triangle for a given view for 3D
+     * @param sector the sector 1..6
+     * @param view (aka layer) 1..3 for u, v, w
+     * @param coords will hold the corners as [x1, y1, z1, ..., x3, y3, z3]
+     */
+    public static void getViewTriangle(int sector, int view, float coords[]) {
+	// in geometry package, PCAL is same sa EC with stack (superlayer) = 0
+	ECGeometry.getViewTriangle(sector, 0, view, coords);
+
+    }
+    
+    /**
+     * Get the strips for use by 3D view
+     * @param sector the sector 1..6
+     * @param view (aka layer) 1..3 for u, v, w
+     * @param strip 1..36
+     * @param coords holds the eight corners as [x1, y1, z1..x8, y8, z8]
+     */
+    public static void getStrip(int sector, int view, int strip, float coords[]) {
+// in geometry package, PCAL is same sa EC with stack (superlayer) = 0
+	ECGeometry.getStrip(sector, 0, view, strip, coords);
+    }
+    
     /**
      * Obtain the shell (for sector views) for the whole PCAL correct for the
      * relative phi.

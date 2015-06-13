@@ -14,6 +14,8 @@ import java.io.Serializable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import cnuphys.bCNU.util.Environment;
+
 /**
  * This is used to create exceptions to
  * 
@@ -22,7 +24,7 @@ import java.util.Vector;
  */
 public class ElizaOverride implements Serializable {
 
-    private static String overrideFile = "/Users/heddle/git/cnuphys/bCNU/src/main/resources/data/elizaSub";
+    private static String overrideFile = Environment.getInstance().getHomeDirectory()+"/git/cnuphys/bCNU/src/main/resources/data/elizaSub";
 
     private static Vector<ElizaOverride> _overRides;
 
