@@ -13,23 +13,23 @@ public class Test {
 
     public static void main(String arg[]) {
 	// will read mag field assuming we are in a
-	// location relative to clasJLib. This will
+	// location relative to clasJlib. This will
 	// have to be modified as appropriate.
 
 	// look in the got location
 
-	String clasJLib = System.getProperty("user.home")
-		+ "/git/cnuphys/clasJLib";
+	String clasJlib = System.getProperty("user.home")
+		+ "/git/cnuphys/clasJlib";
 
 	// see if it is a good location
-	File file = new File(clasJLib);
+	File file = new File(clasJlib);
 	if (!file.exists()) {
-	    System.err.println("dir: " + clasJLib + " does not exist.");
+	    System.err.println("dir: " + clasJlib + " does not exist.");
 	    System.exit(1);
 	}
 
 	// OK, see if we can create a Torus
-	String torusFileName = clasJLib
+	String torusFileName = clasJlib
 		+ "/data/torus/v1.0/clas12_torus_fieldmap_binary.dat";
 	File torusFile = new File(torusFileName);
 	Torus torus = null;
@@ -40,7 +40,7 @@ public class Test {
 	}
 
 	// OK, see if we can create a Solenoid
-	String solenoidFileName = clasJLib
+	String solenoidFileName = clasJlib
 		+ "/data/solenoid/v1.0/solenoid-srr.dat";
 	File solenoidFile = new File(solenoidFileName);
 	Solenoid solenoid = null;
