@@ -41,6 +41,8 @@ public class MCHitDrawer3D extends Item3D {
 	
 	DCDataContainer dcData = _eventManager.getDCData();
 	FTOFDataContainer ftofData = _eventManager.getFTOFData();
+	
+	//has EC and PCAL data
 	ECDataContainer ecData = _eventManager.getECData();
 	
 	showGemcXYZHits(drawable, dcData, dcData.dc_true_avgX,
@@ -51,6 +53,10 @@ public class MCHitDrawer3D extends Item3D {
 		ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ, ftofData.ftof1b_true_pid, 0);
 	showGemcXYZHits(drawable, ftofData, ftofData.ftof2b_true_avgX,
 		ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ, ftofData.ftof2b_true_pid, 0);
+	showGemcXYZHits(drawable, dcData, ecData.ec_true_avgX,
+		ecData.ec_true_avgY, ecData.ec_true_avgZ, ecData.ec_true_pid, 0);
+	showGemcXYZHits(drawable, dcData, ecData.pcal_true_avgX,
+		ecData.pcal_true_avgY, ecData.pcal_true_avgZ, ecData.pcal_true_pid, 0);
 	
    }
 
@@ -86,6 +92,7 @@ public class MCHitDrawer3D extends Item3D {
 	    coords[j+2] = (float) (z[hitIndex] / 10); // mm to cm
 	}
 	Support3D.drawPoints(drawable, coords, color, POINTSIZE);
+	Support3D.drawPoints(drawable, coords, color.brighter(), POINTSIZE-1);
 
     }
 

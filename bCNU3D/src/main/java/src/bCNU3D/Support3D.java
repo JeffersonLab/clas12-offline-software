@@ -211,12 +211,26 @@ public class Support3D {
 
     /**
      * 
-     * @param drawable
-     * @param coords
+     * @param drawable the OpenGL drawable
+     * @param coordsthe trangle as [x1, y1, ..., y3, z3]
+     * @param color the color
+     * @param lineWidth the line width
+     * @param frame if <code>true</code> frame in slightly darker color
+    * @param lineWidth
+     */
+    public static void drawTriangle(GLAutoDrawable drawable, float coords[],
+	    Color color,
+	    float lineWidth, boolean frame) {
+	drawTriangle(drawable, coords, 0, 1, 2, color, lineWidth, frame);
+    }
+    
+    /**
+     * 
+     * @param drawable the OpenGL drawable
+     * @param coords a set of points
      * @param index1
      * @param index2
      * @param index3
-     * @param index4
      * @param color the color
      * @param lineWidth the line width
      * @param frame if <code>true</code> frame in slightly darker color

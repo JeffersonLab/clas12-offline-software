@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import javax.swing.JComponent;
@@ -37,15 +39,28 @@ import com.jogamp.opengl.util.Animator;
 @SuppressWarnings("serial")
 public class Panel3D extends JPanel implements GLEventListener {
 
+    //different modes of operation
+    public static enum DrawMode {MANUAL, ANIMATOR};
+    protected final DrawMode _drawMode = DrawMode.MANUAL;
+    
     protected GLProfile glprofile;
     protected GLCapabilities glcapabilities;
     protected final GLJPanel gljpanel;
     public static GLU glu; // glu utilities
 
+    // keep tack of calls to display()
+    private int _displayCount = 0;
+
     // view rotation angles (degrees)
     private float _view_rotx;
     private float _view_roty;
     private float _view_rotz;
+    
+    // maintenance timer
+    private Timer _timer;
+    boolean _enableMaintenance;
+    boolean _doingMaintenance;
+
 
     // distance in front of the screen
     private float _zdist;
@@ -63,8 +78,6 @@ public class Panel3D extends JPanel implements GLEventListener {
     // listen for key events
     protected KeyAdapter3D _keyAdapter;
 
-    // the openGL version and renderer strings
-    protected String _versionStr;
     protected String _rendererStr;
 
     // private FPSAnimator animator;
@@ -123,7 +136,30 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gljpanel.addKeyListener(_keyAdapter);
 
 	createInitialItems();
+	setupMaintenanceTimer();
     }
+    
+    //calls refresh at a slow rate to get rid of ghosts
+    private void setupMaintenanceTimer() {
+	TimerTask task = new TimerTask() {
+
+	    @Override
+	    public void run() {
+		if (_enableMaintenance) {
+//		    System.err.println("maintenance refresh");
+		    _doingMaintenance = true;
+		    refresh();
+		}
+	    }
+
+	};
+	_timer = new Timer();
+	_timer.scheduleAtFixedRate(task, 10000, 1000);
+	
+    }
+
+    // the openGL version and renderer strings
+    protected String _versionStr;
 
     /**
      * Create the initial items
@@ -161,20 +197,31 @@ public class Panel3D extends JPanel implements GLEventListener {
     @Override
     public void display(GLAutoDrawable drawable) {
 
-	if (animator == null) {
-	    // animator = new FPSAnimator(gljpanel, 24);
-
-	    animator = new Animator(gljpanel);
-	    animator.start();
+	if (_drawMode == DrawMode.ANIMATOR) {
+	    if (animator == null) {
+		// animator = new FPSAnimator(gljpanel, 24);
+		animator = new Animator(gljpanel);
+		animator.start();
+	    }
 	}
 
+	_displayCount++;
+	
+	if ((_displayCount % 100) == 0) {
+	    System.err.println("Called display " + _displayCount + " times " + getClass().getName());    
+	}
+	
 	// every time we draw we pause the animator.
 	// all "refresh" does is restart it!
-	animator.pause();
-
+	if (_drawMode == DrawMode.ANIMATOR) {
+	    animator.pause();
+	}
+	
 	GL2 gl = drawable.getGL().getGL2();
 	gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-	animator.pause();
+	if (_drawMode == DrawMode.ANIMATOR) {
+	    animator.pause();
+	}
 
 	gl.glLoadIdentity(); // reset the model-view matrix
 
@@ -185,7 +232,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glRotatef(_view_rotx, 1.0f, 0.0f, 0.0f);
 	gl.glRotatef(_view_roty, 0.0f, 1.0f, 0.0f);
 	gl.glRotatef(_view_rotz, 0.0f, 0.0f, 1.0f);
-	animator.pause();
 
 	// draw the items
 	for (Item3D item3D : _itemList) {
@@ -193,8 +239,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	    if (item3D.isVisible()) {
 		item3D.drawItem(drawable);
 	    }
-		animator.pause();
-
 	}
 
 	// test tubes
@@ -203,8 +247,20 @@ public class Panel3D extends JPanel implements GLEventListener {
 	// Support3D.drawTube(drawable, 100f, 100f, 100f, 200f, -50f, 125f, 50f,
 	// new Color(255, 0, 0, 64));
 
-	animator.pause();
+	if (_drawMode == DrawMode.ANIMATOR) {
+	    animator.pause();
+	}
 	gl.glPopMatrix();
+	
+	if (_doingMaintenance) {
+//	    System.err.println("Disable maintenance");
+	    _doingMaintenance = false;
+	    _enableMaintenance = false;
+	}
+	else {
+//	    System.err.println("Enable maintenance");
+	    _enableMaintenance = true;
+	}
     }
 
     @Override
@@ -238,7 +294,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	// gl.glClearColor(0f, 0f,0f, 1.0f); // set background (clear) color
 	gl.glClearColor(1f, 1f, 1f, 1f); // set background (clear) color
 	gl.glClearDepth(1.0f); // set clear depth value to farthest
-	// gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
+	gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
 	gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
 	// gl.glDepthFunc(GL.GL_ALWAYS); // the type of depth test to do
 	// best perspective correction
@@ -308,7 +364,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void setRotationY(float angle) {
 	_view_roty = angle;
-	refresh();
+//	refresh();
     }
 
     /**
@@ -319,7 +375,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void setRotationZ(float angle) {
 	_view_rotz = angle;
-	refresh();
+//	refresh();
     }
 
     /**
@@ -357,7 +413,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void deltaX(float dx) {
 	_xdist += dx;
-	refresh();
+//	refresh();
     }
 
     /**
@@ -368,7 +424,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void deltaY(float dy) {
 	_ydist += dy;
-	refresh();
+//	refresh();
     }
 
     /**
@@ -379,16 +435,21 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void deltaZ(float dz) {
 	_zdist += dz;
-	refresh();
+//	refresh();
     }
 
     /**
      * Refresh the drawing
      */
     public void refresh() {
-	if ((animator != null) && (animator.isPaused())) {
-	    animator.resume();
+	if (_drawMode == DrawMode.MANUAL) {
+	    gljpanel.display();
+	} else if (_drawMode == DrawMode.ANIMATOR) {
+	    if ((animator != null) && (animator.isPaused())) {
+		animator.resume();
+	    }
 	}
+
     }
 
     /**
@@ -554,12 +615,11 @@ public class Panel3D extends JPanel implements GLEventListener {
      */
     public void print() {
     }
-    
+
     /**
      * Snapshot of the panel. No default implementation.
      */
     public void snapshot() {
     }
-
 
 }

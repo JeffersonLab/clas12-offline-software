@@ -8,11 +8,14 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ec.ECLayer;
+import org.jlab.geom.detector.ec.ECSector;
 import org.jlab.geom.detector.ec.ECSuperlayer;
+import org.jlab.geom.prim.Face3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.geom.prim.Triangle3D;
 
 /**
  * Holds the EC geometry from the geometry packages
@@ -617,6 +620,89 @@ public class ECGeometry {
     } // initialize
 
     /**
+     * Get the triangle for a given view for 3D
+     * @param sector the sector 1..6
+     * @param stack (aka the superlayer) 1..2 for inner and outer
+     * @param view (aka layer) 1..3 for u, v, w
+     * @param coords will hold the corners as [x1, y1, z1, ..., x3, y3, z3]
+     */
+    public static void getViewTriangle(int sector, int stack, int view, float coords[]) {
+	// argh the geometry pakage superlayers are 1,2 rather than 0,1 because
+	// they use 0 for PCAL. So stack does not need the -1, but view still does.
+	
+	ECSector esect = GeometryManager.clas_Cal_Sector0;
+	ECSuperlayer ecsl = esect.getSuperlayer(stack);
+	ECLayer ecLayer = ecsl.getLayer(view - 1);
+	
+	//NOTE, each ec layer has one face, a triangle
+
+	Triangle3D t3d = (Triangle3D) ecLayer.getBoundary().face(0);
+
+	for (int i = 0; i < 3; i++) {
+	    int j = 3 * i;
+	    Point3D corner = new Point3D(t3d.point(i));
+
+	    if (sector > 1) {
+		corner.rotateZ(Math.toRadians(60 * (sector - 1)));
+	    }
+
+	    coords[j] = (float) corner.x();
+	    coords[j + 1] = (float) corner.y();
+	    coords[j + 2] = (float) corner.z();
+	}
+    }
+    
+    
+    /**
+     * Get the strips for use by 3D view
+     * @param sector the sector 1..6
+     * @param stack (aka the superlayer) 1..2 for inner and outer
+     * @param view (aka layer) 1..3 for u, v, w
+     * @param strip 1..36
+     * @param coords holds the eight corners as [x1, y1, z1..x8, y8, z8]
+     */
+    public static void getStrip(int sector, int stack, int view, int strip, float coords[]) {
+	// argh the geometry pakage superlayers are 1,2 rather than 0,1 because
+	// they use 0 for PCAL. So stack does not need the -1, but view still
+	// does.
+	// So does strip
+
+	ECSector esect = GeometryManager.clas_Cal_Sector0;
+	ECSuperlayer ecsl = esect.getSuperlayer(stack);
+	ECLayer ecLayer = ecsl.getLayer(view - 1);
+	
+	//NOTE, each ec layer has one face, a triangle
+	
+//	for (int i = 0; i < 10; i++) {
+//	Face3D face = ecLayer.getBoundary().face(i);
+//	System.err.println("FACE[ " + (i+1) + "] = " + face);
+//	}
+	
+	
+	ScintillatorPaddle paddle = ecLayer.getComponent(strip - 1);
+
+	Point3D v[] = new Point3D[8];
+
+	for (int i = 0; i < 8; i++) {
+	    v[i] = new Point3D(paddle.getVolumePoint(i));
+	}
+
+	if (sector > 1) {
+	    for (int i = 0; i < 8; i++) {
+		v[i].rotateZ(Math.toRadians(60 * (sector - 1)));
+	    }
+	}
+
+	for (int i = 0; i < 8; i++) {
+	    int j = 3 * i;
+	    coords[j] = (float) v[i].x();
+	    coords[j + 1] = (float) v[i].y();
+	    coords[j + 2] = (float) v[i].z();
+	}
+
+    }
+    
+    /**
      * Get the intersections of a with a constant phi plane. If the paddle does
      * not intersect (happens as phi grows) return null;
      * 
@@ -685,6 +771,38 @@ public class ECGeometry {
 	start.y += dely;
 	end.x += delx;
 	end.y += dely;
+    }
+    
+    public static void main(String arg[]) {
+	
+	GeometryManager.getInstance();
+	
+	int sector = 1;
+	int stack = 1;
+	int view = 1;
+	int strip = 36;
+	
+	float coords[] = new float[24];
+	
+	
+	getStrip(sector, stack, view, strip, coords);
+	
+	for (int i = 0; i < 8; i++) {
+	    int j = 3*i;
+	    
+	    System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j], coords[j+1], coords[j+2]));
+	}
+	
+	System.err.println();
+	view = 3;
+	getStrip(sector, stack, view, strip, coords);
+	
+	for (int i = 0; i < 8; i++) {
+	    int j = 3*i;
+	    
+	    System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j], coords[j+1], coords[j+2]));
+	}
+	
     }
 
 }

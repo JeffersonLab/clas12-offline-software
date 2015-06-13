@@ -12,7 +12,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class SVTPanel3D extends DetectorItem3D {
     
-    protected static final Color outlineColor = new Color(64, 64, 0, 16);
+    protected static final Color outlineColor = X11Colors.getX11Color("wheat", 48);
     protected static final Color hitColor = new Color(255, 64, 0, 32);
 
 

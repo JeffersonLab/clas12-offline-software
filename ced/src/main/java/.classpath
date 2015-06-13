@@ -9,5 +9,16 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
 	<classpathentry kind="lib" path="/Users/heddle/coatjava/lib/clas/coat-libs-1.0-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bCNU3D"/>
+	<classpathentry kind="lib" path="/clasJlib/java3D/v3.0/lib/gluegen-rt.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/clasJlib/java3D/v3.0/lib/jogl-all.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>
