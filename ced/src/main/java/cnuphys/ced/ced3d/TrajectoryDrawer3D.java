@@ -64,11 +64,11 @@ public class TrajectoryDrawer3D extends Item3D {
 	
 	LundId lid = traj.getLundId();
 	LundStyle style = LundStyle.getStyle(lid);
+	Color color = Color.black;
 	
-	Color color1 = Color.lightGray;
 	
 	if (style != null) {
-	    color1 = style.getFillColor();
+	    color = style.getFillColor();
 	} 
 	
 	
@@ -81,9 +81,6 @@ public class TrajectoryDrawer3D extends Item3D {
 	    coords[j+2] = 100*(float) v[2];
 	}
 
-//	Support3D.drawLine(drawable, 0, 0, 0, 200f, -300f, -400f, Color.red, Color.yellow, 2f);
-	
-//	System.err.println("Drawing 3D TRAJ");
-	Support3D.drawPolyLine(drawable, coords, color1, 2f);
+	Support3D.drawPolyLine(drawable, coords, color, 2f);
     }
 }

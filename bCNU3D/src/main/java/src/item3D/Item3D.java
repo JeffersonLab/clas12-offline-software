@@ -38,9 +38,11 @@ public abstract class Item3D {
     //this item's child items
     private Vector<Item3D> _children;
     
+    //this item's parent
+    private Item3D _parent;
+        
     //the owner panel
     protected Panel3D _panel3D;
-    
     
     //defaults
     private static final float _defaultLineWidth = 1f;
@@ -322,6 +324,15 @@ public abstract class Item3D {
     }
     
     /**
+     * Get the parent item (might be null)
+     * @return the parent
+     */
+    public Item3D getParent() {
+	return _parent;
+    }
+
+    
+    /**
      * Add a child item
      * @param item the child item
      */
@@ -332,6 +343,7 @@ public abstract class Item3D {
 	    }
 	    _children.remove(item);
 	    _children.addElement(item);
+	    item._parent = this;
 	}
     }
     

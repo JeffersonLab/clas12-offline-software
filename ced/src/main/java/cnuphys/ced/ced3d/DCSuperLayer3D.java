@@ -24,7 +24,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class DCSuperLayer3D extends DetectorItem3D {
 
-    protected static final Color outlineColor = new Color(0, 200, 200, 24);
     protected static final Color docaColor = new Color(255, 0, 0, 64);
 
     private static final boolean frame = true;
@@ -56,10 +55,9 @@ public class DCSuperLayer3D extends DetectorItem3D {
 
     @Override
     public void drawShape(GLAutoDrawable drawable) {
-	if (!show()) {
-	    return;
-	}
 
+	Color outlineColor = X11Colors.getX11Color("wheat", getVolumeAlpha());
+	   
 	Support3D.drawTriangle(drawable, coords, 0, 1, 2, outlineColor, 1f,
 		frame);
 	Support3D.drawQuad(drawable, coords, 1, 4, 3, 0, outlineColor, 1f,
@@ -71,21 +69,10 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	Support3D.drawTriangle(drawable, coords, 3, 4, 5, outlineColor, 1f,
 		frame);
 
-	// if (_sector == 1) {
-	// Support3D.wireSphere(drawable, 100f, 0, 50f, 50f, 20, 10,
-	// Color.yellow);
-	// }
     }
 
     @Override
     public void drawData(GLAutoDrawable drawable) {
-	if (!show()) {
-	    return;
-	}
-
-	if (_eventManager.isAccumulating()) {
-	    return;
-	}
 
 	DCDataContainer dcData = _eventManager.getDCData();
 
@@ -100,7 +87,18 @@ public class DCSuperLayer3D extends DetectorItem3D {
 			int wire1 = dcData.dc_dgtz_wire[i];
 			getWire(lay1, wire1, coords);
 
-			Support3D.drawLine(drawable, coords, dgtzColor, 1f);
+			if (showMCTruth()) {
+				Color color = truthColor(dcData.dc_true_pid, i);
+				Support3D.drawLine(drawable, coords, color, 1f);
+				// convert mm to cm
+				double xcm = dcData.dc_true_avgX[i]/10;
+				double ycm = dcData.dc_true_avgY[i]/10;
+				double zcm = dcData.dc_true_avgZ[i]/10;
+				drawMCPoint(drawable, xcm, ycm, zcm, color);
+			}
+			else {
+				Support3D.drawLine(drawable, coords, dgtzColor, 1f);
+			}
 			//mm to cm
 			double doca = dcData.get(dcData.dc_dgtz_doca, i) / 10; 
 									      
@@ -150,24 +148,14 @@ public class DCSuperLayer3D extends DetectorItem3D {
     }
 
     // show DCs?
-    private boolean show() {
-	return ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DC);
+    @Override
+    protected boolean show() {
+	boolean showdc = ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DC);
+	return showdc && showSector(_sector);
     }
     // show DOCAs?
     private boolean showDOCA() {
 	return ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DOCA);
     }
-    
-
-    //show MC Truth?
-    protected boolean showMCTruth() {
-	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_TRUTH);
-    }
-
-    //show Volumes?
-    protected boolean showVolumes() {
-	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_VOLUMES);
-    }
-
 
 }

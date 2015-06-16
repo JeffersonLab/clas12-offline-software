@@ -12,9 +12,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class PCALViewPlane3D extends DetectorItem3D {
 
-    protected static final Color outlineColor = new Color(32, 200, 64, 16);
-    protected static final Color outlineColorOuter = new Color(0, 64, 128, 16);
-    protected static final Color hitColor = new Color(255, 0, 0, 128);
 
     //sector is 1..6
     private final int _sector;
@@ -36,10 +33,7 @@ public class PCALViewPlane3D extends DetectorItem3D {
     @Override
     public void drawShape(GLAutoDrawable drawable) {
 	
-	if (!show()) {
-	    return;
-	}
-	
+	Color outlineColor = new Color(32, 200, 64, getVolumeAlpha());
 	Support3D.drawTriangle(drawable, _coords, outlineColor, 1f, true);
  
 //	float coords[] = new float[24];
@@ -64,45 +58,43 @@ public class PCALViewPlane3D extends DetectorItem3D {
 
     @Override
     public void drawData(GLAutoDrawable drawable) {
-	if (!show()) {
-	    return;
-	}
 	
-	
-	//has EC and PCAL data (stack is always 1 for pcal)
+	// has EC and PCAL data (stack is always 1 for pcal)
 	ECDataContainer ecData = _eventManager.getECData();
-	
+
 	int sector[] = ecData.pcal_dgtz_sector;
 	int view[] = ecData.pcal_dgtz_view;
 	int strip[] = ecData.pcal_dgtz_strip;
-	
+	int pid[] = ecData.pcal_true_pid;
+
 	if (sector != null) {
 	    float coords[] = new float[24];
 	    for (int i = 0; i < sector.length; i++) {
 		if ((_sector == sector[i]) && (_view == view[i])) {
 		    PCALGeometry.getStrip(_sector, _view, strip[i], coords);
-		    drawStrip(drawable, hitColor, coords);
+		    if (showMCTruth() && (pid != null)) {
+			Color color = truthColor(pid, i);
+			drawStrip(drawable, color, coords);
+			double xcm = ecData.pcal_true_avgX[i] / 10;
+			double ycm = ecData.pcal_true_avgY[i] / 10;
+			double zcm = ecData.pcal_true_avgZ[i] / 10;
+			drawMCPoint(drawable, xcm, ycm, zcm, color);
+
+		    } else {
+			drawStrip(drawable, dgtzColor, coords);
+		    }
 		}
 	    }
 	}
-	
+
     }
 
     
     //show PCALs?
-    private boolean show() {
-	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_PCAL);
-    }
-
-
-    //show MC Truth?
-    protected boolean showMCTruth() {
-	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_TRUTH);
-    }
-
-    //show Volumes?
-    protected boolean showVolumes() {
-	return ((ForwardPanel3D)_panel3D).show(ForwardPanel3D.SHOW_VOLUMES);
+    @Override
+    protected boolean show() {
+	boolean showpcal = ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_PCAL);
+	return showpcal && showSector(_sector);
     }
 
 }

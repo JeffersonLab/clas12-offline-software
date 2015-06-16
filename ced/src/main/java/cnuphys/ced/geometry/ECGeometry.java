@@ -632,15 +632,32 @@ public class ECGeometry {
 	
 	ECSector esect = GeometryManager.clas_Cal_Sector0;
 	ECSuperlayer ecsl = esect.getSuperlayer(stack);
+	
 	ECLayer ecLayer = ecsl.getLayer(view - 1);
 	
 	//NOTE, each ec layer has one face, a triangle
 
 	Triangle3D t3d = (Triangle3D) ecLayer.getBoundary().face(0);
+	
+	//translation
+	
+	
+	double delK = 14.94; //PCAL val
+	if (stack > 0) {
+	    delK = _deltaK[stack-1];
+	}
+//	System.err.println("deltaK = " + delK);
+	
+	
+	double dist = (view-1)*(delK/3);
+	double xt = dist*Math.sin(Math.toRadians(25));
+	double yt = 0;
+	double zt = dist*Math.cos(Math.toRadians(25));
 
 	for (int i = 0; i < 3; i++) {
 	    int j = 3 * i;
 	    Point3D corner = new Point3D(t3d.point(i));
+	    corner.translateXYZ(xt, yt, zt);
 
 	    if (sector > 1) {
 		corner.rotateZ(Math.toRadians(60 * (sector - 1)));
@@ -682,9 +699,21 @@ public class ECGeometry {
 	ScintillatorPaddle paddle = ecLayer.getComponent(strip - 1);
 
 	Point3D v[] = new Point3D[8];
+	
+	double delK = 14.94; //PCAL val
+	if (stack > 0) {
+	    delK = _deltaK[stack-1];
+	}
+	
+	double dist = (view-1)*(delK/3);
+	double xt = dist*Math.sin(Math.toRadians(25));
+	double yt = 0;
+	double zt = dist*Math.cos(Math.toRadians(25));
+
 
 	for (int i = 0; i < 8; i++) {
 	    v[i] = new Point3D(paddle.getVolumePoint(i));
+	    v[i].translateXYZ(xt, yt, zt);
 	}
 
 	if (sector > 1) {

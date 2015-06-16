@@ -115,6 +115,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	glcapabilities.setBlueBits(8);
 	glcapabilities.setGreenBits(8);
 	glcapabilities.setAlphaBits(8);
+	glcapabilities.setDepthBits(16);
 
 	gljpanel = new GLJPanel(glcapabilities);
 	gljpanel.addGLEventListener(this);
@@ -207,9 +208,9 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 	_displayCount++;
 	
-	if ((_displayCount % 100) == 0) {
-	    System.err.println("Called display " + _displayCount + " times " + getClass().getName());    
-	}
+//	if ((_displayCount % 100) == 0) {
+//	    System.err.println("Called display " + _displayCount + " times " + getClass().getName());    
+//	}
 	
 	// every time we draw we pause the animator.
 	// all "refresh" does is restart it!
@@ -226,7 +227,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glLoadIdentity(); // reset the model-view matrix
 
 	gl.glTranslatef(_xdist, _ydist, _zdist); // translate into the screen
-	// gl.glPolygonStipple(sd, 0);
 
 	gl.glPushMatrix();
 	gl.glRotatef(_view_rotx, 1.0f, 0.0f, 0.0f);
@@ -290,13 +290,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 		+ ", " + values[1]);
 
 	// Global settings.
-	gl.glEnable(GL2.GL_POLYGON_STIPPLE);
 	// gl.glClearColor(0f, 0f,0f, 1.0f); // set background (clear) color
 	gl.glClearColor(1f, 1f, 1f, 1f); // set background (clear) color
 	gl.glClearDepth(1.0f); // set clear depth value to farthest
 	gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
 	gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
-	// gl.glDepthFunc(GL.GL_ALWAYS); // the type of depth test to do
+
 	// best perspective correction
 	gl.glHint(GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
 	// blends colors, smoothes lighting
@@ -442,6 +441,10 @@ public class Panel3D extends JPanel implements GLEventListener {
      * Refresh the drawing
      */
     public void refresh() {
+	if (gljpanel == null) {
+	    return;
+	}
+	
 	if (_drawMode == DrawMode.MANUAL) {
 	    gljpanel.display();
 	} else if (_drawMode == DrawMode.ANIMATOR) {

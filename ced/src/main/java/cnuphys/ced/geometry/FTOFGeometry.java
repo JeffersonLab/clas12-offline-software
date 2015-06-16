@@ -47,7 +47,7 @@ public class FTOFGeometry {
 
     public static void initialize() {
 	System.out.println("\n=======================================");
-	System.out.println("====  FTOF Geometry Inititialization ====");
+	System.out.println("===  FTOF Geometry Inititialization ===");
 	System.out.println("=======================================");
 
 
@@ -67,9 +67,6 @@ public class FTOFGeometry {
 		    numPaddles[superLayer]);
 	}
 
-	String message = "Got FTOF panels from common geometry clas-geometry package.\n";
-	Log.getInstance().config(message);
-	System.out.println(message);
     }
     
     /**
