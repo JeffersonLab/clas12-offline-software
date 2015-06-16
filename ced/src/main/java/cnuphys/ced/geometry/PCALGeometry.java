@@ -357,7 +357,7 @@ public class PCALGeometry {
     public static void initialize() {
 
 	System.out.println("\n=======================================");
-	System.out.println("====  PCAL Geometry Inititialization ====");
+	System.out.println("===  PCAL Geometry Inititialization ===");
 	System.out.println("=======================================");
 
 	// obtain the transformations

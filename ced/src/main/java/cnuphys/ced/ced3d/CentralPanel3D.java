@@ -10,15 +10,16 @@ import cnuphys.lund.X11Colors;
 
 public class CentralPanel3D extends CedPanel3D {
 
+    //dimension of this panel are in cm
     private final float xymax = 25f;
     private final float zmax = 30f;
     private final float zmin = -30f;
     
     //labels for the check box
-    public static final String SHOW_VOLUMES = "Volumes";
-    public static final String SHOW_TRUTH = "GEMC Truth";
-    public static final String SHOW_SVT = "SVT";
-    private static final String _cbaLabels[] = {SHOW_VOLUMES, SHOW_TRUTH, SHOW_SVT};
+    private static final String _cbaLabels[] = {SHOW_VOLUMES, SHOW_TRUTH, SHOW_SVT, 
+	SHOW_SVT_LAYER_1, SHOW_SVT_LAYER_2, SHOW_SVT_LAYER_3, SHOW_SVT_LAYER_4,
+	SHOW_SVT_LAYER_5, SHOW_SVT_LAYER_6, SHOW_SVT_LAYER_7, SHOW_SVT_LAYER_8,
+	SHOW_RECON_CROSSES, SHOW_COSMICS};
 
     public CentralPanel3D(float angleX, float angleY, float angleZ,
 	    float xDist, float yDist, float zDist) {
@@ -35,6 +36,10 @@ public class CentralPanel3D extends CedPanel3D {
 	//trajectory drawer
 	TrajectoryDrawer3D trajDrawer = new TrajectoryDrawer3D(this);
 	addItem(trajDrawer);
+	
+	//mc hit drawer
+//	MCHitDrawer3D mchd = new MCHitDrawer3D(this);
+//	addItem(mchd);	
 	
 	//svt panels
 	for (int layer = 1; layer <= 8; layer++) {

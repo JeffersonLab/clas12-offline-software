@@ -28,9 +28,9 @@ public class KeyboardLegend extends JPanel {
 	add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) y", "y", "Y");
 	add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) z", "z", "Z");
 	add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) z", UnicodeSupport.LARROW, UnicodeSupport.RARROW);
-	add("Drag: free rotation");
-	add("Alter free rotation", "Shift ", "Ctl");
-	add("Accelerates some actions", "Shift ");
+//	add("Drag: free rotation");
+//	add("Alter free rotation", "Shift ", "Ctl");
+//	add("Accelerates some actions", "Shift ");
 	
 	setBorder(new CommonBorder("Keyboard Actions"));
 	validate();

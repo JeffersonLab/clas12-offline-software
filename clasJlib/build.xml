@@ -85,7 +85,7 @@
 		<property name="vdir" value="bcnu/${version}/lib"/>
 		<mkdir dir="${vdir}" />
 		<jar destfile="${vdir}/bcnuimages.jar" 
-			includes="images/*.*" basedir="../bCNU/src/main/resources">
+			includes="images/*.*, data/*" basedir="../bCNU/src/main/resources">
 		</jar>		
 	</target>
 	

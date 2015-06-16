@@ -20,7 +20,7 @@ public class Support3D {
     private static GLUquadric _quad;
 
     /* a stipple pattern */
-    public byte sd[] = { byteB, byteA, byteB, byteA, byteB, byteA, byteB,
+    public static byte sd[] = { byteB, byteA, byteB, byteA, byteB, byteA, byteB,
 	    byteA, byteB, byteA, byteB, byteA, byteB, byteA, byteB, byteA,
 	    byteB, byteA, byteB, byteA, byteB, byteA, byteB, byteA, byteB,
 	    byteA, byteB, byteA, byteB, byteA, byteB, byteA, byteB, byteA,
@@ -37,7 +37,7 @@ public class Support3D {
 	    byteB, byteA, byteB, byteA };
 
     /** for half-tone stipples */
-    public byte halftone[] = { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+    public static byte halftone[] = { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
 	    (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
 	    (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
 	    (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
@@ -90,7 +90,47 @@ public class Support3D {
 	}
 	gl.glEnd();
     }
-       
+
+    /**
+     * Draw a  points
+     * @param drawable
+     *            the OpenGL drawable
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param z the z coordinate
+     *            
+     * @param color
+     *            the color
+     * @param size
+     *            the points size
+     */
+    public static void drawPoint(GLAutoDrawable drawable, double x, double y, double z, Color color, float size) {
+	drawPoint(drawable, (float)x, (float)y, (float)z, color, size);
+    }
+    
+    /**
+     * Draw a  points
+     * @param drawable
+     *            the OpenGL drawable
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param z the z coordinate
+     *            
+     * @param color
+     *            the color
+     * @param size
+     *            the points size
+     */
+    public static void drawPoint(GLAutoDrawable drawable, float x, float y, float z, Color color, float size) {
+	GL2 gl = drawable.getGL().getGL2();
+	gl.glPointSize(size);	
+
+	setColor(gl, color);
+	gl.glBegin(GL.GL_POINTS);
+	gl.glVertex3f(x, y, z);
+	gl.glEnd();
+    }
+
     /**
      * Draw a wire sphere
      * @param drawable
@@ -154,6 +194,60 @@ public class Support3D {
 		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
 		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
 		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		
+		j = i*12;
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+
+		gl.glEnd();
+	    }
+	}
+    }
+   
+    /**
+     * @param drawable the openGL drawable
+     * @param coords the coordinate array
+     * @param color the color
+     * @param lineWidth the line width
+     * @param frame if <code>true</code> frame in slightly darker color
+     */
+    public static void drawQuadsHalfTone(GLAutoDrawable drawable, float coords[],
+	    Color color,
+	    float lineWidth, boolean frame) {
+
+	GL2 gl = drawable.getGL().getGL2();
+	gl.glLineWidth(lineWidth);
+	gl.glEnable(GL2.GL_POLYGON_STIPPLE);
+	 gl.glPolygonStipple(halftone, 0);
+
+	gl.glBegin(GL2GL3.GL_QUADS);
+	setColor(gl, color);
+
+	int numPoints = coords.length / 3;
+
+	for (int i = 0; i < numPoints; i++) {
+	    int j = 3*i;
+	    gl.glVertex3f(coords[j], coords[j+1], coords[j+2]);
+	}
+
+	gl.glEnd();
+	gl.glDisable(GL2.GL_POLYGON_STIPPLE);
+
+
+	if (frame) {
+	    int numQuad = coords.length / 12;
+	    for (int i = 0; i < numQuad; i++) {
+		gl.glBegin(GL.GL_LINE_STRIP);
+		setColor(gl, color.darker());
+		
+		int j = i*12;
+		
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
+
+		j = i*12;
+		gl.glVertex3f(coords[j++], coords[j++], coords[j++]);
 
 		gl.glEnd();
 	    }
@@ -162,7 +256,6 @@ public class Support3D {
 
     }
    
-    
     /**
      * @param drawable the openGL drawable
      * @param coords the coordinate array
@@ -203,6 +296,7 @@ public class Support3D {
 	    gl.glVertex3f(coords[i2], coords[i2 + 1], coords[i2 + 2]);
 	    gl.glVertex3f(coords[i3], coords[i3 + 1], coords[i3 + 2]);
 	    gl.glVertex3f(coords[i4], coords[i4 + 1], coords[i4 + 2]);
+	    gl.glVertex3f(coords[i1], coords[i1 + 1], coords[i1 + 2]);
 	    gl.glEnd();
 	}
 	
@@ -262,9 +356,40 @@ public class Support3D {
 	    gl.glVertex3f(coords[i1], coords[i1 + 1], coords[i1 + 2]);
 	    gl.glVertex3f(coords[i2], coords[i2 + 1], coords[i2 + 2]);
 	    gl.glVertex3f(coords[i3], coords[i3 + 1], coords[i3 + 2]);
+	    gl.glVertex3f(coords[i1], coords[i1 + 1], coords[i1 + 2]);
 	    gl.glEnd();
 	}
 
+    }
+    
+    public static void drawCone(GLAutoDrawable drawable, float x1, float y1,
+	    float z1, float x2, float y2, float z2, float radius, Color color) {
+
+	float vx = x2-x1;
+	float vy = y2-y1;
+	float vz = z2-z1;
+	if (Math.abs(vz) < 1.0e-5) {
+	    vz = 0.0001f;
+	}
+
+	float v = (float) Math.sqrt( vx*vx + vy*vy + vz*vz );
+	float ax = (float) (57.2957795*Math.acos( vz/v ));
+	if ( vz < 0.0 )
+	    ax = -ax;
+	float rx = -vy*vz;
+	float ry = vx*vz;
+
+	GL2 gl = drawable.getGL().getGL2();
+	setColor(gl, color);
+
+	gl.glPushMatrix();
+	//draw the cylinder body
+	gl.glTranslatef( x1, y1, z1 );
+	gl.glRotatef(ax, rx, ry, 0f);
+	
+	glut.glutSolidCone(radius, v, 20, 20);
+	
+	gl.glPopMatrix();
     }
     
     /**
@@ -321,8 +446,36 @@ public class Support3D {
 //	gluQuadricOrientation(quadric,GLU_OUTSIDE);
 	Panel3D.glu.gluCylinder(_quad, radius, radius, v, 10, 1);
 	
-	
 	gl.glPopMatrix();
+    }
+    
+    /**
+     * 
+     * @param gl
+     *            the gl context
+     * @param x1
+     *            x coordinate of start
+     * @param y1
+     *            y coordinate of start
+     * @param z1
+     *            z coordinate of start
+     * @param ux x component of unit vector direction
+     * @param uy y component of unit vector direction
+     * @param uz z component of unit vector direction
+     * @param length the length of the line
+     * @param color
+     *            the color
+     * @param lineWidth
+     *            the line width
+     */
+    public static void drawLine(GLAutoDrawable drawable, float x1, float y1,
+	    float z1, float ux, float uy, float uz, float length, Color color, float lineWidth) {
+	
+	float x2 = x1 + length*ux; 
+	float y2 = y1 + length*uy; 
+	float z2 = z1 + length*uz;
+	
+	drawLine(drawable, x1, y1, z1, x2, y2, z2, color, lineWidth);
     }
     
     /**
