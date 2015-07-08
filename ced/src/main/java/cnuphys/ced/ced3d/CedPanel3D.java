@@ -30,9 +30,9 @@ public class CedPanel3D extends Panel3D {
     public static final String SHOW_PCAL = "PCAL";
     public static final String SHOW_FTOF = "FTOF";
     public static final String SHOW_DOCA = "DC DOCA";
-    public static final String SHOW_SVT = "SVT";
     public static final String SHOW_RECON_CROSSES = "Crosses";
     public static final String SHOW_COSMICS = "Cosmics";
+    public static final String SHOW_SVT = "SVT";
     public static final String SHOW_SVT_LAYER_1 = "SVT Layer 1";
     public static final String SHOW_SVT_LAYER_2 = "SVT Layer 2";
     public static final String SHOW_SVT_LAYER_3 = "SVT Layer 3";
@@ -47,6 +47,12 @@ public class CedPanel3D extends Panel3D {
     public static final String SHOW_SECTOR_4 = "Sector 4";
     public static final String SHOW_SECTOR_5 = "Sector 5";
     public static final String SHOW_SECTOR_6 = "Sector 6";
+    
+    public static final String SHOW_CND = "CNDT";
+    public static final String SHOW_CND_LAYER_1 = "CND Layer 1";
+    public static final String SHOW_CND_LAYER_2 = "CND Layer 2";
+    public static final String SHOW_CND_LAYER_3 = "CND Layer 3";
+ 
    
     
     

@@ -25,6 +25,7 @@ import cnuphys.bCNU.et.ETSupport;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.CNDDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.event.data.ECDataContainer;
 import cnuphys.ced.event.data.FTOFDataContainer;
@@ -101,6 +102,7 @@ public class ClasIoEventManager {
     private GenPartDataContainer _genPartData;
     private RecEventDataContainer _recEventData;
     private GEMCMetaDataContainer _gemcMetaData;
+    private CNDDataContainer _cndData;
 
     // private constructor for singleton
     private ClasIoEventManager() {
@@ -112,6 +114,7 @@ public class ClasIoEventManager {
 	_genPartData = new GenPartDataContainer(this);
 	_recEventData = new RecEventDataContainer(this);
 	_gemcMetaData = new GEMCMetaDataContainer(this);
+	_cndData = new CNDDataContainer(this);
     }
 
     /**
@@ -178,6 +181,16 @@ public class ClasIoEventManager {
 	return _bstData;
     }
 
+    /**
+     * Get the CND data
+     * 
+     * @return the CND data container
+     */
+    public CNDDataContainer getCNDData() {
+	return _cndData;
+    }
+
+ 
     /**
      * Get the unqique lund ids in the current event (if any)
      * 

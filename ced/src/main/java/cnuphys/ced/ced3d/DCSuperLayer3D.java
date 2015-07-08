@@ -87,7 +87,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 			int wire1 = dcData.dc_dgtz_wire[i];
 			getWire(lay1, wire1, coords);
 
-			if (showMCTruth()) {
+			if (showMCTruth() && (dcData.dc_true_avgX != null)) {
 				Color color = truthColor(dcData.dc_true_pid, i);
 				Support3D.drawLine(drawable, coords, color, 1f);
 				// convert mm to cm

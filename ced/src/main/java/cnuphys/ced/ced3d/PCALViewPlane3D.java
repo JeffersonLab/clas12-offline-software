@@ -34,7 +34,7 @@ public class PCALViewPlane3D extends DetectorItem3D {
     public void drawShape(GLAutoDrawable drawable) {
 	
 	Color outlineColor = new Color(32, 200, 64, getVolumeAlpha());
-	Support3D.drawTriangle(drawable, _coords, outlineColor, 1f, true);
+	Support3D.drawTriangles(drawable, _coords, outlineColor, 1f, true);
  
 //	float coords[] = new float[24];
 //	for (int strip = 1; strip <= 36; strip++) {

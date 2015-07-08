@@ -2,6 +2,7 @@ package bCNU3D;
 
 import item3D.Axes3D;
 import item3D.Item3D;
+import item3D.Triangle3D;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -39,28 +40,27 @@ import com.jogamp.opengl.util.Animator;
 @SuppressWarnings("serial")
 public class Panel3D extends JPanel implements GLEventListener {
 
-    //different modes of operation
-    public static enum DrawMode {MANUAL, ANIMATOR};
+    // different modes of operation
+    public static enum DrawMode {
+	MANUAL, ANIMATOR
+    };
+
     protected final DrawMode _drawMode = DrawMode.MANUAL;
-    
+
     protected GLProfile glprofile;
     protected GLCapabilities glcapabilities;
     protected final GLJPanel gljpanel;
     public static GLU glu; // glu utilities
 
-    // keep tack of calls to display()
-    private int _displayCount = 0;
-
     // view rotation angles (degrees)
     private float _view_rotx;
     private float _view_roty;
     private float _view_rotz;
-    
+
     // maintenance timer
     private Timer _timer;
     boolean _enableMaintenance;
     boolean _doingMaintenance;
-
 
     // distance in front of the screen
     private float _zdist;
@@ -115,7 +115,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	glcapabilities.setBlueBits(8);
 	glcapabilities.setGreenBits(8);
 	glcapabilities.setAlphaBits(8);
-	glcapabilities.setDepthBits(16);
+	glcapabilities.setDepthBits(32);
 
 	gljpanel = new GLJPanel(glcapabilities);
 	gljpanel.addGLEventListener(this);
@@ -139,15 +139,15 @@ public class Panel3D extends JPanel implements GLEventListener {
 	createInitialItems();
 	setupMaintenanceTimer();
     }
-    
-    //calls refresh at a slow rate to get rid of ghosts
+
+    // calls refresh at a slow rate to get rid of ghosts
     private void setupMaintenanceTimer() {
 	TimerTask task = new TimerTask() {
 
 	    @Override
 	    public void run() {
 		if (_enableMaintenance) {
-//		    System.err.println("maintenance refresh");
+		    // System.err.println("maintenance refresh");
 		    _doingMaintenance = true;
 		    refresh();
 		}
@@ -156,7 +156,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	};
 	_timer = new Timer();
 	_timer.scheduleAtFixedRate(task, 10000, 1000);
-	
+
     }
 
     // the openGL version and renderer strings
@@ -206,18 +206,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 	    }
 	}
 
-	_displayCount++;
-	
-//	if ((_displayCount % 100) == 0) {
-//	    System.err.println("Called display " + _displayCount + " times " + getClass().getName());    
-//	}
-	
 	// every time we draw we pause the animator.
 	// all "refresh" does is restart it!
 	if (_drawMode == DrawMode.ANIMATOR) {
 	    animator.pause();
 	}
-	
+
 	GL2 gl = drawable.getGL().getGL2();
 	gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 	if (_drawMode == DrawMode.ANIMATOR) {
@@ -242,23 +236,22 @@ public class Panel3D extends JPanel implements GLEventListener {
 	}
 
 	// test tubes
-	// Support3D.drawLine(drawable, 100f, 100f, 100f, 200f, -50f, 125,
-	// Color.red, 1f);
-	// Support3D.drawTube(drawable, 100f, 100f, 100f, 200f, -50f, 125f, 50f,
-	// new Color(255, 0, 0, 64));
+//	 Support3D.drawLine(drawable, 300f, 300f, 200f, -200f, -50f, -50,
+//	 Color.magenta, 1f);
+//	 Support3D.drawTube(drawable, 300f, 300f, 200f, -200f, -50f, -50, 50f,
+//	 new Color(128, 128, 128, 64));
 
 	if (_drawMode == DrawMode.ANIMATOR) {
 	    animator.pause();
 	}
 	gl.glPopMatrix();
-	
+
 	if (_doingMaintenance) {
-//	    System.err.println("Disable maintenance");
+	    // System.err.println("Disable maintenance");
 	    _doingMaintenance = false;
 	    _enableMaintenance = false;
-	}
-	else {
-//	    System.err.println("Enable maintenance");
+	} else {
+	    // System.err.println("Enable maintenance");
 	    _enableMaintenance = true;
 	}
     }
@@ -295,6 +288,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glClearDepth(1.0f); // set clear depth value to farthest
 	gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
 	gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
+	// gl.glDepthFunc(GL.GL_LESS); // the type of depth test to do
 
 	// best perspective correction
 	gl.glHint(GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
@@ -309,12 +303,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_DONT_CARE);
 	gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
 
-	// float pos[] = { 0.0f, 0.0f, 10.0f, 0.0f };
+	 //float pos[] = { 0.0f, 0.0f, -1000.0f, 0.0f };
 
-	// gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, pos, 0);
-	// // gl.glEnable(GL2.GL_CULL_FACE);
-	// gl.glEnable(GL2.GL_LIGHTING);
-	// gl.glEnable(GL2.GL_LIGHT0);
+	 //gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, pos, 0);
+	 // gl.glEnable(GL2.GL_CULL_FACE);
+	 //gl.glEnable(GL2.GL_LIGHTING);
+	 //gl.glEnable(GL2.GL_LIGHT0);
 
     }
 
@@ -348,8 +342,7 @@ public class Panel3D extends JPanel implements GLEventListener {
     /**
      * Set rotation angle about x
      * 
-     * @param angle
-     *            about x (degrees)
+     * @param angle about x (degrees)
      */
     public void setRotationX(float angle) {
 	_view_rotx = angle;
@@ -358,23 +351,21 @@ public class Panel3D extends JPanel implements GLEventListener {
     /**
      * Set rotation angle about y
      * 
-     * @param angle
-     *            about y (degrees)
+     * @param angle about y (degrees)
      */
     public void setRotationY(float angle) {
 	_view_roty = angle;
-//	refresh();
+	// refresh();
     }
 
     /**
      * Set rotation angle about z
      * 
-     * @param angle
-     *            about z (degrees)
+     * @param angle about z (degrees)
      */
     public void setRotationZ(float angle) {
 	_view_rotz = angle;
-//	refresh();
+	// refresh();
     }
 
     /**
@@ -407,34 +398,31 @@ public class Panel3D extends JPanel implements GLEventListener {
     /**
      * Change the x distance to move in or out
      * 
-     * @param dx
-     *            the change in x
+     * @param dx the change in x
      */
     public void deltaX(float dx) {
 	_xdist += dx;
-//	refresh();
+	// refresh();
     }
 
     /**
      * Change the y distance to move in or out
      * 
-     * @param dy
-     *            the change in y
+     * @param dy the change in y
      */
     public void deltaY(float dy) {
 	_ydist += dy;
-//	refresh();
+	// refresh();
     }
 
     /**
      * Change the z distance to move in or out
      * 
-     * @param dz
-     *            the change in z
+     * @param dz the change in z
      */
     public void deltaZ(float dz) {
 	_zdist += dz;
-//	refresh();
+	// refresh();
     }
 
     /**
@@ -444,22 +432,22 @@ public class Panel3D extends JPanel implements GLEventListener {
 	if (gljpanel == null) {
 	    return;
 	}
-	
+
 	if (_drawMode == DrawMode.MANUAL) {
 	    gljpanel.display();
-	} else if (_drawMode == DrawMode.ANIMATOR) {
-	    if ((animator != null) && (animator.isPaused())) {
-		animator.resume();
+	} else
+	    if (_drawMode == DrawMode.ANIMATOR) {
+		if ((animator != null) && (animator.isPaused())) {
+		    animator.resume();
+		}
 	    }
-	}
 
     }
 
     /**
      * Add an item to the list. Note that this does not initiate a redraw.
      * 
-     * @param item
-     *            the item to add.
+     * @param item the item to add.
      */
     public void addItem(Item3D item) {
 	if (item != null) {
@@ -471,8 +459,7 @@ public class Panel3D extends JPanel implements GLEventListener {
     /**
      * Remove an item from the list. Note that this does not initiate a redraw.
      * 
-     * @param item
-     *            the item to remove.
+     * @param item the item to remove.
      */
     public void removeItem(Item3D item) {
 	if (item != null) {
@@ -484,17 +471,12 @@ public class Panel3D extends JPanel implements GLEventListener {
     /**
      * Conver GL coordinates to screen coordinates
      * 
-     * @param gl
-     *            graphics context
-     * @param objX
-     *            GL x coordinate
-     * @param objY
-     *            GL y coordinate
-     * @param objZ
-     *            GL z coordinate
-     * @param winPos
-     *            should be float[3]. Will hold screen coords as floats as [x,
-     *            y, z]. Not sure what z is--ignore.
+     * @param gl graphics context
+     * @param objX GL x coordinate
+     * @param objY GL y coordinate
+     * @param objZ GL z coordinate
+     * @param winPos should be float[3]. Will hold screen coords as floats as
+     *            [x, y, z]. Not sure what z is--ignore.
      */
     public void project(GL2 gl, float objX, float objY, float objZ,
 	    float winPos[]) {
@@ -563,6 +545,21 @@ public class Panel3D extends JPanel implements GLEventListener {
 			zmin, zmax, Color.darkGray, 1f, 7, 7, 8, Color.black,
 			Color.blue, new Font("SansSerif", Font.PLAIN, 11), 0);
 		addItem(axes);
+
+		// add some triangles
+
+		// addItem(new Triangle3D(this,
+		// 0f, 0f, 0f, 100f, 0f, -100f, 50f, 100, 100f, new Color(255,
+		// 0, 0, 64), 2f, true));
+
+		addItem(new Triangle3D(this, 500f, 0f, -200f, -500f, 500f, 0f,
+			0f, -100f, 500f, new Color(255, 0, 0, 64), 1f, true));
+
+		addItem(new Triangle3D(this, 0f, 500f, 0f, -300f, -500f, 500f,
+			0f, -100f, 500f, new Color(0, 0, 255, 64), 2f, true));
+
+		addItem(new Triangle3D(this, 0f, 0f, 500f, 0f, -400f, -500f,
+			500f, -100f, 500f, new Color(0, 255, 0, 64), 2f, true));
 
 		// Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f,
 		// Color.yellow);

@@ -20,6 +20,12 @@ public class FTOFPanel3D extends DetectorItem3D {
     // "superlayer" [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
     private final int _superLayer;
 
+    /**
+     * An FTOF Panel 3D item
+     * @param panel3d the owner graphical panel
+     * @param sector the sector 1..6
+     * @param superLayer the super layer [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
+     */
     public FTOFPanel3D(Panel3D panel3d, int sector, int superLayer) {
 	super(panel3d);
 	_sector = sector;

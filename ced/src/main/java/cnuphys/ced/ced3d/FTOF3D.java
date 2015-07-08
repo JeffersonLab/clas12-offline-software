@@ -10,18 +10,25 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class FTOF3D extends DetectorItem3D {
 
-    private int drawList = -1;
+//    private int drawList = -1;
 
     // individual paddles indices are PANEL_1A, PANEL_1B, PANEL_2 (0,1,2)
+    //and are child items
     private FTOFPanel3D _panels[];
 
     // one based sector [1..6]
     private final int _sector;
 
+    /**
+     * The 3D FTOF
+     * @param panel3d the 3D panel owner
+     * @param sector the 1-based sector [1..6]
+     */
     public FTOF3D(Panel3D panel3d, int sector) {
 	super(panel3d);
 	_sector = sector;
 
+	//add the three panels as child items
 	_panels = new FTOFPanel3D[3];
 	for (int panelId = 0; panelId < 3; panelId++) {
 	    _panels[panelId] = new FTOFPanel3D(panel3d, sector, panelId);
@@ -32,7 +39,7 @@ public class FTOF3D extends DetectorItem3D {
     @Override
     public void drawShape(GLAutoDrawable drawable) {
 
-	GL2 gl = drawable.getGL().getGL2();
+//	GL2 gl = drawable.getGL().getGL2();
 	Color outlineColor = X11Colors.getX11Color("Light Sky Blue", getVolumeAlpha());
 
 	for (FTOFPanel3D panel : _panels) {
@@ -41,7 +48,7 @@ public class FTOF3D extends DetectorItem3D {
 	    }
 	}
 
-	gl.glCallList(drawList);
+//	gl.glCallList(drawList);
 
 //	if (drawList < 0) {
 //	    System.err.println("Creating drawlist for FTOF sector " + _sector);

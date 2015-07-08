@@ -65,18 +65,11 @@ public class SwimAllMC implements ISwimAll {
 								   // MeV
 		    double pz = mcGemcData.genpart_true_pz[index]; // leave in
 								   // MeV
-		    double x = mcGemcData.genpart_true_vx[index] * 10.0; // convert
-									 // mm
-									 // to
-									 // cm
-		    double y = mcGemcData.genpart_true_vy[index] * 10.0; // convert
-									 // mm
-									 // to
-									 // cm
-		    double z = mcGemcData.genpart_true_vz[index] * 10.0; // convert
-									 // mm
-									 // to
-									 // cm
+		    
+		    //note conversions from mm to cm
+		    double x = mcGemcData.genpart_true_vx[index] / 10.0; 
+		    double y = mcGemcData.genpart_true_vy[index] / 10.0;
+		    double z = mcGemcData.genpart_true_vz[index] / 10.0;
 
 		    double p = Math.sqrt(px * px + py * py + pz * pz);
 		    double theta = Math.toDegrees(Math.acos(pz / p));
@@ -136,27 +129,14 @@ public class SwimAllMC implements ISwimAll {
 		} else {
 		    // System.err.println("SWIM particle " + lid);
 
-		    double px = mcGemcData.genpart_true_px[index] / 1000.0; // convert
-									    // to
-									    // GeV
-		    double py = mcGemcData.genpart_true_py[index] / 1000.0; // convert
-									    // to
-									    // GeV
-		    double pz = mcGemcData.genpart_true_pz[index] / 1000.0; // convert
-									    // to
-									    // GeV
-		    double x = mcGemcData.genpart_true_vx[index] / 10.0; // convert
-									 // mm
-									 // to
-									 // cm
-		    double y = mcGemcData.genpart_true_vy[index] / 10.0; // convert
-									 // mm
-									 // to
-									 // cm
-		    double z = mcGemcData.genpart_true_vz[index] / 10.0; // convert
-									 // mm
-									 // to
-									 // cm
+		    //covert momenta to GeV/c from MeV/c
+		    double px = mcGemcData.genpart_true_px[index] / 1000.0;
+		    double py = mcGemcData.genpart_true_py[index] / 1000.0;
+		    double pz = mcGemcData.genpart_true_pz[index] / 1000.0;
+		    //note vertices are in mm must convert to meters
+		    double x = mcGemcData.genpart_true_vx[index] / 1000.0; 
+		    double y = mcGemcData.genpart_true_vy[index] / 1000.0;
+		    double z = mcGemcData.genpart_true_vz[index] / 1000.0;
 
 		    double p = Math.sqrt(px * px + py * py + pz * pz);
 		    double theta = Math.toDegrees(Math.acos(pz / p));
@@ -168,6 +148,8 @@ public class SwimAllMC implements ISwimAll {
 		    Swimmer swimmer = Swimming.getSwimmer();
 		    double stepSize = 5e-4; // m
 		    DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
+		    
+//		    System.err.println("swim vertex: (" + x + ", " + y + ", " + z + ")");
 		    SwimTrajectory traj = swimmer.swim(lid.getCharge(), x, y,
 			    z, p, theta, phi, stopper, PATHMAX, stepSize,
 			    Swimmer.CLAS_Tolerance, null);
