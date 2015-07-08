@@ -11,14 +11,15 @@ import cnuphys.lund.X11Colors;
 public class CentralPanel3D extends CedPanel3D {
 
     //dimension of this panel are in cm
-    private final float xymax = 25f;
-    private final float zmax = 30f;
-    private final float zmin = -30f;
+    private final float xymax = 50f;
+    private final float zmax = 50f;
+    private final float zmin = -50f;
     
     //labels for the check box
     private static final String _cbaLabels[] = {SHOW_VOLUMES, SHOW_TRUTH, SHOW_SVT, 
 	SHOW_SVT_LAYER_1, SHOW_SVT_LAYER_2, SHOW_SVT_LAYER_3, SHOW_SVT_LAYER_4,
 	SHOW_SVT_LAYER_5, SHOW_SVT_LAYER_6, SHOW_SVT_LAYER_7, SHOW_SVT_LAYER_8,
+	SHOW_CND, SHOW_CND_LAYER_1, SHOW_CND_LAYER_2, SHOW_CND_LAYER_3,
 	SHOW_RECON_CROSSES, SHOW_COSMICS};
 
     public CentralPanel3D(float angleX, float angleY, float angleZ,
@@ -29,7 +30,7 @@ public class CentralPanel3D extends CedPanel3D {
     @Override
     public void createInitialItems() {
 	//coordinate axes
-	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 6, 6, 7, 
+	Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, Color.darkGray, 1f, 6, 6, 6, 
 		Color.black, X11Colors.getX11Color("Dark Green"), new Font("SansSerif", Font.PLAIN, 12), 0);
 	addItem(axes);
 	
@@ -50,6 +51,9 @@ public class CentralPanel3D extends CedPanel3D {
 		addItem(svt);
 	    }
 	}
+	
+	//cnd
+	addItem(new CND3D(this));
 		
   }
     

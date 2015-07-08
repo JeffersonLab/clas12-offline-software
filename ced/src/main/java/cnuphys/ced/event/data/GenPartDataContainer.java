@@ -49,9 +49,9 @@ public class GenPartDataContainer extends ADataContainer {
 	    genpart_true_px = event.getDouble("GenPart::true.px");
 	    genpart_true_py = event.getDouble("GenPart::true.py");
 	    genpart_true_pz = event.getDouble("GenPart::true.pz");
-	    genpart_true_vx = event.getDouble("GenPart::true.vx");
-	    genpart_true_vy = event.getDouble("GenPart::true.vy");
-	    genpart_true_vz = event.getDouble("GenPart::true.vz");
+	    genpart_true_vx = event.getDouble("GenPart::true.vx"); //mm
+	    genpart_true_vy = event.getDouble("GenPart::true.vy"); //mm
+	    genpart_true_vz = event.getDouble("GenPart::true.vz"); //mm
 	} // GenPart::true
 
     } // load

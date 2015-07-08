@@ -32,8 +32,6 @@ public class DCGeometry {
     private static double minWireZ;
     private static double maxWireZ;
 
-    public static boolean inited = false;
-    
     /**
      * These are the drift chamber wires from the geometry service. The indices
      * are 0-based: [superlayer 0:5][layer 0:5][wire 0:111]
@@ -46,10 +44,7 @@ public class DCGeometry {
     /**
      * Initialize the DC Geometry by loading all the wires
      */
-    public static void init() {
-	if (inited) {
-	    return;
-	}
+    public static void initialize() {
 
 	System.out.println("\n=======================================");
 	System.out.println("====  DC Geometry Inititialization ====");
@@ -143,8 +138,6 @@ public class DCGeometry {
      * @param coords holds 6*3 = 18 values [x1, y1, z1, ..., x6, y6, z6]
      */
     public static void superLayerVertices(int sector, int superlayer, float[] coords) {
-	
-	Point3D v[] = new Point3D[6];
 	
 	DCSuperlayer sl = sector0.getSuperlayer(superlayer-1);
 	DCLayer dcLayer1 = sl.getLayer(0);
@@ -639,7 +632,7 @@ public class DCGeometry {
     }
 
     public static void main(String arg[]) {
-	DCGeometry.init();
+	DCGeometry.initialize();
 
 	int superlayer = 4;
 	int layer = 3;

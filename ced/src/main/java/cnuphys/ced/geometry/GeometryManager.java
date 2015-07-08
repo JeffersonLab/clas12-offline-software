@@ -43,7 +43,7 @@ public class GeometryManager {
      * Private constructor for the singleton.
      */
     private GeometryManager() {
-	DCGeometry.init();
+	DCGeometry.initialize();
 
 	// get the FTOF geometry
 	FTOFGeometry.initialize();
@@ -68,6 +68,9 @@ public class GeometryManager {
 
 	// get PCAL data
 	PCALGeometry.initialize();
+	
+	// CND data
+	CNDGeometry.initialize();
 
     }
 

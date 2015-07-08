@@ -43,7 +43,7 @@ public class ECViewPlane3D extends DetectorItem3D {
 	    color = X11Colors.getX11Color("Light Green", getVolumeAlpha());
 	}
 
-	Support3D.drawTriangle(drawable, _coords, color, 1f, true);
+	Support3D.drawTriangles(drawable, _coords, color, 1f, true);
 
 	// float coords[] = new float[24];
 	// for (int strip = 1; strip <= 36; strip++) {
