@@ -79,12 +79,6 @@ import cnuphys.bCNU.view.XMLView;
 public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	IAccumulationListener, MagneticFieldChangeListener {
 
-    /**
-     * The path where we'll look for data such as field maps and geometry. This
-     * should be set using a -dataPath command line argument.
-     */
-    public static String dataPath = "data";
-
     // the singleton
     private static Ced instance;
 
@@ -96,10 +90,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
     // used for one time inits
     private int _firstTime = 0;
-    
-    //using 3D?
+
+    // using 3D?
     private static boolean _use3D;
-    
+
     // build (hopefully overwritten by property file
     // commented out because we are leaving svn
     // private static String build = "??";
@@ -110,11 +104,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     // event menu
     private ClasIoEventMenu _eventMenu;
 
-    //progress bar
+    // progress bar
     private JProgressBar _progressBar;
     private JLabel _progressLabel;
 
-    
     // event number label on menu bar
     private JLabel _eventNumberLabel;
 
@@ -147,10 +140,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     /**
      * Constructor (private--used to create singleton)
      * 
-     * @param keyVals
-     *            an optional variable length list of attributes in type-value
-     *            pairs. For example, AttributeType.NAME, "my application",
-     *            AttributeType.CENTER, true, etc.
+     * @param keyVals an optional variable length list of attributes in
+     *            type-value pairs. For example, AttributeType.NAME,
+     *            "my application", AttributeType.CENTER, true, etc.
      */
     private Ced(Object... keyVals) {
 	super(keyVals);
@@ -193,10 +185,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_gemcView, 0, 5, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstXyView, 0, 2, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_bstZView, 0, 2, VirtualView.UPPERRIGHT);
-	    
-	    //note no constraint means "center"
+
+	    // note no constraint means "center"
 	    _virtualView.moveTo(_dcXyView, 0, 3);
-	    
+
 	    _virtualView.moveTo(_pcalView, 0, 1, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_ecView, 0, 1, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_logView, 0, 6, VirtualView.UPPERRIGHT);
@@ -205,10 +197,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_monteCarloView, 0, 0, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_reconEventView, 0, 0, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_plotView, 0, 0, VirtualView.BOTTOMLEFT);
-	    
+
 	    if (_use3D) {
-		_virtualView.moveTo(_forward3DView, 0, 7, VirtualView.BOTTOMRIGHT);
-		_virtualView.moveTo(_central3DView, 0, 7, VirtualView.BOTTOMLEFT);
+		_virtualView.moveTo(_forward3DView, 0, 7,
+			VirtualView.BOTTOMRIGHT);
+		_virtualView.moveTo(_central3DView, 0, 7,
+			VirtualView.BOTTOMLEFT);
 	    }
 	    Log.getInstance().config("reset views on virtual dekstop");
 	}
@@ -235,12 +229,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	_virtualView = VirtualView.createVirtualView();
 	ViewManager.getInstance().getViewMenu().addSeparator();
 
-	//add GEMC data view
-	_gemcView  = new GEMCView();
+	// add GEMC data view
+	_gemcView = new GEMCView();
 
 	// add event view
 	_eventView = ClasIoEventView.createEventView();
-	
+
 	// add monte carlo view
 	_monteCarloView = new ClasIoMonteCarloView();
 
@@ -266,8 +260,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add an pcal view
 	_pcalView = PCALView.createPCALView();
-	
-	//3D view?
+
+	// 3D view?
 	if (_use3D) {
 	    _forward3DView = new ForwardView3D();
 	    _central3DView = new CentralView3D();
@@ -342,8 +336,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	aboutItem.addActionListener(al0);
 
 	fmenu.add(aboutItem, 0);
-	
-	//eliza!
+
+	// eliza!
 	JMenuItem elizaItem = new JMenuItem("Eliza...");
 	ActionListener al1 = new ActionListener() {
 	    @Override
@@ -361,7 +355,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     public void setEventNumberLabel(int num) {
 	if (num < 0) {
 	    _eventNumberLabel.setText("  Event Number:    ");
-	} else {
+	}
+	else {
 	    _eventNumberLabel.setText("  Event Number: " + num + "  ");
 	}
     }
@@ -418,14 +413,17 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	String pname = pev.getPropertyName();
 
 	if (pname.equals(SwimMenu.TRAJ_CLEARED_MC_PROP)) {
-	} else if (pname.equals(SwimMenu.TRAJ_CLEARED_RECON_PROP)) {
-	} else if (pname.equals(SwimMenu.SWIM_ALL_MC_PROP)) {
+	}
+	else if (pname.equals(SwimMenu.TRAJ_CLEARED_RECON_PROP)) {
+	}
+	else if (pname.equals(SwimMenu.SWIM_ALL_MC_PROP)) {
 	    ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 		    .getMCSwimmer();
 	    if (allSwimmer != null) {
 		allSwimmer.swimAll();
 	    }
-	} else if (pname.equals(SwimMenu.SWIM_ALL_RECON_PROP)) {
+	}
+	else if (pname.equals(SwimMenu.SWIM_ALL_RECON_PROP)) {
 	    ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 		    .getReconSwimmer();
 	    if (allSwimmer != null) {
@@ -474,12 +472,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    String solenoidPath) {
 
 	FileUtilities.setDefaultDir("data");
-
-	if (dataPath != null) {
-	    Ced.dataPath = dataPath;
-	    Log.getInstance().config("Data Path: " + Ced.dataPath);
-	    System.out.println("Data Path: [" + Ced.dataPath + "]");
-	}
 
 	if (torusPath != null) {
 	    MagneticFields.setTorusFullPath(torusPath);
@@ -531,7 +523,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 
     }
-    
+
     private void createProgressBar() {
 	getJMenuBar().add(Box.createHorizontalStrut(20));
 	_progressLabel = new JLabel("             ");
@@ -546,11 +538,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    }
 	};
 	_progressBar.setIndeterminate(true);
-	
+
 	int mbh = getJMenuBar().getPreferredSize().height;
 	int pbh = 10;
-	final int vgap = Math.min(2, 1 + (mbh-pbh)/2);
-	
+	final int vgap = Math.min(2, 1 + (mbh - pbh) / 2);
+
 	_progressBar.setVisible(false);
 	Dimension size = new Dimension(60, pbh);
 	_progressBar.setMinimumSize(size);
@@ -560,24 +552,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	_progressBar.setBackground(Color.white);
 
 	_progressLabel.setFont(Fonts.mediumFont);
-	
+
 	JPanel panel = new JPanel() {
 	    @Override
 	    public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(vgap, def.left + 2, 0,
-			def.right + 2);
+		return new Insets(vgap, def.left + 2, 0, def.right + 2);
 	    }
 	};
-	
+
 	panel.setOpaque(true);
 	panel.setBackground(Color.white);
 	panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 0));
-	
+
 	panel.add(_progressLabel);
 	panel.add(_progressBar);
 	getJMenuBar().add(panel);
-   }
+    }
 
     private void createEventNumberLabel() {
 	_eventNumberLabel = new JLabel("  Event Number:    ");
@@ -614,8 +605,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      * <p>
      * Command line arguments:</br> -p [dir] dir is the default directory
      * 
-     * @param arg
-     *            the command line arguments.
+     * @param arg the command line arguments.
      */
     public static void main(String[] arg) {
 
@@ -623,8 +613,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// create a console log listener
 	Log.getInstance().addLogListener(new ConsoleLogListener());
-	
-	//initialize geometry
+
+	// initialize geometry
 	GeometryManager.getInstance();
 
 	if ((arg != null) && (arg.length > 0)) {
@@ -638,30 +628,26 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			i++;
 			FileUtilities.setDefaultDir(arg[i]);
 		    }
-		} else if (arg[i].equalsIgnoreCase("-dataPath")) {
-		    if (i < lm1) {
-			i++;
-			Ced.dataPath = new String(arg[i]);
-			Log.getInstance().config("Data Path: " + Ced.dataPath);
-			System.out.println("Data Path: [" + Ced.dataPath + "]");
-		    }
-		} else if (arg[i].equalsIgnoreCase("-torus")) {
+		}
+		else if (arg[i].equalsIgnoreCase("-torus")) {
 		    i++;
 		    MagneticFields.setTorusFullPath(arg[i]);
 		    Log.getInstance().config("Torus Path: " + arg[i]);
 		    System.out.println("Torus Path: " + arg[i]);
-		} else if (arg[i].equalsIgnoreCase("-solenoid")) {
+		}
+		else if (arg[i].equalsIgnoreCase("-solenoid")) {
 		    i++;
 		    MagneticFields.setSolenoidFullPath(arg[i]);
 		    Log.getInstance().config("Solenoid Path: " + arg[i]);
 		    System.out.println("Solenoid Path: " + arg[i]);
-		} else if (arg[i].contains("3D")) {
+		}
+		else if (arg[i].contains("3D")) {
 		    _use3D = true;
 		    System.err.println("Using 3D");
 		}
 
 		i++;
-		done = (i >= lm1);
+		done = (i >= len);
 	    }
 	}
 
@@ -688,13 +674,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     public void magneticFieldChanged() {
 	fixTitle();
     }
-    
+
     public JProgressBar getProgressBar() {
 	return _progressBar;
     }
-    
+
     /**
      * Get the GEMC view
+     * 
      * @return the GEMC view
      */
     public GEMCView getGEMCView() {
@@ -703,11 +690,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
     /**
      * Check whether we use 3D
+     * 
      * @return <code>true</code> if we use 3D
      */
     public static boolean use3D() {
 	return _use3D;
     }
-
 
 }
