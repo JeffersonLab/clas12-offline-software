@@ -1,5 +1,6 @@
 package cnuphys.ced.geometry;
 
+import java.awt.geom.Point2D;
 import java.util.List;
 
 import org.jlab.clasrec.utils.DataBaseLoader;
@@ -107,6 +108,21 @@ public class CNDGeometry {
 	    coords[j+2] = (float) v[i].z();
 	}
     }
+    
+    /**
+     * Obtain the paddle xy corners for 2D view
+     * @param layer the layer 1..3
+     * @param paddleId the paddle ID 1..48
+     * @param wp the four corners (cm)
+     */
+    public static void paddleXYCorners(int layer, int paddleId, Point2D.Double[] wp) {
+	ScintillatorPaddle paddle = getPaddle(layer, paddleId);
+	for (int i = 0; i < 4; i++) {
+	    Point3D p3d = new Point3D(paddle.getVolumePoint(i));
+	    wp[i].x = p3d.x();
+	    wp[i].y = p3d.y();
+	}
+    }
 
     
     
@@ -143,7 +159,13 @@ public class CNDGeometry {
 	System.out.println("zmax: " + zmax);
 	System.out.println("zmin: " + zmin);
 	
+	ScintillatorPaddle paddle = getPaddle(2, 12);
+	System.out.println("num edges: " + paddle.getNumVolumeEdges());
 	
+	for (int i = 0; i < 8; i++) {
+	    Point3D p3d = new Point3D(paddle.getVolumePoint(i));
+	    System.out.println("Point [" + (i+1) + "] " + p3d);
+	}
     }
    
 }

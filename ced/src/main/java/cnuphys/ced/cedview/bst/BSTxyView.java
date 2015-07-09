@@ -103,6 +103,9 @@ public class BSTxyView extends CedView {
     private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
 	    200., -200., -400., 400.);
 
+//    private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
+//	    400., -400., -800., 800.);
+    
     // used to draw swum trajectories (if any) in the after drawer
     private SwimTrajectoryDrawer _swimTrajectoryDrawer;
 
