@@ -50,6 +50,13 @@
     <version>2.0-SNAPSHOT</version>
   </dependency>
 
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>bCNU3D</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>
+
   <dependency>
     <groupId>cnuphys</groupId>
     <artifactId>splot</artifactId>
@@ -80,14 +87,26 @@
       <version>2.3</version>
       <configuration>
 	<outputFile>target/cnuphys-${project.version}.jar</outputFile>
-	<!--
+	<filters>
+	  <filter>
+	    <artifact>*:*</artifact>
+	    <excludes>
+	      <exclude>META-INF/*.SF</exclude>
+	      <exclude>META-INF/*.DSA</exclude>
+	      <exclude>META-INF/*.RSA</exclude>
+	    </excludes>
+	  </filter>
+	</filters>
+	
 	<artifactSet>
           <excludes>
-            <exclude>org.jlab.coda:clara</exclude>
-            <exclude>org.jlab.coda:jtools</exclude>
+            <exclude>cnuphys:gluegen</exclude>
+            <exclude>cnuphys:jogl</exclude>
+            <exclude>cnuphys:jogl-all</exclude>
+            <exclude>org.jlab.coda:jevio</exclude>
           </excludes>
         </artifactSet>
-	-->
+
       </configuration>
       <executions>
         <execution>
