@@ -2,7 +2,7 @@ package cnuphys.snr;
 
 /**
  * All the parameters needed for noise reduction. Each superlayer should have
- * its own.
+ * its own object. Now should be thread safe.
  * 
  * @author heddle
  */
@@ -489,7 +489,7 @@ public class NoiseReductionParameters {
      * @param direction
      *            either left or right.
      */
-    private static void findPossibleSegments(
+    private void findPossibleSegments(
 	    NoiseReductionParameters parameters, int direction) {
 
 	// set misses to all 1's. That makes our "reservoir" of misses
