@@ -4,7 +4,7 @@ import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 
 /**
- * One stop shopping for clas12 noise analysis. There is
+ * One stop shopping for clas12 noise analysis. Should finally be thread safe.
  * 
  * @author heddle
  *
@@ -33,27 +33,27 @@ public class Clas12NoiseAnalysis {
     public int rawHitCount;
 
     // default num missing layers
-    private static final int[] _defaultMissingLayers = { 2, 2, 2, 2, 2, 2 };
+    private final int[] _defaultMissingLayers = { 2, 2, 2, 2, 2, 2 };
 
     // default layers shifts
-    private static final int[][] _defaultLeftShifts = { { 0, 1, 2, 2, 3, 3 },
+    private final int[][] _defaultLeftShifts = { { 0, 1, 2, 2, 3, 3 },
 	    { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 },
 	    { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 } };
 
     // default layers shifts
-    private static final int[][] _defaultRightShifts = { { 0, 1, 2, 2, 3, 3 },
+    private final int[][] _defaultRightShifts = { { 0, 1, 2, 2, 3, 3 },
 	    { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 },
 	    { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 } };
 
     // default num missing layers for composite chambers (superlayers);
     // unlike the test program there are 4 composite chambers here
     // because of the wire rotations
-    private static final int[] _comp_defaultMissingLayers = { 0, 0, 0, 0 };
+    private final int[] _comp_defaultMissingLayers = { 0, 0, 0, 0 };
 
     // default layers shifts for composite chambers (superlayers)
     // for clas data (unlike the test program) there are
     // 4 composite chambers each with 3 layers
-    private static final int[][] _comp_defaultRightShifts = {
+    private final int[][] _comp_defaultRightShifts = {
 	    // {0, 0, 0}, //LEFT_PLUS
 	    // {0, 22, 34}, //RIGHT_PLUS
 	    // {0, 0, 0}, //LEFT_MINUS
@@ -65,7 +65,7 @@ public class Clas12NoiseAnalysis {
     };
 
     // default layers shifts for composite chambers (superlayers)
-    private static final int[][] _comp_defaultLeftShifts = {
+    private final int[][] _comp_defaultLeftShifts = {
 	    // {0, 22, 34}, //LEFT_PLUS
 	    // {0, 0, 0}, //RIGHT_PLUS
 	    // {0, 22, 34}, //LEFT_MINUS
@@ -78,13 +78,17 @@ public class Clas12NoiseAnalysis {
 
     // there is superlayer dependence on the parameters but not sector
     // dependence
-    private static final NoiseReductionParameters _parameters[][] = new NoiseReductionParameters[NUM_SECTOR][NUM_SUPERLAYER];
+    private final NoiseReductionParameters _parameters[][] = new NoiseReductionParameters[NUM_SECTOR][NUM_SUPERLAYER];
 
     // four sets of parameters for the composite chambers (superlayers)
-    private static final NoiseReductionParameters _compositeParameters[][] = new NoiseReductionParameters[NUM_SECTOR][4];
-
-    // set defaults
-    static {
+    private final NoiseReductionParameters _compositeParameters[][] = new NoiseReductionParameters[NUM_SECTOR][4];
+    
+    public Clas12NoiseAnalysis() {
+	initialize();
+    }
+    
+    //initialize arrays
+    private void initialize() {
 
 	for (int sect = 0; sect < NUM_SECTOR; sect++) {
 	    for (int supl = 0; supl < NUM_SUPERLAYER; supl++) {
