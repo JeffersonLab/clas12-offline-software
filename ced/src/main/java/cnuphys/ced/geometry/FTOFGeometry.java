@@ -14,8 +14,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
-import cnuphys.bCNU.log.Log;
-
 public class FTOFGeometry {
 
     public static final int PANEL_1A = 0;
@@ -46,9 +44,9 @@ public class FTOFGeometry {
     }
 
     public static void initialize() {
-	System.out.println("\n=======================================");
-	System.out.println("===  FTOF Geometry Inititialization ===");
-	System.out.println("=======================================");
+	System.out.println("\n=====================================");
+	System.out.println("===  FTOF Geometry Initialization ===");
+	System.out.println("=====================================");
 
 
 	FTOFDetector ftofDetector = (new FTOFFactory())

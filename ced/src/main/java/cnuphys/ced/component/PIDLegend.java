@@ -14,14 +14,10 @@ import java.util.Vector;
 import javax.swing.JComponent;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
-import cnuphys.bCNU.graphics.toolbar.UserToolBarComponent;
-import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.bCNU.util.Fonts;
-import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
-import cnuphys.splot.plot.GraphicsUtilities;
 
 public class PIDLegend extends JComponent {
 

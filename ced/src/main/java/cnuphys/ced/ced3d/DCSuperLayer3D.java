@@ -1,23 +1,10 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.geom.Point2D;
-
-import org.jlab.geom.component.DriftChamberWire;
-
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
-import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.DCGeometry;
-import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -150,12 +137,12 @@ public class DCSuperLayer3D extends DetectorItem3D {
     // show DCs?
     @Override
     protected boolean show() {
-	boolean showdc = ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DC);
+	boolean showdc = ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_DC);
 	return showdc && showSector(_sector);
     }
     // show DOCAs?
     private boolean showDOCA() {
-	return ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_DOCA);
+	return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_DOCA);
     }
 
 }

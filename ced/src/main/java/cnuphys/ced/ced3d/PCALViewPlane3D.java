@@ -5,7 +5,6 @@ import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.ECDataContainer;
-import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.PCALGeometry;
 
 import com.jogamp.opengl.GLAutoDrawable;

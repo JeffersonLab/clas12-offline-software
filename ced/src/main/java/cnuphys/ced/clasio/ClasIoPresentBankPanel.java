@@ -11,12 +11,9 @@ import java.util.Hashtable;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import org.jlab.data.io.DataBank;
-import org.jlab.data.ui.DataBankPanel;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.component.ActionLabel;
-import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.ced.clasio.table.NodeTable;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;

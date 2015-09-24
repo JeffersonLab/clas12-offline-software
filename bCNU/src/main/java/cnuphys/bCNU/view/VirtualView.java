@@ -41,7 +41,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
     private Vector<BaseView> _views = new Vector<BaseView>();
 
-    private static final int _numcol = 7;
+    private static int _numcol = 8;
     private static final int _numrow = 1;
 
     private int _currentRow = 0;
@@ -98,6 +98,9 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	setAfterDraw();
     }
 
+    /**
+     * Reconfigure the virtual view
+     */
     public void reconfigure() {
 	Dimension d = _parent.getSize();
 
@@ -212,11 +215,12 @@ public class VirtualView extends BaseView implements InternalFrameListener,
      * 
      * @return a new DrawingView object
      */
-    public static VirtualView createVirtualView() {
+    public static VirtualView createVirtualView(int numcol) {
 
+	_numcol = numcol;
 	VirtualView view = null;
 	Rectangle2D.Double world = getWorld();
-	int width = 300;
+	int width = numcol*40;
 	int height = (int) ((width * world.height) / world.width);
 
 	// create the view

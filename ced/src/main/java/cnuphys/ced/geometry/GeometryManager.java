@@ -1,11 +1,6 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
@@ -20,8 +15,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.FileUtilities;
-import cnuphys.ced.frame.Ced;
 
 public class GeometryManager {
 
@@ -72,6 +65,8 @@ public class GeometryManager {
 	// CND data
 	CNDGeometry.initialize();
 
+	//FTCal
+	FTCALGeometry.initialize();
     }
 
     /**

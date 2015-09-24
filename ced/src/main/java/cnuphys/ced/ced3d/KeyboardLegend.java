@@ -2,8 +2,6 @@ package cnuphys.ced.ced3d;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
-
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 

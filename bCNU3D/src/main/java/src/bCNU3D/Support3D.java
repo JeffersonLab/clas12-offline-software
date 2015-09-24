@@ -1,14 +1,18 @@
 package bCNU3D;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 
 import com.jogamp.graph.geom.SVertex;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.Texture;
 
 public class Support3D {
 
@@ -89,6 +93,27 @@ public class Support3D {
 	}
 	gl.glEnd();
     }
+    
+    /**
+     * Draw a set of points
+     * 
+     * @param drawable the OpenGL drawable
+     * @param coords the vertices as [x, y, z, x, y, z, ...]
+     * @param fill the fill color
+     * @param frame the frame color
+     * @param size the points size
+     */
+    public static void drawPoints(GLAutoDrawable drawable, float coords[],
+	    Color fill, Color frame, float size) {
+	if (frame == null) {
+	    drawPoints(drawable, coords, fill, size);
+	}
+	else {
+	    drawPoints(drawable, coords, frame, size);
+	    drawPoints(drawable, coords, fill, size-2);	    
+	}
+   }
+
 
     /**
      * Draw a single point using double coordinates
@@ -127,6 +152,97 @@ public class Support3D {
 	gl.glVertex3f(x, y, z);
 	gl.glEnd();
     }
+    
+    
+    
+    
+    /**
+     * Draw a set of sprite points
+     * 
+     * @param drawable the OpenGL drawable
+     * @param coords the vertices as [x, y, z, x, y, z, ...]
+     * @param color the color
+     * @param size the points size
+     */
+    public static void drawSprites(GLAutoDrawable drawable, float coords[],
+	    Texture sprite, float size) {
+	GL2 gl = drawable.getGL().getGL2();
+	gl.glPointSize(size);
+	setColor(gl, Color.blue);
+	sprite.bind(gl);
+//	sprite.enable(gl);
+
+	loadShader(gl, vshader1, fshader1);
+	
+	//how many points?
+	int np = coords.length / 3;
+
+        int vertShader = gl.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
+        gl.glCompileShader(vertShader);
+
+	gl.glBegin(GL.GL_POINTS);
+//	gl.glEnable(GL2.GL_POINT_SMOOTH);
+
+	for (int i = 0; i < np; i++) {
+	    int j = i * 3;
+	    gl.glVertex3f(coords[j], coords[j + 1], coords[j + 2]);
+	}
+	gl.glEnd();
+//	sprite.disable(gl);
+    }
+    
+    public static final String vshader1 = "void main {\n" +
+            "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n" +
+	    "}";
+
+    public static final String fshader1 = "void main {\n" +
+ 	    "}";
+
+    public static void loadShader(GL2 gl, String vertexShaderString, String fragmentShaderString) {
+	int v = gl.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
+	int f = gl.glCreateShader(GL2ES2.GL_FRAGMENT_SHADER);
+
+        //Compile the vertexShader String into a program.
+        String[] vlines = new String[] { vertexShaderString };
+        int[] vlengths = new int[] { vlines[0].length() };
+        gl.glShaderSource(v, vlines.length, vlines, vlengths, 0);
+	gl.glCompileShader(v);        
+	
+	String[] flines = new String[] { fragmentShaderString };
+        int[] flengths = new int[] { flines[0].length() };
+        gl.glShaderSource(f, flines.length, flines, flengths, 0);
+	gl.glCompileShader(f);
+
+	int shaderprogram = gl.glCreateProgram();
+	gl.glAttachShader(shaderprogram, v);
+	gl.glAttachShader(shaderprogram, f);
+	gl.glLinkProgram(shaderprogram);
+	gl.glValidateProgram(shaderprogram);
+
+//	gl.glDeleteShader(v);
+//	gl.glDeleteShader(f);
+	gl.glUseProgram(shaderprogram);	
+    }
+     
+    
+
+    public static void drawSprite(GLAutoDrawable drawable, Texture texture,
+	    float x, float y, float z, float size) {
+
+	GL2 gl = drawable.getGL().getGL2();
+	gl.glPointSize(size);
+
+	// adjust(tendToColor);
+	texture.bind(gl);
+	// gl.glColor4f(rgba.r,rgba.g,rgba.b,rgba.a);
+	setColor(gl, Color.black);
+
+	gl.glBegin(GL.GL_POINTS);
+	texture.bind(gl);
+	gl.glVertex3f(x, y, z);
+	gl.glEnd();
+    }
+
 
     /**
      * Draw a wire sphere

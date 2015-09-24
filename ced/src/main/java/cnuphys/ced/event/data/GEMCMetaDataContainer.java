@@ -17,6 +17,9 @@ public class GEMCMetaDataContainer extends ADataContainer {
 
     public static final int GEMCMetaBankTag = 5;
     public static final int GEMCMetaBankNum = 1;
+    
+    //has this been use to set the fields?
+    public boolean resetFields;
 
     // the raw strings
     public Vector<String> properties = new Vector<String>();
@@ -153,8 +156,12 @@ public class GEMCMetaDataContainer extends ADataContainer {
 
 	EvioNode node = EvioNodeSupport.getNode(event, GEMCMetaBankTag,
 		GEMCMetaBankNum);
+	
 	if (node != null) {
 
+	    System.err.println("Found GEMC metadata bank.");
+	    resetFields = true;
+	    
 	    byte bytes[] = node.getStructureBuffer(true).array();
 
 	    if (bytes != null) {

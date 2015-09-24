@@ -10,7 +10,6 @@ import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSector;
 import org.jlab.geom.detector.ec.ECSuperlayer;
-import org.jlab.geom.prim.Face3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -454,9 +453,9 @@ public class ECGeometry {
      */
     public static void initialize() {
 
-	System.out.println("\n=======================================");
-	System.out.println("====  EC Geometry Inititialization ====");
-	System.out.println("=======================================");
+	System.out.println("\n=====================================");
+	System.out.println("====  EC Geometry Initialization ====");
+	System.out.println("=====================================");
 
 	// obtain the transformations
 	_transformations[EC_INNER] = new Transformations(DetectorType.EC_INNER);

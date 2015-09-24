@@ -117,6 +117,11 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
     public void newClasIoEvent(EvioDataEvent event) {
 	GEMCMetaDataContainer gemcdata = _eventManager.getGEMCMetaData();
 	
+	if (!gemcdata.resetFields) {
+	    System.err.println("Skipped setting fields.");
+	    return;
+	}
+	
 	//getHitCount returns the  numeber of properties. This should
 	//awlays be zero except for event#1 in a gemc file
 	if (gemcdata.getHitCount(0) > 0) {
@@ -132,7 +137,12 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 	    //fields
 	    setFieldLabel(_torus, hasTorus, torusScale);
 	    setFieldLabel(_solenoid, hasSolenoid, solenoidScale);
+	    
+	    System.err.println("Setting fields from GEMC meta data");
 	    configureFields(hasTorus, torusScale, hasSolenoid, solenoidScale);
+	    
+	    //don't want to resent every event
+	    gemcdata.resetFields = false;
 	}
     }
     

@@ -5,12 +5,10 @@ import java.util.Vector;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.SwimTrajectory2D;
 import cnuphys.swim.Swimming;
 
 import com.jogamp.opengl.GLAutoDrawable;

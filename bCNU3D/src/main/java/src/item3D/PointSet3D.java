@@ -19,10 +19,10 @@ public class PointSet3D extends Item3D {
     private float _pointSize;
     
     /**
-     * Create a simple 3D Line item for use on a Panel3D.
+     * Create a set of same color and size points for use on a Panel3D.
      * @param panel3D the owner 3D panel
      * @param coords the points as [x1, y1, z1, ..., xn, yn, zn]
-     * @param color the color
+     * @param color the color of the points
      * @param pointSize the drawing size of the points
      */
     public PointSet3D(Panel3D panel3D, float[] coords, Color color, float pointSize) {

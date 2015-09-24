@@ -1,8 +1,6 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.List;
-
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
@@ -20,10 +18,6 @@ import org.jlab.geom.prim.Point3D;
  */
 public class CNDGeometry {
     
-    //initialized?
-    private static boolean inited = false;
-
-
     private static ConstantProvider cndDataProvider;
 
     private static CNDFactory cndFactory;
@@ -44,13 +38,13 @@ public class CNDGeometry {
     
 
     /**
-     * Initialize the DC Geometry by loading all the wires
+     * Initialize the CND Geometry by loading all the wires
      */
     public static void initialize() {
 
-	System.out.println("\n=======================================");
-	System.out.println("==== CND Geometry Inititialization ====");
-	System.out.println("=======================================");
+	System.out.println("\n=====================================");
+	System.out.println("==== CND Geometry Initialization ====");
+	System.out.println("=====================================");
 
 	cndDataProvider = DataBaseLoader.getConstantsCND();
 
@@ -88,7 +82,7 @@ public class CNDGeometry {
     
     /**
      * Used by the 3D drawing
-     * @param layer the 1-based sector 1..3
+     * @param layer the 1-based layer 1..3
      * @param paddleId the 1-based paddle 1..48
      * @param coords holds 8*3 = 24 values [x1, y1, z1, ..., x8, y8, z8]
      */
@@ -113,10 +107,14 @@ public class CNDGeometry {
      * Obtain the paddle xy corners for 2D view
      * @param layer the layer 1..3
      * @param paddleId the paddle ID 1..48
-     * @param wp the four corners (cm)
+     * @param wp the four XY corners (cm)
      */
     public static void paddleXYCorners(int layer, int paddleId, Point2D.Double[] wp) {
 	ScintillatorPaddle paddle = getPaddle(layer, paddleId);
+	if (paddle == null) {
+	    return;
+	}
+	
 	for (int i = 0; i < 4; i++) {
 	    Point3D p3d = new Point3D(paddle.getVolumePoint(i));
 	    wp[i].x = p3d.x();
@@ -124,6 +122,31 @@ public class CNDGeometry {
 	}
     }
 
+    /**
+     * Obtain the paddle 3D corners. Order: <br>
+     * 0: xmin, ymin, zmax <br>
+     * 1: xmax, ymin, zmax <br>
+     * 2: xmax, ymax, zmax <br>
+     * 3: xmin, ymax, zmax <br>
+     * 4: xmin, ymin, zmin <br>
+     * 5: xmax, ymin, zmin <br>
+     * 6: xmax, ymax, zmin <br>
+     * 7: xmin, ymax, zmin <br>
+     * @param layer the layer 1..3
+     * @param paddleId the paddle ID 1..48
+     * @param corners the eight XYZ corners (cm)
+     */
+    public static void paddle3DCorners(int layer, int paddleId, Point3D corners[]) {
+	ScintillatorPaddle paddle = getPaddle(layer, paddleId);
+	if (paddle == null) {
+	    return;
+	}
+	
+	for (int i = 0; i < 8; i++) {
+	    corners[i] = paddle.getVolumePoint(i);
+	}
+	
+    }
     
     
     public static void main(String arg[]) {

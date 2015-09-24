@@ -16,7 +16,6 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DCDataContainer;
-import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.item.HexSectorItem;
 
 public class CrossDrawer extends DCXYViewDrawer {

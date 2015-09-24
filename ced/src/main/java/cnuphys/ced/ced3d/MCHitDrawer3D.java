@@ -4,19 +4,10 @@ import java.awt.Color;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
-import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.ECDataContainer;
-import cnuphys.ced.event.data.FTOFDataContainer;
-import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
-
 import com.jogamp.opengl.GLAutoDrawable;
 
 import item3D.Item3D;
