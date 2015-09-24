@@ -3,9 +3,10 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 
 import bCNU3D.Panel3D;
+import bCNU3D.Support3D;
+import cnuphys.ced.event.data.FTOFDataContainer;
 import cnuphys.lund.X11Colors;
 
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class FTOF3D extends DetectorItem3D {
@@ -69,13 +70,37 @@ public class FTOF3D extends DetectorItem3D {
 
     @Override
     public void drawData(GLAutoDrawable drawable) {
-	// children panels handle it
+	FTOFDataContainer ftofData = _eventManager.getFTOFData();
+
+	int sector[] = ftofData.ftofrec_ftofhits_sector;
+	if (sector == null) {
+	    return;
+	}
+	float recX[] = ftofData.ftofrec_ftofhits_x;
+	float recY[] = ftofData.ftofrec_ftofhits_y;
+	float recZ[] = ftofData.ftofrec_ftofhits_z;
+
+	int numHits = sector.length;
+//	System.err.println("FTOF DRAWDATA NUM HITS: " + numHits);
+	
+	float xyz[] = new float[3];
+	for (int i = 0; i < numHits; i++) {
+	    if (_sector == sector[i]) {
+		xyz[0] = recX[i];
+		xyz[1] = recY[i];
+		xyz[2] = recZ[i];
+		
+	//	Support3D.drawPoints(drawable, xyz, Color.cyan, Color.black, 10);
+		
+		Support3D.drawSprite(drawable, Sprites.getInstance().getGreenOn(), xyz[0], xyz[1], xyz[2], 16);
+	    }
+	}
     }
 
     // show FTOFs?
     @Override
     protected boolean show() {
-	boolean showtof = ((ForwardPanel3D) _panel3D).show(ForwardPanel3D.SHOW_FTOF);
+	boolean showtof = ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_FTOF);
 	return showtof && showSector(_sector);
     }
 

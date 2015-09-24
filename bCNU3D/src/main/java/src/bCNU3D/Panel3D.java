@@ -2,6 +2,8 @@ package bCNU3D;
 
 import item3D.Axes3D;
 import item3D.Item3D;
+import item3D.PointSet3D;
+import item3D.SpriteSet;
 import item3D.Triangle3D;
 
 import java.awt.BorderLayout;
@@ -9,6 +11,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -25,15 +29,19 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES1;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 //import com.jogamp.opengl.util.FPSAnimator;
 
@@ -302,6 +310,9 @@ public class Panel3D extends JPanel implements GLEventListener {
 	gl.glEnable(GL2ES3.GL_COLOR);
 	gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_DONT_CARE);
 	gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
+	
+	gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+//	gl.glEnable(GL.GL_POINT_SIZE);
 
 	 //float pos[] = { 0.0f, 0.0f, -1000.0f, 0.0f };
 
@@ -514,6 +525,7 @@ public class Panel3D extends JPanel implements GLEventListener {
      * @param arg
      */
     public static void main(String arg[]) {
+	System.err.println("3D test (A)");
 	final JFrame testFrame = new JFrame("bCNU 3D Panel Test");
 
 	int n = 10000;
@@ -536,6 +548,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	final float thetay = 90f;
 	final float thetaz = 90f;
 
+	
 	Panel3D p3d = new Panel3D(thetax, thetay, thetaz, xdist, ydist, zdist) {
 	    @Override
 	    public void createInitialItems() {
@@ -569,6 +582,48 @@ public class Panel3D extends JPanel implements GLEventListener {
 		// Line3D.lineItemTest(this, num);
 
 		// Cube.cubeTest(this, 40000);
+		
+		//point set test
+		int numPnt = 100;
+		Color color = Color.orange;
+		float pntSize = 10;
+		float coords[] = new float[3*numPnt];
+		for (int i = 0; i < numPnt; i++) {
+		    int j = i*3;
+		    float x = (float)(-xymax + 2*xymax*Math.random());
+		    float y = (float)(-xymax + 2*xymax*Math.random());
+		    float z = (float)(zmin + (zmax-zmin)*Math.random());
+		    coords[j] = x;
+		    coords[j+1] = y;
+		    coords[j+2] = z;
+		}
+		addItem(new PointSet3D(this, coords, color, pntSize));
+		
+		//sprite test
+		try {
+		    String fn = "/Users/heddle/git/cnuphys/bCNU/src/main/resources/images/green-on-16.png";
+		   File file = new File(fn);
+		   System.err.println("files exists: " + file.exists());
+		float coords2[] = new float[3*numPnt];
+		   
+			for (int i = 0; i < numPnt; i++) {
+			    int j = i*3;
+			    float x = (float)(-xymax + 2*xymax*Math.random());
+			    float y = (float)(-xymax + 2*xymax*Math.random());
+			    float z = (float)(zmin + (zmax-zmin)*Math.random());
+			    coords2[j] = x;
+			    coords2[j+1] = y;
+			    coords2[j+2] = z;
+			}
+			addItem(new SpriteSet(this, coords2, file.toURL()));
+		    
+		} catch (GLException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		} catch (IOException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
 
 	    }
 
@@ -588,6 +643,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	};
 
 	testFrame.add(p3d, BorderLayout.CENTER);
+	System.err.println("3D test (B)");
 
 	// set up what to do if the window is closed
 	WindowAdapter windowAdapter = new WindowAdapter() {

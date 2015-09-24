@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -13,13 +12,11 @@ import javax.swing.JMenuItem;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
-import cnuphys.ced.component.PIDLegend;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.lund.SwimTrajectoryListener;

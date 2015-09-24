@@ -23,8 +23,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
 import cnuphys.ced.cedview.CedView;
@@ -35,10 +33,8 @@ import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BSTxyPanel;
-import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
-import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.FTOFPanelItem;
@@ -972,7 +968,7 @@ public class SectorView extends CedView implements ChangeListener {
      * the absolute value of phi.
      * 
      * @param absPhi
-     *            the value of phi in degress, e.g., from a MC track.
+     *            the value of phi in degrees, e.g., from a MC track.
      * @return the corresponding slider value;
      */
     private double getRelativePhi(double absPhi) {

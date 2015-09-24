@@ -15,7 +15,6 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.geometry.DCGeometry;
-import cnuphys.ced.geometry.GeometryManager;
 
 public class DCHexSectorItem extends HexSectorItem {
 

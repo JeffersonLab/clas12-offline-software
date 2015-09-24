@@ -1,6 +1,13 @@
 package cnuphys.ced.cedview.bst;
 
 import java.awt.BorderLayout;
+
+/**
+ * Note this view started out as just the XY view for the BST (SVT). But it has evolved into the xy view for 
+ * all central detectors. 
+ */
+
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -20,20 +27,17 @@ import java.util.Vector;
 import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
-import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.Histo2DData;
-import cnuphys.bCNU.util.Point2DSupport;
-import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
@@ -47,7 +51,7 @@ import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
-public class BSTxyView extends CedView {
+public class BSTxyView extends CedXYView {
 
     // Comments on the Geometry of the BST from Veronique
     // ------------------------------------
@@ -79,32 +83,20 @@ public class BSTxyView extends CedView {
     // corresponds to the z-direction.
     // Strip number 1 in Layer B is parallel to the bottom of the sensor.
 
-    // margins around active area
-    private static int LMARGIN = 50;
-    private static int TMARGIN = 20;
-    private static int RMARGIN = 20;
-    private static int BMARGIN = 50;
-
-    // line stroke
-    private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
-	    LineStyle.SOLID);
-    private static Stroke stroke2 = GraphicsUtilities.getStroke(3f,
-	    LineStyle.SOLID);
-
-    private static final Color TRANS1 = new Color(192, 192, 192, 128);
-    private static final Color TRANS2 = new Color(192, 192, 192, 64);
-    private static final Color LIGHT = new Color(240, 240, 240);
 
     private BSTxyPanel _closestPanel;
 
     private static Color _panelColors[] = { Color.black, Color.darkGray };
+    
+    //the CND xy polygons
+    CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
 
     // units are mm
-    private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-	    200., -200., -400., 400.);
-
 //    private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-//	    400., -400., -800., 800.);
+//	    200., -200., -400., 400.);
+
+    private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
+	    400., -400., -800., 800.);
     
     // used to draw swum trajectories (if any) in the after drawer
     private SwimTrajectoryDrawer _swimTrajectoryDrawer;
@@ -120,10 +112,6 @@ public class BSTxyView extends CedView {
     public BSTxyView(Object... keyVals) {
 	super(keyVals);
 
-	setBeforeDraw();
-	setAfterDraw();
-	addItems();
-
 	_crossDrawer = new CrossDrawerXY(this);
 
 	// draws any swum trajectories (in the after draw)
@@ -131,6 +119,13 @@ public class BSTxyView extends CedView {
 
 	// default properties
 	setBooleanProperty(DisplayArray.HITCROSS_PROPERTY, true);
+
+	//add the CND polys
+	for (int layer = 1; layer <= 3; layer++) {
+	    for (int paddleId = 1; paddleId <= 48; paddleId++) {
+		cndPoly[layer-1][paddleId-1] = new CNDXYPolygon(layer, paddleId);
+	    }
+	}
 
     }
 
@@ -170,7 +165,7 @@ public class BSTxyView extends CedView {
 			& ~BaseToolBar.CONTROLPANELBUTTON
 			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
 		AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-		AttributeType.TITLE, "SVT XY",
+		AttributeType.TITLE, "Central XY",
 		AttributeType.STANDARDVIEWDECORATIONS, true);
 
 	view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
@@ -181,13 +176,15 @@ public class BSTxyView extends CedView {
 
 	view.add(view._controlPanel, BorderLayout.EAST);
 	view.pack();
+	
 	return view;
     }
 
     /**
      * Create the view's before drawer.
      */
-    private void setBeforeDraw() {
+    @Override
+    protected void setBeforeDraw() {
 	// use a before-drawer to sector dividers and labels
 	IDrawable beforeDraw = new DrawableAdapter() {
 
@@ -217,7 +214,8 @@ public class BSTxyView extends CedView {
     /**
      * Set the view's after draw
      */
-    private void setAfterDraw() {
+    @Override
+    protected void setAfterDraw() {
 	IDrawable afterDraw = new DrawableAdapter() {
 
 	    @Override
@@ -236,7 +234,7 @@ public class BSTxyView extends CedView {
 
 		    _swimTrajectoryDrawer.draw(g, container);
 		    Rectangle screenRect = getActiveScreenRectangle(container);
-		    drawAxes(g, container, screenRect);
+		    drawAxes(g, container, screenRect, true);
 		}
 
 	    }
@@ -245,6 +243,7 @@ public class BSTxyView extends CedView {
 	getContainer().setAfterDraw(afterDraw);
     }
 
+    //draw cosmic ray tracks
     private void drawCosmicTracks(Graphics g, IContainer container) {
 
 	BSTDataContainer bstData = _eventManager.getBSTData();
@@ -309,16 +308,25 @@ public class BSTxyView extends CedView {
 	Rectangle sr = container.getInsetRectangle();
 	g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
+	//SVT panels
 	for (BSTxyPanel panel : panels) {
-	    drawPanel(g2, container, panel,
+	    drawSVTPanel(g2, container, panel,
 		    _panelColors[(panel.getSector()) % 2]);
+	}
+	
+	//CND Polys
+	for (int layer = 1; layer <= 3; layer++) {
+	    for (int paddleId = 1; paddleId <= 48; paddleId++) {
+		cndPoly[layer-1][paddleId-1].draw(g2, container);
+	    }
+	    
 	}
 
 	g.setClip(oldClip);
     }
 
-    // draw one panel
-    private void drawPanel(Graphics2D g2, IContainer container,
+    // draw one SVT panel
+    private void drawSVTPanel(Graphics2D g2, IContainer container,
 	    BSTxyPanel panel, Color color) {
 	Stroke oldStroke = g2.getStroke();
 	g2.setColor(color);
@@ -344,15 +352,15 @@ public class BSTxyView extends CedView {
 	Point pmid = new Point();
 	Point2D.Double wporig = new Point2D.Double();
 	container.worldToLocal(porig, wporig);
-	g2.setFont(Fonts.smallFont);
+	g2.setFont(Fonts.tinyFont);
 	FontMetrics fm = getFontMetrics(g2.getFont());
 
 	if ((panel.getLayer() % 2) == 0) {
-	    g2.setColor(Color.gray);
+	    g2.setColor(TEXT);
 	    pmid.x = (p1.x + p2.x) / 2;
 	    pmid.y = (p1.y + p2.y) / 2;
 	    String s = "" + panel.getSector();
-	    extendLine(porig, pmid, 10, fm.stringWidth(s), fm.getHeight());
+	    extendLine(porig, pmid, 4 + panel.getLayer()/2, fm.stringWidth(s), fm.getHeight());
 	    g2.drawString(s, pmid.x, pmid.y);
 	}
 
@@ -455,7 +463,7 @@ public class BSTxyView extends CedView {
 		BSTxyPanel panel = getPanel(bstData.bst_dgtz_layer[i],
 			bstData.bst_dgtz_sector[i]);
 		if (panel != null) {
-		    drawPanel(g2, container, panel, Color.red);
+		    drawSVTPanel(g2, container, panel, Color.red);
 		}
 	    } // for on hits
 
@@ -588,131 +596,14 @@ public class BSTxyView extends CedView {
 	g.drawLine(x - len, y, x + len, y);
 	g.drawLine(x, y - len, x, y + len);
     }
-
-    // draw the axes
-    private void drawAxes(Graphics g, IContainer container, Rectangle bounds) {
-	Rectangle sr = getActiveScreenRectangle(container);
-	// Rectangle sr = container.getInsetRectangle();
-
-	g.setFont(Fonts.mediumFont);
-	FontMetrics fm = container.getComponent().getFontMetrics(g.getFont());
-	int fh = fm.getAscent();
-
-	Rectangle2D.Double wr = new Rectangle2D.Double();
-	container.localToWorld(sr, wr);
-	Point2D.Double wp = new Point2D.Double();
-	Point pp = new Point();
-
-	g.setColor(Color.black);
-	g.drawRect(sr.x, sr.y, sr.width, sr.height);
-
-	// x values
-	double del = wr.width / 40.;
-	wp.y = wr.y;
-	int bottom = sr.y + sr.height;
-	for (int i = 1; i <= 40; i++) {
-	    wp.x = wr.x + del * i;
-	    container.worldToLocal(pp, wp);
-	    if ((i % 5) == 0) {
-		g.drawLine(pp.x, bottom, pp.x, bottom - 12);
-
-		String vs = valueString(wp.x);
-		int xs = pp.x - fm.stringWidth(vs) / 2;
-
-		g.drawString(vs, xs, bottom + fh + 1);
-
-	    } else {
-		g.drawLine(pp.x, bottom, pp.x, bottom - 5);
-	    }
-	}
-
-	del = wr.height / 40.;
-	wp.x = wr.x;
-	for (int i = 0; i <= 40; i++) {
-	    wp.y = wr.y + del * i;
-	    container.worldToLocal(pp, wp);
-	    if ((i % 5) == 0) {
-		g.drawLine(sr.x, pp.y, sr.x + 12, pp.y);
-		String vs = valueString(wp.y);
-		int xs = sr.x - fm.stringWidth(vs) - 1;
-
-		g.drawString(vs, xs, pp.y + fh / 2);
-	    } else {
-		g.drawLine(sr.x, pp.y, sr.x + 5, pp.y);
-	    }
-	}
-
-	// draw phi axis
-	Shape oldClip = g.getClip();
-	g.clipRect(sr.x, sr.y, sr.width, sr.height);
-	Point2D.Double wp2 = new Point2D.Double();
-	Point p2 = new Point();
-	g.setColor(LIGHT);
-	for (int i = 0; i < 3; i++) {
-	    double phi = Math.toRadians(i * 60);
-	    wp.x = 170 * Math.cos(phi);
-	    wp.y = 170 * Math.sin(phi);
-	    wp2.x = -wp.x;
-	    wp2.y = -wp.y;
-	    container.worldToLocal(pp, wp);
-	    container.worldToLocal(p2, wp2);
-	    g.drawLine(pp.x, pp.y, p2.x, p2.y);
-	}
-	g.setClip(oldClip);
-
-	// draw coordinate system
-
-	int left = sr.x + 25;
-	int right = left + 50;
-	bottom = sr.y + sr.height - 20;
-	int top = bottom - 50;
-	// g.setFont(labelFont);
-	// fm = getFontMetrics(labelFont);
-
-	Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top
-		- fm.getHeight() / 2 + 1, (right - left + fm.stringWidth("x")
-		+ fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
-
-	g.setColor(TRANS1);
-	g.fillRect(r.x, r.y, r.width, r.height);
-
-	g.setColor(X11Colors.getX11Color("dark red"));
-	g.drawLine(left, bottom, right, bottom);
-	g.drawLine(right, bottom, right, top);
-
-	g.drawString("y", right + 3, top + fm.getHeight() / 2 - 1);
-	g.drawString("x", left - fm.stringWidth("x") - 2,
-		bottom + fm.getHeight() / 2);
-
-    }
-
-    private String valueString(double val) {
-	if (Math.abs(val) < 1.0e-3) {
-	    return "0";
-	}
-	if (Math.abs(val) < 1.0) {
-	    return DoubleFormat.doubleFormat(val, 1);
-	} else {
-	    return "" + (int) Math.round(val);
-	}
-    }
-
-    private Rectangle getActiveScreenRectangle(IContainer container) {
-	return container.getInsetRectangle();
-    }
-
+    
     /**
      * This adds the detector items. The AllDC view is not faithful to geometry.
      * All we really uses in the number of superlayers, number of layers, and
      * number of wires.
      */
-    private void addItems() {
-    }
-
     @Override
-    public int getSector(IContainer container, Point screenPoint,
-	    Point2D.Double worldPoint) {
-	return 0;
+    protected void addItems() {
     }
 
     /**
@@ -730,15 +621,8 @@ public class BSTxyView extends CedView {
     public void getFeedbackStrings(IContainer container, Point screenPoint,
 	    Point2D.Double worldPoint, List<String> feedbackStrings) {
 
-	// get the common information
-	super.getFeedbackStrings(container, screenPoint, worldPoint,
-		feedbackStrings);
-
-	Rectangle sr = getActiveScreenRectangle(container);
-	if (!sr.contains(screenPoint)) {
-	    return;
-	}
-
+	basicFeedback(container, screenPoint, worldPoint,  "mm", feedbackStrings);
+	
 	if (!Environment.getInstance().isDragging()) {
 	    BSTxyPanel newClosest = getClosest(worldPoint);
 	    if (newClosest != _closestPanel) {
@@ -747,20 +631,41 @@ public class BSTxyView extends CedView {
 	    }
 	}
 
-	fbString("yellow", "xy " + Point2DSupport.toString(worldPoint) + " mm",
-		feedbackStrings);
-	double phi = Math.toDegrees(Math.atan2(worldPoint.y, worldPoint.x));
-	fbString("yellow", "phi " + DoubleFormat.doubleFormat(phi, 2)
-		+ UnicodeSupport.DEGREE, feedbackStrings);
 
 	if (_closestPanel != null) {
 	    int region = (_closestPanel.getLayer() + 1) / 2;
-	    fbString("red", "layer " + _closestPanel.getLayer(),
+	    fbString("red", "svt layer " + _closestPanel.getLayer(),
 		    feedbackStrings);
-	    fbString("red", "region " + region, feedbackStrings);
-	    fbString("red", "sector " + _closestPanel.getSector(),
+	    fbString("red", "svt region " + region, feedbackStrings);
+	    fbString("red", "svt sector " + _closestPanel.getSector(),
 		    feedbackStrings);
+	}
+	else {
+	    double rad = Math.hypot(worldPoint.x, worldPoint.y);
+	    boolean found = false;
 
+	    // cnd ?
+	    if ((rad > 288) && (rad < 382)) {
+
+		for (int layer = 1; layer <= 3; layer++) {
+		    for (int paddleId = 1; paddleId <= 48; paddleId++) {
+
+			found = cndPoly[layer - 1][paddleId - 1]
+				.getFeedbackStrings(container, screenPoint,
+					worldPoint, feedbackStrings);
+
+			if (found) {
+			    break;
+			}
+		    }
+
+		    if (found) {
+			break;
+		    }
+
+		}
+	    }
+	   
 	}
 
 	// hits data
@@ -870,11 +775,6 @@ public class BSTxyView extends CedView {
 
 	} // end for loop
 
-    }
-
-    // convenience method to create a feedback string
-    private void fbString(String color, String str, List<String> fbstrs) {
-	fbstrs.add("$" + color + "$" + str);
     }
 
     /**

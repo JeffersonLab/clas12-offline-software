@@ -1,6 +1,5 @@
 package cnuphys.ced.frame;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -31,6 +30,7 @@ import org.jlab.data.io.DataEvent;
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.ced.ced3d.CentralView3D;
+import cnuphys.ced.ced3d.FTCalView3D;
 import cnuphys.ced.ced3d.ForwardView3D;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
@@ -38,6 +38,7 @@ import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
+import cnuphys.ced.cedview.ft.FTCalXYView;
 import cnuphys.ced.cedview.gemcview.GEMCView;
 import cnuphys.ced.cedview.sectorview.DisplaySectors;
 import cnuphys.ced.cedview.sectorview.SectorView;
@@ -86,7 +87,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private static final int majorRelease = 0;
 
     // subversion
-    private static final int minorRelease = 8;
+    private static final int minorRelease = 9;
 
     // used for one time inits
     private int _firstTime = 0;
@@ -120,6 +121,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private GEMCView _gemcView;
     private BSTxyView _bstXyView;
     private BSTzView _bstZView;
+    private FTCalXYView _ftcalXyView;
     private DCXYView _dcXyView;
     private ECView _ecView;
     private PCALView _pcalView;
@@ -129,6 +131,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private PlotView _plotView;
     private ForwardView3D _forward3DView;
     private CentralView3D _central3DView;
+    private FTCalView3D _ftCal3DView;
 
     // the about string
     private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
@@ -191,18 +194,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	    _virtualView.moveTo(_pcalView, 0, 1, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_ecView, 0, 1, VirtualView.UPPERRIGHT);
-	    _virtualView.moveTo(_logView, 0, 6, VirtualView.UPPERRIGHT);
-	    _virtualView.moveTo(_shellView, 0, 6, VirtualView.BOTTOMLEFT);
-	    _virtualView.moveTo(_xmlView, 0, 6, VirtualView.BOTTOMRIGHT);
+	    _virtualView.moveTo(_logView, 0, 11, VirtualView.UPPERRIGHT);
+	    _virtualView.moveTo(_shellView, 0, 11, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_xmlView, 0, 11, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_monteCarloView, 0, 0, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_reconEventView, 0, 0, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_plotView, 0, 0, VirtualView.BOTTOMLEFT);
+	    
+	    _virtualView.moveTo(_ftcalXyView, 0, 8, VirtualView.BOTTOMLEFT);
+
 
 	    if (_use3D) {
-		_virtualView.moveTo(_forward3DView, 0, 7,
-			VirtualView.BOTTOMRIGHT);
+		_virtualView.moveTo(_forward3DView, 0, 6,
+			VirtualView.CENTER);
 		_virtualView.moveTo(_central3DView, 0, 7,
-			VirtualView.BOTTOMLEFT);
+			VirtualView.CENTER);
+		_virtualView.moveTo(_ftCal3DView, 0, 8,
+			VirtualView.BOTTOMRIGHT);
 	    }
 	    Log.getInstance().config("reset views on virtual dekstop");
 	}
@@ -226,7 +234,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	AccumulationManager.getInstance();
 
 	// add a virtual view
-	_virtualView = VirtualView.createVirtualView();
+	_virtualView = VirtualView.createVirtualView(12);
 	ViewManager.getInstance().getViewMenu().addSeparator();
 
 	// add GEMC data view
@@ -251,6 +259,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add a bstXYView
 	_bstXyView = BSTxyView.createBSTxyView();
+	
+	// add a ftcalxyYView
+	_ftcalXyView = FTCalXYView.createFTCalXYView();
+
 
 	// add a DC XY View
 	_dcXyView = DCXYView.createDCXYView();
@@ -265,6 +277,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	if (_use3D) {
 	    _forward3DView = new ForwardView3D();
 	    _central3DView = new CentralView3D();
+	    _ftCal3DView = new FTCalView3D();
 	}
 
 	// add three sector views

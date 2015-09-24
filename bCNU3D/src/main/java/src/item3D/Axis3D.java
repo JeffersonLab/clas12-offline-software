@@ -34,6 +34,9 @@ public class Axis3D extends Line3D {
     private float _del;
     private float _vals[];
  
+    //offset to shift axis (hack)
+    private float _offset;
+    
     /** possible types of axes */
     public enum AxisType {
 	X_AXIS, Y_AXIS, Z_AXIS
@@ -41,7 +44,7 @@ public class Axis3D extends Line3D {
 
     /** text renderer */
     private TextRenderer _renderer;
-
+    
     /**
      * Create a coordinate axis
      * @param panel3D the owner 3D panel
@@ -65,6 +68,33 @@ public class Axis3D extends Line3D {
      */
     public Axis3D(Panel3D panel3D, AxisType type, float vmin, float vmax, Color color,
 	    float lineWidth, int numTicks, Color tickColor, Color textColor, Font font, int numDec) {
+	this(panel3D, type, vmin, vmax, 0f, color, lineWidth, numTicks, tickColor, textColor, font, numDec);
+    }
+    
+
+    /**
+     * Create a coordinate axis
+     * @param panel3D the owner 3D panel
+     * 
+     * @param type
+     *            the type
+     * @param vmin
+     *            the minimum value
+     * @param vmax
+     *            the maximum value
+     * @param color
+     *            the color of the axes
+     * @param lineWidth
+     *            the line width
+     * @param numTicks
+     *            the number of ticks
+     * @param tickColor the color of the ticks
+     * @param textColor the text color
+     * @param font the text font
+     * @param numdec the number of decimals to display
+     */
+    public Axis3D(Panel3D panel3D, AxisType type, float vmin, float vmax, float offset, Color color,
+	    float lineWidth, int numTicks, Color tickColor, Color textColor, Font font, int numDec) {
 	super(panel3D, getEndpoints(type, vmin, vmax), color, lineWidth);
 	_type = type;
 	_numDec = numDec;
@@ -73,6 +103,8 @@ public class Axis3D extends Line3D {
 	
 	_valMin = vmin;
 	_valMax = vmax;
+	
+	_offset = offset;
 	if (numTicks > 1) {
 	    _del = (vmax - vmin) / (numTicks - 1);
 	    addMajorTicks(color, tickColor, lineWidth);
@@ -97,34 +129,6 @@ public class Axis3D extends Line3D {
 	}
 	
 	Panel3D p3d = getPanel3D();
-
-//	//points as ticks
-//	float coords[] = new float[3 * _numTick];
-//	for (int i = 0; i < _numTick; i++) {
-//	    int j = i * 3;
-//
-//	    switch (_type) {
-//	    case X_AXIS:
-//		coords[j] = _vals[i];
-//		coords[j+1] = 0f;
-//		coords[j+2] = 0f;
-//		break;
-//
-//	    case Y_AXIS:
-//		coords[j] = 0f;
-//		coords[j+1] = _vals[i];
-//		coords[j+2] = 0f;
-//		break;
-//
-//	    case Z_AXIS:
-//		coords[j] = 0f;
-//		coords[j+1] = 0f;
-//		coords[j+2] = _vals[i];
-//		break;
-//	    }
-//	    
-//	    addChild(new PointSet3D(p3d, coords, tickColor, 4f));
-//	}
 	
 	//crosses at ticks
 	for (int i = 0; i < _numTick; i++) {
@@ -133,7 +137,7 @@ public class Axis3D extends Line3D {
 	    _lines2[i] = null;
 	    
 	    if (Math.abs(_vals[i]) > 1.0e-4) {
-
+		
 		switch (_type) {
 		case X_AXIS:
 		    _lines1[i] = new Line3D(p3d, _vals[i], _tickLen, 0, _vals[i], -_tickLen, 0,
@@ -201,9 +205,6 @@ public class Axis3D extends Line3D {
 	double extLen = Math.abs(Math.max(getX1(), Math.max(getY1(), getZ1())))/10;
 	extendedPoint(1, (float) extLen, extend);
 	
-//	System.err.println("extend: " + extend[0]+ ", " +  extend[1] + ", " + extend[2]);
-//	System.err.println("p1: " + getX1()+ ", " +  getY1() + ", " + getZ1());
-	
 	_panel3D.project(gl, extend[0], extend[1], extend[2], winPos);
 //	_panel3D.project(gl, getX1(), getY1(), getZ1(), winPos);
 	int x = (int)winPos[0] + 4;
@@ -214,24 +215,13 @@ public class Axis3D extends Line3D {
 	_renderer.draw(s, x, y);
 	_renderer.endRendering();
 	
-	
-//	extLen = Math.abs(Math.max(getX0(), Math.max(getY0(), getZ0())))/10;
-//	extendedPoint(0, (float) extLen, extend);
-//	_panel3D.project(gl, extend[0], extend[1], extend[2], winPos);
-//	x = (int)winPos[0] + 4;
-//	y = (int)winPos[1] - (fm.getHeight() + 4);
-//	
-//	_renderer.beginRendering(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
-//	_renderer.setColor(getTextColor());
-//	_renderer.draw("-"+s, x, y);
-//	_renderer.endRendering();
 
 	// axis values
 	if (_numDec >= 0) {
 	    for (int i = 0; i < _numTick; i++) {
 
 		if (_lines1[i] != null) {
-		    s = DoubleFormat.doubleFormat(_vals[i], _numDec);
+		    s = DoubleFormat.doubleFormat(_vals[i] + _offset, _numDec);
 		    _panel3D.project(gl, _lines1[i].getX1(),
 			    _lines1[i].getY1(), _lines1[i].getZ1(), winPos);
 		    x = (int) winPos[0] + 4;

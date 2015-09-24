@@ -46,9 +46,9 @@ public class DCGeometry {
      */
     public static void initialize() {
 
-	System.out.println("\n=======================================");
-	System.out.println("====  DC Geometry Inititialization ====");
-	System.out.println("=======================================");
+	System.out.println("\n=====================================");
+	System.out.println("====  DC Geometry Initialization ====");
+	System.out.println("=====================================");
 
 	dcDataProvider = DataBaseLoader.getDriftChamberConstants();
 
@@ -462,16 +462,62 @@ public class DCGeometry {
      *            the transformation to the constant phi
      * @return the approximate center of the projected hexagon
      */
-    public static Point2D.Double getCenter(int superlayer, int layer, int w,
+    public static Point2D.Double getCenter(int superlayer, int layer, int wire,
 	    Transformation3D transform3D) {
+	
 	Point2D.Double wpoly[] = GeometryManager.allocate(6);
 	Point2D.Double centroid = new Point2D.Double();
 
-	List<Line3D> lines = getHexagon(superlayer, layer, w, transform3D);
+	List<Line3D> lines = getHexagon(superlayer, layer, wire, transform3D);
 	int size = worldPolygon(lines, wpoly, centroid);
 	
 	return (size != 6) ? null: centroid;
     }
+    
+    /**
+     * Get the position of the sense wire in sector 0
+     * 
+     * NOTE: the indices are 1-based
+     * 
+     * @param superlayer
+     *            the superlayer [1..6]
+     * @param layer
+     *            the layer [1..6]
+     * @param wire
+     *            the wire [1..112]
+     * @param phi the relative phi (degrees)
+     *            
+     * @return the position of the sense wire
+     */
+    public static Point2D.Double getCenter(int superlayer, int layer, int wire,
+	    double phi) {
+	
+	double tanPhi = Math.tan(Math.toRadians(phi));
+	DriftChamberWire dcw = wires[superlayer - 1][layer - 1][wire - 1];
+	Line3D line3D = dcw.getLine();
+	double x0 = line3D.origin().x();
+	double y0 = line3D.origin().y();
+	double z0 = line3D.origin().z();
+	double x1 = line3D.end().x();
+	double y1 = line3D.end().y();
+	double z1 = line3D.end().z();
+	double dx = x1 - x0;
+	double dy = y1 - y0;
+	double dz = z1 - z0;
+	double t = (x0*tanPhi-y0)/(dy - dx*tanPhi);
+	
+	double x = x0 + t*dx;
+	double y = y0 + t*dy;
+	double z = z0 + t*dz;
+
+	Point2D.Double centroid = new Point2D.Double();
+
+	centroid.x = z;
+	centroid.y = Math.hypot(x, y);
+	return centroid;
+	
+    }
+
 
     /**
      * Get a point on either side of a layer

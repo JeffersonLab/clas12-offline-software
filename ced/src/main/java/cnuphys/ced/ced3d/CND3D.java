@@ -45,7 +45,7 @@ public class CND3D extends DetectorItem3D {
 
     @Override
     protected boolean show() {
-	return ((CentralPanel3D) _panel3D).show(CentralPanel3D.SHOW_CND);
+	return ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_CND);
     }
 
 }

@@ -356,9 +356,9 @@ public class PCALGeometry {
      */
     public static void initialize() {
 
-	System.out.println("\n=======================================");
-	System.out.println("===  PCAL Geometry Inititialization ===");
-	System.out.println("=======================================");
+	System.out.println("\n=====================================");
+	System.out.println("===  PCAL Geometry Initialization ===");
+	System.out.println("=====================================");
 
 	// obtain the transformations
 	_transformations = new Transformations(DetectorType.PCAL);

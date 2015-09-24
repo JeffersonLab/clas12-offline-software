@@ -1,8 +1,6 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.Color;
-import java.awt.Point;
-
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.BSTDataContainer;
@@ -66,16 +64,22 @@ public class SVTPanel3D extends DetectorItem3D {
 
 		if (showMCTruth() && (pid != null)) {
 		    Color color = truthColor(pid, i);
+
+		    if (showHits()) {
 		    Support3D.drawLine(drawable, coords6, color, 2f);
+		    }
 		    double xcm = bstData.bst_true_avgX[i] / 10;
 		    double ycm = bstData.bst_true_avgY[i] / 10;
 		    double zcm = bstData.bst_true_avgZ[i] / 10;
 
 		    drawMCPoint(drawable, xcm, ycm, zcm, color);
 
-		} else {
+		} // mc truth
+		else {
+		    if (showHits()) {
 		    Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
 		}
+	    }
 	    }
 	} //hitcount
 	
@@ -158,6 +162,7 @@ public class SVTPanel3D extends DetectorItem3D {
     }
 
     // show SVT?
+    @Override
     protected boolean show() {
 	boolean showme = ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_SVT);
 
@@ -191,6 +196,11 @@ public class SVTPanel3D extends DetectorItem3D {
 	}
 	
 	return showme;
+    }
+    
+    //show strip hits?
+    protected boolean showHits() {
+	return ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_SVT_HITS);
     }
 
 }

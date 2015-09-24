@@ -1,6 +1,5 @@
 package cnuphys.ced.geometry;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import org.jlab.clasrec.utils.DataBaseLoader;
@@ -49,9 +48,9 @@ public class BSTGeometry {
      */
     public static void initialize() {
 
-	System.out.println("\n=======================================");
-	System.out.println("===  SVT Geometry Inititialization  ===");
-	System.out.println("=======================================");
+	System.out.println("\n=====================================");
+	System.out.println("===  SVT Geometry Initialization  ===");
+	System.out.println("=====================================");
 
 	// create a ring layer
 	_bstLayer0 = bstFactory.createRingLayer(bstDataProvider, 0, 0, 0);

@@ -43,15 +43,15 @@ public class CNDLayer3D extends DetectorItem3D {
 	switch (_layer) {
 	case 1:
 	    return ((CentralPanel3D) _panel3D)
-		    .show(CentralPanel3D.SHOW_CND_LAYER_1);
+		    .show(CedPanel3D.SHOW_CND_LAYER_1);
 
 	case 2:
 	    return ((CentralPanel3D) _panel3D)
-		    .show(CentralPanel3D.SHOW_CND_LAYER_2);
+		    .show(CedPanel3D.SHOW_CND_LAYER_2);
 
 	case 3:
 	    return ((CentralPanel3D) _panel3D)
-		    .show(CentralPanel3D.SHOW_CND_LAYER_3);
+		    .show(CedPanel3D.SHOW_CND_LAYER_3);
 	}
 	return false;
     }
