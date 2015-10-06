@@ -1,5 +1,7 @@
 package cnuphys.bCNU.graphics.toolbar;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
@@ -26,6 +28,10 @@ public class CommonToolBar extends JToolBar {
 
     // the default button
     private JToggleButton _defaultToggleButton;
+    
+    //action listener for toggle buttons
+    private ActionListener _toggleActionListener;
+
 
     /**
      * Creates a new tool bar; orientation defaults to <code>HORIZONTAL</code>.
@@ -81,6 +87,12 @@ public class CommonToolBar extends JToolBar {
 	    add(toggleButton, true);
 	}
     }
+    
+    /** 
+     * The active toggle button has changed
+     */
+    protected void activeToggleButtonChanged() {
+    }
 
     /**
      * Add a toggle button to the toolbar.
@@ -102,7 +114,20 @@ public class CommonToolBar extends JToolBar {
 	    if (_buttonGroup == null) {
 		_buttonGroup = new ButtonGroup();
 	    }
+	    
+	    if (_toggleActionListener == null) {
+		_toggleActionListener = new ActionListener() {
+
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+			activeToggleButtonChanged();
+		    }
+		    
+		};
+	    }
 	    _buttonGroup.add(toggleButton);
+	    toggleButton.addActionListener(_toggleActionListener);
+	    
 	}
     }
 

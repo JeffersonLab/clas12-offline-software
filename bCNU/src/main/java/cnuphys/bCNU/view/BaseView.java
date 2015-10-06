@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -26,6 +27,7 @@ import javax.swing.WindowConstants;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.attributes.Attributes;
+import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -692,6 +694,13 @@ public class BaseView extends JInternalFrame {
 	    return getToolBar().getUserComponent();
 	}
 	return null;
+    }
+    
+    /**
+     * Handle a mgnificaction
+     */
+    public void handleMagnify(MouseEvent me) {
+	MagnifyWindow.magnify(this, me, null);
     }
 
 }

@@ -283,6 +283,7 @@ public class BaseContainer extends JComponent implements IContainer,
 	osg.dispose();
 	g.drawImage(_offscreenBuffer, 0, 0, this);
     }
+    
 
     /**
      * Add a layer for containing items rendered on this container..
@@ -1243,7 +1244,7 @@ public class BaseContainer extends JComponent implements IContainer,
     public Component getComponent() {
 	return this;
     }
-
+    
     /**
      * Set the after-draw drawable for this container.
      * 
@@ -1492,6 +1493,15 @@ public class BaseContainer extends JComponent implements IContainer,
     public Rectangle2D.Double getWorldSystem() {
 	return _worldSystem;
     }
+    
+    /**
+     * Set the world system (does not cause redraw)
+     * @param wr the new world system
+     */
+    public void setWorldSystem(Rectangle2D.Double wr) {
+	_worldSystem = new Rectangle2D.Double(wr.x, wr.y, wr.width, wr.height);
+    }
+
 
     // Get the transforms for world to local and vice versa
     protected void setAffineTransforms() {

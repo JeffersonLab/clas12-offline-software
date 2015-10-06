@@ -423,6 +423,7 @@ public interface IContainer {
      * @return the underlying component
      */
     public Component getComponent();
+    
 
     /**
      * Get the background image.
@@ -554,6 +555,12 @@ public interface IContainer {
      * @return the world system
      */
     public Rectangle2D.Double getWorldSystem();
+    
+    /**
+     * Set the world system (does not cause redraw)
+     * @param wr the new world system
+     */
+    public void setWorldSystem(Rectangle2D.Double wr);
 
     /**
      * Obtain the inset rectangle. Insets are the inert region around the
