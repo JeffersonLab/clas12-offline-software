@@ -14,6 +14,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 
+import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.lasso.FunnelLassoRectButton;
@@ -27,8 +28,8 @@ import cnuphys.bCNU.util.Fonts;
  * 
  */
 @SuppressWarnings("serial")
-public class BaseToolBar extends CommonToolBar implements MouseListener,
-	MouseMotionListener {
+public class BaseToolBar extends CommonToolBar
+	implements MouseListener, MouseMotionListener {
 
     public static final int ELLIPSEBUTTON = 01;
     public static final int TEXTBUTTON = 02;
@@ -42,6 +43,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     public static final int CONTROLPANELBUTTON = 01000; // toggle control panel
     public static final int RADARCBUTTON = 02000;
     public static final int POLYLINEBUTTON = 04000;
+    public static final int MAGNIFYBUTTON = 010000;
 
     // public static final int REFRESHBUTTON = 020000;
     // public static final int UNDOZOOMBUTTON = 040000;
@@ -107,6 +109,9 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     // rubber-band zoom
     private BoxZoomButton _boxZoomButton;
 
+    // magnifying glass
+    private MagnifyButton _magnifyButton;
+
     // center the view
     private CenterButton _centerButton;
 
@@ -154,14 +159,13 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 
     // user component
     private UserToolBarComponent _userComponent;
-
+    
     private boolean notNothing;
 
     /**
      * Create a toolbar with all the buttons.
      * 
-     * @param container
-     *            the container this toolbar controls.
+     * @param container the container this toolbar controls.
      */
     public BaseToolBar(IContainer container) {
 	this(container, EVERYTHING);
@@ -170,10 +174,8 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Create a tool bar.
      * 
-     * @param container
-     *            the container this toolbar controls.
-     * @param bits
-     *            controls which tools are added.
+     * @param container the container this toolbar controls.
+     * @param bits controls which tools are added.
      */
     public BaseToolBar(IContainer container, int bits) {
 	// box layout needed for user component to work
@@ -191,8 +193,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Makes all the buttons.
      * 
-     * @param bits
-     *            Bitwise test of which annotation buttons to add.
+     * @param bits Bitwise test of which annotation buttons to add.
      */
     protected void makeButtons(int bits) {
 	if (notNothing && !Bits.checkBit(bits, NOCAMERABUTTON)) {
@@ -216,6 +217,10 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 
 	if (notNothing && Bits.checkBit(bits, RANGEBUTTON)) {
 	    _rangeButton = new RangeButton(_container);
+	}
+
+	if (notNothing && Bits.checkBit(bits, MAGNIFYBUTTON)) {
+	    _magnifyButton = new MagnifyButton(_container);
 	}
 
 	// if (Bits.checkBit(bits, POINTERBUTTON)) {
@@ -275,6 +280,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 	add(_zoomOutButton);
 	add(_undoZoomButton);
 	add(_panButton);
+	add(_magnifyButton);
 	add(_centerButton);
 	add(_worldButton);
 	add(_rangeButton);
@@ -337,8 +343,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Sets the text in the text field widget.
      * 
-     * @param text
-     *            the new text.
+     * @param text the new text.
      */
     public void setText(String text) {
 	if (_textField == null) {
@@ -347,7 +352,8 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 
 	if (text == null) {
 	    _textField.setText("");
-	} else {
+	}
+	else {
 	    _textField.setText(text);
 	}
     }
@@ -355,8 +361,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Enable/disable the drawing buttons
      * 
-     * @param enabled
-     *            the desired stated.
+     * @param enabled the desired stated.
      */
     public void enableDrawingButtons(boolean enabled) {
 	if (_ellipseButton != null) {
@@ -403,6 +408,15 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
      */
     public BoxZoomButton getBoxZoomButton() {
 	return _boxZoomButton;
+    }
+
+    /**
+     * Get the button used for magnification.
+     * 
+     * @return the button used for magnification.
+     */
+    public MagnifyButton getMagnifyButton() {
+	return _magnifyButton;
     }
 
     /**
@@ -599,8 +613,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
      * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
      * was not moved between press and release.
      * 
-     * @param mouseEvent
-     *            the causal event.
+     * @param mouseEvent the causal event.
      */
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
@@ -618,16 +631,18 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 	boolean mb1 = (mouseEvent.getButton() == MouseEvent.BUTTON1)
 		&& !mouseEvent.isControlDown();
 	boolean mb3 = (mouseEvent.getButton() == MouseEvent.BUTTON3)
-		|| ((mouseEvent.getButton() == MouseEvent.BUTTON1) && mouseEvent
-			.isControlDown());
+		|| ((mouseEvent.getButton() == MouseEvent.BUTTON1)
+			&& mouseEvent.isControlDown());
 
 	if (mb1) {
 	    if (mouseEvent.getClickCount() == 1) { // single click
 		mtb.mouseClicked(mouseEvent);
-	    } else { // double (or more) clicks
+	    }
+	    else { // double (or more) clicks
 		mtb.mouseDoubleClicked(mouseEvent);
 	    }
-	} else if (mb3) {
+	}
+	else if (mb3) {
 	    mtb.mouseButton3Click(mouseEvent);
 	}
 
@@ -636,8 +651,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * The mouse has entered the container.
      * 
-     * @param mouseEvent
-     *            the causal event.
+     * @param mouseEvent the causal event.
      */
     @Override
     public void mouseEntered(MouseEvent mouseEvent) {
@@ -645,17 +659,24 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 	ToolBarToggleButton mtb = getActiveButton();
 	if (mtb != null) {
 	    _container.getComponent().setCursor(mtb.canvasCursor());
+	    mtb.mouseEntered(mouseEvent);
 	}
     }
 
     /**
      * The mouse has exited the container.
      * 
-     * @param me
-     *            the causal event.
+     * @param mouseEvent the causal event.
      */
     @Override
-    public void mouseExited(MouseEvent me) {
+    public void mouseExited(MouseEvent mouseEvent) {
+	ToolBarToggleButton mtb = getActiveButton();
+
+	if (mtb == null) {
+	    return;
+	}
+
+	mtb.mouseExited(mouseEvent);
     }
 
     /**
@@ -663,8 +684,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
      * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
      * was not moved between press and release.
      * 
-     * @param me
-     *            the causal event.
+     * @param me the causal event.
      */
     @Override
     public void mousePressed(MouseEvent me) {
@@ -702,8 +722,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
      * was not moved between press and release. Also, the RELEASED will come
      * even if the mouse was dragged off the container.
      * 
-     * @param me
-     *            the causal event.
+     * @param me the causal event.
      */
     @Override
     public void mouseReleased(MouseEvent me) {
@@ -730,8 +749,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 
     /**
      * 
-     * @param mouseEvent
-     *            the causal event.
+     * @param mouseEvent the causal event.
      */
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
@@ -752,11 +770,17 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
      * The mouse has moved. Note will not come here if mouse button pressed,
      * will go to DRAG instead.
      * 
-     * @param me
-     *            the causal event.
+     * @param me the causal event.
      */
     @Override
     public void mouseMoved(MouseEvent me) {
+	ToolBarToggleButton mtb = getActiveButton();
+
+	if (mtb == null) {
+	    return;
+	}
+
+	mtb.mouseMoved(me);
     }
 
     /**
@@ -791,8 +815,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Set the drawable for the user component (if there is a user component).
      * 
-     * @param drawable
-     *            the drawable to use.
+     * @param drawable the drawable to use.
      */
     public void setUserComponentDrawable(IDrawable drawable) {
 	if (_userComponent != null) {
@@ -803,8 +826,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Add the lasso button
      * 
-     * @param lassoListener
-     *            will respond to the lasso selections
+     * @param lassoListener will respond to the lasso selections
      */
     public void addLassoButton(ILassoListener lassoListener) {
 	addLassoButton(lassoListener, false);
@@ -813,8 +835,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Add the funnellasso button
      * 
-     * @param lassoListener
-     *            will respond to the funnellasso selections
+     * @param lassoListener will respond to the funnellasso selections
      */
     public void addFunnelLassoButton(ILassoListener lassoListener) {
 	addFunnelLassoButton(lassoListener, false);
@@ -823,11 +844,9 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Add the lasso button
      * 
-     * @param lassoListener
-     *            will respond to the lasso selections
-     * @param xormode
-     *            will cause the lasso to rubberband in simpler xormode. This
-     *            works better for 3D containers.
+     * @param lassoListener will respond to the lasso selections
+     * @param xormode will cause the lasso to rubberband in simpler xormode.
+     *            This works better for 3D containers.
      */
     public void addLassoButton(ILassoListener lassoListener, boolean xormode) {
 	_lassoRectButton = new LassoRectButton(_container, lassoListener,
@@ -838,11 +857,9 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     /**
      * Add the funnellasso button
      * 
-     * @param lassoListener
-     *            will respond to the funnel lasso selections
-     * @param xormode
-     *            will cause the funnel lasso to rubberband in simpler xormode.
-     *            This works better for 3D containers.
+     * @param lassoListener will respond to the funnel lasso selections
+     * @param xormode will cause the funnel lasso to rubberband in simpler
+     *            xormode. This works better for 3D containers.
      */
     public void addFunnelLassoButton(ILassoListener lassoListener,
 	    boolean xormode) {
@@ -857,5 +874,15 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
     public JTextField getTextField() {
 	return _textField;
     }
+    
+    /** 
+     * The active toggle button has changed
+     */
+    protected void activeToggleButtonChanged() {
+	if (getActiveButton() != _magnifyButton) {
+	    MagnifyWindow.closeMagnifyWindow();
+	}
+    }
+
 
 }

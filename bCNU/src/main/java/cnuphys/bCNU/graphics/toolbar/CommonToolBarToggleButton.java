@@ -7,6 +7,12 @@ import javax.swing.JToggleButton;
 
 @SuppressWarnings("serial")
 public class CommonToolBarToggleButton extends JToggleButton {
+    
+    /** 
+     * The active toggle button has changed
+     */
+    protected void activeToggleButtonChanged() {
+    }
 
     /**
      * Handle a single click
@@ -72,7 +78,28 @@ public class CommonToolBarToggleButton extends JToggleButton {
     }
 
     /**
-     * Handle a mouse released (into the map canvas) event (if this tool is
+     * Handle a mouse exited  event (if this tool is
+     * active)
+     * 
+     * @param mouseEvent
+     *            the causal event
+     */
+    public void mouseExited(MouseEvent mouseEvent) {
+    }
+    
+    /**
+     * Handle a mouse entered  event (if this tool is
+     * active)
+     * 
+     * @param mouseEvent
+     *            the causal event
+     */
+    public void mouseEntered(MouseEvent mouseEvent) {
+    }
+
+    
+    /**
+     * Handle a mouse released event (if this tool is
      * active)
      * 
      * @param mouseEvent
@@ -80,6 +107,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
      */
     public void mouseReleased(MouseEvent mouseEvent) {
     }
+
 
     /**
      * Get the appropriate cursor for this tool.
