@@ -2,6 +2,8 @@ package cnuphys.bCNU.component;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.MouseInfo;
@@ -13,6 +15,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -40,13 +43,15 @@ public class MagnifyWindow extends JWindow {
 
 	// mouse location relative to container
 	private static Point _mouseLocation;
+	
+	private static Point _oldMouseLocation = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 	// the drawing component
 	private static JComponent _content;
 
-	// for offscreen drawing
-	//private BufferedImage _offscreenBuffer;
-
+	//for offscreen drawing
+	private static BufferedImage _offscreenBuffer;
+		
 	/**
 	 * Create a translucent window
 	 */
@@ -72,6 +77,7 @@ public class MagnifyWindow extends JWindow {
 		if (!(container instanceof BaseContainer)) {
 			return;
 		}
+
 		
 		Rectangle2D.Double saveWorld = container.getWorldSystem();
 		Rectangle2D.Double wr = new Rectangle2D.Double(saveWorld.x, saveWorld.y, saveWorld.width, saveWorld.height);
@@ -85,25 +91,38 @@ public class MagnifyWindow extends JWindow {
 		double ww = saveWorld.width/_MAGFACTOR;
 		double hh = saveWorld.height/_MAGFACTOR;
 		
-		
 		wr.setFrame(wp.x-ww/2, wp.y-hh/2, ww, hh);
 
+		synchronized(container.getWorldSystem()) {
 		container.setWorldSystem(wr);
 		container.setDirty(true);
 		
-		BufferedImage _offscreenBuffer = GraphicsUtilities.getComponentImageBuffer(container.getComponent());
-
+		Component component = container.getComponent();
+		Dimension size = component.getSize();
+		
+		if ((_offscreenBuffer == null) || 
+				(_offscreenBuffer.getWidth(this) < size.width) ||
+				(_offscreenBuffer.getHeight(this) < size.height)) {
+			 _offscreenBuffer = GraphicsUtilities.getComponentImageBuffer(component);
+		}
+		else {
+			System.err.println("reusing buffer");
+		}
+		
 		if (_offscreenBuffer != null) {
-			GraphicsUtilities.paintComponentOnImage(container.getComponent(), _offscreenBuffer);
-			
-			int sx = (b.x + b.width - _WIDTH)/2;
-			int sy = (b.y + b.height - _HEIGHT)/2;
-			g.drawImage(_offscreenBuffer, 0, 0, _WIDTH, _HEIGHT, sx, sy, sx+_WIDTH, sy+_HEIGHT, this);
+			int sx = (b.x + b.width - _WIDTH) / 2;
+			int sy = (b.y + b.height - _HEIGHT) / 2;
+			GraphicsUtilities.paintComponentOnImage(component, _offscreenBuffer);
+			g.drawImage(_offscreenBuffer, 0, 0, _WIDTH, _HEIGHT, sx, sy, sx + _WIDTH, sy + _HEIGHT, component);
+		}
+		else {
+			System.err.println("NULL OFFSCREEN BUFFER!");
 		}
 
 		container.setDirty(true);
 		container.setWorldSystem(saveWorld);
-		container.refresh();
+		}
+//		container.refresh();
 	}
 
 	/**
@@ -118,9 +137,16 @@ public class MagnifyWindow extends JWindow {
 		if (_magnifyWindow == null) {
 			_magnifyWindow = new MagnifyWindow();
 		}
+		
+		_mouseLocation = new Point(me.getPoint());
+
+		if (!mouseChangedEnough()) {
+			return;
+		}
+		
+		
 		// get the screen mouse location
 		Point p = MouseInfo.getPointerInfo().getLocation();
-		System.err.println("Handle magnification at " + p);
 
 		// where to place magnify window
 		int screenX = p.x;
@@ -141,9 +167,25 @@ public class MagnifyWindow extends JWindow {
 		_magnifyWindow.toFront();
 
 		_view = view;
-		_mouseLocation = new Point(me.getPoint());
 		_content.repaint();
 	}
+	
+	private static boolean mouseChangedEnough() {
+		
+		int x = _mouseLocation.x;
+		int y = _mouseLocation.y;
+		int ox = _oldMouseLocation.x;
+		int oy = _oldMouseLocation.y;
+		
+		if ((Math.abs(x-ox) > 0) || (Math.abs(y-oy) > 0)) {
+			_oldMouseLocation.setLocation(_mouseLocation);
+			return true;
+		}
+		
+		System.err.println("Mouse didn't move enough");
+		return false;
+	}
+
 
 	/**
 	 * Hide the magnify window
@@ -152,6 +194,7 @@ public class MagnifyWindow extends JWindow {
 		System.err.println("CLOSE MAG WINDOW");
 		if ((_magnifyWindow != null) && (_magnifyWindow.isVisible())) {
 			_magnifyWindow.setVisible(false);
+			_offscreenBuffer = null;
 		}
 	}
 
