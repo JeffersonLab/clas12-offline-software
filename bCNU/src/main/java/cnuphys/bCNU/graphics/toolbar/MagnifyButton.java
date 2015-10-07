@@ -35,7 +35,6 @@ public class MagnifyButton extends ToolBarToggleButton {
      */
     @Override
     public void mouseEntered(MouseEvent mouseEvent) {
-	System.err.println("Mouse enter with mag glass");
     }
    
     
@@ -47,7 +46,6 @@ public class MagnifyButton extends ToolBarToggleButton {
      */
     @Override
     public void mouseExited(MouseEvent mouseEvent) {
-	System.err.println("Mouse exited with mag glass");
 	MagnifyWindow.closeMagnifyWindow();
     }
 
@@ -60,7 +58,6 @@ public class MagnifyButton extends ToolBarToggleButton {
      */
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
-	System.err.println("Mouse pressed with mag glass");
     }
     
 
@@ -72,7 +69,6 @@ public class MagnifyButton extends ToolBarToggleButton {
      */
     @Override
     public void mouseMoved(MouseEvent mouseEvent) {
-	System.err.println("Mouse moved with mag glass");
 	BaseView view = container.getView();
 	
 	if (view == null) {

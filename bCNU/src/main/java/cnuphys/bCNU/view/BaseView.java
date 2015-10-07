@@ -713,7 +713,7 @@ public class BaseView extends JInternalFrame {
     	};
     	
     	SwingUtilities.invokeLater(magrun);
-    	
+    	_container.refresh();
     }
 
 }
