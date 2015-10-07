@@ -17,8 +17,6 @@ import javax.swing.JWindow;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.BaseContainer;
-import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 
@@ -47,7 +45,7 @@ public class MagnifyWindow extends JWindow {
 	private static JComponent _content;
 
 	// for offscreen drawing
-	private BufferedImage _offscreenBuffer;
+	//private BufferedImage _offscreenBuffer;
 
 	/**
 	 * Create a translucent window
@@ -70,67 +68,42 @@ public class MagnifyWindow extends JWindow {
 
 	// draw the content
 	private synchronized void draw(Graphics g) {
-		// Rectangle b = _content.getBounds();
-		IContainer container = _view.getContainer();
+		BaseContainer container = (BaseContainer)(_view.getContainer());
 		if (!(container instanceof BaseContainer)) {
 			return;
 		}
-
-		// g.setColor(container.getComponent().getBackground());
-		// g.fillRect(0, 0, _WIDTH, _HEIGHT);
-
-		Rectangle2D.Double wr = magWorld(container);
-		System.err.println("MAG WORLD: " + wr + " xc: " + wr.getCenterX() + " yc: " + wr.getCenterY());
-
+		
 		Rectangle2D.Double saveWorld = container.getWorldSystem();
+		Rectangle2D.Double wr = new Rectangle2D.Double(saveWorld.x, saveWorld.y, saveWorld.width, saveWorld.height);
+		
+		Point pp = new Point(_mouseLocation.x, _mouseLocation.y);
+		Point.Double wp = new Point.Double();
+		container.localToWorld(pp, wp);
+		
+		Rectangle b = container.getComponent().getBounds();
+		
+		double ww = saveWorld.width/_MAGFACTOR;
+		double hh = saveWorld.height/_MAGFACTOR;
+		
+		
+		wr.setFrame(wp.x-ww/2, wp.y-hh/2, ww, hh);
 
 		container.setWorldSystem(wr);
 		container.setDirty(true);
+		
+		BufferedImage _offscreenBuffer = GraphicsUtilities.getComponentImageBuffer(container.getComponent());
 
-		getImage((BaseContainer) container);
 		if (_offscreenBuffer != null) {
-			g.drawImage(_offscreenBuffer, 0, 0, this);
+			GraphicsUtilities.paintComponentOnImage(container.getComponent(), _offscreenBuffer);
+			
+			int sx = (b.x + b.width - _WIDTH)/2;
+			int sy = (b.y + b.height - _HEIGHT)/2;
+			g.drawImage(_offscreenBuffer, 0, 0, _WIDTH, _HEIGHT, sx, sy, sx+_WIDTH, sy+_HEIGHT, this);
 		}
-
-		// ((BaseContainer) container).paintComponent(g);
 
 		container.setDirty(true);
 		container.setWorldSystem(saveWorld);
-	}
-
-	private void getImage(BaseContainer container) {
-		// if null, create sized to current component size
-
-		if (_offscreenBuffer == null) {
-			_offscreenBuffer = GraphicsUtilities.getComponentImageBuffer(_content);
-		}
-
-		// if dirty, paint on it
-		if (_offscreenBuffer != null) {
-			GraphicsUtilities.paintComponentOnImage(container.getComponent(), _offscreenBuffer);
-		}
-	}
-
-	// get the appropriate world for the zoom
-	private Rectangle2D.Double magWorld(IContainer container) {
-		Rectangle r = new Rectangle();
-		Rectangle b = container.getComponent().getBounds();
-		System.err.println("BOUNDS: " + b);
-		int xc = _mouseLocation.x;
-		int yc = _mouseLocation.y;
-		
-		System.err.println("Mouse Location: " + _mouseLocation);
-
-		int w = (int) (_WIDTH / _MAGFACTOR);
-		int h = (int) (_HEIGHT / _MAGFACTOR);
-
-		r.setBounds(xc - w / 2, yc - h / 2, w, h);
-		
-		System.err.println("RECT: " + r);
-
-		Rectangle2D.Double wr = new Rectangle2D.Double();
-		container.localToWorld(r, wr);
-		return wr;
+		container.refresh();
 	}
 
 	/**
