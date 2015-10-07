@@ -593,7 +593,7 @@ public class BaseContainer extends JComponent
 		setDirty(true);
 		refresh();
 	}
-
+	
 	/**
 	 * Undo that last zoom.
 	 */
@@ -605,7 +605,7 @@ public class BaseContainer extends JComponent
 		setDirty(true);
 		refresh();
 	}
-
+	
 	/**
 	 * This is called when we have completed a rubber banding. pane.
 	 * 
@@ -1498,6 +1498,13 @@ public class BaseContainer extends JComponent
 			worldToLocal = null;
 			return;
 		}
+		
+		if ((_worldSystem == null) || (_worldSystem.width < 1.0e-12) || (_worldSystem.height < 1.0e-12)) {
+			localToWorld = null;
+			worldToLocal = null;
+			return;
+		}
+
 
 		double scaleX = _worldSystem.width / bounds.width;
 		double scaleY = _worldSystem.height / bounds.height;

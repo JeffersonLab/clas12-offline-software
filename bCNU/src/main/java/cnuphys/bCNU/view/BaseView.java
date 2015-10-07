@@ -22,6 +22,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import cnuphys.bCNU.application.Desktop;
@@ -699,8 +700,20 @@ public class BaseView extends JInternalFrame {
     /**
      * Handle a mgnificaction
      */
-    public void handleMagnify(MouseEvent me) {
-	MagnifyWindow.magnify(this, me, null);
+    public void handleMagnify(final MouseEvent me) {
+		final BaseView bview = this;
+
+    	Runnable magrun = new Runnable() {
+
+			@Override
+			public void run() {
+				MagnifyWindow.magnify(bview, me, null);
+			}
+    		
+    	};
+    	
+    	SwingUtilities.invokeLater(magrun);
+    	
     }
 
 }
