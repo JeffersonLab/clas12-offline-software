@@ -83,7 +83,9 @@ public class McHitDrawer extends PCALViewDrawer {
 		    PCALGeometry.getTransformations(), data.pcal_true_pid,
 		    data.pcal_true_avgX, data.pcal_true_avgY,
 		    data.pcal_true_avgZ, data.pcal_true_totEdep);
-	    _view.ijkToScreen(sector, localP, pp);
+	    
+	    //get the right item
+	    _view.getHexSectorItem(sector).ijkToScreen(container, localP, pp);
 
 	    FeedbackRect rr = new FeedbackRect(pp.x - 4, pp.y - 4, 8, 8,
 		    hitIndex, data, 0, fbs);

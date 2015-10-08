@@ -96,7 +96,9 @@ public class McHitDrawer extends ECViewDrawer {
 			ECGeometry.getTransformations(plane), data.ec_true_pid,
 			data.ec_true_avgX, data.ec_true_avgY,
 			data.ec_true_avgZ, data.ec_true_totEdep);
-		_view.ijkToScreen(sector, localP, pp);
+		
+	    //get the right item
+	    _view.getHexSectorItem(sector).ijkToScreen(container, localP, pp);
 
 		FeedbackRect rr = new FeedbackRect(pp.x - 4, pp.y - 4, 8, 8,
 			hitIndex, data, 0, fbs);

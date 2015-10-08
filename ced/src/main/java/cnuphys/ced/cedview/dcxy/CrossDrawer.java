@@ -129,7 +129,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 		// only care about xy
 		Point2D.Double sp = new Point2D.Double(result[0], result[1]);
-		hsItem.sector2DToLocal(pp, sp);
+		hsItem.sector2DToLocal(container, pp, sp);
 
 		// arrows
 		Point pp2 = new Point();
@@ -146,7 +146,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 		result[2] = tiltedz[i] + r * unitz[i];
 		_view.tiltedToSector(result, result);
 		sp.setLocation(result[0], result[1]);
-		hsItem.sector2DToLocal(pp2, sp);
+		hsItem.sector2DToLocal(container, pp2, sp);
 
 		g.setColor(Color.orange);
 		g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
