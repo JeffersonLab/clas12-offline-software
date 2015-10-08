@@ -218,56 +218,6 @@ public class PCALView extends HexView {
 		PCALGeometry.getTransformations().sectorToLocal(pijk, sectorP);
 	}
 
-	/**
-	 * Lab (CLAS) 3D Cartesian coordinates to screen coordinates.
-	 * 
-	 * @param labXYZ
-	 *            the lab 3D coordinates
-	 * @param pp
-	 *            will hold the screen coordinates
-	 */
-	public void labXYZToScreen(double labXYZ[], Point pp) {
-
-		Point3D clasP = new Point3D(labXYZ[0], labXYZ[1], labXYZ[2]);
-		int sector = GeometryManager.clasToSectorNumber(clasP);
-		Point3D localP = new Point3D();
-		PCALGeometry.getTransformations().clasToLocal(localP, clasP);
-		ijkToScreen(sector, localP, pp);
-	}
-
-	/**
-	 * Convert ijk coordinates to world graphics coordinates
-	 * 
-	 * @param sector
-	 *            the 1-based sector [1..6]
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param wp
-	 *            the world graphics coordinates
-	 */
-	public void ijkToWorld(int sector, Point3D pijk, Point2D.Double wp) {
-		double sectorXYZ[] = new double[3];
-		double labXYZ[] = new double[3];
-		ijkToSectorXYZ(pijk, sectorXYZ);
-		GeometryManager.sectorXYZToLabXYZ(sector, labXYZ, sectorXYZ);
-		GeometryManager.cal_labXYZToWorld(0, labXYZ, wp);
-	}
-
-	/**
-	 * Convert ijk coordinates to world graphics coordinates
-	 * 
-	 * @param sector
-	 *            the 1-based sector [1..6]
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param pp
-	 *            the screen coordinates
-	 */
-	public void ijkToScreen(int sector, Point3D pijk, Point pp) {
-		Point2D.Double wp = new Point2D.Double();
-		ijkToWorld(sector, pijk, wp);
-		getContainer().worldToLocal(pp, wp);
-	}
 
 	/**
 	 * Get the hex item for the given 1-based sector
@@ -276,7 +226,7 @@ public class PCALView extends HexView {
 	 *            the 1-based sector
 	 * @return the corresponding item
 	 */
-	public HexSectorItem getHexSectorItem(int sector) {
+	public PCALHexSectorItem getHexSectorItem(int sector) {
 		return _hexItems[sector - 1];
 	}
 
