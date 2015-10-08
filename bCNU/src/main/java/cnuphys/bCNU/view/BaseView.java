@@ -47,6 +47,7 @@ public class BaseView extends JInternalFrame {
 
     private static RenderingHints renderHints = new RenderingHints(
 	    RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
     static {
 	renderHints.put(RenderingHints.KEY_RENDERING,
 		RenderingHints.VALUE_RENDER_QUALITY);
@@ -86,10 +87,9 @@ public class BaseView extends JInternalFrame {
     /**
      * Constructor
      * 
-     * @param keyVals
-     *            an optional variable length list of attributes in type-value
-     *            pairs. For example, AttributeType.NAME, "my application",
-     *            AttributeType.MAXIMIZABE, true, etc.
+     * @param keyVals an optional variable length list of attributes in
+     *            type-value pairs. For example, AttributeType.NAME,
+     *            "my application", AttributeType.MAXIMIZABE, true, etc.
      */
     public BaseView(Object... keyVals) {
 
@@ -172,8 +172,8 @@ public class BaseView extends JInternalFrame {
 	    }
 
 	    if ((width > 0) && (height > 0)) {
-		_container.getComponent().setPreferredSize(
-			new Dimension(width, height));
+		_container.getComponent()
+			.setPreferredSize(new Dimension(width, height));
 	    }
 
 	    // split west component? (like a file tree)
@@ -185,7 +185,8 @@ public class BaseView extends JInternalFrame {
 			_container.getComponent());
 		splitPane.setResizeWeight(0.0);
 		add(splitPane, BorderLayout.CENTER);
-	    } else {
+	    }
+	    else {
 		add(_container.getComponent(), BorderLayout.CENTER);
 	    }
 
@@ -196,12 +197,14 @@ public class BaseView extends JInternalFrame {
 		int bits = _attributes.intValue(AttributeType.TOOLBARBITS);
 		if (bits == Integer.MIN_VALUE) {
 		    bits = BaseToolBar.EVERYTHING;
-		} else { // normal
+		}
+		else { // normal
 		    BaseToolBar toolBar = new BaseToolBar(_container, bits);
 		    add(toolBar, BorderLayout.NORTH);
 		}
 
-	    } else {
+	    }
+	    else {
 		// hack: invis toolbar, pointer selected
 		BaseToolBar toolBar = new BaseToolBar(_container, 1);
 		// add(toolBar, BorderLayout.NORTH);
@@ -212,7 +215,8 @@ public class BaseView extends JInternalFrame {
 	else { // no container, e.g., log view
 	    if ((width > 0) && (height > 0)) {
 		setBounds(left, top, width, height);
-	    } else {
+	    }
+	    else {
 		setLocation(left, top);
 	    }
 	}
@@ -220,10 +224,10 @@ public class BaseView extends JInternalFrame {
 	// add to the desktop
 	if (_desktop != null) {
 
-	    //keep virtual view on top?
-//	    if (this instanceof VirtualView) {
-//		_desktop.setLayer(this, 1);
-//	    }
+	    // keep virtual view on top?
+	    // if (this instanceof VirtualView) {
+	    // _desktop.setLayer(this, 1);
+	    // }
 
 	    _desktop.add(this, 0);
 	}
@@ -329,8 +333,7 @@ public class BaseView extends JInternalFrame {
      * Called by a container when a right click is not handled. The usual reason
      * is that the right click was on an inert spot.
      * 
-     * @param mouseEvent
-     *            the causal event.
+     * @param mouseEvent the causal event.
      */
     public void rightClicked(MouseEvent mouseEvent) {
     }
@@ -354,8 +357,7 @@ public class BaseView extends JInternalFrame {
     /**
      * Set the view arrangement from the properties
      * 
-     * @param properties
-     *            the properties to use
+     * @param properties the properties to use
      */
     public void setFromProperties(Properties properties) {
 	if (properties == null) {
@@ -376,7 +378,8 @@ public class BaseView extends JInternalFrame {
 
 	    // try to get world bounds and zoom
 	    if (_container != null) {
-		Rectangle2D.Double wr = worldRectangleFromProperties(properties);
+		Rectangle2D.Double wr = worldRectangleFromProperties(
+			properties);
 		if (wr != null) {
 		    _container.zoom(wr.getMinX(), wr.getMaxX(), wr.getMinY(),
 			    wr.getMaxY());
@@ -404,7 +407,8 @@ public class BaseView extends JInternalFrame {
     }
 
     // pull out a boolean property
-    private boolean getBoolean(String key, Properties properties, boolean defVal) {
+    private boolean getBoolean(String key, Properties properties,
+	    boolean defVal) {
 	String str = properties.getProperty(key);
 	return str == null ? defVal : Boolean.parseBoolean(str);
     }
@@ -422,8 +426,7 @@ public class BaseView extends JInternalFrame {
      * Checks a boolean property. Returns <code>false</code> if the property is
      * not found
      * 
-     * @param key
-     *            the key matched to the boolean we are checking
+     * @param key the key matched to the boolean we are checking
      * @return <code>true</code> if the key is found and the value is "true"
      *         (case insensitive)
      */
@@ -438,10 +441,8 @@ public class BaseView extends JInternalFrame {
     /**
      * Set t a boolean property
      * 
-     * @param key
-     *            the key matched to the boolean we are setting
-     * @param val
-     *            the value to set
+     * @param key the key matched to the boolean we are setting
+     * @param val the value to set
      */
     public void setBooleanProperty(String key, boolean val) {
 	_properties.put(key, val ? "true" : "false");
@@ -511,8 +512,8 @@ public class BaseView extends JInternalFrame {
 			    double ymin = Double.parseDouble(yminStr);
 			    double xmax = Double.parseDouble(xmaxStr);
 			    double ymax = Double.parseDouble(ymaxStr);
-			    return new Rectangle2D.Double(xmin, ymin, xmax
-				    - xmin, ymax - ymin);
+			    return new Rectangle2D.Double(xmin, ymin,
+				    xmax - xmin, ymax - ymin);
 			} catch (Exception e) {
 			    e.printStackTrace();
 			}
@@ -584,8 +585,7 @@ public class BaseView extends JInternalFrame {
      * is up to the application to set unique view types if it intends to use
      * them.
      * 
-     * @param viewType
-     *            the viewType to set
+     * @param viewType the viewType to set
      */
     public void setViewType(int viewType) {
 	this._viewType = viewType;
@@ -594,8 +594,7 @@ public class BaseView extends JInternalFrame {
     /**
      * Get a view from its container
      * 
-     * @param container
-     *            the container
+     * @param container the container
      * @return the view which holds this container
      */
     public static BaseView getViewFromContainer(IContainer container) {
@@ -639,8 +638,7 @@ public class BaseView extends JInternalFrame {
     /**
      * Set the virtual window item used on the virtual view
      * 
-     * @param virtualItem
-     *            the virtual window item used on the virtual view
+     * @param virtualItem the virtual window item used on the virtual view
      */
     protected void setVirtualItem(VirtualWindowItem virtualItem) {
 	_virtualItem = virtualItem;
@@ -649,10 +647,8 @@ public class BaseView extends JInternalFrame {
     /**
      * Offset the view's location
      * 
-     * @param dh
-     *            the horizontal change
-     * @param dv
-     *            the vertical change
+     * @param dh the horizontal change
+     * @param dv the vertical change
      */
     public void offset(int dh, int dv) {
 	Rectangle b = getBounds();
@@ -696,24 +692,27 @@ public class BaseView extends JInternalFrame {
 	}
 	return null;
     }
-    
+
     /**
      * Handle a mgnificaction
      */
     public void handleMagnify(final MouseEvent me) {
-		final BaseView bview = this;
+	final BaseView bview = this;
 
-    	Runnable magrun = new Runnable() {
+	Runnable magrun = new Runnable() {
 
-			@Override
-			public void run() {
-				MagnifyWindow.magnify(bview, me, null);
-			}
-    		
-    	};
-    	
-    	SwingUtilities.invokeLater(magrun);
-    	_container.refresh();
+	    @Override
+	    public void run() {
+		IContainer container = bview.getContainer();
+		if (container instanceof BaseContainer) {
+		    MagnifyWindow.magnify((BaseContainer) container, me, null);
+		}
+
+	    }
+	};
+
+	SwingUtilities.invokeLater(magrun);
+	_container.refresh();
     }
 
 }
