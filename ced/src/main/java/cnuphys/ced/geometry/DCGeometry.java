@@ -687,6 +687,7 @@ public class DCGeometry {
 	DriftChamberWire dcw = getWire(superlayer, layer, wire);
 	Line3D line = dcw.getLine();
 
+	System.err.println("Max Wire X: " + DCGeometry.getAbsMaxWireX());
 	System.err.println("MP from DC Wire: " + dcw.getMidpoint());
 	System.err.println("MP from DC Line: " + line.midpoint());
 	System.err.println("Len from DC Wire: " + dcw.getLength());

@@ -59,7 +59,8 @@ public class DCXYView extends HexView {
 
 	_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
 		2 * _ysize);
-    }
+	
+   }
 
     /**
      * Create an allDCView
@@ -273,6 +274,8 @@ public class DCXYView extends HexView {
     @Override
     public void getFeedbackStrings(IContainer container, Point pp,
 	    Point2D.Double wp, List<String> feedbackStrings) {
+
+	container.worldToLocal(pp, wp);
 
 	super.getFeedbackStrings(container, pp, wp, feedbackStrings);
 

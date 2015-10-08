@@ -64,10 +64,9 @@ public class ClasIoEventManager {
 
     private boolean _enabled = true;
     
-    
     // flag that set set to <code>true</code> if we are accumulating events
     private boolean _accumulating = false;
-
+    
     // list of view listeners. There are actually three lists. Those in index 0
     // are notified first. Then those in index 1. Finally those in index 2. The
     // Data
@@ -103,6 +102,9 @@ public class ClasIoEventManager {
     private RecEventDataContainer _recEventData;
     private GEMCMetaDataContainer _gemcMetaData;
     private CNDDataContainer _cndData;
+    
+    //are we looking at GEMC data?
+    private boolean _isGemcData;
 
     // private constructor for singleton
     private ClasIoEventManager() {
@@ -115,8 +117,32 @@ public class ClasIoEventManager {
 	_recEventData = new RecEventDataContainer(this);
 	_gemcMetaData = new GEMCMetaDataContainer(this);
 	_cndData = new CNDDataContainer(this);
-    }
+	
+	//make myself a listener
+	IClasIoEventListener elisten = new IClasIoEventListener() {
 
+	    @Override
+	    public void newClasIoEvent(EvioDataEvent event) {
+	    }
+
+	    @Override
+	    public void openedNewEventFile(String path) {
+		_isGemcData = false;
+	    }
+	    
+	};
+	
+	addPhysicsListener(elisten, 0);
+    }
+    
+    /**
+     * Are we looking at GEMC data?
+     * @return <code>trye</code> if we are looking at GEMC data.
+     */
+    public boolean isGemcData() {
+	return _isGemcData;
+    }
+ 
     /**
      * Get the EC data
      * 
@@ -320,7 +346,7 @@ public class ClasIoEventManager {
 
 	    @Override
 	    protected void done() {
-		progressBar.setString(file.getPath());
+		progressBar.setString(file.getPath() + " Is GEMC: ");
 		progressBar.setIndeterminate(false);
 		progressBar.setVisible(false);
 		setEnabled(true);
@@ -617,9 +643,7 @@ public class ClasIoEventManager {
      * 
      */
     private void notifyListeners() {
-
-	Ced.getInstance().setEventNumberLabel(getEventNumber());
-
+	
 	Swimming.clearMCTrajectories();
 	Swimming.clearReconTrajectories();
 	uniqueLundIds.clear();
@@ -659,6 +683,18 @@ public class ClasIoEventManager {
 	    Ced.getInstance().getSwimMenu()
 		    .firePropertyChange(SwimMenu.SWIM_ALL_RECON_PROP, 0, 1);
 	}
+	
+	//GEMC Data
+	if (_gemcMetaData != null) {
+	    String gcard = _gemcMetaData.getGCard();
+	    if (gcard != null) {
+		_isGemcData = true;
+	    }
+	}
+
+
+	Ced.getInstance().setEventNumberLabel(getEventNumber());
+
     }
 
     // compute some factors used in gradient displays
