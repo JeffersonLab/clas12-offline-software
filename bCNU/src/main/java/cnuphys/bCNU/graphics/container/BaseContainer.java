@@ -123,7 +123,8 @@ public class BaseContainer extends JComponent
     public int m_maxNumPage = 1;
 
     /**
-     * The view that holds this container (might be null for viewless container).
+     * The view that holds this container (might be null for viewless
+     * container).
      */
     protected BaseView _view;
 
@@ -227,10 +228,11 @@ public class BaseContainer extends JComponent
 	// add a controller that listens for layer changes.
 	_layers.addDrawableListener(new LayerControl(this));
     }
-    
+
     /**
-     * Share the model of another view. Note, this is not a copy,
-     * either view can modify the layers and items.
+     * Share the model of another view. Note, this is not a copy, either view
+     * can modify the layers and items.
+     * 
      * @param sContainer the source container
      */
     public void shareModel(BaseContainer sContainer) {
@@ -238,6 +240,8 @@ public class BaseContainer extends JComponent
 	_afterDraw = sContainer._afterDraw;
 	_beforeDraw = sContainer._beforeDraw;
 	_userLayers = sContainer._userLayers;
+	setBackground(sContainer.getBackground());
+	setForeground(sContainer.getForeground());
     }
 
     /**
@@ -429,10 +433,13 @@ public class BaseContainer extends JComponent
 	    } catch (NullPointerException npe) {
 
 		System.err.println(
-			"Null pionter exception in BaseContainer worldToLocal pp = "
+			"Null pointer exception in BaseContainer worldToLocal pp = "
 				+ pp + "  wp = " + wp);
 		npe.printStackTrace();
 	    }
+	}
+	else {
+	    System.err.println("null world to local for " + _view.getTitle());
 	}
     }
 
@@ -1453,8 +1460,8 @@ public class BaseContainer extends JComponent
 	    return;
 	}
 
-	if ((_worldSystem == null) || (_worldSystem.width < 1.0e-12)
-		|| (_worldSystem.height < 1.0e-12)) {
+	if ((_worldSystem == null) || (Math.abs(_worldSystem.width) < 1.0e-12)
+		|| (Math.abs(_worldSystem.height) < 1.0e-12)) {
 	    localToWorld = null;
 	    worldToLocal = null;
 	    return;
@@ -1473,9 +1480,6 @@ public class BaseContainer extends JComponent
 	try {
 	    worldToLocal = localToWorld.createInverse();
 	} catch (NoninvertibleTransformException e) {
-	    System.err.println("scaleX, scaleY = " + scaleX + ", " + scaleY);
-	    System.err.println("world system = " + _worldSystem);
-	    // System.exit(0);
 	    e.printStackTrace();
 	}
     }

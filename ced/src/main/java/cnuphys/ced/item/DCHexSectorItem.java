@@ -121,6 +121,7 @@ public class DCHexSectorItem extends HexSectorItem {
     @Override
     public void getFeedbackStrings(IContainer container, Point pp,
 	    Point2D.Double wp, List<String> feedbackStrings) {
+	
 	if (contains(container, pp)) {
 
 	    // have no z info, just lab x, y, phy

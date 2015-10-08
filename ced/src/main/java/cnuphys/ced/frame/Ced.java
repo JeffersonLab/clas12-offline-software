@@ -200,15 +200,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_monteCarloView, 0, 0, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_reconEventView, 0, 0, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_plotView, 0, 0, VirtualView.BOTTOMLEFT);
-	    
+
 	    _virtualView.moveTo(_ftcalXyView, 0, 8, VirtualView.BOTTOMLEFT);
 
-
 	    if (_use3D) {
-		_virtualView.moveTo(_forward3DView, 0, 6,
-			VirtualView.CENTER);
-		_virtualView.moveTo(_central3DView, 0, 7,
-			VirtualView.CENTER);
+		_virtualView.moveTo(_forward3DView, 0, 6, VirtualView.CENTER);
+		_virtualView.moveTo(_central3DView, 0, 7, VirtualView.CENTER);
 		_virtualView.moveTo(_ftCal3DView, 0, 8,
 			VirtualView.BOTTOMRIGHT);
 	    }
@@ -259,10 +256,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add a bstXYView
 	_bstXyView = BSTxyView.createBSTxyView();
-	
+
 	// add a ftcalxyYView
 	_ftcalXyView = FTCalXYView.createFTCalXYView();
-
 
 	// add a DC XY View
 	_dcXyView = DCXYView.createDCXYView();
@@ -367,10 +363,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
     public void setEventNumberLabel(int num) {
 	if (num < 0) {
-	    _eventNumberLabel.setText("  Event Number:    ");
+	    _eventNumberLabel.setText("  Event Num:      is GEMC: false");
 	}
 	else {
-	    _eventNumberLabel.setText("  Event Number: " + num + "  ");
+	    _eventNumberLabel.setText("  Event Num: " + num + "  is GEMC: "
+		    + ClasIoEventManager.getInstance().isGemcData());
 	}
     }
 
@@ -584,13 +581,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     }
 
     private void createEventNumberLabel() {
-	_eventNumberLabel = new JLabel("  Event Number:    ");
+	_eventNumberLabel = new JLabel("  Event Num:      is GEMC: false");
 	_eventNumberLabel.setOpaque(true);
 	_eventNumberLabel.setBackground(Color.black);
 	_eventNumberLabel.setForeground(Color.yellow);
 	_eventNumberLabel.setFont(new Font("Dialog", Font.BOLD, 12));
-	_eventNumberLabel.setBorder(BorderFactory.createLineBorder(Color.cyan,
-		1));
+	_eventNumberLabel
+		.setBorder(BorderFactory.createLineBorder(Color.cyan, 1));
 	setEventNumberLabel(-1);
 
 	getJMenuBar().add(Box.createHorizontalGlue());
@@ -616,7 +613,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     /**
      * Main program launches the ced gui.
      * <p>
-     * Command line arguments:</br> -p [dir] dir is the default directory
+     * Command line arguments:</br>
+     * -p [dir] dir is the default directory
      * 
      * @param arg the command line arguments.
      */

@@ -25,90 +25,91 @@ import cnuphys.magfield.MagneticFields.FieldType;
 
 public class GEMCView extends BaseView implements IClasIoEventListener {
 
-    //the event manager
+    // the event manager
     protected ClasIoEventManager _eventManager = ClasIoEventManager
 	    .getInstance();
-    
+
     protected String _currentFile;
-    
-    //holds the event file
+
+    // holds the event file
     public JLabel _eventFileName;
-    
-    //gemc gcard file
+
+    // gemc gcard file
     public JLabel _gcardName;
-    
-    //torus
+
+    // torus
     public JLabel _torus;
-    
-    //solenoid
+
+    // solenoid
     public JLabel _solenoid;
-   
-    //table
+
+    // table
     private GEMCMetaDataTable _gemcTable;
-    
+
     public GEMCView() {
 	super(AttributeType.TITLE, "GEMC Options", AttributeType.ICONIFIABLE,
 		true, AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE,
 		true, AttributeType.RESIZABLE, true, AttributeType.WIDTH,
-		GEMCMetaDataTable.preferredWidth(),
-		AttributeType.HEIGHT, 650, AttributeType.LEFT, 700,
-		AttributeType.TOP, 100, AttributeType.VISIBLE, true);
-	
+		GEMCMetaDataTable.preferredWidth(), AttributeType.HEIGHT, 650,
+		AttributeType.LEFT, 700, AttributeType.TOP, 100,
+		AttributeType.VISIBLE, true);
+
 	setLayout(new BorderLayout(4, 4));
-	
+
 	add(getNorthPanel(), BorderLayout.NORTH);
-	
+
 	_gemcTable = new GEMCMetaDataTable();
-	
+
 	add(_gemcTable.getScrollPane(), BorderLayout.CENTER);
 
 	// need to listen for events
-	_eventManager.addPhysicsListener(this, 1); 
+	_eventManager.addPhysicsListener(this, 1);
 	validate();
     }
-    
-    //get the panel for the north
+
+    // get the panel for the north
     private JPanel getNorthPanel() {
 	JPanel panel = new JPanel();
 	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-	
+
 	_eventFileName = newLabel("   EVIO file: ", "", panel);
 	panel.add(Box.createVerticalStrut(4));
-	
-	_gcardName = newLabel("  GCard file: ", "  no GEMC metadata found  ", panel);
+
+	_gcardName = newLabel("  GCard file: ", "  no GEMC metadata found  ",
+		panel);
 	panel.add(Box.createVerticalStrut(4));
 
 	_torus = newLabel("       Torus: ", "", panel);
 	panel.add(Box.createVerticalStrut(4));
 
 	_solenoid = newLabel("    Solenoid: ", "", panel);
-	
+
 	return panel;
     }
-    
+
     private JLabel newLabel(String prompt, String defText, JPanel parent) {
 	JPanel p = new JPanel();
 	p.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
-	
+
 	JLabel plab = new JLabel(prompt);
 	plab.setText(prompt);
 	plab.setOpaque(true);
 	plab.setBackground(Color.yellow);
 	plab.setFont(Fonts.smallMono);
 	plab.setForeground(Color.black);
-	
+
 	JLabel lab = new JLabel();
 	lab.setOpaque(true);
 	lab.setBackground(Color.black);
 	lab.setForeground(Color.cyan);
 	lab.setFont(Fonts.mediumFont);
 	lab.setText(defText);
-	
+
 	p.add(plab);
 	p.add(lab);
-	
+
 	p.setBorder(new CommonBorder());
-	
+
 	parent.add(p);
 	return lab;
     }
@@ -116,59 +117,63 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
     @Override
     public void newClasIoEvent(EvioDataEvent event) {
 	GEMCMetaDataContainer gemcdata = _eventManager.getGEMCMetaData();
-	
+
 	if (!gemcdata.resetFields) {
 	    System.err.println("Skipped setting fields.");
 	    return;
 	}
-	
-	//getHitCount returns the  numeber of properties. This should
-	//awlays be zero except for event#1 in a gemc file
+
+	// getHitCount returns the number of properties. This should
+	// awlays be zero except for event#1 in a gemc file
 	if (gemcdata.getHitCount(0) > 0) {
 	    String gcard = gemcdata.getGCard();
 	    gcard = (gcard == null) ? "" : gcard;
 	    _gcardName.setText("  " + gcard + "  ");
-	    
+
 	    boolean hasTorus = gemcdata.hasTorus();
 	    boolean hasSolenoid = gemcdata.hasSolenoid();
 	    double torusScale = gemcdata.torusScaleFactor();
 	    double solenoidScale = gemcdata.solenoidScaleFactor();
-	    
-	    //fields
+
+	    // fields
 	    setFieldLabel(_torus, hasTorus, torusScale);
 	    setFieldLabel(_solenoid, hasSolenoid, solenoidScale);
-	    
+
 	    System.err.println("Setting fields from GEMC meta data");
 	    configureFields(hasTorus, torusScale, hasSolenoid, solenoidScale);
-	    
-	    //don't want to resent every event
+
+	    // don't want to resent every event
 	    gemcdata.resetFields = false;
 	}
+	else {
+	    _gcardName.setText("  no GEMC metadata found  ");
+	}
     }
-    
+
     private void configureFields(boolean hasTorus, double torusScale,
 	    boolean hasSolenoid, double solenoidScale) {
 
 	FieldType newFieldType = FieldType.ZEROFIELD;
 	if (hasTorus && hasSolenoid) {
 	    newFieldType = FieldType.COMPOSITE;
-	} else if (hasTorus) {
+	}
+	else if (hasTorus) {
 	    newFieldType = FieldType.TORUS;
-	} else if (hasSolenoid) {
+	}
+	else if (hasSolenoid) {
 	    newFieldType = FieldType.SOLENOID;
 	}
 	MagneticFields.setActiveField(newFieldType);
 
 	// now the scales
 	if (hasTorus) {
-	    setScale((MagneticField) MagneticFields.getIField(FieldType.TORUS), torusScale);
+	    setScale((MagneticField) MagneticFields.getIField(FieldType.TORUS),
+		    torusScale);
 	}
 
 	if (hasSolenoid) {
-	    setScale(
-		    (MagneticField) MagneticFields
-			    .getIField(FieldType.SOLENOID),
-		    solenoidScale);
+	    setScale((MagneticField) MagneticFields
+		    .getIField(FieldType.SOLENOID), solenoidScale);
 	}
 
     }
@@ -196,7 +201,7 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 	_eventFileName.setText("   " + _currentFile + "    ");
 	setData(null);
     }
-    
+
     /**
      * Clear all information
      */
@@ -205,19 +210,18 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 	_eventFileName.setText("   ");
 	_gcardName.setText("  no GEMC metadata found  ");
     }
-    
+
     /**
      * Get the underlying GEMC table
+     * 
      * @return the underlying GEMC table
      */
     public GEMCMetaDataTable getGEMCTable() {
 	return _gemcTable;
     }
-    
+
     public void setData(Vector<String> properties) {
 	getGEMCTable().getGEMCMetaDataModel().setData(properties);
     }
-
- 
 
 }
