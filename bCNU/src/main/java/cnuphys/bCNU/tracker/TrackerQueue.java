@@ -12,56 +12,56 @@ import java.util.Vector;
 @SuppressWarnings("serial")
 public class TrackerQueue extends Vector<Runnable> {
 
-    public TrackerQueue() {
-	super(25);
-    }
-
-    /**
-     * Place a new Runnable job in the work queue.
-     * 
-     * @param r
-     *            the <code>Runnable</code> job.
-     */
-    public synchronized void put(Runnable r) {
-	if (r != null) {
-	    add(r);
-
-	    // wake up anyone waiting for a queue entry
-	    notifyAll();
+	public TrackerQueue() {
+		super(25);
 	}
-    }
 
-    /**
-     * Place a new Runnable job in the work queue, removing anyone else already
-     * there.
-     * 
-     * @param r
-     *            the <code>Runnable</code> job.
-     */
-    public synchronized void supercede(Runnable r) {
+	/**
+	 * Place a new Runnable job in the work queue.
+	 * 
+	 * @param r
+	 *            the <code>Runnable</code> job.
+	 */
+	public synchronized void put(Runnable r) {
+		if (r != null) {
+			add(r);
 
-	removeAllElements();
-	if (r != null) {
-	    add(r);
-
-	    // wake up anyone waiting for a queue entry
-	    notifyAll();
+			// wake up anyone waiting for a queue entry
+			notifyAll();
+		}
 	}
-    }
 
-    /**
-     * Dequeue a <code>Runnable</code> job from the FIFO.
-     * 
-     * @return the <code>Runnable</code> job.
-     */
-    public synchronized Runnable get() {
-	if (isEmpty()) {
-	    try {
-		wait();
-	    } catch (InterruptedException e) {
-		e.printStackTrace();
-	    }
+	/**
+	 * Place a new Runnable job in the work queue, removing anyone else already
+	 * there.
+	 * 
+	 * @param r
+	 *            the <code>Runnable</code> job.
+	 */
+	public synchronized void supercede(Runnable r) {
+
+		removeAllElements();
+		if (r != null) {
+			add(r);
+
+			// wake up anyone waiting for a queue entry
+			notifyAll();
+		}
 	}
-	return remove(0);
-    }
+
+	/**
+	 * Dequeue a <code>Runnable</code> job from the FIFO.
+	 * 
+	 * @return the <code>Runnable</code> job.
+	 */
+	public synchronized Runnable get() {
+		if (isEmpty()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return remove(0);
+	}
 }

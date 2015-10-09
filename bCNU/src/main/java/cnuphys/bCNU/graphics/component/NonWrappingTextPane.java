@@ -15,15 +15,15 @@ import javax.swing.text.StyledDocument;
 @SuppressWarnings("serial")
 public class NonWrappingTextPane extends JTextPane {
 
-    public NonWrappingTextPane(StyledDocument d) {
-	super(d);
-    }
+	public NonWrappingTextPane(StyledDocument d) {
+		super(d);
+	}
 
-    @Override
-    public boolean getScrollableTracksViewportWidth() {
-	Component parent = getParent();
-	ComponentUI ui = getUI();
-	return parent != null ? ui.getPreferredSize(this).width <= parent
-		.getSize().getWidth() : true;
-    }
+	@Override
+	public boolean getScrollableTracksViewportWidth() {
+		Component parent = getParent();
+		ComponentUI ui = getUI();
+		return parent != null ? ui.getPreferredSize(this).width <= parent
+				.getSize().getWidth() : true;
+	}
 }

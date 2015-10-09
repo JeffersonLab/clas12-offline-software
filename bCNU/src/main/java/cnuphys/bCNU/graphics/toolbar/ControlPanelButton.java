@@ -16,29 +16,29 @@ import cnuphys.bCNU.graphics.container.IContainer;
  */
 @SuppressWarnings("serial")
 public class ControlPanelButton extends ToolBarToggleButton implements
-	ActionListener {
+		ActionListener {
 
-    /**
-     * Create the button used to delete items on the container.
-     * 
-     * @param container
-     *            the owner container.
-     */
-    public ControlPanelButton(IContainer container) {
-	super(container, "images/cp.gif", "Toggle Control Panel Visibility");
-	addActionListener(this);
-    }
+	/**
+	 * Create the button used to delete items on the container.
+	 * 
+	 * @param container
+	 *            the owner container.
+	 */
+	public ControlPanelButton(IContainer container) {
+		super(container, "images/cp.gif", "Toggle Control Panel Visibility");
+		addActionListener(this);
+	}
 
-    /**
-     * This is what I do if I am pressed. I simply tell the view that the
-     * control panel button was selected
-     * 
-     * @param e
-     *            The causal event.
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	container.getView().controlPanelButtonHit();
-    }
+	/**
+	 * This is what I do if I am pressed. I simply tell the view that the
+	 * control panel button was selected
+	 * 
+	 * @param e
+	 *            The causal event.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		container.getView().controlPanelButtonHit();
+	}
 
 }

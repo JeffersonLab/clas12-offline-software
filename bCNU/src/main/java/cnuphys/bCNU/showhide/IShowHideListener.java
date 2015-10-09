@@ -4,5 +4,5 @@ import java.util.EventListener;
 
 public interface IShowHideListener extends EventListener {
 
-    public void visibilityChanged(IShowHide ishowHide);
+	public void visibilityChanged(IShowHide ishowHide);
 }

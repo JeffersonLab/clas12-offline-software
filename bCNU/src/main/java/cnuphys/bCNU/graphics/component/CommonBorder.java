@@ -14,17 +14,17 @@ import cnuphys.bCNU.util.Fonts;
 @SuppressWarnings("serial")
 public class CommonBorder extends TitledBorder {
 
-    public Border etched = BorderFactory.createEtchedBorder();
-    public Font font = Fonts.commonFont(Font.PLAIN, 9);
+	public Border etched = BorderFactory.createEtchedBorder();
+	public Font font = Fonts.commonFont(Font.PLAIN, 9);
 
-    public CommonBorder() {
-	super(BorderFactory.createEtchedBorder());
-	setTitleColor(Color.blue);
-	setTitleFont(font);
-    }
+	public CommonBorder() {
+		super(BorderFactory.createEtchedBorder());
+		setTitleColor(Color.blue);
+		setTitleFont(font);
+	}
 
-    public CommonBorder(String title) {
-	this();
-	setTitle(title);
-    }
+	public CommonBorder(String title) {
+		this();
+		setTitle(title);
+	}
 }

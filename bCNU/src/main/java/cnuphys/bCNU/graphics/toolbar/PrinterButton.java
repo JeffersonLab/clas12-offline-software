@@ -7,24 +7,24 @@ import cnuphys.bCNU.util.PrintUtilities;
 @SuppressWarnings("serial")
 public class PrinterButton extends ToolBarButton {
 
-    /**
-     * Create a button to print the container.
-     * 
-     * @param container
-     *            the owner container.
-     */
-    public PrinterButton(IContainer container) {
-	super(container, "images/printer.gif", "Send view to printer");
-    }
+	/**
+	 * Create a button to print the container.
+	 * 
+	 * @param container
+	 *            the owner container.
+	 */
+	public PrinterButton(IContainer container) {
+		super(container, "images/printer.gif", "Send view to printer");
+	}
 
-    /**
-     * This is what I do if I am pressed
-     * 
-     * @param actionEvent
-     *            the causal event.
-     */
-    @Override
-    public void actionPerformed(ActionEvent actionEvent) {
-	PrintUtilities.printComponent(container.getComponent());
-    }
+	/**
+	 * This is what I do if I am pressed
+	 * 
+	 * @param actionEvent
+	 *            the causal event.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		PrintUtilities.printComponent(container.getComponent());
+	}
 }

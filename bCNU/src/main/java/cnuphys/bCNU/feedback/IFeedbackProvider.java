@@ -9,19 +9,19 @@ import cnuphys.bCNU.graphics.container.IContainer;
 
 public interface IFeedbackProvider extends EventListener {
 
-    /**
-     * Add any appropriate feedback strings for the headsup display or feedback
-     * panel.
-     * 
-     * @param container
-     *            the container.
-     * @param pp
-     *            the mouse location.
-     * @param wp
-     *            the corresponding world point.
-     * @param feedbackStrings
-     *            the List of feedback strings to add to.
-     */
-    public void getFeedbackStrings(IContainer container, Point pp,
-	    Point2D.Double wp, List<String> feedbackStrings);
+	/**
+	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * panel.
+	 * 
+	 * @param container
+	 *            the container.
+	 * @param pp
+	 *            the mouse location.
+	 * @param wp
+	 *            the corresponding world point.
+	 * @param feedbackStrings
+	 *            the List of feedback strings to add to.
+	 */
+	public void getFeedbackStrings(IContainer container, Point pp,
+			Point2D.Double wp, List<String> feedbackStrings);
 }

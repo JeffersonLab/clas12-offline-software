@@ -7,183 +7,183 @@ import javax.swing.event.EventListenerList;
 
 public class Log {
 
-    public enum Level {
-	ERROR, CONFIG, WARNING, INFO, EXCEPTION
-    }
-
-    // singleton
-    private static Log instance = null;
-
-    // List of feedback providers for the parent container
-    private EventListenerList _listenerList;
-
-    /**
-     * Private constructor since we use the singleton pattern.
-     */
-    private Log() {
-    }
-
-    /**
-     * Access to the Log singleton.
-     * 
-     * @return the Log singleton.
-     */
-    public static Log getInstance() {
-	if (instance == null) {
-	    try {
-		instance = new Log();
-	    } catch (Exception e) {
-		e.printStackTrace();
-	    }
+	public enum Level {
+		ERROR, CONFIG, WARNING, INFO, EXCEPTION
 	}
 
-	return instance;
-    }
+	// singleton
+	private static Log instance = null;
 
-    // notify listeners of message
-    private void notifyListeners(String message, Level level) {
+	// List of feedback providers for the parent container
+	private EventListenerList _listenerList;
 
-	if (_listenerList == null) {
-	    return;
+	/**
+	 * Private constructor since we use the singleton pattern.
+	 */
+	private Log() {
 	}
 
-	// Guaranteed to return a non-null array
-	Object[] listeners = _listenerList.getListenerList();
-
-	// This weird loop is the bullet proof way of notifying all listeners.
-	// for (int i = listeners.length - 2; i >= 0; i -= 2) {
-	// order is flipped so it goes in order as added
-	for (int i = 0; i < listeners.length; i += 2) {
-	    if (listeners[i] == ILogListener.class) {
-
-		ILogListener listener = (ILogListener) listeners[i + 1];
-
-		switch (level) {
-		case ERROR:
-		    listener.error(message);
-		    break;
-
-		case CONFIG:
-		    listener.config(message);
-		    break;
-
-		case WARNING:
-		    listener.warning(message);
-		    break;
-
-		case INFO:
-		    listener.info(message);
-		    break;
-
-		case EXCEPTION:
-		    listener.exception(message);
-		    break;
-
+	/**
+	 * Access to the Log singleton.
+	 * 
+	 * @return the Log singleton.
+	 */
+	public static Log getInstance() {
+		if (instance == null) {
+			try {
+				instance = new Log();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
-	    }
+		return instance;
 	}
 
-    }
+	// notify listeners of message
+	private void notifyListeners(String message, Level level) {
 
-    public void addLogListener(ILogListener logListener) {
+		if (_listenerList == null) {
+			return;
+		}
 
-	if (_listenerList == null) {
-	    _listenerList = new EventListenerList();
+		// Guaranteed to return a non-null array
+		Object[] listeners = _listenerList.getListenerList();
+
+		// This weird loop is the bullet proof way of notifying all listeners.
+		// for (int i = listeners.length - 2; i >= 0; i -= 2) {
+		// order is flipped so it goes in order as added
+		for (int i = 0; i < listeners.length; i += 2) {
+			if (listeners[i] == ILogListener.class) {
+
+				ILogListener listener = (ILogListener) listeners[i + 1];
+
+				switch (level) {
+				case ERROR:
+					listener.error(message);
+					break;
+
+				case CONFIG:
+					listener.config(message);
+					break;
+
+				case WARNING:
+					listener.warning(message);
+					break;
+
+				case INFO:
+					listener.info(message);
+					break;
+
+				case EXCEPTION:
+					listener.exception(message);
+					break;
+
+				}
+
+			}
+		}
+
 	}
 
-	// avoid adding duplicates
-	_listenerList.remove(ILogListener.class, logListener);
-	_listenerList.add(ILogListener.class, logListener);
-    }
+	public void addLogListener(ILogListener logListener) {
 
-    /**
-     * Remove a LogListener.
-     * 
-     * @param logListener
-     *            the LogListener to remove.
-     */
+		if (_listenerList == null) {
+			_listenerList = new EventListenerList();
+		}
 
-    public void removeLogListener(ILogListener logListener) {
-
-	if ((logListener == null) || (_listenerList == null)) {
-	    return;
+		// avoid adding duplicates
+		_listenerList.remove(ILogListener.class, logListener);
+		_listenerList.add(ILogListener.class, logListener);
 	}
 
-	_listenerList.remove(ILogListener.class, logListener);
-    }
+	/**
+	 * Remove a LogListener.
+	 * 
+	 * @param logListener
+	 *            the LogListener to remove.
+	 */
 
-    /**
-     * Send a error string to the listeners.
-     * 
-     * @param message
-     *            the error message string.
-     */
-    public void error(String message) {
-	notifyListeners(message, Level.ERROR);
-    }
+	public void removeLogListener(ILogListener logListener) {
 
-    /**
-     * Send a config string to the listeners.
-     * 
-     * @param message
-     *            the config message string.
-     */
+		if ((logListener == null) || (_listenerList == null)) {
+			return;
+		}
 
-    public void config(String message) {
-	notifyListeners(message, Level.CONFIG);
-    }
+		_listenerList.remove(ILogListener.class, logListener);
+	}
 
-    /**
-     * Send a warning to the logger.
-     * 
-     * @param message
-     *            the warning message.
-     */
-    public void warning(String message) {
-	notifyListeners(message, Level.WARNING);
-    }
+	/**
+	 * Send a error string to the listeners.
+	 * 
+	 * @param message
+	 *            the error message string.
+	 */
+	public void error(String message) {
+		notifyListeners(message, Level.ERROR);
+	}
 
-    /**
-     * Send an info string to the logger.
-     * 
-     * @param message
-     *            the informational string.
-     */
-    public void info(String message) {
-	notifyListeners(message, Level.INFO);
-    }
+	/**
+	 * Send a config string to the listeners.
+	 * 
+	 * @param message
+	 *            the config message string.
+	 */
 
-    /**
-     * Send an exception to the "severe" handler.
-     * 
-     * @param t
-     *            a Throwable--usually an Exception.
-     */
-    public void exception(Throwable t) {
-	notifyListeners(throwableToString(t), Level.EXCEPTION);
-    }
+	public void config(String message) {
+		notifyListeners(message, Level.CONFIG);
+	}
 
-    /**
-     * Place the stack trace from a throwable into a string.
-     * 
-     * @param t
-     *            the Throwable (Exception or Error)
-     * @return the string with the stack trace info.
-     */
-    private String throwableToString(Throwable t) {
-	StringWriter sw = new StringWriter();
-	t.printStackTrace(new PrintWriter(sw));
-	return sw.toString();
-    }
+	/**
+	 * Send a warning to the logger.
+	 * 
+	 * @param message
+	 *            the warning message.
+	 */
+	public void warning(String message) {
+		notifyListeners(message, Level.WARNING);
+	}
 
-    /**
-     * Singleton objects cannot be cloned, so we override clone to throw a
-     * CloneNotSupportedException.
-     */
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-	throw new CloneNotSupportedException();
-    }
+	/**
+	 * Send an info string to the logger.
+	 * 
+	 * @param message
+	 *            the informational string.
+	 */
+	public void info(String message) {
+		notifyListeners(message, Level.INFO);
+	}
+
+	/**
+	 * Send an exception to the "severe" handler.
+	 * 
+	 * @param t
+	 *            a Throwable--usually an Exception.
+	 */
+	public void exception(Throwable t) {
+		notifyListeners(throwableToString(t), Level.EXCEPTION);
+	}
+
+	/**
+	 * Place the stack trace from a throwable into a string.
+	 * 
+	 * @param t
+	 *            the Throwable (Exception or Error)
+	 * @return the string with the stack trace info.
+	 */
+	private String throwableToString(Throwable t) {
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(new PrintWriter(sw));
+		return sw.toString();
+	}
+
+	/**
+	 * Singleton objects cannot be cloned, so we override clone to throw a
+	 * CloneNotSupportedException.
+	 */
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
+	}
 
 }

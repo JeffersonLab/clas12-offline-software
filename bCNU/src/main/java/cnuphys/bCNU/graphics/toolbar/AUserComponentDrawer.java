@@ -21,149 +21,149 @@ import cnuphys.splot.plot.GraphicsUtilities;
 
 public abstract class AUserComponentDrawer extends DrawableAdapter {
 
-    // STring used when no PIDs found (e.g., a raw event)
-    private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
+	// STring used when no PIDs found (e.g., a raw event)
+	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
 
-    // the component on the toolbar being drawn upon
-    private UserToolBarComponent _component;
+	// the component on the toolbar being drawn upon
+	private UserToolBarComponent _component;
 
-    // used to get the text in the right place
-    private static int _ytext = -1;
+	// used to get the text in the right place
+	private static int _ytext = -1;
 
-    // used to get the text in the right place
-    private static int _fh = -1;
+	// used to get the text in the right place
+	private static int _fh = -1;
 
-    // used to get the line in the right place
-    private static int _yeven = -1;
+	// used to get the line in the right place
+	private static int _yeven = -1;
 
-    // used to get the line in the right place
-    private static int _yodd = -1;
+	// used to get the line in the right place
+	private static int _yodd = -1;
 
-    private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 11);
+	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 11);
 
-    // the owner view
-    protected BaseView _view;
+	// the owner view
+	protected BaseView _view;
 
-    /**
-     * Create a User Component (on the toolbar) drawer for a given view.
-     * 
-     * @param view
-     *            the view with a toolbar that has a user component.
-     */
-    public AUserComponentDrawer(BaseView view) {
-	_view = view;
-	_component = view.getUserComponent();
-    }
-
-    /**
-     * Draw on the component.
-     * 
-     * @param g
-     *            the graphics context.
-     * @param container
-     *            the container on the view.
-     */
-    @Override
-    public void draw(Graphics g, IContainer container) {
-
-	Rectangle b = _component.getBounds();
-
-	// fill the background
-	g.setColor(_component.getBackground());
-	g.fillRect(0, 0, b.width - 1, b.height - 1);
-
-	// get the unique lundids found in this event
-	Vector<LundId> lids = getUniqueLundIds();
-
-	int numMC = (lids == null) ? 0 : lids.size();
-
-	if (_fh < 0) {
-	    FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
-	    _fh = fm.getAscent();
-	    // _ytext = (b.height + fm.getHeight())/2 - 2;
-	    _ytext = (b.height + _fh) / 2;
-	    int yc = b.height / 2;
-
-	    _yeven = yc - _fh / 2;
-	    _yodd = yc + _fh / 2;
+	/**
+	 * Create a User Component (on the toolbar) drawer for a given view.
+	 * 
+	 * @param view
+	 *            the view with a toolbar that has a user component.
+	 */
+	public AUserComponentDrawer(BaseView view) {
+		_view = view;
+		_component = view.getUserComponent();
 	}
 
-	if (numMC == 0) {
-	    g.setFont(Fonts.smallFont);
-	    g.setColor(Color.red);
+	/**
+	 * Draw on the component.
+	 * 
+	 * @param g
+	 *            the graphics context.
+	 * @param container
+	 *            the container on the view.
+	 */
+	@Override
+	public void draw(Graphics g, IContainer container) {
 
-	    if (_ytext < 0) {
-		FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
-		_ytext = (b.height + fm.getHeight()) / 2 - 2;
-	    }
+		Rectangle b = _component.getBounds();
 
-	    g.drawString(NO_PIDS, 2, _ytext);
-	} else {
-	    // now draw all of them. Sort so order stays the same
-	    Collections.sort(lids);
-	    int x = 4;
-	    int xoff = -15;
-	    int index = 0;
-	    for (LundId lid : lids) {
-		if ((index % 2) == 0) {
-		    x = x + drawLineForLegend(g, x, _yeven, lid) + xoff;
-		} else {
-		    x = x + drawLineForLegend(g, x, _yodd, lid) + xoff;
+		// fill the background
+		g.setColor(_component.getBackground());
+		g.fillRect(0, 0, b.width - 1, b.height - 1);
+
+		// get the unique lundids found in this event
+		Vector<LundId> lids = getUniqueLundIds();
+
+		int numMC = (lids == null) ? 0 : lids.size();
+
+		if (_fh < 0) {
+			FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
+			_fh = fm.getAscent();
+			// _ytext = (b.height + fm.getHeight())/2 - 2;
+			_ytext = (b.height + _fh) / 2;
+			int yc = b.height / 2;
+
+			_yeven = yc - _fh / 2;
+			_yodd = yc + _fh / 2;
 		}
-		index++;
-	    }
 
-	}
-    }
+		if (numMC == 0) {
+			g.setFont(Fonts.smallFont);
+			g.setColor(Color.red);
 
-    /**
-     * Draw a line for use on a toolbar user component, most likely
-     * 
-     * @param g
-     *            the graphics context
-     * @param x
-     *            the horizontal staring point
-     * @param yc
-     *            the central vertical position
-     * @return the offset
-     */
-    public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
+			if (_ytext < 0) {
+				FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
+				_ytext = (b.height + fm.getHeight()) / 2 - 2;
+			}
 
-	Graphics2D g2 = (Graphics2D) g;
-	Stroke oldStroke = g2.getStroke();
-	LundStyle style = LundStyle.getStyle(lid);
-	g2.setStroke(style.getStroke());
+			g.drawString(NO_PIDS, 2, _ytext);
+		} else {
+			// now draw all of them. Sort so order stays the same
+			Collections.sort(lids);
+			int x = 4;
+			int xoff = -15;
+			int index = 0;
+			for (LundId lid : lids) {
+				if ((index % 2) == 0) {
+					x = x + drawLineForLegend(g, x, _yeven, lid) + xoff;
+				} else {
+					x = x + drawLineForLegend(g, x, _yodd, lid) + xoff;
+				}
+				index++;
+			}
 
-	int linelen = 30;
-
-	if ((lid != null)) {
-	    GraphicsUtilities.drawHighlightedLine(g2, x, yc, x + linelen, yc,
-		    style.getLineColor(),
-		    ASwimTrajectoryDrawer.getHighlightColor(lid));
-	} else {
-	    g.setColor(style.getLineColor());
-	    g2.drawLine(x, yc, x + linelen, yc);
+		}
 	}
 
-	x += linelen + 3;
+	/**
+	 * Draw a line for use on a toolbar user component, most likely
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param x
+	 *            the horizontal staring point
+	 * @param yc
+	 *            the central vertical position
+	 * @return the offset
+	 */
+	public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
 
-	g2.setStroke(oldStroke);
+		Graphics2D g2 = (Graphics2D) g;
+		Stroke oldStroke = g2.getStroke();
+		LundStyle style = LundStyle.getStyle(lid);
+		g2.setStroke(style.getStroke());
 
-	// now the name
-	g.setFont(labelFont);
-	FontMetrics fm = g.getFontMetrics(labelFont);
-	g.setColor(Color.black);
-	g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
+		int linelen = 30;
 
-	return linelen + fm.stringWidth(lid.getName()) + 9;
-    }
+		if ((lid != null)) {
+			GraphicsUtilities.drawHighlightedLine(g2, x, yc, x + linelen, yc,
+					style.getLineColor(),
+					ASwimTrajectoryDrawer.getHighlightColor(lid));
+		} else {
+			g.setColor(style.getLineColor());
+			g2.drawLine(x, yc, x + linelen, yc);
+		}
 
-    /**
-     * This method must be filled in to return all the unique LundIds associated
-     * with this event.
-     * 
-     * @return all the unique LundIds associated with this event.
-     */
-    protected abstract Vector<LundId> getUniqueLundIds();
+		x += linelen + 3;
+
+		g2.setStroke(oldStroke);
+
+		// now the name
+		g.setFont(labelFont);
+		FontMetrics fm = g.getFontMetrics(labelFont);
+		g.setColor(Color.black);
+		g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
+
+		return linelen + fm.stringWidth(lid.getName()) + 9;
+	}
+
+	/**
+	 * This method must be filled in to return all the unique LundIds associated
+	 * with this event.
+	 * 
+	 * @return all the unique LundIds associated with this event.
+	 */
+	protected abstract Vector<LundId> getUniqueLundIds();
 
 }

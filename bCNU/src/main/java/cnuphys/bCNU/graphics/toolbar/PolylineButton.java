@@ -19,58 +19,58 @@ import cnuphys.bCNU.item.AItem;
  */
 @SuppressWarnings("serial")
 public class PolylineButton extends ToolBarToggleButton implements
-	IRubberbanded {
+		IRubberbanded {
 
-    /**
-     * Create a button for creating a polygon.
-     * 
-     * @param container
-     *            the owner container.
-     */
-    public PolylineButton(IContainer container) {
-	super(container, "images/polyline.gif", "Create a polyline");
-    }
-
-    /**
-     * The mouse has been pressed, start rubber banding.
-     * 
-     * @param mouseEvent
-     *            the causal mouse event.
-     */
-    @Override
-    public void mousePressed(MouseEvent mouseEvent) {
-	if (rubberband == null) {
-	    rubberband = new Rubberband(container, this,
-		    Rubberband.Policy.POLYLINE);
-	    rubberband.setActive(true);
-	    rubberband.startRubberbanding(mouseEvent.getPoint());
+	/**
+	 * Create a button for creating a polygon.
+	 * 
+	 * @param container
+	 *            the owner container.
+	 */
+	public PolylineButton(IContainer container) {
+		super(container, "images/polyline.gif", "Create a polyline");
 	}
-    }
 
-    /**
-     * Notification that rubber banding is finished.
-     */
-    @Override
-    public void doneRubberbanding() {
-	Point pp[] = rubberband.getRubberbandVertices();
-	rubberband = null;
-
-	if ((pp == null) || (pp.length < 2)) {
-	    return;
+	/**
+	 * The mouse has been pressed, start rubber banding.
+	 * 
+	 * @param mouseEvent
+	 *            the causal mouse event.
+	 */
+	@Override
+	public void mousePressed(MouseEvent mouseEvent) {
+		if (rubberband == null) {
+			rubberband = new Rubberband(container, this,
+					Rubberband.Policy.POLYLINE);
+			rubberband.setActive(true);
+			rubberband.startRubberbanding(mouseEvent.getPoint());
+		}
 	}
-	AItem item = container.createPolylineItem(
-		container.getAnnotationLayer(), pp);
-	if (item != null) {
-	    item.setRightClickable(true);
-	    item.setDraggable(true);
-	    item.setRotatable(true);
-	    item.setResizable(true);
-	    item.setDeletable(true);
-	    item.setLocked(false);
-	}
-	container.selectAllItems(false);
-	container.getToolBar().resetDefaultSelection();
-	container.refresh();
 
-    }
+	/**
+	 * Notification that rubber banding is finished.
+	 */
+	@Override
+	public void doneRubberbanding() {
+		Point pp[] = rubberband.getRubberbandVertices();
+		rubberband = null;
+
+		if ((pp == null) || (pp.length < 2)) {
+			return;
+		}
+		AItem item = container.createPolylineItem(
+				container.getAnnotationLayer(), pp);
+		if (item != null) {
+			item.setRightClickable(true);
+			item.setDraggable(true);
+			item.setRotatable(true);
+			item.setResizable(true);
+			item.setDeletable(true);
+			item.setLocked(false);
+		}
+		container.selectAllItems(false);
+		container.getToolBar().resetDefaultSelection();
+		container.refresh();
+
+	}
 }

@@ -15,22 +15,22 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class ContainerPanel extends JPanel {
 
-    // the container
-    private IContainer _container;
+	// the container
+	private IContainer _container;
 
-    public ContainerPanel(IContainer container) {
-	_container = container;
+	public ContainerPanel(IContainer container) {
+		_container = container;
 
-	setLayout(new BorderLayout(4, 4));
-	add(container.getComponent(), BorderLayout.CENTER);
-    }
+		setLayout(new BorderLayout(4, 4));
+		add(container.getComponent(), BorderLayout.CENTER);
+	}
 
-    /**
-     * Get the underlying container
-     * 
-     * @return the underlying container
-     */
-    public IContainer getContainer() {
-	return _container;
-    }
+	/**
+	 * Get the underlying container
+	 * 
+	 * @return the underlying container
+	 */
+	public IContainer getContainer() {
+		return _container;
+	}
 }

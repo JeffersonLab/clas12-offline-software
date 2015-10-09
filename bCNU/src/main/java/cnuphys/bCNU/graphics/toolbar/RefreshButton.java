@@ -13,26 +13,26 @@ import cnuphys.bCNU.graphics.container.IContainer;
 @SuppressWarnings("serial")
 public class RefreshButton extends ToolBarButton {
 
-    /**
-     * Create the Refresh button.
-     * 
-     * @param container
-     *            the container this button applies to.
-     */
-    public RefreshButton(IContainer container) {
-	super(container, "images/refresh.gif", "Refresh");
-    }
+	/**
+	 * Create the Refresh button.
+	 * 
+	 * @param container
+	 *            the container this button applies to.
+	 */
+	public RefreshButton(IContainer container) {
+		super(container, "images/refresh.gif", "Refresh");
+	}
 
-    /**
-     * This is what I do if I am pressed
-     * 
-     * @param e
-     *            The causal event.
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	container.refresh();
-	container.getToolBar().resetDefaultSelection();
-    }
+	/**
+	 * This is what I do if I am pressed
+	 * 
+	 * @param e
+	 *            The causal event.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		container.refresh();
+		container.getToolBar().resetDefaultSelection();
+	}
 
 }

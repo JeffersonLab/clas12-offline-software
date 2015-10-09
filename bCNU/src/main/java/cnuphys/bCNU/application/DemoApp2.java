@@ -27,149 +27,149 @@ import cnuphys.bCNU.view.XMLView;
 
 public class DemoApp2 extends BaseMDIApplication {
 
-    // the singleton
-    private static DemoApp2 instance;
+	// the singleton
+	private static DemoApp2 instance;
 
-    /**
-     * Constructor (private--used to create singleton)
-     * 
-     * @param keyVals
-     *            an optional variable length list of attributes in type-value
-     *            pairs. For example, AttributeType.NAME, "my application",
-     *            AttributeType.CENTER, true, etc.
-     */
-    private DemoApp2(Object... keyVals) {
-	super(keyVals);
-    }
-
-    /**
-     * Public access to the singleton.
-     * 
-     * @return the singleton (the main application frame.)(
-     */
-    public static DemoApp2 getInstance() {
-	if (instance == null) {
-	    instance = new DemoApp2(AttributeType.TITLE,
-		    "Demo Application of Generic bCNU Views",
-		    AttributeType.BACKGROUNDIMAGE, "images/cnu.png",
-		    AttributeType.FRACTION, 0.65);
-
-	    instance.addInitialViews();
+	/**
+	 * Constructor (private--used to create singleton)
+	 * 
+	 * @param keyVals
+	 *            an optional variable length list of attributes in type-value
+	 *            pairs. For example, AttributeType.NAME, "my application",
+	 *            AttributeType.CENTER, true, etc.
+	 */
+	private DemoApp2(Object... keyVals) {
+		super(keyVals);
 	}
 
-	return instance;
-    }
+	/**
+	 * Public access to the singleton.
+	 * 
+	 * @return the singleton (the main application frame.)(
+	 */
+	public static DemoApp2 getInstance() {
+		if (instance == null) {
+			instance = new DemoApp2(AttributeType.TITLE,
+					"Demo Application of Generic bCNU Views",
+					AttributeType.BACKGROUNDIMAGE, "images/cnu.png",
+					AttributeType.FRACTION, 0.65);
 
-    private JPanel makeUserPanel() {
-	JPanel panel = new JPanel();
-
-	panel.setBorder(new CommonBorder("Gagik's Curiosities"));
-
-	panel.setLayout(new BorderLayout(4, 4));
-	// north
-	JPanel nPanel = new JPanel();
-	nPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-	nPanel.add(new JButton("Go"));
-	nPanel.add(new JButton("To"));
-	nPanel.add(new JButton("Hell"));
-
-	// center
-	try {
-	    final BufferedImage img = ImageIO
-		    .read(new URL(
-			    "http://i5.photobucket.com/albums/y188/MsPurrl/Fictional%20Characters/Zippy.jpg"));
-
-	    JComponent comp = new JComponent() {
-		@Override
-		public void paintComponent(Graphics g) {
-		    g.drawImage(img, 0, 0, this);
+			instance.addInitialViews();
 		}
-	    };
-	    panel.add(comp, BorderLayout.CENTER);
-	} catch (MalformedURLException e) {
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    e.printStackTrace();
+
+		return instance;
 	}
 
-	// south
-	JPanel sPanel = new JPanel();
-	sPanel.setLayout(new GridLayout(2, 2));
-	sPanel.add(new JButton("Are we"));
-	sPanel.add(new JButton("Having"));
-	sPanel.add(new JButton("Fun"));
-	sPanel.add(new JButton("Yet?"));
+	private JPanel makeUserPanel() {
+		JPanel panel = new JPanel();
 
-	panel.add(nPanel, BorderLayout.NORTH);
-	panel.add(sPanel, BorderLayout.SOUTH);
-	return panel;
-    }
+		panel.setBorder(new CommonBorder("Gagik's Curiosities"));
 
-    /**
-     * Add the initial views to the desktop.
-     */
-    private void addInitialViews() {
+		panel.setLayout(new BorderLayout(4, 4));
+		// north
+		JPanel nPanel = new JPanel();
+		nPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		nPanel.add(new JButton("Go"));
+		nPanel.add(new JButton("To"));
+		nPanel.add(new JButton("Hell"));
 
-	// add logview
-	LogView logView = new LogView();
-	logView.setVisible(false);
-	ViewManager.getInstance().getViewMenu().addSeparator();
+		// center
+		try {
+			final BufferedImage img = ImageIO
+					.read(new URL(
+							"http://i5.photobucket.com/albums/y188/MsPurrl/Fictional%20Characters/Zippy.jpg"));
 
-	// log some environment info
-	Log.getInstance().config(Environment.getInstance().toString());
-
-	// drawing view
-	DrawingView drawingView = DrawingView.createDrawingView();
-	drawingView.setVisible(true);
-
-	// add a user panel on the east
-	drawingView.add(makeUserPanel(), BorderLayout.EAST);
-
-	// xml view
-	XMLView xmlView = new XMLView();
-	xmlView.setVisible(false);
-
-    }
-
-    /**
-     * Main program used for testing only.
-     * <p>
-     * Command line arguments:</br> -p [dir] dir is the optional default
-     * directory for the file manager
-     * 
-     * @param arg
-     *            the command line arguments.
-     */
-    public static void main(String[] arg) {
-
-	if ((arg != null) && (arg.length > 0)) {
-	    int len = arg.length;
-	    int lm1 = len - 1;
-	    boolean done = false;
-	    int i = 0;
-	    while (!done) {
-		if (arg[i].equalsIgnoreCase("-p")) {
-		    if (i < lm1) {
-			i++;
-			FileUtilities.setDefaultDir(arg[i]);
-		    }
+			JComponent comp = new JComponent() {
+				@Override
+				public void paintComponent(Graphics g) {
+					g.drawImage(img, 0, 0, this);
+				}
+			};
+			panel.add(comp, BorderLayout.CENTER);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		i++;
-		done = (i >= lm1);
-	    }
+
+		// south
+		JPanel sPanel = new JPanel();
+		sPanel.setLayout(new GridLayout(2, 2));
+		sPanel.add(new JButton("Are we"));
+		sPanel.add(new JButton("Having"));
+		sPanel.add(new JButton("Fun"));
+		sPanel.add(new JButton("Yet?"));
+
+		panel.add(nPanel, BorderLayout.NORTH);
+		panel.add(sPanel, BorderLayout.SOUTH);
+		return panel;
 	}
 
-	final DemoApp2 frame = getInstance();
+	/**
+	 * Add the initial views to the desktop.
+	 */
+	private void addInitialViews() {
 
-	// now make the frame visible, in the AWT thread
-	EventQueue.invokeLater(new Runnable() {
+		// add logview
+		LogView logView = new LogView();
+		logView.setVisible(false);
+		ViewManager.getInstance().getViewMenu().addSeparator();
 
-	    @Override
-	    public void run() {
-		frame.setVisible(true);
-	    }
+		// log some environment info
+		Log.getInstance().config(Environment.getInstance().toString());
 
-	});
-	Log.getInstance().error("DemoApp is ready.");
-    }
+		// drawing view
+		DrawingView drawingView = DrawingView.createDrawingView();
+		drawingView.setVisible(true);
+
+		// add a user panel on the east
+		drawingView.add(makeUserPanel(), BorderLayout.EAST);
+
+		// xml view
+		XMLView xmlView = new XMLView();
+		xmlView.setVisible(false);
+
+	}
+
+	/**
+	 * Main program used for testing only.
+	 * <p>
+	 * Command line arguments:</br> -p [dir] dir is the optional default
+	 * directory for the file manager
+	 * 
+	 * @param arg
+	 *            the command line arguments.
+	 */
+	public static void main(String[] arg) {
+
+		if ((arg != null) && (arg.length > 0)) {
+			int len = arg.length;
+			int lm1 = len - 1;
+			boolean done = false;
+			int i = 0;
+			while (!done) {
+				if (arg[i].equalsIgnoreCase("-p")) {
+					if (i < lm1) {
+						i++;
+						FileUtilities.setDefaultDir(arg[i]);
+					}
+				}
+				i++;
+				done = (i >= lm1);
+			}
+		}
+
+		final DemoApp2 frame = getInstance();
+
+		// now make the frame visible, in the AWT thread
+		EventQueue.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				frame.setVisible(true);
+			}
+
+		});
+		Log.getInstance().error("DemoApp is ready.");
+	}
 }

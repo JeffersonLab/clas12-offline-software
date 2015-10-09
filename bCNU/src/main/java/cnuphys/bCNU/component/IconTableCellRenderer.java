@@ -43,154 +43,154 @@ import javax.swing.table.TableModel;
 @SuppressWarnings("serial")
 public class IconTableCellRenderer extends DefaultTableCellRenderer {
 
-    Icon defaultIcon;
-    static AbstractButton button = new AbstractButton() {
-    };
+	Icon defaultIcon;
+	static AbstractButton button = new AbstractButton() {
+	};
 
-    static {
-	button.setModel(new DefaultButtonModel());
-    }
+	static {
+		button.setModel(new DefaultButtonModel());
+	}
 
-    /**
-     * Constructs an IconTableCellRenderer which will use a crossed rectangle as
-     * default icon
-     */
-    public IconTableCellRenderer() {
-    }
+	/**
+	 * Constructs an IconTableCellRenderer which will use a crossed rectangle as
+	 * default icon
+	 */
+	public IconTableCellRenderer() {
+	}
 
-    /**
-     * @see DefaultTableCellRenderer#getTableCellRendererComponent(JTable,
-     *      Object, boolean, boolean, int, int)
-     */
-    @Override
-    public Component getTableCellRendererComponent(final JTable table,
-	    Object value, boolean isSelected, boolean hasFocus, int row,
-	    int column) {
-	Icon icon = (Icon) value;
-	setIcon(null);
-	setText("");
-	setBackground(getCorrectBackground(table, isSelected));
+	/**
+	 * @see DefaultTableCellRenderer#getTableCellRendererComponent(JTable,
+	 *      Object, boolean, boolean, int, int)
+	 */
+	@Override
+	public Component getTableCellRendererComponent(final JTable table,
+			Object value, boolean isSelected, boolean hasFocus, int row,
+			int column) {
+		Icon icon = (Icon) value;
+		setIcon(null);
+		setText("");
+		setBackground(getCorrectBackground(table, isSelected));
 
-	try {
-	    createIcon(icon, this);
-	} catch (ClassCastException cce) {
-	    // some paintIcon implementations cast the component to a
-	    // specific subclass of JComponent
-	    try {
-		String className = cce.getMessage();
-		className = className.substring(className.lastIndexOf(" ") + 1);
-		Class clazz = Class.forName(className);
-		createIcon(icon, (JComponent) clazz.newInstance());
-	    } catch (InstantiationException ie) {
-		// OceanTheme.IFIcon#paintIcon casts the component to
-		// AbstractButton
 		try {
-		    createIcon(icon, button);
-		} catch (ClassCastException cce2) {
-		} catch (InstantiationException ie2) {
+			createIcon(icon, this);
+		} catch (ClassCastException cce) {
+			// some paintIcon implementations cast the component to a
+			// specific subclass of JComponent
+			try {
+				String className = cce.getMessage();
+				className = className.substring(className.lastIndexOf(" ") + 1);
+				Class clazz = Class.forName(className);
+				createIcon(icon, (JComponent) clazz.newInstance());
+			} catch (InstantiationException ie) {
+				// OceanTheme.IFIcon#paintIcon casts the component to
+				// AbstractButton
+				try {
+					createIcon(icon, button);
+				} catch (ClassCastException cce2) {
+				} catch (InstantiationException ie2) {
+				}
+			} catch (IllegalAccessException iae) {
+			} catch (ClassNotFoundException cnfe) {
+			}
+		} catch (InstantiationException ie3) {
 		}
-	    } catch (IllegalAccessException iae) {
-	    } catch (ClassNotFoundException cnfe) {
-	    }
-	} catch (InstantiationException ie3) {
-	}
-	if (getIcon() == null) {
-	    try {
-		createIcon(defaultIcon == null ? new XIcon(icon.getIconWidth(),
-			icon.getIconHeight()) : defaultIcon, null);
-	    } catch (Exception ex) {
-	    }
-	}
-	setBackground(getCorrectBackground(table, isSelected));
-
-	return this;
-    }
-
-    /**
-     * Paints the icon to a BufferedImage for use as the renderer's Icon. Also
-     * sets the height of the table row to accommodate the icon.
-     *
-     * @param table
-     *            the JTable
-     * @param row
-     *            row number
-     * @param icon
-     *            the icon to be painted
-     * @param component
-     *            the component it represents
-     * @throws java.lang.ClassCastException
-     *             may originate in paintIcon
-     * @throws java.lang.InstantiationException
-     *             for a default abstract class
-     */
-    private void createIcon(Icon icon, JComponent component)
-	    throws ClassCastException, InstantiationException {
-	BufferedImage image = new BufferedImage(icon.getIconWidth() + 2,
-		icon.getIconHeight() + 2, BufferedImage.TYPE_INT_ARGB);
-	Graphics g = image.createGraphics();
-	icon.paintIcon(component, g, 2, 2);
-	setIcon(new ImageIcon(image));
-    }
-
-    /**
-     * Obtains the correct background as per the selection status
-     *
-     * @param table
-     *            the JTable
-     * @param isSelected
-     *            selection status
-     * @return the correct background Color
-     */
-    private Color getCorrectBackground(JTable table, boolean isSelected) {
-	return isSelected ? null : table.getBackground();
-    }
-
-    public static void setRowHeightsForIcons(JTable table) {
-	TableModel model = table.getModel();
-
-	for (int col = 0; col < table.getColumnCount(); col++) {
-	    if (Icon.class.isAssignableFrom(table.getColumnClass(col))
-		    && table.getDefaultRenderer(Icon.class) instanceof IconTableCellRenderer) {
-		for (int row = 0; row < model.getRowCount(); row++) {
-		    Icon icon = (Icon) model.getValueAt(row, col);
-		    table.setRowHeight(
-			    table.convertRowIndexToView(row),
-			    Math.max(table.getRowHeight(row),
-				    icon.getIconHeight() + 2));
+		if (getIcon() == null) {
+			try {
+				createIcon(defaultIcon == null ? new XIcon(icon.getIconWidth(),
+						icon.getIconHeight()) : defaultIcon, null);
+			} catch (Exception ex) {
+			}
 		}
-	    }
-	}
-    }
+		setBackground(getCorrectBackground(table, isSelected));
 
-    /**
-     * The default icon used if none is supplied. It is drawn as a rectangle
-     * with diagonals
-     */
-    class XIcon implements Icon {
-
-	int width;
-	int height;
-
-	XIcon(int width, int height) {
-	    this.width = width;
-	    this.height = height;
+		return this;
 	}
 
-	@Override
-	public void paintIcon(Component c, Graphics g, int x, int y) {
-	    g.drawRect(x, y, width, height);
-	    g.drawLine(x, y, x + width, y + height);
-	    g.drawLine(x + width, y, x, y + height);
+	/**
+	 * Paints the icon to a BufferedImage for use as the renderer's Icon. Also
+	 * sets the height of the table row to accommodate the icon.
+	 *
+	 * @param table
+	 *            the JTable
+	 * @param row
+	 *            row number
+	 * @param icon
+	 *            the icon to be painted
+	 * @param component
+	 *            the component it represents
+	 * @throws java.lang.ClassCastException
+	 *             may originate in paintIcon
+	 * @throws java.lang.InstantiationException
+	 *             for a default abstract class
+	 */
+	private void createIcon(Icon icon, JComponent component)
+			throws ClassCastException, InstantiationException {
+		BufferedImage image = new BufferedImage(icon.getIconWidth() + 2,
+				icon.getIconHeight() + 2, BufferedImage.TYPE_INT_ARGB);
+		Graphics g = image.createGraphics();
+		icon.paintIcon(component, g, 2, 2);
+		setIcon(new ImageIcon(image));
 	}
 
-	@Override
-	public int getIconWidth() {
-	    return width;
+	/**
+	 * Obtains the correct background as per the selection status
+	 *
+	 * @param table
+	 *            the JTable
+	 * @param isSelected
+	 *            selection status
+	 * @return the correct background Color
+	 */
+	private Color getCorrectBackground(JTable table, boolean isSelected) {
+		return isSelected ? null : table.getBackground();
 	}
 
-	@Override
-	public int getIconHeight() {
-	    return height;
+	public static void setRowHeightsForIcons(JTable table) {
+		TableModel model = table.getModel();
+
+		for (int col = 0; col < table.getColumnCount(); col++) {
+			if (Icon.class.isAssignableFrom(table.getColumnClass(col))
+					&& table.getDefaultRenderer(Icon.class) instanceof IconTableCellRenderer) {
+				for (int row = 0; row < model.getRowCount(); row++) {
+					Icon icon = (Icon) model.getValueAt(row, col);
+					table.setRowHeight(
+							table.convertRowIndexToView(row),
+							Math.max(table.getRowHeight(row),
+									icon.getIconHeight() + 2));
+				}
+			}
+		}
 	}
-    }
+
+	/**
+	 * The default icon used if none is supplied. It is drawn as a rectangle
+	 * with diagonals
+	 */
+	class XIcon implements Icon {
+
+		int width;
+		int height;
+
+		XIcon(int width, int height) {
+			this.width = width;
+			this.height = height;
+		}
+
+		@Override
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			g.drawRect(x, y, width, height);
+			g.drawLine(x, y, x + width, y + height);
+			g.drawLine(x + width, y, x, y + height);
+		}
+
+		@Override
+		public int getIconWidth() {
+			return width;
+		}
+
+		@Override
+		public int getIconHeight() {
+			return height;
+		}
+	}
 }

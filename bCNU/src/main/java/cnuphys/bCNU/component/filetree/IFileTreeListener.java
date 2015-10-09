@@ -8,7 +8,7 @@ import java.util.EventListener;
 import java.util.List;
 
 public interface IFileTreeListener extends EventListener {
-    public void fileDoubleClicked(String fullPath);
+	public void fileDoubleClicked(String fullPath);
 
-    public void filesDoubleClicked(List<File> files);
+	public void filesDoubleClicked(List<File> files);
 }

@@ -1,8 +1,6 @@
 package cnuphys.bCNU.eliza;
 
 import java.io.*;
-import java.net.URL;
-
 import cnuphys.bCNU.util.Environment;
 
 /**
@@ -259,12 +257,12 @@ public class ElizaMain {
 	 * @return
 	 */
 	int readScript() {
-		
+
 		BufferedReader bufferedReader = bufferedReaderFromFile();
 		if (bufferedReader == null) {
 			bufferedReader = bufferedReaderFromResource();
 		}
-		
+
 		if (bufferedReader == null) {
 			return 1;
 		}
@@ -278,15 +276,14 @@ public class ElizaMain {
 				collect(s);
 			}
 			bufferedReader.close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			return 1;
 		}
 
 		return 0;
 	}
-	
+
 	private BufferedReader bufferedReaderFromFile() {
 		File file = new File("data/elizaScript");
 		BufferedReader br = null;
@@ -295,19 +292,18 @@ public class ElizaMain {
 			try {
 				FileReader fileReader = new FileReader(file);
 				br = new BufferedReader(fileReader);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		return br;
 	}
-	
+
 	private BufferedReader bufferedReaderFromResource() {
-	    System.err.println(Environment.getInstance().getClassPath());
-		InputStream inStream = getClass().getClassLoader().getResourceAsStream("data/elizaScript");
+		System.err.println(Environment.getInstance().getClassPath());
+		InputStream inStream = getClass().getClassLoader().getResourceAsStream(
+				"data/elizaScript");
 		return new BufferedReader(new InputStreamReader(inStream));
 	}
-
 
 }

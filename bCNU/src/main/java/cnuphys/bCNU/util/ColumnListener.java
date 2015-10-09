@@ -14,44 +14,44 @@ import javax.swing.table.TableColumnModel;
  */
 public class ColumnListener extends MouseAdapter {
 
-    // TODO fix to work with column rearrangement
+	// TODO fix to work with column rearrangement
 
-    // parent table
-    protected JTable _table;
+	// parent table
+	protected JTable _table;
 
-    // ascending sort?
-    protected boolean _ascendingSort;
+	// ascending sort?
+	protected boolean _ascendingSort;
 
-    // what is the current sort column
-    protected int _sortColumn;
+	// what is the current sort column
+	protected int _sortColumn;
 
-    // will be notified to sort
-    protected ITableSortListener _sortListener;
+	// will be notified to sort
+	protected ITableSortListener _sortListener;
 
-    public ColumnListener(JTable table, ITableSortListener sortListener) {
-	_table = table;
-	_sortListener = sortListener;
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-	TableColumnModel colModel = _table.getColumnModel();
-	int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
-	int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
-
-	if (modelIndex < 0) {
-	    return;
+	public ColumnListener(JTable table, ITableSortListener sortListener) {
+		_table = table;
+		_sortListener = sortListener;
 	}
 
-	// toggle sort direction?
-	if (_sortColumn == modelIndex) {
-	    _ascendingSort = !_ascendingSort;
-	} else {
-	    _sortColumn = modelIndex;
-	}
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		TableColumnModel colModel = _table.getColumnModel();
+		int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
+		int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
 
-	if (_sortListener != null) {
-	    _sortListener.sort(_table, _sortColumn, _ascendingSort);
+		if (modelIndex < 0) {
+			return;
+		}
+
+		// toggle sort direction?
+		if (_sortColumn == modelIndex) {
+			_ascendingSort = !_ascendingSort;
+		} else {
+			_sortColumn = modelIndex;
+		}
+
+		if (_sortListener != null) {
+			_sortListener.sort(_table, _sortColumn, _ascendingSort);
+		}
 	}
-    }
 }
