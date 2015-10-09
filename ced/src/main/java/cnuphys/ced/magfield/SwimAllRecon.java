@@ -22,68 +22,68 @@ import cnuphys.swim.Swimming;
  */
 public class SwimAllRecon implements ISwimAll {
 
-    // convenience reference to event manager
-    private static ClasIoEventManager _eventManager = ClasIoEventManager
-	    .getInstance();
+	// convenience reference to event manager
+	private static ClasIoEventManager _eventManager = ClasIoEventManager
+			.getInstance();
 
-    // integration cutoff
-    private static final double RMAX = 10.0;
-    private static final double PATHMAX = 10.0;
+	// integration cutoff
+	private static final double RMAX = 10.0;
+	private static final double PATHMAX = 10.0;
 
-    /**
-     * Get all the row data so the trajectory dialog can be updated.
-     * 
-     * @param manager
-     *            the swim manager
-     * @return a vector of TrajectoryRowData objects.
-     */
-    @Override
-    public Vector<TrajectoryRowData> getRowData() {
-	return ClasIoReconEventView.getInstance().getRowData();
-    }
-
-    /**
-     * Swim all Monte Carlo particles
-     * 
-     * @param manager
-     *            the swim manager
-     */
-    @Override
-    public void swimAll() {
-	// System.err.println("SWIM ALL RECON");
-	if (ClasIoEventManager.getInstance().isAccumulating()) {
-	    return;
+	/**
+	 * Get all the row data so the trajectory dialog can be updated.
+	 * 
+	 * @param manager
+	 *            the swim manager
+	 * @return a vector of TrajectoryRowData objects.
+	 */
+	@Override
+	public Vector<TrajectoryRowData> getRowData() {
+		return ClasIoReconEventView.getInstance().getRowData();
 	}
 
-	Vector<TrajectoryRowData> data = getRowData();
-	if (data == null) {
-	    return;
-	}
-	// System.err.println("SWIM " + data.size() + "  recon trax");
-
-	Swimmer swimmer = Swimming.getSwimmer();
-	double stepSize = 5e-4; // m
-	DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
-
-	for (TrajectoryRowData trd : data) {
-	    LundId lid = LundSupport.getInstance().get(trd.getId());
-
-	    if (lid != null) {
-		SwimTrajectory traj;
-		try {
-		    traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
-			    trd.getYo() / 100, trd.getZo() / 100,
-			    trd.getMomentum() / 1000, trd.getTheta(),
-			    trd.getPhi(), stopper, PATHMAX, stepSize,
-			    Swimmer.CLAS_Tolerance, null);
-		    traj.setLundId(lid);
-		    Swimming.addReconTrajectory(traj);
-		} catch (RungeKuttaException e) {
-		    e.printStackTrace();
+	/**
+	 * Swim all Monte Carlo particles
+	 * 
+	 * @param manager
+	 *            the swim manager
+	 */
+	@Override
+	public void swimAll() {
+		// System.err.println("SWIM ALL RECON");
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
+			return;
 		}
-	    }
+
+		Vector<TrajectoryRowData> data = getRowData();
+		if (data == null) {
+			return;
+		}
+		// System.err.println("SWIM " + data.size() + "  recon trax");
+
+		Swimmer swimmer = Swimming.getSwimmer();
+		double stepSize = 5e-4; // m
+		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
+
+		for (TrajectoryRowData trd : data) {
+			LundId lid = LundSupport.getInstance().get(trd.getId());
+
+			if (lid != null) {
+				SwimTrajectory traj;
+				try {
+					traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
+							trd.getYo() / 100, trd.getZo() / 100,
+							trd.getMomentum() / 1000, trd.getTheta(),
+							trd.getPhi(), stopper, PATHMAX, stepSize,
+							Swimmer.CLAS_Tolerance, null);
+					traj.setLundId(lid);
+					Swimming.addReconTrajectory(traj);
+				} catch (RungeKuttaException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
 
 	}
-
-    }
 }

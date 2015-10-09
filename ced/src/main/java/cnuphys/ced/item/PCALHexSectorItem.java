@@ -65,7 +65,8 @@ public class PCALHexSectorItem extends HexSectorItem {
 		for (int stripType = 0; stripType < 3; stripType++) {
 			if (_pcalView.showStrips(stripType)) {
 				for (int stripIndex = 0; stripIndex < PCALGeometry.PCAL_NUMSTRIP[stripType]; stripIndex++) {
-					_stripPoly[stripType][stripIndex] = stripPolygon(container, stripType, stripIndex);
+					_stripPoly[stripType][stripIndex] = stripPolygon(container,
+							stripType, stripIndex);
 					g.setColor(Color.white);
 					g.fillPolygon(_stripPoly[stripType][stripIndex]);
 				}
@@ -113,10 +114,11 @@ public class PCALHexSectorItem extends HexSectorItem {
 					Polygon poly = _stripPoly[view0][strip0];
 
 					// if mctruth and have energy deposited, use it
-					if (_pcalView.showMcTruth() && (ecData.pcal_true_totEdep != null)) {
+					if (_pcalView.showMcTruth()
+							&& (ecData.pcal_true_totEdep != null)) {
 
-						int alpha = (int) ((255 * ecData.pcal_true_totEdep[i])
-								/ (ClasIoEventManager.getInstance().getMaxEdepCal(0)));
+						int alpha = (int) ((255 * ecData.pcal_true_totEdep[i]) / (ClasIoEventManager
+								.getInstance().getMaxEdepCal(0)));
 						alpha = Math.max(60, Math.min(255, alpha));
 						g.setColor(new Color(255, 0, 0, alpha));
 					} else {
@@ -142,7 +144,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 		g.drawLine(pp.x - 4, pp.y - 4, pp.x + 4, pp.y + 4);
 		g.drawLine(pp.x - 4, pp.y + 4, pp.x + 4, pp.y - 4);
 	}
-	
+
 	/**
 	 * Convert ijk coordinates to world graphics coordinates
 	 * 
@@ -156,7 +158,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 		ijkToWorld(pijk, wp);
 		container.worldToLocal(pp, wp);
 	}
-	
+
 	/**
 	 * Convert ijk coordinates to world graphics coordinates
 	 * 
@@ -173,7 +175,6 @@ public class PCALHexSectorItem extends HexSectorItem {
 		GeometryManager.cal_labXYZToWorld(0, labXYZ, wp);
 	}
 
-
 	/**
 	 * Get the polygon for a u, v or w strip
 	 * 
@@ -183,7 +184,8 @@ public class PCALHexSectorItem extends HexSectorItem {
 	 *            the strip index [0..(EC_NUMSTRIP-1)]
 	 * @return
 	 */
-	public Polygon stripPolygon(IContainer container, int stripType, int stripIndex) {
+	public Polygon stripPolygon(IContainer container, int stripType,
+			int stripIndex) {
 		Polygon poly = new Polygon();
 		Point pp = new Point();
 
@@ -214,7 +216,8 @@ public class PCALHexSectorItem extends HexSectorItem {
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp,
+			Point2D.Double wp, List<String> feedbackStrings) {
 
 		if (contains(container, pp)) {
 
@@ -249,13 +252,14 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 			String labxyz = "$yellow$lab xyz " + vecStr(labXYZ) + " cm";
 			feedbackStrings.add(labxyz);
-			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", labRho,
-					(Math.toDegrees(labPhi)));
+			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi
+					+ " (%-6.2f, %-6.2f)", labRho, (Math.toDegrees(labPhi)));
 			feedbackStrings.add(labRhoPhi);
 
 			String sectxyz = "$orange$sector xyz " + vecStr(sectorXYZ) + " cm";
 			feedbackStrings.add(sectxyz);
-			String sectRhoPhi = String.format("$orange$sector " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
+			String sectRhoPhi = String.format("$orange$sector "
+					+ CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
 					(Math.toDegrees(sectPhi)));
 			feedbackStrings.add(sectRhoPhi);
 
@@ -263,10 +267,12 @@ public class PCALHexSectorItem extends HexSectorItem {
 			// if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 			if (true) {
 
-				String locStr = "$lime green$loc xyz " + point3DString(lp) + " cm";
+				String locStr = "$lime green$loc xyz " + point3DString(lp)
+						+ " cm";
 				feedbackStrings.add(locStr);
 
-				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1] + ", " + uvw[2] + "]";
+				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1]
+						+ ", " + uvw[2] + "]";
 				feedbackStrings.add(uvwStr);
 
 				// any hits?
@@ -275,14 +281,21 @@ public class PCALHexSectorItem extends HexSectorItem {
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 					for (int stripType = 0; stripType < 3; stripType++) {
 						if (_pcalView.showStrips(stripType)) {
-							Vector<HitRecord> hits = ecData.getMatchingHits(getSector(), 1, stripType + 1,
-									uvw[stripType], ECDataContainer.PCAL_OPTION);
+							Vector<HitRecord> hits = ecData
+									.getMatchingHits(getSector(), 1,
+											stripType + 1, uvw[stripType],
+											ECDataContainer.PCAL_OPTION);
 
 							if (hits != null) {
 								for (HitRecord hit : hits) {
-									ecData.onHitFeedbackStrings(hit.hitIndex, ECDataContainer.PCAL_OPTION,
-											ecData.pcal_true_pid, ecData.pcal_true_mpid, ecData.pcal_true_tid,
-											ecData.pcal_true_mtid, ecData.pcal_true_otid, feedbackStrings);
+									ecData.onHitFeedbackStrings(hit.hitIndex,
+											ECDataContainer.PCAL_OPTION,
+											ecData.pcal_true_pid,
+											ecData.pcal_true_mpid,
+											ecData.pcal_true_tid,
+											ecData.pcal_true_mtid,
+											ecData.pcal_true_otid,
+											feedbackStrings);
 								}
 							}
 						}
@@ -296,7 +309,8 @@ public class PCALHexSectorItem extends HexSectorItem {
 	}
 
 	private String point3DString(Point3D p3d) {
-		return String.format("(%-6.3f, %-6.3f, %-6.3f)", p3d.x(), p3d.y(), p3d.z());
+		return String.format("(%-6.3f, %-6.3f, %-6.3f)", p3d.x(), p3d.y(),
+				p3d.z());
 	}
 
 	// convert screen point to a uvw 1-based triplet
@@ -304,7 +318,8 @@ public class PCALHexSectorItem extends HexSectorItem {
 		for (int stripType = 0; stripType < 3; stripType++) {
 			uvw[stripType] = -1;
 			for (int stripIndex = 0; stripIndex < PCALGeometry.PCAL_NUMSTRIP[stripType]; stripIndex++) {
-				if ((_stripPoly[stripType][stripIndex] != null) && (_stripPoly[stripType][stripIndex].contains(pp))) {
+				if ((_stripPoly[stripType][stripIndex] != null)
+						&& (_stripPoly[stripType][stripIndex].contains(pp))) {
 					uvw[stripType] = stripIndex + 1;
 					break;
 				}

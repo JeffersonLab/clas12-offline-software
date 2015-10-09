@@ -50,727 +50,727 @@ import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class BSTzView extends CedView implements ChangeListener {
-    private double _targetZ = 0;
-    private double _phi = 0; // the cross-sectional phi value
-    private double _sinphi = 0;
-    private double _cosphi = 1;
-    // font for label text
-    private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
+	private double _targetZ = 0;
+	private double _phi = 0; // the cross-sectional phi value
+	private double _sinphi = 0;
+	private double _cosphi = 1;
+	// font for label text
+	private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
 
-    // margins around active area
-    private static int LMARGIN = 50;
-    private static int TMARGIN = 20;
-    private static int RMARGIN = 20;
-    private static int BMARGIN = 50;
+	// margins around active area
+	private static int LMARGIN = 50;
+	private static int TMARGIN = 20;
+	private static int RMARGIN = 20;
+	private static int BMARGIN = 50;
 
-    // fill color
-    private static final Color HITFILL = new Color(255, 128, 0, 64);
-    private static final Color TRANS = new Color(192, 192, 192, 128);
+	// fill color
+	private static final Color HITFILL = new Color(255, 128, 0, 64);
+	private static final Color TRANS = new Color(192, 192, 192, 128);
 
-    // line stroke
-    private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
-	    LineStyle.SOLID);
+	// line stroke
+	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
+			LineStyle.SOLID);
 
-    // units are mm
-    private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-	    -240., -200., 500., 400.);
+	// units are mm
+	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
+			-240., -200., 500., 400.);
 
-    // used to draw swum trajectories (if any) in the after drawer
-    private SwimTrajectoryDrawerZ _swimTrajectoryDrawer;
+	// used to draw swum trajectories (if any) in the after drawer
+	private SwimTrajectoryDrawerZ _swimTrajectoryDrawer;
 
-    // draws reconstructed crosses
-    private CrossDrawerZ _crossDrawer;
+	// draws reconstructed crosses
+	private CrossDrawerZ _crossDrawer;
 
-    public BSTzView(Object... keyVals) {
-	super(keyVals);
+	public BSTzView(Object... keyVals) {
+		super(keyVals);
 
-	setBeforeDraw();
-	setAfterDraw();
-	addItems();
-	_crossDrawer = new CrossDrawerZ(this);
+		setBeforeDraw();
+		setAfterDraw();
+		addItems();
+		_crossDrawer = new CrossDrawerZ(this);
 
-	// draws any swum trajectories (in the after draw)
-	_swimTrajectoryDrawer = new SwimTrajectoryDrawerZ(this);
-    }
+		// draws any swum trajectories (in the after draw)
+		_swimTrajectoryDrawer = new SwimTrajectoryDrawerZ(this);
+	}
 
-    /**
-     * Create a BSTzView object
-     * 
-     * @return the new view
-     */
-    public static BSTzView createBSTzView() {
-	BSTzView view = null;
+	/**
+	 * Create a BSTzView object
+	 * 
+	 * @return the new view
+	 */
+	public static BSTzView createBSTzView() {
+		BSTzView view = null;
 
-	// set to a fraction of screen
-	Dimension d = GraphicsUtilities.screenFraction(0.35);
+		// set to a fraction of screen
+		Dimension d = GraphicsUtilities.screenFraction(0.35);
 
-	// make it square
-	int width = d.width;
-	int height = width;
+		// make it square
+		int width = d.width;
+		int height = width;
 
-	// create the view
-	view = new BSTzView(
-		AttributeType.WORLDSYSTEM,
-		_defaultWorldRectangle,
-		AttributeType.WIDTH,
-		width, // container width, not total view width
-		AttributeType.HEIGHT,
-		height, // container height, not total view width
-		AttributeType.LEFTMARGIN, LMARGIN, AttributeType.TOPMARGIN,
-		TMARGIN, AttributeType.RIGHTMARGIN, RMARGIN,
-		AttributeType.BOTTOMMARGIN, BMARGIN, AttributeType.TOOLBAR,
-		true, AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
-			& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-			& ~BaseToolBar.CONTROLPANELBUTTON
-			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
-		AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-		AttributeType.TITLE, "SVT Z",
-		AttributeType.STANDARDVIEWDECORATIONS, true);
+		// create the view
+		view = new BSTzView(
+				AttributeType.WORLDSYSTEM,
+				_defaultWorldRectangle,
+				AttributeType.WIDTH,
+				width, // container width, not total view width
+				AttributeType.HEIGHT,
+				height, // container height, not total view width
+				AttributeType.LEFTMARGIN, LMARGIN, AttributeType.TOPMARGIN,
+				TMARGIN, AttributeType.RIGHTMARGIN, RMARGIN,
+				AttributeType.BOTTOMMARGIN, BMARGIN, AttributeType.TOOLBAR,
+				true, AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+						& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
+						& ~BaseToolBar.CONTROLPANELBUTTON
+						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
+				AttributeType.TITLE, "SVT Z",
+				AttributeType.STANDARDVIEWDECORATIONS, true);
 
-	view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
-		+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-		+ ControlPanel.PHISLIDER + +ControlPanel.RECONSARRAY
-		+ ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
-		+ ControlPanel.FIELDLEGEND, DisplayBits.MAGFIELD
-		+ DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
-		+ DisplayBits.MCTRUTH + DisplayBits.COSMICS, 2, 6);
+		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+				+ ControlPanel.PHISLIDER + +ControlPanel.RECONSARRAY
+				+ ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
+				+ ControlPanel.FIELDLEGEND, DisplayBits.MAGFIELD
+				+ DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
+				+ DisplayBits.MCTRUTH + DisplayBits.COSMICS, 2, 6);
 
-	view.add(view._controlPanel, BorderLayout.EAST);
-	view.pack();
-	return view;
-    }
+		view.add(view._controlPanel, BorderLayout.EAST);
+		view.pack();
+		return view;
+	}
 
-    /**
-     * Create the view's before drawer.
-     */
-    private void setBeforeDraw() {
-	// use a before-drawer to sector dividers and labels
-	IDrawable beforeDraw = new DrawableAdapter() {
+	/**
+	 * Create the view's before drawer.
+	 */
+	private void setBeforeDraw() {
+		// use a before-drawer to sector dividers and labels
+		IDrawable beforeDraw = new DrawableAdapter() {
 
-	    @Override
-	    public void draw(Graphics g, IContainer container) {
-		Rectangle screenRect = container.getInsetRectangle();
-		g.setColor(Color.white);
-		g.fillRect(screenRect.x, screenRect.y, screenRect.width,
-			screenRect.height);
+			@Override
+			public void draw(Graphics g, IContainer container) {
+				Rectangle screenRect = container.getInsetRectangle();
+				g.setColor(Color.white);
+				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
+						screenRect.height);
 
-	    }
+			}
 
-	};
+		};
 
-	getContainer().setBeforeDraw(beforeDraw);
-    }
+		getContainer().setBeforeDraw(beforeDraw);
+	}
 
-    /**
-     * Set the view's before draw
-     */
-    private void setAfterDraw() {
-	IDrawable afterDraw = new DrawableAdapter() {
+	/**
+	 * Set the view's before draw
+	 */
+	private void setAfterDraw() {
+		IDrawable afterDraw = new DrawableAdapter() {
 
-	    @Override
-	    public void draw(Graphics g, IContainer container) {
+			@Override
+			public void draw(Graphics g, IContainer container) {
 
-		_swimTrajectoryDrawer.draw(g, container);
-		drawGEMCHits(g, container);
-		drawPanels(g, container);
+				_swimTrajectoryDrawer.draw(g, container);
+				drawGEMCHits(g, container);
+				drawPanels(g, container);
 
-		if (showReconsBSTCrosses()) {
-		    _crossDrawer.draw(g, container);
+				if (showReconsBSTCrosses()) {
+					_crossDrawer.draw(g, container);
+				}
+
+				if (showCosmics()) {
+					drawCosmicTracks(g, container);
+				}
+
+				Rectangle screenRect = getActiveScreenRectangle(container);
+				drawAxes(g, container, screenRect);
+
+				drawCoordinateSystem(g, container);
+			}
+
+		};
+		getContainer().setAfterDraw(afterDraw);
+	}
+
+	private void drawCosmicTracks(Graphics g, IContainer container) {
+		BSTDataContainer bstData = _eventManager.getBSTData();
+		if (bstData == null) {
+			return;
 		}
 
-		if (showCosmics()) {
-		    drawCosmicTracks(g, container);
+		Shape oldClip = clipView(g);
+		int ids[] = bstData.bstrec_cosmics_ID;
+		if (ids != null) {
+			double yx_interc[] = bstData.bstrec_cosmics_trkline_yx_interc;
+			double yx_slope[] = bstData.bstrec_cosmics_trkline_yx_slope;
+			double yz_interc[] = bstData.bstrec_cosmics_trkline_yz_interc;
+			double yz_slope[] = bstData.bstrec_cosmics_trkline_yz_slope;
+
+			g.setColor(Color.red);
+			Point p1 = new Point();
+			Point p2 = new Point();
+
+			for (int i = 0; i < ids.length; i++) {
+				double y1 = 1000;
+				double y2 = -1000;
+				double x1 = yx_slope[i] * y1 + yx_interc[i];
+				double x2 = yx_slope[i] * y2 + yx_interc[i];
+				double z1 = yz_slope[i] * y1 + yz_interc[i];
+				double z2 = yz_slope[i] * y2 + yz_interc[i];
+
+				labToLocal(x1, y1, z1, p1);
+				labToLocal(x2, y2, z2, p2);
+				g.drawLine(p1.x, p1.y, p2.x, p2.y);
+			}
 		}
 
-		Rectangle screenRect = getActiveScreenRectangle(container);
-		drawAxes(g, container, screenRect);
-
-		drawCoordinateSystem(g, container);
-	    }
-
-	};
-	getContainer().setAfterDraw(afterDraw);
-    }
-
-    private void drawCosmicTracks(Graphics g, IContainer container) {
-	BSTDataContainer bstData = _eventManager.getBSTData();
-	if (bstData == null) {
-	    return;
+		g.setClip(oldClip);
 	}
 
-	Shape oldClip = clipView(g);
-	int ids[] = bstData.bstrec_cosmics_ID;
-	if (ids != null) {
-	    double yx_interc[] = bstData.bstrec_cosmics_trkline_yx_interc;
-	    double yx_slope[] = bstData.bstrec_cosmics_trkline_yx_slope;
-	    double yz_interc[] = bstData.bstrec_cosmics_trkline_yz_interc;
-	    double yz_slope[] = bstData.bstrec_cosmics_trkline_yz_slope;
-
-	    g.setColor(Color.red);
-	    Point p1 = new Point();
-	    Point p2 = new Point();
-
-	    for (int i = 0; i < ids.length; i++) {
-		double y1 = 1000;
-		double y2 = -1000;
-		double x1 = yx_slope[i] * y1 + yx_interc[i];
-		double x2 = yx_slope[i] * y2 + yx_interc[i];
-		double z1 = yz_slope[i] * y1 + yz_interc[i];
-		double z2 = yz_slope[i] * y2 + yz_interc[i];
-
-		labToLocal(x1, y1, z1, p1);
-		labToLocal(x2, y2, z2, p2);
-		g.drawLine(p1.x, p1.y, p2.x, p2.y);
-	    }
-	}
-
-	g.setClip(oldClip);
-    }
-
-    // draw the panels
-    private void drawPanels(Graphics g, IContainer container) {
-	List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
-	if (panels == null) {
-	    return;
-	}
-
-	// set the perp distance
-	for (BSTxyPanel panel : panels) {
-	    Point2D.Double avgXY = panel.getXyAverage();
-	    double perp = avgXY.y * _cosphi - avgXY.x * _sinphi;
-	    panel.setPerp(perp);
-	}
-
-	Collections.sort(panels);
-
-	// System.err.println("panel count: " + panels.size());
-	// for (BSTxyPanel panel : panels) {
-	// System.err.println("Lay: " + panel.getLayer() + " sect: " +
-	// panel.getSector() + " PERP: " + panel.getPerp());
-	// }
-
-	Graphics2D g2 = (Graphics2D) g;
-	Shape oldClip = g2.getClip();
-	// clip the active area
-	Rectangle sr = container.getInsetRectangle();
-	g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-
-	Stroke oldStroke = g2.getStroke();
-	g2.setStroke(stroke);
-	g2.setColor(Color.black);
-
-	// there are 132 panels
-	// mark the hits if there is data
-	BSTSupport.markPanelHits(panels);
-
-	int index = 0;
-	for (BSTxyPanel panel : panels) {
-
-	    int alpha = 10 + index / 3;
-	    Color col = new Color(128, 128, 128, alpha);
-	    Color col2 = new Color(128, 128, 128, alpha + 40);
-	    WorldPolygon poly[] = getFromPanel(panel);
-
-	    for (int j = 0; j < 3; j++) {
-		boolean hit = panel.hit[j];
-
-		WorldGraphicsUtilities.drawWorldPolygon(g2, container, poly[j],
-			hit ? HITFILL : col, col2, 0, LineStyle.SOLID);
-	    }
-	}
-
-	// restore
-	g2.setStroke(oldStroke);
-	g2.setClip(oldClip);
-    }
-
-    private WorldPolygon[] getFromPanel(BSTxyPanel panel) {
-
-	WorldPolygon polys[] = new WorldPolygon[3];
-
-	double x1 = panel.getX1();
-	double x2 = panel.getX2();
-
-	double y1 = panel.getY1();
-	double y2 = panel.getY2();
-
-	double z0 = panel.getZ0();
-	double z1 = panel.getZ1();
-	double z2 = panel.getZ2();
-	double z3 = panel.getZ3();
-	double z4 = panel.getZ4();
-	double z5 = panel.getZ5();
-
-	double x[] = new double[5];
-	double y[] = new double[5];
-
-	Point2D.Double wp = new Point2D.Double();
-
-	labToWorld(x1, y1, z0, wp);
-	x[0] = wp.x;
-	y[0] = wp.y;
-
-	labToWorld(x2, y2, z0, wp);
-	x[1] = wp.x;
-	y[1] = wp.y;
-
-	labToWorld(x2, y2, z1, wp);
-	x[2] = wp.x;
-	y[2] = wp.y;
-
-	labToWorld(x1, y1, z1, wp);
-	x[3] = wp.x;
-	y[3] = wp.y;
-
-	x[4] = x[0];
-	y[4] = y[0];
-
-	polys[0] = new WorldPolygon(x, y, 5);
-
-	labToWorld(x1, y1, z2, wp);
-	x[0] = wp.x;
-	y[0] = wp.y;
-
-	labToWorld(x2, y2, z2, wp);
-	x[1] = wp.x;
-	y[1] = wp.y;
-
-	labToWorld(x2, y2, z3, wp);
-	x[2] = wp.x;
-	y[2] = wp.y;
-
-	labToWorld(x1, y1, z3, wp);
-	x[3] = wp.x;
-	y[3] = wp.y;
-
-	x[4] = x[0];
-	y[4] = y[0];
-
-	polys[1] = new WorldPolygon(x, y, 5);
-
-	labToWorld(x1, y1, z4, wp);
-	x[0] = wp.x;
-	y[0] = wp.y;
-
-	labToWorld(x2, y2, z4, wp);
-	x[1] = wp.x;
-	y[1] = wp.y;
-
-	labToWorld(x2, y2, z5, wp);
-	x[2] = wp.x;
-	y[2] = wp.y;
-
-	labToWorld(x1, y1, z5, wp);
-	x[3] = wp.x;
-	y[3] = wp.y;
-
-	x[4] = x[0];
-	y[4] = y[0];
-
-	polys[2] = new WorldPolygon(x, y, 5);
-
-	return polys;
-    }
-
-    @Override
-    public Shape getSpecialClip() {
-	Rectangle sr = getContainer().getInsetRectangle();
-	return sr;
-    }
-
-    private void drawGEMCHits(Graphics g, IContainer container) {
-
-	BSTDataContainer bstData = _eventManager.getBSTData();
-
-	double x[] = bstData.bst_true_avgX;
-	if (x == null) {
-	    return;
-	}
-
-	double y[] = bstData.bst_true_avgY;
-	double z[] = bstData.bst_true_avgZ;
-	int pid[] = bstData.bst_true_pid;
-
-	Graphics2D g2 = (Graphics2D) g;
-	Shape oldClip = g2.getClip();
-	// clip the active area
-	Rectangle sr = container.getInsetRectangle();
-	g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-
-	Stroke oldStroke = g2.getStroke();
-	g2.setStroke(stroke);
-
-	Point p1 = new Point();
-	Point2D.Double wp1 = new Point2D.Double();
-	Color default_fc = Color.red;
-
-	for (int i = 0; i < x.length; i++) {
-	    Color fc = default_fc;
-	    if (pid != null) {
-		LundId lid = LundSupport.getInstance().get(pid[i]);
-		if (lid != null) {
-		    fc = lid.getStyle().getFillColor();
+	// draw the panels
+	private void drawPanels(Graphics g, IContainer container) {
+		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
+		if (panels == null) {
+			return;
 		}
-	    }
-	    g2.setColor(fc);
 
-	    wp1.setLocation(z[i], x[i] * _cosphi + y[i] * _sinphi);
-	    container.worldToLocal(p1, wp1);
+		// set the perp distance
+		for (BSTxyPanel panel : panels) {
+			Point2D.Double avgXY = panel.getXyAverage();
+			double perp = avgXY.y * _cosphi - avgXY.x * _sinphi;
+			panel.setPerp(perp);
+		}
 
-	    // draw an x
-	    g2.drawLine(p1.x - 3, p1.y - 3, p1.x + 3, p1.y + 3);
-	    g2.drawLine(p1.x + 3, p1.y - 3, p1.x - 3, p1.y + 3);
+		Collections.sort(panels);
+
+		// System.err.println("panel count: " + panels.size());
+		// for (BSTxyPanel panel : panels) {
+		// System.err.println("Lay: " + panel.getLayer() + " sect: " +
+		// panel.getSector() + " PERP: " + panel.getPerp());
+		// }
+
+		Graphics2D g2 = (Graphics2D) g;
+		Shape oldClip = g2.getClip();
+		// clip the active area
+		Rectangle sr = container.getInsetRectangle();
+		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+
+		Stroke oldStroke = g2.getStroke();
+		g2.setStroke(stroke);
+		g2.setColor(Color.black);
+
+		// there are 132 panels
+		// mark the hits if there is data
+		BSTSupport.markPanelHits(panels);
+
+		int index = 0;
+		for (BSTxyPanel panel : panels) {
+
+			int alpha = 10 + index / 3;
+			Color col = new Color(128, 128, 128, alpha);
+			Color col2 = new Color(128, 128, 128, alpha + 40);
+			WorldPolygon poly[] = getFromPanel(panel);
+
+			for (int j = 0; j < 3; j++) {
+				boolean hit = panel.hit[j];
+
+				WorldGraphicsUtilities.drawWorldPolygon(g2, container, poly[j],
+						hit ? HITFILL : col, col2, 0, LineStyle.SOLID);
+			}
+		}
+
+		// restore
+		g2.setStroke(oldStroke);
+		g2.setClip(oldClip);
 	}
 
-	g2.setStroke(oldStroke);
-	g2.setClip(oldClip);
-    }
+	private WorldPolygon[] getFromPanel(BSTxyPanel panel) {
 
-    private void drawCoordinateSystem(Graphics g, IContainer container) {
-	Rectangle sr = getActiveScreenRectangle(container);
+		WorldPolygon polys[] = new WorldPolygon[3];
 
-	FontMetrics fm = container.getComponent().getFontMetrics(labelFont);
+		double x1 = panel.getX1();
+		double x2 = panel.getX2();
 
-	int size2 = 40;
-	int size = 2 * size2;
+		double y1 = panel.getY1();
+		double y2 = panel.getY2();
 
-	int left = sr.x + 15;
-	int right = left + size;
-	int bottom = sr.y + sr.height - 15;
-	int top = bottom - size;
-	int xc = left + size2;
-	int yc = top + size2;
+		double z0 = panel.getZ0();
+		double z1 = panel.getZ1();
+		double z2 = panel.getZ2();
+		double z3 = panel.getZ3();
+		double z4 = panel.getZ4();
+		double z5 = panel.getZ5();
 
-	// g.setFont(labelFont);
-	// fm = getFontMetrics(labelFont);
+		double x[] = new double[5];
+		double y[] = new double[5];
 
-	g.setColor(TRANS);
-	g.fillRect(left - 4, top - 4, size + 8, size + 8);
+		Point2D.Double wp = new Point2D.Double();
 
-	g.setColor(X11Colors.getX11Color("dark red"));
-	g.drawLine(xc, yc, right - fm.stringWidth("z") - 4, yc);
-	g.drawString("z", right - fm.stringWidth("z") - 2, yc + fm.getAscent()
-		/ 2);
+		labToWorld(x1, y1, z0, wp);
+		x[0] = wp.x;
+		y[0] = wp.y;
 
-	int xscale = (int) Math.abs(size2 * _cosphi);
-	int xx = (int) (_sinphi * xscale);
-	int xy = (int) (_cosphi * xscale);
-	g.drawLine(xc, yc, xc + xx, yc - xy);
-	if ((Math.abs(xx) > 5) || (Math.abs(xy) > 5)) {
-	    g.drawString("x", xc + xx, yc - xy);
-	}
-	int yscale = (int) Math.abs(size2 * _sinphi);
-	int yx = (int) (-_cosphi * yscale);
-	int yy = (int) (_sinphi * yscale);
-	g.drawLine(xc, yc, xc + yx, yc - yy);
+		labToWorld(x2, y2, z0, wp);
+		x[1] = wp.x;
+		y[1] = wp.y;
 
-	if ((Math.abs(yx) > 5) || (Math.abs(yy) > 5)) {
-	    g.drawString("y", xc + yx, yc - yy);
-	}
+		labToWorld(x2, y2, z1, wp);
+		x[2] = wp.x;
+		y[2] = wp.y;
 
-	// g.drawLine(right, bottom, right, top);
-	//
-	// g.drawString("y", right+3, top + fm.getHeight()/2-1);
-	// g.drawString("x", left - fm.stringWidth("x") - 2, bottom +
-	// fm.getHeight()/2);
+		labToWorld(x1, y1, z1, wp);
+		x[3] = wp.x;
+		y[3] = wp.y;
 
-    }
+		x[4] = x[0];
+		y[4] = y[0];
 
-    // draw the coordinate axes
-    private void drawAxes(Graphics g, IContainer container, Rectangle bounds) {
-	Rectangle sr = getActiveScreenRectangle(container);
+		polys[0] = new WorldPolygon(x, y, 5);
 
-	FontMetrics fm = container.getComponent().getFontMetrics(labelFont);
-	int fh = fm.getAscent();
+		labToWorld(x1, y1, z2, wp);
+		x[0] = wp.x;
+		y[0] = wp.y;
 
-	Rectangle2D.Double wr = new Rectangle2D.Double();
-	container.localToWorld(sr, wr);
-	Point2D.Double wp = new Point2D.Double();
-	Point pp = new Point();
+		labToWorld(x2, y2, z2, wp);
+		x[1] = wp.x;
+		y[1] = wp.y;
 
-	g.setColor(Color.black);
-	g.setFont(labelFont);
-	g.drawRect(sr.x, sr.y, sr.width, sr.height);
+		labToWorld(x2, y2, z3, wp);
+		x[2] = wp.x;
+		y[2] = wp.y;
 
-	double del = wr.width / 50.;
-	wp.y = wr.y;
-	int bottom = sr.y + sr.height;
-	for (int i = 0; i <= 50; i++) {
-	    wp.x = wr.x + del * i;
-	    container.worldToLocal(pp, wp);
-	    if ((i % 5) == 0) {
-		g.drawLine(pp.x, bottom, pp.x, bottom - 12);
+		labToWorld(x1, y1, z3, wp);
+		x[3] = wp.x;
+		y[3] = wp.y;
 
-		String vs = valueString(wp.x);
-		int xs = pp.x - fm.stringWidth(vs) / 2;
+		x[4] = x[0];
+		y[4] = y[0];
 
-		g.drawString(vs, xs, bottom + fh + 1);
+		polys[1] = new WorldPolygon(x, y, 5);
 
-	    } else {
-		g.drawLine(pp.x, bottom, pp.x, bottom - 5);
-	    }
-	}
+		labToWorld(x1, y1, z4, wp);
+		x[0] = wp.x;
+		y[0] = wp.y;
 
-	del = wr.height / 40.;
-	wp.x = wr.x;
-	for (int i = 0; i <= 40; i++) {
-	    wp.y = wr.y + del * i;
-	    container.worldToLocal(pp, wp);
-	    if ((i % 5) == 0) {
-		g.drawLine(sr.x, pp.y, sr.x + 12, pp.y);
-		String vs = valueString(wp.y);
-		int xs = sr.x - fm.stringWidth(vs) - 1;
+		labToWorld(x2, y2, z4, wp);
+		x[1] = wp.x;
+		y[1] = wp.y;
 
-		g.drawString(vs, xs, pp.y + fh / 2);
-	    } else {
-		g.drawLine(sr.x, pp.y, sr.x + 5, pp.y);
-	    }
+		labToWorld(x2, y2, z5, wp);
+		x[2] = wp.x;
+		y[2] = wp.y;
+
+		labToWorld(x1, y1, z5, wp);
+		x[3] = wp.x;
+		y[3] = wp.y;
+
+		x[4] = x[0];
+		y[4] = y[0];
+
+		polys[2] = new WorldPolygon(x, y, 5);
+
+		return polys;
 	}
 
-    }
-
-    private String valueString(double val) {
-	if (Math.abs(val) < 1.0e-3) {
-	    return "0";
-	}
-	if (Math.abs(val) < 1.0) {
-	    return DoubleFormat.doubleFormat(val, 1);
-	} else {
-	    return "" + (int) Math.round(val);
-	}
-    }
-
-    private Rectangle getActiveScreenRectangle(IContainer container) {
-	return container.getInsetRectangle();
-    }
-
-    /**
-     * This adds the detector items. The AllDC view is not faithful to geometry.
-     * All we really uses in the number of superlayers, number of layers, and
-     * number of wires.
-     */
-    private void addItems() {
-
-	// add a field object, which won't do anything unless we can read in the
-	// field.
-	LogicalLayer magneticFieldLayer = getContainer().getLogicalLayer(
-		_magneticFieldLayerName);
-	new MagFieldItem(magneticFieldLayer, this);
-	magneticFieldLayer.setVisible(false);
-
-	LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-		_detectorLayerName);
-	new BeamLineItem(detectorLayer);
-    }
-
-    @Override
-    public int getSector(IContainer container, Point screenPoint,
-	    Point2D.Double worldPoint) {
-	return 0;
-    }
-
-    /**
-     * Converts the local screen coordinate obtained by a previous localToWorld
-     * call to full 3D CLAS coordinates
-     * 
-     * @param screenPoint
-     *            the pixel point
-     * @param worldPoint
-     *            the corresponding world location.
-     * @param result
-     *            holds the result. It has five elements. Cartesian x, y, and z
-     *            are in 0, 1, and 2. Cylindrical rho and phi are in 3 and 4.
-     *            (And of course cylindrical z is the same as Cartesian z.)
-     */
-    public void getCLASCordinates(IContainer container, Point screenPoint,
-	    Point2D.Double worldPoint, double result[]) {
-
-	double labRho = Math.abs(worldPoint.y);
-	double labZ = worldPoint.x;
-	double labX = labRho * _cosphi;
-	double labY = labRho * _sinphi;
-
-	result[0] = labX;
-	result[1] = labY;
-	result[2] = labZ;
-	result[3] = labRho;
-	result[4] = _phi;
-    }
-
-    /**
-     * Some view specific feedback. Should always call super.getFeedbackStrings
-     * first.
-     * 
-     * @param container
-     *            the base container for the view.
-     * @param screenPoint
-     *            the pixel point
-     * @param worldPoint
-     *            the corresponding world location.
-     */
-    @Override
-    public void getFeedbackStrings(IContainer container, Point screenPoint,
-	    Point2D.Double worldPoint, List<String> feedbackStrings) {
-
-	// get the common information
-	super.getFeedbackStrings(container, screenPoint, worldPoint,
-		feedbackStrings);
-
-	Rectangle sr = getActiveScreenRectangle(container);
-	if (!sr.contains(screenPoint)) {
-	    return;
+	@Override
+	public Shape getSpecialClip() {
+		Rectangle sr = getContainer().getInsetRectangle();
+		return sr;
 	}
 
-	// the world coordinates
-	double labRho = Math.abs(worldPoint.y);
-	double labZ = worldPoint.x;
-	double labX = labRho * _cosphi;
-	double labY = labRho * _sinphi;
-	double r = Math.sqrt(labX * labX + labY * labY + labZ * labZ);
-	double theta = Math.toDegrees(Math.atan2(labRho, labZ));
+	private void drawGEMCHits(Graphics g, IContainer container) {
 
-	String xyz = "xyz " + vecStr(labX, labY, labZ) + " mm";
+		BSTDataContainer bstData = _eventManager.getBSTData();
 
-	String rtp = CedView.rThetaPhi + " (" + valStr(r, 2) + " mm, "
-		+ valStr(theta, 2) + UnicodeSupport.DEGREE + ", "
-		+ valStr(_phi, 2) + UnicodeSupport.DEGREE + ")";
+		double x[] = bstData.bst_true_avgX;
+		if (x == null) {
+			return;
+		}
 
-	String rzp = CedView.rhoZPhi + " (" + valStr(labRho, 2) + " mm, "
-		+ valStr(labZ, 2) + " mm , " + valStr(_phi, 2)
-		+ UnicodeSupport.DEGREE + ")";
+		double y[] = bstData.bst_true_avgY;
+		double z[] = bstData.bst_true_avgZ;
+		int pid[] = bstData.bst_true_pid;
 
-	feedbackStrings.add(xyz);
-	feedbackStrings.add(rtp);
-	feedbackStrings.add(rzp);
+		Graphics2D g2 = (Graphics2D) g;
+		Shape oldClip = g2.getClip();
+		// clip the active area
+		Rectangle sr = container.getInsetRectangle();
+		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
-	IField activeField = MagneticFields.getActiveField();
-	if (activeField != null) {
-	    float field[] = new float[3];
-	    activeField.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
-		    field);
-	    // convert to Tesla from kG
-	    field[0] /= 10.0;
-	    field[1] /= 10.0;
-	    field[2] /= 10.0;
+		Stroke oldStroke = g2.getStroke();
+		g2.setStroke(stroke);
 
-	    double bmag = VectorSupport.length(field);
-	    feedbackStrings.add("$Lawn Green$"
-		    + MagneticFields.getActiveFieldDescription());
-	    feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
-		    + vecStr(field) + " T");
+		Point p1 = new Point();
+		Point2D.Double wp1 = new Point2D.Double();
+		Color default_fc = Color.red;
+
+		for (int i = 0; i < x.length; i++) {
+			Color fc = default_fc;
+			if (pid != null) {
+				LundId lid = LundSupport.getInstance().get(pid[i]);
+				if (lid != null) {
+					fc = lid.getStyle().getFillColor();
+				}
+			}
+			g2.setColor(fc);
+
+			wp1.setLocation(z[i], x[i] * _cosphi + y[i] * _sinphi);
+			container.worldToLocal(p1, wp1);
+
+			// draw an x
+			g2.drawLine(p1.x - 3, p1.y - 3, p1.x + 3, p1.y + 3);
+			g2.drawLine(p1.x + 3, p1.y - 3, p1.x - 3, p1.y + 3);
+		}
+
+		g2.setStroke(oldStroke);
+		g2.setClip(oldClip);
 	}
 
-	// near a swum trajectory?
-	double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
-	double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
-		* mindist;
-	if (pixlen < 25.0) {
-	    SwimTrajectory2D traj2D = _swimTrajectoryDrawer
-		    .getClosestTrajectory();
-	    if (traj2D != null) {
-		traj2D.addToFeedback(feedbackStrings);
-	    } else {
-		System.err.println("null traj");
-	    }
+	private void drawCoordinateSystem(Graphics g, IContainer container) {
+		Rectangle sr = getActiveScreenRectangle(container);
+
+		FontMetrics fm = container.getComponent().getFontMetrics(labelFont);
+
+		int size2 = 40;
+		int size = 2 * size2;
+
+		int left = sr.x + 15;
+		int right = left + size;
+		int bottom = sr.y + sr.height - 15;
+		int top = bottom - size;
+		int xc = left + size2;
+		int yc = top + size2;
+
+		// g.setFont(labelFont);
+		// fm = getFontMetrics(labelFont);
+
+		g.setColor(TRANS);
+		g.fillRect(left - 4, top - 4, size + 8, size + 8);
+
+		g.setColor(X11Colors.getX11Color("dark red"));
+		g.drawLine(xc, yc, right - fm.stringWidth("z") - 4, yc);
+		g.drawString("z", right - fm.stringWidth("z") - 2, yc + fm.getAscent()
+				/ 2);
+
+		int xscale = (int) Math.abs(size2 * _cosphi);
+		int xx = (int) (_sinphi * xscale);
+		int xy = (int) (_cosphi * xscale);
+		g.drawLine(xc, yc, xc + xx, yc - xy);
+		if ((Math.abs(xx) > 5) || (Math.abs(xy) > 5)) {
+			g.drawString("x", xc + xx, yc - xy);
+		}
+		int yscale = (int) Math.abs(size2 * _sinphi);
+		int yx = (int) (-_cosphi * yscale);
+		int yy = (int) (_sinphi * yscale);
+		g.drawLine(xc, yc, xc + yx, yc - yy);
+
+		if ((Math.abs(yx) > 5) || (Math.abs(yy) > 5)) {
+			g.drawString("y", xc + yx, yc - yy);
+		}
+
+		// g.drawLine(right, bottom, right, top);
+		//
+		// g.drawString("y", right+3, top + fm.getHeight()/2-1);
+		// g.drawString("x", left - fm.stringWidth("x") - 2, bottom +
+		// fm.getHeight()/2);
+
 	}
 
-	// reconstructed feedback?
-	_crossDrawer.feedback(container, screenPoint, worldPoint,
-		feedbackStrings);
+	// draw the coordinate axes
+	private void drawAxes(Graphics g, IContainer container, Rectangle bounds) {
+		Rectangle sr = getActiveScreenRectangle(container);
 
-    }
+		FontMetrics fm = container.getComponent().getFontMetrics(labelFont);
+		int fh = fm.getAscent();
 
-    /**
-     * Returns a string representation of the form: "(x,y,z)".
-     * 
-     * @param numDec
-     *            the number of decimal places for each coordinate.
-     * @return a String representation of the vector
-     */
-    private String vecStr(float v[]) {
-	return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", "
-		+ DoubleFormat.doubleFormat(v[1], 3) + ", "
-		+ DoubleFormat.doubleFormat(v[2], 3) + ")";
-    }
+		Rectangle2D.Double wr = new Rectangle2D.Double();
+		container.localToWorld(sr, wr);
+		Point2D.Double wp = new Point2D.Double();
+		Point pp = new Point();
 
-    // convenience call for double formatter
-    private String valStr(double value, int numdec) {
-	return DoubleFormat.doubleFormat(value, numdec);
-    }
+		g.setColor(Color.black);
+		g.setFont(labelFont);
+		g.drawRect(sr.x, sr.y, sr.width, sr.height);
 
-    /**
-     * Returns a string representation of the form: "(x,y,z)".
-     * 
-     * @param numDec
-     *            the number of decimal places for each coordinate.
-     * @return a String representation of the vector
-     */
-    private String vecStr(double vx, double vy, double vz) {
-	return "(" + DoubleFormat.doubleFormat(vx, 2) + ", "
-		+ DoubleFormat.doubleFormat(vy, 2) + ", "
-		+ DoubleFormat.doubleFormat(vz, 2) + ")";
-    }
+		double del = wr.width / 50.;
+		wp.y = wr.y;
+		int bottom = sr.y + sr.height;
+		for (int i = 0; i <= 50; i++) {
+			wp.x = wr.x + del * i;
+			container.worldToLocal(pp, wp);
+			if ((i % 5) == 0) {
+				g.drawLine(pp.x, bottom, pp.x, bottom - 12);
 
-    // convenience method to create a feedback string
-    private void fbString(String color, String str, List<String> fbstrs) {
-	fbstrs.add("$" + color + "$" + str);
-    }
+				String vs = valueString(wp.x);
+				int xs = pp.x - fm.stringWidth(vs) / 2;
 
-    /**
-     * Get the world graphic coordinates from lab XYZ
-     * 
-     * @param x
-     *            the lab x in cm
-     * @param y
-     *            the lab y in cm
-     * @param z
-     *            the lab z in cm
-     * @param wp
-     *            the world point
-     */
-    public void labToWorld(double x, double y, double z, Point2D.Double wp) {
-	wp.x = z;
-	wp.y = x * _cosphi + y * _sinphi;
+				g.drawString(vs, xs, bottom + fh + 1);
 
-    }
+			} else {
+				g.drawLine(pp.x, bottom, pp.x, bottom - 5);
+			}
+		}
 
-    public void labToLocal(double x, double y, double z, Point pp) {
-	Point2D.Double wp = new Point2D.Double();
-	labToWorld(x, y, z, wp);
-	getContainer().worldToLocal(pp, wp);
-    }
+		del = wr.height / 40.;
+		wp.x = wr.x;
+		for (int i = 0; i <= 40; i++) {
+			wp.y = wr.y + del * i;
+			container.worldToLocal(pp, wp);
+			if ((i % 5) == 0) {
+				g.drawLine(sr.x, pp.y, sr.x + 12, pp.y);
+				String vs = valueString(wp.y);
+				int xs = sr.x - fm.stringWidth(vs) - 1;
 
-    /**
-     * The z location of the target
-     * 
-     * @return z location of the target in cm
-     */
-    public double getTargetZ() {
-	return _targetZ;
-    }
+				g.drawString(vs, xs, pp.y + fh / 2);
+			} else {
+				g.drawLine(sr.x, pp.y, sr.x + 5, pp.y);
+			}
+		}
 
-    /**
-     * This is used to listen for changes on components like sliders.
-     * 
-     * @param e
-     *            the causal event.
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-	Object source = e.getSource();
-
-	// change target z?
-	if (source == _controlPanel.getTargetSlider()) {
-	    _targetZ = (_controlPanel.getTargetSlider().getValue());
-	    getContainer().refresh();
-	} else if (source == _controlPanel.getPhiSlider()) {
-	    _phi = _controlPanel.getPhiSlider().getValue();
-	    // _cosphi = Math.cos(-Math.toRadians(_phiRelMidPlane));
-	    // _sinphi = Math.sin(-Math.toRadians(_phiRelMidPlane));
-	    _sinphi = Math.sin(Math.toRadians(_phi));
-	    _cosphi = Math.cos(Math.toRadians(_phi));
-	    getContainer().setDirty(true);
-	    getContainer().refresh();
 	}
-    }
+
+	private String valueString(double val) {
+		if (Math.abs(val) < 1.0e-3) {
+			return "0";
+		}
+		if (Math.abs(val) < 1.0) {
+			return DoubleFormat.doubleFormat(val, 1);
+		} else {
+			return "" + (int) Math.round(val);
+		}
+	}
+
+	private Rectangle getActiveScreenRectangle(IContainer container) {
+		return container.getInsetRectangle();
+	}
+
+	/**
+	 * This adds the detector items. The AllDC view is not faithful to geometry.
+	 * All we really uses in the number of superlayers, number of layers, and
+	 * number of wires.
+	 */
+	private void addItems() {
+
+		// add a field object, which won't do anything unless we can read in the
+		// field.
+		LogicalLayer magneticFieldLayer = getContainer().getLogicalLayer(
+				_magneticFieldLayerName);
+		new MagFieldItem(magneticFieldLayer, this);
+		magneticFieldLayer.setVisible(false);
+
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
+				_detectorLayerName);
+		new BeamLineItem(detectorLayer);
+	}
+
+	@Override
+	public int getSector(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint) {
+		return 0;
+	}
+
+	/**
+	 * Converts the local screen coordinate obtained by a previous localToWorld
+	 * call to full 3D CLAS coordinates
+	 * 
+	 * @param screenPoint
+	 *            the pixel point
+	 * @param worldPoint
+	 *            the corresponding world location.
+	 * @param result
+	 *            holds the result. It has five elements. Cartesian x, y, and z
+	 *            are in 0, 1, and 2. Cylindrical rho and phi are in 3 and 4.
+	 *            (And of course cylindrical z is the same as Cartesian z.)
+	 */
+	public void getCLASCordinates(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint, double result[]) {
+
+		double labRho = Math.abs(worldPoint.y);
+		double labZ = worldPoint.x;
+		double labX = labRho * _cosphi;
+		double labY = labRho * _sinphi;
+
+		result[0] = labX;
+		result[1] = labY;
+		result[2] = labZ;
+		result[3] = labRho;
+		result[4] = _phi;
+	}
+
+	/**
+	 * Some view specific feedback. Should always call super.getFeedbackStrings
+	 * first.
+	 * 
+	 * @param container
+	 *            the base container for the view.
+	 * @param screenPoint
+	 *            the pixel point
+	 * @param worldPoint
+	 *            the corresponding world location.
+	 */
+	@Override
+	public void getFeedbackStrings(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint, List<String> feedbackStrings) {
+
+		// get the common information
+		super.getFeedbackStrings(container, screenPoint, worldPoint,
+				feedbackStrings);
+
+		Rectangle sr = getActiveScreenRectangle(container);
+		if (!sr.contains(screenPoint)) {
+			return;
+		}
+
+		// the world coordinates
+		double labRho = Math.abs(worldPoint.y);
+		double labZ = worldPoint.x;
+		double labX = labRho * _cosphi;
+		double labY = labRho * _sinphi;
+		double r = Math.sqrt(labX * labX + labY * labY + labZ * labZ);
+		double theta = Math.toDegrees(Math.atan2(labRho, labZ));
+
+		String xyz = "xyz " + vecStr(labX, labY, labZ) + " mm";
+
+		String rtp = CedView.rThetaPhi + " (" + valStr(r, 2) + " mm, "
+				+ valStr(theta, 2) + UnicodeSupport.DEGREE + ", "
+				+ valStr(_phi, 2) + UnicodeSupport.DEGREE + ")";
+
+		String rzp = CedView.rhoZPhi + " (" + valStr(labRho, 2) + " mm, "
+				+ valStr(labZ, 2) + " mm , " + valStr(_phi, 2)
+				+ UnicodeSupport.DEGREE + ")";
+
+		feedbackStrings.add(xyz);
+		feedbackStrings.add(rtp);
+		feedbackStrings.add(rzp);
+
+		IField activeField = MagneticFields.getActiveField();
+		if (activeField != null) {
+			float field[] = new float[3];
+			activeField.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
+					field);
+			// convert to Tesla from kG
+			field[0] /= 10.0;
+			field[1] /= 10.0;
+			field[2] /= 10.0;
+
+			double bmag = VectorSupport.length(field);
+			feedbackStrings.add("$Lawn Green$"
+					+ MagneticFields.getActiveFieldDescription());
+			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
+					+ vecStr(field) + " T");
+		}
+
+		// near a swum trajectory?
+		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
+		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
+				* mindist;
+		if (pixlen < 25.0) {
+			SwimTrajectory2D traj2D = _swimTrajectoryDrawer
+					.getClosestTrajectory();
+			if (traj2D != null) {
+				traj2D.addToFeedback(feedbackStrings);
+			} else {
+				System.err.println("null traj");
+			}
+		}
+
+		// reconstructed feedback?
+		_crossDrawer.feedback(container, screenPoint, worldPoint,
+				feedbackStrings);
+
+	}
+
+	/**
+	 * Returns a string representation of the form: "(x,y,z)".
+	 * 
+	 * @param numDec
+	 *            the number of decimal places for each coordinate.
+	 * @return a String representation of the vector
+	 */
+	private String vecStr(float v[]) {
+		return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", "
+				+ DoubleFormat.doubleFormat(v[1], 3) + ", "
+				+ DoubleFormat.doubleFormat(v[2], 3) + ")";
+	}
+
+	// convenience call for double formatter
+	private String valStr(double value, int numdec) {
+		return DoubleFormat.doubleFormat(value, numdec);
+	}
+
+	/**
+	 * Returns a string representation of the form: "(x,y,z)".
+	 * 
+	 * @param numDec
+	 *            the number of decimal places for each coordinate.
+	 * @return a String representation of the vector
+	 */
+	private String vecStr(double vx, double vy, double vz) {
+		return "(" + DoubleFormat.doubleFormat(vx, 2) + ", "
+				+ DoubleFormat.doubleFormat(vy, 2) + ", "
+				+ DoubleFormat.doubleFormat(vz, 2) + ")";
+	}
+
+	// convenience method to create a feedback string
+	private void fbString(String color, String str, List<String> fbstrs) {
+		fbstrs.add("$" + color + "$" + str);
+	}
+
+	/**
+	 * Get the world graphic coordinates from lab XYZ
+	 * 
+	 * @param x
+	 *            the lab x in cm
+	 * @param y
+	 *            the lab y in cm
+	 * @param z
+	 *            the lab z in cm
+	 * @param wp
+	 *            the world point
+	 */
+	public void labToWorld(double x, double y, double z, Point2D.Double wp) {
+		wp.x = z;
+		wp.y = x * _cosphi + y * _sinphi;
+
+	}
+
+	public void labToLocal(double x, double y, double z, Point pp) {
+		Point2D.Double wp = new Point2D.Double();
+		labToWorld(x, y, z, wp);
+		getContainer().worldToLocal(pp, wp);
+	}
+
+	/**
+	 * The z location of the target
+	 * 
+	 * @return z location of the target in cm
+	 */
+	public double getTargetZ() {
+		return _targetZ;
+	}
+
+	/**
+	 * This is used to listen for changes on components like sliders.
+	 * 
+	 * @param e
+	 *            the causal event.
+	 */
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Object source = e.getSource();
+
+		// change target z?
+		if (source == _controlPanel.getTargetSlider()) {
+			_targetZ = (_controlPanel.getTargetSlider().getValue());
+			getContainer().refresh();
+		} else if (source == _controlPanel.getPhiSlider()) {
+			_phi = _controlPanel.getPhiSlider().getValue();
+			// _cosphi = Math.cos(-Math.toRadians(_phiRelMidPlane));
+			// _sinphi = Math.sin(-Math.toRadians(_phiRelMidPlane));
+			_sinphi = Math.sin(Math.toRadians(_phi));
+			_cosphi = Math.cos(Math.toRadians(_phi));
+			getContainer().setDirty(true);
+			getContainer().refresh();
+		}
+	}
 }

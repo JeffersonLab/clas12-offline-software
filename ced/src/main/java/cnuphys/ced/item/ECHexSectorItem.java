@@ -74,7 +74,8 @@ public class ECHexSectorItem extends HexSectorItem {
 		for (int stripType = 0; stripType < 3; stripType++) {
 			if (_ecView.showStrips(stripType)) {
 				for (int stripIndex = 0; stripIndex < ECGeometry.EC_NUMSTRIP; stripIndex++) {
-					_stripPoly[stripType][stripIndex] = stripPolygon(container, plane, stripType, stripIndex);
+					_stripPoly[stripType][stripIndex] = stripPolygon(container,
+							plane, stripType, stripIndex);
 					g.setColor(Color.white);
 					g.fillPolygon(_stripPoly[stripType][stripIndex]);
 				}
@@ -124,10 +125,11 @@ public class ECHexSectorItem extends HexSectorItem {
 
 						Polygon poly = _stripPoly[view0][strip0];
 						// if mctruth and have energy deposited, use it
-						if (_ecView.showMcTruth() && (ecData.ec_true_totEdep != null)) {
+						if (_ecView.showMcTruth()
+								&& (ecData.ec_true_totEdep != null)) {
 
-							int alpha = (int) ((255 * ecData.ec_true_totEdep[i])
-									/ (ClasIoEventManager.getInstance().getMaxEdepCal(plane + 1)));
+							int alpha = (int) ((255 * ecData.ec_true_totEdep[i]) / (ClasIoEventManager
+									.getInstance().getMaxEdepCal(plane + 1)));
 
 							alpha = Math.max(60, Math.min(255, alpha));
 							g.setColor(new Color(255, 0, 0, alpha));
@@ -156,7 +158,6 @@ public class ECHexSectorItem extends HexSectorItem {
 		g.drawLine(pp.x - 4, pp.y - 4, pp.x + 4, pp.y + 4);
 		g.drawLine(pp.x - 4, pp.y + 4, pp.x + 4, pp.y - 4);
 	}
-	
 
 	/**
 	 * Convert ijk coordinates to world graphics coordinates
@@ -168,7 +169,7 @@ public class ECHexSectorItem extends HexSectorItem {
 	 */
 	public void ijkToScreen(IContainer container, Point3D pijk, Point pp) {
 		Point2D.Double wp = new Point2D.Double();
-		ijkToWorld( pijk, wp);
+		ijkToWorld(pijk, wp);
 		container.worldToLocal(pp, wp);
 	}
 
@@ -188,7 +189,6 @@ public class ECHexSectorItem extends HexSectorItem {
 		_ecView.labXYZToWorld(labXYZ, wp);
 	}
 
-
 	/**
 	 * Get the polygon for a u, v or w strip
 	 * 
@@ -200,12 +200,14 @@ public class ECHexSectorItem extends HexSectorItem {
 	 *            the strip index [0..(EC_NUMSTRIP-1)]
 	 * @return
 	 */
-	public Polygon stripPolygon(IContainer container, int plane, int stripType, int stripIndex) {
+	public Polygon stripPolygon(IContainer container, int plane, int stripType,
+			int stripIndex) {
 		Polygon poly = new Polygon();
 		Point pp = new Point();
 
 		for (int i = 0; i < 4; i++) {
-			Point3D pijk = ECGeometry.getStripPoint(plane, stripType, stripIndex, i);
+			Point3D pijk = ECGeometry.getStripPoint(plane, stripType,
+					stripIndex, i);
 			ijkToScreen(container, pijk, pp);
 			poly.addPoint(pp.x, pp.y);
 		}
@@ -224,7 +226,8 @@ public class ECHexSectorItem extends HexSectorItem {
 	 * @param sectorXYZ
 	 *            the sector xyz point
 	 */
-	public void worldToSectorXYZ(int planeIndex, Point2D.Double wp, double[] sectorXYZ) {
+	public void worldToSectorXYZ(int planeIndex, Point2D.Double wp,
+			double[] sectorXYZ) {
 		Point2D.Double setct2D = new Point2D.Double();
 		worldToSector2D(setct2D, wp);
 		sectorXYZ[0] = setct2D.x;
@@ -233,7 +236,8 @@ public class ECHexSectorItem extends HexSectorItem {
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp,
+			Point2D.Double wp, List<String> feedbackStrings) {
 
 		if (contains(container, pp)) {
 
@@ -274,23 +278,26 @@ public class ECHexSectorItem extends HexSectorItem {
 
 			String labxyz = "$yellow$lab xyz " + vecStr(labXYZ) + " cm";
 			feedbackStrings.add(labxyz);
-			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", labRho,
-					(Math.toDegrees(labPhi)));
+			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi
+					+ " (%-6.2f, %-6.2f)", labRho, (Math.toDegrees(labPhi)));
 			feedbackStrings.add(labRhoPhi);
 
 			String sectxyz = "$orange$sector xyz " + vecStr(sectorXYZ) + " cm";
 			feedbackStrings.add(sectxyz);
-			String sectRhoPhi = String.format("$orange$sector " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
+			String sectRhoPhi = String.format("$orange$sector "
+					+ CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
 					(Math.toDegrees(sectPhi)));
 			feedbackStrings.add(sectRhoPhi);
 
 			// now add the strings
 			if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 
-				String locStr = "$lime green$loc xyz " + point3DString(lp) + " cm";
+				String locStr = "$lime green$loc xyz " + point3DString(lp)
+						+ " cm";
 				feedbackStrings.add(locStr);
 
-				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1] + ", " + uvw[2] + "]";
+				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1]
+						+ ", " + uvw[2] + "]";
 				feedbackStrings.add(uvwStr);
 
 				// feedbackStrings.add("$lime green$pixel " + pixel);
@@ -301,14 +308,20 @@ public class ECHexSectorItem extends HexSectorItem {
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 					for (int stripType = 0; stripType < 3; stripType++) {
 						if (_ecView.showStrips(stripType)) {
-							Vector<HitRecord> hits = ecData.getMatchingHits(getSector(), plane + 1, stripType + 1,
+							Vector<HitRecord> hits = ecData.getMatchingHits(
+									getSector(), plane + 1, stripType + 1,
 									uvw[stripType], ECDataContainer.EC_OPTION);
 
 							if (hits != null) {
 								for (HitRecord hit : hits) {
-									ecData.onHitFeedbackStrings(hit.hitIndex, ECDataContainer.EC_OPTION,
-											ecData.ec_true_pid, ecData.ec_true_mpid, ecData.ec_true_tid,
-											ecData.ec_true_mtid, ecData.ec_true_otid, feedbackStrings);
+									ecData.onHitFeedbackStrings(hit.hitIndex,
+											ECDataContainer.EC_OPTION,
+											ecData.ec_true_pid,
+											ecData.ec_true_mpid,
+											ecData.ec_true_tid,
+											ecData.ec_true_mtid,
+											ecData.ec_true_otid,
+											feedbackStrings);
 								}
 							}
 						}
@@ -320,7 +333,8 @@ public class ECHexSectorItem extends HexSectorItem {
 	}
 
 	private String point3DString(Point3D p3d) {
-		return String.format("(%-6.3f, %-6.3f, %-6.3f)", p3d.x(), p3d.y(), p3d.z());
+		return String.format("(%-6.3f, %-6.3f, %-6.3f)", p3d.x(), p3d.y(),
+				p3d.z());
 	}
 
 	// convert screen point to a uvw 1-based triplet
@@ -328,7 +342,8 @@ public class ECHexSectorItem extends HexSectorItem {
 		for (int stripType = 0; stripType < 3; stripType++) {
 			uvw[stripType] = -1;
 			for (int stripIndex = 0; stripIndex < ECGeometry.EC_NUMSTRIP; stripIndex++) {
-				if ((_stripPoly[stripType][stripIndex] != null) && (_stripPoly[stripType][stripIndex].contains(pp))) {
+				if ((_stripPoly[stripType][stripIndex] != null)
+						&& (_stripPoly[stripType][stripIndex].contains(pp))) {
 					uvw[stripType] = stripIndex + 1;
 					break;
 				}

@@ -24,8 +24,10 @@ public abstract class HexSectorItem extends PolygonItem {
 
 	protected static final Color TRANS = new Color(0, 0, 0, 48);
 
-	public static final Stroke THINSTROKE = GraphicsUtilities.getStroke(0.0f, LineStyle.SOLID);
-	public static final Stroke DASHTHINSTROKE = GraphicsUtilities.getStroke(0.0f, LineStyle.DASH);
+	public static final Stroke THINSTROKE = GraphicsUtilities.getStroke(0.0f,
+			LineStyle.SOLID);
+	public static final Stroke DASHTHINSTROKE = GraphicsUtilities.getStroke(
+			0.0f, LineStyle.DASH);
 
 	// 1-based sector
 	protected int _sector;
@@ -45,7 +47,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	 *            the 1-based sector
 	 */
 	public HexSectorItem(LogicalLayer layer, HexView view, int sector) {
-		super(layer, getPoints(view.getContainer().getWorldSystem().getMinX(), sector));
+		super(layer, getPoints(view.getContainer().getWorldSystem().getMinX(),
+				sector));
 		_sector = sector;
 		// the view this item lives on.
 
@@ -64,7 +67,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
@@ -101,8 +105,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	 * @param color
 	 *            the line color
 	 */
-	protected void drawDashedThinLine(Graphics2D g2, IContainer container, Point2D.Double sp1, Point2D.Double sp2,
-			Color color) {
+	protected void drawDashedThinLine(Graphics2D g2, IContainer container,
+			Point2D.Double sp1, Point2D.Double sp2, Color color) {
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(DASHTHINSTROKE);
@@ -130,8 +134,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	 * @param color
 	 *            the line color
 	 */
-	protected void drawThinLine(Graphics2D g2, IContainer container, Point2D.Double sp1, Point2D.Double sp2,
-			Color color) {
+	protected void drawThinLine(Graphics2D g2, IContainer container,
+			Point2D.Double sp1, Point2D.Double sp2, Color color) {
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THINSTROKE);
@@ -263,7 +267,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	 * @param sp
 	 *            the sector coordinates
 	 */
-	public void sector2DToLocal(IContainer container, Point pp, Point2D.Double sp) {
+	public void sector2DToLocal(IContainer container, Point pp,
+			Point2D.Double sp) {
 		Point2D.Double wp = new Point2D.Double();
 
 		// world are same as lab
@@ -279,7 +284,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	 * @param sp
 	 *            will hold the sector coordinates
 	 */
-	public void localToSector2D(IContainer container, Point pp, Point2D.Double sp) {
+	public void localToSector2D(IContainer container, Point pp,
+			Point2D.Double sp) {
 		Point2D.Double wp = new Point2D.Double();
 		container.localToWorld(pp, wp);
 		// world are same as lab
@@ -299,7 +305,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	 * @return a String representation of the vector
 	 */
 	protected String vecStr(double v[]) {
-		return "(" + DoubleFormat.doubleFormat(v[0], 2) + ", " + DoubleFormat.doubleFormat(v[1], 2) + ", "
+		return "(" + DoubleFormat.doubleFormat(v[0], 2) + ", "
+				+ DoubleFormat.doubleFormat(v[1], 2) + ", "
 				+ DoubleFormat.doubleFormat(v[2], 2) + ")";
 	}
 

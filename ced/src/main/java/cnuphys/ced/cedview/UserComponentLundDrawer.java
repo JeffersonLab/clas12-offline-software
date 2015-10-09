@@ -19,62 +19,62 @@ import cnuphys.lund.LundId;
 
 public class UserComponentLundDrawer extends AUserComponentDrawer {
 
-    // convenience reference to event manager
-    private static ClasIoEventManager _eventManager = ClasIoEventManager
-	    .getInstance();
+	// convenience reference to event manager
+	private static ClasIoEventManager _eventManager = ClasIoEventManager
+			.getInstance();
 
-    public UserComponentLundDrawer(CedView view) {
-	super(view);
-    }
-
-    /**
-     * Draw on the component.
-     * 
-     * @param g
-     *            the graphics context.
-     * @param container
-     *            the container on the view.
-     */
-    @Override
-    public void draw(Graphics g, IContainer container) {
-	if (((CedView) _view).showMcTruth() && !_eventManager.isAccumulating()) {
-	    super.draw(g, container);
+	public UserComponentLundDrawer(CedView view) {
+		super(view);
 	}
-    }
 
-    // convenience method to get the unique LundIds from a double (!) array of
+	/**
+	 * Draw on the component.
+	 * 
+	 * @param g
+	 *            the graphics context.
+	 * @param container
+	 *            the container on the view.
+	 */
+	@Override
+	public void draw(Graphics g, IContainer container) {
+		if (((CedView) _view).showMcTruth() && !_eventManager.isAccumulating()) {
+			super.draw(g, container);
+		}
+	}
 
-    /**
-     * This method must be filled in to return all the unique LundIds associated
-     * with this event.
-     * 
-     * @return all the unique LundIds associated with this event.
-     */
-    @Override
-    protected Vector<LundId> getUniqueLundIds() {
-	return _eventManager.getUniqueLundIds();
-    }
+	// convenience method to get the unique LundIds from a double (!) array of
 
-    @Override
-    public void prepareForRemoval() {
-    }
+	/**
+	 * This method must be filled in to return all the unique LundIds associated
+	 * with this event.
+	 * 
+	 * @return all the unique LundIds associated with this event.
+	 */
+	@Override
+	protected Vector<LundId> getUniqueLundIds() {
+		return _eventManager.getUniqueLundIds();
+	}
 
-    @Override
-    public void setDirty(boolean dirty) {
-    }
+	@Override
+	public void prepareForRemoval() {
+	}
 
-    @Override
-    public String getName() {
-	return null;
-    }
+	@Override
+	public void setDirty(boolean dirty) {
+	}
 
-    @Override
-    public boolean isVisible() {
-	return false;
-    }
+	@Override
+	public String getName() {
+		return null;
+	}
 
-    @Override
-    public void setVisible(boolean visible) {
-    }
+	@Override
+	public boolean isVisible() {
+		return false;
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+	}
 
 }

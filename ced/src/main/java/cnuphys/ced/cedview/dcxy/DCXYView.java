@@ -57,7 +57,8 @@ public class DCXYView extends HexView {
 		double _xsize = DCGeometry.getAbsMaxWireX();
 		double _ysize = _xsize * 1.154734;
 
-		_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize, 2 * _ysize);
+		_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
+				2 * _ysize);
 
 	}
 
@@ -82,12 +83,13 @@ public class DCXYView extends HexView {
 	@Override
 	protected void addControls() {
 
-		_controlPanel = new ControlPanel(this,
-				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-						+ ControlPanel.RECONSARRAY,
-				DisplayBits.ACCUMULATION + DisplayBits.DC_HB_RECONS_HITS + DisplayBits.DC_HB_RECONS_CROSSES
-						+ DisplayBits.DC_TB_RECONS_HITS + DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.MCTRUTH,
-				2, 10);
+		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+				+ ControlPanel.RECONSARRAY, DisplayBits.ACCUMULATION
+				+ DisplayBits.DC_HB_RECONS_HITS
+				+ DisplayBits.DC_HB_RECONS_CROSSES
+				+ DisplayBits.DC_TB_RECONS_HITS
+				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.MCTRUTH, 2, 10);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();
@@ -107,12 +109,14 @@ public class DCXYView extends HexView {
 	// add items to the view
 	@Override
 	protected void addItems() {
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
+				_detectorLayerName);
 
 		_hexItems = new DCHexSectorItem[6];
 
 		for (int sector = 0; sector < 6; sector++) {
-			_hexItems[sector] = new DCHexSectorItem(detectorLayer, this, sector + 1);
+			_hexItems[sector] = new DCHexSectorItem(detectorLayer, this,
+					sector + 1);
 			_hexItems[sector].getStyle().setFillColor(Color.lightGray);
 		}
 	}
@@ -183,8 +187,9 @@ public class DCXYView extends HexView {
 		g.setFont(labelFont);
 		FontMetrics fm = getFontMetrics(labelFont);
 
-		Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top - fm.getHeight() / 2 + 1,
-				(right - left + fm.stringWidth("x") + fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
+		Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top
+				- fm.getHeight() / 2 + 1, (right - left + fm.stringWidth("x")
+				+ fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
 
 		g.setColor(TRANS);
 		g.fillRect(r.x, r.y, r.width, r.height);
@@ -194,13 +199,15 @@ public class DCXYView extends HexView {
 		g.drawLine(right, bottom, right, top);
 
 		g.drawString("y", right + 3, top + fm.getHeight() / 2 - 1);
-		g.drawString("x", left - fm.stringWidth("x") - 2, bottom + fm.getHeight() / 2);
+		g.drawString("x", left - fm.stringWidth("x") - 2,
+				bottom + fm.getHeight() / 2);
 
 	}
 
 	// draw the gemc global hits
 	private void drawAccumulatedGemcGlobalHits(Graphics g, IContainer container) {
-		Histo2DData dcXYGemc = AccumulationManager.getInstance().getDcXYGemcAccumulatedData();
+		Histo2DData dcXYGemc = AccumulationManager.getInstance()
+				.getDcXYGemcAccumulatedData();
 		if (dcXYGemc != null) {
 
 			long counts[][] = dcXYGemc.getCounts();
@@ -223,7 +230,8 @@ public class DCXYView extends HexView {
 							container.worldToLocal(r, wr);
 
 							double fract = ((counts[i][j])) / maxBinCount;
-							Color color = AccumulationManager.getColorScaleModel().getColor(fract);
+							Color color = AccumulationManager
+									.getColorScaleModel().getColor(fract);
 
 							g.setColor(color);
 							g.fillRect(r.x, r.y, r.width, r.height);
@@ -249,20 +257,23 @@ public class DCXYView extends HexView {
 		attributes.add(AttributeType.HEIGHT, d.height);
 
 		attributes.add(AttributeType.TOOLBAR, true);
-		attributes.add(AttributeType.TOOLBARBITS,
-				BaseToolBar.NODRAWING & ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON);
+		attributes.add(AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+				& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
+				& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON
+				& ~BaseToolBar.DELETEBUTTON);
 		attributes.add(AttributeType.VISIBLE, true);
 		attributes.add(AttributeType.HEADSUP, false);
 
-		attributes.add(AttributeType.BACKGROUND, X11Colors.getX11Color("Alice Blue"));
+		attributes.add(AttributeType.BACKGROUND,
+				X11Colors.getX11Color("Alice Blue"));
 		attributes.add(AttributeType.STANDARDVIEWDECORATIONS, true);
 
 		return attributes.toObjectArray();
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp,
+			Point2D.Double wp, List<String> feedbackStrings) {
 
 		container.worldToLocal(pp, wp);
 
@@ -284,7 +295,8 @@ public class DCXYView extends HexView {
 
 	}
 
-	private void labPointsToWorldRect(double x1, double y1, double x2, double y2, Rectangle2D.Double wr) {
+	private void labPointsToWorldRect(double x1, double y1, double x2,
+			double y2, Rectangle2D.Double wr) {
 		Point2D.Double p2d = new Point2D.Double(x1, y1);
 		double wx1 = p2d.x;
 		double wy1 = p2d.y;
@@ -306,7 +318,8 @@ public class DCXYView extends HexView {
 	 * @param lab
 	 *            the lab coordinates
 	 */
-	public static void labToLocal(IContainer container, Point pp, Point2D.Double lab) {
+	public static void labToLocal(IContainer container, Point pp,
+			Point2D.Double lab) {
 		container.worldToLocal(pp, lab);
 	}
 

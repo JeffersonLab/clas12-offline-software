@@ -17,68 +17,66 @@ import item3D.Item3D;
 
 public class TrajectoryDrawer3D extends Item3D {
 
-    public TrajectoryDrawer3D(Panel3D panel3d) {
-	super(panel3d);
-    }
+	public TrajectoryDrawer3D(Panel3D panel3d) {
+		super(panel3d);
+	}
 
-    @Override
-    public void draw(GLAutoDrawable drawable) {
+	@Override
+	public void draw(GLAutoDrawable drawable) {
 
-	if (SwimMenu.showMonteCarloTracks()) {
-	    Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+		if (SwimMenu.showMonteCarloTracks()) {
+			Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 
-	    if (trajectories != null) {
+			if (trajectories != null) {
 
-		for (SwimTrajectory trajectory : trajectories) {
-		    drawSwimTrajectory(drawable, trajectory);
+				for (SwimTrajectory trajectory : trajectories) {
+					drawSwimTrajectory(drawable, trajectory);
+				}
+
+			}
 		}
 
-	    }
+		// reconstructed?
+		if (SwimMenu.showReconstructedTracks()) {
+			Vector<SwimTrajectory> trajectories = Swimming
+					.getReconTrajectories();
+
+			if (trajectories != null) {
+
+				for (SwimTrajectory trajectory : trajectories) {
+					drawSwimTrajectory(drawable, trajectory);
+				}
+
+			}
+		}
 	}
 
-	// reconstructed?
-	if (SwimMenu.showReconstructedTracks()) {
-	    Vector<SwimTrajectory> trajectories = Swimming
-		    .getReconTrajectories();
-
-	    if (trajectories != null) {
-
-		for (SwimTrajectory trajectory : trajectories) {
-		    drawSwimTrajectory(drawable, trajectory);
+	// draw a trajectory in 3D
+	private void drawSwimTrajectory(GLAutoDrawable drawable, SwimTrajectory traj) {
+		int size = traj.size();
+		if (size < 2) {
+			return;
 		}
 
-	    }
-	}
-    }
+		float coords[] = new float[3 * size];
 
-    //draw a trajectory in 3D
-    private void drawSwimTrajectory(GLAutoDrawable drawable, SwimTrajectory traj) {
-	int size = traj.size();
-	if (size < 2) {
-	    return;
-	}
+		LundId lid = traj.getLundId();
+		LundStyle style = LundStyle.getStyle(lid);
+		Color color = Color.black;
 
-	float coords[] = new float[3*size];
-	
-	LundId lid = traj.getLundId();
-	LundStyle style = LundStyle.getStyle(lid);
-	Color color = Color.black;
-	
-	
-	if (style != null) {
-	    color = style.getFillColor();
-	} 
-	
-	
-	for (int i = 0; i < size; i++) {
-	    double v[] = traj.get(i);
-	    int j = i * 3;
-	    //convert to cm
-	    coords[j] = 100*(float) v[0];
-	    coords[j+1] = 100*(float) v[1];
-	    coords[j+2] = 100*(float) v[2];
-	}
+		if (style != null) {
+			color = style.getFillColor();
+		}
 
-	Support3D.drawPolyLine(drawable, coords, color, 2f);
-    }
+		for (int i = 0; i < size; i++) {
+			double v[] = traj.get(i);
+			int j = i * 3;
+			// convert to cm
+			coords[j] = 100 * (float) v[0];
+			coords[j + 1] = 100 * (float) v[1];
+			coords[j + 2] = 100 * (float) v[2];
+		}
+
+		Support3D.drawPolyLine(drawable, coords, color, 2f);
+	}
 }

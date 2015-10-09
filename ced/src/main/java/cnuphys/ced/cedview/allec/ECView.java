@@ -25,9 +25,7 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.geometry.ECGeometry;
-import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.ECHexSectorItem;
-import cnuphys.ced.item.HexSectorItem;
 
 public class ECView extends HexView {
 
@@ -40,8 +38,8 @@ public class ECView extends HexView {
 	private static final double _xsize = 420.0;
 	private static final double _ysize = _xsize * 1.154734;
 
-	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
-			2 * _ysize);
+	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(
+			_xsize, -_ysize, -2 * _xsize, 2 * _ysize);
 
 	/**
 	 * Create an allDCView
@@ -77,10 +75,11 @@ public class ECView extends HexView {
 	@Override
 	protected void addControls() {
 
-		_controlPanel = new ControlPanel(this,
-				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-						+ ControlPanel.RECONSARRAY,
-				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH + DisplayBits.INNEROUTER + DisplayBits.UVWSTRIPS, 3, 2);
+		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+				+ ControlPanel.RECONSARRAY, DisplayBits.ACCUMULATION
+				+ DisplayBits.MCTRUTH + DisplayBits.INNEROUTER
+				+ DisplayBits.UVWSTRIPS, 3, 2);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();
@@ -100,13 +99,16 @@ public class ECView extends HexView {
 	// add items to the view
 	@Override
 	protected void addItems() {
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
+				_detectorLayerName);
 
 		_hexItems = new ECHexSectorItem[6];
 
 		for (int sector = 0; sector < 6; sector++) {
-			_hexItems[sector] = new ECHexSectorItem(detectorLayer, this, sector + 1);
-			_hexItems[sector].getStyle().setFillColor(X11Colors.getX11Color("steel blue"));
+			_hexItems[sector] = new ECHexSectorItem(detectorLayer, this,
+					sector + 1);
+			_hexItems[sector].getStyle().setFillColor(
+					X11Colors.getX11Color("steel blue"));
 		}
 	}
 
@@ -160,20 +162,23 @@ public class ECView extends HexView {
 		attributes.add(AttributeType.HEIGHT, d.height);
 
 		attributes.add(AttributeType.TOOLBAR, true);
-		attributes.add(AttributeType.TOOLBARBITS,
-				BaseToolBar.NODRAWING & ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON);
+		attributes.add(AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+				& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
+				& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON
+				& ~BaseToolBar.DELETEBUTTON);
 		attributes.add(AttributeType.VISIBLE, true);
 		attributes.add(AttributeType.HEADSUP, false);
 
-		attributes.add(AttributeType.BACKGROUND, X11Colors.getX11Color("Alice Blue"));
+		attributes.add(AttributeType.BACKGROUND,
+				X11Colors.getX11Color("Alice Blue"));
 		attributes.add(AttributeType.STANDARDVIEWDECORATIONS, true);
 
 		return attributes.toObjectArray();
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp,
+			Point2D.Double wp, List<String> feedbackStrings) {
 
 		if (displayInner()) {
 			feedbackStrings.add("$white$INNER plane");
@@ -231,7 +236,8 @@ public class ECView extends HexView {
 	public void sectorXYZToIJK(Point3D pijk, double[] sectorXYZ) {
 		boolean inner = displayInner();
 
-		Point3D r0 = inner ? ECGeometry.getR0(ECGeometry.EC_INNER) : ECGeometry.getR0(ECGeometry.EC_OUTER);
+		Point3D r0 = inner ? ECGeometry.getR0(ECGeometry.EC_INNER) : ECGeometry
+				.getR0(ECGeometry.EC_OUTER);
 
 		double delx = sectorXYZ[0] - r0.x();
 		double dely = sectorXYZ[1] - r0.y();

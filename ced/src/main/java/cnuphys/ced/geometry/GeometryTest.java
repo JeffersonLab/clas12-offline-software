@@ -8,7 +8,7 @@ package cnuphys.ced.geometry;
  */
 public class GeometryTest {
 
-    public static void main(String arg[]) {
-    }
+	public static void main(String arg[]) {
+	}
 
 }
