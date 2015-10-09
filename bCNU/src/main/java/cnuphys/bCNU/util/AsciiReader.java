@@ -14,47 +14,47 @@ import java.io.FileReader;
  */
 public class AsciiReader {
 
-    // the number of noncomment lines processed
-    private int nonCommentLineCount;
+	// the number of noncomment lines processed
+	private int nonCommentLineCount;
 
-    /**
-     * Constructor
-     * 
-     * @param file
-     *            the ascii file to be processed
-     * @throws FileNotFoundException
-     */
-    public AsciiReader(File file) throws FileNotFoundException {
-	FileReader fileReader = new FileReader(file);
-	final BufferedReader bufferedReader = new BufferedReader(fileReader);
+	/**
+	 * Constructor
+	 * 
+	 * @param file
+	 *            the ascii file to be processed
+	 * @throws FileNotFoundException
+	 */
+	public AsciiReader(File file) throws FileNotFoundException {
+		FileReader fileReader = new FileReader(file);
+		final BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-	boolean reading = true;
-	while (reading) {
-	    String s = AsciiReadSupport.nextNonComment(bufferedReader);
-	    if (s != null) {
-		nonCommentLineCount++;
-		processLine(s);
-	    } else {
-		reading = false;
-	    }
+		boolean reading = true;
+		while (reading) {
+			String s = AsciiReadSupport.nextNonComment(bufferedReader);
+			if (s != null) {
+				nonCommentLineCount++;
+				processLine(s);
+			} else {
+				reading = false;
+			}
+		}
 	}
-    }
 
-    /**
-     * Process one non comment line from the file. This method should be
-     * overridden.
-     * 
-     * @param line
-     */
-    protected void processLine(String line) {
-	System.out.println(line);
-    }
+	/**
+	 * Process one non comment line from the file. This method should be
+	 * overridden.
+	 * 
+	 * @param line
+	 */
+	protected void processLine(String line) {
+		System.out.println(line);
+	}
 
-    /**
-     * @return the nonCommentLineCount
-     */
-    public int getNonCommentLineCount() {
-	return nonCommentLineCount;
-    }
+	/**
+	 * @return the nonCommentLineCount
+	 */
+	public int getNonCommentLineCount() {
+		return nonCommentLineCount;
+	}
 
 }

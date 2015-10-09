@@ -7,7 +7,7 @@ package cnuphys.bCNU.xml.tree;
 @SuppressWarnings("serial")
 public class BadNodeException extends Exception {
 
-    public BadNodeException(String s) {
-	super(s);
-    }
+	public BadNodeException(String s) {
+		super(s);
+	}
 }

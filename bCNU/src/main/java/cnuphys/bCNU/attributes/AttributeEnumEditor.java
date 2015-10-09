@@ -21,62 +21,62 @@ import cnuphys.bCNU.component.EnumComboBox;
 @SuppressWarnings("serial")
 public class AttributeEnumEditor extends EnumComboBox implements ActionListener {
 
-    /**
-     * The attribute name.
-     */
-    protected String attributeName = null;
+	/**
+	 * The attribute name.
+	 */
+	protected String attributeName = null;
 
-    /**
-     * The owner table.
-     */
-    protected AttributeTable attributeTable = null;
+	/**
+	 * The owner table.
+	 */
+	protected AttributeTable attributeTable = null;
 
-    /**
-     * The EnumMap the editor is based upon.
-     */
-    protected EnumMap<?, String> enumMap;
+	/**
+	 * The EnumMap the editor is based upon.
+	 */
+	protected EnumMap<?, String> enumMap;
 
-    /**
-     * Create a Symbol editor based on a combo box.
-     * 
-     * @param attributeTable
-     *            The owner table.
-     * @param enumMap
-     * @param attributeName
-     *            The name of the property being edited.
-     * @param defaultValue
-     *            The current value.
-     */
+	/**
+	 * Create a Symbol editor based on a combo box.
+	 * 
+	 * @param attributeTable
+	 *            The owner table.
+	 * @param enumMap
+	 * @param attributeName
+	 *            The name of the property being edited.
+	 * @param defaultValue
+	 *            The current value.
+	 */
 
-    public AttributeEnumEditor(AttributeTable attributeTable,
-	    EnumMap<?, String> enumMap, String attributeName,
-	    Enum<?> defaultValue) {
+	public AttributeEnumEditor(AttributeTable attributeTable,
+			EnumMap<?, String> enumMap, String attributeName,
+			Enum<?> defaultValue) {
 
-	super(enumMap, defaultValue);
-	this.enumMap = enumMap;
-	this.attributeTable = attributeTable;
-	this.attributeName = attributeName;
+		super(enumMap, defaultValue);
+		this.enumMap = enumMap;
+		this.attributeTable = attributeTable;
+		this.attributeName = attributeName;
 
-	if ((attributeTable == null) || (attributeName == null)) {
-	    return;
+		if ((attributeTable == null) || (attributeName == null)) {
+			return;
+		}
+
+		setBackground(Color.white);
+		addActionListener(this);
 	}
 
-	setBackground(Color.white);
-	addActionListener(this);
-    }
-
-    /**
-     * The action listener
-     * 
-     * @param e
-     *            the causal event.
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	try {
-	    attributeTable.setAttribute(attributeName, getSelectedEnum());
-	} catch (Exception ex) {
-	    ex.printStackTrace();
+	/**
+	 * The action listener
+	 * 
+	 * @param e
+	 *            the causal event.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		try {
+			attributeTable.setAttribute(attributeName, getSelectedEnum());
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
-    }
 }

@@ -13,25 +13,25 @@ import cnuphys.bCNU.graphics.container.IContainer;
 @SuppressWarnings("serial")
 public class ZoomInButton extends ToolBarButton {
 
-    /**
-     * Create the zoom-in button, which zooms in by a fixed amount.
-     * 
-     * @param container
-     *            the container this button acts upon.
-     */
-    public ZoomInButton(IContainer container) {
-	super(container, "images/zoom_in.gif", "Zoom in");
-    }
+	/**
+	 * Create the zoom-in button, which zooms in by a fixed amount.
+	 * 
+	 * @param container
+	 *            the container this button acts upon.
+	 */
+	public ZoomInButton(IContainer container) {
+		super(container, "images/zoom_in.gif", "Zoom in");
+	}
 
-    /**
-     * This is what I do if I am pressed
-     * 
-     * @param e
-     *            The causal event.
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	container.scale(IContainer.FIXED_ZOOM_FACTOR);
-	container.getToolBar().resetDefaultSelection();
-    }
+	/**
+	 * This is what I do if I am pressed
+	 * 
+	 * @param e
+	 *            The causal event.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		container.scale(IContainer.FIXED_ZOOM_FACTOR);
+		container.getToolBar().resetDefaultSelection();
+	}
 }

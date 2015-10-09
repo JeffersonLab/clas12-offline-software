@@ -4,11 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
 import javax.swing.JFrame;
-import javax.swing.JTextField;
 
 /**
  * Eliza Application.
@@ -22,12 +18,12 @@ public class ElizaApp extends JFrame {
 
 	public ElizaApp() {
 		super("Eliza");
-		
+
 		addContent();
 		System.err.println("done adding content");
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		setSize(600, 600);
+		// setSize(600, 600);
 		pack();
 	}
 
@@ -41,7 +37,8 @@ public class ElizaApp extends JFrame {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component The Component to center.
+	 * @param component
+	 *            The Component to center.
 	 */
 	public static void centerComponent(Component component) {
 
@@ -58,24 +55,22 @@ public class ElizaApp extends JFrame {
 				componentSize.width = screenSize.width;
 			}
 
-			int x = ((screenSize.width - componentSize.width) / 2) ;
+			int x = ((screenSize.width - componentSize.width) / 2);
 			int y = ((screenSize.height - componentSize.height) / 2);
 
 			component.setLocation(x, y);
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			component.setLocation(200, 200);
 			e.printStackTrace();
 		}
 	}
 
-
 	public static void main(String args[]) {
 		final ElizaApp app = new ElizaApp();
 		centerComponent(app);
 		System.err.println("Size: " + app.getSize());
-		
+
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

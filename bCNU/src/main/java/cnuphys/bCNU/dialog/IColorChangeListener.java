@@ -9,5 +9,5 @@ import java.awt.Component;
  */
 public interface IColorChangeListener {
 
-    public void colorChanged(Component component, Color color);
+	public void colorChanged(Component component, Color color);
 }

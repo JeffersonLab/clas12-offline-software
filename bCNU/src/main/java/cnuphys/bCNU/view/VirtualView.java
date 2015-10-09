@@ -30,744 +30,744 @@ import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.util.X11Colors;
 
 public class VirtualView extends BaseView implements InternalFrameListener,
-	IViewListener, MouseMotionListener, MouseListener {
+		IViewListener, MouseMotionListener, MouseListener {
 
-    private JFrame _parent;
+	private JFrame _parent;
 
-    // reserved view type for drawing view
-    public static final int VIRTUALVIEWTYPE = -977821;
+	// reserved view type for drawing view
+	public static final int VIRTUALVIEWTYPE = -977821;
 
-    private static final String VVTITLE = "Desktop";
+	private static final String VVTITLE = "Desktop";
 
-    private Vector<BaseView> _views = new Vector<BaseView>();
+	private Vector<BaseView> _views = new Vector<BaseView>();
 
-    private static int _numcol = 8;
-    private static final int _numrow = 1;
+	private static int _numcol = 8;
+	private static final int _numrow = 1;
 
-    private int _currentRow = 0;
-    private int _currentCol = 0;
-    private Point _offsets[][] = new Point[_numrow][_numcol];
+	private int _currentRow = 0;
+	private int _currentCol = 0;
+	private Point _offsets[][] = new Point[_numrow][_numcol];
 
-    // private static final Color _bg = X11Colors.getX11Color("dark blue");
-    private static final Color _bg = Color.gray;
-    private static final Color _fill = X11Colors.getX11Color("alice blue");
-    private static final Color _vwfillInactive = new Color(255, 200, 120, 128);
-    private static final Color _vwfillActive = new Color(0, 0, 200, 128);
+	// private static final Color _bg = X11Colors.getX11Color("dark blue");
+	private static final Color _bg = Color.gray;
+	private static final Color _fill = X11Colors.getX11Color("alice blue");
+	private static final Color _vwfillInactive = new Color(255, 200, 120, 128);
+	private static final Color _vwfillActive = new Color(0, 0, 200, 128);
 
-    private Point2D.Double _wp = new Point2D.Double();
+	private Point2D.Double _wp = new Point2D.Double();
 
-    // constraint
-    public static final int UPPERLEFT = 0;
-    public static final int UPPERRIGHT = 1;
-    public static final int BOTTOMLEFT = 2;
-    public static final int BOTTOMRIGHT = 3;
-    public static final int CENTER = 4;
+	// constraint
+	public static final int UPPERLEFT = 0;
+	public static final int UPPERRIGHT = 1;
+	public static final int BOTTOMLEFT = 2;
+	public static final int BOTTOMRIGHT = 3;
+	public static final int CENTER = 4;
 
-    /**
-     * Create a drawing view
-     * 
-     * @param keyVals
-     *            variable set of arguments.
-     */
-    private VirtualView(Object... keyVals) {
-	super(keyVals);
-	ViewManager.getInstance().addViewListener(this);
+	/**
+	 * Create a drawing view
+	 * 
+	 * @param keyVals
+	 *            variable set of arguments.
+	 */
+	private VirtualView(Object... keyVals) {
+		super(keyVals);
+		ViewManager.getInstance().addViewListener(this);
 
-	_parent = (JFrame) SwingUtilities.getWindowAncestor(this);
-	ComponentAdapter ca = new ComponentAdapter() {
-	    @Override
-	    public void componentResized(ComponentEvent ce) {
-		reconfigure();
-	    }
-	};
-	_parent.addComponentListener(ca);
+		_parent = (JFrame) SwingUtilities.getWindowAncestor(this);
+		ComponentAdapter ca = new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent ce) {
+				reconfigure();
+			}
+		};
+		_parent.addComponentListener(ca);
 
-	addItems();
+		addItems();
 
-	setBackground(_bg);
-	getContainer().getComponent().setBackground(_bg);
+		setBackground(_bg);
+		getContainer().getComponent().setBackground(_bg);
 
-	getContainer().getComponent().addMouseMotionListener(this);
-	getContainer().getComponent().addMouseListener(this);
+		getContainer().getComponent().addMouseMotionListener(this);
+		getContainer().getComponent().addMouseListener(this);
 
-	// set the offsets
-	setOffsets();
+		// set the offsets
+		setOffsets();
 
-	// System.err.println("[VV] world: " + getContainer().getWorldSystem());
-	setBeforeDraw();
-	setAfterDraw();
-    }
-
-    /**
-     * Reconfigure the virtual view
-     */
-    public void reconfigure() {
-	Dimension d = _parent.getSize();
-
-	int width = _numcol * d.width;
-	int height = _numrow * d.height;
-	getContainer().getWorldSystem().width = width;
-	getContainer().getWorldSystem().height = height;
-	setOffsets();
-
-	for (BaseView view : _views) {
-	    if (view.getVirtualItem() != null) {
-		view.getVirtualItem().setLocation();
-	    }
+		// System.err.println("[VV] world: " + getContainer().getWorldSystem());
+		setBeforeDraw();
+		setAfterDraw();
 	}
 
-	getContainer().refresh();
-    }
+	/**
+	 * Reconfigure the virtual view
+	 */
+	public void reconfigure() {
+		Dimension d = _parent.getSize();
 
-    private void setOffsets() {
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
+		int width = _numcol * d.width;
+		int height = _numrow * d.height;
+		getContainer().getWorldSystem().width = width;
+		getContainer().getWorldSystem().height = height;
+		setOffsets();
 
-	for (int col = 0; col < _numcol; col++) {
-	    for (int row = 0; row < _numrow; row++) {
+		for (BaseView view : _views) {
+			if (view.getVirtualItem() != null) {
+				view.getVirtualItem().setLocation();
+			}
+		}
 
-		_offsets[row][col] = new Point((int) (col * dx),
-			(int) (row * dy));
-	    }
+		getContainer().refresh();
 	}
-    }
 
-    /**
-     * Create the view's before drawer.
-     */
-    private void setBeforeDraw() {
-	// use a before-drawer to sector dividers and labels
-	IDrawable beforeDraw = new DrawableAdapter() {
-
-	    @Override
-	    public void draw(Graphics g, IContainer container) {
-		Rectangle cr = getRowColRect(_currentRow, _currentCol);
-		g.setColor(_fill);
-		g.fillRect(cr.x + 1, cr.y + 1, cr.width - 1, cr.height - 1);
-
-	    }
-
-	};
-
-	getContainer().setBeforeDraw(beforeDraw);
-    }
-
-    /**
-     * Create the view's before drawer.
-     */
-    private void setAfterDraw() {
-	// use a before-drawer to sector dividers and labels
-	IDrawable afterDraw = new DrawableAdapter() {
-
-	    @Override
-	    public void draw(Graphics g, IContainer container) {
-
-		Rectangle b = container.getComponent().getBounds();
+	private void setOffsets() {
 		Rectangle2D.Double world = getContainer().getWorldSystem();
-		Point2D.Double wp = new Point2D.Double();
-		Point pp = new Point();
 		double dx = world.width / _numcol;
-
-		g.setColor(Color.red);
-		wp.y = world.y + world.height / 2;
-		for (int i = 1; i < _numcol; i++) {
-		    wp.x = i * dx;
-		    container.worldToLocal(pp, wp);
-		    g.drawLine(pp.x, 0, pp.x, b.height);
-		}
-
 		double dy = world.height / _numrow;
-		wp.x = world.x + world.width / 2;
-		for (int i = 1; i < _numrow; i++) {
-		    wp.y = i * dy;
-		    container.worldToLocal(pp, wp);
-		    g.drawLine(0, pp.y, b.width, pp.y);
+
+		for (int col = 0; col < _numcol; col++) {
+			for (int row = 0; row < _numrow; row++) {
+
+				_offsets[row][col] = new Point((int) (col * dx),
+						(int) (row * dy));
+			}
+		}
+	}
+
+	/**
+	 * Create the view's before drawer.
+	 */
+	private void setBeforeDraw() {
+		// use a before-drawer to sector dividers and labels
+		IDrawable beforeDraw = new DrawableAdapter() {
+
+			@Override
+			public void draw(Graphics g, IContainer container) {
+				Rectangle cr = getRowColRect(_currentRow, _currentCol);
+				g.setColor(_fill);
+				g.fillRect(cr.x + 1, cr.y + 1, cr.width - 1, cr.height - 1);
+
+			}
+
+		};
+
+		getContainer().setBeforeDraw(beforeDraw);
+	}
+
+	/**
+	 * Create the view's before drawer.
+	 */
+	private void setAfterDraw() {
+		// use a before-drawer to sector dividers and labels
+		IDrawable afterDraw = new DrawableAdapter() {
+
+			@Override
+			public void draw(Graphics g, IContainer container) {
+
+				Rectangle b = container.getComponent().getBounds();
+				Rectangle2D.Double world = getContainer().getWorldSystem();
+				Point2D.Double wp = new Point2D.Double();
+				Point pp = new Point();
+				double dx = world.width / _numcol;
+
+				g.setColor(Color.red);
+				wp.y = world.y + world.height / 2;
+				for (int i = 1; i < _numcol; i++) {
+					wp.x = i * dx;
+					container.worldToLocal(pp, wp);
+					g.drawLine(pp.x, 0, pp.x, b.height);
+				}
+
+				double dy = world.height / _numrow;
+				wp.x = world.x + world.width / 2;
+				for (int i = 1; i < _numrow; i++) {
+					wp.y = i * dy;
+					container.worldToLocal(pp, wp);
+					g.drawLine(0, pp.y, b.width, pp.y);
+				}
+
+				Rectangle cr = getRowColRect(_currentRow, _currentCol);
+
+				g.setColor(Color.red);
+				g.drawRect(0, 0, b.width - 1, b.height - 1);
+
+				g.setColor(Color.green);
+				g.drawRect(cr.x, cr.y, cr.width - 1, cr.height - 1);
+
+			}
+
+		};
+
+		getContainer().setAfterDraw(afterDraw);
+	}
+
+	/**
+	 * This adds the screen items.
+	 */
+	private void addItems() {
+		// add items for all views except me
+		for (BaseView view : ViewManager.getInstance()) {
+			addView(view);
+		}
+	}
+
+	/**
+	 * Convenience method for creating a Drawing View.
+	 * 
+	 * @return a new DrawingView object
+	 */
+	public static VirtualView createVirtualView(int numcol) {
+
+		_numcol = numcol;
+		VirtualView view = null;
+		Rectangle2D.Double world = getWorld();
+		int width = numcol * 40;
+		int height = (int) ((width * world.height) / world.width);
+
+		// create the view
+		view = new VirtualView(AttributeType.WORLDSYSTEM, world,
+				AttributeType.LEFT, 0, AttributeType.TOP, 0,
+				AttributeType.WIDTH, width, AttributeType.HEIGHT, height,
+				AttributeType.TOOLBAR, false, AttributeType.VISIBLE, true,
+				AttributeType.BACKGROUND, Color.white, AttributeType.HEADSUP,
+				false, AttributeType.TITLE, VVTITLE,
+				AttributeType.STANDARDVIEWDECORATIONS, false,
+				AttributeType.ICONIFIABLE, false, AttributeType.RESIZABLE,
+				false, AttributeType.CLOSABLE, false, AttributeType.VIEWTYPE,
+				VIRTUALVIEWTYPE);
+
+		view.pack();
+		return view;
+	}
+
+	// get the world system
+	private static Rectangle2D.Double getWorld() {
+		// System.err.println("VV getting world");
+		GraphicsEnvironment g = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice[] devices = g.getScreenDevices();
+
+		int maxw = 0;
+		int maxh = 0;
+
+		for (int i = 0; i < devices.length; i++) {
+			maxw = Math.max(maxw, devices[i].getDisplayMode().getWidth());
+			maxh = Math.max(maxh, devices[i].getDisplayMode().getHeight());
 		}
 
-		Rectangle cr = getRowColRect(_currentRow, _currentCol);
-
-		g.setColor(Color.red);
-		g.drawRect(0, 0, b.width - 1, b.height - 1);
-
-		g.setColor(Color.green);
-		g.drawRect(cr.x, cr.y, cr.width - 1, cr.height - 1);
-
-	    }
-
-	};
-
-	getContainer().setAfterDraw(afterDraw);
-    }
-
-    /**
-     * This adds the screen items.
-     */
-    private void addItems() {
-	// add items for all views except me
-	for (BaseView view : ViewManager.getInstance()) {
-	    addView(view);
-	}
-    }
-
-    /**
-     * Convenience method for creating a Drawing View.
-     * 
-     * @return a new DrawingView object
-     */
-    public static VirtualView createVirtualView(int numcol) {
-
-	_numcol = numcol;
-	VirtualView view = null;
-	Rectangle2D.Double world = getWorld();
-	int width = numcol*40;
-	int height = (int) ((width * world.height) / world.width);
-
-	// create the view
-	view = new VirtualView(AttributeType.WORLDSYSTEM, world,
-		AttributeType.LEFT, 0, AttributeType.TOP, 0,
-		AttributeType.WIDTH, width, AttributeType.HEIGHT, height,
-		AttributeType.TOOLBAR, false, AttributeType.VISIBLE, true,
-		AttributeType.BACKGROUND, Color.white, AttributeType.HEADSUP,
-		false, AttributeType.TITLE, VVTITLE,
-		AttributeType.STANDARDVIEWDECORATIONS, false,
-		AttributeType.ICONIFIABLE, false, AttributeType.RESIZABLE,
-		false, AttributeType.CLOSABLE, false, AttributeType.VIEWTYPE,
-		VIRTUALVIEWTYPE);
-
-	view.pack();
-	return view;
-    }
-
-    // get the world system
-    private static Rectangle2D.Double getWorld() {
-	// System.err.println("VV getting world");
-	GraphicsEnvironment g = GraphicsEnvironment
-		.getLocalGraphicsEnvironment();
-	GraphicsDevice[] devices = g.getScreenDevices();
-
-	int maxw = 0;
-	int maxh = 0;
-
-	for (int i = 0; i < devices.length; i++) {
-	    maxw = Math.max(maxw, devices[i].getDisplayMode().getWidth());
-	    maxh = Math.max(maxh, devices[i].getDisplayMode().getHeight());
+		int width = _numcol * maxw;
+		int height = _numrow * maxh;
+		return new Rectangle2D.Double(0, 0, width, height);
 	}
 
-	int width = _numcol * maxw;
-	int height = _numrow * maxh;
-	return new Rectangle2D.Double(0, 0, width, height);
-    }
+	@Override
+	public void internalFrameOpened(InternalFrameEvent e) {
+		Object source = e.getSource();
+		if (source instanceof BaseView) {
+			BaseView view = (BaseView) source;
+			// System.err.println("[VV] " + view.getTitle() + " opened");
+			if (view.getVirtualItem() != null) {
+				view.getVirtualItem().setLocation();
+				view.getVirtualItem().setVisible(true);
+				getContainer().refresh();
+			}
+		}
+	}
 
-    @Override
-    public void internalFrameOpened(InternalFrameEvent e) {
-	Object source = e.getSource();
-	if (source instanceof BaseView) {
-	    BaseView view = (BaseView) source;
-	    // System.err.println("[VV] " + view.getTitle() + " opened");
-	    if (view.getVirtualItem() != null) {
-		view.getVirtualItem().setLocation();
-		view.getVirtualItem().setVisible(true);
+	@Override
+	public void internalFrameClosing(InternalFrameEvent e) {
+	}
+
+	@Override
+	public void internalFrameClosed(InternalFrameEvent e) {
+		Object source = e.getSource();
+		if (source instanceof BaseView) {
+			BaseView view = (BaseView) source;
+			view.getVirtualItem().setVisible(false);
+			getContainer().refresh();
+
+		}
+	}
+
+	@Override
+	public void internalFrameIconified(InternalFrameEvent e) {
+		Object source = e.getSource();
+		if (source instanceof BaseView) {
+			BaseView view = (BaseView) source;
+			view.getVirtualItem().setVisible(false);
+			getContainer().refresh();
+			// System.err.println("[VV] " + view.getTitle() + " iconified");
+		}
+	}
+
+	@Override
+	public void internalFrameDeiconified(InternalFrameEvent e) {
+		Object source = e.getSource();
+		if (source instanceof BaseView) {
+			BaseView view = (BaseView) source;
+			view.getVirtualItem().setVisible(true);
+			getContainer().refresh();
+
+			// System.err.println("[VV] " + view.getTitle() + " deiconified");
+		}
+	}
+
+	@Override
+	public void internalFrameActivated(InternalFrameEvent e) {
+		Object source = e.getSource();
+		if (source instanceof BaseView) {
+			BaseView view = (BaseView) source;
+			view.getVirtualItem().setVisible(true);
+			getContainer().getAnnotationLayer().sendToFront(
+					view.getVirtualItem());
+			view.getVirtualItem().getStyle().setFillColor(_vwfillActive);
+			view.getVirtualItem().getStyle().setLineColor(Color.white);
+			getContainer().refresh();
+		}
+	}
+
+	@Override
+	public void internalFrameDeactivated(InternalFrameEvent e) {
+		Object source = e.getSource();
+		if (source instanceof BaseView) {
+			BaseView view = (BaseView) source;
+			view.getVirtualItem().setVisible(true);
+			view.getVirtualItem().getStyle().setFillColor(_vwfillInactive);
+			view.getVirtualItem().getStyle().setLineColor(Color.blue);
+			getContainer().refresh();
+		}
+	}
+
+	@Override
+	public void viewAdded(BaseView view) {
+		addView(view);
 		getContainer().refresh();
-	    }
-	}
-    }
-
-    @Override
-    public void internalFrameClosing(InternalFrameEvent e) {
-    }
-
-    @Override
-    public void internalFrameClosed(InternalFrameEvent e) {
-	Object source = e.getSource();
-	if (source instanceof BaseView) {
-	    BaseView view = (BaseView) source;
-	    view.getVirtualItem().setVisible(false);
-	    getContainer().refresh();
-
-	}
-    }
-
-    @Override
-    public void internalFrameIconified(InternalFrameEvent e) {
-	Object source = e.getSource();
-	if (source instanceof BaseView) {
-	    BaseView view = (BaseView) source;
-	    view.getVirtualItem().setVisible(false);
-	    getContainer().refresh();
-	    // System.err.println("[VV] " + view.getTitle() + " iconified");
-	}
-    }
-
-    @Override
-    public void internalFrameDeiconified(InternalFrameEvent e) {
-	Object source = e.getSource();
-	if (source instanceof BaseView) {
-	    BaseView view = (BaseView) source;
-	    view.getVirtualItem().setVisible(true);
-	    getContainer().refresh();
-
-	    // System.err.println("[VV] " + view.getTitle() + " deiconified");
-	}
-    }
-
-    @Override
-    public void internalFrameActivated(InternalFrameEvent e) {
-	Object source = e.getSource();
-	if (source instanceof BaseView) {
-	    BaseView view = (BaseView) source;
-	    view.getVirtualItem().setVisible(true);
-	    getContainer().getAnnotationLayer().sendToFront(
-		    view.getVirtualItem());
-	    view.getVirtualItem().getStyle().setFillColor(_vwfillActive);
-	    view.getVirtualItem().getStyle().setLineColor(Color.white);
-	    getContainer().refresh();
-	}
-    }
-
-    @Override
-    public void internalFrameDeactivated(InternalFrameEvent e) {
-	Object source = e.getSource();
-	if (source instanceof BaseView) {
-	    BaseView view = (BaseView) source;
-	    view.getVirtualItem().setVisible(true);
-	    view.getVirtualItem().getStyle().setFillColor(_vwfillInactive);
-	    view.getVirtualItem().getStyle().setLineColor(Color.blue);
-	    getContainer().refresh();
-	}
-    }
-
-    @Override
-    public void viewAdded(BaseView view) {
-	addView(view);
-	getContainer().refresh();
-    }
-
-    @Override
-    public void viewRemoved(BaseView view) {
-	if (_views.contains(view)) {
-	    view.removeInternalFrameListener(this);
-
-	    if (view.getVirtualItem() != null) {
-		getContainer().getAnnotationLayer().remove(
-			view.getVirtualItem());
-		view.getContainer().refresh();
-	    }
-
-	    _views.remove(view);
-	}
-    }
-
-    // add a view and create the item that represents it
-    private void addView(BaseView view) {
-	// don't add myself
-	if (view == this) {
-	    return;
 	}
 
-	if (_views.contains(view)) {
-	    return;
+	@Override
+	public void viewRemoved(BaseView view) {
+		if (_views.contains(view)) {
+			view.removeInternalFrameListener(this);
+
+			if (view.getVirtualItem() != null) {
+				getContainer().getAnnotationLayer().remove(
+						view.getVirtualItem());
+				view.getContainer().refresh();
+			}
+
+			_views.remove(view);
+		}
 	}
 
-	_views.add(view);
+	// add a view and create the item that represents it
+	private void addView(BaseView view) {
+		// don't add myself
+		if (view == this) {
+			return;
+		}
 
-	final VirtualWindowItem vitem = new VirtualWindowItem(this, view);
-	vitem.getStyle().setFillColor(_vwfillInactive);
-	vitem.getStyle().setLineColor(Color.blue);
+		if (_views.contains(view)) {
+			return;
+		}
 
-	view.addInternalFrameListener(this);
+		_views.add(view);
 
-	ComponentListener cl = new ComponentListener() {
+		final VirtualWindowItem vitem = new VirtualWindowItem(this, view);
+		vitem.getStyle().setFillColor(_vwfillInactive);
+		vitem.getStyle().setLineColor(Color.blue);
 
-	    @Override
-	    public void componentResized(ComponentEvent e) {
-		vitem.setLocation();
+		view.addInternalFrameListener(this);
+
+		ComponentListener cl = new ComponentListener() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				vitem.setLocation();
+				getContainer().refresh();
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				vitem.setLocation();
+				getContainer().refresh();
+			}
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+				vitem.setLocation();
+				getContainer().refresh();
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				vitem.setLocation();
+				getContainer().refresh();
+			}
+
+		};
+
+		view.addComponentListener(cl);
+
 		getContainer().refresh();
-	    }
+	}
 
-	    @Override
-	    public void componentMoved(ComponentEvent e) {
-		vitem.setLocation();
+	@Override
+	public void mouseDragged(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		getContainer().localToWorld(e.getPoint(), _wp);
+
+		AItem item = getContainer().getItemAtPoint(e.getPoint());
+		if ((item != null) && (item instanceof VirtualWindowItem)) {
+			VirtualWindowItem vvi = (VirtualWindowItem) item;
+			setTitle(VVTITLE + " [" + vvi.getBaseView().getTitle() + "]");
+		} else {
+			setTitle(VVTITLE);
+		}
+	}
+
+	/**
+	 * Virtual view: no offesetting!
+	 * 
+	 * @param dh
+	 *            the horizontal change
+	 * @param dv
+	 *            the vertical change
+	 */
+	@Override
+	public void offset(int dh, int dv) {
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent mouseEvent) {
+		switch (mouseEvent.getButton()) {
+		case MouseEvent.BUTTON1:
+			if (mouseEvent.getClickCount() == 1) { // single click
+			} else { // double (or more) clicks
+				handleDoubleClick(mouseEvent);
+			}
+			return;
+
+		case MouseEvent.BUTTON3:
+			return;
+		}
+	}
+
+	// handle a double click
+	private void handleDoubleClick(MouseEvent mouseEvent) {
+		Point rc = getRowCol(mouseEvent.getPoint());
+		// System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
+
+		int clickRow = rc.y;
+		int clickCol = rc.x;
+		if ((clickRow == _currentRow) && (clickCol == _currentCol)) {
+			return;
+		}
+
+		int dh = _offsets[_currentRow][_currentCol].x
+				- _offsets[clickRow][clickCol].x;
+
+		// can't do dv because can't give internal frames -y
+		int dv = 0;
+
+		for (BaseView view : _views) {
+			view.offset(dh, dv);
+		}
+
+		_currentRow = clickRow;
+		_currentCol = clickCol;
 		getContainer().refresh();
-	    }
+	}
 
-	    @Override
-	    public void componentShown(ComponentEvent e) {
-		vitem.setLocation();
+	private Rectangle getRowColRect(int row, int col) {
+
+		Rectangle2D.Double world = getContainer().getWorldSystem();
+		double dx = world.width / _numcol;
+		double dy = world.height / _numrow;
+
+		double x = col * dx;
+		double y = world.y + world.height - (row + 1) * dy;
+
+		Rectangle2D.Double wr = new Rectangle2D.Double(x, y, dx, dy);
+		Rectangle r = new Rectangle();
+		getContainer().worldToLocal(r, wr);
+		return r;
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		setTitle(VVTITLE);
+	}
+
+	// col is in x
+	// row is in y
+	private Point getRowCol(Point p) {
+
+		Point2D.Double wp = new Point2D.Double();
+
+		getContainer().localToWorld(p, wp);
+
+		Rectangle2D.Double world = getContainer().getWorldSystem();
+		double dx = world.width / _numcol;
+		double dy = world.height / _numrow;
+
+		int col = (int) (wp.x / dx);
+		int row = _numrow - (int) (wp.y / dy) - 1;
+
+		return new Point(col, row);
+
+	}
+
+	/**
+	 * Total offset based on the current cell
+	 * 
+	 * @return dh in x, dv in y
+	 */
+	public Point2D.Double totalOffset() {
+		Rectangle2D.Double world = getContainer().getWorldSystem();
+		double dx = world.width / _numcol;
+		double dy = world.height / _numrow;
+		return new Point2D.Double(_currentCol * dx, _currentRow * dy);
+	}
+
+	/**
+	 * Move a view to the center of a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param row
+	 *            the row
+	 * @param col
+	 *            the col
+	 */
+	public void moveTo(BaseView view, int row, int col) {
+		moveTo(view, row, col, 0, 0);
+	}
+
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param row
+	 *            the row
+	 * @param col
+	 *            the col
+	 * @param dh
+	 *            additional horizontal offset
+	 * @param dv
+	 *            additional vertical offset
+	 */
+	public void moveTo(BaseView view, int row, int col, int dh, int dv) {
+
+		row = Math.max(0, Math.min(row, (_numrow - 1)));
+		col = Math.max(0, Math.min(col, (_numcol - 1)));
+
+		boolean managed = false;
+
+		for (BaseView bv : _views) {
+			if (bv == view) {
+				managed = true;
+				break;
+			}
+		}
+
+		if (!managed) {
+			return;
+		}
+
+		Rectangle2D.Double world = getContainer().getWorldSystem();
+		double dx = world.width / _numcol;
+		double dy = world.height / _numrow;
+
+		double x = col * dx;
+		double y = world.y + world.height - (row + 1) * dy;
+
+		int xc = (int) (x + dx / 2);
+		int yc = (int) (y + dy / 2);
+
+		Rectangle bounds = view.getBounds();
+		int delx = xc - (bounds.x + bounds.width / 2);
+		int dely = (yc - 40) - (bounds.y + bounds.height / 2);
+
+		view.offset(delx + dh, dely + dv);
+	}
+
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param row
+	 *            the row
+	 * @param col
+	 *            the col
+	 */
+	public void moveTo(BaseView view, int row, int col, boolean fit) {
+
+		if (fit == false) {
+			moveTo(view, row, col, 0, 0);
+			return;
+		}
+
+		row = Math.max(0, Math.min(row, (_numrow - 1)));
+		col = Math.max(0, Math.min(col, (_numcol - 1)));
+
+		boolean managed = false;
+
+		for (BaseView bv : _views) {
+			if (bv == view) {
+				managed = true;
+				break;
+			}
+		}
+
+		if (!managed) {
+			return;
+		}
+
+		Rectangle2D.Double world = getContainer().getWorldSystem();
+		double dx = world.width / _numcol;
+		double dy = world.height / _numrow;
+
+		double x = col * dx;
+
+		int margin = 40;
+
+		int left = (int) (x + margin);
+		int top = (margin);
+		int w = (int) (dx - 3 * margin);
+		int h = (int) (dy - 3 * margin);
+		Rectangle bounds = view.getBounds();
+		bounds.setFrame(left, top, w, h);
+		view.setBounds(bounds);
+	}
+
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param row
+	 *            the row
+	 * @param col
+	 *            the col
+	 * @param constraint
+	 *            constraint constant
+	 */
+	public void moveTo(BaseView view, int row, int col, int constraint) {
+
+		if (constraint == CENTER) {
+			moveTo(view, row, col);
+			return;
+		}
+
+		row = Math.max(0, Math.min(row, (_numrow - 1)));
+		col = Math.max(0, Math.min(col, (_numcol - 1)));
+
+		boolean managed = false;
+
+		for (BaseView bv : _views) {
+			if (bv == view) {
+				managed = true;
+				break;
+			}
+		}
+
+		if (!managed) {
+			return;
+		}
+
+		Rectangle2D.Double world = getContainer().getWorldSystem();
+		double dx = world.width / _numcol;
+		double dy = world.height / _numrow;
+
+		double left = col * dx;
+		double top = world.y + world.height - (row + 1) * dy;
+		double right = left + dx;
+		double bottom = top + dy;
+
+		Rectangle bounds = view.getBounds();
+		int x0 = bounds.x;
+		int y0 = bounds.y;
+		int dh = 0;
+		int dv = 0;
+
+		int slop = 10;
+
+		if (constraint == UPPERRIGHT) {
+			int xf = (int) (right - bounds.width - 2 * slop);
+			int yf = (int) (top + slop);
+			dh = xf - x0;
+			dv = yf - y0;
+		} else if (constraint == UPPERLEFT) {
+			int xf = (int) (left + slop);
+			int yf = (int) (top + slop);
+			dh = xf - x0;
+			dv = yf - y0;
+		} else if (constraint == BOTTOMLEFT) {
+			int xf = (int) (left + slop);
+			int yf = (int) (bottom - bounds.height - 7 * slop);
+			dh = xf - x0;
+			dv = yf - y0;
+		} else if (constraint == BOTTOMRIGHT) {
+			int xf = (int) (right - bounds.width - 2 * slop);
+			int yf = (int) (bottom - bounds.height - 7 * slop);
+			dh = xf - x0;
+			dv = yf - y0;
+		}
+		view.offset(dh, dv);
+	}
+
+	/**
+	 * Activates the view's cell so that it is visible
+	 * 
+	 * @param view
+	 *            the view
+	 */
+	public void activateViewCell(BaseView view) {
+
+		if (view.getVirtualItem() == null) {
+			return;
+		}
+
+		Rectangle b = view.getVirtualItem().getBounds(getContainer());
+		Point pp = new Point(b.x + b.width / 2, b.y + b.height / 2);
+		Point rc = getRowCol(pp);
+
+		int col = Math.max(0, Math.min(_numcol - 1, rc.x));
+		int row = Math.max(0, Math.min(_numrow - 1, rc.y));
+
+		if ((col == _currentCol) && (row == _currentRow)) {
+			return;
+		}
+
+		int dh = _offsets[_currentRow][_currentCol].x - _offsets[row][col].x;
+
+		// can't do dv because can't give internal frames -y
+		int dv = 0;
+
+		for (BaseView bview : _views) {
+			bview.offset(dh, dv);
+		}
+
+		_currentRow = row;
+		_currentCol = col;
 		getContainer().refresh();
-	    }
 
-	    @Override
-	    public void componentHidden(ComponentEvent e) {
-		vitem.setLocation();
-		getContainer().refresh();
-	    }
-
-	};
-
-	view.addComponentListener(cl);
-
-	getContainer().refresh();
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-	getContainer().localToWorld(e.getPoint(), _wp);
-
-	AItem item = getContainer().getItemAtPoint(e.getPoint());
-	if ((item != null) && (item instanceof VirtualWindowItem)) {
-	    VirtualWindowItem vvi = (VirtualWindowItem) item;
-	    setTitle(VVTITLE + " [" + vvi.getBaseView().getTitle() + "]");
-	} else {
-	    setTitle(VVTITLE);
 	}
-    }
-
-    /**
-     * Virtual view: no offesetting!
-     * 
-     * @param dh
-     *            the horizontal change
-     * @param dv
-     *            the vertical change
-     */
-    @Override
-    public void offset(int dh, int dv) {
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent) {
-	switch (mouseEvent.getButton()) {
-	case MouseEvent.BUTTON1:
-	    if (mouseEvent.getClickCount() == 1) { // single click
-	    } else { // double (or more) clicks
-		handleDoubleClick(mouseEvent);
-	    }
-	    return;
-
-	case MouseEvent.BUTTON3:
-	    return;
-	}
-    }
-
-    // handle a double click
-    private void handleDoubleClick(MouseEvent mouseEvent) {
-	Point rc = getRowCol(mouseEvent.getPoint());
-	// System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
-
-	int clickRow = rc.y;
-	int clickCol = rc.x;
-	if ((clickRow == _currentRow) && (clickCol == _currentCol)) {
-	    return;
-	}
-
-	int dh = _offsets[_currentRow][_currentCol].x
-		- _offsets[clickRow][clickCol].x;
-
-	// can't do dv because can't give internal frames -y
-	int dv = 0;
-
-	for (BaseView view : _views) {
-	    view.offset(dh, dv);
-	}
-
-	_currentRow = clickRow;
-	_currentCol = clickCol;
-	getContainer().refresh();
-    }
-
-    private Rectangle getRowColRect(int row, int col) {
-
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-
-	double x = col * dx;
-	double y = world.y + world.height - (row + 1) * dy;
-
-	Rectangle2D.Double wr = new Rectangle2D.Double(x, y, dx, dy);
-	Rectangle r = new Rectangle();
-	getContainer().worldToLocal(r, wr);
-	return r;
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-	setTitle(VVTITLE);
-    }
-
-    // col is in x
-    // row is in y
-    private Point getRowCol(Point p) {
-
-	Point2D.Double wp = new Point2D.Double();
-
-	getContainer().localToWorld(p, wp);
-
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-
-	int col = (int) (wp.x / dx);
-	int row = _numrow - (int) (wp.y / dy) - 1;
-
-	return new Point(col, row);
-
-    }
-
-    /**
-     * Total offset based on the current cell
-     * 
-     * @return dh in x, dv in y
-     */
-    public Point2D.Double totalOffset() {
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-	return new Point2D.Double(_currentCol * dx, _currentRow * dy);
-    }
-
-    /**
-     * Move a view to the center of a specific virtual cell
-     * 
-     * @param view
-     *            the view to move
-     * @param row
-     *            the row
-     * @param col
-     *            the col
-     */
-    public void moveTo(BaseView view, int row, int col) {
-	moveTo(view, row, col, 0, 0);
-    }
-
-    /**
-     * Move a view to a specific virtual cell
-     * 
-     * @param view
-     *            the view to move
-     * @param row
-     *            the row
-     * @param col
-     *            the col
-     * @param dh
-     *            additional horizontal offset
-     * @param dv
-     *            additional vertical offset
-     */
-    public void moveTo(BaseView view, int row, int col, int dh, int dv) {
-
-	row = Math.max(0, Math.min(row, (_numrow - 1)));
-	col = Math.max(0, Math.min(col, (_numcol - 1)));
-
-	boolean managed = false;
-
-	for (BaseView bv : _views) {
-	    if (bv == view) {
-		managed = true;
-		break;
-	    }
-	}
-
-	if (!managed) {
-	    return;
-	}
-
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-
-	double x = col * dx;
-	double y = world.y + world.height - (row + 1) * dy;
-
-	int xc = (int) (x + dx / 2);
-	int yc = (int) (y + dy / 2);
-
-	Rectangle bounds = view.getBounds();
-	int delx = xc - (bounds.x + bounds.width / 2);
-	int dely = (yc - 40) - (bounds.y + bounds.height / 2);
-
-	view.offset(delx + dh, dely + dv);
-    }
-
-    /**
-     * Move a view to a specific virtual cell
-     * 
-     * @param view
-     *            the view to move
-     * @param row
-     *            the row
-     * @param col
-     *            the col
-     */
-    public void moveTo(BaseView view, int row, int col, boolean fit) {
-
-	if (fit == false) {
-	    moveTo(view, row, col, 0, 0);
-	    return;
-	}
-
-	row = Math.max(0, Math.min(row, (_numrow - 1)));
-	col = Math.max(0, Math.min(col, (_numcol - 1)));
-
-	boolean managed = false;
-
-	for (BaseView bv : _views) {
-	    if (bv == view) {
-		managed = true;
-		break;
-	    }
-	}
-
-	if (!managed) {
-	    return;
-	}
-
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-
-	double x = col * dx;
-
-	int margin = 40;
-
-	int left = (int) (x + margin);
-	int top = (margin);
-	int w = (int) (dx - 3 * margin);
-	int h = (int) (dy - 3 * margin);
-	Rectangle bounds = view.getBounds();
-	bounds.setFrame(left, top, w, h);
-	view.setBounds(bounds);
-    }
-
-    /**
-     * Move a view to a specific virtual cell
-     * 
-     * @param view
-     *            the view to move
-     * @param row
-     *            the row
-     * @param col
-     *            the col
-     * @param constraint
-     *            constraint constant
-     */
-    public void moveTo(BaseView view, int row, int col, int constraint) {
-	
-	if (constraint == CENTER) {
-	    moveTo(view, row, col);
-	    return;
-	}
-
-	row = Math.max(0, Math.min(row, (_numrow - 1)));
-	col = Math.max(0, Math.min(col, (_numcol - 1)));
-
-	boolean managed = false;
-
-	for (BaseView bv : _views) {
-	    if (bv == view) {
-		managed = true;
-		break;
-	    }
-	}
-
-	if (!managed) {
-	    return;
-	}
-
-	Rectangle2D.Double world = getContainer().getWorldSystem();
-	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-
-	double left = col * dx;
-	double top = world.y + world.height - (row + 1) * dy;
-	double right = left + dx;
-	double bottom = top + dy;
-
-	Rectangle bounds = view.getBounds();
-	int x0 = bounds.x;
-	int y0 = bounds.y;
-	int dh = 0;
-	int dv = 0;
-
-	int slop = 10;
-
-	if (constraint == UPPERRIGHT) {
-	    int xf = (int) (right - bounds.width - 2 * slop);
-	    int yf = (int) (top + slop);
-	    dh = xf - x0;
-	    dv = yf - y0;
-	} else if (constraint == UPPERLEFT) {
-	    int xf = (int) (left + slop);
-	    int yf = (int) (top + slop);
-	    dh = xf - x0;
-	    dv = yf - y0;
-	} else if (constraint == BOTTOMLEFT) {
-	    int xf = (int) (left + slop);
-	    int yf = (int) (bottom - bounds.height - 7 * slop);
-	    dh = xf - x0;
-	    dv = yf - y0;
-	} else if (constraint == BOTTOMRIGHT) {
-	    int xf = (int) (right - bounds.width - 2 * slop);
-	    int yf = (int) (bottom - bounds.height - 7 * slop);
-	    dh = xf - x0;
-	    dv = yf - y0;
-	} 
-	view.offset(dh, dv);
-    }
-
-    /**
-     * Activates the view's cell so that it is visible
-     * 
-     * @param view
-     *            the view
-     */
-    public void activateViewCell(BaseView view) {
-
-	if (view.getVirtualItem() == null) {
-	    return;
-	}
-
-	Rectangle b = view.getVirtualItem().getBounds(getContainer());
-	Point pp = new Point(b.x + b.width / 2, b.y + b.height / 2);
-	Point rc = getRowCol(pp);
-
-	int col = Math.max(0, Math.min(_numcol - 1, rc.x));
-	int row = Math.max(0, Math.min(_numrow - 1, rc.y));
-
-	if ((col == _currentCol) && (row == _currentRow)) {
-	    return;
-	}
-
-	int dh = _offsets[_currentRow][_currentCol].x - _offsets[row][col].x;
-
-	// can't do dv because can't give internal frames -y
-	int dv = 0;
-
-	for (BaseView bview : _views) {
-	    bview.offset(dh, dv);
-	}
-
-	_currentRow = row;
-	_currentCol = col;
-	getContainer().refresh();
-
-    }
 
 }

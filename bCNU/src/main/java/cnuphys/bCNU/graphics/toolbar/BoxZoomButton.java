@@ -18,56 +18,56 @@ import cnuphys.bCNU.util.Environment;
 @SuppressWarnings("serial")
 public class BoxZoomButton extends ToolBarToggleButton implements IRubberbanded {
 
-    // rubberbanding policy
-    private Rubberband.Policy _policy = Rubberband.Policy.RECTANGLE_PRESERVE_ASPECT;
+	// rubberbanding policy
+	private Rubberband.Policy _policy = Rubberband.Policy.RECTANGLE_PRESERVE_ASPECT;
 
-    /**
-     * Create the button for a rubber-band zoom.
-     * 
-     * @param container
-     *            the owner container.
-     */
-    public BoxZoomButton(IContainer container) {
-	super(container, "images/box_zoom.gif", "Rubberband zoom");
-	customCursorImageFile = "images/box_zoomcursor.gif";
-    }
-
-    /**
-     * Handle a mouse press (into the container) event (if this tool is active).
-     * 
-     * @param mouseEvent
-     *            the causal event.
-     */
-    @Override
-    public void mousePressed(MouseEvent mouseEvent) {
-	if (rubberband == null) {
-	    Environment.getInstance().setDragging(true);
-	    rubberband = new Rubberband(container, this, _policy, false);
-	    // make it look different from the pointer rubberband
-	    rubberband.setHighlightColor1(Color.gray);
-	    rubberband.setHighlightColor2(Color.green);
-	    rubberband.setActive(true);
-	    rubberband.startRubberbanding(mouseEvent.getPoint());
+	/**
+	 * Create the button for a rubber-band zoom.
+	 * 
+	 * @param container
+	 *            the owner container.
+	 */
+	public BoxZoomButton(IContainer container) {
+		super(container, "images/box_zoom.gif", "Rubberband zoom");
+		customCursorImageFile = "images/box_zoomcursor.gif";
 	}
-    }
 
-    /**
-     * Notification that rubber banding is finished.
-     */
-    @Override
-    public void doneRubberbanding() {
-	Rectangle b = rubberband.getRubberbandBounds();
-	rubberband = null;
-	container.rubberBanded(b);
-	Environment.getInstance().setDragging(false);
-    }
+	/**
+	 * Handle a mouse press (into the container) event (if this tool is active).
+	 * 
+	 * @param mouseEvent
+	 *            the causal event.
+	 */
+	@Override
+	public void mousePressed(MouseEvent mouseEvent) {
+		if (rubberband == null) {
+			Environment.getInstance().setDragging(true);
+			rubberband = new Rubberband(container, this, _policy, false);
+			// make it look different from the pointer rubberband
+			rubberband.setHighlightColor1(Color.gray);
+			rubberband.setHighlightColor2(Color.green);
+			rubberband.setActive(true);
+			rubberband.startRubberbanding(mouseEvent.getPoint());
+		}
+	}
 
-    /**
-     * @param policy
-     *            the policy to set
-     */
-    public void setPolicy(Rubberband.Policy policy) {
-	_policy = policy;
-    }
+	/**
+	 * Notification that rubber banding is finished.
+	 */
+	@Override
+	public void doneRubberbanding() {
+		Rectangle b = rubberband.getRubberbandBounds();
+		rubberband = null;
+		container.rubberBanded(b);
+		Environment.getInstance().setDragging(false);
+	}
+
+	/**
+	 * @param policy
+	 *            the policy to set
+	 */
+	public void setPolicy(Rubberband.Policy policy) {
+		_policy = policy;
+	}
 
 }

@@ -13,26 +13,26 @@ import cnuphys.bCNU.graphics.container.IContainer;
 @SuppressWarnings("serial")
 public class WorldButton extends ToolBarButton {
 
-    /**
-     * Create the worlds button, which zooms bact to the original extent.
-     * 
-     * @param container
-     *            the container this button acts upon.
-     */
-    public WorldButton(IContainer container) {
-	super(container, "images/world.gif", "restore original zoom");
-    }
+	/**
+	 * Create the worlds button, which zooms bact to the original extent.
+	 * 
+	 * @param container
+	 *            the container this button acts upon.
+	 */
+	public WorldButton(IContainer container) {
+		super(container, "images/world.gif", "restore original zoom");
+	}
 
-    /**
-     * This is what I do if I am pressed
-     * 
-     * @param e
-     *            The causal event.
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	container.restoreDefaultWorld();
-	container.refresh();
-	container.getToolBar().resetDefaultSelection();
-    }
+	/**
+	 * This is what I do if I am pressed
+	 * 
+	 * @param e
+	 *            The causal event.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		container.restoreDefaultWorld();
+		container.refresh();
+		container.getToolBar().resetDefaultSelection();
+	}
 }

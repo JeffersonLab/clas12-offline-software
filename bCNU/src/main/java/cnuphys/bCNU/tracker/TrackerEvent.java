@@ -9,23 +9,23 @@ package cnuphys.bCNU.tracker;
 
 public class TrackerEvent {
 
-    public static enum TrackerEventType {
-	RUNCOMPLETED, ALLRUNSCOMPLETED
-    }
+	public static enum TrackerEventType {
+		RUNCOMPLETED, ALLRUNSCOMPLETED
+	}
 
-    private Runnable runnable;
-    private TrackerEventType type;
+	private Runnable runnable;
+	private TrackerEventType type;
 
-    public TrackerEvent(TrackerEventType type, Runnable runnable) {
-	this.type = type;
-	this.runnable = runnable;
-    }
+	public TrackerEvent(TrackerEventType type, Runnable runnable) {
+		this.type = type;
+		this.runnable = runnable;
+	}
 
-    public Runnable getRunnable() {
-	return runnable;
-    }
+	public Runnable getRunnable() {
+		return runnable;
+	}
 
-    public TrackerEventType getType() {
-	return type;
-    }
+	public TrackerEventType getType() {
+		return type;
+	}
 }

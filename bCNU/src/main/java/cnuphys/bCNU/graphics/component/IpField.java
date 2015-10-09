@@ -18,115 +18,115 @@ import cnuphys.bCNU.util.Fonts;
 
 public class IpField extends JFormattedTextField implements DocumentListener {
 
-    private static final Font _ipFont = Fonts.mono;
+	private static final Font _ipFont = Fonts.mono;
 
-    private boolean goodDoc = true;
+	private boolean goodDoc = true;
 
-    public static final String EVERYADDRESS = "*.*.*.*";
+	public static final String EVERYADDRESS = "*.*.*.*";
 
-    public IpField(String initAddress) {
-	this();
-	setText(initAddress);
-    }
+	public IpField(String initAddress) {
+		this();
+		setText(initAddress);
+	}
 
-    public IpField() {
-	setFont(_ipFont);
+	public IpField() {
+		setFont(_ipFont);
 
-	FontMetrics fm = getFontMetrics(_ipFont);
-	int sw = fm.stringWidth("255.255.255.255");
-	Dimension d = getPreferredSize();
-	d.width = sw + 6;
-	setPreferredSize(d);
+		FontMetrics fm = getFontMetrics(_ipFont);
+		int sw = fm.stringWidth("255.255.255.255");
+		Dimension d = getPreferredSize();
+		d.width = sw + 6;
+		setPreferredSize(d);
 
-	setText("*.*.*.*");
+		setText("*.*.*.*");
 
-	getDocument().addDocumentListener(this);
+		getDocument().addDocumentListener(this);
 
-	setInputVerifier(new InputVerifier() {
-	    @Override
-	    public boolean shouldYieldFocus(JComponent input) {
-		boolean inputOK = verify(input);
-		if (inputOK) {
-		    return true;
+		setInputVerifier(new InputVerifier() {
+			@Override
+			public boolean shouldYieldFocus(JComponent input) {
+				boolean inputOK = verify(input);
+				if (inputOK) {
+					return true;
+				} else {
+					Toolkit.getDefaultToolkit().beep();
+					return false;
+				}
+			}
+
+			@Override
+			public boolean verify(JComponent input) {
+				JTextField field = (JTextField) input;
+				return checkString(field.getText());
+			}
+		});
+
+	}
+
+	/**
+	 * Reset to default state
+	 */
+	public void reset() {
+		setText(EVERYADDRESS);
+	}
+
+	/**
+	 * Is this in its reset state?
+	 * 
+	 * @return <code>true</code> if it is in its reset state.
+	 */
+	public boolean inResetState() {
+		return EVERYADDRESS.equals(getText());
+	}
+
+	@Override
+	public void setText(String s) {
+		if (checkString(s)) {
+			super.setText(s);
 		} else {
-		    Toolkit.getDefaultToolkit().beep();
-		    return false;
+			super.setText("127.0.0.1");
 		}
-	    }
-
-	    @Override
-	    public boolean verify(JComponent input) {
-		JTextField field = (JTextField) input;
-		return checkString(field.getText());
-	    }
-	});
-
-    }
-
-    /**
-     * Reset to default state
-     */
-    public void reset() {
-	setText(EVERYADDRESS);
-    }
-
-    /**
-     * Is this in its reset state?
-     * 
-     * @return <code>true</code> if it is in its reset state.
-     */
-    public boolean inResetState() {
-	return EVERYADDRESS.equals(getText());
-    }
-
-    @Override
-    public void setText(String s) {
-	if (checkString(s)) {
-	    super.setText(s);
-	} else {
-	    super.setText("127.0.0.1");
-	}
-    }
-
-    // checks whether we have a legal string
-    private boolean checkString(String s) {
-	Matcher m = IpAddressSupport.SIMPLE_STAR_PATTERN.matcher(s);
-	return m.matches();
-    }
-
-    // check that the format is valid
-    private void checkDocument(DocumentEvent e) {
-	try {
-	    String text = e.getDocument().getText(0,
-		    e.getDocument().getLength());
-	    goodDoc = checkString(text);
-	} catch (BadLocationException ex) {
-	    // Do something, OK?
 	}
 
-    }
+	// checks whether we have a legal string
+	private boolean checkString(String s) {
+		Matcher m = IpAddressSupport.SIMPLE_STAR_PATTERN.matcher(s);
+		return m.matches();
+	}
 
-    /**
-     * Is the text valid?
-     * 
-     * @return <code>true</code> if the text is valid
-     */
-    public boolean validText() {
-	return goodDoc;
-    }
+	// check that the format is valid
+	private void checkDocument(DocumentEvent e) {
+		try {
+			String text = e.getDocument().getText(0,
+					e.getDocument().getLength());
+			goodDoc = checkString(text);
+		} catch (BadLocationException ex) {
+			// Do something, OK?
+		}
 
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-	checkDocument(e);
-    }
+	}
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-	checkDocument(e);
-    }
+	/**
+	 * Is the text valid?
+	 * 
+	 * @return <code>true</code> if the text is valid
+	 */
+	public boolean validText() {
+		return goodDoc;
+	}
 
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-	checkDocument(e);
-    }
+	@Override
+	public void changedUpdate(DocumentEvent e) {
+		checkDocument(e);
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		checkDocument(e);
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		checkDocument(e);
+	}
 }

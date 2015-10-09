@@ -17,192 +17,192 @@ import java.util.zip.ZipInputStream;
  */
 public class AsciiReadSupport {
 
-    // Comment lines are blank lines or lines whose first non white
-    // space character is a "!"
-    protected static final String commentChar = "!";
+	// Comment lines are blank lines or lines whose first non white
+	// space character is a "!"
+	protected static final String commentChar = "!";
 
-    /**
-     * Get the next non comment line
-     * 
-     * @param bufferedReader
-     *            a buffered reader which should be linked to an ascii file
-     * @return the next non comment line (or <code>null</code>)
-     */
-    public static String nextNonComment(BufferedReader bufferedReader) {
-	String s = null;
-	try {
-	    s = bufferedReader.readLine();
-	    if (s != null) {
-		s = s.trim();
-	    }
-	    while ((s != null) && (s.startsWith(commentChar) || s.length() < 1)) {
-		s = bufferedReader.readLine();
-		if (s != null) {
-		    s = s.trim();
+	/**
+	 * Get the next non comment line
+	 * 
+	 * @param bufferedReader
+	 *            a buffered reader which should be linked to an ascii file
+	 * @return the next non comment line (or <code>null</code>)
+	 */
+	public static String nextNonComment(BufferedReader bufferedReader) {
+		String s = null;
+		try {
+			s = bufferedReader.readLine();
+			if (s != null) {
+				s = s.trim();
+			}
+			while ((s != null) && (s.startsWith(commentChar) || s.length() < 1)) {
+				s = bufferedReader.readLine();
+				if (s != null) {
+					s = s.trim();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-	    }
-	} catch (IOException e) {
-	    e.printStackTrace();
+
+		return s;
 	}
 
-	return s;
-    }
+	/**
+	 * Counts the number of non-comment lines in a file
+	 * 
+	 * @param file
+	 *            the file in question
+	 * @return the number of non-comment lines in the file
+	 */
+	public static int countNonCommentLines(File file) {
 
-    /**
-     * Counts the number of non-comment lines in a file
-     * 
-     * @param file
-     *            the file in question
-     * @return the number of non-comment lines in the file
-     */
-    public static int countNonCommentLines(File file) {
+		int count = 0;
+		try {
 
-	int count = 0;
-	try {
+			BufferedReader bufferedReader;
 
-	    BufferedReader bufferedReader;
+			if (file.getPath().endsWith(".zip")) {
+				FileInputStream fis = new FileInputStream(file);
+				ZipInputStream zis = new ZipInputStream(fis);
+				zis.getNextEntry();
+				InputStreamReader isr = new InputStreamReader(zis);
+				bufferedReader = new BufferedReader(isr);
+			} else {
+				bufferedReader = new BufferedReader(new FileReader(file));
+			}
 
-	    if (file.getPath().endsWith(".zip")) {
-		FileInputStream fis = new FileInputStream(file);
-		ZipInputStream zis = new ZipInputStream(fis);
-		zis.getNextEntry();
-		InputStreamReader isr = new InputStreamReader(zis);
-		bufferedReader = new BufferedReader(isr);
-	    } else {
-		bufferedReader = new BufferedReader(new FileReader(file));
-	    }
+			String s = nextNonComment(bufferedReader);
 
-	    String s = nextNonComment(bufferedReader);
+			while (s != null) {
+				count++;
+				s = nextNonComment(bufferedReader);
+			}
 
-	    while (s != null) {
-		count++;
-		s = nextNonComment(bufferedReader);
-	    }
-
-	    bufferedReader.close();
-	} catch (FileNotFoundException e) {
-	    e.printStackTrace();
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
-
-	return count;
-    }
-
-    /**
-     * Read an entire ascii file into a single string.
-     * 
-     * @param file
-     *            the file to read
-     * @return the string with the entire content of the file
-     */
-    public static String asciiFileToString(File file) {
-	FileReader fileReader;
-	try {
-	    fileReader = new FileReader(file);
-	} catch (FileNotFoundException e1) {
-	    e1.printStackTrace();
-	    return null;
-	}
-	StringBuffer sb = null;
-
-	final BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-	boolean reading = true;
-	while (reading) {
-	    String s = null;
-	    try {
-		s = bufferedReader.readLine();
-	    } catch (IOException e) {
-		e.printStackTrace();
-	    }
-	    if (s != null) {
-		if (sb == null) {
-		    sb = new StringBuffer(10000);
+			bufferedReader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		sb.append(s + "\n");
-	    } else {
-		reading = false;
-	    }
+
+		return count;
 	}
 
-	try {
-	    bufferedReader.close();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-
-	return sb.toString();
-    }
-
-    /**
-     * Count the lines in an ASCII file, without skipping comment
-     * 
-     * @param file
-     *            the file in question
-     * @return the number of lines in the file
-     */
-    public static int countLines(File file) {
-	int count = 0;
-	FileReader fileReader;
-	try {
-
-	    BufferedReader bufferedReader;
-
-	    if (file.getPath().endsWith(".zip")) {
-		FileInputStream fis = new FileInputStream(file);
-		ZipInputStream zis = new ZipInputStream(fis);
-		zis.getNextEntry();
-		InputStreamReader isr = new InputStreamReader(zis);
-		bufferedReader = new BufferedReader(isr);
-	    } else {
-		bufferedReader = new BufferedReader(new FileReader(file));
-	    }
-
-	    boolean reading = true;
-	    while (reading) {
-		String line = bufferedReader.readLine();
-		if (line == null) {
-		    reading = false;
-		} else {
-		    count++;
+	/**
+	 * Read an entire ascii file into a single string.
+	 * 
+	 * @param file
+	 *            the file to read
+	 * @return the string with the entire content of the file
+	 */
+	public static String asciiFileToString(File file) {
+		FileReader fileReader;
+		try {
+			fileReader = new FileReader(file);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+			return null;
 		}
-	    }
+		StringBuffer sb = null;
 
-	    bufferedReader.close();
-	} catch (FileNotFoundException e) {
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    e.printStackTrace();
+		final BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+		boolean reading = true;
+		while (reading) {
+			String s = null;
+			try {
+				s = bufferedReader.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (s != null) {
+				if (sb == null) {
+					sb = new StringBuffer(10000);
+				}
+				sb.append(s + "\n");
+			} else {
+				reading = false;
+			}
+		}
+
+		try {
+			bufferedReader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return sb.toString();
 	}
 
-	return count;
-    }
+	/**
+	 * Count the lines in an ASCII file, without skipping comment
+	 * 
+	 * @param file
+	 *            the file in question
+	 * @return the number of lines in the file
+	 */
+	public static int countLines(File file) {
+		int count = 0;
+		FileReader fileReader;
+		try {
 
-    /**
-     * Get the next tokens from a buffered reader
-     * 
-     * @param bufferedReader
-     *            a buffered reader which should be linked to an ascii file
-     * @return the next set of white-space separated tokens.
-     */
-    public static String[] nextTokens(BufferedReader bufferedReader) {
-	String line = nextNonComment(bufferedReader);
-	return FileUtilities.tokens(line);
-    }
+			BufferedReader bufferedReader;
 
-    /**
-     * Skip lines in an ascii file
-     * 
-     * @param n
-     *            the number of lines to skip
-     * @param bufferedReader
-     *            a buffered reader which should be linked to an ascii file
-     */
-    public static void skipLines(int n, BufferedReader bufferedReader) {
-	for (int i = 0; i < n; i++) {
-	    nextNonComment(bufferedReader);
+			if (file.getPath().endsWith(".zip")) {
+				FileInputStream fis = new FileInputStream(file);
+				ZipInputStream zis = new ZipInputStream(fis);
+				zis.getNextEntry();
+				InputStreamReader isr = new InputStreamReader(zis);
+				bufferedReader = new BufferedReader(isr);
+			} else {
+				bufferedReader = new BufferedReader(new FileReader(file));
+			}
+
+			boolean reading = true;
+			while (reading) {
+				String line = bufferedReader.readLine();
+				if (line == null) {
+					reading = false;
+				} else {
+					count++;
+				}
+			}
+
+			bufferedReader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return count;
 	}
-    }
+
+	/**
+	 * Get the next tokens from a buffered reader
+	 * 
+	 * @param bufferedReader
+	 *            a buffered reader which should be linked to an ascii file
+	 * @return the next set of white-space separated tokens.
+	 */
+	public static String[] nextTokens(BufferedReader bufferedReader) {
+		String line = nextNonComment(bufferedReader);
+		return FileUtilities.tokens(line);
+	}
+
+	/**
+	 * Skip lines in an ascii file
+	 * 
+	 * @param n
+	 *            the number of lines to skip
+	 * @param bufferedReader
+	 *            a buffered reader which should be linked to an ascii file
+	 */
+	public static void skipLines(int n, BufferedReader bufferedReader) {
+		for (int i = 0; i < n; i++) {
+			nextNonComment(bufferedReader);
+		}
+	}
 
 }

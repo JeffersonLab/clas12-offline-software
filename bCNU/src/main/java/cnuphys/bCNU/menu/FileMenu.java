@@ -21,78 +21,78 @@ import cnuphys.bCNU.application.Desktop;
 @SuppressWarnings("serial")
 public class FileMenu extends ABaseMenu {
 
-    public static final String menuLabel = "File";
+	public static final String menuLabel = "File";
 
-    // create the file menu
-    public FileMenu() {
-	super(menuLabel);
-	MenuManager.getInstance().setFileMenu(this);
-    }
+	// create the file menu
+	public FileMenu() {
+		super(menuLabel);
+		MenuManager.getInstance().setFileMenu(this);
+	}
 
-    @Override
-    protected void addDefaultItems() {
-	addSaveConfigurationItem();
-	addClearConfigurationItem();
-	addSeparator();
-	addQuitItem();
-    }
+	@Override
+	protected void addDefaultItems() {
+		addSaveConfigurationItem();
+		addClearConfigurationItem();
+		addSeparator();
+		addQuitItem();
+	}
 
-    // add the save configuration menu item
-    private void addSaveConfigurationItem() {
-	ActionListener al = new ActionListener() {
+	// add the save configuration menu item
+	private void addSaveConfigurationItem() {
+		ActionListener al = new ActionListener() {
 
-	    @Override
-	    public void actionPerformed(ActionEvent arg0) {
-		Desktop.getInstance().writeConfigurationFile();
-	    }
-	};
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Desktop.getInstance().writeConfigurationFile();
+			}
+		};
 
-	JMenuItem item = new JMenuItem("Save View Configuration...");
-	item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit
-		.getDefaultToolkit().getMenuShortcutKeyMask()));
-	item.addActionListener(al);
-	add(item);
-    }
+		JMenuItem item = new JMenuItem("Save View Configuration...");
+		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit
+				.getDefaultToolkit().getMenuShortcutKeyMask()));
+		item.addActionListener(al);
+		add(item);
+	}
 
-    // add the clear configuration menu item
-    private void addClearConfigurationItem() {
-	ActionListener al = new ActionListener() {
+	// add the clear configuration menu item
+	private void addClearConfigurationItem() {
+		ActionListener al = new ActionListener() {
 
-	    @Override
-	    public void actionPerformed(ActionEvent arg0) {
-		Desktop.getInstance().deleteConfigurationFile();
-		// Delete file here
-	    }
-	};
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Desktop.getInstance().deleteConfigurationFile();
+				// Delete file here
+			}
+		};
 
-	JMenuItem item = new JMenuItem("Delete View Configuration...");
-	item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit
-		.getDefaultToolkit().getMenuShortcutKeyMask()));
-	item.addActionListener(al);
-	add(item);
-    }
+		JMenuItem item = new JMenuItem("Delete View Configuration...");
+		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit
+				.getDefaultToolkit().getMenuShortcutKeyMask()));
+		item.addActionListener(al);
+		add(item);
+	}
 
-    // add the quit menu item
-    private void addQuitItem() {
-	ActionListener al = new ActionListener() {
+	// add the quit menu item
+	private void addQuitItem() {
+		ActionListener al = new ActionListener() {
 
-	    @Override
-	    public void actionPerformed(ActionEvent arg0) {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
 
-		int answer = JOptionPane.showConfirmDialog(null,
-			"Do you really want to quit?", "Quit the Application?",
-			JOptionPane.YES_NO_OPTION);
+				int answer = JOptionPane.showConfirmDialog(null,
+						"Do you really want to quit?", "Quit the Application?",
+						JOptionPane.YES_NO_OPTION);
 
-		if (answer == JFileChooser.APPROVE_OPTION) {
-		    System.exit(0);
-		}
-	    }
-	};
+				if (answer == JFileChooser.APPROVE_OPTION) {
+					System.exit(0);
+				}
+			}
+		};
 
-	JMenuItem item = new JMenuItem("Quit");
-	item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit
-		.getDefaultToolkit().getMenuShortcutKeyMask()));
-	item.addActionListener(al);
-	add(item);
-    }
+		JMenuItem item = new JMenuItem("Quit");
+		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit
+				.getDefaultToolkit().getMenuShortcutKeyMask()));
+		item.addActionListener(al);
+		add(item);
+	}
 }

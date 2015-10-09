@@ -12,15 +12,15 @@ import cnuphys.bCNU.log.SimpleLogPane;
 @SuppressWarnings("serial")
 public class LogView extends BaseView {
 
-    // reserved view type for log view
-    public static final int LOGVIEWTYPE = -77001;
+	// reserved view type for log view
+	public static final int LOGVIEWTYPE = -77001;
 
-    public LogView() {
-	super(AttributeType.TITLE, "Log", AttributeType.ICONIFIABLE, true,
-		AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-		AttributeType.RESIZABLE, true, AttributeType.WIDTH, 600,
-		AttributeType.HEIGHT, 600, AttributeType.VISIBLE, false,
-		AttributeType.VIEWTYPE, LOGVIEWTYPE);
-	add(new SimpleLogPane());
-    }
+	public LogView() {
+		super(AttributeType.TITLE, "Log", AttributeType.ICONIFIABLE, true,
+				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
+				AttributeType.RESIZABLE, true, AttributeType.WIDTH, 600,
+				AttributeType.HEIGHT, 600, AttributeType.VISIBLE, false,
+				AttributeType.VIEWTYPE, LOGVIEWTYPE);
+		add(new SimpleLogPane());
+	}
 }

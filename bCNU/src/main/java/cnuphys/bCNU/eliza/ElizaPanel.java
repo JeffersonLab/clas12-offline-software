@@ -12,6 +12,7 @@ import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
 
 /**
  * A panel to hold an Eliza dialog
+ * 
  * @author heddle
  *
  */
@@ -21,7 +22,7 @@ public class ElizaPanel extends JPanel {
 	private ElizaMain _elizaMain;
 	private TextPaneScrollPane _textPane;
 	private JTextField _textfield;
-	
+
 	private String _userName;
 
 	public ElizaPanel() {
@@ -62,13 +63,14 @@ public class ElizaPanel extends JPanel {
 			}
 		};
 		_textfield.addKeyListener(keyAdapter);
-		
+
 	}
-	
-	
+
 	/**
 	 * The doctor is speaking
-	 * @param s what she is saying
+	 * 
+	 * @param s
+	 *            what she is saying
 	 */
 	public void doctor(String s) {
 		_textPane.append("Eliza:  ", TextPaneScrollPane.BLUE_SS_12_B);
@@ -77,6 +79,7 @@ public class ElizaPanel extends JPanel {
 
 	/**
 	 * The patient is speaking
+	 * 
 	 * @param s
 	 */
 	public void patient(String s) {
@@ -86,12 +89,12 @@ public class ElizaPanel extends JPanel {
 		_textPane.append(_userName + ":  ", TextPaneScrollPane.GREEN_SS_12_B);
 		_textPane.append(s + "\n", TextPaneScrollPane.GREEN_SS_12_B);
 	}
-	
+
 	/**
 	 * Clear all text
 	 */
 	public void clear() {
-	    _textPane.clear();
+		_textPane.clear();
 	}
 
 }

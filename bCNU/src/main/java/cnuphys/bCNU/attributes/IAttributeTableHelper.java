@@ -22,43 +22,43 @@ import java.util.EventListener;
  */
 public interface IAttributeTableHelper extends EventListener {
 
-    /**
-     * This notifies that some attribute has changed.
-     * 
-     * @param attributeTable
-     *            the table being displayed.
-     * @param attributeName
-     *            the name of the attribute.
-     * @param value
-     *            the new value.
-     */
-    public void attributeChanged(AttributeTable attributeTable,
-	    String attributeName, Object value);
+	/**
+	 * This notifies that some attribute has changed.
+	 * 
+	 * @param attributeTable
+	 *            the table being displayed.
+	 * @param attributeName
+	 *            the name of the attribute.
+	 * @param value
+	 *            the new value.
+	 */
+	public void attributeChanged(AttributeTable attributeTable,
+			String attributeName, Object value);
 
-    /**
-     * Asks the helper for a table cell renderer for the given Object type,
-     * which the table doesn't recognize.
-     * 
-     * @param attributeTable
-     *            the table being displayed.
-     * @param value
-     *            the value being rendered.
-     * @return a renderer, or <code>null</code> if the helper doesn't know.
-     */
-    public Component getTableCellRenderer(AttributeTable attributeTable,
-	    String attributeName, Object value);
+	/**
+	 * Asks the helper for a table cell renderer for the given Object type,
+	 * which the table doesn't recognize.
+	 * 
+	 * @param attributeTable
+	 *            the table being displayed.
+	 * @param value
+	 *            the value being rendered.
+	 * @return a renderer, or <code>null</code> if the helper doesn't know.
+	 */
+	public Component getTableCellRenderer(AttributeTable attributeTable,
+			String attributeName, Object value);
 
-    /**
-     * Asks the helper for a table cell editor for the given Object type, which
-     * the table doesn't recognize.
-     * 
-     * @param attributeTable
-     *            the table being displayed.
-     * @param value
-     *            the value being edited.
-     * @return an editor, or <code>null</code> if the helper doesn't know.
-     */
-    public Component getTableCellEditor(AttributeTable attributeTable,
-	    String attributeName, Object value);
+	/**
+	 * Asks the helper for a table cell editor for the given Object type, which
+	 * the table doesn't recognize.
+	 * 
+	 * @param attributeTable
+	 *            the table being displayed.
+	 * @param value
+	 *            the value being edited.
+	 * @return an editor, or <code>null</code> if the helper doesn't know.
+	 */
+	public Component getTableCellEditor(AttributeTable attributeTable,
+			String attributeName, Object value);
 
 }

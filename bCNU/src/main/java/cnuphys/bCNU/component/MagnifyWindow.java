@@ -11,8 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -35,7 +33,7 @@ public class MagnifyWindow extends JWindow {
 
 	// the drawing container
 	private static BaseContainer _container;
-	
+
 	private static IDrawable _extraAfterDraw;
 
 	/**
@@ -89,7 +87,7 @@ public class MagnifyWindow extends JWindow {
 
 		_container.setWorldSystem(getMagWorld(sContainer));
 		_container.shareModel(sContainer);
-				
+
 		final IDrawable parentAD = sContainer.getAfterDraw();
 		_extraAfterDraw = new IDrawable() {
 
@@ -121,20 +119,20 @@ public class MagnifyWindow extends JWindow {
 				if (parentAD != null) {
 					parentAD.draw(g, _container);
 				}
-				
+
 				Rectangle bounds = container.getComponent().getBounds();
-				int xc = bounds.x + bounds.width/2;
-				int yc = bounds.y + bounds.height/2;
-				
+				int xc = bounds.x + bounds.width / 2;
+				int yc = bounds.y + bounds.height / 2;
+
 				int S2 = 8;
 				g.setColor(Color.cyan);
-				g.drawLine(xc-S2, yc-1,xc-1,yc-1);
-				g.drawLine(xc-1, yc-S2,xc-1,yc-1);
-				g.drawLine(xc+S2, yc+1,xc+1,yc+1);
-				g.drawLine(xc+1, yc+S2,xc+1,yc+1);
+				g.drawLine(xc - S2, yc - 1, xc - 1, yc - 1);
+				g.drawLine(xc - 1, yc - S2, xc - 1, yc - 1);
+				g.drawLine(xc + S2, yc + 1, xc + 1, yc + 1);
+				g.drawLine(xc + 1, yc + S2, xc + 1, yc + 1);
 				g.setColor(Color.red);
-				g.drawLine(xc-S2, yc,xc+S2,yc);
-				g.drawLine(xc, yc-S2,xc,yc+S2);
+				g.drawLine(xc - S2, yc, xc + S2, yc);
+				g.drawLine(xc, yc - S2, xc, yc + S2);
 			}
 
 			@Override
@@ -144,26 +142,26 @@ public class MagnifyWindow extends JWindow {
 			@Override
 			public void prepareForRemoval() {
 			}
-			
+
 		};
-		
+
 		_container.setAfterDraw(_extraAfterDraw);
 		_container.setDirty(true);
 		_container.refresh();
 
-//		sContainer.setDirty(true);
-//		sContainer.refresh();
-//
-//		Runnable runnable = new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				sContainer.mouseMoved(me);
-//			}
-//			
-//		};
-//		
-//		SwingUtilities.invokeLater(runnable);
+		// sContainer.setDirty(true);
+		// sContainer.refresh();
+		//
+		// Runnable runnable = new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// sContainer.mouseMoved(me);
+		// }
+		//
+		// };
+		//
+		// SwingUtilities.invokeLater(runnable);
 	}
 
 	// get the world for the mag container

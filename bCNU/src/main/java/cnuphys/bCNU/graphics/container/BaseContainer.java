@@ -60,8 +60,9 @@ import cnuphys.bCNU.visible.VisibilityTableScrollPane;
  */
 
 @SuppressWarnings("serial")
-public class BaseContainer extends JComponent
-		implements IContainer, MouseListener, MouseMotionListener, MouseWheelListener, IDrawableListener {
+public class BaseContainer extends JComponent implements IContainer,
+		MouseListener, MouseMotionListener, MouseWheelListener,
+		IDrawableListener {
 
 	/**
 	 * A collection of layers. This is the container's model.
@@ -151,7 +152,8 @@ public class BaseContainer extends JComponent
 	protected LogicalLayer _annotationLayer;
 
 	// A map of layers added by users.
-	private Hashtable<String, LogicalLayer> _userLayers = new Hashtable<String, LogicalLayer>(47);
+	private Hashtable<String, LogicalLayer> _userLayers = new Hashtable<String, LogicalLayer>(
+			47);
 
 	/**
 	 * Controls the feedback for the container. You can add and remove feedback
@@ -197,7 +199,8 @@ public class BaseContainer extends JComponent
 	 * @param addHeadsUp
 	 *            if <code>true</code>, add a headsup display.
 	 */
-	public BaseContainer(BaseView view, Rectangle2D.Double worldSystem, boolean addHeadsUp) {
+	public BaseContainer(BaseView view, Rectangle2D.Double worldSystem,
+			boolean addHeadsUp) {
 		_view = view;
 		_worldSystem = worldSystem;
 		_feedbackControl = new FeedbackControl(this);
@@ -312,7 +315,8 @@ public class BaseContainer extends JComponent
 		}
 		LogicalLayer layer = _userLayers.get(name);
 		if (layer != null) {
-			Log.getInstance().warning("Asked to add layer: " + name + " which already exists.");
+			Log.getInstance().warning(
+					"Asked to add layer: " + name + " which already exists.");
 		} else {
 			layer = new LogicalLayer(this, name);
 			_userLayers.put(name, layer);
@@ -392,13 +396,15 @@ public class BaseContainer extends JComponent
 		boolean newbuffer = false;
 		if (_offscreenBuffer == null) {
 			newbuffer = true;
-		} else if ((_offscreenBuffer.getWidth() != size.width) || (_offscreenBuffer.getHeight() != size.height)) {
+		} else if ((_offscreenBuffer.getWidth() != size.width)
+				|| (_offscreenBuffer.getHeight() != size.height)) {
 			newbuffer = true;
 		}
 
 		if (newbuffer) {
 			try {
-				_offscreenBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+				_offscreenBuffer = new BufferedImage(size.width, size.height,
+						BufferedImage.TYPE_INT_RGB);
 			} catch (Exception e) {
 				Log.getInstance().exception(e);
 				e.printStackTrace();
@@ -439,7 +445,9 @@ public class BaseContainer extends JComponent
 				worldToLocal.transform(wp, pp);
 			} catch (NullPointerException npe) {
 
-				System.err.println("Null pointer exception in BaseContainer worldToLocal pp = " + pp + "  wp = " + wp);
+				System.err
+						.println("Null pointer exception in BaseContainer worldToLocal pp = "
+								+ pp + "  wp = " + wp);
 				npe.printStackTrace();
 			}
 		} else {
@@ -833,9 +841,11 @@ public class BaseContainer extends JComponent
 	 *            maximum y coordinate.
 	 */
 	@Override
-	public void zoom(final double xmin, final double xmax, final double ymin, final double ymax) {
+	public void zoom(final double xmin, final double xmax, final double ymin,
+			final double ymax) {
 		prepareToZoom();
-		_worldSystem = new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin);
+		_worldSystem = new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax
+				- ymin);
 		setDirty(true);
 		refresh();
 	}
@@ -853,7 +863,8 @@ public class BaseContainer extends JComponent
 	 *            maximum y coordinate.
 	 */
 	@Override
-	public void reworld(final double xmin, final double xmax, final double ymin, final double ymax) {
+	public void reworld(final double xmin, final double xmax,
+			final double ymin, final double ymax) {
 		_defaultWorldSystem.setFrame(xmin, ymin, xmax - xmin, ymax - ymin);
 		_previousWorldSystem.setFrame(_defaultWorldSystem);
 		zoom(xmin, xmax, ymin, ymax);
@@ -1089,7 +1100,8 @@ public class BaseContainer extends JComponent
 	 *            the type of the change.
 	 */
 	@Override
-	public void drawableChanged(DrawableList list, IDrawable drawable, DrawableChangeType type) {
+	public void drawableChanged(DrawableList list, IDrawable drawable,
+			DrawableChangeType type) {
 
 		LogicalLayer layer = (LogicalLayer) list;
 		AItem item = (drawable == null) ? null : (AItem) drawable;
@@ -1384,7 +1396,8 @@ public class BaseContainer extends JComponent
 	 * @return the new item
 	 */
 	@Override
-	public AItem createRadArcItem(LogicalLayer layer, Point pc, Point p1, double arcAngle) {
+	public AItem createRadArcItem(LogicalLayer layer, Point pc, Point p1,
+			double arcAngle) {
 		Point2D.Double wpc = new Point2D.Double();
 		Point2D.Double wp1 = new Point2D.Double();
 		localToWorld(pc, wpc);
@@ -1455,7 +1468,8 @@ public class BaseContainer extends JComponent
 	@Override
 	public VisibilityTableScrollPane getVisibilityTableScrollPane() {
 		if (_visTable == null) {
-			_visTable = new VisibilityTableScrollPane(this, _layers, "Layers (drag to reorder)");
+			_visTable = new VisibilityTableScrollPane(this, _layers,
+					"Layers (drag to reorder)");
 		}
 		return _visTable;
 	}
@@ -1522,6 +1536,7 @@ public class BaseContainer extends JComponent
 	 * @param wr
 	 *            the new world system
 	 */
+	@Override
 	public void setWorldSystem(Rectangle2D.Double wr) {
 		_worldSystem = new Rectangle2D.Double(wr.x, wr.y, wr.width, wr.height);
 	}
@@ -1546,9 +1561,12 @@ public class BaseContainer extends JComponent
 		double scaleX = _worldSystem.width / bounds.width;
 		double scaleY = _worldSystem.height / bounds.height;
 
-		localToWorld = AffineTransform.getTranslateInstance(_worldSystem.getMinX(), _worldSystem.getMaxY());
-		localToWorld.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
-		localToWorld.concatenate(AffineTransform.getTranslateInstance(-bounds.x, -bounds.y));
+		localToWorld = AffineTransform.getTranslateInstance(
+				_worldSystem.getMinX(), _worldSystem.getMaxY());
+		localToWorld.concatenate(AffineTransform.getScaleInstance(scaleX,
+				-scaleY));
+		localToWorld.concatenate(AffineTransform.getTranslateInstance(
+				-bounds.x, -bounds.y));
 
 		try {
 			worldToLocal = localToWorld.createInverse();
@@ -1632,7 +1650,8 @@ public class BaseContainer extends JComponent
 		int right = b.width - _rMargin;
 		int bottom = b.height - _bMargin;
 
-		Rectangle screenRect = new Rectangle(left, top, right - left, bottom - top);
+		Rectangle screenRect = new Rectangle(left, top, right - left, bottom
+				- top);
 		return screenRect;
 
 	}

@@ -11,16 +11,16 @@ import javax.swing.JTable;
  */
 public interface ITableSortListener {
 
-    /**
-     * Sort the data
-     * 
-     * @param table
-     *            the table in question
-     * @param columnIndex
-     *            the column index to sort
-     * @param ascendingSort
-     *            if <code>true</code> sort in ascending order.
-     */
-    public void sort(JTable table, int columnIndex, boolean ascendingSort);
+	/**
+	 * Sort the data
+	 * 
+	 * @param table
+	 *            the table in question
+	 * @param columnIndex
+	 *            the column index to sort
+	 * @param ascendingSort
+	 *            if <code>true</code> sort in ascending order.
+	 */
+	public void sort(JTable table, int columnIndex, boolean ascendingSort);
 
 }

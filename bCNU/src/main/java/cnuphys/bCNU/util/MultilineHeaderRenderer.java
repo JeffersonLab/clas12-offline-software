@@ -18,32 +18,32 @@ import javax.swing.table.*;
 @SuppressWarnings("serial")
 public class MultilineHeaderRenderer extends JList implements TableCellRenderer {
 
-    public MultilineHeaderRenderer() {
-	setOpaque(true);
-	setForeground(UIManager.getColor("TableHeader.foreground"));
-	setBackground(UIManager.getColor("TableHeader.background"));
-	setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-	ListCellRenderer renderer = getCellRenderer();
-	((JLabel) renderer).setHorizontalAlignment(SwingConstants.CENTER);
-	setCellRenderer(renderer);
-    }
-
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-	    boolean isSelected, boolean hasFocus, int row, int column) {
-	setFont(table.getFont());
-	String str = (value == null) ? "" : value.toString();
-	BufferedReader br = new BufferedReader(new StringReader(str));
-	String line;
-	Vector<String> v = new Vector<String>();
-	try {
-	    while ((line = br.readLine()) != null) {
-		v.addElement(line);
-	    }
-	} catch (IOException ex) {
-	    ex.printStackTrace();
+	public MultilineHeaderRenderer() {
+		setOpaque(true);
+		setForeground(UIManager.getColor("TableHeader.foreground"));
+		setBackground(UIManager.getColor("TableHeader.background"));
+		setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+		ListCellRenderer renderer = getCellRenderer();
+		((JLabel) renderer).setHorizontalAlignment(SwingConstants.CENTER);
+		setCellRenderer(renderer);
 	}
-	setListData(v);
-	return this;
-    }
+
+	@Override
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
+		setFont(table.getFont());
+		String str = (value == null) ? "" : value.toString();
+		BufferedReader br = new BufferedReader(new StringReader(str));
+		String line;
+		Vector<String> v = new Vector<String>();
+		try {
+			while ((line = br.readLine()) != null) {
+				v.addElement(line);
+			}
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		setListData(v);
+		return this;
+	}
 }
