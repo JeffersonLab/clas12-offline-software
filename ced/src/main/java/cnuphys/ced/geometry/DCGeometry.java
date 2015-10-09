@@ -39,7 +39,13 @@ public class DCGeometry {
 	private static DriftChamberWire wires[][][];
 
 	private static DCFactory dcFactory;
-
+	
+	//ugh. GEMC and data files expect different geometry
+	//Temporary hack
+	public static enum DCGEOMMODE {GEMC, DATA};
+	private static DCGEOMMODE _dcGeomMode = DCGEOMMODE.GEMC;
+	
+	
 	/**
 	 * Initialize the DC Geometry by loading all the wires
 	 */
@@ -129,6 +135,31 @@ public class DCGeometry {
 		// System.err.println("Done initing DC Geometry");
 
 	}
+		
+	/**
+	 * Get the geometry mode. This should be a temp hack, right now
+	 * the gemc files and data files have different brick wall pattern
+	 * @return the geometry mode as a string.
+	 */
+	public static DCGEOMMODE getDCGeometryMode() {
+		return _dcGeomMode;
+	}
+
+
+	/**
+	 * Set the geometry mode. This should be a temp hack, right now
+	 * the gemc files and data files have different brick wall pattern
+	 * @param mode the new mode.
+	 */
+	public static void setDCGeometryMode(DCGEOMMODE mode) {
+		if (_dcGeomMode.equals(mode)) {
+			return; //do nothing
+		}
+		
+		//switch modes
+		System.err.println("Switching Geometry mode to " + mode);
+	}
+
 
 	/**
 	 * Used by the 3D drawing

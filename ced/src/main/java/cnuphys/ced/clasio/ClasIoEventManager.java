@@ -33,6 +33,8 @@ import cnuphys.ced.event.data.GEMCMetaDataContainer;
 import cnuphys.ced.event.data.GenPartDataContainer;
 import cnuphys.ced.event.data.RecEventDataContainer;
 import cnuphys.ced.frame.Ced;
+import cnuphys.ced.geometry.DCGeometry;
+import cnuphys.ced.geometry.DCGeometry.DCGEOMMODE;
 import cnuphys.lund.LundId;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
@@ -103,9 +105,6 @@ public class ClasIoEventManager {
 	private GEMCMetaDataContainer _gemcMetaData;
 	private CNDDataContainer _cndData;
 
-	// are we looking at GEMC data?
-	private boolean _isGemcData;
-
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_evioSource = new EvioSource();
@@ -117,22 +116,6 @@ public class ClasIoEventManager {
 		_recEventData = new RecEventDataContainer(this);
 		_gemcMetaData = new GEMCMetaDataContainer(this);
 		_cndData = new CNDDataContainer(this);
-
-		// make myself a listener
-		IClasIoEventListener elisten = new IClasIoEventListener() {
-
-			@Override
-			public void newClasIoEvent(EvioDataEvent event) {
-			}
-
-			@Override
-			public void openedNewEventFile(String path) {
-				_isGemcData = false;
-			}
-
-		};
-
-		addPhysicsListener(elisten, 0);
 	}
 
 	/**
@@ -141,7 +124,7 @@ public class ClasIoEventManager {
 	 * @return <code>trye</code> if we are looking at GEMC data.
 	 */
 	public boolean isGemcData() {
-		return _isGemcData;
+		return (DCGeometry.getDCGeometryMode() == DCGEOMMODE.GEMC);
 	}
 
 	/**
@@ -684,10 +667,15 @@ public class ClasIoEventManager {
 
 		// GEMC Data
 		if (_gemcMetaData != null) {
+		}
+
+		
+		//check for DCGeomMode change on event # 1 only
+		if (getEventNumber() == 1) {
 			String gcard = _gemcMetaData.getGCard();
-			if (gcard != null) {
-				_isGemcData = true;
-			}
+			DCGEOMMODE mode = (gcard == null) ? DCGEOMMODE.DATA : DCGEOMMODE.GEMC;
+			DCGeometry.setDCGeometryMode(mode);
+			System.err.println("Encountered Event number 1. DC Geometry Mode: " + mode);
 		}
 
 		Ced.getInstance().setEventNumberLabel(getEventNumber());
