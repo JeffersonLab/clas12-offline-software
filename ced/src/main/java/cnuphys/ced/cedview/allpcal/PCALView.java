@@ -24,9 +24,7 @@ import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
-import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
-import cnuphys.ced.item.HexSectorItem;
 import cnuphys.ced.item.PCALHexSectorItem;
 
 public class PCALView extends HexView {
@@ -217,7 +215,6 @@ public class PCALView extends HexView {
 		Point3D sectorP = new Point3D(sectorXYZ[0], sectorXYZ[1], sectorXYZ[2]);
 		PCALGeometry.getTransformations().sectorToLocal(pijk, sectorP);
 	}
-
 
 	/**
 	 * Get the hex item for the given 1-based sector

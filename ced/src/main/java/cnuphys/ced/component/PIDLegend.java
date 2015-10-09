@@ -21,168 +21,168 @@ import cnuphys.lund.LundStyle;
 
 public class PIDLegend extends JComponent {
 
-    // convenience reference to event manager
-    private static ClasIoEventManager _eventManager = ClasIoEventManager
-	    .getInstance();
+	// convenience reference to event manager
+	private static ClasIoEventManager _eventManager = ClasIoEventManager
+			.getInstance();
 
-    // STring used when no PIDs found (e.g., a raw event)
-    private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
+	// STring used when no PIDs found (e.g., a raw event)
+	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
 
-    // used to get the text in the right place
-    private static int _ytext = -1;
+	// used to get the text in the right place
+	private static int _ytext = -1;
 
-    // used to get the text in the right place
-    private static int _fh = -1;
+	// used to get the text in the right place
+	private static int _fh = -1;
 
-    // used to get the line in the right place
-    private static int _yeven = -1;
+	// used to get the line in the right place
+	private static int _yeven = -1;
 
-    // used to get the line in the right place
-    private static int _yodd = -1;
+	// used to get the line in the right place
+	private static int _yodd = -1;
 
-    private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 11);
+	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 11);
 
-    // the owner 
-    protected JComponent _component;
-    
-    private final int prefHeight;
+	// the owner
+	protected JComponent _component;
 
-    /**
-     * Create a User Component (on the toolbar) drawer for a given view.
-     * 
-     * @param view
-     *            the view with a toolbar that has a user component.
-     */
-    public PIDLegend(JComponent parent) {
-	_component = parent;
-	
-	prefHeight = _component.getFontMetrics(labelFont).getHeight()*2;
-	
-	setBorder(new CommonBorder());
-    }
+	private final int prefHeight;
 
-    @Override
-    public Dimension getPreferredSize() {
-	Dimension d = super.getPreferredSize();
-	d.height = prefHeight;
-	return d;
-    }
-    /**
-     * Draw on the component.
-     * 
-     * @param g
-     *            the graphics context.
-     * @param container
-     *            the container on the view.
-     */
-    @Override
-    public void paintComponent(Graphics g) {
+	/**
+	 * Create a User Component (on the toolbar) drawer for a given view.
+	 * 
+	 * @param view
+	 *            the view with a toolbar that has a user component.
+	 */
+	public PIDLegend(JComponent parent) {
+		_component = parent;
 
-	Rectangle b = getBounds();
+		prefHeight = _component.getFontMetrics(labelFont).getHeight() * 2;
 
-	// fill the background
-	g.setColor(getBackground());
-	g.fillRect(0, 0, b.width - 1, b.height - 1);
-	
-	if(_eventManager.isAccumulating()) {
-	    return;
+		setBorder(new CommonBorder());
 	}
 
-	// get the unique lundids found in this event
-	Vector<LundId> lids = getUniqueLundIds();
-
-	int numMC = (lids == null) ? 0 : lids.size();
-
-	if (_fh < 0) {
-	    FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
-	    _fh = fm.getAscent();
-	    // _ytext = (b.height + fm.getHeight())/2 - 2;
-	    _ytext = (b.height + _fh) / 2;
-	    int yc = b.height / 2;
-
-	    _yeven = yc - _fh / 2;
-	    _yodd = yc + _fh / 2;
+	@Override
+	public Dimension getPreferredSize() {
+		Dimension d = super.getPreferredSize();
+		d.height = prefHeight;
+		return d;
 	}
 
-	if (numMC == 0) {
-	    g.setFont(Fonts.smallFont);
-	    g.setColor(Color.red);
+	/**
+	 * Draw on the component.
+	 * 
+	 * @param g
+	 *            the graphics context.
+	 * @param container
+	 *            the container on the view.
+	 */
+	@Override
+	public void paintComponent(Graphics g) {
 
-	    if (_ytext < 0) {
-		FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
-		_ytext = (b.height + fm.getHeight()) / 2 - 2;
-	    }
+		Rectangle b = getBounds();
 
-	    g.drawString(NO_PIDS, 2, _ytext);
-	} else {
-	    // now draw all of them. Sort so order stays the same
-	    Collections.sort(lids);
-	    int x = 4;
-	    int xoff = -15;
-	    int index = 0;
-	    for (LundId lid : lids) {
-		if ((index % 2) == 0) {
-		    x = x + drawLineForLegend(g, x, _yeven, lid) + xoff;
-		} else {
-		    x = x + drawLineForLegend(g, x, _yodd, lid) + xoff;
+		// fill the background
+		g.setColor(getBackground());
+		g.fillRect(0, 0, b.width - 1, b.height - 1);
+
+		if (_eventManager.isAccumulating()) {
+			return;
 		}
-		index++;
-	    }
 
+		// get the unique lundids found in this event
+		Vector<LundId> lids = getUniqueLundIds();
+
+		int numMC = (lids == null) ? 0 : lids.size();
+
+		if (_fh < 0) {
+			FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
+			_fh = fm.getAscent();
+			// _ytext = (b.height + fm.getHeight())/2 - 2;
+			_ytext = (b.height + _fh) / 2;
+			int yc = b.height / 2;
+
+			_yeven = yc - _fh / 2;
+			_yodd = yc + _fh / 2;
+		}
+
+		if (numMC == 0) {
+			g.setFont(Fonts.smallFont);
+			g.setColor(Color.red);
+
+			if (_ytext < 0) {
+				FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
+				_ytext = (b.height + fm.getHeight()) / 2 - 2;
+			}
+
+			g.drawString(NO_PIDS, 2, _ytext);
+		} else {
+			// now draw all of them. Sort so order stays the same
+			Collections.sort(lids);
+			int x = 4;
+			int xoff = -15;
+			int index = 0;
+			for (LundId lid : lids) {
+				if ((index % 2) == 0) {
+					x = x + drawLineForLegend(g, x, _yeven, lid) + xoff;
+				} else {
+					x = x + drawLineForLegend(g, x, _yodd, lid) + xoff;
+				}
+				index++;
+			}
+
+		}
 	}
-    }
 
-    /**
-     * Draw a line for use on a toolbar user component, most likely
-     * 
-     * @param g
-     *            the graphics context
-     * @param x
-     *            the horizontal staring point
-     * @param yc
-     *            the central vertical position
-     * @return the offset
-     */
-    public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
+	/**
+	 * Draw a line for use on a toolbar user component, most likely
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param x
+	 *            the horizontal staring point
+	 * @param yc
+	 *            the central vertical position
+	 * @return the offset
+	 */
+	public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
 
-	Graphics2D g2 = (Graphics2D) g;
-	Stroke oldStroke = g2.getStroke();
-	LundStyle style = LundStyle.getStyle(lid);
-	g2.setStroke(style.getStroke());
+		Graphics2D g2 = (Graphics2D) g;
+		Stroke oldStroke = g2.getStroke();
+		LundStyle style = LundStyle.getStyle(lid);
+		g2.setStroke(style.getStroke());
 
-	int linelen = 30;
-	
-	Color color1 = Color.lightGray;
-	
-	if (style != null) {
-	    color1 = style.getFillColor();
-	} 
-	g.setColor(color1);
+		int linelen = 30;
 
+		Color color1 = Color.lightGray;
 
-	g2.drawLine(x, yc, x + linelen, yc);
+		if (style != null) {
+			color1 = style.getFillColor();
+		}
+		g.setColor(color1);
 
-	x += linelen + 3;
+		g2.drawLine(x, yc, x + linelen, yc);
 
-	g2.setStroke(oldStroke);
+		x += linelen + 3;
 
-	// now the name
-	g.setFont(labelFont);
-	FontMetrics fm = g.getFontMetrics(labelFont);
-	g.setColor(Color.black);
-	g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
+		g2.setStroke(oldStroke);
 
-	return linelen + fm.stringWidth(lid.getName()) + 9;
-    }
+		// now the name
+		g.setFont(labelFont);
+		FontMetrics fm = g.getFontMetrics(labelFont);
+		g.setColor(Color.black);
+		g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
 
-    /**
-     * This method must be filled in to return all the unique LundIds associated
-     * with this event.
-     * 
-     * @return all the unique LundIds associated with this event.
-     */
-    protected Vector<LundId> getUniqueLundIds() {
-	return _eventManager.getUniqueLundIds();
-    }
+		return linelen + fm.stringWidth(lid.getName()) + 9;
+	}
+
+	/**
+	 * This method must be filled in to return all the unique LundIds associated
+	 * with this event.
+	 * 
+	 * @return all the unique LundIds associated with this event.
+	 */
+	protected Vector<LundId> getUniqueLundIds() {
+		return _eventManager.getUniqueLundIds();
+	}
 
 }

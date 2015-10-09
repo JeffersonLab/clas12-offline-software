@@ -19,278 +19,274 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
-import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.geometry.FTCALGeometry;
 
 public class FTCalXYView extends CedXYView {
 
-    //units are cm
-    private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-	    20., -20., -40., 40.);
- 
-    //the CND xy polygons
-    FTCalXYPolygon ftCalPoly[] = new FTCalXYPolygon[332];
+	// units are cm
+	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
+			20., -20., -40., 40.);
 
-    /**
-     * Create a BST View
-     * 
-     * @param keyVals
-     */
-    public FTCalXYView(Object... keyVals) {
-	super(keyVals);
+	// the CND xy polygons
+	FTCalXYPolygon ftCalPoly[] = new FTCalXYPolygon[332];
 
-//
-//	_crossDrawer = new CrossDrawerXY(this);
-//
-//	// draws any swum trajectories (in the after draw)
-//	_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
-//
-//	// default properties
-//	setBooleanProperty(DisplayArray.HITCROSS_PROPERTY, true);
-//
-//	//add the polys
-	int goodIds[] = FTCALGeometry.getGoodIds();
-	for (int i = 0; i < 332; i++) {
-	    int id = goodIds[i];
-	    ftCalPoly[i] = new FTCalXYPolygon(id);
+	/**
+	 * Create a BST View
+	 * 
+	 * @param keyVals
+	 */
+	public FTCalXYView(Object... keyVals) {
+		super(keyVals);
+
+		//
+		// _crossDrawer = new CrossDrawerXY(this);
+		//
+		// // draws any swum trajectories (in the after draw)
+		// _swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
+		//
+		// // default properties
+		// setBooleanProperty(DisplayArray.HITCROSS_PROPERTY, true);
+		//
+		// //add the polys
+		int goodIds[] = FTCALGeometry.getGoodIds();
+		for (int i = 0; i < 332; i++) {
+			int id = goodIds[i];
+			ftCalPoly[i] = new FTCalXYPolygon(id);
+		}
+
 	}
-	
-    }
 
-    /**
-     * Create a FTCalXYView view
-     * 
-     * @return a FTCalXYView View
-     */
-    public static FTCalXYView createFTCalXYView() {
-	FTCalXYView view = null;
+	/**
+	 * Create a FTCalXYView view
+	 * 
+	 * @return a FTCalXYView View
+	 */
+	public static FTCalXYView createFTCalXYView() {
+		FTCalXYView view = null;
 
-	// set to a fraction of screen
-	Dimension d = GraphicsUtilities.screenFraction(0.35);
+		// set to a fraction of screen
+		Dimension d = GraphicsUtilities.screenFraction(0.35);
 
-	// make it square
-	int width = d.width;
-	int height = width;
+		// make it square
+		int width = d.width;
+		int height = width;
 
-	// create the view
-	view = new FTCalXYView(AttributeType.WORLDSYSTEM, _defaultWorldRectangle,
-		AttributeType.WIDTH, width, AttributeType.HEIGHT, height,
-		AttributeType.LEFTMARGIN, LMARGIN, AttributeType.TOPMARGIN,
-		TMARGIN, AttributeType.RIGHTMARGIN, RMARGIN,
-		AttributeType.BOTTOMMARGIN, BMARGIN, AttributeType.TOOLBAR,
-		true, AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
-			& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-			& ~BaseToolBar.CONTROLPANELBUTTON
-			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
-		AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-		AttributeType.TITLE, "FTCal XY",
-		AttributeType.STANDARDVIEWDECORATIONS, true);
+		// create the view
+		view = new FTCalXYView(AttributeType.WORLDSYSTEM,
+				_defaultWorldRectangle, AttributeType.WIDTH, width,
+				AttributeType.HEIGHT, height, AttributeType.LEFTMARGIN,
+				LMARGIN, AttributeType.TOPMARGIN, TMARGIN,
+				AttributeType.RIGHTMARGIN, RMARGIN, AttributeType.BOTTOMMARGIN,
+				BMARGIN, AttributeType.TOOLBAR, true,
+				AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+						& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
+						& ~BaseToolBar.CONTROLPANELBUTTON
+						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
+				AttributeType.TITLE, "FTCal XY",
+				AttributeType.STANDARDVIEWDECORATIONS, true);
 
-	view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
-		+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-		+ ControlPanel.RECONSARRAY, DisplayBits.ACCUMULATION
-		+ DisplayBits.MCTRUTH, 2, 6);
+		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+				+ ControlPanel.RECONSARRAY, DisplayBits.ACCUMULATION
+				+ DisplayBits.MCTRUTH, 2, 6);
 
-	view.add(view._controlPanel, BorderLayout.EAST);
-	view.pack();
-	
-	return view;
-    }
+		view.add(view._controlPanel, BorderLayout.EAST);
+		view.pack();
 
-    /**
-     * Create the view's before drawer.
-     */
-    @Override
-    protected void setBeforeDraw() {
-	// use a before-drawer to sector dividers and labels
-	IDrawable beforeDraw = new DrawableAdapter() {
+		return view;
+	}
 
-	    @Override
-	    public void draw(Graphics g, IContainer container) {
-		Component component = container.getComponent();
-		Rectangle b = component.getBounds();
+	/**
+	 * Create the view's before drawer.
+	 */
+	@Override
+	protected void setBeforeDraw() {
+		// use a before-drawer to sector dividers and labels
+		IDrawable beforeDraw = new DrawableAdapter() {
 
-		// ignore b.x and b.y as usual
+			@Override
+			public void draw(Graphics g, IContainer container) {
+				Component component = container.getComponent();
+				Rectangle b = component.getBounds();
 
-		b.x = 0;
-		b.y = 0;
+				// ignore b.x and b.y as usual
 
-		Rectangle screenRect = container.getInsetRectangle();
-		g.setColor(Color.white);
-		g.fillRect(screenRect.x, screenRect.y, screenRect.width,
-			screenRect.height);
-		
-		for (FTCalXYPolygon poly : ftCalPoly) {
-		    poly.draw(g, container);
+				b.x = 0;
+				b.y = 0;
+
+				Rectangle screenRect = container.getInsetRectangle();
+				g.setColor(Color.white);
+				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
+						screenRect.height);
+
+				for (FTCalXYPolygon poly : ftCalPoly) {
+					poly.draw(g, container);
+				}
+
+			}
+
+		};
+
+		getContainer().setBeforeDraw(beforeDraw);
+	}
+
+	/**
+	 * Set the view's after draw
+	 */
+	@Override
+	protected void setAfterDraw() {
+		IDrawable afterDraw = new DrawableAdapter() {
+
+			@Override
+			public void draw(Graphics g, IContainer container) {
+				//
+				// if (!_eventManager.isAccumulating()) {
+				// drawBSTHits(g, container);
+				//
+				// if (showReconsBSTCrosses()) {
+				// _crossDrawer.draw(g, container);
+				// }
+				//
+				// if (showCosmics()) {
+				// drawCosmicTracks(g, container);
+				// }
+				//
+				// _swimTrajectoryDrawer.draw(g, container);
+				Rectangle screenRect = getActiveScreenRectangle(container);
+				drawAxes(g, container, screenRect, false);
+				// }
+
+			}
+
+		};
+		getContainer().setAfterDraw(afterDraw);
+	}
+
+	/**
+	 * This adds the detector items. The AllDC view is not faithful to geometry.
+	 * All we really uses in the number of superlayers, number of layers, and
+	 * number of wires.
+	 */
+	@Override
+	protected void addItems() {
+	}
+
+	/**
+	 * Some view specific feedback. Should always call super.getFeedbackStrings
+	 * first.
+	 * 
+	 * @param container
+	 *            the base container for the view.
+	 * @param screenPoint
+	 *            the pixel point
+	 * @param worldPoint
+	 *            the corresponding world location.
+	 */
+	@Override
+	public void getFeedbackStrings(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint, List<String> feedbackStrings) {
+
+		basicFeedback(container, screenPoint, worldPoint, "cm", feedbackStrings);
+
+		double rad = Math.hypot(worldPoint.x, worldPoint.y);
+		boolean found = false;
+
+		if ((rad > 4.6) && (rad < 18)) {
+
+			for (FTCalXYPolygon poly : ftCalPoly) {
+				found = poly.getFeedbackStrings(container, screenPoint,
+						worldPoint, feedbackStrings);
+				if (found) {
+					break;
+				}
+			}
+
 		}
 
-	    }
+		// if (!Environment.getInstance().isDragging()) {
+		// BSTxyPanel newClosest = getClosest(worldPoint);
+		// if (newClosest != _closestPanel) {
+		// _closestPanel = newClosest;
+		// container.refresh();
+		// }
+		// }
+		//
+		//
+		// if (_closestPanel != null) {
+		// int region = (_closestPanel.getLayer() + 1) / 2;
+		// fbString("red", "svt layer " + _closestPanel.getLayer(),
+		// feedbackStrings);
+		// fbString("red", "svt region " + region, feedbackStrings);
+		// fbString("red", "svt sector " + _closestPanel.getSector(),
+		// feedbackStrings);
+		// }
+		// else {
+		// double rad = Math.hypot(worldPoint.x, worldPoint.y);
+		// boolean found = false;
+		//
+		// // cnd ?
+		// if ((rad > 288) && (rad < 382)) {
+		//
+		// for (int layer = 1; layer <= 3; layer++) {
+		// for (int paddleId = 1; paddleId <= 48; paddleId++) {
+		//
+		// found = cndPoly[layer - 1][paddleId - 1]
+		// .getFeedbackStrings(container, screenPoint,
+		// worldPoint, feedbackStrings);
+		//
+		// if (found) {
+		// break;
+		// }
+		// }
+		//
+		// if (found) {
+		// break;
+		// }
+		//
+		// }
+		// }
+		//
+		// }
+		//
+		// // hits data
+		// BSTDataContainer bstData = _eventManager.getBSTData();
+		//
+		// int hitCount = bstData.getHitCount(0);
+		// if ((_closestPanel != null) && (hitCount > 0)) {
+		// Vector<int[]> stripADCData = bstData.allStripsForSectorAndLayer(
+		// _closestPanel.getSector(), _closestPanel.getLayer());
+		// if (!stripADCData.isEmpty()) {
+		// for (int sdtdat[] : stripADCData) {
+		// fbString("orange", "strip:  " + sdtdat[0] + " adc: "
+		// + +sdtdat[1], feedbackStrings);
+		// }
+		// }
+		// }
+		//
+		// // near a swum trajectory?
+		// double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
+		// double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
+		// * mindist;
+		//
+		// _lastTrajStr = null; // for hovering response
+		// if (pixlen < 25.0) {
+		// SwimTrajectory2D traj2D = _swimTrajectoryDrawer
+		// .getClosestTrajectory();
+		// if (traj2D != null) {
+		// traj2D.addToFeedback(feedbackStrings);
+		// _lastTrajStr = traj2D.summaryString();
+		// }
+		// }
+		//
+		// // see if any feedback from simulated data
+		// getGemcFeedback(container, screenPoint, worldPoint, feedbackStrings);
+		//
+		// // reconstructed feedback?
+		// _crossDrawer.feedback(container, screenPoint, worldPoint,
+		// feedbackStrings);
 
-	};
-
-	getContainer().setBeforeDraw(beforeDraw);
-    }
-
-    /**
-     * Set the view's after draw
-     */
-    @Override
-    protected void setAfterDraw() {
-	IDrawable afterDraw = new DrawableAdapter() {
-
-	    @Override
-	    public void draw(Graphics g, IContainer container) {
-//
-//		if (!_eventManager.isAccumulating()) {
-//		    drawBSTHits(g, container);
-//
-//		    if (showReconsBSTCrosses()) {
-//			_crossDrawer.draw(g, container);
-//		    }
-//
-//		    if (showCosmics()) {
-//			drawCosmicTracks(g, container);
-//		    }
-//
-//		    _swimTrajectoryDrawer.draw(g, container);
-		    Rectangle screenRect = getActiveScreenRectangle(container);
-		    drawAxes(g, container, screenRect, false);
-//		}
-
-	    }
-
-	};
-	getContainer().setAfterDraw(afterDraw);
-    }
-    
-
-    /**
-     * This adds the detector items. The AllDC view is not faithful to geometry.
-     * All we really uses in the number of superlayers, number of layers, and
-     * number of wires.
-     */
-    @Override
-    protected void addItems() {
-    }
-    
-    
-    /**
-     * Some view specific feedback. Should always call super.getFeedbackStrings
-     * first.
-     * 
-     * @param container
-     *            the base container for the view.
-     * @param screenPoint
-     *            the pixel point
-     * @param worldPoint
-     *            the corresponding world location.
-     */
-    @Override
-    public void getFeedbackStrings(IContainer container, Point screenPoint,
-	    Point2D.Double worldPoint, List<String> feedbackStrings) {
-	
-	basicFeedback(container, screenPoint, worldPoint,  "cm", feedbackStrings);
-	
-	    double rad = Math.hypot(worldPoint.x, worldPoint.y);
-	    boolean found = false;
-
-	    if ((rad > 4.6) && (rad < 18)) {
-		
-		for (FTCalXYPolygon poly : ftCalPoly) {
-		    found = poly.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
-		    if (found) {
-			break;
-		    }
-		}
-
-	    }
-
-	
-	
-//	if (!Environment.getInstance().isDragging()) {
-//	    BSTxyPanel newClosest = getClosest(worldPoint);
-//	    if (newClosest != _closestPanel) {
-//		_closestPanel = newClosest;
-//		container.refresh();
-//	    }
-//	}
-//
-//
-//	if (_closestPanel != null) {
-//	    int region = (_closestPanel.getLayer() + 1) / 2;
-//	    fbString("red", "svt layer " + _closestPanel.getLayer(),
-//		    feedbackStrings);
-//	    fbString("red", "svt region " + region, feedbackStrings);
-//	    fbString("red", "svt sector " + _closestPanel.getSector(),
-//		    feedbackStrings);
-//	}
-//	else {
-//	    double rad = Math.hypot(worldPoint.x, worldPoint.y);
-//	    boolean found = false;
-//
-//	    // cnd ?
-//	    if ((rad > 288) && (rad < 382)) {
-//
-//		for (int layer = 1; layer <= 3; layer++) {
-//		    for (int paddleId = 1; paddleId <= 48; paddleId++) {
-//
-//			found = cndPoly[layer - 1][paddleId - 1]
-//				.getFeedbackStrings(container, screenPoint,
-//					worldPoint, feedbackStrings);
-//
-//			if (found) {
-//			    break;
-//			}
-//		    }
-//
-//		    if (found) {
-//			break;
-//		    }
-//
-//		}
-//	    }
-//	   
-//	}
-//
-//	// hits data
-//	BSTDataContainer bstData = _eventManager.getBSTData();
-//
-//	int hitCount = bstData.getHitCount(0);
-//	if ((_closestPanel != null) && (hitCount > 0)) {
-//	    Vector<int[]> stripADCData = bstData.allStripsForSectorAndLayer(
-//		    _closestPanel.getSector(), _closestPanel.getLayer());
-//	    if (!stripADCData.isEmpty()) {
-//		for (int sdtdat[] : stripADCData) {
-//		    fbString("orange", "strip:  " + sdtdat[0] + " adc: "
-//			    + +sdtdat[1], feedbackStrings);
-//		}
-//	    }
-//	}
-//
-//	// near a swum trajectory?
-//	double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
-//	double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
-//		* mindist;
-//
-//	_lastTrajStr = null; // for hovering response
-//	if (pixlen < 25.0) {
-//	    SwimTrajectory2D traj2D = _swimTrajectoryDrawer
-//		    .getClosestTrajectory();
-//	    if (traj2D != null) {
-//		traj2D.addToFeedback(feedbackStrings);
-//		_lastTrajStr = traj2D.summaryString();
-//	    }
-//	}
-//
-//	// see if any feedback from simulated data
-//	getGemcFeedback(container, screenPoint, worldPoint, feedbackStrings);
-//
-//	// reconstructed feedback?
-//	_crossDrawer.feedback(container, screenPoint, worldPoint,
-//		feedbackStrings);
-
-    }
-
+	}
 
 }

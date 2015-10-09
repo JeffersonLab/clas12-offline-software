@@ -25,166 +25,166 @@ import cnuphys.ced.event.IAccumulationListener;
  *
  */
 public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
-	IClasIoEventListener, IAccumulationListener {
+		IClasIoEventListener, IAccumulationListener {
 
-    // the event manager
-    private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
+	// the event manager
+	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
-    // hash table
-    private Hashtable<String, ActionLabel> _alabels = new Hashtable<String, ActionLabel>(
-	    193);
+	// hash table
+	private Hashtable<String, ActionLabel> _alabels = new Hashtable<String, ActionLabel>(
+			193);
 
-    // the node table
-    private NodeTable _nodeTable;
-    
-    private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<String, ClasIoBankDialog>(193);
+	// the node table
+	private NodeTable _nodeTable;
 
-    /**
-     * This panel holds all the known banks in a grid of buttons. Banks present
-     * will be clickable, and will cause the table to scroll to that name
-     * 
-     * @param nodeTable
-     *            the table
-     */
-    public ClasIoPresentBankPanel(NodeTable nodeTable) {
-	_nodeTable = nodeTable;
-	_eventManager.addPhysicsListener(this, 1);
-	setLayout(new GridLayout(40, 4, 2, 0));
+	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<String, ClasIoBankDialog>(
+			193);
 
-	// get all the known banks
-	String[] allBanks = _eventManager.getKnownBanks();
-	for (String s : allBanks) {
-	    if (!skip(s)) {
-		makeLabel(s);
-	    }
-	}
+	/**
+	 * This panel holds all the known banks in a grid of buttons. Banks present
+	 * will be clickable, and will cause the table to scroll to that name
+	 * 
+	 * @param nodeTable
+	 *            the table
+	 */
+	public ClasIoPresentBankPanel(NodeTable nodeTable) {
+		_nodeTable = nodeTable;
+		_eventManager.addPhysicsListener(this, 1);
+		setLayout(new GridLayout(40, 4, 2, 0));
 
-	setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 2));
-	AccumulationManager.getInstance().addAccumulationListener(this);
-    }
-
-    // skip certain irrelevant banks
-    private boolean skip(String s) {
-//	if ("CLAS6EVENT::particle".equals(s)) {
-//	    return true;
-//	} else if ("SIMEVENT::particle".equals(s)) {
-//	    return true;
-//	}
-	return false;
-    }
-
-    // update as the result of a new event arriving
-    private void update() {
-	String[] allBanks = _eventManager.getKnownBanks();
-	for (String s : allBanks) {
-	    ActionLabel alabel = _alabels.get(s);
-
-	    if (alabel != null) {
-		boolean inCurrent = _eventManager.isBankInCurrentEvent(s);
-		alabel.setEnabled(inCurrent);
-
-		ClasIoBankDialog bd = _dataBanks.get(s);
-		if (bd != null) {
-		    if (inCurrent) {
-			bd.update();
-		    } else {
-			bd.setVisible(false);
-		    }
-		}
-	    }
-	}
-    }
-
-    // convenience method to make a button
-    private ActionLabel makeLabel(final String label) {
-	final ActionLabel alabel = new ActionLabel(label, false);
-	alabel.setOpaque(true);
-	
-	MouseListener ml = new MouseListener() {
-
-	    @Override
-	    public void mouseClicked(MouseEvent e) {
-		if (_eventManager.isBankInCurrentEvent(label)) {
-		    int clickCount = e.getClickCount();
-		    
-		    if (clickCount == 1) {
-			_nodeTable.makeNameVisible(label);			
-		    }
-		    else if (clickCount == 2) {
-			ClasIoBankDialog bd = _dataBanks.get(label);
-			
-			if (bd == null) {
-			    bd = new ClasIoBankDialog(label);
-			    _dataBanks.put(label, bd);
-			    bd.update();
+		// get all the known banks
+		String[] allBanks = _eventManager.getKnownBanks();
+		for (String s : allBanks) {
+			if (!skip(s)) {
+				makeLabel(s);
 			}
-			
-			bd.setVisible(true);
-		    }
 		}
-	    }
 
-	    @Override
-	    public void mousePressed(MouseEvent e) {
-	    }
+		setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 2));
+		AccumulationManager.getInstance().addAccumulationListener(this);
+	}
 
-	    @Override
-	    public void mouseReleased(MouseEvent e) {
-	    }
+	// skip certain irrelevant banks
+	private boolean skip(String s) {
+		// if ("CLAS6EVENT::particle".equals(s)) {
+		// return true;
+		// } else if ("SIMEVENT::particle".equals(s)) {
+		// return true;
+		// }
+		return false;
+	}
 
-	    @Override
-	    public void mouseEntered(MouseEvent e) {
-		if (_eventManager.isBankInCurrentEvent(label)) {
-		    alabel.setBackground(Color.yellow);
+	// update as the result of a new event arriving
+	private void update() {
+		String[] allBanks = _eventManager.getKnownBanks();
+		for (String s : allBanks) {
+			ActionLabel alabel = _alabels.get(s);
+
+			if (alabel != null) {
+				boolean inCurrent = _eventManager.isBankInCurrentEvent(s);
+				alabel.setEnabled(inCurrent);
+
+				ClasIoBankDialog bd = _dataBanks.get(s);
+				if (bd != null) {
+					if (inCurrent) {
+						bd.update();
+					} else {
+						bd.setVisible(false);
+					}
+				}
+			}
 		}
-		
-	    }
-
-	    @Override
-	    public void mouseExited(MouseEvent e) {
-		    alabel.setBackground(null);		
-	    }
-	    
-	};
-	
-	alabel.addMouseListener(ml);
-	
-//	alabel.addActionListener(this);
-	_alabels.put(label, alabel);
-	add(alabel);
-	return alabel;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent ae) {		
-//	_nodeTable.makeNameVisible(ae.getActionCommand());
-    }
-
-    @Override
-    public void newClasIoEvent(EvioDataEvent event) {
-	if (!_eventManager.isAccumulating()) {
-	    update();
 	}
-    }
 
-    @Override
-    public void openedNewEventFile(String path) {
-    }
+	// convenience method to make a button
+	private ActionLabel makeLabel(final String label) {
+		final ActionLabel alabel = new ActionLabel(label, false);
+		alabel.setOpaque(true);
 
-    @Override
-    public void accumulationEvent(int reason) {
-	switch (reason) {
-	case AccumulationManager.ACCUMULATION_STARTED:
-	    break;
+		MouseListener ml = new MouseListener() {
 
-	case AccumulationManager.ACCUMULATION_CANCELLED:
-	    break;
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (_eventManager.isBankInCurrentEvent(label)) {
+					int clickCount = e.getClickCount();
 
-	case AccumulationManager.ACCUMULATION_FINISHED:
-	    System.err.println("ACCUM FINISHED");
-	    update();
-	    break;
+					if (clickCount == 1) {
+						_nodeTable.makeNameVisible(label);
+					} else if (clickCount == 2) {
+						ClasIoBankDialog bd = _dataBanks.get(label);
+
+						if (bd == null) {
+							bd = new ClasIoBankDialog(label);
+							_dataBanks.put(label, bd);
+							bd.update();
+						}
+
+						bd.setVisible(true);
+					}
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				if (_eventManager.isBankInCurrentEvent(label)) {
+					alabel.setBackground(Color.yellow);
+				}
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				alabel.setBackground(null);
+			}
+
+		};
+
+		alabel.addMouseListener(ml);
+
+		// alabel.addActionListener(this);
+		_alabels.put(label, alabel);
+		add(alabel);
+		return alabel;
 	}
-    }
+
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		// _nodeTable.makeNameVisible(ae.getActionCommand());
+	}
+
+	@Override
+	public void newClasIoEvent(EvioDataEvent event) {
+		if (!_eventManager.isAccumulating()) {
+			update();
+		}
+	}
+
+	@Override
+	public void openedNewEventFile(String path) {
+	}
+
+	@Override
+	public void accumulationEvent(int reason) {
+		switch (reason) {
+		case AccumulationManager.ACCUMULATION_STARTED:
+			break;
+
+		case AccumulationManager.ACCUMULATION_CANCELLED:
+			break;
+
+		case AccumulationManager.ACCUMULATION_FINISHED:
+			System.err.println("ACCUM FINISHED");
+			update();
+			break;
+		}
+	}
 
 }

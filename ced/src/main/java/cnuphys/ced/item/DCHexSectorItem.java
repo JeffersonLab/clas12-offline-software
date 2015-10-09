@@ -101,7 +101,8 @@ public class DCHexSectorItem extends HexSectorItem {
 	 * @param end
 	 *            0 or 1 for opposite ends of the wire
 	 */
-	private void wireToLocal(IContainer container, int superlayer, int layer, int wire, int end, Point pp, Point2D.Double workPoint) {
+	private void wireToLocal(IContainer container, int superlayer, int layer,
+			int wire, int end, Point pp, Point2D.Double workPoint) {
 
 		Point3D wireEnd = null;
 		if (end == 0) {
@@ -117,7 +118,8 @@ public class DCHexSectorItem extends HexSectorItem {
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp,
+			Point2D.Double wp, List<String> feedbackStrings) {
 
 		if (contains(container, pp)) {
 
@@ -125,19 +127,22 @@ public class DCHexSectorItem extends HexSectorItem {
 			double labRho = Math.hypot(wp.x, wp.y);
 			double labPhi = Math.atan2(wp.y, wp.x);
 
-			String labXY = String.format("$yellow$lab xy (%-6.2f, %-6.2f) ", wp.x, wp.y);
+			String labXY = String.format("$yellow$lab xy (%-6.2f, %-6.2f) ",
+					wp.x, wp.y);
 
-			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", labRho,
-					(Math.toDegrees(labPhi)));
+			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi
+					+ " (%-6.2f, %-6.2f)", labRho, (Math.toDegrees(labPhi)));
 
 			Point2D.Double sect2D = new Point2D.Double();
 			worldToSector2D(sect2D, wp);
 			double sectRho = Math.hypot(sect2D.x, sect2D.y);
 			double sectPhi = Math.atan2(sect2D.y, sect2D.x);
 
-			String sectXY = String.format("$orange$sector xy (%-6.2f, %-6.2f) ", sect2D.x, sect2D.y);
+			String sectXY = String.format(
+					"$orange$sector xy (%-6.2f, %-6.2f) ", sect2D.x, sect2D.y);
 
-			String sectRhoPhi = String.format("$orange$sector " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
+			String sectRhoPhi = String.format("$orange$sector "
+					+ CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
 					(Math.toDegrees(sectPhi)));
 
 			feedbackStrings.add(labXY);

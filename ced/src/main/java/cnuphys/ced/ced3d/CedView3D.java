@@ -23,118 +23,118 @@ import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.swim.Swimming;
 
 public abstract class CedView3D extends BaseView implements
-	IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener,
-	ActionListener {
+		IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener,
+		ActionListener {
 
-    // the menu bar
-    private final JMenuBar _menuBar;
+	// the menu bar
+	private final JMenuBar _menuBar;
 
-    // the event manager
-    private final ClasIoEventManager _eventManager = ClasIoEventManager
-	    .getInstance();
+	// the event manager
+	private final ClasIoEventManager _eventManager = ClasIoEventManager
+			.getInstance();
 
-    // the 3D panel
-    private final CedPanel3D _panel3D;
+	// the 3D panel
+	private final CedPanel3D _panel3D;
 
-    // menu
-    private JMenuItem _printMenuItem;
-    private JMenuItem _pngMenuItem;
-    private JMenuItem _refreshItem;
+	// menu
+	private JMenuItem _printMenuItem;
+	private JMenuItem _pngMenuItem;
+	private JMenuItem _refreshItem;
 
-    public CedView3D(String title, float angleX, float angleY, float angleZ,
-	    float xDist, float yDist, float zDist) {
-	super(AttributeType.TITLE, title, AttributeType.ICONIFIABLE, true,
-		AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-		AttributeType.RESIZABLE, true, AttributeType.VISIBLE, true);
+	public CedView3D(String title, float angleX, float angleY, float angleZ,
+			float xDist, float yDist, float zDist) {
+		super(AttributeType.TITLE, title, AttributeType.ICONIFIABLE, true,
+				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
+				AttributeType.RESIZABLE, true, AttributeType.VISIBLE, true);
 
-	_eventManager.addPhysicsListener(this, 2);
+		_eventManager.addPhysicsListener(this, 2);
 
-	// listen for trajectory changes
-	Swimming.addSwimTrajectoryListener(this);
+		// listen for trajectory changes
+		Swimming.addSwimTrajectoryListener(this);
 
-	_menuBar = new JMenuBar();
-	setJMenuBar(_menuBar);
-	addMenus();
+		_menuBar = new JMenuBar();
+		setJMenuBar(_menuBar);
+		addMenus();
 
-	setLayout(new BorderLayout(1, 1));
-	_panel3D = make3DPanel(angleX, angleY, angleZ, xDist, yDist, zDist);
+		setLayout(new BorderLayout(1, 1));
+		_panel3D = make3DPanel(angleX, angleY, angleZ, xDist, yDist, zDist);
 
-	add(_panel3D, BorderLayout.CENTER);
-	add(Box.createHorizontalStrut(1), BorderLayout.WEST);
-	pack();
-	AccumulationManager.getInstance().addAccumulationListener(this);
-    }
-
-    protected abstract CedPanel3D make3DPanel(float angleX, float angleY,
-	    float angleZ, float xDist, float yDist, float zDist);
-
-    // add the menus
-    private void addMenus() {
-	JMenu actionMenu = new JMenu("ced3D");
-	_printMenuItem = new JMenuItem("Print...");
-	_printMenuItem.addActionListener(this);
-	actionMenu.add(_printMenuItem);
-
-	_pngMenuItem = new JMenuItem("Save as PNG...");
-	_pngMenuItem.addActionListener(this);
-	actionMenu.add(_pngMenuItem);
-
-	_refreshItem = new JMenuItem("Refresh");
-	_refreshItem.addActionListener(this);
-	actionMenu.add(_refreshItem);
-
-	_menuBar.add(actionMenu);
-    }
-
-    @Override
-    public void newClasIoEvent(EvioDataEvent event) {
-	if (!_eventManager.isAccumulating()) {
-	    // setData(event);
-	    // setEventNumber(_eventManager.getEventNumber());
-	    // fixButtons();
-	    _panel3D.refresh();
+		add(_panel3D, BorderLayout.CENTER);
+		add(Box.createHorizontalStrut(1), BorderLayout.WEST);
+		pack();
+		AccumulationManager.getInstance().addAccumulationListener(this);
 	}
-    }
 
-    @Override
-    public void openedNewEventFile(String path) {
-	_panel3D.refresh();
-    }
+	protected abstract CedPanel3D make3DPanel(float angleX, float angleY,
+			float angleZ, float xDist, float yDist, float zDist);
 
-    @Override
-    public void accumulationEvent(int reason) {
-	switch (reason) {
-	case AccumulationManager.ACCUMULATION_STARTED:
-	    break;
+	// add the menus
+	private void addMenus() {
+		JMenu actionMenu = new JMenu("ced3D");
+		_printMenuItem = new JMenuItem("Print...");
+		_printMenuItem.addActionListener(this);
+		actionMenu.add(_printMenuItem);
 
-	case AccumulationManager.ACCUMULATION_CANCELLED:
-	    _panel3D.refresh();
-	    break;
+		_pngMenuItem = new JMenuItem("Save as PNG...");
+		_pngMenuItem.addActionListener(this);
+		actionMenu.add(_pngMenuItem);
 
-	case AccumulationManager.ACCUMULATION_FINISHED:
-	    _panel3D.refresh();
-	    break;
+		_refreshItem = new JMenuItem("Refresh");
+		_refreshItem.addActionListener(this);
+		actionMenu.add(_refreshItem);
+
+		_menuBar.add(actionMenu);
 	}
-    }
 
-    @Override
-    public void trajectoriesChanged() {
-	if (!_eventManager.isAccumulating()) {
-	    _panel3D.refresh();
+	@Override
+	public void newClasIoEvent(EvioDataEvent event) {
+		if (!_eventManager.isAccumulating()) {
+			// setData(event);
+			// setEventNumber(_eventManager.getEventNumber());
+			// fixButtons();
+			_panel3D.refresh();
+		}
 	}
-    }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-	Object source = e.getSource();
-	if (source == _printMenuItem) {
-	    PrintUtilities.printComponent(_panel3D);
-	} else if (source == _pngMenuItem) {
-	    GraphicsUtilities.saveAsPng(_panel3D);
-	} else if (source == _refreshItem) {
-	    _panel3D.refresh();
+	@Override
+	public void openedNewEventFile(String path) {
+		_panel3D.refresh();
 	}
-    }
+
+	@Override
+	public void accumulationEvent(int reason) {
+		switch (reason) {
+		case AccumulationManager.ACCUMULATION_STARTED:
+			break;
+
+		case AccumulationManager.ACCUMULATION_CANCELLED:
+			_panel3D.refresh();
+			break;
+
+		case AccumulationManager.ACCUMULATION_FINISHED:
+			_panel3D.refresh();
+			break;
+		}
+	}
+
+	@Override
+	public void trajectoriesChanged() {
+		if (!_eventManager.isAccumulating()) {
+			_panel3D.refresh();
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		Object source = e.getSource();
+		if (source == _printMenuItem) {
+			PrintUtilities.printComponent(_panel3D);
+		} else if (source == _pngMenuItem) {
+			GraphicsUtilities.saveAsPng(_panel3D);
+		} else if (source == _refreshItem) {
+			_panel3D.refresh();
+		}
+	}
 
 }

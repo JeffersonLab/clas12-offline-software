@@ -10,76 +10,76 @@ import cnuphys.swim.SwimTrajectory;
 
 public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
-    private DCXYView _view;
+	private DCXYView _view;
 
-    public SwimTrajectoryDrawer(DCXYView view) {
-	_view = view;
-    }
-
-    /**
-     * Actual drawing method
-     * 
-     * @param g
-     *            the graphics context
-     * @param container
-     *            the base container
-     */
-    @Override
-    public void draw(Graphics g, IContainer container) {
-	if (!ClasIoEventManager.getInstance().isAccumulating()) {
-	    super.draw(g, container);
+	public SwimTrajectoryDrawer(DCXYView view) {
+		_view = view;
 	}
-    }
 
-    /**
-     * Here we have a chance to veto a trajectory. For example, we may decide
-     * that the trajectory won't appear on this view (assuming a view owns this
-     * drawer) and so don't bother to compute it. The default implementation
-     * vetoes nothing.
-     * 
-     * @param trajectory
-     *            the trajectory to test.
-     * @return <code>true</code> if this trajectory is vetoed.
-     */
-    @Override
-    protected boolean veto(SwimTrajectory trajectory) {
-	return false;
-    }
+	/**
+	 * Actual drawing method
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param container
+	 *            the base container
+	 */
+	@Override
+	public void draw(Graphics g, IContainer container) {
+		if (!ClasIoEventManager.getInstance().isAccumulating()) {
+			super.draw(g, container);
+		}
+	}
 
-    /**
-     * Just us the xy coordinates directly. Ignore z.
-     * 
-     * @param v3d
-     *            the 3D vector (meters)
-     * @param wp
-     *            the projected world point.
-     */
-    @Override
-    public void project(double[] v3d, Point2D.Double wp) {
-	// convert to cm
-	wp.setLocation(v3d[0] * 100, v3d[1] * 100);
-    }
+	/**
+	 * Here we have a chance to veto a trajectory. For example, we may decide
+	 * that the trajectory won't appear on this view (assuming a view owns this
+	 * drawer) and so don't bother to compute it. The default implementation
+	 * vetoes nothing.
+	 * 
+	 * @param trajectory
+	 *            the trajectory to test.
+	 * @return <code>true</code> if this trajectory is vetoed.
+	 */
+	@Override
+	protected boolean veto(SwimTrajectory trajectory) {
+		return false;
+	}
 
-    @Override
-    public void prepareForRemoval() {
-    }
+	/**
+	 * Just us the xy coordinates directly. Ignore z.
+	 * 
+	 * @param v3d
+	 *            the 3D vector (meters)
+	 * @param wp
+	 *            the projected world point.
+	 */
+	@Override
+	public void project(double[] v3d, Point2D.Double wp) {
+		// convert to cm
+		wp.setLocation(v3d[0] * 100, v3d[1] * 100);
+	}
 
-    @Override
-    public void setDirty(boolean dirty) {
-    }
+	@Override
+	public void prepareForRemoval() {
+	}
 
-    @Override
-    public String getName() {
-	return null;
-    }
+	@Override
+	public void setDirty(boolean dirty) {
+	}
 
-    @Override
-    public boolean isVisible() {
-	return false;
-    }
+	@Override
+	public String getName() {
+		return null;
+	}
 
-    @Override
-    public void setVisible(boolean visible) {
-    }
+	@Override
+	public boolean isVisible() {
+		return false;
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+	}
 
 }

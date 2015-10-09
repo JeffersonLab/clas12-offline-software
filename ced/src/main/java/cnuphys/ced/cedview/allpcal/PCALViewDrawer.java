@@ -12,71 +12,71 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 
 public abstract class PCALViewDrawer implements IDrawable {
 
-    protected static RenderingHints renderHints = new RenderingHints(
-	    RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    static {
-	renderHints.put(RenderingHints.KEY_RENDERING,
-		RenderingHints.VALUE_RENDER_QUALITY);
-    };
+	protected static RenderingHints renderHints = new RenderingHints(
+			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	static {
+		renderHints.put(RenderingHints.KEY_RENDERING,
+				RenderingHints.VALUE_RENDER_QUALITY);
+	};
 
-    // convenient access to the event manager
-    protected ClasIoEventManager _eventManager = ClasIoEventManager
-	    .getInstance();
+	// convenient access to the event manager
+	protected ClasIoEventManager _eventManager = ClasIoEventManager
+			.getInstance();
 
-    // the PCAL View being rendered.
-    protected PCALView _view;
+	// the PCAL View being rendered.
+	protected PCALView _view;
 
-    public PCALViewDrawer(PCALView view) {
-	_view = view;
-    }
+	public PCALViewDrawer(PCALView view) {
+		_view = view;
+	}
 
-    @Override
-    public void setDirty(boolean dirty) {
-    }
+	@Override
+	public void setDirty(boolean dirty) {
+	}
 
-    @Override
-    public void prepareForRemoval() {
-    }
+	@Override
+	public void prepareForRemoval() {
+	}
 
-    @Override
-    public boolean isVisible() {
-	return true;
-    }
+	@Override
+	public boolean isVisible() {
+		return true;
+	}
 
-    @Override
-    public void setVisible(boolean visible) {
-    }
+	@Override
+	public void setVisible(boolean visible) {
+	}
 
-    @Override
-    public boolean isEnabled() {
-	return true;
-    }
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 
-    @Override
-    public void setEnabled(boolean enabled) {
-    }
+	@Override
+	public void setEnabled(boolean enabled) {
+	}
 
-    @Override
-    public String getName() {
-	return null;
-    }
+	@Override
+	public String getName() {
+		return null;
+	}
 
-    @Override
-    public abstract void draw(Graphics g, IContainer container);
+	@Override
+	public abstract void draw(Graphics g, IContainer container);
 
-    /**
-     * Use what was drawn to generate feedback strings
-     * 
-     * @param container
-     *            the drawing container
-     * @param screenPoint
-     *            the mouse location
-     * @param worldPoint
-     *            the corresponding world location
-     * @param feedbackStrings
-     *            add strings to this collection
-     */
-    public abstract void feedback(IContainer container, Point screenPoint,
-	    Point2D.Double worldPoint, List<String> feedbackStrings);
+	/**
+	 * Use what was drawn to generate feedback strings
+	 * 
+	 * @param container
+	 *            the drawing container
+	 * @param screenPoint
+	 *            the mouse location
+	 * @param worldPoint
+	 *            the corresponding world location
+	 * @param feedbackStrings
+	 *            add strings to this collection
+	 */
+	public abstract void feedback(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint, List<String> feedbackStrings);
 
 }

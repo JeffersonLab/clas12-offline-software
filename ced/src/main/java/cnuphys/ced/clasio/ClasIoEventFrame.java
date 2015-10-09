@@ -13,57 +13,57 @@ import cnuphys.ced.clasio.table.NodePanel;
 
 public class ClasIoEventFrame extends JFrame {
 
-    // holds the panel that has the table
-    protected NodePanel _nodePanel;
+	// holds the panel that has the table
+	protected NodePanel _nodePanel;
 
-    // the application frame
-    public ClasIoEventFrame(String title) {
+	// the application frame
+	public ClasIoEventFrame(String title) {
 
-	// set up what to do if the window is closed
-	WindowAdapter windowAdapter = new WindowAdapter() {
-	    @Override
-	    public void windowClosing(WindowEvent event) {
-		System.exit(1);
-	    }
-	};
-	addWindowListener(windowAdapter);
-	setLayout(new BorderLayout());
+		// set up what to do if the window is closed
+		WindowAdapter windowAdapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				System.exit(1);
+			}
+		};
+		addWindowListener(windowAdapter);
+		setLayout(new BorderLayout());
 
-	_nodePanel = new NodePanel();
+		_nodePanel = new NodePanel();
 
-	add(_nodePanel, BorderLayout.CENTER);
+		add(_nodePanel, BorderLayout.CENTER);
 
-	makeMenus();
+		makeMenus();
 
-	// set to a fraction of screen
-	// Dimension d = GraphicsUtilities.screenFraction(0.9);
-	// setSize(d);
+		// set to a fraction of screen
+		// Dimension d = GraphicsUtilities.screenFraction(0.9);
+		// setSize(d);
 
-	pack();
-    }
+		pack();
+	}
 
-    // make the menus
-    private void makeMenus() {
-	JMenuBar menubar = new JMenuBar();
-	setJMenuBar(menubar);
-	menubar.add(new ClasIoEventMenu(false, true));
-    }
+	// make the menus
+	private void makeMenus() {
+		JMenuBar menubar = new JMenuBar();
+		setJMenuBar(menubar);
+		menubar.add(new ClasIoEventMenu(false, true));
+	}
 
-    public static void main(String arg[]) {
+	public static void main(String arg[]) {
 
-	System.out.println("App name: "
-		+ Environment.getInstance().getApplicationName());
+		System.out.println("App name: "
+				+ Environment.getInstance().getApplicationName());
 
-	final ClasIoEventFrame testFrame = new ClasIoEventFrame("EVIO Events");
+		final ClasIoEventFrame testFrame = new ClasIoEventFrame("EVIO Events");
 
-	SwingUtilities.invokeLater(new Runnable() {
-	    @Override
-	    public void run() {
-		// testFrame.pack();
-		testFrame.setVisible(true);
-		testFrame.setLocationRelativeTo(null);
-	    }
-	});
-    }
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// testFrame.pack();
+				testFrame.setVisible(true);
+				testFrame.setLocationRelativeTo(null);
+			}
+		});
+	}
 
 }

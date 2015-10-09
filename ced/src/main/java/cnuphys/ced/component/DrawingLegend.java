@@ -20,104 +20,104 @@ import cnuphys.ced.event.data.DataDrawSupport;
 
 public class DrawingLegend extends JComponent {
 
-    private int width = 100;
-    private int height = 100;
+	private int width = 100;
+	private int height = 100;
 
-    private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 9);
+	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 9);
 
-    // parent view
-    private BaseView _view;
+	// parent view
+	private BaseView _view;
 
-    /**
-     * Set the parent view
-     * 
-     * @param view
-     *            the parent view
-     */
-    public void setView(BaseView view) {
-	_view = view;
-    }
-
-    /**
-     * Get the parent view
-     * 
-     * @return the parent view
-     */
-    public BaseView getView() {
-	return _view;
-    }
-
-    @Override
-    public void paintComponent(Graphics g) {
-	Rectangle b = getBounds();
-	g.setColor(Color.darkGray);
-	g.fillRect(0, 0, b.width, b.height);
-
-	Point pp = new Point();
-	// gemc hit
-	int yc = 8;
-	int x = 8;
-	pp.setLocation(x, yc);
-	DataDrawSupport.drawGemcHit(g, pp);
-	x += quickString(g, x + 6, yc, "GEMC hit ") + 20;
-
-	// reconstructed hit
-	pp.setLocation(x, yc);
-	DataDrawSupport.drawReconHit(g, pp);
-	x += quickString(g, x + 6, yc, "Reconstructed hit ") + 20;
-
-	yc += 12;
-	x = 8;
-
-	// view dependent drawing
-	if (_view != null) {
-	    if (_view instanceof SectorView) {
-		Dimension d = paintSectorViewLegend(g, x, yc);
-	    }
+	/**
+	 * Set the parent view
+	 * 
+	 * @param view
+	 *            the parent view
+	 */
+	public void setView(BaseView view) {
+		_view = view;
 	}
 
-    }
+	/**
+	 * Get the parent view
+	 * 
+	 * @return the parent view
+	 */
+	public BaseView getView() {
+		return _view;
+	}
 
-    private Dimension paintSectorViewLegend(Graphics g, int x, int yc) {
+	@Override
+	public void paintComponent(Graphics g) {
+		Rectangle b = getBounds();
+		g.setColor(Color.darkGray);
+		g.fillRect(0, 0, b.width, b.height);
 
-	int xo = x;
-	int yo = yc;
+		Point pp = new Point();
+		// gemc hit
+		int yc = 8;
+		int x = 8;
+		pp.setLocation(x, yc);
+		DataDrawSupport.drawGemcHit(g, pp);
+		x += quickString(g, x + 6, yc, "GEMC hit ") + 20;
 
-	// hit based dc
-	FeedbackRect fbr = new FeedbackRect(x - 4, yc - 4, 8, 8, 0, null, 0);
-	DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
-		DataDrawSupport.DC_HB_COLOR);
-	x += quickString(g, x + 6, yc, "DC Hit Based ") + 20;
+		// reconstructed hit
+		pp.setLocation(x, yc);
+		DataDrawSupport.drawReconHit(g, pp);
+		x += quickString(g, x + 6, yc, "Reconstructed hit ") + 20;
 
-	fbr = new FeedbackRect(x - 4, yc - 4, 8, 8, 0, null, 0);
-	DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
-		DataDrawSupport.DC_TB_COLOR);
-	x += quickString(g, x + 6, yc, "DC Time Based ") + 20;
+		yc += 12;
+		x = 8;
 
-	return new Dimension(x - xo, yc - yo);
-    }
+		// view dependent drawing
+		if (_view != null) {
+			if (_view instanceof SectorView) {
+				Dimension d = paintSectorViewLegend(g, x, yc);
+			}
+		}
 
-    private int quickString(Graphics g, int x, int yc, String s) {
-	FontMetrics fm = getFontMetrics(labelFont);
-	g.setColor(Color.black);
-	g.setFont(labelFont);
-	g.setColor(Color.cyan);
-	g.drawString(s, x, yc + fm.getAscent() / 2);
-	return x + fm.stringWidth(s);
-    }
+	}
 
-    @Override
-    public Dimension getPreferredSize() {
-	return new Dimension(width, height);
-    }
+	private Dimension paintSectorViewLegend(Graphics g, int x, int yc) {
 
-    public static JPanel getLegendPanel(BaseView view) {
-	JPanel panel = new JPanel();
-	panel.setLayout(new BorderLayout(2, 2));
-	DrawingLegend dleg = new DrawingLegend();
-	dleg.setView(view);
-	panel.add(dleg, BorderLayout.CENTER);
-	panel.setBorder(new CommonBorder("Symbology"));
-	return panel;
-    }
+		int xo = x;
+		int yo = yc;
+
+		// hit based dc
+		FeedbackRect fbr = new FeedbackRect(x - 4, yc - 4, 8, 8, 0, null, 0);
+		DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
+				DataDrawSupport.DC_HB_COLOR);
+		x += quickString(g, x + 6, yc, "DC Hit Based ") + 20;
+
+		fbr = new FeedbackRect(x - 4, yc - 4, 8, 8, 0, null, 0);
+		DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
+				DataDrawSupport.DC_TB_COLOR);
+		x += quickString(g, x + 6, yc, "DC Time Based ") + 20;
+
+		return new Dimension(x - xo, yc - yo);
+	}
+
+	private int quickString(Graphics g, int x, int yc, String s) {
+		FontMetrics fm = getFontMetrics(labelFont);
+		g.setColor(Color.black);
+		g.setFont(labelFont);
+		g.setColor(Color.cyan);
+		g.drawString(s, x, yc + fm.getAscent() / 2);
+		return x + fm.stringWidth(s);
+	}
+
+	@Override
+	public Dimension getPreferredSize() {
+		return new Dimension(width, height);
+	}
+
+	public static JPanel getLegendPanel(BaseView view) {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout(2, 2));
+		DrawingLegend dleg = new DrawingLegend();
+		dleg.setView(view);
+		panel.add(dleg, BorderLayout.CENTER);
+		panel.setBorder(new CommonBorder("Symbology"));
+		return panel;
+	}
 }
