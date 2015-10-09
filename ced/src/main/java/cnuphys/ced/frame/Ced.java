@@ -29,6 +29,7 @@ import org.jlab.data.io.DataEvent;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.attributes.AttributeType;
+import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.ced.ced3d.CentralView3D;
 import cnuphys.ced.ced3d.FTCalView3D;
 import cnuphys.ced.ced3d.ForwardView3D;
@@ -94,11 +95,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// using 3D?
 	private static boolean _use3D;
-
-	// build (hopefully overwritten by property file
-	// commented out because we are leaving svn
-	// private static String build = "??";
-
+	
 	// the swim menu
 	private SwimMenu _swimMenu;
 
@@ -314,9 +311,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		_eventMenu = new ClasIoEventMenu(true, false);
 		mmgr.addMenu(_eventMenu);
+		
+		//the options menu
+		addToOptionMenu(mmgr.getOptionMenu());
+		
 
 		// ET menu
-		mmgr.addMenu(ETSupport.getETMenu());
+		// mmgr.addMenu(ETSupport.getETMenu());
 
 		// create the mag field menu
 		MagneticFields.setActiveField(MagneticFields.FieldType.TORUS);
@@ -328,7 +329,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_swimMenu.addPropertyChangeListener(this);
 
 		// remove the option menu until I need it
-		mmgr.removeMenu(mmgr.getOptionMenu());
+		//mmgr.removeMenu(mmgr.getOptionMenu());
 
 		// add to the file menu
 		JMenu fmenu = mmgr.getFileMenu();
@@ -360,6 +361,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add to the event menu
 		addToEventMenu();
+	}
+	
+	//create the options menu
+	private void addToOptionMenu(JMenu omenu) {
+		omenu.add(MagnifyWindow.magificationMenu());
 	}
 
 	public void setEventNumberLabel(int num) {

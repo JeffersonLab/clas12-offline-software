@@ -7,10 +7,14 @@ import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.JComboBox;
 import javax.swing.JWindow;
+
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -25,9 +29,6 @@ public class MagnifyWindow extends JWindow {
 
 	private static int OFFSET = 10; // from pointer location
 
-	// magnification factor
-	private static double _MAGFACTOR = 4.;
-
 	// mouse location relative to container
 	private static Point _mouseLocation;
 
@@ -35,6 +36,12 @@ public class MagnifyWindow extends JWindow {
 	private static BaseContainer _container;
 
 	private static IDrawable _extraAfterDraw;
+	
+	//combo box mag selector for options menu
+	private static JComboBox<Integer> _magCombo;
+	
+	private static final Integer[] _mags = {2,3,4,5,6,7,8,9,10};
+
 
 	/**
 	 * Create a translucent window
@@ -47,6 +54,35 @@ public class MagnifyWindow extends JWindow {
 
 		add(_container, BorderLayout.CENTER);
 	}
+	
+	/**
+	 * The combo box to put on the menu
+	 * @return combo box to put on the options menu
+	 */
+	public static JComboBox<Integer> magificationMenu() {
+		
+		if (_magCombo != null) {
+			return _magCombo;
+		}
+		
+		_magCombo = new JComboBox<Integer>(_mags);
+		_magCombo.setSelectedIndex(3);
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.err.println("New mag = " + _mags[_magCombo.getSelectedIndex()]);
+			}
+			
+		};
+		_magCombo.addActionListener(al);
+		_magCombo.setEnabled(true);
+		
+		System.err.println("MAGS COMBO");
+		return _magCombo;
+	}
+	
 
 	/**
 	 * Magnify a view
@@ -182,8 +218,9 @@ public class MagnifyWindow extends JWindow {
 		double scaleX = ((double) sBounds.width) / ((double) bounds.width);
 		double scaleY = ((double) sBounds.height) / ((double) bounds.height);
 
-		double ww = sWorld.width / (scaleX * _MAGFACTOR);
-		double hh = sWorld.height / (scaleY * _MAGFACTOR);
+		int magFactor = _mags[_magCombo.getSelectedIndex()];
+		double ww = sWorld.width / (scaleX * magFactor);
+		double hh = sWorld.height / (scaleY * magFactor);
 
 		wr.setFrame(wp.x - ww / 2, wp.y - hh / 2, ww, hh);
 
