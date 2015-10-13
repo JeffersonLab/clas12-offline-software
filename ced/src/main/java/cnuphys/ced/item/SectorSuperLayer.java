@@ -62,7 +62,7 @@ public class SectorSuperLayer extends PolygonItem {
 			X11Colors.getX11Color("cornsilk"), X11Colors.getX11Color("azure") };
 
 	// color for wires
-	private static final Color senseWireColor = Color.cyan;
+	private static final Color senseWireColor = X11Colors.getX11Color("Dodger Blue");
 
 	// convenient access to the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();

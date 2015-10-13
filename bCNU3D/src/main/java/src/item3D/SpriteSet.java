@@ -68,6 +68,7 @@ public class SpriteSet extends Item3D {
 	    _sprite.setTexParameteri(drawable.getGL().getGL2(), GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
 	    _sprite.setTexParameteri(drawable.getGL().getGL2(), GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
 
+	    System.err.println("Sprite image");
 //	    _sprite = TextureIO.newTexture(_url, false, ".png");
 	} catch (GLException e) {
 	    // TODO Auto-generated catch block

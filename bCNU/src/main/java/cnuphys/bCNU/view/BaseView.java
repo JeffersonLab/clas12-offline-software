@@ -709,7 +709,7 @@ public class BaseView extends JInternalFrame {
 			public void run() {
 				IContainer container = bview.getContainer();
 				if (container instanceof BaseContainer) {
-					MagnifyWindow.magnify((BaseContainer) container, me, null);
+					MagnifyWindow.magnify((BaseContainer) container, me);
 				}
 
 			}
