@@ -12,7 +12,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
+import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JWindow;
 
 import cnuphys.bCNU.drawable.IDrawable;
@@ -38,10 +41,10 @@ public class MagnifyWindow extends JWindow {
 	private static IDrawable _extraAfterDraw;
 	
 	//combo box mag selector for options menu
-	private static JComboBox<Integer> _magCombo;
+	private static JMenu _magMenu;
 	
 	private static final Integer[] _mags = {2,3,4,5,6,7,8,9,10};
-
+	private static int _selectedMag = 4;
 
 	/**
 	 * Create a translucent window
@@ -56,31 +59,37 @@ public class MagnifyWindow extends JWindow {
 	}
 	
 	/**
-	 * The combo box to put on the menu
-	 * @return combo box to put on the options menu
+	 * The mag menu to put on the main menu
+	 * @return the mag menu
 	 */
-	public static JComboBox<Integer> magificationMenu() {
+	public static JMenu magificationMenu() {
 		
-		if (_magCombo != null) {
-			return _magCombo;
+		if (_magMenu != null) {
+			return _magMenu;
 		}
 		
-		_magCombo = new JComboBox<Integer>(_mags);
-		_magCombo.setSelectedIndex(3);
+		_magMenu = new JMenu("Magnification Factor");
+		ButtonGroup bga = new ButtonGroup();
 		
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.err.println("New mag = " + _mags[_magCombo.getSelectedIndex()]);
+				_selectedMag = Integer.parseInt(e.getActionCommand());
+//				System.err.println("New mag selection " + _selectedMag);
 			}
 			
 		};
-		_magCombo.addActionListener(al);
-		_magCombo.setEnabled(true);
+
+
+		for (int i = 0; i < _mags.length; i++) {
+			JRadioButtonMenuItem mitem = new JRadioButtonMenuItem(_mags[i].toString(), _selectedMag == _mags[i]); 
+			bga.add(mitem);
+			mitem.addActionListener(al);
+			_magMenu.add(mitem);
+		}
 		
-		System.err.println("MAGS COMBO");
-		return _magCombo;
+		return _magMenu;
 	}
 	
 
@@ -218,9 +227,8 @@ public class MagnifyWindow extends JWindow {
 		double scaleX = ((double) sBounds.width) / ((double) bounds.width);
 		double scaleY = ((double) sBounds.height) / ((double) bounds.height);
 
-		int magFactor = _mags[_magCombo.getSelectedIndex()];
-		double ww = sWorld.width / (scaleX * magFactor);
-		double hh = sWorld.height / (scaleY * magFactor);
+		double ww = sWorld.width / (scaleX * _selectedMag);
+		double hh = sWorld.height / (scaleY * _selectedMag);
 
 		wr.setFrame(wp.x - ww / 2, wp.y - hh / 2, ww, hh);
 

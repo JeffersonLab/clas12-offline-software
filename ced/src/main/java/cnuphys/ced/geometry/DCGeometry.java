@@ -58,6 +58,16 @@ public class DCGeometry {
 		dcDataProvider = DataBaseLoader.getDriftChamberConstants();
 
 		dcFactory = new DCFactory();
+		
+		//arghh ugly hack until GEMC is modified
+		
+		if (_dcGeomMode == DCGEOMMODE.GEMC) {
+			dcFactory = new DCFactory();
+		}
+		else {
+			dcFactory = new DCFactoryUpdated();
+		}
+		
 		dcDetector = dcFactory.createDetectorCLAS(dcDataProvider);
 
 		sector0 = dcDetector.getSector(0);
