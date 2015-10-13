@@ -674,8 +674,8 @@ public class ClasIoEventManager {
 		if (getEventNumber() == 1) {
 			String gcard = _gemcMetaData.getGCard();
 			DCGEOMMODE mode = (gcard == null) ? DCGEOMMODE.DATA : DCGEOMMODE.GEMC;
-			DCGeometry.setDCGeometryMode(mode);
 			System.err.println("Encountered Event number 1. DC Geometry Mode: " + mode);
+			DCGeometry.setDCGeometryMode(mode);
 		}
 
 		Ced.getInstance().setEventNumberLabel(getEventNumber());

@@ -1,5 +1,6 @@
 package cnuphys.bCNU.graphics.container;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -117,6 +118,12 @@ public class BaseContainer extends JComponent implements IContainer,
 	 * This optional drawable is called before the layers are drawn.
 	 */
 	protected IDrawable _beforeDraw;
+	
+	/**
+	 * Option drawer for magnification window rather than just simple magnification
+	 */
+	protected IDrawable _magDraw;
+	
 	/**
 	 * Used to print one page
 	 */
@@ -248,6 +255,19 @@ public class BaseContainer extends JComponent implements IContainer,
 		_userLayers = sContainer._userLayers;
 		setBackground(sContainer.getBackground());
 		setForeground(sContainer.getForeground());
+	}
+	
+	/**
+	 * Just give the container a simple drawer
+	 * @param drawer the only drawer
+	 */
+	public void noModel(IDrawable drawer) {
+		_layers = null;
+		_afterDraw = drawer;
+		_beforeDraw = null;
+		_userLayers = null;
+		setBackground(Color.gray);
+		setForeground(Color.black);
 	}
 
 	/**
@@ -1302,6 +1322,24 @@ public class BaseContainer extends JComponent implements IContainer,
 	public IDrawable getBeforeDraw() {
 		return _beforeDraw;
 	}
+	
+	/**
+	 * Set the optional magnification drawer
+	 * @param mdraw  the optional magnification drawer
+	 */
+	public void setMagnificationDraw(IDrawable mdraw) {
+	    _magDraw = mdraw;
+	}
+	
+	/**
+	 * Get the optional magnification drawer
+	 * @return the optional magnification drawer
+	 */
+	public IDrawable getMagnificationDraw() {
+	    return _magDraw;
+	}
+	
+
 
 	/**
 	 * From a given screen rectangle, create an ellipse item.
