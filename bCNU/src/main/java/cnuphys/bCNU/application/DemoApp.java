@@ -9,6 +9,7 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
+import cnuphys.bCNU.plugin.shapes.PluginLine;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
 import cnuphys.bCNU.plugin.shapes.PluginSquare;
 import cnuphys.bCNU.util.Environment;
@@ -140,6 +141,11 @@ public class DemoApp extends BaseMDIApplication {
 			PluginProperties.LINECOLOR, Color.red,
 			PluginProperties.LINEWIDTH, 3,
 			PluginProperties.LINESTYLE, LineStyle.DASH,
+			PluginProperties.LOCKED, false);
+		
+		new PluginLine(this, "A draggable line", 0.75, 0, -0.25, 0.3,
+			PluginProperties.LINECOLOR, Color.yellow,
+			PluginProperties.LINEWIDTH, 3,
 			PluginProperties.LOCKED, false);
 	    }
 	    
