@@ -186,6 +186,8 @@ public class BSTxyView extends CedXYView {
 	// add a specialized magview drawer
 	((BaseContainer)(view.getContainer())).setMagnificationDraw(new BSTxyMagDrawer(view));
 
+	//add quick zooms
+	view.addQuickZoom("BST & BMT", 190, -190, -190, 190);
 	return view;
     }
 

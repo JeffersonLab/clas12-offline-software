@@ -24,6 +24,7 @@ import org.jlab.evio.clas12.EvioSource;
 import cnuphys.bCNU.et.ETSupport;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
+import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.CNDDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
@@ -100,6 +101,7 @@ public class ClasIoEventManager {
 	private ECDataContainer _ecData;
 	private FTOFDataContainer _ftofData;
 	private BSTDataContainer _bstData;
+	private BMTDataContainer _bmtData;
 	private GenPartDataContainer _genPartData;
 	private RecEventDataContainer _recEventData;
 	private GEMCMetaDataContainer _gemcMetaData;
@@ -112,6 +114,7 @@ public class ClasIoEventManager {
 		_ecData = new ECDataContainer(this);
 		_ftofData = new FTOFDataContainer(this);
 		_bstData = new BSTDataContainer(this);
+		_bmtData = new BMTDataContainer(this);
 		_genPartData = new GenPartDataContainer(this);
 		_recEventData = new RecEventDataContainer(this);
 		_gemcMetaData = new GEMCMetaDataContainer(this);
@@ -188,6 +191,15 @@ public class ClasIoEventManager {
 	 */
 	public BSTDataContainer getBSTData() {
 		return _bstData;
+	}
+
+	/**
+	 * Get the BMT data
+	 * 
+	 * @return the BMT data container
+	 */
+	public BMTDataContainer getBMTData() {
+		return _bmtData;
 	}
 
 	/**
