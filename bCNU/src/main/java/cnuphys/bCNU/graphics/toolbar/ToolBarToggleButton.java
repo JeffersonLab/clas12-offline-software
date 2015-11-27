@@ -15,6 +15,8 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.rubberband.Rubberband;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.ItemPopupManager;
+import cnuphys.bCNU.menu.ViewPopupMenu;
+import cnuphys.bCNU.view.BaseView;
 
 @SuppressWarnings("serial")
 public class ToolBarToggleButton extends CommonToolBarToggleButton {
@@ -180,24 +182,50 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 	 */
 	@Override
 	public void mouseButton3Click(MouseEvent mouseEvent) {
-		Vector<AItem> items = container.getItemsAtPoint(mouseEvent.getPoint());
+//		Vector<AItem> items = container.getItemsAtPoint(mouseEvent.getPoint());
+//
+//		boolean consumed = false;
+//
+//		if ((items != null) && (items.size() > 0)) {
+//			for (AItem item : items) {
+//				if (item.isRightClickable()) {
+//					consumed = true;
+//					ItemPopupManager.prepareForPopup(item, container,
+//							mouseEvent.getPoint());
+//					break;
+//				}
+//			}
+//		}
+//
+//		if (!consumed) {
+//			container.getView().rightClicked(mouseEvent);
+//		}
+	}
+	
 
-		boolean consumed = false;
-
-		if ((items != null) && (items.size() > 0)) {
-			for (AItem item : items) {
-				if (item.isRightClickable()) {
-					consumed = true;
-					ItemPopupManager.prepareForPopup(item, container,
-							mouseEvent.getPoint());
-					break;
-				}
-			}
-		}
-
-		if (!consumed) {
-			container.getView().rightClicked(mouseEvent);
-		}
+	//mouse press platform's popup trigger
+	@Override
+	public void popupTrigger(MouseEvent mouseEvent) {
+	    
+	    BaseView view = getView();
+	    if (view == null) {
+		return;
+	    }
+	    
+	    ViewPopupMenu vmenu = view.getViewPopupMenu();
+	    if ((vmenu == null) || !vmenu.isEnabled()) {
+		return;
+	    }
+	    
+	    vmenu.show(this, mouseEvent.getX(), mouseEvent.getY());
 	}
 
+	
+	/**
+	 * Get the view this toll bar button resides upon
+	 * @return the parent view
+	 */
+	public BaseView getView() {
+	    return (container == null) ? null : container.getView();
+	}
 }

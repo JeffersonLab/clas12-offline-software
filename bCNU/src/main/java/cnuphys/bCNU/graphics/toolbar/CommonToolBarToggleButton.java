@@ -67,6 +67,13 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	 */
 	public void mouseButton3Click(MouseEvent mouseEvent) {
 	}
+	
+	/**
+	 * Handle popup trigger
+	 * @param mouseEvent the causal event
+	 */
+	public void popupTrigger(MouseEvent mouseEvent) {
+	}
 
 	/**
 	 * Handle a mouse press.

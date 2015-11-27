@@ -12,7 +12,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
  * @author heddle
  *
  */
-public class BMTContainer extends ADataContainer {
+public class BMTDataContainer extends ADataContainer {
 
     /** Edep on the strip */
     public double[] bmt_dgtz_Edep;
@@ -227,7 +227,7 @@ public class BMTContainer extends ADataContainer {
     /** tracking status */
     public int[] bmtrec_hits_trkingStat;
 
-    public BMTContainer(ClasIoEventManager eventManager) {
+    public BMTDataContainer(ClasIoEventManager eventManager) {
 	super(eventManager);
 	// TODO Auto-generated constructor stub
     }

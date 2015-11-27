@@ -36,7 +36,12 @@ public class GeometryManager {
 	 * Private constructor for the singleton.
 	 */
 	private GeometryManager() {
+	    //DC Geometry
 		DCGeometry.initialize();
+		
+		//BMT micromegas geometry
+		BMTGeometry.initialize();
+		
 
 		// get the FTOF geometry
 		FTOFGeometry.initialize();

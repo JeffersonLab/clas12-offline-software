@@ -647,7 +647,7 @@ public class BaseToolBar extends CommonToolBar implements MouseListener,
 				mtb.mouseDoubleClicked(mouseEvent);
 			}
 		} else if (mb3) {
-			mtb.mouseButton3Click(mouseEvent);
+//			mtb.mouseButton3Click(mouseEvent);
 		}
 
 	}

@@ -35,7 +35,8 @@ public class SVTPanel3D extends DetectorItem3D {
 
 		BSTGeometry.getLayerQuads(_sector, _layer, coords);
 
-		Color color = X11Colors.getX11Color("wheat", getVolumeAlpha());
+		Color color = ((_layer % 2) == 0) ? X11Colors.getX11Color("coral", getVolumeAlpha())
+			: X11Colors.getX11Color("Powder Blue", getVolumeAlpha());
 		Support3D.drawQuads(drawable, coords, color, 1f, true);
 	}
 

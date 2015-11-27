@@ -117,8 +117,9 @@ public class BaseMDIApplication extends JFrame {
 				.booleanValue(AttributeType.OPTIONMENUDEFAULTS);
 		menuManager.addMenu(new OptionMenu(adOptionMenuDefaults));
 
-		// add the view menu
+		// add the view and plugin menus
 		menuManager.addMenu(ViewManager.getInstance().getViewMenu());
+		menuManager.addMenu(ViewManager.getInstance().getPluginMenu());
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
@@ -204,8 +205,9 @@ public class BaseMDIApplication extends JFrame {
 				.booleanValue(AttributeType.OPTIONMENUDEFAULTS);
 		menuManager.addMenu(new OptionMenu(adOptionMenuDefaults));
 
-		// add the view menu
+		// add the view and plugin menu
 		menuManager.addMenu(ViewManager.getInstance().getViewMenu());
+		menuManager.addMenu(ViewManager.getInstance().getPluginMenu());
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}

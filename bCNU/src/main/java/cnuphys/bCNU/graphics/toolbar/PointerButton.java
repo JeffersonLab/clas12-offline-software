@@ -11,7 +11,9 @@ import cnuphys.bCNU.graphics.rubberband.Rubberband;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.ItemModification;
 import cnuphys.bCNU.item.ItemPopupManager;
+import cnuphys.bCNU.menu.ViewPopupMenu;
 import cnuphys.bCNU.util.Environment;
+import cnuphys.bCNU.view.BaseView;
 
 /**
  * The is the default "pointer" button.
@@ -88,6 +90,7 @@ public class PointerButton extends ToolBarToggleButton implements IRubberbanded 
 		reset();
 	}
 
+	
 	/**
 	 * The mouse was clicked. Note that the order the events will come is
 	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
@@ -98,6 +101,11 @@ public class PointerButton extends ToolBarToggleButton implements IRubberbanded 
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
+	    
+	    if (mouseEvent.isPopupTrigger()) {
+		popupTrigger(mouseEvent);
+		return;
+	    }
 
 		// get the topmost item
 		_modifiedItem = container.getItemAtPoint(mouseEvent.getPoint());

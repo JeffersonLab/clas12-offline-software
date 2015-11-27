@@ -956,15 +956,15 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 
 	/**
 	 * Called when the item was double clicked. The default implementation is to
-	 * edit the item's properties.
+	 * do nothing.
 	 * 
 	 * @param mouseEvent
 	 *            the causal event.
 	 */
 	public void doubleClicked(MouseEvent mouseEvent) {
-		if (isLayerEnabled()) {
-			editProperties();
-		}
+//		if (isLayerEnabled()) {
+//			editProperties();
+//		}
 	}
 
 	/**
