@@ -5,7 +5,9 @@ import java.util.Properties;
 import java.util.UUID;
 
 import cnuphys.bCNU.graphics.style.LineStyle;
+import cnuphys.bCNU.graphics.style.SymbolType;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.item.PathBasedItem;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
 
@@ -19,6 +21,15 @@ public class PluginShape {
     
     //the shape type
     private PluginShapeType _shapeType;
+    
+    //data relevant for ced
+    private int _sector;
+    private int _superlayer;
+    private int _layer;
+    private int _component;
+    private int _crate;
+    private int _slot;
+    private int _channel;
         
     /**
      * Constructor
@@ -102,14 +113,40 @@ public class PluginShape {
 	    _item.setDraggable(true);
 	}
 	
+	//initial rotation angle (degrees)
+	double angle = PluginProperties.getRotationAngle(props);
+	if (Math.abs(angle) > 1.0e-6) {
+	    if (_item instanceof PathBasedItem) {
+		//minus to get ccw rotation
+		((PathBasedItem)_item).rotate(-angle);
+	    }
+	}
+	
+	//ced identifications (yeah shouldn't be here)
+	_sector = PluginProperties.getSector(props);
+	_superlayer = PluginProperties.getSuperlayer(props);
+	_layer = PluginProperties.getLayer(props);
+	_component = PluginProperties.getComponent(props);
+	_crate = PluginProperties.getCrate(props);
+	_slot = PluginProperties.getSlot(props);
+	_channel = PluginProperties.getChannel(props);
+	
     }
 
     //common final initialization
-    protected void commonInit(String name, Properties properties) {
+    protected void commonInit(String info, Properties properties) {
 	_item.setVisible(true);	
-	_item.setName(name);
+	_item.setName(info);
 	processProperties(properties);	
 	_plugin.addShape(this);
+    }
+    
+    /**
+     * Set the shapes's info string
+     * @param info the info string of the shape
+     */
+    public void setInfoString(String info) {
+	_item.setName((info == null) ? "???" : info);
     }
     
     /**
@@ -129,10 +166,10 @@ public class PluginShape {
     }
     
     /**
-     * Get the name of the shape
-     * @return the name of the shape
+     * Get the info string of the shape
+     * @return the info string of the shape
      */
-    public String getName() {
+    public String getInfoString() {
 	return (_item == null) ? "???" : _item.getName();
     }
     
@@ -147,6 +184,30 @@ public class PluginShape {
     }
     
     /**
+     * Set the symbol type. Only relevant for PluginSymbol shapes.
+     * This does not cause a redraw.
+     * @param symbol the symbol.
+     */
+    public void setSymbol(SymbolType symbol) {
+	if (_shapeType == PluginShapeType.SYMBOL) {
+	    _item.getStyle().setSymbolType(symbol);
+	}
+    }
+    
+    /**
+     * Set the symbol size. Only relevant for PluginSymbol shapes.
+     * This does not cause a redraw.
+     * @param size the symbol size (width and height) in pixels.
+     */
+    public void setSymbolSize(int size) {
+	if (_shapeType == PluginShapeType.SYMBOL) {
+	    //keep reasonable
+	    size = Math.max(4, Math.min(40, size));
+	    _item.getStyle().setSymbolSize(size);
+	}
+    }
+    
+    /**
      * Set the line style
      * @param lineStyle the style to set
      * @see cnuphys.bCNU.graphics.style.LineStyle
@@ -154,4 +215,61 @@ public class PluginShape {
     public void setLineStyle(LineStyle lineStyle) {
 	_item.getStyle().setLineStyle(lineStyle);
     }
+    
+    /**
+     * Get the sector id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+     * @return the sector id.
+     */
+    public int getSector() {
+        return _sector;
+    }
+
+    /**
+     * Get the superlayer id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+     * @return the superlayer id.
+     */
+   public int getSuperlayer() {
+        return _superlayer;
+    }
+
+   /**
+    * Get the layer id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+    * @return the layer id.
+    */
+    public int getLayer() {
+        return _layer;
+    }
+
+    /**
+     * Get the component id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+     * @return the component id.
+     */
+    public int getComponent() {
+        return _component;
+    }
+
+    /**
+     * Get the crate id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+     * @return the crate id.
+     */
+    public int getCrate() {
+        return _crate;
+    }
+
+    /**
+     * Get the slot id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+     * @return the slot id.
+     */
+    public int getSlot() {
+        return _slot;
+    }
+
+    /**
+     * Get the channel id. A bad value is indicated by Integer.MIN_VALUE (-2^31 = -2147483648)
+     * @return the channel id.
+     */
+    public int getChannel() {
+        return _channel;
+    }
+
 }

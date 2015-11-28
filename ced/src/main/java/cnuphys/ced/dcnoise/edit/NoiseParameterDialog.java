@@ -381,7 +381,6 @@ public class NoiseParameterDialog extends JDialog {
 									_clonedParameters[superLayer]);
 				}
 			}
-			// NoiseEventListener.getInstance().newPhysicsEvent(null);
 			ViewManager.getInstance().refreshAllContainerViews();
 
 			if (reason == DialogUtilities.OK_RESPONSE) {

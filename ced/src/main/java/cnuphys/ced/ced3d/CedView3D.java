@@ -47,7 +47,7 @@ public abstract class CedView3D extends BaseView implements
 				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
 				AttributeType.RESIZABLE, true, AttributeType.VISIBLE, true);
 
-		_eventManager.addPhysicsListener(this, 2);
+		_eventManager.addClasIoEventListener(this, 2);
 
 		// listen for trajectory changes
 		Swimming.addSwimTrajectoryListener(this);

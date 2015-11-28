@@ -1078,7 +1078,7 @@ public class SectorView extends CedView implements ChangeListener {
 						_controlPanel.getPhiSlider().setValue((int) sliderPhi);
 						getContainer().refresh();
 					} else if (source == integralItem) {
-						PlotView pview = Ced.getInstance().getPlotView();
+						PlotView pview = Ced.getPlotView();
 						PlotCanvas canvas = pview.getPlotCanvas();
 						try {
 							SwimTrajectory traj = traj2D.getTrajectory3D();

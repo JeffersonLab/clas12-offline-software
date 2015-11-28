@@ -34,7 +34,7 @@ public class NoiseManager implements IClasIoEventListener {
 	// private constructor
 	private NoiseManager() {
 		// I need to be notified before the views
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 	}
 
 	/**

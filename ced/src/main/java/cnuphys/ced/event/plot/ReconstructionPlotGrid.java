@@ -25,7 +25,7 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 	private static int _height = 400;
 
 	public ReconstructionPlotGrid() {
-		super(Ced.getInstance(), "Reconstruction Plots", false, _numRow,
+		super(Ced.getFrame(), "Reconstruction Plots", false, _numRow,
 				_numCol, _numCol * _width, _numRow * _height);
 
 		AccumulationManager.getInstance().addAccumulationListener(this);

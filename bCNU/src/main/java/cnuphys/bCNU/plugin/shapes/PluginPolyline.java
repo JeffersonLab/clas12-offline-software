@@ -1,14 +1,14 @@
 package cnuphys.bCNU.plugin.shapes;
 
 import java.awt.geom.Point2D;
-import cnuphys.bCNU.item.PolygonItem;
+
+import cnuphys.bCNU.item.PolylineItem;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginSupport;
 
-public class PluginPolygon extends PluginShape {
-
+public class PluginPolyline extends PluginShape {
     /**
-     * Create a closed polygon shape
+     * Create a polyline shape
      * 
      * @param plugin the plugin that will hold it.
      * @param info a descriptive string that may appear on mouseovers
@@ -16,14 +16,14 @@ public class PluginPolygon extends PluginShape {
      * @param properties extra custom properties
      * @see java.awt.geom.Point2D
      */
-    public PluginPolygon(Plugin plugin, String info, Point2D.Double points[], Object ...properties) {
-	super(plugin, PluginShapeType.POLYGON);	
-	_item = new PolygonItem(plugin.getView().getShapeLayer(), points);
+    public PluginPolyline(Plugin plugin, String info, Point2D.Double points[], Object ...properties) {
+	super(plugin, PluginShapeType.POLYLINE);	
+	_item = new PolylineItem(plugin.getView().getShapeLayer(), points);
 	commonInit(info, PluginSupport.fromKeyValues(properties));
     }
     
     /**
-     * Create a closed polygon shape from separate (ordered) x and y arrays. The x and
+     * Create a polyline shape from separate (ordered) x and y arrays. The x and
      * y arrays should have the same length,
      * 
      * @param plugin the plugin that will hold it.
@@ -33,7 +33,7 @@ public class PluginPolygon extends PluginShape {
      * @param properties extra custom properties
      * @see java.awt.geom.Point2D
      */
-    public PluginPolygon(Plugin plugin, String info, double x[], double y[], Object ...properties) {
+    public PluginPolyline(Plugin plugin, String info, double x[], double y[], Object ...properties) {
 	this(plugin, info, PluginSupport.fromXYArrays(x, y), properties);
     }
 

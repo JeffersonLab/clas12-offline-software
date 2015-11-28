@@ -102,11 +102,19 @@ public class DemoApp extends BaseMDIApplication {
 
 	    @Override
 	    public void addInitialShapes() {
-		new PluginSquare(this, "A square", 0.2, -0.3, 0.5);
+		addSquare("A square", 0.2, -0.3, 0.5);
 	    }
 	    
 	    @Override
 	    public void mouseOverShape(PluginShape shape) {
+	    }
+
+	    @Override
+	    public void shapeClick(PluginShape shape, int clickCount) {
+	    }
+
+	    @Override
+	    public void shapePopupTrigger(PluginShape shape) {
 	    }
 	    
 	};
@@ -136,22 +144,46 @@ public class DemoApp extends BaseMDIApplication {
 
 	    @Override
 	    public void addInitialShapes() {
-		new PluginSquare(this, "A draggable square", 0.2, -0.3, 0.5, 
+		addSquare("A draggable square", 0.2, -0.3, 0.5, 
 			PluginProperties.FILLCOLOR, "wheat",
 			PluginProperties.LINECOLOR, Color.red,
 			PluginProperties.LINEWIDTH, 3,
 			PluginProperties.LINESTYLE, LineStyle.DASH,
 			PluginProperties.LOCKED, false);
 		
-		new PluginLine(this, "A draggable line", 0.75, 0, -0.25, 0.3,
+		addLine("A draggable line", 0.75, 0, -0.25, 0.3,
 			PluginProperties.LINECOLOR, Color.yellow,
 			PluginProperties.LINEWIDTH, 3,
 			PluginProperties.LOCKED, false);
+		
+		addRectangle("Intially rotated rectangle", -0.8, 0.1, .4, .8,
+			PluginProperties.LOCKED, false,
+			PluginProperties.ROTATED, 20);
+		
+		double x[] = {.1, .2, .6, .5, .3};
+		double y[] = {.1, .5, .6, .4, 0};
+		addPolygon("A closed polygon", x, y, PluginProperties.LOCKED, false);
+		
+		for (int i = 0; i < x.length; i++) {
+		    x[i] = -x[i];
+		    y[i] = -y[i];
+		}
+		addPolyline("A polyline", x, y, PluginProperties.LOCKED, false);
 	    }
 	    
 	    @Override
 	    public void mouseOverShape(PluginShape shape) {
-		updateStatus((shape == null) ? null : shape.getName());
+		updateStatus((shape == null) ? null : shape.getInfoString());
+	    }
+
+	    @Override
+	    public void shapeClick(PluginShape shape, int clickCount) {
+		updateStatus((shape == null) ? null : "click count "+ clickCount + " on " + shape.getInfoString());
+	    }
+
+	    @Override
+	    public void shapePopupTrigger(PluginShape shape) {
+		updateStatus((shape == null) ? null : "popup trigger on " + shape.getInfoString());
 	    }
 
 	    

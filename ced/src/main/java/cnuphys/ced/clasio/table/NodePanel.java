@@ -99,7 +99,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	 * Create a node panel for displaying events
 	 */
 	public NodePanel() {
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 
 		new FileDnDHandler(null, this, this);
 

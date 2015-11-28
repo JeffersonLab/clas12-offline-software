@@ -15,8 +15,83 @@ public class PluginProperties {
     public static final String LINESTYLE = "LINESTYLE";
     public static final String LINEWIDTH = "LINEWIDTH";
     public static final String LOCKED = "LOCKED";
+    public static final String ROTATED = "ROTATED";
+    public static final String SYMBOL = "SYMBOL";
+    public static final String SYMBOLSIZE = "SYMBOLSIZE";
     public static final String WIDTH = "WIDTH";
+    
+    //more properties for IDs
+    public static final String SECTOR = "SECTOR";
+    public static final String SUPERLAYER = "SUPERLAYER";
+    public static final String LAYER = "LAYER";
+    public static final String COMPONENT = "COMPONENT";
+    public static final String CRATE = "CRATE";
+    public static final String SLOT = "SLOT";
+    public static final String CHANNEL = "CHANNEL";
 
+    /**
+     * Get the sector id.
+     * @param props the properties
+     * @return the sector Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getSector(Properties props) {
+	return getInt(props, SECTOR, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the superlayer id.
+     * @param props the properties
+     * @return the suplerlayer Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getSuperlayer(Properties props) {
+	return getInt(props, SUPERLAYER, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the layer id.
+     * @param props the properties
+     * @return the layer Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getLayer(Properties props) {
+	return getInt(props, LAYER, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the component id.
+     * @param props the properties
+     * @return the component Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getComponent(Properties props) {
+	return getInt(props, COMPONENT, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the crate id.
+     * @param props the properties
+     * @return the crate Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getCrate(Properties props) {
+	return getInt(props, CRATE, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the slot id.
+     * @param props the properties
+     * @return the slot Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getSlot(Properties props) {
+	return getInt(props, SLOT, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the channelid.
+     * @param props the properties
+     * @return the channel Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getChannel(Properties props) {
+	return getInt(props, CHANNEL, Integer.MIN_VALUE);
+    }
+    
     /**
      * Get the background color from the properties
      * 
@@ -25,6 +100,15 @@ public class PluginProperties {
      */
     public static Color getBackground(Properties props) {
 	return getColor(props, BACKGROUND);
+    }
+    
+    /**
+     * Get the rotation angle assumed to be in degrees.
+     * @param props the properties
+     * @return the rotation angle assumed to be in degrees, 0 on error
+     */
+    public static double getRotationAngle(Properties props) {
+	return getDouble(props, ROTATED, 0);
     }
     
     /**
@@ -177,6 +261,16 @@ public class PluginProperties {
 	if (val instanceof Double) {
 	    return (Double)val;
 	}
+
+	
+	if (val instanceof Float) {
+	    return ((Float)val);
+	}
+	
+	if (val instanceof Integer) {
+	    return ((Integer)val);
+	}
+
 	return defaultValue;
 	
     }

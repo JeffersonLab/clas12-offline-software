@@ -109,7 +109,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	public CedView(Object... keyVals) {
 		super(keyVals);
 
-		_eventManager.addPhysicsListener(this, 2);
+		_eventManager.addClasIoEventListener(this, 2);
 
 		IContainer container = getContainer();
 

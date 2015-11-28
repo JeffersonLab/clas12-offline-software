@@ -3,6 +3,7 @@ package cnuphys.bCNU.plugin;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -10,7 +11,12 @@ import java.util.Properties;
 
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.plugin.shapes.PluginLine;
+import cnuphys.bCNU.plugin.shapes.PluginPolygon;
+import cnuphys.bCNU.plugin.shapes.PluginPolyline;
+import cnuphys.bCNU.plugin.shapes.PluginRectangle;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
+import cnuphys.bCNU.plugin.shapes.PluginSquare;
 import cnuphys.bCNU.view.PluginView;
 
 public abstract class Plugin {
@@ -51,7 +57,7 @@ public abstract class Plugin {
 	//customize
 	customizePlugin();
 	
-	//create the view
+	//create the underlying bCNU view
 	_view = new PluginView(title, 
 		world.x, world.y,
 		world.x + world.width,
@@ -60,17 +66,23 @@ public abstract class Plugin {
 	
 	// the mouse listener
 	MouseAdapter ml = new MouseAdapter() {
+	    
+	    @Override
+	    public void mousePressed(MouseEvent e) {
+		if (e.isPopupTrigger()) {
+		    handlePopupTrigger(e);
+		}
+	    }
 
 	    @Override
 	    public void mouseClicked(MouseEvent e) {
+		if (e.isControlDown()) {
+		    return;
+		}
+		
 		boolean mb1 = (e.getButton() == MouseEvent.BUTTON1);
 		if (mb1) {
-		    if (e.getClickCount() == 1) { // single click
-			System.err.println("SINGLE CLICK");
-		    }
-		    else { // double (or more) clicks
-			System.err.println("DOUBLE CLICK");
-		    }
+		    handleMouseClick(e);
 		}
 	    }
 	};
@@ -91,6 +103,28 @@ public abstract class Plugin {
 	//add the shapes
 	addInitialShapes();
     }
+    
+    //handle that a popup trigger occurred
+    private void handlePopupTrigger(MouseEvent e) {
+	PluginShape shape = PluginSupport.getShapeAtPoint(this, e.getPoint());
+	if (shape != null) {
+	    shapePopupTrigger(shape);
+	}
+    }
+
+    //handle that a mouse click on a shape
+    private void handleMouseClick(MouseEvent e) {
+	PluginShape shape = PluginSupport.getShapeAtPoint(this, e.getPoint());
+	if (shape != null) {
+	    if (e.getClickCount() == 1) { // single click
+		shapeClick(shape, 1);
+	    }
+	    else if (e.getClickCount() == 2) { // double clicks
+		shapeClick(shape, 2);
+	    }
+	}
+    }
+
     
     //handle that a mouse has moved inside the plugin's view
     private void handleMouseMoved(MouseEvent e) {
@@ -252,11 +286,122 @@ public abstract class Plugin {
     public abstract void mouseOverShape(PluginShape shape);
     
     /**
+     * A shape has been clicked.
+     * @param shape the shape in question.
+     * @param clickCount either 1 (regular) or 2 (double-click).
+     */
+    public abstract void shapeClick(PluginShape shape, int clickCount);
+    
+    /**
+     * The popup trigger (usually a right-click) has occurred for a shape.
+     * @param shape the shape in question.
+     */
+    public abstract void shapePopupTrigger(PluginShape shape);
+    
+    /**
      * Update the status line with a new message
      * @param str the new message
      */
     public void updateStatus(String str) {
 	_view.updateStatus(str);
+    }
+    
+    /**
+     * Create a square shape
+     * @param info a descriptive string that may appear on mouseovers
+     * @param xc the horizontal center of the square in world (not pixel) coordinates
+     * @param yc the vertical center of the square in world (not pixel) coordinates
+     * @param length the length of a side in world coordinates. Note: the square will only look
+     * square if the plugin's world system has a 1:1 aspect ratio.
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addSquare(String info, double xc, double yc, double length, Object ...properties) {
+	return new PluginSquare(this, info, xc, yc, length, properties);
+    }
+
+    /**
+     * Create a line shape
+     * @param info a descriptive string that may appear on mouseovers
+     * @param xc the horizontal center of the square in world (not pixel) coordinates
+     * @param yc the vertical center of the square in world (not pixel) coordinates
+     * @param length the length of a side in world coordinates. Note: the square will only look
+     * square if the plugin's world system has a 1:1 aspect ratio.
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addLine(String info, double x1, double y1, double x2, double y2, Object ...properties) {
+	return new PluginLine(this, info, x1, y1, x2, y2, properties);
+    }
+    
+    /**
+     * Create a rectangle shape
+     * @param info a descriptive string that may appear on mouseovers
+     * @param x the left of the rectangle in world (not pixel) coordinates
+     * @param y the bottom of the rectangle  in world (not pixel) coordinates
+     * @param w the width of the rectangle in world coordinates
+     * @param h the height of the rectangle in world coordinates
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addRectangle(String info, double x, double y, double w, double h, Object... properties) {
+	return new PluginRectangle(this, info, x, y, w, h, properties);
+   }
+    
+    /**
+     * Create a closed polygon shape
+     * 
+     * @param info a descriptive string that may appear on mouseovers
+     * @param points array of vertex points in world (not pixel) coordinates.
+     * @param properties extra custom properties
+     * @return the new shape
+     * @see java.awt.geom.Point2D
+     */
+    public PluginShape addPolygon(String info, Point2D.Double points[], Object ...properties) {
+	return new PluginPolygon(this, info, points, properties);
+    }
+    
+    /**
+     * Create a closed polygon shape from separate (ordered) x and y arrays. The x and
+     * y arrays should have the same length,
+     * 
+     * @param info a descriptive string that may appear on mouseovers
+     * @param x horizontal values of vertex points in world (not pixel) coordinates.
+     * @param y vertical values of vertex points in world (not pixel) coordinates.
+     * @param properties extra custom properties
+     * @return the new shape
+     * @see java.awt.geom.Point2D
+     */
+    public PluginShape addPolygon(String info, double x[], double y[], Object ...properties) {
+	return new PluginPolygon(this, info, PluginSupport.fromXYArrays(x, y), properties);
+    }
+
+    /**
+     * Create a polyline shape
+     * 
+     * @param info a descriptive string that may appear on mouseovers
+     * @param points array of vertex points in world (not pixel) coordinates.
+     * @param properties extra custom properties
+     * @return the new shape
+     * @see java.awt.geom.Point2D
+     */
+    public PluginShape addPolyline(String info, Point2D.Double points[], Object ...properties) {
+	return new PluginPolyline(this, info, points, properties);
+    }
+    
+    /**
+     * Create a polyline shape from separate (ordered) x and y arrays. The x and
+     * y arrays should have the same length,
+     * 
+     * @param info a descriptive string that may appear on mouseovers
+     * @param x horizontal values of vertex points in world (not pixel) coordinates.
+     * @param y vertical values of vertex points in world (not pixel) coordinates.
+     * @param properties extra custom properties
+     * @return the new shape
+     * @see java.awt.geom.Point2D
+     */
+    public PluginShape addPolyline(String info, double x[], double y[], Object ...properties) {
+	return new PluginPolyline(this, info, PluginSupport.fromXYArrays(x, y), properties);
     }
 
         

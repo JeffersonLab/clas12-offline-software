@@ -27,7 +27,7 @@ public class ClasIoBankDialog extends JDialog {
 	private static int count = 0;
 
 	public ClasIoBankDialog(String bankName) {
-		super(Ced.getInstance(), bankName, false);
+		super(Ced.getFrame(), bankName, false);
 		_bankName = bankName;
 		setLayout(new BorderLayout(4, 4));
 		setup();

@@ -89,7 +89,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	 * private constructor for singleton.
 	 */
 	private AccumulationManager() {
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 		_dcGemcAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 
 		// dc XY accumulated data stored in a 2D histogram
