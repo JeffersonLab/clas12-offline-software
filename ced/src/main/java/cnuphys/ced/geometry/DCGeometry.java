@@ -198,7 +198,7 @@ public class DCGeometry {
 	//reinitialize DC Geometry
 	initialize();
 
-	Ced.getInstance().refresh();
+	Ced.refresh();
     }
 
     /**
@@ -826,7 +826,7 @@ public class DCGeometry {
 	    public void actionPerformed(ActionEvent e) {
 		System.err.println("Changed geometry mode");
 		
-		Ced.getInstance().setEventNumberLabel(ClasIoEventManager.getInstance().getEventNumber());
+		Ced.setEventNumberLabel(ClasIoEventManager.getInstance().getEventNumber());
 		DCGEOMMODE newMode = (_gemcMenuItem.isSelected() ? DCGEOMMODE.GEMC : DCGEOMMODE.DATA);
 		setDCGeometryMode(newMode);	    }
 

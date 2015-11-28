@@ -43,7 +43,7 @@ public abstract class ADataContainer implements IClasIoEventListener {
 
 	public ADataContainer(ClasIoEventManager eventManager) {
 		_eventManager = eventManager;
-		_eventManager.addPhysicsListener(this, 0);
+		_eventManager.addClasIoEventListener(this, 0);
 	}
 
 	/**

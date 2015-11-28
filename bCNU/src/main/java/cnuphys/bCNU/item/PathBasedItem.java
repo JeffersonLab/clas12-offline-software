@@ -269,6 +269,33 @@ public class PathBasedItem extends AItem {
 	}
 
 	/**
+	 * Rotate the item
+	 * @param angle the angle in degrees
+	 */
+	public void rotate(double angle) {
+	    if (Math.abs(angle) < 0.05) {
+		return;
+	    }
+	    double azim = getAzimuth();
+	    Point2D.Double anchor = WorldGraphicsUtilities.getCentroid(_path);
+	    
+		// minus is for cw v. ccw
+	    AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(-angle),
+				anchor.x, anchor.y);
+		_path.transform(at);
+
+		if (_secondaryPoints != null) {
+			Path2D.Double path2 = (Path2D.Double) _modification
+					.getSecondaryPath().clone();
+			path2.transform(at);
+			WorldGraphicsUtilities.pathToWorldPolygon(path2,
+					_secondaryPoints);
+		}
+
+	    setAzimuth(azim + angle);
+	}
+	
+	/**
 	 * Simple scaling of the object.
 	 */
 	protected void scale() {

@@ -12,11 +12,13 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -26,6 +28,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
 import org.jlab.data.io.DataEvent;
+import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.attributes.AttributeType;
@@ -48,6 +51,10 @@ import cnuphys.ced.clasio.ClasIoEventView;
 import cnuphys.ced.clasio.ClasIoMonteCarloView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoReconEventView;
+import cnuphys.ced.clasio.queue.ClasIoEventQueue;
+import cnuphys.ced.clasio.queue.EventConsumer;
+import cnuphys.ced.clasio.queue.EventProducer;
+import cnuphys.ced.clasio.queue.IEventProcessor;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
@@ -57,6 +64,7 @@ import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
+import cnuphys.ced.plugin.CedDemoPlugin;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimMenu;
@@ -67,6 +75,7 @@ import cnuphys.bCNU.log.ConsoleLogListener;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.bCNU.menu.MenuManager;
+import cnuphys.bCNU.plugin.PluginManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
@@ -83,7 +92,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	IAccumulationListener, MagneticFieldChangeListener {
 
     // the singleton
-    private static Ced instance;
+    private static Ced _instance;
 
     // main version
     private static final int majorRelease = 0;
@@ -96,40 +105,49 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
     // using 3D?
     private static boolean _use3D;
-
+    
+    // if plugin only, do not create intial detector views
+    private static boolean _pluginOnly;
+    
+    //plugin folder
+    private static String _pluginFolder;
+    
+    //plugin manager
+    private PluginManager _pluginManager;
+    
     // the swim menu
-    private SwimMenu _swimMenu;
+    private static SwimMenu _swimMenu;
 
     // event menu
     private ClasIoEventMenu _eventMenu;
+    
 
     // progress bar
-    private JProgressBar _progressBar;
-    private JLabel _progressLabel;
+    private static JProgressBar _progressBar;
+    private static JLabel _progressLabel;
 
     // event number label on menu bar
-    private JLabel _eventNumberLabel;
+    private static JLabel _eventNumberLabel;
 
     // some views
-    private AllDCView _allDCView;
-    private VirtualView _virtualView;
-    private ClasIoMonteCarloView _monteCarloView;
-    private ClasIoReconEventView _reconEventView;
-    private ClasIoEventView _eventView;
-    private GEMCView _gemcView;
-    private BSTxyView _bstXyView;
-    private BSTzView _bstZView;
-    private FTCalXYView _ftcalXyView;
-    private DCXYView _dcXyView;
-    private ECView _ecView;
-    private PCALView _pcalView;
-    private LogView _logView;
-    private XMLView _xmlView;
-    private MiniShellView _shellView;
-    private PlotView _plotView;
-    private ForwardView3D _forward3DView;
-    private CentralView3D _central3DView;
-    private FTCalView3D _ftCal3DView;
+    private static AllDCView _allDCView;
+    private static VirtualView _virtualView;
+    private static ClasIoMonteCarloView _monteCarloView;
+    private static ClasIoReconEventView _reconEventView;
+    private static ClasIoEventView _eventView;
+    private static GEMCView _gemcView;
+    private static BSTxyView _bstXyView;
+    private static BSTzView _bstZView;
+    private static FTCalXYView _ftcalXyView;
+    private static DCXYView _dcXyView;
+    private static ECView _ecView;
+    private static PCALView _pcalView;
+    private static LogView _logView;
+    private static XMLView _xmlView;
+    private static PlotView _plotView;
+    private static ForwardView3D _forward3DView;
+    private static CentralView3D _central3DView;
+    private static FTCalView3D _ftCal3DView;
 
     // the about string
     private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
@@ -158,6 +176,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	    @Override
 	    public void componentMoved(ComponentEvent ce) {
+		placeViewsOnVirtualDesktop();
 	    }
 
 	    @Override
@@ -193,7 +212,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    _virtualView.moveTo(_pcalView, 0, 1, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_ecView, 0, 1, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_logView, 0, 11, VirtualView.UPPERRIGHT);
-	    _virtualView.moveTo(_shellView, 0, 11, VirtualView.BOTTOMLEFT);
 	    _virtualView.moveTo(_xmlView, 0, 11, VirtualView.BOTTOMRIGHT);
 	    _virtualView.moveTo(_monteCarloView, 0, 0, VirtualView.UPPERRIGHT);
 	    _virtualView.moveTo(_reconEventView, 0, 0, VirtualView.BOTTOMRIGHT);
@@ -244,48 +262,48 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// add a reconstructed tracks view
 	_reconEventView = ClasIoReconEventView.getInstance();
 
-	ViewManager.getInstance().getViewMenu().addSeparator();
 
-	// add an alldc view
-	_allDCView = AllDCView.createAllDCView();
+	if (!pluginsOnly()) {
+            ViewManager.getInstance().getViewMenu().addSeparator();
 
-	// add a bstZView
-	_bstZView = BSTzView.createBSTzView();
+	    // add an alldc view
+	    _allDCView = AllDCView.createAllDCView();
 
-	// add a bstXYView
-	_bstXyView = BSTxyView.createBSTxyView();
+	    // add a bstZView
+	    _bstZView = BSTzView.createBSTzView();
 
-	// add a ftcalxyYView
-	_ftcalXyView = FTCalXYView.createFTCalXYView();
+	    // add a bstXYView
+	    _bstXyView = BSTxyView.createBSTxyView();
 
-	// add a DC XY View
-	_dcXyView = DCXYView.createDCXYView();
+	    // add a ftcalxyYView
+	    _ftcalXyView = FTCalXYView.createFTCalXYView();
 
-	// add an ec view
-	_ecView = ECView.createECView();
+	    // add a DC XY View
+	    _dcXyView = DCXYView.createDCXYView();
 
-	// add an pcal view
-	_pcalView = PCALView.createPCALView();
+	    // add an ec view
+	    _ecView = ECView.createECView();
 
-	// 3D view?
-	if (_use3D) {
-	    _forward3DView = new ForwardView3D();
-	    _central3DView = new CentralView3D();
-	    _ftCal3DView = new FTCalView3D();
+	    // add an pcal view
+	    _pcalView = PCALView.createPCALView();
+
+	    // 3D view?
+	    if (_use3D) {
+		_forward3DView = new ForwardView3D();
+		_central3DView = new CentralView3D();
+		_ftCal3DView = new FTCalView3D();
+	    }
+
+	    // add three sector views
+	    ViewManager.getInstance().getViewMenu().addSeparator();
+	    SectorView.createSectorView(DisplaySectors.SECTORS36);
+	    SectorView.createSectorView(DisplaySectors.SECTORS25);
+	    SectorView.createSectorView(DisplaySectors.SECTORS14);
 	}
-
-	// add three sector views
-	ViewManager.getInstance().getViewMenu().addSeparator();
-	SectorView.createSectorView(DisplaySectors.SECTORS36);
-	SectorView.createSectorView(DisplaySectors.SECTORS25);
-	SectorView.createSectorView(DisplaySectors.SECTORS14);
 
 	// add logview
 	ViewManager.getInstance().getViewMenu().addSeparator();
 	_logView = new LogView();
-
-	// add shellview
-	_shellView = MiniShellView.getInstance();
 
 	// plot view
 	_plotView = new PlotView();
@@ -352,7 +370,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	ActionListener al1 = new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		ElizaDialog.showEliza(instance);
+		ElizaDialog.showEliza(_instance);
 	    }
 	};
 	elizaItem.addActionListener(al1);
@@ -371,7 +389,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     /**
      * Refresh all views (with containers)
      */
-    public void refresh() {
+    public static void refresh() {
 	ViewManager.getInstance().refreshAllContainerViews();
     }
 
@@ -379,7 +397,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      * Set the event number label 
      * @param num the event number
      */
-    public void setEventNumberLabel(int num) {
+    public static void setEventNumberLabel(int num) {
 	if (num < 0) {
 	    _eventNumberLabel.setText("  Event Num:      is GEMC: false");
 	}
@@ -411,20 +429,20 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      * 
      * @return the singleton Ced (the main application frame.)(
      */
-    public static Ced getInstance() {
-	if (instance == null) {
-	    instance = new Ced(AttributeType.TITLE, "ced " + versionString(),
+    private static Ced getInstance() {
+	if (_instance == null) {
+	    _instance = new Ced(AttributeType.TITLE, "ced " + versionString(),
 		    AttributeType.BACKGROUNDIMAGE, "images/cnu.png",
 		    AttributeType.WINDOWMENU, false, AttributeType.FRACTION,
 		    0.85);
 
-	    instance.addInitialViews();
-	    instance.createMenus();
+	    _instance.addInitialViews();
+	    _instance.createMenus();
 
 	    // make sure plot manager is ready
 	    PlotManager.getInstance();
 	}
-	return instance;
+	return _instance;
     }
 
     /**
@@ -466,7 +484,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      * 
      * @return the swim menu
      */
-    public SwimMenu getSwimMenu() {
+    public static SwimMenu getSwimMenu() {
 	return _swimMenu;
     }
 
@@ -475,7 +493,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      * 
      * @return the single shared plotview
      */
-    public PlotView getPlotView() {
+    public static PlotView getPlotView() {
 	return _plotView;
     }
 
@@ -496,62 +514,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
     }
 
-    public static Ced createCed(String dataPath, String torusPath,
-	    String solenoidPath) {
 
-	FileUtilities.setDefaultDir("data");
-
-	if (torusPath != null) {
-	    MagneticFields.setTorusFullPath(torusPath);
-	    Log.getInstance().config("Torus Path: " + torusPath);
-	    System.out.println("Torus Path: " + torusPath);
-	}
-
-	if (solenoidPath != null) {
-	    MagneticFields.setSolenoidFullPath(solenoidPath);
-	    Log.getInstance().config("Solenoid Path: " + solenoidPath);
-	    System.out.println("Solenoid Path: " + solenoidPath);
-	}
-
-	final Ced ced = getInstance();
-
-	// create initial canned plots
-	PlotManager.getInstance();
-
-	// now make the frame visible, in the AWT thread
-	EventQueue.invokeLater(new Runnable() {
-
-	    @Override
-	    public void run() {
-		ced.setVisible(true);
-	    }
-
-	});
-	Log.getInstance().info("CED 12.0 GeV is ready.");
-
-	return ced;
-    }
-
-    public void loadEvent(final DataEvent event) {
-
-	Runnable doRun = new Runnable() {
-
-	    @Override
-	    public void run() {
-		ClasIoEventManager.getInstance().loadEvent(event);
-	    }
-
-	};
-	try {
-	    SwingUtilities.invokeAndWait(doRun);
-	} catch (InvocationTargetException e) {
-	    e.printStackTrace();
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	}
-
-    }
-
+    //create the progress bar
     private void createProgressBar() {
 	getJMenuBar().add(Box.createHorizontalStrut(20));
 	_progressLabel = new JLabel("             ");
@@ -598,6 +562,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	getJMenuBar().add(panel);
     }
 
+    //create the event number label
     private void createEventNumberLabel() {
 	_eventNumberLabel = new JLabel("  Event Num:      is GEMC: false");
 	_eventNumberLabel.setOpaque(true);
@@ -628,6 +593,55 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	setTitle(title);
     }
 
+
+    @Override
+    public void magneticFieldChanged() {
+	fixTitle();
+    }
+
+    /**
+     * Get the shared progress bar
+     * @return the shared progress bar
+     */
+    public static JProgressBar getProgressBar() {
+	return _progressBar;
+    }
+
+    /**
+     * Get the GEMC view
+     * 
+     * @return the GEMC view
+     */
+    public static GEMCView getGEMCView() {
+	return _gemcView;
+    }
+
+    /**
+     * Check whether we use 3D
+     * 
+     * @return <code>true</code> if we use 3D
+     */
+    public static boolean use3D() {
+	return _use3D;
+    }
+    
+    /**
+     * Check whether we use Plugins onlyD
+     * 
+     * @return <code>true</code> if we use plugins only
+     */
+    public static boolean pluginsOnly() {
+	return _pluginOnly;
+    }
+
+    /**
+     * Get the parent frame
+     * @return the parent frame
+     */
+    public static JFrame getFrame() {
+	return _instance;
+    }
+    
     /**
      * Main program launches the ced gui.
      * <p>
@@ -643,8 +657,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// create a console log listener
 	Log.getInstance().addLogListener(new ConsoleLogListener());
 
-	// initialize geometry
-	GeometryManager.getInstance();
+	//default plugin folder
+	_pluginFolder = Environment.getInstance().getHomeDirectory() + File.separator + "cedplugins";
+//	System.err.println("Plugin folder: [" + _pluginFolder + "]");
 
 	if ((arg != null) && (arg.length > 0)) {
 	    int len = arg.length;
@@ -674,11 +689,25 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		    _use3D = true;
 		    System.err.println("Using 3D");
 		}
+		else if (arg[i].contains("PLUGINONLY")) {
+		    _pluginOnly = true;
+		    System.err.println("Using Plugins Only");
+		}
+		else if (arg[i].equalsIgnoreCase("-plugindir")) {
+		    i++;
+		    _pluginFolder = arg[i];
+		    Log.getInstance().config("Plugin directory: " + arg[i]);
+		    System.out.println("Plugin directory: " + arg[i]);
+		}
+
 
 		i++;
 		done = (i >= len);
-	    }
-	}
+	    } //!done
+	} //end command arg processing
+	
+	// initialize geometry
+	GeometryManager.getInstance();
 
 	final Ced ced = getInstance();
 
@@ -693,37 +722,33 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	    public void run() {
 		ced.setVisible(true);
 		ced.fixTitle();
+		//get plugin manager
+		ced._pluginManager = new PluginManager(_pluginFolder);
 	    }
 
 	});
+	Log.getInstance().info(Environment.getInstance().toString());
 	Log.getInstance().info("CED 12.0 GeV is ready.");
-    }
+	
+	
+	//test demo plugin
+//	new CedDemoPlugin();
+	
+//	//test event queue
+//	ClasIoEventQueue queue = new ClasIoEventQueue();
+//	new EventProducer(queue);
+//	IEventProcessor processor = new IEventProcessor() {
+//
+//	    @Override
+//	    public void processEvent(EvioDataEvent event) {
+//		System.err.println("GOT EVENT TO PROCESS");
+//	    }
+//	    
+//	};
+//	
+//	new EventConsumer(queue, processor);
+	
+    } // end main
 
-    @Override
-    public void magneticFieldChanged() {
-	fixTitle();
-    }
-
-    public JProgressBar getProgressBar() {
-	return _progressBar;
-    }
-
-    /**
-     * Get the GEMC view
-     * 
-     * @return the GEMC view
-     */
-    public GEMCView getGEMCView() {
-	return _gemcView;
-    }
-
-    /**
-     * Check whether we use 3D
-     * 
-     * @return <code>true</code> if we use 3D
-     */
-    public static boolean use3D() {
-	return _use3D;
-    }
 
 }

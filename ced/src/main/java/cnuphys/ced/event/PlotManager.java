@@ -25,7 +25,7 @@ public class PlotManager {
 
 	private PlotManager() {
 		_plotMenu = new JMenu("Plots");
-		Ced.getInstance().getJMenuBar().add(_plotMenu);
+		Ced.getFrame().getJMenuBar().add(_plotMenu);
 
 		final JMenuItem memPlot = new JMenuItem("Memory Usage");
 		final JMenuItem gridPlot = new JMenuItem("Reconstruction Plots");
@@ -38,7 +38,7 @@ public class PlotManager {
 
 				if (source == memPlot) {
 					if (_memoryUsage == null) {
-						_memoryUsage = new MemoryUsageDialog(Ced.getInstance());
+						_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
 					}
 
 					_memoryUsage.setVisible(true);

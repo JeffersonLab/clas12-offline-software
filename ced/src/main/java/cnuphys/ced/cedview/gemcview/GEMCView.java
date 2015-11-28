@@ -63,7 +63,7 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 		add(_gemcTable.getScrollPane(), BorderLayout.CENTER);
 
 		// need to listen for events
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 		validate();
 	}
 

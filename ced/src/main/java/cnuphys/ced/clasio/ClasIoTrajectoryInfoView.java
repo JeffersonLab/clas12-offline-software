@@ -26,7 +26,7 @@ public abstract class ClasIoTrajectoryInfoView extends BaseView implements
 		add(_trajectoryTable.getScrollPane());
 
 		// need to listen for events
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 	}
 
 	/**

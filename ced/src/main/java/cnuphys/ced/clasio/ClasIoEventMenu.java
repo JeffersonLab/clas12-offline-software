@@ -81,7 +81,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	public ClasIoEventMenu(boolean includeAccumulation, boolean includeQuit) {
 		super("Events");
 
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 
 		// open
 		openEventFile = getOpenEventFileItem();
@@ -198,7 +198,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
 		chooser.setFileFilter(_evioFileFilter);
-		int returnVal = chooser.showOpenDialog(Ced.getInstance());
+		int returnVal = chooser.showOpenDialog(Ced.getFrame());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
 			try {

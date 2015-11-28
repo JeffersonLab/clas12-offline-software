@@ -6,9 +6,11 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 import java.util.Properties;
 
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import cnuphys.bCNU.attributes.AttributeType;
+import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.plugin.Plugin;
@@ -32,7 +34,7 @@ public class PluginView extends BaseView {
     private Plugin _plugin;
     
     //status text field
-    private JTextField _textField;
+    private JTextArea _textField;
 
 
     /**
@@ -70,12 +72,14 @@ public class PluginView extends BaseView {
 	processProperties(props);
 	
 	//add the status line
-	_textField = new JTextField(" ");
+	_textField = new JTextArea(" ", 2, 80);
+	_textField.setLineWrap(true);
 
 	_textField.setFont(Fonts.commonFont(Font.PLAIN, 12));
 	_textField.setEditable(false);
 	_textField.setBackground(Color.black);
 	_textField.setForeground(Color.cyan);
+	
 	add(_textField, BorderLayout.SOUTH);
     }
     
@@ -86,7 +90,24 @@ public class PluginView extends BaseView {
     public void updateStatus(String str) {
 	_textField.setText((str != null) ? str : "");
     }
-
+    
+    /**
+     * Append text to the status line
+     * @param str the test to append
+     */
+    public void appendStatus(String str) {
+	if (str != null) {
+	    _textField.append(str);
+	}
+    }
+    
+    /**
+     * Clear the status text
+     */
+    public void clearStatus() {
+	_textField.setText("");
+    }
+    
     // process properties
     private void processProperties(Properties props) {
 	if ((props == null) || props.isEmpty()) {

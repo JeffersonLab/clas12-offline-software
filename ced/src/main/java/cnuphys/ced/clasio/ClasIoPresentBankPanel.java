@@ -49,7 +49,7 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	 */
 	public ClasIoPresentBankPanel(NodeTable nodeTable) {
 		_nodeTable = nodeTable;
-		_eventManager.addPhysicsListener(this, 1);
+		_eventManager.addClasIoEventListener(this, 1);
 		setLayout(new GridLayout(40, 4, 2, 0));
 
 		// get all the known banks
