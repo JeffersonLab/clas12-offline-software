@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.VirtualView;
 
 public class PluginProperties {
 
@@ -20,7 +21,11 @@ public class PluginProperties {
     public static final String SYMBOLSIZE = "SYMBOLSIZE";
     public static final String WIDTH = "WIDTH";
     
-    //more properties for IDs
+    //related to virtual view placement
+    public static final String VVPANEL = "VVPANEL";
+    public static final String VVLOCATION = "VVLOCATION";
+    
+    //more properties for Data
     public static final String SECTOR = "SECTOR";
     public static final String SUPERLAYER = "SUPERLAYER";
     public static final String LAYER = "LAYER";
@@ -28,7 +33,19 @@ public class PluginProperties {
     public static final String CRATE = "CRATE";
     public static final String SLOT = "SLOT";
     public static final String CHANNEL = "CHANNEL";
+    public static final String USERDATA = "USERDATA";
 
+    
+    /**
+     * Get the optional user data. This is any object that the user wants
+     * to attach to the shape.
+     * @param props the properties
+     * @return the user data (might be <code>null</code>.
+     */
+    public static Object getUserData(Properties props) {
+	return props.get(USERDATA);
+    }
+    
     /**
      * Get the sector id.
      * @param props the properties
@@ -169,6 +186,25 @@ public class PluginProperties {
      */
     public static int getHeight(Properties props) {
 	return getInt(props, HEIGHT, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get the virtual view panel from the properties
+     * @param props the properties
+     * @return the virtual view panel. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
+     */
+    public static int getVVPanel(Properties props) {
+	return getInt(props, VVPANEL, Integer.MIN_VALUE);
+    }
+    
+    /**
+     * Get a virtual view placement location from the properties. Only 
+     * meaningful values are the constants defined in VirtualView.
+     * @param props the properties
+     * @return the virtual view location. On error return VirtualView.CENTER
+     */
+    public static int getVVLocation(Properties props) {
+	return getInt(props, VVLOCATION, VirtualView.CENTER);
     }
     
     /**

@@ -63,8 +63,11 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     public static final int BOTTOMRIGHT = 3;
     public static final int CENTER = 4;
 
+    //for public access
+    private static VirtualView _instance;
+    
     /**
-     * Create a drawing view
+     * Create a virtual view view
      * 
      * @param keyVals variable set of arguments.
      */
@@ -95,6 +98,16 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	// System.err.println("[VV] world: " + getContainer().getWorldSystem());
 	setBeforeDraw();
 	setAfterDraw();
+	
+	_instance = this;
+    }
+
+    /**
+     * Public access to the virtual view.
+     * @return the virtual view.
+     */
+    public static VirtualView getInstance() {
+	return _instance;
     }
 
     /**
@@ -236,6 +249,14 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	view.pack();
 	return view;
+    }
+    
+    /**
+     * Get the number of columns
+     * @return the number of columns
+     */
+    public int getNumCol() {
+	return _numcol;
     }
 
     // get the world system
