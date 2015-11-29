@@ -7,6 +7,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.plugin.PluginProperties;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
+import cnuphys.bCNU.view.VirtualView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DCDataContainer;
 
@@ -27,11 +28,13 @@ public class CedDemoPlugin extends CedPlugin {
 
     @Override
     public void customizePlugin() {
-	//THIS IS OPTIONAL!!!
+	// THIS IS OPTIONAL!!!
 	addProperty(PluginProperties.WIDTH, 900);
 	addProperty(PluginProperties.HEIGHT, 300);
 	addProperty(PluginProperties.BACKGROUND, "light blue");
-   }
+	addProperty(PluginProperties.VVPANEL, 2);
+	addProperty(PluginProperties.VVLOCATION, VirtualView.BOTTOMLEFT);
+    }
 
     @Override
     public String getPluginTitle() {

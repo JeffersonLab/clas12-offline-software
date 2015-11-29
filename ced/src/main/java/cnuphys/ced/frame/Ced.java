@@ -732,7 +732,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	
 	//test demo plugin
-//	new CedDemoPlugin();
+	new CedDemoPlugin();
 	
 //	//test event queue
 //	ClasIoEventQueue queue = new ClasIoEventQueue();

@@ -22,6 +22,10 @@ public class PluginShape {
     //the shape type
     private PluginShapeType _shapeType;
     
+    //optional user data. This is any object that the user wants
+    //to attach to the shape.
+    private Object _userData;
+        
     //data relevant for ced
     private int _sector;
     private int _superlayer;
@@ -130,6 +134,9 @@ public class PluginShape {
 	_crate = PluginProperties.getCrate(props);
 	_slot = PluginProperties.getSlot(props);
 	_channel = PluginProperties.getChannel(props);
+	
+	//optional user object that is attached to the shape
+	_userData = PluginProperties.getUserData(props);
 	
     }
 
@@ -270,6 +277,24 @@ public class PluginShape {
      */
     public int getChannel() {
         return _channel;
+    }
+
+    /**
+     * Get the user data. This is any object that the user wants
+     * to attach to the shape.
+     * return the user data (or <code>null</code> if none).
+     */
+    public Object getUserData() {
+	return _userData;
+    }
+    
+    /**
+     * Get the user data. This is any object that the user wants
+     * to attach to the shape.
+     * @param userData the new user data.
+     */
+    public void setUserData(Object userData) {
+	_userData = userData;
     }
 
 }

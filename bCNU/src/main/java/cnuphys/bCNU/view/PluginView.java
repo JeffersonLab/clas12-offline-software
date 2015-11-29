@@ -36,6 +36,9 @@ public class PluginView extends BaseView {
     //status text field
     private JTextArea _textField;
 
+    //used for vv placement
+    private int _vvPanel = -1;
+    private int _vvLocation = VirtualView.CENTER;
 
     /**
      * Create a plugin view
@@ -81,6 +84,15 @@ public class PluginView extends BaseView {
 	_textField.setForeground(Color.cyan);
 	
 	add(_textField, BorderLayout.SOUTH);
+	VirtualView vv = VirtualView.getInstance();
+	vv.reconfigure();
+	if ((vv != null) && (_vvPanel > 0)) {
+	    int col = _vvPanel - 1;
+	    int numCol = vv.getNumCol();
+	    col = Math.max(0, Math.min((numCol-1), col));
+	    vv.moveTo(this, 0, col, _vvLocation);
+	}
+
     }
     
     /**
@@ -131,6 +143,10 @@ public class PluginView extends BaseView {
 	}
 
 	setSize(width, height);
+	
+	//vv setting
+	_vvPanel = PluginProperties.getVVPanel(props);
+	_vvLocation = PluginProperties.getVVLocation(props);
 
     }
 
