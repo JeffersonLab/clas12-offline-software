@@ -1133,11 +1133,11 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 		menu.add(cbitem);
 
 		// properties
-		JMenuItem pitem = new JMenuItem("Properties...");
-		pitem.setEnabled(isLayerEnabled());
-
-		pitem.addActionListener(_editAction);
-		menu.add(pitem);
+//		JMenuItem pitem = new JMenuItem("Properties...");
+//		pitem.setEnabled(isLayerEnabled());
+//
+//		pitem.addActionListener(_editAction);
+//		menu.add(pitem);
 
 		return menu;
 	}

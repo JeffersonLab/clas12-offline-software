@@ -13,8 +13,6 @@ import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -25,11 +23,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
-
-import org.jlab.data.io.DataEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
-
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.component.MagnifyWindow;
@@ -51,10 +44,6 @@ import cnuphys.ced.clasio.ClasIoEventView;
 import cnuphys.ced.clasio.ClasIoMonteCarloView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoReconEventView;
-import cnuphys.ced.clasio.queue.ClasIoEventQueue;
-import cnuphys.ced.clasio.queue.EventConsumer;
-import cnuphys.ced.clasio.queue.EventProducer;
-import cnuphys.ced.clasio.queue.IEventProcessor;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
@@ -79,12 +68,10 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.view.LogView;
-import cnuphys.bCNU.view.MiniShellView;
 import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 //import cnuphys.bCNU.view.XMLView;
 import cnuphys.bCNU.view.VirtualView;
-import cnuphys.bCNU.view.XMLView;
 
 @SuppressWarnings("serial")
 public class Ced extends BaseMDIApplication implements PropertyChangeListener,

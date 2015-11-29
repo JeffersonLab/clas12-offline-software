@@ -1,5 +1,6 @@
 package cnuphys.ced.plugin;
 
+import java.awt.Point;
 import java.awt.geom.Rectangle2D.Double;
 
 import org.jlab.evio.clas12.EvioDataEvent;
@@ -50,44 +51,6 @@ public abstract class CedPlugin extends Plugin implements IAccumulationListener 
      */
     public abstract void processClasIoEvent(EvioDataEvent event, boolean isAccumulating);
     
-    public static void main(String arg[]) {
-	new CedPlugin() {
-
-	    @Override
-	    public void processClasIoEvent(EvioDataEvent event, boolean isAccumulating) {
-	    }
-
-	    @Override
-	    public void initializePluginWorld(Double world) {
-	    }
-
-	    @Override
-	    public void customizePlugin() {
-	    }
-
-	    @Override
-	    public String getPluginTitle() {
-		return null;
-	    }
-
-	    @Override
-	    public void addInitialShapes() {
-	    }
-
-	    @Override
-	    public void mouseOverShape(PluginShape shape) {
-	    }
-
-	    @Override
-	    public void shapeClick(PluginShape shape, int clickCount) {
-	    }
-
-	    @Override
-	    public void shapePopupTrigger(PluginShape shape) {
-	    }
-	    
-	};
-    }
     
     @Override
     public void accumulationEvent(int reason) {

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Properties;
 
 import cnuphys.bCNU.graphics.style.LineStyle;
+import cnuphys.bCNU.graphics.style.SymbolType;
 import cnuphys.bCNU.util.X11Colors;
 
 public class PluginProperties {
@@ -34,6 +35,28 @@ public class PluginProperties {
     public static final String CHANNEL = "CHANNEL";
     public static final String USERDATA = "USERDATA";
 
+    /**
+     * Get a symbol from the properties
+     * @param props the properties
+     * @return a SymbolType, on error return SymbolType.SQUARE
+     */
+    public static SymbolType getSymbol(Properties props) {
+	Object val = props.get(SYMBOL);
+	if ((val == null) || !(val instanceof SymbolType)) {
+	    return SymbolType.SQUARE;
+	}
+	return (SymbolType)val;
+    }
+    
+    /**
+     * Get the symbol size in pixels
+     * @param props the properties
+     * @return get the symbol size (width and height) in pixels. On error return 8.
+     */
+    public static int getSymbolSize(Properties props) {
+	int size = getInt(props, SYMBOLSIZE, 8);
+	return size;
+    }
     
     /**
      * Get the optional user data. This is any object that the user wants

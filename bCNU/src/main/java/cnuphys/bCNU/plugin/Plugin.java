@@ -1,5 +1,6 @@
 package cnuphys.bCNU.plugin;
 
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -11,12 +12,15 @@ import java.util.Properties;
 
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.plugin.shapes.PluginCircle;
+import cnuphys.bCNU.plugin.shapes.PluginEllipse;
 import cnuphys.bCNU.plugin.shapes.PluginLine;
 import cnuphys.bCNU.plugin.shapes.PluginPolygon;
 import cnuphys.bCNU.plugin.shapes.PluginPolyline;
 import cnuphys.bCNU.plugin.shapes.PluginRectangle;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
 import cnuphys.bCNU.plugin.shapes.PluginSquare;
+import cnuphys.bCNU.plugin.shapes.PluginSymbol;
 import cnuphys.bCNU.view.PluginView;
 import cnuphys.bCNU.view.VirtualView;
 
@@ -116,7 +120,7 @@ public abstract class Plugin {
     private void handlePopupTrigger(MouseEvent e) {
 	PluginShape shape = PluginSupport.getShapeAtPoint(this, e.getPoint());
 	if (shape != null) {
-	    shapePopupTrigger(shape);
+	    shapePopupTrigger(shape, e.getPoint());
 	}
     }
 
@@ -125,10 +129,10 @@ public abstract class Plugin {
 	PluginShape shape = PluginSupport.getShapeAtPoint(this, e.getPoint());
 	if (shape != null) {
 	    if (e.getClickCount() == 1) { // single click
-		shapeClick(shape, 1);
+		shapeClick(shape, 1, e.getPoint());
 	    }
 	    else if (e.getClickCount() == 2) { // double clicks
-		shapeClick(shape, 2);
+		shapeClick(shape, 2, e.getPoint());
 	    }
 	}
     }
@@ -297,14 +301,16 @@ public abstract class Plugin {
      * A shape has been clicked.
      * @param shape the shape in question.
      * @param clickCount either 1 (regular) or 2 (double-click).
+     * @param pixelPoint the pixel location of the click
      */
-    public abstract void shapeClick(PluginShape shape, int clickCount);
+    public abstract void shapeClick(PluginShape shape, int clickCount, Point pixelPoint);
     
     /**
      * The popup trigger (usually a right-click) has occurred for a shape.
      * @param shape the shape in question.
+     * @param pixelPoint the pixel location of the click
      */
-    public abstract void shapePopupTrigger(PluginShape shape);
+    public abstract void shapePopupTrigger(PluginShape shape, Point pixelPoint);
     
     /**
      * Update the status line with a new message
@@ -313,6 +319,19 @@ public abstract class Plugin {
     public void updateStatus(String str) {
 	_view.updateStatus(str);
     }
+    
+    /**
+     * Create a symbol shape. The defaul is an 8x8 (pixel) square
+     * @param info a descriptive string that may appear on mouseovers
+     * @param x the horizontal location of the symbol in world (not pixel) coordinates
+     * @param y the vertical location of the symbol in world (not pixel) coordinates
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addSymbol(String info, double x, double y, Object ...properties) {
+	return new PluginSymbol(this, info, x, y, properties);
+    }
+
     
     /**
      * Create a square shape
@@ -328,6 +347,20 @@ public abstract class Plugin {
 	return new PluginSquare(this, info, xc, yc, length, properties);
     }
 
+    /**
+     * Create a circle shape
+     * @param info a descriptive string that may appear on mouseovers
+     * @param xc the horizontal center of the circle in world (not pixel) coordinates
+     * @param yc the vertical center of the circle in world (not pixel) coordinates
+     * @param radius the radius of the circle in world coordinates. Note: the circle will only look
+     * circular if the plugin's world system has a 1:1 aspect ratio.
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addCircle(String info, double xc, double yc, double radius, Object ...properties) {
+	return new PluginCircle(this, info, xc, yc, radius, properties);
+    }
+    
     /**
      * Create a line shape
      * @param info a descriptive string that may appear on mouseovers
@@ -354,6 +387,20 @@ public abstract class Plugin {
      */
     public PluginShape addRectangle(String info, double x, double y, double w, double h, Object... properties) {
 	return new PluginRectangle(this, info, x, y, w, h, properties);
+   }
+    
+    /**
+     * Create an ellipse shape
+     * @param info a descriptive string that may appear on mouseovers
+     * @param x the left of the bounding rectangle in world (not pixel) coordinates
+     * @param y the bottom of the bounding rectangle  in world (not pixel) coordinates
+     * @param w the width of the bounding rectangle in world coordinates
+     * @param h the height of the bounding rectangle in world coordinates
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addEllipse(String info, double x, double y, double w, double h, Object... properties) {
+	return new PluginEllipse(this, info, x, y, w, h, properties);
    }
     
     /**
@@ -410,6 +457,25 @@ public abstract class Plugin {
      */
     public PluginShape addPolyline(String info, double x[], double y[], Object ...properties) {
 	return new PluginPolyline(this, info, PluginSupport.fromXYArrays(x, y), properties);
+    }
+
+    /**
+     * Convert a point in pixels to a point in world coordinates
+     * @param pixelPoint the pixel values of the point (input)
+     * @param worldPoint the world coordinates of the point (output)
+     */
+    public void pixelToWorld(Point pixelPoint, Point2D.Double worldPoint) {
+	_view.getContainer().localToWorld(pixelPoint, worldPoint);
+    }
+    
+
+    /**
+     * Convert a point in world coordinates to a point in pixels
+     * @param pixelPoint the pixel values of the point (output)
+     * @param worldPoint the world coordinates of the point (input)
+     */
+    public void worldToPixel(Point pixelPoint, Point2D.Double worldPoint) {
+	_view.getContainer().worldToLocal(pixelPoint, worldPoint);
     }
 
         
