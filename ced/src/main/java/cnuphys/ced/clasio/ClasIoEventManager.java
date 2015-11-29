@@ -21,7 +21,6 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.evio.clas12.EvioFactory;
 import org.jlab.evio.clas12.EvioSource;
 
-import cnuphys.bCNU.et.ETSupport;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.event.data.BMTDataContainer;
@@ -452,9 +451,6 @@ public class ClasIoEventManager {
 	if (isSourceFile()) {
 	    evnum = _evioSource.getCurrentIndex() - 1;
 	}
-	else if (isSourceET()) {
-	    evnum = (int) ETSupport.getETEventNumber();
-	}
 	return evnum;
     }
 
@@ -465,8 +461,7 @@ public class ClasIoEventManager {
      */
     public boolean isNextOK() {
 	return (isSourceFile() && (getEventCount() > 0)
-		&& (getEventNumber() < getEventCount()))
-		|| (isSourceET() && ETSupport.isReady());
+		&& (getEventNumber() < getEventCount()));
     }
 
     /**
@@ -481,9 +476,6 @@ public class ClasIoEventManager {
 	if (isSourceFile() && (getEventCount() > 0)
 		&& (getEventNumber() < getEventCount())) {
 	    numRemaining = getEventCount() - getEventNumber();
-	}
-	else if (isSourceET() && ETSupport.isReady()) {
-	    numRemaining = ClasIoAccumulationDialog.MAXACCUMULATIONCOUNT;
 	}
 	return numRemaining;
     }

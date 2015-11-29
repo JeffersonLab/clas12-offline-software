@@ -5,7 +5,6 @@ import java.util.Properties;
 
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.util.X11Colors;
-import cnuphys.bCNU.view.VirtualView;
 
 public class PluginProperties {
 
@@ -204,7 +203,7 @@ public class PluginProperties {
      * @return the virtual view location. On error return VirtualView.CENTER
      */
     public static int getVVLocation(Properties props) {
-	return getInt(props, VVLOCATION, VirtualView.CENTER);
+	return getInt(props, VVLOCATION, Plugin.CENTER);
     }
     
     /**

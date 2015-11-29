@@ -36,7 +36,6 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
-import cnuphys.bCNU.view.EventDisplayView;
 
 public class AllDCSuperLayer extends RectangleItem {
 
@@ -493,7 +492,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				// get absolute phi
 				double phi = (_sector - 1) * 60.0;
 
-				String rtp = "approx " + EventDisplayView.rThetaPhi + " "
+				String rtp = "approx " + CedView.rThetaPhi + " "
 						+ DoubleFormat.doubleFormat(r, 1) + "cm, "
 						+ DoubleFormat.doubleFormat(theta, 1)
 						+ UnicodeSupport.DEGREE + ", "

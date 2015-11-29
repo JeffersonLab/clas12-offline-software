@@ -7,7 +7,6 @@ import java.io.File;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.FileUtilities;
-import cnuphys.bCNU.view.EventView;
 
 /**
  * @author heddle
@@ -27,10 +26,7 @@ public class FileHandlerFactory {
 		if (extension != null) {
 			if (extension.equals("xml")) {
 				return new XMLFileHandler();
-			} else if (EventView.goodExtension(extension)) {
-				// System.err.println("Factory provided event file handler");
-				return new EventFileHandler();
-			}
+			} 
 		}
 
 		Log.getInstance().warning(

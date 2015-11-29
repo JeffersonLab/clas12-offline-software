@@ -69,7 +69,6 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimMenu;
 import cnuphys.bCNU.eliza.ElizaDialog;
-import cnuphys.bCNU.et.ETSupport;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.ConsoleLogListener;
 import cnuphys.bCNU.log.Log;
@@ -143,7 +142,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private static ECView _ecView;
     private static PCALView _pcalView;
     private static LogView _logView;
-    private static XMLView _xmlView;
     private static PlotView _plotView;
     private static ForwardView3D _forward3DView;
     private static CentralView3D _central3DView;
@@ -200,29 +198,28 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	if (_firstTime == 1) {
 	    // reaarange some views in virtual space
 	    _virtualView.reconfigure();
-	    _virtualView.moveTo(_allDCView, 0, 4);
-	    _virtualView.moveTo(_eventView, 0, 5, VirtualView.BOTTOMRIGHT);
-	    _virtualView.moveTo(_gemcView, 0, 5, VirtualView.BOTTOMLEFT);
-	    _virtualView.moveTo(_bstXyView, 0, 2, VirtualView.BOTTOMLEFT);
-	    _virtualView.moveTo(_bstZView, 0, 2, VirtualView.UPPERRIGHT);
+	    _virtualView.moveTo(_allDCView, 4);
+	    _virtualView.moveTo(_eventView, 5, VirtualView.BOTTOMRIGHT);
+	    _virtualView.moveTo(_gemcView, 5, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_bstXyView, 2, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_bstZView, 2, VirtualView.UPPERRIGHT);
 
 	    // note no constraint means "center"
-	    _virtualView.moveTo(_dcXyView, 0, 3);
+	    _virtualView.moveTo(_dcXyView, 6);
 
-	    _virtualView.moveTo(_pcalView, 0, 1, VirtualView.BOTTOMLEFT);
-	    _virtualView.moveTo(_ecView, 0, 1, VirtualView.UPPERRIGHT);
-	    _virtualView.moveTo(_logView, 0, 11, VirtualView.UPPERRIGHT);
-	    _virtualView.moveTo(_xmlView, 0, 11, VirtualView.BOTTOMRIGHT);
-	    _virtualView.moveTo(_monteCarloView, 0, 0, VirtualView.UPPERRIGHT);
-	    _virtualView.moveTo(_reconEventView, 0, 0, VirtualView.BOTTOMRIGHT);
-	    _virtualView.moveTo(_plotView, 0, 0, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_pcalView, 3, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_ecView, 3, VirtualView.UPPERRIGHT);
+	    _virtualView.moveTo(_logView, 11, VirtualView.UPPERRIGHT);
+	    _virtualView.moveTo(_monteCarloView, 1, VirtualView.UPPERRIGHT);
+	    _virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMRIGHT);
+	    _virtualView.moveTo(_plotView, 11, VirtualView.BOTTOMLEFT);
 
-	    _virtualView.moveTo(_ftcalXyView, 0, 8, VirtualView.BOTTOMLEFT);
+	    _virtualView.moveTo(_ftcalXyView, 9, VirtualView.BOTTOMLEFT);
 
 	    if (_use3D) {
-		_virtualView.moveTo(_forward3DView, 0, 6, VirtualView.CENTER);
-		_virtualView.moveTo(_central3DView, 0, 7, VirtualView.CENTER);
-		_virtualView.moveTo(_ftCal3DView, 0, 8,
+		_virtualView.moveTo(_forward3DView, 7, VirtualView.CENTER);
+		_virtualView.moveTo(_central3DView, 8, VirtualView.CENTER);
+		_virtualView.moveTo(_ftCal3DView, 9,
 			VirtualView.BOTTOMRIGHT);
 	    }
 	    Log.getInstance().config("reset views on virtual dekstop");
@@ -310,9 +307,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// log some environment info
 	Log.getInstance().config(Environment.getInstance().toString());
-
-	// xml view
-	_xmlView = new XMLView();
 
 	// use config file info
 	// Desktop.getInstance().configureViews();
