@@ -221,8 +221,6 @@ public class SectorSuperLayer extends PolygonItem {
     private void drawGemcDCHit(Graphics g, IContainer container, int layer,
 	    int wire, boolean noise, int pid, double doca) {
 
-	System.err.println("Draw GemcDCHit doca: " + doca);
-
 	// abort if hiding noise and this is noise
 	if (_view.hideNoise() && noise) {
 	    return;

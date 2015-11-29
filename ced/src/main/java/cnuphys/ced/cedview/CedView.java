@@ -16,7 +16,6 @@ import javax.swing.Timer;
 
 import cnuphys.bCNU.component.InfoWindow;
 import cnuphys.bCNU.component.TranslucentWindow;
-import cnuphys.bCNU.et.ETSupport;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
@@ -590,13 +589,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		if (_currentEvent == null) {
 			feedbackStrings.add("$orange red$No event");
 		} else {
-			if (_eventManager.isSourceET()) {
-				feedbackStrings.add("$orange red$" + "ET event "
-						+ ETSupport.getETEventNumber());
-			} else {
-				feedbackStrings.add("$orange red$" + "event # "
-						+ _eventManager.getEventNumber());
-			}
+			feedbackStrings.add("$orange red$" + "event # "
+				+ _eventManager.getEventNumber());
 		}
 
 		// get the sector

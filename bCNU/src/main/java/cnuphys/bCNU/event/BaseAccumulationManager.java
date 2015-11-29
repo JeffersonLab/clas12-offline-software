@@ -4,8 +4,7 @@ import java.awt.Color;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 
-public abstract class BaseAccumulationManager implements IAccumulator,
-		IPhysicsEventListener {
+public class BaseAccumulationManager  {
 
 	// common colorscale
 	public static ColorScaleModel colorScaleModel = new ColorScaleModel(

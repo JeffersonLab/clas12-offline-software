@@ -38,7 +38,7 @@ public class PluginView extends BaseView {
 
     //used for vv placement
     private int _vvPanel = -1;
-    private int _vvLocation = VirtualView.CENTER;
+    private int _vvLocation = Plugin.CENTER;
 
     /**
      * Create a plugin view
@@ -90,7 +90,7 @@ public class PluginView extends BaseView {
 	    int col = _vvPanel - 1;
 	    int numCol = vv.getNumCol();
 	    col = Math.max(0, Math.min((numCol-1), col));
-	    vv.moveTo(this, 0, col, _vvLocation);
+	    vv.moveTo(this, col, _vvLocation);
 	}
 
     }

@@ -10,7 +10,7 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.UnicodeSupport;
-import cnuphys.bCNU.view.EventDisplayView;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.geometry.PCALGeometry;
@@ -378,7 +378,7 @@ public abstract class ADataContainer implements IClasIoEventListener {
 			sb.append(prefix + " ");
 		}
 
-		sb.append(EventDisplayView.rThetaPhi + " (");
+		sb.append(CedView.rThetaPhi + " (");
 
 		sb.append(DoubleFormat.doubleFormat(r, numDec) + "cm, ");
 		sb.append(DoubleFormat.doubleFormat(theta, numDec));

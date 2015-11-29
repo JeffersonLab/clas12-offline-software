@@ -18,9 +18,17 @@ import cnuphys.bCNU.plugin.shapes.PluginRectangle;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
 import cnuphys.bCNU.plugin.shapes.PluginSquare;
 import cnuphys.bCNU.view.PluginView;
+import cnuphys.bCNU.view.VirtualView;
 
 public abstract class Plugin {
     
+    //virtual view constraints
+    public static final int UPPERLEFT = VirtualView.UPPERLEFT;
+    public static final int UPPERRIGHT = VirtualView.UPPERRIGHT;
+    public static final int BOTTOMLEFT = VirtualView.BOTTOMLEFT;
+    public static final int BOTTOMRIGHT = VirtualView.BOTTOMRIGHT;
+    public static final int CENTER = VirtualView.CENTER;
+        
     //count of plugins
     private static int _pluginCount;
     

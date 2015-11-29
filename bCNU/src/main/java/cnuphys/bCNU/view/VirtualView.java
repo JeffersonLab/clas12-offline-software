@@ -42,11 +42,9 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     private Vector<BaseView> _views = new Vector<BaseView>();
 
     private static int _numcol = 8;
-    private static final int _numrow = 1;
 
-    private int _currentRow = 0;
     private int _currentCol = 0;
-    private Point _offsets[][] = new Point[_numrow][_numcol];
+    private Point _offsets[] = new Point[_numcol];
 
     // private static final Color _bg = X11Colors.getX11Color("dark blue");
     private static final Color _bg = Color.gray;
@@ -117,7 +115,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	Dimension d = _parent.getSize();
 
 	int width = _numcol * d.width;
-	int height = _numrow * d.height;
+	int height = d.height;
 	getContainer().getWorldSystem().width = width;
 	getContainer().getWorldSystem().height = height;
 	setOffsets();
@@ -134,14 +132,11 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     private void setOffsets() {
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
+	double dy = world.height;
 
 	for (int col = 0; col < _numcol; col++) {
-	    for (int row = 0; row < _numrow; row++) {
 
-		_offsets[row][col] = new Point((int) (col * dx),
-			(int) (row * dy));
-	    }
+	    _offsets[col] = new Point((int) (col * dx), (int) (dy));
 	}
     }
 
@@ -154,7 +149,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	    @Override
 	    public void draw(Graphics g, IContainer container) {
-		Rectangle cr = getRowColRect(_currentRow, _currentCol);
+		Rectangle cr = getColRect(_currentCol);
 		g.setColor(_fill);
 		g.fillRect(cr.x + 1, cr.y + 1, cr.width - 1, cr.height - 1);
 
@@ -189,15 +184,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		    g.drawLine(pp.x, 0, pp.x, b.height);
 		}
 
-		double dy = world.height / _numrow;
+		double dy = world.height;
 		wp.x = world.x + world.width / 2;
-		for (int i = 1; i < _numrow; i++) {
-		    wp.y = i * dy;
-		    container.worldToLocal(pp, wp);
-		    g.drawLine(0, pp.y, b.width, pp.y);
-		}
 
-		Rectangle cr = getRowColRect(_currentRow, _currentCol);
+		Rectangle cr = getColRect(_currentCol);
 
 		g.setColor(Color.red);
 		g.drawRect(0, 0, b.width - 1, b.height - 1);
@@ -275,7 +265,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	}
 
 	int width = _numcol * maxw;
-	int height = _numrow * maxh;
+	int height = maxh;
 	return new Rectangle2D.Double(0, 0, width, height);
     }
 
@@ -479,14 +469,13 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	Point rc = getRowCol(mouseEvent.getPoint());
 	// System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
 
-	int clickRow = rc.y;
 	int clickCol = rc.x;
-	if ((clickRow == _currentRow) && (clickCol == _currentCol)) {
+	if ((clickCol == _currentCol)) {
 	    return;
 	}
 
-	int dh = _offsets[_currentRow][_currentCol].x
-		- _offsets[clickRow][clickCol].x;
+	int dh = _offsets[_currentCol].x
+		- _offsets[clickCol].x;
 
 	// can't do dv because can't give internal frames -y
 	int dv = 0;
@@ -495,19 +484,18 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	    view.offset(dh, dv);
 	}
 
-	_currentRow = clickRow;
 	_currentCol = clickCol;
 	getContainer().refresh();
     }
 
-    private Rectangle getRowColRect(int row, int col) {
+    private Rectangle getColRect(int col) {
 
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
+	double dy = world.height;
 
 	double x = col * dx;
-	double y = world.y + world.height - (row + 1) * dy;
+	double y = world.y + world.height - dy;
 
 	Rectangle2D.Double wr = new Rectangle2D.Double(x, y, dx, dy);
 	Rectangle r = new Rectangle();
@@ -533,7 +521,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     }
 
     // col is in x
-    // row is in y
+    // row = 0 is in y
     private Point getRowCol(Point p) {
 
 	Point2D.Double wp = new Point2D.Double();
@@ -542,12 +530,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
 
 	int col = (int) (wp.x / dx);
-	int row = _numrow - (int) (wp.y / dy) - 1;
 
-	return new Point(col, row);
+	return new Point(col, 0);
 
     }
 
@@ -559,41 +545,38 @@ public class VirtualView extends BaseView implements InternalFrameListener,
     public Point2D.Double totalOffset() {
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
-	return new Point2D.Double(_currentCol * dx, _currentRow * dy);
+	double dy = world.height;
+	return new Point2D.Double(_currentCol * dx, 0);
     }
 
     /**
      * Move a view to the center of a specific virtual cell
      * 
      * @param view the view to move
-     * @param row the row
      * @param col the col
      */
-    public void moveTo(BaseView view, int row, int col) {
+    public void moveTo(BaseView view, int col) {
 	if (view == null) {
 	    return;
 	}
 
-	moveTo(view, row, col, 0, 0);
+	moveTo(view, col, 0, 0);
     }
 
     /**
      * Move a view to a specific virtual cell
      * 
      * @param view the view to move
-     * @param row the row
      * @param col the col
      * @param dh additional horizontal offset
      * @param dv additional vertical offset
      */
-    public void moveTo(BaseView view, int row, int col, int dh, int dv) {
+    public void moveTo(BaseView view, int col, int dh, int dv) {
 
 	if (view == null) {
 	    return;
 	}
 
-	row = Math.max(0, Math.min(row, (_numrow - 1)));
 	col = Math.max(0, Math.min(col, (_numcol - 1)));
 
 	boolean managed = false;
@@ -611,10 +594,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
+	double dy = world.height;
 
 	double x = col * dx;
-	double y = world.y + world.height - (row + 1) * dy;
+	double y = world.y + world.height - dy;
 
 	int xc = (int) (x + dx / 2);
 	int yc = (int) (y + dy / 2);
@@ -630,21 +613,19 @@ public class VirtualView extends BaseView implements InternalFrameListener,
      * Move a view to a specific virtual cell
      * 
      * @param view the view to move
-     * @param row the row
      * @param col the col
      */
-    public void moveTo(BaseView view, int row, int col, boolean fit) {
+    public void moveTo(BaseView view,  int col, boolean fit) {
 	
 	if (view == null) {
 	    return;
 	}
 
 	if (fit == false) {
-	    moveTo(view, row, col, 0, 0);
+	    moveTo(view, col, 0, 0);
 	    return;
 	}
 
-	row = Math.max(0, Math.min(row, (_numrow - 1)));
 	col = Math.max(0, Math.min(col, (_numcol - 1)));
 
 	boolean managed = false;
@@ -662,7 +643,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
+	double dy = world.height;
 
 	double x = col * dx;
 
@@ -681,18 +662,16 @@ public class VirtualView extends BaseView implements InternalFrameListener,
      * Move a view to a specific virtual cell
      * 
      * @param view the view to move
-     * @param row the row
      * @param col the col
      * @param constraint constraint constant
      */
-    public void moveTo(BaseView view, int row, int col, int constraint) {
+    public void moveTo(BaseView view, int col, int constraint) {
 
 	if (constraint == CENTER) {
-	    moveTo(view, row, col);
+	    moveTo(view, col);
 	    return;
 	}
 
-	row = Math.max(0, Math.min(row, (_numrow - 1)));
 	col = Math.max(0, Math.min(col, (_numcol - 1)));
 
 	boolean managed = false;
@@ -710,10 +689,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 	Rectangle2D.Double world = getContainer().getWorldSystem();
 	double dx = world.width / _numcol;
-	double dy = world.height / _numrow;
+	double dy = world.height;
 
 	double left = col * dx;
-	double top = world.y + world.height - (row + 1) * dy;
+	double top = world.y + world.height -  dy;
 	double right = left + dx;
 	double bottom = top + dy;
 
@@ -768,13 +747,12 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	Point rc = getRowCol(pp);
 
 	int col = Math.max(0, Math.min(_numcol - 1, rc.x));
-	int row = Math.max(0, Math.min(_numrow - 1, rc.y));
 
-	if ((col == _currentCol) && (row == _currentRow)) {
+	if (col == _currentCol) {
 	    return;
 	}
 
-	int dh = _offsets[_currentRow][_currentCol].x - _offsets[row][col].x;
+	int dh = _offsets[_currentCol].x - _offsets[col].x;
 
 	// can't do dv because can't give internal frames -y
 	int dv = 0;
@@ -783,7 +761,6 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	    bview.offset(dh, dv);
 	}
 
-	_currentRow = row;
 	_currentCol = col;
 	getContainer().refresh();
 
