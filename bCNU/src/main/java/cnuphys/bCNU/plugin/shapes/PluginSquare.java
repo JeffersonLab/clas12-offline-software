@@ -9,7 +9,7 @@ import cnuphys.bCNU.plugin.PluginSupport;
 public class PluginSquare extends PluginShape {
 
     /**
-     * Create a rectangle shape
+     * Create a square shape
      * 
      * @param plugin the plugin that will hold it.
      * @param info a descriptive info that may appear on mouseovers

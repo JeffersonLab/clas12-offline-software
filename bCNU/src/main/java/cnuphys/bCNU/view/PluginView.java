@@ -82,15 +82,17 @@ public class PluginView extends BaseView {
 	_textField.setEditable(false);
 	_textField.setBackground(Color.black);
 	_textField.setForeground(Color.cyan);
-	
+
 	add(_textField, BorderLayout.SOUTH);
 	VirtualView vv = VirtualView.getInstance();
-	vv.reconfigure();
-	if ((vv != null) && (_vvPanel > 0)) {
-	    int col = _vvPanel - 1;
-	    int numCol = vv.getNumCol();
-	    col = Math.max(0, Math.min((numCol-1), col));
-	    vv.moveTo(this, col, _vvLocation);
+	if (vv != null) {
+	    vv.reconfigure();
+	    if (_vvPanel > 0) {
+		int col = _vvPanel - 1;
+		int numCol = vv.getNumCol();
+		col = Math.max(0, Math.min((numCol - 1), col));
+		vv.moveTo(this, col, _vvLocation);
+	    }
 	}
 
     }

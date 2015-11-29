@@ -11,9 +11,7 @@ import cnuphys.bCNU.graphics.rubberband.Rubberband;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.ItemModification;
 import cnuphys.bCNU.item.ItemPopupManager;
-import cnuphys.bCNU.menu.ViewPopupMenu;
 import cnuphys.bCNU.util.Environment;
-import cnuphys.bCNU.view.BaseView;
 
 /**
  * The is the default "pointer" button.
@@ -266,24 +264,24 @@ public class PointerButton extends ToolBarToggleButton
      */
     @Override
     public void mouseButton3Click(MouseEvent mouseEvent) {
-	Vector<AItem> items = container.getItemsAtPoint(mouseEvent.getPoint());
-
-	boolean consumed = false;
-
-	if ((items != null) && (items.size() > 0)) {
-	    for (AItem item : items) {
-		if (item.isRightClickable()) {
-		    consumed = true;
-		    ItemPopupManager.prepareForPopup(item, container,
-			    mouseEvent.getPoint());
-		    break;
-		}
-	    }
-	}
-
-	if (!consumed) {
-	    container.getView().rightClicked(mouseEvent);
-	}
+//	Vector<AItem> items = container.getItemsAtPoint(mouseEvent.getPoint());
+//
+//	boolean consumed = false;
+//
+//	if ((items != null) && (items.size() > 0)) {
+//	    for (AItem item : items) {
+//		if (item.isRightClickable()) {
+//		    consumed = true;
+//		    ItemPopupManager.prepareForPopup(item, container,
+//			    mouseEvent.getPoint());
+//		    break;
+//		}
+//	    }
+//	}
+//
+//	if (!consumed) {
+//	    container.getView().rightClicked(mouseEvent);
+//	}
     }
 
     /**

@@ -2,10 +2,12 @@ package cnuphys.bCNU.application;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Point;
 import java.awt.geom.Rectangle2D.Double;
 
 import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.graphics.style.LineStyle;
+import cnuphys.bCNU.graphics.style.SymbolType;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
@@ -80,47 +82,10 @@ public class DemoApp extends BaseMDIApplication {
 	XMLView xmlView = new XMLView();
 	xmlView.setVisible(false);
 
-	//Sample plugins
-	Plugin plugin1 = new Plugin() {
-
-	    @Override
-	    public void initializePluginWorld(Double world) {
-		world.x = -1;   //xmin
-		world.y = -1;   //ymin
-		world.width = 2;
-		world.height = 2;
-	    }
-
-	    @Override
-	    public void customizePlugin() {
-	    }
-
-	    @Override
-	    public String getPluginTitle() {
-		return "Barebones Plugin";
-	    }
-
-	    @Override
-	    public void addInitialShapes() {
-		addSquare("A square", 0.2, -0.3, 0.5);
-	    }
-	    
-	    @Override
-	    public void mouseOverShape(PluginShape shape) {
-	    }
-
-	    @Override
-	    public void shapeClick(PluginShape shape, int clickCount) {
-	    }
-
-	    @Override
-	    public void shapePopupTrigger(PluginShape shape) {
-	    }
-	    
-	};
+	//Sample plugin
 	
-	//Sample plugins
-	Plugin plugin2 = new Plugin() {
+	//Sample plugin
+	new Plugin() {
 
 	    @Override
 	    public void initializePluginWorld(Double world) {
@@ -144,6 +109,15 @@ public class DemoApp extends BaseMDIApplication {
 
 	    @Override
 	    public void addInitialShapes() {
+		
+		addSymbol("A symbol", -0.8, -0.25, 
+			PluginProperties.FILLCOLOR, "Aquamarine",
+			PluginProperties.LINECOLOR, Color.yellow,
+			PluginProperties.LINEWIDTH, 2,
+			PluginProperties.SYMBOL, SymbolType.UPTRIANGLE,
+			PluginProperties.SYMBOLSIZE, 20,
+			PluginProperties.LOCKED, false);
+
 		addSquare("A draggable square", 0.2, -0.3, 0.5, 
 			PluginProperties.FILLCOLOR, "wheat",
 			PluginProperties.LINECOLOR, Color.red,
@@ -159,6 +133,19 @@ public class DemoApp extends BaseMDIApplication {
 		addRectangle("Intially rotated rectangle", -0.8, 0.1, .4, .8,
 			PluginProperties.LOCKED, false,
 			PluginProperties.ROTATED, 20);
+		
+		addEllipse("Intially rotated ellipse", -0.07, 0.6, .5, .3,
+			PluginProperties.LOCKED, false,
+			PluginProperties.ROTATED, -20,
+			PluginProperties.FILLCOLOR, new Color(60, 90, 120, 120));
+		
+		addCircle("A circle", 0.731, -0.684, 0.269, 
+			PluginProperties.FILLCOLOR, "orange red",
+			PluginProperties.LINECOLOR, Color.green,
+			PluginProperties.LINEWIDTH, 2,
+			PluginProperties.LINESTYLE, LineStyle.DOT,
+			PluginProperties.LOCKED, false);
+		
 		
 		double x[] = {.1, .2, .6, .5, .3};
 		double y[] = {.1, .5, .6, .4, 0};
@@ -177,12 +164,12 @@ public class DemoApp extends BaseMDIApplication {
 	    }
 
 	    @Override
-	    public void shapeClick(PluginShape shape, int clickCount) {
+	    public void shapeClick(PluginShape shape, int clickCount, Point pixelPoint) {
 		updateStatus((shape == null) ? null : "click count "+ clickCount + " on " + shape.getInfoString());
 	    }
 
 	    @Override
-	    public void shapePopupTrigger(PluginShape shape) {
+	    public void shapePopupTrigger(PluginShape shape, Point pixelPoint) {
 		updateStatus((shape == null) ? null : "popup trigger on " + shape.getInfoString());
 	    }
 

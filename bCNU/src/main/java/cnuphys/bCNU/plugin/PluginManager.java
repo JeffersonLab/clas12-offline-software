@@ -119,68 +119,6 @@ public class PluginManager {
 
     }
     
-    // process the folder
-//    private void processPluginFolder() {
-//	// System.err.println("PLUGINDir exists: " + _pluginDir.exists());
-//	if (_pluginDir.exists()) {
-//	    // System.err.println(
-//	    // "PLUGINDir is directory: " + _pluginDir.isDirectory());
-//
-//	    if (_pluginDir.isDirectory()) {
-//
-//		File files[] = _pluginDir.listFiles(filter);
-//		int count = (files == null) ? 0 : files.length;
-//
-//		if (count == 0) {
-//		    System.err.println("No class files found");
-//		}
-//		else {
-//		    System.err.println(count + " class files found");
-//
-//		    URL url[] = new URL[count];
-//
-//		    int i = 0;
-//		    for (File file : files) {
-//			try {
-//			    URI uri = file.toURI();
-//			    url[i++] = uri.toURL();
-//			} catch (MalformedURLException e) {
-//			    e.printStackTrace();
-//			}
-//		    }
-//
-//		    URLClassLoader ucl = new URLClassLoader(url);
-//		    for (File file : files) {
-//			String bareName = file.getName().substring(0,
-//				file.getName().lastIndexOf('.'));
-//			boolean tried = _attemptedLoads.contains(bareName);
-//
-//			if (tried) {
-//			    System.err.println("Already tried " + bareName);
-//			}
-//			else {
-//
-//			    _attemptedLoads.add(bareName);
-//			    // System.err.println("LOAD " + bareName);
-//			    try {
-//				Class claz = ucl.loadClass(bareName);
-//				try {
-//				    claz.newInstance();
-//				} catch (InstantiationException e) {
-//				    e.printStackTrace();
-//				} catch (IllegalAccessException e) {
-//				    e.printStackTrace();
-//				}
-//			    } catch (ClassNotFoundException e) {
-//				e.printStackTrace();
-//			    }
-//			} // !tried
-//		    }
-//		}
-//	    }
-//	}
-//
-//    }
 
     /**
      * Search a directory for classes that are plugins.

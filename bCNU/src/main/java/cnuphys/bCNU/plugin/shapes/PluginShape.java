@@ -102,11 +102,12 @@ public class PluginShape {
 	}
 	
 	//line width and style
-	int lineWidth = PluginProperties.getLineWidth(props);
-	setLineWidth(lineWidth);
+	setLineWidth(PluginProperties.getLineWidth(props));
+	setLineStyle(PluginProperties.getLineStyle(props));
 	
-	LineStyle lineStyle = PluginProperties.getLineStyle(props);
-	setLineStyle(lineStyle);
+	//symbol and symbol size
+	setSymbol(PluginProperties.getSymbol(props));
+	setSymbolSize(PluginProperties.getSymbolSize(props));
 
 	// item locked
 	boolean locked = PluginProperties.getLocked(props);
@@ -115,6 +116,7 @@ public class PluginShape {
 	    _item.setRotatable(true);
 	    _item.setResizable(false);
 	    _item.setDraggable(true);
+	    _item.setRightClickable(true);
 	}
 	
 	//initial rotation angle (degrees)

@@ -21,9 +21,9 @@ public class EllipseItem extends PolygonItem {
 	 * @param layer
 	 *            the Layer this item is on.
 	 * @param w
-	 *            the width of the ellipse in km
+	 *            the width of the ellipse
 	 * @param h
-	 *            the height of the ellipse in km
+	 *            the height of the ellipse
 	 * @param azimuth
 	 *            the rotation of the ellipse in degrees. 0 is north, 90 east,
 	 *            etc.

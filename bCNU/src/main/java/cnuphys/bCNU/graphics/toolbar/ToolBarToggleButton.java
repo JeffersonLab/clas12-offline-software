@@ -174,25 +174,6 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
      */
     @Override
     public void mouseButton3Click(MouseEvent mouseEvent) {
-	// Vector<AItem> items =
-	// container.getItemsAtPoint(mouseEvent.getPoint());
-	//
-	// boolean consumed = false;
-	//
-	// if ((items != null) && (items.size() > 0)) {
-	// for (AItem item : items) {
-	// if (item.isRightClickable()) {
-	// consumed = true;
-	// ItemPopupManager.prepareForPopup(item, container,
-	// mouseEvent.getPoint());
-	// break;
-	// }
-	// }
-	// }
-	//
-	// if (!consumed) {
-	// container.getView().rightClicked(mouseEvent);
-	// }
     }
 
     // mouse press platform's popup trigger
@@ -210,9 +191,13 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 	if (view.getContainer() != null) {
 	    item = view.getContainer().getItemAtPoint(mouseEvent.getPoint());
 	}
-	
+
 	if (item != null) {
-	    //TODO handle item popup
+	    if (item.isRightClickable()) {
+		ItemPopupManager.prepareForPopup(item, container,
+			mouseEvent.getPoint());
+	    }
+
 	    return;
 	}
 

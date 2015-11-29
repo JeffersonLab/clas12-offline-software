@@ -1,6 +1,8 @@
 package cnuphys.ced.plugin;
 
 import java.awt.Color;
+import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D.Double;
 
 import org.jlab.evio.clas12.EvioDataEvent;
@@ -48,12 +50,12 @@ public class CedDemoPlugin extends CedPlugin {
     }
 
     @Override
-    public void shapeClick(PluginShape shape, int clickCount) {
+    public void shapeClick(PluginShape shape, int clickCount, Point pixelPoint) {
 	updateStatus((shape == null) ? null : "click count "+ clickCount + " on " + shape.getInfoString());
     }
 
     @Override
-    public void shapePopupTrigger(PluginShape shape) {
+    public void shapePopupTrigger(PluginShape shape, Point pixelPoint) {
 	updateStatus((shape == null) ? null : "popup trigger on " + shape.getInfoString());
     }
     
@@ -79,7 +81,7 @@ public class CedDemoPlugin extends CedPlugin {
     public void processClasIoEvent(EvioDataEvent event,
 	    boolean isAccumulating) {
 	
-	//reset all the fill colors and names
+	//reset all the fill colors and info strings
 	for (int layer = 1; layer <= 6; layer++) {
 	    for (int wire = 1; wire <= 112; wire++) {
 		shapes[layer][wire].setFillColor(Color.lightGray);
@@ -102,7 +104,6 @@ public class CedDemoPlugin extends CedPlugin {
 	    
 	}
 
-	
 	refresh();
     }
 
