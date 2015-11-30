@@ -1,6 +1,7 @@
 package cnuphys.ced.component;
 
 import java.awt.Dimension;
+
 import javax.swing.Box;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -8,7 +9,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeListener;
 
-import cnuphys.bCNU.event.BaseAccumulationManager;
 import cnuphys.bCNU.feedback.FeedbackPane;
 import cnuphys.bCNU.graphics.colorscale.ColorModelLegend;
 import cnuphys.bCNU.graphics.component.CommonBorder;
@@ -17,6 +17,7 @@ import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.bst.BSTzView;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.item.MagFieldItem;
 
 @SuppressWarnings("serial")
@@ -225,7 +226,7 @@ public class ControlPanel extends JPanel {
 		// accumulation
 		if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
 			box.add(new ColorModelLegend(
-					BaseAccumulationManager.colorScaleModel, 160,
+					AccumulationManager.colorScaleModel, 160,
 					"Relative Accumulation"));
 		}
 
