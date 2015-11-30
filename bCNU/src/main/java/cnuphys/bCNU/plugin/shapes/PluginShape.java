@@ -1,6 +1,7 @@
 package cnuphys.bCNU.plugin.shapes;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.style.SymbolType;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.PathBasedItem;
+import cnuphys.bCNU.item.TextItem;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
 
@@ -90,7 +92,7 @@ public class PluginShape {
 	    return;
 	}
 	
-	//fill color and line color
+	//fill color and line color and text color
 	Color fillColor = PluginProperties.getFillColor(props);
 	if (fillColor != null) {
 	    setFillColor(fillColor);
@@ -101,6 +103,12 @@ public class PluginShape {
 	    setLineColor(lineColor);
 	}
 	
+	Color textColor = PluginProperties.getTextColor(props);
+	if (textColor != null) {
+	    setTextColor(textColor);
+	}
+
+	
 	//line width and style
 	setLineWidth(PluginProperties.getLineWidth(props));
 	setLineStyle(PluginProperties.getLineStyle(props));
@@ -108,6 +116,10 @@ public class PluginShape {
 	//symbol and symbol size
 	setSymbol(PluginProperties.getSymbol(props));
 	setSymbolSize(PluginProperties.getSymbolSize(props));
+	
+	//font and text color
+	setFont(PluginProperties.getFont(props));
+	setTextColor(PluginProperties.getTextColor(props));
 
 	// item locked
 	boolean locked = PluginProperties.getLocked(props);
@@ -165,6 +177,35 @@ public class PluginShape {
     public void setLineColor(Color color) {
 	_item.getStyle().setLineColor(color);
     }
+    
+	/**
+	 * Set the text color for the shape. Only relevant for PluginText shapes
+	 * This does not cause a redraw.
+	 * 
+	 * @param color the text colot
+	 */
+	public void setTextColor(Color color) {
+		if (_shapeType == PluginShapeType.TEXT) {
+			if (_item instanceof TextItem) {
+				((TextItem) _item).setTextColor(color);
+			}
+		}
+	}
+	
+	/**
+	 * Set the font for the shape. Only relevant for PluginText shapes
+	 * This does not cause a redraw.
+	 * 
+	 * @param font the Font
+	 */
+	public void setFont(Font font) {
+		if (_shapeType == PluginShapeType.TEXT) {
+			if (_item instanceof TextItem) {
+				((TextItem) _item).setFont(font);
+			}
+		}
+	}
+
 
     /**
      * Set the fill color for the shape. This does not cause a redraw.

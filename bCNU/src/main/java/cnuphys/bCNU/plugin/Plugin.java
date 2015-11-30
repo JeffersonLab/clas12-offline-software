@@ -21,6 +21,7 @@ import cnuphys.bCNU.plugin.shapes.PluginRectangle;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
 import cnuphys.bCNU.plugin.shapes.PluginSquare;
 import cnuphys.bCNU.plugin.shapes.PluginSymbol;
+import cnuphys.bCNU.plugin.shapes.PluginText;
 import cnuphys.bCNU.view.PluginView;
 import cnuphys.bCNU.view.VirtualView;
 
@@ -321,7 +322,19 @@ public abstract class Plugin {
     }
     
     /**
-     * Create a symbol shape. The defaul is an 8x8 (pixel) square
+     * Create a text shape. 
+     * @param info the text
+     * @param x the horizontal location of the left of the text in world (not pixel) coordinates
+     * @param y the vertical location of the baseline of the text in world (not pixel) coordinates
+     * @param properties extra custom properties
+     * @return the new shape
+     */
+    public PluginShape addText(String info, double x, double y, Object ...properties) {
+	return new PluginText(this, info, x, y, properties);
+    }
+
+    /**
+     * Create a symbol shape. The default is an 8x8 (pixel) square
      * @param info a descriptive string that may appear on mouseovers
      * @param x the horizontal location of the symbol in world (not pixel) coordinates
      * @param y the vertical location of the symbol in world (not pixel) coordinates

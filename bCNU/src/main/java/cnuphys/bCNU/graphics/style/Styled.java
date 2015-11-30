@@ -16,7 +16,7 @@ public class Styled implements IStyled {
 	// default fill color half-alpha blue
 	private Color _fillColor = new Color(0, 0, 255, 128);
 
-	// default line color is blacl
+	// default line color is black
 	private Color _lineColor = Color.black;
 
 	// default line style is solid
