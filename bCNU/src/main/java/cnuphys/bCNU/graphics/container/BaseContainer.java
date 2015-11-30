@@ -461,7 +461,9 @@ public class BaseContainer extends JComponent
 	    }
 	}
 	else {
-	    System.err.println("null world to local for " + _view.getTitle());
+//	    System.err.println("null world to local for " + _view.getTitle());
+//	    Throwable t = new Throwable();
+//	    t.printStackTrace();
 	}
     }
 

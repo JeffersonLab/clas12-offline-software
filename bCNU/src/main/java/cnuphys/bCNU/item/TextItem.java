@@ -17,6 +17,7 @@ import java.util.Vector;
 import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.attributes.Attributes;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -64,8 +65,7 @@ public class TextItem extends RectangleItem {
 	 */
 	public TextItem(LogicalLayer layer, Point2D.Double location, Font font,
 			String text, Color textColor, Color fillColor, Color lineColor) {
-		super(layer, getWorldRectangle(layer.getContainer(), location, font,
-				UnicodeSupport.specialCharReplace(text)));
+		super(layer, new Rectangle2D.Double(location.x, location.y, 1, 1));
 		setFont(font);
 		setText(text);
 		_textColor = textColor;
@@ -86,6 +86,10 @@ public class TextItem extends RectangleItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
+		
+		Point2D.Double oldFocus = _focus;
+		setPath(getPoints(container));
+		_focus = oldFocus;
 		super.drawItem(g, container);
 
 		if (_text == null) {
@@ -201,6 +205,7 @@ public class TextItem extends RectangleItem {
 	// get the world rectangle bounds
 	private static Rectangle2D.Double getWorldRectangle(IContainer container,
 			Point2D.Double location, Font font, String text) {
+		
 		Dimension size = sizeText(container.getComponent(), font, text);
 		FontMetrics fm = container.getComponent().getFontMetrics(font);
 		Point p = new Point();
