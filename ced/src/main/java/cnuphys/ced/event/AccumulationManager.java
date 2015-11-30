@@ -4,11 +4,11 @@ import java.awt.Color;
 
 import javax.swing.event.EventListenerList;
 
-import cnuphys.bCNU.event.IAccumulator;
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Histo2DData;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.event.data.BSTDataContainer;
@@ -527,5 +527,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 
 		_listeners.add(IAccumulationListener.class, listener);
 	}
+	
+	
 
 }

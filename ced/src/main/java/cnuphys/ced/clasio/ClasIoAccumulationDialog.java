@@ -19,7 +19,6 @@ import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.dialog.ButtonPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
-import cnuphys.bCNU.event.IAccumulator;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.view.ViewManager;

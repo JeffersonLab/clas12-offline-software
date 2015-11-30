@@ -1,4 +1,4 @@
-package cnuphys.bCNU.event;
+package cnuphys.ced.clasio;
 
 public interface IAccumulator {
 
