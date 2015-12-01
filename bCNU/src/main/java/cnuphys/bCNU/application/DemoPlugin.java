@@ -77,6 +77,17 @@ public class DemoPlugin extends Plugin {
 			PluginProperties.FONT, new Font(Font.MONOSPACED, Font.BOLD, 16),
 			PluginProperties.LOCKED, false);
 	
+	addArc("An arc", -0.885, -0.7045, 0.2, 30, -120,
+			PluginProperties.LINECOLOR, "dark green",
+			PluginProperties.LINEWIDTH, 3,
+			PluginProperties.LINESTYLE, LineStyle.DOT,
+			PluginProperties.LOCKED, false);
+	
+	addDonut("A donut", -0.1392, 0.4939, 0.2, 0.4, 30, 120,
+			PluginProperties.FILLCOLOR, "orange red",
+			PluginProperties.LINECOLOR, "dark green",
+			PluginProperties.LINEWIDTH, 3,
+			PluginProperties.LOCKED, false);
 	
 	double x[] = {.1, .2, .6, .5, .3};
 	double y[] = {.1, .5, .6, .4, 0};

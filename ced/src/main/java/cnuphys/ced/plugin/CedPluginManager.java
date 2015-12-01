@@ -3,10 +3,12 @@ package cnuphys.ced.plugin;
 import java.io.File;
 import java.util.Vector;
 
-import org.clas.viewer.EventViewerModule;
+import javax.swing.JPanel;
+
+import org.jlab.clas.detector.DetectorType;
+import org.jlab.clas12.basic.IDetectorModule;
 
 import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.log.SimpleLogPane;
 import cnuphys.bCNU.plugin.PluginManager;
 import cnuphys.bCNU.util.Jar;
 import cnuphys.bCNU.view.BaseView;
@@ -16,9 +18,34 @@ public class CedPluginManager extends PluginManager {
     //look for Gagik's panels.
     // the base class for bCNU plugins
     
-    static EventViewerModule evm;
+    static IDetectorModule evm;
     static {
-	evm = new EventViewerModule() {
+	evm = new IDetectorModule() {
+
+		@Override
+		public String getAuthor() {
+			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			return null;
+		}
+
+		@Override
+		public JPanel getDetectorPanel() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return null;
+		}
+
+		@Override
+		public DetectorType getType() {
+			return null;
+		}
 	}; 
     }
 
@@ -61,7 +88,7 @@ public class CedPluginManager extends PluginManager {
 	    try {
 		Object o = claz.newInstance();
 		System.err.println("LOADED Gagik Plugin");
-		new PView((EventViewerModule)o);
+		new PView((IDetectorModule)o);
 		
 	    } catch (InstantiationException e) {
 		e.printStackTrace();
@@ -74,8 +101,8 @@ public class CedPluginManager extends PluginManager {
 
 
     class PView extends BaseView {
-	public PView(EventViewerModule evm) {
-		super(AttributeType.TITLE, "Log", AttributeType.ICONIFIABLE, true,
+	public PView(IDetectorModule evm) {
+		super(AttributeType.TITLE, evm.getName(), AttributeType.ICONIFIABLE, true,
 			AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
 			AttributeType.RESIZABLE, true, AttributeType.WIDTH, 600,
 			AttributeType.HEIGHT, 600, AttributeType.VISIBLE, false,
