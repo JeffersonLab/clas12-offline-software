@@ -54,6 +54,7 @@ import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.plugin.CedDemoPlugin;
+import cnuphys.ced.plugin.CedPluginManager;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimMenu;
@@ -63,7 +64,6 @@ import cnuphys.bCNU.log.ConsoleLogListener;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.bCNU.menu.MenuManager;
-import cnuphys.bCNU.plugin.PluginManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
@@ -99,7 +99,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
     private static String _pluginFolder;
     
     //plugin manager
-    private PluginManager _pluginManager;
+    private CedPluginManager _pluginManager;
     
     // the swim menu
     private static SwimMenu _swimMenu;
@@ -704,7 +704,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		ced.setVisible(true);
 		ced.fixTitle();
 		//get plugin manager
-		ced._pluginManager = new PluginManager(_pluginFolder);
+		ced._pluginManager = new CedPluginManager(_pluginFolder);
 	    }
 
 	});
@@ -713,7 +713,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	
 	//test demo plugin
-	new CedDemoPlugin();
+//	new CedDemoPlugin();
 	
 //	//test event queue
 //	ClasIoEventQueue queue = new ClasIoEventQueue();

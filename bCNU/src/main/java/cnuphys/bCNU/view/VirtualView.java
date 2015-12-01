@@ -596,7 +596,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	double dx = world.width / _numcol;
 	double dy = world.height;
 
-	double x = col * dx;
+	double x = (col - _currentCol) * dx;
 	double y = world.y + world.height - dy;
 
 	int xc = (int) (x + dx / 2);
@@ -645,7 +645,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	double dx = world.width / _numcol;
 	double dy = world.height;
 
-	double x = col * dx;
+	double x = (col - _currentCol) * dx;
 
 	int margin = 40;
 
@@ -691,7 +691,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	double dx = world.width / _numcol;
 	double dy = world.height;
 
-	double left = col * dx;
+	double left = (col - _currentCol) * dx;
 	double top = world.y + world.height -  dy;
 	double right = left + dx;
 	double bottom = top + dy;

@@ -19,23 +19,24 @@ import java.util.Vector;
 public class PluginManager {
 
     // so we only try a name once
-    private Vector<String> _attemptedLoads = new Vector<String>();
+    protected Vector<String> _attemptedLoads = new Vector<String>();
 
     // the bad dir holding the plugins
-    private File _pluginDir;
+    protected File _pluginDir;
 
-    private int pdirLen;
-    
-    // the base class
-    private Class<Plugin> _pluginClaz;
+    protected int pdirLen;
+
+    // the base class for bCNU plugins
+    protected Class<Plugin> _bcnuPluginClaz;
 
     // filter on .class files and subdirectories
-    private FilenameFilter filter = new FilenameFilter() {
+    protected FilenameFilter filter = new FilenameFilter() {
 
 	@Override
 	public boolean accept(File dir, String name) {
 	    File theFile = new File(dir, name);
-	    return (theFile.isDirectory() || name.endsWith(".class"));
+	    return (theFile.isDirectory() || name.endsWith(".class")
+		    || name.endsWith(".jar"));
 	}
 
     };
@@ -47,12 +48,12 @@ public class PluginManager {
      */
     public PluginManager(String pluginFolder) {
 	try {
-	    _pluginClaz = (Class<Plugin>) Class.forName("cnuphys.bCNU.plugin.Plugin");
+	    _bcnuPluginClaz = (Class<Plugin>) Class
+		    .forName("cnuphys.bCNU.plugin.Plugin");
 	} catch (ClassNotFoundException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	
+
 	if (pluginFolder != null) {
 	    _pluginDir = new File(pluginFolder);
 
@@ -83,10 +84,11 @@ public class PluginManager {
 	} // plugin folder not null
 
     }
-    
-    private void loadClasses(Vector<PHolder> v) {
+
+    // load the classes
+    protected void loadClasses(Vector<PHolder> v) {
 	URL url[] = new URL[v.size()];
-	
+
 	int i = 0;
 	for (PHolder ph : v) {
 	    URI uri = ph.file.toURI();
@@ -94,23 +96,26 @@ public class PluginManager {
 		url[i++] = uri.toURL();
 	    } catch (MalformedURLException e) {
 		e.printStackTrace();
-	    }	    
+	    }
 	}
-	
+
 	URLClassLoader ucl = new URLClassLoader(url);
 	for (PHolder ph : v) {
 	    try {
 		Class claz = ucl.loadClass(ph.className);
-		
-		//make sure it is a subclass of Plugin
-		if (_pluginClaz.isAssignableFrom(claz)) {
-		try {
-		    claz.newInstance();
-		} catch (InstantiationException e) {
-		    e.printStackTrace();
-		} catch (IllegalAccessException e) {
-		    e.printStackTrace();
+
+		// make sure it is a subclass of Plugin
+		if (_bcnuPluginClaz.isAssignableFrom(claz)) {
+		    try {
+			claz.newInstance();
+		    } catch (InstantiationException e) {
+			e.printStackTrace();
+		    } catch (IllegalAccessException e) {
+			e.printStackTrace();
+		    }
 		}
+		else {
+		    handleUnknownKlaz(claz);
 		}
 	    } catch (ClassNotFoundException e1) {
 		e1.printStackTrace();
@@ -119,6 +124,9 @@ public class PluginManager {
 
     }
     
+    //let a subclass handle it
+    protected void handleUnknownKlaz(Class claz) {
+    }
 
     /**
      * Search a directory for classes that are plugins.
@@ -126,7 +134,7 @@ public class PluginManager {
      * @param dir the file the is a directory in the classpath
      * @param v the vector to which we add any matching classes.
      */
-    private void searchDir(File dir, Vector<PHolder> v) {
+    protected void searchDir(File dir, Vector<PHolder> v) {
 	// System.out.println("Searching directory: " + dir.getAbsolutePath());
 
 	String[] files = dir.list(filter);
@@ -138,10 +146,14 @@ public class PluginManager {
 	for (String fileName : files) {
 	    File file = new File(dir.getAbsolutePath(), fileName);
 
+	    // System.err.println("FILE: " + file.getAbsolutePath());
 	    if (file.isDirectory()) {
 		searchDir(file, v);
 	    }
-	    else { // is a file
+	    else if (file.getAbsolutePath().endsWith(".jar")) {
+		searchJar(file, v);
+	    }
+	    else { // is a regular file
 
 		String klass = file.getAbsolutePath();
 
@@ -182,11 +194,14 @@ public class PluginManager {
 	    }
 	}
     }
-    
-    class PHolder {
+
+    protected void searchJar(File file, Vector<PHolder> v) {
+    }
+
+    protected class PHolder {
 	public File file;
 	public String className;
-	
+
 	public PHolder(File file, String className) {
 	    this.file = file;
 	    this.className = className;
