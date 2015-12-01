@@ -1380,6 +1380,7 @@ public class BaseContainer extends JComponent
 	localToWorld(pc, wpc);
 	localToWorld(p1, wp1);
 	return new RadArcItem(layer, wpc, wp1, arcAngle);
+//	return new ArcItem(layer, wpc, wp1, arcAngle);
     }
 
     /**
