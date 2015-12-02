@@ -150,7 +150,7 @@ public class PointItem extends AItem {
 	}
 
 	/**
-	 * get the bounding rect of the teardrop part.
+	 * get the bounding rect in pixels.
 	 * 
 	 * @param container
 	 *            the container being rendered
