@@ -40,6 +40,9 @@ import cnuphys.bCNU.graphics.world.WorldPolygon;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.EllipseItem;
 import cnuphys.bCNU.item.LineItem;
+import cnuphys.bCNU.item.PanelItem;
+import cnuphys.bCNU.item.PixelRectangleItem;
+import cnuphys.bCNU.item.PlotItem;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.item.PolylineItem;
 import cnuphys.bCNU.item.RadArcItem;
@@ -1341,6 +1344,9 @@ public class BaseContainer extends JComponent
     public AItem createRectangleItem(LogicalLayer layer, Rectangle b) {
 	Rectangle2D.Double wr = new Rectangle2D.Double();
 	localToWorld(b, wr);
+	
+//	return new PlotItem(layer, new Point2D.Double(wr.x, wr.y), 
+//			b.width, b.height);
 	return new RectangleItem(layer, wr);
     }
 
