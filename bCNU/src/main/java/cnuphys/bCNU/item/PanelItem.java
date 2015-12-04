@@ -1,8 +1,11 @@
 package cnuphys.bCNU.item;
 
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+
+import javax.swing.JLabel;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -29,21 +32,30 @@ public class PanelItem extends PixelRectangleItem {
 			int width, int height) {
 		super(layer, location, width, height);
 		_virtualPanel = new VirtualPanel();
-		getContainer().getView().setGlassPane(_virtualPanel);
-		getContainer().getView().getGlassPane().setVisible(true);
+		_virtualPanel.setVisible(true);
+//		_virtualPanel.addMainComponent(new JLabel("Main Component"));
 	}
 	
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		Rectangle r = getBounds(container);
 		Rectangle b = container.getComponent().getBounds();
-		
-		_virtualPanel.setBounds(r.x+b.x, r.y+b.y, r.width, r.height);
 
-		_virtualPanel.validate();
-		_virtualPanel.paintComponent(null);
-		g.drawImage(_virtualPanel.getImage(), r.x, r.y, r.width, r.height, _virtualPanel);
-		
+		_virtualPanel.setBounds(r.x + b.x, r.y + b.y, r.width, r.height);
+		_virtualPanel.getReady();
+		Image image = _virtualPanel.getImage();
+		if (image != null) {
+//			System.err.println("DRAW on IMAGE");
+			Graphics imageG = image.getGraphics();
+			_virtualPanel.paint(imageG);
+			imageG.dispose();
+			
+			g.drawImage(_virtualPanel.getImage(), r.x, r.y, r.width, r.height,
+					_virtualPanel);
+//			 g.drawImage(_virtualPanel.getImage(), r.x, r.y, r.x+r.width,
+//			 r.y+r.height, 0, 0, r.width, r.height, _virtualPanel);
+		}
+
 	}
 
 }

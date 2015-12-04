@@ -1345,9 +1345,14 @@ public class BaseContainer extends JComponent
 	Rectangle2D.Double wr = new Rectangle2D.Double();
 	localToWorld(b, wr);
 	
+//	return new PanelItem(layer, new Point2D.Double(wr.x, wr.y), 
+//			b.width, b.height);
 //	return new PlotItem(layer, new Point2D.Double(wr.x, wr.y), 
 //			b.width, b.height);
-	return new RectangleItem(layer, wr);
+	
+	return PlotItem.createHistogram(layer, new Point2D.Double(wr.x, wr.y), b.width, b.height, "Title", "X axis", "Y axis",
+			"curve 1", 1, 112, 112);
+////	return new RectangleItem(layer, wr);
     }
 
     /**

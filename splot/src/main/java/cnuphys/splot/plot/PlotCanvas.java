@@ -464,6 +464,8 @@ public class PlotCanvas extends JComponent implements MouseListener,
      */
     @Override
     public void mouseMoved(MouseEvent e) {
+    	
+  //  	System.err.println("Plot Canvas MMoved");
 	if (_dataSet == null) {
 	    return;
 	}
