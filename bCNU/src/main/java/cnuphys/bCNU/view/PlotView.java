@@ -1,7 +1,8 @@
 package cnuphys.bCNU.view;
 
 import javax.swing.JMenuBar;
-import cnuphys.bCNU.attributes.AttributeType;
+
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.splot.plot.SplotMenus;
@@ -28,11 +29,11 @@ public class PlotView extends BaseView {
 	protected SplotMenus _menus;
 
 	public PlotView() {
-		super(AttributeType.TITLE, "sPlot", AttributeType.ICONIFIABLE, true,
-				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-				AttributeType.RESIZABLE, true, AttributeType.WIDTH, 800,
-				AttributeType.HEIGHT, 800, AttributeType.VISIBLE, false,
-				AttributeType.VIEWTYPE, PLOTVIEWTYPE);
+		super(PropertySupport.TITLE, "sPlot", PropertySupport.ICONIFIABLE, true,
+				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
+				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 800,
+				PropertySupport.HEIGHT, 800, PropertySupport.VISIBLE, false,
+				PropertySupport.VIEWTYPE, PLOTVIEWTYPE);
 		add(createPlotPanel());
 		addMenus();
 	}

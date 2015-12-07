@@ -5,8 +5,6 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
-import javax.swing.JLabel;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.layer.LogicalLayer;
 

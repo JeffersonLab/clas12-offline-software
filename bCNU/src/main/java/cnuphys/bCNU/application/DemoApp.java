@@ -1,21 +1,10 @@
 package cnuphys.bCNU.application;
 
-import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.Point;
-import java.awt.geom.Rectangle2D.Double;
-
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.graphics.style.LineStyle;
-import cnuphys.bCNU.graphics.style.SymbolType;
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginProperties;
-import cnuphys.bCNU.plugin.shapes.PluginLine;
-import cnuphys.bCNU.plugin.shapes.PluginShape;
-import cnuphys.bCNU.plugin.shapes.PluginSquare;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.DrawingView;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.ViewManager;
@@ -52,10 +41,10 @@ public class DemoApp extends BaseMDIApplication {
 	 */
 	public static DemoApp getInstance() {
 		if (instance == null) {
-			instance = new DemoApp(AttributeType.TITLE,
+			instance = new DemoApp(PropertySupport.TITLE,
 					"Demo Application of Generic bCNU Views",
-					AttributeType.BACKGROUNDIMAGE, "images/cnu.png",
-					AttributeType.FRACTION, 0.8);
+					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
+					PropertySupport.FRACTION, 0.8);
 
 			instance.addInitialViews();
 		}

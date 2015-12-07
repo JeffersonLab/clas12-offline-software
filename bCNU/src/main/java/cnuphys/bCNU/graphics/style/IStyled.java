@@ -2,8 +2,6 @@ package cnuphys.bCNU.graphics.style;
 
 import java.awt.Color;
 
-import cnuphys.bCNU.attributes.Attributes;
-
 public interface IStyled {
 
 	/**
@@ -95,20 +93,4 @@ public interface IStyled {
 	 *            symbol size (full width) in pixels.
 	 */
 	public void setSymbolSize(int symbolSize);
-
-	/**
-	 * Place clones of the style parameters into the attributes for editing.
-	 * 
-	 * @param attributes
-	 *            the attributes object to stuff.
-	 */
-	public void toAttributes(Attributes attributes);
-
-	/**
-	 * Extract style parameters from an attributes object
-	 * 
-	 * @param attributes
-	 *            the attribute object in question.
-	 */
-	public void fromAttributes(Attributes attributes);
 }

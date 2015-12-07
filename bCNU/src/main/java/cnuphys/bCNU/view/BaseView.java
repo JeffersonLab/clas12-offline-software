@@ -25,8 +25,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import cnuphys.bCNU.application.Desktop;
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.attributes.Attributes;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.BaseContainer;
@@ -34,6 +32,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.UserToolBarComponent;
 import cnuphys.bCNU.menu.ViewPopupMenu;
+import cnuphys.bCNU.util.PropertySupport;
 
 /**
  * The BaseView class is the base class for all "views." Views are the internal
@@ -62,9 +61,6 @@ public class BaseView extends JInternalFrame {
     // generate a UUID for this view
     private UUID _uuid = UUID.randomUUID();
 
-    // properties object
-    private Properties _properties = new Properties();
-
     // user provided viewtype
     private int _viewType;
 
@@ -82,7 +78,7 @@ public class BaseView extends JInternalFrame {
     private ViewPopupMenu _viewPopupMenu;
 
     // attributes from var args
-    protected Attributes _attributes;
+    protected Properties _properties;
 
     // virtual view item, if used
     protected VirtualWindowItem _virtualItem;
@@ -90,9 +86,9 @@ public class BaseView extends JInternalFrame {
     /**
      * Constructor
      * 
-     * @param keyVals an optional variable length list of attributes in
-     *            type-value pairs. For example, AttributeType.NAME,
-     *            "my application", AttributeType.MAXIMIZABE, true, etc.
+     * @param keyVals an optional variable length list of propeties in
+     *            type-value pairs. For example, PropertySupport.TITLE,
+     *            "my application", PropertySupport.MAXIMIZABE, true, etc.
      */
     public BaseView(Object... keyVals) {
 
@@ -103,25 +99,22 @@ public class BaseView extends JInternalFrame {
 
 	// setLayout(new BorderLayout());
 
-	_attributes = new Attributes(keyVals);
+	_properties = PropertySupport.fromKeyValues(keyVals);
 	// get the recognized attributes
-	String title = _attributes.stringValue(AttributeType.TITLE);
+	String title = PropertySupport.getTitle(_properties);
 
 	// view decorations
-	boolean standardDecorations = _attributes
-		.booleanValue(AttributeType.STANDARDVIEWDECORATIONS);
-	boolean iconifiable = _attributes
-		.booleanValue(AttributeType.ICONIFIABLE);
-	boolean maximizable = _attributes
-		.booleanValue(AttributeType.MAXIMIZABLE);
-	boolean resizable = _attributes.booleanValue(AttributeType.RESIZABLE);
-	boolean closable = _attributes.booleanValue(AttributeType.CLOSABLE);
+	boolean standardDecorations = PropertySupport.getStandardViewDecorations(_properties);
+	boolean iconifiable = PropertySupport.getIconifiable(_properties);
+	boolean maximizable = PropertySupport.getMaximizable(_properties);
+	boolean resizable = PropertySupport.getResizable(_properties);
+	boolean closable = PropertySupport.getClosable(_properties);
 
 	// view visible
-	boolean visible = _attributes.booleanValue(AttributeType.VISIBLE);
+	boolean visible = PropertySupport.getVisible(_properties);
 
 	// view type
-	setViewType(_attributes.intValue(AttributeType.VIEWTYPE));
+	setViewType(PropertySupport.getViewType(_properties));
 
 	// apply the attributes
 	setTitle((title != null) ? title : "A View");
@@ -131,10 +124,10 @@ public class BaseView extends JInternalFrame {
 	setClosable(standardDecorations || closable);
 	setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
-	int left = _attributes.intValue(AttributeType.LEFT);
-	int top = _attributes.intValue(AttributeType.TOP);
-	int width = _attributes.intValue(AttributeType.WIDTH);
-	int height = _attributes.intValue(AttributeType.HEIGHT);
+	int left = PropertySupport.getLeft(_properties);
+	int top = PropertySupport.getTop(_properties);
+	int width = PropertySupport.getWidth(_properties);
+	int height = PropertySupport.getHeight(_properties);
 	if (left < 1) {
 	    left = LASTLEFT;
 	    LASTLEFT += DEL_H;
@@ -148,23 +141,22 @@ public class BaseView extends JInternalFrame {
 	ViewManager.getInstance().add(this);
 
 	// if the world system is not null, add a container
-	Rectangle2D.Double worldSystem = _attributes
-		.worldRectangleValue(AttributeType.WORLDSYSTEM);
+	Rectangle2D.Double worldSystem = PropertySupport.getWorldSystem(_properties);
 	if (worldSystem != null) {
 	    setLocation(left, top);
 
 	    // container in attributes? if not, use a BaseContainer
-	    _container = _attributes.containerValue(AttributeType.CONTAINER);
+	    _container = PropertySupport.getContainer(_properties);
 	    if (_container == null) {
 		_container = new BaseContainer(this, worldSystem,
-			_attributes.booleanValue(AttributeType.HEADSUP));
+			PropertySupport.getHeadsUp(_properties));
 	    }
 
 	    if (_container instanceof BaseContainer) {
-		int lmargin = _attributes.intValue(AttributeType.LEFTMARGIN);
-		int tmargin = _attributes.intValue(AttributeType.TOPMARGIN);
-		int rmargin = _attributes.intValue(AttributeType.RIGHTMARGIN);
-		int bmargin = _attributes.intValue(AttributeType.BOTTOMMARGIN);
+		int lmargin = PropertySupport.getLeftMargin(_properties);
+		int tmargin = PropertySupport.getTopMargin(_properties);
+		int rmargin = PropertySupport.getRightMargin(_properties);
+		int bmargin = PropertySupport.getBottomMargin(_properties);
 		_container.setLeftMargin(lmargin);
 		_container.setTopMargin(tmargin);
 		_container.setRightMargin(rmargin);
@@ -172,7 +164,7 @@ public class BaseView extends JInternalFrame {
 	    }
 
 	    // background color applies to the container
-	    Color background = _attributes.colorValue(AttributeType.BACKGROUND);
+	    Color background = PropertySupport.getBackground(_properties);
 	    if (background != null) {
 		_container.getComponent().setBackground(background);
 	    }
@@ -183,8 +175,7 @@ public class BaseView extends JInternalFrame {
 	    }
 
 	    // split west component? (like a file tree)
-	    JComponent westComponent = _attributes
-		    .componentValue(AttributeType.SPLITWESTCOMPONENT);
+	    JComponent westComponent = PropertySupport.getSplitWestComponent(_properties);
 	    if (westComponent != null) {
 		JSplitPane splitPane = new JSplitPane(
 			JSplitPane.HORIZONTAL_SPLIT, false, westComponent,
@@ -197,10 +188,9 @@ public class BaseView extends JInternalFrame {
 	    }
 
 	    // add a toolbar?
-	    boolean addToolBar = _attributes
-		    .booleanValue(AttributeType.TOOLBAR);
+	    boolean addToolBar = PropertySupport.getToolbar(_properties);
 	    if (addToolBar) {
-		int bits = _attributes.intValue(AttributeType.TOOLBARBITS);
+		int bits = PropertySupport.getToolbarBits(_properties);
 		if (bits == Integer.MIN_VALUE) {
 		    bits = BaseToolBar.EVERYTHING;
 		}
@@ -429,23 +419,16 @@ public class BaseView extends JInternalFrame {
     }
 
     /**
-     * Checks a boolean property. Returns <code>false</code> if the property is
-     * not found
-     * 
-     * @param key the key matched to the boolean we are checking
-     * @return <code>true</code> if the key is found and the value is "true"
-     *         (case insensitive)
+     * Get a boolean property 
+     * @param key the key
+     * @return the value (false on error).
      */
     public boolean checkBooleanProperty(String key) {
-	String s = _properties.getProperty(key);
-	if (s == null) {
-	    return false;
-	}
-	return s.equalsIgnoreCase("true");
+	return PropertySupport.getBoolean(_properties, key, false);
     }
 
     /**
-     * Set t a boolean property
+     * Set set a boolean property
      * 
      * @param key the key matched to the boolean we are setting
      * @param val the value to set

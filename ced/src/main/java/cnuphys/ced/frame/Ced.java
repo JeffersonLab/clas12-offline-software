@@ -24,7 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import cnuphys.bCNU.application.BaseMDIApplication;
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.ced.ced3d.CentralView3D;
 import cnuphys.ced.ced3d.FTCalView3D;
@@ -53,7 +52,6 @@ import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
-import cnuphys.ced.plugin.CedDemoPlugin;
 import cnuphys.ced.plugin.CedPluginManager;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
@@ -67,6 +65,7 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
@@ -145,8 +144,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      * Constructor (private--used to create singleton)
      * 
      * @param keyVals an optional variable length list of attributes in
-     *            type-value pairs. For example, AttributeType.NAME,
-     *            "my application", AttributeType.CENTER, true, etc.
+     *            type-value pairs. For example, PropertySupport.NAME,
+     *            "my application", PropertySupport.CENTER, true, etc.
      */
     private Ced(Object... keyVals) {
 	super(keyVals);
@@ -412,9 +411,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
      */
     private static Ced getInstance() {
 	if (_instance == null) {
-	    _instance = new Ced(AttributeType.TITLE, "ced " + versionString(),
-		    AttributeType.BACKGROUNDIMAGE, "images/cnu.png",
-		    AttributeType.WINDOWMENU, false, AttributeType.FRACTION,
+	    _instance = new Ced(PropertySupport.TITLE, "ced " + versionString(),
+		    PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
+		    PropertySupport.WINDOWMENU, false, PropertySupport.FRACTION,
 		    0.85);
 
 	    _instance.addInitialViews();

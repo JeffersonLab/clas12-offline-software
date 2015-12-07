@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.swing.JSplitPane;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.component.filetree.ExtensionFileFilter;
 import cnuphys.bCNU.component.filetree.FileDnDHandler;
 import cnuphys.bCNU.component.filetree.FileTreePanel;
@@ -15,6 +14,7 @@ import cnuphys.bCNU.component.filetree.IFileTreeListener;
 import cnuphys.bCNU.file.AFileHandler;
 import cnuphys.bCNU.file.FileHandlerFactory;
 import cnuphys.bCNU.file.IFileHandler;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.xml.tree.SAXJTree;
 
 @SuppressWarnings("serial")
@@ -50,11 +50,11 @@ public class XMLView extends BaseView implements IFileHandler,
 	 * Constructor for XML view.
 	 */
 	public XMLView() {
-		super(AttributeType.TITLE, "XML Tree", AttributeType.ICONIFIABLE, true,
-				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-				AttributeType.RESIZABLE, true, AttributeType.WIDTH, 700,
-				AttributeType.HEIGHT, 700, AttributeType.VISIBLE, false,
-				AttributeType.VIEWTYPE, XMLVIEWVIEWTYPE);
+		super(PropertySupport.TITLE, "XML Tree", PropertySupport.ICONIFIABLE, true,
+			PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
+			PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
+			PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false,
+			PropertySupport.VIEWTYPE, XMLVIEWVIEWTYPE);
 
 		_saxTree = new SAXJTree();
 		_fileTreePanel = createFileTreePanel();

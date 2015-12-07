@@ -53,7 +53,6 @@ import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.SwimTrajectory2D;
 import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.format.DoubleFormat;
@@ -66,6 +65,7 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.graphics.world.WorldPolygon;
 import cnuphys.bCNU.item.YouAreHereItem;
 import cnuphys.bCNU.layer.LogicalLayer;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
@@ -214,24 +214,24 @@ public class SectorView extends CedView implements ChangeListener {
 		}
 
 		// create the view
-		view = new SectorView(displaySectors, AttributeType.WORLDSYSTEM,
+		view = new SectorView(displaySectors, PropertySupport.WORLDSYSTEM,
 				new Rectangle2D.Double(zo, xo, wwidth, wheight),
 
-				AttributeType.LEFT, LEFT, AttributeType.TOP, TOP,
-				AttributeType.WIDTH, width, AttributeType.HEIGHT, height,
-				AttributeType.TOOLBAR, true, AttributeType.TOOLBARBITS,
+				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP,
+				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
+				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
 				BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
 						& ~BaseToolBar.CONTROLPANELBUTTON
 						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
-				AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
+				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 
-				AttributeType.BACKGROUND,
+				PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue").darker(),
-				// AttributeType.BACKGROUND,
+				// PropertySupport.BACKGROUND,
 				// X11Colors.getX11Color("dark slate gray"),
-				// AttributeType.BACKGROUND, Color.lightGray,
-				AttributeType.TITLE, title,
-				AttributeType.STANDARDVIEWDECORATIONS, true);
+				// PropertySupport.BACKGROUND, Color.lightGray,
+				PropertySupport.TITLE, title,
+				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.PHISLIDER

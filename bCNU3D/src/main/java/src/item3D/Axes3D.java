@@ -1,14 +1,11 @@
 package item3D;
 
-import item3D.Axis3D.AxisType;
-
 import java.awt.Color;
 import java.awt.Font;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class Axes3D extends Item3D {

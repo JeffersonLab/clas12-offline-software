@@ -10,7 +10,6 @@ import cnuphys.bCNU.graphics.rubberband.IRubberbanded;
 import cnuphys.bCNU.graphics.rubberband.Rubberband;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.ItemModification;
-import cnuphys.bCNU.item.ItemPopupManager;
 import cnuphys.bCNU.util.Environment;
 
 /**

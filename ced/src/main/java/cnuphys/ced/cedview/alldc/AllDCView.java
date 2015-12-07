@@ -18,7 +18,6 @@ import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.item.AllDCSuperLayer;
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -28,6 +27,7 @@ import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
 /**
@@ -107,20 +107,20 @@ public class AllDCView extends CedView {
 
 		// create the view
 		view = new AllDCView(
-				AttributeType.WORLDSYSTEM,
+				PropertySupport.WORLDSYSTEM,
 				_defaultWorldRectangle,
-				AttributeType.WIDTH,
+				PropertySupport.WIDTH,
 				d.width, // container width, not total view width
-				AttributeType.HEIGHT,
+				PropertySupport.HEIGHT,
 				d.height, // container height, not total view width
-				AttributeType.TOOLBAR, true, AttributeType.TOOLBARBITS,
+				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
 				BaseToolBar.NODRAWING & ~BaseToolBar.RANGEBUTTON
 						& ~BaseToolBar.TEXTFIELD
 						& ~BaseToolBar.CONTROLPANELBUTTON
 						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
-				AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-				AttributeType.TITLE, "All Drift Chambers",
-				AttributeType.STANDARDVIEWDECORATIONS, true);
+				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.TITLE, "All Drift Chambers",
+				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK

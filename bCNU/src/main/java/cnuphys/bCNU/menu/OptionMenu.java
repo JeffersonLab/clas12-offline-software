@@ -1,7 +1,9 @@
 package cnuphys.bCNU.menu;
 
+import javax.swing.JMenu;
+
 @SuppressWarnings("serial")
-public class OptionMenu extends ABaseMenu {
+public class OptionMenu extends JMenu {
 
 	// menu label
 	public static final String menuLabel = "Options";
@@ -11,20 +13,6 @@ public class OptionMenu extends ABaseMenu {
 	 */
 	public OptionMenu() {
 		super(menuLabel);
-	}
-
-	/**
-	 * Create the option menu.
-	 * 
-	 * @param addDefaults
-	 *            if <code>true</code> add the default menu items.
-	 */
-	public OptionMenu(boolean addDefaults) {
-		super(menuLabel, addDefaults);
-	}
-
-	@Override
-	protected void addDefaultItems() {
 	}
 
 }

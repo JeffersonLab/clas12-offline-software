@@ -2,7 +2,6 @@ package cnuphys.bCNU.item;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -35,6 +34,7 @@ public class VirtualPanel extends JPanel {
 		centerPanel.add(comp, BorderLayout.CENTER);
 	}
 	
+	@Override
 	public void paint(Graphics g) {
 //		System.err.println("PAINT");
 		super.paint(g);

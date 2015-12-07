@@ -8,9 +8,9 @@ import javax.swing.JPanel;
 import org.jlab.clas.detector.DetectorType;
 import org.jlab.clas12.basic.IDetectorModule;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.plugin.PluginManager;
 import cnuphys.bCNU.util.Jar;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
 
 public class CedPluginManager extends PluginManager {
@@ -102,11 +102,11 @@ public class CedPluginManager extends PluginManager {
 
     class PView extends BaseView {
 	public PView(IDetectorModule evm) {
-		super(AttributeType.TITLE, evm.getName(), AttributeType.ICONIFIABLE, true,
-			AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-			AttributeType.RESIZABLE, true, AttributeType.WIDTH, 600,
-			AttributeType.HEIGHT, 600, AttributeType.VISIBLE, false,
-			AttributeType.VIEWTYPE, -999);
+		super(PropertySupport.TITLE, evm.getName(), PropertySupport.ICONIFIABLE, true,
+			PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
+			PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 600,
+			PropertySupport.HEIGHT, 600, PropertySupport.VISIBLE, false,
+			PropertySupport.VIEWTYPE, -999);
 	    
 		add(evm.getDetectorPanel());
 	}

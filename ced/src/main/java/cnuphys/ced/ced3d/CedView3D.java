@@ -11,9 +11,9 @@ import javax.swing.JMenuItem;
 
 import org.jlab.evio.clas12.EvioDataEvent;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.util.PrintUtilities;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
@@ -43,9 +43,9 @@ public abstract class CedView3D extends BaseView implements
 
 	public CedView3D(String title, float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
-		super(AttributeType.TITLE, title, AttributeType.ICONIFIABLE, true,
-				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-				AttributeType.RESIZABLE, true, AttributeType.VISIBLE, true);
+		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
+				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
+				PropertySupport.RESIZABLE, true, PropertySupport.VISIBLE, true);
 
 		_eventManager.addClasIoEventListener(this, 2);
 

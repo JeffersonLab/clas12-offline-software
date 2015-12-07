@@ -14,10 +14,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Vector;
 
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.attributes.Attributes;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
-import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -309,46 +306,6 @@ public class TextItem extends RectangleItem {
 			}
 
 		}
-	}
-
-	/**
-	 * Get an displayable array of attributes. These will get changed if the
-	 * user makes any modifications--even if cancel is selected, so it is the
-	 * calling object's responsibility to send a clone if necessary. The
-	 * attribute editor will only call "setEditableAttributes" if the user
-	 * selects "OK" or "Apply".
-	 * 
-	 * @return a set of Attributes that will be placed in an Attribute Editor.
-	 */
-	@Override
-	public Attributes getDisplayedAttributes() {
-		// base implementation. The idea is to clone, if possible. The clone
-		// will be changed,
-		// even if the user hits cancel. But only if the user OK or cancel will
-		// the method
-		// setEditableAttributes be called.
-
-		Attributes attributes = super.getDisplayedAttributes();
-		attributes.add(AttributeType.TEXT, new String(_text));
-		return attributes;
-	}
-
-	/**
-	 * Notifies an object that a set of attributes has been edited, and the user
-	 * has selected OK or Apply. However, even if Cancel was selected, the
-	 * attributes may have changed, so it is the object's responsibility to, if
-	 * necessary, clone the attributes before sending them in a
-	 * GetEditableAttributes call.
-	 * 
-	 * @param attributes
-	 *            the modified attributes.
-	 */
-	@Override
-	public void setEditableAttributes(Attributes attributes) {
-		String nt = attributes.stringValue(AttributeType.TEXT);
-		_text = (nt == null) ? "" : new String(nt);
-		_text = UnicodeSupport.specialCharReplace(_text);
-		super.setEditableAttributes(attributes);
 	}
 
 }

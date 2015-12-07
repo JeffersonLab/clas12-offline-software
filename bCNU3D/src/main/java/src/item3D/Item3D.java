@@ -6,11 +6,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.glu.GLU;
-
 import bCNU3D.Bad3DPropertyException;
 import bCNU3D.Panel3D;
 

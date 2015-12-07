@@ -3,8 +3,6 @@ package cnuphys.bCNU.item;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
 
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.attributes.Attributes;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -60,29 +58,6 @@ public class PolylineItem extends PathBasedItem {
 		wpoly[index] = wp;
 		_path = WorldGraphicsUtilities.worldPolygonToPath(wpoly);
 		updateFocus();
-	}
-
-	/**
-	 * Get an displayable array of attributes. These will get changed if the
-	 * user makes any modifications--even if cancel is selected, so it is the
-	 * calling object's responsibility to send a clone if necessary. The
-	 * attribute editor will only call "setEditableAttributes" if the user
-	 * selects "OK" or "Apply".
-	 * 
-	 * @return a set of Attributes that will be placed in an Attribute Editor.
-	 */
-	@Override
-	public Attributes getDisplayedAttributes() {
-		// base implementation. The idea is to clone, if possible. The clone
-		// will be changed,
-		// even if the user hits cancel. But only if the user OK or cancel will
-		// the method
-		// setEditableAttributes be called.
-
-		Attributes attributes = super.getDisplayedAttributes();
-		attributes.remove(AttributeType.FILLCOLOR);
-		attributes.remove(AttributeType.UUID);
-		return attributes;
 	}
 
 }

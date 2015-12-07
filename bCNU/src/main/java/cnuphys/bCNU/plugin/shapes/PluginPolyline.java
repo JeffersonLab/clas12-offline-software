@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import cnuphys.bCNU.item.PolylineItem;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginPolyline extends PluginShape {
     /**
@@ -19,7 +20,7 @@ public class PluginPolyline extends PluginShape {
     public PluginPolyline(Plugin plugin, String info, Point2D.Double points[], Object ...properties) {
 	super(plugin, PluginShapeType.POLYLINE);	
 	_item = new PolylineItem(plugin.getView().getShapeLayer(), points);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	commonInit(info, PropertySupport.fromKeyValues(properties));
     }
     
     /**

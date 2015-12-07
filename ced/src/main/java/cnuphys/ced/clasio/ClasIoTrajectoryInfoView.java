@@ -2,7 +2,7 @@ package cnuphys.ced.clasio;
 
 import java.util.Vector;
 
-import cnuphys.bCNU.attributes.AttributeType;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.lund.TrajectoryRowData;
 import cnuphys.lund.TrajectoryTable;
@@ -16,11 +16,11 @@ public abstract class ClasIoTrajectoryInfoView extends BaseView implements
 			.getInstance();
 
 	protected ClasIoTrajectoryInfoView(String title) {
-		super(AttributeType.TITLE, title, AttributeType.ICONIFIABLE, true,
-				AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE, true,
-				AttributeType.RESIZABLE, true, AttributeType.WIDTH, 760,
-				AttributeType.HEIGHT, 250, AttributeType.LEFT, 700,
-				AttributeType.TOP, 100, AttributeType.VISIBLE, true);
+		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
+				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
+				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 760,
+				PropertySupport.HEIGHT, 250, PropertySupport.LEFT, 700,
+				PropertySupport.TOP, 100, PropertySupport.VISIBLE, true);
 
 		_trajectoryTable = new TrajectoryTable();
 		add(_trajectoryTable.getScrollPane());

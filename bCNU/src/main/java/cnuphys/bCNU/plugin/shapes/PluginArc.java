@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 
 import cnuphys.bCNU.item.ArcItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginArc extends PluginShape {
 
@@ -35,7 +35,7 @@ public class PluginArc extends PluginShape {
 		super(plugin, PluginShapeType.ARC);
 		Point2D.Double center = new Point2D.Double(xc, yc);
 		_item = new ArcItem(plugin.getView().getShapeLayer(), center, radius, startAngle, openingAngle);
-		commonInit(info, PluginSupport.fromKeyValues(properties));
+		commonInit(info, PropertySupport.fromKeyValues(properties));
 	}
 
 }

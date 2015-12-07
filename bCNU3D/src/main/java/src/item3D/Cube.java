@@ -1,12 +1,11 @@
 package item3D;
 
 import java.awt.Color;
-import java.awt.geom.Rectangle2D;
-
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class Cube extends Item3D {
@@ -45,42 +44,42 @@ public class Cube extends Item3D {
 	float zp = _zc + _halfLength;
 	
 	Support3D.setColor(gl, getColor());
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glVertex3f(xm, ym, zp);
 	gl.glVertex3f(xm, yp, zp);
 	gl.glVertex3f(xp, yp, zp);
 	gl.glVertex3f(xp, ym, zp);
 	gl.glEnd();
 	
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glVertex3f(xm, ym, zm);
 	gl.glVertex3f(xm, yp, zm);
 	gl.glVertex3f(xp, yp, zm);
 	gl.glVertex3f(xp, ym, zm);
 	gl.glEnd();
 	
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glVertex3f(xm, yp, zm);
 	gl.glVertex3f(xm, yp, zp);
 	gl.glVertex3f(xp, yp, zp);
 	gl.glVertex3f(xp, yp, zm);
 	gl.glEnd();
 	
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glVertex3f(xm, ym, zm);
 	gl.glVertex3f(xm, ym, zp);
 	gl.glVertex3f(xp, ym, zp);
 	gl.glVertex3f(xp, ym, zm);
 	gl.glEnd();
 	
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glVertex3f(xp, yp, zm);
 	gl.glVertex3f(xp, yp, zp);
 	gl.glVertex3f(xp, ym, zp);
 	gl.glVertex3f(xp, ym, zm);
 	gl.glEnd();
 
-	gl.glBegin(GL2.GL_QUADS);
+	gl.glBegin(GL2GL3.GL_QUADS);
 	gl.glVertex3f(xm, yp, zm);
 	gl.glVertex3f(xm, yp, zp);
 	gl.glVertex3f(xm, ym, zp);
