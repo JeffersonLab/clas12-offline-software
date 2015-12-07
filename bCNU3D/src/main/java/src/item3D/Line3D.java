@@ -5,7 +5,6 @@ import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class Line3D extends Item3D {

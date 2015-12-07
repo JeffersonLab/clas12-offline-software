@@ -15,11 +15,11 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.DrawingView;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.ViewManager;
@@ -49,10 +49,10 @@ public class DemoApp2 extends BaseMDIApplication {
 	 */
 	public static DemoApp2 getInstance() {
 		if (instance == null) {
-			instance = new DemoApp2(AttributeType.TITLE,
+			instance = new DemoApp2(PropertySupport.TITLE,
 					"Demo Application of Generic bCNU Views",
-					AttributeType.BACKGROUNDIMAGE, "images/cnu.png",
-					AttributeType.FRACTION, 0.65);
+					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
+					PropertySupport.FRACTION, 0.65);
 
 			instance.addInitialViews();
 		}

@@ -12,9 +12,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Properties;
 
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.attributes.Attributes;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -23,6 +22,7 @@ import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.Histo2DData;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
@@ -246,29 +246,29 @@ public class DCXYView extends HexView {
 	// get the attributes to pass to the super constructor
 	private static Object[] getAttributes(String title) {
 
-		Attributes attributes = new Attributes();
-		attributes.add(AttributeType.TITLE, title);
+		Properties props = new Properties();
+		props.put(PropertySupport.TITLE, title);
 
 		// set to a fraction of screen
 		Dimension d = GraphicsUtilities.screenFraction(0.65);
 
-		attributes.add(AttributeType.WORLDSYSTEM, _defaultWorld);
-		attributes.add(AttributeType.WIDTH, (int) (0.866 * d.height));
-		attributes.add(AttributeType.HEIGHT, d.height);
+		props.put(PropertySupport.WORLDSYSTEM, _defaultWorld);
+		props.put(PropertySupport.WIDTH, (int) (0.866 * d.height));
+		props.put(PropertySupport.HEIGHT, d.height);
 
-		attributes.add(AttributeType.TOOLBAR, true);
-		attributes.add(AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+		props.put(PropertySupport.TOOLBAR, true);
+		props.put(PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
 				& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
 				& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON
 				& ~BaseToolBar.DELETEBUTTON);
-		attributes.add(AttributeType.VISIBLE, true);
-		attributes.add(AttributeType.HEADSUP, false);
+		props.put(PropertySupport.VISIBLE, true);
+		props.put(PropertySupport.HEADSUP, false);
 
-		attributes.add(AttributeType.BACKGROUND,
+		props.put(PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue"));
-		attributes.add(AttributeType.STANDARDVIEWDECORATIONS, true);
+		props.put(PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		return attributes.toObjectArray();
+		return PropertySupport.toObjectArray(props);
 	}
 
 	@Override

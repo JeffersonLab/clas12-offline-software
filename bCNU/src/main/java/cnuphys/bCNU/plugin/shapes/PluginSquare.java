@@ -4,7 +4,7 @@ import java.awt.geom.Rectangle2D;
 
 import cnuphys.bCNU.item.RectangleItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginSquare extends PluginShape {
 
@@ -26,7 +26,7 @@ public class PluginSquare extends PluginShape {
 	double ymin = yc - halfLen;
 	Rectangle2D.Double wr = new Rectangle2D.Double(xmin, ymin, length, length);
 	_item = new RectangleItem(plugin.getView().getShapeLayer(), wr);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	commonInit(info, PropertySupport.fromKeyValues(properties));
     }
 
 }

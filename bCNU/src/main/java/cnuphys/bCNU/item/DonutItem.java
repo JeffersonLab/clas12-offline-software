@@ -6,7 +6,6 @@ import java.awt.geom.Point2D;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.bCNU.util.Point2DSupport;
 
 public class DonutItem extends PolygonItem {
 

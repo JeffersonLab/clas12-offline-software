@@ -32,7 +32,7 @@ public class Geometry {
 	// strip "num_strip" for the "num_detector"
 	int num_detector = sector - 1; // index of the detector (0...2)
 	int num_strip = strip - 1; // index of the strip (starts at 0)
-	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2)
+	int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 						    // 0=layers 1&2, 1=layers
 						    // 3&4, 2=layers 5&6
 
@@ -58,7 +58,7 @@ public class Geometry {
     public int getZStrip(int layer, double angle) { // the angle is the Lorentz
 						    // uncorrected angle
 
-	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2)
+	int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 						    // 0=layers 1&2, 1=layers
 						    // 3&4, 2=layers 5&6
 	int num_detector = -1;
@@ -90,7 +90,7 @@ public class Geometry {
      * @return the Z position of the strip center
      */
     private double CRZ_GetZStrip(int layer) {
-	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2)
+	int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 						    // 0=layers 1&2, 1=layers
 						    // 3&4, 2=layers 5&6
 	// For CR6Z, this function returns the Z position of the strip center
@@ -111,7 +111,7 @@ public class Geometry {
 	// num_detector = 0 (region A), 1 (region B), 2, (region C)
 
 	int num_detector = sector - 1; // index of the detector (0...2)
-	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2)
+	int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 						    // 0=layers 1&2, 1=layers
 						    // 3&4, 2=layers 5&6
 
@@ -136,7 +136,7 @@ public class Geometry {
 	// num_detector = 0 (region A), 1 (region B), 2, (region C)
 
 	int num_detector = sector - 1; // index of the detector (0...2)
-	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2)
+	int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 						    // 0=layers 1&2, 1=layers
 						    // 3&4, 2=layers 5&6
 
@@ -154,7 +154,7 @@ public class Geometry {
     private double CRC_GetZStrip(int sector, int layer, int strip) {
 
 	int num_strip = strip - 1; // index of the strip (starts at 0)
-	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2)
+	int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 						    // 0=layers 1&2, 1=layers
 						    // 3&4, 2=layers 5&6
 

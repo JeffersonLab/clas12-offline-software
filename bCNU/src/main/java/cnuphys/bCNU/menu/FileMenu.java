@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
@@ -19,7 +20,7 @@ import cnuphys.bCNU.application.Desktop;
  * 
  */
 @SuppressWarnings("serial")
-public class FileMenu extends ABaseMenu {
+public class FileMenu extends JMenu {
 
 	public static final String menuLabel = "File";
 
@@ -27,10 +28,6 @@ public class FileMenu extends ABaseMenu {
 	public FileMenu() {
 		super(menuLabel);
 		MenuManager.getInstance().setFileMenu(this);
-	}
-
-	@Override
-	protected void addDefaultItems() {
 		addSaveConfigurationItem();
 		addClearConfigurationItem();
 		addSeparator();

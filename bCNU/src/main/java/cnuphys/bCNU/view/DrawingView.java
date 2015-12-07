@@ -7,11 +7,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
+import cnuphys.bCNU.util.PropertySupport;
 
 /**
  * A simple view used to test the tool bar.
@@ -59,18 +59,18 @@ public class DrawingView extends BaseView implements IFeedbackProvider {
 
 		// create the view
 		view = new DrawingView(
-				AttributeType.WORLDSYSTEM,
+				PropertySupport.WORLDSYSTEM,
 				new Rectangle2D.Double(0.0, 0.0, width, height),
-				AttributeType.WIDTH,
+				PropertySupport.WIDTH,
 				width, // container width, not total view width
-				AttributeType.HEIGHT,
+				PropertySupport.HEIGHT,
 				height, // container height, not total view width
-				AttributeType.TOOLBAR, true, AttributeType.TOOLBARBITS,
-				BaseToolBar.EVERYTHING, AttributeType.VISIBLE, true,
-				AttributeType.BACKGROUND, Color.white, AttributeType.HEADSUP,
-				true, AttributeType.TITLE, " Drawing View ",
-				AttributeType.STANDARDVIEWDECORATIONS, true,
-				AttributeType.VIEWTYPE, DRAWINGVIEWTYPE);
+				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
+				BaseToolBar.EVERYTHING, PropertySupport.VISIBLE, true,
+				PropertySupport.BACKGROUND, Color.white, PropertySupport.HEADSUP,
+				true, PropertySupport.TITLE, " Drawing View ",
+				PropertySupport.STANDARDVIEWDECORATIONS, true,
+				PropertySupport.VIEWTYPE, DRAWINGVIEWTYPE);
 
 		view.pack();
 		return view;

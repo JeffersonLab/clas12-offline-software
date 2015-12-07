@@ -11,7 +11,7 @@ import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.item.PathBasedItem;
 import cnuphys.bCNU.item.TextItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginProperties;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginShape {
 
@@ -93,36 +93,36 @@ public class PluginShape {
 	}
 	
 	//fill color and line color and text color
-	Color fillColor = PluginProperties.getFillColor(props);
+	Color fillColor = PropertySupport.getFillColor(props);
 	if (fillColor != null) {
 	    setFillColor(fillColor);
 	}
 
-	Color lineColor = PluginProperties.getLineColor(props);
+	Color lineColor = PropertySupport.getLineColor(props);
 	if (lineColor != null) {
 	    setLineColor(lineColor);
 	}
 	
-	Color textColor = PluginProperties.getTextColor(props);
+	Color textColor = PropertySupport.getTextColor(props);
 	if (textColor != null) {
 	    setTextColor(textColor);
 	}
 
 	
 	//line width and style
-	setLineWidth(PluginProperties.getLineWidth(props));
-	setLineStyle(PluginProperties.getLineStyle(props));
+	setLineWidth(PropertySupport.getLineWidth(props));
+	setLineStyle(PropertySupport.getLineStyle(props));
 	
 	//symbol and symbol size
-	setSymbol(PluginProperties.getSymbol(props));
-	setSymbolSize(PluginProperties.getSymbolSize(props));
+	setSymbol(PropertySupport.getSymbol(props));
+	setSymbolSize(PropertySupport.getSymbolSize(props));
 	
 	//font and text color
-	setFont(PluginProperties.getFont(props));
-	setTextColor(PluginProperties.getTextColor(props));
+	setFont(PropertySupport.getFont(props));
+	setTextColor(PropertySupport.getTextColor(props));
 
 	// item locked
-	boolean locked = PluginProperties.getLocked(props);
+	boolean locked = PropertySupport.getLocked(props);
 	if (!locked) {
 	    _item.setLocked(false);
 	    _item.setRotatable(true);
@@ -132,7 +132,7 @@ public class PluginShape {
 	}
 	
 	//initial rotation angle (degrees)
-	double angle = PluginProperties.getRotationAngle(props);
+	double angle = PropertySupport.getRotationAngle(props);
 	if (Math.abs(angle) > 1.0e-6) {
 	    if (_item instanceof PathBasedItem) {
 		//minus to get ccw rotation
@@ -141,16 +141,16 @@ public class PluginShape {
 	}
 	
 	//ced identifications (yeah shouldn't be here)
-	_sector = PluginProperties.getSector(props);
-	_superlayer = PluginProperties.getSuperlayer(props);
-	_layer = PluginProperties.getLayer(props);
-	_component = PluginProperties.getComponent(props);
-	_crate = PluginProperties.getCrate(props);
-	_slot = PluginProperties.getSlot(props);
-	_channel = PluginProperties.getChannel(props);
+	_sector = PropertySupport.getSector(props);
+	_superlayer = PropertySupport.getSuperlayer(props);
+	_layer = PropertySupport.getLayer(props);
+	_component = PropertySupport.getComponent(props);
+	_crate = PropertySupport.getCrate(props);
+	_slot = PropertySupport.getSlot(props);
+	_channel = PropertySupport.getChannel(props);
 	
 	//optional user object that is attached to the shape
-	_userData = PluginProperties.getUserData(props);
+	_userData = PropertySupport.getUserData(props);
 	
     }
 

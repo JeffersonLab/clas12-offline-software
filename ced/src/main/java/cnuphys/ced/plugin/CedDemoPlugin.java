@@ -2,7 +2,6 @@ package cnuphys.ced.plugin;
 
 import java.awt.Color;
 import java.awt.Point;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D.Double;
 
 import org.jlab.evio.clas12.EvioDataEvent;
@@ -10,7 +9,6 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
-import cnuphys.bCNU.view.VirtualView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DCDataContainer;
 

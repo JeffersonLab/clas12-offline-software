@@ -2,33 +2,11 @@ package cnuphys.bCNU.plugin;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.Properties;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
 
 public class PluginSupport {    
     
-    /**
-     * Create a set of properties from the key values
-     * @param keyValues the set of key values
-     * @return a set of properties
-     */
-    public static Properties fromKeyValues(Object... keyValues) {
-	if ((keyValues == null) || (keyValues.length < 2)) {
-	    return null;
-	}
-	
-	int len = keyValues.length;
-	Properties props = new Properties();
-	
-	for (int i = 0; i < (len-1); i += 2) {
-	    Object key = keyValues[i];
-	    Object val = keyValues[i+1];
-	    props.put(key, val);
-	}
-	
-	return props;
-    }
     
     /**
      * Convenience method to covert separate x and y ordered arrays into and array

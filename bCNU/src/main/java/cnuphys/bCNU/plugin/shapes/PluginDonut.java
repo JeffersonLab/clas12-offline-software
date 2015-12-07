@@ -2,10 +2,9 @@ package cnuphys.bCNU.plugin.shapes;
 
 import java.awt.geom.Point2D;
 
-import cnuphys.bCNU.item.ArcItem;
 import cnuphys.bCNU.item.DonutItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginDonut extends PluginShape {
 
@@ -35,7 +34,7 @@ public class PluginDonut extends PluginShape {
 		super(plugin, PluginShapeType.DONUT);
 		Point2D.Double center = new Point2D.Double(xc, yc);
 		_item = new DonutItem(plugin.getView().getShapeLayer(), center, radiusInner, radiusOuter, startAngle, openingAngle);
-		commonInit(info, PluginSupport.fromKeyValues(properties));
+		commonInit(info, PropertySupport.fromKeyValues(properties));
 	}
 
 }

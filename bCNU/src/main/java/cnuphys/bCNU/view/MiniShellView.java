@@ -10,10 +10,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.shell.IProcessListener;
 import cnuphys.bCNU.shell.Shell;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.PropertySupport;
 
 /**
  * This is a predefined view used to mimic a shell.
@@ -37,11 +37,11 @@ public class MiniShellView extends BaseView implements KeyListener {
 	private static MiniShellView instance;
 
 	private MiniShellView() {
-		super(AttributeType.TITLE, "Mini Shell", AttributeType.ICONIFIABLE,
-				true, AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE,
-				true, AttributeType.RESIZABLE, true, AttributeType.WIDTH, 700,
-				AttributeType.HEIGHT, 450, AttributeType.VISIBLE, false,
-				AttributeType.VIEWTYPE, MINISHELLVIEWTYPE);
+		super(PropertySupport.TITLE, "Mini Shell", PropertySupport.ICONIFIABLE,
+				true, PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE,
+				true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
+				PropertySupport.HEIGHT, 450, PropertySupport.VISIBLE, false,
+				PropertySupport.VIEWTYPE, MINISHELLVIEWTYPE);
 		add(mainPanel());
 		setVisible(false);
 	}

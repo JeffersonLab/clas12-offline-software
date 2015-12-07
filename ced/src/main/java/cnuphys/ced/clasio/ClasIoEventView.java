@@ -5,8 +5,8 @@ import java.awt.Dimension;
 
 import javax.swing.JPanel;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.table.NodePanel;
 
@@ -23,10 +23,10 @@ public class ClasIoEventView extends BaseView {
 	 */
 	private ClasIoEventView() {
 
-		super(AttributeType.TITLE, "Evio Event", AttributeType.ICONIFIABLE,
-				true, AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE,
-				true, AttributeType.RESIZABLE, true, AttributeType.WIDTH, 950,
-				AttributeType.HEIGHT, 600, AttributeType.VISIBLE, true);
+		super(PropertySupport.TITLE, "Evio Event", PropertySupport.ICONIFIABLE,
+				true, PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE,
+				true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 950,
+				PropertySupport.HEIGHT, 600, PropertySupport.VISIBLE, true);
 
 		JPanel sPanel = new JPanel();
 		sPanel.setLayout(new BorderLayout(2, 2));

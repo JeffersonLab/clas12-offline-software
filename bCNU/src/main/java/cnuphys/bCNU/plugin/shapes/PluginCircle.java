@@ -3,7 +3,7 @@ package cnuphys.bCNU.plugin.shapes;
 import java.awt.geom.Point2D;
 import cnuphys.bCNU.item.EllipseItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginCircle extends PluginShape {
 
@@ -22,7 +22,7 @@ public class PluginCircle extends PluginShape {
 	super(plugin, PluginShapeType.CIRCLE);
 	Point2D.Double center = new Point2D.Double(xc, yc);
 	_item = new EllipseItem(plugin.getView().getShapeLayer(), 2*radius, 2*radius, 0, center);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	commonInit(info, PropertySupport.fromKeyValues(properties));
     }
 
 }

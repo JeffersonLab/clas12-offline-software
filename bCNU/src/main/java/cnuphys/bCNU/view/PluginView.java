@@ -7,15 +7,11 @@ import java.awt.geom.Rectangle2D;
 import java.util.Properties;
 
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginProperties;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginView extends BaseView {
 
@@ -52,20 +48,20 @@ public class PluginView extends BaseView {
      */
     public PluginView(String title, double xmin, double ymin, double xmax,
 	    double ymax, Properties props) {
-	super(AttributeType.TITLE, title, AttributeType.WORLDSYSTEM,
+	super(PropertySupport.TITLE, title, PropertySupport.WORLDSYSTEM,
 		new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin),
-		AttributeType.WIDTH, DEFAULT_WIDTH, AttributeType.HEIGHT,
-		DEFAULT_HEIGHT, AttributeType.TOOLBAR, true,
-		AttributeType.TOOLBARBITS,
+		PropertySupport.WIDTH, DEFAULT_WIDTH, PropertySupport.HEIGHT,
+		DEFAULT_HEIGHT, PropertySupport.TOOLBAR, true,
+		PropertySupport.TOOLBARBITS,
 		// BaseToolBar.EVERYTHING,
 		BaseToolBar.NODRAWING & ~BaseToolBar.RANGEBUTTON
 		// & ~BaseToolBar.TEXTFIELD
 			& ~BaseToolBar.CONTROLPANELBUTTON
 			& ~BaseToolBar.DELETEBUTTON,
-		AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-		AttributeType.BACKGROUND, DEFAULT_BACKGROUND,
-		AttributeType.VIEWTYPE, PLUGINVIEWTYPE,
-		AttributeType.STANDARDVIEWDECORATIONS, true);
+			PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+		PropertySupport.BACKGROUND, DEFAULT_BACKGROUND,
+		PropertySupport.VIEWTYPE, PLUGINVIEWTYPE,
+		PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 	// add the shape layer
 	_shapeLayer = new LogicalLayer(getContainer(), "Shapes");
@@ -128,14 +124,14 @@ public class PluginView extends BaseView {
 	    return;
 	}
 
-	Color background = PluginProperties.getBackground(props);
+	Color background = PropertySupport.getBackground(props);
 	if (background != null) {
 	    getContainer().getComponent().setBackground(background);
 	}
 
 	// height and width?
-	int height = PluginProperties.getHeight(props);
-	int width = PluginProperties.getWidth(props);
+	int height = PropertySupport.getHeight(props);
+	int width = PropertySupport.getWidth(props);
 
 	if (height == Integer.MIN_VALUE) {
 	    height = DEFAULT_HEIGHT;
@@ -147,8 +143,8 @@ public class PluginView extends BaseView {
 	setSize(width, height);
 	
 	//vv setting
-	_vvPanel = PluginProperties.getVVPanel(props);
-	_vvLocation = PluginProperties.getVVLocation(props);
+	_vvPanel = PropertySupport.getVVPanel(props);
+	_vvLocation = PropertySupport.getVVLocation(props);
 
     }
 

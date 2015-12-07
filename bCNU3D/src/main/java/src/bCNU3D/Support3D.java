@@ -1,14 +1,11 @@
 package bCNU3D;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-
 import com.jogamp.graph.geom.SVertex;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2GL3;
-import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;

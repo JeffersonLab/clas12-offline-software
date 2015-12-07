@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 
 import cnuphys.bCNU.item.PointItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginSymbol extends PluginShape {
 
@@ -21,6 +21,6 @@ public class PluginSymbol extends PluginShape {
 	super(plugin, PluginShapeType.SYMBOL);
 	Point2D.Double wp = new Point2D.Double(x, y);
 	_item = new PointItem(plugin.getView().getShapeLayer(), wp);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	commonInit(info, PropertySupport.fromKeyValues(properties));
     }
 }

@@ -11,12 +11,12 @@ import java.util.List;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
@@ -73,19 +73,19 @@ public class FTCalXYView extends CedXYView {
 		int height = width;
 
 		// create the view
-		view = new FTCalXYView(AttributeType.WORLDSYSTEM,
-				_defaultWorldRectangle, AttributeType.WIDTH, width,
-				AttributeType.HEIGHT, height, AttributeType.LEFTMARGIN,
-				LMARGIN, AttributeType.TOPMARGIN, TMARGIN,
-				AttributeType.RIGHTMARGIN, RMARGIN, AttributeType.BOTTOMMARGIN,
-				BMARGIN, AttributeType.TOOLBAR, true,
-				AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+		view = new FTCalXYView(PropertySupport.WORLDSYSTEM,
+				_defaultWorldRectangle, PropertySupport.WIDTH, width,
+				PropertySupport.HEIGHT, height, PropertySupport.LEFTMARGIN,
+				LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
+				PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN,
+				BMARGIN, PropertySupport.TOOLBAR, true,
+				PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
 						& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
 						& ~BaseToolBar.CONTROLPANELBUTTON
 						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
-				AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-				AttributeType.TITLE, "FTCal XY",
-				AttributeType.STANDARDVIEWDECORATIONS, true);
+				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.TITLE, "FTCal XY",
+				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND

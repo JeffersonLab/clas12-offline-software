@@ -3,7 +3,7 @@ package cnuphys.bCNU.plugin.shapes;
 import java.awt.geom.Point2D;
 import cnuphys.bCNU.item.LineItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginLine extends PluginShape {
 
@@ -24,7 +24,7 @@ public class PluginLine extends PluginShape {
 	Point2D.Double p1 = new Point2D.Double(x1, y1);
 	Point2D.Double p2 = new Point2D.Double(x2, y2);
 	_item = new LineItem(plugin.getView().getShapeLayer(), p1, p2);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	commonInit(info, PropertySupport.fromKeyValues(properties));
     }
 
 }

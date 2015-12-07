@@ -12,9 +12,9 @@ import javax.swing.JPanel;
 
 import org.jlab.evio.clas12.EvioDataEvent;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
@@ -47,12 +47,12 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 	private GEMCMetaDataTable _gemcTable;
 
 	public GEMCView() {
-		super(AttributeType.TITLE, "GEMC Options", AttributeType.ICONIFIABLE,
-				true, AttributeType.MAXIMIZABLE, true, AttributeType.CLOSABLE,
-				true, AttributeType.RESIZABLE, true, AttributeType.WIDTH,
-				GEMCMetaDataTable.preferredWidth(), AttributeType.HEIGHT, 650,
-				AttributeType.LEFT, 700, AttributeType.TOP, 100,
-				AttributeType.VISIBLE, true);
+		super(PropertySupport.TITLE, "GEMC Options", PropertySupport.ICONIFIABLE,
+				true, PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE,
+				true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH,
+				GEMCMetaDataTable.preferredWidth(), PropertySupport.HEIGHT, 650,
+				PropertySupport.LEFT, 700, PropertySupport.TOP, 100,
+				PropertySupport.VISIBLE, true);
 
 		setLayout(new BorderLayout(4, 4));
 

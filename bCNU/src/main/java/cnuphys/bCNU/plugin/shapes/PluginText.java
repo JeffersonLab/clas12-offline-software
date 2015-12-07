@@ -4,8 +4,7 @@ import java.awt.geom.Point2D;
 
 import cnuphys.bCNU.item.TextItem;
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.PluginProperties;
-import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginText extends PluginShape {
 
@@ -21,9 +20,9 @@ public class PluginText extends PluginShape {
     public PluginText(Plugin plugin, String info, double x, double y, Object ...properties) {
 	super(plugin, PluginShapeType.TEXT);
 	Point2D.Double location = new Point2D.Double(x, y);
-	_item = new TextItem(plugin.getView().getShapeLayer(), location, PluginProperties.defaultFont,
-			info, PluginProperties.defaultTextColor, null, null);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	_item = new TextItem(plugin.getView().getShapeLayer(), location, PropertySupport.defaultFont,
+			info, PropertySupport.defaultTextColor, null, null);
+	commonInit(info, PropertySupport.fromKeyValues(properties));
 	_item.setResizable(false);
 	_item.setRotatable(false);
     }

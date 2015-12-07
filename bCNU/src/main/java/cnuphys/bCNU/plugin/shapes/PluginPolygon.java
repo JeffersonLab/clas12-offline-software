@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginSupport;
+import cnuphys.bCNU.util.PropertySupport;
 
 public class PluginPolygon extends PluginShape {
 
@@ -19,7 +20,7 @@ public class PluginPolygon extends PluginShape {
     public PluginPolygon(Plugin plugin, String info, Point2D.Double points[], Object ...properties) {
 	super(plugin, PluginShapeType.POLYGON);	
 	_item = new PolygonItem(plugin.getView().getShapeLayer(), points);
-	commonInit(info, PluginSupport.fromKeyValues(properties));
+	commonInit(info, PropertySupport.fromKeyValues(properties));
     }
     
     /**

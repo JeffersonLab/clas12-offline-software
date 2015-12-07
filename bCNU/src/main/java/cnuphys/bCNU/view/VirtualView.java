@@ -22,11 +22,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
 public class VirtualView extends BaseView implements InternalFrameListener,
@@ -226,15 +226,15 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	int height = (int) ((width * world.height) / world.width);
 
 	// create the view
-	view = new VirtualView(AttributeType.WORLDSYSTEM, world,
-		AttributeType.LEFT, 0, AttributeType.TOP, 0,
-		AttributeType.WIDTH, width, AttributeType.HEIGHT, height,
-		AttributeType.TOOLBAR, false, AttributeType.VISIBLE, true,
-		AttributeType.BACKGROUND, Color.white, AttributeType.HEADSUP,
-		false, AttributeType.TITLE, VVTITLE,
-		AttributeType.STANDARDVIEWDECORATIONS, false,
-		AttributeType.ICONIFIABLE, false, AttributeType.RESIZABLE,
-		false, AttributeType.CLOSABLE, false, AttributeType.VIEWTYPE,
+	view = new VirtualView(PropertySupport.WORLDSYSTEM, world,
+		PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
+		PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
+		PropertySupport.TOOLBAR, false, PropertySupport.VISIBLE, true,
+		PropertySupport.BACKGROUND, Color.white, PropertySupport.HEADSUP,
+		false, PropertySupport.TITLE, VVTITLE,
+		PropertySupport.STANDARDVIEWDECORATIONS, false,
+		PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE,
+		false, PropertySupport.CLOSABLE, false, PropertySupport.VIEWTYPE,
 		VIRTUALVIEWTYPE);
 
 	view.pack();

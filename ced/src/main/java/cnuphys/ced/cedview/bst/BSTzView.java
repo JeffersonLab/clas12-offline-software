@@ -19,7 +19,6 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import cnuphys.bCNU.attributes.AttributeType;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.format.DoubleFormat;
@@ -31,6 +30,7 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.graphics.world.WorldPolygon;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
@@ -110,22 +110,22 @@ public class BSTzView extends CedView implements ChangeListener {
 
 		// create the view
 		view = new BSTzView(
-				AttributeType.WORLDSYSTEM,
+				PropertySupport.WORLDSYSTEM,
 				_defaultWorldRectangle,
-				AttributeType.WIDTH,
+				PropertySupport.WIDTH,
 				width, // container width, not total view width
-				AttributeType.HEIGHT,
+				PropertySupport.HEIGHT,
 				height, // container height, not total view width
-				AttributeType.LEFTMARGIN, LMARGIN, AttributeType.TOPMARGIN,
-				TMARGIN, AttributeType.RIGHTMARGIN, RMARGIN,
-				AttributeType.BOTTOMMARGIN, BMARGIN, AttributeType.TOOLBAR,
-				true, AttributeType.TOOLBARBITS, BaseToolBar.NODRAWING
+				PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN,
+				TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN,
+				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
+				true, PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
 						& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
 						& ~BaseToolBar.CONTROLPANELBUTTON
 						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
-				AttributeType.VISIBLE, true, AttributeType.HEADSUP, false,
-				AttributeType.TITLE, "SVT Z",
-				AttributeType.STANDARDVIEWDECORATIONS, true);
+				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.TITLE, "SVT Z",
+				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND

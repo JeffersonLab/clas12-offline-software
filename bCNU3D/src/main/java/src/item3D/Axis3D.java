@@ -6,8 +6,6 @@ import java.awt.FontMetrics;
 
 import bCNU3D.DoubleFormat;
 import bCNU3D.Panel3D;
-import bCNU3D.Support3D;
-
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.awt.TextRenderer;

@@ -6,8 +6,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
-import java.util.Vector;
-
 import javax.swing.ImageIcon;
 
 import cnuphys.bCNU.graphics.ImageManager;

@@ -2,9 +2,6 @@ package cnuphys.bCNU.graphics.style;
 
 import java.awt.Color;
 
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.attributes.Attributes;
-
 /**
  * An adapter for the IStyled interface.
  * 
@@ -137,62 +134,4 @@ public class Styled implements IStyled {
 		_symbolSize = symbolSize;
 	}
 
-	/**
-	 * Place clones of the style parameters into the attributes for editing.
-	 * 
-	 * @param attributes
-	 *            the attributes object to stuff.
-	 */
-	@Override
-	public void toAttributes(Attributes attributes) {
-		if (attributes == null) {
-			return;
-		}
-
-		Color fc = clone(_fillColor);
-		Color lc = clone(_lineColor);
-
-		fc = (fc != null) ? fc : Attributes.NULLCOLOR;
-		lc = (lc != null) ? lc : Attributes.NULLCOLOR;
-
-		// enums and primitives do not have to be cloned
-		attributes.add(AttributeType.SYMBOLTYPE, _symbolType);
-		attributes.add(AttributeType.LINESTYLE, _lineStyle);
-		attributes.add(AttributeType.FILLCOLOR, fc);
-		attributes.add(AttributeType.LINECOLOR, lc);
-		attributes.add(AttributeType.SYMBOLSIZE, _symbolSize);
-		attributes.add(AttributeType.LINEWIDTH, _lineWidth);
-	}
-
-	/**
-	 * Extract style parameters from an attributes object
-	 * 
-	 * @param attributes
-	 *            the attribute object in question.
-	 */
-	@Override
-	public void fromAttributes(Attributes attributes) {
-		if (attributes == null) {
-			return;
-		}
-
-		_symbolType = attributes.symbolTypeValue(AttributeType.SYMBOLTYPE);
-		_lineStyle = attributes.lineStyleValue(AttributeType.LINESTYLE);
-
-		_fillColor = clone(attributes.colorValue(AttributeType.FILLCOLOR));
-		_lineColor = clone(attributes.colorValue(AttributeType.LINECOLOR));
-
-		_symbolSize = Math
-				.max(3, attributes.intValue(AttributeType.SYMBOLSIZE));
-		_lineWidth = Math.max(0,
-				Math.min(10, attributes.intValue(AttributeType.LINEWIDTH)));
-	}
-
-	// clone a color
-	private Color clone(Color c) {
-		if (c == null) {
-			return null;
-		}
-		return new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
-	}
 }

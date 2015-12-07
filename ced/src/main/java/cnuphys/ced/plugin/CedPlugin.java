@@ -1,12 +1,8 @@
 package cnuphys.ced.plugin;
 
-import java.awt.Point;
-import java.awt.geom.Rectangle2D.Double;
-
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.plugin.Plugin;
-import cnuphys.bCNU.plugin.shapes.PluginShape;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.queue.ClasIoEventQueue;
 import cnuphys.ced.clasio.queue.EventConsumer;

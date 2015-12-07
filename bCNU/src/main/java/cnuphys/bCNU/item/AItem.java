@@ -8,7 +8,6 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
@@ -16,23 +15,15 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
 
-import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import cnuphys.bCNU.application.GlobalOptions;
-import cnuphys.bCNU.attributes.AttributeDialogEditor;
-import cnuphys.bCNU.attributes.AttributeType;
-import cnuphys.bCNU.attributes.Attributes;
-import cnuphys.bCNU.attributes.IAttributeDisplayable;
-import cnuphys.bCNU.attributes.IAttributeTableHelper;
 import cnuphys.bCNU.drawable.DrawableChangeType;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
@@ -54,8 +45,7 @@ import cnuphys.bCNU.view.BaseView;
  * @author heddle
  * 
  */
-public abstract class AItem implements IDrawable, IFeedbackProvider,
-		IAttributeDisplayable {
+public abstract class AItem implements IDrawable, IFeedbackProvider {
 
 	// usef for drawing a the focus point
 	protected static final Color _FOCUSFILL = new Color(128, 128, 128, 128);
@@ -75,9 +65,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 	// icon for rotation
 	protected static ImageIcon rotateIcon = ImageManager.getInstance()
 			.loadImageIcon("images/rotate.png");
-
-	// shared properties editor
-	protected static AttributeDialogEditor _editor;
 
 	/**
 	 * The path is used by some items (not point or line based items). NOTE: it
@@ -228,9 +215,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 	// used for select points
 	private static final Color _selectLine = Color.black;
 
-	// the action used to launch an edit
-	protected AbstractAction _editAction;
-
 	/**
 	 * Create an item on a specific layer.
 	 * 
@@ -245,13 +229,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 
 		_layer.getContainer().getFeedbackControl().addFeedbackProvider(this);
 
-		// action used to launch an edit
-		_editAction = new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editProperties();
-			}
-		};
 	}
 
 	/**
@@ -966,21 +943,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 //			editProperties();
 //		}
 	}
-
-	/**
-	 * Edit the item's properties. This could be called from the double click or
-	 * also from a right click --> "properties..." selection.
-	 */
-	public void editProperties() {
-		if (_editor == null) {
-			_editor = new AttributeDialogEditor("Properties", this);
-		} else {
-			_editor.setDisplayObject(this);
-		}
-		_editor.setVisible(true);
-
-	}
-
+	
+	
 	/**
 	 * Get the uuid for this item
 	 * 
@@ -1333,94 +1297,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider,
 		return getLayer().getContainer();
 	}
 
-	/**
-	 * Get an displayable array of attributes. These will get changed if the
-	 * user makes any modifications--even if cancel is selected, so it is the
-	 * calling object's responsibility to send a clone if necessary. The
-	 * attribute editor will only call "setEditableAttributes" if the user
-	 * selects "OK" or "Apply".
-	 * 
-	 * @return a set of Attributes that will be placed in an Attribute Editor.
-	 */
-	@Override
-	public Attributes getDisplayedAttributes() {
-		// base implementation. The idea is to clone, if possible. The clone
-		// will be changed,
-		// even if the user hits cancel. But only if the user OK or cancel will
-		// the method
-		// setEditableAttributes be called.
-
-		Attributes attributes = new Attributes();
-
-		// name
-		String cn = (_name == null) ? "no name" : new String(_name);
-		attributes.add(AttributeType.NAME, cn);
-
-		if (isRotatable()) {
-			attributes.add(AttributeType.AZIMUTH, _azimuth);
-		}
-
-		// uuid which will be uneditable
-		attributes.add(AttributeType.UUID, _uuid.toString());
-
-		// load style into attributes
-		_style.toAttributes(attributes);
-
-		return attributes;
-	}
-
-	/**
-	 * Notifies an object that a set of attributes has been edited, and the user
-	 * has selected OK or Apply. However, even if Cancel was selected, the
-	 * attributes may have changed, so it is the object's responsibility to, if
-	 * necessary, clone the attributes before sending them in a
-	 * GetEditableAttributes call.
-	 * 
-	 * @param attributes
-	 *            the modified attributes.
-	 */
-	@Override
-	public void setEditableAttributes(Attributes attributes) {
-		_style.fromAttributes(attributes);
-
-		String nn = attributes.stringValue(AttributeType.NAME);
-		_name = (nn == null) ? "no name" : new String(nn);
-
-		if (isRotatable()) {
-			_azimuth = attributes.doubleValue(AttributeType.AZIMUTH);
-		}
-
-		_layer.notifyDrawableChangeListeners(this, DrawableChangeType.MODIFIED);
-		// getContainer().setDirty(true);
-		getContainer().refresh();
-	}
-
-	/**
-	 * This optional help is needed if non standard attributes are being edited.
-	 * It will be asked to prove a Component for rendering the attribute in the
-	 * table and for editing the attribute.
-	 * 
-	 * @return the appropriate AttributeTableHelper.
-	 */
-	@Override
-	public IAttributeTableHelper getAttributeTableHelper() {
-		return null;
-	}
-
-	/**
-	 * This is used to get uneditable keys (names) so that they can just be
-	 * displayed in the table.
-	 * 
-	 * @return a collection of names (keys) that cannot be edited. If non-string
-	 *         objects are used as keys, supply their <code>toString()</code>
-	 *         result.
-	 */
-	@Override
-	public Collection<String> getUneditableKeys() {
-		Vector<String> v = new Vector<String>(10);
-		v.add(AttributeType.UUID.toString());
-		return v;
-	}
 
 	/**
 	 * @return the secondary points

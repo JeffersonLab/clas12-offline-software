@@ -1,6 +1,5 @@
 package item3D;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -8,12 +7,10 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureIO;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 import bCNU3D.Panel3D;
