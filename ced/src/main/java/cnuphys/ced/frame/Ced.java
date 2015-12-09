@@ -413,7 +413,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	if (_instance == null) {
 	    _instance = new Ced(PropertySupport.TITLE, "ced " + versionString(),
 		    PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
-		    PropertySupport.WINDOWMENU, false, PropertySupport.FRACTION,
+		    PropertySupport.FRACTION,
 		    0.85);
 
 	    _instance.addInitialViews();
