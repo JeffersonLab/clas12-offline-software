@@ -893,6 +893,9 @@ public class BaseToolBar extends CommonToolBar
 	if (getActiveButton() != _magnifyButton) {
 	    MagnifyWindow.closeMagnifyWindow();
 	}
+	if (_container != null) {
+	    _container.activeToolBarButtonChanged(getActiveButton());
+	}
     }
 
 }
