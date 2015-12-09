@@ -65,7 +65,6 @@ public class PropertySupport {
     public static final String VVPANEL = "VVPANEL";
     public static final String VVLOCATION = "VVLOCATION";
     public static final String WIDTH = "WIDTH";
-    public static final String WINDOWMENU = "WINDOWMENU";
     public static final String WORLDSYSTEM = "WORLDSYSTEM";
 
  
@@ -249,15 +248,6 @@ public class PropertySupport {
 	return getBoolean(props, TOOLBAR, true);
     }
     
-    /**
-     * Get the "use a window menu" boolean flag.
-     * @param props the properties
-     * @return the windowmenu flag. On error, return true.
-     */
-    public static boolean getWindowMenu(Properties props) {
-	return getBoolean(props, WINDOWMENU, true);
-    }
-
     /**
      * Get the tool bar bits.
      * @param props the properties

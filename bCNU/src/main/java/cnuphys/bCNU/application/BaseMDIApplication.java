@@ -13,7 +13,6 @@ import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.menu.FileMenu;
 import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.menu.OptionMenu;
-import cnuphys.bCNU.menu.WindowMenu;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.ViewManager;
 
@@ -64,8 +63,6 @@ public class BaseMDIApplication extends JFrame {
 		addWindowListener(wa);
 
 		// Get the attributes that we recognize;
-
-		WindowMenu.setUseWindowMenu(PropertySupport.getWindowMenu(_properties));
 
 		Color background =  PropertySupport.getBackground(_properties);
 		String backgroundImage = PropertySupport.getBackgroundImage(_properties);

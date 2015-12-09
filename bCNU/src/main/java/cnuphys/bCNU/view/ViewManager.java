@@ -12,7 +12,6 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.menu.WindowMenu;
 
 /**
  * Manages all the views, or internal frames.
@@ -151,10 +150,6 @@ public class ViewManager extends Vector<BaseView>
     @Override
     public void internalFrameActivated(InternalFrameEvent ife) {
 	BaseView view = (BaseView) (ife.getSource());
-	// Add to WindowMenu list
-	if (WindowMenu.useWindowMenu()) {
-	    WindowMenu.getInstance().addWindowToList(view);
-	}
     }
 
     /**
@@ -175,11 +170,6 @@ public class ViewManager extends Vector<BaseView>
     @Override
     public void internalFrameClosing(InternalFrameEvent ife) {
 	BaseView view = (BaseView) (ife.getSource());
-
-	// Remove from WindowMenu list
-	if (WindowMenu.useWindowMenu()) {
-	    WindowMenu.getInstance().removeWindowFromList(view);
-	}
     }
 
     /**
@@ -220,12 +210,7 @@ public class ViewManager extends Vector<BaseView>
     @Override
     public void internalFrameOpened(InternalFrameEvent ife) {
 	BaseView view = (BaseView) (ife.getSource());
-
-	// Add to WindowMenu list
-	if (WindowMenu.useWindowMenu()) {
-	    WindowMenu.getInstance().addWindowToList(view);
-	}
-    }
+   }
 
     /**
      * Gets the view menu whose state is maintained by the ViewManager.

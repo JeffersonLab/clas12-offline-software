@@ -1700,4 +1700,14 @@ public class BaseContainer extends JComponent
     private Rectangle2D.Double copy(Rectangle2D.Double wr) {
 	return new Rectangle2D.Double(wr.x, wr.y, wr.width, wr.height);
     }
+    
+    /**
+     * The active toolbar button changed.
+     * 
+     * @param activeButton the new active button.
+     */
+    @Override
+    public void activeToolBarButtonChanged(ToolBarToggleButton activeButton) {
+    }
+
 }

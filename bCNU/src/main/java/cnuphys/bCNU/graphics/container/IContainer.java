@@ -301,6 +301,12 @@ public interface IContainer {
 	 *            the new toolbar.
 	 */
 	public void setToolBar(BaseToolBar toolBar);
+	
+	/**
+	 * The active toolbar button changed.
+	 * @param activeButton the new active button.
+	 */
+	public void activeToolBarButtonChanged(ToolBarToggleButton activeButton);
 
 	/**
 	 * Get the active button on the toolbar, if there is a toolbar.
