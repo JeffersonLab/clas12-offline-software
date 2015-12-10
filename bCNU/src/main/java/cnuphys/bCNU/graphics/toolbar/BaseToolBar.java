@@ -51,7 +51,7 @@ public class BaseToolBar extends CommonToolBar
     // public static final int RUBBERBANDZOOMBUTTON = 0200000;
     // public static final int POINTERBUTTON = 0400000;
 
-    // public static final int XYBUTTON = 01000000;
+     public static final int RECTGRIDBUTTON = 01000000;
     // public static final int XZBUTTON = 02000000;
     // public static final int YZBUTTON = 04000000;
 
@@ -136,6 +136,9 @@ public class BaseToolBar extends CommonToolBar
 
     // draw a world rectangle
     private RectangleButton _rectangleButton;
+
+    // draw a world rectangle grid
+    private RectGridButton _rectgridButton;
 
     // draw a world rad arc
     private RadArcButton _radarcButton;
@@ -258,6 +261,10 @@ public class BaseToolBar extends CommonToolBar
 	if (notNothing && Bits.checkBit(bits, RECTANGLEBUTTON)) {
 	    _rectangleButton = new RectangleButton(_container);
 	}
+	
+	if (notNothing && Bits.checkBit(bits, RECTGRIDBUTTON)) {
+	    _rectgridButton = new RectGridButton(_container);
+	}
 
 	if (notNothing && Bits.checkBit(bits, RADARCBUTTON)) {
 	    _radarcButton = new RadArcButton(_container);
@@ -303,6 +310,7 @@ public class BaseToolBar extends CommonToolBar
 	add(_polylineButton);
 	add(_textButton);
 	add(_deleteButton);
+	add(_rectgridButton);
 
 	// add the text field?
 
@@ -544,6 +552,15 @@ public class BaseToolBar extends CommonToolBar
      */
     public RectangleButton getRectangleButton() {
 	return _rectangleButton;
+    }
+
+    /**
+     * Get the toolbar's rectangle grid button.
+     * 
+     * @return the toolbar's rectangle grid button.
+     */
+    public RectGridButton getRectGridButton() {
+	return _rectgridButton;
     }
 
     /**
