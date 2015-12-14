@@ -15,6 +15,7 @@ import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
 
 public class CrossDrawerXY extends BSTxyViewDrawer {
@@ -48,7 +49,15 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
-		// dc crosses?
+		drawBSTCrosses(g, container);
+		drawBMTCrosses(g, container);
+
+		g2.setStroke(oldStroke);
+	}
+
+	public void drawBSTCrosses(Graphics g, IContainer container) {
+
+		// bst crosses?
 		BSTDataContainer bstData = _eventManager.getBSTData();
 		if (bstData.getCrossCount() == 0) {
 			return;
@@ -104,23 +113,80 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 				// fbrects for quick feedback
 				_fbRects[i] = new Rectangle(pp.x - CROSSHALF, pp.y - CROSSHALF,
 						2 * CROSSHALF, 2 * CROSSHALF);
-			}
-		}
-
-		g2.setStroke(oldStroke);
+			} //for i to len
+		} //crosses not null
 	}
 
+	public void drawBMTCrosses(Graphics g, IContainer container) {
+
+		// bst crosses?
+		BMTDataContainer bmtData = _eventManager.getBMTData();
+		if (bmtData.getCrossCount() == 0) {
+			return;
+		}
+
+		// System.err.println("Drawing reconstructed data");
+
+		Point2D.Double wp = new Point2D.Double();
+		Point pp = new Point();
+		Point2D.Double wp2 = new Point2D.Double();
+		Point pp2 = new Point();
+
+		if (bmtData.bmtrec_crosses_x != null) {
+			double labx[] = bmtData.bmtrec_crosses_x;
+			double laby[] = bmtData.bmtrec_crosses_y;
+
+			int len = (labx == null) ? 0 : labx.length;
+
+			if (len == 0) {
+				_fbRects = null;
+			} else {
+				_fbRects = new Rectangle[len];
+			}
+
+			for (int i = 0; i < len; i++) {
+				wp.setLocation(labx[i], laby[i]);
+
+				// arrows
+
+				int pixlen = ARROWLEN;
+				double r = pixlen
+						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
+
+				double unitx[] = bmtData.bmtrec_crosses_ux;
+				double unity[] = bmtData.bmtrec_crosses_uy;
+				wp2.x = wp.x + r * unitx[i];
+				wp2.y = wp.y + r * unity[i];
+
+				container.worldToLocal(pp, wp);
+				container.worldToLocal(pp2, wp2);
+
+				g.setColor(Color.orange);
+				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+				g.setColor(Color.darkGray);
+				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+
+				// the circles and crosses
+				SymbolDraw.drawOval(g, pp.x, pp.y, CROSSHALF, CROSSHALF,
+						Color.black, TRANSYELLOW);
+				SymbolDraw.drawCross(g, pp.x, pp.y, CROSSHALF, Color.black);
+
+				// fbrects for quick feedback
+				_fbRects[i] = new Rectangle(pp.x - CROSSHALF, pp.y - CROSSHALF,
+						2 * CROSSHALF, 2 * CROSSHALF);
+			} //for i to len
+		} //crosses not null
+	}
+	
+	
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container the drawing container
+	 * @param screenPoint the mouse location
+	 * @param worldPoint the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
 	public void feedback(IContainer container, Point screenPoint,

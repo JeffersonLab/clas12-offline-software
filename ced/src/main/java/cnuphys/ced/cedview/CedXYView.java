@@ -225,6 +225,9 @@ public abstract class CedXYView extends CedView {
 
 		fbString("yellow", "xy " + Point2DSupport.toString(worldPoint) + " "
 				+ units, feedbackStrings);
+		fbString("yellow", "radius " + 
+				DoubleFormat.doubleFormat(Math.hypot(worldPoint.x, worldPoint.y), 2) + " "
+				+ units, feedbackStrings);
 		double phi = Math.toDegrees(Math.atan2(worldPoint.y, worldPoint.x));
 		fbString("yellow", "phi " + DoubleFormat.doubleFormat(phi, 2)
 				+ UnicodeSupport.DEGREE, feedbackStrings);

@@ -90,17 +90,19 @@ public class CedDemoPlugin extends CedPlugin {
 	DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
 	for (int hit = 0; hit < dcData.getHitCount(0); hit++) {
 		int sect = dcData.dc_dgtz_sector[hit]; // 1 based
-		int supl = dcData.dc_dgtz_superlayer[hit]; // 1 based
-		if ((sect == 2) && (supl == 1)) {
-		    int lay = dcData.dc_dgtz_layer[hit]; // 1 based
-		    int wire = dcData.dc_dgtz_wire[hit]; // 1 based
-		    shapes[lay][wire].setFillColor(Color.red);
-		    
-		    int tdc = dcData.dc_dgtz_tdc[hit];
-		    shapes[lay][wire].setInfoString("Layer: " + lay + " Wire: " + wire + "  TDC: " + tdc);
+			int supl = dcData.dc_dgtz_superlayer[hit]; // 1 based
+			if ((sect == 2) && (supl == 1)) {
+				int lay = dcData.dc_dgtz_layer[hit]; // 1 based
+				int wire = dcData.dc_dgtz_wire[hit]; // 1 based
+				shapes[lay][wire].setFillColor(Color.red);
+				if (dcData.dc_dgtz_tdc != null) {
+					int tdc = dcData.dc_dgtz_tdc[hit];
+					shapes[lay][wire].setInfoString("Layer: " + lay + " Wire: "
+							+ wire + "  TDC: " + tdc);
+				}
+			}
+
 		}
-	    
-	}
 
 	refresh();
     }
