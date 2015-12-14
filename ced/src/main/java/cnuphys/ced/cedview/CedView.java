@@ -314,7 +314,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 * @return <code>true</code> if we are to show the bst reconstructed
 	 *         crosses.
 	 */
-	public boolean showReconsBSTCrosses() {
+	public boolean showReconsCrosses() {
 		if ((_controlPanel == null)
 				|| (_controlPanel.getReconsDisplayArray() == null)) {
 			return false;

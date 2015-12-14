@@ -174,7 +174,7 @@ public class BSTzView extends CedView implements ChangeListener {
 				drawGEMCHits(g, container);
 				drawPanels(g, container);
 
-				if (showReconsBSTCrosses()) {
+				if (showReconsCrosses()) {
 					_crossDrawer.draw(g, container);
 				}
 

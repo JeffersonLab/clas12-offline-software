@@ -16,7 +16,6 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
-import java.util.UUID;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -86,23 +85,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	 * The focus of the item--often it is the center.
 	 */
 	protected Point2D.Double _focus;
-
-	/**
-	 * the item's unique id
-	 */
-	protected UUID _uuid;
-
-	/**
-	 * An arbitrary data object associated with this item, such as a remote
-	 * object.
-	 */
-	protected Object _associatedDataObject;
-
-	/**
-	 * An arbitrary graphics object associated with this item, such as from a
-	 * map toolkit.
-	 */
-	protected Object _associatedGraphicObject;
 
 	/**
 	 * What layer the item is on.
@@ -221,9 +203,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	 * @param layer
 	 *            the layer it is on.
 	 */
-	@SuppressWarnings("serial")
 	public AItem(LogicalLayer layer) {
-		_uuid = UUID.randomUUID();
 		_layer = layer;
 		_layer.add(this);
 
@@ -939,58 +919,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	 *            the causal event.
 	 */
 	public void doubleClicked(MouseEvent mouseEvent) {
-//		if (isLayerEnabled()) {
-//			editProperties();
-//		}
 	}
 	
-	
-	/**
-	 * Get the uuid for this item
-	 * 
-	 * @return the uuid
-	 */
-	public UUID getUuid() {
-		return _uuid;
-	}
-
-	/**
-	 * Get the optional data object associated with this item
-	 * 
-	 * @return the optional data object associated with this item
-	 */
-	public Object getAssociatedDataObject() {
-		return _associatedDataObject;
-	}
-
-	/**
-	 * Set the optional data object associated with this item
-	 * 
-	 * @param associatedObject
-	 *            the associated data bject to set
-	 */
-	public void setAssociatedDataObject(Object associatedObject) {
-		_associatedDataObject = associatedObject;
-	}
-
-	/**
-	 * Get the optional graphic object associated with this item
-	 * 
-	 * @return the optional graphic object associated with this item
-	 */
-	public Object getAssociatedGraphicObject() {
-		return _associatedGraphicObject;
-	}
-
-	/**
-	 * Set the optional object associated with this item
-	 * 
-	 * @param associatedObject
-	 *            the associated graphic object to set
-	 */
-	public void setAssociatedGraphicObject(Object associatedObject) {
-		_associatedGraphicObject = associatedObject;
-	}
 
 	/**
 	 * Is the given point int a select rect?
@@ -1224,15 +1154,12 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 		if (_parent != null) {
 			_parent.removeChild(this);
 
-			_associatedDataObject = null;
-			_associatedGraphicObject = null;
 			_focus = null;
 			_lastDrawnPolygon = null;
 			_layer = null;
 			_path = null;
 			_secondaryPoints = null;
 			_style = null;
-			_uuid = null;
 		}
 
 		// remove my children

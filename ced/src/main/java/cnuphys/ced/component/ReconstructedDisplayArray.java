@@ -36,7 +36,7 @@ public class ReconstructedDisplayArray extends CheckBoxArray implements
 	private static final String DC_TB_CROSS_LABEL = "DC TB Crosses";
 
 	/** Label for bst reconstructed crosses button */
-	private static final String BSTRECONS_CROSS_LABEL = "SVT Crosses";
+	private static final String RECONS_CROSS_LABEL = "BST/BMT Crosses";
 
 	/** Label for ftof reconstructed hits button */
 	private static final String FTOFRECONS_HIT_LABEL = "FTOF Hits";
@@ -107,7 +107,7 @@ public class ReconstructedDisplayArray extends CheckBoxArray implements
 		}
 
 		if (Bits.checkBit(bits, DisplayBits.BSTRECONS_CROSSES)) {
-			_reconsBSTCrossButton = add(BSTRECONS_CROSS_LABEL,
+			_reconsBSTCrossButton = add(RECONS_CROSS_LABEL,
 					showBSTreconsCrosses, true, this, _buttonColor)
 					.getCheckBox();
 		}
