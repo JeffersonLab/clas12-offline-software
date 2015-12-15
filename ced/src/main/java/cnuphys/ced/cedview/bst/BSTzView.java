@@ -66,6 +66,10 @@ public class BSTzView extends CedView implements ChangeListener {
 	// fill color
 	private static final Color HITFILL = new Color(255, 128, 0, 64);
 	private static final Color TRANS = new Color(192, 192, 192, 128);
+	
+	// default fill color half-alpha blue
+	private static final Color TRANS2 = new Color(0, 0, 255, 128);
+
 
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
@@ -73,7 +77,7 @@ public class BSTzView extends CedView implements ChangeListener {
 
 	// units are mm
 	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			-240., -200., 500., 400.);
+			-240., -230., 520., 460.);
 
 	// used to draw swum trajectories (if any) in the after drawer
 	private SwimTrajectoryDrawerZ _swimTrajectoryDrawer;
@@ -124,14 +128,15 @@ public class BSTzView extends CedView implements ChangeListener {
 						& ~BaseToolBar.CONTROLPANELBUTTON
 						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
-				PropertySupport.TITLE, "SVT Z",
+				PropertySupport.TITLE, "Central Z",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 				+ ControlPanel.PHISLIDER + +ControlPanel.RECONSARRAY
 				+ ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
-				+ ControlPanel.FIELDLEGEND, DisplayBits.MAGFIELD
+				+ ControlPanel.FIELDLEGEND + ControlPanel.DRAWLEGEND,
+				DisplayBits.MAGFIELD
 				+ DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
 				+ DisplayBits.MCTRUTH + DisplayBits.COSMICS, 2, 6);
 
@@ -169,17 +174,19 @@ public class BSTzView extends CedView implements ChangeListener {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
+				if (showCosmics()) {
+					drawCosmicTracks(g, container);
+				}
 
 				_swimTrajectoryDrawer.draw(g, container);
 				drawGEMCHits(g, container);
 				drawPanels(g, container);
+				
+				//not very sophisticated
+				denoteMicroMegas(g, container);
 
 				if (showReconsCrosses()) {
 					_crossDrawer.draw(g, container);
-				}
-
-				if (showCosmics()) {
-					drawCosmicTracks(g, container);
 				}
 
 				Rectangle screenRect = getActiveScreenRectangle(container);
@@ -190,6 +197,38 @@ public class BSTzView extends CedView implements ChangeListener {
 
 		};
 		getContainer().setAfterDraw(afterDraw);
+	}
+	
+	private void denoteMicroMegas(Graphics g, IContainer container) {
+		//hardwire for now layers 5 and 6
+		
+		double zmin = -166.51;
+		double zmax = 272.09;
+		double r5 = 205.8;
+		double r6 = 220.8;
+		double w = zmax-zmin;
+		double h = 4;
+
+		Graphics2D g2 = (Graphics2D) g;
+		Shape oldClip = g2.getClip();
+		// clip the active area
+		Rectangle sr = container.getInsetRectangle();
+		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+		
+		
+		Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r5, w, h);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
+		
+		wr.setFrame(zmin, -r5-h, w, h);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
+		
+		wr.setFrame(zmin, r6, w, h);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
+		
+		wr.setFrame(zmin, -r6-h, w, h);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
+		
+		g2.setClip(oldClip);
 	}
 
 	private void drawCosmicTracks(Graphics g, IContainer container) {

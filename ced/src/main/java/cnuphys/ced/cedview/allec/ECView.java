@@ -131,7 +131,7 @@ public class ECView extends HexView {
 
 	private void setAfterDraw() {
 		// use a before-drawer to sector dividers and labels
-		IDrawable beforeDraw = new DrawableAdapter() {
+		IDrawable afterDraw = new DrawableAdapter() {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
@@ -145,7 +145,7 @@ public class ECView extends HexView {
 
 		};
 
-		getContainer().setAfterDraw(beforeDraw);
+		getContainer().setAfterDraw(afterDraw);
 	}
 
 	// get the attributes to pass to the super constructor

@@ -31,21 +31,14 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.Fonts;
-import cnuphys.bCNU.util.Histo2DData;
 import cnuphys.bCNU.util.PropertySupport;
-import cnuphys.bCNU.util.X11Colors;
-import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
-import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
-import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -109,6 +102,9 @@ public class BSTxyView extends CedXYView {
 
 	// draws reconstructed crosses
 	private CrossDrawerXY _crossDrawer;
+	
+	//draws hits
+	private BSTxyHitDrawer _hitDrawer;
 
 	/**
 	 * Create a BST View
@@ -119,7 +115,8 @@ public class BSTxyView extends CedXYView {
 		super(keyVals);
 
 		_crossDrawer = new CrossDrawerXY(this);
-
+		_hitDrawer = new BSTxyHitDrawer(this);
+		
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
@@ -133,8 +130,16 @@ public class BSTxyView extends CedXYView {
 						paddleId);
 			}
 		}
-		
-
+	}
+	
+	/**
+	 * Get the Micromegas sector item
+	 * @param sector [1..3]
+	 * @param layer [1..6]
+	 * @return the Micromegas sector item
+	 */
+	public MicroMegasSector getMicroMegasSector(int sector, int layer) {
+		return microMegasSector[sector-1][layer-1];
 	}
 
 	/**
@@ -180,7 +185,7 @@ public class BSTxyView extends CedXYView {
 		view._controlPanel = new ControlPanel(view,
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 						+ ControlPanel.ACCUMULATIONLEGEND
-						+ ControlPanel.RECONSARRAY,
+						+ ControlPanel.RECONSARRAY + ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
 						+ DisplayBits.BSTHITS + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
@@ -244,9 +249,8 @@ public class BSTxyView extends CedXYView {
 					if (showCosmics()) {
 						drawCosmicTracks(g, container);
 					}
-					drawBSTHits(g, container);
 					
-					drawMicroMegasHits(g, container);
+					_hitDrawer.draw(g, container);
 
 					if (showReconsCrosses()) {
 						_crossDrawer.draw(g, container);
@@ -297,7 +301,7 @@ public class BSTxyView extends CedXYView {
 	}
 
 	// find the panel given the 1-based layer and sector
-	private BSTxyPanel getPanel(int layer, int sector) {
+	public BSTxyPanel getPanel(int layer, int sector) {
 		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return null;
@@ -346,7 +350,7 @@ public class BSTxyView extends CedXYView {
 	}
 
 	// draw one SVT panel
-	private void drawSVTPanel(Graphics2D g2, IContainer container,
+	public void drawSVTPanel(Graphics2D g2, IContainer container,
 			BSTxyPanel panel, Color color) {
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
@@ -415,248 +419,7 @@ public class BSTxyView extends CedXYView {
 		p1.y += dely;
 	}
 
-	// draw gemc simulated hits
-	private void drawBSTHits(Graphics g, IContainer container) {
-		if (getMode() == CedView.Mode.SINGLE_EVENT) {
-			drawBSTHitsSingleMode(g, container);
-		}
-		else {
-			drawGEMCHitsAccumulatedMode(g, container);
-		}
-	}
-	
-	//draw micromegas hits
-	private void drawMicroMegasHits(Graphics g, IContainer container) {
-		
-		for (int sect = 0; sect < 3; sect++) {
-			for (int lay = 4; lay < 6; lay++) {
-				microMegasSector[sect][lay].clearFBRects();
-			}
-		}
-		
-		
-		if (getMode() == CedView.Mode.SINGLE_EVENT) {
-			BMTDataContainer bmtData = _eventManager.getBMTData();
 
-			// System.err.println("BMTDATAContainer: " + bmtData);
-			int hitCount = bmtData.getHitCount(0);
-			if (hitCount > 0) {
-				// System.err.println("BMT HIT COUNT: " + hitCount);
-
-				int sect[] = bmtData.bmt_dgtz_sector;
-				int layer[] = bmtData.bmt_dgtz_layer;
-
-				for (int hit = 0; hit < hitCount; hit++) {
-					int geoSector = MicroMegasSector.geoSectorFromDataSector(sect[hit]);
-					MicroMegasSector mms = microMegasSector[geoSector-1][layer[hit]-1];
-					if (mms != null) {
-						mms.drawHit(g, container, bmtData, hit, X11Colors.getX11Color("lawn green"), Color.black);
-					}
-				}
-			}
-		}
-		else {
-		}
-	}
-
-	// draw gemc simulated hits accumulated mode
-	private void drawGEMCHitsAccumulatedMode(Graphics g, IContainer container) {
-		Histo2DData bstXYData = AccumulationManager.getInstance()
-				.getBSTXYGemcAccumulatedData();
-		if (bstXYData != null) {
-			// System.err.println("Good count: " + bstXYData.getGoodCount());
-			// System.err.println("Bad count: " +
-			// bstXYData.getOutOfRangeCount());
-			// System.err.println("Max count: " + bstXYData.getMaxZ());
-
-			long counts[][] = bstXYData.getCounts();
-			if (counts != null) {
-				Rectangle2D.Double wr = new Rectangle2D.Double();
-				Rectangle r = new Rectangle();
-
-				double maxBinCount = bstXYData.getMaxZ();
-
-				for (int i = 0; i < bstXYData.getNumberBinsX(); i++) {
-					double x1 = bstXYData.getBinMinX(i);
-					double x2 = bstXYData.getBinMaxX(i);
-
-					for (int j = 0; j < bstXYData.getNumberBinsY(); j++) {
-						if (counts[i][j] > 0) {
-							double y1 = bstXYData.getBinMinY(j);
-							double y2 = bstXYData.getBinMaxY(j);
-
-							wr.setFrame(x1, y1, x2 - x1, y2 - y1);
-
-							container.worldToLocal(r, wr);
-
-							double fract = ((counts[i][j])) / maxBinCount;
-							Color color = AccumulationManager
-									.getColorScaleModel().getColor(fract);
-
-							g.setColor(color);
-							g.fillRect(r.x, r.y, r.width, r.height);
-						}
-
-					}
-				}
-			} // counts != null
-
-		}
-	}
-
-	// draw gemc simulated hits single event mode
-	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
-
-		BSTDataContainer bstData = _eventManager.getBSTData();
-
-		int hitCount = bstData.getHitCount(0);
-		if (hitCount > 0) {
-
-			Shape oldClip = g.getClip();
-			Graphics2D g2 = (Graphics2D) g;
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON);
-
-			// panels
-			for (int i = 0; i < bstData.getHitCount(0); i++) {
-				BSTxyPanel panel = getPanel(bstData.bst_dgtz_layer[i],
-						bstData.bst_dgtz_sector[i]);
-				if (panel != null) {
-					drawSVTPanel(g2, container, panel, Color.red);
-				}
-			} // for on hits
-
-			// draw the actual hits
-
-			if (displayDgtzCrosses()) {
-
-				// System.err.println("DISPLAY CROSSES");
-
-				for (int superlayer = 0; superlayer < 4; superlayer++) {
-					for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[superlayer]; sector++) {
-						for (int layer = 0; layer < 2; layer++) {
-							// get all the strips for this triplet
-							Vector<Integer> vstrips = strips(sector, superlayer,
-									layer);
-							if (vstrips != null) {
-
-							}
-						}
-					}
-				}
-			}
-			else {
-				// System.err.println("DISPLAY MIDPOINTS");
-				Point pp = new Point();
-				for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-					// covert all to zero based indices
-					int sector = bstData.bst_dgtz_sector[hitIndex] - 1;
-					int complayer = bstData.bst_dgtz_layer[hitIndex];
-					int superlayer = (complayer - 1) / 2;
-					int layer = (complayer - 1) % 2;
-					int strip = bstData.bst_dgtz_strip[hitIndex] - 1;
-
-					if ((strip > 255) || (strip < 0)) {
-						Log.getInstance()
-								.warning("In BST dgtz data, bad strip Id:"
-										+ bstData.bst_dgtz_strip[hitIndex]);
-					}
-					else {
-						// System.err.println("Drawing strip midpoint ");
-						Point2D.Double wp = BSTGeometry.getStripMidpoint(sector,
-								superlayer, layer, strip);
-
-						container.worldToLocal(pp, 10 * wp.x, 10 * wp.y);
-
-						drawCross(g, pp.x, pp.y + 1,
-								X11Colors.getX11Color("Aquamarine"));
-						drawCross(g, pp.x, pp.y,
-								X11Colors.getX11Color("Dark Green"));
-					}
-
-					// System.out.println("sect " + sector + " supl " +
-					// superlayer + " lay " + layer + " strip " + strip);
-				}
-			}
-
-			// draw GEMC nearest x and y
-
-			if ((bstData.bst_true_avgX != null) && showMcTruth()) {
-
-				Rectangle sr = container.getInsetRectangle();
-				g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-
-				Point p1 = new Point();
-				Point2D.Double wp1 = new Point2D.Double();
-				Color default_fc = Color.red;
-
-				Stroke oldStroke = g2.getStroke();
-				g2.setStroke(stroke);
-
-				for (int i = 0; i < bstData.bst_true_avgX.length; i++) {
-					Color fc = default_fc;
-					if (bstData.bst_true_pid != null) {
-						LundId lid = LundSupport.getInstance()
-								.get(bstData.bst_true_pid[i]);
-						if (lid != null) {
-							fc = lid.getStyle().getFillColor();
-						}
-					}
-					g2.setColor(fc);
-
-					wp1.setLocation(bstData.bst_true_avgX[i],
-							bstData.bst_true_avgY[i]);
-					container.worldToLocal(p1, wp1);
-
-					// draw an x
-					g2.drawLine(p1.x - 3, p1.y - 3, p1.x + 3, p1.y + 3);
-					g2.drawLine(p1.x + 3, p1.y - 3, p1.x - 3, p1.y + 3);
-				}
-				g2.setStroke(oldStroke);
-			}
-
-			g.setClip(oldClip);
-		} // hotcount > 0
-
-	}
-
-	// get all the strips that match the input triplet
-	private Vector<Integer> strips(int sector, int superlayer, int layer) {
-
-		BSTDataContainer bstData = _eventManager.getBSTData();
-		int hitCount = bstData.getHitCount(0);
-		if (hitCount < 1) {
-			return null;
-		}
-
-		Vector<Integer> v = null;
-		int sect = sector + 1; // 1-based
-		int compositeLayer = 2 * superlayer + layer + 1; // composite layer
-
-		for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-			if (bstData.bst_dgtz_sector[hitIndex] == sect) {
-				if (bstData.bst_dgtz_layer[hitIndex] == compositeLayer) {
-					if (v == null) {
-						v = new Vector<Integer>();
-					}
-					v.add(bstData.bst_dgtz_strip[hitIndex]);
-				}
-			}
-		}
-
-		return v;
-	}
-
-	// draw a cross
-	private void drawCross(Graphics g, int x, int y, Color color) {
-		int len = 5;
-
-		g.setColor(TRANS2);
-		g.fillOval(x - len, y - len, 2 * len, 2 * len);
-		g.setColor(color);
-		g.drawLine(x - len, y, x + len, y);
-		g.drawLine(x, y - len, x, y + len);
-	}
 
 	/**
 	 * This adds the detector items. The AllDC view is not faithful to geometry.
@@ -782,6 +545,9 @@ public class BSTxyView extends CedXYView {
 		// reconstructed feedback?
 		_crossDrawer.feedback(container, screenPoint, worldPoint,
 				feedbackStrings);
+		
+		//hit feedback
+		_hitDrawer.feedback(container, screenPoint, worldPoint, feedbackStrings);
 
 	}
 

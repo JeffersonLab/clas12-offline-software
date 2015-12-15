@@ -125,8 +125,8 @@ public class AllDCView extends CedView {
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 				+ ControlPanel.ACCUMULATIONLEGEND + ControlPanel.RECONSARRAY,
-				DisplayBits.ACCUMULATION + DisplayBits.DC_HB_RECONS_HITS
-						+ DisplayBits.DC_TB_RECONS_HITS + DisplayBits.MCTRUTH,
+				DisplayBits.ACCUMULATION 
+						 + DisplayBits.MCTRUTH,
 				2, 10);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -188,48 +188,6 @@ public class AllDCView extends CedView {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-				DCDataContainer dcData = _eventManager.getDCData();
-
-				// reconstructed drawing
-				if (showDChbHits() && !_eventManager.isAccumulating()) {
-					int hbHitCount = dcData.getHitBasedHitCount();
-					if (hbHitCount > 0) {
-						int sector[] = dcData.hitbasedtrkg_hbhits_sector;
-						int wire[] = dcData.hitbasedtrkg_hbhits_wire;
-						int layer[] = dcData.hitbasedtrkg_hbhits_layer;
-						;
-						int superLayer[] = dcData.hitbasedtrkg_hbhits_superlayer;
-						Rectangle2D.Double wr = new Rectangle2D.Double();
-						Rectangle rr = new Rectangle();
-						for (int i = 0; i < hbHitCount; i++) {
-							getCell(sector[i], superLayer[i], layer[i],
-									wire[i], wr);
-
-							container.worldToLocal(rr, wr);
-							drawDiag(g, rr, DataDrawSupport.DC_TB_COLOR, 0);
-						} // end for
-					} // end hbhitcount > 0
-				} // show hb recons hits
-
-				if (showDCtbHits() && !_eventManager.isAccumulating()) {
-					int tbHitCount = dcData.getTimeBasedHitCount();
-					if (tbHitCount > 0) {
-						int sector[] = dcData.timebasedtrkg_tbhits_sector;
-						int wire[] = dcData.timebasedtrkg_tbhits_wire;
-						int layer[] = dcData.timebasedtrkg_tbhits_layer;
-						;
-						int superLayer[] = dcData.timebasedtrkg_tbhits_superlayer;
-						Rectangle2D.Double wr = new Rectangle2D.Double();
-						Rectangle rr = new Rectangle();
-						for (int i = 0; i < tbHitCount; i++) {
-							getCell(sector[i], superLayer[i], layer[i],
-									wire[i], wr);
-
-							container.worldToLocal(rr, wr);
-							drawDiag(g, rr, DataDrawSupport.DC_TB_COLOR, 1);
-						} // end for
-					} // end hbhitcount > 0
-				} // end tb hits
 			}
 
 		};

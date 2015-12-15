@@ -2,10 +2,12 @@ package cnuphys.ced.micromegas;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.DonutItem;
@@ -30,10 +32,9 @@ public class MicroMegasSector extends DonutItem {
 	private static double[] innerRadius = new double[6];
 	private static double[] outerRadius = new double[6];
 	
-	// cached rectangles for feedback
-	private Vector<FeedbackRect> _fbRects = new Vector<FeedbackRect>();
 
-
+	public static final String microMegasStr = UnicodeSupport.SMALL_MU + "megas";
+	
 	private static Geometry geo;
 
 	static {
@@ -78,10 +79,6 @@ public class MicroMegasSector extends DonutItem {
 		_layer = layer;
 	}
 	
-	public void clearFBRects() {
-		_fbRects.clear();		
-	}
-	
 	/**
 	 * Custom drawer for the item.
 	 * 
@@ -92,6 +89,13 @@ public class MicroMegasSector extends DonutItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
+		
+		Graphics2D g2 = (Graphics2D) g;
+		Shape oldClip = g2.getClip();
+		// clip the active area
+		Rectangle sr = container.getInsetRectangle();
+		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+
 		super.drawItem(g, container);
 		
 		if (_layer == 6) {
@@ -106,6 +110,8 @@ public class MicroMegasSector extends DonutItem {
 			container.worldToLocal(pp, wp);
 			g.drawString(s, pp.x+xoff[_sector-1], pp.y);
 		}
+		
+		g2.setClip(oldClip);
 	}
 	
 	//horrible hack
@@ -130,11 +136,11 @@ public class MicroMegasSector extends DonutItem {
 	 * @param fillColor
 	 * @param lineColor
 	 */
-	public void drawHit(Graphics g, IContainer container, BMTDataContainer bmtData,
+	public FeedbackRect drawHit(Graphics g, IContainer container, BMTDataContainer bmtData,
 			int hit, Color fillColor, Color lineColor) {
 		
 		if ((_layer % 2) == 0) {
-			return;
+			return null;
 		}
 		
 		int strips[] = bmtData.bmt_dgtz_strip;
@@ -162,19 +168,15 @@ public class MicroMegasSector extends DonutItem {
 		g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
 		g.setColor(lineColor);
 		g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
-		
-//		public FeedbackRect(int x, int y, int w, int h, int index,
-//				ADataContainer data, int opt, String... fbString) {
-		
+				
 		String edepStr="";
 		if (bmtData.bmt_dgtz_Edep != null) {
 			edepStr = "  edep " + DoubleFormat.doubleFormat(bmtData.bmt_dgtz_Edep[hit],2);
 		}
 		
-		_fbRects.add(new FeedbackRect(pp.x - 3, pp.y - 3, 6, 6, hit, bmtData, 0, 
-				"hit " + hit  + " strip " + strip + edepStr));
+		return new FeedbackRect(pp.x - 3, pp.y - 3, 6, 6, hit, bmtData, 0, 
+				microMegasStr + " hit " + hit  + " strip " + strip + edepStr);
 		
-//		System.err.println("FBRECTS LEN: " + _fbRects.size());
 	}
 
 	/**
@@ -193,17 +195,8 @@ public class MicroMegasSector extends DonutItem {
 			double ang  = Math.PI-Math.atan2(wp.y, wp.x);
 			int zstrip = geo.getZStrip(_layer, ang);
 
-			feedbackStrings.add("$lawn green$" + UnicodeSupport.SMALL_MU + "megas sect: "
-					+ sectorNames[_sector - 1] + " lay: " + _layer + " strip: " + zstrip);
-			
-			
-			if (!_fbRects.isEmpty()) {
-				for (FeedbackRect fbr : _fbRects) {
-					if (fbr.contains(screenPoint, feedbackStrings)) {
-						break;
-					}
-				}
-			}
+			feedbackStrings.add("$lawn green$" + microMegasStr + " sect: "
+					+ sectorNames[_sector - 1] + " lay: " + _layer + " strip: " + zstrip);			
 		}
 	}
 }

@@ -30,9 +30,9 @@ public abstract class CedXYView extends CedView {
 	protected static int BMARGIN = 50;
 
 	// line stroke
-	protected static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
+	public static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
 			LineStyle.SOLID);
-	protected static Stroke stroke2 = GraphicsUtilities.getStroke(3f,
+	public static Stroke stroke2 = GraphicsUtilities.getStroke(3f,
 			LineStyle.SOLID);
 
 	public static final Color TRANS1 = new Color(192, 192, 192, 128);

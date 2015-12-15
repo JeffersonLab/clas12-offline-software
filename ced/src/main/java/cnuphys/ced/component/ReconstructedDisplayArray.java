@@ -41,14 +41,8 @@ public class ReconstructedDisplayArray extends CheckBoxArray implements
 	/** Label for ftof reconstructed hits button */
 	private static final String FTOFRECONS_HIT_LABEL = "FTOF Hits";
 
-	// controls whether dc HB recons are displayed
-	private AbstractButton _dcHBHitsButton;
-
 	// controls whether dc HB reconstructed crosses are displayed
 	private AbstractButton _dcHBCrossesButton;
-
-	// controls whether dc TB recons are displayed
-	private AbstractButton _dcTBHitsButton;
 
 	// controls whether dc TB reconstructed crosses are displayed
 	private AbstractButton _dcTBCrossesButton;
@@ -88,22 +82,10 @@ public class ReconstructedDisplayArray extends CheckBoxArray implements
 					this, _buttonColor).getCheckBox();
 		}
 
-		// display hit based reconstructed hits?
-		if (Bits.checkBit(bits, DisplayBits.DC_HB_RECONS_HITS)) {
-			_dcHBHitsButton = add(DC_HB_HIT_LABEL, showDChbHits, true, this,
-					_buttonColor).getCheckBox();
-		}
-
 		// dc time based based reonstructed crosses?
 		if (Bits.checkBit(bits, DisplayBits.DC_TB_RECONS_CROSSES)) {
 			_dcTBCrossesButton = add(DC_TB_CROSS_LABEL, showDCtbCrosses, true,
 					this, _buttonColor).getCheckBox();
-		}
-
-		// display time based based reconstructed hits?
-		if (Bits.checkBit(bits, DisplayBits.DC_TB_RECONS_HITS)) {
-			_dcTBHitsButton = add(DC_TB_HIT_LABEL, showDCtbHits, true, this,
-					_buttonColor).getCheckBox();
 		}
 
 		if (Bits.checkBit(bits, DisplayBits.BSTRECONS_CROSSES)) {
@@ -148,30 +130,12 @@ public class ReconstructedDisplayArray extends CheckBoxArray implements
 	}
 
 	/**
-	 * Convenience method to see if we show the dc hb reconstructed hits.
-	 * 
-	 * @return <code>true</code> if we are to show dc hb reconstructed hits.
-	 */
-	public boolean showDChbHits() {
-		return (_dcHBHitsButton != null) && _dcHBHitsButton.isSelected();
-	}
-
-	/**
 	 * Convenience method to see if we show the dc hb reconstructed crosses.
 	 * 
 	 * @return <code>true</code> if we are to show dc hb reconstructed crosses.
 	 */
 	public boolean showDChbCrosses() {
 		return (_dcHBCrossesButton != null) && _dcHBCrossesButton.isSelected();
-	}
-
-	/**
-	 * Convenience method to see if we show the dc tb reconstructed hits.
-	 * 
-	 * @return <code>true</code> if we are to show dc tb reconstructed hits.
-	 */
-	public boolean showDCtbHits() {
-		return (_dcTBHitsButton != null) && _dcTBHitsButton.isSelected();
 	}
 
 	/**

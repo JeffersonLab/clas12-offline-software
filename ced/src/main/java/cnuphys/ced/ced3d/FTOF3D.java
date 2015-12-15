@@ -73,10 +73,23 @@ public class FTOF3D extends DetectorItem3D {
 
 	}
 
+	/**
+	 * Create a set of same color and size points for use on a Panel3D.
+	 * 
+	 * @param panel3D the owner 3D panel
+	 * @param coords the points as [x1, y1, z1, ..., xn, yn, zn]
+	 * @param color the color of the points
+	 * @param pointSize the drawing size of the points
+	 */
+//	public PointSet3D(Panel3D panel3D, float[] coords, Color color,
+//			float pointSize, boolean circular) {
+	
+	
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 		FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
+		//DRAW reconstructed hits
 		int sector[] = ftofData.ftofrec_ftofhits_sector;
 		if (sector == null) {
 			return;
@@ -95,11 +108,9 @@ public class FTOF3D extends DetectorItem3D {
 				xyz[1] = recY[i];
 				xyz[2] = recZ[i];
 
-				// Support3D.drawPoints(drawable, xyz, Color.cyan, Color.black,
-				// 10);
+				 Support3D.drawPoints(drawable, xyz, Color.cyan, Color.black,
+				 10, true);
 
-				Support3D.drawSprite(drawable, Sprites.getInstance()
-						.getGreenOn(), xyz[0], xyz[1], xyz[2], 16);
 			}
 		}
 	}

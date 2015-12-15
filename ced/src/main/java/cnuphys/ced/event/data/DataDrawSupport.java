@@ -4,10 +4,27 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 
-import cnuphys.ced.event.FeedbackRect;
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.splot.plot.X11Colors;
 
 public class DataDrawSupport {
+	
+	public static final int HB_CROSS  = 0;
+	public static final int TB_CROSS  = 1;
+	public static final int BST_CROSS = 2;
+	public static final int BMT_CROSS = 3;
+	
+	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
+	private static final Color TRANSORANGE = new Color(255, 128, 0, 240);
+	private static final Color TRANSGREEN = X11Colors.getX11Color("lawn green", 250);
+
+	public static Color transColors[] = { TRANSYELLOW, TRANSORANGE, TRANSYELLOW, TRANSGREEN };
+	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT "};
+	
+
+	public static final int CROSSHALF = 6; // pixels
+
+
 
 	private static final Color gemc_hit_fillColor = new Color(255, 255, 0, 128);
 	private static final Color gemc_hit_lineColor = X11Colors
@@ -59,6 +76,19 @@ public class DataDrawSupport {
 		g.drawLine(pp.x - 3, pp.y - 3, pp.x + 3, pp.y + 3);
 		g.drawLine(pp.x - 3, pp.y + 3, pp.x + 3, pp.y - 3);
 	}
+	
+	/**
+	 * Draw a reconstructed cross
+	 * @param g the graphics context
+	 * @param x the x location
+	 * @param y the y location
+	 * @param mode the mode (HB, TB, etc)
+	 */
+	public static void drawCross(Graphics g, int x, int y, int mode) {
+		SymbolDraw.drawOval(g, x, y, CROSSHALF, CROSSHALF, Color.black,
+				transColors[mode]);
+		SymbolDraw.drawCross(g, x, y, CROSSHALF, Color.black);
+	}
 
 	/**
 	 * Get a string representing the id array
@@ -81,40 +111,6 @@ public class DataDrawSupport {
 		}
 		return sb.toString();
 	}
-
-	/**
-	 * Draw a circle with a cross
-	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param fbr
-	 *            the enclosing rectangle
-	 * @param circColor
-	 *            the circle color
-	 * @param crossColor
-	 *            the cross color
-	 */
-	public static void drawCircleCross(Graphics g, FeedbackRect fbr,
-			Color circColor, Color crossColor) {
-		int l = fbr.x + 2;
-		int t = fbr.y + 2;
-		int r = l + fbr.width - 4;
-		int b = t + fbr.height - 4;
-
-		g.setColor(crossColor);
-		if (fbr.option == 0) {
-			g.drawLine(l, b, r, t);
-			g.drawLine(l, t, r, b);
-		} else {
-			int xc = (l + r) / 2;
-			int yc = (t + b) / 2;
-			g.drawLine(l, yc, r, yc);
-			g.drawLine(xc, t, xc, b);
-		}
-
-		g.setColor(circColor);
-		g.drawOval(fbr.x, fbr.y, fbr.width, fbr.height);
-
-	}
+	
 
 }

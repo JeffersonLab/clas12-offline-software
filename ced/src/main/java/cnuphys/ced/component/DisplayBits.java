@@ -17,17 +17,11 @@ public class DisplayBits {
 	/** A bit for inner/outer selection for ec */
 	public static final int INNEROUTER = 020;
 
-	/** dc hit based reconstructed hits */
-	public static final int DC_HB_RECONS_HITS = 040;
-
 	/** dc hit based reconstructed crosses */
 	public static final int DC_HB_RECONS_CROSSES = 0100;
 
 	/** bst reconstructed crosses */
 	public static final int BSTRECONS_CROSSES = 0200;
-
-	/** dc hit based reconstructed hits */
-	public static final int DC_TB_RECONS_HITS = 0400;
 
 	/** dc hit based reconstructed crosses */
 	public static final int DC_TB_RECONS_CROSSES = 01000;

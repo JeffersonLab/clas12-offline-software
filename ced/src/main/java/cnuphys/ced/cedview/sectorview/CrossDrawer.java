@@ -16,19 +16,13 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.DataDrawSupport;
 
 public class CrossDrawer extends SectorViewDrawer {
 
 	public static final int HB = 0;
 	public static final int TB = 1;
 
-	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
-	private static final Color TRANSORANGE = new Color(255, 128, 0, 240);
-
-	private static Color transColors[] = { TRANSYELLOW, TRANSORANGE };
-	private static String prefix[] = { "HB ", "TB " };
-
-	private static final int CROSSHALF = 6; // pixels
 	private static final int ARROWLEN = 40; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
 
@@ -149,13 +143,11 @@ public class CrossDrawer extends SectorViewDrawer {
 					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
 					// the circles and crosses
-					SymbolDraw.drawOval(g, pp.x, pp.y, CROSSHALF, CROSSHALF,
-							Color.black, transColors[_mode]);
-					SymbolDraw.drawCross(g, pp.x, pp.y, CROSSHALF, Color.black);
+					DataDrawSupport.drawCross(g2, pp.x, pp.y, _mode);
 
 					// fbrects for quick feedback
-					_fbRects[_mode].rects[i] = new Rectangle(pp.x - CROSSHALF,
-							pp.y - CROSSHALF, 2 * CROSSHALF, 2 * CROSSHALF);
+					_fbRects[_mode].rects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF,
+							pp.y - DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 				}
 
 			} // end for
@@ -245,7 +237,7 @@ public class CrossDrawer extends SectorViewDrawer {
 				// "cross ID: " + id
 				// + "  sect: " + sect + "  reg: " + reg
 				// + "  track: " + track);
-				feedbackStrings.add(fbcolors[_mode] + prefix[_mode]
+				feedbackStrings.add(fbcolors[_mode] + DataDrawSupport.prefix[_mode]
 						+ "cross ID: " + id + "  sect: " + sect + "  reg: "
 						+ reg);
 
@@ -276,7 +268,7 @@ public class CrossDrawer extends SectorViewDrawer {
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return fbcolors[_mode] + prefix[_mode] + prompt + " ("
+		return fbcolors[_mode] + DataDrawSupport.prefix[_mode] + prompt + " ("
 				+ DoubleFormat.doubleFormat(vx, 2) + ", "
 				+ DoubleFormat.doubleFormat(vy, 2) + ", "
 				+ DoubleFormat.doubleFormat(vz, 2) + ")";
