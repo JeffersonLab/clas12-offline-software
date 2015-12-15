@@ -23,6 +23,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
 import cnuphys.ced.cedview.CedView;
@@ -152,6 +153,7 @@ public class SectorView extends CedView implements ChangeListener {
 			X11Colors.getX11Color("Dark Green"), Color.black, Color.gray,
 			X11Colors.getX11Color("wheat") };
 
+	private CoordinateTransform _coordinateTransform;
 	/**
 	 * Create a sector view
 	 * 
@@ -176,6 +178,8 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// Recon drawer
 		_reconDrawer = new ReconDrawer(this);
+		
+		_coordinateTransform = new CoordinateTransform(this);
 	}
 
 	/**
@@ -239,9 +243,8 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER
 				+ ControlPanel.RECONSARRAY, DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
-				+ DisplayBits.DC_HB_RECONS_HITS
 				+ DisplayBits.DC_TB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_HITS + DisplayBits.FTOFHITS
+				+ DisplayBits.FTOFHITS
 				+ DisplayBits.SCALE + DisplayBits.MCTRUTH, 3, 6);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -564,20 +567,27 @@ public class SectorView extends CedView implements ChangeListener {
 	 */
 	public void getWorldFromLabXYZ(double x, double y, double z,
 			Point2D.Double wp) {
-		wp.x = z;
-		//
-		// int sector = GeometryManager.getSector(x, y);
-		// wp.y = Math.sqrt(x * x + y * y);
-		// if ((sector > 3)) {
-		// wp.y = - wp.y;
-		// }
+		
+		_coordinateTransform.labToWorld(x, y, z, wp);
+//		wp.x = z;
+//		
+////		 int sector = GeometryManager.getSector(x, y);
+////			Point3D p3d = new Point3D(x, y, z);
+////			p3d.rotateZ(Math.toRadians(getPhiRotate()));
+////
+////		 wp.y = Math.hypot(p3d.x(), p3d.y());
+////		 if ((sector > 3)) {
+////		 wp.y = - wp.y;
+////		 }
+//
+//		double phiRotate = Math.toRadians(getPhiRotate());
+////		 double beta = Math.atan2(y, x);
+////		 double alpha = phiRotate-beta;
+//
+//		wp.y = x * Math.cos(phiRotate) + y * Math.sin(phiRotate);
+//		// wp.y = Math.sqrt(x*x + y*y)*Math.cos(alpha); //gives exact same!
+		
 
-		double phiRotate = Math.toRadians(getPhiRotate());
-		// double beta = Math.atan2(y, x);
-		// double alpha = phiRotate-beta;
-
-		wp.y = x * Math.cos(phiRotate) + y * Math.sin(phiRotate);
-		// wp.y = Math.sqrt(x*x + y*y)*Math.cos(alpha); //gives exact same!
 	}
 
 	/**
@@ -660,7 +670,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// we are essentially display a plan yp=0, with xp vertical and zp
 		// horizontal. We need
-		// to rotate around z by "phiRotate" to get the x and y coordinates. Not
+		// to rotate around z by "phiRotate" to get the x and y coordinates. Note
 		// it is
 		// a simple rotation since yp is zero
 		double phiRotate = Math.toRadians(getPhiRotate());
@@ -792,14 +802,6 @@ public class SectorView extends CedView implements ChangeListener {
 
 		if (showMcTruth()) {
 			_mcHitDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
-		}
-
-		if (this.showDChbHits()) {
-			_reconDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
-		}
-
-		if (this.showDCtbHits()) {
-			_reconDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 1);
 		}
 
 	}
@@ -987,8 +989,10 @@ public class SectorView extends CedView implements ChangeListener {
 	 *            the causal event.
 	 */
 	@Override
-	public void rightClicked(MouseEvent mouseEvent) {
+	public boolean rightClicked(MouseEvent mouseEvent) {
 
+		System.err.println("RIGHT CLICKED");
+		
 		JPopupMenu popup = null;
 
 		final DCDataContainer dcData = _eventManager.getDCData();
@@ -1049,7 +1053,7 @@ public class SectorView extends CedView implements ChangeListener {
 			final SwimTrajectory2D traj2D = _swimTrajectoryDrawer
 					.getClosestTrajectory();
 			if (traj2D == null) {
-				return;
+				return false;
 			}
 
 			// get the phi from the trajectory
@@ -1130,8 +1134,10 @@ public class SectorView extends CedView implements ChangeListener {
 		Point p = mouseEvent.getPoint();
 		if (popup != null) {
 			popup.show(getContainer().getComponent(), p.x, p.y);
+			return true;
 		}
 
+		return false;
 	}
 
 	private void initPlot(PlotCanvas canvas, SwimTrajectory2D traj2D)

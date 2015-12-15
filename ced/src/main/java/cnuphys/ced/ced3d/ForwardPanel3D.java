@@ -17,11 +17,11 @@ public class ForwardPanel3D extends CedPanel3D {
 			SHOW_SECTOR_1, SHOW_SECTOR_2, SHOW_SECTOR_3, SHOW_SECTOR_4,
 			SHOW_SECTOR_5, SHOW_SECTOR_6, SHOW_DC, SHOW_EC, SHOW_PCAL,
 			SHOW_FTOF, SHOW_DOCA };
+	
 
 	public ForwardPanel3D(float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
 		super(angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
-
 	}
 
 	@Override
@@ -36,10 +36,11 @@ public class ForwardPanel3D extends CedPanel3D {
 		// trajectory drawer
 		TrajectoryDrawer3D trajDrawer = new TrajectoryDrawer3D(this);
 		addItem(trajDrawer);
+		
 
-		// mc hit drawer
-		// MCHitDrawer3D mchd = new MCHitDrawer3D(this);
-		// addItem(mchd);
+//		 mc hit drawer
+		 MCHitDrawer3D mchd = new MCHitDrawer3D(this);
+		 addItem(mchd);
 
 		// dc super layers
 		for (int sector = 1; sector <= 6; sector++) {

@@ -14,13 +14,14 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.DataDrawSupport;
 
 public class CrossDrawerZ extends BSTzViewDrawer {
 
-	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
-	private static final int CROSSHALF = 6; // pixels
 	private static final int ARROWLEN = 30; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
 	private static final Color ERROR = new Color(255, 0, 0, 128);
@@ -49,7 +50,13 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
-		// svt crosses?
+		drawBSTCrosses(g, container);
+		drawBMTCrosses(g, container);
+		g2.setStroke(oldStroke);
+	}
+
+	public void drawBSTCrosses(Graphics g, IContainer container) {
+		// bst crosses?
 		BSTDataContainer bstData = _eventManager.getBSTData();
 		if (bstData.getCrossCount() == 0) {
 			return;
@@ -76,6 +83,21 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 				_fbRects = new Rectangle[len];
 			}
 
+			// error bars
+			if (errz != null) {
+				for (int i = 0; i < len; i++) {
+					// System.err.println("Draw Z error bars");
+					_view.labToWorld(labx[i], laby[i], labz[i], wp);
+					wp3.setLocation(wp.x - errz[i], wp.y);
+					wp4.setLocation(wp.x + errz[i], wp.y);
+					container.worldToLocal(pp, wp3);
+					container.worldToLocal(pp2, wp4);
+					g.setColor(ERROR);
+					g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x,
+							2 * DataDrawSupport.CROSSHALF);
+				}
+			}
+			
 			for (int i = 0; i < len; i++) {
 				_view.labToWorld(labx[i], laby[i], labz[i], wp);
 
@@ -103,31 +125,95 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
 				// the circles and crosses
-				SymbolDraw.drawOval(g, pp.x, pp.y, CROSSHALF, CROSSHALF,
-						Color.black, TRANSYELLOW);
-				SymbolDraw.drawCross(g, pp.x, pp.y, CROSSHALF, Color.black);
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
 
-				// errorbars
-				if (errz != null) {
+				// fbrects for quick feedback
+				_fbRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
+			}
+		}
+	}
+	
+	public void drawBMTCrosses(Graphics g, IContainer container) {
+		// bst crosses?
+		BMTDataContainer bmtData = _eventManager.getBMTData();
+		if (bmtData.getCrossCount() == 0) {
+			return;
+		}
+
+		Point2D.Double wp = new Point2D.Double();
+		Point pp = new Point();
+		Point2D.Double wp2 = new Point2D.Double();
+		Point pp2 = new Point();
+		Point2D.Double wp3 = new Point2D.Double();
+		Point2D.Double wp4 = new Point2D.Double();
+
+		if (bmtData.bmtrec_crosses_x != null) {
+			double labx[] = bmtData.bmtrec_crosses_x;
+			double laby[] = bmtData.bmtrec_crosses_y;
+			double labz[] = bmtData.bmtrec_crosses_z;
+			double errz[] = bmtData.bmtrec_crosses_err_z;
+
+			int len = (labx == null) ? 0 : labx.length;
+
+			if (len == 0) {
+				_fbRects = null;
+			} else {
+				_fbRects = new Rectangle[len];
+			}
+			
+			// error bars
+			if (errz != null) {
+				for (int i = 0; i < len; i++) {
 					// System.err.println("Draw Z error bars");
+					_view.labToWorld(labx[i], laby[i], labz[i], wp);
 					wp3.setLocation(wp.x - errz[i], wp.y);
 					wp4.setLocation(wp.x + errz[i], wp.y);
 					container.worldToLocal(pp, wp3);
 					container.worldToLocal(pp2, wp4);
 					g.setColor(ERROR);
-					g.fillRect(pp.x, pp.y - CROSSHALF, pp2.x - pp.x,
-							2 * CROSSHALF);
+					g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x,
+							2 * DataDrawSupport.CROSSHALF);
 				}
+			}
+
+
+			for (int i = 0; i < len; i++) {
+				_view.labToWorld(labx[i], laby[i], labz[i], wp);
+
+				// arrows
+
+				int pixlen = ARROWLEN;
+				double r = pixlen
+						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
+
+				double unitx[] = bmtData.bmtrec_crosses_ux;
+				double unity[] = bmtData.bmtrec_crosses_uy;
+				double unitz[] = bmtData.bmtrec_crosses_uz;
+				double xa = labx[i] + r * unitx[i];
+				double ya = laby[i] + r * unity[i];
+				double za = labz[i] + r * unitz[i];
+				_view.labToWorld(xa, ya, za, wp2);
+
+				container.worldToLocal(pp, wp);
+				container.worldToLocal(pp2, wp2);
+
+				g.setColor(Color.orange);
+				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+				g.setColor(Color.darkGray);
+				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BMT_CROSS);
 
 				// fbrects for quick feedback
-				_fbRects[i] = new Rectangle(pp.x - CROSSHALF, pp.y - CROSSHALF,
-						2 * CROSSHALF, 2 * CROSSHALF);
+				_fbRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 			}
 		}
-
-		g2.setStroke(oldStroke);
 	}
-
+	
+	
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 

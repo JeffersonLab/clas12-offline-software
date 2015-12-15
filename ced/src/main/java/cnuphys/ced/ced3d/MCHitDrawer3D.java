@@ -8,6 +8,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.FTOFDataContainer;
+
 import com.jogamp.opengl.GLAutoDrawable;
 
 import item3D.Item3D;
@@ -32,7 +34,7 @@ public class MCHitDrawer3D extends Item3D {
 
 		if (_panel3D instanceof ForwardPanel3D) { // forward detectors
 		// DCDataContainer dcData = _eventManager.getDCData();
-		// FTOFDataContainer ftofData = _eventManager.getFTOFData();
+		 FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
 			// has EC and PCAL data
 			ECDataContainer ecData = _eventManager.getECData();
@@ -43,17 +45,17 @@ public class MCHitDrawer3D extends Item3D {
 			// dcData.dc_true_pid, 0);
 			// }
 
-			// if (showFTOF()) {
-			// showGemcXYZHits(drawable, ftofData, ftofData.ftof1a_true_avgX,
-			// ftofData.ftof1a_true_avgY, ftofData.ftof1a_true_avgZ,
-			// ftofData.ftof1a_true_pid, 0);
-			// showGemcXYZHits(drawable, ftofData, ftofData.ftof1b_true_avgX,
-			// ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ,
-			// ftofData.ftof1b_true_pid, 0);
-			// showGemcXYZHits(drawable, ftofData, ftofData.ftof2b_true_avgX,
-			// ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ,
-			// ftofData.ftof2b_true_pid, 0);
-			// }
+			if (showFTOF()) {
+				showGemcXYZHits(drawable, ftofData, ftofData.ftof1a_true_avgX,
+						ftofData.ftof1a_true_avgY, ftofData.ftof1a_true_avgZ,
+						ftofData.ftof1a_true_pid, 0);
+				showGemcXYZHits(drawable, ftofData, ftofData.ftof1b_true_avgX,
+						ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ,
+						ftofData.ftof1b_true_pid, 0);
+				showGemcXYZHits(drawable, ftofData, ftofData.ftof2b_true_avgX,
+						ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ,
+						ftofData.ftof2b_true_pid, 0);
+			}
 
 			if (showEC()) {
 				showGemcXYZHits(drawable, ecData, ecData.ec_true_avgX,
@@ -138,14 +140,15 @@ public class MCHitDrawer3D extends Item3D {
 			return;
 		}
 
+		
 		for (int hitIndex = 0; hitIndex < len; hitIndex++) {
 			Color truthColor = DetectorItem3D.truthColor(pid, hitIndex);
 			float xcm = (float) (x[hitIndex] / 10); // convert mm to cm
 			float ycm = (float) (y[hitIndex] / 10); // convert mm to cm
 			float zcm = (float) (z[hitIndex] / 10); // convert mm to cm
 			Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.black,
-					POINTSIZE + 2);
-			Support3D.drawPoint(drawable, xcm, ycm, zcm, truthColor, POINTSIZE);
+					POINTSIZE + 2, true);
+			Support3D.drawPoint(drawable, xcm, ycm, zcm, truthColor, POINTSIZE, true);
 
 		}
 

@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -14,14 +15,15 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.DataDrawSupport;
 
 public class CrossDrawerXY extends BSTxyViewDrawer {
 
-	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
-	private static final int CROSSHALF = 6; // pixels
+
 	private static final int ARROWLEN = 30; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
 
@@ -44,6 +46,10 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		}
 
 		Graphics2D g2 = (Graphics2D) g;
+		Shape oldClip = g2.getClip();
+		// clip the active area
+		Rectangle sr = container.getInsetRectangle();
+		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 		_fbRects = null;
 
 		Stroke oldStroke = g2.getStroke();
@@ -53,6 +59,8 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		drawBMTCrosses(g, container);
 
 		g2.setStroke(oldStroke);
+		
+		g2.setClip(oldClip);
 	}
 
 	public void drawBSTCrosses(Graphics g, IContainer container) {
@@ -106,13 +114,11 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
 				// the circles and crosses
-				SymbolDraw.drawOval(g, pp.x, pp.y, CROSSHALF, CROSSHALF,
-						Color.black, TRANSYELLOW);
-				SymbolDraw.drawCross(g, pp.x, pp.y, CROSSHALF, Color.black);
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
 
 				// fbrects for quick feedback
-				_fbRects[i] = new Rectangle(pp.x - CROSSHALF, pp.y - CROSSHALF,
-						2 * CROSSHALF, 2 * CROSSHALF);
+				_fbRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 			} //for i to len
 		} //crosses not null
 	}
@@ -168,13 +174,11 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
 				// the circles and crosses
-				SymbolDraw.drawOval(g, pp.x, pp.y, CROSSHALF, CROSSHALF,
-						Color.black, TRANSYELLOW);
-				SymbolDraw.drawCross(g, pp.x, pp.y, CROSSHALF, Color.black);
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BMT_CROSS);
 
 				// fbrects for quick feedback
-				_fbRects[i] = new Rectangle(pp.x - CROSSHALF, pp.y - CROSSHALF,
-						2 * CROSSHALF, 2 * CROSSHALF);
+				_fbRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 			} //for i to len
 		} //crosses not null
 	}

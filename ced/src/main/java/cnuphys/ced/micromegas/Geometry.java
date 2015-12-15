@@ -72,6 +72,10 @@ public class Geometry {
 				break;
 			}
 		}
+		
+		if (num_detector < 0) {
+			return -1;
+		}
 
 		int strip_num = (int) Math
 				.floor(((angle - Constants.CRZEDGE1[num_region][num_detector])
@@ -89,7 +93,7 @@ public class Geometry {
 	 * @param layer the layer 1...6
 	 * @return the Z position of the strip center
 	 */
-	private double CRZ_GetZStrip(int layer) {
+	public double CRZ_GetZStrip(int layer) {
 		int num_region = (layer + 1) / 2 - 1; // region index (0...2)
 		// 0=layers 1&2, 1=layers
 		// 3&4, 2=layers 5&6
@@ -198,6 +202,14 @@ public class Geometry {
 			}
 		}
 		
+		System.out.println();
+		// some z extent
+		for (int layer = 5; layer <= 6; layer++) {
+			double z = geo.CRZ_GetZStrip(layer);
+			double len2 = Constants.CRCLENGTH[2]/2;
+			System.out.println("layer: " + layer + " z min: " + (z-len2) + "  z max: " + (z+len2));
+		}
+	
 
 //		int sector = 3;
 //		int layer = 5;

@@ -12,8 +12,12 @@ import java.awt.Rectangle;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.view.BaseView;
+import cnuphys.ced.cedview.bst.BSTxyView;
+import cnuphys.ced.cedview.bst.BSTzView;
+import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DataDrawSupport;
@@ -22,6 +26,7 @@ public class DrawingLegend extends JComponent {
 
 	private int width = 100;
 	private int height = 100;
+	
 
 	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 9);
 
@@ -71,30 +76,33 @@ public class DrawingLegend extends JComponent {
 
 		// view dependent drawing
 		if (_view != null) {
-			if (_view instanceof SectorView) {
-				Dimension d = paintSectorViewLegend(g, x, yc);
+			if ((_view instanceof SectorView) || (_view instanceof DCXYView)) {
+				paintSectorViewLegend(g, x, yc);
+			}
+			
+			else if ((_view instanceof BSTxyView) || (_view instanceof BSTzView)) {
+				paintCentralViewLegend(g, x, yc);
 			}
 		}
 
 	}
 
-	private Dimension paintSectorViewLegend(Graphics g, int x, int yc) {
+	private void paintCentralViewLegend(Graphics g, int x, int yc) {
+		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
+		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
+	}
 
-		int xo = x;
-		int yo = yc;
+	private void paintSectorViewLegend(Graphics g, int x, int yc) {
+		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
+		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
+	}
 
-		// hit based dc
-		FeedbackRect fbr = new FeedbackRect(x - 4, yc - 4, 8, 8, 0, null, 0);
-		DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
-				DataDrawSupport.DC_HB_COLOR);
-		x += quickString(g, x + 6, yc, "DC Hit Based ") + 20;
-
-		fbr = new FeedbackRect(x - 4, yc - 4, 8, 8, 0, null, 0);
-		DataDrawSupport.drawCircleCross(g, fbr, Color.gray,
-				DataDrawSupport.DC_TB_COLOR);
-		x += quickString(g, x + 6, yc, "DC Time Based ") + 20;
-
-		return new Dimension(x - xo, yc - yo);
+	private int drawCross(Graphics g, int x, int y, int mode) {
+		DataDrawSupport.drawCross(g, x, y, mode);
+		
+		x += (2*DataDrawSupport.CROSSHALF);
+		String s = DataDrawSupport.prefix[mode] + "cross";
+		return quickString(g, x, y, s) + 16;
 	}
 
 	private int quickString(Graphics g, int x, int yc, String s) {

@@ -323,20 +323,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	}
 
 	/**
-	 * Convenience method to see it we show the dc hit-based reconstructed hits.
-	 * 
-	 * @return <code>true</code> if we are to show the dc hit-based
-	 *         reconstructed hits.
-	 */
-	public boolean showDChbHits() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
-			return false;
-		}
-		return _controlPanel.getReconsDisplayArray().showDChbHits();
-	}
-
-	/**
 	 * Convenience method to see it we show the dc hit-based reconstructed
 	 * crosses.
 	 * 
@@ -349,21 +335,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 			return false;
 		}
 		return _controlPanel.getReconsDisplayArray().showDChbCrosses();
-	}
-
-	/**
-	 * Convenience method to see it we show the dc time-based reconstructed
-	 * hits.
-	 * 
-	 * @return <code>true</code> if we are to show the dc time-based
-	 *         reconstructed hits.
-	 */
-	public boolean showDCtbHits() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
-			return false;
-		}
-		return _controlPanel.getReconsDisplayArray().showDCtbHits();
 	}
 
 	/**

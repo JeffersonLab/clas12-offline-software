@@ -25,7 +25,7 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
 	private Line2D.Double line;
 
 	/**
-	 * Create a BSTxyPanel from a string. The panel is really just a thick line
+	 * Create a BSTxyPanel. The panel is really just a thick line
 	 * 
 	 * @param sect
 	 *            1-based

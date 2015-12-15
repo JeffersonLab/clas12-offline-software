@@ -123,17 +123,17 @@ public abstract class DetectorItem3D extends Item3D {
 	protected void drawMCPoint(GLAutoDrawable drawable, double xcm, double ycm,
 			double zcm, Color truthColor) {
 		Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.black,
-				MC_POINTSIZE + 2);
-		Support3D.drawPoint(drawable, xcm, ycm, zcm, truthColor, MC_POINTSIZE);
+				MC_POINTSIZE + 2, true);
+		Support3D.drawPoint(drawable, xcm, ycm, zcm, truthColor, MC_POINTSIZE, true);
 
 	}
 
 	protected void drawCrossPoint(GLAutoDrawable drawable, double xcm,
 			double ycm, double zcm, Color crossColor) {
 		Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.red,
-				CROSS_POINTSIZE + 2);
+				CROSS_POINTSIZE + 2, true);
 		Support3D.drawPoint(drawable, xcm, ycm, zcm, crossColor,
-				CROSS_POINTSIZE);
+				CROSS_POINTSIZE, true);
 
 	}
 
