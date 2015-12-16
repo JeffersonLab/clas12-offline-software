@@ -156,7 +156,7 @@ public class BSTxyHitDrawer implements IDrawable {
 					}
 				}
 			}
-		}
+		} //single event
 	}
 	
 

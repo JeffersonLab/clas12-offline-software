@@ -223,10 +223,8 @@ public class SectorView extends CedView implements ChangeListener {
 
 				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP,
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
-				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
-				BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON
-						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				PropertySupport.TOOLBAR, true, 
+				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 
 				PropertySupport.BACKGROUND,

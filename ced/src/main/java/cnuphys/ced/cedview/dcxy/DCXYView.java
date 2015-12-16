@@ -256,10 +256,7 @@ public class DCXYView extends HexView {
 		props.put(PropertySupport.HEIGHT, d.height);
 
 		props.put(PropertySupport.TOOLBAR, true);
-		props.put(PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
-				& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-				& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON
-				& ~BaseToolBar.DELETEBUTTON);
+		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
 		props.put(PropertySupport.HEADSUP, false);
 

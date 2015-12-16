@@ -17,6 +17,7 @@ import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
@@ -79,10 +80,7 @@ public class FTCalXYView extends CedXYView {
 				LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
 				PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN,
 				BMARGIN, PropertySupport.TOOLBAR, true,
-				PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
-						& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON
-						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, "FTCal XY",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);

@@ -35,13 +35,19 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
+import cnuphys.ced.micromegas.Constants;
+import cnuphys.ced.micromegas.Geometry;
+import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.magfield.IField;
@@ -50,6 +56,14 @@ import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class BSTzView extends CedView implements ChangeListener {
+	
+	private static Geometry geo;
+
+	static {
+		Constants.Load();
+		geo = new Geometry();
+	}
+	
 	private double _targetZ = 0;
 	private double _phi = 0; // the cross-sectional phi value
 	private double _sinphi = 0;
@@ -123,10 +137,7 @@ public class BSTzView extends CedView implements ChangeListener {
 				PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN,
 				TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN,
 				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
-				true, PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
-						& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON
-						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, "Central Z",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
@@ -227,6 +238,57 @@ public class BSTzView extends CedView implements ChangeListener {
 		
 		wr.setFrame(zmin, -r6-h, w, h);
 		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
+		
+		//hits?
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
+			
+		}
+		else {
+			BMTDataContainer bmtData = _eventManager.getBMTData();
+			int hitCount = bmtData.getHitCount(0);
+			if (hitCount > 0) {
+
+				int sect[] = bmtData.bmt_dgtz_sector;
+				int layer[] = bmtData.bmt_dgtz_layer;
+				if (showMcTruth()) {
+
+				}
+
+				// dgtz
+				Point2D.Double wp = new Point2D.Double();
+				Point pp = new Point();
+				for (int hit = 0; hit < hitCount; hit++) {
+
+					if ((layer[hit] == 5) || (layer[hit] == 6)) {
+						int strip = bmtData.bmt_dgtz_strip[hit];
+						if (strip > 0) {
+							double z = geo.CRC_GetZStrip(sect[hit], layer[hit], strip);
+							wp.x = z;
+							
+							if (layer[hit] == 6) {
+								wp.y = r6 + 2;
+								container.worldToLocal(pp, wp);
+								g.setColor(X11Colors.getX11Color("lawn green"));
+								g.fillOval(pp.x-3,pp.y-3, 6, 6);
+								g.setColor(Color.black);
+								g.drawOval(pp.x-3,pp.y-3, 6, 6);
+								
+								wp.y = -r6 - 2;
+								container.worldToLocal(pp, wp);
+								g.setColor(X11Colors.getX11Color("lawn green"));
+								g.fillOval(pp.x-3,pp.y-3, 6, 6);
+								g.setColor(Color.black);
+								g.drawOval(pp.x-3,pp.y-3, 6, 6);
+						
+							}
+							
+							
+						}
+					} // layer == 5 or 6
+				}
+			}
+		}
+		
 		
 		g2.setClip(oldClip);
 	}

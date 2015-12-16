@@ -20,6 +20,7 @@ import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
@@ -166,10 +167,7 @@ public class PCALView extends HexView {
 		props.put(PropertySupport.HEIGHT, d.height);
 
 		props.put(PropertySupport.TOOLBAR, true);
-		props.put(PropertySupport.TOOLBARBITS, BaseToolBar.NODRAWING
-				& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.TEXTFIELD
-				& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.TEXTBUTTON
-				& ~BaseToolBar.DELETEBUTTON);
+		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
 		props.put(PropertySupport.HEADSUP, false);
 
