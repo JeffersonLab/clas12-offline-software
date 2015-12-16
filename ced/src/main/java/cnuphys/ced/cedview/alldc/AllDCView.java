@@ -113,11 +113,8 @@ public class AllDCView extends CedView {
 				d.width, // container width, not total view width
 				PropertySupport.HEIGHT,
 				d.height, // container height, not total view width
-				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
-				BaseToolBar.NODRAWING & ~BaseToolBar.RANGEBUTTON
-						& ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON
-						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				PropertySupport.TOOLBAR, true, 
+				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, "All Drift Chambers",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);

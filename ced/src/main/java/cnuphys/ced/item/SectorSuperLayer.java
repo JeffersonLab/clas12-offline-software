@@ -10,6 +10,8 @@ import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import org.jlab.geom.prim.Line3D;
+
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.ADataContainer;
@@ -56,6 +58,8 @@ public class SectorSuperLayer extends PolygonItem {
 	private static final Color defaultHitCellFill = Color.red;
 	private static final Color defaultHitCellLine = X11Colors
 			.getX11Color("Dark Red");
+	
+	private static final Color hexColor = new Color(223, 239, 239);
 
 	// pale color used to fill in layers
 	private static final Color _layerFillColors[] = {
@@ -77,7 +81,7 @@ public class SectorSuperLayer extends PolygonItem {
 	private int _superLayer;
 
 	// cache the outline
-	private Point2D.Double[] _cachedWorldPolygon = GeometryManager.allocate(5);
+	private Point2D.Double[] _cachedWorldPolygon = GeometryManager.allocate(4);
 
 	// cache the layer polygons. They must be recomputed if the item is dirty.
 	private Polygon _layerPolygons[] = new Polygon[6];
@@ -193,15 +197,15 @@ public class SectorSuperLayer extends PolygonItem {
 
 		g2.setStroke(oldStroke);
 
-		// draw outer boundary again.
-		g.setColor(_style.getLineColor());
-		g.drawPolygon(_lastDrawnPolygon);
-
 		// draw wires?
 		if (reallyClose || (WorldGraphicsUtilities.getMeanPixelDensity(
 				_view.getContainer()) > wireThreshold[_superLayer])) {
 			drawWires(g, container, reallyClose);
 		}
+
+		// draw outer boundary again.
+		g.setColor(_style.getLineColor());
+		g.drawPolygon(_lastDrawnPolygon);
 
 		g2.setClip(clip);
 
@@ -345,8 +349,7 @@ public class SectorSuperLayer extends PolygonItem {
 			String s = "Problem  in wire() [SectorSuperLayer] layer = " + layer
 					+ "  wire = " + wire;
 			System.err.println(s);
-			e.printStackTrace();
-			// System.exit(1);
+			e.printStackTrace();			// System.exit(1);
 		}
 		return wp;
 	}
@@ -411,6 +414,14 @@ public class SectorSuperLayer extends PolygonItem {
 					container.worldToLocal(pp, wp);
 					if (reallyClose) {
 						g.fillRect(pp.x - 1, pp.y - 1, 2, 2);
+						Polygon hexagon = getHexagon(container, layer, wire);
+						if (hexagon == null) {
+							return;
+						}
+						else {
+							g.setColor(hexColor);
+							g.drawPolygon(hexagon);
+						}
 					}
 					else {
 						g.fillRect(pp.x, pp.y, 1, 1);

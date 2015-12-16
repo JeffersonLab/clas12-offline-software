@@ -47,6 +47,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 	// our mode
 	protected Mode _mode = Mode.SINGLE_EVENT;
+	
+	//basic toolbar bits
+	protected static final int TOOLBARBITS = BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
+			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON
+			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON;
+
 
 	/**
 	 * A string that has r-theta-phi using unicode greek characters

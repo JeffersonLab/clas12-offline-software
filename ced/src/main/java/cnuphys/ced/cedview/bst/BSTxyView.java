@@ -34,6 +34,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
@@ -173,11 +174,7 @@ public class BSTxyView extends CedXYView {
 				LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
 				PropertySupport.RIGHTMARGIN, RMARGIN,
 				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
-				true, PropertySupport.TOOLBARBITS,
-				BaseToolBar.NODRAWING & ~BaseToolBar.RANGEBUTTON
-						& ~BaseToolBar.TEXTFIELD
-						& ~BaseToolBar.CONTROLPANELBUTTON
-						& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON,
+				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, "Central XY",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
