@@ -597,33 +597,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 				}
 				addItem(new PointSet3D(this, coords, color, pntSize, true));
 
-				// sprite test
-				try {
-					String fn = "/Users/heddle/git/cnuphys/bCNU/src/main/resources/images/green-on-16.png";
-					File file = new File(fn);
-					System.err.println("files exists: " + file.exists());
-					float coords2[] = new float[3 * numPnt];
-
-					for (int i = 0; i < numPnt; i++) {
-						int j = i * 3;
-						float x = (float) (-xymax + 2 * xymax * Math.random());
-						float y = (float) (-xymax + 2 * xymax * Math.random());
-						float z = (float) (zmin
-								+ (zmax - zmin) * Math.random());
-						coords2[j] = x;
-						coords2[j + 1] = y;
-						coords2[j + 2] = z;
-					}
-					addItem(new SpriteSet(this, coords2, file.toURL()));
-
-				} catch (GLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
 			}
 
 			/**

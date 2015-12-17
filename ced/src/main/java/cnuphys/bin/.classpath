@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bCNU"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/magfield"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/numericalRec"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/snr"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bCNU3D"/>
+	<classpathentry kind="lib" path="/Users/heddle/coatjava/lib/clas/coat-libs-2.0-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SampleEventModule"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JOGL"/>
+	<classpathentry kind="output" path="cnuphys/bin"/>
+</classpath>

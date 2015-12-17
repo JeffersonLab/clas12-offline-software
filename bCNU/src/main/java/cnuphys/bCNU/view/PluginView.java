@@ -20,9 +20,6 @@ public class PluginView extends BaseView {
     private static final int DEFAULT_HEIGHT = 500;
     private static final Color DEFAULT_BACKGROUND = Color.white;
 
-    // reserved view type for drawing view
-    public static final int PLUGINVIEWTYPE = -59132;
-
     // all items on the same layer
     private LogicalLayer _shapeLayer;
 
@@ -60,7 +57,6 @@ public class PluginView extends BaseView {
 			& ~BaseToolBar.DELETEBUTTON,
 			PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 		PropertySupport.BACKGROUND, DEFAULT_BACKGROUND,
-		PropertySupport.VIEWTYPE, PLUGINVIEWTYPE,
 		PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 	// add the shape layer
