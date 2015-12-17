@@ -212,6 +212,14 @@ public class PluginShape {
 	public void setFillColor(Color color) {
 		_item.getStyle().setFillColor(color);
 	}
+	/**
+	 * Returns the shapes fill color
+	 * 
+	 * @return FillColor
+	 */
+	public Color getFillColor(){
+		return _item.getStyle().getFillColor();
+	}
 
 	/**
 	 * Get the info string of the shape
