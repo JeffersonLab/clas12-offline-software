@@ -16,8 +16,6 @@ import cnuphys.splot.plot.SplotMenus;
 @SuppressWarnings("serial")
 public class PlotView extends BaseView {
 
-	// reserved view type for log view
-	public static final int PLOTVIEWTYPE = -340555;
 
 	// the owner canvas
 	protected PlotCanvas _plotCanvas;
@@ -32,8 +30,7 @@ public class PlotView extends BaseView {
 		super(PropertySupport.TITLE, "sPlot", PropertySupport.ICONIFIABLE, true,
 				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
 				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 800,
-				PropertySupport.HEIGHT, 800, PropertySupport.VISIBLE, false,
-				PropertySupport.VIEWTYPE, PLOTVIEWTYPE);
+				PropertySupport.HEIGHT, 800, PropertySupport.VISIBLE, false);
 		add(createPlotPanel());
 		addMenus();
 	}

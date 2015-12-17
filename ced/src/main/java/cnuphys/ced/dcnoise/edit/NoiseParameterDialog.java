@@ -82,7 +82,7 @@ public class NoiseParameterDialog extends JDialog {
 	 * of six (one per superlayer) common to all sectors.
 	 */
 	public NoiseParameterDialog() {
-		setTitle("DC Noise Alorithm Parameters");
+		setTitle("DC Noise Algorithm Parameters");
 		setModal(true);
 
 		// close is like a cancel

@@ -34,9 +34,6 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
     private JFrame _parent;
 
-    // reserved view type for drawing view
-    public static final int VIRTUALVIEWTYPE = -977821;
-
     private static final String VVTITLE = "Desktop";
 
     private Vector<BaseView> _views = new Vector<BaseView>();
@@ -234,8 +231,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		false, PropertySupport.TITLE, VVTITLE,
 		PropertySupport.STANDARDVIEWDECORATIONS, false,
 		PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE,
-		false, PropertySupport.CLOSABLE, false, PropertySupport.VIEWTYPE,
-		VIRTUALVIEWTYPE);
+		false, PropertySupport.CLOSABLE, false);
 
 	view.pack();
 	return view;

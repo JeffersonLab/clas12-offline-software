@@ -30,9 +30,6 @@ public class MiniShellView extends BaseView implements KeyListener {
 	// the underlying faux shell
 	private Shell shell;
 
-	// reserved view type for mini shell view
-	public static final int MINISHELLVIEWTYPE = -7746231;
-
 	// singleton
 	private static MiniShellView instance;
 
@@ -40,8 +37,7 @@ public class MiniShellView extends BaseView implements KeyListener {
 		super(PropertySupport.TITLE, "Mini Shell", PropertySupport.ICONIFIABLE,
 				true, PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE,
 				true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
-				PropertySupport.HEIGHT, 450, PropertySupport.VISIBLE, false,
-				PropertySupport.VIEWTYPE, MINISHELLVIEWTYPE);
+				PropertySupport.HEIGHT, 450, PropertySupport.VISIBLE, false);
 		add(mainPanel());
 		setVisible(false);
 	}

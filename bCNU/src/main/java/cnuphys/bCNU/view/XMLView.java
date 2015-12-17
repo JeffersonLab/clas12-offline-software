@@ -21,9 +21,6 @@ import cnuphys.bCNU.xml.tree.SAXJTree;
 public class XMLView extends BaseView implements IFileHandler,
 		IFileTreeListener {
 
-	// reserved view type for xml view
-	public static final int XMLVIEWVIEWTYPE = -77005;
-
 	// constant used for file tree width
 	private static final int FILE_PANEL_WIDTH = 200;
 
@@ -53,8 +50,7 @@ public class XMLView extends BaseView implements IFileHandler,
 		super(PropertySupport.TITLE, "XML Tree", PropertySupport.ICONIFIABLE, true,
 			PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
 			PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
-			PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false,
-			PropertySupport.VIEWTYPE, XMLVIEWVIEWTYPE);
+			PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false);
 
 		_saxTree = new SAXJTree();
 		_fileTreePanel = createFileTreePanel();

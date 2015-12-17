@@ -83,7 +83,7 @@ System.err.println("process Event");
 				shapes[layer][wire].setInfoString("Layer: " + layer + " Wire: " + wire);
 			}
 		}
-		for( int i = 0; i < 8; i++){
+		for( int i = 1; i <= 8; i++){
 			shapes[2][i].setFillColor(Color.red);
 			System.out.println("Filling");
 		}

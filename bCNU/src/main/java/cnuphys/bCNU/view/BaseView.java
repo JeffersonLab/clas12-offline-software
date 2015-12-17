@@ -61,9 +61,6 @@ public class BaseView extends JInternalFrame {
 	// generate a UUID for this view
 	private UUID _uuid = UUID.randomUUID();
 
-	// user provided viewtype
-	private int _viewType;
-
 	// The desktop owner of this view (internal frame.)
 	private JDesktopPane _desktop;
 
@@ -114,10 +111,7 @@ public class BaseView extends JInternalFrame {
 		// view visible
 		boolean visible = PropertySupport.getVisible(_properties);
 
-		// view type
-		setViewType(PropertySupport.getViewType(_properties));
-
-		// apply the attributes
+		// apply some properties
 		setTitle((title != null) ? title : "A View");
 		setIconifiable(standardDecorations || iconifiable);
 		setMaximizable(standardDecorations || maximizable);
@@ -564,27 +558,6 @@ public class BaseView extends JInternalFrame {
 		return _uuid;
 	}
 
-	/**
-	 * Get the view type. This is not guaranteed to be meaningful or unique. It
-	 * is up to the application to set unique view types if it intends to use
-	 * them.
-	 * 
-	 * @return the viewType the application provided view type.
-	 */
-	public int getViewType() {
-		return _viewType;
-	}
-
-	/**
-	 * Set the view type. This is not guaranteed to be meaningful or unique. It
-	 * is up to the application to set unique view types if it intends to use
-	 * them.
-	 * 
-	 * @param viewType the viewType to set
-	 */
-	public void setViewType(int viewType) {
-		this._viewType = viewType;
-	}
 
 	/**
 	 * Get a view from its container

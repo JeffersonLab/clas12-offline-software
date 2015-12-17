@@ -22,9 +22,6 @@ import cnuphys.bCNU.util.PropertySupport;
 @SuppressWarnings("serial")
 public class DrawingView extends BaseView implements IFeedbackProvider {
 
-	// reserved view type for drawing view
-	public static final int DRAWINGVIEWTYPE = -77002;
-
 	/**
 	 * Create a drawing view
 	 * 
@@ -69,8 +66,7 @@ public class DrawingView extends BaseView implements IFeedbackProvider {
 				BaseToolBar.EVERYTHING, PropertySupport.VISIBLE, true,
 				PropertySupport.BACKGROUND, Color.white, PropertySupport.HEADSUP,
 				true, PropertySupport.TITLE, " Drawing View ",
-				PropertySupport.STANDARDVIEWDECORATIONS, true,
-				PropertySupport.VIEWTYPE, DRAWINGVIEWTYPE);
+				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view.pack();
 		return view;

@@ -12,15 +12,11 @@ import cnuphys.bCNU.util.PropertySupport;
 @SuppressWarnings("serial")
 public class LogView extends BaseView {
 
-	// reserved view type for log view
-	public static final int LOGVIEWTYPE = -77001;
-
 	public LogView() {
 		super(PropertySupport.TITLE, "Log", PropertySupport.ICONIFIABLE, true,
 				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
 				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 600,
-				PropertySupport.HEIGHT, 600, PropertySupport.VISIBLE, false,
-				PropertySupport.VIEWTYPE, LOGVIEWTYPE);
+				PropertySupport.HEIGHT, 600, PropertySupport.VISIBLE, false);
 		add(new SimpleLogPane());
 	}
 }

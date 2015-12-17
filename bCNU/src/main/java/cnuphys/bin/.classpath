@@ -6,7 +6,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
 	<classpathentry kind="lib" path="/clasJlib/bCNU/v1.0/lib/bcnuimages.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
-	<classpathentry kind="lib" path="/clasJlib/et/v14.0/lib/et-14.0.jar"/>
-	<classpathentry kind="lib" path="/Users/heddle/coatjava/lib/clas/coat-libs-2.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>
