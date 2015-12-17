@@ -38,14 +38,14 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	private static String _recentFileKey = "RecentEvioFiles";
 
 	// the menu items
-	private JMenuItem openEventFile;
+	private JMenuItem _openEventFile;
 	private JMenuItem quitItem;
 	private JMenuItem nextItem;
 	private JMenuItem prevItem;
 	private JMenuItem accumulationItem;
 
 	// recently opened menu
-	private JMenu recentMenu;
+	private static JMenu _recentMenu;
 
 	// a hash table of menu items used by recent file feature
 	private static Hashtable<String, JMenuItem> _menuItems;
@@ -84,14 +84,14 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		_eventManager.addClasIoEventListener(this, 1);
 
 		// open
-		openEventFile = getOpenEventFileItem();
-		openEventFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-				ActionEvent.CTRL_MASK));
-		add(openEventFile);
+//		_openEventFile = getOpenEventFileItem();
+//		_openEventFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+//				ActionEvent.CTRL_MASK));
+//		add(_openEventFile);
 
 		// recent
-		add(getRecentEvioFileMenu());
-		addSeparator();
+//		add(getRecentEvioFileMenu());
+//		addSeparator();
 
 		// next
 		nextItem = addMenuItem("Next Event", KeyEvent.VK_N);
@@ -218,8 +218,11 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 * 
 	 * @return the menu from which you can choose a recently opened file
 	 */
-	private JMenu getRecentEvioFileMenu() {
-		recentMenu = new JMenu("Recent Event Files");
+	public static JMenu getRecentEvioFileMenu() {
+		if (_recentMenu != null) {
+			return _recentMenu;
+		}
+		_recentMenu = new JMenu("Recent Event Files");
 
 		// get the recent files from the prefs
 		Vector<String> recentFiles = Environment.getInstance()
@@ -231,16 +234,16 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 			}
 		}
 
-		return recentMenu;
+		return _recentMenu;
 	}
 
-	private void addMenu(String path, boolean atTop) {
+	private static void addMenu(String path, boolean atTop) {
 
 		// if it is in the hash, remove from has and from menu
 		if (_menuItems != null) {
 			JMenuItem item = _menuItems.remove(path);
 			if (item != null) {
-				recentMenu.remove(item);
+				_recentMenu.remove(item);
 			}
 		} else {
 			_menuItems = new Hashtable<String, JMenuItem>(41);
@@ -255,7 +258,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 					File file = new File(fn);
 					if (file.exists()) {
 						try {
-							_eventManager.openEvioFile(file);
+							ClasIoEventManager.getInstance().openEvioFile(file);
 						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {
@@ -272,9 +275,9 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		item.addActionListener(al);
 		_menuItems.put(path, item);
 		if (atTop) {
-			recentMenu.add(item, 0);
+			_recentMenu.add(item, 0);
 		} else {
-			recentMenu.add(item);
+			_recentMenu.add(item);
 		}
 
 	}
