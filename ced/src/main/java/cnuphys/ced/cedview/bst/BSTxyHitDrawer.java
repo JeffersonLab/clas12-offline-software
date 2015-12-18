@@ -25,6 +25,7 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -96,7 +97,7 @@ public class BSTxyHitDrawer implements IDrawable {
 
 			drawHits(g, container);
 		}
-		
+
 		g2.setClip(oldClip);
 
 	}
@@ -146,19 +147,18 @@ public class BSTxyHitDrawer implements IDrawable {
 					MicroMegasSector mms = _view.getMicroMegasSector(geoSector,
 							layer[hit]);
 					if (mms != null) {
-						FeedbackRect fbr = mms.drawHit(g, container, bmtData, hit,
-								X11Colors.getX11Color("lawn green"),
+						FeedbackRect fbr = mms.drawHit(g, container, bmtData,
+								hit, X11Colors.getX11Color("lawn green"),
 								Color.black);
-						
+
 						if (fbr != null) {
 							_fbRects.add(fbr);
 						}
 					}
 				}
 			}
-		} //single event
+		} // single event
 	}
-	
 
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
@@ -249,9 +249,7 @@ public class BSTxyHitDrawer implements IDrawable {
 							bstData.bst_true_avgY[i]);
 					container.worldToLocal(p1, wp1);
 
-					// draw an x
-					g2.drawLine(p1.x - 3, p1.y - 3, p1.x + 3, p1.y + 3);
-					g2.drawLine(p1.x + 3, p1.y - 3, p1.x - 3, p1.y + 3);
+					DataDrawSupport.drawGemcHit(g, p1);
 				}
 				g2.setStroke(oldStroke);
 			}

@@ -647,6 +647,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
+		
+		//for running from runnable jar (for coatjava)
+		String clas12dir = System.getProperty("CLAS12DIR");
+		if (clas12dir == null) {
+			clas12dir = "coatjava";
+			System.setProperty("CLAS12DIR", clas12dir);
+		}
+		System.err.println("CLAS12DIR: " + clas12dir);
 
 		FileUtilities.setDefaultDir("data");
 
@@ -730,10 +738,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			public void run() {
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
+				splashWindow.writeCachedText();
 				ced.fixTitle();
 				// get plugin manager
 				ced._pluginManager = new CedPluginManager(_pluginFolder);
-				System.err.println("Go.");
 			}
 
 		});

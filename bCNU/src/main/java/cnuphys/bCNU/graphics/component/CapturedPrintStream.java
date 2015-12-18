@@ -5,6 +5,9 @@ import java.io.PrintStream;
 
 public abstract class CapturedPrintStream extends PrintStream {
 	
+	/**
+	 * Capture a standard stream
+	 */
 	public CapturedPrintStream() {
 		super(new ByteArrayOutputStream());
 	}
