@@ -2,6 +2,7 @@ package cnuphys.bCNU.graphics.component;
 
 import java.awt.Color;
 import java.io.PrintStream;
+import java.util.Vector;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -25,6 +26,8 @@ public class StreamCapturePane extends JScrollPane {
 	// black terminal
 	public static SimpleAttributeSet BLACK_TERMINAL = createStyle(Color.black,
 			transparent, "monospaced", 11, false, false);
+	
+	private Vector<CachedText> _cachedText = new Vector<CachedText>();
 
 	/**
 	 * The text area that will be on this scroll pane.
@@ -41,6 +44,7 @@ public class StreamCapturePane extends JScrollPane {
 	
 	private PrintStream stdErr;
 	private PrintStream stdOut;
+	
 	/**
 	 * Constructor will also create the text pane itself.
 	 * 
@@ -62,11 +66,13 @@ public class StreamCapturePane extends JScrollPane {
 			@Override
 			public void println(String s) {
 				baseAppend(s + "\n", BLACK_TERMINAL);
+				_cachedText.add(new CachedText(s + "\n", CachedText.STDOUT));
 			}
 
 			@Override
 			public void print(String s) {
 				baseAppend(s, BLACK_TERMINAL);
+				_cachedText.add(new CachedText(s, CachedText.STDOUT));
 			}
 		};
 		
@@ -76,16 +82,24 @@ public class StreamCapturePane extends JScrollPane {
 			@Override
 			public void println(String s) {
 				baseAppend(s + "\n", RED_TERMINAL);
+				_cachedText.add(new CachedText(s + "\n", CachedText.STDERR));
 			}
 
 			@Override
 			public void print(String s) {
 				baseAppend(s, RED_TERMINAL);
+				_cachedText.add(new CachedText(s, CachedText.STDERR));
 			}
 		};
 		
 		System.setOut(_outCps);
 		System.setErr(_errCps);
+	}
+	
+	public void writeCachedText() {
+		for (CachedText ct : _cachedText) {
+			ct.write();
+		}
 	}
 	
 	public void unCapture() {

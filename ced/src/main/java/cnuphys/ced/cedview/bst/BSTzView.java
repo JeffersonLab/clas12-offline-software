@@ -41,6 +41,7 @@ import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
@@ -518,9 +519,7 @@ public class BSTzView extends CedView implements ChangeListener {
 			wp1.setLocation(z[i], x[i] * _cosphi + y[i] * _sinphi);
 			container.worldToLocal(p1, wp1);
 
-			// draw an x
-			g2.drawLine(p1.x - 3, p1.y - 3, p1.x + 3, p1.y + 3);
-			g2.drawLine(p1.x + 3, p1.y - 3, p1.x - 3, p1.y + 3);
+			DataDrawSupport.drawGemcHit(g, p1);
 		}
 
 		g2.setStroke(oldStroke);

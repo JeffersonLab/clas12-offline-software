@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -18,6 +20,7 @@ import javax.swing.JWindow;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.StreamCapturePane;
+import cnuphys.bCNU.util.TextUtilities;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.splot.plot.GraphicsUtilities;
 
@@ -35,7 +38,6 @@ public class SplashWindow extends JWindow {
 
 	// The size of a tile.
 	private Dimension _tileSize;
-
 
 	public SplashWindow(String title, Color bg, int width, String backgroundImage) {
 		setLayout(new BorderLayout(2, 2));
@@ -60,6 +62,14 @@ public class SplashWindow extends JWindow {
 		GraphicsUtilities.centerComponent(this);
 	}
 	
+	/**
+	 * Write out the cached text
+	 */
+	public void writeCachedText() {
+		if (_scp != null) {
+			_scp.writeCachedText();
+		}
+	}
 
 	@Override
 	public void setVisible(boolean vis) {
@@ -133,7 +143,7 @@ public class SplashWindow extends JWindow {
 						g.drawImage(_icon.getImage(), x, y, this);
 					}
 				}
-
+				
 			}
 
 		};
