@@ -14,6 +14,7 @@ import org.jlab.geom.prim.Line3D;
 
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.geometry.DCGeometry;
@@ -158,6 +159,36 @@ public class SectorSuperLayer extends PolygonItem {
 		}
 
 		// draw the hits
+		drawHits(g, container);
+
+		g2.setStroke(oldStroke);
+
+		// draw wires?
+		if (reallyClose || (WorldGraphicsUtilities.getMeanPixelDensity(
+				_view.getContainer()) > wireThreshold[_superLayer])) {
+			drawWires(g, container, reallyClose);
+		}
+
+		// draw outer boundary again.
+		g.setColor(_style.getLineColor());
+		g.drawPolygon(_lastDrawnPolygon);
+
+		g2.setClip(clip);
+
+	}
+
+	
+	private void drawHits(Graphics g, IContainer container) {
+		
+		if (_view.isSingleEventMode()) {
+			drawSingleModeHits(g, container);
+		}
+		else {
+			drawAccumulatedHits(g, container);
+		}
+	}
+	
+	private void drawSingleModeHits(Graphics g, IContainer container) {
 
 		DCDataContainer dcData = _eventManager.getDCData();
 
@@ -186,7 +217,7 @@ public class SectorSuperLayer extends PolygonItem {
 							: dcData.dc_true_pid[i];
 
 					double doca = dcData.get(dcData.dc_dgtz_doca, i);
-					drawGemcDCHit(g2, container, lay1, wire1, noise, pid, doca);
+					drawGemcDCHit((Graphics2D)g, container, lay1, wire1, noise, pid, doca);
 				}
 			} catch (NullPointerException e) {
 				System.err.println(
@@ -195,22 +226,39 @@ public class SectorSuperLayer extends PolygonItem {
 			}
 		} // for loop
 
-		g2.setStroke(oldStroke);
+	}
+	
+	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
+				.getAccumulatedDgtzDcData();
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
+		if (maxHit < 1) {
+			return;
+		}
+		
+		int sect0 = _sector-1;
+		int supl0 = _superLayer-1;
+		
+		for (int lay0 = 0; lay0 < 6; lay0++) {
+			for (int wire0 = 0; wire0 < 112; wire0++) {
+				double fract = ((double) dcAccumulatedData[sect0][supl0][lay0][wire0]) / maxHit;
+				Color color = AccumulationManager.getColorScaleModel()
+						.getColor(fract);
+				
+				g.setColor(color);
+				Polygon hexagon = getHexagon(container, lay0+1, wire0+1);
+				if (hexagon != null) {
+					g.fillPolygon(hexagon);
+					g.drawPolygon(hexagon);
+				}
 
-		// draw wires?
-		if (reallyClose || (WorldGraphicsUtilities.getMeanPixelDensity(
-				_view.getContainer()) > wireThreshold[_superLayer])) {
-			drawWires(g, container, reallyClose);
+			}
 		}
 
-		// draw outer boundary again.
-		g.setColor(_style.getLineColor());
-		g.drawPolygon(_lastDrawnPolygon);
-
-		g2.setClip(clip);
-
 	}
-
+	
+	
 	/**
 	 * Draw a single dc hit
 	 * 

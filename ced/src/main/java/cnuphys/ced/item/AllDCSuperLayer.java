@@ -173,25 +173,25 @@ public class AllDCSuperLayer extends RectangleItem {
 				+ _superLayer, -9, -5);
 
 		// now the data
-		if (_view.getMode() == CedView.Mode.SINGLE_EVENT) {
+		if (_view.isSingleEventMode()) {
 			singleEventDrawItem(g, container);
+			// shade the layers
+			for (int i = 0; i < GeoConstants.NUM_LAYER; i += 2) {
+				WorldGraphicsUtilities.drawWorldRectangle(g, container,
+						_layerWorldRects[i], cellOverlayColor, null);
+
+			}
+
+			// causes cell shading
+			for (int i = 0; i < _numWires; i += 2) {
+				WorldGraphicsUtilities.drawWorldRectangle(g, container,
+						_positionWorldRects[i], cellOverlayColor, null);
+
+			}
 		} else {
 			accumulatedDrawItem(g, container);
 		}
 
-		// shade the layers
-		for (int i = 0; i < GeoConstants.NUM_LAYER; i += 2) {
-			WorldGraphicsUtilities.drawWorldRectangle(g, container,
-					_layerWorldRects[i], cellOverlayColor, null);
-
-		}
-
-		// causes cell shading
-		for (int i = 0; i < _numWires; i += 2) {
-			WorldGraphicsUtilities.drawWorldRectangle(g, container,
-					_positionWorldRects[i], cellOverlayColor, null);
-
-		}
 
 		// just to make clean
 		g.setColor(_style.getLineColor());
@@ -429,10 +429,11 @@ public class AllDCSuperLayer extends RectangleItem {
 	 *            the rendering container
 	 */
 	private void accumulatedDrawItem(Graphics g, IContainer container) {
+		
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedGemcDcData();
-		int maxHit = AccumulationManager.getInstance().getMaxGemcDcCount();
+				.getAccumulatedDgtzDcData();
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
 		if (maxHit < 1) {
 			return;
 		}
@@ -502,7 +503,7 @@ public class AllDCSuperLayer extends RectangleItem {
 
 			}
 
-			if (_view.getMode() == CedView.Mode.SINGLE_EVENT) {
+			if (_view.isSingleEventMode()) {
 				singleEventFeedbackStrings(wire, layer, feedbackStrings);
 			} else {
 				accumulatedFeedbackStrings(wire, layer, feedbackStrings);
@@ -567,9 +568,9 @@ public class AllDCSuperLayer extends RectangleItem {
 				+ "  wire " + wire);
 
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedGemcDcData();
+				.getAccumulatedDgtzDcData();
 		int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer - 1][wire - 1];
-		int maxHit = AccumulationManager.getInstance().getMaxGemcDcCount();
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
 		if ((hitCount < 1) || (maxHit < 1)) {
 			feedbackStrings.add("hit fraction 0.0");
 		} else {

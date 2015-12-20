@@ -238,12 +238,14 @@ public class SectorView extends CedView implements ChangeListener {
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.PHISLIDER
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
-				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER
-				+ ControlPanel.RECONSARRAY, DisplayBits.MAGFIELD
+				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER +
+				+ ControlPanel.RECONSARRAY, 
+				DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
 				+ DisplayBits.DC_TB_RECONS_CROSSES
 				+ DisplayBits.FTOFHITS
-				+ DisplayBits.SCALE + DisplayBits.MCTRUTH, 3, 6);
+				+ DisplayBits.ACCUMULATION 
+				+ DisplayBits.SCALE + DisplayBits.MCTRUTH, 2, 6);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 
@@ -1335,7 +1337,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// there are 132 panels
 		// mark the hits if there is data
-		BSTSupport.markPanelHits(panels);
+		BSTSupport.markPanelHits(this, panels);
 
 		int index = 0;
 		for (BSTxyPanel panel : panels) {

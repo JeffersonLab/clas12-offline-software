@@ -652,7 +652,6 @@ public class NodePanel extends JPanel implements ActionListener,
 			break;
 
 		case AccumulationManager.ACCUMULATION_FINISHED:
-			System.err.println("ACCUM FINISHED");
 			setData(_eventManager.getCurrentEvent());
 			setEventNumber(_eventManager.getEventNumber());
 			fixButtons();

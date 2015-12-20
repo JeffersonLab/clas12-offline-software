@@ -27,6 +27,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.MagFieldDisplayArray;
+import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.magfield.MagneticFieldChangeListener;
@@ -37,7 +39,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider,
-		SwimTrajectoryListener, MagneticFieldChangeListener,
+		SwimTrajectoryListener, MagneticFieldChangeListener, IAccumulationListener,
 		IClasIoEventListener {
 
 	// are we showing single events or are we showing accumulated data
@@ -143,6 +145,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		createHeartbeat();
 		// prepare to check for hovering
 		prepareForHovering();
+		
+		AccumulationManager.getInstance().addAccumulationListener(this);
 	}
 
 	// called when heartbeat goes off.
@@ -399,6 +403,21 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		}
 		return _controlPanel.getDisplayArray().showMcTruth();
 	}
+	
+	/**
+	 * Convenience method to see it we show thestrip midpoints.
+	 * 
+	 * @return <code>true</code> if we are to show the strip midpoints
+	 * for hit strips.
+	 */
+	public boolean showStripMidpoints() {
+		if ((_controlPanel == null)
+				|| (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showStripMidpoints();
+	}
+
 
 	/**
 	 * Convenience method to see it we show the cosmic tracks.
@@ -604,6 +623,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	public Mode getMode() {
 		return _mode;
 	}
+	
+	/**
+	 * See if we are in single event mode (vice accumulated mode)
+	 * @return <code>true</code> if we are in single event mode
+	 */
+	public boolean isSingleEventMode() {
+		return (_mode == Mode.SINGLE_EVENT);
+	}
+
+	/**
+	 * See if we are in accumulation event mode (vice single event mode)
+	 * @return <code>true</code> if we are in accumulation mode
+	 */
+	public boolean isAccumulatedMode() {
+		return !isSingleEventMode();
+	}
 
 	/**
 	 * Set the mode for this view.
@@ -706,5 +741,21 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 		return oldClip;
 	}
+	
+	public void accumulationEvent(int reason) {
+		switch (reason) {
+		case AccumulationManager.ACCUMULATION_STARTED:
+			break;
+
+		case AccumulationManager.ACCUMULATION_CANCELLED:
+			fixTitle(_eventManager.getCurrentEvent());
+			break;
+
+		case AccumulationManager.ACCUMULATION_FINISHED:
+			fixTitle(_eventManager.getCurrentEvent());
+			break;
+		}
+	}
+
 
 }

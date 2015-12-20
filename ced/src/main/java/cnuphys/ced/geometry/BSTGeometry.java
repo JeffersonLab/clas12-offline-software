@@ -119,33 +119,33 @@ public class BSTGeometry {
 //	return p;
 //    }
 
-    /**
-     * Get the coordinates (a line) for a strip for 3D view
-     * 
-     * @param sector the 1-based layer dependent sector
-     * @param layer the "big" layer 1..8
-     * @param strip the strip 1..256
-     * @param coords (dim = 6) will hold line as [x1,y1,z1,x2,y2,z2] in cm
-     */
-    public static void getStrip(int sector, int layer, int strip,
-	    float coords[]) {
-	// geom service uses 0-based superlayer and layer
-	int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
-	int lay = ((layer - 1) % 2); // 0, 1, 0, 1
+	/**
+	 * Get the coordinates (a line) for a strip for 3D view
+	 * 
+	 * @param sector the 1-based layer dependent sector
+	 * @param layer the "big" layer 1..8
+	 * @param strip the strip 1..256
+	 * @param coords (dim = 6) will hold line as [x1,y1,z1,x2,y2,z2] in cm
+	 */
+	public static void getStrip(int sector, int layer, int strip,
+			float coords[]) {
+		// geom service uses 0-based superlayer and layer
+		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
+		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
 
-	// note supl and lay just computed as zero based
-	Line3D line = getStrip(sector - 1, supl, lay, strip - 1);
+		// note supl and lay just computed as zero based
+		Line3D line = getStrip(sector - 1, supl, lay, strip - 1);
 
-	if (line != null) {
-	    coords[0] = (float) (line.origin().x());
-	    coords[1] = (float) (line.origin().y());
-	    coords[2] = (float) (line.origin().z());
-	    coords[3] = (float) (line.end().x());
-	    coords[4] = (float) (line.end().y());
-	    coords[5] = (float) (line.end().z());
+		if (line != null) {
+			coords[0] = (float) (line.origin().x());
+			coords[1] = (float) (line.origin().y());
+			coords[2] = (float) (line.origin().z());
+			coords[3] = (float) (line.end().x());
+			coords[4] = (float) (line.end().y());
+			coords[5] = (float) (line.end().z());
 
+		}
 	}
-    }
 
     /**
      * Get the triplet quad coordinates for 3D view

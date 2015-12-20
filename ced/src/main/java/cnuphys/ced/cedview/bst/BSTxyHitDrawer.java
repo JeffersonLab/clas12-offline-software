@@ -31,6 +31,8 @@ import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.splot.plot.GraphicsUtilities;
+import cnuphys.splot.style.SymbolDraw;
 
 public class BSTxyHitDrawer implements IDrawable {
 
@@ -78,6 +80,10 @@ public class BSTxyHitDrawer implements IDrawable {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
+		if (_eventManager.isAccumulating()) {
+			return;
+		}
+
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();
 		// clip the active area
@@ -86,16 +92,15 @@ public class BSTxyHitDrawer implements IDrawable {
 
 		_fbRects.clear();
 
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
-			drawAccumulatedHits(g, container);
-		}
-
-		else {
+		if (_view.isSingleEventMode()) {
 			if (_view.showMcTruth()) {
 				drawMCTruth(g, container);
 			}
 
-			drawHits(g, container);
+			drawHitsSingleMode(g, container);
+		}
+		else {
+			drawAccumulatedHits(g, container);
 		}
 
 		g2.setClip(oldClip);
@@ -109,55 +114,70 @@ public class BSTxyHitDrawer implements IDrawable {
 		}
 	}
 
+	//draw accumulated hits (panels)
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		drawGEMCHitsAccumulatedMode(g, container);
+		// panels
+
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzBstCount();
+		if (maxHit < 1) {
+			return;
+		}
+
+		// first index is layer 0..7, second is sector 0..23
+		int bstData[][] = AccumulationManager.getInstance()
+				.getAccumulatedDgtzBstData();
+		for (int lay0 = 0; lay0 < 8; lay0++) {
+			for (int sect0 = 0; sect0 < 24; sect0++) {
+				BSTxyPanel panel = BSTxyView.getPanel(lay0 + 1, sect0 + 1);
+
+				if (panel != null) {
+					int hitCount = bstData[lay0][sect0];
+					double fract = ((double) hitCount) / maxHit;
+
+					Color color = AccumulationManager.getColorScaleModel()
+							.getColor(fract);
+					_view.drawSVTPanel((Graphics2D) g, container, panel, color);
+
+				}
+			}
+		}
 	}
 
-	private void drawHits(Graphics g, IContainer container) {
-		drawBSTHits(g, container);
-		drawMicroMegasHits(g, container);
-	}
-
-	// draw gemc simulated hits
-	private void drawBSTHits(Graphics g, IContainer container) {
-		if (_view.getMode() == CedView.Mode.SINGLE_EVENT) {
-			drawBSTHitsSingleMode(g, container);
-		}
-		else {
-		}
+	// only called in single event mode
+	private void drawHitsSingleMode(Graphics g, IContainer container) {
+		drawBSTHitsSingleMode(g, container);
+		drawMicroMegasHitsSingleMode(g, container);
 	}
 
 	// draw micromegas hits
-	private void drawMicroMegasHits(Graphics g, IContainer container) {
+	private void drawMicroMegasHitsSingleMode(Graphics g,
+			IContainer container) {
 
-		if (_view.getMode() == CedView.Mode.SINGLE_EVENT) {
-			BMTDataContainer bmtData = _eventManager.getBMTData();
+		BMTDataContainer bmtData = _eventManager.getBMTData();
 
-			// System.err.println("BMTDATAContainer: " + bmtData);
-			int hitCount = bmtData.getHitCount(0);
-			if (hitCount > 0) {
-				// System.err.println("BMT HIT COUNT: " + hitCount);
+		// System.err.println("BMTDATAContainer: " + bmtData);
+		int hitCount = bmtData.getHitCount(0);
+		if (hitCount > 0) {
+			// System.err.println("BMT HIT COUNT: " + hitCount);
 
-				int sect[] = bmtData.bmt_dgtz_sector;
-				int layer[] = bmtData.bmt_dgtz_layer;
+			int sect[] = bmtData.bmt_dgtz_sector;
+			int layer[] = bmtData.bmt_dgtz_layer;
 
-				for (int hit = 0; hit < hitCount; hit++) {
-					int geoSector = MicroMegasSector
-							.geoSectorFromDataSector(sect[hit]);
-					MicroMegasSector mms = _view.getMicroMegasSector(geoSector,
-							layer[hit]);
-					if (mms != null) {
-						FeedbackRect fbr = mms.drawHit(g, container, bmtData,
-								hit, X11Colors.getX11Color("lawn green"),
-								Color.black);
+			for (int hit = 0; hit < hitCount; hit++) {
+				int geoSector = MicroMegasSector
+						.geoSectorFromDataSector(sect[hit]);
+				MicroMegasSector mms = _view.getMicroMegasSector(geoSector,
+						layer[hit]);
+				if (mms != null) {
+					FeedbackRect fbr = mms.drawHit(g, container, bmtData, hit,
+							X11Colors.getX11Color("lawn green"), Color.black);
 
-						if (fbr != null) {
-							_fbRects.add(fbr);
-						}
+					if (fbr != null) {
+						_fbRects.add(fbr);
 					}
 				}
 			}
-		} // single event
+		}
 	}
 
 	// draw gemc simulated hits single event mode
@@ -175,18 +195,15 @@ public class BSTxyHitDrawer implements IDrawable {
 
 			// panels
 			for (int i = 0; i < bstData.getHitCount(0); i++) {
-				BSTxyPanel panel = _view.getPanel(bstData.bst_dgtz_layer[i],
+				BSTxyPanel panel = BSTxyView.getPanel(bstData.bst_dgtz_layer[i],
 						bstData.bst_dgtz_sector[i]);
 				if (panel != null) {
 					_view.drawSVTPanel(g2, container, panel, Color.red);
 				}
 			} // for on hits
 
-			// draw the actual hits
-
-			if (_view.displayDgtzCrosses()) {
-			}
-			else {
+			// desginate the hits by strip midpoints?
+			if (_view.showStripMidpoints()) {
 				// System.err.println("DISPLAY MIDPOINTS");
 				Point pp = new Point();
 				for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
@@ -209,10 +226,9 @@ public class BSTxyHitDrawer implements IDrawable {
 
 						container.worldToLocal(pp, 10 * wp.x, 10 * wp.y);
 
-						drawCross(g, pp.x, pp.y + 1,
+						SymbolDraw.drawUpTriangle(g2, pp.x, pp.y, 3,
+								X11Colors.getX11Color("Dark Green"),
 								X11Colors.getX11Color("Aquamarine"));
-						drawCross(g, pp.x, pp.y,
-								X11Colors.getX11Color("Dark Green"));
 					}
 
 					// System.out.println("sect " + sector + " supl " +
@@ -257,62 +273,6 @@ public class BSTxyHitDrawer implements IDrawable {
 			g.setClip(oldClip);
 		} // hotcount > 0
 
-	}
-
-	// draw gemc simulated hits accumulated mode
-	private void drawGEMCHitsAccumulatedMode(Graphics g, IContainer container) {
-		Histo2DData bstXYData = AccumulationManager.getInstance()
-				.getBSTXYGemcAccumulatedData();
-		if (bstXYData != null) {
-			// System.err.println("Good count: " + bstXYData.getGoodCount());
-			// System.err.println("Bad count: " +
-			// bstXYData.getOutOfRangeCount());
-			// System.err.println("Max count: " + bstXYData.getMaxZ());
-
-			long counts[][] = bstXYData.getCounts();
-			if (counts != null) {
-				Rectangle2D.Double wr = new Rectangle2D.Double();
-				Rectangle r = new Rectangle();
-
-				double maxBinCount = bstXYData.getMaxZ();
-
-				for (int i = 0; i < bstXYData.getNumberBinsX(); i++) {
-					double x1 = bstXYData.getBinMinX(i);
-					double x2 = bstXYData.getBinMaxX(i);
-
-					for (int j = 0; j < bstXYData.getNumberBinsY(); j++) {
-						if (counts[i][j] > 0) {
-							double y1 = bstXYData.getBinMinY(j);
-							double y2 = bstXYData.getBinMaxY(j);
-
-							wr.setFrame(x1, y1, x2 - x1, y2 - y1);
-
-							container.worldToLocal(r, wr);
-
-							double fract = ((counts[i][j])) / maxBinCount;
-							Color color = AccumulationManager
-									.getColorScaleModel().getColor(fract);
-
-							g.setColor(color);
-							g.fillRect(r.x, r.y, r.width, r.height);
-						}
-
-					}
-				}
-			} // counts != null
-
-		}
-	}
-
-	// draw a cross
-	private void drawCross(Graphics g, int x, int y, Color color) {
-		int len = 5;
-
-		g.setColor(CedXYView.TRANS2);
-		g.fillOval(x - len, y - len, 2 * len, 2 * len);
-		g.setColor(color);
-		g.drawLine(x - len, y, x + len, y);
-		g.drawLine(x, y - len, x, y + len);
 	}
 
 	private void drawMCTruth(Graphics g, IContainer container) {

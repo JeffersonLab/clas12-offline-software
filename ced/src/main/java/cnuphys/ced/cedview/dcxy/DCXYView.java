@@ -150,10 +150,10 @@ public class DCXYView extends HexView {
 					_swimTrajectoryDrawer.draw(g, container);
 
 					// mc hits
-					if (getMode() == CedView.Mode.SINGLE_EVENT) {
+					if (isSingleEventMode()) {
 						_mcHitDrawer.draw(g, container);
 					} else {
-						drawAccumulatedGemcGlobalHits(g, container);
+						drawAccumulatedHits(g, container);
 					}
 
 					// draw reconstructed dc crosses
@@ -204,42 +204,7 @@ public class DCXYView extends HexView {
 	}
 
 	// draw the gemc global hits
-	private void drawAccumulatedGemcGlobalHits(Graphics g, IContainer container) {
-		Histo2DData dcXYGemc = AccumulationManager.getInstance()
-				.getDcXYGemcAccumulatedData();
-		if (dcXYGemc != null) {
-
-			long counts[][] = dcXYGemc.getCounts();
-
-			if (counts != null) {
-				Rectangle2D.Double wr = new Rectangle2D.Double();
-				Rectangle r = new Rectangle();
-
-				double maxBinCount = dcXYGemc.getMaxZ();
-
-				for (int i = 0; i < dcXYGemc.getNumberBinsX(); i++) {
-					double x1 = dcXYGemc.getBinMinX(i);
-					double x2 = dcXYGemc.getBinMaxX(i);
-
-					for (int j = 0; j < dcXYGemc.getNumberBinsY(); j++) {
-						if (counts[i][j] > 0) {
-							double y1 = dcXYGemc.getBinMinY(j);
-							double y2 = dcXYGemc.getBinMaxY(j);
-							labPointsToWorldRect(x1, y1, x2, y2, wr);
-							container.worldToLocal(r, wr);
-
-							double fract = ((counts[i][j])) / maxBinCount;
-							Color color = AccumulationManager
-									.getColorScaleModel().getColor(fract);
-
-							g.setColor(color);
-							g.fillRect(r.x, r.y, r.width, r.height);
-						}
-
-					}
-				}
-			} // counts != null
-		}
+	private void drawAccumulatedHits(Graphics g, IContainer container) {
 	}
 
 	// get the attributes to pass to the super constructor

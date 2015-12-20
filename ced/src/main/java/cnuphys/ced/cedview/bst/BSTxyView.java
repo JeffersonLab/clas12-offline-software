@@ -121,9 +121,6 @@ public class BSTxyView extends CedXYView {
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
-		// default properties
-		setBooleanProperty(DisplayArray.HITCROSS_PROPERTY, true);
-
 		// add the CND polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
@@ -141,16 +138,6 @@ public class BSTxyView extends CedXYView {
 	 */
 	public MicroMegasSector getMicroMegasSector(int sector, int layer) {
 		return microMegasSector[sector-1][layer-1];
-	}
-
-	/**
-	 * See if we are to display the midpoints or the crosses from the actual
-	 * dgtz hits
-	 * 
-	 * @return <code>true</code> if we are to display the crosses
-	 */
-	public boolean displayDgtzCrosses() {
-		return checkBooleanProperty(DisplayArray.HITCROSS_PROPERTY);
 	}
 
 	/**
@@ -297,8 +284,13 @@ public class BSTxyView extends CedXYView {
 		g.setClip(oldClip);
 	}
 
-	// find the panel given the 1-based layer and sector
-	public BSTxyPanel getPanel(int layer, int sector) {
+	/**
+	 * Get the panel based on the layer and sector
+	 * @param layer 1..8
+	 * @param sector 1..24
+	 * @return the panel
+	 */
+	public static BSTxyPanel getPanel(int layer, int sector) {
 		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return null;

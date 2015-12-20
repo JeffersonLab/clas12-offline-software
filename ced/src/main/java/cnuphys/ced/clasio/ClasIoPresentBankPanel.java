@@ -181,7 +181,6 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 			break;
 
 		case AccumulationManager.ACCUMULATION_FINISHED:
-			System.err.println("ACCUM FINISHED");
 			update();
 			break;
 		}

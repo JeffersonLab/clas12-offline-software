@@ -26,7 +26,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (!ClasIoEventManager.getInstance().isAccumulating()) {
+		if (!ClasIoEventManager.getInstance().isAccumulating() && _view.isSingleEventMode()) {
 			super.draw(g, container);
 		}
 	}

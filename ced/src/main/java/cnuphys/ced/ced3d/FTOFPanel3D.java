@@ -101,7 +101,7 @@ public class FTOFPanel3D extends DetectorItem3D {
 			y = ftofData.ftof1b_true_avgY;
 			z = ftofData.ftof1b_true_avgZ;
 			break;
-		case FTOFDataContainer.PANEL_2B:
+		case FTOFDataContainer.PANEL_2:
 			pid = ftofData.ftof2b_true_pid;
 			sector = ftofData.ftof2b_dgtz_sector;
 			paddleId = ftofData.ftof2b_dgtz_paddle;

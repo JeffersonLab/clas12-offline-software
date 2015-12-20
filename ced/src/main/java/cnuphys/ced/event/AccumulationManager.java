@@ -1,18 +1,21 @@
 package cnuphys.ced.event;
 
 import java.awt.Color;
+import java.util.Vector;
 
 import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.Histo2DData;
+import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
+import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.FTOFDataContainer;
 import cnuphys.ced.event.data.GenPartDataContainer;
 import cnuphys.splot.pdata.GrowableArray;
 import cnuphys.swim.SwimTrajectory;
@@ -49,14 +52,18 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	private static AccumulationManager instance;
 
 	// dc accumulated data indices are sector, superlayer, layer, wire
-	private int _dcGemcAccumulatedData[][][][];
-	private int _maxGemcDcCount;
-
-	// dc XY accumulated data stored in a 2D histogram
-	private Histo2DData _dcXYGemcAccumulatedData;
-
-	// bst hit xy accumulated data
-	private Histo2DData _bstXYAccumulatedData;
+	private int _dcDgtzAccumulatedData[][][][];
+	private int _maxDgtzDcCount;
+	
+	//BST accumulated data (layer[0..7], sector[0..23])
+	private int _bstDgtzAccumulatedData[][];
+	private int _maxDgtzBstCount;
+	
+	//FTOF accumulated Data
+	private int _ftof1aDgtzAccumulatedData[][];
+	private int _ftof1bDgtzAccumulatedData[][];
+	private int _ftof2DgtzAccumulatedData[][];
+	private int _maxDgtzFtofCount;
 
 	// time based momentum resolution
 	private GrowableArray _tbPResolutionHistoData = new GrowableArray(500, 100);
@@ -90,19 +97,12 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	 */
 	private AccumulationManager() {
 		_eventManager.addClasIoEventListener(this, 1);
-		_dcGemcAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
-
-		// dc XY accumulated data stored in a 2D histogram
-		// use 100 bins in each direction
-		_dcXYGemcAccumulatedData = new Histo2DData("DC XY Data", -390, 390,
-				100, -450, 450, 100);
-
-		// BST XY accumulated data also stored in histo
-		_bstXYAccumulatedData = new Histo2DData("BST XY Data", -170, 170, 100,
-				-170, 170, 100);
-
-		// testing a splot creation
-
+		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
+		_bstDgtzAccumulatedData = new int[8][24];
+		
+		_ftof1aDgtzAccumulatedData = new int[6][23];
+		_ftof1bDgtzAccumulatedData = new int[6][62];
+		_ftof2DgtzAccumulatedData = new int[6][5];
 		clear();
 	}
 
@@ -117,17 +117,35 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
 				for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 					for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
-						_dcGemcAccumulatedData[sector][superLayer][layer][wire] = 0;
+						_dcDgtzAccumulatedData[sector][superLayer][layer][wire] = 0;
 					}
 				}
 			}
 		}
-		_maxGemcDcCount = 0;
+		_maxDgtzDcCount = 0;
 
-		// clear other stuff
-		_dcXYGemcAccumulatedData.clear();
-		_bstXYAccumulatedData.clear();
-
+		// clear bst panel accumulation
+		for (int layer = 0; layer < 8; layer++) {
+			for (int sector = 0; sector < 24; sector++) {
+				_bstDgtzAccumulatedData[layer][sector] = 0;
+			}
+		}
+		_maxDgtzBstCount = 0;
+		
+		//clear ftof data
+		for (int sector = 0; sector < 6; sector++) {
+			for (int  paddle = 0; paddle < _ftof1aDgtzAccumulatedData[0].length; paddle++) {
+				_ftof1aDgtzAccumulatedData[sector][paddle] = 0;
+			}
+			for (int  paddle = 0; paddle < _ftof1bDgtzAccumulatedData[0].length; paddle++) {
+				_ftof1bDgtzAccumulatedData[sector][paddle] = 0;
+			}
+			for (int  paddle = 0; paddle < _ftof2DgtzAccumulatedData[0].length; paddle++) {
+				_ftof2DgtzAccumulatedData[sector][paddle] = 0;
+			}
+		}
+		_maxDgtzFtofCount = 0;
+		
 		// growable arrays used for canned histograms
 		_tbPResolutionHistoData.clear();
 		_tbThetaResolutionHistoData.clear();
@@ -203,44 +221,81 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	}
 
 	/**
-	 * Get the accumulated Gemc DC data
+	 * Get the accumulated dgtz DC data
 	 * 
 	 * @return the accumulated dc data
 	 */
-	public int[][][][] getAccumulatedGemcDcData() {
-		return _dcGemcAccumulatedData;
+	public int[][][][] getAccumulatedDgtzDcData() {
+		return _dcDgtzAccumulatedData;
 	}
 
 	/**
+	 * Get the max counts on any wire
 	 * @return the max counts for any DC wire.
 	 */
-	public int getMaxGemcDcCount() {
-		return _maxGemcDcCount;
+	public int getMaxDgtzDcCount() {
+		return _maxDgtzDcCount;
 	}
+
+	/**
+	 * Get the accumulated dgtz Bst panel data
+	 * 
+	 * @return the accumulated bst panel data
+	 */
+	public int[][] getAccumulatedDgtzBstData() {
+		return _bstDgtzAccumulatedData;
+	}
+
+	/**
+	 * Get the max counts on any bst panel
+	 * @return the max counts for any bst panel.
+	 */
+	public int getMaxDgtzBstCount() {
+		return _maxDgtzBstCount;
+	}
+	
+	/**
+	 * Get the accumulated dgtz ftof panel 1a
+	 * 
+	 * @return the accumulated ftof panel 1a
+	 */
+	public int[][] getAccumulatedDgtzFtof1aData() {
+		return _ftof1aDgtzAccumulatedData;
+	}
+
+	/**
+	 * Get the accumulated dgtz ftof panel 1b
+	 * 
+	 * @return the accumulated ftof panel 1b
+	 */
+	public int[][] getAccumulatedDgtzFtof1bData() {
+		return _ftof1bDgtzAccumulatedData;
+	}
+
+	/**
+	 * Get the accumulated dgtz ftof panel 2
+	 * 
+	 * @return the accumulated ftof panel 2
+	 */
+	public int[][] getAccumulatedDgtzFtof2Data() {
+		return _ftof2DgtzAccumulatedData;
+	}
+
+	
+	/**
+	 * Get the max counts on any ftof panel
+	 * @return the max counts for any ftof panel.
+	 */
+	public int getMaxDgtzFtofCount() {
+		return _maxDgtzFtofCount;
+	}
+
 
 	/**
 	 * @return the colorScaleModel
 	 */
 	public static ColorScaleModel getColorScaleModel() {
 		return colorScaleModel;
-	}
-
-	/**
-	 * Get the Gemc DC xy accumulated data
-	 * 
-	 * @return the Gemc DC xy accumulated data
-	 */
-	public Histo2DData getDcXYGemcAccumulatedData() {
-		return _dcXYGemcAccumulatedData;
-	}
-
-	/**
-	 * Get the BST XY ccumulated data
-	 * 
-	 * @return the BST XY accumulated data
-	 */
-	public Histo2DData getBSTXYGemcAccumulatedData() {
-		return _bstXYAccumulatedData;
 	}
 
 	@Override
@@ -259,10 +314,10 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			int lay0 = dcData.dc_dgtz_layer[i] - 1; // make 0 based
 			int wire0 = dcData.dc_dgtz_wire[i] - 1; // make 0 based
 			try {
-				_dcGemcAccumulatedData[sect0][supl0][lay0][wire0] += 1;
-				_maxGemcDcCount = Math.max(
-						_dcGemcAccumulatedData[sect0][supl0][lay0][wire0],
-						_maxGemcDcCount);
+				_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
+				_maxDgtzDcCount = Math.max(
+						_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
+						_maxDgtzDcCount);
 
 			} catch (ArrayIndexOutOfBoundsException e) {
 				String msg = String
@@ -276,27 +331,44 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			}
 
 		} // end loop hits
-
-		if ((dcData.getHitCount(0) > 0) && (dcData.dc_true_avgX != null)) {
-			for (int i = 0; i < dcData.dc_true_avgX.length; i++) {
-				double valueX = dcData.dc_true_avgX[i] / 10; // convert to cm
-				double valueY = dcData.dc_true_avgY[i] / 10;
-				_dcXYGemcAccumulatedData.add(valueX, valueY);
-			}
-		}
-
-		// BST XY accumulation
+		
+		//bst data
 		BSTDataContainer bstData = _eventManager.getBSTData();
-		if (bstData != null) {
-			if (bstData.bst_true_avgX != null) {
-				int len = bstData.bst_true_avgX.length;
-				for (int i = 0; i < len; i++) {
-					_bstXYAccumulatedData.add(bstData.bst_true_avgX[i],
-							bstData.bst_true_avgY[i]);
-				}
-			}
 
-		} // bstData != null
+		for (int i = 0; i < bstData.getHitCount(0); i++) {
+			BSTxyPanel panel = BSTxyView.getPanel(bstData.bst_dgtz_layer[i],
+					bstData.bst_dgtz_sector[i]);
+			if (panel != null) {
+				int lay0 = bstData.bst_dgtz_layer[i] - 1;
+				int sect0 = bstData.bst_dgtz_sector[i] - 1;
+				try {
+					_bstDgtzAccumulatedData[lay0][sect0] += 1;
+					_maxDgtzBstCount = Math.max(
+							_bstDgtzAccumulatedData[lay0][sect0],
+							_maxDgtzBstCount);
+
+				} catch (ArrayIndexOutOfBoundsException e) {
+					String msg = String.format(
+							"Index out of bounds (BST). Event# %d lay %d sect %d ",
+							_eventManager.getEventNumber(),
+							dcData.dc_dgtz_layer[i],
+							dcData.dc_dgtz_sector[i]);
+					Log.getInstance().warning(msg);
+					System.err.println(msg);
+				}
+
+			}
+		} // for on hits
+
+		
+		//ftof data
+		// the overall container
+		FTOFDataContainer ftofData = _eventManager.getFTOFData();
+		if (ftofData != null) {
+			accumFtof(ftofData.ftof1a_dgtz_sector, ftofData.ftof1a_dgtz_paddle, _ftof1aDgtzAccumulatedData);
+			accumFtof(ftofData.ftof1b_dgtz_sector, ftofData.ftof1b_dgtz_paddle, _ftof1bDgtzAccumulatedData);
+			accumFtof(ftofData.ftof2b_dgtz_sector, ftofData.ftof2b_dgtz_paddle, _ftof2DgtzAccumulatedData);
+		}
 
 		// splot histo test
 
@@ -409,13 +481,30 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 
 	}
 
+	private void accumFtof(int sector[], int paddle[], int[][] hitHolder) {
+		
+		if ((sector == null) || (paddle == null)) {
+			return;
+		}
+		
+		for (int hit = 0; hit < sector.length; hit++) {
+			int sect0 = sector[hit] - 1;
+			int paddle0 = paddle[hit] - 1;
+			hitHolder[sect0][paddle0] += 1;
+			_maxDgtzFtofCount = Math.max(
+					hitHolder[sect0][paddle0],
+					_maxDgtzFtofCount);
+		}
+		
+	}
+	
 	@Override
 	public void openedNewEventFile(String path) {
 	}
 
 	/**
-	 * Get the values array for the plot.
-	 * 
+	 * Get the values array for the color scale.
+	 * Note the range is 0..1 so use fraction of max value to get color
 	 * @return the values array.
 	 */
 	private static double getAccumulationValues()[] {
