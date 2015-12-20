@@ -37,7 +37,7 @@ public class BSTxyMagDrawer extends DrawableAdapter {
     @Override
     public void draw(Graphics g, IContainer container) {
 
-	if (_view.getMode() != CedView.Mode.SINGLE_EVENT) {
+	if (_view.isAccumulatedMode()) {
 	    return;
 	}
 

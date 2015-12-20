@@ -42,6 +42,7 @@ import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
@@ -57,14 +58,14 @@ import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class BSTzView extends CedView implements ChangeListener {
-	
+
 	private static Geometry geo;
 
 	static {
 		Constants.Load();
 		geo = new Geometry();
 	}
-	
+
 	private double _targetZ = 0;
 	private double _phi = 0; // the cross-sectional phi value
 	private double _sinphi = 0;
@@ -81,13 +82,14 @@ public class BSTzView extends CedView implements ChangeListener {
 	// fill color
 	private static final Color HITFILL = new Color(255, 128, 0, 64);
 	private static final Color TRANS = new Color(192, 192, 192, 128);
-	
+
 	// default fill color half-alpha blue
 	private static final Color TRANS2 = new Color(0, 0, 255, 128);
 
-
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
+			LineStyle.SOLID);
+	private static Stroke stroke2 = GraphicsUtilities.getStroke(2.0f,
 			LineStyle.SOLID);
 
 	// units are mm
@@ -100,13 +102,17 @@ public class BSTzView extends CedView implements ChangeListener {
 	// draws reconstructed crosses
 	private CrossDrawerZ _crossDrawer;
 
+	// draws hits
+	private BSTzHitDrawer _hitDrawer;
+
 	public BSTzView(Object... keyVals) {
 		super(keyVals);
+		_crossDrawer = new CrossDrawerZ(this);
+		_hitDrawer = new BSTzHitDrawer(this);
 
 		setBeforeDraw();
 		setAfterDraw();
 		addItems();
-		_crossDrawer = new CrossDrawerZ(this);
 
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawerZ(this);
@@ -128,13 +134,11 @@ public class BSTzView extends CedView implements ChangeListener {
 		int height = width;
 
 		// create the view
-		view = new BSTzView(
-				PropertySupport.WORLDSYSTEM,
-				_defaultWorldRectangle,
-				PropertySupport.WIDTH,
-				width, // container width, not total view width
-				PropertySupport.HEIGHT,
-				height, // container height, not total view width
+		view = new BSTzView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle,
+				PropertySupport.WIDTH, width, // container width, not total view
+											  // width
+				PropertySupport.HEIGHT, height, // container height, not total
+												// view width
 				PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN,
 				TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN,
 				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
@@ -148,9 +152,10 @@ public class BSTzView extends CedView implements ChangeListener {
 				+ ControlPanel.PHISLIDER + +ControlPanel.RECONSARRAY
 				+ ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
 				+ ControlPanel.FIELDLEGEND + ControlPanel.DRAWLEGEND,
-				DisplayBits.MAGFIELD
-				+ DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
-				+ DisplayBits.MCTRUTH + DisplayBits.COSMICS, 2, 6);
+				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
+						+ DisplayBits.BSTRECONS_CROSSES + DisplayBits.MCTRUTH
+						+ DisplayBits.COSMICS,
+				2, 6);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
@@ -193,9 +198,11 @@ public class BSTzView extends CedView implements ChangeListener {
 				_swimTrajectoryDrawer.draw(g, container);
 				drawGEMCHits(g, container);
 				drawPanels(g, container);
-				
-				//not very sophisticated
+
+				// not very sophisticated
 				denoteMicroMegas(g, container);
+
+				_hitDrawer.draw(g, container);
 
 				if (showReconsCrosses()) {
 					_crossDrawer.draw(g, container);
@@ -210,15 +217,15 @@ public class BSTzView extends CedView implements ChangeListener {
 		};
 		getContainer().setAfterDraw(afterDraw);
 	}
-	
+
 	private void denoteMicroMegas(Graphics g, IContainer container) {
-		//hardwire for now layers 5 and 6
-		
+		// hardwire for now layers 5 and 6
+
 		double zmin = -166.51;
 		double zmax = 272.09;
 		double r5 = 205.8;
 		double r6 = 220.8;
-		double w = zmax-zmin;
+		double w = zmax - zmin;
 		double h = 4;
 
 		Graphics2D g2 = (Graphics2D) g;
@@ -226,71 +233,77 @@ public class BSTzView extends CedView implements ChangeListener {
 		// clip the active area
 		Rectangle sr = container.getInsetRectangle();
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-		
-		
+
 		Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r5, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
-		
-		wr.setFrame(zmin, -r5-h, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
-		
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
+				Color.gray, 1, LineStyle.SOLID);
+
+		wr.setFrame(zmin, -r5 - h, w, h);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
+				Color.gray, 1, LineStyle.SOLID);
+
 		wr.setFrame(zmin, r6, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
-		
-		wr.setFrame(zmin, -r6-h, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2, Color.gray, 1, LineStyle.SOLID);
-		
-		//hits?
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
+				Color.gray, 1, LineStyle.SOLID);
+
+		wr.setFrame(zmin, -r6 - h, w, h);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
+				Color.gray, 1, LineStyle.SOLID);
+
+		// hits?
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
-			
+
 		}
 		else {
-			BMTDataContainer bmtData = _eventManager.getBMTData();
-			int hitCount = bmtData.getHitCount(0);
-			if (hitCount > 0) {
+			if (isSingleEventMode()) {
+				BMTDataContainer bmtData = _eventManager.getBMTData();
+				int hitCount = bmtData.getHitCount(0);
+				if (hitCount > 0) {
 
-				int sect[] = bmtData.bmt_dgtz_sector;
-				int layer[] = bmtData.bmt_dgtz_layer;
-				if (showMcTruth()) {
+					int sect[] = bmtData.bmt_dgtz_sector;
+					int layer[] = bmtData.bmt_dgtz_layer;
+					if (showMcTruth()) {
 
-				}
+					}
 
-				// dgtz
-				Point2D.Double wp = new Point2D.Double();
-				Point pp = new Point();
-				for (int hit = 0; hit < hitCount; hit++) {
+					// dgtz
+					Point2D.Double wp = new Point2D.Double();
+					Point pp = new Point();
+					for (int hit = 0; hit < hitCount; hit++) {
 
-					if ((layer[hit] == 5) || (layer[hit] == 6)) {
-						int strip = bmtData.bmt_dgtz_strip[hit];
-						if (strip > 0) {
-							double z = geo.CRC_GetZStrip(sect[hit], layer[hit], strip);
-							wp.x = z;
-							
-							if (layer[hit] == 6) {
-								wp.y = r6 + 2;
-								container.worldToLocal(pp, wp);
-								g.setColor(X11Colors.getX11Color("lawn green"));
-								g.fillOval(pp.x-3,pp.y-3, 6, 6);
-								g.setColor(Color.black);
-								g.drawOval(pp.x-3,pp.y-3, 6, 6);
-								
-								wp.y = -r6 - 2;
-								container.worldToLocal(pp, wp);
-								g.setColor(X11Colors.getX11Color("lawn green"));
-								g.fillOval(pp.x-3,pp.y-3, 6, 6);
-								g.setColor(Color.black);
-								g.drawOval(pp.x-3,pp.y-3, 6, 6);
-						
+						if ((layer[hit] == 5) || (layer[hit] == 6)) {
+							int strip = bmtData.bmt_dgtz_strip[hit];
+							if (strip > 0) {
+								double z = geo.CRC_GetZStrip(sect[hit],
+										layer[hit], strip);
+								wp.x = z;
+
+								if (layer[hit] == 6) {
+									wp.y = r6 + 2;
+									container.worldToLocal(pp, wp);
+									g.setColor(X11Colors
+											.getX11Color("lawn green"));
+									g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
+									g.setColor(Color.black);
+									g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
+
+									wp.y = -r6 - 2;
+									container.worldToLocal(pp, wp);
+									g.setColor(X11Colors
+											.getX11Color("lawn green"));
+									g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
+									g.setColor(Color.black);
+									g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
+
+								}
+
 							}
-							
-							
-						}
-					} // layer == 5 or 6
+						} // layer == 5 or 6
+					}
 				}
-			}
+			} // single event mode
 		}
-		
-		
+
 		g2.setClip(oldClip);
 	}
 
@@ -362,8 +375,9 @@ public class BSTzView extends CedView implements ChangeListener {
 		g2.setColor(Color.black);
 
 		// there are 132 panels
-		// mark the hits if there is data
-		BSTSupport.markPanelHits(panels);
+		// mark the hits if there is gemc data
+		BSTSupport.markPanelHits(this, panels);
+		
 
 		int index = 0;
 		for (BSTxyPanel panel : panels) {
@@ -549,8 +563,8 @@ public class BSTzView extends CedView implements ChangeListener {
 
 		g.setColor(X11Colors.getX11Color("dark red"));
 		g.drawLine(xc, yc, right - fm.stringWidth("z") - 4, yc);
-		g.drawString("z", right - fm.stringWidth("z") - 2, yc + fm.getAscent()
-				/ 2);
+		g.drawString("z", right - fm.stringWidth("z") - 2,
+				yc + fm.getAscent() / 2);
 
 		int xscale = (int) Math.abs(size2 * _cosphi);
 		int xx = (int) (_sinphi * xscale);
@@ -606,7 +620,8 @@ public class BSTzView extends CedView implements ChangeListener {
 
 				g.drawString(vs, xs, bottom + fh + 1);
 
-			} else {
+			}
+			else {
 				g.drawLine(pp.x, bottom, pp.x, bottom - 5);
 			}
 		}
@@ -622,7 +637,8 @@ public class BSTzView extends CedView implements ChangeListener {
 				int xs = sr.x - fm.stringWidth(vs) - 1;
 
 				g.drawString(vs, xs, pp.y + fh / 2);
-			} else {
+			}
+			else {
 				g.drawLine(sr.x, pp.y, sr.x + 5, pp.y);
 			}
 		}
@@ -635,7 +651,8 @@ public class BSTzView extends CedView implements ChangeListener {
 		}
 		if (Math.abs(val) < 1.0) {
 			return DoubleFormat.doubleFormat(val, 1);
-		} else {
+		}
+		else {
 			return "" + (int) Math.round(val);
 		}
 	}
@@ -653,13 +670,13 @@ public class BSTzView extends CedView implements ChangeListener {
 
 		// add a field object, which won't do anything unless we can read in the
 		// field.
-		LogicalLayer magneticFieldLayer = getContainer().getLogicalLayer(
-				_magneticFieldLayerName);
+		LogicalLayer magneticFieldLayer = getContainer()
+				.getLogicalLayer(_magneticFieldLayerName);
 		new MagFieldItem(magneticFieldLayer, this);
 		magneticFieldLayer.setVisible(false);
 
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer()
+				.getLogicalLayer(_detectorLayerName);
 		new BeamLineItem(detectorLayer);
 	}
 
@@ -673,13 +690,10 @@ public class BSTzView extends CedView implements ChangeListener {
 	 * Converts the local screen coordinate obtained by a previous localToWorld
 	 * call to full 3D CLAS coordinates
 	 * 
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
-	 * @param result
-	 *            holds the result. It has five elements. Cartesian x, y, and z
-	 *            are in 0, 1, and 2. Cylindrical rho and phi are in 3 and 4.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint the corresponding world location.
+	 * @param result holds the result. It has five elements. Cartesian x, y, and
+	 *            z are in 0, 1, and 2. Cylindrical rho and phi are in 3 and 4.
 	 *            (And of course cylindrical z is the same as Cartesian z.)
 	 */
 	public void getCLASCordinates(IContainer container, Point screenPoint,
@@ -701,12 +715,9 @@ public class BSTzView extends CedView implements ChangeListener {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint the corresponding world location.
 	 */
 	@Override
 	public void getFeedbackStrings(IContainer container, Point screenPoint,
@@ -769,7 +780,8 @@ public class BSTzView extends CedView implements ChangeListener {
 					.getClosestTrajectory();
 			if (traj2D != null) {
 				traj2D.addToFeedback(feedbackStrings);
-			} else {
+			}
+			else {
 				System.err.println("null traj");
 			}
 		}
@@ -783,8 +795,7 @@ public class BSTzView extends CedView implements ChangeListener {
 	/**
 	 * Returns a string representation of the form: "(x,y,z)".
 	 * 
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	private String vecStr(float v[]) {
@@ -801,8 +812,7 @@ public class BSTzView extends CedView implements ChangeListener {
 	/**
 	 * Returns a string representation of the form: "(x,y,z)".
 	 * 
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	private String vecStr(double vx, double vy, double vz) {
@@ -819,14 +829,10 @@ public class BSTzView extends CedView implements ChangeListener {
 	/**
 	 * Get the world graphic coordinates from lab XYZ
 	 * 
-	 * @param x
-	 *            the lab x in cm
-	 * @param y
-	 *            the lab y in cm
-	 * @param z
-	 *            the lab z in cm
-	 * @param wp
-	 *            the world point
+	 * @param x the lab x in cm
+	 * @param y the lab y in cm
+	 * @param z the lab z in cm
+	 * @param wp the world point
 	 */
 	public void labToWorld(double x, double y, double z, Point2D.Double wp) {
 		wp.x = z;
@@ -840,6 +846,31 @@ public class BSTzView extends CedView implements ChangeListener {
 		getContainer().worldToLocal(pp, wp);
 	}
 
+	// draw one SVT panel
+	public void drawSVTStrip(Graphics2D g2, IContainer container,
+			Color color, int sector, int layer, int strip) {
+
+		float coords[] = new float[6];
+		
+		BSTGeometry.getStrip(sector, layer, strip, coords);
+		
+		Stroke oldStroke = g2.getStroke();
+		g2.setColor(color);
+		g2.setStroke(stroke);
+		Point p1 = new Point();
+		Point p2 = new Point();
+		// Just draw a line from (x1,y1,z1) to (x2,y2,z2)
+
+		//cm to mm
+		labToLocal(10*coords[0], 10*coords[1], 10*coords[2], p1);
+		labToLocal(10*coords[3], 10*coords[4], 10*coords[5], p2);
+
+		g2.drawLine(p1.x, p1.y, p2.x, p2.y);
+		g2.setStroke(oldStroke);
+
+	}
+
+
 	/**
 	 * The z location of the target
 	 * 
@@ -852,8 +883,7 @@ public class BSTzView extends CedView implements ChangeListener {
 	/**
 	 * This is used to listen for changes on components like sliders.
 	 * 
-	 * @param e
-	 *            the causal event.
+	 * @param e the causal event.
 	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -863,7 +893,8 @@ public class BSTzView extends CedView implements ChangeListener {
 		if (source == _controlPanel.getTargetSlider()) {
 			_targetZ = (_controlPanel.getTargetSlider().getValue());
 			getContainer().refresh();
-		} else if (source == _controlPanel.getPhiSlider()) {
+		}
+		else if (source == _controlPanel.getPhiSlider()) {
 			_phi = _controlPanel.getPhiSlider().getValue();
 			// _cosphi = Math.cos(-Math.toRadians(_phiRelMidPlane));
 			// _sinphi = Math.sin(-Math.toRadians(_phiRelMidPlane));

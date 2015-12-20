@@ -18,7 +18,7 @@ public class FTOFPanel {
 		} else if (pname.contains("1b") || pname.contains("1B")) {
 			_panelType = FTOFDataContainer.PANEL_1B; // 1
 		} else {
-			_panelType = FTOFDataContainer.PANEL_2B; // 2
+			_panelType = FTOFDataContainer.PANEL_2; // 2
 		}
 		_numPaddle = numPaddle;
 	}

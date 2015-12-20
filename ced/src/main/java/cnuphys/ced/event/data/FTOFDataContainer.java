@@ -11,7 +11,7 @@ public class FTOFDataContainer extends ADataContainer {
 
 	public static final int PANEL_1A = 0;
 	public static final int PANEL_1B = 1;
-	public static final int PANEL_2B = 2;
+	public static final int PANEL_2 = 2;
 
 	public static final String panelNames[] = { "Panel 1A", "Panel 1B",
 			"Panel 2" };
@@ -533,7 +533,7 @@ public class FTOFDataContainer extends ADataContainer {
 			hitCount = (ftof1b_dgtz_sector == null) ? 0
 					: ftof1b_dgtz_sector.length;
 			break;
-		case PANEL_2B:
+		case PANEL_2:
 			hitCount = (ftof2b_dgtz_sector == null) ? 0
 					: ftof2b_dgtz_sector.length;
 			break;
@@ -914,7 +914,7 @@ public class FTOFDataContainer extends ADataContainer {
 					+ ftof1b_dgtz_TDCL[hitIndex] + "  tdc_right "
 					+ ftof1b_dgtz_TDCR[hitIndex]);
 			break;
-		case FTOFDataContainer.PANEL_2B:
+		case FTOFDataContainer.PANEL_2:
 			feedbackStrings.add(dgtxColor + "panel_2  sector "
 					+ ftof2b_dgtz_sector[hitIndex] + "  paddle "
 					+ ftof2b_dgtz_paddle[hitIndex]);
@@ -977,7 +977,7 @@ public class FTOFDataContainer extends ADataContainer {
 			sector = ftof1b_dgtz_sector;
 			paddles = ftof1b_dgtz_paddle;
 			break;
-		case FTOFDataContainer.PANEL_2B:
+		case FTOFDataContainer.PANEL_2:
 			sector = ftof2b_dgtz_sector;
 			paddles = ftof2b_dgtz_paddle;
 			break;

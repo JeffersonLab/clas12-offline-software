@@ -26,9 +26,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** property for inner outer */
 	public static final String SHOWINNER_PROPERTY = "DisplayInner";
 
-	/** property for mid point cross */
-	public static final String HITCROSS_PROPERTY = "MidpointCross";
-
 	/** Label and access to the monte carlo truth checkbox */
 	public static final String MCTRUTH_LABEL = "GEMC Truth";
 
@@ -69,9 +66,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public static final String MIDPOINTS_LABEL = "Strip Midpoints";
 
 	/** BST Hits as crosses */
-	public static final String CROSSES_LABEL = "Strip Crosses";
-
-	/** BST Hits as crosses */
 	public static final String COSMIC_LABEL = "Cosmic Tracks";
 
 	// controls mc truth is displayed (when available)
@@ -96,10 +90,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	private AbstractButton _outerButton;
 
 	// controls whether hits in BST are shown as midpoints of strips
-	private AbstractButton _hitsMidpointsButton;
-
-	// controls whether hits in BST are shown as midpoints of strips
-	private AbstractButton _hitsCrossesButton;
+	private AbstractButton _stripMidpointsButton;
 
 	// controls whether we draw u strips
 	private AbstractButton _uButton;
@@ -133,20 +124,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		boolean show_w = true;
 		boolean show_cosmic = true;
 
-		// private AbstractButton _hitsMidpointsButton;
-		// private AbstractButton _hitsCrossesButton;
-
-		// BST hits or crosses
-		if (Bits.checkBit(bits, DisplayBits.BSTHITS)) {
-			_hitsMidpointsButton = add(MIDPOINTS_LABEL, false, true,
-					MIDPOINTCROSS_BUTTONGROUP, this,
-					X11Colors.getX11Color("maroon")).getCheckBox();
-
-			_hitsCrossesButton = add(CROSSES_LABEL, true, true,
-					MIDPOINTCROSS_BUTTONGROUP, this,
-					X11Colors.getX11Color("maroon")).getCheckBox();
-		}
-
 		// innerouter?
 		if (Bits.checkBit(bits, DisplayBits.INNEROUTER)) {
 			_innerButton = add(INNER_LABEL, true, true, INNEROUTER_BUTTONGROUP,
@@ -169,14 +146,21 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		// accumulation?
 		if (Bits.checkBit(bits, DisplayBits.ACCUMULATION)) {
 			_singleEventButton = add(SINGLEEVENT_LABEL,
-					view.getMode() == CedView.Mode.SINGLE_EVENT, true,
+					view.isSingleEventMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
 
 			_accumulatedButton = add(ACCUMULATED_LABEL,
-					view.getMode() == CedView.Mode.ACCUMULATED, true,
+					view.isAccumulatedMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
+		}
+
+		// BST hits as midpoints of hit strips
+		if (Bits.checkBit(bits, DisplayBits.BSTHITS)) {
+			_stripMidpointsButton = add(MIDPOINTS_LABEL, false, true,
+					this, X11Colors.getX11Color("maroon")).getCheckBox();
+
 		}
 
 		// display mc truth?
@@ -219,12 +203,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_view.setBooleanProperty(SHOWINNER_PROPERTY, false);
 		}
 
-		else if (button == _hitsMidpointsButton) {
-			_view.setBooleanProperty(HITCROSS_PROPERTY, false);
-		} else if (button == _hitsCrossesButton) {
-			_view.setBooleanProperty(HITCROSS_PROPERTY, true);
-		}
-
 		// repaint the view
 		if (_view != null) {
 			_view.getContainer().refresh();
@@ -239,6 +217,16 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 */
 	public boolean showMcTruth() {
 		return (_mcTruthButton != null) && _mcTruthButton.isSelected();
+	}
+	
+	/**
+	 * Convenience method to see it we show thestrip midpoints.
+	 * 
+	 * @return <code>true</code> if we are to show the strip midpoints
+	 * for hit strips.
+	 */
+	public boolean showStripMidpoints() {
+		return (_stripMidpointsButton != null) && _stripMidpointsButton.isSelected();
 	}
 
 	/**

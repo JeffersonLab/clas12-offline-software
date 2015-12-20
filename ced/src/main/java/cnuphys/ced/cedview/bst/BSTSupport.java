@@ -2,6 +2,7 @@ package cnuphys.ced.cedview.bst;
 
 import java.util.List;
 
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.geometry.BSTxyPanel;
@@ -14,7 +15,7 @@ public class BSTSupport {
 	 * @param panels
 	 *            the list of panels
 	 */
-	public static void markPanelHits(List<BSTxyPanel> panels) {
+	public static void markPanelHits(CedView view,  List<BSTxyPanel> panels) {
 		for (BSTxyPanel panel : panels) {
 			panel.hit[0] = false;
 			panel.hit[1] = false;
@@ -28,21 +29,29 @@ public class BSTSupport {
 			return;
 		}
 
+		//NOTE this uses "true" (gemc data) to segment the z direction
 		double z[] = bstData.bst_true_avgLz;
-		if (z == null) {
-			return;
-		}
 
 		int len = z.length;
 		for (int i = 0; i < len; i++) {
 			for (BSTxyPanel panel : panels) {
 				if ((panel.getLayer() == bstData.bst_dgtz_layer[i])
 						&& (panel.getSector() == bstData.bst_dgtz_sector[i])) {
-					int zindex = panel.getZIndex(z[i]);
 
-					if (zindex >= 0) {
-						panel.hit[zindex] = true;
+					if (view.showMcTruth() && (z != null)) {
+						int zindex = panel.getZIndex(z[i]);
+
+						if (zindex >= 0) {
+							panel.hit[zindex] = true;
+						}
 					}
+					else {
+						//no "true (gemc z vals)" data use full z range
+						panel.hit[0] = true;
+						panel.hit[1] = true;
+						panel.hit[2] = true;
+					}
+					
 					break;
 				}
 			}

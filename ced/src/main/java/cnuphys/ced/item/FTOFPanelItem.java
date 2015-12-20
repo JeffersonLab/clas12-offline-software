@@ -17,6 +17,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.FTOFDataContainer;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.lund.LundId;
@@ -94,20 +95,6 @@ public class FTOFPanelItem extends PolygonItem {
 		// hits
 		drawHits(g, container);
 
-		// now the divisions
-		// for (int i = 0; i < _ftofPanel.getCount(); i++) {
-		// Point2D.Double wp[] = getPaddle(_view, i,
-		// _ftofPanel, _sector);
-		//
-		// if (wp != null) {
-		// Path2D.Double padpath = WorldGraphicsUtilities
-		// .worldPolygonToPath(wp);
-		// WorldGraphicsUtilities.drawPath2D(g, container, padpath, null,
-		// Color.black,
-		// 1, LineStyle.SOLID, true);
-		// }
-		// }
-
 		Point2D.Double wp[] = new Point2D.Double[2];
 		wp[0] = new Point2D.Double();
 		wp[1] = new Point2D.Double();
@@ -128,7 +115,54 @@ public class FTOFPanelItem extends PolygonItem {
 
 	// draw any hits
 	private void drawHits(Graphics g, IContainer container) {
+		
+		if (_view.isSingleEventMode()) {
+			drawSingleModeHits(g, container);
+		}
+		else {
+			drawAccumulatedHits(g, container);
+		}
+	}
+	
+	
+	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		int hits[][] = null;
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzFtofCount();
+		
+		int panelType = _ftofPanel.getPanelType();
+		switch (panelType) {
+		case FTOFDataContainer.PANEL_1A:
+			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1aData();
+			break;
+		case FTOFDataContainer.PANEL_1B:
+			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1bData();
+			break;
+		case FTOFDataContainer.PANEL_2:
+			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof2Data();
+			break;
+		}
+		
+		if (hits != null) {
+			int sect0 = _sector - 1;
+			for (int paddle0 = 0; paddle0 < hits[0].length; paddle0++) {
+				double fract = ((double) (hits[sect0][paddle0]))/maxHit;
+				Color fc = AccumulationManager.getColorScaleModel().getColor(fract);
+				Point2D.Double wp[] = getPaddle(_view, paddle0,
+						_ftofPanel, _sector);
 
+				if (wp != null) {
+					Path2D.Double path = WorldGraphicsUtilities
+							.worldPolygonToPath(wp);
+					WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
+							_style.getLineColor(), 0, LineStyle.SOLID, true);
+				}
+			}
+		}
+
+	}
+
+	//works for both showMcTruth and not
+	private void drawSingleModeHits(Graphics g, IContainer container) {
 		// the overall container
 		FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
@@ -154,15 +188,18 @@ public class FTOFPanelItem extends PolygonItem {
 			sector = ftofData.ftof1b_dgtz_sector;
 			paddles = ftofData.ftof1b_dgtz_paddle;
 			break;
-		case FTOFDataContainer.PANEL_2B:
+		case FTOFDataContainer.PANEL_2:
 			pid = ftofData.ftof2b_true_pid;
 			sector = ftofData.ftof2b_dgtz_sector;
 			paddles = ftofData.ftof2b_dgtz_paddle;
 			break;
 		}
-
-		if (paddles == null) {
-			Log.getInstance().warning("null paddles array in FTOFPanelItem");
+		
+		if (!_view.showMcTruth()) {
+			pid = null;
+		}
+		
+		if ((sector == null) || (paddles == null)) {
 			return;
 		}
 
@@ -190,8 +227,9 @@ public class FTOFPanelItem extends PolygonItem {
 
 			}
 		}
-	}
 
+	}
+	
 	/**
 	 * Get the FTOFPanel which contains the geometry
 	 * 
@@ -325,7 +363,7 @@ public class FTOFPanelItem extends PolygonItem {
 									ftofData.ftof1b_true_otid, feedbackStrings);
 							break;
 
-						case FTOFDataContainer.PANEL_2B:
+						case FTOFDataContainer.PANEL_2:
 							// System.err.println("CONTAINS HIT 2B");
 							ftofData.onHitFeedbackStrings(hitIndex, panelType,
 									ftofData.ftof2b_true_pid,

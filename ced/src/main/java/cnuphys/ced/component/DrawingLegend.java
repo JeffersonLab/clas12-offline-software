@@ -14,7 +14,9 @@ import javax.swing.JPanel;
 
 import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
+import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
@@ -55,7 +57,7 @@ public class DrawingLegend extends JComponent {
 	@Override
 	public void paintComponent(Graphics g) {
 		Rectangle b = getBounds();
-		g.setColor(Color.darkGray);
+		g.setColor(Color.black);
 		g.fillRect(0, 0, b.width, b.height);
 
 		Point pp = new Point();
@@ -87,9 +89,17 @@ public class DrawingLegend extends JComponent {
 
 	}
 
+	//paint the legent for the central 2D views
 	private void paintCentralViewLegend(Graphics g, int x, int yc) {
+		int xo = x;
 		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
+		
+		yc += 16;
+		SymbolDraw.drawUpTriangle(g, xo, yc, 3, 
+				X11Colors.getX11Color("Dark Green"), X11Colors.getX11Color("Aquamarine"));
+
+		quickString(g, xo+16, yc, "hit strip midpoint");
 	}
 
 	private void paintSectorViewLegend(Graphics g, int x, int yc) {

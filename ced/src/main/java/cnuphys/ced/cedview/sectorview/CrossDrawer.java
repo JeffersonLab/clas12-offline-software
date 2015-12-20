@@ -65,6 +65,10 @@ public class CrossDrawer extends SectorViewDrawer {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
+		
+		if (_view.isAccumulatedMode()) {
+			return;
+		}
 
 		Graphics2D g2 = (Graphics2D) g;
 

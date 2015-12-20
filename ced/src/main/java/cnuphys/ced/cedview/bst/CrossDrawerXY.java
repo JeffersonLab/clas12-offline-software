@@ -16,6 +16,7 @@ import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BMTDataContainer;
 import cnuphys.ced.event.data.BSTDataContainer;
@@ -42,6 +43,10 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
+			return;
+		}
+		
+		if (_view.isAccumulatedMode()) {
 			return;
 		}
 
