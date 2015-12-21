@@ -132,6 +132,18 @@ public class ColorScaleModel {
 	public Color getColor(double value) {
 		return getColor(value, false);
 	}
+	
+	/**
+	 * Get a color via getColor but add an alpha value
+	 * @param value the value 
+	 * @param alpha the alpha value [0..255]
+	 * @return the color corresponding to the value.
+	 */
+	public Color getAlphaColor(double value, int alpha) {
+		Color c = getColor(value);
+		Color color = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+		return color;
+	}
 
 	/**
 	 * Given a value, returns the corresponding color. Example:

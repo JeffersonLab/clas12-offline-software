@@ -1,5 +1,6 @@
 package cnuphys.swim;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -115,6 +116,8 @@ public class SwimMenu extends JMenu implements ActionListener {
 
     private JPanel createEpsPanel() {
 	JPanel sp = new JPanel();
+	sp.setBackground(Color.white);
+
 	sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
 	JLabel label = new JLabel("Swimming Tolerance: ");
@@ -152,6 +155,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 
     private JPanel createMaxSSPanel() {
 	JPanel sp = new JPanel();
+	sp.setBackground(Color.white);
 	sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
 	JLabel label = new JLabel("Max Stepsize (cm): ");

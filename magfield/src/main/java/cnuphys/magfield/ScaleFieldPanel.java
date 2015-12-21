@@ -1,5 +1,6 @@
 package cnuphys.magfield;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -18,6 +19,7 @@ public class ScaleFieldPanel extends JPanel {
     public ScaleFieldPanel(final MagneticFields.FieldType type,
 	    final String name, double defaultVal) {
 	setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
+	setBackground(Color.white);
 	_fieldType = type;
 
 	// label

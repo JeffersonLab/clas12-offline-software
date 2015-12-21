@@ -34,13 +34,18 @@ public class McHitDrawer extends ECViewDrawer {
 			return;
 		}
 
+		_fbRects.clear();
+
 		if (!_view.showMcTruth()) {
+			return;
+		}
+		
+		if (_view.isAccumulatedMode()) {
 			return;
 		}
 
 		ECDataContainer ecData = _eventManager.getECData();
 
-		_fbRects.clear();
 
 		showGemcXYZHits(g, container, ecData);
 	}

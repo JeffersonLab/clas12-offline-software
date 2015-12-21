@@ -81,12 +81,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// the singleton
 	private static Ced _instance;
-
-	// main version
-	private static final int majorRelease = 0;
-
-	// subversion
-	private static final int minorRelease = 9;
+	
+	private static final String _release = "build 0.95.01";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -395,6 +391,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @param num the event number
 	 */
 	public static void setEventNumberLabel(int num) {
+		
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
+			return;
+		}
 		if (num < 0) {
 			_eventNumberLabel.setText("  Event Num:      is GEMC: false");
 		}
@@ -417,6 +417,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				dialog.setVisible(true);
 			}
 		};
+		
+		_eventMenu.addSeparator();
 		MenuManager.addMenuItem("Noise Algorithm Parameters...", _eventMenu,
 				al2);
 	}
@@ -447,7 +449,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @return the version string
 	 */
 	public static String versionString() {
-		return String.format("Version %d.%d", majorRelease, minorRelease);
+		return _release;
 	}
 
 	@Override
@@ -506,6 +508,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			break;
 
 		case AccumulationManager.ACCUMULATION_FINISHED:
+			setEventNumberLabel(ClasIoEventManager.getInstance().getEventNumber());
 			break;
 		}
 	}
@@ -662,7 +665,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Log.getInstance().addLogListener(new ConsoleLogListener());
 		
 		//splash frame
-		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png");
+		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png", _release);
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
 

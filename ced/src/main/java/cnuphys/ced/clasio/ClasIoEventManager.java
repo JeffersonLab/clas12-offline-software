@@ -402,9 +402,9 @@ public class ClasIoEventManager {
 		bg.add(fileRadioMenuItem);
 		bg.add(etRadioMenuItem);
 
-		menu.add(fileRadioMenuItem, 0);
-		menu.add(etRadioMenuItem, 1);
-		menu.insertSeparator(2);
+		menu.addSeparator();
+		menu.add(fileRadioMenuItem);
+		menu.add(etRadioMenuItem);
 	}
 
 	/**

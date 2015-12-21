@@ -97,8 +97,12 @@ public class StreamCapturePane extends JScrollPane {
 	}
 	
 	public void writeCachedText() {
-		for (CachedText ct : _cachedText) {
-			ct.write();
+		try {
+			for (CachedText ct : _cachedText) {
+				ct.write();
+			}
+		} catch (Exception e) {
+
 		}
 	}
 	

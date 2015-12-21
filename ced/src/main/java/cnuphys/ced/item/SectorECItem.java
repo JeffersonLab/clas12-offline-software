@@ -18,6 +18,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ECDataContainer;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.geometry.ECGeometry;
@@ -155,6 +156,17 @@ public class SectorECItem extends PolygonItem {
 
 	// draw any hits
 	private void drawHits(Graphics g, IContainer container) {
+		
+		if (_view.isSingleEventMode()) {
+			drawSingleEventHits(g, container);
+		}
+		else {
+			drawAccumulatedHits(g, container);
+		}
+	}
+	
+	//single event drawer
+	private void drawSingleEventHits(Graphics g, IContainer container) {
 
 		// the data container
 		ECDataContainer ecData = _eventManager.getECData();
@@ -162,7 +174,6 @@ public class SectorECItem extends PolygonItem {
 		Color default_fc = Color.red;
 		int pid[] = ecData.ec_true_pid;
 
-		boolean drew = false;
 
 		for (int hitIndex = 0; hitIndex < ecData
 				.getHitCount(ECDataContainer.EC_OPTION); hitIndex++) {
@@ -170,10 +181,14 @@ public class SectorECItem extends PolygonItem {
 					&& (ecData.ec_dgtz_stack[hitIndex] == (_plane + 1))
 					&& (ecData.ec_dgtz_view[hitIndex] == (_stripType + 1))) {
 				Color fc = default_fc;
-				if (pid != null) {
-					LundId lid = LundSupport.getInstance().get(pid[hitIndex]);
-					if (lid != null) {
-						fc = lid.getStyle().getFillColor();
+				
+				if (_view.showMcTruth()) {
+					if (pid != null) {
+						LundId lid = LundSupport.getInstance()
+								.get(pid[hitIndex]);
+						if (lid != null) {
+							fc = lid.getStyle().getFillColor();
+						}
 					}
 				}
 
@@ -186,26 +201,37 @@ public class SectorECItem extends PolygonItem {
 							.worldPolygonToPath(wp);
 					WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
 							_style.getLineColor(), 0, LineStyle.SOLID, true);
-					drew = true;
 				}
 
 			}
 		}
+	}
+	
+	// accumulated drawer
+	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzEcCount();
+		if (maxHit < 1) {
+			return;
+		}
 
-		// redraw shell
-		// if (drew) {
-		// for (int stripIndex = 0; stripIndex < ECGeometry.EC_NUMSTRIP;
-		// stripIndex++) {
-		// Point2D.Double wp[] = getStrip(stripIndex);
-		//
-		// if (wp != null) {
-		// Path2D.Double path2d = WorldGraphicsUtilities
-		// .worldPolygonToPath(wp);
-		// WorldGraphicsUtilities.drawPath2D(g, container, path2d, null,
-		// _style.getLineColor(), 0, LineStyle.SOLID, true);
-		// }
-		// }
-		// }
+		int hits[][][][] = AccumulationManager.getInstance()
+				.getAccumulatedDgtzEcData();
+		for (int strip0 = 0; strip0 < 36; strip0++) {
+			int hit = hits[_sector - 1][_plane][_stripType][strip0];
+			double fract = ((double) (hit)) / maxHit;
+			
+			Point2D.Double wp[] = getStrip(strip0);
+
+			if (wp != null) {
+				Color color = AccumulationManager.getColorScaleModel()
+						.getColor(fract);
+				Path2D.Double path = WorldGraphicsUtilities
+						.worldPolygonToPath(wp);
+				WorldGraphicsUtilities.drawPath2D(g, container, path, color,
+						_style.getLineColor(), 0, LineStyle.SOLID, true);
+			}
+
+		}
 	}
 
 	/**
