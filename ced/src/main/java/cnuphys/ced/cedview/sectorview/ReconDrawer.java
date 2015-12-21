@@ -29,11 +29,20 @@ public class ReconDrawer extends SectorViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
+		_fbRects.clear();
+		
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 
-		_fbRects.clear();
+		if (!_view.showMcTruth()) {
+			return;
+		}
+
+		if (_view.isAccumulatedMode()) {
+			return;
+		}
+
 
 		// FTOF
 		if (_view.showFTOFReconHits()) {

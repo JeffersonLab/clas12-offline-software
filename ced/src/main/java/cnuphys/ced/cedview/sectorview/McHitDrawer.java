@@ -31,6 +31,8 @@ public class McHitDrawer extends SectorViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
+		_fbRects.clear();
+
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -39,12 +41,15 @@ public class McHitDrawer extends SectorViewDrawer {
 			return;
 		}
 
+		if (_view.isAccumulatedMode()) {
+			return;
+		}
+		
 		// get the data
 		DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
 		FTOFDataContainer ftofData = _eventManager.getFTOFData();
 		ECDataContainer ecData = _eventManager.getECData();
 
-		_fbRects.clear();
 
 		showGemcXYZHits(g, container, dcData, dcData.dc_true_avgX,
 				dcData.dc_true_avgY, dcData.dc_true_avgZ, dcData.dc_true_pid, 0);

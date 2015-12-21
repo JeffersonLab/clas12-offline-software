@@ -119,7 +119,7 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 		GEMCMetaDataContainer gemcdata = _eventManager.getGEMCMetaData();
 
 		if (!gemcdata.resetFields) {
-			System.err.println("Skipped setting fields.");
+//			System.err.println("Skipped setting fields.");
 			return;
 		}
 

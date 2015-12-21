@@ -1,5 +1,6 @@
 package cnuphys.ced.clasio;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,7 +39,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	private static String _recentFileKey = "RecentEvioFiles";
 
 	// the menu items
-	private JMenuItem _openEventFile;
 	private JMenuItem quitItem;
 	private JMenuItem nextItem;
 	private JMenuItem prevItem;
@@ -82,6 +82,14 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		super("Events");
 
 		_eventManager.addClasIoEventListener(this, 1);
+		
+		// accumulate
+		if (includeAccumulation) {
+			accumulationItem = addMenuItem("Accumulate Events...",
+					KeyEvent.VK_A);
+			addSeparator();
+		}
+
 
 		// open
 //		_openEventFile = getOpenEventFileItem();
@@ -105,11 +113,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		// periodic event
 		add(createEventPeriodPanel());
 
-		// accumulate
-		if (includeAccumulation) {
-			accumulationItem = addMenuItem("Accumulate Events...",
-					KeyEvent.VK_A);
-		}
 
 		if (includeQuit) {
 			addSeparator();
@@ -315,6 +318,8 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	private JPanel createGoToPanel() {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
+		
+		sp.setBackground(Color.white);
 
 		JLabel label = new JLabel("Go To Event: ");
 
@@ -345,6 +350,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	// create the event every so many seconds widget
 	private JPanel createEventPeriodPanel() {
 		JPanel sp = new JPanel();
+		sp.setBackground(Color.white);
 		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
 		_periodEvent = new JCheckBox("Auto Next Event Every ");

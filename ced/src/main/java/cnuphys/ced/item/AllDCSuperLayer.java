@@ -443,6 +443,10 @@ public class AllDCSuperLayer extends RectangleItem {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
 				double fract = ((double) hitCount) / maxHit;
+				
+				if ((_sector == 2) && (_superLayer == 1) && (layer == 2)) {
+					System.err.println("hit count: " + hitCount + "  max: " + maxHit);
+				}
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getColorScaleModel()
 						.getColor(fract);

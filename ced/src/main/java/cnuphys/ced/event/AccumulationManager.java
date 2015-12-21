@@ -15,6 +15,7 @@ import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ECDataContainer;
 import cnuphys.ced.event.data.FTOFDataContainer;
 import cnuphys.ced.event.data.GenPartDataContainer;
 import cnuphys.splot.pdata.GrowableArray;
@@ -64,6 +65,15 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	private int _ftof1bDgtzAccumulatedData[][];
 	private int _ftof2DgtzAccumulatedData[][];
 	private int _maxDgtzFtofCount;
+	
+	//EC  [sector, stack (inner, outer), view (uvw), strip]
+	private int _ecDgtzAccumulatedData[][][][];
+	private int _maxDgtzEcCount;
+	
+	//PCAL  [sector, view (uvw), strip]
+	private int _pcalDgtzAccumulatedData[][][];
+	private int _maxDgtzPcalCount;
+
 
 	// time based momentum resolution
 	private GrowableArray _tbPResolutionHistoData = new GrowableArray(500, 100);
@@ -100,9 +110,15 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 		_bstDgtzAccumulatedData = new int[8][24];
 		
+		//ftop storage
 		_ftof1aDgtzAccumulatedData = new int[6][23];
 		_ftof1bDgtzAccumulatedData = new int[6][62];
 		_ftof2DgtzAccumulatedData = new int[6][5];
+		
+		//ec and pcal storage
+		_ecDgtzAccumulatedData = new int[6][2][3][36];
+		_pcalDgtzAccumulatedData = new int[6][3][68];
+		
 		clear();
 	}
 
@@ -123,6 +139,29 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			}
 		}
 		_maxDgtzDcCount = 0;
+		
+		//clear ec data
+		for (int sector = 0; sector < 6; sector++) {
+			for (int stack = 0; stack < 2; stack++) {
+				for (int view = 0; view < 3; view++) {
+					for (int strip = 0; strip < 36; strip++) {
+						_ecDgtzAccumulatedData[sector][stack][view][strip] = 0;
+					}
+				}
+			}
+		}
+		_maxDgtzEcCount = 0;
+		
+		//clear pcal data
+		for (int sector = 0; sector < 6; sector++) {
+				for (int view = 0; view < 3; view++) {
+					for (int strip = 0; strip < 68; strip++) {
+						_pcalDgtzAccumulatedData[sector][view][strip] = 0;
+					}
+				}
+		}
+		_maxDgtzPcalCount = 0;
+
 
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
@@ -219,6 +258,24 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	public GrowableArray getHBPhiResolutionData() {
 		return _hbPhiResolutionHistoData;
 	}
+	
+	/**
+	 * Get the accumulated dgtz EC data
+	 * 
+	 * @return the accumulated ec data
+	 */
+	public int[][][][] getAccumulatedDgtzEcData() {
+		return _ecDgtzAccumulatedData;
+	}
+
+	/**
+	 * Get the accumulated dgtz PCAL data
+	 * 
+	 * @return the accumulated PCAL data
+	 */
+	public int[][][] getAccumulatedDgtzPcalData() {
+		return _pcalDgtzAccumulatedData;
+	}
 
 	/**
 	 * Get the accumulated dgtz DC data
@@ -244,6 +301,22 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	 */
 	public int[][] getAccumulatedDgtzBstData() {
 		return _bstDgtzAccumulatedData;
+	}
+	
+	/**
+	 * Get the max counts for ec strips
+	 * @return the max counts for ec strips.
+	 */
+	public int getMaxDgtzEcCount() {
+		return _maxDgtzEcCount;
+	}
+
+	/**
+	 * Get the max counts for pcal strips
+	 * @return the max counts for pcal strips.
+	 */
+	public int getMaxDgtzPcalCount() {
+		return _maxDgtzPcalCount;
 	}
 
 	/**
@@ -315,10 +388,11 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			int wire0 = dcData.dc_dgtz_wire[i] - 1; // make 0 based
 			try {
 				_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
+				
 				_maxDgtzDcCount = Math.max(
 						_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
 						_maxDgtzDcCount);
-
+				
 			} catch (ArrayIndexOutOfBoundsException e) {
 				String msg = String
 						.format("Index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
@@ -331,6 +405,35 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			}
 
 		} // end loop hits
+		
+		//ec and pcal
+		ECDataContainer ecData = _eventManager.getECData();
+
+		//ec data
+		for (int i = 0; i < ecData.getHitCount(0); i++) {
+			int sect0 = ecData.ec_dgtz_sector[i] - 1; // make 0 based
+			int stack0 = ecData.ec_dgtz_stack[i] - 1; // make 0 based
+			int view0 = ecData.ec_dgtz_view[i] - 1; // make 0 based
+			int strip0 = ecData.ec_dgtz_strip[i] - 1; // make 0 based
+			_ecDgtzAccumulatedData[sect0][stack0][view0][strip0] += 1;
+			
+			_maxDgtzEcCount = Math.max(
+					_ecDgtzAccumulatedData[sect0][stack0][view0][strip0],
+					_maxDgtzEcCount);
+		}
+
+		
+		//pcal data
+		for (int i = 0; i < ecData.getHitCount(1); i++) {
+			int sect0 = ecData.pcal_dgtz_sector[i] - 1; // make 0 based
+			int view0 = ecData.pcal_dgtz_view[i] - 1; // make 0 based
+			int strip0 = ecData.pcal_dgtz_strip[i] - 1; // make 0 based
+			_pcalDgtzAccumulatedData[sect0][view0][strip0] += 1;
+			
+			_maxDgtzPcalCount = Math.max(
+					_pcalDgtzAccumulatedData[sect0][view0][strip0],
+					_maxDgtzPcalCount);
+		}
 		
 		//bst data
 		BSTDataContainer bstData = _eventManager.getBSTData();
@@ -529,9 +632,17 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	 */
 	private static Color getAccumulationColors()[] {
 
-		int r[] = { 255, 176, 255, 255, 255, 255, 255, 200, 150 };
-		int g[] = { 255, 224, 255, 255, 165, 100, 0, 0, 0 };
-		int b[] = { 255, 230, 128, 0, 0, 0, 0, 0, 0 };
+//		int r[] = { 255, 176, 255, 255, 255, 255, 255, 200, 150 };
+//		int g[] = { 255, 224, 255, 255, 165, 100, 0, 0, 0 };
+//		int b[] = { 255, 230, 128, 0, 0, 0, 0, 0, 0 };
+
+//		int r[] = { 176, 124, 0, 173, 255, 255, 255, 255, 139 };
+//		int g[] = { 224, 252, 255, 255, 255, 165, 69, 0, 0 };
+//		int b[] = { 230, 0, 0, 47, 0, 0, 0, 0, 0 };
+
+		int r[] = { 240, 176, 124, 173, 255, 255, 255, 255, 139 };
+		int g[] = { 248, 224, 255, 255, 255, 165, 69, 0, 0 };
+		int b[] = { 255, 230, 0, 47, 0, 0, 0, 0, 0 };
 
 		int n = 8;
 

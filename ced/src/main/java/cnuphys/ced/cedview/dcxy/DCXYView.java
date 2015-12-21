@@ -14,21 +14,23 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Properties;
 
+import org.jlab.geom.prim.Line3D;
+
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
-import cnuphys.bCNU.util.Histo2DData;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.item.DCHexSectorItem;
 import cnuphys.ced.item.HexSectorItem;
@@ -50,12 +52,14 @@ public class DCXYView extends HexView {
 	// font for label text
 	private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
 	private static final Color TRANS = new Color(192, 192, 192, 128);
+	private static final Color TRANSTEXT = new Color(64, 64, 192, 40);
+	private static final Font _font = Fonts.commonFont(Font.BOLD, 60);
 
 	protected static Rectangle2D.Double _defaultWorld;
 
 	static {
-		double _xsize = DCGeometry.getAbsMaxWireX();
-		double _ysize = _xsize * 1.154734;
+		double _xsize = 1.02*DCGeometry.getAbsMaxWireX();
+		double _ysize = 1.02*_xsize * 1.154734;
 
 		_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
 				2 * _ysize);
@@ -149,12 +153,7 @@ public class DCXYView extends HexView {
 					// draw trajectories
 					_swimTrajectoryDrawer.draw(g, container);
 
-					// mc hits
-					if (isSingleEventMode()) {
-						_mcHitDrawer.draw(g, container);
-					} else {
-						drawAccumulatedHits(g, container);
-					}
+					drawHits(g, container);
 
 					// draw reconstructed dc crosses
 					if (showDChbCrosses()) {
@@ -166,6 +165,7 @@ public class DCXYView extends HexView {
 						_crossDrawer.draw(g, container);
 					}
 					drawCoordinateSystem(g, container);
+					drawSectorNumbers(g, container);
 				} // not acumulating
 			}
 
@@ -173,7 +173,73 @@ public class DCXYView extends HexView {
 
 		getContainer().setAfterDraw(beforeDraw);
 	}
+	
+	private void drawHits(Graphics g, IContainer container) {
+		if (isSingleEventMode()) {
+			if (showMcTruth()) {
+				_mcHitDrawer.draw(g, container);
+				
+				DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
 
+				int hitCount = dcData.getHitCount(0);
+				if (hitCount > 0) {
+					int sector[] = dcData.dc_dgtz_sector;
+					int superlayer[] = dcData.dc_dgtz_superlayer;
+					int layer[] = dcData.dc_dgtz_layer;
+					int wire[] = dcData.dc_dgtz_wire;
+					
+					g.setColor(Color.red);
+					Point pp1 = new Point();
+					Point pp2 = new Point();
+					Point2D.Double wp1 = new Point2D.Double();
+					Point2D.Double wp2 = new Point2D.Double();
+					
+					for (int hit = 0; hit < hitCount; hit++) {
+						Line3D line = DCGeometry.getWire(sector[hit], superlayer[hit], layer[hit], wire[hit]);
+						wp1.setLocation(line.origin().x(), line.origin().y());
+						wp2.setLocation(line.end().x(), line.end().y());
+						container.worldToLocal(pp1, wp1);
+						container.worldToLocal(pp2, wp2);
+						g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+					}
+				}
+			}
+		}
+		else {
+			drawAccumulatedHits(g, container);
+		}
+	}
+	
+	//draw the sector numbers
+	private void drawSectorNumbers(Graphics g, IContainer container) {
+		double r3over2 = Math.sqrt(3)/2;
+		
+		double x = 320;
+		double y = 0;
+		FontMetrics fm = getFontMetrics(_font);
+		g.setFont(_font);
+		g.setColor(TRANSTEXT);
+		Point pp = new Point();
+
+		
+		for (int sect = 1; sect <= 6; sect++) {
+			container.worldToLocal(pp, x, y);
+			
+			String s = "" + sect;
+			int sw = fm.stringWidth(s);
+			
+			g.drawString(s, pp.x- sw/2, pp.y + fm.getHeight()/2);
+			
+			if (sect != 6) {
+				double tx = x;
+				double ty = y;
+				x = 0.5*tx - r3over2*ty;
+				y = r3over2*tx + 0.5*ty;
+			}
+		}
+	}
+
+	//draw the coordinate system
 	private void drawCoordinateSystem(Graphics g, IContainer container) {
 		// draw coordinate system
 		Component component = container.getComponent();
@@ -205,6 +271,37 @@ public class DCXYView extends HexView {
 
 	// draw the gemc global hits
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
+				.getAccumulatedDgtzDcData();
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
+		if (maxHit < 1) {
+			return;
+		}
+
+		Point pp1 = new Point();
+		Point pp2 = new Point();
+		Point2D.Double wp1 = new Point2D.Double();
+		Point2D.Double wp2 = new Point2D.Double();
+
+		for (int sect0 = 0; sect0 < 6; sect0++) {
+			for (int supl0 = 0; supl0 < 6; supl0++) {
+				for (int lay0 = 0; lay0 < 6; lay0++) {
+					for (int wire0 = 0; wire0 < 112; wire0++) {
+						
+						double fract = ((double)dcAccumulatedData[sect0][supl0][lay0][wire0])/maxHit;
+						Color color = AccumulationManager.getColorScaleModel().getColor(fract);
+						g.setColor(color);
+						Line3D line = DCGeometry.getWire(sect0+1, supl0+1, lay0+1, wire0+1);
+						wp1.setLocation(line.origin().x(), line.origin().y());
+						wp2.setLocation(line.end().x(), line.end().y());
+						container.worldToLocal(pp1, wp1);
+						container.worldToLocal(pp2, wp2);
+						g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+					}
+				}
+			}
+		}
 	}
 
 	// get the attributes to pass to the super constructor
@@ -254,19 +351,6 @@ public class DCXYView extends HexView {
 			_mcHitDrawer.feedback(container, pp, wp, feedbackStrings);
 		}
 
-	}
-
-	private void labPointsToWorldRect(double x1, double y1, double x2,
-			double y2, Rectangle2D.Double wr) {
-		Point2D.Double p2d = new Point2D.Double(x1, y1);
-		double wx1 = p2d.x;
-		double wy1 = p2d.y;
-
-		p2d.setLocation(x2, y2);
-		double wx2 = p2d.x;
-		double wy2 = p2d.y;
-
-		wr.setFrame(wx1, wy1, wx2 - wx1, wy2 - wy1);
 	}
 
 	/**

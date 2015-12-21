@@ -30,17 +30,22 @@ public class McHitDrawer extends PCALViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
+
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 
+		_fbRects.clear();
+
 		if (!_view.showMcTruth()) {
+			return;
+		}
+		
+		if (_view.isAccumulatedMode()) {
 			return;
 		}
 
 		ECDataContainer ecData = _eventManager.getECData();
-
-		_fbRects.clear();
 
 		showGemcXYZHits(g, container, ecData);
 	}

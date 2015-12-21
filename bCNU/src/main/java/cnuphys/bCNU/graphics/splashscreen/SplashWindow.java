@@ -20,6 +20,7 @@ import javax.swing.JWindow;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.StreamCapturePane;
+import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.TextUtilities;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.splot.plot.GraphicsUtilities;
@@ -38,8 +39,14 @@ public class SplashWindow extends JWindow {
 
 	// The size of a tile.
 	private Dimension _tileSize;
+	
+	private String _version;
+	
+	private Font _font = Fonts.commonFont(Font.BOLD, 18);
 
-	public SplashWindow(String title, Color bg, int width, String backgroundImage) {
+	public SplashWindow(String title, Color bg, int width, String backgroundImage, String version) {
+		
+		_version = version;
 		setLayout(new BorderLayout(2, 2));
 		
 		if (backgroundImage != null) {
@@ -127,6 +134,17 @@ public class SplashWindow extends JWindow {
 				}
 				else {
 					tile(g);
+				}
+				
+				if (_version != null) {
+					g.setFont(_font);
+					FontMetrics fm = getFontMetrics(_font);
+					int w = fm.stringWidth("" + _version + " ");
+					int h = fm.getHeight()+ 8;
+					
+					GraphicsUtilities.drawSimple3DRect(g, 4, 4, w, h, X11Colors.getX11Color("dark red"), false);
+					g.setColor(Color.white);
+					g.drawString(_version, 6, h-4);
 				}
 			}
 			

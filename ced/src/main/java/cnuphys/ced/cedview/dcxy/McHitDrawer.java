@@ -35,6 +35,10 @@ public class McHitDrawer extends DCXYViewDrawer {
 		if (!_view.showMcTruth()) {
 			return;
 		}
+		
+		if (_view.isAccumulatedMode()) {
+			return;
+		}
 
 		// dc and ftof data?
 		DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
