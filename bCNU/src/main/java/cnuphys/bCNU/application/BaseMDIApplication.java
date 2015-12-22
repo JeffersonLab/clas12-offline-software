@@ -111,7 +111,6 @@ public class BaseMDIApplication extends JFrame {
 
 		// add the view and plugin menus
 		menuManager.addMenu(ViewManager.getInstance().getViewMenu());
-		menuManager.addMenu(ViewManager.getInstance().getPluginMenu());
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}

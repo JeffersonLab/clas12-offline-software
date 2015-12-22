@@ -12,6 +12,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.menu.MenuManager;
 
 /**
  * Manages all the views, or internal frames.
@@ -21,269 +22,277 @@ import cnuphys.bCNU.log.Log;
  */
 @SuppressWarnings("serial")
 public class ViewManager extends Vector<BaseView>
-	implements InternalFrameListener {
+		implements InternalFrameListener {
 
-    // singleton instance
-    private static ViewManager instance;
+	// singleton instance
+	private static ViewManager instance;
 
-    // the view menu
-    private JMenu _viewMenu;
-    
-    // the plugin view menu
-    private JMenu _pluginMenu;
+	// the view menu
+	private JMenu _viewMenu;
 
-    // List of view change listeners
-    private EventListenerList _listenerList;
+	// the plugin view menu
+	private JMenu _pluginMenu;
+	private boolean _firstPlugin = true;
+	
+	//histogram view
+	private JMenu _histoMenu;
+	private boolean _firstHisto = true;
 
-    // Virtual view is present
-    private VirtualView _virtualView;
+	// List of view change listeners
+	private EventListenerList _listenerList;
 
-    /**
-     * Private constructor used to create singleton.
-     */
-    private ViewManager() {
-	_viewMenu = new JMenu("Views");
-	_pluginMenu = new JMenu("Plugins");
-    }
+	// Virtual view is present
+	private VirtualView _virtualView;
 
-    /**
-     * Add (register) a view for control by this manager.
-     * 
-     * @param view the View to add.
-     * @return <code>true</code>, per Collection guidelines.
-     */
-    @Override
-    public boolean add(final BaseView view) {
-	boolean result = super.add(view);
-	notifyListeners(view, true);
+	/**
+	 * Private constructor used to create singleton.
+	 */
+	private ViewManager() {
+		_viewMenu = new JMenu("Views");
+	}
 
-	JMenuItem mi = new JMenuItem(view.getTitle());
-	ActionListener al = new ActionListener() {
+	/**
+	 * Add (register) a view for control by this manager.
+	 * 
+	 * @param view the View to add.
+	 * @return <code>true</code>, per Collection guidelines.
+	 */
+	@Override
+	public boolean add(final BaseView view) {
+		boolean result = super.add(view);
+		notifyListeners(view, true);
 
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		if (view.isIcon()) {
-		    try {
-			view.setIcon(false);
-		    } catch (PropertyVetoException e1) {
-		    }
+		JMenuItem mi = new JMenuItem(view.getTitle());
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (view.isIcon()) {
+					try {
+						view.setIcon(false);
+					} catch (PropertyVetoException e1) {
+					}
+				}
+				view.setVisible(true);
+				view.toFront();
+
+				if (!(view instanceof VirtualView)) {
+					makeViewVisibleInVirtualWorld(view);
+				}
+			}
+
+		};
+		mi.addActionListener(al);
+		if (view instanceof PluginView) {
+			if (_firstPlugin) {
+				_pluginMenu = new JMenu("Plugins");
+				MenuManager.getInstance().addMenu(_pluginMenu);
+				_firstPlugin = false;
+			}
+			_pluginMenu.add(mi);
 		}
-		view.setVisible(true);
-		view.toFront();
-
-		if (!(view instanceof VirtualView)) {
-		    makeViewVisibleInVirtualWorld(view);
-		}
-	    }
-
-	};
-	mi.addActionListener(al);
-	if (view instanceof PluginView) {
-	    _pluginMenu.add(mi);
-	}
-	else {
-	    _viewMenu.add(mi);
-	}
-
-	view.addInternalFrameListener(this);
-	Log.getInstance().config("ViewManager: added view: " + view.getTitle());
-
-	if (view instanceof VirtualView) {
-	    _virtualView = (VirtualView) view;
-	}
-	return result;
-    }
-
-    /**
-     * Removes (unregisters) a view.
-     * 
-     * @param view the View to remove.
-     * @return <code>true</code> if this ViewManager contained the specified
-     *         view.
-     */
-    public boolean remove(BaseView view) {
-	if (view != null) {
-	    view.removeInternalFrameListener(this);
-	    Log.getInstance()
-		    .config("ViewManager: removed view: " + view.getTitle());
-
-	    notifyListeners(view, false);
-	    return super.remove(view);
-	}
-	return false;
-    }
-
-    /**
-     * Refresh all the views with containers.
-     */
-    public void refreshAllContainerViews() {
-	for (BaseView view : this) {
-	    if (view.getContainer() != null) {
-		view.getContainer().refresh();
-	    }
-	}
-    }
-
-    public void makeViewVisibleInVirtualWorld(BaseView view) {
-	if ((_virtualView != null) && (_virtualView != view)) {
-	    _virtualView.activateViewCell(view);
-	}
-    }
-
-    /**
-     * Obtain the singleton.
-     * 
-     * @return the singleton ViewManager object.
-     */
-    public static ViewManager getInstance() {
-	if (instance == null) {
-	    instance = new ViewManager();
-	}
-	return instance;
-    }
-
-    /**
-     * The internal frame has been activated.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameActivated(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-    }
-
-    /**
-     * The internal frame has been closed.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameClosed(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-    }
-
-    /**
-     * The internal frame is closing.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameClosing(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-    }
-
-    /**
-     * The internal frame has been deactivated.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameDeactivated(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-    }
-
-    /**
-     * The internal frame has been deiconified.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameDeiconified(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-    }
-
-    /**
-     * The internal frame has been iconified.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameIconified(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-    }
-
-    /**
-     * The internal frame has been opened.
-     * 
-     * @param ife the causal event.
-     */
-    @Override
-    public void internalFrameOpened(InternalFrameEvent ife) {
-	BaseView view = (BaseView) (ife.getSource());
-   }
-
-    /**
-     * Gets the view menu whose state is maintained by the ViewManager.
-     * 
-     * @return the view menu.
-     */
-    public JMenu getViewMenu() {
-	return _viewMenu;
-    }
-
-    /**
-     * Gets the plugin menu whose state is maintained by the ViewManager.
-     * 
-     * @return the plugin menu.
-     */
-    public JMenu getPluginMenu() {
-	return _pluginMenu;
-    }
-
-    // notify listeners of a change in the views
-    private void notifyListeners(BaseView view, boolean added) {
-
-	if (_listenerList == null) {
-	    return;
-	}
-
-	// Guaranteed to return a non-null array
-	Object[] listeners = _listenerList.getListenerList();
-
-	// This weird loop is the bullet proof way of notifying all listeners.
-	for (int i = 0; i < listeners.length; i += 2) {
-	    if (listeners[i] == IViewListener.class) {
-		IViewListener listener = (IViewListener) listeners[i + 1];
-		if (added) {
-		    listener.viewAdded(view);
+		else if (view instanceof HistoGridView) {
+			if (_firstHisto) {
+				_histoMenu = new JMenu("Histograms");
+				MenuManager.getInstance().addMenu(_histoMenu);
+				_firstHisto = false;
+			}
+			_histoMenu.add(mi);
 		}
 		else {
-		    listener.viewRemoved(view);
+			_viewMenu.add(mi);
 		}
-	    }
 
-	}
-    }
+		view.addInternalFrameListener(this);
+		Log.getInstance().config("ViewManager: added view: " + view.getTitle());
 
-    /**
-     * Add a data change listener
-     * 
-     * @param listener the listener to add
-     */
-    public void addViewListener(IViewListener listener) {
-
-	if (_listenerList == null) {
-	    _listenerList = new EventListenerList();
+		if (view instanceof VirtualView) {
+			_virtualView = (VirtualView) view;
+		}
+		return result;
 	}
 
-	// avoid adding duplicates
-	_listenerList.remove(IViewListener.class, listener);
-	_listenerList.add(IViewListener.class, listener);
-    }
+	/**
+	 * Removes (unregisters) a view.
+	 * 
+	 * @param view the View to remove.
+	 * @return <code>true</code> if this ViewManager contained the specified
+	 *         view.
+	 */
+	public boolean remove(BaseView view) {
+		if (view != null) {
+			view.removeInternalFrameListener(this);
+			Log.getInstance()
+					.config("ViewManager: removed view: " + view.getTitle());
 
-    /**
-     * Remove a ViewListener.
-     * 
-     * @param listener the listener to remove.
-     */
-
-    public void removeViewListener(IViewListener listener) {
-
-	if ((listener == null) || (_listenerList == null)) {
-	    return;
+			notifyListeners(view, false);
+			return super.remove(view);
+		}
+		return false;
 	}
 
-	_listenerList.remove(IViewListener.class, listener);
-    }
+	/**
+	 * Refresh all the views with containers.
+	 */
+	public void refreshAllContainerViews() {
+		for (BaseView view : this) {
+			if (view.getContainer() != null) {
+				view.getContainer().refresh();
+			}
+		}
+	}
+
+	public void makeViewVisibleInVirtualWorld(BaseView view) {
+		if ((_virtualView != null) && (_virtualView != view)) {
+			_virtualView.activateViewCell(view);
+		}
+	}
+
+	/**
+	 * Obtain the singleton.
+	 * 
+	 * @return the singleton ViewManager object.
+	 */
+	public static ViewManager getInstance() {
+		if (instance == null) {
+			instance = new ViewManager();
+		}
+		return instance;
+	}
+
+	/**
+	 * The internal frame has been activated.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameActivated(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * The internal frame has been closed.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameClosed(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * The internal frame is closing.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameClosing(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * The internal frame has been deactivated.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameDeactivated(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * The internal frame has been deiconified.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameDeiconified(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * The internal frame has been iconified.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameIconified(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * The internal frame has been opened.
+	 * 
+	 * @param ife the causal event.
+	 */
+	@Override
+	public void internalFrameOpened(InternalFrameEvent ife) {
+		BaseView view = (BaseView) (ife.getSource());
+	}
+
+	/**
+	 * Gets the view menu whose state is maintained by the ViewManager.
+	 * 
+	 * @return the view menu.
+	 */
+	public JMenu getViewMenu() {
+		return _viewMenu;
+	}
+
+	// notify listeners of a change in the views
+	private void notifyListeners(BaseView view, boolean added) {
+
+		if (_listenerList == null) {
+			return;
+		}
+
+		// Guaranteed to return a non-null array
+		Object[] listeners = _listenerList.getListenerList();
+
+		// This weird loop is the bullet proof way of notifying all listeners.
+		for (int i = 0; i < listeners.length; i += 2) {
+			if (listeners[i] == IViewListener.class) {
+				IViewListener listener = (IViewListener) listeners[i + 1];
+				if (added) {
+					listener.viewAdded(view);
+				}
+				else {
+					listener.viewRemoved(view);
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Add a data change listener
+	 * 
+	 * @param listener the listener to add
+	 */
+	public void addViewListener(IViewListener listener) {
+
+		if (_listenerList == null) {
+			_listenerList = new EventListenerList();
+		}
+
+		// avoid adding duplicates
+		_listenerList.remove(IViewListener.class, listener);
+		_listenerList.add(IViewListener.class, listener);
+	}
+
+	/**
+	 * Remove a ViewListener.
+	 * 
+	 * @param listener the listener to remove.
+	 */
+
+	public void removeViewListener(IViewListener listener) {
+
+		if ((listener == null) || (_listenerList == null)) {
+			return;
+		}
+
+		_listenerList.remove(IViewListener.class, listener);
+	}
 
 }

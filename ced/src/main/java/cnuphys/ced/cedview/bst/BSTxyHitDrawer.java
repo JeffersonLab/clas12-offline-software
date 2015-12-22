@@ -134,8 +134,7 @@ public class BSTxyHitDrawer implements IDrawable {
 					int hitCount = bstData[lay0][sect0];
 					double fract = ((double) hitCount) / maxHit;
 
-					Color color = AccumulationManager.getColorScaleModel()
-							.getColor(fract);
+					Color color = AccumulationManager.getInstance().getColor(fract);
 					_view.drawSVTPanel((Graphics2D) g, container, panel, color);
 
 				}
@@ -158,7 +157,6 @@ public class BSTxyHitDrawer implements IDrawable {
 		// System.err.println("BMTDATAContainer: " + bmtData);
 		int hitCount = bmtData.getHitCount(0);
 		if (hitCount > 0) {
-			// System.err.println("BMT HIT COUNT: " + hitCount);
 
 			int sect[] = bmtData.bmt_dgtz_sector;
 			int layer[] = bmtData.bmt_dgtz_layer;

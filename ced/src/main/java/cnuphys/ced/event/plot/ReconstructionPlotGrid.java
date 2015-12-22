@@ -81,24 +81,24 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 
 		if (row == 0) {
 			if (col == 0) {
-				HistoData hd = new HistoData("", -0.25, 0.25, 50, 1000);
+				HistoData hd = new HistoData("", -0.25, 0.25, 50);
 				return new DataSet(hd);
 			} else if (col == 1) {
-				HistoData hd = new HistoData("", -2.0, 2.0, 50, 1000);
+				HistoData hd = new HistoData("", -2.0, 2.0, 50);
 				return new DataSet(hd);
 			} else if (col == 2) {
-				HistoData hd = new HistoData("", -3, 3, 50, 1000);
+				HistoData hd = new HistoData("", -3, 3, 50);
 				return new DataSet(hd);
 			}
 		} else if (row == 1) {
 			if (col == 0) {
-				HistoData hd = new HistoData("", -0.25, 0.25, 50, 1000);
+				HistoData hd = new HistoData("", -0.25, 0.25, 50);
 				return new DataSet(hd);
 			} else if (col == 1) {
-				HistoData hd = new HistoData("", -5.0, 5.0, 50, 1000);
+				HistoData hd = new HistoData("", -5.0, 5.0, 50);
 				return new DataSet(hd);
 			} else if (col == 2) {
-				HistoData hd = new HistoData("", -3, 3, 50, 1000);
+				HistoData hd = new HistoData("", -3, 3, 50);
 				return new DataSet(hd);
 			}
 		}

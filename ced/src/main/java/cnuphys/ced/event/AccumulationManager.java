@@ -42,7 +42,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	/** Indicates hat accumulation has finished */
 	public static final int ACCUMULATION_FINISHED = 1;
 
-	/** Indicates hat accumulation has finished */
+	/** Indicates hat accumulation has received clear */
 	public static final int ACCUMULATION_CLEAR = 2;
 
 	// common colorscale
@@ -51,6 +51,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 
 	// the singleton
 	private static AccumulationManager instance;
+	
+	private static final Color NULLCOLOR = new Color(128, 128, 128);
 
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _dcDgtzAccumulatedData[][][][];
@@ -363,14 +365,39 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		return _maxDgtzFtofCount;
 	}
 
+//
+//	/**
+//	 * @return the colorScaleModel
+//	 */
+//	public static ColorScaleModel getColorScaleModel() {
+//		return colorScaleModel;
+//	}
 
 	/**
-	 * @return the colorScaleModel
+	 * Get the color to use
+	 * @param fract the fraction (compared to max hits)
+	 * @return the color to use
 	 */
-	public static ColorScaleModel getColorScaleModel() {
-		return colorScaleModel;
+	public Color getColor(double fract) {
+		if (fract < 1.0e-6) {
+			return NULLCOLOR;
+		}
+		return colorScaleModel.getColor(fract);
+	}
+	
+	/**
+	 * Get a color via getColor but add an alpha value
+	 * @param value the value 
+	 * @param alpha the alpha value [0..255]
+	 * @return the color corresponding to the value.
+	 */
+	public Color getAlphaColor(double value, int alpha) {
+		Color c = getColor(value);
+		Color color = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+		return color;
 	}
 
+	
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 

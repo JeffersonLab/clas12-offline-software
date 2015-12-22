@@ -7,8 +7,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -20,6 +22,7 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
+import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
@@ -54,6 +57,10 @@ public class DCXYView extends HexView {
 	private static final Color TRANS = new Color(192, 192, 192, 128);
 	private static final Color TRANSTEXT = new Color(64, 64, 192, 40);
 	private static final Font _font = Fonts.commonFont(Font.BOLD, 60);
+	
+	private static Stroke stroke = GraphicsUtilities.getStroke(0.5f,
+			LineStyle.SOLID);
+
 
 	protected static Rectangle2D.Double _defaultWorld;
 
@@ -175,6 +182,7 @@ public class DCXYView extends HexView {
 	}
 	
 	private void drawHits(Graphics g, IContainer container) {
+		
 		if (isSingleEventMode()) {
 			if (showMcTruth()) {
 				_mcHitDrawer.draw(g, container);
@@ -183,6 +191,10 @@ public class DCXYView extends HexView {
 
 				int hitCount = dcData.getHitCount(0);
 				if (hitCount > 0) {
+					
+					Graphics2D g2 = (Graphics2D)g;
+					Stroke oldStroke = g2.getStroke();
+					g2.setStroke(stroke);
 					int sector[] = dcData.dc_dgtz_sector;
 					int superlayer[] = dcData.dc_dgtz_superlayer;
 					int layer[] = dcData.dc_dgtz_layer;
@@ -202,7 +214,9 @@ public class DCXYView extends HexView {
 						container.worldToLocal(pp2, wp2);
 						g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
 					}
-				}
+					
+					g2.setStroke(oldStroke);
+				} //hitcount >0
 			}
 		}
 		else {
@@ -290,7 +304,7 @@ public class DCXYView extends HexView {
 					for (int wire0 = 0; wire0 < 112; wire0++) {
 						
 						double fract = ((double)dcAccumulatedData[sect0][supl0][lay0][wire0])/maxHit;
-						Color color = AccumulationManager.getColorScaleModel().getColor(fract);
+						Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
 						g.setColor(color);
 						Line3D line = DCGeometry.getWire(sect0+1, supl0+1, lay0+1, wire0+1);
 						wp1.setLocation(line.origin().x(), line.origin().y());

@@ -817,34 +817,5 @@ public class FileUtilities {
 		return classes;
 	}
 
-	public static void main(String args[]) {
-		String abspath = "/Users/heddle/clax/wd";
-		String relto = "/Users/heddle/myws";
-
-		String relPath = convertToRelativePath(abspath, relto);
-		System.out.println("absPath: " + abspath);
-		System.out.println("relto: " + relto);
-		System.out.println("relPath: " + relPath);
-
-		File file = findDirectory("C:\\", "javaDev", 10);
-		if (file == null) {
-			System.out.println("\ndid not find javaDev");
-		} else {
-			System.out.println("\nfound: " + file.getPath());
-
-			// String s = concatenate(file, "xml");
-			// System.out.println("Len: " + ((s == null) ? 0 : s.length()));
-			// System.out.println(s);
-
-		}
-
-		// solenoid-srr.dat
-		file = findFile("C:\\", "solenoid-srr.dat", 10);
-		if (file == null) {
-			System.out.println("\ndid not find solenoid-srr.dat");
-		} else {
-			System.out.println("\nfound: " + file.getPath());
-		}
-	}
 
 }

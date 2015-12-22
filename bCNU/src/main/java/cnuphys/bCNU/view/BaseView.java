@@ -2,6 +2,7 @@ package cnuphys.bCNU.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
@@ -20,6 +21,7 @@ import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -79,6 +81,9 @@ public class BaseView extends JInternalFrame {
 
 	// virtual view item, if used
 	protected VirtualWindowItem _virtualItem;
+	
+	//optional scrollpane
+	private JScrollPane _scrollPane;
 
 	/**
 	 * Constructor
@@ -107,6 +112,9 @@ public class BaseView extends JInternalFrame {
 		boolean maximizable = PropertySupport.getMaximizable(_properties);
 		boolean resizable = PropertySupport.getResizable(_properties);
 		boolean closable = PropertySupport.getClosable(_properties);
+		
+		//scrollable?
+		boolean scrollable = PropertySupport.getScrollable(_properties);
 
 		// view visible
 		boolean visible = PropertySupport.getVisible(_properties);
@@ -147,6 +155,9 @@ public class BaseView extends JInternalFrame {
 				_container = new BaseContainer(this, worldSystem,
 						PropertySupport.getHeadsUp(_properties));
 			}
+			else {
+				_container.setView(this);
+			}
 
 			if (_container instanceof BaseContainer) {
 				int lmargin = PropertySupport.getLeftMargin(_properties);
@@ -157,6 +168,11 @@ public class BaseView extends JInternalFrame {
 				_container.setTopMargin(tmargin);
 				_container.setRightMargin(rmargin);
 				_container.setBottomMargin(bmargin);
+			}
+			
+			//scrollable?
+			if (scrollable && (_container.getComponent() != null)) {
+				_scrollPane = new JScrollPane(_container.getComponent());
 			}
 
 			// background color applies to the container
@@ -173,15 +189,18 @@ public class BaseView extends JInternalFrame {
 			// split west component? (like a file tree)
 			JComponent westComponent = PropertySupport
 					.getSplitWestComponent(_properties);
+			
+			Component c = (_scrollPane == null) ? _container.getComponent() : _scrollPane;
+
 			if (westComponent != null) {
 				JSplitPane splitPane = new JSplitPane(
-						JSplitPane.HORIZONTAL_SPLIT, false, westComponent,
-						_container.getComponent());
+						JSplitPane.HORIZONTAL_SPLIT, false, westComponent, c);
+				
 				splitPane.setResizeWeight(0.0);
 				add(splitPane, BorderLayout.CENTER);
 			}
 			else {
-				add(_container.getComponent(), BorderLayout.CENTER);
+				add(c, BorderLayout.CENTER);
 			}
 
 			// add a toolbar?
@@ -662,7 +681,7 @@ public class BaseView extends JInternalFrame {
 	}
 
 	/**
-	 * Handle a mgnificaction
+	 * Handle a magnification
 	 */
 	public void handleMagnify(final MouseEvent me) {
 		final BaseView bview = this;
@@ -705,6 +724,22 @@ public class BaseView extends JInternalFrame {
 			final double xmax, final double ymax) {
 
 		_viewPopupMenu.addQuickZoom(title, xmin, ymin, xmax, ymax);
+	}
+	
+	/**
+	 * Check whether this view is scrollable
+	 * @return <code>true</code> if this view is scrollable
+	 */
+	public boolean isScrollable() {
+		return (_scrollPane != null);
+	}
+	
+	/**
+	 * Get the scroll pane (often <code>null</code>)
+	 * @return the scroll pane
+	 */
+	public JScrollPane getScrollPane() {
+		return _scrollPane;
 	}
 
 }

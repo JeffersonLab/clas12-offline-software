@@ -143,8 +143,8 @@ public class Grid extends JFrame implements IValueGetter {
 	    return new DataSet(DataSetType.XYEXYE, getColumnNames(index));
 
 	case 4:
-	    HistoData h1 = new HistoData("Histo 1", 0.0, 100.0, 50, 1000);
-	    HistoData h2 = new HistoData("Histo 2", 0.0, 150.0, 50, 100000);
+	    HistoData h1 = new HistoData("Histo 1", 0.0, 100.0, 50);
+	    HistoData h2 = new HistoData("Histo 2", 0.0, 150.0, 50);
 	    return new DataSet(h1, h2);
 
 	case 5:
