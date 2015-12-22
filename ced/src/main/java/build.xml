@@ -11,6 +11,8 @@
 		<property name="coat" value="coatjava/lib/clas/coat-libs-2.0-SNAPSHOT.jar"/>
 		<property name="glue" value="JOGL/gluegen-rt.jar"/>
 		<property name="jogl" value="JOGL/jogl-all.jar"/>
+		<property name="f2j" value="numRec/lib/f2jutil.jar"/>
+		<property name="nr" value="numRec/lib/numRec.jar"/>
 		
 		
 		<!-- copying  necessary stuff-->
@@ -30,7 +32,13 @@
 			<fileset includes="JOGL/**" excludes="**/*src.zip"
 							dir="${user.home}" />
 		</copy>
+		
 
+		<!-- copy numrec -->
+		<copy todir="${destdir}">
+			<fileset includes="numRec/**" excludes="**/junit.jar **/bin/** **/src/** **/test/** **/*.txt **/*.xml"
+							dir="${cnudir}" />
+		</copy>
 		
 		<!-- the ced jar-->
 		<jar destfile="${destdir}/ced.jar">
@@ -75,7 +83,7 @@
 			<!-- make it executable -->
 		    <manifest>
 		        <attribute name="Main-Class" value="cnuphys.ced.frame.Ced"/>
-		    	<attribute name="Class-Path" value="${coat} ${glue} ${jogl}"/>
+		    	<attribute name="Class-Path" value="${coat} ${glue} ${jogl} ${f2j} ${nr}"/>
 		    </manifest>
 		</jar>
 		
