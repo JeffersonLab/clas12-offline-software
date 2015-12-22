@@ -146,7 +146,7 @@ public class FTOFPanelItem extends PolygonItem {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[0].length; paddle0++) {
 				double fract = ((double) (hits[sect0][paddle0]))/maxHit;
-				Color fc = AccumulationManager.getColorScaleModel().getColor(fract);
+				Color fc = AccumulationManager.getInstance().getColor(fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0,
 						_ftofPanel, _sector);
 

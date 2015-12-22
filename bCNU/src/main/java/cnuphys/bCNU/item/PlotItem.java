@@ -8,6 +8,7 @@ import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
+import cnuphys.splot.plot.PlotParameters;
 
 public class PlotItem extends PanelItem {
 
@@ -81,7 +82,7 @@ public class PlotItem extends PanelItem {
 			double minValue, double maxValue, int numBin) {
 
 		HistoData h1 = new HistoData(histoCurveName, minValue, maxValue,
-				numBin, 0);
+				numBin);
 
 		DataSet data;
 		try {
@@ -101,5 +102,16 @@ public class PlotItem extends PanelItem {
 	 */
 	public PlotCanvas getPlotCanvas() {
 		return _plotCanvas;
+	}
+	
+	/**
+	 * Get the plot parameters
+	 * @return the plot parameters
+	 */
+	public PlotParameters getPlotParameters() {
+		if (_plotCanvas == null) {
+			return null;
+		}
+		return _plotCanvas.getParameters();
 	}
 }

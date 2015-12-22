@@ -57,13 +57,12 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	 *            (stripped down panel?)
 	 */
 	public PlotPanel(PlotCanvas canvas, boolean bare) {
-
-		_bare = bare;
+		_canvas = canvas;
+		_canvas.setParent(this);
+    	_bare = bare;
 		Environment.getInstance().commonize(this, null);
 		setLayout(new BorderLayout(0, 0));
 
-		_canvas = canvas;
-		_canvas.setParent(this);
 		_canvas.addPropertyChangeListener(this);
 		add(_canvas, BorderLayout.CENTER);
 
@@ -71,6 +70,9 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 
 		if (!bare) {
 			addNorth();
+		}
+		else {
+			addNorthLite();
 		}
 		addWest();
 
@@ -154,6 +156,24 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		npanel.add(_titleLabel, BorderLayout.CENTER);
 		add(npanel, BorderLayout.NORTH);
 	}
+	
+	private void addNorthLite() {
+		PlotParameters parameters = _canvas.getParameters();
+
+		JPanel npanel = new JPanel();
+		npanel.setOpaque(true);
+		npanel.setBackground(Color.white);
+		Environment.getInstance().commonize(npanel, null);
+		npanel.setLayout(new BorderLayout());
+
+		// title label
+		_titleLabel = makeJLabel(_canvas.getParameters().getPlotTitle(),
+				parameters.getTitleFont(), SwingConstants.CENTER, Color.white,
+				null, false);
+		_titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		npanel.add(_titleLabel, BorderLayout.CENTER);
+		add(npanel, BorderLayout.NORTH);
+	}
 
 	// add the west component
 	private void addWest() {
@@ -218,6 +238,23 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	 */
 	public PlotCanvas getCanvas() {
 		return _canvas;
+	}
+	
+	/**
+	 * Get the plot parameters
+	 * 
+	 * @return the plot parameters
+	 */
+	public PlotParameters getParameters() {
+		return _canvas.getParameters();
+	}
+	
+	public void setColor(Color bg) {
+		super.setBackground(bg);
+		_canvas.setBackground(bg);
+		_titleLabel.setBackground(bg);
+		_xLabel.setBackground(bg);
+		_yLabel.setBackground(bg);
 	}
 
 	@Override

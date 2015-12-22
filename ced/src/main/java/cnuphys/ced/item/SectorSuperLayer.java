@@ -243,7 +243,7 @@ public class SectorSuperLayer extends PolygonItem {
 		for (int lay0 = 0; lay0 < 6; lay0++) {
 			for (int wire0 = 0; wire0 < 112; wire0++) {
 				double fract = ((double) dcAccumulatedData[sect0][supl0][lay0][wire0]) / maxHit;
-				Color color = AccumulationManager.getColorScaleModel()
+				Color color = AccumulationManager.getInstance()
 						.getColor(fract);
 				
 				g.setColor(color);

@@ -46,6 +46,7 @@ public class PropertySupport {
 	public static final String RIGHTMARGIN = "RIGHTMARGIN";
 	public static final String ROTATABLE = "ROTATABLE";
 	public static final String ROTATED = "ROTATED";
+	public static final String SCROLLABLE = "SCROLLABLE";
 	public static final String SECTOR = "SECTOR";
 	public static final String SLOT = "SLOT";
 	public static final String SPLITWESTCOMPONENT = "SPLITWESTCOMPONENT";
@@ -235,6 +236,17 @@ public class PropertySupport {
 	public static boolean getVisible(Properties props) {
 		return getBoolean(props, VISIBLE, true);
 	}
+	
+	/**
+	 * Get the "scrollable" boolean flag.
+	 * 
+	 * @param props the properties
+	 * @return the scrollable flag. On error, return false.
+	 */
+	public static boolean getScrollable(Properties props) {
+		return getBoolean(props, SCROLLABLE, false);
+	}
+
 
 	/**
 	 * Get the "use toolbar" boolean flag.

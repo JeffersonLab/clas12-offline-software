@@ -34,6 +34,8 @@ public abstract class Plugin {
 	public static final int UPPERRIGHT = VirtualView.UPPERRIGHT;
 	public static final int BOTTOMLEFT = VirtualView.BOTTOMLEFT;
 	public static final int BOTTOMRIGHT = VirtualView.BOTTOMRIGHT;
+	public static final int TOPCENTER = VirtualView.TOPCENTER;
+	public static final int BOTTOMCENTER = VirtualView.BOTTOMCENTER;
 	public static final int CENTER = VirtualView.CENTER;
 
 	// count of plugins

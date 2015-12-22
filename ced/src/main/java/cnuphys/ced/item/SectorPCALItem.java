@@ -215,7 +215,7 @@ public class SectorPCALItem extends PolygonItem {
 			Point2D.Double wp[] = getStrip(strip0);
 
 			if (wp != null) {
-				Color color = AccumulationManager.getColorScaleModel()
+				Color color = AccumulationManager.getInstance()
 						.getColor(fract);
 				Path2D.Double path = WorldGraphicsUtilities
 						.worldPolygonToPath(wp);
