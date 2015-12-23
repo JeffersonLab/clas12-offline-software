@@ -30,9 +30,26 @@ public interface IStyled {
      * Set the color used for fill the line drawing.
      * 
      * @param lineColor
-     *            the fill color.
+     *            the line color.
      */
     public void setLineColor(Color lineColor);
+    
+    /**
+     * Get the color used for fits.
+     * 
+     * @return the fit color.
+     */
+    
+    public Color getFitColor();
+    
+   /**
+     * Set the color used for fill the fit drawing.
+     * 
+     * @param fitColor
+     *            the fit color.
+     */
+    public void setFitColor(Color fitColor);
+
 
     /**
      * Get the style used for drawing lines.
