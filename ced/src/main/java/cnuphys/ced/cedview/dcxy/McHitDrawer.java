@@ -36,7 +36,7 @@ public class McHitDrawer extends DCXYViewDrawer {
 			return;
 		}
 		
-		if (_view.isAccumulatedMode()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 

@@ -44,7 +44,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
-		SINGLE_EVENT, ACCUMULATED
+		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
 	};
 
 	// our mode
@@ -326,10 +326,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 */
 	public boolean showReconsCrosses() {
 		if ((_controlPanel == null)
-				|| (_controlPanel.getReconsDisplayArray() == null)) {
+				|| (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getReconsDisplayArray().showBSTReconsCrosses();
+		return _controlPanel.getDisplayArray().showBSTReconsCrosses();
 	}
 
 	/**
@@ -341,10 +341,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 */
 	public boolean showDChbCrosses() {
 		if ((_controlPanel == null)
-				|| (_controlPanel.getReconsDisplayArray() == null)) {
+				|| (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getReconsDisplayArray().showDChbCrosses();
+		return _controlPanel.getDisplayArray().showDChbCrosses();
 	}
 
 	/**
@@ -358,7 +358,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 				|| (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getReconsDisplayArray().showFTOFHits();
+		return _controlPanel.getDisplayArray().showFTOFHits();
 	}
 
 	/**
@@ -370,10 +370,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 */
 	public boolean showDCtbCrosses() {
 		if ((_controlPanel == null)
-				|| (_controlPanel.getReconsDisplayArray() == null)) {
+				|| (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getReconsDisplayArray().showDCtbCrosses();
+		return _controlPanel.getDisplayArray().showDCtbCrosses();
 	}
 
 	/**
@@ -636,10 +636,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 * See if we are in accumulation event mode (vice single event mode)
 	 * @return <code>true</code> if we are in accumulation mode
 	 */
-	public boolean isAccumulatedMode() {
-		return !isSingleEventMode();
+	public boolean isSimpleAccumulatedMode() {
+		return (_mode == Mode.SIMPLEACCUMULATED);
 	}
 
+	/**
+	 * See if we are in log accumulation event mode 
+	 * @return <code>true</code> if we are in accumulation mode
+	 */
+	public boolean isLogAccumulatedMode() {
+		return (_mode == Mode.LOGACCUMULATED);
+	}
+
+	
 	/**
 	 * Set the mode for this view.
 	 * 

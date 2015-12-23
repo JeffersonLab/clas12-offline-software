@@ -14,7 +14,6 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
@@ -145,7 +144,16 @@ public class FTOFPanelItem extends PolygonItem {
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[0].length; paddle0++) {
-				double fract = ((double) (hits[sect0][paddle0]))/maxHit;
+				
+				int hit = hits[sect0][paddle0];
+				double fract;
+				if (_view.isSimpleAccumulatedMode()) {
+					fract = ((double) hit) / maxHit;
+				}
+				else {
+					fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+				}
+
 				Color fc = AccumulationManager.getInstance().getColor(fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0,
 						_ftofPanel, _sector);

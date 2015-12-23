@@ -139,6 +139,11 @@ public class HistoGridView extends ScrollableGridView implements MouseMotionList
 			e.printStackTrace();
 			return null;
 		}
+		
+		int numXticks = numBin-1;
+		while (numXticks > 9) {
+			numXticks /= 2;
+		}
 
 		PlotCanvas canvas = new PlotCanvas(data, title, xLabel, yLabel);
 
@@ -151,14 +156,15 @@ public class HistoGridView extends ScrollableGridView implements MouseMotionList
 		canvas.getParameters().setXRange(minValue, maxValue);
 		canvas.getParameters().setLegendFont(Fonts.smallFont);
 		
-		canvas.getPlotTicks().setNumMajorTickX(5);
+		canvas.getPlotTicks().setDrawBinValue(true);
+		canvas.getPlotTicks().setNumMajorTickX(numXticks);
 		canvas.getPlotTicks().setNumMajorTickY(2);
 		canvas.getPlotTicks().setNumMinorTickX(0);
 		canvas.getPlotTicks().setNumMinorTickY(0);
 		canvas.getPlotTicks().setTickFont(Fonts.smallFont);
 		
 		DataSet ds = canvas.getDataSet();
-		ds.getCurveStyle(0).setFillColor(Color.black);
+		ds.getCurveStyle(0).setFillColor(X11Colors.getX11Color("dark red"));
 		ds.getCurveStyle(0).setLineColor(null);
 		ds.getCurve(0).getFit().setFitType(FitType.NOLINE);
 

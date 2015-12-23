@@ -5,12 +5,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.JComponent;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.splot.plot.X11Colors;
 
 /**
  * @author heddle
@@ -22,6 +26,12 @@ public class ColorModelLegend extends JComponent {
 	private ColorScaleModel _model;
 
 	private Dimension size;
+	
+	private int gap = 2;
+	private int left;
+	private int right;
+	private int top; 
+	private int bottom;
 
 	/**
 	 * Create a color legend with the given color model.
@@ -30,10 +40,11 @@ public class ColorModelLegend extends JComponent {
 	 *            the model to display as a legend.
 	 */
 	public ColorModelLegend(ColorScaleModel model, int desiredWidth, String name) {
-		size = new Dimension(desiredWidth, 50);
+		size = new Dimension(desiredWidth + 2*gap, 50);
 		setLayout(new BorderLayout(2, 4));
 		_model = model;
 		setBorder(new CommonBorder(name));
+		setOpaque(true);
 	}
 
 	@Override
@@ -41,19 +52,21 @@ public class ColorModelLegend extends JComponent {
 		Color colors[] = _model.getColors();
 		double values[] = _model.getValues();
 		Rectangle bounds = getBounds();
-		int dx = bounds.width / colors.length;
+				
+		int useableW = bounds.width-2*gap;
+		int dx = useableW / colors.length;
 
 		// make sure it fits
-		if ((colors.length * dx) > (bounds.width - 8)) {
+		if ((colors.length * dx) > (useableW - 8)) {
 			dx -= 1;
 		}
 
-		int left = (bounds.width - (colors.length * dx)) / 2;
-		int top = bounds.height - 30;
+		left = gap + (useableW - (colors.length * dx)) / 2;
+		top = bounds.height - 30;
 		int height = 12;
 		int ytext = bounds.height - 6;
-		int bottom = top + height;
-		int right = left + colors.length * dx;
+		bottom = top + height;
+		right = left + colors.length * dx;
 
 		for (int i = 0; i < colors.length; i++) {
 			int xt = left + i * dx;
@@ -62,10 +75,15 @@ public class ColorModelLegend extends JComponent {
 			g.fillRect(xt, top, dx, height);
 			if (i == 0) {
 				double val = _model.getMinValue();
+
 				g.setColor(Color.black);
-				g.drawString(
-						DoubleFormat.doubleFormat(val, _model.getPrecision()),
-						xt - 3, ytext);
+				if (Math.abs(val) < 1.0e-5) {
+					g.drawString("0", xt - 1, ytext);
+				}
+				else {
+					g.drawString(DoubleFormat.doubleFormat(val,
+							_model.getPrecision()), xt - 3, ytext);
+				}
 			}
 
 			else if (i == (colors.length / 2)) {
@@ -95,14 +113,19 @@ public class ColorModelLegend extends JComponent {
 			else if (i == (colors.length - 1)) {
 				double val = _model.getMaxValue();
 				g.setColor(Color.black);
-				g.drawString(
-						DoubleFormat.doubleFormat(val, _model.getPrecision()),
-						xt - 5, ytext);
+				if (Math.abs(val-1) < 1.0e-5) {
+					g.drawString("1", xt - 3, ytext);
+				}
+				else {
+					g.drawString(DoubleFormat.doubleFormat(val,
+							_model.getPrecision()), xt - 5, ytext);
+				}
 			}
 		}
 
 		GraphicsUtilities.drawSimple3DRect(g, left, top, right - left, bottom
 				- top, true);
+		
 	}
 
 	@Override

@@ -189,7 +189,7 @@ public class GEMCMetaDataContainer extends ADataContainer {
 			} // for s
 		    } // tokens != null
 
-		    Ced.getGEMCView().getGEMCTable().getGEMCMetaDataModel()
+		    Ced.getCed().getGEMCView().getGEMCTable().getGEMCMetaDataModel()
 			    .setData(properties);
 		} // ss not null
 	    } // bytes not null

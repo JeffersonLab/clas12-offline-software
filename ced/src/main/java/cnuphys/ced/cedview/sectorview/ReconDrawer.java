@@ -35,14 +35,9 @@ public class ReconDrawer extends SectorViewDrawer {
 			return;
 		}
 
-		if (!_view.showMcTruth()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
-
-		if (_view.isAccumulatedMode()) {
-			return;
-		}
-
 
 		// FTOF
 		if (_view.showFTOFReconHits()) {

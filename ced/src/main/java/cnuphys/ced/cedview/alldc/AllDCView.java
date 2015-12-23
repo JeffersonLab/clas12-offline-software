@@ -121,7 +121,7 @@ public class AllDCView extends CedView {
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
-				+ ControlPanel.ACCUMULATIONLEGEND + ControlPanel.RECONSARRAY,
+				+ ControlPanel.ACCUMULATIONLEGEND,
 				DisplayBits.ACCUMULATION 
 						 + DisplayBits.MCTRUTH,
 				2, 10);
@@ -162,20 +162,6 @@ public class AllDCView extends CedView {
 		getContainer().setBeforeDraw(_beforeDraw);
 	}
 
-	private void drawDiag(Graphics g, Rectangle rect, Color color, int opt) {
-		int l = rect.x + 1;
-		int t = rect.y + 1;
-		int r = l + rect.width - 2;
-		int b = t + rect.height - 2;
-
-		g.setColor(color);
-
-		if (opt == 0) {
-			g.drawLine(l, b, r, t);
-		} else {
-			g.drawLine(l, t, r, b);
-		}
-	}
 
 	/**
 	 * Set the views before draw

@@ -40,7 +40,7 @@ public class McHitDrawer extends ECViewDrawer {
 			return;
 		}
 		
-		if (_view.isAccumulatedMode()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 

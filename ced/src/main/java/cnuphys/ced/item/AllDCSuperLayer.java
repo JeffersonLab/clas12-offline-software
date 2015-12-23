@@ -442,7 +442,16 @@ public class AllDCSuperLayer extends RectangleItem {
 			for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
-				double fract = ((double) hitCount) / maxHit;
+				
+				//test log drawing to remove hotspots
+				
+				double fract;
+				if (_view.isSimpleAccumulatedMode()) {
+					fract = ((double) hitCount) / maxHit;
+				}
+				else {
+					fract = Math.log((double)(hitCount+1.))/Math.log(maxHit+1.);
+				}
 				
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getInstance().getColor(fract);

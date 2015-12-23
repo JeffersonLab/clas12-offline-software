@@ -132,7 +132,14 @@ public class BSTxyHitDrawer implements IDrawable {
 
 				if (panel != null) {
 					int hitCount = bstData[lay0][sect0];
-					double fract = ((double) hitCount) / maxHit;
+					
+					double fract;
+					if (_view.isSimpleAccumulatedMode()) {
+						fract = ((double) hitCount) / maxHit;
+					}
+					else {
+						fract = Math.log((double)(hitCount+1.))/Math.log(maxHit+1.);
+					}
 
 					Color color = AccumulationManager.getInstance().getColor(fract);
 					_view.drawSVTPanel((Graphics2D) g, container, panel, color);

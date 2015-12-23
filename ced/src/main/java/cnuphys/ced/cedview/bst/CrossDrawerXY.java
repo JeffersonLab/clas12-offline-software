@@ -46,7 +46,7 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 			return;
 		}
 		
-		if (_view.isAccumulatedMode()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 

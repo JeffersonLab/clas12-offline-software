@@ -29,8 +29,8 @@ public class PlotView extends BaseView {
 	public PlotView() {
 		super(PropertySupport.TITLE, "sPlot", PropertySupport.ICONIFIABLE, true,
 				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 800,
-				PropertySupport.HEIGHT, 800, PropertySupport.VISIBLE, false);
+				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
+				PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false);
 		add(createPlotPanel());
 		addMenus();
 	}

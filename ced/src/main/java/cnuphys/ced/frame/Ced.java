@@ -48,7 +48,9 @@ import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.ced.event.PlotManager;
+import cnuphys.ced.event.data.FTOFDataContainer;
 import cnuphys.ced.geometry.DCGeometry;
+import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
@@ -56,6 +58,7 @@ import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.plugin.CedPluginManager;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.splot.example.MemoryUsageDialog;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
@@ -80,7 +83,7 @@ import cnuphys.bCNU.view.VirtualView;
 
 @SuppressWarnings("serial")
 public class Ced extends BaseMDIApplication implements PropertyChangeListener,
-		IAccumulationListener, MagneticFieldChangeListener {
+		MagneticFieldChangeListener {
 
 	// the singleton
 	private static Ced _instance;
@@ -114,32 +117,38 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// event number label on menu bar
 	private static JLabel _eventNumberLabel;
+		
+	// memory usage dialog
+	private MemoryUsageDialog _memoryUsage;
 
 	// some views
-	private static AllDCView _allDCView;
-	private static VirtualView _virtualView;
-	private static ClasIoMonteCarloView _monteCarloView;
-	private static ClasIoReconEventView _reconEventView;
-	private static ClasIoEventView _eventView;
-	private static GEMCView _gemcView;
-	private static BSTxyView _bstXyView;
-	private static BSTzView _bstZView;
-	private static FTCalXYView _ftcalXyView;
-	private static DCXYView _dcXyView;
-	private static ECView _ecView;
-	private static PCALView _pcalView;
-	private static LogView _logView;
-	private static PlotView _plotView;
-	private static HistoGridView _dcHistoView;
-	private static ForwardView3D _forward3DView;
-	private static CentralView3D _central3DView;
-	private static FTCalView3D _ftCal3DView;
+	private AllDCView _allDCView;
+	private VirtualView _virtualView;
+	private ClasIoMonteCarloView _monteCarloView;
+	private ClasIoReconEventView _reconEventView;
+	private ClasIoEventView _eventView;
+	private GEMCView _gemcView;
+	private BSTxyView _bstXyView;
+	private BSTzView _bstZView;
+	private FTCalXYView _ftcalXyView;
+	private DCXYView _dcXyView;
+	private ECView _ecView;
+	private PCALView _pcalView;
+	private LogView _logView;
+	private PlotView _plotView;
+	private ForwardView3D _forward3DView;
+	private CentralView3D _central3DView;
+	private FTCalView3D _ftCal3DView;
 	
 	//sector views
-	private static SectorView _sectorView14;
-	private static SectorView _sectorView25;
-	private static SectorView _sectorView36;
-
+	private SectorView _sectorView14;
+	private SectorView _sectorView25;
+	private SectorView _sectorView36;
+	
+	//histogram grids (which are also views)
+	protected HistoGridView dcHistoGrid;
+	protected HistoGridView ftofHistoGrid;
+	
 	// the about string
 	private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
 
@@ -157,7 +166,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private Ced(Object... keyVals) {
 		super(keyVals);
 
-		AccumulationManager.getInstance().addAccumulationListener(this);
+		//histogram filler
+		new CedHistoFiller(this);
 
 		ComponentListener cl = new ComponentListener() {
 
@@ -191,7 +201,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			// reaarange some views in virtual space
 			_virtualView.reconfigure();
 						
-			_virtualView.moveTo(_allDCView, 3);
+			_virtualView.moveTo(dcHistoGrid, 12);
+			_virtualView.moveTo(ftofHistoGrid, 13);
+			
+	    	_virtualView.moveTo(_allDCView, 3);
 			_virtualView.moveTo(_eventView, 6, VirtualView.BOTTOMRIGHT);
 			_virtualView.moveTo(_gemcView, 6, VirtualView.BOTTOMLEFT);
 			_virtualView.moveTo(_bstXyView, 2, VirtualView.BOTTOMLEFT);
@@ -206,7 +219,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 			_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
 			_virtualView.moveTo(_plotView, 11, VirtualView.BOTTOMLEFT);
-			_virtualView.moveTo(_dcHistoView, 12);
 
 			_virtualView.moveTo(_ftcalXyView, 10, VirtualView.BOTTOMLEFT);
 
@@ -237,7 +249,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		AccumulationManager.getInstance();
 
 		// add a virtual view
-		_virtualView = VirtualView.createVirtualView(16);
+		_virtualView = VirtualView.createVirtualView(18);
 		ViewManager.getInstance().getViewMenu().addSeparator();
 
 		// add GEMC data view
@@ -297,8 +309,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// plot view
 		_plotView = new PlotView();
 		
-        //dc histo view
+        //add histograms
+		addDcHistogram();
+		addFtofHistogram();
 		
+		
+
+		// log some environment info
+		Log.getInstance().config(Environment.getInstance().toString());
+
+		// use config file info
+		// Desktop.getInstance().configureViews();
+
+		_virtualView.toFront();
+	}
+	
+	//dc wire histogram
+	private void addDcHistogram() {
 		IHistogramMaker maker = new IHistogramMaker() {
 
 			@Override
@@ -311,23 +338,49 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				int supl = 1 + (row-1) % 6;
 				String title = "sect_" + sect + "  supl_" + supl + "  lay_" + lay;
 				
-				panel = HistoGridView.createHistogram(_dcHistoView, w, h, title, "wire", "count", -0.5, 120, 120);
+				panel = HistoGridView.createHistogram(dcHistoGrid, w, h, title, "wire", "count", -0.5, 112, 112);
 
 				return panel;
 			}
 			
 		};
-		_dcHistoView = HistoGridView.createHistoGridView("DC Wire Histograms", 36, 6, 260, 240, 0.7, maker);
-		
-
-		// log some environment info
-		Log.getInstance().config(Environment.getInstance().toString());
-
-		// use config file info
-		// Desktop.getInstance().configureViews();
-
-		_virtualView.toFront();
+		dcHistoGrid = HistoGridView.createHistoGridView("DC Wire Histograms", 36, 6, 260, 240, 0.7, maker);
 	}
+	
+	//ftof wire histogram
+	private void addFtofHistogram() {
+		IHistogramMaker maker = new IHistogramMaker() {
+
+			@Override
+			public PlotPanel addHistogram(int row, int col, int w, int h) {
+				
+				PlotPanel panel;
+
+				int panelType = col-1; // 1A, 1B, 2 for 0,1,2
+				int numPaddle = FTOFGeometry.numPaddles[panelType];
+				int sect = 1 + (row - 1) % 6;
+				String title = "sect_" + sect + "  " +
+						FTOFDataContainer.getName(panelType);
+
+				switch (panelType) {
+				case 0: // 1A has 23 paddles
+					panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "paddle", "count", -0.5, numPaddle-0.5, numPaddle);
+					break;
+				case 1: // 1B has 62 paddles
+					panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "paddle", "count", -0.5, numPaddle-0.5, numPaddle);
+					break;
+				default: //2 has 5 paddles
+					panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "paddle", "count", -0.5, numPaddle-0.5, numPaddle);
+					break;
+				}
+
+				return panel;
+			}
+			
+		};
+		ftofHistoGrid = HistoGridView.createHistoGridView("FTOF Histograms", 6, 3, 260, 240, 0.7, maker);
+	}
+
 
 	/**
 	 * Add items to existing menus and/or create new menus NOTE: Swim menu is
@@ -409,6 +462,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private void addToOptionMenu(JMenu omenu) {
 		omenu.add(DCGeometry.getDCGeometryMenu());
 		omenu.add(MagnifyWindow.magificationMenu());
+		omenu.addSeparator();
+		
+		final JMenuItem memPlot = new JMenuItem("Memory Usage");
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (_memoryUsage == null) {
+					_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
+				}
+
+				_memoryUsage.setVisible(true);
+			}
+			
+		};
+		memPlot.addActionListener(al);
+		omenu.add(memPlot);
 	}
 
 	/**
@@ -457,9 +527,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 
 	/**
-	 * Public access to the Ced singleton.
+	 * private access to the Ced singleton.
 	 * 
-	 * @return the singleton Ced (the main application frame.)(
+	 * @return the singleton Ced (the main application frame.)
 	 */
 	private static Ced getInstance() {
 		if (_instance == null) {
@@ -471,8 +541,16 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_instance.createMenus();
 
 			// make sure plot manager is ready
-			PlotManager.getInstance();
+			//PlotManager.getInstance();
 		}
+		return _instance;
+	}
+	
+	/**
+	 * public access to the singleton
+	 * @return the singleton Ced (the main application frame.)
+	 */
+	public static Ced getCed() {
 		return _instance;
 	}
 
@@ -524,65 +602,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * 
 	 * @return the single shared plotview
 	 */
-	public static PlotView getPlotView() {
+	public PlotView getPlotView() {
 		return _plotView;
 	}
 
-	/**
-	 * Notification of accumulation events
-	 */
-	@Override
-	public void accumulationEvent(int reason) {
-		switch (reason) {
-
-		case AccumulationManager.ACCUMULATION_CLEAR:
-			System.err.println("Clear accumulation");
-
-			if (_dcHistoView != null) {
-				_dcHistoView.clear();
-			}
-			break;
-
-		case AccumulationManager.ACCUMULATION_STARTED:
-			break;
-
-		case AccumulationManager.ACCUMULATION_CANCELLED:
-			break;
-
-		case AccumulationManager.ACCUMULATION_FINISHED:
-			setEventNumberLabel(
-					ClasIoEventManager.getInstance().getEventNumber());
-
-			// update histograms
-			// dc wires
-			if (_dcHistoView != null) {
-				int dchits[][][][] = AccumulationManager.getInstance()
-						.getAccumulatedDgtzDcData();
-				for (int sect0 = 0; sect0 < 6; sect0++) {
-					for (int supl0 = 0; supl0 < 6; supl0++) {
-						int row = 6 * sect0 + supl0 + 1;
-						for (int lay0 = 0; lay0 < 6; lay0++) {
-							int col = lay0 + 1;
-
-							PlotPanel ppan = _dcHistoView.getPlotPanel(row,
-									col);
-							HistoData hd = _dcHistoView.getHistoData(row, col);
-
-							for (int wire0 = 0; wire0 < 112; wire0++) {
-								hd.setCount(wire0, //do not add 1
-										dchits[sect0][supl0][lay0][wire0]);
-								
-							}
-
-							ppan.getCanvas().needsRedraw(true);
-						}
-						
-					}
-				}
-			}
-			break;
-		}
-	}
 
 	// create the progress bar
 	private void createProgressBar() {
@@ -681,7 +704,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * 
 	 * @return the GEMC view
 	 */
-	public static GEMCView getGEMCView() {
+	public GEMCView getGEMCView() {
 		return _gemcView;
 	}
 
@@ -810,6 +833,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			@Override
 			public void run() {
+				ced.placeViewsOnVirtualDesktop();
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
 				splashWindow.writeCachedText();

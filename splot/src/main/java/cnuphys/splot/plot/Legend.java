@@ -39,10 +39,10 @@ public class Legend extends Rectangle
 	private PlotParameters _params;
 
 	// gap before text
-	private final int HGAP = 10;
+	private final int HGAP = 8;
 
 	// extra v gap
-	private final int VGAP = 8;
+	private final int VGAP = 6;
 
 	private int _maxStringWidth;
 	private int _extra;

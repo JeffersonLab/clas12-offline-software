@@ -50,6 +50,20 @@ public class ViewManager extends Vector<BaseView>
 	private ViewManager() {
 		_viewMenu = new JMenu("Views");
 	}
+	
+	/**
+	 * Make the view visible and change to its viretual panel
+	 * @param view the view
+	 * @param vis whether it is visible
+	 */
+	public void setVisible(BaseView view, boolean vis) {
+		view.setVisible(vis);
+		if (vis) {
+			if (!(view instanceof VirtualView)) {
+				makeViewVisibleInVirtualWorld(view);
+			}
+		}
+	}
 
 	/**
 	 * Add (register) a view for control by this manager.

@@ -145,11 +145,11 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 			break;
 
 		case AccumulationManager.ACCUMULATION_CANCELLED:
-			update();
+//			update();
 			break;
 
 		case AccumulationManager.ACCUMULATION_FINISHED:
-			update();
+//			update();
 			break;
 
 		case AccumulationManager.ACCUMULATION_CLEAR:
@@ -168,42 +168,42 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 
 	}
 
-	private void update() {
-
-		DataSet dataSet;
-		GrowableArray data;
-
-		// time based momentum resolution
-		dataSet = _plotGrid.getDataSet(0, 0);
-		data = AccumulationManager.getInstance().getTBMomentumResolutionData();
-		add(dataSet, data);
-
-		// time based theta resolution
-		dataSet = _plotGrid.getDataSet(0, 1);
-		data = AccumulationManager.getInstance().getTBThetaResolutionData();
-		add(dataSet, data);
-
-		// time based phi resolution
-		dataSet = _plotGrid.getDataSet(0, 2);
-		data = AccumulationManager.getInstance().getTBPhiResolutionData();
-		add(dataSet, data);
-
-		// hit based momentum resolution
-		dataSet = _plotGrid.getDataSet(1, 0);
-		data = AccumulationManager.getInstance().getHBMomentumResolutionData();
-		add(dataSet, data);
-
-		// hit based theta resolution
-		dataSet = _plotGrid.getDataSet(1, 1);
-		data = AccumulationManager.getInstance().getHBThetaResolutionData();
-		add(dataSet, data);
-
-		// hit based phi resolution
-		dataSet = _plotGrid.getDataSet(1, 2);
-		data = AccumulationManager.getInstance().getHBPhiResolutionData();
-		add(dataSet, data);
-
-	}
+//	private void update() {
+//
+//		DataSet dataSet;
+//		GrowableArray data;
+//
+//		// time based momentum resolution
+//		dataSet = _plotGrid.getDataSet(0, 0);
+//		data = AccumulationManager.getInstance().getTBMomentumResolutionData();
+//		add(dataSet, data);
+//
+//		// time based theta resolution
+//		dataSet = _plotGrid.getDataSet(0, 1);
+//		data = AccumulationManager.getInstance().getTBThetaResolutionData();
+//		add(dataSet, data);
+//
+//		// time based phi resolution
+//		dataSet = _plotGrid.getDataSet(0, 2);
+//		data = AccumulationManager.getInstance().getTBPhiResolutionData();
+//		add(dataSet, data);
+//
+//		// hit based momentum resolution
+//		dataSet = _plotGrid.getDataSet(1, 0);
+//		data = AccumulationManager.getInstance().getHBMomentumResolutionData();
+//		add(dataSet, data);
+//
+//		// hit based theta resolution
+//		dataSet = _plotGrid.getDataSet(1, 1);
+//		data = AccumulationManager.getInstance().getHBThetaResolutionData();
+//		add(dataSet, data);
+//
+//		// hit based phi resolution
+//		dataSet = _plotGrid.getDataSet(1, 2);
+//		data = AccumulationManager.getInstance().getHBPhiResolutionData();
+//		add(dataSet, data);
+//
+//	}
 
 	private void add(DataSet ds, GrowableArray ga) {
 		if ((ds == null) || (ga == null)) {
