@@ -110,6 +110,10 @@ public class SymbolDraw {
 		case DOWNTRIANGLE:
 			drawDownTriangle(g, x, y, s2, lineColor, fillColor);
 			break;
+			
+		case DAVID:
+			drawDavid(g, x, y, s2, lineColor, fillColor);
+			break;
 
 		case X:
 			drawX(g, x, y, s2, lineColor);
@@ -234,6 +238,45 @@ public class SymbolDraw {
 		}
 	}
 
+	/**
+	 * Draw the david symbol
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param x
+	 *            the horizontal center
+	 * @param y
+	 *            the vertical center
+	 * @param s2
+	 *            the half-width
+	 * @param lc
+	 *            the line color
+	 * @param fc
+	 *            tThe fillcolor
+	 */
+	public static void drawDavid(Graphics g, int x, int y, int s2,
+			Color lc, Color fc) {
+		int l = x - s2;
+		int t = y - s2;
+		int r = x + s2;
+		int b = y + s2;
+		Polygon poly = new Polygon();
+		poly.addPoint(l, t);
+		poly.addPoint(r, t);
+		poly.addPoint(x+1, y);
+		poly.addPoint(r, b);
+		poly.addPoint(l, b);
+		poly.addPoint(x-1, y);
+		if (fc != null) {
+			g.setColor(fc);
+			g.fillPolygon(poly);
+		}
+		if (lc != null) {
+			g.setColor(lc);
+			g.drawPolygon(poly);
+		}
+	}
+	
 	/**
 	 * Draw a simple down triangle
 	 * 

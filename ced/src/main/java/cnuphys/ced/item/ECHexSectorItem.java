@@ -183,7 +183,14 @@ public class ECHexSectorItem extends HexSectorItem {
 							strip0);
 
 					int hit = hits[sect0][plane][view0][strip0];
-					double fract = ((double) hit) / maxHit;
+					double fract;
+					if (_ecView.isSimpleAccumulatedMode()) {
+						fract = ((double) hit) / maxHit;
+					}
+					else {
+						fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+					}
+					
 					Color color = AccumulationManager.colorScaleModel
 							.getAlphaColor(fract, 128);
 

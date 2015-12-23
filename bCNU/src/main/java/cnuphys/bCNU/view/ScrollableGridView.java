@@ -15,6 +15,7 @@ import javax.swing.JScrollPane;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.lund.X11Colors;
 
 public class ScrollableGridView extends BaseView {
 	
@@ -47,6 +48,9 @@ public class ScrollableGridView extends BaseView {
 		
 		_gridPanel = new JPanel();
 		_gridPanel.setLayout(new GridLayout(numRow, numCol, 2, 2));
+		_gridPanel.setOpaque(true);
+		_gridPanel.setBackground(X11Colors.getX11Color("wheat"));
+
 		
 		_numRow = numRow;
 		_numCol = numCol;

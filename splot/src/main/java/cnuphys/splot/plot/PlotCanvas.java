@@ -2,6 +2,7 @@ package cnuphys.splot.plot;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -67,8 +68,8 @@ public class PlotCanvas extends JComponent
 
 	// default values for margins
 	private int _topMargin = 10;
-	private int _leftMargin = 30;
-	private int _bottomMargin = 30;
+//	private int _leftMargin = 30;
+//	private int _bottomMargin = 30;
 	private int _rightMargin = 10;
 
 	// for saving files
@@ -388,10 +389,19 @@ public class PlotCanvas extends JComponent
 			int right = left + bounds.width;
 			int bottom = top + bounds.height;
 
-			left += _leftMargin;
+			int bottomMargin = 25;
+			int leftMargin = 25;
+
+			if (_parameters.getAxesFont() != null) {
+				FontMetrics fm = getFontMetrics(_parameters.getAxesFont());
+				bottomMargin = 6 + fm.getHeight();
+				leftMargin = 6 + fm.getHeight();
+			}
+
+			left += leftMargin;
 			top += _topMargin;
-			right -= _rightMargin;
-			bottom -= _bottomMargin;
+			right -= _rightMargin;			
+			bottom -= bottomMargin;
 
 			if (_activeBounds == null) {
 				_activeBounds = new Rectangle();

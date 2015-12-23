@@ -41,7 +41,7 @@ public class McHitDrawer extends PCALViewDrawer {
 			return;
 		}
 		
-		if (_view.isAccumulatedMode()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 

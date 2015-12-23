@@ -86,8 +86,8 @@ public class FTCalXYView extends CedXYView {
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-				+ ControlPanel.RECONSARRAY, DisplayBits.ACCUMULATION
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION
 				+ DisplayBits.MCTRUTH, 2, 6);
 
 		view.add(view._controlPanel, BorderLayout.EAST);

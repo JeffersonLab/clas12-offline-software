@@ -16,6 +16,10 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Properties;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
 import org.jlab.geom.prim.Line3D;
 
 import cnuphys.bCNU.drawable.DrawableAdapter;
@@ -51,6 +55,11 @@ public class DCXYView extends HexView {
 
 	// draws mc hits
 	private McHitDrawer _mcHitDrawer;
+		
+	//exach superlayer in a different color
+	private static Color _wireColors[] = {Color.red, X11Colors.getX11Color("dark red"), 
+			X11Colors.getX11Color("cadet blue"), X11Colors.getX11Color("dark blue"),
+			X11Colors.getX11Color("olive"), X11Colors.getX11Color("dark green")};
 
 	// font for label text
 	private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
@@ -88,6 +97,42 @@ public class DCXYView extends HexView {
 		setBeforeDraw();
 		setAfterDraw();
 		getContainer().getComponent().setBackground(Color.gray);
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		JComponent wireLegend = new JComponent() {
+			@Override
+			public void paintComponent(Graphics g) {
+				Rectangle b = getBounds();
+				g.setColor(Color.darkGray);
+				g.fillRect(b.x, b.y, b.width, b.height);
+				int yc = b.y + b.height/2;
+				int linelen = 40;
+				g.setFont(Fonts.mediumFont);
+				FontMetrics fm = this.getFontMetrics(Fonts.mediumFont);
+				
+				int x = 6;
+				for (int supl0 = 0; supl0 < 6; supl0++) {
+					String s = " superlayer " + (supl0+1) + "    ";
+					g.setColor(_wireColors[supl0]);
+					g.drawLine(x, yc, x+linelen, yc);
+					x = x + linelen + 4;
+					g.setColor(Color.white);
+					g.drawString(s, x, yc+4);
+					x += fm.stringWidth(s);
+				}
+			}
+			
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension d = super.getPreferredSize();
+				d.height = 24;
+				return d;
+			}
+		};
+		panel.add(wireLegend, BorderLayout.CENTER);
+		panel.setBorder(BorderFactory.createEtchedBorder());
+		add(panel, BorderLayout.SOUTH);
 	}
 
 	// add the control panel
@@ -96,7 +141,7 @@ public class DCXYView extends HexView {
 
 		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-				+ ControlPanel.RECONSARRAY + ControlPanel.DRAWLEGEND, 
+				+ ControlPanel.DRAWLEGEND, 
 				DisplayBits.ACCUMULATION
 				+ DisplayBits.DC_HB_RECONS_CROSSES
 				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.MCTRUTH, 2, 10);
@@ -200,13 +245,13 @@ public class DCXYView extends HexView {
 					int layer[] = dcData.dc_dgtz_layer;
 					int wire[] = dcData.dc_dgtz_wire;
 					
-					g.setColor(Color.red);
 					Point pp1 = new Point();
 					Point pp2 = new Point();
 					Point2D.Double wp1 = new Point2D.Double();
 					Point2D.Double wp2 = new Point2D.Double();
 					
 					for (int hit = 0; hit < hitCount; hit++) {
+						g.setColor(_wireColors[superlayer[hit]-1]);
 						Line3D line = DCGeometry.getWire(sector[hit], superlayer[hit], layer[hit], wire[hit]);
 						wp1.setLocation(line.origin().x(), line.origin().y());
 						wp2.setLocation(line.end().x(), line.end().y());
@@ -303,7 +348,15 @@ public class DCXYView extends HexView {
 				for (int lay0 = 0; lay0 < 6; lay0++) {
 					for (int wire0 = 0; wire0 < 112; wire0++) {
 						
-						double fract = ((double)dcAccumulatedData[sect0][supl0][lay0][wire0])/maxHit;
+						double fract;
+						int hitCount = dcAccumulatedData[sect0][supl0][lay0][wire0];
+						if (isSimpleAccumulatedMode()) {
+							fract = ((double) hitCount) / maxHit;
+						}
+						else {
+							fract = Math.log((double)(hitCount+1.))/Math.log(maxHit+1.);
+						}
+
 						Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
 						g.setColor(color);
 						Line3D line = DCGeometry.getWire(sect0+1, supl0+1, lay0+1, wire0+1);

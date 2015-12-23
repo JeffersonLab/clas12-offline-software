@@ -12,6 +12,8 @@ import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.xml.XmlPrintStreamWritable;
 import cnuphys.splot.xml.XmlPrintStreamWriter;
 
@@ -34,7 +36,10 @@ public class PlotTicks implements XmlPrintStreamWritable {
 	private int numMinorTickX = 4; // interior ticks
 	private int numMajorTickY = 4; // interior ticks
 	private int numMinorTickY = 4; // interior ticks
-
+	
+	//draw 1-based bin instead of value
+	private boolean drawBinValue;
+	
 	private Color _tickColor = Color.black;
 
 	private Font _tickFont = Environment.getInstance().getCommonFont(11);
@@ -53,6 +58,18 @@ public class PlotTicks implements XmlPrintStreamWritable {
 	public void setTickFont(Font font) {
 		_tickFont = font;
 	}
+	
+	/**
+	 * Sets whether we want to draw the bin values on the x axis.
+	 * Only relevant for histograms
+	 * @param drawBinVal the value
+	 */
+	public void setDrawBinValue(boolean drawBinVal) {
+		if (_plotCanvas._dataSet.is1DHistoSet()) {
+			drawBinValue = drawBinVal;
+		}
+	}
+
 
 	/**
 	 * Draw the plot ticks
@@ -103,10 +120,55 @@ public class PlotTicks implements XmlPrintStreamWritable {
 
 	}
 
+	//draw hisogram bin values
+	private void drawBinValues(Graphics g, double xmin, double xmax, double yc,
+			int ticklen, int numtick, Rectangle ab, boolean drawVal) {
+		
+		DataSet ds = _plotCanvas.getDataSet();
+		if (!ds.is1DHistoSet()) {
+			return;
+		}
+		HistoData hd = ds.getColumn(0).getHistoData();
+		if (hd == null) {
+			return;
+		}
+		
+		PlotParameters params = _plotCanvas.getParameters();
+		FontMetrics fm = _plotCanvas.getFontMetrics(_tickFont);
+		double delx = (xmax - xmin) / (numtick + 1);
+		
+		int t = ab.y;
+		int b = t + ab.height;
+		int sb = b + fm.getHeight();
+		
+		for (int i = 1; i <= (numtick+1); i++) {
+			double value = xmin + (i-0.5) * delx;
+			_wp.setLocation(value, yc);
+			_plotCanvas.worldToLocal(_pp, _wp);
+			g.drawLine(_pp.x, b, _pp.x, b - ticklen);
+			g.drawLine(_pp.x, t, _pp.x, t + ticklen);
+
+			if (drawVal) {
+				int bin = hd.getBin(value) + 1;
+				String valStr = "" + bin;
+				int sw = fm.stringWidth(valStr);
+				g.drawString(valStr, _pp.x - sw / 2, sb);
+
+			} // draw val
+		} // for
+
+	}
+
 	// draw x tick marks
 	private void drawXTicks(Graphics g, double xmin, double xmax, double yc,
 			int ticklen, int numtick, Rectangle ab, boolean drawVal) {
 		if (numtick < 1) {
+			return;
+		}
+		
+		if (drawBinValue) {
+			drawBinValues(g, xmin, xmax, yc,
+					ticklen, numtick, ab, drawVal);
 			return;
 		}
 
@@ -118,22 +180,21 @@ public class PlotTicks implements XmlPrintStreamWritable {
 		int b = t + ab.height;
 		int sb = b + fm.getHeight();
 
-		for (int i = 0; i <= (numtick + 1); i++) {
-			if ((i > 0) && (i < numtick + 1)) {
-				double value = xmin + i * delx;
-				_wp.setLocation(value, yc);
-				_plotCanvas.worldToLocal(_pp, _wp);
-				g.drawLine(_pp.x, b, _pp.x, b - ticklen);
-				g.drawLine(_pp.x, t, _pp.x, t + ticklen);
+		for (int i = 1; i <= numtick; i++) {
+			double value = xmin + i * delx;
+			_wp.setLocation(value, yc);
+			_plotCanvas.worldToLocal(_pp, _wp);
+			g.drawLine(_pp.x, b, _pp.x, b - ticklen);
+			g.drawLine(_pp.x, t, _pp.x, t + ticklen);
 
-				if (drawVal) {
-					String valstr = DoubleFormat.doubleFormat(value,
-							params.getNumDecimalX(), params.getMinExponentX());
-					int sw = fm.stringWidth(valstr);
-					g.drawString(valstr, _pp.x - sw / 2, sb);
-				}
-			}
-		}
+			if (drawVal) {
+				String valStr = DoubleFormat.doubleFormat(value,
+						params.getNumDecimalX(), params.getMinExponentX());
+				int sw = fm.stringWidth(valStr);
+				g.drawString(valStr, _pp.x - sw / 2, sb);
+
+			} // draw val
+		} // for
 
 	}
 
@@ -202,6 +263,23 @@ public class PlotTicks implements XmlPrintStreamWritable {
 	public void setNumMinorTickY(int numMinorTickY) {
 		this.numMinorTickY = numMinorTickY;
 	}
+	
+	public int getMajorTickLen() {
+		return majorTickLen;
+	}
+
+	public void setMajorTickLen(int majorTickLen) {
+		this.majorTickLen = majorTickLen;
+	}
+
+	public int getMinorTickLen() {
+		return minorTickLen;
+	}
+
+	public void setMinorTickLen(int minorTickLen) {
+		this.minorTickLen = minorTickLen;
+	}
+
 
 	/**
 	 * This is called as a result of a save. The PlotTicks needs to write itself

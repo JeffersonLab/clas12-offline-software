@@ -3,6 +3,8 @@ package cnuphys.bCNU.graphics.colorscale;
 import java.awt.Color;
 import java.util.Arrays;
 
+import cnuphys.lund.X11Colors;
+
 /**
  * Used for color scales, such as on magnetic field plots
  * 
@@ -30,7 +32,7 @@ public class ColorScaleModel {
 	private Color _tooSmallColor = new Color(64, 64, 64, 64);
 
 	// Color returned for a too-big value (default: null)
-	private Color _tooBigColor = new Color(176, 176, 176, 64);
+	private Color _tooBigColor = X11Colors.getX11Color("brown");
 
 	// An extra comment.
 	private String _comment = "";

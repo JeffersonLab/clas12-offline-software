@@ -210,7 +210,13 @@ public class SectorPCALItem extends PolygonItem {
 				.getAccumulatedDgtzPcalData();
 		for (int strip0 = 0; strip0 < _stripCounts[_stripType]; strip0++) {
 			int hit = hits[_sector - 1][_stripType][strip0];
-			double fract = ((double) (hit)) / maxHit;
+			double fract;
+			if (_view.isSimpleAccumulatedMode()) {
+				fract = ((double) hit) / maxHit;
+			}
+			else {
+				fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+			}
 			
 			Point2D.Double wp[] = getStrip(strip0);
 

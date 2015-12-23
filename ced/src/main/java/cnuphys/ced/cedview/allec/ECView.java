@@ -77,8 +77,8 @@ public class ECView extends HexView {
 	protected void addControls() {
 
 		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-				+ ControlPanel.RECONSARRAY, DisplayBits.ACCUMULATION
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION
 				+ DisplayBits.MCTRUTH + DisplayBits.INNEROUTER
 				+ DisplayBits.UVWSTRIPS, 2, 8);
 

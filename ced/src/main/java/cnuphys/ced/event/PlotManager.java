@@ -17,9 +17,6 @@ public class PlotManager {
 	// singleton
 	private static PlotManager instance;
 
-	// memory usage dialog
-	private MemoryUsageDialog _memoryUsage;
-
 	// plot grid dialog
 	private static ReconstructionPlotGrid _reconGrid = new ReconstructionPlotGrid();
 
@@ -27,7 +24,6 @@ public class PlotManager {
 		_plotMenu = new JMenu("Plots");
 		Ced.getFrame().getJMenuBar().add(_plotMenu);
 
-		final JMenuItem memPlot = new JMenuItem("Memory Usage");
 		final JMenuItem gridPlot = new JMenuItem("Reconstruction Plots");
 
 		ActionListener al = new ActionListener() {
@@ -36,13 +32,7 @@ public class PlotManager {
 			public void actionPerformed(ActionEvent e) {
 				Object source = e.getSource();
 
-				if (source == memPlot) {
-					if (_memoryUsage == null) {
-						_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
-					}
-
-					_memoryUsage.setVisible(true);
-				} else if (source == gridPlot) {
+				if (source == gridPlot) {
 					_reconGrid.setVisible(true);
 				}
 
@@ -50,9 +40,7 @@ public class PlotManager {
 
 		};
 
-		memPlot.addActionListener(al);
 		gridPlot.addActionListener(al);
-		_plotMenu.add(memPlot);
 		_plotMenu.add(gridPlot);
 	}
 

@@ -1,5 +1,6 @@
 package cnuphys.ced.component;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import javax.swing.Box;
@@ -79,11 +80,6 @@ public class ControlPanel extends JPanel {
 	 */
 	public static final int PHI_SLIDER_BIG = 0400;
 
-	/**
-	 * Bit to display reconstructed display array
-	 */
-	public static final int RECONSARRAY = 01000;
-
 	// the view parent
 	private CedView _view;
 
@@ -92,9 +88,6 @@ public class ControlPanel extends JPanel {
 
 	// magnetic field display
 	private MagFieldDisplayArray _magFieldDisplayArray;
-
-	// reconstructed data display array
-	private ReconstructedDisplayArray _reconsDisplayArray;
 
 	// control the nominal target z
 	private JSlider _targetSlider;
@@ -143,20 +136,6 @@ public class ControlPanel extends JPanel {
 
 		add(box);
 
-		// JPanel panel = new JPanel();
-		// panel.setLayout(new BorderLayout(0, 2));
-		// panel.add(addTabbedPane(view, controlPanelBits, displayArrayBits),
-		// BorderLayout.NORTH);
-		//
-		// // feedback
-		// if (Bits.checkBit(controlPanelBits, FEEDBACK)) {
-		// _feedbackPane = new FeedbackPane(FEEDBACKWIDTH);
-		// view.getContainer().setFeedbackPane(_feedbackPane);
-		// panel.add(_feedbackPane, BorderLayout.CENTER);
-		// }
-		//
-		// add(panel);
-
 	}
 
 	// use a tabbed pane to save space
@@ -164,12 +143,6 @@ public class ControlPanel extends JPanel {
 			int displayArrayBits) {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(Fonts.smallFont);
-
-		// recons display array
-		if (Bits.checkBit(controlPanelBits, RECONSARRAY)) {
-			_reconsDisplayArray = new ReconstructedDisplayArray(view,
-					displayArrayBits, 2, 8);
-		}
 
 		// dc noise control
 		if (Bits.checkBit(controlPanelBits, NOISECONTROL)) {
@@ -223,12 +196,6 @@ public class ControlPanel extends JPanel {
 			box.add(DrawingLegend.getLegendPanel(_view));
 		}
 
-		// accumulation
-		if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
-			box.add(new ColorModelLegend(
-					AccumulationManager.colorScaleModel, 160,
-					"Relative Accumulation"));
-		}
 
 		// symbol legend
 		// TODO add symbol legend
@@ -242,11 +209,17 @@ public class ControlPanel extends JPanel {
 		basic.add(box);
 
 		if (_displayArray != null) {
-			tabbedPane.add(_displayArray, "display");
-		}
+			JPanel sp = new JPanel();
+			sp.setLayout(new BorderLayout(2, 2));
+			sp.add(_displayArray, BorderLayout.CENTER);
+			// accumulation
+			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
+				sp.add(new ColorModelLegend(
+						AccumulationManager.colorScaleModel, 160,
+						"Relative Accumulation"), BorderLayout.SOUTH);
+			}
 
-		if (_reconsDisplayArray != null) {
-			tabbedPane.add(_reconsDisplayArray, "recons");
+			tabbedPane.add(sp, "display");
 		}
 
 		tabbedPane.add(basic, "basic");
@@ -375,15 +348,6 @@ public class ControlPanel extends JPanel {
 	 */
 	public MagFieldDisplayArray getMagFieldDisplayArray() {
 		return _magFieldDisplayArray;
-	}
-
-	/**
-	 * Get the reconstructed data display array
-	 * 
-	 * @return the reconstructed data display array
-	 */
-	public ReconstructedDisplayArray getReconsDisplayArray() {
-		return _reconsDisplayArray;
 	}
 
 	/**

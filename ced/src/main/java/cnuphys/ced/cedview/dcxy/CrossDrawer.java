@@ -62,7 +62,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating() || _view.isAccumulatedMode()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || (!_view.isSingleEventMode())) {
 			return;
 		}
 

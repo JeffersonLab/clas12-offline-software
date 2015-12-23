@@ -26,11 +26,11 @@ public class DataDrawSupport {
 
 
 
-	private static final Color gemc_hit_fillColor = new Color(255, 255, 0, 128);
+	private static final Color gemc_hit_fillColor = new Color(255, 255, 0, 196);
 	private static final Color gemc_hit_lineColor = X11Colors
-			.getX11Color("dark green");
+			.getX11Color("dark red");
 
-	private static final Color rec_hit_fillColor = new Color(0, 255, 255, 128);
+	private static final Color rec_hit_fillColor = new Color(0, 255, 255, 196);
 	private static final Color rec_hit_lineColor = X11Colors
 			.getX11Color("dark red");
 
@@ -50,13 +50,14 @@ public class DataDrawSupport {
 	 *            the screen location
 	 */
 	public static void drawGemcHit(Graphics g, Point pp) {
-		g.setColor(gemc_hit_fillColor);
-		g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
-		// now the cross
-		g.setColor(gemc_hit_lineColor);
-		g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
-		g.drawLine(pp.x - 3, pp.y, pp.x + 3, pp.y);
-		g.drawLine(pp.x, pp.y - 3, pp.x, pp.y + 3);
+		SymbolDraw.drawDavid(g, pp.x, pp.y, 4, gemc_hit_lineColor, gemc_hit_fillColor);
+//		g.setColor(gemc_hit_fillColor);
+//		g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
+//		// now the cross
+//		g.setColor(gemc_hit_lineColor);
+//		g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
+//		g.drawLine(pp.x - 3, pp.y, pp.x + 3, pp.y);
+//		g.drawLine(pp.x, pp.y - 3, pp.x, pp.y + 3);
 	}
 
 	/**
@@ -68,13 +69,14 @@ public class DataDrawSupport {
 	 *            the screen location
 	 */
 	public static void drawReconHit(Graphics g, Point pp) {
-		g.setColor(rec_hit_fillColor);
-		g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
 		// now the cross
 		g.setColor(rec_hit_lineColor);
-		g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
-		g.drawLine(pp.x - 3, pp.y - 3, pp.x + 3, pp.y + 3);
-		g.drawLine(pp.x - 3, pp.y + 3, pp.x + 3, pp.y - 3);
+		g.drawLine(pp.x - 4, pp.y - 4, pp.x + 4, pp.y + 4);
+		g.drawLine(pp.x - 4, pp.y + 4, pp.x + 4, pp.y - 4);
+		g.setColor(rec_hit_fillColor);
+		g.fillRect(pp.x - 3, pp.y - 3, 6, 6);
+		g.setColor(rec_hit_lineColor);
+		g.drawRect(pp.x - 3, pp.y - 3, 6, 6);
 	}
 	
 	/**

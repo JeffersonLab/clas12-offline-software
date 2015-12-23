@@ -71,6 +71,7 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.PlotView;
+import cnuphys.bCNU.view.ViewManager;
 
 /**
  * This is the classic sector view.
@@ -239,7 +240,7 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.PHISLIDER
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
 				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER +
-				+ ControlPanel.RECONSARRAY + ControlPanel.ACCUMULATIONLEGEND, 
+				+ ControlPanel.ACCUMULATIONLEGEND, 
 				DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
 				+ DisplayBits.DC_TB_RECONS_CROSSES
@@ -1082,7 +1083,7 @@ public class SectorView extends CedView implements ChangeListener {
 						_controlPanel.getPhiSlider().setValue((int) sliderPhi);
 						getContainer().refresh();
 					} else if (source == integralItem) {
-						PlotView pview = Ced.getPlotView();
+						PlotView pview = Ced.getCed().getPlotView();
 						PlotCanvas canvas = pview.getPlotCanvas();
 						try {
 							SwimTrajectory traj = traj2D.getTrajectory3D();
@@ -1115,7 +1116,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 							}
 
-							pview.setVisible(true);
+							ViewManager.getInstance().setVisible(pview, true);
 							canvas.repaint();
 						} catch (DataSetException e) {
 							e.printStackTrace();

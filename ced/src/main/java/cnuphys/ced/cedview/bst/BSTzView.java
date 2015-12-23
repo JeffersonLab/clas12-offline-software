@@ -149,7 +149,7 @@ public class BSTzView extends CedView implements ChangeListener {
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-				+ ControlPanel.PHISLIDER + +ControlPanel.RECONSARRAY
+				+ ControlPanel.PHISLIDER 
 				+ ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
 				+ ControlPanel.FIELDLEGEND + ControlPanel.DRAWLEGEND,
 				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION

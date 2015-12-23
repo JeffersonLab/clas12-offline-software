@@ -169,7 +169,7 @@ public class BSTxyView extends CedXYView {
 		view._controlPanel = new ControlPanel(view,
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 						+ ControlPanel.ACCUMULATIONLEGEND
-						+ ControlPanel.RECONSARRAY + ControlPanel.DRAWLEGEND,
+						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
 						+ DisplayBits.BSTHITS + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,

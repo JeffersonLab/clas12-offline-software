@@ -41,7 +41,7 @@ public class McHitDrawer extends SectorViewDrawer {
 			return;
 		}
 
-		if (_view.isAccumulatedMode()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 		
@@ -62,17 +62,17 @@ public class McHitDrawer extends SectorViewDrawer {
 		// ecData.pcal_true_avgY, ecData.ec_true_avgZ,
 		// ecData.pcal_true_pid, ECDataContainer.PCAL_OPTION);
 		//
-		// showGemcXYZHits(g, container, ftofData, ftofData.ftof1a_true_avgX,
-		// ftofData.ftof1a_true_avgY, ftofData.ftof1a_true_avgZ,
-		// ftofData.ftof1a_true_pid, FTOFDataContainer.PANEL_1A);
-		//
-		// showGemcXYZHits(g, container, ftofData, ftofData.ftof1b_true_avgX,
-		// ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ,
-		// ftofData.ftof1b_true_pid, FTOFDataContainer.PANEL_1B);
-		//
-		// showGemcXYZHits(g, container, ftofData, ftofData.ftof2b_true_avgX,
-		// ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ,
-		// ftofData.ftof2b_true_pid, FTOFDataContainer.PANEL_2B);
+		 showGemcXYZHits(g, container, ftofData, ftofData.ftof1a_true_avgX,
+		 ftofData.ftof1a_true_avgY, ftofData.ftof1a_true_avgZ,
+		 ftofData.ftof1a_true_pid, FTOFDataContainer.PANEL_1A);
+		
+		 showGemcXYZHits(g, container, ftofData, ftofData.ftof1b_true_avgX,
+		 ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ,
+		 ftofData.ftof1b_true_pid, FTOFDataContainer.PANEL_1B);
+		
+		 showGemcXYZHits(g, container, ftofData, ftofData.ftof2b_true_avgX,
+		 ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ,
+		 ftofData.ftof2b_true_pid, FTOFDataContainer.PANEL_2);
 
 	}
 

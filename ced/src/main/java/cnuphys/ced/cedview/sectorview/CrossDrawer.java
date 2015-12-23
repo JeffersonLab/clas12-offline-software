@@ -66,7 +66,7 @@ public class CrossDrawer extends SectorViewDrawer {
 			return;
 		}
 		
-		if (_view.isAccumulatedMode()) {
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 

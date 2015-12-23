@@ -35,6 +35,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Label and access to the accumulated button */
 	public static final String ACCUMULATED_LABEL = "Accumulated";
 
+	/** Label and access to the accumulated button */
+	public static final String LOG_ACCUMULATED_LABEL = "Log Accumulated";
+
 	/** Tag and access to the accumulated button group */
 	public static final String ACCUMULATED_BUTTONGROUP = "AccumulatedButtonGroup";
 
@@ -67,6 +70,33 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** BST Hits as crosses */
 	public static final String COSMIC_LABEL = "Cosmic Tracks";
+	
+	private static final Color _buttonColor = X11Colors.getX11Color("Dark Red");
+
+	/** Label for dc HB reconstructed crosses button */
+	private static final String DC_HB_CROSS_LABEL = "DC HB Crosses";
+
+	/** Label for dc TB reconstructed crosses button */
+	private static final String DC_TB_CROSS_LABEL = "DC TB Crosses";
+
+	/** Label for bst reconstructed crosses button */
+	private static final String RECONS_CROSS_LABEL = "BST/BMT Crosses";
+
+	/** Label for ftof reconstructed hits button */
+	private static final String FTOFRECONS_HIT_LABEL = "FTOF Hits";
+
+	// controls whether dc HB reconstructed crosses are displayed
+	private AbstractButton _dcHBCrossesButton;
+
+	// controls whether dc TB reconstructed crosses are displayed
+	private AbstractButton _dcTBCrossesButton;
+
+	// controls whether bst reconstructed crosses are displayed
+	private AbstractButton _reconsBSTCrossButton;
+
+	// controls whether FTOF reconstructed hits are displayed
+	private AbstractButton _reconsFTOFHitButton;
+
 
 	// controls mc truth is displayed (when available)
 	private AbstractButton _mcTruthButton;
@@ -82,6 +112,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether accumulated hits are displayed
 	private AbstractButton _accumulatedButton;
+
+	// controls whether log of accumulated hits are displayed
+	private AbstractButton _log_accumulatedButton;
 
 	// controls whether inner plane displayed for ec
 	private AbstractButton _innerButton;
@@ -123,6 +156,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		boolean show_v = true;
 		boolean show_w = true;
 		boolean show_cosmic = true;
+		
+		//recons flags
+		boolean showDChbCrosses = true;
+		boolean showDCtbCrosses = true;
+		boolean showBSTreconsCrosses = true;
+		boolean showFTOFreconsHits = true;
+
 
 		// innerouter?
 		if (Bits.checkBit(bits, DisplayBits.INNEROUTER)) {
@@ -151,9 +191,15 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 					X11Colors.getX11Color("teal")).getCheckBox();
 
 			_accumulatedButton = add(ACCUMULATED_LABEL,
-					view.isAccumulatedMode(), true,
+					view.isSimpleAccumulatedMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
+
+			_log_accumulatedButton = add(LOG_ACCUMULATED_LABEL,
+					view.isLogAccumulatedMode(), true,
+					ACCUMULATED_BUTTONGROUP, this,
+					X11Colors.getX11Color("teal")).getCheckBox();
+
 		}
 
 		// BST hits as midpoints of hit strips
@@ -180,8 +226,33 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_showScaleButton = add(SCALE_LABEL, show_scale, true, this,
 					Color.black).getCheckBox();
 		}
+		
+		// dc hit based reonstructed crosses?
+		if (Bits.checkBit(bits, DisplayBits.DC_HB_RECONS_CROSSES)) {
+			_dcHBCrossesButton = add(DC_HB_CROSS_LABEL, showDChbCrosses, true,
+					this, _buttonColor).getCheckBox();
+		}
 
-		setBorder(new CommonBorder("Display Options"));
+		// dc time based based reonstructed crosses?
+		if (Bits.checkBit(bits, DisplayBits.DC_TB_RECONS_CROSSES)) {
+			_dcTBCrossesButton = add(DC_TB_CROSS_LABEL, showDCtbCrosses, true,
+					this, _buttonColor).getCheckBox();
+		}
+
+		if (Bits.checkBit(bits, DisplayBits.BSTRECONS_CROSSES)) {
+			_reconsBSTCrossButton = add(RECONS_CROSS_LABEL,
+					showBSTreconsCrosses, true, this, _buttonColor)
+					.getCheckBox();
+		}
+
+		// ftof reconstructed hits
+		if (Bits.checkBit(bits, DisplayBits.FTOFHITS)) {
+			_reconsFTOFHitButton = add(FTOFRECONS_HIT_LABEL,
+					showFTOFreconsHits, true, this, _buttonColor).getCheckBox();
+		}
+
+
+	//	setBorder(new CommonBorder("Display Options"));
 	}
 
 	/**
@@ -195,11 +266,17 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		AbstractButton button = (AbstractButton) e.getSource();
 		if (button == _singleEventButton) {
 			_view.setMode(CedView.Mode.SINGLE_EVENT);
-		} else if (button == _accumulatedButton) {
-			_view.setMode(CedView.Mode.ACCUMULATED);
-		} else if (button == _innerButton) {
+		}
+		else if (button == _accumulatedButton) {
+			_view.setMode(CedView.Mode.SIMPLEACCUMULATED);
+		}
+		else if (button == _log_accumulatedButton) {
+			_view.setMode(CedView.Mode.LOGACCUMULATED);
+		}
+		else if (button == _innerButton) {
 			_view.setBooleanProperty(SHOWINNER_PROPERTY, true);
-		} else if (button == _outerButton) {
+		}
+		else if (button == _outerButton) {
 			_view.setBooleanProperty(SHOWINNER_PROPERTY, false);
 		}
 
@@ -273,6 +350,44 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 */
 	public boolean showWStrips() {
 		return _wButton == null ? false : _wButton.isSelected();
+	}
+	
+	/**
+	 * Convenience method to see if we show the ftof reconstructed hits.
+	 * 
+	 * @return <code>true</code> if we are to show dc hb reconstructed hits.
+	 */
+	public boolean showFTOFHits() {
+		return (_reconsFTOFHitButton != null)
+				&& _reconsFTOFHitButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show the dc hb reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show dc hb reconstructed crosses.
+	 */
+	public boolean showDChbCrosses() {
+		return (_dcHBCrossesButton != null) && _dcHBCrossesButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show the dc tb reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show dc tb reconstructed crosses.
+	 */
+	public boolean showDCtbCrosses() {
+		return (_dcTBCrossesButton != null) && _dcTBCrossesButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show the bst reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show bst reconstructed crosses.
+	 */
+	public boolean showBSTReconsCrosses() {
+		return (_reconsBSTCrossButton != null)
+				&& _reconsBSTCrossButton.isSelected();
 	}
 
 }
