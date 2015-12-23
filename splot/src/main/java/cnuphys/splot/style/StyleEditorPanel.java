@@ -16,204 +16,203 @@ import cnuphys.splot.plot.TextFieldSlider;
 
 public class StyleEditorPanel extends JPanel {
 
-    public static final String SYMBOLSIZEPROP = "Symbol Size";
+	public static final String SYMBOLSIZEPROP = "Symbol Size";
 
-    private static final Font _font = Environment.getInstance().getCommonFont(
-	    10);
+	private static final Font _font = Environment.getInstance()
+			.getCommonFont(10);
 
-    // change symbol type
-    EnumComboBox _symbolSelector;
+	// change symbol type
+	EnumComboBox _symbolSelector;
 
-    // change line style
-    EnumComboBox _lineSelector;
+	// change line style
+	EnumComboBox _lineSelector;
 
-    // line color
-    protected ColorLabel _lineColor;
+	// line color
+	protected ColorLabel _lineColor;
 
-    // symbol color
-    protected ColorLabel _symbolColor;
+	// symbol color
+	protected ColorLabel _symbolColor;
 
-    // symbol size
-    protected TextFieldSlider _symbolSizeSelector;
+	// symbol size
+	protected TextFieldSlider _symbolSizeSelector;
 
-    /**
-     * Create the stye editing panel.
-     */
-    public StyleEditorPanel(DataSetType type) {
-	addContent(type);
-	setBorder(new CommonBorder("Style"));
+	/**
+	 * Create the stye editing panel.
+	 */
+	public StyleEditorPanel(DataSetType type) {
+		addContent(type);
+		setBorder(new CommonBorder("Style"));
 
-	Environment.getInstance().commonize(this, null);
-    }
-
-    // add the content
-    private void addContent(DataSetType type) {
-	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-	JPanel symPan = null;
-	if (type != DataSetType.H1D) {
-	    symPan = flowPanel(FlowLayout.LEFT);
-	    _symbolSelector = SymbolType.getComboBox(SymbolType.NOSYMBOL);
-	    _symbolColor = new ColorLabel(null, Color.black, _font, "Symbol");
-	    symPan.add(_symbolSelector);
-	    symPan.add(_symbolColor);
-
+		Environment.getInstance().commonize(this, null);
 	}
 
-	JPanel linePanel = flowPanel(FlowLayout.LEFT);
-	_lineSelector = LineStyle.getComboBox(LineStyle.SOLID);
+	// add the content
+	private void addContent(DataSetType type) {
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-	// make same size
-	if (_symbolSelector != null) {
-	    Dimension dim1 = _symbolSelector.getPreferredSize();
-	    Dimension dim2 = _lineSelector.getPreferredSize();
-	    int mw = Math.max(dim1.width, dim2.width);
-	    dim1.width = mw;
-	    _symbolSelector.setPreferredSize(dim1);
-	    _lineSelector.setPreferredSize(dim1);
-	}
+		JPanel symPan = null;
+		if (type != DataSetType.H1D) {
+			symPan = flowPanel(FlowLayout.LEFT);
+			_symbolSelector = SymbolType.getComboBox(SymbolType.NOSYMBOL);
+			_symbolColor = new ColorLabel(null, Color.black, _font, "Symbol");
+			symPan.add(_symbolSelector);
+			symPan.add(_symbolColor);
 
-	_lineColor = new ColorLabel(null, Color.black, _font, "Line");
-	linePanel.add(_lineSelector);
-	linePanel.add(_lineColor);
-
-	if (type != DataSetType.H1D) {
-	    String labels[] = { "4", "8", "12", "16", "20", "24", "28" };
-	    _symbolSizeSelector = new TextFieldSlider(4, 28, 8, _font, 1,
-		    labels, 180, 40, "Symbol Size") {
-
-		@Override
-		public double sliderValueToRealValue() {
-		    return getValue();
 		}
 
-		@Override
-		public int realValueToSliderValue(double val) {
-		    return (int) val;
+		JPanel linePanel = flowPanel(FlowLayout.LEFT);
+		_lineSelector = LineStyle.getComboBox(LineStyle.SOLID);
+
+		// make same size
+		if (_symbolSelector != null) {
+			Dimension dim1 = _symbolSelector.getPreferredSize();
+			Dimension dim2 = _lineSelector.getPreferredSize();
+			int mw = Math.max(dim1.width, dim2.width);
+			dim1.width = mw;
+			_symbolSelector.setPreferredSize(dim1);
+			_lineSelector.setPreferredSize(dim1);
 		}
 
-		@Override
-		public String valueString(double val) {
-		    return "" + getValue();
+		_lineColor = new ColorLabel(null, Color.black, _font, "Line");
+		linePanel.add(_lineSelector);
+		linePanel.add(_lineColor);
+
+		if (type != DataSetType.H1D) {
+			String labels[] = { "4", "8", "12", "16", "20", "24", "28" };
+			_symbolSizeSelector = new TextFieldSlider(4, 28, 8, _font, 1,
+					labels, 180, 40, "Symbol Size") {
+
+				@Override
+				public double sliderValueToRealValue() {
+					return getValue();
+				}
+
+				@Override
+				public int realValueToSliderValue(double val) {
+					return (int) val;
+				}
+
+				@Override
+				public String valueString(double val) {
+					return "" + getValue();
+				}
+
+				@Override
+				public void valueChanged() {
+					firePropertyChange(SYMBOLSIZEPROP, -1,
+							_symbolSizeSelector.getValue());
+				}
+
+			};
 		}
 
-		@Override
-		public void valueChanged() {
-		    firePropertyChange(SYMBOLSIZEPROP, -1,
-			    _symbolSizeSelector.getValue());
+		if (symPan != null) {
+			add(symPan);
+		}
+		add(linePanel);
+		if (type != DataSetType.H1D) {
+			add(_symbolSizeSelector);
 		}
 
-	    };
 	}
 
-	if (symPan != null) {
-	    add(symPan);
+	private JPanel flowPanel(int constraint) {
+		JPanel sp = new JPanel();
+		sp.setLayout(new FlowLayout(constraint));
+		Environment.getInstance().commonize(sp, null);
+		return sp;
 	}
-	add(linePanel);
-	if (type != DataSetType.H1D) {
-	    add(_symbolSizeSelector);
+
+	// set components enabled
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+
+		if (_symbolSelector != null) {
+			_symbolSelector.setEnabled(enabled);
+		}
+		if (_lineSelector != null) {
+			_lineSelector.setEnabled(enabled);
+		}
+		if (_symbolColor != null) {
+			_symbolColor.setEnabled(enabled);
+		}
+		if (_lineColor != null) {
+			_lineColor.setEnabled(enabled);
+		}
+		if (_symbolSizeSelector != null) {
+			_symbolSizeSelector.setEnabled(enabled);
+		}
 	}
 
-    }
-
-    private JPanel flowPanel(int constraint) {
-	JPanel sp = new JPanel();
-	sp.setLayout(new FlowLayout(constraint));
-	Environment.getInstance().commonize(sp, null);
-	return sp;
-    }
-
-    // set components enabled
-    @Override
-    public void setEnabled(boolean enabled) {
-	super.setEnabled(enabled);
-
-	if (_symbolSelector != null) {
-	    _symbolSelector.setEnabled(enabled);
+	/**
+	 * Set the choices
+	 * 
+	 * @param style the new choices
+	 */
+	public void setStyle(IStyled style) {
+		if (style != null) {
+			if (_symbolSelector != null) {
+				_symbolSelector
+						.setSelectedItem(style.getSymbolType().getName());
+			}
+			if (_lineSelector != null) {
+				_lineSelector.setSelectedItem(style.getLineStyle().getName());
+			}
+			if (_symbolColor != null) {
+				_symbolColor.setColor(style.getFillColor());
+			}
+			if (_lineColor != null) {
+				_lineColor.setColor(style.getLineColor());
+			}
+			if (_symbolSizeSelector != null) {
+				_symbolSizeSelector.setValue(style.getSymbolSize());
+			}
+		}
 	}
-	if (_lineSelector != null) {
-	    _lineSelector.setEnabled(enabled);
+
+	/**
+	 * Get the symbols size slider
+	 * 
+	 * @return symbols size slider
+	 */
+	public TextFieldSlider getSymbolSizeSelector() {
+		return _symbolSizeSelector;
 	}
-	if (_symbolColor != null) {
-	    _symbolColor.setEnabled(enabled);
+
+	/**
+	 * Get the symbol selector
+	 * 
+	 * @return the symbol selector
+	 */
+	public EnumComboBox getSymbolSelector() {
+		return _symbolSelector;
 	}
-	if (_lineColor != null) {
-	    _lineColor.setEnabled(enabled);
+
+	/**
+	 * Get the line selector
+	 * 
+	 * @return the line selector
+	 */
+	public EnumComboBox getLineSelector() {
+		return _lineSelector;
 	}
-	if (_symbolSizeSelector != null) {
-	    _symbolSizeSelector.setEnabled(enabled);
+
+	/**
+	 * Get the symbol color selector
+	 * 
+	 * @return the symbol color selector
+	 */
+	public ColorLabel getSymbolColor() {
+		return _symbolColor;
 	}
-    }
 
-    /**
-     * Set the choices
-     * 
-     * @param style
-     *            the new choices
-     */
-    public void setStyle(IStyled style) {
-	if (style != null) {
-	    if (_symbolSelector != null) {
-		_symbolSelector
-			.setSelectedItem(style.getSymbolType().getName());
-	    }
-	    if (_lineSelector != null) {
-		_lineSelector.setSelectedItem(style.getLineStyle().getName());
-	    }
-	    if (_symbolColor != null) {
-		_symbolColor.setColor(style.getFillColor());
-	    }
-	    if (_lineColor != null) {
-		_lineColor.setColor(style.getLineColor());
-	    }
-	    if (_symbolSizeSelector != null) {
-		_symbolSizeSelector.setValue(style.getSymbolSize());
-	    }
+	/**
+	 * Get the line color selector
+	 * 
+	 * @return the line color selector
+	 */
+	public ColorLabel getLineColor() {
+		return _lineColor;
 	}
-    }
-
-    /**
-     * Get the symbols size slider
-     * 
-     * @return symbols size slider
-     */
-    public TextFieldSlider getSymbolSizeSelector() {
-	return _symbolSizeSelector;
-    }
-
-    /**
-     * Get the symbol selector
-     * 
-     * @return the symbol selector
-     */
-    public EnumComboBox getSymbolSelector() {
-	return _symbolSelector;
-    }
-
-    /**
-     * Get the line selector
-     * 
-     * @return the line selector
-     */
-    public EnumComboBox getLineSelector() {
-	return _lineSelector;
-    }
-
-    /**
-     * Get the symbol color selector
-     * 
-     * @return the symbol color selector
-     */
-    public ColorLabel getSymbolColor() {
-	return _symbolColor;
-    }
-
-    /**
-     * Get the line color selector
-     * 
-     * @return the line color selector
-     */
-    public ColorLabel getLineColor() {
-	return _lineColor;
-    }
 }

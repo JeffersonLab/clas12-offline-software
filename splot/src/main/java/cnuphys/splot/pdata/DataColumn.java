@@ -135,7 +135,7 @@ public class DataColumn extends GrowableArray
 	 * @return the name of the array
 	 */
 	public String getName() {
-		return _name;
+		return (_name != null) ? _name : "";
 	}
 
 	/**
