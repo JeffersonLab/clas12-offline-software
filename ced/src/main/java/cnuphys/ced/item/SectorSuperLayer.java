@@ -611,7 +611,7 @@ public class SectorSuperLayer extends PolygonItem {
 			// now check the layers
 			for (int layer = 1; layer <= 6; layer++) {
 				Polygon poly = _layerPolygons[layer - 1];
-				if (poly.contains(pp)) {
+				if ((poly != null) && poly.contains(pp)) {
 					return layer;
 				}
 			}

@@ -607,11 +607,19 @@ public class PlotCanvas extends JComponent
 
 			if (CommonToolBar.BOXZOOM.equals(command)
 					&& (_rubberband == null)) {
+				
 				if (getDataSet().is1DHistoSet()) {
-					_rubberband = new Rubberband(this, this,
-							Rubberband.Policy.XONLY);
+					
+					if (e.isShiftDown()) {
+						_rubberband = new Rubberband(this, this,
+						Rubberband.Policy.XONLY);
+					}
+					else {
+						_rubberband = new Rubberband(this, this,
+						Rubberband.Policy.YONLY);
+					}
 
-				}
+			}
 				else {
 					_rubberband = new Rubberband(this, this,
 							Rubberband.Policy.RECTANGLE);
@@ -730,17 +738,18 @@ public class PlotCanvas extends JComponent
 			return;
 		}
 
-		if (getDataSet().is1DHistoSet()) {
-			// preserve full y
-			double y = _worldSystem.y;
-			double h = _worldSystem.height;
-			localToWorld(rbrect, _worldSystem);
-			_worldSystem.y = y;
-			_worldSystem.height = h;
-		}
-		else {
-			localToWorld(rbrect, _worldSystem);
-		}
+		localToWorld(rbrect, _worldSystem);
+
+//		if (getDataSet().is1DHistoSet()) {
+//			// preserve full y
+//			double y = _worldSystem.y;
+//			double h = _worldSystem.height;
+//			localToWorld(rbrect, _worldSystem);
+//			_worldSystem.y = y;
+//			_worldSystem.height = h;
+//		}
+//		else {
+//		}
 		_rubberband = null;
 		repaint();
 	}
@@ -772,16 +781,9 @@ public class PlotCanvas extends JComponent
 		double h;
 		double y;
 
-		// if histo scale x only
-		if ((getDataSet() != null) && (getDataSet().is1DHistoSet())) {
-			h = _worldSystem.height;
-			y = _worldSystem.y;
-		}
-		else {
-			h = _worldSystem.height * amount;
-			double yc = _worldSystem.getCenterY();
-			y = yc - h / 2;
-		}
+		h = _worldSystem.height * amount;
+		double yc = _worldSystem.getCenterY();
+		y = yc - h / 2;
 		_worldSystem.setFrame(x, y, w, h);
 		repaint();
 	}
@@ -789,8 +791,10 @@ public class PlotCanvas extends JComponent
 	@Override
 	public void buttonPressed(CommonToolBar toolbar, ToolBarButton button) {
 		_toolbar = toolbar;
-		String command = button.getActionCommand();
-
+		doButtonAction(button.getActionCommand());
+	}
+	
+	public void doButtonAction(String command) {
 		if (CommonToolBar.ZOOMIN.equals(command)) {
 			scale(0.85);
 		}

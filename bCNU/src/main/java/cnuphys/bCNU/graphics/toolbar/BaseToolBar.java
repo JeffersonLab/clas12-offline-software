@@ -48,6 +48,7 @@ public class BaseToolBar extends CommonToolBar
 	public static final int NOZOOM = 020000;
 
 	public static final int PANBUTTON = 0100000;
+	public static final int UNDOZOOMBUTTON = 0100000;
 
 	public static final int RECTGRIDBUTTON = 01000000;
 
@@ -213,7 +214,10 @@ public class BaseToolBar extends CommonToolBar
 			if (!Bits.checkBit(bits, NOZOOM)) {
 				_zoomInButton = new ZoomInButton(_container);
 				_zoomOutButton = new ZoomOutButton(_container);
-				_undoZoomButton = new UndoZoomButton(_container);
+
+				if (Bits.checkBit(bits, UNDOZOOMBUTTON)) {
+					_undoZoomButton = new UndoZoomButton(_container);
+				}
 				_worldButton = new WorldButton(_container);
 				_boxZoomButton = new BoxZoomButton(_container);
 			}

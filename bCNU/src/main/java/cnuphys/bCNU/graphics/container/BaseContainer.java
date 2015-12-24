@@ -273,6 +273,7 @@ public class BaseContainer extends JComponent
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
+		
 		// if our offscreen buffer is not dirty, use it and we are done.
 		if (!_offscreenBufferDirty) {
 			g.drawImage(_offscreenBuffer, 0, 0, this);
