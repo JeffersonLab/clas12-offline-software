@@ -827,14 +827,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		ced.createProgressBar();
 		ced.createEventNumberLabel();
 		MagneticFields.addMagneticFieldChangeListener(ced);
+		ced.placeViewsOnVirtualDesktop();
+		splashWindow.setVisible(false);
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
-				ced.placeViewsOnVirtualDesktop();
-				splashWindow.setVisible(false);
 				ced.setVisible(true);
 				splashWindow.writeCachedText();
 				ced.fixTitle();

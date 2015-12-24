@@ -347,24 +347,31 @@ public class DCXYView extends HexView {
 			for (int supl0 = 0; supl0 < 6; supl0++) {
 				for (int lay0 = 0; lay0 < 6; lay0++) {
 					for (int wire0 = 0; wire0 < 112; wire0++) {
-						
+
 						double fract;
 						int hitCount = dcAccumulatedData[sect0][supl0][lay0][wire0];
-						if (isSimpleAccumulatedMode()) {
-							fract = ((double) hitCount) / maxHit;
-						}
-						else {
-							fract = Math.log((double)(hitCount+1.))/Math.log(maxHit+1.);
-						}
 
-						Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
-						g.setColor(color);
-						Line3D line = DCGeometry.getWire(sect0+1, supl0+1, lay0+1, wire0+1);
-						wp1.setLocation(line.origin().x(), line.origin().y());
-						wp2.setLocation(line.end().x(), line.end().y());
-						container.worldToLocal(pp1, wp1);
-						container.worldToLocal(pp2, wp2);
-						g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+						if (hitCount > 0) {
+							if (isSimpleAccumulatedMode()) {
+								fract = ((double) hitCount) / maxHit;
+							}
+							else {
+								fract = Math.log((double) (hitCount + 1.))
+										/ Math.log(maxHit + 1.);
+							}
+
+							Color color = AccumulationManager.getInstance()
+									.getAlphaColor(fract, 128);
+							g.setColor(color);
+							Line3D line = DCGeometry.getWire(sect0 + 1,
+									supl0 + 1, lay0 + 1, wire0 + 1);
+							wp1.setLocation(line.origin().x(),
+									line.origin().y());
+							wp2.setLocation(line.end().x(), line.end().y());
+							container.worldToLocal(pp1, wp1);
+							container.worldToLocal(pp2, wp2);
+							g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+						} // hitcount > 0
 					}
 				}
 			}

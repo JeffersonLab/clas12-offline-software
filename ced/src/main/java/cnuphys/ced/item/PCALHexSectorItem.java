@@ -33,7 +33,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 	public static final Color baseFillColor = new Color(139, 0, 0, 160);
 
-	private static int[] _stripCounts = {68, 62, 62}; //u,v,w
+	private static int[] _stripCounts = PCALGeometry.PCAL_NUMSTRIP; //u,v,w
 
 	/**
 	 * Get a hex sector item
@@ -166,23 +166,25 @@ public class PCALHexSectorItem extends HexSectorItem {
 		for (int view0 = 0; view0 < 3; view0++) {
 			for (int strip0 = 0; strip0 < _stripCounts[view0]; strip0++) {
 				if (_pcalView.showStrips(view0)) {
-					Polygon poly = stripPolygon(container, view0,
-							strip0);
+					Polygon poly = stripPolygon(container, view0, strip0);
 
 					int hit = hits[sect0][view0][strip0];
-					double fract;
-					if (_pcalView.isSimpleAccumulatedMode()) {
-						fract = ((double) hit) / maxHit;
-					}
-					else {
-						fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
-					}
-									
-					Color color = AccumulationManager.colorScaleModel
-							.getAlphaColor(fract, 128);
+					if (hit > 0) {
+						double fract;
+						if (_pcalView.isSimpleAccumulatedMode()) {
+							fract = ((double) hit) / maxHit;
+						}
+						else {
+							fract = Math.log((double) (hit + 1.))
+									/ Math.log(maxHit + 1.);
+						}
 
-					g.setColor(color);
-					g.fillPolygon(poly);
+						Color color = AccumulationManager.colorScaleModel
+								.getAlphaColor(fract, 128);
+
+						g.setColor(color);
+						g.fillPolygon(poly);
+					}
 				}
 
 			}

@@ -846,7 +846,15 @@ public class BSTzView extends CedView implements ChangeListener {
 		getContainer().worldToLocal(pp, wp);
 	}
 
-	// draw one SVT panel
+	/**
+	 * Draw an svt strip
+	 * @param g2 graphics context
+	 * @param container the container
+	 * @param color the color
+	 * @param sector 1-based sector 1..
+	 * @param layer 1-based layer 1..8
+	 * @param strip 1-based strip 1..255
+	 */
 	public void drawSVTStrip(Graphics2D g2, IContainer container,
 			Color color, int sector, int layer, int strip) {
 

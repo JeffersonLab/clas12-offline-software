@@ -127,7 +127,8 @@ public class BSTxyHitDrawer implements IDrawable {
 		int bstData[][] = AccumulationManager.getInstance()
 				.getAccumulatedDgtzBstData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
-			for (int sect0 = 0; sect0 < 24; sect0++) {
+			int supl0 = lay0/2;
+			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
 				BSTxyPanel panel = BSTxyView.getPanel(lay0 + 1, sect0 + 1);
 
 				if (panel != null) {
