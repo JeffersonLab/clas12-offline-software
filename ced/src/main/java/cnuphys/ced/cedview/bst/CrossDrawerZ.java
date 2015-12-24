@@ -43,6 +43,10 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
+		
+		if (!_view.isSingleEventMode()) {
+			return;
+		}
 
 		Graphics2D g2 = (Graphics2D) g;
 		_fbRects = null;

@@ -183,19 +183,22 @@ public class ECHexSectorItem extends HexSectorItem {
 							strip0);
 
 					int hit = hits[sect0][plane][view0][strip0];
-					double fract;
-					if (_ecView.isSimpleAccumulatedMode()) {
-						fract = ((double) hit) / maxHit;
-					}
-					else {
-						fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
-					}
-					
-					Color color = AccumulationManager.colorScaleModel
-							.getAlphaColor(fract, 128);
+					if (hit > 0) {
+						double fract;
+						if (_ecView.isSimpleAccumulatedMode()) {
+							fract = ((double) hit) / maxHit;
+						}
+						else {
+							fract = Math.log((double) (hit + 1.))
+									/ Math.log(maxHit + 1.);
+						}
 
-					g.setColor(color);
-					g.fillPolygon(poly);
+						Color color = AccumulationManager.colorScaleModel
+								.getAlphaColor(fract, 128);
+
+						g.setColor(color);
+						g.fillPolygon(poly);
+					}
 				}
 
 			}

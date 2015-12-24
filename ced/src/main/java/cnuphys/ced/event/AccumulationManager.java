@@ -11,9 +11,11 @@ import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
+import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.event.data.ECDataContainer;
@@ -63,6 +65,11 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	private int _bstDgtzAccumulatedData[][];
 	private int _maxDgtzBstCount;
 	
+	//BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
+	private int _bstDgtzFullAccumulatedData[][][];
+	private int _maxDgtzFullBstCount;
+
+	
 	//FTOF accumulated Data
 	private int _ftof1aDgtzAccumulatedData[][];
 	private int _ftof1bDgtzAccumulatedData[][];
@@ -111,7 +118,22 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	private AccumulationManager() {
 		_eventManager.addClasIoEventListener(this, 1);
 		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
-		_bstDgtzAccumulatedData = new int[8][24];
+		
+		//down to layer
+		_bstDgtzAccumulatedData = new int[8][];
+		for (int lay0 = 0; lay0 < 8; lay0++) {
+			int supl0 = lay0 / 2;
+			_bstDgtzAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
+		}
+		
+	//	_bstDgtzAccumulatedData = new int[8][24];
+		
+		//down to strip
+		_bstDgtzFullAccumulatedData = new int[8][][];
+		for (int lay0 = 0; lay0 < 8; lay0++) {
+			int supl0 = lay0 / 2;
+			_bstDgtzFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
+		}
 		
 		//ftop storage
 		_ftof1aDgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[0]];
@@ -120,7 +142,14 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		
 		//ec and pcal storage
 		_ecDgtzAccumulatedData = new int[6][2][3][36];
-		_pcalDgtzAccumulatedData = new int[6][3][68];
+		
+		
+		_pcalDgtzAccumulatedData = new int[6][3][];
+		for (int sect0 = 0; sect0 < 6; sect0++) {
+			for (int view0 = 0; view0 < 3; view0++) {
+				_pcalDgtzAccumulatedData[sect0][view0] = new int[PCALGeometry.PCAL_NUMSTRIP[view0]];
+			}
+		}
 		
 		clear();
 	}
@@ -158,7 +187,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		//clear pcal data
 		for (int sector = 0; sector < 6; sector++) {
 				for (int view = 0; view < 3; view++) {
-					for (int strip = 0; strip < 68; strip++) {
+					for (int strip = 0; strip < PCALGeometry.PCAL_NUMSTRIP[view]; strip++) {
 						_pcalDgtzAccumulatedData[sector][view][strip] = 0;
 					}
 				}
@@ -168,11 +197,16 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
-			for (int sector = 0; sector < 24; sector++) {
+			int supl0 = layer/2;
+			for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
 				_bstDgtzAccumulatedData[layer][sector] = 0;
+				for (int strip = 0; strip < 256; strip++) {
+					_bstDgtzFullAccumulatedData[layer][sector][strip] = 0;
+				}
 			}
 		}
 		_maxDgtzBstCount = 0;
+		_maxDgtzFullBstCount = 0;
 		
 		//clear ftof data
 		for (int sector = 0; sector < 6; sector++) {
@@ -306,6 +340,17 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		return _bstDgtzAccumulatedData;
 	}
 	
+
+	/**
+	 * Get the accumulated dgtz full Bst strip data
+	 * 
+	 * @return the accumulated bst strip data
+	 */
+	public int[][][] getAccumulatedDgtzFullBstData() {
+		return _bstDgtzFullAccumulatedData;
+	}
+
+	
 	/**
 	 * Get the max counts for ec strips
 	 * @return the max counts for ec strips.
@@ -329,6 +374,15 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	public int getMaxDgtzBstCount() {
 		return _maxDgtzBstCount;
 	}
+	
+	/**
+	 * Get the max counts on any bst strip
+	 * @return the max counts for any bst strip.
+	 */
+	public int getMaxDgtzFullBstCount() {
+		return _maxDgtzFullBstCount;
+	}
+
 	
 	/**
 	 * Get the accumulated dgtz ftof panel 1a
@@ -472,18 +526,27 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 			if (panel != null) {
 				int lay0 = bstData.bst_dgtz_layer[i] - 1;
 				int sect0 = bstData.bst_dgtz_sector[i] - 1;
+				int strip0 = bstData.bst_dgtz_strip[i] - 1;
 				try {
 					_bstDgtzAccumulatedData[lay0][sect0] += 1;
 					_maxDgtzBstCount = Math.max(
 							_bstDgtzAccumulatedData[lay0][sect0],
 							_maxDgtzBstCount);
 
+					if (strip0 >= 0) {
+						_bstDgtzFullAccumulatedData[lay0][sect0][strip0] += 1;
+						_maxDgtzFullBstCount = Math.max(
+								_bstDgtzFullAccumulatedData[lay0][sect0][strip0],
+								_maxDgtzFullBstCount);
+					}
+
 				} catch (ArrayIndexOutOfBoundsException e) {
 					String msg = String.format(
-							"Index out of bounds (BST). Event# %d lay %d sect %d ",
+							"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
 							_eventManager.getEventNumber(),
-							dcData.dc_dgtz_layer[i],
-							dcData.dc_dgtz_sector[i]);
+							bstData.bst_dgtz_layer[i],
+							bstData.bst_dgtz_sector[i],
+							bstData.bst_dgtz_strip[i]);
 					Log.getInstance().warning(msg);
 					System.err.println(msg);
 				}

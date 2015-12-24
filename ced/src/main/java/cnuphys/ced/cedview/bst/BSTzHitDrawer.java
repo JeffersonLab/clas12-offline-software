@@ -14,8 +14,10 @@ import java.util.Vector;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 
 public class BSTzHitDrawer implements IDrawable {
@@ -100,7 +102,51 @@ public class BSTzHitDrawer implements IDrawable {
 
 	// draw accumulated hits (panels)
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		drawBSTHitsAccumulatedMode(g, container);
+		drawMicroMegasHitsAccumulatedMode(g, container);
 	}
+	
+	private void drawBSTHitsAccumulatedMode(Graphics g, IContainer container) {
+
+		int maxHit = AccumulationManager.getInstance().getMaxDgtzFullBstCount();
+		if (maxHit < 1) {
+			return;
+		}
+
+		// first index is layer 0..7, second is sector 0..23
+		int bstFullData[][][] = AccumulationManager.getInstance()
+				.getAccumulatedDgtzFullBstData();
+		for (int lay0 = 0; lay0 < 8; lay0++) {
+			int supl0 = lay0 / 2;
+			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+				for (int strip0 = 0; strip0 < 255; strip0++) {
+					int hitCount = bstFullData[lay0][sect0][strip0];
+
+					if (hitCount > 1) {
+
+						double fract;
+						if (_view.isSimpleAccumulatedMode()) {
+							fract = ((double) hitCount) / maxHit;
+						}
+						else {
+							fract = Math.log((double) (hitCount + 1.))
+									/ Math.log(maxHit + 1.);
+						}
+
+						Color color = AccumulationManager.getInstance()
+								.getColor(fract);
+						_view.drawSVTStrip((Graphics2D) g, container, color,
+								sect0 + 1, lay0 + 1, strip0 + 1);
+					}
+
+				}
+			}
+		}
+	}
+	
+	private void drawMicroMegasHitsAccumulatedMode(Graphics g, IContainer container) {
+	}
+
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
