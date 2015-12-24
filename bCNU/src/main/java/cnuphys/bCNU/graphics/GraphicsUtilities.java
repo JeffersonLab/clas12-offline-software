@@ -34,6 +34,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
@@ -158,6 +159,32 @@ public class GraphicsUtilities {
 	public static void setTexturedButton(JButton button) {
 		button.putClientProperty("JButton.buttonType", "textured");
 	}
+	
+	/**
+	 * Compute a minimal clip from the intersection of the bounds of the current clip
+	 * and a rectangle
+	 * @param currentClip the current clip
+	 * @param rect the rectangle of interest
+	 * @return the intersection bounding rect, or <code>null</code>
+	 */
+	public static  Rectangle minClip(Shape currentClip, Rectangle rect) {
+		if ((currentClip == null) || (rect == null)) {
+			return null;
+		}
+		
+		if ((rect.width == 0) || (rect.height == 0)) {
+			return null;
+		}
+		
+		Rectangle cb = currentClip.getBounds();
+		if ((cb == null) || (cb.width == 0) || (cb.height == 0)) {
+			return null;
+		}
+		
+		SwingUtilities.computeIntersection(rect.x, rect.y, rect.width, rect.height, cb);
+		return cb;
+	}
+
 
 	/**
 	 * Gets a stroke appropriate for the line width and line type. Try the hash

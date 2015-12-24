@@ -30,9 +30,16 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	// axes labels
 	private JLabel _xLabel;
 	private JLabel _yLabel;
+	
+	//how adorned
+	public static int VERYBARE = -2;
+	public static int BARE = 1;
+	public static int STANDARD = 0;
+	
+	//toolbar
+	protected CommonToolBar _toolbar;
 
-	// bare means no toolbar or status
-	private boolean _bare;
+	protected int _decorations;
 
 	/**
 	 * Create a plot panel for a single xy dataset and a toolbar
@@ -43,7 +50,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	 *            the title of the plot
 	 */
 	public PlotPanel(PlotCanvas canvas) {
-		this(canvas, false);
+		this(canvas, STANDARD);
 	}
 
 	/**
@@ -53,13 +60,14 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	 *            the data set
 	 * @param plotTitle
 	 *            the title of the plot
-	 * @param bare
+	 * @param decorations
 	 *            (stripped down panel?)
 	 */
-	public PlotPanel(PlotCanvas canvas, boolean bare) {
+	public PlotPanel(PlotCanvas canvas, int decorations) {
 		_canvas = canvas;
 		_canvas.setParent(this);
-    	_bare = bare;
+    	_decorations = decorations;
+    	
 		Environment.getInstance().commonize(this, null);
 		setLayout(new BorderLayout(0, 0));
 
@@ -68,7 +76,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 
 		addSouth();
 
-		if (!bare) {
+		if (_decorations != VERYBARE) {
 			addNorth();
 		}
 		else {
@@ -76,7 +84,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		}
 		addWest();
 
-		if (!bare) {
+		if (_decorations == STANDARD) {
 			// update the status line with the mouse plot coordinates of the
 			// mouse
 			MouseMotionAdapter mma = new MouseMotionAdapter() {
@@ -111,7 +119,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		spanel.add(_xLabel, BorderLayout.CENTER);
 
 		// status label
-		if (!_bare) {
+		if (_decorations == STANDARD) {
 			_status = makeJLabel("  ", parameters.getStatusFont(),
 					SwingConstants.CENTER, new Color(240, 240, 240),
 					Color.blue, true);
@@ -128,7 +136,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		PlotParameters parameters = _canvas.getParameters();
 
 		// toolbar
-		CommonToolBar toolbar = new CommonToolBar(SwingConstants.HORIZONTAL) {
+		_toolbar = new CommonToolBar(SwingConstants.HORIZONTAL) {
 			@Override
 			public void paint(Graphics g) {
 				// exclude from print
@@ -137,7 +145,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 				}
 			}
 		};
-		toolbar.addToolBarListener(_canvas);
+		_toolbar.addToolBarListener(_canvas);
 
 		JPanel npanel = new JPanel();
 		npanel.setOpaque(true);
@@ -150,9 +158,9 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 				parameters.getTitleFont(), SwingConstants.CENTER, Color.white,
 				null, false);
 		_titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		toolbar.setAlignmentX(Component.LEFT_ALIGNMENT);
+		_toolbar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		npanel.add(toolbar, BorderLayout.NORTH);
+		npanel.add(_toolbar, BorderLayout.NORTH);
 		npanel.add(_titleLabel, BorderLayout.CENTER);
 		add(npanel, BorderLayout.NORTH);
 	}

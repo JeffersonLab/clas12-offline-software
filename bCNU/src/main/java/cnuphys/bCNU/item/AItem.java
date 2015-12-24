@@ -223,6 +223,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	public void draw(Graphics g, IContainer container) {
 
 		if (_visible) {
+						
 			if (shouldDraw(g, container)) {
 
 				// special clip?

@@ -3,12 +3,17 @@ package cnuphys.bCNU.view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.container.BaseContainer;
+import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.util.RowColumnPoint;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
@@ -17,10 +22,16 @@ import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
 
-public class HistoGridView extends ScrollableGridView implements MouseMotionListener {
+public class HistoGridView extends ScrollableGridView implements MouseListener, MouseMotionListener {
 
 	// the plot items
 	protected PlotPanel _plotPanel[][];
+	
+	//which 1-based cell is selected
+	protected PlotCanvas _hotCanvas;
+	
+	private static final Color selectedColor = Color.red;
+	private static final Color unselectedColor = X11Colors.getX11Color("wheat");
 
 	/**
 	 * Create a histo grid
@@ -96,10 +107,38 @@ public class HistoGridView extends ScrollableGridView implements MouseMotionList
 
 		int width = numCol * cellWidth;
 		int height = numRow * cellHeight;
+		
+		int tbarbits = BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
+				& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON
+				& ~BaseToolBar.MAGNIFYBUTTON & ~BaseToolBar.PANBUTTON
+				& ~BaseToolBar.RANGEBUTTON & ~BaseToolBar.CENTERBUTTON
+				& ~BaseToolBar.UNDOZOOMBUTTON
+				& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON;
+
+		BaseContainer container = new BaseContainer(new Rectangle2D.Double(0,0,1,1), false) {
+			@Override
+			public void scale(double scaleFactor) {
+				PlotCanvas canvas = ((HistoGridView)(getView()))._hotCanvas;
+				if (canvas != null) {
+					canvas.scale(scaleFactor);
+				}
+			}
+			
+			@Override
+			public void restoreDefaultWorld() {
+				System.err.println("DUDE!!!!");
+				PlotCanvas canvas = ((HistoGridView)(getView()))._hotCanvas;
+				if (canvas != null) {
+					canvas.setWorldSystem();
+				}
+			}
+		};
 
 		final HistoGridView view = new HistoGridView(numRow, numCol, cellWidth,
 				cellHeight, PropertySupport.WIDTH, width,
-				PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
+				PropertySupport.CONTAINER, container,
+				PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, true,
+				PropertySupport.TOOLBARBITS, tbarbits,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, title, PropertySupport.SCROLLABLE, true,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
@@ -116,6 +155,8 @@ public class HistoGridView extends ScrollableGridView implements MouseMotionList
 					if (histo != null) {
 						view.addComponent(histo);
 						histo.getCanvas().addMouseMotionListener(view);
+						histo.getCanvas().addMouseListener(view);
+						histo.getCanvas().getParent().setBackground(unselectedColor);
 					}
 					view._plotPanel[row - 1][col - 1] = histo;
 				}
@@ -170,7 +211,7 @@ public class HistoGridView extends ScrollableGridView implements MouseMotionList
 		ds.getCurve(0).getFit().setFitType(FitType.NOLINE);
 
 
-		PlotPanel ppanel = new PlotPanel(canvas, true);
+		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.VERYBARE);
 		ppanel.setColor(X11Colors.getX11Color("alice blue"));
 		ppanel.setPreferredSize(new Dimension(width, height));
 		return ppanel;
@@ -204,6 +245,40 @@ public class HistoGridView extends ScrollableGridView implements MouseMotionList
 
 			setStatus(s);
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (e.getClickCount() == 1) {
+			
+			if (_hotCanvas != null) {
+				_hotCanvas.getParent().setBackground(unselectedColor);
+			}
+			PlotCanvas canvas = (PlotCanvas)(e.getSource());
+			if (canvas != _hotCanvas) {
+				canvas.getParent().setBackground(selectedColor);
+				_hotCanvas = canvas;
+			}
+			else {
+				_hotCanvas = null;
+			}
+		}
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
 	}
 
 }

@@ -53,7 +53,7 @@ public class PlotItem extends PanelItem {
 			String title, String xLabel, String yLabel, DataSet dataSet) {
 		super(layer, location, width, height);
 		_plotCanvas = new PlotCanvas(dataSet, title, xLabel, yLabel);
-		_plotPanel = new PlotPanel(_plotCanvas, true);
+		_plotPanel = new PlotPanel(_plotCanvas, PlotPanel.VERYBARE);
 		_virtualPanel.addMainComponent(_plotPanel);
 		
 		

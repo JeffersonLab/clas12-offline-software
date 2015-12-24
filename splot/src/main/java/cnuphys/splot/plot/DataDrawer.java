@@ -1,8 +1,11 @@
 package cnuphys.splot.plot;
 
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.util.Vector;
+
+import javax.swing.SwingUtilities;
 
 import cnuphys.splot.pdata.DataSet;
 
@@ -32,11 +35,23 @@ public class DataDrawer {
 			return;
 		}
 
+		
+		if (!(g.getClip().intersects(_plotCanvas.getActiveBounds()))) {
+//			System.err.println("CLIP SKIP");
+			return;
+		}
+		
+		
+		
+		Rectangle clipRect = GraphicsUtilities.minClip(g.getClip(), _plotCanvas.getActiveBounds());
+		if ((clipRect == null) || (clipRect.width == 0) || (clipRect.height == 0)) {
+			return;
+		}
+
 		// save the clip, set clip to active area
-	//	Shape oldClip = g.getClip();
-		
-		
-	//	g.setClip(_plotCanvas.getActiveBounds());
+		Shape oldClip = g.getClip();
+
+		g.setClip(clipRect);
 
 		// any fixed lines?
 		Vector<PlotLine> lines = _plotCanvas.getParameters().getPlotLines();
@@ -96,7 +111,7 @@ public class DataDrawer {
 		}
 
 		// restore the old clip
-		//g.setClip(oldClip);
+		g.setClip(oldClip);
 	}
 
 }
