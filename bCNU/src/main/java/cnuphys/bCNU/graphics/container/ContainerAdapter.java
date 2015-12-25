@@ -325,5 +325,22 @@ public class ContainerAdapter implements IContainer {
     @Override
     public void activeToolBarButtonChanged(ToolBarToggleButton activeButton) {
     }
+    
+	/**
+	 * Have you handled the print button so the default action is ignored.
+	 * @return <code>true</code> if the printer button was handled.
+	 */
+	public boolean handledPrint() {
+		return false;
+	}
+	
+	/**
+	 * Have you handled the camera button so the default action is ignored.
+	 * @return <code>true</code> if the camera button was handled.
+	 */
+	public boolean handledCamera() {
+		return false;
+	}
+
 
 }

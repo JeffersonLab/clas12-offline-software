@@ -14,6 +14,7 @@ import java.util.List;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.GeoConstants;
@@ -305,6 +306,10 @@ public class AllDCView extends CedView {
 		super.getFeedbackStrings(container, screenPoint, worldPoint,
 				feedbackStrings);
 		// feedbackStrings.add("#DC hits: " + _numHits);
+		
+		if (!isSingleEventMode()) {
+			AccumulationManager.getInstance().addFeedback(feedbackStrings);
+		}
 	}
 
 	/**

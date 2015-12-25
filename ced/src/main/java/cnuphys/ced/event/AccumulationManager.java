@@ -1,8 +1,7 @@
 package cnuphys.ced.event;
 
 import java.awt.Color;
-import java.util.Vector;
-
+import java.util.List;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
@@ -20,12 +19,6 @@ import cnuphys.ced.event.data.BSTDataContainer;
 import cnuphys.ced.event.data.DCDataContainer;
 import cnuphys.ced.event.data.ECDataContainer;
 import cnuphys.ced.event.data.FTOFDataContainer;
-import cnuphys.ced.event.data.GenPartDataContainer;
-import cnuphys.splot.pdata.GrowableArray;
-import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.Swimmer;
-import cnuphys.swim.Swimming;
-
 import org.jlab.evio.clas12.EvioDataEvent;
 
 /**
@@ -48,6 +41,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	/** Indicates hat accumulation has received clear */
 	public static final int ACCUMULATION_CLEAR = 2;
 
+	
 	// common colorscale
 	public static ColorScaleModel colorScaleModel = new ColorScaleModel(
 			getAccumulationValues(), getAccumulationColors());
@@ -83,7 +77,13 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	//PCAL  [sector, view (uvw), strip]
 	private int _pcalDgtzAccumulatedData[][][];
 	private int _maxDgtzPcalCount;
-
+	
+	//overall event count
+	private long _eventCount;
+	
+	/** Colors used for accumulated related feedback */
+	public static final String accumulationFBColor = "$olive$";
+	
 
 //	// time based momentum resolution
 //	private GrowableArray _tbPResolutionHistoData = new GrowableArray(500, 100);
@@ -159,6 +159,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	 */
 	@Override
 	public void clear() {
+		_eventCount = 0;
+		
 		// System.err.println("AccumMgr clear");
 		// clear accumulated gemc dc data
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
@@ -452,6 +454,44 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		return color;
 	}
 
+	/**
+	 * Get the number of events in the current accumulation
+	 * @return the number of events in the current accumulation
+	 */
+	public long getAccumulationEventCount() {
+		return _eventCount;
+	}
+	
+	/**
+	 * Add some basic info to feedback
+	 * @param feedbackStrings
+	 */
+	public void addFeedback(List<String> feedbackStrings) {
+		feedbackStrings.add(accumulationFBColor + "number of accumulated events " + _eventCount);
+	}
+	
+	/**
+	 * Get the average occupancy for a given sector and superlayer
+	 * @param sect0 0 based sector 0..5
+	 * @param supl0 0 based superlayer 0..5
+	 * @return the occupancy 
+	 */
+	public double getAverageDCOccupancy(int sect0, int supl0) {
+		if (_eventCount == 0) {
+			return 0;
+		}
+		
+		long count = 0;
+		for (int lay0 = 0; lay0 < 6; lay0++) {
+			for (int wire0 = 0; wire0 < 112; wire0++) {
+				count += _dcDgtzAccumulatedData[sect0][supl0][lay0][wire0];
+			}
+		}
+
+		double avgHits = ((double)count)/_eventCount;
+		
+		return avgHits/(6*112);
+	}
 	
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
@@ -460,6 +500,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		if (!_eventManager.isAccumulating() || (event == null)) {
 			return;
 		}
+		
+		_eventCount++;
 
 		// dc data
 		DCDataContainer dcData = _eventManager.getDCData();

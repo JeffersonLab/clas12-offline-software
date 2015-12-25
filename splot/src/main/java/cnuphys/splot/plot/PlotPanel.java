@@ -75,13 +75,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		add(_canvas, BorderLayout.CENTER);
 
 		addSouth();
-
-		if (_decorations != VERYBARE) {
-			addNorth();
-		}
-		else {
-			addNorthLite();
-		}
+		addNorth();
 		addWest();
 
 		if (_decorations == STANDARD) {
@@ -160,29 +154,14 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		_titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		_toolbar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		npanel.add(_toolbar, BorderLayout.NORTH);
+		// if verybare, tool bar is hidden
+		if (_decorations != VERYBARE) {
+			npanel.add(_toolbar, BorderLayout.NORTH);
+		}
 		npanel.add(_titleLabel, BorderLayout.CENTER);
 		add(npanel, BorderLayout.NORTH);
 	}
 	
-	private void addNorthLite() {
-		PlotParameters parameters = _canvas.getParameters();
-
-		JPanel npanel = new JPanel();
-		npanel.setOpaque(true);
-		npanel.setBackground(Color.white);
-		Environment.getInstance().commonize(npanel, null);
-		npanel.setLayout(new BorderLayout());
-
-		// title label
-		_titleLabel = makeJLabel(_canvas.getParameters().getPlotTitle(),
-				parameters.getTitleFont(), SwingConstants.CENTER, Color.white,
-				null, false);
-		_titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		npanel.add(_titleLabel, BorderLayout.CENTER);
-		add(npanel, BorderLayout.NORTH);
-	}
-
 	// add the west component
 	private void addWest() {
 		PlotParameters parameters = _canvas.getParameters();
@@ -278,6 +257,15 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 			_yLabel.repaint();
 		}
 
+	}
+
+	/**
+	 * Set which toggle button is selected
+	 */
+	public void setSelectedToggle(String s) {
+		if (_toolbar != null) {
+			_toolbar.setSelectedToggle(s);
+		}
 	}
 
 }
