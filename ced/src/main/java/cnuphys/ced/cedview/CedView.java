@@ -585,8 +585,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		if (_currentEvent == null) {
 			feedbackStrings.add("$orange red$No event");
 		} else {
-			feedbackStrings.add("$orange red$" + "event # "
+			feedbackStrings.add("$orange red$" + "event "
 				+ _eventManager.getEventNumber());
+			feedbackStrings.add("$orange red$" + _eventManager.getCurrentEventFileName());
 		}
 
 		// get the sector

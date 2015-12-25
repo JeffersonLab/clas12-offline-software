@@ -577,6 +577,8 @@ public class AllDCSuperLayer extends RectangleItem {
 		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
 
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+				"accumulated event count   " + AccumulationManager.getInstance().getAccumulationEventCount());
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 				"avg occupancy  " + DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
 
 	}

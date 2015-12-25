@@ -35,7 +35,6 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.bCNU.component.filetree.FileDnDHandler;
 import cnuphys.bCNU.component.filetree.FileTreePanel;
 import cnuphys.bCNU.component.filetree.IFileTreeListener;
-import cnuphys.bCNU.event.graphics.EventInfoPanel;
 import cnuphys.bCNU.file.IFileHandler;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;

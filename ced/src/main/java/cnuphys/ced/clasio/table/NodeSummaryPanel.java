@@ -11,7 +11,6 @@ import javax.swing.border.EmptyBorder;
 import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EvioNode;
 
-import cnuphys.bCNU.event.graphics.NamedLabel;
 import cnuphys.ced.clasio.EvioNodeSupport;
 
 public class NodeSummaryPanel extends JPanel {

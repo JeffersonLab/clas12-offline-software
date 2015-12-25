@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
@@ -21,6 +20,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.evio.clas12.EvioFactory;
 import org.jlab.evio.clas12.EvioSource;
 
+import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.event.data.BMTDataContainer;
@@ -63,7 +63,7 @@ public class ClasIoEventManager {
 	public enum EventSourceType {
 		FILE, ET
 	}
-
+	
 	private boolean _enabled = true;
 
 	// flag that set set to <code>true</code> if we are accumulating events
@@ -283,6 +283,16 @@ public class ClasIoEventManager {
 	}
 
 	/**
+	 * Get the base simple name of the current file
+	 * 
+	 * @return the path of the current file
+	 */
+	public String getCurrentEventFileName() {
+		return (_currentEventFile == null) ? "(none)"
+				: _currentEventFile.getName();
+	}
+	
+	/**
 	 * Set the clas-io evio source to read from an evio file
 	 * 
 	 * @param path the full path to the file
@@ -296,7 +306,7 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Set the clas-io evio source to read from an evio file
+	 * Open an evio file
 	 * 
 	 * @param file the evio file
 	 * @return the current compact reader (might be <code>null</code>);
@@ -314,20 +324,27 @@ public class ClasIoEventManager {
 		}
 
 		threadedOpenEvioFile(file);
-	}
-
+	}	
+	
+	//read in a seperate thread
 	private void threadedOpenEvioFile(final File file) {
 
-		final JProgressBar progressBar = Ced.getProgressBar();
-		progressBar.setString("Reading " + file.getPath());
-		progressBar.setIndeterminate(true);
-		setEnabled(false);
+//		final JProgressBar progressBar = Ced.getProgressBar();
+//		progressBar.setString("Reading " + file.getPath());
+//		progressBar.setIndeterminate(true);
+//		setEnabled(false);
+//		progressBar.setVisible(true);
+		
+		
+		final BusyPanel busyPanel = Ced.getBusyPanel();
+		busyPanel.setText("Reading " + file.getPath());
+		busyPanel.setVisible(true);
+		
+		_evioSource.close();
 
 		class MyWorker extends SwingWorker<String, Void> {
 			@Override
 			protected String doInBackground() {
-				progressBar.setVisible(true);
-				_evioSource.close();
 				_evioSource.open(file);
 				notifyListeners(file.getPath());
 				_currentEventFile = file;
@@ -336,9 +353,12 @@ public class ClasIoEventManager {
 
 			@Override
 			protected void done() {
-				progressBar.setString(file.getPath());
-				progressBar.setIndeterminate(false);
-				progressBar.setVisible(false);
+//				progressBar.setString(file.getPath());
+//				progressBar.setIndeterminate(false);
+//				progressBar.setVisible(false);
+				
+				busyPanel.setVisible(false);
+				Ced.getCed().fixTitle();
 				setEnabled(true);
 				try {
 					getNextEvent();
