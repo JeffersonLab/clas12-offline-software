@@ -1,4 +1,4 @@
-package cnuphys.bCNU.event.graphics;
+package cnuphys.ced.clasio.table;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

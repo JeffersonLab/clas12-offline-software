@@ -1,7 +1,6 @@
 package cnuphys.ced.event;
 
 import java.awt.Color;
-import java.util.List;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
@@ -27,7 +26,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
  * @author heddle
  * 
  */
-public class AccumulationManager implements IAccumulator, IClasIoEventListener {
+public class AccumulationManager implements IAccumulator, IClasIoEventListener, IAccumulationListener {
 
 	/** Indicates hat accumulation has started */
 	public static final int ACCUMULATION_STARTED = 0;
@@ -62,7 +61,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	//BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
 	private int _bstDgtzFullAccumulatedData[][][];
 	private int _maxDgtzFullBstCount;
-
 	
 	//FTOF accumulated Data
 	private int _ftof1aDgtzAccumulatedData[][];
@@ -82,7 +80,10 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	private long _eventCount;
 	
 	/** Colors used for accumulated related feedback */
-	public static final String accumulationFBColor = "$olive$";
+	public static final String accumulationFBColor = "$Pale Green$";
+	
+	//occupancy data by sector, superlayer
+	public static double avgDcOccupancy[][] = new double[6][6];
 	
 
 //	// time based momentum resolution
@@ -116,6 +117,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	 * private constructor for singleton.
 	 */
 	private AccumulationManager() {
+		addAccumulationListener(this);
 		_eventManager.addClasIoEventListener(this, 1);
 		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 		
@@ -165,6 +167,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		// clear accumulated gemc dc data
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
+				avgDcOccupancy[sector][superLayer] = 0;
 				for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 					for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
 						_dcDgtzAccumulatedData[sector][superLayer][layer][wire] = 0;
@@ -463,34 +466,13 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 	}
 	
 	/**
-	 * Add some basic info to feedback
-	 * @param feedbackStrings
-	 */
-	public void addFeedback(List<String> feedbackStrings) {
-		feedbackStrings.add(accumulationFBColor + "number of accumulated events " + _eventCount);
-	}
-	
-	/**
 	 * Get the average occupancy for a given sector and superlayer
 	 * @param sect0 0 based sector 0..5
 	 * @param supl0 0 based superlayer 0..5
 	 * @return the occupancy 
 	 */
 	public double getAverageDCOccupancy(int sect0, int supl0) {
-		if (_eventCount == 0) {
-			return 0;
-		}
-		
-		long count = 0;
-		for (int lay0 = 0; lay0 < 6; lay0++) {
-			for (int wire0 = 0; wire0 < 112; wire0++) {
-				count += _dcDgtzAccumulatedData[sect0][supl0][lay0][wire0];
-			}
-		}
-
-		double avgHits = ((double)count)/_eventCount;
-		
-		return avgHits/(6*112);
+		return avgDcOccupancy[sect0][supl0];
 	}
 	
 	@Override
@@ -860,6 +842,41 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener {
 		}
 
 		_listeners.add(IAccumulationListener.class, listener);
+	}
+
+	@Override
+	public void accumulationEvent(int reason) {
+		switch (reason) {
+		case AccumulationManager.ACCUMULATION_STARTED:
+			break;
+
+
+		case AccumulationManager.ACCUMULATION_CANCELLED:
+		case AccumulationManager.ACCUMULATION_FINISHED:
+
+			if (_eventCount != 0) {
+
+				for (int sect0 = 0; sect0 < 6; sect0++) {
+					for (int supl0 = 0; supl0 < 6; supl0++) {
+
+						long count = 0;
+
+						for (int lay0 = 0; lay0 < 6; lay0++) {
+							for (int wire0 = 0; wire0 < 112; wire0++) {
+								count += _dcDgtzAccumulatedData[sect0][supl0][lay0][wire0];
+							}
+						} // lay0
+
+						double avgHits = avgDcOccupancy[sect0][supl0] = ((double) count)
+								/ _eventCount;
+						//divide by num wires in superlayer
+						avgDcOccupancy[sect0][supl0] = avgHits/(6*112);
+					} // supl0
+				} // sect0
+			} // _eventCount != 0
+
+			break;
+		}
 	}
 	
 	

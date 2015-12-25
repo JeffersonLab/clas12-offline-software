@@ -307,9 +307,6 @@ public class AllDCView extends CedView {
 				feedbackStrings);
 		// feedbackStrings.add("#DC hits: " + _numHits);
 		
-		if (!isSingleEventMode()) {
-			AccumulationManager.getInstance().addFeedback(feedbackStrings);
-		}
 	}
 
 	/**

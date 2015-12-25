@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
 	<classpathentry kind="lib" path="/numericalRec/lib/f2jutil.jar"/>
 	<classpathentry kind="lib" path="/numericalRec/lib/numRec.jar"/>
-	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

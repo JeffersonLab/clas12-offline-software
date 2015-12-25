@@ -1,4 +1,4 @@
-package cnuphys.bCNU.event.graphics;
+package cnuphys.ced.clasio.table;
 
 import java.awt.Color;
 import java.awt.Dimension;
