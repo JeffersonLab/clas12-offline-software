@@ -806,13 +806,19 @@ public class PlotCanvas extends JComponent
 			repaint();
 		}
 		if (CommonToolBar.PRINT.equals(command)) {
-			// PrintUtilities.printComponent(this);
-			PrintUtilities.printComponent((_parent != null) ? _parent : this);
+			print();
 		}
 
 		if (CommonToolBar.PNG.equals(command)) {
 			takePicture();
 		}
+	}
+	
+	/**
+	 * Print
+	 */
+	public void print() {
+		PrintUtilities.printComponent((_parent != null) ? _parent : this);
 	}
 
 	public File getSavePngFile() {
@@ -845,8 +851,11 @@ public class PlotCanvas extends JComponent
 		return selectedFile;
 	}
 
-	// take a picture, save as png
-	private void takePicture() {
+
+/**
+ * Take a picture, sanve as png
+ */
+	public void takePicture() {
 		try {
 
 			// try making a png
@@ -944,9 +953,21 @@ public class PlotCanvas extends JComponent
 	private void writeBasicData(XmlPrintStreamWriter writer)
 			throws XMLStreamException {
 	}
-	
+
 	public PlotTicks getPlotTicks() {
 		return _plotTicks;
+	}
+
+	/**
+	 * Set which toggle button is selected
+	 */
+	public void setSelectedToggle(String s) {
+		if ((_parent != null) && (_parent instanceof PlotPanel)) {
+			PlotPanel ppan = (PlotPanel) _parent;
+			if (ppan._toolbar != null) {
+				ppan._toolbar.setSelectedToggle(s);
+			}
+		}
 	}
 
 }

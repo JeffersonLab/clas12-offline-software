@@ -487,6 +487,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			// report approximate position
 			// for now nearest wire--could interpolate
 			if ((wire > 0) && (wire <= 112)) {
+				
 				Point3D midPoint = DCGeometry.getMidPoint(_superLayer, layer,
 						wire);
 
@@ -572,21 +573,12 @@ public class AllDCSuperLayer extends RectangleItem {
 	 */
 	private void accumulatedFeedbackStrings(int wire, int layer,
 			List<String> feedbackStrings) {
+		
+		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
 
-		feedbackStrings.add("superlayer " + _superLayer + "  layer " + layer
-				+ "  wire " + wire);
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+				"avg occupancy  " + DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
 
-		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzDcData();
-		int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer - 1][wire - 1];
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
-		if ((hitCount < 1) || (maxHit < 1)) {
-			feedbackStrings.add("hit fraction 0.0");
-		} else {
-			double fract = ((double) hitCount) / maxHit;
-			feedbackStrings.add("hit fraction "
-					+ DoubleFormat.doubleFormat(fract, 3));
-		}
 	}
 
 	/**

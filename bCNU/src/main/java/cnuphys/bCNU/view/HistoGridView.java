@@ -11,6 +11,7 @@ import java.awt.geom.Rectangle2D;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
+import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.RowColumnPoint;
@@ -21,6 +22,7 @@ import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
+import cnuphys.splot.toolbar.CommonToolBar;
 
 public class HistoGridView extends ScrollableGridView implements MouseListener, MouseMotionListener {
 
@@ -118,20 +120,59 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 		BaseContainer container = new BaseContainer(new Rectangle2D.Double(0,0,1,1), false) {
 			@Override
 			public void scale(double scaleFactor) {
-				PlotCanvas canvas = ((HistoGridView)(getView()))._hotCanvas;
+				PlotCanvas canvas = ((HistoGridView) (getView()))._hotCanvas;
 				if (canvas != null) {
 					canvas.scale(scaleFactor);
 				}
 			}
-			
+
 			@Override
 			public void restoreDefaultWorld() {
-				System.err.println("DUDE!!!!");
-				PlotCanvas canvas = ((HistoGridView)(getView()))._hotCanvas;
+				PlotCanvas canvas = ((HistoGridView) (getView()))._hotCanvas;
 				if (canvas != null) {
 					canvas.setWorldSystem();
+					canvas.repaint();
 				}
 			}
+			
+			/**
+			 * The active toolbar button changed.
+			 * @param activeButton the new active button.
+			 */
+			@Override
+			public void activeToolBarButtonChanged(ToolBarToggleButton activeButton) {
+				((HistoGridView) (getView())).resetPlotToolbars(activeButton == getToolBar().getBoxZoomButton());
+			}
+			
+			/**
+			 * Have you handled the print button so the default action is ignored.
+			 * @return <code>true</code> if the printer button was handled.
+			 */
+			@Override
+			public boolean handledPrint() {
+				PlotCanvas canvas = ((HistoGridView) (getView()))._hotCanvas;
+				if (canvas != null) {
+					canvas.print();
+				}
+
+				return true;
+			}
+			
+			/**
+			 * Have you handled the camera button so the default action is ignored.
+			 * @return <code>true</code> if the camera button was handled.
+			 */
+			@Override
+			public boolean handledCamera() {
+				PlotCanvas canvas = ((HistoGridView) (getView()))._hotCanvas;
+				if (canvas != null) {
+					canvas.takePicture();
+				}
+
+				return true;
+			}
+
+
 		};
 
 		final HistoGridView view = new HistoGridView(numRow, numCol, cellWidth,
@@ -253,12 +294,17 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+
+		if (!isPointerButtonActive()) {
+			return;
+		}
+
 		if (e.getClickCount() == 1) {
-			
+
 			if (_hotCanvas != null) {
 				_hotCanvas.getParent().setBackground(unselectedColor);
 			}
-			PlotCanvas canvas = (PlotCanvas)(e.getSource());
+			PlotCanvas canvas = (PlotCanvas) (e.getSource());
 			if (canvas != _hotCanvas) {
 				canvas.getParent().setBackground(selectedColor);
 				_hotCanvas = canvas;
@@ -280,5 +326,28 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 	@Override
 	public void mouseExited(MouseEvent e) {
 	}
+
+	/**
+	 * Check whether the pointer bar is active on the tool bar
+	 * 
+	 * @return <code>true</code> if the Pointer button is active.
+	 */
+	protected boolean isPointerButtonActive() {
+		ToolBarToggleButton mtb = getContainer().getActiveButton();
+		return (mtb == getContainer().getToolBar().getPointerButton());
+	}
+	
+	protected void resetPlotToolbars(boolean boxZoom) {
+		String s = (boxZoom ? CommonToolBar.BOXZOOM : null);
+		for (int row = 0; row < _numRow; row++) {
+			for (int col = 0; col < _numCol; col++) {
+				PlotPanel ppan = _plotPanel[row][col];
+				if (ppan != null) {
+					ppan.setSelectedToggle(s);
+				}
+			}
+		}
+	}
+
 
 }

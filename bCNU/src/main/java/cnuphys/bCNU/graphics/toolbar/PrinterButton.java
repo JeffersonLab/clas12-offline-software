@@ -25,6 +25,11 @@ public class PrinterButton extends ToolBarButton {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent actionEvent) {
+		
+		if (container.handledPrint()) {
+			return;
+		}
+
 		PrintUtilities.printComponent(container.getComponent());
 	}
 }

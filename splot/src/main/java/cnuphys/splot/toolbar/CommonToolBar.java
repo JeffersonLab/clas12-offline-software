@@ -24,8 +24,14 @@ public class CommonToolBar extends JToolBar
 	private ButtonGroup _buttonGroup = new ButtonGroup();
 
 	// the default button
-	private ToolBarToggleButton _defaultToggleButton;
+	private ToolBarToggleButton _pointerButton;
+	
+	//box zoom
+	private ToolBarToggleButton _boxZoomButton;
 
+	// recenter button
+	private ToolBarToggleButton _recenterButton;
+	
 	// List of toolBar listeners
 	private EventListenerList _listenerList;
 
@@ -53,15 +59,19 @@ public class CommonToolBar extends JToolBar
 		Environment.getInstance().commonize(this, null);
 		setBorder(BorderFactory.createEtchedBorder());
 
-		_defaultToggleButton = new ToolBarToggleButton("images/pointer.gif",
+		_pointerButton = new ToolBarToggleButton("images/pointer.gif",
 				"Make selections", POINTER, 3, 1, "images/pointercursor.gif");
-		_defaultToggleButton.setSelected(true);
-		add(_defaultToggleButton);
+		_pointerButton.setSelected(true);
+		add(_pointerButton);
 
-		add(new ToolBarToggleButton("images/box_zoom.gif", "Zoom to area",
-				BOXZOOM, 3, 1, "images/box_zoomcursor.gif"));
-		add(new ToolBarToggleButton("images/center.gif", "Recenter the plot",
-				CENTER, -1, -1, "images/centercursor.gif"));
+		_boxZoomButton = new ToolBarToggleButton("images/box_zoom.gif", "Zoom to area",
+				BOXZOOM, 3, 1, "images/box_zoomcursor.gif");
+		add(_boxZoomButton);
+		
+		_recenterButton = new ToolBarToggleButton("images/center.gif", "Recenter the plot",
+				CENTER, -1, -1, "images/centercursor.gif");
+		
+		add(_recenterButton);
 
 		addHGap(8);
 		add(new ToolBarButton("images/zoom_in.gif", "Zoom in", ZOOMIN));
@@ -69,6 +79,24 @@ public class CommonToolBar extends JToolBar
 		add(new ToolBarButton("images/world.gif", "Include all data", WORLD));
 		add(new ToolBarButton("images/printer.gif", "Print the plot", PRINT));
 		add(new ToolBarButton("images/camera.gif", "Save as PNG", PNG));
+	}
+	
+	/**
+	 * Set which toggle buttonis selected
+	 */
+	public void setSelectedToggle(String s) {
+		if (s == null) {
+			_pointerButton.setSelected(true);
+		}
+		else if (s.equals(BOXZOOM)) {
+			_boxZoomButton.setSelected(true);			
+		}
+		else if (s.equals(CENTER)) {
+			_recenterButton.setSelected(true);			
+		}
+		else {
+			_pointerButton.setSelected(true);
+		}
 	}
 
 	/**
@@ -146,7 +174,7 @@ public class CommonToolBar extends JToolBar
 	 * @return the default toggle buton.
 	 */
 	public JToggleButton getDefaultToggleButton() {
-		return _defaultToggleButton;
+		return _pointerButton;
 	}
 
 	/**
@@ -157,7 +185,7 @@ public class CommonToolBar extends JToolBar
 	 */
 	public void setDefaultToggleButton(
 			ToolBarToggleButton defaultToggleButton) {
-		_defaultToggleButton = defaultToggleButton;
+		_pointerButton = defaultToggleButton;
 	}
 
 	/**
@@ -165,8 +193,8 @@ public class CommonToolBar extends JToolBar
 	 */
 	public void resetDefaultSelection() {
 
-		if (_defaultToggleButton != null) {
-			_defaultToggleButton.doClick();
+		if (_pointerButton != null) {
+			_pointerButton.doClick();
 		}
 	}
 
@@ -214,7 +242,7 @@ public class CommonToolBar extends JToolBar
 	 */
 	public boolean isDefaultActivated() {
 		ToolBarToggleButton tbtb = getActiveButton();
-		return ((tbtb != null) && (tbtb == _defaultToggleButton));
+		return ((tbtb != null) && (tbtb == _pointerButton));
 	}
 
 	/**
