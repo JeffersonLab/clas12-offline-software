@@ -42,9 +42,12 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.DCGeometry;
+import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
+import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
@@ -140,6 +143,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//histogram grids (which are also views)
 	protected HistoGridView dcHistoGrid;
 	protected HistoGridView ftofHistoGrid;
+	protected HistoGridView bstHistoGrid;
+	protected HistoGridView pcalHistoGrid;
+	protected HistoGridView ecHistoGrid;
 	
 	// the about string
 	private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
@@ -195,6 +201,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 						
 			_virtualView.moveTo(dcHistoGrid, 12);
 			_virtualView.moveTo(ftofHistoGrid, 13);
+			_virtualView.moveTo(bstHistoGrid, 14);
+			_virtualView.moveTo(pcalHistoGrid, 15);
+			_virtualView.moveTo(ecHistoGrid, 16);
 			
 	    	_virtualView.moveTo(_allDCView, 3);
 			_virtualView.moveTo(_eventView, 6, VirtualView.BOTTOMRIGHT);
@@ -304,6 +313,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
         //add histograms
 		addDcHistogram();
 		addFtofHistogram();
+		addBstHistogram();
+		addPcalHistogram();
+		addEcHistogram();
 		
 		
 
@@ -315,7 +327,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		_virtualView.toFront();
 	}
-	
+
 	//dc wire histogram
 	private void addDcHistogram() {
 		IHistogramMaker maker = new IHistogramMaker() {
@@ -328,7 +340,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				int lay = col;
 				int sect = 1 + (row-1) / 6;
 				int supl = 1 + (row-1) % 6;
-				String title = "sect_" + sect + "  supl_" + supl + "  lay_" + lay;
+				String title = "DC sect_" + sect + "  supl_" + supl + "  lay_" + lay;
 				
 				panel = HistoGridView.createHistogram(dcHistoGrid, w, h, title, "wire", "count", -0.5, 112, 112);
 
@@ -351,7 +363,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				int panelType = col-1; // 1A, 1B, 2 for 0,1,2
 				int numPaddle = FTOFGeometry.numPaddles[panelType];
 				int sect = 1 + (row - 1) % 6;
-				String title = "sect_" + sect + "  " +
+				String title = "FTOF sect_" + sect + "  " +
 						FTOFDataContainer.getName(panelType);
 
 				switch (panelType) {
@@ -372,6 +384,81 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		};
 		ftofHistoGrid = HistoGridView.createHistoGridView("FTOF Histograms", 6, 3, 260, 240, 0.7, maker);
 	}
+	
+	//ftof wire histogram
+	private void addBstHistogram() {
+		IHistogramMaker maker = new IHistogramMaker() {
+
+			@Override
+			public PlotPanel addHistogram(int row, int col, int w, int h) {
+				
+				int layer = row;
+				int sector = col;
+				
+				int supl0 = (layer-1) / 2;
+				
+				int maxSector = BSTGeometry.sectorsPerSuperlayer[supl0];
+				if (sector > maxSector) {
+					return null;
+				}
+				
+				PlotPanel panel;
+				String title = "BST layer_" + layer + " sector_" + sector;
+				panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "strip", "count", -0.5, 256-0.5, 256);
+				return panel;
+			}
+			
+		};
+		bstHistoGrid = HistoGridView.createHistoGridView("BST Histograms", 8, 24, 300, 240, 0.7, maker);
+	}
+	
+	//pcal strip histogram
+	private void addPcalHistogram() {
+		IHistogramMaker maker = new IHistogramMaker() {
+
+			@Override
+			public PlotPanel addHistogram(int row, int col, int w, int h) {
+				
+				int sector = row;
+				int plane = col-1; //u, v, w
+				int numStrip = PCALGeometry.PCAL_NUMSTRIP[plane];
+								
+				PlotPanel panel;
+				String title = "PCAL sector_" + sector + "_" + PCALGeometry.PLANE_NAMES[plane];
+				panel = HistoGridView.createHistogram(pcalHistoGrid, w, h, title, "strip", "count", -0.5, numStrip-0.5, numStrip);
+				return panel;
+			}
+			
+		};
+
+		pcalHistoGrid = HistoGridView.createHistoGridView("PCAL Histograms", 6, 3, 240, 240, 0.7, maker);
+	}
+
+	//ec strip histogram
+	private void addEcHistogram() {
+		IHistogramMaker maker = new IHistogramMaker() {
+
+			@Override
+			public PlotPanel addHistogram(int row, int col, int w, int h) {
+				
+				int sector = row;
+				int stack = (col - 1) / 3; //inner outer
+				int plane = (col - 1) % 3; //u, v, w
+				int numStrip = 36;
+								
+				PlotPanel panel;
+				String stackName = ECGeometry.STACK_NAMES[stack];
+				String planeName = ECGeometry.PLANE_NAMES[plane];
+				
+				String title = "EC sector_" + sector + "_" + stackName +  "_" + planeName;
+				panel = HistoGridView.createHistogram(ecHistoGrid, w, h, title, "strip", "count", -0.5, numStrip-0.5, numStrip);
+				return panel;
+			}
+			
+		};
+		ecHistoGrid = HistoGridView.createHistoGridView("EC Histograms", 6, 6, 240, 240, 0.7, maker);
+	}
+	
 
 
 	/**
@@ -862,7 +949,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
-		Log.getInstance().info("CED 12.0 GeV is ready.");
+		Log.getInstance().info("ced is ready.");
 
 		// test demo plugin
 		// new CedDemoPlugin();

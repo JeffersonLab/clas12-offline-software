@@ -30,6 +30,9 @@ public class PCALGeometry {
 
 	/** constant for the u strip index */
 	public static final int PCAL_W = 2;
+	
+	//** plane or "view" names */
+	public static final String PLANE_NAMES[] = {"U", "V", "W"};
 
 	/** there are 36 strips for u, v and w */
 	public static final int PCAL_NUMSTRIP[] = { 68, 62, 62 };

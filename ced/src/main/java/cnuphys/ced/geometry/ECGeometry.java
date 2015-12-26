@@ -38,6 +38,13 @@ public class ECGeometry {
 
 	/** constant for the u strip index */
 	public static final int EC_W = 2;
+	
+	//** stack names names */
+	public static final String STACK_NAMES[] = {"Inner", "Outer"};
+
+	//** plane or "view" names */
+	public static final String PLANE_NAMES[] = {"U", "V", "W"};
+
 
 	/** there are 36 strips for u, v and w */
 	public static final int EC_NUMSTRIP = 36;

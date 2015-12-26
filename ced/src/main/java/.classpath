@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="/Users/heddle/coatjava/lib/clas/coat-libs-2.0-SNAPSHOT.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SampleEventModule"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JOGL"/>
+	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>
