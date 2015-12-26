@@ -5,7 +5,9 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
+import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotPanel;
 
@@ -46,8 +48,8 @@ public class CedHistoFiller implements IAccumulationListener {
 			fillDcHistogramGrid(ced.dcHistoGrid);
 			fillFtofHistogramGrid(ced.ftofHistoGrid);
 			fillBstHistogramGrid(ced.bstHistoGrid);
-			fillPcalHistogramGrid(ced.bstHistoGrid);
-			fillEcHistogramGrid(ced.bstHistoGrid);
+			fillPcalHistogramGrid(ced.pcalHistoGrid);
+			fillEcHistogramGrid(ced.ecHistoGrid);
 			break;
 		}
 	}
@@ -64,6 +66,27 @@ public class CedHistoFiller implements IAccumulationListener {
 		if (pcalGrid == null) {
 			return;
 		}
+
+		//sect, plane (view) uvw, strip
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzPcalData();
+
+		for (int sect0 = 0; sect0 < 6; sect0++) {
+			int row = sect0+1;
+			for (int plane = 0; plane < 3; plane++) {
+				int col = plane+1;
+				
+				PlotPanel ppan = pcalGrid.getPlotPanel(row,
+						col);
+				HistoData hd = pcalGrid.getHistoData(row, col);
+
+				for (int strip0 = 0; strip0 < PCALGeometry.PCAL_NUMSTRIP[plane]; strip0++) {
+					hd.setCount(strip0, //do not add 1
+							hits[sect0][plane][strip0]);
+				}
+				ppan.getCanvas().needsRedraw(true);
+			}
+		}
+		
 	}
 
 	//fill the ec histo grid (view)
@@ -71,6 +94,29 @@ public class CedHistoFiller implements IAccumulationListener {
 		if (ecGrid == null) {
 			return;
 		}
+
+		// sect, stack inner-outer, plane (view) uvw, strip
+		int hits[][][][] = AccumulationManager.getInstance()
+				.getAccumulatedDgtzEcData();
+
+		for (int sect0 = 0; sect0 < 6; sect0++) {
+			int row = sect0 + 1;
+			for (int stack = 0; stack < 2; stack++) {
+				for (int plane = 0; plane < 3; plane++) {
+					int col = (3 * stack) + plane + 1;
+
+					PlotPanel ppan = ecGrid.getPlotPanel(row, col);
+					HistoData hd = ecGrid.getHistoData(row, col);
+
+					for (int strip0 = 0; strip0 < ECGeometry.EC_NUMSTRIP; strip0++) {
+						hd.setCount(strip0, // do not add 1
+								hits[sect0][stack][plane][strip0]);
+					}
+					ppan.getCanvas().needsRedraw(true);
+				}
+			}
+		}
+
 	}
 	
 

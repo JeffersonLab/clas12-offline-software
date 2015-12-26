@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -89,10 +90,31 @@ public class SplashWindow extends JWindow {
 	private void addNorth(String title, String version) {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 80, 2));
+		sp.setBackground(Color.white);
 
-		ImageIcon rubikIcon = ImageManager.getInstance().loadImageIcon("images/rubik80.gif");
-		if ((rubikIcon != null) && (rubikIcon.getImage() != null)) {
-			JLabel rlab = new JLabel(rubikIcon);
+		String imageNames[] = {
+				"images/sun.gif",
+				"images/rubik80.gif",
+				"images/bee.gif",
+				"images/saucer.gif",
+				"images/spinglobe.gif",
+				"images/runner.gif",
+				"images/sun2.gif",
+				"images/bee2.gif"};
+		
+		
+		int index = (new Random()).nextInt(imageNames.length);
+		if (index < 0) {
+			System.err.println("Bad index in splashWindow: " + index);
+			index = 0;
+		}
+		else if (index >= imageNames.length) {
+			System.err.println("Bad index in splashWindow: " + index);
+			index = imageNames.length-1;
+		}
+		ImageIcon icon = ImageManager.getInstance().loadImageIcon(imageNames[index]);
+		if ((icon != null) && (icon.getImage() != null)) {
+			JLabel rlab = new JLabel(icon);
 			sp.add(rlab);
 		}
 
