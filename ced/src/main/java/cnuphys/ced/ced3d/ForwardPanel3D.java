@@ -5,6 +5,7 @@ import item3D.Axes3D;
 import java.awt.Color;
 import java.awt.Font;
 
+import adapter3D.KeyAdapter3D;
 import cnuphys.lund.X11Colors;
 
 public class ForwardPanel3D extends CedPanel3D {

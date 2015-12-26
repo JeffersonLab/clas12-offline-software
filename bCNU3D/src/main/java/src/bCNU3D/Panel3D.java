@@ -3,22 +3,24 @@ package bCNU3D;
 import item3D.Axes3D;
 import item3D.Item3D;
 import item3D.PointSet3D;
-import item3D.SpriteSet;
 import item3D.Triangle3D;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
 import adapter3D.KeyAdapter3D;
@@ -33,7 +35,6 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.fixedfunc.GLLightingFunc;
@@ -133,18 +134,21 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		// GLJPanel in the center
 		add(gljpanel, BorderLayout.CENTER);
+				
+		_keyAdapter = new KeyAdapter3D(this);
+		gljpanel.addKeyListener(_keyAdapter);
 
 		_mouseAdapter = new MouseAdapter3D(this);
 		gljpanel.addMouseListener(_mouseAdapter);
 		gljpanel.addMouseMotionListener(_mouseAdapter);
 		gljpanel.addMouseWheelListener(_mouseAdapter);
 
-		_keyAdapter = new KeyAdapter3D(this);
-		gljpanel.addKeyListener(_keyAdapter);
-
 		createInitialItems();
 		setupMaintenanceTimer();
+		
+		gljpanel.requestFocus();
 	}
+	
 
 	// calls refresh at a slow rate to get rid of ghosts
 	private void setupMaintenanceTimer() {
