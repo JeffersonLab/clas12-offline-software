@@ -40,13 +40,10 @@ public class SplashWindow extends JWindow {
 	// The size of a tile.
 	private Dimension _tileSize;
 	
-	private String _version;
-	
 	private Font _font = Fonts.commonFont(Font.BOLD, 18);
 
 	public SplashWindow(String title, Color bg, int width, String backgroundImage, String version) {
 		
-		_version = version;
 		setLayout(new BorderLayout(2, 2));
 		
 		if (backgroundImage != null) {
@@ -64,7 +61,7 @@ public class SplashWindow extends JWindow {
 		
 		addCenter(bg, width);
 		addSouth(width);
-		addNorth(title);
+		addNorth(title, version);
 		pack();
 		GraphicsUtilities.centerComponent(this);
 	}
@@ -89,11 +86,25 @@ public class SplashWindow extends JWindow {
 		}
 	}
 	
-	private void addNorth(String title) {
+	private void addNorth(String title, String version) {
 		JPanel sp = new JPanel();
-		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 2));
-		JLabel label = new JLabel(title);
+		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 80, 2));
+
+		ImageIcon rubikIcon = ImageManager.getInstance().loadImageIcon("images/rubik80.gif");
+		if ((rubikIcon != null) && (rubikIcon.getImage() != null)) {
+			JLabel rlab = new JLabel(rubikIcon);
+			sp.add(rlab);
+		}
+
+		String s = title;
+		if (version != null) {
+			s = s + " " + version;
+		}
+		JLabel label = new JLabel(s);
+		label.setFont(_font);
 		sp.add(label);
+		
+
 		
 		final JButton cb = new JButton("Close");
 		
@@ -136,16 +147,6 @@ public class SplashWindow extends JWindow {
 					tile(g);
 				}
 				
-				if (_version != null) {
-					g.setFont(_font);
-					FontMetrics fm = getFontMetrics(_font);
-					int w = fm.stringWidth("" + _version + " ");
-					int h = fm.getHeight()+ 8;
-					
-					GraphicsUtilities.drawSimple3DRect(g, 4, 4, w, h, X11Colors.getX11Color("dark red"), false);
-					g.setColor(Color.white);
-					g.drawString(_version, 6, h-4);
-				}
 			}
 			
 			private void tile(Graphics g) {

@@ -4,6 +4,7 @@ import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotPanel;
@@ -30,6 +31,9 @@ public class CedHistoFiller implements IAccumulationListener {
 		case AccumulationManager.ACCUMULATION_CLEAR:
 			clearHisto(ced.dcHistoGrid);
 			clearHisto(ced.ftofHistoGrid);
+			clearHisto(ced.bstHistoGrid);
+			clearHisto(ced.pcalHistoGrid);
+			clearHisto(ced.ecHistoGrid);
 			break;
 
 		case AccumulationManager.ACCUMULATION_STARTED:
@@ -41,6 +45,9 @@ public class CedHistoFiller implements IAccumulationListener {
 
 			fillDcHistogramGrid(ced.dcHistoGrid);
 			fillFtofHistogramGrid(ced.ftofHistoGrid);
+			fillBstHistogramGrid(ced.bstHistoGrid);
+			fillPcalHistogramGrid(ced.bstHistoGrid);
+			fillEcHistogramGrid(ced.bstHistoGrid);
 			break;
 		}
 	}
@@ -52,7 +59,49 @@ public class CedHistoFiller implements IAccumulationListener {
 		}
 	}
 	
-	//fill the dc histo grid (view)
+	//fill the pcal histo grid (view)
+	private void fillPcalHistogramGrid(HistoGridView pcalGrid) {
+		if (pcalGrid == null) {
+			return;
+		}
+	}
+
+	//fill the ec histo grid (view)
+	private void fillEcHistogramGrid(HistoGridView ecGrid) {
+		if (ecGrid == null) {
+			return;
+		}
+	}
+	
+
+	//fill the bst histo grid (view)
+	private void fillBstHistogramGrid(HistoGridView bstGrid) {
+		if (bstGrid == null) {
+			return;
+		}
+		
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzFullBstData();
+		for (int lay0 = 0; lay0 < 8; lay0++) {
+			int row = lay0+1;
+			int supl0 = lay0/2;
+			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+				int col = sect0+1;
+				
+				PlotPanel ppan = bstGrid.getPlotPanel(row,
+						col);
+				HistoData hd = bstGrid.getHistoData(row, col);
+
+				for (int strip0 = 0; strip0 < 256; strip0++) {
+					hd.setCount(strip0, //do not add 1
+							hits[lay0][sect0][strip0]);
+					
+				}
+				ppan.getCanvas().needsRedraw(true);
+			}
+		}
+	}
+	
+	//fill the ftof histo grid (view)
 	private void fillFtofHistogramGrid(HistoGridView ftofGrid) {
 		if (ftofGrid == null) {
 			return;
@@ -86,9 +135,7 @@ public class CedHistoFiller implements IAccumulationListener {
 					
 				}
 
-				
 				ppan.getCanvas().needsRedraw(true);
-
 			}
 		}
 		

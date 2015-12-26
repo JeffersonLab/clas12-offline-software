@@ -8,6 +8,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.Box;
+import javax.swing.JLabel;
+
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
@@ -198,6 +201,9 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 						histo.getCanvas().addMouseMotionListener(view);
 						histo.getCanvas().addMouseListener(view);
 						histo.getCanvas().getParent().setBackground(unselectedColor);
+					}
+					else {
+						view.addComponent(new JLabel("empty cell"));
 					}
 					view._plotPanel[row - 1][col - 1] = histo;
 				}
