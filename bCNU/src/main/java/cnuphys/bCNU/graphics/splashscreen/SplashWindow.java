@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -147,6 +148,8 @@ public class SplashWindow extends JWindow {
 		
 		cb.addActionListener(al);
 		sp.add(cb);
+		
+		sp.setBorder(BorderFactory.createEtchedBorder());
 		add(sp, BorderLayout.NORTH);
 	}
 
@@ -199,6 +202,8 @@ public class SplashWindow extends JWindow {
 		}
 		
 		_center.setSize(new Dimension(width, 300));
+		
+		_center.setBorder(BorderFactory.createEtchedBorder());
 		add(_center, BorderLayout.CENTER);
 
 	}
@@ -211,6 +216,7 @@ public class SplashWindow extends JWindow {
 			}
 		};
 		
+		_scp.setBorder(BorderFactory.createEtchedBorder());
 		add(_scp, BorderLayout.SOUTH);
 	}
 }

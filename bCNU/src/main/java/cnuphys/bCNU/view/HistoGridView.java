@@ -228,10 +228,7 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 			return null;
 		}
 		
-		int numXticks = numBin-1;
-		while (numXticks > 9) {
-			numXticks /= 2;
-		}
+		int numXticks = Math.min(5, numBin-1);
 
 		PlotCanvas canvas = new PlotCanvas(data, title, xLabel, yLabel);
 
