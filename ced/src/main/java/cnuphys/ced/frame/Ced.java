@@ -82,7 +82,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.95.02";
+	private static final String _release = "build 0.95.03";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -618,9 +618,15 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			_instance.addInitialViews();
 			_instance.createMenus();
-
+			_instance.placeViewsOnVirtualDesktop();
 			// make sure plot manager is ready
 			//PlotManager.getInstance();
+			
+//			ced.createProgressBar();
+			_instance.createBusyPanel();
+			_instance.createEventNumberLabel();
+			MagneticFields.addMagneticFieldChangeListener(_instance);
+
 		}
 		return _instance;
 	}
@@ -928,18 +934,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		final Ced ced = getInstance();
 
-//		ced.createProgressBar();
-		ced.createBusyPanel();
-		ced.createEventNumberLabel();
-		MagneticFields.addMagneticFieldChangeListener(ced);
-		ced.placeViewsOnVirtualDesktop();
-		splashWindow.setVisible(false);
-
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
+				splashWindow.setVisible(false);
 				ced.setVisible(true);
 				splashWindow.writeCachedText();
 				ced.fixTitle();
