@@ -155,6 +155,7 @@ public class SectorView extends CedView implements ChangeListener {
 			X11Colors.getX11Color("wheat") };
 
 	private CoordinateTransform _coordinateTransform;
+
 	/**
 	 * Create a sector view
 	 * 
@@ -179,7 +180,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// Recon drawer
 		_reconDrawer = new ReconDrawer(this);
-		
+
 		_coordinateTransform = new CoordinateTransform(this);
 	}
 
@@ -224,9 +225,9 @@ public class SectorView extends CedView implements ChangeListener {
 
 				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP,
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
-				PropertySupport.TOOLBAR, true, 
-				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
+				CedView.TOOLBARBITS, PropertySupport.VISIBLE, true,
+				PropertySupport.HEADSUP, false,
 
 				PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue").darker(),
@@ -239,14 +240,12 @@ public class SectorView extends CedView implements ChangeListener {
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.PHISLIDER
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
-				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER +
-				+ ControlPanel.ACCUMULATIONLEGEND, 
-				DisplayBits.MAGFIELD
+				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER
+				+ +ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_CROSSES
-				+ DisplayBits.FTOFHITS
-				+ DisplayBits.ACCUMULATION 
-				+ DisplayBits.SCALE + DisplayBits.MCTRUTH, 2, 6);
+				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.FTOFHITS
+				+ DisplayBits.ACCUMULATION + DisplayBits.SCALE
+				+ DisplayBits.MCTRUTH, 2, 6);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 
@@ -568,26 +567,25 @@ public class SectorView extends CedView implements ChangeListener {
 	 */
 	public void getWorldFromLabXYZ(double x, double y, double z,
 			Point2D.Double wp) {
-		
+
 		_coordinateTransform.labToWorld(x, y, z, wp);
-//		wp.x = z;
-//		
-////		 int sector = GeometryManager.getSector(x, y);
-////			Point3D p3d = new Point3D(x, y, z);
-////			p3d.rotateZ(Math.toRadians(getPhiRotate()));
-////
-////		 wp.y = Math.hypot(p3d.x(), p3d.y());
-////		 if ((sector > 3)) {
-////		 wp.y = - wp.y;
-////		 }
-//
-//		double phiRotate = Math.toRadians(getPhiRotate());
-////		 double beta = Math.atan2(y, x);
-////		 double alpha = phiRotate-beta;
-//
-//		wp.y = x * Math.cos(phiRotate) + y * Math.sin(phiRotate);
-//		// wp.y = Math.sqrt(x*x + y*y)*Math.cos(alpha); //gives exact same!
-		
+		// wp.x = z;
+		//
+		// // int sector = GeometryManager.getSector(x, y);
+		// // Point3D p3d = new Point3D(x, y, z);
+		// // p3d.rotateZ(Math.toRadians(getPhiRotate()));
+		// //
+		// // wp.y = Math.hypot(p3d.x(), p3d.y());
+		// // if ((sector > 3)) {
+		// // wp.y = - wp.y;
+		// // }
+		//
+		// double phiRotate = Math.toRadians(getPhiRotate());
+		// // double beta = Math.atan2(y, x);
+		// // double alpha = phiRotate-beta;
+		//
+		// wp.y = x * Math.cos(phiRotate) + y * Math.sin(phiRotate);
+		// // wp.y = Math.sqrt(x*x + y*y)*Math.cos(alpha); //gives exact same!
 
 	}
 
@@ -671,7 +669,8 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// we are essentially display a plan yp=0, with xp vertical and zp
 		// horizontal. We need
-		// to rotate around z by "phiRotate" to get the x and y coordinates. Note
+		// to rotate around z by "phiRotate" to get the x and y coordinates.
+		// Note
 		// it is
 		// a simple rotation since yp is zero
 		double phiRotate = Math.toRadians(getPhiRotate());
@@ -993,7 +992,7 @@ public class SectorView extends CedView implements ChangeListener {
 	public boolean rightClicked(MouseEvent mouseEvent) {
 
 		System.err.println("RIGHT CLICKED");
-		
+
 		JPopupMenu popup = null;
 
 		final DCDataContainer dcData = _eventManager.getDCData();
@@ -1083,45 +1082,48 @@ public class SectorView extends CedView implements ChangeListener {
 						_controlPanel.getPhiSlider().setValue((int) sliderPhi);
 						getContainer().refresh();
 					} else if (source == integralItem) {
-						PlotView pview = Ced.getCed().getPlotView();
-						PlotCanvas canvas = pview.getPlotCanvas();
-						try {
-							SwimTrajectory traj = traj2D.getTrajectory3D();
-							traj.computeBDL(MagneticFields.getActiveField());
+						PlotView pview = ViewManager.getInstance()
+								.getPlotView();
+						if (pview != null) {
+							PlotCanvas canvas = pview.getPlotCanvas();
+							try {
+								SwimTrajectory traj = traj2D.getTrajectory3D();
+								traj.computeBDL(MagneticFields.getActiveField());
 
-							// do we already have data?
-							boolean havePlotData = (canvas.getDataSet() == null) ? false
-									: canvas.getDataSet().dataAdded();
+								// do we already have data?
+								boolean havePlotData = (canvas.getDataSet() == null) ? false
+										: canvas.getDataSet().dataAdded();
 
-							if (!havePlotData) {
-								initPlot(canvas, traj2D);
-							} else { // have to add a curve
-								int curveCount = canvas.getDataSet()
-										.getCurveCount();
-								DataSet dataSet = canvas.getDataSet();
-								dataSet.addCurve(
-										"X",
-										traj2D.summaryString()
-												+ " ["
-												+ MagneticFields
-														.getActiveFieldDescription()
-												+ "]");
-								for (double v[] : traj) {
-									dataSet.addToCurve(curveCount,
-											v[SwimTrajectory.PATHLEN_IDX],
-											v[SwimTrajectory.BXDL_IDX]);
+								if (!havePlotData) {
+									initPlot(canvas, traj2D);
+								} else { // have to add a curve
+									int curveCount = canvas.getDataSet()
+											.getCurveCount();
+									DataSet dataSet = canvas.getDataSet();
+									dataSet.addCurve(
+											"X",
+											traj2D.summaryString()
+													+ " ["
+													+ MagneticFields
+															.getActiveFieldDescription()
+													+ "]");
+									for (double v[] : traj) {
+										dataSet.addToCurve(curveCount,
+												v[SwimTrajectory.PATHLEN_IDX],
+												v[SwimTrajectory.BXDL_IDX]);
 
-									setCurveStyle(canvas, curveCount);
+										setCurveStyle(canvas, curveCount);
+									}
+
 								}
 
+								ViewManager.getInstance().setVisible(pview,
+										true);
+								canvas.repaint();
+							} catch (DataSetException e) {
+								e.printStackTrace();
 							}
-
-							ViewManager.getInstance().setVisible(pview, true);
-							canvas.repaint();
-						} catch (DataSetException e) {
-							e.printStackTrace();
-						}
-
+						} // pview not null
 					} // integral
 				}
 			};

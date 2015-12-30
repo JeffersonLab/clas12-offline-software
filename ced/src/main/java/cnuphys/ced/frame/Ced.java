@@ -682,15 +682,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		return _swimMenu;
 	}
 
-	/**
-	 * Obtain the single shared plotview
-	 * 
-	 * @return the single shared plotview
-	 */
-	public PlotView getPlotView() {
-		return _plotView;
-	}
-
 
 	private void createBusyPanel() {
 		getJMenuBar().add(Box.createHorizontalStrut(20));
