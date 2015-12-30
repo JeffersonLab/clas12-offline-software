@@ -10,6 +10,8 @@ import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -859,23 +861,31 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// create a console log listener
 		Log.getInstance().addLogListener(new ConsoleLogListener());
 		
-		//splash frame
-		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png", _release);
-		// now make the frame visible, in the AWT thread
-		EventQueue.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				splashWindow.setVisible(true);
-			}
-
-		});
-
 		// default plugin folder
 		_pluginFolder = Environment.getInstance().getHomeDirectory()
 				+ File.separator + "cedplugins";
 		// System.err.println("Plugin folder: [" + _pluginFolder + "]");
 
+		
+		//splash frame
+		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png", _release);
+		// now make the frame visible, in the AWT thread
+		try {
+			EventQueue.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+					splashWindow.setVisible(true);
+				}
+
+			});
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+//process command args
 		if ((arg != null) && (arg.length > 0)) {
 			int len = arg.length;
 			int lm1 = len - 1;
@@ -923,13 +933,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// initialize geometry
 		GeometryManager.getInstance();
 
-		final Ced ced = getInstance();
-
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
+				Ced ced = getInstance();
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
 				splashWindow.writeCachedText();
