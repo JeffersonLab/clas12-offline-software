@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import javax.swing.text.SimpleAttributeSet;
 
 import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
+import cnuphys.splot.plot.X11Colors;
 
 /**
  * Combines all log messages into one text pane. Uses different colors to
@@ -19,9 +20,9 @@ import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
 public class SimpleLogPane extends TextPaneScrollPane {
 
 	private static int CONFIGFONTSIZE = 12;
-	private static int WARNINGFONTSIZE = 12;
+	private static int WARNINGFONTSIZE = 11;
 	private static int INFOFONTSIZE = 12;
-	private static int ERRORFONTSIZE = 12;
+	private static int ERRORFONTSIZE = 11;
 
 	// reduce from seven levels
 	private static enum Grade {
@@ -104,15 +105,14 @@ public class SimpleLogPane extends TextPaneScrollPane {
 							false));
 			styles.put(
 					Grade.WARNING,
-					createStyle(Color.orange, "monospaced", WARNINGFONTSIZE,
+					createStyle(X11Colors.getX11Color("orange red"), "monospaced", WARNINGFONTSIZE,
 							false, true));
 			styles.put(
 					Grade.ERROR,
 					createStyle(Color.red, "monospaced", ERRORFONTSIZE, false,
 							true));
 		}
-		append(fixMessage(message), styles.get(grade), (grade == Grade.WARNING)
-				|| (grade == Grade.ERROR));
+		append(fixMessage(message), styles.get(grade), (grade == Grade.ERROR));
 	}
 
 }
