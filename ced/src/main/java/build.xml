@@ -14,12 +14,14 @@
 		<property name="f2j" value="numRec/lib/f2jutil.jar"/>
 		<property name="nr" value="numRec/lib/numRec.jar"/>
 		
+		<!-- deleted existing dir -->
+		<delete dir="${destdir}"/>
 		
 		<!-- copying  necessary stuff-->
 		<!-- copy coatjava from home dir-->
 		<copy todir="${destdir}">
 			<fileset includes="coatjava/etc/bankdefs/clas12/*.xml, coatjava/lib/clas/coat*.jar"  
-							dir="${user.home}" />
+							dir="${cnudir}" />
 		</copy>
 		
 		<!-- copy data (field maps)-->
@@ -30,7 +32,7 @@
 		<!-- copy jogl from home dir-->
 		<copy todir="${destdir}">
 			<fileset includes="JOGL/**" excludes="**/*src.zip"
-							dir="${user.home}" />
+							dir="${cnudir}" />
 		</copy>
 		
 
