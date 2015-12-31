@@ -107,9 +107,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// event menu
 	private ClasIoEventMenu _eventMenu;
 
-	// progress bar
-//	private static JProgressBar _progressBar;
-//	private static JLabel _progressLabel;
+	// busy panel shows working when reading file
 	private static BusyPanel _busyPanel;
 
 	// event number label on menu bar
@@ -621,10 +619,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_instance.addInitialViews();
 			_instance.createMenus();
 			_instance.placeViewsOnVirtualDesktop();
-			// make sure plot manager is ready
-			//PlotManager.getInstance();
-			
-//			ced.createProgressBar();
+
 			_instance.createBusyPanel();
 			_instance.createEventNumberLabel();
 			MagneticFields.addMagneticFieldChangeListener(_instance);
@@ -691,53 +686,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_busyPanel.setVisible(false);
 		getJMenuBar().add(_busyPanel);
 	}
-	
-	// create the progress bar
-//	private void createProgressBar() {
-//		getJMenuBar().add(Box.createHorizontalStrut(20));
-//		_progressLabel = new JLabel("             ");
-//		_progressLabel.setOpaque(true);
-//		_progressLabel.setBackground(Color.white);
-//		_progressLabel.setForeground(Color.red);
-//
-//		_progressBar = new JProgressBar() {
-//			@Override
-//			public void setString(String s) {
-//				_progressLabel.setText(s);
-//			}
-//		};
-//		_progressBar.setIndeterminate(true);
-//
-//		int mbh = getJMenuBar().getPreferredSize().height;
-//		int pbh = 10;
-//		final int vgap = Math.min(2, 1 + (mbh - pbh) / 2);
-//
-//		_progressBar.setVisible(false);
-//		Dimension size = new Dimension(60, pbh);
-//		_progressBar.setMinimumSize(size);
-//		_progressBar.setMaximumSize(size);
-//		_progressBar.setPreferredSize(size);
-//		_progressBar.setOpaque(true);
-//		_progressBar.setBackground(Color.white);
-//
-//		_progressLabel.setFont(Fonts.mediumFont);
-//
-//		JPanel panel = new JPanel() {
-//			@Override
-//			public Insets getInsets() {
-//				Insets def = super.getInsets();
-//				return new Insets(vgap, def.left + 2, 0, def.right + 2);
-//			}
-//		};
-//
-//		panel.setOpaque(true);
-//		panel.setBackground(Color.white);
-//		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 0));
-//
-//		panel.add(_progressLabel);
-//		panel.add(_progressBar);
-//		getJMenuBar().add(panel);
-//	}
 
 	// create the event number label
 	private void createEventNumberLabel() {
@@ -782,15 +730,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	public void magneticFieldChanged() {
 		fixTitle();
 	}
-
-//	/**
-//	 * Get the shared progress bar
-//	 * 
-//	 * @return the shared progress bar
-//	 */
-//	public static JProgressBar getProgressBar() {
-//		return _progressBar;
-//	}
 	
 	/**
 	 * Get the shared busy panel
@@ -850,6 +789,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		//for running from runnable jar (for coatjava)
 		String clas12dir = System.getProperty("CLAS12DIR");
+		
 		if (clas12dir == null) {
 			clas12dir = "coatjava";
 			System.setProperty("CLAS12DIR", clas12dir);
