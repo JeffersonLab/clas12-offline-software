@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -512,6 +513,18 @@ public final class Environment {
 	 */
 	public void setDragging(boolean dragging) {
 		_dragging = dragging;
+	}
+	
+	/**
+	 * Useful for making common look components
+	 * 
+	 * @param component the component
+	 * @param color the background color--if <code>null</code> use default.
+	 */
+	public void commonize(JComponent component, Color color) {
+		component.setOpaque(true);
+		color = (color == null) ? _defaultPanelBackgroundColor : color;
+		component.setBackground(color);
 	}
 
 	/**

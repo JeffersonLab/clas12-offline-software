@@ -25,9 +25,6 @@ public class KeyAdapter3D implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		
-		System.err.println("3D KEY PRESS");
-
-		// System.err.println("key pressed");
 		int keyCode = e.getKeyCode();
 		boolean shifted = e.isShiftDown();
 

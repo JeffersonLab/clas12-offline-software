@@ -8,7 +8,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-import javax.swing.Box;
 import javax.swing.JLabel;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -17,7 +16,6 @@ import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
-import cnuphys.bCNU.util.RowColumnPoint;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
