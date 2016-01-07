@@ -11,6 +11,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
@@ -47,10 +48,10 @@ public class McHitDrawer extends SectorViewDrawer {
 
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.DC, 
-				ColumnData.getDoubleArray("DC::true.avgX"),
-				ColumnData.getDoubleArray("DC::true.avgY"), 
-				ColumnData.getDoubleArray("DC::true.avgZ"), 
-				ColumnData.getIntArray("DC::true.pid"),
+				DC.avgX(),
+				DC.avgY(), 
+				DC.avgZ(), 
+				DC.pid(),
 				0);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 

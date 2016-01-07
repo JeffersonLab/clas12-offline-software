@@ -15,8 +15,8 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.item.HexSectorItem;
 
 public class CrossDrawer extends DCXYViewDrawer {
@@ -73,10 +73,10 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 		int crossCount = 0;
 		if (_mode == HB) {
-			crossCount = DataSupport.getHitBasedCrossCount();
+			crossCount = DC.hitBasedCrossCount();
 		}
 		else if (_mode == TB) {
-			crossCount = DataSupport.getTimeBasedCrossCount();
+			crossCount = DC.timeBasedCrossCount();
 		}
 
 		_fbRects[_mode].rects = null;
@@ -195,7 +195,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 		}
 
 		// hit based dc crosses?
-		int hbcrosscount = DataSupport.getHitBasedCrossCount();
+		int hbcrosscount = DC.hitBasedCrossCount();
 
 		if (hbcrosscount < 1) {
 			return;

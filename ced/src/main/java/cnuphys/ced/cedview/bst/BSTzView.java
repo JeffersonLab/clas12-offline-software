@@ -39,7 +39,6 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;

@@ -1717,6 +1717,7 @@ public class BaseContainer extends JComponent
 	 * Have you handled the print button so the default action is ignored.
 	 * @return <code>true</code> if the printer button was handled.
 	 */
+	@Override
 	public boolean handledPrint() {
 		return false;
 	}
@@ -1725,6 +1726,7 @@ public class BaseContainer extends JComponent
 	 * Have you handled the camera button so the default action is ignored.
 	 * @return <code>true</code> if the camera button was handled.
 	 */
+	@Override
 	public boolean handledCamera() {
 		return false;
 	}

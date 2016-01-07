@@ -5,8 +5,6 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.util.Vector;
 
-import javax.swing.SwingUtilities;
-
 import cnuphys.splot.pdata.DataSet;
 
 public class DataDrawer {

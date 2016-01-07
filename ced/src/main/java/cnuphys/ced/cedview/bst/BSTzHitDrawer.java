@@ -130,7 +130,7 @@ public class BSTzHitDrawer implements IDrawable {
 							fract = ((double) hitCount) / maxHit;
 						}
 						else {
-							fract = Math.log((double) (hitCount + 1.))
+							fract = Math.log(hitCount + 1.)
 									/ Math.log(maxHit + 1.);
 						}
 

@@ -7,7 +7,6 @@ import javax.swing.JMenuItem;
 
 import cnuphys.ced.event.plot.ReconstructionPlotGrid;
 import cnuphys.ced.frame.Ced;
-import cnuphys.splot.example.MemoryUsageDialog;
 
 public class PlotManager {
 

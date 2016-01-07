@@ -14,7 +14,6 @@ import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.geometry.Transformations;
-import cnuphys.ced.noise.NoiseManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.splot.plot.DoubleFormat;
@@ -24,7 +23,7 @@ public class DataSupport {
 	// for uniform feedback colors
 	public static final String prelimColor = "$orange$";
 	public static final String trueColor = "$Alice Blue$";
-	public static final String dgtxColor = "$Moccasin$";
+	public static final String dgtzColor = "$Moccasin$";
 	public static final String reconColor = "$coral$";
 
 	// ftof constants
@@ -43,30 +42,6 @@ public class DataSupport {
 	public static final int FB_TOTEDEP = 04; // total energy dep (MeV)
 	public static final int FB_LOCAL_XYZ = 010;
 
-	/**
-	 * Some DC noise feedback
-	 * 
-	 * @param hitIndex the hit index
-	 * @param feedbackStrings the collection of feedback strings
-	 */
-	public static void dcNoiseFeedback(int hitIndex,
-			List<String> feedbackStrings) {
-		if (hitIndex < 0) {
-			return;
-		}
-
-		boolean noise[] = NoiseManager.getInstance().getNoise();
-
-		if ((noise == null) || (hitIndex >= noise.length)) {
-			return;
-		}
-
-		String noiseStr = prelimColor + "Noise Hit Guess: "
-				+ (((noise != null) && noise[hitIndex]) ? "noise"
-						: "not noise");
-		feedbackStrings.add(noiseStr);
-
-	}
 
 	/**
 	 * Add the pid information
@@ -120,7 +95,7 @@ public class DataSupport {
 		String adcStr = safeString(ADC, hitIndex);
 		String tdcStr = safeString(TDC, hitIndex);
 
-		feedbackStrings.add(dgtxColor + "adc " + adcStr + "  tdc " + tdcStr
+		feedbackStrings.add(dgtzColor + "adc " + adcStr + "  tdc " + tdcStr
 				+ " ns" + "  hit " + hitStr);
 
 	}
@@ -186,83 +161,16 @@ public class DataSupport {
 			return;
 		}
 
-		feedbackStrings.add(dgtxColor + "panel_1B  sector " + sector[hitIndex]
+		feedbackStrings.add(dgtzColor + "panel_1B  sector " + sector[hitIndex]
 				+ "  paddle " + paddle[hitIndex]);
 
-		feedbackStrings.add(dgtxColor + "adc_left " + ADCL[hitIndex]
+		feedbackStrings.add(dgtzColor + "adc_left " + ADCL[hitIndex]
 				+ "  adc_right " + ADCR[hitIndex]);
-		feedbackStrings.add(dgtxColor + "tdc_left " + TDCL[hitIndex]
+		feedbackStrings.add(dgtzColor + "tdc_left " + TDCL[hitIndex]
 				+ "  tdc_right " + TDCR[hitIndex]);
 
 	}
 
-	/**
-	 * Add some dgtz hit feedback for dc
-	 * 
-	 * @param hitIndex the hit index
-	 * @param feedbackStrings the collection of feedback strings
-	 */
-	public static void dcDgtzFeedback(int hitIndex,
-			List<String> feedbackStrings) {
-
-		if (hitIndex < 0) {
-			return;
-		}
-
-		int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-		if ((sector == null) || (hitIndex >= sector.length)) {
-			return;
-		}
-		int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-		int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-		int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
-		int lr[] = ColumnData.getIntArray("DC::dgtz.LR");
-		int hitn[] = ColumnData.getIntArray("DC::dgtz.hitn");
-		double doca[] = ColumnData.getDoubleArray("DC::dgtz.doca");
-		double sdoca[] = ColumnData.getDoubleArray("DC::dgtz.sdoca");
-		double time[] = ColumnData.getDoubleArray("DC::dgtz.time");
-		double stime[] = ColumnData.getDoubleArray("DC::dgtz.stime");
-
-		feedbackStrings.add(dgtxColor + "sector " + sector[hitIndex]
-				+ "  superlayer " + superlayer[hitIndex] + "  layer "
-				+ layer[hitIndex] + "  wire " + wire[hitIndex]);
-
-		String lraStr = safeString(lr, hitIndex);
-		String hitStr = safeString(hitn, hitIndex);
-		String docaStr = safeString(doca, hitIndex, 1);
-		String timeStr = safeString(time, hitIndex, 1);
-		String sdocaStr = safeString(sdoca, hitIndex, 1);
-		String stimeStr = safeString(stime, hitIndex, 1);
-
-		feedbackStrings.add(dgtxColor + "LRA " + lraStr + "  hit " + hitStr);
-		feedbackStrings.add(
-				dgtxColor + "doca " + docaStr + "  sdoca " + sdocaStr + " mm");
-		feedbackStrings.add(
-				dgtxColor + "time " + timeStr + "  stime " + stimeStr + " ns");
-	}
-
-	/**
-	 * Some truth feedback for DC
-	 * 
-	 * @param hitIndex the hit index
-	 * @param feedbackStrings the collection of feedback strings
-	 */
-	public static void dcTrueFeedback(int hitIndex,
-			List<String> feedbackStrings) {
-
-		if (hitIndex < 0) {
-			return;
-		}
-
-		double trackE[] = ColumnData.getDoubleArray("DC::true.trackE");
-		if ((trackE == null) || (hitIndex >= trackE.length)) {
-			return;
-		}
-
-		double etrack = trackE[hitIndex] / 1000; // to gev
-		feedbackStrings.add(trueColor + "true energy "
-				+ DoubleFormat.doubleFormat(etrack, 2) + " GeV");
-	}
 
 	/**
 	 * Some true feedback for ec and pcal
@@ -454,7 +362,7 @@ public class DataSupport {
 	 * @param index the array index
 	 * @return a string for printing
 	 */
-	private static String safeString(int[] array, int index) {
+	public static String safeString(int[] array, int index) {
 		if (array == null) {
 			return "null";
 		}
@@ -474,7 +382,7 @@ public class DataSupport {
 	 * @param numdec the number of decimal points
 	 * @return a string for printing
 	 */
-	private static String safeString(double[] array, int index, int numdec) {
+	public static String safeString(double[] array, int index, int numdec) {
 		if (array == null) {
 			return "null";
 		}
@@ -685,65 +593,6 @@ public class DataSupport {
 		return array[index];
 	}
 
-	/**
-	 * Get the index of the dc hit
-	 * 
-	 * @param sect the 1-based sector
-	 * @param supl the 1-based superlayer
-	 * @param lay the 1-based layer
-	 * @param wireid the 1-based wire
-	 * @return the index of a hit with these parameters, or -1 if not found
-	 */
-	public static int dcGetHitIndex(int sect, int supl, int lay, int wireid) {
-
-		int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-		int hitCount = (sector == null) ? 0 : sector.length;
-		if (hitCount < 1) {
-			return -1;
-		}
-		int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-		int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-		int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
-
-		for (int i = 0; i < hitCount; i++) {
-			if ((sect == sector[i]) && (supl == superlayer[i])
-					&& (lay == layer[i]) && (wireid == wire[i])) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Get the number of hit based crosses
-	 * 
-	 * @return he number of hit based crosses
-	 */
-	public static int getHitBasedCrossCount() {
-		int sector[] = ColumnData.getIntArray("HitBasedTrkg::HBCrosses.sector");
-		return (sector == null) ? 0 : sector.length;
-	}
-
-	/**
-	 * Get the number of time based crosses
-	 * 
-	 * @return the number of time based crosses
-	 */
-	public static int getTimeBasedCrossCount() {
-		int sector[] = ColumnData
-				.getIntArray("TimeBasedTrkg::TBCrosses.sector");
-		return (sector == null) ? 0 : sector.length;
-	}
-
-	/**
-	 * Get the number of time based tracks
-	 * 
-	 * @return the number of time based tracks
-	 */
-	public static int getTimeBasedTrackCount() {
-		int sector[] = ColumnData.getIntArray("TimeBasedTrkg::TBTracks.sector");
-		return (sector == null) ? 0 : sector.length;
-	}
 
 	/**
 	 * Get the number of reconstructed crosses for bmt
@@ -989,15 +838,6 @@ public class DataSupport {
 			count = PCAL.hitCount();
 		}
 		return count;
-	}
-
-	/**
-	 * Get the dc hit count for the current event
-	 * @return the dc hit count
-	 */
-	public static int dcGetHitCount() {
-		int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-		return (sector == null) ? 0 : sector.length;
 	}
 
 

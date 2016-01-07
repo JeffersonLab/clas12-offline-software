@@ -752,6 +752,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		return oldClip;
 	}
 	
+	@Override
 	public void accumulationEvent(int reason) {
 		switch (reason) {
 		case AccumulationManager.ACCUMULATION_STARTED:

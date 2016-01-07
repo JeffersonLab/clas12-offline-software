@@ -45,6 +45,7 @@ import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.DefinitionManager;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.ECGeometry;
@@ -116,7 +117,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 	// memory usage dialog
 	private MemoryUsageDialog _memoryUsage;
-
+	
 	// some views
 	private AllDCView _allDCView;
 	private VirtualView _virtualView;
@@ -495,6 +496,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add to the event menu
 		addToEventMenu();
+		
+		//define menu
+		mmgr.addMenu(DefinitionManager.getInstance().getMenu());
 	}
 	
 	//add to the file menu
@@ -795,7 +799,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			clas12dir = "coatjava";
 			System.setProperty("CLAS12DIR", clas12dir);
 		}
-		System.err.println("CLAS12DIR: " + clas12dir);
 
 		FileUtilities.setDefaultDir("data");
 
@@ -805,7 +808,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// default plugin folder
 		_pluginFolder = Environment.getInstance().getHomeDirectory()
 				+ File.separator + "cedplugins";
-		// System.err.println("Plugin folder: [" + _pluginFolder + "]");
 
 		
 		//splash frame
@@ -892,6 +894,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
+		Log.getInstance().config("CLAS12DIR: " + clas12dir);
 		Log.getInstance().info("ced is ready.");
 
 		// test demo plugin

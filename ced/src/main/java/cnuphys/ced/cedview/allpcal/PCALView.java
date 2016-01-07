@@ -16,7 +16,6 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;

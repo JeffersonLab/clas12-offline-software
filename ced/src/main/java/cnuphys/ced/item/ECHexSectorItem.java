@@ -192,7 +192,7 @@ public class ECHexSectorItem extends HexSectorItem {
 							fract = ((double) hit) / maxHit;
 						}
 						else {
-							fract = Math.log((double) (hit + 1.))
+							fract = Math.log(hit + 1.)
 									/ Math.log(maxHit + 1.);
 						}
 

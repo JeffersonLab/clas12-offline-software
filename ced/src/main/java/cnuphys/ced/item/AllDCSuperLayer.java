@@ -17,7 +17,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
 //import cnuphys.ced.dcnoise.test.TestParameters;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.DCGeometry;
@@ -223,14 +222,14 @@ public class AllDCSuperLayer extends RectangleItem {
 			drawMasks(g, container, parameters);
 		}
 
-		int hitCount = DataSupport.dcGetHitCount();
+		int hitCount = DC.hitCount();
 
 		if (hitCount > 0)  {
-			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
-			int pid[] = ColumnData.getIntArray("DC::true.pid");
+			int sector[] = DC.sector();
+			int superlayer[] = DC.superlayer();
+			int layer[] = DC.layer();
+			int wire[] = DC.wire();
+			int pid[] = DC.pid();
 			
 			for (int i = 0; i < hitCount; i++) {
 				int sect1 = sector[i]; // 1 based
@@ -461,7 +460,7 @@ public class AllDCSuperLayer extends RectangleItem {
 					fract = ((double) hitCount) / maxHit;
 				}
 				else {
-					fract = Math.log((double)(hitCount+1.))/Math.log(maxHit+1.);
+					fract = Math.log(hitCount+1.)/Math.log(maxHit+1.);
 				}
 				
 				AccumulationManager.getInstance();
@@ -560,15 +559,15 @@ public class AllDCSuperLayer extends RectangleItem {
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");
 
-		int hitIndex = DataSupport.dcGetHitIndex(_sector, _superLayer, layer, wire);
+		int hitIndex = DC.getHitIndex(_sector, _superLayer, layer, wire);
 		if (hitIndex < 0) {
 			feedbackStrings.add("superlayer " + _superLayer + "  layer "
 					+ layer + "  wire " + wire);
 		} else {
-			DataSupport.dcNoiseFeedback(hitIndex, feedbackStrings);
-			DataSupport.dcTrueFeedback(hitIndex, feedbackStrings);
+			DC.noiseFeedback(hitIndex, feedbackStrings);
+			DC.trueFeedback(hitIndex, feedbackStrings);
 			DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
-			DataSupport.dcDgtzFeedback(hitIndex, feedbackStrings);
+			DC.dgtzFeedback(hitIndex, feedbackStrings);
 		}
 
 	}

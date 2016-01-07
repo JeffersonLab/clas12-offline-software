@@ -9,8 +9,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.DC;
 
 public class CedDemoPlugin extends CedPlugin {
 
@@ -90,14 +89,14 @@ public class CedDemoPlugin extends CedPlugin {
 			}
 		}
 		
-		int hitCount = DataSupport.dcGetHitCount();
+		int hitCount = DC.hitCount();
 		
 		if (hitCount > 0) {
-			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
-			int tdc[] = ColumnData.getIntArray("DC::dgtz.tdc");
+			int sector[] = DC.sector();
+			int superlayer[] = DC.superlayer();
+			int layer[] = DC.layer();
+			int wire[] = DC.wire();
+			int tdc[] = DC.tdc();
 			
 			for (int hit = 0; hit < hitCount; hit++) {
 				int sect = sector[hit]; // 1 based

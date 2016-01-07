@@ -10,8 +10,6 @@ import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import org.jlab.geom.prim.Line3D;
-
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
@@ -191,14 +189,15 @@ public class SectorSuperLayer extends PolygonItem {
 	
 	private void drawSingleModeHits(Graphics g, IContainer container) {
 		
-		int hitCount = DataSupport.dcGetHitCount();
+		int hitCount = DC.hitCount();
 
 		if (hitCount > 0)  {
-			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
-			int pid[] = ColumnData.getIntArray("DC::true.pid");
+			int sector[] = DC.sector();
+			int superlayer[] = DC.superlayer();
+			int layer[] = DC.layer();
+			int wire[] = DC.wire();
+			int pid[] = DC.pid();
+			double doca[] = DC.doca();
 			
 			for (int i = 0; i < hitCount; i++) {
 				try {
@@ -223,10 +222,8 @@ public class SectorSuperLayer extends PolygonItem {
 
 						int pdgid = (pid == null) ? -1
 								: pid[i];
-
-						double doca = DataSupport.getDouble("DC::dgtz.doca", i);
 						
-						drawGemcDCHit((Graphics2D)g, container, lay1, wire1, noise, pdgid, doca);
+						drawGemcDCHit(g, container, lay1, wire1, noise, pdgid, doca[i]);
 					}
 				} catch (NullPointerException e) {
 					System.err.println(
@@ -259,7 +256,7 @@ public class SectorSuperLayer extends PolygonItem {
 					fract = ((double) hit) / maxHit;
 				}
 				else {
-					fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+					fract = Math.log(hit+1.)/Math.log(maxHit+1.);
 				}
 
 				Color color = AccumulationManager.getInstance()
@@ -724,17 +721,17 @@ public class SectorSuperLayer extends PolygonItem {
 				int wire = getWire(layer, worldPoint);
 				if ((wire > 0) && (wire <= GeoConstants.NUM_WIRE)) {
 
-					int hitIndex = DataSupport.dcGetHitIndex(_sector, _superLayer,
+					int hitIndex = DC.getHitIndex(_sector, _superLayer,
 							layer, wire);
 					if (hitIndex < 0) {
 						feedbackStrings.add("superlayer " + _superLayer
 								+ "  layer " + layer + "  wire " + wire);
 					}
 					else {
-						DataSupport.dcNoiseFeedback(hitIndex, feedbackStrings);
-						DataSupport.dcTrueFeedback(hitIndex, feedbackStrings);
+						DC.noiseFeedback(hitIndex, feedbackStrings);
+						DC.trueFeedback(hitIndex, feedbackStrings);
 						DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
-						DataSupport.dcDgtzFeedback(hitIndex, feedbackStrings);
+						DC.dgtzFeedback(hitIndex, feedbackStrings);
 					}
 
 				} // good wire

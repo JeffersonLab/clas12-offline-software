@@ -224,7 +224,7 @@ public class SectorECItem extends PolygonItem {
 				fract = ((double) hit) / maxHit;
 			}
 			else {
-				fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+				fract = Math.log(hit+1.)/Math.log(maxHit+1.);
 			}
 			
 			Point2D.Double wp[] = getStrip(strip0);

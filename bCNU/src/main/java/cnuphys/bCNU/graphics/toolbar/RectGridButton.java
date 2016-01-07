@@ -1,12 +1,10 @@
 package cnuphys.bCNU.graphics.toolbar;
 
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.rubberband.IRubberbanded;
 import cnuphys.bCNU.graphics.rubberband.Rubberband;
-import cnuphys.bCNU.item.AItem;
 
 @SuppressWarnings("serial")
 public class RectGridButton extends ToolBarToggleButton implements

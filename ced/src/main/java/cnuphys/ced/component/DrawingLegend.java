@@ -16,12 +16,10 @@ import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
-import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.sectorview.SectorView;
-import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DataDrawSupport;
 
 public class DrawingLegend extends JComponent {
