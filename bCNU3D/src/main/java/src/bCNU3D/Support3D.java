@@ -4,6 +4,7 @@ import java.awt.Color;
 import com.jogamp.graph.geom.SVertex;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES1;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -82,10 +83,10 @@ public class Support3D {
 		int np = coords.length / 3;
 
 		if (circular) {
-			gl.glEnable(GL2.GL_POINT_SMOOTH);
+			gl.glEnable(GL2ES1.GL_POINT_SMOOTH);
 		}
 		else {
-			gl.glDisable(GL2.GL_POINT_SMOOTH);
+			gl.glDisable(GL2ES1.GL_POINT_SMOOTH);
 		}
 		gl.glBegin(GL.GL_POINTS);
 		setColor(gl, color);
@@ -151,10 +152,10 @@ public class Support3D {
 
 		setColor(gl, color);
 		if (circular) {
-			gl.glEnable(GL2.GL_POINT_SMOOTH);
+			gl.glEnable(GL2ES1.GL_POINT_SMOOTH);
 		}
 		else {
-			gl.glDisable(GL2.GL_POINT_SMOOTH);
+			gl.glDisable(GL2ES1.GL_POINT_SMOOTH);
 		}
 
 		gl.glBegin(GL.GL_POINTS);

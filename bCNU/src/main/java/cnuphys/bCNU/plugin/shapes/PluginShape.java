@@ -3,8 +3,6 @@ package cnuphys.bCNU.plugin.shapes;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.Properties;
-import java.util.UUID;
-
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.style.SymbolType;
 import cnuphys.bCNU.item.AItem;
