@@ -33,11 +33,11 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
-import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.item.DCHexSectorItem;
 import cnuphys.ced.item.HexSectorItem;
@@ -232,18 +232,17 @@ public class DCXYView extends HexView {
 			if (showMcTruth()) {
 				_mcHitDrawer.draw(g, container);
 				
-				DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
-
-				int hitCount = dcData.getHitCount(0);
+				int hitCount = DataSupport.dcGetHitCount();
+				
 				if (hitCount > 0) {
+					int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
+					int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
+					int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
+					int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
 					
 					Graphics2D g2 = (Graphics2D)g;
 					Stroke oldStroke = g2.getStroke();
 					g2.setStroke(stroke);
-					int sector[] = dcData.dc_dgtz_sector;
-					int superlayer[] = dcData.dc_dgtz_superlayer;
-					int layer[] = dcData.dc_dgtz_layer;
-					int wire[] = dcData.dc_dgtz_wire;
 					
 					Point pp1 = new Point();
 					Point pp2 = new Point();
@@ -261,7 +260,9 @@ public class DCXYView extends HexView {
 					}
 					
 					g2.setStroke(oldStroke);
-				} //hitcount >0
+
+				} //hitCount > 0
+				
 			}
 		}
 		else {
@@ -356,7 +357,7 @@ public class DCXYView extends HexView {
 								fract = ((double) hitCount) / maxHit;
 							}
 							else {
-								fract = Math.log((double) (hitCount + 1.))
+								fract = Math.log(hitCount + 1.)
 										/ Math.log(maxHit + 1.);
 							}
 

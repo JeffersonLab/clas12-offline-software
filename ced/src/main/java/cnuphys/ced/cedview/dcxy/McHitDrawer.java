@@ -10,9 +10,9 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ADataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 
@@ -40,20 +40,17 @@ public class McHitDrawer extends DCXYViewDrawer {
 			return;
 		}
 
-		// dc and ftof data?
-		DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
-
 		_fbRects.clear();
 
-		showGemcXYHits(g, container, dcData);
+		showGemcXYHits(g, container);
 	}
 
-	private void showGemcXYHits(Graphics g, IContainer container,
-			DCDataContainer data) {
-		double x[] = data.dc_true_avgX;
-		double y[] = data.dc_true_avgY;
-		double z[] = data.dc_true_avgZ;
-		int pid[] = data.dc_true_pid;
+	private void showGemcXYHits(Graphics g, IContainer container) {
+		
+		double x[] = ColumnData.getDoubleArray("DC::true.avgX ");
+		double y[] = ColumnData.getDoubleArray("DC::true.avgY ");
+		double z[] = ColumnData.getDoubleArray("DC::true.avgZ ");
+		int pid[] = ColumnData.getIntArray("DC::true.pid ");
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {
 			return;
@@ -83,8 +80,8 @@ public class McHitDrawer extends DCXYViewDrawer {
 			String s = vecStr("Gemc Hit [" + (hitIndex + 1) + "] " + pidstr,
 					x[hitIndex] / 10, y[hitIndex] / 10, z[hitIndex] / 10)
 					+ " cm";
-			FeedbackRect rr = new FeedbackRect(pp.x - 4, pp.y - 4, 8, 8,
-					hitIndex, data, 0, s);
+			FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.DC, pp.x - 4, pp.y - 4, 8, 8,
+					hitIndex, 0, s);
 			_fbRects.addElement(rr);
 
 			DataDrawSupport.drawGemcHit(g, pp);
@@ -121,7 +118,7 @@ public class McHitDrawer extends DCXYViewDrawer {
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return ADataContainer.trueColor + prompt + " ("
+		return DataSupport.trueColor + prompt + " ("
 				+ DoubleFormat.doubleFormat(vx, 3) + ", "
 				+ DoubleFormat.doubleFormat(vy, 3) + ", "
 				+ DoubleFormat.doubleFormat(vz, 3) + ")";

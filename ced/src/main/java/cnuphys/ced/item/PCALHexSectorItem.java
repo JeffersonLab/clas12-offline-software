@@ -16,8 +16,10 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
+import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
 
@@ -25,11 +27,6 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 	// the view owner
 	private PCALView _pcalView;
-
-	// cache the strip polygons
-	// private Polygon[][] _stripPoly = new Polygon[3][68];
-
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	public static final Color baseFillColor = new Color(139, 0, 0, 160);
 
@@ -76,8 +73,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 		drawOutlines(g, container, Color.lightGray);
 
-		ECDataContainer ecData = _eventManager.getECData();
-		if (ecData.getHitCount(ECDataContainer.PCAL_OPTION) > 0) {
+		if (DataSupport.ecGetHitCount(DataSupport.PCAL_OPTION) > 0) {
 			drawPCALHits(g, container);
 		}
 
@@ -117,37 +113,41 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 	//draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container) {
-		// ClasIoEventManager.getInstance().computeSomeScalingFactors();
+		
+		int hitCount = PCAL.hitCount();
+		if (hitCount > 0) {
+			int sector[] = EC.sector();
+			int view[] = EC.view();
+			int strip[] = EC.strip();
+			double totEdep[] = EC.totEdep();
+			
+			for (int i = 0; i < hitCount; i++) {
+				if (sector[i] == getSector()) {
+					int view0 = view[i] - 1; // uvw
+					int strip0 = strip[i] - 1;
+					if (_pcalView.showStrips(view0)) {
+						Polygon poly = stripPolygon(container, view0, strip0);
 
-		ECDataContainer ecData = _eventManager.getECData();
-		for (int i = 0; i < ecData
-				.getHitCount(ECDataContainer.PCAL_OPTION); i++) {
-			if (ecData.pcal_dgtz_sector[i] == getSector()) {
-				int view0 = ecData.pcal_dgtz_view[i] - 1; // uvw
-				int strip0 = ecData.pcal_dgtz_strip[i] - 1;
-				if (_pcalView.showStrips(view0)) {
-					Polygon poly = stripPolygon(container, view0, strip0);
+						// Polygon poly = _stripPoly[view0][strip0];
 
-					// Polygon poly = _stripPoly[view0][strip0];
+						// if mctruth and have energy deposited, use it
+						if (_pcalView.showMcTruth() && (totEdep != null)) {
 
-					// if mctruth and have energy deposited, use it
-					if (_pcalView.showMcTruth()
-							&& (ecData.pcal_true_totEdep != null)) {
-
-						int alpha = (int) ((255 * ecData.pcal_true_totEdep[i])
-								/ (ClasIoEventManager.getInstance()
-										.getMaxEdepCal(0)));
-						alpha = Math.max(60, Math.min(255, alpha));
-						g.setColor(new Color(255, 0, 0, alpha));
+							int alpha = (int) ((255 * totEdep[i])
+									/ (ClasIoEventManager.getInstance()
+											.getMaxEdepCal(0)));
+							alpha = Math.max(60, Math.min(255, alpha));
+							g.setColor(new Color(255, 0, 0, alpha));
+						}
+						else {
+							g.setColor(baseFillColor);
+						}
+						g.fillPolygon(poly);
+						g.drawPolygon(poly);
 					}
-					else {
-						g.setColor(baseFillColor);
-					}
-					g.fillPolygon(poly);
-					g.drawPolygon(poly);
 				}
-			}
-		}
+			} //end for loop
+		} // hitCount > 0
 	}
 	
 	//draw accumulated hits
@@ -330,25 +330,19 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 				// any hits?
 
-				ECDataContainer ecData = _eventManager.getECData();
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 					for (int stripType = 0; stripType < 3; stripType++) {
 						if (_pcalView.showStrips(stripType)) {
-							Vector<HitRecord> hits = ecData.getMatchingHits(
+							Vector<HitRecord> hits = DataSupport.ecGetMatchingHits(
 									getSector(), 1, stripType + 1,
 									uvw[stripType],
-									ECDataContainer.PCAL_OPTION);
+									DataSupport.PCAL_OPTION);
 
 							if (hits != null) {
 								for (HitRecord hit : hits) {
-									ecData.onHitFeedbackStrings(hit.hitIndex,
-											ECDataContainer.PCAL_OPTION,
-											ecData.pcal_true_pid,
-											ecData.pcal_true_mpid,
-											ecData.pcal_true_tid,
-											ecData.pcal_true_mtid,
-											ecData.pcal_true_otid,
-											feedbackStrings);
+									DataSupport.ecPreliminaryFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
+									DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
+									DataSupport.ecDgtzFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
 								}
 							}
 						}

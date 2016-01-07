@@ -8,13 +8,13 @@ import java.util.Vector;
 
 import org.jlab.geom.prim.Point3D;
 
-import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ADataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
 
@@ -45,18 +45,15 @@ public class McHitDrawer extends PCALViewDrawer {
 			return;
 		}
 
-		ECDataContainer ecData = _eventManager.getECData();
-
-		showGemcXYZHits(g, container, ecData);
+		showGemcXYZHits(g, container);
 	}
 
 	// the actual hit drawing
-	private void showGemcXYZHits(Graphics g, IContainer container,
-			ECDataContainer data) {
+	private void showGemcXYZHits(Graphics g, IContainer container) {
 
-		double x[] = data.pcal_true_avgX;
-		double y[] = data.pcal_true_avgY;
-		double z[] = data.pcal_true_avgZ;
+		double x[] = PCAL.avgX();
+		double y[] = PCAL.avgY();
+		double z[] = PCAL.avgZ();
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {
 			return;
@@ -80,20 +77,19 @@ public class McHitDrawer extends PCALViewDrawer {
 			PCALGeometry.getTransformations().clasToLocal(localP, clasP);
 			int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 			localP.setZ(0);
-
-			List<String> fbs = data.gemcHitFeedback(hitIndex,
-					ADataContainer.FB_CLAS_XYZ + ADataContainer.FB_CLAS_RTP
-							+ ADataContainer.FB_LOCAL_XYZ
-							+ ADataContainer.FB_TOTEDEP,
-					PCALGeometry.getTransformations(), data.pcal_true_pid,
-					data.pcal_true_avgX, data.pcal_true_avgY,
-					data.pcal_true_avgZ, data.pcal_true_totEdep);
+			
+			List<String> fbs = DataSupport.ecGemcHitFeedback(hitIndex, 
+					DataSupport.PCAL_OPTION, 
+					DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
+					+ DataSupport.FB_LOCAL_XYZ
+					+ DataSupport.FB_TOTEDEP, 
+					PCALGeometry.getTransformations());
 
 			// get the right item
 			_view.getHexSectorItem(sector).ijkToScreen(container, localP, pp);
 
-			FeedbackRect rr = new FeedbackRect(pp.x - 4, pp.y - 4, 8, 8,
-					hitIndex, data, 0, fbs);
+			FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.PCAL, pp.x - 4, pp.y - 4, 8, 8,
+					hitIndex, 0, fbs);
 			_fbRects.addElement(rr);
 
 			DataDrawSupport.drawGemcHit(g, pp);
@@ -120,39 +116,33 @@ public class McHitDrawer extends PCALViewDrawer {
 			return;
 		}
 
+		int strips[] = PCAL.strip();
+		int views[] = PCAL.view();
+		
 		for (FeedbackRect rr : _fbRects) {
 			boolean contains = rr.contains(screenPoint, feedbackStrings);
 			if (contains && (rr.hitIndex >= 0)) {
 
-				ADataContainer data = rr.dataContainer;
 				int hitIndex = rr.hitIndex;
 
 				// additional feedback
-				if (rr.dataContainer instanceof ECDataContainer) {
-					ECDataContainer ecdata = (ECDataContainer) (rr.dataContainer);
-					int strip = data.get(ecdata.pcal_dgtz_strip, hitIndex);
-					int view = rr.dataContainer.get(ecdata.pcal_dgtz_view,
-							hitIndex);
-
+				if (rr.type == FeedbackRect.Dtype.PCAL) {
+					
+					int strip = strips[hitIndex];
+					int view = views[hitIndex];
+					
 					if ((strip > 0) && (view > 0)) {
-						String s = ADataContainer.trueColor + "Gemc Hit "
+						String s = DataSupport.trueColor + "Gemc Hit "
 								+ " type "
 								+ DataDrawSupport.EC_VIEW_NAMES[view]
 								+ " strip " + strip;
 						feedbackStrings.add(s);
 					}
 				}
+				
 				return;
-			}
+			} //contains
 		}
 
-	}
-
-	// for writing out a vector
-	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return ADataContainer.trueColor + prompt + " ("
-				+ DoubleFormat.doubleFormat(vx, 3) + ", "
-				+ DoubleFormat.doubleFormat(vy, 3) + ", "
-				+ DoubleFormat.doubleFormat(vz, 3) + ")";
 	}
 }

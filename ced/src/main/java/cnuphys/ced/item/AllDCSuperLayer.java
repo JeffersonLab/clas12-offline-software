@@ -17,8 +17,9 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
 //import cnuphys.ced.dcnoise.test.TestParameters;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ADataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.noise.NoiseManager;
@@ -222,26 +223,36 @@ public class AllDCSuperLayer extends RectangleItem {
 			drawMasks(g, container, parameters);
 		}
 
-		DCDataContainer dcData = _eventManager.getDCData();
+		int hitCount = DataSupport.dcGetHitCount();
 
-		for (int i = 0; i < dcData.getHitCount(0); i++) {
-			int sect1 = dcData.dc_dgtz_sector[i]; // 1 based
-			int supl1 = dcData.dc_dgtz_superlayer[i]; // 1 based
+		if (hitCount > 0)  {
+			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
+			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
+			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
+			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+			int pid[] = ColumnData.getIntArray("DC::true.pid");
+			
+			for (int i = 0; i < hitCount; i++) {
+				int sect1 = sector[i]; // 1 based
+				int supl1 = superlayer[i]; // 1 based
 
-			if ((sect1 == _sector) && (supl1 == _superLayer)) {
-				int lay1 = dcData.dc_dgtz_layer[i]; // 1 based
-				int wire1 = dcData.dc_dgtz_wire[i]; // 1 based
+				if ((sect1 == _sector) && (supl1 == _superLayer)) {
+					int lay1 = layer[i]; // 1 based
+					int wire1 = wire[i]; // 1 based
 
-				boolean noise = false;
-				if (_noiseManager.getNoise() != null) {
-					noise = _noiseManager.getNoise()[i];
+					boolean noise = false;
+					if (_noiseManager.getNoise() != null) {
+						noise = _noiseManager.getNoise()[i];
+					}
+
+					int pdgid = (pid == null) ? -1
+							: pid[i];
+					drawGemcDCHit(g, container, lay1, wire1, noise, pdgid, wr);
 				}
+			} // for
 
-				int pid = (dcData.dc_true_pid == null) ? -1
-						: dcData.dc_true_pid[i];
-				drawGemcDCHit(g, container, lay1, wire1, noise, pid, wr);
-			}
-		} // for
+		}
+		
 	}
 
 	/**
@@ -538,30 +549,30 @@ public class AllDCSuperLayer extends RectangleItem {
 		NoiseReductionParameters parameters = _noiseManager.getParameters(
 				_sector - 1, _superLayer - 1);
 
-		feedbackStrings.add(ADataContainer.prelimColor
+		feedbackStrings.add(DataSupport.prelimColor
 				+ "Raw Occupancy "
 				+ DoubleFormat.doubleFormat(
 						100.0 * parameters.getRawOccupancy(), 2) + "%");
 		feedbackStrings
-				.add(ADataContainer.prelimColor
+				.add(DataSupport.prelimColor
 						+ "Reduced Occupancy "
 						+ DoubleFormat.doubleFormat(
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");
 
-		DCDataContainer dcData = _eventManager.getDCData();
-		int hitIndex = dcData.getHitIndex(_sector, _superLayer, layer, wire);
+		int hitIndex = DataSupport.dcGetHitIndex(_sector, _superLayer, layer, wire);
 		if (hitIndex < 0) {
 			feedbackStrings.add("superlayer " + _superLayer + "  layer "
 					+ layer + "  wire " + wire);
 		} else {
-			dcData.onHitFeedbackStrings(hitIndex, 0, dcData.dc_true_pid,
-					dcData.dc_true_mpid, dcData.dc_true_tid,
-					dcData.dc_true_mtid, dcData.dc_true_otid, feedbackStrings);
+			DataSupport.dcNoiseFeedback(hitIndex, feedbackStrings);
+			DataSupport.dcTrueFeedback(hitIndex, feedbackStrings);
+			DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
+			DataSupport.dcDgtzFeedback(hitIndex, feedbackStrings);
 		}
 
 	}
-
+		
 	/**
 	 * Get the feedback strings for single event mode
 	 * 

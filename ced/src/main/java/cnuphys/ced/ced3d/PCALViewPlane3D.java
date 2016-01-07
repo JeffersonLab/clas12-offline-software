@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.PCALGeometry;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -56,34 +56,37 @@ public class PCALViewPlane3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		// has EC and PCAL data (stack is always 1 for pcal)
-		ECDataContainer ecData = _eventManager.getECData();
-
-		int sector[] = ecData.pcal_dgtz_sector;
-		int view[] = ecData.pcal_dgtz_view;
-		int strip[] = ecData.pcal_dgtz_strip;
-		int pid[] = ecData.pcal_true_pid;
-
-		if (sector != null) {
+		int hitCount = PCAL.hitCount();
+		
+		if (hitCount > 0) {
+			int sector[] = PCAL.sector();
+			int view[] = PCAL.view();
+			int strip[] = PCAL.strip();
+			int pid[] = PCAL.pid();
+			double avgX[] = PCAL.avgX();
+			double avgY[] = PCAL.avgY();
+			double avgZ[] = PCAL.avgZ();
+			
 			float coords[] = new float[24];
-			for (int i = 0; i < sector.length; i++) {
+			for (int i = 0; i < hitCount; i++) {
 				if ((_sector == sector[i]) && (_view == view[i])) {
-					PCALGeometry.getStrip(_sector, _view, strip[i], coords);
+					PCALGeometry.getStrip(_sector, _view, strip[i],
+							coords);
 					if (showMCTruth() && (pid != null)) {
 						Color color = truthColor(pid, i);
 						drawStrip(drawable, color, coords);
-						double xcm = ecData.pcal_true_avgX[i] / 10;
-						double ycm = ecData.pcal_true_avgY[i] / 10;
-						double zcm = ecData.pcal_true_avgZ[i] / 10;
+						double xcm = avgX[i] / 10;
+						double ycm = avgY[i] / 10;
+						double zcm = avgZ[i] / 10;
 						drawMCPoint(drawable, xcm, ycm, zcm, color);
 
 					} else {
 						drawStrip(drawable, dgtzColor, coords);
 					}
 				}
-			}
-		}
+			} //end for loop
 
+		} //hitCount > 0
 	}
 
 	// show PCALs?

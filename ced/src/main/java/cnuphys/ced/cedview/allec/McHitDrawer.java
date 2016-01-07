@@ -8,13 +8,12 @@ import java.util.Vector;
 
 import org.jlab.geom.prim.Point3D;
 
-import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ADataContainer;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.EC;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 
@@ -44,20 +43,16 @@ public class McHitDrawer extends ECViewDrawer {
 			return;
 		}
 
-		ECDataContainer ecData = _eventManager.getECData();
-
-
-		showGemcXYZHits(g, container, ecData);
+		showGemcXYZHits(g, container);
 	}
 
 	// the actual hit drawing
-	private void showGemcXYZHits(Graphics g, IContainer container,
-			ECDataContainer data) {
+	private void showGemcXYZHits(Graphics g, IContainer container) {
 
-		double x[] = data.ec_true_avgX;
-		double y[] = data.ec_true_avgY;
-		double z[] = data.ec_true_avgZ;
-		int stack[] = data.ec_dgtz_stack;
+		double x[] = EC.avgX();
+		double y[] = EC.avgY();
+		double z[] = EC.avgZ();
+		int stack[] = EC.stack();
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)
 				|| (stack == null)) {
@@ -94,20 +89,19 @@ public class McHitDrawer extends ECViewDrawer {
 				int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 				localP.setZ(0);
 
-				List<String> fbs = data.gemcHitFeedback(hitIndex,
-						ADataContainer.FB_CLAS_XYZ + ADataContainer.FB_CLAS_RTP
-								+ ADataContainer.FB_LOCAL_XYZ
-								+ ADataContainer.FB_TOTEDEP,
-						ECGeometry.getTransformations(plane), data.ec_true_pid,
-						data.ec_true_avgX, data.ec_true_avgY,
-						data.ec_true_avgZ, data.ec_true_totEdep);
-
+				List<String> fbs = DataSupport.ecGemcHitFeedback(hitIndex, 
+						DataSupport.EC_OPTION, 
+						DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
+						+ DataSupport.FB_LOCAL_XYZ
+						+ DataSupport.FB_TOTEDEP, 
+						ECGeometry.getTransformations(plane));
+				
 				// get the right item
 				_view.getHexSectorItem(sector).ijkToScreen(container, localP,
 						pp);
 
-				FeedbackRect rr = new FeedbackRect(pp.x - 4, pp.y - 4, 8, 8,
-						hitIndex, data, 0, fbs);
+				FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.EC, pp.x - 4, pp.y - 4, 8, 8,
+						hitIndex, 0, fbs);
 				_fbRects.addElement(rr);
 
 				DataDrawSupport.drawGemcHit(g, pp);
@@ -135,25 +129,30 @@ public class McHitDrawer extends ECViewDrawer {
 			return;
 		}
 
+		int strips[] = EC.strip();
+		int stacks[] = EC.stack();
+		int views[] = EC.view();
+		
+		if ((strips == null) || (stacks == null) || (views == null)) {
+			return;
+		}
+		
 		for (FeedbackRect rr : _fbRects) {
 			boolean contains = rr.contains(screenPoint, feedbackStrings);
 			if (contains && (rr.hitIndex >= 0)) {
 
-				ADataContainer data = rr.dataContainer;
 				int hitIndex = rr.hitIndex;
 
 				// additional feedback
-				if (rr.dataContainer instanceof ECDataContainer) {
-					ECDataContainer ecdata = (ECDataContainer) (rr.dataContainer);
-					int strip = rr.dataContainer.get(ecdata.ec_dgtz_strip,
-							hitIndex);
-					int stack = rr.dataContainer.get(ecdata.ec_dgtz_stack,
-							hitIndex);
-					int view = rr.dataContainer.get(ecdata.ec_dgtz_view,
-							hitIndex);
+				if (rr.type == FeedbackRect.Dtype.EC) {
+					
+					int strip = strips[hitIndex];
+					int stack = stacks[hitIndex];
+					int view = views[hitIndex];
+					
 
 					if ((strip > 0) && (stack > 0) && (view > 0)) {
-						String s = ADataContainer.trueColor + "Gemc Hit "
+						String s = DataSupport.trueColor + "Gemc Hit "
 								+ " plane "
 								+ DataDrawSupport.EC_PLANE_NAMES[stack]
 								+ " type "
@@ -166,14 +165,6 @@ public class McHitDrawer extends ECViewDrawer {
 			}
 		}
 
-	}
-
-	// for writing out a vector
-	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return ADataContainer.trueColor + prompt + " ("
-				+ DoubleFormat.doubleFormat(vx, 3) + ", "
-				+ DoubleFormat.doubleFormat(vy, 3) + ", "
-				+ DoubleFormat.doubleFormat(vz, 3) + ")";
 	}
 
 }

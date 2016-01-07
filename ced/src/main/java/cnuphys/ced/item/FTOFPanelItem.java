@@ -17,7 +17,9 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -39,9 +41,6 @@ public class FTOFPanelItem extends PolygonItem {
 	// the container sector view
 	private SectorView _view;
 
-	// the event manager
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-
 	/**
 	 * Create a FTOFPanelItem
 	 * 
@@ -55,7 +54,7 @@ public class FTOFPanelItem extends PolygonItem {
 		_ftofPanel = panel;
 		_sector = sector;
 
-		_name = (panel != null) ? FTOFDataContainer.getName(panel
+		_name = (panel != null) ? DataSupport.ftofGetName(panel
 				.getPanelType()) : "??";
 
 		// _style.setFillColor(X11Colors.getX11Color("Wheat", 128));
@@ -130,13 +129,13 @@ public class FTOFPanelItem extends PolygonItem {
 		
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
-		case FTOFDataContainer.PANEL_1A:
+		case DataSupport.PANEL_1A:
 			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1aData();
 			break;
-		case FTOFDataContainer.PANEL_1B:
+		case DataSupport.PANEL_1B:
 			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1bData();
 			break;
-		case FTOFDataContainer.PANEL_2:
+		case DataSupport.PANEL_2:
 			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof2Data();
 			break;
 		}
@@ -172,34 +171,33 @@ public class FTOFPanelItem extends PolygonItem {
 	//works for both showMcTruth and not
 	private void drawSingleModeHits(Graphics g, IContainer container) {
 		// the overall container
-		FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
 		int panelType = _ftofPanel.getPanelType();
 
 		int pid[] = null;
 		int sector[] = null;
 		int paddles[] = null;
-		int hitCount = ftofData.getHitCount(panelType);
+		int hitCount = DataSupport.ftofGetHitCount(panelType);
 
 		if (hitCount < 1) {
 			return;
 		}
 
 		switch (panelType) {
-		case FTOFDataContainer.PANEL_1A:
-			pid = ftofData.ftof1a_true_pid;
-			sector = ftofData.ftof1a_dgtz_sector;
-			paddles = ftofData.ftof1a_dgtz_paddle;
+		case DataSupport.PANEL_1A:
+			pid = ColumnData.getIntArray("FTOF1A::true.pid");
+			sector = ColumnData.getIntArray("FTOF1A::dgtz.sector");
+			paddles = ColumnData.getIntArray("FTOF1A::dgtz.paddle");
 			break;
-		case FTOFDataContainer.PANEL_1B:
-			pid = ftofData.ftof1b_true_pid;
-			sector = ftofData.ftof1b_dgtz_sector;
-			paddles = ftofData.ftof1b_dgtz_paddle;
+		case DataSupport.PANEL_1B:
+			pid = ColumnData.getIntArray("FTOF1B::true.pid");
+			sector = ColumnData.getIntArray("FTOF1B::dgtz.sector");
+			paddles = ColumnData.getIntArray("FTOF1B::dgtz.paddle");
 			break;
-		case FTOFDataContainer.PANEL_2:
-			pid = ftofData.ftof2b_true_pid;
-			sector = ftofData.ftof2b_dgtz_sector;
-			paddles = ftofData.ftof2b_dgtz_paddle;
+		case DataSupport.PANEL_2:
+			pid = ColumnData.getIntArray("FTOF2B::true.pid");
+			sector = ColumnData.getIntArray("FTOF2B::dgtz.sector");
+			paddles = ColumnData.getIntArray("FTOF2B::dgtz.paddle");
 			break;
 		}
 		
@@ -337,12 +335,10 @@ public class FTOFPanelItem extends PolygonItem {
 				if (path.contains(worldPoint)) {
 
 					// hit?
-					// the overall container
-					FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
 					int panelType = _ftofPanel.getPanelType();
 
-					int hitIndex = ftofData.getHitIndex(_sector, index + 1,
+					int hitIndex = DataSupport.ftofGetHitIndex(_sector, index + 1,
 							panelType);
 
 					if (hitIndex < 0) {
@@ -351,34 +347,22 @@ public class FTOFPanelItem extends PolygonItem {
 								+ (index + 1));
 					} else {
 						switch (panelType) {
-						case FTOFDataContainer.PANEL_1A:
+						case DataSupport.PANEL_1A:
 							// System.err.println("CONTAINS HIT 1A");
-							ftofData.onHitFeedbackStrings(hitIndex, panelType,
-									ftofData.ftof1a_true_pid,
-									ftofData.ftof1a_true_mpid,
-									ftofData.ftof1a_true_tid,
-									ftofData.ftof1a_true_mtid,
-									ftofData.ftof1a_true_otid, feedbackStrings);
+							DataSupport.truePidFeedback(FTOF.pid_1A(), hitIndex, feedbackStrings);
+							DataSupport.ftofDgtzFeedback(hitIndex, DataSupport.PANEL_1A, feedbackStrings);
 							break;
 
-						case FTOFDataContainer.PANEL_1B:
+						case DataSupport.PANEL_1B:
 							// System.err.println("CONTAINS HIT 1B");
-							ftofData.onHitFeedbackStrings(hitIndex, panelType,
-									ftofData.ftof1b_true_pid,
-									ftofData.ftof1b_true_mpid,
-									ftofData.ftof1b_true_tid,
-									ftofData.ftof1b_true_mtid,
-									ftofData.ftof1b_true_otid, feedbackStrings);
+							DataSupport.truePidFeedback(FTOF.pid_1B(), hitIndex, feedbackStrings);
+							DataSupport.ftofDgtzFeedback(hitIndex, DataSupport.PANEL_1B, feedbackStrings);
 							break;
 
-						case FTOFDataContainer.PANEL_2:
+						case DataSupport.PANEL_2:
 							// System.err.println("CONTAINS HIT 2B");
-							ftofData.onHitFeedbackStrings(hitIndex, panelType,
-									ftofData.ftof2b_true_pid,
-									ftofData.ftof2b_true_mpid,
-									ftofData.ftof2b_true_tid,
-									ftofData.ftof2b_true_mtid,
-									ftofData.ftof2b_true_otid, feedbackStrings);
+							DataSupport.truePidFeedback(FTOF.pid_2B(), hitIndex, feedbackStrings);
+							DataSupport.ftofDgtzFeedback(hitIndex, DataSupport.PANEL_2, feedbackStrings);
 							break;
 
 						}

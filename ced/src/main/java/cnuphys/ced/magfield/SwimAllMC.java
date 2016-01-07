@@ -5,7 +5,7 @@ import java.util.Vector;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.GenPartDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
@@ -22,10 +22,6 @@ import cnuphys.swim.Swimming;
  */
 public class SwimAllMC implements ISwimAll {
 
-	// convenience reference to event manager
-	private static ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
-
 	// integration cutoff
 	private static final double RMAX = 10.0;
 	private static final double PATHMAX = 10.0;
@@ -40,17 +36,26 @@ public class SwimAllMC implements ISwimAll {
 	@Override
 	public Vector<TrajectoryRowData> getRowData() {
 
-		GenPartDataContainer mcGemcData = _eventManager.getGenPartData();
-		if ((mcGemcData == null) || (mcGemcData.genpart_true_px == null)) {
-			return null;
-		}
+		
 
-		int pid[] = mcGemcData.genpart_true_pid;
+		int pid[] = ColumnData.getIntArray("GenPart::true.pid");
 
 		int len = (pid == null) ? 0 : pid.length;
 		if (len < 1) {
 			return null;
 		}
+		
+		double px[] = ColumnData.getDoubleArray("GenPart::true.px");
+		if (px == null) {
+			return null;
+		}
+		double py[] = ColumnData.getDoubleArray("GenPart::true.py");
+		double pz[] = ColumnData.getDoubleArray("GenPart::true.pz");
+		double vx[] = ColumnData.getDoubleArray("GenPart::true.vx");
+		double vy[] = ColumnData.getDoubleArray("GenPart::true.vy");
+		double vz[] = ColumnData.getDoubleArray("GenPart::true.vz");
+		
+		
 		Vector<TrajectoryRowData> v = new Vector<TrajectoryRowData>(len);
 
 		try {
@@ -59,21 +64,18 @@ public class SwimAllMC implements ISwimAll {
 				LundId lid = LundSupport.getInstance().get(pid[index]);
 
 				if (lid != null) {
-					double px = mcGemcData.genpart_true_px[index]; // leave in
-					// MeV
-					double py = mcGemcData.genpart_true_py[index]; // leave in
-					// MeV
-					double pz = mcGemcData.genpart_true_pz[index]; // leave in
-					// MeV
+					double pxo = px[index]; // leave in  MeV
+					double pyo = py[index]; 
+					double pzo = pz[index]; 
 
 					// note conversions from mm to cm
-					double x = mcGemcData.genpart_true_vx[index] / 10.0;
-					double y = mcGemcData.genpart_true_vy[index] / 10.0;
-					double z = mcGemcData.genpart_true_vz[index] / 10.0;
+					double x = vx[index] / 10.0;
+					double y = vy[index] / 10.0;
+					double z = vz[index] / 10.0;
 
-					double p = Math.sqrt(px * px + py * py + pz * pz);
-					double theta = Math.toDegrees(Math.acos(pz / p));
-					double phi = Math.toDegrees(Math.atan2(py, px));
+					double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
+					double theta = Math.toDegrees(Math.acos(pzo / p));
+					double phi = Math.toDegrees(Math.atan2(pyo, pxo));
 
 					v.add(new TrajectoryRowData(lid, x, y, z, p, theta, phi));
 				}
@@ -105,18 +107,24 @@ public class SwimAllMC implements ISwimAll {
 		}
 
 		Swimming.clearMCTrajectories(); // clear all existing trajectories
-
-		GenPartDataContainer mcGemcData = _eventManager.getGenPartData();
-		if ((mcGemcData == null) || (mcGemcData.genpart_true_px == null)) {
-			return;
-		}
-
-		int pid[] = mcGemcData.genpart_true_pid;
+		
+		int pid[] = ColumnData.getIntArray("GenPart::true.pid");
 
 		int len = (pid == null) ? 0 : pid.length;
 		if (len < 1) {
 			return;
 		}
+		
+		double px[] = ColumnData.getDoubleArray("GenPart::true.px");
+		if (px == null) {
+			return;
+		}
+		double py[] = ColumnData.getDoubleArray("GenPart::true.py");
+		double pz[] = ColumnData.getDoubleArray("GenPart::true.pz");
+		double vx[] = ColumnData.getDoubleArray("GenPart::true.vx");
+		double vy[] = ColumnData.getDoubleArray("GenPart::true.vy");
+		double vz[] = ColumnData.getDoubleArray("GenPart::true.vz");
+
 
 		try {
 
@@ -130,17 +138,17 @@ public class SwimAllMC implements ISwimAll {
 					// System.err.println("SWIM particle " + lid);
 
 					// covert momenta to GeV/c from MeV/c
-					double px = mcGemcData.genpart_true_px[index] / 1000.0;
-					double py = mcGemcData.genpart_true_py[index] / 1000.0;
-					double pz = mcGemcData.genpart_true_pz[index] / 1000.0;
+					double pxo = px[index] / 1000.0;
+					double pyo = py[index] / 1000.0;
+					double pzo = pz[index] / 1000.0;
 					// note vertices are in mm must convert to meters
-					double x = mcGemcData.genpart_true_vx[index] / 1000.0;
-					double y = mcGemcData.genpart_true_vy[index] / 1000.0;
-					double z = mcGemcData.genpart_true_vz[index] / 1000.0;
+					double x = vx[index] / 1000.0;
+					double y = vy[index] / 1000.0;
+					double z = vz[index] / 1000.0;
 
-					double p = Math.sqrt(px * px + py * py + pz * pz);
-					double theta = Math.toDegrees(Math.acos(pz / p));
-					double phi = Math.toDegrees(Math.atan2(py, px));
+					double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
+					double theta = Math.toDegrees(Math.acos(pzo / p));
+					double phi = Math.toDegrees(Math.atan2(pyo, pxo));
 
 					// Swimming.swim(lid.getCharge(), x, y, z, p, theta, phi,
 					// RMAX, PATHMAX);

@@ -16,7 +16,8 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
@@ -31,11 +32,6 @@ public class ECHexSectorItem extends HexSectorItem {
 
 	// the view owner
 	private ECView _ecView;
-
-	// cache the strip polygons
-	// private Polygon[][] _stripPoly = new Polygon[3][ECGeometry.EC_NUMSTRIP];
-
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	public static final Color baseFillColor = new Color(139, 0, 0, 160);
 
@@ -84,8 +80,7 @@ public class ECHexSectorItem extends HexSectorItem {
 
 		drawOutlines(g, container, plane, Color.lightGray);
 
-		ECDataContainer ecData = _eventManager.getECData();
-		if (ecData.getHitCount(ECDataContainer.EC_OPTION) > 0) {
+		if (DataSupport.ecGetHitCount(DataSupport.EC_OPTION) > 0) {
 			drawECHits(g, container, plane);
 		}
 
@@ -116,7 +111,7 @@ public class ECHexSectorItem extends HexSectorItem {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
-		
+
 		if (_ecView.isSingleEventMode()) {
 			drawSingleEvent(g, container, plane);
 		}
@@ -125,47 +120,55 @@ public class ECHexSectorItem extends HexSectorItem {
 		}
 	}
 
-	//draw single event hit
+	// draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container, int plane) {
-		ECDataContainer ecData = _eventManager.getECData();
-		for (int i = 0; i < ecData
-				.getHitCount(ECDataContainer.EC_OPTION); i++) {
-			if (ecData.ec_dgtz_sector[i] == getSector()) {
-				if (plane == (ecData.ec_dgtz_stack[i] - 1)) { // inner outer
-					int view0 = ecData.ec_dgtz_view[i] - 1; // uvw
-					int strip0 = ecData.ec_dgtz_strip[i] - 1;
-					if (_ecView.showStrips(view0)) {
 
-						// Polygon poly = _stripPoly[view0][strip0];
+		int hitCount = EC.hitCount();
+		if (hitCount > 0) {
+			int sector[] = EC.sector();
+			int stack[] = EC.stack();
+			int view[] = EC.view();
+			int strip[] = EC.strip();
+			double totEdep[] = EC.totEdep();
 
-						Polygon poly = stripPolygon(container, plane, view0,
-								strip0);
+			for (int i = 0; i < hitCount; i++) {
+				if (sector[i] == getSector()) {
+					if (plane == (stack[i] - 1)) { // inner outer
+						int view0 = view[i] - 1; // uvw
+						int strip0 = strip[i] - 1;
+						if (_ecView.showStrips(view0)) {
 
-						// if mctruth and have energy deposited, use it
-						if (_ecView.showMcTruth()
-								&& (ecData.ec_true_totEdep != null)) {
+							// Polygon poly = _stripPoly[view0][strip0];
 
-							int alpha = (int) ((255 * ecData.ec_true_totEdep[i])
-									/ (ClasIoEventManager.getInstance()
-											.getMaxEdepCal(plane + 1)));
+							Polygon poly = stripPolygon(container, plane, view0,
+									strip0);
 
-							alpha = Math.max(60, Math.min(255, alpha));
-							g.setColor(new Color(255, 0, 0, alpha));
+							// if mctruth and have energy deposited, use it
+							if (_ecView.showMcTruth() && (totEdep != null)) {
+
+								int alpha = (int) ((255 * totEdep[i])
+										/ (ClasIoEventManager.getInstance()
+												.getMaxEdepCal(plane + 1)));
+
+								alpha = Math.max(60, Math.min(255, alpha));
+								g.setColor(new Color(255, 0, 0, alpha));
+							}
+							else {
+								g.setColor(baseFillColor);
+							}
+							g.fillPolygon(poly);
+							g.drawPolygon(poly);
 						}
-						else {
-							g.setColor(baseFillColor);
-						}
-						g.fillPolygon(poly);
-						g.drawPolygon(poly);
 					}
 				}
-			}
-		}
+			} // end for loop
+		} // hitcount > 0
 	}
-	
-	//draw accumulated hits
-	private void drawAccumulatedHits(Graphics g, IContainer container, int plane) {
-		
+
+	// draw accumulated hits
+	private void drawAccumulatedHits(Graphics g, IContainer container,
+			int plane) {
+
 		int maxHit = AccumulationManager.getInstance().getMaxDgtzEcCount();
 		if (maxHit < 1) {
 			return;
@@ -205,8 +208,6 @@ public class ECHexSectorItem extends HexSectorItem {
 		}
 
 	}
-
-	
 
 	// mark the origin og the ijk system
 	private void drawIJKOrigin(Graphics g, IContainer container) {
@@ -355,24 +356,23 @@ public class ECHexSectorItem extends HexSectorItem {
 				// feedbackStrings.add("$lime green$pixel " + pixel);
 
 				// any hits?
-
-				ECDataContainer ecData = _eventManager.getECData();
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 					for (int stripType = 0; stripType < 3; stripType++) {
 						if (_ecView.showStrips(stripType)) {
-							Vector<HitRecord> hits = ecData.getMatchingHits(
-									getSector(), plane + 1, stripType + 1,
-									uvw[stripType], ECDataContainer.EC_OPTION);
+							Vector<HitRecord> hits = DataSupport
+									.ecGetMatchingHits(getSector(), plane + 1,
+											stripType + 1, uvw[stripType],
+											DataSupport.EC_OPTION);
 
 							if (hits != null) {
 								for (HitRecord hit : hits) {
-									ecData.onHitFeedbackStrings(hit.hitIndex,
-											ECDataContainer.EC_OPTION,
-											ecData.ec_true_pid,
-											ecData.ec_true_mpid,
-											ecData.ec_true_tid,
-											ecData.ec_true_mtid,
-											ecData.ec_true_otid,
+									DataSupport.ecPreliminaryFeedback(
+											hit.hitIndex, DataSupport.EC_OPTION,
+											feedbackStrings);
+									DataSupport.truePidFeedback(EC.pid(),
+											hit.hitIndex, feedbackStrings);
+									DataSupport.ecDgtzFeedback(hit.hitIndex,
+											DataSupport.EC_OPTION,
 											feedbackStrings);
 								}
 							}

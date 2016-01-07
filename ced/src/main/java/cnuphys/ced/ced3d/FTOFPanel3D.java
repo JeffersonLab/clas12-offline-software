@@ -5,7 +5,8 @@ import java.awt.Color;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import cnuphys.bCNU.log.Log;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.FTOFGeometry;
 import bCNU3D.Panel3D;
 
@@ -69,45 +70,44 @@ public class FTOFPanel3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		// the overall container
-		FTOFDataContainer ftofData = _eventManager.getFTOFData();
-
-		int pid[] = null;
-		int sector[] = null;
-		int paddleId[] = null;
-		int hitCount = ftofData.getHitCount(_superLayer);
-		double x[] = null;
-		double y[] = null;
-		double z[] = null;
-
+		int hitCount = DataSupport.ftofGetHitCount(_superLayer);
 		if (hitCount < 1) {
 			return;
 		}
 
+
+		int pid[] = null;
+		int sector[] = null;
+		int paddleId[] = null;
+		double x[] = null;
+		double y[] = null;
+		double z[] = null;
+
+
 		switch (_superLayer) {
-		case FTOFDataContainer.PANEL_1A:
-			pid = ftofData.ftof1a_true_pid;
-			sector = ftofData.ftof1a_dgtz_sector;
-			paddleId = ftofData.ftof1a_dgtz_paddle;
-			x = ftofData.ftof1a_true_avgX;
-			y = ftofData.ftof1a_true_avgY;
-			z = ftofData.ftof1a_true_avgZ;
+		case DataSupport.PANEL_1A:
+			pid = ColumnData.getIntArray("FTOF1A::true.pid");
+			x = ColumnData.getDoubleArray("FTOF1A::true.avgX");
+			y = ColumnData.getDoubleArray("FTOF1A::true.avgY");
+			z = ColumnData.getDoubleArray("FTOF1A::true.avgZ");
+			sector = ColumnData.getIntArray("FTOF1A::dgtz.sector");
+			paddleId = ColumnData.getIntArray("FTOF1A::dgtz.paddle");
 			break;
-		case FTOFDataContainer.PANEL_1B:
-			pid = ftofData.ftof1b_true_pid;
-			sector = ftofData.ftof1b_dgtz_sector;
-			paddleId = ftofData.ftof1b_dgtz_paddle;
-			x = ftofData.ftof1b_true_avgX;
-			y = ftofData.ftof1b_true_avgY;
-			z = ftofData.ftof1b_true_avgZ;
+		case DataSupport.PANEL_1B:
+			pid = ColumnData.getIntArray("FTOF1B::true.pid");
+			x = ColumnData.getDoubleArray("FTOF1B::true.avgX");
+			y = ColumnData.getDoubleArray("FTOF1B::true.avgY");
+			z = ColumnData.getDoubleArray("FTOF1B::true.avgZ");
+			sector = ColumnData.getIntArray("FTOF1B::dgtz.sector");
+			paddleId = ColumnData.getIntArray("FTOF1B::dgtz.paddle");
 			break;
-		case FTOFDataContainer.PANEL_2:
-			pid = ftofData.ftof2b_true_pid;
-			sector = ftofData.ftof2b_dgtz_sector;
-			paddleId = ftofData.ftof2b_dgtz_paddle;
-			x = ftofData.ftof2b_true_avgX;
-			y = ftofData.ftof2b_true_avgY;
-			z = ftofData.ftof2b_true_avgZ;
+		case DataSupport.PANEL_2:
+			pid = ColumnData.getIntArray("FTOF2B::true.pid");
+			x = ColumnData.getDoubleArray("FTOF2B::true.avgX");
+			y = ColumnData.getDoubleArray("FTOF2B::true.avgY");
+			z = ColumnData.getDoubleArray("FTOF2B::true.avgZ");
+			sector = ColumnData.getIntArray("FTOF2B::dgtz.sector");
+			paddleId = ColumnData.getIntArray("FTOF2B::dgtz.paddle");
 			break;
 		}
 

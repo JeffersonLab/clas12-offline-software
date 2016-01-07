@@ -14,10 +14,11 @@ import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
-import cnuphys.ced.event.data.BSTDataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
-import cnuphys.ced.event.data.ECDataContainer;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.PCAL;
+
 import org.jlab.evio.clas12.EvioDataEvent;
 
 /**
@@ -26,7 +27,8 @@ import org.jlab.evio.clas12.EvioDataEvent;
  * @author heddle
  * 
  */
-public class AccumulationManager implements IAccumulator, IClasIoEventListener, IAccumulationListener {
+public class AccumulationManager
+		implements IAccumulator, IClasIoEventListener, IAccumulationListener {
 
 	/** Indicates hat accumulation has started */
 	public static final int ACCUMULATION_STARTED = 0;
@@ -40,73 +42,75 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/** Indicates hat accumulation has received clear */
 	public static final int ACCUMULATION_CLEAR = 2;
 
-	
 	// common colorscale
 	public static ColorScaleModel colorScaleModel = new ColorScaleModel(
 			getAccumulationValues(), getAccumulationColors());
 
 	// the singleton
 	private static AccumulationManager instance;
-	
+
 	private static final Color NULLCOLOR = new Color(128, 128, 128);
 
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _dcDgtzAccumulatedData[][][][];
 	private int _maxDgtzDcCount;
-	
-	//BST accumulated data (layer[0..7], sector[0..23])
+
+	// BST accumulated data (layer[0..7], sector[0..23])
 	private int _bstDgtzAccumulatedData[][];
 	private int _maxDgtzBstCount;
-	
-	//BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
+
+	// BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
 	private int _bstDgtzFullAccumulatedData[][][];
 	private int _maxDgtzFullBstCount;
-	
-	//FTOF accumulated Data
+
+	// FTOF accumulated Data
 	private int _ftof1aDgtzAccumulatedData[][];
 	private int _ftof1bDgtzAccumulatedData[][];
 	private int _ftof2DgtzAccumulatedData[][];
 	private int _maxDgtzFtofCount;
-	
-	//EC  [sector, stack (inner, outer), view (uvw), strip]
+
+	// EC [sector, stack (inner, outer), view (uvw), strip]
 	private int _ecDgtzAccumulatedData[][][][];
 	private int _maxDgtzEcCount;
-	
-	//PCAL  [sector, view (uvw), strip]
+
+	// PCAL [sector, view (uvw), strip]
 	private int _pcalDgtzAccumulatedData[][][];
 	private int _maxDgtzPcalCount;
-	
-	//overall event count
+
+	// overall event count
 	private long _eventCount;
-	
+
 	/** Colors used for accumulated related feedback */
 	public static final String accumulationFBColor = "$Pale Green$";
-	
-	//occupancy data by sector, superlayer
-	public static double avgDcOccupancy[][] = new double[6][6];
-	
 
-//	// time based momentum resolution
-//	private GrowableArray _tbPResolutionHistoData = new GrowableArray(500, 100);
-//
-//	// time based theta resolution
-//	private GrowableArray _tbThetaResolutionHistoData = new GrowableArray(500,
-//			100);
-//
-//	// time based phi resolution
-//	private GrowableArray _tbPhiResolutionHistoData = new GrowableArray(500,
-//			100);
-//
-//	// hit based momentum resolution
-//	private GrowableArray _hbPResolutionHistoData = new GrowableArray(500, 100);
-//
-//	// hit based theta resolution
-//	private GrowableArray _hbThetaResolutionHistoData = new GrowableArray(500,
-//			100);
-//
-//	// hit based phi resolution
-//	private GrowableArray _hbPhiResolutionHistoData = new GrowableArray(500,
-//			100);
+	// occupancy data by sector, superlayer
+	public static double avgDcOccupancy[][] = new double[6][6];
+
+	// // time based momentum resolution
+	// private GrowableArray _tbPResolutionHistoData = new GrowableArray(500,
+	// 100);
+	//
+	// // time based theta resolution
+	// private GrowableArray _tbThetaResolutionHistoData = new
+	// GrowableArray(500,
+	// 100);
+	//
+	// // time based phi resolution
+	// private GrowableArray _tbPhiResolutionHistoData = new GrowableArray(500,
+	// 100);
+	//
+	// // hit based momentum resolution
+	// private GrowableArray _hbPResolutionHistoData = new GrowableArray(500,
+	// 100);
+	//
+	// // hit based theta resolution
+	// private GrowableArray _hbThetaResolutionHistoData = new
+	// GrowableArray(500,
+	// 100);
+	//
+	// // hit based phi resolution
+	// private GrowableArray _hbPhiResolutionHistoData = new GrowableArray(500,
+	// 100);
 
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
@@ -120,39 +124,38 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		addAccumulationListener(this);
 		_eventManager.addClasIoEventListener(this, 1);
 		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
-		
-		//down to layer
+
+		// down to layer
 		_bstDgtzAccumulatedData = new int[8][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			_bstDgtzAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
 		}
-		
-	//	_bstDgtzAccumulatedData = new int[8][24];
-		
-		//down to strip
+
+		// _bstDgtzAccumulatedData = new int[8][24];
+
+		// down to strip
 		_bstDgtzFullAccumulatedData = new int[8][][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			_bstDgtzFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
 		}
-		
-		//ftop storage
+
+		// ftop storage
 		_ftof1aDgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[0]];
 		_ftof1bDgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[1]];
 		_ftof2DgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[2]];
-		
-		//ec and pcal storage
+
+		// ec and pcal storage
 		_ecDgtzAccumulatedData = new int[6][2][3][36];
-		
-		
+
 		_pcalDgtzAccumulatedData = new int[6][3][];
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			for (int view0 = 0; view0 < 3; view0++) {
 				_pcalDgtzAccumulatedData[sect0][view0] = new int[PCALGeometry.PCAL_NUMSTRIP[view0]];
 			}
 		}
-		
+
 		clear();
 	}
 
@@ -162,7 +165,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	@Override
 	public void clear() {
 		_eventCount = 0;
-		
+
 		// System.err.println("AccumMgr clear");
 		// clear accumulated gemc dc data
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
@@ -176,8 +179,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 			}
 		}
 		_maxDgtzDcCount = 0;
-		
-		//clear ec data
+
+		// clear ec data
 		for (int sector = 0; sector < 6; sector++) {
 			for (int stack = 0; stack < 2; stack++) {
 				for (int view = 0; view < 3; view++) {
@@ -188,21 +191,20 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 			}
 		}
 		_maxDgtzEcCount = 0;
-		
-		//clear pcal data
+
+		// clear pcal data
 		for (int sector = 0; sector < 6; sector++) {
-				for (int view = 0; view < 3; view++) {
-					for (int strip = 0; strip < PCALGeometry.PCAL_NUMSTRIP[view]; strip++) {
-						_pcalDgtzAccumulatedData[sector][view][strip] = 0;
-					}
+			for (int view = 0; view < 3; view++) {
+				for (int strip = 0; strip < PCALGeometry.PCAL_NUMSTRIP[view]; strip++) {
+					_pcalDgtzAccumulatedData[sector][view][strip] = 0;
 				}
+			}
 		}
 		_maxDgtzPcalCount = 0;
 
-
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
-			int supl0 = layer/2;
+			int supl0 = layer / 2;
 			for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
 				_bstDgtzAccumulatedData[layer][sector] = 0;
 				for (int strip = 0; strip < 256; strip++) {
@@ -212,25 +214,25 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		}
 		_maxDgtzBstCount = 0;
 		_maxDgtzFullBstCount = 0;
-		
-		//clear ftof data
+
+		// clear ftof data
 		for (int sector = 0; sector < 6; sector++) {
-			for (int  paddle = 0; paddle < _ftof1aDgtzAccumulatedData[0].length; paddle++) {
+			for (int paddle = 0; paddle < _ftof1aDgtzAccumulatedData[0].length; paddle++) {
 				_ftof1aDgtzAccumulatedData[sector][paddle] = 0;
 			}
-			for (int  paddle = 0; paddle < _ftof1bDgtzAccumulatedData[0].length; paddle++) {
+			for (int paddle = 0; paddle < _ftof1bDgtzAccumulatedData[0].length; paddle++) {
 				_ftof1bDgtzAccumulatedData[sector][paddle] = 0;
 			}
-			for (int  paddle = 0; paddle < _ftof2DgtzAccumulatedData[0].length; paddle++) {
+			for (int paddle = 0; paddle < _ftof2DgtzAccumulatedData[0].length; paddle++) {
 				_ftof2DgtzAccumulatedData[sector][paddle] = 0;
 			}
 		}
 		_maxDgtzFtofCount = 0;
-		
+
 		// growable arrays used for canned histograms
-//		_tbPResolutionHistoData.clear();
-//		_tbThetaResolutionHistoData.clear();
-//		_tbPhiResolutionHistoData.clear();
+		// _tbPResolutionHistoData.clear();
+		// _tbThetaResolutionHistoData.clear();
+		// _tbPhiResolutionHistoData.clear();
 
 		notifyListeners(ACCUMULATION_CLEAR);
 	}
@@ -247,60 +249,60 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		return instance;
 	}
 
-//	/**
-//	 * Get the data used for the testtime based momentum resolution histo
-//	 * 
-//	 * @return the data used for the test momentum resolution histo
-//	 */
-//	public GrowableArray getTBMomentumResolutionData() {
-//		return _tbPResolutionHistoData;
-//	}
-//
-//	/**
-//	 * Get the data used for the test time based theta resolution histo
-//	 * 
-//	 * @return the data used for the test theta resolution histo
-//	 */
-//	public GrowableArray getTBThetaResolutionData() {
-//		return _tbThetaResolutionHistoData;
-//	}
-//
-//	/**
-//	 * Get the data used for the test time based phi resolution histo
-//	 * 
-//	 * @return the data used for the test phi resolution histo
-//	 */
-//	public GrowableArray getTBPhiResolutionData() {
-//		return _tbPhiResolutionHistoData;
-//	}
-//
-//	/**
-//	 * Get the data used for the test hit based momentum resolution histo
-//	 * 
-//	 * @return the data used for the test momentum resolution histo
-//	 */
-//	public GrowableArray getHBMomentumResolutionData() {
-//		return _hbPResolutionHistoData;
-//	}
-//
-//	/**
-//	 * Get the data used for the test hit based theta resolution histo
-//	 * 
-//	 * @return the data used for the test theta resolution histo
-//	 */
-//	public GrowableArray getHBThetaResolutionData() {
-//		return _hbThetaResolutionHistoData;
-//	}
-//
-//	/**
-//	 * Get the data used for the test hit based phi resolution histo
-//	 * 
-//	 * @return the data used for the test hit based phi resolution histo
-//	 */
-//	public GrowableArray getHBPhiResolutionData() {
-//		return _hbPhiResolutionHistoData;
-//	}
-	
+	// /**
+	// * Get the data used for the testtime based momentum resolution histo
+	// *
+	// * @return the data used for the test momentum resolution histo
+	// */
+	// public GrowableArray getTBMomentumResolutionData() {
+	// return _tbPResolutionHistoData;
+	// }
+	//
+	// /**
+	// * Get the data used for the test time based theta resolution histo
+	// *
+	// * @return the data used for the test theta resolution histo
+	// */
+	// public GrowableArray getTBThetaResolutionData() {
+	// return _tbThetaResolutionHistoData;
+	// }
+	//
+	// /**
+	// * Get the data used for the test time based phi resolution histo
+	// *
+	// * @return the data used for the test phi resolution histo
+	// */
+	// public GrowableArray getTBPhiResolutionData() {
+	// return _tbPhiResolutionHistoData;
+	// }
+	//
+	// /**
+	// * Get the data used for the test hit based momentum resolution histo
+	// *
+	// * @return the data used for the test momentum resolution histo
+	// */
+	// public GrowableArray getHBMomentumResolutionData() {
+	// return _hbPResolutionHistoData;
+	// }
+	//
+	// /**
+	// * Get the data used for the test hit based theta resolution histo
+	// *
+	// * @return the data used for the test theta resolution histo
+	// */
+	// public GrowableArray getHBThetaResolutionData() {
+	// return _hbThetaResolutionHistoData;
+	// }
+	//
+	// /**
+	// * Get the data used for the test hit based phi resolution histo
+	// *
+	// * @return the data used for the test hit based phi resolution histo
+	// */
+	// public GrowableArray getHBPhiResolutionData() {
+	// return _hbPhiResolutionHistoData;
+	// }
+
 	/**
 	 * Get the accumulated dgtz EC data
 	 * 
@@ -330,6 +332,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	/**
 	 * Get the max counts on any wire
+	 * 
 	 * @return the max counts for any DC wire.
 	 */
 	public int getMaxDgtzDcCount() {
@@ -344,7 +347,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int[][] getAccumulatedDgtzBstData() {
 		return _bstDgtzAccumulatedData;
 	}
-	
 
 	/**
 	 * Get the accumulated dgtz full Bst strip data
@@ -355,9 +357,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		return _bstDgtzFullAccumulatedData;
 	}
 
-	
 	/**
 	 * Get the max counts for ec strips
+	 * 
 	 * @return the max counts for ec strips.
 	 */
 	public int getMaxDgtzEcCount() {
@@ -366,6 +368,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	/**
 	 * Get the max counts for pcal strips
+	 * 
 	 * @return the max counts for pcal strips.
 	 */
 	public int getMaxDgtzPcalCount() {
@@ -374,21 +377,22 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	/**
 	 * Get the max counts on any bst panel
+	 * 
 	 * @return the max counts for any bst panel.
 	 */
 	public int getMaxDgtzBstCount() {
 		return _maxDgtzBstCount;
 	}
-	
+
 	/**
 	 * Get the max counts on any bst strip
+	 * 
 	 * @return the max counts for any bst strip.
 	 */
 	public int getMaxDgtzFullBstCount() {
 		return _maxDgtzFullBstCount;
 	}
 
-	
 	/**
 	 * Get the accumulated dgtz ftof panel 1a
 	 * 
@@ -416,25 +420,26 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		return _ftof2DgtzAccumulatedData;
 	}
 
-	
 	/**
 	 * Get the max counts on any ftof panel
+	 * 
 	 * @return the max counts for any ftof panel.
 	 */
 	public int getMaxDgtzFtofCount() {
 		return _maxDgtzFtofCount;
 	}
 
-//
-//	/**
-//	 * @return the colorScaleModel
-//	 */
-//	public static ColorScaleModel getColorScaleModel() {
-//		return colorScaleModel;
-//	}
+	//
+	// /**
+	// * @return the colorScaleModel
+	// */
+	// public static ColorScaleModel getColorScaleModel() {
+	// return colorScaleModel;
+	// }
 
 	/**
 	 * Get the color to use
+	 * 
 	 * @param fract the fraction (compared to max hits)
 	 * @return the color to use
 	 */
@@ -444,10 +449,11 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		}
 		return colorScaleModel.getColor(fract);
 	}
-	
+
 	/**
 	 * Get a color via getColor but add an alpha value
-	 * @param value the value 
+	 * 
+	 * @param value the value
 	 * @param alpha the alpha value [0..255]
 	 * @return the color corresponding to the value.
 	 */
@@ -459,22 +465,24 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	/**
 	 * Get the number of events in the current accumulation
+	 * 
 	 * @return the number of events in the current accumulation
 	 */
 	public long getAccumulationEventCount() {
 		return _eventCount;
 	}
-	
+
 	/**
 	 * Get the average occupancy for a given sector and superlayer
+	 * 
 	 * @param sect0 0 based sector 0..5
 	 * @param supl0 0 based superlayer 0..5
-	 * @return the occupancy 
+	 * @return the occupancy
 	 */
 	public double getAverageDCOccupancy(int sect0, int supl0) {
 		return avgDcOccupancy[sect0][supl0];
 	}
-	
+
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 
@@ -482,248 +490,274 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		if (!_eventManager.isAccumulating() || (event == null)) {
 			return;
 		}
-		
+
 		_eventCount++;
 
 		// dc data
-		DCDataContainer dcData = _eventManager.getDCData();
-		for (int i = 0; i < dcData.getHitCount(0); i++) {
-			int sect0 = dcData.dc_dgtz_sector[i] - 1; // make 0 based
-			int supl0 = dcData.dc_dgtz_superlayer[i] - 1; // make 0 based
-			int lay0 = dcData.dc_dgtz_layer[i] - 1; // make 0 based
-			int wire0 = dcData.dc_dgtz_wire[i] - 1; // make 0 based
-			try {
-				_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
-				
-				_maxDgtzDcCount = Math.max(
-						_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
-						_maxDgtzDcCount);
-				
-			} catch (ArrayIndexOutOfBoundsException e) {
-				String msg = String
-						.format("Index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
-								_eventManager.getEventNumber(),
-								dcData.dc_dgtz_sector[i],
-								dcData.dc_dgtz_superlayer[i],
-								dcData.dc_dgtz_layer[i], dcData.dc_dgtz_wire[i]);
-				Log.getInstance().warning(msg);
-				System.err.println(msg);
-			}
+		int dcHitCount = DataSupport.dcGetHitCount();
 
-		} // end loop hits
-		
-		//ec and pcal
-		ECDataContainer ecData = _eventManager.getECData();
+		if (dcHitCount > 0) {
+			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
+			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
+			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
+			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
 
-		//ec data
-		for (int i = 0; i < ecData.getHitCount(0); i++) {
-			int sect0 = ecData.ec_dgtz_sector[i] - 1; // make 0 based
-			int stack0 = ecData.ec_dgtz_stack[i] - 1; // make 0 based
-			int view0 = ecData.ec_dgtz_view[i] - 1; // make 0 based
-			int strip0 = ecData.ec_dgtz_strip[i] - 1; // make 0 based
-			_ecDgtzAccumulatedData[sect0][stack0][view0][strip0] += 1;
-			
-			_maxDgtzEcCount = Math.max(
-					_ecDgtzAccumulatedData[sect0][stack0][view0][strip0],
-					_maxDgtzEcCount);
-		}
-
-		
-		//pcal data
-		for (int i = 0; i < ecData.getHitCount(1); i++) {
-			int sect0 = ecData.pcal_dgtz_sector[i] - 1; // make 0 based
-			int view0 = ecData.pcal_dgtz_view[i] - 1; // make 0 based
-			int strip0 = ecData.pcal_dgtz_strip[i] - 1; // make 0 based
-			_pcalDgtzAccumulatedData[sect0][view0][strip0] += 1;
-			
-			_maxDgtzPcalCount = Math.max(
-					_pcalDgtzAccumulatedData[sect0][view0][strip0],
-					_maxDgtzPcalCount);
-		}
-		
-		//bst data
-		BSTDataContainer bstData = _eventManager.getBSTData();
-
-		for (int i = 0; i < bstData.getHitCount(0); i++) {
-			BSTxyPanel panel = BSTxyView.getPanel(bstData.bst_dgtz_layer[i],
-					bstData.bst_dgtz_sector[i]);
-			if (panel != null) {
-				int lay0 = bstData.bst_dgtz_layer[i] - 1;
-				int sect0 = bstData.bst_dgtz_sector[i] - 1;
-				int strip0 = bstData.bst_dgtz_strip[i] - 1;
+			for (int i = 0; i < dcHitCount; i++) {
+				int sect0 = sector[i] - 1; // make 0 based
+				int supl0 = superlayer[i] - 1; // make 0 based
+				int lay0 = layer[i] - 1; // make 0 based
+				int wire0 = wire[i] - 1; // make 0 based
 				try {
-					_bstDgtzAccumulatedData[lay0][sect0] += 1;
-					_maxDgtzBstCount = Math.max(
-							_bstDgtzAccumulatedData[lay0][sect0],
-							_maxDgtzBstCount);
+					_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
 
-					if (strip0 >= 0) {
-						_bstDgtzFullAccumulatedData[lay0][sect0][strip0] += 1;
-						_maxDgtzFullBstCount = Math.max(
-								_bstDgtzFullAccumulatedData[lay0][sect0][strip0],
-								_maxDgtzFullBstCount);
-					}
+					_maxDgtzDcCount = Math.max(
+							_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
+							_maxDgtzDcCount);
 
 				} catch (ArrayIndexOutOfBoundsException e) {
 					String msg = String.format(
-							"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
-							_eventManager.getEventNumber(),
-							bstData.bst_dgtz_layer[i],
-							bstData.bst_dgtz_sector[i],
-							bstData.bst_dgtz_strip[i]);
+							"Index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
+							_eventManager.getEventNumber(), sector[i],
+							superlayer[i], layer[i], wire[i]);
 					Log.getInstance().warning(msg);
 					System.err.println(msg);
 				}
 
-			}
-		} // for on hits
+			} // end loop hits
 
-		
-		//ftof data
-		// the overall container
-		FTOFDataContainer ftofData = _eventManager.getFTOFData();
-		if (ftofData != null) {
-			accumFtof(ftofData.ftof1a_dgtz_sector, ftofData.ftof1a_dgtz_paddle, _ftof1aDgtzAccumulatedData);
-			accumFtof(ftofData.ftof1b_dgtz_sector, ftofData.ftof1b_dgtz_paddle, _ftof1bDgtzAccumulatedData);
-			accumFtof(ftofData.ftof2b_dgtz_sector, ftofData.ftof2b_dgtz_paddle, _ftof2DgtzAccumulatedData);
+		} // dcHitCount > 0
+
+
+		// ec data
+		int ecHitCount = DataSupport.ecGetHitCount(DataSupport.EC_OPTION);
+		if (ecHitCount > 0) {
+			int sect[] = EC.sector();
+			int stack[] = EC.stack();
+			int view[] = EC.view();
+			int strip[] = EC.strip();
+			
+			for (int i = 0; i < ecHitCount; i++) {
+				int sect0 = sect[i] - 1; // make 0 based
+				int stack0 = stack[i] - 1; // make 0 based
+				int view0 = view[i] - 1; // make 0 based
+				int strip0 = strip[i] - 1; // make 0 based
+				_ecDgtzAccumulatedData[sect0][stack0][view0][strip0] += 1;
+
+				_maxDgtzEcCount = Math.max(
+						_ecDgtzAccumulatedData[sect0][stack0][view0][strip0],
+						_maxDgtzEcCount);
+			}
 		}
+		
+		int pcalHitCount = DataSupport.ecGetHitCount(DataSupport.PCAL_OPTION);
+		if (pcalHitCount > 0) {
+			int sect[] = PCAL.sector();
+			int view[] = PCAL.view();
+			int strip[] = PCAL.strip();
+			for (int i = 0; i < pcalHitCount; i++) {
+				int sect0 = sect[i] - 1; // make 0 based
+				int view0 = view[i] - 1; // make 0 based
+				int strip0 = strip[i] - 1; // make 0 based
+				_pcalDgtzAccumulatedData[sect0][view0][strip0] += 1;
+
+				_maxDgtzPcalCount = Math.max(
+						_pcalDgtzAccumulatedData[sect0][view0][strip0],
+						_maxDgtzPcalCount);
+			}
+		}
+
+
+		//bst
+		int hitCount = DataSupport.bstGetHitCount();
+		if (hitCount > 0) {
+			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
+			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
+			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
+			
+			for (int i = 0; i < hitCount; i++) {
+				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+						bstsector[i]);
+				if (panel != null) {
+					int lay0 = bstlayer[i] - 1;
+					int sect0 = bstsector[i] - 1;
+					int strip0 = bststrip[i] - 1;
+					try {
+						_bstDgtzAccumulatedData[lay0][sect0] += 1;
+						_maxDgtzBstCount = Math.max(
+								_bstDgtzAccumulatedData[lay0][sect0],
+								_maxDgtzBstCount);
+
+						if (strip0 >= 0) {
+							_bstDgtzFullAccumulatedData[lay0][sect0][strip0] += 1;
+							_maxDgtzFullBstCount = Math.max(
+									_bstDgtzFullAccumulatedData[lay0][sect0][strip0],
+									_maxDgtzFullBstCount);
+						}
+
+					} catch (ArrayIndexOutOfBoundsException e) {
+						String msg = String.format(
+								"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
+								_eventManager.getEventNumber(),
+								bstlayer[i],
+								bstsector[i],
+								bststrip[i]);
+						Log.getInstance().warning(msg);
+						System.err.println(msg);
+					}
+
+				}
+			} // for on hits
+		} //hitcount > 0
+		
+
+		// ftof data
+		int sector1A[] = ColumnData.getIntArray("FTOF1A::dgtz.sector");
+		int paddle1A[] = ColumnData.getIntArray("FTOF1A::dgtz.paddle");
+		int sector1B[] = ColumnData.getIntArray("FTOF1B::dgtz.sector");
+		int paddle1B[] = ColumnData.getIntArray("FTOF1B::dgtz.paddle");
+		int sector2B[] = ColumnData.getIntArray("FTOF2B::dgtz.sector");
+		int paddle2B[] = ColumnData.getIntArray("FTOF2B::dgtz.paddle");
+
+		accumFtof(sector1A, paddle1A, _ftof1aDgtzAccumulatedData);
+		accumFtof(sector1B, paddle1B, _ftof1bDgtzAccumulatedData);
+		accumFtof(sector2B, paddle2B, _ftof2DgtzAccumulatedData);
 
 		// splot histo test
 
-//		GenPartDataContainer genPart = _eventManager.getGenPartData();
-//		if (genPart.genpart_true_px != null) {
-//			double px = genPart.genpart_true_px[0] / 1000;
-//			double py = genPart.genpart_true_py[0] / 1000;
-//			double pz = genPart.genpart_true_pz[0] / 1000;
-//			double trueP = Math.sqrt(px * px + py * py + pz * pz);
-//
-//			double trueTheta = Math.toDegrees(Math.acos(pz / trueP));
-//			double truePhi = Math.toDegrees(Math.atan2(py, px));
-//
-//			// hit based
-//			if (dcData.getHitBasedTrackCount() > 0) {
-//				double reconsP = dcData.hitbasedtrkg_hbtracks_p[0];
-//				if (trueP > 0.001) {
-//					double frac = (trueP - reconsP) / trueP;
-//					_hbPResolutionHistoData.add(frac);
-//				}
-//
-//				// have to swim traj backwards!
-//				// swimBackwardsToVertex(int q, double xo, double yo, double zo,
-//				// double px, double py, double pz) {
-//
-//				int q = dcData.hitbasedtrkg_hbtracks_q[0];
-//				double xo = dcData.hitbasedtrkg_hbtracks_c3_x[0] / 100;
-//				double yo = dcData.hitbasedtrkg_hbtracks_c3_y[0] / 100;
-//				double zo = dcData.hitbasedtrkg_hbtracks_c3_z[0] / 100;
-//
-//				double ux = dcData.hitbasedtrkg_hbtracks_c3_ux[0];
-//				double uy = dcData.hitbasedtrkg_hbtracks_c3_uy[0];
-//				double uz = dcData.hitbasedtrkg_hbtracks_c3_uz[0];
-//
-//				double pxo = reconsP * ux;
-//				double pyo = reconsP * uy;
-//				double pzo = reconsP * uz;
-//
-//				SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo, yo,
-//						zo, pxo, pyo, pzo);
-//				Swimming.addReconTrajectory(traj);
-//
-//				// Q = [x, y, z, px/p, py/p, pz/p]
-//				double lastQ[] = traj.lastElement();
-//
-//				xo = lastQ[0];
-//				yo = lastQ[1];
-//				zo = lastQ[2];
-//				pxo = -lastQ[3];
-//				pyo = -lastQ[4];
-//				pzo = -lastQ[5];
-//
-//				// pt = Math.hypot(pxo, pyo);
-//				double reconTheta = Math.toDegrees(Math.acos(pzo));
-//				double reconPhi = Math.toDegrees(Math.atan2(pyo, pxo));
-//
-//				_hbThetaResolutionHistoData.add(reconTheta - trueTheta);
-//				_hbPhiResolutionHistoData.add(reconPhi - truePhi);
-//
-//			} // hb track count
-//
-//			// time based
-//			if (dcData.getTimeBasedTrackCount() > 0) {
-//				double reconsP = dcData.timebasedtrkg_tbtracks_p[0];
-//				if (trueP > 0.001) {
-//					double frac = (trueP - reconsP) / trueP;
-//					_tbPResolutionHistoData.add(frac);
-//				}
-//
-//				// have to swim traj backwards!
-//				// swimBackwardsToVertex(int q, double xo, double yo, double zo,
-//				// double px, double py, double pz) {
-//
-//				int q = dcData.timebasedtrkg_tbtracks_q[0];
-//				double xo = dcData.timebasedtrkg_tbtracks_c3_x[0] / 100;
-//				double yo = dcData.timebasedtrkg_tbtracks_c3_y[0] / 100;
-//				double zo = dcData.timebasedtrkg_tbtracks_c3_z[0] / 100;
-//
-//				double ux = dcData.timebasedtrkg_tbtracks_c3_ux[0];
-//				double uy = dcData.timebasedtrkg_tbtracks_c3_uy[0];
-//				double uz = dcData.timebasedtrkg_tbtracks_c3_uz[0];
-//
-//				double pxo = reconsP * ux;
-//				double pyo = reconsP * uy;
-//				double pzo = reconsP * uz;
-//
-//				SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo, yo,
-//						zo, pxo, pyo, pzo);
-//				Swimming.addReconTrajectory(traj);
-//
-//				// Q = [x, y, z, px/p, py/p, pz/p]
-//				double lastQ[] = traj.lastElement();
-//
-//				xo = lastQ[0];
-//				yo = lastQ[1];
-//				zo = lastQ[2];
-//				pxo = -lastQ[3];
-//				pyo = -lastQ[4];
-//				pzo = -lastQ[5];
-//
-//				// pt = Math.hypot(pxo, pyo);
-//				double reconTheta = Math.toDegrees(Math.acos(pzo));
-//				double reconPhi = Math.toDegrees(Math.atan2(pyo, pxo));
-//
-//				_tbThetaResolutionHistoData.add(reconTheta - trueTheta);
-//				_tbPhiResolutionHistoData.add(reconPhi - truePhi);
-//
-//			} // time based track count
-//		}
+		// GenPartDataContainer genPart = _eventManager.getGenPartData();
+		// if (genPart.genpart_true_px != null) {
+		// double px = genPart.genpart_true_px[0] / 1000;
+		// double py = genPart.genpart_true_py[0] / 1000;
+		// double pz = genPart.genpart_true_pz[0] / 1000;
+		// double trueP = Math.sqrt(px * px + py * py + pz * pz);
+		//
+		// double trueTheta = Math.toDegrees(Math.acos(pz / trueP));
+		// double truePhi = Math.toDegrees(Math.atan2(py, px));
+		//
+		// // hit based
+		// if (dcData.getHitBasedTrackCount() > 0) {
+		// double reconsP = dcData.hitbasedtrkg_hbtracks_p[0];
+		// if (trueP > 0.001) {
+		// double frac = (trueP - reconsP) / trueP;
+		// _hbPResolutionHistoData.add(frac);
+		// }
+		//
+		// // have to swim traj backwards!
+		// // swimBackwardsToVertex(int q, double xo, double yo, double zo,
+		// // double px, double py, double pz) {
+		//
+		// int q = dcData.hitbasedtrkg_hbtracks_q[0];
+		// double xo = dcData.hitbasedtrkg_hbtracks_c3_x[0] / 100;
+		// double yo = dcData.hitbasedtrkg_hbtracks_c3_y[0] / 100;
+		// double zo = dcData.hitbasedtrkg_hbtracks_c3_z[0] / 100;
+		//
+		// double ux = dcData.hitbasedtrkg_hbtracks_c3_ux[0];
+		// double uy = dcData.hitbasedtrkg_hbtracks_c3_uy[0];
+		// double uz = dcData.hitbasedtrkg_hbtracks_c3_uz[0];
+		//
+		// double pxo = reconsP * ux;
+		// double pyo = reconsP * uy;
+		// double pzo = reconsP * uz;
+		//
+		// SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo, yo,
+		// zo, pxo, pyo, pzo);
+		// Swimming.addReconTrajectory(traj);
+		//
+		// // Q = [x, y, z, px/p, py/p, pz/p]
+		// double lastQ[] = traj.lastElement();
+		//
+		// xo = lastQ[0];
+		// yo = lastQ[1];
+		// zo = lastQ[2];
+		// pxo = -lastQ[3];
+		// pyo = -lastQ[4];
+		// pzo = -lastQ[5];
+		//
+		// // pt = Math.hypot(pxo, pyo);
+		// double reconTheta = Math.toDegrees(Math.acos(pzo));
+		// double reconPhi = Math.toDegrees(Math.atan2(pyo, pxo));
+		//
+		// _hbThetaResolutionHistoData.add(reconTheta - trueTheta);
+		// _hbPhiResolutionHistoData.add(reconPhi - truePhi);
+		//
+		// } // hb track count
+		//
+		// // time based
+		// if (dcData.getTimeBasedTrackCount() > 0) {
+		// double reconsP = dcData.timebasedtrkg_tbtracks_p[0];
+		// if (trueP > 0.001) {
+		// double frac = (trueP - reconsP) / trueP;
+		// _tbPResolutionHistoData.add(frac);
+		// }
+		//
+		// // have to swim traj backwards!
+		// // swimBackwardsToVertex(int q, double xo, double yo, double zo,
+		// // double px, double py, double pz) {
+		//
+		// int q = dcData.timebasedtrkg_tbtracks_q[0];
+		// double xo = dcData.timebasedtrkg_tbtracks_c3_x[0] / 100;
+		// double yo = dcData.timebasedtrkg_tbtracks_c3_y[0] / 100;
+		// double zo = dcData.timebasedtrkg_tbtracks_c3_z[0] / 100;
+		//
+		// double ux = dcData.timebasedtrkg_tbtracks_c3_ux[0];
+		// double uy = dcData.timebasedtrkg_tbtracks_c3_uy[0];
+		// double uz = dcData.timebasedtrkg_tbtracks_c3_uz[0];
+		//
+		// double pxo = reconsP * ux;
+		// double pyo = reconsP * uy;
+		// double pzo = reconsP * uz;
+		//
+		// SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo, yo,
+		// zo, pxo, pyo, pzo);
+		// Swimming.addReconTrajectory(traj);
+		//
+		// // Q = [x, y, z, px/p, py/p, pz/p]
+		// double lastQ[] = traj.lastElement();
+		//
+		// xo = lastQ[0];
+		// yo = lastQ[1];
+		// zo = lastQ[2];
+		// pxo = -lastQ[3];
+		// pyo = -lastQ[4];
+		// pzo = -lastQ[5];
+		//
+		// // pt = Math.hypot(pxo, pyo);
+		// double reconTheta = Math.toDegrees(Math.acos(pzo));
+		// double reconPhi = Math.toDegrees(Math.atan2(pyo, pxo));
+		//
+		// _tbThetaResolutionHistoData.add(reconTheta - trueTheta);
+		// _tbPhiResolutionHistoData.add(reconPhi - truePhi);
+		//
+		// } // time based track count
+		// }
 
 	}
 
-	//for ftot accumulating
+	// for ftot accumulating
 	private void accumFtof(int sector[], int paddle[], int[][] hitHolder) {
-		
+
 		if ((sector == null) || (paddle == null)) {
 			return;
 		}
-		
+
 		for (int hit = 0; hit < sector.length; hit++) {
 			int sect0 = sector[hit] - 1;
 			int paddle0 = paddle[hit] - 1;
 			hitHolder[sect0][paddle0] += 1;
-			_maxDgtzFtofCount = Math.max(
-					hitHolder[sect0][paddle0],
+			_maxDgtzFtofCount = Math.max(hitHolder[sect0][paddle0],
 					_maxDgtzFtofCount);
 		}
-		
+
 	}
-	
+
 	@Override
 	public void openedNewEventFile(String path) {
 	}
 
 	/**
-	 * Get the values array for the color scale.
-	 * Note the range is 0..1 so use fraction of max value to get color
+	 * Get the values array for the color scale. Note the range is 0..1 so use
+	 * fraction of max value to get color
+	 * 
 	 * @return the values array.
 	 */
 	private static double getAccumulationValues()[] {
@@ -748,13 +782,13 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	 */
 	private static Color getAccumulationColors()[] {
 
-//		int r[] = { 255, 176, 255, 255, 255, 255, 255, 200, 150 };
-//		int g[] = { 255, 224, 255, 255, 165, 100, 0, 0, 0 };
-//		int b[] = { 255, 230, 128, 0, 0, 0, 0, 0, 0 };
+		// int r[] = { 255, 176, 255, 255, 255, 255, 255, 200, 150 };
+		// int g[] = { 255, 224, 255, 255, 165, 100, 0, 0, 0 };
+		// int b[] = { 255, 230, 128, 0, 0, 0, 0, 0, 0 };
 
-//		int r[] = { 176, 124, 0, 173, 255, 255, 255, 255, 139 };
-//		int g[] = { 224, 252, 255, 255, 255, 165, 69, 0, 0 };
-//		int b[] = { 230, 0, 0, 47, 0, 0, 0, 0, 0 };
+		// int r[] = { 176, 124, 0, 173, 255, 255, 255, 255, 139 };
+		// int g[] = { 224, 252, 255, 255, 255, 165, 69, 0, 0 };
+		// int b[] = { 230, 0, 0, 47, 0, 0, 0, 0, 0 };
 
 		int r[] = { 240, 176, 124, 173, 255, 255, 255, 255, 139 };
 		int g[] = { 248, 224, 255, 255, 255, 165, 69, 0, 0 };
@@ -786,8 +820,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Notify listeners we of an accumulation event
 	 * 
-	 * @param reason
-	 *            should be one of the ACCUMULATION_X constants
+	 * @param reason should be one of the ACCUMULATION_X constants
 	 * 
 	 */
 	public void notifyListeners(int reason) {
@@ -811,8 +844,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Remove an Accumulation listener.
 	 * 
-	 * @param listener
-	 *            the Accumulation listener to remove.
+	 * @param listener the Accumulation listener to remove.
 	 */
 	public void removeAccumulationListener(IAccumulationListener listener) {
 
@@ -828,8 +860,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Add an Accumulation listener.
 	 * 
-	 * @param listener
-	 *            the Accumulation listener to add.
+	 * @param listener the Accumulation listener to add.
 	 */
 	public void addAccumulationListener(IAccumulationListener listener) {
 
@@ -850,7 +881,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		case AccumulationManager.ACCUMULATION_STARTED:
 			break;
 
-
 		case AccumulationManager.ACCUMULATION_CANCELLED:
 		case AccumulationManager.ACCUMULATION_FINISHED:
 
@@ -869,8 +899,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 						double avgHits = avgDcOccupancy[sect0][supl0] = ((double) count)
 								/ _eventCount;
-						//divide by num wires in superlayer
-						avgDcOccupancy[sect0][supl0] = avgHits/(6*112);
+						// divide by num wires in superlayer
+						avgDcOccupancy[sect0][supl0] = avgHits / (6 * 112);
 					} // supl0
 				} // sect0
 			} // _eventCount != 0
@@ -878,7 +908,5 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 			break;
 		}
 	}
-	
-	
 
 }

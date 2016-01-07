@@ -3,7 +3,8 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -61,44 +62,63 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		DCDataContainer dcData = _eventManager.getDCData();
-
 		float coords[] = new float[6];
-		for (int i = 0; i < dcData.getHitCount(0); i++) {
-			try {
-				int sect1 = dcData.dc_dgtz_sector[i]; // 1 based
-				if (sect1 == _sector) {
-					int supl1 = dcData.dc_dgtz_superlayer[i]; // 1 based
-					if (supl1 == _superLayer) {
-						int lay1 = dcData.dc_dgtz_layer[i];
-						int wire1 = dcData.dc_dgtz_wire[i];
-						getWire(lay1, wire1, coords);
+		
+		int hitCount = DataSupport.dcGetHitCount();
+		
+		if (hitCount > 0) {
+			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
+			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
+			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
+			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+			int pid[] = ColumnData.getIntArray("DC::true.pid");
+			double avgX[] = ColumnData.getDoubleArray("DC::true.avgX");
+			double avgY[] = ColumnData.getDoubleArray("DC::true.avgY");
+			double avgZ[] = ColumnData.getDoubleArray("DC::true.avgZ");
 
-						if (showMCTruth() && (dcData.dc_true_avgX != null)) {
-							Color color = truthColor(dcData.dc_true_pid, i);
-							Support3D.drawLine(drawable, coords, color, 1f);
-							// convert mm to cm
-							double xcm = dcData.dc_true_avgX[i] / 10;
-							double ycm = dcData.dc_true_avgY[i] / 10;
-							double zcm = dcData.dc_true_avgZ[i] / 10;
-							drawMCPoint(drawable, xcm, ycm, zcm, color);
-						} else {
-							Support3D.drawLine(drawable, coords, dgtzColor, 1f);
-						}
-						// mm to cm
-						double doca = dcData.get(dcData.dc_dgtz_doca, i) / 10;
+			
+			for (int i = 0; i < hitCount; i++) {
+				try {
+					int sect1 = sector[i]; // 1 based
+					if (sect1 == _sector) {
+						int supl1 = superlayer[i]; // 1 based
+						if (supl1 == _superLayer) {
+							int lay1 = layer[i];
+							int wire1 = wire[i];
+							getWire(lay1, wire1, coords);
 
-						if (showDOCA() && !Double.isNaN(doca) && (doca > .01)) {
-							Support3D.drawTube(drawable, coords[0], coords[1],
-									coords[2], coords[3], coords[4], coords[5],
-									(float) doca, docaColor);
+							if (showMCTruth() && (pid != null) && (avgX != null)) {
+								
+
+								
+								Color color = truthColor(pid, i);
+								Support3D.drawLine(drawable, coords, color, 1f);
+								// convert mm to cm
+								double xcm = avgX[i] / 10;
+								double ycm = avgY[i] / 10;
+								double zcm = avgZ[i] / 10;
+								drawMCPoint(drawable, xcm, ycm, zcm, color);
+							} else {
+								Support3D.drawLine(drawable, coords, dgtzColor, 1f);
+							}
+							// doca: mm to cm
+							double doca = DataSupport.getDouble("DC::dgtz.doca", i) / 10;
+
+							if (showDOCA() && !Double.isNaN(doca) && (doca > .01)) {
+								Support3D.drawTube(drawable, coords[0], coords[1],
+										coords[2], coords[3], coords[4], coords[5],
+										(float) doca, docaColor);
+							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			} //for
+
 		}
+		
+		
 	}
 
 	/**

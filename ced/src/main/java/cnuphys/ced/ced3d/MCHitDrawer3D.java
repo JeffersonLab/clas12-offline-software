@@ -5,10 +5,9 @@ import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.ADataContainer;
-import cnuphys.ced.event.data.BSTDataContainer;
-import cnuphys.ced.event.data.ECDataContainer;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.PCAL;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -33,61 +32,56 @@ public class MCHitDrawer3D extends Item3D {
 		}
 
 		if (_panel3D instanceof ForwardPanel3D) { // forward detectors
-		// DCDataContainer dcData = _eventManager.getDCData();
-		 FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
-			// has EC and PCAL data
-			ECDataContainer ecData = _eventManager.getECData();
 
 			// if (showDC()) {
-			// showGemcXYZHits(drawable, dcData, dcData.dc_true_avgX,
-			// dcData.dc_true_avgY, dcData.dc_true_avgZ,
-			// dcData.dc_true_pid, 0);
 			// }
 
 			if (showFTOF()) {
-				showGemcXYZHits(drawable, ftofData, ftofData.ftof1a_true_avgX,
-						ftofData.ftof1a_true_avgY, ftofData.ftof1a_true_avgZ,
-						ftofData.ftof1a_true_pid, 0);
-				showGemcXYZHits(drawable, ftofData, ftofData.ftof1b_true_avgX,
-						ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ,
-						ftofData.ftof1b_true_pid, 0);
-				showGemcXYZHits(drawable, ftofData, ftofData.ftof2b_true_avgX,
-						ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ,
-						ftofData.ftof2b_true_pid, 0);
+				showGemcXYZHits(drawable, 
+						ColumnData.getDoubleArray("FTOF1A::true.avgX"),
+						ColumnData.getDoubleArray("FTOF1A::true.avgY"), 
+						ColumnData.getDoubleArray("FTOF1A::true.avgZ"),
+						ColumnData.getIntArray("FTOF1A::true.pid"), 
+						0);
+				showGemcXYZHits(drawable, 
+						ColumnData.getDoubleArray("FTOF1B::true.avgX"),
+						ColumnData.getDoubleArray("FTOF1B::true.avgY"), 
+						ColumnData.getDoubleArray("FTOF1B::true.avgZ"),
+						ColumnData.getIntArray("FTOF1B::true.pid"), 
+						0);
+				showGemcXYZHits(drawable, 
+						ColumnData.getDoubleArray("FTOF2B::true.avgX"),
+						ColumnData.getDoubleArray("FTOF2B::true.avgY"), 
+						ColumnData.getDoubleArray("FTOF2B::true.avgZ"),
+						ColumnData.getIntArray("FTOF2B::true.pid"), 
+						0);
 			}
 
 			if (showEC()) {
-				showGemcXYZHits(drawable, ecData, ecData.ec_true_avgX,
-						ecData.ec_true_avgY, ecData.ec_true_avgZ,
-						ecData.ec_true_pid, 0);
+				showGemcXYZHits(drawable, EC.avgX(),
+						EC.avgY(), EC.avgZ(),
+						EC.pid(), 0);
 			}
 
 			if (showPCAL()) {
-				showGemcXYZHits(drawable, ecData, ecData.pcal_true_avgX,
-						ecData.pcal_true_avgY, ecData.pcal_true_avgZ,
-						ecData.pcal_true_pid, 0);
+				showGemcXYZHits(drawable, PCAL.avgX(),
+						PCAL.avgY(), PCAL.avgZ(),
+						PCAL.pid(), 0);
 			}
 
 		} else if (_panel3D instanceof CentralPanel3D) { // central detectors
 
 			if (showSVT()) {
-				BSTDataContainer bstData = _eventManager.getBSTData();
-				showGemcXYZHits(drawable, bstData, bstData.bst_true_avgX,
-						bstData.bst_true_avgY, bstData.bst_true_avgZ,
-						bstData.bst_true_pid, 0);
+				showGemcXYZHits(drawable, 
+						ColumnData.getDoubleArray("BST::true.avgX"),
+						ColumnData.getDoubleArray("BST::true.avgY"),
+						ColumnData.getDoubleArray("BST::true.avgZ"),
+						ColumnData.getIntArray("BST::true.pid"), 0);
 			}
 
 		}
 
-	}
-
-	// show DC
-	private boolean showDC() {
-		if (_panel3D instanceof ForwardPanel3D) {
-			return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_DC);
-		}
-		return false;
 	}
 
 	private boolean showEC() {
@@ -124,7 +118,7 @@ public class MCHitDrawer3D extends Item3D {
 	}
 
 	// draw all the MC hits at once
-	private void showGemcXYZHits(GLAutoDrawable drawable, ADataContainer data,
+	private void showGemcXYZHits(GLAutoDrawable drawable,
 			double x[], double y[], double z[], int pid[], int option) {
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {

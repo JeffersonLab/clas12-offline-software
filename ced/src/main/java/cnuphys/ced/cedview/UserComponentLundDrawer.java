@@ -52,7 +52,7 @@ public class UserComponentLundDrawer extends AUserComponentDrawer {
 	 */
 	@Override
 	protected Vector<LundId> getUniqueLundIds() {
-		return _eventManager.getUniqueLundIds();
+		return _eventManager.uniqueLundIds();
 	}
 
 	@Override

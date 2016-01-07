@@ -11,12 +11,12 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.item.HexSectorItem;
 
 public class CrossDrawer extends DCXYViewDrawer {
@@ -53,8 +53,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 	/**
 	 * Set the mode. 0 for hit based, 1 for time based
 	 * 
-	 * @param mode
-	 *            the new mode
+	 * @param mode the new mode
 	 */
 	public void setMode(int mode) {
 		_mode = mode;
@@ -62,7 +61,8 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating() || (!_view.isSingleEventMode())) {
+		if (ClasIoEventManager.getInstance().isAccumulating()
+				|| (!_view.isSingleEventMode())) {
 			return;
 		}
 
@@ -71,14 +71,12 @@ public class CrossDrawer extends DCXYViewDrawer {
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
-		// dc crosses?
-		DCDataContainer dcData = _eventManager.getDCData();
-
 		int crossCount = 0;
 		if (_mode == HB) {
-			crossCount = dcData.getHitBasedCrossCount();
-		} else if (_mode == TB) {
-			crossCount = dcData.getTimeBasedCrossCount();
+			crossCount = DataSupport.getHitBasedCrossCount();
+		}
+		else if (_mode == TB) {
+			crossCount = DataSupport.getTimeBasedCrossCount();
 		}
 
 		_fbRects[_mode].rects = null;
@@ -88,21 +86,33 @@ public class CrossDrawer extends DCXYViewDrawer {
 			Point pp = new Point();
 
 			if (_mode == HB) {
-				tiltedx = dcData.hitbasedtrkg_hbcrosses_x;
-				tiltedy = dcData.hitbasedtrkg_hbcrosses_y;
-				tiltedz = dcData.hitbasedtrkg_hbcrosses_z;
-				sector = dcData.hitbasedtrkg_hbcrosses_sector;
-				unitx = dcData.hitbasedtrkg_hbcrosses_ux;
-				unity = dcData.hitbasedtrkg_hbcrosses_uy;
-				unitz = dcData.hitbasedtrkg_hbcrosses_uz;
-			} else if (_mode == TB) {
-				tiltedx = dcData.timebasedtrkg_tbcrosses_x;
-				tiltedy = dcData.timebasedtrkg_tbcrosses_y;
-				tiltedz = dcData.timebasedtrkg_tbcrosses_z;
-				sector = dcData.timebasedtrkg_tbcrosses_sector;
-				unitx = dcData.timebasedtrkg_tbcrosses_ux;
-				unity = dcData.timebasedtrkg_tbcrosses_uy;
-				unitz = dcData.timebasedtrkg_tbcrosses_uz;
+				sector = ColumnData
+						.getIntArray("HitBasedTrkg::HBCrosses.sector");
+				tiltedx = ColumnData
+						.getDoubleArray("HitBasedTrkg::HBCrosses.x");
+				tiltedy = ColumnData
+						.getDoubleArray("HitBasedTrkg::HBCrosses.y");
+				tiltedz = ColumnData
+						.getDoubleArray("HitBasedTrkg::HBCrosses.z");
+				unitx = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.ux");
+				unity = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.uy");
+				unitz = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.uz");
+			}
+			else { //TB
+				sector = ColumnData
+						.getIntArray("TimeBasedTrkg::TBCrosses.sector");
+				tiltedx = ColumnData
+						.getDoubleArray("TimeBasedTrkg::TBCrosses.x");
+				tiltedy = ColumnData
+						.getDoubleArray("TimeBasedTrkg::TBCrosses.y");
+				tiltedz = ColumnData
+						.getDoubleArray("TimeBasedTrkg::TBCrosses.z");
+				unitx = ColumnData
+						.getDoubleArray("TimeBasedTrkg::TBCrosses.ux");
+				unity = ColumnData
+						.getDoubleArray("TimeBasedTrkg::TBCrosses.uy");
+				unitz = ColumnData
+						.getDoubleArray("TimeBasedTrkg::TBCrosses.uz");
 			}
 
 			_fbRects[_mode].rects = new Rectangle[crossCount];
@@ -111,8 +121,8 @@ public class CrossDrawer extends DCXYViewDrawer {
 				HexSectorItem hsItem = _view.getHexSectorItem(sector[i]);
 
 				if (hsItem == null) {
-					System.err
-							.println("null sector item in DCXY Cross Drawer sector: "
+					System.err.println(
+							"null sector item in DCXY Cross Drawer sector: "
 									+ sector[i]);
 					break;
 				}
@@ -133,9 +143,9 @@ public class CrossDrawer extends DCXYViewDrawer {
 				double r = pixlen
 						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-				// System.err.println("ARROWLEN r = " + r + "   absmaxx: " +
+				// System.err.println("ARROWLEN r = " + r + " absmaxx: " +
 				// DCGeometry.getAbsMaxWireX());
-				// System.err.println("PIX LEN: " + pixlen + "  density " +
+				// System.err.println("PIX LEN: " + pixlen + " density " +
 				// WorldGraphicsUtilities.getMeanPixelDensity(container) +
 				// " pix/len");
 
@@ -156,8 +166,11 @@ public class CrossDrawer extends DCXYViewDrawer {
 				DataDrawSupport.drawCross(g, pp.x, pp.y, _mode);
 
 				// fbrects for quick feedback
-				_fbRects[_mode].rects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y
-						- DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
+				_fbRects[_mode].rects[i] = new Rectangle(
+						pp.x - DataDrawSupport.CROSSHALF,
+						pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF);
 
 			} // end for
 		} // hbcrosscount > 0
@@ -168,14 +181,10 @@ public class CrossDrawer extends DCXYViewDrawer {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container the drawing container
+	 * @param screenPoint the mouse location
+	 * @param worldPoint the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
 	public void feedback(IContainer container, Point screenPoint,
@@ -186,41 +195,62 @@ public class CrossDrawer extends DCXYViewDrawer {
 		}
 
 		// hit based dc crosses?
-		DCDataContainer dcData = _eventManager.getDCData();
-		int hbcrosscount = dcData.getHitBasedCrossCount();
+		int hbcrosscount = DataSupport.getHitBasedCrossCount();
 
 		if (hbcrosscount < 1) {
 			return;
 		}
 
-		boolean hitBased = (_mode == HB);
+		int sectarray[];
+		int regarray[];
+		int idarray[];
+		double cross_x[];
+		double cross_y[];
+		double cross_z[];
+		double uxarray[];
+		double uyarray[];
+		double uzarray[];
+		double errxarray[];
+		double erryarray[];
+		double errzarray[];
 
-		double cross_x[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_x
-				: dcData.timebasedtrkg_tbcrosses_x;
-		double cross_y[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_y
-				: dcData.timebasedtrkg_tbcrosses_y;
-		double cross_z[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_z
-				: dcData.timebasedtrkg_tbcrosses_z;
-		int idarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_ID
-				: dcData.timebasedtrkg_tbcrosses_ID;
-		int sectarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_sector
-				: dcData.timebasedtrkg_tbcrosses_sector;
-		int regarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_region
-				: dcData.timebasedtrkg_tbcrosses_region;
-		// int trackarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_trackID
-		// : dcData.timebasedtrkg_tbcrosses_trackID;
-		double errxarray[] = (_mode == HB) ? dcData.hitbasedtrkg_hbcrosses_err_x
-				: dcData.timebasedtrkg_tbcrosses_err_x;
-		double erryarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_err_y
-				: dcData.timebasedtrkg_tbcrosses_err_y;
-		double errzarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_err_z
-				: dcData.timebasedtrkg_tbcrosses_err_z;
-		double uxarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_ux
-				: dcData.timebasedtrkg_tbcrosses_ux;
-		double uyarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_uy
-				: dcData.timebasedtrkg_tbcrosses_uy;
-		double uzarray[] = hitBased ? dcData.hitbasedtrkg_hbcrosses_uz
-				: dcData.timebasedtrkg_tbcrosses_uz;
+		if (_mode == HB) {
+			sectarray = ColumnData
+					.getIntArray("HitBasedTrkg::HBCrosses.sector");
+			regarray = ColumnData.getIntArray("HitBasedTrkg::HBCrosses.region");
+			idarray = ColumnData.getIntArray("HitBasedTrkg::HBCrosses.ID");
+			cross_x = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.x");
+			cross_y = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.y");
+			cross_z = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.z");
+			uxarray = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.ux");
+			uyarray = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.uy");
+			uzarray = ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.uz");
+			errxarray = ColumnData
+					.getDoubleArray("HitBasedTrkg::HBCrosses.err_x");
+			erryarray = ColumnData
+					.getDoubleArray("HitBasedTrkg::HBCrosses.err_y");
+			errzarray = ColumnData
+					.getDoubleArray("HitBasedTrkg::HBCrosses.err_z");
+		}
+		else { // TB
+			sectarray = ColumnData
+					.getIntArray("TimeBasedTrkg::TBCrosses.sector");
+			regarray = ColumnData
+					.getIntArray("TimeBasedTrkg::TBCrosses.region");
+			idarray = ColumnData.getIntArray("TimeBasedTrkg::TBCrosses.ID");
+			cross_x = ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.x");
+			cross_y = ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.y");
+			cross_z = ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.z");
+			uxarray = ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.ux");
+			uyarray = ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.uy");
+			uzarray = ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.uz");
+			errxarray = ColumnData
+					.getDoubleArray("TimeBasedTrkg::TBCrosses.err_x");
+			erryarray = ColumnData
+					.getDoubleArray("TimeBasedTrkg::TBCrosses.err_y");
+			errzarray = ColumnData
+					.getDoubleArray("TimeBasedTrkg::TBCrosses.err_z");
+		}
 
 		for (int i = 0; i < _fbRects[_mode].rects.length; i++) {
 			if ((_fbRects[_mode].rects[i] != null)
@@ -244,15 +274,15 @@ public class CrossDrawer extends DCXYViewDrawer {
 				double uz = uzarray[i];
 
 				// feedbackStrings.add(fbcolors[_mode] + prefix[_mode]
-				// + "cross ID: " + id + "  sect: " + sect + "  reg: "
-				// + reg + "  track: " + track);
+				// + "cross ID: " + id + " sect: " + sect + " reg: "
+				// + reg + " track: " + track);
 
-				feedbackStrings.add(fbcolors[_mode] + DataDrawSupport.prefix[_mode]
-						+ "cross ID: " + id + "  sect: " + sect + "  reg: "
-						+ reg);
+				feedbackStrings.add(fbcolors[_mode]
+						+ DataDrawSupport.prefix[_mode] + "cross ID: " + id
+						+ "  sect: " + sect + "  reg: " + reg);
 
-				feedbackStrings.add(vecStr("cross loc tilted", tiltedx,
-						tiltedy, tiltedz));
+				feedbackStrings.add(
+						vecStr("cross loc tilted", tiltedx, tiltedy, tiltedz));
 				feedbackStrings.add(vecStr("cross error", xerr, yerr, zerr));
 				feedbackStrings.add(vecStr("cross direc tilted", ux, uy, uz));
 

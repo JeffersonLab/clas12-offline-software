@@ -7,9 +7,6 @@ public class HitRecord {
 	/** the hit Index */
 	public int hitIndex;
 
-	/** the data container */
-	public ADataContainer dataContainer;
-
 	public Point3D avgHit;
 	/**
 	 * The 1-based ints (int order) used to identify the hit. For example, in EC
@@ -30,13 +27,13 @@ public class HitRecord {
 	 *            example, in EC the ints are sect, stack, view, strip.For DC
 	 *            they are sect, superlayer, layer, wire.
 	 */
-	public HitRecord(ADataContainer dContainer, double avgX[], double avgY[],
+	public HitRecord(double avgX[], double avgY[],
 			double avgZ[], int hIndex, int... idArray) {
-		dataContainer = dContainer;
 		hitIndex = hIndex;
 		ids = idArray;
 
 		if ((avgX != null) && (avgX.length > hIndex)) {
+			//convert to cm
 			avgHit = new Point3D(avgX[hIndex] / 10, avgY[hIndex] / 10,
 					avgZ[hIndex] / 10);
 		}

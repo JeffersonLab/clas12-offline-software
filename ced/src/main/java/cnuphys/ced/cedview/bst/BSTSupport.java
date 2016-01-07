@@ -3,8 +3,8 @@ package cnuphys.ced.cedview.bst;
 import java.util.List;
 
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
 
 public class BSTSupport {
@@ -22,21 +22,21 @@ public class BSTSupport {
 			panel.hit[2] = false;
 		}
 
-		ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-		BSTDataContainer bstData = _eventManager.getBSTData();
-		int hitCount = bstData.getHitCount(0);
+		int hitCount = DataSupport.bstGetHitCount();
 		if (hitCount < 1) {
 			return;
 		}
 
 		//NOTE this uses "true" (gemc data) to segment the z direction
-		double z[] = bstData.bst_true_avgLz;
+		double z[] = ColumnData.getDoubleArray("BST::true.avgLz");
+		int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
+		int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
 
 		int len = z.length;
 		for (int i = 0; i < len; i++) {
 			for (BSTxyPanel panel : panels) {
-				if ((panel.getLayer() == bstData.bst_dgtz_layer[i])
-						&& (panel.getSector() == bstData.bst_dgtz_sector[i])) {
+				if ((panel.getLayer() == bstlayer[i])
+						&& (panel.getSector() == bstsector[i])) {
 
 					if (view.showMcTruth() && (z != null)) {
 						int zindex = panel.getZIndex(z[i]);
