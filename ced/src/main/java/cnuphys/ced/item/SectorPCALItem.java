@@ -20,7 +20,6 @@ import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.PCALGeometry;
@@ -220,7 +219,7 @@ public class SectorPCALItem extends PolygonItem {
 				fract = ((double) hit) / maxHit;
 			}
 			else {
-				fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+				fract = Math.log(hit+1.)/Math.log(maxHit+1.);
 			}
 			
 			Point2D.Double wp[] = getStrip(strip0);

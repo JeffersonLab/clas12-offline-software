@@ -10,7 +10,7 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.lund.LundId;
@@ -47,10 +47,10 @@ public class McHitDrawer extends DCXYViewDrawer {
 
 	private void showGemcXYHits(Graphics g, IContainer container) {
 		
-		double x[] = ColumnData.getDoubleArray("DC::true.avgX ");
-		double y[] = ColumnData.getDoubleArray("DC::true.avgY ");
-		double z[] = ColumnData.getDoubleArray("DC::true.avgZ ");
-		int pid[] = ColumnData.getIntArray("DC::true.pid ");
+		double x[] = DC.avgX();
+		double y[] = DC.avgY();
+		double z[] = DC.avgZ();
+		int pid[] = DC.pid();
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {
 			return;

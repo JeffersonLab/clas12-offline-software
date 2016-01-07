@@ -3,8 +3,7 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -64,17 +63,18 @@ public class DCSuperLayer3D extends DetectorItem3D {
 
 		float coords[] = new float[6];
 		
-		int hitCount = DataSupport.dcGetHitCount();
+		int hitCount = DC.hitCount();
 		
 		if (hitCount > 0) {
-			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
-			int pid[] = ColumnData.getIntArray("DC::true.pid");
-			double avgX[] = ColumnData.getDoubleArray("DC::true.avgX");
-			double avgY[] = ColumnData.getDoubleArray("DC::true.avgY");
-			double avgZ[] = ColumnData.getDoubleArray("DC::true.avgZ");
+			int sector[] = DC.sector();
+			int superlayer[] = DC.superlayer();
+			int layer[] = DC.layer();
+			int wire[] = DC.wire();
+			int pid[] = DC.pid();
+			double avgX[] = DC.avgX();
+			double avgY[] = DC.avgY();
+			double avgZ[] = DC.avgZ();
+			double docas[] = DC.doca();
 
 			
 			for (int i = 0; i < hitCount; i++) {
@@ -102,7 +102,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 								Support3D.drawLine(drawable, coords, dgtzColor, 1f);
 							}
 							// doca: mm to cm
-							double doca = DataSupport.getDouble("DC::dgtz.doca", i) / 10;
+							double doca = docas[i]/10;
 
 							if (showDOCA() && !Double.isNaN(doca) && (doca > .01)) {
 								Support3D.drawTube(drawable, coords[0], coords[1],

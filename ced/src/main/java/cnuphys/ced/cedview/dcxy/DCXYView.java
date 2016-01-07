@@ -36,8 +36,7 @@ import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.item.DCHexSectorItem;
 import cnuphys.ced.item.HexSectorItem;
@@ -232,13 +231,13 @@ public class DCXYView extends HexView {
 			if (showMcTruth()) {
 				_mcHitDrawer.draw(g, container);
 				
-				int hitCount = DataSupport.dcGetHitCount();
+				int hitCount = DC.hitCount();
 				
 				if (hitCount > 0) {
-					int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-					int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-					int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-					int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+					int sector[] = DC.sector();
+					int superlayer[] = DC.superlayer();
+					int layer[] = DC.layer();
+					int wire[] = DC.wire();
 					
 					Graphics2D g2 = (Graphics2D)g;
 					Stroke oldStroke = g2.getStroke();

@@ -15,6 +15,7 @@ import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.PCAL;
@@ -494,13 +495,13 @@ public class AccumulationManager
 		_eventCount++;
 
 		// dc data
-		int dcHitCount = DataSupport.dcGetHitCount();
+		int dcHitCount = DC.hitCount();
 
 		if (dcHitCount > 0) {
-			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+			int sector[] = DC.sector();
+			int superlayer[] = DC.superlayer();
+			int layer[] = DC.layer();
+			int wire[] = DC.wire();
 
 			for (int i = 0; i < dcHitCount; i++) {
 				int sect0 = sector[i] - 1; // make 0 based

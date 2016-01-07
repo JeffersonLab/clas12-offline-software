@@ -11,7 +11,6 @@ import org.jlab.geom.prim.Point3D;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.PCAL;

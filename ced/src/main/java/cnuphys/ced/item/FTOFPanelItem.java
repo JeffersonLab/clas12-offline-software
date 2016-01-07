@@ -150,7 +150,7 @@ public class FTOFPanelItem extends PolygonItem {
 					fract = ((double) hit) / maxHit;
 				}
 				else {
-					fract = Math.log((double)(hit+1.))/Math.log(maxHit+1.);
+					fract = Math.log(hit+1.)/Math.log(maxHit+1.);
 				}
 
 				Color fc = AccumulationManager.getInstance().getColor(fract);

@@ -103,7 +103,6 @@ public class EC {
 		return ColumnData.getDoubleArray("EC::true.avgLz");
 	}
 
-	
 	/**
 	 * Get the hitn array from the dgtz data
 	 * @return the hitn array

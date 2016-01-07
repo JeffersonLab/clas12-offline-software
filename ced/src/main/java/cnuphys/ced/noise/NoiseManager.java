@@ -6,8 +6,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.DC;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -78,13 +77,13 @@ public class NoiseManager implements IClasIoEventListener {
 		noisePackage.clear();
 		noiseResults.clear();
 		
-		int hitCount = DataSupport.dcGetHitCount();
+		int hitCount = DC.hitCount();
 		
 		if (hitCount > 0) {
-			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
-			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
-			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
-			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+			int sector[] = DC.sector();
+			int superlayer[] = DC.superlayer();
+			int layer[] = DC.layer();
+			int wire[] = DC.wire();
 			
 			noisePackage.findNoise(sector,
 					superlayer, layer,

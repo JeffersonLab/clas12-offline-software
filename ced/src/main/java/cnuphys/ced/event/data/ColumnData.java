@@ -60,7 +60,7 @@ public class ColumnData {
 				
 				Arrays.sort(knownBanks);
 				for (String bankName : knownBanks) {
-					System.err.println(bankName);
+					Log.getInstance().info(bankName);
 
 					DataDescriptor dd = dataDict.getDescriptor(bankName);
 
@@ -80,7 +80,7 @@ public class ColumnData {
 									type);
 							
 							count++;
-							System.err.println(count + "  " + cd);
+							Log.getInstance().info(count + "  " + cd);
 							_columnData.put(cd._fullName, cd);
 						}
 					}

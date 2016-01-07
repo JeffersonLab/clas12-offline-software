@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -23,7 +22,6 @@ import javax.swing.JWindow;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.StreamCapturePane;
 import cnuphys.bCNU.util.Fonts;
-import cnuphys.bCNU.util.TextUtilities;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.splot.plot.GraphicsUtilities;
 
