@@ -10,17 +10,14 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.DataSupport;
 
 public class ReconDrawer extends SectorViewDrawer {
 
 	// cached rectangles for feedback
 	private Vector<FeedbackRect> _fbRects = new Vector<FeedbackRect>();
-
-	// feedback string color
-	private static String fbcolors[] = { "$wheat$", "$misty rose$" };
-	private static String prefix[] = { "HB ", "TB " };
 
 	public ReconDrawer(SectorView view) {
 		super(view);
@@ -49,15 +46,14 @@ public class ReconDrawer extends SectorViewDrawer {
 
 	// draw reconstructed hits
 	private void drawFTOFReconHits(Graphics g, IContainer container) {
-		FTOFDataContainer ftofData = _eventManager.getFTOFData();
 
 		// arggh this sector array is zero based
-		int sector[] = ftofData.ftofrec_ftofhits_sector;
-		float recX[] = ftofData.ftofrec_ftofhits_x;
-		float recY[] = ftofData.ftofrec_ftofhits_y;
-		float recZ[] = ftofData.ftofrec_ftofhits_z;
-		int panel[] = ftofData.ftofrec_ftofhits_panel_id;
-		int paddle[] = ftofData.ftofrec_ftofhits_paddle_id;
+		int sector[] = ColumnData.getIntArray("FTOFRec::ftofhits.sector");
+		int panel[] = ColumnData.getIntArray("FTOFRec::ftofhits.panel_id");
+		int paddle[] = ColumnData.getIntArray("FTOFRec::ftofhits.paddle_id");
+		float recX[] = ColumnData.getFloatArray("FTOFRec::ftofhits.x");
+		float recY[] = ColumnData.getFloatArray("FTOFRec::ftofhits.y");
+		float recZ[] = ColumnData.getFloatArray("FTOFRec::ftofhits.z");
 
 		// _view.getWorldFromDetectorXYZ(100 * v3d[0], 100 *v3d[1],
 		// 100 * v3d[2], wp);
@@ -81,12 +77,12 @@ public class ReconDrawer extends SectorViewDrawer {
 					String s1 = "$Orange Red$" + vecStr("FTOF hit (lab)",
 							recX[hitIndex], recY[hitIndex], recZ[hitIndex]);
 					String s2 = "$Orange Red$FTOF panel: "
-							+ FTOFDataContainer.panelNames[panel[hitIndex] - 1]
+							+ DataSupport.panelNames[panel[hitIndex] - 1]
 							+ " paddle: " + (paddle[hitIndex] + 1);
 
 					container.worldToLocal(pp, wp);
-					FeedbackRect fbr = new FeedbackRect(pp.x - 4, pp.y - 4, 8,
-							8, hitIndex, ftofData, 0, s1, s2);
+					FeedbackRect fbr = new FeedbackRect(FeedbackRect.Dtype.FTOF, pp.x - 4, pp.y - 4, 8,
+							8, hitIndex, panel[hitIndex], s1, s2);
 					_fbRects.add(fbr);
 
 					DataDrawSupport.drawReconHit(g, pp);

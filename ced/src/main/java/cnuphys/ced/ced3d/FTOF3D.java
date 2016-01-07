@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -87,16 +87,15 @@ public class FTOF3D extends DetectorItem3D {
 	
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		FTOFDataContainer ftofData = _eventManager.getFTOFData();
-
-		//DRAW reconstructed hits
-		int sector[] = ftofData.ftofrec_ftofhits_sector;
+		
+		// arggh this sector array is zero based
+		int sector[] = ColumnData.getIntArray("FTOFRec::ftofhits.sector");
 		if (sector == null) {
 			return;
 		}
-		float recX[] = ftofData.ftofrec_ftofhits_x;
-		float recY[] = ftofData.ftofrec_ftofhits_y;
-		float recZ[] = ftofData.ftofrec_ftofhits_z;
+		float recX[] = ColumnData.getFloatArray("FTOFRec::ftofhits.x");
+		float recY[] = ColumnData.getFloatArray("FTOFRec::ftofhits.y");
+		float recZ[] = ColumnData.getFloatArray("FTOFRec::ftofhits.z");
 
 		int numHits = sector.length;
 		// System.err.println("FTOF DRAWDATA NUM HITS: " + numHits);

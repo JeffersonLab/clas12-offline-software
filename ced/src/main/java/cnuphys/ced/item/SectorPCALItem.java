@@ -19,8 +19,10 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
+import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -162,41 +164,44 @@ public class SectorPCALItem extends PolygonItem {
 	//single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
 		
-		// the data container
-		ECDataContainer ecData = _eventManager.getECData();
+		int hitCount = PCAL.hitCount();
+		if (hitCount > 0) {
+			Color default_fc = Color.red;
 
-		Color default_fc = Color.red;
-		int pid[] = ecData.pcal_true_pid;
-
-		for (int hitIndex = 0; hitIndex < ecData
-				.getHitCount(ECDataContainer.PCAL_OPTION); hitIndex++) {
-			if ((ecData.pcal_dgtz_sector[hitIndex] == _sector)
-					&& (ecData.pcal_dgtz_view[hitIndex] == (_stripType + 1))) {
-				Color fc = default_fc;
-				
-				if (_view.showMcTruth()) {
-					if (pid != null) {
-						LundId lid = LundSupport.getInstance()
-								.get(pid[hitIndex]);
-						if (lid != null) {
-							fc = lid.getStyle().getFillColor();
+			int pid[] = PCAL.pid();
+			int sector[] = PCAL.sector();
+			int view[] = PCAL.view();
+			int strip[] = PCAL.strip();
+			
+			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
+				if ((sector[hitIndex] == _sector)
+						&& (view[hitIndex] == (_stripType + 1))) {
+					Color fc = default_fc;
+					
+					if (_view.showMcTruth()) {
+						if (pid != null) {
+							LundId lid = LundSupport.getInstance()
+									.get(pid[hitIndex]);
+							if (lid != null) {
+								fc = lid.getStyle().getFillColor();
+							}
 						}
 					}
+
+					int strip0 = strip[hitIndex] - 1;
+
+					Point2D.Double wp[] = getStrip(strip0);
+
+					if (wp != null) {
+						Path2D.Double path = WorldGraphicsUtilities
+								.worldPolygonToPath(wp);
+						WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
+								_style.getLineColor(), 0, LineStyle.SOLID, true);
+					}
+
 				}
-
-				int strip0 = ecData.pcal_dgtz_strip[hitIndex] - 1;
-
-				Point2D.Double wp[] = getStrip(strip0);
-
-				if (wp != null) {
-					Path2D.Double path = WorldGraphicsUtilities
-							.worldPolygonToPath(wp);
-					WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
-							_style.getLineColor(), 0, LineStyle.SOLID, true);
-				}
-
-			}
-		} // loop hits
+			} // loop hits
+		} //hitcount > 0
 	}
 	
 	//accumulated drawer
@@ -303,20 +308,15 @@ public class SectorPCALItem extends PolygonItem {
 
 					// on a hit?
 					// the data container
-					ECDataContainer ecData = _eventManager.getECData();
-					Vector<HitRecord> hits = ecData.getMatchingHits(_sector, 1,
+					Vector<HitRecord> hits = DataSupport.ecGetMatchingHits(_sector, 1,
 							_stripType + 1, stripId + 1,
-							ECDataContainer.PCAL_OPTION);
+							DataSupport.PCAL_OPTION);
 
 					if (hits != null) {
 						for (HitRecord hit : hits) {
-							ecData.onHitFeedbackStrings(hit.hitIndex,
-									ECDataContainer.PCAL_OPTION,
-									ecData.pcal_true_pid,
-									ecData.pcal_true_mpid,
-									ecData.pcal_true_tid,
-									ecData.pcal_true_mtid,
-									ecData.pcal_true_otid, feedbackStrings);
+							DataSupport.ecPreliminaryFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
+							DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
+							DataSupport.ecDgtzFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
 						}
 					}
 

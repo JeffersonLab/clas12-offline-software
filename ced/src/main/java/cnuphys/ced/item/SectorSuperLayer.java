@@ -15,8 +15,9 @@ import org.jlab.geom.prim.Line3D;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ADataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.GeometryManager;
@@ -189,43 +190,52 @@ public class SectorSuperLayer extends PolygonItem {
 	}
 	
 	private void drawSingleModeHits(Graphics g, IContainer container) {
+		
+		int hitCount = DataSupport.dcGetHitCount();
 
-		DCDataContainer dcData = _eventManager.getDCData();
+		if (hitCount > 0)  {
+			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
+			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
+			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
+			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+			int pid[] = ColumnData.getIntArray("DC::true.pid");
+			
+			for (int i = 0; i < hitCount; i++) {
+				try {
+					int sect1 = sector[i]; // 1 based
+					int supl1 = superlayer[i]; // 1 based
 
-		for (int i = 0; i < dcData.getHitCount(0); i++) {
-			try {
-				int sect1 = dcData.dc_dgtz_sector[i]; // 1 based
-				int supl1 = dcData.dc_dgtz_superlayer[i]; // 1 based
+					if ((sect1 == _sector) && (supl1 == _superLayer)) {
+						int lay1 = layer[i]; // 1 based
+						int wire1 = wire[i]; // 1 based
 
-				if ((sect1 == _sector) && (supl1 == _superLayer)) {
-					int lay1 = dcData.dc_dgtz_layer[i]; // 1 based
-					int wire1 = dcData.dc_dgtz_wire[i]; // 1 based
-
-					boolean noise = false;
-					if (_noiseManager.getNoise() != null) {
-						if (i < _noiseManager.getNoise().length) {
-							noise = _noiseManager.getNoise()[i];
+						boolean noise = false;
+						if (_noiseManager.getNoise() != null) {
+							if (i < _noiseManager.getNoise().length) {
+								noise = _noiseManager.getNoise()[i];
+							}
+							else {
+								String ws = " hit index = " + i + " noise length = "
+										+ _noiseManager.getNoise().length;
+								Log.getInstance().warning(ws);
+							}
 						}
-						else {
-							String ws = " hit index = " + i + " noise length = "
-									+ _noiseManager.getNoise().length;
-							Log.getInstance().warning(ws);
-						}
+
+						int pdgid = (pid == null) ? -1
+								: pid[i];
+
+						double doca = DataSupport.getDouble("DC::dgtz.doca", i);
+						
+						drawGemcDCHit((Graphics2D)g, container, lay1, wire1, noise, pdgid, doca);
 					}
-
-					int pid = (dcData.dc_true_pid == null) ? -1
-							: dcData.dc_true_pid[i];
-
-					double doca = dcData.get(dcData.dc_dgtz_doca, i);
-					drawGemcDCHit((Graphics2D)g, container, lay1, wire1, noise, pid, doca);
+				} catch (NullPointerException e) {
+					System.err.println(
+							"null pointer in SectorSuperLayer hit drawing");
+					e.printStackTrace();
 				}
-			} catch (NullPointerException e) {
-				System.err.println(
-						"null pointer in SectorSuperLayer hit drawing");
-				e.printStackTrace();
-			}
-		} // for loop
+			} // for loop
 
+		}
 	}
 	
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
@@ -697,11 +707,11 @@ public class SectorSuperLayer extends PolygonItem {
 					.getParameters(_sector - 1, _superLayer - 1);
 
 			feedbackStrings
-					.add(ADataContainer.prelimColor + "Raw Occupancy "
+					.add(DataSupport.prelimColor + "Raw Occupancy "
 							+ DoubleFormat.doubleFormat(
 									100.0 * parameters.getRawOccupancy(), 2)
 					+ "%");
-			feedbackStrings.add(ADataContainer.prelimColor
+			feedbackStrings.add(DataSupport.prelimColor
 					+ "Reduced Occupancy "
 					+ DoubleFormat.doubleFormat(
 							100.0 * parameters.getNoiseReducedOccupancy(), 2)
@@ -710,30 +720,47 @@ public class SectorSuperLayer extends PolygonItem {
 			// getLayer returns a 1 based index (-1 on failure)
 			int layer = getLayer(container, screenPoint);
 
-			DCDataContainer dcData = _eventManager.getDCData();
-
 			if (layer > 0) {
 				int wire = getWire(layer, worldPoint);
 				if ((wire > 0) && (wire <= GeoConstants.NUM_WIRE)) {
 
-					int hitIndex = dcData.getHitIndex(_sector, _superLayer,
+					int hitIndex = DataSupport.dcGetHitIndex(_sector, _superLayer,
 							layer, wire);
 					if (hitIndex < 0) {
 						feedbackStrings.add("superlayer " + _superLayer
 								+ "  layer " + layer + "  wire " + wire);
 					}
 					else {
-						dcData.onHitFeedbackStrings(hitIndex, 0,
-								dcData.dc_true_pid, dcData.dc_true_mpid,
-								dcData.dc_true_tid, dcData.dc_true_mtid,
-								dcData.dc_true_otid, feedbackStrings);
+						DataSupport.dcNoiseFeedback(hitIndex, feedbackStrings);
+						DataSupport.dcTrueFeedback(hitIndex, feedbackStrings);
+						DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
+						DataSupport.dcDgtzFeedback(hitIndex, feedbackStrings);
 					}
 
 				} // good wire
 			} // good layer
 
-			dcData.generalFeedbackStrings(0, feedbackStrings);
+			addReconstructedFeedback(feedbackStrings);
 		}
+	}
+	
+	// add time based recons fb
+	private void addReconstructedFeedback(List<String> feedbackStrings) {
+
+		double p[] = ColumnData.getDoubleArray("TimeBasedTrkg::TBTracks.p");
+		if (p != null) {
+			int reconTrackCount = p.length;
+			if (reconTrackCount > 0) {
+				feedbackStrings.add(DataSupport.reconColor
+						+ "TB #reconstructed tracks " + reconTrackCount);
+				for (int i = 0; i < reconTrackCount; i++) {
+
+					feedbackStrings.add(DataSupport.reconColor
+							+ "TB trk# " + (i + 1) + " recon p "
+							+ DoubleFormat.doubleFormat(p[i], 5) + " Gev/c");
+				}
+			}
+		} // p != null
 	}
 
 	/**

@@ -755,7 +755,7 @@ public class LundTrackDialog extends JDialog {
     public class CommonBorder extends TitledBorder {
 
 	public Border etched = BorderFactory.createEtchedBorder();
-	public Font font = new Font("SandSerif", Font.PLAIN, 9);;
+	public Font font = new Font("SandSerif", Font.PLAIN, 9);
 
 	public CommonBorder() {
 	    super(BorderFactory.createEtchedBorder());

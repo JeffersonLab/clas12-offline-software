@@ -10,11 +10,11 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ADataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.ECDataContainer;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -44,41 +44,42 @@ public class McHitDrawer extends SectorViewDrawer {
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
-		
-		// get the data
-		DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
-		FTOFDataContainer ftofData = _eventManager.getFTOFData();
-		ECDataContainer ecData = _eventManager.getECData();
 
 
-		showGemcXYZHits(g, container, dcData, dcData.dc_true_avgX,
-				dcData.dc_true_avgY, dcData.dc_true_avgZ, dcData.dc_true_pid, 0);
+		showGemcXYZHits(g, container, FeedbackRect.Dtype.DC, 
+				ColumnData.getDoubleArray("DC::true.avgX"),
+				ColumnData.getDoubleArray("DC::true.avgY"), 
+				ColumnData.getDoubleArray("DC::true.avgZ"), 
+				ColumnData.getIntArray("DC::true.pid"),
+				0);
 
-		// showGemcXYZHits(g, container, ecData, ecData.ec_true_avgX,
-		// ecData.ec_true_avgY, ecData.ec_true_avgZ, ecData.ec_true_pid,
-		// ECDataContainer.EC_OPTION);
-		//
-		// showGemcXYZHits(g, container, ecData, ecData.pcal_true_avgX,
-		// ecData.pcal_true_avgY, ecData.ec_true_avgZ,
-		// ecData.pcal_true_pid, ECDataContainer.PCAL_OPTION);
-		//
-		 showGemcXYZHits(g, container, ftofData, ftofData.ftof1a_true_avgX,
-		 ftofData.ftof1a_true_avgY, ftofData.ftof1a_true_avgZ,
-		 ftofData.ftof1a_true_pid, FTOFDataContainer.PANEL_1A);
-		
-		 showGemcXYZHits(g, container, ftofData, ftofData.ftof1b_true_avgX,
-		 ftofData.ftof1b_true_avgY, ftofData.ftof1b_true_avgZ,
-		 ftofData.ftof1b_true_pid, FTOFDataContainer.PANEL_1B);
-		
-		 showGemcXYZHits(g, container, ftofData, ftofData.ftof2b_true_avgX,
-		 ftofData.ftof2b_true_avgY, ftofData.ftof2b_true_avgZ,
-		 ftofData.ftof2b_true_pid, FTOFDataContainer.PANEL_2);
+		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
+				ColumnData.getDoubleArray("FTOF1A::true.avgX"),
+				ColumnData.getDoubleArray("FTOF1A::true.avgY"), 
+				ColumnData.getDoubleArray("FTOF1A::true.avgZ"), 
+				ColumnData.getIntArray("FTOF1A::true.pid"),
+				DataSupport.PANEL_1A);
+
+		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
+				ColumnData.getDoubleArray("FTOF1B::true.avgX"),
+				ColumnData.getDoubleArray("FTOF1B::true.avgY"), 
+				ColumnData.getDoubleArray("FTOF1B::true.avgZ"), 
+				ColumnData.getIntArray("FTOF1B::true.pid"),
+				DataSupport.PANEL_1B);
+
+		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
+				ColumnData.getDoubleArray("FTOF2B::true.avgX"),
+				ColumnData.getDoubleArray("FTOF2B::true.avgY"), 
+				ColumnData.getDoubleArray("FTOF2B::true.avgZ"), 
+				ColumnData.getIntArray("FTOF2B::true.pid"),
+				DataSupport.PANEL_2);
 
 	}
 
 	// the actual hit drawing
 	private void showGemcXYZHits(Graphics g, IContainer container,
-			ADataContainer data, double x[], double y[], double z[], int pid[],
+			FeedbackRect.Dtype dtype,
+			double x[], double y[], double z[], int pid[],
 			int option) {
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {
@@ -123,7 +124,8 @@ public class McHitDrawer extends SectorViewDrawer {
 					LundId lid = LundSupport.getInstance().get(pid[hitIndex]);
 					if (lid != null) {
 						pidstr = " [" + lid.getName() + "] ";
-					} else {
+					}
+					else {
 						pidstr = " [??] (" + pid[hitIndex] + ") ";
 					}
 				}
@@ -131,12 +133,10 @@ public class McHitDrawer extends SectorViewDrawer {
 				// display 1-based hit index
 
 				pidstr += "  sect: " + sector + "  ";
-				String s = vecStr(
-						"Gemc Hit [" + (hitIndex + 1) + "] " + pidstr,
-						labXYZ[0], labXYZ[1], labXYZ[2])
-						+ " cm";
-				FeedbackRect rr = new FeedbackRect(pp.x - 4, pp.y - 4, 8, 8,
-						hitIndex, data, option, s);
+				String s = vecStr("Gemc Hit [" + (hitIndex + 1) + "] " + pidstr,
+						labXYZ[0], labXYZ[1], labXYZ[2]) + " cm";
+				FeedbackRect rr = new FeedbackRect(dtype, pp.x - 4, pp.y - 4, 8, 8,
+						hitIndex, option, s);
 				_fbRects.addElement(rr);
 
 				DataDrawSupport.drawGemcHit(g, pp);
@@ -148,71 +148,68 @@ public class McHitDrawer extends SectorViewDrawer {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container the drawing container
+	 * @param screenPoint the mouse location
+	 * @param worldPoint the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
 	public void vdrawFeedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings, int option) {
+			Point2D.Double worldPoint, List<String> feedbackStrings,
+			int option) {
 
 		if (_fbRects.isEmpty()) {
 			return;
 		}
+		
+		int ecstrip[] = EC.strip();
+		int ecstack[] = EC.stack();
+		int ecview[] = EC.view();
+		
+		int pcalstrip[] = PCAL.strip();
+		int pcalstack[] = PCAL.stack(); //all 1s
+		int pcalview[] = PCAL.view();
+		
 
 		for (FeedbackRect rr : _fbRects) {
 			boolean contains = rr.contains(screenPoint, feedbackStrings);
 			if (contains && (rr.hitIndex >= 0)) {
 
 				int hitIndex = rr.hitIndex;
+				
+				int strip = -1;
+				int stack = -1;
+				int view = -1;
 
-				// additional feedback EC (and PCAL)
-				if (rr.dataContainer instanceof ECDataContainer) {
-					ECDataContainer data = (ECDataContainer) (rr.dataContainer);
-
-					int strip = -1;
-					int stack = -1;
-					int view = -1;
-					if (rr.option == ECDataContainer.EC_OPTION) {
-						strip = rr.dataContainer.get(data.ec_dgtz_strip,
-								hitIndex);
-						stack = rr.dataContainer.get(data.ec_dgtz_stack,
-								hitIndex);
-						view = rr.dataContainer
-								.get(data.ec_dgtz_view, hitIndex);
-					} else { // pcal
-						strip = rr.dataContainer.get(data.pcal_dgtz_strip,
-								hitIndex);
-						stack = rr.dataContainer.get(data.pcal_dgtz_stack,
-								hitIndex);
-						view = rr.dataContainer.get(data.pcal_dgtz_view,
-								hitIndex);
-					}
-
-					if ((strip > 0) && (stack > 0) && (view > 0)) {
-						String s = ADataContainer.trueColor + "Gemc Hit "
-								+ " plane "
-								+ DataDrawSupport.EC_PLANE_NAMES[stack]
-								+ " type "
-								+ DataDrawSupport.EC_VIEW_NAMES[view]
-								+ " strip " + strip;
-						feedbackStrings.add(s);
-					}
+				if (rr.type == FeedbackRect.Dtype.EC) {
+					strip = ecstrip[hitIndex];
+					stack = ecstack[hitIndex];
+					view = ecview[hitIndex];
 				}
+				else if (rr.type == FeedbackRect.Dtype.PCAL) {
+					strip = pcalstrip[hitIndex];
+					stack = pcalstack[hitIndex];
+					view = pcalview[hitIndex];
+				}
+				
+				if ((strip > 0) && (stack > 0) && (view > 0)) {
+					String s = DataSupport.trueColor + "Gemc Hit "
+							+ " plane "
+							+ DataDrawSupport.EC_PLANE_NAMES[stack]
+							+ " type " + DataDrawSupport.EC_VIEW_NAMES[view]
+							+ " strip " + strip;
+					feedbackStrings.add(s);
+				}
+				
 				return;
-			}
+			} //contains
 		}
 
 	}
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return ADataContainer.trueColor + prompt + " ("
+		return DataSupport.trueColor + prompt + " ("
 				+ DoubleFormat.doubleFormat(vx, 3) + ", "
 				+ DoubleFormat.doubleFormat(vy, 3) + ", "
 				+ DoubleFormat.doubleFormat(vz, 3) + ")";

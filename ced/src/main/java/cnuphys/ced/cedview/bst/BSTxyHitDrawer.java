@@ -9,29 +9,25 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.Histo2DData;
 import cnuphys.bCNU.util.X11Colors;
-import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.BMTDataContainer;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
-import cnuphys.splot.plot.GraphicsUtilities;
 import cnuphys.splot.style.SymbolDraw;
 
 public class BSTxyHitDrawer implements IDrawable {
@@ -139,7 +135,7 @@ public class BSTxyHitDrawer implements IDrawable {
 						fract = ((double) hitCount) / maxHit;
 					}
 					else {
-						fract = Math.log((double)(hitCount+1.))/Math.log(maxHit+1.);
+						fract = Math.log(hitCount+1.)/Math.log(maxHit+1.);
 					}
 
 					Color color = AccumulationManager.getInstance().getColor(fract);
@@ -160,14 +156,11 @@ public class BSTxyHitDrawer implements IDrawable {
 	private void drawMicroMegasHitsSingleMode(Graphics g,
 			IContainer container) {
 
-		BMTDataContainer bmtData = _eventManager.getBMTData();
-
-		// System.err.println("BMTDATAContainer: " + bmtData);
-		int hitCount = bmtData.getHitCount(0);
+		int sect[] = ColumnData.getIntArray("BMT::dgtz.sector");
+		int hitCount = (sect == null) ? 0 : sect.length;
 		if (hitCount > 0) {
 
-			int sect[] = bmtData.bmt_dgtz_sector;
-			int layer[] = bmtData.bmt_dgtz_layer;
+			int layer[] = ColumnData.getIntArray("BMT::dgtz.layer");
 
 			for (int hit = 0; hit < hitCount; hit++) {
 				int geoSector = MicroMegasSector
@@ -175,7 +168,7 @@ public class BSTxyHitDrawer implements IDrawable {
 				MicroMegasSector mms = _view.getMicroMegasSector(geoSector,
 						layer[hit]);
 				if (mms != null) {
-					FeedbackRect fbr = mms.drawHit(g, container, bmtData, hit,
+					FeedbackRect fbr = mms.drawHit(g, container, hit,
 							X11Colors.getX11Color("lawn green"), Color.black);
 
 					if (fbr != null) {
@@ -189,10 +182,11 @@ public class BSTxyHitDrawer implements IDrawable {
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 
-		BSTDataContainer bstData = _eventManager.getBSTData();
-
-		int hitCount = bstData.getHitCount(0);
+		int hitCount = DataSupport.bstGetHitCount();
 		if (hitCount > 0) {
+			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
+			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
+			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
 
 			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
@@ -200,9 +194,9 @@ public class BSTxyHitDrawer implements IDrawable {
 					RenderingHints.VALUE_ANTIALIAS_ON);
 
 			// panels
-			for (int i = 0; i < bstData.getHitCount(0); i++) {
-				BSTxyPanel panel = BSTxyView.getPanel(bstData.bst_dgtz_layer[i],
-						bstData.bst_dgtz_sector[i]);
+			for (int i = 0; i < hitCount; i++) {
+				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+						bstsector[i]);
 				if (panel != null) {
 					_view.drawSVTPanel(g2, container, panel, Color.red);
 				}
@@ -214,16 +208,16 @@ public class BSTxyHitDrawer implements IDrawable {
 				Point pp = new Point();
 				for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
 					// covert all to zero based indices
-					int sector = bstData.bst_dgtz_sector[hitIndex] - 1;
-					int complayer = bstData.bst_dgtz_layer[hitIndex];
+					int sector = bstsector[hitIndex] - 1;
+					int complayer = bstlayer[hitIndex];
 					int superlayer = (complayer - 1) / 2;
 					int layer = (complayer - 1) % 2;
-					int strip = bstData.bst_dgtz_strip[hitIndex] - 1;
+					int strip = bststrip[hitIndex] - 1;
 
 					if ((strip > 255) || (strip < 0)) {
 						Log.getInstance()
 								.warning("In BST dgtz data, bad strip Id:"
-										+ bstData.bst_dgtz_strip[hitIndex]);
+										+ bststrip[hitIndex]);
 					}
 					else {
 						// System.err.println("Drawing strip midpoint ");
@@ -244,7 +238,10 @@ public class BSTxyHitDrawer implements IDrawable {
 
 			// draw GEMC nearest x and y
 
-			if ((bstData.bst_true_avgX != null) && _view.showMcTruth()) {
+			double avgX[] = ColumnData.getDoubleArray("BST::true.avgX");
+			if ((avgX != null) && _view.showMcTruth()) {
+				double avgY[] = ColumnData.getDoubleArray("BST::true.avgY");
+				int pid[] = ColumnData.getIntArray("BST::true.pid");
 
 				Rectangle sr = container.getInsetRectangle();
 				g2.clipRect(sr.x, sr.y, sr.width, sr.height);
@@ -256,19 +253,19 @@ public class BSTxyHitDrawer implements IDrawable {
 				Stroke oldStroke = g2.getStroke();
 				g2.setStroke(CedXYView.stroke);
 
-				for (int i = 0; i < bstData.bst_true_avgX.length; i++) {
+				for (int i = 0; i < avgX.length; i++) {
 					Color fc = default_fc;
-					if (bstData.bst_true_pid != null) {
+					if (pid != null) {
 						LundId lid = LundSupport.getInstance()
-								.get(bstData.bst_true_pid[i]);
+								.get(pid[i]);
 						if (lid != null) {
 							fc = lid.getStyle().getFillColor();
 						}
 					}
 					g2.setColor(fc);
 
-					wp1.setLocation(bstData.bst_true_avgX[i],
-							bstData.bst_true_avgY[i]);
+					wp1.setLocation(avgX[i],
+							avgY[i]);
 					container.worldToLocal(p1, wp1);
 
 					DataDrawSupport.drawGemcHit(g, p1);

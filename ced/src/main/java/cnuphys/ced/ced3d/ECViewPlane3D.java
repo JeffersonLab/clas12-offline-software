@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.ECDataContainer;
+import cnuphys.ced.event.data.EC;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -67,18 +67,20 @@ public class ECViewPlane3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		// has EC and PCAL data
-		ECDataContainer ecData = _eventManager.getECData();
-
-		int sector[] = ecData.ec_dgtz_sector;
-		int stack[] = ecData.ec_dgtz_stack;
-		int view[] = ecData.ec_dgtz_view;
-		int strip[] = ecData.ec_dgtz_strip;
-		int pid[] = ecData.ec_true_pid;
-
-		if (sector != null) {
+		int hitCount = EC.hitCount();
+		
+		if (hitCount > 0) {
+			int sector[] = EC.sector();
+			int stack[] = EC.stack();
+			int view[] = EC.view();
+			int strip[] = EC.strip();
+			int pid[] = EC.pid();
+			double avgX[] = EC.avgX();
+			double avgY[] = EC.avgY();
+			double avgZ[] = EC.avgZ();
+			
 			float coords[] = new float[24];
-			for (int i = 0; i < sector.length; i++) {
+			for (int i = 0; i < hitCount; i++) {
 				if ((_sector == sector[i]) && (_stack == stack[i])
 						&& (_view == view[i])) {
 					ECGeometry.getStrip(_sector, _stack, _view, strip[i],
@@ -86,17 +88,19 @@ public class ECViewPlane3D extends DetectorItem3D {
 					if (showMCTruth() && (pid != null)) {
 						Color color = truthColor(pid, i);
 						drawStrip(drawable, color, coords);
-						double xcm = ecData.ec_true_avgX[i] / 10;
-						double ycm = ecData.ec_true_avgY[i] / 10;
-						double zcm = ecData.ec_true_avgZ[i] / 10;
+						double xcm = avgX[i] / 10;
+						double ycm = avgY[i] / 10;
+						double zcm = avgZ[i] / 10;
 						drawMCPoint(drawable, xcm, ycm, zcm, color);
 
 					} else {
 						drawStrip(drawable, dgtzColor, coords);
 					}
 				}
-			}
-		}
+			} //end for loop
+
+		} //hitCount > 0
+
 
 	}
 

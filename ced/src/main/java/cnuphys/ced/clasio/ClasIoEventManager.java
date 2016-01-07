@@ -14,7 +14,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
 
-import org.jlab.data.io.DataEvent;
 import org.jlab.evio.clas12.EvioDataDictionary;
 import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.evio.clas12.EvioFactory;
@@ -23,19 +22,15 @@ import org.jlab.evio.clas12.EvioSource;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
-import cnuphys.ced.event.data.BMTDataContainer;
-import cnuphys.ced.event.data.BSTDataContainer;
-import cnuphys.ced.event.data.CNDDataContainer;
-import cnuphys.ced.event.data.DCDataContainer;
-import cnuphys.ced.event.data.ECDataContainer;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.GEMCMetaDataContainer;
-import cnuphys.ced.event.data.GenPartDataContainer;
-import cnuphys.ced.event.data.RecEventDataContainer;
+import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.DCGeometry.DCGEOMMODE;
 import cnuphys.lund.LundId;
+import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
 
@@ -48,7 +43,7 @@ public class ClasIoEventManager {
 	public static JRadioButtonMenuItem etRadioMenuItem; // ET system
 
 	// Unique lund ids in the event (if any)
-	private Vector<LundId> uniqueLundIds = new Vector<LundId>();
+	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
 
 	// A list of known, sorted banks from the dictionary
 	private String _knownBanks[];
@@ -95,29 +90,13 @@ public class ClasIoEventManager {
 	// the current event
 	private EvioDataEvent _currentEvent;
 
-	// the data containers
-	private DCDataContainer _dcData;
-	private ECDataContainer _ecData;
-	private FTOFDataContainer _ftofData;
-	private BSTDataContainer _bstData;
-	private BMTDataContainer _bmtData;
-	private GenPartDataContainer _genPartData;
-	private RecEventDataContainer _recEventData;
+	// the gemc metadata container
 	private GEMCMetaDataContainer _gemcMetaData;
-	private CNDDataContainer _cndData;
 
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_evioSource = new EvioSource();
-		_dcData = new DCDataContainer(this);
-		_ecData = new ECDataContainer(this);
-		_ftofData = new FTOFDataContainer(this);
-		_bstData = new BSTDataContainer(this);
-		_bmtData = new BMTDataContainer(this);
-		_genPartData = new GenPartDataContainer(this);
-		_recEventData = new RecEventDataContainer(this);
 		_gemcMetaData = new GEMCMetaDataContainer(this);
-		_cndData = new CNDDataContainer(this);
 	}
 
 	/**
@@ -130,42 +109,6 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get the EC data
-	 * 
-	 * @return the EC data container
-	 */
-	public ECDataContainer getECData() {
-		return _ecData;
-	}
-
-	/**
-	 * Get the reconstructed event data
-	 * 
-	 * @return the reconstructed event data container
-	 */
-	public RecEventDataContainer getReconEventData() {
-		return _recEventData;
-	}
-
-	/**
-	 * Get the Generated particle data
-	 * 
-	 * @return the DC data container
-	 */
-	public GenPartDataContainer getGenPartData() {
-		return _genPartData;
-	}
-
-	/**
-	 * Get the DC data
-	 * 
-	 * @return the DC data container
-	 */
-	public DCDataContainer getDCData() {
-		return _dcData;
-	}
-
-	/**
 	 * Get the GEMCMetaData data
 	 * 
 	 * @return the GEMCMetaData data container
@@ -174,49 +117,45 @@ public class ClasIoEventManager {
 		return _gemcMetaData;
 	}
 
-	/**
-	 * Get the FTOF data
-	 * 
-	 * @return the FTOF data container
-	 */
-	public FTOFDataContainer getFTOFData() {
-		return _ftofData;
-	}
+	
+	public Vector<LundId> uniqueLundIds() {
+		
+		if (_uniqueLundIds != null) {
+			return _uniqueLundIds;
+		}
+		
+		_uniqueLundIds = new Vector<LundId>();
 
-	/**
-	 * Get the BST data
-	 * 
-	 * @return the BST data container
-	 */
-	public BSTDataContainer getBSTData() {
-		return _bstData;
-	}
-
-	/**
-	 * Get the BMT data
-	 * 
-	 * @return the BMT data container
-	 */
-	public BMTDataContainer getBMTData() {
-		return _bmtData;
-	}
-
-	/**
-	 * Get the CND data
-	 * 
-	 * @return the CND data container
-	 */
-	public CNDDataContainer getCNDData() {
-		return _cndData;
-	}
-
-	/**
-	 * Get the unqique lund ids in the current event (if any)
-	 * 
-	 * @return the unqique lund ids in the current event (if any)
-	 */
-	public Vector<LundId> getUniqueLundIds() {
-		return uniqueLundIds;
+		if (_currentEvent != null) {
+			// use any bank with a true pid column
+			String[] knownBanks = ClasIoEventManager.getInstance()
+					.getKnownBanks();
+			if (knownBanks != null) {
+				for (String bankName : knownBanks) {
+					if (bankName.contains("::true")) {
+						ColumnData cd = ColumnData.getColumnData(bankName,
+								"pid");
+						if (cd != null) {
+							int pid[] = (int[]) (cd.getDataArray());
+							if (pid != null) {
+								for (int pdgid : pid) {
+									LundId lid = LundSupport.getInstance()
+											.get(pdgid);
+									if (lid != null) {
+										// System.err.println(" " +
+										// lid.getName());
+										_uniqueLundIds.remove(lid); // avoid duplicates
+										_uniqueLundIds.add(lid);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return _uniqueLundIds;
 	}
 
 	/**
@@ -326,16 +265,9 @@ public class ClasIoEventManager {
 		threadedOpenEvioFile(file);
 	}	
 	
-	//read in a seperate thread
+	//read in a separate thread
 	private void threadedOpenEvioFile(final File file) {
 
-//		final JProgressBar progressBar = Ced.getProgressBar();
-//		progressBar.setString("Reading " + file.getPath());
-//		progressBar.setIndeterminate(true);
-//		setEnabled(false);
-//		progressBar.setVisible(true);
-		
-		
 		final BusyPanel busyPanel = Ced.getBusyPanel();
 		busyPanel.setText("Reading " + file.getPath());
 		busyPanel.setVisible(true);
@@ -353,9 +285,6 @@ public class ClasIoEventManager {
 
 			@Override
 			protected void done() {
-//				progressBar.setString(file.getPath());
-//				progressBar.setIndeterminate(false);
-//				progressBar.setVisible(false);
 				
 				busyPanel.setVisible(false);
 				Ced.getCed().fixTitle();
@@ -571,11 +500,6 @@ public class ClasIoEventManager {
 		return _currentEvent;
 	}
 
-	public void loadEvent(DataEvent event) {
-		_currentEvent = (EvioDataEvent) event;
-		notifyListeners();
-	}
-
 	/**
 	 * Get the previous event from the current compact reader
 	 * 
@@ -648,7 +572,7 @@ public class ClasIoEventManager {
 
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();
-		uniqueLundIds.clear();
+		_uniqueLundIds = null;
 
 		_currentBanks = (_currentEvent == null) ? null
 				: _currentEvent.getBankList();
@@ -707,30 +631,25 @@ public class ClasIoEventManager {
 	// compute some factors used in gradient displays
 	private void computeSomeScalingFactors() {
 
-		ECDataContainer ecData = getECData();
-		if (ecData == null) {
-			return;
-		}
 
-		double edep[] = null;
-
+		double[] pcalEdep = PCAL.totEdep();
+		double[] ecEdep = EC.totEdep();
+		int stack[] = EC.stack();
 		// pcal (plane = 0)
-		edep = ecData.pcal_true_totEdep;
-		if (edep != null) {
+		if (pcalEdep != null) {
 			maxEDepCal[0] = 0;
-			for (double e : edep) {
+			for (double e : pcalEdep) {
 				maxEDepCal[0] = Math.max(e, maxEDepCal[0]);
 			}
 		}
 
 		// ec
-		edep = ecData.ec_true_totEdep;
-		if (edep != null) {
+		if ((ecEdep != null) && (stack != null)) {
 			maxEDepCal[1] = 0;
 			maxEDepCal[2] = 0;
-			for (int i = 0; i < edep.length; i++) {
-				int plane = ecData.ec_dgtz_stack[i];
-				maxEDepCal[plane] = Math.max(edep[i], maxEDepCal[plane]);
+			for (int i = 0; i < ecEdep.length; i++) {
+				int plane = stack[i];
+				maxEDepCal[plane] = Math.max(ecEdep[i], maxEDepCal[plane]);
 			}
 		}
 	}

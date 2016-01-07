@@ -9,13 +9,13 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.bCNU.plugin.Plugin;
 import cnuphys.bCNU.plugin.PluginProperties;
 import cnuphys.bCNU.plugin.shapes.PluginShape;
-import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.DCDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 
 public class CedDemoPlugin extends CedPlugin {
 
 	// cache my wires
-	private PluginShape shapes[][];;
+	private PluginShape shapes[][];
 
 	@Override
 	public void initializePluginWorld(Double world) {
@@ -89,23 +89,35 @@ public class CedDemoPlugin extends CedPlugin {
 						.setInfoString("Layer: " + layer + " Wire: " + wire);
 			}
 		}
-		// loop over hits
-		DCDataContainer dcData = ClasIoEventManager.getInstance().getDCData();
-		for (int hit = 0; hit < dcData.getHitCount(0); hit++) {
-			int sect = dcData.dc_dgtz_sector[hit]; // 1 based
-			int supl = dcData.dc_dgtz_superlayer[hit]; // 1 based
-			if ((sect == 2) && (supl == 1)) {
-				int lay = dcData.dc_dgtz_layer[hit]; // 1 based
-				int wire = dcData.dc_dgtz_wire[hit]; // 1 based
-				shapes[lay][wire].setFillColor(Color.red);
-				if (dcData.dc_dgtz_tdc != null) {
-					int tdc = dcData.dc_dgtz_tdc[hit];
-					shapes[lay][wire].setInfoString("Layer: " + lay + " Wire: "
-							+ wire + "  TDC: " + tdc);
+		
+		int hitCount = DataSupport.dcGetHitCount();
+		
+		if (hitCount > 0) {
+			int sector[] = ColumnData.getIntArray("DC::dgtz.sector");
+			int superlayer[] = ColumnData.getIntArray("DC::dgtz.superlayer");
+			int layer[] = ColumnData.getIntArray("DC::dgtz.layer");
+			int wire[] = ColumnData.getIntArray("DC::dgtz.wire");
+			int tdc[] = ColumnData.getIntArray("DC::dgtz.tdc");
+			
+			for (int hit = 0; hit < hitCount; hit++) {
+				int sect = sector[hit]; // 1 based
+				int supl = superlayer[hit]; // 1 based
+				if ((sect == 2) && (supl == 1)) {
+					int lay = layer[hit]; // 1 based
+					int w = wire[hit]; // 1 based
+					shapes[lay][w].setFillColor(Color.red);
+					
+					if (tdc != null) {
+						shapes[lay][w].setInfoString("Layer: " + lay + " Wire: "
+								+ wire + "  TDC: " + tdc[hit]);
+					}
 				}
+
 			}
 
 		}
+		
+		// loop over hits
 
 		refresh();
 	}

@@ -3,7 +3,8 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -42,25 +43,31 @@ public class SVTPanel3D extends DetectorItem3D {
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		BSTDataContainer bstData = _eventManager.getBSTData();
 
-		int hitCount = bstData.getHitCount(0);
+		int hitCount = DataSupport.bstGetHitCount();
 		float coords6[] = new float[6];
 		float coords36[] = new float[36];
+		int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
+		int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
+		int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
+        int pid[] = ColumnData.getIntArray("BST::true.pid");
+		double avgX[] = ColumnData.getDoubleArray("BST::true.avgX");
+		double avgY[] = ColumnData.getDoubleArray("BST::true.avgY");
+		double avgZ[] = ColumnData.getDoubleArray("BST::true.avgZ");
 
+		
 		boolean drawOutline = false;
 		// now strips
 		for (int i = 0; i < hitCount; i++) {
 			// 1 based sector
-			int sector = bstData.bst_dgtz_sector[i];
+			int sector = bstsector[i];
 			// "big layer" ..8
-			int layer = bstData.bst_dgtz_layer[i];
+			int layer = bstlayer[i];
 
 			if ((_sector == sector) && (_layer == layer)) {
 				drawOutline = true;
 				// strip 1..256
-				int strip = bstData.bst_dgtz_strip[i];
-				int pid[] = bstData.bst_true_pid;
+				int strip = bststrip[i];
 
 				BSTGeometry.getStrip(sector, layer, strip, coords6);
 
@@ -70,9 +77,9 @@ public class SVTPanel3D extends DetectorItem3D {
 					if (showHits()) {
 						Support3D.drawLine(drawable, coords6, color, 2f);
 					}
-					double xcm = bstData.bst_true_avgX[i] / 10;
-					double ycm = bstData.bst_true_avgY[i] / 10;
-					double zcm = bstData.bst_true_avgZ[i] / 10;
+					double xcm = avgX[i] / 10;
+					double ycm = avgY[i] / 10;
+					double zcm = avgZ[i] / 10;
 
 					drawMCPoint(drawable, xcm, ycm, zcm, color);
 
@@ -91,12 +98,13 @@ public class SVTPanel3D extends DetectorItem3D {
 		}
 
 		// cosmics?
-		int ids[] = bstData.bstrec_cosmics_ID;
+		int ids[] = ColumnData.getIntArray("BSTRec::Cosmics.ID");
 		if (showCosmics() && (ids != null)) {
-			double yx_interc[] = bstData.bstrec_cosmics_trkline_yx_interc;
-			double yx_slope[] = bstData.bstrec_cosmics_trkline_yx_slope;
-			double yz_interc[] = bstData.bstrec_cosmics_trkline_yz_interc;
-			double yz_slope[] = bstData.bstrec_cosmics_trkline_yz_slope;
+			double yx_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
+			double yx_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
+			double yz_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_interc");
+			double yz_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_slope");
+
 			for (int i = 0; i < ids.length; i++) {
 				double y1 = 2000;
 				double y2 = -2000;
@@ -115,14 +123,14 @@ public class SVTPanel3D extends DetectorItem3D {
 		}
 
 		// reconstructed crosses?
-		if (showCrosses() && (bstData.bstrec_crosses_x != null)) {
+		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
+		if (showCrosses() && (labx != null)) {
 			// these arrays are in mm
-			double labx[] = bstData.bstrec_crosses_x;
-			double laby[] = bstData.bstrec_crosses_y;
-			double labz[] = bstData.bstrec_crosses_z;
-			double ux[] = bstData.bstrec_crosses_ux;
-			double uy[] = bstData.bstrec_crosses_uy;
-			double uz[] = bstData.bstrec_crosses_uz;
+			double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
+			double labz[] = ColumnData.getDoubleArray("BSTRec::Crosses.z");
+			double ux[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
+			double uy[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
+			double uz[] = ColumnData.getDoubleArray("BSTRec::Crosses.uz");
 
 			int len = (labx == null) ? 0 : labx.length;
 

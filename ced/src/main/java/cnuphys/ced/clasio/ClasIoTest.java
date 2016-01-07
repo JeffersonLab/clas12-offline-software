@@ -14,7 +14,7 @@ public class ClasIoTest {
 
 	public static void main(String arg[]) {
 		String testFile = Environment.getInstance().getHomeDirectory()
-				+ "/evioData/e1000_1MeV.ev";
+				+ "/evioData/gmnElectrons.evio";
 		System.err.println("testFile: " + testFile);
 
 		ClasIoEventManager eventManager = ClasIoEventManager.getInstance();

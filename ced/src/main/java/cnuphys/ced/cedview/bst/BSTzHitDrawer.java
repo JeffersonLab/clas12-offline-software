@@ -16,7 +16,8 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 
@@ -162,26 +163,27 @@ public class BSTzHitDrawer implements IDrawable {
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 
-		BSTDataContainer bstData = _eventManager.getBSTData();
-
-		int hitCount = bstData.getHitCount(0);
+		int hitCount = DataSupport.bstGetHitCount();
 		if (hitCount > 0) {
+			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
+			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
+			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
 
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
 
 			// panels
-			for (int i = 0; i < bstData.getHitCount(0); i++) {
-				BSTxyPanel panel = BSTxyView.getPanel(bstData.bst_dgtz_layer[i],
-						bstData.bst_dgtz_sector[i]);
+			for (int i = 0; i < hitCount; i++) {
+				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+						bstsector[i]);
 				if (panel != null) {
 					for (int zopt = 0; zopt < 3; zopt++) {
 						if (panel.hit[zopt]) {
 							_view.drawSVTStrip(g2, container, Color.red,
-									bstData.bst_dgtz_sector[i],
-									bstData.bst_dgtz_layer[i],
-									bstData.bst_dgtz_strip[i]);
+									bstsector[i],
+									bstlayer[i],
+									bststrip[i]);
 						}
 					}
 				}

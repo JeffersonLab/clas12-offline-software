@@ -182,7 +182,7 @@ public class PIDLegend extends JComponent {
 	 * @return all the unique LundIds associated with this event.
 	 */
 	protected Vector<LundId> getUniqueLundIds() {
-		return _eventManager.getUniqueLundIds();
+		return _eventManager.uniqueLundIds();
 	}
 
 }

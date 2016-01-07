@@ -12,15 +12,12 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
-import cnuphys.bCNU.util.X11Colors;
-import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.BMTDataContainer;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.DataSupport;
 
 public class CrossDrawerXY extends BSTxyViewDrawer {
 
@@ -71,8 +68,7 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 	public void drawBSTCrosses(Graphics g, IContainer container) {
 
 		// bst crosses?
-		BSTDataContainer bstData = _eventManager.getBSTData();
-		if (bstData.getCrossCount() == 0) {
+		if (DataSupport.bstGetCrossCount() == 0) {
 			return;
 		}
 
@@ -83,9 +79,12 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		Point2D.Double wp2 = new Point2D.Double();
 		Point pp2 = new Point();
 
-		if (bstData.bstrec_crosses_x != null) {
-			double labx[] = bstData.bstrec_crosses_x;
-			double laby[] = bstData.bstrec_crosses_y;
+		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
+		
+		if (labx != null) {
+			double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
+			double unitx[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
+			double unity[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
 
 			int len = (labx == null) ? 0 : labx.length;
 
@@ -104,8 +103,6 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 				double r = pixlen
 						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-				double unitx[] = bstData.bstrec_crosses_ux;
-				double unity[] = bstData.bstrec_crosses_uy;
 				wp2.x = wp.x + r * unitx[i];
 				wp2.y = wp.y + r * unity[i];
 
@@ -131,8 +128,7 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 	public void drawBMTCrosses(Graphics g, IContainer container) {
 
 		// bst crosses?
-		BMTDataContainer bmtData = _eventManager.getBMTData();
-		if (bmtData.getCrossCount() == 0) {
+		if (DataSupport.bmtGetCrossCount() == 0) {
 			return;
 		}
 
@@ -142,10 +138,13 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		Point pp = new Point();
 		Point2D.Double wp2 = new Point2D.Double();
 		Point pp2 = new Point();
+		
+		double labx[] = ColumnData.getDoubleArray("BMTRec::Crosses.x");
 
-		if (bmtData.bmtrec_crosses_x != null) {
-			double labx[] = bmtData.bmtrec_crosses_x;
-			double laby[] = bmtData.bmtrec_crosses_y;
+		if (labx != null) {
+			double laby[] = ColumnData.getDoubleArray("BMTRec::Crosses.y");
+			double unitx[] = ColumnData.getDoubleArray("BMTRec::Crosses.ux");
+			double unity[] = ColumnData.getDoubleArray("BMTRec::Crosses.uy");
 
 			int len = (labx == null) ? 0 : labx.length;
 
@@ -164,8 +163,6 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 				double r = pixlen
 						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-				double unitx[] = bmtData.bmtrec_crosses_ux;
-				double unity[] = bmtData.bmtrec_crosses_uy;
 				wp2.x = wp.x + r * unitx[i];
 				wp2.y = wp.y + r * unity[i];
 
@@ -206,43 +203,34 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		}
 
 		// svt crosses?
-		BSTDataContainer bstData = _eventManager.getBSTData();
-
-		if (bstData == null) {
-			System.err.println("null bst data in CrossDrawerXY feedback");
-			return;
-		}
 
 		if (_fbRects == null) {
 			return;
 		}
 
+		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
+		double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
+		double labz[] = ColumnData.getDoubleArray("BSTRec::Crosses.z");
+		double ux[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
+		double uy[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
+		double uz[] = ColumnData.getDoubleArray("BSTRec::Crosses.uz");
+		int id[] = ColumnData.getIntArray("BSTRec::Crosses.ID");
+		double xerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_x");
+		double yerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_y");
+		double zerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_z");
+		int sect[] = ColumnData.getIntArray("BSTRec::Crosses.sector");
+		int reg[] = ColumnData.getIntArray("BSTRec::Crosses.region");
+
 		for (int i = 0; i < _fbRects.length; i++) {
 			if ((_fbRects[i] != null) && _fbRects[i].contains(screenPoint)) {
 
-				double labx = bstData.bstrec_crosses_x[i];
-				double laby = bstData.bstrec_crosses_y[i];
-				double labz = bstData.bstrec_crosses_z[i];
-
-				int id = bstData.bstrec_crosses_ID[i];
-				int sect = bstData.bstrec_crosses_sector[i];
-				int reg = bstData.bstrec_crosses_region[i];
-
-				double xerr = bstData.bstrec_crosses_err_x[i];
-				double yerr = bstData.bstrec_crosses_err_y[i];
-				double zerr = bstData.bstrec_crosses_err_z[i];
-
-				double ux = bstData.bstrec_crosses_ux[i];
-				double uy = bstData.bstrec_crosses_uy[i];
-				double uz = bstData.bstrec_crosses_uz[i];
-
-				feedbackStrings.add(FBCOL + "cross ID: " + id + "  sect: "
-						+ sect + "  reg: " + reg);
+				feedbackStrings.add(FBCOL + "cross ID: " + id[i] + "  sect: "
+						+ sect[i] + "  reg: " + reg[i]);
 
 				feedbackStrings
-						.add(vecStr("cross loc (lab)", labx, laby, labz));
-				feedbackStrings.add(vecStr("cross error", xerr, yerr, zerr));
-				feedbackStrings.add(vecStr("cross direction", ux, uy, uz));
+						.add(vecStr("cross loc (lab)", labx[i], laby[i], labz[i]));
+				feedbackStrings.add(vecStr("cross error", xerr[i], yerr[i], zerr[i]));
+				feedbackStrings.add(vecStr("cross direction", ux[i], uy[i], uz[i]));
 
 				break;
 			}

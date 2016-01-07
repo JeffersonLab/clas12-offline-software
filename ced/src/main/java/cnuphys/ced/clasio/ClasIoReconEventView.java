@@ -5,7 +5,7 @@ import java.util.Vector;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.log.Log;
-import cnuphys.ced.event.data.RecEventDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
@@ -47,54 +47,63 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 		if (!_eventManager.isAccumulating()) {
 
 			// now fill the table.
-			if (!_eventManager.isAccumulating()) {
-				RecEventDataContainer recData = _eventManager
-						.getReconEventData();
-				TrajectoryTableModel model = _trajectoryTable
-						.getTrajectoryModel();
-				int numTracks = recData.getHitCount(0);
+			TrajectoryTableModel model = _trajectoryTable.getTrajectoryModel();
 
-				if (numTracks > 0) {
-					for (int i = 0; i < numTracks; i++) {
-						int pid = recData.eventhb_particle_pid[i];
-						LundId lid = LundSupport.getInstance().get(pid);
+			int pid[] = ColumnData.getIntArray("EVENTHB::particle.pid");
+			int numTracks = (pid == null) ? 0 : pid.length;
 
-						if (lid != null) {
-							double xo = recData.eventhb_particle_vx[i]; // cm
-							double yo = recData.eventhb_particle_vy[i]; // cm
-							double zo = recData.eventhb_particle_vz[i]; // cm
+			if (numTracks > 0) {
+				for (int i = 0; i < numTracks; i++) {
 
-							double px = recData.eventhb_particle_px[i]; // GeV/c
-							double py = recData.eventhb_particle_py[i];
-							double pz = recData.eventhb_particle_pz[i];
+					double vx[] = ColumnData
+							.getDoubleArray("EVENTHB::particle.vx");
+					double vy[] = ColumnData
+							.getDoubleArray("EVENTHB::particle.vy");
+					double vz[] = ColumnData
+							.getDoubleArray("EVENTHB::particle.vz");
+					double px[] = ColumnData
+							.getDoubleArray("EVENTHB::particle.px");
+					double py[] = ColumnData
+							.getDoubleArray("EVENTHB::particle.py");
+					double pz[] = ColumnData
+							.getDoubleArray("EVENTHB::particle.pz");
+					LundId lid = LundSupport.getInstance().get(pid[i]);
 
-							double p = Math.sqrt(px * px + py * py + pz * pz); // GeV
-							double phi = Math.atan2(py, px);
-							double theta = Math.acos(pz / p);
+					if (lid != null) {
+						double xo = vx[i]; // cm
+						double yo = vy[i]; // cm
+						double zo = vz[i]; // cm
 
-							// note conversions to degrees and MeV
-							TrajectoryRowData row = new TrajectoryRowData(lid,
-									xo, yo, zo, 1000 * p,
-									Math.toDegrees(theta), Math.toDegrees(phi));
-							data.add(row);
-						} else {
-							Log.getInstance().warning(
-									"Bad pid: " + pid
-											+ " in ClasIoReconEventView");
-						}
+						double pxo = px[i]; // GeV/c
+						double pyo = py[i];
+						double pzo = pz[i];
 
-						// public TrajectoryRowData(LundId lundId, double xo,
-						// double yo, double zo,
-						// double p, double theta, double phi) {
+						double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo); // GeV
+						double phi = Math.atan2(pyo, pxo);
+						double theta = Math.acos(pzo / p);
 
+						// note conversions to degrees and MeV
+						TrajectoryRowData row = new TrajectoryRowData(lid, xo,
+								yo, zo, 1000 * p, Math.toDegrees(theta),
+								Math.toDegrees(phi));
+						data.add(row);
+					}
+					else {
+						Log.getInstance().warning(
+								"Bad pid: " + pid + " in ClasIoReconEventView");
 					}
 
+					// public TrajectoryRowData(LundId lundId, double xo,
+					// double yo, double zo,
+					// double p, double theta, double phi) {
+
 				}
+
 				model.setData(data);
 				model.fireTableDataChanged();
 				_trajectoryTable.repaint();
-			}
-		}
+			} //numTracks > 0
+		} // !accumulating
 	}
 
 	@Override

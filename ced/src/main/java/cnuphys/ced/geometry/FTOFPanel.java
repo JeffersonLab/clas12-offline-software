@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 
 import org.jlab.geom.prim.Transformation3D;
 
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.DataSupport;
 
 public class FTOFPanel {
 
@@ -14,11 +14,11 @@ public class FTOFPanel {
 
 	public FTOFPanel(String pname, int numPaddle) {
 		if (pname.contains("1a") || pname.contains("1A")) {
-			_panelType = FTOFDataContainer.PANEL_1A; // 0
+			_panelType = DataSupport.PANEL_1A; // 0
 		} else if (pname.contains("1b") || pname.contains("1B")) {
-			_panelType = FTOFDataContainer.PANEL_1B; // 1
+			_panelType = DataSupport.PANEL_1B; // 1
 		} else {
-			_panelType = FTOFDataContainer.PANEL_2; // 2
+			_panelType = DataSupport.PANEL_2; // 2
 		}
 		_numPaddle = numPaddle;
 	}

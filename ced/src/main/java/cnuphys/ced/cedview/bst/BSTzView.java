@@ -25,7 +25,6 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
-import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.graphics.world.WorldPolygon;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -38,10 +37,9 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
-import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.BMTDataContainer;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
@@ -49,7 +47,6 @@ import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
 import cnuphys.ced.micromegas.Constants;
 import cnuphys.ced.micromegas.Geometry;
-import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.magfield.IField;
@@ -256,12 +253,13 @@ public class BSTzView extends CedView implements ChangeListener {
 		}
 		else {
 			if (isSingleEventMode()) {
-				BMTDataContainer bmtData = _eventManager.getBMTData();
-				int hitCount = bmtData.getHitCount(0);
+				
+				int sect[] = ColumnData.getIntArray("BMT::dgtz.sector");
+				int hitCount = (sect == null) ? 0 : sect.length;
 				if (hitCount > 0) {
 
-					int sect[] = bmtData.bmt_dgtz_sector;
-					int layer[] = bmtData.bmt_dgtz_layer;
+					int layer[] = ColumnData.getIntArray("BMT::dgtz.layer");
+					int strip[] = ColumnData.getIntArray("BMT::dgtz.strip");
 					if (showMcTruth()) {
 
 					}
@@ -272,10 +270,9 @@ public class BSTzView extends CedView implements ChangeListener {
 					for (int hit = 0; hit < hitCount; hit++) {
 
 						if ((layer[hit] == 5) || (layer[hit] == 6)) {
-							int strip = bmtData.bmt_dgtz_strip[hit];
-							if (strip > 0) {
+							if (strip[hit] > 0) {
 								double z = geo.CRC_GetZStrip(sect[hit],
-										layer[hit], strip);
+										layer[hit], strip[hit]);
 								wp.x = z;
 
 								if (layer[hit] == 6) {
@@ -308,18 +305,14 @@ public class BSTzView extends CedView implements ChangeListener {
 	}
 
 	private void drawCosmicTracks(Graphics g, IContainer container) {
-		BSTDataContainer bstData = _eventManager.getBSTData();
-		if (bstData == null) {
-			return;
-		}
 
 		Shape oldClip = clipView(g);
-		int ids[] = bstData.bstrec_cosmics_ID;
+		int ids[] = ColumnData.getIntArray("BSTRec::Cosmics.ID");
 		if (ids != null) {
-			double yx_interc[] = bstData.bstrec_cosmics_trkline_yx_interc;
-			double yx_slope[] = bstData.bstrec_cosmics_trkline_yx_slope;
-			double yz_interc[] = bstData.bstrec_cosmics_trkline_yz_interc;
-			double yz_slope[] = bstData.bstrec_cosmics_trkline_yz_slope;
+			double yx_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
+			double yx_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
+			double yz_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_interc");
+			double yz_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_slope");
 
 			g.setColor(Color.red);
 			Point p1 = new Point();
@@ -496,16 +489,14 @@ public class BSTzView extends CedView implements ChangeListener {
 
 	private void drawGEMCHits(Graphics g, IContainer container) {
 
-		BSTDataContainer bstData = _eventManager.getBSTData();
-
-		double x[] = bstData.bst_true_avgX;
+		double x[] = ColumnData.getDoubleArray("BST::true.avgX");
 		if (x == null) {
 			return;
 		}
 
-		double y[] = bstData.bst_true_avgY;
-		double z[] = bstData.bst_true_avgZ;
-		int pid[] = bstData.bst_true_pid;
+		double y[] = ColumnData.getDoubleArray("BST::true.avgY");
+		double z[] = ColumnData.getDoubleArray("BST::true.avgZ");
+		int pid[] = ColumnData.getIntArray("BST::true.pid");
 
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();

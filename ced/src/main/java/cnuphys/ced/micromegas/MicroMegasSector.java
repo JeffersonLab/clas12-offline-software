@@ -15,7 +15,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.BMTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
 import cnuphys.splot.plot.DoubleFormat;
 
 public class MicroMegasSector extends DonutItem {
@@ -136,21 +136,20 @@ public class MicroMegasSector extends DonutItem {
 	 * @param fillColor
 	 * @param lineColor
 	 */
-	public FeedbackRect drawHit(Graphics g, IContainer container, BMTDataContainer bmtData,
+	public FeedbackRect drawHit(Graphics g, IContainer container,
 			int hit, Color fillColor, Color lineColor) {
 		
 		if ((_layer % 2) == 0) {
 			return null;
 		}
 		
-		int strips[] = bmtData.bmt_dgtz_strip;
+		int strips[] = ColumnData.getIntArray("BMT::dgtz.strip");
+		double edep[] = ColumnData.getDoubleArray("BMT::dgtz.Edep");
 
 		int strip = strips[hit];
 		
 		//double ang = Math.PI-geo.CRZ_GetAngleStrip(_sector, _layer, strip);
 		double ang = geo.CRZ_GetAngleStrip(_sector, _layer, strip);
-
-		int zstrip = geo.getZStrip(_layer, geo.CRZ_GetAngleStrip(_sector, _layer, strip));
 		
 		if (ang > Math.PI) {
 			ang -= (2 * Math.PI);
@@ -170,11 +169,11 @@ public class MicroMegasSector extends DonutItem {
 		g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
 				
 		String edepStr="";
-		if (bmtData.bmt_dgtz_Edep != null) {
-			edepStr = "  edep " + DoubleFormat.doubleFormat(bmtData.bmt_dgtz_Edep[hit],2);
+		if (edep != null) {
+			edepStr = "  edep " + DoubleFormat.doubleFormat(edep[hit],2);
 		}
 		
-		return new FeedbackRect(pp.x - 3, pp.y - 3, 6, 6, hit, bmtData, 0, 
+		return new FeedbackRect(FeedbackRect.Dtype.BMT, pp.x - 3, pp.y - 3, 6, 6, hit, 0, 
 				microMegasStr + " hit " + hit  + " strip " + strip + edepStr);
 		
 	}

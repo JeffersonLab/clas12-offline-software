@@ -39,7 +39,8 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
-import cnuphys.ced.event.data.BSTDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -254,17 +255,13 @@ public class BSTxyView extends CedXYView {
 	// draw cosmic ray tracks
 	private void drawCosmicTracks(Graphics g, IContainer container) {
 
-		BSTDataContainer bstData = _eventManager.getBSTData();
-		if (bstData == null) {
-			return;
-		}
 
 		Shape oldClip = clipView(g);
 
-		int ids[] = bstData.bstrec_cosmics_ID;
+		int ids[] = ColumnData.getIntArray("BSTRec::Cosmics.ID");
 		if (ids != null) {
-			double yx_interc[] = bstData.bstrec_cosmics_trkline_yx_interc;
-			double yx_slope[] = bstData.bstrec_cosmics_trkline_yx_slope;
+			double yx_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
+			double yx_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
 
 			g.setColor(Color.red);
 			Point p1 = new Point();
@@ -498,11 +495,10 @@ public class BSTxyView extends CedXYView {
 		}
 
 		// hits data
-		BSTDataContainer bstData = _eventManager.getBSTData();
 
-		int hitCount = bstData.getHitCount(0);
+		int hitCount = DataSupport.bstGetHitCount();
 		if ((_closestPanel != null) && (hitCount > 0)) {
-			Vector<int[]> stripADCData = bstData.allStripsForSectorAndLayer(
+			Vector<int[]> stripADCData = DataSupport.bstAllStripsForSectorAndLayer(
 					_closestPanel.getSector(), _closestPanel.getLayer());
 			if (!stripADCData.isEmpty()) {
 				for (int sdtdat[] : stripADCData) {
@@ -569,10 +565,9 @@ public class BSTxyView extends CedXYView {
 	private void getGemcFeedback(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
-		BSTDataContainer bstData = _eventManager.getBSTData();
 		String cstr = "$orange$";
 
-		double x[] = bstData.bst_true_avgX;
+		double x[] = ColumnData.getDoubleArray("BST::true.avgX");
 
 		int len = (x == null) ? 0 : x.length;
 		if (len == 0) {
@@ -583,7 +578,8 @@ public class BSTxyView extends CedXYView {
 			feedbackStrings.add(cstr + "GEMC hit count: " + len);
 		}
 
-		double y[] = bstData.bst_true_avgY;
+		double y[] = ColumnData.getDoubleArray("BST::true.avgY");
+		int pid[] = ColumnData.getIntArray("BST::true.pid");
 		Point p1 = new Point();
 		Point2D.Double wp1 = new Point2D.Double();
 		Rectangle rr = new Rectangle();
@@ -594,9 +590,9 @@ public class BSTxyView extends CedXYView {
 			rr.setFrame(p1.x - 3, p1.y - 3, 6, 6);
 
 			if (rr.contains(screenPoint)) {
-				if (bstData.bst_true_pid != null) {
+				if (pid != null) {
 					LundId lid = LundSupport.getInstance()
-							.get(bstData.bst_true_pid[index]);
+							.get(pid[index]);
 					feedbackStrings.add(cstr + "GEMC pid: " + lid.getName());
 
 					String hitXYstr = cstr + String.format(

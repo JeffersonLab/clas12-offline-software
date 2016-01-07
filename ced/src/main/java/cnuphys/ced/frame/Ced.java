@@ -11,7 +11,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -20,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
@@ -43,7 +43,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.FTOFDataContainer;
+import cnuphys.ced.event.data.ColumnData;
+import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.ECGeometry;
@@ -84,7 +85,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.95.03";
+	private static final String _release = "build 0.95.04";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -364,7 +365,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				int numPaddle = FTOFGeometry.numPaddles[panelType];
 				int sect = 1 + (row - 1) % 6;
 				String title = "FTOF sect_" + sect + "  " +
-						FTOFDataContainer.getName(panelType);
+						DataSupport.ftofGetName(panelType);
 
 				switch (panelType) {
 				case 0: // 1A has 23 paddles
@@ -883,6 +884,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				ced.setVisible(true);
 				splashWindow.writeCachedText();
 				ced.fixTitle();
+				//initialize data columns
+				ColumnData.intitialize();
 				// get plugin manager
 				ced._pluginManager = new CedPluginManager(_pluginFolder);
 			}
