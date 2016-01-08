@@ -2,6 +2,7 @@ package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -21,15 +22,25 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	
 	private JLabel _fullName;
 
-	public SelectPanel() {
+	public SelectPanel(String label) {
 		setLayout(new BorderLayout(2,4));
 		addCenter();
-		
+		addNorth(label);
 		_fullName = new JLabel("");
 		_fullName.setOpaque(true);
 		_fullName.setBackground(Color.black);
 		_fullName.setForeground(Color.cyan);
 		add(_fullName, BorderLayout.SOUTH);
+	}
+	
+	protected void addNorth(String label) {
+		if (label != null) {
+			JPanel p = new JPanel();
+			p.setLayout(new FlowLayout(FlowLayout.CENTER, 2, 2));
+			JLabel jlab = new JLabel(label);
+			p.add(jlab);
+			add(p, BorderLayout.NORTH);
+		}
 	}
 	
 	public String getSelection() {
@@ -106,7 +117,8 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 
 		frame.setLayout(new BorderLayout());
 		
-		HistoPanel hp = new HistoPanel();
+//		HistoPanel hp = new HistoPanel();
+		ScatterPanel hp = new ScatterPanel();
 		frame.add(hp);
 		
 		SwingUtilities.invokeLater(new Runnable() {

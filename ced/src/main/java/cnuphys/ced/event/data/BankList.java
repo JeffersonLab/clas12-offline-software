@@ -1,18 +1,11 @@
 package cnuphys.ced.event.data;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-
 import org.jlab.evio.clas12.EvioDataDictionary;
 import org.jlab.evio.clas12.EvioFactory;
 
@@ -20,7 +13,7 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 
 public class BankList extends JList<String> {
 	
-	private static Dimension _size = new Dimension(220, 300);
+	private static Dimension _size = new Dimension(220, 250);
 
 	private static EvioDataDictionary _dataDict = EvioFactory.getDictionary();
 

@@ -10,6 +10,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.HistoData;
 
 /**
@@ -116,18 +117,57 @@ public class DefinitionManager implements ActionListener {
 		}
 	}
 	
+	
+	//define a scatterplot
+	private void defineScatterPlot() {
+		DefineScatterDialog dialog = new DefineScatterDialog();
+		dialog.setVisible(true);
+		int reason = dialog.getReason();
+		if (reason == DialogUtilities.OK_RESPONSE) {
+			DataSet dataSet = dialog.getDataSeta();
+			if (dataSet != null) {
+				String name = ScatterPanel.getTitle(dataSet);
+				if (_plots.containsKey(name)) {
+					JOptionPane.showMessageDialog(null, "Already have a plot named " + name);
+				}
+				else {
+					if (!addedSeparator) {
+						_menu.addSeparator();
+						addedSeparator = true;
+					}
+
+					JMenuItem item = new JMenuItem(name);
+					final ScatterPlot plot = new ScatterPlot(dataSet);
+					int count = _plots.size();
+					int x = 10 + 30*(count % 20);
+					int y = 10 + 30*(count / 20);
+					plot.setLocation(x, y);
+					_plots.put(name, new Holder(name, plot, item));
+										
+					ActionListener al = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							plot.setVisible(true);
+						}					
+					};
+					item.addActionListener(al);
+					_menu.add(item);
+				}
+
+			}
+		}
+	}
+	
+	/**
+	 * Remove a plot
+	 * @param name the name of the plot to remove
+	 */
 	public void remove(String name) {
 		Holder holder = _plots.remove(name);
 		if (holder != null) {
 			_menu.remove(holder.item);
 			holder.dialog.setVisible(false);
 		}
-	}
-	
-	
-	//define a scatterplot
-	private void defineScatterPlot() {
-		
 	}
 	
 	class Holder {

@@ -15,7 +15,7 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 
 public class ColumnList extends JList<String> {
 
-	private static Dimension _size = new Dimension(220, 300);
+	private static Dimension _size = new Dimension(220, 250);
 
 	private static EvioDataDictionary _dataDict = EvioFactory.getDictionary();
 
