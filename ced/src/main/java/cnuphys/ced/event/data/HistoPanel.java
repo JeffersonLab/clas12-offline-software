@@ -5,25 +5,16 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.splot.pdata.HistoData;
 
 public class HistoPanel extends JPanel implements PropertyChangeListener {
-
-	protected static NumberFormat _intFormat = NumberFormat.getNumberInstance();
-
-	static {
-		_intFormat.setMinimumFractionDigits(0);
-	}
 
 	private JFormattedTextField _numBinsTF;
 
@@ -43,7 +34,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	public HistoPanel() {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel();
+		_sp = new SelectPanel("Select Variable");
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
@@ -58,12 +49,16 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	}
 
 	private void addEast() {
+		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(5, 1, 4, 4));
-		_numBinsTF = integerField(p, "Number of Bins", _numBins);
-		_minValTF = decimalField(p, "Min Value", _minVal);
-		_maxValTF = decimalField(p, "Max Value", _maxVal);
-		_componentCountTF = integerField(p, "Set for Component Count", _numComponents);
+		p.setLayout(new BorderLayout(0, 0));
+
+		JPanel sp = new JPanel();
+		sp.setLayout(new GridLayout(4, 1, 4, 4));
+		_numBinsTF = integerField(sp, "Number of Bins", _numBins);
+		_minValTF = decimalField(sp, "Min Value", _minVal);
+		_maxValTF = decimalField(sp, "Max Value", _maxVal);
+		_componentCountTF = integerField(sp, "Set for Component Count", _numComponents);
 		
 		KeyAdapter kl = new KeyAdapter() {
 			@Override
@@ -76,8 +71,8 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 						
 						if (_numComponents > 0) {
 							_numBins = _numComponents;
-							_minVal = -0.5;
-							_maxVal = _numComponents;
+							_minVal = 0.5;
+							_maxVal = _numComponents + 0.5;
 							_numBinsTF.setValue(_numBins);
 							_minValTF.setValue(_minVal);
 							_maxValTF.setValue(_maxVal);
@@ -92,22 +87,15 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		_numBinsTF.addPropertyChangeListener("value", this);
 		_minValTF.addPropertyChangeListener("value", this);
 		_maxValTF.addPropertyChangeListener("value", this);
+		p.add(sp, BorderLayout.NORTH);
 		add(p, BorderLayout.EAST);
-	}
-
-	private JTextField textField(JPanel p, String title, String defText) {
-		JPanel panel = titledPanel(title);
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		JTextField tf = new JTextField(defText, 20);
-		panel.add(tf);
-		p.add(panel);
-		return tf;
 	}
 
 	private JFormattedTextField integerField(JPanel p, String title,
 			int defValue) {
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
 		numberFormat.setMaximumFractionDigits(0);
+		numberFormat.setGroupingUsed(false);
 
 		JPanel panel = titledPanel(title);
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -123,6 +111,8 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	private JFormattedTextField decimalField(JPanel p, String title,
 			double defValue) {
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
+		numberFormat.setMaximumFractionDigits(4);
+		numberFormat.setGroupingUsed(false);
 
 		JPanel panel = titledPanel(title);
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -157,6 +147,10 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		}
 	}
 
+	/**
+	 * Create the histogram data
+	 * @return the histogram data
+	 */
 	public HistoData getHistoData() {
 		// public HistoData(String name, double valMin, double valMax, int
 		// numBins) {

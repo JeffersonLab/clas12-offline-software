@@ -172,6 +172,70 @@ public class ColumnData {
 	}
 	
 	/**
+	 * Get the array with double values regardless of type
+	 * @return the data as a double array
+	 */
+	public double[] getAsDoubleArray() {
+		double da[] = null;
+		
+		EvioDataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+
+		if (event != null) {
+			switch (_type) {
+			case INT8:
+				byte b[] = event.getByte(_fullName);
+				int len = (b == null) ? 0 : b.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = b[j];
+					}
+				}
+				break;
+
+			case INT16:
+				short s[] = event.getShort(_fullName);
+				len = (s == null) ? 0 : s.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = s[j];
+					}
+				}
+				break;
+
+			case INT32:
+				int i[] = event.getInt(_fullName);
+				len = (i == null) ? 0 : i.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = i[j];
+					}
+				}
+				break;
+
+			case FLOAT32:
+				float f[] = event.getFloat(_fullName);
+				len = (f == null) ? 0 : f.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = f[j];
+					}
+				}
+				break;
+
+			case FLOAT64:
+				da = event.getDouble(_fullName);
+				break;
+			}
+		}
+
+		return da;
+	}
+	
+	/**
 	 * Get the length of the underlying data array
 	 * @return the length of the underlying data array
 	 */

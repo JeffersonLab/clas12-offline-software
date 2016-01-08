@@ -77,21 +77,28 @@ public class GrowableArray implements XmlPrintStreamWritable {
     }
 
     /**
-     * Get the minimal copy of the data array. This copies the actual data into
-     * a new array of just the right size. This new array can be used normally,
-     * i.e., it is safe to use its <code>length</code>.
-     * 
-     * @return a copy of the data array of just the right length
-     */
-    public double[] getMinimalCopy() {
-	if (_dataLen == 0) {
-	    return null;
-	}
-	double acopy[] = new double[_dataLen];
+	 * Get the minimal copy of the data array. This copies the actual data into
+	 * a new array of just the right size. This new array can be used normally,
+	 * i.e., it is safe to use its <code>length</code>.
+	 * 
+	 * @return a copy of the data array of just the right length
+	 */
+	public double[] getMinimalCopy() {
+		if (_dataLen == 0) {
+			return null;
+		}
+		double acopy[] = new double[_dataLen];
 
-	System.arraycopy(_data, 0, acopy, 0, _dataLen);
-	return acopy;
-    }
+		try {
+			System.arraycopy(_data, 0, acopy, 0, _dataLen);
+		} catch (Exception e) {
+
+			System.err.println("Exception in GrowableArray.getMinimalCopy: " + e.getMessage());
+			System.err.println("_dataLen: " + _dataLen);
+			System.err.println("_data: " + _data);
+		}
+		return acopy;
+	}
 
     /**
      * removes the first entry and moves all other entries up one
