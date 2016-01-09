@@ -14,6 +14,7 @@ import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
@@ -569,11 +570,11 @@ public class AccumulationManager
 
 
 		//bst
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		if (hitCount > 0) {
-			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
-			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
-			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
+			int bstsector[] = BST.sector();
+			int bstlayer[] = BST.layer();
+			int bststrip[] = BST.strip();
 			
 			for (int i = 0; i < hitCount; i++) {
 				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],

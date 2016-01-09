@@ -3,6 +3,7 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -44,16 +45,16 @@ public class SVTPanel3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		float coords6[] = new float[6];
 		float coords36[] = new float[36];
-		int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
-		int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
-		int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
-        int pid[] = ColumnData.getIntArray("BST::true.pid");
-		double avgX[] = ColumnData.getDoubleArray("BST::true.avgX");
-		double avgY[] = ColumnData.getDoubleArray("BST::true.avgY");
-		double avgZ[] = ColumnData.getDoubleArray("BST::true.avgZ");
+		int bstsector[] = BST.sector();
+		int bstlayer[] = BST.layer();
+		int bststrip[] = BST.strip();
+        int pid[] = BST.pid();
+		double avgX[] = BST.avgX();
+		double avgY[] = BST.avgY();
+		double avgZ[] = BST.avgZ();
 
 		
 		boolean drawOutline = false;
@@ -123,14 +124,14 @@ public class SVTPanel3D extends DetectorItem3D {
 		}
 
 		// reconstructed crosses?
-		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
+		double labx[] = BST.crossX();
 		if (showCrosses() && (labx != null)) {
 			// these arrays are in mm
-			double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
-			double labz[] = ColumnData.getDoubleArray("BSTRec::Crosses.z");
-			double ux[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
-			double uy[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
-			double uz[] = ColumnData.getDoubleArray("BSTRec::Crosses.uz");
+			double laby[] = BST.crossY();
+			double labz[] = BST.crossZ();
+			double ux[] = BST.crossUx();
+			double uy[] = BST.crossUy();
+			double uz[] = BST.crossUz();
 
 			int len = (labx == null) ? 0 : labx.length;
 

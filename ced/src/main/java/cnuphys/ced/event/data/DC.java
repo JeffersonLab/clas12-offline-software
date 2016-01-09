@@ -6,7 +6,7 @@ import cnuphys.ced.noise.NoiseManager;
 import cnuphys.splot.plot.DoubleFormat;
 
 /**
- * static methods to centralize getting data arrays
+ * static methods to centralize getting data arrays related to DC
  * @author heddle
  *
  */

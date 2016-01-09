@@ -15,6 +15,7 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
@@ -65,10 +66,15 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		g2.setClip(oldClip);
 	}
 
+	/**
+	 * Draw BST crosses
+	 * @param g the graphics context
+	 * @param container the drawing container
+	 */
 	public void drawBSTCrosses(Graphics g, IContainer container) {
 
 		// bst crosses?
-		if (DataSupport.bstGetCrossCount() == 0) {
+		if (BST.crossCount() == 0) {
 			return;
 		}
 
@@ -79,12 +85,12 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 		Point2D.Double wp2 = new Point2D.Double();
 		Point pp2 = new Point();
 
-		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
+		double labx[] = BST.crossX();
 		
 		if (labx != null) {
-			double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
-			double unitx[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
-			double unity[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
+			double laby[] = BST.crossY();
+			double unitx[] = BST.crossUx();
+			double unity[] = BST.crossUy();
 
 			int len = (labx == null) ? 0 : labx.length;
 
@@ -208,12 +214,12 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 			return;
 		}
 
-		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
-		double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
-		double labz[] = ColumnData.getDoubleArray("BSTRec::Crosses.z");
-		double ux[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
-		double uy[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
-		double uz[] = ColumnData.getDoubleArray("BSTRec::Crosses.uz");
+		double labx[] = BST.crossX();
+		double laby[] = BST.crossY();
+		double labz[] = BST.crossZ();
+		double ux[] = BST.crossUx();
+		double uy[] = BST.crossUy();
+		double uz[] = BST.crossUz();
 		int id[] = ColumnData.getIntArray("BSTRec::Crosses.ID");
 		double xerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_x");
 		double yerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_y");

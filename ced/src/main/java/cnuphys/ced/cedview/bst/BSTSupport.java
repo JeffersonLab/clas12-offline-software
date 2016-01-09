@@ -3,6 +3,7 @@ package cnuphys.ced.cedview.bst;
 import java.util.List;
 
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
@@ -22,15 +23,15 @@ public class BSTSupport {
 			panel.hit[2] = false;
 		}
 
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		if (hitCount < 1) {
 			return;
 		}
 
 		//NOTE this uses "true" (gemc data) to segment the z direction
-		double z[] = ColumnData.getDoubleArray("BST::true.avgLz");
-		int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
-		int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
+		double z[] = BST.avgLz();
+		int bstsector[] = BST.sector();
+		int bstlayer[] = BST.layer();
 
 		int len = z.length;
 		for (int i = 0; i < len; i++) {

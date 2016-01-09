@@ -20,6 +20,7 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
@@ -182,11 +183,12 @@ public class BSTxyHitDrawer implements IDrawable {
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		if (hitCount > 0) {
-			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
-			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
-			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
+			
+			int bstsector[] = BST.sector();
+			int bstlayer[] = BST.layer();
+			int bststrip[] = BST.strip();
 
 			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
@@ -238,40 +240,42 @@ public class BSTxyHitDrawer implements IDrawable {
 
 			// draw GEMC nearest x and y
 
-			double avgX[] = ColumnData.getDoubleArray("BST::true.avgX");
-			if ((avgX != null) && _view.showMcTruth()) {
-				double avgY[] = ColumnData.getDoubleArray("BST::true.avgY");
-				int pid[] = ColumnData.getIntArray("BST::true.pid");
+			if (_view.showMcTruth()) {
+		        int pid[] = BST.pid();
+				double avgX[] = BST.avgX();
+				double avgY[] = BST.avgY();
+				if (avgX != null) {
 
-				Rectangle sr = container.getInsetRectangle();
-				g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+					Rectangle sr = container.getInsetRectangle();
+					g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
-				Point p1 = new Point();
-				Point2D.Double wp1 = new Point2D.Double();
-				Color default_fc = Color.red;
+					Point p1 = new Point();
+					Point2D.Double wp1 = new Point2D.Double();
+					Color default_fc = Color.red;
 
-				Stroke oldStroke = g2.getStroke();
-				g2.setStroke(CedXYView.stroke);
+					Stroke oldStroke = g2.getStroke();
+					g2.setStroke(CedXYView.stroke);
 
-				for (int i = 0; i < avgX.length; i++) {
-					Color fc = default_fc;
-					if (pid != null) {
-						LundId lid = LundSupport.getInstance()
-								.get(pid[i]);
-						if (lid != null) {
-							fc = lid.getStyle().getFillColor();
+					for (int i = 0; i < avgX.length; i++) {
+						Color fc = default_fc;
+						if (pid != null) {
+							LundId lid = LundSupport.getInstance()
+									.get(pid[i]);
+							if (lid != null) {
+								fc = lid.getStyle().getFillColor();
+							}
 						}
+						g2.setColor(fc);
+
+						wp1.setLocation(avgX[i],
+								avgY[i]);
+						container.worldToLocal(p1, wp1);
+
+						DataDrawSupport.drawGemcHit(g, p1);
 					}
-					g2.setColor(fc);
-
-					wp1.setLocation(avgX[i],
-							avgY[i]);
-					container.worldToLocal(p1, wp1);
-
-					DataDrawSupport.drawGemcHit(g, p1);
-				}
-				g2.setStroke(oldStroke);
-			}
+					g2.setStroke(oldStroke);
+				} //avgx != null
+			} //show mc truth
 
 			g.setClip(oldClip);
 		} // hotcount > 0

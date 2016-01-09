@@ -37,6 +37,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -488,14 +489,14 @@ public class BSTzView extends CedView implements ChangeListener {
 
 	private void drawGEMCHits(Graphics g, IContainer container) {
 
-		double x[] = ColumnData.getDoubleArray("BST::true.avgX");
+		double x[] = BST.avgX();
 		if (x == null) {
 			return;
 		}
 
-		double y[] = ColumnData.getDoubleArray("BST::true.avgY");
-		double z[] = ColumnData.getDoubleArray("BST::true.avgZ");
-		int pid[] = ColumnData.getIntArray("BST::true.pid");
+		double y[] = BST.avgY();
+		double z[] = BST.avgZ();
+		int pid[] = BST.pid();
 
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();

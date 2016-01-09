@@ -2,9 +2,10 @@ package cnuphys.ced.event.data;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
-import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -27,11 +28,13 @@ public class DefinitionManager implements ActionListener {
 	private JMenu _menu;
 	private JMenuItem _histo;
 	private JMenuItem _scatter;
+	private JMenuItem _open;
 	private boolean addedSeparator;
 	
 	//all the define plots, which are dialogs
 	private Hashtable<String, Holder> _plots = new Hashtable<String, Holder>();
 	
+	//private constructor for single ton
 	private DefinitionManager() {
 	}
 	
@@ -55,12 +58,15 @@ public class DefinitionManager implements ActionListener {
 			_menu = new JMenu("Define");
 			_histo = new JMenuItem("Define Histogram...");
 			_scatter = new JMenuItem("Define Scatter Plot...");
+			_open = new JMenuItem("Read a Plot Definition...");
 			
 			_histo.addActionListener(this);
 			_scatter.addActionListener(this);
+			_open.addActionListener(this);
 			
 			_menu.add(_histo);
 			_menu.add(_scatter);
+			_menu.add(_open);
 		}
 		return _menu;
 	}
@@ -74,6 +80,14 @@ public class DefinitionManager implements ActionListener {
 		else if (o == _scatter) {
 			defineScatterPlot();
 		}
+		else if (o == _open) {
+			readPlotDefinition();
+		}
+	}
+	
+	//read a saved plot definition
+	private void readPlotDefinition() {
+		
 	}
 	
 	//define a histogram
@@ -172,14 +186,32 @@ public class DefinitionManager implements ActionListener {
 	
 	class Holder {
 		public String name;
-		public JDialog dialog;
+		public PlotDialog dialog;
 		public JMenuItem item;
-		public Holder(String n, JDialog d, JMenuItem mi) {
+		public Holder(String n, PlotDialog d, JMenuItem mi) {
 			name = n;
 			dialog = d;
 			item = mi;
 		}
 	}
 
+	/**
+	 * Get all the current plots
+	 * @return all the plots
+	 */
+	public static Vector<PlotDialog> getAllPlots() {
+		if ((_instance._plots == null) || _instance._plots.isEmpty()) {
+			return null;
+		}
+		
+		Vector<PlotDialog> v = new Vector<PlotDialog>();
+		Enumeration<Holder> e = _instance._plots.elements();
+		while (e.hasMoreElements()) {
+			Holder holder = e.nextElement();
+			v.add(holder.dialog);
+		}
+		
+		return v;
+	}
 	
 }

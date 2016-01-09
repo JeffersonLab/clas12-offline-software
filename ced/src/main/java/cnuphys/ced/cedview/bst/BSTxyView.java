@@ -37,6 +37,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
@@ -494,9 +495,9 @@ public class BSTxyView extends CedXYView {
 
 		// hits data
 
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		if ((_closestPanel != null) && (hitCount > 0)) {
-			Vector<int[]> stripADCData = DataSupport.bstAllStripsForSectorAndLayer(
+			Vector<int[]> stripADCData = BST.allStripsForSectorAndLayer(
 					_closestPanel.getSector(), _closestPanel.getLayer());
 			if (!stripADCData.isEmpty()) {
 				for (int sdtdat[] : stripADCData) {
@@ -565,19 +566,16 @@ public class BSTxyView extends CedXYView {
 
 		String cstr = "$orange$";
 
-		double x[] = ColumnData.getDoubleArray("BST::true.avgX");
+		double x[] = BST.avgX();
 
 		int len = (x == null) ? 0 : x.length;
 		if (len == 0) {
 			feedbackStrings.add(cstr + "No GEMC hits");
 			return;
 		}
-		else {
-			feedbackStrings.add(cstr + "GEMC hit count: " + len);
-		}
 
-		double y[] = ColumnData.getDoubleArray("BST::true.avgY");
-		int pid[] = ColumnData.getIntArray("BST::true.pid");
+		double y[] = BST.avgY();
+		int pid[] = BST.pid();
 		Point p1 = new Point();
 		Point2D.Double wp1 = new Point2D.Double();
 		Rectangle rr = new Rectangle();
