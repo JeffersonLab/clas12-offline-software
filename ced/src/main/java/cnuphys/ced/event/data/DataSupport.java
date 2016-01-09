@@ -605,16 +605,6 @@ public class DataSupport {
 	}
 
 	/**
-	 * Get the number of reconstructed crosses
-	 * 
-	 * @return the number of reconstructed crosses
-	 */
-	public static int bstGetCrossCount() {
-		int sector[] = ColumnData.getIntArray("BSTRec::Crosses.sector");
-		return (sector == null) ? 0 : sector.length;
-	}
-
-	/**
 	 * Get the name from the panel type
 	 * 
 	 * @param panelType the panel type
@@ -698,61 +688,6 @@ public class DataSupport {
 		}
 
 		return (sector == null) ? 0 : sector.length;
-	}
-
-	
-	/**
-	 * Get the hit count for bst 
-	 * @return the hit count
-	 */
-	public static int bstGetHitCount() {
-		int sector[] = ColumnData.getIntArray("BST::dgtz.sector");
-		return (sector == null) ? 0 : sector.length;
-	}
-	
-	
-	/**
-	 * Get a collection of all strip, adc doublets for a given sector and layer
-	 * 
-	 * @param sector the 1-based sector
-	 * @param layer the 1-based layer
-	 * @return a collection of all strip, adc doublets for a given sector and
-	 *         layer. It is a collection of integer arrays. For each array, the
-	 *         0 entry is the 1-based strip and the 1 entry is the adc.
-	 */
-	public static Vector<int[]> bstAllStripsForSectorAndLayer(int sector,
-			int layer) {
-		Vector<int[]> strips = new Vector<int[]>();
-
-		int sect[] = ColumnData.getIntArray("BST::dgtz.sector");
-
-		if (sect != null) {
-			int lay[] = ColumnData.getIntArray("BST::dgtz.layer");
-			int strip[] = ColumnData.getIntArray("BST::dgtz.strip");
-			int ADC[] = ColumnData.getIntArray("BST::dgtz.ADC");
-
-			for (int hitIndex = 0; hitIndex < sect.length; hitIndex++) {
-				if ((sect[hitIndex] == sector) && (lay[hitIndex] == layer)) {
-					int data[] = { strip[hitIndex], ADC[hitIndex] };
-					strips.add(data);
-				}
-			}
-		}
-
-		// sort based on strips
-		if (strips.size() > 1) {
-			Comparator<int[]> c = new Comparator<int[]>() {
-
-				@Override
-				public int compare(int[] o1, int[] o2) {
-					return Integer.compare(o1[0], o2[0]);
-				}
-			};
-
-			Collections.sort(strips, c);
-		}
-
-		return strips;
 	}
 	
 

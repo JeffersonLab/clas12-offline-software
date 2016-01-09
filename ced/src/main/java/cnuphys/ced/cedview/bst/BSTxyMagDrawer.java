@@ -14,6 +14,7 @@ import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -149,15 +150,14 @@ public class BSTxyMagDrawer extends DrawableAdapter {
 
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container,
 			int sector, int laylow, int layhi, int y) {
-		ClasIoEventManager eventManager = ClasIoEventManager.getInstance();
 
 		String hitString = "";
 
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		if (hitCount > 0) {
-			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
-			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
-			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
+			int bstsector[] = BST.sector();
+			int bstlayer[] = BST.layer();
+			int bststrip[] = BST.strip();
 
 			float coords[] = new float[6];
 
@@ -200,10 +200,10 @@ public class BSTxyMagDrawer extends DrawableAdapter {
 		g.drawString(hitString, 4, y);
 
 		// crosses?
-		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
+		double labx[] = BST.crossX();
 		if (labx != null) {
-			double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
-			double labz[] = ColumnData.getDoubleArray("BSTRec::Crosses.z");
+			double laby[] = BST.crossY();
+			double labz[] = BST.crossZ();
 			// bstData.bstrec
 			// for (int i = 0; i < labx.length; i++) {
 			// Point3D p3d = new Point3D(labx[i], laby[i], labz[i]);

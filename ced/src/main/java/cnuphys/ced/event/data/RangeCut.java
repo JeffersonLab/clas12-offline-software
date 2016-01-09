@@ -6,7 +6,7 @@ import cnuphys.bCNU.log.Log;
 public class RangeCut implements ICut {
 	
 	private static final double TOLERANCE = 1.0e-8;
-	
+		
 	/** minimum value */
 	public double min;
 	
@@ -18,6 +18,8 @@ public class RangeCut implements ICut {
 	protected String _name;
 	
 	protected ColumnData _cd;
+	
+	public static final String CUT_TYPE = "RANGECUT";
 	
 	public RangeCut(String name, double minVal, double maxVal) {
 		_name = name;
@@ -86,5 +88,47 @@ public class RangeCut implements ICut {
 	public String getName() {
 		return _name;
 	}
+	
+	/**
+	 * Create a range cut from a token string
+	 * @param s the definition string from properties
+	 * @return a RangeCut greated from a string
+	 */
+	public static RangeCut fromString(String s) {
+		RangeCut rc = null;
+		String tokens[] = PlotDialog.getTokens(s);
+		if ((tokens != null) && (tokens.length == 5)) {
+			// 0th token is type
+			String name = tokens[1];
+			double minVal = Double.parseDouble(tokens[2]);
+			double maxVal = Double.parseDouble(tokens[3]);
+			boolean active = Boolean.parseBoolean(tokens[4]);
+			rc = new RangeCut(name, minVal, maxVal);
+			if (rc != null) {
+				rc.setActive(active);
+			}
+		}
+		return rc;
+	}
+	
+	/**
+	 * Get the definition used to write in the properties
+	 * @return the definition string
+	 */
+	@Override
+	public String getDefinition() {
+		String minString = DoubleFormat.doubleFormat(min, 10);
+		String maxString = DoubleFormat.doubleFormat(max, 10);
+		String activeString = "" + isActive();
+		return PlotDialog.makeDelimittedString(CUT_TYPE, _name, minString, maxString, activeString);
+	}
 
+
+	/**
+	 * Get a unique type name
+	 */
+	@Override
+	public String getCutType() {
+		return CUT_TYPE;
+	}
 }

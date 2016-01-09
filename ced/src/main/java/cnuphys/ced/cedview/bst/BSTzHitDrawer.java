@@ -16,6 +16,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -163,11 +164,11 @@ public class BSTzHitDrawer implements IDrawable {
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 
-		int hitCount = DataSupport.bstGetHitCount();
+		int hitCount = BST.hitCount();
 		if (hitCount > 0) {
-			int bstsector[] = ColumnData.getIntArray("BST::dgtz.sector");
-			int bstlayer[] = ColumnData.getIntArray("BST::dgtz.layer");
-			int bststrip[] = ColumnData.getIntArray("BST::dgtz.strip");
+			int bstsector[] = BST.sector();
+			int bstlayer[] = BST.layer();
+			int bststrip[] = BST.strip();
 
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,

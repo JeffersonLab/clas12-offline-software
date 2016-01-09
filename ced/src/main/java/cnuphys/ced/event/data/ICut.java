@@ -12,5 +12,7 @@ public interface ICut {
 	
 	public String getName();
 
+	public String getDefinition();
 	
+	public String getCutType();
 }

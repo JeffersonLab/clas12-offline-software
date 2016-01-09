@@ -5,6 +5,7 @@ import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.PCAL;
@@ -74,10 +75,10 @@ public class MCHitDrawer3D extends Item3D {
 
 			if (showSVT()) {
 				showGemcXYZHits(drawable, 
-						ColumnData.getDoubleArray("BST::true.avgX"),
-						ColumnData.getDoubleArray("BST::true.avgY"),
-						ColumnData.getDoubleArray("BST::true.avgZ"),
-						ColumnData.getIntArray("BST::true.pid"), 0);
+						BST.avgX(),
+						BST.avgY(),
+						BST.avgZ(),
+						BST.pid(), 0);
 			}
 
 		}

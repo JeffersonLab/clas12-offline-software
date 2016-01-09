@@ -14,6 +14,7 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
@@ -30,8 +31,10 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 	// cached rectangles for feedback
 	private Rectangle _fbRects[];
 
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-
+	/**
+	 * A BST Cross drawer
+	 * @param view the owner vie
+	 */
 	public CrossDrawerZ(BSTzView view) {
 		super(view);
 	}
@@ -59,7 +62,7 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 
 	public void drawBSTCrosses(Graphics g, IContainer container) {
 		// bst crosses?
-		if (DataSupport.bstGetCrossCount() == 0) {
+		if (BST.crossCount() == 0) {
 			return;
 		}
 
@@ -242,12 +245,12 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 			return;
 		}
 
-		double labx[] = ColumnData.getDoubleArray("BSTRec::Crosses.x");
-		double laby[] = ColumnData.getDoubleArray("BSTRec::Crosses.y");
-		double labz[] = ColumnData.getDoubleArray("BSTRec::Crosses.z");
-		double ux[] = ColumnData.getDoubleArray("BSTRec::Crosses.ux");
-		double uy[] = ColumnData.getDoubleArray("BSTRec::Crosses.uy");
-		double uz[] = ColumnData.getDoubleArray("BSTRec::Crosses.uz");
+		double labx[] = BST.crossX();
+		double laby[] = BST.crossY();
+		double labz[] = BST.crossZ();
+		double ux[] = BST.crossUx();
+		double uy[] = BST.crossUy();
+		double uz[] = BST.crossUz();
 		int id[] = ColumnData.getIntArray("BSTRec::Crosses.ID");
 		double xerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_x");
 		double yerr[] = ColumnData.getDoubleArray("BSTRec::Crosses.err_y");

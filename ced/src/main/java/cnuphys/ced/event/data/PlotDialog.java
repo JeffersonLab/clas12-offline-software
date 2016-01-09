@@ -3,7 +3,10 @@ package cnuphys.ced.event.data;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.JDialog;
@@ -12,10 +15,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
+import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
@@ -23,6 +26,12 @@ import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.splot.plot.PlotPanel;
 
 public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener {
+	
+	//String delimitter for tokenizing
+	public static final String DELIMIT = "$ $";
+
+	//properties for saving/reading definitions
+	protected static final String NAME = "NAME";
 	
 	//the name
 	protected String _name;
@@ -49,6 +58,10 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	//cut table
 	protected CutTablePanel _cutPanel;
 
+	/**
+	 * Create a Plot Dialog
+	 * @param name the name of the plot
+	 */
 	public PlotDialog(String name) {
 		_name = name;
 		setTitle(name);
@@ -106,7 +119,16 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		else if (o == _saveItem) {
 			File file = getSaveDefinitionFile();
 			if (file != null) {
-				saveDefinition(file);
+			    FileWriter fstream;
+				try {
+					fstream = new FileWriter(file.getPath(), false);
+				    BufferedWriter out = new BufferedWriter(fstream);
+					saveDefinition(out);
+					out.flush();
+					out.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} //true tells to append data.
 			}
 		}
 
@@ -116,17 +138,49 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	protected abstract void clear();
 
 	/** Save the definition */
-	protected abstract void saveDefinition(File file);
+	protected void saveDefinition(BufferedWriter out) {
+		try {
+			comment(out, "ced Plot Definition File");
+			writeDelimitted(out, "TYPE", getPlotType()); //type
+			
+			Vector<ICut> cuts = getCuts();
+			if ((cuts != null) && !cuts.isEmpty()) {
+				comment(out, "cuts-- count = " + cuts.size());
+				for (ICut cut:cuts) {
+					out.write(cut.getDefinition() + "\n");
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Write a delimitted string to the save file
+	 * @param out theoutput stream
+	 * @param sa the array of strings
+	 * @throws IOException
+	 */
+	protected void writeDelimitted(BufferedWriter out, String... sa) throws IOException {
+		String s = makeDelimittedString(sa);
+		if (s != null) {
+			out.write(s + "\n");
+		}
+	}
+	protected void comment(BufferedWriter out, String s) throws IOException {
+		out.write("\n" + "!" + s + "\n");
+	}
+	
+	/** custom definitions */
+	protected abstract void customWrite(BufferedWriter out);
 	
 	//select file for saving
 	protected File getSaveDefinitionFile() {
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Plot Definition File",
-				"pdef", "PDEF");
-
 		File selectedFile = null;
 		JFileChooser chooser = new JFileChooser(_saveDir);
-		chooser.setSelectedFile(null);
-		chooser.setFileFilter(filter);
+		
+		File defFile = new File(_saveDir, "plotdef.pltd");
+		chooser.setSelectedFile(defFile);
 		int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
@@ -191,5 +245,44 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	protected Vector<ICut> getCuts() {
 		return _cutPanel.getModel()._data;
 	}
-
+	
+	/**
+	 * Get a string representing the type
+	 * @return a string representing the type
+	 */
+	public abstract String getPlotType();
+	    
+    /**
+     * Make a single delimited string out of collection 
+     * @param sa the array of strings
+     * @return the delimitted string
+     */
+    public static String makeDelimittedString(String... sa) {
+    	if (sa == null) {
+    		return null;
+    	}
+    	
+    	String s = sa[0];
+    	
+    	if (sa.length > 1) {
+    		for (int i = 1; i < sa.length; i++) {
+    			s = s + DELIMIT + sa[i];
+    		}
+    	}
+    	
+    	return s;
+    }
+    
+    /**
+     * Get the tokens from a string
+     * @param s the string 
+     * @return the tokens
+     */
+    public static String[] getTokens(String s) {
+    	if (s == null) {
+    		return null;
+    	}
+    	return FileUtilities.tokens(s, DELIMIT);
+    }
+	
 }
