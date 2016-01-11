@@ -37,8 +37,8 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
@@ -85,8 +85,6 @@ public class BSTzView extends CedView implements ChangeListener {
 
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
-			LineStyle.SOLID);
-	private static Stroke stroke2 = GraphicsUtilities.getStroke(2.0f,
 			LineStyle.SOLID);
 
 	// units are mm
@@ -144,11 +142,12 @@ public class BSTzView extends CedView implements ChangeListener {
 				PropertySupport.TITLE, "Central Z",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-				+ ControlPanel.PHISLIDER 
-				+ ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
-				+ ControlPanel.FIELDLEGEND + ControlPanel.DRAWLEGEND,
+		view._controlPanel = new ControlPanel(view,
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
+						+ ControlPanel.ACCUMULATIONLEGEND
+						+ ControlPanel.PHISLIDER + ControlPanel.TARGETSLIDER
+						+ ControlPanel.PHI_SLIDER_BIG + ControlPanel.FIELDLEGEND
+						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
 						+ DisplayBits.BSTRECONS_CROSSES + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
@@ -253,18 +252,13 @@ public class BSTzView extends CedView implements ChangeListener {
 		}
 		else {
 			if (isSingleEventMode()) {
-				
-				int sect[] = ColumnData.getIntArray("BMT::dgtz.sector");
-				int hitCount = (sect == null) ? 0 : sect.length;
+
+				int hitCount = BMT.hitCount();
 				if (hitCount > 0) {
+					int sect[] = BMT.sector();
+					int layer[] = BMT.layer();
+					int strip[] = BMT.strip();
 
-					int layer[] = ColumnData.getIntArray("BMT::dgtz.layer");
-					int strip[] = ColumnData.getIntArray("BMT::dgtz.strip");
-					if (showMcTruth()) {
-
-					}
-
-					// dgtz
 					Point2D.Double wp = new Point2D.Double();
 					Point pp = new Point();
 					for (int hit = 0; hit < hitCount; hit++) {
@@ -296,8 +290,13 @@ public class BSTzView extends CedView implements ChangeListener {
 
 							}
 						} // layer == 5 or 6
+					} // for
+
+					if (showMcTruth()) {
+
 					}
-				}
+
+				} // hit count > 0
 			} // single event mode
 		}
 
@@ -307,12 +306,12 @@ public class BSTzView extends CedView implements ChangeListener {
 	private void drawCosmicTracks(Graphics g, IContainer container) {
 
 		Shape oldClip = clipView(g);
-		int ids[] = ColumnData.getIntArray("BSTRec::Cosmics.ID");
+		int ids[] = BST.cosmicID();
 		if (ids != null) {
-			double yx_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
-			double yx_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
-			double yz_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_interc");
-			double yz_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_slope");
+			double yx_interc[] = BST.cosmicYxInterc();
+			double yx_slope[] = BST.cosmicYxSlope();
+			double yz_interc[] = BST.cosmicYzInterc();
+			double yz_slope[] = BST.cosmicYzSlope();
 
 			g.setColor(Color.red);
 			Point p1 = new Point();
@@ -370,7 +369,6 @@ public class BSTzView extends CedView implements ChangeListener {
 		// there are 132 panels
 		// mark the hits if there is gemc data
 		BSTSupport.markPanelHits(this, panels);
-		
 
 		int index = 0;
 		for (BSTxyPanel panel : panels) {
@@ -839,6 +837,7 @@ public class BSTzView extends CedView implements ChangeListener {
 
 	/**
 	 * Draw an svt strip
+	 * 
 	 * @param g2 graphics context
 	 * @param container the container
 	 * @param color the color
@@ -846,13 +845,13 @@ public class BSTzView extends CedView implements ChangeListener {
 	 * @param layer 1-based layer 1..8
 	 * @param strip 1-based strip 1..255
 	 */
-	public void drawSVTStrip(Graphics2D g2, IContainer container,
-			Color color, int sector, int layer, int strip) {
+	public void drawSVTStrip(Graphics2D g2, IContainer container, Color color,
+			int sector, int layer, int strip) {
 
 		float coords[] = new float[6];
-		
+
 		BSTGeometry.getStrip(sector, layer, strip, coords);
-		
+
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
 		g2.setStroke(stroke);
@@ -860,15 +859,14 @@ public class BSTzView extends CedView implements ChangeListener {
 		Point p2 = new Point();
 		// Just draw a line from (x1,y1,z1) to (x2,y2,z2)
 
-		//cm to mm
-		labToLocal(10*coords[0], 10*coords[1], 10*coords[2], p1);
-		labToLocal(10*coords[3], 10*coords[4], 10*coords[5], p2);
+		// cm to mm
+		labToLocal(10 * coords[0], 10 * coords[1], 10 * coords[2], p1);
+		labToLocal(10 * coords[3], 10 * coords[4], 10 * coords[5], p2);
 
 		g2.drawLine(p1.x, p1.y, p2.x, p2.y);
 		g2.setStroke(oldStroke);
 
 	}
-
 
 	/**
 	 * The z location of the target

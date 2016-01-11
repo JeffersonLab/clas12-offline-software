@@ -4,8 +4,6 @@ import java.util.List;
 
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
 
 public class BSTSupport {

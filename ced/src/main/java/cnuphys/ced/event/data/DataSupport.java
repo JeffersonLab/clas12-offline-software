@@ -1,7 +1,5 @@
 package cnuphys.ced.event.data;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -593,16 +591,6 @@ public class DataSupport {
 		return array[index];
 	}
 
-
-	/**
-	 * Get the number of reconstructed crosses for bmt
-	 * 
-	 * @return the number of reconstructed crosses for bmy
-	 */
-	public static int bmtGetCrossCount() {
-		int sector[] = ColumnData.getIntArray("BMTRec::Crosses.sector");
-		return (sector == null) ? 0 : sector.length;
-	}
 
 	/**
 	 * Get the name from the panel type

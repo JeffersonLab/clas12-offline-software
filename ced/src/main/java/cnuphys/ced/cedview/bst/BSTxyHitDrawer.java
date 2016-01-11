@@ -20,10 +20,10 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -111,7 +111,7 @@ public class BSTxyHitDrawer implements IDrawable {
 		}
 	}
 
-	//draw accumulated hits (panels)
+	// draw accumulated hits (panels)
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		// panels
 
@@ -124,22 +124,23 @@ public class BSTxyHitDrawer implements IDrawable {
 		int bstData[][] = AccumulationManager.getInstance()
 				.getAccumulatedDgtzBstData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
-			int supl0 = lay0/2;
+			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
 				BSTxyPanel panel = BSTxyView.getPanel(lay0 + 1, sect0 + 1);
 
 				if (panel != null) {
 					int hitCount = bstData[lay0][sect0];
-					
+
 					double fract;
 					if (_view.isSimpleAccumulatedMode()) {
 						fract = ((double) hitCount) / maxHit;
 					}
 					else {
-						fract = Math.log(hitCount+1.)/Math.log(maxHit+1.);
+						fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
 					}
 
-					Color color = AccumulationManager.getInstance().getColor(fract);
+					Color color = AccumulationManager.getInstance()
+							.getColor(fract);
 					_view.drawSVTPanel((Graphics2D) g, container, panel, color);
 
 				}
@@ -157,11 +158,10 @@ public class BSTxyHitDrawer implements IDrawable {
 	private void drawMicroMegasHitsSingleMode(Graphics g,
 			IContainer container) {
 
-		int sect[] = ColumnData.getIntArray("BMT::dgtz.sector");
-		int hitCount = (sect == null) ? 0 : sect.length;
+		int hitCount = BMT.hitCount();
 		if (hitCount > 0) {
-
-			int layer[] = ColumnData.getIntArray("BMT::dgtz.layer");
+			int sect[] = BMT.sector();
+			int layer[] = BMT.layer();
 
 			for (int hit = 0; hit < hitCount; hit++) {
 				int geoSector = MicroMegasSector
@@ -176,8 +176,8 @@ public class BSTxyHitDrawer implements IDrawable {
 						_fbRects.add(fbr);
 					}
 				}
-			}
-		}
+			} // for
+		} // hitcount > 0
 	}
 
 	// draw gemc simulated hits single event mode
@@ -185,7 +185,7 @@ public class BSTxyHitDrawer implements IDrawable {
 
 		int hitCount = BST.hitCount();
 		if (hitCount > 0) {
-			
+
 			int bstsector[] = BST.sector();
 			int bstlayer[] = BST.layer();
 			int bststrip[] = BST.strip();
@@ -241,7 +241,7 @@ public class BSTxyHitDrawer implements IDrawable {
 			// draw GEMC nearest x and y
 
 			if (_view.showMcTruth()) {
-		        int pid[] = BST.pid();
+				int pid[] = BST.pid();
 				double avgX[] = BST.avgX();
 				double avgY[] = BST.avgY();
 				if (avgX != null) {
@@ -259,23 +259,21 @@ public class BSTxyHitDrawer implements IDrawable {
 					for (int i = 0; i < avgX.length; i++) {
 						Color fc = default_fc;
 						if (pid != null) {
-							LundId lid = LundSupport.getInstance()
-									.get(pid[i]);
+							LundId lid = LundSupport.getInstance().get(pid[i]);
 							if (lid != null) {
 								fc = lid.getStyle().getFillColor();
 							}
 						}
 						g2.setColor(fc);
 
-						wp1.setLocation(avgX[i],
-								avgY[i]);
+						wp1.setLocation(avgX[i], avgY[i]);
 						container.worldToLocal(p1, wp1);
 
 						DataDrawSupport.drawGemcHit(g, p1);
 					}
 					g2.setStroke(oldStroke);
-				} //avgx != null
-			} //show mc truth
+				} // avgx != null
+			} // show mc truth
 
 			g.setClip(oldClip);
 		} // hotcount > 0
