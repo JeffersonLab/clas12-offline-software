@@ -15,6 +15,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.splot.plot.DoubleFormat;
 
@@ -143,8 +144,8 @@ public class MicroMegasSector extends DonutItem {
 			return null;
 		}
 		
-		int strips[] = ColumnData.getIntArray("BMT::dgtz.strip");
-		double edep[] = ColumnData.getDoubleArray("BMT::dgtz.Edep");
+		int strips[] = BMT.strip();
+		double edep[] = BMT.Edep();
 
 		int strip = strips[hit];
 		

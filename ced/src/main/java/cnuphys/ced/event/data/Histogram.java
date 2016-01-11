@@ -3,7 +3,6 @@ package cnuphys.ced.event.data;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedWriter;
-import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -28,14 +27,6 @@ public class Histogram extends PlotDialog {
 	//the histgram data
 	private HistoData _histoData;
 		
-	/**
-	 * Create from properties
-	 * @param props the properties
-	 */
-	public Histogram(Properties props) {
-		super((String)props.get(NAME));
-	}
-	
 	/**
 	 * Create an on-the-fly histogram
 	 * @param histoData

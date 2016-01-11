@@ -13,10 +13,7 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.Fonts;
-import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 

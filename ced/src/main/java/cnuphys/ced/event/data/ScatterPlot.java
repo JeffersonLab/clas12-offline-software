@@ -35,14 +35,9 @@ public class ScatterPlot extends PlotDialog {
 	private ColumnData _colDatY;
 
 	/**
-	 * Create from properties
-	 * 
-	 * @param props the properties
+	 * Create a Scatter Plot
+	 * @param dataSet the underlying data set
 	 */
-	public ScatterPlot(Properties props) {
-		super((String) props.get(NAME));
-	}
-
 	public ScatterPlot(DataSet dataSet) {
 		super(ScatterPanel.getTitle(dataSet));
 		_dataSet = dataSet;

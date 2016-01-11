@@ -38,8 +38,6 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -257,10 +255,10 @@ public class BSTxyView extends CedXYView {
 
 		Shape oldClip = clipView(g);
 
-		int ids[] = ColumnData.getIntArray("BSTRec::Cosmics.ID");
+		int ids[] = BST.cosmicID();
 		if (ids != null) {
-			double yx_interc[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
-			double yx_slope[] = ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
+			double yx_interc[] = BST.cosmicYxInterc();
+			double yx_slope[] = BST.cosmicYxSlope();
 
 			g.setColor(Color.red);
 			Point p1 = new Point();

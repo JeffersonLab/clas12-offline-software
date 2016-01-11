@@ -150,6 +150,95 @@ public class BST {
 	}
 	
 	/**
+	 * Get the cross xerr array from the reconstructed data
+	 * @return the cross xerr array
+	 */
+	public static double[] crossXerr() {
+		return ColumnData.getDoubleArray("BSTRec::Crosses.err_x");
+	}
+
+	/**
+	 * Get the cross yerr array from the reconstructed data
+	 * @return the cross yerr array
+	 */
+	public static double[] crossYerr() {
+		return ColumnData.getDoubleArray("BSTRec::Crosses.err_y");
+	}
+
+	/**
+	 * Get the cross zerr array from the reconstructed data
+	 * @return the cross zerr array
+	 */
+	public static double[] crossZerr() {
+		return ColumnData.getDoubleArray("BSTRec::Crosses.err_z");
+	}
+
+	/**
+	 * Get the IDs from the reconstructed cross data
+	 * @return the ID array
+	 */
+	public static int[] crossID() {
+		return ColumnData.getIntArray("BSTRec::Crosses.ID");
+	}
+		
+	/**
+	 * Get the cross sector from the reconstructed cross data
+	 * @return the cross sector array
+	 */
+	public static int[] crossSector() {
+		return ColumnData.getIntArray("BSTRec::Crosses.sector");
+	}
+	
+	/**
+	 * Get the cross region from the reconstructed cross data
+	 * @return the cross region array
+	 */
+	public static int[] crossRegion() {
+		return ColumnData.getIntArray("BSTRec::Crosses.region");
+	}
+	
+	
+	/**
+	 * Get the yx intercept from the reconstructed cosmics data
+	 * @return the yx intercept array
+	 */
+	public static double[] cosmicYxInterc() {
+		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
+	}
+	
+	/**
+	 * Get the yx slope from the reconstructed cosmics data
+	 * @return the yx slope array
+	 */
+	public static double[] cosmicYxSlope() {
+		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
+	}
+	
+	/**
+	 * Get the yz intercept from the reconstructed cosmics data
+	 * @return the yz intercept array
+	 */
+	public static double[] cosmicYzInterc() {
+		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_interc");
+	}
+	
+	/**
+	 * Get the yz slope from the reconstructed cosmics data
+	 * @return the yz slope array
+	 */
+	public static double[] cosmicYzSlope() {
+		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_slope");
+	}
+	
+	/**
+	 * Get the IDs from the reconstructed cosmics data
+	 * @return the ID array
+	 */
+	public static int[] cosmicID() {
+		return ColumnData.getIntArray("BSTRec::Cosmics.ID");
+	}
+	
+	/**
 	 * Get a collection of all strip, adc doublets for a given sector and layer
 	 * 
 	 * @param sector the 1-based sector
@@ -208,7 +297,7 @@ public class BST {
 	 * @return the number of reconstructed crosses
 	 */
 	public static int crossCount() {
-		int sector[] = ColumnData.getIntArray("BSTRec::Crosses.sector");
+		int sector[] = crossSector();
 		return (sector == null) ? 0 : sector.length;
 	}
 

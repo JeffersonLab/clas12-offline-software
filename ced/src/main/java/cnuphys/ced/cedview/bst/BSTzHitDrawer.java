@@ -17,8 +17,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 

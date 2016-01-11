@@ -1,6 +1,7 @@
 package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -31,7 +32,8 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	public static final String DELIMIT = "$ $";
 
 	//properties for saving/reading definitions
-	protected static final String NAME = "NAME";
+	protected static final String TYPE = "TYPE";
+	protected static final String BOUNDS = "BOUNDS";
 	
 	//the name
 	protected String _name;
@@ -141,7 +143,12 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	protected void saveDefinition(BufferedWriter out) {
 		try {
 			comment(out, "ced Plot Definition File");
-			writeDelimitted(out, "TYPE", getPlotType()); //type
+			writeDelimitted(out, TYPE, getPlotType()); //type
+			
+			//location
+			Rectangle r = getBounds();
+			comment(out, "plot bounds");
+			writeDelimitted(out, BOUNDS, ""+r.x, ""+r.y, ""+r.width, ""+r.height);
 			
 			Vector<ICut> cuts = getCuts();
 			if ((cuts != null) && !cuts.isEmpty()) {
