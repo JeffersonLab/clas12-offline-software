@@ -695,7 +695,7 @@ public class DCGeometry {
 			Point2D.Double ext) {
 
 		if ((p0 == null) || (p1 == null) || (ext == null)) {
-			System.err.println("null point in DCGeometry::extPoint");
+			System.err.println("null point in DCGeometry.extPoint");
 			return;
 		}
 

@@ -77,8 +77,7 @@ public class McHitDrawer extends PCALViewDrawer {
 			int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 			localP.setZ(0);
 			
-			List<String> fbs = DataSupport.ecGemcHitFeedback(hitIndex, 
-					DataSupport.PCAL_OPTION, 
+			List<String> fbs = PCAL.gemcHitFeedback(hitIndex, 
 					DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
 					+ DataSupport.FB_LOCAL_XYZ
 					+ DataSupport.FB_TOTEDEP, 

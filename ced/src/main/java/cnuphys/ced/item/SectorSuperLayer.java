@@ -13,7 +13,6 @@ import java.util.List;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.geometry.DCGeometry;
@@ -721,7 +720,7 @@ public class SectorSuperLayer extends PolygonItem {
 				int wire = getWire(layer, worldPoint);
 				if ((wire > 0) && (wire <= GeoConstants.NUM_WIRE)) {
 
-					int hitIndex = DC.getHitIndex(_sector, _superLayer,
+					int hitIndex = DC.hitIndex(_sector, _superLayer,
 							layer, wire);
 					if (hitIndex < 0) {
 						feedbackStrings.add("superlayer " + _superLayer
@@ -744,7 +743,7 @@ public class SectorSuperLayer extends PolygonItem {
 	// add time based recons fb
 	private void addReconstructedFeedback(List<String> feedbackStrings) {
 
-		double p[] = ColumnData.getDoubleArray("TimeBasedTrkg::TBTracks.p");
+		double p[] = DC.timeBasedTrackP();
 		if (p != null) {
 			int reconTrackCount = p.length;
 			if (reconTrackCount > 0) {

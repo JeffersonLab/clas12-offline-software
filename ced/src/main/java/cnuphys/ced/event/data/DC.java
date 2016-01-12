@@ -148,7 +148,209 @@ public class DC {
 		return (sector == null) ? 0 : sector.length;
 	}
 	
+	/**
+	 * Get the time based tracking momentum array
+	 * @return the time based tracking momentum array
+	 */
+	public static double[] timeBasedTrackP() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBTracks.p");
+	}
+	
+	/**
+	 * Get the time based tracking crosses sector array
+	 * @return the time based tracking crosses sector array
+	 */
+	public static int[] timeBasedCrossSector() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBCrosses.sector");
+	}
 
+	/**
+	 * Get the hit based tracking crosses sector
+	 * @return the hit based tracking crosses sector array
+	 */
+	public static int[] hitBasedCrossSector() {
+		return ColumnData.getIntArray("HitBasedTrkg::HBCrosses.sector");
+	}
+	
+	
+	/**
+	 * Get the time based tracking crosses region array
+	 * @return the time based tracking crosses region array
+	 */
+	public static int[] timeBasedCrossRegion() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBCrosses.region");
+	}
+
+	/**
+	 * Get the hit based tracking crosses region
+	 * @return the hit based tracking crosses region array
+	 */
+	public static int[] hitBasedCrossRegion() {
+		return ColumnData.getIntArray("HitBasedTrkg::HBCrosses.region");
+	}
+
+	
+	/**
+	 * Get the time based tracking crosses ID array
+	 * @return the time based tracking crosses ID array
+	 */
+	public static int[] timeBasedCrossID() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBCrosses.ID");
+	}
+
+	/**
+	 * Get the hit based tracking crosses ID
+	 * @return the hit based tracking crosses ID array
+	 */
+	public static int[] hitBasedCrossID() {
+		return ColumnData.getIntArray("HitBasedTrkg::HBCrosses.ID");
+	}
+
+	/**
+	 * get the time based crosses X position
+	 * @return the time based crosses X position
+	 */
+	public static double[] timeBasedCrossX() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.x");
+	}
+	
+	/**
+	 * get the time based crosses Y position
+	 * @return the time based crosses Y position
+	 */
+	public static double[] timeBasedCrossY() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.y");
+	}
+	
+	/**
+	 * get the time based crosses Z position
+	 * @return the time based crosses Z position
+	 */
+	public static double[] timeBasedCrossZ() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.z");
+	}
+	
+	/**
+	 * get the time based crosses Ux direction
+	 * @return the time based crosses X direction
+	 */
+	public static double[] timeBasedCrossUx() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.ux");
+	}
+	
+	/**
+	 * get the time based crosses Uy direction
+	 * @return the time based crosses Uy direction
+	 */
+	public static double[] timeBasedCrossUy() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.uy");
+	}
+	
+	/**
+	 * get the time based crosses Uz direction
+	 * @return the time based crosses Uz direction
+	 */
+	public static double[] timeBasedCrossUz() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.uz");
+	}
+
+	/**
+	 * get the time based crosses X error
+	 * @return the time based crosses X error
+	 */
+	public static double[] timeBasedCrossErrX() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.err_x");
+	}
+	
+	/**
+	 * get the time based crosses Y error
+	 * @return the time based crosses Y error
+	 */
+	public static double[] timeBasedCrossErrY() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.err_y");
+	}
+	
+	/**
+	 * get the time based crosses Z error
+	 * @return the time based crosses Z error
+	 */
+	public static double[] timeBasedCrossErrZ() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBCrosses.err_z");
+	}
+
+	/**
+	 * get the hit based crosses X position
+	 * @return the hit based crosses X position
+	 */
+	public static double[] hitBasedCrossX() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.x");
+	}
+	
+	/**
+	 * get the hit based crosses Y position
+	 * @return the hit based crosses Y position
+	 */
+	public static double[] hitBasedCrossY() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.y");
+	}
+	
+	/**
+	 * get the hit based crosses Z position
+	 * @return the hit based crosses Z position
+	 */
+	public static double[] hitBasedCrossZ() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.z");
+	}
+	
+	/**
+	 * get the hit based crosses Ux direction
+	 * @return the hit based crosses X direction
+	 */
+	public static double[] hitBasedCrossUx() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.ux");
+	}
+	
+	/**
+	 * get the hit based crosses Uy direction
+	 * @return the hit based crosses Uy direction
+	 */
+	public static double[] hitBasedCrossUy() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.uy");
+	}
+	
+	/**
+	 * get the hit based crosses Uz direction
+	 * @return the hit based crosses Uz direction
+	 */
+	public static double[] hitBasedCrossUz() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.uz");
+	}
+
+	/**
+	 * get the hit based crosses X error
+	 * @return the hit based crosses X error
+	 */
+	public static double[] hitBasedCrossErrX() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.err_x");
+	}
+	
+	/**
+	 * get the hit based crosses Y error
+	 * @return the hit based crosses Y error
+	 */
+	public static double[] hitBasedCrossErrY() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.err_y");
+	}
+	
+	/**
+	 * get the hit based crosses Z error
+	 * @return the hit based crosses Z error
+	 */
+	public static double[] hitBasedCrossErrZ() {
+		return ColumnData.getDoubleArray("HitBasedTrkg::HBCrosses.err_z");
+	}
+	
+	
 	/**
 	 * Some truth feedback for DC
 	 * 
@@ -255,7 +457,7 @@ public class DC {
 	 * @param wireid the 1-based wire
 	 * @return the index of a hit with these parameters, or -1 if not found
 	 */
-	public static int getHitIndex(int sect, int supl, int lay, int wireid) {
+	public static int hitIndex(int sect, int supl, int lay, int wireid) {
 
 		int hitCount = hitCount();
 		if (hitCount > 0) {

@@ -15,6 +15,7 @@ import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;
@@ -55,25 +56,25 @@ public class McHitDrawer extends SectorViewDrawer {
 				0);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
-				ColumnData.getDoubleArray("FTOF1A::true.avgX"),
-				ColumnData.getDoubleArray("FTOF1A::true.avgY"), 
-				ColumnData.getDoubleArray("FTOF1A::true.avgZ"), 
-				ColumnData.getIntArray("FTOF1A::true.pid"),
-				DataSupport.PANEL_1A);
+				FTOF.avgX(FTOF.PANEL_1A),
+				FTOF.avgY(FTOF.PANEL_1A), 
+				FTOF.avgZ(FTOF.PANEL_1A),
+				FTOF.pid(FTOF.PANEL_1A), 
+				FTOF.PANEL_1A);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
 				ColumnData.getDoubleArray("FTOF1B::true.avgX"),
 				ColumnData.getDoubleArray("FTOF1B::true.avgY"), 
 				ColumnData.getDoubleArray("FTOF1B::true.avgZ"), 
 				ColumnData.getIntArray("FTOF1B::true.pid"),
-				DataSupport.PANEL_1B);
+				FTOF.PANEL_1B);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
 				ColumnData.getDoubleArray("FTOF2B::true.avgX"),
 				ColumnData.getDoubleArray("FTOF2B::true.avgY"), 
 				ColumnData.getDoubleArray("FTOF2B::true.avgZ"), 
 				ColumnData.getIntArray("FTOF2B::true.pid"),
-				DataSupport.PANEL_2);
+				FTOF.PANEL_2);
 
 	}
 

@@ -494,22 +494,26 @@ public class FileUtilities {
 		try {
 			FileReader fileReader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			String s = bufferedReader.readLine();
-			while (s != null) {
-				if (!s.startsWith(commentChar)) {
-					s = stripInLineComment(s);
-					if (s != null) {
-						s = s.trim();
-						if (s.length() > 0) { // remove blank lines too
-							if (strings == null) {
-								strings = new Vector<String>(250, 10);
+			if (bufferedReader != null) {
+				String s = bufferedReader.readLine();
+				while (s != null) {
+					if (!s.startsWith(commentChar)) {
+						s = stripInLineComment(s);
+						if (s != null) {
+							s = s.trim();
+							if (s.length() > 0) { // remove blank lines too
+								if (strings == null) {
+									strings = new Vector<String>(250, 10);
+								}
+								strings.add(s);
 							}
-							strings.add(s);
 						}
 					}
-				}
 
-				s = bufferedReader.readLine();
+					s = bufferedReader.readLine();
+				} // s != null
+
+				bufferedReader.close();
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

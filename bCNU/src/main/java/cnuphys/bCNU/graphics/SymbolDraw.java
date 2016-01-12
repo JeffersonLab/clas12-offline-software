@@ -118,8 +118,12 @@ public class SymbolDraw {
 		case X:
 			drawX(g, x, y, s2, lineColor);
 			break;
-		}
+			
+		case NOSYMBOL:
+			break;
 
+		}
+		
 		g2.setStroke(oldStroke);
 
 	}

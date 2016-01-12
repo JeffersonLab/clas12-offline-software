@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.text.NumberFormat;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
@@ -26,14 +25,6 @@ import cnuphys.splot.plot.Environment;
 
 public class DataTable extends JTable {
 
-	private int DEFCOLWIDTH;
-
-//	protected static NumberFormat numberFormat = NumberFormat
-//			.getNumberInstance();
-//
-//	static {
-//		numberFormat.setMinimumFractionDigits(8);
-//	}
 
 	private double _currentValue = Double.NaN;
 

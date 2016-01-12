@@ -73,7 +73,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 		drawOutlines(g, container, Color.lightGray);
 
-		if (DataSupport.ecGetHitCount(DataSupport.PCAL_OPTION) > 0) {
+		if (PCAL.hitCount() > 0) {
 			drawPCALHits(g, container);
 		}
 
@@ -116,10 +116,10 @@ public class PCALHexSectorItem extends HexSectorItem {
 		
 		int hitCount = PCAL.hitCount();
 		if (hitCount > 0) {
-			int sector[] = EC.sector();
-			int view[] = EC.view();
-			int strip[] = EC.strip();
-			double totEdep[] = EC.totEdep();
+			int sector[] = PCAL.sector();
+			int view[] = PCAL.view();
+			int strip[] = PCAL.strip();
+			double totEdep[] = PCAL.totEdep();
 			
 			for (int i = 0; i < hitCount; i++) {
 				if (sector[i] == getSector()) {
@@ -333,16 +333,15 @@ public class PCALHexSectorItem extends HexSectorItem {
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 					for (int stripType = 0; stripType < 3; stripType++) {
 						if (_pcalView.showStrips(stripType)) {
-							Vector<HitRecord> hits = DataSupport.ecGetMatchingHits(
-									getSector(), 1, stripType + 1,
-									uvw[stripType],
-									DataSupport.PCAL_OPTION);
+							Vector<HitRecord> hits = PCAL.matchingHits(
+									getSector(), stripType + 1,
+									uvw[stripType]);
 
 							if (hits != null) {
 								for (HitRecord hit : hits) {
-									DataSupport.ecPreliminaryFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
+									PCAL.preliminaryFeedback(hit.hitIndex, feedbackStrings);
 									DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
-									DataSupport.ecDgtzFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
+									PCAL.dgtzFeedback(hit.hitIndex, feedbackStrings);
 								}
 							}
 						}

@@ -6,8 +6,8 @@ import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.PCAL;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -40,23 +40,23 @@ public class MCHitDrawer3D extends Item3D {
 
 			if (showFTOF()) {
 				showGemcXYZHits(drawable, 
-						ColumnData.getDoubleArray("FTOF1A::true.avgX"),
-						ColumnData.getDoubleArray("FTOF1A::true.avgY"), 
-						ColumnData.getDoubleArray("FTOF1A::true.avgZ"),
-						ColumnData.getIntArray("FTOF1A::true.pid"), 
+						FTOF.avgX(FTOF.PANEL_1A),
+						FTOF.avgY(FTOF.PANEL_1A), 
+						FTOF.avgZ(FTOF.PANEL_1A),
+						FTOF.pid(FTOF.PANEL_1A), 
 						0);
 				showGemcXYZHits(drawable, 
-						ColumnData.getDoubleArray("FTOF1B::true.avgX"),
-						ColumnData.getDoubleArray("FTOF1B::true.avgY"), 
-						ColumnData.getDoubleArray("FTOF1B::true.avgZ"),
-						ColumnData.getIntArray("FTOF1B::true.pid"), 
-						0);
+						FTOF.avgX(FTOF.PANEL_1B),
+						FTOF.avgY(FTOF.PANEL_1B), 
+						FTOF.avgZ(FTOF.PANEL_1B),
+						FTOF.pid(FTOF.PANEL_1B), 
+						1);
 				showGemcXYZHits(drawable, 
-						ColumnData.getDoubleArray("FTOF2B::true.avgX"),
-						ColumnData.getDoubleArray("FTOF2B::true.avgY"), 
-						ColumnData.getDoubleArray("FTOF2B::true.avgZ"),
-						ColumnData.getIntArray("FTOF2B::true.pid"), 
-						0);
+						FTOF.avgX(FTOF.PANEL_2),
+						FTOF.avgY(FTOF.PANEL_2), 
+						FTOF.avgZ(FTOF.PANEL_2),
+						FTOF.pid(FTOF.PANEL_2), 
+						2);
 			}
 
 			if (showEC()) {

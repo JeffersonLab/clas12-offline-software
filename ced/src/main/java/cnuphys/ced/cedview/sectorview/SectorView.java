@@ -984,8 +984,6 @@ public class SectorView extends CedView implements ChangeListener {
 	@Override
 	public boolean rightClicked(MouseEvent mouseEvent) {
 
-		System.err.println("RIGHT CLICKED");
-
 		JPopupMenu popup = null;
 
 		final SectorView fview = this;

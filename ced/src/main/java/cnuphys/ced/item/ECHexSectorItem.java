@@ -80,7 +80,7 @@ public class ECHexSectorItem extends HexSectorItem {
 
 		drawOutlines(g, container, plane, Color.lightGray);
 
-		if (DataSupport.ecGetHitCount(DataSupport.EC_OPTION) > 0) {
+		if (EC.hitCount() > 0) {
 			drawECHits(g, container, plane);
 		}
 
@@ -359,21 +359,17 @@ public class ECHexSectorItem extends HexSectorItem {
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 					for (int stripType = 0; stripType < 3; stripType++) {
 						if (_ecView.showStrips(stripType)) {
-							Vector<HitRecord> hits = DataSupport
-									.ecGetMatchingHits(getSector(), plane + 1,
-											stripType + 1, uvw[stripType],
-											DataSupport.EC_OPTION);
+							Vector<HitRecord> hits = EC.matchingHits(getSector(), plane + 1,
+											stripType + 1, uvw[stripType]);
 
 							if (hits != null) {
 								for (HitRecord hit : hits) {
-									DataSupport.ecPreliminaryFeedback(
-											hit.hitIndex, DataSupport.EC_OPTION,
+									EC.preliminaryFeedback(
+											hit.hitIndex,
 											feedbackStrings);
 									DataSupport.truePidFeedback(EC.pid(),
 											hit.hitIndex, feedbackStrings);
-									DataSupport.ecDgtzFeedback(hit.hitIndex,
-											DataSupport.EC_OPTION,
-											feedbackStrings);
+									EC.dgtzFeedback(hit.hitIndex, feedbackStrings);
 								}
 							}
 						}

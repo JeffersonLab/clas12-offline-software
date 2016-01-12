@@ -37,6 +37,9 @@ public class Transformations {
 		case EC_OUTER:
 			initCal(2); // 2 for ec outer
 			break;
+			
+		case FTOT:
+			break;
 
 		case PCAL:
 			initCal(0); // 0 for pcal

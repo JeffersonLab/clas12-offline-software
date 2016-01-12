@@ -226,6 +226,11 @@ public class DataSet extends DefaultTableModel
 					"[sPlot] Can not add curve for type: " + getType());
 			break;
 
+		case STRIP:
+			System.err.println(
+					"[sPlot] Can not add curve for type: " + getType());
+			break;
+			
 		case UNKNOWN:
 			System.err.println(
 					"[sPlot] Can not add curve for type: " + getType());
@@ -279,6 +284,11 @@ public class DataSet extends DefaultTableModel
 			break;
 
 		case H1D:
+			System.err.println(
+					"[sPlot] Can not add to curve for type: " + getType());
+			break;
+			
+		case STRIP:
 			System.err.println(
 					"[sPlot] Can not add to curve for type: " + getType());
 			break;

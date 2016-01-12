@@ -12,7 +12,7 @@ import java.io.FileReader;
  * @author heddle
  *
  */
-public class AsciiReader {
+public abstract class AsciiReader {
 
 	// the number of noncomment lines processed
 	private int nonCommentLineCount;
@@ -38,17 +38,15 @@ public class AsciiReader {
 				reading = false;
 			}
 		}
+		done();
 	}
 
 	/**
-	 * Process one non comment line from the file. This method should be
-	 * overridden.
+	 * Process one non comment line from the file. 
 	 * 
-	 * @param line
+	 * @param line the line to be processed.
 	 */
-	protected void processLine(String line) {
-		System.out.println(line);
-	}
+	protected abstract void processLine(String line);
 
 	/**
 	 * @return the nonCommentLineCount
@@ -56,5 +54,8 @@ public class AsciiReader {
 	public int getNonCommentLineCount() {
 		return nonCommentLineCount;
 	}
+	
+	/** Done reading */
+	public abstract void done();
 
 }

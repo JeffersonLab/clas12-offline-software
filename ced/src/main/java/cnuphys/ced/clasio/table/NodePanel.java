@@ -182,11 +182,11 @@ public class NodePanel extends JPanel implements ActionListener,
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-	// add the west components
-	private void addWest() {
-		_filePanel = createFileTreePanel();
-		add(_filePanel, BorderLayout.WEST);
-	}
+//	// add the west components
+//	private void addWest() {
+//		_filePanel = createFileTreePanel();
+//		add(_filePanel, BorderLayout.WEST);
+//	}
 
 	/**
 	 * Creates the file tree panel.

@@ -2,6 +2,8 @@ package cnuphys.ced.event.data;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -11,6 +13,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.util.AsciiReader;
+import cnuphys.bCNU.util.Environment;
+import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.HistoData;
 
@@ -31,6 +36,10 @@ public class DefinitionManager implements ActionListener {
 	private JMenuItem _open;
 	private boolean addedSeparator;
 	
+	//save dir
+	private String _saveDir = Environment.getInstance().getHomeDirectory();
+
+	
 	//all the define plots, which are dialogs
 	private Hashtable<String, Holder> _plots = new Hashtable<String, Holder>();
 	
@@ -47,6 +56,22 @@ public class DefinitionManager implements ActionListener {
 			_instance = new DefinitionManager();
 		}
 		return _instance;
+	}
+	
+	/**
+	 * Get the plot save directory
+	 * @return the plot save directory
+	 */
+	public String getSaveDir() {
+		return _saveDir;
+	}
+	
+	/**
+	 * Set the plot save directory
+	 * @param saveDir the new plot save directory
+	 */
+	public void setSaveDir(String saveDir) {
+		_saveDir = saveDir;
 	}
 	
 	/**
@@ -87,7 +112,20 @@ public class DefinitionManager implements ActionListener {
 	
 	//read a saved plot definition
 	private void readPlotDefinition() {
-		
+		File file = FileUtilities.openFile(_saveDir, "Plot Definition File", "pltd", "PLTD");
+		if (file != null) {
+			try {
+				PlotReader reader = new PlotReader(file);
+				if (reader != null) {
+					PlotDialog pdialog = reader.getPlotDialog();
+					if (pdialog != null) {
+						
+					}
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		} // file != null
 	}
 	
 	//define a histogram

@@ -17,7 +17,6 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.geometry.FTOFPanel;
@@ -54,7 +53,7 @@ public class FTOFPanelItem extends PolygonItem {
 		_ftofPanel = panel;
 		_sector = sector;
 
-		_name = (panel != null) ? DataSupport.ftofGetName(panel
+		_name = (panel != null) ? FTOF.name(panel
 				.getPanelType()) : "??";
 
 		// _style.setFillColor(X11Colors.getX11Color("Wheat", 128));
@@ -129,13 +128,13 @@ public class FTOFPanelItem extends PolygonItem {
 		
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
-		case DataSupport.PANEL_1A:
+		case FTOF.PANEL_1A:
 			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1aData();
 			break;
-		case DataSupport.PANEL_1B:
+		case FTOF.PANEL_1B:
 			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1bData();
 			break;
-		case DataSupport.PANEL_2:
+		case FTOF.PANEL_2:
 			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof2Data();
 			break;
 		}
@@ -174,32 +173,14 @@ public class FTOFPanelItem extends PolygonItem {
 
 		int panelType = _ftofPanel.getPanelType();
 
-		int pid[] = null;
-		int sector[] = null;
-		int paddles[] = null;
-		int hitCount = DataSupport.ftofGetHitCount(panelType);
+		int hitCount = FTOF.hitCount(panelType);
 
 		if (hitCount < 1) {
 			return;
 		}
-
-		switch (panelType) {
-		case DataSupport.PANEL_1A:
-			pid = ColumnData.getIntArray("FTOF1A::true.pid");
-			sector = ColumnData.getIntArray("FTOF1A::dgtz.sector");
-			paddles = ColumnData.getIntArray("FTOF1A::dgtz.paddle");
-			break;
-		case DataSupport.PANEL_1B:
-			pid = ColumnData.getIntArray("FTOF1B::true.pid");
-			sector = ColumnData.getIntArray("FTOF1B::dgtz.sector");
-			paddles = ColumnData.getIntArray("FTOF1B::dgtz.paddle");
-			break;
-		case DataSupport.PANEL_2:
-			pid = ColumnData.getIntArray("FTOF2B::true.pid");
-			sector = ColumnData.getIntArray("FTOF2B::dgtz.sector");
-			paddles = ColumnData.getIntArray("FTOF2B::dgtz.paddle");
-			break;
-		}
+		int pid[] = FTOF.pid(panelType);
+		int sector[] = FTOF.sector(panelType);
+		int paddles[] = FTOF.paddle(panelType);
 		
 		if (!_view.showMcTruth()) {
 			pid = null;
@@ -338,7 +319,7 @@ public class FTOFPanelItem extends PolygonItem {
 
 					int panelType = _ftofPanel.getPanelType();
 
-					int hitIndex = DataSupport.ftofGetHitIndex(_sector, index + 1,
+					int hitIndex = FTOF.hitIndex(_sector, index + 1,
 							panelType);
 
 					if (hitIndex < 0) {
@@ -346,26 +327,8 @@ public class FTOFPanelItem extends PolygonItem {
 								+ "  sector " + _sector + " paddle "
 								+ (index + 1));
 					} else {
-						switch (panelType) {
-						case DataSupport.PANEL_1A:
-							// System.err.println("CONTAINS HIT 1A");
-							DataSupport.truePidFeedback(FTOF.pid_1A(), hitIndex, feedbackStrings);
-							DataSupport.ftofDgtzFeedback(hitIndex, DataSupport.PANEL_1A, feedbackStrings);
-							break;
-
-						case DataSupport.PANEL_1B:
-							// System.err.println("CONTAINS HIT 1B");
-							DataSupport.truePidFeedback(FTOF.pid_1B(), hitIndex, feedbackStrings);
-							DataSupport.ftofDgtzFeedback(hitIndex, DataSupport.PANEL_1B, feedbackStrings);
-							break;
-
-						case DataSupport.PANEL_2:
-							// System.err.println("CONTAINS HIT 2B");
-							DataSupport.truePidFeedback(FTOF.pid_2B(), hitIndex, feedbackStrings);
-							DataSupport.ftofDgtzFeedback(hitIndex, DataSupport.PANEL_2, feedbackStrings);
-							break;
-
-						}
+						DataSupport.truePidFeedback(FTOF.pid(panelType), hitIndex, feedbackStrings);
+						FTOF.dgtzFeedback(hitIndex, panelType, feedbackStrings);
 					}
 
 					break;

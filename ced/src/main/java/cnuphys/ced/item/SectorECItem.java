@@ -314,15 +314,14 @@ public class SectorECItem extends PolygonItem {
 
 					// on a hit?
 					// the data container
-					Vector<HitRecord> hits = DataSupport.ecGetMatchingHits(_sector,
-							_plane + 1, _stripType + 1, stripId + 1,
-							DataSupport.EC_OPTION);
+					Vector<HitRecord> hits = EC.matchingHits(_sector,
+							_plane + 1, _stripType + 1, stripId + 1);
 
 					if (hits != null) {
 						for (HitRecord hit : hits) {
-							DataSupport.ecPreliminaryFeedback(hit.hitIndex, DataSupport.EC_OPTION, feedbackStrings);
+							EC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
 							DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
-							DataSupport.ecDgtzFeedback(hit.hitIndex, DataSupport.EC_OPTION, feedbackStrings);
+							EC.dgtzFeedback(hit.hitIndex, feedbackStrings);
 						}
 					}
 

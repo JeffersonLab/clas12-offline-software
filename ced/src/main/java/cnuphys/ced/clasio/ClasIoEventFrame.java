@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.clasio.table.NodePanel;
 
+@SuppressWarnings("serial")
 public class ClasIoEventFrame extends JFrame {
 
 	// holds the panel that has the table
