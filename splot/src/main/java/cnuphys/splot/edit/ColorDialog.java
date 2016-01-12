@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 
+@SuppressWarnings("serial")
 public class ColorDialog extends JDialog {
     protected ColorPanel colorPanel = null;
     protected int answer = -1;

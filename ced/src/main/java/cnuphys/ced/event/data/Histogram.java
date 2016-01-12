@@ -3,6 +3,7 @@ package cnuphys.ced.event.data;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -137,6 +138,15 @@ public class Histogram extends PlotDialog {
 	@Override
 	protected  void customWrite(BufferedWriter out) {
 		
+		String name = _histoData.getName();
+		String numBin = "" + _histoData.getNumberBins();
+		String xMin = "" + _histoData.getMinX();
+		String xMax = "" + _histoData.getMaxX();
+		try {
+			writeDelimitted(out, HISTODATA, name, numBin, xMin, xMax);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 

@@ -16,7 +16,6 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
 
 public class CrossDrawerZ extends BSTzViewDrawer {

@@ -24,6 +24,7 @@ import cnuphys.ced.event.IAccumulationListener;
  * @author heddle
  *
  */
+@SuppressWarnings("serial")
 public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 		IClasIoEventListener, IAccumulationListener {
 

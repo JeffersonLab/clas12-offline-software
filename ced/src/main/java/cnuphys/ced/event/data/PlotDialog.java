@@ -18,7 +18,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
@@ -34,16 +33,14 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	//properties for saving/reading definitions
 	protected static final String TYPE = "TYPE";
 	protected static final String BOUNDS = "BOUNDS";
+	protected static final String HISTODATA = "HISTODATA";
 	
 	//the name
 	protected String _name;
 	
 	private static final int width = 650;
 	private static final int height = 500;
-	
-	//save dir
-	private static String _saveDir = Environment.getInstance().getHomeDirectory();
-	
+		
 	//menus
 	protected JMenu _fileMenu;	
 	protected JMenuItem _saveItem;
@@ -118,7 +115,7 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		else if (o == _clearItem) {
 			clear();
 		}
-		else if (o == _saveItem) {
+		else if (o == _saveItem) { //save the plot definition?
 			File file = getSaveDefinitionFile();
 			if (file != null) {
 			    FileWriter fstream;
@@ -142,6 +139,7 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	/** Save the definition */
 	protected void saveDefinition(BufferedWriter out) {
 		try {
+			//plot type
 			comment(out, "ced Plot Definition File");
 			writeDelimitted(out, TYPE, getPlotType()); //type
 			
@@ -150,6 +148,7 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 			comment(out, "plot bounds");
 			writeDelimitted(out, BOUNDS, ""+r.x, ""+r.y, ""+r.width, ""+r.height);
 			
+			//cuts
 			Vector<ICut> cuts = getCuts();
 			if ((cuts != null) && !cuts.isEmpty()) {
 				comment(out, "cuts-- count = " + cuts.size());
@@ -157,6 +156,10 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 					out.write(cut.getDefinition() + "\n");
 				}
 			}
+			
+			//cutsom
+			comment(out, "custom data");
+			customWrite(out);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -184,15 +187,15 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	//select file for saving
 	protected File getSaveDefinitionFile() {
 		File selectedFile = null;
-		JFileChooser chooser = new JFileChooser(_saveDir);
+		JFileChooser chooser = new JFileChooser();
 		
-		File defFile = new File(_saveDir, "plotdef.pltd");
+		File defFile = new File(DefinitionManager.getInstance().getSaveDir(), "plotdef.pltd");
 		chooser.setSelectedFile(defFile);
 		int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
 			if (selectedFile != null) {
-				_saveDir =selectedFile.getParent();
+				DefinitionManager.getInstance().setSaveDir(selectedFile.getParent());
 
 				if (selectedFile.exists()) {
 					int answer = JOptionPane.showConfirmDialog(null,

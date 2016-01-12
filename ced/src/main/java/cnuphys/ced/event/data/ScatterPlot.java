@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;

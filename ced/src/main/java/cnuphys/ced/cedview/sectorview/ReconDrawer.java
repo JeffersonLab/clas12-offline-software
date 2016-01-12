@@ -10,9 +10,8 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.FTOF;
 
 public class ReconDrawer extends SectorViewDrawer {
 
@@ -48,12 +47,12 @@ public class ReconDrawer extends SectorViewDrawer {
 	private void drawFTOFReconHits(Graphics g, IContainer container) {
 
 		// arggh this sector array is zero based
-		int sector[] = ColumnData.getIntArray("FTOFRec::ftofhits.sector");
-		int panel[] = ColumnData.getIntArray("FTOFRec::ftofhits.panel_id");
-		int paddle[] = ColumnData.getIntArray("FTOFRec::ftofhits.paddle_id");
-		float recX[] = ColumnData.getFloatArray("FTOFRec::ftofhits.x");
-		float recY[] = ColumnData.getFloatArray("FTOFRec::ftofhits.y");
-		float recZ[] = ColumnData.getFloatArray("FTOFRec::ftofhits.z");
+		int sector[] = FTOF.reconSector();
+		int panel[] = FTOF.reconPanel();
+		int paddle[] = FTOF.reconPaddle();
+		float recX[] = FTOF.reconX();
+		float recY[] = FTOF.reconY();
+		float recZ[] = FTOF.reconZ();
 
 		// _view.getWorldFromDetectorXYZ(100 * v3d[0], 100 *v3d[1],
 		// 100 * v3d[2], wp);
@@ -77,7 +76,7 @@ public class ReconDrawer extends SectorViewDrawer {
 					String s1 = "$Orange Red$" + vecStr("FTOF hit (lab)",
 							recX[hitIndex], recY[hitIndex], recZ[hitIndex]);
 					String s2 = "$Orange Red$FTOF panel: "
-							+ DataSupport.panelNames[panel[hitIndex] - 1]
+							+ FTOF.panelNames[panel[hitIndex] - 1]
 							+ " paddle: " + (paddle[hitIndex] + 1);
 
 					container.worldToLocal(pp, wp);

@@ -559,7 +559,7 @@ public class AllDCSuperLayer extends RectangleItem {
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");
 
-		int hitIndex = DC.getHitIndex(_sector, _superLayer, layer, wire);
+		int hitIndex = DC.hitIndex(_sector, _superLayer, layer, wire);
 		if (hitIndex < 0) {
 			feedbackStrings.add("superlayer " + _superLayer + "  layer "
 					+ layer + "  wire " + wire);

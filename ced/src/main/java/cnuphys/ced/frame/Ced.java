@@ -11,6 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -44,8 +45,8 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ColumnData;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.DefinitionManager;
+import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.ECGeometry;
@@ -366,7 +367,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				int numPaddle = FTOFGeometry.numPaddles[panelType];
 				int sect = 1 + (row - 1) % 6;
 				String title = "FTOF sect_" + sect + "  " +
-						DataSupport.ftofGetName(panelType);
+						FTOF.name(panelType);
 
 				switch (panelType) {
 				case 0: // 1A has 23 paddles

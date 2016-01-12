@@ -307,15 +307,14 @@ public class SectorPCALItem extends PolygonItem {
 
 					// on a hit?
 					// the data container
-					Vector<HitRecord> hits = DataSupport.ecGetMatchingHits(_sector, 1,
-							_stripType + 1, stripId + 1,
-							DataSupport.PCAL_OPTION);
+					Vector<HitRecord> hits = PCAL.matchingHits(_sector,
+							_stripType + 1, stripId + 1);
 
 					if (hits != null) {
 						for (HitRecord hit : hits) {
-							DataSupport.ecPreliminaryFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
+							PCAL.preliminaryFeedback(hit.hitIndex, feedbackStrings);
 							DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
-							DataSupport.ecDgtzFeedback(hit.hitIndex, DataSupport.PCAL_OPTION, feedbackStrings);
+							PCAL.dgtzFeedback(hit.hitIndex, feedbackStrings);
 						}
 					}
 

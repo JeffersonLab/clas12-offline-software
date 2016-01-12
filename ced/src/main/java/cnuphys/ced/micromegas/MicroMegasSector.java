@@ -16,7 +16,6 @@ import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BMT;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.splot.plot.DoubleFormat;
 
 public class MicroMegasSector extends DonutItem {

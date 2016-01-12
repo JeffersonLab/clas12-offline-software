@@ -89,8 +89,7 @@ public class McHitDrawer extends ECViewDrawer {
 				int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 				localP.setZ(0);
 
-				List<String> fbs = DataSupport.ecGemcHitFeedback(hitIndex, 
-						DataSupport.EC_OPTION, 
+				List<String> fbs = EC.gemcHitFeedback(hitIndex, 
 						DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
 						+ DataSupport.FB_LOCAL_XYZ
 						+ DataSupport.FB_TOTEDEP, 

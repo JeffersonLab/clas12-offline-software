@@ -17,7 +17,6 @@ import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.PCAL;
 
@@ -531,7 +530,7 @@ public class AccumulationManager
 
 
 		// ec data
-		int ecHitCount = DataSupport.ecGetHitCount(DataSupport.EC_OPTION);
+		int ecHitCount = EC.hitCount();
 		if (ecHitCount > 0) {
 			int sect[] = EC.sector();
 			int stack[] = EC.stack();
@@ -551,7 +550,7 @@ public class AccumulationManager
 			}
 		}
 		
-		int pcalHitCount = DataSupport.ecGetHitCount(DataSupport.PCAL_OPTION);
+		int pcalHitCount = PCAL.hitCount();
 		if (pcalHitCount > 0) {
 			int sect[] = PCAL.sector();
 			int view[] = PCAL.view();
