@@ -106,11 +106,18 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		int reason = dialog.getReason();
 		if (reason == DialogUtilities.OK_RESPONSE) {
 			RangeCut rangeCut = dialog.getRangeCut();
-			if (rangeCut != null) {
-				System.err.println("ADD ICIT");
-				getModel().add(rangeCut);
-				getModel().fireTableDataChanged();
-			}
+			addCut(rangeCut);
+		}
+	}
+
+	/**
+	 * Add a cut
+	 * @param cut the cut to add
+	 */
+	public void addCut(ICut cut) {
+		if (cut != null) {
+			getModel().add(cut);
+			getModel().fireTableDataChanged();
 		}
 	}
 	

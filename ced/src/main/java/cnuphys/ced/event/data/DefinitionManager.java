@@ -13,7 +13,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
-import cnuphys.bCNU.util.AsciiReader;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.splot.pdata.DataSet;
@@ -34,7 +33,6 @@ public class DefinitionManager implements ActionListener {
 	private JMenuItem _histo;
 	private JMenuItem _scatter;
 	private JMenuItem _open;
-	private boolean addedSeparator;
 	
 	//save dir
 	private String _saveDir = Environment.getInstance().getHomeDirectory();
@@ -91,7 +89,9 @@ public class DefinitionManager implements ActionListener {
 			
 			_menu.add(_histo);
 			_menu.add(_scatter);
+			_menu.addSeparator();
 			_menu.add(_open);
+			_menu.addSeparator();
 		}
 		return _menu;
 	}
@@ -142,10 +142,6 @@ public class DefinitionManager implements ActionListener {
 					JOptionPane.showMessageDialog(null, "Already have a histogram named " + name);
 				}
 				else {
-					if (!addedSeparator) {
-						_menu.addSeparator();
-						addedSeparator = true;
-					}
 
 					JMenuItem item = new JMenuItem(name);
 					final Histogram histo = new Histogram(histoData);
@@ -169,6 +165,68 @@ public class DefinitionManager implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Add a histogram
+	 * @param histoData the HistoData object
+	 * @return the histogram
+	 */
+	public Histogram addHistogram(HistoData histoData) {
+
+		if (histoData != null) {
+			String name = histoData.getName();
+			if (_plots.containsKey(name)) {
+				JOptionPane.showMessageDialog(null, "Already have a histogram named " + name);
+				return null;
+			}
+			
+			final Histogram histo = new Histogram(histoData);
+			JMenuItem item = new JMenuItem(name);
+			_plots.put(name, new Holder(name, histo, item));
+			
+			ActionListener al = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					histo.setVisible(true);
+				}					
+			};
+			item.addActionListener(al);
+			_menu.add(item);
+			
+			return histo;
+		}
+		return null;
+	}
+	
+	/**
+	 * Add a scatter plot
+	 * @param DataSet the DataSet object
+	 * @return the scatter plot
+	 */
+	public ScatterPlot addScatterPlot(DataSet dataSet) {
+		if (dataSet != null) {
+			String name = ScatterPanel.getTitle(dataSet);
+			if (_plots.containsKey(name)) {
+				JOptionPane.showMessageDialog(null, "Already have a scatter plot named " + name);
+				return null;
+			}
+			
+			final ScatterPlot splot = new ScatterPlot(dataSet);
+			JMenuItem item = new JMenuItem(name);
+			_plots.put(name, new Holder(name, splot, item));
+			
+			ActionListener al = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					splot.setVisible(true);
+				}					
+			};
+			item.addActionListener(al);
+			_menu.add(item);
+			
+			return splot;
+		}
+		return null;
+	}
 	
 	//define a scatterplot
 	private void defineScatterPlot() {
@@ -183,10 +241,6 @@ public class DefinitionManager implements ActionListener {
 					JOptionPane.showMessageDialog(null, "Already have a plot named " + name);
 				}
 				else {
-					if (!addedSeparator) {
-						_menu.addSeparator();
-						addedSeparator = true;
-					}
 
 					JMenuItem item = new JMenuItem(name);
 					final ScatterPlot plot = new ScatterPlot(dataSet);

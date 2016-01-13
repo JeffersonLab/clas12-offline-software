@@ -131,7 +131,7 @@ public class Histogram extends PlotDialog {
 	 */
 	@Override
 	public String getPlotType() {
-		return "HISTOGRAM";
+		return PlotDialog.HISTOGRAM;
 	}
 	
 	/** custom definitions */

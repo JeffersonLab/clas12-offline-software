@@ -3,6 +3,7 @@ package cnuphys.ced.event.data;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -148,12 +149,19 @@ public class ScatterPlot extends PlotDialog {
 
 	@Override
 	public String getPlotType() {
-		return "SCATTERPLOT";
+		return PlotDialog.SCATTERPLOT;
 	}
 
 	/** custom definitions */
 	@Override
 	protected  void customWrite(BufferedWriter out) {
+		String xname = "" + _dataSet.getColumnName(0);
+		String yname = "" + _dataSet.getColumnName(1);
+		try {
+			writeDelimitted(out, DATASET, xname, yname);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 
