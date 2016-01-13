@@ -33,7 +33,10 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	//properties for saving/reading definitions
 	protected static final String TYPE = "TYPE";
 	protected static final String BOUNDS = "BOUNDS";
+	protected static final String DATASET = "DATASET";
 	protected static final String HISTODATA = "HISTODATA";
+	protected static final String HISTOGRAM = "HISTOGRAM";
+	protected static final String SCATTERPLOT = "SCATTERPLOT";
 	
 	//the name
 	protected String _name;
@@ -246,6 +249,14 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		if (_errorCount < 10) {
 			Log.getInstance().warning(s);
 		}
+	}
+	
+	/**
+	 * Add a cut
+	 * @param cut the cut to add
+	 */
+	public void addCut(ICut cut) {
+		_cutPanel.addCut(cut);
 	}
 	
 	/**
