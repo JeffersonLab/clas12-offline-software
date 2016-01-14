@@ -8,27 +8,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.util.Properties;
-
-import javax.xml.stream.XMLStreamException;
-
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.HistoData;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
 
-public class PlotTicks implements XmlPrintStreamWritable {
-
-	/** The XML root element name */
-	public static final String XmlRootElementName = "TickParameters";
-
-	// ticks
-	public static final String XmlMajTickLenAttName = "majticklen";
-	public static final String XmlMinTickLenAttName = "minticklen";
-	public static final String XmlNumMajTickXAttName = "xnummajtick";
-	public static final String XmlNumMinTickXAttName = "xnummintick";
-	public static final String XmlNumMajTickYAttName = "ynummajtick";
-	public static final String XmlNumMinTickYAttName = "ynummintick";
+public class PlotTicks {
 
 	private int majorTickLen = 6;
 	private int minorTickLen = 2;
@@ -278,30 +261,6 @@ public class PlotTicks implements XmlPrintStreamWritable {
 
 	public void setMinorTickLen(int minorTickLen) {
 		this.minorTickLen = minorTickLen;
-	}
-
-
-	/**
-	 * This is called as a result of a save. The PlotTicks needs to write itself
-	 * out in xml.
-	 * 
-	 * @param write the xml writer
-	 */
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			Properties props = new Properties();
-			props.put(XmlMajTickLenAttName, majorTickLen);
-			props.put(XmlMinTickLenAttName, minorTickLen);
-			props.put(XmlNumMajTickXAttName, numMajorTickX);
-			props.put(XmlNumMinTickXAttName, numMinorTickX);
-			props.put(XmlNumMajTickYAttName, numMajorTickY);
-			props.put(XmlNumMinTickYAttName, numMinorTickY);
-			writer.writeElementWithProps(XmlRootElementName, props);
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
 	}
 
 }

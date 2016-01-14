@@ -7,7 +7,6 @@ import java.awt.Point;
 import cnuphys.splot.style.LineStyle;
 import cnuphys.splot.style.Styled;
 import cnuphys.splot.style.SymbolType;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
 
 /**
  * Just a straight line to be drawn on the plot, e.g. a y = 0 line
@@ -15,7 +14,7 @@ import cnuphys.splot.xml.XmlPrintStreamWritable;
  * @author heddle
  *
  */
-public abstract class PlotLine implements XmlPrintStreamWritable {
+public abstract class PlotLine {
 
     // for weiting lines to xml
 

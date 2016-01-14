@@ -3,24 +3,17 @@ package cnuphys.splot.pdata;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.util.Arrays;
-import java.util.Properties;
-
-import javax.xml.stream.XMLStreamException;
-
 import cnuphys.splot.plot.DoubleFormat;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.UnicodeSupport;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
-
 /**
  * Xontainer class for histogram data
  * 
  * @author heddle
  *
  */
-public class HistoData implements XmlPrintStreamWritable {
+public class HistoData {
 
 	/** The XML root element name */
 	public static final String XmlRootElementName = "HistoData";
@@ -33,23 +26,6 @@ public class HistoData implements XmlPrintStreamWritable {
 	// out of range constants
 	private static int UNDERFLOW = -200;
 	private static int OVERFLOW = -100;
-
-	// basic data
-	public static final String XmlHistoBasicDataElementName = "HistoBasicData";
-	public static final String XmlHistoNameAttName = "histoname";
-	public static final String XmlHistoUnderCountAttName = "histoundercount";
-	public static final String XmlHistoOverCountAttName = "histoovercount";
-	public static final String XmlHistoUniformBinsAttName = "histoiniformbins";
-	public static final String XmlHistoNumBinsAttName = "histonumbins";
-	public static final String XmlHistoBinMinAttName = "histoxmin";
-	public static final String XmlHistoBinMaxAttName = "histoxmax";
-	public static final String XmlHistoMeanAttName = "histomean";
-	public static final String XmlHistoStdDevAttName = "histostddev";
-	public static final String XmlHistoRMSAttName = "historms";
-
-	// from checkboxes
-	public static final String XmlHistoRMSLegendName = "histormslegend";
-	public static final String XmlHistoDrawStatErrName = "histostaterr";
 
 	// this is the "curve" name
 	private String _name;
@@ -554,20 +530,6 @@ public class HistoData implements XmlPrintStreamWritable {
 	public boolean drawStatisticalErrors() {
 		return _statErrors;
 	}
-
-
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeBasicData(writer);
-			writeData(writer);
-			writer.writeEndElement();
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public String maxBinString() {
 		long maxCount = -1;
@@ -588,32 +550,4 @@ public class HistoData implements XmlPrintStreamWritable {
 		}
 		return s;
 	}
-
-	// write a little basic data
-	private void writeBasicData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlHistoNameAttName, _name);
-		props.put(XmlHistoUnderCountAttName, _underCount);
-		props.put(XmlHistoOverCountAttName, _overCount);
-		props.put(XmlHistoUniformBinsAttName, _uniformBins);
-		props.put(XmlHistoNumBinsAttName, getNumberBins());
-		props.put(XmlHistoBinMinAttName, getMinX());
-		props.put(XmlHistoBinMaxAttName, getMaxX());
-		props.put(XmlHistoMeanAttName, _stats[0]);
-		props.put(XmlHistoStdDevAttName, _stats[1]);
-		props.put(XmlHistoRMSAttName, _stats[2]);
-
-		props.put(XmlHistoRMSLegendName, _rmsInHistoLegend);
-		props.put(XmlHistoDrawStatErrName, _statErrors);
-
-		writer.writeElementWithProps(XmlHistoBasicDataElementName, props);
-	}
-
-	private void writeData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		writer.writeArray("histogrid", _grid);
-		writer.writeArray("histocounts", _counts);
-	}
-
 }

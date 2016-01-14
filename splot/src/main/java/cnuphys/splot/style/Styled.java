@@ -1,25 +1,8 @@
 package cnuphys.splot.style;
 
 import java.awt.Color;
-import java.util.Properties;
 
-import javax.xml.stream.XMLStreamException;
-
-import cnuphys.splot.plot.GraphicsUtilities;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
-
-public class Styled implements IStyled, XmlPrintStreamWritable {
-
-	/** The XML root element name */
-	public static final String XmlRootElementName = "Style";
-
-	public static final String XmlStyleFillColorAttName = "stylefillcolor";
-	public static final String XmlStyleLineColorAttName = "stylelinecolor";
-	public static final String XmlStyleLineStyleAttName = "stylelinestyle";
-	public static final String XmlStyleLineWidthAttName = "stylelinewidth";
-	public static final String XmlStyleSymbolTypeAttName = "stylesymboltype";
-	public static final String XmlStyleSymbolSizeAttName = "stylesymbolsize";
+public class Styled implements IStyled {
 
 	// default fill color half-alpha blue
 	private Color _fillColor = new Color(0, 0, 255, 128);
@@ -217,26 +200,5 @@ public class Styled implements IStyled, XmlPrintStreamWritable {
 	@Override
 	public void setSymbolSize(int symbolSize) {
 		_symbolSize = symbolSize;
-	}
-
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			Properties props = new Properties();
-
-			String fillHex = GraphicsUtilities.colorToHex(_fillColor);
-			String lineHex = GraphicsUtilities.colorToHex(_lineColor);
-
-			props.put(XmlStyleFillColorAttName, fillHex);
-			props.put(XmlStyleLineColorAttName, lineHex);
-			props.put(XmlStyleLineStyleAttName, _lineStyle);
-			props.put(XmlStyleLineWidthAttName, _lineWidth);
-			props.put(XmlStyleSymbolTypeAttName, _symbolType);
-			props.put(XmlStyleSymbolSizeAttName, _symbolSize);
-			writer.writeElementWithProps(XmlRootElementName, props);
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
 	}
 }

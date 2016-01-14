@@ -1,16 +1,11 @@
 package cnuphys.splot.fit;
 
-import java.util.Properties;
 import java.util.Vector;
-
-import javax.xml.stream.XMLStreamException;
 
 import cnuphys.splot.pdata.DataColumn;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.Environment;
 import cnuphys.splot.plot.UnicodeSupport;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
 
 /**
  * General Fit container class. It holds all the information for a fit, but the
@@ -21,22 +16,12 @@ import cnuphys.splot.xml.XmlPrintStreamWriter;
  *
  */
 
-public class Fit implements XmlPrintStreamWritable {
+public class Fit {
 
-	/** The XML root element name */
-	public static final String XmlRootElementName = "FitParameters";
 
 	protected enum ErrorType {
 		Y_Errors, X_Errors, XY_Errors, Massaged_Zeroes, No_Errors
 	};
-
-	// fit basic data
-	public static final String XmlFitBasicDataElementName = "FitBasicData";
-	public static final String XmlFitTypeAttName = "fittype";
-	public static final String XmlFitOrderAttName = "fitorder";
-	public static final String XmlFitNumGaussAttName = "fitnumgauss";
-	public static final String XmlFitToleranceAttName = "fittolorance";
-	public static final String XmlFitErrorTypeAttName = "fiterrortype";
 
 	// the fit type
 	private FitType _type = FitType.LINE;
@@ -533,39 +518,6 @@ public class Fit implements XmlPrintStreamWritable {
 		System.out.println("intercept = " + lfit.getIntercept() + " +- "
 				+ lfit.getInterceptSigma());
 
-	}
-
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeBasicData(writer);
-
-			// tell any fit holds to write themselves
-			for (FitHold fh : _holds) {
-				fh.writeXml(writer);
-			}
-
-			writer.writeEndElement();
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// write a little basic data before writing the columns
-	private void writeBasicData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlFitTypeAttName, _type);
-		props.put(XmlFitOrderAttName, _order);
-		props.put(XmlFitNumGaussAttName, _numGauss);
-		props.put(XmlFitToleranceAttName, _tolerance);
-
-		if (_errorType != null) {
-			props.put(XmlFitErrorTypeAttName, _errorType);
-		}
-		writer.writeElementWithProps(XmlFitBasicDataElementName, props);
 	}
 
 }

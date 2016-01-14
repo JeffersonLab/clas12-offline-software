@@ -2,13 +2,7 @@ package cnuphys.splot.plot;
 
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.Collection;
-import java.util.Properties;
-
-import javax.xml.stream.XMLStreamException;
-
 import cnuphys.splot.fit.Fit;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataColumn;
@@ -17,20 +11,8 @@ import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.style.Styled;
 import cnuphys.splot.style.SymbolDraw;
 import cnuphys.splot.style.SymbolType;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
-import cnuphys.splot.xml.XmlSupport;
 
-public class Legend extends Rectangle
-		implements XmlPrintStreamWritable, Draggable {
-
-	/** The XML root element name */
-	public static final String XmlRootElementName = "Legend";
-
-	public static final String XmlLegendParamsElementName = "LegendParameters";
-	public static final String XmlHgapAttName = "hgap";
-	public static final String XmlVgapAttName = "vgap";
-	public static final String XmlLegendBoundsElementName = "LegendBounds";
+public class Legend extends DraggableRectangle {
 
 	// the owner plot panel
 	private PlotCanvas _canvas;
@@ -49,6 +31,10 @@ public class Legend extends Rectangle
 
 	private int _numVisCurves;
 
+	/**
+	 * Create a Legend rectangle
+	 * @param canvas the parent plot canvas
+	 */
 	public Legend(PlotCanvas canvas) {
 		_canvas = canvas;
 		_params = canvas.getParameters();
@@ -60,6 +46,7 @@ public class Legend extends Rectangle
 	 * @param g the graphics context
 	 */
 	public void draw(Graphics g) {
+	//	System.err.println(toString());
 		DataSet ds = _canvas.getDataSet();
 
 		if (ds == null) {
@@ -185,102 +172,11 @@ public class Legend extends Rectangle
 
 		return height;
 	}
-
-	/**
-	 * Set whether or not the border should be drawn.
-	 * 
-	 * @param drawBorder the new flag
-	 */
-	public void setDrawBorder(boolean drawBorder) {
-		if (_params.isLegendBorder() != drawBorder) {
-			_params.setLegendBorder(drawBorder);
-			_canvas.repaint();
-		}
-	}
-
+	
 	// get the vertical space needed for a curve
 	private int spaceNeeded(DataColumn curve) {
 		FontMetrics fm = _canvas.getFontMetrics(_params.getLegendFont());
 		return Math.max(fm.getHeight(), curve.getStyle().getSymbolSize());
-	}
-
-	/**
-	 * This is called as a result of a save. The Legend needs to write itself
-	 * out in xml.
-	 * 
-	 * @param write the xml writer
-	 */
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeLegendProperties(writer);
-			writeLegendBounds(writer);
-			writer.writeEndElement();
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// write some basic legend parameters
-	private void writeLegendProperties(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlHgapAttName, HGAP);
-		props.put(XmlVgapAttName, VGAP);
-		writer.writeElementWithProps(XmlLegendParamsElementName, props);
-	}
-
-	// write bounds info
-	private void writeLegendBounds(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		XmlSupport.addRectangleAttribute(props, this);
-		writer.writeElementWithProps(XmlLegendBoundsElementName, props);
-	}
-
-	// are we being dragged
-	private boolean _dragging;
-
-	// is dragging primed
-	private boolean _draggingPrimed;
-
-	// current point
-	private Point _currentPoint;
-
-	@Override
-	public boolean isDraggingPrimed() {
-		return _draggingPrimed;
-	}
-
-	@Override
-	public boolean isDragging() {
-		return _dragging;
-	}
-
-	@Override
-	public void setDraggingPrimed(boolean primed) {
-		_draggingPrimed = primed;
-	}
-
-	@Override
-	public void setDragging(boolean dragging) {
-		_dragging = dragging;
-	}
-
-	@Override
-	public void setCurrentPoint(Point p) {
-		if (p == null) {
-			_currentPoint = null;
-		}
-		else {
-			_currentPoint = new Point(p);
-		}
-	}
-
-	@Override
-	public Point getCurrentPoint() {
-		return _currentPoint;
 	}
 
 }

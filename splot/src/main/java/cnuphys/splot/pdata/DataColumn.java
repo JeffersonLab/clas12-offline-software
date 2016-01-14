@@ -1,17 +1,9 @@
 package cnuphys.splot.pdata;
 
-import java.util.Properties;
-
-import javax.xml.stream.XMLStreamException;
-
 import cnuphys.splot.fit.Fit;
 import cnuphys.splot.style.Styled;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
-import cnuphys.splot.xml.XmlSupport;
 
-public class DataColumn extends GrowableArray
-		implements XmlPrintStreamWritable {
+public class DataColumn extends GrowableArray {
 
 	/** The XML root element name */
 	public static final String XmlRootElementName = "DataColumn";
@@ -24,13 +16,6 @@ public class DataColumn extends GrowableArray
 
 	// the fit (Y columns only)
 	protected Fit _fit;
-
-	// basic data
-	public static final String XmlDataColBasicDataElementName = "DataColumnBasicData";
-	public static final String XmlDataColTypeAttName = "dctype";
-	public static final String XmlDataColNameAttName = "dcname";
-	public static final String XmlDataColIsHistoAttName = "dcishisto";
-	public static final String XmlDataColVisibleAttName = "dcvisible";
 
 	// the column name
 	protected String _name;
@@ -340,46 +325,6 @@ public class DataColumn extends GrowableArray
 		if (_fit != null) {
 			_fit.setDirty();
 		}
-	}
-
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeBasicData(writer);
-
-			// x columns have no style
-			if (_style != null) {
-				_style.writeXml(writer);
-			}
-
-			if (_fit != null) {
-				_fit.writeXml(writer);
-			}
-
-			if (_histoData != null) {
-				_histoData.writeXml(writer);
-			}
-			else {
-				super.writeXml(writer);
-			}
-			writer.writeEndElement();
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	// write a little basic data
-	private void writeBasicData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlDataColTypeAttName, _type);
-		props.put(XmlDataColNameAttName, XmlSupport.validXML(_name));
-		props.put(XmlDataColIsHistoAttName, _isHisto);
-		props.put(XmlDataColVisibleAttName, _visible);
-		writer.writeElementWithProps(XmlDataColBasicDataElementName, props);
 	}
 
 }

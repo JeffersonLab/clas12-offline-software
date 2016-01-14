@@ -31,8 +31,6 @@ import javax.swing.Timer;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.stream.XMLStreamException;
-
 import cnuphys.splot.edit.DataEditor;
 import cnuphys.splot.edit.PlotPreferencesDialog;
 import cnuphys.splot.pdata.DataColumn;
@@ -47,15 +45,10 @@ import cnuphys.splot.toolbar.CommonToolBar;
 import cnuphys.splot.toolbar.IToolBarListener;
 import cnuphys.splot.toolbar.ToolBarButton;
 import cnuphys.splot.toolbar.ToolBarToggleButton;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
 
 public class PlotCanvas extends JComponent
 		implements MouseListener, MouseMotionListener, IRubberbanded,
-		IToolBarListener, TableModelListener, XmlPrintStreamWritable {
-
-	/** The XML root element name */
-	public static final String XmlRootElementName = "sPlot";
+		IToolBarListener, TableModelListener {
 
 	public static final String DONEDRAWINGPROP = "Done Drawing";
 	public static final String TITLECHANGEPROP = "Plot Title Change";
@@ -108,6 +101,9 @@ public class PlotCanvas extends JComponent
 
 	// legend and floating label dragging
 	private Legend _legend;
+	
+	// extra and floating label dragging
+	private ExtraText _extra;
 
 	// data drawer
 	private DataDrawer _dataDrawer;
@@ -162,6 +158,7 @@ public class PlotCanvas extends JComponent
 		};
 
 		_legend = new Legend(this);
+		_extra = new ExtraText(this);
 		_dataDrawer = new DataDrawer(this);
 		_plotPopup = new PlotPopupMenu(this);
 		setComponentPopupMenu(_plotPopup);
@@ -352,6 +349,11 @@ public class PlotCanvas extends JComponent
 		if (_parameters.legendDrawing()) {
 			_legend.draw(g);
 		}
+		
+		if (_parameters.extraDrawing()) {
+			_extra.draw(g);
+		}
+
 
 		firePropertyChange(DONEDRAWINGPROP, drawCount, ++drawCount);
 
@@ -464,6 +466,20 @@ public class PlotCanvas extends JComponent
 			_legend.setCurrentPoint(e.getPoint());
 			repaint();
 		}
+		
+		if (_extra.isDraggingPrimed()) {
+			_extra.setDragging(true);
+		}
+
+		if (_extra.isDragging()) {
+			int dx = e.getX() - _extra.getCurrentPoint().x;
+			int dy = e.getY() - _extra.getCurrentPoint().y;
+			_extra.x += dx;
+			_extra.y += dy;
+			_extra.setCurrentPoint(e.getPoint());
+			repaint();
+		}
+
 	}
 
 	/**
@@ -603,6 +619,12 @@ public class PlotCanvas extends JComponent
 			_legend.setDraggingPrimed(true);
 			_legend.setCurrentPoint(e.getPoint());
 		}
+		else if (isPointer() && _parameters.extraDrawing()
+				&& _extra.contains(e.getPoint())) {
+			_extra.setDraggingPrimed(true);
+			_extra.setCurrentPoint(e.getPoint());
+		}
+
 		else {
 
 			if (CommonToolBar.BOXZOOM.equals(command)
@@ -649,6 +671,9 @@ public class PlotCanvas extends JComponent
 		_legend.setDragging(false);
 		_legend.setDraggingPrimed(false);
 		_legend.setCurrentPoint(null);
+		_extra.setDragging(false);
+		_extra.setDraggingPrimed(false);
+		_extra.setCurrentPoint(null);
 	}
 
 	/**
@@ -926,32 +951,6 @@ public class PlotCanvas extends JComponent
 	public void tableChanged(TableModelEvent e) {
 		setWorldSystem();
 		needsRedraw(false);
-	}
-
-	/**
-	 * This is called as a result of a save. The canvas needs to write itself
-	 * out in xml.
-	 * 
-	 * @param write the xml writer
-	 */
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeBasicData(writer);
-			_parameters.writeXml(writer);
-			_legend.writeXml(writer);
-			_plotTicks.writeXml(writer);
-			_dataSet.writeXml(writer);
-			writer.writeEndElement();
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// write a little basic data
-	private void writeBasicData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
 	}
 
 	public PlotTicks getPlotTicks() {
