@@ -2,60 +2,19 @@ package cnuphys.splot.plot;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.Properties;
 import java.util.Vector;
 
-import javax.xml.stream.XMLStreamException;
-
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
-import cnuphys.splot.xml.XmlSupport;
-
-public class PlotParameters implements XmlPrintStreamWritable {
-
-	/** The XML root element name */
-	public static final String XmlRootElementName = "PlotParameters";
+public class PlotParameters {
 
 	// force include zero on plots?
-	public static final String XmlIncZeroElementName = "IncludeZero";
-	public static final String XmlXZeroAttName = "xzero";
-	public static final String XmlYZeroAttName = "yzero";
 	private boolean _includeYzero = false;
 	private boolean _includeXzero = false;
 
 	// use data limits as plot limits
-	public static final String XmlUseDataLimitElementName = "UseDataLimits";
-	public static final String XmlXUseDataLimitAttName = "xdatalimit";
-	public static final String XmlYUseDataLimitAttName = "ydatalimit";
 	private boolean _useYDataLimits = false;
 	private boolean _useXDataLimits = false;
 
-	// ticks
-	public static final String XmlTickValueDisplayElementName = "TickValueDisplay";
-	public static final String XmlNumDecXAttName = "xnumdec";
-	public static final String XmlMixExpXAttName = "xminexp";
-	public static final String XmlNumDecYAttName = "ynumdec";
-	public static final String XmlMixExpYAttName = "yminexp";
-
-	// names for manual ranges XmlManualRangeElementName
-	public static final String XmlManualRangeElementName = "ManualRanges";
-	public static final String XmlUseManualXAttName = "xmanual";
-	public static final String XmlUseManualYAttName = "ymanual";
-	public static final String XmlManualMinXAttName = "xminmanual";
-	public static final String XmlManualMaxXAttName = "xmaxmanual";
-	public static final String XmlManualMinYAttName = "yminmanual";
-	public static final String XmlManualMaxYAttName = "ymaxmanual";
-
-	// legend
-	public static final String XmlLegendElementName = "LegendDrawing";
-	public static final String XmlDrawLegendAttName = "draw";
-	public static final String XmlLegendFontAttName = "legendfont";
-	public static final String XmlLegendLineLengthAttName = "legendlinelength";
-	public static final String XmlLegendBorderAttName = "legendborder";
-	public static final String XmlLegendFillColorAttName = "legendbackground";
-	public static final String XmlLegendTextColorAttName = "legendforeground";
-	public static final String XmlLegendBorderColorAttName = "legendbordercolor";
-
+	//legend related
 	private int _legendLineLength = 70;
 	private Font _legendFont = Environment.getInstance().getCommonFont(12);
 	private boolean _legendBorder = true;
@@ -63,15 +22,15 @@ public class PlotParameters implements XmlPrintStreamWritable {
 	private Color _legendTextColor = Color.black;
 	private Color _legendBorderColor = Color.black;
 	private boolean _drawLegend = true;
-
-	// labels
-	public static final String XmlMainLabelElementName = "MainLabels";
-	public static final String XmlTitleAttName = "title";
-	public static final String XmlXLabAttName = "xlab";
-	public static final String XmlYLabAttName = "ylab";
-	public static final String XmlTitleFontAttName = "titlefont";
-	public static final String XmlAxesFontAttName = "axesfont";
-	public static final String XmlStatusFontAttName = "statusfont";
+	
+	//extra text
+	private Font _extraFont = Environment.getInstance().getCommonFont(12);
+	private boolean _extraBorder = true;
+	private Color _extraFillColor = new Color(255, 255, 255, 164);
+	private Color _extraTextColor = Color.black;
+	private Color _extraBorderColor = Color.black;
+	private boolean _drawExtra = true;
+	private String[] _extraStrings;
 
 	private Font _titleFont = Environment.getInstance().getCommonFont(20);
 	private Font _axesLabelFont = Environment.getInstance().getCommonFont(14);
@@ -127,6 +86,95 @@ public class PlotParameters implements XmlPrintStreamWritable {
 	public void mustIncludeYZero(boolean incZero) {
 		_includeYzero = incZero;
 	}
+	
+	/**
+	 * Get the extra strings for a second legend like display
+	 * @return the extra strings
+	 */
+	public String[] getExtraStrings() {
+		return _extraStrings;
+	}
+	
+	/**
+	 * Set the extra strings for a second legend like display
+	 * @param extraStrings the new extra strings array
+	 */
+	public void setExtraStrings(String[] extraStrings) {
+		_extraStrings = extraStrings;
+	}
+	
+	/**
+	 * Set the extra text fill color
+	 * 
+	 * @param color the extra text fill color
+	 */
+	public void setExtraBackground(Color color) {
+		_extraFillColor = color;
+	}
+
+	/**
+	 * Get the extra text fill color
+	 * 
+	 * @return the extra text fill color
+	 */
+	public Color getExtraBackground() {
+		return _extraFillColor;
+	}
+
+	/**
+	 * Set the extra text text color
+	 * 
+	 * @param color the extra text text color
+	 */
+	public void setExtraForeground(Color color) {
+		_extraTextColor = color;
+	}
+
+	/**
+	 * Get the extra text text color
+	 * 
+	 * @return the extra text text color
+	 */
+	public Color getExtraForeground() {
+		return _extraTextColor;
+	}
+
+	/**
+	 * Get the extra text border color
+	 * 
+	 * @return the extra text border color
+	 */
+	public Color getExtraBorderColor() {
+		return _extraBorderColor;
+	}
+
+	/**
+	 * Set the extra text border color
+	 * 
+	 * @param color the extra text border color
+	 */
+	public void setExtraBorderColor(Color color) {
+		_extraBorderColor = color;
+	}
+	
+	/**
+	 * Check whether the extra text border is drawn
+	 * 
+	 * @return <code>true</code> if the extra text border is drawn.
+	 */
+	public boolean isExtraBorder() {
+		return _extraBorder;
+	}
+
+	/**
+	 * Set whether the extra text border is drawn
+	 * 
+	 * @param extraBorder <code>true</code> if the extra text border is drawn.
+	 */
+	public void setExtraBorder(boolean extraBorder) {
+		_extraBorder = extraBorder;
+	}
+	
 
 	/**
 	 * Check whether the legend border is drawn
@@ -270,6 +318,24 @@ public class PlotParameters implements XmlPrintStreamWritable {
 	 */
 	public Font getLegendFont() {
 		return _legendFont;
+	}
+
+	/**
+	 * Set the extra font
+	 * 
+	 * @param font the new extra font
+	 */
+	public void setExtraFont(Font font) {
+		_extraFont = font;
+	}
+
+	/**
+	 * Get the extra text font
+	 * 
+	 * @return the extra text font
+	 */
+	public Font getExtraFont() {
+		return _extraFont;
 	}
 
 	/**
@@ -435,6 +501,24 @@ public class PlotParameters implements XmlPrintStreamWritable {
 	}
 
 	/**
+	 * Check whether we should draw extra text
+	 * 
+	 * @return whether we should draw the extra text
+	 */
+	public boolean extraDrawing() {
+		return _drawExtra;
+	}
+
+	/**
+	 * Set whether we should draw the extra text
+	 * 
+	 * @param draw the new drawing flag
+	 */
+	public void setExtraDrawing(boolean draw) {
+		_drawExtra = draw;
+	}
+	
+	/**
 	 * Check whether we should draw a legend
 	 * 
 	 * @return whether we should draw a legend
@@ -451,6 +535,7 @@ public class PlotParameters implements XmlPrintStreamWritable {
 	public void setLegendDrawing(boolean draw) {
 		_drawLegend = draw;
 	}
+
 
 	/**
 	 * The number of decimals for tick values on x axis
@@ -603,108 +688,4 @@ public class PlotParameters implements XmlPrintStreamWritable {
 	public double getManualYMax() {
 		return _manualYmax;
 	}
-
-	/**
-	 * This is called as a result of a save. The object needs to write itself
-	 * out in xml.
-	 * 
-	 * @param write the xml writer
-	 */
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeXmlMainLabels(writer);
-			writeXmlIncludeZero(writer);
-			writeLegend(writer);
-			writeTickValueDisplay(writer);
-			writeManualRangeData(writer);
-			writeDataLimitData(writer);
-
-			// tell any plotlines to write themselves
-			for (PlotLine plotline : _lines) {
-				plotline.writeXml(writer);
-			}
-
-			writer.writeEndElement();
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// write the info about the plot title and axis labels
-	private void writeXmlMainLabels(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlTitleAttName, XmlSupport.validXML(_plotTitle));
-		props.put(XmlXLabAttName, XmlSupport.validXML(_xLabel));
-		props.put(XmlYLabAttName, XmlSupport.validXML(_yLabel));
-		props.put(XmlTitleFontAttName, _titleFont);
-		props.put(XmlAxesFontAttName, _axesLabelFont);
-		props.put(XmlStatusFontAttName, _statusFont);
-		writer.writeElementWithProps(XmlMainLabelElementName, props);
-	}
-
-	// write the info about whether we include zeros
-	private void writeXmlIncludeZero(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlXZeroAttName, _includeXzero);
-		props.put(XmlYZeroAttName, _includeYzero);
-		writer.writeElementWithProps(XmlIncZeroElementName, props);
-	}
-
-	// write info about the legend
-	private void writeLegend(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-
-		String fgHex = GraphicsUtilities.colorToHex(_legendFillColor);
-		String bgHex = GraphicsUtilities.colorToHex(_legendTextColor);
-		String bcHex = GraphicsUtilities.colorToHex(_legendBorderColor);
-
-		props.put(XmlDrawLegendAttName, _drawLegend);
-		props.put(XmlLegendFontAttName, _legendFont);
-		props.put(XmlLegendLineLengthAttName, _legendLineLength);
-		props.put(XmlLegendBorderAttName, _legendBorder);
-		props.put(XmlLegendFillColorAttName, fgHex);
-		props.put(XmlLegendTextColorAttName, bgHex);
-		props.put(XmlLegendBorderColorAttName, bcHex);
-		writer.writeElementWithProps(XmlLegendElementName, props);
-	}
-
-	// write info about how tick values are displayed
-	private void writeTickValueDisplay(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlNumDecXAttName, _numDecimalX);
-		props.put(XmlMixExpXAttName, _minExponentX);
-		props.put(XmlNumDecYAttName, _numDecimalY);
-		props.put(XmlMixExpYAttName, _minExponentY);
-		writer.writeElementWithProps(XmlTickValueDisplayElementName, props);
-	}
-
-	// write info about data limits as plot limits
-	private void writeDataLimitData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlXUseDataLimitAttName, _useXDataLimits);
-		props.put(XmlYUseDataLimitAttName, _useYDataLimits);
-		writer.writeElementWithProps(XmlUseDataLimitElementName, props);
-	}
-
-	// write info about manual ranges if used
-	private void writeManualRangeData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlUseManualXAttName, _manualXRange);
-		props.put(XmlManualMinXAttName, _manualXmin);
-		props.put(XmlManualMaxXAttName, _manualXmax);
-		props.put(XmlUseManualYAttName, _manualYRange);
-		props.put(XmlManualMinYAttName, _manualYmin);
-		props.put(XmlManualMaxYAttName, _manualYmax);
-		writer.writeElementWithProps(XmlManualRangeElementName, props);
-	}
-
 }

@@ -2,21 +2,16 @@ package cnuphys.splot.pdata;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.stream.XMLStreamException;
-
 import cnuphys.splot.fit.Fit;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.plot.DoubleFormat;
 import cnuphys.splot.style.IStyled;
 import cnuphys.splot.style.Styled;
 import cnuphys.splot.style.SymbolType;
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
 
 /**
  * This is essentially a table of not necessarily equal length columns.
@@ -24,8 +19,7 @@ import cnuphys.splot.xml.XmlPrintStreamWriter;
  * @author heddle
  * 
  */
-public class DataSet extends DefaultTableModel
-		implements XmlPrintStreamWritable {
+public class DataSet extends DefaultTableModel {
 
 	/** The XML root element name */
 	public static final String XmlRootElementName = "DataSet";
@@ -35,10 +29,6 @@ public class DataSet extends DefaultTableModel
 
 	// List of dataset change listeners
 	private EventListenerList _listenerList;
-
-	public static final String XmlDataSetBasicDataElementName = "DataSetBasicData";
-	public static final String XmlDataSetTypeAttName = "dstype";
-	public static final String XmlDataSetHasXErrAttName = "dshasxerr";
 
 	// the dataset type
 	private DataSetType _type = DataSetType.UNKNOWN;
@@ -914,33 +904,5 @@ public class DataSet extends DefaultTableModel
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 		DataColumn dc = getColumn(columnIndex);
 		dc.set(rowIndex, (Double) aValue);
-	}
-
-	@Override
-	public void writeXml(XmlPrintStreamWriter writer) {
-		try {
-			writer.writeStartElement(XmlRootElementName);
-			writeBasicData(writer);
-
-			// now the columns with the bulk of the data
-			for (DataColumn dc : _columns) {
-				dc.writeXml(writer);
-			}
-
-			writer.writeEndElement();
-
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	// write a little basic data before writing the columns
-	private void writeBasicData(XmlPrintStreamWriter writer)
-			throws XMLStreamException {
-		Properties props = new Properties();
-		props.put(XmlDataSetTypeAttName, _type);
-		props.put(XmlDataSetHasXErrAttName, _hasXErrors);
-		writer.writeElementWithProps(XmlDataSetBasicDataElementName, props);
 	}
 }

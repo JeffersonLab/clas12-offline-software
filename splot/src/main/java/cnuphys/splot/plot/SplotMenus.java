@@ -12,7 +12,6 @@ import javax.swing.KeyStroke;
 
 import cnuphys.splot.edit.CurveEditorDialog;
 import cnuphys.splot.edit.DialogUtilities;
-import cnuphys.splot.xml.XmlSupport;
 
 public class SplotMenus implements ActionListener {
 
@@ -29,8 +28,6 @@ public class SplotMenus implements ActionListener {
 	protected JMenuItem _dataItem;
 	protected JMenuItem _clearItem;
 	protected JMenuItem _curveItem;
-	protected JMenuItem _openItem;
-	protected JMenuItem _saveItem;
 
 	/**
 	 * Create a set of menus and items for sPlot
@@ -65,11 +62,9 @@ public class SplotMenus implements ActionListener {
 	// make the file menu
 	protected void makeFileMenu(Container container, boolean addQuit) {
 		_fileMenu = new JMenu("File");
-		_openItem = addMenuItem("Open...", 'O', _fileMenu);
-		_saveItem = addMenuItem("Save...", 'S', _fileMenu);
-
+		
 		if (addQuit) {
-			_fileMenu.addSeparator();
+//			_fileMenu.addSeparator();
 			_quitItem = addMenuItem("Quit", 'Q', _fileMenu);
 		}
 		container.add(_fileMenu);
@@ -119,13 +114,7 @@ public class SplotMenus implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 
-		if (source == _openItem) {
-			XmlSupport.open(_plotCanvas);
-		}
-		else if (source == _saveItem) {
-			XmlSupport.save(_plotCanvas);
-		}
-		else if (source == _quitItem) {
+		if (source == _quitItem) {
 			System.exit(0);
 		}
 		else if (source == _prefItem) {
@@ -206,24 +195,6 @@ public class SplotMenus implements ActionListener {
 	 */
 	public JMenuItem getCurveItem() {
 		return _curveItem;
-	}
-
-	/**
-	 * Get the open item
-	 * 
-	 * @return the open item
-	 */
-	public JMenuItem getOpenItem() {
-		return _openItem;
-	}
-
-	/**
-	 * Get the save item
-	 * 
-	 * @return the save item
-	 */
-	public JMenuItem getSaveItem() {
-		return _saveItem;
 	}
 
 }

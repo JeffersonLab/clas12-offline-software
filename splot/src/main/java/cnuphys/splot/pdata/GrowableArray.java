@@ -1,12 +1,5 @@
 package cnuphys.splot.pdata;
 
-import java.util.Properties;
-
-import javax.xml.stream.XMLStreamException;
-
-import cnuphys.splot.xml.XmlPrintStreamWritable;
-import cnuphys.splot.xml.XmlPrintStreamWriter;
-
 /**
  * This class supports named arrays that grow. They are an alternative to
  * Vectors or ArrayLists. The advantages are speed and usage for those cases
@@ -16,67 +9,58 @@ import cnuphys.splot.xml.XmlPrintStreamWriter;
  * @author heddle
  * 
  */
-public class GrowableArray implements XmlPrintStreamWritable {
+public class GrowableArray {
 
-    public static final String XmlRootElementName = "GrowableDataArray";
+	// the actual array
+	protected double _data[];
 
-    public static final String XmlArrayBasicDataElementName = "ArrayBasicData";
-    public static final String XmlArrayLenAttName = "arraylen";
-    public static final String XmlArrayMinAttName = "arraymin";
-    public static final String XmlArrayMaxAttName = "arraymax";
-    public static final String XmlArrayInitCapAttName = "arrayinitcap";
-    public static final String XmlArrayIncrementAttName = "arrayincrement";
+	// the current size (amount of data, not capacity) of the array
+	// this will be the size of the minimal copy
+	protected int _dataLen;
 
-    // the actual array
-    protected double _data[];
+	// the increment when the array must grow
+	protected int _increment;
 
-    // the current size (amount of data, not capacity) of the array
-    // this will be the size of the minimal copy
-    protected int _dataLen;
+	// the initial capacity
+	protected int _initCap;
 
-    // the increment when the array must grow
-    protected int _increment;
+	// min and max data values
+	protected double _minValue;
+	protected double _maxValue;
 
-    // the initial capacity
-    protected int _initCap;
+	/**
+	 * Creates a GrowableArray with initial capacity 100 and increment 100.
+	 */
+	public GrowableArray() {
+		this(100, 100);
+	}
 
-    // min and max data values
-    protected double _minValue;
-    protected double _maxValue;
+	/**
+	 * Create a GrowableArray
+	 * 
+	 * @param initCap
+	 *            the initial capacity
+	 * @param increment
+	 *            the increment when the array grows.
+	 */
+	public GrowableArray(int initCap, int increment) {
+		_initCap = initCap;
+		_increment = increment;
+		clear();
+	}
 
-    /**
-     * Creates a GrowableArray with initial capacity 100 and increment 100.
-     */
-    public GrowableArray() {
-	this(100, 100);
-    }
+	/**
+	 * Get the number of real data in the array, which in general is less than
+	 * the length of the array. This is the effective length of the array, so
+	 * loops should go from 0 to this value minus 1.
+	 * 
+	 * @return the number of real data.
+	 */
+	public int size() {
+		return _dataLen;
+	}
 
-    /**
-     * Create a GrowableArray
-     * 
-     * @param initCap
-     *            the initial capacity
-     * @param increment
-     *            the increment when the array grows.
-     */
-    public GrowableArray(int initCap, int increment) {
-	_initCap = initCap;
-	_increment = increment;
-	clear();
-    }
-
-    /**
-     * Get the number of real data in the array, which in general is less than
-     * the length of the array. This is the effective length of the array, so
-     * loops should go from 0 to this value minus 1.
-     * 
-     * @return the number of real data.
-     */
-    public int size() {
-	return _dataLen;
-    }
-
-    /**
+	/**
 	 * Get the minimal copy of the data array. This copies the actual data into
 	 * a new array of just the right size. This new array can be used normally,
 	 * i.e., it is safe to use its <code>length</code>.
@@ -93,139 +77,115 @@ public class GrowableArray implements XmlPrintStreamWritable {
 			System.arraycopy(_data, 0, acopy, 0, _dataLen);
 		} catch (Exception e) {
 
-			System.err.println("Exception in GrowableArray.getMinimalCopy: " + e.getMessage());
+			System.err.println("Exception in GrowableArray.getMinimalCopy: "
+					+ e.getMessage());
 			System.err.println("_dataLen: " + _dataLen);
 			System.err.println("_data: " + _data);
 		}
 		return acopy;
 	}
 
-    /**
-     * removes the first entry and moves all other entries up one
-     */
-    public void removeFirst() {
-	if (_dataLen > 0) {
-	    _dataLen--;
+	/**
+	 * removes the first entry and moves all other entries up one
+	 */
+	public void removeFirst() {
+		if (_dataLen > 0) {
+			_dataLen--;
 
-	    _minValue = Double.POSITIVE_INFINITY;
-	    _maxValue = Double.NEGATIVE_INFINITY;
-	    for (int i = 0; i < _dataLen; i++) {
-		_data[i] = _data[i + 1];
-		_minValue = Math.min(_data[i], _minValue);
-		_maxValue = Math.max(_data[i], _maxValue);
-	    }
-	    _data[_dataLen] = Double.NaN;
-	}
-    }
-
-    /**
-     * Add a value to the array, growing it if necessary.
-     * 
-     * @param val
-     *            the value to add
-     */
-    public void add(double val) {
-	if (_dataLen == _data.length) {
-	    double newArray[] = new double[_dataLen + _increment];
-	    System.arraycopy(_data, 0, newArray, 0, _dataLen);
-
-	    // fill empty space with NaNs
-	    for (int i = _dataLen; i < newArray.length; i++) {
-		newArray[i] = Double.NaN;
-	    }
-	    _data = newArray;
-	}
-	_data[_dataLen] = val;
-	_dataLen++;
-
-	// fix min and max vals
-	if (_dataLen == 1) {
-	    _minValue = val;
-	    _maxValue = val;
-	} else {
-	    _minValue = Math.min(_minValue, val);
-	    _maxValue = Math.max(_maxValue, val);
-	}
-    }
-
-    /**
-     * Get the minimum data value
-     * 
-     * @return the minimum data value
-     */
-    public double getMinValue() {
-	return _minValue;
-    }
-
-    /**
-     * Get the maximum data value
-     * 
-     * @return the maximum data value
-     */
-    public double getMaxValue() {
-	return _maxValue;
-    }
-
-    /**
-     * Reset the data array to the initial capacity and fill with all NaNs.
-     */
-    public void clear() {
-	_data = new double[_initCap];
-	_dataLen = 0;
-	for (int i = 0; i < _initCap; i++) {
-	    _data[i] = Double.NaN;
+			_minValue = Double.POSITIVE_INFINITY;
+			_maxValue = Double.NEGATIVE_INFINITY;
+			for (int i = 0; i < _dataLen; i++) {
+				_data[i] = _data[i + 1];
+				_minValue = Math.min(_data[i], _minValue);
+				_maxValue = Math.max(_data[i], _maxValue);
+			}
+			_data[_dataLen] = Double.NaN;
+		}
 	}
 
-	_minValue = Double.NaN;
-	_maxValue = Double.NaN;
-    }
+	/**
+	 * Add a value to the array, growing it if necessary.
+	 * 
+	 * @param val
+	 *            the value to add
+	 */
+	public void add(double val) {
+		if (_dataLen == _data.length) {
+			double newArray[] = new double[_dataLen + _increment];
+			System.arraycopy(_data, 0, newArray, 0, _dataLen);
 
-    /**
-     * Get the value at the given index
-     * 
-     * @param index
-     *            the index
-     * @return the value at the index
-     */
-    public double get(int index) {
-	return _data[index];
-    }
+			// fill empty space with NaNs
+			for (int i = _dataLen; i < newArray.length; i++) {
+				newArray[i] = Double.NaN;
+			}
+			_data = newArray;
+		}
+		_data[_dataLen] = val;
+		_dataLen++;
 
-    /**
-     * Set the value at the given index
-     * 
-     * @param index
-     *            the index
-     * @param val
-     *            the value at the index
-     */
-    public void set(int index, double val) {
-	_data[index] = val;
-    }
-
-    @Override
-    public void writeXml(XmlPrintStreamWriter writer) {
-	try {
-	    writer.writeStartElement(XmlRootElementName);
-	    writeBasicData(writer);
-	    writer.writeArray("DataValues", _data, _dataLen);
-	    writer.writeEndElement();
-
-	} catch (XMLStreamException e) {
-	    e.printStackTrace();
+		// fix min and max vals
+		if (_dataLen == 1) {
+			_minValue = val;
+			_maxValue = val;
+		} else {
+			_minValue = Math.min(_minValue, val);
+			_maxValue = Math.max(_maxValue, val);
+		}
 	}
-    }
 
-    // write a little basic data
-    private void writeBasicData(XmlPrintStreamWriter writer)
-	    throws XMLStreamException {
-	Properties props = new Properties();
-	props.put(XmlArrayLenAttName, _dataLen);
-	props.put(XmlArrayMinAttName, _minValue);
-	props.put(XmlArrayMaxAttName, _maxValue);
-	props.put(XmlArrayInitCapAttName, _initCap);
-	props.put(XmlArrayIncrementAttName, _increment);
-	writer.writeElementWithProps(XmlArrayBasicDataElementName, props);
-    }
+	/**
+	 * Get the minimum data value
+	 * 
+	 * @return the minimum data value
+	 */
+	public double getMinValue() {
+		return _minValue;
+	}
+
+	/**
+	 * Get the maximum data value
+	 * 
+	 * @return the maximum data value
+	 */
+	public double getMaxValue() {
+		return _maxValue;
+	}
+
+	/**
+	 * Reset the data array to the initial capacity and fill with all NaNs.
+	 */
+	public void clear() {
+		_data = new double[_initCap];
+		_dataLen = 0;
+		for (int i = 0; i < _initCap; i++) {
+			_data[i] = Double.NaN;
+		}
+
+		_minValue = Double.NaN;
+		_maxValue = Double.NaN;
+	}
+
+	/**
+	 * Get the value at the given index
+	 * 
+	 * @param index
+	 *            the index
+	 * @return the value at the index
+	 */
+	public double get(int index) {
+		return _data[index];
+	}
+
+	/**
+	 * Set the value at the given index
+	 * 
+	 * @param index
+	 *            the index
+	 * @param val
+	 *            the value at the index
+	 */
+	public void set(int index, double val) {
+		_data[index] = val;
+	}
 
 }
