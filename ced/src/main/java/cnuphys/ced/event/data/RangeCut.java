@@ -34,10 +34,18 @@ public class RangeCut implements ICut {
 	@Override
 	public String toString() {
 	
-		String minString = "min: " + DoubleFormat.doubleFormat(min, 4);
-		String maxString = "max: " + DoubleFormat.doubleFormat(max, 4);
+		String minString = "Min: " + DoubleFormat.doubleFormat(min, 3, 2);
+		String maxString = "Max: " + DoubleFormat.doubleFormat(max, 3, 2);
 		
 		return _name + "\n" + minString + "\n" + maxString;
+	}
+	
+	@Override
+	public String plotText() {
+		String minString = " Min: " + DoubleFormat.doubleFormat(min, 3, 2);
+		String maxString = " Max: " + DoubleFormat.doubleFormat(max, 3, 2);
+		
+		return _name + minString + maxString;
 	}
 
 	@Override

@@ -69,11 +69,11 @@ public class Legend extends DraggableRectangle {
 		width = getLegendWidth();
 		height = getLegendHeight();
 
-		g.setColor(_params.getLegendBackground());
+		g.setColor(_params.getTextBackground());
 		g.fillRect(x, y, width, height);
 
 		if (_params.isLegendBorder()) {
-			g.setColor(_params.getLegendBorderColor());
+			g.setColor(_params.getTextBorderColor());
 			g.drawRect(x, y, width, height);
 		}
 
@@ -89,9 +89,9 @@ public class Legend extends DraggableRectangle {
 
 	// draw the info for the given y column
 	private int drawColumnLegendInfo(Graphics g, int y, DataColumn curve) {
-		FontMetrics fm = _canvas.getFontMetrics(_params.getLegendFont());
-		g.setFont(_params.getLegendFont());
-		g.setColor(_params.getLegendForeground());
+		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());
+		g.setFont(_params.getTextFont());
+		g.setColor(_params.getTextForeground());
 
 		Styled style = curve.getStyle();
 		Fit fit = curve.getFit();
@@ -122,7 +122,7 @@ public class Legend extends DraggableRectangle {
 
 	// get required width of the legend
 	private int getLegendWidth() {
-		FontMetrics fm = _canvas.getFontMetrics(_params.getLegendFont());
+		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());
 		DataSet ds = _canvas.getDataSet();
 
 		_maxStringWidth = 0;
@@ -175,7 +175,7 @@ public class Legend extends DraggableRectangle {
 	
 	// get the vertical space needed for a curve
 	private int spaceNeeded(DataColumn curve) {
-		FontMetrics fm = _canvas.getFontMetrics(_params.getLegendFont());
+		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());
 		return Math.max(fm.getHeight(), curve.getStyle().getSymbolSize());
 	}
 

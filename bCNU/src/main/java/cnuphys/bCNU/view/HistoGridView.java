@@ -237,7 +237,7 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 		canvas.getParameters().setMinExponentY(5);
 		canvas.getParameters().setMinExponentX(4);
 		canvas.getParameters().setXRange(minValue, maxValue);
-		canvas.getParameters().setLegendFont(Fonts.smallFont);
+		canvas.getParameters().setTextFont(Fonts.smallFont);
 		
 		canvas.getPlotTicks().setDrawBinValue(true);
 		canvas.getPlotTicks().setNumMajorTickX(numXticks);

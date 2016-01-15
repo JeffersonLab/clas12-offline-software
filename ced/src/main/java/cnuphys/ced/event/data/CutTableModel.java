@@ -88,6 +88,7 @@ public class CutTableModel extends DefaultTableModel {
 		case ACTIVE:
 			boolean enabled = (Boolean) value;
 			icut.setActive(enabled);
+			fireTableRowsUpdated(row, row);
 			break;
 
 		case NAME:
