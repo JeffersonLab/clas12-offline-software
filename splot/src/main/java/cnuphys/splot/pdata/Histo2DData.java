@@ -1,5 +1,7 @@
-package cnuphys.bCNU.util;
+package cnuphys.splot.pdata;
 
+
+import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
 public class Histo2DData {
@@ -24,6 +26,9 @@ public class Histo2DData {
 
 	// the counts
 	private long[][] _counts;
+	
+	//the bin with the max counts
+	private long _maxCount;
 
 	/**
 	 * The data for a 2D histogram where the bin spacing is uniform.
@@ -45,7 +50,7 @@ public class Histo2DData {
 	}
 
 	/**
-	 * The data for a 1D histogram where the bin spacing is arbitrary (i.e., not
+	 * The data for a 2D histogram where the bin spacing is arbitrary (i.e., not
 	 * uniform)
 	 * 
 	 * @param name
@@ -83,6 +88,7 @@ public class Histo2DData {
 	// reset some data
 	private void reset() {
 		_outOfRangeCount = 0;
+		_maxCount = 0;
 		_counts = null;
 		int nbinX = getNumberBinsX();
 		int nbinY = getNumberBinsY();
@@ -211,27 +217,11 @@ public class Histo2DData {
 	}
 
 	/**
-	 * Get the maximum "z" value. The z axis corresponds to "counts", so this
-	 * always returns the count of the bin with the most counts.
+	 * Get the maximum count of any bin
+	 * @return the count of the bin with the most counts.
 	 */
-	public double getMaxZ() {
-		if (_counts == null) {
-			return 1;
-		}
-
-		long maxCount = 0;
-
-		if (_counts != null) {
-			int nbinX = getNumberBinsX();
-			int nbinY = getNumberBinsY();
-
-			for (int i = 0; i < nbinX; i++) {
-				for (int j = 0; j < nbinY; j++) {
-					maxCount = Math.max(maxCount, _counts[i][j]);
-				}
-			}
-		}
-		return maxCount;
+	public long getMaxCount() {
+		return _maxCount;
 	}
 
 	/**
@@ -253,6 +243,8 @@ public class Histo2DData {
 			return;
 		}
 		_counts[binX][binY]++;
+		
+		_maxCount = Math.max(_maxCount, _counts[binX][binY]);
 	}
 
 	/**
@@ -406,5 +398,75 @@ public class Histo2DData {
 
 		return bin;
 	}
+	
+	/**
+	 * Get the world rectangle containing the given x and y values
+	 * @param x the x value
+	 * @param y the y value
+	 * @return the world rectangle, or <code>null</code>.
+	 */
+	Rectangle2D.Double getRectangle(double x, double y) {
+		int binX = getBinX(x);
+		int binY = getBinY(y);
+		return getRectangle(binX, binY);
+	}
+	
+	/**
+	 * Get the world rectangle corresponding to the given bins
+	 * @param binX the x bin
+	 * @param binY the y bin
+	 * @return  the world rectangle, or <code>null</code>.
+	 */
+	Rectangle2D.Double getRectangle(int binX, int binY) {
+		
+		if ((binX < 0) || (binY < 0)) {
+			return null;
+		}
+		
+		double xmin = getBinMinX(binX);
+		if (Double.isNaN(xmin)) {
+			return null;
+		}
+
+		double xmax = getBinMaxX(binX);
+		if (Double.isNaN(xmax)) {
+			return null;
+		}
+
+		double ymin = getBinMinY(binY);
+		if (Double.isNaN(ymin)) {
+			return null;
+		}
+		
+		double ymax = getBinMaxY(binY);
+		if (Double.isNaN(ymax)) {
+			return null;
+		}
+
+		return new Rectangle2D.Double(xmin, ymin, (xmax-xmin), (ymax-ymin));
+	}
+	
+	/**
+	 * Get the fractional value (fraction of max value) for use
+	 * in a plot
+	 * @param binX the x bin
+	 * @param binY the y bin
+	 * @return the fractional value (fraction of max value).
+	 */
+	public double getFractionalValue(int binX, int binY) {
+		if (_maxCount < 1) {
+			return 0;
+		}
+		
+		if ((binX < 0) || (binY < 0)) {
+			return 0;
+		}
+		
+		long count = _counts[binX][binY];
+		
+		return ((double)count)/((double)_maxCount);
+
+	}
+
 
 }
