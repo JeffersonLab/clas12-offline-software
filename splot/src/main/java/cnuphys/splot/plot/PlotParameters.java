@@ -5,7 +5,13 @@ import java.awt.Font;
 import java.util.Vector;
 
 public class PlotParameters {
-
+	
+	//for legend and extra text box
+	private Font _textFont = Environment.getInstance().getCommonFont(12);
+	private Color _textFillColor = new Color(240, 240, 240, 164);
+	private Color _textTextColor = Color.black;
+	private Color _textBorderColor = Color.black;
+	
 	// force include zero on plots?
 	private boolean _includeYzero = false;
 	private boolean _includeXzero = false;
@@ -16,19 +22,11 @@ public class PlotParameters {
 
 	//legend related
 	private int _legendLineLength = 70;
-	private Font _legendFont = Environment.getInstance().getCommonFont(12);
 	private boolean _legendBorder = true;
-	private Color _legendFillColor = new Color(255, 255, 255, 164);
-	private Color _legendTextColor = Color.black;
-	private Color _legendBorderColor = Color.black;
 	private boolean _drawLegend = true;
 	
 	//extra text
-	private Font _extraFont = Environment.getInstance().getCommonFont(12);
 	private boolean _extraBorder = true;
-	private Color _extraFillColor = new Color(255, 255, 255, 164);
-	private Color _extraTextColor = Color.black;
-	private Color _extraBorderColor = Color.black;
 	private boolean _drawExtra = true;
 	private String[] _extraStrings;
 
@@ -100,61 +98,8 @@ public class PlotParameters {
 	 * @param extraStrings the new extra strings array
 	 */
 	public void setExtraStrings(String[] extraStrings) {
+		System.err.println("SET EXTRA STR COUNT " + ((extraStrings == null) ? "NULL" : extraStrings.length));
 		_extraStrings = extraStrings;
-	}
-	
-	/**
-	 * Set the extra text fill color
-	 * 
-	 * @param color the extra text fill color
-	 */
-	public void setExtraBackground(Color color) {
-		_extraFillColor = color;
-	}
-
-	/**
-	 * Get the extra text fill color
-	 * 
-	 * @return the extra text fill color
-	 */
-	public Color getExtraBackground() {
-		return _extraFillColor;
-	}
-
-	/**
-	 * Set the extra text text color
-	 * 
-	 * @param color the extra text text color
-	 */
-	public void setExtraForeground(Color color) {
-		_extraTextColor = color;
-	}
-
-	/**
-	 * Get the extra text text color
-	 * 
-	 * @return the extra text text color
-	 */
-	public Color getExtraForeground() {
-		return _extraTextColor;
-	}
-
-	/**
-	 * Get the extra text border color
-	 * 
-	 * @return the extra text border color
-	 */
-	public Color getExtraBorderColor() {
-		return _extraBorderColor;
-	}
-
-	/**
-	 * Set the extra text border color
-	 * 
-	 * @param color the extra text border color
-	 */
-	public void setExtraBorderColor(Color color) {
-		_extraBorderColor = color;
 	}
 	
 	/**
@@ -195,39 +140,39 @@ public class PlotParameters {
 	}
 
 	/**
-	 * Set the legend fill color
+	 * Set the text box (legend and extra text) fill color
 	 * 
-	 * @param color the legend fill color
+	 * @param color the text box (legend and extra text) fill color
 	 */
-	public void setLegendBackground(Color color) {
-		_legendFillColor = color;
+	public void setTextBackground(Color color) {
+		_textFillColor = color;
 	}
 
 	/**
-	 * Get the legend fill color
+	 * Get the text box (legend and extra text) fill color
 	 * 
-	 * @return the legend fill coor
+	 * @return the text box (legend and extra text) fill coor
 	 */
-	public Color getLegendBackground() {
-		return _legendFillColor;
+	public Color getTextBackground() {
+		return _textFillColor;
 	}
 
 	/**
-	 * Set the legend text color
+	 * Set the text box (legend and extra text) text color
 	 * 
-	 * @param color the legend text color
+	 * @param color the text box (legend and extra text) text color
 	 */
-	public void setLegendForeground(Color color) {
-		_legendTextColor = color;
+	public void setTextForeground(Color color) {
+		_textTextColor = color;
 	}
 
 	/**
-	 * Get the legend text color
+	 * Get the text box (legend and extra text) text color
 	 * 
-	 * @return the legend text color
+	 * @return the text box (legend and extra text) text color
 	 */
-	public Color getLegendForeground() {
-		return _legendTextColor;
+	public Color getTextForeground() {
+		return _textTextColor;
 	}
 
 	/**
@@ -235,17 +180,35 @@ public class PlotParameters {
 	 * 
 	 * @return the legend border color
 	 */
-	public Color getLegendBorderColor() {
-		return _legendBorderColor;
+	public Color getTextBorderColor() {
+		return _textBorderColor;
 	}
 
 	/**
-	 * Set the legend border color
+	 * Set the text box (legend and extra text) border color
 	 * 
-	 * @param color the legend border color
+	 * @param color the text box (legend and extra text) border color
 	 */
-	public void setLegendBorderColor(Color color) {
-		_legendBorderColor = color;
+	public void setTextBorderColor(Color color) {
+		_textBorderColor = color;
+	}
+
+	/**
+	 * Set the text box (legend and extra text) font
+	 * 
+	 * @param font the new text box (legend and extra text) font
+	 */
+	public void setTextFont(Font font) {
+		_textFont = font;
+	}
+
+	/**
+	 * Get the text box (legend and extra text) font
+	 * 
+	 * @return the text box (legend and extra text) font
+	 */
+	public Font getTextFont() {
+		return _textFont;
 	}
 
 	/**
@@ -300,42 +263,6 @@ public class PlotParameters {
 	 */
 	public Font getStatusFont() {
 		return _statusFont;
-	}
-
-	/**
-	 * Set the legend font
-	 * 
-	 * @param font the new legend font
-	 */
-	public void setLegendFont(Font font) {
-		_legendFont = font;
-	}
-
-	/**
-	 * Get the legend font
-	 * 
-	 * @return the legend font
-	 */
-	public Font getLegendFont() {
-		return _legendFont;
-	}
-
-	/**
-	 * Set the extra font
-	 * 
-	 * @param font the new extra font
-	 */
-	public void setExtraFont(Font font) {
-		_extraFont = font;
-	}
-
-	/**
-	 * Get the extra text font
-	 * 
-	 * @return the extra text font
-	 */
-	public Font getExtraFont() {
-		return _extraFont;
 	}
 
 	/**

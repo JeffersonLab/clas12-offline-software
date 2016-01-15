@@ -20,6 +20,7 @@ import javax.swing.table.TableColumn;
 public class CutTable extends JTable implements ItemListener {
 
 	private DefaultTableCellRenderer def_renderer = new DefaultTableCellRenderer();
+	
 
 	/**
 	 * Create a table for toggling activity of plot cuts
@@ -74,33 +75,9 @@ public class CutTable extends JTable implements ItemListener {
 		// no reordering
 		getTableHeader().setReorderingAllowed(false);
 
-		// add mouse adapter
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent me) {
-
-				if (me.getClickCount() == 1) {
-					CutTableModel model = getCutModel();
-					JTable target = (JTable) me.getSource();
-					int row = target.getSelectedRow();
-					int column = target.getSelectedColumn();
-
-					if (column == CutTableModel.ACTIVE) {
-						Component c = checkBoxRenderer.getComponentAt(me.getPoint());
-						if (c instanceof Checkbox) {
-							ICut icut = model.getCutAtRow(row);
-							icut.setActive(((Checkbox)c).getState());
-							model.fireTableDataChanged();
-						}
-					}
-
-				}
-
-			}
-		});
 	}
 
-	private CutTableModel getCutModel() {
+	public CutTableModel getCutModel() {
 		return (CutTableModel) getModel();
 	}
 

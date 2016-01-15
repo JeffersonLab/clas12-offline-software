@@ -1,11 +1,16 @@
 package cnuphys.ced.event.data;
 
+import java.awt.Checkbox;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 
 public class CutTableScrollPane extends JScrollPane {
@@ -34,6 +39,24 @@ public class CutTableScrollPane extends JScrollPane {
 
 		setBorder(BorderFactory.createTitledBorder(null, label,
 				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
+//		addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent me) {
+//				System.err.println("DUDE");
+//
+//				if (me.getClickCount() == 1) {
+//					CutTableModel model = getCutTableModel();
+//					int row = cutTable.getSelectedRow();
+//					int column = cutTable.getSelectedColumn();
+//
+//					if ((row >= 0) && (column == CutTableModel.ACTIVE)) {
+//						model.fireTableDataChanged();
+//					}
+//
+//				}
+//			}
+//		});
+
 	}
 
 	/**

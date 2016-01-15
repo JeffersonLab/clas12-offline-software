@@ -6,13 +6,15 @@ import java.awt.Rectangle;
 public class DraggableRectangle extends Rectangle implements Draggable {
 	
 	// are we being dragged
-	private boolean _dragging;
+	protected boolean _dragging;
 
 	// is dragging primed
-	private boolean _draggingPrimed;
+	protected boolean _draggingPrimed;
 
 	// current point
-	private Point _currentPoint;
+	protected Point _currentPoint;
+	
+	protected boolean _beenMoved;
 
 	@Override
 	public boolean isDraggingPrimed() {
@@ -32,6 +34,7 @@ public class DraggableRectangle extends Rectangle implements Draggable {
 	@Override
 	public void setDragging(boolean dragging) {
 		_dragging = dragging;
+		_beenMoved = true;
 	}
 
 	@Override

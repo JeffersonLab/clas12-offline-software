@@ -8,8 +8,11 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
+
 import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.splot.pdata.HistoData;
@@ -22,7 +25,8 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 
 	private JFormattedTextField _maxValTF;
 	
-	private JFormattedTextField _componentCountTF;
+//	private JFormattedTextField _componentCountTF;
+	private JTextField _componentCountTF;
 
 	private SelectPanel _sp;
 
@@ -58,37 +62,81 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		_numBinsTF = integerField(sp, "Number of Bins", _numBins);
 		_minValTF = decimalField(sp, "Min Value", _minVal);
 		_maxValTF = decimalField(sp, "Max Value", _maxVal);
-		_componentCountTF = integerField(sp, "Set for Component Count", _numComponents);
+//		_componentCountTF = integerField(sp, "Set for Component Count", _numComponents);
+		_componentCountTF = numField(sp, "Set for Component Count", _numComponents);
 		
-		KeyAdapter kl = new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent kev) {
-				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
-					try {
-						_numComponents = ((Number) _componentCountTF.getValue()).intValue();
-						_numComponents = Math.max(0, Math.min(_numComponents, 10000));
-						_componentCountTF.setValue(_numComponents);
-						
-						if (_numComponents > 0) {
-							_numBins = _numComponents;
-							_minVal = 0.5;
-							_maxVal = _numComponents + 0.5;
-							_numBinsTF.setValue(_numBins);
-							_minValTF.setValue(_minVal);
-							_maxValTF.setValue(_maxVal);
-						}
-					} catch (Exception e) {
-					}
-				}
-			}
-		};
-		_componentCountTF.addKeyListener(kl);
+//		KeyAdapter kl = new KeyAdapter() {
+//			@Override
+//			public void keyReleased(KeyEvent kev) {
+//				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
+////				if (Character.isDigit(kev.getKeyChar())) {
+//					try {
+//						_numComponents = ((Number) _componentCountTF.getValue()).intValue();
+//						_numComponents = Math.max(0, Math.min(_numComponents, 10000));
+//						_componentCountTF.setValue(_numComponents);
+//						
+//						if (_numComponents > 0) {
+//							_numBins = _numComponents;
+//							_minVal = 0.5;
+//							_maxVal = _numComponents + 0.5;
+//							_numBinsTF.setValue(_numBins);
+//							_minValTF.setValue(_minVal);
+//							_maxValTF.setValue(_maxVal);
+//						}
+//					} catch (Exception e) {
+//					}
+//				}
+//			}
+//		};
+//		_componentCountTF.addKeyListener(kl);
 
 		_numBinsTF.addPropertyChangeListener("value", this);
 		_minValTF.addPropertyChangeListener("value", this);
 		_maxValTF.addPropertyChangeListener("value", this);
 		p.add(sp, BorderLayout.NORTH);
 		add(p, BorderLayout.EAST);
+	}
+	
+	private JTextField numField(JPanel p, String title, int defValue) {
+		final JTextField tf = new JTextField();
+
+		KeyAdapter kl = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent kev) {
+
+				int oldCount = _numComponents;
+				try {
+					String s = tf.getText();
+					if (s != null) {
+						s = s.trim();
+						if (s.length() > 0) {
+							_numComponents = Integer.parseInt(tf.getText());
+
+							if (_numComponents > 0) {
+								_numBins = _numComponents;
+								_minVal = 0.5;
+								_maxVal = _numComponents + 0.5;
+								_numBinsTF.setValue(_numBins);
+								_minValTF.setValue(_minVal);
+								_maxValTF.setValue(_maxVal);
+							}
+						}
+					}
+				} catch (Exception e) {
+					_numComponents = oldCount;
+					tf.setText("" + _numComponents);
+				}
+			}
+		};
+		tf.addKeyListener(kl);
+		
+		tf.setText("" + defValue);
+		tf.setColumns(8);
+		JPanel panel = titledPanel(title);
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		panel.add(tf);
+		p.add(panel);
+		return tf;
 	}
 
 	private JFormattedTextField integerField(JPanel p, String title,

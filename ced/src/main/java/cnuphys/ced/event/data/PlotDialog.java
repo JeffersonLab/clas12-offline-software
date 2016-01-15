@@ -23,7 +23,9 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
+import cnuphys.splot.plot.PlotParameters;
 
 public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener {
 	
@@ -304,6 +306,31 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
     		return null;
     	}
     	return FileUtilities.tokens(s, DELIMIT);
+    }
+    
+    /**
+     * Get the plot parameters for the underlying plot.
+     * @return the plot parameters for the underlying plot.
+     */
+    public PlotParameters getParameters() {
+    	PlotCanvas canvas = getCanvas();
+    	if (canvas != null) {
+    		return canvas.getParameters();
+    	}
+    	
+    	return null;
+    }
+    
+    /**
+     * Get the plot canvas for the underlying plot.
+     * @return the plot canvas for the underlying plot.
+     */
+    public PlotCanvas getCanvas() {
+    	if (_plotPanel != null) {
+    		return _plotPanel.getCanvas();
+    	}
+    	
+    	return null;
     }
 	
 }

@@ -64,7 +64,7 @@ public class Histogram extends PlotDialog {
 //		System.err.println("MIN X: " + h1.getMinX());
 //		System.err.println("MAX X: " + h1.getMaxX());
 		canvas.getParameters().setXRange(h1.getMinX(), h1.getMaxX());
-		canvas.getParameters().setLegendFont(Fonts.smallFont);
+		canvas.getParameters().setTextFont(Fonts.smallFont);
 		
 		canvas.getPlotTicks().setDrawBinValue(false);
 		canvas.getPlotTicks().setNumMajorTickX(numXticks);

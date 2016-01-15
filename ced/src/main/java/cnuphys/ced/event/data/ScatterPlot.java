@@ -63,7 +63,7 @@ public class ScatterPlot extends PlotDialog {
 		canvas.getParameters().setAxesFont(Fonts.smallFont);
 		canvas.getParameters().setMinExponentY(5);
 		canvas.getParameters().setMinExponentX(4);
-		canvas.getParameters().setLegendFont(Fonts.smallFont);
+		canvas.getParameters().setTextFont(Fonts.smallFont);
 
 		canvas.getPlotTicks().setDrawBinValue(false);
 		canvas.getPlotTicks().setNumMajorTickX(4);

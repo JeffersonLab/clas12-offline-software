@@ -12,6 +12,8 @@ public interface ICut {
 	
 	public String getName();
 
+	public String plotText();
+
 	public String getDefinition();
 	
 	public String getCutType();

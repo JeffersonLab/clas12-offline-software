@@ -102,6 +102,12 @@ public class Gaussians extends AExample {
 		params.mustIncludeXZero(true);
 		params.mustIncludeYZero(true);
 		
+		String extra[] = {
+				"This is an extra string",
+				"This is a longer extra string",
+				"This is an even longer extra string"
+		};
+		params.setExtraStrings(extra);
 		
 	}
 
