@@ -35,7 +35,6 @@ public class Histo extends AExample {
 
 	@Override
 	protected String getPlotTitle() {
-		// TODO Auto-generated method stub
 		return "Sample 1D Histogram";
 	}
 

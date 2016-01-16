@@ -6,6 +6,7 @@ import java.awt.Shape;
 import java.util.Vector;
 
 import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.Histo2DData;
 
 public class DataDrawer {
 
@@ -28,12 +29,11 @@ public class DataDrawer {
 	 * @param ds the DataSet to draw.
 	 */
 	public void draw(Graphics g, DataSet ds) {
-
+		
 		if ((ds == null) || ds.getSize() < 1) {
 			return;
 		}
 
-		
 		if (!(g.getClip().intersects(_plotCanvas.getActiveBounds()))) {
 //			System.err.println("CLIP SKIP");
 			return;
@@ -81,6 +81,10 @@ public class DataDrawer {
 			for (int i = 0; i < ds.getColumnCount(); i++) {
 				CurveDrawer.drawHisto1D(g, _plotCanvas, ds.getColumn(i));
 			}
+			break;
+			
+		case H2D:
+			CurveDrawer.drawHisto2D(g, _plotCanvas, ds.getColumn(0));
 			break;
 
 		case XYY: // share an x column

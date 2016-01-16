@@ -10,6 +10,7 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import cnuphys.splot.fit.AltPolynomialFit;
 import cnuphys.splot.fit.CubicSpline;
@@ -26,6 +27,7 @@ import cnuphys.splot.fit.PolyAndGaussianFit;
 import cnuphys.splot.fit.PolyFit;
 import cnuphys.splot.pdata.DataColumn;
 import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.style.IStyled;
 import cnuphys.splot.style.Styled;
@@ -36,6 +38,37 @@ public class CurveDrawer {
 
 	private static final Color _transGray = new Color(80, 80, 80, 16);
 
+	public static void drawHisto2D(Graphics g, PlotCanvas canvas,
+			DataColumn histoColumn) {
+		Histo2DData hd2 = histoColumn.getHistoData2D();
+		
+		long maxCount = hd2.getMaxCount();
+		if (maxCount < 1) {
+			return;
+		}
+		
+		long counts[][] = hd2.getCounts();
+		
+		Gradient gradient = canvas.getGradient();
+		
+		Rectangle r = new Rectangle();
+		for (int xbin = 0; xbin < hd2.getNumberBinsX(); xbin++) {
+			for (int ybin = 0; ybin < hd2.getNumberBinsY(); ybin++) {
+				long count = counts[xbin][ybin];
+				double fract = ((double)count)/maxCount;
+				
+				Color color = gradient.getColor(fract);
+				
+				Rectangle2D.Double wrect = hd2.getRectangle(xbin, ybin);
+//				System.err.println("WR: " + wrect);
+				canvas.worldToLocal(r, wrect);
+				
+				g.setColor(color);;
+				g.fillRect(r.x, r.y, r.width, r.height);
+				
+			}
+		}
+	}
 	/**
 	 * Draw a 1D histogram
 	 * 

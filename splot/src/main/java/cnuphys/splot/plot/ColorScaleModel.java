@@ -56,7 +56,9 @@ public class ColorScaleModel {
 			Color colors[] = {
 	//				new Color(0, 0, 139),
 	//				new Color(0, 0, 255),
-					new Color(0, 128, 255),
+	//				new Color(0, 128, 255),
+					new Color(255, 255, 255),
+					new Color(128, 255, 255),
 					new Color(0, 255, 255),
 					new Color(86, 255, 86), //
 					new Color(173, 255, 47),

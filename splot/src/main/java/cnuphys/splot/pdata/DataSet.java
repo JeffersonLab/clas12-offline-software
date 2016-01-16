@@ -331,6 +331,15 @@ public class DataSet extends DefaultTableModel {
 	}
 
 	/**
+	 * Check to see if this data set is for 2D Histograms
+	 * 
+	 * @return <code>true</code> if this is for 2D histograms
+	 */
+	public boolean is2DHistoSet() {
+		return (_type == DataSetType.H2D);
+	}
+
+	/**
 	 * Set all fits to dirty.
 	 */
 	public void setAllFitsDirty() {
@@ -728,6 +737,15 @@ public class DataSet extends DefaultTableModel {
 	public void add(double... vals) throws DataSetException {
 
 		int count = (vals == null) ? 0 : vals.length;
+		
+		if (_type == DataSetType.H2D) {
+			if (count == 2) {
+				getColumn(0).histo2DAdd(vals[0], vals[1]);
+			}
+			return;
+		}
+		
+		
 		if (count > getColumnCount()) {
 			String msg = "Expected " + getColumnCount()
 					+ " values in add, but got: " + count;
@@ -866,6 +884,10 @@ public class DataSet extends DefaultTableModel {
 			if (is1DHistoSet()) {
 				HistoData hd = dc.getHistoData();
 				return hd.getNumberBins();
+			}
+			else if (is2DHistoSet()) {
+				Histo2DData h2d = dc.getHistoData2D();
+				return (h2d == null) ? 0 : 1;
 			}
 			else {
 				rowCount = dc.size();
