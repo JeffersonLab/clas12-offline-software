@@ -189,7 +189,7 @@ public class FitEditorPanel extends JPanel {
 		}
 		else {
 
-			if (curve.isHistogram()) {
+			if (curve.isHistogram1D()) {
 				HistoData hd = curve.getHistoData();
 				carefulAdd(_histoCBPanel);
 			}
@@ -249,7 +249,7 @@ public class FitEditorPanel extends JPanel {
 	 */
 	public void setFit(DataColumn curve) {
 
-		if (curve.isHistogram()) {
+		if (curve.isHistogram1D()) {
 			HistoData hd = curve.getHistoData();
 			_rmsOrCB.setSelected(hd.useRmsInHistoLegend());
 		}

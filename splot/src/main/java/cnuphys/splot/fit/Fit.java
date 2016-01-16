@@ -387,7 +387,7 @@ public class Fit {
 		StringBuffer sb = new StringBuffer(1024);
 
 		sb.append(curve.getName() + "<BR>");
-		if (curve.isHistogram()) {
+		if (curve.isHistogram1D()) {
 			HistoData hd = curve.getHistoData();
 			String cntStr = String.format(
 					"Total counts: %d<BR> Good counts: %d<BR> Over counts: %d<BR> Under counts: %d",

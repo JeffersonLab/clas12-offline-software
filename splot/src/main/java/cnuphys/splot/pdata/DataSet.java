@@ -516,7 +516,7 @@ public class DataSet extends DefaultTableModel {
 					DataColumnType.Y);
 			if (!ycols.isEmpty()) {
 				for (DataColumn yc : ycols) {
-					if (yc.isHistogram()) {
+					if (yc.isHistogram1D()) {
 						v.add(yc.getHistoData());
 					}
 					else {

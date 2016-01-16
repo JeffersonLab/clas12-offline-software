@@ -29,6 +29,9 @@ public class PlotParameters {
 	private boolean _extraBorder = true;
 	private boolean _drawExtra = true;
 	private String[] _extraStrings;
+	
+	//color scale
+	private boolean _drawGradient = true;
 
 	private Font _titleFont = Environment.getInstance().getCommonFont(20);
 	private Font _axesLabelFont = Environment.getInstance().getCommonFont(14);
@@ -463,6 +466,24 @@ public class PlotParameters {
 		_drawLegend = draw;
 	}
 
+	
+	/**
+	 * Check whether we should draw a gradient
+	 * 
+	 * @return whether we should draw a legend
+	 */
+	public boolean gradientDrawing() {
+		return _drawGradient;
+	}
+
+	/**
+	 * Set whether we should draw a gradient
+	 * 
+	 * @param draw the new drawing flag
+	 */
+	public void setGradientDrawing(boolean draw) {
+		_drawGradient = draw;
+	}
 
 	/**
 	 * The number of decimals for tick values on x axis
