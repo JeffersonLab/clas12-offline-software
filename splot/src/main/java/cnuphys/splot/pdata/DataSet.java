@@ -35,11 +35,32 @@ public class DataSet extends DefaultTableModel {
 
 	// most sets do not have x errors
 	private boolean _hasXErrors;
+	
+	/**
+	 * This constructor is for a 2D histogram
+	 * @param h2d
+	 */
+	public DataSet(Histo2DData h2d) throws DataSetException {
+		if (h2d == null) {
+			throw (new DataSetException(
+					"Must supply at least one histogram data object."));
+		}
+		
+		_type = DataSetType.H2D;
+
+		//just one column
+		_columns.add(new DataColumn(DataColumnType.Y, h2d.getName()));
+		getColumn(0).setHistoData2D(h2d);
+		getColumn(0).initStyle();
+		getColumn(0).getStyle().setSymbolType(SymbolType.NOSYMBOL);
+		getColumn(0).initFit();
+
+	}
 
 	/**
 	 * This constructor is used for 1D histograms
 	 * 
-	 * @param histos an array of hiso data objects
+	 * @param histos an array of histo data objects
 	 */
 	public DataSet(HistoData... histos) throws DataSetException {
 		if ((histos == null) || (histos.length < 1)) {
