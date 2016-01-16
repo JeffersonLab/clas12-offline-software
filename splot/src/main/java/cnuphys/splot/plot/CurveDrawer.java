@@ -245,7 +245,7 @@ public class CurveDrawer {
 			return false;
 		}
 
-		if (ycol.isHistogram()) {
+		if (ycol.isHistogram1D()) {
 			HistoData hd = ycol.getHistoData();
 			if ((hd == null) || (hd.getGoodCount() < 3)) {
 				return false;

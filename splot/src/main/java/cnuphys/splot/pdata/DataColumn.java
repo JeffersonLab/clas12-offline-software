@@ -5,9 +5,6 @@ import cnuphys.splot.style.Styled;
 
 public class DataColumn extends GrowableArray {
 
-	/** The XML root element name */
-	public static final String XmlRootElementName = "DataColumn";
-
 	// diagnostic counter
 	private static int _count = 0;
 
@@ -89,7 +86,7 @@ public class DataColumn extends GrowableArray {
 	 * 
 	 * @return <code>true</code> if this is a histogram
 	 */
-	public boolean isHistogram() {
+	public boolean isHistogram1D() {
 		return _isHisto;
 	}
 

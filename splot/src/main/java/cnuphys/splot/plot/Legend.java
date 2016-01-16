@@ -61,7 +61,7 @@ public class Legend extends DraggableRectangle {
 
 		if (_numVisCurves == 1) {
 			DataColumn dc = ds.getCurve(0);
-			if (!dc.isHistogram()) {
+			if (!dc.isHistogram1D()) {
 				return;
 			}
 		}
@@ -103,7 +103,7 @@ public class Legend extends DraggableRectangle {
 			legStr = "";
 		}
 
-		if (curve.isHistogram()) {
+		if (curve.isHistogram1D()) {
 			legStr += (" " + curve.getHistoData().statStr());
 		}
 
@@ -144,7 +144,7 @@ public class Legend extends DraggableRectangle {
 				}
 
 				String legStr = dc.getName();
-				if (dc.isHistogram()) {
+				if (dc.isHistogram1D()) {
 					legStr += (" " + dc.getHistoData().statStr());
 				}
 

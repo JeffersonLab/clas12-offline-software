@@ -104,6 +104,9 @@ public class PlotCanvas extends JComponent
 	
 	// extra and floating label dragging
 	private ExtraText _extra;
+	
+	//color gradient
+	private Gradient _gradient;
 
 	// data drawer
 	private DataDrawer _dataDrawer;
@@ -159,6 +162,7 @@ public class PlotCanvas extends JComponent
 
 		_legend = new Legend(this);
 		_extra = new ExtraText(this);
+		_gradient = new Gradient(this);
 		_dataDrawer = new DataDrawer(this);
 		_plotPopup = new PlotPopupMenu(this);
 		setComponentPopupMenu(_plotPopup);
@@ -354,6 +358,9 @@ public class PlotCanvas extends JComponent
 			_extra.draw(g);
 		}
 
+		if (_parameters.gradientDrawing()) {
+			_gradient.draw(g);
+		}
 
 		firePropertyChange(DONEDRAWINGPROP, drawCount, ++drawCount);
 
@@ -479,6 +486,20 @@ public class PlotCanvas extends JComponent
 			_extra.setCurrentPoint(e.getPoint());
 			repaint();
 		}
+		
+		if (_gradient.isDraggingPrimed()) {
+			_gradient.setDragging(true);
+		}
+
+		if (_gradient.isDragging()) {
+			int dx = e.getX() - _gradient.getCurrentPoint().x;
+			int dy = e.getY() - _gradient.getCurrentPoint().y;
+			_gradient.x += dx;
+			_gradient.y += dy;
+			_gradient.setCurrentPoint(e.getPoint());
+			repaint();
+		}
+
 
 	}
 
@@ -624,6 +645,11 @@ public class PlotCanvas extends JComponent
 			_extra.setDraggingPrimed(true);
 			_extra.setCurrentPoint(e.getPoint());
 		}
+		else if (isPointer() && _parameters.gradientDrawing()
+				&& _gradient.contains(e.getPoint())) {
+			_gradient.setDraggingPrimed(true);
+			_gradient.setCurrentPoint(e.getPoint());
+		}
 
 		else {
 
@@ -674,6 +700,9 @@ public class PlotCanvas extends JComponent
 		_extra.setDragging(false);
 		_extra.setDraggingPrimed(false);
 		_extra.setCurrentPoint(null);
+		_gradient.setDragging(false);
+		_gradient.setDraggingPrimed(false);
+		_gradient.setCurrentPoint(null);
 	}
 
 	/**
