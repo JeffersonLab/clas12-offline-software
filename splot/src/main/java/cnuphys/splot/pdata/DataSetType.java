@@ -11,9 +11,10 @@ package cnuphys.splot.pdata;
  *         <li><code>XYEEXYEE</code> An arbitrary number of (x, y, xerr, yerr)
  *         columns
  *         <li><code>H1D</code> Data values for a 1D histogram
+ *         <li><code>H2D</code> Data values for a 2D histogram
  *         <li><code>STRIP</code> xy strip chart
  */
 public enum DataSetType {
-    XYY, XYXY, XYEXYE, XYEEXYEE, H1D, STRIP, UNKNOWN;
+    XYY, XYXY, XYEXYE, XYEEXYEE, H1D, H2D, STRIP, UNKNOWN;
 
 }

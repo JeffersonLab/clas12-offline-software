@@ -30,10 +30,16 @@ public class DataColumn extends GrowableArray {
 	private double _Q;
 
 	// used by 1D histograms
-	private HistoData _histoData;
+	private HistoData _histoData1D;
+	
+	// used by 2D histograms
+	private Histo2DData _histoData2D;
 
-	// set if this is a histogram
-	private boolean _isHisto = false;
+	// set if this is a 1D histogram
+	private boolean _isHisto1D = false;
+
+	// set if this is a 2D histogram
+	private boolean _isHisto2D = false;
 
 	/**
 	 * Creates a DataColumn with initial capacity 100 and increment 100.
@@ -66,7 +72,7 @@ public class DataColumn extends GrowableArray {
 	 * @return the histogram data
 	 */
 	public HistoData getHistoData() {
-		return _histoData;
+		return _histoData1D;
 	}
 
 	/**
@@ -76,19 +82,56 @@ public class DataColumn extends GrowableArray {
 	 */
 	protected void setHistoData(HistoData histo) {
 		if (histo != null) {
-			_isHisto = true;
-			_histoData = histo;
+			_isHisto1D = true;
+			_isHisto2D = false;
+			_histoData1D = histo;
 		}
+	}
+	
+
+	/**
+	 * This gets the histogram 2D data, which for non-histograms will be
+	 * <code>null</code>.
+	 * 
+	 * @return the histogram 2D data
+	 */
+	public Histo2DData getHistoData2D() {
+		return _histoData2D;
 	}
 
 	/**
-	 * Checks whether this is a histogram
+	 * Set the histogram 2D data container
 	 * 
-	 * @return <code>true</code> if this is a histogram
+	 * @param histo2D the histogram 2D data
+	 */
+	protected void setHistoData2D(Histo2DData histo2D) {
+		if (histo2D != null) {
+			_isHisto1D = false;
+			_isHisto2D = true;
+			_histoData2D = histo2D;
+		}
+	}
+
+
+	/**
+	 * Checks whether this is a 1D histogram
+	 * 
+	 * @return <code>true</code> if this is a 1D histogram
 	 */
 	public boolean isHistogram1D() {
-		return _isHisto;
+		return _isHisto1D;
 	}
+	
+
+	/**
+	 * Checks whether this is a 2D histogram
+	 * 
+	 * @return <code>true</code> if this is a 2D histogram
+	 */
+	public boolean isHistogram2D() {
+		return _isHisto2D;
+	}
+
 
 	/**
 	 * Check whether this "curve" is visible. Only relevant for Y columns.
@@ -106,8 +149,11 @@ public class DataColumn extends GrowableArray {
 	 */
 	public void setName(String name) {
 		_name = name;
-		if (_isHisto) {
-			_histoData.setName(name);
+		if (_isHisto1D) {
+			_histoData1D.setName(name);
+		}
+		else if (_isHisto2D) {
+			_histoData2D.setName(name);
 		}
 	}
 
@@ -190,6 +236,22 @@ public class DataColumn extends GrowableArray {
 	}
 
 	/**
+	 * Add used only by 2D histograms
+	 * @param xval the x value
+	 * @param yval the y value
+	 */
+	public void histo2DAdd(double xval, double yval) {
+		if (_isHisto2D) {
+			if (_histoData2D != null) {
+				_histoData2D.add(xval, yval);
+			}
+		}
+		else {
+			System.err.println("In DataColumn, histo2DAdd(x,y) inexplicably called for non-2D histogram");
+		}
+	}
+	
+	/**
 	 * Add a value to the array, growing it if necessary.
 	 * 
 	 * @param val the value to add
@@ -197,8 +259,8 @@ public class DataColumn extends GrowableArray {
 	@Override
 	public void add(double val) {
 
-		if (_isHisto) {
-			_histoData.add(val);
+		if (_isHisto1D) {
+			_histoData1D.add(val);
 		}
 		else {
 			super.add(val);
@@ -211,8 +273,8 @@ public class DataColumn extends GrowableArray {
 		// some running sums for statistics
 
 		long n;
-		if (_isHisto) {
-			n = _histoData.getTotalCount();
+		if (_isHisto1D) {
+			n = _histoData1D.getTotalCount();
 		}
 		else {
 			n = size();
@@ -238,8 +300,8 @@ public class DataColumn extends GrowableArray {
 	 */
 	public double getMean() {
 		long n;
-		if (_isHisto) {
-			n = _histoData.getTotalCount();
+		if (_isHisto1D) {
+			n = _histoData1D.getTotalCount();
 		}
 		else {
 			n = size();
@@ -258,8 +320,8 @@ public class DataColumn extends GrowableArray {
 	 */
 	public double getVariance() {
 		long n;
-		if (_isHisto) {
-			n = _histoData.getTotalCount();
+		if (_isHisto1D) {
+			n = _histoData1D.getTotalCount();
 		}
 		else {
 			n = size();
@@ -300,8 +362,11 @@ public class DataColumn extends GrowableArray {
 	@Override
 	public void clear() {
 		super.clear();
-		if (_isHisto) {
-			_histoData.clear();
+		if (_isHisto1D) {
+			_histoData1D.clear();
+		}
+		else if (_isHisto2D) {
+			_histoData2D.clear();
 		}
 
 		if (_fit != null) {
@@ -317,6 +382,11 @@ public class DataColumn extends GrowableArray {
 	 */
 	@Override
 	public void set(int index, double val) {
+		
+		if (_isHisto2D) {
+			System.err.println("DataColumn,set inexlpicably called for 2D histo");
+			return;
+		}
 		// TODO something for histograms this is called from datatable
 		super.set(index, val);
 		if (_fit != null) {
