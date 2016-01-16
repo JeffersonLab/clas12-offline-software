@@ -107,7 +107,7 @@ public class PlotCanvas extends JComponent
 	
 	//color gradient
 	private Gradient _gradient;
-
+	
 	// data drawer
 	private DataDrawer _dataDrawer;
 
@@ -772,6 +772,31 @@ public class PlotCanvas extends JComponent
 			_worldToLocal.transform(wp, pp);
 		}
 	}
+	
+	public void worldToLocal(Rectangle r, Rectangle.Double wr) {
+		// New version to accommodate world with x decreasing right
+		Point2D.Double wp0 = new Point2D.Double(wr.getMinX(), wr.getMinY());
+		Point2D.Double wp1 = new Point2D.Double(wr.getMaxX(), wr.getMaxY());
+		Point p0 = new Point();
+		Point p1 = new Point();
+		worldToLocal(p0, wp0);
+		worldToLocal(p1, wp1);
+
+		// Old version
+		// Point2D.Double wp0 = new Point2D.Double(wr.x, wr.y);
+		// Point2D.Double wp1 = new Point2D.Double(wr.x + wr.width, wr.y +
+		// wr.height);
+		// Point p0 = new Point();
+		// Point p1 = new Point();
+		// worldToLocal(p0, wp0);
+		// worldToLocal(p1, wp1);
+
+		int x = Math.min(p0.x, p1.x);
+		int y = Math.min(p0.y, p1.y);
+		int w = Math.abs(p1.x - p0.x);
+		int h = Math.abs(p1.y - p0.y);
+		r.setBounds(x, y, w, h);
+	}
 
 	// /**
 	// * The data set has changed, so we must redraw.
@@ -982,9 +1007,22 @@ public class PlotCanvas extends JComponent
 		needsRedraw(false);
 	}
 
+	/**
+	 * Get the canavas's plot ticks
+	 * @return the plot ticks
+	 */
 	public PlotTicks getPlotTicks() {
 		return _plotTicks;
 	}
+	
+	/**
+	 * Get the canvas's color gradient
+	 * @return the color gradient
+	 */
+	public Gradient getGradient() {
+		return _gradient;
+	}
+
 
 	/**
 	 * Set which toggle button is selected

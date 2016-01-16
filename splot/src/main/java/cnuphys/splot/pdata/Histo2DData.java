@@ -242,6 +242,8 @@ public class Histo2DData {
 			_outOfRangeCount++;
 			return;
 		}
+		
+//		System.err.println("   BINX, BINY: " + binX + ", " + binY);
 		_counts[binX][binY]++;
 		
 		_maxCount = Math.max(_maxCount, _counts[binX][binY]);
@@ -405,7 +407,7 @@ public class Histo2DData {
 	 * @param y the y value
 	 * @return the world rectangle, or <code>null</code>.
 	 */
-	Rectangle2D.Double getRectangle(double x, double y) {
+	public Rectangle2D.Double getRectangle(double x, double y) {
 		int binX = getBinX(x);
 		int binY = getBinY(y);
 		return getRectangle(binX, binY);
@@ -417,7 +419,7 @@ public class Histo2DData {
 	 * @param binY the y bin
 	 * @return  the world rectangle, or <code>null</code>.
 	 */
-	Rectangle2D.Double getRectangle(int binX, int binY) {
+	public Rectangle2D.Double getRectangle(int binX, int binY) {
 		
 		if ((binX < 0) || (binY < 0)) {
 			return null;
