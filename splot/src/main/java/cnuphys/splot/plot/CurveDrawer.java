@@ -56,7 +56,7 @@ public class CurveDrawer {
 			for (int ybin = 0; ybin < hd2.getNumberBinsY(); ybin++) {
 				long count = counts[xbin][ybin];
 				double fract = ((double)count)/maxCount;
-				
+								
 				Color color = gradient.getColor(fract);
 				
 				Rectangle2D.Double wrect = hd2.getRectangle(xbin, ybin);

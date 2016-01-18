@@ -82,6 +82,9 @@ public class Gradient extends DraggableRectangle {
 			g.setColor(c);
 			g.fillRect(x, bottom-i, GRAD_WIDTH, 2);
 		}
+		
+		g.setColor(Color.black);
+		g.drawRect(x, y+1, GRAD_WIDTH, GRAD_HEIGHT+1);
 	}
 	
 
