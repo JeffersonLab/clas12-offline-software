@@ -17,7 +17,6 @@ import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.GeometryManager;

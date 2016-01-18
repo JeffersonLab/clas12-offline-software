@@ -1,8 +1,14 @@
 package cnuphys.splot.pdata;
 
 
+import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
+
+import cnuphys.splot.plot.DoubleFormat;
+import cnuphys.splot.plot.PlotCanvas;
+import cnuphys.splot.plot.PlotParameters;
 
 public class Histo2DData {
 
@@ -468,6 +474,63 @@ public class Histo2DData {
 		
 		return ((double)count)/((double)_maxCount);
 
+	}
+
+
+	/**
+	 * Get the status string
+	 * 
+	 * @param canvas the plot canvas
+	 * @param histo the histo data object
+	 * @param mousePoint where the mouse is
+	 * @param wp the data coordinates of the mouse
+	 * @return a status string
+	 */
+	public static String statusString(PlotCanvas canvas, Histo2DData histo,
+			Point mousePoint, Point.Double wp) {
+		String s = null;
+		int xBin = histo.getBinX(wp.x);
+		int yBin = histo.getBinY(wp.y);
+
+		PlotParameters params = canvas.getParameters();
+		String xMinStr = DoubleFormat.doubleFormat(histo.getBinMinX(xBin),
+				params.getNumDecimalX(), params.getMinExponentX());
+		String xMaxStr = DoubleFormat.doubleFormat(histo.getBinMaxX(xBin),
+				params.getNumDecimalX(), params.getMinExponentX());
+		
+		String yMinStr = DoubleFormat.doubleFormat(histo.getBinMinY(yBin),
+				params.getNumDecimalY(), params.getMinExponentY());
+		String yMaxStr = DoubleFormat.doubleFormat(histo.getBinMaxY(yBin),
+				params.getNumDecimalY(), params.getMinExponentY());
+
+		s = "[" + histo.getName() + "] xbin: " + xBin + " [" + xMinStr + " - "
+				+ xMaxStr +  "] ybin: " + yBin + " [" + yMinStr + " - "
+						+ yMaxStr + "]";
+		s += " counts: " + histo.getCount(xBin, yBin);
+
+		return s;
+	}
+	
+	/**
+	 * Get the count for a given bin double
+	 * 
+	 * @param xbin the x bin
+	 * @param ybin the y bin
+	 * @return the count for that bin double
+	 */
+	public long getCount(int xbin, int ybin) {
+		if (_counts == null) {
+			return 0;
+		}
+
+		if ((xbin < 0) || (xbin >= this.getNumberBinsX())) {
+			return 0;
+		}
+
+		if ((ybin < 0) || (ybin >= this.getNumberBinsY())) {
+			return 0;
+		}
+		return _counts[xbin][ybin];
 	}
 
 

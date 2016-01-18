@@ -1,10 +1,7 @@
 package cnuphys.splot.example;
 
-import java.awt.Color;
-
 import com.nr.ran.Normaldev;
 
-import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.Histo2DData;

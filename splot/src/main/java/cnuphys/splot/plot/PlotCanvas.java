@@ -37,6 +37,7 @@ import cnuphys.splot.pdata.DataColumn;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.DataSetType;
+import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.pdata.NiceScale;
 import cnuphys.splot.rubberband.IRubberbanded;
@@ -546,6 +547,16 @@ public class PlotCanvas extends JComponent
 								+ colorStr(s, GraphicsUtilities.colorToHex(lc));
 						// break;
 					}
+				}
+			}
+			else if (_dataSet.is2DHistoSet()) {
+				Histo2DData h2d = _dataSet.getColumn(0).getHistoData2D();
+				String s = Histo2DData.statusString(this, h2d, pp, _workPoint);
+				if (s != null) {
+					Color lc = Color.red;
+					_locationString += "&nbsp&nbsp"
+							+ colorStr(s, GraphicsUtilities.colorToHex(lc));
+					// break;
 				}
 			}
 

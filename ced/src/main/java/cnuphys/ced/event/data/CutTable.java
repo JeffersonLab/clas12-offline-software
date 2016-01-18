@@ -1,12 +1,9 @@
 package cnuphys.ced.event.data;
 
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
