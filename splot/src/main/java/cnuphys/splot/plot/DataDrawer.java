@@ -6,7 +6,6 @@ import java.awt.Shape;
 import java.util.Vector;
 
 import cnuphys.splot.pdata.DataSet;
-import cnuphys.splot.pdata.Histo2DData;
 
 public class DataDrawer {
 
