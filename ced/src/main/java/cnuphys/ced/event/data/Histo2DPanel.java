@@ -38,7 +38,24 @@ public class Histo2DPanel extends JPanel {
 	 * @return the 2D histogram data
 	 */
 
+	/**
+	 * Get the Histo2DData object based on the selections.
+	 * @return the Histo2DData object
+	 */
 	public Histo2DData getHisto2DData() {
-		return null;
+		String xname = getSelectPanelX().getFullName();
+		String yname = getSelectPanelY().getFullName();
+		String name = xname + " - " + yname;
+		
+		int xnumBins = _histoPanelX.getNumBins();
+		double xminVal = _histoPanelX.getMinVal();
+		double xmaxVal = _histoPanelX.getMaxVal();
+
+		
+		int ynumBins = _histoPanelY.getNumBins();
+		double yminVal = _histoPanelY.getMinVal();
+		double ymaxVal = _histoPanelY.getMaxVal();
+		
+		return new Histo2DData(name, xname, yname, xminVal, xmaxVal, xnumBins, yminVal, ymaxVal, ynumBins);
 	}
 }

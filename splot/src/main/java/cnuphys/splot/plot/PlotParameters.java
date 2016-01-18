@@ -31,7 +31,7 @@ public class PlotParameters {
 	private String[] _extraStrings;
 	
 	//color scale
-	private boolean _drawGradient = true;
+	private boolean _drawGradient = false;
 
 	private Font _titleFont = Environment.getInstance().getCommonFont(20);
 	private Font _axesLabelFont = Environment.getInstance().getCommonFont(14);

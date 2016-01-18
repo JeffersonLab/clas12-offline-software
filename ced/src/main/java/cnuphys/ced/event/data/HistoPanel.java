@@ -206,10 +206,34 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		if (name == null) {
 			name = "???";
 		}
-		_numBins = ((Number) _numBinsTF.getValue()).intValue();
-		_minVal = ((Number) _minValTF.getValue()).doubleValue();
-		_maxVal = ((Number) _maxValTF.getValue()).doubleValue();
+		_numBins = getNumBins();
+		_minVal = getMinVal();
+		_maxVal = getMaxVal();
 
 		return new HistoData(name, _minVal, _maxVal, _numBins);
 	}
+	
+	/**
+	 * Get the number of bins
+	 * @return the number of bins
+	 */
+	public int getNumBins() {
+		return ((Number) _numBinsTF.getValue()).intValue();
+	}
+	
+	/**
+	 * Get the minimum value
+	 * @return the minimum value
+	 */
+	public double getMinVal() {
+		return ((Number) _minValTF.getValue()).doubleValue();
+	} 
+	
+	/**
+	 * Get the maximum value
+	 * @return the maximum value
+	 */
+	public double getMaxVal() {
+		return ((Number) _maxValTF.getValue()).doubleValue();
+	} 
 }

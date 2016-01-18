@@ -1,6 +1,5 @@
 package cnuphys.splot.pdata;
 
-
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
@@ -14,8 +13,12 @@ public class Histo2DData {
 
 	private static int OUTOFRANGE = -100;
 
-	// this is the name
+	// this is the over all name
 	private String _name;
+
+	// the x an y variable names
+	private String _xName;
+	private String _yName;
 
 	// some counts
 	private long _outOfRangeCount;
@@ -32,15 +35,17 @@ public class Histo2DData {
 
 	// the counts
 	private long[][] _counts;
-	
-	//the bin with the max counts
+
+	// the bin with the max counts
 	private long _maxCount;
 
 	/**
 	 * The data for a 2D histogram where the bin spacing is uniform.
 	 * 
 	 * @param name
-	 *            the cname
+	 *            the name
+	 * @param xname  the x variable name
+	 * @param yname  the y variable name
 	 * @param valMin
 	 *            the data min
 	 * @param valMax
@@ -48,10 +53,11 @@ public class Histo2DData {
 	 * @param numBins
 	 *            the number of bins
 	 */
-	public Histo2DData(String name, double valMinX, double valMaxX,
-			int numBinsX, double valMinY, double valMaxY, int numBinsY) {
+	public Histo2DData(String name, String xname, String yname, double valMinX,
+			double valMaxX, int numBinsX, double valMinY, double valMaxY,
+			int numBinsY) {
 
-		this(name, evenBins(valMinX, valMaxX, numBinsX), evenBins(valMinY,
+		this(name, xname, yname, evenBins(valMinX, valMaxX, numBinsX), evenBins(valMinY,
 				valMaxY, numBinsY));
 	}
 
@@ -61,12 +67,16 @@ public class Histo2DData {
 	 * 
 	 * @param name
 	 *            the curve name of the histogram
+	 * @param xname  the x variable name
+	 * @param yname  the y variable name
 	 * @param grid
 	 *            the binning grid. It must be in ascending order but is
 	 *            otherwise arbitrary.
 	 */
-	public Histo2DData(String name, double[] gridX, double[] gridY) {
+	public Histo2DData(String name, String xname, String yname, double[] gridX, double[] gridY) {
 		_name = name;
+		_xName = xname;
+		_yName = yname;
 		_gridX = gridX;
 		_gridY = gridY;
 		clear();
@@ -224,6 +234,7 @@ public class Histo2DData {
 
 	/**
 	 * Get the maximum count of any bin
+	 * 
 	 * @return the count of the bin with the most counts.
 	 */
 	public long getMaxCount() {
@@ -248,10 +259,10 @@ public class Histo2DData {
 			_outOfRangeCount++;
 			return;
 		}
-		
-//		System.err.println("   BINX, BINY: " + binX + ", " + binY);
+
+		// System.err.println("   BINX, BINY: " + binX + ", " + binY);
 		_counts[binX][binY]++;
-		
+
 		_maxCount = Math.max(_maxCount, _counts[binX][binY]);
 	}
 
@@ -406,11 +417,14 @@ public class Histo2DData {
 
 		return bin;
 	}
-	
+
 	/**
 	 * Get the world rectangle containing the given x and y values
-	 * @param x the x value
-	 * @param y the y value
+	 * 
+	 * @param x
+	 *            the x value
+	 * @param y
+	 *            the y value
 	 * @return the world rectangle, or <code>null</code>.
 	 */
 	public Rectangle2D.Double getRectangle(double x, double y) {
@@ -418,19 +432,22 @@ public class Histo2DData {
 		int binY = getBinY(y);
 		return getRectangle(binX, binY);
 	}
-	
+
 	/**
 	 * Get the world rectangle corresponding to the given bins
-	 * @param binX the x bin
-	 * @param binY the y bin
-	 * @return  the world rectangle, or <code>null</code>.
+	 * 
+	 * @param binX
+	 *            the x bin
+	 * @param binY
+	 *            the y bin
+	 * @return the world rectangle, or <code>null</code>.
 	 */
 	public Rectangle2D.Double getRectangle(int binX, int binY) {
-		
+
 		if ((binX < 0) || (binY < 0)) {
 			return null;
 		}
-		
+
 		double xmin = getBinMinX(binX);
 		if (Double.isNaN(xmin)) {
 			return null;
@@ -445,77 +462,86 @@ public class Histo2DData {
 		if (Double.isNaN(ymin)) {
 			return null;
 		}
-		
+
 		double ymax = getBinMaxY(binY);
 		if (Double.isNaN(ymax)) {
 			return null;
 		}
 
-		return new Rectangle2D.Double(xmin, ymin, (xmax-xmin), (ymax-ymin));
+		return new Rectangle2D.Double(xmin, ymin, (xmax - xmin), (ymax - ymin));
 	}
-	
+
 	/**
-	 * Get the fractional value (fraction of max value) for use
-	 * in a plot
-	 * @param binX the x bin
-	 * @param binY the y bin
+	 * Get the fractional value (fraction of max value) for use in a plot
+	 * 
+	 * @param binX
+	 *            the x bin
+	 * @param binY
+	 *            the y bin
 	 * @return the fractional value (fraction of max value).
 	 */
 	public double getFractionalValue(int binX, int binY) {
 		if (_maxCount < 1) {
 			return 0;
 		}
-		
+
 		if ((binX < 0) || (binY < 0)) {
 			return 0;
 		}
-		
+
 		long count = _counts[binX][binY];
-		
-		return ((double)count)/((double)_maxCount);
+
+		return ((double) count) / ((double) _maxCount);
 
 	}
-
 
 	/**
 	 * Get the status string
 	 * 
-	 * @param canvas the plot canvas
-	 * @param histo the histo data object
-	 * @param mousePoint where the mouse is
-	 * @param wp the data coordinates of the mouse
+	 * @param canvas
+	 *            the plot canvas
+	 * @param histo
+	 *            the histo data object
+	 * @param mousePoint
+	 *            where the mouse is
+	 * @param wp
+	 *            the data coordinates of the mouse
 	 * @return a status string
 	 */
 	public static String statusString(PlotCanvas canvas, Histo2DData histo,
 			Point mousePoint, Point.Double wp) {
-		String s = null;
+		String s = "[" + histo.getName() + "] ";
 		int xBin = histo.getBinX(wp.x);
 		int yBin = histo.getBinY(wp.y);
 
-		PlotParameters params = canvas.getParameters();
-		String xMinStr = DoubleFormat.doubleFormat(histo.getBinMinX(xBin),
-				params.getNumDecimalX(), params.getMinExponentX());
-		String xMaxStr = DoubleFormat.doubleFormat(histo.getBinMaxX(xBin),
-				params.getNumDecimalX(), params.getMinExponentX());
-		
-		String yMinStr = DoubleFormat.doubleFormat(histo.getBinMinY(yBin),
-				params.getNumDecimalY(), params.getMinExponentY());
-		String yMaxStr = DoubleFormat.doubleFormat(histo.getBinMaxY(yBin),
-				params.getNumDecimalY(), params.getMinExponentY());
+		if ((xBin > -1) && (yBin > -1)) {
+			PlotParameters params = canvas.getParameters();
+			String xMinStr = DoubleFormat.doubleFormat(histo.getBinMinX(xBin),
+					params.getNumDecimalX(), params.getMinExponentX());
+			String xMaxStr = DoubleFormat.doubleFormat(histo.getBinMaxX(xBin),
+					params.getNumDecimalX(), params.getMinExponentX());
 
-		s = "[" + histo.getName() + "] xbin: " + xBin + " [" + xMinStr + " - "
-				+ xMaxStr +  "] ybin: " + yBin + " [" + yMinStr + " - "
-						+ yMaxStr + "]";
-		s += " counts: " + histo.getCount(xBin, yBin);
+			String yMinStr = DoubleFormat.doubleFormat(histo.getBinMinY(yBin),
+					params.getNumDecimalY(), params.getMinExponentY());
+			String yMaxStr = DoubleFormat.doubleFormat(histo.getBinMaxY(yBin),
+					params.getNumDecimalY(), params.getMinExponentY());
+
+			s += histo.getName() + "] xbin: " + xBin + " [" + xMinStr
+					+ " - " + xMaxStr + "] ybin: " + yBin + " [" + yMinStr
+					+ " - " + yMaxStr + "]";
+			s += " counts: " + histo.getCount(xBin, yBin);
+		}
 
 		return s;
 	}
-	
+
 	/**
 	 * Get the count for a given bin double
 	 * 
-	 * @param xbin the x bin
-	 * @param ybin the y bin
+	 * @param xbin
+	 *            the x bin
+	 * @param ybin
+	 *            the y bin
 	 * @return the count for that bin double
 	 */
 	public long getCount(int xbin, int ybin) {
@@ -533,5 +559,22 @@ public class Histo2DData {
 		return _counts[xbin][ybin];
 	}
 
+	/**
+	 * Get the name for the x axis variable
+	 * 
+	 * @return the name for the x axis variable
+	 */
+	public String getXName() {
+		return _xName;
+	}
+
+	/**
+	 * Get the name for the y axis variable
+	 * 
+	 * @return the name for the y axis variable
+	 */
+	public String getYName() {
+		return _yName;
+	}
 
 }

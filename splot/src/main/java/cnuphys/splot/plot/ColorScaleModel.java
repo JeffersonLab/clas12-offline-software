@@ -28,6 +28,9 @@ public class ColorScaleModel {
 
 	// Color returned for a too-big value 
 	private Color _tooBigColor = new Color(64, 64, 64, 64);
+	
+	private Color _zeroColor = Color.white;
+
 
 	private double _minVal;
 	
@@ -57,7 +60,7 @@ public class ColorScaleModel {
 	//				new Color(0, 0, 139),
 	//				new Color(0, 0, 255),
 	//				new Color(0, 128, 255),
-					new Color(255, 255, 255),
+					new Color(240, 240, 255),
 					new Color(128, 255, 255),
 					new Color(0, 255, 255),
 					new Color(86, 255, 86), //
@@ -118,7 +121,7 @@ public class ColorScaleModel {
 		int collen = _colors.length;
 
 		if (relativeDifference(value, _minVal) < TINY) {
-			return _colors[0];
+			return _zeroColor;
 		} else if (relativeDifference(value, _maxVal) < TINY) {
 			return _colors[collen - 1];
 		} else if (value < _minVal) {
@@ -128,6 +131,7 @@ public class ColorScaleModel {
 		}
 		
 		double fract = (value - _minVal)/(_maxVal - _minVal);
+		
 		int index = (int)((collen-1)*fract);
 
 		if (index < 0) {

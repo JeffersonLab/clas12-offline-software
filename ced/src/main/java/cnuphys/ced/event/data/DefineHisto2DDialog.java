@@ -20,6 +20,10 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 	private JButton _cancelButton;
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
 	private Histo2DPanel _histoPanel;
+	
+	//names resulting from selection
+	private String _xName;
+	private String _yName;
 
 	public DefineHisto2DDialog() {
 		setTitle("Define a 2D Histogram");
@@ -91,13 +95,36 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 	public void propertyChange(PropertyChangeEvent evt) {
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
-//		if ((o == _histoPanel.getSelectPanel()) && prop.equals("newname")) {
-//			String fn = (String)(evt.getNewValue());
-//			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
-//			_okButton.setEnabled(valid);
-//		}	
+		
+		if ((o == _histoPanel.getSelectPanelX()) && prop.equals("newname")) {
+			_xName = (String)(evt.getNewValue());
+		}	
+		else if ((o == _histoPanel.getSelectPanelY()) && prop.equals("newname")) {
+			_yName = (String)(evt.getNewValue());
+		}	
+		
+		boolean xValid = ((_xName != null) && (_xName.length() > 4) && _xName.contains(":") && _xName.contains("."));
+		boolean yValid = ((_yName != null) && (_yName.length() > 4) && _yName.contains(":") && _yName.contains("."));
+		_okButton.setEnabled(xValid && yValid);
 	}
 	
+	/**
+	 * Get the name for the x axis variable
+	 * @return the name for the x axis variable
+	 */
+	public String getXName() {
+		return _xName;
+	}
+
+	
+	/**
+	 * Get the name for the y axis variable
+	 * @return the name for the y axis variable
+	 */
+	public String getYName() {
+		return _yName;
+	}
+
 	public static void main(String arg[]) {
 		DefineHisto2DDialog dialog = new DefineHisto2DDialog();
 		dialog.setVisible(true);

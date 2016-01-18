@@ -16,6 +16,7 @@ import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
 
 /**
@@ -32,6 +33,7 @@ public class DefinitionManager implements ActionListener {
 	private JMenu _menu;
 	private JMenuItem _histo;
 	private JMenuItem _scatter;
+	private JMenuItem _histo2D;
 	private JMenuItem _open;
 	
 	//save dir
@@ -79,15 +81,18 @@ public class DefinitionManager implements ActionListener {
 	public JMenu getMenu() {
 		if (_menu == null) {
 			_menu = new JMenu("Define");
-			_histo = new JMenuItem("Define Histogram...");
+			_histo = new JMenuItem("Define 1D Histogram...");
+			_histo2D = new JMenuItem("Define 2D (colorized) Histogram...");
 			_scatter = new JMenuItem("Define Scatter Plot...");
 			_open = new JMenuItem("Read a Plot Definition...");
 			
 			_histo.addActionListener(this);
+			_histo2D.addActionListener(this);
 			_scatter.addActionListener(this);
 			_open.addActionListener(this);
 			
 			_menu.add(_histo);
+			_menu.add(_histo2D);
 			_menu.add(_scatter);
 			_menu.addSeparator();
 			_menu.add(_open);
@@ -102,6 +107,10 @@ public class DefinitionManager implements ActionListener {
 		if (o == _histo) {
 			defineHistogram();
 		}
+		else if (o == _histo2D) {
+			defineHistogram2D();
+		}
+
 		else if (o == _scatter) {
 			defineScatterPlot();
 		}
@@ -118,9 +127,9 @@ public class DefinitionManager implements ActionListener {
 				PlotReader reader = new PlotReader(file);
 				if (reader != null) {
 					PlotDialog pdialog = reader.getPlotDialog();
-					if (pdialog != null) {
-						
-					}
+//					if (pdialog != null) {
+//						
+//					}
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -128,7 +137,7 @@ public class DefinitionManager implements ActionListener {
 		} // file != null
 	}
 	
-	//define a histogram
+	//define a 1D histogram
 	private void defineHistogram() {
 		DefineHistoDialog dialog = new DefineHistoDialog();
 		dialog.setVisible(true);
@@ -142,7 +151,6 @@ public class DefinitionManager implements ActionListener {
 					JOptionPane.showMessageDialog(null, "Already have a histogram named " + name);
 				}
 				else {
-
 					JMenuItem item = new JMenuItem(name);
 					final Histogram histo = new Histogram(histoData);
 					int count = _plots.size();
@@ -165,6 +173,41 @@ public class DefinitionManager implements ActionListener {
 		}
 	}
 	
+	//define a 2D colorized histogram
+	private void defineHistogram2D() {
+		DefineHisto2DDialog dialog = new DefineHisto2DDialog();
+		dialog.setVisible(true);
+		int reason = dialog.getReason();
+		if (reason == DialogUtilities.OK_RESPONSE) {
+			Histo2DData histoData = dialog.getHistoData();
+			if (histoData != null) {
+				String name = histoData.getName();
+				if (_plots.containsKey(name)) {
+					JOptionPane.showMessageDialog(null, "Already have a 2D histogram named " + name);
+				}
+				else {
+					JMenuItem item = new JMenuItem(name);
+					final Histogram2D histo = new Histogram2D(histoData);
+					int count = _plots.size();
+					int x = 10 + 30*(count % 20);
+					int y = 10 + 30*(count / 20);
+					histo.setLocation(x, y);
+					_plots.put(name, new Holder(name, histo, item));
+										
+					ActionListener al = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							histo.setVisible(true);
+						}					
+					};
+					item.addActionListener(al);
+					_menu.add(item);
+				} //unique name
+			} //histodata != null
+		} //OK response
+
+	}
+	
 	/**
 	 * Add a histogram
 	 * @param histoData the HistoData object
@@ -180,6 +223,37 @@ public class DefinitionManager implements ActionListener {
 			}
 			
 			final Histogram histo = new Histogram(histoData);
+			JMenuItem item = new JMenuItem(name);
+			_plots.put(name, new Holder(name, histo, item));
+			
+			ActionListener al = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					histo.setVisible(true);
+				}					
+			};
+			item.addActionListener(al);
+			_menu.add(item);
+			
+			return histo;
+		}
+		return null;
+	}
+	
+	/**
+	 * Add a 2D histogram
+	 * @param histoData the Histo2DData object
+	 * @return the 2D histogram
+	 */
+	public Histogram2D addHistogram2D(Histo2DData histoData) {
+		if (histoData != null) {
+			String name = histoData.getName();
+			if (_plots.containsKey(name)) {
+				JOptionPane.showMessageDialog(null, "Already have a 2D histogram named " + name);
+				return null;
+			}
+			
+			final Histogram2D histo = new Histogram2D(histoData);
 			JMenuItem item = new JMenuItem(name);
 			_plots.put(name, new Holder(name, histo, item));
 			

@@ -10,7 +10,7 @@ import cnuphys.splot.plot.PlotParameters;
 public class Histo2D extends AExample {
 	@Override
 	protected DataSet createDataSet() throws DataSetException {
-		Histo2DData h1 = new Histo2DData("Histo 2D", 0.0, 100.0, 80, 0.0, 50.0, 60);
+		Histo2DData h1 = new Histo2DData("Histo 2D Example", "X variable", "Y variable", 0.0, 100.0, 80, 0.0, 50.0, 60);
 		return new DataSet(h1);
 	}
 
@@ -21,12 +21,12 @@ public class Histo2D extends AExample {
 
 	@Override
 	protected String getXAxisLabel() {
-		return "X DATA";
+		return null;
 	}
 
 	@Override
 	protected String getYAxisLabel() {
-		return "Y DATA";
+		return null;
 	}
 
 	@Override
@@ -67,6 +67,10 @@ public class Histo2D extends AExample {
 		
 		params.setMinExponentY(6);
 		params.setNumDecimalY(0);
+		
+		params.setPlotTitle(h2d.getName());
+		params.setXLabel(h2d.getXName());
+		params.setYLabel(h2d.getYName());
 
 		params.setXRange(h2d.getMinX(), h2d.getMaxX());
 		params.setYRange(h2d.getMinY(), h2d.getMaxY());

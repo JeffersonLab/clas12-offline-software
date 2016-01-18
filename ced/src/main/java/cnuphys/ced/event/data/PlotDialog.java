@@ -30,7 +30,7 @@ import cnuphys.splot.plot.PlotParameters;
 public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener {
 	
 	//String delimitter for tokenizing
-	public static final String DELIMIT = "$ $";
+	public static final String DELIMIT = "$$$";
 
 	//properties for saving/reading definitions
 	protected static final String TYPE = "TYPE";
@@ -38,6 +38,8 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	protected static final String DATASET = "DATASET";
 	protected static final String HISTODATA = "HISTODATA";
 	protected static final String HISTOGRAM = "HISTOGRAM";
+	protected static final String HISTO2DDATA = "HISTO2DDATA";
+	protected static final String HISTOGRAM2D = "HISTOGRAM2D";
 	protected static final String SCATTERPLOT = "SCATTERPLOT";
 	
 	//the name
