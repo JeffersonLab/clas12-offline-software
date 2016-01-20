@@ -1,7 +1,6 @@
 package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Vector;
@@ -17,7 +16,6 @@ import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.Histo2DData;
-import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
 

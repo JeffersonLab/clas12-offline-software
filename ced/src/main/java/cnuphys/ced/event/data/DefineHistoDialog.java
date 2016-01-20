@@ -25,7 +25,7 @@ public class DefineHistoDialog extends JDialog implements ActionListener, Proper
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		
-		_histoPanel = new HistoPanel();
+		_histoPanel = new HistoPanel("Select a Variable");
 		add(_histoPanel, BorderLayout.CENTER);
 
 		_histoPanel.getSelectPanel().addPropertyChangeListener(this);

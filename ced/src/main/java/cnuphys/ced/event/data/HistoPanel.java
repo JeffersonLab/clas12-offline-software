@@ -35,10 +35,10 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	private double _maxVal = 1;
 	private int _numComponents = 0;
 
-	public HistoPanel() {
+	public HistoPanel(String label) {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel("Select Variable");
+		_sp = new SelectPanel(label);
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}

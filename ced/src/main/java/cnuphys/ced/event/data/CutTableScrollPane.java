@@ -86,14 +86,6 @@ public class CutTableScrollPane extends JScrollPane {
 	}
 	
 	/**
-	 * Get the underlyiong table
-	 * @return the table
-	 */
-	private CutTable getTable() {
-		return cutTable;
-	}
-
-	/**
 	 * @param height
 	 *            The height to set.
 	 */

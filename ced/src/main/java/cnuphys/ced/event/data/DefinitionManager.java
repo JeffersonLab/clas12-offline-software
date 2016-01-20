@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -42,6 +43,9 @@ public class DefinitionManager implements ActionListener {
 	
 	//all the define plots, which are dialogs
 	private Hashtable<String, Holder> _plots = new Hashtable<String, Holder>();
+	
+	//name bundings
+    protected Vector<NameBinding> _bindings = new Vector<NameBinding>();
 	
 	//private constructor for single ton
 	private DefinitionManager() {
@@ -378,6 +382,48 @@ public class DefinitionManager implements ActionListener {
 		}
 		
 		return v;
+	}
+	
+	/**
+	 * Add a binding
+	 * @param vname the variable name, like "x" or "theta". Case sensitive.
+	 * @param bcname the bank column name, like "DC::dgtz.sector"
+	 */
+	public boolean addBinding(String vname, String bcname) {
+		if (isNameBound(vname)) {
+			JOptionPane.showMessageDialog(null, "Already have a variable named " + vname);
+			return false;
+		}
+		
+		NameBinding nb = new NameBinding(vname, bcname);
+		_bindings.add(nb);
+		Collections.sort(_bindings);
+		return true;
+	}
+	
+	/**
+	 * Check to see if a name is already bound
+	 * @param name the variable name, like "x" or "theta". Case sensitive.
+	 * @return <code>true</code> if the name is already bound
+	 */
+	public boolean isNameBound(String name) {
+		//there are not a lot of these so no need for a clever search
+		if ((_bindings != null) && !_bindings.isEmpty()) {
+			for (NameBinding nb : _bindings) {
+				if (nb.varName.equals(name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the name bindings
+	 * @return the name bindings
+	 */
+	public Vector<NameBinding> getBindings() {
+		return _bindings;
 	}
 	
 }

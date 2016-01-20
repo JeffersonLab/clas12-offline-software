@@ -40,7 +40,7 @@ public class CutTable extends JTable implements ItemListener {
 			column.setPreferredWidth(CutTableModel.columnWidths[i]);
 		}
 
-		setDragEnabled(true);
+		setDragEnabled(false);
 
 		showVerticalLines = false;
 
