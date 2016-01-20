@@ -18,8 +18,8 @@ public class Histo2DPanel extends JPanel {
 		
 		setLayout(new GridLayout(2, 1, 0, 8));
 
-		_histoPanelX = new HistoPanel();
-		_histoPanelY = new HistoPanel();
+		_histoPanelX = new HistoPanel("Select X");
+		_histoPanelY = new HistoPanel("Select Y");
 		add(_histoPanelX);
 		add(_histoPanelY);
 	}
