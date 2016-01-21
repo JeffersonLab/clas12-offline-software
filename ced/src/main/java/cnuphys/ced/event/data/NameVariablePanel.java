@@ -11,26 +11,36 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 
-public class NameVariablePanel extends JPanel implements PropertyChangeListener{
+public class NameVariablePanel extends JPanel implements PropertyChangeListener {
 	
 	private SelectPanel _selectPanel;
 	
-	private JTextField _textField;
+	private JTextField _VariableNameTextField;
 	
+	//bound variables
 	private BoundVariablePanel _bvPanel;
+	
+	//expressions
+	private ExpressionPanel _expPanel;
+	
+	//expression entry
+	private EntryPanel _entryPanel;
 	
 	public NameVariablePanel() {
 		setLayout(new BorderLayout(4, 4));
 		addWest();
 		addEast();
+		addSouth();
 	}
 	
+	//add the panel on the south
 	private void addWest() {
 		JPanel westPanel = new JPanel();
 		westPanel.setLayout(new BorderLayout(4, 4));
@@ -44,10 +54,10 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener{
 		
 		JLabel label = new JLabel("Bind to name:");
 		
-		createTextField();
+		createVarNameTF();
 		
 		sp.add(label);
-		sp.add(_textField);
+		sp.add(_VariableNameTextField);
 		
 		sp.setBorder(new CommonBorder("Bind the Variable"));
 		westPanel.add(sp, BorderLayout.SOUTH);
@@ -55,6 +65,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener{
 		add(westPanel, BorderLayout.WEST);
 	}
 
+	//add the panel on the east
 	private void addEast() {
 		JPanel eastPanel = new JPanel();
 		eastPanel.setLayout(new BorderLayout(4, 4));
@@ -65,9 +76,24 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener{
 		add(eastPanel, BorderLayout.EAST);
 	}
 	
-	private void createTextField() {
-		_textField = new JTextField("", 20);
-		_textField.setEnabled(false);
+	//add the panel on the south
+	private void addSouth() {
+		JPanel southPanel = new JPanel();
+		southPanel.setLayout(new BorderLayout(4, 4));
+		_expPanel = new ExpressionPanel();
+		
+		_entryPanel = new EntryPanel(_expPanel);
+		
+		southPanel.add(_entryPanel, BorderLayout.CENTER);
+		southPanel.add(_expPanel, BorderLayout.EAST);
+		
+		add(southPanel, BorderLayout.SOUTH);
+		
+	}
+	
+	private void createVarNameTF() {
+		_VariableNameTextField = new JTextField("", 20);
+		_VariableNameTextField.setEnabled(false);
 		
 		KeyAdapter kl = new KeyAdapter() {
 			@Override
@@ -79,14 +105,24 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener{
 			}
 		};
 		
-		_textField.addKeyListener(kl);
+		_VariableNameTextField.addKeyListener(kl);
 	}
 	
 	//do the actual variable binding
 	private void bindVariable() {
 		// get the variable name
-		String vname = _textField.getText();
-		if ((vname == null) || (vname.length() < 1)) {
+		String vname = _VariableNameTextField.getText();
+		if (vname == null) {
+			return;
+		}
+
+		vname = vname.trim();
+		if (vname.length() < 1) {
+			return;
+		}
+
+		if (!Character.isLetter(vname.charAt(0))) {
+			JOptionPane.showMessageDialog(null, "A valid name must start with a character.");
 			return;
 		}
 		
@@ -146,7 +182,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener{
 		if ((o == _selectPanel) && prop.equals("newname")) {
 			String fn = (String)(evt.getNewValue());
 			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
-			_textField.setEnabled(valid);
+			_VariableNameTextField.setEnabled(valid);
 		}	
 
 	}

@@ -46,6 +46,9 @@ public class DefinitionManager implements ActionListener {
 	
 	//name bundings
     protected Vector<NameBinding> _bindings = new Vector<NameBinding>();
+    
+    //expressions
+    protected Vector<NamedExpression> _expressions = new Vector<NamedExpression>();
 	
 	//private constructor for single ton
 	private DefinitionManager() {
@@ -426,4 +429,46 @@ public class DefinitionManager implements ActionListener {
 		return _bindings;
 	}
 	
+	
+	/**
+	 * Add an expression
+	 * @param ename the expression name. Case sensitive.
+	 * @param estring the expression
+	 */
+	public boolean addExpression(String ename, String estring) {
+		if (isNamedExpression(ename)) {
+			JOptionPane.showMessageDialog(null, "Already have an expression named " + ename);
+			return false;
+		}
+		
+		NamedExpression nb = new NamedExpression(ename, estring);
+		_expressions.add(nb);
+		Collections.sort(_expressions);
+		return true;
+	}
+	
+	/**
+	 * Check to see if a name is already defined for an expression
+	 * @param name the expression name.
+	 * @return <code>true</code> if the name is already bound to an expression
+	 */
+	public boolean isNamedExpression(String name) {
+		//there are not a lot of these so no need for a clever search
+		if ((_expressions != null) && !_expressions.isEmpty()) {
+			for (NamedExpression nb : _expressions) {
+				if (nb.expName.equals(name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the named expressions
+	 * @return the expressions
+	 */
+	public Vector<NamedExpression> getExpressions() {
+		return _expressions;
+	}	
 }

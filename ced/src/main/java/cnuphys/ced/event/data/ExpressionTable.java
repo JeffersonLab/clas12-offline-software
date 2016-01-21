@@ -4,10 +4,10 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 
-public class BoundVariableTable extends JTable {
+public class ExpressionTable extends JTable {
 
-	public BoundVariableTable() {
-		super(new BoundVariableTableModel());
+	public ExpressionTable() {
+		super(new ExpressionTableModel());
 		
 		// multiple selection
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -15,7 +15,7 @@ public class BoundVariableTable extends JTable {
 		// set preferred widths
 		for (int i = 0; i < getColumnCount(); i++) {
 			TableColumn column = getColumnModel().getColumn(i);
-			column.setPreferredWidth(BoundVariableTableModel.columnWidths[i]);
+			column.setPreferredWidth(ExpressionTableModel.columnWidths[i]);
 		}
 
 		setDragEnabled(false);
@@ -26,8 +26,8 @@ public class BoundVariableTable extends JTable {
 
 	}
 	
-	public BoundVariableTableModel getBoundVariableModel() {
-		return (BoundVariableTableModel) getModel();
+	public ExpressionTableModel getExpressionModel() {
+		return (ExpressionTableModel) getModel();
 	}
 
 }
