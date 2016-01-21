@@ -42,6 +42,7 @@ public class EntryPanel extends JPanel {
 		addCenter();
 	}
 
+	//add the center panel
 	private void addCenter() {
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BorderLayout(4, 4));
@@ -63,6 +64,7 @@ public class EntryPanel extends JPanel {
 
 	}
 
+	//add the north panel
 	private void addNorth() {
 		// the functions
 		JTextArea fdef = new JTextArea("", 5, 40);
@@ -96,6 +98,7 @@ public class EntryPanel extends JPanel {
 		add(sp, BorderLayout.SOUTH);
 	}
 
+	//create the expression entry area
 	private void createExpressionArea() {
 		_expressionText = new JTextArea();
 		_expressionText.setLineWrap(true);
@@ -105,6 +108,7 @@ public class EntryPanel extends JPanel {
 		_expressionText.setBorder(new CommonBorder("Enter the expression"));
 	}
 
+	//the expression name text field
 	private void createExpNameTF() {
 		_nameTF = new JTextField("", 20);
 		// _nameTF.setEnabled(false);
@@ -122,6 +126,7 @@ public class EntryPanel extends JPanel {
 		_nameTF.addKeyListener(kl);
 	}
 
+	//add the named expression
 	private void nameExpression() {
 		// get the variable name
 		String ename = _nameTF.getText();
@@ -143,15 +148,16 @@ public class EntryPanel extends JPanel {
 		// see if it makes a valid expression
 		Expression e = getExpression();
 
-		// get the bank and column name
-		String fn = _expressionText.getText();
-		boolean valid = ((fn != null) && (fn.length() > 2));
+		// get the expression descriptor
+	//	String fn = _expressionText.getText();
+		Expression expression = this.getExpression();
+		boolean valid = (expression != null);
 		if (!valid) {
 			return;
 		}
 
 		// System.err.println("Binding [" + vname + "] to [" + fn + "]");
-		if (DefinitionManager.getInstance().addExpression(ename, fn)) {
+		if (DefinitionManager.getInstance().addExpression(ename, _expressionText.getText().trim())) {
 			_expressionPanel.getExpressionModel().fireTableDataChanged();
 		}
 	}

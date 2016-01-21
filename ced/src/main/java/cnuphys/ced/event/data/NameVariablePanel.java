@@ -33,6 +33,9 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 	//expression entry
 	private EntryPanel _entryPanel;
 	
+	/**
+	 * The full panel for bindind variables and creating expressions.
+	 */
 	public NameVariablePanel() {
 		setLayout(new BorderLayout(4, 4));
 		addWest();
@@ -91,6 +94,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		
 	}
 	
+	//create the variable name text field
 	private void createVarNameTF() {
 		_VariableNameTextField = new JTextField("", 20);
 		_VariableNameTextField.setEnabled(false);
@@ -141,6 +145,24 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 
 	}
 	
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		Object o = evt.getSource();
+		String prop = evt.getPropertyName();
+		if ((o == _selectPanel) && prop.equals("newname")) {
+			String fn = (String)(evt.getNewValue());
+			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
+			_VariableNameTextField.setEnabled(valid);
+		}	
+
+	}
+
+	
+	/**
+	 * Main program for testing
+	 * @param arg command arguments (ignored)
+	 */
 	public static void main(String arg[]) {
 		final JFrame frame = new JFrame();
 
@@ -173,18 +195,6 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 			}
 		});
 		
-	}
-	
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		Object o = evt.getSource();
-		String prop = evt.getPropertyName();
-		if ((o == _selectPanel) && prop.equals("newname")) {
-			String fn = (String)(evt.getNewValue());
-			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
-			_VariableNameTextField.setEnabled(valid);
-		}	
-
 	}
 
 }
