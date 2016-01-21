@@ -1,16 +1,15 @@
 package cnuphys.ced.event.data;
 
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 
 public class ExpressionTable extends JTable {
 
-	public ExpressionTable() {
+	public ExpressionTable(int selectionMode) {
 		super(new ExpressionTableModel());
 		
 		// multiple selection
-		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		setSelectionMode(selectionMode);
 
 		// set preferred widths
 		for (int i = 0; i < getColumnCount(); i++) {
@@ -26,8 +25,25 @@ public class ExpressionTable extends JTable {
 
 	}
 	
+	/**
+	 * Get the Expression table model
+	 * @return the model
+	 */
 	public ExpressionTableModel getExpressionModel() {
 		return (ExpressionTableModel) getModel();
 	}
 
+	/**
+	 * Get the selected (or first selected) named expression
+	 * @return the selected (or first selected) named expression
+	 */
+	public NamedExpression getSelectedExpression() {
+		NamedExpression ne = null;
+		int row =getSelectedRow();
+		
+		if (row >= 0) {
+			ne = getExpressionModel().getNamedExpression(row);
+		}
+		return ne;
+	}
 }

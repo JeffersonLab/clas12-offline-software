@@ -26,7 +26,7 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 
 	public DefineHisto2DDialog() {
 		setTitle("Define a 2D Histogram");
-		setModal(true);
+		setModal(false);
 		setLayout(new BorderLayout(4, 4));
 		
 		_histoPanel = new Histo2DPanel();

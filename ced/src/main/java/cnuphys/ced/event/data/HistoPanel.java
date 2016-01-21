@@ -38,7 +38,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	public HistoPanel(String label) {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel(label);
+		_sp = new SelectPanel(label, DefinitionManager.getInstance().haveExpressions());
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}

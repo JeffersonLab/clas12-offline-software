@@ -26,9 +26,9 @@ public class ExpressionTableScrollPane extends JScrollPane {
 	 *            a label for the list
 	 */
 
-	public ExpressionTableScrollPane(String label) {
+	public ExpressionTableScrollPane(String label, int selectionMode) {
 		super();
-		_table = new ExpressionTable();
+		_table = new ExpressionTable(selectionMode);
 		getViewport().add(_table);
 
 		setBorder(BorderFactory.createTitledBorder(null, label,
@@ -65,6 +65,15 @@ public class ExpressionTableScrollPane extends JScrollPane {
 		}
 
 		return _table.getExpressionModel();
+	}
+	
+	
+	/**
+	 * Get the selected (or first selected) named expression
+	 * @return the selected (or first selected) named expression
+	 */
+	public NamedExpression getSelectedExpression() {
+		return _table.getSelectedExpression();
 	}
 	
 }

@@ -34,6 +34,7 @@ public class DefinitionManager implements ActionListener {
 	private JMenu _menu;
 	private JMenuItem _histo;
 	private JMenuItem _scatter;
+	private JMenuItem _expression;
 	private JMenuItem _histo2D;
 	private JMenuItem _open;
 	
@@ -49,6 +50,9 @@ public class DefinitionManager implements ActionListener {
     
     //expressions
     protected Vector<NamedExpression> _expressions = new Vector<NamedExpression>();
+    
+    //for creating expressions
+    protected DefineExpressionDialog _defineExpressionDialog;
 	
 	//private constructor for single ton
 	private DefinitionManager() {
@@ -88,19 +92,22 @@ public class DefinitionManager implements ActionListener {
 	public JMenu getMenu() {
 		if (_menu == null) {
 			_menu = new JMenu("Define");
-			_histo = new JMenuItem("Define 1D Histogram...");
-			_histo2D = new JMenuItem("Define 2D (colorized) Histogram...");
-			_scatter = new JMenuItem("Define Scatter Plot...");
+			_histo = new JMenuItem("Define a 1D Histogram...");
+			_histo2D = new JMenuItem("Define a 2D (colorized) Histogram...");
+			_scatter = new JMenuItem("Define a Scatter Plot...");
+			_expression = new JMenuItem("Define Expressions...");
 			_open = new JMenuItem("Read a Plot Definition...");
 			
 			_histo.addActionListener(this);
 			_histo2D.addActionListener(this);
 			_scatter.addActionListener(this);
+			_expression.addActionListener(this);
 			_open.addActionListener(this);
 			
 			_menu.add(_histo);
 			_menu.add(_histo2D);
 			_menu.add(_scatter);
+			_menu.add(_expression);
 			_menu.addSeparator();
 			_menu.add(_open);
 			_menu.addSeparator();
@@ -117,9 +124,11 @@ public class DefinitionManager implements ActionListener {
 		else if (o == _histo2D) {
 			defineHistogram2D();
 		}
-
 		else if (o == _scatter) {
 			defineScatterPlot();
+		}
+		else if (o == _expression) {
+			defineExpressions();
 		}
 		else if (o == _open) {
 			readPlotDefinition();
@@ -142,6 +151,15 @@ public class DefinitionManager implements ActionListener {
 				e.printStackTrace();
 			}
 		} // file != null
+	}
+	
+	//Expressions
+	private void defineExpressions() {
+		if (_defineExpressionDialog == null) {
+			_defineExpressionDialog = new DefineExpressionDialog();
+		}
+		
+		_defineExpressionDialog.setVisible(true);
 	}
 	
 	//define a 1D histogram
@@ -471,4 +489,12 @@ public class DefinitionManager implements ActionListener {
 	public Vector<NamedExpression> getExpressions() {
 		return _expressions;
 	}	
+	
+	/**
+	 * Check whether we have any expressions
+	 * @return <code>true</code> if we have at least one expression
+	 */
+	public boolean haveExpressions() {
+		return (_expressions == null) ? false : !_expressions.isEmpty();
+	}
 }

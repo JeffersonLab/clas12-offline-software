@@ -26,8 +26,8 @@ public class ScatterPanel extends JPanel implements PropertyChangeListener {
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(2, 1, 2, 10));
 		
-		_spx = new SelectPanel("X axis Variable");
-		_spy = new SelectPanel("Y axis Variable");
+		_spx = new SelectPanel("X axis Variable", DefinitionManager.getInstance().haveExpressions());
+		_spy = new SelectPanel("Y axis Variable", DefinitionManager.getInstance().haveExpressions());
 		
 		p.add(_spx);
 		p.add(_spy);

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -14,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
@@ -34,7 +37,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 	private EntryPanel _entryPanel;
 	
 	/**
-	 * The full panel for bindind variables and creating expressions.
+	 * The full panel for binding variables and creating expressions.
 	 */
 	public NameVariablePanel() {
 		setLayout(new BorderLayout(4, 4));
@@ -47,7 +50,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 	private void addWest() {
 		JPanel westPanel = new JPanel();
 		westPanel.setLayout(new BorderLayout(4, 4));
-		_selectPanel = new SelectPanel("Select a Variable");
+		_selectPanel = new SelectPanel("Select a Variable", false);
 		_selectPanel.addPropertyChangeListener(this);
 		westPanel.add(_selectPanel, BorderLayout.CENTER);
 		
@@ -83,7 +86,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 	private void addSouth() {
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new BorderLayout(4, 4));
-		_expPanel = new ExpressionPanel();
+		_expPanel = new ExpressionPanel(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		
 		_entryPanel = new EntryPanel(_expPanel);
 		
@@ -91,6 +94,14 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		southPanel.add(_expPanel, BorderLayout.EAST);
 		
 		add(southPanel, BorderLayout.SOUTH);
+		_expPanel.getTable().addMouseListener(new MouseAdapter() {
+		    public void mousePressed(MouseEvent me) {
+		        int row = _expPanel.getTable().rowAtPoint(me.getPoint());
+		        if (me.getClickCount() == 2) {
+		        	_entryPanel.editRow(row);
+		        }
+		    }
+		});		
 		
 	}
 	
