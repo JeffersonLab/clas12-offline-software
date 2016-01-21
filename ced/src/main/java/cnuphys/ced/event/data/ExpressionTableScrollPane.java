@@ -2,11 +2,12 @@ package cnuphys.ced.event.data;
 
 import java.awt.Color;
 import java.awt.Dimension;
+
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-public class BoundVariableTableScrollPane extends JScrollPane {
+public class ExpressionTableScrollPane extends JScrollPane {
 
 	protected int width = 330;
 	protected int height = 300;
@@ -14,7 +15,7 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 	/**
 	 * The table that will be on this scroll pane.
 	 */
-	private BoundVariableTable _table;
+	private ExpressionTable _table;
 
 	/**
 	 * Constructor will also create the table itself.
@@ -25,9 +26,9 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 	 *            a label for the list
 	 */
 
-	public BoundVariableTableScrollPane(String label) {
+	public ExpressionTableScrollPane(String label) {
 		super();
-		_table = new BoundVariableTable();
+		_table = new ExpressionTable();
 		getViewport().add(_table);
 
 		setBorder(BorderFactory.createTitledBorder(null, label,
@@ -38,9 +39,9 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 	/**
 	 * Accessor for the underlying table.
 	 * 
-	 * @return the underlying bound variable table.
+	 * @return the underlying expression table.
 	 */
-	public BoundVariableTable getTable() {
+	public ExpressionTable getTable() {
 		return _table;
 	}
 
@@ -58,12 +59,12 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 	 * 
 	 * @return The underlying table model.
 	 */
-	public BoundVariableTableModel getBoundVariableModel() {
+	public ExpressionTableModel getExpressionModel() {
 		if (_table == null) {
 			return null;
 		}
 
-		return _table.getBoundVariableModel();
+		return _table.getExpressionModel();
 	}
 	
 }

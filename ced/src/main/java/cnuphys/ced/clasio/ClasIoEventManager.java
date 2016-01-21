@@ -506,7 +506,16 @@ public class ClasIoEventManager {
 	 * @return the previous event, if possible.
 	 */
 	public EvioDataEvent getPreviousEvent() {
+		
+		int evNum = getEventNumber();
 		_currentEvent = (EvioDataEvent) _evioSource.getPreviousEvent();
+		
+		//evioSource.getPreviousEvent() doesn't work at the end of the file
+		//so hack
+		if ((_currentEvent == null) && (evNum > 0)) {
+			return gotoEvent(evNum-1);
+		}
+		
 		notifyListeners();
 		return _currentEvent;
 	}
