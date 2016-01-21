@@ -62,7 +62,7 @@ public abstract class Operators {
             @Override
             public double apply(final double... args) {
                 if (args[1] == 0d) {
-                    throw new ArithmeticException("Division by zero!");
+                    throw new ArithmeticException("Division by zero.");
                 }
                 return args[0] / args[1];
             }
@@ -77,7 +77,7 @@ public abstract class Operators {
             @Override
             public double apply(final double... args) {
                 if (args[1] == 0d) {
-                    throw new ArithmeticException("Division by zero!");
+                    throw new ArithmeticException("Division by zero.");
                 }
                 return args[0] % args[1];
             }

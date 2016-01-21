@@ -15,5 +15,15 @@ public class Example {
 		e2.setVariable("x", -Math.sqrt(3));
 		e2.setVariable("y", -1);
 		System.err.println(""+e2.evaluate());
+		
+		System.err.println("===========");
+		Expression e3 = new ExpressionBuilder("x + 2^x").variables("x").build();
+		e3.setVariable("x", 3);
+		System.err.println(""+e3.evaluate());
+
+		System.err.println("===========");
+		Expression e4 = new ExpressionBuilder("8*2-10").variables().build();
+		System.err.println(""+e4.evaluate());
+
 	}
 }
