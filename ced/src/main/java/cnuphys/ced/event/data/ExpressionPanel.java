@@ -18,10 +18,10 @@ public class ExpressionPanel extends JPanel implements ActionListener, ListSelec
 	//remove bindings from the table
 	private JButton _remove;
 	
-	public ExpressionPanel() {
+	public ExpressionPanel(int selectionMode) {
 		setLayout (new BorderLayout(4, 4));
 		
-		_scrollPane = new ExpressionTableScrollPane("Expressions");
+		_scrollPane = new ExpressionTableScrollPane("Expressions", selectionMode);
 		add(_scrollPane, BorderLayout.CENTER);
 		
 		JPanel sp = new JPanel();
@@ -73,6 +73,20 @@ public class ExpressionPanel extends JPanel implements ActionListener, ListSelec
 			}
 		}
 		
+	}
+	
+	/**
+	 * Remove a row from the table
+	 * @param row the zero based row
+	 * @return the removed NamedExpression, or null
+	 */
+	public NamedExpression removeRow(int row) {
+		NamedExpression ne = getExpressionModel().getNamedExpression(row);
+		if (ne != null) {
+			getExpressionModel().getData().remove(ne);
+			getExpressionModel().fireTableRowsDeleted(0, 0);
+		}
+		return ne;
 	}
 
 	@Override

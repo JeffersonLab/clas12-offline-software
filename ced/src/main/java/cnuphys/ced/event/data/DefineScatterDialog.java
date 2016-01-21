@@ -22,7 +22,7 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 
 	public DefineScatterDialog() {
 		setTitle("Define a Scatter Plot");
-		setModal(true);
+		setModal(false);
 		setLayout(new BorderLayout(4, 4));
 		
 		_scatterPanel = new ScatterPanel();

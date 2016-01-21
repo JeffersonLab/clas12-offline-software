@@ -49,17 +49,20 @@ public class EntryPanel extends JPanel {
 
 		createExpressionArea();
 		centerPanel.add(_expressionText, BorderLayout.CENTER);
+		
+		JPanel sp = new JPanel();
+		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 2));
 
-		_validationTF = new JTextArea("", 2, 40);
-		_validationTF.setOpaque(true);
-		_validationTF.setEditable(false);
-		_validationTF.setLineWrap(true);
-		_validationTF.setBackground(X11Colors.getX11Color("alice blue"));
-		_validationTF.setFont(Fonts.mediumFont);
-		_validationTF.setForeground(Color.red);
-		centerPanel.add(_validationTF, BorderLayout.SOUTH);
-		_validationTF.setBorder(new CommonBorder("Validation"));
+		JLabel label = new JLabel("Expression name:");
 
+		createExpNameTF();
+
+		sp.add(label);
+		sp.add(_nameTF);
+
+		sp.setBorder(new CommonBorder("Name the Expression"));
+		centerPanel.add(sp, BorderLayout.SOUTH);
+		
 		add(centerPanel, BorderLayout.CENTER);
 
 	}
@@ -84,18 +87,15 @@ public class EntryPanel extends JPanel {
 	}
 
 	private void addSouth() {
-		JPanel sp = new JPanel();
-		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 2));
-
-		JLabel label = new JLabel("Expression name:");
-
-		createExpNameTF();
-
-		sp.add(label);
-		sp.add(_nameTF);
-
-		sp.setBorder(new CommonBorder("Name the Expression"));
-		add(sp, BorderLayout.SOUTH);
+		_validationTF = new JTextArea("", 2, 40);
+		_validationTF.setOpaque(true);
+		_validationTF.setEditable(false);
+		_validationTF.setLineWrap(true);
+		_validationTF.setBackground(X11Colors.getX11Color("alice blue"));
+		_validationTF.setFont(Fonts.mediumFont);
+		_validationTF.setForeground(Color.red);
+		_validationTF.setBorder(new CommonBorder("Validation"));
+		add(_validationTF, BorderLayout.SOUTH);
 	}
 
 	//create the expression entry area
@@ -104,7 +104,7 @@ public class EntryPanel extends JPanel {
 		_expressionText.setLineWrap(true);
 		_expressionText.setOpaque(true);
 		_expressionText.setEditable(true);
-		_expressionText.setBackground(X11Colors.getX11Color("wheat"));
+//		_expressionText.setBackground(X11Colors.getX11Color("Light Goldenrod"));
 		_expressionText.setBorder(new CommonBorder("Enter the expression"));
 	}
 
@@ -237,6 +237,27 @@ public class EntryPanel extends JPanel {
 			}
 		}
 		return e;
+	}
+	
+	/**
+	 * Edit a row from the table
+	 * @param row the zero-based row to edit
+	 */
+	public void editRow(int row) {
+		ExpressionTable table = _expressionPanel.getTable();
+		if (table == null) {
+			return;
+		}
+		
+		if ((row < 0) || (row >= table.getRowCount())) {
+			return;
+		}
+		
+		NamedExpression ne = _expressionPanel.removeRow(row);
+		if (ne != null) {
+			_nameTF.setText(ne.expName);
+			_expressionText.setText(ne.expString);
+		}
 	}
 
 }

@@ -27,7 +27,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	public RangeCutPanel() {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel("Select Variable");
+		_sp = new SelectPanel("Select Variable", DefinitionManager.getInstance().haveExpressions());
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
