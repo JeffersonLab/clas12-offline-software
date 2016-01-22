@@ -1,4 +1,4 @@
-package net.objecthunter.exp4j;
+package net.oh.exp4j;
 
 public class Example {
 

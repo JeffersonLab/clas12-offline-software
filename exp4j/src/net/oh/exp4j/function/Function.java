@@ -14,7 +14,7 @@
  * limitations under the License. 
  */
 
-package net.objecthunter.exp4j.function;
+package net.oh.exp4j.function;
 
 /**
  * A class representing a Function which can be used in an expression

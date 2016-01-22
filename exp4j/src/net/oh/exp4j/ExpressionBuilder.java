@@ -14,14 +14,14 @@
  * limitations under the License. 
  */
 
-package net.objecthunter.exp4j;
+package net.oh.exp4j;
 
 import java.util.*;
 
-import net.objecthunter.exp4j.function.Function;
-import net.objecthunter.exp4j.function.Functions;
-import net.objecthunter.exp4j.operator.Operator;
-import net.objecthunter.exp4j.shuntingyard.ShuntingYard;
+import net.oh.exp4j.function.Function;
+import net.oh.exp4j.function.Functions;
+import net.oh.exp4j.operator.Operator;
+import net.oh.exp4j.shuntingyard.ShuntingYard;
 
 /**
  * Factory class for {@link Expression} instances. This class is the main API entrypoint. Users should create new
@@ -52,8 +52,8 @@ public class ExpressionBuilder {
     }
 
     /**
-     * Add a {@link net.objecthunter.exp4j.function.Function} implementation available for use in the expression
-     * @param function the custom {@link net.objecthunter.exp4j.function.Function} implementation that should be available for use in the expression.
+     * Add a {@link net.oh.exp4j.function.Function} implementation available for use in the expression
+     * @param function the custom {@link net.oh.exp4j.function.Function} implementation that should be available for use in the expression.
      * @return the ExpressionBuilder instance
      */
     public ExpressionBuilder function(Function function) {
@@ -62,8 +62,8 @@ public class ExpressionBuilder {
     }
 
     /**
-     * Add multiple {@link net.objecthunter.exp4j.function.Function} implementations available for use in the expression
-     * @param functions the custom {@link net.objecthunter.exp4j.function.Function} implementations
+     * Add multiple {@link net.oh.exp4j.function.Function} implementations available for use in the expression
+     * @param functions the custom {@link net.oh.exp4j.function.Function} implementations
      * @return the ExpressionBuilder instance
      */
     public ExpressionBuilder functions(Function... functions) {
@@ -74,8 +74,8 @@ public class ExpressionBuilder {
     }
 
     /**
-     * Add multiple {@link net.objecthunter.exp4j.function.Function} implementations available for use in the expression
-     * @param functions A {@link java.util.List} of custom {@link net.objecthunter.exp4j.function.Function} implementations
+     * Add multiple {@link net.oh.exp4j.function.Function} implementations available for use in the expression
+     * @param functions A {@link java.util.List} of custom {@link net.oh.exp4j.function.Function} implementations
      * @return the ExpressionBuilder instance
      */
     public ExpressionBuilder functions(List<Function> functions) {
@@ -101,8 +101,8 @@ public class ExpressionBuilder {
     }
 
     /**
-     * Add an {@link net.objecthunter.exp4j.operator.Operator} which should be available for use in the expression
-     * @param operator the custom {@link net.objecthunter.exp4j.operator.Operator} to add
+     * Add an {@link net.oh.exp4j.operator.Operator} which should be available for use in the expression
+     * @param operator the custom {@link net.oh.exp4j.operator.Operator} to add
      * @return the ExpressionBuilder instance
      */
     public ExpressionBuilder operator(Operator operator) {
@@ -121,8 +121,8 @@ public class ExpressionBuilder {
     }
 
     /**
-     * Add multiple {@link net.objecthunter.exp4j.operator.Operator} implementations which should be available for use in the expression
-     * @param operators the set of custom {@link net.objecthunter.exp4j.operator.Operator} implementations to add
+     * Add multiple {@link net.oh.exp4j.operator.Operator} implementations which should be available for use in the expression
+     * @param operators the set of custom {@link net.oh.exp4j.operator.Operator} implementations to add
      * @return the ExpressionBuilder instance
      */
     public ExpressionBuilder operator(Operator... operators) {
@@ -133,8 +133,8 @@ public class ExpressionBuilder {
     }
 
     /**
-     * Add multiple {@link net.objecthunter.exp4j.operator.Operator} implementations which should be available for use in the expression
-     * @param operators the {@link java.util.List} of custom {@link net.objecthunter.exp4j.operator.Operator} implementations to add
+     * Add multiple {@link net.oh.exp4j.operator.Operator} implementations which should be available for use in the expression
+     * @param operators the {@link java.util.List} of custom {@link net.oh.exp4j.operator.Operator} implementations to add
      * @return the ExpressionBuilder instance
      */
     public ExpressionBuilder operator(List<Operator> operators) {

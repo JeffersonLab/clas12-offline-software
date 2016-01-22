@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License. 
 */
-package net.objecthunter.exp4j.operator;
+package net.oh.exp4j.operator;
 
 public abstract class Operators {
     private static final int INDEX_ADDITION = 0;

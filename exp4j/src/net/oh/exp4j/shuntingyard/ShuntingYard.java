@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.objecthunter.exp4j.shuntingyard;
+package net.oh.exp4j.shuntingyard;
 
 import java.util.*;
 
-import net.objecthunter.exp4j.function.Function;
-import net.objecthunter.exp4j.operator.Operator;
-import net.objecthunter.exp4j.tokenizer.OperatorToken;
-import net.objecthunter.exp4j.tokenizer.Token;
-import net.objecthunter.exp4j.tokenizer.Tokenizer;
+import net.oh.exp4j.function.Function;
+import net.oh.exp4j.operator.Operator;
+import net.oh.exp4j.tokenizer.OperatorToken;
+import net.oh.exp4j.tokenizer.Token;
+import net.oh.exp4j.tokenizer.Tokenizer;
 
 /**
  * Shunting yard implementation to convert infix to reverse polish notation
@@ -34,7 +34,7 @@ public class ShuntingYard {
      * @param userFunctions the custom functions used
      * @param userOperators the custom operators used
      * @param variableNames the variable names used in the expression
-     * @return a {@link net.objecthunter.exp4j.tokenizer.Token} array containing the result
+     * @return a {@link net.oh.exp4j.tokenizer.Token} array containing the result
      */
     public static Token[] convertToRPN(final String expression, final Map<String, Function> userFunctions,
             final Map<String, Operator> userOperators, final Set<String> variableNames){
