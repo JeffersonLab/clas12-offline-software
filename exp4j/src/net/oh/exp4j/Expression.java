@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package net.objecthunter.exp4j;
+package net.oh.exp4j;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-import net.objecthunter.exp4j.function.Function;
-import net.objecthunter.exp4j.operator.Operator;
-import net.objecthunter.exp4j.tokenizer.*;
+import net.oh.exp4j.function.Function;
+import net.oh.exp4j.operator.Operator;
+import net.oh.exp4j.tokenizer.*;
 
 public class Expression {
 

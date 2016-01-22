@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License. 
 */
-package net.objecthunter.exp4j.function;
+package net.oh.exp4j.function;
 
 /**
  * Class representing the builtin functions available for use in expressions

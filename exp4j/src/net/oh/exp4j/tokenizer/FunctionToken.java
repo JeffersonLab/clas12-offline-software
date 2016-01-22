@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.objecthunter.exp4j.tokenizer;
+package net.oh.exp4j.tokenizer;
 
-import net.objecthunter.exp4j.function.Function;
+import net.oh.exp4j.function.Function;
 
 public class FunctionToken extends Token{
     private final Function function;
