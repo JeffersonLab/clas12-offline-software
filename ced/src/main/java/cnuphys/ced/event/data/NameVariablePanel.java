@@ -96,7 +96,8 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		
 		add(southPanel, BorderLayout.SOUTH);
 		_expPanel.getTable().addMouseListener(new MouseAdapter() {
-		    public void mousePressed(MouseEvent me) {
+		    @Override
+			public void mousePressed(MouseEvent me) {
 		        int row = _expPanel.getTable().rowAtPoint(me.getPoint());
 		        if (me.getClickCount() == 2) {
 		        	_entryPanel.editRow(row);
