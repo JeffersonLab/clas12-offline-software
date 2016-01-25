@@ -20,6 +20,8 @@ import javax.swing.JOptionPane;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.xml.XmlPrintStreamWritable;
+import cnuphys.bCNU.xml.XmlSupport;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
@@ -28,7 +30,7 @@ import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.splot.plot.PlotParameters;
 
-public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener {
+public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener, XmlPrintStreamWritable {
 	
 	//String delimitter for tokenizing
 	public static final String DELIMIT = "$$$";
@@ -124,19 +126,25 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 			clear();
 		}
 		else if (o == _saveItem) { //save the plot definition?
-			File file = getSaveDefinitionFile();
-			if (file != null) {
-			    FileWriter fstream;
-				try {
-					fstream = new FileWriter(file.getPath(), false);
-				    BufferedWriter out = new BufferedWriter(fstream);
-					saveDefinition(out);
-					out.flush();
-					out.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				} //true tells to append data.
-			}
+			
+			XmlSupport.save(this);
+			
+			//write out the plot as an xml file
+			
+			
+//			File file = getSaveDefinitionFile();
+//			if (file != null) {
+//			    FileWriter fstream;
+//				try {
+//					fstream = new FileWriter(file.getPath(), false);
+//				    BufferedWriter out = new BufferedWriter(fstream);
+//					saveDefinition(out);
+//					out.flush();
+//					out.close();
+//				} catch (IOException e1) {
+//					e1.printStackTrace();
+//				} //true tells to append data.
+//			}
 		}
 
 	}

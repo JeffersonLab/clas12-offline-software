@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Properties;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -78,7 +77,7 @@ public class XmlSupport {
 	}
 
 	/**
-	 * Export the plot data to an xml file. This will will bring up the save dialog.
+	 * Export  to an xml file. This will will bring up the save dialog.
 	 * @param canvas the canvas to export
 	 */
 	public static void save(XmlPrintStreamWritable rootWritable) {
