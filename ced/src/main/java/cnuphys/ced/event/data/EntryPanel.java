@@ -181,8 +181,8 @@ public class EntryPanel extends JPanel {
 		
 		NamedExpression ne = _expressionPanel.removeRow(row);
 		if (ne != null) {
-			_nameTF.setText(ne.expName);
-			_expressionText.setText(ne.expString);
+			_nameTF.setText(ne._expName);
+			_expressionText.setText(ne._expString);
 		}
 	}
 

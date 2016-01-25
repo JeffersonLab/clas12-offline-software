@@ -42,16 +42,19 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	public SelectPanel(String label, boolean addExpressionTable) {
 		setLayout(new BorderLayout(2,4));
 		addCenter(label);
-		addSouth();
-		if (addExpressionTable && DefinitionManager.getInstance().haveExpressions()) {
+		
+		boolean expNameToo = addExpressionTable && DefinitionManager.getInstance().haveExpressions();
+		
+		addSouth(expNameToo);
+		if (expNameToo) {
 			addEast();
 		}
 	}
 	
-	private void addSouth() {
+	private void addSouth(boolean expNameToo) {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 6, 4));
-		
+
 		panel.add(new JLabel("Column"));
 
 		_columnName = new JTextField(null, 30);
@@ -60,14 +63,16 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		_columnName.setForeground(Color.cyan);
 		panel.add(_columnName, BorderLayout.SOUTH);
 
-		panel.add(Box.createHorizontalStrut(50));
+		if (expNameToo) {
+			panel.add(Box.createHorizontalStrut(50));
 
-		panel.add(new JLabel("Expression"));
-		_expressionName = new JTextField(null, 20);
-		_expressionName.setEditable(true);
-		_expressionName.setBackground(Color.black);
-		_expressionName.setForeground(Color.cyan);
-		panel.add(_expressionName, BorderLayout.SOUTH);
+			panel.add(new JLabel("Expression"));
+			_expressionName = new JTextField(null, 20);
+			_expressionName.setEditable(true);
+			_expressionName.setBackground(Color.black);
+			_expressionName.setForeground(Color.cyan);
+			panel.add(_expressionName, BorderLayout.SOUTH);
+		}
 
 		add(panel, BorderLayout.SOUTH);
 	}
@@ -136,8 +141,8 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 			if (ne != null) {
 				_clist.getSelectionModel().clearSelection();
 				_blist.getSelectionModel().clearSelection();
-				_expressionName.setText(ne.expName);
-				firePropertyChange("expression", "", ne.expName);
+				_expressionName.setText(ne._expName);
+				firePropertyChange("expression", "", ne._expName);
 
 			}
 			else {
