@@ -438,5 +438,15 @@ public class ColumnData {
 		}
 		return array;
 	}
+	
+	/**
+	 * (Approximate) test whether this is a valid column name. Doesn't test whether
+	 * the column exists.
+	 * @param name the name to test
+	 * @return <code>true</code> if name is structured as a valid column name.
+	 */
+	public static boolean validColumnName(String name) {
+		return ((name != null) && (name.length() > 4) && name.contains(":") && name.contains("."));
+	}
 
 }

@@ -18,6 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import cnuphys.bCNU.graphics.ImageManager;
+
 @SuppressWarnings("serial")
 public class FileNode implements Transferable, Serializable {
 
@@ -198,7 +200,7 @@ public class FileNode implements Transferable, Serializable {
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(null, "Error reading directory "
 					+ theFile.getAbsolutePath(), "Warning",
-					JOptionPane.WARNING_MESSAGE);
+					JOptionPane.WARNING_MESSAGE, ImageManager.cnuIcon);
 			return null;
 		}
 	}

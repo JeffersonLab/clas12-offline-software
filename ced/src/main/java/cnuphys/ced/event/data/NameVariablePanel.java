@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 
 public class NameVariablePanel extends JPanel implements PropertyChangeListener {
@@ -137,14 +138,16 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		}
 
 		if (!Character.isLetter(vname.charAt(0))) {
-			JOptionPane.showMessageDialog(null, "A valid name must start with a character.");
+			JOptionPane.showMessageDialog(null,
+					"A valid name must start with a character.", "Invalid Name", 
+					JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 			return;
 		}
 		
 		
 		//get the bank and column name
-		String fn = _selectPanel.getFullName();
-		boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
+		String fn = _selectPanel.getFullColumnName();
+		boolean valid = ColumnData.validColumnName(fn);
 		if (!valid) {
 			return;
 		}
@@ -163,7 +166,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		String prop = evt.getPropertyName();
 		if ((o == _selectPanel) && prop.equals("newname")) {
 			String fn = (String)(evt.getNewValue());
-			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
+			boolean valid = ColumnData.validColumnName(fn);
 			_VariableNameTextField.setEnabled(valid);
 		}	
 

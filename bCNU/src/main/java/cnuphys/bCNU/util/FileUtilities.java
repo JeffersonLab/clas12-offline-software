@@ -22,6 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import cnuphys.bCNU.component.filetree.ExtensionFileFilter;
+import cnuphys.bCNU.graphics.ImageManager;
 
 public class FileUtilities {
 
@@ -262,7 +263,8 @@ public class FileUtilities {
 			if (file.exists()) {
 				int answer = JOptionPane.showConfirmDialog(null, filename
 						+ "  already exists. Do you want to overwrite it?",
-						"Overwite Existing File?", JOptionPane.YES_NO_OPTION);
+						"Overwite Existing File?", JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE, ImageManager.cnuIcon);
 
 				if (answer == JFileChooser.APPROVE_OPTION) {
 					return file;
@@ -554,7 +556,7 @@ public class FileUtilities {
 
 		return JOptionPane.showOptionDialog(null, prompt,
 				"Append or Overwrite?", JOptionPane.YES_NO_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+				JOptionPane.QUESTION_MESSAGE, ImageManager.cnuIcon, options, options[0]);
 	}
 
 	/**

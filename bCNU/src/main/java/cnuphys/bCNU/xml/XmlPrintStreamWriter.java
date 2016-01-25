@@ -9,7 +9,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-public class IXmlPrintStreamWriter implements XMLStreamWriter {
+public class XmlPrintStreamWriter implements XMLStreamWriter {
 
 	/**
 	 * A Stack of elements. When an element is started, it is popped onto the
@@ -31,7 +31,7 @@ public class IXmlPrintStreamWriter implements XMLStreamWriter {
 	 * @param out
 	 *            the <code><PrintStream></code> object to use.
 	 */
-	public IXmlPrintStreamWriter(PrintStream out) {
+	public XmlPrintStreamWriter(PrintStream out) {
 		this.out = out;
 	}
 
@@ -45,7 +45,7 @@ public class IXmlPrintStreamWriter implements XMLStreamWriter {
 	 *            the <code><File></code> object to use.
 	 * @throws FileNotFoundException
 	 */
-	public IXmlPrintStreamWriter(File file) throws FileNotFoundException {
+	public XmlPrintStreamWriter(File file) throws FileNotFoundException {
 		this(new PrintStream(file));
 	}
 
@@ -59,7 +59,7 @@ public class IXmlPrintStreamWriter implements XMLStreamWriter {
 	 *            the fully qualified path name to use.
 	 * @throws FileNotFoundException
 	 */
-	public IXmlPrintStreamWriter(String fullPathName)
+	public XmlPrintStreamWriter(String fullPathName)
 			throws FileNotFoundException {
 		this(new File(fullPathName));
 	}
@@ -76,7 +76,7 @@ public class IXmlPrintStreamWriter implements XMLStreamWriter {
 	 *            the name of just the file.
 	 * @throws FileNotFoundException
 	 */
-	public IXmlPrintStreamWriter(String dirName, String bareFileName)
+	public XmlPrintStreamWriter(String dirName, String bareFileName)
 			throws FileNotFoundException {
 		this(new File(dirName, bareFileName));
 	}
@@ -371,7 +371,7 @@ public class IXmlPrintStreamWriter implements XMLStreamWriter {
 		// try {
 		// XmlPrintStreamWriter xmlPrintStreamWriter = new
 		// XmlPrintStreamWriter(homeDirectory, "test.xml");
-		IXmlPrintStreamWriter xmlPrintStreamWriter = new IXmlPrintStreamWriter(
+		XmlPrintStreamWriter xmlPrintStreamWriter = new XmlPrintStreamWriter(
 				System.out);
 		try {
 			xmlPrintStreamWriter.writeStartDocument();

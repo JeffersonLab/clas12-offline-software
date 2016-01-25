@@ -13,13 +13,14 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
-import net.objecthunter.exp4j.ValidationResult;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
+import net.oh.exp4j.Expression;
+import net.oh.exp4j.ExpressionBuilder;
+import net.oh.exp4j.ValidationResult;
 
 public class EntryPanel extends JPanel {
 
@@ -141,15 +142,12 @@ public class EntryPanel extends JPanel {
 
 		if (!Character.isLetter(ename.charAt(0))) {
 			JOptionPane.showMessageDialog(null,
-					"A valid name must start with a character.");
+					"A valid name must start with a character.", "Invalid Name", 
+					JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 			return;
 		}
 
 		// see if it makes a valid expression
-		Expression e = getExpression();
-
-		// get the expression descriptor
-	//	String fn = _expressionText.getText();
 		Expression expression = this.getExpression();
 		boolean valid = (expression != null);
 		if (!valid) {
@@ -168,75 +166,8 @@ public class EntryPanel extends JPanel {
 	 * @return the expression or <code>null</code>
 	 */
 	private Expression getExpression() {
-
 		String s = _expressionText.getText();
-		if ((s == null) || (s.length() < 1)) {
-			return null;
-		}
-
-		// step 1, remove all white space
-		s = s.replaceAll("\\s+", "");
-		if (s.length() < 1) {
-			return null;
-		}
-
-		// step 2, tokenize
-		String tokens[] = FileUtilities.tokens(s, ",)(+-*/%^");
-		if ((tokens == null) || (tokens.length < 1)) {
-			return null;
-		}
-
-		for (String token : tokens) {
-			System.err.println("TOKEN [" + token + "]");
-		}
-
-		// Step 3 get the variables
-		Vector<String> vv = new Vector<String>();
-		for (String token : tokens) {
-			if (token.startsWith("_")) {
-				vv.remove(token);
-				vv.add(token);
-			}
-		}
-
-		String vars[] = (vv.size() == 0) ? null : new String[vv.size()];
-
-		if (vars != null) {
-			vv.toArray(vars);
-			for (String v : vars) {
-				System.err.println("VARIABLE [" + v + "]");
-			}
-		}
-
-		Expression e = null;
-		// it is technically ok if there are no vars--it means a c expression
-
-		try {
-			if ((vars == null) || (vars.length < 1)) {
-				e = new ExpressionBuilder(s).variables().build();
-			} else {
-				e = new ExpressionBuilder(s).variables(vars).build();
-			}
-		} catch (IllegalArgumentException ex) {
-			e = null;
-			_validationTF.setText("Invalid expression. " + ex.getMessage());
-		}
-
-		// valid?
-		if (e != null) {
-			// don't check for set variables here
-			ValidationResult vres = e.validate(false);
-			if (vres == ValidationResult.SUCCESS) {
-				_validationTF.setText("Valid expression");
-			} else {
-				String estr = "Invalid expression.";
-				for (String es : vres.getErrors()) {
-					estr += " [" + es + "]";
-				}
-				_validationTF.setText(estr);
-			}
-		}
-		return e;
+		return NamedExpression.getExpression(s, _validationTF);
 	}
 	
 	/**

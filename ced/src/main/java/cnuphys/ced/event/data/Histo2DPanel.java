@@ -43,8 +43,8 @@ public class Histo2DPanel extends JPanel {
 	 * @return the Histo2DData object
 	 */
 	public Histo2DData getHisto2DData() {
-		String xname = getSelectPanelX().getFullName();
-		String yname = getSelectPanelY().getFullName();
+		String xname = getSelectPanelX().getFullColumnName();
+		String yname = getSelectPanelY().getFullColumnName();
 		String name = xname + " - " + yname;
 		
 		int xnumBins = _histoPanelX.getNumBins();

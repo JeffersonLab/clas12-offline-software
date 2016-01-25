@@ -17,6 +17,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -209,7 +210,9 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 							selectedFile.getAbsolutePath()
 									+ "  already exists. Do you want to overwrite it?",
 							"Overwite Existing File?",
-							JOptionPane.YES_NO_OPTION);
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE,
+							ImageManager.cnuIcon);
 
 					if (answer != JFileChooser.APPROVE_OPTION) {
 						selectedFile = null;

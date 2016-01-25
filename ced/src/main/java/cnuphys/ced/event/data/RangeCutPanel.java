@@ -27,7 +27,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	public RangeCutPanel() {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel("Select Variable", DefinitionManager.getInstance().haveExpressions());
+		_sp = new SelectPanel("Select Variable", true);
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
@@ -89,7 +89,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	public RangeCut getRangeCut() {
 		// public HistoData(String name, double valMin, double valMax, int
 		// numBins) {
-		String name = _sp.getFullName();
+		String name = _sp.getFullColumnName();
 		if (name == null) {
 			name = "???";
 		}

@@ -38,7 +38,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	public HistoPanel(String label) {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel(label, DefinitionManager.getInstance().haveExpressions());
+		_sp = new SelectPanel(label, true);
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
@@ -202,13 +202,18 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	public HistoData getHistoData() {
 		// public HistoData(String name, double valMin, double valMax, int
 		// numBins) {
-		String name = _sp.getFullName();
-		if (name == null) {
-			name = "???";
+		String name = _sp.getFullColumnName();
+		if ((name == null) || name.isEmpty()) {
+			name =  _sp.getExpressionName();
+			if ((name == null) || name.isEmpty()) {
+				name = "???";
+			}
 		}
 		_numBins = getNumBins();
 		_minVal = getMinVal();
 		_maxVal = getMaxVal();
+
+		System.err.println("HISTO NAME: [" + name + "]");
 
 		return new HistoData(name, _minVal, _maxVal, _numBins);
 	}

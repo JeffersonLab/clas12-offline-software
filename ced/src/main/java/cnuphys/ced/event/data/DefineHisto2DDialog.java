@@ -102,8 +102,8 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 			_yName = (String)(evt.getNewValue());
 		}	
 		
-		boolean xValid = ((_xName != null) && (_xName.length() > 4) && _xName.contains(":") && _xName.contains("."));
-		boolean yValid = ((_yName != null) && (_yName.length() > 4) && _yName.contains(":") && _yName.contains("."));
+		boolean xValid = ColumnData.validColumnName(_xName);
+		boolean yValid = ColumnData.validColumnName(_yName);
 		_okButton.setEnabled(xValid && yValid);
 	}
 	

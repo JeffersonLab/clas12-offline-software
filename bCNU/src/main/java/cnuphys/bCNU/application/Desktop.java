@@ -278,8 +278,9 @@ public final class Desktop extends JDesktopPane {
 		if (file.exists()) {
 			int answer = JOptionPane.showConfirmDialog(null,
 					file.getAbsolutePath()
-							+ "  already exists. Do you want to overwrite it?",
-					"Overwite Existing File?", JOptionPane.YES_NO_OPTION);
+							+ "  already exists.\nDo you want to overwrite it?",
+					"Overwite Existing File?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+					ImageManager.cnuIcon);
 
 			if (answer != JFileChooser.APPROVE_OPTION) {
 				return;
@@ -323,9 +324,11 @@ public final class Desktop extends JDesktopPane {
 		File file = Environment.getInstance().getConfigurationFile();
 
 		if (file.exists()) {
+			ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
 			int answer = JOptionPane.showConfirmDialog(null,
-					"Confim delete operation (This Can not be undone).",
-					"Delete Configuration?", JOptionPane.YES_NO_OPTION);
+					"Confim delete operation (this can not be undone).",
+					"Delete Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
+					ImageManager.cnuIcon);
 
 			if (answer != JFileChooser.APPROVE_OPTION) {
 				return;

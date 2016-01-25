@@ -14,13 +14,12 @@ import org.xml.sax.SAXException;
 
 import cnuphys.bCNU.log.Log;
 
-public class XMLDomParser {
+public class XmlDomParser {
 
 	/**
 	 * Return a dom object corresponding to an xml file.
 	 * 
-	 * @param fullPath
-	 *            the full path of the XML file
+	 * @param fullPath the full path of the XML file
 	 * @return the dom object (or <code>null</code>
 	 */
 	public static Document getDomObject(String fullPath) {
@@ -51,10 +50,8 @@ public class XMLDomParser {
 	 * Given an xml element and the tag name, look for the tag and get the text
 	 * content.
 	 * 
-	 * @param element
-	 *            the xml element.
-	 * @param tagName
-	 *            the name of the tag.
+	 * @param element the xml element.
+	 * @param tagName the name of the tag.
 	 * @return the text value.
 	 */
 	public static String getTextValue(Element element, String tagName) {
@@ -72,10 +69,8 @@ public class XMLDomParser {
 	 * Given an xml element and the tag name, look for the tag and get the
 	 * integer content.
 	 * 
-	 * @param element
-	 *            the xml element.
-	 * @param tagName
-	 *            the name of the tag.
+	 * @param element the xml element.
+	 * @param tagName the name of the tag.
 	 * @return the int value, or Integer.MIN_VALUE on error.
 	 */
 	public static int getIntValue(Element element, String tagName) {
@@ -102,10 +97,8 @@ public class XMLDomParser {
 	 * Given an xml element and the tag name, look for the tag and get the
 	 * boolean content.
 	 * 
-	 * @param element
-	 *            the xml element.
-	 * @param tagName
-	 *            the name of the tag.
+	 * @param element the xml element.
+	 * @param tagName the name of the tag.
 	 * @return the boolean value. If there is any problem, <code>false</code> is
 	 *         returned.
 	 */
@@ -133,10 +126,8 @@ public class XMLDomParser {
 	 * Given an xml element and the tag name, look for the tag and get the
 	 * double content.
 	 * 
-	 * @param element
-	 *            the xml element.
-	 * @param tagName
-	 *            the name of the tag.
+	 * @param element the xml element.
+	 * @param tagName the name of the tag.
 	 * @return the double value, or Double.NaN on error.
 	 */
 	public static double getDoubleValue(Element element, String tagName) {

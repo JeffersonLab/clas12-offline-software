@@ -9,13 +9,18 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.xml.XmlPrintStreamWritable;
+import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.bCNU.xml.XmlSupport;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
@@ -25,7 +30,7 @@ import cnuphys.splot.pdata.HistoData;
  * @author heddle
  *
  */
-public class DefinitionManager implements ActionListener {
+public class DefinitionManager implements ActionListener, XmlPrintStreamWritable {
 
 	//singleton
 	private static DefinitionManager _instance;
@@ -36,7 +41,9 @@ public class DefinitionManager implements ActionListener {
 	private JMenuItem _scatter;
 	private JMenuItem _expression;
 	private JMenuItem _histo2D;
-	private JMenuItem _open;
+	private JMenuItem _openSinglePlot;
+	private JMenuItem _saveAll;
+	private JMenuItem _readAll;
 	
 	//save dir
 	private String _saveDir = Environment.getInstance().getHomeDirectory();
@@ -96,20 +103,26 @@ public class DefinitionManager implements ActionListener {
 			_histo2D = new JMenuItem("Define a 2D (colorized) Histogram...");
 			_scatter = new JMenuItem("Define a Scatter Plot...");
 			_expression = new JMenuItem("Define Expressions...");
-			_open = new JMenuItem("Read a Plot Definition...");
+			_saveAll = new JMenuItem("Save All Definitions to XML...");
+			_readAll = new JMenuItem("Read All Definitions from XML...");
+			_openSinglePlot = new JMenuItem("Read a Single Plot Definition...");
 			
 			_histo.addActionListener(this);
 			_histo2D.addActionListener(this);
 			_scatter.addActionListener(this);
 			_expression.addActionListener(this);
-			_open.addActionListener(this);
+			_saveAll.addActionListener(this);
+			_readAll.addActionListener(this);
+			_openSinglePlot.addActionListener(this);
 			
 			_menu.add(_histo);
 			_menu.add(_histo2D);
 			_menu.add(_scatter);
 			_menu.add(_expression);
 			_menu.addSeparator();
-			_menu.add(_open);
+			_menu.add(_saveAll);
+			_menu.add(_readAll);
+			_menu.add(_openSinglePlot);
 			_menu.addSeparator();
 		}
 		return _menu;
@@ -130,9 +143,28 @@ public class DefinitionManager implements ActionListener {
 		else if (o == _expression) {
 			defineExpressions();
 		}
-		else if (o == _open) {
+		else if (o == _openSinglePlot) {
 			readPlotDefinition();
 		}
+		else if (o == _saveAll) {
+			saveAllDefinitions();
+		}
+		else if (o == _readAll) {
+			readAllDefinitions();
+		}
+	}
+	
+	//save all definitions
+	private void saveAllDefinitions() {
+//		XmlSupport.save(this);
+		JOptionPane.showMessageDialog(null, "Not Implemented Yet", "Not Yet",
+				JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+	}
+	
+	//read a complete set of definitions
+	private void readAllDefinitions() {
+		JOptionPane.showMessageDialog(null, "Not Implemented Yet", "Not Yet",
+				JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 	}
 	
 	//read a saved plot definition
@@ -173,7 +205,8 @@ public class DefinitionManager implements ActionListener {
 				//see if already have
 				String name = histoData.getName();
 				if (_plots.containsKey(name)) {
-					JOptionPane.showMessageDialog(null, "Already have a histogram named " + name);
+					JOptionPane.showMessageDialog(null, "Already have a histogram named " + name, 
+							"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				}
 				else {
 					JMenuItem item = new JMenuItem(name);
@@ -208,7 +241,8 @@ public class DefinitionManager implements ActionListener {
 			if (histoData != null) {
 				String name = histoData.getName();
 				if (_plots.containsKey(name)) {
-					JOptionPane.showMessageDialog(null, "Already have a 2D histogram named " + name);
+					JOptionPane.showMessageDialog(null, "Already have a 2D histogram named " + name,
+							"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				}
 				else {
 					JMenuItem item = new JMenuItem(name);
@@ -243,7 +277,8 @@ public class DefinitionManager implements ActionListener {
 		if (histoData != null) {
 			String name = histoData.getName();
 			if (_plots.containsKey(name)) {
-				JOptionPane.showMessageDialog(null, "Already have a histogram named " + name);
+				JOptionPane.showMessageDialog(null, "Already have a histogram named " + name,
+						"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				return null;
 			}
 			
@@ -274,7 +309,8 @@ public class DefinitionManager implements ActionListener {
 		if (histoData != null) {
 			String name = histoData.getName();
 			if (_plots.containsKey(name)) {
-				JOptionPane.showMessageDialog(null, "Already have a 2D histogram named " + name);
+				JOptionPane.showMessageDialog(null, "Already have a 2D histogram named " + name,
+						"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				return null;
 			}
 			
@@ -305,7 +341,8 @@ public class DefinitionManager implements ActionListener {
 		if (dataSet != null) {
 			String name = ScatterPanel.getTitle(dataSet);
 			if (_plots.containsKey(name)) {
-				JOptionPane.showMessageDialog(null, "Already have a scatter plot named " + name);
+				JOptionPane.showMessageDialog(null, "Already have a scatter plot named " + name,
+						"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				return null;
 			}
 			
@@ -337,7 +374,8 @@ public class DefinitionManager implements ActionListener {
 			if (dataSet != null) {
 				String name = ScatterPanel.getTitle(dataSet);
 				if (_plots.containsKey(name)) {
-					JOptionPane.showMessageDialog(null, "Already have a plot named " + name);
+					JOptionPane.showMessageDialog(null, "Already have a plot named " + name,
+							"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				}
 				else {
 
@@ -412,7 +450,8 @@ public class DefinitionManager implements ActionListener {
 	 */
 	public boolean addBinding(String vname, String bcname) {
 		if (isNameBound(vname)) {
-			JOptionPane.showMessageDialog(null, "Already have a variable named " + vname);
+			JOptionPane.showMessageDialog(null, "Already have a variable named " + vname, 
+					"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 			return false;
 		}
 		
@@ -455,7 +494,8 @@ public class DefinitionManager implements ActionListener {
 	 */
 	public boolean addExpression(String ename, String estring) {
 		if (isNamedExpression(ename)) {
-			JOptionPane.showMessageDialog(null, "Already have an expression named " + ename);
+			JOptionPane.showMessageDialog(null, "Already have an expression named " + ename,
+					"Already Exists", JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 			return false;
 		}
 		
@@ -488,7 +528,28 @@ public class DefinitionManager implements ActionListener {
 	 */
 	public Vector<NamedExpression> getExpressions() {
 		return _expressions;
-	}	
+	}
+	
+	/**
+	 * Find a NamedExpression with the matching name or return null.
+	 * @param name the name to match
+	 * @return the matching NamedExpression
+	 */
+	public NamedExpression getNamedExpression(String name) {
+		
+		if ((name == null) || name.isEmpty()) {
+			return null;
+		}
+		
+		if (haveExpressions()) {
+			for (NamedExpression ne : _expressions) {
+				if (name.endsWith(ne.expName)) {
+					return ne;
+				}
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Check whether we have any expressions
@@ -496,5 +557,9 @@ public class DefinitionManager implements ActionListener {
 	 */
 	public boolean haveExpressions() {
 		return (_expressions == null) ? false : !_expressions.isEmpty();
+	}
+
+	@Override
+	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
 	}
 }

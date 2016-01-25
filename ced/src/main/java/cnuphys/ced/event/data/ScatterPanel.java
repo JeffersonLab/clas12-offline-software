@@ -26,8 +26,8 @@ public class ScatterPanel extends JPanel implements PropertyChangeListener {
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(2, 1, 2, 10));
 		
-		_spx = new SelectPanel("X axis Variable", DefinitionManager.getInstance().haveExpressions());
-		_spy = new SelectPanel("Y axis Variable", DefinitionManager.getInstance().haveExpressions());
+		_spx = new SelectPanel("X axis Variable", true);
+		_spy = new SelectPanel("Y axis Variable", true);
 		
 		p.add(_spx);
 		p.add(_spy);
@@ -64,8 +64,8 @@ public class ScatterPanel extends JPanel implements PropertyChangeListener {
 	 * @return the scatter plot data set
 	 */
 	public DataSet createDataSet() {
-		String xname = _spx.getFullName();
-		String yname = _spy.getFullName();
+		String xname = _spx.getFullColumnName();
+		String yname = _spy.getFullColumnName();
 		String colNames[] = {xname, yname};
 		try {
 			return new DataSet(DataSetType.XYXY, colNames);
