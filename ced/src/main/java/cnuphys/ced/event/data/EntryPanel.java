@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Vector;
-
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -15,12 +13,9 @@ import javax.swing.JTextField;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
-import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import net.oh.exp4j.Expression;
-import net.oh.exp4j.ExpressionBuilder;
-import net.oh.exp4j.ValidationResult;
 
 public class EntryPanel extends JPanel {
 

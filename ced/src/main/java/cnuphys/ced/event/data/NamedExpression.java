@@ -2,7 +2,6 @@ package cnuphys.ced.event.data;
 
 import java.util.Vector;
 
-import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
 import cnuphys.bCNU.util.FileUtilities;

@@ -9,7 +9,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -20,7 +19,6 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
-import cnuphys.bCNU.xml.XmlSupport;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
