@@ -8,10 +8,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
@@ -26,7 +28,11 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	
 	private ColumnList _clist;
 	
-	private JLabel _fullName;
+	//for the column name
+	private JTextField _columnName;
+	
+	//for the expression name
+	private JTextField _expressionName;
 	
 	//related to expression table
 	private ExpressionTableScrollPane _expressionScrollPane;
@@ -36,22 +42,39 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	public SelectPanel(String label, boolean addExpressionTable) {
 		setLayout(new BorderLayout(2,4));
 		addCenter(label);
-//		addNorth(label);
-		_fullName = new JLabel("");
-		_fullName.setOpaque(true);
-		_fullName.setBackground(Color.black);
-		_fullName.setForeground(Color.cyan);
-		add(_fullName, BorderLayout.SOUTH);
-		
-		if (addExpressionTable) {
+		addSouth();
+		if (addExpressionTable && DefinitionManager.getInstance().haveExpressions()) {
 			addEast();
 		}
 	}
 	
+	private void addSouth() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 6, 4));
+		
+		panel.add(new JLabel("Column"));
+
+		_columnName = new JTextField(null, 30);
+		_columnName.setEditable(true);
+		_columnName.setBackground(Color.black);
+		_columnName.setForeground(Color.cyan);
+		panel.add(_columnName, BorderLayout.SOUTH);
+
+		panel.add(Box.createHorizontalStrut(50));
+
+		panel.add(new JLabel("Expression"));
+		_expressionName = new JTextField(null, 20);
+		_expressionName.setEditable(true);
+		_expressionName.setBackground(Color.black);
+		_expressionName.setForeground(Color.cyan);
+		panel.add(_expressionName, BorderLayout.SOUTH);
+
+		add(panel, BorderLayout.SOUTH);
+	}
+	
+	//add the east panel which contains the expression table
 	private void addEast() {
 		JPanel eastPanel = new JPanel();
-		
-//		eastPanel.setBorder(new CommonBorder("Select an Expression"));
 		JLabel orLab = new JLabel("  or  ");
 		orLab.setOpaque(true);
 		orLab.setBackground(X11Colors.getX11Color("sea green"));
@@ -71,11 +94,11 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		
 	}
 	
-	public String getSelection() {
-		return _fullName.getText();
-	}
-	
-	public void addSelectionListener(ListSelectionListener lsl) {
+	/**
+	 * Add a selection listener to the bank and column lists
+	 * @param lsl the selection listener
+	 */
+	public void addBankColumnListener(ListSelectionListener lsl) {
 		_blist.addListSelectionListener(lsl);
 		_clist.addListSelectionListener(lsl);
 	}
@@ -87,7 +110,7 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		_blist = new BankList();
 		_clist = new ColumnList();
 		
-		addSelectionListener(this);
+		addBankColumnListener(this);
 		
 		p.add(_blist.getScrollPane());
 		p.add(_clist.getScrollPane());
@@ -113,6 +136,12 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 			if (ne != null) {
 				_clist.getSelectionModel().clearSelection();
 				_blist.getSelectionModel().clearSelection();
+				_expressionName.setText(ne.expName);
+				firePropertyChange("expression", "", ne.expName);
+
+			}
+			else {
+				_expressionName.setText(null);
 			}
 			return;
 		}
@@ -126,28 +155,40 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		String cname = _clist.getSelectedValue();
 		
 		if ((bname == null) || (cname == null)) {
-			_fullName.setText(null);
+			_columnName.setText(null);
 		}
 		else {
-			_fullName.setText(bname + "." + cname);	
+			_columnName.setText(bname + "." + cname);	
 			if (_expressionSelectionModel != null) {
 				System.err.println("Clearing selection");
 				_expressionSelectionModel.clearSelection();
 			}
 		}
-		firePropertyChange("newname", "", _fullName.getText());
+		firePropertyChange("newname", "", _columnName.getText());
 	}
 	
 	/**
-	 * Get the full name
-	 * @return the full name
+	 * Get the full column name
+	 * @return the full column name
 	 */
-	public String getFullName() {
-		String fn = _fullName.getText();
-		return fn;
+	public String getFullColumnName() {
+		return _columnName.getText();
+	}
+	
+	/**
+	 * Get the expression name
+	 * @return the expression name
+	 */
+	public String getExpressionName() {
+		return _expressionName.getText();
 	}
 	
 	public static void main(String arg[]) {
+		DefinitionManager.getInstance().addExpression("eee", "whatever");
+		DefinitionManager.getInstance().addExpression("ddd", "whatever");
+		DefinitionManager.getInstance().addExpression("bbb", "whatever");
+		DefinitionManager.getInstance().addExpression("ccc", "whatever");
+		DefinitionManager.getInstance().addExpression("aaa", "whatever");
 		final JFrame frame = new JFrame();
 
 		// set up what to do if the window is closed
@@ -167,7 +208,7 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		frame.setLayout(new BorderLayout());
 		
 //		HistoPanel hp = new HistoPanel();
-		ScatterPanel hp = new ScatterPanel();
+		SelectPanel hp = new SelectPanel("Select", true);
 		frame.add(hp);
 		
 		SwingUtilities.invokeLater(new Runnable() {

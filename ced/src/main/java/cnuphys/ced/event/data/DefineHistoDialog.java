@@ -89,14 +89,24 @@ public class DefineHistoDialog extends JDialog implements ActionListener, Proper
 	public void propertyChange(PropertyChangeEvent evt) {
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
-		if ((o == _histoPanel.getSelectPanel()) && prop.equals("newname")) {
-			String fn = (String)(evt.getNewValue());
-			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
-			_okButton.setEnabled(valid);
-		}	
+		if (o == _histoPanel.getSelectPanel()) {
+			if (prop.equals("newname")) {
+				String fn = (String) (evt.getNewValue());
+				_okButton.setEnabled(ColumnData.validColumnName(fn));
+			} //newname (column)
+			else if (prop.equals("expression")) {
+				_okButton.setEnabled(true);
+			} //expression
+		} 
 	}
 	
 	public static void main(String arg[]) {
+		DefinitionManager.getInstance().addExpression("eee", "whatever");
+		DefinitionManager.getInstance().addExpression("ddd", "whatever");
+		DefinitionManager.getInstance().addExpression("bbb", "whatever");
+		DefinitionManager.getInstance().addExpression("ccc", "whatever");
+		DefinitionManager.getInstance().addExpression("aaa", "whatever");
+		
 		DefineHistoDialog dialog = new DefineHistoDialog();
 		dialog.setVisible(true);
 		int reason = dialog.getReason();

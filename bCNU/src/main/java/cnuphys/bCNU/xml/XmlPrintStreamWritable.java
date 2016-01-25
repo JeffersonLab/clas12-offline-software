@@ -10,5 +10,5 @@ public interface XmlPrintStreamWritable {
 	 * 
 	 * @param xmlPrintStreamWriter
 	 */
-	public void writeXml(IXmlPrintStreamWriter xmlPrintStreamWriter);
+	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter);
 }

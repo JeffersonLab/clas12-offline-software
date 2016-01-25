@@ -153,10 +153,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the about string
 	private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
 
-	// icon for about ced dialog
-	protected static ImageIcon _aboutIcon = ImageManager.getInstance()
-			.loadImageIcon("images/cnuicon.png");
-
 	/**
 	 * Constructor (private--used to create singleton)
 	 * 
@@ -526,7 +522,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(Ced.getInstance(), _aboutString,
 						"About ced", JOptionPane.INFORMATION_MESSAGE,
-						_aboutIcon);
+						ImageManager.cnuIcon);
 
 			}
 		};

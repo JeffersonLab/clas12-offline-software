@@ -15,6 +15,9 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 
 public class ImageManager {
+	
+	public static ImageIcon cnuIcon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
+
 
 	/**
 	 * A memory only cache for Images (not ImageIcons).

@@ -97,10 +97,10 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		if (prop.equals("newname")) {
 			SelectPanel sp[] = _scatterPanel.getScatterPanel();
 			if ((o == sp[0]) || (o == sp[1])) {
-				String xfn = sp[0].getFullName();
-				String yfn = sp[1].getFullName();
-				boolean xvalid = ((xfn != null) && (xfn.length() > 4) && xfn.contains(":") && xfn.contains("."));
-				boolean yvalid = ((yfn != null) && (yfn.length() > 4) && yfn.contains(":") && yfn.contains("."));
+				String xfn = sp[0].getFullColumnName();
+				String yfn = sp[1].getFullColumnName();
+				boolean xvalid = ColumnData.validColumnName(xfn);
+				boolean yvalid =  ColumnData.validColumnName(yfn);
 				_okButton.setEnabled(xvalid && yvalid);
 			}
 		}

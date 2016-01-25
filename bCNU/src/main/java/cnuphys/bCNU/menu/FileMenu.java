@@ -73,14 +73,6 @@ public class FileMenu extends JMenu {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-
-//				int answer = JOptionPane.showConfirmDialog(null,
-//						"Do you really want to quit?", "Quit the Application?",
-//						JOptionPane.YES_NO_OPTION);
-//
-//				if (answer == JFileChooser.APPROVE_OPTION) {
-//					System.exit(0);
-//				}
 				System.exit(0);
 			}
 		};

@@ -91,8 +91,7 @@ public class DefineRangeCutDialog extends JDialog implements ActionListener, Pro
 		String prop = evt.getPropertyName();
 		if ((o == _rangeCutPanel.getSelectPanel()) && prop.equals("newname")) {
 			String fn = (String)(evt.getNewValue());
-			boolean valid = ((fn != null) && (fn.length() > 4) && fn.contains(":") && fn.contains("."));
-			_okButton.setEnabled(valid);
+			_okButton.setEnabled(ColumnData.validColumnName(fn));
 		}	
 	}
 	

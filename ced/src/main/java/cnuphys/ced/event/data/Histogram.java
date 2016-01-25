@@ -35,8 +35,9 @@ public class Histogram extends PlotDialog {
 	public Histogram(HistoData histoData) {
 		super(histoData.getName());
 		_histoData = histoData;
+		
+		
 		_colDat = ColumnData.getColumnData(histoData.getName());
-//		System.err.println("CD type: " + _colDat.getType());
 		
 		_plotPanel = createPlotPanel(histoData);
 		add(_plotPanel, BorderLayout.CENTER);
