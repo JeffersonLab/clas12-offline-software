@@ -12,5 +12,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/JOGL"/>
 	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
 	<classpathentry kind="lib" path="/coatjava/lib/clas/coat-libs-2.0-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/exp4j"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>
