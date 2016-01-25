@@ -72,10 +72,10 @@ public class ExpressionTableModel extends DefaultTableModel {
 		switch (col) {
 
 		case ENAME:
-			return nb.expName;
+			return nb._expName;
 
 		case ESTRING:
-			return nb.expString;
+			return nb._expString;
 		}
 
 		return null;

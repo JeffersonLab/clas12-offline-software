@@ -11,6 +11,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
@@ -167,5 +168,8 @@ public class Histogram2D extends PlotDialog {
 		return PlotDialog.HISTOGRAM2D;
 	}
 	
+	@Override
+	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+	}
 
 }

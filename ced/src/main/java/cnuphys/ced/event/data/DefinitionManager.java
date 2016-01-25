@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
+import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
@@ -512,7 +513,7 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 		//there are not a lot of these so no need for a clever search
 		if ((_expressions != null) && !_expressions.isEmpty()) {
 			for (NamedExpression nb : _expressions) {
-				if (nb.expName.equals(name)) {
+				if (nb._expName.equals(name)) {
 					return true;
 				}
 			}
@@ -541,7 +542,7 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 		
 		if (haveExpressions()) {
 			for (NamedExpression ne : _expressions) {
-				if (name.endsWith(ne.expName)) {
+				if (name.endsWith(ne._expName)) {
 					return ne;
 				}
 			}
@@ -556,6 +557,46 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 	public boolean haveExpressions() {
 		return (_expressions == null) ? false : !_expressions.isEmpty();
 	}
+	
+	/**
+	 * Find a NameBinding with the matching name or return null.
+	 * @param name the name to match
+	 * @return the matching NameBinding
+	 */
+	public NameBinding getNameBinding(String name) {
+		
+		
+		if ((name == null) || (name.length() < 2)) {
+			return null;
+		}
+		
+		if (name.startsWith("_")) {
+			name = name.substring(1);
+		}
+		else {
+			Log.getInstance().warning("In getNameBindings variable did not start with an underscore [" + name + "]");
+		}
+
+		
+		if (haveBindings()) {
+			for (NameBinding ne : _bindings) {
+				if (name.equals(ne.varName)) {
+					return ne;
+				}
+			}
+		}
+		return null;
+	}
+
+	
+	/**
+	 * Check whether we have any bindings
+	 * @return <code>true</code> if we have at least one expression
+	 */
+	public boolean haveBindings() {
+		return (_bindings == null) ? false : !_bindings.isEmpty();
+	}
+
 
 	@Override
 	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {

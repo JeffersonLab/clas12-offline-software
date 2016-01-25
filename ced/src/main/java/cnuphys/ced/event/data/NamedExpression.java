@@ -12,22 +12,29 @@ import net.oh.exp4j.ValidationResult;
 public class NamedExpression implements Comparable<NamedExpression> {
 
 	/** The expression name */
-	public String expName;
+	protected String _expName;
 
 	/** The expression definition string */
-	public String expString;
+	protected String _expString;
 
-	private Expression _expression;
-
+	/** The actual expression */
+	protected Expression _expression;
+	
+	/** The variables of the expression */
+	protected String[] _variables;
+	
+	/** A matching array of ColumnData objects */
+	protected ColumnData[] _columnData;
+	
 	public NamedExpression(String eName, String eString) {
-		expName = eName;
-		expString = eString;
+		_expName = eName;
+		_expString = eString;
 	}
 
 	@Override
 	public int compareTo(NamedExpression o) {
-		String lcv = expName.toLowerCase();
-		String lco = o.expName.toLowerCase();
+		String lcv = _expName.toLowerCase();
+		String lco = o._expName.toLowerCase();
 		return lcv.compareTo(lco);
 	}
 
@@ -38,7 +45,20 @@ public class NamedExpression implements Comparable<NamedExpression> {
 	 */
 	public Expression getExpression() {
 		if (_expression == null) {
-			_expression = getExpression(expString);
+			_variables = getVariables(_expString);
+			if ((_variables != null) && (_variables.length > 0)) {
+				_columnData = new ColumnData[_variables.length];
+				for (int i = 0; i < _variables.length; i++) {
+					_columnData[i] = null;
+					NameBinding nb = DefinitionManager.getInstance().getNameBinding(_variables[i]);
+					if (nb != null) {
+						_columnData[i] = ColumnData.getColumnData(nb.bankColumnName);
+					}
+					
+					System.err.println("var name: [" + _variables[i] + "]  columnData: " + _columnData[i]);
+				} //end for i
+			}
+			_expression = getExpression(_expString);
 		}
 		return _expression;
 	}
@@ -54,13 +74,11 @@ public class NamedExpression implements Comparable<NamedExpression> {
 	}
 
 	/**
-	 * Obtain a valid expression from an expression string
-	 * 
+	 * Get an array of variables from the expression string
 	 * @param expStr the expression string
-	 * @param tf an optional textfield for messages
-	 * @return an Expression, or null;
+	 * @return an array of variables which should have a leading underscore
 	 */
-	public static Expression getExpression(String expStr, JTextComponent tf) {
+	private static String[] getVariables(String expStr) {
 		if ((expStr == null) || expStr.isEmpty()) {
 			return null;
 		}
@@ -94,10 +112,25 @@ public class NamedExpression implements Comparable<NamedExpression> {
 
 		if (vars != null) {
 			vv.toArray(vars);
-			for (String v : vars) {
-				System.err.println("VARIABLE [" + v + "]");
-			}
+//			for (String v : vars) {
+//				System.err.println("VARIABLE [" + v + "]");
+//			}
 		}
+		
+		return vars;
+	}
+	
+	/**
+	 * Obtain a valid expression from an expression string
+	 * 
+	 * @param expStr the expression string
+	 * @param tf an optional textfield for messages
+	 * @return an Expression, or null;
+	 */
+	public static Expression getExpression(String expStr, JTextComponent tf) {
+
+        // get the variables
+		String vars[] = getVariables(expStr);
 
 		Expression expression = null;
 		// it is technically ok if there are no vars--it means a constant expression
@@ -139,4 +172,75 @@ public class NamedExpression implements Comparable<NamedExpression> {
 		return expression;
 	}
 
+	public int minLength() {
+		if (!readyToCompute()) {
+			return 0;
+		}
+		
+		int len = (_columnData == null) ? 0 : _columnData.length;
+		if (len < 1) {
+			return 0;
+		}
+		
+		double a[] = _columnData[0].getAsDoubleArray();
+		int dataLen = (a == null) ? 0 : a.length;
+		
+		for (int i = 1; i < len; i++) {
+			a = _columnData[i].getAsDoubleArray();
+			int alen = (a == null) ? 0 : a.length;
+			dataLen = Math.min(alen, dataLen);
+		}
+		return dataLen;
+	}
+
+	/**
+	 * The named expression is ready to compute if it has an expression,
+	 * and the length of the variable array is the length of the ColumnData
+	 * array, and not of the ColumnData elements are <code>null</code>.
+	 * @return <code>true</code> if the named expression is eady to compute
+	 */
+	public boolean readyToCompute() {
+		getExpression();
+		if (_expression == null) {
+			return false;
+		}
+		
+		int vlen = (_variables == null) ? 0 : _variables.length;
+		int clen = (_columnData == null) ? 0 : _columnData.length;
+		
+		if (vlen != clen) {
+			return false;
+		}
+		
+		for (int i = 0; i < clen; i++) {
+			if (_columnData[i] == null) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Compute the value of the expression
+	 * @param index the index into the data arrays
+	 * @return the value
+	 */
+	public double value(int index) {
+		if (readyToCompute()) {
+			int vlen = (_variables == null) ? 0 : _variables.length;
+			for (int i = 0; i < vlen; i++) {
+				double val[] = _columnData[i].getAsDoubleArray();
+				if (val == null) {
+					return Double.NaN;
+				}
+	//			System.err.println("EXP INDX: " + i + "  val = " + val[i]);
+				_expression.setVariable(_variables[i], val[index]);
+			}
+			return _expression.evaluate();
+		}
+		
+		return Double.NaN;
+	}
+	
 }
