@@ -3,6 +3,8 @@ package cnuphys.bCNU.xml;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Stack;
 
 import javax.xml.namespace.NamespaceContext;
@@ -10,6 +12,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 public class XmlPrintStreamWriter implements XMLStreamWriter {
+	
+	//for writing arrays
+	public static final String XmlArrayNumbersElementName = "numbers";
+	public static final String XmlArrayTypeAttName = "type";
+	public static final String XmlArrayNameAttName = "name";
+	public static final String XmlArrayValueElementName = "value";
+
 
 	/**
 	 * A Stack of elements. When an element is started, it is popped onto the
@@ -28,8 +37,7 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	 * Create an <code>XmlPrintStreamWriter</code> from a
 	 * <code><PrintStream></code> object.
 	 * 
-	 * @param out
-	 *            the <code><PrintStream></code> object to use.
+	 * @param out the <code><PrintStream></code> object to use.
 	 */
 	public XmlPrintStreamWriter(PrintStream out) {
 		this.out = out;
@@ -41,8 +49,7 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	 * otherwise, a new file will be created. The output will be written to the
 	 * file and is buffered.
 	 * 
-	 * @param file
-	 *            the <code><File></code> object to use.
+	 * @param file the <code><File></code> object to use.
 	 * @throws FileNotFoundException
 	 */
 	public XmlPrintStreamWriter(File file) throws FileNotFoundException {
@@ -55,8 +62,7 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	 * otherwise, a new file will be created. The output will be written to the
 	 * file and is buffered.
 	 * 
-	 * @param fullPathName
-	 *            the fully qualified path name to use.
+	 * @param fullPathName the fully qualified path name to use.
 	 * @throws FileNotFoundException
 	 */
 	public XmlPrintStreamWriter(String fullPathName)
@@ -70,10 +76,8 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	 * size; otherwise, a new file will be created. The output will be written
 	 * to the file and is buffered.
 	 * 
-	 * @param dirName
-	 *            the fully qualified path to the parent directory.
-	 * @param bareFileName
-	 *            the name of just the file.
+	 * @param dirName the fully qualified path to the parent directory.
+	 * @param bareFileName the name of just the file.
 	 * @throws FileNotFoundException
 	 */
 	public XmlPrintStreamWriter(String dirName, String bareFileName)
@@ -113,10 +117,32 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 			out.flush();
 		}
 	}
+	
+	/**
+	 * This writes an element using a Properties object for the name-value attributes.
+	 * @param elementName the element name
+	 * @param properties used to store the attribute name-value pairs
+	 * @throws XMLStreamException
+	 */
+	public void writeElementWithProps(String elementName, Properties properties) throws XMLStreamException {
+		
+		writeStartElement(elementName);
+		
+		if (properties != null) {
+			Enumeration<?> keys = properties.keys();
+			while (keys.hasMoreElements()) {
+				String key = (String) keys.nextElement();
+				Object val = properties.get(key);
+				writeAttribute(key, val.toString());
+			}
+		}
+		out.print(">\n");
+		
+	    writeEndElement();
+	}
 
 	@Override
 	public NamespaceContext getNamespaceContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -128,74 +154,119 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 
 	@Override
 	public Object getProperty(String arg0) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void setDefaultNamespace(String arg0) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"setDefaultNamespace(String arg0) not implemented yet");
 	}
 
 	@Override
 	public void setNamespaceContext(NamespaceContext arg0)
 			throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"setNamespaceContext(NamespaceContext arg0) not implemented yet");
 	}
 
 	@Override
 	public void setPrefix(String arg0, String arg1) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"setPrefix(String arg0, String arg1) not implemented yet");
 	}
 
 	@Override
-	public void writeAttribute(String arg0, String arg1)
+	public void writeAttribute(String name, String value)
 			throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		out.print("\n " + name + "=\"" + value + "\"");
 	}
 
 	@Override
-	public void writeAttribute(String arg0, String arg1, String arg2)
+	public void writeAttribute(String name, String value, String s)
 			throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		out.print("\n " + name + "=\"" + value + "\"" + s);
 	}
 
 	@Override
 	public void writeAttribute(String arg0, String arg1, String arg2,
 			String arg3) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"writeAttribute(String arg0, String arg1, String arg2, String arg3) not implemented yet");
 	}
 
 	@Override
 	public void writeCData(String arg0) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"writeCData(String arg0) not implemented yet");
 	}
 
 	@Override
-	public void writeCharacters(String arg0) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+	public void writeCharacters(String s) throws XMLStreamException {
+		out.print(s);
 	}
 
 	@Override
 	public void writeCharacters(char[] arg0, int arg1, int arg2)
 			throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"writeProcessingInstruction(String arg0, String arg1) not implemented yet");
+	}
+	
+	public void writeArray(String name, double array[]) throws XMLStreamException {
+		writeArray(name, array, (array == null) ? 0 :  array.length);
 	}
 
+	public void writeArray(String name, double array[], int dataLen) throws XMLStreamException {
+		writeStartElement(XmlArrayNumbersElementName);
+		writeAttribute(XmlArrayNameAttName, name, " ");
+		writeAttribute(XmlArrayTypeAttName, "array", ">");
+
+		for (int i = 0; i < dataLen; i++) {
+			writeCharacters("<" + XmlArrayValueElementName + ">"
+					+ array[i] + "</" + XmlArrayValueElementName + ">");
+			
+			if (((i+1) % 4) == 0) {
+				writeCharacters("\n");
+			}
+			else {
+				writeCharacters(" ");
+			}
+		}
+
+		writeEndElement();
+		
+	}
+	
+	public void writeArray(String name, long array[]) throws XMLStreamException {
+		writeArray(name, array, (array == null) ? 0 :  array.length);
+	}
+
+	public void writeArray(String name, long array[], int dataLen) throws XMLStreamException {
+		writeStartElement(XmlArrayNumbersElementName);
+		writeAttribute(XmlArrayNameAttName, name, " ");
+		writeAttribute(XmlArrayTypeAttName, "array", ">");
+
+		for (int i = 0; i < dataLen; i++) {
+			writeCharacters("<" + XmlArrayValueElementName + ">"
+					+ array[i] + "</" + XmlArrayValueElementName + ">");
+			
+			if (((i+1) % 8) == 0) {
+				writeCharacters("\n");
+			}
+			else {
+				writeCharacters(" ");
+			}
+		}
+
+		writeEndElement();
+		
+	}
+	
 	/**
 	 * Write an XML comment to the output stream.
 	 * 
-	 * @param comment
-	 *            the bare comment. May be null. The XML tags will be added
+	 * @param comment the bare comment. May be null. The XML tags will be added
 	 *            automatically.
 	 */
 	@Override
@@ -207,14 +278,14 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 
 	@Override
 	public void writeDTD(String arg0) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"writeDTD(String arg0) not implemented yet");
 	}
 
 	@Override
 	public void writeDefaultNamespace(String arg0) throws XMLStreamException {
-		// TODO Auto-generated method stub
-
+		throw new XMLStreamException(
+				"writeDefaultNamespace(String arg0) not implemented yet");
 	}
 
 	@Override
@@ -257,7 +328,6 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	 */
 	@Override
 	public void writeEndElement() throws XMLStreamException {
-		// closes the current element.
 		String currentElement = elements.pop();
 		out.println("</" + currentElement + ">");
 	}
@@ -300,8 +370,7 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	/**
 	 * Write the XML header. This method will default to utf-8.
 	 * 
-	 * @param version
-	 *            the version string, e.g., "1.0". (Don't embed the quote
+	 * @param version the version string, e.g., "1.0". (Don't embed the quote
 	 *            characters).
 	 */
 	@Override
@@ -312,11 +381,9 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	/**
 	 * Write the XML header.
 	 * 
-	 * @param encoding
-	 *            the encoding string, e.g., "utf-8". (Don't embed the quote
-	 *            characters).
-	 * @param version
-	 *            the version string, e.g., "1.0". (Don't embed the quote
+	 * @param encoding the encoding string, e.g., "utf-8". (Don't embed the
+	 *            quote characters).
+	 * @param version the version string, e.g., "1.0". (Don't embed the quote
 	 *            characters).
 	 */
 	@Override
@@ -331,14 +398,13 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	 * Starts a new element, with no namespace or prefix. If there is a current
 	 * element, it finishes it by adding a close bracket, but does not close it.
 	 * 
-	 * @param localName
-	 *            the base element name.
+	 * @param localName the base element name.
 	 */
 	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
 		// see if stack is not empty
 		if (!elements.isEmpty()) {
-			// String currentElem = elements.peek();
+			//String currentElem = elements.peek();
 			// the close bracket is written now
 			out.println(">");
 		}
@@ -371,16 +437,24 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 		// try {
 		// XmlPrintStreamWriter xmlPrintStreamWriter = new
 		// XmlPrintStreamWriter(homeDirectory, "test.xml");
-		XmlPrintStreamWriter xmlPrintStreamWriter = new XmlPrintStreamWriter(
+		XmlPrintStreamWriter writer = new XmlPrintStreamWriter(
 				System.out);
 		try {
-			xmlPrintStreamWriter.writeStartDocument();
+			writer.writeStartDocument();
 
-			xmlPrintStreamWriter.writeStartElement("slideshow");
-			xmlPrintStreamWriter.writeEndElement();
+			writer.writeStartElement("slideshow");
+			
+			Properties props = new Properties();
+			props.put("ival", 7);
+			props.put("bval", false);
+			
+			writer.writeElementWithProps("Element1", props);
+		//	props.clear();
 
-			xmlPrintStreamWriter.writeEndDocument();
-		} catch (XMLStreamException e) {
+			writer.writeEndElement();
+			writer.writeEndDocument();
+		}
+		catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
 		// }

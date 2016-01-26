@@ -4,9 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.xml.stream.XMLStreamException;
 
 import net.oh.exp4j.Expression;
 
@@ -15,6 +17,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.bCNU.xml.XmlSupport;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
@@ -198,9 +201,20 @@ public class Histogram extends PlotDialog {
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+
+		Properties props = new Properties();
+		XmlSupport.addRectangleAttribute(props, getBounds());
+		try {
+			xmlPrintStreamWriter.writeStartElement(getPlotType());
+			writeBounds(xmlPrintStreamWriter);
+			writeHistoData(xmlPrintStreamWriter, _histoData);
+			xmlPrintStreamWriter.writeEndElement();
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -6,8 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JDialog;
@@ -16,21 +16,31 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.xml.stream.XMLStreamException;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
+import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.bCNU.xml.XmlSupport;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.splot.plot.PlotParameters;
 
 public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener, XmlPrintStreamWritable {
+	
+	//XML tags and attributes
+	public static final String XmlBounds = "BOUNDS";
+	public static final String XmlHistoData = "HISTODATA";
+	public static final String XmlMin = "min";
+	public static final String XmlMax = "max";
+	public static final String XmlCount = "count";
 	
 	//String delimitter for tokenizing
 	public static final String DELIMIT = "$$$";
@@ -344,6 +354,39 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
     	}
     	
     	return null;
+    }
+    
+    /**
+     * Write out the bounds of the plot dialog
+     * @param xmlPrintStreamWriter the writer
+     */
+    protected void writeBounds(XmlPrintStreamWriter xmlPrintStreamWriter) {
+		Properties props = new Properties();
+		XmlSupport.addRectangleAttribute(props, getBounds());
+		try {
+			xmlPrintStreamWriter.writeElementWithProps(XmlBounds, props);
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    /**
+     * Write out histo data
+     * @param xmlPrintStreamWriter
+     * @param hd the histo data
+     */
+    protected void writeHistoData(XmlPrintStreamWriter xmlPrintStreamWriter,
+    		HistoData hd) {
+		Properties props = new Properties();
+		props.put(XmlMin, hd.getMinX());
+		props.put(XmlMax, hd.getMaxX());
+		props.put(XmlCount, hd.getNumberBins());
+		try {
+			xmlPrintStreamWriter.writeElementWithProps(XmlHistoData, props);
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+		
     }
 	
 }
