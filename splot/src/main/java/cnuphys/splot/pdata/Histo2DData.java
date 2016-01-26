@@ -1,7 +1,6 @@
 package cnuphys.splot.pdata;
 
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 

@@ -136,7 +136,7 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 				writeAttribute(key, val.toString());
 			}
 		}
-		out.print(">\n");
+		closeBracket();
 		
 	    writeEndElement();
 	}
@@ -403,14 +403,18 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
 		// see if stack is not empty
-		if (!elements.isEmpty()) {
-			//String currentElem = elements.peek();
-			// the close bracket is written now
-			out.println(">");
-		}
+//		if (!elements.isEmpty()) {
+//			//String currentElem = elements.peek();
+//			// the close bracket is written now
+//			out.println("*>*");
+//		}
 
 		elements.push(localName);
 		out.print("<" + localName);
+	}
+	
+	public void closeBracket() {
+		out.print(">\n");
 	}
 
 	@Override

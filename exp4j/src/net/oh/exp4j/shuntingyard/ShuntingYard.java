@@ -99,6 +99,6 @@ public class ShuntingYard {
                 output.add(t);
             }
         }
-        return (Token[]) output.toArray(new Token[output.size()]);
+        return output.toArray(new Token[output.size()]);
     }
 }

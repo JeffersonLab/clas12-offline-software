@@ -155,21 +155,21 @@ public class ScatterPlot extends PlotDialog {
 		return PlotDialog.SCATTERPLOT;
 	}
 
-	/** custom definitions */
-	@Override
-	protected  void customWrite(BufferedWriter out) {
-		String xname = "" + _dataSet.getColumnName(0);
-		String yname = "" + _dataSet.getColumnName(1);
-		try {
-			writeDelimitted(out, DATASET, xname, yname);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
+//	/** custom definitions */
+//	@Override
+//	protected  void customWrite(BufferedWriter out) {
+//		String xname = "" + _dataSet.getColumnName(0);
+//		String yname = "" + _dataSet.getColumnName(1);
+//		try {
+//			writeDelimitted(out, DATASET, xname, yname);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		
+//	}
 
 	@Override
-	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+	public void customXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
 	}
 
 }
