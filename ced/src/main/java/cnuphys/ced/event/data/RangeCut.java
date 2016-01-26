@@ -1,7 +1,12 @@
 package cnuphys.ced.event.data;
 
+import java.util.Properties;
+
+import javax.xml.stream.XMLStreamException;
+
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 
 public class RangeCut implements ICut {
 	
@@ -21,6 +26,13 @@ public class RangeCut implements ICut {
 	
 	public static final String CUT_TYPE = "RANGECUT";
 	
+	/**
+	 * A RangeCut is a simmple cut based on whether
+	 * a column or expression value falls in range
+	 * @param name the name, either a column or an expression
+	 * @param minVal the min value
+	 * @param maxVal the max value
+	 */
 	public RangeCut(String name, double minVal, double maxVal) {
 		_name = name;
 		_cd = ColumnData.getColumnData(name);
@@ -97,40 +109,6 @@ public class RangeCut implements ICut {
 		return _name;
 	}
 	
-	/**
-	 * Create a range cut from a token string
-	 * @param s the definition string from properties
-	 * @return a RangeCut greated from a string
-	 */
-	public static RangeCut fromString(String s) {
-		RangeCut rc = null;
-		String tokens[] = PlotDialog.getTokens(s);
-		if ((tokens != null) && (tokens.length == 5)) {
-			// 0th token is type
-			String name = tokens[1];
-			double minVal = Double.parseDouble(tokens[2]);
-			double maxVal = Double.parseDouble(tokens[3]);
-			boolean active = Boolean.parseBoolean(tokens[4]);
-			rc = new RangeCut(name, minVal, maxVal);
-			if (rc != null) {
-				rc.setActive(active);
-			}
-		}
-		return rc;
-	}
-	
-	/**
-	 * Get the definition used to write in the properties
-	 * @return the definition string
-	 */
-	@Override
-	public String getDefinition() {
-		String minString = DoubleFormat.doubleFormat(min, 10);
-		String maxString = DoubleFormat.doubleFormat(max, 10);
-		String activeString = "" + isActive();
-		return PlotDialog.makeDelimittedString(CUT_TYPE, _name, minString, maxString, activeString);
-	}
-
 
 	/**
 	 * Get a unique type name
@@ -138,5 +116,19 @@ public class RangeCut implements ICut {
 	@Override
 	public String getCutType() {
 		return CUT_TYPE;
+	}
+	
+	@Override
+	public void writeXml(XmlPrintStreamWriter writer) {
+		Properties props = new Properties();
+		props.put(PlotDialog.XmlName, _name);
+		props.put(PlotDialog.XmlMin, DoubleFormat.doubleFormat(min, 10));
+		props.put(PlotDialog.XmlMax, DoubleFormat.doubleFormat(max, 10));
+		props.put(PlotDialog.XmlActive, isActive());
+		try {
+			writer.writeElementWithProps(PlotDialog.XmlRangeCut, props);
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
 	}
 }

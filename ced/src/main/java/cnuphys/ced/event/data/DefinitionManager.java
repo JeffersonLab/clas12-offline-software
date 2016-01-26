@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -13,13 +15,19 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
-import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.bCNU.xml.XmlSupport;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
@@ -40,9 +48,8 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 	private JMenuItem _scatter;
 	private JMenuItem _expression;
 	private JMenuItem _histo2D;
-	private JMenuItem _openSinglePlot;
 	private JMenuItem _saveAll;
-	private JMenuItem _readAll;
+	private JMenuItem _readXml;
 	
 	//save dir
 	private String _saveDir = Environment.getInstance().getHomeDirectory();
@@ -103,16 +110,14 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 			_scatter = new JMenuItem("Define a Scatter Plot...");
 			_expression = new JMenuItem("Define Expressions...");
 			_saveAll = new JMenuItem("Save All Definitions to XML...");
-			_readAll = new JMenuItem("Read All Definitions from XML...");
-			_openSinglePlot = new JMenuItem("Read a Single Plot Definition...");
+			_readXml = new JMenuItem("Read from XML...");
 			
 			_histo.addActionListener(this);
 			_histo2D.addActionListener(this);
 			_scatter.addActionListener(this);
 			_expression.addActionListener(this);
 			_saveAll.addActionListener(this);
-			_readAll.addActionListener(this);
-			_openSinglePlot.addActionListener(this);
+			_readXml.addActionListener(this);
 			
 			_menu.add(_histo);
 			_menu.add(_histo2D);
@@ -120,8 +125,7 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 			_menu.add(_expression);
 			_menu.addSeparator();
 			_menu.add(_saveAll);
-			_menu.add(_readAll);
-			_menu.add(_openSinglePlot);
+			_menu.add(_readXml);
 			_menu.addSeparator();
 		}
 		return _menu;
@@ -142,14 +146,11 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 		else if (o == _expression) {
 			defineExpressions();
 		}
-		else if (o == _openSinglePlot) {
-			readPlotDefinition();
-		}
 		else if (o == _saveAll) {
 			saveAllDefinitions();
 		}
-		else if (o == _readAll) {
-			readAllDefinitions();
+		else if (o == _readXml) {
+			readXML();
 		}
 	}
 	
@@ -161,29 +162,39 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 	}
 	
 	//read a complete set of definitions
-	private void readAllDefinitions() {
-		JOptionPane.showMessageDialog(null, "Not Implemented Yet", "Not Yet",
-				JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-	}
-	
-	//read a saved plot definition
-	private void readPlotDefinition() {
-		File file = FileUtilities.openFile(_saveDir, "Plot Definition File", "pltd", "PLTD");
+	private void readXML() {
+		File file = XmlSupport.openXmlFile();
 		if (file != null) {
+			XMLReader reader;
 			try {
-				PlotReader reader = new PlotReader(file);
-				if (reader != null) {
-					PlotDialog pdialog = reader.getPlotDialog();
-//					if (pdialog != null) {
-//						
-//					}
+				reader = XMLReaderFactory.createXMLReader();
+				
+				ContentHandler handler = new DefinitionXmlHandler();
+				reader.setContentHandler(handler);
+				
+				FileReader fileReader = null;
+				try {
+					fileReader = new FileReader(file);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					return;
 				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+
+				InputSource inputSource = new InputSource(fileReader);
+				try {
+					reader.parse(inputSource);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			} catch (SAXException e1) {
+				e1.printStackTrace();
 			}
-		} // file != null
+
+
+		}
 	}
-	
+		
 	//Expressions
 	private void defineExpressions() {
 		if (_defineExpressionDialog == null) {

@@ -1,6 +1,8 @@
 package cnuphys.ced.event.data;
 
-public interface ICut {
+import cnuphys.bCNU.xml.XmlPrintStreamWritable;
+
+public interface ICut extends XmlPrintStreamWritable {
 
 	public boolean pass(double val);
 	
@@ -13,8 +15,6 @@ public interface ICut {
 	public String getName();
 
 	public String plotText();
-
-	public String getDefinition();
 	
 	public String getCutType();
 }

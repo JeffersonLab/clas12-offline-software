@@ -1,26 +1,18 @@
 package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.xml.stream.XMLStreamException;
 
-import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.bCNU.xml.XmlSupport;
@@ -35,25 +27,25 @@ import cnuphys.splot.plot.PlotParameters;
 
 public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener, XmlPrintStreamWritable {
 	
-	//XML tags and attributes
+	//XML elements (upper case)
 	public static final String XmlBounds = "BOUNDS";
 	public static final String XmlHistoData = "HISTODATA";
+	public static final String XmlPlot = "PLOT";
+	public static final String XmlRangeCut = "RANGECUT";
+	
+	
+	//XML attributes (lower case)
+	public static final String XmlActive = "active";
+	public static final String XmlCount = "count";
 	public static final String XmlMin = "min";
 	public static final String XmlMax = "max";
-	public static final String XmlCount = "count";
-	
-	//String delimitter for tokenizing
-	public static final String DELIMIT = "$$$";
-
-	//properties for saving/reading definitions
-	protected static final String TYPE = "TYPE";
-	protected static final String BOUNDS = "BOUNDS";
-	protected static final String DATASET = "DATASET";
-	protected static final String HISTODATA = "HISTODATA";
-	protected static final String HISTOGRAM = "HISTOGRAM";
-	protected static final String HISTO2DDATA = "HISTO2DDATA";
-	protected static final String HISTOGRAM2D = "HISTOGRAM2D";
-	protected static final String SCATTERPLOT = "SCATTERPLOT";
+	public static final String XmlName = "name";
+	public static final String XmlType = "type";
+		
+	//plot types
+	protected static final String HISTOGRAM = "histogram";
+	protected static final String HISTOGRAM2D = "histogram2d";
+	protected static final String SCATTERPLOT = "scatterplot";
 	
 	//the name
 	protected String _name;
@@ -136,112 +128,13 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 			clear();
 		}
 		else if (o == _saveItem) { //save the plot definition?
-			
 			XmlSupport.save(this);
-			
-			//write out the plot as an xml file
-			
-			
-//			File file = getSaveDefinitionFile();
-//			if (file != null) {
-//			    FileWriter fstream;
-//				try {
-//					fstream = new FileWriter(file.getPath(), false);
-//				    BufferedWriter out = new BufferedWriter(fstream);
-//					saveDefinition(out);
-//					out.flush();
-//					out.close();
-//				} catch (IOException e1) {
-//					e1.printStackTrace();
-//				} //true tells to append data.
-//			}
 		}
 
 	}
 	
 	/** Clear all the data */
-	protected abstract void clear();
-
-	/** Save the definition */
-	protected void saveDefinition(BufferedWriter out) {
-		try {
-			//plot type
-			comment(out, "ced Plot Definition File");
-			writeDelimitted(out, TYPE, getPlotType()); //type
-			
-			//location
-			Rectangle r = getBounds();
-			comment(out, "plot bounds");
-			writeDelimitted(out, BOUNDS, ""+r.x, ""+r.y, ""+r.width, ""+r.height);
-			
-			//cuts
-			Vector<ICut> cuts = getCuts();
-			if ((cuts != null) && !cuts.isEmpty()) {
-				comment(out, "cuts-- count = " + cuts.size());
-				for (ICut cut:cuts) {
-					out.write(cut.getDefinition() + "\n");
-				}
-			}
-			
-			//cutsom
-			comment(out, "custom data");
-			customWrite(out);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Write a delimitted string to the save file
-	 * @param out theoutput stream
-	 * @param sa the array of strings
-	 * @throws IOException
-	 */
-	protected void writeDelimitted(BufferedWriter out, String... sa) throws IOException {
-		String s = makeDelimittedString(sa);
-		if (s != null) {
-			out.write(s + "\n");
-		}
-	}
-	protected void comment(BufferedWriter out, String s) throws IOException {
-		out.write("\n" + "!" + s + "\n");
-	}
-	
-	/** custom definitions */
-	protected abstract void customWrite(BufferedWriter out);
-	
-	//select file for saving
-	protected File getSaveDefinitionFile() {
-		File selectedFile = null;
-		JFileChooser chooser = new JFileChooser();
-		
-		File defFile = new File(DefinitionManager.getInstance().getSaveDir(), "plotdef.pltd");
-		chooser.setSelectedFile(defFile);
-		int returnVal = chooser.showSaveDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			selectedFile = chooser.getSelectedFile();
-			if (selectedFile != null) {
-				DefinitionManager.getInstance().setSaveDir(selectedFile.getParent());
-
-				if (selectedFile.exists()) {
-					int answer = JOptionPane.showConfirmDialog(null,
-							selectedFile.getAbsolutePath()
-									+ "  already exists. Do you want to overwrite it?",
-							"Overwite Existing File?",
-							JOptionPane.YES_NO_OPTION,
-							JOptionPane.QUESTION_MESSAGE,
-							ImageManager.cnuIcon);
-
-					if (answer != JFileChooser.APPROVE_OPTION) {
-						selectedFile = null;
-					}
-				} // end file exists check
-			}
-		}
-
-		return selectedFile;
-	}
-	
+	protected abstract void clear();	
 	
 	@Override
 	public void accumulationEvent(int reason) {
@@ -298,38 +191,6 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	 */
 	public abstract String getPlotType();
 	    
-    /**
-     * Make a single delimited string out of collection 
-     * @param sa the array of strings
-     * @return the delimitted string
-     */
-    public static String makeDelimittedString(String... sa) {
-    	if (sa == null) {
-    		return null;
-    	}
-    	
-    	String s = sa[0];
-    	
-    	if (sa.length > 1) {
-    		for (int i = 1; i < sa.length; i++) {
-    			s = s + DELIMIT + sa[i];
-    		}
-    	}
-    	
-    	return s;
-    }
-    
-    /**
-     * Get the tokens from a string
-     * @param s the string 
-     * @return the tokens
-     */
-    public static String[] getTokens(String s) {
-    	if (s == null) {
-    		return null;
-    	}
-    	return FileUtilities.tokens(s, DELIMIT);
-    }
     
     /**
      * Get the plot parameters for the underlying plot.
@@ -355,6 +216,19 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
     	
     	return null;
     }
+    
+    /**
+     * Write out the cuts of the plot dialog
+     * @param xmlPrintStreamWriter the writer
+     */
+   protected void writeCuts(XmlPrintStreamWriter xmlPrintStreamWriter) {
+		Vector<ICut> cuts = getCuts();
+		if ((cuts != null) && !cuts.isEmpty()) {
+			for (ICut cut:cuts) {
+				cut.writeXml(xmlPrintStreamWriter);
+			}
+		}
+  }
     
     /**
      * Write out the bounds of the plot dialog
@@ -388,5 +262,30 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		}
 		
     }
+    
+	@Override
+	public void writeXml(XmlPrintStreamWriter writer) {
+		
+
+		try {
+			writer.writeStartElement(XmlPlot);
+			writer.writeAttribute(XmlType, getPlotType());
+			writer.closeBracket();
+			
+			writeBounds(writer);
+			writeCuts(writer);
+			customXml(writer);
+			writer.writeEndElement();
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Write out plot specific xml
+	 * @param writer the writer
+	 */
+	public abstract void customXml(XmlPrintStreamWriter writer);
+
 	
 }

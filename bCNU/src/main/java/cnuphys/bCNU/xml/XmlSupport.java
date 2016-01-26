@@ -140,6 +140,26 @@ public class XmlSupport {
 	}
 
 	/**
+	 * Simple file selection using the xml filter
+	 * @return the selected file, or <code>null</code>
+	 */
+	public static File openXmlFile() {
+		File file = null;
+		JFileChooser chooser = new JFileChooser(dataFilePath);
+		chooser.setSelectedFile(null);
+		chooser.setFileFilter(xmlFilter);
+		int returnVal = chooser.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			file = chooser.getSelectedFile();
+			if (file != null) {
+				dataFilePath = file.getParent();
+			}
+		}
+		return file;
+	}
+	
+	
+	/**
 	 * Select a plot xml file and open it, replacing whatever (if anything) is currently
 	 * on the canvas. This will call an open file dialog.
 	 * @param canvas the canvas that will receive the new plot(s).
@@ -167,7 +187,7 @@ public class XmlSupport {
 		//get the dom model
 		Document dom = XmlDomParser.getDomObject(xmlFile.getPath());
 
-//Get the plot basic data	
+//Get the list of notes
 		
 		NodeList nodes = dom.getElementsByTagName(rootElementName);
 		if (nodes != null) {

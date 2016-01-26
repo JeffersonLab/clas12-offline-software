@@ -139,25 +139,25 @@ public class Histogram2D extends PlotDialog {
 		_errorCount = 0;
 	}
 
-	@Override
-	protected void customWrite(BufferedWriter out) {
-		String name = _histoData.getName();
-		String xnumBin = "" + _histoData.getNumberBinsX();
-		String xMin = "" + _histoData.getMinX();
-		String xMax = "" + _histoData.getMaxX();
-		String ynumBin = "" + _histoData.getNumberBinsY();
-		String yMin = "" + _histoData.getMinY();
-		String yMax = "" + _histoData.getMaxY();
-		
-		String xname = _histoData.getXName();
-		String yname = _histoData.getYName();
-		
-		try {
-			writeDelimitted(out, HISTO2DDATA, name, xname, yname, xnumBin, xMin, xMax, ynumBin, yMin, yMax);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	@Override
+//	protected void customWrite(BufferedWriter out) {
+//		String name = _histoData.getName();
+//		String xnumBin = "" + _histoData.getNumberBinsX();
+//		String xMin = "" + _histoData.getMinX();
+//		String xMax = "" + _histoData.getMaxX();
+//		String ynumBin = "" + _histoData.getNumberBinsY();
+//		String yMin = "" + _histoData.getMinY();
+//		String yMax = "" + _histoData.getMaxY();
+//		
+//		String xname = _histoData.getXName();
+//		String yname = _histoData.getYName();
+//		
+//		try {
+//			writeDelimitted(out, HISTO2DDATA, name, xname, yname, xnumBin, xMin, xMax, ynumBin, yMin, yMax);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	/**
 	 * Get the plot type for properties
@@ -169,7 +169,7 @@ public class Histogram2D extends PlotDialog {
 	}
 	
 	@Override
-	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+	public void customXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
 	}
 
 }
