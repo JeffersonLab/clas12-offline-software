@@ -28,7 +28,7 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		_scatterPanel = new ScatterPanel();
 		add(_scatterPanel, BorderLayout.CENTER);
 		
-		SelectPanel sp[] = _scatterPanel.getScatterPanel();
+		SelectPanel sp[] = _scatterPanel.getScatterPanels();
 		sp[0].addPropertyChangeListener(this);
 		sp[1].addPropertyChangeListener(this);
 		
@@ -88,25 +88,37 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		return null;
 	}
 
-	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
-		
-		if (prop.equals("newname")) {
-			SelectPanel sp[] = _scatterPanel.getScatterPanel();
-			if ((o == sp[0]) || (o == sp[1])) {
-				String xfn = sp[0].getFullColumnName();
-				String yfn = sp[1].getFullColumnName();
-				boolean xvalid = ColumnData.validColumnName(xfn);
-				boolean yvalid =  ColumnData.validColumnName(yfn);
-				_okButton.setEnabled(xvalid && yvalid);
+		if ((prop.equals("newname")) || (prop.equals("expression"))) {
+
+			SelectPanel sp[] = _scatterPanel.getScatterPanels();
+			boolean xvalid = false;
+			boolean yvalid = false;
+
+			String xname = sp[0].getFullColumnName();
+			if (ColumnData.validColumnName(xname)) {
+				xvalid = true;
+			} else {
+				xname = sp[0].getExpressionName();
+				xvalid = ((xname != null) && !xname.isEmpty());
 			}
+
+			String yname = sp[1].getFullColumnName();
+			if (ColumnData.validColumnName(yname)) {
+				yvalid = true;
+			} else {
+				yname = sp[1].getExpressionName();
+				yvalid = ((yname != null) && !yname.isEmpty());
+			}
+
+			_okButton.setEnabled(xvalid && yvalid);
 		}
 
 	}
-	
+
 	public static void main(String arg[]) {
 		DefineScatterDialog dialog = new DefineScatterDialog();
 		dialog.setVisible(true);

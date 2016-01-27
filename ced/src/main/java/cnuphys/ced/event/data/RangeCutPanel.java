@@ -87,11 +87,12 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	 * @return a Range or <code>null</code>.
 	 */
 	public RangeCut getRangeCut() {
-		// public HistoData(String name, double valMin, double valMax, int
-		// numBins) {
 		String name = _sp.getFullColumnName();
-		if (name == null) {
-			name = "???";
+		if ((name == null) || name.isEmpty()) {
+			name =  _sp.getExpressionName();
+			if ((name == null) || name.isEmpty()) {
+				name = "???";
+			}
 		}
 		_minVal = ((Number) _minValTF.getValue()).doubleValue();
 		_maxVal = ((Number) _maxValTF.getValue()).doubleValue();
@@ -109,11 +110,6 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 		else if (source == _maxValTF) {
 			_maxVal = ((Number) _maxValTF.getValue()).doubleValue();
 		}
-	}
-	
-	@Override
-	public String getName() {
-		return "???";
 	}
 
 }

@@ -2,11 +2,8 @@ package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Vector;
-
 import javax.swing.BorderFactory;
+
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.util.Fonts;
@@ -26,7 +23,8 @@ public class Histogram extends PlotDialog {
 	private ColumnData _columnData;
 
 	// the expression being binned (unless it is binning a column)
-	private NamedExpression _namedExpression;
+	private String  _namedExpressionName;
+    private NamedExpression _namedExpression;
 
 	// the histgram data
 	private HistoData _histoData;
@@ -47,17 +45,29 @@ public class Histogram extends PlotDialog {
 		if (isColumn) {
 			_columnData = ColumnData.getColumnData(histoData.getName());
 		} else {
-			_namedExpression = DefinitionManager.getInstance()
-					.getNamedExpression(name);
-			if (_namedExpression != null) {
-				System.err.println("EXP found named expression");
-			}
+			_namedExpressionName = name;
 		}
 
 		_plotPanel = createPlotPanel(histoData);
 		add(_plotPanel, BorderLayout.CENTER);
 	}
+	
+	/**
+	 * Get the NamedExpression which might be null
+	 * @return the named expression
+	 */
+	public NamedExpression getNamedExpression() {
+		if (_namedExpression != null) {
+			return _namedExpression;
+		}
+		
+		_namedExpression = DefinitionManager.getInstance()
+				.getNamedExpression(_namedExpressionName);
+		return _namedExpression;
+	}
 
+
+	//create the plot panel
 	private PlotPanel createPlotPanel(HistoData h1) {
 		DataSet data;
 		try {
@@ -107,60 +117,15 @@ public class Histogram extends PlotDialog {
 	public void newClasIoEvent(EvioDataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 
-			if (_columnData != null) {
-				double vals[] = _columnData.getAsDoubleArray();
-				if (vals != null) {
+			NamedExpression namedExpression = getNamedExpression();
 
-					// cuts?
-					Vector<ICut> cuts = getCuts();
-					for (int i = 0; i < vals.length; i++) {
-						boolean pass = true;
-
-						if (cuts != null) {
-							for (ICut cut : cuts) {
-								pass = cut.pass(i);
-								if (!pass) {
-									break;
-								}
-							}
-						}
-
-						if (pass) {
-							_histoData.add(vals[i]);
-						}
-					}
-				} else {
-					warning("null Data Array in Histogram.newClasIoEvent");
+			int len = getMinLength(_columnData, namedExpression);
+			for (int index = 0; index < len; index++) {
+				double val = getValue(index, _columnData, namedExpression);
+				if (!Double.isNaN(val)) {
+					_histoData.add(val);
 				}
-			} // colData != null
-			else if (_namedExpression != null) {
-				System.err.println("EXP A");
-				if (_namedExpression.readyToCompute()) {
-					int len = _namedExpression.minLength();
-					System.err.println("EXP B len = " + len);
-					
-					Vector<ICut> cuts = getCuts();
-					for (int i = 0; i < len; i++) {
-						boolean pass = true;
-
-						if (cuts != null) {
-							for (ICut cut : cuts) {
-								pass = cut.pass(i);
-								if (!pass) {
-									break;
-								}
-							}
-						}
-
-						if (pass) {
-							double val = _namedExpression.value(i);
-							System.err.println("EXP C val = " + val);
-							_histoData.add(val);
-						}
-					}
-					
-				} //
-			} //_namedExp != null
+			}
 		}
 	}
 

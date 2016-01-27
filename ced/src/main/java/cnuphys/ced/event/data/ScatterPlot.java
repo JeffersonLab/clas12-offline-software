@@ -2,11 +2,7 @@ package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Vector;
-
 import javax.swing.BorderFactory;
 
 import org.jlab.evio.clas12.EvioDataEvent;
@@ -34,6 +30,12 @@ public class ScatterPlot extends PlotDialog {
 	// the x and y column data
 	private ColumnData _colDatX;
 	private ColumnData _colDatY;
+	
+	//the (alternative) x and y expressions
+	private String  _namedExpressionNameX;
+	private String  _namedExpressionNameY;
+	private NamedExpression _expressionX;
+	private NamedExpression _expressionY;
 
 	/**
 	 * Create a Scatter Plot
@@ -42,14 +44,60 @@ public class ScatterPlot extends PlotDialog {
 	public ScatterPlot(DataSet dataSet) {
 		super(ScatterPanel.getTitle(dataSet));
 		_dataSet = dataSet;
+		
+		String xname = dataSet.getColumnName(0);
+		String yname = dataSet.getColumnName(1);
+		
+		boolean isColumnX = ColumnData.validColumnName(xname);
+		boolean isColumnY = ColumnData.validColumnName(yname);
 
-		_colDatX = ColumnData.getColumnData(dataSet.getColumnName(0));
-		_colDatY = ColumnData.getColumnData(dataSet.getColumnName(1));
+		if (isColumnX) {
+			_colDatX = ColumnData.getColumnData(xname);
+		} else {
+			_namedExpressionNameX = xname;
+		}
+		if (isColumnY) {
+			_colDatY = ColumnData.getColumnData(yname);
+		} else {
+			_namedExpressionNameY = yname;
+		}
 
 		_plotPanel = createPlotPanel(_dataSet);
 		add(_plotPanel, BorderLayout.CENTER);
 
 	}
+	
+	
+	/**
+	 * Get the NamedExpression (for X) which might be null
+	 * @return the named expression
+	 */
+	public NamedExpression getNamedExpressionX() {
+		if (_expressionX != null) {
+			return _expressionX;
+		}
+		
+		_expressionX =  DefinitionManager.getInstance()
+				.getNamedExpression(_namedExpressionNameX);
+		return _expressionX;
+	}
+	
+	
+	/**
+	 * Get the NamedExpression (for Y) which might be null
+	 * @return the named expression
+	 */
+	public NamedExpression getNamedExpressionY() {
+		if (_expressionY != null) {
+			return _expressionY;
+		}
+		
+		_expressionY =  DefinitionManager.getInstance()
+				.getNamedExpression(_namedExpressionNameY);
+		return _expressionY;
+	}
+
+
 
 	private PlotPanel createPlotPanel(DataSet data) {
 
@@ -94,51 +142,27 @@ public class ScatterPlot extends PlotDialog {
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
-
-			double valsX[] = _colDatX.getAsDoubleArray();
-			double valsY[] = _colDatY.getAsDoubleArray();
-			if (valsX == null) {
-				warning("null Data Array (X) in ScatterPlot.newClasIoEvent");
-				return;
-			}
-			if (valsY == null) {
-				warning("null Data Array (Y) in ScatterPlot.newClasIoEvent");
-				return;
-			}
-
-			int lenX = valsX.length;
-			int lenY = valsY.length;
-
-			if (lenX != lenY) {
-				warning("Unequal lenght data arrays in ScatterPlot.newClasIoEvent");
-			}
 			
-			int len = Math.min(lenX, lenY);
+			NamedExpression expX = getNamedExpressionX();
+			NamedExpression expY = getNamedExpressionY();
 
-			// cuts?
-			Vector<ICut> cuts = getCuts();
-			for (int i = 0; i < len; i++) {
-
-				boolean pass = true;
-
-				if (cuts != null) {
-					for (ICut cut : cuts) {
-						pass = cut.pass(i);
-						if (!pass) {
-							break;
-						}
-					}
-				}
-
-				if (pass) {
+			
+			int lenx = getMinLength(_colDatX, expX);
+			int leny = getMinLength(_colDatY, expY);
+			int len = Math.min(lenx, leny);
+			
+			for (int index = 0; index < len; index++) {
+				double valx = getValue(index, _colDatX, expX);
+				double valy = getValue(index, _colDatY, expY);
+				if (!Double.isNaN(valx) && !Double.isNaN(valy)) {
 					try {
-						_dataSet.add(valsX[i], valsY[i]);
+						_dataSet.add(valx, valy);
 					} catch (DataSetException e) {
 						e.printStackTrace();
 					}
 				}
-			}
 
+			}
 		} //isAccumulating
 	}
 
@@ -149,6 +173,7 @@ public class ScatterPlot extends PlotDialog {
 		_errorCount = 0;
 	}
 
+	
 
 	@Override
 	public String getPlotType() {

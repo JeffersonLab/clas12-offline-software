@@ -14,6 +14,7 @@ import java.util.Vector;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.xml.stream.XMLStreamException;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -48,8 +49,8 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 	private JMenuItem _scatter;
 	private JMenuItem _expression;
 	private JMenuItem _histo2D;
-	private JMenuItem _saveAll;
-	private JMenuItem _readXml;
+	private JMenuItem _saveDefinitions;
+	private JMenuItem _readDefinitions;
 	
 	//save dir
 	private String _saveDir = Environment.getInstance().getHomeDirectory();
@@ -109,23 +110,23 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 			_histo2D = new JMenuItem("Define a 2D (colorized) Histogram...");
 			_scatter = new JMenuItem("Define a Scatter Plot...");
 			_expression = new JMenuItem("Define Expressions...");
-			_saveAll = new JMenuItem("Save All Definitions to XML...");
-			_readXml = new JMenuItem("Read from XML...");
+			_saveDefinitions = new JMenuItem("Save Definitions...");
+			_readDefinitions = new JMenuItem("Read Definitions...");
 			
 			_histo.addActionListener(this);
 			_histo2D.addActionListener(this);
 			_scatter.addActionListener(this);
 			_expression.addActionListener(this);
-			_saveAll.addActionListener(this);
-			_readXml.addActionListener(this);
+			_saveDefinitions.addActionListener(this);
+			_readDefinitions.addActionListener(this);
 			
 			_menu.add(_histo);
 			_menu.add(_histo2D);
 			_menu.add(_scatter);
 			_menu.add(_expression);
 			_menu.addSeparator();
-			_menu.add(_saveAll);
-			_menu.add(_readXml);
+			_menu.add(_saveDefinitions);
+			_menu.add(_readDefinitions);
 			_menu.addSeparator();
 		}
 		return _menu;
@@ -146,19 +147,17 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 		else if (o == _expression) {
 			defineExpressions();
 		}
-		else if (o == _saveAll) {
+		else if (o == _saveDefinitions) {
 			saveAllDefinitions();
 		}
-		else if (o == _readXml) {
+		else if (o == _readDefinitions) {
 			readXML();
 		}
 	}
 	
 	//save all definitions
 	private void saveAllDefinitions() {
-//		XmlSupport.save(this);
-		JOptionPane.showMessageDialog(null, "Not Implemented Yet", "Not Yet",
-				JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+		XmlSupport.save(this);
 	}
 	
 	//read a complete set of definitions
@@ -610,6 +609,37 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 
 
 	@Override
-	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
-	}
+	public void writeXml(XmlPrintStreamWriter writer) {
+		
+		try {
+			writer.writeStartElement(XmlUtilities.XmlCed);
+			writer.closeBracket();
+			//save the plots
+			Vector<PlotDialog> plots = getAllPlots();
+			if (plots != null) {
+				for (PlotDialog pd : plots) {
+					pd.writeXml(writer);
+				}
+			}
+			
+			
+			//save the bindings
+			if (_bindings != null) {
+				for (NameBinding nb : _bindings) {
+					nb.writeXml(writer);
+				}
+			}
+			
+			//save the expressions
+			if (_expressions != null) {
+				for (NamedExpression ne : _expressions) {
+					ne.writeXml(writer);
+				}
+			}
+			
+			writer.writeEndElement();
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+	} //writexml
 }

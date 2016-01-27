@@ -87,12 +87,18 @@ public class DefineRangeCutDialog extends JDialog implements ActionListener, Pro
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
-		if ((o == _rangeCutPanel.getSelectPanel()) && prop.equals("newname")) {
-			String fn = (String)(evt.getNewValue());
-			_okButton.setEnabled(ColumnData.validColumnName(fn));
-		}	
+		if (o == _rangeCutPanel.getSelectPanel()) {
+			if (prop.equals("newname")) {
+				String fn = (String) (evt.getNewValue());
+				_okButton.setEnabled(ColumnData.validColumnName(fn));
+			} //newname (column)
+			else if (prop.equals("expression")) {
+				_okButton.setEnabled(true);
+			} //expression
+		} 
 	}
 	
 	public static void main(String arg[]) {

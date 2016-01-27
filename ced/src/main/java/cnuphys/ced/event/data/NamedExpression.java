@@ -1,15 +1,19 @@
 package cnuphys.ced.event.data;
 
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.text.JTextComponent;
+import javax.xml.stream.XMLStreamException;
 
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.xml.XmlPrintStreamWritable;
+import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import net.oh.exp4j.Expression;
 import net.oh.exp4j.ExpressionBuilder;
 import net.oh.exp4j.ValidationResult;
 
-public class NamedExpression implements Comparable<NamedExpression> {
+public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStreamWritable {
 
 	/** The expression name */
 	protected String _expName;
@@ -241,6 +245,19 @@ public class NamedExpression implements Comparable<NamedExpression> {
 		}
 		
 		return Double.NaN;
+	}
+
+	@Override
+	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+		Properties props = new Properties();
+		props.put(XmlUtilities.XmlName, _expName);
+		props.put(XmlUtilities.XmlDefinition, _expString);
+		try {
+			xmlPrintStreamWriter.writeElementWithProps(XmlUtilities.XmlExpression, props);
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 }
