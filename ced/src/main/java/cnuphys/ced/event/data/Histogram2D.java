@@ -1,8 +1,6 @@
 package cnuphys.ced.event.data;
 
 import java.awt.BorderLayout;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;

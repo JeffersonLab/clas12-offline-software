@@ -185,7 +185,7 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	 * @return the expression name
 	 */
 	public String getExpressionName() {
-		return _expressionName.getText();
+		return (_expressionName == null) ? null : _expressionName.getText();
 	}
 	
 	public static void main(String arg[]) {

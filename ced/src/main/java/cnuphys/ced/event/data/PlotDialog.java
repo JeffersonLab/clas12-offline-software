@@ -27,20 +27,6 @@ import cnuphys.splot.plot.PlotParameters;
 
 public abstract class PlotDialog extends JDialog implements ActionListener, IAccumulationListener, IClasIoEventListener, XmlPrintStreamWritable {
 	
-	//XML elements (upper case)
-	public static final String XmlBounds = "BOUNDS";
-	public static final String XmlHistoData = "HISTODATA";
-	public static final String XmlPlot = "PLOT";
-	public static final String XmlRangeCut = "RANGECUT";
-	
-	
-	//XML attributes (lower case)
-	public static final String XmlActive = "active";
-	public static final String XmlCount = "count";
-	public static final String XmlMin = "min";
-	public static final String XmlMax = "max";
-	public static final String XmlName = "name";
-	public static final String XmlType = "type";
 		
 	//plot types
 	protected static final String HISTOGRAM = "histogram";
@@ -55,7 +41,6 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		
 	//menus
 	protected JMenu _fileMenu;	
-	protected JMenuItem _saveItem;
 	protected JMenuItem _closeItem;
 	protected JMenuItem _deleteItem;
 	protected JMenuItem _clearItem;
@@ -94,7 +79,6 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		setJMenuBar(mbar);
 		
 		_fileMenu = new JMenu("File");
-		_saveItem = addItem(_fileMenu, "Save Definition...");
 		_closeItem = addItem(_fileMenu, "Close");
 		_clearItem = addItem(_fileMenu, "Clear Data");
 		
@@ -127,10 +111,6 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		else if (o == _clearItem) {
 			clear();
 		}
-		else if (o == _saveItem) { //save the plot definition?
-			XmlSupport.save(this);
-		}
-
 	}
 	
 	/** Clear all the data */
@@ -238,7 +218,7 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		Properties props = new Properties();
 		XmlSupport.addRectangleAttribute(props, getBounds());
 		try {
-			xmlPrintStreamWriter.writeElementWithProps(XmlBounds, props);
+			xmlPrintStreamWriter.writeElementWithProps(XmlUtilities.XmlBounds, props);
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
@@ -252,11 +232,12 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
     protected void writeHistoData(XmlPrintStreamWriter xmlPrintStreamWriter,
     		HistoData hd) {
 		Properties props = new Properties();
-		props.put(XmlMin, hd.getMinX());
-		props.put(XmlMax, hd.getMaxX());
-		props.put(XmlCount, hd.getNumberBins());
+		props.put(XmlUtilities.XmlName, hd.getName());
+		props.put(XmlUtilities.XmlMin, hd.getMinX());
+		props.put(XmlUtilities.XmlMax, hd.getMaxX());
+		props.put(XmlUtilities.XmlCount, hd.getNumberBins());
 		try {
-			xmlPrintStreamWriter.writeElementWithProps(XmlHistoData, props);
+			xmlPrintStreamWriter.writeElementWithProps(XmlUtilities.XmlHistoData, props);
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
@@ -268,8 +249,8 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		
 
 		try {
-			writer.writeStartElement(XmlPlot);
-			writer.writeAttribute(XmlType, getPlotType());
+			writer.writeStartElement(XmlUtilities.XmlPlot);
+			writer.writeAttribute(XmlUtilities.XmlType, getPlotType());
 			writer.closeBracket();
 			
 			writeBounds(writer);
@@ -286,6 +267,71 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	 * @param writer the writer
 	 */
 	public abstract void customXml(XmlPrintStreamWriter writer);
+
+	/**
+	 * Get the effective length of the data
+	 * @param cd the column data
+	 * @param ne the named expression
+	 * @return the effective length of the data
+	 */
+	public int getMinLength(ColumnData cd, NamedExpression ne) {
+		int len = 0;
+		if (cd != null) {
+			double vals[] = cd.getAsDoubleArray();
+			len = (vals == null) ? 0 : vals.length;
+		} // colData != null
+		else if (ne != null) {
+			len = ne.minLength();
+		}
+
+		return len;
+	}
+	
+	/**
+	 * Get a value for either the column data or the named expression
+	 * @param index the index
+	 * @param cd the column data
+	 * @param ne the named expression
+	 * @return the value at the index or Double.NaN on error
+	 */
+	public double getValue(int index, ColumnData cd, NamedExpression ne) {
+		if (index < 0) {
+			return Double.NaN;
+		}
+		if ((cd == null) && (ne == null)) {
+			return Double.NaN;
+		}
+		
+		double val = Double.NaN;
+
+		
+		if (cd != null) {
+			double vals[] = cd.getAsDoubleArray();
+			if ((vals != null) && (index < vals.length)) {
+				val = vals[index];
+			}
+		}
+		else {  //expression
+			if (ne.readyToCompute()) {
+				int len = ne.minLength();
+				if (index < len) {
+					val = ne.value(index);
+				}
+			}
+		}
+		
+		//cut?
+		Vector<ICut> cuts = getCuts();
+		if (cuts != null) {
+			for (ICut cut : cuts) {
+				if (!cut.pass(index)) {
+					return Double.NaN;
+				}
+			}
+		}
+
+		return val;
+	}
 
 	
 }

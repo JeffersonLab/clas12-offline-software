@@ -50,7 +50,7 @@ public class ScatterPanel extends JPanel implements PropertyChangeListener {
 	 * Get the two select panels x,y
 	 * @return the select panels
 	 */
-	public SelectPanel[] getScatterPanel() {
+	public SelectPanel[] getScatterPanels() {
 		SelectPanel p[] = {_spx, _spy};
 		return p;
 	}
@@ -64,8 +64,23 @@ public class ScatterPanel extends JPanel implements PropertyChangeListener {
 	 * @return the scatter plot data set
 	 */
 	public DataSet createDataSet() {
+		
 		String xname = _spx.getFullColumnName();
+		if ((xname == null) || xname.isEmpty()) {
+			xname =  _spx.getExpressionName();
+			if ((xname == null) || xname.isEmpty()) {
+				xname = "???";
+			}
+		}
+	
 		String yname = _spy.getFullColumnName();
+		if ((yname == null) || yname.isEmpty()) {
+			yname =  _spy.getExpressionName();
+			if ((yname == null) || yname.isEmpty()) {
+				yname = "???";
+			}
+		}
+		
 		String colNames[] = {xname, yname};
 		try {
 			return new DataSet(DataSetType.XYXY, colNames);

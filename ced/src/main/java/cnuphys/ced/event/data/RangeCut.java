@@ -22,25 +22,57 @@ public class RangeCut implements ICut {
 	
 	protected String _name;
 	
-	protected ColumnData _cd;
+	//Column Data (if the name is a column name)
+	protected ColumnData _columnData;
+	
+	//The expression (if expression used instead of columnData)
+	private String _namedExpressionName;
+    private NamedExpression _namedExpression;
 	
 	public static final String CUT_TYPE = "RANGECUT";
 	
 	/**
-	 * A RangeCut is a simmple cut based on whether
-	 * a column or expression value falls in range
-	 * @param name the name, either a column or an expression
-	 * @param minVal the min value
-	 * @param maxVal the max value
+	 * A RangeCut is a simple cut based on whether a column or expression value
+	 * falls in range
+	 * 
+	 * @param name
+	 *            the name, either a column or an expression
+	 * @param minVal
+	 *            the min value
+	 * @param maxVal
+	 *            the max value
 	 */
 	public RangeCut(String name, double minVal, double maxVal) {
 		_name = name;
-		_cd = ColumnData.getColumnData(name);
-		if (_cd == null) {
-			Log.getInstance().warning("null ColumnData in RangeCut for [" + name + "]");
+
+		boolean isColumn = ColumnData.validColumnName(name);
+		if (isColumn) {
+			_columnData = ColumnData.getColumnData(name);
+			if (_columnData == null) {
+				Log.getInstance().warning(
+						"null ColumnData in RangeCut for [" + name + "]");
+			}
+		} else {
+			_namedExpressionName = name;
 		}
+
 		min = minVal;
 		max = maxVal;
+	}
+	
+	/**
+	 * Get the NamedExpression which might be null
+	 * @return the named expression
+	 */
+	public NamedExpression getNamedExpression() {
+		if (_namedExpression != null) {
+			return _namedExpression;
+		}
+		
+		_namedExpression =  DefinitionManager.getInstance()
+				.getNamedExpression(_namedExpressionName);
+		
+		return _namedExpression;
 	}
 	
 	@Override
@@ -65,6 +97,7 @@ public class RangeCut implements ICut {
 		if (!_active) {
 			return true;
 		}
+		
 		boolean passMin = (val - min) > -TOLERANCE;
 		boolean passMax = (max - val) > -TOLERANCE;
 		return passMax && passMin;
@@ -77,21 +110,30 @@ public class RangeCut implements ICut {
 			return true;
 		}
 		
-		if (_cd == null) {
+		NamedExpression namedExpression = getNamedExpression();
+		
+		if ((_columnData == null) && (namedExpression == null)) {
 			return true;
 		}
-		
-		double vals[] = _cd.getAsDoubleArray();
 
-		if ((vals == null) || (index < 0)) {
-			return false;
+		double val;
+		if (_columnData != null) {
+			double vals[] = _columnData.getAsDoubleArray();
+
+			if ((vals == null) || (index < 0)) {
+				return false;
+			}
+
+			if (index >= vals.length) {
+				return false;
+			}
+
+			val = vals[index];
 		}
-		
-		if (index >= vals.length) {
-			return false;
+		else {
+			val = namedExpression.value(index);
 		}
-		
-		return pass(vals[index]);
+		return pass(val);
 	}
 
 	@Override
@@ -121,12 +163,12 @@ public class RangeCut implements ICut {
 	@Override
 	public void writeXml(XmlPrintStreamWriter writer) {
 		Properties props = new Properties();
-		props.put(PlotDialog.XmlName, _name);
-		props.put(PlotDialog.XmlMin, DoubleFormat.doubleFormat(min, 10));
-		props.put(PlotDialog.XmlMax, DoubleFormat.doubleFormat(max, 10));
-		props.put(PlotDialog.XmlActive, isActive());
+		props.put(XmlUtilities.XmlName, _name);
+		props.put(XmlUtilities.XmlMin, DoubleFormat.doubleFormat(min, 10));
+		props.put(XmlUtilities.XmlMax, DoubleFormat.doubleFormat(max, 10));
+		props.put(XmlUtilities.XmlActive, isActive());
 		try {
-			writer.writeElementWithProps(PlotDialog.XmlRangeCut, props);
+			writer.writeElementWithProps(XmlUtilities.XmlRangeCut, props);
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
