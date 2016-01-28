@@ -87,13 +87,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	 * @return a Range or <code>null</code>.
 	 */
 	public RangeCut getRangeCut() {
-		String name = _sp.getFullColumnName();
-		if ((name == null) || name.isEmpty()) {
-			name =  _sp.getExpressionName();
-			if ((name == null) || name.isEmpty()) {
-				name = "???";
-			}
-		}
+		String name = _sp.getResolvedName();
 		_minVal = ((Number) _minValTF.getValue()).doubleValue();
 		_maxVal = ((Number) _maxValTF.getValue()).doubleValue();
 

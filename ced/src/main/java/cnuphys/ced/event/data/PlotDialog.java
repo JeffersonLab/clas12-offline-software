@@ -20,6 +20,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
@@ -225,11 +227,54 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
     }
     
     /**
-     * Write out histo data
-     * @param xmlPrintStreamWriter
+     * Write out the data set for scatter plots
+     * @param writer
+     * @param dataSet
+     */
+    protected void writeDataSetXYXY(XmlPrintStreamWriter writer,
+    		DataSet dataSet) {
+    	Properties props = new Properties();
+    	props.put(XmlUtilities.XmlNameX, dataSet.getColumnName(0));
+    	props.put(XmlUtilities.XmlNameY, dataSet.getColumnName(1));
+		try {
+			writer.writeElementWithProps(XmlUtilities.XmlDataSetXYXY, props);
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    
+    /**
+     * Write out 1D histo data
+     * @param writer
      * @param hd the histo data
      */
-    protected void writeHistoData(XmlPrintStreamWriter xmlPrintStreamWriter,
+    protected void writeHisto2DData(XmlPrintStreamWriter writer,
+    		Histo2DData hd) {
+		Properties props = new Properties();
+		props.put(XmlUtilities.XmlName, hd.getName());
+		props.put(XmlUtilities.XmlNameX, hd.getXName());
+		props.put(XmlUtilities.XmlNameY, hd.getYName());
+		props.put(XmlUtilities.XmlMinX, hd.getMinX());
+		props.put(XmlUtilities.XmlMaxX, hd.getMaxX());
+		props.put(XmlUtilities.XmlCountX, hd.getNumberBinsX());
+		props.put(XmlUtilities.XmlMinY, hd.getMinY());
+		props.put(XmlUtilities.XmlMaxY, hd.getMaxY());
+		props.put(XmlUtilities.XmlCountY, hd.getNumberBinsY());
+		try {
+			writer.writeElementWithProps(XmlUtilities.XmlHistoData2D, props);
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+		
+    }
+
+    /**
+     * Write out 1D histo data
+     * @param writer
+     * @param hd the histo data
+     */
+    protected void writeHistoData(XmlPrintStreamWriter writer,
     		HistoData hd) {
 		Properties props = new Properties();
 		props.put(XmlUtilities.XmlName, hd.getName());
@@ -237,7 +282,7 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 		props.put(XmlUtilities.XmlMax, hd.getMaxX());
 		props.put(XmlUtilities.XmlCount, hd.getNumberBins());
 		try {
-			xmlPrintStreamWriter.writeElementWithProps(XmlUtilities.XmlHistoData, props);
+			writer.writeElementWithProps(XmlUtilities.XmlHistoData, props);
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}

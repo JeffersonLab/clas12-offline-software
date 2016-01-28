@@ -194,7 +194,8 @@ public class ScatterPlot extends PlotDialog {
 //	}
 
 	@Override
-	public void customXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+	public void customXml(XmlPrintStreamWriter writer) {
+		writeDataSetXYXY(writer, _dataSet);
 	}
 
 }

@@ -27,17 +27,67 @@ public class Histogram2D extends PlotDialog {
 	private ColumnData _colDatX;
 	private ColumnData _colDatY;
 
+	//the (alternative) x and y expressions
+	private String  _namedExpressionNameX;
+	private String  _namedExpressionNameY;
+	private NamedExpression _expressionX;
+	private NamedExpression _expressionY;
 	
 	public Histogram2D(Histo2DData histoData) {
 		super(histoData.getName());
 		_histoData = histoData;
 		
-		_colDatX = ColumnData.getColumnData(histoData.getXName());
-		_colDatY = ColumnData.getColumnData(histoData.getYName());
+		String xname = histoData.getXName();
+		String yname = histoData.getYName();
+		
+		boolean isColumnX = ColumnData.validColumnName(xname);
+		boolean isColumnY = ColumnData.validColumnName(yname);
+
+		if (isColumnX) {
+			_colDatX = ColumnData.getColumnData(xname);
+		} else {
+			_namedExpressionNameX = xname;
+		}
+		if (isColumnY) {
+			_colDatY = ColumnData.getColumnData(yname);
+		} else {
+			_namedExpressionNameY = yname;
+		}
 
 		_plotPanel = createPlotPanel(histoData);
 		add(_plotPanel, BorderLayout.CENTER);
 	}
+	
+	/**
+	 * Get the NamedExpression (for X) which might be null
+	 * @return the named expression
+	 */
+	public NamedExpression getNamedExpressionX() {
+		if (_expressionX != null) {
+			return _expressionX;
+		}
+		
+		_expressionX =  DefinitionManager.getInstance()
+				.getNamedExpression(_namedExpressionNameX);
+		return _expressionX;
+	}
+	
+	
+	/**
+	 * Get the NamedExpression (for Y) which might be null
+	 * @return the named expression
+	 */
+	public NamedExpression getNamedExpressionY() {
+		if (_expressionY != null) {
+			return _expressionY;
+		}
+		
+		_expressionY =  DefinitionManager.getInstance()
+				.getNamedExpression(_namedExpressionNameY);
+		return _expressionY;
+	}
+
+
 	
 	private PlotPanel createPlotPanel(Histo2DData h2) {
 		DataSet data;
@@ -57,8 +107,6 @@ public class Histogram2D extends PlotDialog {
 		canvas.getParameters().setMinExponentY(4);
 		canvas.getParameters().setMinExponentX(4);
 		
-//		System.err.println("MIN X: " + h1.getMinX());
-//		System.err.println("MAX X: " + h1.getMaxX());
 		canvas.getParameters().setXRange(h2.getMinX(), h2.getMaxX());
 		canvas.getParameters().setYRange(h2.getMinY(), h2.getMaxY());
 		canvas.getParameters().setTextFont(Fonts.smallFont);
@@ -86,47 +134,23 @@ public class Histogram2D extends PlotDialog {
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
-
-			double valsX[] = _colDatX.getAsDoubleArray();
-			double valsY[] = _colDatY.getAsDoubleArray();
-			if (valsX == null) {
-				warning("null Data Array (X) in Histogram2D.newClasIoEvent");
-				return;
-			}
-			if (valsY == null) {
-				warning("null Data Array (Y) in Histogram2D.newClasIoEvent");
-				return;
-			}
-
-			int lenX = valsX.length;
-			int lenY = valsY.length;
-
-			if (lenX != lenY) {
-				warning("Unequal lenght data arrays in Histogram2D.newClasIoEvent");
-			}
 			
-			int len = Math.min(lenX, lenY);
+			
+			NamedExpression expX = getNamedExpressionX();
+			NamedExpression expY = getNamedExpressionY();
 
-			// cuts?
-			Vector<ICut> cuts = getCuts();
-			for (int i = 0; i < len; i++) {
-
-				boolean pass = true;
-
-				if (cuts != null) {
-					for (ICut cut : cuts) {
-						pass = cut.pass(i);
-						if (!pass) {
-							break;
-						}
-					}
-				}
-
-				if (pass) {
-					_histoData.add(valsX[i], valsY[i]);
+			
+			int lenx = getMinLength(_colDatX, expX);
+			int leny = getMinLength(_colDatY, expY);
+			int len = Math.min(lenx, leny);
+			
+			for (int index = 0; index < len; index++) {
+				double valx = getValue(index, _colDatX, expX);
+				double valy = getValue(index, _colDatY, expY);
+				if (!Double.isNaN(valx) && !Double.isNaN(valy)) {
+					_histoData.add(valx, valy);
 				}
 			}
-
 		} //isAccumulating
 	}
 
@@ -136,26 +160,6 @@ public class Histogram2D extends PlotDialog {
 		_plotPanel.getCanvas().needsRedraw(true);
 		_errorCount = 0;
 	}
-
-//	@Override
-//	protected void customWrite(BufferedWriter out) {
-//		String name = _histoData.getName();
-//		String xnumBin = "" + _histoData.getNumberBinsX();
-//		String xMin = "" + _histoData.getMinX();
-//		String xMax = "" + _histoData.getMaxX();
-//		String ynumBin = "" + _histoData.getNumberBinsY();
-//		String yMin = "" + _histoData.getMinY();
-//		String yMax = "" + _histoData.getMaxY();
-//		
-//		String xname = _histoData.getXName();
-//		String yname = _histoData.getYName();
-//		
-//		try {
-//			writeDelimitted(out, HISTO2DDATA, name, xname, yname, xnumBin, xMin, xMax, ynumBin, yMin, yMax);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 	/**
 	 * Get the plot type for properties
@@ -167,7 +171,8 @@ public class Histogram2D extends PlotDialog {
 	}
 	
 	@Override
-	public void customXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
+	public void customXml(XmlPrintStreamWriter writer) {
+		writeHisto2DData(writer, _histoData);
 	}
 
 }

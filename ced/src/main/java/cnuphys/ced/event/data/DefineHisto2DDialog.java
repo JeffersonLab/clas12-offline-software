@@ -10,6 +10,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.splot.pdata.Histo2DData;
 
@@ -92,19 +93,35 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		
+		
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
-		
-		if ((o == _histoPanel.getSelectPanelX()) && prop.equals("newname")) {
-			_xName = (String)(evt.getNewValue());
-		}	
-		else if ((o == _histoPanel.getSelectPanelY()) && prop.equals("newname")) {
-			_yName = (String)(evt.getNewValue());
-		}	
-		
-		boolean xValid = ColumnData.validColumnName(_xName);
-		boolean yValid = ColumnData.validColumnName(_yName);
-		_okButton.setEnabled(xValid && yValid);
+		if ((prop.equals("newname")) || (prop.equals("expression"))) {
+
+			SelectPanel spx = _histoPanel.getSelectPanelX();
+			SelectPanel spy = _histoPanel.getSelectPanelY();
+			boolean xvalid = false;
+			boolean yvalid = false;
+
+			String xname = spx.getFullColumnName();
+			if (ColumnData.validColumnName(xname)) {
+				xvalid = true;
+			} else {
+				xname = spx.getExpressionName();
+				xvalid = ((xname != null) && !xname.isEmpty());
+			}
+
+			String yname = spy.getFullColumnName();
+			if (ColumnData.validColumnName(yname)) {
+				yvalid = true;
+			} else {
+				yname = spy.getExpressionName();
+				yvalid = ((yname != null) && !yname.isEmpty());
+			}
+
+			_okButton.setEnabled(xvalid && yvalid);
+		}
 	}
 	
 	/**

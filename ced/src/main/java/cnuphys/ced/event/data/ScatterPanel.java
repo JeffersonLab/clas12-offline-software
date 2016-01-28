@@ -65,21 +65,8 @@ public class ScatterPanel extends JPanel implements PropertyChangeListener {
 	 */
 	public DataSet createDataSet() {
 		
-		String xname = _spx.getFullColumnName();
-		if ((xname == null) || xname.isEmpty()) {
-			xname =  _spx.getExpressionName();
-			if ((xname == null) || xname.isEmpty()) {
-				xname = "???";
-			}
-		}
-	
-		String yname = _spy.getFullColumnName();
-		if ((yname == null) || yname.isEmpty()) {
-			yname =  _spy.getExpressionName();
-			if ((yname == null) || yname.isEmpty()) {
-				yname = "???";
-			}
-		}
+		String xname = _spx.getResolvedName();
+		String yname = _spy.getResolvedName();
 		
 		String colNames[] = {xname, yname};
 		try {
