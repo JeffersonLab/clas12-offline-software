@@ -38,15 +38,15 @@ public class CameraButton extends ToolBarButton {
 	@Override
 	public void actionPerformed(ActionEvent actionEvent) {
 		
+		if (container == null) {
+			return;
+		}
+		
 		if (container.handledCamera()) {
 			return;
 		}
 		
 		Toolkit.getDefaultToolkit().beep();
-
-		if (container == null) {
-			return;
-		}
 
 		try {
 

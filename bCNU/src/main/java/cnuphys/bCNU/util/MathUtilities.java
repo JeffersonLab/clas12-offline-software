@@ -191,7 +191,7 @@ public class MathUtilities {
 	 */
 	public static int getConvexHull(Point2D.Double points[]) {
 
-		if ((points == null) || (points.length < 3)) {
+		if ((points == null) || (points.length < 1)) {
 			return -1;
 		}
 

@@ -392,10 +392,10 @@ public class BaseContainer extends JComponent
 	public void removeLogicalLayer(LogicalLayer layer) {
 		if (layer != null) {
 			_layers.remove(layer);
-		}
-		// also remove from hash
-		if (_userLayers.contains(layer)) {
-			_userLayers.remove(layer.getName());
+			// also remove from hash
+			if (_userLayers.contains(layer)) {
+				_userLayers.remove(layer.getName());
+			}
 		}
 	}
 

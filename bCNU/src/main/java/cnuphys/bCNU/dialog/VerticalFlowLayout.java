@@ -69,7 +69,7 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 	 * or Right.
 	 */
 
-	private class AlignedComponent {
+	private class AlignedComponent implements Serializable {
 		Component m_comp;
 
 		String m_alignment;
