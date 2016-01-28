@@ -121,7 +121,7 @@ public class MenuManager {
 	 * 
 	 * @param menu the file menu
 	 */
-	public void setFileMenu(JMenu menu) {
+	public static void setFileMenu(JMenu menu) {
 		_fileMenu = menu;
 	}
 

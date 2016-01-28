@@ -19,7 +19,8 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Create a layer for holding items.
 	 * 
-	 * @param name the name of the layer.
+	 * @param name
+	 *            the name of the layer.
 	 */
 	public LogicalLayer(IContainer container, String name) {
 		super(name);
@@ -30,9 +31,12 @@ public class LogicalLayer extends DrawableList {
 	 * Add all the items on this layer that enclose a given point to a vector of
 	 * items. This will be used to collect all such items across all layers.
 	 * 
-	 * @param items the collection we are adding to.
-	 * @param container the graphical container rendering the item.
-	 * @param screenPoint the point in question.
+	 * @param items
+	 *            the collection we are adding to.
+	 * @param container
+	 *            the graphical container rendering the item.
+	 * @param screenPoint
+	 *            the point in question.
 	 */
 	public void addItemsAtPoint(Vector<AItem> items, IContainer container,
 			Point screenPoint) {
@@ -46,8 +50,9 @@ public class LogicalLayer extends DrawableList {
 	 * Add all the selected items on this layer to an Items collection. This is
 	 * used to find all selected items across all layers.
 	 * 
-	 * @param items the collection to which we will add all selected items on
-	 *            this layer.
+	 * @param items
+	 *            the collection to which we will add all selected items on this
+	 *            layer.
 	 */
 	public void addSelectedItems(Vector<AItem> items) {
 
@@ -76,14 +81,13 @@ public class LogicalLayer extends DrawableList {
 			}
 
 			for (AItem item : allItems) {
-				if (item.isDeletable()) {
+				if (item.isDeletable() && (container != null)) {
 
 					container.getFeedbackControl().removeFeedbackProvider(item);
 					remove(item);
 
 					// did I delete the reference item?
-					if ((container != null)
-							&& (item == container.getYouAreHereItem())) {
+					if (item == container.getYouAreHereItem()) {
 						container.setYouAreHereItem(null);
 					}
 				}
@@ -98,7 +102,8 @@ public class LogicalLayer extends DrawableList {
 	 * removing them from the list. They will no longer be drawn. Items that are
 	 * not deletable are not removed.
 	 * 
-	 * @param container the container they lived on.
+	 * @param container
+	 *            the container they lived on.
 	 */
 	public void deleteSelectedItems(IContainer container) {
 
@@ -113,8 +118,10 @@ public class LogicalLayer extends DrawableList {
 				for (AItem item : selitems) {
 					if (item.isDeletable()) {
 
-						container.getFeedbackControl()
-								.removeFeedbackProvider(item);
+						if (container != null) {
+							container.getFeedbackControl()
+									.removeFeedbackProvider(item);
+						}
 						remove(item);
 
 						// did I delete the reference item?
@@ -132,7 +139,8 @@ public class LogicalLayer extends DrawableList {
 	 * Delete a single item, making sure to remove it from the feedback listener
 	 * list.
 	 * 
-	 * @param item the item to remove
+	 * @param item
+	 *            the item to remove
 	 */
 	public void deleteItem(AItem item) {
 		item.getContainer().getFeedbackControl().removeFeedbackProvider(item);
@@ -142,8 +150,10 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Find the topmost item, if any, at the point, probably a mouse location.
 	 * 
-	 * @param container the graphical container rendering the item.
-	 * @param screenPoint the point in question.
+	 * @param container
+	 *            the graphical container rendering the item.
+	 * @param screenPoint
+	 *            the point in question.
 	 * @return the topmost item at that location, or <code>null</code>.
 	 */
 	public AItem getItemAtPoint(IContainer container, Point screenPoint) {
@@ -165,8 +175,10 @@ public class LogicalLayer extends DrawableList {
 	 * Returns all items that contain the given point. The items are returned in
 	 * reverse order, from top to bottom.
 	 * 
-	 * @param container the graphical container rendering the item.
-	 * @param lp the point in question.
+	 * @param container
+	 *            the graphical container rendering the item.
+	 * @param lp
+	 *            the point in question.
 	 * @return all items that contain the given point. If any, the topmost will
 	 *         be the first entry.
 	 */
@@ -270,7 +282,8 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Select (or deselect) all items.
 	 * 
-	 * @param select if <code>true</code> select, otherwise deselect.
+	 * @param select
+	 *            if <code>true</code> select, otherwise deselect.
 	 */
 	public void selectAllItems(boolean select) {
 		selectAllItems(select, null);
@@ -279,9 +292,10 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Select (or deselect) all item excepting a single specified item.
 	 * 
-	 * @param select if <code>true</code> select, otherwise deselect.
-	 * @param excludedItem optional Item to be excluded from the operation, may
-	 *            be null.
+	 * @param select
+	 *            if <code>true</code> select, otherwise deselect.
+	 * @param excludedItem
+	 *            optional Item to be excluded from the operation, may be null.
 	 */
 	public void selectAllItems(boolean select, AItem excludedItem) {
 		for (IDrawable drawable : this) {
@@ -293,8 +307,7 @@ public class LogicalLayer extends DrawableList {
 						item.setSelected(true);
 						notifyDrawableChangeListeners(drawable,
 								DrawableChangeType.SELECTED);
-					}
-					else if (!select && item.isSelected()) {
+					} else if (!select && item.isSelected()) {
 						item.setSelected(false);
 						notifyDrawableChangeListeners(drawable,
 								DrawableChangeType.DESELECTED);
@@ -307,17 +320,17 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Select or deselect a single item and send the notification.
 	 * 
-	 * @param item the item in question.
-	 * @param select the new select state.
+	 * @param item
+	 *            the item in question.
+	 * @param select
+	 *            the new select state.
 	 */
 	public void selectItem(AItem item, boolean select) {
 		if ((item != null) && (!item.isLocked())) {
 			if (select && !item.isSelected()) {
 				item.setSelected(true);
-				notifyDrawableChangeListeners(item,
-						DrawableChangeType.SELECTED);
-			}
-			else if (!select && item.isSelected()) {
+				notifyDrawableChangeListeners(item, DrawableChangeType.SELECTED);
+			} else if (!select && item.isSelected()) {
 				item.setSelected(false);
 				notifyDrawableChangeListeners(item,
 						DrawableChangeType.DESELECTED);
@@ -328,9 +341,12 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Add all the enclosed items to a collection
 	 * 
-	 * @param container the container being rendered.
-	 * @param items the vector we are adding to.
-	 * @param rect the enclosing rectangle.
+	 * @param container
+	 *            the container being rendered.
+	 * @param items
+	 *            the vector we are adding to.
+	 * @param rect
+	 *            the enclosing rectangle.
 	 */
 	public void addEnclosedItems(IContainer container, Vector<AItem> items,
 			Rectangle rect) {
@@ -345,11 +361,12 @@ public class LogicalLayer extends DrawableList {
 	/**
 	 * Get all the items enclosed by a rectangle.
 	 * 
-	 * @param container the container being rendered.
-	 * @param rect the rectangle in question.
+	 * @param container
+	 *            the container being rendered.
+	 * @param rect
+	 *            the rectangle in question.
 	 */
-	public Vector<AItem> getEnclosedItems(IContainer container,
-			Rectangle rect) {
+	public Vector<AItem> getEnclosedItems(IContainer container, Rectangle rect) {
 
 		synchronized (this) {
 			if (size() > 0) {
@@ -357,8 +374,7 @@ public class LogicalLayer extends DrawableList {
 				for (IDrawable drawable : this) {
 					if (drawable instanceof AItem) {
 						AItem item = (AItem) drawable;
-						if (item.isVisible()
-								&& item.enclosed(container, rect)) {
+						if (item.isVisible() && item.enclosed(container, rect)) {
 							encitems.add(item);
 						}
 					}
@@ -374,10 +390,9 @@ public class LogicalLayer extends DrawableList {
 	 * 
 	 * @return <code>true</code> if objects are equal.
 	 */
-	@Override
-	public boolean equals(Object o) {
+	public boolean equals(LogicalLayer o) {
 
-		if ((o != null) && (o instanceof LogicalLayer)) {
+		if (o != null) {
 			return (this == o);
 		}
 		return false;

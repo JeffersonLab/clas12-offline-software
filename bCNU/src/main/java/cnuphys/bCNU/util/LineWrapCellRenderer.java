@@ -21,7 +21,9 @@ public class LineWrapCellRenderer extends JTextArea implements
 
 	public LineWrapCellRenderer() {
 		super();
-		noFocusBorder = new EmptyBorder(1, 2, 1, 2);
+		if (noFocusBorder == null) {
+			noFocusBorder = new EmptyBorder(1, 2, 1, 2);
+		}
 		setLineWrap(true);
 		setWrapStyleWord(true);
 		setOpaque(true);

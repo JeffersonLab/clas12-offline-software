@@ -24,7 +24,7 @@ public class TrajectoryDrawer3D extends Item3D {
 	@Override
 	public void draw(GLAutoDrawable drawable) {
 
-		if (SwimMenu.showMonteCarloTracks()) {
+		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 
 			if (trajectories != null) {
@@ -37,7 +37,7 @@ public class TrajectoryDrawer3D extends Item3D {
 		}
 
 		// reconstructed?
-		if (SwimMenu.showReconstructedTracks()) {
+		if (SwimMenu.getInstance().showReconstructedTracks()) {
 			Vector<SwimTrajectory> trajectories = Swimming
 					.getReconTrajectories();
 

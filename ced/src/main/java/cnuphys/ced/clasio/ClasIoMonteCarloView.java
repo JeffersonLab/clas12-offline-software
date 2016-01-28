@@ -23,18 +23,15 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 	public void newClasIoEvent(EvioDataEvent event) {
 		_trajectoryTable.clear(); // remove existing events
 
+		// now fill the table.
 		if (!_eventManager.isAccumulating()) {
-
-			// now fill the table.
-			if (!_eventManager.isAccumulating()) {
-				ISwimAll allSwimmer = _eventManager.getMCSwimmer();
-				if (allSwimmer != null) {
-					TrajectoryTableModel model = _trajectoryTable
-							.getTrajectoryModel();
-					model.setData(allSwimmer.getRowData());
-					model.fireTableDataChanged();
-					_trajectoryTable.repaint();
-				}
+			ISwimAll allSwimmer = _eventManager.getMCSwimmer();
+			if (allSwimmer != null) {
+				TrajectoryTableModel model = _trajectoryTable
+						.getTrajectoryModel();
+				model.setData(allSwimmer.getRowData());
+				model.fireTableDataChanged();
+				_trajectoryTable.repaint();
 			}
 		}
 	}

@@ -30,6 +30,26 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	}
 
 	private static EnumMap<Grade, SimpleAttributeSet> styles;
+	
+	static {
+		styles = new EnumMap<Grade, SimpleAttributeSet>(Grade.class);
+		styles.put(
+				Grade.INFO,
+				createStyle(Color.black, "sansserif", INFOFONTSIZE, false,
+						false));
+		styles.put(
+				Grade.CONFIG,
+				createStyle(Color.blue, "sansserif", CONFIGFONTSIZE, false,
+						false));
+		styles.put(
+				Grade.WARNING,
+				createStyle(X11Colors.getX11Color("orange red"), "monospaced", WARNINGFONTSIZE,
+						false, true));
+		styles.put(
+				Grade.ERROR,
+				createStyle(Color.red, "monospaced", ERRORFONTSIZE, false,
+						true));
+	}
 
 	public SimpleLogPane() {
 		setPreferredSize(new Dimension(800, 400));
@@ -93,25 +113,6 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	 *            the message text.
 	 */
 	private void append(Grade grade, String message) {
-		if (styles == null) {
-			styles = new EnumMap<Grade, SimpleAttributeSet>(Grade.class);
-			styles.put(
-					Grade.INFO,
-					createStyle(Color.black, "sansserif", INFOFONTSIZE, false,
-							false));
-			styles.put(
-					Grade.CONFIG,
-					createStyle(Color.blue, "sansserif", CONFIGFONTSIZE, false,
-							false));
-			styles.put(
-					Grade.WARNING,
-					createStyle(X11Colors.getX11Color("orange red"), "monospaced", WARNINGFONTSIZE,
-							false, true));
-			styles.put(
-					Grade.ERROR,
-					createStyle(Color.red, "monospaced", ERRORFONTSIZE, false,
-							true));
-		}
 		append(fixMessage(message), styles.get(grade), (grade == Grade.ERROR));
 	}
 

@@ -1,5 +1,6 @@
 package cnuphys.splot.edit;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 
 import cnuphys.splot.plot.GeneralPlotParamPanel;
@@ -29,6 +30,7 @@ public class PlotPreferencesDialog extends SimpleDialog {
 
 		// note components already created by super constructor
 		_plotCanvas = plotCanvas;
+		addCenter();
 		pack();
 	}
 
@@ -47,12 +49,12 @@ public class PlotPreferencesDialog extends SimpleDialog {
 	 * 
 	 * @return the component that is placed in the center
 	 */
-	@Override
-	protected Component createCenterComponent() {
+	protected Component addCenter() {
 		// _tabbedPane = new JTabbedPane();
 
 		_genPanel = new GeneralPlotParamPanel(_plotCanvas);
 
+		add(_genPanel, BorderLayout.CENTER);
 		return _genPanel;
 	}
 

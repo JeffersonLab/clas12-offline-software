@@ -80,7 +80,6 @@ public class GrowableArray {
 			System.err.println("Exception in GrowableArray.getMinimalCopy: "
 					+ e.getMessage());
 			System.err.println("_dataLen: " + _dataLen);
-			System.err.println("_data: " + _data);
 		}
 		return acopy;
 	}

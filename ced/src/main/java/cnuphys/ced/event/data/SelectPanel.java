@@ -132,7 +132,6 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		}
 
 		Object o = e.getSource();
-		System.err.println("source = " + o.getClass().getName());
 
 		// expression?
 		if ((_expressionSelectionModel != null)

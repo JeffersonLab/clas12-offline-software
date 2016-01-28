@@ -49,8 +49,6 @@ public class BSTxyMagDrawer extends DrawableAdapter {
 		int layer = closestPanel.getLayer(); // 1..8
 		int supl = (layer - 1) / 2; // 0..3
 
-		float coords[] = new float[6];
-
 		setWorld(container, closestPanel);
 
 		Rectangle b = container.getComponent().getBounds();

@@ -149,13 +149,13 @@ public class PIDLegend extends JComponent {
 		Graphics2D g2 = (Graphics2D) g;
 		Stroke oldStroke = g2.getStroke();
 		LundStyle style = LundStyle.getStyle(lid);
-		g2.setStroke(style.getStroke());
 
 		int linelen = 30;
 
 		Color color1 = Color.lightGray;
 
 		if (style != null) {
+			g2.setStroke(style.getStroke());
 			color1 = style.getFillColor();
 		}
 		g.setColor(color1);

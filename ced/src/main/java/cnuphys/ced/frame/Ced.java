@@ -103,9 +103,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// plugin manager
 	private CedPluginManager _pluginManager;
 
-	// the swim menu
-	private static SwimMenu _swimMenu;
-
 	// event menu
 	private ClasIoEventMenu _eventMenu;
 
@@ -480,9 +477,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		mmgr.addMenu(MagneticFields.getMagneticFieldMenu());
 
 		// the swimmer menu
-		_swimMenu = new SwimMenu();
-		mmgr.addMenu(_swimMenu);
-		_swimMenu.addPropertyChangeListener(this);
+		mmgr.addMenu(SwimMenu.getInstance());
+		SwimMenu.getInstance().addPropertyChangeListener(this);
 
 		// remove the option menu until I need it
 		// mmgr.removeMenu(mmgr.getOptionMenu());
@@ -670,16 +666,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 
 	}
-
-	/**
-	 * Accessor for the swim menu
-	 * 
-	 * @return the swim menu
-	 */
-	public static SwimMenu getSwimMenu() {
-		return _swimMenu;
-	}
-
 
 	private void createBusyPanel() {
 		getJMenuBar().add(Box.createHorizontalStrut(20));
