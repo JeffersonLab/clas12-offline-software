@@ -35,7 +35,7 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 		if (!ClasIoEventManager.getInstance().isAccumulating()) {
 
 			// mc
-			if (SwimMenu.showMonteCarloTracks()) {
+			if (SwimMenu.getInstance().showMonteCarloTracks()) {
 				Vector<SwimTrajectory> trajectories = Swimming
 						.getMCTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {
@@ -53,7 +53,7 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 			}
 
 			// recon
-			if (SwimMenu.showReconstructedTracks()) {
+			if (SwimMenu.getInstance().showReconstructedTracks()) {
 				Vector<SwimTrajectory> trajectories = Swimming
 						.getReconTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {

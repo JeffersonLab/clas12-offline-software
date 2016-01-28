@@ -215,7 +215,7 @@ public class BaseView extends JInternalFrame {
 			}
 			else {
 				// hack: invis toolbar, pointer selected
-				BaseToolBar toolBar = new BaseToolBar(_container, 1);
+				new BaseToolBar(_container, 1);
 				// add(toolBar, BorderLayout.NORTH);
 			}
 

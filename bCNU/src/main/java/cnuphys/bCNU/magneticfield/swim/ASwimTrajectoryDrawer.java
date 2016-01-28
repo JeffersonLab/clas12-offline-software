@@ -59,7 +59,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 		_trajectories2D.clear();
 		_closestTrajectory = null;
 
-		if (SwimMenu.showMonteCarloTracks()) {
+		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 
 			if (trajectories != null) {
@@ -81,7 +81,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 		}
 
 		// reconstructed?
-		if (SwimMenu.showReconstructedTracks()) {
+		if (SwimMenu.getInstance().showReconstructedTracks()) {
 			Vector<SwimTrajectory> trajectories = Swimming
 					.getReconTrajectories();
 

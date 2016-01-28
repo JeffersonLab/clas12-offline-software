@@ -37,6 +37,9 @@ public class ClasIoTest {
 			String s;
 			try {
 				s = br.readLine();
+				if (s == null) {
+					s = "";
+				}
 
 				if (s.equalsIgnoreCase("q")) { // q
 					done = true;
@@ -60,12 +63,6 @@ public class ClasIoTest {
 									+ eventManager.isBankInCurrentEvent(bs));
 						}
 					}
-					// System.out.println("IN EVENT");
-					// String inEvent[] =
-					// eventManager.getCurrentEvent().getBankList();
-					// for (String ine : inEvent) {
-					// System.out.println(ine);
-					// }
 				}
 
 				else if (s.equalsIgnoreCase("r")) { // root node

@@ -31,13 +31,13 @@ public class BSTSupport {
 		int bstsector[] = BST.sector();
 		int bstlayer[] = BST.layer();
 
-		int len = z.length;
+		int len = (z == null) ? 0 : z.length;
 		for (int i = 0; i < len; i++) {
 			for (BSTxyPanel panel : panels) {
 				if ((panel.getLayer() == bstlayer[i])
 						&& (panel.getSector() == bstsector[i])) {
 
-					if (view.showMcTruth() && (z != null)) {
+					if (view.showMcTruth()) {
 						int zindex = panel.getZIndex(z[i]);
 
 						if (zindex >= 0) {

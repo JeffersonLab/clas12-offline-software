@@ -19,10 +19,6 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	private static Vector<TrajectoryRowData> data = new Vector<TrajectoryRowData>(
 			25);
 
-	// convenient access to the event manager
-	protected ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
-
 	private ClasIoReconEventView() {
 		super("Reconstructed Tracks");
 	}
@@ -90,7 +86,7 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 					}
 					else {
 						Log.getInstance().warning(
-								"Bad pid: " + pid + " in ClasIoReconEventView");
+								"Bad pid: " + pid[i] + " in ClasIoReconEventView");
 					}
 
 					// public TrajectoryRowData(LundId lundId, double xo,

@@ -81,10 +81,8 @@ public class FeedbackRect extends Rectangle {
 	public boolean contains(Point pp, List<String> feedbackStrings) {
 		boolean inside = super.contains(pp);
 		if (inside && (feedbackString != null)) {
-			if (feedbackString != null) {
-				for (String s : feedbackString) {
-					feedbackStrings.add(s);
-				}
+			for (String s : feedbackString) {
+				feedbackStrings.add(s);
 			}
 		}
 		return inside;

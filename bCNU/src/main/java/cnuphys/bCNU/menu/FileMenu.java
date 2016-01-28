@@ -25,7 +25,7 @@ public class FileMenu extends JMenu {
 	// create the file menu
 	public FileMenu() {
 		super(menuLabel);
-		MenuManager.getInstance().setFileMenu(this);
+		MenuManager.setFileMenu(this);
 		addSaveConfigurationItem();
 		addClearConfigurationItem();
 		addSeparator();

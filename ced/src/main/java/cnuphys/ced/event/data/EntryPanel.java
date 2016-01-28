@@ -75,7 +75,7 @@ public class EntryPanel extends JPanel {
 		fdef.setText("abs, acos, asin, atan, atan2, cbrt, ceil, cos, cosh, exp, expm1, floor, log,\n"
 				+ "log, log1p, log10, pow, sin, sinh, sqrt, tan, tanh, toDegrees, toRadians\n\n"
 				+ "OPERATORS: +, -, *, /, %, ^ (power, e.g., 2^x or x^y)\n\n"
-				+ "NOTE: Prepend named variables with an underscore, e.g., atan2(_x, _y)");
+				+ "NOTE: Prepend named variables with an underscore, e.g., atan2(_y, _x)");
 
 		fdef.setBorder(new CommonBorder(
 				"Allowed functions (see Java Math class for use) and operators"));

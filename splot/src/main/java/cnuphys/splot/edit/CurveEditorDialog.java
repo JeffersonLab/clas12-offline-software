@@ -1,5 +1,6 @@
 package cnuphys.splot.edit;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 
 import cnuphys.splot.plot.PlotCanvas;
@@ -25,6 +26,9 @@ public class CurveEditorDialog extends SimpleDialog {
 
 		// note components already created by super constructor
 		_plotCanvas = plotCanvas;
+		
+		_curvePanel = new CurveEditorPanel(_plotCanvas);
+		add(_curvePanel, BorderLayout.CENTER);
 		pack();
 	}
 
@@ -35,18 +39,6 @@ public class CurveEditorDialog extends SimpleDialog {
 	@Override
 	protected void prepare() {
 		_plotCanvas = (PlotCanvas) _userObject;
-	}
-
-	/**
-	 * Override to create the component that goes in the center. Usually this is
-	 * the "main" component.
-	 * 
-	 * @return the component that is placed in the center
-	 */
-	@Override
-	protected Component createCenterComponent() {
-		_curvePanel = new CurveEditorPanel(_plotCanvas);
-		return _curvePanel;
 	}
 
 	/**

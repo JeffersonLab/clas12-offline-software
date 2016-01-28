@@ -988,49 +988,49 @@ public class SectorView extends CedView implements ChangeListener {
 
 		final SectorView fview = this;
 		// are we on a time based recon item
-//		final FeedbackRect fbr = _reconDrawer.getFeedbackRect(getContainer(),
-//				mouseEvent.getPoint(), 1);
-//
-//		if ((fbr != null) && (DataSupport.getTimeBasedTrackCount() > 0)) {
-//			popup = new JPopupMenu();
-//			final JMenuItem swimBackwardsItem = new JMenuItem(
-//					"Swim time-based track backwards");
-//			ActionListener al = new ActionListener() {
-//
-//				@Override
-//				public void actionPerformed(ActionEvent e) {
-//					// for now just back swim the first
-//					double reconsP = dcData.timebasedtrkg_tbtracks_p[0];
-//
-//					// have to swim traj backwards!
-//					// swimBackwardsToVertex(int q, double xo, double yo, double
-//					// zo, double px, double py, double pz) {
-//
-//					int q = dcData.timebasedtrkg_tbtracks_q[0];
-//					double xo = dcData.timebasedtrkg_tbtracks_c3_x[0] / 100;
-//					double yo = dcData.timebasedtrkg_tbtracks_c3_y[0] / 100;
-//					double zo = dcData.timebasedtrkg_tbtracks_c3_z[0] / 100;
-//
-//					double ux = dcData.timebasedtrkg_tbtracks_c3_ux[0];
-//					double uy = dcData.timebasedtrkg_tbtracks_c3_uy[0];
-//					double uz = dcData.timebasedtrkg_tbtracks_c3_uz[0];
-//
-//					double pxo = reconsP * ux;
-//					double pyo = reconsP * uy;
-//					double pzo = reconsP * uz;
-//
-//					SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo,
-//							yo, zo, pxo, pyo, pzo);
-//					traj.userObject = fview;
-//
-//					Swimming.addReconTrajectory(traj);
-//				}
-//
-//			};
-//
-//			swimBackwardsItem.addActionListener(al);
-//			popup.add(swimBackwardsItem);
-//		}
+		// final FeedbackRect fbr = _reconDrawer.getFeedbackRect(getContainer(),
+		// mouseEvent.getPoint(), 1);
+		//
+		// if ((fbr != null) && (DataSupport.getTimeBasedTrackCount() > 0)) {
+		// popup = new JPopupMenu();
+		// final JMenuItem swimBackwardsItem = new JMenuItem(
+		// "Swim time-based track backwards");
+		// ActionListener al = new ActionListener() {
+		//
+		// @Override
+		// public void actionPerformed(ActionEvent e) {
+		// // for now just back swim the first
+		// double reconsP = dcData.timebasedtrkg_tbtracks_p[0];
+		//
+		// // have to swim traj backwards!
+		// // swimBackwardsToVertex(int q, double xo, double yo, double
+		// // zo, double px, double py, double pz) {
+		//
+		// int q = dcData.timebasedtrkg_tbtracks_q[0];
+		// double xo = dcData.timebasedtrkg_tbtracks_c3_x[0] / 100;
+		// double yo = dcData.timebasedtrkg_tbtracks_c3_y[0] / 100;
+		// double zo = dcData.timebasedtrkg_tbtracks_c3_z[0] / 100;
+		//
+		// double ux = dcData.timebasedtrkg_tbtracks_c3_ux[0];
+		// double uy = dcData.timebasedtrkg_tbtracks_c3_uy[0];
+		// double uz = dcData.timebasedtrkg_tbtracks_c3_uz[0];
+		//
+		// double pxo = reconsP * ux;
+		// double pyo = reconsP * uy;
+		// double pzo = reconsP * uz;
+		//
+		// SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo,
+		// yo, zo, pxo, pyo, pzo);
+		// traj.userObject = fview;
+		//
+		// Swimming.addReconTrajectory(traj);
+		// }
+		//
+		// };
+		//
+		// swimBackwardsItem.addActionListener(al);
+		// popup.add(swimBackwardsItem);
+		// }
 
 		// near a swum trajectory?
 		Point2D.Double wp = new Point2D.Double();
@@ -1297,12 +1297,15 @@ public class SectorView extends CedView implements ChangeListener {
 		switch (_displaySectors) {
 		case SECTORS14:
 			sector = 1;
+			break;
 
 		case SECTORS25:
 			sector = 2;
+			break;
 
 		case SECTORS36:
 			sector = 3;
+			break;
 		}
 
 		double phi = (sector - 1) * 60.0 + getSliderPhi();

@@ -179,10 +179,17 @@ public class TextUtilities {
 		for (int i = 0; i < list1.size(); i++) {
 			String s1 = list1.get(i);
 			String s2 = list2.get(i);
+			
+
+			
 			if ((s1 == null) && (s2 != null)) {
 				return false;
 			}
-			if (!(s1.equals(s2))) {
+			if ((s1 != null) && (s2 == null)) {
+				return false;
+			}
+			
+			if ((s1 != null) && (s2 != null) && !(s1.equals(s2))) {
 				return false;
 			}
 

@@ -108,7 +108,7 @@ public class CedDemoPlugin extends CedPlugin {
 					
 					if (tdc != null) {
 						shapes[lay][w].setInfoString("Layer: " + lay + " Wire: "
-								+ wire + "  TDC: " + tdc[hit]);
+								+ w + "  TDC: " + tdc[hit]);
 					}
 				}
 

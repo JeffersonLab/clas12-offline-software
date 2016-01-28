@@ -7,24 +7,31 @@ import java.util.TimeZone;
 public class DateString {
 
 	/**
-	 * A default time zone
-	 */
-	private static TimeZone defTZ = null;
-
-	/**
 	 * A formatter to get the time in down to minutes.
 	 */
-	private static SimpleDateFormat formattermm = null;
+	private static SimpleDateFormat formattermm;
 
 	/**
 	 * A formatter to get the time in down to seconds.
 	 */
-	private static SimpleDateFormat formatterss = null;
+	private static SimpleDateFormat formatterss;
 
 	/**
 	 * A formatter to get the time in down to seconds (no day info).
 	 */
-	private static SimpleDateFormat formattershort = null;
+	private static SimpleDateFormat formattershort;
+	
+	static {
+		TimeZone tz = TimeZone.getDefault();
+		formattermm = new SimpleDateFormat("EEE MMM d  h:mm a");
+		formattermm.setTimeZone(tz);
+		
+		formatterss = new SimpleDateFormat("EEE MMM d  h:mm:ss a");
+		formatterss.setTimeZone(tz);
+
+		formattershort = new SimpleDateFormat("h:mm:ss");
+		formattershort.setTimeZone(tz);
+	}
 
 	/**
 	 * Returns the current time.
@@ -52,14 +59,6 @@ public class DateString {
 	 * @return a string representation of the current time, down to minutes.
 	 */
 	public static String dateStringMM(long longtime) {
-
-		if (defTZ == null)
-			defTZ = TimeZone.getDefault();
-
-		if (formattermm == null) {
-			formattermm = new SimpleDateFormat("EEE MMM d  h:mm a");
-			formattermm.setTimeZone(defTZ);
-		}
 		return formattermm.format(new Date(longtime));
 	}
 
@@ -71,14 +70,6 @@ public class DateString {
 	 * @return a string representation of the current time, down to seconds.
 	 */
 	public static String dateStringSS(long longtime) {
-
-		if (defTZ == null)
-			defTZ = TimeZone.getDefault();
-
-		if (formatterss == null) {
-			formatterss = new SimpleDateFormat("EEE MMM d  h:mm:ss a");
-			formatterss.setTimeZone(defTZ);
-		}
 		return formatterss.format(new Date(longtime));
 	}
 
@@ -100,14 +91,6 @@ public class DateString {
 	 *         without day information.
 	 */
 	public static String dateStringShort(long ltime) {
-
-		if (defTZ == null)
-			defTZ = TimeZone.getDefault();
-
-		if (formattershort == null) {
-			formattershort = new SimpleDateFormat("h:mm:ss");
-			formattershort.setTimeZone(defTZ);
-		}
 		return formattershort.format(new Date(ltime));
 	}
 

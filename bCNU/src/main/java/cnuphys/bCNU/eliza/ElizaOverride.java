@@ -300,8 +300,6 @@ public class ElizaOverride implements Serializable {
 			_overRides = new Vector<ElizaOverride>(10, 10);
 		}
 
-		_overRides = new Vector<ElizaOverride>(10, 10);
-
 		_overRides
 				.add(new ElizaOverride(
 						MATCH_ALL,

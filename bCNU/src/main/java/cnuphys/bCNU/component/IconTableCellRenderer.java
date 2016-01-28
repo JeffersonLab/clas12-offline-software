@@ -43,7 +43,6 @@ import javax.swing.table.TableModel;
 @SuppressWarnings("serial")
 public class IconTableCellRenderer extends DefaultTableCellRenderer {
 
-	Icon defaultIcon;
 	static AbstractButton button = new AbstractButton() {
 	};
 
@@ -96,9 +95,9 @@ public class IconTableCellRenderer extends DefaultTableCellRenderer {
 		}
 		if (getIcon() == null) {
 			try {
-				createIcon(defaultIcon == null
-						? new XIcon(icon.getIconWidth(), icon.getIconHeight())
-						: defaultIcon, null);
+				Icon ticon = new XIcon(icon.getIconWidth(),
+						icon.getIconHeight());
+				createIcon(ticon, null);
 			} catch (Exception ex) {
 			}
 		}
@@ -111,12 +110,18 @@ public class IconTableCellRenderer extends DefaultTableCellRenderer {
 	 * Paints the icon to a BufferedImage for use as the renderer's Icon. Also
 	 * sets the height of the table row to accommodate the icon.
 	 *
-	 * @param table the JTable
-	 * @param row row number
-	 * @param icon the icon to be painted
-	 * @param component the component it represents
-	 * @throws java.lang.ClassCastException may originate in paintIcon
-	 * @throws java.lang.InstantiationException for a default abstract class
+	 * @param table
+	 *            the JTable
+	 * @param row
+	 *            row number
+	 * @param icon
+	 *            the icon to be painted
+	 * @param component
+	 *            the component it represents
+	 * @throws java.lang.ClassCastException
+	 *             may originate in paintIcon
+	 * @throws java.lang.InstantiationException
+	 *             for a default abstract class
 	 */
 	private void createIcon(Icon icon, JComponent component)
 			throws ClassCastException, InstantiationException {
@@ -130,8 +135,10 @@ public class IconTableCellRenderer extends DefaultTableCellRenderer {
 	/**
 	 * Obtains the correct background as per the selection status
 	 *
-	 * @param table the JTable
-	 * @param isSelected selection status
+	 * @param table
+	 *            the JTable
+	 * @param isSelected
+	 *            selection status
 	 * @return the correct background Color
 	 */
 	private Color getCorrectBackground(JTable table, boolean isSelected) {
@@ -143,11 +150,11 @@ public class IconTableCellRenderer extends DefaultTableCellRenderer {
 
 		for (int col = 0; col < table.getColumnCount(); col++) {
 			if (Icon.class.isAssignableFrom(table.getColumnClass(col))
-					&& table.getDefaultRenderer(
-							Icon.class) instanceof IconTableCellRenderer) {
+					&& table.getDefaultRenderer(Icon.class) instanceof IconTableCellRenderer) {
 				for (int row = 0; row < model.getRowCount(); row++) {
 					Icon icon = (Icon) model.getValueAt(row, col);
-					table.setRowHeight(table.convertRowIndexToView(row),
+					table.setRowHeight(
+							table.convertRowIndexToView(row),
 							Math.max(table.getRowHeight(row),
 									icon.getIconHeight() + 2));
 				}

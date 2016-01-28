@@ -150,6 +150,7 @@ public class PlotCanvas extends JComponent
 				e.printStackTrace();
 			}
 		}
+		
 
 		setDataSet(dataSet);
 
@@ -168,7 +169,9 @@ public class PlotCanvas extends JComponent
 		_plotPopup = new PlotPopupMenu(this);
 		setComponentPopupMenu(_plotPopup);
 
-		dataSet.addTableModelListener(this);
+		if (dataSet != null) {
+			dataSet.addTableModelListener(this);
+		}
 
 		addComponentListener(componentAdapter);
 		addMouseListener(this);

@@ -412,7 +412,7 @@ public class FTOF {
 		if (paddles == null) {
 			Log.getInstance().warning(
 					"null paddles array in hitIndex for panelType: "
-							+ panelType + " sector: " + sector + " paddle: "
+							+ panelType + " sector: " + sect + " paddle: "
 							+ paddle);
 			return -1;
 		}

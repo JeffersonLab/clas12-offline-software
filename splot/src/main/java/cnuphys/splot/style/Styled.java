@@ -92,7 +92,7 @@ public class Styled implements IStyled {
 		if (darkerLineColor) {
 			_lineColor = fillColor.darker();
 		}
-		else if (darkerLineColor) {
+		else {
 			_lineColor = fillColor.brighter();
 		}
 

@@ -58,36 +58,6 @@ public class ShowHideTableModel extends DefaultTableModel {
 		return _data.size();
 	}
 
-	/**
-	 * Set the value at a given row and column.
-	 * 
-	 * @param value
-	 *            The string to set.
-	 * @param row
-	 *            The zero based row.
-	 * @param col
-	 *            The zero based column.
-	 */
-
-	@Override
-	public void setValueAt(Object value, int row, int col) {
-		IShowHide ivis = _data.get(row);
-		switch (col) {
-
-		case DISPLAY_VALUE:
-			boolean newvis = (Boolean) value;
-			boolean oldvis = ivis.isVisible();
-			// if (oldvis != newvis) {
-			// ivis.setVisible(newvis);
-			// notifyModelChangeListeners(ivis);
-			// }
-			break;
-
-		case NAME:
-			break;
-		}
-
-	}
 
 	/**
 	 * Get the value at a given row and column

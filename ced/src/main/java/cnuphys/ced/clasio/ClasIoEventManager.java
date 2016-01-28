@@ -610,12 +610,12 @@ public class ClasIoEventManager {
 		computeSomeScalingFactors();
 
 		// auto swim?
-		if (Ced.getSwimMenu().isAlwaysSwimMC()) {
-			Ced.getSwimMenu().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0,
+		if (SwimMenu.getInstance().isAlwaysSwimMC()) {
+			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0,
 					1);
 		}
-		if (Ced.getSwimMenu().isAlwaysSwimRecon()) {
-			Ced.getSwimMenu().firePropertyChange(SwimMenu.SWIM_ALL_RECON_PROP,
+		if (SwimMenu.getInstance().isAlwaysSwimRecon()) {
+			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_RECON_PROP,
 					0, 1);
 		}
 

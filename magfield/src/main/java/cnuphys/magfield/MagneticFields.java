@@ -628,15 +628,6 @@ public class MagneticFields {
 			}
 		};
 
-		ItemListener il = new ItemListener() {
-
-			@Override
-			public void itemStateChanged(ItemEvent iev) {
-				handleStateChange(iev);
-			}
-
-		};
-
 		_torusItem = createRadioMenuItem("Torus", menu, bg,
 				(_activeField != null) && (_activeField == _torus), al);
 		_solenoidItem = createRadioMenuItem("Solenoid", menu, bg,
