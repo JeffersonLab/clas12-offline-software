@@ -9,6 +9,10 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
 import cnuphys.bCNU.xml.XmlSupport;
+import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.DataSetException;
+import cnuphys.splot.pdata.DataSetType;
+import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
 
 public class DefinitionXmlHandler implements ContentHandler {
@@ -17,6 +21,9 @@ public class DefinitionXmlHandler implements ContentHandler {
 	private String _plotType;
     private Rectangle _plotBounds;
     private HistoData _histoData;
+    private Histo2DData _histoData2D;
+   private DataSet _dataSetXYXY;
+    
     Vector<ICut> _cuts = new Vector<ICut>();
  
 
@@ -30,6 +37,9 @@ public class DefinitionXmlHandler implements ContentHandler {
 		else if (localName.equals(XmlUtilities.XmlHistoData)) {
 			readHistogramData(atts);
 		}
+		else if (localName.equals(XmlUtilities.XmlHistoData2D)) {
+			readHistogramData2D(atts);
+		}
 		else if (localName.equals(XmlUtilities.XmlRangeCut)) {
 			readRangeCut(atts);
 		}
@@ -41,6 +51,9 @@ public class DefinitionXmlHandler implements ContentHandler {
 		}
 		else if (localName.equals(XmlUtilities.XmlExpression)) {
 			readExpression(atts);
+		}
+		else if (localName.equals(XmlUtilities.XmlDataSetXYXY)) {
+			readDataSetXYXY(atts);
 		}
 
 	}
@@ -87,6 +100,18 @@ public class DefinitionXmlHandler implements ContentHandler {
 			return false;
 		}
 	}
+	
+	//read the scatter plot data set
+	private void readDataSetXYXY(Attributes atts) {
+		String xname = atts.getValue("", XmlUtilities.XmlNameX);
+		String yname = atts.getValue("", XmlUtilities.XmlNameY);
+		String colNames[]= {xname, yname};
+		try {
+			_dataSetXYXY = new DataSet(DataSetType.XYXY, colNames);
+		} catch (DataSetException e) {
+			e.printStackTrace();
+		}
+	}
 
 	//name binding
 	private void readBinding(Attributes atts) {
@@ -119,6 +144,21 @@ public class DefinitionXmlHandler implements ContentHandler {
 		int binCount = getInt(atts, XmlUtilities.XmlCount);
 		_histoData = new HistoData(name, min, max, binCount);
 	}
+
+	
+	//load the 2D histogram data
+	private void readHistogramData2D(Attributes atts) {
+		String name = atts.getValue("", XmlUtilities.XmlName);
+		String xname = atts.getValue("", XmlUtilities.XmlNameX);
+		String yname = atts.getValue("", XmlUtilities.XmlNameY);
+		double xmin = getDouble(atts, XmlUtilities.XmlMinX);
+		double xmax = getDouble(atts, XmlUtilities.XmlMaxX);
+		int xbinCount = getInt(atts, XmlUtilities.XmlCountX);
+		double ymin = getDouble(atts, XmlUtilities.XmlMinY);
+		double ymax = getDouble(atts, XmlUtilities.XmlMaxY);
+		int ybinCount = getInt(atts, XmlUtilities.XmlCountY);
+		_histoData2D = new Histo2DData(name, xname, yname, xmin, xmax, xbinCount, ymin, ymax, ybinCount);
+	}
 	
 	//read a range cut
 	private void readRangeCut(Attributes atts) {
@@ -140,6 +180,8 @@ public class DefinitionXmlHandler implements ContentHandler {
 		_plotType = null;
 		_plotBounds = null;
 		_histoData = null;
+		_histoData2D = null;
+		_dataSetXYXY = null;
 		_cuts.clear();
 		
 		//the one attribute should be yhe plot type
@@ -158,10 +200,14 @@ public class DefinitionXmlHandler implements ContentHandler {
 				}
 			}
 			else if (PlotDialog.HISTOGRAM2D.equals(_plotType)) {
-				
+				if (_histoData2D != null) {
+					pdialog = DefinitionManager.getInstance().addHistogram2D(_histoData2D);
+				}
 			}
 			else if (PlotDialog.SCATTERPLOT.equals(_plotType)) {
-				
+				if (_dataSetXYXY != null) {
+					pdialog = DefinitionManager.getInstance().addScatterPlot(_dataSetXYXY);
+				}
 			}
 		}
 		

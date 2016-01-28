@@ -202,13 +202,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	public HistoData getHistoData() {
 		// public HistoData(String name, double valMin, double valMax, int
 		// numBins) {
-		String name = _sp.getFullColumnName();
-		if ((name == null) || name.isEmpty()) {
-			name =  _sp.getExpressionName();
-			if ((name == null) || name.isEmpty()) {
-				name = "???";
-			}
-		}
+		String name = _sp.getResolvedName();
 		_numBins = getNumBins();
 		_minVal = getMinVal();
 		_maxVal = getMaxVal();

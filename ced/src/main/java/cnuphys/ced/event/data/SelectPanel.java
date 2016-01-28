@@ -177,7 +177,23 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	 * @return the full column name
 	 */
 	public String getFullColumnName() {
-		return _columnName.getText();
+		return (_columnName == null) ? null : _columnName.getText();
+	}
+	
+	/**
+	 * Get the full bank-column name. If that is no good,
+	 * get the expression name.
+	 * @return the name
+	 */
+	public String getResolvedName() {
+		String name = getFullColumnName();
+		if ((name == null) || name.isEmpty()) {
+			name =  getExpressionName();
+			if ((name == null) || name.isEmpty()) {
+				name = "???";
+			}
+		}
+		return name;
 	}
 	
 	/**

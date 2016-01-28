@@ -34,17 +34,12 @@ public class Histo2DPanel extends JPanel {
 	}
 
 	/**
-	 * Create the 2D histogram data
-	 * @return the 2D histogram data
-	 */
-
-	/**
 	 * Get the Histo2DData object based on the selections.
 	 * @return the Histo2DData object
 	 */
 	public Histo2DData getHisto2DData() {
-		String xname = getSelectPanelX().getFullColumnName();
-		String yname = getSelectPanelY().getFullColumnName();
+		String xname = getSelectPanelX().getResolvedName();
+		String yname = getSelectPanelY().getResolvedName();
 		String name = xname + " - " + yname;
 		
 		int xnumBins = _histoPanelX.getNumBins();
