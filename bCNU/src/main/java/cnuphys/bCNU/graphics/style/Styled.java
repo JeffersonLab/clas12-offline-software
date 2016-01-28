@@ -57,7 +57,7 @@ public class Styled implements IStyled {
 		_fillColor = fillColor;
 		if (darkerLineColor) {
 			_lineColor = fillColor.darker();
-		} else if (darkerLineColor) {
+		} else  {
 			_lineColor = fillColor.brighter();
 		}
 

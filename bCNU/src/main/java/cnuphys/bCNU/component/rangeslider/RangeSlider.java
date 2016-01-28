@@ -44,7 +44,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 			0);
 
 	// Listener list for slider updates.
-	protected EventListenerList listenerList;
+	protected EventListenerList _listenerList;
 
 	// default font used for the labels
 	protected Font _font = Fonts.commonFont(Font.PLAIN, 9);
@@ -445,11 +445,11 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	 */
 	public void removeRangeSliderListener(IRangeSliderListener listener) {
 
-		if ((listener == null) || (listenerList == null)) {
+		if ((listener == null) || (_listenerList == null)) {
 			return;
 		}
 
-		listenerList.remove(IRangeSliderListener.class, listener);
+		_listenerList.remove(IRangeSliderListener.class, listener);
 	}
 
 	/**
@@ -464,23 +464,23 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 			return;
 		}
 
-		if (listenerList == null) {
-			listenerList = new EventListenerList();
+		if (_listenerList == null) {
+			_listenerList = new EventListenerList();
 		}
 
-		listenerList.add(IRangeSliderListener.class, listener);
+		_listenerList.add(IRangeSliderListener.class, listener);
 	}
 
 	/**
 	 * Notify listeners that a range slider (namely "this") was updated.
 	 */
 	protected void notifyListeners() {
-		if (listenerList == null) {
+		if (_listenerList == null) {
 			return;
 		}
 
 		// Guaranteed to return a non-null array
-		Object[] listeners = listenerList.getListenerList();
+		Object[] listeners = _listenerList.getListenerList();
 
 		// Process the listeners last to first, notifying
 		// those that are interested in this event

@@ -153,9 +153,14 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 		g.setFont(labelFont);
 		FontMetrics fm = g.getFontMetrics(labelFont);
 		g.setColor(Color.black);
-		g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
+		
+		int esw = 0;
+		if (lid != null) {
+			g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
+			esw = fm.stringWidth(lid.getName()) + 9;
+		}
 
-		return linelen + fm.stringWidth(lid.getName()) + 9;
+		return linelen + esw;
 	}
 
 	/**

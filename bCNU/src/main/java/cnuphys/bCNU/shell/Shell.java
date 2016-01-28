@@ -418,9 +418,6 @@ public class Shell extends TextPaneScrollPane {
 				final BufferedReader stdErrReader = new BufferedReader(
 						new InputStreamReader(process.getErrorStream()));
 
-				final BufferedWriter stdInWriter = new BufferedWriter(
-						new OutputStreamWriter(process.getOutputStream()));
-
 				// this will just block until process ends
 				Runnable runnable = new Runnable() {
 

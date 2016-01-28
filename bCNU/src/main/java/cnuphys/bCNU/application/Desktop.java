@@ -226,8 +226,6 @@ public final class Desktop extends JDesktopPane {
 
 		File file = Environment.getInstance().getConfigurationFile();
 
-		System.err.println("config file: " + file.getPath());
-
 		if ((file != null) && file.exists() && file.canRead()) {
 			try {
 				FileInputStream fis = new FileInputStream(file);

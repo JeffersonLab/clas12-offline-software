@@ -210,11 +210,8 @@ public class BaseView extends JInternalFrame {
 				if (bits == Integer.MIN_VALUE) {
 					bits = BaseToolBar.EVERYTHING;
 				}
-				else { // normal
-					BaseToolBar toolBar = new BaseToolBar(_container, bits);
-					add(toolBar, BorderLayout.NORTH);
-				}
-
+				BaseToolBar toolBar = new BaseToolBar(_container, bits);
+				add(toolBar, BorderLayout.NORTH);
 			}
 			else {
 				// hack: invis toolbar, pointer selected

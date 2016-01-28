@@ -50,7 +50,7 @@ public class LineButton extends ToolBarToggleButton implements IRubberbanded {
 
 		// create a line item
 
-		if ((Math.abs(p0.x - p1.x) > 2) || (Math.abs(p1.y - p1.y) > 2)) {
+		if ((Math.abs(p0.x - p1.x) > 2) || (Math.abs(p0.y - p1.y) > 2)) {
 			AItem item = container.createLineItem(
 					container.getAnnotationLayer(), p0, p1);
 			if (item != null) {
