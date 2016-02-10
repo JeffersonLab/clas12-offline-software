@@ -59,6 +59,11 @@
 				<include name="**/*.class"/>
 			</fileset>
 			
+			<!-- exp4j (use src, not bin-->
+			<fileset dir="${cnudir}/exp4j/src">
+				<include name="**/*.class"/>
+			</fileset>
+			
 			<!-- magfield -->
 			<fileset dir="${cnudir}/magfield/src/main/java/cnuphys/bin">
 				<include name="**/*.class"/>

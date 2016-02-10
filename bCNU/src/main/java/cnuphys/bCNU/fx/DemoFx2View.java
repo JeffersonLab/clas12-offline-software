@@ -1,112 +1,66 @@
 package cnuphys.bCNU.fx;
 
-import java.util.Vector;
-
-import org.fxyz.cameras.CameraTransformer;
-import org.fxyz.geometry.Point3D;
-import org.fxyz.shapes.composites.PolyLine3D;
-
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Box;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 
 public class DemoFx2View extends FxView {
-
-	//Camera related
-	   private  CameraTransformer cameraTransform = new CameraTransformer();
-	   private  Camera camera;
 
 	public DemoFx2View(String title, int x, int y, int w, int h) {
 		super(title, x, y, w, h);
 	}
-	
+
 	@Override
 	public void start(JFXPanel panel) {
 		Group root = new Group();
-        Scene scene = new Scene(root, 2000, 2000);
-        scene.setFill(Color.BLACK);
-        
-//        PolyLine3D p3D = createPolyLine(10, 100, Color.AQUA);
-//        root.getChildren().add(p3D);
-        
-        root.getChildren().add(buildAxes());
+		Scene scene = new Scene(root, 2000, 2000);
+		scene.setFill(Color.WHITE);
 
-        addCamera(scene, -50, -50, -500);
-         panel.setScene(scene);
-	}
-	
-	private void addCamera(Scene scene, double xo, double yo, double zo) {
-		camera = new PerspectiveCamera(true);
+		TriangleMesh pyramidMesh = new TriangleMesh();
+		pyramidMesh.getTexCoords().addAll(0, 0);
+		float h = 200; // Height
+		float s = 400; // Side
+		pyramidMesh.getPoints().addAll(0, 0, 0, // Point 0 - Top
+				0, h, -s / 2, // Point 1 - Front
+				-s / 2, h, 0, // Point 2 - Left
+				s / 2, h, 0, // Point 3 - Back
+				0, h, s / 2 // Point 4 - Right
+		);
+		pyramidMesh.getFaces().addAll(0, 0, 2, 0, 1, 0, // Front left face
+				0, 0, 1, 0, 3, 0, // Front right face
+				0, 0, 3, 0, 4, 0, // Back right face
+				0, 0, 4, 0, 2, 0, // Back left face
+				4, 0, 1, 0, 2, 0, // Bottom rear face
+				4, 0, 3, 0, 1, 0 // Bottom front face
+		);
+		MeshView pyramid = new MeshView(pyramidMesh);
+		pyramid.setDrawMode(DrawMode.FILL);
+		
+		PhongMaterial blueStuff = new PhongMaterial();
+		
+		blueStuff.setDiffuseColor(Color.RED);
+		
+//		Color blue = new Color(0, 0, 1, 0.5);
+//		blueStuff.setSpecularColor(Color.BLUE);
+		
+		pyramid.setMaterial(blueStuff);
+//		pyramid.setTranslateX(200);
+		pyramid.setTranslateY(-200);
+//		pyramid.setTranslateZ(200);
+		root.getChildren().add(pyramid);
 
-		// setup camera transform for rotational support
-		cameraTransform.setTranslate(0, 0, 0);
-		cameraTransform.getChildren().add(camera);
-		camera.setNearClip(0.001);
+		PerspectiveCamera camera = new PerspectiveCamera(true);
+		camera.setNearClip(0.1);
 		camera.setFarClip(10000.0);
-		camera.setTranslateX(xo);
-		camera.setTranslateY(yo);
-		camera.setTranslateZ(zo);
-		// cameraTransform.ry.setAngle(-45.0);
-		// cameraTransform.rx.setAngle(-10.0);
-		// add a Point Light for better viewing of the grid coordinate system
-		// PointLight light = new PointLight(Color.WHITE);
-		// cameraTransform.getChildren().add(light);
-		// light.setTranslateX(camera.getTranslateX());
-		// light.setTranslateY(camera.getTranslateY());
-		// light.setTranslateZ(camera.getTranslateZ());
+		camera.setTranslateZ(-1000.0);
 		scene.setCamera(camera);
+		panel.setScene(scene);
 	}
-	
-	private PolyLine3D createPolyLine(int n, int width, Color color) {
-		Point3D v;
-		Vector<Point3D> points;
-		
-		float scale = 800;
-		float s2 = scale/2;
-		
-		points = new Vector<Point3D>(n);
-		for (int i = 0; i < n; i++) {
-			
-			float x = s2-(float) (scale*Math.random());
-			float y = s2-(float) (scale*Math.random());
-			float z = s2-(float) (scale*Math.random());
-			Point3D p3d = new Point3D(x, y, z);
-			points.add(p3d);
-		}
-		
-		return new PolyLine3D(points, width, color);
-	}
-	
-	private Group buildAxes() {
-		final Group axisGroup = new Group();
-        System.out.println("buildAxes()");
-        final PhongMaterial redMaterial = new PhongMaterial();
-        redMaterial.setDiffuseColor(Color.DARKRED);
-        redMaterial.setSpecularColor(Color.RED);
- 
-        final PhongMaterial greenMaterial = new PhongMaterial();
-        greenMaterial.setDiffuseColor(Color.DARKGREEN);
-        greenMaterial.setSpecularColor(Color.GREEN);
- 
-        final PhongMaterial blueMaterial = new PhongMaterial();
-        blueMaterial.setDiffuseColor(Color.WHITE);
-        blueMaterial.setSpecularColor(Color.WHITE);
- 
-        final Box xAxis = new Box(1000.0, 5, 5);
-        final Box yAxis = new Box(5, 1000.0, 5);
-        final Box zAxis = new Box(5, 5, 1000.0);
-        
-        xAxis.setMaterial(redMaterial);
-        yAxis.setMaterial(greenMaterial);
-        zAxis.setMaterial(blueMaterial);
- 
-        axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
-        return axisGroup;
-     }
 
 }
