@@ -436,8 +436,8 @@ public class Support3D {
 	 * Break one triangle into smaller triangles
 	 * 
 	 * @param coords the triangle as [x1, y1, ..., y3, z3]
-	 * @param level [1..] number of times called recursively. If level is 1, get
-	 *            4^level triangles
+	 * @param level [1..] number of times called recursively. If level is n, get
+	 *            4^n triangles
 	 * @return all the triangles in a coordinate array
 	 */
 	public static float[] triangulateTriangle(float coords[], int level) {
