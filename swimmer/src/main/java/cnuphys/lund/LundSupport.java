@@ -39,10 +39,10 @@ public class LundSupport {
 	 * private constructor for the singleton.
 	 */
 	private LundSupport() {
+		System.err.println("CONSTRUCTOR");
 		initialize();
 		// sort based on Id so we can use binary search
 		Collections.sort(_lundIds);
-		initStyles();
 	}
 
 	/**
@@ -53,6 +53,7 @@ public class LundSupport {
 	public static LundSupport getInstance() {
 		if (instance == null) {
 			instance = new LundSupport();
+			instance.initStyles();
 		}
 		return instance;
 	}
@@ -644,7 +645,6 @@ public class LundSupport {
 		// _lundIds.add(new LundId("Nucleus", "alpha", 1022, 3.727417, 6, 0));
 		// _lundIds.add(new LundId("Nucleus", "anti-alpha", -1022, 3.727417, -6,
 		// 0));
-
 	}
 
 	/**

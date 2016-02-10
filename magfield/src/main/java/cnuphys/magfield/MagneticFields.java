@@ -933,11 +933,76 @@ public class MagneticFields {
 			@Override
 			public void run() {
 				testFrame.setVisible(true);
+				bzTest();
 			}
 		});
 
 	}
+	
+	private static void bzTest() {
+		
+		System.err.println("========= START Bz TEST ==========");
 
+		int N1 = 10000;
+		int N2 = 100000;
+		double tolerance = 1.0e-4;
+		
+		_solenoid.setScaleFactor(0);
+		double rho[] = new double[N1];
+		double z[] = new double[N1];
+		double phi[] = new double[N1];
+		float b[] = new float[3];
+		float bz[] = new float[N1];
+		double rhoMax = 100;
+		double zMax = 100;
+		double phiMax = 10;
+		
+		double worstZ = Double.NaN;
+		double worstPhi = Double.NaN;
+		double worstRho = Double.NaN;
+		double maxDel = 0.0;
+		
+		long count = 0;
+		for (int j = 0; j < N2; j++) {
+			
+			setActiveField(FieldType.TORUS);
+			for (int i = 0; i < N1; i++) {
+				count++;
+				rho[i] = rhoMax*Math.random();
+				z[i] = zMax*Math.random();
+				phi[i] = phiMax*(2*Math.random()-1.);
+				getActiveField().fieldCylindrical(phi[i], rho[i], z[i], b);
+				bz[i] = b[2];
+			}
+			
+			setActiveField(FieldType.COMPOSITE);
+			for (int i = 0; i < N1; i++) {
+				getActiveField().fieldCylindrical(phi[i], rho[i], z[i], b);
+				double bzt = b[2];
+				double del = Math.abs(bzt-bz[i]);
+				if (del > tolerance) {
+					System.err.println("BIG DIFFERENCE dl = " + del);
+					System.exit(1);
+				}
+				if (del > maxDel) {
+					maxDel = del;
+					worstZ = z[i];
+					worstRho = rho[i];
+					worstPhi = phi[i];
+				}
+			}
+
+		}
+
+		System.err.println("Points tested: " + count);
+		System.err.println("Worst del = " + maxDel);
+		if (maxDel > 0) {
+			System.err.println("AT: rho = " + worstRho + "  z = " + worstZ + "  phi = " + worstPhi);
+		}
+		System.err.println("========= END Bz TEST ==========");
+
+}
+	
 	public static void main2(String arg[]) {
 		int numThread = 20;
 
