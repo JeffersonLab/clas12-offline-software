@@ -55,7 +55,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 	// for auto next event
 	private JCheckBox _periodEvent;
-	private int _period = 2; // sec
+	private float _period = 2f; // sec
 	private JTextField _periodTF;
 	private Timer _nextEventTimer;
 
@@ -373,7 +373,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 						};
 
-						int delay = 1000 * _period;
+						int delay = (int)(1000 * _period);
 						_nextEventTimer = new Timer(delay, nextAl);
 
 					}
@@ -396,11 +396,12 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
 					MenuSelectionManager.defaultManager().clearSelectedPath();
 					try {
-						int period = Integer.parseInt(_periodTF.getText());
-						_period = Math.max(1, Math.min(60, period));
+						float period = Float.parseFloat(_periodTF.getText());
+						_period = Math.max(0.01f, Math.min(60f, period));
 
 						if (_nextEventTimer != null) {
-							int delay = 1000 * _period;
+							int delay = (int)(1000 * _period);
+//							System.err.println("Set next event delay to " + delay + " ms");
 							_nextEventTimer.setDelay(delay);
 						}
 					} catch (Exception e) {
