@@ -28,13 +28,6 @@ import cnuphys.lund.LundSupport;
 
 public class SectorECItem extends PolygonItem {
 
-	protected static RenderingHints renderHints = new RenderingHints(
-			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	static {
-		renderHints.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
-	};
-
 	// 1-based sector
 	private int _sector;
 
@@ -106,7 +99,6 @@ public class SectorECItem extends PolygonItem {
 		}
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.addRenderingHints(renderHints);
 		setPath(path);
 		// super.drawItem(g, container);
 

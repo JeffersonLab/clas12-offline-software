@@ -46,14 +46,6 @@ import cnuphys.bCNU.util.PropertySupport;
 @SuppressWarnings("serial")
 public class BaseView extends JInternalFrame {
 
-	private static RenderingHints renderHints = new RenderingHints(
-			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-	static {
-		renderHints.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
-	};
-
 	// use to stack views as added
 	private static int LASTLEFT = 0;
 	private static int LASTTOP = 0;

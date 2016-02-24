@@ -46,7 +46,7 @@ public class PrintUtilities implements Printable {
 			// g2d.setTransform(nt);
 
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON);
+					RenderingHints.VALUE_ANTIALIAS_OFF);
 
 			g2d.translate(pageFormat.getImageableX(),
 					pageFormat.getImageableY());
