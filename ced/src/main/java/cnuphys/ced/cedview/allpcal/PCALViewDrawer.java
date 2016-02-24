@@ -12,13 +12,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 
 public abstract class PCALViewDrawer implements IDrawable {
 
-	protected static RenderingHints renderHints = new RenderingHints(
-			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	static {
-		renderHints.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
-	};
-
 	// convenient access to the event manager
 	protected ClasIoEventManager _eventManager = ClasIoEventManager
 			.getInstance();

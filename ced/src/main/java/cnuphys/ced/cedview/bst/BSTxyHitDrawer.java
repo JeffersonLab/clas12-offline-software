@@ -191,9 +191,7 @@ public class BSTxyHitDrawer implements IDrawable {
 
 			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON);
-
+			
 			// panels
 			for (int i = 0; i < hitCount; i++) {
 				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],

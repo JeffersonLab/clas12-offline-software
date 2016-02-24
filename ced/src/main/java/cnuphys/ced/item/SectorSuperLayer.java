@@ -120,10 +120,6 @@ public class SectorSuperLayer extends PolygonItem {
 			return;
 		}
 
-		if ((_sector == 2) && (_superLayer == 1)) {
-			System.err.println("Sector = " + _sector + "  Superlayer = " + _superLayer + "  dirty: " + _dirty);
-		}
-		
 		Graphics2D g2 = (Graphics2D) g;
 
 		getStyle().setFillColor(Color.white);

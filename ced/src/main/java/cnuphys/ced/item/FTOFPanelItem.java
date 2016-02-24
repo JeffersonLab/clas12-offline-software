@@ -25,13 +25,6 @@ import cnuphys.lund.LundSupport;
 
 public class FTOFPanelItem extends PolygonItem {
 
-	protected static RenderingHints renderHints = new RenderingHints(
-			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	static {
-		renderHints.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
-	};
-
 	private FTOFPanel _ftofPanel;
 
 	// 1-based sector
@@ -84,7 +77,6 @@ public class FTOFPanelItem extends PolygonItem {
 		}
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHints(renderHints);
 
 		setPath(path);
 		super.drawItem(g, container);

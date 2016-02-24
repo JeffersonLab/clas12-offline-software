@@ -302,21 +302,12 @@ public class CurveDrawer {
 			return;
 		}
 
-		RenderingHints renderHints = new RenderingHints(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		{
-			renderHints.put(RenderingHints.KEY_RENDERING,
-					RenderingHints.VALUE_RENDER_QUALITY);
-		}
-		;
 
 		Point2D.Double wp = new Point2D.Double();
 		Point p0 = new Point();
 		Point p1 = new Point();
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHints(renderHints);
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(GraphicsUtilities.getStroke(style.getLineWidth(),

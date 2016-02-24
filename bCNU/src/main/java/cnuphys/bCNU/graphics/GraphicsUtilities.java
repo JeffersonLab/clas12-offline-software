@@ -1503,17 +1503,8 @@ public class GraphicsUtilities {
 	public static void drawSwimTrajectory(Graphics g, IContainer container,
 			SwimTrajectory2D trajectory) {
 
-		RenderingHints renderHints = new RenderingHints(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		{
-			renderHints.put(RenderingHints.KEY_RENDERING,
-					RenderingHints.VALUE_RENDER_QUALITY);
-		}
-		;
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHints(renderHints);
 
 		Stroke oldStroke = g2.getStroke();
 

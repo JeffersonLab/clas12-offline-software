@@ -40,13 +40,13 @@ public class TrackTest {
 
 	RenderingHints rhints = g2.getRenderingHints();
 	boolean antialiasOn = rhints
-		.containsValue(RenderingHints.VALUE_ANTIALIAS_ON);
+		.containsValue(RenderingHints.VALUE_ANTIALIAS_OFF);
 
 	// Enable antialiasing for shapes
 
 	if (!antialiasOn) {
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-		    RenderingHints.VALUE_ANTIALIAS_ON);
+		    RenderingHints.VALUE_ANTIALIAS_OFF);
 	}
 
 	TestSupport.toLocal(world, local, p0, startPoint);
