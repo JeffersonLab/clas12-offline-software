@@ -953,9 +953,9 @@ public class MagneticFields {
 		double phi[] = new double[N1];
 		float b[] = new float[3];
 		float bz[] = new float[N1];
-		double rhoMax = 100;
-		double zMax = 100;
-		double phiMax = 10;
+		double rhoMax = 200;
+		double zMax = 300;
+		double phiMax = 30;
 		
 		double worstZ = Double.NaN;
 		double worstPhi = Double.NaN;
@@ -969,7 +969,7 @@ public class MagneticFields {
 			for (int i = 0; i < N1; i++) {
 				count++;
 				rho[i] = rhoMax*Math.random();
-				z[i] = zMax*Math.random();
+				z[i] = zMax*Math.random() - 10;
 				phi[i] = phiMax*(2*Math.random()-1.);
 				getActiveField().fieldCylindrical(phi[i], rho[i], z[i], b);
 				bz[i] = b[2];
