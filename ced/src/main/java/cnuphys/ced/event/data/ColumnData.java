@@ -80,7 +80,7 @@ public class ColumnData {
 									type);
 							
 							count++;
-							Log.getInstance().info(count + "  " + cd);
+//							Log.getInstance().info(count + "  " + cd);
 							_columnData.put(cd._fullName, cd);
 						}
 					}
