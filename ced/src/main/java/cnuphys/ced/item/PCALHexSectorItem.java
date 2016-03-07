@@ -50,7 +50,6 @@ public class PCALHexSectorItem extends HexSectorItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -97,11 +96,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 		}
 	}
 	// draw the hits
-	private void drawPCALHits(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
-			return;
-		}
-		
+	private void drawPCALHits(Graphics g, IContainer container) {		
 		if (_pcalView.isSingleEventMode()) {
 			drawSingleEvent(g, container);
 		}

@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 import cnuphys.bCNU.drawable.DrawableChangeType;
 import cnuphys.bCNU.drawable.DrawableList;
@@ -264,6 +265,29 @@ public class BaseContainer extends JComponent
 		_userLayers = null;
 		setBackground(Color.gray);
 		setForeground(Color.black);
+	}
+	
+	/**
+	 * Test whether the view is on screen
+	 * @return <code>true</code> if the view is on screen
+	 */
+	public boolean isOnScreen() {
+		if (_view == null) {
+//			System.err.println("null view");
+			return false;
+		}
+		
+		JFrame jf = _view.getParentFrame();
+		if (jf == null) {
+//			System.err.println("null jframe for view " + _view.getTitle());
+			return false;
+		}
+		
+		Dimension d = jf.getSize();
+		Rectangle pr = new Rectangle(0, 0, d.width, d.height);
+		Rectangle r = _view.getBounds();
+//		System.err.println("pr: " + pr + "  r: " + r);
+		return ((pr != null) && (r != null) && pr.intersects(r));
 	}
 
 	/**

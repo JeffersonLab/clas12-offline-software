@@ -38,6 +38,7 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -342,8 +343,6 @@ public class BSTxyView extends CedXYView {
 		g2.setStroke((panel == _closestPanel) ? stroke2 : stroke);
 		// Just draw a line from (x1,y1) to (x2,y2)
 
-		// TODO resolve -x hack with gagik
-
 		wp1.setLocation(panel.getX1(), panel.getY1());
 		wp2.setLocation(panel.getX2(), panel.getY2());
 		container.worldToLocal(p1, wp1);
@@ -364,12 +363,31 @@ public class BSTxyView extends CedXYView {
 			g2.setColor(TEXT);
 			pmid.x = (p1.x + p2.x) / 2;
 			pmid.y = (p1.y + p2.y) / 2;
-			String s = "" + panel.getSector();
+//			String s = "" + panel.getSector();
+			//TODO fix HACK
+			String s = "" + svtSectorHack(panel.getLayer(), panel.getSector());
 			extendLine(porig, pmid, 4 + panel.getLayer() / 2, fm.stringWidth(s),
 					fm.getHeight());
 			g2.drawString(s, pmid.x, pmid.y);
 		}
-
+	}
+	
+	/**
+	 * Rotates the sector number by 180 degrees
+	 * @param layer the layer 1..8
+	 * @param sector the sector 1..N
+	 */
+	public int svtSectorHack(int layer, int sector) {
+		int superlayer = (layer-1) / 2; //zero based
+		int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+		int n2 = numSect/2;
+		int hackSect = (sector + n2) % numSect;
+		if (hackSect == 0) {
+			hackSect = numSect;
+		}
+		System.err.println("LAY: " + layer + "  SUPL: " + superlayer + " SECT " + sector + "  NUMSECT: " + 
+		numSect + "  hackSect: " + hackSect);
+		return hackSect;
 	}
 
 	private static void extendLine(Point p0, Point p1, int del, int sw,

@@ -54,7 +54,7 @@ public class ECHexSectorItem extends HexSectorItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-
+		
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -108,10 +108,6 @@ public class ECHexSectorItem extends HexSectorItem {
 
 	// draw the hits
 	private void drawECHits(Graphics g, IContainer container, int plane) {
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
-			return;
-		}
-
 		if (_ecView.isSingleEventMode()) {
 			drawSingleEvent(g, container, plane);
 		}
