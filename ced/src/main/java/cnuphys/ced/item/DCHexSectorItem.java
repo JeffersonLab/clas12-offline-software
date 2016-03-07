@@ -44,7 +44,6 @@ public class DCHexSectorItem extends HexSectorItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}

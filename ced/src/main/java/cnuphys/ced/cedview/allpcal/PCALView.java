@@ -21,6 +21,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayArray;
 import cnuphys.ced.component.DisplayBits;
@@ -137,13 +138,11 @@ public class PCALView extends HexView {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-
-				if (!_eventManager.isAccumulating()) {
-
-					// draw MC Hits
-					_mcHitDrawer.draw(g, container);
-
-				} // not acumulating
+				if (!ClasIoEventManager.getInstance().isAccumulating()) {
+					return;
+				}
+				// draw MC Hits
+				_mcHitDrawer.draw(g, container);
 			}
 
 		};

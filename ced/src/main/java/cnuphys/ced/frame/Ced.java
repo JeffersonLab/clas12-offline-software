@@ -86,7 +86,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.95.08";
+	private static final String _release = "build 0.95.09";
 
 	// used for one time inits
 	private int _firstTime = 0;

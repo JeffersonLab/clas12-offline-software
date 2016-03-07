@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -51,10 +53,10 @@ public class BaseView extends JInternalFrame {
 	private static int LASTTOP = 0;
 	private static final int DEL_H = 40;
 	private static final int DEL_V = 20;
-
-	// generate a UUID for this view
-	private UUID _uuid = UUID.randomUUID();
-
+	
+	//parent frame
+    private JFrame _parentFrame;
+	
 	// The desktop owner of this view (internal frame.)
 	private JDesktopPane _desktop;
 
@@ -270,6 +272,19 @@ public class BaseView extends JInternalFrame {
 			}
 		};
 		addComponentListener(ca);
+	}
+	
+	/**
+	 * Get the parent JFrame
+	 * 
+	 * @return the parent JFrame (the application)
+	 */
+	public JFrame getParentFrame() {
+		if (_parentFrame == null) {
+			_parentFrame = (JFrame) SwingUtilities
+					.getAncestorOfClass(Frame.class, this);
+		}
+		return _parentFrame;
 	}
 
 	/**
@@ -556,16 +571,6 @@ public class BaseView extends JInternalFrame {
 
 		return null;
 	}
-
-	/**
-	 * Get the UUID for this view
-	 * 
-	 * @return the uuid for this view.
-	 */
-	public UUID getUuid() {
-		return _uuid;
-	}
-
 
 	/**
 	 * Get a view from its container
