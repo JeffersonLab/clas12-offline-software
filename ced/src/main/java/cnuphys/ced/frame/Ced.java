@@ -51,6 +51,7 @@ import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
+import cnuphys.ced.geometry.GeometryReportView;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
@@ -133,6 +134,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ForwardView3D _forward3DView;
 	private CentralView3D _central3DView;
 	private FTCalView3D _ftCal3DView;
+	private GeometryReportView _geoReportView;
 	
 	//sector views
 	private SectorView _sectorView14;
@@ -215,6 +217,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 			_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
 			_virtualView.moveTo(_plotView, 11, VirtualView.BOTTOMLEFT);
+			_virtualView.moveTo(_geoReportView, 17, VirtualView.CENTER);
 
 			_virtualView.moveTo(_ftcalXyView, 10, VirtualView.BOTTOMLEFT);
 
@@ -260,6 +263,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// add a reconstructed tracks view
 		_reconEventView = ClasIoReconEventView.getInstance();
 
+		//geometry report view
+		_geoReportView = new GeometryReportView();
+		
 		if (!pluginsOnly()) {
 			ViewManager.getInstance().getViewMenu().addSeparator();
 
