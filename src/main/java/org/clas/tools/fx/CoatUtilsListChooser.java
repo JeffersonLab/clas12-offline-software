@@ -36,7 +36,7 @@ public class CoatUtilsListChooser {
     private void initStage(List<String> list){
         this.chooserList = list;
         BorderPane  root = new BorderPane();
-        Scene scene = new Scene(root,600,400);        
+        Scene scene = new Scene(root,500,350);        
         this.listView = new ListView();
         this.listView.setItems(FXCollections.observableArrayList(chooserList));
         root.setPadding(new Insets(10,10,10,10));
@@ -65,6 +65,8 @@ public class CoatUtilsListChooser {
         
         this.stage  = new Stage();
         this.stage.setTitle("List Selector");
+        this.stage.setMinWidth(500);
+        this.stage.setMinHeight(350);
         this.stage.setScene(scene);
     }
     

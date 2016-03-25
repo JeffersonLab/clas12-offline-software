@@ -95,11 +95,13 @@ public class CoatUtilsJar {
     
     public static Map<String,List<String> >  scanDirectory(String directory, String supeclass){
         Map<String,List<String> >  jarClasses = new TreeMap<String,List<String> >();
-        List<String>  jarFiles = CoatUtilsFile.getFileList(directory);
-        for(String item : jarFiles){
-            List<String>  cList = CoatUtilsJar.scanJarFile(item, supeclass);
-            int index = item.lastIndexOf("/");
-            jarClasses.put(item.substring(index+1, item.length()), cList);
+        if(directory!=null){
+            List<String>  jarFiles = CoatUtilsFile.getFileList(directory);
+            for(String item : jarFiles){
+                List<String>  cList = CoatUtilsJar.scanJarFile(item, supeclass);
+                int index = item.lastIndexOf("/");
+                jarClasses.put(item.substring(index+1, item.length()), cList);
+            }
         }
         return jarClasses;
     }

@@ -52,8 +52,10 @@ public class CoatPluginChooser {
         root.setPadding(new Insets(10,10,10,10));
         root.setCenter(this.treeView);
         root.setBottom(buttonPane);
-        Scene scene = new Scene(root,600,500);
+        Scene scene = new Scene(root,500,400);
         this.stage = new Stage();
+        this.stage.setMinWidth(500);
+        this.stage.setMinHeight(400);
         this.stage.setScene(scene);
     }
     

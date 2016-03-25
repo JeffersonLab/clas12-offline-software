@@ -37,7 +37,7 @@ public class CoatUtilsFile {
      */
     public static String getResourceDir(String env, String rpath){
         
-        String envString = System.getenv("env");
+        String envString = System.getenv(env);
         if(envString==null){
             CoatUtilsFile.printLog("Environment variable ["+env+"] is not defined");
             envString = System.getProperty(env);

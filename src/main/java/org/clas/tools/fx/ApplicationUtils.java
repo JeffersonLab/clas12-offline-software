@@ -15,12 +15,14 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.clas.utils.CoatUtilsFile;
 import org.clas.utils.CoatUtilsJar;
+import org.clas.utils.Configuration;
+import org.clas.utils.ConfigurationGroup;
 
 /**
  *
  * @author gavalian
  */
-public class ApplocationUtils extends Application {
+public class ApplicationUtils extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -47,7 +49,7 @@ public class ApplocationUtils extends Application {
         } );
         
         
-        root.add(btnChooser, 0, 0);
+        root.add(btnChooser, 4, 3);
         
         Button btnJarfile = new Button("Scan Jar");
         btnJarfile.setOnAction(e -> {
@@ -64,9 +66,42 @@ public class ApplocationUtils extends Application {
             chooser.show();
         });
         
-        root.add(btnJarfile, 1, 0);
-        Scene scene = new Scene(root,200,600);        
+        root.add(btnJarfile, 3, 3);
+        
+        ConfigurationGroup group = new ConfigurationGroup("DCHB");
+        group.addItem("torus", new String[]{"-1.0","-0.5","0.0","0.5","1.0"});
+        group.addItem("solenoid", 0.5);
+        group.addItem("kalman", new String[]{"true","false"});
+        group.addItem("mcdata", new String[]{"true","false"});
+        group.addItem("method", new String[]{"normalized","chi2","Log Likelihood"});
+        group.addItem("debug", 15);
+        ConfigurationGroup groupSEB = new ConfigurationGroup("H100");
+        groupSEB.addItem("vX", new String[]{"K0","Phi0","MxE"});
+        groupSEB.addItem("vY", new String[]{"K0","Phi0","MxE"});
+        groupSEB.addItem("X min", 0.5);
+        groupSEB.addItem("X max", 0.5);        
+        groupSEB.addItem("X bins", 120);
+        
+        groupSEB.addItem("Y min", 0.5);
+        groupSEB.addItem("Y max", 0.5);        
+        groupSEB.addItem("Y bins", 120);
+        
+        ConfigurationGroup groupB = new ConfigurationGroup("K0mass");
+        groupB.addItem("property", new String[]{"p","mass","theta","phi","px","py","pz"});
+        groupB.addItem("particles", new String[]{"[b]","[t]","[2212]","[211]"});
+
+        Configuration config = new Configuration();
+        config.addGroup(group);
+        config.addGroup(groupSEB);
+        config.addGroup(groupB);
+        root.add(config.getConfigPane(), 1, 0,4,2);
+        
+        Scene scene = new Scene(root,500,600);
+        
         primaryStage.setScene(scene);
+        primaryStage.setMinWidth(500);
+        primaryStage.setMinHeight(600);
+        
         primaryStage.show();
     }
 
