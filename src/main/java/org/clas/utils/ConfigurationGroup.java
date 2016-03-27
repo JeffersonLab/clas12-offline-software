@@ -122,10 +122,8 @@ public class ConfigurationGroup {
         cbox.setOnAction(e -> {
             String change = (String) cbox.getSelectionModel().getSelectedItem();
             System.out.println("something has changed "+ itemname + " -> " + change);
-            configItems.get(itemname).setValue(value);
-            
+            configItems.get(itemname).setValue(value);            
         });
-        
     }
     
     public void show(){

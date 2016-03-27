@@ -69,12 +69,14 @@ public class ApplicationUtils extends Application {
         root.add(btnJarfile, 3, 3);
         
         ConfigurationGroup group = new ConfigurationGroup("DCHB");
+        
         group.addItem("torus", new String[]{"-1.0","-0.5","0.0","0.5","1.0"});
         group.addItem("solenoid", 0.5);
         group.addItem("kalman", new String[]{"true","false"});
         group.addItem("mcdata", new String[]{"true","false"});
         group.addItem("method", new String[]{"normalized","chi2","Log Likelihood"});
         group.addItem("debug", 15);
+        
         ConfigurationGroup groupSEB = new ConfigurationGroup("H100");
         groupSEB.addItem("vX", new String[]{"K0","Phi0","MxE"});
         groupSEB.addItem("vY", new String[]{"K0","Phi0","MxE"});
