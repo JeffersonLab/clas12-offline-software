@@ -6,12 +6,16 @@
 package org.clas.utils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -110,6 +114,25 @@ public class CoatUtilsFile {
             if(item.endsWith(ext)==true) selected.add(item);
         }
         return selected;
+    }
+    
+    public static void   writeFile(String filename, List<String> lines){
+        System.out.println("writing file --->  " + filename);
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(filename));
+            for(String line : lines){
+                writer.write (line +"\n");
+            }  writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(CoatUtilsFile.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(CoatUtilsFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     /**
      * Reads a text file into a list of strings  

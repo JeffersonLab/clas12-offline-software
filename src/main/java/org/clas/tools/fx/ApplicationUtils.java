@@ -15,8 +15,8 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.clas.utils.CoatUtilsFile;
 import org.clas.utils.CoatUtilsJar;
-import org.clas.utils.Configuration;
-import org.clas.utils.ConfigurationGroup;
+import org.clas.config.Configuration;
+import org.clas.config.ConfigurationGroup;
 
 /**
  *
@@ -78,8 +78,7 @@ public class ApplicationUtils extends Application {
         group.addItem("debug", 15);
         
         ConfigurationGroup groupSEB = new ConfigurationGroup("H100");
-        groupSEB.addItem("vX", new String[]{"K0","Phi0","MxE"});
-        groupSEB.addItem("vY", new String[]{"K0","Phi0","MxE"});
+       
         groupSEB.addItem("X min", 0.5);
         groupSEB.addItem("X max", 0.5);        
         groupSEB.addItem("X bins", 120);
@@ -92,12 +91,13 @@ public class ApplicationUtils extends Application {
         groupB.addItem("property", new String[]{"p","mass","theta","phi","px","py","pz"});
         groupB.addItem("particles", new String[]{"[b]","[t]","[2212]","[211]"});
 
-        Configuration config = new Configuration();
+        Configuration config = new Configuration("data","program.cfg");
         config.addGroup(group);
         config.addGroup(groupSEB);
         config.addGroup(groupB);
-        root.add(config.getConfigPane(), 1, 0,4,2);
-        
+        //root.add(config.getConfigPane(), 1, 0,4,2);
+        config.update();
+        root.add(config.getConfigPane(), 0, 0);
         Scene scene = new Scene(root,500,600);
         
         primaryStage.setScene(scene);
