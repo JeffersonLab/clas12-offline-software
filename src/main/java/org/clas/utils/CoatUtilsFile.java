@@ -149,7 +149,8 @@ public class CoatUtilsFile {
             BufferedReader bufferedReader =  new BufferedReader(fileReader);
 
             while((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
+                //System.out.println(line);
+                lines.add(line);
             }   
             // Always close files.
             bufferedReader.close();         

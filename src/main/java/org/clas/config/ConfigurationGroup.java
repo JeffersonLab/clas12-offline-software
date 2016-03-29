@@ -6,9 +6,11 @@
 
 package org.clas.config;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +34,9 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonWriter;
 
 /**
  *
@@ -156,6 +161,16 @@ public class ConfigurationGroup {
             configItems.get(itemname).setValue(value);            
         });
     }*/
+    
+    public List< Map<String,Object> >  getGroupMaps(){
+            List< Map<String,Object> > mapList = new ArrayList< Map<String,Object> >();
+            for(Map.Entry<String,ConfigurationItem>  item : this.configItems.entrySet()){
+                Map<String,Object> itemMap = item.getValue().getMap();
+                itemMap.put("namespace", this.getName());
+                mapList.add(itemMap);
+            }
+            return mapList;
+    }
     
     public void show(){
         System.out.println("GROUP [" + this.getName() + "]  ITEMS = " + this.configItems.size());
@@ -369,6 +384,8 @@ public class ConfigurationGroup {
             }
         }
         
+        
+        
         public String getOptionsString(){
             StringBuilder str = new StringBuilder();
             str.append("{ ");
@@ -400,7 +417,35 @@ public class ConfigurationGroup {
         public String   getName(){ return itemName;}
         public T        getValue(){ return this.itemValues.get(0);};
         public Set<T>   getOptions(){ return this.itemOptions;}
+        /**
+         * returns a map to be serialized.
+         * @return 
+         */
+        public Map<String,Object> getMap(){
+            
+            Map<String,Object> map = new LinkedHashMap<String,Object>();
+            map.put("name", this.itemName);
 
+            if(this.getValue() instanceof String){
+                map.put("type", "string");
+            }
+            if(this.getValue() instanceof Integer){
+                map.put("type", "integer");
+            }
+            if(this.getValue() instanceof Double){
+                map.put("type", "double");
+            }
+            map.put("value", this.getValue());
+            if(this.itemOptions.size()>0){
+                List<T> opt = new ArrayList<T>();
+                for(T it : this.itemOptions){
+                    opt.add(it);
+                }
+                //System.out.println("OPTIONS FLAG = " + opt);
+                map.put("options", opt);
+            }
+            return map;
+        }
         @Override
         public String  toString(){
             
@@ -421,6 +466,22 @@ public class ConfigurationGroup {
         //ConfigurationGroup group = new ConfigurationGroup("group");
         //group.add("property" , 25, 12, 45, 67,89);
         //group.add("fillcolor", 32);
+        //Map<String,Object> model = new HashMap<String,Object>();
+        JsonObject model = Json.createObjectBuilder()
+                .add("firstName", "Duke")
+                .add("lastName", "Java")
+                .add("age", 18).add("ratio",3.2).build();
+        StringWriter stWriter = new StringWriter();
+        JsonWriter jsonWriter = Json.createWriter(stWriter);
+        jsonWriter.writeObject(model);
+        
+        jsonWriter.close();
+        
+        String jsonData = stWriter.toString();
+        System.out.println(jsonData);
+        
+        
+        /*
         ConfigurationGroup group = new ConfigurationGroup("Canvas");
         group.addItem("FillColor", 1);
         group.addItem("LineColor", 4.5);
@@ -432,6 +493,6 @@ public class ConfigurationGroup {
         group.getItem("LineStyle").setValue(7);
         group.getItem("FillColor").setValue(7);
         
-        group.show();
+        group.show();*/
     }
 }

@@ -16,7 +16,7 @@ import javafx.beans.value.ObservableValue;
 public class Config<T> implements ObservableValue<T> {
     
     public static void main(String[] args){
-        
+        //JsonWriter writer = null;
     }
 
     @Override
