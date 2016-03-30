@@ -6,7 +6,7 @@
 package org.clas.config;
 
 import org.clas.config.ConfigurationGroup;
-import com.sun.media.jfxmedia.logging.Logger;
+
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javax.json.Json;
@@ -26,9 +25,8 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
-import javax.json.stream.JsonParser;
-import org.clas.config.ConfigurationGroup.ConfigurationItem;
 import org.clas.utils.CoatUtilsFile;
+import org.clas.utils.CoatUtilsJson;
 
 /**
  *
@@ -54,60 +52,76 @@ public class Configuration {
         this.update();
     }
     
+    public void parseLine(String line){
+        
+        String itemName   = CoatUtilsJson.getValueString(line, "name");
+        String groupName  = CoatUtilsJson.getValueString(line, "namespace");
+        String type       = CoatUtilsJson.getValueString(line, "type");
+        String value      = CoatUtilsJson.getValueString(line, "value");
+        String options    = CoatUtilsJson.getListString(line, "options");
+        
+        //System.out.println("TYPE = " + type);
+        if(type.compareTo("string")==0){
+                if(options!=null){
+                    List<String>  optList = CoatUtilsJson.getListAsString(options);
+                    //System.out.println(">>>>>>>>>>>>" + optList);
+                    String[] optString = new String[optList.size()];
+                    for(int i=0;i<optList.size();i++) optString[i] = optList.get(i);
+                    this.addItem(groupName,itemName,optString);
+                    this.setValue(groupName, itemName, value);
+                } else {
+                    //System.out.println("******************* TYPE STRING");
+                    this.addItem( groupName,itemName, value );
+                }
+        }
+        /**
+         * setting integer group values
+         */
+        if(type.compareTo("integer")==0){
+            if(options!=null){
+                List<String>  optList = CoatUtilsJson.getListAsString(options);
+                //System.out.println(">>>>>>>>>>>>" + optList);
+                Integer[] optString = new Integer[optList.size()];
+                for(int i=0;i<optList.size();i++) optString[i] = Integer.parseInt(optList.get(i));
+                this.addItem(groupName,itemName,optString);
+                this.setValue(groupName, itemName, Integer.parseInt(value));
+            } else {
+                //System.out.println("******************* TYPE STRING");
+                this.addItem( groupName,itemName, Integer.parseInt(value));
+            }
+        }
+        /**
+         * setting double group values
+         */
+        if(type.compareTo("double")==0){
+            if(options!=null){
+                List<String>  optList = CoatUtilsJson.getListAsString(options);
+                //System.out.println(">>>>>>>>>>>>" + optList);
+                Double[] optString = new Double[optList.size()];
+                for(int i=0;i<optList.size();i++) optString[i] = Double.parseDouble(optList.get(i));
+                this.addItem(groupName,itemName,optString);
+                this.setValue(groupName, itemName, Double.parseDouble(value));
+            } else {
+                //System.out.println("******************* TYPE STRING");
+                this.addItem( groupName,itemName, Double.parseDouble(value));
+            }
+        }
+        
+        
+    }
     
     public void readFile(String filename){
         List<String>  readLines = CoatUtilsFile.readFile(filename);
-        System.out.println("N LINES = " + readLines.size());
+        //System.out.println("N LINES = " + readLines.size());
+        System.out.println("[reading configuration] ---> " + filename);
         for(String line : readLines){
             if(line.startsWith("#")==true) continue;
-            StringReader  reader = new StringReader(line);
-            JsonReader parser = Json.createReader(reader);
-            JsonObject  map = parser.readObject();
-            String  name    = map.getString("name");
-            String  name_sc = map.getString("namespace");
-            String  type    = map.getString("type");
-
-            if(map.containsKey("options")==true){
-                JsonArray  array = map.getJsonArray("options");
-                int nsize = array.size();
-                if(type.compareTo("string")==0){
-                    String[] options = new String[nsize];
-                    for(int loop = 0; loop < nsize; loop++){
-                        options[loop] = array.getString(loop);
-                    }
-                    this.addItem(name_sc, name, options);
-                    String value = map.getString("value");
-                    this.setValue(name_sc, name, value);
-                    //this.addItem(name_sc, name, value);         
-                }
-                if(type.compareTo("integer")==0){
-                    Integer[] options = new Integer[nsize];
-                    for(int loop = 0; loop < nsize; loop++){
-                        options[loop] = array.getInt(loop);
-                    }
-                    this.addItem(name_sc, name, options);
-                    Integer value = map.getInt("value");
-                    this.setValue(name_sc, name, value);
-                    //this.addItem(name_sc, name, value);         
-                }
-                
-            } else {
-                if(type.compareTo("string")==0){                
-                    String value = map.getString("value");
-                    this.addItem(name_sc, name, value);                
-                }
-                if(type.compareTo("integer")==0){
-                    Integer value = map.getInt("value");
-                    this.addItem(name_sc, name, value);                
-                }
-                if(type.compareTo("double")==0){
-                    //String value = map.getString("value");
-                    //JsonObject  value = map.getJsonObject("value");    
-                    JsonNumber  number = map.getJsonNumber("value");                
-                    this.addItem(name_sc, name, number.doubleValue());
-                }
-            }
-
+            //System.out.println("[parsing line] --> " + line);
+            
+            this.parseLine(line);
+            
+            //System.out.println(" group = " + groupName + " item = " + itemName
+            //+ " type = " + type);
             //System.out.println("LINE : " + name);
             //System.out.println("JSON : " + map);
         }
@@ -116,6 +130,7 @@ public class Configuration {
     public void readFile(){
         String envResource = CoatUtilsFile.getResourceDir("HOME", ".coat/configurations/"+configFile);
         this.readFile(envResource);
+        this.show();
     }
     
     public void update(){
@@ -128,11 +143,12 @@ public class Configuration {
             //System.out.println("CREATE DIRECTORY BOOLEAN " + success);
         }
         String filename = envResource + configFile;
-        List<String>  fileLines = new ArrayList<String>();
+        /*List<String>  fileLines = new ArrayList<String>();
         for(Map.Entry<String,ConfigurationGroup> entry : this.cGroups.entrySet()){
             fileLines.add(entry.getValue().toString());
         }
-        CoatUtilsFile.writeFile(filename, fileLines);
+        CoatUtilsFile.writeFile(filename, fileLines);*/
+        this.writeFile(filename);
     }
     
     public Node  getConfigPane(){
@@ -224,48 +240,16 @@ public class Configuration {
     
     
     public void writeFile(String filename){
+        
         List<String>  writeLines = new ArrayList<String>();
         
         for(Map.Entry<String, ConfigurationGroup>  group : this.cGroups.entrySet()){
             List< Map<String,Object> > objects = group.getValue().getGroupMaps();
-            for(Map<String,Object>  map : objects){
-                JsonObjectBuilder model = Json.createObjectBuilder();
-                for(Map.Entry<String,Object> mapItem : map.entrySet()){
-                    if(mapItem.getValue() instanceof Integer){
-                        model.add(mapItem.getKey(), (int) mapItem.getValue());
-                    }
-                    if(mapItem.getValue() instanceof String){
-                        model.add(mapItem.getKey(), (String) mapItem.getValue());
-                    }
-                    if(mapItem.getValue() instanceof Double){
-                        model.add(mapItem.getKey(), (double) mapItem.getValue());
-                    }
-                    if(mapItem.getValue() instanceof List){
-                        JsonArrayBuilder  aBuilder = Json.createArrayBuilder();
-                        for(Object obj : (List) mapItem.getValue()){
-                            if(obj instanceof String){
-                                aBuilder.add((String) obj);
-                            }
-                            if(obj instanceof Integer){
-                                aBuilder.add((Integer) obj);
-                            }
-                            if(obj instanceof Double){
-                                aBuilder.add((Double) obj);
-                            }
-                        }
-                        JsonArray jarray = (JsonArray) aBuilder.build();
-                        model.add(mapItem.getKey(), jarray);
-                    }
-                    //model.add(mapItem.getKey(), mapItem.getValue());                   
-                }
-                JsonObject jsonObject = model.build();
-                StringWriter stWriter = new StringWriter();
-                JsonWriter jsonWriter = Json.createWriter(stWriter);
-                jsonWriter.writeObject(jsonObject);
-                jsonWriter.close();
+            for(Map<String,Object> map : objects){
+                String jsonString = CoatUtilsJson.getJsonMap(map);
                 //System.out.println(stWriter.toString());
-                writeLines.add(stWriter.toString());
-            }
+                writeLines.add(jsonString);
+            }            
         }
         CoatUtilsFile.writeFile(filename, writeLines);
     }
@@ -277,12 +261,16 @@ public class Configuration {
         config.setValue("DCHB", "solenoid", 3);
         config.addItem("EB", "ecmatching", 20.0);
         config.addItem("DCTB", "kalman","true","false");
+        config.setValue("DCTB", "kalman","false");
         config.addItem("EB", "ftofmatching", 30.0);
         config.show();
         config.writeFile("test.json");
         
         Configuration  newConfig = new Configuration();
         newConfig.readFile("test.json");
+        System.out.println("\n\n\n======>");
         newConfig.show();
+        
+       
     }
 }
