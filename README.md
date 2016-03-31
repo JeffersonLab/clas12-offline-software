@@ -1,2 +1,2 @@
 # clas12detector-ec
-java code for reconstruction and analysis of EC/PCAL data.
+Java code for reconstruction and analysis of CLAS12 EC/PCAL data.
