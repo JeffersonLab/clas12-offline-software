@@ -160,6 +160,8 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 
 			for (int i = 0; i < len; i++) {
 				wp.setLocation(labx[i], laby[i]);
+				
+	//			System.err.println("DRAW BMT CROSS [" + (i+1) + "] AT x = " + labx[i] + "  y = " + laby[i]);
 
 				// arrows
 

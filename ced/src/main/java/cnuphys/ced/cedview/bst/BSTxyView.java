@@ -385,8 +385,8 @@ public class BSTxyView extends CedXYView {
 		if (hackSect == 0) {
 			hackSect = numSect;
 		}
-		System.err.println("LAY: " + layer + "  SUPL: " + superlayer + " SECT " + sector + "  NUMSECT: " + 
-		numSect + "  hackSect: " + hackSect);
+	//	System.err.println("LAY: " + layer + "  SUPL: " + superlayer + " SECT " + sector + "  NUMSECT: " + 
+	//	numSect + "  hackSect: " + hackSect);
 		return hackSect;
 	}
 

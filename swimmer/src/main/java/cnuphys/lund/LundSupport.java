@@ -108,6 +108,11 @@ public class LundSupport {
 	 */
 	private void initialize() {
 		_lundIds = new ArrayList<LundId>(400);
+		
+		//Geantinos
+		_lundIds.add(new LundId("Lepton", "G" + SUPERPLUS, 0, 0, 3, 0));
+		
+		
 		_lundIds.add(new LundId("InterBoson", "g", 21, 0, 0, 2));
 		// 510998910
 		_lundIds.add(new LundId("Lepton", "e" + SUPERMINUS, 11, 0.00051099891,
@@ -632,11 +637,11 @@ public class LundSupport {
 		// _lundIds.add(new LundId("Baryon", "Omega_b*-", 5334, 6.13, -3, 3));
 		// _lundIds.add(new LundId("Baryon", "anti-Omega_b*+", -5334, 6.13, 3,
 		// 3));
-		// _lundIds.add(new LundId("Nucleus", "deuteron", 1011, 1.8756134, 3,
-		// 0));
+		 _lundIds.add(new LundId("Nucleus", "deuteron", 1011, 1.8756134, 3,
+		 0));
 		// _lundIds.add(new LundId("Nucleus", "anti-deuteron", -1011, 1.8756134,
 		// -3, 0));
-		// _lundIds.add(new LundId("Nucleus", "t", 1021, 2.80925, 3, 1));
+		 _lundIds.add(new LundId("Nucleus", "t", 1021, 2.80925, 3, 1));
 		// _lundIds.add(new LundId("Nucleus", "anti-tritium", -1021, 2.80925,
 		// -3, 1));
 		// _lundIds.add(new LundId("Nucleus", "He3", 1012, 2.80923, 6, 1));
@@ -656,7 +661,7 @@ public class LundSupport {
 	 * @return the object if found, or <code>null</code>
 	 */
 	public LundId get(int id) {
-		if ((_lundIds == null) || (id == 0)) {
+		if (_lundIds == null) {
 			return null;
 		}
 		LundId testId = new LundId(null, null, id, 0, 0, 0);
@@ -665,6 +670,8 @@ public class LundSupport {
 		if (index >= 0) {
 			return _lundIds.get(index);
 		} else {
+//			System.err.println("LundId not found for pid: " + id);
+			(new Throwable()).printStackTrace();
 			return null;
 		}
 	}
@@ -857,6 +864,10 @@ public class LundSupport {
 	 * Used to initialize the styles for some jlab particles of interest.
 	 */
 	private void initStyles() {
+		//Geatininos
+		setStyle(0, Color.pink);
+		
+		
 		setStyle(11, orangeRed); // e-
 		setStyle(-11, Color.magenta); // e+
 		setStyle(111, wheat); // pi0
