@@ -15,7 +15,7 @@ public class GeometryReportPane extends TextPaneScrollPane {
 
 	// reduce from seven levels
 	public static enum MCOLOR {
-		M_BLACK, M_BLACK2, M_BLUE, M_ORANGERED, M_GREEN, M_RED
+		M_BLACK, M_BLACK2, M_BLUE, M_ORANGERED, M_GREEN, M_RED, M_CORAL
 	}
 
 	private static EnumMap<MCOLOR, SimpleAttributeSet> styles;
@@ -46,6 +46,10 @@ public class GeometryReportPane extends TextPaneScrollPane {
 				MCOLOR.M_RED,
 				createStyle(Color.red, "monospaced", FONTSIZE, false,
 						false));
+		styles.put(
+				MCOLOR.M_CORAL,
+				createStyle(X11Colors.getX11Color("coral"), "serif", FONTSIZE+1,
+						false, true));
 	}
 	
 	public GeometryReportPane() {
