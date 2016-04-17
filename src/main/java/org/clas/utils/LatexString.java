@@ -111,6 +111,8 @@ public class LatexString {
         ls.addString(String.format(LatexString.formatStrings.get(places), number));
         return ls;
     }
+
+    
     /**
      * Draw the text on graphics context
      * @param gc graphics context
@@ -120,7 +122,6 @@ public class LatexString {
     public void draw(GraphicsContext gc, float x, float y){
         
         float position = x;
-
         
         float height = this.getHeight();        
         gc.strokeLine(x, y, x + 100, y);
