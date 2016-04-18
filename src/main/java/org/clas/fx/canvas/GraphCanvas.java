@@ -30,7 +30,9 @@ public class GraphCanvas extends Canvas {
         this.widthProperty().addListener(observable -> redraw());
         this.heightProperty().addListener(observable -> redraw());
         this.mouseEventsInit();
-        this.addObject(new AbsGraphCanvasObject(20,20,40,40));
+        AbsGraphCanvasObject ig = new AbsGraphCanvasObject(20,20,40,40);
+        ig.setMovable(false);
+        this.addObject(ig);
         this.addObject(new AbsGraphCanvasObject(120,120,60,60));
         /*
         this.addEventFilter(MouseEvent.MOUSE_CLICKED, (final MouseEvent mouseEvent) -> {
@@ -65,6 +67,7 @@ public class GraphCanvas extends Canvas {
     
     
     private void mouseEventsInit(){
+        
         EventHandler<MouseEvent> objectDraggedHandler = 
                 new EventHandler<MouseEvent>() {
                     
@@ -78,7 +81,7 @@ public class GraphCanvas extends Canvas {
                         if(objectActive>=0){
                             double xshift = t.getX() - originalX;
                             double yshift = t.getY() - originalY;
-                            canvasObjects.get(objectActive).mouseDrag(originalX, originalY,
+                            canvasObjects.get(objectActive).mouseDragged(originalX, originalY,
                                     t.getX(),t.getY());
                             originalX = t.getX();
                             originalY = t.getY();

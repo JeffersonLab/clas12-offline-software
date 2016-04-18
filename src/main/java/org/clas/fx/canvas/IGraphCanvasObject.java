@@ -15,7 +15,9 @@ import javafx.scene.canvas.GraphicsContext;
 public interface IGraphCanvasObject {
     
     public Rectangle2D  bounds();
-    public void mouseClick(double x, double y, int button);
-    public void mouseDrag(double x1, double y1,double x2, double y2);
+    public void mousePressed(double x, double y, int button);
+    public void mouseDragged(double x1, double y1,double x2, double y2);
+    public void mouseReleased(double x, double y);
+    public void mouseZoom(double x1, double y1,double x2, double y2);
     public void draw(GraphicsContext gc);
 }

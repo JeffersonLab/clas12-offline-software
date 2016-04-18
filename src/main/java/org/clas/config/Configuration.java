@@ -17,14 +17,6 @@ import java.util.List;
 import java.util.Map;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonWriter;
 import org.clas.utils.CoatUtilsFile;
 import org.clas.utils.CoatUtilsJson;
 

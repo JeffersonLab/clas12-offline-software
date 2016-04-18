@@ -34,9 +34,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
+
 
 /**
  *
@@ -467,7 +465,7 @@ public class ConfigurationGroup {
         //group.add("property" , 25, 12, 45, 67,89);
         //group.add("fillcolor", 32);
         //Map<String,Object> model = new HashMap<String,Object>();
-        JsonObject model = Json.createObjectBuilder()
+       /* JsonObject model = Json.createObjectBuilder()
                 .add("firstName", "Duke")
                 .add("lastName", "Java")
                 .add("age", 18).add("ratio",3.2).build();
@@ -480,7 +478,7 @@ public class ConfigurationGroup {
         String jsonData = stWriter.toString();
         System.out.println(jsonData);
         
-        
+        */
         /*
         ConfigurationGroup group = new ConfigurationGroup("Canvas");
         group.addItem("FillColor", 1);
