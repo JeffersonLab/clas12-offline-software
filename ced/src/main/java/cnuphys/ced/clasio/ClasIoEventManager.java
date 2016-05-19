@@ -27,8 +27,6 @@ import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.GEMCMetaDataContainer;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.frame.Ced;
-import cnuphys.ced.geometry.DCGeometry;
-import cnuphys.ced.geometry.DCGeometry.DCGEOMMODE;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimMenu;
@@ -97,15 +95,6 @@ public class ClasIoEventManager {
 	private ClasIoEventManager() {
 		_evioSource = new EvioSource();
 		_gemcMetaData = new GEMCMetaDataContainer(this);
-	}
-
-	/**
-	 * Are we looking at GEMC data?
-	 * 
-	 * @return <code>trye</code> if we are looking at GEMC data.
-	 */
-	public boolean isGemcData() {
-		return (DCGeometry.getDCGeometryMode() == DCGEOMMODE.GEMC);
 	}
 
 	/**
@@ -621,16 +610,6 @@ public class ClasIoEventManager {
 
 		// GEMC Data
 		if (_gemcMetaData != null) {
-		}
-
-		// check for DCGeomMode change on event # 1 only
-		if (getEventNumber() == 1) {
-			String gcard = _gemcMetaData.getGCard();
-			DCGEOMMODE mode = (gcard == null) ? DCGEOMMODE.DATA
-					: DCGEOMMODE.GEMC;
-			System.err.println(
-					"Encountered Event number 1. DC Geometry Mode: " + mode);
-			DCGeometry.setDCGeometryMode(mode);
 		}
 
 		Ced.setEventNumberLabel(getEventNumber());

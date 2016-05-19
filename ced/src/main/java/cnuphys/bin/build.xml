@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="ced" default="export" basedir=".">
+	<!-- export -->
+	<target name="export">
+		<echo>${user.dir}</echo>
+		<property name="destdir" value="${user.home}/cedbuild"/>
+		<property name="cnudir" value="../../../.."/>
+		
+		<!-- for making classpath -->
+		<property name="coat" value="coatjava/lib/clas/coat-libs-2.0-SNAPSHOT.jar"/>
+		<property name="glue" value="JOGL/gluegen-rt.jar"/>
+		<property name="jogl" value="JOGL/jogl-all.jar"/>
+		<property name="f2j" value="numRec/lib/f2jutil.jar"/>
+		<property name="nr" value="numRec/lib/numRec.jar"/>
+		
+		<!-- deleted existing dir -->
+		<delete dir="${destdir}"/>
+		
+		<!-- copying  necessary stuff-->
+		<!-- copy coatjava from home dir-->
+		<copy todir="${destdir}">
+			<fileset includes="coatjava/etc/bankdefs/clas12/*.xml, coatjava/lib/clas/coat*.jar"  
+							dir="${cnudir}" />
+		</copy>
+		
+		<!-- copy data (field maps)-->
+		<copy todir="${destdir}">
+			<fileset includes="data/*" excludes="**/.project" dir="${cnudir}/ced" />
+		</copy>
+		
+		<!-- copy jogl from home dir-->
+		<copy todir="${destdir}">
+			<fileset includes="JOGL/**" excludes="**/*src.zip"
+							dir="${cnudir}" />
+		</copy>
+		
+
+		<!-- copy numrec -->
+		<copy todir="${destdir}">
+			<fileset includes="numRec/**" excludes="**/junit.jar **/bin/** **/src/** **/test/** **/*.txt **/*.xml"
+							dir="${cnudir}" />
+		</copy>
+		
+		<!-- the ced jar-->
+		<jar destfile="${destdir}/ced.jar">
+			<!-- ced -->
+			<fileset dir="cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- snr -->
+			<fileset dir="${cnudir}/snr/src/main/java/cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- swimmer -->
+			<fileset dir="${cnudir}/swimmer/src/main/java/cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- exp4j (use src, not bin-->
+			<fileset dir="${cnudir}/exp4j/src">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- magfield -->
+			<fileset dir="${cnudir}/magfield/src/main/java/cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- splot -->
+			<fileset dir="${cnudir}/splot/src/main/java/cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- bCNU3D -->
+			<fileset dir="${cnudir}/bCNU3D/src/main/java/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- bCNU -->
+			<fileset dir="${cnudir}/bCNU/src/main/java/cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			<!-- bCNU images and data -->
+			<fileset includes="images/*.*, data/*" dir="${cnudir}/bCNU/src/main/resources" />
+						
+			<!-- make it executable -->
+		    <manifest>
+		        <attribute name="Main-Class" value="cnuphys.ced.frame.Ced"/>
+		    	<attribute name="Class-Path" value="${coat} ${glue} ${jogl} ${f2j} ${nr}"/>
+		    </manifest>
+		</jar>
+		
+
+
+	</target>
+	
+</project>
+

@@ -1,19 +1,12 @@
 package cnuphys.ced.geometry;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.util.List;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JMenu;
-import javax.swing.JRadioButtonMenuItem;
 
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
 import org.jlab.geom.detector.dc.DCDetector;
-import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.dc.DCFactoryUpdated;
 import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
@@ -23,9 +16,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Triangle3D;
-
-import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.frame.Ced;
 
 public class DCGeometry {
 
@@ -48,29 +38,10 @@ public class DCGeometry {
 	 */
 	private static DriftChamberWire wires[][][];
 
-	// ugh. GEMC and data files expect different geometry
-	// Temporary hack
-	public static enum DCGEOMMODE {
-		GEMC, DATA
-	};
-
-	// temp hack for different brick wall pattern
-	private static DCGEOMMODE _dcGeomMode = DCGEOMMODE.GEMC;
-	private static JRadioButtonMenuItem _gemcMenuItem;
-	private static JRadioButtonMenuItem _dataMenuItem;
-
-	// menu selector for dc mode menu
-	private static JMenu _dcMenu;
-
 	/**
 	 * Initialize the DC Geometry by loading all the wires
 	 */
 	public static void initialize() {
-
-		System.out.println("\n=====================================");
-		System.out.println("====  DC Geometry Initialization for mode: "
-				+ _dcGeomMode + " ====");
-		System.out.println("=====================================");
 
 		if (dcDataProvider == null) {
 			dcDataProvider = DataBaseLoader.getDriftChamberConstants();
@@ -78,14 +49,8 @@ public class DCGeometry {
 
 		// arghh ugly hack until GEMC is modified
 
-		if (_dcGeomMode == DCGEOMMODE.GEMC) {
-			DCFactory dcFactory = new DCFactory();
-			dcDetector = dcFactory.createDetectorCLAS(dcDataProvider);
-		}
-		else {
-			DCFactoryUpdated dcFactory = new DCFactoryUpdated();
-			dcDetector = dcFactory.createDetectorCLAS(dcDataProvider);
-		}
+		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
+		dcDetector = dcFactory.createDetectorCLAS(dcDataProvider);
 
 		sector0 = dcDetector.getSector(0);
 
@@ -163,43 +128,7 @@ public class DCGeometry {
 
 	}
 
-	/**
-	 * Get the geometry mode. This should be a temp hack, right now the gemc
-	 * files and data files have different brick wall pattern
-	 * 
-	 * @return the geometry mode as a string.
-	 */
-	public static DCGEOMMODE getDCGeometryMode() {
-		return _dcGeomMode;
-	}
 
-	/**
-	 * Set the geometry mode. This should be a temp hack, right now the gemc
-	 * files and data files have different brick wall pattern
-	 * 
-	 * @param mode the new mode.
-	 */
-	public static void setDCGeometryMode(DCGEOMMODE mode) {
-		if (_dcGeomMode.equals(mode)) {
-			return; // do nothing
-		}
-
-		// switch modes
-		System.err.println("Switching Geometry mode to " + mode);
-		_dcGeomMode = mode;
-
-		if (mode == DCGEOMMODE.GEMC) {
-			_gemcMenuItem.setSelected(true);
-		}
-		if (mode == DCGEOMMODE.DATA) {
-			_dataMenuItem.setSelected(true);
-		}
-
-		// reinitialize DC Geometry
-		initialize();
-
-		Ced.refresh();
-	}
 
 	/**
 	 * Used by the 3D drawing
@@ -816,49 +745,6 @@ public class DCGeometry {
 
 	}
 
-	/**
-	 * The dc geometry mode menu to put on the main menu
-	 * 
-	 * @return the dc geometry menu
-	 */
-	public static JMenu getDCGeometryMenu() {
 
-		if (_dcMenu != null) {
-			return _dcMenu;
-		}
-
-		_dcMenu = new JMenu("DC Geometry Mode");
-		ButtonGroup bga = new ButtonGroup();
-
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.err.println("Changed geometry mode");
-
-				Ced.setEventNumberLabel(
-						ClasIoEventManager.getInstance().getEventNumber());
-				DCGEOMMODE newMode = (_gemcMenuItem.isSelected()
-						? DCGEOMMODE.GEMC : DCGEOMMODE.DATA);
-				setDCGeometryMode(newMode);
-			}
-
-		};
-
-		_gemcMenuItem = new JRadioButtonMenuItem("GEMC Mode",
-				_dcGeomMode == DCGEOMMODE.GEMC);
-		_dataMenuItem = new JRadioButtonMenuItem("Data Mode",
-				_dcGeomMode == DCGEOMMODE.DATA);
-
-		bga.add(_gemcMenuItem);
-		_gemcMenuItem.addActionListener(al);
-		_dcMenu.add(_gemcMenuItem);
-
-		bga.add(_dataMenuItem);
-		_dataMenuItem.addActionListener(al);
-		_dcMenu.add(_dataMenuItem);
-
-		return _dcMenu;
-	}
 
 }

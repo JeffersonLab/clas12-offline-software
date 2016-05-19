@@ -367,7 +367,7 @@ public final class Desktop extends JDesktopPane {
 					}
 				}
 			}
-		}
+		} //end for
 	}
 
 	/**

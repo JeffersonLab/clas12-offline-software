@@ -47,7 +47,6 @@ import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DefinitionManager;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
@@ -87,7 +86,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.95.11";
+	private static final String _release = "build 0.95.13";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -542,7 +541,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// create the options menu
 	private void addToOptionMenu(JMenu omenu) {
-		omenu.add(DCGeometry.getDCGeometryMenu());
 		omenu.add(MagnifyWindow.magificationMenu());
 		omenu.addSeparator();
 		
@@ -581,11 +579,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			return;
 		}
 		if (num < 0) {
-			_eventNumberLabel.setText("  Event Num:      is GEMC: false");
+			_eventNumberLabel.setText("  Event Num:      ");
 		}
 		else {
-			_eventNumberLabel.setText("  Event Num: " + num + "  is GEMC: "
-					+ ClasIoEventManager.getInstance().isGemcData());
+			_eventNumberLabel.setText("  Event Num: " + num);
 		}
 	}
 

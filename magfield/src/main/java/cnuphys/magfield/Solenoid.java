@@ -150,8 +150,7 @@ public class Solenoid extends MagneticField {
 		// System.out.println("Field: " + fieldStr);
 
 		// covert the new ascii to binary
-		File asciiFile = new File("data/clas12SolenoidFieldMap.dat");
-		// File asciiFile = new File("data/srr-solenoid_sebouh.dat");
+		File asciiFile = new File("../../../data/clas12SolenoidFieldMap.dat.txt");
 		if (!asciiFile.exists()) {
 			System.out.println("File not found: " + asciiFile.getPath());
 		}
@@ -165,7 +164,7 @@ public class Solenoid extends MagneticField {
 						fileReader);
 
 				// prepare the binary file
-				String binaryFileName = "data/solenoid-srr_V2.dat";
+				String binaryFileName = "../../../data/solenoid-srr.dat";
 				// String binaryFileName = "data/solenoid-srr_V3.dat";
 				int nPhi = 1;
 				int nRho = 601;
@@ -208,14 +207,15 @@ public class Solenoid extends MagneticField {
 				boolean reading = true;
 				while (reading) {
 					String s = nextNonComment(bufferedReader);
+					// System.out.println("s: [" + s + "]");
+
 					if (s != null) {
 						String tokens[] = tokens(s, " ");
 						dos.writeFloat(0f);
 						dos.writeFloat(10 * Float.parseFloat(tokens[2]));
 						dos.writeFloat(10 * Float.parseFloat(tokens[3]));
 						// System.out.println(s);
-					}
-					else {
+					} else {
 						reading = false;
 					}
 				}
