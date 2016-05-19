@@ -933,7 +933,7 @@ public class MagneticFields {
 			@Override
 			public void run() {
 				testFrame.setVisible(true);
-				bzTest();
+//				bzTest();
 			}
 		});
 

@@ -5,6 +5,7 @@ import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.DCGeometry;
+import cnuphys.ced.item.SectorSuperLayer;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -104,7 +105,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 							// doca: mm to cm
 							double doca = docas[i]/10;
 
-							if (showDOCA() && !Double.isNaN(doca) && (doca > .01)) {
+							if (showGemcDOCA() && !Double.isNaN(doca) && (doca > .01)) {
 								Support3D.drawTube(drawable, coords[0], coords[1],
 										coords[2], coords[3], coords[4], coords[5],
 										(float) doca, docaColor);
@@ -116,9 +117,48 @@ public class DCSuperLayer3D extends DetectorItem3D {
 				}
 			} //for
 
-		}
-		
-		
+		} //hitcount > 0
+		drawTBData(drawable);	
+	}
+	
+	private void drawTBData(GLAutoDrawable drawable) {
+		int hitCount = DC.timeBasedTrkgHitCount();
+
+		if (hitCount > 0) {
+			int sector[] = DC.timeBasedTrkgSector();
+			int superlayer[] = DC.timeBasedTrkgSuperlayer();
+			int layer[] = DC.timeBasedTrkgLayer();
+			int wire[] = DC.timeBasedTrkgWire();
+			double doca[] = DC.timeBasedTrkgDoca();
+			
+			for (int i = 0; i < hitCount; i++) {
+				try {
+					int sect1 = sector[i]; // 1 based
+					int supl1 = superlayer[i]; // 1 based
+
+					if ((sect1 == _sector) && (supl1 == _superLayer)) {
+						int lay1 = layer[i]; // 1 based
+						int wire1 = wire[i]; // 1 based
+						getWire(lay1, wire1, coords);
+
+						// drawDOCA(Graphics g, IContainer container, int layer,
+						// int wire, double doca2d, Color fillColor, Color
+						// lineColor) {
+
+						double tbdoca = doca[i];
+						if (showTBDOCA() && !Double.isNaN(tbdoca) && (tbdoca > .01)) {
+							Support3D.drawTube(drawable, coords[0], coords[1],
+									coords[2], coords[3], coords[4], coords[5],
+									(float) tbdoca, SectorSuperLayer.tbDocaLine);
+						}
+					}
+				} catch (NullPointerException e) {
+					System.err.println("null pointer in SectorSuperLayer time based hit drawing");
+					e.printStackTrace();
+				}
+			} // for loop
+
+		} //hit count > 0
 	}
 
 	/**
@@ -159,9 +199,14 @@ public class DCSuperLayer3D extends DetectorItem3D {
 		return showdc && showSector(_sector);
 	}
 
-	// show DOCAs?
-	private boolean showDOCA() {
-		return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_DOCA);
+	// show GEMC DOCAs?
+	private boolean showGemcDOCA() {
+		return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_GEMC_DOCA);
+	}
+
+	// show Time based DOCAs?
+	private boolean showTBDOCA() {
+		return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_TB_DOCA);
 	}
 
 }

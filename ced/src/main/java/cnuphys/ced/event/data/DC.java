@@ -69,6 +69,59 @@ public class DC {
 	}
 	
 	/**
+	 * Get the DOCAs from time based reconstruction
+	 * @return the DOCAs from reconstruction
+	 */
+	public static double[] timeBasedTrkgDoca() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBHits.doca");
+	}
+	
+	/**
+	 * Get the sectors of time based hits
+	 * 
+	 * @return the sectors of time based hits
+	 */
+	public static int[] timeBasedTrkgSector() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBHits.sector");
+	}
+
+	/**
+	 * Get the superlayer of time based hits
+	 * 
+	 * @return the super layers of time based hits
+	 */
+	public static int[] timeBasedTrkgSuperlayer() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBHits.superlayer");
+	}
+
+	/**
+	 * Get the layers of time based hits
+	 * 
+	 * @return the layers of time based hits
+	 */
+	public static int[] timeBasedTrkgLayer() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBHits.layer");
+	}
+
+	/**
+	 * Get the wires of time based hits
+	 * 
+	 * @return the wires of time based hits
+	 */
+	public static int[] timeBasedTrkgWire() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBHits.wire");
+	}
+	/**
+	 * Get the number of time based hits
+	 * 
+	 * @return the number of time based tracks
+	 */
+	public static int timeBasedTrkgHitCount() {
+		int sector[] = timeBasedTrkgSector();
+		return (sector == null) ? 0 : sector.length;
+	}
+	
+	/**
 	 * Get the doca array from the dgtz data
 	 * @return the doca array
 	 */
@@ -510,5 +563,4 @@ public class DC {
 		return (sector == null) ? 0 : sector.length;
 	}
 	
-
 }

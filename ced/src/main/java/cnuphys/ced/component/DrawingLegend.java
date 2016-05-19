@@ -21,6 +21,7 @@ import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.item.SectorSuperLayer;
 
 public class DrawingLegend extends JComponent {
 
@@ -103,6 +104,7 @@ public class DrawingLegend extends JComponent {
 	private void paintSectorViewLegend(Graphics g, int x, int yc) {
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
+		x = drawCircle(g, x, yc, SectorSuperLayer.tbDocaLine, "TB Doca");
 	}
 
 	private int drawCross(Graphics g, int x, int y, int mode) {
@@ -112,6 +114,13 @@ public class DrawingLegend extends JComponent {
 		String s = DataDrawSupport.prefix[mode] + "cross";
 		return quickString(g, x, y, s) + 16;
 	}
+	
+	private int drawCircle(Graphics g, int x, int y, Color color, String s) {
+		SymbolDraw.drawOval(g, x, y, DataDrawSupport.CROSSHALF, DataDrawSupport.CROSSHALF, color, Color.black);
+		x += (2*DataDrawSupport.CROSSHALF);
+		return quickString(g, x, y, s) + 16;
+	}
+
 
 	private int quickString(Graphics g, int x, int yc, String s) {
 		FontMetrics fm = getFontMetrics(labelFont);

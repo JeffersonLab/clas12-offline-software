@@ -6,7 +6,7 @@
           <column name="mpid"    num="2"  type="int32"   info="ID of the mother of the first particle entering the sensitive volume"/>
           <column name="tid"     num="3"  type="int32"   info="Track ID of the first particle entering the sensitive volume"/>
           <column name="mtid"    num="4"  type="int32"   info="Track ID of the mother of the first particle entering the sensitive volume"/>
-          <column name="otid"    num="5"  tpye="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
+          <column name="otid"    num="5"  type="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
           <column name="trackE"  num="6"  type="float64" info="Energy of the track"/>
           <column name="totEdep" num="7"  type="float64" info="Total Energy Deposited"/>
           <column name="avgX"    num="8"  type="float64" info="Average X position in global reference system"/>
@@ -45,7 +45,7 @@
           <column name="mpid"    num="2"  type="int32"   info="ID of the mother of the first particle entering the sensitive volume"/>
           <column name="tid"     num="3"  type="int32"   info="Track ID of the first particle entering the sensitive volume"/>
           <column name="mtid"    num="4"  type="int32"   info="Track ID of the mother of the first particle entering the sensitive volume"/>
-          <column name="otid"    num="5"  tpye="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
+          <column name="otid"    num="5"  type="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
           <column name="trackE"  num="6"  type="float64" info="Energy of the track"/>
           <column name="totEdep" num="7"  type="float64" info="Total Energy Deposited"/>
           <column name="avgX"    num="8"  type="float64" info="Average X position in global reference system"/>
@@ -84,7 +84,7 @@
           <column name="mpid"    num="2"  type="int32"   info="ID of the mother of the first particle entering the sensitive volume"/>
           <column name="tid"     num="3"  type="int32"   info="Track ID of the first particle entering the sensitive volume"/>
           <column name="mtid"    num="4"  type="int32"   info="Track ID of the mother of the first particle entering the sensitive volume"/>
-          <column name="otid"    num="5"  tpye="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
+          <column name="otid"    num="5"  type="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
           <column name="trackE"  num="6"  type="float64" info="Energy of the track"/>
           <column name="totEdep" num="7"  type="float64" info="Total Energy Deposited"/>
           <column name="avgX"    num="8"  type="float64" info="Average X position in global reference system"/>

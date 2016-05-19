@@ -78,6 +78,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Label for dc TB reconstructed crosses button */
 	private static final String DC_TB_CROSS_LABEL = "DC TB Crosses";
 
+	/** Label for dc TB reconstructed doca button */
+	private static final String DC_TB_DOCA_LABEL = "DC TB Doca";
+
 	/** Label for bst reconstructed crosses button */
 	private static final String RECONS_CROSS_LABEL = "BST/BMT Crosses";
 
@@ -89,6 +92,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether dc TB reconstructed crosses are displayed
 	private AbstractButton _dcTBCrossesButton;
+
+	// controls whether dc TB reconstructed doca are displayed
+	private AbstractButton _dcTBDocaButton;
 
 	// controls whether bst reconstructed crosses are displayed
 	private AbstractButton _reconsBSTCrossButton;
@@ -159,6 +165,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		//recons flags
 		boolean showDChbCrosses = true;
 		boolean showDCtbCrosses = true;
+		boolean showDCtbDoca = true;
 		boolean showBSTreconsCrosses = true;
 		boolean showFTOFreconsHits = true;
 
@@ -237,6 +244,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_dcTBCrossesButton = add(DC_TB_CROSS_LABEL, showDCtbCrosses, true,
 					this, _buttonColor).getCheckBox();
 		}
+		
+		// dc time based based reonstructed doca?
+		if (Bits.checkBit(bits, DisplayBits.DC_TB_RECONS_DOCA)) {
+			_dcTBDocaButton = add(DC_TB_DOCA_LABEL, showDCtbDoca, true,
+					this, _buttonColor).getCheckBox();
+		}
+
 
 		if (Bits.checkBit(bits, DisplayBits.BSTRECONS_CROSSES)) {
 			_reconsBSTCrossButton = add(RECONS_CROSS_LABEL,
@@ -377,6 +391,15 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 */
 	public boolean showDCtbCrosses() {
 		return (_dcTBCrossesButton != null) && _dcTBCrossesButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show the dc tb reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show dc tb reconstructed crosses.
+	 */
+	public boolean showDCtbDoca() {
+		return (_dcTBDocaButton != null) && _dcTBDocaButton.isSelected();
 	}
 
 	/**

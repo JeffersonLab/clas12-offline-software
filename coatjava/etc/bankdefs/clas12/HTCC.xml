@@ -31,7 +31,8 @@
 	    <column name="ring"    num = "2"   type = "int32"  info = "ring"/>
 	    <column name="half"    num = "3"   type = "int32"  info = "half of the sector"/>
 	    <column name="nphe"    num = "4"   type = "int32"  info = "number of photoelectrons"/>
-	    <column name="hitn"    num = "99"  type = "int32"  info = "number of photoelectrons"/>
+		<column name="time"    num = "5"   type = "float64"  info = "time of hit"/>
+	    <column name="hitn"    num = "99"  type = "int32"  info = "number of hits"/>
 	  </section>
 	</bank>
 	<bank name="HTCCRec" tag="610" info="HTCC Reconstructed Bank">

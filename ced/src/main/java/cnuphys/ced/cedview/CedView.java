@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -12,11 +13,14 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.Timer;
 
 import cnuphys.bCNU.component.InfoWindow;
 import cnuphys.bCNU.component.TranslucentWindow;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
+import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.UserToolBarComponent;
@@ -46,6 +50,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	public enum Mode {
 		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
 	};
+	
+	//next event button
+	protected JButton nextEvent;
 
 	// our mode
 	protected Mode _mode = Mode.SINGLE_EVENT;
@@ -147,6 +154,28 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		prepareForHovering();
 		
 		AccumulationManager.getInstance().addAccumulationListener(this);
+		
+		//add the next event button
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (ClasIoEventManager.getInstance().isNextOK()) {
+					ClasIoEventManager.getInstance().getNextEvent();
+				}
+				else {
+					Toolkit.getDefaultToolkit().beep();
+				}
+			}
+			
+		};
+		nextEvent = new JButton("Next");
+		nextEvent.setToolTipText("Next Event");
+		nextEvent.addActionListener(al);
+		GraphicsUtilities.setSizeMini(nextEvent);
+		getToolBar().add(Box.createHorizontalStrut(5), 0);
+		getToolBar().add(nextEvent, 0);
 	}
 
 	// called when heartbeat goes off.
@@ -375,6 +404,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		}
 		return _controlPanel.getDisplayArray().showDCtbCrosses();
 	}
+	
+	/**
+	 * Convenience method to see it we show the dc time-based reconstructed
+	 * doca.
+	 * 
+	 * @return <code>true</code> if we are to show the dc time-based
+	 *         reconstructed doca.
+	 */
+	public boolean showDCtbDoca() {
+		if ((_controlPanel == null)
+				|| (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCtbDoca();
+	}
+
 
 	/**
 	 * Convenience method to get the magnetic field display option.

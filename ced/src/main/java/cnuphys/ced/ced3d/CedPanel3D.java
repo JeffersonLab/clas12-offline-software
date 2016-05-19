@@ -28,7 +28,8 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_EC = "EC";
 	public static final String SHOW_PCAL = "PCAL";
 	public static final String SHOW_FTOF = "FTOF";
-	public static final String SHOW_DOCA = "DC DOCA";
+	public static final String SHOW_GEMC_DOCA = "GEMC DOCA";
+	public static final String SHOW_TB_DOCA = "TB DOCA";
 	public static final String SHOW_RECON_FTOF = "Rec-FTOF";
 	public static final String SHOW_RECON_CROSSES = "Crosses";
 	public static final String SHOW_COSMICS = "Cosmics";
@@ -110,7 +111,7 @@ public class CedPanel3D extends Panel3D {
 			AbstractButton ab = _checkBoxArray.getButton(s);
 			ab.setFont(Fonts.smallFont);
 
-			if (!SHOW_DOCA.equals(s)) {
+			if (!SHOW_GEMC_DOCA.equals(s)) {
 				ab.setSelected(true);
 			}
 			ab.addActionListener(al);

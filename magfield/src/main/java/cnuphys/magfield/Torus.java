@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.StringTokenizer;
 
+import org.omg.CORBA.Environment;
+
 /**
  * The Class Torus.
  *
@@ -160,24 +162,20 @@ public class Torus extends MagneticField {
 
 	public static void asciiToBinary() {
 
-		String asciiFileName = "/home/heddle/fieldmaps/clas12_torus_fieldmap.dat"; // small
-		// String asciiFileName = "/home/heddle/fieldmaps/sptorus_map.dat";
-		// //big
+//		String cwd = System.getProperty("user.dir");
+//		System.out.println("CWD: " + cwd);
+
+		String asciiFileName = "../../../data/clas12TorusOriginalMap.dat.txt"; 
 
 		File file = new File(asciiFileName);
 		long numMB = file.length() / 1000000;
 		System.out.println("Size of ascii file in MB: " + numMB);
 
-		String binaryFileName = "/home/heddle/fieldmaps/clas12_torus_fieldmap_binary.dat";
-		int nPhi = 61;
-		int nRho = 126;
-		int nZ = 126;
-		if (numMB > 100) {
-			binaryFileName = "/home/heddle/fieldmaps/clas12_torus_fieldmap_big_binary.dat";
-			nPhi = 121;
-			nRho = 251;
-			nZ = 251;
-		}
+		String binaryFileName = "../../../data/clas12TorusOriginalMap.binary.dat";
+		
+		int nPhi = 121;
+		int nRho = 251;
+		int nZ = 251;
 
 		// Opening of the file
 
@@ -221,26 +219,43 @@ public class Torus extends MagneticField {
 				dos.writeInt(0);
 
 				int nLine = 0;
+				boolean readheader = false;
 				while (true) {
 					String line = null;
+
 					try {
 						line = lnr.readLine();
 
+						if (!readheader) {
+							readheader = line.contains("</mfield>");
+							if (readheader) {
+								line = lnr.readLine();
+							}
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 
-					// detection of EOF
-					if (line == null) {
-						break;
+					if (readheader) {
+
+						// detection of EOF
+						if (line == null) {
+							break;
+						}
+
+						String tokens[] = tokens(line, " ");
+						try {
+							dos.writeFloat(Float.parseFloat(tokens[3]));
+							dos.writeFloat(Float.parseFloat(tokens[4]));
+							dos.writeFloat(Float.parseFloat(tokens[5]));
+						} catch (ArrayIndexOutOfBoundsException aeobe) {
+							System.err.println("line: " + line);
+							aeobe.printStackTrace();
+							System.exit(1);
+						}
+
+						nLine++;
 					}
-
-					String tokens[] = tokens(line, " ");
-					dos.writeFloat(Float.parseFloat(tokens[3]));
-					dos.writeFloat(Float.parseFloat(tokens[4]));
-					dos.writeFloat(Float.parseFloat(tokens[5]));
-
-					nLine++;
 				}
 
 				long elapsedTime = System.nanoTime() - startTime;

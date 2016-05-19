@@ -39,7 +39,6 @@ public class LundSupport {
 	 * private constructor for the singleton.
 	 */
 	private LundSupport() {
-		System.err.println("CONSTRUCTOR");
 		initialize();
 		// sort based on Id so we can use binary search
 		Collections.sort(_lundIds);
@@ -671,7 +670,7 @@ public class LundSupport {
 			return _lundIds.get(index);
 		} else {
 //			System.err.println("LundId not found for pid: " + id);
-			(new Throwable()).printStackTrace();
+//			(new Throwable()).printStackTrace();
 			return null;
 		}
 	}

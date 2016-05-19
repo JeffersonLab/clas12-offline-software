@@ -37,6 +37,10 @@ public class DisplayBits {
 
 	/** Cosmic tracks */
 	public static final int COSMICS = 020000;
+	
+	/** dc hit based reconstructed doca */
+	public static final int DC_TB_RECONS_DOCA = 040000;
+
 
 	// max octal for ints 20000000000
 
