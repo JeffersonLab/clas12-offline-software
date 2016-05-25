@@ -34,6 +34,7 @@ import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.ft.FTCalXYView;
 import cnuphys.ced.cedview.gemcview.GEMCView;
+import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.DisplaySectors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventMenu;
@@ -86,7 +87,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.95.13";
+	private static final String _release = "build 0.97.01";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -126,6 +127,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private BSTzView _bstZView;
 	private FTCalXYView _ftcalXyView;
 	private DCXYView _dcXyView;
+	private ProjectedDCView _projectedDCView;
 	private ECView _ecView;
 	private PCALView _pcalView;
 	private LogView _logView;
@@ -195,11 +197,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			// reaarange some views in virtual space
 			_virtualView.reconfigure();
 						
-			_virtualView.moveTo(dcHistoGrid, 12);
-			_virtualView.moveTo(ftofHistoGrid, 13);
-			_virtualView.moveTo(bstHistoGrid, 14);
-			_virtualView.moveTo(pcalHistoGrid, 15);
-			_virtualView.moveTo(ecHistoGrid, 16);
+			_virtualView.moveTo(dcHistoGrid, 13);
+			_virtualView.moveTo(ftofHistoGrid, 14);
+			_virtualView.moveTo(bstHistoGrid, 15);
+			_virtualView.moveTo(pcalHistoGrid, 16);
+			_virtualView.moveTo(ecHistoGrid, 17);
 			
 	    	_virtualView.moveTo(_allDCView, 3);
 			_virtualView.moveTo(_eventView, 6, VirtualView.BOTTOMRIGHT);
@@ -209,21 +211,22 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			// note no constraint means "center"
 			_virtualView.moveTo(_dcXyView, 7);
+			_virtualView.moveTo(_projectedDCView, 8);
 
 			_virtualView.moveTo(_pcalView, 4);
 			_virtualView.moveTo(_ecView, 5);
-			_virtualView.moveTo(_logView, 11, VirtualView.UPPERRIGHT);
+			_virtualView.moveTo(_logView, 12, VirtualView.UPPERRIGHT);
 			_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 			_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
-			_virtualView.moveTo(_plotView, 11, VirtualView.BOTTOMLEFT);
-			_virtualView.moveTo(_geoReportView, 17, VirtualView.CENTER);
+			_virtualView.moveTo(_plotView, 12, VirtualView.BOTTOMLEFT);
+			_virtualView.moveTo(_geoReportView, 18, VirtualView.CENTER);
 
 			_virtualView.moveTo(_ftcalXyView, 10, VirtualView.BOTTOMLEFT);
 
 			if (_use3D) {
-				_virtualView.moveTo(_forward3DView, 8, VirtualView.CENTER);
-				_virtualView.moveTo(_central3DView, 9, VirtualView.CENTER);
-				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
+				_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
+				_virtualView.moveTo(_central3DView, 10, VirtualView.CENTER);
+				_virtualView.moveTo(_ftCal3DView, 11, VirtualView.BOTTOMRIGHT);
 			}
 			Log.getInstance().config("reset views on virtual dekstop");
 		}
@@ -247,7 +250,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		AccumulationManager.getInstance();
 
 		// add a virtual view
-		_virtualView = VirtualView.createVirtualView(18);
+		_virtualView = VirtualView.createVirtualView(19);
 		ViewManager.getInstance().getViewMenu().addSeparator();
 
 		// add GEMC data view
@@ -283,6 +286,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			// add a DC XY View
 			_dcXyView = DCXYView.createDCXYView();
 
+			
+			// projected dC view
+			_projectedDCView = ProjectedDCView.createProjectedDCView();
+			
 			// add an ec view
 			_ecView = ECView.createECView();
 

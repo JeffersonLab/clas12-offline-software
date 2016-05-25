@@ -2,7 +2,7 @@ package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
 
-import org.jlab.geom.prim.Transformation3D;
+import org.jlab.geom.prim.Plane3D;
 
 import cnuphys.ced.event.data.FTOF;
 
@@ -24,84 +24,40 @@ public class FTOFPanel {
 	}
 
 	/**
-	 * Get the edge that connects P3 to P0
-	 * 
-	 * @param index
-	 *            zero-based paddle index
-	 * @param t3d
-	 *            the transformation to constant phi plane
-	 * @param wp
-	 *            should be able to hold two already instantiated points
-	 * @return <code>false</code> if there is no intersection
-	 */
-	public boolean getP0P3Edge(int index, Transformation3D t3d,
-			Point2D.Double wp[]) {
-
-		Point2D.Double p[] = FTOFGeometry.getIntersections(_panelType, index,
-				t3d);
-		if (p == null) {
-			return false;
-		}
-		wp[0] = p[0];
-		wp[1] = p[3];
-		return true;
-	}
-
-	/**
 	 * Obtain the shell for the paddle.
 	 * 
 	 * @index the zero based index of the paddle
-	 * @param t3d
-	 *            the transformation to constant phi plane
-	 * @return the shell for the paddle, or null if no intersection.
+	 * @param projectionPlane
+	 *            the projection plane
+	 * @param wp holds the shell for the paddle in 2D world coordinates
 	 */
-	public Point2D.Double[] getPaddle(int index, Transformation3D t3d) {
-		return FTOFGeometry.getIntersections(_panelType, index, t3d);
+	public void getPaddle(int index, Plane3D projectionPlane, Point2D.Double wp[]) {
+		FTOFGeometry.getIntersections(_panelType, index, projectionPlane, wp);
 	}
 
 	/**
 	 * Obtain the shell for the whole panel.
 	 * 
-	 * @param t3d
-	 *            the transformation to constant phi plane
+	 * @param projectionPlane
+	 *            the projection plane
 	 * @return the shell for the whole panel.
 	 */
-	public Point2D.Double[] getShell(Transformation3D t3d) {
-		Point2D.Double wp[] = new Point2D.Double[4];
-		for (int i = 0; i < 4; i++) {
-			wp[i] = new Point2D.Double();
-		}
+	public Point2D.Double[] getShell(Plane3D projectionPlane) {
+		Point2D.Double wp[] = GeometryManager.allocate(4);
 
 		int lastIndex = _numPaddle - 1;
 
-		// get last visible (intersecting) panel
-		Point2D.Double lastPP[] = null;
-		while ((lastPP == null) && (lastIndex >= 0)) {
-			lastPP = getPaddle(lastIndex, t3d);
-			if (lastPP == null) {
-				lastIndex--;
-			}
-		}
-		if (lastPP == null) {
-			return null;
-		}
-
-		// get the first visible (intersecting) paddle
-		// if we are here, we'll find one, even if it is
-		// the same as the last
-		Point2D.Double firstPP[] = null;
-		int firstIndex = 0;
-		while (firstPP == null) {
-			firstPP = getPaddle(firstIndex, t3d);
-			if (firstPP == null) {
-				firstIndex++;
-			}
-		}
-
-		wp[0] = lastPP[0];
-		wp[1] = firstPP[1];
-		wp[2] = firstPP[2];
-		wp[3] = lastPP[3];
+		// get first and last panel
+		Point2D.Double lastPP[] = GeometryManager.allocate(4);
+		Point2D.Double firstPP[] = GeometryManager.allocate(4);
+		
+		getPaddle(lastIndex, projectionPlane, lastPP);
+		getPaddle(0, projectionPlane, firstPP);
+		
+		wp[0] = lastPP[1];
+		wp[1] = firstPP[0];
+		wp[2] = firstPP[3];
+		wp[3] = lastPP[2];
 
 		return wp;
 	}

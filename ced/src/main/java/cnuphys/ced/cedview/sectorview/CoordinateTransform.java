@@ -32,7 +32,13 @@ public class CoordinateTransform {
 		wp.y = d;
 	}
 
-	public void worldToLab(double world[], Point2D.Double wp, double phi) {
+	/**
+	 * Convert world (sector) coordinates to lab coordinates
+	 * @param lab the lab (clas) coordinates
+	 * @param wp the world *sector) coordinates
+	 * @param phi the total phi rotation angle (deg)
+	 */
+	public void worldToLab(double lab[], Point2D.Double wp, double phi) {
 		double z = wp.x;
 		
 		double rho = Math.abs(wp.y);
@@ -41,9 +47,9 @@ public class CoordinateTransform {
 		double x = rho*Math.cos(phi);
 		double y = rho*Math.sin(phi);
 		
-		world[0] = x;
-		world[1] = y;
-		world[2] = z;
+		lab[0] = x;
+		lab[1] = y;
+		lab[2] = z;
 	}
 	
 	public int getSector(double x, double y) {

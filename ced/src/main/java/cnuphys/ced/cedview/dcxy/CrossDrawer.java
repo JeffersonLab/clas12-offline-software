@@ -23,7 +23,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 	public static final int HB = 0;
 	public static final int TB = 1;
 
-	private static final int ARROWLEN = 40; // pixels
+	private static final int ARROWLEN = 30; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
 
 	// feedback string color

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -44,6 +43,8 @@ public class SectorECItem extends PolygonItem {
 	private static final String _ecStripNames[] = { "U", "V", "W" };
 	private static final Color _ecFill[] = { new Color(220, 220, 220),
 			Color.white };
+	private static final Color _ecLine[] = { Color.gray,
+			Color.gray };
 
 	/**
 	 * Create a world polygon item
@@ -71,6 +72,7 @@ public class SectorECItem extends PolygonItem {
 				+ _sector;
 
 		_style.setFillColor(_ecFill[planeIndex]);
+		_style.setLineColor(_ecLine[planeIndex]);
 		_style.setLineWidth(0);
 		_view = (SectorView) getLayer().getContainer().getView();
 
@@ -128,7 +130,7 @@ public class SectorECItem extends PolygonItem {
 	 */
 	private Point2D.Double[] getStrip(int stripId) {
 		Point2D.Double wp[] = ECGeometry.getIntersections(_plane, _stripType,
-				stripId, _view.getTransformation3D(), true);
+				stripId, _view.getProjectionPlane(), true);
 
 		if (wp == null) {
 			return null;
@@ -250,7 +252,7 @@ public class SectorECItem extends PolygonItem {
 			int stripType, int sector) {
 
 		Point2D.Double wp[] = ECGeometry.getShell(planeIndex, stripType,
-				view.getTransformation3D());
+				view.getProjectionPlane());
 
 		if (wp == null) {
 			Log.getInstance().warning(

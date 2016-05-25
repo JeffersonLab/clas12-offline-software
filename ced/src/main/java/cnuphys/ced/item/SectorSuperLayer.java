@@ -2,37 +2,21 @@ package cnuphys.ced.item;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import org.jlab.geom.prim.Plane3D;
+
+import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.frame.SuperLayerDrawing;
 import cnuphys.ced.geometry.DCGeometry;
-import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.ced.noise.NoiseManager;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundStyle;
-import cnuphys.lund.LundSupport;
-import cnuphys.snr.NoiseReductionParameters;
-import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.style.LineStyle;
-import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.MathUtilities;
-import cnuphys.bCNU.util.X11Colors;
 
 /**
  * Used in SectorView views.
@@ -40,54 +24,22 @@ import cnuphys.bCNU.util.X11Colors;
  * @author heddle
  *
  */
-public class SectorSuperLayer extends PolygonItem {
+public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 
-	// pixel density thresholds. As we zoom in. the pixels/cm increases. At
-	// certain thresholds, other drawing kicks in
-	private static final double wireThreshold[] = { Double.NaN, 2.0, 2.0, 1.7, 1.7, 1.6, 1.6 };
-	private static final double closeupThreshold[] = { Double.NaN, 16.0, 16.0, 12.0, 12.0, 7.0, 7.0 };
-
-	// for gemc doca's
-	private static final Color _docaLine = Color.lightGray;
-	private static final Color _docaFill = new Color(255, 255, 255, 60);
-
-	// for gemc smeared doca's
-	private static final Color _sdocaLine = Color.gray;
-	private static final Color _sdocaFill = new Color(255, 128, 255, 60);
-
-	// track fit docas
-	public static final Color tbDocaLine = Color.green;
-	public static final Color tbDocaFill = new Color(255, 255, 120, 60);
-
-	// for hits cells
-	private static final Color defaultHitCellFill = Color.red;
-	private static final Color defaultHitCellLine = X11Colors.getX11Color("Dark Red");
-
-	private static final Color hexColor = new Color(223, 239, 239);
-
-	// pale color used to fill in layers
-	private static final Color _layerFillColors[] = { X11Colors.getX11Color("cornsilk"),
-			X11Colors.getX11Color("azure") };
-
-	// color for wires
-	private static final Color senseWireColor = X11Colors.getX11Color("Dodger Blue");
+	//base superlayer drawer
+	private SuperLayerDrawing _superlayerDrawer;
 
 	// convenient access to the event manager
-	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
+	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
-	// convenient access to the noise manager
-	NoiseManager _noiseManager = NoiseManager.getInstance();
 	// sector 1-based 1..6
 	private int _sector;
 
 	// superlayer 1-based 1..6
-	private int _superLayer;
+	private int _superlayer;
 
 	// cache the outline
-	private Point2D.Double[] _cachedWorldPolygon = GeometryManager.allocate(4);
-
-	// cache the layer polygons. They must be recomputed if the item is dirty.
-	private Polygon _layerPolygons[] = new Polygon[6];
+	private Point2D.Double[] _cachedWorldPolygon = GeometryManager.allocate(34);
 
 	// the view this item lives on.
 	private SectorView _view;
@@ -98,7 +50,7 @@ public class SectorSuperLayer extends PolygonItem {
 	 * method, which will send projected wire positions (with a border of guard
 	 * wires)
 	 * 
-	 * @param layer
+	 * @param logLayer
 	 *            the Layer this item is on.
 	 * @param view
 	 *            the view this item lives on.
@@ -107,11 +59,12 @@ public class SectorSuperLayer extends PolygonItem {
 	 * @param superLayer
 	 *            the 1-based superlayer [1..6]
 	 */
-	public SectorSuperLayer(LogicalLayer layer, SectorView view, int sector, int superLayer) {
-		super(layer);
+	public SectorSuperLayer(LogicalLayer logLayer, SectorView view, int sector, int superLayer) {
+		super(logLayer);
 		_view = view;
 		_sector = sector;
-		_superLayer = superLayer;
+		_superlayer = superLayer;
+		_superlayerDrawer = new SuperLayerDrawing(_view, this);
 	}
 
 	/**
@@ -129,618 +82,12 @@ public class SectorSuperLayer extends PolygonItem {
 			return;
 		}
 
-		Graphics2D g2 = (Graphics2D) g;
-
 		getStyle().setFillColor(Color.white);
 		super.drawItem(g, container); // draws shell
 
-		// are we really zoomed in?
-		boolean reallyClose = (WorldGraphicsUtilities
-				.getMeanPixelDensity(_view.getContainer()) > closeupThreshold[_superLayer]);
-
-		// draw layer outlines to guide the eye
-
-		Shape clip = g2.getClip();
-		g2.setClip(_lastDrawnPolygon);
-		for (int layer = 1; layer <= 6; layer++) {
-			Polygon poly = getLayerPolygon(container, layer);
-			g.setColor(_layerFillColors[layer % 2]);
-			g.fillPolygon(poly);
-			g.drawPolygon(poly);
-		}
-
-		// draw results of noise reduction? If so will need the parameters
-		// (which also have the results)
-		NoiseReductionParameters parameters = _noiseManager.getParameters(_sector - 1, _superLayer - 1);
-
-		// show the noise segment masks?
-		if (_view.showMasks()) {
-			drawMasks(g, container, parameters);
-		}
-
-		// if really zoomed in, draw cell outlines thicker
-		Stroke oldStroke = g2.getStroke();
-		if (reallyClose) {
-			g2.setStroke(GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID));
-		}
-
-		// draw the hits
-		drawHits(g, container);
-
-		g2.setStroke(oldStroke);
-
-		// draw wires?
-		if (reallyClose
-				|| (WorldGraphicsUtilities.getMeanPixelDensity(_view.getContainer()) > wireThreshold[_superLayer])) {
-			drawWires(g, container, reallyClose);
-		}
-
-		// draw outer boundary again.
-		g.setColor(_style.getLineColor());
-		g.drawPolygon(_lastDrawnPolygon);
-
-		g2.setClip(clip);
-
+		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon);
 	}
 
-	private void drawHits(Graphics g, IContainer container) {
-
-		if (_view.isSingleEventMode()) {
-			drawSingleModeHits(g, container);
-		} else {
-			drawAccumulatedHits(g, container);
-		}
-	}
-
-	private void drawSingleModeHits(Graphics g, IContainer container) {
-
-		int hitCount = DC.hitCount();
-
-		if (hitCount > 0) {
-			int sector[] = DC.sector();
-			int superlayer[] = DC.superlayer();
-			int layer[] = DC.layer();
-			int wire[] = DC.wire();
-			int pid[] = DC.pid();
-			double doca[] = DC.doca();
-			double sdoca[] = DC.sdoca();
-
-			for (int i = 0; i < hitCount; i++) {
-				try {
-					int sect1 = sector[i]; // 1 based
-					int supl1 = superlayer[i]; // 1 based
-
-					if ((sect1 == _sector) && (supl1 == _superLayer)) {
-						int lay1 = layer[i]; // 1 based
-						int wire1 = wire[i]; // 1 based
-
-						boolean noise = false;
-						if (_noiseManager.getNoise() != null) {
-							if (i < _noiseManager.getNoise().length) {
-								noise = _noiseManager.getNoise()[i];
-							} else {
-								String ws = " hit index = " + i + " noise length = " + _noiseManager.getNoise().length;
-								Log.getInstance().warning(ws);
-							}
-						}
-
-						int pdgid = (pid == null) ? -1 : pid[i];
-
-						drawDCHit(g, container, lay1, wire1, noise, pdgid, i, doca, sdoca);
-					}
-				} catch (NullPointerException e) {
-					System.err.println("null pointer in SectorSuperLayer hit drawing");
-					e.printStackTrace();
-				}
-			} // for loop
-
-		} //hitcount > 0
-		
-		//draw track based hits
-		drawTimeBaseHits(g, container);
-	}
-	
-	private void drawTimeBaseHits(Graphics g, IContainer container) {
-		int hitCount = DC.timeBasedTrkgHitCount();
-
-		if (hitCount > 0) {
-			int sector[] = DC.timeBasedTrkgSector();
-			int superlayer[] = DC.timeBasedTrkgSuperlayer();
-			int layer[] = DC.timeBasedTrkgLayer();
-			int wire[] = DC.timeBasedTrkgWire();
-			double doca[] = DC.timeBasedTrkgDoca();
-			
-			for (int i = 0; i < hitCount; i++) {
-				try {
-					int sect1 = sector[i]; // 1 based
-					int supl1 = superlayer[i]; // 1 based
-
-					if ((sect1 == _sector) && (supl1 == _superLayer)) {
-						int lay1 = layer[i]; // 1 based
-						int wire1 = wire[i]; // 1 based
-
-						// drawDOCA(Graphics g, IContainer container, int layer,
-						// int wire, double doca2d, Color fillColor, Color
-						// lineColor) {
-
-						// note conversion to mm
-						if (_view.showDCtbDoca()) {
-							drawDOCA(g, container, lay1, wire1, 10 * doca[i], tbDocaFill, tbDocaLine);
-						}
-					}
-				} catch (NullPointerException e) {
-					System.err.println("null pointer in SectorSuperLayer time based hit drawing");
-					e.printStackTrace();
-				}
-			} // for loop
-		} //hit count > 0
-	}
-
-	private void drawAccumulatedHits(Graphics g, IContainer container) {
-
-		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDgtzDcData();
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
-		if (maxHit < 1) {
-			return;
-		}
-
-		int sect0 = _sector - 1;
-		int supl0 = _superLayer - 1;
-
-		for (int lay0 = 0; lay0 < 6; lay0++) {
-			for (int wire0 = 0; wire0 < 112; wire0++) {
-
-				int hit = dcAccumulatedData[sect0][supl0][lay0][wire0];
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
-
-				Color color = AccumulationManager.getInstance().getColor(fract);
-
-				g.setColor(color);
-				Polygon hexagon = getHexagon(container, lay0 + 1, wire0 + 1);
-				if (hexagon != null) {
-					g.fillPolygon(hexagon);
-					g.drawPolygon(hexagon);
-				}
-
-			}
-		}
-
-	}
-
-	/**
-	 * Draw a single dc hit
-	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            1-based layer
-	 * @param wire
-	 *            1-based wire
-	 * @param noise
-	 *            is noise hit
-	 * @param pid
-	 *            gemc id
-	 * @param doca
-	 *            the distance of closest approach in mm
-	 */
-	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
-			int index, double doca[], double sdoca[]) {
-
-		// abort if hiding noise and this is noise
-		if (_view.hideNoise() && noise) {
-			return;
-		}
-
-		// get the hexagon
-		Polygon hexagon = getHexagon(container, layer, wire);
-		if (hexagon == null) {
-			return;
-		}
-
-		// are we to show mc (MonteCarlo simulation) truth?
-		boolean showTruth = _view.showMcTruth();
-
-		Color hitFill = defaultHitCellFill;
-		Color hitLine = defaultHitCellLine;
-
-		// do we have simulated "truth" data?
-		if (showTruth) {
-			LundId lid = LundSupport.getInstance().get(pid);
-			if (lid != null) {
-				LundStyle style = lid.getStyle();
-				if (style != null) {
-					hitFill = style.getFillColor();
-					hitLine = hitFill.darker();
-				}
-			}
-		} // end gemcData != null
-
-		if ((_view.showNoiseAnalysis()) && noise) {
-			highlightNoiseHit(g, container, !showTruth, hexagon);
-		} else {
-			g.setColor(hitFill);
-			g.fillPolygon(hexagon);
-			g.setColor(hitLine);
-			g.drawPolygon(hexagon);
-		}
-
-		// draw gems docas?
-		if (showTruth
-				&& (WorldGraphicsUtilities.getMeanPixelDensity(_view.getContainer()) > wireThreshold[_superLayer])) {
-			if ((doca != null) &&  (doca[index] > 1.0e-6)) {
-				drawDOCA(g, container, layer, wire, doca[index], _docaFill, _docaLine);
-			}
-			if ((sdoca != null) &&  (sdoca[index] > 1.0e-6)) {
-	//			drawDOCA(g, container, layer, wire, doca[index], _sdocaFill, _sdocaLine);
-			}
-		}
-
-	}
-
-	/**
-	 * Draw a distance of closest approach circle
-	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            the 1-based layer
-	 * @param wire
-	 *            the 1-based wire
-	 * @param doca2d
-	 *            the doca in mm
-	 */
-	private void drawDOCA(Graphics g, IContainer container, int layer, int wire, double doca2d, Color fillColor, Color lineColor) {
-
-		if (Double.isNaN(doca2d) || (doca2d < 1.0e-6)) {
-			return;
-		}
-
-		// draw gemc doca
-		// convert micron to cm
-		double radius = doca2d / 10.0; // converted mm to cm
-
-		if (radius > 5) {
-			String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _sector + " supl: " + _superLayer
-					+ "lay: " + layer + " wire: " + wire;
-
-			Log.getInstance().warning(wmsg);
-			System.err.println(wmsg);
-			return;
-		}
-
-		// center is the given wire projected locations
-
-		Point2D.Double center = wire(layer, wire);
-		Point2D.Double doca[] = _view.getCenteredWorldCircle(center, radius);
-
-		if (doca == null) {
-			return;
-		}
-
-		// Point2D.Double doca[] = _view.getCenteredWorldCircle(_sector - 1,
-		// _superLayer - 1, layer, wire, radius);
-		Polygon docaPoly = new Polygon();
-		Point dp = new Point();
-		for (int i = 0; i < doca.length; i++) {
-			container.worldToLocal(dp, doca[i]);
-			docaPoly.addPoint(dp.x, dp.y);
-		}
-		g.setColor(fillColor);
-		g.fillPolygon(docaPoly);
-		g.setColor(lineColor);
-		g.drawPolygon(docaPoly);
-	}
-
-	/**
-	 * Get the projected wire location
-	 * 
-	 * @param layer
-	 *            the 1-based layer 1..6
-	 * @param wire
-	 *            the 1-based wire 1..112
-	 * @return the point, which might have NaNs
-	 */
-	public Point2D.Double wire(int layer, int wire) {
-		// the indices to all DCGeometry calls are 1-based
-
-		Point2D.Double wp = null;
-		try {
-			wp = DCGeometry.getCenter(_superLayer, layer, wire, _view.getTransformation3D());
-
-			if ((wp != null) && isLowerSector()) {
-				wp.y = -wp.y;
-			}
-		} catch (Exception e) {
-			String s = "Problem  in wire() [SectorSuperLayer] layer = " + layer + "  wire = " + wire;
-			System.err.println(s);
-			e.printStackTrace(); // System.exit(1);
-		}
-		return wp;
-	}
-
-	/**
-	 * Highlight a noise hit
-	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param dchit
-	 *            the wire hit object
-	 * @param simple
-	 *            if <code>true</code> use simple highlighting
-	 */
-	private void highlightNoiseHit(Graphics g, IContainer container, boolean simple, Polygon hexagon) {
-
-		if (hexagon == null) {
-			return;
-		}
-
-		if (simple) {
-			g.setColor(Color.black);
-			g.fillPolygon(hexagon);
-			g.setColor(Color.black);
-			g.drawPolygon(hexagon);
-		} else {
-			g.setColor(Color.gray);
-			int x[] = hexagon.xpoints;
-			int y[] = hexagon.ypoints;
-
-			// from projection may not be 6 points!
-			if (hexagon.npoints > 5) {
-				g.drawLine(x[0], y[0], x[3], y[3]);
-				g.drawLine(x[1], y[1], x[4], y[4]);
-				g.drawLine(x[2], y[2], x[5], y[5]);
-			}
-
-			g.setColor(Color.black);
-			g.drawPolygon(hexagon);
-		}
-	}
-
-	/**
-	 * Draw the wires.
-	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param reallyClose
-	 *            if <code>true</code> we are really close
-	 */
-	private void drawWires(Graphics g, IContainer container, boolean reallyClose) {
-		Point pp = new Point(); // workspace
-		for (int layer = 1; layer <= 6; layer++) {
-			for (int wire = 1; wire <= 112; wire++) {
-				// note: no conversion to 0-based because the wire array has
-				// a "border" of guard wires!
-
-				g.setColor(senseWireColor);
-				Point2D.Double wp = wire(layer, wire);
-
-				if (wp != null) {
-					container.worldToLocal(pp, wp);
-					if (reallyClose) {
-						g.fillRect(pp.x - 1, pp.y - 1, 2, 2);
-						Polygon hexagon = getHexagon(container, layer, wire);
-						if (hexagon == null) {
-							return;
-						} else {
-							g.setColor(hexColor);
-							g.drawPolygon(hexagon);
-						}
-					} else {
-						g.fillRect(pp.x, pp.y, 1, 1);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Draw the masks showing the effect of the noise finding algorithm
-	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param parameters
-	 *            the noise algorithm parameters
-	 */
-	private void drawMasks(Graphics g, IContainer container, NoiseReductionParameters parameters) {
-		for (int wire = 0; wire < parameters.getNumWire(); wire++) {
-			boolean leftSeg = parameters.getLeftSegments().checkBit(wire);
-			boolean rightSeg = parameters.getRightSegments().checkBit(wire);
-			if (leftSeg || rightSeg) {
-				if (leftSeg) {
-					drawMask(g, container, wire, parameters.getLeftLayerShifts(), 1);
-				}
-				if (rightSeg) {
-					drawMask(g, container, wire, parameters.getRightLayerShifts(), -1);
-				}
-
-			}
-		}
-	}
-
-	/**
-	 * Draws the masking that shows where the noise algorithm thinks there are
-	 * segments. Anything not masked is noise.
-	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the rendering container
-	 * @param wire
-	 *            the ZERO BASED wire 0..
-	 * @param shifts
-	 *            the parameter shifts for this direction
-	 * @param sign
-	 *            the direction 1 for left -1 for right * @param wr essentially
-	 *            workspace
-	 */
-	private void drawMask(Graphics g, IContainer container, int wire, int shifts[], int sign) {
-
-		wire++; // convert to 1-based
-
-		if (sign == 1) {
-			g.setColor(NoiseManager.maskFillLeft);
-		} else {
-			g.setColor(NoiseManager.maskFillRight);
-		}
-
-		for (int layer = 1; layer <= GeoConstants.NUM_LAYER; layer++) {
-
-			Polygon hexagon = getHexagon(container, layer, wire);
-
-			if (hexagon != null) {
-				g.fillPolygon(hexagon);
-				g.drawPolygon(hexagon);
-			}
-
-			// ugh -- shifts are 0-based
-			for (int shift = 1; shift <= shifts[layer - 1]; shift++) {
-				int tempWire = wire + sign * shift;
-				if ((tempWire > 0) && (tempWire <= GeoConstants.NUM_WIRE)) {
-					hexagon = getHexagon(container, layer, tempWire);
-					if (hexagon != null) {
-						g.fillPolygon(hexagon);
-						g.drawPolygon(hexagon);
-					}
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * Obtain a crude outline of a sense wire layer
-	 * 
-	 * @param container
-	 *            the container being rendered
-	 * @param layer
-	 *            the layer in question--a 1-based sensewire layer [1..6]
-	 * @return a layer outline
-	 */
-	private Polygon getLayerPolygon(IContainer container, int layer) {
-
-		if (_dirty) {
-			Point2D.Double corners[] = GeometryManager.allocate(5);
-
-			// all indices in DCGeometry calls are 1-based
-			DCGeometry.getLayerPolygon(_superLayer, layer, _view.getTransformation3D(), corners);
-
-			if (isLowerSector()) {
-				flipPolyToLowerSector(corners);
-			}
-
-			Polygon poly = new Polygon();
-			Point pp = new Point();
-
-			for (Point2D.Double wp : corners) {
-				container.worldToLocal(pp, wp);
-				poly.addPoint(pp.x, pp.y);
-			}
-
-			_layerPolygons[layer - 1] = poly;
-		}
-
-		return _layerPolygons[layer - 1];
-	}
-
-	/**
-	 * Gets the layer from the screen point. This only gives sensible results if
-	 * the world point has already passed the "inside" test.
-	 * 
-	 * @param pp
-	 *            the screen point in question.
-	 * @return the layer containing the given world point. It returns [1..6] or
-	 *         -1 on failure
-	 */
-	private int getLayer(IContainer container, Point pp) {
-
-		// first see if we are in the super layer
-		if (contains(container, pp)) {
-
-			// now check the layers
-			for (int layer = 1; layer <= 6; layer++) {
-				Polygon poly = _layerPolygons[layer - 1];
-				if ((poly != null) && poly.contains(pp)) {
-					return layer;
-				}
-			}
-		} else {
-			System.err.println("not in superlayer!");
-		}
-		return -1;
-	}
-
-	/**
-	 * Gets the layer from the screen point. This only gives sensible results if
-	 * the world point has already passed the "inside" test.
-	 * 
-	 * @param wp
-	 *            the world point in question.
-	 * @return the layer containing the given world point. It returns [1..6] or
-	 *         -1 on failure
-	 */
-	// private int getLayer(Point pp) {
-	// Point2D.Double corners[] = GeometryManager.allocate(5);
-	//
-	// // first see if we are in the super layer
-	// corners = getWorldPolygon();
-	// if (WorldGraphicsUtilities.contains(corners, wp)) {
-	//
-	// // now check the layers
-	// for (int layer = 1; layer <= 6; layer++) {
-	// // all indices in DCGeometry calls are 1-based
-	// DCGeometry.getLayerPolygon(_superLayer, layer,
-	// _view.getTransformation3D(), corners);
-	//
-	// if (isLowerSector()) {
-	// flipPolyToLowerSector(corners);
-	// }
-	//
-	// if (WorldGraphicsUtilities.contains(corners, wp)) {
-	// return layer;
-	// }
-	// }
-	// }
-	// return -1;
-	// }
-
-	/**
-	 * Gets the wire from the world point. This only gives sensible results if
-	 * the world point has already passed the "inside" test and we used getLayer
-	 * on the same point to get the layer.
-	 * 
-	 * @param layer
-	 *            the one based layer [1..6]
-	 * @param wp
-	 *            the world point in question.
-	 * @return the closest wire index on the given layer in range [1..112].
-	 */
-	private int getWire(int layer, Point2D.Double wp) {
-		Point2D.Double ends[] = GeometryManager.allocate(2);
-		DCGeometry.getLayerExtendedPoints(_superLayer, layer, _view.getTransformation3D(), ends);
-
-		if (isLowerSector()) {
-			flipPolyToLowerSector(ends);
-		}
-
-		double fract = MathUtilities.perpendicularIntersection(ends[0], ends[1], wp);
-		int wire = (int) Math.round(fract * (GeoConstants.NUM_WIRE + 1));
-		return Math.max(1, Math.min(112, wire));
-	}
 
 	/**
 	 * Add any appropriate feedback strings for the headsup display or feedback
@@ -758,54 +105,7 @@ public class SectorSuperLayer extends PolygonItem {
 	@Override
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {
-		if (contains(container, screenPoint)) {
-
-			NoiseReductionParameters parameters = _noiseManager.getParameters(_sector - 1, _superLayer - 1);
-
-			feedbackStrings.add(DataSupport.prelimColor + "Raw Occupancy "
-					+ DoubleFormat.doubleFormat(100.0 * parameters.getRawOccupancy(), 2) + "%");
-			feedbackStrings.add(DataSupport.prelimColor + "Reduced Occupancy "
-					+ DoubleFormat.doubleFormat(100.0 * parameters.getNoiseReducedOccupancy(), 2) + "%");
-
-			// getLayer returns a 1 based index (-1 on failure)
-			int layer = getLayer(container, screenPoint);
-
-			if (layer > 0) {
-				int wire = getWire(layer, worldPoint);
-				if ((wire > 0) && (wire <= GeoConstants.NUM_WIRE)) {
-
-					int hitIndex = DC.hitIndex(_sector, _superLayer, layer, wire);
-					if (hitIndex < 0) {
-						feedbackStrings.add("superlayer " + _superLayer + "  layer " + layer + "  wire " + wire);
-					} else {
-						DC.noiseFeedback(hitIndex, feedbackStrings);
-						DC.trueFeedback(hitIndex, feedbackStrings);
-						DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
-						DC.dgtzFeedback(hitIndex, feedbackStrings);
-					}
-
-				} // good wire
-			} // good layer
-
-			addReconstructedFeedback(feedbackStrings);
-		}
-	}
-
-	// add time based recons fb
-	private void addReconstructedFeedback(List<String> feedbackStrings) {
-
-		double p[] = DC.timeBasedTrackP();
-		if (p != null) {
-			int reconTrackCount = p.length;
-			if (reconTrackCount > 0) {
-				feedbackStrings.add(DataSupport.reconColor + "TB #reconstructed tracks " + reconTrackCount);
-				for (int i = 0; i < reconTrackCount; i++) {
-
-					feedbackStrings.add(DataSupport.reconColor + "TB trk# " + (i + 1) + " recon p "
-							+ DoubleFormat.doubleFormat(p[i], 5) + " Gev/c");
-				}
-			}
-		} // p != null
+		_superlayerDrawer.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
 	}
 
 	/**
@@ -823,65 +123,57 @@ public class SectorSuperLayer extends PolygonItem {
 	private Point2D.Double[] getWorldPolygon() {
 
 		if (_dirty) {
-			DCGeometry.getSuperLayerPolygon(_superLayer, _view.getTransformation3D(), _cachedWorldPolygon);
+			DCGeometry.getSuperLayerPolygon(_superlayer, projectionPlane(), _cachedWorldPolygon);
 			if (isLowerSector()) {
-				flipPolyToLowerSector(_cachedWorldPolygon);
+				SuperLayerDrawing.flipPolyToLowerSector(_cachedWorldPolygon);
 			}
 		} // end dirty
 		return _cachedWorldPolygon;
 	}
 
-	// flip a poly created for the upper sector to the lower sector
-	private void flipPolyToLowerSector(Point2D.Double wpoly[]) {
-		for (Point2D.Double wp : wpoly) {
-			wp.y = -wp.y;
-		}
-	}
 
 	/**
-	 * Gets the cell hexagon as a screen polygon.
-	 * 
-	 * @param container
-	 *            the container being rendered.
-	 * @param layer
-	 *            the 1-based layer 1--6
-	 * @param wire
-	 *            the one based wire 1..GeoConstants.NUM_WIRE
-	 * @return the cell hexagon
+	 * Get the plane perpendicular to the wires
+	 * @return the plane perpendicular to the wires
 	 */
-	public Polygon getHexagon(IContainer container, int layer, int wire) {
-
-		Point2D.Double wpoly[] = GeometryManager.allocate(6);
-		// note all indices in calls to DCGeometry are 1-based
-		int size = DCGeometry.worldPolygon(_superLayer, layer, wire, _view.getTransformation3D(), wpoly, null);
-
-		if (isLowerSector()) {
-			flipPolyToLowerSector(wpoly);
-		}
-
-		if (size < 3) {
-			return null;
-		}
-
-		Point pp = new Point();
-		Polygon poly = new Polygon();
-
-		for (int i = 0; i < size; i++) {
-			Point2D.Double wp = wpoly[i];
-			container.worldToLocal(pp, wp);
-			poly.addPoint(pp.x, pp.y);
-		}
-
-		return poly;
+	@Override
+	public Plane3D projectionPlane() {
+		return _view.getProjectionPlane();
 	}
-
 	/**
 	 * Test whether this is a lower sector
 	 * 
 	 * @return <code>true</code> if this is a lower sector
 	 */
+	@Override
 	public boolean isLowerSector() {
 		return (_sector > 3);
+	}
+	/**
+	 * Get the 1-based sector
+	 * @return the 1-based sector
+	 */
+	@Override
+	public int sector() {
+		return _sector;
+	}
+	
+	/**
+	 * Get the one based superlayer
+	 * @return the one based superlayyer
+	 */
+	@Override
+	public int superlayer() {
+		return _superlayer;
+	}
+	
+	/**
+	 * return the underlying polygon item
+	 * @return the underlying polygon item
+	 */
+	@Override
+	public PolygonItem item() {
+		return this;
 	}
 
 }

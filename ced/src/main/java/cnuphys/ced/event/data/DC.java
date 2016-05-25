@@ -69,6 +69,68 @@ public class DC {
 	}
 	
 	/**
+	 * Get the sectors of time based segments
+	 * 
+	 * @return the sectors of time based segments
+	 */
+	public static int[] timeBasedSegmentSector() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBSegments.sector");
+	}
+
+	/**
+	 * Get the superlayers of time based segments
+	 * 
+	 * @return the superlayers of time based segments
+	 */
+	public static int[] timeBasedSegmentSuperlayer() {
+		return ColumnData.getIntArray("TimeBasedTrkg::TBSegments.superlayer");
+	}
+	
+	/**
+	 * Get the start x coordinates in the midplane in sector system
+	 * @return the start x coordinates
+	 */
+	public static double[] timeBasedSegment1X() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint1X");
+	}
+
+	/**
+	 * Get the start z coordinates in the midplane in sector system
+	 * @return the start z coordinates
+	 */
+	public static double[] timeBasedSegment1Z() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint1Z");
+	}
+	
+	
+	/**
+	 * Get the end x coordinates in the midplane in sector system
+	 * @return the end x coordinates
+	 */
+	public static double[] timeBasedSegment2X() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint2X");
+	}
+
+	/**
+	 * Get the end z coordinates in the midplane in sector system
+	 * @return the end z coordinates
+	 */
+	public static double[] timeBasedSegment2Z() {
+		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint2Z");
+	}
+
+	
+	/**
+	 * Get the number of time based segments
+	 * 
+	 * @return the number of time based segments
+	 */
+	public static int timeBasedSegmentCount() {
+		int sector[] = timeBasedSegmentSector();
+		return (sector == null) ? 0 : sector.length;
+	}
+
+	/**
 	 * Get the DOCAs from time based reconstruction
 	 * @return the DOCAs from reconstruction
 	 */
@@ -111,6 +173,8 @@ public class DC {
 	public static int[] timeBasedTrkgWire() {
 		return ColumnData.getIntArray("TimeBasedTrkg::TBHits.wire");
 	}
+	
+	
 	/**
 	 * Get the number of time based hits
 	 * 

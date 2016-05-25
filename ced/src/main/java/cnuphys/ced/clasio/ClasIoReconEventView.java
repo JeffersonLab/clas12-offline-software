@@ -49,21 +49,38 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			int numTracks = (pid == null) ? 0 : pid.length;
 
 			if (numTracks > 0) {
+				float vx[] = ColumnData
+						.getFloatArray("EVENTHB::particle.vx");
+				float vy[] = ColumnData
+						.getFloatArray("EVENTHB::particle.vy");
+				float vz[] = ColumnData
+						.getFloatArray("EVENTHB::particle.vz");
+				float px[] = ColumnData
+						.getFloatArray("EVENTHB::particle.px");
+				float py[] = ColumnData
+						.getFloatArray("EVENTHB::particle.py");
+				float pz[] = ColumnData
+						.getFloatArray("EVENTHB::particle.pz");
+				int charge[] = ColumnData
+						.getIntArray("EVENTHB::particle.charge");
+
 				for (int i = 0; i < numTracks; i++) {
 
-					double vx[] = ColumnData
-							.getDoubleArray("EVENTHB::particle.vx");
-					double vy[] = ColumnData
-							.getDoubleArray("EVENTHB::particle.vy");
-					double vz[] = ColumnData
-							.getDoubleArray("EVENTHB::particle.vz");
-					double px[] = ColumnData
-							.getDoubleArray("EVENTHB::particle.px");
-					double py[] = ColumnData
-							.getDoubleArray("EVENTHB::particle.py");
-					double pz[] = ColumnData
-							.getDoubleArray("EVENTHB::particle.pz");
-					LundId lid = LundSupport.getInstance().get(pid[i]);
+					// hack for 0 pid
+					int thePid = pid[i];
+					if (thePid == 0) {
+						int q = charge[i];
+						if (q == -1) {
+							thePid = 11;
+						}
+						else if (q == 1)  {
+							thePid = 0; //Geantino+
+						}
+						else {
+							thePid = 22;  //photon
+						}
+					}
+					LundId lid = LundSupport.getInstance().get(thePid);
 
 					if (lid != null) {
 						double xo = vx[i]; // cm

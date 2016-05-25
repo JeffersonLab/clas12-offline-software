@@ -57,7 +57,7 @@
             <column name="X" num="10" type="float64" info="wire x-coordinate  in tilted-sector"/>
             <column name="Z" num="11" type="float64" info="wire z-coordinate  in tilted-sector"/>
             <column name="clusterID" num="12" type="int32" info="associated cluster ID"/>
-	    <column name="doca" num="13" type="float64" info="doca (cm)"/>
+            <column name="doca" num="13" type="float64" info="doca (cm)"/>
             <column name="docaError" num="14" type="float64" info="docaError (cm)"/>
         </section>
         
@@ -109,7 +109,11 @@
             <column name="fitSlopeErr" num="20" type="float64" info="error on slope"/>
             <column name="fitInterc" num="21" type="float64" info="line fit intercept"/>
             <column name="fitIntercErr" num="22" type="float64" info="error on the intercept"/>
-	    <column name="size" num="23" type="int32" info="size"/>
+            <column name="SegEndPoint1X" num="24" type="float64" info="Segment 1st endpoint x coordinate in the sector coordinate system (for ced display)"/>
+            <column name="SegEndPoint1Z" num="25" type="float64" info="Segment 1st endpoint z coordinate in the sector coordinate system (for ced display)"/>
+            <column name="SegEndPoint2X" num="26" type="float64" info="Segment 2nd endpoint x coordinate in the sector coordinate system (for ced display)"/>
+            <column name="SegEndPoint2Z" num="27" type="float64" info="Segment 2nd endpoint z coordinate in the sector coordinate system (for ced display)"/>
+            <column name="size" num="23" type="int32" info="size"/>
         </section>
         
         <section name="HBSegmentTrajectory" tag="1317" info="Segment Trajectory">
@@ -238,6 +242,10 @@
             <column name="fitSlopeErr" num="20" type="float64" info="error on slope"/>
             <column name="fitInterc" num="21" type="float64" info="line fit intercept"/>
             <column name="fitIntercErr" num="22" type="float64" info="error on the intercept"/>
+            <column name="SegEndPoint1X" num="24" type="float64" info="Segment 1st endpoint x coordinate in the sector coordinate system (for ced display)"/>
+            <column name="SegEndPoint1Z" num="25" type="float64" info="Segment 1st endpoint z coordinate in the sector coordinate system (for ced display)"/>
+            <column name="SegEndPoint2X" num="26" type="float64" info="Segment 2nd endpoint x coordinate in the sector coordinate system (for ced display)"/>
+            <column name="SegEndPoint2Z" num="27" type="float64" info="Segment 2nd endpoint z coordinate in the sector coordinate system (for ced display)"/>
 	    <column name="size" num="23" type="int32" info="size"/>
         </section>
         

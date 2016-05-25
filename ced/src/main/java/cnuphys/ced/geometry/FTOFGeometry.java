@@ -1,8 +1,6 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.List;
-
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
@@ -10,9 +8,8 @@ import org.jlab.geom.detector.ftof.FTOFDetector;
 import org.jlab.geom.detector.ftof.FTOFFactory;
 import org.jlab.geom.detector.ftof.FTOFLayer;
 import org.jlab.geom.detector.ftof.FTOFSector;
-import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Transformation3D;
 
 public class FTOFGeometry {
 
@@ -122,36 +119,16 @@ public class FTOFGeometry {
 	 *            0, 1 or 2 for 1A, 1B, 2
 	 * @param paddleid
 	 *            the 0-based paddle id
-	 * @param transform3D
-	 *            the transformation to the constant phi
+	 * @param projectionPlane
+	 *            the projection plane
 	 * @return the intersection points (z component will be 0).
 	 */
-	public static Point2D.Double[] getIntersections(int superlayer,
-			int paddleid, Transformation3D transform3D) {
+	public static void getIntersections(int superlayer,
+			int paddleid, Plane3D projectionPlane, Point2D.Double wp[]) {
 		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(
 				0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleid);
-
-		List<Line3D> lines = paddle.getVolumeCrossSection(transform3D);
-		// perhaps no intersection
-
-		if ((lines == null) || (lines.size() < 4)) {
-			return null;
-		}
-
-		Point3D[] pnts = new Point3D[4];
-		for (int i = 0; i < 4; i++) {
-			pnts[i] = lines.get(i).end();
-		}
-
-		// note reordering
-		Point2D.Double p2d[] = new Point2D.Double[4];
-
-		p2d[0] = new Point2D.Double(pnts[2].x(), pnts[2].y());
-		p2d[1] = new Point2D.Double(pnts[3].x(), pnts[3].y());
-		p2d[2] = new Point2D.Double(pnts[0].x(), pnts[0].y());
-		p2d[3] = new Point2D.Double(pnts[1].x(), pnts[1].y());
-		return p2d;
+		GeometryManager.getProjectedPolygon(paddle, projectionPlane, 6, 4, wp, null);
 	}
 
 	public static void main(String arg[]) {
@@ -159,6 +136,7 @@ public class FTOFGeometry {
 
 		int superLayer = PANEL_1B;
 		int paddleId = 20;
+		
 		ScintillatorPaddle paddle = getPaddle(superLayer, paddleId);
 
 		System.err.println("Num vertex points: " + paddle.getNumVolumePoints());

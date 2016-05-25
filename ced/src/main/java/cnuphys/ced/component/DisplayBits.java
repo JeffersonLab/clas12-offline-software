@@ -41,6 +41,8 @@ public class DisplayBits {
 	/** dc hit based reconstructed doca */
 	public static final int DC_TB_RECONS_DOCA = 040000;
 
+	/** dc hit based reconstructed doca */
+	public static final int DC_TB_RECONS_SEGMENTS = 0100000;
 
 	// max octal for ints 20000000000
 

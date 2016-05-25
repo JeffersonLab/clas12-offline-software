@@ -2,7 +2,6 @@ package cnuphys.ced.cedview.allec;
 
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.util.List;
 

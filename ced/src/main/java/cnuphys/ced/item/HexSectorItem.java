@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
@@ -17,6 +16,7 @@ import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.geometry.GeometryManager;
 
 public abstract class HexSectorItem extends PolygonItem {
 
@@ -161,11 +161,7 @@ public abstract class HexSectorItem extends PolygonItem {
 	// the use of xmax from the views world system makes the
 	// world system the same as the lab 2D (xy) system!
 	private static Point2D.Double[] getPoints(double xmax, int sector) {
-		Point2D.Double[] points = new Point2D.Double[4];
-
-		for (int i = 0; i < 4; i++) {
-			points[i] = new Point2D.Double();
-		}
+		Point2D.Double[] points = GeometryManager.allocate(4);
 
 		points[0].setLocation(xmax, -xmax * TAN30);
 		points[1].setLocation(xmax, xmax * TAN30);

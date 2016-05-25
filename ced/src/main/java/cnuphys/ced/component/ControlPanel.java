@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import javax.swing.Box;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
@@ -122,6 +123,8 @@ public class ControlPanel extends JPanel {
 
 		_nc = nc;
 		_hgap = hgap;
+		
+		setLayout(new BorderLayout(0, 2));
 
 		Box box = Box.createVerticalBox();
 		box.add(addTabbedPane(view, controlPanelBits, displayArrayBits));
@@ -134,8 +137,16 @@ public class ControlPanel extends JPanel {
 			box.add(Box.createVerticalGlue());
 		}
 
-		add(box);
+		add(box, BorderLayout.CENTER);
 
+	}
+	
+	/**
+	 * Add a component to the north, above the tabbed pane.
+	 * @param component the added component
+	 */
+	public void addNorth(JComponent component) {
+		add(component, BorderLayout.NORTH);
 	}
 
 	// use a tabbed pane to save space
@@ -183,22 +194,21 @@ public class ControlPanel extends JPanel {
 
 		// every thing else on a "general" panel
 		JPanel basic = new JPanel();
-		Box box = Box.createVerticalBox();
+		basic.setLayout(new BorderLayout(2, 2));
+	//	Box box = Box.createVerticalBox();
 
+		
 		// target phi slider
 		if (Bits.checkBit(controlPanelBits, PHISLIDER)) {
 			boolean isBig = Bits.checkBit(controlPanelBits, PHI_SLIDER_BIG);
-			box.add(createPhiSlider(isBig));
+			basic.add(createPhiSlider(isBig), BorderLayout.NORTH);
 		}
 
 		// drawing legend
 		if (Bits.checkBit(controlPanelBits, DRAWLEGEND)) {
-			box.add(DrawingLegend.getLegendPanel(_view));
+			
+			basic.add(DrawingLegend.getLegendPanel(_view), BorderLayout.CENTER);
 		}
-
-
-		// symbol legend
-		// TODO add symbol legend
 
 		// target z slider
 		if (Bits.checkBit(controlPanelBits, TARGETSLIDER)) {
@@ -206,7 +216,7 @@ public class ControlPanel extends JPanel {
 			// box.add(createTargetSlider());
 		}
 
-		basic.add(box);
+//		basic.add(box);
 
 		if (_displayArray != null) {
 			JPanel sp = new JPanel();

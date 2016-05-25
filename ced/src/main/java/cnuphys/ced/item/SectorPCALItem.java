@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -25,7 +24,6 @@ import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
-import cnuphys.splot.plot.X11Colors;
 
 public class SectorPCALItem extends PolygonItem {
 
@@ -42,7 +40,8 @@ public class SectorPCALItem extends PolygonItem {
 	private int _stripType;
 
 	private static final String _stripNames[] = { "U", "V", "W" };
-	private static final Color _ecFill = X11Colors.getX11Color("alice blue");
+	private static final Color _pcalFill = new Color(220, 220, 220);
+	private static final Color _pcalLine = new Color(140, 140, 140);
 	
 	private static int[] _stripCounts = {68, 62, 62}; //u,v,w
 
@@ -66,7 +65,8 @@ public class SectorPCALItem extends PolygonItem {
 
 		_name = "PCAL " + _stripNames[stripIndex] + " sector " + _sector;
 
-		_style.setFillColor(_ecFill);
+		_style.setFillColor(_pcalFill);
+		_style.setLineColor(_pcalLine);
 		_style.setLineWidth(0);
 		_view = (SectorView) getLayer().getContainer().getView();
 
@@ -124,7 +124,7 @@ public class SectorPCALItem extends PolygonItem {
 	 */
 	private Point2D.Double[] getStrip(int stripId) {
 		Point2D.Double wp[] = PCALGeometry.getIntersections(_stripType,
-				stripId, _view.getTransformation3D(), true);
+				stripId, _view.getProjectionPlane(), true);
 
 		if (wp == null) {
 			return null;
@@ -187,7 +187,7 @@ public class SectorPCALItem extends PolygonItem {
 						Path2D.Double path = WorldGraphicsUtilities
 								.worldPolygonToPath(wp);
 						WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
-								_style.getLineColor(), 0, LineStyle.SOLID, true);
+								fc, 0, LineStyle.SOLID, true);
 					}
 
 				}
@@ -244,7 +244,7 @@ public class SectorPCALItem extends PolygonItem {
 			int sector) {
 
 		Point2D.Double wp[] = PCALGeometry.getShell(stripType,
-				view.getTransformation3D());
+				view.getProjectionPlane());
 
 		if (wp == null) {
 			Log.getInstance().warning(

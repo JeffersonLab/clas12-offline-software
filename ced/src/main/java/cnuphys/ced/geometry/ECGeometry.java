@@ -1,8 +1,6 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.List;
-
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
@@ -10,10 +8,8 @@ import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSector;
 import org.jlab.geom.detector.ec.ECSuperlayer;
-import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Triangle3D;
 
 /**
@@ -328,23 +324,20 @@ public class ECGeometry {
 	 *            should be EC_INNER or EC_OUTER
 	 * @param stripType
 	 *            should be EC_U, EC_V, or EC_W
-	 * @param t3d
-	 *            the geometry package transformation for the view
+	 * @param projectionPlane 
+	 *            the projection plane
 	 * @return the shell for the whole panel.
 	 */
 	public static Point2D.Double[] getShell(int planeIndex, int stripType,
-			Transformation3D t3d) {
+			Plane3D projectionPlane) {
 
-		Point2D.Double wp[] = new Point2D.Double[4];
-		for (int i = 0; i < 4; i++) {
-			wp[i] = new Point2D.Double();
-		}
+		Point2D.Double wp[] = GeometryManager.allocate(4);
 
 		// get last visible (intersecting) strip
 		int lastIndex = EC_NUMSTRIP - 1;
 		Point2D.Double lastPP[] = null;
 		while ((lastPP == null) && (lastIndex >= 0)) {
-			lastPP = getIntersections(planeIndex, stripType, lastIndex, t3d,
+			lastPP = getIntersections(planeIndex, stripType, lastIndex, projectionPlane,
 					true);
 			if (lastPP == null) {
 				lastIndex--;
@@ -360,7 +353,7 @@ public class ECGeometry {
 		Point2D.Double firstPP[] = null;
 		int firstIndex = 0;
 		while (firstPP == null) {
-			firstPP = getIntersections(planeIndex, stripType, firstIndex, t3d,
+			firstPP = getIntersections(planeIndex, stripType, firstIndex, projectionPlane,
 					true);
 			if (firstPP == null) {
 				firstIndex++;
@@ -756,38 +749,29 @@ public class ECGeometry {
 	 *            EC_U, EC_V, EC_W
 	 * @param stripid
 	 *            the 0-based paddle id
-	 * @param transform3D
-	 *            the transformation to the constant phi
+	 * @param projectionPlane 
+	 *            the projection plane
 	 * @return the intersection points (z component will be 0).
 	 */
 	public static Point2D.Double[] getIntersections(int superlayer, int layer,
-			int stripid, Transformation3D transform3D, boolean offset) {
-		// argh the geometry pakage superlayers are 1,2 rather than 0,1 because
+			int stripid, Plane3D projectionPlane, boolean offset) {
+		// argh the geometry package superlayers are 1,2 rather than 0,1 because
 		// they use 0 for PCAL--hence the +1
 
 		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
 				superlayer + 1).getLayer(layer);
 
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
-		List<Line3D> lines = strip.getVolumeCrossSection(transform3D);
-		// perhaps no intersection
-
-		if ((lines == null) || (lines.size() < 4)) {
-			return null;
-		}
-
-		Point3D[] pnts = new Point3D[4];
-		for (int i = 0; i < 4; i++) {
-			pnts[i] = lines.get(i).end();
-		}
-
+		Point2D.Double wp[] = GeometryManager.allocate(4);
+		GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
+		
 		// note reordering
 		Point2D.Double p2d[] = new Point2D.Double[4];
 
-		p2d[0] = new Point2D.Double(pnts[2].x(), pnts[2].y());
-		p2d[1] = new Point2D.Double(pnts[3].x(), pnts[3].y());
-		p2d[2] = new Point2D.Double(pnts[0].x(), pnts[0].y());
-		p2d[3] = new Point2D.Double(pnts[1].x(), pnts[1].y());
+		p2d[0] = new Point2D.Double(wp[2].x, wp[2].y);
+		p2d[1] = new Point2D.Double(wp[3].x, wp[3].y);
+		p2d[2] = new Point2D.Double(wp[0].x, wp[0].y);
+		p2d[3] = new Point2D.Double(wp[1].x, wp[1].y);
 
 		if (offset) {
 			// move

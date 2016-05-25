@@ -1,8 +1,6 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.List;
-
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
@@ -12,9 +10,9 @@ import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
-import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Triangle3D;
 
 public class DCGeometry {
@@ -332,95 +330,25 @@ public class DCGeometry {
 		return wires[superlayer - 1][layer - 1][wire - 1].getLine().end();
 	}
 
-	/**
-	 * Get the intersections of a dcwire with a constant phi plane. If the wire
-	 * does not intersect (happens as phi grows) return null;
-	 * 
-	 * NOTE: the indices are 1-based
-	 * 
-	 * @param superlayer the superlayer [1..6]
-	 * @param layer the layer [1..6]
-	 * @param wire the wire [1..112]
-	 * @param transform3D the transformation to the constant phi
-	 * @return the lines of the "hexagon", or null if no intersection.
-	 */
-	public static List<Line3D> getHexagon(int superlayer, int layer, int wire,
-			Transformation3D transform3D) {
-
-		DriftChamberWire dcw = wires[superlayer - 1][layer - 1][wire - 1];
-		return dcw.getVolumeCrossSection(transform3D);
-	}
-
-	/**
-	 * For the given parameters, compute the intersecing polygon
-	 * 
-	 * @param superlayer the superlayer [1..6]
-	 * @param layer the layer [1..6]
-	 * @param wire the wire [1..112]
-	 * @param transform3D the transformation to the constant phi
-	 * @param wp the world polygon, already allocated with 6 points. Note the
-	 *            last point in the polygon is NOT the same as the first.
-	 * @param centroid if null, ignored. If not null, will hold the center of
-	 *            the polygon
-	 * @return the number of good points in the polygon (should be 6)
-	 */
-	public static int worldPolygon(int superlayer, int layer, int wire,
-			Transformation3D transform3D, Point2D.Double wp[],
-			Point2D.Double centroid) {
-		List<Line3D> lines = getHexagon(superlayer, layer, wire, transform3D);
-		return worldPolygon(lines, wp, centroid);
-	}
-
-	/**
-	 * Given a list of lines return from getHexagon, this computes the world
-	 * polygon and the center
-	 * 
-	 * @param lines the lines from getHexagon
-	 * @param wp the world polygon, already allocated with 6 points. Note the
-	 *            last point in the polygon is NOT the same as the first.
-	 * @param centroid if null, ignored. If not null, will hold the center of
-	 *            the polygon
-	 * @return the number of good points in the polygon (should be 6)
-	 */
-	public static int worldPolygon(List<Line3D> lines, Point2D.Double wp[],
+	
+		/**
+		 * Get the intersections of a dcwire with a constant phi plane. If the wire
+		 * does not intersect (happens as phi grows) return null;
+		 * 
+		 * NOTE: the indices are 1-based
+		 * 
+		 * @param superlayer the superlayer [1..6]
+		 * @param layer the layer [1..6]
+		 * @param wire the wire [1..112]
+		 * @param projectionPlane the projection plane
+		 */
+		public static void getHexagon(int superlayer, int layer, int wire, 
+				Plane3D projectionPlane,
+			Point2D.Double wp[],
 			Point2D.Double centroid) {
 
-		int size = (lines == null) ? 0 : lines.size();
-		// System.err.println(x);
-
-		if (size < 6) {
-			size = 0;
-		}
-		if (size > 6) {
-			// System.err.println("Bad size in worldPolygon [DCGeometry] = "
-			// + size);
-			//
-			size = 6;
-		}
-
-		for (int i = 0; i < size; i++) {
-			if (lines == null) {
-				wp[i].x = Double.NaN;
-				wp[i].y = Double.NaN;
-			}
-			else {
-				Point3D p = lines.get(i).origin();
-				wp[i].x = p.x();
-				wp[i].y = p.y();
-			}
-		}
-
-		if (centroid != null) {
-			if (lines == null) {
-				centroid.x = Double.NaN;
-				centroid.y = Double.NaN;
-			}
-			else {
-				average(wp, centroid);
-			}
-		}
-
-		return size;
+			DriftChamberWire dcw = DCGeometry.getWire(superlayer, layer, wire);
+			GeometryManager.getProjectedPolygon(dcw, projectionPlane, 10, 6, wp, centroid);
 	}
 
 	/**
@@ -435,16 +363,35 @@ public class DCGeometry {
 	 * @return the approximate center of the projected hexagon
 	 */
 	public static Point2D.Double getCenter(int superlayer, int layer, int wire,
-			Transformation3D transform3D) {
+			Plane3D projectionPlane) {
 
-		Point2D.Double wpoly[] = GeometryManager.allocate(6);
 		Point2D.Double centroid = new Point2D.Double();
+		
+		DriftChamberWire dcw = DCGeometry.getWire(superlayer, layer, wire);
+		Line3D l3D = dcw.getLine();
+		Point3D p3 = new Point3D();
+		projectionPlane.intersection(l3D, p3);
 
-		List<Line3D> lines = getHexagon(superlayer, layer, wire, transform3D);
-		int size = worldPolygon(lines, wpoly, centroid);
+		centroid.x = p3.z();
+		centroid.y = Math.hypot(p3.x(), p3.y());
 
-		return (size != 6) ? null : centroid;
+		return centroid;
 	}
+	
+	
+	/**
+	 * Get a super layer plane
+	 * @param sector the 1-based sector (result IS sector dependent)
+	 * @param superlayer the 1-based superlayer
+	 * @return the plane perpendicular to the wires for this superlayer
+	 */
+	public static Plane3D getSuperlayerPlane(int sector, int  superlayer) {
+		//can use arbitrary wire
+		Line3D l3d = getWire(sector, superlayer, 3, 55);
+		Point3D origin = new Point3D(0, 0, 0);
+		return new Plane3D(origin, l3d.direction());
+	}
+
 
 	/**
 	 * Get the position of the sense wire in sector 0
@@ -501,47 +448,27 @@ public class DCGeometry {
 	 *            of wire 111.
 	 */
 	public static void getLayerExtendedPoints(int superLayer, int layer,
-			Transformation3D transform3D, Point2D.Double wp[]) {
-
-		int firstWire = 1;
-		Point2D.Double first = null;
-		Point2D.Double second = getCenter(superLayer, layer, 1, transform3D);
-		;
-		while ((firstWire < 111) && ((first == null) || (second == null))) {
-			first = second;
-			second = getCenter(superLayer, layer, firstWire + 1, transform3D);
-			if ((first == null) || (second == null)) {
-				firstWire++;
-			}
-			else {
-				break;
-			}
-		}
-
-		if (firstWire > 110) {
-			return;
-		}
-
-		// System.err.println("FIRST WIRE: " + firstWire);
-
-		Point2D.Double last = getCenter(superLayer, layer, 112, transform3D);
-		Point2D.Double nexttolast = getCenter(superLayer, layer, 111,
-				transform3D);
-
-		if (first == null)
-			System.err.println("null first in getLayerExtendedPoints supl: "
-					+ superLayer + " layer: " + layer);
-		if (second == null)
-			System.err.println("null second in getLayerExtendedPoints");
-		if (last == null)
-			System.err.println("null last in getLayerExtendedPoints");
-		if (nexttolast == null)
-			System.err.println("null nexttolast in getLayerExtendedPoints");
-
+			Plane3D projectionPlane, Point2D.Double wp[]) {
+		
+		Point2D.Double hexagon[] = GeometryManager.allocate(6);
+		
+		getHexagon(superLayer, layer, 1, projectionPlane, hexagon, null);
+		Point2D.Double first = new Point2D.Double(hexagon[0].x, hexagon[0].y);
+		
+		getHexagon(superLayer, layer, 2, projectionPlane, hexagon, null);
+		Point2D.Double second = new Point2D.Double(hexagon[0].x, hexagon[0].y);
+		
+		getHexagon(superLayer, layer, 111, projectionPlane, hexagon, null);
+		Point2D.Double nexttolast = new Point2D.Double(hexagon[0].x, hexagon[0].y);
+		
+		getHexagon(superLayer, layer, 112, projectionPlane, hexagon, null);
+		Point2D.Double last = new Point2D.Double(hexagon[0].x, hexagon[0].y);
+		
 		extPoint(first, second, wp[0]);
 		extPoint(last, nexttolast, wp[1]);
 	}
 
+	
 	/**
 	 * Get the boundary of a layer
 	 * 
@@ -553,71 +480,117 @@ public class DCGeometry {
 	 * @param wp a four point layer boundary
 	 */
 	public static void getLayerPolygon(int superLayer, int layer,
-			Transformation3D transform3D, Point2D.Double wp[]) {
+			Plane3D plane, Point2D.Double wp[]) {
+		
+		Point2D.Double hex[] = GeometryManager.allocate(6);
+		getHexagon(superLayer, layer, 1, plane, hex, null);
+		assignFromHex(wp, 0, hex, 0);
+		assignFromHex(wp, 11, hex, 3);
+		assignFromHex(wp, 12, hex, 4);
+		assignFromHex(wp, 13, hex, 5);
+		
+		getHexagon(superLayer, layer, 13, plane, hex, null);
+		assignFromHex(wp, 1, hex, 0);
+		assignFromHex(wp, 10, hex, 3);
+	
+		getHexagon(superLayer, layer, 57, plane, hex, null);
+		assignFromHex(wp, 2, hex, 0);
+		assignFromHex(wp, 9, hex, 3);
 
-		Point2D.Double thisLayer[] = GeometryManager.allocate(2);
-		Point2D.Double nextLayer[] = GeometryManager.allocate(2);
+		getHexagon(superLayer, layer, 99, plane, hex, null);
+		assignFromHex(wp, 3, hex, 0);
+		assignFromHex(wp, 8, hex, 3);
 
-		int nl = ((layer % 2) == 0) ? layer - 1 : layer + 1;
-
-		getLayerExtendedPoints(superLayer, layer, transform3D, thisLayer);
-		getLayerExtendedPoints(superLayer, nl, transform3D, nextLayer);
-
-		double delx = Math.abs(nextLayer[1].x - thisLayer[1].x) / 2;
-		double dely = Math.abs(nextLayer[1].y - thisLayer[1].y) / 2;
-
-		// System.err.println("DELX: " + delx);
-		// System.err.println("DELY: " + dely);
-
-		wp[0].setLocation(thisLayer[0].x - delx, thisLayer[0].y - dely);
-		wp[1].setLocation(thisLayer[1].x - delx, thisLayer[1].y - dely);
-		wp[2].setLocation(thisLayer[1].x + delx, thisLayer[1].y + dely);
-		wp[3].setLocation(thisLayer[0].x + delx, thisLayer[0].y + dely);
-
-		// close?
-		if (wp.length == 5) {
-			wp[4].x = wp[0].x;
-			wp[4].y = wp[0].y;
-		}
+		getHexagon(superLayer, layer, 112, plane, hex, null);
+		assignFromHex(wp, 4, hex, 0);
+		assignFromHex(wp, 5, hex, 1);
+		assignFromHex(wp, 6, hex, 2);
+		assignFromHex(wp, 7, hex, 3);
 	}
+
 
 	/**
 	 * Get the boundary of a super layer
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer the superlayer [1..6]
-	 * @param transform3D the transformation to the constant phi
-	 * @param wp a four point super layer boundary
+	 * @param superlayer
+	 *            the superlayer [1..6]
+	 * @param transform3D
+	 *            the transformation to the constant phi
+	 * @param wp
+	 *            a four point super layer boundary
 	 */
-	public static void getSuperLayerPolygon(int superLayer,
-			Transformation3D transform3D, Point2D.Double wp[]) {
-		Point2D.Double layerBoundary[] = GeometryManager.allocate(4);
+	public static void getSuperLayerPolygon(int superLayer, Plane3D projectionPlane, Point2D.Double wp[]) {
 
-		getLayerPolygon(superLayer, 1, transform3D, layerBoundary);
-		wp[0].setLocation(layerBoundary[0]);
-		wp[1].setLocation(layerBoundary[1]);
-		getLayerPolygon(superLayer, 6, transform3D, layerBoundary);
-		wp[2].setLocation(layerBoundary[2]);
-		wp[3].setLocation(layerBoundary[3]);
+		Point2D.Double lb[] = GeometryManager.allocate(14);
+		getLayerPolygon(superLayer, 1, projectionPlane, lb);
+		wp[0].setLocation(lb[12]);
+		wp[1].setLocation(lb[13]);
+		wp[2].setLocation(lb[0]);
+		wp[3].setLocation(lb[1]);
+		wp[4].setLocation(lb[2]);
+		wp[5].setLocation(lb[3]);
+		wp[6].setLocation(lb[4]);
+		wp[7].setLocation(lb[5]);
+		wp[8].setLocation(lb[6]);
+		
+		getLayerPolygon(superLayer, 2, projectionPlane, lb);
+		wp[9].setLocation(lb[5]);
+		wp[10].setLocation(lb[6]);
+		wp[32].setLocation(lb[12]);
+		wp[33].setLocation(lb[13]);
+		
+		getLayerPolygon(superLayer, 3, projectionPlane, lb);
+		wp[11].setLocation(lb[5]);
+		wp[12].setLocation(lb[6]);
+		wp[30].setLocation(lb[12]);
+		wp[31].setLocation(lb[13]);
+		
+		getLayerPolygon(superLayer, 4, projectionPlane, lb);
+		wp[13].setLocation(lb[5]);
+		wp[14].setLocation(lb[6]);
+		wp[28].setLocation(lb[12]);
+		wp[29].setLocation(lb[13]);
+		
+		getLayerPolygon(superLayer, 5, projectionPlane, lb);
+		wp[15].setLocation(lb[5]);
+		wp[16].setLocation(lb[6]);
+		wp[26].setLocation(lb[12]);
+		wp[27].setLocation(lb[13]);
+		
+		getLayerPolygon(superLayer, 6, projectionPlane, lb);
+		wp[17].setLocation(lb[5]);
+		wp[18].setLocation(lb[6]);
+		wp[19].setLocation(lb[7]);
+		wp[20].setLocation(lb[8]);
+		wp[21].setLocation(lb[9]);
+		wp[22].setLocation(lb[10]);
+		wp[23].setLocation(lb[11]);
+		wp[24].setLocation(lb[12]);
+		wp[25].setLocation(lb[13]);
 
-		//expand a little
-		expand(wp[1], wp[2], 1.05);
-		expand(wp[0], wp[3], 1.05);
+
 	}
 	
-	private static void expand(Point2D.Double wp0, Point2D.Double wp1, double factor) {
-		double delx = factor*(wp1.x - wp0.x);
-		double dely = factor*(wp1.y - wp0.y);
-		
-		double x0 = wp0.x;
-		double y0 = wp0.y;
-		
-		wp0.x = wp1.x - delx;
-		wp0.y = wp1.y - dely;
-		wp1.x = x0 + delx;
-		wp1.y = y0 + dely;
+	private static void assignFromHex(Point2D.Double wp[], int wpIndex, Point2D.Double hex[], int hexIndex) {
+		Point2D.Double p =  new Point2D.Double(hex[hexIndex].x, hex[hexIndex].y);
+		wp[wpIndex] = p;
 	}
+
+
+//	private static void expand(Point2D.Double wp0, Point2D.Double wp1, double factor) {
+//		double delx = factor * (wp1.x - wp0.x);
+//		double dely = factor * (wp1.y - wp0.y);
+//
+//		double x0 = wp0.x;
+//		double y0 = wp0.y;
+//
+//		wp0.x = wp1.x - delx;
+//		wp0.y = wp1.y - dely;
+//		wp1.x = x0 + delx;
+//		wp1.y = y0 + dely;
+//	}
 
 	// extend a point
 	private static void extPoint(Point2D.Double p0, Point2D.Double p1,
@@ -631,120 +604,6 @@ public class DCGeometry {
 		ext.x = p0.x + (p0.x - p1.x);
 		ext.y = p0.y + (p0.y - p1.y);
 	}
-
-	// faster than centroid, and good enough
-	private static void average(Point2D.Double wp[], Point2D.Double centroid) {
-		double xsum = 0;
-		double ysum = 0;
-
-		int size = wp.length;
-		for (int i = 0; i < size; i++) {
-			xsum += wp[i].x;
-			ysum += wp[i].y;
-		}
-
-		centroid.x = xsum / size;
-		centroid.y = ysum / size;
-	}
-
-	public static void main(String arg[]) {
-		DCGeometry.initialize();
-
-		int superlayer = 4;
-		int layer = 3;
-		int wire = 36;
-
-		DriftChamberWire dcw = getWire(superlayer, layer, wire);
-		Line3D line = dcw.getLine();
-
-		System.err.println("Max Wire X: " + DCGeometry.getAbsMaxWireX());
-		System.err.println("MP from DC Wire: " + dcw.getMidpoint());
-		System.err.println("MP from DC Line: " + line.midpoint());
-		System.err.println("Len from DC Wire: " + dcw.getLength());
-		System.err.println("Len from DC Line: " + dcw.getLine().length());
-		System.err.println("DC Line: " + line);
-
-		transReport(superlayer, layer, wire, 0.);
-		transReport(superlayer, layer, wire, 15.);
-		transReport(superlayer, layer, wire, -15.);
-
-		Transformation3D transform0 = GeometryManager.toConstantPhi(15);
-
-		System.err.println("Test extended layer points");
-		Point2D.Double first = getCenter(superlayer, layer, 1, transform0);
-		Point2D.Double last = getCenter(superlayer, layer, 112, transform0);
-
-		Point2D.Double extWp[] = GeometryManager.allocate(2);
-		getLayerExtendedPoints(superlayer, layer, transform0, extWp);
-		System.err.println("first: " + first);
-		System.err.println("ext0: " + extWp[0]);
-		System.err.println("last: " + last);
-		System.err.println("ext1: " + extWp[1]);
-
-		System.err.println("\nTest extended layer points");
-
-		for (int lay = 1; lay <= 6; lay++) {
-			System.err.println("\nLAYER: " + lay);
-			Point2D.Double corners[] = GeometryManager.allocate(4);
-			getLayerExtendedPoints(superlayer, lay, transform0, extWp);
-			getLayerPolygon(superlayer, lay, transform0, corners);
-			System.err.println("extended point 0 " + extWp[0]);
-			System.err.println("extended point 1 " + extWp[1]);
-
-			for (int i = 0; i < 4; i++) {
-				System.err.println("corner[" + i + "]  " + corners[i]);
-			}
-		}
-
-		// System.err.println("\nTest contains");
-		// getSuperLayerPolygon(superlayer, transform0, corners);
-		// for (int lay = 1; lay <= 6; lay++) {
-		// for (int w = 1; w <= 112; w++) {
-		// Point2D.Double p2d = getCenter(superlayer, lay, w, transform0);
-		// System.err.print(WorldGraphicsUtilities.contains(corners, p2d)
-		// + " ");
-		// if (((w + 1) % 10) == 0)
-		// System.err.println();
-		// }
-		// }
-
-		System.err.println("test rotations");
-		for (int sector = 1; sector <= 6; sector++) {
-			System.err.println("\nSECTOR " + sector);
-			line = getWire(sector, superlayer, layer, wire);
-			System.err.println("MP from DC Line: " + line.midpoint());
-			// System.err.println("Len from DC Wire: " + dcw.getLength());
-			// System.err.println("Len from DC Line: " +
-			// dcw.getLine().length());
-			System.err.println("DC Line: " + line);
-		}
-
-	}
-
-	private static void transReport(int superlayer, int layer, int wire,
-			double phi) {
-		System.err.println("\n** AFTER transformation phi = " + +phi);
-		Point2D.Double wpoly[] = GeometryManager.allocate(6);
-		Point2D.Double centroid = new Point2D.Double();
-		Transformation3D transform3D = GeometryManager.toConstantPhi(phi);
-
-		List<Line3D> lines = getHexagon(superlayer, layer, wire, transform3D);
-		int size = worldPolygon(lines, wpoly, centroid);
-
-		if (size > 0) {
-			for (int i = 0; i < 1; i++) {
-				System.err.println("lines[" + (i + 1) + "] = " + lines.get(i));
-			}
-			System.err.println(
-					"Poly centroid: " + centroid + "   poly size: " + size);
-
-		}
-		else {
-			System.err.println("No intesection, phi too big");
-		}
-
-	}
-
 
 
 }

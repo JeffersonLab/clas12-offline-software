@@ -1,8 +1,6 @@
 package cnuphys.ced.cedview;
 
 import java.awt.Graphics;
-import java.awt.RenderingHints;
-
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.log.Log;
