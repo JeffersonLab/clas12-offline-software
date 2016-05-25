@@ -34,12 +34,14 @@ import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.ced.geometry.ECGeometry;
+import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.Swimming;
 
 import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.geom.prim.Plane3D;
 
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider,
@@ -51,8 +53,15 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
 	};
 	
+	// used for computing world circles
+	private static final int NUMCIRCPNTS = 40;
+
 	//next event button
 	protected JButton nextEvent;
+	
+	//this is the projection plane. For SectorView it will be a constant
+	//phi plane. For other views, something else, or null;
+	protected Plane3D projectionPlane;
 
 	// our mode
 	protected Mode _mode = Mode.SINGLE_EVENT;
@@ -62,6 +71,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON
 			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON;
 
+	protected static final int NORANGETOOLBARBITS = TOOLBARBITS & ~BaseToolBar.RANGEBUTTON;
 
 	/**
 	 * A string that has r-theta-phi using unicode greek characters
@@ -103,7 +113,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	private long minHoverTrigger = 1000; // ms
 	private long hoverStartCheck = -1;
 	private MouseEvent hoverMouseEvent;
-	// last trajectory hovering reposne
+	// last trajectory hovering response
 	protected String _lastTrajStr;
 
 	// for Veronique's tilted sector coordinate system
@@ -420,6 +430,13 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		return _controlPanel.getDisplayArray().showDCtbDoca();
 	}
 
+	public boolean showDCtbSegments() {
+		if ((_controlPanel == null)
+				|| (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCtbSegments();
+	}
 
 	/**
 	 * Convenience method to get the magnetic field display option.
@@ -640,7 +657,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		if (sector > 0) {
 			feedbackStrings.add("Sector " + sector);
 		}
-
+		
+		String pixStr = "$Sky Blue$Pixels: [" + pp.x + ", " + pp.y + "]";
+		feedbackStrings.add(pixStr);
 	}
 
 	/**
@@ -810,6 +829,65 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		case AccumulationManager.ACCUMULATION_FINISHED:
 			fixTitle(_eventManager.getCurrentEvent());
 			break;
+		}
+	}
+
+	/**
+	 * Compute a world polygon for (roughly) a circle centered about a point.
+	 * 
+	 * @param center the center point
+	 * @param radius
+	 *            the radius in cm
+	 */
+	public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center,
+			double radius) {
+
+		if (center == null) {
+			return null;
+		}
+
+		Point2D.Double circle[] = new Point2D.Double[NUMCIRCPNTS];
+		double deltheta = 2.0 * Math.PI / (NUMCIRCPNTS - 1);
+
+		for (int i = 0; i < NUMCIRCPNTS; i++) {
+			double theta = i * deltheta;
+			double zz = center.x + radius * Math.cos(theta);
+			double xx = center.y + radius * Math.sin(theta);
+			circle[i] = new Point2D.Double(zz, xx);
+		}
+
+		return circle;
+
+	}
+	
+	/**
+	 * Get the geometry package transformation to constant phi plane
+	 * 
+	 * @return the current geometry package transformation for this view
+	 */
+	public Plane3D getProjectionPlane() {
+		return projectionPlane;
+	}
+
+	/**
+	 * Convert sector to world (not global, but graphical world)
+	 * 
+	 * @param projPlane the projection plane
+	 * @param wp
+	 *            the world point
+	 * @param sectorXYZ
+	 *            the sector coordinates (cm)
+	 * @param the
+	 *            sector 1..6
+	 */
+	public static void sectorToWorld(Plane3D projPlane, Point2D.Double wp, double[] sectorXYZ, int sector) {
+		double sectx = sectorXYZ[0];
+		double secty = sectorXYZ[1];
+		double sectz = sectorXYZ[2];
+		
+		GeometryManager.projectedPoint(sectx, secty, sectz, projPlane, wp);
+		if (sector > 3) {
+			wp.y = -wp.y;
 		}
 	}
 

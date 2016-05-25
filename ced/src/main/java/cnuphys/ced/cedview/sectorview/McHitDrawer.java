@@ -118,7 +118,7 @@ public class McHitDrawer extends SectorViewDrawer {
 			}
 
 			if (showPoint) {
-				_view.getWorldFromLabXYZ(labXYZ[0], labXYZ[1], labXYZ[2], wp);
+				_view.getWorldFromClas(labXYZ[0], labXYZ[1], labXYZ[2], wp);
 				container.worldToLocal(pp, wp);
 
 				String pidstr = "";

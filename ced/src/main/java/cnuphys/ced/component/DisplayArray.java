@@ -79,7 +79,10 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	private static final String DC_TB_CROSS_LABEL = "DC TB Crosses";
 
 	/** Label for dc TB reconstructed doca button */
-	private static final String DC_TB_DOCA_LABEL = "DC TB Doca";
+	private static final String DC_TB_DOCA_LABEL = "TB Doca";
+
+	/** Label for dc TB reconstructed segment button */
+	private static final String DC_TB_SEGMENT_LABEL = "TB Segments";
 
 	/** Label for bst reconstructed crosses button */
 	private static final String RECONS_CROSS_LABEL = "BST/BMT Crosses";
@@ -95,6 +98,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether dc TB reconstructed doca are displayed
 	private AbstractButton _dcTBDocaButton;
+
+	// controls whether dc TB reconstructed segments are displayed
+	private AbstractButton _dcTBSegmentButton;
 
 	// controls whether bst reconstructed crosses are displayed
 	private AbstractButton _reconsBSTCrossButton;
@@ -250,6 +256,12 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_dcTBDocaButton = add(DC_TB_DOCA_LABEL, showDCtbDoca, true,
 					this, _buttonColor).getCheckBox();
 		}
+		
+		// dc time based based segments?
+		if (Bits.checkBit(bits, DisplayBits.DC_TB_RECONS_SEGMENTS)) {
+			_dcTBSegmentButton = add(DC_TB_SEGMENT_LABEL, showDCtbDoca, true,
+					this, _buttonColor).getCheckBox();
+		}
 
 
 		if (Bits.checkBit(bits, DisplayBits.BSTRECONS_CROSSES)) {
@@ -400,6 +412,15 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 */
 	public boolean showDCtbDoca() {
 		return (_dcTBDocaButton != null) && _dcTBDocaButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show the dc tb reconstructed segments.
+	 * 
+	 * @return <code>true</code> if we are to show dc tb reconstructed crosses.
+	 */
+	public boolean showDCtbSegments() {
+		return (_dcTBSegmentButton != null) && _dcTBSegmentButton.isSelected();
 	}
 
 	/**

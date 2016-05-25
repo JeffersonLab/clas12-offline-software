@@ -4,8 +4,8 @@ import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.ced.geometry.DCGeometry;
-import cnuphys.ced.item.SectorSuperLayer;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -149,7 +149,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 						if (showTBDOCA() && !Double.isNaN(tbdoca) && (tbdoca > .01)) {
 							Support3D.drawTube(drawable, coords[0], coords[1],
 									coords[2], coords[3], coords[4], coords[5],
-									(float) tbdoca, SectorSuperLayer.tbDocaLine);
+									(float) tbdoca, CedColors.tbDocaLine);
 						}
 					}
 				} catch (NullPointerException e) {

@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.sectorview;
+package cnuphys.ced.cedview.projecteddc;
 
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
@@ -10,9 +10,9 @@ import cnuphys.swim.SwimTrajectory;
 
 public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
-	private SectorView _view;
+	private ProjectedDCView _view;
 
-	public SwimTrajectoryDrawer(SectorView view) {
+	public SwimTrajectoryDrawer(ProjectedDCView view) {
 		_view = view;
 	}
 
@@ -44,13 +44,13 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	@Override
 	protected boolean veto(SwimTrajectory trajectory) {
 		if ((trajectory.userObject != null)
-				&& (trajectory.userObject instanceof SectorView)) {
+				&& (trajectory.userObject instanceof ProjectedDCView)) {
 			return (trajectory.userObject != _view);
 		}
 
 		double phi = trajectory.getOriginalPhi();
 		boolean onThisView = _view.inThisView(phi);
-	//	System.err.println("ORIG PHI SV: " + phi +  " on view: " + onThisView);
+//		System.err.println("ORIG PHI PDC: " + phi +  " on view: " + onThisView);
 		return !onThisView;
 	}
 
@@ -91,5 +91,4 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	@Override
 	public void setVisible(boolean visible) {
 	}
-
 }

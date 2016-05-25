@@ -6,22 +6,26 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
+import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.item.SectorSuperLayer;
+import cnuphys.ced.frame.CedColors;
 
 public class DrawingLegend extends JComponent {
 
@@ -56,7 +60,7 @@ public class DrawingLegend extends JComponent {
 	@Override
 	public void paintComponent(Graphics g) {
 		Rectangle b = getBounds();
-		g.setColor(Color.black);
+		g.setColor(Color.darkGray);
 		g.fillRect(0, 0, b.width, b.height);
 
 		Point pp = new Point();
@@ -77,7 +81,8 @@ public class DrawingLegend extends JComponent {
 
 		// view dependent drawing
 		if (_view != null) {
-			if ((_view instanceof SectorView) || (_view instanceof DCXYView)) {
+			if ((_view instanceof SectorView) ||
+					(_view instanceof DCXYView) || (_view instanceof ProjectedDCView)) {
 				paintSectorViewLegend(g, x, yc);
 			}
 			
@@ -102,9 +107,24 @@ public class DrawingLegend extends JComponent {
 	}
 
 	private void paintSectorViewLegend(Graphics g, int x, int yc) {
+		
+		int xo = x;
+		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
-		x = drawCircle(g, x, yc, SectorSuperLayer.tbDocaLine, "TB Doca");
+		x = drawCircle(g, x, yc, CedColors.tbDocaLine, "TB Doca");
+		yc += 16;
+		
+		//segment line
+		x = xo;
+		g.setColor(CedColors.docaFill);
+		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
+		g.drawLine(x, yc, x+30, yc);
+		g.setColor(CedColors.tbSegmentLine);
+		g2.setStroke(GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID));
+		g.drawLine(x, yc, x+30, yc);
+		x += 40;
+		x = quickString(g, x, yc-2, "TB Segment") + 16;
 	}
 
 	private int drawCross(Graphics g, int x, int y, int mode) {

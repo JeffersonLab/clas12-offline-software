@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.geom.abs.AbstractComponent;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.detector.ec.ECDetector;
 import org.jlab.geom.detector.ec.ECFactory;
@@ -13,6 +14,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.geom.prim.Vector3D;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.frame.Ced;
@@ -313,6 +315,20 @@ public class GeometryManager {
 		// z coordinates are the same
 		sectorP.setZ(clasP.z());
 	}
+	
+	/**
+	 * Converts the lab 3D coordinates to sector 3D coordinates
+	 * 
+	 * @param x the lab (clas) x coordinate
+	 * @param y the lab (clas) y coordinate
+	 * @param z the lab (clas) z coordinate
+	 * @param sectorP the sector 3D Cartesian coordinates (modified)
+	 */
+	public static void clasToSector(double x, double y, double z, Point3D sectorP) {
+		Point3D clasP = new Point3D(x, y, z);
+		clasToSector(clasP, sectorP);
+	}
+
 
 	/**
 	 * Converts the sector 3D coordinates to clas (lab) 3D coordinates
@@ -518,7 +534,102 @@ public class GeometryManager {
 		transform3D.rotateZ(Math.toRadians(-90));
 		transform3D.rotateX(Math.toRadians(-90));
 		transform3D.rotateZ(Math.toRadians(phi)); // phi rotation
+		
+//		transform3D.rotateX(Math.toRadians(-90));
+//		transform3D.rotateZ(Math.toRadians(phi)); // phi rotation
+
 		return transform3D;
+	}
+	
+	/**
+	 * Get a world 2D polygon from a clas geo object like a FTOF slab.
+	 * @param geoObj the geometric object
+	 * @param projectionPlane the projection plane
+	 * @param startIndex the firstIndex of the volume edges corresponding to a "long" edge
+	 * @param count the number of such edges (should be contiguous!)
+	 * @param wp will hold the world 2D polygon
+	 * @param centroid optionally compute the centroid.
+	 */
+	public static void getProjectedPolygon(AbstractComponent geoObj, Plane3D projectionPlane, int startIndex, int count, Point2D.Double wp[], Point2D.Double centroid) {
+		Point3D pp[] = new Point3D[count];
+		for (int i = 0; i < count; i++) {
+			pp[i] = new Point3D();
+		}
+
+		for (int i = 0; i <count; i++) {
+			int index = startIndex + i;
+			Line3D l3d = geoObj.getVolumeEdge(index);
+			projectionPlane.intersection(l3d, pp[i]);
+		}
+		
+		Vector<Line3D> lines = new Vector<Line3D>();
+		for (int i = 0; i < count; i++) {
+			int j = (i+1) % count;
+			lines.add(new Line3D(pp[i], pp[j]));
+		}
+		
+		for (int i = 0; i < count; i++) {
+			wp[i].x = pp[i].z();
+			wp[i].y = Math.hypot(pp[i].x(), pp[i].y());
+		}
+		
+		if (centroid != null) {
+			average(wp, centroid);
+		}
+
+	}
+
+	// faster than centroid, and good enough
+	private static void average(Point2D.Double wp[], Point2D.Double centroid) {
+		double xsum = 0;
+		double ysum = 0;
+
+		int size = wp.length;
+		for (int i = 0; i < size; i++) {
+			xsum += wp[i].x;
+			ysum += wp[i].y;
+		}
+
+		centroid.x = xsum / size;
+		centroid.y = ysum / size;
+	}
+	
+	/**
+	 * Project a space point. Projected by finding the closest point on the plane.
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 * @param projectionPlane the projection plane
+	 * @param wp will hold the projected 2D world point
+	 * @return the projected 3D space point
+	 */
+	public static Point3D projectedPoint(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
+		Point3D p1 = new Point3D(x, y, z);
+		Vector3D normal = projectionPlane.normal();
+		Point3D p2 = new Point3D(p1.x() + normal.x(),
+				p1.y() + normal.y(), p1.z() + normal.z());
+		Line3D perp = new Line3D(p1, p2);
+		Point3D pisect = new Point3D();
+		projectionPlane.intersection(perp, pisect);
+		
+		wp.x = pisect.z();
+		wp.y = Math.hypot(pisect.x(), pisect.y());
+		return pisect;
+	}
+
+
+	/**
+	 * Get a plane of constant phi
+	 * @param phi the azimutha angle in degrees
+	 * @return a plane of constant phi
+	 */
+	public static Plane3D constantPhiPlane(double phi) {
+		Point3D point = new Point3D(0, 0, 0);
+		phi = Math.toRadians(phi);
+		double cphi = Math.cos(phi);
+		double sphi = Math.sin(phi);
+		Vector3D norm = new Vector3D(sphi, -cphi, 0);
+		return new Plane3D(point, norm);
 	}
 
 	/**

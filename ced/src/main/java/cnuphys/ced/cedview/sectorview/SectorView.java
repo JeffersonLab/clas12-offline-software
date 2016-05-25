@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -23,8 +22,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.jlab.geom.prim.Transformation3D;
-
+import org.jlab.geom.prim.Point3D;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.bst.BSTSupport;
 import cnuphys.ced.component.ControlPanel;
@@ -85,13 +83,10 @@ public class SectorView extends CedView implements ChangeListener {
 	private static int TOP = 30;
 	private static int DELTAV = 30;
 
-	// used for computing world circles
-	private static final int NUMCIRCPNTS = 40;
-
 	// for tilted axis
 	private static final Color TRANSCOLOR = new Color(0, 0, 0, 64);
 	private static final Color TRANSCOLOR2 = new Color(255, 255, 255, 64);
-
+	
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
 			LineStyle.SOLID);
@@ -100,14 +95,10 @@ public class SectorView extends CedView implements ChangeListener {
 	private static final Color BSTHITFILL = new Color(255, 128, 0, 64);
 	// private static final Color TRANS = new Color(192, 192, 192, 128);
 
-	// the geometry package object used for transformations to constant phi
-	// plane
-	private Transformation3D _transform3D = GeometryManager.toConstantPhi(0);
-
 	// superlayer (graphical) items. The first index [0..1] is for upper and
 	// lower sectors.
 	// the second is for for super layer 0..5
-	SectorSuperLayer _superLayers[][] = new SectorSuperLayer[2][6];
+	private SectorSuperLayer _superLayers[][] = new SectorSuperLayer[2][6];
 
 	// determines if the wire intersections must be recalculated. This is caused
 	// by a change in phi using the phi slider.
@@ -140,14 +131,12 @@ public class SectorView extends CedView implements ChangeListener {
 			ScaleDrawer.BOTTOMLEFT);
 
 	// reconstructed cross drawer (and feedback handler)
-	private CrossDrawer _crossDrawer;
+	private ACrossDrawer _crossDrawer;
 
 	private static Color plotColors[] = { X11Colors.getX11Color("Dark Red"),
 			X11Colors.getX11Color("Dark Blue"),
 			X11Colors.getX11Color("Dark Green"), Color.black, Color.gray,
 			X11Colors.getX11Color("wheat") };
-
-	private CoordinateTransform _coordinateTransform;
 
 	/**
 	 * Create a sector view
@@ -158,6 +147,10 @@ public class SectorView extends CedView implements ChangeListener {
 	public SectorView(DisplaySectors displaySectors, Object... keyVals) {
 		super(keyVals);
 		_displaySectors = displaySectors;
+		
+		//the projection plane starts as midplane
+		projectionPlane = GeometryManager.constantPhiPlane(0);
+		
 		addItems();
 		setBeforeDraw();
 		setAfterDraw();
@@ -166,15 +159,13 @@ public class SectorView extends CedView implements ChangeListener {
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
 		// cross drawer
-		_crossDrawer = new CrossDrawer(this);
+		_crossDrawer = new ACrossDrawer(this);
 
 		// MC hit drawer
 		_mcHitDrawer = new McHitDrawer(this);
 
 		// Recon drawer
 		_reconDrawer = new ReconDrawer(this);
-
-		_coordinateTransform = new CoordinateTransform(this);
 	}
 
 	/**
@@ -234,10 +225,10 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.DISPLAYARRAY + ControlPanel.PHISLIDER
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
 				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER
-				+ +ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
+				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
 				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.FTOFHITS
-				+ DisplayBits.DC_TB_RECONS_DOCA 
+				+ DisplayBits.DC_TB_RECONS_DOCA + DisplayBits.DC_TB_RECONS_SEGMENTS
 				+ DisplayBits.ACCUMULATION + DisplayBits.SCALE
 				+ DisplayBits.MCTRUTH, 2, 6);
 
@@ -382,7 +373,7 @@ public class SectorView extends CedView implements ChangeListener {
 	 * Set the views before draw
 	 */
 	private void setBeforeDraw() {
-		IDrawable _beforeDraw = new DrawableAdapter() {
+		IDrawable beforeDraw = new DrawableAdapter() {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
@@ -403,7 +394,7 @@ public class SectorView extends CedView implements ChangeListener {
 			}
 
 		};
-		getContainer().setBeforeDraw(_beforeDraw);
+		getContainer().setBeforeDraw(beforeDraw);
 	}
 
 	// draw the tilted axis
@@ -429,7 +420,7 @@ public class SectorView extends CedView implements ChangeListener {
 		}
 		phi = Math.toRadians(phi);
 
-		getWorldFromLabXYZ(0, 0, 0, wp0);
+		getWorldFromClas(0, 0, 0, wp0);
 		container.worldToLocal(p0, wp0);
 
 		for (int i = 1; i <= 10; i++) {
@@ -438,7 +429,7 @@ public class SectorView extends CedView implements ChangeListener {
 			double x = rho * Math.cos(phi);
 			double y = rho * Math.sin(phi);
 			double z = r * Math.cos(theta);
-			getWorldFromLabXYZ(x, y, z, wp1);
+			getWorldFromClas(x, y, z, wp1);
 
 			container.worldToLocal(p1, wp1);
 
@@ -458,7 +449,7 @@ public class SectorView extends CedView implements ChangeListener {
 	 * Set the views before draw
 	 */
 	private void setAfterDraw() {
-		IDrawable _afterDraw = new DrawableAdapter() {
+		IDrawable afterDraw = new DrawableAdapter() {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
@@ -477,11 +468,11 @@ public class SectorView extends CedView implements ChangeListener {
 
 				// draw reconstructed dc crosses
 				if (showDChbCrosses()) {
-					_crossDrawer.setMode(CrossDrawer.HB);
+					_crossDrawer.setMode(ACrossDrawer.HB);
 					_crossDrawer.draw(g, container);
 				}
 				if (showDCtbCrosses()) {
-					_crossDrawer.setMode(CrossDrawer.TB);
+					_crossDrawer.setMode(ACrossDrawer.TB);
 					_crossDrawer.draw(g, container);
 				}
 
@@ -497,7 +488,7 @@ public class SectorView extends CedView implements ChangeListener {
 			}
 
 		};
-		getContainer().setAfterDraw(_afterDraw);
+		getContainer().setAfterDraw(afterDraw);
 	}
 
 	/**
@@ -510,43 +501,7 @@ public class SectorView extends CedView implements ChangeListener {
 		return _displaySectors;
 	}
 
-	/**
-	 * Compute a world polygon for (roughly) a circle centered about a wire.
-	 * 
-	 * @param sector
-	 *            the sector 0..5
-	 * @param superLayer
-	 *            layer 0..5
-	 * @param layer
-	 *            the layer 0..7 layers 0 and 7 are guard layers
-	 * @param wire
-	 *            the wire 0..113 wires 0 and 113 are guard wires. This means
-	 *            the wire id from a 1-based hit bank does not have to be
-	 *            converted to 0-based.
-	 * @param radius
-	 *            the radius in cm
-	 */
-	public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center,
-			double radius) {
-
-		if (center == null) {
-			return null;
-		}
-
-		Point2D.Double circle[] = new Point2D.Double[NUMCIRCPNTS];
-		double deltheta = 2.0 * Math.PI / (NUMCIRCPNTS - 1);
-
-		for (int i = 0; i < NUMCIRCPNTS; i++) {
-			double theta = i * deltheta;
-			double zz = center.x + radius * Math.cos(theta);
-			double xx = center.y + radius * Math.sin(theta);
-			circle[i] = new Point2D.Double(zz, xx);
-		}
-
-		return circle;
-
-	}
-
+	
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
@@ -557,30 +512,19 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param z
 	 *            the detector z coordinate
 	 * @param wp
-	 *            the projected world point.
+	 *            the projected 2D world point.
 	 */
-	public void getWorldFromLabXYZ(double x, double y, double z,
+	public void getWorldFromClas(double x, double y, double z,
 			Point2D.Double wp) {
-
-		_coordinateTransform.labToWorld(x, y, z, wp);
-		// wp.x = z;
-		//
-		// // int sector = GeometryManager.getSector(x, y);
-		// // Point3D p3d = new Point3D(x, y, z);
-		// // p3d.rotateZ(Math.toRadians(getPhiRotate()));
-		// //
-		// // wp.y = Math.hypot(p3d.x(), p3d.y());
-		// // if ((sector > 3)) {
-		// // wp.y = - wp.y;
-		// // }
-		//
-		// double phiRotate = Math.toRadians(getPhiRotate());
-		// // double beta = Math.atan2(y, x);
-		// // double alpha = phiRotate-beta;
-		//
-		// wp.y = x * Math.cos(phiRotate) + y * Math.sin(phiRotate);
-		// // wp.y = Math.sqrt(x*x + y*y)*Math.cos(alpha); //gives exact same!
-
+		
+		Point3D sectorP = new Point3D();
+		GeometryManager.clasToSector(x, y, z, sectorP);
+		GeometryManager.projectedPoint(sectorP.x(), sectorP.y(), sectorP.z(), projectionPlane, wp);
+		int sector = GeometryManager.getSector(x, y);
+		if (sector > 3) {
+		  wp.y = - wp.y;
+		}
+		
 	}
 
 	/**
@@ -627,20 +571,13 @@ public class SectorView extends CedView implements ChangeListener {
 			_targetZ = (_controlPanel.getTargetSlider().getValue());
 			getContainer().refresh();
 		} else if (source == _controlPanel.getPhiSlider()) {
-			_transform3D = GeometryManager.toConstantPhi(getSliderPhi());
+			//change the projection plane
+			projectionPlane = GeometryManager.constantPhiPlane(getSliderPhi());
+			
 			_wiresDirty = true;
 			getContainer().setDirty(true);
 			getContainer().refresh();
 		}
-	}
-
-	/**
-	 * Get the geometry package transformation to constant phi plane
-	 * 
-	 * @return the current geometry package transformation for this view
-	 */
-	public Transformation3D getTransformation3D() {
-		return _transform3D;
 	}
 
 	/**
@@ -786,11 +723,11 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// reconstructed feedback?
 		if (showDChbCrosses()) {
-			_crossDrawer.setMode(CrossDrawer.HB);
+			_crossDrawer.setMode(ACrossDrawer.HB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 		if (showDCtbCrosses()) {
-			_crossDrawer.setMode(CrossDrawer.TB);
+			_crossDrawer.setMode(ACrossDrawer.TB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
@@ -906,7 +843,7 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @return the rotation angle to transform from world coordinates to global
 	 *         coordinates, in degrees.
 	 */
-	protected double getPhiRotate() {
+	public double getPhiRotate() {
 		// double phiRotate = _phiRelMidPlane;
 		double phiRotate = getSliderPhi();
 		if (_displaySectors == DisplaySectors.SECTORS25) {
@@ -916,7 +853,17 @@ public class SectorView extends CedView implements ChangeListener {
 		}
 		return phiRotate;
 	}
-
+	
+	public double getMidplanePhiRotate() {
+		double phiRotate = 0;
+		if (_displaySectors == DisplaySectors.SECTORS25) {
+			phiRotate += 60.0;
+		} else if (_displaySectors == DisplaySectors.SECTORS36) {
+			phiRotate += 120.0;
+		}
+		return phiRotate;
+	}
+	
 	/**
 	 * Returns the absolute phi. This is the actual, global phi, e.g, -30 to 30
 	 * for sector 1, 30 to 90 for sector 2, etc.
@@ -1237,56 +1184,6 @@ public class SectorView extends CedView implements ChangeListener {
 		return false;
 	}
 
-	/**
-	 * Convert sector to world (not global, but graphical world)
-	 * 
-	 * @param wp
-	 *            the world point
-	 * @param sectorXYZ
-	 *            the sector coordinates (cm)
-	 * @param the
-	 *            sector 1..6
-	 */
-	public void sectorToWorld(Point2D.Double wp, double[] sectorXYZ, int sector) {
-		double sectx = sectorXYZ[0];
-		double secty = sectorXYZ[1];
-		double sectz = sectorXYZ[2];
-
-		double perp = Math.sqrt(sectx * sectx + secty * secty);
-		if (sector > 3) {
-			perp = -perp;
-		}
-
-		// wp.y = perp;
-		// wp.x = sectz;
-
-		double labXYZ[] = new double[3];
-		GeometryManager.sectorXYZToLabXYZ(sector, labXYZ, sectorXYZ);
-		getWorldFromLabXYZ(labXYZ[0], labXYZ[1], labXYZ[2], wp);
-
-	}
-
-	/**
-	 * Gets the cell hexagon as a screen polygon.
-	 * 
-	 * @param container
-	 *            the container being rendered.
-	 * @param uplowSect
-	 *            0 for upper, 1 for lower
-	 * @param superLayer
-	 *            the 1-based superlayer
-	 * @param layer
-	 *            the 1-based layer 1--6
-	 * @param wire
-	 *            the one based wire 1..GeoConstants.NUM_WIRE
-	 * @return the cell hexagon
-	 */
-	public Polygon getHexagon(IContainer container, int uplowSect,
-			int superLayer, int layer, int wire) {
-		return _superLayers[uplowSect][superLayer - 1].getHexagon(container,
-				layer, wire);
-	}
-
 	// draw the BST panels
 	private void drawBSTPanels(Graphics g, IContainer container) {
 		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
@@ -1465,5 +1362,5 @@ public class SectorView extends CedView implements ChangeListener {
 
 		return polys;
 	}
-
+	
 }

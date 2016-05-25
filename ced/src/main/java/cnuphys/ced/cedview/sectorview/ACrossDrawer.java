@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.dcxy;
+package cnuphys.ced.cedview.sectorview;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -13,36 +13,36 @@ import java.util.List;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.item.HexSectorItem;
 
-public class CrossDrawer extends DCXYViewDrawer {
+public class ACrossDrawer extends CedViewDrawer {
 
 	public static final int HB = 0;
 	public static final int TB = 1;
 
-	private static final int ARROWLEN = 30; // pixels
-	private static final Stroke THICKLINE = new BasicStroke(1.5f);
+	protected static final int ARROWLEN = 30; // pixels
+	protected static final Stroke THICKLINE = new BasicStroke(1.5f);
 
 	// feedback string color
-	private static String fbcolors[] = { "$wheat$", "$misty rose$" };
+	protected static String fbcolors[] = { "$wheat$", "$misty rose$" };
 
-	private int _mode = HB;
+	protected int _mode = HB;
+
+	protected double tiltedx[];
+	protected double tiltedy[];
+	protected double tiltedz[];
+	protected int sector[];
+	protected double unitx[];
+	protected double unity[];
+	protected double unitz[];
 
 	// cached rectangles for feedback
-	private FeedbackRects[] _fbRects = new FeedbackRects[2];
+	protected FeedbackRects[] _fbRects = new FeedbackRects[2];
 
-	private double tiltedx[];
-	private double tiltedy[];
-	private double tiltedz[];
-	private int sector[];
-	private double unitx[];
-	private double unity[];
-	private double unitz[];
-
-	public CrossDrawer(DCXYView view) {
+	public ACrossDrawer(CedView view) {
 		super(view);
 		for (int i = 0; i < _fbRects.length; i++) {
 			_fbRects[i] = new FeedbackRects();
@@ -57,11 +57,16 @@ public class CrossDrawer extends DCXYViewDrawer {
 	public void setMode(int mode) {
 		_mode = mode;
 	}
+	
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating()
-				|| (!_view.isSingleEventMode())) {
+
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
+			return;
+		}
+
+		if (!_view.isSingleEventMode()) {
 			return;
 		}
 
@@ -70,6 +75,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
+		// dc crosses?
 		int crossCount = 0;
 		if (_mode == HB) {
 			crossCount = DC.hitBasedCrossCount();
@@ -83,7 +89,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 		if (crossCount > 0) {
 			double result[] = new double[3];
 			Point pp = new Point();
-
+			Point2D.Double wp = new Point2D.Double();
 			if (_mode == HB) {
 				sector = DC.hitBasedCrossSector();
 				tiltedx = DC.hitBasedCrossX();
@@ -93,7 +99,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 				unity = DC.hitBasedCrossUy();
 				unitz = DC.hitBasedCrossUz();
 			}
-			else { //TB
+			else if (_mode == TB) {
 				sector = DC.timeBasedCrossSector();
 				tiltedx = DC.timeBasedCrossX();
 				tiltedy = DC.timeBasedCrossY();
@@ -106,66 +112,57 @@ public class CrossDrawer extends DCXYViewDrawer {
 			_fbRects[_mode].rects = new Rectangle[crossCount];
 
 			for (int i = 0; i < crossCount; i++) {
-				HexSectorItem hsItem = _view.getHexSectorItem(sector[i]);
-
-				if (hsItem == null) {
-					System.err.println(
-							"null sector item in DCXY Cross Drawer sector: "
-									+ sector[i]);
-					break;
-				}
-
 				result[0] = tiltedx[i];
 				result[1] = tiltedy[i];
 				result[2] = tiltedz[i];
 				_view.tiltedToSector(result, result);
+				CedView.sectorToWorld(_view.getProjectionPlane(), wp, result, sector[i]);
 
-				// only care about xy
-				Point2D.Double sp = new Point2D.Double(result[0], result[1]);
-				hsItem.sector2DToLocal(container, pp, sp);
+				// right sector?
+				int mySector = _view.getSector(container, null, wp);
+				if (mySector == sector[i]) {
 
-				// arrows
-				Point pp2 = new Point();
+					container.worldToLocal(pp, wp);
 
-				int pixlen = ARROWLEN;
-				double r = pixlen
-						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
+					// arrows
+					Point2D.Double wp2 = new Point2D.Double();
+					Point pp2 = new Point();
 
-				// System.err.println("ARROWLEN r = " + r + " absmaxx: " +
-				// DCGeometry.getAbsMaxWireX());
-				// System.err.println("PIX LEN: " + pixlen + " density " +
-				// WorldGraphicsUtilities.getMeanPixelDensity(container) +
-				// " pix/len");
+					int pixlen = ARROWLEN;
+					double r = pixlen / WorldGraphicsUtilities
+							.getMeanPixelDensity(container);
 
-				result[0] = tiltedx[i] + r * unitx[i];
-				result[1] = tiltedy[i] + r * unity[i];
-				result[2] = tiltedz[i] + r * unitz[i];
-				_view.tiltedToSector(result, result);
-				sp.setLocation(result[0], result[1]);
-				hsItem.sector2DToLocal(container, pp2, sp);
+					result[0] = tiltedx[i] + r * unitx[i];
+					result[1] = tiltedy[i] + r * unity[i];
+					result[2] = tiltedz[i] + r * unitz[i];
+					_view.tiltedToSector(result, result);
 
-				g.setColor(Color.orange);
-				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
-				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
-				g.setColor(Color.darkGray);
-				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+					CedView.sectorToWorld(_view.getProjectionPlane(), wp2, result, sector[i]);
+					container.worldToLocal(pp2, wp2);
 
-				// the circles and crosses
-				DataDrawSupport.drawCross(g, pp.x, pp.y, _mode);
+					g.setColor(Color.orange);
+					g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+					g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+					g.setColor(Color.darkGray);
+					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
-				// fbrects for quick feedback
-				_fbRects[_mode].rects[i] = new Rectangle(
-						pp.x - DataDrawSupport.CROSSHALF,
-						pp.y - DataDrawSupport.CROSSHALF,
-						2 * DataDrawSupport.CROSSHALF,
-						2 * DataDrawSupport.CROSSHALF);
+					// the circles and crosses
+					DataDrawSupport.drawCross(g2, pp.x, pp.y, _mode);
+
+					// fbrects for quick feedback
+					_fbRects[_mode].rects[i] = new Rectangle(
+							pp.x - DataDrawSupport.CROSSHALF,
+							pp.y - DataDrawSupport.CROSSHALF,
+							2 * DataDrawSupport.CROSSHALF,
+							2 * DataDrawSupport.CROSSHALF);
+				}
 
 			} // end for
 		} // hbcrosscount > 0
 
 		g2.setStroke(oldStroke);
 	}
-
+	
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
@@ -175,8 +172,9 @@ public class CrossDrawer extends DCXYViewDrawer {
 	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void vdrawFeedback(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint, List<String> feedbackStrings,
+			int option) {
 
 		if (_fbRects[_mode].rects == null) {
 			return;
@@ -252,10 +250,10 @@ public class CrossDrawer extends DCXYViewDrawer {
 				double uy = uyarray[i];
 				double uz = uzarray[i];
 
-				// feedbackStrings.add(fbcolors[_mode] + prefix[_mode]
-				// + "cross ID: " + id + " sect: " + sect + " reg: "
-				// + reg + " track: " + track);
-
+				// feedbackStrings.add(fbcolors[_mode] + prefix[_mode] +
+				// "cross ID: " + id
+				// + " sect: " + sect + " reg: " + reg
+				// + " track: " + track);
 				feedbackStrings.add(fbcolors[_mode]
 						+ DataDrawSupport.prefix[_mode] + "cross ID: " + id
 						+ "  sect: " + sect + "  reg: " + reg);
@@ -296,4 +294,5 @@ public class CrossDrawer extends DCXYViewDrawer {
 	class FeedbackRects {
 		public Rectangle rects[];
 	}
+
 }

@@ -1,48 +1,41 @@
-package cnuphys.ced.item;
+package cnuphys.ced.cedview.projecteddc;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.util.List;
 
 import org.jlab.geom.prim.Plane3D;
 
-import cnuphys.ced.cedview.projecteddc.ISuperLayer;
-import cnuphys.ced.cedview.sectorview.SectorView;
+import cnuphys.bCNU.graphics.container.IContainer;
+import cnuphys.bCNU.item.PolygonItem;
+import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.frame.SuperLayerDrawing;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.item.PolygonItem;
-import cnuphys.bCNU.layer.LogicalLayer;
 
-/**
- * Used in SectorView views.
- * 
- * @author heddle
- *
- */
-public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
+public class ProjectedSuperLayer extends PolygonItem implements ISuperLayer {
 
 	//base superlayer drawer
 	private SuperLayerDrawing _superlayerDrawer;
 
 	// convenient access to the event manager
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
+	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
-	// sector 1-based 1..6
-	private int _sector;
-
+	// the view owner
+	private ProjectedDCView _view;
+	
 	// superlayer 1-based 1..6
 	private int _superlayer;
 
 	// cache the outline
 	private Point2D.Double[] _cachedWorldPolygon = GeometryManager.allocate(34);
-
-	// the view this item lives on.
-	private SectorView _view;
+	
+	//the projection plane for this superlayer
+	private Plane3D _projectionPlane;
 
 	/**
 	 * Create a super layer item for the sector view. Note, no points are added
@@ -54,19 +47,26 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	 *            the Layer this item is on.
 	 * @param view
 	 *            the view this item lives on.
-	 * @param sector
-	 *            the 1-based sector [1..6]
 	 * @param superLayer
 	 *            the 1-based superlayer [1..6]
 	 */
-	public SectorSuperLayer(LogicalLayer logLayer, SectorView view, int sector, int superLayer) {
+	public ProjectedSuperLayer(LogicalLayer logLayer, ProjectedDCView view, 
+			int superLayer) {
 		super(logLayer);
 		_view = view;
-		_sector = sector;
 		_superlayer = superLayer;
 		_superlayerDrawer = new SuperLayerDrawing(_view, this);
+		_projectionPlane = DCGeometry.getSuperlayerPlane(1, superLayer);
+		
+		System.err.println("PSL CONSTRUCTOR");
 	}
+	
+//	@Override
+//	public boolean shouldDraw(Graphics g, IContainer container) {
+//		return true;
+//	}
 
+		
 	/**
 	 * Custom drawer for the item.
 	 * 
@@ -77,7 +77,7 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-
+		
 		if (_eventManager.isAccumulating()) {
 			return;
 		}
@@ -88,6 +88,9 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon);
 	}
 
+	public Polygon getLastDrawnPolygon() {
+		return _lastDrawnPolygon;
+	}
 
 	/**
 	 * Add any appropriate feedback strings for the headsup display or feedback
@@ -107,7 +110,7 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 			List<String> feedbackStrings) {
 		_superlayerDrawer.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
 	}
-
+	
 	/**
 	 * The wires are dirty, probably because of a phi rotation
 	 * 
@@ -124,9 +127,6 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 
 		if (_dirty) {
 			DCGeometry.getSuperLayerPolygon(_superlayer, projectionPlane(), _cachedWorldPolygon);
-			if (isLowerSector()) {
-				SuperLayerDrawing.flipPolyToLowerSector(_cachedWorldPolygon);
-			}
 		} // end dirty
 		return _cachedWorldPolygon;
 	}
@@ -138,7 +138,7 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	 */
 	@Override
 	public Plane3D projectionPlane() {
-		return _view.getProjectionPlane();
+		return _projectionPlane;
 	}
 	/**
 	 * Test whether this is a lower sector
@@ -147,7 +147,7 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	 */
 	@Override
 	public boolean isLowerSector() {
-		return (_sector > 3);
+		return false;
 	}
 	/**
 	 * Get the 1-based sector
@@ -155,7 +155,7 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	 */
 	@Override
 	public int sector() {
-		return _sector;
+		return _view.getSector();
 	}
 	
 	/**

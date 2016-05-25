@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.allpcal;
+package cnuphys.ced.cedview.sectorview;
 
 import java.awt.Graphics;
 import java.awt.Point;
@@ -7,18 +7,19 @@ import java.util.List;
 
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 
-public abstract class PCALViewDrawer implements IDrawable {
+public abstract class CedViewDrawer implements IDrawable {
 
 	// convenient access to the event manager
 	protected ClasIoEventManager _eventManager = ClasIoEventManager
 			.getInstance();
 
-	// the PCAL View being rendered.
-	protected PCALView _view;
+	// the CedView being rendered.
+	protected CedView _view;
 
-	public PCALViewDrawer(PCALView view) {
+	public CedViewDrawer(CedView view) {
 		_view = view;
 	}
 
@@ -67,8 +68,9 @@ public abstract class PCALViewDrawer implements IDrawable {
 	 *            the corresponding world location
 	 * @param feedbackStrings
 	 *            add strings to this collection
+	 * @param option
+	 *            for whatever needed purpose
 	 */
-	public abstract void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings);
-
+	public abstract void vdrawFeedback(IContainer container, Point screenPoint,
+			Point2D.Double worldPoint, List<String> feedbackStrings, int option);
 }
