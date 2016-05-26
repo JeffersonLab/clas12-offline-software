@@ -1,4 +1,4 @@
-package cnuphys.ced.frame;
+package cnuphys.ced.common;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,6 +25,7 @@ import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.GeometryManager;

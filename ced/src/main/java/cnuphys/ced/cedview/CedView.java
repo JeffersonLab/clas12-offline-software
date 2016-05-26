@@ -42,6 +42,7 @@ import cnuphys.swim.Swimming;
 
 import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Point3D;
 
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider,
@@ -890,6 +891,27 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 			wp.y = -wp.y;
 		}
 	}
+	
+	/**
+	 * From detector xyz get the projected world point.
+	 * 
+	 * @param x
+	 *            the detector x coordinate
+	 * @param y
+	 *            the detector y coordinate
+	 * @param z
+	 *            the detector z coordinate
+	 * @param wp
+	 *            the projected 2D world point.
+	 */
+	public void getWorldFromClas(double x, double y, double z,
+			Point2D.Double wp) {
+		
+		Point3D sectorP = new Point3D();
+		GeometryManager.clasToSector(x, y, z, sectorP);
+		GeometryManager.projectedPoint(sectorP.x(), sectorP.y(), sectorP.z(), projectionPlane, wp);
+	}
+
 
 
 }

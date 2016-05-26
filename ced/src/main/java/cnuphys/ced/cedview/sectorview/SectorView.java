@@ -515,17 +515,15 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param wp
 	 *            the projected 2D world point.
 	 */
+	@Override
 	public void getWorldFromClas(double x, double y, double z,
 			Point2D.Double wp) {
 		
-		Point3D sectorP = new Point3D();
-		GeometryManager.clasToSector(x, y, z, sectorP);
-		GeometryManager.projectedPoint(sectorP.x(), sectorP.y(), sectorP.z(), projectionPlane, wp);
+		super.getWorldFromClas(x, y, z, wp);
 		int sector = GeometryManager.getSector(x, y);
 		if (sector > 3) {
 		  wp.y = - wp.y;
 		}
-		
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.sectorview;
+package cnuphys.ced.common;
 
 import java.awt.Graphics;
 import java.awt.Point;

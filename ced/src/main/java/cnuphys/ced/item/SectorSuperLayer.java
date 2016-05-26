@@ -11,7 +11,7 @@ import org.jlab.geom.prim.Plane3D;
 import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.frame.SuperLayerDrawing;
+import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.bCNU.graphics.container.IContainer;

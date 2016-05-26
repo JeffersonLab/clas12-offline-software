@@ -13,7 +13,6 @@ import org.jlab.geom.detector.ec.ECSector;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 import cnuphys.bCNU.log.Log;
@@ -182,88 +181,6 @@ public class GeometryManager {
 
 		return absPhi;
 	}
-
-	// /**
-	// * Get the intersection of the given line with RELATIVE phi plane. All
-	// * coordinates are in the sector system.
-	// *
-	// * @param xa
-	// * sector x coordinate of one end point
-	// * @param ya
-	// * sector y coordinate of one end point
-	// * @param za
-	// * sector z coordinate of one end point
-	// * @param xb
-	// * sector x coordinate of other end point
-	// * @param yb
-	// * sector y coordinate of other end point
-	// * @param zb
-	// * sector z coordinate of other end point
-	// * @param relativePhi
-	// * the relative phi (relative to the midplane) [-30..30]
-	// * @param wp
-	// * will hold the intersection. wp.x will be the horizontal
-	// * coordinate (i.e., z in the usual sector system) and wp.y will
-	// * be the cylindrical r (or rho) in the sector system. wp.y is
-	// * positive definite, so should be negated for lower sectors
-	// * (4,5,6) in sector views
-	// */
-	// public static void getPlaneIntersection(double xa, double ya, double za,
-	// double xb, double yb, double zb, double relativePhi,
-	// Point2D.Double wp) {
-	//
-	// double tanphi = Math.tan(-Math.toRadians(relativePhi));
-	//
-	// // not t value depends only on x and y, not z
-	// double t = getPlaneIntersectionT(xa, ya, xb, yb, tanphi);
-	//
-	// // get intersection
-	// double x = xa + t * (xb - xa);
-	// double y = ya + t * (yb - ya);
-	// double z = za + t * (zb - za);
-	//
-	// wp.x = z;
-	// wp.y = Math.hypot(x, y);
-	// }
-
-	// /**
-	// * Gets the t for the line parameterization for the intersection of the
-	// * given line with current relative phi. Note it only depends on the x and
-	// y
-	// * values of the wire endpoints, not the z.This is to be used only
-	// primarily
-	// * in sector views. After return, x = xa + T(xb-xa), etc.
-	// *
-	// * @param xa
-	// * x coordinate of one end point
-	// * @param ya
-	// * y coordinate of one end point
-	// * @param xb
-	// * x coordinate of other end point
-	// * @param yb
-	// * y coordinate of other end point
-	// * @param tanphi
-	// * the tangent of the local phi, whith phi [-30, 30]
-	// * @return the t value of the parameterization
-	// */
-	// public static double getPlaneIntersectionT(double xa, double ya, double
-	// xb,
-	// double yb, double tanphi) {
-	//
-	// double delx = xb - xa;
-	// double dely = yb - ya;
-	// return (xa * tanphi - ya) / (dely - delx * tanphi);
-	// }
-	//
-	// public static void main(String arg[]) {
-	// double phis[] = { -27, 27, 39, 67, 82, 119, 209, 212, 245, 270, 279,
-	// 337 };
-	//
-	// for (double val : phis) {
-	// System.err.println("val: " + val + " sect: " + getSector(val)
-	// + " rel phi: " + getRelativePhi(val));
-	// }
-	// }
 
 	public static List<BSTxyPanel> getBSTxyPanels() {
 		return _bstXYpanels;
@@ -484,61 +401,6 @@ public class GeometryManager {
 		plane.intersection(line3D, iPoint);
 		wp.x = iPoint.x();
 		wp.y = iPoint.y();
-
-		// Path3D path = new Path3D();
-
-		// path.addPoint(start);
-		// path.addPoint(end);
-
-		// //TODO find a way where I do not have to cache the detector
-		// List<DetectorHit> isects =
-		// GeometryManager.clas_Cal_Detector.getLayerHits(path);
-		//
-		// if ((isects != null) && (!isects.isEmpty())) {
-		//
-		// for (DetectorHit hit : isects) {
-		// if ((hit.getSuperlayerId() == superlayer) && (hit.getLayerId() ==
-		// layer)) {
-		// Point3D hp = hit.getPosition();
-		// wp.x = hp.x();
-		// wp.y = hp.y();
-		//
-		// //TEST using plane
-		// int sector = getSector(labXYZ[0], labXYZ[1]);
-		// Plane3D plane = PCALGeometry.getFrontPlane(sector);
-		// Line3D line3D = new Line3D(start, end);
-		//
-		// Point3D iPoint = new Point3D();
-		// plane.intersection(line3D, iPoint);
-		//
-		// System.err.println("\nfrom getHits: " + hp);
-		// System.err.println("from plane: " + iPoint);
-		// return;
-		// }
-		// }
-		// }
-		//
-		// wp.x = labXYZ[0];
-		// wp.y = labXYZ[1];
-
-	}
-
-	/**
-	 * Geometry package transformation to phi=constant plane
-	 * 
-	 * @param phi the angle in degrees
-	 * @return the geometry package transformation
-	 */
-	public static Transformation3D toConstantPhi(double phi) {
-		Transformation3D transform3D = new Transformation3D();
-		transform3D.rotateZ(Math.toRadians(-90));
-		transform3D.rotateX(Math.toRadians(-90));
-		transform3D.rotateZ(Math.toRadians(phi)); // phi rotation
-		
-//		transform3D.rotateX(Math.toRadians(-90));
-//		transform3D.rotateZ(Math.toRadians(phi)); // phi rotation
-
-		return transform3D;
 	}
 	
 	/**
@@ -615,6 +477,20 @@ public class GeometryManager {
 		wp.x = pisect.z();
 		wp.y = Math.hypot(pisect.x(), pisect.y());
 		return pisect;
+	}
+	
+	/**
+	 * Create an XY plane
+	 * @param z the z location of the plane
+	 * @return the new plane
+	 */
+	public static Plane3D xyPlane(double z) {
+		//can use arbitrary wire
+		Point3D p1 = new Point3D(0, 0, 0);
+		Point3D p2 = new Point3D(0, 0, 100);
+		Line3D l3d = new Line3D(p1, p2);
+		Point3D origin = new Point3D(0, 0, z);
+		return new Plane3D(origin, l3d.direction());
 	}
 
 

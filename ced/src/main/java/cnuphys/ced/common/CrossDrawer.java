@@ -14,7 +14,6 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.sectorview.CedViewDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
