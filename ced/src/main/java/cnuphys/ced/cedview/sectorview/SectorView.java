@@ -25,6 +25,7 @@ import javax.swing.event.ChangeListener;
 import org.jlab.geom.prim.Point3D;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.bst.BSTSupport;
+import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.geometry.BSTxyPanel;
@@ -131,7 +132,7 @@ public class SectorView extends CedView implements ChangeListener {
 			ScaleDrawer.BOTTOMLEFT);
 
 	// reconstructed cross drawer (and feedback handler)
-	private ACrossDrawer _crossDrawer;
+	private CrossDrawer _crossDrawer;
 
 	private static Color plotColors[] = { X11Colors.getX11Color("Dark Red"),
 			X11Colors.getX11Color("Dark Blue"),
@@ -159,7 +160,7 @@ public class SectorView extends CedView implements ChangeListener {
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
 		// cross drawer
-		_crossDrawer = new ACrossDrawer(this);
+		_crossDrawer = new CrossDrawer(this);
 
 		// MC hit drawer
 		_mcHitDrawer = new McHitDrawer(this);
@@ -468,11 +469,11 @@ public class SectorView extends CedView implements ChangeListener {
 
 				// draw reconstructed dc crosses
 				if (showDChbCrosses()) {
-					_crossDrawer.setMode(ACrossDrawer.HB);
+					_crossDrawer.setMode(CrossDrawer.HB);
 					_crossDrawer.draw(g, container);
 				}
 				if (showDCtbCrosses()) {
-					_crossDrawer.setMode(ACrossDrawer.TB);
+					_crossDrawer.setMode(CrossDrawer.TB);
 					_crossDrawer.draw(g, container);
 				}
 
@@ -723,11 +724,11 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// reconstructed feedback?
 		if (showDChbCrosses()) {
-			_crossDrawer.setMode(ACrossDrawer.HB);
+			_crossDrawer.setMode(CrossDrawer.HB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 		if (showDCtbCrosses()) {
-			_crossDrawer.setMode(ACrossDrawer.TB);
+			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 

@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.sectorview;
+package cnuphys.ced.common;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -14,11 +14,12 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.cedview.sectorview.CedViewDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 
-public class ACrossDrawer extends CedViewDrawer {
+public class CrossDrawer extends CedViewDrawer {
 
 	public static final int HB = 0;
 	public static final int TB = 1;
@@ -42,7 +43,7 @@ public class ACrossDrawer extends CedViewDrawer {
 	// cached rectangles for feedback
 	protected FeedbackRects[] _fbRects = new FeedbackRects[2];
 
-	public ACrossDrawer(CedView view) {
+	public CrossDrawer(CedView view) {
 		super(view);
 		for (int i = 0; i < _fbRects.length; i++) {
 			_fbRects[i] = new FeedbackRects();
