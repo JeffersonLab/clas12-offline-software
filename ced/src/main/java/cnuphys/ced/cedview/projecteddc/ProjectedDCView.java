@@ -27,7 +27,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.sectorview.ACrossDrawer;
+import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.geometry.GeometryManager;
@@ -56,7 +56,7 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 	private ProjectedSuperLayer _superLayers[] = new ProjectedSuperLayer[6];
 	
 	// reconstructed cross drawer (and feedback handler)
-	private ACrossDrawer _crossDrawer;
+	private CrossDrawer _crossDrawer;
 
 	// used to draw swum trajectories (if any) in the after drawer
 	private SwimTrajectoryDrawer _swimTrajectoryDrawer;
@@ -77,7 +77,7 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
 		// cross drawer
-		_crossDrawer = new ACrossDrawer(this);
+		_crossDrawer = new CrossDrawer(this);
 		
 		// MC hit drawer
 		_mcHitDrawer = new McHitDrawer(this);
@@ -211,11 +211,11 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 
 				// draw reconstructed dc crosses
 				if (showDChbCrosses()) {
-					_crossDrawer.setMode(ACrossDrawer.HB);
+					_crossDrawer.setMode(CrossDrawer.HB);
 					_crossDrawer.draw(g, container);
 				}
 				if (showDCtbCrosses()) {
-					_crossDrawer.setMode(ACrossDrawer.TB);
+					_crossDrawer.setMode(CrossDrawer.TB);
 					_crossDrawer.draw(g, container);
 				}
 			}
@@ -381,11 +381,11 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 
 		// reconstructed feedback?
 		if (showDChbCrosses()) {
-			_crossDrawer.setMode(ACrossDrawer.HB);
+			_crossDrawer.setMode(CrossDrawer.HB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 		if (showDCtbCrosses()) {
-			_crossDrawer.setMode(ACrossDrawer.TB);
+			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
