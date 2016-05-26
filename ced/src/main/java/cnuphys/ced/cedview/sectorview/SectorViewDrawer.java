@@ -1,5 +1,7 @@
 package cnuphys.ced.cedview.sectorview;
 
+import cnuphys.ced.common.CedViewDrawer;
+
 public abstract class SectorViewDrawer extends CedViewDrawer {
 
 	// the SectorView being rendered.

@@ -13,7 +13,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.frame.SuperLayerDrawing;
+import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 

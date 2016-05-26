@@ -466,24 +466,4 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 		return (sector == _sector);
 	}
 	
-	/**
-	 * From detector xyz get the projected world point.
-	 * 
-	 * @param x
-	 *            the detector x coordinate
-	 * @param y
-	 *            the detector y coordinate
-	 * @param z
-	 *            the detector z coordinate
-	 * @param wp
-	 *            the projected 2D world point.
-	 */
-	public void getWorldFromClas(double x, double y, double z,
-			Point2D.Double wp) {
-		
-		Point3D sectorP = new Point3D();
-		GeometryManager.clasToSector(x, y, z, sectorP);
-		GeometryManager.projectedPoint(sectorP.x(), sectorP.y(), sectorP.z(), projectionPlane, wp);
-	}
-
 }
