@@ -66,8 +66,8 @@ public class ReconDrawer extends SectorViewDrawer {
 				int sect = sector[hitIndex] + 1; // 1-based
 				if (_view.isSectorOnView(sect)) {
 
-					_view.getWorldFromClas(recX[hitIndex], recY[hitIndex], recZ[hitIndex],
-							wp);
+					_view.projectClasToWorld(recX[hitIndex], recY[hitIndex], recZ[hitIndex],
+							 _view.getProjectionPlane(), wp);
 					
 					
 					// _view.sectorToWorld(wp, sectXYZ, sect);

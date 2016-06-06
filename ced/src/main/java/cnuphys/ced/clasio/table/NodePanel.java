@@ -29,6 +29,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.coda.jevio.EvioNode;
 import org.jlab.evio.clas12.EvioDataEvent;
 
@@ -582,6 +583,14 @@ public class NodePanel extends JPanel implements ActionListener,
 	}
 
 	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
+
+	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
 	 * @param event
@@ -613,6 +622,15 @@ public class NodePanel extends JPanel implements ActionListener,
 		setNumberOfEvents(_eventManager.getEventCount());
 		fixButtons();
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
 
 	@Override
 	public void fileDoubleClicked(String fullPath) {

@@ -113,7 +113,7 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 			boolean showPoint = correctSector(sector);
 
 			if (showPoint) {
-				_view.getWorldFromClas(labXYZ[0], labXYZ[1], labXYZ[2], wp);
+				_view.projectClasToWorld(labXYZ[0], labXYZ[1], labXYZ[2],  _view.getProjectionPlane(), wp);
 				container.worldToLocal(pp, wp);
 
 				String pidstr = "";

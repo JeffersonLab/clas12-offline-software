@@ -208,7 +208,7 @@ public class LundTrackDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setMomentum();
-				doSwim();
+				doCommonSwim();
 			}
 		});
 
@@ -225,10 +225,10 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Swim the particle
 	 */
-	private void doSwim() {
+	private void doCommonSwim() {
 
 		// get the current swimmer
-		Swimmer swimmer = Swimming.getSwimmer();
+		Swimmer swimmer = new Swimmer(MagneticFields.getActiveField());
 
 		if (swimmer != null) {
 			try {

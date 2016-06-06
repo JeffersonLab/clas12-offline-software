@@ -10,6 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
@@ -114,6 +115,14 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 		return lab;
 	}
 
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
+
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 		GEMCMetaDataContainer gemcdata = _eventManager.getGEMCMetaData();
@@ -198,6 +207,14 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 		_currentFile = (path == null) ? "" : path;
 		_eventFileName.setText("   " + _currentFile + "    ");
 		setData(null);
+	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 	}
 
 	/**

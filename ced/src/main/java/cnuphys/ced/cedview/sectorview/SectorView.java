@@ -22,6 +22,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.bst.BSTSupport;
@@ -421,7 +422,7 @@ public class SectorView extends CedView implements ChangeListener {
 		}
 		phi = Math.toRadians(phi);
 
-		getWorldFromClas(0, 0, 0, wp0);
+		projectClasToWorld(0, 0, 0, projectionPlane, wp0);
 		container.worldToLocal(p0, wp0);
 
 		for (int i = 1; i <= 10; i++) {
@@ -430,7 +431,7 @@ public class SectorView extends CedView implements ChangeListener {
 			double x = rho * Math.cos(phi);
 			double y = rho * Math.sin(phi);
 			double z = r * Math.cos(theta);
-			getWorldFromClas(x, y, z, wp1);
+			projectClasToWorld(x, y, z, projectionPlane, wp1);
 
 			container.worldToLocal(p1, wp1);
 
@@ -516,10 +517,10 @@ public class SectorView extends CedView implements ChangeListener {
 	 *            the projected 2D world point.
 	 */
 	@Override
-	public void getWorldFromClas(double x, double y, double z,
-			Point2D.Double wp) {
+	public void projectClasToWorld(double x, double y, double z,
+			Plane3D projectionPlane, Point2D.Double wp) {
 		
-		super.getWorldFromClas(x, y, z, wp);
+		super.projectClasToWorld(x, y, z, projectionPlane, wp);
 		int sector = GeometryManager.getSector(x, y);
 		if (sector > 3) {
 		  wp.y = - wp.y;

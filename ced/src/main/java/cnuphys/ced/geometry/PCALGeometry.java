@@ -73,6 +73,7 @@ public class PCALGeometry {
 
 	// used for coordinate transformations
 	private static Transformations _transformations;
+	
 
 	/**
 	 * Obtain the separation between the front of the inner and the front of the

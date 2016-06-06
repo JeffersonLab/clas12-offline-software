@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.util.Fonts;
@@ -112,6 +113,14 @@ public class Histogram extends PlotDialog {
 
 		return ppanel;
 	}
+
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {

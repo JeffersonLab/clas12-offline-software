@@ -142,6 +142,16 @@ public abstract class PlotDialog extends JDialog implements ActionListener, IAcc
 	public void openedNewEventFile(String path) {
 		_errorCount = 0;
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+		_errorCount = 0;
+	}
+
 
 	protected void warning(String s) {
 		_errorCount++;

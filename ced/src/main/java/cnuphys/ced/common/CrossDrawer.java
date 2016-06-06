@@ -116,7 +116,7 @@ public class CrossDrawer extends CedViewDrawer {
 				result[1] = tiltedy[i];
 				result[2] = tiltedz[i];
 				_view.tiltedToSector(result, result);
-				CedView.sectorToWorld(_view.getProjectionPlane(), wp, result, sector[i]);
+				_view.sectorToWorld(_view.getProjectionPlane(), wp, result, sector[i]);
 
 				// right sector?
 				int mySector = _view.getSector(container, null, wp);
@@ -137,7 +137,7 @@ public class CrossDrawer extends CedViewDrawer {
 					result[2] = tiltedz[i] + r * unitz[i];
 					_view.tiltedToSector(result, result);
 
-					CedView.sectorToWorld(_view.getProjectionPlane(), wp2, result, sector[i]);
+					_view.sectorToWorld(_view.getProjectionPlane(), wp2, result, sector[i]);
 					container.worldToLocal(pp2, wp2);
 
 					g.setColor(Color.orange);

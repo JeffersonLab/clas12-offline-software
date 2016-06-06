@@ -26,6 +26,9 @@ import javax.swing.event.EventListenerList;
  * 
  */
 public class MagneticFields {
+	
+	//initialize only once
+	private static boolean _initialized = false;
 
 	// solenoidal field
 	private static Solenoid _solenoid;
@@ -60,8 +63,6 @@ public class MagneticFields {
 	static {
 		_torusFullPath = sysPropOrEnvVar("TORUSMAP");
 		_solenoidFullPath = sysPropOrEnvVar("SOLENOIDMAP");
-
-		getMagneticFields();
 	}
 
 	private static String sysPropOrEnvVar(String key) {
@@ -124,6 +125,15 @@ public class MagneticFields {
 	public static void setSolenoidFullPath(String fullPath) {
 		_solenoidFullPath = fullPath;
 	}
+	
+	/**
+	 * Sets the active field
+	 * 
+	 * @param field the new active field
+	 */
+	public static void setActiveField(IField field) {
+		_activeField = field;
+	}
 
 	/**
 	 * Sets the active field
@@ -166,33 +176,7 @@ public class MagneticFields {
 	 * @return a string description of the active field
 	 */
 	public static final String getActiveFieldDescription() {
-		if (_activeField == _torus) {
-			return "Torus Only";
-		}
-		else if (_activeField == _solenoid) {
-			return "Solenoid Only";
-		}
-		else if (_activeField == _compositeField) {
-			return "Torus and Solenoid";
-		}
-		else if (_activeField == _rotatedCompositeField) {
-			return "Rotated Composite Field";
-		}
-		else if (_activeField == _macTest) {
-			return "Mac's 1/r Test Field Field";
-		}
-		else if (_activeField == _perfectSolenoid) {
-			return "Perfect Solenoid";
-		}
-		else if (_activeField == _uniform) {
-			return "Uniform Field";
-		}
-		else if (_activeField == null) {
-			return "Zero Field";
-		}
-		else {
-			return "???";
-		}
+		return (_activeField == null) ? "None" : _activeField.getName();
 	}
 
 	/**
@@ -243,7 +227,7 @@ public class MagneticFields {
 
 		return ifield;
 	}
-
+	
 	/**
 	 * Obtain the magnetic field (from the active field) at a given location
 	 * using expressed in Cartesian coordinates. The field is returned as a
@@ -351,7 +335,13 @@ public class MagneticFields {
 	/**
 	 * Tries to load the magnetic fields from fieldmaps
 	 */
-	private static void getMagneticFields() {
+	public static void initializeMagneticFields() {
+		
+		if (_initialized) {
+			return;
+		}
+		_initialized = true;
+		
 		System.out.println("===========================================");
 		System.out.println("======  Initializing Magnetic Fields  =====");
 		System.out.println("===========================================");
@@ -477,6 +467,7 @@ public class MagneticFields {
 			_compositeField.add(_solenoid);
 			_rotatedCompositeField.add(_solenoid);
 		}
+		
 
 		float result[] = new float[3];
 		_compositeField.field(27.16f, 0.f, 65.71f, result);
@@ -628,25 +619,12 @@ public class MagneticFields {
 			}
 		};
 
-		_torusItem = createRadioMenuItem("Torus", menu, bg,
-				(_activeField != null) && (_activeField == _torus), al);
-		_solenoidItem = createRadioMenuItem("Solenoid", menu, bg,
-				(_activeField != null) && (_activeField == _solenoid), al);
-		_bothItem = createRadioMenuItem("Torus and Solenoid", menu, bg,
-				(_activeField != null) && (_activeField == _compositeField),
-				al);
+		_torusItem = createRadioMenuItem(_torus, "Torus", menu, bg, al);
+		_solenoidItem = createRadioMenuItem(_solenoid, "Solenoid", menu, bg, al);
+		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
+		_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
 
-		if (incRotatedField) {
-			_bothRotatedItem = createRadioMenuItem(
-					"Torus and Solenoid (Rotated)", menu, bg,
-					(_activeField != null)
-							&& (_activeField == _rotatedCompositeField),
-					al);
-			_bothRotatedItem
-					.setEnabled((_torus != null) && (_solenoid != null));
-		}
-		_zeroItem = createRadioMenuItem("No Field", menu, bg,
-				(_activeField == null), al);
+		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
 
 		// interpolation related
 		menu.addSeparator();
@@ -672,15 +650,9 @@ public class MagneticFields {
 
 		if (includeTestFields) {
 			menu.addSeparator();
-			_uniformItem = createRadioMenuItem("Constant 5 Tesla Field", menu,
-					bg, (_activeField != null) && (_activeField == _uniform),
-					al);
-			_perfectSolenoidItem = createRadioMenuItem(
-					"Perfect 5 Tesla Solenoid", menu, bg, (_activeField != null)
-							&& (_activeField == _perfectSolenoid),
-					al);
-			_macTestItem = createRadioMenuItem("Mac's 1/r Test Field", menu, bg,
-					(_activeField != null) && (_activeField == _macTest), al);
+			_uniformItem = createRadioMenuItem(_uniform, "Constant 5 Tesla Field", menu, bg, al);
+			_perfectSolenoidItem = createRadioMenuItem(_perfectSolenoid,"Perfect 5 Tesla Solenoid", menu, bg, al);
+			_macTestItem = createRadioMenuItem(_macTest, "Mac's 1/r Test Field", menu, bg, al);
 		}
 
 		_torusItem.setEnabled(_torus != null);
@@ -694,6 +666,7 @@ public class MagneticFields {
 
 		return menu;
 	}
+	
 
 	// handle the radio menu selections from the magnetic field menu
 	private static void handleMenuSelection(ActionEvent ae) {
@@ -838,14 +811,35 @@ public class MagneticFields {
 	}
 
 	// convenience method for adding a radio button
+	private static JRadioButtonMenuItem createRadioMenuItem(IField field, String label,
+			JMenu menu, ButtonGroup bg, ActionListener al) {
+		
+		String s = label;
+		if (field != null) {
+			s = field.getName();
+		}
+		
+		boolean on = ((_activeField != null) && (_activeField == field)); 
+		
+		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(s, on);
+		mi.addActionListener(al);
+		bg.add(mi);
+		menu.add(mi);
+		return mi;
+	}
+	
+	// convenience method for adding a radio button
 	private static JRadioButtonMenuItem createRadioMenuItem(String label,
 			JMenu menu, ButtonGroup bg, boolean on, ActionListener al) {
+		
+		
 		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(label, on);
 		mi.addActionListener(al);
 		bg.add(mi);
 		menu.add(mi);
 		return mi;
 	}
+
 
 	// convenience method for adding a checkbox button
 	private static JCheckBoxMenuItem createCheckBoxMenuItem(String label,
@@ -891,6 +885,22 @@ public class MagneticFields {
 	public static Solenoid getSolenoid() {
 		return _solenoid;
 	}
+	
+	/**
+	 * Get the composite field
+	 * @return the composite field
+	 */
+	public static CompositeField getCompositeField() {
+		return _compositeField;
+	}
+	
+	/**
+	 * Get the rotated composite field
+	 * @return the rotated composite field
+	 */
+	public static RotatedCompositeField getRotatedCompositeField() {
+		return _rotatedCompositeField;
+	}
 
 	/**
 	 * For testing and also as an example
@@ -899,6 +909,8 @@ public class MagneticFields {
 	 */
 	public static void main(String arg[]) {
 		final JFrame testFrame = new JFrame("Magnetic Field");
+		
+		initializeMagneticFields();
 
 		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
 		// drawing canvas
@@ -934,75 +946,71 @@ public class MagneticFields {
 			public void run() {
 				testFrame.setVisible(true);
 //				bzTest();
+				compositeTest();
 			}
 		});
 
 	}
-	
-	private static void bzTest() {
 		
-		System.err.println("========= START Bz TEST ==========");
+	private static void compositeTest() {
+		
+		System.err.println("========= START Composite TEST ==========");
+		
+		System.err.println("COMP FIELD 1: " + _compositeField.getName());
+		CompositeField compositeField2 = new CompositeField();
+		compositeField2.add(_torus);
+		System.err.println("COMP FIELD 2: " + compositeField2.getName());
+		
+		
+		_rotatedCompositeField.remove(_torus);
+		_rotatedCompositeField.remove(_solenoid);
+		_rotatedCompositeField.add(_solenoid);
+		_rotatedCompositeField.add(_torus);
+		System.err.println("ROT COMP FIELD 1: " + _rotatedCompositeField.getName());
+		RotatedCompositeField rotatedCompositeField2 = new RotatedCompositeField();
+		rotatedCompositeField2.add(_torus);
+		System.err.println("ROT COMP FIELD 2: " + rotatedCompositeField2.getName());
 
-		int N1 = 10000;
-		int N2 = 100000;
-		double tolerance = 1.0e-4;
 		
-		_solenoid.setScaleFactor(0);
-		double rho[] = new double[N1];
-		double z[] = new double[N1];
-		double phi[] = new double[N1];
-		float b[] = new float[3];
-		float bz[] = new float[N1];
-		double rhoMax = 200;
+		int N1 = 1000;
+		int N2 = 1000;
+		
+		_solenoid.setZeroField(true);
+		
+		double xMax = 50;
+		double yMax = 50;
 		double zMax = 300;
-		double phiMax = 30;
-		
-		double worstZ = Double.NaN;
-		double worstPhi = Double.NaN;
-		double worstRho = Double.NaN;
-		double maxDel = 0.0;
-		
-		long count = 0;
+		float b1[] = new float[3];
+		float b2[] = new float[3];
+		double TOLERANCE = 1.0e-6;
+
 		for (int j = 0; j < N2; j++) {
 			
-			setActiveField(FieldType.TORUS);
 			for (int i = 0; i < N1; i++) {
-				count++;
-				rho[i] = rhoMax*Math.random();
-				z[i] = zMax*Math.random() - 10;
-				phi[i] = phiMax*(2*Math.random()-1.);
-				getActiveField().fieldCylindrical(phi[i], rho[i], z[i], b);
-				bz[i] = b[2];
-			}
-			
-			setActiveField(FieldType.COMPOSITE);
-			for (int i = 0; i < N1; i++) {
-				getActiveField().fieldCylindrical(phi[i], rho[i], z[i], b);
-				double bzt = b[2];
-				double del = Math.abs(bzt-bz[i]);
-				if (del > tolerance) {
-					System.err.println("BIG DIFFERENCE dl = " + del);
+				double xs = xMax*Math.random();
+				double ys = yMax*Math.random();
+				double zs = zMax*Math.random();
+				
+				_rotatedCompositeField.field((float)xs, (float)ys, (float)zs, b1);
+				rotatedCompositeField2.field((float)xs, (float)ys, (float)zs, b2);
+				
+				if ((absdif(b1[0], b2[0]) > TOLERANCE) || (absdif(b1[1], b2[1]) > TOLERANCE)
+						|| (absdif(b1[2], b2[2]) > TOLERANCE)) {
+					
+					System.err.println("FAILURE");
 					System.exit(1);
 				}
-				if (del > maxDel) {
-					maxDel = del;
-					worstZ = z[i];
-					worstRho = rho[i];
-					worstPhi = phi[i];
-				}
 			}
+			
 
 		}
-
-		System.err.println("Points tested: " + count);
-		System.err.println("Worst del = " + maxDel);
-		if (maxDel > 0) {
-			System.err.println("AT: rho = " + worstRho + "  z = " + worstZ + "  phi = " + worstPhi);
-		}
-		System.err.println("========= END Bz TEST ==========");
+		System.err.println("========= END Composite TEST (SUCCESS) ==========");
 
 }
 	
+	private static double absdif(double v1, double v2) {
+		return Math.abs(v1-v2);
+	}
 	public static void main2(String arg[]) {
 		int numThread = 20;
 

@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.component.ActionLabel;
@@ -161,6 +162,13 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 		// _nodeTable.makeNameVisible(ae.getActionCommand());
 	}
 
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 		if (!_eventManager.isAccumulating()) {
@@ -186,5 +194,14 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 			break;
 		}
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
 
 }
