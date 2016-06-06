@@ -341,15 +341,16 @@ public class ECHexSectorItem extends HexSectorItem {
 			// now add the strings
 			if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 
-				String locStr = "$lime green$loc xyz " + point3DString(lp)
-						+ " cm";
+				String locStr = "$lime green$loc xyz " + point3DString(lp) + " cm";
 				feedbackStrings.add(locStr);
 
-				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1]
-						+ ", " + uvw[2] + "]";
-				feedbackStrings.add(uvwStr);
+				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
+					String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1] + ", " + uvw[2] + "]";
+					feedbackStrings.add(uvwStr);
 
-				// feedbackStrings.add("$lime green$pixel " + pixel);
+					int pixel = ECGeometry.pixelFromUVW(uvw[0], uvw[1], uvw[2]);
+					feedbackStrings.add("$lime green$pixel " + pixel);
+				}
 
 				// any hits?
 				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {

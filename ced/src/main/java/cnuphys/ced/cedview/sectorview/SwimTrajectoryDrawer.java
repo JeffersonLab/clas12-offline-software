@@ -66,7 +66,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	public void project(double[] v3d, Point2D.Double wp) {
 
 		// the path in the 3D traj is in meters. We want cm.
-		_view.getWorldFromClas(100 * v3d[0], 100 * v3d[1], 100 * v3d[2], wp);
+		_view.projectClasToWorld(100 * v3d[0], 100 * v3d[1], 100 * v3d[2], _view.getProjectionPlane(), wp);
 
 	}
 

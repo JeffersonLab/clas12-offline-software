@@ -109,9 +109,6 @@ public abstract class MagneticField implements IField {
 	// is the field ready to use?
 	protected boolean _fieldReady = false;
 
-	// set to the zero field?
-	protected boolean _zeroField;
-
 	// scale factor always treated as positive
 	protected double _scaleFactor = 1.0;
 
@@ -152,7 +149,7 @@ public abstract class MagneticField implements IField {
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	public boolean isZeroField() {
-		return (_zeroField || (Math.abs(_scaleFactor) < 1.0e-6));
+		return (Math.abs(_scaleFactor) < 1.0e-6);
 	}
 
 	/**
@@ -162,7 +159,7 @@ public abstract class MagneticField implements IField {
 	 *            if set to <code>true</code> the field will always return 0.
 	 */
 	public void setZeroField(boolean zeroField) {
-		_zeroField = zeroField;
+		setScaleFactor(0.0);
 	}
 
 	/**

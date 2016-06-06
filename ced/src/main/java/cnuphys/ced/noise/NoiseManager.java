@@ -2,6 +2,7 @@ package cnuphys.ced.noise;
 
 import java.awt.Color;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -71,6 +72,14 @@ public class NoiseManager implements IClasIoEventListener {
 	public NoiseReductionParameters getParameters(int sect0, int supl0) {
 		return noisePackage.getParameters(sect0, supl0);
 	}
+	
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
@@ -94,4 +103,13 @@ public class NoiseManager implements IClasIoEventListener {
 	@Override
 	public void openedNewEventFile(String path) {
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
 }

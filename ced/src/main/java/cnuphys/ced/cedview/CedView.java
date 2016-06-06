@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.Box;
@@ -29,10 +30,13 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
+import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.ced.fastmc.AcceptanceManager;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.SwimTrajectoryListener;
@@ -40,57 +44,56 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.Swimming;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 @SuppressWarnings("serial")
-public abstract class CedView extends BaseView implements IFeedbackProvider,
-		SwimTrajectoryListener, MagneticFieldChangeListener, IAccumulationListener,
-		IClasIoEventListener {
+public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
+		MagneticFieldChangeListener, IAccumulationListener, IClasIoEventListener {
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
 		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
 	};
-	
+
 	// used for computing world circles
 	private static final int NUMCIRCPNTS = 40;
 
-	//next event button
+	// next event button
 	protected JButton nextEvent;
-	
-	//this is the projection plane. For SectorView it will be a constant
-	//phi plane. For other views, something else, or null;
+
+	// this is the projection plane. For SectorView it will be a constant
+	// phi plane. For other views, something else, or null;
 	protected Plane3D projectionPlane;
 
 	// our mode
 	protected Mode _mode = Mode.SINGLE_EVENT;
-	
-	//basic toolbar bits
+
+	// basic toolbar bits
 	protected static final int TOOLBARBITS = BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
-			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON
-			& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON;
+			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON & ~BaseToolBar.TEXTBUTTON
+			& ~BaseToolBar.DELETEBUTTON;
 
 	protected static final int NORANGETOOLBARBITS = TOOLBARBITS & ~BaseToolBar.RANGEBUTTON;
 
 	/**
 	 * A string that has r-theta-phi using unicode greek characters
 	 */
-	public static final String rThetaPhi = "r" + UnicodeSupport.SMALL_THETA
-			+ UnicodeSupport.SMALL_PHI;
+	public static final String rThetaPhi = "r" + UnicodeSupport.SMALL_THETA + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-theta-phi using unicode greek characters
 	 */
-	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + "z"
-			+ UnicodeSupport.SMALL_PHI;
+	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + "z" + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-phi using unicode greek characters for hex views
 	 */
-	public static final String rhoPhi = UnicodeSupport.SMALL_RHO
-			+ UnicodeSupport.SMALL_PHI;
+	public static final String rhoPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.SMALL_PHI;
 
 	private static final String evnumAppend = "  (Event# ";
 
@@ -122,8 +125,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	protected static final double SIN_TILT = Math.sin(Math.toRadians(25.));
 
 	// the clasIO event manager
-	protected ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	protected ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	/**
 	 * Constructor
@@ -163,23 +165,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		createHeartbeat();
 		// prepare to check for hovering
 		prepareForHovering();
-		
+
 		AccumulationManager.getInstance().addAccumulationListener(this);
-		
-		//add the next event button
-		
+
+		// add the next event button
+
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (ClasIoEventManager.getInstance().isNextOK()) {
 					ClasIoEventManager.getInstance().getNextEvent();
-				}
-				else {
+				} else {
 					Toolkit.getDefaultToolkit().beep();
 				}
 			}
-			
+
 		};
 		nextEvent = new JButton("Next");
 		nextEvent.setToolTipText("Next Event");
@@ -365,8 +366,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         crosses.
 	 */
 	public boolean showReconsCrosses() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showBSTReconsCrosses();
@@ -380,8 +380,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         reconstructed crosses.
 	 */
 	public boolean showDChbCrosses() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showDChbCrosses();
@@ -394,8 +393,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         hits.
 	 */
 	public boolean showFTOFReconHits() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showFTOFHits();
@@ -409,13 +407,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         reconstructed crosses.
 	 */
 	public boolean showDCtbCrosses() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showDCtbCrosses();
 	}
-	
+
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
 	 * doca.
@@ -424,16 +421,14 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         reconstructed doca.
 	 */
 	public boolean showDCtbDoca() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showDCtbDoca();
 	}
 
 	public boolean showDCtbSegments() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showDCtbSegments();
@@ -445,12 +440,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 * @return the magnetic field display option.
 	 */
 	public int getMagFieldDisplayOption() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getMagFieldDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getMagFieldDisplayArray() == null)) {
 			return MagFieldDisplayArray.NOMAGDISPLAY;
 		}
-		return _controlPanel.getMagFieldDisplayArray()
-				.getMagFieldDisplayOption();
+		return _controlPanel.getMagFieldDisplayArray().getMagFieldDisplayOption();
 	}
 
 	/**
@@ -460,27 +453,24 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         is available.
 	 */
 	public boolean showMcTruth() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showMcTruth();
 	}
-	
+
 	/**
 	 * Convenience method to see it we show thestrip midpoints.
 	 * 
-	 * @return <code>true</code> if we are to show the strip midpoints
-	 * for hit strips.
+	 * @return <code>true</code> if we are to show the strip midpoints for hit
+	 *         strips.
 	 */
 	public boolean showStripMidpoints() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showStripMidpoints();
 	}
-
 
 	/**
 	 * Convenience method to see it we show the cosmic tracks.
@@ -489,8 +479,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *         available.
 	 */
 	public boolean showCosmics() {
-		if ((_controlPanel == null)
-				|| (_controlPanel.getDisplayArray() == null)) {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showCosmics();
@@ -553,8 +542,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *            the corresponding world location.
 	 * @return the sector [1..6] or -1 for none.
 	 */
-	public abstract int getSector(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint);
+	public abstract int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint);
 
 	/**
 	 * The magnetic field has changed
@@ -639,18 +627,33 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *            the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
-		EvioDataEvent _currentEvent = _eventManager.getCurrentEvent();
+		boolean haveEvent = false;
+
+		EventSourceType estype = ClasIoEventManager.getEventSourceType();
+		switch (estype) {
+		case FILE:
+		case ET:
+			haveEvent = (_eventManager.getCurrentEvent() != null);
+			break;
+		case FASTMC:
+			haveEvent = (FastMCManager.getInstance().getCurrentGenEvent() != null);
+			break;
+		}
 
 		// add some information about the current event
-		if (_currentEvent == null) {
+		if (!haveEvent) {
 			feedbackStrings.add("$orange red$No event");
 		} else {
-			feedbackStrings.add("$orange red$" + "event "
-				+ _eventManager.getEventNumber());
+			feedbackStrings.add("$orange red$" + "event " + _eventManager.getEventNumber());
 			feedbackStrings.add("$orange red$" + _eventManager.getCurrentEventFileName());
+		}
+
+		// acceptance for fast MC
+		if (_eventManager.isSourceFastMC()) {
+			PhysicsEvent fmcEvent = FastMCManager.getInstance().getCurrentGenEvent();
+			feedbackStrings.add("$orange red$FastMC: " + AcceptanceManager.getInstance().unacceptedReason(fmcEvent));
 		}
 
 		// get the sector
@@ -658,8 +661,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		if (sector > 0) {
 			feedbackStrings.add("Sector " + sector);
 		}
-		
-		String pixStr = "$Sky Blue$Pixels: [" + pp.x + ", " + pp.y + "]";
+
+		String pixStr = "$Sky Blue$ScreenXY: [" + pp.x + ", " + pp.y + "]";
 		feedbackStrings.add(pixStr);
 	}
 
@@ -689,9 +692,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	public Mode getMode() {
 		return _mode;
 	}
-	
+
 	/**
 	 * See if we are in single event mode (vice accumulated mode)
+	 * 
 	 * @return <code>true</code> if we are in single event mode
 	 */
 	public boolean isSingleEventMode() {
@@ -700,6 +704,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 	/**
 	 * See if we are in accumulation event mode (vice single event mode)
+	 * 
 	 * @return <code>true</code> if we are in accumulation mode
 	 */
 	public boolean isSimpleAccumulatedMode() {
@@ -707,14 +712,14 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	}
 
 	/**
-	 * See if we are in log accumulation event mode 
+	 * See if we are in log accumulation event mode
+	 * 
 	 * @return <code>true</code> if we are in accumulation mode
 	 */
 	public boolean isLogAccumulatedMode() {
 		return (_mode == Mode.LOGACCUMULATED);
 	}
 
-	
 	/**
 	 * Set the mode for this view.
 	 * 
@@ -765,6 +770,15 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	}
 
 	/**
+	 * New fast mc event
+	 * 
+	 * @param event
+	 *            the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+
+	/**
 	 * A new event has arrived.
 	 * 
 	 * @param event
@@ -808,6 +822,16 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	public void openedNewEventFile(final String path) {
 	}
 
+	/**
+	 * Change the event source type
+	 * 
+	 * @param source
+	 *            the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
 	public Shape clipView(Graphics g) {
 		Shape oldClip = g.getClip();
 
@@ -816,7 +840,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 
 		return oldClip;
 	}
-	
+
 	@Override
 	public void accumulationEvent(int reason) {
 		switch (reason) {
@@ -836,12 +860,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	/**
 	 * Compute a world polygon for (roughly) a circle centered about a point.
 	 * 
-	 * @param center the center point
+	 * @param center
+	 *            the center point
 	 * @param radius
 	 *            the radius in cm
 	 */
-	public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center,
-			double radius) {
+	public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center, double radius) {
 
 		if (center == null) {
 			return null;
@@ -860,7 +884,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 		return circle;
 
 	}
-	
+
 	/**
 	 * Get the geometry package transformation to constant phi plane
 	 * 
@@ -873,25 +897,28 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	/**
 	 * Convert sector to world (not global, but graphical world)
 	 * 
-	 * @param projPlane the projection plane
+	 * @param projPlane
+	 *            the projection plane
 	 * @param wp
 	 *            the world point
 	 * @param sectorXYZ
 	 *            the sector coordinates (cm)
+	 * @param projectionPlane
+	 *            the projection plane
 	 * @param the
 	 *            sector 1..6
 	 */
-	public static void sectorToWorld(Plane3D projPlane, Point2D.Double wp, double[] sectorXYZ, int sector) {
+	public void sectorToWorld(Plane3D projPlane, Point2D.Double wp, double[] sectorXYZ, int sector) {
 		double sectx = sectorXYZ[0];
 		double secty = sectorXYZ[1];
 		double sectz = sectorXYZ[2];
-		
-		GeometryManager.projectedPoint(sectx, secty, sectz, projPlane, wp);
+
+		projectedPoint(sectx, secty, sectz, projPlane, wp);
 		if (sector > 3) {
 			wp.y = -wp.y;
 		}
 	}
-	
+
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
@@ -901,17 +928,59 @@ public abstract class CedView extends BaseView implements IFeedbackProvider,
 	 *            the detector y coordinate
 	 * @param z
 	 *            the detector z coordinate
+	 * @param projectionPlane
+	 *            the projection plane
 	 * @param wp
 	 *            the projected 2D world point.
 	 */
-	public void getWorldFromClas(double x, double y, double z,
-			Point2D.Double wp) {
-		
+	public void projectClasToWorld(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
+
 		Point3D sectorP = new Point3D();
 		GeometryManager.clasToSector(x, y, z, sectorP);
-		GeometryManager.projectedPoint(sectorP.x(), sectorP.y(), sectorP.z(), projectionPlane, wp);
+		projectedPoint(sectorP.x(), sectorP.y(), sectorP.z(), projectionPlane, wp);
 	}
 
+	/**
+	 * From detector xyz get the projected world point.
+	 * 
+	 * @param clasPoint
+	 *            the point in lab (clas) coordinates
+	 * @param projectionPlane
+	 *            the projection plane
+	 * @param wp
+	 *            the projected 2D world point.
+	 */
+	public void projectClasToWorld(Point3D clasPoint, Plane3D projectionPlane, Point2D.Double wp) {
+		projectClasToWorld(clasPoint.x(), clasPoint.y(), clasPoint.z(), projectionPlane, wp);
+	}
 
+	/**
+	 * Project a space point. Projected by finding the closest point on the
+	 * plane.
+	 * 
+	 * @param x
+	 *            the x coordinate
+	 * @param y
+	 *            the y coordinate
+	 * @param z
+	 *            the z coordinate
+	 * @param projectionPlane
+	 *            the projection plane
+	 * @param wp
+	 *            will hold the projected 2D world point
+	 * @return the projected 3D space point
+	 */
+	public Point3D projectedPoint(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
+		Point3D p1 = new Point3D(x, y, z);
+		Vector3D normal = projectionPlane.normal();
+		Point3D p2 = new Point3D(p1.x() + normal.x(), p1.y() + normal.y(), p1.z() + normal.z());
+		Line3D perp = new Line3D(p1, p2);
+		Point3D pisect = new Point3D();
+		projectionPlane.intersection(perp, pisect);
+
+		wp.x = pisect.z();
+		wp.y = Math.hypot(pisect.x(), pisect.y());
+		return pisect;
+	}
 
 }

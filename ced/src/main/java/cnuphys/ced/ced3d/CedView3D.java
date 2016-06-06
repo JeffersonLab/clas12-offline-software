@@ -9,6 +9,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -85,6 +86,15 @@ public abstract class CedView3D extends BaseView implements
 
 		_menuBar.add(actionMenu);
 	}
+	
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+		
+	}
+
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
@@ -100,6 +110,15 @@ public abstract class CedView3D extends BaseView implements
 	public void openedNewEventFile(String path) {
 		_panel3D.refresh();
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
 
 	@Override
 	public void accumulationEvent(int reason) {

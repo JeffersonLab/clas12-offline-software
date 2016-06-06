@@ -2,6 +2,7 @@ package cnuphys.ced.event.data;
 
 import java.util.Vector;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.coda.jevio.EvioNode;
 import org.jlab.evio.clas12.EvioDataEvent;
 
@@ -133,6 +134,22 @@ public class GEMCMetaDataContainer implements IClasIoEventListener  {
 	public void openedNewEventFile(String path) {
 		clear();
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {

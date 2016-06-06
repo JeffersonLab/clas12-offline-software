@@ -2,6 +2,7 @@ package cnuphys.ced.clasio;
 
 import java.util.Vector;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 import cnuphys.bCNU.log.Log;
@@ -34,6 +35,14 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	public Vector<TrajectoryRowData> getRowData() {
 		return data;
 	}
+
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+	}
+	
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
@@ -121,6 +130,14 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 
 	@Override
 	public void openedNewEventFile(String path) {
+	}
+
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 	}
 
 }

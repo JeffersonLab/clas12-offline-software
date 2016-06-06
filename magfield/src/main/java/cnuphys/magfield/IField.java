@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
  * @version 1.0
  */
 public interface IField {
+	
+	public String getName();
 
     /**
      * Get the field by trilinear interpolation.

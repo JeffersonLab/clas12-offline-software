@@ -8,6 +8,7 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
+import cnuphys.magfield.MagneticFields;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimTrajectory;
@@ -61,7 +62,7 @@ public class SwimAllRecon implements ISwimAll {
 		}
 		// System.err.println("SWIM " + data.size() + "  recon trax");
 
-		Swimmer swimmer = Swimming.getSwimmer();
+		Swimmer swimmer = new Swimmer(MagneticFields.getActiveField());
 		double stepSize = 5e-4; // m
 		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
 

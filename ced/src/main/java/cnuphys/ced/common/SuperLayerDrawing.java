@@ -779,7 +779,7 @@ public class SuperLayerDrawing {
 	 * @return the projected space point
 	 */
 	public Point3D projectedPoint(double x, double y, double z, Point2D.Double wp) {
-		return GeometryManager.projectedPoint(x, y, z, _iSupl.projectionPlane(), wp);
+		return _view.projectedPoint(x, y, z, _iSupl.projectionPlane(), wp);
 	}
 
 	/**

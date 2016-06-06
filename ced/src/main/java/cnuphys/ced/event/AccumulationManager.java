@@ -20,6 +20,7 @@ import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.PCAL;
 
+import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
 /**
@@ -483,6 +484,15 @@ public class AccumulationManager
 	public double getAverageDCOccupancy(int sect0, int supl0) {
 		return avgDcOccupancy[sect0][supl0];
 	}
+	
+	/**
+	 * New fast mc event
+	 * @param event the generated physics event
+	 */
+	public void newFastMCGenEvent(PhysicsEvent event) {
+		
+	}
+
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
@@ -754,6 +764,15 @@ public class AccumulationManager
 	@Override
 	public void openedNewEventFile(String path) {
 	}
+	
+	/**
+	 * Change the event source type
+	 * @param source the new source: File, ET, FastMC
+	 */
+	@Override
+	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+	}
+
 
 	/**
 	 * Get the values array for the color scale. Note the range is 0..1 so use

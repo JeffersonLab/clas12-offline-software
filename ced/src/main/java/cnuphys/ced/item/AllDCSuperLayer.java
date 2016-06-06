@@ -19,6 +19,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.noise.NoiseManager;
@@ -197,6 +198,10 @@ public class AllDCSuperLayer extends RectangleItem {
 		g.setColor(_style.getLineColor());
 		g.drawPolygon(_lastDrawnPolygon);
 	}
+	
+	//draw a fast MC even rather than an evio event
+	private void fastMCDraw(Graphics g, IContainer container) {
+	}
 
 	/**
 	 * Draw in single event mode
@@ -207,6 +212,13 @@ public class AllDCSuperLayer extends RectangleItem {
 	 *            the rendering container
 	 */
 	private void singleEventDrawItem(Graphics g, IContainer container) {
+		
+		//reroute for fast MC
+		if (_eventManager.isSourceFastMC()) {
+			fastMCDraw(g, container);
+			return;
+		}
+		
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 
 		// draw results of noise reduction? If so will need the parameters

@@ -38,6 +38,7 @@ import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.DCGeometry;
+import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.DCHexSectorItem;
 import cnuphys.ced.item.HexSectorItem;
 
@@ -69,6 +70,9 @@ public class DCXYView extends HexView {
 	private static Stroke stroke = GraphicsUtilities.getStroke(0.5f,
 			LineStyle.SOLID);
 
+	//the z location of the projection plane
+	private double _zplane = 100;
+
 
 	protected static Rectangle2D.Double _defaultWorld;
 
@@ -78,7 +82,7 @@ public class DCXYView extends HexView {
 
 		_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
 				2 * _ysize);
-
+		
 	}
 
 	/**
@@ -89,6 +93,10 @@ public class DCXYView extends HexView {
 	 */
 	private DCXYView(String title) {
 		super(getAttributes(title));
+		
+		//projection plane
+		projectionPlane = GeometryManager.xyPlane(_zplane);
+		
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 		_crossDrawer = new CrossDrawer(this);
@@ -115,6 +123,7 @@ public class DCXYView extends HexView {
 					String s = " superlayer " + (supl0+1) + "    ";
 					g.setColor(_wireColors[supl0]);
 					g.drawLine(x, yc, x+linelen, yc);
+					g.drawLine(x+1, yc+1, x+linelen+1, yc+1);
 					x = x + linelen + 4;
 					g.setColor(Color.white);
 					g.drawString(s, x, yc+4);
@@ -249,12 +258,8 @@ public class DCXYView extends HexView {
 					Point2D.Double wp2 = new Point2D.Double();
 					
 					for (int hit = 0; hit < hitCount; hit++) {
+						projectWire(g, container, sector[hit], superlayer[hit], layer[hit], wire[hit], wp1, wp2, pp1, pp2);
 						g.setColor(_wireColors[superlayer[hit]-1]);
-						Line3D line = DCGeometry.getWire(sector[hit], superlayer[hit], layer[hit], wire[hit]);
-						wp1.setLocation(line.origin().x(), line.origin().y());
-						wp2.setLocation(line.end().x(), line.end().y());
-						container.worldToLocal(pp1, wp1);
-						container.worldToLocal(pp2, wp2);
 						g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
 					}
 					
@@ -267,6 +272,17 @@ public class DCXYView extends HexView {
 		else {
 			drawAccumulatedHits(g, container);
 		}
+	}
+	
+	private void projectWire(Graphics g, IContainer container, int sect1, int supl1, 
+			int layer1, int wire1, Point2D.Double wp1, Point2D.Double wp2, 
+			Point p1, Point p2) {
+		Line3D line = DCGeometry.getWire(sect1, supl1, layer1, wire1);
+		projectClasToWorld(line.origin(), projectionPlane, wp1);
+		projectClasToWorld(line.end(), projectionPlane, wp2);
+		
+		container.worldToLocal(p1, wp1);
+		container.worldToLocal(p2, wp2);
 	}
 	
 	//draw the sector numbers
@@ -362,21 +378,19 @@ public class DCXYView extends HexView {
 
 							Color color = AccumulationManager.getInstance()
 									.getAlphaColor(fract, 128);
+							
+							projectWire(g, container, sect0 + 1,
+									supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
+
 							g.setColor(color);
-							Line3D line = DCGeometry.getWire(sect0 + 1,
-									supl0 + 1, lay0 + 1, wire0 + 1);
-							wp1.setLocation(line.origin().x(),
-									line.origin().y());
-							wp2.setLocation(line.end().x(), line.end().y());
-							container.worldToLocal(pp1, wp1);
-							container.worldToLocal(pp2, wp2);
-							g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
 						} // hitcount > 0
 					}
 				}
 			}
 		}
 	}
+	
+
 
 	// get the attributes to pass to the super constructor
 	private static Object[] getAttributes(String title) {

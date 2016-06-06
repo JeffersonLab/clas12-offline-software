@@ -19,6 +19,7 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.event.data.PCAL;
+import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
 
@@ -314,13 +315,13 @@ public class PCALHexSectorItem extends HexSectorItem {
 			// if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
 			if (true) {
 
-				String locStr = "$lime green$loc xyz " + point3DString(lp)
-						+ " cm";
+				String locStr = "$lime green$loc xyz " + point3DString(lp) + " cm";
 				feedbackStrings.add(locStr);
 
-				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1]
-						+ ", " + uvw[2] + "]";
-				feedbackStrings.add(uvwStr);
+				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
+					String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1] + ", " + uvw[2] + "]";
+					feedbackStrings.add(uvwStr);
+				}
 
 				// any hits?
 

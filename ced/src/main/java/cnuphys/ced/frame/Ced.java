@@ -41,12 +41,15 @@ import cnuphys.ced.clasio.ClasIoEventMenu;
 import cnuphys.ced.clasio.ClasIoEventView;
 import cnuphys.ced.clasio.ClasIoMonteCarloView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DefinitionManager;
 import cnuphys.ced.event.data.FTOF;
+import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.FastMCMenu;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
@@ -87,7 +90,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.97.01";
+	private static final String _release = "build 0.97.02";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -503,6 +506,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		//define menu
 		mmgr.addMenu(DefinitionManager.getInstance().getMenu());
+		
+		//FastMC
+		mmgr.addMenu(new FastMCMenu());
 	}
 	
 	//add to the file menu
@@ -596,7 +602,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// add to the event menu
 	private void addToEventMenu() {
 
-		ClasIoEventManager.createSourceItems(_eventMenu);
+		ClasIoEventManager.getInstance().createSourceItems(_eventMenu);
 
 		// add the noise parameter menu item
 		ActionListener al2 = new ActionListener() {
@@ -714,11 +720,26 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				+ MagneticFields.getActiveFieldDescription();
 		title += "]";
 		
-		//current event file?
-		File file = ClasIoEventManager.getInstance().getCurrentEventFile();
-		if (file != null) {
-			title += "   [Evio: " + file.getName() + "]";
+		EventSourceType estype = ClasIoEventManager.getEventSourceType();
+		switch (estype) {
+		case FILE:
+			File file = ClasIoEventManager.getInstance().getCurrentEventFile();
+			if (file != null) {
+				title += "   [Evio: " + file.getName() + "]";
+			}
+			break;
+		case ET:
+			title += "   [ET]";
+			break;
+		case FASTMC:
+			file = FastMCManager.getInstance().getCurrentFile();
+			if (file != null) {
+				title += "   [FastMC: " + file.getName() + "]";
+			}
+			break;
 		}
+		
+		//current event file?
 		
 		setTitle(title);
 	}
@@ -864,6 +885,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				done = (i >= len);
 			} // !done
 		} // end command arg processing
+		
+		//initialize magnetic fields
+		MagneticFields.initializeMagneticFields();
+
 
 		// initialize geometry
 		GeometryManager.getInstance();
