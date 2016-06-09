@@ -9,7 +9,9 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
+import java.util.Vector;
 
+import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import cnuphys.bCNU.format.DoubleFormat;
@@ -22,9 +24,12 @@ import cnuphys.bCNU.util.MathUtilities;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.projecteddc.ISuperLayer;
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.frame.CedColors;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
@@ -301,6 +306,36 @@ public class SuperLayerDrawing {
 		} //layer loop
 
 	}
+	
+	/**
+	 * Draw hits (and other data) when we are in single hit mode
+	 * 
+	 * @param g
+	 *            The graphics object
+	 * @param container
+	 *            the drawing container
+	 */
+	private void drawFastMCSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
+		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
+		if ((phits == null) || phits.isEmpty()) {
+			return;
+		}
+		
+		for (ParticleHits hits : phits) {
+			List<DetectorHit> dchits = hits.getDCHits();
+			if (dchits != null) {
+				for (DetectorHit hit : dchits) {
+					int sect1 = hit.getSectorId() + 1;
+					int supl1 = hit.getSuperlayerId() + 1;
+					if ((sect1 == _iSupl.sector()) && (supl1 == _iSupl.superlayer())) {
+						int lay1 = hit.getLayerId() + 1;
+						int wire1 = hit.getComponentId() + 1;
+						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), -1, null, null);
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Draw hits (and other data) when we are in single hit mode
@@ -312,7 +347,15 @@ public class SuperLayerDrawing {
 	 */
 	private void drawSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
 
+		if (ClasIoEventManager.getInstance().isSourceFastMC()) {
+			drawFastMCSingleModeHits(g, container, reallyClose);
+			return;
+		}
+		
+		
 		int hitCount = DC.hitCount();
+		
+	//	System.err.println("SINGLEMODEHITS HC: " + hitCount);
 
 		if (hitCount > 0) {
 			Point pp = new Point();
@@ -358,7 +401,7 @@ public class SuperLayerDrawing {
 
 		} // hitcount > 0
 
-		// draw track based hits (docas) and segents
+		// draw track based hits (docas) and segments
 		drawTimeBasedHits(g, container);
 		drawTimeBasedSegments(g, container);
 	}

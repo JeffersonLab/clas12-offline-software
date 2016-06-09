@@ -90,7 +90,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.97.02";
+	private static final String _release = "build 0.97.03";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -109,7 +109,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// event menu
 	private ClasIoEventMenu _eventMenu;
-
+	
 	// busy panel shows working when reading file
 	private static BusyPanel _busyPanel;
 
@@ -442,6 +442,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		};
 
 		pcalHistoGrid = HistoGridView.createHistoGridView("PCAL Histograms", 6, 3, 240, 240, 0.7, maker);
+	}
+	
+	/**
+	 * Accessor for the event menu
+	 * @return the event menu
+	 */
+	public ClasIoEventMenu getEventMenu() {
+		return _eventMenu;
 	}
 
 	//ec strip histogram

@@ -161,6 +161,8 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		}
 
 		boolean nextOK = _eventManager.isNextOK();
+		
+	//	System.err.println("FIX STATE: nextOK: " + nextOK);
 
 		nextItem.setEnabled(nextOK);
 		prevItem.setEnabled(_eventManager.isPrevOK());
@@ -354,7 +356,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		sp.setBackground(Color.white);
 		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
-		_periodEvent = new JCheckBox("Auto Next Event Every ");
+		_periodEvent = new JCheckBox("Auto Next-Event Every ");
 
 		_periodTF = new JTextField("" + _period, 4);
 
@@ -364,11 +366,16 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 			public void actionPerformed(ActionEvent e) {
 				if (_periodEvent.isSelected()) {
 					if (_nextEventTimer == null) {
+						
+						float period = Float.parseFloat(_periodTF.getText());
+						_period = Math.max(0.001f, Math.min(60f, period));
+
 
 						ActionListener nextAl = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
+								//System.err.println("NEXT EVENT period = " + _period);
 								_eventManager.getNextEvent();
 							}
 
@@ -398,7 +405,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 					MenuSelectionManager.defaultManager().clearSelectedPath();
 					try {
 						float period = Float.parseFloat(_periodTF.getText());
-						_period = Math.max(0.01f, Math.min(60f, period));
+						_period = Math.max(0.001f, Math.min(60f, period));
 
 						if (_nextEventTimer != null) {
 							int delay = (int)(1000 * _period);
@@ -478,6 +485,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+		fixState();
 	}
 
 }

@@ -262,6 +262,9 @@ public class ClasIoAccumulationDialog extends JDialog {
 						_eventManager.setAccumulating(false);
 						AccumulationManager.getInstance().notifyListeners(
 								AccumulationManager.ACCUMULATION_FINISHED);
+						
+						//reload last event
+						_eventManager.reloadCurrentEvent();
 
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override

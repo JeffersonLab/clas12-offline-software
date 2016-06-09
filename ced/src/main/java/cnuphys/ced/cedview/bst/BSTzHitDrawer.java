@@ -22,8 +22,7 @@ import cnuphys.ced.geometry.BSTxyPanel;
 public class BSTzHitDrawer implements IDrawable {
 
 	// the event manager
-	private final ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	private final ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	private boolean _visible = true;
 
@@ -83,8 +82,7 @@ public class BSTzHitDrawer implements IDrawable {
 			}
 
 			drawHitsSingleMode(g, container);
-		}
-		else {
+		} else {
 			drawAccumulatedHits(g, container);
 		}
 
@@ -92,8 +90,8 @@ public class BSTzHitDrawer implements IDrawable {
 
 	}
 
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 		for (FeedbackRect rr : _fbRects) {
 			rr.contains(screenPoint, feedbackStrings);
 		}
@@ -104,7 +102,7 @@ public class BSTzHitDrawer implements IDrawable {
 		drawBSTHitsAccumulatedMode(g, container);
 		drawMicroMegasHitsAccumulatedMode(g, container);
 	}
-	
+
 	private void drawBSTHitsAccumulatedMode(Graphics g, IContainer container) {
 
 		int maxHit = AccumulationManager.getInstance().getMaxDgtzFullBstCount();
@@ -113,8 +111,7 @@ public class BSTzHitDrawer implements IDrawable {
 		}
 
 		// first index is layer 0..7, second is sector 0..23
-		int bstFullData[][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzFullBstData();
+		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedDgtzFullBstData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
@@ -126,26 +123,21 @@ public class BSTzHitDrawer implements IDrawable {
 						double fract;
 						if (_view.isSimpleAccumulatedMode()) {
 							fract = ((double) hitCount) / maxHit;
-						}
-						else {
-							fract = Math.log(hitCount + 1.)
-									/ Math.log(maxHit + 1.);
+						} else {
+							fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
 						}
 
-						Color color = AccumulationManager.getInstance()
-								.getColor(fract);
-						_view.drawSVTStrip((Graphics2D) g, container, color,
-								sect0 + 1, lay0 + 1, strip0 + 1);
+						Color color = AccumulationManager.getInstance().getColor(fract);
+						_view.drawSVTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);
 					}
 
 				}
 			}
 		}
 	}
-	
+
 	private void drawMicroMegasHitsAccumulatedMode(Graphics g, IContainer container) {
 	}
-
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
@@ -154,14 +146,14 @@ public class BSTzHitDrawer implements IDrawable {
 	}
 
 	// draw micromegas hits
-	private void drawMicroMegasHitsSingleMode(Graphics g,
-			IContainer container) {
+	private void drawMicroMegasHitsSingleMode(Graphics g, IContainer container) {
 	}
 
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 
 		int hitCount = BST.hitCount();
+//		System.err.println("BST HIT COUNT: " + hitCount);
 		if (hitCount > 0) {
 			int bstsector[] = BST.sector();
 			int bstlayer[] = BST.layer();
@@ -171,19 +163,22 @@ public class BSTzHitDrawer implements IDrawable {
 
 			// panels
 			for (int i = 0; i < hitCount; i++) {
-				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
-						bstsector[i]);
+				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
 				if (panel != null) {
 					for (int zopt = 0; zopt < 3; zopt++) {
 						if (panel.hit[zopt]) {
-							_view.drawSVTStrip(g2, container, Color.red,
-									bstsector[i],
-									bstlayer[i],
-									bststrip[i]);
+//							System.err.println("drawing panel");
+							_view.drawSVTStrip(g2, container, Color.red, bstsector[i], bstlayer[i], bststrip[i]);
 						}
+//						else {
+//							System.err.println("!panel hit for zopt == " + zopt);
+//						}
 					}
 				}
-			} // for on hits
+				else {
+					System.err.println("null BSTZ panel");
+				}
+			} // for loop on hits
 
 		} // hotcount > 0
 

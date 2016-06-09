@@ -91,11 +91,10 @@ public abstract class DetectorItem3D extends Item3D {
 
 	/**
 	 * Obtain the MC truth color, which corresponds
-	 * 
-	 * @param pid
-	 * @param index
-	 * @param showMCTruth
-	 * @return
+	 * to the LundId
+	 * @param pid the particle lund id array
+	 * @param index index into the array
+	 * @return the truth color
 	 */
 	protected static Color truthColor(int pid[], int index) {
 
@@ -110,6 +109,23 @@ public abstract class DetectorItem3D extends Item3D {
 
 		return lid.getStyle().getFillColor();
 	}
+	
+	/**
+	 * Obtain the MC truth color, which corresponds
+	 * to the LundId
+	 * @param lundId
+	 * @return the truth color
+	 */
+	protected static Color truthColor(int lundId) {
+
+		LundId lid = LundSupport.getInstance().get(lundId);
+		if (lid == null) {
+			return dgtzColor;
+		}
+
+		return lid.getStyle().getFillColor();
+	}
+
 
 	/**
 	 * Draw a MC 3D point

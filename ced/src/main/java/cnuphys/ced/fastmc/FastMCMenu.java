@@ -12,6 +12,7 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.clasio.IClasIoEventListener;
+import cnuphys.ced.frame.Ced;
 
 public class FastMCMenu extends JMenu implements ActionListener, IClasIoEventListener {
 	
@@ -26,6 +27,7 @@ public class FastMCMenu extends JMenu implements ActionListener, IClasIoEventLis
 	
 	//the next menu item
 	private JMenuItem _nextItem;
+	
 	/**
 	 * Create a FastMC Menu
 	 */
@@ -95,6 +97,8 @@ public class FastMCMenu extends JMenu implements ActionListener, IClasIoEventLis
 		boolean  goodFile = (_fastMCManager.getCurrentFile() != null);
 		
 		_nextItem.setEnabled(goodFile);
+		
+		Ced.getCed().getEventMenu().fixState();
 	}
 
 }

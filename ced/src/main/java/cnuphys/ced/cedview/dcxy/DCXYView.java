@@ -15,11 +15,13 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Line3D;
 
 import cnuphys.bCNU.drawable.DrawableAdapter;
@@ -37,6 +39,8 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.DCHexSectorItem;
@@ -234,9 +238,54 @@ public class DCXYView extends HexView {
 		getContainer().setAfterDraw(beforeDraw);
 	}
 	
+	//draw a fast MC even rather than an evio event
+	private void fastMCDraw(Graphics g, IContainer container) {
+		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
+		if ((phits == null) || phits.isEmpty()) {
+			return;
+		}
+		
+		Graphics2D g2 = (Graphics2D)g;
+		Stroke oldStroke = g2.getStroke();
+		g2.setStroke(stroke);
+		
+		Point pp1 = new Point();
+		Point pp2 = new Point();
+		Point2D.Double wp1 = new Point2D.Double();
+		Point2D.Double wp2 = new Point2D.Double();
+
+		for (ParticleHits hits : phits) {
+			List<DetectorHit> dchits = hits.getDCHits();
+			if (dchits != null) {
+				for (DetectorHit hit : dchits) {
+					int sect1 = hit.getSectorId() + 1;
+					int supl1 = hit.getSuperlayerId() + 1;
+					int lay1 = hit.getLayerId() + 1;
+					int wire1 = hit.getComponentId() + 1;
+					
+					projectWire(g, container, sect1, supl1, lay1, wire1, wp1, wp2, pp1, pp2);
+					g.setColor(_wireColors[supl1-1]);
+					g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+
+				}
+			}
+		}
+		
+		g2.setStroke(oldStroke);
+
+	}
+
+	
 	private void drawHits(Graphics g, IContainer container) {
 		
 		if (isSingleEventMode()) {
+			
+			if (_eventManager.isSourceFastMC()) {
+				fastMCDraw(g, container);
+				return;
+			}
+
+			
 			if (showMcTruth()) {
 				_mcHitDrawer.draw(g, container);
 				

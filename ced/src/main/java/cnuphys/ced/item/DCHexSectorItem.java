@@ -25,13 +25,13 @@ public class DCHexSectorItem extends HexSectorItem {
 	/**
 	 * Get a hex sector item
 	 * 
-	 * @param layer
+	 * @param logLayer
 	 *            the logical layer
 	 * @param sector
 	 *            the 1-based sector
 	 */
-	public DCHexSectorItem(LogicalLayer layer, DCXYView view, int sector) {
-		super(layer, view, sector);
+	public DCHexSectorItem(LogicalLayer logLayer, DCXYView view, int sector) {
+		super(logLayer, view, sector);
 	}
 
 	/**
