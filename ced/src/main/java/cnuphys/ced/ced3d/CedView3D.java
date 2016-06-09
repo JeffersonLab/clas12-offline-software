@@ -1,10 +1,12 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -29,6 +31,7 @@ public abstract class CedView3D extends BaseView implements
 
 	// the menu bar
 	private final JMenuBar _menuBar;
+	
 
 	// the event manager
 	private final ClasIoEventManager _eventManager = ClasIoEventManager

@@ -1,5 +1,5 @@
 *.class
-*dvcs*.dat
+*lundfiles*.dat
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

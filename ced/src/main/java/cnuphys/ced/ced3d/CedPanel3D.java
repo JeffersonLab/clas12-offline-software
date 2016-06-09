@@ -2,10 +2,13 @@ package cnuphys.ced.ced3d;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractButton;
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.jogamp.opengl.awt.GLJPanel;
@@ -16,6 +19,7 @@ import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PrintUtilities;
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.PIDLegend;
 import bCNU3D.Panel3D;
 
@@ -123,10 +127,30 @@ public class CedPanel3D extends Panel3D {
 	private void addNorth() {
 		JPanel np = new JPanel();
 		np.setLayout(new BorderLayout(20, 0));
+		
+		JButton nextEvent;
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (ClasIoEventManager.getInstance().isNextOK()) {
+					ClasIoEventManager.getInstance().getNextEvent();
+				} else {
+					Toolkit.getDefaultToolkit().beep();
+				}
+			}
+
+		};
+		nextEvent = new JButton("Next");
+		nextEvent.setToolTipText("Next Event");
+		nextEvent.addActionListener(al);
+		GraphicsUtilities.setSizeMini(nextEvent);
+		np.add(nextEvent, BorderLayout.WEST);
+
 
 		_pidLegend = new PIDLegend(this);
 		_volumeAlphaSlider = new AlphaSlider(this, "Volume alpha");
-		np.add(_volumeAlphaSlider, BorderLayout.WEST);
+		np.add(_volumeAlphaSlider, BorderLayout.EAST);
 		np.add(_pidLegend, BorderLayout.CENTER);
 		add(np, BorderLayout.NORTH);
 	}

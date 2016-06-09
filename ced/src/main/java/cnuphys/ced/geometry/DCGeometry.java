@@ -1,7 +1,10 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
+import java.util.List;
+
 import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
 import org.jlab.geom.detector.dc.DCDetector;
@@ -10,6 +13,7 @@ import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
@@ -17,8 +21,8 @@ import org.jlab.geom.prim.Triangle3D;
 
 public class DCGeometry {
 
-	private static ConstantProvider dcDataProvider;
-	private static DCDetector dcDetector;
+	private static ConstantProvider _dcDataProvider;
+	private static DCDetector _dcDetector;
 	private static DCSector sector0;
 
 	private static double shortestWire;
@@ -31,6 +35,18 @@ public class DCGeometry {
 	private static double maxWireZ;
 
 	/**
+	 * Get the list of detector hits (a la FastMC, not evio)
+	 * @param path the path generated from a swim trajectory
+	 * @return the list of hits FastMC geometry only.
+	 */
+	public static List<DetectorHit> getHits(Path3D path) {
+		if (path == null) {
+			return null;
+		}
+		return _dcDetector.getHits(path);
+	}
+	
+	/**
 	 * These are the drift chamber wires from the geometry service. The indices
 	 * are 0-based: [superlayer 0:5][layer 0:5][wire 0:111]
 	 */
@@ -41,16 +57,16 @@ public class DCGeometry {
 	 */
 	public static void initialize() {
 
-		if (dcDataProvider == null) {
-			dcDataProvider = DataBaseLoader.getDriftChamberConstants();
+		if (_dcDataProvider == null) {
+			_dcDataProvider = DataBaseLoader.getDriftChamberConstants();
 		}
 
 		// arghh ugly hack until GEMC is modified
 
 		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
-		dcDetector = dcFactory.createDetectorCLAS(dcDataProvider);
+		_dcDetector = dcFactory.createDetectorCLAS(_dcDataProvider);
 
-		sector0 = dcDetector.getSector(0);
+		sector0 = _dcDetector.getSector(0);
 
 		shortestWire = Double.POSITIVE_INFINITY;
 		longestWire = Double.NEGATIVE_INFINITY;

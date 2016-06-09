@@ -24,7 +24,6 @@ import org.jlab.evio.clas12.EvioSource;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
-import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.GEMCMetaDataContainer;
@@ -362,19 +361,19 @@ public class ClasIoEventManager {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				menu.fixState();
 				notifyEventListeners(getEventSourceType());
 				Ced.getCed().fixTitle();
+				menu.fixState();
 			}
 
 		};
 
 		//radio buttons for event source
-		fileRadioMenuItem = new JRadioButtonMenuItem("Events From Files",
+		fileRadioMenuItem = new JRadioButtonMenuItem("Events From EVIO Files",
 				getEventSourceType() == EventSourceType.FILE);
 		etRadioMenuItem = new JRadioButtonMenuItem("Events From ET",
 				getEventSourceType() == EventSourceType.ET);
-		fastMCRadioMenuItem = new JRadioButtonMenuItem("Events From FastMC",
+		fastMCRadioMenuItem = new JRadioButtonMenuItem("Events From (FastMC) Lund Files",
 				getEventSourceType() == EventSourceType.FASTMC);
 
 		fileRadioMenuItem.addActionListener(sal);
@@ -679,8 +678,7 @@ public class ClasIoEventManager {
 	
 	public void notifyListenersFastMCGenEvent(PhysicsEvent event) {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+
 		_uniqueLundIds = null;
 
 
@@ -699,8 +697,6 @@ public class ClasIoEventManager {
 				}
 			}
 		} //index loop
-
-		finalSteps();
 	}
 
 
@@ -743,12 +739,19 @@ public class ClasIoEventManager {
 		finalSteps();
 	}
 	
+	//final steps
 	private void finalSteps() {
+		if (isAccumulating() || isSourceFastMC()) {
+			return;
+		}
+		
+		//System.err.println("FINAL STEPS");
 		// some scaling factors for gradient displays
 		computeSomeScalingFactors();
 
-		// auto swim?
+		// auto swim? (always for fast mc)
 		if (SwimMenu.getInstance().isAlwaysSwimMC()) {
+			//System.err.println("SWIMMING MC");
 			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0,
 					1);
 		}

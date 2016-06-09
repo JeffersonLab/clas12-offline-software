@@ -7,7 +7,9 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Vector;
 
+import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
@@ -20,6 +22,7 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.noise.NoiseManager;
@@ -199,8 +202,61 @@ public class AllDCSuperLayer extends RectangleItem {
 		g.drawPolygon(_lastDrawnPolygon);
 	}
 	
+//	/**
+//	 * Draw hits (and other data) when we are in single hit mode
+//	 * 
+//	 * @param g
+//	 *            The graphics object
+//	 * @param container
+//	 *            the drawing container
+//	 */
+//	private void drawFastMCSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
+//		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
+//		if ((phits == null) || phits.isEmpty()) {
+//			return;
+//		}
+//		
+//		for (ParticleHits hits : phits) {
+//			List<DetectorHit> dchits = hits.getDCHits();
+//			if (dchits != null) {
+//				for (DetectorHit hit : dchits) {
+//					int sect1 = hit.getSectorId() + 1;
+//					int supl1 = hit.getSuperlayerId() + 1;
+//					if ((sect1 == _iSupl.sector()) && (supl1 == _iSupl.superlayer())) {
+//						int lay1 = hit.getLayerId() + 1;
+//						int wire1 = hit.getComponentId() + 1;
+//						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), -1, null, null);
+//					}
+//				}
+//			}
+//		}
+//	}
+
+	
 	//draw a fast MC even rather than an evio event
 	private void fastMCDraw(Graphics g, IContainer container) {
+		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
+		if ((phits == null) || phits.isEmpty()) {
+			return;
+		}
+		
+		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
+
+		for (ParticleHits hits : phits) {
+			List<DetectorHit> dchits = hits.getDCHits();
+			if (dchits != null) {
+				for (DetectorHit hit : dchits) {
+					int sect1 = hit.getSectorId() + 1;
+					int supl1 = hit.getSuperlayerId() + 1;
+					if ((sect1 == _sector) && (supl1 == _superLayer)) {
+						int lay1 = hit.getLayerId() + 1;
+						int wire1 = hit.getComponentId() + 1;
+						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), wr);
+
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -258,7 +314,7 @@ public class AllDCSuperLayer extends RectangleItem {
 
 					int pdgid = (pid == null) ? -1
 							: pid[i];
-					drawGemcDCHit(g, container, lay1, wire1, noise, pdgid, wr);
+					drawDCHit(g, container, lay1, wire1, noise, pdgid, wr);
 				}
 			} // for
 
@@ -320,7 +376,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * @param wr
 	 *            workspace
 	 */
-	private void drawGemcDCHit(Graphics g, IContainer container, int layer,
+	private void drawDCHit(Graphics g, IContainer container, int layer,
 			int wire, boolean noise, int pid, Rectangle2D.Double wr) {
 
 		if (wire > GeoConstants.NUM_WIRE) {

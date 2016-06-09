@@ -1,13 +1,17 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
+import java.util.List;
+
 import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ftof.FTOFDetector;
 import org.jlab.geom.detector.ftof.FTOFFactory;
 import org.jlab.geom.detector.ftof.FTOFLayer;
 import org.jlab.geom.detector.ftof.FTOFSector;
+import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 
@@ -16,6 +20,13 @@ public class FTOFGeometry {
 	public static final int PANEL_1A = 0;
 	public static final int PANEL_1B = 1;
 	public static final int PANEL_2 = 2;
+	
+	//the overall detector
+	private static FTOFDetector _ftofDetector;
+	
+	//first index -s sector 0..5
+	//2nd index = panel type (superlayer) 0..2 for 1A, 1B, 2
+	private static FTOFLayer[][] _ftofLayers = new FTOFLayer[6][3];
 
 	public static int numPaddles[] = new int[3];
 
@@ -37,15 +48,50 @@ public class FTOFGeometry {
 	public static FTOFPanel[] getFtofPanel() {
 		return _ftofPanel;
 	}
+	
+	/**
+	 * Get the list of detector hits (a la FastMC, not evio)
+	 * @param path the path generated from a swim trajectory for the full detector
+	 * @return the list of hits FastMC geometry only.
+	 */
+	public static List<DetectorHit> getHits(Path3D path) {
+		if (path == null) {
+			return null;
+		}
+		return _ftofDetector.getHits(path);
+	}
+	
+	/**
+	 * Get the layer hits
+	 * @param sect0 the 0-based sector 0..5
+	 * @param ptype the panel type (0,1,2) = (1A, 1B, 2)
+	 * @param path the 3D path
+	 * @return the layer hits
+	 */
+	public static List<DetectorHit> getHits(int sect0, int ptype, Path3D path) {
+		if (path == null) {
+			return null;
+		}
+		return _ftofLayers[sect0][ptype].getHits(path);
+	}
 
 	public static void initialize() {
 		System.out.println("\n=====================================");
 		System.out.println("===  FTOF Geometry Initialization ===");
 		System.out.println("=====================================");
 
-		FTOFDetector ftofDetector = (new FTOFFactory())
+		_ftofDetector = (new FTOFFactory())
 				.createDetectorCLAS(tofDataProvider);
-		_clas_sector0 = ftofDetector.getSector(0);
+		
+		for (int sect = 0; sect < 6; sect++) {
+			FTOFSector ftofSector = _ftofDetector.getSector(sect);
+			for (int ptype = 0; ptype < 3; ptype++) {
+				//only one layer (0)
+				_ftofLayers[sect][ptype] = ftofSector.getSuperlayer(ptype).getLayer(0);
+			}
+		}
+		
+		_clas_sector0 = _ftofDetector.getSector(0);
 
 		// here superlayers are panels 1a, 1b, 2
 		for (int superLayer = 0; superLayer < 3; superLayer++) {
@@ -53,6 +99,8 @@ public class FTOFGeometry {
 			// there is only a layer 0
 			FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superLayer)
 					.getLayer(0);
+			
+			
 			numPaddles[superLayer] = ftofLayer.getNumComponents();
 
 			_ftofPanel[superLayer] = new FTOFPanel(ftofNames[superLayer],

@@ -41,39 +41,34 @@ public class BSTSupport {
 		double z[] = BST.avgLz();
 		int bstsector[] = BST.sector();
 		int bstlayer[] = BST.layer();
-		
-		if ((z != null) && (bstsector != null) && (bstlayer != null)) {
-			try {
-				int len = (z == null) ? 0 : z.length;
-				for (int i = 0; i < len; i++) {
-					for (BSTxyPanel panel : panels) {
-						if ((panel.getLayer() == bstlayer[i])
-								&& (panel.getSector() == bstsector[i])) {
 
-							if (view.showMcTruth()) {
-								int zindex = panel.getZIndex(z[i]);
+		boolean segmentZ = (z != null) && (view.showMcTruth());
 
-								if (zindex >= 0) {
-									panel.hit[zindex] = true;
-								}
+		if ((bstsector != null) && (bstlayer != null)) {
+			int len = (bstsector == null) ? 0 : bstsector.length;
+			for (int i = 0; i < len; i++) {
+				for (BSTxyPanel panel : panels) {
+
+					if ((panel.getLayer() == bstlayer[i]) && (panel.getSector() == bstsector[i])) {
+
+						if (segmentZ) {
+							int zindex = panel.getZIndex(z[i]);
+
+							if (zindex >= 0) {
+								panel.hit[zindex] = true;
 							}
-							else {
-								//note "true (gemc z vals)" data use full z range
-								panel.hit[0] = true;
-								panel.hit[1] = true;
-								panel.hit[2] = true;
-							}
-							
-							break;
+						} else {
+							panel.hit[0] = true;
+							panel.hit[1] = true;
+							panel.hit[2] = true;
 						}
+						
+						break;
 					}
-				} //end for i = 0 < len
-			}
-			catch (NullPointerException e) {
-				Log.getInstance().exception(e);
-				e.printStackTrace();
+				}
 			}
 		}
+		
 
 
 	} //markPanelHits
