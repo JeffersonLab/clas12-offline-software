@@ -134,7 +134,7 @@ public class FastMCManager {
 	
 	//parse the event
 	private void parseEvent(PhysicsEvent event) {
-		clear();
+		_particleHits.clear();
 		if ((event == null) || (event.count() < 1)) {
 			return;
 		}
@@ -192,13 +192,7 @@ public class FastMCManager {
 		//notify all listeners of the event
 		ClasIoEventManager.getInstance().notifyListenersFastMCGenEvent(event);
 	}
-	
-	private void clear() {
-		_particleHits.clear();
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
-	}
-	
+		
 	/**
 	 * Get the hits for all particles
 	 * @return the detector hits
@@ -241,6 +235,48 @@ public class FastMCManager {
 		return _genEvent;
 	}
 	
+	/**
+	 * Get the data needed to run the SNR analysis
+	 * @return the data for the snr analysis
+	 */
+	public NoiseData getNoiseData() {
+		
+		if ((_particleHits == null) || (_particleHits.isEmpty())) {
+			return null;
+		}
+		
+		//count DC hits
+		int count = 0;
+		for (ParticleHits phits : _particleHits) {
+			count += phits.DCHitCount();
+		}
+		
+		if (count == 0) {
+			return null;
+		}
+
+		NoiseData nd = new NoiseData();
+		nd.count = count;
+		nd.sector = new int[count];
+		nd.superlayer = new int[count];
+		nd.layer = new int[count];
+		nd.wire = new int[count];
+		int index = 0;
+		for (ParticleHits phits : _particleHits) {
+			List<DetectorHit> ldh = phits.getDCHits();
+			if (ldh != null) {
+				for (DetectorHit hit : ldh) {
+					nd.sector[index] = hit.getSectorId() + 1;
+					nd.superlayer[index] = hit.getSuperlayerId() + 1;
+					nd.layer[index] = hit.getLayerId() + 1;
+					nd.wire[index] = hit.getComponentId() + 1;
+					index++;
+				}
+			}
+		}
+		
+		return nd;
+	}
 
 
 }

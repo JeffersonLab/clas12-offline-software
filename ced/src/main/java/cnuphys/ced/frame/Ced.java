@@ -675,6 +675,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		else if (pname.equals(SwimMenu.TRAJ_CLEARED_RECON_PROP)) {
 		}
 		else if (pname.equals(SwimMenu.SWIM_ALL_MC_PROP)) {
+	//		System.err.println("Curent Thread: " + Thread.currentThread().getName());
 			ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 					.getMCSwimmer();
 			if (allSwimmer != null) {
@@ -690,6 +691,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 
 	}
+	
 
 	private void createBusyPanel() {
 		getJMenuBar().add(Box.createHorizontalStrut(20));

@@ -43,7 +43,7 @@ public class FastMCMenu extends JMenu implements ActionListener, IClasIoEventLis
 
 		
 		fixMenuState();
-		setEnabled(false);
+//		setEnabled(false);
 	}
 	
 	//add a menu item
@@ -85,7 +85,7 @@ public class FastMCMenu extends JMenu implements ActionListener, IClasIoEventLis
 			_fastMCManager.nextEvent();
 		}
 		else if (o == _acceptanceItem) {
-			//TODO implement
+			AcceptanceManager.getInstance().defineAcceptance();
 		}
 		
 		fixMenuState();

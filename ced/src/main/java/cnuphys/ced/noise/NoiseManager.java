@@ -8,6 +8,8 @@ import org.jlab.evio.clas12.EvioDataEvent;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.NoiseData;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -27,7 +29,7 @@ public class NoiseManager implements IClasIoEventListener {
 	private Clas12NoiseAnalysis noisePackage = new Clas12NoiseAnalysis();
 
 	// result container
-	private Clas12NoiseResult noiseResults = new Clas12NoiseResult();
+	private Clas12NoiseResult _noiseResults = new Clas12NoiseResult();
 
 	// event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -57,7 +59,7 @@ public class NoiseManager implements IClasIoEventListener {
 	 * @return the noise array
 	 */
 	public boolean[] getNoise() {
-		return noiseResults.noise;
+		return _noiseResults.noise;
 	}
 
 	/**
@@ -78,13 +80,23 @@ public class NoiseManager implements IClasIoEventListener {
 	 * @param event the generated physics event
 	 */
 	public void newFastMCGenEvent(PhysicsEvent event) {
+		noisePackage.clear();
+		_noiseResults.clear();
+		
+		NoiseData noiseData = FastMCManager.getInstance().getNoiseData();
+		
+		if ((noiseData != null) && (noiseData.count > 0)) {
+			noisePackage.findNoise(noiseData.sector,
+					noiseData.superlayer, noiseData.layer,
+					noiseData.wire, _noiseResults);
+		}
 	}
 	
 
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 		noisePackage.clear();
-		noiseResults.clear();
+		_noiseResults.clear();
 		
 		int hitCount = DC.hitCount();
 		
@@ -96,7 +108,7 @@ public class NoiseManager implements IClasIoEventListener {
 			
 			noisePackage.findNoise(sector,
 					superlayer, layer,
-					wire, noiseResults);
+					wire, _noiseResults);
 		}		
 	}
 

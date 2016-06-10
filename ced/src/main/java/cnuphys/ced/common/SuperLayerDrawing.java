@@ -191,14 +191,11 @@ public class SuperLayerDrawing {
 		for (int wire = 0; wire < parameters.getNumWire(); wire++) {
 			boolean leftSeg = parameters.getLeftSegments().checkBit(wire);
 			boolean rightSeg = parameters.getRightSegments().checkBit(wire);
-			if (leftSeg || rightSeg) {
-				if (leftSeg) {
-					drawMask(g, container, wire, parameters.getLeftLayerShifts(), 1);
-				}
-				if (rightSeg) {
-					drawMask(g, container, wire, parameters.getRightLayerShifts(), -1);
-				}
-
+			if (leftSeg) {
+				drawMask(g, container, wire, parameters.getLeftLayerShifts(), 1);
+			}
+			if (rightSeg) {
+				drawMask(g, container, wire, parameters.getRightLayerShifts(), -1);
 			}
 		}
 	}

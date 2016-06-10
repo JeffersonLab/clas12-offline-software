@@ -235,6 +235,20 @@ public class AllDCSuperLayer extends RectangleItem {
 	
 	//draw a fast MC even rather than an evio event
 	private void fastMCDraw(Graphics g, IContainer container) {
+		
+		// draw results of noise reduction? If so will need the parameters
+		// (which have the results)
+		NoiseReductionParameters parameters = _noiseManager.getParameters(
+				_sector - 1, _superLayer - 1);
+		// NoiseReductionParameters parameters =
+		// NoiseEventListener.getInstance()
+		// .getNoiseParameters(_sector - 1, _superLayer - 1);
+
+		// show the noise segment masks?
+		if (_view.showMasks()) {
+			drawMasks(g, container, parameters);
+		}
+
 		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
 		if ((phits == null) || phits.isEmpty()) {
 			return;
