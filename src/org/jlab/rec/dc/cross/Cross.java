@@ -1,0 +1,332 @@
+package org.jlab.rec.dc.cross;
+
+import java.util.ArrayList;
+
+import org.jlab.geom.prim.Point3D;
+
+import org.jlab.rec.dc.GeometryLoader;
+import org.jlab.rec.dc.segment.Segment;
+
+/**
+ * The crosses are objects used to find tracks and are characterized by a 3-D point and a direction unit vector.
+ * @author ziegler
+ *
+ */
+public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
+
+	/**
+	 * serial id
+	 */
+	private static final long serialVersionUID = 5317526429163382618L;
+
+	/**
+	 * 
+	 * @param sector the sector (1...6)
+	 * @param region the region (1...3)
+	 * @param rid the cross ID (if there are only 3 crosses in the event, the ID corresponds to the region index
+	 */
+	public Cross(int sector, int region, int rid) {
+		this._Sector = sector;
+		this._Region = region;
+		this._Id = rid;
+	}
+	
+	private int _Sector;      							//	    sector[1...6]
+	private int _Region;    		 					//	    region [1,...3]
+	private int _Id;									//		cross Id
+
+	// point parameters:
+	private Point3D _Point;
+	private Point3D _PointErr;
+	private Point3D _Dir;
+	private Point3D _DirErr;
+	
+	/**
+	 * 
+	 * @return the sector of the cross
+	 */
+	public int get_Sector() {
+		return _Sector;
+	}
+
+	/**
+	 * Sets the sector
+	 * @param _Sector  the sector of the cross
+	 */
+	public void set_Sector(int _Sector) {
+		this._Sector = _Sector;
+	}
+
+	/**
+	 * 
+	 * @return the region of the cross
+	 */
+	public int get_Region() {
+		return _Region;
+	}
+
+	/**
+	 * Sets the region
+	 * @param _Region  the region of the cross
+	 */
+	public void set_Region(int _Region) {
+		this._Region = _Region;
+	}
+
+	/**
+	 * 
+	 * @return the id of the cross
+	 */
+	public int get_Id() {
+		return _Id;
+	}
+
+	/**
+	 * Sets the cross ID
+	 * @param _Id  the id of the cross
+	 */
+	public void set_Id(int _Id) {
+		this._Id = _Id;
+	}
+
+	/**
+	 * 
+	 * @return a 3-D point characterizing the position of the cross in the tilted coordinate system.
+	 */
+	public Point3D get_Point() {
+		return _Point;
+	}
+
+	/**
+	 * Sets the cross 3-D point 
+	 * @param _Point  a 3-D point characterizing the position of the cross in the tilted coordinate system.
+	 */
+	public void set_Point(Point3D _Point) {
+		this._Point = _Point;
+	}
+
+	/**
+	 * 
+	 * @return a 3-dimensional error on the 3-D point characterizing the position of the cross in the tilted coordinate system.
+	 */
+	public Point3D get_PointErr() {
+		return _PointErr;
+	}
+
+	/**
+	 * Sets a 3-dimensional error on the 3-D point 
+	 * @param _PointErr a 3-dimensional error on the 3-D point characterizing the position of the cross in the tilted coordinate system.
+	 */
+	public void set_PointErr(Point3D _PointErr) {
+		this._PointErr = _PointErr;
+	}
+
+	/**
+	 * 
+	 * @return the cross unit direction vector
+	 */
+	public Point3D get_Dir() {
+		return _Dir;
+	}
+
+	/**
+	 * Sets the cross unit direction vector
+	 * @param _Dir the cross unit direction vector
+	 */
+	public void set_Dir(Point3D _Dir) {
+		this._Dir = _Dir;
+	}
+
+	/**
+	 * 
+	 * @return the cross unit direction vector
+	 */
+	public Point3D get_DirErr() {
+		return _DirErr;
+	}
+
+	/**
+	 * Sets the cross unit direction vector
+	 * @param _DirErr the cross unit direction vector
+	 */
+	public void set_DirErr(Point3D _DirErr) {
+		this._DirErr = _DirErr;
+	}
+
+	/**
+	 * 
+	 * @return serialVersionUID
+	 */
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+
+	/**
+	 * Sorts crosses by azimuth angle values
+	 */
+	@Override
+	public int compareTo(Cross arg) {
+		double theta_rad1 = Math.atan2(this.get_Point().y(),this.get_Point().x());
+		double theta_deg1 = (theta_rad1/Math.PI*180.) + (theta_rad1 > 0 ? 0 : 360.);
+		double theta_rad2 = Math.atan2(arg.get_Point().y(),arg.get_Point().x());
+		double theta_deg2 = (theta_rad2/Math.PI*180.) + (theta_rad2 > 0 ? 0 : 360.);
+		
+		if(theta_deg1<theta_deg2) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+
+	private Segment _seg1;
+	private Segment _seg2;
+	
+	/**
+	 * Set the first segment (corresponding to the first superlayer in a region)
+	 * @param seg1 the segment (in the first superlayer) which is used to make a cross
+	 */
+	public void set_Segment1(Segment seg1) {
+		this._seg1 = seg1;
+	}
+
+	/**
+	 * Set the second segment (corresponding to the second superlayer in a region)
+	 * @param seg2 the segment (in the second superlayer) which is used to make a cross
+	 */
+	public void set_Segment2(Segment seg2) {
+		this._seg2 = seg2;
+	}
+
+	/**
+	 * 
+	 * @return he segment (in the first superlayer) which is used to make a cross
+	 */
+	public Segment get_Segment1() {
+		return _seg1;
+	}
+	
+	/**
+	 * 
+	 * @return the segment (in the second superlayer) which is used to make a cross
+	 */
+	public Segment get_Segment2() {
+		return _seg2;
+	}
+
+	/**
+	 * Sets the cross parameters: the position and direction unit vector
+	 */
+	public void set_CrossParams() {
+		
+		double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
+		
+		double wy_over_wx = (Math.cos(Math.toRadians(6.))/Math.sin(Math.toRadians(6.)));
+				
+		double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
+		double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
+		double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();
+		double val_it2 = this._seg2.get_fittedCluster().get_clusterLineFitIntercept();
+		
+		double x = 0.5*(val_it1+val_it2)+0.5*z*(val_sl1+val_sl2);
+		double y = 0.5*wy_over_wx*(val_it2-val_it1)+0.5*wy_over_wx*z*(val_sl2-val_sl1);
+		
+		      
+		this.set_Point(new Point3D(x,y,z));
+		
+		
+		double tanThX = val_sl2;
+		double tanThY = Math.atan2(y,z);
+		double uz = 1./Math.sqrt( 1 + tanThX*tanThX +tanThY*tanThY );
+		double ux = uz*tanThX;
+		double uy = uz*tanThY;
+		
+		Point3D dirVec = new Point3D(ux,uy,uz);
+		this.set_Dir(dirVec);
+		
+			
+		if(this.get_Dir().z()==0) {
+			System.err.print("Error in tangent to trajectory calculation");
+			return;
+		}
+		
+		// Error ...  propagated from errors on slopes and intercepts
+		double err_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlopeErr();
+		double err_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlopeErr();
+		double err_it1 = this._seg1.get_fittedCluster().get_clusterLineFitInterceptErr();
+		double err_it2 = this._seg2.get_fittedCluster().get_clusterLineFitInterceptErr();
+
+		double err_x = 0.5*Math.sqrt(err_it1*err_it1+err_it2*err_it2 + z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
+		double err_y = 0.5*wy_over_wx*Math.sqrt(err_it1*err_it1+err_it2*err_it2 +z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
+		
+		
+		this.set_PointErr(new Point3D(err_x,err_y,0));		
+		
+		double inv_N_sq = 1./(0.25*val_sl1*val_sl1*(1+wy_over_wx*wy_over_wx) + 0.25*val_sl2*val_sl2*(1+wy_over_wx*wy_over_wx) +0.5*val_sl1*val_sl2*(1-wy_over_wx*wy_over_wx) +1); 
+		double inv_N = Math.sqrt(inv_N_sq); 
+		double del_inv_n_del_sl1err = -0.25*(val_sl1*(1+wy_over_wx*wy_over_wx)+val_sl2*(1-wy_over_wx*wy_over_wx))*inv_N*inv_N_sq;
+		double del_inv_n_del_sl2err = -0.25*(val_sl2*(1+wy_over_wx*wy_over_wx)+val_sl1*(1-wy_over_wx*wy_over_wx))*inv_N*inv_N_sq;
+		
+		double err_x2 = 0.5*(inv_N + (val_sl1+val_sl2)*del_inv_n_del_sl1err)*(inv_N + (val_sl1+val_sl2)*del_inv_n_del_sl1err)*err_sl1*err_sl1
+				+ 0.5*(inv_N + (val_sl1+val_sl2)*del_inv_n_del_sl2err)*(inv_N + (val_sl1+val_sl2)*del_inv_n_del_sl2err)*err_sl2*err_sl2;
+		
+		double err_y2 = 0.5*(-inv_N*wy_over_wx + (val_sl2-val_sl1)*wy_over_wx*del_inv_n_del_sl1err)*(-inv_N*wy_over_wx + (val_sl2-val_sl1)*wy_over_wx*del_inv_n_del_sl1err)*err_sl1*err_sl1
+				+ 0.5*(inv_N*wy_over_wx + (val_sl2-val_sl1)*del_inv_n_del_sl2err)*(inv_N*wy_over_wx + (val_sl2-val_sl1)*del_inv_n_del_sl2err)*err_sl2*err_sl2;
+		
+		double err_z2 = del_inv_n_del_sl1err*del_inv_n_del_sl1err*err_sl1*err_sl1 + del_inv_n_del_sl2err*del_inv_n_del_sl2err*err_sl2*err_sl2;
+		
+		double err_xDir = Math.sqrt(err_x2);
+		double err_yDir = Math.sqrt(err_y2);
+		double err_zDir = Math.sqrt(err_z2);
+		
+
+		Point3D estimDirErr = new Point3D(err_xDir,err_yDir,err_zDir);
+		
+		this.set_DirErr(estimDirErr);
+		
+	}
+
+	
+	/**
+	 * 
+	 * @return the track info.
+	 */
+	public String printInfo() {
+		String s = "DC cross: ID "+this.get_Id()+" Sector "+this.get_Sector()+" Region "+this.get_Region()
+				+" Point "+this.get_Point().toString()+"  Dir "+this.get_Dir().toString();
+		return s;
+	}
+
+	/**
+	 * 
+	 * @param X
+	 * @param Y
+	 * @param Z
+	 * @return rotated coords from tilted sector coordinate system to the sector coordinate system
+	 */
+	public Point3D getCoordsInSector(double X, double Y, double Z) {
+		double rz =  -X*Math.sin(Math.toRadians(25.))+Z*Math.cos(Math.toRadians(25.));
+        double rx =  X*Math.cos(Math.toRadians(25.))+Z*Math.sin(Math.toRadians(25.));
+        
+        return new Point3D(rx,Y,rz);
+	}
+
+	/**
+	 * 
+	 * @param X
+	 * @param Y
+	 * @param Z
+	 * @return rotated coords from tilted sector coordinate system to the lab frame
+	 */
+	public Point3D getCoordsInLab(double X,double Y,double Z) {
+		Point3D PointInSec = this.getCoordsInSector(X, Y, Z);
+		double rx =  PointInSec.x()*Math.cos((this.get_Sector()-1)*Math.toRadians(60.))-PointInSec.y()*Math.sin((this.get_Sector()-1)*Math.toRadians(60.));
+        double ry =  PointInSec.x()*Math.sin((this.get_Sector()-1)*Math.toRadians(60.))+PointInSec.y()*Math.cos((this.get_Sector()-1)*Math.toRadians(60.));
+       
+        return new Point3D(rx,ry,PointInSec.z());
+	}
+	
+	
+	
+	
+}
