@@ -27,6 +27,8 @@ public class Swimming {
 	 * Clear all the mc trajectories.
 	 */
 	public static void clearMCTrajectories() {
+//		System.err.println("CLEAR MC TRAJ");
+//		(new Throwable()).printStackTrace();
 		_mcTrajectories.clear();
 		notifyListeners();
 	}

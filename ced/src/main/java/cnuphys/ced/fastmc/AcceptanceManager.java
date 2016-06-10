@@ -3,6 +3,9 @@ package cnuphys.ced.fastmc;
 import org.jlab.clas.physics.PhysicsEvent;
 
 public class AcceptanceManager {
+	
+	//acceptance dialog
+	private AcceptanceDialog _dialog;
 
 	private static AcceptanceManager _instance;
 	private AcceptanceManager() {	
@@ -54,6 +57,10 @@ public class AcceptanceManager {
 	 * Define the acceptance
 	 */
 	public void defineAcceptance() {
-	//TODO implement
+	
+		if (_dialog == null) {
+			_dialog = new AcceptanceDialog();
+		}
+		_dialog.setVisible(true);
 	}
 }

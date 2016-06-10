@@ -776,10 +776,10 @@ public class MagneticFields {
 	/**
 	 * Add a magnetic field change listener
 	 * 
-	 * @param MagneticFieldChangeListener the listener to add
+	 * @param magChangeListener the listener to add
 	 */
 	public static void addMagneticFieldChangeListener(
-			MagneticFieldChangeListener MagneticFieldChangeListener) {
+			MagneticFieldChangeListener magChangeListener) {
 
 		if (_listenerList == null) {
 			_listenerList = new EventListenerList();
@@ -787,27 +787,27 @@ public class MagneticFields {
 
 		// avoid adding duplicates
 		_listenerList.remove(MagneticFieldChangeListener.class,
-				MagneticFieldChangeListener);
+				magChangeListener);
 		_listenerList.add(MagneticFieldChangeListener.class,
-				MagneticFieldChangeListener);
+				magChangeListener);
 	}
 
 	/**
 	 * Remove a MagneticFieldChangeListener.
 	 * 
-	 * @param MagneticFieldChangeListener the MagneticFieldChangeListener to
+	 * @param magChangeListener the MagneticFieldChangeListener to
 	 *            remove.
 	 */
 
 	public static void removeMagneticFieldChangeListener(
-			MagneticFieldChangeListener MagneticFieldChangeListener) {
+			MagneticFieldChangeListener magChangeListener) {
 
-		if ((MagneticFieldChangeListener == null) || (_listenerList == null)) {
+		if ((magChangeListener == null) || (_listenerList == null)) {
 			return;
 		}
 
 		_listenerList.remove(MagneticFieldChangeListener.class,
-				MagneticFieldChangeListener);
+				magChangeListener);
 	}
 
 	// convenience method for adding a radio button
