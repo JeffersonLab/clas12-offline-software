@@ -19,9 +19,9 @@ public class ForwardPanel3D extends CedPanel3D {
 			SHOW_FTOF, SHOW_GEMC_DOCA, SHOW_TB_DOCA };
 	
 
-	public ForwardPanel3D(float angleX, float angleY, float angleZ,
+	public ForwardPanel3D(CedView3D view, float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
-		super(angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
+		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
 	}
 
 	@Override

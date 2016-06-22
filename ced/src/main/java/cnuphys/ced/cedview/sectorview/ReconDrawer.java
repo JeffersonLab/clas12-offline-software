@@ -12,6 +12,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.FTOF;
+import cnuphys.ced.fastmc.FastMCManager;
 
 public class ReconDrawer extends SectorViewDrawer {
 
@@ -27,7 +28,7 @@ public class ReconDrawer extends SectorViewDrawer {
 
 		_fbRects.clear();
 		
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

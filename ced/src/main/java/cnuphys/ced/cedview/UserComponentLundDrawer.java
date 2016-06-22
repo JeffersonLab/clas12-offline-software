@@ -6,6 +6,7 @@ import java.util.Vector;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.AUserComponentDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 
 /**
@@ -37,7 +38,7 @@ public class UserComponentLundDrawer extends AUserComponentDrawer {
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (((CedView) _view).showMcTruth() && !_eventManager.isAccumulating()) {
+		if (((CedView) _view).showMcTruth() && !_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
 			super.draw(g, container);
 		}
 	}

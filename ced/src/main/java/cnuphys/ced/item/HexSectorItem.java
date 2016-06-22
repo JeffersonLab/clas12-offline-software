@@ -16,6 +16,7 @@ import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 
 public abstract class HexSectorItem extends PolygonItem {
@@ -68,7 +69,7 @@ public abstract class HexSectorItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		Graphics2D g2 = (Graphics2D) g;
 
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

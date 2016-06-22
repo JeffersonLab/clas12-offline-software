@@ -652,8 +652,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 		// acceptance for fast MC
 		if (_eventManager.isSourceFastMC()) {
-			PhysicsEvent fmcEvent = FastMCManager.getInstance().getCurrentGenEvent();
-			feedbackStrings.add("$orange red$FastMC: " + AcceptanceManager.getInstance().unacceptedReason(fmcEvent));
+			if (!FastMCManager.getInstance().isStreaming()) {
+				feedbackStrings.add("$orange red$" + AcceptanceManager.getInstance().acceptanceResult());
+			}
 		}
 
 		// get the sector
@@ -764,7 +765,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void trajectoriesChanged() {
-		if (!_eventManager.isAccumulating()) {
+		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
 			getContainer().refresh();
 		}
 	}

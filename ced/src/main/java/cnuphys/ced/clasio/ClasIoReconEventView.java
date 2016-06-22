@@ -113,18 +113,73 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 					else {
 						Log.getInstance().warning(
 								"Bad pid: " + pid[i] + " in ClasIoReconEventView");
-					}
-
-					// public TrajectoryRowData(LundId lundId, double xo,
-					// double yo, double zo,
-					// double p, double theta, double phi) {
-
-				}
+					}					
+				} //loop over num hb tracks
 
 				model.setData(data);
 				model.fireTableDataChanged();
 				_trajectoryTable.repaint();
 			} //numTracks > 0
+			
+			
+			//cvt tracks?
+			int q[] = ColumnData.getIntArray("CVTRec::Tracks.q");
+
+			numTracks = (q == null) ? 0 : q.length;
+
+			if (numTracks > 0) {
+				double zz0[] = ColumnData
+						.getDoubleArray("CVTRec::Tracks.z0");
+				double d0[] = ColumnData
+						.getDoubleArray("CVTRec::Tracks.d0");
+				double phi0[] = ColumnData
+						.getDoubleArray("CVTRec::Tracks.phi0");
+				double tandip[] = ColumnData
+						.getDoubleArray("CVTRec::Tracks.tandip");
+				double pt[] = ColumnData
+						.getDoubleArray("CVTRec::Tracks.pt");
+
+				
+				for (int i = 0; i < numTracks; i++) {
+					int thePid = 22;  //photon
+					if (q[i] > 0) {
+						thePid = 2212;  //assume proton for pos charge
+					}
+					else if (q[i] < 0) {
+						thePid = 11; //assume electron for neg charge
+					}
+					
+					LundId lid = LundSupport.getInstance().get(thePid);
+
+					
+					//convert mm to cm
+					double x0 = d0[i]*Math.cos(phi0[i])/10;
+					double y0 = d0[i]*Math.sin(phi0[i])/10;
+					double z0 = zz0[i]/10;
+					
+					double px = pt[i]*Math.cos(phi0[i]);
+					double py = pt[i]*Math.sin(phi0[i]);
+					double pz = pt[i]*tandip[i];
+					
+					double p = Math.sqrt(px * px + py * py + pz * pz); // GeV
+					double phi = Math.atan2(py, px);
+					double theta = Math.acos(pz / p);
+
+					// note conversions to degrees and MeV
+					TrajectoryRowData row = new TrajectoryRowData(lid, x0,
+							y0, z0, 1000 * p, Math.toDegrees(theta),
+							Math.toDegrees(phi));
+					data.add(row);
+
+
+				}
+				
+				model.setData(data);
+				model.fireTableDataChanged();
+				_trajectoryTable.repaint();
+
+			} //num tracks > 0
+
 		} // !accumulating
 	}
 

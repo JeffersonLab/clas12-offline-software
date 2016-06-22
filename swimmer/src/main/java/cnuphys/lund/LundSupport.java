@@ -108,8 +108,10 @@ public class LundSupport {
 	private void initialize() {
 		_lundIds = new ArrayList<LundId>(400);
 		
-		//Geantinos
-		_lundIds.add(new LundId("Lepton", "G" + SUPERPLUS, 0, 0, 3, 0));
+		//Geantinos or generic 
+		_lundIds.add(new LundId("Lepton", "G" + SUPERPLUS,   0, 0,  3, 0));
+		_lundIds.add(new LundId("Lepton", "G" + SUPERMINUS, -1, 0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "G" + SUPERZERO,   -2, 0, 0, 0));
 		
 		
 		_lundIds.add(new LundId("InterBoson", "g", 21, 0, 0, 2));

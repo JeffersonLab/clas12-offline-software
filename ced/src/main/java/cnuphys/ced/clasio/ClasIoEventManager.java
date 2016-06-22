@@ -63,8 +63,6 @@ public class ClasIoEventManager {
 		FILE, ET, FASTMC
 	}
 	
-	private boolean _enabled = true;
-
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
 
@@ -124,7 +122,7 @@ public class ClasIoEventManager {
 
 		_uniqueLundIds = new Vector<LundId>();
 
-		if (this.isSourceFastMC()) {
+		if (isSourceFastMC() && !FastMCManager.getInstance().isStreaming()) {
 			PhysicsEvent event = FastMCManager.getInstance().getCurrentGenEvent();
 			if ((event != null) && (event.count() > 0)) {
 				for (int index = 0; index < event.count(); index++) {
@@ -310,7 +308,6 @@ public class ClasIoEventManager {
 				
 				busyPanel.setVisible(false);
 				Ced.getCed().fixTitle();
-				setEnabled(true);
 				try {
 					getNextEvent();
 				} catch (Exception e) {
@@ -556,10 +553,6 @@ public class ClasIoEventManager {
 	 */
 	public EvioDataEvent getNextEvent() {
 
-		if (!isEnabled()) {
-			Toolkit.getDefaultToolkit().beep();
-			return null;
-		}
 
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
 		switch (estype) {
@@ -903,14 +896,6 @@ public class ClasIoEventManager {
 		}
 		int index = Arrays.binarySearch(allBanks, bankName);
 		return index >= 0;
-	}
-
-	public void setEnabled(boolean enabled) {
-		_enabled = enabled;
-	}
-
-	public boolean isEnabled() {
-		return _enabled;
 	}
 
 }

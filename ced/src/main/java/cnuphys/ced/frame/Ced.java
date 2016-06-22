@@ -90,7 +90,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.97.03";
+	private static final String _release = "build 0.97.06";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -232,6 +232,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				_virtualView.moveTo(_ftCal3DView, 11, VirtualView.BOTTOMRIGHT);
 			}
 			Log.getInstance().config("reset views on virtual dekstop");
+//			_virtualView.reportVisibility();
 		}
 		_firstTime++;
 	}
@@ -596,7 +597,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 */
 	public static void setEventNumberLabel(int num) {
 		
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 		if (num < 0) {
@@ -923,6 +924,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Log.getInstance().info(Environment.getInstance().toString());
 		Log.getInstance().config("CLAS12DIR: " + clas12dir);
 		Log.getInstance().info("ced is ready.");
+//		Environment.getInstance().say("c e d is ready");
 
 		// test demo plugin
 		// new CedDemoPlugin();

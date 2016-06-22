@@ -193,8 +193,22 @@ public class BSTxyHitDrawer implements IDrawable {
 			
 			// panels
 			for (int i = 0; i < hitCount; i++) {
+				
+				//HACK GEO SECTOR DOESN"T MATCH REAL
+				//TODO Undo hack when geometry fixed
+				
+				int superlayer = (bstlayer[i] - 1) / 2;
+                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
+				if (hackSect == 0) hackSect = numSect;
+				
+				
 				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
-						bstsector[i]);
+						hackSect);
+				
+//				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+//						bstsector[i]);
+				
 				if (panel != null) {
 					_view.drawSVTPanel(g2, container, panel, Color.red);
 				}

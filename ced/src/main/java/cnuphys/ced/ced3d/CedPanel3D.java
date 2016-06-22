@@ -11,6 +11,7 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.awt.GLJPanel;
 
 import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
@@ -19,6 +20,7 @@ import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PrintUtilities;
+import cnuphys.bCNU.view.VirtualView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.PIDLegend;
 import bCNU3D.Panel3D;
@@ -74,6 +76,8 @@ public class CedPanel3D extends Panel3D {
 
 	// display array labels
 	private String _cbaLabels[];
+	
+	private CedView3D _view;
 
 	/*
 	 * The panel that holds the 3D objects
@@ -90,10 +94,11 @@ public class CedPanel3D extends Panel3D {
 	 * 
 	 * @param zdist the initial viewer z distance should be negative
 	 */
-	public CedPanel3D(float angleX, float angleY, float angleZ, float xDist,
+	public CedPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist,
 			float yDist, float zDist, String... cbaLabels) {
 		super(angleX, angleY, angleZ, xDist, yDist, zDist);
 
+		_view = view;
 		_cbaLabels = cbaLabels;
 
 		gljpanel.setBorder(new CommonBorder());
@@ -122,6 +127,17 @@ public class CedPanel3D extends Panel3D {
 		}
 		fixSize();
 	}
+	
+	@Override
+	public void display(GLAutoDrawable drawable) {
+		if (VirtualView.getInstance().isViewVisible(_view)) {
+			super.display(drawable);
+		}
+		else {
+			System.err.println("SKIPPED");
+		}
+	}
+	
 
 	// add north panel
 	private void addNorth() {

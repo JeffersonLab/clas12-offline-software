@@ -22,6 +22,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.swim.Swimming;
 
@@ -45,6 +46,16 @@ public abstract class CedView3D extends BaseView implements
 	private JMenuItem _pngMenuItem;
 	private JMenuItem _refreshItem;
 
+	/**
+	 * Create a 3D view
+	 * @param title
+	 * @param angleX
+	 * @param angleY
+	 * @param angleZ
+	 * @param xDist
+	 * @param yDist
+	 * @param zDist
+	 */
 	public CedView3D(String title, float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
 		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
@@ -141,7 +152,7 @@ public abstract class CedView3D extends BaseView implements
 
 	@Override
 	public void trajectoriesChanged() {
-		if (!_eventManager.isAccumulating()) {
+		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
 			_panel3D.refresh();
 		}
 	}

@@ -12,6 +12,7 @@ import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -78,7 +79,7 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 
-		if (_eventManager.isAccumulating()) {
+		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

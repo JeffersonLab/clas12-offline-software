@@ -17,6 +17,7 @@ import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.magfield.GridCoordinate;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
@@ -94,7 +95,7 @@ public class MagFieldItem extends AItem {
 			return;
 		}
 
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

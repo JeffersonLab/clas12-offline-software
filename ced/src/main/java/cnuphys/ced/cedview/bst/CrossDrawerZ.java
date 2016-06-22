@@ -72,15 +72,15 @@ public class CrossDrawerZ extends BSTzViewDrawer {
 		Point2D.Double wp3 = new Point2D.Double();
 		Point2D.Double wp4 = new Point2D.Double();
 
-		double labx[] = BMT.crossX();
+		double labx[] = BST.crossX();
 
 		if (labx != null) {
-			double laby[] = BMT.crossY();
-			double labz[] = BMT.crossZ();
-			double errz[] = BMT.crossZerr();
-			double unitx[] = BMT.crossUx();
-			double unity[] = BMT.crossUy();
-			double unitz[] = BMT.crossUz();
+			double laby[] = BST.crossY();
+			double labz[] = BST.crossZ();
+			double errz[] = BST.crossZerr();
+			double unitx[] = BST.crossUx();
+			double unity[] = BST.crossUy();
+			double unitz[] = BST.crossUz();
 			
 			int len = (labx == null) ? 0 : labx.length;
 
