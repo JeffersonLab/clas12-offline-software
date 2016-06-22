@@ -22,9 +22,9 @@ public class FTCalPanel3D extends CedPanel3D {
 	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH,
 			SHOW_RECON_CROSSES, SHOW_COSMICS };
 
-	public FTCalPanel3D(float angleX, float angleY, float angleZ, float xDist,
+	public FTCalPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist,
 			float yDist, float zDist) {
-		super(angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
+		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
 	}
 
 	@Override

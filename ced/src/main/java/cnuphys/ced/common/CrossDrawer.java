@@ -17,6 +17,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.fastmc.FastMCManager;
 
 public class CrossDrawer extends CedViewDrawer {
 
@@ -62,7 +63,7 @@ public class CrossDrawer extends CedViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

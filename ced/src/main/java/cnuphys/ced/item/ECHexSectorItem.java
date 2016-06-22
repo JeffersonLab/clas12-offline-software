@@ -19,6 +19,7 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 
@@ -55,7 +56,7 @@ public class ECHexSectorItem extends HexSectorItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

@@ -23,9 +23,9 @@ public class CentralPanel3D extends CedPanel3D {
 			SHOW_CND_LAYER_1, SHOW_CND_LAYER_2, SHOW_CND_LAYER_3,
 			SHOW_RECON_CROSSES, SHOW_COSMICS };
 
-	public CentralPanel3D(float angleX, float angleY, float angleZ,
+	public CentralPanel3D(CedView3D view, float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
-		super(angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
+		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
 	}
 
 	@Override

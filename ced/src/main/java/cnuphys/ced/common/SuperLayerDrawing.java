@@ -313,6 +313,10 @@ public class SuperLayerDrawing {
 	 *            the drawing container
 	 */
 	private void drawFastMCSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
+		if (FastMCManager.getInstance().isStreaming()) {
+			return;
+		}
+
 		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
 		if ((phits == null) || phits.isEmpty()) {
 			return;

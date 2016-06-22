@@ -162,7 +162,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 
-		if (_eventManager.isAccumulating()) {
+		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 
@@ -235,6 +235,14 @@ public class AllDCSuperLayer extends RectangleItem {
 	
 	//draw a fast MC even rather than an evio event
 	private void fastMCDraw(Graphics g, IContainer container) {
+		if (FastMCManager.getInstance().isStreaming()) {
+			return;
+		}
+		
+		//don't draw if streaming
+		if (FastMCManager.getInstance().isStreaming()) {
+			return;
+		}
 		
 		// draw results of noise reduction? If so will need the parameters
 		// (which have the results)

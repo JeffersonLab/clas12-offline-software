@@ -21,6 +21,7 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.event.data.PCAL;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -84,7 +85,7 @@ public class SectorPCALItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

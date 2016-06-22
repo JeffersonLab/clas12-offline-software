@@ -5,6 +5,8 @@ import java.util.Vector;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
+import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.swim.SwimMenu;
@@ -23,6 +25,10 @@ public class TrajectoryDrawer3D extends Item3D {
 
 	@Override
 	public void draw(GLAutoDrawable drawable) {
+
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+			return;
+		}
 
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();

@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.swim.SwimTrajectory;
 
 public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
@@ -26,7 +27,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (!ClasIoEventManager.getInstance().isAccumulating() && _view.isSingleEventMode()) {
+		if (!ClasIoEventManager.getInstance().isAccumulating() && !FastMCManager.getInstance().isStreaming() && _view.isSingleEventMode()) {
 			super.draw(g, container);
 		}
 	}

@@ -67,6 +67,10 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	}
 	
 	private void fastMCDraw(GLAutoDrawable drawable) {
+		if (FastMCManager.getInstance().isStreaming()) {
+			return;
+		}
+
 		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
 		if ((phits == null) || phits.isEmpty()) {
 			return;

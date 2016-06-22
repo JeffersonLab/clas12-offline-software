@@ -10,6 +10,7 @@ import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.StreamTimer;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
@@ -151,7 +152,10 @@ public class SwimAllMC implements ISwimAll {
 			double y = particle.vertex().y()/100.; //cm to meters
 			double z = particle.vertex().z()/100.; //cm to meters
 
+			StreamTimer st = FastMCManager.getInstance().getTimer();
+			if (st.isTiming()) st.start(StreamTimer.SWIM2);
 			swim(lid, pxo, pyo, pzo, x, y, z);
+			if (st.isTiming()) st.stop(StreamTimer.SWIM2);
 
 		}
 	}

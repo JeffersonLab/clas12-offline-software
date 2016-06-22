@@ -26,50 +26,62 @@ import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimming;
 
 public class FastMCManager {
-	
-	//the singleton
+
+	// the singleton
 	private static FastMCManager _instance;
-	
-	//are we training?
+
+	// are we training?
 	private boolean _training = false;
-	
-	//the event numnber
+
+	// the event numnber
 	private int _eventNum = 0;
-	
-	//current lund file
+
+	// current lund file
 	private File _currentFile;
-	
-	//Lund reader
+
+	// Lund reader
 	private LundReader _lundReader;
-	
-	//current generated event
+
+	// current generated event
 	private PhysicsEvent _genEvent;
-	
+
+	// are we streaming
+	private boolean _isStreaming;
+
 	/** Last selected data file */
 	private static String dataFilePath = Environment.getInstance().getCurrentWorkingDirectory() + "/../../../data";
 
-	public static String extensions[] = { "dat", "DAT"};
+	public static String extensions[] = { "dat", "DAT" };
 
-	private static FileNameExtensionFilter _lundFileFilter = new FileNameExtensionFilter(
-			"Lund Event Files", extensions);
+	private static FileNameExtensionFilter _lundFileFilter = new FileNameExtensionFilter("Lund Event Files",
+			extensions);
 
 	private Vector<ParticleHits> _particleHits = new Vector<ParticleHits>();
-	
-	//private constructor for singleton
+
+	private StreamTimer _streamTimer = new StreamTimer();
+
+	// private constructor for singleton
 	private FastMCManager() {
 	}
-	
+
+	public StreamTimer getTimer() {
+		return _streamTimer;
+	}
+
 	/**
 	 * Check whether we are training
+	 * 
 	 * @return the training flag
 	 */
 	public boolean isTraining() {
 		return _training;
 	}
-	
+
 	/**
 	 * Set whether we are training
-	 * @param training the new training flag
+	 * 
+	 * @param training
+	 *            the new training flag
 	 */
 	public void setTraining(boolean training) {
 		_training = training;
@@ -77,6 +89,7 @@ public class FastMCManager {
 
 	/**
 	 * Get the manager singleton
+	 * 
 	 * @return the manager
 	 */
 	public static FastMCManager getInstance() {
@@ -85,15 +98,16 @@ public class FastMCManager {
 		}
 		return _instance;
 	}
-	
+
 	/**
 	 * Open a Lund File
+	 * 
 	 * @return the lund file
 	 */
 	public File openFile() {
 		_currentFile = null;
 		_lundReader = new LundReader();
-		
+
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
 		chooser.setFileFilter(_lundFileFilter);
@@ -101,122 +115,131 @@ public class FastMCManager {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			_currentFile = chooser.getSelectedFile();
 			dataFilePath = _currentFile.getParent();
-			
+
 			_lundReader.addFile(_currentFile.getPath());
 			_lundReader.open();
 			_eventNum = 0;
-			
-//			//test to eof
-//			nextEvent();
-//			while (_genEvent != null) nextEvent();
+
+			// //test to eof
+			// nextEvent();
+			// while (_genEvent != null) nextEvent();
 		}
 
-		
 		Ced.getCed().fixTitle();
 		return _currentFile;
 	}
-	
+
 	public boolean nextEvent() {
+		if (_streamTimer.isTiming())
+			_streamTimer.start(StreamTimer.READ);
 		boolean gotOne = _lundReader.next();
+		if (_streamTimer.isTiming())
+			_streamTimer.stop(StreamTimer.READ);
+
 		if (gotOne) {
+			if (_streamTimer.isTiming())
+				_streamTimer.start(StreamTimer.GET);
 			_genEvent = _lundReader.getEvent();
+			if (_streamTimer.isTiming())
+				_streamTimer.stop(StreamTimer.GET);
 			_eventNum++;
-	//		System.err.println("fastmc event num: " + _eventNum + "  has: " + _genEvent.count() + " particles");
-	//		System.out.println(_genEvent.toLundString());
+			// System.err.println("fastmc event num: " + _eventNum + " has: " +
+			// _genEvent.count() + " particles");
+			// System.out.println(_genEvent.toLundString());
+
 			parseEvent(_genEvent);
-		}
-		else {
+		} else {
 			_genEvent = null;
 			Toolkit.getDefaultToolkit().beep();
 		}
 		return gotOne;
 	}
-	
-	//parse the event
+
+	/**
+	 * Get the DC hit count for a given particle
+	 * 
+	 * @param lundid
+	 *            the integer lund id
+	 * @return the number of dc hits for tht particle
+	 */
+	public int particleDCHitCount(int lundid) {
+		for (ParticleHits phits : _particleHits) {
+			if (phits.lundId() == lundid) {
+				return phits.DCHitCount();
+			}
+		}
+		return 0;
+	}
+
+	// parse the event
 	private void parseEvent(PhysicsEvent event) {
 		_particleHits.clear();
 		if ((event == null) || (event.count() < 1)) {
 			return;
 		}
-		
-		//always swim fastMC MC tracks, that is needed to get the hits
-		SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0,
-				1);
-		
-		//how many trajectories?
+
+		// always swim fastMC MC tracks, that is needed to get the hits
+		if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.SWIM);
+		SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0, 1);
+		if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.SWIM);
+
+		// how many trajectories?
+		if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.TRAJ2D);
 		Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
-		int trajCount = (trajectories == null) ? 0 : trajectories.size();
-//		System.err.println("NUMBER of FASTMC TRAJ: " + trajCount);
+		if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.TRAJ2D);
+		
+		
+//		int trajCount = (trajectories == null) ? 0 : trajectories.size();
+		// System.err.println("NUMBER of FASTMC TRAJ: " + trajCount);
 
 		// get DC hits for charged particles
 
 		if (trajectories != null) {
 			for (SwimTrajectory traj : trajectories) {
 				if (traj.getLundId() != null) {
+					if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.GETHITS);
 					Path3D path3D = GeometryManager.fromSwimTrajectory(traj);
+					if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.GETHITS);
+					
+					if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.STORE);
 					_particleHits.add(new ParticleHits(traj.getLundId(), path3D));
+					if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.STORE);
 				}
-				
-//				int charge = traj.getLundId().getCharge();
-//				System.err.println("CHARGE: " + charge);
-//				if (charge != 0) {
-//					List<DetectorHit> hits = DCGeometry.getHits(path3D);
-//					
-//					for (DetectorHit hit : hits) {
-//						// indices from gethits are 0-based
-//						System.err.println("sector: " + (hit.getSectorId()+1) 
-//						+ " superlayer: " + (hit.getSuperlayerId()+1)
-//						+ " layer: " + (hit.getLayerId()+1) 
-//						+ "  wire: " + (hit.getComponentId()+1));
-//					}
-//				}
 			}
 		}
-		
-		
-//		ISwimAll allSwimmer = ClasIoEventManager.getInstance().getMCSwimmer();
-//		if (allSwimmer != null) {
-//			TrajectoryTableModel model = _trajectoryTable
-//					.getTrajectoryModel();
-//			model.setData(allSwimmer.getRowData());
-//			model.fireTableDataChanged();
-//			_trajectoryTable.repaint();
-//		}
 
-		
-//		for (int index = 0; index < event.count(); index++) {
-//			Particle particle = event.getParticle(index);
-//			System.err.println("[" + (index+1) + "]  " +  particle.toLundString());
-//		}
-		
-		//notify all listeners of the event
+		// notify all listeners of the event
+		AcceptanceManager.getInstance().testAccepted(event);
 		ClasIoEventManager.getInstance().notifyListenersFastMCGenEvent(event);
 	}
-		
+
 	/**
 	 * Get the hits for all particles
+	 * 
 	 * @return the detector hits
 	 */
 	public Vector<ParticleHits> getFastMCHits() {
 		return _particleHits;
 	}
-	
+
 	/**
 	 * Get the current Lund File
+	 * 
 	 * @return the current Lund file.
 	 */
 	public File getCurrentFile() {
 		return _currentFile;
 	}
-	
+
 	/**
 	 * Get the current event number
-	 * @return  the current event number
+	 * 
+	 * @return the current event number
 	 */
 	public int getEventNumber() {
 		return _eventNum;
 	}
-	
+
 	/**
 	 * Set the default directory in which to look for event files.
 	 * 
@@ -226,31 +249,33 @@ public class FastMCManager {
 	public static void setDefaultDataDir(String defaultDataDir) {
 		dataFilePath = defaultDataDir;
 	}
-	
+
 	/**
 	 * Get the current generated event
+	 * 
 	 * @return the current generated event
 	 */
 	public PhysicsEvent getCurrentGenEvent() {
 		return _genEvent;
 	}
-	
+
 	/**
 	 * Get the data needed to run the SNR analysis
+	 * 
 	 * @return the data for the snr analysis
 	 */
 	public NoiseData getNoiseData() {
-		
+
 		if ((_particleHits == null) || (_particleHits.isEmpty())) {
 			return null;
 		}
-		
-		//count DC hits
+
+		// count DC hits
 		int count = 0;
 		for (ParticleHits phits : _particleHits) {
 			count += phits.DCHitCount();
 		}
-		
+
 		if (count == 0) {
 			return null;
 		}
@@ -274,9 +299,27 @@ public class FastMCManager {
 				}
 			}
 		}
-		
+
 		return nd;
 	}
 
+	/**
+	 * Set whether we are streaming
+	 * 
+	 * @param streaming
+	 *            the new value of the streaming flag
+	 */
+	public void setStreaming(boolean streaming) {
+		_isStreaming = streaming;
+	}
+
+	/**
+	 * Check whether we are streaming
+	 * 
+	 * @return <code>true</code> id we are streaming
+	 */
+	public boolean isStreaming() {
+		return _isStreaming;
+	}
 
 }

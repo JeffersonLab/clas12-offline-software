@@ -240,6 +240,10 @@ public class DCXYView extends HexView {
 	
 	//draw a fast MC even rather than an evio event
 	private void fastMCDraw(Graphics g, IContainer container) {
+		if (FastMCManager.getInstance().isStreaming()) {
+			return;
+		}
+
 		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
 		if ((phits == null) || phits.isEmpty()) {
 			return;

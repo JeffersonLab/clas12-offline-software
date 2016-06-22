@@ -32,6 +32,7 @@ public class Swimmer {
 	 * reasonable one to use for CLAS.
 	 */
 	private static double _eps = 1.0e-5;
+//	private static double _eps = 1.0e-4;
 	public static double CLAS_Tolerance[];
 
 	static {
@@ -472,7 +473,7 @@ public class Swimmer {
 		// if we stopped because of max path, we are done (never reached target
 		// z)
 		if (stopper.getFinalT() > maxPathLength) {
-			System.err.println("Reached max path length");
+			//System.err.println("Reached max path length");
 			return traj;
 		}
 

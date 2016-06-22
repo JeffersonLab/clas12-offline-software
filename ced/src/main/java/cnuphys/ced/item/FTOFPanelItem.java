@@ -69,7 +69,7 @@ public class FTOFPanelItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

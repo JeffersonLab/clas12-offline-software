@@ -18,6 +18,7 @@ import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.PCAL;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -36,7 +37,7 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 
 		_fbRects.clear();
 
-		if (ClasIoEventManager.getInstance().isAccumulating()) {
+		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
 

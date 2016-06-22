@@ -17,7 +17,7 @@ public class FTCalView3D extends CedView3D {
 	@Override
 	protected CedPanel3D make3DPanel(float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
-		return new FTCalPanel3D(angleX, angleY, angleZ, xDist, yDist, zDist);
+		return new FTCalPanel3D(this, angleX, angleY, angleZ, xDist, yDist, zDist);
 	}
 
 }

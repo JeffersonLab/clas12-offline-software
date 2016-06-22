@@ -2,6 +2,7 @@ package cnuphys.bCNU.util;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -288,6 +289,19 @@ public final class Environment {
 	 */
 	public ImageWriter getPngWriter() {
 		return _pngWriter;
+	}
+	
+	public void say(String s) {
+		if (s == null) {
+			return;
+		}
+		if (isMac()) {
+			try {
+				Process p = Runtime.getRuntime().exec("say -v Samantha " + s);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**

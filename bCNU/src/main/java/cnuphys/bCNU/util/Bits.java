@@ -91,4 +91,50 @@ public class Bits {
 		}
 		return b;
 	}
+	
+	/**
+	 * See if the control bit is set in the bits variable.
+	 * 
+	 * @param bits
+	 *            the long that holds the bits.
+	 * @param b
+	 *            the bit to check.
+	 * @return <code>true</code> if the bit is set.
+	 */
+	public static boolean checkBit(long bits, long b) {
+		return ((bits & b) == b);
+	}
+
+	/**
+	 * Sets the given control bit.
+	 * 
+	 * @param bits
+	 *            the long that holds the bits.
+	 * @param bitIndex
+	 *            the bit index [0..63] to set.
+	 * @return the modified bits.
+	 */
+	public static long setBitAtLocation(long bits, long bitIndex) {
+		bits |= (1L << bitIndex);
+		return bits;
+	}
+
+
+	/**
+	 * Count the bits turned on in a word.
+	 * 
+	 * @param x
+	 *            the word to count.
+	 * @return the number of "on" bits in the word.
+	 */
+	public static long countBits(long x) {
+		long b;
+
+		for (b = 0; x != 0; x = x >> 1) {
+			if ((x & 01) == 01) {
+				b++;
+			}
+		}
+		return b;
+	}
 }

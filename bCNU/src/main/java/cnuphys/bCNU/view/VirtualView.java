@@ -29,8 +29,8 @@ import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
-public class VirtualView extends BaseView implements InternalFrameListener,
-		IViewListener, MouseMotionListener, MouseListener {
+public class VirtualView extends BaseView
+		implements InternalFrameListener, IViewListener, MouseMotionListener, MouseListener {
 
 	private JFrame _parent;
 
@@ -66,7 +66,8 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	/**
 	 * Create a virtual view view
 	 * 
-	 * @param keyVals variable set of arguments.
+	 * @param keyVals
+	 *            variable set of arguments.
 	 */
 	private VirtualView(Object... keyVals) {
 		super(keyVals);
@@ -226,16 +227,13 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		int height = (int) ((width * world.height) / world.width);
 
 		// create the view
-		view = new VirtualView(PropertySupport.WORLDSYSTEM, world,
-				PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
-				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
-				PropertySupport.TOOLBAR, false, PropertySupport.VISIBLE, true,
-				PropertySupport.BACKGROUND, Color.white,
-				PropertySupport.HEADSUP, false, PropertySupport.TITLE, VVTITLE,
-				PropertySupport.STANDARDVIEWDECORATIONS, false,
-				PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE,
-				false, PropertySupport.CLOSABLE, false);
+		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
+				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
+				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white, PropertySupport.HEADSUP, false,
+				PropertySupport.TITLE, VVTITLE, PropertySupport.STANDARDVIEWDECORATIONS, false,
+				PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE, false, PropertySupport.CLOSABLE, false);
 
+		view._offsets = new Point[_numcol];
 		view.pack();
 		return view;
 	}
@@ -252,8 +250,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	// get the world system
 	private static Rectangle2D.Double getWorld() {
 		// System.err.println("VV getting world");
-		GraphicsEnvironment g = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] devices = g.getScreenDevices();
 
 		int maxw = 0;
@@ -327,8 +324,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		if (source instanceof BaseView) {
 			BaseView view = (BaseView) source;
 			view.getVirtualItem().setVisible(true);
-			getContainer().getAnnotationLayer()
-					.sendToFront(view.getVirtualItem());
+			getContainer().getAnnotationLayer().sendToFront(view.getVirtualItem());
 			view.getVirtualItem().getStyle().setFillColor(_vwfillActive);
 			view.getVirtualItem().getStyle().setLineColor(Color.white);
 			getContainer().refresh();
@@ -359,8 +355,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 			view.removeInternalFrameListener(this);
 
 			if (view.getVirtualItem() != null) {
-				getContainer().getAnnotationLayer()
-						.remove(view.getVirtualItem());
+				getContainer().getAnnotationLayer().remove(view.getVirtualItem());
 				view.getContainer().refresh();
 			}
 
@@ -432,8 +427,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		if ((item != null) && (item instanceof VirtualWindowItem)) {
 			VirtualWindowItem vvi = (VirtualWindowItem) item;
 			setTitle(VVTITLE + " [" + vvi.getBaseView().getTitle() + "]");
-		}
-		else {
+		} else {
 			setTitle(VVTITLE);
 		}
 	}
@@ -441,8 +435,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	/**
 	 * Virtual view: no offesetting!
 	 * 
-	 * @param dh the horizontal change
-	 * @param dv the vertical change
+	 * @param dh
+	 *            the horizontal change
+	 * @param dv
+	 *            the vertical change
 	 */
 	@Override
 	public void offset(int dh, int dv) {
@@ -453,8 +449,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		switch (mouseEvent.getButton()) {
 		case MouseEvent.BUTTON1:
 			if (mouseEvent.getClickCount() == 1) { // single click
-			}
-			else { // double (or more) clicks
+			} else { // double (or more) clicks
 				handleDoubleClick(mouseEvent);
 			}
 			return;
@@ -485,6 +480,7 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 
 		_currentCol = clickCol;
 		getContainer().refresh();
+		reportVisibility();
 	}
 
 	private Rectangle getColRect(int col) {
@@ -544,15 +540,16 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	public Point2D.Double totalOffset() {
 		Rectangle2D.Double world = getContainer().getWorldSystem();
 		double dx = world.width / _numcol;
-		double dy = world.height;
 		return new Point2D.Double(_currentCol * dx, 0);
 	}
 
 	/**
 	 * Move a view to the center of a specific virtual cell
 	 * 
-	 * @param view the view to move
-	 * @param col the col
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
 	 */
 	public void moveTo(BaseView view, int col) {
 		if (view == null) {
@@ -565,10 +562,14 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view the view to move
-	 * @param col the col
-	 * @param dh additional horizontal offset
-	 * @param dv additional vertical offset
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
+	 * @param dh
+	 *            additional horizontal offset
+	 * @param dv
+	 *            additional vertical offset
 	 */
 	public void moveTo(BaseView view, int col, int dh, int dv) {
 
@@ -611,8 +612,10 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view the view to move
-	 * @param col the col
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
 	 */
 	public void moveTo(BaseView view, int col, boolean fit) {
 
@@ -660,9 +663,12 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view the view to move
-	 * @param col the col
-	 * @param constraint constraint constant
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
+	 * @param constraint
+	 *            constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int constraint) {
 
@@ -708,45 +714,41 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 			int yf = (int) (top + slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == UPPERLEFT) {
+		} else if (constraint == UPPERLEFT) {
 			int xf = (int) (left + slop);
 			int yf = (int) (top + slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == BOTTOMLEFT) {
+		} else if (constraint == BOTTOMLEFT) {
 			int xf = (int) (left + slop);
 			int yf = (int) (bottom - bounds.height - 7 * slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == BOTTOMRIGHT) {
+		} else if (constraint == BOTTOMRIGHT) {
 			int xf = (int) (right - bounds.width - 2 * slop);
 			int yf = (int) (bottom - bounds.height - 7 * slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == TOPCENTER) {
-			int xf = (int) (left + right - bounds.width - slop)/2;
+		} else if (constraint == TOPCENTER) {
+			int xf = (int) (left + right - bounds.width - slop) / 2;
 			int yf = (int) (top + slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == BOTTOMCENTER) {
-			int xf = (int) (left + right - bounds.width - slop)/2;
+		} else if (constraint == BOTTOMCENTER) {
+			int xf = (int) (left + right - bounds.width - slop) / 2;
 			int yf = (int) (bottom - bounds.height - 7 * slop);
 			dh = xf - x0;
 			dv = yf - y0;
 		}
 
-			view.offset(dh, dv);
+		view.offset(dh, dv);
 	}
 
 	/**
 	 * Activates the view's cell so that it is visible
 	 * 
-	 * @param view the view
+	 * @param view
+	 *            the view
 	 */
 	public void activateViewCell(BaseView view) {
 
@@ -776,6 +778,34 @@ public class VirtualView extends BaseView implements InternalFrameListener,
 		_currentCol = col;
 		getContainer().refresh();
 
+	}
+
+	/**
+	 * Is a given view visible (crue test)
+	 * 
+	 * @param view
+	 *            the view to check
+	 * @return <code>true</code> if the view appears to be visible.
+	 */
+	public boolean isViewVisible(BaseView view) {
+		if (view == null) {
+			return false;
+		}
+		if (view.isIcon()) {
+			return false;
+		}
+
+		Rectangle b = view.getBounds();
+		Dimension d = _parent.getSize();
+		Rectangle c = new Rectangle(0, 0, d.width, d.height);
+		return b.intersects(c);
+	}
+
+	public void reportVisibility() {
+		System.err.println("-------------");
+		for (BaseView view : _views) {
+			System.err.println("View " + view.getTitle() + " VIS: " + isViewVisible(view));
+		}
 	}
 
 }

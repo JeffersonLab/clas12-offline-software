@@ -163,7 +163,19 @@ public class BSTzHitDrawer implements IDrawable {
 
 			// panels
 			for (int i = 0; i < hitCount; i++) {
-				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
+				
+				
+				//HACK GEO SECTOR DOESN"T MATCH REAL
+				//TODO Undo hack when geometry fixed
+				
+				int superlayer = (bstlayer[i] - 1) / 2;
+                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
+				if (hackSect == 0) hackSect = numSect;
+				
+
+//				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
+				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], hackSect);
 				if (panel != null) {
 					for (int zopt = 0; zopt < 3; zopt++) {
 						if (panel.hit[zopt]) {
