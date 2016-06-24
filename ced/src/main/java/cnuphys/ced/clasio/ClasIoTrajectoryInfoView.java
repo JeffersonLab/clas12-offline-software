@@ -18,7 +18,7 @@ public abstract class ClasIoTrajectoryInfoView extends BaseView implements
 	protected ClasIoTrajectoryInfoView(String title) {
 		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
 				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 760,
+				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 950,
 				PropertySupport.HEIGHT, 250, PropertySupport.LEFT, 700,
 				PropertySupport.TOP, 100, PropertySupport.VISIBLE, true);
 

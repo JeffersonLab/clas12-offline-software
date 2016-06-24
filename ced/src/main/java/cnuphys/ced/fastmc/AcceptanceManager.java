@@ -5,6 +5,7 @@ import java.util.Vector;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
 
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.clasio.IClasIoEventListener;
 
@@ -26,6 +27,7 @@ public class AcceptanceManager implements IClasIoEventListener {
 	private static AcceptanceManager _instance;
 
 	private AcceptanceManager() {
+		ClasIoEventManager.getInstance().addClasIoEventListener(this, 2);
 	}
 
 	public ACondition getElectronCondition() {

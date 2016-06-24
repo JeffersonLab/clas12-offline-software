@@ -72,6 +72,9 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 						.getFloatArray("EVENTHB::particle.pz");
 				int charge[] = ColumnData
 						.getIntArray("EVENTHB::particle.charge");
+				int status[] = ColumnData
+						.getIntArray("EVENTHB::particle.status");
+
 
 				for (int i = 0; i < numTracks; i++) {
 
@@ -107,7 +110,7 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 						// note conversions to degrees and MeV
 						TrajectoryRowData row = new TrajectoryRowData(lid, xo,
 								yo, zo, 1000 * p, Math.toDegrees(theta),
-								Math.toDegrees(phi));
+								Math.toDegrees(phi), status[i], "EVENTHB::particle");
 						data.add(row);
 					}
 					else {
@@ -168,7 +171,7 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 					// note conversions to degrees and MeV
 					TrajectoryRowData row = new TrajectoryRowData(lid, x0,
 							y0, z0, 1000 * p, Math.toDegrees(theta),
-							Math.toDegrees(phi));
+							Math.toDegrees(phi), 0, "CVTRec::Tracks");
 					data.add(row);
 
 
