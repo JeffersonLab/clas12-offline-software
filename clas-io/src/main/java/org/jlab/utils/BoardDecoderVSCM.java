@@ -7,11 +7,11 @@
 package org.jlab.utils;
 
 import java.util.ArrayList;
-import org.jlab.evio.clas12.EvioDataBank;
-import org.jlab.evio.clas12.EvioDataDictionary;
-import org.jlab.evio.clas12.EvioDataEvent;
-import org.jlab.evio.clas12.EvioDataSync;
-import org.jlab.evio.clas12.EvioSource;
+import org.jlab.io.evio.EvioDataBank;
+import org.jlab.io.evio.EvioDataDictionary;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioDataSync;
+import org.jlab.io.evio.EvioSource;
 
 /**
  *
