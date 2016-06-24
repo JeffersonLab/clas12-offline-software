@@ -90,7 +90,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.97.06";
+	private static final String _release = "build 0.97.08";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -98,7 +98,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// using 3D?
 	private static boolean _use3D = true;
 
-	// if plugin only, do not create intial detector views
+	// if plugin only, do not create initial detector views
 	private static boolean _pluginOnly;
 
 	// plugin folder

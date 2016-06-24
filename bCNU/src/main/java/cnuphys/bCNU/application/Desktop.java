@@ -343,13 +343,28 @@ public final class Desktop extends JDesktopPane {
 
 		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
 
-		String preferredLnF[] = { UIManager.getSystemLookAndFeelClassName(),
-				"Windows", UIManager.getCrossPlatformLookAndFeelClassName() };
-
+		String preferredLnF[];
+		
+		if (Environment.getInstance().isWindows()) {
+			String arry[] = { "Metal", "CDE/Motif", "Nimbus", UIManager.getSystemLookAndFeelClassName(),
+					UIManager.getCrossPlatformLookAndFeelClassName() };
+			preferredLnF = arry;
+		}
+		else {
+			String arry[] = { UIManager.getSystemLookAndFeelClassName(),
+					"Windows", UIManager.getCrossPlatformLookAndFeelClassName() };
+			preferredLnF = arry;
+		}
+		
 		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
 			System.err.println("No installed look and feels");
 			return;
 		}
+//		else {
+//			for (LookAndFeelInfo linfo : lnfinfo) {
+//				System.err.println(" ****** [" + linfo.getName() + "]");
+//			}
+//		}
 
 		for (String targetLnF : preferredLnF) {
 			for (int i = 0; i < lnfinfo.length; i++) {

@@ -118,9 +118,8 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 						if (bd == null) {
 							bd = new ClasIoBankDialog(label);
 							_dataBanks.put(label, bd);
-							bd.update();
 						}
-
+						bd.update();
 						bd.setVisible(true);
 					}
 				}

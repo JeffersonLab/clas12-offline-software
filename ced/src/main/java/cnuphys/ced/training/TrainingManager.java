@@ -2,12 +2,19 @@ package cnuphys.ced.training;
 
 import javax.swing.event.EventListenerList;
 
+import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.evio.clas12.EvioDataEvent;
+
+import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
+import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.clasio.IClasIoEventListener;
+
 /**
  * For training, e.g. neural net or dictionary
  * @author heddle
  *
  */
-public class TrainingManager {
+public class TrainingManager implements IClasIoEventListener {
 
 	//the singleton
 	private static TrainingManager _instance;
@@ -15,8 +22,9 @@ public class TrainingManager {
 	//listener list
 	private static EventListenerList _listenerList;
 
-	
+	//create the singleton
 	private TrainingManager() {
+		ClasIoEventManager.getInstance().addClasIoEventListener(this, 2);
 	}
 	
 	/**
@@ -36,7 +44,7 @@ public class TrainingManager {
 	 * @param theta the polar angle in degrees
 	 * @param phi the azimuthal angle in degrees
 	 */
-	public static void notifyListeners(long data[], double p, double theta, double phi) {
+	public static void notifyListeners(TrainingData data, double p, double theta, double phi) {
 
 		if (_listenerList == null) {
 			return;
@@ -81,7 +89,7 @@ public class TrainingManager {
 	 * 
 	 * @param trainer the listener to add
 	 */
-	public static void addMagneticFieldChangeListener(
+	public static void addTrainingListener(
 			ITrainingListener trainer) {
 
 		if (_listenerList == null) {
@@ -93,6 +101,23 @@ public class TrainingManager {
 				trainer);
 		_listenerList.add(ITrainingListener.class,
 				trainer);
+	}
+
+	@Override
+	public void newClasIoEvent(EvioDataEvent event) {
+	}
+
+	@Override
+	public void openedNewEventFile(String path) {
+	}
+
+	@Override
+	public void changedEventSource(EventSourceType source) {
+	}
+
+	@Override
+	public void newFastMCGenEvent(PhysicsEvent event) {
+		//TODO take the physics event, make the training data, call the trainers
 	}
 
 	

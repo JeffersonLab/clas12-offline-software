@@ -480,7 +480,7 @@ public class VirtualView extends BaseView
 
 		_currentCol = clickCol;
 		getContainer().refresh();
-		reportVisibility();
+//		reportVisibility();
 	}
 
 	private Rectangle getColRect(int col) {
@@ -801,11 +801,11 @@ public class VirtualView extends BaseView
 		return b.intersects(c);
 	}
 
-	public void reportVisibility() {
-		System.err.println("-------------");
-		for (BaseView view : _views) {
-			System.err.println("View " + view.getTitle() + " VIS: " + isViewVisible(view));
-		}
-	}
+//	public void reportVisibility() {
+//		System.err.println("-------------");
+//		for (BaseView view : _views) {
+//			System.err.println("View " + view.getTitle() + " VIS: " + isViewVisible(view));
+//		}
+//	}
 
 }
