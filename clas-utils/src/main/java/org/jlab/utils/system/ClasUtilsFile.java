@@ -4,16 +4,12 @@
  * and open the template in the editor.
  */
 
-package org.jlab.io.task;
-
-import org.jlab.io.base.DataEvent;
+package org.jlab.utils.system;
 
 /**
  *
  * @author gavalian
  */
-public interface IDataEventListener {
-    void  dataEventAction(DataEvent event);
-    void  timerUpdate();
-    void  resetEventListener();
+public class ClasUtilsFile {
+    
 }
