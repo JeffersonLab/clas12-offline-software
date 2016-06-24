@@ -8,9 +8,9 @@ public interface DataEvent {
     String[] getColumnList(String bank_name);
     DataDictionary getDictionary();
     ByteBuffer getEventBuffer();
-    void     appendBank(DataBank bank);
-    void     appendBanks(DataBank... bank);
     
+    void     appendBank(DataBank bank);
+    void     appendBanks(DataBank... bank);    
     boolean  hasBank(String name);
     
     DataBank getBank(String bank_name);

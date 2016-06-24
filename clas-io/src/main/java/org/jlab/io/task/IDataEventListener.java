@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package org.jlab.io.task;
 
 import org.jlab.io.base.DataEvent;
@@ -11,6 +12,7 @@ import org.jlab.io.base.DataEvent;
  *
  * @author gavalian
  */
-public interface IDataEventProcessor {    
-    public void processEvent(DataEvent event, IDataEventType type);    
+public interface IDataEventListener {
+    void  dataEventAction(DataEvent event);
+    void  eventTimerUpdate();
 }
