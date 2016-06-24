@@ -16,8 +16,10 @@
     <module>clas-utils</module>
     <module>clas-physics</module>
     <module>clas-io</module>
+    <module>clas-geometry</module>
+    <module>clas-detector</module>
 <!--    <module>clas-reco</module> -->
-<!--    <module>clas-geometry</module> -->
+
   </modules>
 
 </project>
