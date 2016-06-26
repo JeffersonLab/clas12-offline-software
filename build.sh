@@ -10,12 +10,12 @@ while getopts dm name
 do
     case $name in
        d) dopt=1;; # -d option is for generating Javadoc 
-       m) sopt=1;; # -s option is for compiling the code
+       m) mopt=1;; # -s option is for compiling the code
        *) echo "Invalid arg : "; echo "\t use : build.sh -m -d" ; echo "" ;exit;
     esac
 done
 
-if [[ ! -z $sopt ]]
+if [[ ! -z $mopt ]]
 then
     mvn install
     cd coat-lib

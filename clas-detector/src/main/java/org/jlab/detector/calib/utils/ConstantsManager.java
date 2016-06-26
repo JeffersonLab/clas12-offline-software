@@ -42,10 +42,14 @@ public class ConstantsManager {
         this.defaultDescriptor.addTables(tables);
     }
     
+    public void init(List<String>  keys, List<String>  tables){
+        this.defaultDescriptor.addTables(keys,tables);
+    }
+    
     public IndexedTable  getConstants(int run, String table){
         if(this.runConstants.containsKey(run)==false){
             this.loadConstantsForRun(run);
-        }        
+        }
         DatabaseConstantsDescriptor  descriptor = this.runConstants.get(run);
         if(descriptor.getMap().containsKey(table)==false){
             System.out.println("[getConstants] error ( run = " + run + " ) "
@@ -65,15 +69,32 @@ public class ConstantsManager {
                 String tableName = desc.getTableNames().get(i);
                 try {
                     IndexedTable  table = provider.readTable(tableName);
-                    desc.getMap().put(tableName, table);
+                    desc.getMap().put(desc.getTableKeys().get(i), table);
+                    System.out.println("adding : table " + tableName 
+                    + "  key = " + desc.getTableKeys().get(i));
                 } catch (Exception e) {
                     System.out.println("[ConstantsManager] ---> error reading table : "
                     + tableName);
                 }
             }
             this.runConstants.put(run, desc);
+            System.out.println(this.toString());
     }
     
+    @Override
+    public String toString(){
+        StringBuilder str = new StringBuilder();
+        for(Map.Entry<Integer,DatabaseConstantsDescriptor> entry : runConstants.entrySet()){
+            str.append("CONSTANTS SET FOR RUN = ");
+            str.append(entry.getKey());
+            str.append("\n");
+            DatabaseConstantsDescriptor desc = entry.getValue();
+            for(Map.Entry<String,IndexedTable>  tables : desc.getMap().entrySet()){
+                str.append(String.format("TABLE : %s\n", tables.getKey()));
+            }
+        }
+        return str.toString();
+    }
     /**
      * Helper class to hold all constants for particular run.
      */
@@ -82,7 +103,9 @@ public class ConstantsManager {
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
         
-        List<String>    tableNames = new ArrayList<String>();        
+        List<String>    tableNames = new ArrayList<String>();
+        List<String>    mapKeys    = new ArrayList<String>();
+        
         Map<String,IndexedTable>  hashTables = new LinkedHashMap<String,IndexedTable>();
         
         public DatabaseConstantsDescriptor(){
@@ -91,11 +114,24 @@ public class ConstantsManager {
         
         public void addTables(String[] tables){
             tableNames.addAll(Arrays.asList(tables));
+            mapKeys.addAll(Arrays.asList(tables));
         }
         
         public void addTables(List<String> tables){
             for(String table : tables){
                 tableNames.add(table);
+                mapKeys.add(table);
+            }
+        }
+        
+        public void addTables(List<String> keys, List<String> tables){
+            if(keys.size()!=tables.size()){
+                System.out.println("[DatabaseConstantsDescriptor] error --> "
+                + " size of keys ("+keys.size()+") does not match size of"
+                        + " tables ("+tables.size()+")");
+            } else {
+                mapKeys.addAll(keys);
+                tableNames.addAll(tables);                
             }
         }
         
@@ -123,9 +159,13 @@ public class ConstantsManager {
             return this.tableNames;
         }
         
+        public List<String>  getTableKeys(){
+            return this.mapKeys;
+        }
+        
         public DatabaseConstantsDescriptor  getCopy(int run){
             DatabaseConstantsDescriptor desc = new DatabaseConstantsDescriptor();
-            desc.addTables(this.getTableNames());
+            desc.addTables(this.getTableKeys(),this.getTableNames());
             return desc;
         }
         

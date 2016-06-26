@@ -121,6 +121,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         mediaPlay.addActionListener(this);
         mediaPlay.setEnabled(false);
         
+        mediaPlay.setBorderPainted(false); 
+        mediaPlay.setContentAreaFilled(false); 
+        mediaPlay.setFocusPainted(false); 
+        mediaPlay.setOpaque(false);
+        
         mediaNext = new JButton();
         mediaNext.setIcon(nextIcon);
         mediaNext.setActionCommand("PlayNext");

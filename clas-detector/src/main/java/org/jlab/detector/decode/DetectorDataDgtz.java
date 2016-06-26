@@ -1,0 +1,255 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package org.jlab.detector.decode;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.jlab.detector.base.DetectorDescriptor;
+
+/**
+ *
+ * @author gavalian
+ */
+public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
+    
+    private final List<ADCData>    adcStore   = new ArrayList<ADCData>();
+    private final List<TDCData>    tdcStore   = new ArrayList<TDCData>();
+    //private final List<ADCPulse>  pulseStore = new ArrayList<ADCPulse>();    
+    private Long                 timeStamp = 0L;
+    
+    private final DetectorDescriptor  descriptor = new DetectorDescriptor();
+    
+    public DetectorDataDgtz(){
+        
+    }
+    
+    public DetectorDataDgtz(int crate, int slot, int channel){
+        this.descriptor.setCrateSlotChannel(crate, slot, channel);
+    }
+    
+    public DetectorDataDgtz addPulse(short[] data){
+        this.adcStore.add(new ADCData(data));
+        return this;
+    }
+    
+    public DetectorDataDgtz addADC(ADCData adc){
+        this.adcStore.add(adc);
+        return this;
+    }
+    
+    public DetectorDataDgtz addTDC(TDCData tdc){
+        this.tdcStore.add(tdc);
+        return this;
+    }
+    
+    public void setTimeStamp(long time){
+        this.timeStamp = time;
+    }
+    
+    public long getTimeStamp(){
+        return this.timeStamp;
+    }
+    
+    public DetectorDescriptor getDescriptor(){
+        return this.descriptor;
+    }
+    
+    @Override
+    public String toString(){
+        StringBuilder str = new StringBuilder();
+        str.append(descriptor.toString());
+        str.append(" -> ");
+        for(ADCData data : this.adcStore){
+            str.append(data);
+        }
+        
+        for(TDCData data : this.tdcStore){
+            str.append(data);
+        }
+        
+        return str.toString();
+    }
+
+    public ADCData getADCData(int index){
+        return this.adcStore.get(index);
+    }
+    
+    public TDCData getTDCData(int index){
+        return this.tdcStore.get(index);
+    }
+    
+    public int getADCSize(){
+        return this.adcStore.size();
+    }
+    
+    public int getTDCSize(){
+        return this.tdcStore.size();
+    }
+    
+    public int compareTo(DetectorDataDgtz o) {
+        /*if(this.getDescriptor().getType().getDetectorId()
+                <o.getDescriptor().getType().getDetectorId()) return -1;
+        */
+        /*if(this.getDescriptor().getOrder()<o.getDescriptor().getOrder()){
+            return -1;
+        } else {
+            return 1;
+        }*/
+        return 1;
+    }
+   
+    /**
+     * a class to hold ADC values
+     */
+    
+    public static class ADCData implements Comparable<ADCData> {
+        
+        private int   adcOrder       = 0;
+        private int   pulseIntegral  = 0;
+        private short pulsePedestal  = 0;
+        private short pulseTime      = 0;
+        private short pulseMin       = 0;
+        private short pulseMax       = 0;
+        
+        private List<short[]>   adcPulse = new ArrayList<short[]>();
+        
+        private boolean isPedistalSubtracted = false;
+        
+        public ADCData(){
+            
+        }
+        
+        public ADCData(short[] pulse){
+            this.setPulse(pulse);
+        }
+        
+        public final ADCData setPulse(short[] pulse){
+            adcPulse.clear();
+            adcPulse.add(pulse);
+            return this;
+        }
+        /**
+         * returns number of samples in the pulse
+         * @return 
+         */
+        public int  getPulseSize(){
+            if(adcPulse.isEmpty()==true) return 0;
+            return adcPulse.get(0).length;
+        }
+        /**
+         * returns adc value from the pulse
+         * @param bin pulse bin
+         * @return 
+         */
+        public short getPulseValue(int bin){
+            if(adcPulse.isEmpty()==true){
+                System.out.println("[ADCData] error --> does not contain a pulse");
+                return (short) 0;
+            }
+            if(bin<0||bin>=adcPulse.get(0).length){
+                System.out.println("[ADCData] error --> index out of bounds "
+                + " index = " + bin + "  pulse size = " + adcPulse.get(0).length);
+                return 0;
+            }
+            return adcPulse.get(0)[bin];
+        }
+        /**
+         * returns fitted integral of the pulse either set by pulse
+         * fitter or initialized from FPGA pulse parameters.
+         * @return 
+         */
+        public int getIntegral(){
+            return this.pulseIntegral;
+        }
+        
+        public int getPulseMin(){
+            return this.pulseMin;
+        }
+        
+        public int getPulseMax(){
+            return this.pulseMax;
+        }
+        
+        public short getPedestal(){
+            return this.pulsePedestal;
+        }
+        
+        public int   getOrder() { return adcOrder;}
+        
+        public short getTime(){
+            return this.pulseTime;
+        }
+        
+        public ADCData setPulseMin(short min){
+            this.pulseMin = min;
+            return this;
+        }
+        
+        public ADCData setPulseMax(short max){
+            this.pulseMax = max;
+            return this;
+        }
+        
+        public ADCData setIntegral(int integral){
+            this.pulseIntegral = integral;
+            return this;
+        }
+        
+        public ADCData setTime(short time){
+            this.pulseTime = time;
+            return this;
+        }
+        
+        public ADCData setPedestal(short pedestal){
+            this.pulsePedestal = pedestal;
+            return this;
+        }
+        
+        public ADCData setOrder(int order){ adcOrder = order; return this;}
+        
+        @Override
+        public String toString(){
+            StringBuilder str = new StringBuilder();
+            str.append(String.format("ADC (%d) : %5d %5d  min/max %5d %5d",
+                    getOrder(),
+                    getIntegral(),getTime(),getPulseMin(),getPulseMax()));
+            return str.toString();
+        }
+                
+        public int compareTo(ADCData o) {
+            if(getOrder()<o.getOrder()) return -1;
+            return 1;
+        }
+    }
+    
+   /**
+    * a class to hold TDC data
+    */
+    
+    public static class TDCData implements Comparable<TDCData>{
+        
+        private int   tdcOrder = 0;
+        private int tdcTime = 0;
+        
+        public TDCData() {}
+        public TDCData(int time) { this.tdcTime = time;}
+        public int getTime() { return this.tdcTime;}
+        public int   getOrder() { return tdcOrder;}
+        public TDCData  setOrder(int order) { tdcOrder = order;return this;}
+        public TDCData  setTime(short time) { tdcTime = time;return this;}
+        
+        @Override
+        public String toString(){
+            return String.format("TDC (%d) : %5d", getOrder(),getTime());
+        }
+
+        public int compareTo(TDCData o) {
+            if(this.getOrder()<o.getOrder()) return -1;
+            return 1;
+        }        
+    }
+}

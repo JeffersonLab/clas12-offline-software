@@ -61,6 +61,10 @@ public class IndexedTable extends DefaultTableModel {
     
     }
     
+    public boolean hasEntry(int... index){
+        return this.entries.hasItem(index);
+    }
+    
     public final void setIndexName(int index, String name){
         indexNames.set(index, name);
     }
