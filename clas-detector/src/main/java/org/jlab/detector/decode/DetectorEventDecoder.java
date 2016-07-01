@@ -112,13 +112,23 @@ public class DetectorEventDecoder {
             int crate    = data.getDescriptor().getCrate();
             int slot     = data.getDescriptor().getSlot();
             int channel  = data.getDescriptor().getChannel();
+            //System.out.println(" looking for " + crate + "  " 
+            //        + slot + " " + channel);
             for(String table : keysFitter){
                 IndexedTable  daq = fitterManager.getConstants(runNumber, table);
                 DetectorType  type = DetectorType.getType(table);
                 if(daq.hasEntry(crate,slot,channel)==true){                    
-                    basicFitter.setPulse(0, 4).setPedestal(35, 70);
-                    for(int i = 0; i < data.getADCSize(); i++){
-                        basicFitter.fit(data.getADCData(i));
+                    //basicFitter.setPulse(0, 4).setPedestal(35, 70);
+                    //for(int i = 0; i < data.getADCSize(); i++){
+                    //    basicFitter.fit(data.getADCData(i));
+                    //}
+                    int nsa = daq.getIntValue("nsa", crate,slot,channel);
+                    int nsb = daq.getIntValue("nsb", crate,slot,channel);
+                    //System.out.println(" apply nsa nsb " + nsa + " " + nsb);
+                    if(data.getADCSize()>0){
+                        for(int i = 0; i < data.getADCSize(); i++){
+                            data.getADCData(i).setADC(nsa, nsb);
+                        }
                     }
                 }
             }

@@ -97,6 +97,9 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         this.add(sourcePane,BorderLayout.LINE_END);
     }
     
+    public void addEventListener(IDataEventListener del){
+        this.dataProcessor.addEventListener(del);
+    }
     
     private JPanel  createMediaPane(){
         
@@ -134,13 +137,13 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         
         mediaPrev = new JButton();
         mediaPrev.setIcon(prevIcon);
-        mediaPrev.setActionCommand("PlayNext");
+        mediaPrev.setActionCommand("PlayPrev");
         mediaPrev.addActionListener(this);
         mediaPrev.setEnabled(false);
         
         mediaEject = new JButton();
         mediaEject.setIcon(ejectIcon);
-        mediaEject.setActionCommand("PlayNext");
+        mediaEject.setActionCommand("PlayEject");
         mediaEject.addActionListener(this);
         mediaEject.setEnabled(false);
         
@@ -159,6 +162,8 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         if(e.getActionCommand().compareTo("PlayFile")==0){
             mediaPlay.setEnabled(false);
             mediaPause.setEnabled(true);
+            mediaNext.setEnabled(true);
+            mediaPrev.setEnabled(true);
             this.startProcessorTimer();
         }
 
@@ -167,6 +172,10 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             mediaPause.setEnabled(false);
             this.processTimer.cancel();
             this.processTimer = null;
+        }
+        
+        if(e.getActionCommand().compareTo("PlayNext")==0){
+            this.dataProcessor.processNextEvent();
         }
         
         if(e.getActionCommand().compareTo("OpenFile")==0){

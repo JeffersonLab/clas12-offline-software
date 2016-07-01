@@ -91,6 +91,9 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
       
     
     public void copy(DetectorDescriptor desc){
+        this.hw_SLOT    = desc.hw_SLOT;
+        this.hw_CRATE   = desc.hw_CRATE;
+        this.hw_CHANNEL = desc.hw_CHANNEL;
         this.detectorType = desc.detectorType;
         this.dt_SECTOR    = desc.dt_SECTOR;
         this.dt_LAYER     = desc.dt_LAYER;
@@ -131,6 +134,7 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
                 this.dt_SECTOR,this.dt_LAYER,this.dt_COMPONENT, this.dt_ORDER);
     }
 
+    @Override
     public int compareTo(DetectorDescriptor o) {
         if(this.getType().getDetectorId()<o.getType().getDetectorId()){
             return -1;

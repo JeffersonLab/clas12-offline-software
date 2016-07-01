@@ -267,7 +267,7 @@ public class CodaEventDecoder {
                             DetectorDataDgtz  entry = new DetectorDataDgtz(crate,slot,channel);
                             //entry.setData(BankType.ADCFPGA, new int[]{tdc, adc, pmin, pmax});
                             ADCData   adcData = new ADCData();
-                            adcData.setIntegral(adc).setTime(tdc).setPulseMin(pmin).setPulseMax(pmax);
+                            adcData.setIntegral(adc).setTimeWord(tdc).setPedestal(pmin).setHeight(pmax);
                             entry.addADC(adcData);
                             entry.setTimeStamp(time);
                             entries.add(entry);
@@ -333,6 +333,7 @@ public class CodaEventDecoder {
             EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
             List<DetectorDataDgtz>  dataSet = decoder.getDataEntries(event);
             detectorDecoder.translate(dataSet);
+            detectorDecoder.fitPulses(dataSet);
             
             System.out.println("---> printout EVENT # " + icounter);
             for(DetectorDataDgtz data : dataSet){

@@ -9,6 +9,7 @@ package org.jlab.detector.decode;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.utils.data.DataUtils;
 
 /**
  *
@@ -108,12 +109,14 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
     
     public static class ADCData implements Comparable<ADCData> {
         
-        private int   adcOrder       = 0;
-        private int   pulseIntegral  = 0;
-        private short pulsePedestal  = 0;
-        private short pulseTime      = 0;
-        private short pulseMin       = 0;
-        private short pulseMax       = 0;
+        private int    adcOrder        = 0;
+        private int    pulseIntegral   = 0;
+        private int    pulseADC        = 0;
+        private short  pulsePedestal   = 0;
+        private double pulseTime       = 0;
+        private int    pulseTimeCourse = 0;
+        private short  pulseHeight     = 0;
+
         
         private List<short[]>   adcPulse = new ArrayList<short[]>();
         
@@ -166,31 +169,44 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             return this.pulseIntegral;
         }
         
-        public int getPulseMin(){
-            return this.pulseMin;
+        public int getADC(){
+            return this.pulseADC;
         }
         
-        public int getPulseMax(){
-            return this.pulseMax;
-        }
-        
-        public short getPedestal(){
+        public int getPedestal(){
             return this.pulsePedestal;
         }
         
-        public int   getOrder() { return adcOrder;}
+        public int getHeight(){
+            return this.pulseHeight;
+        }
         
-        public short getTime(){
+        public double getTime(){
             return this.pulseTime;
         }
         
-        public ADCData setPulseMin(short min){
-            this.pulseMin = min;
+        public int  getTimeCourse(){
+            return this.pulseTimeCourse;
+        }
+        
+        
+        
+        
+        
+        public int   getOrder() { return adcOrder;}
+        
+        public ADCData setADC(int nsa, int nsb){
+            this.pulseADC = this.pulseIntegral - this.pulsePedestal*(nsa+nsb);
             return this;
         }
         
-        public ADCData setPulseMax(short max){
-            this.pulseMax = max;
+        public ADCData setPedestal(short ped){
+            this.pulsePedestal = ped;
+            return this;
+        }
+        
+        public ADCData setHeight(short max){
+            this.pulseHeight = max;
             return this;
         }
         
@@ -199,24 +215,23 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             return this;
         }
         
-        public ADCData setTime(short time){
-            this.pulseTime = time;
+        public ADCData setTimeWord(int timeWord){
+            pulseTimeCourse = DataUtils.getInteger(timeWord, 0, 5);
+            int timeFine    = DataUtils.getInteger(timeWord, 6, 16);
+            pulseTime = pulseTimeCourse*4.0 + timeFine*0.0625;
             return this;
         }
         
-        public ADCData setPedestal(short pedestal){
-            this.pulsePedestal = pedestal;
-            return this;
-        }
+
         
         public ADCData setOrder(int order){ adcOrder = order; return this;}
         
         @Override
         public String toString(){
             StringBuilder str = new StringBuilder();
-            str.append(String.format("ADC (%d) : %5d %5d  min/max %5d %5d",
+            str.append(String.format("ADC (%d) : %5d %5d %5d  time = %5d  %9.4f  max = %5d",
                     getOrder(),
-                    getIntegral(),getTime(),getPulseMin(),getPulseMax()));
+                    getIntegral(),getADC(), getPedestal(), getTimeCourse(), getTime(), getHeight()));
             return str.toString();
         }
                 
