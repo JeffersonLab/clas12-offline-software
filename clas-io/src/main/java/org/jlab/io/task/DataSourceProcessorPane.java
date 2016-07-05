@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
+import org.jlab.io.base.DataEventType;
 import org.jlab.io.evio.EvioSource;
 
 /**
@@ -208,7 +209,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 if(hasFinished==true) return;
                 //System.out.println("running");
                 for (int i=1 ; i<100 ; i++) {
-                    boolean status = dataProcessor.processNextEvent();
+                    boolean status = dataProcessor.processNextEvent(0,DataEventType.EVENT_ACCUMULATE);
                     if(status==false&&hasFinished==false){
                         hasFinished = true;
                         System.out.println("[DataProcessingPane] ----> task is done...");

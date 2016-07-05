@@ -18,6 +18,7 @@ import org.jlab.detector.decode.DetectorEventDecoder;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.base.DataEventType;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.task.DataSourceProcessorPane;
 import org.jlab.io.task.IDataEventListener;
@@ -64,18 +65,25 @@ public class RawEventViewer implements IDataEventListener {
     
     public final void updateDetectorView(){
         double FTOFSize = 500.0;
-        int[]     npaddles = new int[]{23,64,5};
+        int[]     npaddles = new int[]{64,23,5};
+        int[]     widths   = new int[]{6,15,25};
+        int[]     lengths  = new int[]{6,15,25};
+        
         String[]  names    = new String[]{"FTOF 1A","FTOF 1B","FTOF 2"};
         for(int sector = 1; sector <= 6; sector++){
             double rotation = Math.toRadians(sector-1)*(360.0/6);
+            
             for(int layer = 1; layer <=3; layer++){
-                int width = 6;
+            
+                int width  = widths[layer-1];
+                int length = lengths[layer-1];
+                
                 for(int paddle = 1; paddle < npaddles[layer-1]; paddle++){
                     
                     DetectorShape2D shape = new DetectorShape2D();
                     shape.getDescriptor().setType(DetectorType.FTOF);
                     shape.getDescriptor().setSectorLayerComponent(sector, layer, paddle);
-                    shape.createBarXY(20, width);
+                    shape.createBarXY(20 + length*paddle, width);
                     shape.getShapePath().translateXYZ(0.0, 40 + width*paddle , 0.0);
                     shape.getShapePath().rotateZ(rotation);
                     detectorView.getView().addShape(names[layer-1], shape);
@@ -95,13 +103,20 @@ public class RawEventViewer implements IDataEventListener {
         List<DetectorDataDgtz>  dataSet = decoder.getDataEntries((EvioDataEvent) event);
         detectorDecoder.translate(dataSet);
         detectorDecoder.fitPulses(dataSet);
+        //System.out.println(" EVENT TYPE = " + event.getType());
         //System.out.println(" processed the event data set Size = " + dataSet.size());
         //detectorData.clear();
         //detectorData.addAll(dataSet);
         //this.updateTableModel();
-        detectorDecoderView.updateData(dataSet);
+        if(event.getType()==DataEventType.EVENT_SINGLE){
+            detectorDecoderView.updateData(dataSet);
+            detectorView.getView().fill(dataSet, "");
+        } else {
+            detectorView.getView().fill(dataSet, "same");
+        }
         
-        detectorView.getView().fill(dataSet, "same");
+        
+        detectorView.update();
         //detectorDecoderView.repaint();
     }
 

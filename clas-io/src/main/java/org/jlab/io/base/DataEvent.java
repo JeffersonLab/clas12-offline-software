@@ -37,4 +37,7 @@ public interface DataEvent {
     byte[] getByte(String path);
     void setByte(String path, byte[] arr);
     void appendByte(String path, byte[] arr);
+    
+    void setType(DataEventType type);
+    DataEventType getType();
 }

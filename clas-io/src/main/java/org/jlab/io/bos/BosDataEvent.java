@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDictionary;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.base.DataEventType;
 
 /**
  *
@@ -30,6 +31,7 @@ public class BosDataEvent implements DataEvent {
     private BosDataDictionary bankDictionary = null;
     private int               RunNumber;
     private int               EventNumber;
+    private DataEventType     eventType = DataEventType.UNDEFINED;
     
     public BosDataEvent(){
         
@@ -746,6 +748,14 @@ public class BosDataEvent implements DataEvent {
     @Override
     public void appendBanks(DataBank... bank) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setType(DataEventType type) {
+        this.eventType = type;
+    }
+
+    public DataEventType getType() {
+        return eventType;
     }
     
 }

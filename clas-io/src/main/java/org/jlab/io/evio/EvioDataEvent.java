@@ -25,6 +25,7 @@ import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataDictionary;
 import org.jlab.io.base.DataEntryType;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.base.DataEventType;
 import org.jlab.utils.TablePrintout;
 
 public class EvioDataEvent implements DataEvent {
@@ -35,6 +36,7 @@ public class EvioDataEvent implements DataEvent {
     private EvioDataEventHandler        eventHandler = null;
     private EvioDataDictionary dictionary = null;
     private List<EvioNode> eventNodes  = null;
+    private DataEventType  eventType   = DataEventType.EVENT_ACCUMULATE;
     
     public EvioDataEvent(byte[] buffer, ByteOrder b_order){
         
@@ -895,5 +897,13 @@ public class EvioDataEvent implements DataEvent {
         } catch (EvioException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setType(DataEventType type) {
+        this.eventType = type;
+    }
+
+    public DataEventType getType() {
+        return this.eventType;
     }
 }

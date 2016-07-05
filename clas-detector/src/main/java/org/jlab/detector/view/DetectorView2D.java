@@ -65,6 +65,8 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
         }
     }
     
+   
+    
     @Override
     public void paint(Graphics g){ 
 
@@ -170,6 +172,7 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
     @Override
     public void mouseMoved(MouseEvent e) {
         //System.out.println("mouse moved = " + e.getX() + " " + e.getY());
+        /*
         if(this.isMouseMotionListener==true) {
             double x = world.getViewX(e.getX());
             double y = world.getViewY(e.getY());
@@ -193,7 +196,7 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
                 activeShape = selection;
                 repaint();
             }
-        }
+        }*/
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     /**
@@ -305,8 +308,18 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
             if(options.contains("same")==true) doReset = false;
             for(Map.Entry<Long,DetectorShape2D>  shape : shapes.getMap().entrySet()){
                 if(doReset==true){ shape.getValue().reset(); }
-                int cv = shape.getValue().getCounter();
-                shape.getValue().setCounter(cv+1);
+                
+                for(int d = 0 ; d < detectorData.size(); d++){                     
+                    DetectorDescriptor dd = detectorData.get(d).getDescriptor();
+                    DetectorDescriptor dm = shape.getValue().getDescriptor();
+                    if(dd.getType()==dm.getType()&dd.getSector()==dm.getSector()&
+                            dd.getLayer()==dm.getLayer()&dd.getComponent()==dm.getComponent()
+                            ){                            
+                        //System.out.println("COLORING COMPONENT " + shape.getValue().getDescriptor());
+                        int cv = shape.getValue().getCounter();
+                        shape.getValue().setCounter(cv+1);
+                    }
+                }
             }
         }
         
@@ -314,9 +327,12 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
             //System.out.println(" WORLD      = " + d2d);
             //System.out.println(" Layer Boundaries = " + this.boundaries);
             
-            if(this.showHitMap==true){
-                this.getAxisRange();
-            }
+            //if(this.showHitMap==true){
+            //    this.getAxisRange();
+            //}
+            int counterZero = 0;
+            int counterOne  = 0;
+            
             for(Map.Entry<Long,DetectorShape2D> entry : this.shapes.getMap().entrySet()){
                 DetectorShape2D shape = entry.getValue();
                 //System.out.println(" drating shape ----> " + entry.getKey());
@@ -326,16 +342,27 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
                 Color shapeColor = shape.getSwingColorWithAlpha(this.opacity);
                 
                 if(this.showHitMap==true){
+                    if(shape.getCounter()>0){
+                        counterOne++;
+                    } else {
+                        counterZero++;
+                    }
                     //Color mapColor = ;//ColorPalette.gaxisRange.getMax();
                     shapeColor = palette.getColor3D(shape.getCounter(),axisRange.getMax(), false);
+                    
+                    //System.out.println(" AXIS MAX = " + axisRange.getMax() + "  VALUE = " + shape.getCounter());
                 }
 
                 if(this.selectedDescriptor.compare(shape.getDescriptor())==true){
                     shape.drawShape(g2d, world, Color.red, Color.black);
-                } else {
-                    shape.drawShape(g2d, world, shapeColor, Color.black);
+                } else {                 
+                    shape.drawShape(g2d, world, shapeColor, Color.black);                        
                 }
                 
+                //if(this.showHitMap==true){
+                   // System.out.println("Counters Zero = " + counterZero + "  One = "
+                   //         + counterOne);
+                //}
             }
         }
         

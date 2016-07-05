@@ -104,6 +104,10 @@ public class DetectorPane2D extends JPanel implements ActionListener {
         return this.view2D;
     }
     
+    public void update(){
+        this.getView().repaint();
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().compareTo("background")==0){

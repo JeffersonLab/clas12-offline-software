@@ -177,6 +177,11 @@ public class DetectorShape2D {
                 yp = shapePath.point(i).y();
                 path.lineTo(world.getPointX(xp),world.getPointY(yp));
             }
+            
+            xp = shapePath.point(0).x();
+            yp = shapePath.point(0).y();
+            
+            path.lineTo(world.getPointX(xp),world.getPointY(yp));
             g2d.setColor(fillcolor);
             g2d.fill(path);
             g2d.setColor(strokecolor);

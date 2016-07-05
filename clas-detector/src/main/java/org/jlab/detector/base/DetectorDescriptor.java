@@ -141,6 +141,7 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
         } else {
             return 1;
         }
+        //return 0;
         //return 1;
     }
 }

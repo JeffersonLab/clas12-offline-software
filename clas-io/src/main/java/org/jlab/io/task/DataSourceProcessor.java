@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.paint.Color;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.base.DataEventType;
 import org.jlab.io.base.DataSource;
 
 /**
@@ -97,10 +98,10 @@ public class DataSourceProcessor {
     }
     
     public boolean processNextEvent(){
-        return processNextEvent(0);
+        return processNextEvent(0,DataEventType.EVENT_SINGLE);
     }
     
-    public boolean processNextEvent(int delay){
+    public boolean processNextEvent(int delay, DataEventType type){
         
         if(dataSource==null) {
             //System.out.println("[DataSourceProcessor] error ---> data source is not set");
@@ -113,6 +114,7 @@ public class DataSourceProcessor {
         this.eventsProcessed++;
         Long st = System.currentTimeMillis();
         DataEvent event = dataSource.getNextEvent();
+        event.setType(type);
         Long et = System.currentTimeMillis();
         this.timeSpendOnReading += (et-st);
         //System.out.println(" processing next event ---> " + this.eventsProcessed);
@@ -140,5 +142,7 @@ public class DataSourceProcessor {
         }
         
         return true;
-    } 
+    }
+    
+    
 }
