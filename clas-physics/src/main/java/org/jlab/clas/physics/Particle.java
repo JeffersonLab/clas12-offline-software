@@ -36,9 +36,15 @@ public class Particle {
                 p.vertex().x(),p.vertex().y(),p.vertex().z()
                 );
     }
+    
     public Particle(int pid, double px, double py, double pz, double vx, double vy, double vz)
     {
         this.initParticle(pid, px, py, pz, vx, vy, vz);
+    }
+    
+    public Particle(int pid, double px, double py, double pz)
+    {
+        this.initParticle(pid, px, py, pz, 0.0,0.0,0.0);
     }
     
     public Particle(int pid, double mass, byte charge, double px, double py, double pz, double vx, double vy, double vz)

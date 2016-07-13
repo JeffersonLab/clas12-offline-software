@@ -16,6 +16,8 @@ import java.util.Map;
 public class PDGDatabase {
     
     static final HashMap<Integer,PDGParticle> particleDatabase = initDatabase();
+    
+    
     public PDGDatabase()
     {
     }
