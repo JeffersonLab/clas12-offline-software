@@ -8,6 +8,8 @@ package org.jlab.detector.calib.utils;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +48,29 @@ public class CalibrationConstantsView extends JPanel implements ActionListener {
         this.add(buttonsPanel,BorderLayout.PAGE_END);
         comboBox = new JComboBox();
         buttonsPanel.add(comboBox);
+        
+       
+    }
+    
+    
+    public void addConstants(CalibrationConstants calib, CalibrationConstantsListener listener){
+        JTable dataTable = new JTable(calib);
+         dataTable.addMouseListener(new MouseAdapter() {
+             public void mouseClicked(MouseEvent e) {
+                 int row = dataTable.getSelectedRow();
+                 int col = dataTable.getSelectedColumn();
+                 listener.constantsEvent(calib, col, row);
+                 //System.out.println("selected row  " + row + " column "
+                 //+ col);
+             }
+         });
+        JScrollPane   scrollPane = new JScrollPane(dataTable);        
+        calibrationMap.put(calib.getName(), calib);        
+        tabbedPane.addTab(calib.getName(), scrollPane);
     }
     
     public void addConstants(CalibrationConstants calib){
-        JTable dataTable = new JTable(calib);
+        JTable dataTable = new JTable(calib);         
         JScrollPane   scrollPane = new JScrollPane(dataTable);        
         calibrationMap.put(calib.getName(), calib);        
         tabbedPane.addTab(calib.getName(), scrollPane);

@@ -8,8 +8,10 @@ package org.jlab.detector.calib.tasks;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.groot.group.DataGroup;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.task.IDataEventListener;
+import org.jlab.utils.groups.IndexedList;
 
 /**
  *
@@ -37,6 +39,10 @@ public class CalibrationEngine implements IDataEventListener {
     @Override
     public void resetEventListener() {
         
+    }
+    
+    public IndexedList<DataGroup>  getDataGroup(){
+        return null;
     }
     
     public List<CalibrationConstants>  getCalibrationConstants(){

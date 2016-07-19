@@ -91,12 +91,13 @@ public class CalibrationEngineTask {
     
     public void showResults(){
         JFrame frame = new JFrame();
-        CalibrationConstantsView view = new CalibrationConstantsView();
+        //CalibrationConstantsView view = new CalibrationConstantsView();
+        CalibrationEngineView  view = new CalibrationEngineView(calibrationEngines.get(0));
         frame.add(view);
-        for(CalibrationEngine engine : this.calibrationEngines){
+        /*for(CalibrationEngine engine : this.calibrationEngines){
             List<CalibrationConstants> calibConsts = engine.getCalibrationConstants();
             view.addConstants(calibConsts);
-        }
+        }*/
         
         frame.setSize(600, 600);
         frame.setVisible(true);
