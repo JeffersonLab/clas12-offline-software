@@ -28,20 +28,23 @@ public class IndexedTable extends DefaultTableModel {
     private Map<String,String>        entryTypes = new LinkedHashMap<String,String>();
     private List<String>              entryNames = new ArrayList<String>();
     private List<String>              indexNames = new ArrayList<String>();
+    private String                    precisionFormat = "%.6f";
     
     private Map<Integer,RowConstraint>  constrains = new HashMap<Integer,RowConstraint>(); 
     
     public IndexedTable(int indexCount){
         entries = new IndexedList<IndexedEntry>(indexCount);
         for(int i = 0; i < indexCount; i++){
-           this.setIndexName(i, "A"+i);
+           //this.setIndexName(i, "A"+i);
+            this.indexNames.add("A"+i);
         }
     }
     
     public IndexedTable(int indexCount,String format){
         entries = new IndexedList<IndexedEntry>(indexCount);
         for(int i = 0; i < indexCount; i++){
-           this.setIndexName(i, "A"+i);
+            //this.setIndexName(i, "A"+i);
+            this.indexNames.add("A"+i);
         }
         this.parseFormat(format);
     }
@@ -59,6 +62,14 @@ public class IndexedTable extends DefaultTableModel {
             entryNames.add(tokens[0]);
         }
     
+    }
+    
+    public void setPrecision(Integer precision){
+        StringBuilder str = new StringBuilder();
+        str.append("%.");
+        str.append(precision.toString());
+        str.append("f");
+        this.precisionFormat = str.toString();
     }
     
     public boolean hasEntry(int... index){
@@ -130,6 +141,10 @@ public class IndexedTable extends DefaultTableModel {
             }
         }
         return 0;
+    }
+    
+    public IndexedList getList(){
+        return this.entries;
     }
     
     private void parseFormat(String format){
@@ -263,6 +278,10 @@ public class IndexedTable extends DefaultTableModel {
         /*if((column-ic)>=trow.getSize()){
             return "0";
         }*/
+        Number trowNum = trow.getValue(column-ic);
+        if(trowNum instanceof Double){
+            return String.format(this.precisionFormat, trowNum.doubleValue());
+        }
         return trow.getValue(column-ic).toString();
     }
     

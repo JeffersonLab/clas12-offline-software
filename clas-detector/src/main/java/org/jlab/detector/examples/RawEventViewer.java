@@ -115,11 +115,34 @@ public class RawEventViewer implements IDataEventListener {
             detectorView.getView().fill(dataSet, "same");
         }
         
+        if(event.getType()==DataEventType.EVENT_START){
+            this.clearHistograms();
+        }
         
+        if(event.getType()==DataEventType.EVENT_ACCUMULATE){
+            this.fillhistograms();
+        }
+        
+        if(event.getType()==DataEventType.EVENT_STOP){
+            this.analyzeData();
+        }
         detectorView.update();
         //detectorDecoderView.repaint();
     }
 
+    public void clearHistograms(){
+        
+    }
+    
+    
+    public void analyzeData(){
+        
+    }
+    
+    public void fillhistograms(){
+        
+    }
+    
     @Override
     public void timerUpdate() {
         

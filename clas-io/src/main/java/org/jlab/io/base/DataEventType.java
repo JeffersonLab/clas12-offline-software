@@ -12,9 +12,9 @@ package org.jlab.io.base;
 public enum DataEventType {
     UNDEFINED          ( 0, "UNDEFINED"),
     EVENT_SINGLE       ( 1, "EVENT_SINGLE"),
-    EVENT_START        ( 1, "EVENT_START"),
-    EVENT_ACCUMULATE   ( 1, "EVENT_ACCUMULATE"),
-    EVENT_STOP         ( 1, "EVENT_STOP");    
+    EVENT_START        ( 2, "EVENT_START"),
+    EVENT_ACCUMULATE   ( 3, "EVENT_ACCUMULATE"),
+    EVENT_STOP         ( 4, "EVENT_STOP");    
     
     private final int typeId;
     private final String typeName;
