@@ -85,6 +85,7 @@ public class HipoDataSync implements DataSync {
             System.out.println("[error] ---> compression type string is invalid.");
             System.exit(0);
         }
+        
         String outputFile       = args[1];
         List<String> inputFiles = new ArrayList<String>();
         

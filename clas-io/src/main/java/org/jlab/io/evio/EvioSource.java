@@ -54,7 +54,7 @@ public class EvioSource implements DataSource {
         dictionary = EvioFactory.getDictionary();
         System.err.println("[EvioSource] ---> Factory loaded descriptor count : " 
                 + dictionary.getDescriptorList().length);
-        dictionary.show();
+        //dictionary.show();
     }
     
     public EvioSource(String filename){

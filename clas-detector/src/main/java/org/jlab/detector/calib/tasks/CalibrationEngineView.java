@@ -26,18 +26,20 @@ public class CalibrationEngineView extends JPanel implements CalibrationConstant
     CalibrationConstantsView ccview = null;
     EmbeddedCanvas           canvas = null;
     
+    
     public CalibrationEngineView(CalibrationEngine ce){        
         super();
         this.setLayout(new BorderLayout());
         engine = ce;
-        splitPane = new JSplitPane();
-        canvas = new EmbeddedCanvas();
-        
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        canvas = new EmbeddedCanvas();        
         ccview = new CalibrationConstantsView();
         ccview.addConstants(engine.getCalibrationConstants().get(0),this);
         splitPane.setTopComponent(canvas);
         splitPane.setBottomComponent(ccview);
         this.add(splitPane,BorderLayout.CENTER);
+        splitPane.setDividerLocation(0.5);
+        
     }
 
     @Override

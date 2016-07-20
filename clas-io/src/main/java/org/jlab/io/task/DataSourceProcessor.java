@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.evio.EvioFactory;
 
 /**
  *
@@ -86,9 +87,7 @@ public class DataSourceProcessor {
         this.timeSpendOnReading = 0L;
         this.timeSpendOnProcessing = 0L;
     }
-    
-    
-    
+           
     
     public void processSource(int delay){
         eventsProcessed = 0;
@@ -103,18 +102,34 @@ public class DataSourceProcessor {
     
     public boolean processNextEvent(int delay, DataEventType type){
         
+        if(type==DataEventType.EVENT_STOP){
+            DataEvent event = EvioFactory.createEvioEvent();
+            event.setType(type);
+            for(IDataEventListener processor : eventListeners){
+                processor.dataEventAction(event);
+            }
+            return true;
+        }
+        
         if(dataSource==null) {
             //System.out.println("[DataSourceProcessor] error ---> data source is not set");
             return false;
-        }        
+        }
         if(dataSource.hasEvent()==false){
             //System.out.println("[DataSourceProcessor] error ---> data source has no events");
             return false;
         }
-        this.eventsProcessed++;
+               
+        
         Long st = System.currentTimeMillis();
-        DataEvent event = dataSource.getNextEvent();
+        DataEvent event = dataSource.getNextEvent();        
         event.setType(type);
+        
+        if(this.eventsProcessed==0){
+            event.setType(DataEventType.EVENT_START);
+        }
+        
+        this.eventsProcessed++;
         Long et = System.currentTimeMillis();
         this.timeSpendOnReading += (et-st);
         //System.out.println(" processing next event ---> " + this.eventsProcessed);

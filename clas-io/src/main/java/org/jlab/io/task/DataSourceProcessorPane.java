@@ -102,6 +102,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         this.dataProcessor.addEventListener(del);
     }
     
+    
+    public void setUpdateRate(int nevents){
+        this.dataProcessor.setUpdateRate(nevents);
+    }
+    
     private JPanel  createMediaPane(){
         
         ImageIcon playIcon  = new ImageIcon(DataSourceProcessorPane.class.getClassLoader().getResource("icons/media/themes/thin/play-24x24.png"));
@@ -206,7 +211,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         class CrunchifyReminder extends TimerTask {
             boolean hasFinished = false;
             public void run() {
-                if(hasFinished==true) return;
+                //dataProcessor.processNextEvent(0, DataEventType.EVENT_START);
+                if(hasFinished==true){
+                    dataProcessor.processNextEvent(0, DataEventType.EVENT_STOP);
+                    return;
+                }
                 //System.out.println("running");
                 for (int i=1 ; i<100 ; i++) {
                     boolean status = dataProcessor.processNextEvent(0,DataEventType.EVENT_ACCUMULATE);
@@ -219,8 +228,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             }
         }
         processTimer = new java.util.Timer();
-        processTimer.schedule(new CrunchifyReminder(),1,1);
-        
+        processTimer.schedule(new CrunchifyReminder(),1,1);        
     }
     
     public static void main(String[] args){

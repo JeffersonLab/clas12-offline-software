@@ -63,6 +63,7 @@ public class CalibrationEngineTask {
         for(int i = 0; i < nFilesToProcess; i++){
             EvioSource dataSource = new EvioSource();
             dataSource.open(fileList.get(i));
+            System.out.println("[oppening file] --->  opened file # " + i + " file : " + fileList.get(i));
             while(dataSource.hasEvent()){
                 DataEvent event = dataSource.getNextEvent();
                 if(evCounter==0){
