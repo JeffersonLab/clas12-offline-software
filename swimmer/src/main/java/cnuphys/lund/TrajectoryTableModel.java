@@ -16,18 +16,18 @@ public class TrajectoryTableModel extends DefaultTableModel {
 			"KE (MeV)", "Et (MeV)", "status", "source" };
 
 	protected static final int columnWidths[] = { 70, // lund id
-			80, // name
-			135, // mass
-			120, // xo
-			120, // yo
-			120, // zo
-			140, // p
-			120, // theta
-			120, // phi
-			145, // KE
-			145, // Etot
+			82, // name
+			137, // mass
+			122, // xo
+			122, // yo
+			122, // zo
+			142, // p
+			122, // theta
+			122, // phi
+			147, // KE
+			147, // Etot
 			70, //status
-			200 //source
+			280 //source
 	};
 
 	// the model data

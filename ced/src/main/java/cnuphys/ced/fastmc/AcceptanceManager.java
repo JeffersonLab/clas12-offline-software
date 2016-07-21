@@ -27,7 +27,7 @@ public class AcceptanceManager implements IClasIoEventListener {
 	private static AcceptanceManager _instance;
 
 	private AcceptanceManager() {
-		ClasIoEventManager.getInstance().addClasIoEventListener(this, 2);
+		ClasIoEventManager.getInstance().addClasIoEventListener(this, 1);
 	}
 
 	public ACondition getElectronCondition() {

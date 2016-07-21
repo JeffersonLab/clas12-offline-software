@@ -1,11 +1,19 @@
 package cnuphys.ced.training;
 
+import java.awt.geom.Rectangle2D;
+import java.util.List;
+import java.util.Vector;
+
 import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.geom.DetectorHit;
 
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
+import cnuphys.ced.fastmc.AcceptanceManager;
+import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 
@@ -18,6 +26,7 @@ public class TrainingManager implements IClasIoEventListener {
 
 	//the singleton
 	private static TrainingManager _instance;
+	static {getInstance();}
 	
 	//listener list
 	private static EventListenerList _listenerList;
@@ -117,7 +126,40 @@ public class TrainingManager implements IClasIoEventListener {
 
 	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
-		//TODO take the physics event, make the training data, call the trainers
+
+		if (event == null) {
+			return;
+		}
+		
+		if (!AcceptanceManager.getInstance().currentEventAccepted()) {
+//			System.err.println("Current Event not ACCEPTED");
+			return;
+		}
+//		System.err.println("Current Event ACCEPTED");
+		
+		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
+		if ((phits == null) || phits.isEmpty()) {
+			return;
+		}
+		
+		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
+
+		for (ParticleHits hits : phits) {
+			List<DetectorHit> dchits = hits.getDCHits();
+			if (dchits != null) {
+				for (DetectorHit hit : dchits) {
+//					int sect1 = hit.getSectorId() + 1;
+//					int supl1 = hit.getSuperlayerId() + 1;
+//					if ((sect1 == _sector) && (supl1 == _superLayer)) {
+//						int lay1 = hit.getLayerId() + 1;
+//						int wire1 = hit.getComponentId() + 1;
+//						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), wr);
+//
+//					}
+				}
+			}
+		}
+		
 	}
 
 	

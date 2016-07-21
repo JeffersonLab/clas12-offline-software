@@ -766,6 +766,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	@Override
 	public void trajectoriesChanged() {
 		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
+			//System.err.println("TRAJ CHANGE view: " + getTitle());
 			getContainer().refresh();
 		}
 	}

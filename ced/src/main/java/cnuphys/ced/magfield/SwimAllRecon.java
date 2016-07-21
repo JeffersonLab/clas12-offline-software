@@ -55,6 +55,8 @@ public class SwimAllRecon implements ISwimAll {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
+		
+		Swimming.clearReconTrajectories();
 
 		Vector<TrajectoryRowData> data = getRowData();
 		if (data == null) {

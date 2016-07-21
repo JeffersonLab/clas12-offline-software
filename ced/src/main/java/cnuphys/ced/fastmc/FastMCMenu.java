@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
-
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -28,8 +26,14 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	//the open menu
 	private JMenuItem  _openItem;
 	
+	//pause item
+	private JMenuItem _pauseItem;
+	
 	//define acceptance
 	private JMenu _acceptanceMenu;
+	
+	//used to pause streaming
+	private boolean _paused = false;
 	
 	//hard coded acceptance definitions
 	private JCheckBoxMenuItem _eItem;
@@ -40,6 +44,9 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	
 	//stream events
 	private JMenuItem _streamItem;
+	
+	//count events streamed
+	private int _streamCount = 0;
 		
 	/**
 	 * Create a FastMC Menu
@@ -59,7 +66,10 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 		addSeparator();
 
 		_nextItem = addItem("Next FastMC Event");
+		addSeparator();
 		_streamItem = addItem("Stream all Events");
+		_pauseItem = addItem("Pause Streaming");
+		_pauseItem.setEnabled(false);
 		
 		fixMenuState();
 //		setEnabled(false);
@@ -108,11 +118,19 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 		Object o = e.getSource();
 
 		if (o == _openItem) {
-			_fastMCManager.openFile();
+			_streamCount = 0;
+			_paused = false;
+			_pauseItem.setEnabled(false);
+		_fastMCManager.openFile();
 		} else if (o == _nextItem) {
 			_fastMCManager.nextEvent();
 		} else if (o == _streamItem) {
+			_paused = false;
 			threadedScanFile();
+		}
+		else if (o == _pauseItem) {
+			_paused = true;
+			_pauseItem.setEnabled(false);
 		}
 		fixMenuState();
 	}
@@ -121,60 +139,29 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	private void threadedScanFile() {
 
 		final BusyPanel busyPanel = Ced.getBusyPanel();
-		
-		
-		
-//		Runnable runnable = new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				_fastMCManager.setStreaming(true);
-//				_fastMCManager.getTimer().restart();
-//				File file = _fastMCManager.getCurrentFile();
-//				String path = (file != null) ? file.getName() : "";
-////				busyPanel.setText("Reading " + path);
-////				busyPanel.setVisible(true);
-//				int count = 0;
-//				do {
-//					if ((count % 100) == 0) {
-//						System.err.println("Getting Event  " + count);
-//						_fastMCManager.getTimer().report();
-//					}
-//					count++;
-////					System.err.println("Getting Event  " + count);
-//					_fastMCManager.nextEvent();
-////					System.err.println("Done  " + count);
-//				} while (_fastMCManager.getCurrentGenEvent() != null);
-//				
-//				_fastMCManager.getTimer().done();
-//				_fastMCManager.getTimer().report();
-////				busyPanel.setVisible(false);
-//				Ced.getCed().fixTitle();
-//				_fastMCManager.setStreaming(false);
-//
-//			}
-//			
-//		};
-//		Thread thread = new Thread(runnable);
-//		thread.start();
-//		
-		
-		
 
 		class MyWorker extends SwingWorker<String, Void> {
 			@Override
 			protected String doInBackground() {
 				_fastMCManager.setStreaming(true);
-				int count = 0;
+				_pauseItem.setEnabled(true);
+				_openItem.setEnabled(false);
 				do {
-					count++;
-					if ((count % 100) == 0) {
-						busyPanel.setText("Processing event  " + count);
+					_streamCount++;
+					if ((_streamCount % 100) == 0) {
+						busyPanel.setText("Processing event  " + _streamCount);
 					}
 					_fastMCManager.nextEvent();
-				} while (_fastMCManager.getCurrentGenEvent() != null);
+				} while ((_fastMCManager.getCurrentGenEvent() != null) && !_paused);
+				
 				_fastMCManager.setStreaming(false);
-				return "Done. Processed " + count + " events.";
+				if (!_paused) {
+					_streamCount = 0;
+				}
+				_paused = false;
+				_pauseItem.setEnabled(false);
+				_openItem.setEnabled(true);
+				return "Done";
 			}
 
 			@Override
@@ -195,6 +182,7 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 		
 		_nextItem.setEnabled(goodFile);
 		_streamItem.setEnabled(goodFile);
+		_pauseItem.setEnabled(_fastMCManager.isStreaming());
 		
 		Ced.getCed().getEventMenu().fixState();
 	}

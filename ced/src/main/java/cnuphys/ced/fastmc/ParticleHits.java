@@ -23,6 +23,11 @@ public class ParticleHits {
 	//ftof layer hits
 	private List<DetectorHit>[][] _ftofLayerHits = new List[6][3];
 	
+	/**
+	 * The particle hits
+	 * @param lundId te Lund Id
+	 * @param path the path 
+	 */
 	public ParticleHits(LundId lundId, Path3D path) {
 		_lundId = lundId;
 		int charge = lundId.getCharge();
