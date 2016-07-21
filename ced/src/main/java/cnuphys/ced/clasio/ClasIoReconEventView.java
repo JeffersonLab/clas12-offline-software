@@ -41,6 +41,7 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	 * @param event the generated physics event
 	 */
 	public void newFastMCGenEvent(PhysicsEvent event) {
+		_trajectoryTable.clear(); // remove existing events
 	}
 	
 

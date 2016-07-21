@@ -129,19 +129,17 @@ public class FastMCManager {
 		return _currentFile;
 	}
 
+	public void reloadCurrentEvent() {
+		if (_genEvent != null) {
+			parseEvent(_genEvent);
+		}
+	}
+	
 	public boolean nextEvent() {
-		if (_streamTimer.isTiming())
-			_streamTimer.start(StreamTimer.READ);
 		boolean gotOne = _lundReader.next();
-		if (_streamTimer.isTiming())
-			_streamTimer.stop(StreamTimer.READ);
 
 		if (gotOne) {
-			if (_streamTimer.isTiming())
-				_streamTimer.start(StreamTimer.GET);
 			_genEvent = _lundReader.getEvent();
-			if (_streamTimer.isTiming())
-				_streamTimer.stop(StreamTimer.GET);
 			_eventNum++;
 			// System.err.println("fastmc event num: " + _eventNum + " has: " +
 			// _genEvent.count() + " particles");
@@ -179,14 +177,10 @@ public class FastMCManager {
 		}
 
 		// always swim fastMC MC tracks, that is needed to get the hits
-		if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.SWIM);
 		SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0, 1);
-		if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.SWIM);
 
 		// how many trajectories?
-		if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.TRAJ2D);
 		Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
-		if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.TRAJ2D);
 		
 		
 //		int trajCount = (trajectories == null) ? 0 : trajectories.size();
@@ -197,13 +191,8 @@ public class FastMCManager {
 		if (trajectories != null) {
 			for (SwimTrajectory traj : trajectories) {
 				if (traj.getLundId() != null) {
-					if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.GETHITS);
-					Path3D path3D = GeometryManager.fromSwimTrajectory(traj);
-					if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.GETHITS);
-					
-					if (_streamTimer.isTiming()) _streamTimer.start(StreamTimer.STORE);
+					Path3D path3D = GeometryManager.fromSwimTrajectory(traj);					
 					_particleHits.add(new ParticleHits(traj.getLundId(), path3D));
-					if (_streamTimer.isTiming()) _streamTimer.stop(StreamTimer.STORE);
 				}
 			}
 		}

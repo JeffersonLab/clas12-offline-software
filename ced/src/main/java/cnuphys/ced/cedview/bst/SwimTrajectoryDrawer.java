@@ -10,6 +10,7 @@ import java.util.Vector;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimming;
@@ -32,7 +33,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (!ClasIoEventManager.getInstance().isAccumulating()) {
+		if (!ClasIoEventManager.getInstance().isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
 
 			// mc
 			if (SwimMenu.getInstance().showMonteCarloTracks()) {
@@ -41,7 +42,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 				if ((trajectories == null) || (trajectories.size() < 1)) {
 					return;
 				}
-
+				
 				Rectangle sr = container.getInsetRectangle();
 				Graphics2D g2 = (Graphics2D) g;
 

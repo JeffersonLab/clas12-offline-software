@@ -18,6 +18,7 @@ import cnuphys.bCNU.component.ActionLabel;
 import cnuphys.ced.clasio.table.NodeTable;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.ced.fastmc.FastMCManager;
 
 /**
  * Panel that shows which banks are present in an event
@@ -166,6 +167,9 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	 * @param event the generated physics event
 	 */
 	public void newFastMCGenEvent(PhysicsEvent event) {
+		if (!FastMCManager.getInstance().isStreaming()) {
+			update();
+		}
 	}
 	
 	@Override

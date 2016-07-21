@@ -57,8 +57,6 @@ public class ProjectedSuperLayer extends PolygonItem implements ISuperLayer {
 		_superlayer = superLayer;
 		_superlayerDrawer = new SuperLayerDrawing(_view, this);
 		_projectionPlane = DCGeometry.getSuperlayerPlane(1, superLayer);
-		
-		System.err.println("PSL CONSTRUCTOR");
 	}
 	
 //	@Override

@@ -60,11 +60,14 @@ import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.plugin.CedPluginManager;
+import cnuphys.ced.properties.PropertiesManager;
+import cnuphys.ced.training.TrainingManager;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.splot.example.MemoryUsageDialog;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
+import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.splashscreen.SplashWindow;
@@ -90,7 +93,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.97.08";
+	private static final String _release = "build 0.97.09";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -757,7 +760,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	@Override
 	public void magneticFieldChanged() {
+		Swimming.clearMCTrajectories();
+		Swimming.clearReconTrajectories();
 		fixTitle();
+		ClasIoEventManager.getInstance().reloadCurrentEvent();
 	}
 	
 	/**
@@ -815,6 +821,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
+		//read in userprefs
+		PropertiesManager.getInstance();
+		
+		TrainingManager.getInstance();
 		
 		//for running from runnable jar (for coatjava)
 		String clas12dir = System.getProperty("CLAS12DIR");

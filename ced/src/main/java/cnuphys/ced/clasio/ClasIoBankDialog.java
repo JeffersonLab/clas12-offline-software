@@ -17,11 +17,14 @@ import org.jlab.data.io.DataDescriptor;
 import org.jlab.data.ui.BankEntryMasks;
 import org.jlab.data.ui.DataBankPanel;
 import org.jlab.evio.clas12.EvioDataDictionary;
+import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.evio.clas12.EvioFactory;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.frame.Ced;
+import cnuphys.ced.properties.PropertiesManager;
 
 public class ClasIoBankDialog extends JDialog implements ItemListener {
 
@@ -97,28 +100,35 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 			JCheckBox cb[] = _visHash.get(bankName);
 
 			String maskString = "";
-			boolean first = true;
+//			boolean first = true;
 
 			for (int i = 0; i < columns.length; i++) {
 				if (cb[i].isSelected()) {
-					if (first) {
-						first = false;
-					} else {
-						maskString += ":";
-					}
+//					if (first) {
+//						first = false;
+//					} else {
+//						maskString += ":";
+//					}
 					maskString += columns[i];
+					maskString += ":";
 				}
 			}
 
-			System.err.println(bankName + "," + maskString);
+//			System.err.println(bankName + "," + maskString);
 			mask.setMask(bankName, maskString);
 
+			PropertiesManager.getInstance().putAndWrite(bankName, maskString);
 		} // have columns
 
 		return mask;
 	}
 
 	public void update() {
+		EvioDataEvent evioEvent = _eventManager.getCurrentEvent();
+		if (evioEvent == null) {
+			return;
+		}
+		
 		// Gagik's data panel
 		DataBank db = _eventManager.getCurrentEvent().getBank(_bankName);
 
@@ -141,6 +151,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 
 	private void setup() {
 
+		//add Gagik's panel;
 		_dataBankPanel = new DataBankPanel();
 		add(_dataBankPanel, BorderLayout.CENTER);
 
@@ -155,15 +166,38 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		if ((columns != null) && (columns.length > 0)) {
 
 			JCheckBox cbarray[] = new JCheckBox[columns.length];
+			
+			//get the mask (if there is one) from the user preferences (persistance)
+			String maskName = PropertiesManager.getInstance().get(_bankName);
+			String tokens[] = null;
+			if (maskName != null) {
+				tokens = FileUtilities.tokens(maskName, ":");
+			}
 
 			for (int i = 0; i < columns.length; i++) {
-				cbarray[i] = new JCheckBox(columns[i], true);
+				
+				//the checkbox is selected if there is no mask or, if there is a mask,
+				//if the column name is one of the tokens generated from the mask
+				boolean selected  = false;
+				if ((tokens == null) || (tokens.length < 1)) {
+					selected = true;
+				}
+				else {
+					for (String token : tokens) {
+						if (columns[i].equals(token)) {
+							selected = true;
+							break;
+						}
+					}
+				}
+				
+				cbarray[i] = new JCheckBox(columns[i], selected);
 				cbarray[i].addItemListener(this);
 				_checkboxPanel.add(cbarray[i]);
 			}
 			
+			//cache the checbox array
 			_visHash.put(_bankName, cbarray);
-
 		}
 
 		add(_checkboxPanel, BorderLayout.SOUTH);

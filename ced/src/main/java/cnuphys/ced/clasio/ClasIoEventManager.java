@@ -607,6 +607,13 @@ public class ClasIoEventManager {
 	 * @return the same current event
 	 */
 	public EvioDataEvent reloadCurrentEvent() {
+		
+		if (isSourceFastMC()) {
+			FastMCManager.getInstance().reloadCurrentEvent();
+			return null;
+		}
+		
+		
 		if (_currentEvent != null) {
 			notifyEventListeners();
 		}
@@ -858,6 +865,10 @@ public class ClasIoEventManager {
 	 */
 	public boolean isBankInCurrentEvent(String bankName) {
 		if ((bankName == null) || (_currentBanks == null)) {
+			return false;
+		}
+		
+		if (this.isSourceFastMC()) {
 			return false;
 		}
 
