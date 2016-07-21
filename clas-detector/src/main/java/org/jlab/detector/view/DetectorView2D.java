@@ -11,6 +11,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ import org.jlab.utils.groups.IndexedList;
  *
  * @author gavalian
  */
-public class DetectorView2D extends JPanel implements MouseMotionListener {
+public class DetectorView2D extends JPanel implements MouseMotionListener, MouseListener {
     
     
     Map<String,DetectorViewLayer2D>  viewLayers = new LinkedHashMap<String,DetectorViewLayer2D>();
@@ -53,10 +54,15 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
         addListeners();
     }
     
+    public void addDetectorListener(DetectorListener listener){
+        this.detectorListeners.add(listener);
+    }
+    
     private void addListeners(){
         if(this.isMouseMotionListener==true){
-            this.addMouseMotionListener(this);
+            this.addMouseMotionListener(this);            
         }
+        this.addMouseListener(this);
     }
     
     public void fill(List<DetectorDataDgtz> data, String options){
@@ -197,6 +203,57 @@ public class DetectorView2D extends JPanel implements MouseMotionListener {
                 repaint();
             }
         }*/
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        //System.out.println("You clicked me at " + e.getX() + " " + e.getY());
+        double x = world.getViewX(e.getX());
+        double y = world.getViewY(e.getY());
+        DetectorShape2D selection = null;
+            for(String layer : this.viewLayerNames){
+                if(viewLayers.get(layer).isActive()==true){
+                    this.viewLayers.get(layer).resetSelection();
+                    selection = this.viewLayers.get(layer).getShapeByXY( x,y);
+                    if(selection!=null) {
+                        this.viewLayers.get(layer).setSelected(selection);
+                        break;
+                    }
+                }
+            }
+            if(selection!=null){
+                if(activeShape!=null){
+                    //System.out.println(" compare = " + activeShape.getDescriptor().compare(selection.getDescriptor()));
+                    //System.out.println(" active shape = " + selection.getDescriptor());
+                }
+                //System.out.println(" SELECTION = " + selection.getDescriptor());
+                activeShape = selection;
+                for(DetectorListener listener : this.detectorListeners){
+                    listener.processShape(activeShape);
+                }
+                repaint();
+            }
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {        
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     /**

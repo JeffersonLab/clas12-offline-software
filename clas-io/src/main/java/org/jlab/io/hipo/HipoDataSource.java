@@ -52,7 +52,7 @@ public class HipoDataSource implements DataSource {
             EvioDataDescriptor  descriptor = new EvioDataDescriptor(descString);
             this.dictionary.addDescriptor(descriptor);
         }
-        this.dictionary.show();
+        //this.dictionary.show();
         this.minEventNumber = ncount;
         this.currentEventNumber = ncount;
         this.numberOfEvent      = this.reader.getEventCount();

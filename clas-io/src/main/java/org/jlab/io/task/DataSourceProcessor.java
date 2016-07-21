@@ -63,12 +63,13 @@ public class DataSourceProcessor {
     public String getStatusString(){
         double evRate = this.eventsProcessed/(this.timeSpendOnReading/1000.0);
         double prRate = this.eventsProcessed/(this.timeSpendOnProcessing/1000.0);
+        double totalTime = (this.timeSpendOnProcessing+this.timeSpendOnReading)/1000.0;
         if(this.eventListeners.isEmpty()) prRate = 0.0;
         if(this.timeSpendOnProcessing==0L) prRate = 0.0;
         if(this.timeSpendOnReading==0L) evRate = 0.0;
         
-        return String.format("    Events %d  : Reading %.2f  evt/sec. Processing %.2f evt/sec",
-                this.eventsProcessed,
+        return String.format("    Events %d  Time %.2f sec : Reading %.2f  evt/sec. Processing %.2f evt/sec",                
+                this.eventsProcessed, totalTime,
                 evRate,prRate);
     }
     
@@ -102,14 +103,14 @@ public class DataSourceProcessor {
     
     public boolean processNextEvent(int delay, DataEventType type){
         
-        if(type==DataEventType.EVENT_STOP){
+        /*if(type==DataEventType.EVENT_STOP){
             DataEvent event = EvioFactory.createEvioEvent();
             event.setType(type);
             for(IDataEventListener processor : eventListeners){
                 processor.dataEventAction(event);
             }
             return true;
-        }
+        }*/
         
         if(dataSource==null) {
             //System.out.println("[DataSourceProcessor] error ---> data source is not set");
@@ -128,7 +129,9 @@ public class DataSourceProcessor {
         if(this.eventsProcessed==0){
             event.setType(DataEventType.EVENT_START);
         }
-        
+        if(dataSource.hasEvent()==false){
+            event.setType(DataEventType.EVENT_STOP);
+        }
         this.eventsProcessed++;
         Long et = System.currentTimeMillis();
         this.timeSpendOnReading += (et-st);

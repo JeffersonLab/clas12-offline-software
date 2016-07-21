@@ -15,6 +15,7 @@ import org.jlab.detector.decode.CodaEventDecoder;
 import org.jlab.detector.decode.DetectorDataDgtz;
 import org.jlab.detector.decode.DetectorDecoderView;
 import org.jlab.detector.decode.DetectorEventDecoder;
+import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
 import org.jlab.io.base.DataEvent;
@@ -27,7 +28,7 @@ import org.jlab.io.task.IDataEventListener;
  *
  * @author gavalian
  */
-public class RawEventViewer implements IDataEventListener {
+public class RawEventViewer implements IDataEventListener,DetectorListener {
     
     DetectorPane2D            detectorView        = null;
     DetectorDecoderView       detectorDecoderView = null;
@@ -58,7 +59,7 @@ public class RawEventViewer implements IDataEventListener {
         processorPane = new DataSourceProcessorPane();
         pane.add(processorPane,BorderLayout.PAGE_END);
         
-        
+        this.detectorView.getView().addDetectorListener(this);
         this.processorPane.addEventListener(this);
     }
    
@@ -153,6 +154,11 @@ public class RawEventViewer implements IDataEventListener {
         
     }
     
+    @Override
+    public void processShape(DetectorShape2D shape) {
+        System.out.println("SHAPE SELECTED = " + shape.getDescriptor());
+    }
+    
     public static void main(String[] args){
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -161,4 +167,6 @@ public class RawEventViewer implements IDataEventListener {
         frame.setSize(900, 600);
         frame.setVisible(true);
     }
+
+   
 }

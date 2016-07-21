@@ -16,6 +16,7 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import org.jlab.ccdb.Assignment;
 import org.jlab.ccdb.CcdbPackage;
+import org.jlab.ccdb.Directory;
 import org.jlab.ccdb.JDBCProvider;
 import org.jlab.ccdb.TypeTable;
 import org.jlab.ccdb.TypeTableColumn;
@@ -143,6 +144,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
         provider.setDefaultVariation(variation);
         provider.setDefaultRun(this.runNumber);
 
+        //Directory dir = provider.getDirectory("/calibration/ftof/");        
         //Assignment asgmt = provider.getData("/test/test_vars/test_table");
     }
     

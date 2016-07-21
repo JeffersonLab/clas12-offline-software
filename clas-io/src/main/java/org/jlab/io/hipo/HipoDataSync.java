@@ -15,6 +15,7 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.hipo.io.HipoWriter;
+import org.jlab.io.evio.EvioDataBank;
 
 /**
  *
@@ -58,7 +59,13 @@ public class HipoDataSync implements DataSync {
             System.out.println("\t\t -lz4  : lz4 compression");
             System.out.println("\n");
     }
+    
     public static void main(String[] args){
+        
+        if(args.length<3){
+            HipoDataSync.printUsage();
+            System.exit(0);
+        }
         
         if(args[0].startsWith("-")==false){
             System.out.println("\n\n--> please provide compression type");
@@ -108,7 +115,11 @@ public class HipoDataSync implements DataSync {
             reader.open(inFile);
             while(reader.hasEvent()){
                 EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
-                writer.writeEvent(event);
+                
+                EvioDataBank  bankFTOF = EvioHipoEvent.getBankFTOF(event);
+                EvioDataEvent cevent   = EvioFactory.createEvioEvent();
+                cevent.appendBank(bankFTOF);
+                writer.writeEvent(cevent);
             }
         }
         writer.close();

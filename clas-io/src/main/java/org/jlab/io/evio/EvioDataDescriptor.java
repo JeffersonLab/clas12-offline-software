@@ -41,7 +41,7 @@ public class EvioDataDescriptor implements DataDescriptor {
     public void init(String s) {
         descriptorEntries.clear();
         String[] tokens = s.split("/");
-        System.out.println(" N - tokens = " + tokens.length);
+        //System.out.println(" N - tokens = " + tokens.length);
         String[] header = tokens[0].split(":");
         this.descriptorName = header[0] + "::" + header[1];
         String section_name = header[1];

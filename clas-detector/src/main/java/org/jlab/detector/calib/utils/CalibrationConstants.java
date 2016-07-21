@@ -5,9 +5,13 @@
  */
 package org.jlab.detector.calib.utils;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.utils.system.ClasUtilsFile;
@@ -69,6 +73,48 @@ public class CalibrationConstants extends IndexedTable {
         
         ClasUtilsFile.writeFile(file, linesFile);
     }
+    
+    
+    public static class CalibrationConstantsRenderer extends DefaultTableCellRenderer {        
+        CalibrationConstants calib = null;
+        public CalibrationConstantsRenderer(CalibrationConstants cc){
+            calib = cc;
+        }        
+        @Override
+        public Component getTableCellRendererComponent
+             (JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+             {
+                 Component c = super.getTableCellRendererComponent
+                                                  (table, value, isSelected, hasFocus, row, column);
+                 
+                 if(calib.isValid(row, column)==false){
+                     if(isSelected==true){
+                         c.setBackground(Color.RED);
+                     } else {
+                         c.setBackground(new Color(255,120,120));
+                     }
+                     c.setForeground(Color.YELLOW);
+                     return c;
+                 }
+                 
+                 if(isSelected==true){
+                     c.setBackground(new Color(20,20,255));
+                     c.setForeground(Color.WHITE);
+                     return c;
+                 }
+                 
+                 if(row%2==0){
+                     c.setBackground(new Color(220,255,220));
+                     c.setForeground(Color.BLACK);
+                 } else {                     
+                     c.setBackground(new Color(220,220,255));
+                     c.setForeground(Color.BLACK);
+                 }
+                 
+                 return c;
+             }
+    }
+    
     
     public static void main(String[] args){
         CalibrationConstants gain = new CalibrationConstants(3,"Mean/F:Error/I:Sigma/F:Serror/F");

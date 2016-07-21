@@ -6,6 +6,8 @@
 package org.jlab.detector.calib.utils;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -21,6 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -47,23 +51,23 @@ public class CalibrationConstantsView extends JPanel implements ActionListener {
         buttonsPanel.add(drawDifference);
         this.add(buttonsPanel,BorderLayout.PAGE_END);
         comboBox = new JComboBox();
-        buttonsPanel.add(comboBox);
-        
+        buttonsPanel.add(comboBox);        
        
     }
     
     
     public void addConstants(CalibrationConstants calib, CalibrationConstantsListener listener){
         JTable dataTable = new JTable(calib);
-         dataTable.addMouseListener(new MouseAdapter() {
-             public void mouseClicked(MouseEvent e) {
-                 int row = dataTable.getSelectedRow();
-                 int col = dataTable.getSelectedColumn();
-                 listener.constantsEvent(calib, col, row);
-                 //System.out.println("selected row  " + row + " column "
-                 //+ col);
-             }
-         });
+        dataTable.setDefaultRenderer(Object.class, new CalibrationConstants.CalibrationConstantsRenderer(calib));
+        dataTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int row = dataTable.getSelectedRow();
+                int col = dataTable.getSelectedColumn();
+                listener.constantsEvent(calib, col, row);
+                //System.out.println("selected row  " + row + " column "
+                //+ col);
+            }
+        });
         JScrollPane   scrollPane = new JScrollPane(dataTable);        
         calibrationMap.put(calib.getName(), calib);        
         tabbedPane.addTab(calib.getName(), scrollPane);
@@ -71,11 +75,16 @@ public class CalibrationConstantsView extends JPanel implements ActionListener {
     
     public void addConstants(CalibrationConstants calib){
         JTable dataTable = new JTable(calib);         
+        dataTable.setDefaultRenderer(Object.class, new CalibrationConstants.CalibrationConstantsRenderer(calib));
         JScrollPane   scrollPane = new JScrollPane(dataTable);        
         calibrationMap.put(calib.getName(), calib);        
         tabbedPane.addTab(calib.getName(), scrollPane);
     }
     
+    public JTabbedPane  getTabbedPane(){
+        return this.tabbedPane;
+    }
+        
     private void updateComboBox(){
         int index = this.tabbedPane.getSelectedIndex();
         String name = tabbedPane.getTitleAt(index);
@@ -107,6 +116,8 @@ public class CalibrationConstantsView extends JPanel implements ActionListener {
         }
     }
     
+    
+    
     public static void main(String[] args){
         JFrame frame = new JFrame();
         CalibrationConstantsView view = new CalibrationConstantsView();
@@ -115,7 +126,7 @@ public class CalibrationConstantsView extends JPanel implements ActionListener {
         for(int i = 0; i < 23; i++){
             gain.addEntry(1,1,i+1);
         }
-        
+        gain.addConstraint(3, 0.2, 1.0);
         gain.setDoubleValue(0.2, "Mean", 1,1,1);
         gain.setDoubleValue(0.3, "Mean", 1,1,2);
         gain.setDoubleValue(0.4, "Mean", 1,1,3);

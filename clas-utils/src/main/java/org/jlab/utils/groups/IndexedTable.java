@@ -5,6 +5,8 @@
  */
 package org.jlab.utils.groups;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -30,7 +34,8 @@ public class IndexedTable extends DefaultTableModel {
     private List<String>              indexNames = new ArrayList<String>();
     private String                    precisionFormat = "%.6f";
     
-    private Map<Integer,RowConstraint>  constrains = new HashMap<Integer,RowConstraint>(); 
+    private Map<Integer,List<RowConstraint>>  constrains = new HashMap<Integer,List<RowConstraint>>(); 
+    
     
     public IndexedTable(int indexCount){
         entries = new IndexedList<IndexedEntry>(indexCount);
@@ -86,9 +91,23 @@ public class IndexedTable extends DefaultTableModel {
     }
     
     public  void addConstraint(int column, double min, double max){
-        constrains.put(column, new RowConstraint(column,min,max));
+        if(constrains.containsKey(column)==false){
+            constrains.put(column, new ArrayList<RowConstraint>());
+        }
+        
+        //constrains.put(column, new RowConstraint(column,min,max));
+        constrains.get(column).add(new RowConstraint(column,min,max));
     }
     
+     public  void addConstraint(int column, double min, double max, int condition, int condValue){
+        if(constrains.containsKey(column)==false){
+            constrains.put(column, new ArrayList<RowConstraint>());
+        }
+        
+        //constrains.put(column, new RowConstraint(column,min,max));
+        constrains.get(column).add(new RowConstraint(column,min,max,condition,condValue));
+    }
+     
     public  void setIntValue(Integer value, String item, int... index){
         if(this.entries.hasItem(index)==false){
             System.out.println( "[IndexedTable] ---> error.. entry does not exist");
@@ -203,11 +222,31 @@ public class IndexedTable extends DefaultTableModel {
         }
         return str.toString();
     }
-    
+    /**
+     * Checks the array of row constraints to see if it passes the cut.
+     * this method is used by CellRenderer.
+     * @param row
+     * @param column
+     * @return 
+     */
     public boolean isValid(int row, int column){
         if(this.constrains.containsKey(column)==false) return true;
-        String value = (String) this.getValueAt(row, column);
-        return this.constrains.get(column).isValid(Double.parseDouble(value)) != false;            
+        
+        String value  = (String) this.getValueAt(row, column);
+        Double dvalue = Double.parseDouble(value);
+        for(RowConstraint rc : constrains.get(column)){
+            if(rc.conditionColumn()>=0){
+                String controlColumn = (String) this.getValueAt(row, rc.conditionColumn());
+                Integer intColumnValue = Integer.parseInt(controlColumn);
+                if(intColumnValue==rc.conditionColumnValue()){
+                    return rc.isValid(dvalue)!=false;
+                } 
+                //return this.constrains.get(column).isValid(Double.parseDouble(value)) != false;
+            } else {
+                return rc.isValid(dvalue)!=false;
+            }
+        }
+        return true;
     }
     
     /**
@@ -287,9 +326,11 @@ public class IndexedTable extends DefaultTableModel {
     
     public class RowConstraint {
         
-        public int COLUMN = 0;
-        public double MIN = 0.0;
-        public double MAX;
+        public int   COLUMN = 0;
+        public double   MIN = 0.0;
+        public double   MAX;
+        public int      CONDITION_COLUMN       = -1;
+        public int      CONDITION_COLUMN_VALUE = -1;
         
         public RowConstraint ( int column, double min, double max){
             this.COLUMN = column;
@@ -297,7 +338,43 @@ public class IndexedTable extends DefaultTableModel {
             this.MAX    = max;
         }
         
+        public RowConstraint ( int column, double min, double max, int ccol, int cvalue){
+            this.COLUMN = column;
+            this.MIN    = min;
+            this.MAX    = max;
+            this.CONDITION_COLUMN = ccol;
+            this.CONDITION_COLUMN_VALUE = cvalue;
+        }
+        
+        
         public boolean isValid(double value){ return (value>=this.MIN&&value<=this.MAX);}
+        public int     conditionColumn(){ return this.CONDITION_COLUMN;}
+        public int     conditionColumnValue(){ return this.CONDITION_COLUMN_VALUE;}
+    }
+    
+    
+    /**
+     * internal class used for cell rendering
+     */
+    public static class IndexedCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent
+                (JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+                {
+                    Component c = super.getTableCellRendererComponent
+                                          (table, value, isSelected, hasFocus, row, column);
+                     if(isSelected==true){
+                         c.setBackground(new Color(20,20,255));                
+                         return c;
+                     }
+                    if(row%2==0){
+                        c.setBackground(new Color(220,255,220));
+                    } else {
+                        c.setBackground(new Color(220,220,255));
+                    }
+                    
+                    return c;
+                }
     }
     
     public static class IndexedEntry {

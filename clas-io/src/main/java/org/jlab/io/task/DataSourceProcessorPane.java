@@ -23,8 +23,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
+import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
 
 /**
  *
@@ -69,6 +71,10 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         sourceFile.setIcon(fileIcon);
         sourceFile.setActionCommand("OpenFile");                
         sourceFile.addActionListener(this);
+        
+        JButton sourceFileHipo = new JButton("H");
+        sourceFileHipo.setActionCommand("OpenFileHipo");
+        sourceFileHipo.addActionListener(this);
         //sourceFile.setBackground(this.paneBackground);
         
         JPanel mediaPane = this.createMediaPane();
@@ -78,6 +84,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         sourcePane.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.LOWERED));
         //sourcePane.setBackground(Color.LIGHT_GRAY);
         sourcePane.add(sourceFile);
+        sourcePane.add(sourceFileHipo);
         //this.add(openFile);
         //this.add(Box.createHorizontalStrut(30));
         //this.add(mediaPane);
@@ -185,6 +192,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
         
         if(e.getActionCommand().compareTo("OpenFile")==0){
+
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
             
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
@@ -204,6 +216,33 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 
             }
         }
+        
+        if(e.getActionCommand().compareTo("OpenFileHipo")==0){
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
+            
+            JFileChooser fc = new JFileChooser();
+            fc.setCurrentDirectory(null);
+            int returnVal = fc.showOpenDialog(this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                String fileName = fc.getSelectedFile().getAbsolutePath();
+                System.out.println("file -> " + fileName);
+                HipoDataSource source = new HipoDataSource();
+                source.open(fileName);
+
+                //This is where a real application would open the file.
+                this.dataProcessor.setSource(source);
+                statusLabel.setText(dataProcessor.getStatusString());
+                mediaNext.setEnabled(true);
+                mediaPrev.setEnabled(true);
+                mediaPlay.setEnabled(true);
+            } else {
+                
+            }
+        }
     }
     
     private void startProcessorTimer(){
@@ -212,12 +251,12 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             boolean hasFinished = false;
             public void run() {
                 //dataProcessor.processNextEvent(0, DataEventType.EVENT_START);
-                if(hasFinished==true){
+                /*if(hasFinished==true){
                     dataProcessor.processNextEvent(0, DataEventType.EVENT_STOP);
                     return;
-                }
+                }*/
                 //System.out.println("running");
-                for (int i=1 ; i<100 ; i++) {
+                for (int i=1 ; i<5000 ; i++) {
                     boolean status = dataProcessor.processNextEvent(0,DataEventType.EVENT_ACCUMULATE);
                     if(status==false&&hasFinished==false){
                         hasFinished = true;
@@ -236,6 +275,30 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         DataSourceProcessorPane pane = new DataSourceProcessorPane();
+        
+        pane.addEventListener(new IDataEventListener(){
+            int ncount = 0;
+            public void dataEventAction(DataEvent event) {
+                ncount++;
+                if(event.getType() == DataEventType.EVENT_START){
+                    System.out.println(" ---> start event " + ncount);
+                }
+                
+                if(event.getType() == DataEventType.EVENT_STOP){
+                    System.out.println(" ---> stop event " + ncount);
+                }
+            }
+
+            public void timerUpdate() {
+                System.out.println("update is called");
+            }
+
+            public void resetEventListener() {
+                System.out.println("reset is called");
+                ncount = 0;
+            }
+            
+        });
         panel.add(pane,BorderLayout.PAGE_END);
         frame.add(panel);
         frame.pack();
