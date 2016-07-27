@@ -34,14 +34,11 @@ public class SectorPCALItem extends PolygonItem {
 	// the container sector view
 	private SectorView _view;
 
-	// the event manager
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-
 	// should be PCLAGeometry.PCAL_U, PCAL_V, or PCAL_W
 	private int _stripType;
 
 	private static final String _stripNames[] = { "U", "V", "W" };
-	private static final Color _pcalFill = new Color(220, 220, 220);
+	private static final Color _pcalFill = new Color(215, 225, 215);
 	private static final Color _pcalLine = new Color(140, 140, 140);
 	
 	private static int[] _stripCounts = {68, 62, 62}; //u,v,w
@@ -124,6 +121,13 @@ public class SectorPCALItem extends PolygonItem {
 	 * @return
 	 */
 	private Point2D.Double[] getStrip(int stripId) {
+		
+		if (!PCALGeometry.doesProjectedPolyFullyIntersect(_stripType,
+				stripId, _view.getProjectionPlane())) {
+			return null;
+		}
+		
+		
 		Point2D.Double wp[] = PCALGeometry.getIntersections(_stripType,
 				stripId, _view.getProjectionPlane(), true);
 

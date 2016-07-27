@@ -106,6 +106,6 @@ public class ClasIoTest {
 
 		}
 
-		eventManager.getEvioSource().close();
+		eventManager.getDataSource().close();
 	}
 }

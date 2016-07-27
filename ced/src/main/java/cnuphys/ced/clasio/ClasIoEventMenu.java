@@ -66,7 +66,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	private static String dataFilePath;
 
 	public static String extensions[] = { "ev", "ev0", "ev1", "ev2", "ev3",
-			"ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "evio" };
+			"ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "evio", "hipo" };
 
 	private static FileNameExtensionFilter _evioFileFilter = new FileNameExtensionFilter(
 			"EVIO Event Files", extensions);

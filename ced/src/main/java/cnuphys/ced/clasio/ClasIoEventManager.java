@@ -16,6 +16,8 @@ import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.data.io.DataSource;
+import org.jlab.data.io.hipo.HipoDataSource;
 import org.jlab.evio.clas12.EvioDataDictionary;
 import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.evio.clas12.EvioFactory;
@@ -24,6 +26,7 @@ import org.jlab.evio.clas12.EvioSource;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
+import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.GEMCMetaDataContainer;
@@ -84,7 +87,7 @@ public class ClasIoEventManager {
 	private File _currentEventFile;
 
 	// the clas_io source of events
-	private EvioSource _evioSource;
+	private DataSource _dataSource;
 
 	// singleton
 	private static ClasIoEventManager instance;
@@ -97,7 +100,7 @@ public class ClasIoEventManager {
 
 	// private constructor for singleton
 	private ClasIoEventManager() {
-		_evioSource = new EvioSource();
+		_dataSource = new EvioSource();
 		_gemcMetaData = new GEMCMetaDataContainer(this);
 	}
 
@@ -137,9 +140,11 @@ public class ClasIoEventManager {
 		} else {
 			if (_currentEvent != null) {
 				// use any bank with a true pid column
-				String[] knownBanks = ClasIoEventManager.getInstance().getKnownBanks();
-				if (knownBanks != null) {
-					for (String bankName : knownBanks) {
+				//String[] knownBanks = ClasIoEventManager.getInstance().getKnownBanks();
+				
+				String[] cbanks = _currentEvent.getBankList();
+				if (cbanks != null) {
+					for (String bankName : cbanks) {
 						if (bankName.contains("::true")) {
 							ColumnData cd = ColumnData.getColumnData(bankName, "pid");
 							if (cd != null) {
@@ -180,8 +185,8 @@ public class ClasIoEventManager {
 	 * 
 	 * @return the EvioSource object
 	 */
-	public EvioSource getEvioSource() {
-		return _evioSource;
+	public DataSource getDataSource() {
+		return _dataSource;
 	}
 
 	/**
@@ -291,13 +296,19 @@ public class ClasIoEventManager {
 		busyPanel.setText("Reading " + file.getPath());
 		busyPanel.setVisible(true);
 		
-		_evioSource.close();
+		_dataSource.close();
 		_currentEvent = null;
 
 		class MyWorker extends SwingWorker<String, Void> {
 			@Override
 			protected String doInBackground() {
-				_evioSource.open(file);
+				if (FileUtilities.getExtension(file).equals("hipo")) {
+					_dataSource = new HipoDataSource();
+				}
+				else {
+					_dataSource = new EvioSource();
+				}
+				_dataSource.open(file.getPath());
 				notifyEventListeners(file.getPath());
 				_currentEventFile = file;
 				return "Done.";
@@ -366,7 +377,7 @@ public class ClasIoEventManager {
 		};
 
 		//radio buttons for event source
-		fileRadioMenuItem = new JRadioButtonMenuItem("Events From EVIO Files",
+		fileRadioMenuItem = new JRadioButtonMenuItem("Events From EVIO or HIPO Files",
 				getEventSourceType() == EventSourceType.FILE);
 		etRadioMenuItem = new JRadioButtonMenuItem("Events From ET",
 				getEventSourceType() == EventSourceType.ET);
@@ -426,7 +437,7 @@ public class ClasIoEventManager {
 
 		int evcount = 0;
 		if (isSourceFile()) {
-			evcount = _evioSource.getSize();
+			evcount = _dataSource.getSize();
 		}
 		else if (isSourceET()) {
 		}
@@ -443,7 +454,7 @@ public class ClasIoEventManager {
 	public int getEventNumber() {
 		int evnum = 0;
 		if (isSourceFile()) {
-			evnum = _evioSource.getCurrentIndex() - 1;
+			evnum = _dataSource.getCurrentIndex() - 1;
 		}
 		else if (isSourceFastMC()) {
 			evnum = FastMCManager.getInstance().getEventNumber();
@@ -557,7 +568,7 @@ public class ClasIoEventManager {
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
 		switch (estype) {
 		case FILE:
-			_currentEvent = (EvioDataEvent) _evioSource.getNextEvent();
+			_currentEvent = (EvioDataEvent) _dataSource.getNextEvent();
 			notifyEventListeners();
 			break;
 		case ET:
@@ -578,7 +589,7 @@ public class ClasIoEventManager {
 	public EvioDataEvent getPreviousEvent() {
 		
 		int evNum = getEventNumber();
-		_currentEvent = (EvioDataEvent) _evioSource.getPreviousEvent();
+		_currentEvent = (EvioDataEvent) _dataSource.getPreviousEvent();
 		
 		//evioSource.getPreviousEvent() doesn't work at the end of the file
 		//so hack
@@ -596,7 +607,7 @@ public class ClasIoEventManager {
 	 * @return the event at the given number (if possible).
 	 */
 	public EvioDataEvent gotoEvent(int eventNumber) {
-		_currentEvent = (EvioDataEvent) _evioSource.gotoEvent(eventNumber);
+		_currentEvent = (EvioDataEvent) _dataSource.gotoEvent(eventNumber);
 		notifyEventListeners();
 		return _currentEvent;
 	}
@@ -630,8 +641,8 @@ public class ClasIoEventManager {
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();
 		
-		if (_evioSource != null) {
-			_evioSource.close();
+		if (_dataSource != null) {
+			_dataSource.close();
 			_currentEvent = null;
 		}
 

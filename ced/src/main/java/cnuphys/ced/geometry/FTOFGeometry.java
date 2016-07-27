@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jlab.clasrec.utils.DataBaseLoader;
 import org.jlab.geom.DetectorHit;
+import org.jlab.geom.abs.AbstractComponent;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ftof.FTOFDetector;
@@ -75,6 +76,9 @@ public class FTOFGeometry {
 		return _ftofLayers[sect0][ptype].getHits(path);
 	}
 
+	/**
+	 * Initialize the FTOF Geometry
+	 */
 	public static void initialize() {
 		System.out.println("\n=====================================");
 		System.out.println("===  FTOF Geometry Initialization ===");
@@ -158,6 +162,20 @@ public class FTOFGeometry {
 			coords[j + 2] = (float) v[i].z();
 		}
 	}
+	
+	/**
+	 * 
+	 * @return if the projected polygon fully intersects the plane
+	 */
+	public static boolean doesProjectedPolyFullyIntersect(int superlayer,
+			int paddleid, 
+			Plane3D projectionPlane) {
+		
+		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(
+				0);
+		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleid);
+		return GeometryManager.doesProjectedPolyFullyIntersect(paddle, projectionPlane, 6, 4);
+	}
 
 	/**
 	 * Get the intersections with a constant phi plane. If the paddle does not
@@ -169,14 +187,13 @@ public class FTOFGeometry {
 	 *            the 0-based paddle id
 	 * @param projectionPlane
 	 *            the projection plane
-	 * @return the intersection points (z component will be 0).
 	 */
-	public static void getIntersections(int superlayer,
+	public static boolean getIntersections(int superlayer,
 			int paddleid, Plane3D projectionPlane, Point2D.Double wp[]) {
 		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(
 				0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleid);
-		GeometryManager.getProjectedPolygon(paddle, projectionPlane, 6, 4, wp, null);
+		return GeometryManager.getProjectedPolygon(paddle, projectionPlane, 6, 4, wp, null);
 	}
 
 	public static void main(String arg[]) {

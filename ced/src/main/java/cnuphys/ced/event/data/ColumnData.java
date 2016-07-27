@@ -145,26 +145,31 @@ public class ColumnData {
 		EvioDataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
 
 		if (event != null) {
-			switch (_type) {
-			case INT8:
-				oa = event.getByte(_fullName);
-				break;
+			try {
+				switch (_type) {
+				case INT8:
+					oa = event.getByte(_fullName);
+					break;
 
-			case INT16:
-				oa = event.getShort(_fullName);
-				break;
+				case INT16:
+					oa = event.getShort(_fullName);
+					break;
 
-			case INT32:
-				oa = event.getInt(_fullName);
-				break;
+				case INT32:
+					oa = event.getInt(_fullName);
+					break;
 
-			case FLOAT32:
-				oa = event.getFloat(_fullName);
-				break;
+				case FLOAT32:
+					oa = event.getFloat(_fullName);
+					break;
 
-			case FLOAT64:
-				oa = event.getDouble(_fullName);
-				break;
+				case FLOAT64:
+					oa = event.getDouble(_fullName);
+					break;
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage() + " Exception with fulName: " + _fullName);
+				e.printStackTrace();
 			}
 		}
 

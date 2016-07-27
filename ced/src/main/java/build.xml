@@ -24,6 +24,9 @@
 							dir="${cnudir}" />
 		</copy>
 		
+		<!-- copy shell script -->
+		<copy file="${cnudir}/ced/ced.sh" todir="${destdir}"/>
+		
 		<!-- copy data (field maps)-->
 		<copy todir="${destdir}">
 			<fileset includes="data/*" excludes="**/.project" dir="${cnudir}/ced" />

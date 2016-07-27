@@ -22,6 +22,7 @@ import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
+import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;
@@ -86,14 +87,17 @@ public class FTOFPanelItem extends PolygonItem {
 
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
+		//draw a line marking paddle boundary
 		for (int i = 0; i < _ftofPanel.getCount(); i++) {
-			_ftofPanel.getPaddle(i, _view.getProjectionPlane(), wp);
+			boolean isects = _ftofPanel.getPaddle(i, _view.getProjectionPlane(), wp);
+			if (isects) {
 			if (_sector > 3) {
 				wp[0].y = -wp[0].y;
 				wp[3].y = -wp[3].y;
 			}
 
 			WorldGraphicsUtilities.drawWorldLine(g, container, wp[0], wp[3], _style);
+			}
 		}
 
 	}
@@ -259,6 +263,11 @@ public class FTOFPanelItem extends PolygonItem {
 	 */
 	private static Point2D.Double[] getPaddle(SectorView view, int index, FTOFPanel panel, int sector) {
 
+		//hide if don't fully intersect, which happens as phi moves away from midplane
+		if (!doesPaddleFullIntersectPlane(view, index, panel)) {
+			return null;
+		}
+		
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
 		panel.getPaddle(index, view.getProjectionPlane(), wp);
@@ -272,6 +281,15 @@ public class FTOFPanelItem extends PolygonItem {
 
 		return wp;
 	}
+	
+	//does paddle fully intersect projection plane?
+	private static boolean doesPaddleFullIntersectPlane(SectorView view, int index, 
+			FTOFPanel panel) {
+	
+		return panel.paddleFullyIntersects(index, view.getProjectionPlane());
+	}
+	
+
 
 	/**
 	 * Get the shell of the tof panel.
@@ -323,6 +341,8 @@ public class FTOFPanelItem extends PolygonItem {
 		for (int index = 0; index < _ftofPanel.getCount(); index++) {
 
 			Point2D.Double wp[] = getPaddle(_view, index, _ftofPanel, _sector);
+			
+			
 			if (wp != null) {
 				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
@@ -342,6 +362,10 @@ public class FTOFPanelItem extends PolygonItem {
 						FTOF.dgtzFeedback(hitIndex, panelType, feedbackStrings);
 					}
 
+					//test
+//					boolean isects = doesPaddleFullIntersectPlane(_view, index, _ftofPanel);
+//					feedbackStrings.add("$Orange Red$paddle fully intersects: " + isects);
+					
 					break;
 				} // path contains wp
 			} // end wp != null

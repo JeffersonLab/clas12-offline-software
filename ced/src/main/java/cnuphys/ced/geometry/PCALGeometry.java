@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSuperlayer;
+import org.jlab.geom.detector.ftof.FTOFLayer;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 
@@ -296,29 +297,24 @@ public class PCALGeometry {
 
 		// get last visible (intersecting) strip
 		int lastIndex = PCAL_NUMSTRIP[stripType] - 1;
+		while (!doesProjectedPolyFullyIntersect(stripType, lastIndex, projectionPlane)) {
+			lastIndex--;
+			if (lastIndex < 1) {
+				return null;
+			}
+		}
+
 		Point2D.Double lastPP[] = null;
-		while ((lastPP == null) && (lastIndex >= 0)) {
-			lastPP = getIntersections(stripType, lastIndex, projectionPlane, true);
-			if (lastPP == null) {
-				lastIndex--;
-			}
-		}
-		if (lastPP == null) {
-			return null;
-		}
-
-		// get the first visible (intersecting) paddle
-		// if we are here, we'll find one, even if it is
-		// the same as the last
-		Point2D.Double firstPP[] = null;
+		lastPP = getIntersections(stripType, lastIndex, projectionPlane, true);
+		
 		int firstIndex = 0;
-		while (firstPP == null) {
-			firstPP = getIntersections(stripType, firstIndex, projectionPlane, true);
-			if (firstPP == null) {
-				firstIndex++;
-			}
+			
+		while (!doesProjectedPolyFullyIntersect(stripType, firstIndex, projectionPlane)) {
+			firstIndex++;
 		}
-
+		Point2D.Double firstPP[] = null;
+		firstPP = getIntersections(stripType, firstIndex, projectionPlane, true);
+		
 		if (lastPP[0].y > firstPP[0].y) {
 			wp[0] = lastPP[0];
 			wp[1] = firstPP[1];
@@ -333,7 +329,6 @@ public class PCALGeometry {
 		}
 
 		return wp;
-
 	}
 
 	/**
@@ -467,6 +462,26 @@ public class PCALGeometry {
 	} // initialize
 
 	/**
+	 * @param layer
+	 *            PCAL_U, PCAL_V, PCAL_W
+	 * @param stripid
+	 *            the 0-based paddle id
+	 * @param projectionPlane
+	 *            the projection plane
+	 * @return <code>true</code> if the projected polygon fully intersects the plane
+	 */
+	public static boolean doesProjectedPolyFullyIntersect(int layer,
+			int stripid, 
+			Plane3D projectionPlane) {
+		
+		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
+				EC_PCAL).getLayer(layer);
+		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
+		Point2D.Double wp[] = GeometryManager.allocate(4);
+		return GeometryManager.doesProjectedPolyFullyIntersect(strip, projectionPlane, 6, 4);
+	}
+
+	/**
 	 * Get the intersections of a with a constant phi plane. If the paddle does
 	 * not intersect (happens as phi grows) return null;
 	 * 
@@ -485,7 +500,7 @@ public class PCALGeometry {
 				EC_PCAL).getLayer(layer);
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
 		Point2D.Double wp[] = GeometryManager.allocate(4);
-		GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
+		boolean isects = GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
 		
 		// note reordering
 		Point2D.Double p2d[] = new Point2D.Double[4];
