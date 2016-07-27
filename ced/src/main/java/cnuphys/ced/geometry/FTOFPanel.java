@@ -30,9 +30,21 @@ public class FTOFPanel {
 	 * @param projectionPlane
 	 *            the projection plane
 	 * @param wp holds the shell for the paddle in 2D world coordinates
+	 * @return <code>true</code> if the paddle fully intersects the projection plane
 	 */
-	public void getPaddle(int index, Plane3D projectionPlane, Point2D.Double wp[]) {
-		FTOFGeometry.getIntersections(_panelType, index, projectionPlane, wp);
+	public boolean getPaddle(int index, Plane3D projectionPlane, Point2D.Double wp[]) {
+		return FTOFGeometry.getIntersections(_panelType, index, projectionPlane, wp);
+	}
+	
+	/**
+	 * Does the paddle fully intersect the projection plane
+	 * @index the zero based index of the paddle
+	 * @param projectionPlane
+	 *            the projection plane
+	 * @return
+	 */
+	public boolean paddleFullyIntersects(int index, Plane3D projectionPlane) {
+		return FTOFGeometry.doesProjectedPolyFullyIntersect(_panelType, index, projectionPlane);
 	}
 
 	/**
@@ -45,14 +57,21 @@ public class FTOFPanel {
 	public Point2D.Double[] getShell(Plane3D projectionPlane) {
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
-		int lastIndex = _numPaddle - 1;
 
 		// get first and last panel
 		Point2D.Double lastPP[] = GeometryManager.allocate(4);
 		Point2D.Double firstPP[] = GeometryManager.allocate(4);
 		
-		getPaddle(lastIndex, projectionPlane, lastPP);
-		getPaddle(0, projectionPlane, firstPP);
+		int lastIndex = _numPaddle - 1;
+		int firstIndex = 0;
+
+		while (!getPaddle(lastIndex, projectionPlane, lastPP)) {
+			lastIndex--;
+		}
+		
+		while (!getPaddle(firstIndex, projectionPlane, firstPP)) {
+			firstIndex++;
+		}
 		
 		wp[0] = lastPP[1];
 		wp[1] = firstPP[0];

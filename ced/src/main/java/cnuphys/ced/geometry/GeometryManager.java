@@ -405,6 +405,50 @@ public class GeometryManager {
 		wp.y = iPoint.y();
 	}
 	
+	
+	private static boolean lengthTest(double len, Point3D p0, Point3D p1, Point3D pint) {
+		
+		double lentest = p0.distance(pint);
+		if (lentest > len) {
+			return false;
+		}
+
+		lentest = p1.distance(pint);
+		if (lentest > len) {
+			return false;
+		}
+
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @return if the projected polygon fully intersects the plane
+	 */
+	public static boolean doesProjectedPolyFullyIntersect(AbstractComponent geoObj, 
+			Plane3D projectionPlane, 
+			int startIndex, 
+			int count) {
+		
+		boolean isects = true;
+		Point3D pp[] = new Point3D[count];
+		for (int i = 0; i < count; i++) {
+			pp[i] = new Point3D();
+		}
+		
+		for (int i = 0; i <count; i++) {
+			int index = startIndex + i;
+			Line3D l3d = geoObj.getVolumeEdge(index);
+			projectionPlane.intersection(l3d, pp[i]);
+
+			if (isects) {
+				isects = lengthTest(l3d.length(), l3d.origin(), l3d.end(), pp[i]);
+			}
+		}
+
+		return isects;
+	}
+	
 	/**
 	 * Get a world 2D polygon from a clas geo object like a FTOF slab.
 	 * @param geoObj the geometric object
@@ -414,7 +458,14 @@ public class GeometryManager {
 	 * @param wp will hold the world 2D polygon
 	 * @param centroid optionally compute the centroid.
 	 */
-	public static void getProjectedPolygon(AbstractComponent geoObj, Plane3D projectionPlane, int startIndex, int count, Point2D.Double wp[], Point2D.Double centroid) {
+	public static boolean getProjectedPolygon(AbstractComponent geoObj, 
+			Plane3D projectionPlane, 
+			int startIndex, 
+			int count, 
+			Point2D.Double wp[], 
+			Point2D.Double centroid) {
+		
+		
 		Point3D pp[] = new Point3D[count];
 		for (int i = 0; i < count; i++) {
 			pp[i] = new Point3D();
@@ -440,7 +491,8 @@ public class GeometryManager {
 		if (centroid != null) {
 			average(wp, centroid);
 		}
-
+		
+		return doesProjectedPolyFullyIntersect(geoObj, projectionPlane, startIndex, count);
 	}
 	
 

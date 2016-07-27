@@ -364,7 +364,7 @@ public class DCGeometry {
 			Point2D.Double centroid) {
 
 			DriftChamberWire dcw = DCGeometry.getWire(superlayer, layer, wire);
-			GeometryManager.getProjectedPolygon(dcw, projectionPlane, 10, 6, wp, centroid);
+			boolean isects = GeometryManager.getProjectedPolygon(dcw, projectionPlane, 10, 6, wp, centroid);
 	}
 
 	/**

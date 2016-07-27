@@ -2,7 +2,6 @@ package cnuphys.ced.item;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -42,8 +41,8 @@ public class SectorECItem extends PolygonItem {
 
 	private static final String _ecNames[] = { "EC (inner)", "EC (outer)" };
 	private static final String _ecStripNames[] = { "U", "V", "W" };
-	private static final Color _ecFill[] = { new Color(220, 220, 220),
-			Color.white };
+	private static final Color _ecFill[] = { new Color(225, 215, 215),
+			new Color(215, 215, 225) };
 	private static final Color _ecLine[] = { Color.gray,
 			Color.gray };
 
@@ -101,7 +100,6 @@ public class SectorECItem extends PolygonItem {
 			return;
 		}
 
-		Graphics2D g2 = (Graphics2D) g;
 		setPath(path);
 		// super.drawItem(g, container);
 
@@ -130,6 +128,12 @@ public class SectorECItem extends PolygonItem {
 	 * @return
 	 */
 	private Point2D.Double[] getStrip(int stripId) {
+		
+		if (!ECGeometry.doesProjectedPolyFullyIntersect(_plane, _stripType,
+				stripId, _view.getProjectionPlane())) {
+			return null;
+		}
+
 		Point2D.Double wp[] = ECGeometry.getIntersections(_plane, _stripType,
 				stripId, _view.getProjectionPlane(), true);
 

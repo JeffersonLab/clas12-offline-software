@@ -332,33 +332,31 @@ public class ECGeometry {
 			Plane3D projectionPlane) {
 
 		Point2D.Double wp[] = GeometryManager.allocate(4);
-
+		
 		// get last visible (intersecting) strip
 		int lastIndex = EC_NUMSTRIP - 1;
-		Point2D.Double lastPP[] = null;
-		while ((lastPP == null) && (lastIndex >= 0)) {
-			lastPP = getIntersections(planeIndex, stripType, lastIndex, projectionPlane,
-					true);
-			if (lastPP == null) {
-				lastIndex--;
-			}
-		}
-		if (lastPP == null) {
-			return null;
-		}
+//		while (!doesProjectedPolyFullyIntersect(planeIndex, stripType, lastIndex, projectionPlane)) {
+//			lastIndex--;
+//			if (lastIndex < 1) {
+//				return null;
+//			}
+//		}
 
-		// get the first visible (intersecting) paddle
-		// if we are here, we'll find one, even if it is
-		// the same as the last
-		Point2D.Double firstPP[] = null;
+		Point2D.Double lastPP[] = null;
+		lastPP = getIntersections(planeIndex, stripType, lastIndex, projectionPlane, true);
+		
 		int firstIndex = 0;
-		while (firstPP == null) {
-			firstPP = getIntersections(planeIndex, stripType, firstIndex, projectionPlane,
-					true);
-			if (firstPP == null) {
-				firstIndex++;
-			}
-		}
+			
+//		while (!doesProjectedPolyFullyIntersect(planeIndex, stripType, firstIndex, projectionPlane)) {
+//			firstIndex++;
+//		}
+		Point2D.Double firstPP[] = null;
+		firstPP = getIntersections(planeIndex, stripType, firstIndex, projectionPlane, true);
+
+		
+//		if ((planeIndex == ECGeometry.EC_INNER) && (stripType ==  ECGeometry.EC_W)) {
+//			System.err.println("FIRSTINDEX: " + firstIndex + "  LASTINDEX: " + lastIndex);
+//		}
 
 		if (lastPP[0].y > firstPP[0].y) {
 			wp[0] = lastPP[0];
@@ -736,8 +734,32 @@ public class ECGeometry {
 			coords[j + 1] = (float) v[i].y();
 			coords[j + 2] = (float) v[i].z();
 		}
-
 	}
+	
+	/**
+	 * 
+	 * @param superlayer
+	 *            0, 1 (EC_INNER or EC_OUTER)
+	 * @param layer
+	 *            EC_U, EC_V, EC_W
+	 * @param stripid
+	 *            the 0-based paddle id
+	 * @param projectionPlane 
+	 *            the projection plane
+	 * @return <code>true</code> if the projected polygon fully intersects the plane
+	 */
+	public static boolean doesProjectedPolyFullyIntersect(int superlayer, int layer,
+			int stripid, 
+			Plane3D projectionPlane) {
+		
+		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
+				superlayer + 1).getLayer(layer);
+
+		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
+		Point2D.Double wp[] = GeometryManager.allocate(4);
+		return GeometryManager.doesProjectedPolyFullyIntersect(strip, projectionPlane, 6, 4);
+	}
+
 
 	/**
 	 * Get the intersections of a with a constant phi plane. If the paddle does
@@ -763,7 +785,7 @@ public class ECGeometry {
 
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
 		Point2D.Double wp[] = GeometryManager.allocate(4);
-		GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
+		boolean isects = GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
 		
 		// note reordering
 		Point2D.Double p2d[] = new Point2D.Double[4];
