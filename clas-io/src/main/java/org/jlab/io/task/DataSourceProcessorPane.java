@@ -125,22 +125,27 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         JPanel mediaPane = new JPanel();
         mediaPane.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.LOWERED));
         mediaPane.setLayout(new FlowLayout());
+        
         mediaPause = new JButton();
-        mediaPause.setIcon(pauseIcon);
+        
+        mediaPause.setIcon(pauseIcon);        
+        //mediaPause.setContentAreaFilled(false);
+        //mediaPause.setOpaque(true);
         mediaPause.setActionCommand("PauseFile");
         mediaPause.addActionListener(this);
         mediaPause.setEnabled(false);
         
         mediaPlay = new JButton();
+        mediaPlay.setBackground(new Color(80,105,220));
         mediaPlay.setIcon(playIcon);
         mediaPlay.setActionCommand("PlayFile");
         mediaPlay.addActionListener(this);
         mediaPlay.setEnabled(false);
         
-        mediaPlay.setBorderPainted(false); 
+        //mediaPlay.setBorderPainted(false); 
         mediaPlay.setContentAreaFilled(false); 
         mediaPlay.setFocusPainted(false); 
-        mediaPlay.setOpaque(false);
+        //mediaPlay.setOpaque(false);
         
         mediaNext = new JButton();
         mediaNext.setIcon(nextIcon);
