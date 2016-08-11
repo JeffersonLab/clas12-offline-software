@@ -23,6 +23,7 @@ public class DimensionSpace {
     double dimMaximum = 1.0;
     double constrainUpper = 1.0;
     double constrainLower = 0.0;
+    int    numberOfBins   = 1;
     
     JPanel dimPanel   = null;
     
@@ -62,7 +63,23 @@ public class DimensionSpace {
         this.dimValue = this.getRandom();
     }
     
+    public int getBin(){
+        double delta = (this.dimMaximum-this.dimMinimum)/this.numberOfBins;
+        double w = (this.dimValue-this.dimMinimum)/delta;
+        int  bin = (int) w;
+        return bin;
+    }
+    
+    public int  getNBins(){
+        return this.numberOfBins;
+    }
+    
+    public void setNBins(int bins){
+        this.numberOfBins = bins;
+    }
+    
     public String getName(){ return this.dimName;}
+    
     public void   setValue(double value){ this.dimValue = value;}
     
     public void setValueNormalized(double value){

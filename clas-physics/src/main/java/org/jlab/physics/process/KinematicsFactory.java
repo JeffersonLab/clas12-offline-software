@@ -54,6 +54,17 @@ public class KinematicsFactory {
         return 2.0*xb*0.93827/q2;
     }
     
+    public static double getQ2(double E, double x, double y){
+        return 2.0*MP*E*y*x;
+    }
+    
+    /**
+     * returns an electron for given beam energy, q2 and xb
+     * @param E
+     * @param q2
+     * @param xb
+     * @return 
+     */
     public static Particle getElectron(double E, double q2, double xb){        
         double eprime = KinematicsFactory.getEprime( E, q2, xb);
         double theta  = KinematicsFactory.getTheta(  E, q2, xb);

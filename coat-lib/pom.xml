@@ -220,8 +220,8 @@
 	<artifactSet>
           <excludes>
             <exclude>cnuphys:cnuphys</exclude>
-            <exclude>cnuphys:magfield</exclude>
-            <exclude>cnuphys:swimmer</exclude>
+           <!-- <exclude>cnuphys:magfield</exclude>
+            <exclude>cnuphys:swimmer</exclude> -->
             <exclude>cnuphys:bCNU</exclude>
             <exclude>cnuphys:bCNU3D</exclude>
             <exclude>cnuphys:jogl-all</exclude>

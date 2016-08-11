@@ -51,13 +51,16 @@ public abstract class ReconstructionEngine implements Engine {
      */
     
     public EngineData configure(EngineData ed) {
-        EngineData data = new EngineData();
-        return data;
+        //EngineData data = new EngineData();
+        System.out.println("--- engine configuration is called ");
+        return ed;
     }
 
     public EngineData execute(EngineData input) {
         
         EngineData output = input;
+        
+        //return output;
         
         String mt = input.getMimeType();
         /*
@@ -67,6 +70,7 @@ public abstract class ReconstructionEngine implements Engine {
             output.setDescription(msg);
             return output;
         }*/
+        
         EvioDataEvent dataevent = null;
         
         try {
@@ -91,23 +95,31 @@ public abstract class ReconstructionEngine implements Engine {
         }
         
         return output;        
+        
     }
 
     public EngineData executeGroup(Set<EngineData> set) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public Set<EngineDataType> getInputDataTypes() {
-        Set<EngineDataType> types = new HashSet<EngineDataType>();
-        types.add(EngineDataType.BYTES);
-        return types;
+        return ClaraUtil.buildDataTypes(Clas12Types.EVIO,
+                                        EngineDataType.JSON,
+                                        EngineDataType.STRING);
+        //Set<EngineDataType> types = new HashSet<EngineDataType>();
+        //types.add(EngineDataType.BYTES);
+        //return types;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public Set<EngineDataType> getOutputDataTypes() {
-        Set<EngineDataType> types = new HashSet<EngineDataType>();
-        types.add(EngineDataType.BYTES);
-        return types;
+        return ClaraUtil.buildDataTypes(Clas12Types.EVIO,
+                                        EngineDataType.JSON,
+                                        EngineDataType.STRING);
+        //Set<EngineDataType> types = new HashSet<EngineDataType>();
+        //types.add(EngineDataType.BYTES);
+        //return types;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
