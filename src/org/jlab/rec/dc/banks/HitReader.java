@@ -94,7 +94,8 @@ public class HitReader {
 			stime = bankDGTZ.getDouble("stime");
 		}
 		
-		if(Constants.isSimulation == false) {		
+		if(Constants.isSimulation == false) {
+			// only for cosmics for now
 			tdc = bankDGTZ.getInt("tdc");
 		}
 		
