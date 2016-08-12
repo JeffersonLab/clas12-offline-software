@@ -19,7 +19,13 @@ if [[ ! -z $mopt ]]
 then
     mvn install
     cp target/clas12detector-ec-1.0-SNAPSHOT.jar $COATJAVA/lib/plugins/.
-    cd ..
+#    cd ..
+    echo "\n"
+    echo "*****************************************"
+    echo "* ---> Compilation is done....          *"
+    echo "*****************************************"
+    echo "\n"
+    exit
 fi
 #=================================================================
 # Documentation build
@@ -31,9 +37,10 @@ fi
 #=================================================================
 # Finishing touches
 echo ""
-echo "--> Done building....."
+#echo "--> Done building....."
 echo ""
-echo " \t Usage : build.sh -d -m"
-echo ""
-
-
+echo "   Usage : build.sh -d -m"
+echo "\n"
+echo "\t -m : run the build script with maven and install plugin"
+echo "\t -s : run the documentation generation with javadoc"
+echo "\n\n"
