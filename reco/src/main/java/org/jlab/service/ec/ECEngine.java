@@ -33,7 +33,7 @@ public class ECEngine extends ReconstructionEngine {
         List<ECStrip>  ecStrips = ECCommon.initStrips(de, ecDetector, this.getConstantsManager(), 10);
         
         for(ECStrip strip : ecStrips){
-            System.out.println(strip);
+            //System.out.println(strip);
         }
         return true;
     }

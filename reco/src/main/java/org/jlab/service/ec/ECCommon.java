@@ -38,11 +38,18 @@ public class ECCommon {
         if(event.hasBank("EC::dgtz")==true){
             EvioDataBank ecBank = (EvioDataBank) event.getBank("EC::dgtz");
             int nrows = ecBank.rows();
+            //System.out.println(" BANK EC loaded with ROWS = " + nrows);
             for(int row = 0; row < nrows; row++){
-                
+                /*
                 int sector    = (int) ecBank.getByte("sector", row);
                 int layer     = (int) ecBank.getByte("layer", row);
                 int component = (int) ecBank.getByte("component", row);
+                */
+                int sector = ecBank.getInt("sector", row);
+                int stack  = ecBank.getInt("stack", row);
+                int view   = ecBank.getInt("view", row);
+                int component  = ecBank.getInt("strip", row);
+                int layer  = stack*3 + view;
                 
                 ECStrip strip = new ECStrip(
                         sector,layer,component
@@ -51,14 +58,16 @@ public class ECCommon {
                 strip.setADC(ecBank.getInt("ADC", row));
                 strip.setTDC(ecBank.getInt("TDC", row));
                 if(atten!=null){
-                    /*strip.setAttenuation(
+                    //atten.show();
+                    strip.setAttenuation(
                             atten.getDoubleValue("A", sector,layer,component),
                             atten.getDoubleValue("B", sector,layer,component),
                             atten.getDoubleValue("C", sector,layer,component)
-                    );*/
+                    );
                 } else {
                     System.out.println(manager.toString());
                 }
+                strips.add(strip);
             }
         }
         
