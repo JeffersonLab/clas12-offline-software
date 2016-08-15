@@ -617,7 +617,7 @@ public class SuperLayerDrawing {
 				
 				for (int wire = minWire; wire <= maxWire; wire++) {
 					Polygon hexagon = getHexagon(container, lay, wire);
-					if (hexagon.contains(pp)) {
+					if ((hexagon != null) && hexagon.contains(pp)) {
 						data[0] = lay;
 						data[1] = wire;
 						return;
@@ -694,7 +694,10 @@ public class SuperLayerDrawing {
 
 		Point2D.Double wpoly[] = GeometryManager.allocate(6);
 		// note all indices in calls to DCGeometry are 1-based
-		DCGeometry.getHexagon(_iSupl.superlayer(), layer, wire, _iSupl.projectionPlane(), wpoly, null);
+		if (!DCGeometry.getHexagon(_iSupl.superlayer(), layer, wire, 
+				_iSupl.projectionPlane(), wpoly, null)) {
+			return null;
+		};
 
 		if (_iSupl.isLowerSector()) {
 			flipPolyToLowerSector(wpoly);

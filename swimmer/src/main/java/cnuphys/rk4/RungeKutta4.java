@@ -21,26 +21,6 @@ public class RungeKutta4 {
 	// [x,y,z,vx,vy,vz].
 	private static int MAXDIM = 10; // we'll know if this fails!
 
-	// used for work arrays
-	// public static Vector<double[]> arrayPool;
-
-	// static {
-	// int initCap = 20;
-	// arrayPool = new Vector<double[]>(initCap, 10);
-	// }
-
-	// obtain a work array from the pool
-	// private static double[] getWorkArray() {
-	// synchronized (arrayPool) {
-	// if (arrayPool.isEmpty()) {
-	// return new double[MAXDIM];
-	// }
-	// else {
-	// return arrayPool.remove(arrayPool.size()-1);
-	// }
-	// }
-	// }
-
 	private double[] getWorkArray() {
 		return new double[MAXDIM];
 	}

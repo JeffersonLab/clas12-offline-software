@@ -1,6 +1,6 @@
 package cnuphys.swim;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.IField;
@@ -175,7 +175,7 @@ public class Swimmer {
 		double u[][] = new double[6][ntotal];
 
 		// create the trajectory container
-		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, nsave, 100);
+		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, nsave);
 
 		// Integrate
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
@@ -371,7 +371,8 @@ public class Swimmer {
 		while ((count < maxtry) && (del > accuracy)) {
 			// last element had z beyond cutoff
 			int lastIndex = trajectory.size() - 1;
-			trajectory.removeElementAt(lastIndex);
+			
+			trajectory.remove(lastIndex);
 			lastY = trajectory.lastElement();
 			xo = lastY[0];
 			yo = lastY[1];
@@ -497,7 +498,7 @@ public class Swimmer {
 		while ((count < maxtry) && (del > accuracy)) {
 			// last element had z beyond cutoff
 			int lastIndex = traj.size() - 1;
-			traj.removeElementAt(lastIndex);
+			traj.remove(lastIndex);
 			lastY = traj.lastElement();
 			xo = lastY[0];
 			yo = lastY[1];
@@ -601,14 +602,14 @@ public class Swimmer {
 					throws RungeKuttaException {
 
 		// create the lists to hold the trajectory
-		Vector<Double> s = new Vector<Double>(100, 100);
-		Vector<double[]> u = new Vector<double[]>(100, 100);
+		ArrayList<Double> s = new ArrayList<Double>(100);
+		ArrayList<double[]> u = new ArrayList<double[]>(100);
 
 		// the the initial six vector
 		double uo[] = intitialState(xo, yo, zo, theta, phi);
 
 		// create the trajectory container
-		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, 100, 100);
+		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, 100);
 
 		// the derivative
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
@@ -734,17 +735,15 @@ public class Swimmer {
 		// construct an appropriate yscale array for CLAS12
 		double yscale[] = { 1., 1., 1., 1., 1., 1., };
 
-		int ntotal = (int) (maxPathLength / stepSize); // number steps
-
 		// create the lists to hold the trajectory
-		Vector<Double> t = new Vector<Double>(100, 100);
-		Vector<double[]> y = new Vector<double[]>(100, 100);
+		ArrayList<Double> t = new ArrayList<Double>(100);
+		ArrayList<double[]> y = new ArrayList<double[]>(100);
 
 		// the the initial six vector
 		double uo[] = intitialState(xo, yo, zo, theta, phi);
 
 		// create the trajectory container
-		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, 100, 100);
+		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, 100);
 
 		// Integrate
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
@@ -892,7 +891,7 @@ public class Swimmer {
 		double uf[] = makeVector(xo + delx, yo + dely, zo + delz, uo[3], uo[4], uo[5]);
 
 		// create the trajectory and add the two points
-		SwimTrajectory traj = new SwimTrajectory(genPartRec, 2, 1);
+		SwimTrajectory traj = new SwimTrajectory(genPartRec, 2);
 		traj.add(uo);
 		traj.add(uf);
 
@@ -935,7 +934,7 @@ public class Swimmer {
 		}
 
 		// create the trajectory and add the two points
-		SwimTrajectory traj = new SwimTrajectory(genPartRec, 2, 1);
+		SwimTrajectory traj = new SwimTrajectory(genPartRec, 2);
 		traj.add(uo);
 		traj.add(uf);
 

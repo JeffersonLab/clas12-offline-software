@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
+import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -37,7 +38,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 			// mc
 			if (SwimMenu.getInstance().showMonteCarloTracks()) {
-				Vector<SwimTrajectory> trajectories = Swimming
+				List<SwimTrajectory> trajectories = Swimming
 						.getMCTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {
 					return;
@@ -55,7 +56,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 			// recon
 			if (SwimMenu.getInstance().showReconstructedTracks()) {
-				Vector<SwimTrajectory> trajectories = Swimming
+				List<SwimTrajectory> trajectories = Swimming
 						.getReconTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {
 					return;

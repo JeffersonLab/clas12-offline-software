@@ -1,16 +1,10 @@
 package cnuphys.swim;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.Random;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.event.EventListenerList;
 
 import cnuphys.lund.SwimTrajectoryListener;
-import cnuphys.magfield.MagneticFieldChangeListener;
-import cnuphys.magfield.MagneticFields;
-import cnuphys.rk4.RungeKuttaException;
 
 public class Swimming {
 
@@ -18,10 +12,10 @@ public class Swimming {
 	private static EventListenerList _listenerList;
 
 	// the mc trajectories
-	private static Vector<SwimTrajectory> _mcTrajectories = new Vector<SwimTrajectory>();
+	private static ArrayList<SwimTrajectory> _mcTrajectories = new ArrayList<SwimTrajectory>();
 
 	// the recon trajectories
-	private static Vector<SwimTrajectory> _reconTrajectories = new Vector<SwimTrajectory>();
+	private static ArrayList<SwimTrajectory> _reconTrajectories = new ArrayList<SwimTrajectory>();
 
 	/**
 	 * Clear all the mc trajectories.
@@ -46,7 +40,7 @@ public class Swimming {
 	 * 
 	 * @return all the cached mc trajectories
 	 */
-	public static Vector<SwimTrajectory> getMCTrajectories() {
+	public static ArrayList<SwimTrajectory> getMCTrajectories() {
 		return _mcTrajectories;
 	}
 
@@ -55,7 +49,7 @@ public class Swimming {
 	 * 
 	 * @return all the cached recon trajectories
 	 */
-	public static Vector<SwimTrajectory> getReconTrajectories() {
+	public static ArrayList<SwimTrajectory> getReconTrajectories() {
 		return _reconTrajectories;
 	}
 

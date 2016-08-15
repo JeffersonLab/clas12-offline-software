@@ -478,7 +478,7 @@ public class PCALGeometry {
 				EC_PCAL).getLayer(layer);
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
 		Point2D.Double wp[] = GeometryManager.allocate(4);
-		return GeometryManager.doesProjectedPolyFullyIntersect(strip, projectionPlane, 6, 4);
+		return GeometryManager.doesProjectedPolyIntersect(strip, projectionPlane, 6, 4);
 	}
 
 	/**

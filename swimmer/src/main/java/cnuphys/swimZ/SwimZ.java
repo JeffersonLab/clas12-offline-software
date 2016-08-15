@@ -1,6 +1,6 @@
 package cnuphys.swimZ;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import cnuphys.magfield.IField;
 import cnuphys.rk4.DefaultStopper;
@@ -103,8 +103,8 @@ public class SwimZ {
 	double yo[] = { start.x, start.y, start.tx, start.ty };
 
 	// create the lists to hold the trajectory
-	Vector<Double> z = new Vector<Double>(100, 100);
-	Vector<double[]> y = new Vector<double[]>(100, 100);
+	ArrayList<Double> z = new ArrayList<Double>(100);
+	ArrayList<double[]> y = new ArrayList<double[]>(100);
 
 	int nStep = 0;
 	try {
@@ -118,7 +118,7 @@ public class SwimZ {
 	    return null;
 	}
 
-	SwimZResult result = new SwimZResult(Q, p, start.z, zf, nStep, 10);
+	SwimZResult result = new SwimZResult(Q, p, start.z, zf, nStep);
 	result.add(start);
 	for (int i = 0; i < z.size(); i++) {
 	    double v[] = y.get(i);
@@ -220,7 +220,7 @@ public class SwimZ {
 	double y[][] = new double[nDim][nStep];
 	nStep = rk4.uniformStep(yo, start.z, zf, y, z, deriv, stopper);
 
-	SwimZResult result = new SwimZResult(Q, p, start.z, zf, nStep + 1, 100);
+	SwimZResult result = new SwimZResult(Q, p, start.z, zf, nStep + 1);
 	result.add(start);
 	for (int i = 0; i < nStep; i++) {
 
@@ -268,7 +268,7 @@ public class SwimZ {
 
 	// storage for results
 	SwimZResult result = new SwimZResult(Q, p, start.z, zf,
-		swimZrange.getNumStep() + 1, 100);
+		swimZrange.getNumStep() + 1);
 	result.add(start);
 	SwimZStateVector v0 = start;
 
@@ -315,7 +315,7 @@ public class SwimZ {
 
     private SwimZResult straightLineResult(int Q, double p,
 	    SwimZStateVector start, double zf) {
-	SwimZResult result = new SwimZResult(Q, p, start.z, zf, 2, 2);
+	SwimZResult result = new SwimZResult(Q, p, start.z, zf, 2);
 	result.add(start);
 	double s = zf - start.z;
 	double x1 = start.x + start.tx * s;

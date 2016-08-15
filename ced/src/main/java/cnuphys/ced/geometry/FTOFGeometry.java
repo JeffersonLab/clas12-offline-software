@@ -174,7 +174,7 @@ public class FTOFGeometry {
 		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(
 				0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleid);
-		return GeometryManager.doesProjectedPolyFullyIntersect(paddle, projectionPlane, 6, 4);
+		return GeometryManager.doesProjectedPolyIntersect(paddle, projectionPlane, 6, 4);
 	}
 
 	/**
