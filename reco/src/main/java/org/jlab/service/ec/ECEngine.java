@@ -25,8 +25,7 @@ public class ECEngine extends ReconstructionEngine {
     public ECEngine(){
         super("EC","gavalian","1.0");
     }
-    
-    
+        
     @Override
     public boolean processDataEvent(DataEvent de) {
         
@@ -44,8 +43,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
         };
-        
-        this.getConstantsManager().init(Arrays.asList(ecTables));
+               
+        requireConstants(Arrays.asList(ecTables));
         
         ecDetector =  GeometryFactory.getDetector(DetectorType.EC);
         

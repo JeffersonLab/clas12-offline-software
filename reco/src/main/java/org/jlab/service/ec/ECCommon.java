@@ -64,7 +64,7 @@ public class ECCommon {
                             atten.getDoubleValue("B", sector,layer,component),
                             atten.getDoubleValue("C", sector,layer,component)
                     );
-                } else {
+                } else {                    
                     System.out.println(manager.toString());
                 }
                 strips.add(strip);
