@@ -8,6 +8,7 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
+import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.DrawableAdapter;
@@ -64,7 +65,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 		_closestTrajectory = null;
 
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
-			Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+			List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 
 			if (trajectories != null) {
 
@@ -86,7 +87,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 
 		// reconstructed?
 		if (SwimMenu.getInstance().showReconstructedTracks()) {
-			Vector<SwimTrajectory> trajectories = Swimming
+			List<SwimTrajectory> trajectories = Swimming
 					.getReconTrajectories();
 
 			if (trajectories != null) {

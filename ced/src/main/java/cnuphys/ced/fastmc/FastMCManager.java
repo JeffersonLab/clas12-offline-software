@@ -1,6 +1,5 @@
 package cnuphys.ced.fastmc;
 
-import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.io.File;
 import java.util.List;
@@ -9,16 +8,13 @@ import java.util.Vector;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clasrec.io.LundReader;
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Path3D;
 
-import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.frame.Ced;
-import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.splot.plot.Environment;
 import cnuphys.swim.SwimMenu;
@@ -180,7 +176,7 @@ public class FastMCManager {
 		SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0, 1);
 
 		// how many trajectories?
-		Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+		List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 		
 		
 //		int trajCount = (trajectories == null) ? 0 : trajectories.size();

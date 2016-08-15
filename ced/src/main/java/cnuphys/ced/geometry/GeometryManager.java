@@ -423,30 +423,30 @@ public class GeometryManager {
 	
 	/**
 	 * 
-	 * @return if the projected polygon fully intersects the plane
+	 * @return if the projected polygon intersects the plane
 	 */
-	public static boolean doesProjectedPolyFullyIntersect(AbstractComponent geoObj, 
+	public static boolean doesProjectedPolyIntersect(AbstractComponent geoObj, 
 			Plane3D projectionPlane, 
 			int startIndex, 
 			int count) {
 		
-		boolean isects = true;
 		Point3D pp[] = new Point3D[count];
 		for (int i = 0; i < count; i++) {
 			pp[i] = new Point3D();
 		}
 		
+		int isectsCount = 0;
 		for (int i = 0; i <count; i++) {
 			int index = startIndex + i;
 			Line3D l3d = geoObj.getVolumeEdge(index);
 			projectionPlane.intersection(l3d, pp[i]);
 
-			if (isects) {
-				isects = lengthTest(l3d.length(), l3d.origin(), l3d.end(), pp[i]);
+			if (lengthTest(l3d.length(), l3d.origin(), l3d.end(), pp[i])) {
+				isectsCount += 1;
 			}
 		}
 
-		return isects;
+		return isectsCount > 2;
 	}
 	
 	/**
@@ -492,7 +492,7 @@ public class GeometryManager {
 			average(wp, centroid);
 		}
 		
-		return doesProjectedPolyFullyIntersect(geoObj, projectionPlane, startIndex, count);
+		return doesProjectedPolyIntersect(geoObj, projectionPlane, startIndex, count);
 	}
 	
 

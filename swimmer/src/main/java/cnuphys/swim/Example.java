@@ -50,9 +50,10 @@ public class Example {
 		// example4();
 		// example5();
 		// example6();
-		example7();
-		example8();
+//		example7();
+//		example8();
 		// example9();
+		example10();
 
 		System.out.println("\nDONE.");
 	}
@@ -290,6 +291,36 @@ public class Example {
 			e.printStackTrace();
 		}
 	}
+	
+	// example 7 adaptive fixed z stop
+	private static void example10() {
+		System.out.println("\n=== EXAMPLE 10 ===");
+		System.err.println("[Adaptive] Fixed Z cutoff");
+		double ztarget = 2.75; // where integration should stop
+		double accuracy = 10e-6; // 10 microns
+		double stepSize = 5e-4; // m
+
+		int N = 10000;
+		long start = System.nanoTime();
+		for (int i = 0; i <= N; i++) {
+			try {
+				SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget,
+						accuracy, rmax, maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+				double lastY[] = traj.lastElement();
+				if (i == N) {
+					printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
+							traj.size(), momentum, lastY, hdata);
+					terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=275}");
+				}
+			} catch (RungeKuttaException e) {
+				e.printStackTrace();
+			}
+		}
+		double totTime = (System.nanoTime()-start)/1.0e9;
+
+		System.err.println("\nApprox run time: " + totTime);
+	}
+
 
 	private static void printSummary(String message, int nstep,
 			double momentum, double Q[], double hdata[]) {

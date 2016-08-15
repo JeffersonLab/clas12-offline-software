@@ -1,6 +1,7 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Vector;
 
 import bCNU3D.Panel3D;
@@ -31,7 +32,7 @@ public class TrajectoryDrawer3D extends Item3D {
 		}
 
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
-			Vector<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+			List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 
 			if (trajectories != null) {
 
@@ -44,7 +45,7 @@ public class TrajectoryDrawer3D extends Item3D {
 
 		// reconstructed?
 		if (SwimMenu.getInstance().showReconstructedTracks()) {
-			Vector<SwimTrajectory> trajectories = Swimming
+			List<SwimTrajectory> trajectories = Swimming
 					.getReconTrajectories();
 
 			if (trajectories != null) {

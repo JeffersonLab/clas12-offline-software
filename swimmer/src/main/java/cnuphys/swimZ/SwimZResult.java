@@ -1,6 +1,7 @@
 package cnuphys.swimZ;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.swim.SwimTrajectory;
@@ -15,7 +16,7 @@ import cnuphys.swim.SwimTrajectory;
 public class SwimZResult {
 
     // the trajectory of state vectors
-    private Vector<SwimZStateVector> _trajectory;
+    private ArrayList<SwimZStateVector> _trajectory;
 
     // the integer charge (-1 for electron)
     private int _Q;
@@ -61,14 +62,13 @@ public class SwimZResult {
      * @param increment
      *            the increment when more space is needed
      */
-    public SwimZResult(int Q, double p, double zo, double zf, int capacity,
-	    int increment) {
+    public SwimZResult(int Q, double p, double zo, double zf, int capacity) {
 	_Q = Q;
 	_p = p;
 	_zo = zo;
 	_zf = zf;
 	_pzSign = (zf < zo) ? -1 : 1;
-	_trajectory = new Vector<SwimZStateVector>(capacity, increment);
+	_trajectory = new ArrayList<SwimZStateVector>(capacity);
     }
 
     /**
@@ -181,7 +181,7 @@ public class SwimZResult {
      * 
      * @return the trajectory
      */
-    public Vector<SwimZStateVector> getTrajectory() {
+    public List<SwimZStateVector> getTrajectory() {
 	return _trajectory;
     }
 
@@ -194,7 +194,7 @@ public class SwimZResult {
 	if ((_trajectory == null) || _trajectory.isEmpty()) {
 	    return null;
 	}
-	return _trajectory.firstElement();
+	return _trajectory.get(0);
     }
 
     /**
@@ -218,7 +218,7 @@ public class SwimZResult {
 	if ((_trajectory == null) || _trajectory.isEmpty()) {
 	    return null;
 	}
-	return _trajectory.lastElement();
+	return _trajectory.get(_trajectory.size()-1);
     }
 
     /**

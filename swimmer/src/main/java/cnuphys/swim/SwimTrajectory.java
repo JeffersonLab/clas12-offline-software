@@ -1,6 +1,6 @@
 package cnuphys.swim;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
@@ -16,8 +16,8 @@ import cnuphys.magfield.IField;
  * 
  */
 @SuppressWarnings("serial")
-public class SwimTrajectory extends Vector<double[]> {
-
+public class SwimTrajectory extends ArrayList<double[]> {
+	
 	// the particle that we swam
 	private GeneratedParticleRecord _genPartRec;
 
@@ -75,7 +75,7 @@ public class SwimTrajectory extends Vector<double[]> {
 	 *            initial azimuthal angle in degrees
 	 */
 	public SwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi) {
-		this(charge, xo, yo, zo, momentum, theta, phi, 1, 1);
+		this(charge, xo, yo, zo, momentum, theta, phi, 1);
 
 		double thetRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
@@ -112,12 +112,10 @@ public class SwimTrajectory extends Vector<double[]> {
 	 *            initial azimuthal angle in degrees
 	 * @param initialCapacity
 	 *            the initial capacity of the trajectory list
-	 * @param increment
-	 *            the size increment when the list needs to expand
 	 */
 	public SwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			int initialCapacity, int increment) {
-		this(new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi), initialCapacity, increment);
+			int initialCapacity) {
+		this(new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi), initialCapacity);
 	}
 
 	/**
@@ -125,11 +123,9 @@ public class SwimTrajectory extends Vector<double[]> {
 	 *            the generated particle record
 	 * @param initialCapacity
 	 *            the initial capacity of the trajectory list
-	 * @param increment
-	 *            the size increment when the list needs to expand
 	 */
-	public SwimTrajectory(GeneratedParticleRecord genPartRec, int initialCapacity, int increment) {
-		super(initialCapacity, increment);
+	public SwimTrajectory(GeneratedParticleRecord genPartRec, int initialCapacity) {
+		super(initialCapacity);
 		_genPartRec = genPartRec;
 	}
 
@@ -204,6 +200,18 @@ public class SwimTrajectory extends Vector<double[]> {
 
 		return Math.toDegrees(phi / count);
 	}
+	
+	/**
+	 * Get the last element
+	 * @return the last element
+	 */
+	public double[] lastElement() {
+		if (isEmpty()) {
+			return null;
+		}
+		return get(size()-1);
+	}
+
 
 	/**
 	 * Get the final radial coordinate
@@ -232,7 +240,8 @@ public class SwimTrajectory extends Vector<double[]> {
 			return null;
 		}
 		double[] pos = new double[3];
-		double lastQ[] = lastElement();
+		double lastQ[] = get(this.size()-1);
+//		double lastQ[] = lastElement();
 
 		for (int i = 0; i < 3; i++) {
 			pos[i] = lastQ[i];

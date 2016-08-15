@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
-import java.util.Vector;
+import java.util.List;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
@@ -36,7 +36,7 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
 			// mc
 			if (SwimMenu.getInstance().showMonteCarloTracks()) {
-				Vector<SwimTrajectory> trajectories = Swimming
+				List<SwimTrajectory> trajectories = Swimming
 						.getMCTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {
 					return;
@@ -54,7 +54,7 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
 			// recon
 			if (SwimMenu.getInstance().showReconstructedTracks()) {
-				Vector<SwimTrajectory> trajectories = Swimming
+				List<SwimTrajectory> trajectories = Swimming
 						.getReconTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {
 					return;

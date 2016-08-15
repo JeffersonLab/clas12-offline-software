@@ -181,7 +181,7 @@ public abstract class MagneticField implements IField {
 	 */
 	@Override
 	public void field(float x, float y, float z, float result[]) {
-		float rho = (float) Math.sqrt(x * x + y * y);
+		float rho = (float) Math.hypot(x, y);
 		float phi = (float) Math.toDegrees(Math.atan2(y, x));
 		fieldCylindrical(phi, rho, z, result);
 	}
@@ -238,8 +238,8 @@ public abstract class MagneticField implements IField {
 	 */
 	protected int getCompositeIndex(int n1, int n2, int n3) {
 		if (N23 < 1) { // first time
-			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
 			N3 = q3Coordinate.getNumPoints();
+			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
 		}
 
 		return n1 * N23 + n2 * N3 + n3;
