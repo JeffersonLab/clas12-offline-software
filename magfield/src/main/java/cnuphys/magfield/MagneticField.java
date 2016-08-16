@@ -125,7 +125,7 @@ public abstract class MagneticField implements IField {
 	 */
 	public final void setScaleFactor(double scale) {
 		_scaleFactor = scale;
-		MagneticFields.changedScale(this);
+		MagneticFields.getInstance().changedScale(this);
 	}
 
 	/**
@@ -815,6 +815,7 @@ public abstract class MagneticField implements IField {
 	 * 
 	 * @return the name, e.e. "Torus"
 	 */
+	@Override
 	public abstract String getName();
 
 	/**

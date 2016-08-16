@@ -72,9 +72,6 @@ public final class Solenoid extends MagneticField {
 		// for interpolation in phi
 
 		// rotate onto to proper sector?
-		// System.err.println("relative: " + relativePhi);
-		// System.err.println("absolute: " + phi);
-		// System.err.println("diff: " + (phi - relativePhi));
 
 		if (phi > 0.001) {
 			double rphi = Math.toRadians(phi);

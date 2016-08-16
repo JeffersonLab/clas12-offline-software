@@ -31,9 +31,6 @@ public class GridCoordinate {
 	/** The step size (computed). */
 	private double _delta;
 
-	/** half the step size */
-	private double _halfDelta;
-
 	/** The name of the coordinate. */
 	private String _name;
 
@@ -58,7 +55,6 @@ public class GridCoordinate {
 		_max = max;
 		_numPoints = numPoints;
 		_delta = (max - min) / (numPoints - 1);
-		_halfDelta = _delta / 2.;
 
 		_values = new double[numPoints];
 		for (int i = 0; i < numPoints; i++) {
@@ -100,38 +96,6 @@ public class GridCoordinate {
 		if (index == _numPoints - 1) {
 			index--;
 		}
-
-		return index;
-	}
-
-	/**
-	 * Returns an index [0..numPoints-2] such that the grid values index and
-	 * index+1 enclose the value. A return of 0 means the value is between min
-	 * and min + delta; A return of numPoints-2 means the value is between max -
-	 * delta and max. A return value of -1 indicates out of range.
-	 * 
-	 * @param val
-	 *            the value to test
-	 * @return an index [0..numPoints-2] such that the grid values index and
-	 *         index+1 enclose the value.
-	 */
-	public int OLDgetIndex(double val) {
-		if ((val < _min) || (val > _max)) {
-			return -1;
-		}
-		int index = (int) Math.floor((val - _min) / _delta);
-		// pathology if val == max, we'd get numPoints-1
-		if (index == _numPoints - 1) {
-			index--;
-		}
-
-		// int newIndex = NEWgetIndex(val);
-		// if (index != newIndex) {
-		// System.err.println("INDICES do not match. Old: " + index + " New: "
-		// + newIndex + " VAL: " + val);
-		// System.err.println(toString());
-		// System.exit(0);
-		// }
 
 		return index;
 	}

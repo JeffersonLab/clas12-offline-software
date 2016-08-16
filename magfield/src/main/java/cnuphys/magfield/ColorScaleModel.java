@@ -153,7 +153,6 @@ public class ColorScaleModel {
     public Color getColor(double value, boolean useColorInterpolation) {
 
 	if (Double.isNaN(value)) {
-	    // System.err.println("NULL COLOR");
 	    return null;
 	}
 

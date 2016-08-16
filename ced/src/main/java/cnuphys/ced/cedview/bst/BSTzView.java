@@ -743,7 +743,7 @@ public class BSTzView extends CedView implements ChangeListener {
 		feedbackStrings.add(rtp);
 		feedbackStrings.add(rzp);
 
-		IField activeField = MagneticFields.getActiveField();
+		IField activeField = MagneticFields.getInstance().getActiveField();
 		if (activeField != null) {
 			float field[] = new float[3];
 			activeField.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
@@ -755,7 +755,7 @@ public class BSTzView extends CedView implements ChangeListener {
 
 			double bmag = VectorSupport.length(field);
 			feedbackStrings.add("$Lawn Green$"
-					+ MagneticFields.getActiveFieldDescription());
+					+ MagneticFields.getInstance().getActiveFieldDescription());
 			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
 					+ vecStr(field) + " T");
 		}

@@ -36,11 +36,11 @@ public class SwimZTest {
 	private static Swimmer swimmer;
 
 	public static void main(String arg[]) {
-		MagneticFields.setActiveField(FieldType.TORUS);
-		swimmer = new Swimmer(MagneticFields.getActiveField());
+		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
+		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
 		System.out.println("Active Field Description: "
-				+ MagneticFields.getActiveFieldDescription());
+				+ MagneticFields.getInstance().getActiveFieldDescription());
 
 		int numTest = 1000;
 		// testParabolicApproximation(numTest);
@@ -73,7 +73,7 @@ public class SwimZTest {
 		SwimZResult result = null;
 		SwimZStateVector last = null;
 
-		SwimZ sz = new SwimZ(MagneticFields.getActiveField());
+		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
@@ -100,7 +100,7 @@ public class SwimZTest {
 		SwimZResult result = null;
 		SwimZStateVector last = null;
 
-		SwimZ sz = new SwimZ(MagneticFields.getActiveField());
+		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
@@ -124,7 +124,7 @@ public class SwimZTest {
 		SwimZResult result = null;
 		double hdata[] = new double[3];
 
-		SwimZ sz = new SwimZ(MagneticFields.getActiveField());
+		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {

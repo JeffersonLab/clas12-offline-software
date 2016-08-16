@@ -66,6 +66,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		return super.add(field);
 	}
 
+	@Override
 	public String getName() {
 		String s = "Composite contains: ";
 

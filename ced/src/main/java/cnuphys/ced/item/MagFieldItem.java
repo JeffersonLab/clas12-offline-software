@@ -60,7 +60,7 @@ public class MagFieldItem extends AItem {
 	 */
 	public MagFieldItem(LogicalLayer layer, CedView view) {
 		super(layer);
-		MagneticFields.getActiveField();
+		MagneticFields.getInstance().getActiveField();
 		_view = view;
 		_style.setFillColor(null);
 		_style.setLineColor(Color.red);
@@ -91,7 +91,7 @@ public class MagFieldItem extends AItem {
 			return;
 		}
 
-		if (MagneticFields.getActiveField() == null) {
+		if (MagneticFields.getInstance().getActiveField() == null) {
 			return;
 		}
 
@@ -106,8 +106,8 @@ public class MagFieldItem extends AItem {
 			return;
 		}
 
-		boolean hasTorus = MagneticFields.hasTorus();
-		boolean hasSolenoid = MagneticFields.hasSolenoid();
+		boolean hasTorus = MagneticFields.getInstance().hasTorus();
+		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
 
 		if (_view instanceof SectorView) {
 			drawItemSectorView(g, container, displayOption, hasTorus,
@@ -141,7 +141,7 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		IField activeField = MagneticFields.getActiveField();
+		IField activeField = MagneticFields.getInstance().getActiveField();
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
@@ -218,16 +218,16 @@ public class MagFieldItem extends AItem {
 		GridCoordinate rCoordinate = null;
 		GridCoordinate zCoordinate = null;
 		if (hasTorus) {
-			rCoordinate = MagneticFields.getTorus().getRCoordinate();
-			zCoordinate = MagneticFields.getTorus().getZCoordinate();
+			rCoordinate = MagneticFields.getInstance().getTorus().getRCoordinate();
+			zCoordinate = MagneticFields.getInstance().getTorus().getZCoordinate();
 		} else {
-			rCoordinate = MagneticFields.getSolenoid().getRCoordinate();
-			zCoordinate = MagneticFields.getSolenoid().getZCoordinate();
+			rCoordinate = MagneticFields.getInstance().getSolenoid().getRCoordinate();
+			zCoordinate = MagneticFields.getInstance().getSolenoid().getZCoordinate();
 		}
 
 		fieldBoundary.x = zCoordinate.getMin();
 		if (hasSolenoid) {
-			fieldBoundary.x = MagneticFields.getSolenoid().getZCoordinate()
+			fieldBoundary.x = MagneticFields.getInstance().getSolenoid().getZCoordinate()
 					.getMin();
 		}
 		fieldBoundary.width = (zCoordinate.getMax() - fieldBoundary.x);
@@ -259,7 +259,7 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		IField activeField = MagneticFields.getActiveField();
+		IField activeField = MagneticFields.getInstance().getActiveField();
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
@@ -361,7 +361,7 @@ public class MagFieldItem extends AItem {
 
 		double values[] = new double[len];
 		double min = 0.0;
-		double max = MagneticFields.maxFieldMagnitude() / 10.0;
+		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
 		// double del = (max-min)/(values.length-1);
 
 		values[0] = min;
@@ -394,7 +394,7 @@ public class MagFieldItem extends AItem {
 
 		double values[] = new double[len];
 		double min = 3.0;
-		double max = MagneticFields.maxFieldMagnitude() / 10.0;
+		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
 		// double del = (max-min)/(values.length-1);
 
 		values[0] = min;

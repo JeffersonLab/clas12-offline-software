@@ -1,6 +1,6 @@
 package cnuphys.magfield;
 
-public class PerfectSolenoid extends MagneticField {
+public final class PerfectSolenoid extends MagneticField {
 
 	private static float FIELD = 50f; // kG
 

@@ -85,7 +85,7 @@ public class ScaleFieldPanel extends JPanel {
 			double currentSF = getField()._scaleFactor;
 			if (Math.abs(newSF - currentSF) > 1.0e-6) {
 				getField()._scaleFactor = newSF;
-				MagneticFields.notifyListeners();
+				MagneticFields.getInstance().notifyListeners();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -94,7 +94,7 @@ public class ScaleFieldPanel extends JPanel {
 	}
 
 	private MagneticField getField() {
-		return (MagneticField) MagneticFields.getIField(_fieldType);
+		return (MagneticField) MagneticFields.getInstance().getIField(_fieldType);
 	}
 
 	@Override

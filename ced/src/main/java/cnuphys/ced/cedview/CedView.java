@@ -153,7 +153,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		// listen for trajectory changes
 		Swimming.addSwimTrajectoryListener(this);
 
-		MagneticFields.addMagneticFieldChangeListener(this);
+		MagneticFields.getInstance().addMagneticFieldChangeListener(this);
 
 		_userComponentDrawer = new UserComponentLundDrawer(this);
 

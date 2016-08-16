@@ -169,18 +169,18 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 		} else if (hasSolenoid) {
 			newFieldType = FieldType.SOLENOID;
 		}
-		MagneticFields.setActiveField(newFieldType);
+		MagneticFields.getInstance().setActiveField(newFieldType);
 
 		// now the scales
 		if (hasTorus) {
-			setScale((MagneticField) MagneticFields.getIField(FieldType.TORUS),
+			setScale((MagneticField) MagneticFields.getInstance().getIField(FieldType.TORUS),
 					torusScale);
 		}
 
 		if (hasSolenoid) {
 			setScale(
 					(MagneticField) MagneticFields
-							.getIField(FieldType.SOLENOID),
+							.getInstance().getIField(FieldType.SOLENOID),
 					solenoidScale);
 		}
 

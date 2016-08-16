@@ -1,6 +1,6 @@
 package cnuphys.magfield;
 
-public class RotatedCompositeField extends CompositeField {
+public final class RotatedCompositeField extends CompositeField {
 
 	// the angle in degrees
 	private float _angle = -25.0f;
@@ -19,6 +19,7 @@ public class RotatedCompositeField extends CompositeField {
 		_cos = (float) Math.cos(Math.toRadians(_angle));
 	}
 	
+	@Override
 	public String getName() {
 		String s = "Rotated Composite contains: ";
 

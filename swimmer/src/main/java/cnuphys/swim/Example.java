@@ -18,7 +18,7 @@ public class Example {
 
 	// create a swimmer for the torus field
 	private static final Swimmer swimmer = new Swimmer(
-			MagneticFields.getIField(MagneticFields.FieldType.TORUS));
+			MagneticFields.getInstance().getIField(MagneticFields.FieldType.TORUS));
 
 	// vertex position
 	private static final double xo = 0.0;
@@ -194,7 +194,7 @@ public class Example {
 					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE]");
 
 			// lets try getting integral |b x dl|
-			traj.computeBDL(MagneticFields.getActiveField());
+			traj.computeBDL(MagneticFields.getInstance().getActiveField());
 			terminalPlot(
 					traj,
 					"Pathlength (horizontal, m) vs. Int|Bxdl| (vertical, kg-m) [ADAPTIVE] ",
