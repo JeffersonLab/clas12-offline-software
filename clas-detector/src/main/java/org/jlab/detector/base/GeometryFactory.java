@@ -17,6 +17,17 @@ import org.jlab.geom.detector.ec.ECFactory;
  */
 public class GeometryFactory {
     
+    public static int SYSTEM_LOCAL  = 1;
+    public static int SYSTEM_TILTED = 2;
+    public static int SYSTEM_CLAS   = 3;
+    
+    //private volatile 
+    
+    public GeometryFactory(){
+        
+    }
+    
+    
     /**
      * Load constants for given detector, with RUN and VARIATION specified
      * @param type detector type
@@ -96,8 +107,6 @@ public class GeometryFactory {
         System.out.println("[GeometryFactory] --->  detector construction for " 
                 + type.getName() + "  is not implemented");
         return null;
-    }
-    
-    
+    }        
     
 }

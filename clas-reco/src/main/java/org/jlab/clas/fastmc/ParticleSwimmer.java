@@ -24,7 +24,7 @@ import org.jlab.utils.CLASResources;
  * @author gavalian
  */
 public class ParticleSwimmer {
-     private  CompositeField compositeField;
+    private  CompositeField compositeField;
     private static final double rmax = 8.0;
     private static final double maxPathLength = 12.5;
     private static final double hdata[] = new double[3];

@@ -147,6 +147,68 @@ public class DatabaseConstantProvider implements ConstantProvider {
         //Directory dir = provider.getDirectory("/calibration/ftof/");        
         //Assignment asgmt = provider.getData("/test/test_vars/test_table");
     }
+    /**
+     * Reads calibration constants for given table in the database.
+     * @param table_name
+     * @return 
+     */
+    public CalibrationConstants  readConstants(String table_name){
+        
+        Assignment asgmt = provider.getData(table_name);
+        int ncolumns = asgmt.getColumnCount();
+        Vector<TypeTableColumn> typecolumn = asgmt.getTypeTable().getColumns();
+        String[] format = new String[ncolumns-3];
+
+        for(int loop = 3; loop < ncolumns; loop++){
+            //System.out.println("COLUMN " + typecolumn.get(loop).getName() 
+            //        + "  " + typecolumn.get(loop).getCellType().name());
+            if(typecolumn.get(loop).getCellType().name().compareTo("DOUBLE")==0){
+                format[loop-3] = typecolumn.get(loop).getName() + "/D";
+            } else {
+                format[loop-3] = typecolumn.get(loop).getName() + "/I";
+            }
+            //format[loop-3] = 
+        }
+        
+        CalibrationConstants  table = new CalibrationConstants(3,format);
+        for(int i = 0; i < 3; i++){
+            table.setIndexName(i, typecolumn.get(i).getName());
+        }
+        table.show();
+                List< Vector<String> >  tableRows = new ArrayList< Vector<String> >();
+        
+        
+        for(int loop = 0; loop < ncolumns; loop++){
+                Vector<String> column = asgmt.getColumnValuesString(loop);
+                tableRows.add(column);
+        }
+        
+        int nrows = tableRows.get(0).size();
+        
+        for(int nr = 0 ; nr < nrows; nr++){
+            String[] values = new String[ncolumns];
+            for(int nc = 0; nc < ncolumns; nc++){
+                values[nc] = tableRows.get(nc).get(nr);
+            }
+            /*System.out.println("\n LENGTH = " + values.length);
+            for(String item : values){
+                System.out.print(item + "  :  ");
+            }*/
+            //table.addRow(values);
+            table.addEntryFromString(values);
+        }
+        /*
+                String[] values = new String[row.size()];
+                System.out.println("VALUES SIZE = " + row.size());
+                for(int el = 0; el < row.size(); el++){
+                    values[el] = row.elementAt(el);                    
+                    //for(String cell: row){
+                    //System.out.print(cell + " ");
+                }
+                table.addRow(values);
+        }*/
+        return table;  
+    }
     
     
     public IndexedTable  readTable(String table_name){
@@ -207,8 +269,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
                 }
                 table.addRow(values);
         }*/
-        return table;
-        
+        return table;        
     }
     
     public void loadTable(String table_name){

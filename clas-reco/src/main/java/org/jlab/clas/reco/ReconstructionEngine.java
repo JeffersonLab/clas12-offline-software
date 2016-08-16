@@ -8,7 +8,10 @@ package org.jlab.clas.reco;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.jlab.clara.base.ClaraUtil;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
@@ -25,7 +28,11 @@ import org.jlab.io.evio.EvioFactory;
  */
 public abstract class ReconstructionEngine implements Engine {
     
-    ConstantsManager   constantsManager  = new ConstantsManager();
+    static ConstantsManager   constantsManager  = new ConstantsManager();
+    
+    static volatile ConcurrentMap<String,ConstantsManager> constManagerMap
+            = new ConcurrentHashMap<String,ConstantsManager>();
+    
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
@@ -40,9 +47,20 @@ public abstract class ReconstructionEngine implements Engine {
     abstract public boolean processDataEvent(DataEvent event);        
     abstract public boolean init();    
     
+    
+    public synchronized void requireConstants(List<String> tables){
+        if(constManagerMap.containsKey(this.getClass().getName())==false){
+            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            ConstantsManager manager = new ConstantsManager();
+            manager.init(tables);
+            constManagerMap.put(this.getClass().getName(), manager);
+        }
+    }
+    
+    
     public ConstantsManager  getConstantsManager(){
-        return this.constantsManager;
-    }    
+        return constManagerMap.get(this.getClass().getName());
+    }
     
     /**
      * 
@@ -52,7 +70,8 @@ public abstract class ReconstructionEngine implements Engine {
     
     public EngineData configure(EngineData ed) {
         //EngineData data = new EngineData();
-        System.out.println("--- engine configuration is called ");
+        //System.out.println("--- engine configuration is called ");
+        this.init();
         return ed;
     }
 
