@@ -245,7 +245,7 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * Convert a composite indix back to the coordinate indices
+	 * Convert a composite index back to the coordinate indices
 	 * 
 	 * @param index
 	 *            the composite index.
