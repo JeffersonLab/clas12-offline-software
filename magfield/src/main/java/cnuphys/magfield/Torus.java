@@ -19,7 +19,7 @@ import org.omg.CORBA.Environment;
  * @author Nicole Schumacher
  * @version 1.0
  */
-public class Torus extends MagneticField {
+public final class Torus extends MagneticField {
 
 	// private constructor
 	/**

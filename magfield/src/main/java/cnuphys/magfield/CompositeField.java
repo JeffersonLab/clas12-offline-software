@@ -84,22 +84,6 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	}
 
 	/**
-	 * Check whether the field is ready to be used.For a composite field, all
-	 * fields must be ready.
-	 * 
-	 * @return <code>true</code> if the field is ready.
-	 */
-	@Override
-	public boolean isFieldLoaded() {
-		for (IField field : this) {
-			if (!field.isFieldLoaded()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Read a magnetic field from a binary file. The file has the documented
 	 * format. Since this object is a composite field, this should not be called
 	 * so an empty implementation is provided to complete the interface. The

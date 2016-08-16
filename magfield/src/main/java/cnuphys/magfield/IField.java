@@ -85,13 +85,6 @@ public interface IField {
     public float getMaxFieldMagnitude();
 
     /**
-     * Check whether the field is ready to be used.
-     * 
-     * @return <code>true</code> if the field is ready.
-     */
-    public boolean isFieldLoaded();
-
-    /**
      * Read a magnetic field from a binary file. The file has the documented
      * format.
      *
