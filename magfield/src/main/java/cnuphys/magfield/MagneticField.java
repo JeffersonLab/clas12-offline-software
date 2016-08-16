@@ -101,10 +101,10 @@ public abstract class MagneticField implements IField {
 	protected int numFieldPoints;
 
 	// used internally for index calculations
-	private int N23 = -1;
+	//private int N23 = -1;
 
 	// used internally for index calculations
-	private int N3;
+	//private int N3;
 
 	// scale factor always treated as positive
 	protected double _scaleFactor = 1.0;
@@ -452,7 +452,7 @@ public abstract class MagneticField implements IField {
 	public final void readBinaryMagneticField(File binaryFile)
 			throws FileNotFoundException {
 
-		N23 = -1;
+	//	N23 = -1;
 
 		try {
 			DataInputStream dos = new DataInputStream(new FileInputStream(
