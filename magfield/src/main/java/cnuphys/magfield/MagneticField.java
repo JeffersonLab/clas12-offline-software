@@ -29,10 +29,10 @@ public abstract class MagneticField implements IField {
 	protected float maxField = (float) -1.0e10;
 
 	/** The max vector field. */
-	protected float maxVectorField[] = new float[3];
+	protected final float maxVectorField[] = new float[3];
 
 	/** The location of the maximum field. */
-	protected float maxFieldLocation[] = new float[3];
+	protected final float maxFieldLocation[] = new float[3];
 
 	/** The average magnitude of the field. */
 	protected float avgField = Float.NaN;
@@ -106,9 +106,6 @@ public abstract class MagneticField implements IField {
 	// used internally for index calculations
 	private int N3;
 
-	// is the field ready to use?
-	protected boolean _fieldReady = false;
-
 	// scale factor always treated as positive
 	protected double _scaleFactor = 1.0;
 
@@ -126,7 +123,7 @@ public abstract class MagneticField implements IField {
 	 * @param scale
 	 *            the scale factor
 	 */
-	public void setScaleFactor(double scale) {
+	public final void setScaleFactor(double scale) {
 		_scaleFactor = scale;
 		MagneticFields.changedScale(this);
 	}
@@ -139,7 +136,7 @@ public abstract class MagneticField implements IField {
 	 * @param scale
 	 *            the scale factor between 0 and 1
 	 */
-	public double getScaleFactor() {
+	public final double getScaleFactor() {
 		return _scaleFactor;
 	}
 
@@ -148,7 +145,7 @@ public abstract class MagneticField implements IField {
 	 * 
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
-	public boolean isZeroField() {
+	public final boolean isZeroField() {
 		return (Math.abs(_scaleFactor) < 1.0e-6);
 	}
 
@@ -158,7 +155,7 @@ public abstract class MagneticField implements IField {
 	 * @param zeroField
 	 *            if set to <code>true</code> the field will always return 0.
 	 */
-	public void setZeroField(boolean zeroField) {
+	public final void setZeroField(boolean zeroField) {
 		setScaleFactor(0.0);
 	}
 
@@ -180,7 +177,7 @@ public abstract class MagneticField implements IField {
 	 *            components.
 	 */
 	@Override
-	public void field(float x, float y, float z, float result[]) {
+	public final void field(float x, float y, float z, float result[]) {
 		float rho = (float) Math.hypot(x, y);
 		float phi = (float) Math.toDegrees(Math.atan2(y, x));
 		fieldCylindrical(phi, rho, z, result);
@@ -199,7 +196,7 @@ public abstract class MagneticField implements IField {
 	 * @return the magnitude of the field in kiloGauss.
 	 */
 	@Override
-	public float fieldMagnitudeCylindrical(double phi, double r, double z) {
+	public final float fieldMagnitudeCylindrical(double phi, double r, double z) {
 		float result[] = new float[3];
 		fieldCylindrical(phi, r, z, result);
 		return vectorLength(result);
@@ -218,7 +215,7 @@ public abstract class MagneticField implements IField {
 	 * @return the magnitude of the field in kiloGauss.
 	 */
 	@Override
-	public float fieldMagnitude(float x, float y, float z) {
+	public final float fieldMagnitude(float x, float y, float z) {
 		float result[] = new float[3];
 		field(x, y, z, result);
 		return vectorLength(result);
@@ -236,7 +233,7 @@ public abstract class MagneticField implements IField {
 	 *            the index in the q3 direction
 	 * @return the composite index (buffer offset)
 	 */
-	protected int getCompositeIndex(int n1, int n2, int n3) {
+	protected final int getCompositeIndex(int n1, int n2, int n3) {
 		if (N23 < 1) { // first time
 			N3 = q3Coordinate.getNumPoints();
 			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
@@ -253,7 +250,7 @@ public abstract class MagneticField implements IField {
 	 * @param qindices
 	 *            the coordinate indices
 	 */
-	protected void getCoordinateIndices(int index, int qindices[]) {
+	protected final void getCoordinateIndices(int index, int qindices[]) {
 		int N3 = q3Coordinate.getNumPoints();
 		int n3 = index % N3;
 		index = (index - n3) / N3;
@@ -281,7 +278,7 @@ public abstract class MagneticField implements IField {
 	 * 
 	 * @return the index of the max field magnitude.
 	 */
-	public int maxFieldMagnitude() {
+	public final int maxFieldMagnitude() {
 		return maxFieldIndex;
 	}
 
@@ -315,7 +312,7 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the square of field magnitude at the given index.
 	 */
-	protected double squareMagnitude(int index) {
+	protected final double squareMagnitude(int index) {
 		int i = 3 * index;
 		float B1 = field.get(i);
 		float B2 = field.get(i + 1);
@@ -331,7 +328,7 @@ public abstract class MagneticField implements IField {
 	 * @param vv
 	 *            an array of three floats to hold the result.
 	 */
-	protected void vectorField(int index, float vv[]) {
+	protected final void vectorField(int index, float vv[]) {
 		int i = 3 * index;
 		vv[0] = field.get(i);
 		vv[1] = field.get(i + 1);
@@ -344,7 +341,7 @@ public abstract class MagneticField implements IField {
 	 * @return a string representation.
 	 */
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuffer sb = new StringBuffer(1024);
 		sb.append("\n");
 		sb.append(q1Coordinate.toString());
@@ -433,7 +430,7 @@ public abstract class MagneticField implements IField {
 	 *            the v
 	 * @return the float
 	 */
-	protected float vectorLength(float v[]) {
+	protected final float vectorLength(float v[]) {
 		float vx = v[0];
 		float vy = v[1];
 		float vz = v[2];
@@ -450,12 +447,10 @@ public abstract class MagneticField implements IField {
 	 *             the file not found exception
 	 */
 	@Override
-	public void readBinaryMagneticField(File binaryFile)
+	public final void readBinaryMagneticField(File binaryFile)
 			throws FileNotFoundException {
 
 		N23 = -1;
-
-		_fieldReady = false;
 
 		try {
 			DataInputStream dos = new DataInputStream(new FileInputStream(
@@ -515,13 +510,11 @@ public abstract class MagneticField implements IField {
 			// read the bytes as a block
 			dos.read(bytes);
 			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-			field = byteBuffer.asFloatBuffer();
+			field = byteBuffer.asReadOnlyBuffer().asFloatBuffer();
 			computeMaxField();
 
 			System.out.println(toString());
 			dos.close();
-			_fieldReady = true;
-			// cache some quantities
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -539,7 +532,7 @@ public abstract class MagneticField implements IField {
 	 * @param result
 	 *            will hold the result
 	 */
-	protected void interpolateField(double q1, double q2, double q3,
+	protected final void interpolateField(double q1, double q2, double q3,
 			float result[]) {
 
 		result[0] = 0f;
@@ -644,7 +637,7 @@ public abstract class MagneticField implements IField {
 	 *            magnitude
 	 * @return the float
 	 */
-	protected float interpolateFieldMagnitude(double q1, double q2, double q3) {
+	protected final float interpolateFieldMagnitude(double q1, double q2, double q3) {
 
 		int n0 = q1Coordinate.getIndex(q1);
 		if (n0 < 0) {
@@ -702,7 +695,7 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the field magnitude at the given index.
 	 */
-	public float fieldMagnitude(int index) {
+	public final float fieldMagnitude(int index) {
 		int i = 3 * index;
 		float B1 = field.get(i);
 		float B2 = field.get(i + 1);
@@ -718,7 +711,7 @@ public abstract class MagneticField implements IField {
 	 * @param r
 	 *            a vector that holds the three components of the location
 	 */
-	public void getLocation(int index, float r[]) {
+	public final void getLocation(int index, float r[]) {
 		int qindices[] = new int[3];
 		getCoordinateIndices(index, qindices);
 		r[0] = (float) q1Coordinate.getValue(qindices[0]);
@@ -733,7 +726,7 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the B1 at the given index.
 	 */
-	protected float getB1(int index) {
+	protected final float getB1(int index) {
 		int i = 3 * index;
 		return field.get(i);
 	}
@@ -745,7 +738,7 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the B2 at the given index.
 	 */
-	protected float getB2(int index) {
+	protected final float getB2(int index) {
 		int i = 3 * index;
 		return field.get(i + 1);
 	}
@@ -757,7 +750,7 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the B3 at the given index.
 	 */
-	protected float getB3(int index) {
+	protected final float getB3(int index) {
 		int i = 3 * index;
 		return field.get(i + 2);
 	}
@@ -767,7 +760,7 @@ public abstract class MagneticField implements IField {
 	 *
 	 * @return the q1 coordinate
 	 */
-	public GridCoordinate getQ1Coordinate() {
+	public final GridCoordinate getQ1Coordinate() {
 		return q1Coordinate;
 	}
 
@@ -776,7 +769,7 @@ public abstract class MagneticField implements IField {
 	 *
 	 * @return the q2 coordinate
 	 */
-	public GridCoordinate getQ2Coordinate() {
+	public final GridCoordinate getQ2Coordinate() {
 		return q2Coordinate;
 	}
 
@@ -785,7 +778,7 @@ public abstract class MagneticField implements IField {
 	 *
 	 * @return the q3 coordinate
 	 */
-	public GridCoordinate getQ3Coordinate() {
+	public final GridCoordinate getQ3Coordinate() {
 		return q3Coordinate;
 	}
 
@@ -815,16 +808,6 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * Check whether the solenoidal field is ready to be used.
-	 * 
-	 * @return <code>true</code> if the field is ready.
-	 */
-	@Override
-	public boolean isFieldLoaded() {
-		return _fieldReady;
-	}
-
-	/**
 	 * Get the name of the field
 	 * 
 	 * @return the name, e.e. "Torus"
@@ -836,7 +819,7 @@ public abstract class MagneticField implements IField {
 	 * 
 	 * @return the interpolate flag
 	 */
-	public static boolean isInterpolate() {
+	public static final boolean isInterpolate() {
 		return _interpolate;
 	}
 
@@ -846,7 +829,7 @@ public abstract class MagneticField implements IField {
 	 * @param interpolate
 	 *            the interpolate flag to set
 	 */
-	public static void setInterpolate(boolean interpolate) {
+	public static final void setInterpolate(boolean interpolate) {
 		_interpolate = interpolate;
 		System.out.println("Interpolating fields: " + _interpolate);
 	}

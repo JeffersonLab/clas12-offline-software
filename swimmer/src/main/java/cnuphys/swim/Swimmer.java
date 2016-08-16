@@ -16,7 +16,7 @@ import cnuphys.rk4.RungeKuttaException;
  * @author heddle
  *
  */
-public class Swimmer {
+public final class Swimmer {
 
 	// Speed of light in m/s
 	public static final double C = 299792458.0; // m/s
@@ -25,7 +25,7 @@ public class Swimmer {
 	public static final double MINMOMENTUM = 5e-05;
 
 	// We have different tableaus we can use for RK integration
-	public static ButcherTableau _defaultTableau = ButcherTableau.DORMAND_PRINCE;
+	public static final ButcherTableau _defaultTableau = ButcherTableau.DORMAND_PRINCE;
 
 	/**
 	 * In swimming routines that require a tolerance vector, this is a

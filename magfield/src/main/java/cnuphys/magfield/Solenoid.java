@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
  * @author Sebouh Paul
  * @version 1.0
  */
-public class Solenoid extends MagneticField {
+public final class Solenoid extends MagneticField {
 
 	// private constructor
 	/**
