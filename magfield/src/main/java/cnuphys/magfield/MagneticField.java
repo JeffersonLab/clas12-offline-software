@@ -509,8 +509,9 @@ public abstract class MagneticField implements IField {
 
 			// read the bytes as a block
 			dos.read(bytes);
-			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-			field = byteBuffer.asReadOnlyBuffer().asFloatBuffer();
+			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+			field = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
+			
 			computeMaxField();
 
 			System.out.println(toString());
