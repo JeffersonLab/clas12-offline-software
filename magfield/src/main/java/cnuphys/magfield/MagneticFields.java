@@ -3,15 +3,12 @@ package cnuphys.magfield;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -28,44 +25,53 @@ import javax.swing.event.EventListenerList;
 public class MagneticFields {
 	
 	//initialize only once
-	private static boolean _initialized = false;
+	private boolean _initialized = false;
 
 	// solenoidal field
-	private static Solenoid _solenoid;
+	private Solenoid _solenoid;
 
 	// torus field
-	private static Torus _torus;
+	private Torus _torus;
 
 	// perfect solenoid
-	private static PerfectSolenoid _perfectSolenoid;
+	private PerfectSolenoid _perfectSolenoid;
 
 	// mac test field
-	private static MacTestField _macTest;
+	private MacTestField _macTest;
 
 	// 1 tesla uniform
-	private static ConstantField _uniform;
+	private ConstantField _uniform;
 
 	// composite field
-	private static CompositeField _compositeField;
+	private CompositeField _compositeField;
 
 	// composite rotated
-	private static RotatedCompositeField _rotatedCompositeField;
+	private RotatedCompositeField _rotatedCompositeField;
 
 	// optional full path to torus set by command line argument in ced
-	private static String _torusFullPath;
+	private String _torusFullPath = sysPropOrEnvVar("TORUSMAP");
 
 	// optional full path to torus set by command line argument in ced
-	private static String _solenoidFullPath;
+	private String _solenoidFullPath = sysPropOrEnvVar("SOLENOIDMAP");
+	
+	//singleton
+	private static MagneticFields instance;
+	
+	private MagneticFields() {
+		
+	}
+	
+	public static MagneticFields getInstance() {
+		if (instance == null) {
+			instance = new MagneticFields();
+		}
+		return instance;
+	}
 
 	// optional full path to solenoid set by command line argument in ced
 
-	// load the fields
-	static {
-		_torusFullPath = sysPropOrEnvVar("TORUSMAP");
-		_solenoidFullPath = sysPropOrEnvVar("SOLENOIDMAP");
-	}
 
-	private static String sysPropOrEnvVar(String key) {
+	private String sysPropOrEnvVar(String key) {
 		String s = System.getProperty(key);
 		if (s == null) {
 			s = System.getenv(key);
@@ -76,11 +82,8 @@ public class MagneticFields {
 		return s;
 	}
 
-	// trigger the fields to be loaded
-	// private static boolean _firstTime = true;
-
 	// which field is active
-	private static IField _activeField;
+	private IField _activeField;
 
 	// types of fields
 	public enum FieldType {
@@ -88,23 +91,23 @@ public class MagneticFields {
 	}
 
 	// List of magnetic field change listeners
-	private static EventListenerList _listenerList;
+	private EventListenerList _listenerList;
 
 	// menu stuff
-	private static JRadioButtonMenuItem _torusItem;
-	private static JRadioButtonMenuItem _solenoidItem;
-	private static JRadioButtonMenuItem _bothItem;
-	private static JRadioButtonMenuItem _bothRotatedItem;
-	private static JRadioButtonMenuItem _zeroItem;
-	private static JRadioButtonMenuItem _perfectSolenoidItem;
-	private static JRadioButtonMenuItem _uniformItem;
-	private static JRadioButtonMenuItem _macTestItem;
+	private JRadioButtonMenuItem _torusItem;
+	private JRadioButtonMenuItem _solenoidItem;
+	private JRadioButtonMenuItem _bothItem;
+	private JRadioButtonMenuItem _bothRotatedItem;
+	private JRadioButtonMenuItem _zeroItem;
+	private JRadioButtonMenuItem _perfectSolenoidItem;
+	private JRadioButtonMenuItem _uniformItem;
+	private JRadioButtonMenuItem _macTestItem;
 
-	private static JRadioButtonMenuItem _interpolateItem;
-	private static JRadioButtonMenuItem _nearestNeighborItem;
+	private JRadioButtonMenuItem _interpolateItem;
+	private JRadioButtonMenuItem _nearestNeighborItem;
 
-	private static ScaleFieldPanel _scaleTorusPanel;
-	private static ScaleFieldPanel _scaleSolenoidPanel;
+	private ScaleFieldPanel _scaleTorusPanel;
+	private ScaleFieldPanel _scaleSolenoidPanel;
 
 	/**
 	 * Sets the full path to the torus map. If this is set before a call to
@@ -112,7 +115,7 @@ public class MagneticFields {
 	 * 
 	 * @param fullPath the full path to the torus field map.
 	 */
-	public static void setTorusFullPath(String fullPath) {
+	public void setTorusFullPath(String fullPath) {
 		_torusFullPath = fullPath;
 	}
 
@@ -122,7 +125,7 @@ public class MagneticFields {
 	 * 
 	 * @param fullPath the full path to the solenoid field map.
 	 */
-	public static void setSolenoidFullPath(String fullPath) {
+	public void setSolenoidFullPath(String fullPath) {
 		_solenoidFullPath = fullPath;
 	}
 	
@@ -131,7 +134,7 @@ public class MagneticFields {
 	 * 
 	 * @param field the new active field
 	 */
-	public static void setActiveField(IField field) {
+	public void setActiveField(IField field) {
 		_activeField = field;
 	}
 
@@ -140,7 +143,7 @@ public class MagneticFields {
 	 * 
 	 * @param ftype one of the enum values
 	 */
-	public static void setActiveField(FieldType ftype) {
+	public void setActiveField(FieldType ftype) {
 		// init();
 		switch (ftype) {
 		case TORUS:
@@ -175,7 +178,7 @@ public class MagneticFields {
 	 * 
 	 * @return a string description of the active field
 	 */
-	public static final String getActiveFieldDescription() {
+	public final String getActiveFieldDescription() {
 		return (_activeField == null) ? "None" : _activeField.getName();
 	}
 
@@ -184,7 +187,7 @@ public class MagneticFields {
 	 * 
 	 * @return the active field
 	 */
-	public static IField getActiveField() {
+	public IField getActiveField() {
 		// init(); //harmless if already inited
 		return _activeField;
 	}
@@ -195,7 +198,7 @@ public class MagneticFields {
 	 * @param ftype the field map to get
 	 * @return the field map, which might be <code>null</code>.
 	 */
-	public static IField getIField(FieldType ftype) {
+	public IField getIField(FieldType ftype) {
 		IField ifield = null;
 
 		switch (ftype) {
@@ -242,7 +245,7 @@ public class MagneticFields {
 	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
 	 *            components.
 	 */
-	public static void field(float x, float y, float z, float result[]) {
+	public void field(float x, float y, float z, float result[]) {
 
 		// init(); //harmless if already inited
 
@@ -261,7 +264,7 @@ public class MagneticFields {
 	 * 
 	 * @return the maximum value of the active field in kG
 	 */
-	public static double maxFieldMagnitude() {
+	public double maxFieldMagnitude() {
 		// init(); //harmless if already inited
 		double maxVal = 0;
 		if (_activeField != null) {
@@ -286,7 +289,7 @@ public class MagneticFields {
 	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
 	 *            components.
 	 */
-	public static void field(FieldType ftype, float x, float y, float z,
+	public void field(FieldType ftype, float x, float y, float z,
 			float result[]) {
 
 		// init(); //harmless if already inited
@@ -335,7 +338,7 @@ public class MagneticFields {
 	/**
 	 * Tries to load the magnetic fields from fieldmaps
 	 */
-	public static void initializeMagneticFields() {
+	public void initializeMagneticFields() {
 		
 		if (_initialized) {
 			return;
@@ -472,17 +475,6 @@ public class MagneticFields {
 		float result[] = new float[3];
 		_compositeField.field(27.16f, 0.f, 65.71f, result);
 
-		// System.out.println("location: (27.16, 0.f, 65.71)");
-		// System.out
-		// .println(String
-		// .format("Test field (should be 1.018, 0, 2.234): %6.3f, %6.3f, %6.3f
-		// T",
-		// result[0] / 10, result[1] / 10, result[2] / 10));
-		// _compositeField.field(55.6f, 0.f, 427.14f, result);
-		// System.out.println(String.format(
-		// "Test field (should be 0, -1.747, 0): %6.3f, %6.3f, %6.3f T",
-		// result[0] / 10, result[1] / 10, result[2] / 10));
-
 		// set the default active field
 		_activeField = null;
 		if ((_torus != null) && (_solenoid != null)) {
@@ -508,14 +500,14 @@ public class MagneticFields {
 	 * @param maxLevel the maximum number of levels to drill down
 	 * @return the first matching dir that is found, or null.
 	 */
-	public static File findDirectory(String root, String baseName,
+	public File findDirectory(String root, String baseName,
 			int maxLevel) {
 		return findDirectory(fixSeparator(root), baseName, 0,
 				Math.max(Math.min(maxLevel, 15), 1));
 	}
 
 	// recursive call used by public findDirectory
-	private static File findDirectory(String root, String baseName,
+	private File findDirectory(String root, String baseName,
 			int currentLevel, int maxLevel) {
 
 		if (baseName == null) {
@@ -566,7 +558,7 @@ public class MagneticFields {
 	 * @param s the input string.
 	 * @return the string with the correct file separator.
 	 */
-	public static String fixSeparator(String s) {
+	public String fixSeparator(String s) {
 		if (s == null) {
 			return null;
 		}
@@ -585,25 +577,16 @@ public class MagneticFields {
 	 * 
 	 * @return the magnetic field menu
 	 */
-	public static JMenu getMagneticFieldMenu() {
+	public JMenu getMagneticFieldMenu() {
 		return getMagneticFieldMenu(false, false);
 	}
-
-	// inits the field (just once--harmless to call again
-	// private static void init() {
-	// // load the fields the first time we need them.
-	// if (_firstTime) {
-	// getMagneticFields();
-	// _firstTime = false;
-	// }
-	// }
 
 	/**
 	 * Get the magnetic field menu
 	 * 
 	 * @return the magnetic field menu
 	 */
-	public static JMenu getMagneticFieldMenu(boolean incRotatedField,
+	public JMenu getMagneticFieldMenu(boolean incRotatedField,
 			boolean includeTestFields) {
 		// // init(); //harmless if already inited
 		JMenu menu = new JMenu("Magnetic Field");
@@ -669,7 +652,7 @@ public class MagneticFields {
 	
 
 	// handle the radio menu selections from the magnetic field menu
-	private static void handleMenuSelection(ActionEvent ae) {
+	private void handleMenuSelection(ActionEvent ae) {
 		Object source = ae.getSource();
 
 		if (source == _torusItem) {
@@ -728,14 +711,7 @@ public class MagneticFields {
 		notifyListeners();
 	}
 
-	// handle the checkbox selections from the magnetic field menu
-	private static void handleStateChange(ItemEvent iev) {
-		Object source = iev.getSource();
-
-		notifyListeners();
-	}
-
-	protected static void changedScale(MagneticField field) {
+	protected void changedScale(MagneticField field) {
 		if (field != null) {
 			if (field == _torus) {
 				_scaleTorusPanel._textField.setText(
@@ -751,7 +727,7 @@ public class MagneticFields {
 	}
 
 	// notify listeners of a change in the magnetic field
-	protected static void notifyListeners() {
+	protected void notifyListeners() {
 
 		if (_listenerList == null) {
 			return;
@@ -778,7 +754,7 @@ public class MagneticFields {
 	 * 
 	 * @param magChangeListener the listener to add
 	 */
-	public static void addMagneticFieldChangeListener(
+	public void addMagneticFieldChangeListener(
 			MagneticFieldChangeListener magChangeListener) {
 
 		if (_listenerList == null) {
@@ -799,7 +775,7 @@ public class MagneticFields {
 	 *            remove.
 	 */
 
-	public static void removeMagneticFieldChangeListener(
+	public void removeMagneticFieldChangeListener(
 			MagneticFieldChangeListener magChangeListener) {
 
 		if ((magChangeListener == null) || (_listenerList == null)) {
@@ -811,7 +787,7 @@ public class MagneticFields {
 	}
 
 	// convenience method for adding a radio button
-	private static JRadioButtonMenuItem createRadioMenuItem(IField field, String label,
+	private JRadioButtonMenuItem createRadioMenuItem(IField field, String label,
 			JMenu menu, ButtonGroup bg, ActionListener al) {
 		
 		String s = label;
@@ -829,7 +805,7 @@ public class MagneticFields {
 	}
 	
 	// convenience method for adding a radio button
-	private static JRadioButtonMenuItem createRadioMenuItem(String label,
+	private JRadioButtonMenuItem createRadioMenuItem(String label,
 			JMenu menu, ButtonGroup bg, boolean on, ActionListener al) {
 		
 		
@@ -841,21 +817,12 @@ public class MagneticFields {
 	}
 
 
-	// convenience method for adding a checkbox button
-	private static JCheckBoxMenuItem createCheckBoxMenuItem(String label,
-			JMenu menu, boolean on, ItemListener il) {
-		JCheckBoxMenuItem mi = new JCheckBoxMenuItem(label, on);
-		mi.addItemListener(il);
-		menu.add(mi);
-		return mi;
-	}
-
 	/**
 	 * Check whether we have a torus field
 	 * 
 	 * @return <code>true</code> if we have a torus
 	 */
-	public static boolean hasTorus() {
+	public boolean hasTorus() {
 		return (_torus != null);
 	}
 
@@ -864,7 +831,7 @@ public class MagneticFields {
 	 * 
 	 * @return <code>true</code> if we have a solenoid
 	 */
-	public static boolean hasSolenoid() {
+	public boolean hasSolenoid() {
 		return (_solenoid != null);
 	}
 
@@ -873,7 +840,7 @@ public class MagneticFields {
 	 * 
 	 * @return the torus field
 	 */
-	public static Torus getTorus() {
+	public Torus getTorus() {
 		return _torus;
 	}
 
@@ -882,7 +849,7 @@ public class MagneticFields {
 	 * 
 	 * @return the solenoid field
 	 */
-	public static Solenoid getSolenoid() {
+	public Solenoid getSolenoid() {
 		return _solenoid;
 	}
 	
@@ -890,7 +857,7 @@ public class MagneticFields {
 	 * Get the composite field
 	 * @return the composite field
 	 */
-	public static CompositeField getCompositeField() {
+	public CompositeField getCompositeField() {
 		return _compositeField;
 	}
 	
@@ -898,7 +865,7 @@ public class MagneticFields {
 	 * Get the rotated composite field
 	 * @return the rotated composite field
 	 */
-	public static RotatedCompositeField getRotatedCompositeField() {
+	public RotatedCompositeField getRotatedCompositeField() {
 		return _rotatedCompositeField;
 	}
 
@@ -910,7 +877,8 @@ public class MagneticFields {
 	public static void main(String arg[]) {
 		final JFrame testFrame = new JFrame("Magnetic Field");
 		
-		initializeMagneticFields();
+		MagneticFields mf = MagneticFields.getInstance();
+		mf.initializeMagneticFields();
 
 		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
 		// drawing canvas
@@ -933,7 +901,7 @@ public class MagneticFields {
 		// add the menu
 		JMenuBar mb = new JMenuBar();
 		testFrame.setJMenuBar(mb);
-		mb.add(getMagneticFieldMenu(true, true));
+		mb.add(mf.getMagneticFieldMenu(true, true));
 
 		testFrame.add(magPanel1);
 		testFrame.add(magPanel2);
@@ -945,14 +913,13 @@ public class MagneticFields {
 			@Override
 			public void run() {
 				testFrame.setVisible(true);
-//				bzTest();
-				compositeTest();
+				mf.compositeTest();
 			}
 		});
 
 	}
 		
-	private static void compositeTest() {
+	private void compositeTest() {
 		
 		System.err.println("========= START Composite TEST ==========");
 		
@@ -1011,36 +978,6 @@ public class MagneticFields {
 	private static double absdif(double v1, double v2) {
 		return Math.abs(v1-v2);
 	}
-	public static void main2(String arg[]) {
-		int numThread = 20;
 
-		Thread thread[] = new Thread[numThread];
-		for (int i = 0; i < numThread; i++) {
-
-			Runnable rmag = new Runnable() {
-
-				@Override
-				public void run() {
-					float[] result = new float[3];
-					for (int x = 10; x < 200; x = x + 2) {
-						for (int z = 10; z < 400; z = z + 4) {
-							MagneticFields.field(x, 0f, z, result);
-						}
-
-					}
-					System.out.println(
-							result[0] + ", " + result[1] + ", " + result[2]);
-				}
-
-			};
-
-			thread[i] = new Thread(rmag);
-		}
-
-		for (Thread t : thread) {
-			t.start();
-		}
-
-	}
 
 }

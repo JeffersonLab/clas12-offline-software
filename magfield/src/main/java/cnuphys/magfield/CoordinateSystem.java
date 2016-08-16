@@ -14,22 +14,22 @@ package cnuphys.magfield;
 
 public enum CoordinateSystem {
 
-    CYLINDRICAL, CARTESIAN;
+	CYLINDRICAL, CARTESIAN;
 
-    /**
-     * Get the coordinate system from an integer
-     * 
-     * @param val
-     *            the integer value
-     * @return the coordinate system
-     */
-    public static CoordinateSystem fromInt(int val) {
-	if (val == 0) {
-	    return CYLINDRICAL;
-	} else if (val == 1) {
-	    return CARTESIAN;
+	/**
+	 * Get the coordinate system from an integer
+	 * 
+	 * @param val
+	 *            the integer value
+	 * @return the coordinate system
+	 */
+	public static CoordinateSystem fromInt(int val) {
+		if (val == 0) {
+			return CYLINDRICAL;
+		} else if (val == 1) {
+			return CARTESIAN;
+		}
+		return null;
 	}
-	return null;
-    }
 
 }

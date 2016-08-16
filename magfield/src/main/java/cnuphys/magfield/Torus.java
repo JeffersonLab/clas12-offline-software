@@ -10,8 +10,6 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.StringTokenizer;
 
-import org.omg.CORBA.Environment;
-
 /**
  * The Class Torus.
  *
@@ -102,9 +100,6 @@ public final class Torus extends MagneticField {
 		}
 
 		// rotate onto to proper sector?
-		// System.err.println("relative: " + relativePhi);
-		// System.err.println("absolute: " + phi);
-		// System.err.println("diff: " + (phi - relativePhi));
 
 		double diff = (phi - relativePhi);
 		if (diff > 0.001) {
@@ -284,52 +279,52 @@ public final class Torus extends MagneticField {
 
 		return lines;
 	}
-
-	/**
-	 * main method used for testing.
-	 *
-	 * @param arg command line arguments
-	 */
-	public static void main(String arg[]) {
-
-		boolean convert = true;
-		if (convert) {
-			asciiToBinary();
-			System.exit(0);
-		}
-
-		String path = null;
-
-		if ((arg != null) && (arg.length > 0)) {
-			path = arg[0];
-		}
-
-		if (path == null) {
-			path = "data/clas12_torus_fieldmap_binary.dat";
-		}
-
-		File file = new File(path);
-
-		Torus torus = null;
-		try {
-			torus = fromBinaryFile(file);
-			System.out.println("Created field object.");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		float x = 32.60f;
-		float y = 106.62f;
-		float z = 410.0f;
-		float result[] = new float[3];
-		torus.field(x, y, z, result);
-
-		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
-
-		String fieldStr = torus.vectorToString(result);
-		System.out.println("Field: " + fieldStr);
-	}
+//
+//	/**
+//	 * main method used for testing.
+//	 *
+//	 * @param arg command line arguments
+//	 */
+//	public static void main(String arg[]) {
+//
+//		boolean convert = true;
+//		if (convert) {
+//			asciiToBinary();
+//			System.exit(0);
+//		}
+//
+//		String path = null;
+//
+//		if ((arg != null) && (arg.length > 0)) {
+//			path = arg[0];
+//		}
+//
+//		if (path == null) {
+//			path = "data/clas12_torus_fieldmap_binary.dat";
+//		}
+//
+//		File file = new File(path);
+//
+//		Torus torus = null;
+//		try {
+//			torus = fromBinaryFile(file);
+//			System.out.println("Created field object.");
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
+//
+//		float x = 32.60f;
+//		float y = 106.62f;
+//		float z = 410.0f;
+//		float result[] = new float[3];
+//		torus.field(x, y, z, result);
+//
+//		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+//
+//		String fieldStr = torus.vectorToString(result);
+//		System.out.println("Field: " + fieldStr);
+//	}
 
 	/**
 	 * Get the name of the field

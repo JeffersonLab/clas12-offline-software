@@ -236,7 +236,7 @@ public class SwimAllMC implements ISwimAll {
 		double theta = Math.toDegrees(Math.acos(pz / p));
 		double phi = Math.toDegrees(Math.atan2(py, px));
 
-		Swimmer swimmer = new Swimmer(MagneticFields.getActiveField());
+		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 		double stepSize = 5e-4; // m
 		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
 

@@ -23,10 +23,6 @@ import cnuphys.swim.Swimming;
  */
 public class SwimAllRecon implements ISwimAll {
 
-	// convenience reference to event manager
-	private static ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
-
 	// integration cutoff
 	private static final double RMAX = 10.0;
 	private static final double PATHMAX = 10.0;
@@ -64,7 +60,7 @@ public class SwimAllRecon implements ISwimAll {
 		}
 		// System.err.println("SWIM " + data.size() + "  recon trax");
 
-		Swimmer swimmer = new Swimmer(MagneticFields.getActiveField());
+		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 		double stepSize = 5e-4; // m
 		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
 

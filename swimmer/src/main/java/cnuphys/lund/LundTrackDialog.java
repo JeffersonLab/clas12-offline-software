@@ -228,7 +228,7 @@ public class LundTrackDialog extends JDialog {
 	private void doCommonSwim() {
 
 		// get the current swimmer
-		Swimmer swimmer = new Swimmer(MagneticFields.getActiveField());
+		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
 		if (swimmer != null) {
 			try {
@@ -281,7 +281,7 @@ public class LundTrackDialog extends JDialog {
 									xo * 100, yo * 100, zo * 100, momentum,
 									theta, phi);
 							SwimZ sz = new SwimZ(
-									MagneticFields.getActiveField());
+									MagneticFields.getInstance().getActiveField());
 
 							double adaptiveInitStepSize = 0.01;
 

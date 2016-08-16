@@ -94,7 +94,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 			}
 
 		};
-		MagneticFields.addMagneticFieldChangeListener(mflistener);
+		MagneticFields.getInstance().addMagneticFieldChangeListener(mflistener);
 
 	}
 
@@ -320,11 +320,11 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 
 				switch (_cstype) {
 				case XZ:
-					MagneticFields.field((float) (wp.y), 0f, (float) (wp.x),
+					MagneticFields.getInstance().field((float) (wp.y), 0f, (float) (wp.x),
 							result);
 					break;
 				case YZ:
-					MagneticFields.field(0f, (float) (wp.y), (float) (wp.x),
+					MagneticFields.getInstance().field(0f, (float) (wp.y), (float) (wp.x),
 							result);
 					break;
 				}
@@ -430,7 +430,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 
 		double values[] = new double[len];
 		double min = 0.0;
-		double max = MagneticFields.maxFieldMagnitude() / 10.0;
+		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
 
 		values[0] = min;
 		values[len - 1] = max;
@@ -494,7 +494,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 				String s = null;
 				switch (_cstype) {
 				case XZ:
-					MagneticFields.field((float) (_workPoint.y), 0f,
+					MagneticFields.getInstance().field((float) (_workPoint.y), 0f,
 							(float) (_workPoint.x), _workResult);
 					float Bx = _workResult[0];
 					float By = _workResult[1];
@@ -506,7 +506,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 									Bx / 10, By / 10, Bz / 10);
 					break;
 				case YZ:
-					MagneticFields.field(0f, (float) (_workPoint.y),
+					MagneticFields.getInstance().field(0f, (float) (_workPoint.y),
 							(float) (_workPoint.x), _workResult);
 					Bx = _workResult[0];
 					By = _workResult[1];

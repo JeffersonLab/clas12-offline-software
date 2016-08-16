@@ -690,7 +690,7 @@ public class SectorView extends CedView implements ChangeListener {
 				+ " cm";
 		feedbackStrings.add(tiltsectxyz);
 
-		IField activeField = MagneticFields.getActiveField();
+		IField activeField = MagneticFields.getInstance().getActiveField();
 		if (activeField != null) {
 			float field[] = new float[3];
 			activeField.fieldCylindrical(absphi, rho, z, field);
@@ -701,7 +701,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 			double bmag = VectorSupport.length(field);
 			feedbackStrings.add("$Lawn Green$"
-					+ MagneticFields.getActiveFieldDescription());
+					+ MagneticFields.getInstance().getActiveFieldDescription());
 			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
 					+ vecStr(field) + " T");
 		}
@@ -1026,7 +1026,7 @@ public class SectorView extends CedView implements ChangeListener {
 							PlotCanvas canvas = pview.getPlotCanvas();
 							try {
 								SwimTrajectory traj = traj2D.getTrajectory3D();
-								traj.computeBDL(MagneticFields.getActiveField());
+								traj.computeBDL(MagneticFields.getInstance().getActiveField());
 
 								// do we already have data?
 								boolean havePlotData = (canvas.getDataSet() == null) ? false
@@ -1043,7 +1043,7 @@ public class SectorView extends CedView implements ChangeListener {
 											traj2D.summaryString()
 													+ " ["
 													+ MagneticFields
-															.getActiveFieldDescription()
+															.getInstance().getActiveFieldDescription()
 													+ "]");
 									for (double v[] : traj) {
 										dataSet.addToCurve(curveCount,
@@ -1086,7 +1086,7 @@ public class SectorView extends CedView implements ChangeListener {
 		SwimTrajectory traj = traj2D.getTrajectory3D();
 		DataSet dataSet = new DataSet(DataSetType.XYXY, "X",
 				traj2D.summaryString() + " ["
-						+ MagneticFields.getActiveFieldDescription() + "]");
+						+ MagneticFields.getInstance().getActiveFieldDescription() + "]");
 
 		canvas.getParameters().setPlotTitle("Magnetic Field Integral");
 		canvas.getParameters().setXLabel("Path Length (m)");

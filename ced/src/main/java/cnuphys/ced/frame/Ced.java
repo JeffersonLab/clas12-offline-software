@@ -500,8 +500,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// mmgr.addMenu(ETSupport.getETMenu());
 
 		// create the mag field menu
-		MagneticFields.setActiveField(MagneticFields.FieldType.TORUS);
-		mmgr.addMenu(MagneticFields.getMagneticFieldMenu());
+		MagneticFields.getInstance().setActiveField(MagneticFields.FieldType.TORUS);
+		mmgr.addMenu(MagneticFields.getInstance().getMagneticFieldMenu());
 
 		// the swimmer menu
 		mmgr.addMenu(SwimMenu.getInstance());
@@ -647,7 +647,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			_instance.createBusyPanel();
 			_instance.createEventNumberLabel();
-			MagneticFields.addMagneticFieldChangeListener(_instance);
+			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
 		}
 		return _instance;
@@ -731,7 +731,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 
 		title += "   [Magnetic Field: "
-				+ MagneticFields.getActiveFieldDescription();
+				+ MagneticFields.getInstance().getActiveFieldDescription();
 		title += "]";
 		
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
@@ -877,13 +877,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				}
 				else if (arg[i].equalsIgnoreCase("-torus")) {
 					i++;
-					MagneticFields.setTorusFullPath(arg[i]);
+					MagneticFields.getInstance().setTorusFullPath(arg[i]);
 					Log.getInstance().config("Torus Path: " + arg[i]);
 					System.out.println("Torus Path: " + arg[i]);
 				}
 				else if (arg[i].equalsIgnoreCase("-solenoid")) {
 					i++;
-					MagneticFields.setSolenoidFullPath(arg[i]);
+					MagneticFields.getInstance().setSolenoidFullPath(arg[i]);
 					Log.getInstance().config("Solenoid Path: " + arg[i]);
 					System.out.println("Solenoid Path: " + arg[i]);
 				}
@@ -908,7 +908,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		} // end command arg processing
 		
 		//initialize magnetic fields
-		MagneticFields.initializeMagneticFields();
+		MagneticFields.getInstance().initializeMagneticFields();
 
 
 		// initialize geometry
