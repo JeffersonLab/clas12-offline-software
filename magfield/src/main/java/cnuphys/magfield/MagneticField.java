@@ -234,12 +234,14 @@ public abstract class MagneticField implements IField {
 	 * @return the composite index (buffer offset)
 	 */
 	protected final int getCompositeIndex(int n1, int n2, int n3) {
-		if (N23 < 1) { // first time
-			N3 = q3Coordinate.getNumPoints();
-			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
-		}
-
-		return n1 * N23 + n2 * N3 + n3;
+//		if (N23 < 1) { // first time
+//			N3 = q3Coordinate.getNumPoints();
+//			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
+//		}
+//
+//		return n1 * N23 + n2 * N3 + n3;
+		return n1 * (q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints()) 
+				+ n2 * q3Coordinate.getNumPoints() + n3;
 	}
 
 	/**
