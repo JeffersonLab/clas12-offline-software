@@ -16,6 +16,9 @@ import java.nio.FloatBuffer;
  * @version 1.0
  */
 public abstract class MagneticField implements IField {
+	
+	//use table lookup for atan2
+	private static final boolean USEFASTATAN2 = true;
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -179,7 +182,14 @@ public abstract class MagneticField implements IField {
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
 		float rho = (float) Math.hypot(x, y);
-		float phi = (float) Math.toDegrees(Math.atan2(y, x));
+		
+		float phi = 0f;
+		if (USEFASTATAN2) {
+			phi = FastMath.atan2Deg(y, x);
+		}
+		else {
+			phi = (float) Math.toDegrees(Math.atan2(y, x));
+		}
 		fieldCylindrical(phi, rho, z, result);
 	}
 
@@ -836,6 +846,10 @@ public abstract class MagneticField implements IField {
 	public static final void setInterpolate(boolean interpolate) {
 		_interpolate = interpolate;
 		System.out.println("Interpolating fields: " + _interpolate);
+	}
+
+	public int capacity() {
+		return field.capacity();
 	}
 
 }

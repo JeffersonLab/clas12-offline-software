@@ -7,6 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.management.ManagementFactory;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -869,6 +870,14 @@ public class MagneticFields {
 		return _rotatedCompositeField;
 	}
 
+	private static void threadTest(MagneticFields mf) {
+		int cores = Runtime.getRuntime().availableProcessors();
+		System.err.println("Number of available cores: " + cores);
+		
+		System.err.println("Torus capacity: " + mf._torus.capacity());
+
+		System.err.println("Thread count: " + ManagementFactory.getThreadMXBean().getThreadCount());
+	}
 	/**
 	 * For testing and also as an example
 	 * 
@@ -877,7 +886,7 @@ public class MagneticFields {
 	public static void main(String arg[]) {
 		final JFrame testFrame = new JFrame("Magnetic Field");
 		
-		MagneticFields mf = MagneticFields.getInstance();
+		final MagneticFields mf = MagneticFields.getInstance();
 		mf.initializeMagneticFields();
 
 		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
@@ -913,7 +922,17 @@ public class MagneticFields {
 			@Override
 			public void run() {
 				testFrame.setVisible(true);
-				mf.compositeTest();
+//				mf.compositeTest();
+				
+				Runnable runner = new Runnable() {
+
+					@Override
+					public void run() {
+						mf.threadTest(mf);
+					}
+				};
+				new Thread(runner).start();
+				
 			}
 		});
 
