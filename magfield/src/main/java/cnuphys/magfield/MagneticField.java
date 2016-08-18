@@ -184,24 +184,10 @@ public abstract class MagneticField implements IField {
 	//	float rho = (float) Math.hypot(x, y);
 		float rho = (float) Math.sqrt(x*x + y*y);
 		
-		float phi = atan2Deg(y, x);
+		float phi = (float) atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
 	
-	/**
-	 * Might use standard or fast atan2
-	 * @param y
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static float atan2Deg(float y, float x) {
-		if (USEFASTMATH) {
-			return FastMath.atan2Deg(y, x);
-		}
-		else {
-			return (float) Math.toDegrees(Math.atan2(y, x));
-		}
-	}
 	
 	/**
 	 * Might use standard or fast atan2
@@ -211,7 +197,8 @@ public abstract class MagneticField implements IField {
 	 */
 	public static double atan2Deg(double y, double x) {
 		if (USEFASTMATH) {
-			return (double) FastMath.atan2Deg((float)y, (float)x);
+			double phirad =  org.apache.commons.math3.util.FastMath.atan2(y, x);
+			return Math.toDegrees(phirad);
 		}
 		else {
 			return Math.toDegrees(Math.atan2(y, x));
@@ -226,10 +213,10 @@ public abstract class MagneticField implements IField {
 	 */
 	public static double hypot(double x, double y) {
 		if (USEFASTMATH) {
-			return Math.sqrt(x*x + y*y);
+			return org.apache.commons.math3.util.FastMath.hypot(x, y);
 		}
 		else {
-			return Math.hypot(x, y);
+			return Math.sqrt(x*x + y*y);
 		}
 	}
 
