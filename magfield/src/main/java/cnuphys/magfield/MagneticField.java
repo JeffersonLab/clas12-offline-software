@@ -18,8 +18,8 @@ import java.nio.FloatBuffer;
 public abstract class MagneticField implements IField {
 	
 	//use table lookup for atan2
-	private static final boolean USEFASTATAN2 = true;
-
+	private static boolean USEFASTMATH = true;
+	
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
 
@@ -181,16 +181,56 @@ public abstract class MagneticField implements IField {
 	 */
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
-		float rho = (float) Math.hypot(x, y);
+	//	float rho = (float) Math.hypot(x, y);
+		float rho = (float) Math.sqrt(x*x + y*y);
 		
-		float phi = 0f;
-		if (USEFASTATAN2) {
-			phi = FastMath.atan2Deg(y, x);
+		float phi = atan2Deg(y, x);
+		fieldCylindrical(phi, rho, z, result);
+	}
+	
+	/**
+	 * Might use standard or fast atan2
+	 * @param y
+	 * @param x
+	 * @return atan2(y, x)
+	 */
+	public static float atan2Deg(float y, float x) {
+		if (USEFASTMATH) {
+			return FastMath.atan2Deg(y, x);
 		}
 		else {
-			phi = (float) Math.toDegrees(Math.atan2(y, x));
+			return (float) Math.toDegrees(Math.atan2(y, x));
 		}
-		fieldCylindrical(phi, rho, z, result);
+	}
+	
+	/**
+	 * Might use standard or fast atan2
+	 * @param y
+	 * @param x
+	 * @return atan2(y, x)
+	 */
+	public static double atan2Deg(double y, double x) {
+		if (USEFASTMATH) {
+			return (double) FastMath.atan2Deg((float)y, (float)x);
+		}
+		else {
+			return Math.toDegrees(Math.atan2(y, x));
+		}
+	}
+
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static double hypot(double x, double y) {
+		if (USEFASTMATH) {
+			return Math.sqrt(x*x + y*y);
+		}
+		else {
+			return Math.hypot(x, y);
+		}
 	}
 
 	/**
@@ -333,6 +373,22 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
+	 * Set whether to use the fast (less accurate) math functions
+	 * @param useFast the value of the flag.
+	 */
+	public static void setUseFastMath(boolean useFast) {
+		USEFASTMATH = useFast;
+	}
+	
+	/**
+	 * Check whether we are using the fast (less accurate) math functions
+	 * @return <code>true</code> if we will use the fast (less accurate) version of atan2
+	 */
+	public static boolean useFastMath() {
+		return USEFASTMATH;
+	}
+
+	/**
 	 * Get the vector for a given index.
 	 * 
 	 * @param index
@@ -401,6 +457,8 @@ public abstract class MagneticField implements IField {
 		// convert to cylindrical
 		double phi = Math.atan2(xyz[1], xyz[0]);
 		double rho = Math.hypot(xyz[0], xyz[1]);
+		
+		
 		double cyl[] = { phi, rho, xyz[2] };
 		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f",
 				Math.toDegrees(cyl[0]), cyl[1], cyl[2],

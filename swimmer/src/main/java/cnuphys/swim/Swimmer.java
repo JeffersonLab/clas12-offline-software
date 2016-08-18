@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.IField;
+import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IRk4Listener;
 import cnuphys.rk4.IStopper;
@@ -384,7 +385,7 @@ public final class Swimmer {
 			stopper = zStopper(maxR, fixedZ, normalDirection);
 
 			theta = Math.toDegrees(Math.acos(pz));
-			phi = Math.toDegrees(Math.atan2(py, px));
+			phi = MagneticField.atan2Deg(py, px);
 
 			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
 					distanceBetweenSaves);
@@ -511,7 +512,8 @@ public final class Swimmer {
 
 			// momentum = traj.getFinalMomentum();
 			theta = Math.toDegrees(Math.acos(pz));
-			phi = Math.toDegrees(Math.atan2(py, px));
+			phi = MagneticField.atan2Deg(py, px);
+
 
 			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
 					relTolerance, hdata);
@@ -966,10 +968,10 @@ public final class Swimmer {
 		q = -q;
 
 		// get the angles
-		double pt = Math.hypot(px, py);
-		double p = Math.hypot(pt, pz);
+		double pt = MagneticField.hypot(px, py);
+		double p = MagneticField.hypot(pt, pz);
 		double theta = Math.toDegrees(Math.acos(pz / p));
-		double phi = Math.toDegrees(Math.atan2(py, px));
+		double phi = MagneticField.atan2Deg(py, px);
 
 		// accuracy to z = 0 (m)
 		double ztarget = 0;

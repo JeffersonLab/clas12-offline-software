@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
 import cnuphys.magfield.IField;
+import cnuphys.magfield.MagneticField;
 
 /**
  * Combines a generated particle record with a path (trajectory). A trajectory
@@ -193,7 +194,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			double pos[] = get(i);
 			double x = pos[X_IDX];
 			double y = pos[Y_IDX];
-			double tp = Math.atan2(y, x);
+			double tp = MagneticField.atan2Deg(y, x);
 			phi += tp;
 			count++;
 		}
