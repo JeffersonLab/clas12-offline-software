@@ -2,5 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/apache/lib/commons-math3-3.6.1.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>
