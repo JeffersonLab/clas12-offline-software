@@ -34,6 +34,33 @@ public class ECEngine extends ReconstructionEngine {
         for(ECStrip strip : ecStrips){
             //System.out.println(strip);
         }
+        
+        
+        
+        List<ECPeak> ecPeaks = ECCommon.createPeaks(ecStrips);
+        int peaksOriginal = ecPeaks.size();
+        //for(ECPeak p : ecPeaks){ System.out.println(p);}
+        
+        
+        ECPeakAnalysis.splitPeaks(ecPeaks);
+        int peaksOriginalSplit = ecPeaks.size();
+        System.out.println(String.format("SPLIT PROCEDURE %8d %8d",peaksOriginal,
+                peaksOriginalSplit));
+        //for(ECPeak p : ecPeaks){ System.out.println(p);}
+        /*
+        for(ECPeak peak : ecPeaks){
+            //peak.redoPeakLine();
+            if(peak.getMultiplicity()==4){
+                System.out.println(peak);
+                int stripSplit = peak.getSplitStrip();                
+                if(stripSplit>0){
+                    List<ECPeak>  twoPeaks = peak.splitPeak(stripSplit);
+                    for(ECPeak p : twoPeaks){
+                        System.out.println("\t SPLIT PEAK  = " + p);                        
+                    }
+                }
+            }
+        }*/
         return true;
     }
 

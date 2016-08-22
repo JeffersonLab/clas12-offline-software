@@ -22,15 +22,15 @@ public class MagF {
         field = MagF.readFromFile(file);        
     }
     
-    private  void initalize(){
+    private  void  initalize(){
         byte[] data = new byte[4096];
         //field = ByteBuffer.wrap(data);
     }
     
-    public static  ByteBuffer readFromFile(String file){
+    public static  ByteBuffer  readFromFile(String file){
         int size = 1024*1024*8;
         byte[] data = new byte[size];
-        ByteBuffer f = ByteBuffer.wrap(data).asReadOnlyBuffer();
+        ByteBuffer f = ByteBuffer.wrap(data);
         for(int i = 0; i < size/4; i++){
             float value = (float) Math.random();
             f.putFloat(i*4, value);
