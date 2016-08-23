@@ -207,7 +207,7 @@ public final class Polygon {
             for (int i = 0; i < this.vertices.size() - 2; i++) {
                 sb.
                         append("  facet normal ").append(
-                                this.plane.normal.toStlString()).append("\n").
+                        this.plane.normal.toStlString()).append("\n").
                         append("    outer loop\n").
                         append("      ").append(firstVertexStl).append("\n").
                         append("      ");
@@ -427,15 +427,30 @@ public final class Polygon {
         }
         return oddNodes;
     }
-    
+
+    public Intersection getIntersection(Line3d line) {
+        Intersection intersect = new Intersection();
+
+        for (int ivert = 1; ivert < vertices.size() - 1; ivert++) {
+            Triangle3d triangle = new Triangle3d(vertices.get(0).pos, vertices.get(1).pos, vertices.get(2).pos);
+
+            intersect = triangle.getIntersection(line);
+            if (intersect.exist()) {
+                return intersect;
+            }
+        }
+
+        return intersect;
+    }
+
     public boolean contains(Polygon p) {
-        
+
         for (Vertex v : p.vertices) {
             if (!contains(v.pos)) {
                 return false;
             }
         }
-        
+
         return true;
     }
 

@@ -99,7 +99,7 @@ public class Transform {
      * @return this transform
      */
     public Transform rotX(double degrees) {
-        double radians = degrees * Math.PI * (1.0 / 180.0);
+        double radians = Math.toRadians(degrees);
         double cos = Math.cos(radians);
         double sin = Math.sin(radians);
         double elemenents[] = {
@@ -117,7 +117,7 @@ public class Transform {
      * @return this transform
      */
     public Transform rotY(double degrees) {
-        double radians = degrees * Math.PI * (1.0 / 180.0);
+        double radians = Math.toRadians(degrees);
         double cos = Math.cos(radians);
         double sin = Math.sin(radians);
         double elemenents[] = {
@@ -135,7 +135,7 @@ public class Transform {
      * @return this transform
      */
     public Transform rotZ(double degrees) {
-        double radians = degrees * Math.PI * (1.0 / 180.0);
+        double radians = Math.toRadians(degrees);
         double cos = Math.cos(radians);
         double sin = Math.sin(radians);
         double elemenents[] = {

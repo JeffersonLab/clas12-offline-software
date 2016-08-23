@@ -84,6 +84,26 @@ public class Vector3d {
         this.z = 0;
     }
 
+    public void set(double x, double y, double z) {
+
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public void set(double x, double y) {
+
+        this.x = x;
+        this.y = y;
+        this.z = 0;
+    }
+
+    public void set(Vector3d vec) {
+        this.x = vec.x;
+        this.y = vec.y;
+        this.z = vec.z;
+    }
+
     @Override
     public Vector3d clone() {
         return new Vector3d(x, y, z);
@@ -205,13 +225,14 @@ public class Vector3d {
     }
 
     /**
-     * Returns the squared magnitude of this vector (<code>this.dot(this)</code>).
+     * Returns the squared magnitude of this vector
+     * (<code>this.dot(this)</code>).
      *
      * <b>Note:</b> this vector is not modified.
      *
      * @return the squared magnitude of this vector
      */
-    double magnitudeSq() {
+    public double magnitudeSq() {
         return this.dot(this);
     }
 
@@ -368,6 +389,10 @@ public class Vector3d {
     public double angle(Vector3d v) {
         double val = this.dot(v) / (this.magnitude() * v.magnitude());
         return acos(max(min(val, 1), -1)); // compensate rounding errors
+    }
+
+    public double distance(Vector3d v) {
+        return this.minus(v).magnitude();
     }
 
     @Override

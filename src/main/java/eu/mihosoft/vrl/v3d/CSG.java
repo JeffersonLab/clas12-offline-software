@@ -33,20 +33,14 @@
  */
 package eu.mihosoft.vrl.v3d;
 
-import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
-import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.TriangleMesh;
 
 /**
@@ -195,6 +189,20 @@ public class CSG {
     }
 
     /**
+     *
+     * @param line
+     * @return the positions of intersections of CSG with line
+     */
+    public List<Vector3d> getIntersection(Line3d line) {
+        return polygons.stream()
+                .map(face -> face.getIntersection(line))
+                .filter(intersect -> intersect.exist())
+                .map(intersect -> intersect.pos)
+                .sorted((Vector3d p1, Vector3d p2) -> (int) Math.signum(p2.distance(line.origin()) - p1.distance(line.origin())))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Defines the CSg optimization type.
      *
      * @param type optimization type
@@ -241,27 +249,30 @@ public class CSG {
                 return _unionNoOpt(csg);
         }
     }
-    
+
     /**
-     * Returns a csg consisting of the polygons of this csg and the specified csg.
-     * 
+     * Returns a csg consisting of the polygons of this csg and the specified
+     * csg.
+     *
      * The purpose of this method is to allow fast union operations for objects
-     * that do not intersect. 
-     * 
-     * <p><b>WARNING:</b> this method does not apply the csg algorithms. Therefore,
+     * that do not intersect.
+     *
+     * <p>
+     * <b>WARNING:</b> this method does not apply the csg algorithms. Therefore,
      * please ensure that this csg and the specified csg do not intersect.
-     * 
+     *
      * @param csg csg
-     * 
-     * @return a csg consisting of the polygons of this csg and the specified csg
+     *
+     * @return a csg consisting of the polygons of this csg and the specified
+     * csg
      */
     public CSG dumbUnion(CSG csg) {
-        
+
         CSG result = this.clone();
         CSG other = csg.clone();
-        
+
         result.polygons.addAll(other.polygons);
-        
+
         return result;
     }
 
@@ -333,11 +344,6 @@ public class CSG {
      *
      * @return the convex hull of this csg
      */
-    public CSG hull() {
-
-        return HullUtil.hull(this, storage);
-    }
-
     /**
      * Returns the convex hull of this csg and the union of the specified csgs.
      *
@@ -943,7 +949,6 @@ public class CSG {
 
         return result;
     }
- 
 
     // TODO finish experiment (20.7.2014)
     public MeshContainer toJavaFXMesh() {
