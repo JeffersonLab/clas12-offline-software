@@ -193,7 +193,7 @@ public final class Line3D implements Transformable, Showable {
     public double length() {
         return boundPoint0.distance(boundPoint1);
     }
-
+    
     /**
      * Constructs a new {@code Point3D} at the midpoint between the two bounding
      * points.

@@ -77,21 +77,21 @@ public class ConstantsManager {
         
         //for(String tableName : desc.getTableNames())
         
-            for(int i = 0; i < desc.getTableNames().size(); i++){                
-                String tableName = tn.get(i);
-                try {
-                    IndexedTable  table = provider.readTable(tableName);
-                    desc.getMap().put(tk.get(i), table);
-                    System.out.println("adding : table " + tableName 
-                    + "  key = " + tk.get(i));
-                } catch (Exception e) {
-                    System.out.println("[ConstantsManager] ---> error reading table : "
-                    + tableName);
-                }
+        for(int i = 0; i < desc.getTableNames().size(); i++){                
+            String tableName = tn.get(i);
+            try {
+                IndexedTable  table = provider.readTable(tableName);
+                desc.getMap().put(tk.get(i), table);
+                System.out.println("adding : table " + tableName 
+                        + "  key = " + tk.get(i));
+            } catch (Exception e) {
+                System.out.println("[ConstantsManager] ---> error reading table : "
+                        + tableName);
             }
+        }
             
-            this.runConstants.put(run, desc);
-            System.out.println(this.toString());
+        this.runConstants.put(run, desc);
+        System.out.println(this.toString());
     }
     
     @Override
@@ -111,13 +111,15 @@ public class ConstantsManager {
     /**
      * Helper class to hold all constants for particular run.
      */
-    public static class DatabaseConstantsDescriptor{
+    public static class DatabaseConstantsDescriptor {
         
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
+        private int     nIndex     = 3;
         
-        Set<String>    tableNames = new LinkedHashSet<String>();
-        Set<String>    mapKeys    = new LinkedHashSet<String>();
+        Set<String>    tableNames  = new LinkedHashSet<String>();
+        
+        Set<String>    mapKeys     = new LinkedHashSet<String>();
         
         Map<String,IndexedTable>  hashTables = new LinkedHashMap<String,IndexedTable>();
         
@@ -199,9 +201,11 @@ public class ConstantsManager {
     public static void main(String[] args){
         
         ConstantsManager  manager = new ConstantsManager("default");
+        
         manager.init(Arrays.asList(new String[]{
             "/daq/fadc/ec",
             "/daq/fadc/ftof","/daq/fadc/htcc"}));
+        
         IndexedTable  table1 = manager.getConstants(10, "/daq/fadc/htcc");
         IndexedTable  table2 = manager.getConstants(10, "/daq/fadc/ec");
         IndexedTable  table3 = manager.getConstants(12, "/daq/fadc/htcc");
