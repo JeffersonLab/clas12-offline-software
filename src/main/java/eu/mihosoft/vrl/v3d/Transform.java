@@ -95,13 +95,12 @@ public class Transform {
     /**
      * Applies rotation operation around the x axis to this transform.
      *
-     * @param degrees degrees
+     * @param angle angle
      * @return this transform
      */
-    public Transform rotX(double degrees) {
-        double radians = Math.toRadians(degrees);
-        double cos = Math.cos(radians);
-        double sin = Math.sin(radians);
+    public Transform rotX(double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
         double elemenents[] = {
             1, 0, 0, 0, 0, cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1
         };
@@ -112,14 +111,13 @@ public class Transform {
     /**
      * Applies rotation operation around the y axis to this transform.
      *
-     * @param degrees degrees
+     * @param angle angle
      *
      * @return this transform
      */
-    public Transform rotY(double degrees) {
-        double radians = Math.toRadians(degrees);
-        double cos = Math.cos(radians);
-        double sin = Math.sin(radians);
+    public Transform rotY(double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
         double elemenents[] = {
             cos, 0, -sin, 0, 0, 1, 0, 0, sin, 0, cos, 0, 0, 0, 0, 1
         };
@@ -130,14 +128,13 @@ public class Transform {
     /**
      * Applies rotation operation around the z axis to this transform.
      *
-     * @param degrees degrees
+     * @param angle angle
      *
      * @return this transform
      */
-    public Transform rotZ(double degrees) {
-        double radians = Math.toRadians(degrees);
-        double cos = Math.cos(radians);
-        double sin = Math.sin(radians);
+    public Transform rotZ(double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
         double elemenents[] = {
             cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
         };
@@ -148,9 +145,9 @@ public class Transform {
     /**
      * Applies a rotation operation to this transform.
      *
-     * @param x x axis rotation (degrees)
-     * @param y y axis rotation (degrees)
-     * @param z z axis rotation (degrees)
+     * @param x x axis rotation (angle)
+     * @param y y axis rotation (angle)
+     * @param z z axis rotation (angle)
      *
      * @return this transform
      */
@@ -161,7 +158,7 @@ public class Transform {
     /**
      * Applies a rotation operation to this transform.
      *
-     * @param vec axis rotation for x, y, z (degrees)
+     * @param vec axis rotation for x, y, z (angle)
      *
      * @return this transform
      */

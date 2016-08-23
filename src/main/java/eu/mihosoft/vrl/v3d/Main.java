@@ -51,8 +51,8 @@ public class Main {
         CSG cube = new Cube(2).toCSG().color(Color.RED);
         CSG sphere = new Sphere(1.25).toCSG().color(Color.BLUE);
         CSG cyl = new Cylinder(0.5,3,16).toCSG().transformed(Transform.unity().translateZ(-1.5)).color(Color.GREEN);
-        CSG cyl2 = cyl.transformed(Transform.unity().rotY(90));
-        CSG cyl3 = cyl.transformed(Transform.unity().rotX(90));
+        CSG cyl2 = cyl.transformed(Transform.unity().rotY(Math.toRadians(90)));
+        CSG cyl3 = cyl.transformed(Transform.unity().rotX(Math.toRadians(90)));
         
         // perform union, difference and intersection
         CSG cubePlusSphere = cube.union(sphere);

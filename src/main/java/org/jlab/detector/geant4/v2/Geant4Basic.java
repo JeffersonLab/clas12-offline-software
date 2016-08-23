@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public abstract class Geant4Basic {
 
     Transform volumeTranslation = Transform.unity();
     Transform volumeRotation = Transform.unity();
+    Transform motherTransform = Transform.unity();
 
     String rotationOrder = "xyz";
     double[] rotationValues = {0.0, 0.0, 0.0};
@@ -48,6 +50,7 @@ public abstract class Geant4Basic {
     public void setMother(Geant4Basic motherVol) {
         this.motherVolume = motherVol;
         this.motherVolume.getChildren().add(this);
+        motherTransform.apply(motherVol.getTransform());
     }
 
     public Geant4Basic getMother() {
@@ -74,16 +77,18 @@ public abstract class Geant4Basic {
         return this.volumeID;
     }
 
+    public Transform getTransform(){
+        return Transform.unity().apply(volumeRotation).apply(volumeTranslation);
+    }
+    
     public void setPosition(double x, double y, double z) {
         volumeTranslation = Transform.unity();
-        this.volumeTranslation.translate(x, y, z);
-        this.volumePosition.set(x, y, z);
+        volumeTranslation.translate(x, y, z);
+        volumePosition.set(x, y, z);
     }
 
     public void setPosition(Vector3d pos) {
-        volumeTranslation = Transform.unity();
-        this.volumeTranslation.translate(pos);
-        this.volumePosition.set(pos);
+        setPosition(pos.x, pos.y, pos.z);
     }
 
     public void setRotation(String order, double r1, double r2, double r3) {
@@ -94,22 +99,22 @@ public abstract class Geant4Basic {
 
         switch (order) {
             case "xyz":
-                this.volumeRotation.rotX(r1).rotY(r2).rotZ(r3);
+                this.volumeRotation.rotZ(r3).rotY(r2).rotX(r1);
                 break;
             case "xzy":
-                this.volumeRotation.rotX(r1).rotZ(r2).rotY(r3);
+                this.volumeRotation.rotY(r3).rotZ(r2).rotX(r1);
                 break;
             case "yxz":
-                this.volumeRotation.rotY(r1).rotX(r2).rotZ(r3);
+                this.volumeRotation.rotZ(r3).rotX(r2).rotY(r1);
                 break;
             case "yzx":
-                this.volumeRotation.rotY(r1).rotZ(r2).rotX(r3);
+                this.volumeRotation.rotX(r3).rotZ(r2).rotY(r1);
                 break;
             case "zxy":
-                this.volumeRotation.rotZ(r1).rotX(r2).rotY(r3);
+                this.volumeRotation.rotY(r3).rotX(r2).rotZ(r1);
                 break;
             case "zyx":
-                this.volumeRotation.rotZ(r1).rotY(r2).rotX(r3);
+                this.volumeRotation.rotX(r3).rotY(r2).rotZ(r1);
                 break;
             default:
                 System.out.println("[GEANT4VOLUME]---> unknown rotation " + order);
@@ -153,15 +158,28 @@ public abstract class Geant4Basic {
 
         return str.toString();
     }
-    
-    public String gemcStringRecursive(){
+
+    public String gemcStringRecursive() {
         StringBuilder str = new StringBuilder();
         str.append(gemcString());
         str.append(System.getProperty("line.separator"));
 
         children.stream().
                 forEach(child -> str.append(child.gemcStringRecursive()));
-        
+
         return str.toString();
+    }
+
+    public abstract CSG toCSG();
+
+    public List<CSG> getCSG() {
+        List<CSG> csgs = new ArrayList<>();
+        if (children.isEmpty()) {
+            csgs.add(toCSG());
+        } else {
+            children.stream()
+                    .forEach(child -> csgs.addAll(child.getCSG()));
+        }
+        return csgs;
     }
 }

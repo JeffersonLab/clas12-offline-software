@@ -5,6 +5,11 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.FileUtil;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import static org.jlab.detector.geant4.v2.SystemOfUnits.Length;
@@ -25,9 +30,9 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         "1a", "1b", "2"
     };
 
-    public FTOFGeant4Factory(ConstantProvider provider) {
+    public FTOFGeant4Factory(ConstantProvider provider) throws IOException {
         motherVolume = new G4Box("fc", 0, 0, 0);
-        
+
         for (int sector = 1; sector <= 6; sector++) {
             for (int layer = 1; layer <= 3; layer++) {
                 Geant4Basic layerVolume = createPanel(provider, sector, layer);
@@ -37,18 +42,32 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         properties.put("email", "carman@jlab.org, jguerra@jlab.org");
         properties.put("author", "carman, guerra");
         properties.put("date", "06/03/13");
+
+        List<CSG> csgs = new ArrayList<>();
+        csgs.addAll(motherVolume.getCSG());
+        factory = new Cube(1).toCSG();
+        //System.out.println(csgs.size());
+        //factory.union(csgs);
+//        factory = csgs.stream()
+//                .reduce((v1, v2) -> v1.union(v2)).get();
     }
 
-    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
-        double motherGap = 4.0*Length.cm;
+    private CSG factory;
+
+    public CSG toCSG() {
+        return factory;
+    }
+
+    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) throws IOException {
+        double motherGap = 4.0 * Length.cm;
 
         double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
         double thmin = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thmin", 0));
-        double dist2edge = cp.getDouble(stringLayers[layer - 1] + "/panel/dist2edge", 0)*Length.cm;
+        double dist2edge = cp.getDouble(stringLayers[layer - 1] + "/panel/dist2edge", 0) * Length.cm;
 
         List<G4Box> paddles = this.createLayer(cp, layer);
 
-        double panel_width = (paddles.get(paddles.size() - 1).getPosition().z- paddles.get(0).getPosition().z)
+        double panel_width = (paddles.get(paddles.size() - 1).getPosition().z - paddles.get(0).getPosition().z)
                 + 2 * paddles.get(0).getZHalfLength() + 2 * motherGap;
 
         double panel_mother_dx1 = paddles.get(0).getXHalfLength() + motherGap;
@@ -74,8 +93,9 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
             paddles.get(ipaddle).setId(sector, layer, ipaddle + 1);
-
             paddles.get(ipaddle).setMother(panelVolume);
+
+            FileUtil.write(Paths.get("/home/kenjo/geometry_test/box.s" + sector + ".l" + layer + ".p" + ipaddle + ".stl"), paddles.get(ipaddle).toCSG().toStlString());
         }
         return panelVolume;
     }
@@ -97,15 +117,14 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         for (int ipaddle = 0; ipaddle < numPaddles; ipaddle++) {
             double paddlelength = cp.getDouble(paddleLengthStr, ipaddle);
             String vname = String.format("sci_S%d_L%d_C%d", 0, layer, ipaddle + 1);
-            G4Box volume = new G4Box(vname, paddlelength / 2.*Length.cm, paddlethickness / 2.*Length.cm, paddlewidth / 2.0*Length.cm);
+            G4Box volume = new G4Box(vname, paddlelength / 2. * Length.cm, paddlethickness / 2. * Length.cm, paddlewidth / 2.0 * Length.cm);
 
             double zoffset = (ipaddle - numPaddles / 2. + 0.5) * (paddlewidth + gap + 2 * wrapperthickness);
-            volume.setPosition(0.0, 0.0, zoffset*Length.cm);
+            volume.setPosition(0.0, 0.0, zoffset * Length.cm);
             volume.setRotation("xyz", 0, 0, 0);
-            
+
             paddleVolumes.add(volume);
         }
         return paddleVolumes;
     }
-
 }
