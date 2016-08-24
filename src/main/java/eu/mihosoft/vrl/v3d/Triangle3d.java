@@ -47,7 +47,7 @@ public class Triangle3d {
             tt /= denom;
             Vector3d p0 = line.origin().plus(line.diff().times(tt));
             if (this.contains(p0)) {
-                intersect.setPosition(p0);
+                intersect.setPosition(p0, tt);
             }
         }
 

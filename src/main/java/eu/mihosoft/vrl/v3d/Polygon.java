@@ -432,10 +432,10 @@ public final class Polygon {
         Intersection intersect = new Intersection();
 
         for (int ivert = 1; ivert < vertices.size() - 1; ivert++) {
-            Triangle3d triangle = new Triangle3d(vertices.get(0).pos, vertices.get(1).pos, vertices.get(2).pos);
+            Triangle3d triangle = new Triangle3d(vertices.get(0).pos, vertices.get(ivert).pos, vertices.get(ivert+1).pos);
 
             intersect = triangle.getIntersection(line);
-            if (intersect.exist()) {
+            if (intersect.isPresent()) {
                 return intersect;
             }
         }

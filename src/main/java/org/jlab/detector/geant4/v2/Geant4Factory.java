@@ -5,7 +5,11 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Line3d;
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -37,5 +41,13 @@ public abstract class Geant4Factory {
 
     public String getProperty(String name) {
         return properties.containsKey(name) ? properties.get(name) : "none";
+    }
+
+    List<Geant4Basic> getComponents(){
+        return motherVolume.getComponents();
+    }
+    
+    List<Vector3d> getIntersections(Line3d line){
+        return motherVolume.getIntersections(line);
     }
 }

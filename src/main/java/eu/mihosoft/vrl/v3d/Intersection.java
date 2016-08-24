@@ -9,16 +9,17 @@ package eu.mihosoft.vrl.v3d;
  *
  * @author kenjo
  */
-public class Intersection{
+public class Intersection {
 
     public Vector3d pos;
     private boolean exist;
+    private double parametricT;
 
     public Intersection() {
         exist = false;
     }
 
-    public boolean exist() {
+    public boolean isPresent() {
         return exist;
     }
 
@@ -27,4 +28,13 @@ public class Intersection{
         this.pos = pos;
     }
 
+    public void setPosition(Vector3d pos, double parametricT) {
+        exist = true;
+        this.pos = pos;
+        this.parametricT = parametricT;
+    }
+    
+    public double getParametricT(){
+        return parametricT;
+    }
 }

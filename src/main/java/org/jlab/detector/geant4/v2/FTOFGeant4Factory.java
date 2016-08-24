@@ -5,11 +5,7 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Cube;
-import eu.mihosoft.vrl.v3d.FileUtil;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import static org.jlab.detector.geant4.v2.SystemOfUnits.Length;
@@ -42,20 +38,6 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         properties.put("email", "carman@jlab.org, jguerra@jlab.org");
         properties.put("author", "carman, guerra");
         properties.put("date", "06/03/13");
-
-        List<CSG> csgs = new ArrayList<>();
-        csgs.addAll(motherVolume.getCSG());
-        factory = new Cube(1).toCSG();
-        //System.out.println(csgs.size());
-        //factory.union(csgs);
-//        factory = csgs.stream()
-//                .reduce((v1, v2) -> v1.union(v2)).get();
-    }
-
-    private CSG factory;
-
-    public CSG toCSG() {
-        return factory;
     }
 
     public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) throws IOException {
@@ -94,8 +76,6 @@ public final class FTOFGeant4Factory extends Geant4Factory {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
             paddles.get(ipaddle).setId(sector, layer, ipaddle + 1);
             paddles.get(ipaddle).setMother(panelVolume);
-
-            FileUtil.write(Paths.get("/home/kenjo/geometry_test/box.s" + sector + ".l" + layer + ".p" + ipaddle + ".stl"), paddles.get(ipaddle).toCSG().toStlString());
         }
         return panelVolume;
     }
@@ -127,4 +107,5 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         }
         return paddleVolumes;
     }
+         
 }

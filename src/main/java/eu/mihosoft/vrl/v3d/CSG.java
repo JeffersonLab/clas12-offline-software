@@ -193,12 +193,12 @@ public class CSG {
      * @param line
      * @return the positions of intersections of CSG with line
      */
-    public List<Vector3d> getIntersection(Line3d line) {
+    public List<Vector3d> getIntersections(Line3d line) {
         return polygons.stream()
                 .map(face -> face.getIntersection(line))
-                .filter(intersect -> intersect.exist())
+                .filter(intersect -> intersect.isPresent())
+                .sorted((p2, p1) -> (int) Math.signum(p2.getParametricT() - p1.getParametricT()))
                 .map(intersect -> intersect.pos)
-                .sorted((Vector3d p1, Vector3d p2) -> (int) Math.signum(p2.distance(line.origin()) - p1.distance(line.origin())))
                 .collect(Collectors.toList());
     }
 

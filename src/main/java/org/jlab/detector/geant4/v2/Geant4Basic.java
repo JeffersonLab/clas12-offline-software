@@ -6,11 +6,14 @@
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Line3d;
+import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.jlab.detector.geant4.v2.SystemOfUnits.Length;
 
 /**
@@ -22,9 +25,11 @@ public abstract class Geant4Basic {
     String volumeName;
     String volumeType;
 
+    protected CSG volumeCSG;
+    protected Primitive volumeSolid;
+
     Transform volumeTranslation = Transform.unity();
     Transform volumeRotation = Transform.unity();
-    Transform motherTransform = Transform.unity();
 
     String rotationOrder = "xyz";
     double[] rotationValues = {0.0, 0.0, 0.0};
@@ -50,7 +55,8 @@ public abstract class Geant4Basic {
     public void setMother(Geant4Basic motherVol) {
         this.motherVolume = motherVol;
         this.motherVolume.getChildren().add(this);
-        motherTransform.apply(motherVol.getTransform());
+
+        transform();
     }
 
     public Geant4Basic getMother() {
@@ -77,14 +83,31 @@ public abstract class Geant4Basic {
         return this.volumeID;
     }
 
-    public Transform getTransform(){
-        return Transform.unity().apply(volumeRotation).apply(volumeTranslation);
+    private Transform getLocalTransform() {
+        return Transform.unity().apply(volumeTranslation).apply(volumeRotation);
     }
-    
+
+    public Transform getGlobalTransform() {
+        Transform globalTransform = Transform.unity();
+        if (motherVolume != null) {
+            globalTransform.apply(motherVolume.getGlobalTransform());
+        }
+        return globalTransform.apply(getLocalTransform());
+        //return globalTransform.apply(getTransform());
+    }
+
+    protected void transform() {
+        if (volumeSolid != null) {
+            volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
+        }
+    }
+
     public void setPosition(double x, double y, double z) {
         volumeTranslation = Transform.unity();
         volumeTranslation.translate(x, y, z);
         volumePosition.set(x, y, z);
+
+        transform();
     }
 
     public void setPosition(Vector3d pos) {
@@ -93,7 +116,6 @@ public abstract class Geant4Basic {
 
     public void setRotation(String order, double r1, double r2, double r3) {
         rotationOrder = order;
-        rotationValues = new double[]{r1, r2, r3};
 
         volumeRotation = Transform.unity();
 
@@ -120,6 +142,8 @@ public abstract class Geant4Basic {
                 System.out.println("[GEANT4VOLUME]---> unknown rotation " + order);
                 break;
         }
+
+        transform();
     }
 
     public void setId(int... id) {
@@ -170,16 +194,27 @@ public abstract class Geant4Basic {
         return str.toString();
     }
 
-    public abstract CSG toCSG();
+    public CSG toCSG() {
+        return volumeCSG;
+    }
 
-    public List<CSG> getCSG() {
-        List<CSG> csgs = new ArrayList<>();
+    public List<Geant4Basic> getComponents() {
         if (children.isEmpty()) {
-            csgs.add(toCSG());
-        } else {
-            children.stream()
-                    .forEach(child -> csgs.addAll(child.getCSG()));
+            return Arrays.asList(this);
         }
-        return csgs;
+
+        return children.stream()
+                .flatMap(child -> child.getComponents().stream())
+                .collect(Collectors.toList());
+    }
+
+    public List<Vector3d> getIntersections(Line3d line) {
+        if (children.isEmpty()) {
+            return volumeCSG.getIntersections(line);
+        }
+        
+        return children.stream()
+                .flatMap(child -> child.getIntersections(line).stream())
+                .collect(Collectors.toList());
     }
 }

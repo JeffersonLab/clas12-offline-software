@@ -7,7 +7,6 @@ package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
-import eu.mihosoft.vrl.v3d.Transform;
 import org.jlab.detector.geant4.v2.SystemOfUnits.Length;
 
 /**
@@ -16,13 +15,15 @@ import org.jlab.detector.geant4.v2.SystemOfUnits.Length;
  */
 public class G4Box extends Geant4Basic {
 
-    private double sizex, sizey, sizez;
-    
+    private final double sizex, sizey, sizez;
+
     public G4Box(String name, double sizex, double sizey, double sizez) {
         super(name, "G4Box", Length.unit(sizex), Length.unit(sizey), Length.unit(sizez));
         this.sizex = sizex;
         this.sizey = sizey;
         this.sizez = sizez;
+        
+        volumeSolid = new Cube(sizex * 2., sizey * 2., sizez * 2.);
     }
 
     public double getXHalfLength() {
@@ -35,11 +36,5 @@ public class G4Box extends Geant4Basic {
 
     public double getZHalfLength() {
         return volumeDimensions.get(2).value;
-    }
-    
-    @Override
-    public CSG toCSG(){
-        Cube box = new Cube(sizex*2., sizey*2., sizez*2.);
-        return box.toCSG().transformed(Transform.unity().apply(motherTransform).apply(volumeRotation).apply(volumeTranslation));
     }
 }
