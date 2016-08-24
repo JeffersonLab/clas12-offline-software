@@ -1,0 +1,300 @@
+package org.jlab.rec.dc.segment;
+
+import java.util.ArrayList;
+
+import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.GeometryLoader;
+import org.jlab.rec.dc.cluster.FittedCluster;
+import org.jlab.rec.dc.hit.FittedHit;
+import org.jlab.rec.dc.trajectory.SegmentTrajectory;
+
+/**
+ * A class to describe segment objects, where a Segment is a fitted cluster that has been pruned of hits with bad residuals
+ * @author ziegler
+ *
+ */
+public class Segment extends ArrayList<FittedHit> {
+
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -997960312423538455L;
+	private FittedCluster _fittedCluster ;
+
+	/**
+	 * Construct the segment from the fitted cluster.
+	 * @param fCluster the fitted Cluster
+	 */
+	public Segment(FittedCluster fCluster) {
+		for(int i = 0; i< fCluster.size(); i++) {
+			this.add(fCluster.get(i));
+		}
+		this.set_fittedCluster(fCluster);
+		this._Sector = fCluster.get_Sector();
+		this._Superlayer = fCluster.get_Superlayer();
+		this._Id = fCluster.get_Id();
+		
+	}
+    
+	/**
+	 * 
+	 * @return the fitted cluster
+	 */
+	public FittedCluster get_fittedCluster() {
+		return _fittedCluster;
+	}
+
+	/**
+	 * Sets the fitted cluster
+	 * @param _fittedCluster the fitted cluster
+	 */
+	public void set_fittedCluster(FittedCluster _fittedCluster) {
+		this._fittedCluster = _fittedCluster;
+	}
+
+	private int _Sector;      							//	    sector[1...6]
+	private int _Superlayer;    	 					//	    superlayer [1,...6]
+	private int _Id;									//		cluster Id
+
+	/**
+	 * 
+	 * @return the segment sector (1...6)
+	 */
+	public int get_Sector() {
+		return _Sector;
+	}
+	
+	/** 
+	 * Sets the segment sector
+	 * @param _Sector the segment sector (1...6)
+	 */
+	public void set_Sector(int _Sector) {
+		this._Sector = _Sector;
+	}
+	
+	/**
+	 * 
+	 * @return the segment superlayer (1...6)
+	 */
+	public int get_Superlayer() {
+		return _Superlayer;
+	}
+	
+	/**
+	 * Sets the superlayer
+	 * @param _Superlayer the superlayer (1...6)
+	 */
+	public void set_Superlayer(int _Superlayer) {
+		this._Superlayer = _Superlayer;
+	}
+	
+	/**
+	 * 
+	 * @return the segment ID, where the id corresponds to the index in the sequence of found segments
+	 */
+	public int get_Id() {
+		return _Id;
+	}
+	
+	/**
+	 * Sets the segment ID
+	 * @param _Id the segment ID
+	 */
+	public void set_Id(int _Id) {
+		this._Id = _Id;
+	}
+
+
+	/**
+	 * 
+	 * @return region (1...3)
+	 */
+    public int get_Region() {
+     	return (int) (this._Superlayer+1)/2;
+     }
+    /**
+     * 
+     * @return superlayer 1 or 2 in region (1...3)
+     */
+    public int get_RegionSlayer() {
+    	return (this._Superlayer+1)%2+1;
+	}
+    
+       
+    /**
+     * 
+     * @param otherseg matching cluster in other superlayer in a region
+     * @return a region-segment proximity condition 
+     */
+	public boolean isCloseTo(Segment otherseg) {
+		/// A region-segment contains two segments if they are in the same sector 
+		/// and region and satisfy the proximity condition: \n\n
+		/// <center><b>|Xwires<sub>2</sub>-Xwires<sub>1</sub>| = a*Xwires<sub>1</sub> + b</b></center>\n
+		/// where a and b are DC parameters set by DC_RSEG_a and DC_RSEG_B .\n\n
+		boolean value = false; 
+		//System.out.println("in Segment DeltaW "+Math.abs(this.getAvgwire()-otherseg.getAvgwire() )+
+			//	" < ? "+(Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B));
+         if( Math.abs(this.getAvgwire()-otherseg.getAvgwire() ) < Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B) 
+        	 value = true;
+         
+         return value;
+	}
+	
+	public boolean hasConsistentSlope(Segment otherseg) {
+		boolean value = false;
+		
+		if(this.get_fitPlane()!= null && otherseg.get_fitPlane()!=null) {
+			 if(Math.abs(Math.toDegrees(Math.acos(this.get_fitPlane().normal().dot(otherseg.get_fitPlane().normal())))-12.)<Constants.SEGMENTPLANESANGLE) // the angle between the plane normals is 12 degrees with some tolerance
+				value = true;
+		}
+		
+		return value;
+	}
+	/**
+	 * 
+	 * @return the average wire number for the segment (this is used in the proximity condition employed in segment matching)
+	 */
+	public double getAvgwire() {
+		double avewire = 0;
+		int hSize = this.size();
+			for (int h =0; h< hSize; h++) {
+				avewire += this.get(h).get_Wire();
+			}
+			return ((double)avewire/hSize);
+	}
+    
+	
+	private Plane3D _fitPlane;
+	private SegmentTrajectory _Trajectory;
+	private int _Status = 1;
+	private double[] _SegmentEndPoints;
+	
+	/**
+	 * 
+	 * @return the plane containing the segment fitted-line representation
+	 */
+	public Plane3D get_fitPlane() {		
+		return _fitPlane;
+	}
+
+	/**
+	 * Sets the segment endpoints in the sector coordinate system for ced display
+	 */
+	public void set_SegmentEndPointsSecCoordSys() {
+		
+		double Z_1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().z();
+		double X_1 = this.get_fittedCluster().get_clusterLineFitSlope()*Z_1 + this.get_fittedCluster().get_clusterLineFitIntercept();
+		
+		double x1 = Math.cos(Math.toRadians(25.))*X_1 + Math.sin(Math.toRadians(25.))*Z_1;
+		double z1 = -Math.sin(Math.toRadians(25.))*X_1 + Math.cos(Math.toRadians(25.))*Z_1;
+		
+		double Z_2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(5).getComponent(0).getMidpoint().z();
+		double X_2 = this.get_fittedCluster().get_clusterLineFitSlope()*Z_2 + this.get_fittedCluster().get_clusterLineFitIntercept();
+		
+		double x2 = Math.cos(Math.toRadians(25.))*X_2 + Math.sin(Math.toRadians(25.))*Z_2;
+		double z2 = -Math.sin(Math.toRadians(25.))*X_2 + Math.cos(Math.toRadians(25.))*Z_2;
+		
+		double[] EndPointsArray = new double[4];
+		EndPointsArray[0] = x1;
+		EndPointsArray[1] = z1;
+		EndPointsArray[2] = x2;
+		EndPointsArray[3] = z2;
+		 
+		this.set_SegmentEndPoints(EndPointsArray);
+	}
+	/**
+	 * Sets the plane containing the segment fitted-line representation
+	 */
+	public void set_fitPlane() {
+		if(this.get_fittedCluster().get_clusLine()==null) {
+			System.err.println(" no clusterline for "+this.get_fittedCluster().printInfo());
+			return;
+		}
+		set_SegmentEndPointsSecCoordSys();
+		double dir_x = this.get_fittedCluster().get_clusLine().end().x() - this.get_fittedCluster().get_clusLine().origin().x();
+		double dir_y = this.get_fittedCluster().get_clusLine().end().y() - this.get_fittedCluster().get_clusLine().origin().y();
+		double dir_z = this.get_fittedCluster().get_clusLine().end().z() - this.get_fittedCluster().get_clusLine().origin().z();
+		
+		double dir = Math.sqrt(dir_x*dir_x + dir_y*dir_y + dir_z*dir_z);
+		
+		dir_x/=dir;
+		dir_y/=dir;
+		dir_z/=dir;
+		
+		Vector3D dirVec = new Vector3D(dir_x, dir_y, dir_z);
+		
+		this._fitPlane = calc_fitPlane(this.get_fittedCluster().get_clusLine().origin(),
+				dirVec);
+	}
+
+	
+	
+	public double[] get_SegmentEndPoints() {
+		return _SegmentEndPoints;
+	}
+
+	public void set_SegmentEndPoints(double[] _SegmentEndPoints) {
+		this._SegmentEndPoints = _SegmentEndPoints;
+	}
+
+	/**
+	 * 
+	 * @param refPoint the reference point on the segment plane
+	 * @param refDir the normal vector on the segment plane
+	 * @return the plane containing the segment line, the plane is characterized by a point on the plane and a unit normal vector.
+	 */
+	private Plane3D calc_fitPlane(Point3D refPoint, Vector3D refDir) {
+				
+		double X = Math.pow(-1, (this.get_Superlayer()-1))*Math.sin(Math.toRadians(6));
+		double Y = Math.cos(Math.toRadians(6.));
+		
+		Vector3D plDir = new Vector3D(X,Y,0);
+		
+		Vector3D normDir = plDir.cross(refDir);
+        
+		
+		if(normDir.mag()>1.e-10) {
+			normDir.scale(1./normDir.mag());
+		} else {
+			System.err.println("Segment Fit Plane not calculated");
+			return new Plane3D(new Point3D(0,0,0), new Vector3D(0,0,0));
+		}
+		Plane3D fitPlane = new Plane3D(refPoint, normDir);
+		
+		return fitPlane;
+	}
+	
+	
+	
+	public SegmentTrajectory get_Trajectory() {
+		return _Trajectory;
+	}
+
+	public void set_Trajectory(SegmentTrajectory _Trajectory) {
+		this._Trajectory = _Trajectory;
+	}
+
+	public int get_Status() {
+		return _Status;
+	}
+
+	public void set_Status(int _Status) {
+		this._Status = _Status;
+	}
+
+	/**
+	 * 
+	 * @return the segment info.
+	 */
+	public String printInfo() {
+		String s = "Segment: ID "+this.get_Id()+" Sector "+this.get_Sector()+" Superlayer "+this.get_Superlayer()+" Size "+this.size() ;
+		return s;
+	}
+    
+
+
+}
