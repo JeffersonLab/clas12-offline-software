@@ -8,7 +8,8 @@ package org.jlab.detector.geant4.v2;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import static org.jlab.detector.geant4.v2.SystemOfUnits.Length;
+import static org.jlab.detector.hits.DetId.FTOFID;
+import static org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.geom.base.ConstantProvider;
 
 /**
@@ -62,7 +63,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         Geant4Basic panelVolume = new G4Trd("ftof_p" + gemcLayerNames[layer - 1] + "_s" + sector,
                 panel_mother_dx1, panel_mother_dx2, panel_mother_dy, panel_mother_dy, panel_mother_dz);
-        panelVolume.setId(sector, layer, 0);
+        panelVolume.setId(FTOFID, sector, layer, 0);
 
         double panel_pos_xy = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt);
         double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
@@ -74,7 +75,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
-            paddles.get(ipaddle).setId(sector, layer, ipaddle + 1);
+            paddles.get(ipaddle).setId(FTOFID, sector, layer, ipaddle + 1);
             paddles.get(ipaddle).setMother(panelVolume);
         }
         return panelVolume;

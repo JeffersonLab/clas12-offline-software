@@ -14,8 +14,8 @@ public class Line3d {
     private Vector3d origin, end;
 
     public Line3d(Vector3d origin, Vector3d end) {
-        this.origin = origin;
-        this.end = end;
+        this.origin = origin.clone();
+        this.end = end.clone();
     }
     
     public Vector3d origin(){

@@ -5,11 +5,10 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Line3d;
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.HashMap;
 import java.util.List;
+import org.jlab.detector.hits.DetHit;
 
 /**
  *
@@ -32,9 +31,8 @@ public abstract class Geant4Factory {
     public String toString() {
         StringBuilder str = new StringBuilder();
 
-        for (Geant4Basic volume : motherVolume.getChildren()) {
-            str.append(volume.gemcStringRecursive());
-        }
+        motherVolume.getChildren().stream()
+                .forEach(child -> str.append(child.gemcStringRecursive()));
 
         return str.toString();
     }
@@ -47,7 +45,7 @@ public abstract class Geant4Factory {
         return motherVolume.getComponents();
     }
     
-    List<Vector3d> getIntersections(Line3d line){
+    List<DetHit> getIntersections(Line3d line){
         return motherVolume.getIntersections(line);
     }
 }

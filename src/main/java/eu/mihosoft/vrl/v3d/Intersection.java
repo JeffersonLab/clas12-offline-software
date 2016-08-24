@@ -25,12 +25,11 @@ public class Intersection {
 
     public void setPosition(Vector3d pos) {
         exist = true;
-        this.pos = pos;
+        this.pos = pos.clone();
     }
 
     public void setPosition(Vector3d pos, double parametricT) {
-        exist = true;
-        this.pos = pos;
+        setPosition(pos);
         this.parametricT = parametricT;
     }
     

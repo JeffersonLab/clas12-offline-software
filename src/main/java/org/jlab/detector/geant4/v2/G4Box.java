@@ -7,7 +7,7 @@ package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
-import org.jlab.detector.geant4.v2.SystemOfUnits.Length;
+import org.jlab.detector.units.SystemOfUnits.Length;
 
 /**
  *

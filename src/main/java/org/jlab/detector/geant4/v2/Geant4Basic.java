@@ -5,7 +5,9 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import org.jlab.detector.units.Measurement;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Intersection;
 import eu.mihosoft.vrl.v3d.Line3d;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -14,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jlab.detector.geant4.v2.SystemOfUnits.Length;
+import org.jlab.detector.hits.DetHit;
+import org.jlab.detector.units.SystemOfUnits.Length;
 
 /**
  *
@@ -35,7 +38,7 @@ public abstract class Geant4Basic {
     double[] rotationValues = {0.0, 0.0, 0.0};
     Vector3d volumePosition = new Vector3d(0.0, 0.0, 0.0);
 
-    int[] volumeID = new int[]{};
+    int[] volumeId = new int[]{};
     protected List<Measurement> volumeDimensions;
 
     private final List<Geant4Basic> children = new ArrayList<>();
@@ -80,7 +83,7 @@ public abstract class Geant4Basic {
     }
 
     public int[] getId() {
-        return this.volumeID;
+        return this.volumeId;
     }
 
     private Transform getLocalTransform() {
@@ -147,8 +150,8 @@ public abstract class Geant4Basic {
     }
 
     public void setId(int... id) {
-        this.volumeID = new int[id.length];
-        System.arraycopy(id, 0, volumeID, 0, volumeID.length);
+        this.volumeId = new int[id.length];
+        System.arraycopy(id, 0, volumeId, 0, volumeId.length);
     }
 
     public String gemcString() {
@@ -208,11 +211,19 @@ public abstract class Geant4Basic {
                 .collect(Collectors.toList());
     }
 
-    public List<Vector3d> getIntersections(Line3d line) {
+    public List<DetHit> getIntersections(Line3d line) {
         if (children.isEmpty()) {
-            return volumeCSG.getIntersections(line);
+            List<DetHit> hits = new ArrayList<>();
+
+            List<Vector3d> dots = volumeCSG.getIntersections(line);
+            for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
+                DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), volumeId);
+                hits.add(hit);
+            }
+
+            return hits;
         }
-        
+
         return children.stream()
                 .flatMap(child -> child.getIntersections(line).stream())
                 .collect(Collectors.toList());
