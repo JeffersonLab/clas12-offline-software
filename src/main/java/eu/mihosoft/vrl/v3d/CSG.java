@@ -33,6 +33,8 @@
  */
 package eu.mihosoft.vrl.v3d;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -714,6 +716,10 @@ public class CSG {
         return intersect(Arrays.asList(csgs));
     }
 
+    public void toStlFile(String filename) throws IOException {
+        FileUtil.write(Paths.get(filename), this.toStlString());
+    }
+
     /**
      * Returns this csg in STL string format.
      *
@@ -948,6 +954,20 @@ public class CSG {
         result.storage = storage;
 
         return result;
+    }
+    
+    /**
+     *
+     * @param transform the current CSG
+     */
+    public void transform(Transform transform) {
+
+        if (polygons.isEmpty()) {
+            return;
+        }
+
+        this.polygons.stream().forEach(
+                p -> p.transform(transform));
     }
 
     // TODO finish experiment (20.7.2014)
