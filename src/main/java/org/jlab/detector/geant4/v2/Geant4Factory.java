@@ -16,12 +16,11 @@ import org.jlab.detector.hits.DetHit;
  */
 public abstract class Geant4Factory {
     protected Geant4Basic motherVolume;
+    protected final HashMap<String, String> properties = new HashMap<>();
 
     protected Geant4Factory(){
         motherVolume = new G4Box("fc",0,0,0);
     }
-    
-    protected final HashMap<String, String> properties = new HashMap<>();
 
     public Geant4Basic getMother() {
         return motherVolume;

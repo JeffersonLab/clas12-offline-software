@@ -6,6 +6,7 @@
 package org.jlab.detector.hits;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.detector.geant4.v2.Geant4Basic;
 
 /**
  *
@@ -16,6 +17,7 @@ public class DetHit {
     protected Vector3d origin = new Vector3d(0, 0, 0);
     protected Vector3d end = new Vector3d(0, 0, 0);
     protected int[] detId;
+    protected Geant4Basic detectorComponent;
 
     public DetHit() {
 
@@ -29,6 +31,11 @@ public class DetHit {
         this.origin.set(origin);
         this.end.set(end);
         setId(id);
+    }
+
+    public DetHit(Vector3d origin, Vector3d end, Geant4Basic component) {
+        this(origin, end, component.getId());
+        detectorComponent = component;
     }
 
     public Vector3d origin() {
@@ -74,5 +81,9 @@ public class DetHit {
         str.append(System.getProperty("line.separator"));
 
         return str.toString();
+    }
+
+    public Geant4Basic getComponent() {
+        return detectorComponent;
     }
 }

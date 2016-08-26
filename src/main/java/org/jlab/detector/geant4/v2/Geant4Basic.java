@@ -7,7 +7,6 @@ package org.jlab.detector.geant4.v2;
 
 import org.jlab.detector.units.Measurement;
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Intersection;
 import eu.mihosoft.vrl.v3d.Line3d;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -31,12 +30,10 @@ public abstract class Geant4Basic {
     protected CSG volumeCSG;
     protected Primitive volumeSolid;
 
-    Transform volumeTranslation = Transform.unity();
-    Transform volumeRotation = Transform.unity();
+    Transform volumeTransformation = Transform.unity();
 
     String rotationOrder = "xyz";
     double[] rotationValues = {0.0, 0.0, 0.0};
-    Vector3d volumePosition = new Vector3d(0.0, 0.0, 0.0);
 
     int[] volumeId = new int[]{};
     protected List<Measurement> volumeDimensions;
@@ -59,7 +56,7 @@ public abstract class Geant4Basic {
         this.motherVolume = motherVol;
         this.motherVolume.getChildren().add(this);
 
-        transform();
+        updateCSGtransformation();
     }
 
     public Geant4Basic getMother() {
@@ -79,15 +76,11 @@ public abstract class Geant4Basic {
     }
 
     public Vector3d getPosition() {
-        return volumePosition;
+        return getGlobalTransform().transform(new Vector3d(0, 0, 0));
     }
 
     public int[] getId() {
         return this.volumeId;
-    }
-
-    private Transform getLocalTransform() {
-        return Transform.unity().apply(volumeTranslation).apply(volumeRotation);
     }
 
     public Transform getGlobalTransform() {
@@ -95,58 +88,56 @@ public abstract class Geant4Basic {
         if (motherVolume != null) {
             globalTransform.apply(motherVolume.getGlobalTransform());
         }
-        return globalTransform.apply(getLocalTransform());
-        //return globalTransform.apply(getTransform());
+        globalTransform.apply(volumeTransformation);
+        return globalTransform;
     }
 
-    protected void transform() {
+    protected void updateCSGtransformation() {
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }
     }
 
-    public void setPosition(double x, double y, double z) {
-        volumeTranslation = Transform.unity();
-        volumeTranslation.translate(x, y, z);
-        volumePosition.set(x, y, z);
+    public void translate(double x, double y, double z) {
+        volumeTransformation.prepend(Transform.unity().translate(x, y, z));
 
-        transform();
+        updateCSGtransformation();
     }
 
-    public void setPosition(Vector3d pos) {
-        setPosition(pos.x, pos.y, pos.z);
+    public void translate(Vector3d pos) {
+        translate(pos.x, pos.y, pos.z);
     }
 
-    public void setRotation(String order, double r1, double r2, double r3) {
+    public void rotate(String order, double r1, double r2, double r3) {
         rotationOrder = order;
-
-        volumeRotation = Transform.unity();
+        Transform volumeRotation = Transform.unity();
 
         switch (order) {
             case "xyz":
-                this.volumeRotation.rotZ(r3).rotY(r2).rotX(r1);
+                volumeRotation.rotZ(r3).rotY(r2).rotX(r1);
                 break;
             case "xzy":
-                this.volumeRotation.rotY(r3).rotZ(r2).rotX(r1);
+                volumeRotation.rotY(r3).rotZ(r2).rotX(r1);
                 break;
             case "yxz":
-                this.volumeRotation.rotZ(r3).rotX(r2).rotY(r1);
+                volumeRotation.rotZ(r3).rotX(r2).rotY(r1);
                 break;
             case "yzx":
-                this.volumeRotation.rotX(r3).rotZ(r2).rotY(r1);
+                volumeRotation.rotX(r3).rotZ(r2).rotY(r1);
                 break;
             case "zxy":
-                this.volumeRotation.rotY(r3).rotX(r2).rotZ(r1);
+                volumeRotation.rotY(r3).rotX(r2).rotZ(r1);
                 break;
             case "zyx":
-                this.volumeRotation.rotX(r3).rotY(r2).rotZ(r1);
+                volumeRotation.rotX(r3).rotY(r2).rotZ(r1);
                 break;
             default:
                 System.out.println("[GEANT4VOLUME]---> unknown rotation " + order);
                 break;
         }
 
-        transform();
+        volumeTransformation.prepend(volumeRotation);
+        updateCSGtransformation();
     }
 
     public void setId(int... id) {
@@ -163,10 +154,11 @@ public abstract class Geant4Basic {
             str.append(String.format("%18s | %8s", volumeName, motherVolume.getName()));
         }
 
+        Vector3d pos = getPosition();
         str.append(String.format("| %8.4f*%s %8.4f*%s %8.4f*%s",
-                this.volumePosition.x, Length.unit(),
-                this.volumePosition.y, Length.unit(),
-                this.volumePosition.z, Length.unit()));
+                pos.x, Length.unit(),
+                pos.y, Length.unit(),
+                pos.z, Length.unit()));
 
         str.append(String.format("| ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
         for (int irot = 0; irot < rotationValues.length; irot++) {
@@ -197,7 +189,7 @@ public abstract class Geant4Basic {
         return str.toString();
     }
 
-    public CSG toCSG() {
+    public final CSG toCSG() {
         return volumeCSG;
     }
 
@@ -212,20 +204,25 @@ public abstract class Geant4Basic {
     }
 
     public List<DetHit> getIntersections(Line3d line) {
-        if (children.isEmpty()) {
-            List<DetHit> hits = new ArrayList<>();
+        List<DetHit> hits = new ArrayList<>();
 
-            List<Vector3d> dots = volumeCSG.getIntersections(line);
+        List<Vector3d> dots = volumeCSG.getIntersections(line);
+
+        if (children.isEmpty()) {
             for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
-                DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), volumeId);
+                DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), this);
                 hits.add(hit);
             }
 
             return hits;
         }
 
-        return children.stream()
-                .flatMap(child -> child.getIntersections(line).stream())
-                .collect(Collectors.toList());
+        if (!dots.isEmpty()) {
+            return children.stream()
+                    .flatMap(child -> child.getIntersections(line).stream())
+                    .collect(Collectors.toList());
+        }
+
+        return hits;
     }
 }

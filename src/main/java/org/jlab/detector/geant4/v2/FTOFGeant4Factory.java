@@ -70,8 +70,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
         double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt);
 
-        panelVolume.setPosition(panel_pos_x, panel_pos_y, panel_pos_z);
-        panelVolume.setRotation("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
+        panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
+        panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
@@ -101,8 +101,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
             G4Box volume = new G4Box(vname, paddlelength / 2. * Length.cm, paddlethickness / 2. * Length.cm, paddlewidth / 2.0 * Length.cm);
 
             double zoffset = (ipaddle - numPaddles / 2. + 0.5) * (paddlewidth + gap + 2 * wrapperthickness);
-            volume.setPosition(0.0, 0.0, zoffset * Length.cm);
-            volume.setRotation("xyz", 0, 0, 0);
+            volume.translate(0.0, 0.0, zoffset * Length.cm);
 
             paddleVolumes.add(volume);
         }

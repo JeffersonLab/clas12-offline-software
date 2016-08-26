@@ -15,6 +15,7 @@ public final class FTOFDetHit extends DetHit {
 
     public FTOFDetHit(DetHit hit) {
         super(hit.origin(), hit.end(), hit.detId);
+        detectorComponent = hit.detectorComponent;
 
         if (hit.detId.length != 4 || hit.getId()[0] != FTOFID) {
             throw new IllegalArgumentException("Hit is not FTOF Detector Hit!");

@@ -261,9 +261,9 @@ public class Transform {
      * @return this transform
      */
     public Transform mirror(Plane plane) {
-        
+
         System.err.println("WARNING: I'm too dumb to implement the mirror() operation correctly. Please fix me!");
-        
+
         double nx = plane.normal.x;
         double ny = plane.normal.y;
         double nz = plane.normal.z;
@@ -286,11 +286,11 @@ public class Transform {
      * @return this transform
      */
     public Transform scale(Vector3d vec) {
-        
+
         if (vec.x == 0 || vec.y == 0 || vec.z == 0) {
             throw new IllegalArgumentException("scale by 0 not allowed!");
         }
-        
+
         double elemenents[] = {
             vec.x, 0, 0, 0, 0, vec.y, 0, 0, 0, 0, vec.z, 0, 0, 0, 0, 1};
         m.mul(new Matrix4d(elemenents));
@@ -307,11 +307,11 @@ public class Transform {
      * @return this transform
      */
     public Transform scale(double x, double y, double z) {
-        
-        if (x ==0 || y == 0 || z == 0) {
+
+        if (x == 0 || y == 0 || z == 0) {
             throw new IllegalArgumentException("scale by 0 not allowed!");
         }
-        
+
         double elemenents[] = {
             x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1};
         m.mul(new Matrix4d(elemenents));
@@ -326,12 +326,11 @@ public class Transform {
      * @return this transform
      */
     public Transform scale(double s) {
-        
-        
+
         if (s == 0) {
             throw new IllegalArgumentException("scale by 0 not allowed!");
         }
-        
+
         double elemenents[] = {
             s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1};
         m.mul(new Matrix4d(elemenents));
@@ -346,12 +345,11 @@ public class Transform {
      * @return this transform
      */
     public Transform scaleX(double s) {
-        
-        
+
         if (s == 0) {
             throw new IllegalArgumentException("scale by 0 not allowed!");
         }
-        
+
         double elemenents[] = {
             s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
         m.mul(new Matrix4d(elemenents));
@@ -366,11 +364,11 @@ public class Transform {
      * @return this transform
      */
     public Transform scaleY(double s) {
-        
+
         if (s == 0) {
             throw new IllegalArgumentException("scale by 0 not allowed!");
         }
-        
+
         double elemenents[] = {
             1, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
         m.mul(new Matrix4d(elemenents));
@@ -385,11 +383,11 @@ public class Transform {
      * @return this transform
      */
     public Transform scaleZ(double s) {
-        
+
         if (s == 0) {
             throw new IllegalArgumentException("scale by 0 not allowed!");
         }
-        
+
         double elemenents[] = {
             1, 0, 0, 0, 0, 1, 0, 0, 0, 0, s, 0, 0, 0, 0, 1};
         m.mul(new Matrix4d(elemenents));
@@ -413,7 +411,7 @@ public class Transform {
 
         return vec;
     }
-    
+
     /**
      * Applies this transform to the specified vector.
      *
@@ -427,22 +425,21 @@ public class Transform {
         double prevX = vec.x;
         double prevY = vec.y;
         double prevZ = vec.z;
-        
+
         final double x, y;
         x = m.m00 * vec.x + m.m01 * vec.y + m.m02 * vec.z + m.m03;
         y = m.m10 * vec.x + m.m11 * vec.y + m.m12 * vec.z + m.m13;
         vec.z = m.m20 * vec.x + m.m21 * vec.y + m.m22 * vec.z + m.m23;
         vec.x = x;
         vec.y = y;
-        
-        double diffX = vec.x-prevX;
-        double diffY = vec.y-prevY;
-        double diffZ = vec.z-prevZ;
-        
-        vec.x = prevX + (diffX)*amount;
-        vec.y = prevY + (diffY)*amount;
-        vec.z = prevZ + (diffZ)*amount;
 
+        double diffX = vec.x - prevX;
+        double diffY = vec.y - prevY;
+        double diffZ = vec.z - prevZ;
+
+        vec.x = prevX + (diffX) * amount;
+        vec.y = prevY + (diffY) * amount;
+        vec.z = prevZ + (diffZ) * amount;
 
         return vec;
     }
@@ -483,8 +480,8 @@ public class Transform {
     }
 
     /**
-     * Indicates whether this transform performs a mirror operation, i.e., 
-     * flips the orientation.
+     * Indicates whether this transform performs a mirror operation, i.e., flips
+     * the orientation.
      *
      * @return <code>true</code> if this transform performs a mirror operation;
      * <code>false</code> otherwise
@@ -502,6 +499,12 @@ public class Transform {
      */
     public Transform apply(Transform t) {
         m.mul(t.m);
+        return this;
+    }
+
+    public Transform prepend(Transform t) {
+        m.mulTransposeBoth(m, t.m);
+        m.transpose();
         return this;
     }
 
