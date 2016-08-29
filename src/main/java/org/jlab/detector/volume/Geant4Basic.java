@@ -226,9 +226,9 @@ public abstract class Geant4Basic {
         } else {
             List<Vector3d> dots = volumeCSG.getIntersections(line.toLine());
             if (dots.size() > 0) {
-                hits.addAll(children.stream()
+                return children.stream()
                         .flatMap(child -> child.getIntersections(line).stream())
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList());
             }
         }
         
