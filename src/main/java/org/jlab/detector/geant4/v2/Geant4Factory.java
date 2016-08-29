@@ -6,7 +6,6 @@
 package org.jlab.detector.geant4.v2;
 
 import org.jlab.detector.volume.Geant4Basic;
-import org.jlab.detector.volume.G4Box;
 import org.jlab.geometry.prim.Straight;
 import java.util.HashMap;
 import java.util.List;

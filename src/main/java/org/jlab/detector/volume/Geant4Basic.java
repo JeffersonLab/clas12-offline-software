@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.units.SystemOfUnits.Length;
-import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -43,11 +42,11 @@ public abstract class Geant4Basic {
 
     private Geant4Basic motherVolume;
 
-    protected Geant4Basic(Primitive volumeSolid){
+    protected Geant4Basic(Primitive volumeSolid) {
         this.volumeSolid = volumeSolid;
         updateCSGtransformation();
     }
-    
+
     protected final void setDimensions(Measurement... pars) {
         volumeDimensions = Arrays.asList(pars);
     }
@@ -55,8 +54,8 @@ public abstract class Geant4Basic {
     public final void setName(String name) {
         this.volumeName = name;
     }
-    
-    protected final void setType(String type){
+
+    protected final void setType(String type) {
         this.volumeType = type;
     }
 
@@ -97,7 +96,7 @@ public abstract class Geant4Basic {
             globalTransform.apply(motherVolume.getGlobalTransform());
         }
         globalTransform.apply(volumeTransformation);
-        
+
         return globalTransform;
     }
 
@@ -120,7 +119,7 @@ public abstract class Geant4Basic {
     public void rotate(String order, double r1, double r2, double r3) {
         rotationOrder = order;
         rotationValues = new double[]{r1, r2, r3};
-        
+
         Transform volumeRotation = Transform.unity();
 
         switch (order) {
@@ -199,7 +198,7 @@ public abstract class Geant4Basic {
 
         return str.toString();
     }
-    
+
     public final CSG toCSG() {
         return volumeCSG;
     }
@@ -215,20 +214,25 @@ public abstract class Geant4Basic {
     }
 
     public List<DetHit> getIntersections(Straight line) {
+        List<DetHit> hits = new ArrayList<>();
+
         if (children.isEmpty()) {
-            List<DetHit> hits = new ArrayList<>();
-            List<Vector3d> dots = volumeCSG.getIntersections(line.toLine());
-            
+            List<Vector3d> dots = volumeCSG.getIntersections(line);
+
             for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
                 DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), this);
                 hits.add(hit);
             }
-
-            return hits;
+        } else {
+            List<Vector3d> dots = volumeCSG.getIntersections(line.toLine());
+            if (dots.size() > 0) {
+                hits.addAll(children.stream()
+                        .flatMap(child -> child.getIntersections(line).stream())
+                        .collect(Collectors.toList()));
+            }
         }
-
-        return children.stream()
-                .flatMap(child -> child.getIntersections(line).stream())
-                .collect(Collectors.toList());
+        
+        return hits;
     }
+
 }
