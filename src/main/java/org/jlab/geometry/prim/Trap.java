@@ -2,8 +2,13 @@
  * Trap.java
  *
  */
-package eu.mihosoft.vrl.v3d;
+package org.jlab.geometry.prim;
 
+import eu.mihosoft.vrl.v3d.Polygon;
+import eu.mihosoft.vrl.v3d.Primitive;
+import eu.mihosoft.vrl.v3d.PropertyStorage;
+import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.Vertex;
 import java.util.ArrayList;
 import java.util.List;
 

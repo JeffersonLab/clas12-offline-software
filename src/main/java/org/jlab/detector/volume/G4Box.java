@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.detector.geant4.v2;
+package org.jlab.detector.volume;
 
-import eu.mihosoft.vrl.v3d.Cube;
-import eu.mihosoft.vrl.v3d.Primitive;
 import org.jlab.detector.units.SystemOfUnits.Length;
+import org.jlab.geometry.prim.Box;
 
 /**
  *
@@ -15,10 +14,10 @@ import org.jlab.detector.units.SystemOfUnits.Length;
  */
 public class G4Box extends Geant4Basic {
     public G4Box(String name, double sizex, double sizey, double sizez) {
-        super(new Cube(sizex * 2., sizey * 2., sizez * 2.));
+        super(new Box(sizex, sizey, sizez));
         setName(name);
         setType("Box");
-        setDimensions(Length.unit(sizex), Length.unit(sizey), Length.unit(sizez));
+        setDimensions(Length.value(sizex), Length.value(sizey), Length.value(sizez));
     }
     
     public double getXHalfLength() {

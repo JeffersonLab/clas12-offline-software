@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.detector.geant4.v2;
+package org.jlab.detector.volume;
 
 import org.jlab.detector.units.Measurement;
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Straight;
+import org.jlab.geometry.prim.Straight;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.units.SystemOfUnits.Length;
+import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -36,7 +37,7 @@ public abstract class Geant4Basic {
     double[] rotationValues = {0.0, 0.0, 0.0};
 
     int[] volumeId = new int[]{};
-    protected List<Measurement> volumeDimensions;
+    protected List<Measurement> volumeDimensions = new ArrayList<>();
 
     private final List<Geant4Basic> children = new ArrayList<>();
 
@@ -216,7 +217,7 @@ public abstract class Geant4Basic {
     public List<DetHit> getIntersections(Straight line) {
         if (children.isEmpty()) {
             List<DetHit> hits = new ArrayList<>();
-            List<Vector3d> dots = volumeCSG.getIntersections(line);
+            List<Vector3d> dots = volumeCSG.getIntersections(line.toLine());
             
             for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
                 DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), this);

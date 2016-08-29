@@ -2,8 +2,13 @@
  * Trap.java
  *
  */
-package eu.mihosoft.vrl.v3d;
+package org.jlab.geometry.prim;
 
+import eu.mihosoft.vrl.v3d.Polygon;
+import eu.mihosoft.vrl.v3d.Primitive;
+import eu.mihosoft.vrl.v3d.PropertyStorage;
+import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.Vertex;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,22 +17,20 @@ import java.util.List;
  *
  * @author Andrey Kim;
  */
-public class Trd implements Primitive {
+public class Box implements Primitive {
 
     private final PropertyStorage properties = new PropertyStorage();
-    private double pDz, pDy1, pDy2, pDx1, pDx2;
+    private double pDz, pDy, pDx;
 
-    public Trd(double pDx1, double pDx2, double pDy1, double pDy2, double pDz) {
+    public Box(double pDx, double pDy, double pDz) {
 
-        if (pDx1 <= 0 || pDx2 <= 0 || pDy1 <= 0 || pDy2 <= 0 || pDz <= 0) {
+        if (pDx <= 0 || pDy <= 0 || pDz <= 0) {
             throw new IllegalArgumentException("Illegal arguments for Trd Primitive!");
         }
 
         this.pDz = pDz;
-        this.pDx1 = pDx1;
-        this.pDx2 = pDx2;
-        this.pDy1 = pDy1;
-        this.pDy2 = pDy2;
+        this.pDx = pDx;
+        this.pDy = pDy;
     }
 
     @Override
@@ -42,23 +45,18 @@ public class Trd implements Primitive {
             {{0, 2, 3, 1}, {0, 0, -1}},
             {{4, 5, 7, 6}, {0, 0, +1}}
         };
-        
-        Vector3d[] vpos = {
-            new Vector3d(-pDx1, -pDy1, -pDz),
-            new Vector3d(pDx1, -pDy1, -pDz),
-            new Vector3d(-pDx1, pDy1, -pDz),
-            new Vector3d(pDx1, pDy1, -pDz),
-            
-            new Vector3d(-pDx2, -pDy2, pDz),
-            new Vector3d(pDx2, -pDy2, pDz),
-            new Vector3d(-pDx2, pDy2, pDz),
-            new Vector3d(pDx2, pDy2, pDz)};
 
         List<Polygon> polygons = new ArrayList<>();
         for (int[][] face : facenorm) {
             List<Vertex> vertices = new ArrayList<>();
             for (int ivert : face[0]) {
-                vertices.add(new Vertex(vpos[ivert], new Vector3d(
+                Vector3d vpos = new Vector3d(
+                        pDx * (2 * Math.min(1, ivert & 1) - 1),
+                        pDy * (2 * Math.min(1, ivert & 2) - 1),
+                        pDz * (2 * Math.min(1, ivert & 4) - 1)
+                );
+
+                vertices.add(new Vertex(vpos, new Vector3d(
                         (double) face[1][0],
                         (double) face[1][1],
                         (double) face[1][2]

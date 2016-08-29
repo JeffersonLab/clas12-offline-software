@@ -5,18 +5,21 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import eu.mihosoft.vrl.v3d.Straight;
+import org.jlab.detector.volume.Geant4Basic;
+import org.jlab.detector.volume.G4Box;
+import org.jlab.geometry.prim.Straight;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jlab.detector.hits.DetHit;
+import org.jlab.detector.volume.G4World;
 
 /**
  *
  * @author kenjo
  */
 public abstract class Geant4Factory {
-    protected Geant4Basic motherVolume = new G4Box("fc",0,0,0);
+    protected G4World motherVolume = new G4World("fc");
     protected final HashMap<String, String> properties = new HashMap<>();
 
     @Override

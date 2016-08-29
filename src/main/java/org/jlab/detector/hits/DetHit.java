@@ -6,7 +6,7 @@
 package org.jlab.detector.hits;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
-import org.jlab.detector.geant4.v2.Geant4Basic;
+import org.jlab.detector.volume.Geant4Basic;
 
 /**
  *

@@ -5,11 +5,15 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import org.jlab.detector.volume.Geant4Basic;
+import org.jlab.detector.volume.G4Trd;
+import org.jlab.detector.volume.G4Box;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import static org.jlab.detector.hits.DetId.FTOFID;
 import static org.jlab.detector.units.SystemOfUnits.Length;
+import org.jlab.detector.volume.G4World;
 import org.jlab.geom.base.ConstantProvider;
 
 /**
@@ -28,7 +32,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     };
 
     public FTOFGeant4Factory(ConstantProvider provider) throws IOException {
-        motherVolume = new G4Box("fc", 0, 0, 0);
+        motherVolume = new G4World("fc");
 
         for (int sector = 1; sector <= 6; sector++) {
             for (int layer = 1; layer <= 3; layer++) {

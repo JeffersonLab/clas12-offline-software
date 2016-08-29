@@ -33,6 +33,8 @@
  */
 package eu.mihosoft.vrl.v3d;
 
+import org.jlab.geometry.prim.Triangle3d;
+import org.jlab.geometry.prim.Straight;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

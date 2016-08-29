@@ -19,7 +19,7 @@ public final class SystemOfUnits {
         private Length() {
         }
 
-        public static Measurement unit(double value) {
+        public static Measurement value(double value) {
             return new Measurement(value, "mm");
         }
         
@@ -44,7 +44,7 @@ public final class SystemOfUnits {
         private Angle() {
         }
 
-        public static Measurement unit(double value) {
+        public static Measurement value(double value) {
             return new Measurement(value, "rad");
         }
         

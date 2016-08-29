@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.detector.geant4.v2;
+package org.jlab.detector.volume;
+
+import org.jlab.geometry.prim.Box;
 
 /**
  *
@@ -11,6 +13,8 @@ package org.jlab.detector.geant4.v2;
  */
 public class G4World extends Geant4Basic{
     public G4World(String name){
-        super(name, "G4World");
+        super(new Box(1,1,1));
+        setName(name);
+        setType("World");
     }
 }

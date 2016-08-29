@@ -3,24 +3,25 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.mihosoft.vrl.v3d;
+package org.jlab.geometry.prim;
+
+import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
  *
  * @author kenjo
  */
-public class Ray3d extends Straight{
-    public Ray3d(Vector3d origin, Vector3d end){
+public class Line3d extends Straight{
+    public Line3d(Vector3d origin, Vector3d end){
         super(origin, end);
     }
     
-    public Ray3d(Straight line){
-        super(line.origin(), line.end());
+    protected Line3d(Straight line){
+        super(line);
     }
     
     @Override
     public boolean contains(double parametricT){
-        System.out.println("it's Ray");
-        return parametricT>=0;
+        return true;
     }
 }

@@ -3,7 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.mihosoft.vrl.v3d;
+package org.jlab.geometry.prim;
+
+import eu.mihosoft.vrl.v3d.Intersection;
+import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.geometry.prim.Straight;
 
 /**
  *
