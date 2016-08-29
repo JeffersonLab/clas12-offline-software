@@ -50,7 +50,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         List<G4Box> paddles = this.createLayer(cp, layer);
 
-        double panel_width = (paddles.get(paddles.size() - 1).getPosition().z - paddles.get(0).getPosition().z)
+        double panel_width = (paddles.get(paddles.size() - 1).getLocalPosition().z - paddles.get(0).getLocalPosition().z)
                 + 2 * paddles.get(0).getZHalfLength() + 2 * motherGap;
 
         double panel_mother_dx1 = paddles.get(0).getXHalfLength() + motherGap;

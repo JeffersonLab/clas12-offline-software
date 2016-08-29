@@ -38,24 +38,21 @@ public class Triangle3d {
         return (vv >= 0 && ww >= 0 && (vv + ww) <= 1);
     }
 
-    public Intersection getIntersection(Line3d line) {
+    public Intersection getIntersection(Straight line) {
         Intersection intersect = new Intersection();
 
         double tt = vertices[0].minus(line.origin()).dot(normal);
         double denom = line.diff().dot(normal);
         if (denom != 0) {
             tt /= denom;
-            if (tt < 0 || tt > 1) {
-                return intersect;
+            if (line.contains(tt)) {
+                Vector3d p0 = line.origin().plus(line.diff().times(tt));
+                if (this.contains(p0)) {
+                    intersect.setPosition(p0, tt);
+                }
             }
 
-            Vector3d p0 = line.origin().plus(line.diff().times(tt));
-            if (this.contains(p0)) {
-                intersect.setPosition(p0, tt);
-            }
         }
-
         return intersect;
     }
-
 }

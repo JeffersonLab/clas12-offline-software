@@ -195,7 +195,7 @@ public class CSG {
      * @param line
      * @return the positions of intersections of CSG with line
      */
-    public List<Vector3d> getIntersections(Line3d line) {
+    public List<Vector3d> getIntersections(Straight line) {
         return polygons.stream()
                 .map(face -> face.getIntersection(line))
                 .filter(intersect -> intersect.isPresent())

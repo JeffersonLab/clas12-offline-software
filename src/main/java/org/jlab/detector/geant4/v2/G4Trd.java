@@ -15,7 +15,7 @@ import org.jlab.detector.units.SystemOfUnits.Length;
 public class G4Trd extends Geant4Basic{
     
     public G4Trd(String name, double pdx1, double pdx2, double pdy1, double pdy2, double pdz) {
-        super(name, "G4Trd", Length.unit(pdx1), Length.unit(pdx2), Length.unit(pdy1), Length.unit(pdy2), Length.unit(pdz));
+        super(name, "Trd", Length.unit(pdx1), Length.unit(pdx2), Length.unit(pdy1), Length.unit(pdy2), Length.unit(pdz));
         
         volumeSolid = new Trd(pdx1, pdx2, pdy1, pdy2, pdz);
     }

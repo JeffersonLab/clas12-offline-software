@@ -428,7 +428,7 @@ public final class Polygon {
         return oddNodes;
     }
 
-    public Intersection getIntersection(Line3d line) {
+    public Intersection getIntersection(Straight line) {
         Intersection intersect = new Intersection();
 
         for (int ivert = 1; ivert < vertices.size() - 1; ivert++) {

@@ -9,18 +9,18 @@ package eu.mihosoft.vrl.v3d;
  *
  * @author kenjo
  */
-public class Line3d extends Straight{
-    public Line3d(Vector3d origin, Vector3d end){
+public class Ray3d extends Straight{
+    public Ray3d(Vector3d origin, Vector3d end){
         super(origin, end);
     }
     
-    public Line3d(Straight line){
+    public Ray3d(Straight line){
         super(line.origin(), line.end());
     }
     
     @Override
     public boolean contains(double parametricT){
-        System.out.println("it's Line");
-        return true;
+        System.out.println("it's Ray");
+        return parametricT>=0;
     }
 }

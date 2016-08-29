@@ -7,7 +7,7 @@ package org.jlab.detector.geant4.v2;
 
 import org.jlab.detector.units.Measurement;
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Line3d;
+import eu.mihosoft.vrl.v3d.Straight;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -28,7 +28,7 @@ public abstract class Geant4Basic {
     String volumeType;
 
     protected CSG volumeCSG;
-    protected Primitive volumeSolid;
+    protected final Primitive volumeSolid;
 
     Transform volumeTransformation = Transform.unity();
 
@@ -42,14 +42,21 @@ public abstract class Geant4Basic {
 
     private Geant4Basic motherVolume;
 
-    public Geant4Basic(String name, String type, Measurement... pars) {
-        this.volumeName = name;
-        this.volumeType = type;
+    protected Geant4Basic(Primitive volumeSolid){
+        this.volumeSolid = volumeSolid;
+        updateCSGtransformation();
+    }
+    
+    protected final void setDimensions(Measurement... pars) {
         volumeDimensions = Arrays.asList(pars);
     }
 
-    public void setName(String name) {
+    public final void setName(String name) {
         this.volumeName = name;
+    }
+    
+    protected final void setType(String type){
+        this.volumeType = type;
     }
 
     public void setMother(Geant4Basic motherVol) {
@@ -75,8 +82,8 @@ public abstract class Geant4Basic {
         return this.children;
     }
 
-    public Vector3d getPosition() {
-        return getGlobalTransform().transform(new Vector3d(0, 0, 0));
+    public Vector3d getLocalPosition() {
+        return volumeTransformation.transform(new Vector3d(0, 0, 0));
     }
 
     public int[] getId() {
@@ -89,10 +96,11 @@ public abstract class Geant4Basic {
             globalTransform.apply(motherVolume.getGlobalTransform());
         }
         globalTransform.apply(volumeTransformation);
+        
         return globalTransform;
     }
 
-    protected void updateCSGtransformation() {
+    protected final void updateCSGtransformation() {
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }
@@ -110,6 +118,8 @@ public abstract class Geant4Basic {
 
     public void rotate(String order, double r1, double r2, double r3) {
         rotationOrder = order;
+        rotationValues = new double[]{r1, r2, r3};
+        
         Transform volumeRotation = Transform.unity();
 
         switch (order) {
@@ -154,7 +164,7 @@ public abstract class Geant4Basic {
             str.append(String.format("%18s | %8s", volumeName, motherVolume.getName()));
         }
 
-        Vector3d pos = getPosition();
+        Vector3d pos = getLocalPosition();
         str.append(String.format("| %8.4f*%s %8.4f*%s %8.4f*%s",
                 pos.x, Length.unit(),
                 pos.y, Length.unit(),
@@ -188,7 +198,7 @@ public abstract class Geant4Basic {
 
         return str.toString();
     }
-
+    
     public final CSG toCSG() {
         return volumeCSG;
     }
@@ -203,12 +213,11 @@ public abstract class Geant4Basic {
                 .collect(Collectors.toList());
     }
 
-    public List<DetHit> getIntersections(Line3d line) {
-        List<DetHit> hits = new ArrayList<>();
-
-        List<Vector3d> dots = volumeCSG.getIntersections(line);
-
+    public List<DetHit> getIntersections(Straight line) {
         if (children.isEmpty()) {
+            List<DetHit> hits = new ArrayList<>();
+            List<Vector3d> dots = volumeCSG.getIntersections(line);
+            
             for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
                 DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), this);
                 hits.add(hit);
@@ -217,12 +226,8 @@ public abstract class Geant4Basic {
             return hits;
         }
 
-        if (!dots.isEmpty()) {
-            return children.stream()
-                    .flatMap(child -> child.getIntersections(line).stream())
-                    .collect(Collectors.toList());
-        }
-
-        return hits;
+        return children.stream()
+                .flatMap(child -> child.getIntersections(line).stream())
+                .collect(Collectors.toList());
     }
 }
