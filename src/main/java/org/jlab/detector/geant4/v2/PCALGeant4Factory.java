@@ -5,33 +5,42 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
+import org.jlab.detector.volume.G4Box;
+import org.jlab.detector.volume.G4Trap;
+import org.jlab.detector.volume.G4World;
+import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
-import org.jlab.geom.geant.Geant4Basic;
 
 /**
  *
  * @author kenjo
  */
-public final class PCALGeant4Factory {
+public final class PCALGeant4Factory extends Geant4Factory {
 
-    private final Geant4Basic motherVolume = new Geant4Basic("fc", "Box", 0);
-
-    private final HashMap<String, String> properties = new HashMap<>();
+    private final class ULayer extends G4Trap {
+        private final static double H=10, DU=1, UMAX=10;
+        
+        public ULayer(String name, double thickness) {
+            super(name, DU, 0, 0, H, virtualzero, UMAX, 0, H, virtualzero, UMAX, 0);
+        }
+    }
 
     private final double microgap = 0.1;
     private final double extrathickness = 0.5;
     private final double virtualzero = 0.00000001;
     private double layerZpos;
-
-    public PCALGeant4Factory() {
-
-    }
+    
+    private final int nsectors, nviews, nlayers, nsteel, nfoam;
+    private final double dsteel;
 
     public PCALGeant4Factory(ConstantProvider cp) {
-        int nsectors = cp.getInteger("/geometry/pcal/pcal/nsectors", 0);
+        motherVolume = new G4World("fc");
+
+        nsectors = cp.getInteger("/geometry/pcal/pcal/nsectors", 0);
+        nlayers = cp.getInteger("/geometry/pcal/pcal/nlayers", 0);
+        nviews = cp.getInteger("/geometry/pcal/pcal/nviews", 0);
+        nsteel = cp.getInteger("/geometry/pcal/pcal/nsteel", 0);
+        nfoam = cp.getInteger("/geometry/pcal/pcal/nfoam", 0);
 
         for (int isec = 0; isec < nsectors; isec++) {
             Geant4Basic sectorVolume = createSector(cp, isec);
@@ -39,11 +48,6 @@ public final class PCALGeant4Factory {
     }
 
     public Geant4Basic createSector(ConstantProvider cp, int isec) {
-
-        int nlayers = cp.getInteger("/geometry/pcal/pcal/nlayers", 0);
-        int nviews = cp.getInteger("/geometry/pcal/pcal/nviews", 0);
-        int nsteel = cp.getInteger("/geometry/pcal/pcal/nsteel", 0);
-        int nfoam = cp.getInteger("/geometry/pcal/pcal/nfoam", 0);
 
         double dsteel = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0);
         double dfoam = cp.getDouble("/geometry/pcal/pcal/foam_thick", 0);
@@ -64,20 +68,19 @@ public final class PCALGeant4Factory {
         double layer_params[] = {0.0, 0, 0,
             hsector / 2, virtualzero, umax / 2, 0,
             hsector / 2, virtualzero, umax / 2, 0};
-        
+
         //params - G4Trap dimensions for sector volume (mother volume)
         double params[] = {dsector / 2.0, 0, 0,
             hsector / 2 + extrathickness, virtualzero, umax / 2, 0,
             hsector / 2 + extrathickness, virtualzero, umax / 2, 0};
-        Geant4Basic sectorVolume = new Geant4Basic("pcal_s" + (isec + 1), "G4Trap", params);
-        sectorVolume.setParUnits("mm", "deg", "deg", "mm", "mm", "mm", "deg", "mm", "mm", "mm", "deg");
-        sectorVolume.setPosition(0, 0, isec * 20);
+        Geant4Basic sectorVolume = new G4Box("pcal_s" + (isec + 1), 1, 1, 1);
         sectorVolume.setMother(motherVolume);
-        
-        layerZpos=microgap;
 
-        createLayer("", layer_params, dsteel, sectorVolume);
-        
+        layerZpos = microgap;
+
+//        createLayer("", layer_params, dsteel, sectorVolume);
+
+        /*
         for (int ilayer = 0; ilayer < nlayers; ilayer++) {
             for (int iview = 0; iview < nviews; iview++) {
                 Geant4Basic layerVolume = createLayer(cp, isec, ilayer, iview);
@@ -85,18 +88,20 @@ public final class PCALGeant4Factory {
             }
         }
 
+         */
+        return new G4Box("asdf", 1, 1, 1);
     }
-    
-    public Geant4Basic createLayer(String volname, double params[], double thickness, Geant4Basic motherVol){
+
+    /*
+
+    public Geant4Basic createLayer(String volname, double params[], double thickness, Geant4Basic motherVol) {
         Geant4Basic sectorVolume = new Geant4Basic("pcal_s" + (isec + 1), "G4Trap", params);
         sectorVolume.setParUnits("mm", "deg", "deg", "mm", "mm", "mm", "deg", "mm", "mm", "mm", "deg");
-        sectorVolume.setPosition(0, 0, isec * 20);       
+        sectorVolume.setPosition(0, 0, isec * 20);
         layerVolume.setMother(motherVol);
     }
 
-
-
-public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
+    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
         //Geant4Basic  mother = new Geant4Basic();
 
         double motherGap = 4.0;
@@ -175,29 +180,5 @@ public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
         }
         return paddleVolumes;
     }
-
-    public Geant4Basic getMother() {
-        return motherVolume;
-    }
-
-    @Override
-        public String toString() {
-        StringBuilder str = new StringBuilder();
-
-        for(Geant4Basic layerVolume : motherVolume.getChildren()) {
-            str.append(layerVolume.gemcString());
-            str.append(System.getProperty("line.separator"));
-
-            for(Geant4Basic paddleVolume : layerVolume.getChildren()) {
-                str.append(paddleVolume.gemcString());
-                str.append(System.getProperty("line.separator"));
-            }
-        }
-
-        return str.toString();
-    }
-
-    public String getProperty(String name) {
-        return properties.containsKey(name) ? properties.get(name) : "none";
-    }
+     */
 }

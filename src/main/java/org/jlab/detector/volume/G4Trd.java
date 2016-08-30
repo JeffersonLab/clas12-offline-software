@@ -19,7 +19,5 @@ public class G4Trd extends Geant4Basic{
         setName(name);
         setType("Trd");
         setDimensions(Length.value(pdx1), Length.value(pdx2), Length.value(pdy1), Length.value(pdy2), Length.value(pdz));
-        
-        
     }
 }
