@@ -106,17 +106,18 @@ public abstract class Geant4Basic {
         }
     }
 
-    public void translate(double x, double y, double z) {
+    public Geant4Basic translate(double x, double y, double z) {
         volumeTransformation.prepend(Transform.unity().translate(x, y, z));
-
         updateCSGtransformation();
+        
+        return this;
     }
 
-    public void translate(Vector3d pos) {
-        translate(pos.x, pos.y, pos.z);
+    public Geant4Basic translate(Vector3d pos) {
+        return translate(pos.x, pos.y, pos.z);
     }
 
-    public void rotate(String order, double r1, double r2, double r3) {
+    public Geant4Basic rotate(String order, double r1, double r2, double r3) {
         rotationOrder = order;
         rotationValues = new double[]{r1, r2, r3};
 
@@ -148,6 +149,8 @@ public abstract class Geant4Basic {
 
         volumeTransformation.prepend(volumeRotation);
         updateCSGtransformation();
+        
+        return this;
     }
 
     public void setId(int... id) {
