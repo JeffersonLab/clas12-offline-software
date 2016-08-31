@@ -11,7 +11,7 @@ import org.jlab.geometry.prim.Box;
  *
  * @author kenjo
  */
-public class G4World extends Geant4Basic{
+public final class G4World extends Geant4Basic{
     public G4World(String name){
         super(new Box(1,1,1));
         setName(name);

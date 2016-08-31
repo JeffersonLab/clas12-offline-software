@@ -5,8 +5,6 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
-import org.jlab.detector.volume.G4Box;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
@@ -18,69 +16,12 @@ import org.jlab.geom.base.ConstantProvider;
  */
 public final class PCALGeant4Factory extends Geant4Factory {
 
-    private class Layer extends G4Trap {
-        private final double thickness;
-        
-        public Layer(String name, double thickness) {
-            super(name, thickness/2.0, 0, 0, uheight/2.0, virtualzero, umax/2.0, 0, uheight/2.0, virtualzero, umax/2.0, 0);
-            this.thickness = thickness;
-        }
-        
-        public double shiftZ(double dz){
-            translate(0,0,dz+thickness/2.0);
-            return dz+thickness;
-        }
-    }
-
-    private final class ULayer extends Layer {
-
-        public ULayer(String name, double thickness) {
-            super(name, thickness);
-        }
-    }
-
-    private enum 
-    private class PCALSector {
-
-        private final G4Trap sectorVolume;
-        private final double hsector = uheight + 2.0 * extrathickness;
-        private final double dsector = nsteel * dsteel + nfoam * dfoam
-                + nviews * nlayers * dstrip
-                + (nviews * nlayers - 1) * dlead
-                + (2 * nviews * nlayers + nsteel + nfoam) * microgap;
-
-        public PCALSector(int isector) {
-            sectorVolume = new G4Trap("pcal_s"+isector, dsector / 2.0, 0, 0, hsector / 2.0, virtualzero, umax / 2.0, 0, hsector / 2.0, virtualzero, umax / 2.0, 0);
-            
-            double layerPos = -dsector / 2.0 + microgap;
-            
-            Layer steelVol1 = new Layer("Stainless_Steel_Front_1_s"+isector, dsteel);
-            steelVol1.setMother(sectorVolume);
-            layerPos = steelVol1.shiftZ(layerPos) + microgap;
-            
-            Layer foamVol1 = new Layer("Last-a-Foam_Front_s"+isector, dfoam);
-            foamVol1.setMother(sectorVolume);
-            layerPos = foamVol1.shiftZ(layerPos) + microgap;
-            
-            Layer steelVol2 = new Layer("Stainless_Steel_Front_2_s"+isector, dsteel);
-            steelVol2.setMother(sectorVolume);
-            layerPos = steelVol2.shiftZ(layerPos) + microgap;
-            
-
-        }
-
-        public void setMother(Geant4Basic motherVolume) {
-            sectorVolume.setMother(motherVolume);
-        }
-    }
-
     private final double microgap = 0.1;
     private final double extrathickness = 0.5;
     private final double virtualzero = 0.00000001;
-    private double layerZpos;
 
     private final int nsectors, nviews, nlayers, nsteel, nfoam;
-    private final double dsteel, dfoam, dlead, dstrip, umax, thview, uheight;
+    private final double dsteel, dfoam, dlead, dstrip, umax, wmax, thview, uheight, wheight, walpha;
 
     public PCALGeant4Factory(ConstantProvider cp) {
         motherVolume = new G4World("fc");
@@ -97,40 +38,126 @@ public final class PCALGeant4Factory extends Geant4Factory {
         dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0);
 
         umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0);
-        thview = cp.getDouble("/geometry/pcal/pcal/view_angle", 0);
-        uheight = umax * Math.tan(Math.toRadians(thview)) / 2.0;
+        wmax = cp.getDouble("/geometry/pcal/Wview/max_length", 0);
 
-        for (int isec = 0; isec < nsectors; isec++) {
-            Geant4Basic sectorVolume = createSector(cp, isec);
+        thview = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
+        uheight = umax * Math.tan(thview) / 2.0;
+        wheight = wmax * Math.sin(2 * thview);
+        walpha = Math.atan((0.5 - 2.0 * Math.pow(Math.cos(thview), 2.0)) * wmax / wheight);
+
+        for (int isec = 1; isec <= 1; isec++) {
+            PCALSector sectorVolume = new PCALSector(isec);
+            sectorVolume.setMother(motherVolume);
         }
     }
 
-    public Geant4Basic createSector(ConstantProvider cp, int isec) {
+    private Layer getULayer(int ilayer, int isector) {
+        Layer uLayer = new ULayer(ilayer, isector);
+        uLayer.setName("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector);
+        return uLayer;
+    }
 
-        //layer_params - G4Trap dimensions for U layer, same for all lead, stell, foam layers
-        //used for creation of all passive layers
-        double layer_params[] = {0.0, 0, 0,
-            hsector / 2, virtualzero, umax / 2, 0,
-            hsector / 2, virtualzero, umax / 2, 0};
+    private Layer getVLayer(int ilayer, int isector) {
+        Layer vLayer = new WLayer(ilayer, isector);
+        vLayer.setName("V-scintillator_" + (ilayer * 3 + 2) + "_s" + isector);
+        vLayer.rotate("xyz", 0, Math.toRadians(180), thview);
+        return vLayer;
+    }
 
-        //params - G4Trap dimensions for sector volume (mother volume)
-        Geant4Basic sectorVolume = new G4Box("pcal_s" + (isec + 1), 1, 1, 1);
-        sectorVolume.setMother(motherVolume);
+    private Layer getWLayer(int ilayer, int isector) {
+        Layer wLayer = new WLayer(ilayer, isector);
+        wLayer.setName("W-scintillator_" + (ilayer * 3 + 3) + "_s" + isector);
+        wLayer.rotate("xyz", 0, 0, thview);
+        return wLayer;
+    }
 
-        layerZpos = microgap;
+    private class Layer extends G4Trap {
 
-//        createLayer("", layer_params, dsteel, sectorVolume);
+        private final double thickness;
 
-        /*
-        for (int ilayer = 0; ilayer < nlayers; ilayer++) {
-            for (int iview = 0; iview < nviews; iview++) {
-                Geant4Basic layerVolume = createLayer(cp, isec, ilayer, iview);
-                layerVolume.setMother(sectorVolume);
+        protected Layer(String name, double pDz, double pDy, double pDx1, double pDx2, double pAlpha) {
+            super(name, pDz, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
+            this.thickness = 2.0 * pDz;
+        }
+
+        private Layer(String name, double thickness) {
+            //G4Trap dimensions for U layer, same for all lead, stell, foam layers
+            //used for creation of all passive layers
+            this(name, thickness / 2.0, uheight / 2.0, virtualzero, umax / 2.0, 0);
+        }
+
+        public double shiftZ(double dz) {
+            translate(0, 0, dz + thickness / 2.0);
+            return dz + thickness;
+        }
+    }
+
+    private final class ULayer extends Layer {
+        private ULayer(int ilayer, int isector) {
+            super("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
+        }
+    }
+
+    private final class WLayer extends Layer {
+        private WLayer(int ilayer, int isector) {
+            super("", dstrip / 2.0, wheight / 2.0, virtualzero, wmax / 2.0, -walpha);
+        }
+    }
+
+    private final class PCALSector {
+
+        private final G4Trap sectorVolume;
+        //G4Trap dimensions for sector volume (mother volume)
+        private final double hsector = uheight + 2.0 * extrathickness;
+        private final double dsector = nsteel * dsteel + nfoam * dfoam
+                + nviews * nlayers * dstrip
+                + (nviews * nlayers - 1) * dlead
+                + (2 * nviews * nlayers + nsteel + nfoam) * microgap;
+        private double layerPos;
+        private final int isector;
+
+        public PCALSector(int isector) {
+            sectorVolume = new G4Trap("pcal_s" + isector, dsector / 2.0, 0, 0, hsector / 2.0, virtualzero, umax / 2.0, 0, hsector / 2.0, virtualzero, umax / 2.0, 0);
+            this.isector = isector;
+            layerPos = -dsector / 2.0 + microgap;
+
+            makeWindow("Front");
+
+            int ilead = 1;
+            for (int ilayer = 0; ilayer < nlayers; ilayer++) {
+                for (Layer lVol : new Layer[]{
+                    getULayer(ilayer, isector),
+                    getVLayer(ilayer, isector),
+                    getWLayer(ilayer, isector)}) {
+
+                    lVol.setMother(sectorVolume);
+                    layerPos = lVol.shiftZ(layerPos) + microgap;
+/*
+                    if (ilead < 15) {
+                        Layer leadVol = new Layer("PCAL_Lead_Layer_" + (ilead++) + "_s" + isector, dlead);
+                        leadVol.setMother(sectorVolume);
+                        layerPos = lVol.shiftZ(layerPos) + microgap;
+                    }
+*/
+                }
+                makeWindow("Back");
             }
         }
 
-         */
-        return new G4Box("asdf", 1, 1, 1);
+        public void makeWindow(String winname) {
+            for (Layer layerVol : new Layer[]{
+                new Layer("Stainless_Steel_" + winname + "_1_s" + isector, dsteel),
+                new Layer("Last-a-Foam_" + winname + "_s" + isector, dfoam),
+                new Layer("Stainless_Steel_" + winname + "_2_s" + isector, dsteel)}) {
+
+                layerVol.setMother(sectorVolume);
+                layerPos = layerVol.shiftZ(layerPos) + microgap;
+            }
+        }
+
+        public void setMother(Geant4Basic motherVolume) {
+            sectorVolume.setMother(motherVolume);
+        }
     }
 
 }
