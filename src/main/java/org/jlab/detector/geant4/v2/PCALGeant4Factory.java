@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
@@ -18,7 +19,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
     private final double microgap = 0.1;
     private final double extrathickness = 0.5;
-    private final double virtualzero = 0.00000001;
+    private final double virtualzero = 1e-8;
 
     private final int nsectors, nviews, nlayers, nsteel, nfoam;
     private final double dsteel, dfoam, dlead, dstrip, umax, wmax, thview, uheight, wheight, walpha;
@@ -60,7 +61,10 @@ public final class PCALGeant4Factory extends Geant4Factory {
     private Layer getVLayer(int ilayer, int isector) {
         Layer vLayer = new WLayer(ilayer, isector);
         vLayer.setName("V-scintillator_" + (ilayer * 3 + 2) + "_s" + isector);
-        vLayer.rotate("xyz", 0, Math.toRadians(180), thview);
+        vLayer.rotate("zyx", thview, Math.toRadians(180), 0);
+        Vector3d uTopRight = new Vector3d(umax/2.0, uheight/2.0, 0);
+        Vector3d shiftVec = uTopRight.minus(vLayer.getLocalTransform().transform(new Vector3d(-wmax*(Math.pow(Math.cos(thview), 2.0)+0.25), -wheight/2.0, 0)));
+        vLayer.translate(shiftVec);
         return vLayer;
     }
 
@@ -68,6 +72,9 @@ public final class PCALGeant4Factory extends Geant4Factory {
         Layer wLayer = new WLayer(ilayer, isector);
         wLayer.setName("W-scintillator_" + (ilayer * 3 + 3) + "_s" + isector);
         wLayer.rotate("xyz", 0, 0, thview);
+        Vector3d uTopLeft = new Vector3d(-umax/2.0, uheight/2.0, 0);
+        Vector3d shiftVec = uTopLeft.minus(wLayer.getLocalTransform().transform(new Vector3d(-wmax*(Math.pow(Math.cos(thview), 2.0)+0.25), -wheight/2.0, 0)));
+        wLayer.translate(shiftVec);
         return wLayer;
     }
 
@@ -75,15 +82,15 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
         private final double thickness;
 
-        protected Layer(String name, double pDz, double pDy, double pDx1, double pDx2, double pAlpha) {
-            super(name, pDz, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
-            this.thickness = 2.0 * pDz;
+        protected Layer(String name, double thickness, double pDy, double pDx1, double pDx2, double pAlpha) {
+            super(name, thickness/2.0, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
+            this.thickness = thickness;
         }
 
         private Layer(String name, double thickness) {
             //G4Trap dimensions for U layer, same for all lead, stell, foam layers
             //used for creation of all passive layers
-            this(name, thickness / 2.0, uheight / 2.0, virtualzero, umax / 2.0, 0);
+            this(name, thickness, uheight / 2.0, virtualzero, umax / 2.0, 0);
         }
 
         public double shiftZ(double dz) {
@@ -93,14 +100,16 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     private final class ULayer extends Layer {
+
         private ULayer(int ilayer, int isector) {
             super("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
         }
     }
 
     private final class WLayer extends Layer {
+
         private WLayer(int ilayer, int isector) {
-            super("", dstrip / 2.0, wheight / 2.0, virtualzero, wmax / 2.0, -walpha);
+            super("", dstrip, wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
         }
     }
 
@@ -125,23 +134,23 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
             int ilead = 1;
             for (int ilayer = 0; ilayer < nlayers; ilayer++) {
-                for (Layer lVol : new Layer[]{
+                for (Layer uvwVol : new Layer[]{
                     getULayer(ilayer, isector),
                     getVLayer(ilayer, isector),
                     getWLayer(ilayer, isector)}) {
 
-                    lVol.setMother(sectorVolume);
-                    layerPos = lVol.shiftZ(layerPos) + microgap;
-/*
+                    uvwVol.setMother(sectorVolume);
+                    layerPos = uvwVol.shiftZ(layerPos) + microgap;
+                    
                     if (ilead < 15) {
                         Layer leadVol = new Layer("PCAL_Lead_Layer_" + (ilead++) + "_s" + isector, dlead);
                         leadVol.setMother(sectorVolume);
-                        layerPos = lVol.shiftZ(layerPos) + microgap;
+                        layerPos = leadVol.shiftZ(layerPos) + microgap;
                     }
-*/
+                    
                 }
-                makeWindow("Back");
             }
+            makeWindow("Back");
         }
 
         public void makeWindow(String winname) {

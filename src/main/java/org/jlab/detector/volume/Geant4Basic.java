@@ -30,7 +30,7 @@ public abstract class Geant4Basic {
     protected CSG volumeCSG;
     protected final Primitive volumeSolid;
 
-    Transform volumeTransformation = Transform.unity();
+    private Transform volumeTransformation = Transform.unity();
 
     String rotationOrder = "xyz";
     double[] rotationValues = {0.0, 0.0, 0.0};
@@ -90,6 +90,10 @@ public abstract class Geant4Basic {
         return this.volumeId;
     }
 
+    public Transform getLocalTransform(){
+        return volumeTransformation;
+    }
+    
     public Transform getGlobalTransform() {
         Transform globalTransform = Transform.unity();
         if (motherVolume != null) {
@@ -168,19 +172,19 @@ public abstract class Geant4Basic {
         }
 
         Vector3d pos = getLocalPosition();
-        str.append(String.format("| %8.4f*%s %8.4f*%s %8.4f*%s",
+        str.append(String.format("| %f*%s %f*%s %f*%s",
                 pos.x, Length.unit(),
                 pos.y, Length.unit(),
                 pos.z, Length.unit()));
 
         str.append(String.format("| ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
         for (int irot = 0; irot < rotationValues.length; irot++) {
-            str.append(String.format(" %8.4f*deg ", Math.toDegrees(rotationValues[rotationValues.length - irot - 1])));
+            str.append(String.format(" %f*deg ", Math.toDegrees(rotationValues[rotationValues.length - irot - 1])));
         }
 
         str.append(String.format("| %8s |", this.getType()));
         volumeDimensions.stream()
-                .forEach(dim -> str.append(String.format("%12.4f*%s", dim.value, dim.unit)));
+                .forEach(dim -> str.append(String.format("%f*%s ", dim.value, dim.unit)));
         str.append(" | ");
 
         int[] ids = this.getId();
