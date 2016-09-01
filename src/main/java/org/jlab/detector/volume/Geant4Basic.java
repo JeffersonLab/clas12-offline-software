@@ -90,10 +90,10 @@ public abstract class Geant4Basic {
         return this.volumeId;
     }
 
-    public Transform getLocalTransform(){
+    public Transform getLocalTransform() {
         return volumeTransformation;
     }
-    
+
     public Transform getGlobalTransform() {
         Transform globalTransform = Transform.unity();
         if (motherVolume != null) {
@@ -113,7 +113,7 @@ public abstract class Geant4Basic {
     public Geant4Basic translate(double x, double y, double z) {
         volumeTransformation.prepend(Transform.unity().translate(x, y, z));
         updateCSGtransformation();
-        
+
         return this;
     }
 
@@ -153,7 +153,7 @@ public abstract class Geant4Basic {
 
         volumeTransformation.prepend(volumeRotation);
         updateCSGtransformation();
-        
+
         return this;
     }
 
@@ -168,23 +168,22 @@ public abstract class Geant4Basic {
         if (motherVolume == null) {
             str.append(String.format("%18s | |", volumeName));
         } else {
-            str.append(String.format("%18s | %8s", volumeName, motherVolume.getName()));
+            str.append(String.format("%18s | %8s | ", volumeName, motherVolume.getName()));
         }
 
         Vector3d pos = getLocalPosition();
-        str.append(String.format("| %f*%s %f*%s %f*%s",
-                pos.x, Length.unit(),
-                pos.y, Length.unit(),
-                pos.z, Length.unit()));
+        str.append(pos.x + "*" + Length.unit() + " "
+                + pos.y + "*" + Length.unit() + " "
+                + pos.z + "*" + Length.unit() + " ");
 
         str.append(String.format("| ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
         for (int irot = 0; irot < rotationValues.length; irot++) {
-            str.append(String.format(" %f*deg ", Math.toDegrees(rotationValues[rotationValues.length - irot - 1])));
+            str.append(Math.toDegrees(rotationValues[rotationValues.length - irot - 1])).append("*deg ");
         }
 
-        str.append(String.format("| %8s |", this.getType()));
+        str.append(String.format("| %8s | ", this.getType()));
         volumeDimensions.stream()
-                .forEach(dim -> str.append(String.format("%f*%s ", dim.value, dim.unit)));
+                .forEach(dim -> str.append(dim.value).append("*").append(dim.unit).append(" "));
         str.append(" | ");
 
         int[] ids = this.getId();
@@ -238,7 +237,7 @@ public abstract class Geant4Basic {
                         .collect(Collectors.toList());
             }
         }
-        
+
         return hits;
     }
 
