@@ -593,4 +593,47 @@ public class Vector3d {
 
     }
 
+    public Vector3d add(double x, double y, double z){
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        return this;
+    }
+
+    public Vector3d add(Vector3d vec){
+        this.x += vec.x;
+        this.y += vec.y;
+        this.z += vec.z;
+        return this;
+    }
+
+    public Vector3d rotateX(double angle) {
+        double s = Math.sin(angle);
+        double c = Math.cos(angle);
+        double yy = y;
+        y = c * yy - s * z;
+        z = s * yy + c * z;
+        
+        return this;
+    }
+
+    public Vector3d rotateY(double angle) {
+        double s = Math.sin(angle);
+        double c = Math.cos(angle);
+        double zz = z;
+        z = c * zz - s * x;
+        x = s * zz + c * x;
+        
+        return this;
+    }
+
+    public Vector3d rotateZ(double angle) {
+        double s = Math.sin(angle);
+        double c = Math.cos(angle);
+        double xx = x;
+        x = c * xx - s * y;
+        y = s * xx + c * y;
+        
+        return this;
+    }
 }

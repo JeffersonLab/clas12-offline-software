@@ -24,7 +24,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
     private final int nustrips, nwstrips;
     private final double dsteel, dfoam, dlead, dstrip, dwrap, wstrip;
     private final double umax, wmax, uheight, wheight;
-    private final double thview, walpha;
+    private final double thtilt, thview, walpha, dist2tgt, yhigh;
 
     public PCALGeant4Factory(ConstantProvider cp) {
         motherVolume = new G4World("fc");
@@ -45,15 +45,20 @@ public final class PCALGeant4Factory extends Geant4Factory {
         dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0);
         wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0);
 
+        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0);
+        yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0);
+
         umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0);
         wmax = cp.getDouble("/geometry/pcal/Wview/max_length", 0);
 
         thview = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
+        thtilt = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/thtilt", 0));
+
         uheight = umax * Math.tan(thview) / 2.0;
         wheight = wmax * Math.sin(2 * thview);
         walpha = Math.atan((0.5 - 2.0 * Math.pow(Math.cos(thview), 2.0)) * wmax / wheight);
 
-        for (int isec = 1; isec <= 1; isec++) {
+        for (int isec = 1; isec <= nsectors; isec++) {
             PCALSector sectorVolume = new PCALSector(isec);
             sectorVolume.setMother(motherVolume);
         }
@@ -154,37 +159,53 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
 
-                stripVol.setMother(layerVol);
                 double ystrip = (wheight - hbtm - htop) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
+                stripVol.setMother(layerVol);
 
                 htop = hbtm + 2.0 * dwrap;
                 hbtm += wstrip;
             }
-
         }
     }
 
     private final class PCALSector {
+
         private final double extrathickness = 0.5;
-        private final G4Trap sectorVolume;
         //G4Trap dimensions for sector volume (mother volume)
         private final double dsector = nsteel * dsteel + nfoam * dfoam
                 + nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + nsteel + nfoam) * microgap;
+        private final double dist2midplane = dist2tgt
+                + (nviews * nlayers * dstrip
+                + (nviews * nlayers - 1) * dlead
+                + (2 * nviews * nlayers - 2) * microgap) / 2.0;
+        private final double hshift = uheight / 2.0 - yhigh;
+
         private double layerPos;
         private final int isector;
+        private final G4Trap sectorVolume;
 
         public PCALSector(int isector) {
             sectorVolume = new G4Trap("pcal_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
                     uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0,
                     uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0);
+
+            double secphi = Math.toRadians(90 - (isector - 1) * 60);
+            sectorVolume.rotate("yxz", 0, thtilt, secphi);
+
+            Vector3d secPos = new Vector3d(0, 0, dist2midplane)
+                    .rotateX(-thtilt)
+                    .add(0, -hshift * Math.cos(thtilt), hshift * Math.sin(thtilt))
+                    .rotateZ(-secphi);
+            sectorVolume.translate(secPos);
+
             this.isector = isector;
             layerPos = -dsector / 2.0 + microgap;
 
-//            makeWindow("Front");
+            makeWindow("Front");
             int ilead = 1;
             for (int ilayer = 0; ilayer < nlayers; ilayer++) {
                 for (Layer uvwVol : new Layer[]{
@@ -203,7 +224,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
                 }
             }
-//            makeWindow("Back");
+            makeWindow("Back");
         }
 
         public void makeWindow(String winname) {
