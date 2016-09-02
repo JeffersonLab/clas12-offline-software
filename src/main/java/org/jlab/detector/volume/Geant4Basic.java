@@ -105,6 +105,9 @@ public abstract class Geant4Basic {
     }
 
     protected final void updateCSGtransformation() {
+        children.stream()
+                .forEach(child -> child.updateCSGtransformation());
+        
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }

@@ -18,7 +18,6 @@ import org.jlab.geom.base.ConstantProvider;
 public final class PCALGeant4Factory extends Geant4Factory {
 
     private final double microgap = 0.1;
-    private final double extrathickness = 0.5;
     private final double virtualzero = 1e-8;
 
     private final int nsectors, nviews, nlayers, nsteel, nfoam;
@@ -60,21 +59,42 @@ public final class PCALGeant4Factory extends Geant4Factory {
         }
     }
 
+    private Layer getULayer(int ilayer, int isector) {
+        Layer uLayer = new Layer("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
+        uLayer.populateUstrips(ilayer, isector);
+        return uLayer;
+    }
+
+    private Layer getWLayer(int ilayer, int isector) {
+        Layer wLayer = new Layer("W-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip,
+                wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
+        wLayer.layerVol.rotate("xyz", 0, 0, thview);
+
+        Vector3d uTopLeft = new Vector3d(-umax / 2.0, uheight / 2.0, 0);
+        Vector3d shiftVec = uTopLeft.minus(wLayer.layerVol.getLocalTransform().transform(
+                new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
+        wLayer.layerVol.translate(shiftVec);
+        wLayer.populateWstrips(ilayer, isector);
+        return wLayer;
+    }
+
     private Layer getVLayer(int ilayer, int isector) {
-        Layer vLayer = new WLayer(ilayer, isector);
-        vLayer.setName("V-scintillator_" + (ilayer * 3 + 2) + "_s" + isector);
-        vLayer.rotate("zyx", thview, Math.toRadians(180), 0);
+        Layer vLayer = new Layer("V-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip,
+                wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
+        vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
+
         Vector3d uTopRight = new Vector3d(umax / 2.0, uheight / 2.0, 0);
-        Vector3d shiftVec = uTopRight.minus(vLayer.getLocalTransform().transform(new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
-        vLayer.translate(shiftVec);
+        Vector3d shiftVec = uTopRight.minus(vLayer.layerVol.getLocalTransform().transform(
+                new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
+        vLayer.layerVol.translate(shiftVec);
+        vLayer.populateWstrips(ilayer, isector);
         return vLayer;
     }
 
-
     private class Layer {
 
-        protected final G4Trap layerVol;
-        private final double thickness;
+        final G4Trap layerVol;
+        final double thickness;
 
         protected Layer(String name, double thickness, double pDy, double pDx1, double pDx2, double pAlpha) {
             layerVol = new G4Trap(name, thickness / 2.0, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
@@ -91,25 +111,26 @@ public final class PCALGeant4Factory extends Geant4Factory {
             layerVol.translate(0, 0, dz + thickness / 2.0);
             return dz + thickness;
         }
-    }
 
-    private final class ULayer extends Layer {
-        private ULayer(int ilayer, int isector) {
-            super("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
+        public void setMother(Geant4Basic motherVol) {
+            layerVol.setMother(motherVol);
+        }
 
+        public void populateUstrips(int ilayer, int isector) {
             double w0 = uheight - wstrip * nustrips;
             double hbtm = dwrap;
             double htop = w0 - dwrap;
 
             for (int istrip = 0; istrip <= nustrips; istrip++) {
-                double lbtm = hbtm/Math.tan(thview);
-                double ltop = htop/Math.tan(thview);
+                double uwidth = (istrip == 0) ? w0 : wstrip;
+                double lhalfbtm = hbtm / Math.tan(thview);
+                double lhalftop = htop / Math.tan(thview);
 
-                G4Trap stripVol = new G4Trap("U_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
-                        wstrip / 2.0 - dwrap, lbtm, ltop, 0,
-                        wstrip / 2.0 - dwrap, lbtm, ltop, 0);
-                
+                        uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
+                        uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
+
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hbtm + htop) / 2.0, 0);
 
@@ -117,29 +138,38 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 htop += wstrip;
             }
         }
-    }
 
-    private final class WLayer extends Layer {
+        public void populateWstrips(int ilayer, int isector) {
+            double w0 = wheight - wstrip * nwstrips;
+            double htop = dwrap;
+            double hbtm = w0 - dwrap;
 
-    private Layer getWLayer(int ilayer, int isector) {
-        Layer wLayer = new WLayer(ilayer, isector);
-        wLayer.setName("W-scintillator_" + (ilayer * 3 + 3) + "_s" + isector);
-        wLayer.rotate("xyz", 0, 0, thview);
-        Vector3d uTopLeft = new Vector3d(-umax / 2.0, uheight / 2.0, 0);
-        Vector3d shiftVec = uTopLeft.minus(wLayer.getLocalTransform().transform(new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
-        wLayer.translate(shiftVec);
-        return wLayer;
-    }
-        private WLayer(int ilayer, int isector) {
-            super("", dstrip, wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
+            for (int istrip = 0; istrip <= nwstrips; istrip++) {
+                double wwidth = (istrip == 0) ? w0 : wstrip;
+                double lbtm = hbtm / Math.sin(2.0 * thview);
+                double ltop = htop / Math.sin(2.0 * thview);
+
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+                        dstrip / 2.0 - dwrap, 0, 0,
+                        wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
+                        wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
+
+                stripVol.setMother(layerVol);
+                double ystrip = (wheight - hbtm - htop) / 2.0;
+                double xstrip = ystrip * Math.tan(-walpha);
+                stripVol.translate(xstrip, ystrip, 0);
+
+                htop = hbtm + 2.0 * dwrap;
+                hbtm += wstrip;
+            }
+
         }
     }
 
     private final class PCALSector {
-
+        private final double extrathickness = 0.5;
         private final G4Trap sectorVolume;
         //G4Trap dimensions for sector volume (mother volume)
-        private final double hsector = uheight + 2.0 * extrathickness;
         private final double dsector = nsteel * dsteel + nfoam * dfoam
                 + nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
@@ -148,12 +178,13 @@ public final class PCALGeant4Factory extends Geant4Factory {
         private final int isector;
 
         public PCALSector(int isector) {
-            sectorVolume = new G4Trap("pcal_s" + isector, dsector / 2.0, 0, 0, hsector / 2.0, virtualzero, umax / 2.0, 0, hsector / 2.0, virtualzero, umax / 2.0, 0);
+            sectorVolume = new G4Trap("pcal_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
+                    uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0,
+                    uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0);
             this.isector = isector;
             layerPos = -dsector / 2.0 + microgap;
 
-            makeWindow("Front");
-
+//            makeWindow("Front");
             int ilead = 1;
             for (int ilayer = 0; ilayer < nlayers; ilayer++) {
                 for (Layer uvwVol : new Layer[]{
@@ -172,7 +203,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
                 }
             }
-            makeWindow("Back");
+//            makeWindow("Back");
         }
 
         public void makeWindow(String winname) {
