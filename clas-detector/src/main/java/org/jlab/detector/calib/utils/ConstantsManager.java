@@ -8,8 +8,10 @@ package org.jlab.detector.calib.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -19,7 +21,7 @@ import org.jlab.utils.groups.IndexedTable;
 public class ConstantsManager {
     
     private DatabaseConstantsDescriptor  defaultDescriptor = new DatabaseConstantsDescriptor();
-    private Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
+    private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
     private String   databaseVariation = "default";
     
     public ConstantsManager(){
@@ -38,12 +40,15 @@ public class ConstantsManager {
         this.databaseVariation = variation;
     }
     
-    public void init(List<String>  tables){
+    public synchronized void init(List<String>  tables){
         this.defaultDescriptor.addTables(tables);
     }
     
-    public void init(List<String>  keys, List<String>  tables){
-        this.defaultDescriptor.addTables(keys,tables);
+    public synchronized void init(List<String>  keys, List<String>  tables){
+        Set<String> keysSet = new LinkedHashSet<String>(keys);
+        Set<String> tablesSet = new LinkedHashSet<String>(tables);
+        this.defaultDescriptor.addTables(keysSet,tablesSet);
+        
     }
     
     public IndexedTable  getConstants(int run, String table){
@@ -58,27 +63,35 @@ public class ConstantsManager {
         return descriptor.getMap().get(table);
     }
     
-    private void loadConstantsForRun(int run){
+    private synchronized void loadConstantsForRun(int run){
 
+        if(this.runConstants.containsKey(run)==true) return;
+        
         System.out.println("[ConstantsManager] --->  loading table for run = " + run);
         DatabaseConstantsDescriptor desc = defaultDescriptor.getCopy(run);
         DatabaseConstantProvider provider = new DatabaseConstantProvider(run,
                 this.databaseVariation);
-
-            for(int i = 0; i < desc.getTableNames().size(); i++){                
-                String tableName = desc.getTableNames().get(i);
-                try {
-                    IndexedTable  table = provider.readTable(tableName);
-                    desc.getMap().put(desc.getTableKeys().get(i), table);
-                    System.out.println("adding : table " + tableName 
-                    + "  key = " + desc.getTableKeys().get(i));
-                } catch (Exception e) {
-                    System.out.println("[ConstantsManager] ---> error reading table : "
-                    + tableName);
-                }
+        
+        List<String>   tn = new ArrayList<String>(desc.getTableNames());
+        List<String>   tk = new ArrayList<String>(desc.getTableKeys());
+        
+        //for(String tableName : desc.getTableNames())
+        
+        for(int i = 0; i < desc.getTableNames().size(); i++){                
+            String tableName = tn.get(i);
+            try {
+                IndexedTable  table = provider.readTable(tableName);
+                desc.getMap().put(tk.get(i), table);
+                System.out.println("adding : table " + tableName 
+                        + "  key = " + tk.get(i));
+            } catch (Exception e) {
+                System.out.println("[ConstantsManager] ---> error reading table : "
+                        + tableName);
             }
-            this.runConstants.put(run, desc);
-            System.out.println(this.toString());
+        }
+            
+        this.runConstants.put(run, desc);
+        System.out.println(this.toString());
     }
     
     @Override
@@ -98,13 +111,15 @@ public class ConstantsManager {
     /**
      * Helper class to hold all constants for particular run.
      */
-    public static class DatabaseConstantsDescriptor{
+    public static class DatabaseConstantsDescriptor {
         
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
+        private int     nIndex     = 3;
         
-        List<String>    tableNames = new ArrayList<String>();
-        List<String>    mapKeys    = new ArrayList<String>();
+        Set<String>    tableNames  = new LinkedHashSet<String>();
+        
+        Set<String>    mapKeys     = new LinkedHashSet<String>();
         
         Map<String,IndexedTable>  hashTables = new LinkedHashMap<String,IndexedTable>();
         
@@ -124,7 +139,7 @@ public class ConstantsManager {
             }
         }
         
-        public void addTables(List<String> keys, List<String> tables){
+        public void addTables(Set<String> keys, Set<String> tables){
             if(keys.size()!=tables.size()){
                 System.out.println("[DatabaseConstantsDescriptor] error --> "
                 + " size of keys ("+keys.size()+") does not match size of"
@@ -155,11 +170,11 @@ public class ConstantsManager {
             return this.hashTables.get(table);
         }
         
-        public List<String>  getTableNames(){
+        public Set<String>  getTableNames(){
             return this.tableNames;
         }
         
-        public List<String>  getTableKeys(){
+        public Set<String>  getTableKeys(){
             return this.mapKeys;
         }
         
@@ -172,8 +187,11 @@ public class ConstantsManager {
         @Override
         public String toString(){
             StringBuilder str = new StringBuilder();
-            for(int i = 0; i < this.tableNames.size();i++){
-                str.append(String.format("%4d : %s\n", i , this.tableNames.get(i)));
+            int i = 0;
+            for(String name : tableNames){
+                //for(int i = 0; i < this.tableNames.size();i++){
+                str.append(String.format("%4d : %s\n", i , name));
+                i++;
             }
             return str.toString();
         }
@@ -183,9 +201,11 @@ public class ConstantsManager {
     public static void main(String[] args){
         
         ConstantsManager  manager = new ConstantsManager("default");
+        
         manager.init(Arrays.asList(new String[]{
             "/daq/fadc/ec",
-            "/daq/fadc/ftof","/daq/fadc/htcc"}));        
+            "/daq/fadc/ftof","/daq/fadc/htcc"}));
+        
         IndexedTable  table1 = manager.getConstants(10, "/daq/fadc/htcc");
         IndexedTable  table2 = manager.getConstants(10, "/daq/fadc/ec");
         IndexedTable  table3 = manager.getConstants(12, "/daq/fadc/htcc");

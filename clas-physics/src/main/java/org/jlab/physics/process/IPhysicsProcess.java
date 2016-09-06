@@ -14,6 +14,8 @@ import org.jlab.physics.base.PhaseSpace;
  * @author gavalian
  */
 public interface IPhysicsProcess {
+    
     PhysicsEvent        getEvent(PhaseSpace kinematics);
     PhaseSpace          getPhaseSpace();
+    double              getWeight(PhaseSpace kinematics);
 }

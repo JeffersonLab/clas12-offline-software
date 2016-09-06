@@ -259,4 +259,8 @@ public class DVCSProcess implements IPhysicsProcess {
             event = dvcs.getEvent(kinematics);
         }*/
     }    
+
+    public double getWeight(PhaseSpace kinematics) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

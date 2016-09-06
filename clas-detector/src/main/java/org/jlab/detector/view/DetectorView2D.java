@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -170,6 +171,11 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
         viewLayers.get(layer).setActive(flag);
     }
     
+    public void initiateMouseEvent(int x, int y){
+        //ActionEvent ac = new ActionEvent(this,1,"");
+        
+    }
+    
     @Override
     public void mouseDragged(MouseEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -310,6 +316,9 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
             return this;
         }
         
+        public IndexedList<DetectorShape2D>  getShapes(){
+            return this.shapes;
+        }
         
         public int     getOpacity(){return opacity;}
 

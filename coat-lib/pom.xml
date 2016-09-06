@@ -2,7 +2,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
-  <artifactId>coat-lib</artifactId>
+  <artifactId>coat-libs</artifactId>
   <version>3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -77,6 +77,12 @@
   <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas-io</artifactId>
+    <version>3.0-SNAPSHOT</version>
+  </dependency>
+
+  <dependency>
+    <groupId>org.jlab.clas</groupId>
+    <artifactId>clas-reco</artifactId>
     <version>3.0-SNAPSHOT</version>
   </dependency>
 
@@ -214,8 +220,8 @@
 	<artifactSet>
           <excludes>
             <exclude>cnuphys:cnuphys</exclude>
-            <exclude>cnuphys:magfield</exclude>
-            <exclude>cnuphys:swimmer</exclude>
+           <!-- <exclude>cnuphys:magfield</exclude>
+            <exclude>cnuphys:swimmer</exclude> -->
             <exclude>cnuphys:bCNU</exclude>
             <exclude>cnuphys:bCNU3D</exclude>
             <exclude>cnuphys:jogl-all</exclude>

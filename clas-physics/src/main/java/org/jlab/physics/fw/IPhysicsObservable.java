@@ -6,13 +6,17 @@
 package org.jlab.physics.fw;
 
 import java.util.Map;
+import org.jlab.physics.base.ParameterSpace;
+import org.jlab.physics.base.PhaseSpace;
 
 /**
  *
  * @author gavalian
  */
-public interface IPhysicsObservable {    
+public interface IPhysicsObservable {
+    /*
     Map<String,Double>  getVariables();
     double  getValue();
-    String  getName();
+    String  getName();*/
+    double getValue(PhaseSpace space, ParameterSpace params);
 }

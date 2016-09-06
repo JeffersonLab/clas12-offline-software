@@ -81,4 +81,32 @@ public class EvioHipoEvent {
                 
         return EvioHipoEvent.getBankFTOF(list.get(0), list.get(1), list.get(2));
     }
+    
+    
+    public static EvioDataBank  getBankEC(EvioDataEvent event){
+        int nrows = 0;
+        List<EvioDataBank>  ecbanks = new ArrayList<EvioDataBank>();
+        boolean pcalExists = false;
+        boolean ecExists   = false;
+        
+        if(event.hasBank("PCAL::dgtz")==true){
+            EvioDataBank bank = (EvioDataBank) event.getBank("PCAL::dgtz");
+            nrows += bank.rows();
+            ecbanks.add(bank);            
+            pcalExists = true;
+        } 
+        
+        if(event.hasBank("EC::dgtz")==true){
+            EvioDataBank bank = (EvioDataBank) event.getBank("EC::dgtz");
+            nrows += bank.rows();
+            ecbanks.add(bank);
+            ecExists = true;
+        }
+        
+        EvioDataBank ecuBank = EvioFactory.createBank("ECU::dgtz",nrows);
+        
+        //for(pcal)
+        
+        return ecuBank;
+    }
 }

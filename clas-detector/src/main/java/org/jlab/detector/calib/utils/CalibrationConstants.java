@@ -45,6 +45,21 @@ public class CalibrationConstants extends IndexedTable {
         
     }
     
+    public CalibrationConstants(int indexCount,String[] format) {
+        super(indexCount,format);
+        if(indexCount==3){
+            this.setIndexName(0, "sector");
+            this.setIndexName(1, "layer");
+            this.setIndexName(2, "component");
+        }
+        if(indexCount==4){
+            this.setIndexName(0, "detector");
+            this.setIndexName(1, "sector");
+            this.setIndexName(2, "layer");
+            this.setIndexName(3, "component");
+        }
+        
+    }
     
     public void setName(String name){
         this.constantsName = name;

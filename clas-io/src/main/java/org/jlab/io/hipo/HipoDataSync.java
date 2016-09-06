@@ -119,7 +119,13 @@ public class HipoDataSync implements DataSync {
                 EvioDataBank  bankFTOF = EvioHipoEvent.getBankFTOF(event);
                 EvioDataEvent cevent   = EvioFactory.createEvioEvent();
                 cevent.appendBank(bankFTOF);
+                if(event.hasBank("TimeBasedTrkg::TBTracks")==true){
+                    EvioDataBank bankTRK = (EvioDataBank) event.getBank("TimeBasedTrkg::TBTracks");
+                    cevent.appendBanks(bankTRK);
+                }
+                
                 writer.writeEvent(cevent);
+                //writer.writeEvent(event);
             }
         }
         writer.close();
