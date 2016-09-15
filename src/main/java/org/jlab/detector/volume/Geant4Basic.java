@@ -30,7 +30,7 @@ public abstract class Geant4Basic {
     protected CSG volumeCSG;
     protected final Primitive volumeSolid;
 
-    private Transform volumeTransformation = Transform.unity();
+    private final Transform volumeTransformation = Transform.unity();
 
     String rotationOrder = "xyz";
     double[] rotationValues = {0.0, 0.0, 0.0};

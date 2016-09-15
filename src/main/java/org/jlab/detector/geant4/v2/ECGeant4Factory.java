@@ -21,8 +21,8 @@ public final class ECGeant4Factory extends Geant4Factory {
     private final double virtualzero = 1e-8;
 
     private final int nsectors, nviews, nlayers;
-    private final int nustrips, nwstrips;
-    private final double dlead, dstrip, dwrap;
+    private final int nustrips, nwstrips, nvstrips;
+    private final double dlead, dstrip, dwrap, dalum;
     private final double wUstrip, dwUstrip, wVstrip, dwVstrip, wWstrip, dwWstrip;
     private final double thtilt, thview, walpha;
     private final double dist2tgt, dist2cnt, shiftcnt;
@@ -34,212 +34,233 @@ public final class ECGeant4Factory extends Geant4Factory {
         nlayers = cp.getInteger("/geometry/ec/ec/nlayers", 0);
         nviews = cp.getInteger("/geometry/ec/ec/nviews", 0);
 
-        nustrips = cp.getInteger("/geometry/pcal/Uview/nstrips", 0);
-        nwstrips = cp.getInteger("/geometry/pcal/Wview/nstrips", 0);
+        nustrips = cp.getInteger("/geometry/ec/uview/nstrips", 0);
+        nvstrips = cp.getInteger("/geometry/ec/vview/nstrips", 0);
+        nwstrips = cp.getInteger("/geometry/ec/wview/nstrips", 0);
 
         dlead = cp.getDouble("/geometry/ec/ec/lead_thick", 0);
         dstrip = cp.getDouble("/geometry/ec/ec/strip_thick", 0);
         dwrap = cp.getDouble("/geometry/ec/ec/wrapper_thick", 0);
+        dalum = cp.getDouble("/geometry/ec/ec/alum_thick", 0);
 
         dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0);
         dist2cnt = cp.getDouble("/geometry/ec/ec/dist2cnt", 0);
         shiftcnt = cp.getDouble("/geometry/ec/ec/a1", 0);
 
-        wUstrip = cp.getDouble("/geometry/pcal/uview/a5", 0);
-        dwUstrip = cp.getDouble("/geometry/pcal/uview/a6", 0);
+        wUstrip = cp.getDouble("/geometry/ec/uview/a5", 0);
+        dwUstrip = cp.getDouble("/geometry/ec/uview/a6", 0);
 
-        wVstrip = cp.getDouble("/geometry/pcal/vview/a5", 0);
-        dwVstrip = cp.getDouble("/geometry/pcal/vview/a6", 0);
+        wVstrip = cp.getDouble("/geometry/ec/vview/a5", 0);
+        dwVstrip = cp.getDouble("/geometry/ec/vview/a6", 0);
 
-        wWstrip = cp.getDouble("/geometry/pcal/wview/a5", 0);
-        dwWstrip = cp.getDouble("/geometry/pcal/wview/a6", 0);
+        wWstrip = cp.getDouble("/geometry/ec/wview/a5", 0);
+        dwWstrip = cp.getDouble("/geometry/ec/wview/a6", 0);
 
         thview = Math.toRadians(cp.getDouble("/geometry/ec/ec/view_angle", 0));
         thtilt = Math.toRadians(cp.getDouble("/geometry/ec/ec/thtilt", 0));
         walpha = Math.atan((Math.pow(Math.tan(thview), 2.0) - 3) / 4 / Math.tan(thview));
 
         for (int isec = 1; isec <= nsectors; isec++) {
-            PCALSector sectorVolume = new PCALSector(isec);
+            ECSector sectorVolume = new ECSector(isec);
             sectorVolume.setMother(motherVolume);
         }
     }
 
-    private final class ULayer {
-        private Ulayer(int ilayer, int isector) {
-            super("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
-            uLayer.populateUstrips(ilayer, isector);
-        }
+    private Layer getULayer(int iuvw, int isector) {
+        int ilayer = iuvw * 3 + 1;
+        double height = nustrips * (wUstrip + (ilayer - 1) * dwUstrip);
+        double halfbase = height / Math.tan(thview);
+
+        Layer uLayer = new Layer("U-scintillator_" + ilayer + "_s" + isector, dstrip,
+                height / 2.0, virtualzero, halfbase, 0);
+        uLayer.populateUstrips(ilayer, isector);
+        return uLayer;
     }
 
-    private final class VLayer {
-        private VLayer(int ilayer, int isector) {
-            int globlayer = ilayer*3+2;
-            super("V-scintillator_" + globlayer + "_s" + isector+"_stack_"+((globlayer>15)+1), dstrip,
-                    wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
-            vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
+    private Layer getVLayer(int iuvw, int isector) {
+        int ilayer = iuvw * 3 + 2;
+        double height = nvstrips * (wVstrip + (ilayer - 2) * dwVstrip);
+        double lenbtm = height / Math.sin(2.0 * thview);
+        Layer vLayer = new Layer("V-scintillator_" + ilayer + "_s" + isector, dstrip,
+                height / 2.0, lenbtm / 2.0, virtualzero, -walpha);
+        vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
 
-            Vector3d uTopRight = new Vector3d(umax / 2.0, uheight / 2.0, 0);
-            Vector3d shiftVec = uTopRight.minus(vLayer.layerVol.getLocalTransform().transform(
-                    new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
-            vLayer.layerVol.translate(shiftVec);
-            //vLayer.populateWstrips(ilayer, isector);
-        }
+        vLayer.populateVstrips(ilayer, isector);
+        vLayer.align(ilayer);
+
+        return vLayer;
     }
 
-    private final class WLayer {
+    private Layer getWLayer(int iuvw, int isector) {
+        int ilayer = iuvw * 3 + 3;
+        double height = nwstrips * (wWstrip + (ilayer - 3) * dwWstrip);
+        double lenbtm = height / Math.sin(2.0 * thview);
+        Layer wLayer = new Layer("W-scintillator_" + ilayer + "_s" + isector, dstrip,
+                height / 2.0, lenbtm / 2.0, virtualzero, -walpha);
+        wLayer.layerVol.rotate("zyx", thview, 0, 0);
+        wLayer.populateWstrips(ilayer, isector);
+        wLayer.align(ilayer);
 
-        private WLayer(int ilayer, int isector) {
-            super("W-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip,
-                    wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
-            wLayer.layerVol.rotate("xyz", 0, 0, thview);
-
-            Vector3d uTopLeft = new Vector3d(-umax / 2.0, uheight / 2.0, 0);
-            Vector3d shiftVec = uTopLeft.minus(wLayer.layerVol.getLocalTransform().transform(
-                    new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
-            wLayer.layerVol.translate(shiftVec);
-            //wLayer.populateWstrips(ilayer, isector);
-        }
+        return wLayer;
     }
 
-    private class Layer {
+    private final class Layer {
 
         final G4Trap layerVol;
         final double thickness;
 
-        protected Layer(String name, double thickness, double pDy, double pDx1, double pDx2, double pAlpha) {
+        public Layer(String name, double thickness, int ilayer) {
+            double height = getLeadHeight(ilayer);
+            double halfbase = height / Math.tan(thview);
+            layerVol = new G4Trap(name, thickness / 2.0, 0, 0, height / 2.0, virtualzero, halfbase, 0, height / 2.0, virtualzero, halfbase, 0);
+            this.thickness = thickness;
+        }
+
+        public Layer(String name, double thickness, double pDy, double pDx1, double pDx2, double pAlpha) {
             layerVol = new G4Trap(name, thickness / 2.0, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
             this.thickness = thickness;
         }
 
-        private Layer(String name, double thickness) {
-            //G4Trap dimensions for U layer, same for all lead, stell, foam layers
-            //used for creation of all passive layers
-            this(name, thickness, uheight / 2.0, virtualzero, umax / 2.0, 0);
+        public final double getLayerHeight(int ilayer) {
+            switch ((ilayer - 1) % 3) {
+                case 1:
+                    return (wVstrip + (ilayer - 2) * dwVstrip) * nvstrips;
+                case 2:
+                    return (wWstrip + (ilayer - 3) * dwWstrip) * nwstrips;
+            }
+            return (wUstrip + (ilayer - 1) * dwUstrip) * nustrips;
         }
 
-        public double shiftZ(double dz) {
-            layerVol.translate(0, 0, dz + thickness / 2.0);
+        public final double getLeadHeight(int ilayer) {
+            double width = getLayerHeight(ilayer);
+            if ((ilayer - 1) % 3 == 0) {
+                return width;
+            }
+            return width / Math.sin(2 * thview) * Math.sin(thview);
+        }
+
+        public void align(int ilayer) {
+            double height = getLayerHeight(ilayer);
+            double uheight = getLeadHeight(ilayer);
+            Vector3d uVertex = new Vector3d(0, -uheight / 2.0, 0);
+            Vector3d trivertex = new Vector3d(height * (0.5 / Math.sin(2.0 * thview) + 0.125 * (Math.tan(thview) * Math.tan(thview) - 3) / Math.tan(thview)), -height / 2.0, 0);
+            layerVol.translate(uVertex.minus(layerVol.getLocalTransform().transform(trivertex)));
+        }
+
+        public double shiftZ(double dx, double dy, double dz) {
+            layerVol.translate(dx, dy, dz + thickness / 2.0);
             return dz + thickness;
         }
 
-        public void setMother(Geant4Basic motherVol) {
-            layerVol.setMother(motherVol);
-        }
-
         public void populateUstrips(int ilayer, int isector) {
-            double w0 = uheight - wstrip * nustrips;
-            double hbtm = dwrap;
-            double htop = w0 - dwrap;
+            double wstrip = wUstrip + (ilayer - 1) * dwUstrip;
+            double uheight = getLayerHeight(ilayer);
 
-            for (int istrip = 0; istrip <= nustrips; istrip++) {
-                double uwidth = (istrip == 0) ? w0 : wstrip;
-                double lhalfbtm = hbtm / Math.tan(thview);
-                double lhalftop = htop / Math.tan(thview);
-
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+            double hshort = dwrap;
+            for (int istrip = 0; istrip < nustrips; istrip++) {
+                double hlong = hshort + wstrip - dwrap;
+                double lshort = hshort / Math.tan(thview);
+                double llong = hlong / Math.tan(thview);
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + (istrip + 1) + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
-                        uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
-                        uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
+                        wstrip / 2.0 - dwrap, lshort, llong, 0,
+                        wstrip / 2.0 - dwrap, lshort, llong, 0);
 
                 stripVol.setMother(layerVol);
-                stripVol.translate(0, (-uheight + hbtm + htop) / 2.0, 0);
+                stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
 
-                hbtm = htop + 2.0 * dwrap;
-                htop += wstrip;
+                hshort += wstrip;
             }
         }
 
+        public void populateVstrips(int ilayer, int isector) {
+            populateVWstrips(ilayer, isector, nvstrips, wVstrip + (ilayer - 2) * dwVstrip);
+        }
+
         public void populateWstrips(int ilayer, int isector) {
-            double w0 = wheight - wstrip * nwstrips;
-            double htop = dwrap;
-            double hbtm = w0 - dwrap;
+            populateVWstrips(ilayer, isector, nwstrips, wWstrip + (ilayer - 3) * dwWstrip);
+        }
 
-            for (int istrip = 0; istrip <= nwstrips; istrip++) {
-                double wwidth = (istrip == 0) ? w0 : wstrip;
-                double lbtm = hbtm / Math.sin(2.0 * thview);
-                double ltop = htop / Math.sin(2.0 * thview);
+        public void populateVWstrips(int ilayer, int isector, int nstrips, double wstrip) {
+            double hshort = dwrap;
+            double height = getLayerHeight(ilayer);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+            for (int istrip = 0; istrip < nstrips; istrip++) {
+                double hlong = hshort + wstrip - dwrap;
+                double lshort = hshort / Math.sin(2.0 * thview);
+                double llong = hlong / Math.sin(2.0 * thview);
+
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + (istrip + 1) + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
-                        wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
-                        wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
+                        wstrip / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha,
+                        wstrip / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha);
 
-                double ystrip = (wheight - hbtm - htop) / 2.0;
+                double ystrip = (height - hlong - hshort) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
 
-                htop = hbtm + 2.0 * dwrap;
-                hbtm += wstrip;
+                hshort += wstrip;
             }
         }
     }
 
-    private final class PCALSector {
+    private final class ECSector {
 
         private final double extrathickness = 0.5;
         //G4Trap dimensions for sector volume (mother volume)
-        private final double dsector = nsteel * dsteel + nfoam * dfoam
-                + nviews * nlayers * dstrip
+        private final double dsector = dalum + nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
-                + (2 * nviews * nlayers + nsteel + nfoam) * microgap;
+                + (2 * nviews * nlayers + 1) * microgap;
         private final double dist2midplane = dist2tgt
-                + (nviews * nlayers * dstrip
-                + (nviews * nlayers - 1) * dlead
-                + (2 * nviews * nlayers - 2) * microgap) / 2.0;
-        private final double hshift = uheight / 2.0 - yhigh;
+                - dalum - 2.0 * microgap + dsector / 2.0;
 
         private double layerPos;
-        private final int isector;
         private final G4Trap sectorVolume;
 
-        public PCALSector(int isector) {
-            sectorVolume = new G4Trap("pcal_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
-                    uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0,
-                    uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0);
+        public ECSector(int isector) {
+            double height = (wUstrip + 16 * dwUstrip) * nustrips;
+            double halfbase = height / Math.tan(thview);
+            height += 2.0 * 16 * shiftcnt;
+
+            sectorVolume = new G4Trap("ec_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
+                    height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0,
+                    height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0);
 
             double secphi = Math.toRadians(90 - (isector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
 
             Vector3d secPos = new Vector3d(0, 0, dist2midplane)
                     .rotateX(-thtilt)
-                    .add(0, -hshift * Math.cos(thtilt), hshift * Math.sin(thtilt))
+                    .add(0, -dist2cnt * Math.cos(thtilt), dist2cnt * Math.sin(thtilt))
                     .rotateZ(-secphi);
             sectorVolume.translate(secPos);
 
-            this.isector = isector;
             layerPos = -dsector / 2.0 + microgap;
+            int ilayer = 1;
 
-            makeWindow("Front");
-            int ilead = 1;
-            for (int ilayer = 0; ilayer < nlayers; ilayer++) {
+            Layer alumVol = new Layer("eclid_s" + isector, dalum, ilayer);
+            alumVol.layerVol.setMother(sectorVolume);
+            layerPos = alumVol.shiftZ(0, 0, layerPos) + microgap;
+
+            for (int iuvw = 0; iuvw < nlayers; iuvw++) {
                 for (Layer uvwVol : new Layer[]{
-                    getULayer(ilayer, isector),
-                    getVLayer(ilayer, isector),
-                    getWLayer(ilayer, isector)}) {
+                    getULayer(iuvw, isector),
+                    getVLayer(iuvw, isector),
+                    getWLayer(iuvw, isector)}) {
 
-                    uvwVol.setMother(sectorVolume);
-                    layerPos = uvwVol.shiftZ(layerPos) + microgap;
-
-                    if (ilead < 15) {
-                        Layer leadVol = new Layer("PCAL_Lead_Layer_" + (ilead++) + "_s" + isector, dlead);
-                        leadVol.setMother(sectorVolume);
-                        layerPos = leadVol.shiftZ(layerPos) + microgap;
+                    if (ilayer > 1) {
+                        Layer leadVol = new Layer(String.format("lead_%02d_s%d_view_%d_stack_%d",
+                                ilayer, isector, (ilayer % 3) + 1, (ilayer > 15) ? 2 : 1), dlead, ilayer);
+                        leadVol.layerVol.setMother(sectorVolume);
+                        layerPos = leadVol.shiftZ(0, (ilayer - 1) * shiftcnt, layerPos) + microgap;
                     }
 
+                    uvwVol.layerVol.setMother(sectorVolume);
+                    layerPos = uvwVol.shiftZ(0, (ilayer - 1) * shiftcnt, layerPos) + microgap;
+
+                    ilayer++;
                 }
-            }
-            makeWindow("Back");
-        }
-
-        public void makeWindow(String winname) {
-            for (Layer layerVol : new Layer[]{
-                new Layer("Stainless_Steel_" + winname + "_1_s" + isector, dsteel),
-                new Layer("Last-a-Foam_" + winname + "_s" + isector, dfoam),
-                new Layer("Stainless_Steel_" + winname + "_2_s" + isector, dsteel)}) {
-
-                layerVol.setMother(sectorVolume);
-                layerPos = layerVol.shiftZ(layerPos) + microgap;
             }
         }
 
