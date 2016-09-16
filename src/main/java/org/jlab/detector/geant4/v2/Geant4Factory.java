@@ -32,13 +32,13 @@ public abstract class Geant4Factory {
         return properties.containsKey(name) ? properties.get(name) : "none";
     }
 
-    List<Geant4Basic> getComponents(){
+    public List<Geant4Basic> getComponents(){
         return motherVolume.getChildren().stream()
                 .flatMap(child -> child.getComponents().stream())
                 .collect(Collectors.toList());
     }
     
-    List<DetHit> getIntersections(Straight line){
+    public List<DetHit> getIntersections(Straight line){
         return motherVolume.getChildren().stream()
                 .flatMap(child -> child.getIntersections(line).stream())
                 .collect(Collectors.toList());
