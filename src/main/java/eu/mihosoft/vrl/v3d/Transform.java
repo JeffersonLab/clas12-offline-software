@@ -413,6 +413,16 @@ public class Transform {
     }
 
     /**
+     * Invert the transformation
+     *
+     * @return this transform inverted
+     */
+    public Transform invert() {
+        m.invert();
+        return this;
+    }
+
+    /**
      * Applies this transform to the specified vector.
      *
      * @param vec vector to transform

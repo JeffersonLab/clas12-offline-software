@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.hits;
 
+import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.volume.Geant4Basic;
 
@@ -46,6 +47,10 @@ public class DetHit {
         return end;
     }
 
+    public Vector3d mid() {
+        return origin.plus(end).dividedBy(2);
+    }
+    
     public int[] getId() {
         return detId;
     }
@@ -61,10 +66,6 @@ public class DetHit {
     public final void setId(int[] id) {
         this.detId = new int[id.length];
         System.arraycopy(id, 0, detId, 0, id.length);
-    }
-
-    public Vector3d mid() {
-        return origin.plus(end).dividedBy(2);
     }
 
     public double length() {
@@ -85,5 +86,10 @@ public class DetHit {
 
     public Geant4Basic getComponent() {
         return detectorComponent;
+    }
+    
+    public Vector3d getLocal(Vector3d vec){
+        Transform trans = detectorComponent.getGlobalTransform().invert();
+        return trans.transform(vec.clone());
     }
 }

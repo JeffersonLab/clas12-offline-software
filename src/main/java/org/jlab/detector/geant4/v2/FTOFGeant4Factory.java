@@ -111,5 +111,20 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         }
         return paddleVolumes;
     }
-         
+
+    public Geant4Basic getComponent(int isector, int ilayer, int ipaddle){
+        int ivolume = (isector-1)*3 + ilayer-1;
+        Geant4Basic volComponent = null;
+        
+        try{
+             volComponent = motherVolume.getChildren().get(ivolume).getChildren().get(ipaddle-1);
+        }
+        catch (IndexOutOfBoundsException e) {
+            System.err.println("ERROR!!!");
+            System.err.println("Component: sector: "+isector+", layer: "+ilayer+", paddle: "+ipaddle+" doesn't exist");
+            System.exit(111);
+        }
+        
+        return volComponent;
+    }
 }
