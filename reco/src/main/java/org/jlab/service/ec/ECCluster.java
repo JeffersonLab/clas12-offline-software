@@ -17,15 +17,18 @@ import org.jlab.geom.prim.Point3D;
 public class ECCluster {
     
     List<ECPeak>   clusterPeaks = new ArrayList<ECPeak>();
+    
     int            clusterMultiplicity = 0;
     Point3D        clusterHitPosition  = new Point3D();
     double         clusterHitPositionError = 1000.0;
+    
     public         int UVIEW_ID = -1;
     public         int VVIEW_ID = -1;
     public         int WVIEW_ID = -1;
     
     
     public ECCluster(ECPeak u, ECPeak v, ECPeak w){
+        
         this.clusterPeaks.add(u);
         this.clusterPeaks.add(v);
         this.clusterPeaks.add(w);
@@ -58,6 +61,7 @@ public class ECCluster {
     public double getTime(){
         return this.clusterPeaks.get(0).getTime();
     }
+    
     public double getRawEnergy(){
         double energy = 0;
         for(int view = 0; view < 3; view++){

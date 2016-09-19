@@ -5,6 +5,7 @@
  */
 package org.jlab.service.ec;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -29,23 +30,53 @@ public class ECEngine extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent de) {
         
-        List<ECStrip>  ecStrips = ECCommon.initStrips(de, ecDetector, this.getConstantsManager(), 10);
+        //List<ECStrip>  ecStrips = ECCommon.initStrips(de, ecDetector, this.getConstantsManager(), 10);
+        //List<ECStrip>  ecStrips = ECCommon.readStrips(de);//, ecDetector, this.getConstantsManager(), 10);
+
+        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), 10);
+        
+        //System.out.println(" STRIPS SIZE = " + ecStrips.size());
         
         for(ECStrip strip : ecStrips){
             //System.out.println(strip);
         }
         
-        
-        
-        List<ECPeak> ecPeaks = ECCommon.createPeaks(ecStrips);
+        List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
+        List<ECPeak> ecPeaks    = ECCommon.processPeaks(ecPeaksALL);
         int peaksOriginal = ecPeaks.size();
+        
+        //System.out.println(" PEAKS  SIZE = " + ecPeaks.size());
         //for(ECPeak p : ecPeaks){ System.out.println(p);}
         
-        
+        /*
         ECPeakAnalysis.splitPeaks(ecPeaks);
         int peaksOriginalSplit = ecPeaks.size();
         System.out.println(String.format("SPLIT PROCEDURE %8d %8d",peaksOriginal,
                 peaksOriginalSplit));
+               
+        for(ECPeak p : ecPeaks){
+            //p.redoPeakLine();
+            System.out.println(p);
+        }
+        */
+        
+        List<ECCluster> cPCAL  = ECCommon.createClusters(ecPeaks,1);
+        List<ECCluster> cECIN  = ECCommon.createClusters(ecPeaks,4);
+        List<ECCluster> cECOUT = ECCommon.createClusters(ecPeaks,7);
+        
+        List<ECCluster> cEC   = new ArrayList<ECCluster>();
+        
+        cEC.addAll(cPCAL);
+        //cEC.addAll(cECIN);
+        //cEC.addAll(cECOUT);
+        
+        System.out.println("\n\n\n\n\nEC CLUSTERS SIZE = " + cEC.size());
+        if(cEC.size()==2){
+            for(ECCluster c : cEC){            
+                 System.out.println(c);
+            }
+        }
+        
         //for(ECPeak p : ecPeaks){ System.out.println(p);}
         /*
         for(ECPeak peak : ecPeaks){

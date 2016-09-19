@@ -12,6 +12,7 @@ import java.util.List;
  * @author gavalian
  */
 public class ECPeakAnalysis {
+    
     public static int getPeakSplitIndex(List<ECPeak> peaks){
         int index = -1;
         for(int i = 0; i < peaks.size(); i++){

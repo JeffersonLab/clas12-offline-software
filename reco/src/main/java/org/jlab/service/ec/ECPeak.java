@@ -24,6 +24,7 @@ public class ECPeak {
     private Line3D              peakLine   = new Line3D();
     private int                 indexMaxStrip = -1;
     private int                 peakOrder     = -1;
+
     //private int                 peakID        = -1;
     
     public ECPeak(ECStrip strip){
@@ -74,6 +75,10 @@ public class ECPeak {
         return this.desc;
     }
     
+    public int      getMaxStrip(){
+        return this.peakStrips.get(this.indexMaxStrip).getDescriptor().getComponent();
+    }
+    
     public boolean  addStrip(ECStrip strip){
         for(ECStrip s : this.peakStrips){
             if(s.isNeighbour(strip)){
@@ -88,6 +93,13 @@ public class ECPeak {
         return false;
     }
     
+    public int getADC(){
+        int adc = 0;
+        for(ECStrip s : this.peakStrips){
+            adc+= s.getADC();
+        }
+        return adc;
+    }
     
     public void redoPeakLine(){
         Point3D pointOrigin = new Point3D(0.0,0.0,0.0);
@@ -107,6 +119,9 @@ public class ECPeak {
             
             logSumm += le;
         }
+        
+        //System.out.println(" LOG SUMM = " + logSumm);
+        
         this.peakLine.set(
                 pointOrigin.x()/logSumm,
                 pointOrigin.y()/logSumm,
@@ -193,12 +208,14 @@ public class ECPeak {
         StringBuilder str = new StringBuilder();
         str.append(String.format("----> peak  ( %3d %3d )  ENERGY = %12.5f\n", 
                 this.desc.getSector(),this.desc.getLayer(), this.getEnergy()));
+        str.append(this.peakLine.toString());
+        str.append("\n");
         for(ECStrip strip : this.peakStrips){
             str.append("\t\t");
             str.append(strip.toString());
             str.append("\n");
         }
-
+        
         return str.toString();
     }
 }
