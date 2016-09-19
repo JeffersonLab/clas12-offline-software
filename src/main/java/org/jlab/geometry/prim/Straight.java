@@ -5,6 +5,7 @@
  */
 package org.jlab.geometry.prim;
 
+import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
@@ -46,5 +47,14 @@ public abstract class Straight {
         }
         return innerLine;
     }
-
+    
+    protected void transform(Transform trans){
+        trans.transform(origin);
+        trans.transform(end);
+    }
+    
+    @Override
+    public String toString(){
+        return "Straight line from "+origin+" to "+end;
+    }
 }
