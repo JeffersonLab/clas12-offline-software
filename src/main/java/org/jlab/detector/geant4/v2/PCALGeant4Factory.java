@@ -45,7 +45,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
         dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0);
         wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0);
 
-        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0);
+        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0)-293.36;
         yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0);
 
         umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0);

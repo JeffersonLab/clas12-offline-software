@@ -43,7 +43,7 @@ public final class ECGeant4Factory extends Geant4Factory {
         dwrap = cp.getDouble("/geometry/ec/ec/wrapper_thick", 0);
         dalum = cp.getDouble("/geometry/ec/ec/alum_thick", 0);
 
-        dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0);
+        dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0) + 174.66;
         dist2cnt = cp.getDouble("/geometry/ec/ec/dist2cnt", 0);
         shiftcnt = cp.getDouble("/geometry/ec/ec/a1", 0);
 
@@ -213,7 +213,7 @@ public final class ECGeant4Factory extends Geant4Factory {
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + 1) * microgap;
         private final double dist2midplane = dist2tgt
-                - dalum - 2.0 * microgap + dsector / 2.0;
+                + dsector / 2.0 - dalum - 2.0 * microgap;
 
         private double layerPos;
         private final G4Trap sectorVolume;
