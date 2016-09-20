@@ -127,4 +127,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         
         return volComponent;
     }
+
+    public G4World getMother(){
+        return motherVolume;
+    }
 }

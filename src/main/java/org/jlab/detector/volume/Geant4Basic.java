@@ -51,6 +51,10 @@ public abstract class Geant4Basic {
         volumeDimensions = Arrays.asList(pars);
     }
 
+    public final List<Measurement> getDimensions(){
+        return volumeDimensions;
+    }
+
     public final void setName(String name) {
         this.volumeName = name;
     }
@@ -86,6 +90,14 @@ public abstract class Geant4Basic {
         return volumeTransformation.transform(new Vector3d(0, 0, 0));
     }
 
+    public String getLocalRotationOrder(){
+        return rotationOrder;
+    }
+
+    public double[] getLocalRotation(){
+        return rotationValues;
+    }
+
     public int[] getId() {
         return this.volumeId;
     }
@@ -107,7 +119,7 @@ public abstract class Geant4Basic {
     protected final void updateCSGtransformation() {
         children.stream()
                 .forEach(child -> child.updateCSGtransformation());
-        
+
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }
