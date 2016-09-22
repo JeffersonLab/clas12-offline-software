@@ -189,9 +189,11 @@ public abstract class Geant4Basic {
         Vector3d pos = getLocalPosition();
         str.append(pos.x + "*" + Length.unit() + " "
                 + pos.y + "*" + Length.unit() + " "
-                + pos.z + "*" + Length.unit() + " ");
+                + pos.z + "*" + Length.unit() + " | ");
 
-        str.append(String.format("| ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
+        if(!"zyx".equals(rotationOrder)){
+            str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
+        }
         for (int irot = 0; irot < rotationValues.length; irot++) {
             str.append(Math.toDegrees(rotationValues[rotationValues.length - irot - 1])).append("*deg ");
         }
