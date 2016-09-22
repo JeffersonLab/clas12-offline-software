@@ -71,7 +71,7 @@ public final class ECGeant4Factory extends Geant4Factory {
         double height = nustrips * (wUstrip + (ilayer - 1) * dwUstrip);
         double halfbase = height / Math.tan(thview);
 
-        Layer uLayer = new Layer("U-scintillator_" + ilayer + "_s" + isector, dstrip,
+        Layer uLayer = new Layer("U-scintillator_" + ilayer + "_s" + isector+"view_1_stack_"+((ilayer<16)?1 : 2), dstrip,
                 height / 2.0, virtualzero, halfbase, 0);
         uLayer.populateUstrips(ilayer, isector);
         return uLayer;
@@ -81,7 +81,7 @@ public final class ECGeant4Factory extends Geant4Factory {
         int ilayer = iuvw * 3 + 2;
         double height = nvstrips * (wVstrip + (ilayer - 2) * dwVstrip);
         double lenbtm = height / Math.sin(2.0 * thview);
-        Layer vLayer = new Layer("V-scintillator_" + ilayer + "_s" + isector, dstrip,
+        Layer vLayer = new Layer("V-scintillator_" + ilayer + "_s" + isector+"view_2_stack_"+((ilayer<16)?1 : 2), dstrip,
                 height / 2.0, lenbtm / 2.0, virtualzero, -walpha);
         vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
 
@@ -95,7 +95,7 @@ public final class ECGeant4Factory extends Geant4Factory {
         int ilayer = iuvw * 3 + 3;
         double height = nwstrips * (wWstrip + (ilayer - 3) * dwWstrip);
         double lenbtm = height / Math.sin(2.0 * thview);
-        Layer wLayer = new Layer("W-scintillator_" + ilayer + "_s" + isector, dstrip,
+        Layer wLayer = new Layer("W-scintillator_" + ilayer + "_s" + isector+"view_3_stack_"+((ilayer<16)?1 : 2), dstrip,
                 height / 2.0, lenbtm / 2.0, virtualzero, -walpha);
         wLayer.layerVol.rotate("zyx", thview, 0, 0);
         wLayer.populateWstrips(ilayer, isector);
@@ -161,7 +161,8 @@ public final class ECGeant4Factory extends Geant4Factory {
                 double hlong = hshort + wstrip - dwrap;
                 double lshort = hshort / Math.tan(thview);
                 double llong = hlong / Math.tan(thview);
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + (istrip + 1) + "_s" + isector,
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1)
+                        + "_" + (istrip + 1) + "_s" + isector + "_stack_"+((ilayer<16)?1 : 2),
                         dstrip / 2.0 - dwrap, 0, 0,
                         wstrip / 2.0 - dwrap, lshort, llong, 0,
                         wstrip / 2.0 - dwrap, lshort, llong, 0);
@@ -209,11 +210,13 @@ public final class ECGeant4Factory extends Geant4Factory {
 
         private final double extrathickness = 0.5;
         //G4Trap dimensions for sector volume (mother volume)
-        private final double dsector = dalum + nviews * nlayers * dstrip
+        private final double dsector = dalum + 1.75*2.0 + nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
-                + (2 * nviews * nlayers + 1) * microgap;
+                + (2 * nviews * nlayers + 3) * microgap;
         private final double dist2midplane = dist2tgt
-                + dsector / 2.0 - dalum - 2.0 * microgap;
+                + (nviews * nlayers * dstrip
+                + (nviews * nlayers - 1) * dlead
+                + (2 * nviews * nlayers - 2) * microgap) / 2.0;;
 
         private double layerPos;
         private final G4Trap sectorVolume;
@@ -239,9 +242,15 @@ public final class ECGeant4Factory extends Geant4Factory {
             layerPos = -dsector / 2.0 + microgap;
             int ilayer = 1;
 
-            Layer alumVol = new Layer("eclid_s" + isector, dalum, ilayer);
+            Layer steelVol1 = new Layer("eclid1_s" + isector, 1.75, ilayer);
+            steelVol1.layerVol.setMother(sectorVolume);
+            layerPos = steelVol1.shiftZ(0, 0, layerPos) + microgap;
+            Layer alumVol = new Layer("eclid2_s" + isector, dalum, ilayer);
             alumVol.layerVol.setMother(sectorVolume);
             layerPos = alumVol.shiftZ(0, 0, layerPos) + microgap;
+            Layer steelVol2 = new Layer("eclid3_s" + isector, 1.75, ilayer);
+            steelVol2.layerVol.setMother(sectorVolume);
+            layerPos = steelVol2.shiftZ(0, 0, layerPos) + microgap;
 
             for (int iuvw = 0; iuvw < nlayers; iuvw++) {
                 for (Layer uvwVol : new Layer[]{
