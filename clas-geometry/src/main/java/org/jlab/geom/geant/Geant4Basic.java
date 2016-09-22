@@ -187,7 +187,8 @@ public class Geant4Basic implements IGeant4Volume {
         }
         str.append(String.format("| %8s |", this.getType()));
         for (int ipar = 0; ipar < volumeParameters.length; ipar++) {
-            str.append(String.format("%12.4f*%s", volumeParameters[ipar], volumeParUnits[ipar]));
+            //str.append(String.format("%12.4f*%s", volumeParameters[ipar], volumeParUnits[ipar]));
+            str.append(String.format("%14.6f*%s", volumeParameters[ipar], volumeParUnits[ipar])); // pdavies 22-Sep-2016 increased precision of parameters written out to fix rounding error in gemc
         }
         str.append(" | ");
         int[] ids = this.getId();
