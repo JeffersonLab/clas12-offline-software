@@ -65,26 +65,13 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     private Layer getULayer(int ilayer, int isector) {
-        Layer uLayer = new Layer("U-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
+        Layer uLayer = new Layer("U-view-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
         uLayer.populateUstrips(ilayer, isector);
         return uLayer;
     }
 
-    private Layer getWLayer(int ilayer, int isector) {
-        Layer wLayer = new Layer("W-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip,
-                wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
-        wLayer.layerVol.rotate("xyz", 0, 0, thview);
-
-        Vector3d uTopLeft = new Vector3d(-umax / 2.0, uheight / 2.0, 0);
-        Vector3d shiftVec = uTopLeft.minus(wLayer.layerVol.getLocalTransform().transform(
-                new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
-        wLayer.layerVol.translate(shiftVec);
-        wLayer.populateWstrips(ilayer, isector);
-        return wLayer;
-    }
-
     private Layer getVLayer(int ilayer, int isector) {
-        Layer vLayer = new Layer("V-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip,
+        Layer vLayer = new Layer("V-view-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip,
                 wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
         vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
 
@@ -94,6 +81,19 @@ public final class PCALGeant4Factory extends Geant4Factory {
         vLayer.layerVol.translate(shiftVec);
         vLayer.populateWstrips(ilayer, isector);
         return vLayer;
+    }
+    
+    private Layer getWLayer(int ilayer, int isector) {
+        Layer wLayer = new Layer("W-view-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip,
+                wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
+        wLayer.layerVol.rotate("xyz", 0, 0, thview);
+
+        Vector3d uTopLeft = new Vector3d(-umax / 2.0, uheight / 2.0, 0);
+        Vector3d shiftVec = uTopLeft.minus(wLayer.layerVol.getLocalTransform().transform(
+                new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
+        wLayer.layerVol.translate(shiftVec);
+        wLayer.populateWstrips(ilayer, isector);
+        return wLayer;
     }
 
     private class Layer {
@@ -131,7 +131,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lhalfbtm = hbtm / Math.tan(thview);
                 double lhalftop = htop / Math.tan(thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
@@ -154,7 +154,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lbtm = hbtm / Math.sin(2.0 * thview);
                 double ltop = htop / Math.sin(2.0 * thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
