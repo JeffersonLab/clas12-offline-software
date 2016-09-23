@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
