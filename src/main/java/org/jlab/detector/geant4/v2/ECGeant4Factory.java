@@ -153,24 +153,24 @@ public final class ECGeant4Factory extends Geant4Factory {
         }
 
         public void populateUstrips(int ilayer, int isector) {
-            double wstrip = wUstrip + (ilayer - 1) * dwUstrip;
+            double uwidth = wUstrip + (ilayer - 1) * dwUstrip;
             double uheight = getLayerHeight(ilayer);
 
             double hshort = dwrap;
-            for (int istrip = 0; istrip < nustrips; istrip++) {
-                double hlong = hshort + wstrip - dwrap;
+            for (int istrip = 1; istrip <= nustrips; istrip++) {
+                double hlong = hshort + uwidth - 2.0*dwrap;
                 double lshort = hshort / Math.tan(thview);
                 double llong = hlong / Math.tan(thview);
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1)
-                        + "_" + (istrip + 1) + "_s" + isector + "_stack_"+((ilayer<16)?1 : 2),
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_strip_" + ilayer
+                        + "_" + istrip + "_s" + isector + "_stack_"+((ilayer<16)?1 : 2),
                         dstrip / 2.0 - dwrap, 0, 0,
-                        wstrip / 2.0 - dwrap, lshort, llong, 0,
-                        wstrip / 2.0 - dwrap, lshort, llong, 0);
+                        uwidth / 2.0 - dwrap, lshort, llong, 0,
+                        uwidth / 2.0 - dwrap, lshort, llong, 0);
 
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
 
-                hshort += wstrip;
+                hshort += uwidth;
             }
         }
 
@@ -182,27 +182,27 @@ public final class ECGeant4Factory extends Geant4Factory {
             populateVWstrips(ilayer, isector, nwstrips, wWstrip + (ilayer - 3) * dwWstrip);
         }
 
-        public void populateVWstrips(int ilayer, int isector, int nstrips, double wstrip) {
+        public void populateVWstrips(int ilayer, int isector, int nstrips, double stripwidth) {
             double hshort = dwrap;
             double height = getLayerHeight(ilayer);
 
-            for (int istrip = 0; istrip < nstrips; istrip++) {
-                double hlong = hshort + wstrip - dwrap;
+            for (int istrip = 1; istrip <= nstrips; istrip++) {
+                double hlong = hshort + stripwidth - 2.0*dwrap;
                 double lshort = hshort / Math.sin(2.0 * thview);
                 double llong = hlong / Math.sin(2.0 * thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_single_" + (ilayer + 1)
-                        + "_" + (istrip + 1) + "_s" + isector + "_stack_"+((ilayer<16)?1 : 2),
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_strip_" + ilayer
+                        + "_" + istrip + "_s" + isector + "_stack_"+((ilayer<16)?1 : 2),
                         dstrip / 2.0 - dwrap, 0, 0,
-                        wstrip / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha,
-                        wstrip / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha);
+                        stripwidth / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha,
+                        stripwidth / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha);
 
                 double ystrip = (height - hlong - hshort) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
 
-                hshort += wstrip;
+                hshort += stripwidth;
             }
         }
     }
