@@ -51,7 +51,7 @@ public abstract class Geant4Basic {
         volumeDimensions = Arrays.asList(pars);
     }
 
-    public final List<Measurement> getDimensions(){
+    public final List<Measurement> getDimensions() {
         return volumeDimensions;
     }
 
@@ -90,11 +90,11 @@ public abstract class Geant4Basic {
         return volumeTransformation.transform(new Vector3d(0, 0, 0));
     }
 
-    public String getLocalRotationOrder(){
+    public String getLocalRotationOrder() {
         return rotationOrder;
     }
 
-    public double[] getLocalRotation(){
+    public double[] getLocalRotation() {
         return rotationValues;
     }
 
@@ -191,13 +191,16 @@ public abstract class Geant4Basic {
                 + pos.y + "*" + Length.unit() + " "
                 + pos.z + "*" + Length.unit() + " | ");
 
-        if(!"zyx".equals(rotationOrder)){
-            str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
+        if (rotationValues[0] == 0 && rotationValues[1] == 0 && rotationValues[2] == 0) {
+            str.append("0 0 0 ");
+        } else {
+            if (!"zyx".equals(rotationOrder)) {
+                str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
+            }
+            for (int irot = 0; irot < rotationValues.length; irot++) {
+                str.append(Math.toDegrees(rotationValues[rotationValues.length - irot - 1])).append("*deg ");
+            }
         }
-        for (int irot = 0; irot < rotationValues.length; irot++) {
-            str.append(Math.toDegrees(rotationValues[rotationValues.length - irot - 1])).append("*deg ");
-        }
-
         str.append(String.format("| %8s | ", this.getType()));
         volumeDimensions.stream()
                 .forEach(dim -> str.append(dim.value).append("*").append(dim.unit).append(" "));
