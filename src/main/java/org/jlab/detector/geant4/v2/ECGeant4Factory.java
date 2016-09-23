@@ -223,13 +223,12 @@ public final class ECGeant4Factory extends Geant4Factory {
         private final G4Trap sectorVolume;
 
         public ECSector(int isector) {
-            double height = (wUstrip + 16 * dwUstrip) * nustrips;
+            double height = (wUstrip + 39 * dwUstrip) * nustrips + 2*39*shiftcnt;
             double halfbase = height / Math.tan(thview);
-            height += 2.0 * 16 * shiftcnt;
 
             sectorVolume = new G4Trap("ec_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
-                    height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0,
-                    height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0);
+                    height / 2.0, virtualzero, halfbase, 0,
+                    height / 2.0, virtualzero, halfbase, 0);
 
             double secphi = Math.toRadians(90 - (isector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
