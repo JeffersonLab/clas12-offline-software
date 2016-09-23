@@ -1,0 +1,113 @@
+package org.jlab.service.ctof;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.geom.prim.Path3D;
+import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.rec.ctof.CTOFGeometry;
+import org.jlab.rec.ctof.CalibrationConstantsLoader;
+import org.jlab.rec.ctof.Constants;
+import org.jlab.rec.tof.banks.ctof.HitReader;
+import org.jlab.rec.tof.banks.ctof.RecoBankWriter;
+import org.jlab.rec.tof.banks.ctof.TrackReader;
+import org.jlab.rec.tof.cluster.Cluster;
+import org.jlab.rec.tof.cluster.ClusterFinder;
+import org.jlab.rec.tof.hit.AHit;
+import org.jlab.rec.tof.hit.ctof.Hit;
+
+/**
+ * 
+ * @author ziegler
+ *
+ */
+public class CTOFEngine extends ReconstructionEngine {
+
+	public CTOFEngine() {
+		super("CTOFRec", "carman, ziegler", "0.2");
+	}
+
+	@Override
+	public boolean init() {
+		// Load the Constants
+		if (Constants.CSTLOADED == false) {
+			Constants.Load();
+		}
+		// Load the Calibration Constants
+		if (CalibrationConstantsLoader.CSTLOADED == false) {
+			CalibrationConstantsLoader.Load();
+		}
+		return true;
+	}
+
+	@Override
+	public boolean processDataEvent(DataEvent event) {
+		CTOFGeometry geometry = new CTOFGeometry();
+		// Get the list of track lines which will be used for matching the CTOF hit to the CVT track
+		TrackReader trkRead = new TrackReader();
+		List<ArrayList<Path3D>> trkLines = trkRead.get_TrkLines();
+		List<double[]> paths = trkRead.get_Paths();
+		
+		List<Hit> hits		   = new ArrayList<Hit>();		// all hits
+		List<Cluster> clusters = new ArrayList<Cluster>(); 	// all clusters
+		// read in the hits for CTOF
+		HitReader hitRead = new HitReader();		
+		hitRead.fetch_Hits(event, geometry, trkLines, paths);
+		
+		//1) get the hits
+		List<Hit> CTOFHits = hitRead.get_CTOFHits();
+		
+		//1.1) exit if hit list is empty
+		if(CTOFHits!=null)
+			hits.addAll(CTOFHits);
+		
+		if(hits.size()==0 ) {
+			//System.err.println(" no hits ....");
+			return true ;			
+		}
+		
+		//1.2) Sort the hits for clustering
+		Collections.sort(hits);
+		
+		//2) find the clusters from these hits
+		ClusterFinder clusFinder = new ClusterFinder();
+		int[] npaddles = Constants.NPAD ;
+		int npanels = 1;
+		int nsectors = 1;
+		List<Cluster> CTOFClusters = null;
+		if(CTOFHits!=null && CTOFHits.size()>0)
+			CTOFClusters = clusFinder.findClusters(hits, nsectors, npanels, npaddles);
+		
+		if(CTOFClusters != null)
+			clusters.addAll(CTOFClusters);
+		
+		//2.1) exit if cluster list is empty but save the hits
+		if(clusters.size()==0 ) {
+			RecoBankWriter.appendCTOFBanks((EvioDataEvent) event, hits, null);
+			return true;
+		}
+		// continuing ... there are clusters
+		if(Constants.DEBUGMODE) { // if running in DEBUG MODE print out the reconstructed info about the hits and the clusters
+			System.out.println("=============== All Hits ===============");
+			for(Hit hit : hits)
+				hit.printInfo();
+			System.out.println("==================================================");
+			for(Cluster cls : clusters) {
+				cls.printInfo();
+				System.out.println("contains:");
+				for(AHit hit : cls)
+					hit.printInfo();
+				System.out.println("---------------------------------------------");
+			}			
+		}
+		RecoBankWriter.appendCTOFBanks((EvioDataEvent) event, hits, clusters);
+		
+		return true;
+		
+		
+	}
+
+}
