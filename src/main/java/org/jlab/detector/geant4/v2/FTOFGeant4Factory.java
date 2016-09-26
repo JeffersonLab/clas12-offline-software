@@ -31,7 +31,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         "1a", "1b", "2"
     };
 
-    public FTOFGeant4Factory(ConstantProvider provider) throws IOException {
+    public FTOFGeant4Factory(ConstantProvider provider){
         motherVolume = new G4World("fc");
 
         for (int sector = 1; sector <= 6; sector++) {
@@ -45,7 +45,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         properties.put("date", "06/03/13");
     }
 
-    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) throws IOException {
+    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer){
         double motherGap = 4.0 * Length.cm;
 
         double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
