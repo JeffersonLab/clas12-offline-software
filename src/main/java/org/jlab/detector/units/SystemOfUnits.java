@@ -20,15 +20,15 @@ public final class SystemOfUnits {
         }
 
         public static Measurement value(double value) {
-            return new Measurement(value, "mm");
+            return new Measurement(value, "cm");
         }
         
         public static String unit(){
-            return "mm";
+            return "cm";
         }
 
-        public static final double millimeter = 1.;
-        public static final double centimeter = 10. * millimeter;
+        public static final double centimeter = 1.;
+        public static final double millimeter = 0.1;
         public static final double meter = 1000. * millimeter;
         public static final double kilometer = 1000. * meter;
         public static final double micrometer = 1.e-6 * meter;

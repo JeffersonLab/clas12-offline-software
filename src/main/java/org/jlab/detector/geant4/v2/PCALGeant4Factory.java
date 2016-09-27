@@ -6,6 +6,7 @@
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
@@ -17,8 +18,8 @@ import org.jlab.geom.base.ConstantProvider;
  */
 public final class PCALGeant4Factory extends Geant4Factory {
 
-    private final double microgap = 0.1;
-    private final double virtualzero = 1e-8;
+    private final double microgap = 0.01;
+    private final double virtualzero = 1e-9;
 
     private final int nsectors, nviews, nlayers, nsteel, nfoam;
     private final int nustrips, nwstrips;
@@ -38,18 +39,18 @@ public final class PCALGeant4Factory extends Geant4Factory {
         nustrips = cp.getInteger("/geometry/pcal/Uview/nstrips", 0);
         nwstrips = cp.getInteger("/geometry/pcal/Wview/nstrips", 0);
 
-        dsteel = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0);
-        dfoam = cp.getDouble("/geometry/pcal/pcal/foam_thick", 0);
-        dlead = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0);
-        dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0);
-        dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0);
-        wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0);
+        dsteel = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)* Length.mm;
+        dfoam = cp.getDouble("/geometry/pcal/pcal/foam_thick", 0)* Length.mm;
+        dlead = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)* Length.mm;
+        dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)* Length.mm;
+        dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0)* Length.mm;
+        wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)* Length.mm;
 
-        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0);
-        yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0);
+        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0)* Length.mm;
+        yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)* Length.mm;
 
-        umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0);
-        wmax = cp.getDouble("/geometry/pcal/Wview/max_length", 0);
+        umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0)* Length.mm;
+        wmax = cp.getDouble("/geometry/pcal/Wview/max_length", 0)* Length.mm;
 
         thview = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
         thtilt = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/thtilt", 0));
@@ -172,7 +173,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
     private final class PCALSector {
 
-        private final double extrathickness = 0.5;
+        private final double extrathickness = 0.05;
         //G4Trap dimensions for sector volume (mother volume)
         private final double dsector = nsteel * dsteel + nfoam * dfoam
                 + nviews * nlayers * dstrip

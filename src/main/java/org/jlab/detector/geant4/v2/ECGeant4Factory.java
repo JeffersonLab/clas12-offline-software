@@ -6,10 +6,12 @@
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
+
 
 /**
  *
@@ -17,8 +19,8 @@ import org.jlab.geom.base.ConstantProvider;
  */
 public final class ECGeant4Factory extends Geant4Factory {
 
-    private final double microgap = 0.1;
-    private final double virtualzero = 1e-8;
+    private final double microgap = 0.01;
+    private final double virtualzero = 1e-9;
 
     private final int nsectors, nviews, nlayers;
     private final int nustrips, nwstrips, nvstrips;
@@ -38,23 +40,23 @@ public final class ECGeant4Factory extends Geant4Factory {
         nvstrips = cp.getInteger("/geometry/ec/vview/nstrips", 0);
         nwstrips = cp.getInteger("/geometry/ec/wview/nstrips", 0);
 
-        dlead = cp.getDouble("/geometry/ec/ec/lead_thick", 0);
-        dstrip = cp.getDouble("/geometry/ec/ec/strip_thick", 0);
-        dwrap = cp.getDouble("/geometry/ec/ec/wrapper_thick", 0);
-        dalum = cp.getDouble("/geometry/ec/ec/alum_thick", 0);
+        dlead = cp.getDouble("/geometry/ec/ec/lead_thick", 0)* Length.mm;
+        dstrip = cp.getDouble("/geometry/ec/ec/strip_thick", 0)* Length.mm;
+        dwrap = cp.getDouble("/geometry/ec/ec/wrapper_thick", 0)* Length.mm;
+        dalum = cp.getDouble("/geometry/ec/ec/alum_thick", 0)* Length.mm;
 
-        dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0) + 174.66;
-        dist2cnt = cp.getDouble("/geometry/ec/ec/dist2cnt", 0);
-        shiftcnt = cp.getDouble("/geometry/ec/ec/a1", 0);
+        dist2tgt = (cp.getDouble("/geometry/ec/ec/dist2tgt", 0) + 174.66)* Length.mm;
+        dist2cnt = cp.getDouble("/geometry/ec/ec/dist2cnt", 0)* Length.mm;
+        shiftcnt = cp.getDouble("/geometry/ec/ec/a1", 0)* Length.mm;
 
-        wUstrip = cp.getDouble("/geometry/ec/uview/a5", 0);
-        dwUstrip = cp.getDouble("/geometry/ec/uview/a6", 0);
+        wUstrip = cp.getDouble("/geometry/ec/uview/a5", 0)* Length.mm;
+        dwUstrip = cp.getDouble("/geometry/ec/uview/a6", 0)* Length.mm;
 
-        wVstrip = cp.getDouble("/geometry/ec/vview/a5", 0);
-        dwVstrip = cp.getDouble("/geometry/ec/vview/a6", 0);
+        wVstrip = cp.getDouble("/geometry/ec/vview/a5", 0)* Length.mm;
+        dwVstrip = cp.getDouble("/geometry/ec/vview/a6", 0)* Length.mm;
 
-        wWstrip = cp.getDouble("/geometry/ec/wview/a5", 0);
-        dwWstrip = cp.getDouble("/geometry/ec/wview/a6", 0);
+        wWstrip = cp.getDouble("/geometry/ec/wview/a5", 0)* Length.mm;
+        dwWstrip = cp.getDouble("/geometry/ec/wview/a6", 0)* Length.mm;
 
         thview = Math.toRadians(cp.getDouble("/geometry/ec/ec/view_angle", 0));
         thtilt = Math.toRadians(cp.getDouble("/geometry/ec/ec/thtilt", 0));
@@ -209,9 +211,9 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private final class ECSector {
 
-        private final double extrathickness = 0.5;
+        private final double extrathickness = 0.05;
         //G4Trap dimensions for sector volume (mother volume)
-        private final double dsector = dalum + 1.75*2.0 + nviews * nlayers * dstrip
+        private final double dsector = dalum + 0.175*2.0 + nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + 3) * microgap;
         private final double dist2midplane = dist2tgt
@@ -242,13 +244,13 @@ public final class ECGeant4Factory extends Geant4Factory {
             layerPos = -dsector / 2.0 + microgap;
             int ilayer = 1;
 
-            Layer steelVol1 = new Layer("eclid1_s" + isector, 1.75, ilayer);
+            Layer steelVol1 = new Layer("eclid1_s" + isector, 0.175, ilayer);
             steelVol1.layerVol.setMother(sectorVolume);
             layerPos = steelVol1.shiftZ(0, 0, layerPos) + microgap;
             Layer alumVol = new Layer("eclid2_s" + isector, dalum, ilayer);
             alumVol.layerVol.setMother(sectorVolume);
             layerPos = alumVol.shiftZ(0, 0, layerPos) + microgap;
-            Layer steelVol2 = new Layer("eclid3_s" + isector, 1.75, ilayer);
+            Layer steelVol2 = new Layer("eclid3_s" + isector, 0.175, ilayer);
             steelVol2.layerVol.setMother(sectorVolume);
             layerPos = steelVol2.shiftZ(0, 0, layerPos) + microgap;
 
