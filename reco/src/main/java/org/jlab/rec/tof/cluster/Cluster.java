@@ -290,7 +290,7 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster>{
 	public void matchToTrack() {
 		double xTrk = 0; double yTrk = 0; double zTrk = 0;
 		for(AHit h : this) { // only one track intersection should happen per cluster ?... check this...
-			if(Double.isNaN(h.get_TrkPosition().x()) )
+			if(h.get_TrkPosition()==null || Double.isNaN(h.get_TrkPosition().x()) )
 				continue;
 				xTrk = h.get_TrkPosition().x();
 				yTrk = h.get_TrkPosition().y();

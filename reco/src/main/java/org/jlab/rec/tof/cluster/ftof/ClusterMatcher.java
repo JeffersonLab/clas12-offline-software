@@ -16,8 +16,7 @@ import org.jlab.rec.tof.hit.AHit;
 public class ClusterMatcher {
 
 	/**
-	 * IMPORTANT:
-	 * A possible mismatch between the evaluation at the face of the counter from tracking and in the middle of the counter from clustering needs to be checked !!!
+	 * Matches the clusters in panel 1A and 1B
 	 */
 	public ClusterMatcher() {
 		

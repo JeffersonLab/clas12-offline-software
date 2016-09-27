@@ -52,11 +52,11 @@ public class TrackReader {
 		}
 
 				
-		EvioDataBank bankDC = (EvioDataBank) event.getBank("TimeBasedTrkg::TBTracks");
+		EvioDataBank bankDC = (EvioDataBank) event.getBank("HitBasedTrkg::HBTracks");
 		
 		double[] fitChisq = bankDC.getDouble("fitChisq"); // use this to select good tracks
        
-		double[] x		= bankDC.getDouble("c3_x");			// Region 3 cross x-position in the lab
+		double[] x		= bankDC.getDouble("c3_x");			// Region 3 cross x-position in the lab (in cm = default unit)
 		double[] y		= bankDC.getDouble("c3_y");  		// Region 3 cross y-position in the lab
 		double[] z		= bankDC.getDouble("c3_z");  		// Region 3 cross z-position in the lab
 		double[] ux		= bankDC.getDouble("c3_ux"); 		// Region 3 cross x-unit-dir in the lab
@@ -64,7 +64,7 @@ public class TrackReader {
 		double[] uz		= bankDC.getDouble("c3_uz"); 		// Region 3 cross z-unit-dir in the lab
 		double[] p		= bankDC.getDouble("pathlength"); 	// pathlength of the track from origin to DC R3
 		  
-		if(event.hasBank("TimeBasedTrkg::TBTracks")==true) {
+		if(event.hasBank("HitBasedTrkg::HBTracks")==true) {
 			// instanciates the list 
 			// each arraylist corresponds to the tracks for a given sector
 			List<Line3d> trkLines = new ArrayList<Line3d>();

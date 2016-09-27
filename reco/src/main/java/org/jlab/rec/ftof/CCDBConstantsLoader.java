@@ -1,18 +1,33 @@
 package org.jlab.rec.ftof;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Random;
+
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.detector.hits.DetHit;
+import org.jlab.detector.hits.FTOFDetHit;
+import org.jlab.geometry.prim.Line3d;
+
+import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
  * 
  * @author ziegler
  *
  */
-public class CalibrationConstantsLoader {
+public class CCDBConstantsLoader {
 
-	public CalibrationConstantsLoader() {
+	public CCDBConstantsLoader() {
 		// TODO Auto-generated constructor stub
 	}
+	
 	public static boolean CSTLOADED = false;
+	
+    //static FTOFGeant4Factory geometry ;
 	
 	// Instantiating the constants arrays
 	public static double[][][] YOFF 			= new double[6][3][62];
@@ -36,12 +51,23 @@ public class CalibrationConstantsLoader {
 	public static int[][][] STATUSD 			= new int[6][3][62];
 	
 	 //Calibration parameters from DB    
-    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
+   // public static final DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
     //private Detector ftofDetector;
-    public static boolean areCalibConstantsLoaded = false;
-    
-    public static synchronized void Load() {
-		if (CSTLOADED) return;
+   // public static boolean areCalibConstantsLoaded = false;
+   
+    public static synchronized DatabaseConstantProvider Load(){
+    	System.out.println(" LOADING CONSTANTS ");
+		if (CSTLOADED == true) 
+			return null;
+		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
+		// load the geometry tables 
+		dbprovider.loadTable("/geometry/ftof/panel1a/paddles");
+		dbprovider.loadTable("/geometry/ftof/panel1a/panel");
+		dbprovider.loadTable("/geometry/ftof/panel1b/paddles");
+		dbprovider.loadTable("/geometry/ftof/panel1b/panel");
+		dbprovider.loadTable("/geometry/ftof/panel2/paddles");
+		dbprovider.loadTable("/geometry/ftof/panel2/panel");
+		
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/ftof/attenuation");
 	    dbprovider.loadTable("/calibration/ftof/effective_velocity");
@@ -52,7 +78,7 @@ public class CalibrationConstantsLoader {
 	    dbprovider.disconnect(); 
 
 	   // dbprovider.show();
-	    
+	  
 	    // Getting the Timing Constants
 	    // 1) Time-walk
 	    for(int i =0; i< dbprovider.length("/calibration/ftof/time_walk/tw0_left"); i++) {
@@ -138,11 +164,37 @@ public class CalibrationConstantsLoader {
 	       
 	    }
 	    CSTLOADED = true;
+	    System.out.println("SUCCESSFULLY LOADED FTOF CALIBRATION CONSTANTS....");
+		return dbprovider;
     }
    
     
     
     public static void main (String arg[]) {
-    	CalibrationConstantsLoader.Load();
+    	CCDBConstantsLoader.Load();
+    	Random rnd = new Random();
+    	FTOFGeant4Factory geometry = null;
+    	/*
+    	try {
+    		ConstantProvider  cp = GeometryFactory.getConstants(DetectorType.FTOF);
+	    	geometry = new FTOFGeant4Factory();
+		} catch (IOException e) {
+			System.err.println("Error Loading Geometry...");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+    	
+    	for(int itrack=0; itrack<1000; itrack++){
+	        Line3d line = new Line3d(new Vector3d(rnd.nextDouble() * 10000 - 5000, rnd.nextDouble() * 10000 - 5000,  3000),
+	                                                new Vector3d(rnd.nextDouble() * 10000 - 5000, rnd.nextDouble() * 10000 - 5000,  9000));
+
+	        List<DetHit> hits = geometry.getIntersections(line);
+
+	        for(DetHit hit: hits){
+	                FTOFDetHit fhit = new FTOFDetHit(hit);
+	               System.out.println(fhit.toString());
+	        }
+    	}
+
     }
 }

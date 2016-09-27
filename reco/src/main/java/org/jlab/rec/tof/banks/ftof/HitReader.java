@@ -3,14 +3,17 @@ package org.jlab.rec.tof.banks.ftof;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+//import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
-import org.jlab.rec.ftof.CalibrationConstantsLoader;
+import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.hit.ftof.Hit;
 
@@ -60,7 +63,7 @@ public class HitReader {
 	public void fetch_Hits(DataEvent event, FTOFGeant4Factory geometry, List<Line3d> trks, double[] paths) {
 		
 		if(event.hasBank("FTOF1A::dgtz")==false && event.hasBank("FTOF1B::dgtz")==false && event.hasBank("FTOF2B::dgtz")==false) {
-			System.err.println("there is no FTOF bank ");
+			//System.err.println("there is no FTOF bank ");
 			
 			_FTOF1AHits = new ArrayList<Hit>();
 			_FTOF1BHits = new ArrayList<Hit>();
@@ -85,8 +88,8 @@ public class HitReader {
 			
 			for(int i = 0; i<id_1A.length; i++){
 			    // get the status
-				int statusL = CalibrationConstantsLoader.STATUSU[sector_1A[i]-1][0][paddle_1A[i]-1];
-				int statusR = CalibrationConstantsLoader.STATUSD[sector_1A[i]-1][0][paddle_1A[i]-1];
+				int statusL = CCDBConstantsLoader.STATUSU[sector_1A[i]-1][0][paddle_1A[i]-1];
+				int statusR = CCDBConstantsLoader.STATUSD[sector_1A[i]-1][0][paddle_1A[i]-1];
 				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1A[i], TDCL_1A[i], ADCR_1A[i], TDCR_1A[i]);
 				
 				
@@ -123,8 +126,8 @@ public class HitReader {
 			
 			for(int i = 0; i<id_1B.length; i++){
 				// get the status
-				int statusL = CalibrationConstantsLoader.STATUSU[sector_1B[i]-1][1][paddle_1B[i]-1];
-				int statusR = CalibrationConstantsLoader.STATUSD[sector_1B[i]-1][1][paddle_1B[i]-1];
+				int statusL = CCDBConstantsLoader.STATUSU[sector_1B[i]-1][1][paddle_1B[i]-1];
+				int statusR = CCDBConstantsLoader.STATUSD[sector_1B[i]-1][1][paddle_1B[i]-1];
 				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]);
 				
 				
@@ -161,8 +164,8 @@ public class HitReader {
 			List<Hit> hits = new ArrayList<Hit>();
 			
 			for(int i = 0; i<id_2.length; i++){// get the status
-				int statusL = CalibrationConstantsLoader.STATUSU[sector_2[i]-1][2][paddle_2[i]-1];
-				int statusR = CalibrationConstantsLoader.STATUSD[sector_2[i]-1][2][paddle_2[i]-1];
+				int statusL = CCDBConstantsLoader.STATUSU[sector_2[i]-1][2][paddle_2[i]-1];
+				int statusR = CCDBConstantsLoader.STATUSD[sector_2[i]-1][2][paddle_2[i]-1];
 				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]);
 				
 				

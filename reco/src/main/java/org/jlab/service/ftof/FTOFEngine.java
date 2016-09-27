@@ -6,11 +6,15 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.rec.ftof.CalibrationConstantsLoader;
+import org.jlab.io.evio.EvioSource;
+import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
-import org.jlab.rec.ftof.GeometryConstantsLoader;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.banks.ftof.RecoBankWriter;
 import org.jlab.rec.tof.banks.ftof.TrackReader;
@@ -19,8 +23,9 @@ import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
+import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 
 /**
  * 
@@ -34,33 +39,39 @@ public class FTOFEngine extends ReconstructionEngine {
 	}
 
 	
-	@Override
-	public boolean init() {
+	
+	FTOFGeant4Factory geometry;
+	
+	@Override	
+	public boolean init(){
+		
 		// Load the Constants
-		if (Constants.CSTLOADED == false) {
+		//if (Constants.CSTLOADED == false) {
 			Constants.Load();
-		}
+		
+	
 		// Load the Calibration Constants
-		if (CalibrationConstantsLoader.CSTLOADED == false) {
-			CalibrationConstantsLoader.Load();
-		}
-		if (GeometryConstantsLoader.CSTLOADED == false) {
-			GeometryConstantsLoader.Load();
-		}
+		//if (CCDBConstantsLoader.CSTLOADED == false) {
+			DatabaseConstantProvider db = CCDBConstantsLoader.Load();
+		//}
+		//if(db!=null) {
+			//Detector ftofdet = GeometryFactory.getDetector(DetectorType.FTOF);
+			ConstantProvider  cp = GeometryFactory.getConstants(DetectorType.FTOF);
+			geometry = new FTOFGeant4Factory(db);
+			
+		//} 
 		return true;
 	}
 
 	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		FTOFGeant4Factory geometry = null;
-		try {
-			geometry = new FTOFGeant4Factory(GeometryConstantsLoader.dbprovider);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
+		//System.out.println(" PROCESSING EVENT ....");
+		
+    	if(geometry == null) {
+    		System.err.println(" FTOF Geometry not loaded !!!");
+    		return false;
+    	}
 		// Get the list of track lines which will be used for matching the FTOF hit to the DC hit
 		TrackReader trkRead = new TrackReader();
 		List<Line3d> trkLines = trkRead.get_TrkLines();
@@ -152,4 +163,14 @@ public class FTOFEngine extends ReconstructionEngine {
 		return true;
 	}
 
+	public static void main (String arg[]) throws IOException {
+		FTOFEngine en = new FTOFEngine();
+		en.init();
+		String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
+		EvioSource  reader = new EvioSource();
+		reader.open(input);
+		while(reader.getNextEvent()!=null)
+			en.processDataEvent(reader.getNextEvent());
+		
+	}
 }

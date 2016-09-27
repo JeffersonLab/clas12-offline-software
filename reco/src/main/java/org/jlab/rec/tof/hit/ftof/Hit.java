@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+//import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.detector.volume.G4Box;
@@ -22,7 +23,7 @@ import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.rec.ftof.CalibrationConstantsLoader;
+import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.hit.AHit;
@@ -191,7 +192,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW01() {
-		double TW0L = CalibrationConstantsLoader.TW0L[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW0L = CCDBConstantsLoader.TW0L[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW0L;
 	}
@@ -199,7 +200,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW02() {
-		double TW0R = CalibrationConstantsLoader.TW0R[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW0R = CCDBConstantsLoader.TW0R[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW0R;
 	}
@@ -207,7 +208,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW11() {
-		double TW1L = CalibrationConstantsLoader.TW1L[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW1L = CCDBConstantsLoader.TW1L[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW1L;
 	}
@@ -215,7 +216,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW12() {
-		double TW1R = CalibrationConstantsLoader.TW1R[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW1R = CCDBConstantsLoader.TW1R[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW1R;
 	}
@@ -223,55 +224,55 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double lambda1() {
-		return CalibrationConstantsLoader.LAMBDAL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.LAMBDAL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double lambda2() {
-		return CalibrationConstantsLoader.LAMBDAR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.LAMBDAR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double lambda1Unc() {
-		return CalibrationConstantsLoader.LAMBDALU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.LAMBDALU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double lambda2Unc() {
-		return CalibrationConstantsLoader.LAMBDARU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.LAMBDARU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double yOffset() {
-		return CalibrationConstantsLoader.YOFF[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.YOFF[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v1() {
-		return CalibrationConstantsLoader.EFFVELL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.EFFVELL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v2() {
-		return CalibrationConstantsLoader.EFFVELR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.EFFVELR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v1Unc() {
-		return CalibrationConstantsLoader.EFFVELLU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.EFFVELLU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v2Unc() {
-		return CalibrationConstantsLoader.EFFVELRU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.EFFVELRU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
@@ -316,12 +317,12 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	}
 	@Override
 	public double PaddleToPaddle(){
-		return CalibrationConstantsLoader.PADDLE2PADDLE[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];	
+		return CCDBConstantsLoader.PADDLE2PADDLE[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];	
 	}
 	
 	@Override
 	public double TimeOffset() {
-		return CalibrationConstantsLoader.LR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstantsLoader.LR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 	
 	@Override
@@ -384,8 +385,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	    FTOFGeant4Factory factory = new FTOFGeant4Factory(provider);
 
 
-		int statusL = CalibrationConstantsLoader.STATUSU[sector-1][0][paddle-1];
-		int statusR = CalibrationConstantsLoader.STATUSD[sector-1][0][paddle-1];
+		int statusL = CCDBConstantsLoader.STATUSU[sector-1][0][paddle-1];
+		int statusR = CCDBConstantsLoader.STATUSD[sector-1][0][paddle-1];
 		
 		Random rnd = new Random();
 

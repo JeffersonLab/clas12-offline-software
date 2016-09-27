@@ -121,6 +121,8 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("FTOFRec::ftofmatchedclusters", matchedClusters.size());
 		
 		for(int i =0; i< matchedClusters.size(); i++) {
+			if(matchedClusters.get(i)== null)
+				continue;
 			bank.setInt("sector",i, matchedClusters.get(i).get(0).get_Sector());
 			bank.setInt("paddle_id1A",i,  matchedClusters.get(i).get(0).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
 			bank.setInt("paddle_id1B",i,  matchedClusters.get(i).get(1).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]			

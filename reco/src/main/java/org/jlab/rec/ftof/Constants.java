@@ -54,7 +54,7 @@ public class Constants {
 	
 	
 	public static synchronized void Load() {
-		if (CSTLOADED) return;
+		if (CSTLOADED==true) return;
 		
 		NPAD[0] = 23;
 		NPAD[1] = 62;
