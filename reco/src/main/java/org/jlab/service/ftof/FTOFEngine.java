@@ -35,7 +35,7 @@ import org.jlab.geometry.prim.Line3d;
 public class FTOFEngine extends ReconstructionEngine {
 
 	public FTOFEngine() {
-		super("FTOFRec", "golovach, gavalian, carman, ziegler", "0.2");
+		super("FTOFRec", "golovach, gavalian, carman, ziegler", "0.3");
 	}
 
 	
@@ -74,6 +74,7 @@ public class FTOFEngine extends ReconstructionEngine {
     	}
 		// Get the list of track lines which will be used for matching the FTOF hit to the DC hit
 		TrackReader trkRead = new TrackReader();
+		trkRead.fetch_Trks(event);
 		List<Line3d> trkLines = trkRead.get_TrkLines();
 		double[] paths = trkRead.get_Paths();
 		

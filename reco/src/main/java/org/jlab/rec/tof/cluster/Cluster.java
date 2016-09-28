@@ -28,9 +28,9 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster>{
 	private double _y;				// the cluster energy-weighted y global coordinate 
 	private double _z;				// the cluster energy-weighted z global coordinate 
 	
-	private double _xTrk;			// the cluster matched track x global coordinate 
-	private double _yTrk;			// the cluster matched track y global coordinate 
-	private double _zTrk;			// the cluster matched track z global coordinate 
+	private double[] _xTrk;			// track x global coordinate for each hit in the cluster that the track intersects
+	private double[] _yTrk;			// track y global coordinate for each hit in the cluster that the track intersects
+	private double[] _zTrk;			// track z global coordinate for each hit in the cluster that the track intersects
 
 	private double _Energy;			// the total energy of the cluster
 	
@@ -105,27 +105,27 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster>{
 		this._z = _z;
 	}
 
-	public double get_xTrk() {
+	public double[] get_xTrk() {
 		return _xTrk;
 	}
 
-	public void set_xTrk(double _xTrk) {
+	public void set_xTrk(double[] _xTrk) {
 		this._xTrk = _xTrk;
 	}
 
-	public double get_yTrk() {
+	public double[] get_yTrk() {
 		return _yTrk;
 	}
 
-	public void set_yTrk(double _yTrk) {
+	public void set_yTrk(double[] _yTrk) {
 		this._yTrk = _yTrk;
 	}
 
-	public double get_zTrk() {
+	public double[] get_zTrk() {
 		return _zTrk;
 	}
 
-	public void set_zTrk(double _zTrk) {
+	public void set_zTrk(double[] _zTrk) {
 		this._zTrk = _zTrk;
 	}
 
@@ -287,22 +287,54 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster>{
 		System.out.println(s);
 	}
 
-	public void matchToTrack() {
+	public int[] indexesClusHitsMatchedToTrk ;
+	
+	public void matchToTrack() { 
 		double xTrk = 0; double yTrk = 0; double zTrk = 0;
-		for(AHit h : this) { // only one track intersection should happen per cluster ?... check this...
+		int[] iClusHitsMatchedToTrk = new int[this.size()];
+		int totNbMatches = 0;
+		
+		for(int i =0; i< this.size(); i++) { 
+			iClusHitsMatchedToTrk[i] = -1;
+			
+			AHit h = this.get(i);
+			
 			if(h.get_TrkPosition()==null || Double.isNaN(h.get_TrkPosition().x()) )
-				continue;
+				continue;	
+			
 				xTrk = h.get_TrkPosition().x();
 				yTrk = h.get_TrkPosition().y();
 				zTrk = h.get_TrkPosition().z();
+				
+				if(Math.abs(xTrk - this.get_x()) < Constants.TRKMATCHXPAR[this.get_Panel()-1] && 
+				Math.abs(yTrk - this.get_y()) < Constants.TRKMATCHYPAR[this.get_Panel()-1] && 
+				Math.abs(zTrk - this.get_z()) < Constants.TRKMATCHZPAR[this.get_Panel()-1])	{
+					iClusHitsMatchedToTrk[i] = i;
+					
+					totNbMatches++;
+				}
 		}
+		if(totNbMatches==0)
+			return;
 		
-		if(Math.abs(xTrk - this.get_x()) < Constants.TRKMATCHXPAR[this.get_Panel()-1])
-			this.set_xTrk(xTrk);
-		if(Math.abs(yTrk - this.get_y()) < Constants.TRKMATCHYPAR[this.get_Panel()-1])
-			this.set_yTrk(yTrk);
-		if(Math.abs(zTrk - this.get_z()) < Constants.TRKMATCHZPAR[this.get_Panel()-1])
-			this.set_zTrk(zTrk);
+		int nbMatches = 0;
+		double[] x_Trk = new double[totNbMatches];
+		double[] y_Trk = new double[totNbMatches];
+		double[] z_Trk = new double[totNbMatches];
+		
+		for (int j = 0; j< iClusHitsMatchedToTrk.length ; j++) {
+			if(iClusHitsMatchedToTrk[j] != -1) {
+				x_Trk[nbMatches] = this.get(iClusHitsMatchedToTrk[j]).get_TrkPosition().x();
+				y_Trk[nbMatches] = this.get(iClusHitsMatchedToTrk[j]).get_TrkPosition().y();
+				z_Trk[nbMatches] = this.get(iClusHitsMatchedToTrk[j]).get_TrkPosition().z();
+				
+				nbMatches++;
+			}
+				
+		}
+		this.set_xTrk(x_Trk);
+		this.set_yTrk(y_Trk);
+		this.set_zTrk(z_Trk);
 		
 	}
 

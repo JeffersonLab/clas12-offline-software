@@ -42,10 +42,9 @@ public class TrackReader {
 	
 	
 	public void fetch_Trks(DataEvent event) {
-	 
-		if(event.hasBank("TimeBasedTrkg::TBTracks")==false ) {
-			System.err.println("there is no DC bank ");
-			
+	
+		if(event.hasBank("HitBasedTrkg::HBTracks")==false ) {
+			//System.err.println("there is no DC bank ");			
 			_TrkLines = new ArrayList<Line3d>();
 			
 			return;
@@ -54,7 +53,7 @@ public class TrackReader {
 				
 		EvioDataBank bankDC = (EvioDataBank) event.getBank("HitBasedTrkg::HBTracks");
 		
-		double[] fitChisq = bankDC.getDouble("fitChisq"); // use this to select good tracks
+		//double[] fitChisq = bankDC.getDouble("fitChisq"); // use this to select good tracks
        
 		double[] x		= bankDC.getDouble("c3_x");			// Region 3 cross x-position in the lab (in cm = default unit)
 		double[] y		= bankDC.getDouble("c3_y");  		// Region 3 cross y-position in the lab
@@ -71,12 +70,11 @@ public class TrackReader {
 			// each array of paths likewise corresponds to the tracks for a given sector
 			double[] paths = new double[x.length];
 			
-			
 			for(int i = 0; i<x.length; i++){
-				if(fitChisq[i]>1)
-					continue; // check this
+				//if(fitChisq[i]>1)
+				//	continue; // check this
 				
-				Line3d trk_path = new Line3d(new Vector3d(x[i],y[i],z[i]), new Vector3d(ux[i],uy[i],uz[i]));
+				Line3d trk_path = new Line3d(new Vector3d(x[i],y[i],z[i]), new Vector3d(x[i]+250*ux[i], y[i]+250*uy[i], z[i]+250*uz[i]));
 			    
 	    	    // add this hit
 			    trkLines.add(trk_path);

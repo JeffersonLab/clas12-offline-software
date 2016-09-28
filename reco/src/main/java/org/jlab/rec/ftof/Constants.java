@@ -41,16 +41,22 @@ public class Constants {
 	public static final double[] TRKMATCHYPAR = new double[3];		// track matching parameter for coord y
 	public static final double[] TRKMATCHZPAR = new double[3];		// track matching parameter for coord z
 
-	public static double CLSMATCHXPAR = 1 ;							// x-matching parameter between panels 1a and 1b
-	public static double CLSMATCHYPAR = 1 ;							// y-matching parameter between panels 1a and 1b
-	public static double CLSMATCHZPAR = 1 ;							// z-matching parameter between panels 1a and 1b
-	public static double CLSMATCHTPAR = 1 ;							// t-matching parameter between panels 1a and 1b
-	public static double CLS1ATRKMATCHXPAR = 1;						// x-matching parameter between panel 1a cluster and track intersection with it
-	public static double CLS1ATRKMATCHYPAR = 1;						// y-matching parameter between panel 1a cluster and track intersection with it
-	public static double CLS1ATRKMATCHZPAR = 1;						// z-matching parameter between panel 1a cluster and track intersection with it
-	public static double CLS1BTRKMATCHXPAR = 1;						// x-matching parameter between panel 1b cluster and track intersection with it
-	public static double CLS1BTRKMATCHYPAR = 1;						// y-matching parameter between panel 1b cluster and track intersection with it
-	public static double CLS1BTRKMATCHZPAR = 1;						// z-matching parameter between panel 1b cluster and track intersection with it
+
+	public static final double TDCMINSCALE = 20;					// converted tdc value minimum value
+	public static final double TDCMAXSCALE = 80;					// converted tdc value maximum value
+	public static final double ADCMIN      = 100;					// adc value minimum value
+	public static final double ADCMAX      = 10000;					// adc value maximum value
+
+	public static double CLSMATCHXPAR = 10 ;							// x-matching parameter between panels 1a and 1b
+	public static double CLSMATCHYPAR = 10 ;							// y-matching parameter between panels 1a and 1b
+	public static double CLSMATCHZPAR = 10 ;							// z-matching parameter between panels 1a and 1b
+	public static double CLSMATCHTPAR = 10 ;							// t-matching parameter between panels 1a and 1b
+	public static double CLS1ATRKMATCHXPAR = 15;						// x-matching parameter between panel 1a cluster and track intersection with it
+	public static double CLS1ATRKMATCHYPAR = 10;						// y-matching parameter between panel 1a cluster and track intersection with it
+	public static double CLS1ATRKMATCHZPAR = 10;						// z-matching parameter between panel 1a cluster and track intersection with it
+	public static double CLS1BTRKMATCHXPAR = 15;						// x-matching parameter between panel 1b cluster and track intersection with it
+	public static double CLS1BTRKMATCHYPAR = 10;						// y-matching parameter between panel 1b cluster and track intersection with it
+	public static double CLS1BTRKMATCHZPAR = 10;						// z-matching parameter between panel 1b cluster and track intersection with it
 	
 	
 	public static synchronized void Load() {
@@ -75,15 +81,15 @@ public class Constants {
 		DELTA_T[2][0] = 5.00;
 		DELTA_T[2][1] = 145.00;
 		
-		TRKMATCHXPAR[0] = 1; // some reasonable value needs to be put there
-		TRKMATCHXPAR[1] = 1; // some reasonable value needs to be put there
-		TRKMATCHXPAR[2] = 1; // some reasonable value needs to be put there
-		TRKMATCHYPAR[0] = 1; // some reasonable value needs to be put there
-		TRKMATCHYPAR[1] = 1; // some reasonable value needs to be put there
-		TRKMATCHYPAR[2] = 1; // some reasonable value needs to be put there
-		TRKMATCHZPAR[0] = 1; // some reasonable value needs to be put there
-		TRKMATCHZPAR[1] = 1; // some reasonable value needs to be put there
-		TRKMATCHZPAR[2] = 1; // some reasonable value needs to be put there
+		TRKMATCHXPAR[0] = 15; // some reasonable value needs to be put there
+		TRKMATCHXPAR[1] = 10; // some reasonable value needs to be put there
+		TRKMATCHXPAR[2] = 10; // some reasonable value needs to be put there
+		TRKMATCHYPAR[0] = 15; // some reasonable value needs to be put there
+		TRKMATCHYPAR[1] = 10; // some reasonable value needs to be put there
+		TRKMATCHYPAR[2] = 10; // some reasonable value needs to be put there
+		TRKMATCHZPAR[0] = 15; // some reasonable value needs to be put there
+		TRKMATCHZPAR[1] = 10; // some reasonable value needs to be put there
+		TRKMATCHZPAR[2] = 10; // some reasonable value needs to be put there
 		
 		CSTLOADED = true;
 	}

@@ -1,7 +1,9 @@
 package org.jlab.rec.tof.banks.ftof;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 
 
 
@@ -87,12 +89,14 @@ public class HitReader {
 			List<Hit> hits = new ArrayList<Hit>();
 			
 			for(int i = 0; i<id_1A.length; i++){
+				if( passADC(ADCL_1A[i])==0 || passADC(ADCR_1A[i])==0 || passTDC(TDCL_1A[i])==0 || passTDC(TDCR_1A[i])==0 )
+					continue;
+				
 			    // get the status
 				int statusL = CCDBConstantsLoader.STATUSU[sector_1A[i]-1][0][paddle_1A[i]-1];
 				int statusR = CCDBConstantsLoader.STATUSD[sector_1A[i]-1][0][paddle_1A[i]-1];
 				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1A[i], TDCL_1A[i], ADCR_1A[i], TDCR_1A[i]);
-				
-				
+								
 				// create the hit object
 				Hit hit = new Hit(id_1A[i], 1, sector_1A[i], paddle_1A[i], ADCL_1A[i], TDCL_1A[i], ADCR_1A[i], TDCR_1A[i]) ;				
 				hit.set_StatusWord(statusWord);
@@ -108,6 +112,8 @@ public class HitReader {
 				// superlayer = 1;
 				hit.set_HitParameters(1);				
 			}
+			
+			Collections.sort(updated_hits);
 			// fill the list of TOF hits
 			this.set_FTOF1AHits(updated_hits);
 		}
@@ -125,11 +131,12 @@ public class HitReader {
 			List<Hit> hits = new ArrayList<Hit>();
 			
 			for(int i = 0; i<id_1B.length; i++){
+				if( passADC(ADCL_1B[i])==0 || passADC(ADCR_1B[i])==0 || passTDC(TDCL_1B[i])==0 || passTDC(TDCR_1B[i])==0 )
+					continue;
 				// get the status
 				int statusL = CCDBConstantsLoader.STATUSU[sector_1B[i]-1][1][paddle_1B[i]-1];
 				int statusR = CCDBConstantsLoader.STATUSD[sector_1B[i]-1][1][paddle_1B[i]-1];
-				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]);
-				
+				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]);			
 				
 				// create the hit object
 				Hit hit = new Hit(id_1B[i], 2, sector_1B[i], paddle_1B[i], ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]) ;
@@ -146,6 +153,8 @@ public class HitReader {
 				// superlayer = 2;
 				hit.set_HitParameters(2);				
 			}
+			
+			Collections.sort(updated_hits);
 			// fill the list of TOF hits
 			this.set_FTOF1BHits(updated_hits);
 		}
@@ -164,10 +173,11 @@ public class HitReader {
 			List<Hit> hits = new ArrayList<Hit>();
 			
 			for(int i = 0; i<id_2.length; i++){// get the status
+				if( passADC(ADCL_2[i])==0 || passADC(ADCR_2[i])==0 || passTDC(TDCL_2[i])==0 || passTDC(TDCR_2[i])==0 )
+					continue;
 				int statusL = CCDBConstantsLoader.STATUSU[sector_2[i]-1][2][paddle_2[i]-1];
 				int statusR = CCDBConstantsLoader.STATUSD[sector_2[i]-1][2][paddle_2[i]-1];
 				String statusWord = this.set_StatusWord(statusL, statusR, ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]);
-				
 				
 				// create the hit object
 				Hit hit = new Hit(id_2[i], 3, sector_2[i], paddle_2[i], ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]) ;
@@ -185,6 +195,7 @@ public class HitReader {
 				// superlayer = 3;
 				hit.set_HitParameters(3);				
 			}
+			Collections.sort(updated_hits);
 			// fill the list of TOF hits
 			this.set_FTOF2Hits(updated_hits);
 		}
@@ -223,17 +234,17 @@ public class HitReader {
 	}
 
 	private int passTDC(int tDC) {
-		// selected ranges TDC in [0, ? 1000] // what is the upper limit?
+		// selected ranges TDC 
 		int pass =0;
-		if(Constants.LSBCONVFAC*tDC>20 &&  Constants.LSBCONVFAC*tDC<80)
+		if(Constants.LSBCONVFAC*tDC>Constants.TDCMINSCALE &&  Constants.LSBCONVFAC*tDC<Constants.TDCMAXSCALE)
 			pass = 1;
 		return pass;
 	}
 
 	private int passADC(int aDC) {
-		// selected ranges  ADC in [0, ? 8192]
+		// selected ranges  ADC 
 		int pass =0;
-		if(aDC>700 && aDC<7000)
+		if(aDC>Constants.ADCMIN && aDC<Constants.ADCMAX)
 			pass = 1;
 		return pass;
 	}
@@ -247,7 +258,7 @@ public class HitReader {
 					
 		for(int i = 0; i<trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
 			Line3d trk = trks.get(i);
-				
+			
 			FTOFDetHit[][][] HitArray = new FTOFDetHit[6][3][62] ;
 			List<DetHit> hits = ftofDetector.getIntersections(trk);
 			
@@ -262,9 +273,11 @@ public class HitReader {
 					hitList.add(fhit);	// add this hit to the output list anyway
 				}
 			}
+			
 			for(Hit fhit : FTOFhits) {
 				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1]!=null) {
 					FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1];
+					
 					// create a new FTOF hit for each intersecting track with this hit counter 
 					// create the hit object
 					Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2()) ;
@@ -273,7 +286,7 @@ public class HitReader {
 					hit.set_matchedTrackHit(matchedHit);
 					hit.set_matchedTrack(trk);
 					// get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
-					double deltaPath = matchedHit.origin().distance(matchedHit.mid());
+					double deltaPath = matchedHit.origin().distance(matchedHit.mid()); 
 					hit.set_TrkPathLen(paths[i]+deltaPath);
 					// get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
 					hit.set_TrkPosition(new Point3D(matchedHit.mid().x,matchedHit.mid().y,matchedHit.mid().z));

@@ -67,7 +67,7 @@ public class ClusterMatcher {
 	 * @return a 2-cluster system corresponding to a match between panel 1a and panel 1b
 	 */
 	public ArrayList<Cluster> ClusterDoublet(Cluster C1a, Cluster C1b) { // CHECK this...
-		if(Double.isNaN(C1b.get_xTrk()) || Double.isNaN(C1a.get_xTrk()) )
+		if(C1b.get_xTrk()==null || C1a.get_xTrk()==null )
 			return null;  // no tracking info
 		
 		ArrayList<Cluster> ClsDoublet = new ArrayList<Cluster>(2);
@@ -91,9 +91,9 @@ public class ClusterMatcher {
 		double C1a_z_etrapPan1b = C1a.get_z()-uz_mid;
 		
 		// Matching the cluster position to the track position
-		if(Math.abs(C1a.get_x()-C1a.get_xTrk()) > Constants.CLS1ATRKMATCHXPAR || Math.abs(C1a.get_y()-C1a.get_yTrk()) > Constants.CLS1ATRKMATCHYPAR || Math.abs(C1a.get_z()-C1a.get_zTrk()) > Constants.CLS1ATRKMATCHZPAR)
+		if(Math.abs(C1a.get_x()-C1a.get_xTrk()[0]) > Constants.CLS1ATRKMATCHXPAR || Math.abs(C1a.get_y()-C1a.get_yTrk()[0]) > Constants.CLS1ATRKMATCHYPAR || Math.abs(C1a.get_z()-C1a.get_zTrk()[0]) > Constants.CLS1ATRKMATCHZPAR)
 			return null;		// not matched
-		if(Math.abs(C1b.get_x()-C1b.get_xTrk()) > Constants.CLS1BTRKMATCHXPAR || Math.abs(C1b.get_y()-C1b.get_yTrk()) > Constants.CLS1BTRKMATCHYPAR || Math.abs(C1b.get_z()-C1b.get_zTrk()) > Constants.CLS1BTRKMATCHZPAR)
+		if(Math.abs(C1b.get_x()-C1b.get_xTrk()[0]) > Constants.CLS1BTRKMATCHXPAR || Math.abs(C1b.get_y()-C1b.get_yTrk()[0]) > Constants.CLS1BTRKMATCHYPAR || Math.abs(C1b.get_z()-C1b.get_zTrk()[0]) > Constants.CLS1BTRKMATCHZPAR)
 			return null;		// not matched
 		
 		// Matching between 1A and 1B
@@ -195,6 +195,7 @@ public class ClusterMatcher {
 					continue;
 				if(C1.get_Sector()!=C2.get_Sector())
 					continue;
+				
 				ArrayList<Cluster> ClsDoub = ClusterDoublet(C1, C2);
 				C2.set_tCorr(this.get_CorrectedHitTime(C1, C2)); // set the corrected Time for 1b
 				ClsDoublets.add(ClsDoub);
