@@ -35,27 +35,7 @@ public class DCTBEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean init() {
-		if (GeometryLoader.isGeometryLoaded == false) {
-			GeometryLoader.Load();
-		}
-
-		// Load the Constants
-		if (Constants.areConstantsLoaded == false) {
-			Constants.Load();
-			System.out.println(" DB VARIATION LOADED AS "+Constants.DBVAR);
-		}
-		// Load the calibration constants
-		if (CalibrationConstantsLoader.CSTLOADED == false) {
-			CalibrationConstantsLoader.Load();
-		}
-		// Load the fields
-		if (DCSwimmer.areFieldsLoaded == false) {
-			DCSwimmer.getMagneticFields();
-		}
-		 // Load the time-to-distance function
-		if( TableLoader.T2DLOADED == false) {
-			TableLoader.Fill();
-		}
+		
 		return true;
 	}
 

@@ -49,7 +49,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	private double _TrkFitDoca =-1;
 	private double _TimeToDistance =0;
 
-	
 	/**
 	 * 
 	 * @return the local hit x-position in the local superlayer coordinate system;
@@ -99,8 +98,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 			if(this.get_TimeToDistance()==0) // if the time-to-dist is not set ... set it
 				set_TimeToDistance(0);
 			
-			err = Constants.CELLRESOL; 
-			if(Constants.useParametricResol==true) {
+			err = Constants.CELLRESOL; // default
+			//if(Constants.useParametricResol==true) {
 				double x = this.get_Doca()/this.get_CellSize();
 				double p1 = CalibrationConstantsLoader.PAR1[this.get_Sector()-1][this.get_Superlayer()-1];
 				double p2 = CalibrationConstantsLoader.PAR2[this.get_Sector()-1][this.get_Superlayer()-1];
@@ -109,7 +108,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 				double scale = CalibrationConstantsLoader.SCAL[this.get_Sector()-1][this.get_Superlayer()-1];
 				err = (p1 + p2/((p3+x)*(p3+x)) + p4*Math.pow(x, 8))*scale*0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
 				
-			}
+			//}
 		}
 		
 		return err;
@@ -218,14 +217,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 */
 	 
 	public void set_TimeToDistance(double cosTrkAngle) {
-		
+		boolean useTimeToDistanceGrid = Constants.isT2DGRID();
 		double d =0;
 		int slIdx = this.get_Superlayer()-1;
 		int secIdx = this.get_Sector()-1;
 		if(_TrkgStatus!=-1 && this.get_Time()>0) { 
 			d = Constants.TIMETODIST[this.get_Region()-1]; 
 			// chose method to get the distance from the time -- for now this is only used for cosmics so B =0
-			if(Constants.useTimeToDistanceGrid==true) {
+			if(useTimeToDistanceGrid==true) {
 				double beta =1;
 				double x = this.get_ClusFitDoca();
 				

@@ -20,21 +20,17 @@ public class GeometryLoader {
 	public static boolean isGeometryLoaded = false;
 	public static DCDetector dcDetector;
 
-	public static synchronized void Load() {
+	public static synchronized void Load(int runNb, String var) {
 		// the geometry is different is hardware and geometry... until GEMC gets updated we need to run with this flag
-		ConstantProvider  provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
+		ConstantProvider  provider = GeometryFactory.getConstants(DetectorType.DC, runNb, var);
         dcDetector = (new DCFactoryUpdated()).createDetectorTilted(provider);
-        
-		if (isGeometryLoaded) return;
-
-		// mark the geometry as loaded
-		isGeometryLoaded = true;
-		System.out.println(" -- DC Geometry constants are Loaded --  ");
+       
+		System.out.println(" -- DC Geometry constants are Loaded for RUN   "+runNb+" with VARIATION "+var);
 	}
 	
 	public static void main (String arg[]) throws FileNotFoundException {
 
-		GeometryLoader.Load();
+		GeometryLoader.Load(10, "default");
 		
 		Point3D ep1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(111).getLine().origin();
 		Point3D ep2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(111).getLine().end();

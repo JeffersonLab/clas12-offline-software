@@ -2,10 +2,10 @@ package org.jlab.rec.dc.track;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossList;
@@ -81,7 +81,7 @@ public class TrackCandListFinder {
 			        //positive charges bend outward for nominal GEMC field configuration
 					int q = (int) Math.signum(deltaTheta); 
 					
-					q*=-1*Constants.TORSCALE;						
+					q*=-1*Constants.getTORSCALE();						
 					
 					if(iBdl == 0 || (deltaTheta== 0)) {
 						System.err.print("Error in estimating track candidate trajectory: integral_B_dl not found, no trajectory...");
@@ -126,7 +126,7 @@ public class TrackCandListFinder {
 								}
 								
 								kf.runKalFit(); 
-										
+								
 								if(kf.chi2>fitChisq || kf.chi2>Constants.MAXCHI2+1 || Math.abs(kf.chi2-fitChisq)<0.0000001) {
 									iterationNb = totNbOfIterations;
 									continue;
@@ -247,9 +247,25 @@ public class TrackCandListFinder {
 		if(z==cand.get(2).get_Point().z())
 			cand.set_TotPathLen(totPathLen);
 		
-		cand.set_Vtx0(trakOrig);
-		cand.set_pAtOrig(pAtOrig.toVector3D());
-		//System.out.println("TCS p = "+cand.get_pAtOrig_TiltedCS().toString()+" V= "+cand.get_Vtx0_TiltedCS()+" p = "+cand.get_pAtOrig().toString()+" V= "+cand.get_Vtx0());
+		
+		DCSwimmer swim2 = new DCSwimmer();
+		swim2.isRotatedCoordinateSystem = false;
+		// the rotated vtx in the lab frame does not coincide with the plane z =0,  The track must be rewam to that plane
+		int dir =1;
+		if(trakOrig.z()>0)
+			dir =-1;
+		swim2.SetSwimParameters(trakOrig.x(), trakOrig.y(), trakOrig.z(), dir*pAtOrig.x(), dir*pAtOrig.y(), dir*pAtOrig.z(), dir*cand.get_Q());
+		double[] VecAtTarlab = swim2.SwimToPlane(0);
+    	double xOrFix = VecAtTarlab[0];
+		double yOrFix = VecAtTarlab[1];
+		double zOrFix = VecAtTarlab[2];
+		double pxOrFix = dir*VecAtTarlab[3];
+		double pyOrFix = dir*VecAtTarlab[4];
+		double pzOrFix = dir*VecAtTarlab[5];
+		
+		cand.set_Vtx0(new Point3D(xOrFix,yOrFix, zOrFix));
+		cand.set_pAtOrig(new Vector3D(pxOrFix, pyOrFix, pzOrFix));
+	//	System.out.println("old V = "+trakOrig.toString()+" new V= "+cand.get_Vtx0().toString());
 		cand.fit_Successful=true;
 		cand.set_TrackingInfoString(trking);
 	}

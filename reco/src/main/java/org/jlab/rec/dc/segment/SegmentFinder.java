@@ -35,7 +35,7 @@ public class SegmentFinder {
 			Segment seg = new Segment(fClus);
 			seg.set_fitPlane();	
 			
-			if(Constants.isCalibrationRun) {
+			if(Constants.isCALIB()) {
 				// get all the hits to obtain layer efficiency
 				EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("DC::dgtz");
 		        

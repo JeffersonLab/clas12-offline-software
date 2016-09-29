@@ -280,7 +280,7 @@ public class RecoBankWriter {
 			bank.setDouble("p0_z",  i,candlist.get(i).get_pAtOrig().z() );
 			bank.setInt("Cross1_ID", i,candlist.get(i).get(0).get_Id());
 			bank.setInt("Cross2_ID", i,candlist.get(i).get(1).get_Id());
-			bank.setInt("Cross3_ID", i,candlist.get(i).get(2).get_Id());
+			bank.setInt("Cross3_ID", i,candlist.get(i).get(2).get_Id());			
 		}
 		
 		return bank;

@@ -11,7 +11,7 @@ public class CalibrationConstantsLoader {
 	public CalibrationConstantsLoader() {
 		// TODO Auto-generated constructor stub
 	}
-	public static  boolean CSTLOADED = false;
+	
 	// T2D
 	public static final double[][] deltanm = new double[6][6];
 	public static final double[][] v0 = new double[6][6];					    // staturated drift velocity in cm/ns
@@ -39,14 +39,10 @@ public class CalibrationConstantsLoader {
 	
 	 //Calibration parameters from DB    
     static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
-    //private Detector ftofDetector;
-    public static final boolean areCalibConstantsLoaded = false;
     
-    public static final synchronized void Load() {
-    	
-		if (CSTLOADED) return;
-		
-		dbprovider = new DatabaseConstantProvider(10,Constants.DBVAR); // reset using the variation
+    public static final synchronized void Load(int runNb, String var) {
+    	if(runNb!=10 || !var.equalsIgnoreCase("default"));
+			dbprovider = new DatabaseConstantProvider(runNb, var); // reset using the new variation
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/dc/signal_generation/dc_resolution");
 	    dbprovider.loadTable("/calibration/dc/time_to_distance/tvsx_devel_v2");
@@ -108,13 +104,12 @@ public class CalibrationConstantsLoader {
 	    	System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
 	    	"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
 	    }
-	    
-	    CSTLOADED = true;
+	   
     }
    
     
     
     public static final void main (String arg[]) {
-    	CalibrationConstantsLoader.Load();
+    	CalibrationConstantsLoader.Load(11, "default");
     }
 }

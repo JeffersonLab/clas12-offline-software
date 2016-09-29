@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 import cnuphys.magfield.CompositeField;
+import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.RotatedCompositeField;
 import cnuphys.magfield.Solenoid;
 import cnuphys.magfield.Torus;
@@ -49,8 +50,6 @@ public class DCSwimmer {
 	
 	public int nSteps; 
 	
-	public static boolean areFieldsLoaded;
-	
 	public DCSwimmer() {
 		//create a swimmer for our magnetic field
 		//swimmer = new Swimmer(rcompositeField);
@@ -76,7 +75,6 @@ public class DCSwimmer {
 	 * @param charge
 	 */
 	public void SetSwimParameters(int direction, double x0, double y0, double z0, double thx, double thy, double p, int charge) {
-		
 		
 		// x,y,z in m = swimmer units
 		 _x0  = x0/100;
@@ -349,10 +347,33 @@ public class DCSwimmer {
 		return new Point3D(result[0]/10, result[1]/10, result[2]/10);
 		
 	}
-	
 	//tries to get the magnetic field assuming it is in clasJLib
-	public static synchronized  void getMagneticFields() {
-
+	public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale) {
+		if (rcompositeField.get(0) != null) {			
+			((MagneticField) rcompositeField.get(0)).setScaleFactor(TorusScale);
+			System.out.println("***** ****** ****** THE TORUS IS BEING SCALED BY "+ (TorusScale*100) +"  %   *******  ****** **** ");			
+		}
+		if (compositeField.get(0) != null) 		
+			((MagneticField) compositeField.get(0)).setScaleFactor(TorusScale);
+		
+		if (rcompositeField.get(1) != null) {			
+			((MagneticField) rcompositeField.get(1)).setScaleFactor(SolenoidScale);
+			System.out.println("***** ****** ****** THE SOLENOID IS BEING SCALED BY "+ (SolenoidScale*100) +"  %   *******  ****** **** ");			
+		}
+		if (compositeField.get(1) != null) 		
+			((MagneticField) compositeField.get(1)).setScaleFactor(SolenoidScale);
+		
+		//System.out.println(" Fields at orig = "+compositeField.fieldMagnitude(0, 0, 0)+" Rotated Fields: "+rcompositeField.fieldMagnitude(0, 0, 0));
+	
+		
+	}
+	
+	static boolean FieldsLoaded = false ;
+	//tries to get the magnetic fields 
+	public static synchronized void getMagneticFields() {
+		 if(FieldsLoaded)
+			 return;
+		 
 		 Torus torus = null;
 		 Solenoid solenoid = null;
 		//will read mag field assuming we are in a 
@@ -361,7 +382,7 @@ public class DCSwimmer {
 		
 		String clasDictionaryPath = CLASResources.getResourcePath("etc");
 		
-		 String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
+		String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
 		
 		File torusFile = new File(torusFileName);
 		try {
@@ -373,8 +394,8 @@ public class DCSwimmer {
 		//OK, see if we can create a Solenoid
 		String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
 			//OK, see if we can create a Torus
-			if(clasDictionaryPath == "../clasJLib")
-				solenoidFileName = clasDictionaryPath + "/data/solenoid/v1.0/solenoid-srr.dat";
+			//if(clasDictionaryPath == "../clasJLib")
+			//	solenoidFileName = clasDictionaryPath + "/data/solenoid/v1.0/solenoid-srr.dat";
 			
 		File solenoidFile = new File(solenoidFileName);
 		try {
@@ -382,72 +403,23 @@ public class DCSwimmer {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		/*
-		if(Constants.FieldConfig=="variable") {
 		
-			if(Constants.TORSCALE<0) {
-				if(torus.isInvertField()==false)
-					torus.setInvertField(true);
-			}
-			if(Constants.SOLSCALE<0) {
-				if(solenoid.isInvertField()==false)
-					solenoid.setInvertField(true);
-			}
-			if(Constants.TORSCALE>0) {
-				if(torus.isInvertField()==true)
-					torus.setInvertField(false);
-			}
-			if(Constants.SOLSCALE>0) {
-				if(solenoid.isInvertField()==true)
-					solenoid.setInvertField(false);
-			}
-		} */
 		rcompositeField = new RotatedCompositeField();
 		compositeField = new CompositeField();
 		//System.out.println("***** ****** CREATED A COMPOSITE ROTATED FIELD ****** **** ");
 			
-		if (torus != null) {
-			/*
-			if(Constants.TORSCALE<0) {
-				if(torus.isInvertField()==false)
-					torus.setInvertField(true);
-			}
+		if (torus != null) {			
 			
-			if(Constants.TORSCALE>0) {
-				if(torus.isInvertField()==true)
-					torus.setInvertField(false);
-			}
-			
-			torus.setScaleField(true);  */
-			torus.setScaleFactor(Constants.TORSCALE);
-			System.out.println("***** ****** ****** THE TORUS IS BEING SCALED BY "+ (Constants.TORSCALE*100) +"  %   *******  ****** **** ");
 			rcompositeField.add(torus);
 			compositeField.add(torus);
 		}
 		if (solenoid != null) {
-			/*
-			if(Constants.SOLSCALE<0) {
-				if(solenoid.isInvertField()==false)
-					solenoid.setInvertField(true);
-			}
 			
-			if(Constants.SOLSCALE>0) {
-				if(solenoid.isInvertField()==true)
-					solenoid.setInvertField(false);
-			}
-			solenoid.setScaleField(true); */
-			solenoid.setScaleFactor(Constants.SOLSCALE);
-			System.out.println(" Sol at orig = "+solenoid.fieldMagnitude(0, 0, 0));
-			System.out.println("***** ****** ****** THE SOLENOID IS BEING SCALED BY "+ (Constants.SOLSCALE*100) +"  %   *******  ****** **** ");
-					
-				rcompositeField.add(solenoid);
-				compositeField.add(solenoid);
-				System.out.println(" Compos at orig = "+compositeField.fieldMagnitude(0, 0, 0)+" "+rcompositeField.fieldMagnitude(0, 0, 0));
-		
+			rcompositeField.add(solenoid);
+			compositeField.add(solenoid);
+			
 		}
-		areFieldsLoaded = true;
-		//System.out.println("Fields are Loaded! with torus inverted ? "+torus.isInvertField()+
-		//		" and solenoid inverted ? "+solenoid.isInvertField());
+		FieldsLoaded = true;
 	}	
 		
 		

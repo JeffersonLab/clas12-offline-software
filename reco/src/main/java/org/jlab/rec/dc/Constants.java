@@ -9,14 +9,12 @@ import cnuphys.snr.NoiseReductionParameters;
  */
 public class Constants {
 
-	// SIMULATION FLAG
-	public static final boolean isSimulation = true;
-	
+	static boolean ConstantsLoaded = false;
 	// RECONSTRUCTION PARAMETERS
 	public static final int DC_MIN_NLAYERS = 4;
 
 	// DATABASE VARIATION
-	public static final String DBVAR = "default";
+	//public static final String DBVAR = "default";
 	
 	// GEOMETRY PARAMETERS
 
@@ -102,24 +100,16 @@ public class Constants {
 
 	public static final int MAXCLUSSIZE = 14;
 	
-	public static final double MAXCHI2 = 600;
-
+	public static final double MAXCHI2 = 10;
 
 	public static final boolean LAYEREFFS = false;
 	
-	public static boolean areConstantsLoaded = false;
-
 	public static final boolean OUTOFTIMEFLAG = true;
 
-	// the nominal configuration is tor -1 sol +1
-	// the reverse configuration is tor +1 sol +1
-	// ---------------------------------------------
+	private static boolean T2DGRID ;
+	private static boolean CALIB;
+	private static double TORSCALE;
 	
-	//public static final String FieldConfig = "nominal";
-	
-	public static final double TORSCALE = -1.;
-	public static final double SOLSCALE = 1.;
-
 	// SNR parameters -- can be optimized
 	public static final  int[] SNR_RIGHTSHIFTS = {0,1,2,2,4,4};
 	public static final  int[] SNR_LEFTSHIFTS  = {0,1,2,2,4,4};	
@@ -131,10 +121,10 @@ public class Constants {
 	public static final boolean useRaster = false;
 
 	public static final double T0 =0;
-	public static final boolean useParametricResol = true;
-	public static final boolean isCalibrationRun = false;
+	
+	//public static final boolean isCalibrationRun = false;
 	public static final boolean useTimeToDistanceGrid = false;
-	public static final boolean DEBUGCROSSES = false;
+	//public static final boolean DEBUGCROSSES = false;
 
 	// Arrays for combinatorial cluster compositions
     static final int[][] CombArray1Layer = new int[][]{{0},{1}};
@@ -147,9 +137,9 @@ public class Constants {
 	public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
 	
 	
-	public static final synchronized void Load() {
-		if (areConstantsLoaded) return;
-		
+	public static final synchronized void Load(boolean timeToDistanceGridSetting, boolean calibRun, double torusScale) {
+		if (ConstantsLoaded==true)
+			return;
 		CombArray.add(CombArray1Layer);
 		CombArray.add(CombArray2Layers);
 		CombArray.add(CombArray3Layers);
@@ -157,6 +147,9 @@ public class Constants {
 		CombArray.add(CombArray5Layers);
 		CombArray.add(CombArray6Layers);
 		
+		setT2DGRID(timeToDistanceGridSetting);
+		setCALIB(calibRun);
+		setTORSCALE(torusScale);
 		
 		NoiseReductionParameters.setLookForTracks(false);
 		
@@ -169,11 +162,38 @@ public class Constants {
 		TIMETODIST[0] = 0.0053;  //in cm per ns
 		TIMETODIST[1] = 0.0026;
 		TIMETODIST[2] = 0.0036;
-
 		
-		areConstantsLoaded = true;
-
-		System.out.println(" DB VAR in Calib "+Constants.DBVAR);
+		System.out.println("CONSTANTS LOADED!!!");
 		
+	}
+
+
+	public static final boolean isT2DGRID() {
+		return T2DGRID;
+	}
+
+
+	public static final void setT2DGRID(final boolean t2dgrid) {
+		T2DGRID = t2dgrid;
+	}
+
+
+	public static final boolean isCALIB() {
+		return CALIB;
+	}
+
+
+	public static final void setCALIB(boolean cALIB) {
+		CALIB = cALIB;
+	}
+
+
+	public static final double getTORSCALE() {
+		return TORSCALE;
+	}
+
+
+	public static final void setTORSCALE(double tORSCALE) {
+		TORSCALE = tORSCALE;
 	}
 }

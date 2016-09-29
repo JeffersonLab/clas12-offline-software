@@ -156,6 +156,7 @@ public class HitReader {
 	 * Reads HB DC hits written to the DC bank
 	 * @param event
 	 */
+
 	public void read_HBHits(DataEvent event) {
 		
 		if(event.hasBank("HitBasedTrkg::HBHits")==false) {

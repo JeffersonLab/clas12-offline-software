@@ -5,7 +5,6 @@ import java.text.DecimalFormat;
 
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 
-
 public class TableLoader {
 
 	public TableLoader() {
@@ -13,7 +12,7 @@ public class TableLoader {
 	}
 
 	public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
-	public static boolean T2DLOADED = false;
+	static boolean T2DLOADED = false;
 	static int minBinIdxB = 0;
 	static int maxBinIdxB = 5;
 	static int minBinIdxAlpha = 0;
@@ -22,9 +21,6 @@ public class TableLoader {
 	static int[][][][] maxBinIdxT  = new int[6][6][6][6];
 	
 	public static double FracDmaxAtMinVel = 0.615;		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
-	
-	
-	
 	
 	/*
 	 * 
@@ -151,7 +147,7 @@ public class TableLoader {
 	 }
 
 	public static void main(String args[]) {
-		CalibrationConstantsLoader.Load();
+		CalibrationConstantsLoader.Load(10, "default");
 		TableLoader tbl = new TableLoader();
 		TableLoader.Fill();
 		//System.out.println(maxBinIdxT[1][0][0]+" "+maxBinIdxT[1][0][5]+" "+DISTFROMTIME[1][0][0][maxBinIdxT[1][0][0]]+ " "+DISTFROMTIME[1][0][5][maxBinIdxT[1][0][5]]);

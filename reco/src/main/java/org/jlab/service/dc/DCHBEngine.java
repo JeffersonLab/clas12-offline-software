@@ -7,6 +7,7 @@ import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
@@ -25,6 +26,7 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
@@ -39,25 +41,14 @@ public class DCHBEngine extends ReconstructionEngine {
 		super("DCHB","ziegler","3.0");
 	}
 
+	String FieldsConfig="";
+	int Run = -1;
+	
 	@Override
 	public boolean init() {
-		if (GeometryLoader.isGeometryLoaded == false) {
-			GeometryLoader.Load();
-		}
-
-		// Load the Constants
-		if (Constants.areConstantsLoaded == false) {
-			Constants.Load();
-			System.out.println(" DB VARIATION LOADED AS "+Constants.DBVAR);
-		}
-		// Load the calibration constants
-		if (CalibrationConstantsLoader.CSTLOADED == false) {
-			CalibrationConstantsLoader.Load();
-		}
-		// Load the fields
-		if (DCSwimmer.areFieldsLoaded == false) {
-			DCSwimmer.getMagneticFields();
-		}
+		
+		// Load the Fields 
+		DCSwimmer.getMagneticFields();
 		
 		return true;
 	}
@@ -65,7 +56,7 @@ public class DCHBEngine extends ReconstructionEngine {
 	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		
+		setRunConditionsParameters( event) ;
 		 // init SNR 
 	    Clas12NoiseResult results = new Clas12NoiseResult(); 
 		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
@@ -202,10 +193,52 @@ public class DCHBEngine extends ReconstructionEngine {
 		return true;
 	}
 
+	public void setRunConditionsParameters(DataEvent event) {
+		if(event.hasBank("RUN::config")==false) {
+			System.err.println("RUN CONDITIONS NOT READ!");
+			return;
+		}
+		boolean isMC = false;
+		boolean isCosmics = false;
+		EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+        
+		if(bank.getByte("Type")[0]==1)
+			isMC = true;
+		if(bank.getByte("Mode")[0]==1)
+			isCosmics = true;
+		
+		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
+		
+		// Load the fields
+		//-----------------
+		String newConfig = "SOLENOID"+bank.getFloat("Solenoid")[0]+"TORUS"+bank.getFloat("Torus")[0];		
+		
+		if (FieldsConfig.equals(newConfig)==false) {
+			// Load the Constants
+			Constants.Load(isCosmics, isCalib, (double)bank.getFloat("Torus")[0]); // set the T2D Grid for Cosmics data only so far....
+			// Load the Fields
+			DCSwimmer.setMagneticFieldsScales(bank.getFloat("Solenoid")[0], bank.getFloat("Torus")[0]); // something changed in the configuration
+		}
+		FieldsConfig = newConfig;
+		
+		// Load the constants
+		//-------------------
+		int newRun = bank.getInt("Run")[0];
+		
+		if(Run!=newRun) {
+			CalibrationConstantsLoader.Load(newRun, "default");
+
+			TableLoader.Fill();
+			
+			GeometryLoader.Load(newRun, "default");
+		}
+		Run = newRun;
+		
+	}
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		 
-		String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
-		
+		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/output_with_header.0.evio";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -214,7 +247,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		DCHBEngine en = new DCHBEngine();
 		en.init();
 		DCTBEngine en2 = new DCTBEngine();
-		en.init();
+		en2.init();
 		org.jlab.io.evio.EvioSource reader = new org.jlab.io.evio.EvioSource();
 		
 		int counter = 0;
@@ -238,4 +271,5 @@ public class DCHBEngine extends ReconstructionEngine {
 		double t = System.currentTimeMillis()-t1;
 		System.out.println("TOTAL  PROCESSING TIME = "+t);
 	 }
+	
 }
