@@ -1,20 +1,21 @@
-
-
 package eu.mihosoft.vrl.v3d.ext.imagej;
 
 /**
  * Fork of
  * https://github.com/fiji/fiji/blob/master/src-plugins/3D_Viewer/src/main/java/customnode/STLLoader.java
- * 
+ *
  * TODO: license unclear
  */
-
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -49,52 +50,47 @@ public class STLLoader {
     // attributes of the currently read mesh
     private ArrayList<Point3f> vertices = new ArrayList<>();
     private Point3f normal = new Point3f(0.0f, 0.0f, 0.0f); //to be used for file checking
-    private FileInputStream fis;
     private int triangles;
 //    private DecimalFormat decimalFormat = new DecimalFormat("0.0E0");
 
-
-
-    public ArrayList<Point3f> parse(File f) throws IOException {
+    public ArrayList<Point3f> parse(InputStream fis) throws IOException {
         vertices.clear();
 
-                // determine if this is a binary or ASCII STL
+        BufferedInputStream bufstr = new BufferedInputStream(fis);
+        bufstr.mark(1000000);
+
+        // determine if this is a binary or ASCII STL
         // and send to the appropriate parsing method
         // Hypothesis 1: this is an ASCII STL
-        BufferedReader br = new BufferedReader(new FileReader(f));
+        BufferedReader br = new BufferedReader(new InputStreamReader(bufstr));
         String line = br.readLine();
         String[] words = line.trim().split("\\s+");
         if (line.indexOf('\0') < 0 && words[0].equalsIgnoreCase("solid")) {
-            System.out.println("Looks like an ASCII STL");
-            parseAscii(f);
+//            System.out.println("Looks like an ASCII STL");
+            parseAscii(bufstr);
             return vertices;
         }
 
-        // Hypothesis 2: this is a binary STL
-        FileInputStream fs = new FileInputStream(f);
+        bufstr.reset();
 
-                // bytes 80, 81, 82 and 83 form a little-endian int
+        // Hypothesis 2: this is a binary STL
+        BufferedInputStream fs = new BufferedInputStream(bufstr);
+        // bytes 80, 81, 82 and 83 form a little-endian int
         // that contains the number of triangles
         byte[] buffer = new byte[84];
         fs.read(buffer, 0, 84);
         triangles = (int) (((buffer[83] & 0xff) << 24)
                 | ((buffer[82] & 0xff) << 16) | ((buffer[81] & 0xff) << 8) | (buffer[80] & 0xff));
-        if (((f.length() - 84) / 50) == triangles) {
-            System.out.println("Looks like a binary STL");
-            parseBinary(f);
-            return vertices;
-        }
-        System.err.println("File is not a valid STL");
-        
+
+        bufstr.reset();
+//        System.out.println("Looks like a binary STL");
+        parseBinary(bufstr);
+
         return vertices;
     }
 
-    private void parseAscii(File f) {
-        try {
-            in = new BufferedReader(new FileReader(f));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+    private void parseAscii(BufferedInputStream bufstr) {
+        in = new BufferedReader(new InputStreamReader(bufstr));
         vertices = new ArrayList<>();
         try {
             while ((line = in.readLine()) != null) {
@@ -119,17 +115,16 @@ public class STLLoader {
         }
     }
 
-    private void parseBinary(File f) {
+    private void parseBinary(BufferedInputStream bufstr) {
         vertices = new ArrayList<Point3f>();
         try {
-            fis = new FileInputStream(f);
             for (int h = 0; h < 84; h++) {
-                fis.read();// skip the header bytes
+                bufstr.read();// skip the header bytes
             }
             for (int t = 0; t < triangles; t++) {
                 byte[] tri = new byte[50];
                 for (int tb = 0; tb < 50; tb++) {
-                    tri[tb] = (byte) fis.read();
+                    tri[tb] = (byte) bufstr.read();
                 }
                 normal.x = leBytesToFloat(tri[0], tri[1], tri[2], tri[3]);
                 normal.y = leBytesToFloat(tri[4], tri[5], tri[6], tri[7]);
@@ -146,7 +141,7 @@ public class STLLoader {
                     vertices.add(p);
                 }
             }
-            fis.close();
+            bufstr.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -161,7 +156,6 @@ public class STLLoader {
 //        string = string.replaceFirst("e\\-", "E-");
 //        return decimalFormat.parse(string).floatValue();
 //    }
-    
     private float parseFloat(String string) throws ParseException {
 
         return Float.parseFloat(string);

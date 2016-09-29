@@ -7,6 +7,7 @@ package org.jlab.detector.volume;
 
 import org.jlab.detector.units.Measurement;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Plane;
 import org.jlab.geometry.prim.Straight;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -127,6 +128,20 @@ public abstract class Geant4Basic {
 
     public Geant4Basic translate(double x, double y, double z) {
         volumeTransformation.prepend(Transform.unity().translate(x, y, z));
+        updateCSGtransformation();
+
+        return this;
+    }
+    
+    public Geant4Basic mirror(Plane plane){
+        volumeTransformation.prepend(Transform.unity().mirror(plane));
+        updateCSGtransformation();
+
+        return this;
+    }
+    
+    public Geant4Basic scale(double scalefactor){
+        volumeTransformation.prepend(Transform.unity().scale(scalefactor));
         updateCSGtransformation();
 
         return this;

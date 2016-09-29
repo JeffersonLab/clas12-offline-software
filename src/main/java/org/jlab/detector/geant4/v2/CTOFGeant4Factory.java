@@ -5,10 +5,9 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.STL;
+import eu.mihosoft.vrl.v3d.Plane;
 import java.io.IOException;
-import java.io.InputStream;
+import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
 
 /**
@@ -17,21 +16,22 @@ import org.jlab.detector.volume.G4World;
  */
 public final class CTOFGeant4Factory extends Geant4Factory {
 
+    private final int nscintillators = 48;
+
     public CTOFGeant4Factory() throws IOException {
         motherVolume = new G4World("fc");
 
-//        System.out.println(getClass().getClassLoader().getResourceAsStream("ctof/cad/test.txt"));
-        InputStream configStream = getClass().getClassLoader().getResourceAsStream("ctof/cad/test.txt");
-        System.out.println(configStream);
+        ClassLoader cloader = getClass().getClassLoader();
 
-//String filepath = getClass().getClassLoader().getResourceAsStream("ctof/cad/sc48.stl");
-//        CSG detector = STL.file(java.nio.file.Paths.get(filepath));
-//        detector.toStlFile("/home/kenjo/1.stl");
-        IOUtils.toString(configStream);
-        //IOUtils.
-    }
-
-    public static void main(String[] args) throws IOException {
-        CTOFGeant4Factory ctof = new CTOFGeant4Factory();
+        for (String name : new String[]{"sc", "lgu", "lgd"}) {
+            for (int iscint = 1; iscint <= nscintillators; iscint++) {
+                G4Stl component = new G4Stl(String.format("%s%02d", name, iscint),
+                        cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)));
+                component.scale(0.1);
+//                component.mirror(Plane.XY_PLANE);
+//                component.translate(0,0,2720.0);
+                component.setMother(motherVolume);
+            }
+        }
     }
 }
