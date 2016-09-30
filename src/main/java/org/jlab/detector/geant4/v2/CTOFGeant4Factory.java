@@ -27,6 +27,8 @@ public final class CTOFGeant4Factory extends Geant4Factory {
                 G4Stl component = new G4Stl(String.format("%s%02d", name, iscint),
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)));
                 component.scale(0.1);
+                component.rotate("zyx", 0, Math.toRadians(180), 0);
+                component.translate(0,0,127.327);
                 component.setMother(motherVolume);
             }
         }
