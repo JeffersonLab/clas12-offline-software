@@ -262,7 +262,7 @@ public class Transform {
      */
     public Transform mirror(Plane plane) {
 
-//        System.err.println("WARNING: I'm too dumb to implement the mirror() operation correctly. Please fix me!");
+        System.err.println("WARNING: I'm too dumb to implement the mirror() operation correctly. Please fix me!");
 
         double nx = plane.normal.x;
         double ny = plane.normal.y;

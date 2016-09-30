@@ -133,13 +133,6 @@ public abstract class Geant4Basic {
         return this;
     }
     
-    public Geant4Basic mirror(Plane plane){
-        volumeTransformation.prepend(Transform.unity().mirror(plane));
-        updateCSGtransformation();
-
-        return this;
-    }
-    
     public Geant4Basic scale(double scalefactor){
         volumeTransformation.prepend(Transform.unity().scale(scalefactor));
         updateCSGtransformation();
