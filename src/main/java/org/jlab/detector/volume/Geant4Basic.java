@@ -7,7 +7,6 @@ package org.jlab.detector.volume;
 
 import org.jlab.detector.units.Measurement;
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Plane;
 import org.jlab.geometry.prim.Straight;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -25,15 +24,16 @@ import org.jlab.detector.units.SystemOfUnits.Length;
  */
 public abstract class Geant4Basic {
 
-    String volumeName;
-    String volumeType;
+    protected String volumeName;
+    protected String volumeType;
+    protected boolean sensitivity = false;
 
     protected CSG volumeCSG;
     protected final Primitive volumeSolid;
 
     private final Transform volumeTransformation = Transform.unity();
 
-    String rotationOrder = "xyz";
+    protected String rotationOrder = "xyz";
     double[] rotationValues = {0.0, 0.0, 0.0};
 
     int[] volumeId = new int[]{};
@@ -54,6 +54,14 @@ public abstract class Geant4Basic {
 
     public final List<Measurement> getDimensions() {
         return volumeDimensions;
+    }
+
+    public final void makeSensitive() {
+        sensitivity = true;
+    }
+
+    public boolean isSensitive() {
+        return sensitivity;
     }
 
     public final void setName(String name) {
@@ -132,8 +140,8 @@ public abstract class Geant4Basic {
 
         return this;
     }
-    
-    public Geant4Basic scale(double scalefactor){
+
+    public Geant4Basic scale(double scalefactor) {
         volumeTransformation.prepend(Transform.unity().scale(scalefactor));
         updateCSGtransformation();
 
@@ -248,15 +256,8 @@ public abstract class Geant4Basic {
     }
 
     public List<DetHit> getIntersections(Straight line) {
-        List<DetHit> hits = new ArrayList<>();
-
         if (children.isEmpty()) {
-            List<Vector3d> dots = volumeCSG.getIntersections(line);
-
-            for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
-                DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), this);
-                hits.add(hit);
-            }
+            return getIntersectedHits(line);
         } else {
             List<Vector3d> dots = volumeCSG.getIntersections(line.toLine());
             if (dots.size() > 0) {
@@ -266,7 +267,31 @@ public abstract class Geant4Basic {
             }
         }
 
-        return hits;
+        return new ArrayList<>();
     }
 
+    protected List<DetHit> getIntersectedHits(Straight line) {
+        List<DetHit> hits = new ArrayList<>();
+        if (this.isSensitive()) {
+            
+            //mainly for complicated shapes
+            //if the number of polygons is large,
+            //it's more efficient to test the bounds on intersections
+            //before testing all polygons involved
+            if (volumeCSG.getPolygons().size() > 20) {
+                List<Vector3d> dots = volumeCSG.getBounds().toCSG().getIntersections(line.toLine());
+                if (dots.isEmpty()) {
+                    return hits;
+                }
+            }
+            
+            List<Vector3d> dots = volumeCSG.getIntersections(line);
+
+            for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
+                DetHit hit = new DetHit(dots.get(ihit * 2), dots.get(ihit * 2 + 1), this);
+                hits.add(hit);
+            }
+        }
+        return hits;
+    }
 }

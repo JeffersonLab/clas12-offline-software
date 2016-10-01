@@ -8,7 +8,6 @@ package org.jlab.detector.geant4.v2;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.detector.volume.G4Trd;
 import org.jlab.detector.volume.G4Box;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import static org.jlab.detector.hits.DetId.FTOFID;
@@ -31,7 +30,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         "1a", "1b", "2"
     };
 
-    public FTOFGeant4Factory(ConstantProvider provider){
+    public FTOFGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
 
         for (int sector = 1; sector <= 6; sector++) {
@@ -45,7 +44,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         properties.put("date", "06/03/13");
     }
 
-    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer){
+    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
         double motherGap = 4.0 * Length.cm;
 
         double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
@@ -103,6 +102,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
             double paddlelength = cp.getDouble(paddleLengthStr, ipaddle);
             String vname = String.format("sci_S%d_L%d_C%d", 0, layer, ipaddle + 1);
             G4Box volume = new G4Box(vname, paddlelength / 2. * Length.cm, paddlethickness / 2. * Length.cm, paddlewidth / 2.0 * Length.cm);
+            volume.makeSensitive();
 
             double zoffset = (ipaddle - numPaddles / 2. + 0.5) * (paddlewidth + gap + 2 * wrapperthickness);
             volume.translate(0.0, 0.0, zoffset * Length.cm);
@@ -112,23 +112,29 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         return paddleVolumes;
     }
 
-    public G4Box getComponent(int isector, int ilayer, int ipaddle){
-        int ivolume = (isector-1)*3 + ilayer-1;
+    public G4Box getComponent(int isector, int ilayer, int ipaddle) {
+        int ivolume = (isector - 1) * 3 + ilayer - 1;
         G4Box volComponent = null;
-        
-        try{
-             volComponent = (G4Box) motherVolume.getChildren().get(ivolume).getChildren().get(ipaddle-1);
+
+        if (isector >= 1 && isector <= 6
+                && ilayer >= 1 && ilayer <= 3) {
+
+            List<Geant4Basic> layer = motherVolume.getChildren().get(ivolume).getChildren();
+            int npaddles = layer.size();
+
+            if (ipaddle >= 1 && ipaddle <= npaddles) {
+                return (G4Box) layer.get(ipaddle - 1);
+            }
         }
-        catch (IndexOutOfBoundsException e) {
-            System.err.println("ERROR!!!");
-            System.err.println("Component: sector: "+isector+", layer: "+ilayer+", paddle: "+ipaddle+" doesn't exist");
-            System.exit(111);
-        }
-        
+
+        System.err.println("ERROR!!!");
+        System.err.println("Component: sector: " + isector + ", layer: " + ilayer + ", paddle: " + ipaddle + " doesn't exist");
+        System.exit(111);
+
         return volComponent;
     }
 
-    public G4World getMother(){
+    public G4World getMother() {
         return motherVolume;
     }
 }
