@@ -42,8 +42,10 @@ public class CalibrationConstantsLoader {
     
     public static boolean areCalibConstantsLoaded = false;
     
-    public static synchronized void Load() {
-		if (CSTLOADED) return;
+    public static synchronized DatabaseConstantProvider Load() {
+    	if (CSTLOADED == true) 
+			return null;
+		
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/ctof/attenuation");
 	    dbprovider.loadTable("/calibration/ctof/effective_velocity");
@@ -142,6 +144,7 @@ public class CalibrationConstantsLoader {
 	      
 	    }
 	    CSTLOADED = true;
+		return dbprovider;
     }
    
     

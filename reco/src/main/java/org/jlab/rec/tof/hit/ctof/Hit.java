@@ -8,11 +8,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jlab.geom.component.ScintillatorPaddle;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.hits.CTOFDetHit;
+import org.jlab.detector.volume.G4Box;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.ctof.CTOFGeometry;
 import org.jlab.rec.ctof.CalibrationConstantsLoader;
 import org.jlab.rec.ctof.Constants;
@@ -34,38 +37,59 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	
 	private Line3D 	_paddleLine;		// paddle line 
 	
+
+	private CTOFDetHit _matchedTrackHit;  // matched hit information from tracking; this contains the information of the entrance and exit point of the track with the FTOF hit counter
+	private Line3d _matchedTrack;
+	
 	public Line3D get_paddleLine() {
 		return _paddleLine;
 	}
 	
-	public void set_paddleLine(Line3D _paddleLine) {
-		this._paddleLine = _paddleLine;
+	public void set_paddleLine(Line3D paddleLine) {
+		this._paddleLine = paddleLine;
 	}
+
+	public CTOFDetHit get_matchedTrackHit() {
+		return _matchedTrackHit;
+	}
+
+	public void set_matchedTrackHit(CTOFDetHit matchedTrackHit) {
+		this._matchedTrackHit = matchedTrackHit;
+	}
+
+	public Line3d get_matchedTrack() {
+		return _matchedTrack;
+	}
+
+	public void set_matchedTrack(Line3d _matchedTrack) {
+		this._matchedTrack = _matchedTrack;
+	}
+	
 	
 	public void set_HitParameters(int superlayer) {
 		
 		double pl = this.get_paddleLine().length();
 		
 		// Get all the constants used in the hit parameters calculation
-		double TW0L = this.TW01();
-		double TW0R = this.TW02();
-		double TW1L = this.TW11();
-		double TW1R = this.TW12();
-		double lambdaL = this.lambda1();
-		this.set_lambda1(lambdaL);
+		double TW0U = this.TW01();
+		double TW0D = this.TW02();
+		double TW1U = this.TW11();
+		double TW1D = this.TW12();
+		double lambdaU = this.lambda1();
+		this.set_lambda1(lambdaU);
 		this.set_lambda1Unc(this.lambda1Unc());
-		double lambdaR = this.lambda1();
-		this.set_lambda2(lambdaR);
+		double lambdaD = this.lambda1();
+		this.set_lambda2(lambdaD);
 		this.set_lambda2Unc(this.lambda2Unc());
 		double yOffset = this.yOffset();		
-		double vL = this.v1();
-		double vR = this.v2();
-		double vLUnc = this.v1Unc();
-		double vRUnc = this.v2Unc();
-		double PEDL = this.PED1();
-		double PEDR = this.PED2();
-		double PEDLUnc = this.PED1Unc();
-		double PEDRUnc = this.PED2Unc();
+		double vU = this.v1();
+		double vD = this.v2();
+		double vUUnc = this.v1Unc();
+		double vDUnc = this.v2Unc();
+		double PEDU = this.PED1();
+		double PEDD = this.PED2();
+		double PEDUUnc = this.PED1Unc();
+		double PEDDUnc = this.PED2Unc();
 		double paddle2paddle = this.PaddleToPaddle();
 		double timeOffset = this.TimeOffset();
 		double LSBConv = this.LSBConversion();
@@ -79,12 +103,21 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		double DEDX_MIP = this.DEDX_MIP();
 		double ScinBarThickn = this.ScinBarThickn();
 		
-		this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, lambdaL, lambdaR, yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc, PEDRUnc, paddle2paddle, timeOffset, LSBConv, LSBConvErr, ADCUErr, ADCDErr, TDCUErr, TDCDErr, ADC_MIP, ADC_MIPErr, DEDX_MIP, ScinBarThickn, pl);
+		this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, lambdaU, lambdaD, yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc, PEDDUnc, paddle2paddle, timeOffset, LSBConv, LSBConvErr, ADCUErr, ADCDErr, TDCUErr, TDCDErr, ADC_MIP, ADC_MIPErr, DEDX_MIP, ScinBarThickn, pl);
 		// Set the hit position in the local coordinate of the bar
 		this.set_Position(this.calc_hitPosition());
 
 	}
-	
+	 public void setPaddleLine(CTOFGeant4Factory geometry) {
+			// get the line in the middle of the paddle
+		G4Box comp =(G4Box)geometry.getComponents().get(get_Paddle()-1);
+		Line3D paddleLine = new Line3D();
+		// The scintilator paddles are constructed with the length of the paddle
+        // as X dimention in the lab frame, so getLineX will return a line going
+        // through the center of the paddle and length() equal to the paddle length
+		paddleLine.set(comp.getLineX().origin().x, comp.getLineX().origin().y, comp.getLineX().origin().z, comp.getLineX().end().x, comp.getLineX().end().y, comp.getLineX().end().z);
+		this.set_paddleLine(paddleLine);
+	 }	
 
 	private Point3D calc_hitPosition() {
 		Point3D hitPosition = new Point3D();
@@ -311,17 +344,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		return Constants.SCBARTHICKN[this.get_Panel()-1];
 	}
 	
-	/**
-
-	 * @param geometry TO DO GET THE CTOF GEOMETRY
-	 * @return a line representing the direction and end points of the paddle bar
-	 */
-	public Line3D calc_PaddleLine( CTOFGeometry ctofDetector) {
-		ScintillatorPaddle geomPaddle = (ScintillatorPaddle) ctofDetector.getScintillatorPaddle(this.get_Paddle());
-		Line3D lineX = geomPaddle.getLine(); // Line representing the paddle 
-
-        return lineX;
-	}
 	
 	
 	public static void main (String arg[]) throws FileNotFoundException{
@@ -346,7 +368,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		Hit hit = new Hit(id, 1, sector, paddle, 900, 900, 800, 1000) ;
 		String statusWord = hrd.set_StatusWord(statusL, statusR, hit.get_ADC1(), hit.get_TDC1(), hit.get_ADC2(), hit.get_TDC2());
 		// get the line in the middle of the paddle
-		hit.set_paddleLine(hit.calc_PaddleLine(geometry)); 
+		//hit.set_paddleLine(hit.calc_PaddleLine(geometry)); 
 		hit.set_StatusWord(statusWord);
 		hit.set_HitParameters(superlayer);
 		// read the hit object

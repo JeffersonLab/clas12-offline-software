@@ -1,16 +1,20 @@
 package org.jlab.rec.tof.banks.ctof;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.jlab.geom.component.ScintillatorPaddle;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.detector.hits.DetHit;
+import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
-import org.jlab.rec.ctof.CTOFGeometry;
 import org.jlab.rec.ctof.CalibrationConstantsLoader;
 import org.jlab.rec.tof.hit.ctof.Hit;
 
@@ -40,7 +44,7 @@ public class HitReader {
 	 * @param event the evio event
 	 * @param geometry the CTOF geometry from package
 	 */
-	public void fetch_Hits(DataEvent event, CTOFGeometry geometry, List<ArrayList<Path3D>> trks, List<double[]> paths) {
+	public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry, List<Line3d> trks, double[] paths) {
 		
 		if(event.hasBank("CTOF::dgtz")==false) {
 			//System.err.println("there is no CTOF bank ");
@@ -73,16 +77,14 @@ public class HitReader {
 				
 				// create the hit object
 				Hit hit = new Hit(id[i], 1, 1, paddle[i], ADCU[i], TDCU[i], ADCD[i], TDCD[i]) ;
-				
+				hit.setPaddleLine(geometry);
 				hit.set_StatusWord(statusWord);
-				// get the line in the middle of the paddle
-				hit.set_paddleLine(hit.calc_PaddleLine(geometry)); 
 				
-				// add this hit
-				hits.add(hit); 
+	    	    // add this hit
+	            hits.add(hit); 
 			}
-			
-			List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths);
+
+			List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths) ;
 			
 			for(Hit hit : updated_hits) {
 				hit.set_HitParameters(1);
@@ -142,61 +144,63 @@ public class HitReader {
 		return pass;
 	}
 
-	private List<Hit> matchHitsToCVTTrk(List<Hit> hits, CTOFGeometry ctofDetector, List<ArrayList<Path3D>> trks, List<double[]> paths) { 
+	private List<Hit> matchHitsToCVTTrk(List<Hit>CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths) { 
+		if(trks==null || trks.size()==0)
+			return CTOFhits; // no hits were matched with DC tracks
 		
-		if(trks == null)
-			return hits; // no tracking information available
-		
+		// Instantiates the list of hits
 		List<Hit> hitList = new ArrayList<Hit>();
-		
-		for(Hit hit : hits) { // for each hit loop over the tracks in the event and find a match... will be redone in a more efficient way using the new geometry package
+					
+		for(int i = 0; i<trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
+			Line3d trk = trks.get(i);
 			
-			ScintillatorPaddle geomPaddle = (ScintillatorPaddle) ctofDetector.getScintillatorPaddle(hit.get_Paddle());
-			Line3D lineX = geomPaddle.getLine(); // Line representing the paddle 
-			int NbofMatchedTrksforThisHit = 0;
+			CTOFDetHit[] HitArray = new CTOFDetHit[48] ;
+			List<DetHit> hits = ctofDetector.getIntersections(trk);
 			
-			for(int i = 0; i<trks.get(hit.get_Sector()-1).size(); i++) { // looping over the tracks find the intersection of the track with that plane
-				Path3D path = trks.get(hit.get_Sector()-1).get(i);
-				Line3D intersect = path.distance(lineX); // intersection of the path with the paddle line
-				
-				boolean isTrkIntersPad = false ;
-				if(intersect.length()<1) // not sure what the cut value should be
-					isTrkIntersPad=false;
-				
-				if(isTrkIntersPad==false)
-					continue;
-				
-				// there is a track intersection
-				// make a new hit
-				Hit newhit = new Hit(hit.get_Id(), hit.get_Panel(), hit.get_Sector(), hit.get_Paddle(), hit.get_ADC1(), hit.get_TDC1(), hit.get_ADC2(), hit.get_TDC2()) ;
-				newhit.set_StatusWord(hit.get_StatusWord());			
-				newhit.set_paddleLine(lineX);
-				
-		 		Point3D intP = intersect.end(); 
-		 		
-		        double deltaCTtoTOFx = intersect.end().x()-intersect.origin().x();
-		        double deltaCTtoTOFy = intersect.end().y()-intersect.origin().y();
-		        double deltaCTtoTOFz = intersect.end().z()-intersect.origin().z();
-		        
-		        Vector3D deltaCTtoTOF = new Vector3D(deltaCTtoTOFx,deltaCTtoTOFy,deltaCTtoTOFz);
-		        
-				// get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar			
-		        newhit.set_TrkPathLen(paths.get(newhit.get_Sector()-1)[i]+deltaCTtoTOF.mag());
-				// get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
-		        newhit.set_TrkPosition(new Point3D(intP.x(), intP.y(),intP.z()));
-				// local y:
-				intP.rotateZ(-(hit.get_Paddle()-1)*Math.toRadians(7.5));
-				newhit.set_yTrk(intP.y());
-				
-				// add it to the list
-				hitList.add(newhit);
-				NbofMatchedTrksforThisHit++;
+			if(hits != null && hits.size()>0) {
+				for(DetHit hit: hits){
+					CTOFDetHit fhit = new CTOFDetHit(hit);
+					HitArray[fhit.getPaddle()-1] = fhit;
+				}
 			}
-			if(NbofMatchedTrksforThisHit==0) // no track matched to this hit
-				hitList.add(hit);
+			for(Hit fhit : CTOFhits) {
+				if(HitArray[fhit.get_Paddle()-1]==null) { // there is no track matched to this hit
+					hitList.add(fhit);	// add this hit to the output list anyway
+				}
+			}
+			
+			for(Hit fhit : CTOFhits) {
+				if(HitArray[fhit.get_Paddle()-1]!=null) {
+					CTOFDetHit matchedHit = HitArray[fhit.get_Paddle()-1];
+					
+					// create a new FTOF hit for each intersecting track with this hit counter 
+					// create the hit object
+					Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2()) ;
+					hit.set_StatusWord(fhit.get_StatusWord());			
+					hit.set_paddleLine(fhit.get_paddleLine());
+					hit.set_matchedTrackHit(matchedHit);
+					hit.set_matchedTrack(trk);
+					// get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
+					double deltaPath = matchedHit.origin().distance(matchedHit.mid()); 
+					hit.set_TrkPathLen(paths[i]+deltaPath);
+					// get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
+					hit.set_TrkPosition(new Point3D(matchedHit.mid().x,matchedHit.mid().y,matchedHit.mid().z));
+					
+					// compute the local y at the middle of the bar :
+					//----------------------------------------------
+			        Point3D origPaddleLine = hit.get_paddleLine().origin();
+			        Point3D trkPosinMidlBar = new Point3D(matchedHit.mid().x, matchedHit.mid().y, matchedHit.mid().z);
+			        double Lov2 = hit.get_paddleLine().length()/2;
+			        double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
+			        // local y:
+			        hit.set_yTrk(barOrigToTrkPos-Lov2);
+			        //---------------------------------------
+					hitList.add(hit);
+				}
+			}
 		}
 		return hitList;
 	}
-	
+
 	
 }

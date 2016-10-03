@@ -5,12 +5,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.geom.prim.Path3D;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.rec.ctof.CTOFGeometry;
 import org.jlab.rec.ctof.CalibrationConstantsLoader;
 import org.jlab.rec.ctof.Constants;
+import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.tof.banks.ctof.HitReader;
 import org.jlab.rec.tof.banks.ctof.RecoBankWriter;
 import org.jlab.rec.tof.banks.ctof.TrackReader;
@@ -27,29 +29,37 @@ import org.jlab.rec.tof.hit.ctof.Hit;
 public class CTOFEngine extends ReconstructionEngine {
 
 	public CTOFEngine() {
-		super("CTOFRec", "carman, ziegler", "0.2");
+		super("CTOFRec", "carman, ziegler", "0.3");
 	}
-
+	CTOFGeant4Factory geometry;
 	@Override
 	public boolean init() {
 		// Load the Constants
-		if (Constants.CSTLOADED == false) {
+		//if (Constants.CSTLOADED == false) {
 			Constants.Load();
-		}
+		//}
 		// Load the Calibration Constants
-		if (CalibrationConstantsLoader.CSTLOADED == false) {
+		//if (CalibrationConstantsLoader.CSTLOADED == false) {
+			DatabaseConstantProvider db = CCDBConstantsLoader.Load();
+			//}
+			
+			geometry = new CTOFGeant4Factory();
 			CalibrationConstantsLoader.Load();
-		}
+		//}
 		return true;
 	}
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		CTOFGeometry geometry = new CTOFGeometry();
+		if(geometry == null) {
+    		System.err.println(" CTOF Geometry not loaded !!!");
+    		return false;
+    	}
 		// Get the list of track lines which will be used for matching the CTOF hit to the CVT track
 		TrackReader trkRead = new TrackReader();
-		List<ArrayList<Path3D>> trkLines = trkRead.get_TrkLines();
-		List<double[]> paths = trkRead.get_Paths();
+		trkRead.fetch_Trks(event);
+		List<Line3d> trkLines = trkRead.get_TrkLines();
+		double[] paths = trkRead.get_Paths();
 		
 		List<Hit> hits		   = new ArrayList<Hit>();		// all hits
 		List<Cluster> clusters = new ArrayList<Cluster>(); 	// all clusters

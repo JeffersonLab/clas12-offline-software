@@ -1,11 +1,8 @@
 package org.jlab.rec.ftof;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;

@@ -37,7 +37,6 @@ public class FTOFEngine extends ReconstructionEngine {
 	public FTOFEngine() {
 		super("FTOFRec", "golovach, gavalian, carman, ziegler", "0.3");
 	}
-
 	
 	
 	FTOFGeant4Factory geometry;
