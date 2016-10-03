@@ -73,7 +73,7 @@ public class PhysicsAnalysis {
         return str.toString();
     }
     
-    public class ParticleDescriptor {
+    public static class ParticleDescriptor {
         
         String descriptorName = "";
         String descriptorOperator = "";
@@ -110,5 +110,5 @@ public class PhysicsAnalysis {
             return str.toString();
         }
     }
-        
+    
 }

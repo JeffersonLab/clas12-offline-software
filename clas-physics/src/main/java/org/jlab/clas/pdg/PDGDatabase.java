@@ -90,7 +90,7 @@ public class PDGDatabase {
         particleMap.put( 2212, new PDGParticle("p",    2212, 14, 0.938272046,1));
         particleMap.put(-2212, new PDGParticle("p-",  -2212, 15, 0.938272046,-1));
         particleMap.put( 2112, new PDGParticle("n",    2112, 13, 0.939565379,0));
-        particleMap.put(-2112, new PDGParticle("n",   -2112, 13, 0.939565379,0));
+        particleMap.put(-2112, new PDGParticle("nbar", -2112, 13, 0.939565379,0));
         particleMap.put( 3122, new PDGParticle("Lambda0", 3122, 100, 1.115683,0));
         
         return particleMap;

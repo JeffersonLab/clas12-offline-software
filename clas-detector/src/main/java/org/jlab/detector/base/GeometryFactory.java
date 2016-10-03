@@ -10,6 +10,7 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.ec.ECFactory;
+import org.jlab.geom.detector.ftof.FTOFFactory;
 
 /**
  *
@@ -102,6 +103,12 @@ public class GeometryFactory {
             ECFactory factory = new ECFactory();
             Detector ec = factory.createDetectorCLAS(provider);
             return ec;
+        }
+        
+        if(type==DetectorType.FTOF){
+            FTOFFactory factory = new FTOFFactory();
+            Detector ftof = factory.getDetectorGeant4(provider);
+            return   ftof;
         }
         
         System.out.println("[GeometryFactory] --->  detector construction for " 

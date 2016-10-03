@@ -20,22 +20,26 @@ public class PhysicsEvent {
     Particle  eventBeam;
     Particle  eventTarget;    
     private EventSelector  eventSelector = new EventSelector();
-    ArrayList<Particle> eventParticles;
+    List<Particle> eventParticles;
+    List<Particle> generatedParticles;
+    
     HashMap<String,Double> eventProperties;
     
     public PhysicsEvent()
     {
-        eventBeam   = new Particle(11,0.,0.,5.017,0.,0.,0.);
-        eventTarget = new Particle(2212,0.,0.,0.,0.,0.,0.);
-        eventParticles = new ArrayList<Particle>();
-        eventProperties = new HashMap<String,Double>();
+        eventBeam          = new Particle(11,0.,0.,5.017,0.,0.,0.);
+        eventTarget        = new Particle(2212,0.,0.,0.,0.,0.,0.);
+        eventParticles     = new ArrayList<Particle>();
+        generatedParticles = new ArrayList<Particle>();
+        eventProperties    = new HashMap<String,Double>();
     }
     
     public PhysicsEvent(double be){
-        eventBeam   = new Particle(11,0.,0.,be,0.,0.,0.);
-        eventTarget = new Particle(2212,0.,0.,0.,0.,0.,0.);
-        eventParticles = new ArrayList<Particle>();
-        eventProperties = new HashMap<String,Double>();
+        eventBeam          = new Particle(11,0.,0.,be,0.,0.,0.);
+        eventTarget        = new Particle(2212,0.,0.,0.,0.,0.,0.);
+        eventParticles     = new ArrayList<Particle>();
+        generatedParticles = new ArrayList<Particle>();
+        eventProperties    = new HashMap<String,Double>();
     }
     
     public void addProperty(String name, double value)
@@ -53,8 +57,10 @@ public class PhysicsEvent {
         return eventProperties.get(name);
     }
     
-    public void clear() {eventParticles.clear(); eventProperties.clear();}
-    public int count() { return eventParticles.size();}
+    public void clear() {eventParticles.clear(); eventProperties.clear(); generatedParticles.clear();}
+    
+    public int count()  { return eventParticles.size();}
+    public int countGenerated()  { return generatedParticles.size();}
     
     public int countByCharge(int charge)
     {
@@ -69,6 +75,20 @@ public class PhysicsEvent {
         //System.out.println("particles with charge " + charge + " = " + icount);
         return icount;
     }
+    /**
+     * returns number of particles with given PID (Lund id), if
+     * generated flag==true the count in generated particles is returned.
+     * @param pid
+     * @param generated
+     * @return 
+     */
+    public int countByPid(int pid, boolean generated){
+        if(generated==false) return countByPid(pid);
+        int icount = 0;
+        for(int loop = 0; loop < generatedParticles.size(); loop++)
+            if(generatedParticles.get(loop).pid()==pid) icount++;
+        return icount;
+    }
     
     public int countByPid(int pid)
     {
@@ -76,6 +96,16 @@ public class PhysicsEvent {
         for(int loop = 0; loop < eventParticles.size(); loop++)
             if(eventParticles.get(loop).pid()==pid) icount++;
         return icount;
+    }
+    
+    public void addGeneratedParticle(Particle part){
+        generatedParticles.add(part);
+    }
+    
+    public void addGeneratedParticle(int pid, double px, double py, double pz, double vx, double vy,
+            double vz)
+    {
+        generatedParticles.add(new Particle(pid,px,py,pz,vx,vy,vz));
     }
     
     public void addParticle(Particle part)
@@ -204,6 +234,13 @@ public class PhysicsEvent {
         return eventParticles.get(index);        
     }
     
+    
+    public Particle getGeneratedParticle(int index){
+        if(index<0||index>=generatedParticles.size()) return null;
+        return generatedParticles.get(index);
+    }
+        
+    
     public Particle getParticle(int index)
     {
         if(index<0||index>=eventParticles.size()) return null;
@@ -213,6 +250,21 @@ public class PhysicsEvent {
     public Particle getParticle(String selector){
         eventSelector.parse(selector);
         return eventSelector.get(this);
+    }
+    
+    public String toLundStringGenerated(){
+        StringBuilder str = new StringBuilder();
+                str.append(String.format("%12d %2d. %2d. %2d %2d %5.3f %7.3f %7.3f %7.3f %7.3f\n",
+                generatedParticles.size(),
+                (int) 1, (int) 1, (int) 1, (int) 1, (float) 0.0, (float) 0.0,
+                eventBeam.vector().e(),
+                (float) 0.0, (float) 0.0));
+        for(int loop = 0; loop < generatedParticles.size(); loop++){
+            str.append(String.format("%5d", loop+1));
+            str.append(generatedParticles.get(loop).toLundString());
+            str.append("\n");
+        }
+        return str.toString();
     }
     
     public String toLundString()
@@ -253,6 +305,7 @@ public class PhysicsEvent {
         }
         return str.toString();
     }
+    
     public Particle closestParticle(Particle child){
         Particle part = new Particle();
         double minCos = -1.0;

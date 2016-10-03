@@ -6,11 +6,15 @@
 package org.jlab.io.utils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 import org.jlab.io.bos.BosDataBank;
 import org.jlab.io.bos.BosDataEvent;
+import org.jlab.io.bos.BosDataSource;
 import org.jlab.io.evio.EvioDataBank;
+import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.hipo.HipoDataSync;
 
 /**
  *
@@ -222,5 +226,113 @@ public class Bos2EvioEventBank {
             BosDataBank bCCPB = (BosDataBank) event.getBank("CCPB");
             this.bosDataBanks.put(bCCPB.getDescriptor().getName(), bCCPB);
         }
+    }
+    
+    public static void printUsage(){
+        System.out.println("\n \t Usage : bos2hipo [options] [output file] [input file]");
+        System.out.println("\n\n Options: ");
+        System.out.println("\t    -u : uncompressed");
+        System.out.println("\t -gzip : gzip compression");
+        System.out.println("\t  -lz4 : LZ4 compression\n\n");
+    }
+    
+    public static void main(String[] args){
+        int compression = -1;
+        
+        if(args.length<3){
+            Bos2EvioEventBank.printUsage();
+            System.exit(0);            
+        }
+        
+        if(args[0].startsWith("-")==false){
+            Bos2EvioEventBank.printUsage();
+            System.exit(0); 
+        } else {
+            if(args[0].compareTo("-u")==0){
+                compression = 0;
+            }
+            if(args[0].compareTo("-gzip")==0){
+                compression =1;
+            }
+            if(args[0].compareTo("-lz4")==0){
+                compression =2;
+            }
+        }
+        
+        
+        if(compression<0){
+            Bos2EvioEventBank.printUsage();
+            System.exit(0); 
+        }
+        String  hipoFileName = args[1];
+        String  bosFileName  = args[2];
+        
+        
+        Bos2EvioEventBank bos2evio = new Bos2EvioEventBank();
+        
+        HipoDataSync  writer = new HipoDataSync();
+        writer.open(hipoFileName);
+        writer.setCompressionType(compression);
+        
+        BosDataSource reader = new BosDataSource();                      
+        reader.open(bosFileName);
+        int progressCounter = 0;
+        
+        while(reader.hasEvent()){
+            progressCounter++;
+            
+            
+            if(progressCounter%5000==0){
+                System.out.println(String.format("-------->  progress : n events processed %12d", progressCounter));
+            }
+            
+            BosDataEvent event = (BosDataEvent) reader.getNextEvent();
+            try{
+                bos2evio.initBosBanks(event);
+                bos2evio.initEvioBank();
+                
+                TreeMap<String,EvioDataBank>  evioBanks = bos2evio.getEvioBankStore();
+                
+                EvioDataEvent evioEvent = EvioFactory.createEvioEvent();
+                
+                if(evioBanks.containsKey("HEVT")==true){
+                    evioEvent.appendBanks(evioBanks.get("HEVT"));
+                }
+                
+                if(evioBanks.containsKey("EVNT")==true){
+                    evioEvent.appendBanks(evioBanks.get("EVNT"));
+                }
+                
+                List<EvioDataBank>  detectorBanks = new ArrayList<EvioDataBank>();
+                
+                if(evioBanks.containsKey("ECPB")==true){
+                    detectorBanks.add(evioBanks.get("ECPB"));
+                }
+                if(evioBanks.containsKey("SCPB")==true){
+                    detectorBanks.add(evioBanks.get("SCPB"));
+                }
+                if(evioBanks.containsKey("CCPB")==true){
+                    detectorBanks.add(evioBanks.get("CCPB"));
+                }
+                
+                //System.out.println(" DETECTOR BANKS SIZE = " + detectorBanks.size());
+                
+                if(detectorBanks.size()>0){
+                    EvioDataBank[] banks  = new EvioDataBank[detectorBanks.size()];
+                    for(int i = 0; i < detectorBanks.size();i++){
+                        banks[i] = detectorBanks.get(i);
+                    }
+                    evioEvent.appendBanks(banks);
+                }
+                
+                if(evioBanks.containsKey("EVNT")==true&&evioBanks.containsKey("HEVT")==true){
+                    writer.writeEvent(evioEvent);
+                }
+            } catch (Exception e) {
+                System.out.println("---> error at event # " + progressCounter);
+            }
+        }
+        
+        writer.close();
     }
 }
