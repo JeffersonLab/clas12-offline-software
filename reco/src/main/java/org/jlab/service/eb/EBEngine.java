@@ -7,6 +7,7 @@ package org.jlab.service.eb;
 
 import java.util.List;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
@@ -32,7 +33,12 @@ public class EBEngine extends ReconstructionEngine {
         }
         
         List<DetectorParticle>  chargedParticles = EBio.readTracks(de, eventType);
+        List<DetectorResponse>  ftofResponse     = EBio.readFTOF(de);
         
+        EBProcessor processor = new EBProcessor(chargedParticles);
+        processor.addTOF(ftofResponse);
+        processor.matchTimeOfFlight();
+        processor.show();
         /*System.out.println("CHARGED PARTICLES = " + chargedParticles.size());
         for(DetectorParticle p : chargedParticles){
             System.out.println(p);

@@ -8,6 +8,8 @@ package org.jlab.service.eb;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.DetectorResponse;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
@@ -63,7 +65,7 @@ public class EBio {
                         bank.getDouble("c3_uy", i),
                         bank.getDouble("c3_uz", i)
                 );
-                
+                p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
             }
@@ -118,5 +120,32 @@ public class EBio {
         }
         
         return bank;
+    }
+    
+    
+    public static List<DetectorResponse>  readFTOF(DataEvent event){
+        List<DetectorResponse> ftof = new ArrayList<DetectorResponse>();
+        if(event.hasBank("FTOFRec::ftofhits")==true){
+            EvioDataBank bank = (EvioDataBank) event.getBank("FTOFRec::ftofhits");
+            int nrows = bank.rows();
+            for(int i = 0; i < nrows; i++){
+                int sector  = bank.getInt("sector", i);
+                int layer   = bank.getInt("panel_id", i);
+                int paddle  = bank.getInt("paddle_id", i);
+                if(layer==2||layer==3){
+                    DetectorResponse resp = new DetectorResponse();
+                    resp.getDescriptor().setType(DetectorType.FTOF);
+                    resp.getDescriptor().setSectorLayerComponent(sector, layer, paddle);
+                    resp.setPosition(
+                            bank.getFloat("x", i),bank.getFloat("y", i),
+                            bank.getFloat("z", i)
+                    );
+                    resp.setTime(bank.getFloat("time", i));
+                    resp.setEnergy(bank.getFloat("energy", i));
+                    ftof.add(resp);
+                }
+            }
+        }
+        return ftof;
     }
 }
