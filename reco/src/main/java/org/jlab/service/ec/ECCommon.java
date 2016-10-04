@@ -81,7 +81,7 @@ public class ECCommon {
                 strip.getLine().copy(paddle.getLine());
                 //= detector.getSector(sector).getSuperlayer(stack).getLayer(view).getComponent(component);
                 
-                if(strip.getADC()>50){
+                if(strip.getADC()>20){
                     strips.add(strip);
                 }
             }
@@ -133,7 +133,7 @@ public class ECCommon {
                 ECStrip  strip = new ECStrip(sector, view, component);
                 strip.setADC(ecBank.getInt("ADC", row));
                 strip.setTDC(ecBank.getInt("TDC", row));
-                if(strip.getADC()>50) strips.add(strip);
+                if(strip.getADC()>20) strips.add(strip);
             }
          }
         return strips;
@@ -157,7 +157,7 @@ public class ECCommon {
                 ECStrip  strip = new ECStrip(sector, layer, component);
                 strip.setADC(ecBank.getInt("ADC", row));
                 strip.setTDC(ecBank.getInt("TDC", row));
-                if(strip.getADC()>50)
+                if(strip.getADC()>5)
                     strips.add(strip);
             }
          }
@@ -195,9 +195,12 @@ public class ECCommon {
                 }
             }
         }
+        
         for(int loop = 0; loop < peakList.size(); loop++){
             peakList.get(loop).setPeakId(loop+1);
+            peakList.get(loop).setOrder(loop+1);
         }
+        
         return peakList;
     }
     
@@ -205,9 +208,9 @@ public class ECCommon {
         List<ECPeak> ecPeaks = new ArrayList<ECPeak>();
         for(ECPeak p : peaks){
             int adc = p.getADC();
-            if(adc>300){
+            //if(adc>300){
                 ecPeaks.add(p);
-            }
+            //}
         }
         return ecPeaks;
     }
@@ -227,6 +230,30 @@ public class ECCommon {
             }
         }
         return selected;
+    }
+    
+    
+    public static void shareClustersEnergy(List<ECCluster> clusters){
+        
+        int nclusters = clusters.size();
+        
+        for(int i = 0; i < nclusters - 1; i++){
+            for(int k = i+1 ; k < nclusters; k++){
+                int sharedView = clusters.get(i).sharedView(clusters.get(k));
+                if(sharedView>=0){
+                    
+                    //System.out.println(" CLUSTERS SHARE VIEW : " + i + " " + k 
+                    //+ "  energy " + clusters.get(i).getEnergy() + "  " + clusters.get(k).getEnergy());
+                    
+                    //System.out.println(clusters.get(i));
+                    //System.out.println(clusters.get(k));
+                    
+                    ECCluster.shareEnergy(clusters.get(i), clusters.get(k), sharedView);
+                    //System.out.println("\t -->  " 
+                    //+ " corrected energy " + clusters.get(i).getEnergy() + "  " + clusters.get(k).getEnergy());
+                }
+            }
+        }
     }
     
     public static List<ECCluster>   createClusters(List<ECPeak>  peaks, int startLayer){
@@ -259,7 +286,7 @@ public class ECCommon {
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(
                                     pU.get(bU),pV.get(bV),pW.get(bW));
-                            if(cluster.getHitPositionError()<5.5)
+                            if(cluster.getHitPositionError()<9.5)
                             //System.out.println(" POSITION ERROR - > " + cluster.getHitPositionError());
                                 clusters.add(cluster);
                         }
@@ -267,6 +294,15 @@ public class ECCommon {
                 }
             }
         }
+        
+        for(int i = 0 ; i < clusters.size(); i++){
+            clusters.get(i).setEnergy(
+                    clusters.get(i).getEnergy(0) + 
+                            clusters.get(i).getEnergy(1) +
+                            clusters.get(i).getEnergy(2)
+            );
+        }
+        
         return clusters;
     }    
 }

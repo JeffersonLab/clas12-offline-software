@@ -25,7 +25,7 @@ public class ECCluster {
     public         int UVIEW_ID = -1;
     public         int VVIEW_ID = -1;
     public         int WVIEW_ID = -1;
-    
+    public         double clusterEnergy = 0.0;
     
     public ECCluster(ECPeak u, ECPeak v, ECPeak w){
         
@@ -51,11 +51,85 @@ public class ECCluster {
     }
     
     public double getEnergy(){
+        /*
         double energy = 0;
         for(int view = 0; view < 3; view++){
             energy += this.clusterPeaks.get(view).getEnergy(clusterHitPosition);
+        }*/
+        return this.clusterEnergy;
+    }
+    
+    public void setEnergy(double energy){
+        this.clusterEnergy = energy;
+    }
+    
+    public static void shareEnergy(ECCluster cluster1, ECCluster cluster2, int view){
+        
+        if(view==0){
+            
+            double en1ic = cluster1.getEnergy(1) + cluster1.getEnergy(2);
+            double en2ic = cluster2.getEnergy(1) + cluster2.getEnergy(2);
+            
+            double e1sh  = cluster1.getEnergy(0);
+            double e2sh  = cluster2.getEnergy(0);
+            
+            double ratio1 = en1ic/(en1ic + en2ic);
+            double ratio2 = en2ic/(en1ic + en2ic);
+            
+            cluster1.setEnergy(en1ic + e1sh*ratio1);
+            cluster2.setEnergy(en2ic + e2sh*ratio2);
+                        
+            return;
         }
-        return energy;
+        
+        if(view==1){
+            
+            double en1ic = cluster1.getEnergy(0) + cluster1.getEnergy(2);
+            double en2ic = cluster2.getEnergy(0) + cluster2.getEnergy(2);
+            
+            double e1sh  = cluster1.getEnergy(1);
+            double e2sh  = cluster2.getEnergy(1);
+            
+            double ratio1 = en1ic/(en1ic + en2ic);
+            double ratio2 = en2ic/(en1ic + en2ic);
+            
+            cluster1.setEnergy(en1ic + e1sh*ratio1);
+            cluster2.setEnergy(en2ic + e2sh*ratio2);
+                        
+            return;
+        }
+        
+        if(view==2){
+            
+            double en1ic = cluster1.getEnergy(0) + cluster1.getEnergy(1);
+            double en2ic = cluster2.getEnergy(0) + cluster2.getEnergy(1);
+            
+            double e1sh  = cluster1.getEnergy(2);
+            double e2sh  = cluster2.getEnergy(2);
+            
+            double ratio1 = en1ic/(en1ic + en2ic);
+            double ratio2 = en2ic/(en1ic + en2ic);
+            
+            cluster1.setEnergy(en1ic + e1sh*ratio1);
+            cluster2.setEnergy(en2ic + e2sh*ratio2);                                 
+        }
+        
+    }
+    
+    public int sharedView(ECCluster cluster){
+        if(cluster.getPeak(0).getOrder()==getPeak(0).getOrder()){
+            return 0;
+        }
+        if(cluster.getPeak(1).getOrder()==getPeak(1).getOrder()){
+            return 1;
+        }
+        if(cluster.getPeak(2).getOrder()==getPeak(2).getOrder()){
+            return 2;
+        }
+        return -1;
+    }
+    public double getEnergy(int view){
+        return this.clusterPeaks.get(view).getEnergy(clusterHitPosition);
     }
     
     public double getTime(){

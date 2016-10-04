@@ -13,7 +13,9 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 
 /**
  *
@@ -21,19 +23,26 @@ import org.jlab.io.base.DataEvent;
  */
 public class ECEngine extends ReconstructionEngine {
 
-    Detector ecDetector = null;
+    Detector    ecDetector = null;
+    Detector  ftofDetector = null;
     
     public ECEngine(){
         super("EC","gavalian","1.0");
     }
-        
+    
     @Override
     public boolean processDataEvent(DataEvent de) {
         
         //List<ECStrip>  ecStrips = ECCommon.initStrips(de, ecDetector, this.getConstantsManager(), 10);
         //List<ECStrip>  ecStrips = ECCommon.readStrips(de);//, ecDetector, this.getConstantsManager(), 10);
-
-        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), 10);
+        /*
+        if(de.hasBank("RUN::config")==true){
+            EvioDataBank bankHeader = (EvioDataBank) de.getBank("RUN::config");
+            System.out.println(String.format("***>>> RUN # %6d   EVENT %6d", 
+                    bankHeader.getInt("Run",0), bankHeader.getInt("Event",0)));
+        }*/
+        
+        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), 11);
         
         //System.out.println(" STRIPS SIZE = " + ecStrips.size());
         
@@ -53,12 +62,17 @@ public class ECEngine extends ReconstructionEngine {
         int peaksOriginalSplit = ecPeaks.size();
         System.out.println(String.format("SPLIT PROCEDURE %8d %8d",peaksOriginal,
                 peaksOriginalSplit));
-               
+        */       
+        
+        int counter = 0;
         for(ECPeak p : ecPeaks){
+            if(p.getDescriptor().getLayer()<=3){
+                counter++;
+            }
             //p.redoPeakLine();
-            System.out.println(p);
+            //System.out.println(p);
         }
-        */
+        
         
         List<ECCluster> cPCAL  = ECCommon.createClusters(ecPeaks,1);
         List<ECCluster> cECIN  = ECCommon.createClusters(ecPeaks,4);
@@ -66,16 +80,26 @@ public class ECEngine extends ReconstructionEngine {
         
         List<ECCluster> cEC   = new ArrayList<ECCluster>();
         
-        cEC.addAll(cPCAL);
-        //cEC.addAll(cECIN);
-        //cEC.addAll(cECOUT);
         
+        cEC.addAll(cPCAL);
+        cEC.addAll(cECIN);
+        cEC.addAll(cECOUT);
+        
+        ECCommon.shareClustersEnergy(cEC);
+        
+        DataBank  bankCL = ECio.createBankClusters(cEC);
+        if(bankCL.rows()>0){
+            //if(cECIN.size()>1&&cPCAL.size()>1) System.out.println(" SIZES = " + cPCAL.size() + " " + cECIN.size() + " " + cECOUT.size());
+            //if(counter<6) 
+            de.appendBanks(bankCL);
+        }
+        /*
         System.out.println("\n\n\n\n\nEC CLUSTERS SIZE = " + cEC.size());
         if(cEC.size()==2){
             for(ECCluster c : cEC){            
                  System.out.println(c);
             }
-        }
+        }*/
         
         //for(ECPeak p : ecPeaks){ System.out.println(p);}
         /*
@@ -101,10 +125,12 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
         };
-               
+        
         requireConstants(Arrays.asList(ecTables));
         
-        ecDetector =  GeometryFactory.getDetector(DetectorType.EC);
+        ecDetector   =  GeometryFactory.getDetector(DetectorType.EC);
+        
+        ftofDetector =  GeometryFactory.getDetector(DetectorType.FTOF);
         
         return true;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
