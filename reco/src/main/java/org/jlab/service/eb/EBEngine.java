@@ -17,7 +17,6 @@ import org.jlab.io.evio.EvioDataBank;
  * @author gavalian
  */
 public class EBEngine extends ReconstructionEngine {
-
     
     public EBEngine(){
         super("EB","gavalian","1.0");
@@ -34,16 +33,27 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorParticle>  chargedParticles = EBio.readTracks(de, eventType);
         List<DetectorResponse>  ftofResponse     = EBio.readFTOF(de);
+        List<DetectorResponse>  ecalResponse     = EBio.readECAL(de);
         
         EBProcessor processor = new EBProcessor(chargedParticles);
         processor.addTOF(ftofResponse);
+        processor.addECAL(ecalResponse);
+        
         processor.matchTimeOfFlight();
-        processor.show();
+        processor.matchCalorimeter();
+        processor.matchNeutral();
+        /*
+        if(de.hasBank("RUN::config")==true){
+            EvioDataBank bankHeader = (EvioDataBank) de.getBank("RUN::config");
+            System.out.println(String.format("***>>> RUN # %6d   EVENT %6d", 
+                    bankHeader.getInt("Run",0), bankHeader.getInt("Event",0)));
+        }*/
+        //processor.show();
         /*System.out.println("CHARGED PARTICLES = " + chargedParticles.size());
         for(DetectorParticle p : chargedParticles){
             System.out.println(p);
         }*/
-        EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(chargedParticles, eventType);
+        EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(processor.getParticles(), eventType);
         de.appendBanks(pBank);
         
         return true;

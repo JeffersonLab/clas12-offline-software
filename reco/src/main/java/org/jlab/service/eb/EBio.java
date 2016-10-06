@@ -122,6 +122,31 @@ public class EBio {
         return bank;
     }
     
+    public static List<DetectorResponse> readECAL(DataEvent event){
+        List<DetectorResponse> ecal = new ArrayList<DetectorResponse>();
+        if(event.hasBank("ECDetector::clusters")==true){
+            EvioDataBank bank = (EvioDataBank) event.getBank("ECDetector::clusters");
+            int nrows = bank.rows();
+            //System.out.println("*************************\n\n\n\n ECAL " + nrows);
+            for(int i = 0; i < nrows; i++){
+                int sector  = bank.getByte("sector", i);
+                int layer   = bank.getByte("layer", i);
+                DetectorResponse resp = new DetectorResponse();
+                resp.getDescriptor().setType(DetectorType.EC);
+                resp.getDescriptor().setSectorLayerComponent(sector, layer, 0);
+                resp.setPosition(
+                            bank.getFloat("X", i),bank.getFloat("Y", i),
+                            bank.getFloat("Z", i)
+                    );
+                    resp.setTime(bank.getFloat("time", i));
+                    resp.setEnergy(bank.getFloat("energy", i));
+                    ecal.add(resp);
+            }
+        } else {
+            //System.out.println("\n\n\n\n NO ECAL");
+        }
+        return ecal;
+    }
     
     public static List<DetectorResponse>  readFTOF(DataEvent event){
         List<DetectorResponse> ftof = new ArrayList<DetectorResponse>();
