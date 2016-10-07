@@ -48,20 +48,4 @@ public abstract class Geant4Factory {
                 .flatMap(child -> child.getIntersections(line).stream())
                 .collect(Collectors.toList());
     }
-
-    public void toSCAD(String dirname, String scadname) throws IOException {
-        File detdir = new File(dirname);
-        detdir.mkdirs();
-        try (PrintWriter scadout = new PrintWriter(new FileOutputStream(scadname, false))) {
-            for (Geant4Basic component : getComponents()) {
-                String stlpath = detdir.getAbsolutePath()+"/"+component.getName() + ".stl";
-                System.out.println(stlpath);
-                component.toCSG().toStlFile(stlpath);
-                
-                scadout.println(String.format("color([%d/255, %d/255, %d/255]) import(\"%s\");",
-                        component.getColor()[0], component.getColor()[1], component.getColor()[2],
-                        stlpath));
-            }
-        }
-    }
 }
