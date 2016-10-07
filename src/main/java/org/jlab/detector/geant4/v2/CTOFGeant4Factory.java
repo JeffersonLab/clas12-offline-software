@@ -5,7 +5,6 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import java.io.IOException;
 import static org.jlab.detector.hits.DetId.CTOFID;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;

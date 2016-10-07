@@ -26,6 +26,7 @@ public abstract class Geant4Basic {
 
     protected String volumeName;
     protected String volumeType;
+    protected int[] rgb = {0x00, 0x00, 0xff};
     protected boolean sensitivity = false;
 
     protected CSG volumeCSG;
@@ -77,6 +78,16 @@ public abstract class Geant4Basic {
         this.motherVolume.getChildren().add(this);
 
         updateCSGtransformation();
+    }
+
+    public void setColor1(int rgbR, int rgbG, int rgbB) {
+        rgb[0] = rgbR;
+        rgb[1] = rgbG;
+        rgb[2] = rgbB;
+    }
+
+    public int[] getColor1(){
+        return rgb;
     }
 
     public Geant4Basic getMother() {
