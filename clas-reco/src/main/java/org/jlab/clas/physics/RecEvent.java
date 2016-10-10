@@ -39,11 +39,18 @@ public class RecEvent {
     
     public Particle getMatched(int gindex){
         Particle p = this.genEvent.getParticle(gindex);
+        double maxDistance = 1000;
+        int    maxIndex    = -1;
         for(int i = 0; i < recEvent.count();i++){
             double distance = recEvent.getParticle(i).euclideanDistance(p);
-            System.out.println(" INDEX = " +  gindex +  " particle " + i + "  distance =  " + distance);
+            if(distance<maxDistance){
+                maxIndex = i;
+                maxDistance = distance;
+            }
+            //System.out.println(" INDEX = " +  gindex +  " particle " + i + "  distance =  " + distance);
         }
-        
+        //System.out.println(" INDEX = " +  gindex +  " particle " + maxIndex + "  distance =  " + maxDistance);
+        if(maxDistance<0.08) return recEvent.getParticle(maxIndex);
         return new Particle();
     }
     

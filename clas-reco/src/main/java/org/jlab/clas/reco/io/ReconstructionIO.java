@@ -57,12 +57,12 @@ public class ReconstructionIO {
     }
     
     
-    public static void writeHeader(String inputEvio, int run, double torus, double solenoid, int type){
+    public static void writeHeader(String inputEvio, String outputEvio, int run, double torus, double solenoid, int type){
         EvioSource reader = new EvioSource();
         reader.open(inputEvio);
         
         EvioDataSync  writer = new EvioDataSync();
-        writer.open("output_with_header.evio");
+        writer.open(outputEvio);
         
         int evtCounter = 1;
         
@@ -100,12 +100,13 @@ public class ReconstructionIO {
         
         
         String input    = args[0];
+        
         int    run      = Integer.parseInt(args[1]);
         double torus    = Double.parseDouble(args[2]);
         double solenoid = Double.parseDouble(args[3]);
         int type = 0;
         
         if(args.length>4) type = Integer.parseInt(args[4]);
-        ReconstructionIO.writeHeader(input, run, torus, solenoid,type);
+        ReconstructionIO.writeHeader(input, "output.evio" , run, torus, solenoid,type);
     }
 }

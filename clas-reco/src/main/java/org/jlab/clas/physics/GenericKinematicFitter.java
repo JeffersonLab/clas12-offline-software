@@ -41,6 +41,8 @@ public class GenericKinematicFitter {
                 for(int loop = 0; loop < nrows; loop++){
                     
                     int pid    = evntBank.getInt("pid", loop);
+                    int status = evntBank.getInt("status", loop);
+                    
                     if(PDGDatabase.isValidPid(pid)==true){
                         Particle part = new Particle(
                                 evntBank.getInt("pid", loop),
@@ -63,7 +65,10 @@ public class GenericKinematicFitter {
                                 evntBank.getFloat("vy", loop),
                                 evntBank.getFloat("vz", loop)
                         );
-                        physEvent.addParticle(part);
+                        
+                        if(status>0){
+                            physEvent.addParticle(part);
+                        }
                     }
                 }
                 return physEvent;
