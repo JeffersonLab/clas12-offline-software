@@ -64,6 +64,22 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ftof/panel2/paddles");
             provider.loadTable("/geometry/ftof/panel2/panel");
         }
+        
+        if(type==DetectorType.BST){
+            provider.loadTable("/geometry/bst/region");
+            provider.loadTable("/geometry/bst/sector");
+            provider.loadTable("/geometry/bst/bst");
+        }
+        
+        if(type==DetectorType.CND){
+            provider.loadTable("/geometry/cnd/cnd");
+            provider.loadTable("/geometry/cnd/layer");
+        }
+        
+        if(type==DetectorType.FTCAL){
+            provider.loadTable("/geometry/ft/ftcal");
+        }
+        
         provider.disconnect();
         return provider;
     }

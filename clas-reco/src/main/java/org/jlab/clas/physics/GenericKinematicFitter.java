@@ -31,12 +31,12 @@ public class GenericKinematicFitter {
      * @return PhysicsEvent : event containing particles.
      */
     public PhysicsEvent  getPhysicsEvent(DataEvent  event){
-        if(event instanceof EvioDataEvent){
+        //if(event instanceof EvioDataEvent){
             //System.out.println("   CHECK FOR  PARTICLE = " + event.hasBank("EVENT::particle"));
-            if(event.hasBank("EVENTTB::particle")){
-                EvioDataBank evntBank = (EvioDataBank) event.getBank("EVENTTB::particle");
-                int nrows = evntBank.rows();
-                PhysicsEvent  physEvent = new PhysicsEvent();
+        if(event.hasBank("EVENTTB::particle")){
+            EvioDataBank evntBank = (EvioDataBank) event.getBank("EVENTTB::particle");
+            int nrows = evntBank.rows();
+            PhysicsEvent  physEvent = new PhysicsEvent();
                 physEvent.setBeam(this.beamEnergy);
                 for(int loop = 0; loop < nrows; loop++){
                     
@@ -52,7 +52,9 @@ public class GenericKinematicFitter {
                                 evntBank.getFloat("vx", loop),
                                 evntBank.getFloat("vy", loop),
                                 evntBank.getFloat("vz", loop));
-                        physEvent.addParticle(part);
+                        if(status>0){
+                            physEvent.addParticle(part);
+                        }
                     } else {
                         Particle part = new Particle();
                         int charge = evntBank.getInt("charge", loop);
@@ -70,11 +72,12 @@ public class GenericKinematicFitter {
                             physEvent.addParticle(part);
                         }
                     }
+                   
                 }
                 return physEvent;
             }
             
-        }
+        //}
         return new PhysicsEvent(this.beamEnergy);
     }
     
