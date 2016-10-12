@@ -50,5 +50,4 @@ public class G4Box extends Geant4Basic {
         Line3d zline = new Line3d(new Vector3d(0,0,-getZHalfLength()), new Vector3d(0,0,getZHalfLength()));
         return zline.transformed(getGlobalTransform());
     }
-           
 }

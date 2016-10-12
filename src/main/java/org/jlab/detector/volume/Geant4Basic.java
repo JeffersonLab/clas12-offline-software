@@ -136,6 +136,8 @@ public abstract class Geant4Basic {
         return globalTransform;
     }
 
+    protected void afterCSGtransformation() {};
+    
     protected final void updateCSGtransformation() {
         children.stream()
                 .forEach(child -> child.updateCSGtransformation());
@@ -143,6 +145,8 @@ public abstract class Geant4Basic {
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }
+        
+        afterCSGtransformation();
     }
 
     public Geant4Basic translate(double x, double y, double z) {
