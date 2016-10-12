@@ -11,5 +11,7 @@ package org.jlab.detector.hits;
  */
 public final class DetId {
     public static final int FTOFID = 11;
-    public static final int CTOFID = 12;
+    public static final int CTOFID = 22;
+    public static final int PCALID = 33;
+    public static final int ECID = 44;
 }

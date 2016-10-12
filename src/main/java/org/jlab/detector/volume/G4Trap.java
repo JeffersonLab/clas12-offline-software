@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.volume;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.units.SystemOfUnits.Angle;
 import org.jlab.geometry.prim.Trap;
@@ -25,5 +26,11 @@ public class G4Trap extends Geant4Basic {
         setDimensions(Length.value(pDz), Angle.value(pTheta), Angle.value(pPhi),
                 Length.value(pDy1), Length.value(pDx1), Length.value(pDx2), Angle.value(pAlp1),
                 Length.value(pDy2), Length.value(pDx3), Length.value(pDx4), Angle.value(pAlp2));
+    }
+    
+    public Vector3d getVertex(int ivertex){
+        int ipol = ivertex/4;
+        int[][] ivert = {{0,3,1,2}, {0,1,3,2}};
+        return volumeCSG.getPolygons().get(4+ipol).vertices.get(ivert[ipol][ivertex-ipol*4]).pos;
     }
 }

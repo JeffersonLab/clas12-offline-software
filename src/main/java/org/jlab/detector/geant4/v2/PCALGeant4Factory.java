@@ -243,5 +243,17 @@ public final class PCALGeant4Factory extends Geant4Factory {
             sectorVolume.setMother(motherVolume);
         }
     }
+    
+    public G4Trap getPaddle(int isector, int ilayer, int ipaddle){
+        int iview=(ilayer-1)/3;
+        int[] npaddles = {nustrips, nwstrips, nwstrips};
+        if(isector<1 || isector>6 || ilayer<1 || ilayer>15 || ipaddle<1 || ipaddle>npaddles[iview]){
+            System.err.println(String.format("Paddle #%d in sector %d, layer %d doesn't exist", ipaddle, isector, ilayer));
+            throw new IndexOutOfBoundsException();
+        }
+        return (G4Trap) motherVolume.getChildren().get(isector-1)
+                .getChildren().get(3+(ilayer-1)*2)
+                .getChildren().get(ipaddle);
+    }
 
 }
