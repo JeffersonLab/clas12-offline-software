@@ -14,7 +14,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
  */
 public abstract class Straight {
 
-    protected final Vector3d origin, end;
+    protected Vector3d origin, end;
     private Line3d innerLine;
     
     public Straight(Vector3d origin, Vector3d end) {
@@ -27,6 +27,14 @@ public abstract class Straight {
         this.end = line.end;
     }
 
+    public void setEnd(Vector3d end){
+        this.end = end.clone();
+    }
+    
+    public void setOrigin(Vector3d origin){
+        this.origin = origin.clone();
+    }
+    
     public Vector3d origin() {
         return origin;
     }

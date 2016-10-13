@@ -7,7 +7,9 @@ package org.jlab.geometry.prim;
 
 import eu.mihosoft.vrl.v3d.Intersection;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import org.jlab.geometry.prim.Straight;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -58,5 +60,32 @@ public class Triangle3d {
 
         }
         return intersect;
+    }
+
+    public Optional<Line3d> getIntersection(Vector3d planePoint, Vector3d planeNormal) {
+        Optional<Line3d> line = Optional.empty();
+        List<Vector3d> interpoints = new ArrayList<>();
+                
+        for (int ivert = 0; ivert < 3; ivert++) {
+            LineSegment3d side = new LineSegment3d(vertices[ivert], vertices[ivert<2 ? ivert+1 : 0]);
+            double tt = planePoint.minus(side.origin()).dot(planeNormal);
+            double denom = side.diff().dot(planeNormal);
+            if (denom != 0) {
+                tt /= denom;
+                if (side.contains(tt)) {
+                    interpoints.add(side.origin().plus(side.diff().times(tt)));
+                }
+            }
+        }
+        
+        if(interpoints.size()==2) {
+            line = Optional.of(new Line3d(interpoints.get(0), interpoints.get(1)));
+        }
+        else if(!interpoints.isEmpty()) {
+            System.err.println("Intersection of planes produced "+interpoints.size()+"points!!!!");
+            System.exit(1111);
+        }
+
+        return line;
     }
 }

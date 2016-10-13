@@ -40,6 +40,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
+import java.util.Optional;
+import org.jlab.geometry.prim.Line3d;
 
 /**
  * Represents a convex polygon.
@@ -65,6 +67,8 @@ public final class Polygon {
      * <b>Note:</b> uses first three vertices to define the plane.
      */
     public final Plane plane;
+    
+    private static final double EPSILON = 1e-6;
 
     void setStorage(PropertyStorage storage) {
         this.shared = storage;
@@ -443,6 +447,21 @@ public final class Polygon {
         }
 
         return intersect;
+    }
+    
+    public List<Line3d> getIntersection(Vector3d planePoint, Vector3d planeNormal) {
+        List<Line3d> lines = new ArrayList<>();
+        
+        for (int ivert = 1; ivert < vertices.size() - 1; ivert++) {
+            Triangle3d triangle = new Triangle3d(vertices.get(0).pos, vertices.get(ivert).pos, vertices.get(ivert+1).pos);
+            Optional<Line3d> line = triangle.getIntersection(planePoint, planeNormal);
+            
+            if(line.isPresent()) {
+                lines.add(line.get());
+            }
+        }
+
+        return lines;
     }
 
     public boolean contains(Polygon p) {

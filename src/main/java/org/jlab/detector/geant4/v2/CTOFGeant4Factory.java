@@ -8,6 +8,7 @@ package org.jlab.detector.geant4.v2;
 import static org.jlab.detector.hits.DetId.CTOFID;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
+import org.jlab.detector.volume.Geant4Basic;
 
 /**
  *
@@ -15,7 +16,7 @@ import org.jlab.detector.volume.G4World;
  */
 public final class CTOFGeant4Factory extends Geant4Factory {
 
-    private final int nscintillators = 48;
+    private final int npaddles = 48;
 
     public CTOFGeant4Factory() {
         motherVolume = new G4World("fc");
@@ -23,7 +24,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         ClassLoader cloader = getClass().getClassLoader();
 
         for (String name : new String[]{"sc", "lgu", "lgd"}) {
-            for (int iscint = 1; iscint <= nscintillators; iscint++) {
+            for (int iscint = 1; iscint <= npaddles; iscint++) {
                 G4Stl component = new G4Stl(String.format("%s%02d", name, iscint),
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)));
                 component.scale(0.1);
@@ -38,5 +39,14 @@ public final class CTOFGeant4Factory extends Geant4Factory {
                 }
             }
         }
+    }
+
+    public Geant4Basic getPaddle(int ipaddle) {
+        if (ipaddle < 1 || ipaddle > npaddles) {
+            System.err.println("ERROR!!!");
+            System.err.println("CTOF Paddle #" + ipaddle + " doesn't exist");
+            System.exit(111);
+        }
+        return motherVolume.getChildren().get(ipaddle - 1);
     }
 }

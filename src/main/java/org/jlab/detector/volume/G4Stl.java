@@ -5,12 +5,10 @@
  */
 package org.jlab.detector.volume;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.geometry.prim.StlPrim;
 
 /**
@@ -29,11 +27,13 @@ public class G4Stl extends Geant4Basic {
         setType("Stl");
     }
 
+    /*
     @Override
     public void afterCSGtransformation() {
         boundVol = volumeCSG.getBounds().toCSG();
     }
-
+*/
+    
     /*
     public Line3d getLineX() {
         Line3d xline = new Line3d(new Vector3d(-getXHalfLength(), 0, 0), new Vector3d(getXHalfLength(), 0, 0));

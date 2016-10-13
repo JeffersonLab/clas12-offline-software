@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.TriangleMesh;
+import org.jlab.geometry.prim.Line3d;
 
 /**
  * Constructive Solid Geometry (CSG).
@@ -202,6 +203,12 @@ public class CSG {
                 .filter(intersect -> intersect.isPresent())
                 .sorted((p2, p1) -> (int) Math.signum(p2.getParametricT() - p1.getParametricT()))
                 .map(intersect -> intersect.pos)
+                .collect(Collectors.toList());
+    }
+
+    public List<Line3d> getCrossSection(Vector3d planePoint, Vector3d planeNormal) {
+        return polygons.stream()
+                .flatMap(face -> face.getIntersection(planePoint, planeNormal).stream())
                 .collect(Collectors.toList());
     }
 
@@ -956,7 +963,7 @@ public class CSG {
 
         return result;
     }
-    
+
     /**
      *
      * @param transform the current CSG
