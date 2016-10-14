@@ -5,10 +5,14 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
+import java.io.InputStream;
+import java.util.List;
 import static org.jlab.detector.hits.DetId.CTOFID;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
+import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -25,8 +29,8 @@ public final class CTOFGeant4Factory extends Geant4Factory {
 
         for (String name : new String[]{"sc", "lgu", "lgd"}) {
             for (int iscint = 1; iscint <= npaddles; iscint++) {
-                G4Stl component = new G4Stl(String.format("%s%02d", name, iscint),
-                        cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)));
+                CTOFpaddle component = new CTOFpaddle(String.format("%s%02d", name, iscint),
+                        cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);
                 component.scale(0.1);
 
                 component.rotate("zyx", 0, Math.toRadians(180), 0);
@@ -48,5 +52,28 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             System.exit(111);
         }
         return motherVolume.getChildren().get(ipaddle - 1);
+    }
+
+    private class CTOFpaddle extends G4Stl {
+        private final int padnum;
+        private Line3d centerline;
+        private final double angle0 = -3.75, dangle = 7.5;
+        private final double zmin = -54.18, zmax = 36.26;
+        
+        CTOFpaddle(String name, InputStream stlstream, int padnum) {
+            super(name, stlstream);
+            this.padnum = padnum;
+        }
+
+        @Override
+        public void afterCSGtransformation() {
+            Vector3d cent = new Vector3d(0, -26.62, 0);
+            cent.rotateZ(Math.toRadians(angle0+(padnum-1)*dangle));
+            centerline = new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
+        }
+        
+        public Line3d getLineZ() {
+            return centerline;
+        }
     }
 }
