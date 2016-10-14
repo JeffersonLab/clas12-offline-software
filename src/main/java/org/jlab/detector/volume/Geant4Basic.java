@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.units.SystemOfUnits.Length;
+import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -86,7 +87,7 @@ public abstract class Geant4Basic {
         rgb[2] = rgbB;
     }
 
-    public int[] getColor1(){
+    public int[] getColor1() {
         return rgb;
     }
 
@@ -136,7 +137,10 @@ public abstract class Geant4Basic {
         return globalTransform;
     }
 
-    protected void afterCSGtransformation() {};
+    protected void afterCSGtransformation() {
+    }
+
+    ;
     
     protected final void updateCSGtransformation() {
         children.stream()
@@ -145,7 +149,7 @@ public abstract class Geant4Basic {
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }
-        
+
         afterCSGtransformation();
     }
 
@@ -288,7 +292,7 @@ public abstract class Geant4Basic {
     protected List<DetHit> getIntersectedHits(Straight line) {
         List<DetHit> hits = new ArrayList<>();
         if (this.isSensitive()) {
-            
+
             //mainly for complicated shapes
             //if the number of polygons is large,
             //it's more efficient to test the bounds on intersections
@@ -299,7 +303,7 @@ public abstract class Geant4Basic {
                     return hits;
                 }
             }
-            
+
             List<Vector3d> dots = volumeCSG.getIntersections(line);
 
             for (int ihit = 0; ihit < dots.size() / 2; ihit++) {
@@ -308,5 +312,10 @@ public abstract class Geant4Basic {
             }
         }
         return hits;
+    }
+
+    public Line3d getLineZ() {
+        throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
+//        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
 }

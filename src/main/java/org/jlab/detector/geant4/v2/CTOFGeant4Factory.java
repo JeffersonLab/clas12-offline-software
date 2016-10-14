@@ -7,7 +7,6 @@ package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.InputStream;
-import java.util.List;
 import static org.jlab.detector.hits.DetId.CTOFID;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
@@ -55,11 +54,12 @@ public final class CTOFGeant4Factory extends Geant4Factory {
     }
 
     private class CTOFpaddle extends G4Stl {
+
         private final int padnum;
         private Line3d centerline;
         private final double angle0 = -3.75, dangle = 7.5;
         private final double zmin = -54.18, zmax = 36.26;
-        
+
         CTOFpaddle(String name, InputStream stlstream, int padnum) {
             super(name, stlstream);
             this.padnum = padnum;
@@ -68,12 +68,23 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         @Override
         public void afterCSGtransformation() {
             Vector3d cent = new Vector3d(0, -26.62, 0);
-            cent.rotateZ(Math.toRadians(angle0+(padnum-1)*dangle));
+            cent.rotateZ(Math.toRadians(angle0 + (padnum - 1) * dangle));
             centerline = new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
         }
-        
+
+        @Override
         public Line3d getLineZ() {
             return centerline;
+        }
+    }
+
+    public static void main(String[] args) {
+        CTOFGeant4Factory factory = new CTOFGeant4Factory();
+
+        for (int ipad = 15; ipad <= 19; ipad++) {
+            Geant4Basic pad = factory.getPaddle(ipad);
+            Line3d line = pad.getLineZ();
+            System.out.println(line);
         }
     }
 }
