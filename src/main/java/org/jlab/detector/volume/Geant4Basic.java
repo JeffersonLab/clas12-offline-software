@@ -231,9 +231,8 @@ public abstract class Geant4Basic {
         }
 
         Vector3d pos = getLocalPosition();
-        str.append(pos.x + "*" + Length.unit() + " "
-                + pos.y + "*" + Length.unit() + " "
-                + pos.z + "*" + Length.unit() + " | ");
+        str.append(String.format("%f*%s %f*%s %f*%s | ",
+                pos.x, Length.unit(), pos.y, Length.unit(), pos.z, Length.unit()));
 
         if (rotationValues[0] == 0 && rotationValues[1] == 0 && rotationValues[2] == 0) {
             str.append("0 0 0 ");
