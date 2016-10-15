@@ -29,6 +29,7 @@ public abstract class Geant4Basic {
     protected String volumeType;
     protected int[] rgb = {0x00, 0x00, 0xff};
     protected boolean sensitivity = false;
+    protected boolean abstraction = false;
 
     protected CSG volumeCSG;
     protected final Primitive volumeSolid;
@@ -64,6 +65,14 @@ public abstract class Geant4Basic {
 
     public boolean isSensitive() {
         return sensitivity;
+    }
+
+    public final void makeAbstract() {
+        abstraction = true;
+    }
+
+    public boolean isAbstract() {
+        return abstraction;
     }
 
     public final void setName(String name) {

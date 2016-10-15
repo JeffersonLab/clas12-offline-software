@@ -5,10 +5,6 @@
  */
 package org.jlab.detector.geant4.v2;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geometry.prim.Straight;
 import java.util.HashMap;

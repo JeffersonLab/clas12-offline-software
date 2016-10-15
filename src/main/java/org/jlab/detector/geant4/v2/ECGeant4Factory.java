@@ -167,7 +167,8 @@ public final class ECGeant4Factory extends Geant4Factory {
                         dstrip / 2.0 - dwrap, 0, 0,
                         uwidth / 2.0 - dwrap, lshort, llong, 0,
                         uwidth / 2.0 - dwrap, lshort, llong, 0);
-
+                
+                stripVol.makeSensitive();
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
 
@@ -201,6 +202,7 @@ public final class ECGeant4Factory extends Geant4Factory {
                 double ystrip = (height - hlong - hshort) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
+                stripVol.makeSensitive();
                 stripVol.setMother(layerVol);
 
                 hshort += stripwidth;

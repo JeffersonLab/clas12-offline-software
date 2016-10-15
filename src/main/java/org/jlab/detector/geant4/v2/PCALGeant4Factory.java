@@ -137,6 +137,9 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
 
+                if(istrip>0){
+                    stripVol.makeSensitive();
+                }
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hbtm + htop) / 2.0, 0);
 
@@ -160,6 +163,9 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
 
+                if(istrip>0){
+                    stripVol.makeSensitive();
+                }
                 double ystrip = (wheight - hbtm - htop) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
