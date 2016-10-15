@@ -39,18 +39,18 @@ public final class PCALGeant4Factory extends Geant4Factory {
         nustrips = cp.getInteger("/geometry/pcal/Uview/nstrips", 0);
         nwstrips = cp.getInteger("/geometry/pcal/Wview/nstrips", 0);
 
-        dsteel = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)* Length.mm;
-        dfoam = cp.getDouble("/geometry/pcal/pcal/foam_thick", 0)* Length.mm;
-        dlead = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)* Length.mm;
-        dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)* Length.mm;
-        dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0)* Length.mm;
-        wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)* Length.mm;
+        dsteel = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0) * Length.mm;
+        dfoam = cp.getDouble("/geometry/pcal/pcal/foam_thick", 0) * Length.mm;
+        dlead = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0) * Length.mm;
+        dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0) * Length.mm;
+        dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0) * Length.mm;
+        wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0) * Length.mm;
 
-        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0)* Length.mm;
-        yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)* Length.mm;
+        dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0) * Length.mm;
+        yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0) * Length.mm;
 
-        umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0)* Length.mm;
-        wmax = cp.getDouble("/geometry/pcal/Wview/max_length", 0)* Length.mm;
+        umax = cp.getDouble("/geometry/pcal/Uview/max_length", 0) * Length.mm;
+        wmax = cp.getDouble("/geometry/pcal/Wview/max_length", 0) * Length.mm;
 
         thview = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
         thtilt = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/thtilt", 0));
@@ -83,7 +83,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
         vLayer.populateWstrips(ilayer, isector);
         return vLayer;
     }
-    
+
     private Layer getWLayer(int ilayer, int isector) {
         Layer wLayer = new Layer("W-view-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip,
                 wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
@@ -123,56 +123,98 @@ public final class PCALGeant4Factory extends Geant4Factory {
         }
 
         public void populateUstrips(int ilayer, int isector) {
+            final int ndoubles = 16;
             double w0 = uheight - wstrip * nustrips;
-            double hbtm = dwrap;
-            double htop = w0 - dwrap;
+            double hshort = dwrap;
 
             for (int istrip = 0; istrip <= nustrips; istrip++) {
                 double uwidth = (istrip == 0) ? w0 : wstrip;
-                double lhalfbtm = hbtm / Math.tan(thview);
-                double lhalftop = htop / Math.tan(thview);
+                double hlong = hshort + uwidth - 2.0 * dwrap;
+                double lhalfbtm = hshort / Math.tan(thview);
+                double lhalftop = hlong / Math.tan(thview);
 
                 G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
 
-                if(istrip>0){
+                if (istrip > 0 && istrip<=(nustrips - ndoubles * 2)) {
                     stripVol.makeSensitive();
                 }
                 stripVol.setMother(layerVol);
-                stripVol.translate(0, (-uheight + hbtm + htop) / 2.0, 0);
+                stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
 
-                hbtm = htop + 2.0 * dwrap;
-                htop += wstrip;
+                hshort += uwidth;
             }
+
+            hshort = w0 + (nustrips - ndoubles * 2) * wstrip + dwrap;
+            for (int idouble = 1; idouble <= ndoubles; idouble++) {
+                double hlong = hshort + 2.0 * wstrip - 2.0 * dwrap;
+                double lhalfbtm = hshort / Math.tan(thview);
+                double lhalftop = hlong / Math.tan(thview);
+
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
+                        dstrip / 2.0 - dwrap, 0, 0,
+                        wstrip - dwrap, lhalfbtm, lhalftop, 0,
+                        wstrip - dwrap, lhalfbtm, lhalftop, 0);
+
+                stripVol.makeAbstract();
+                stripVol.makeSensitive();
+                stripVol.setMother(layerVol);
+                stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
+
+                hshort += 2.0 * wstrip;
+            }
+
         }
 
         public void populateWstrips(int ilayer, int isector) {
+            final int ndoubles = 15;
             double w0 = wheight - wstrip * nwstrips;
-            double htop = dwrap;
-            double hbtm = w0 - dwrap;
+            double hshort = dwrap;
 
             for (int istrip = 0; istrip <= nwstrips; istrip++) {
                 double wwidth = (istrip == 0) ? w0 : wstrip;
-                double lbtm = hbtm / Math.sin(2.0 * thview);
-                double ltop = htop / Math.sin(2.0 * thview);
+                double hlong = hshort + wwidth - 2.0 * dwrap;
+                double lbtm = hlong / Math.sin(2.0 * thview);
+                double ltop = hshort / Math.sin(2.0 * thview);
 
                 G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
 
-                if(istrip>0){
+                if (istrip > ndoubles*2) {
                     stripVol.makeSensitive();
                 }
-                double ystrip = (wheight - hbtm - htop) / 2.0;
+                double ystrip = (wheight - hlong - hshort) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
 
-                htop = hbtm + 2.0 * dwrap;
-                hbtm += wstrip;
+                hshort += wwidth;
+            }
+            
+            
+            hshort = w0 + dwrap;
+            for (int idouble = 1; idouble <= ndoubles; idouble++) {
+                double hlong = hshort + 2.0*wstrip - 2.0 * dwrap;
+                double lbtm = hlong / Math.sin(2.0 * thview);
+                double ltop = hshort / Math.sin(2.0 * thview);
+
+                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
+                        dstrip / 2.0 - dwrap, 0, 0,
+                        wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
+                        wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
+
+                stripVol.makeAbstract();
+                stripVol.makeSensitive();
+                double ystrip = (wheight - hlong - hshort) / 2.0;
+                double xstrip = ystrip * Math.tan(-walpha);
+                stripVol.translate(xstrip, ystrip, 0);
+                stripVol.setMother(layerVol);
+
+                hshort += wstrip;
             }
         }
     }
@@ -249,16 +291,16 @@ public final class PCALGeant4Factory extends Geant4Factory {
             sectorVolume.setMother(motherVolume);
         }
     }
-    
-    public G4Trap getPaddle(int isector, int ilayer, int ipaddle){
-        int iview=(ilayer-1)/3;
+
+    public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {
+        int iview = (ilayer - 1) / 3;
         int[] npaddles = {nustrips, nwstrips, nwstrips};
-        if(isector<1 || isector>6 || ilayer<1 || ilayer>15 || ipaddle<1 || ipaddle>npaddles[iview]){
+        if (isector < 1 || isector > 6 || ilayer < 1 || ilayer > 15 || ipaddle < 1 || ipaddle > npaddles[iview]) {
             System.err.println(String.format("Paddle #%d in sector %d, layer %d doesn't exist", ipaddle, isector, ilayer));
             throw new IndexOutOfBoundsException();
         }
-        return (G4Trap) motherVolume.getChildren().get(isector-1)
-                .getChildren().get(3+(ilayer-1)*2)
+        return (G4Trap) motherVolume.getChildren().get(isector - 1)
+                .getChildren().get(3 + (ilayer - 1) * 2)
                 .getChildren().get(ipaddle);
     }
 

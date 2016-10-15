@@ -260,8 +260,10 @@ public abstract class Geant4Basic {
 
     public String gemcStringRecursive() {
         StringBuilder str = new StringBuilder();
-        str.append(gemcString());
-        str.append(System.getProperty("line.separator"));
+        if(!isAbstract()){
+            str.append(gemcString());
+            str.append(System.getProperty("line.separator"));
+        }
 
         children.stream().
                 forEach(child -> str.append(child.gemcStringRecursive()));

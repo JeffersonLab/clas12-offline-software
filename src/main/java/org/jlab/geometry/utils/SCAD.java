@@ -51,18 +51,23 @@ public class SCAD {
         File detdir = new File(dirname);
         detdir.mkdirs();
         for (Geant4Basic component : factory.getComponents()) {
+            if(component.isAbstract()) continue;
+            
             String compname = component.getName();
             String stlpath = detdir.getAbsolutePath() + "/" + compname + ".stl";
             component.toCSG().toStlFile(stlpath);
 
+            Color col = Color.AZURE;
             for (Map.Entry<String, Color> entry : CLAS12COLORS.entrySet()) {
                 if (compname.contains(entry.getKey())) {
-                    Color col = entry.getValue();
-                    stlout.append(String.format("color([%.4f, %.4f, %.4f]) import(\"%s\");\n",
-                            col.getRed(), col.getGreen(), col.getBlue(), stlpath));
+                    col = entry.getValue();
                     break;
                 }
             }
+
+            stlout.append(String.format("color([%.4f, %.4f, %.4f]) import(\"%s\");\n",
+                    col.getRed(), col.getGreen(), col.getBlue(), stlpath));
+
         }
         return stlout.toString();
     }
