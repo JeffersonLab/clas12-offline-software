@@ -18,7 +18,7 @@ import org.jlab.geom.base.ConstantProvider;
  */
 public final class ECGeant4Factory extends Geant4Factory {
 
-    private final double microgap = 0.01;
+    private final double microgap = 0.0001;
     private final double virtualzero = 1e-9;
 
     private final int nsectors, nviews, nlayers;
