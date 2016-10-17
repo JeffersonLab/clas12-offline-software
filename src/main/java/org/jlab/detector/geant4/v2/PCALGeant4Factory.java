@@ -28,7 +28,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
     private final double dsteel, dfoam, dlead, dstrip, dwrap, wstrip;
     private final double umax, wmax, uheight, wheight;
     private final double thtilt, thview, walpha, dist2tgt, yhigh;
-    
+
     List<PCALSector> sectorVolumes = new ArrayList<>();
 
     public PCALGeant4Factory(ConstantProvider cp) {
@@ -102,6 +102,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
         return wLayer;
     }
 
+
     private class Layer {
 
         final G4Trap layerVol;
@@ -139,12 +140,12 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lhalfbtm = hshort / Math.tan(thview);
                 double lhalftop = hlong / Math.tan(thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+                G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
 
-                if (istrip > 0 && istrip<=(nustrips - ndoubles * 2)) {
+                if (istrip > 0 && istrip <= (nustrips - ndoubles * 2)) {
                     stripVol.makeSensitive();
                     scipaddles.add(stripVol);
                 }
@@ -160,7 +161,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lhalfbtm = hshort / Math.tan(thview);
                 double lhalftop = hlong / Math.tan(thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
+                G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         wstrip - dwrap, lhalfbtm, lhalftop, 0,
                         wstrip - dwrap, lhalfbtm, lhalftop, 0);
@@ -179,14 +180,14 @@ public final class PCALGeant4Factory extends Geant4Factory {
         public void populateWstrips(int ilayer, int isector) {
             final int ndoubles = 15;
             double w0 = wheight - wstrip * nwstrips;
-            
+
             double hshort = w0 + dwrap;
             for (int idouble = 1; idouble <= ndoubles; idouble++) {
-                double hlong = hshort + 2.0*wstrip - 2.0 * dwrap;
+                double hlong = hshort + 2.0 * wstrip - 2.0 * dwrap;
                 double lbtm = hlong / Math.sin(2.0 * thview);
                 double ltop = hshort / Math.sin(2.0 * thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
+                G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
@@ -201,7 +202,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
                 hshort += wstrip;
             }
-            
+
             hshort = dwrap;
             for (int istrip = 0; istrip <= nwstrips; istrip++) {
                 double wwidth = (istrip == 0) ? w0 : wstrip;
@@ -209,12 +210,12 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lbtm = hlong / Math.sin(2.0 * thview);
                 double ltop = hshort / Math.sin(2.0 * thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
+                G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
                         dstrip / 2.0 - dwrap, 0, 0,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
 
-                if (istrip > ndoubles*2) {
+                if (istrip > ndoubles * 2) {
                     stripVol.makeSensitive();
                     scipaddles.add(stripVol);
                 }
@@ -225,7 +226,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
                 hshort += wwidth;
             }
-            
+
         }
     }
 
@@ -255,7 +256,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
             double secphi = Math.toRadians(90 - (isector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
-
+sectorVolume.rotate("yxz", 0, 0, secphi);
             Vector3d secPos = new Vector3d(0, 0, dist2midplane)
                     .rotateX(-thtilt)
                     .add(0, -hshift * Math.cos(thtilt), hshift * Math.sin(thtilt))
@@ -304,28 +305,54 @@ public final class PCALGeant4Factory extends Geant4Factory {
         }
     }
 
+    private class PCALstrip extends G4Trap {
+
+        final int iview;
+
+        PCALstrip(String name, double pDz, double pTheta, double pPhi,
+                double pDy1, double pDx1, double pDx2, double pAlp1,
+                double pDy2, double pDx3, double pDx4, double pAlp2) {
+            super(name, pDz, pTheta, pPhi, pDy1, pDx1, pDx2, pAlp1, pDy2, pDx3, pDx4, pAlp2);
+
+            iview = name.charAt(0) - 'U';
+        }
+
+        @Override
+        public Vector3d getVertex(int ivertex) {
+            int ipol = ivertex / 4;
+            if(iview==1) ipol = 1-ipol;
+
+            int[][][] ivert = {
+                {{0, 3, 1, 2}, {0, 1, 3, 2}},
+                {{1, 2, 0, 3}, {3, 2, 0, 1}},
+                {{2, 1, 3, 0}, {2, 3, 1, 0}}
+            };
+            return volumeCSG.getPolygons().get(4 + ipol).vertices.get(ivert[iview][ipol][ivertex%4]).pos;
+        }
+    }
+
     public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {
         isector--;
         ilayer--;
         ipaddle--;
-        
-        if(isector<0 || isector>= sectorVolumes.size()){
-            System.err.println(String.format("Sector %d  doesn't exist", isector+1));
+
+        if (isector < 0 || isector >= sectorVolumes.size()) {
+            System.err.println(String.format("Sector %d  doesn't exist", isector + 1));
             throw new IndexOutOfBoundsException();
         }
-        
+
         PCALSector secVol = sectorVolumes.get(isector);
-        if(ilayer<0 || ilayer>= secVol.layerVolumes.size()){
-            System.err.println(String.format("Layer %d  doesn't exist", ilayer+1));
+        if (ilayer < 0 || ilayer >= secVol.layerVolumes.size()) {
+            System.err.println(String.format("Layer %d  doesn't exist", ilayer + 1));
             throw new IndexOutOfBoundsException();
         }
-        
+
         Layer lVol = secVol.layerVolumes.get(ilayer);
-        if(ipaddle<0 || ipaddle>= lVol.scipaddles.size()){
-            System.err.println(String.format("Paddle %d  doesn't exist", ipaddle+1));
+        if (ipaddle < 0 || ipaddle >= lVol.scipaddles.size()) {
+            System.err.println(String.format("Paddle %d  doesn't exist", ipaddle + 1));
             throw new IndexOutOfBoundsException();
         }
-        
+
         return (G4Trap) lVol.scipaddles.get(ipaddle);
     }
 }
