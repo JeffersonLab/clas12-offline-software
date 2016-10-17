@@ -42,6 +42,9 @@ public class EBEngine extends ReconstructionEngine {
         processor.matchTimeOfFlight();
         processor.matchCalorimeter();
         processor.matchNeutral();
+        List<DetectorParticle> centralParticles = EBio.readCentralTracks(de);
+        
+        processor.getParticles().addAll(centralParticles);
         /*
         if(de.hasBank("RUN::config")==true){
             EvioDataBank bankHeader = (EvioDataBank) de.getBank("RUN::config");

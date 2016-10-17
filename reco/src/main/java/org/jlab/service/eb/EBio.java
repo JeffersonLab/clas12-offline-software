@@ -73,6 +73,38 @@ public class EBio {
         return dpList;
     }
     
+    
+    public static List<DetectorParticle>  readCentralTracks(DataEvent event){
+        List<DetectorParticle> dpList = new ArrayList<DetectorParticle>();
+        if(event.hasBank("CVTRec::Tracks")==true){
+            EvioDataBank bank = (EvioDataBank) event.getBank("CVTRec::Tracks");
+            int nrows = bank.rows();
+            for(int i = 0; i < nrows; i++){
+                double p = bank.getDouble("p", i);
+                double pt = bank.getDouble("pt", i);
+                double phi0 = bank.getDouble("phi0", i);
+                double tandip = bank.getDouble("tandip", i);
+                double z0 = bank.getDouble("z0", i);
+                double d0 = bank.getDouble("d0", i);
+                
+                DetectorParticle part = new DetectorParticle();
+                part.setStatus(200);
+                double pz = pt*tandip;
+                double py = pt*Math.sin(phi0);
+                double px = pt*Math.cos(phi0);
+                
+                double vx = d0*Math.cos(phi0);
+                double vy = d0*Math.sin(phi0);
+                
+                part.vector().setXYZ(px, py, pz);
+                part.vertex().setXYZ(vx, vy, z0);
+                part.setCharge(bank.getInt("q", i));
+                dpList.add(part);
+            }
+        }
+        return dpList;
+    }
+    
     public static boolean isTimeBased(DataEvent de){
         return de.hasBank("TimeBasedTrkg::TBTracks");
     }
