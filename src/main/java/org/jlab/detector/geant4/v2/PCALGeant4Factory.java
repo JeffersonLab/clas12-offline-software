@@ -256,7 +256,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
 
             double secphi = Math.toRadians(90 - (isector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
-sectorVolume.rotate("yxz", 0, 0, secphi);
+
             Vector3d secPos = new Vector3d(0, 0, dist2midplane)
                     .rotateX(-thtilt)
                     .add(0, -hshift * Math.cos(thtilt), hshift * Math.sin(thtilt))
