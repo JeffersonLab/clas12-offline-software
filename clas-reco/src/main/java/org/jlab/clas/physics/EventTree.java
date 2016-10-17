@@ -79,6 +79,9 @@ public class EventTree {
     
     public Tree getTree(){return treeObject;}
     
+    /**
+     * class describing EventTree branch
+     */
     public static class EventTreeBranch {
         
         private String branchName = "";
