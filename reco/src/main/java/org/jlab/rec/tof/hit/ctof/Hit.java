@@ -110,13 +110,18 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	}
 	 public void setPaddleLine(CTOFGeant4Factory geometry) {
 			// get the line in the middle of the paddle
-		G4Box comp =(G4Box)geometry.getComponents().get(get_Paddle()-1);
-		Line3D paddleLine = new Line3D();
+		 org.jlab.detector.volume.Geant4Basic pad = geometry.getPaddle(get_Paddle());
+		 Line3d l = pad.getLineZ();
+		 Line3D paddleLine = new Line3D();
 		// The scintilator paddles are constructed with the length of the paddle
         // as X dimention in the lab frame, so getLineX will return a line going
         // through the center of the paddle and length() equal to the paddle length
-		paddleLine.set(comp.getLineX().origin().x, comp.getLineX().origin().y, comp.getLineX().origin().z, comp.getLineX().end().x, comp.getLineX().end().y, comp.getLineX().end().z);
-		this.set_paddleLine(paddleLine);
+		//paddleLine.set(comp.getLineX().origin().x, comp.getLineX().origin().y, comp.getLineX().origin().z, comp.getLineX().end().x, comp.getLineX().end().y, comp.getLineX().end().z);
+		//paddleLine.set(comp.getLineX().origin().x, comp.getLineX().origin().y, comp.getLineX().origin().z, comp.getLineX().end().x, comp.getLineX().end().y, comp.getLineX().end().z);
+		
+		 paddleLine.set(l.origin().x, l.origin().y, l.origin().z, l.end().x, l.end().y, l.end().z);
+		
+		 this.set_paddleLine(paddleLine);
 	 }	
 
 	private Point3D calc_hitPosition() {

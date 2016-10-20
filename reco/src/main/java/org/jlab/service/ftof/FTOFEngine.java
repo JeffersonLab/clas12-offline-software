@@ -24,7 +24,6 @@ import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.geom.base.ConstantProvider;
-import org.jlab.geom.base.Detector;
 import org.jlab.geometry.prim.Line3d;
 
 /**

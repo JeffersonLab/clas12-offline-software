@@ -30,6 +30,7 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("FTOFRec::rawhits", hitlist.size());
 
 		for(int i =0; i< hitlist.size(); i++) {
+			bank.setInt("id", i, hitlist.get(i).get_Id());
 			bank.setInt("sector",i, hitlist.get(i).get_Sector());
 			bank.setInt("panel_id",i, hitlist.get(i).get_Panel());
 			bank.setInt("paddle_id",i, hitlist.get(i).get_Paddle());
@@ -59,6 +60,7 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("FTOFRec::ftofhits", hitlist.size());
 
 		for(int i =0; i< hitlist.size(); i++) {
+			bank.setInt("id", i, hitlist.get(i).get_Id());
 			bank.setInt("sector",i, hitlist.get(i).get_Sector());
 			bank.setInt("panel_id",i, hitlist.get(i).get_Panel());
 			bank.setInt("paddle_id",i, hitlist.get(i).get_Paddle());
@@ -70,6 +72,11 @@ public class RecoBankWriter {
 			bank.setFloat("x",i, (float) hitlist.get(i).get_Position().x());
 			bank.setFloat("y",i, (float) hitlist.get(i).get_Position().y());
 			bank.setFloat("z",i, (float) hitlist.get(i).get_Position().z());
+			if(hitlist.get(i).get_TrkPosition()!=null) {
+				bank.setFloat("tx",i, (float) hitlist.get(i).get_TrkPosition().x());
+				bank.setFloat("ty",i, (float) hitlist.get(i).get_TrkPosition().y());
+				bank.setFloat("tz",i, (float) hitlist.get(i).get_TrkPosition().z());
+			}
 			bank.setFloat("x_unc",i, 5); 			
 			bank.setFloat("y_unc",i, (float) hitlist.get(i).get_yUnc()); 			
 			bank.setFloat("z_unc",i, 10); 						
@@ -89,6 +96,7 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("FTOFRec::ftofclusters", cluslist.size());
 
 		for(int i =0; i< cluslist.size(); i++) {
+			bank.setInt("id", i, cluslist.get(i).get_Id());
 			bank.setInt("sector",i, cluslist.get(i).get_Sector());
 			bank.setInt("panel_id",i, cluslist.get(i).get_Panel());
 			bank.setInt("paddle_id",i, cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
@@ -128,6 +136,8 @@ public class RecoBankWriter {
 			bank.setInt("paddle_id1B",i,  matchedClusters.get(i).get(1).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]			
 			bank.setInt("clusSize_1A",i,  matchedClusters.get(i).get(0).size());					  // size of cluster in 1a
 			bank.setInt("clusSize_1B",i,  matchedClusters.get(i).get(1).size());					  // size of cluster in 1b
+			bank.setInt("clus_1A",i,  matchedClusters.get(i).get(0).get_Id());					  	  // id of cluster in 1a
+			bank.setInt("clus_1B",i,  matchedClusters.get(i).get(1).get_Id());					  	  // id of cluster in 1b
 			bank.setFloat("tminAlgo_1B_tCorr",i,    (float) matchedClusters.get(i).get(1).get_tCorr()[0]);	  // uses tmin algorithm to compute the path length between counters
 			bank.setFloat("midbarAlgo_1B_tCorr",i,  (float) matchedClusters.get(i).get(1).get_tCorr()[1]);    // uses middle of bar algorithm to compute the path length between counters
 			bank.setFloat("EmaxAlgo_1B_tCorr",i,    (float) matchedClusters.get(i).get(1).get_tCorr()[2]);	  // uses Emax algorithm to compute the path length between counters

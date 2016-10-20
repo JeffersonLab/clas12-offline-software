@@ -1,17 +1,12 @@
 package org.jlab.rec.tof.banks.ctof;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.CTOFDetHit;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
@@ -69,6 +64,8 @@ public class HitReader {
 			List<Hit> hits = new ArrayList<Hit>();
 			
 			for(int i = 0; i<id.length; i++){
+				if(paddle[i]<1)
+					continue;
 			    // get the status				
 				int statusU = CalibrationConstantsLoader.STATUSU[0][0][paddle[i]-1];
 				int statusD = CalibrationConstantsLoader.STATUSD[0][0][paddle[i]-1]; 

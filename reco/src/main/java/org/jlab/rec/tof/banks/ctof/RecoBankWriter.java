@@ -30,6 +30,7 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("CTOFRec::rawhits", hitlist.size());
 
 		for(int i =0; i< hitlist.size(); i++) {
+			bank.setInt("id", i, hitlist.get(i).get_Id());
 			bank.setInt("paddle_id",i, hitlist.get(i).get_Paddle());
 			bank.setInt("paddle_status",i, Integer.parseInt(hitlist.get(i).get_StatusWord()));
 			bank.setFloat("energy_up",i, (float) hitlist.get(i).get_Energy1());
@@ -56,6 +57,7 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("CTOFRec::ctofhits", hitlist.size());
 
 		for(int i =0; i< hitlist.size(); i++) {
+			bank.setInt("id", i, hitlist.get(i).get_Id());
 			bank.setInt("paddle",i, hitlist.get(i).get_Paddle());
 			bank.setInt("paddle_status",i, Integer.parseInt(hitlist.get(i).get_StatusWord()));
 			bank.setFloat("energy",i, (float) hitlist.get(i).get_Energy());
@@ -65,6 +67,11 @@ public class RecoBankWriter {
 			bank.setFloat("x",i, (float) hitlist.get(i).get_Position().x());
 			bank.setFloat("y",i, (float) hitlist.get(i).get_Position().y());
 			bank.setFloat("z",i, (float) hitlist.get(i).get_Position().z());
+			if(hitlist.get(i).get_TrkPosition()!=null) {
+				bank.setFloat("tx",i, (float) hitlist.get(i).get_TrkPosition().x());
+				bank.setFloat("ty",i, (float) hitlist.get(i).get_TrkPosition().y());
+				bank.setFloat("tz",i, (float) hitlist.get(i).get_TrkPosition().z());
+			}
 			bank.setFloat("x_unc",i, 5); 			
 			bank.setFloat("y_unc",i, (float) hitlist.get(i).get_yUnc()); 			
 			bank.setFloat("z_unc",i, 10); 			
@@ -85,6 +92,7 @@ public class RecoBankWriter {
 		          event.getDictionary().createBank("CTOFRec::ctofclusters", cluslist.size());
 
 		for(int i =0; i< cluslist.size(); i++) {
+			bank.setInt("id", i, cluslist.get(i).get_Id());
 			bank.setInt("paddle",i, cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
 			bank.setInt("paddle_status",i, Integer.parseInt(cluslist.get(i).get_StatusWord()));
 			bank.setFloat("energy",i, (float) cluslist.get(i).get_Energy());
