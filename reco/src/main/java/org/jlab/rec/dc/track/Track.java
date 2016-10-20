@@ -32,6 +32,8 @@ public class Track extends Trajectory implements Comparable<Track>{
 	
 	private Point3D _Region3CrossPoint;
 	private Point3D _Region3CrossDir;
+	private Point3D _Region1CrossPoint;
+	private Point3D _Region1CrossDir;
 	
 	private StateVec _StateVecAtReg1MiddlePlane;
 	
@@ -73,22 +75,31 @@ public class Track extends Trajectory implements Comparable<Track>{
 	public void set_P(double _P) {
 		this._P = _P;
 	}
-	public Point3D get_Region3CrossPoint() {
+	public Point3D get_PostRegion3CrossPoint() {
 		return _Region3CrossPoint;
 	}
-	public void set_Region3CrossPoint(Point3D point) {
-		//Point3D point = this.get(2).get_Point();
-		//_Region3CrossPoint = this.get(2).getCoordsInLab(point.x(),point.y(),point.z());
+	public void set_PostRegion3CrossPoint(Point3D point) {
 		_Region3CrossPoint = point;
 	}
 
-	public Point3D get_Region3CrossDir() {
+	public Point3D get_PostRegion3CrossDir() {
 		return _Region3CrossDir;
 	}
-	public void set_Region3CrossDir(Point3D dir) {
-		//Point3D dir = this.get(2).get_Dir();		
-		//_Region3CrossDir = this.get(2).getCoordsInLab(dir.x(),dir.y(),dir.z());
+	public void set_PostRegion3CrossDir(Point3D dir) {
 		_Region3CrossDir = dir;
+	}
+	public Point3D get_PreRegion1CrossPoint() {
+		return _Region1CrossPoint;
+	}
+	public void set_PreRegion1CrossPoint(Point3D point) {
+		_Region1CrossPoint = point;
+	}
+
+	public Point3D get_PreRegion1CrossDir() {
+		return _Region1CrossDir;
+	}
+	public void set_PreRegion1CrossDir(Point3D dir) {
+		_Region1CrossDir = dir;
 	}
 	
 	public List<Point3D> get_MicroMegasPointsList() {
@@ -154,6 +165,7 @@ public class Track extends Trajectory implements Comparable<Track>{
 	
 	private double _fitChisq;
 	public boolean fit_Successful;
+	public int status;
 	
 	
 	

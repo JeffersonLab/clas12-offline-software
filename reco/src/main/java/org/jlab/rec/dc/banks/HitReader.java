@@ -166,8 +166,8 @@ public class HitReader {
 		}
  
 		EvioDataBank bank = (EvioDataBank) event.getBank("HitBasedTrkg::HBHits");
-        
-		int[]  id = bank.getInt("id");
+		
+		int[] id = bank.getInt("id");
 		
         int[] sector = bank.getInt("sector");
 		int[] slayer = bank.getInt("superlayer");

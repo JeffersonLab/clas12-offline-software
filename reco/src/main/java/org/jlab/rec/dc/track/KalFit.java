@@ -74,7 +74,7 @@ public class KalFit {
 		
 		double[] VecAtFirstMeasSite =null;
 		
-		if(trkcand.get_MicroMegasPointsList()==null || trkcand.get_MicroMegasPointsList().size()==0) {
+		if(trkcand.get_StateVecAtReg1MiddlePlane()!=null ) {
 			dcSwim.SetSwimParameters(-1, trkcand.get_StateVecAtReg1MiddlePlane().x(),trkcand.get_StateVecAtReg1MiddlePlane().y(),trkcand.get(0).get_Point().z(),
 					trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX(),trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY(),trkcand.get_P(),
 					 trkcand.get_Q()); 
@@ -84,25 +84,6 @@ public class KalFit {
 			
 		}
 		
-		
-		if(trkcand.get_MicroMegasPointsList()!=null && trkcand.get_MicroMegasPointsList().size()!=0) {
-			
-			if(trkcand.get_Vtx0_TiltedCS() == null || trkcand.get_pAtOrig_TiltedCS() == null)
-				return;
-			
-			Point3D V0 = trkcand.get_Vtx0_TiltedCS();
-			Vector3D P0 = trkcand.get_pAtOrig_TiltedCS();
-			dcSwim.SetSwimParameters(V0.x(),V0.y(),V0.z(),
-					P0.x(),P0.y(),P0.z(),
-					 trkcand.get_Q());
-			
-			VecAtFirstMeasSite = dcSwim.SwimToPlane(trkcand.get_MicroMegasPointsList().get(0).z());
-			
-			VecAtFirstMeasSite[3] *= -1;
-			VecAtFirstMeasSite[4] *= -1;
-			VecAtFirstMeasSite[5] *= -1;			
-			
-		}
 		
 		if(VecAtFirstMeasSite==null) {
 			KalFitFail = true;

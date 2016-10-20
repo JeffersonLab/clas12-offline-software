@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
@@ -13,6 +14,7 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
+import org.jlab.rec.dc.trajectory.Vertex;
 
 /**
  * A class with a method implementing an algorithm that finds lists of track candidates in the DC
@@ -158,8 +160,9 @@ public class TrackCandListFinder {
 								
 								cand.set_FitChi2(fitChisq); 
 							}
-								
+							
 						}	
+						
 						this.setTrackPars(cand, traj, trjFind, VecAtReg3MiddlePlane, cand.get(2).get_Point().z());
 						
 						if(cand.fit_Successful==false)
@@ -182,7 +185,22 @@ public class TrackCandListFinder {
 		return cands;
 	}
 	
-
+	private int getSector(double x, double y) {
+		double phi = Math.toDegrees(FastMath.atan2(y, x));
+		double ang = phi + 30;
+		while (ang < 0) {
+			ang += 360;
+		}
+		int sector = 1 + (int)(ang/60.);
+		
+		if(sector ==7 )
+			sector =6;
+		
+		if ((sector < 1) || (sector > 6)) {
+			System.err.println("Track sector not found....");
+		}
+		return sector;
+	}
 	
 	public void setTrackPars(Track cand, Trajectory traj, TrajectoryFinder trjFind, StateVec stateVec, double z) {
 		double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX()*stateVec.tanThetaX() + stateVec.tanThetaY()*stateVec.tanThetaY() + 1);
@@ -192,6 +210,7 @@ public class TrackCandListFinder {
 				pz*stateVec.tanThetaX(),pz*stateVec.tanThetaY(),pz,
 				 cand.get_Q());
 		
+		// swimming to a ref points outside of the last DC region
 		double[] VecAtTarOut = dcSwim.SwimToPlane(592);
 		double xOuter  = VecAtTarOut[0];
 		double yOuter  = VecAtTarOut[1];
@@ -199,29 +218,37 @@ public class TrackCandListFinder {
 		double uxOuter = VecAtTarOut[3]/cand.get_P();
 		double uyOuter = VecAtTarOut[4]/cand.get_P();
 		double uzOuter = VecAtTarOut[5]/cand.get_P();
+		Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+		Point3D xOuterExtp = crossR.getCoordsInLab(xOuter, yOuter, zOuter);
+		Point3D uOuterExtp = crossR.getCoordsInLab(uxOuter, uyOuter, uzOuter);
+		
+		//set the pseudocross at extrapolated position
+		cand.set_PostRegion3CrossPoint(xOuterExtp);
+		cand.set_PostRegion3CrossDir(uOuterExtp);
 		
 		dcSwim.SetSwimParameters(stateVec.x(),stateVec.y(),z,
 				-pz*stateVec.tanThetaX(),-pz*stateVec.tanThetaY(),-pz,
 				 -cand.get_Q());
 		
-		double[] VecAtTar = dcSwim.SwimToPlane(0);
+		//swimming to a ref point upstream of the first DC region
+		double[] VecAtTarIn = dcSwim.SwimToPlane(180);
 		
-		if(VecAtTar==null) {
-			cand.fit_Successful=false;
-			return;
-		}
-		double totPathLen = VecAtTar[6]+VecAtTarOut[6];
-		if(totPathLen<cand.get(1).get_Point().z()) {
+		if(VecAtTarIn==null) {
 			cand.fit_Successful=false;
 			return;
 		}
 		
-		double xOr = VecAtTar[0];
-		double yOr = VecAtTar[1];
-		double zOr = VecAtTar[2];
-		double pxOr = -VecAtTar[3];
-		double pyOr = -VecAtTar[4];
-		double pzOr = -VecAtTar[5];
+		if(VecAtTarIn[6]+VecAtTarOut[6]<200) {
+			cand.fit_Successful=false;
+			return;
+		}
+		
+		double xOr = VecAtTarIn[0];
+		double yOr = VecAtTarIn[1];
+		double zOr = VecAtTarIn[2];
+		double pxOr = -VecAtTarIn[3];
+		double pyOr = -VecAtTarIn[4];
+		double pzOr = -VecAtTarIn[5];
 		
 		if(traj!=null && trjFind!=null)
 			traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(xOr, yOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q()));
@@ -232,40 +259,53 @@ public class TrackCandListFinder {
 		cand.set_Vtx0_TiltedCS(trakOrigTiltSec);
 		cand.set_pAtOrig_TiltedCS(pAtOrigTiltSec.toVector3D());
 		
-		Cross crossAtOrig = new Cross(cand.get(0).get_Sector(), cand.get(0).get_Region(), -1);
+		Cross C = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
 		
-		Point3D trakOrig = crossAtOrig.getCoordsInLab(trakOrigTiltSec.x(),trakOrigTiltSec.y(),trakOrigTiltSec.z());
-		Point3D pAtOrig = crossAtOrig.getCoordsInLab(pAtOrigTiltSec.x(),pAtOrigTiltSec.y(),pAtOrigTiltSec.z());
+		Point3D R3TrkPoint = C.getCoordsInLab(stateVec.x(),stateVec.y(),z);
+		Point3D R3TrkMomentum = C.getCoordsInLab(pz*stateVec.tanThetaX(),pz*stateVec.tanThetaY(),pz);
 		
-		Point3D xOuterExtp = crossAtOrig.getCoordsInLab(xOuter, yOuter, zOuter);
-		Point3D uOuterExtp = crossAtOrig.getCoordsInLab(uxOuter, uyOuter, uzOuter);
+		dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
+		double[] VecAtTarlab0 = dcSwim.SwimToPlaneLab(0.0);
+		Vertex vtx = new Vertex();
+		double[] Bvtx = new double[]{0.0,0.0};
+		double[] Vt = vtx.VertexParams(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5], (double) cand.get_Q(), dcSwim.BfieldLab(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2]).toVector3D().mag(), Bvtx[0], Bvtx[1]);
 		
-		//set the pseudocross at extrapolated position
-		cand.set_Region3CrossPoint(xOuterExtp);
-		cand.set_Region3CrossDir(uOuterExtp);
+		int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
 		
-		if(z==cand.get(2).get_Point().z())
-			cand.set_TotPathLen(totPathLen);
+		int status = -1;
+		if(sectorNearTarget==cand.get(0).get_Sector()) {
+			status = 1;
+		} else {
+			status = 0;
+		}
 		
+		double xOrFix = Vt[0];
+		double yOrFix = Vt[1];
+		double zOrFix = Vt[2];
+		double pxOrFix = Vt[3];
+		double pyOrFix = Vt[4];
+		double pzOrFix = Vt[5];
+		double arclen = Vt[6];
 		
-		DCSwimmer swim2 = new DCSwimmer();
-		swim2.isRotatedCoordinateSystem = false;
-		// the rotated vtx in the lab frame does not coincide with the plane z =0,  The track must be rewam to that plane
-		int dir =1;
-		if(trakOrig.z()>0)
-			dir =-1;
-		swim2.SetSwimParameters(trakOrig.x(), trakOrig.y(), trakOrig.z(), dir*pAtOrig.x(), dir*pAtOrig.y(), dir*pAtOrig.z(), dir*cand.get_Q());
-		double[] VecAtTarlab = swim2.SwimToPlane(0);
-    	double xOrFix = VecAtTarlab[0];
-		double yOrFix = VecAtTarlab[1];
-		double zOrFix = VecAtTarlab[2];
-		double pxOrFix = dir*VecAtTarlab[3];
-		double pyOrFix = dir*VecAtTarlab[4];
-		double pzOrFix = dir*VecAtTarlab[5];
+		double totPathLen = VecAtTarlab0[6] + VecAtTarOut[6] + arclen;
+		cand.set_TotPathLen(totPathLen);
 		
 		cand.set_Vtx0(new Point3D(xOrFix,yOrFix, zOrFix));
 		cand.set_pAtOrig(new Vector3D(pxOrFix, pyOrFix, pzOrFix));
-	//	System.out.println("old V = "+trakOrig.toString()+" new V= "+cand.get_Vtx0().toString());
+	
+		double[] VecAtHtccSurf = dcSwim.SwimToSphere(20);
+		double xInner  = VecAtHtccSurf[0];
+		double yInner  = VecAtHtccSurf[1];
+		double zInner  = VecAtHtccSurf[2];
+		double uxInner = VecAtHtccSurf[3]/cand.get_P();
+		double uyInner = VecAtHtccSurf[4]/cand.get_P();
+		double uzInner = VecAtHtccSurf[5]/cand.get_P();
+		
+		//set the pseudocross at extrapolated position
+		cand.set_PreRegion1CrossPoint(new Point3D(xInner,yInner,zInner));
+		cand.set_PreRegion1CrossDir(new Point3D(uxInner,uyInner,uzInner));
+		
+		cand.status = status;
 		cand.fit_Successful=true;
 		cand.set_TrackingInfoString(trking);
 	}
@@ -325,7 +365,6 @@ public class TrackCandListFinder {
 		}
 		return bestTrk;
 	}
-
 	
 
 

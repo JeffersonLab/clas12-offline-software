@@ -15,8 +15,6 @@ public class Vertex {
 	DCSwimmer swim2 = new DCSwimmer();
 	
 	public Vertex() {
-
-		swim2.isRotatedCoordinateSystem = false;
 		
 	}
 	public double vertexEstimator(EvioDataEvent event) {
@@ -66,5 +64,56 @@ public class Vertex {
     	
 	}
 
+	
+	public double[] VertexParams(double x, double y, double z, double px, double py, double pz, double Q, double Bfield, double xb, double yb ) {
+        
+		double[] value = new double[7];
+		
+		double LIGHTVEL     = 0.000299792458 ; 
+        double pt = Math.sqrt(px*px + py*py);
+        
+        double R = Q* pt / (LIGHTVEL * Bfield);
+        double tanL = pz / pt;
+
+        double phi = Math.atan2(py, px);
+       
+        double xc   = x + R * Math.sin(phi);
+        double yc   = y - R * Math.cos(phi);
+        
+        double Rc = Math.sqrt(xc*xc + yc*yc);
+        
+        double dca = R + Rc;
+        if(Q>0) {
+            dca = R - Rc;
+        }
+        
+        //xc = 0 + (R-dca)sinphi0; yc = 0-(R-dca)cosphi0;
+        double phi_dca = Math.atan2(-(xc-xb),-( -yc+yb));
+        if(Q>0) {
+        	phi_dca = Math.atan2((xc-xb),( -yc+yb));
+        }
+        
+        double x0 = -dca*Math.sin(phi_dca);
+        double y0 = dca*Math.cos(phi_dca);
+        
+    
+        double arclength  = (((x-x0)*Math.cos(phi_dca))+((y-y0)*Math.sin(phi_dca)));
+        double z0 = z - arclength * tanL;
+ 		
+        double p0x = pt*Math.cos(phi_dca);
+        double p0y = pt*Math.sin(phi_dca);
+        double p0z = pz;
+        
+        value[0] = x0;
+        value[1] = y0;
+        value[2] = z0;
+        value[3] = p0x;
+        value[4] = p0y;
+        value[5] = p0z;
+        value[6] = arclength;
+        
+        return value;
+        
+	}
 	
 }

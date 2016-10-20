@@ -264,23 +264,29 @@ public class RecoBankWriter {
 			bank.setInt("sector",i, candlist.get(i).get_Sector());	
 			bank.setInt("q", i, candlist.get(i).get_Q());
 			bank.setDouble("p", i, candlist.get(i).get_P());
-			bank.setDouble("c3_x", i, candlist.get(i).get_Region3CrossPoint().x());
-			bank.setDouble("c3_y", i, candlist.get(i).get_Region3CrossPoint().y());
-			bank.setDouble("c3_z", i, candlist.get(i).get_Region3CrossPoint().z());
-			bank.setDouble("c3_ux", i, candlist.get(i).get_Region3CrossDir().x());
-			bank.setDouble("c3_uy", i, candlist.get(i).get_Region3CrossDir().y());
-			bank.setDouble("c3_uz", i, candlist.get(i).get_Region3CrossDir().z());
+			bank.setDouble("c1_x", i, candlist.get(i).get_PreRegion1CrossPoint().x());
+			bank.setDouble("c1_y", i, candlist.get(i).get_PreRegion1CrossPoint().y());
+			bank.setDouble("c1_z", i, candlist.get(i).get_PreRegion1CrossPoint().z());
+			bank.setDouble("c1_ux", i, candlist.get(i).get_PreRegion1CrossDir().x());
+			bank.setDouble("c1_uy", i, candlist.get(i).get_PreRegion1CrossDir().y());
+			bank.setDouble("c1_uz", i, candlist.get(i).get_PreRegion1CrossDir().z());
+			bank.setDouble("c3_x", i, candlist.get(i).get_PostRegion3CrossPoint().x());
+			bank.setDouble("c3_y", i, candlist.get(i).get_PostRegion3CrossPoint().y());
+			bank.setDouble("c3_z", i, candlist.get(i).get_PostRegion3CrossPoint().z());
+			bank.setDouble("c3_ux", i, candlist.get(i).get_PostRegion3CrossDir().x());
+			bank.setDouble("c3_uy", i, candlist.get(i).get_PostRegion3CrossDir().y());
+			bank.setDouble("c3_uz", i, candlist.get(i).get_PostRegion3CrossDir().z());
 			bank.setDouble("pathlength", i, candlist.get(i).get_TotPathLen());
 			bank.setDouble("Vtx0_x",  i,candlist.get(i).get_Vtx0().x() );
 			bank.setDouble("Vtx0_y",  i,candlist.get(i).get_Vtx0().y() );
-			bank.setDouble("Vtx0_z",  i,candlist.get(i).get_Vtx0().z() );
-			
+			bank.setDouble("Vtx0_z",  i,candlist.get(i).get_Vtx0().z() );			
 			bank.setDouble("p0_x",  i,candlist.get(i).get_pAtOrig().x() );
 			bank.setDouble("p0_y",  i,candlist.get(i).get_pAtOrig().y() );
 			bank.setDouble("p0_z",  i,candlist.get(i).get_pAtOrig().z() );
 			bank.setInt("Cross1_ID", i,candlist.get(i).get(0).get_Id());
 			bank.setInt("Cross2_ID", i,candlist.get(i).get(1).get_Id());
-			bank.setInt("Cross3_ID", i,candlist.get(i).get(2).get_Id());			
+			bank.setInt("Cross3_ID", i,candlist.get(i).get(2).get_Id());		
+			bank.setInt("status", i, candlist.get(i).status);
 		}
 		
 		return bank;
@@ -596,12 +602,18 @@ public class RecoBankWriter {
 			bank.setInt("sector",i, candlist.get(i).get_Sector());	
 			bank.setInt("q", i, candlist.get(i).get_Q());
 			bank.setDouble("p", i, candlist.get(i).get_P());
-			bank.setDouble("c3_x", i, candlist.get(i).get_Region3CrossPoint().x());
-			bank.setDouble("c3_y", i, candlist.get(i).get_Region3CrossPoint().y());
-			bank.setDouble("c3_z", i, candlist.get(i).get_Region3CrossPoint().z());
-			bank.setDouble("c3_ux", i, candlist.get(i).get_Region3CrossDir().x());
-			bank.setDouble("c3_uy", i, candlist.get(i).get_Region3CrossDir().y());
-			bank.setDouble("c3_uz", i, candlist.get(i).get_Region3CrossDir().z());
+			bank.setDouble("c1_x", i, candlist.get(i).get_PreRegion1CrossPoint().x());
+			bank.setDouble("c1_y", i, candlist.get(i).get_PreRegion1CrossPoint().y());
+			bank.setDouble("c1_z", i, candlist.get(i).get_PreRegion1CrossPoint().z());
+			bank.setDouble("c1_ux", i, candlist.get(i).get_PreRegion1CrossDir().x());
+			bank.setDouble("c1_uy", i, candlist.get(i).get_PreRegion1CrossDir().y());
+			bank.setDouble("c1_uz", i, candlist.get(i).get_PreRegion1CrossDir().z());
+			bank.setDouble("c3_x", i, candlist.get(i).get_PostRegion3CrossPoint().x());
+			bank.setDouble("c3_y", i, candlist.get(i).get_PostRegion3CrossPoint().y());
+			bank.setDouble("c3_z", i, candlist.get(i).get_PostRegion3CrossPoint().z());
+			bank.setDouble("c3_ux", i, candlist.get(i).get_PostRegion3CrossDir().x());
+			bank.setDouble("c3_uy", i, candlist.get(i).get_PostRegion3CrossDir().y());
+			bank.setDouble("c3_uz", i, candlist.get(i).get_PostRegion3CrossDir().z());
 			bank.setDouble("pathlength", i, candlist.get(i).get_TotPathLen());
 			bank.setDouble("Vtx0_x",  i,candlist.get(i).get_Vtx0().x() );
 			bank.setDouble("Vtx0_y",  i,candlist.get(i).get_Vtx0().y() );
@@ -612,6 +624,7 @@ public class RecoBankWriter {
 			bank.setInt("Cross1_ID", i,candlist.get(i).get(0).get_Id());
 			bank.setInt("Cross2_ID", i,candlist.get(i).get(1).get_Id());
 			bank.setInt("Cross3_ID", i,candlist.get(i).get(2).get_Id());
+			bank.setInt("status", i, candlist.get(i).status);
 			Matrix covMat = new Matrix(5,5);
 			if(candlist.get(i).get_CovMat()!=null)
 				covMat = candlist.get(i).get_CovMat();

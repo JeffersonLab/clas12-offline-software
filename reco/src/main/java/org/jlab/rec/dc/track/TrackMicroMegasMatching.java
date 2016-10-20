@@ -111,24 +111,23 @@ public class TrackMicroMegasMatching {
 		
     	//swim in lab frame to MM planes
 		DCSwimmer swim = new DCSwimmer();
-		swim.isRotatedCoordinateSystem = false;
 		
 		
     	double[] MMZ = this.MMPlanesZ();
     	
     	swim.SetSwimParameters(x0, y0, z0, p0x, p0y, p0z, q);
     	
-    	double[] VecAtMMPl1 = swim.SwimToPlane(MMZ[0]);
+    	double[] VecAtMMPl1 = swim.SwimToPlaneLab(MMZ[0]);
     	
     	if(VecAtMMPl1!=null)
     		swim.SetSwimParameters(VecAtMMPl1[0],VecAtMMPl1[1],VecAtMMPl1[2],VecAtMMPl1[3],VecAtMMPl1[4],VecAtMMPl1[5],q);
     	
-    	double[] VecAtMMPl2 = swim.SwimToPlane(MMZ[1]);
+    	double[] VecAtMMPl2 = swim.SwimToPlaneLab(MMZ[1]);
     	
     	if(VecAtMMPl2 !=null)
     		swim.SetSwimParameters(VecAtMMPl2[0],VecAtMMPl2[1],VecAtMMPl2[2],VecAtMMPl2[3],VecAtMMPl2[4],VecAtMMPl2[5],q);
     	
-    	double[] VecAtMMPl3 = swim.SwimToPlane(MMZ[2]);
+    	double[] VecAtMMPl3 = swim.SwimToPlaneLab(MMZ[2]);
 		
     	
     	if(VecAtMMPl1 == null || VecAtMMPl2 ==null || VecAtMMPl3 ==null)

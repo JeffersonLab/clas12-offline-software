@@ -34,8 +34,23 @@ public class DCSwimmer {
 	private static CompositeField compositeField;
 	
 	private  Swimmer swimmer;
+	public Swimmer getSwimmer() {
+		return labswimmer;
+	}
+
+	public void setSwimmer(Swimmer labswimmer) {
+		this.labswimmer = labswimmer;
+	}
+	private  Swimmer labswimmer;
+	public Swimmer getLabswimmer() {
+		return labswimmer;
+	}
+
+	public void setLabswimmer(Swimmer labswimmer) {
+		this.labswimmer = labswimmer;
+	}
+	
 	// get some fit results
-	private  final double hdata[] = new double[3];
 	private  double _x0;
 	private  double _y0;
 	private  double _z0;
@@ -46,7 +61,7 @@ public class DCSwimmer {
 	public  double _maxPathLength = 9;
 	private  int _charge;
 		
-	public boolean isRotatedCoordinateSystem = true;
+	//public boolean isRotatedCoordinateSystem = true;
 	
 	public int nSteps; 
 	
@@ -57,11 +72,9 @@ public class DCSwimmer {
 		//if(areFieldsLoaded==false)
 		//    getMagneticFields();
 		
-		if(isRotatedCoordinateSystem == true)
-			swimmer = new Swimmer(rcompositeField);
+		swimmer = new Swimmer(rcompositeField);
 		
-		if(isRotatedCoordinateSystem == false)
-			swimmer = new Swimmer(compositeField);
+		labswimmer = new Swimmer(compositeField);
 	}
 
 	/**
@@ -159,21 +172,18 @@ public class DCSwimmer {
 		
 		if(_pTot<Constants.MINTRKMOM  ) // fiducial cut 
 			return null;
-		
+		SwimTrajectory traj = null;		
+		double hdata[] = new double[3];
+    
 		try {
-			SwimTrajectory traj = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, 
+			traj = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, 
 					_theta, _phi, z, accuracy,_rMax, 
 					_maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 			
-			if(isRotatedCoordinateSystem == true)
-				traj.computeBDL(rcompositeField);
-			if(isRotatedCoordinateSystem == false)
-				traj.computeBDL(compositeField);
+			traj.computeBDL(rcompositeField);
 			
 			double lastY[] = traj.lastElement();
 			
-			//System.out.println("Swimmer End Params:");
-			//System.out.println(lastY[0]+" "+lastY[1]+" "+lastY[2]+" "+lastY[3]+" "+lastY[4]+" "+lastY[5]+" .");
 			value[0] = lastY[0]*100; // convert back to cm
 			value[1] = lastY[1]*100; // convert back to cm
 			value[2] = lastY[2]*100; // convert back to cm
@@ -190,50 +200,97 @@ public class DCSwimmer {
 		return value;
 		
 	}
-	
-	//added for raster study
-		private class CylinderBoundarySwimStopper implements IStopper {
+	public  double[] SwimToPlaneLab(double z_cm) {
+		double z = z_cm/100; // the magfield method uses meters
+		double[] value = new double[8];
+		double accuracy = 20e-6; //20 microns
+		double stepSize = Constants.SWIMSTEPSIZE; //  microns
+		
+		if(_pTot<Constants.MINTRKMOM  ) // fiducial cut 
+			return null;
+		SwimTrajectory traj = null;		
+		double hdata[] = new double[3];
+      
+		
+		try {
+			traj = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, 
+					_theta, _phi, z, accuracy,_rMax, 
+					_maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+			
+			traj.computeBDL(compositeField);
+			
+			double lastY[] = traj.lastElement();
+			
+			value[0] = lastY[0]*100; // convert back to cm
+			value[1] = lastY[1]*100; // convert back to cm
+			value[2] = lastY[2]*100; // convert back to cm
+			value[3] = lastY[3]*_pTot;
+			value[4] = lastY[4]*_pTot;
+			value[5] = lastY[5]*_pTot;
+			value[6] = lastY[6]*100;
+			value[7] = lastY[7]*10;
+			
+			
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
+		return value;
+		
+	}
+	//
+	//for matching to HTCC
+		private class SphericalBoundarySwimStopper implements IStopper {
+			
+			private double _finalPathLength = Double.NaN;
 
-			private double _cylRad;
+			private double _Rad;
 			/**
 			 * A  swim stopper that will stop if the boundary of a plane is crossed
 			 * @param maxR the max radial coordinate in meters. 
 			 */
-			private CylinderBoundarySwimStopper(double cylRad) {
+			private SphericalBoundarySwimStopper(double Rad) {
 				// DC reconstruction units are cm.  Swimmer units are m.  Hence scale by 100
-				_cylRad = cylRad;
+				_Rad = Rad;
 			}
 			@Override
 			public boolean stopIntegration(double t, double[] y) {
 				
-				double r = Math.sqrt(y[0]*y[0] +y[1]*y[1])*100.;
+				double r = Math.sqrt(y[0]*y[0] +y[1]*y[1] + y[2]*y[2])*100.;
 
-				return (r > _cylRad);
+				return (r > _Rad);
 				
 			}
+			/**
+			 * Get the final path length in meters
+			 * 
+			 * @return the final path length in meters
+			 */
 			@Override
 			public double getFinalT() {
-				// TODO Auto-generated method stub
-				return 0;
+				return _finalPathLength;
 			}
+			
+			/**
+			 * Set the final path length in meters
+			 * @param finalPathLength the final path length in meters
+			 */
 			@Override
-			public void setFinalT(double arg0) {
-				// TODO Auto-generated method stub
-				
+			public void setFinalT(double finalPathLength) {
+				_finalPathLength = finalPathLength;
 			}
 		}
 	
-		public  double[] SwimToCylinder(double cylRad) {
+		public  double[] SwimToSphere(double Rad) {
 				
 				double[] value = new double[8];
 				// using adaptive stepsize
 				
-				CylinderBoundarySwimStopper stopper = new CylinderBoundarySwimStopper(cylRad);
+				SphericalBoundarySwimStopper stopper = new SphericalBoundarySwimStopper(Rad);
 		
 				// step size in m
 				double stepSize = 1e-4; // m
 		
-				SwimTrajectory st = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
+				SwimTrajectory st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
 				st.computeBDL(compositeField);
 				double[] lastY = st.lastElement();
 				
@@ -249,10 +306,96 @@ public class DCSwimmer {
 			return value;
 				
 		}
+	
+		private class CylinderBoundarySwimStopper implements IStopper {
+
+			private double _rMaxSq;
+
+			private double _finalPathLength = Double.NaN;
+
+			// step size in m
+			double stepSize = 1e-4; // m
+			/**
+			 * A default swim stopper that will stop if either a max pathlength is
+			 * exceeded or if a radial coordinate is exceeded
+			 * 
+			 * @param maxR
+			 *            the max radial coordinate in meters. Give a negative
+			 */
+			private CylinderBoundarySwimStopper(final double maxR) {
+
+				_rMaxSq =  maxR;
+			}
+
+			@Override
+			public boolean stopIntegration(double t, double[] y) {
+				double xx = y[0];
+				double yy = y[1];
+				
+				// stop if radial coordinate too big
+				double rsq = Math.sqrt(xx * xx + yy * yy) ; // put in units cm
+				
+				return (rsq <(stepSize + _rMaxSq));
+			}
+			
+			/**
+			 * Get the final path length in meters
+			 * 
+			 * @return the final path length in meters
+			 */
+			@Override
+			public double getFinalT() {
+				return _finalPathLength;
+			}
+			
+			/**
+			 * Set the final path length in meters
+			 * @param finalPathLength the final path length in meters
+			 */
+			@Override
+			public void setFinalT(double finalPathLength) {
+				_finalPathLength = finalPathLength;
+			}
+
+		}
+
+
+		public  double[] SwimToCylinder(double cylRad) {
+			
+			double[] value = new double[8];
+			// using adaptive stepsize
+			double tolerance = 10.e-6;
+			double[] hdata = null;
+			CylinderBoundarySwimStopper stopper = new CylinderBoundarySwimStopper(cylRad);
+			// step size in m
+			double stepSize = 1.e-5; // m
+
+			SwimTrajectory st = null;
+			try {
+				st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, tolerance, hdata);
+			} catch (RungeKuttaException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			st.computeBDL(compositeField);
+			double[] lastY = st.lastElement();
+			
+			value[0] = lastY[0]*100; // convert back to cm
+			value[1] = lastY[1]*100; // convert back to cm
+			value[2] = lastY[2]*100; // convert back to cm
+			value[3] = lastY[3]*_pTot; //normalized values
+			value[4] = lastY[4]*_pTot;
+			value[5] = lastY[5]*_pTot;
+			value[6] = lastY[6]*100;
+			value[7] = lastY[7]*10; //Conversion from kG.m to T.cm 
+	
+		return value;
+				
+		}
 		
 		//added for swimming to outer detectors
 		private class PlaneBoundarySwimStopper implements IStopper {
-
+			private double _finalPathLength = Double.NaN;
 			private double 	 _d;
 			private Vector3D _n;
 			/**
@@ -265,8 +408,7 @@ public class DCSwimmer {
 				_n = n;
 			}
 			@Override
-			public boolean stopIntegration(double t, double[] y) {
-				
+			public boolean stopIntegration(double t, double[] y) {				
 				
 				double dtrk = _n.x()*y[0]*100+_n.y()*y[1]*100+_n.z()*y[2]*100;
 
@@ -275,13 +417,17 @@ public class DCSwimmer {
 			}
 			@Override
 			public double getFinalT() {
-				// TODO Auto-generated method stub
-				return 0;
-			}
-			@Override
-			public void setFinalT(double arg0) {
-				// TODO Auto-generated method stub
 				
+				return _finalPathLength;
+			}
+			
+			/**
+			 * Set the final path length in meters
+			 * @param finalPathLength the final path length in meters
+			 */
+			@Override
+			public void setFinalT(double finalPathLength) {
+				_finalPathLength = finalPathLength;
 			}
 		}
 		
@@ -339,26 +485,32 @@ public class DCSwimmer {
 		
 		float result[] = new float[3];
 
-		if(isRotatedCoordinateSystem == true)
-			rcompositeField.field((float)x_cm, (float)y_cm, (float)z_cm, result);
-		if(isRotatedCoordinateSystem == false)
-			compositeField.field((float)x_cm, (float)y_cm, (float)z_cm, result);
+		rcompositeField.field((float)x_cm, (float)y_cm, (float)z_cm, result);
 
 		return new Point3D(result[0]/10, result[1]/10, result[2]/10);
 		
 	}
-	//tries to get the magnetic field assuming it is in clasJLib
+	
+	public Point3D BfieldLab(double x_cm, double y_cm, double z_cm) {
+		
+		float result[] = new float[3];
+
+		compositeField.field((float)x_cm, (float)y_cm, (float)z_cm, result);
+
+		return new Point3D(result[0]/10, result[1]/10, result[2]/10);
+		
+	}
 	public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale) {
 		if (rcompositeField.get(0) != null) {			
 			((MagneticField) rcompositeField.get(0)).setScaleFactor(TorusScale);
-			System.out.println("***** ****** ****** THE TORUS IS BEING SCALED BY "+ (TorusScale*100) +"  %   *******  ****** **** ");			
+			System.out.println("FORWARD TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY "+ (TorusScale*100) +"  %   *******  ****** **** ");			
 		}
 		if (compositeField.get(0) != null) 		
 			((MagneticField) compositeField.get(0)).setScaleFactor(TorusScale);
 		
 		if (rcompositeField.get(1) != null) {			
 			((MagneticField) rcompositeField.get(1)).setScaleFactor(SolenoidScale);
-			System.out.println("***** ****** ****** THE SOLENOID IS BEING SCALED BY "+ (SolenoidScale*100) +"  %   *******  ****** **** ");			
+			System.out.println("FORWARD TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY "+ (SolenoidScale*100) +"  %   *******  ****** **** ");			
 		}
 		if (compositeField.get(1) != null) 		
 			((MagneticField) compositeField.get(1)).setScaleFactor(SolenoidScale);
@@ -424,14 +576,7 @@ public class DCSwimmer {
 		
 		
 	
-	public  Swimmer getSwimmer() {
-		return swimmer;
-	}
-
-	public  void setSwimmer(Swimmer swimmer) {
-		this.swimmer = swimmer;
-	}
-
+	
 	public double get_x0() {
 		return _x0;
 	}

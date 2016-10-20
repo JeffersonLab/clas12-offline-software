@@ -202,11 +202,11 @@ public class DCHBEngine extends ReconstructionEngine {
 		boolean isCosmics = false;
 		EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
         
-		if(bank.getByte("Type")[0]==1)
+		if(bank.getByte("Type")[0]==0)
 			isMC = true;
 		if(bank.getByte("Mode")[0]==1)
 			isCosmics = true;
-		
+		//System.out.println(bank.getInt("Event")[0]);
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
 		
 		// Load the fields
@@ -217,7 +217,8 @@ public class DCHBEngine extends ReconstructionEngine {
 			// Load the Constants
 			Constants.Load(isCosmics, isCalib, (double)bank.getFloat("Torus")[0]); // set the T2D Grid for Cosmics data only so far....
 			// Load the Fields
-			DCSwimmer.setMagneticFieldsScales(bank.getFloat("Solenoid")[0], bank.getFloat("Torus")[0]); // something changed in the configuration
+			DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... empirical rescale of sol --> checkthis
+			//DCSwimmer.setMagneticFieldsScales(bank.getFloat("Solenoid")[0], bank.getFloat("Torus")[0]); // something changed in the configuration ... empirical rescale of sol --> checkthis
 		}
 		FieldsConfig = newConfig;
 		
@@ -238,7 +239,7 @@ public class DCHBEngine extends ReconstructionEngine {
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		 
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/output_with_header.0.evio";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -254,7 +255,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
 		reader.open(inputFile);
 		long t1 = System.currentTimeMillis();
-		while(reader.hasEvent()){
+		while(reader.hasEvent() ){
 			
 			counter++;
 			org.jlab.io.evio.EvioDataEvent event = (org.jlab.io.evio.EvioDataEvent) reader.getNextEvent();
@@ -263,7 +264,7 @@ public class DCHBEngine extends ReconstructionEngine {
 			// Processing TB   
 			en2.processDataEvent(event);
 			
-			if(counter>500) break;
+			if(counter>5) break;
 			//if(counter%100==0)
 			//	System.out.println("run "+counter+" events");
 			
