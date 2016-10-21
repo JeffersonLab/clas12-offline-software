@@ -42,8 +42,8 @@ public class Constants {
 	public static final double[] TRKMATCHZPAR = new double[3];		// track matching parameter for coord z
 
 
-	public static final double TDCMINSCALE = 20;					// converted tdc value minimum value
-	public static final double TDCMAXSCALE = 80;					// converted tdc value maximum value
+	public static final double TDCMINSCALE = 140;					// converted tdc value minimum value
+	public static final double TDCMAXSCALE = 250;					// converted tdc value maximum value
 	public static final double ADCMIN      = 100;					// adc value minimum value
 	public static final double ADCMAX      = 10000;					// adc value maximum value
 

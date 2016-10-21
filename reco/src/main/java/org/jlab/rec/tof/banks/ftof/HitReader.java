@@ -143,7 +143,7 @@ public class HitReader {
 				hit.set_StatusWord(statusWord);
 				hit.setPaddleLine(geometry);
 	    	    // add this hit
-	            hits.add(hit);
+	            hits.add(hit); 
 			}
 			
 			List<Hit> updated_hits= matchHitsToDCTrk(hits,  geometry, trks, paths);
@@ -183,7 +183,6 @@ public class HitReader {
 				Hit hit = new Hit(id_2[i], 3, sector_2[i], paddle_2[i], ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]) ;
 				hit.setPaddleLine(geometry);
 				hit.set_StatusWord(statusWord);
-				
 	    	    // add this hit
 	            hits.add(hit); 
 			}
@@ -237,7 +236,7 @@ public class HitReader {
 		// selected ranges TDC 
 		int pass =0;
 		if(Constants.LSBCONVFAC*tDC>Constants.TDCMINSCALE &&  Constants.LSBCONVFAC*tDC<Constants.TDCMAXSCALE)
-			pass = 1;
+			pass = 1; 
 		return pass;
 	}
 
@@ -245,7 +244,7 @@ public class HitReader {
 		// selected ranges  ADC 
 		int pass =0;
 		if(aDC>Constants.ADCMIN && aDC<Constants.ADCMAX)
-			pass = 1;
+			pass = 1; System.out.println(" ADC "+pass);
 		return pass;
 	}
 
