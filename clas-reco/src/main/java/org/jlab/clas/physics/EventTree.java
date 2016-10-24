@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.groot.data.H1F;
+import org.jlab.groot.studio.StudioUI;
 import org.jlab.groot.tree.Tree;
 import org.jlab.groot.ui.TCanvas;
 import org.jlab.io.base.DataEvent;
@@ -20,14 +21,52 @@ import org.jlab.io.hipo.HipoDataSource;
  *
  * @author gavalian
  */
-public class EventTree {
+public class EventTree extends Tree {
     
     private Map<String,EventTreeBranch>  treeBranches = new LinkedHashMap<String,EventTreeBranch>();
     private Tree treeObject = new Tree("Event");
     private GenericKinematicFitter kinFitter = new GenericKinematicFitter(11);
+    private HipoDataSource reader = null;
+    private int            currentEvent = 0;
     
     public EventTree(){
-        
+        super("EventTree");
+    }
+    
+    @Override
+    public void reset(){
+        currentEvent = 0;
+        reader.gotoEvent(0);
+    }
+    
+    @Override
+    public int getEntries(){
+        return this.reader.getSize();
+    }
+    
+    @Override
+    public int readEntry(int entry) {
+        DataEvent event = reader.gotoEvent(entry);
+        if(event==null){
+            System.out.println(" NULL event for entry #" + entry);
+        } else {
+            this.processEvent(event);
+        }
+        return 1;
+    }
+    
+    @Override
+    public boolean readNext() {
+        if(reader.hasEvent()==false) return false;        
+        DataEvent event = reader.getNextEvent();
+        System.out.println("reading event");
+        this.processEvent(event);
+        return true;
+    }
+    
+    public void setSource(String filename){
+        reader = new HipoDataSource();
+        reader.open(filename);
     }
     
     public void addBranch(String name, String filter){
@@ -48,7 +87,7 @@ public class EventTree {
                 List<String> properties = item.getValue().getProperties();
                 for(int i = 0; i < properties.size();i++){
                     String branch = item.getValue().getLeafPropertyName(i);
-                    treeObject.addBranch(branch, "", "GeV");
+                    this.addBranch(branch, "", "GeV");
                 }
             }
         }
@@ -69,7 +108,7 @@ public class EventTree {
                     for(int i = 0; i < properties.size(); i++){                        
                         String branch = item.getValue().getLeafPropertyName(i);
                         double value = p.get(properties.get(i));
-                        treeObject.getBranch(branch).setValue(value);
+                        this.getBranch(branch).setValue(value);
                     }
                 }
             }
@@ -77,7 +116,7 @@ public class EventTree {
         //treeObject.print();
     }
     
-    public Tree getTree(){return treeObject;}
+    //public Tree getTree(){return treeObject;}
     
     /**
      * class describing EventTree branch
@@ -148,7 +187,7 @@ public class EventTree {
         }
         
         public String getLeafPropertyName(int index){
-            return String.format("%s:%s.%s", parentBranch,leafName,leafProperties.get(index));
+            return String.format("%s_%s_%s", parentBranch,leafName,leafProperties.get(index));
         }
         
         public String getExpression(){return leafExpression;}
@@ -161,7 +200,7 @@ public class EventTree {
         public List<String> getTreeBranches(String prefix){
             List<String> branches = new ArrayList<String>();
             for(String property : leafProperties){
-                branches.add(String.format("%s:%s.%s", prefix,leafName,property));
+                branches.add(String.format("%s_%s_%s", prefix,leafName,property));
             }
             return branches;
         }
@@ -171,16 +210,17 @@ public class EventTree {
     public static void main(String[] args){
         
         EventTree  evtTree = new EventTree();
-        
-        evtTree.addBranch("DVPI0", "11:2212:X+:X-:Xn");
-        
-        evtTree.addLeaf("DVPI0", "mxEp", "[b]+[t]-[11]-[2212]","mass","theta","phi");
-        evtTree.addLeaf("DVPI0", "proton", "[2212]","p","theta","phi");
-        
+
+        evtTree.addBranch("DVPI0", "11:2212:X+:X-:Xn");        
+        evtTree.addLeaf("DVPI0", "mxEp", "[b]+[t]-[11]-[2212]","mass2","theta","phi");
+        evtTree.addLeaf("DVPI0", "proton", "[2212]","px","py","pz");
+        evtTree.setSource("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/Debugging/eppi0_rec_central_DST.hipo");
         evtTree.initTree();
         
+        StudioUI studio = new StudioUI(evtTree);
+        /*
         HipoDataSource reader = new HipoDataSource();
-        
+        //reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/Debugging/eppi0_rec_central_DST.hipo");        
         reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/Debugging/eppi0_rec_central_DST.hipo");
         H1F h1 = new H1F("h1",80,0.0,0.85);
         for(int i = 0; i < 36000; i++){
@@ -194,6 +234,6 @@ public class EventTree {
         }
         
         TCanvas c1 = new TCanvas("c1",500,500);
-        c1.draw(h1);
+        c1.draw(h1);*/
     }
 }

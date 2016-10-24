@@ -13,6 +13,7 @@ import org.jlab.io.evio.EvioDataSync;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.utils.system.ClasUtilsFile;
 
 /**
  *
@@ -107,6 +108,7 @@ public class ReconstructionIO {
         int type = 0;
         
         if(args.length>4) type = Integer.parseInt(args[4]);
-        ReconstructionIO.writeHeader(input, "output.evio" , run, torus, solenoid,type);
+        String output = ClasUtilsFile.createFileName(input, "_header", false);
+        ReconstructionIO.writeHeader(input, output , run, torus, solenoid,type);
     }
 }

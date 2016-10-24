@@ -15,7 +15,7 @@ import org.jlab.geom.Showable;
  */
 public class Sphere3D implements Transformable, Showable{
 
-    private Point3D sphereCenter = new Point3D(0.0,0.0,0.0);
+    private final Point3D sphereCenter = new Point3D(0.0,0.0,0.0);
     private double sphereRadius  = 1.0;
     
     public Sphere3D(){
@@ -27,22 +27,27 @@ public class Sphere3D implements Transformable, Showable{
         this.sphereRadius = r;
     }
     
+    @Override
     public void translateXYZ(double dx, double dy, double dz) {
         this.sphereCenter.translateXYZ(dx, dy, dz);
     }
         
+    @Override
     public void rotateX(double angle) {
         this.sphereCenter.rotateX(angle);
     }
 
+    @Override
     public void rotateY(double angle) {
         this.sphereCenter.rotateY(angle);
     }
 
+    @Override
     public void rotateZ(double angle) {
         this.sphereCenter.rotateZ(angle);
     }
 
+    @Override
     public void show() {
         this.sphereCenter.show();
     }

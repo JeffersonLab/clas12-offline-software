@@ -16,12 +16,13 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
  * @author gavalian
  */
-public class DetectorParticle {
+public class DetectorParticle implements Comparable {
     
     private Vector3 particleMomenta = new Vector3();
     private Vector3 particleVertex  = new Vector3();
@@ -31,15 +32,19 @@ public class DetectorParticle {
     private Double  particleBeta    = 0.0;
     private Double  particleMass    = 0.0;
     private Double  particlePath    = 0.0;
+    
+    private int     particleScore     = 0; // scores are assigned detector hits
+    private double  particleScoreChi2 = 0.0; // chi2 for particle score 
+    
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
+    
+    private Line3D  driftChamberEnter = new Line3D();
     
     private List<DetectorResponse>  responseStore = new ArrayList<DetectorResponse>();
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
-    
-    
-    
+            
     
     public DetectorParticle(){
         
@@ -50,8 +55,18 @@ public class DetectorParticle {
     }
     
     public void addResponse(DetectorResponse res, boolean match){
-        if(match==false){
-            this.responseStore.add(res);
+        this.responseStore.add(res);
+        if(match==true){
+            Line3D distance = res.getDistance(this);
+            res.getMatchedPosition().setXYZ(distance.origin().x(),
+                    distance.origin().y(),distance.origin().z());
+            
+            /*Vector3D vec = new Vector3D(
+                    this.particleCrossPosition.x(),
+                    particleCrossPosition.y(),
+                    particleCrossPosition.z());
+            */
+            res.setPath(this.getPathLength(res.getPosition()));
         }
     }
     
@@ -71,37 +86,44 @@ public class DetectorParticle {
         return this.vector().compare(new Vector3(x,y,z));
     }
     
+    public void setLowerCross(double x, double y, double z, double ux, double uy, double uz){
+        this.driftChamberEnter.set(x, y, z, x+1000.0*ux, y+1000.0*uy, z + 1000.0*uz);
+    }
+    /**
+     * Particle score combined number that represents which detectors were hit
+     * HTCC - 1000, FTOF - 100, EC - 10
+     * SCORE = HTCC + FTOF + EC
+     * @param score 
+     */
+    public void setScore(int score){
+        this.particleScore = score;
+    }
+    /**
+     * Chi square of score determination.
+     * @param chi2 
+     */
+    public void setChi2(double chi2){
+        this.particleScoreChi2 = chi2;
+    }
+    /**
+     * returns particle score.
+     * @return 
+     */
+    public int getScore(){
+        return this.particleScore;
+    }
+    /**
+     * returns chi2 of score.
+     * @return 
+     */
+    public double getChi2(){
+        return this.particleScoreChi2;
+    }
+    /**
+     * add detector response to the particle
+     * @param res 
+     */
     public void addResponse(DetectorResponse res){
-        /*
-        double distance = Math.sqrt(
-                (this.particleCrossPosition.x()-res.getPosition().x())*
-                        (this.particleCrossPosition.x()-res.getPosition().x())
-                +
-                        (this.particleCrossPosition.y()-res.getPosition().y())*
-                                (this.particleCrossPosition.y()-res.getPosition().y())
-                +
-                        (this.particleCrossPosition.z()-res.getPosition().z())*
-                                (this.particleCrossPosition.z()-res.getPosition().z())
-        );
-        
-        Line3D   crossLine = new Line3D(this.particleCrossPosition.x(),
-                this.particleCrossPosition.y(),
-                this.particleCrossPosition.z(),
-                this.particleCrossDirection.x()*1500.0,
-                this.particleCrossDirection.y()*1500.0,
-                this.particleCrossDirection.z()*1500.0);
-        
-        Line3D distanceLine = crossLine.distance(new Point3D
-                (res.getPosition().x(), res.getPosition().y(),res.getPosition().z()));
-        
-        res.getMatchedPosition().setXYZ(
-                distanceLine.origin().x(),
-                distanceLine.origin().y(),
-                distanceLine.origin().z()
-                );
-        
-        res.setPath(distance+this.particlePath);
-        this.responseStore.add(res);*/
         this.responseStore.add(res);
     }
     
@@ -360,5 +382,9 @@ public class DetectorParticle {
         }
         
         return str.toString();
+    }
+
+    public int compareTo(Object o) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

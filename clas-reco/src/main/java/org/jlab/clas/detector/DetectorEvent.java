@@ -17,9 +17,11 @@ import org.jlab.clas.physics.PhysicsEvent;
 public class DetectorEvent {
     
     private List<DetectorParticle>  particleList = new ArrayList<DetectorParticle>();
-    private PhysicsEvent   generatedEvent = new PhysicsEvent();
+    private PhysicsEvent       generatedEvent = new PhysicsEvent();
     private PhysicsEvent   reconstructedEvent = new PhysicsEvent();
-     
+    private double         eventStartTime     = 0.0;
+    
+    
     public DetectorEvent(){
         
     }
@@ -58,10 +60,12 @@ public class DetectorEvent {
         this.particleList.clear();
     }
     
-    public void addParticle(DetectorParticle particle){
-        
+    public void addParticle(DetectorParticle particle){        
         this.particleList.add(particle);
     }
+    
+    public void    setStartTime(double time){ this.eventStartTime = time;}
+    public double  getStartTime(){ return this.eventStartTime;}
     
     public List<DetectorParticle> getParticles(){ return this.particleList;}
     

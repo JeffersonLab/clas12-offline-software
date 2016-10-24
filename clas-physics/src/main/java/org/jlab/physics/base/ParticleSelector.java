@@ -17,6 +17,10 @@ import org.jlab.clas.physics.PhysicsEvent;
  */
 public class ParticleSelector {
     
+    public static int TYPE_GENERATED    = 1;
+    public static int TYPE_RECONSTRUCED = 2;
+    public static int TYPE_DETECTOR_PARTICLE = 2;
+    
     private Integer   particleID   = 11;
     private Integer   particleSkip = 0;
     private Integer   particleSign = 1;

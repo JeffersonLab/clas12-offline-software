@@ -73,12 +73,13 @@ public class EvioDataSync implements DataSync {
         } else {
             this.evioOutputDirectory = filepath.getParent().toString();
         }
+        /*
         int extensionIndex = this.evioOutputFile.lastIndexOf(".");
         if(extensionIndex>=0&&extensionIndex<this.evioOutputFile.length()){
             this.evioOutputFile = this.evioOutputFile.substring(0, extensionIndex);
-        }
-        System.out.println("dir  - > " + this.evioOutputDirectory);
-        System.out.println("file - > " + this.evioOutputFile);
+        }*/
+        System.out.println("[EvioDataSync] ---> " + this.evioOutputDirectory);
+        System.out.println("[EvioDataSync] ---> " + this.evioOutputFile);
         
     }
     
@@ -89,9 +90,9 @@ public class EvioDataSync implements DataSync {
             str.append("/");
         }
         str.append(this.evioOutputFile);
-        str.append(".");
-        str.append(this.evioCurrentFileNumber);
-        str.append(".evio");
+        //str.append(".");
+        //str.append(this.evioCurrentFileNumber);
+        //str.append(".evio");
         String filename = str.toString();
         String dictionary = "<xmlDict>\n" + 
                 //EvioDictionaryGenerator.createDAQDictionary(CLASDetectors)
