@@ -419,7 +419,13 @@ public class EvioDataEvent implements DataEvent {
             for(String bank : bankNames){
                 String[] tokens = new String[3];
                 tokens[0] = bank;
-                DataBank dbank = this.getBank(bank);
+                DataBank dbank = null;
+                try {
+                    dbank = this.getBank(bank);
+                } catch (Exception e){
+                    System.out.println(" ERROR : getbank failed for bank name " + bank);
+                    e.printStackTrace();
+                }
                 if(dbank==null){
                     System.err.println("[EvioDataEvent::show] ERROR : bank "
                     + bank + " does not exist");

@@ -9,9 +9,20 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
+import org.jlab.groot.data.DataVector;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.studio.StudioUI;
+import org.jlab.groot.tree.DynamicTree;
 import org.jlab.groot.tree.Tree;
+import org.jlab.groot.tree.TreeProvider;
 import org.jlab.groot.ui.TCanvas;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -21,7 +32,7 @@ import org.jlab.io.hipo.HipoDataSource;
  *
  * @author gavalian
  */
-public class EventTree extends Tree {
+public class EventTree extends Tree implements TreeProvider {
     
     private Map<String,EventTreeBranch>  treeBranches = new LinkedHashMap<String,EventTreeBranch>();
     private Tree treeObject = new Tree("Event");
@@ -71,8 +82,12 @@ public class EventTree extends Tree {
     
     public void addBranch(String name, String filter){
         EventTreeBranch branch = new EventTreeBranch(name);
-        branch.setFilter(filter);        
-        treeBranches.put(name, branch);
+        branch.setFilter(filter);
+        if(treeBranches.containsKey(name)==false){
+            treeBranches.put(name, branch);
+        } else {
+            System.out.println("TREE Branch already exists : " + name);
+        }
     }
     
     public void addLeaf(String branch, String name, String expression, String... properties){
@@ -80,7 +95,7 @@ public class EventTree extends Tree {
     }
     
     public void initTree(){
-        treeObject = new Tree("EventTree");
+        //treeObject = new Tree("EventTree");
         for(Map.Entry<String,EventTreeBranch> entry : treeBranches.entrySet()){
             Map<String,EventTreeLeaf>  leafs = entry.getValue().getLeafs();
             for(Map.Entry<String,EventTreeLeaf> item : leafs.entrySet()){
@@ -95,9 +110,10 @@ public class EventTree extends Tree {
     }
     
     public void processEvent(DataEvent event){
+        
         RecEvent  recEvent = kinFitter.getRecEvent(event);
         recEvent.doPidMatch();
-        treeObject.resetBranches(-1000.0);
+        this.resetBranches(-1000.0);
         for(Map.Entry<String,EventTreeBranch> entry : treeBranches.entrySet()){
             if(entry.getValue().getFilter().isValid(recEvent.getReconstructed())==true){
                 //System.out.println("passed the filter");
@@ -114,6 +130,111 @@ public class EventTree extends Tree {
             }
         }
         //treeObject.print();
+    }
+
+    public Tree tree() {
+        return this;
+    }
+
+    public TreeModel getTreeModel() {
+        return null;
+    }
+
+    @Override
+    public DynamicTree getDynamicTree() {
+        DynamicTree tree = new DynamicTree(getName());
+
+        //roota.add(new DefaultMutableTreeNode("e-") );
+        //tree.addObject(rootb, "e+");        
+        //tree.addObject(rootbranch);
+        for(Map.Entry<String,EventTreeBranch> entry : this.treeBranches.entrySet()){
+            String name = entry.getKey();
+            DefaultMutableTreeNode base = tree.addObject( new DefaultMutableTreeNode(name));
+            //tree.addObject(base);
+            System.out.println("creating base = " + name);
+            EventTreeBranch branch = entry.getValue();
+            for(Map.Entry<String,EventTreeLeaf> item : branch.getLeafs().entrySet()){
+                DefaultMutableTreeNode particle = tree.addObject(base, item.getValue().getName(),true);
+                
+                System.out.println("adding leaf = " + item.getValue().getName());
+                item.getValue().getProperties();
+                for(String property : item.getValue().getProperties()){
+                    System.out.println("adding property = " + property);
+                    tree.addObject(particle, property);
+                }
+            }
+            //root.add(base);
+        }
+        //tree.addObject(root);
+        
+        return tree;
+    }
+    
+    public List<DataVector> actionTreeNode(TreePath[] path, int limit) {
+        List<DataVector> result = new ArrayList<DataVector>();
+        //System.out.println("Got callback to compute something");
+        if(path.length==1&&path[0].getPathCount()==4){
+            String branch = path[0].getPathComponent(1).toString() + "_" 
+                    + path[0].getPathComponent(2).toString() + "_" 
+                    + path[0].getPathComponent(3).toString();
+            DataVector vector = new DataVector();
+            int nevents = reader.getSize();
+            for(int i = 0; i < nevents; i++){
+                
+                DataEvent event = reader.gotoEvent(i);
+                if(event!=null){
+                    this.processEvent(event);
+                    double value = this.getBranch(branch).getValue().doubleValue();
+                    System.out.println( " # "  + i + " " + branch + " --> " + value);
+                    if(value>-500){ vector.add(value);}
+                } else {
+                    System.out.println(" NULL pointer at event " + i);
+                }
+            }
+            
+            result.add(vector);
+            //return result;
+                    
+        }
+        return result;
+    }
+
+    public JDialog treeConfigure() {
+        
+        String[] options = new String[]{"mass","p","theta","phi","px","py","pz","mass2"};
+        JComboBox propertyOne    = new JComboBox(options);
+        JComboBox propertyTwo    = new JComboBox(options);
+        JComboBox propertyThree  = new JComboBox(options);
+        JTextField  textName     = new JTextField();
+        JTextField  textFilter   = new JTextField();
+        JTextField  textParticle = new JTextField();
+        JTextField  textExpression = new JTextField();
+        
+        Object[] message = {
+            "Name : ", textName,
+            "Event Filter : ", textFilter,
+            "Particle : ", textParticle, 
+            "Expression : ", textExpression, 
+            "property :", propertyOne,
+            "property :", propertyTwo,
+            "property :", propertyThree
+        };
+        int option = JOptionPane.showConfirmDialog(null, message, "Add Particle", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            String strOne = (String) propertyOne.getSelectedItem();
+            String strTwo = (String) propertyTwo.getSelectedItem();
+            String strThree = (String) propertyThree.getSelectedItem();
+            String name   = textName.getText();
+            String filter = textFilter.getText();
+            String particle = textFilter.getText();
+            String expression = textExpression.getText();
+            this.addBranch(name, filter);
+            this.addLeaf(name, particle, expression, new String[]{strOne,strTwo,strThree});
+            //this.getCanvas().divide(Integer.parseInt(stringCOLS), Integer.parseInt(stringROWS));
+            System.out.println(" ADDING BRANCH ----> ");
+        }
+
+        return new JDialog();
     }
     
     //public Tree getTree(){return treeObject;}
@@ -211,12 +332,22 @@ public class EventTree extends Tree {
         
         EventTree  evtTree = new EventTree();
 
-        evtTree.addBranch("DVPI0", "11:2212:X+:X-:Xn");        
-        evtTree.addLeaf("DVPI0", "mxEp", "[b]+[t]-[11]-[2212]","mass2","theta","phi");
-        evtTree.addLeaf("DVPI0", "proton", "[2212]","px","py","pz");
-        evtTree.setSource("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/Debugging/eppi0_rec_central_DST.hipo");
+        evtTree.addBranch("LAMBDA", "-211:2212:X+:X-:Xn");        
+        evtTree.addLeaf("LAMBDA", "Mppi", "[-211]+[2212]","mass2","mass","theta","phi");
+        //evtTree.addLeaf("DVPI0", "proton", "[2212]","px","py","pz");
         evtTree.initTree();
+        //evtTree.treeConfigure();
+        evtTree.setSource("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/datasets/reco/eklambda/reco_eklambda_dst.hipo");
+        //evtTree.initTree();
         
+        
+        /*
+        DynamicTree tree = evtTree.getDynamicTree();
+        JFrame frame = new JFrame();
+        frame.add(tree);
+        frame.pack();
+        frame.setVisible(true);
+        */
         StudioUI studio = new StudioUI(evtTree);
         /*
         HipoDataSource reader = new HipoDataSource();

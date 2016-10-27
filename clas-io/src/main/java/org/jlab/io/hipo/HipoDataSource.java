@@ -44,11 +44,13 @@ public class HipoDataSource implements DataSource {
 
     public void open(String filename) {
         this.reader.open(filename);
-        HipoRecord header = this.reader.readRecord(0);
+        HipoRecord header = this.reader.getHeaderRecord();
         int  ncount = header.getEventCount();
+        System.out.println("[HipoDataSource] ---> dictionary record opened. # entries = " + ncount);
         for(int ev = 0; ev < ncount; ev++){
-            byte[] descBytes  = this.reader.readEvent(ev);
+            byte[] descBytes  = header.getEvent(ev);
             String descString = new String(descBytes);
+            System.out.println("init dictionary : " + descString);
             EvioDataDescriptor  descriptor = new EvioDataDescriptor(descString);
             this.dictionary.addDescriptor(descriptor);
         }

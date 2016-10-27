@@ -30,13 +30,14 @@ public class HipoDataSync implements DataSync {
     }
     
     public void open(String file) {
-        this.writer.open(file);
+
         EvioDataDictionary  dict = EvioFactory.getDictionary();
         String[] descList = dict.getDescriptorList();
         for(String desc : descList){
             String descString = dict.getDescriptor(desc).toString();
             this.writer.addHeader(descString);
         }
+        this.writer.open(file);
     }
 
     public void writeEvent(DataEvent event) {
