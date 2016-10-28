@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import org.jlab.coda.jevio.EvioNode;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;

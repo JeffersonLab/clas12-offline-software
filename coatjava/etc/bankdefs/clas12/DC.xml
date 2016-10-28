@@ -59,6 +59,7 @@
             <column name="clusterID" num="12" type="int32" info="associated cluster ID"/>
             <column name="doca" num="13" type="float64" info="doca (cm)"/>
             <column name="docaError" num="14" type="float64" info="docaError (cm)"/>
+            <column name="trkID" num="15" type="int32" info="associated HB trk ID"/>
         </section>
         
         <section name="HBClusters" tag="1312" info="reconstructed hit-based tracking DC clusters">

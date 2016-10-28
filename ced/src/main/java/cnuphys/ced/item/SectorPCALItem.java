@@ -82,6 +82,7 @@ public class SectorPCALItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
+		
 		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
 			return;
 		}
@@ -92,14 +93,13 @@ public class SectorPCALItem extends PolygonItem {
 			return;
 		}
 
-		Graphics2D g2 = (Graphics2D) g;
 		setPath(path);
-		// super.drawItem(g, container);
 
 		for (int stripIndex = 0; stripIndex < PCALGeometry.PCAL_NUMSTRIP[_stripType]; stripIndex++) {
 			Point2D.Double wp[] = getStrip(stripIndex);
 
 			if (wp != null) {
+
 				Path2D.Double path2d = WorldGraphicsUtilities
 						.worldPolygonToPath(wp);
 				WorldGraphicsUtilities.drawPath2D(g, container, path2d,

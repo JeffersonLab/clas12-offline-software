@@ -289,9 +289,12 @@ public class BSTxyView extends CedXYView {
 		if (panels == null) {
 			return null;
 		}
-		for (BSTxyPanel panel : panels) {
-			if ((panel.getLayer() == layer) && (panel.getSector() == sector)) {
-				return panel;
+
+		synchronized (panels) {
+			for (BSTxyPanel panel : panels) {
+				if ((panel.getLayer() == layer) && (panel.getSector() == sector)) {
+					return panel;
+				}
 			}
 		}
 

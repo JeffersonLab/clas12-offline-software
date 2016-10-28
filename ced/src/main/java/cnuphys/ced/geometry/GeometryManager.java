@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Vector;
 
-import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.abs.AbstractComponent;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.detector.ec.ECDetector;
@@ -45,6 +45,9 @@ public class GeometryManager {
 		if (Ced.pluginsOnly()) {
 			return;
 		}
+		
+		//HTCC Geometry
+		HTCCGeometry.initialize();
 
 		// DC Geometry
 		DCGeometry.initialize();
@@ -59,8 +62,8 @@ public class GeometryManager {
 		BSTGeometry.initialize();
 		getBSTPanels();
 
-		ConstantProvider ecDataProvider = DataBaseLoader
-				.getCalorimeterConstants();
+		ConstantProvider ecDataProvider = 
+				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.EC);
 		ECDetector clas_Cal_Detector = (new ECFactory())
 				.createDetectorCLAS(ecDataProvider);
 

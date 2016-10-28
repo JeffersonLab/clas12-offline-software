@@ -11,7 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
@@ -128,13 +128,15 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 		GEMCMetaDataContainer gemcdata = _eventManager.getGEMCMetaData();
 
 		if (!gemcdata.resetFields) {
-//			System.err.println("Skipped setting fields.");
+	//		System.err.println("Skipped setting fields.");
 			return;
 		}
 
 		// getHitCount returns the number of properties. This should
 		// awlays be zero except for event#1 in a gemc file
 		if (gemcdata.getHitCount(0) > 0) {
+			// don't want to resent every event
+			gemcdata.resetFields = false;
 			String gcard = gemcdata.getGCard();
 			gcard = (gcard == null) ? "" : gcard;
 			_gcardName.setText("  " + gcard + "  ");
@@ -151,8 +153,6 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 			System.err.println("Setting fields from GEMC meta data");
 			configureFields(hasTorus, torusScale, hasSolenoid, solenoidScale);
 
-			// don't want to resent every event
-			gemcdata.resetFields = false;
 		} else {
 			_gcardName.setText("  no GEMC metadata found  ");
 		}

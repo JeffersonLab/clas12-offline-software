@@ -17,6 +17,7 @@ import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.FTOF;
+import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
@@ -51,8 +52,19 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 
 		drawGemCXYZHits_DC(g, container);
 		drawGemCXYZHits_FTOF(g, container);
+		drawGemCXYZHits_HTCC(g, container);
 		
 	}
+	
+	protected void drawGemCXYZHits_HTCC(Graphics g, IContainer container) {
+		showGemcXYZHits(g, container, FeedbackRect.Dtype.HTCC, 
+				HTCC.avgX(), 
+				HTCC.avgY(), 
+				HTCC.avgZ(), 
+				HTCC.pid(), 
+				0);
+	}
+	
 
 	protected void drawGemCXYZHits_DC(Graphics g, IContainer container) {
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.DC, 
@@ -86,12 +98,12 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 				FTOF.PANEL_2);
 	}
 
-	// the actual hit drawing
 	protected void showGemcXYZHits(Graphics g, IContainer container,
 			FeedbackRect.Dtype dtype,
 			double x[], double y[], double z[], int pid[],
 			int option) {
 
+		
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {
 			return;
 		}

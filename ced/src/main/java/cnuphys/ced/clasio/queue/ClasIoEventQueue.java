@@ -2,7 +2,7 @@ package cnuphys.ced.clasio.queue;
 
 import java.util.Vector;
 
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 /**
  * A queue for holding events to be used in a wait-notify manner.

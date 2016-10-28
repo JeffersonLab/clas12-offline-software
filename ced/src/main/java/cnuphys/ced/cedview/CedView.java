@@ -45,11 +45,11 @@ import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.Swimming;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.io.evio.EvioDataEvent;
 
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
@@ -169,7 +169,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		AccumulationManager.getInstance().addAccumulationListener(this);
 
 		// add the next event button
-
+		
 		ActionListener al = new ActionListener() {
 
 			@Override

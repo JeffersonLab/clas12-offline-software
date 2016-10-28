@@ -9,9 +9,9 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.clasrec.io.LundReader;
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Path3D;
+import org.jlab.physics.io.LundReader;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.frame.Ced;

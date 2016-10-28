@@ -147,7 +147,7 @@ public class EC {
 	}
 	
 	/**
-	 * Get the index of the dc hit
+	 * Get the index of the ec hit
 	 * 
 	 * @param sect
 	 *            the 1-based sector
@@ -157,7 +157,7 @@ public class EC {
 	 *            the 1-based strip type (u, v, w) = (1, 2, 3)
 	 * @param strip
 	 *            the 1-based strip
-	 * @return the index of a hit with these parameters, or -1 if not found
+	 * @return the list of matching hits
 	 */
 	public static Vector<HitRecord> matchingHits(int sect, int stack, int view,
 			int strip) {

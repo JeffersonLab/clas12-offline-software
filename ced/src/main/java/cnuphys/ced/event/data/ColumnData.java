@@ -3,10 +3,10 @@ package cnuphys.ced.event.data;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.jlab.data.io.DataDescriptor;
-import org.jlab.evio.clas12.EvioDataDictionary;
-import org.jlab.evio.clas12.EvioDataEvent;
-import org.jlab.evio.clas12.EvioFactory;
+import org.jlab.io.base.DataDescriptor;
+import org.jlab.io.evio.EvioDataDictionary;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioFactory;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -326,7 +326,7 @@ public class ColumnData {
 		byte[] array = null;
 		ColumnData cd = getColumnData(fullName);
 		if (cd == null) {
-			Log.getInstance().warning("In ColumnData.getByteArray, requested array for non-existent column: [" + fullName + "]");
+			//Log.getInstance().warning("In ColumnData.getByteArray, requested array for non-existent column: [" + fullName + "]");
 		}
 		else {
 			Object o = cd.getDataArray();
@@ -335,7 +335,7 @@ public class ColumnData {
 					array = (byte[])o;
 				}
 				else {
-					Log.getInstance().warning("In ColumnData.getByteArray, requested array for non-matching column: [" + fullName + "]");
+					//Log.getInstance().warning("In ColumnData.getByteArray, requested array for non-matching column: [" + fullName + "]");
 				}
 			}
 		}
@@ -351,7 +351,7 @@ public class ColumnData {
 		short[] array = null;
 		ColumnData cd = getColumnData(fullName);
 		if (cd == null) {
-			Log.getInstance().warning("In ColumnData.getShortArray, requested array for non-existent column: [" + fullName + "]");
+			//Log.getInstance().warning("In ColumnData.getShortArray, requested array for non-existent column: [" + fullName + "]");
 		}
 		else {
 			Object o = cd.getDataArray();
@@ -360,7 +360,7 @@ public class ColumnData {
 					array = (short[])o;
 				}
 				else {
-					Log.getInstance().warning("In ColumnData.getShortArray, requested array for non-matching column: [" + fullName + "]");
+					//Log.getInstance().warning("In ColumnData.getShortArray, requested array for non-matching column: [" + fullName + "]");
 				}
 			}
 		}
@@ -376,7 +376,7 @@ public class ColumnData {
 		int[] array = null;
 		ColumnData cd = getColumnData(fullName);
 		if (cd == null) {
-			Log.getInstance().warning("In ColumnData.getIntArray, requested array for non-existent column: [" + fullName + "]");
+			//Log.getInstance().warning("In ColumnData.getIntArray, requested array for non-existent column: [" + fullName + "]");
 		}
 		else {
 			Object o = cd.getDataArray();
@@ -385,7 +385,7 @@ public class ColumnData {
 					array = (int[])o;
 				}
 				else {
-					Log.getInstance().warning("In ColumnData.getIntArray, requested array for non-matching column: [" + fullName + "]");
+					//Log.getInstance().warning("In ColumnData.getIntArray, requested array for non-matching column: [" + fullName + "]");
 				}
 			}
 		}
@@ -402,7 +402,7 @@ public class ColumnData {
 		float[] array = null;
 		ColumnData cd = getColumnData(fullName);
 		if (cd == null) {
-			Log.getInstance().warning("In ColumnData.getFloatArray, requested array for non-existent column: [" + fullName + "]");
+			//Log.getInstance().warning("In ColumnData.getFloatArray, requested array for non-existent column: [" + fullName + "]");
 		}
 		else {
 			Object o = cd.getDataArray();
@@ -411,7 +411,7 @@ public class ColumnData {
 					array = (float[])o;
 				}
 				else {
-					Log.getInstance().warning("In ColumnData.getFloatArray, requested array for non-matching column: [" + fullName + "]");
+					//Log.getInstance().warning("In ColumnData.getFloatArray, requested array for non-matching column: [" + fullName + "]");
 				}
 			}
 		}
@@ -428,7 +428,7 @@ public class ColumnData {
 		double[] array = null;
 		ColumnData cd = getColumnData(fullName);
 		if (cd == null) {
-			Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for non-existent column: [" + fullName + "]");
+			//Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for non-existent column: [" + fullName + "]");
 		}
 		else {
 			Object o = cd.getDataArray();
@@ -437,7 +437,7 @@ public class ColumnData {
 					array = (double[])o;
 				}
 				else {
-					Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for non-matching column: [" + fullName + "]");
+					//Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for non-matching column: [" + fullName + "]");
 				}
 			}
 		}

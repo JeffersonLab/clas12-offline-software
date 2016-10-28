@@ -258,6 +258,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 								_progressBar.setValue(value);
 							}
 						}
+						
 						// we are done accumulating
 						_eventManager.setAccumulating(false);
 						AccumulationManager.getInstance().notifyListeners(

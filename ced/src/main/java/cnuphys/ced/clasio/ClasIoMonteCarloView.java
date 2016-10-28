@@ -3,7 +3,7 @@ package cnuphys.ced.clasio;
 import java.util.Vector;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.lund.TrajectoryRowData;

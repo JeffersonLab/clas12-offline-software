@@ -31,7 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.coda.jevio.EvioNode;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.component.filetree.FileDnDHandler;
 import cnuphys.bCNU.component.filetree.FileTreePanel;

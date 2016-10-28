@@ -1,6 +1,6 @@
 package cnuphys.ced.geometry;
 
-import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.detector.ec.ECDetector;
 import org.jlab.geom.detector.ec.ECFactory;
@@ -50,7 +50,8 @@ public class Transformations {
 
 	// init for cal superlayer = (0,1,2) for PCAL, EC_IN, EC_OUT
 	private void initCal(int superlayer) {
-		ConstantProvider provider = DataBaseLoader.getCalorimeterConstants();
+		ConstantProvider provider = 
+				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.EC);
 		ECFactory ecFactory = new ECFactory();
 
 		// detector in sector coordinates

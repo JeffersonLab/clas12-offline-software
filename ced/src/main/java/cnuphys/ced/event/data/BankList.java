@@ -6,8 +6,9 @@ import java.util.Arrays;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import org.jlab.evio.clas12.EvioDataDictionary;
-import org.jlab.evio.clas12.EvioFactory;
+
+import org.jlab.io.evio.EvioDataDictionary;
+import org.jlab.io.evio.EvioFactory;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 

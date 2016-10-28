@@ -59,7 +59,6 @@ import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
-import cnuphys.ced.plugin.CedPluginManager;
 import cnuphys.ced.properties.PropertiesManager;
 import cnuphys.ced.training.TrainingManager;
 import cnuphys.magfield.MagneticFieldChangeListener;
@@ -93,7 +92,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.97.11";
+	private static final String _release = "build 0.98.02";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -103,12 +102,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// if plugin only, do not create initial detector views
 	private static boolean _pluginOnly;
-
-	// plugin folder
-	private static String _pluginFolder;
-
-	// plugin manager
-	private CedPluginManager _pluginManager;
 
 	// event menu
 	private ClasIoEventMenu _eventMenu;
@@ -839,10 +832,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// create a console log listener
 		Log.getInstance().addLogListener(new ConsoleLogListener());
 		
-		// default plugin folder
-		_pluginFolder = Environment.getInstance().getHomeDirectory()
-				+ File.separator + "cedplugins";
-
 		
 		//splash frame
 		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png", _release);
@@ -895,12 +884,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 					_pluginOnly = true;
 					System.err.println("Using Plugins Only");
 				}
-				else if (arg[i].equalsIgnoreCase("-plugindir")) {
-					i++;
-					_pluginFolder = arg[i];
-					Log.getInstance().config("Plugin directory: " + arg[i]);
-					System.out.println("Plugin directory: " + arg[i]);
-				}
 
 				i++;
 				done = (i >= len);
@@ -926,8 +909,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				ced.fixTitle();
 				//initialize data columns
 				ColumnData.intitialize();
-				// get plugin manager
-				ced._pluginManager = new CedPluginManager(_pluginFolder);
 			}
 
 		});

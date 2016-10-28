@@ -1,0 +1,24 @@
+<evio_dictionary>
+    <bank name="FTOF" tag="2000" info="FTOF Bank includes 1A,1B and 2B as Layer=1,2,3">
+      <section name="dgtz" tag="2002" num="0" info="Digitized Bank">
+	<column name="sector"     num="1"  type="int8"   info="sector number"/>
+	<column name="layer"      num="2"  type="int8"   info="layer number"/>
+	<column name="component"  num="3"  type="int16"  info="paddle number"/>
+	<column name="ADCL"       num="4"  type="int32"  info="ADC Left"/>
+        <column name="ADCR"       num="5"  type="int32"  info="ADC Right"/>
+        <column name="TDCL"       num="6"  type="int32"  info="TDC Left"/>
+        <column name="TDCR"       num="7"  type="int32"  info="TDC Right"/>
+      </section>
+    </bank>
+
+    <bank name="ECU" tag="2600" info="EC detector bank. Layer=1..3 PCAL, Layer=4..6 EC Inner, Layer=7..9 EC Outer">    
+      <section name="dgtz" tag="2602" num="0" info="uploading the hit definition">
+	<column name="sector"     num="1"  type="int8"   info="sector number"/>
+	<column name="layer"      num="2"  type="int8"   info="layer number"/>
+	<column name="component"  num="3"  type="int16"  info="paddle number"/>
+        <column name="ADC"        num="4"  type="int32"  info="ADC Value"/>
+        <column name="TDC"        num="5"  type="int32"  info="TDC Value"/>
+      </section>
+    </bank>
+    
+</evio_dictionary>

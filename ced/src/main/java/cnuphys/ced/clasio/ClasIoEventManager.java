@@ -16,17 +16,18 @@ import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.data.io.DataSource;
-import org.jlab.data.io.hipo.HipoDataSource;
-import org.jlab.evio.clas12.EvioDataDictionary;
-import org.jlab.evio.clas12.EvioDataEvent;
-import org.jlab.evio.clas12.EvioFactory;
-import org.jlab.evio.clas12.EvioSource;
+import org.jlab.io.base.DataSource;
+import org.jlab.io.evio.EvioDataDictionary;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
 
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.GEMCMetaDataContainer;
@@ -569,7 +570,13 @@ public class ClasIoEventManager {
 		switch (estype) {
 		case FILE:
 			_currentEvent = (EvioDataEvent) _dataSource.getNextEvent();
-			notifyEventListeners();
+			
+			if (!isAccumulating()) {
+				notifyEventListeners();
+			}
+			else {
+				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+			}
 			break;
 		case ET:
 			break;

@@ -12,13 +12,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import org.jlab.data.io.DataBank;
-import org.jlab.data.io.DataDescriptor;
-import org.jlab.data.ui.BankEntryMasks;
-import org.jlab.data.ui.DataBankPanel;
-import org.jlab.evio.clas12.EvioDataDictionary;
-import org.jlab.evio.clas12.EvioDataEvent;
-import org.jlab.evio.clas12.EvioFactory;
+import org.jlab.io.base.DataDescriptor;
+import org.jlab.io.evio.EvioDataDictionary;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.ui.BankEntryMasks;
+import org.jlab.io.ui.DataBankPanel;
+import org.jlab.io.base.DataBank;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;

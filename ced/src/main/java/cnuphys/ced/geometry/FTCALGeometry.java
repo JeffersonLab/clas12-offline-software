@@ -3,7 +3,7 @@ package cnuphys.ced.geometry;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ft.FTCALDetector;
@@ -45,7 +45,7 @@ public class FTCALGeometry {
 		System.out.println("=== FTCAL Geometry Initialization ===");
 		System.out.println("=====================================");
 
-		ftCalDataProvider = DataBaseLoader.getConstantsFTCAL();
+		ftCalDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.FTCAL);
 
 		ftCalFactory = new FTCALFactory();
 		ftCalDetector = ftCalFactory.createDetectorCLAS(ftCalDataProvider);

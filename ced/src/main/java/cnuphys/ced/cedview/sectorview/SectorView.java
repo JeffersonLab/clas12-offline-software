@@ -37,6 +37,7 @@ import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.FTOFPanelItem;
 import cnuphys.ced.item.MagFieldItem;
 import cnuphys.ced.item.SectorECItem;
+import cnuphys.ced.item.SectorHTCCItem;
 import cnuphys.ced.item.SectorPCALItem;
 import cnuphys.ced.item.SectorSuperLayer;
 import cnuphys.magfield.IField;
@@ -97,6 +98,9 @@ public class SectorView extends CedView implements ChangeListener {
 	private static final Color BSTHITFILL = new Color(255, 128, 0, 64);
 	// private static final Color TRANS = new Color(192, 192, 192, 128);
 
+	// HTCC Items, 8 per sector, not geometrically realistic
+	private SectorHTCCItem _htcc[][] = new SectorHTCCItem[4][2];
+	
 	// superlayer (graphical) items. The first index [0..1] is for upper and
 	// lower sectors.
 	// the second is for for super layer 0..5
@@ -260,6 +264,36 @@ public class SectorView extends CedView implements ChangeListener {
 		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
 				_detectorLayerName);
 		new BeamLineItem(detectorLayer);
+		
+		//add the htcc items
+		for (int ring = 1; ring <= 4; ring++) {
+			for (int half = 1; half <= 2; half++) {
+				
+				switch (_displaySectors) {
+				case SECTORS14:
+					_htcc[ring-1][half-1] = new SectorHTCCItem(detectorLayer, 
+							this, 1, ring, half);
+							_htcc[ring-1][half-1] = new SectorHTCCItem(detectorLayer, 
+									this, 4, ring, half);
+					break;
+
+				case SECTORS25:
+					_htcc[ring-1][half-1] = new SectorHTCCItem(detectorLayer, 
+							this, 2, ring, half);
+							_htcc[ring-1][half-1] = new SectorHTCCItem(detectorLayer, 
+									this, 5, ring, half);
+					break;
+
+				case SECTORS36:
+					_htcc[ring-1][half-1] = new SectorHTCCItem(detectorLayer, 
+							this, 3, ring, half);
+							_htcc[ring-1][half-1] = new SectorHTCCItem(detectorLayer, 
+									this, 6, ring, half);
+					break;
+				}
+				
+			}
+		}
 
 		// add the superlayer items
 		for (int superLayer = 0; superLayer < 6; superLayer++) {
