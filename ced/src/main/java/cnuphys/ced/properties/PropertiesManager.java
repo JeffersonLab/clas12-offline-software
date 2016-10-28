@@ -3,9 +3,8 @@ package cnuphys.ced.properties;
 import java.io.File;
 import java.util.Properties;
 
-import org.jlab.coda.jevio.Environment;
-
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.SerialIO;
 
 public class PropertiesManager {

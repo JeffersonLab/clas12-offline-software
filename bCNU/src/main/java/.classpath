@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/bcnuimages.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
+	<classpathentry kind="lib" path="/coatjava/lib/clas/coat-libs-3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

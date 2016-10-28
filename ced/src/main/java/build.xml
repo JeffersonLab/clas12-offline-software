@@ -8,7 +8,8 @@
 		<property name="cnudir" value="../../../.."/>
 		
 		<!-- for making classpath -->
-		<property name="coat" value="coatjava/lib/clas/coat-libs-2.4-SNAPSHOT.jar"/>
+		<property name="coat" value="coatjava/lib/clas/coat-libs-3.0-SNAPSHOT.jar"/>
+		<property name="apache" value="apache/lib/commons-math3-3.6.1.jar"/>
 		<property name="glue" value="JOGL/gluegen-rt.jar"/>
 		<property name="jogl" value="JOGL/jogl-all.jar"/>
 		<property name="f2j" value="numRec/lib/f2jutil.jar"/>
@@ -38,6 +39,11 @@
 							dir="${cnudir}" />
 		</copy>
 		
+		<!-- copy apache from home dir-->
+		<copy todir="${destdir}">
+			<fileset includes="apache/**" excludes="**/*src.zip"
+							dir="${cnudir}" />
+		</copy>
 
 		<!-- copy numrec -->
 		<copy todir="${destdir}">
@@ -93,7 +99,7 @@
 			<!-- make it executable -->
 		    <manifest>
 		        <attribute name="Main-Class" value="cnuphys.ced.frame.Ced"/>
-		    	<attribute name="Class-Path" value="${coat} ${glue} ${jogl} ${f2j} ${nr}"/>
+		    	<attribute name="Class-Path" value="${coat} ${apache} ${glue} ${jogl} ${f2j} ${nr}"/>
 		    </manifest>
 		</jar>
 		
