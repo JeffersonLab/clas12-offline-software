@@ -8,7 +8,7 @@ import java.util.List;
 public class FeedbackRect extends Rectangle {
 
 	public enum Dtype {
-		BMT, BST, CND, DC, EC, FMT, FTOF, PCAL
+		BMT, BST, CND, DC, EC, FMT, FTOF, PCAL, HTCC
 	};
 
 	/** the hit index associated with this feedback rect */

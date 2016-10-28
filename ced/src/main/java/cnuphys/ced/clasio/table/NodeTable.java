@@ -14,7 +14,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
 import org.jlab.coda.jevio.EvioNode;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.ced.clasio.EvioNodeSupport;
 import cnuphys.splot.plot.X11Colors;

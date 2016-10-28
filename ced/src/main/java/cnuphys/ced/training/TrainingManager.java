@@ -7,8 +7,8 @@ import java.util.Vector;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.geom.DetectorHit;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.fastmc.AcceptanceManager;

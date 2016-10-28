@@ -3,7 +3,7 @@ package cnuphys.ced.clasio;
 import java.util.EventListener;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 public interface IClasIoEventListener extends EventListener {
 	/**

@@ -10,7 +10,7 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingWorker;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.ced.clasio.ClasIoEventManager;

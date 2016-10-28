@@ -1,7 +1,8 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import org.jlab.clasrec.utils.DataBaseLoader;
+
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.cnd.CNDDetector;
@@ -46,7 +47,7 @@ public class CNDGeometry {
 		System.out.println("==== CND Geometry Initialization ====");
 		System.out.println("=====================================");
 
-		cndDataProvider = DataBaseLoader.getConstantsCND();
+		cndDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.CND);
 
 		cndFactory = new CNDFactory();
 		cndDetector = cndFactory.createDetectorCLAS(cndDataProvider);

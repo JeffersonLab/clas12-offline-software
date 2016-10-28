@@ -25,7 +25,7 @@ import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.event.AccumulationManager;

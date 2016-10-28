@@ -3,9 +3,8 @@ package cnuphys.ced.geometry;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.DetectorHit;
-import org.jlab.geom.abs.AbstractComponent;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ftof.FTOFDetector;
@@ -35,8 +34,8 @@ public class FTOFGeometry {
 	private static FTOFPanel _ftofPanel[] = new FTOFPanel[3];
 	private static String ftofNames[] = { "Panel 1A", "Panel 1B", "Panel 2" };
 
-	private static ConstantProvider tofDataProvider = DataBaseLoader
-			.getTimeOfFlightConstants();
+	private static ConstantProvider tofDataProvider = 
+			GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.FTOF);
 
 	// only need sector 0
 	private static FTOFSector _clas_sector0;

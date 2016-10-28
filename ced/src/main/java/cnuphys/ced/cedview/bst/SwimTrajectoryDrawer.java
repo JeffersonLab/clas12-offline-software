@@ -2,18 +2,25 @@ package cnuphys.ced.cedview.bst;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Vector;
 
+import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.lund.LundId;
+import cnuphys.lund.LundStyle;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
+import cnuphys.swim.SwimTrajectory2D;
 import cnuphys.swim.Swimming;
 
 public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
@@ -34,6 +41,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
+		
 		if (!ClasIoEventManager.getInstance().isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
 
 			// mc
@@ -44,6 +52,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 					return;
 				}
 				
+				System.err.println("BST SWIM DRAWER  A");
 				Rectangle sr = container.getInsetRectangle();
 				Graphics2D g2 = (Graphics2D) g;
 
@@ -86,8 +95,9 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	protected boolean veto(SwimTrajectory trajectory) {
-		double theta = trajectory.getOriginalTheta();
-		return theta < 30 || theta > 150;
+//		double theta = trajectory.getOriginalTheta();
+//		return theta < 30 || theta > 150;
+		return false;
 	}
 
 	/**

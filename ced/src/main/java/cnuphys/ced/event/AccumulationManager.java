@@ -18,10 +18,11 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 /**
  * Manages the accumulation of data
@@ -53,6 +54,11 @@ public class AccumulationManager
 
 	private static final Color NULLCOLOR = new Color(128, 128, 128);
 
+	// HTCC accumulated accumulated data indices are sector, ring, half
+	private int _htccDgtzAccumulatedData[][][];
+	private int _maxDgtzHTCCCount;
+	
+	
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _dcDgtzAccumulatedData[][][][];
 	private int _maxDgtzDcCount;
@@ -88,32 +94,8 @@ public class AccumulationManager
 	// occupancy data by sector, superlayer
 	public static double avgDcOccupancy[][] = new double[6][6];
 
-	// // time based momentum resolution
-	// private GrowableArray _tbPResolutionHistoData = new GrowableArray(500,
-	// 100);
-	//
-	// // time based theta resolution
-	// private GrowableArray _tbThetaResolutionHistoData = new
-	// GrowableArray(500,
-	// 100);
-	//
-	// // time based phi resolution
-	// private GrowableArray _tbPhiResolutionHistoData = new GrowableArray(500,
-	// 100);
-	//
-	// // hit based momentum resolution
-	// private GrowableArray _hbPResolutionHistoData = new GrowableArray(500,
-	// 100);
-	//
-	// // hit based theta resolution
-	// private GrowableArray _hbThetaResolutionHistoData = new
-	// GrowableArray(500,
-	// 100);
-	//
-	// // hit based phi resolution
-	// private GrowableArray _hbPhiResolutionHistoData = new GrowableArray(500,
-	// 100);
 
+	//event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// list of accumulation listeners
@@ -125,6 +107,11 @@ public class AccumulationManager
 	private AccumulationManager() {
 		addAccumulationListener(this);
 		_eventManager.addClasIoEventListener(this, 1);
+		
+		//htcc data
+		_htccDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
+		
+		//dc data
 		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 
 		// down to layer
@@ -169,6 +156,17 @@ public class AccumulationManager
 		_eventCount = 0;
 
 		// System.err.println("AccumMgr clear");
+		
+		//clear accumulated HTCC
+		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
+			for (int ring = 0; ring < 4; ring++) {
+				for (int half = 0; half < 2; half++) {
+						_htccDgtzAccumulatedData[sector][ring][half] = 0;
+				}
+			}
+		}
+		_maxDgtzHTCCCount = 0;
+		
 		// clear accumulated gemc dc data
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
@@ -250,60 +248,16 @@ public class AccumulationManager
 		}
 		return instance;
 	}
+	
+	/**
+	 * Get the accumulated dgtz HTCC data
+	 * 
+	 * @return the accumulated HTCC data
+	 */
+	public int[][][] getAccumulatedDgtzHTCCData() {
+		return _htccDgtzAccumulatedData;
+	}
 
-	// /**
-	// * Get the data used for the testtime based momentum resolution histo
-	// *
-	// * @return the data used for the test momentum resolution histo
-	// */
-	// public GrowableArray getTBMomentumResolutionData() {
-	// return _tbPResolutionHistoData;
-	// }
-	//
-	// /**
-	// * Get the data used for the test time based theta resolution histo
-	// *
-	// * @return the data used for the test theta resolution histo
-	// */
-	// public GrowableArray getTBThetaResolutionData() {
-	// return _tbThetaResolutionHistoData;
-	// }
-	//
-	// /**
-	// * Get the data used for the test time based phi resolution histo
-	// *
-	// * @return the data used for the test phi resolution histo
-	// */
-	// public GrowableArray getTBPhiResolutionData() {
-	// return _tbPhiResolutionHistoData;
-	// }
-	//
-	// /**
-	// * Get the data used for the test hit based momentum resolution histo
-	// *
-	// * @return the data used for the test momentum resolution histo
-	// */
-	// public GrowableArray getHBMomentumResolutionData() {
-	// return _hbPResolutionHistoData;
-	// }
-	//
-	// /**
-	// * Get the data used for the test hit based theta resolution histo
-	// *
-	// * @return the data used for the test theta resolution histo
-	// */
-	// public GrowableArray getHBThetaResolutionData() {
-	// return _hbThetaResolutionHistoData;
-	// }
-	//
-	// /**
-	// * Get the data used for the test hit based phi resolution histo
-	// *
-	// * @return the data used for the test hit based phi resolution histo
-	// */
-	// public GrowableArray getHBPhiResolutionData() {
-	// return _hbPhiResolutionHistoData;
-	// }
 
 	/**
 	 * Get the accumulated dgtz EC data
@@ -366,6 +320,15 @@ public class AccumulationManager
 	 */
 	public int getMaxDgtzEcCount() {
 		return _maxDgtzEcCount;
+	}
+
+	/**
+	 * Get the max counts for ec strips
+	 * 
+	 * @return the max counts for ec strips.
+	 */
+	public int getMaxDgtzHTCCCount() {
+		return _maxDgtzHTCCCount;
 	}
 
 	/**
@@ -494,6 +457,9 @@ public class AccumulationManager
 	}
 
 
+	/**
+	 * Here is an event, so increment the correct accumulation arrays
+	 */
 	@Override
 	public void newClasIoEvent(EvioDataEvent event) {
 
@@ -503,6 +469,37 @@ public class AccumulationManager
 		}
 
 		_eventCount++;
+		
+		//htcc data
+		int htccHitCount = HTCC.hitCount();
+		if (htccHitCount > 0) {
+			int sector[] = HTCC.sector();
+			int ring[] = HTCC.ring();
+			int half[] = HTCC.half();
+			
+			for (int i = 0; i < htccHitCount; i++) {
+				int sect0 = sector[i] - 1; // make 0 based
+				int ring0 = ring[i] - 1; // make 0 based
+				int half0 = half[i] - 1; // make 0 based
+
+				if (sect0 >= 0) {
+					try {
+						_htccDgtzAccumulatedData[sect0][ring0][half0] += 1;
+						
+						_maxDgtzHTCCCount = Math.max(_htccDgtzAccumulatedData[sect0][ring0][half0],
+								_maxDgtzHTCCCount);
+
+					} catch (ArrayIndexOutOfBoundsException e) {
+						String msg = String.format("HTCC index out of bounds. Event# %d sect %d ring %d half %d",
+								_eventManager.getEventNumber(), sector[i], ring[i], half[i]);
+						Log.getInstance().warning(msg);
+						System.err.println(msg);
+					}
+				}
+
+			} // end loop hits
+
+		} // htcc hit count > 0
 
 		// dc data
 		int dcHitCount = DC.hitCount();
@@ -527,7 +524,7 @@ public class AccumulationManager
 
 				} catch (ArrayIndexOutOfBoundsException e) {
 					String msg = String.format(
-							"Index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
+							"DC index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
 							_eventManager.getEventNumber(), sector[i],
 							superlayer[i], layer[i], wire[i]);
 					Log.getInstance().warning(msg);
@@ -633,114 +630,6 @@ public class AccumulationManager
 		accumFtof(sector1B, paddle1B, _ftof1bDgtzAccumulatedData);
 		accumFtof(sector2B, paddle2B, _ftof2DgtzAccumulatedData);
 
-		// splot histo test
-
-		// GenPartDataContainer genPart = _eventManager.getGenPartData();
-		// if (genPart.genpart_true_px != null) {
-		// double px = genPart.genpart_true_px[0] / 1000;
-		// double py = genPart.genpart_true_py[0] / 1000;
-		// double pz = genPart.genpart_true_pz[0] / 1000;
-		// double trueP = Math.sqrt(px * px + py * py + pz * pz);
-		//
-		// double trueTheta = Math.toDegrees(Math.acos(pz / trueP));
-		// double truePhi = Math.toDegrees(Math.atan2(py, px));
-		//
-		// // hit based
-		// if (dcData.getHitBasedTrackCount() > 0) {
-		// double reconsP = dcData.hitbasedtrkg_hbtracks_p[0];
-		// if (trueP > 0.001) {
-		// double frac = (trueP - reconsP) / trueP;
-		// _hbPResolutionHistoData.add(frac);
-		// }
-		//
-		// // have to swim traj backwards!
-		// // swimBackwardsToVertex(int q, double xo, double yo, double zo,
-		// // double px, double py, double pz) {
-		//
-		// int q = dcData.hitbasedtrkg_hbtracks_q[0];
-		// double xo = dcData.hitbasedtrkg_hbtracks_c3_x[0] / 100;
-		// double yo = dcData.hitbasedtrkg_hbtracks_c3_y[0] / 100;
-		// double zo = dcData.hitbasedtrkg_hbtracks_c3_z[0] / 100;
-		//
-		// double ux = dcData.hitbasedtrkg_hbtracks_c3_ux[0];
-		// double uy = dcData.hitbasedtrkg_hbtracks_c3_uy[0];
-		// double uz = dcData.hitbasedtrkg_hbtracks_c3_uz[0];
-		//
-		// double pxo = reconsP * ux;
-		// double pyo = reconsP * uy;
-		// double pzo = reconsP * uz;
-		//
-		// SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo, yo,
-		// zo, pxo, pyo, pzo);
-		// Swimming.addReconTrajectory(traj);
-		//
-		// // Q = [x, y, z, px/p, py/p, pz/p]
-		// double lastQ[] = traj.lastElement();
-		//
-		// xo = lastQ[0];
-		// yo = lastQ[1];
-		// zo = lastQ[2];
-		// pxo = -lastQ[3];
-		// pyo = -lastQ[4];
-		// pzo = -lastQ[5];
-		//
-		// // pt = Math.hypot(pxo, pyo);
-		// double reconTheta = Math.toDegrees(Math.acos(pzo));
-		// double reconPhi = Math.toDegrees(Math.atan2(pyo, pxo));
-		//
-		// _hbThetaResolutionHistoData.add(reconTheta - trueTheta);
-		// _hbPhiResolutionHistoData.add(reconPhi - truePhi);
-		//
-		// } // hb track count
-		//
-		// // time based
-		// if (dcData.getTimeBasedTrackCount() > 0) {
-		// double reconsP = dcData.timebasedtrkg_tbtracks_p[0];
-		// if (trueP > 0.001) {
-		// double frac = (trueP - reconsP) / trueP;
-		// _tbPResolutionHistoData.add(frac);
-		// }
-		//
-		// // have to swim traj backwards!
-		// // swimBackwardsToVertex(int q, double xo, double yo, double zo,
-		// // double px, double py, double pz) {
-		//
-		// int q = dcData.timebasedtrkg_tbtracks_q[0];
-		// double xo = dcData.timebasedtrkg_tbtracks_c3_x[0] / 100;
-		// double yo = dcData.timebasedtrkg_tbtracks_c3_y[0] / 100;
-		// double zo = dcData.timebasedtrkg_tbtracks_c3_z[0] / 100;
-		//
-		// double ux = dcData.timebasedtrkg_tbtracks_c3_ux[0];
-		// double uy = dcData.timebasedtrkg_tbtracks_c3_uy[0];
-		// double uz = dcData.timebasedtrkg_tbtracks_c3_uz[0];
-		//
-		// double pxo = reconsP * ux;
-		// double pyo = reconsP * uy;
-		// double pzo = reconsP * uz;
-		//
-		// SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo, yo,
-		// zo, pxo, pyo, pzo);
-		// Swimming.addReconTrajectory(traj);
-		//
-		// // Q = [x, y, z, px/p, py/p, pz/p]
-		// double lastQ[] = traj.lastElement();
-		//
-		// xo = lastQ[0];
-		// yo = lastQ[1];
-		// zo = lastQ[2];
-		// pxo = -lastQ[3];
-		// pyo = -lastQ[4];
-		// pzo = -lastQ[5];
-		//
-		// // pt = Math.hypot(pxo, pyo);
-		// double reconTheta = Math.toDegrees(Math.acos(pzo));
-		// double reconPhi = Math.toDegrees(Math.atan2(pyo, pxo));
-		//
-		// _tbThetaResolutionHistoData.add(reconTheta - trueTheta);
-		// _tbPhiResolutionHistoData.add(reconPhi - truePhi);
-		//
-		// } // time based track count
-		// }
 
 	}
 

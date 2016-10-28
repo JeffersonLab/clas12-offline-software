@@ -8,9 +8,9 @@ import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EvioCompactStructureHandler;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioNode;
-import org.jlab.evio.clas12.EvioDataDictionary;
-import org.jlab.evio.clas12.EvioDataEvent;
-import org.jlab.evio.clas12.EvioFactory;
+import org.jlab.io.evio.EvioDataDictionary;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioFactory;
 
 public class EvioNodeSupport {
 

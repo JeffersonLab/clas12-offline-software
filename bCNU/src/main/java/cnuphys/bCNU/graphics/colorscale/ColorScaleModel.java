@@ -98,8 +98,7 @@ public class ColorScaleModel {
 	 * @param numberOfRows
 	 *            the number of rows to us displaying the colors.
 	 */
-	public ColorScaleModel(String comment, double values[], Color[] colors,
-			int precision, int numberOfRows) {
+	public ColorScaleModel(String comment, double values[], Color[] colors, int precision, int numberOfRows) {
 		_comment = comment;
 		this.colors = colors;
 		Arrays.sort(values);
@@ -134,11 +133,14 @@ public class ColorScaleModel {
 	public Color getColor(double value) {
 		return getColor(value, false);
 	}
-	
+
 	/**
 	 * Get a color via getColor but add an alpha value
-	 * @param value the value 
-	 * @param alpha the alpha value [0..255]
+	 * 
+	 * @param value
+	 *            the value
+	 * @param alpha
+	 *            the alpha value [0..255]
 	 * @return the color corresponding to the value.
 	 */
 	public Color getAlphaColor(double value, int alpha) {

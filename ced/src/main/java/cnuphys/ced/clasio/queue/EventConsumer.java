@@ -1,6 +1,6 @@
 package cnuphys.ced.clasio.queue;
 
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 public class EventConsumer {
 

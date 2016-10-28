@@ -4,7 +4,7 @@ import java.util.Vector;
 
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.coda.jevio.EvioNode;
-import org.jlab.evio.clas12.EvioDataEvent;
+import org.jlab.io.evio.EvioDataEvent;
 
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -132,6 +132,7 @@ public class GEMCMetaDataContainer implements IClasIoEventListener  {
 
 	@Override
 	public void openedNewEventFile(String path) {
+		resetFields = true;
 		clear();
 	}
 	
@@ -172,8 +173,8 @@ public class GEMCMetaDataContainer implements IClasIoEventListener  {
 
 		if (node != null) {
 
-			System.err.println("Found GEMC metadata bank.");
-			resetFields = true;
+//			System.err.println("Found GEMC metadata bank.");
+//			resetFields = true;
 
 			byte bytes[] = node.getStructureBuffer(true).array();
 

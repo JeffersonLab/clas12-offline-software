@@ -1,10 +1,8 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import org.jlab.clasrec.utils.DataBaseLoader;
-import org.jlab.geom.base.ConstantProvider;
+
 import org.jlab.geom.component.ScintillatorPaddle;
-import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSector;
 import org.jlab.geom.detector.ec.ECSuperlayer;
@@ -94,10 +92,6 @@ public class ECGeometry {
 	private static double[] SLOPES = { Double.NaN, Double.NaN };
 
 	private static Transformations _transformations[] = new Transformations[2];
-
-	private static ConstantProvider ecDataProvider = DataBaseLoader
-			.getCalorimeterConstants();
-	private static ECFactory ecFactory = new ECFactory();
 
 	/**
 	 * Obtain the separation between the front of the inner and the front of the
@@ -756,7 +750,6 @@ public class ECGeometry {
 				superlayer + 1).getLayer(layer);
 
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
-		Point2D.Double wp[] = GeometryManager.allocate(4);
 		return GeometryManager.doesProjectedPolyIntersect(strip, projectionPlane, 6, 4);
 	}
 
@@ -781,9 +774,9 @@ public class ECGeometry {
 		// they use 0 for PCAL--hence the +1
 
 		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
-				superlayer + 1).getLayer(layer);
-
+				superlayer+1).getLayer(layer);
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
+		
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 		boolean isects = GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
 		

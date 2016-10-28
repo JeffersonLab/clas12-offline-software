@@ -85,8 +85,9 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	protected boolean veto(SwimTrajectory trajectory) {
-		double theta = trajectory.getOriginalTheta();
-		return theta < 30 || theta > 150;
+//		double theta = trajectory.getOriginalTheta();
+//		return theta < 30 || theta > 150;
+		return false;
 	}
 
 	/**
