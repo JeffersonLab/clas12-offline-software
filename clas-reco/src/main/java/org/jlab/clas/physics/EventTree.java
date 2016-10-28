@@ -114,8 +114,10 @@ public class EventTree extends Tree implements TreeProvider {
         RecEvent  recEvent = kinFitter.getRecEvent(event);
         recEvent.doPidMatch();
         this.resetBranches(-1000.0);
+        EventFilter  filter = new EventFilter("11:2112:321:Xn:X-:X+");
         for(Map.Entry<String,EventTreeBranch> entry : treeBranches.entrySet()){
-            if(entry.getValue().getFilter().isValid(recEvent.getReconstructed())==true){
+            if(entry.getValue().getFilter().isValid(recEvent.getReconstructed())==true
+                    &&filter.isValid(recEvent.getGenerated())){
                 //System.out.println("passed the filter");
                 Map<String,EventTreeLeaf>  leafs = entry.getValue().getLeafs();
                 for(Map.Entry<String,EventTreeLeaf> item : leafs.entrySet()){
@@ -185,10 +187,10 @@ public class EventTree extends Tree implements TreeProvider {
                 if(event!=null){
                     this.processEvent(event);
                     double value = this.getBranch(branch).getValue().doubleValue();
-                    System.out.println( " # "  + i + " " + branch + " --> " + value);
+                    //System.out.println( " # "  + i + " " + branch + " --> " + value);
                     if(value>-500){ vector.add(value);}
                 } else {
-                    System.out.println(" NULL pointer at event " + i);
+                    //System.out.println(" NULL pointer at event " + i);
                 }
             }
             
@@ -207,11 +209,21 @@ public class EventTree extends Tree implements TreeProvider {
         JComboBox propertyThree  = new JComboBox(options);
         JTextField  textName     = new JTextField();
         JTextField  textFilter   = new JTextField();
+        JTextField  textGenFilter   = new JTextField();
         JTextField  textParticle = new JTextField();
         JTextField  textExpression = new JTextField();
+        textName.setText("INCLUSIVE");
+        textGenFilter.setText("11:X+:X-:Xn");
+        textFilter.setText("11:X+:X-:Xn");
+        textParticle.setText("electron");
+        textExpression.setText("[11]");
+        propertyOne.setSelectedIndex(0);
+        propertyTwo.setSelectedIndex(1);
+        propertyThree.setSelectedIndex(2);
         
         Object[] message = {
             "Name : ", textName,
+            "Generated Filter : ", textGenFilter,
             "Event Filter : ", textFilter,
             "Particle : ", textParticle, 
             "Expression : ", textExpression, 
@@ -332,12 +344,18 @@ public class EventTree extends Tree implements TreeProvider {
         
         EventTree  evtTree = new EventTree();
 
-        evtTree.addBranch("LAMBDA", "-211:2212:X+:X-:Xn");        
+        evtTree.addBranch("LAMBDA", "-211:2212:X+:X-:Xn");  
         evtTree.addLeaf("LAMBDA", "Mppi", "[-211]+[2212]","mass2","mass","theta","phi");
+        evtTree.addBranch("LAMBDA_EK", "11:321:X+:X-:Xn");
+        evtTree.addLeaf("LAMBDA_EK", "MxeK", "[b]+[t]-[11]-[321]","mass2","mass","theta","phi");
+        evtTree.addBranch("LAMBDA_EKG", "11:321:22:X+:X-:Xn");
+        evtTree.addLeaf("LAMBDA_EKG", "MxeK", "[b]+[t]-[11]-[321]","mass2","mass","theta","phi");
+        evtTree.addBranch("LAMBDA_EKNG", "11:321:X+:X-");
+        evtTree.addLeaf("LAMBDA_EKNG", "MxeK", "[b]+[t]-[11]-[321]","mass2","mass","theta","phi");
         //evtTree.addLeaf("DVPI0", "proton", "[2212]","px","py","pz");
         evtTree.initTree();
         //evtTree.treeConfigure();
-        evtTree.setSource("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/datasets/reco/eklambda/reco_eklambda_dst.hipo");
+        evtTree.setSource("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/datasets/reco/reco_eklambda_dst.hipo");
         //evtTree.initTree();
         
         
