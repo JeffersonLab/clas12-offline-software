@@ -21,7 +21,7 @@ import org.jlab.geom.base.ConstantProvider;
 public final class PCALGeant4Factory extends Geant4Factory {
 
     private final double microgap = 0.0001;
-    private final double virtualzero = 1e-9;
+    private final double virtualzero = 1e-6;
 
     private final int nsectors, nviews, nlayers, nsteel, nfoam;
     private final int nustrips, nwstrips;
@@ -46,8 +46,8 @@ public final class PCALGeant4Factory extends Geant4Factory {
         dsteel = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0) * Length.mm;
         dfoam = cp.getDouble("/geometry/pcal/pcal/foam_thick", 0) * Length.mm;
         dlead = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0) * Length.mm;
-        dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0) * Length.mm;
         dwrap = cp.getDouble("/geometry/pcal/pcal/wrapper_thick", 0) * Length.mm;
+        dstrip = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0) * Length.mm;
         wstrip = cp.getDouble("/geometry/pcal/pcal/strip_width", 0) * Length.mm;
 
         dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0) * Length.mm;
@@ -71,13 +71,13 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     private Layer getULayer(int ilayer, int isector) {
-        Layer uLayer = new Layer("U-view-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip);
+        Layer uLayer = new Layer("U-view-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip+2.0*dwrap);
         uLayer.populateUstrips(ilayer, isector);
         return uLayer;
     }
 
     private Layer getVLayer(int ilayer, int isector) {
-        Layer vLayer = new Layer("V-view-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip,
+        Layer vLayer = new Layer("V-view-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip+2.0*dwrap,
                 wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
         vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
 
@@ -90,7 +90,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     private Layer getWLayer(int ilayer, int isector) {
-        Layer wLayer = new Layer("W-view-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip,
+        Layer wLayer = new Layer("W-view-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip+2.0*dwrap,
                 wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
         wLayer.layerVol.rotate("xyz", 0, 0, thview);
 
@@ -110,14 +110,16 @@ public final class PCALGeant4Factory extends Geant4Factory {
         List<Geant4Basic> scipaddles = new ArrayList<>();
 
         protected Layer(String name, double thickness, double pDy, double pDx1, double pDx2, double pAlpha) {
-            layerVol = new G4Trap(name, thickness / 2.0, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
+            layerVol = new G4Trap(name, thickness / 2.0, 0, 0,
+                    pDy, pDx1 + virtualzero, pDx2 + virtualzero, pAlpha,
+                    pDy, pDx1 + virtualzero, pDx2 + virtualzero, pAlpha);
             this.thickness = thickness;
         }
 
         private Layer(String name, double thickness) {
             //G4Trap dimensions for U layer, same for all lead, stell, foam layers
             //used for creation of all passive layers
-            this(name, thickness, uheight / 2.0, virtualzero, umax / 2.0, 0);
+            this(name, thickness, uheight / 2.0, 0, umax / 2.0, 0);
         }
 
         public double shiftZ(double dz) {
@@ -141,7 +143,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lhalftop = hlong / Math.tan(thview);
 
                 G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
-                        dstrip / 2.0 - dwrap, 0, 0,
+                        dstrip / 2.0, 0, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
 
@@ -162,7 +164,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double lhalftop = hlong / Math.tan(thview);
 
                 G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
-                        dstrip / 2.0 - dwrap, 0, 0,
+                        dstrip / 2.0, 0, 0,
                         wstrip - dwrap, lhalfbtm, lhalftop, 0,
                         wstrip - dwrap, lhalfbtm, lhalftop, 0);
 
@@ -188,7 +190,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double ltop = hshort / Math.sin(2.0 * thview);
 
                 G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_double_strip_" + (ilayer + 1) + "_" + idouble + "_s" + isector,
-                        dstrip / 2.0 - dwrap, 0, 0,
+                        dstrip / 2.0, 0, 0,
                         wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
 
@@ -211,7 +213,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double ltop = hshort / Math.sin(2.0 * thview);
 
                 G4Trap stripVol = new PCALstrip(layerVol.getName().charAt(0) + "-view_single_strip_" + (ilayer + 1) + "_" + istrip + "_s" + isector,
-                        dstrip / 2.0 - dwrap, 0, 0,
+                        dstrip / 2.0, 0, 0,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
 
@@ -235,11 +237,11 @@ public final class PCALGeant4Factory extends Geant4Factory {
         private final double extrathickness = 0.05;
         //G4Trap dimensions for sector volume (mother volume)
         private final double dsector = nsteel * dsteel + nfoam * dfoam
-                + nviews * nlayers * dstrip
+                + nviews * nlayers * (dstrip+2.0*dwrap)
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + nsteel + nfoam) * microgap;
         private final double dist2midplane = dist2tgt
-                + (nviews * nlayers * dstrip
+                + (nviews * nlayers * (dstrip+2.0*dwrap)
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers - 2) * microgap) / 2.0;
         private final double hshift = uheight / 2.0 - yhigh;

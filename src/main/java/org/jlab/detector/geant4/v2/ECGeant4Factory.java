@@ -19,7 +19,7 @@ import org.jlab.geom.base.ConstantProvider;
 public final class ECGeant4Factory extends Geant4Factory {
 
     private final double microgap = 0.0001;
-    private final double virtualzero = 1e-9;
+    private final double virtualzero = 1e-6;
 
     private final int nsectors, nviews, nlayers;
     private final int nustrips, nwstrips, nvstrips;
@@ -44,7 +44,7 @@ public final class ECGeant4Factory extends Geant4Factory {
         dwrap = cp.getDouble("/geometry/ec/ec/wrapper_thick", 0) * Length.mm;
         dalum = cp.getDouble("/geometry/ec/ec/alum_thick", 0) * Length.mm;
 
-        dist2tgt = (cp.getDouble("/geometry/ec/ec/dist2tgt", 0) + 174.66) * Length.mm;
+        dist2tgt = (cp.getDouble("/geometry/ec/ec/dist2tgt", 0)) * Length.mm;
         dist2cnt = cp.getDouble("/geometry/ec/ec/dist2cnt", 0) * Length.mm;
         shiftcnt = cp.getDouble("/geometry/ec/ec/a1", 0) * Length.mm;
 
@@ -69,7 +69,7 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private Layer getULayer(int iuvw, int isector) {
         int ilayer = iuvw * 3 + 1;
-        double height = nustrips * (wUstrip + (ilayer - 1) * dwUstrip);
+        double height = nustrips * (wUstrip + (ilayer - 1) * dwUstrip)+2.0*virtualzero;
         double halfbase = height / Math.tan(thview);
 
         Layer uLayer = new Layer("U-scintillator_" + ilayer + "_s" + isector + "_view_1_stack_" + ((ilayer < 16) ? 1 : 2), dstrip,
@@ -80,7 +80,7 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private Layer getVLayer(int iuvw, int isector) {
         int ilayer = iuvw * 3 + 2;
-        double height = nvstrips * (wVstrip + (ilayer - 2) * dwVstrip);
+        double height = nvstrips * (wVstrip + (ilayer - 2) * dwVstrip) + 2.0 * virtualzero;
         double lenbtm = height / Math.sin(2.0 * thview);
         Layer vLayer = new Layer("V-scintillator_" + ilayer + "_s" + isector + "_view_2_stack_" + ((ilayer < 16) ? 1 : 2), dstrip,
                 height / 2.0, lenbtm / 2.0, virtualzero, -walpha);
@@ -94,7 +94,7 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private Layer getWLayer(int iuvw, int isector) {
         int ilayer = iuvw * 3 + 3;
-        double height = nwstrips * (wWstrip + (ilayer - 3) * dwWstrip);
+        double height = nwstrips * (wWstrip + (ilayer - 3) * dwWstrip) + 2.0 * virtualzero;
         double lenbtm = height / Math.sin(2.0 * thview);
         Layer wLayer = new Layer("W-scintillator_" + ilayer + "_s" + isector + "_view_3_stack_" + ((ilayer < 16) ? 1 : 2), dstrip,
                 height / 2.0, lenbtm / 2.0, virtualzero, -walpha);
@@ -111,14 +111,18 @@ public final class ECGeant4Factory extends Geant4Factory {
         final double thickness;
 
         public Layer(String name, double thickness, int ilayer) {
-            double height = getLeadHeight(ilayer);
+            double height = getLeadHeight(ilayer)+2.0*virtualzero;
             double halfbase = height / Math.tan(thview);
-            layerVol = new G4Trap(name, thickness / 2.0, 0, 0, height / 2.0, virtualzero, halfbase, 0, height / 2.0, virtualzero, halfbase, 0);
+            layerVol = new G4Trap(name, thickness / 2.0, 0, 0,
+                    height / 2.0, virtualzero, halfbase, 0,
+                    height / 2.0, virtualzero, halfbase, 0);
             this.thickness = thickness;
         }
 
         public Layer(String name, double thickness, double pDy, double pDx1, double pDx2, double pAlpha) {
-            layerVol = new G4Trap(name, thickness / 2.0, 0, 0, pDy, pDx1, pDx2, pAlpha, pDy, pDx1, pDx2, pAlpha);
+            layerVol = new G4Trap(name, thickness / 2.0, 0, 0,
+                    pDy, pDx1, pDx2, pAlpha,
+                    pDy, pDx1, pDx2, pAlpha);
             this.thickness = thickness;
         }
 
@@ -157,17 +161,17 @@ public final class ECGeant4Factory extends Geant4Factory {
             double uwidth = wUstrip + (ilayer - 1) * dwUstrip;
             double uheight = getLayerHeight(ilayer);
 
-            double hshort = dwrap;
+            double hshort = virtualzero;
             for (int istrip = 1; istrip <= nustrips; istrip++) {
-                double hlong = hshort + uwidth - 2.0 * dwrap;
+                double hlong = hshort + uwidth;
                 double lshort = hshort / Math.tan(thview);
                 double llong = hlong / Math.tan(thview);
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_strip_" + ilayer
+                G4Trap stripVol = new ECstrip(layerVol.getName().charAt(0) + "_strip_" + ilayer
                         + "_" + istrip + "_s" + isector + "_stack_" + ((ilayer < 16) ? 1 : 2),
-                        dstrip / 2.0 - dwrap, 0, 0,
-                        uwidth / 2.0 - dwrap, lshort, llong, 0,
-                        uwidth / 2.0 - dwrap, lshort, llong, 0);
-                
+                        dstrip / 2.0, 0, 0,
+                        uwidth / 2.0, lshort, llong, 0,
+                        uwidth / 2.0, lshort, llong, 0);
+
                 stripVol.makeSensitive();
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
@@ -185,19 +189,19 @@ public final class ECGeant4Factory extends Geant4Factory {
         }
 
         public void populateVWstrips(int ilayer, int isector, int nstrips, double stripwidth) {
-            double hshort = dwrap;
             double height = getLayerHeight(ilayer);
 
+            double hshort = virtualzero;
             for (int istrip = 1; istrip <= nstrips; istrip++) {
-                double hlong = hshort + stripwidth - 2.0 * dwrap;
+                double hlong = hshort + stripwidth;
                 double lshort = hshort / Math.sin(2.0 * thview);
                 double llong = hlong / Math.sin(2.0 * thview);
 
-                G4Trap stripVol = new G4Trap(layerVol.getName().charAt(0) + "_strip_" + ilayer
+                G4Trap stripVol = new ECstrip(layerVol.getName().charAt(0) + "_strip_" + ilayer
                         + "_" + istrip + "_s" + isector + "_stack_" + ((ilayer < 16) ? 1 : 2),
-                        dstrip / 2.0 - dwrap, 0, 0,
-                        stripwidth / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha,
-                        stripwidth / 2.0 - dwrap, llong / 2.0, lshort / 2.0, -walpha);
+                        dstrip / 2.0, 0, 0,
+                        stripwidth / 2.0, llong / 2.0, lshort / 2.0, -walpha,
+                        stripwidth / 2.0, llong / 2.0, lshort / 2.0, -walpha);
 
                 double ystrip = (height - hlong - hshort) / 2.0;
                 double xstrip = ystrip * Math.tan(-walpha);
@@ -212,9 +216,11 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private final class ECSector {
 
+        private final double dfoam = 5.08, dsteel = 0.15875;
+
         private final double extrathickness = 0.05;
         //G4Trap dimensions for sector volume (mother volume)
-        private final double dsector = dalum + 0.175 * 2.0 + nviews * nlayers * dstrip
+        private final double dsector = dfoam + dsteel * 2.0 + nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + 3) * microgap;
         private final double dist2midplane = dist2tgt
@@ -231,8 +237,8 @@ public final class ECGeant4Factory extends Geant4Factory {
             double halfbase = height / Math.tan(thview);
 
             sectorVolume = new G4Trap("ec_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
-                    height / 2.0, virtualzero, halfbase, 0,
-                    height / 2.0, virtualzero, halfbase, 0);
+                    height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0,
+                    height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0);
 
             double secphi = Math.toRadians(90 - (isector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
@@ -246,13 +252,13 @@ public final class ECGeant4Factory extends Geant4Factory {
             layerPos = -dsector / 2.0 + microgap;
             int ilayer = 1;
 
-            Layer steelVol1 = new Layer("eclid1_s" + isector, 0.175, ilayer);
+            Layer steelVol1 = new Layer("eclid1_s" + isector, dsteel, ilayer);
             steelVol1.layerVol.setMother(sectorVolume);
             layerPos = steelVol1.shiftZ(0, 0, layerPos) + microgap;
-            Layer alumVol = new Layer("eclid2_s" + isector, dalum, ilayer);
+            Layer alumVol = new Layer("eclid2_s" + isector, dfoam, ilayer);
             alumVol.layerVol.setMother(sectorVolume);
             layerPos = alumVol.shiftZ(0, 0, layerPos) + microgap;
-            Layer steelVol2 = new Layer("eclid3_s" + isector, 0.175, ilayer);
+            Layer steelVol2 = new Layer("eclid3_s" + isector, dsteel, ilayer);
             steelVol2.layerVol.setMother(sectorVolume);
             layerPos = steelVol2.shiftZ(0, 0, layerPos) + microgap;
 
@@ -282,6 +288,34 @@ public final class ECGeant4Factory extends Geant4Factory {
         }
     }
 
+    private class ECstrip extends G4Trap {
+
+        final int iview;
+
+        ECstrip(String name, double pDz, double pTheta, double pPhi,
+                double pDy1, double pDx1, double pDx2, double pAlp1,
+                double pDy2, double pDx3, double pDx4, double pAlp2) {
+            super(name, pDz, pTheta, pPhi, pDy1, pDx1, pDx2, pAlp1, pDy2, pDx3, pDx4, pAlp2);
+
+            iview = name.charAt(0) - 'U';
+        }
+
+        @Override
+        public Vector3d getVertex(int ivertex) {
+            int ipol = ivertex / 4;
+            if (iview == 1) {
+                ipol = 1 - ipol;
+            }
+
+            int[][][] ivert = {
+                {{0, 3, 1, 2}, {0, 1, 3, 2}},
+                {{1, 2, 0, 3}, {3, 2, 0, 1}},
+                {{2, 1, 3, 0}, {2, 3, 1, 0}}
+            };
+            return volumeCSG.getPolygons().get(4 + ipol).vertices.get(ivert[iview][ipol][ivertex % 4]).pos;
+        }
+    }
+
     public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {
         int iview = (ilayer - 1) / 3;
         int[] npaddles = {nustrips, nvstrips, nwstrips};
@@ -289,10 +323,10 @@ public final class ECGeant4Factory extends Geant4Factory {
             System.err.println(String.format("Paddle #%d in sector %d, layer %d doesn't exist", ipaddle, isector, ilayer));
             throw new IndexOutOfBoundsException();
         }
-        
+
         return (G4Trap) motherVolume.getChildren().get(isector - 1)
                 .getChildren().get(3 + (ilayer - 1) * 2)
-                .getChildren().get(ipaddle-1);
+                .getChildren().get(ipaddle - 1);
     }
 
 }
