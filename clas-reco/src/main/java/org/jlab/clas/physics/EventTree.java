@@ -192,11 +192,48 @@ public class EventTree extends Tree implements TreeProvider {
                 } else {
                     //System.out.println(" NULL pointer at event " + i);
                 }
+                if(limit>0&&i>limit){
+                    break;
+                }
             }
             
             result.add(vector);
             //return result;
                     
+        }
+        
+        if(path.length==2&&path[0].getPathCount()==4){
+             String branch_1 = path[0].getPathComponent(1).toString() + "_" 
+                    + path[0].getPathComponent(2).toString() + "_" 
+                    + path[0].getPathComponent(3).toString();
+             String branch_2 = path[1].getPathComponent(1).toString() + "_" 
+                    + path[1].getPathComponent(2).toString() + "_" 
+                    + path[1].getPathComponent(3).toString();
+            DataVector vector_1 = new DataVector();
+            DataVector vector_2 = new DataVector();
+            
+            int nevents = reader.getSize();
+            for(int i = 0; i < nevents; i++){
+                
+                DataEvent event = reader.gotoEvent(i);
+                if(event!=null){
+                    this.processEvent(event);
+                    double value_1 = this.getBranch(branch_1).getValue().doubleValue();
+                    double value_2 = this.getBranch(branch_2).getValue().doubleValue();
+                    //System.out.println( " # "  + i + " " + branch + " --> " + value);
+                    if(value_1>-500&&value_2>-500){ 
+                        vector_1.add(value_1);
+                        vector_2.add(value_2);
+                    }
+                } else {
+                    //System.out.println(" NULL pointer at event " + i);
+                }
+                if(limit>0&&i>limit){
+                    break;
+                }
+                result.add(vector_1);
+                result.add(vector_2);
+            }
         }
         return result;
     }
