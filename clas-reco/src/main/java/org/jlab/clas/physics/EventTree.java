@@ -175,65 +175,44 @@ public class EventTree extends Tree implements TreeProvider {
     public List<DataVector> actionTreeNode(TreePath[] path, int limit) {
         List<DataVector> result = new ArrayList<DataVector>();
         //System.out.println("Got callback to compute something");
-        if(path.length==1&&path[0].getPathCount()==4){
-            String branch = path[0].getPathComponent(1).toString() + "_" 
-                    + path[0].getPathComponent(2).toString() + "_" 
-                    + path[0].getPathComponent(3).toString();
-            DataVector vector = new DataVector();
-            int nevents = reader.getSize();
-            for(int i = 0; i < nevents; i++){
-                
-                DataEvent event = reader.gotoEvent(i);
-                if(event!=null){
-                    this.processEvent(event);
-                    double value = this.getBranch(branch).getValue().doubleValue();
-                    //System.out.println( " # "  + i + " " + branch + " --> " + value);
-                    if(value>-500){ vector.add(value);}
-                } else {
-                    //System.out.println(" NULL pointer at event " + i);
-                }
-                if(limit>0&&i>limit){
-                    break;
-                }
-            }
-            
-            result.add(vector);
-            //return result;
-                    
+        boolean pathOK = true;
+        
+        for(TreePath p : path){
+            if(p.getPathCount()!=4) pathOK = false;
         }
         
-        if(path.length==2&&path[0].getPathCount()==4){
-             String branch_1 = path[0].getPathComponent(1).toString() + "_" 
-                    + path[0].getPathComponent(2).toString() + "_" 
-                    + path[0].getPathComponent(3).toString();
-             String branch_2 = path[1].getPathComponent(1).toString() + "_" 
-                    + path[1].getPathComponent(2).toString() + "_" 
-                    + path[1].getPathComponent(3).toString();
-            DataVector vector_1 = new DataVector();
-            DataVector vector_2 = new DataVector();
-            
-            int nevents = reader.getSize();
-            for(int i = 0; i < nevents; i++){
+        if(pathOK==false) return result;
+        
+        List<String>  variables = new ArrayList<String>();
+        
+        for(int i = 0; i < path.length; i++){
+             String branch = path[i].getPathComponent(1).toString() + "_" 
+                    + path[i].getPathComponent(2).toString() + "_" 
+                    + path[i].getPathComponent(3).toString();
+             variables.add(branch);
+             result.add(new DataVector());
+        }
+        
+        int counter = 0;
+        int nevents = reader.getSize();
+        for(int i = 0; i < nevents; i++){
                 
-                DataEvent event = reader.gotoEvent(i);
-                if(event!=null){
-                    this.processEvent(event);
-                    double value_1 = this.getBranch(branch_1).getValue().doubleValue();
-                    double value_2 = this.getBranch(branch_2).getValue().doubleValue();
-                    //System.out.println( " # "  + i + " " + branch + " --> " + value);
-                    if(value_1>-500&&value_2>-500){ 
-                        vector_1.add(value_1);
-                        vector_2.add(value_2);
+            DataEvent event = reader.gotoEvent(i);
+            if(event!=null){
+                counter++;
+                this.processEvent(event);
+                boolean addEvent = true;
+                
+                for(int k = 0; k < variables.size(); k++){
+                    if(this.getBranch(variables.get(k)).getValue().doubleValue()<-500) addEvent = false;
+                }
+                if(addEvent==true){
+                    for(int k = 0; k < variables.size(); k++){
+                        result.get(k).add(this.getBranch(variables.get(k)).getValue().doubleValue());
                     }
-                } else {
-                    //System.out.println(" NULL pointer at event " + i);
                 }
-                if(limit>0&&i>limit){
-                    break;
-                }
-                result.add(vector_1);
-                result.add(vector_2);
-            }
+            } 
+            if(limit>0&&counter>limit) break;
         }
         return result;
     }
