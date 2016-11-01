@@ -196,28 +196,44 @@ public class EventTree extends Tree implements TreeProvider {
     public List<DataVector> actionTreeNode(TreePath[] path, int limit) {
         List<DataVector> result = new ArrayList<DataVector>();
         //System.out.println("Got callback to compute something");
-        if(path.length==1&&path[0].getPathCount()==4){
-            String branch = path[0].getPathComponent(1).toString() + "_" 
-                    + path[0].getPathComponent(2).toString() + "_" 
-                    + path[0].getPathComponent(3).toString();
-            DataVector vector = new DataVector();
-            int nevents = reader.getSize();
-            for(int i = 0; i < nevents; i++){
+        boolean pathOK = true;
+        
+        for(TreePath p : path){
+            if(p.getPathCount()!=4) pathOK = false;
+        }
+        
+        if(pathOK==false) return result;
+        
+        List<String>  variables = new ArrayList<String>();
+        
+        for(int i = 0; i < path.length; i++){
+             String branch = path[i].getPathComponent(1).toString() + "_" 
+                    + path[i].getPathComponent(2).toString() + "_" 
+                    + path[i].getPathComponent(3).toString();
+             variables.add(branch);
+             result.add(new DataVector());
+        }
+        
+        int counter = 0;
+        int nevents = reader.getSize();
+        for(int i = 0; i < nevents; i++){
                 
-                DataEvent event = reader.gotoEvent(i);
-                if(event!=null){
-                    this.processEvent(event);
-                    double value = this.getBranch(branch).getValue().doubleValue();
-                    //System.out.println( " # "  + i + " " + branch + " --> " + value);
-                    if(value>-500){ vector.add(value);}
-                } else {
-                    //System.out.println(" NULL pointer at event " + i);
+            DataEvent event = reader.gotoEvent(i);
+            if(event!=null){
+                counter++;
+                this.processEvent(event);
+                boolean addEvent = true;
+                
+                for(int k = 0; k < variables.size(); k++){
+                    if(this.getBranch(variables.get(k)).getValue().doubleValue()<-500) addEvent = false;
                 }
-            }
-            
-            result.add(vector);
-            //return result;
-                    
+                if(addEvent==true){
+                    for(int k = 0; k < variables.size(); k++){
+                        result.get(k).add(this.getBranch(variables.get(k)).getValue().doubleValue());
+                    }
+                }
+            } 
+            if(limit>0&&counter>limit) break;
         }
         return result;
     }
