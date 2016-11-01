@@ -42,7 +42,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     
     private JDBCProvider provider;
     
-    private int          debugMode = 0;
+    private int          debugMode = 1;
     
     public DatabaseConstantProvider(){
         this.loadTimeErrors = 0;

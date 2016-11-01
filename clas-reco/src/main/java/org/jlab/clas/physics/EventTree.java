@@ -5,6 +5,8 @@
  */
 package org.jlab.clas.physics;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.Map;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,6 +26,7 @@ import org.jlab.groot.studio.StudioUI;
 import org.jlab.groot.tree.DynamicTree;
 import org.jlab.groot.tree.Tree;
 import org.jlab.groot.tree.TreeProvider;
+import org.jlab.groot.tree.TreeTextFile;
 import org.jlab.groot.ui.TCanvas;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -39,6 +43,7 @@ public class EventTree extends Tree implements TreeProvider {
     private GenericKinematicFitter kinFitter = new GenericKinematicFitter(11);
     private HipoDataSource reader = null;
     private int            currentEvent = 0;
+    private DynamicTree    dynamicTree  = new DynamicTree("EventTree");
     
     public EventTree(){
         super("EventTree");
@@ -90,12 +95,24 @@ public class EventTree extends Tree implements TreeProvider {
         }
     }
     
+    public void addBranchWithFilter(String name, String filter, String genFilter){
+        EventTreeBranch branch = new EventTreeBranch(name);
+        branch.setFilter(filter);
+        branch.setFilterGenerated(genFilter);
+        if(treeBranches.containsKey(name)==false){
+            treeBranches.put(name, branch);
+        } else {
+            System.out.println("TREE Branch already exists : " + name);
+        }
+    }
+    
     public void addLeaf(String branch, String name, String expression, String... properties){
         treeBranches.get(branch).addLeaf(name, expression, properties);        
     }
     
     public void initTree(){
         //treeObject = new Tree("EventTree");
+        this.reset();
         for(Map.Entry<String,EventTreeBranch> entry : treeBranches.entrySet()){
             Map<String,EventTreeLeaf>  leafs = entry.getValue().getLeafs();
             for(Map.Entry<String,EventTreeLeaf> item : leafs.entrySet()){
@@ -103,10 +120,12 @@ public class EventTree extends Tree implements TreeProvider {
                 for(int i = 0; i < properties.size();i++){
                     String branch = item.getValue().getLeafPropertyName(i);
                     this.addBranch(branch, "", "GeV");
+                    System.out.println("adding a branch with name = " + branch);
                 }
             }
         }
         treeObject.print();
+        this.getDynamicTree();
     }
     
     public void processEvent(DataEvent event){
@@ -144,32 +163,34 @@ public class EventTree extends Tree implements TreeProvider {
 
     @Override
     public DynamicTree getDynamicTree() {
-        DynamicTree tree = new DynamicTree(getName());
-
+        
+        //DynamicTree tree = new DynamicTree(getName());
+        this.dynamicTree.clear();
         //roota.add(new DefaultMutableTreeNode("e-") );
         //tree.addObject(rootb, "e+");        
         //tree.addObject(rootbranch);
         for(Map.Entry<String,EventTreeBranch> entry : this.treeBranches.entrySet()){
             String name = entry.getKey();
-            DefaultMutableTreeNode base = tree.addObject( new DefaultMutableTreeNode(name));
+            DefaultMutableTreeNode base = this.dynamicTree.addObject( new DefaultMutableTreeNode(name));
             //tree.addObject(base);
             System.out.println("creating base = " + name);
             EventTreeBranch branch = entry.getValue();
             for(Map.Entry<String,EventTreeLeaf> item : branch.getLeafs().entrySet()){
-                DefaultMutableTreeNode particle = tree.addObject(base, item.getValue().getName(),true);
+                DefaultMutableTreeNode particle = this.dynamicTree.addObject(base, item.getValue().getName(),true);
                 
                 System.out.println("adding leaf = " + item.getValue().getName());
                 item.getValue().getProperties();
                 for(String property : item.getValue().getProperties()){
                     System.out.println("adding property = " + property);
-                    tree.addObject(particle, property);
+                    this.dynamicTree.addObject(particle, property);
                 }
             }
             //root.add(base);
         }
         //tree.addObject(root);
-        
-        return tree;
+        this.dynamicTree.repaint();
+        this.dynamicTree.revalidate();
+        return dynamicTree;
     }
     
     public List<DataVector> actionTreeNode(TreePath[] path, int limit) {
@@ -238,12 +259,15 @@ public class EventTree extends Tree implements TreeProvider {
             String strThree = (String) propertyThree.getSelectedItem();
             String name   = textName.getText();
             String filter = textFilter.getText();
-            String particle = textFilter.getText();
+            String filterGen = textGenFilter.getText();
+            String particle = textParticle.getText();
             String expression = textExpression.getText();
-            this.addBranch(name, filter);
+            this.addBranchWithFilter(name, filter, filterGen);
+            
             this.addLeaf(name, particle, expression, new String[]{strOne,strTwo,strThree});
             //this.getCanvas().divide(Integer.parseInt(stringCOLS), Integer.parseInt(stringROWS));
             System.out.println(" ADDING BRANCH ----> ");
+            this.initTree();
         }
 
         return new JDialog();
@@ -257,7 +281,8 @@ public class EventTree extends Tree implements TreeProvider {
     public static class EventTreeBranch {
         
         private String branchName = "";
-        private final EventFilter   branchFilter = new EventFilter();        
+        private final EventFilter   branchFilter          = new EventFilter();
+        private final EventFilter   branchFilterGenerated = new EventFilter();
         private final Map<String,EventTreeLeaf>  branchLeafs = new LinkedHashMap<String,EventTreeLeaf>();
                 
         public EventTreeBranch(String name){
@@ -284,10 +309,14 @@ public class EventTree extends Tree implements TreeProvider {
             branchLeafs.put(leaf.getName(), leaf);
         }
         
+        
+        
         public void setName(String name){ branchName = name;}
         public String getName(){return branchName;}
         public EventFilter getFilter(){return branchFilter;}
+        public EventFilter getFilterGenerated(){return branchFilterGenerated;}
         public void setFilter(String filter) { branchFilter.setFilter(filter);}
+        public void setFilterGenerated(String filter) { branchFilterGenerated.setFilter(filter);}
         
     }
     
@@ -339,50 +368,41 @@ public class EventTree extends Tree implements TreeProvider {
         }
     }
     
+    public void openFile(){
+        
+    }
     
     public static void main(String[] args){
         
-        EventTree  evtTree = new EventTree();
-
-        evtTree.addBranch("LAMBDA", "-211:2212:X+:X-:Xn");  
-        evtTree.addLeaf("LAMBDA", "Mppi", "[-211]+[2212]","mass2","mass","theta","phi");
-        evtTree.addBranch("LAMBDA_EK", "11:321:X+:X-:Xn");
-        evtTree.addLeaf("LAMBDA_EK", "MxeK", "[b]+[t]-[11]-[321]","mass2","mass","theta","phi");
-        evtTree.addBranch("LAMBDA_EKG", "11:321:22:X+:X-:Xn");
-        evtTree.addLeaf("LAMBDA_EKG", "MxeK", "[b]+[t]-[11]-[321]","mass2","mass","theta","phi");
-        evtTree.addBranch("LAMBDA_EKNG", "11:321:X+:X-");
-        evtTree.addLeaf("LAMBDA_EKNG", "MxeK", "[b]+[t]-[11]-[321]","mass2","mass","theta","phi");
-        //evtTree.addLeaf("DVPI0", "proton", "[2212]","px","py","pz");
-        evtTree.initTree();
-        //evtTree.treeConfigure();
-        evtTree.setSource("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/datasets/reco/reco_eklambda_dst.hipo");
-        //evtTree.initTree();
-        
-        
-        /*
-        DynamicTree tree = evtTree.getDynamicTree();
-        JFrame frame = new JFrame();
-        frame.add(tree);
-        frame.pack();
-        frame.setVisible(true);
-        */
-        StudioUI studio = new StudioUI(evtTree);
-        /*
-        HipoDataSource reader = new HipoDataSource();
-        //reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/Debugging/eppi0_rec_central_DST.hipo");        
-        reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/Debugging/eppi0_rec_central_DST.hipo");
-        H1F h1 = new H1F("h1",80,0.0,0.85);
-        for(int i = 0; i < 36000; i++){
-            EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
-            evtTree.processEvent(event);
-            double mass = evtTree.getTree().getBranch("DVPI0:mxEp.mass").getValue().doubleValue();
-            double theta = evtTree.getTree().getBranch("DVPI0:proton.theta").getValue().doubleValue();
-            double p = evtTree.getTree().getBranch("DVPI0:proton.p").getValue().doubleValue();
-            if(theta*57.29>45.0&&p>0.8)
-                h1.fill(mass);
+        if(args.length==0){
+            StudioUI studio = new StudioUI();
+        } else  {
+            
+            String inputFile = args[0];
+            
+            if(inputFile.endsWith(".hipo")==true){
+                System.out.println("----> opening a HIPO DST Studio");
+                final EventTree  evtTree = new EventTree();
+                evtTree.setSource(inputFile);                
+                
+                JMenuItem itemOpen = new JMenuItem("Open DST Hipo...");
+                
+                itemOpen.addActionListener(new ActionListener(){
+                    public void actionPerformed(ActionEvent e) {
+                        evtTree.openFile();
+                    }
+                    
+                });
+                StudioUI studio = new StudioUI(evtTree);
+                studio.addImportMenuItem(itemOpen);
+                
+            } else if(inputFile.endsWith(".txt")==true){
+                TreeTextFile textTree = new TreeTextFile("TextTree");
+                textTree.readFile(inputFile);
+                StudioUI studio = new StudioUI(textTree);
+            }            
+            
         }
-        
-        TCanvas c1 = new TCanvas("c1",500,500);
-        c1.draw(h1);*/
+                
     }
 }
