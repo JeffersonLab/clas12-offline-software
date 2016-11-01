@@ -69,8 +69,8 @@ public class PDGDatabase {
         HashMap<Integer,PDGParticle> particleMap = new HashMap<Integer,PDGParticle>();
         particleMap.put(   11, new PDGParticle("e-",     11, 3, 0.0005, -1));
         particleMap.put(  -11, new PDGParticle("e+",    -11, 2, 0.0005, 1));
-        particleMap.put(  -11, new PDGParticle("nue",    12, 0, 0.320e-6, 0));
-        particleMap.put(  -11, new PDGParticle("nue-",  -12, 0, 0.320e-6, 0));
+        particleMap.put(   12, new PDGParticle("nue",    12, 0, 0.320e-6, 0));
+        particleMap.put(  -12, new PDGParticle("nue-",  -12, 0, 0.320e-6, 0));
         
         particleMap.put(   13, new PDGParticle("mu-",    13, 6, 0.1056583715,-1));
         particleMap.put(  -13, new PDGParticle("mu+",   -13, 5, 0.1056583715,1));        
