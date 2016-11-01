@@ -20,6 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import org.jlab.groot.base.GStyle;
 import org.jlab.groot.data.DataVector;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.studio.StudioUI;
@@ -47,6 +48,18 @@ public class EventTree extends Tree implements TreeProvider {
     
     public EventTree(){
         super("EventTree");
+        GStyle.getGraphErrorsAttributes().setMarkerStyle(0);
+        GStyle.getGraphErrorsAttributes().setMarkerColor(3);
+        GStyle.getGraphErrorsAttributes().setMarkerSize(7);
+        GStyle.getGraphErrorsAttributes().setLineColor(3);
+        GStyle.getGraphErrorsAttributes().setLineWidth(2);
+        GStyle.getFunctionAttributes().setLineWidth(6);
+        GStyle.getAxisAttributesX().setTitleFontSize(14);
+        GStyle.getAxisAttributesX().setLabelFontSize(12);
+        GStyle.getAxisAttributesY().setTitleFontSize(14);
+        GStyle.getAxisAttributesY().setLabelFontSize(12);
+        GStyle.getH1FAttributes().setFillColor(43);
+        GStyle.getH1FAttributes().setOptStat("1110");
     }
     
     @Override
