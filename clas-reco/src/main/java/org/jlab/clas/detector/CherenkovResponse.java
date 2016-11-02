@@ -14,12 +14,12 @@ import org.jlab.geom.prim.Line3D;
  */
 public class CherenkovResponse {
     
-    private double  hitTime = 0.0;
-    private double hitTheta = 0.0;
-    private double hitPhi   = 0.0;
-    private double hitNphe  = 0.0;
-    private double hitDeltaPhi   = 0.0;
-    private double hitDeltaTheta = 0.0;
+    private double        hitTime = 0.0;
+    private double       hitTheta = 0.0;
+    private double         hitPhi = 0.0;
+    private double        hitNphe = 0.0;
+    private double    hitDeltaPhi = 0.0;
+    private double  hitDeltaTheta = 0.0;
     //private Sphere3D 
     private DetectorDescriptor desc = new DetectorDescriptor();
     
