@@ -22,8 +22,8 @@ public final class SystemOfUnits {
         public static Measurement value(double value) {
             return new Measurement(value, "cm");
         }
-        
-        public static String unit(){
+
+        public static String unit() {
             return "cm";
         }
 
@@ -37,6 +37,7 @@ public final class SystemOfUnits {
         public static final double cm = centimeter;
         public static final double m = meter;
         public static final double km = kilometer;
+        public static final double in = 2.54 * cm;
     }
 
     public static final class Angle {
@@ -47,7 +48,6 @@ public final class SystemOfUnits {
         public static Measurement value(double value) {
             return new Measurement(value, "rad");
         }
-        
 
         public static String unit() {
             return "rad";
