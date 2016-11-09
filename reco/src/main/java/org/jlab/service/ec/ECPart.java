@@ -1,10 +1,8 @@
-package org.clas.fcmon.ec;
+package org.jlab.service.ec;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.clas.fcmon.tools.DetectorParticle;
-import org.clas.fcmon.tools.DetectorResponse;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
