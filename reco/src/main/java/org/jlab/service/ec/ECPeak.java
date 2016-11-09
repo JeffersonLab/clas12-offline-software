@@ -29,7 +29,7 @@ public class ECPeak {
     
     public ECPeak(ECStrip strip){
         this.desc.setSectorLayerComponent(strip.getDescriptor().getSector(), 
-                strip.getDescriptor().getLayer(), 0);
+                                          strip.getDescriptor().getLayer(), 0);
         this.peakStrips.add(strip);
         this.peakLine.copy(strip.getLine());
         this.indexMaxStrip = 0;
@@ -40,6 +40,7 @@ public class ECPeak {
     }
     
     public void setOrder(int order){ this.peakOrder = order; }
+    
     public int  getOrder(){ return this.peakOrder;}
     
     public void setPeakId(int id){
@@ -54,6 +55,7 @@ public class ECPeak {
         }
             return 0.0;
     }
+    
     public double getEnergy(){
         double energy = 0.0;
         for(ECStrip strip : this.peakStrips){
@@ -107,8 +109,11 @@ public class ECPeak {
         double logSumm = 0.0;
         for(int i = 0; i < this.peakStrips.size(); i++){
             Line3D line = this.peakStrips.get(i).getLine();
+            
             double energy = this.peakStrips.get(i).getEnergy();
-            double le = Math.log(energy);
+//            double     le = Math.log(energy);
+            double     le = energy;
+                       
             pointOrigin.setX(pointOrigin.x()+line.origin().x()*le);
             pointOrigin.setY(pointOrigin.y()+line.origin().y()*le);
             pointOrigin.setZ(pointOrigin.z()+line.origin().z()*le);
@@ -141,8 +146,8 @@ public class ECPeak {
         double energy_norm = 0.0;
         for(ECStrip strip : this.peakStrips){
             energy_summ += strip.getEnergy();
-	    int str = strip.getDescriptor().getComponent() - 1;
-	    str = str*8+4;
+	        int str = strip.getDescriptor().getComponent() - 1;
+	        str = str*8+4;
             energy_norm += strip.getEnergy()*str;
         }        
         return (int) (energy_norm/energy_summ);
