@@ -3,15 +3,20 @@ package org.jlab.service.ec;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.groot.data.H1F;
+import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
+
 
 public class ECPart {
 	
@@ -236,19 +241,56 @@ public class ECPart {
     }
     
     public static void main(String[] args){
-        EvioSource reader = new EvioSource();
-        reader.open(args[0]);
         
-        GenericKinematicFitter fitter = new GenericKinematicFitter(11);
+        ECEngine   engine = new ECEngine();
+        EvioSource reader = new EvioSource();
+//        reader.open(args[0]);
+        
+        //This GEMC file 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2
+        reader.open("/Users/colesmith/coatjava/data/pizero/fc-pizero-10k-s2-25deg-oldgeom.evio");
+        
+        engine.init();
+        engine.setStripThresholds(10,9,8);
+        engine.setPeakThresholds(18,20,15);
+        engine.setClusterCuts(7,15,20);
+        H1F h1 = new H1F("Invariant Mass",50,10.,200);         
+        h1.setOptStat(Integer.parseInt("1100")); h1.setTitleX("Pizero Invariant Mass (MeV)");
+        H1F h2 = new H1F("Energy Asymmetry",50,-1.0,1.0);      
+        h2.setOptStat(Integer.parseInt("1100")); h2.setTitleX("X:(E1-E2)/(E1+E2)");
+        H1F h3 = new H1F("Pizero Energy Error",50,-500.,500.); 
+        h3.setOptStat(Integer.parseInt("1100")); h3.setTitleX("Pizero Energy Error (MeV)");
+        H1F h4 = new H1F("Pizero Theta Error",50,-1.,1.);      
+        h4.setOptStat(Integer.parseInt("1100")); h4.setTitleX("Pizero Theta Error (deg)");
         
         while(reader.hasEvent()){
             EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
-            //ECPion.getPion(event);
-           // ECPart.getPhoton(event);
+            //engine.debug = true;
+            engine.processDataEvent((EvioDataEvent) event);      
             
-            //PhysicsEvent gen = fitter.getGeneratedEvent(event);
-            //Particle pion = gen.getParticle("[22]+[22,1]");
-            //System.out.println("---> " + pion.mass());
+            ECPart                        part = new ECPart(); part.geom = "2.4";
+            GenericKinematicFitter      fitter = new GenericKinematicFitter(11);
+            PhysicsEvent                   gen = fitter.getGeneratedEvent((EvioDataEvent)event);
+            List<DetectorResponse>  ecClusters = part.readEC((EvioDataEvent)event);           
+            double                     invmass = 1e3*Math.sqrt(part.getTwoPhoton(gen, ecClusters));
+            
+            h1.fill((float)invmass,1.);                          //Two-photon invariant mass
+            if (invmass>60 && invmass<200) {
+                h2.fill((float)part.X);                          //Pizero energy asymmetry
+                h3.fill((float)1e3*(Math.sqrt(part.tpi2)-2.0));  //Pizero total energy error
+                h4.fill(Math.acos(part.cpi0)*180/3.14159-25.);   //Pizero theta angle error
+            }
         }
+        
+        JFrame frame = new JFrame("Pizero Reconstruction");
+        frame.setSize(800,800);
+        EmbeddedCanvas canvas = new EmbeddedCanvas();
+        canvas.divide(2,2);
+        canvas.cd(0); canvas.draw(h1);
+        canvas.cd(1); canvas.draw(h2);
+        canvas.cd(2); canvas.draw(h3);
+        canvas.cd(3); canvas.draw(h4);
+        frame.add(canvas);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);     
     }
 }

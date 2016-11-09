@@ -174,8 +174,8 @@ public class ECEngine extends ReconstructionEngine {
         ECCommon.peakThreshold[2] = thr2;
     }   
     
-    public void setClusterErrors(float err0, float err1, float err2) {
-        System.out.println("ECEngine: Cluster Errors = "+err0+" "+err1+" "+err2);
+    public void setClusterCuts(float err0, float err1, float err2) {
+        System.out.println("ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2);
         ECCommon.clusterError[0] = err0;
         ECCommon.clusterError[1] = err1;
         ECCommon.clusterError[2] = err2;
