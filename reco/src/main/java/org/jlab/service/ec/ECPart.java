@@ -20,10 +20,10 @@ import org.jlab.io.evio.EvioSource;
 
 public class ECPart {
 	
-	public static double distance11,distance12,distance21,distance22;
-	public static double e1,e2,e1c,e2c,cth,cth1,cth2,X,tpi2,cpi0;
-	static double mpi0 = 0.1349764;
-	public static String geom = "2.4";
+    public static double distance11,distance12,distance21,distance22;
+    public static double e1,e2,e1c,e2c,cth,cth1,cth2,X,tpi2,cpi0;
+    static double mpi0 = 0.1349764;
+    public static String geom = "2.4";
     public static double SF1 = 0.27;
     public static double SF2 = 0.27;
     
@@ -245,15 +245,14 @@ public class ECPart {
         ECEngine   engine = new ECEngine();
         EvioSource reader = new EvioSource();
         
-        if (args.length != 0) { 
-            reader.open(args[0]);
-        } else {
+        if (args.length == 0) { 
             reader.open("/Users/colesmith/coatjava/data/pizero/fc-pizero-10k-s2-25deg-oldgeom.evio");
+        } else {
+            //GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
+            String inputFile = args[0];
+            reader.open(inputFile);
         }
-        
-        //GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
-        reader.open("/Users/colesmith/coatjava/data/pizero/fc-pizero-10k-s2-25deg-oldgeom.evio");
-        
+                
         engine.init();
         engine.setStripThresholds(10,9,8);
         engine.setPeakThresholds(18,20,15);
