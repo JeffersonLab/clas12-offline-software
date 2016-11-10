@@ -244,9 +244,14 @@ public class ECPart {
         
         ECEngine   engine = new ECEngine();
         EvioSource reader = new EvioSource();
-//        reader.open(args[0]);
         
-        //This GEMC file 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2
+        if (args.length != 0) { 
+            reader.open(args[0]);
+        } else {
+            reader.open("/Users/colesmith/coatjava/data/pizero/fc-pizero-10k-s2-25deg-oldgeom.evio");
+        }
+        
+        //GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
         reader.open("/Users/colesmith/coatjava/data/pizero/fc-pizero-10k-s2-25deg-oldgeom.evio");
         
         engine.init();
