@@ -21,9 +21,14 @@ public class PhysicsEvent {
     Particle  eventTarget;    
     private EventSelector  eventSelector = new EventSelector();
     List<Particle> eventParticles;
-    List<Particle> generatedParticles;
-    
+    List<Particle> generatedParticles;    
     HashMap<String,Double> eventProperties;
+    
+    
+    private ParticleList mcEvent = new ParticleList();
+    private double matchThresholdResolution = 0.02;
+    private double matchThresholdAngle      = 0.998;
+    
     
     public PhysicsEvent()
     {
@@ -50,6 +55,41 @@ public class PhysicsEvent {
     public boolean hasProperty(String name)
     {
         return eventProperties.containsKey(name);
+    }
+    /**
+     * returns generated event
+     * @return 
+     */
+    public ParticleList mc(){ return this.mcEvent;}
+    /**
+     * returns particle from reconstructed event that matches particle
+     * selected from generated event.
+     * @param pid pid of the particle in generated event
+     * @param skip order of particle in generated event
+     * @return particle from reconstructed event
+     */
+    public Particle getParticleMatchByPid(int pid, int skip){
+        Particle p = this.mcEvent.getByPid(pid, skip);
+        Particle result = new Particle();
+        double bestCos = 0.5;
+        double bestRes = 0.5;
+        //System.out.println(" LOOKING FOR MATCH WITH = " + p.toLundString());
+        for(int i =0; i < this.eventParticles.size(); i++){
+            if(p.charge()==this.eventParticles.get(i).charge()){
+                double cosTheta   = p.cosTheta(eventParticles.get(i));
+                double resolution = Math.abs((p.p() - eventParticles.get(i).p())/p.p());
+                //System.out.println(i + " " + "  cos = " + cosTheta + " res = " + resolution);
+                if(cosTheta>bestCos&&resolution<bestRes){
+                    if(cosTheta>=this.matchThresholdAngle&&resolution<this.matchThresholdResolution){
+                        bestCos = cosTheta;
+                        bestRes = resolution;
+                        //System.out.println(" THIS IS A GOOD PARTICLE = " + eventParticles.get(i).toLundString());
+                        result.copy(eventParticles.get(i));
+                    }
+                }
+            }
+        }
+        return result;
     }
     
     public double getProperty(String name)
@@ -248,8 +288,12 @@ public class PhysicsEvent {
     }
     
     public Particle getParticle(String selector){
+        EventSelector evt_selector = new EventSelector(selector);
+        return evt_selector.get(this);
+        /*
         eventSelector.parse(selector);
         return eventSelector.get(this);
+        */
     }
     
     public String toLundStringGenerated(){

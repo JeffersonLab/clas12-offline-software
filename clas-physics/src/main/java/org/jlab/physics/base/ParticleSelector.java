@@ -19,20 +19,47 @@ public class ParticleSelector {
     
     public static int TYPE_GENERATED    = 1;
     public static int TYPE_RECONSTRUCED = 2;
-    public static int TYPE_DETECTOR_PARTICLE = 2;
+    public static int TYPE_MATCHED      = 3;
+    public static int TYPE_DETECTOR_PARTICLE = 4;
     
     private Integer   particleID   = 11;
     private Integer   particleSkip = 0;
     private Integer   particleSign = 1;
     private String    particleType = "11";
+    private Integer   particleSelectionType = ParticleSelector.TYPE_RECONSTRUCED;
     private Boolean   overridePid  = false;
     private Integer   overrideParticleID = 11;
     private String    selectorFormat     = "[11,0]";
-    private final  char      bracketsOpen        = '[';
-    private final  char      bracketsClose       = ']';
+    
+    private char      bracketsOpen        = '(';
+    private char      bracketsClose       = ')';
+    
+    private final char[]    bracketTypes  = new char[]{'(',')','[',']','{','}'};
+    
+    public ParticleSelector(String format, int type){
+        
+        if(type>0&&type<4){
+            bracketsOpen  = bracketTypes[ (type-1)*2];
+            bracketsClose = bracketTypes[ (type-1)*2 + 1];
+            this.particleSelectionType = type;
+            this.parse(format);
+        }
+    }
+    
     
     public ParticleSelector(String format){
-        this.parse(format);
+        
+        int type = 1;
+        if(format.charAt(format.length()-1)==')') type = 1;
+        if(format.charAt(format.length()-1)==']') type = 2;
+        if(format.charAt(format.length()-1)=='}') type = 3;
+        
+        if(type>0&&type<4){
+            bracketsOpen  = bracketTypes[ (type-1)*2];
+            bracketsClose = bracketTypes[ (type-1)*2 + 1];
+            this.particleSelectionType = type;
+            this.parse(format);
+        }
     }
     
     public ParticleSelector(){
@@ -100,10 +127,10 @@ public class ParticleSelector {
         String trimmed;
         if(selectorFormat.charAt(1)==this.bracketsOpen&&
                 selectorFormat.charAt(selectorFormat.length()-1)==this.bracketsClose){
+            
             if(selectorFormat.charAt(0)=='-'){
                 this.particleSign = -1;                
-            } else {this.particleSign = 1;}
-            
+            } else {this.particleSign = 1;}            
             trimmed = selectorFormat.substring(2, selectorFormat.length()-1);
         } else if(selectorFormat.charAt(0)==this.bracketsOpen&&
                 selectorFormat.charAt(selectorFormat.length()-1)==this.bracketsClose){
@@ -111,7 +138,7 @@ public class ParticleSelector {
             this.particleSign = 1;
         } else {
             System.err.println("[ParticleSelector] ---> Syntax error. in string ("
-            +this.selectorFormat + ").");
+                    +this.selectorFormat + ").");
             return;
         }
         
@@ -139,11 +166,81 @@ public class ParticleSelector {
     public int pid(){return particleID;}
     public int skip(){return particleSkip;}
     
+    public boolean getParticle(PhysicsEvent event, Particle p){                
+        
+        p.setParticleWithMass(0.0,(byte) 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        try {
+            
+            if(particleID==5000){
+                p.copyParticle(event.beamParticle());
+                return true;
+            }
+            if(particleID==5001){
+                p.copyParticle(event.targetParticle());
+                return true;
+            }        
+            
+        } catch (Exception ex){
+            System.out.println("ERROR: getting particle beam or target has failed");
+        }
+        
+        
+        if(this.particleSelectionType==ParticleSelector.TYPE_RECONSTRUCED&&event.countByPid(particleID)<particleSkip) {
+            //System.out.println("debug 1");
+            return false;
+        }
+        if(this.particleSelectionType==ParticleSelector.TYPE_GENERATED&&event.mc().countByPid(particleID)<particleSkip){ 
+            //System.out.println("debug 2");
+            return false;
+        }
+        
+        //System.out.println("debug 3");
+        try {
+            
+            Particle  fromEvent = event.getParticleByPid(particleID, particleSkip);
+            
+            if(this.particleSelectionType==ParticleSelector.TYPE_GENERATED){
+                //System.out.println("debug 4");
+                fromEvent = event.mc().getByPid(particleID, particleSkip);
+            }
+            
+            if(this.particleSelectionType==ParticleSelector.TYPE_MATCHED){
+                //System.out.println("debug 5");
+                fromEvent = event.getParticleMatchByPid(particleID,particleSkip);                
+            }
+            
+            if(fromEvent.p()<0.0000001){
+                //System.out.println(" momentum is toooooo small");
+                return false;
+            }
+            
+            if(this.overridePid==false){
+                p.copyParticle(fromEvent);
+                p.changePid(this.particleID);
+                //System.out.println("----------->>>>>> COPY IS DONE ON " + fromEvent.toString());
+                if(this.particleSign<0) p.vector().invert();
+                return true;                
+            }            
+            p.initParticle(this.overrideParticleID,
+                    fromEvent.px(),
+                    fromEvent.py(),
+                    fromEvent.pz(),
+                    fromEvent.vertex().x(),                    
+                    fromEvent.vertex().y(),
+                    fromEvent.vertex().z()
+            );
+            if(this.particleSign<0) p.vector().invert();
+            return true;            
+        } catch (Exception e){
+            
+        }
+        return false;
+    }
+    
     public Particle getParticle(PhysicsEvent event){
         try {
         if(particleID==5000) return event.beamParticle();
-        if(particleID==5001) return event.targetParticle();
-        
+        if(particleID==5001) return event.targetParticle();        
         
         if(particleType.compareTo("-")==0){
             Particle  fromEvent = event.getParticleByCharge(-1,particleSkip);
@@ -226,9 +323,15 @@ public class ParticleSelector {
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
-        str.append(String.format("SELECTOR : FORMAT = (%32s) (%8d,%8s,%4d,%3d, override = [%6d,%6s] )",
+        str.append(String.format("SELECTOR : FORMAT = (%s) ( id = %8d, name = %8s, order = %4d, sign = %3d, type = %2d, override = [%6d,%6s] )",
                 selectorFormat,particleID,particleType,particleSkip,particleSign,
-                this.overrideParticleID,this.overridePid));
+                this.particleSelectionType,this.overrideParticleID,this.overridePid));
         return str.toString();
+    }
+    
+    public static void main(String[] args){
+        ParticleSelector selector = new ParticleSelector("-{211,2,2212}",3);
+        //selector.parse("-(211,2,2212)");
+        System.out.println(selector.toString());
     }
 }

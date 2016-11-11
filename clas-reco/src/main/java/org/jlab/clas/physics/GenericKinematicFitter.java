@@ -104,7 +104,15 @@ public class GenericKinematicFitter {
         }
         return physEvent;
     }
-    
+        
+    public PhysicsEvent createEvent(DataEvent event){
+        PhysicsEvent  recEvent = this.getPhysicsEvent(event);
+        PhysicsEvent  genEvent = this.getGeneratedEvent(event);
+        for(int i = 0; i < genEvent.count();i++){
+            recEvent.mc().add(genEvent.getParticle(i));
+        }
+        return recEvent;
+    }
     
     public RecEvent getRecEvent(DataEvent event){
         

@@ -84,6 +84,33 @@ public class EventFilter {
         return filter;
     }
     
+    
+    public boolean checkFinalState(ParticleList plist)
+    {
+        boolean filter = true;
+        
+        int pc = plist.countByCharge(+1);
+        int pm = plist.countByCharge(-1);
+        int pn = plist.countByCharge( 0);
+        
+        if(pc<this.getMinimumByCharge(+1)||pc>this.getMaximumByCharge(+1))
+            return false;
+        if(pm<this.getMinimumByCharge(-1)||pm>this.getMaximumByCharge(-1))
+            return false;       
+        if(pn<this.getMinimumByCharge( 0)||pn>this.getMaximumByCharge( 0))
+            return false;
+        
+        Set<Integer> pKeys = this.getIdKeys();
+        Iterator it = pKeys.iterator();
+        while(it.hasNext())
+        {
+            Integer key = (Integer) it.next();
+            int idcount = this.getIdCount(key);
+            if(plist.countByPid(key)<idcount) return false;
+        }
+        return filter;
+    }
+    
     public boolean isValid(PhysicsEvent event)
     {
         this.numberOfChecks++;
