@@ -245,10 +245,13 @@ public class ECPart {
         ECEngine   engine = new ECEngine();
         EvioSource reader = new EvioSource();
         
+        String evioPath = "/Users/colesmith/coatjava/data/pizero/";
+        // GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
+        // JLAB: evioPath = "/lustre/expphy/work/hallb/clas12/lcsmith/clas12/forcar/gemc/evio/";
+        
         if (args.length == 0) { 
-            reader.open("/Users/colesmith/coatjava/data/pizero/fc-pizero-10k-s2-25deg-oldgeom.evio");
+            reader.open(evioPath+"fc-pizero-10k-s2-25deg-oldgeom.evio");
         } else {
-            //GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
             String inputFile = args[0];
             reader.open(inputFile);
         }
@@ -257,6 +260,7 @@ public class ECPart {
         engine.setStripThresholds(10,9,8);
         engine.setPeakThresholds(18,20,15);
         engine.setClusterCuts(7,15,20);
+        
         H1F h1 = new H1F("Invariant Mass",50,10.,200);         
         h1.setOptStat(Integer.parseInt("1100")); h1.setTitleX("Pizero Invariant Mass (MeV)");
         H1F h2 = new H1F("Energy Asymmetry",50,-1.0,1.0);      
