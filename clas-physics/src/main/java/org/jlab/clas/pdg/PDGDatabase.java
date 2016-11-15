@@ -85,17 +85,17 @@ public class PDGDatabase {
 		particleMap.put(3122, new PDGParticle("Lambda0", 3122, 100, 1.115683, 0));
 		particleMap.put(-3122, new PDGParticle("antiLambda0", -3122, 100, 1.115683, 0));
 
-		particleMap.put(3212, new PDGParticle("Sigma0", 3212, 1.189, 0));
-		particleMap.put(-3212, new PDGParticle("antiSigma0", -3212, 1.189, 0));
+		particleMap.put(3212, new PDGParticle("Sigma0", 3212, 1.192, 0));
+		particleMap.put(-3212, new PDGParticle("antiSigma0", -3212, 1.192, 0));
 
 		particleMap.put(3222, new PDGParticle("Sigma+", 3222, 1.189, 1));
 		particleMap.put(-3222, new PDGParticle("antiSigma+", -3222, 1.189, -1));
 
-		particleMap.put(3112, new PDGParticle("Sigma-", 3112, 1.189, -1));
-		particleMap.put(-3112, new PDGParticle("antiSigma-", -3112, 1.189, 1));
+		particleMap.put(3112, new PDGParticle("Sigma-", 3112, 1.197, -1));
+		particleMap.put(-3112, new PDGParticle("antiSigma-", -3112, 1.197, 1));
 
-		particleMap.put(3312, new PDGParticle("Xi-", 3312, 1.315, -1));
-		particleMap.put(-3312, new PDGParticle("antiXi-", -3312, 1.315, 1));
+		particleMap.put(3312, new PDGParticle("Xi-", 3312, 1.321, -1));
+		particleMap.put(-3312, new PDGParticle("antiXi-", -3312, 1.321, 1));
 		particleMap.put(3322, new PDGParticle("Xi0", 3322, 1.315, 0));
 		return particleMap;
 	}
