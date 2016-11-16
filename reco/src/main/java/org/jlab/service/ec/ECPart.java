@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.DetectorResponse;
 
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
