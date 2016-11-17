@@ -5,7 +5,10 @@
  */
 package org.jlab.clas.physics;
 
+import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
+import org.jlab.hipo.data.HipoEvent;
+import org.jlab.hipo.data.HipoNode;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
@@ -112,6 +115,28 @@ public class GenericKinematicFitter {
             recEvent.mc().add(genEvent.getParticle(i));
         }
         return recEvent;
+    }
+    
+    public PhysicsEvent createEvent(HipoEvent event){
+        PhysicsEvent physEvent = new PhysicsEvent();
+        physEvent.setBeam(this.beamEnergy);
+        if(event.hasGroup(20)==true){
+            Map<Integer,HipoNode>  items = event.getGroup(20);
+            int nentries = items.get(1).getDataSize();
+            for(int i = 0; i < nentries; i++){
+                int pid = items.get(1).getInt(i);
+                double px = items.get(2).getFloat(i*3+0);
+                double py = items.get(2).getFloat(i*3+1);
+                double pz = items.get(2).getFloat(i*3+2);
+                Particle particle = new Particle(pid,px,py,pz);
+                double vx = items.get(3).getShort(i*3+0)*100.0;
+                double vy = items.get(3).getShort(i*3+1)*100.0;
+                double vz = items.get(3).getShort(i*3+2)*100.0;
+                particle.vertex().setXYZ(vx, vy, vz);
+                physEvent.mc().add(particle);
+            }
+        }
+        return physEvent;
     }
     
     public RecEvent getRecEvent(DataEvent event){
