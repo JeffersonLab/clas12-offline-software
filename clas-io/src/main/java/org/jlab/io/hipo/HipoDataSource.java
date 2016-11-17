@@ -50,7 +50,7 @@ public class HipoDataSource implements DataSource {
         for(int ev = 0; ev < ncount; ev++){
             byte[] descBytes  = header.getEvent(ev);
             String descString = new String(descBytes);
-            System.out.println("init dictionary : " + descString);
+            //System.out.println("init dictionary : " + descString);
             EvioDataDescriptor  descriptor = new EvioDataDescriptor(descString);
             this.dictionary.addDescriptor(descriptor);
         }

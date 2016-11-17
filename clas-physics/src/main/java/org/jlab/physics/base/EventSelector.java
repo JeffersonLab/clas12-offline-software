@@ -9,6 +9,7 @@ package org.jlab.physics.base;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
+import org.jlab.clas.physics.ParticleNotFoundException;
 import org.jlab.clas.physics.PhysicsEvent;
 
 /**
@@ -58,25 +59,31 @@ public class EventSelector {
     }
     
     public Particle get(PhysicsEvent event){
-        List<Particle>  plist = this.getParticleList(event);
-        if(plist.isEmpty()) return null;
-        
-        Particle part = new Particle();
-        part.copy(plist.get(0));
-        for(int loop =1 ; loop < plist.size(); loop++){
-            part.combine(plist.get(loop), 1);
+        try {
+            List<Particle>  plist = this.getParticleList(event);
+            if(plist.isEmpty()) return null;
+            
+            Particle part = new Particle();
+            part.copy(plist.get(0));
+            for(int loop =1 ; loop < plist.size(); loop++){
+                part.combine(plist.get(loop), 1);
+            }
+            return part;
+        } catch (ParticleNotFoundException e){
+            return new Particle();
         }
-        return part;
     }
     
-    public List getParticleList(PhysicsEvent event){
+    public List getParticleList(PhysicsEvent event) throws ParticleNotFoundException{
         ArrayList<Particle>  plist = new ArrayList<Particle>();
         for(ParticleSelector sel : pSelectors){
             Particle part = new Particle();
             boolean status = sel.getParticle(event,part);
             if(status==false){
-                System.err.println("[EventSelector::ERROR] event does no contain "
+                throw new ParticleNotFoundException("[EventSelector::ERROR] event does no contain "
                 + "particle for selector \n" + sel.toString());
+                /*System.err.println("[EventSelector::ERROR] event does no contain "
+                + "particle for selector \n" + sel.toString());*/
             } else {
                 plist.add(part);
             }

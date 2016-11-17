@@ -75,8 +75,8 @@ public class LundReader {
 			if (nrows < 1)
 				return false;
 			physEvent.addProperty("nPart", nrows);
-			physEvent.addProperty("nTarNucl", Integer.parseInt(tokens[1]));
-			physEvent.addProperty("nTarProt", Integer.parseInt(tokens[2]));
+			physEvent.addProperty("nTarNucl", Double.parseDouble(tokens[1]));
+			physEvent.addProperty("nTarProt", Double.parseDouble(tokens[2]));
 			physEvent.addProperty("tarPol", Double.parseDouble(tokens[3]));
 			physEvent.addProperty("beamPol", Double.parseDouble(tokens[4]));
 			physEvent.addProperty("x", Double.parseDouble(tokens[5]));

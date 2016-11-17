@@ -58,13 +58,13 @@ public class BasicDataBank implements DataBank {
     
     }
     
-    @Override
+    
     public String[] getColumnList() {
         return null;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
+    
     public DataDescriptor getDescriptor() {
         return bankDescriptor;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -74,7 +74,7 @@ public class BasicDataBank implements DataBank {
      * @param path name of the column
      * @return double array
      */
-    @Override
+    
     public double[] getDouble(String path) {
         if(doubleContainer.containsKey(path)==true){
             return doubleContainer.get(path);
@@ -87,7 +87,7 @@ public class BasicDataBank implements DataBank {
      * @param path column name
      * @param arr array of doubles to add to the container. 
      */
-    @Override
+    
     public void setDouble(String path, double[] arr) {
         if(doubleContainer.containsKey(path)==true){
             this.printWarningColumnExists("setDouble", path);
@@ -102,7 +102,7 @@ public class BasicDataBank implements DataBank {
      * @param row column element
      * @param value new value to set
      */
-    @Override
+    
     public void setDouble(String path, int row, double value) {
         if(doubleContainer.containsKey(path)==false){
             this.printWarningColumnDoesNotExist("setDouble", path);
@@ -121,7 +121,7 @@ public class BasicDataBank implements DataBank {
      * @param path
      * @param arr 
      */
-    @Override
+    
     public void appendDouble(String path, double[] arr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -130,7 +130,7 @@ public class BasicDataBank implements DataBank {
      * @param path
      * @return array of floats
      */
-    @Override
+    
     public float[] getFloat(String path) {
         if(floatContainer.containsKey(path)==true){
             return floatContainer.get(path);
@@ -143,7 +143,7 @@ public class BasicDataBank implements DataBank {
      * @param path
      * @param arr 
      */
-    @Override
+    
     public void setFloat(String path, float[] arr) {
         if(floatContainer.containsKey(path)==true){
             this.printWarningColumnExists("setDouble", path);
@@ -158,7 +158,7 @@ public class BasicDataBank implements DataBank {
      * @param row
      * @param value 
      */
-    @Override
+    
     public void setFloat(String path, int row, float value) {
         if(floatContainer.containsKey(path)==false){
             this.printWarningColumnDoesNotExist("setDouble", path);
@@ -177,12 +177,12 @@ public class BasicDataBank implements DataBank {
      * @param path
      * @param arr 
      */
-    @Override
+    
     public void appendFloat(String path, float[] arr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    @Override
+    
     public int[] getInt(String path) {
         if(intContainer.containsKey(path)==true){
             return intContainer.get(path);
@@ -190,7 +190,7 @@ public class BasicDataBank implements DataBank {
         return new int[0];
     }
     
-    @Override
+    
     public void setInt(String path, int[] arr) {
         if(intContainer.containsKey(path)==true){
             this.printWarningColumnExists("setInt", path);
@@ -199,7 +199,7 @@ public class BasicDataBank implements DataBank {
         }
     }
     
-    @Override
+    
     public void setInt(String path, int row, int value) {
         if(intContainer.containsKey(path)==false){
             this.printWarningColumnDoesNotExist("setInt", path);
@@ -218,12 +218,12 @@ public class BasicDataBank implements DataBank {
      * @param path
      * @param arr 
      */
-    @Override
+    
     public void appendInt(String path, int[] arr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
+    
     public short[] getShort(String path) {
         if(shortContainer.containsKey(path)==true){
             return shortContainer.get(path);
@@ -231,7 +231,7 @@ public class BasicDataBank implements DataBank {
         return new short[0];
     }
 
-    @Override
+    
     public void setShort(String path, short[] arr) {
         if(shortContainer.containsKey(path)==true){
             this.printWarningColumnExists("setShort", path);
@@ -240,7 +240,7 @@ public class BasicDataBank implements DataBank {
         }
     }
 
-    @Override
+    
     public void setShort(String path, int row, short value) {
         if(shortContainer.containsKey(path)==false){
             this.printWarningColumnDoesNotExist("setShort", path);
@@ -255,12 +255,12 @@ public class BasicDataBank implements DataBank {
         }
     }
 
-    @Override
+    
     public void appendShort(String path, short[] arr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
+    
     public byte[] getByte(String path) {
         if(byteContainer.containsKey(path)==true){
             return byteContainer.get(path);
@@ -268,7 +268,7 @@ public class BasicDataBank implements DataBank {
         return new byte[0];        
     }
 
-    @Override
+    
     public void setByte(String path, byte[] arr) {
         if(byteContainer.containsKey(path)==true){
             this.printWarningColumnExists("setByte", path);
@@ -277,7 +277,7 @@ public class BasicDataBank implements DataBank {
         }
     }
 
-    @Override
+    
     public void setByte(String path, int row, byte value) {
         if(byteContainer.containsKey(path)==false){
             this.printWarningColumnDoesNotExist("setByte", path);
@@ -292,12 +292,12 @@ public class BasicDataBank implements DataBank {
         }
     }
 
-    @Override
+    
     public void appendByte(String path, byte[] arr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
+    
     public int columns() {
         int ic = 0;
         ic += shortContainer.size();
@@ -308,7 +308,7 @@ public class BasicDataBank implements DataBank {
         return ic;
     }
 
-    @Override
+    
     public int rows() {
         int nrows = 0;
         for(Map.Entry<String,float[]> item : floatContainer.entrySet()){
@@ -324,7 +324,7 @@ public class BasicDataBank implements DataBank {
         return nrows;
     }
 
-    @Override
+    
     public void show() {
         int size = this.columns();
         String bankname = "undefined";
@@ -375,7 +375,7 @@ public class BasicDataBank implements DataBank {
         }
     }
 
-    @Override
+    
     public void reset() {
         shortContainer.clear();
         byteContainer.clear();
@@ -384,12 +384,12 @@ public class BasicDataBank implements DataBank {
         doubleContainer.clear();
     }
 
-    @Override
+    
     public void allocate(int rows) {
         System.err.println("[BasicDataBank]---> allocate is not implemented..");
     }
 
-    @Override
+    
     public double getDouble(String path, int index) {
         if(doubleContainer.containsKey(path)==true){
             if(doubleContainer.get(path).length<=index){
@@ -405,7 +405,7 @@ public class BasicDataBank implements DataBank {
         return 0.0;
     }
 
-    @Override
+    
     public float getFloat(String path, int index) {
         if(floatContainer.containsKey(path)==true){
             if(floatContainer.get(path).length<=index){
@@ -421,7 +421,7 @@ public class BasicDataBank implements DataBank {
         return (float) 0.0;
     }
 
-    @Override
+    
     public int getInt(String path, int index) {
         if(intContainer.containsKey(path)==true){
             if(intContainer.get(path).length<=index){
@@ -437,7 +437,7 @@ public class BasicDataBank implements DataBank {
         return 0;
     }
 
-    @Override
+    
     public short getShort(String path, int index) {
         if(shortContainer.containsKey(path)==true){
             if(shortContainer.get(path).length<=index){
@@ -453,7 +453,7 @@ public class BasicDataBank implements DataBank {
         return 0;
     }
 
-    @Override
+    
     public byte getByte(String path, int index) {
          if(byteContainer.containsKey(path)==true){
             if(byteContainer.get(path).length<=index){
