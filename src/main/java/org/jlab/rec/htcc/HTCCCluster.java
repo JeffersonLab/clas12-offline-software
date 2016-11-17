@@ -12,6 +12,7 @@ import java.util.Set;
  * @author G. Gavalian
  */
 class HTCCCluster {
+    private double[] thetaBorder = new double[]{5, 13, 21, 28}; 
     private int nhitclust;
     private int nthetaclust;
     private int nphiclust;
@@ -22,7 +23,10 @@ class HTCCCluster {
     private int iphimax;
 
     private int nphetot;
-
+    private double x;
+    private double y;
+    private double z;
+    
     private double theta;
     private double dtheta;
     private double phi;
@@ -51,7 +55,10 @@ class HTCCCluster {
         iphimax = 0;
 
         nphetot = 0;
-
+        x = 0;
+        y = 0;
+        z = 0;
+        
         theta = 0.0;
         dtheta = 0.0;
         phi = 0.0;
@@ -98,9 +105,11 @@ class HTCCCluster {
         phi = 0.0;
         dtheta = 0.0;
         dphi = 0.0;
-  
+        int mirror = 0;
         nphetot = 0;
-
+        x = 0;
+        y = 0;
+        z = 0;
         nhitclust = hitnphe.size();
   
         double cosphi = 0.0;
@@ -128,8 +137,20 @@ class HTCCCluster {
         theta /= dtheta;
         cosphi /= dphi;
         sinphi /= dphi;
+        for (int u = 0; u < 4; u++){
+        if (theta > thetaBorder[u] && theta < thetaBorder[u + 1]){
+            mirror = u + 1;
+        }
 
+        }
+       
         phi = Math.atan2(sinphi, cosphi );
+        Geom.Ellipse ellipse1 = new Geom.Ellipse(Geom.eXR[mirror], Geom.eYR[mirror], Geom.eZR[mirror], 0,0.0,0.0,Geom.fXR[mirror], Geom.fYR[mirror], Geom.fZR[mirror]);
+        Geom.FindIntersect intersect1 = new Geom.FindIntersect(theta, ellipse1.cY, ellipse1.cZ, ellipse1.b, ellipse1.c);
+        Geom.Rotate3D rot = new Geom.Rotate3D(phi, 0.0, intersect1.getyIntersect(), intersect1.getzIntersect());
+        x = rot.getXPrime();
+        y = rot.getYPrime();
+        z = rot.getZPrime();
 
         dtheta = Math.pow(dtheta, -0.5);
         dphi = Math.pow(dphi, -0.5);
@@ -150,7 +171,15 @@ class HTCCCluster {
     public int getNHitClust() {
         return nhitclust;
     }
-    
+    public double getX(){
+        return x;
+    }
+    public double getY(){
+        return y;
+    }
+    public double getZ(){
+        return z;      
+    }
     public int getIThetaMin() {
         return ithetamin;
     }

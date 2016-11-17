@@ -299,6 +299,9 @@ public class HTCCReconstruction {
             bankClusters.setDouble("phi", i, cluster.getPhi());
             bankClusters.setDouble("dtheta", i, cluster.getDTheta());
             bankClusters.setDouble("dphi", i, cluster.getDPhi());
+            bankClusters.setDouble("x", i, cluster.getX());
+            bankClusters.setDouble("y", i, cluster.getY());
+            bankClusters.setDouble("z", i, cluster.getZ());
         }
         
         // Push the results into the bank
@@ -313,6 +316,7 @@ public class HTCCReconstruction {
      * Contains the HTCC reconstruction parameters.
      */
     class ReconstructionParameters {
+        
         double theta0[];
         double dtheta0[];
         double phi0;
