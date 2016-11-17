@@ -41,7 +41,8 @@ public class Triangle3d {
         double denom = d00 * d11 - d01 * d01;
         double vv = (d11 * d20 - d01 * d21) / denom;
         double ww = (d00 * d21 - d01 * d20) / denom;
-        return (vv >= 0 && ww >= 0 && (vv + ww) <= 1);
+        //added 1e-10 to account for error related to precision
+        return (vv >= -1e-10 && ww >= -1e-10 && (vv + ww) <= 1+1e-10);
     }
 
     public Intersection getIntersection(Straight line) {

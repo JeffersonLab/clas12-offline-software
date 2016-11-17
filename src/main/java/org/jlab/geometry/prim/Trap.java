@@ -64,7 +64,7 @@ public class Trap implements Primitive {
             {{0, 2, 3, 1}, {0, 0, -1}},
             {{4, 5, 7, 6}, {0, 0, +1}}
         };
-        
+
         Vector3d[] vpos = {
             new Vector3d(-pDz * pTthetaCphi - pDy1 * pTalpha1 - pDx1,
             -pDz * pTthetaSphi - pDy1, -pDz),

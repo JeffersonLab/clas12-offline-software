@@ -146,9 +146,6 @@ public abstract class Geant4Basic {
         return globalTransform;
     }
 
-    protected void afterCSGtransformation() {
-    }
-
     protected final void updateCSGtransformation() {
         children.stream()
                 .forEach(child -> child.updateCSGtransformation());
@@ -156,8 +153,6 @@ public abstract class Geant4Basic {
         if (volumeSolid != null) {
             volumeCSG = volumeSolid.toCSG().transformed(getGlobalTransform());
         }
-
-        afterCSGtransformation();
     }
 
     public Geant4Basic translate(double x, double y, double z) {
@@ -320,6 +315,16 @@ public abstract class Geant4Basic {
             }
         }
         return hits;
+    }
+
+    public Line3d getLineX() {
+        throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
+//        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
+    }
+
+    public Line3d getLineY() {
+        throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
+//        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
 
     public Line3d getLineZ() {

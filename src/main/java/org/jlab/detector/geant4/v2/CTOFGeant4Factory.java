@@ -66,15 +66,10 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         }
 
         @Override
-        public void afterCSGtransformation() {
+        public Line3d getLineZ() {
             Vector3d cent = new Vector3d(0, -26.62, 0);
             cent.rotateZ(Math.toRadians(angle0 + (padnum - 1) * dangle));
-            centerline = new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
-        }
-
-        @Override
-        public Line3d getLineZ() {
-            return centerline;
+            return new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
         }
     }
 

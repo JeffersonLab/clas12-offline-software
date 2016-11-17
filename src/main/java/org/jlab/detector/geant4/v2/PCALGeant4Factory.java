@@ -71,13 +71,13 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     private Layer getULayer(int ilayer, int isector) {
-        Layer uLayer = new Layer("U-view-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip+2.0*dwrap);
+        Layer uLayer = new Layer("U-view-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip + 2.0 * dwrap);
         uLayer.populateUstrips(ilayer, isector);
         return uLayer;
     }
 
     private Layer getVLayer(int ilayer, int isector) {
-        Layer vLayer = new Layer("V-view-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip+2.0*dwrap,
+        Layer vLayer = new Layer("V-view-scintillator_" + (ilayer * 3 + 2) + "_s" + isector, dstrip + 2.0 * dwrap,
                 wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
         vLayer.layerVol.rotate("zyx", thview, Math.toRadians(180), 0);
 
@@ -90,7 +90,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     private Layer getWLayer(int ilayer, int isector) {
-        Layer wLayer = new Layer("W-view-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip+2.0*dwrap,
+        Layer wLayer = new Layer("W-view-scintillator_" + (ilayer * 3 + 3) + "_s" + isector, dstrip + 2.0 * dwrap,
                 wheight / 2.0, wmax / 2.0, virtualzero, -walpha);
         wLayer.layerVol.rotate("xyz", 0, 0, thview);
 
@@ -101,7 +101,6 @@ public final class PCALGeant4Factory extends Geant4Factory {
         wLayer.populateWstrips(ilayer, isector);
         return wLayer;
     }
-
 
     private class Layer {
 
@@ -237,11 +236,11 @@ public final class PCALGeant4Factory extends Geant4Factory {
         private final double extrathickness = 0.05;
         //G4Trap dimensions for sector volume (mother volume)
         private final double dsector = nsteel * dsteel + nfoam * dfoam
-                + nviews * nlayers * (dstrip+2.0*dwrap)
+                + nviews * nlayers * (dstrip + 2.0 * dwrap)
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + nsteel + nfoam) * microgap;
         private final double dist2midplane = dist2tgt
-                + (nviews * nlayers * (dstrip+2.0*dwrap)
+                + (nviews * nlayers * (dstrip + 2.0 * dwrap)
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers - 2) * microgap) / 2.0;
         private final double hshift = uheight / 2.0 - yhigh;
@@ -322,15 +321,37 @@ public final class PCALGeant4Factory extends Geant4Factory {
         @Override
         public Vector3d getVertex(int ivertex) {
             int ipol = ivertex / 4;
-            if(iview==1) ipol = 1-ipol;
+            if (iview == 1) {
+                ipol = 1 - ipol;
+            }
 
             int[][][] ivert = {
                 {{0, 3, 1, 2}, {0, 1, 3, 2}},
                 {{1, 2, 0, 3}, {3, 2, 0, 1}},
                 {{2, 1, 3, 0}, {2, 3, 1, 0}}
             };
-            return volumeCSG.getPolygons().get(4 + ipol).vertices.get(ivert[iview][ipol][ivertex%4]).pos;
+            return volumeCSG.getPolygons().get(4 + ipol).vertices.get(ivert[iview][ipol][ivertex % 4]).pos;
         }
+    }
+
+    public int getNumberOfSectors() {
+        return nsectors;
+    }
+
+    public int getNumberOfLayers() {
+        return nviews * nlayers;
+    }
+
+    public int getNumberOfPaddles(int ilayer) {
+        ilayer--;
+        PCALSector secVol = sectorVolumes.get(0);
+        if (ilayer < 0 || ilayer >= secVol.layerVolumes.size()) {
+            System.err.println(String.format("Layer %d  doesn't exist", ilayer + 1));
+            throw new IndexOutOfBoundsException();
+        }
+
+        Layer lVol = secVol.layerVolumes.get(ilayer);
+        return lVol.scipaddles.size();
     }
 
     public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {

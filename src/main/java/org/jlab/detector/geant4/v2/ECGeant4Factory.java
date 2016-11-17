@@ -329,7 +329,7 @@ public final class ECGeant4Factory extends Geant4Factory {
     }
 
     public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {
-        int iview = (ilayer - 1) / 3;
+        int iview = (ilayer - 1) % 3;
         int[] npaddles = {nustrips, nvstrips, nwstrips};
         if (isector < 1 || isector > nsectors || ilayer < 1 || ilayer > nlayers*nviews || ipaddle < 1 || ipaddle > npaddles[iview]) {
             System.err.println(String.format("Paddle #%d in sector %d, layer %d doesn't exist", ipaddle, isector, ilayer));
