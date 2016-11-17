@@ -18,7 +18,7 @@ public class Line3d extends Straight {
         super(origin, end);
     }
 
-    protected Line3d(Straight line) {
+    public Line3d(Straight line) {
         super(line);
     }
 

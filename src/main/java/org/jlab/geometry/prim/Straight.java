@@ -22,9 +22,9 @@ public abstract class Straight {
         this.end = end.clone();
     }
     
-    protected Straight(Straight line){
-        this.origin = line.origin;
-        this.end = line.end;
+    public Straight(Straight line){
+        this.origin = line.origin.clone();
+        this.end = line.end.clone();
     }
 
     public void setEnd(Vector3d end){
@@ -52,6 +52,10 @@ public abstract class Straight {
     public Straight toLine() {
         if (innerLine == null) {
             innerLine = new Line3d(this);
+
+            //use the same points, change of original line will change the innerLine
+            innerLine.origin = this.origin;
+            innerLine.end = this.end;
         }
         return innerLine;
     }

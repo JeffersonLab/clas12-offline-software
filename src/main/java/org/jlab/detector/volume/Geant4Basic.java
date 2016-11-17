@@ -149,8 +149,6 @@ public abstract class Geant4Basic {
     protected void afterCSGtransformation() {
     }
 
-    ;
-    
     protected final void updateCSGtransformation() {
         children.stream()
                 .forEach(child -> child.updateCSGtransformation());
@@ -259,7 +257,7 @@ public abstract class Geant4Basic {
 
     public String gemcStringRecursive() {
         StringBuilder str = new StringBuilder();
-        if(!isAbstract()){
+        if (!isAbstract()) {
             str.append(gemcString());
             str.append(System.getProperty("line.separator"));
         }
@@ -327,5 +325,10 @@ public abstract class Geant4Basic {
     public Line3d getLineZ() {
         throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
 //        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
+    }
+
+    public Vector3d getLocal(Vector3d vec) {
+        Transform trans = getGlobalTransform().invert();
+        return trans.transform(vec.clone());
     }
 }

@@ -69,7 +69,7 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private Layer getULayer(int iuvw, int isector) {
         int ilayer = iuvw * 3 + 1;
-        double height = nustrips * (wUstrip + (ilayer - 1) * dwUstrip)+2.0*virtualzero;
+        double height = nustrips * (wUstrip + (ilayer - 1) * dwUstrip) + 2.0 * virtualzero;
         double halfbase = height / Math.tan(thview);
 
         Layer uLayer = new Layer("U-scintillator_" + ilayer + "_s" + isector + "_view_1_stack_" + ((ilayer < 16) ? 1 : 2), dstrip,
@@ -111,7 +111,7 @@ public final class ECGeant4Factory extends Geant4Factory {
         final double thickness;
 
         public Layer(String name, double thickness, int ilayer) {
-            double height = getLeadHeight(ilayer)+2.0*virtualzero;
+            double height = getLeadHeight(ilayer) + 2.0 * virtualzero;
             double halfbase = height / Math.tan(thview);
             layerVol = new G4Trap(name, thickness / 2.0, 0, 0,
                     height / 2.0, virtualzero, halfbase, 0,
@@ -316,10 +316,22 @@ public final class ECGeant4Factory extends Geant4Factory {
         }
     }
 
+    public int getNumberOfSectors() {
+        return nsectors;
+    }
+
+    public int getNumberOfLayers() {
+        return nviews * nlayers;
+    }
+
+    public int getNumberOfPaddles() {
+        return nustrips;
+    }
+
     public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {
         int iview = (ilayer - 1) / 3;
         int[] npaddles = {nustrips, nvstrips, nwstrips};
-        if (isector < 1 || isector > 6 || ilayer < 1 || ilayer > 39 || ipaddle < 1 || ipaddle > npaddles[iview]) {
+        if (isector < 1 || isector > nsectors || ilayer < 1 || ilayer > nlayers*nviews || ipaddle < 1 || ipaddle > npaddles[iview]) {
             System.err.println(String.format("Paddle #%d in sector %d, layer %d doesn't exist", ipaddle, isector, ilayer));
             throw new IndexOutOfBoundsException();
         }

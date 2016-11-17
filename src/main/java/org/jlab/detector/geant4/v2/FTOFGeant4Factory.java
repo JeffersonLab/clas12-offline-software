@@ -23,7 +23,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
     private final double motherGap = 4.0 * Length.cm;
     private final double pbthickness = 0.005 * Length.in;
-    private final double microgap = 0.0001;
+    private final double microgap = 0.001;
 
     private final String[] stringLayers = new String[]{
         "/geometry/ftof/panel1a",
@@ -70,10 +70,10 @@ public final class FTOFGeant4Factory extends Geant4Factory {
                 panel_mother_dz + motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
-        double panel_pos_xy = dist2edge * Math.sin(thmin) + (panel_width + motherGap) / 2 * Math.cos(thtilt);
+        double panel_pos_xy = dist2edge * Math.sin(thmin) + (panel_width + 2.0 * motherGap) / 2 * Math.cos(thtilt);
         double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
         double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
-        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width + motherGap) / 2 * Math.sin(thtilt);
+        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width + 2.0 * motherGap) / 2 * Math.sin(thtilt);
 
         panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
         panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
