@@ -5,6 +5,8 @@
  */
 package org.jlab.detector.base;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.utils.groups.IndexedList;
 
@@ -13,6 +15,7 @@ import org.jlab.utils.groups.IndexedList;
  * @author gavalian
  */
 public class DetectorCollection<T> {
+    
     private IndexedList<T>  collection = new IndexedList<T>(3);
     private String          collectionName = "undefined";
     
@@ -47,4 +50,56 @@ public class DetectorCollection<T> {
         return this.collection.getItem(sector,layer,comp);
                 //.get(DetectorDescriptor.generateHashCode(sector, layer, comp));
     }
+    /**
+     * Returns Set of sectors defined in the map
+     * @return 
+     */
+    public Set<Integer> getSectors(){
+        Set<Long>  list = this.collection.getMap().keySet();
+        Set<Integer>  sectors = new HashSet<Integer>();
+                
+        for(Long item : list){
+            int sect = IndexedList.IndexGenerator.getIndex(item, 0);
+            sectors.add(sect);
+        }
+        return sectors;
+    }
+    
+     /**
+     * returns Set of layers for given sector.
+     * @param sector
+     * @return 
+     */
+    public Set<Integer> getLayers(int sector){
+        Set<Long>  list = this.collection.getMap().keySet();
+        Set<Integer>  layers = new HashSet<Integer>();
+        for(Long item : list){
+            int sect = IndexedList.IndexGenerator.getIndex(item, 0);
+            if(sect==sector){
+                int lay = IndexedList.IndexGenerator.getIndex(item, 1);
+                layers.add(lay);
+            }
+        }
+        return layers;
+    }
+    /**
+     * returns component set for given sector and layer
+     * @param sector
+     * @param layer
+     * @return 
+     */
+    public Set<Integer>  getComponents(int sector, int layer){
+        Set<Long>  list = this.collection.getMap().keySet();
+        Set<Integer>  components = new HashSet<Integer>();
+        for(Long item : list){
+            int sect = IndexedList.IndexGenerator.getIndex(item, 0);
+            int lay = IndexedList.IndexGenerator.getIndex(item, 1);
+            if(sect==sector&&lay==layer){
+                int comp = IndexedList.IndexGenerator.getIndex(item, 2);
+                components.add(comp);
+            }
+        }
+        return components; 
+    }
+    
 }
