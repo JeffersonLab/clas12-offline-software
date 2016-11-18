@@ -247,7 +247,8 @@ public class ECPart {
         ECEngine   engine = new ECEngine();
         EvioSource reader = new EvioSource();
         
-        String evioPath = "/Users/colesmith/coatjava/data/pizero/";
+        //String evioPath = "/Users/colesmith/coatjava/data/pizero/";
+        String evioPath = "/Users/gavalian/Work/Software/Release-9.0/Distribution/clas12detector-ec/";
         // GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
         // JLAB: evioPath = "/lustre/expphy/work/hallb/clas12/lcsmith/clas12/forcar/gemc/evio/";
         
