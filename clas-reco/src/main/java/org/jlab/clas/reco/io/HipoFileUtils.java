@@ -83,7 +83,7 @@ public class HipoFileUtils {
         reader.open();
         
         HipoWriter writer = new HipoWriter();
-        writer.addHeader("{Reconstruction-File-LUND}");
+        //writer.addHeader("{Reconstruction-File-LUND}");
         writer.setCompressionType(2);
         writer.open(output);
         while(reader.next()==true){
