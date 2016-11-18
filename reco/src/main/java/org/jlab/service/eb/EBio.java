@@ -45,8 +45,12 @@ public class EBio {
             int nrows = bank.rows();
             
             for(int i = 0; i < nrows; i++){
+                
                 DetectorParticle p = new DetectorParticle();
                 
+                int trStatus = bank.getInt("status", i);
+                
+                p.setStatus(100+10*trStatus);
                 p.vector().setXYZ(
                         bank.getDouble("p0_x",i),
                         bank.getDouble("p0_y",i),
@@ -154,6 +158,40 @@ public class EBio {
         return bank;
     }
     
+    public static DataBank writeResponses(List<DetectorResponse> responses, int type ){
+        String bankName = "EVENTHB::particle";
+        
+        switch (type){
+            case 1 : bankName = "EVENTHB::detector"; break;
+            case 2 : bankName = "EVENTTB::detector"; break;
+            default: break;
+        }
+        
+        EvioDataBank  bank = EvioFactory.createBank(bankName, responses.size());
+        
+        for(int i = 0; i < responses.size();i++){
+            bank.setInt("pindex", i,responses.get(i).getAssociation());
+            bank.setInt("index", i,i);
+            bank.setInt("detector", i, responses.get(i).getDescriptor().getType().getDetectorId());
+            bank.setInt("sector", i, responses.get(i).getDescriptor().getSector());
+            bank.setInt("layer", i, responses.get(i).getDescriptor().getLayer());
+            
+            bank.setFloat("X", i, (float) responses.get(i).getPosition().x());
+            bank.setFloat("Y", i, (float) responses.get(i).getPosition().y());
+            bank.setFloat("Z", i, (float) responses.get(i).getPosition().z());
+            
+            bank.setFloat("hX", i, (float) responses.get(i).getMatchedPosition().x());
+            bank.setFloat("hY", i, (float) responses.get(i).getMatchedPosition().y());
+            bank.setFloat("hZ", i, (float) responses.get(i).getMatchedPosition().z());
+            
+            bank.setFloat("path", i, (float) responses.get(i).getPath());
+            bank.setFloat("time", i, (float) responses.get(i).getTime());
+            bank.setFloat("energy", i, (float) responses.get(i).getEnergy());
+            
+        }
+        return bank;
+    }
+    
     public static List<DetectorResponse> readECAL(DataEvent event){
         List<DetectorResponse> ecal = new ArrayList<DetectorResponse>();
         if(event.hasBank("ECDetector::clusters")==true){
@@ -161,17 +199,17 @@ public class EBio {
             int nrows = bank.rows();
             //System.out.println("*************************\n\n\n\n ECAL " + nrows);
             for(int i = 0; i < nrows; i++){
-                int sector  = bank.getByte("sector", i);
-                int layer   = bank.getByte("layer", i);
+                int sector  = bank.getInt("sector", i);
+                int layer   = bank.getInt("layer", i);
                 DetectorResponse resp = new DetectorResponse();
                 resp.getDescriptor().setType(DetectorType.EC);
                 resp.getDescriptor().setSectorLayerComponent(sector, layer, 0);
                 resp.setPosition(
-                            bank.getFloat("X", i),bank.getFloat("Y", i),
-                            bank.getFloat("Z", i)
+                            bank.getDouble("X", i),bank.getDouble("Y", i),
+                            bank.getDouble("Z", i)
                     );
-                    resp.setTime(bank.getFloat("time", i));
-                    resp.setEnergy(bank.getFloat("energy", i));
+                    resp.setTime(bank.getDouble("time", i));
+                    resp.setEnergy(bank.getDouble("energy", i));
                     ecal.add(resp);
             }
         } else {

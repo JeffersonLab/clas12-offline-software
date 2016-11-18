@@ -38,6 +38,13 @@ public class EBProcessor {
         responsesECAL.addAll(det_ecal);
     }
     
+    public List<DetectorResponse> getResponses(){
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        responses.addAll(this.responsesFTOF);
+        responses.addAll(this.responsesECAL);
+        return responses;
+    }
+    
     public void matchCalorimeter(){
         
         for(DetectorResponse resp : responsesECAL){
@@ -52,7 +59,7 @@ public class EBProcessor {
             if(index>=0){
                 DetectorResponse response = pcal.get(index);
                 response.setAssociation(iparticle);
-                p.addResponse(response);
+                p.addResponse(response,true);
             }
             iparticle++;
         }
@@ -62,11 +69,11 @@ public class EBProcessor {
         //System.out.println(" ECIN COUNTER = " + ecin.size());
         iparticle = 0;
         for(DetectorParticle p : particles){            
-            int index = p.getDetectorHit(ecin,DetectorType.EC,4,10.0);
+            int index = p.getDetectorHit(ecin,DetectorType.EC,4,15.0);
             if(index>=0){
                 DetectorResponse response = ecin.get(index);
                 response.setAssociation(iparticle);
-                p.addResponse(response);
+                p.addResponse(response,true);
             }
             iparticle++;
         }
@@ -75,11 +82,11 @@ public class EBProcessor {
         //System.out.println(" ECOUT COUNTER = " + ecout.size());
         iparticle = 0;
         for(DetectorParticle p : particles){            
-            int index = p.getDetectorHit(ecout,DetectorType.EC,7,10.0);
+            int index = p.getDetectorHit(ecout,DetectorType.EC,7,15.0);
             if(index>=0){
                 DetectorResponse response = ecout.get(index);
                 response.setAssociation(iparticle);
-                p.addResponse(response);
+                p.addResponse(response,true);
             }
             iparticle++;
         }
@@ -155,7 +162,7 @@ public class EBProcessor {
             if(index>=0){
                 DetectorResponse response = responsesFTOF.get(index);
                 response.setAssociation(iparticle);
-                p.addResponse(response);
+                p.addResponse(response,true);
                 p.setBeta(p.getBeta(DetectorType.FTOF));
                 p.setMass(p.getMass2(DetectorType.FTOF));
             }

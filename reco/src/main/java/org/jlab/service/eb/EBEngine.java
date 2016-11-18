@@ -57,7 +57,8 @@ public class EBEngine extends ReconstructionEngine {
             System.out.println(p);
         }*/
         EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(processor.getParticles(), eventType);
-        de.appendBanks(pBank);
+        EvioDataBank dBank = (EvioDataBank) EBio.writeResponses(processor.getResponses(), eventType);
+        de.appendBanks(pBank,dBank);
         
         return true;
     }
