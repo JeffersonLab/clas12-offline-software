@@ -260,6 +260,7 @@ public class ECPart {
         }
                 
         engine.init();
+	engine.setCalRun(2);
         engine.setStripThresholds(10,9,8);
         engine.setPeakThresholds(18,20,15);
         engine.setClusterCuts(7,15,20);
