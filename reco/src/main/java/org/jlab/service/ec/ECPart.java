@@ -251,11 +251,11 @@ public class ECPart {
         String evioPath = "/Users/gavalian/Work/Software/Release-9.0/Distribution/clas12detector-ec/";
         // GEMC file: 10k 2.0 GeV pizeros thrown at 25 deg into Sector 2 using GEMC 2.4 geometry
         // JLAB: evioPath = "/lustre/expphy/work/hallb/clas12/lcsmith/clas12/forcar/gemc/evio/";
-        
-        if (args.length == 0) { 
+      
+        if (args.length == 1) {
             reader.open(evioPath+"fc-pizero-10k-s2-25deg-oldgeom.evio");
         } else {
-            String inputFile = args[0];
+            String inputFile = args[1];
             reader.open(inputFile);
         }
                 
