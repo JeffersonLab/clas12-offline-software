@@ -8,6 +8,7 @@ package org.jlab.detector.geant4.v2;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.InputStream;
 import static org.jlab.detector.hits.DetId.CTOFID;
+import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
@@ -30,7 +31,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             for (int iscint = 1; iscint <= npaddles; iscint++) {
                 CTOFpaddle component = new CTOFpaddle(String.format("%s%02d", name, iscint),
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);
-                component.scale(0.1);
+                component.scale(Length.mm/Length.cm);
 
                 component.rotate("zyx", 0, Math.toRadians(180), 0);
                 component.translate(0, 0, 127.327);

@@ -90,16 +90,6 @@ public abstract class Geant4Basic {
         updateCSGtransformation();
     }
 
-    public void setColor1(int rgbR, int rgbG, int rgbB) {
-        rgb[0] = rgbR;
-        rgb[1] = rgbG;
-        rgb[2] = rgbB;
-    }
-
-    public int[] getColor1() {
-        return rgb;
-    }
-
     public Geant4Basic getMother() {
         return this.motherVolume;
     }
@@ -275,6 +265,12 @@ public abstract class Geant4Basic {
         return children.stream()
                 .flatMap(child -> child.getComponents().stream())
                 .collect(Collectors.toList());
+    }
+
+    //returns original component before transformation (important for STL volumes)
+    //use it to export volumes to STL files before transformation for GEMC
+    public Primitive getPrimitive(){
+        return volumeSolid;
     }
 
     public List<DetHit> getIntersections(Straight line) {
