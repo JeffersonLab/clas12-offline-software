@@ -39,6 +39,9 @@ public class Constants {
 	public static final double[] TRKMATCHYPAR = new double[1];		// track matching parameter for coord y
 	public static final double[] TRKMATCHZPAR = new double[1];		// track matching parameter for coord z
 
+
+	public static final double DYHL = 0.8861;						// Shift along beam line between high and the low pitch angles counters
+
 	public static double CLSMATCHXPAR = 1 ;							// x-matching parameter between panels 1a and 1b
 	public static double CLSMATCHYPAR = 1 ;							// y-matching parameter between panels 1a and 1b
 	public static double CLSMATCHZPAR = 1 ;							// z-matching parameter between panels 1a and 1b

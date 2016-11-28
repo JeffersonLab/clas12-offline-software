@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
-import org.jlab.detector.volume.G4Box;
+
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
@@ -242,7 +242,12 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double yOffset() {
-		return CalibrationConstantsLoader.YOFF[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double ccdbOffset = CalibrationConstantsLoader.YOFF[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double shift = Constants.DYHL;
+		if(this.get_Paddle()%2==1)
+			shift = 0;
+		
+		return ccdbOffset - shift;
 	}
 
 
@@ -352,7 +357,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	
 	
 	public static void main (String arg[]) throws FileNotFoundException{
-
+/*
 		CTOFEngine rec = new CTOFEngine() ;		
 		rec.init();
 		HitReader hrd = new HitReader();
@@ -378,7 +383,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		hit.set_HitParameters(superlayer);
 		// read the hit object
 		System.out.println(" hit "); hit.printInfo();
-		
+		*/
 	}
 
 

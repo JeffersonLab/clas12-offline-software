@@ -1,10 +1,12 @@
 package org.jlab.service.ctof;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.coda.jevio.EvioException;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geometry.prim.Line3d;
@@ -119,5 +121,39 @@ public class CTOFEngine extends ReconstructionEngine {
 		
 		
 	}
+	
+	
+	public static void main(String[] args) throws FileNotFoundException, EvioException{
+		 
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/sim0_header.evio";
+		//String inputFile = args[0];
+		//String outputFile = args[1];
+		
+		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+
+		CTOFEngine en = new CTOFEngine();
+		en.init();
+		
+		org.jlab.io.evio.EvioSource reader = new org.jlab.io.evio.EvioSource();
+		
+		int counter = 0;
+		
+		reader.open(inputFile);
+		long t1 = System.currentTimeMillis();
+		while(reader.hasEvent() ){
+			
+			counter++;
+			org.jlab.io.evio.EvioDataEvent event = (org.jlab.io.evio.EvioDataEvent) reader.getNextEvent();
+			en.processDataEvent(event);
+			
+			if(counter>50) break;
+			//if(counter%100==0)
+			//	System.out.println("run "+counter+" events");
+			
+		}
+		double t = System.currentTimeMillis()-t1;
+		System.out.println("TOTAL  PROCESSING TIME = "+t);
+	 }
+	
 
 }

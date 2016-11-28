@@ -64,7 +64,8 @@ public class HitReader {
 	 */
 	public void fetch_Hits(DataEvent event, FTOFGeant4Factory geometry, List<Line3d> trks, double[] paths) {
 		
-		if(event.hasBank("FTOF1A::dgtz")==false && event.hasBank("FTOF1B::dgtz")==false && event.hasBank("FTOF2B::dgtz")==false) {
+		//if(event.hasBank("FTOF1A::dgtz")==false && event.hasBank("FTOF1B::dgtz")==false && event.hasBank("FTOF2B::dgtz")==false) {
+		if(event.hasBank("FTOF::dgtz")==false ) {				
 			//System.err.println("there is no FTOF bank ");
 			
 			_FTOF1AHits = new ArrayList<Hit>();
@@ -142,6 +143,7 @@ public class HitReader {
 				Hit hit = new Hit(id_1B[i], 2, sector_1B[i], paddle_1B[i], ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]) ;
 				hit.set_StatusWord(statusWord);
 				hit.setPaddleLine(geometry);
+				
 	    	    // add this hit
 	            hits.add(hit); 
 			}
@@ -151,7 +153,7 @@ public class HitReader {
 			for(Hit hit : updated_hits) {
 				// set the superlayer to get the paddle position from the geometry package
 				// superlayer = 2;
-				hit.set_HitParameters(2);				
+				hit.set_HitParameters(2);		
 			}
 			
 			Collections.sort(updated_hits);
@@ -199,6 +201,64 @@ public class HitReader {
 			this.set_FTOF2Hits(updated_hits);
 		}
 
+		if(event.hasBank("FTOF::dgtz")==true) {
+			EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("FTOF::dgtz");
+			
+			int[] id 	= bankDGTZ.getInt("hitn");
+	        int[] sector = bankDGTZ.getInt("sector");
+	        int[] panel  = bankDGTZ.getInt("layer"); 
+			int[] paddle = bankDGTZ.getInt("paddle");
+			int[] ADCL 	= bankDGTZ.getInt("ADCL");
+			int[] ADCR 	= bankDGTZ.getInt("ADCR");
+			int[] TDCL 	= bankDGTZ.getInt("TDCL");
+			int[] TDCR 	= bankDGTZ.getInt("TDCR");
+			// Instantiates the lists of hits
+			List<Hit> hits = new ArrayList<Hit>();
+			
+			for(int i = 0; i<id.length; i++){
+				if( passADC(ADCL[i])==0 || passADC(ADCR[i])==0 || passTDC(TDCL[i])==0 || passTDC(TDCR[i])==0 )
+					continue;
+				
+			    // get the status
+				int statusL = CCDBConstantsLoader.STATUSU[sector[i]-1][0][paddle[i]-1];
+				int statusR = CCDBConstantsLoader.STATUSD[sector[i]-1][0][paddle[i]-1];
+				String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i], TDCL[i], ADCR[i], TDCR[i]);
+								
+				// create the hit object
+				Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i], TDCL[i], ADCR[i], TDCR[i]) ;				
+				hit.set_StatusWord(statusWord);
+				hit.setPaddleLine(geometry);
+	    	    // add this hit
+	            hits.add(hit); 
+			}
+			
+			List<Hit> updated_hits= matchHitsToDCTrk(hits, geometry, trks, paths);
+			
+			ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
+			for(int j =0; j<3; j++)
+				DetHits.add(j, new ArrayList<Hit>());
+			
+			for(Hit hit : updated_hits) {
+				// set the layer to get the paddle position from the geometry package				
+				hit.set_HitParameters(hit.get_Panel());
+				DetHits.get(hit.get_Panel()-1).add(hit);
+			}
+			if(DetHits.get(0).size()>0) {
+				Collections.sort(DetHits.get(0));
+				// fill the list of TOF hits
+				this.set_FTOF1AHits(DetHits.get(0));
+			}
+			if(DetHits.get(1).size()>0) {
+				Collections.sort(DetHits.get(1));
+				// fill the list of TOF hits
+				this.set_FTOF1AHits(DetHits.get(1));
+			}
+			if(DetHits.get(2).size()>0) {
+				Collections.sort(DetHits.get(2));
+				// fill the list of TOF hits
+				this.set_FTOF1AHits(DetHits.get(2));
+			}
+		}
 	}
 
 	 
@@ -237,6 +297,7 @@ public class HitReader {
 		int pass =0;
 		if(Constants.LSBCONVFAC*tDC>Constants.TDCMINSCALE &&  Constants.LSBCONVFAC*tDC<Constants.TDCMAXSCALE)
 			pass = 1; 
+		pass = 1; 
 		return pass;
 	}
 
@@ -244,7 +305,8 @@ public class HitReader {
 		// selected ranges  ADC 
 		int pass =0;
 		if(aDC>Constants.ADCMIN && aDC<Constants.ADCMAX)
-			pass = 1; System.out.println(" ADC "+pass);
+			pass = 1; 
+		pass = 1; 
 		return pass;
 	}
 
@@ -254,28 +316,26 @@ public class HitReader {
 		
 		// Instantiates the list of hits
 		List<Hit> hitList = new ArrayList<Hit>();
-					
+		FTOFDetHit[][][][] HitArray = new FTOFDetHit[6][3][62][trks.size()] ;	
 		for(int i = 0; i<trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
 			Line3d trk = trks.get(i);
 			
-			FTOFDetHit[][][] HitArray = new FTOFDetHit[6][3][62] ;
 			List<DetHit> hits = ftofDetector.getIntersections(trk);
 			
 			if(hits != null && hits.size()>0) {
 				for(DetHit hit: hits){
-					FTOFDetHit fhit = new FTOFDetHit(hit);
-					HitArray[fhit.getSector()-1][fhit.getLayer()-1][fhit.getPaddle()-1] = fhit;
+					FTOFDetHit fhit = new FTOFDetHit(hit); 
+					HitArray[fhit.getSector()-1][fhit.getLayer()-1][fhit.getPaddle()-1][i] = fhit;
 				}
 			}
-			for(Hit fhit : FTOFhits) {
-				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1]==null) { // there is no track matched to this hit
-					hitList.add(fhit);	// add this hit to the output list anyway
-				}
-			}
-			
-			for(Hit fhit : FTOFhits) {
-				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1]!=null) {
-					FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1];
+		}
+		for(Hit fhit : FTOFhits) {
+			boolean isAssociatedWTrk = false;
+			for(int i = 0; i<trks.size(); i++) {
+				
+				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i]!=null) {
+					isAssociatedWTrk = true;
+					FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i];
 					
 					// create a new FTOF hit for each intersecting track with this hit counter 
 					// create the hit object
@@ -283,13 +343,13 @@ public class HitReader {
 					hit.set_StatusWord(fhit.get_StatusWord());			
 					hit.set_paddleLine(fhit.get_paddleLine());
 					hit.set_matchedTrackHit(matchedHit);
-					hit.set_matchedTrack(trk);
+					hit.set_matchedTrack(trks.get(i));
 					// get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
 					double deltaPath = matchedHit.origin().distance(matchedHit.mid()); 
 					hit.set_TrkPathLen(paths[i]+deltaPath);
 					// get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
 					hit.set_TrkPosition(new Point3D(matchedHit.mid().x,matchedHit.mid().y,matchedHit.mid().z));
-					
+					hit._AssociatedTrkId = i;
 					// compute the local y at the middle of the bar :
 					//----------------------------------------------
 			        Point3D origPaddleLine = hit.get_paddleLine().origin();
@@ -299,10 +359,15 @@ public class HitReader {
 			        // local y:
 			        hit.set_yTrk(barOrigToTrkPos-Lov2);
 			        //---------------------------------------
-					hitList.add(hit);
+			        hitList.add(hit);	// add this hit to the output list 
 				}
 			}
+			if(isAssociatedWTrk == false )
+				hitList.add(fhit);	// add this hit to the output list anyway
+			
 		}
+			
+			
 		return hitList;
 	}
 

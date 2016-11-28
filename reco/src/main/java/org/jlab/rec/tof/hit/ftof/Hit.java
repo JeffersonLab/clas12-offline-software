@@ -51,6 +51,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	private Line3D 	_paddleLine;		  // paddle line 
 	private FTOFDetHit _matchedTrackHit;  // matched hit information from tracking; this contains the information of the entrance and exit point of the track with the FTOF hit counter
 	private Line3d _matchedTrack;
+	public int _AssociatedTrkId = -1;
 	
 	public Line3D get_paddleLine() {
 		return _paddleLine;

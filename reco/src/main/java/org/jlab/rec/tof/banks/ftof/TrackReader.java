@@ -75,7 +75,7 @@ public class TrackReader {
 				//	continue; // check this
 				
 				Line3d trk_path = new Line3d(new Vector3d(x[i],y[i],z[i]), new Vector3d(x[i]+250*ux[i], y[i]+250*uy[i], z[i]+250*uz[i]));
-			    
+			   
 	    	    // add this hit
 			    trkLines.add(trk_path);
 			    paths[i] = p[i];
