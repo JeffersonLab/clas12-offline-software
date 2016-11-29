@@ -18,10 +18,11 @@ import org.jlab.io.base.DataDescriptor;
  * @author gavalian
  */
 public class HipoDataBank extends HipoGroup implements DataBank  {
+    
     private HipoDataDescriptor descriptor = null;
     
     public HipoDataBank(HipoDataDescriptor desc){
-        super(desc);
+        super(desc.getSchema());
         this.descriptor = desc;
     }
     

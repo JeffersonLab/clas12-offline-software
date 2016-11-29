@@ -24,7 +24,7 @@ import org.jlab.io.evio.EvioDataBank;
 public class HipoDataSync implements DataSync {
     
     HipoWriter writer = null;
-        
+    
     public HipoDataSync(){
         this.writer = new HipoWriter();
     }

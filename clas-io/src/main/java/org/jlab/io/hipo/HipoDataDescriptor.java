@@ -12,10 +12,12 @@ import org.jlab.io.base.DataDescriptor;
  *
  * @author gavalian
  */
-public class HipoDataDescriptor extends Schema implements DataDescriptor {
+public class HipoDataDescriptor implements DataDescriptor {
 
+    private final Schema hipoSchema = new Schema();
+    
     public void init(String s) {
-        this.setFromText(s);
+        this.hipoSchema.setFromText(s);
     }
 
     public String[] getEntryList() {
@@ -28,7 +30,7 @@ public class HipoDataDescriptor extends Schema implements DataDescriptor {
     }
 
     public boolean hasEntry(String entry) {
-        return (this.getEntry(entry)!=null);
+        return (this.hipoSchema.getEntry(entry)!=null);
     }
 
     public boolean hasEntries(String... entries) {
@@ -57,5 +59,10 @@ public class HipoDataDescriptor extends Schema implements DataDescriptor {
     public void show() {
         
     }
+
+    public String getName() {
+        return this.hipoSchema.getName();
+    }
     
+    public Schema getSchema(){ return this.hipoSchema;}
 }
