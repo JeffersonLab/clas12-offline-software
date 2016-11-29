@@ -7,6 +7,8 @@ package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.hipo.io.HipoWriter;
+import org.jlab.hipo.schema.Schema;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioDataSync;
@@ -20,6 +22,18 @@ import org.jlab.utils.system.ClasUtilsFile;
  * @author gavalian
  */
 public class ReconstructionIO {
+    
+    
+    public static void writeHipoEvents(String name, List<String> inputFiles){
+        
+        HipoWriter writer = new HipoWriter();
+        
+        writer.defineSchema(new Schema("{10,RUN::info}[1,Run,INT][2,Event,INT][3,Type,BYTE][4,Mode,BYTE][5,Torus,FLOAT][6,Solenoid,FLOAT]"));
+        writer.defineSchema(new Schema("{20,GenPart::true}[1,pid,INT][2,px,FLOAT][3,py,FLOAT][4,pz,FLOAT][5,vx,FLOAT][6,vy,FLOAT][7,vz,FLOAT]"));
+                
+        writer.open(name);
+                
+    }
     
     public static void createDST(String filename, List<String> inputFiles){
         HipoDataSync  writer = new HipoDataSync();

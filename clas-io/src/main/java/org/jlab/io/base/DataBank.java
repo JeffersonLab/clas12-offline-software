@@ -92,6 +92,7 @@ public interface DataBank {
     void allocate(int rows);
     /**
      * Returns a table model for displaying the bank information
+     * @param mask
      * @return 
      */
     TableModel getTableModel(String mask);

@@ -7,7 +7,11 @@ package org.jlab.io.hipo;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.hipo.data.HipoEvent;
+import org.jlab.hipo.data.HipoNodeBuilder;
 import org.jlab.io.evio.EvioDataBank;
+import org.jlab.io.evio.EvioDataDescriptor;
+import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 
@@ -17,6 +21,31 @@ import org.jlab.io.evio.EvioFactory;
  */
 public class EvioHipoEvent {
     
+    
+    public static void addFTOF(HipoEvent hevent, EvioDataEvent event){
+        
+        EvioDataBank bank = (EvioDataBank) event.getBank("FTOF");
+
+        HipoNodeBuilder<Byte>   node_sector = new HipoNodeBuilder<Byte>();
+        HipoNodeBuilder<Byte>   node_layer  = new HipoNodeBuilder<Byte>();
+        HipoNodeBuilder<Short>  node_comp   = new HipoNodeBuilder<Short>();
+        
+        HipoNodeBuilder<Integer>   node_adcl = new HipoNodeBuilder<Integer>();
+        HipoNodeBuilder<Integer>   node_adcr = new HipoNodeBuilder<Integer>();
+        HipoNodeBuilder<Integer>   node_tdcl = new HipoNodeBuilder<Integer>();
+        HipoNodeBuilder<Integer>   node_tdcr = new HipoNodeBuilder<Integer>();
+        
+        for(int i = 0; i < bank.rows(); i++){
+            node_sector.push((byte) bank.getInt("sector",i));
+            node_layer.push((byte) bank.getInt("layer",i));
+            node_comp.push((short) bank.getInt("component",i));
+            node_adcl.push(bank.getInt("ADCL", i));
+            node_adcr.push(bank.getInt("ADCR", i));
+            node_adcl.push(bank.getInt("TDCL", i));
+            node_adcr.push(bank.getInt("TDCR", i));
+        }
+    }
+                
     public static EvioDataBank getBankFTOF(EvioDataBank ftof1a, EvioDataBank ftof1b,
             EvioDataBank ftof2){
         int nrows = ftof1a.rows() + ftof1b.rows() + ftof2.rows();
@@ -108,5 +137,13 @@ public class EvioHipoEvent {
         //for(pcal)
         
         return ecuBank;
+    }
+        
+    public static void main(String[] args){
+        EvioDataDictionary dictionary = new EvioDataDictionary("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/coatjava/etc/bankdefs/hipo");
+        dictionary.show();
+        
+        EvioDataDescriptor desc = (EvioDataDescriptor) dictionary.getDescriptor("ECAL::dgtz");
+        desc.show();
     }
 }

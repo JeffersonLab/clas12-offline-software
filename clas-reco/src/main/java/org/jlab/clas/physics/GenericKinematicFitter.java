@@ -20,7 +20,7 @@ import org.jlab.io.evio.EvioDataEvent;
 public class GenericKinematicFitter {
     
     private final   EventFilter filter = new EventFilter();
-    private Double  beamEnergy  = 11.0;
+    protected Double  beamEnergy  = 11.0;
     
     
     public GenericKinematicFitter(double beam){

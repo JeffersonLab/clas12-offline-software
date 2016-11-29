@@ -19,6 +19,7 @@ import org.jlab.hipo.data.HipoNode;
 import org.jlab.hipo.data.HipoNodeBuilder;
 import org.jlab.hipo.io.HipoReader;
 import org.jlab.hipo.io.HipoWriter;
+import org.jlab.hipo.schema.Schema;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
@@ -32,6 +33,16 @@ import org.jlab.utils.system.CommandLineParser;
  * @author gavalian
  */
 public class HipoFileUtils {
+    
+    
+     public static void writeHipoEvents(String name, List<String> inputFiles){
+        HipoWriter writer = new HipoWriter();
+        writer.defineSchema(new Schema("{20,GenPart::true}[1,pid,INT][2,px,FLOAT][3,py,FLOAT][4,pz,FLOAT][5,vx,FLOAT][6,vy,FLOAT][7,vz,FLOAT]"));
+        writer.defineSchema(new Schema("{10,RUN::info}[1,Run,INT][2,Event,INT][3,Type,BYTE][4,Mode,BYTE][5,Torus,FLOAT][6,Solenoid,FLOAT]"));        
+        writer.open(name);
+        
+        
+    }
     
     public static EvioDataBank getGenPart(PhysicsEvent event){
         EvioDataBank bank = EvioFactory.createBank("GenPart::true", event.count());
@@ -84,6 +95,7 @@ public class HipoFileUtils {
         
         HipoWriter writer = new HipoWriter();
         //writer.addHeader("{Reconstruction-File-LUND}");
+        
         writer.setCompressionType(2);
         writer.open(output);
         while(reader.next()==true){
