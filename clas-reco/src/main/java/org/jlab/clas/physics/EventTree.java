@@ -48,18 +48,6 @@ public class EventTree extends Tree implements TreeProvider {
     
     public EventTree(){
         super("EventTree");
-        GStyle.getGraphErrorsAttributes().setMarkerStyle(0);
-        GStyle.getGraphErrorsAttributes().setMarkerColor(3);
-        GStyle.getGraphErrorsAttributes().setMarkerSize(7);
-        GStyle.getGraphErrorsAttributes().setLineColor(3);
-        GStyle.getGraphErrorsAttributes().setLineWidth(2);
-        GStyle.getFunctionAttributes().setLineWidth(6);
-        GStyle.getAxisAttributesX().setTitleFontSize(14);
-        GStyle.getAxisAttributesX().setLabelFontSize(12);
-        GStyle.getAxisAttributesY().setTitleFontSize(14);
-        GStyle.getAxisAttributesY().setLabelFontSize(12);
-        GStyle.getH1FAttributes().setFillColor(43);
-        GStyle.getH1FAttributes().setOptStat("1110");
     }
     
     @Override
@@ -402,6 +390,18 @@ public class EventTree extends Tree implements TreeProvider {
     }
     
     public static void main(String[] args){
+        GStyle.getGraphErrorsAttributes().setMarkerStyle(0);
+        GStyle.getGraphErrorsAttributes().setMarkerColor(3);
+        GStyle.getGraphErrorsAttributes().setMarkerSize(7);
+        GStyle.getGraphErrorsAttributes().setLineColor(3);
+        GStyle.getGraphErrorsAttributes().setLineWidth(2);
+        GStyle.getFunctionAttributes().setLineWidth(6);
+        GStyle.getAxisAttributesX().setTitleFontSize(14);
+        GStyle.getAxisAttributesX().setLabelFontSize(12);
+        GStyle.getAxisAttributesY().setTitleFontSize(14);
+        GStyle.getAxisAttributesY().setLabelFontSize(12);
+        GStyle.getH1FAttributes().setFillColor(43);
+        GStyle.getH1FAttributes().setOptStat("1110");
         
         if(args.length==0){
             StudioUI studio = new StudioUI();
