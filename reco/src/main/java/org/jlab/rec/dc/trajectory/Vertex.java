@@ -2,6 +2,7 @@ package org.jlab.rec.dc.trajectory;
 
 import java.util.Random;
 
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.evio.EvioDataBank;
@@ -35,9 +36,12 @@ public class Vertex {
 		
 		double r = vertexEstimator(event) ;
 		
+		//System.out.println(" r "+r);
 		double x0 = thecand.get_Vtx0().x();
 		double y0 = thecand.get_Vtx0().y();
 		double z0 = thecand.get_Vtx0().z();
+		if(thecand.get_Vtx0().toVector3D().mag()>r)
+			return;
 		
 		double p0x = thecand.get_pAtOrig().x();
 		double p0y = thecand.get_pAtOrig().y();
@@ -55,6 +59,7 @@ public class Vertex {
     	double rpz = result[5];
     	double rpath = result[6];
     	
+    	//System.out.println(r+" } --> x0 "+x0 +" y0 "+y0+" rx "+rx +" ry "+ry+" r "+Math.sqrt(rx*rx+ry*ry));
     	
     	double path = thecand.get_TotPathLen()-rpath;
     	
@@ -68,6 +73,27 @@ public class Vertex {
 	public double[] VertexParams(double x, double y, double z, double px, double py, double pz, double Q, double Bfield, double xb, double yb ) {
         
 		double[] value = new double[7];
+		
+		if(Bfield < 0.0000001) {
+			Line3D trk = new Line3D();
+			Point3D point = new Point3D(x,y,z);
+			Vector3D direction = new Vector3D(px,py,pz);
+			direction.asUnit();
+			trk.set(point, direction);
+			
+			Line3D beamL = new Line3D();
+			beamL.set(new Point3D(0,0,0), new Vector3D(0,0,1));
+			
+			Point3D Vt = trk.distance(beamL).origin();
+			value[0] = Vt.x();
+	        value[1] = Vt.y();
+	        value[2] = Vt.z();
+	        value[3] = px;
+	        value[4] = py;
+	        value[5] = pz;
+	        value[6] = trk.distance(beamL).length();
+			
+		} else {
 		
 		double LIGHTVEL     = 0.000299792458 ; 
         double pt = Math.sqrt(px*px + py*py);
@@ -111,9 +137,9 @@ public class Vertex {
         value[4] = p0y;
         value[5] = p0z;
         value[6] = arclength;
-        
+		}
         return value;
-        
+		 
 	}
 	
 }

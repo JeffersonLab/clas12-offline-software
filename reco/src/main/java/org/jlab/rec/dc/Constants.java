@@ -123,7 +123,7 @@ public class Constants {
 	public static final double T0 =0;
 	
 	//public static final boolean isCalibrationRun = false;
-	public static final boolean useTimeToDistanceGrid = false;
+	public static final boolean useTimeToDistanceGrid = true;
 	//public static final boolean DEBUGCROSSES = false;
 
 	// Arrays for combinatorial cluster compositions

@@ -114,9 +114,9 @@ public class TrackCandListFinder {
 						
 						if(VecAtReg1MiddlePlane!=null) {
 							if(trking == "TimeBased") {
-								totNbOfIterations = 10;
+								totNbOfIterations = 20;
 							} else {
-								totNbOfIterations = 2;
+								totNbOfIterations = 10;
 							}
 								
 							while(iterationNb < totNbOfIterations) {
@@ -253,23 +253,26 @@ public class TrackCandListFinder {
 		if(traj!=null && trjFind!=null)
 			traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(xOr, yOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q()));
 		
-		Point3D trakOrigTiltSec = new Point3D(xOr,yOr,zOr);
-		Point3D pAtOrigTiltSec = new Point3D(pxOr,pyOr,pzOr);
-		
-		cand.set_Vtx0_TiltedCS(trakOrigTiltSec);
-		cand.set_pAtOrig_TiltedCS(pAtOrigTiltSec.toVector3D());
+		//cand.set_Vtx0_TiltedCS(trakOrigTiltSec);
+		//cand.set_pAtOrig_TiltedCS(pAtOrigTiltSec.toVector3D());
 		
 		Cross C = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
 		
+		Point3D trkR1X = C.getCoordsInLab(xOr,yOr,zOr);
+		Point3D trkR1P = C.getCoordsInLab(pxOr,pyOr,pzOr);
+		cand.set_Region1TrackX(new Point3D(trkR1X.x(), trkR1X.y(), trkR1X.z()));
+		cand.set_Region1TrackP(new Point3D(trkR1P.x(), trkR1P.y(), trkR1P.z()));
+		
 		Point3D R3TrkPoint = C.getCoordsInLab(stateVec.x(),stateVec.y(),z);
 		Point3D R3TrkMomentum = C.getCoordsInLab(pz*stateVec.tanThetaX(),pz*stateVec.tanThetaY(),pz);
+		
 		
 		dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
 		double[] VecAtTarlab0 = dcSwim.SwimToPlaneLab(0.0);
 		Vertex vtx = new Vertex();
 		double[] Bvtx = new double[]{0.0,0.0};
 		double[] Vt = vtx.VertexParams(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5], (double) cand.get_Q(), dcSwim.BfieldLab(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2]).toVector3D().mag(), Bvtx[0], Bvtx[1]);
-		
+		//Vt = new double[]{VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5],0};
 		int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
 		
 		int status = -1;

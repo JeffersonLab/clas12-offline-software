@@ -276,7 +276,13 @@ public class RecoBankWriter {
 			bank.setDouble("c3_ux", i, candlist.get(i).get_PostRegion3CrossDir().x());
 			bank.setDouble("c3_uy", i, candlist.get(i).get_PostRegion3CrossDir().y());
 			bank.setDouble("c3_uz", i, candlist.get(i).get_PostRegion3CrossDir().z());
-			bank.setDouble("pathlength", i, candlist.get(i).get_TotPathLen());
+			bank.setDouble("t1_x", i, candlist.get(i).get_Region1TrackX().x());
+			bank.setDouble("t1_y", i, candlist.get(i).get_Region1TrackX().y());
+			bank.setDouble("t1_z", i, candlist.get(i).get_Region1TrackX().z());
+			bank.setDouble("t1_px", i, candlist.get(i).get_Region1TrackP().x());
+			bank.setDouble("t1_py", i, candlist.get(i).get_Region1TrackP().y());
+			bank.setDouble("t1_pz", i, candlist.get(i).get_Region1TrackP().z());
+			bank.setDouble("pathlength", i, candlist.get(i).get_TotPathLen()); 
 			bank.setDouble("Vtx0_x",  i,candlist.get(i).get_Vtx0().x() );
 			bank.setDouble("Vtx0_y",  i,candlist.get(i).get_Vtx0().y() );
 			bank.setDouble("Vtx0_z",  i,candlist.get(i).get_Vtx0().z() );			
@@ -411,6 +417,7 @@ public class RecoBankWriter {
 			bank.setDouble("trkDoca", i, hitlist.get(i).get_ClusFitDoca());
 			
 			bank.setInt("clusterID", i, hitlist.get(i).get_AssociatedClusterID());
+			bank.setInt("trkID", i, hitlist.get(i).get_AssociatedTBTrackID());
 			bank.setDouble("timeResidual", i, hitlist.get(i).get_TimeResidual());
 			
 		}
@@ -614,7 +621,13 @@ public class RecoBankWriter {
 			bank.setDouble("c3_ux", i, candlist.get(i).get_PostRegion3CrossDir().x());
 			bank.setDouble("c3_uy", i, candlist.get(i).get_PostRegion3CrossDir().y());
 			bank.setDouble("c3_uz", i, candlist.get(i).get_PostRegion3CrossDir().z());
-			bank.setDouble("pathlength", i, candlist.get(i).get_TotPathLen());
+			bank.setDouble("t1_x", i, candlist.get(i).get_Region1TrackX().x());
+			bank.setDouble("t1_y", i, candlist.get(i).get_Region1TrackX().y());
+			bank.setDouble("t1_z", i, candlist.get(i).get_Region1TrackX().z());
+			bank.setDouble("t1_px", i, candlist.get(i).get_Region1TrackP().x());
+			bank.setDouble("t1_py", i, candlist.get(i).get_Region1TrackP().y());
+			bank.setDouble("t1_pz", i, candlist.get(i).get_Region1TrackP().z()); 
+			bank.setDouble("pathlength", i, candlist.get(i).get_TotPathLen()); 
 			bank.setDouble("Vtx0_x",  i,candlist.get(i).get_Vtx0().x() );
 			bank.setDouble("Vtx0_y",  i,candlist.get(i).get_Vtx0().y() );
 			bank.setDouble("Vtx0_z",  i,candlist.get(i).get_Vtx0().z() );

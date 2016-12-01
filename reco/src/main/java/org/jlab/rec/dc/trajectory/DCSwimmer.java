@@ -255,7 +255,7 @@ public class DCSwimmer {
 			@Override
 			public boolean stopIntegration(double t, double[] y) {
 				
-				double r = Math.sqrt(y[0]*y[0] +y[1]*y[1] + y[2]*y[2])*100.;
+				double r = Math.sqrt(y[0]*y[0] + y[1]*y[1] + y[2]*y[2])*100.;
 
 				return (r > _Rad);
 				
@@ -313,8 +313,7 @@ public class DCSwimmer {
 
 			private double _finalPathLength = Double.NaN;
 
-			// step size in m
-			double stepSize = 1e-4; // m
+			
 			/**
 			 * A default swim stopper that will stop if either a max pathlength is
 			 * exceeded or if a radial coordinate is exceeded
@@ -333,9 +332,9 @@ public class DCSwimmer {
 				double yy = y[1];
 				
 				// stop if radial coordinate too big
-				double rsq = Math.sqrt(xx * xx + yy * yy) ; // put in units cm
+				double rsq = Math.sqrt(xx * xx + yy * yy); 
 				
-				return (rsq <(stepSize + _rMaxSq));
+				return (rsq > _rMaxSq);
 			}
 			
 			/**
@@ -360,23 +359,19 @@ public class DCSwimmer {
 		}
 
 
-		public  double[] SwimToCylinder(double cylRad) {
+		public  double[] SwimToCylinder(double cylRad_cm) {
 			
+			double cylRad = cylRad_cm/100.0;
 			double[] value = new double[8];
 			// using adaptive stepsize
-			double tolerance = 10.e-6;
+			double tolerance = 1.e-6;
 			double[] hdata = null;
 			CylinderBoundarySwimStopper stopper = new CylinderBoundarySwimStopper(cylRad);
 			// step size in m
-			double stepSize = 1.e-5; // m
+			double stepSize = 1.e-6; // m
 
 			SwimTrajectory st = null;
-			try {
-				st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, tolerance, hdata);
-			} catch (RungeKuttaException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.000001);
 			st.computeBDL(compositeField);
 			double[] lastY = st.lastElement();
 			

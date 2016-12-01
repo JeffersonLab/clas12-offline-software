@@ -206,8 +206,11 @@ public class DCHBEngine extends ReconstructionEngine {
 			isMC = true;
 		if(bank.getByte("Mode")[0]==1)
 			isCosmics = true;
+		// force cosmics
+		//isCosmics = true;
 		//System.out.println(bank.getInt("Event")[0]);
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
+		//
 		
 		// Load the fields
 		//-----------------
@@ -217,8 +220,8 @@ public class DCHBEngine extends ReconstructionEngine {
 			// Load the Constants
 			Constants.Load(isCosmics, isCalib, (double)bank.getFloat("Torus")[0]); // set the T2D Grid for Cosmics data only so far....
 			// Load the Fields
-			DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... empirical rescale of sol --> checkthis
-			//DCSwimmer.setMagneticFieldsScales(bank.getFloat("Solenoid")[0], bank.getFloat("Torus")[0]); // something changed in the configuration ... empirical rescale of sol --> checkthis
+			//DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... 
+			DCSwimmer.setMagneticFieldsScales(bank.getFloat("Solenoid")[0], bank.getFloat("Torus")[0]); // something changed in the configuration ... 
 		}
 		FieldsConfig = newConfig;
 		
@@ -227,8 +230,8 @@ public class DCHBEngine extends ReconstructionEngine {
 		int newRun = bank.getInt("Run")[0];
 		
 		if(Run!=newRun) {
-			CalibrationConstantsLoader.Load(newRun, "default");
-
+			//CalibrationConstantsLoader.Load(newRun, "default");
+			CalibrationConstantsLoader.Load(newRun, "dc_test1");
 			TableLoader.Fill();
 			
 			GeometryLoader.Load(newRun, "default");
@@ -239,15 +242,20 @@ public class DCHBEngine extends ReconstructionEngine {
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		 
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/out.ev";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
 		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
-
+		
+		HeaderEngine enh = new HeaderEngine();
+		enh.init();
+		
 		DCHBEngine en = new DCHBEngine();
 		en.init();
 		DCTBEngine en2 = new DCTBEngine();
+		//DCTBRasterEngine en2 = new DCTBRasterEngine();
 		en2.init();
 		org.jlab.io.evio.EvioSource reader = new org.jlab.io.evio.EvioSource();
 		
@@ -255,20 +263,32 @@ public class DCHBEngine extends ReconstructionEngine {
 		
 		reader.open(inputFile);
 		long t1 = System.currentTimeMillis();
+		
+		//Writer
+		
+		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/DCRBREC.evio";
+		String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/REC2.evio";
+		org.jlab.io.evio.EvioDataSync writer = new org.jlab.io.evio.EvioDataSync();
+		writer.open(outputFile);
+		
+		
 		while(reader.hasEvent() ){
 			
 			counter++;
 			org.jlab.io.evio.EvioDataEvent event = (org.jlab.io.evio.EvioDataEvent) reader.getNextEvent();
+			enh.processDataEvent(event);
+			
 			en.processDataEvent(event);
 			
 			// Processing TB   
 			en2.processDataEvent(event);
 			
-			if(counter>5) break;
+			//if(counter>15) break;
 			//if(counter%100==0)
 			//	System.out.println("run "+counter+" events");
-			
+			writer.writeEvent(event);
 		}
+		writer.close();
 		double t = System.currentTimeMillis()-t1;
 		System.out.println("TOTAL  PROCESSING TIME = "+t);
 	 }

@@ -84,64 +84,45 @@ public class HitReader {
 		
 		double[] stime = null ;
 		int[] tdc = null;
-		
-		//if(Constants.isSimulation ==true) {
-			stime = bankDGTZ.getDouble("stime");
-		//}
-		
-		//if(Constants.isSimulation == false) {		
-			tdc = bankDGTZ.getInt("tdc");
-		//}
-		
-		//if(Constants.useNoiseAlgo == true) {
-		//	results.clear();
-		//	noiseAnalysis.clear();
-			
-		//	noiseAnalysis.findNoise(sector, slayer, layer, wire, results);
-		
-		//}
-		
-		
+		stime = bankDGTZ.getDouble("stime");
+		tdc = bankDGTZ.getInt("TDC");
+				
 		int size = layer.length;
-
+		int[] layerNum = new int[size];
+		int[] superlayerNum =new int[size];
+		double[] smearedTime = new double[size];
+		
 		List<Hit> hits = new ArrayList<Hit>();
 		
 		for(int i = 0; i<size; i++) {
 			
-			double smearedTime = 0;
-			
 			//if(Constants.isSimulation == false) {
-			//	if(tdc!=null) {
-			//		if(tdc[i]<0)
-			//			continue;
-			//		smearedTime = (double) tdc[i];
-			//	}
-			//} else {
-				
-				smearedTime = stime[i];
-			//}
-			//if(smearedTime<0)
-			//	continue;
-			if(smearedTime<0) {
-				continue;
-			//	if(Constants.isSimulation) {
-			//		//continue;
-			//	} else {
-			//		smearedTime =0;
-			//	}
-				
+			if(tdc!=null && tdc.length>0) {
+					smearedTime[i] = (double) tdc[i];
+			} 
+			if(stime!=null && stime.length>0) {
+				smearedTime[i] = stime[i];
 			}
 			
-			Hit hit = new Hit(sector[i], slayer[i], layer[i], wire[i], smearedTime, 0, hitno[i]);
-			
-			double posError = hit.get_CellSize()/Math.sqrt(12.);
-			hit.set_DocaErr(posError);
-			results.clear();
-			noiseAnalysis.clear();
-			
-			noiseAnalysis.findNoise(sector, slayer, layer, wire, results);
-			
-			if(wire[i]!=-1 && results.noise[i]==false){		
+			if(slayer!=null && slayer.length>0) {
+				layerNum[i] = layer[i];
+				superlayerNum[i] = slayer[i];
+			} else {
+				superlayerNum[i]=(layer[i]-1)/6 + 1;
+				layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 
+			}
+	
+		}
+		results.clear();
+		noiseAnalysis.clear();
+		
+		noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
+		
+		for(int i = 0; i<size; i++) {	
+			if(wire[i]!=-1 && results.noise[i]==false && smearedTime[i]>=0.0){		
+				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, hitno[i]);			
+				double posError = hit.get_CellSize()/Math.sqrt(12.);
+				hit.set_DocaErr(posError);
 				hit.set_Id(hits.size()); 
 				hits.add(hit); 
 			}	

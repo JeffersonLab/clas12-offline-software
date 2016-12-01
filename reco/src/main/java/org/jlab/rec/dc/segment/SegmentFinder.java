@@ -8,6 +8,7 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.cluster.FittedCluster;
+import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 
 /**
@@ -38,12 +39,47 @@ public class SegmentFinder {
 			if(Constants.isCALIB()) {
 				// get all the hits to obtain layer efficiency
 				EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("DC::dgtz");
-		        
 				int[] hitno = bankDGTZ.getInt("hitn");
 		        int[] sector = bankDGTZ.getInt("sector");
 				int[] slayer = bankDGTZ.getInt("superlayer");
 				int[] layer = bankDGTZ.getInt("layer");
 				int[] wire = bankDGTZ.getInt("wire");
+				
+				double[] stime = null ;
+				int[] tdc = null;
+				stime = bankDGTZ.getDouble("stime");
+				tdc = bankDGTZ.getInt("TDC");
+						
+				int size = layer.length;
+				int[] layerNum = new int[size];
+				int[] superlayerNum =new int[size];
+				double[] smearedTime = new double[size];
+				
+				for(int i = 0; i<size; i++) {
+				
+					if(tdc!=null && tdc.length>0) {
+						
+						if(tdc[i]<0)
+							continue;
+							smearedTime[i] = (double) tdc[i];
+						} else {
+						if(stime!=null && stime.length>0)
+							smearedTime[i] = stime[i];
+					}
+					
+					if(slayer!=null && slayer.length>0) {
+						layerNum[i] = layer[i];
+						superlayerNum[i] = slayer[i];
+					} else {
+						superlayerNum[i]=(layer[i]-1)/6 + 1;
+						layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 
+					}
+			
+				}
+				
+			
+				
+				
 				
 				// Get the Segment Trajectory
 				SegmentTrajectory trj = new SegmentTrajectory();
@@ -73,7 +109,7 @@ public class SegmentFinder {
 					trkDocas[l] = calc_doca;
 					
 					for(int j = 0; j< hitno.length; j++) {
-						if(sector[j]== seg.get_Sector() && slayer[j]== seg.get_Superlayer()) {
+						if(sector[j]== seg.get_Sector() && superlayerNum[j]== seg.get_Superlayer()) {
 							if(layer[j]==l+1) {
 								for(int wo =0; wo<2; wo++)
 									if( Math.abs(trjWire-wire[j])==wo)

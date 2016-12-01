@@ -223,11 +223,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		int secIdx = this.get_Sector()-1;
 		if(_TrkgStatus!=-1 && this.get_Time()>0) { 
 			d = Constants.TIMETODIST[this.get_Region()-1]; 
+			
 			// chose method to get the distance from the time -- for now this is only used for cosmics so B =0
 			if(useTimeToDistanceGrid==true) {
 				double beta =1;
 				double x = this.get_ClusFitDoca();
-				
 				TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
 				double deltatime_beta = 0;
 				if(x!=-1)
@@ -450,7 +450,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	public int get_AssociatedHBTrackID() {
 		return _AssociatedHBTrackID ;	
 	}
-	
+	private int _AssociatedTBTrackID;
+	public void set_AssociatedTBTrackID(int _id) {
+		_AssociatedTBTrackID = _id;	
+	}
+	public int get_AssociatedTBTrackID() {
+		return _AssociatedTBTrackID ;	
+	}
 
 	
 	

@@ -21,11 +21,12 @@ import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
+import org.jlab.rec.dc.trajectory.Vertex;
 
-public class DCTBEngine extends ReconstructionEngine {
+public class DCTBRasterEngine extends ReconstructionEngine {
 
-	public DCTBEngine() {
-		super("DCTB","ziegler","3.0");
+	public DCTBRasterEngine() {
+		super("DCTBR","ziegler","3.0");
 	}
 
 	@Override
@@ -134,7 +135,11 @@ public class DCTBEngine extends ReconstructionEngine {
 		}
 		
 		trkcandFinder.removeOverlappingTracks(trkcands);		
-		
+		Vertex vt = new Vertex();
+		for(int k =0; k< trkcands.size(); k++) {
+			vt.resetTrackAtRasterRadius((EvioDataEvent) event, trkcands.get(k) );
+			
+		}
 		for(Track trk : trkcands) {
 			for(Cross c : trk) {
 				for(Segment s : c) {
@@ -144,7 +149,6 @@ public class DCTBEngine extends ReconstructionEngine {
 				}
 			}
 		}
-		
 		rbc.fillAllTBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, trkcands);
 
 			

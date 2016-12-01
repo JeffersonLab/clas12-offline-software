@@ -34,6 +34,8 @@ public class Track extends Trajectory implements Comparable<Track>{
 	private Point3D _Region3CrossDir;
 	private Point3D _Region1CrossPoint;
 	private Point3D _Region1CrossDir;
+	private Point3D _Region1TrackX;
+	private Point3D _Region1TrackP;
 	
 	private StateVec _StateVecAtReg1MiddlePlane;
 	
@@ -102,6 +104,18 @@ public class Track extends Trajectory implements Comparable<Track>{
 		_Region1CrossDir = dir;
 	}
 	
+	public Point3D get_Region1TrackX() {
+		return _Region1TrackX;
+	}
+	public void set_Region1TrackX(Point3D _Region1TrackX) {
+		this._Region1TrackX = _Region1TrackX;
+	}
+	public Point3D get_Region1TrackP() {
+		return _Region1TrackP;
+	}
+	public void set_Region1TrackP(Point3D _Region1TrackP) {
+		this._Region1TrackP = _Region1TrackP;
+	}
 	public List<Point3D> get_MicroMegasPointsList() {
 		return _MicroMegasPointsList;
 	}
@@ -127,13 +141,14 @@ public class Track extends Trajectory implements Comparable<Track>{
 	public double get_TotPathLen() {
 		return _totPathLen;
 	}
+	
 	public Point3D get_Vtx0() {
 		return _trakOrig;
 	}
 	public Vector3D get_pAtOrig() {
 		return _pOrig;
 	}
-	
+	/*
 	public Point3D get_Vtx0_TiltedCS() {
 		return _Vtx0_TiltedCS;
 	}
@@ -147,7 +162,7 @@ public class Track extends Trajectory implements Comparable<Track>{
 	public void set_pAtOrig_TiltedCS(Vector3D _pAtOrig_TiltedCS) {
 		this._pAtOrig_TiltedCS = _pAtOrig_TiltedCS;
 	}
-
+*/
 	private String _trking;
 	/**
 	 * Method to assign a string indicated if the stage of tracking is hi-based or time-based
