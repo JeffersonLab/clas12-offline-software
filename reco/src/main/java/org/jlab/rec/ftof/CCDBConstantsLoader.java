@@ -44,8 +44,9 @@ public class CCDBConstantsLoader {
 	public static double[][][] TW2R 			= new double[6][3][62];
 	public static double[][][] LR 				= new double[6][3][62];
 	public static double[][][] PADDLE2PADDLE 	= new double[6][3][62];
-	public static int[][][] STATUSU 			= new int[6][3][62];
-	public static int[][][] STATUSD 			= new int[6][3][62];
+	public static int[][][] STATUSL 			= new int[6][3][62];
+	public static int[][][] STATUSR 			= new int[6][3][62];
+	
 	
 	 //Calibration parameters from DB    
    // public static final DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
@@ -156,8 +157,8 @@ public class CCDBConstantsLoader {
 	        int statL = dbprovider.getInteger("/calibration/ftof/status/stat_left", i);
 	        int statR = dbprovider.getInteger("/calibration/ftof/status/stat_right", i);
 	         
-	        STATUSU[iSec-1][iPan-1][iPad-1] = statL;
-	        STATUSD[iSec-1][iPan-1][iPad-1] = statR;
+	        STATUSL[iSec-1][iPan-1][iPad-1] = statL;
+	        STATUSR[iSec-1][iPan-1][iPad-1] = statR;
 	       
 	    }
 	    CSTLOADED = true;

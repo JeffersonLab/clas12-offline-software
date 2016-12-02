@@ -386,8 +386,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	    FTOFGeant4Factory factory = new FTOFGeant4Factory(provider);
 
 
-		int statusL = CCDBConstantsLoader.STATUSU[sector-1][0][paddle-1];
-		int statusR = CCDBConstantsLoader.STATUSD[sector-1][0][paddle-1];
+		int statusL = CCDBConstantsLoader.STATUSL[sector-1][0][paddle-1];
+		int statusR = CCDBConstantsLoader.STATUSR[sector-1][0][paddle-1];
 		
 		Random rnd = new Random();
 

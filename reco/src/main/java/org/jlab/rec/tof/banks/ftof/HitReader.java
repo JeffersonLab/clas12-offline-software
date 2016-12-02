@@ -94,8 +94,8 @@ public class HitReader {
 						continue;
 					
 				    // get the status
-					int statusL = CCDBConstantsLoader.STATUSU[sector_1A[i]-1][0][paddle_1A[i]-1];
-					int statusR = CCDBConstantsLoader.STATUSD[sector_1A[i]-1][0][paddle_1A[i]-1];
+					int statusL = CCDBConstantsLoader.STATUSL[sector_1A[i]-1][0][paddle_1A[i]-1];
+					int statusR = CCDBConstantsLoader.STATUSR[sector_1A[i]-1][0][paddle_1A[i]-1];
 					String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1A[i], TDCL_1A[i], ADCR_1A[i], TDCR_1A[i]);
 									
 					// create the hit object
@@ -135,8 +135,8 @@ public class HitReader {
 					if( passADC(ADCL_1B[i])==0 || passADC(ADCR_1B[i])==0 || passTDC(TDCL_1B[i])==0 || passTDC(TDCR_1B[i])==0 )
 						continue;
 					// get the status
-					int statusL = CCDBConstantsLoader.STATUSU[sector_1B[i]-1][1][paddle_1B[i]-1];
-					int statusR = CCDBConstantsLoader.STATUSD[sector_1B[i]-1][1][paddle_1B[i]-1];
+					int statusL = CCDBConstantsLoader.STATUSL[sector_1B[i]-1][1][paddle_1B[i]-1];
+					int statusR = CCDBConstantsLoader.STATUSR[sector_1B[i]-1][1][paddle_1B[i]-1];
 					String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]);			
 					
 					// create the hit object
@@ -177,8 +177,8 @@ public class HitReader {
 				for(int i = 0; i<id_2.length; i++){// get the status
 					if( passADC(ADCL_2[i])==0 || passADC(ADCR_2[i])==0 || passTDC(TDCL_2[i])==0 || passTDC(TDCR_2[i])==0 )
 						continue;
-					int statusL = CCDBConstantsLoader.STATUSU[sector_2[i]-1][2][paddle_2[i]-1];
-					int statusR = CCDBConstantsLoader.STATUSD[sector_2[i]-1][2][paddle_2[i]-1];
+					int statusL = CCDBConstantsLoader.STATUSL[sector_2[i]-1][2][paddle_2[i]-1];
+					int statusR = CCDBConstantsLoader.STATUSR[sector_2[i]-1][2][paddle_2[i]-1];
 					String statusWord = this.set_StatusWord(statusL, statusR, ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]);
 					
 					// create the hit object
@@ -220,8 +220,8 @@ public class HitReader {
 					continue;
 				
 			    // get the status
-				int statusL = CCDBConstantsLoader.STATUSU[sector[i]-1][0][paddle[i]-1];
-				int statusR = CCDBConstantsLoader.STATUSD[sector[i]-1][0][paddle[i]-1];
+				int statusL = CCDBConstantsLoader.STATUSL[sector[i]-1][panel[i]-1][paddle[i]-1];
+				int statusR = CCDBConstantsLoader.STATUSR[sector[i]-1][panel[i]-1][paddle[i]-1];
 				String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i], TDCL[i], ADCR[i], TDCR[i]);
 								
 				// create the hit object
