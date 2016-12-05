@@ -5,24 +5,18 @@ package org.jlab.rec.tof.hit.ctof;
 
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
 
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.rec.ctof.CTOFGeometry;
 import org.jlab.rec.ctof.CalibrationConstantsLoader;
 import org.jlab.rec.ctof.Constants;
-import org.jlab.rec.tof.banks.ctof.HitReader;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.IGetCalibrationParams;
-import org.jlab.service.ctof.CTOFEngine;
 
 /**
  * @author ziegler
@@ -246,8 +240,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		double shift = Constants.DYHL;
 		if(this.get_Paddle()%2==1)
 			shift = 0;
-		
-		return ccdbOffset - shift;
+		double paddleCenteringOffset = Constants.PCO;
+		return ccdbOffset + shift - paddleCenteringOffset;
 	}
 
 
