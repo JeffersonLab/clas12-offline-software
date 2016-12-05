@@ -41,7 +41,9 @@ public class DetectorParticle implements Comparable {
     
     private Line3D  driftChamberEnter = new Line3D();
     
-    private List<DetectorResponse>  responseStore = new ArrayList<DetectorResponse>();
+    private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
+    private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
+    
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
             
@@ -52,6 +54,14 @@ public class DetectorParticle implements Comparable {
     
     public void clear(){
         this.responseStore.clear();
+    }
+    
+    public List<CherenkovResponse> getCherenkovResponse(){
+        return this.cherenkovStore;
+    }
+    
+    public void addCherenkovResponse(CherenkovResponse res){
+        this.cherenkovStore.add(res);
     }
     
     public void addResponse(DetectorResponse res, boolean match){
@@ -88,6 +98,10 @@ public class DetectorParticle implements Comparable {
     
     public void setLowerCross(double x, double y, double z, double ux, double uy, double uz){
         this.driftChamberEnter.set(x, y, z, x+1000.0*ux, y+1000.0*uy, z + 1000.0*uz);
+    }
+    
+    public Line3D getLowerCross(){
+        return this.driftChamberEnter;
     }
     /**
      * Particle score combined number that represents which detectors were hit
