@@ -11,6 +11,7 @@ import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
+import org.jlab.service.pid.AssignPid;
 
 /**
  *
@@ -42,6 +43,8 @@ public class EBEngine extends ReconstructionEngine {
         processor.matchTimeOfFlight();
         processor.matchCalorimeter();
         processor.matchNeutral();
+        
+        AssignPid.assignPid(processor.getParticles());
         List<DetectorParticle> centralParticles = EBio.readCentralTracks(de);
         
         /*
