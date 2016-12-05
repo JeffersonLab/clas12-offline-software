@@ -241,7 +241,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		if(this.get_Paddle()%2==1)
 			shift = 0;
 		double paddleCenteringOffset = Constants.PCO;
-		return ccdbOffset + shift - paddleCenteringOffset;
+		return ccdbOffset - shift + paddleCenteringOffset;
 	}
 
 
