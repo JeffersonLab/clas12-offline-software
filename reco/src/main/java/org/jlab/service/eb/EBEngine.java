@@ -44,6 +44,18 @@ public class EBEngine extends ReconstructionEngine {
         processor.matchNeutral();
         List<DetectorParticle> centralParticles = EBio.readCentralTracks(de);
         
+        /*
+        int nparticles = processor.getParticles().size();
+        System.out.println("--------------------------------- ### NPARTICLES " + nparticles);
+        for(int i = 0; i < nparticles; i++){
+            if(processor.getParticles().get(i).getCharge()<0){
+                System.out.println(processor.getParticles().get(i).toString());
+            }                        
+        }
+        for(int i = 0; i < processor.getResponses().size(); i++){
+            System.out.println(processor.getResponses().get(i).toString());
+        }*/
+        
         processor.getParticles().addAll(centralParticles);
         /*
         if(de.hasBank("RUN::config")==true){
@@ -58,6 +70,7 @@ public class EBEngine extends ReconstructionEngine {
         }*/
         EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(processor.getParticles(), eventType);
         EvioDataBank dBank = (EvioDataBank) EBio.writeResponses(processor.getResponses(), eventType);
+
         de.appendBanks(pBank,dBank);
         
         return true;
