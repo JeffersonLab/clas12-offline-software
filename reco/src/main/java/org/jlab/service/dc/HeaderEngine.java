@@ -58,8 +58,7 @@ public class HeaderEngine extends ReconstructionEngine{
 	// the raw strings
 	public Vector<String> properties = new Vector<String>();
 
-	
-	
+
 	private String scaleString(String magnet, String key, String val) {
 
 		String valStr = null;
