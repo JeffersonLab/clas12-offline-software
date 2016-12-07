@@ -169,4 +169,8 @@ public class EvioETSync implements DataSync {
             writer.writeEvent(event);
         }
     }
+
+    public DataEvent createEvent() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

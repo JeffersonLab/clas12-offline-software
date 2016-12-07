@@ -8,6 +8,7 @@ package org.jlab.io.hipo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.hipo.data.HipoEvent;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSync;
 import org.jlab.io.evio.EvioDataDictionary;
@@ -15,6 +16,7 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.hipo.io.HipoWriter;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.evio.EvioDataBank;
 
 /**
@@ -27,21 +29,27 @@ public class HipoDataSync implements DataSync {
     
     public HipoDataSync(){
         this.writer = new HipoWriter();
+        this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        //this.writer.getSchemaFactory().show();
     }
     
     public void open(String file) {
+        /*
         EvioDataDictionary  dict = EvioFactory.getDictionary();
         String[] descList = dict.getDescriptorList();
         for(String desc : descList){
             String descString = dict.getDescriptor(desc).toString();
             this.writer.addHeader(descString);
-        }
+        }*/
         this.writer.open(file);
     }
 
     public void writeEvent(DataEvent event) {
-        EvioDataEvent  evioEvent = (EvioDataEvent) event;
-        this.writer.writeEvent(evioEvent.getEventBuffer().array());
+        //EvioDataEvent  evioEvent = (EvioDataEvent) event;
+        if(event instanceof HipoDataEvent) {
+            HipoDataEvent hipoEvent = (HipoDataEvent) event;
+            this.writer.writeEvent(hipoEvent.getHipoEvent());
+        }
     }
 
     public void close() {
@@ -51,6 +59,12 @@ public class HipoDataSync implements DataSync {
     public void setCompressionType(int type){
         this.writer.setCompressionType(type);
     }
+    
+    public DataEvent createEvent() {
+        HipoEvent event = this.writer.createEvent();
+        return new HipoDataEvent(event);
+    }
+    
     public static void printUsage(){
         System.out.println("\tUsage: convert -[option] output.hipo input.evio [input2.evio] [input3.evio]");
             System.out.println("\n\t Options :");
@@ -62,6 +76,27 @@ public class HipoDataSync implements DataSync {
     
     public static void main(String[] args){
         
+        HipoDataSync writer = new HipoDataSync();
+        writer.open("test_hipoio.hipo");
+        for(int i = 0; i < 20; i++){
+            DataEvent event = writer.createEvent();
+            DataBank   bank = event.createBank("FTOF::dgtz", 12);
+            DataBank   bankDC = event.createBank("DC::dgtz",  7);
+            for(int k = 0; k < 5; k++){
+                bank.setByte("sector", k, (byte) (1+k));
+                bank.setByte("layer", k, (byte) (2+k));
+                bank.setShort("component", k, (short) (2+k*5));
+                bank.setInt("ADCL", k, (int) (Math.random()*3000) );
+                bank.setInt("ADCR", k, (int) (Math.random()*3000) );
+                bank.setInt("TDCL", k, (int) (Math.random()*3000) );
+                bank.setInt("TDCR", k, (int) (Math.random()*3000) );
+            }
+            //bank.show();
+            event.appendBanks(bank,bankDC);
+            writer.writeEvent(event);
+        }
+        writer.close();
+        /*
         if(args.length<3){
             HipoDataSync.printUsage();
             System.exit(0);
@@ -128,6 +163,7 @@ public class HipoDataSync implements DataSync {
                 //writer.writeEvent(event);
             }
         }
-        writer.close();
+        writer.close();*/
     }
+
 }

@@ -848,4 +848,10 @@ public class EvioDataEvent implements DataEvent {
 	public DataEventType getType() {
 		return this.eventType;
 	}
+
+    public DataBank createBank(String bank_name, int rows) {
+        return this.dictionary.createBank(bank_name, rows);
+    }
+
+    
 }

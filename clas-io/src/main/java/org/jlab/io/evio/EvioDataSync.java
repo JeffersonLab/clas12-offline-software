@@ -189,7 +189,7 @@ public class EvioDataSync implements DataSync {
 		return null;
 	}
 
-	public EvioDataEvent createEvent() {
+	public DataEvent createEvent() {
 
 		try {
 			// EvioEvent baseBank = new EvioEvent(1, DataType.BANK, 0);

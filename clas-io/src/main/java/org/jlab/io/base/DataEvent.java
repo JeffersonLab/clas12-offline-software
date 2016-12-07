@@ -10,10 +10,13 @@ public interface DataEvent {
     ByteBuffer getEventBuffer();
     
     void     appendBank(DataBank bank);
-    void     appendBanks(DataBank... bank);    
+    void     appendBanks(DataBank... bank);
     boolean  hasBank(String name);
     
+    DataBank createBank(String bank_name, int rows);    
     DataBank getBank(String bank_name);
+    void     show();
+    
     void getBank(String bank_name, DataBank bank);
     void setProperty(String property, String value);
     String getProperty(String property);

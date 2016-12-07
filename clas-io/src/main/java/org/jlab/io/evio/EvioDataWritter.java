@@ -27,5 +27,9 @@ public class EvioDataWritter implements DataSync {
     public void close() {
         
     }
+
+    public DataEvent createEvent() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

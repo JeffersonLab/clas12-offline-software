@@ -654,4 +654,14 @@ public class BosDataEvent implements DataEvent {
 		return eventType;
 	}
 
+    public DataBank createBank(String bank_name, int rows) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void show() {
+        System.out.println("[BosDataEvent]  show is not implemented");
+    }
+
+    
+
 }

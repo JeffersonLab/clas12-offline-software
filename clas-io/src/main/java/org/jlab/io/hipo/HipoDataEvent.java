@@ -31,6 +31,12 @@ public class HipoDataEvent implements DataEvent {
         hipoEvent = new HipoEvent(array,factory);
     }
     
+    public HipoDataEvent(HipoEvent event){
+        this.hipoEvent = event;
+    }
+    
+    public HipoEvent  getHipoEvent(){return this.hipoEvent;}
+    
     public String[] getBankList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -51,7 +57,7 @@ public class HipoDataEvent implements DataEvent {
 
     public void appendBank(DataBank bank) {
         if(bank instanceof HipoDataBank){
-            HipoGroup group = (HipoGroup) bank;
+            HipoGroup group =  ((HipoDataBank) bank).getGroup();
             this.hipoEvent.addNodes(group.getNodes());
         }
     }
@@ -157,4 +163,18 @@ public class HipoDataEvent implements DataEvent {
         return this.eventType;
     }
     
+    public void show(){
+        this.hipoEvent.show();
+    }
+    
+    public void showBankByOrder(int order){
+        this.hipoEvent.showGroupByOrder(order);
+    }
+    
+    public DataBank createBank(String bank_name, int rows) {
+        if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==false) return null;
+        HipoGroup group = this.hipoEvent.getSchemaFactory().getSchema(bank_name).createGroup(rows);
+        HipoDataBank bank = new HipoDataBank(group);
+        return bank;
+    }
 }

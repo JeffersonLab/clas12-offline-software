@@ -17,19 +17,31 @@ import org.jlab.io.base.DataDescriptor;
  *
  * @author gavalian
  */
-public class HipoDataBank extends HipoGroup implements DataBank  {
+public class HipoDataBank implements DataBank  {
     
     private HipoDataDescriptor descriptor = null;
+    private HipoGroup          hipoGroup  = null;
     
-    public HipoDataBank(HipoDataDescriptor desc){
-        super(desc.getSchema());
+    public HipoDataBank(HipoDataDescriptor desc, int size){        
+        Map<Integer,HipoNode>  nodes = desc.getSchema().createNodeMap(size);
         this.descriptor = desc;
+        hipoGroup = new HipoGroup(nodes,this.descriptor.getSchema());
     }
     
     public HipoDataBank(Map<Integer,HipoNode> nodes, Schema desc){
-        super(nodes,desc);
         descriptor = new HipoDataDescriptor();
         descriptor.init(desc.getText());
+        hipoGroup = new HipoGroup(nodes,this.descriptor.getSchema());
+    }
+    
+    public HipoDataBank(HipoGroup group){
+        this.hipoGroup = group;
+        descriptor = new HipoDataDescriptor();
+        descriptor.init(this.hipoGroup.getSchema().getText());
+    }
+    
+    public HipoGroup getGroup(){
+        return this.hipoGroup;
     }
     
     public String[] getColumnList() {
@@ -45,7 +57,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public double getDouble(String path, int index) {
-        return this.getNode(path).getDouble(index);
+        return this.hipoGroup.getNode(path).getDouble(index);
     }
 
     public void setDouble(String path, double[] arr) {
@@ -53,7 +65,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public void setDouble(String path, int row, double value) {
-        this.getNode(path).setDouble(row, value);
+        this.hipoGroup.getNode(path).setDouble(row, value);
     }
 
     public void appendDouble(String path, double[] arr) {
@@ -73,7 +85,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public void setFloat(String path, int row, float value) {
-        this.getNode(path).setFloat(row, value);
+        this.hipoGroup.getNode(path).setFloat(row, value);
     }
 
     public void appendFloat(String path, float[] arr) {
@@ -85,7 +97,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public int getInt(String path, int index) {
-        return this.getNode(path).getInt(index);
+        return this.hipoGroup.getNode(path).getInt(index);
     }
 
     public void setInt(String path, int[] arr) {
@@ -93,7 +105,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public void setInt(String path, int row, int value) {
-        this.getNode(path).setInt(row, value);
+        this.hipoGroup.getNode(path).setInt(row, value);
     }
 
     public void appendInt(String path, int[] arr) {
@@ -105,7 +117,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public short getShort(String path, int index) {
-        return this.getNode(path).getShort(index);
+        return this.hipoGroup.getNode(path).getShort(index);
     }
 
     public void setShort(String path, short[] arr) {
@@ -113,7 +125,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public void setShort(String path, int row, short value) {
-        this.getNode(path).setShort(row, value);
+        this.hipoGroup.getNode(path).setShort(row, value);
     }
 
     public void appendShort(String path, short[] arr) {
@@ -125,7 +137,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public byte getByte(String path, int index) {
-        return this.getNode(path).getByte(index);
+        return this.hipoGroup.getNode(path).getByte(index);
     }
 
     public void setByte(String path, byte[] arr) {
@@ -133,7 +145,7 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public void setByte(String path, int row, byte value) {
-        this.getNode(path).setByte(row, value);
+        this.hipoGroup.getNode(path).setByte(row, value);
     }
 
     public void appendByte(String path, byte[] arr) {
@@ -141,15 +153,16 @@ public class HipoDataBank extends HipoGroup implements DataBank  {
     }
 
     public int columns() {
-        return 1;
+        return this.hipoGroup.getSchema().getEntries();
     }
 
     public int rows() {
-        return 1;
+        return this.hipoGroup.getMaxSize();
     }
 
     public void show() {
-        
+        System.out.println(" SHOWING BANK");
+        this.hipoGroup.show();
     }
 
     public void reset() {
