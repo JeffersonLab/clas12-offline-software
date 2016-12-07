@@ -165,7 +165,8 @@ public class FTOFEngine extends ReconstructionEngine {
 	public static void main (String arg[]) throws IOException {
 		FTOFEngine en = new FTOFEngine();
 		en.init();
-		String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
+		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
+		String input = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/TestTOFBanks.evio";
 		EvioSource  reader = new EvioSource();
 		reader.open(input);
 		while(reader.getNextEvent()!=null)

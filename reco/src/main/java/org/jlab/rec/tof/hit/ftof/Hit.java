@@ -144,8 +144,9 @@ public class Hit extends AHit implements IGetCalibrationParams {
         hitPosition.setX(startpoint.x() + (L_2+this.get_y())*dir.x());
         hitPosition.setY(startpoint.y() + (L_2+this.get_y())*dir.y());
         hitPosition.setZ(startpoint.z() + (L_2+this.get_y())*dir.z());
-        
+
         return hitPosition;
+        
 	}
 	 
 	public void printInfo() {

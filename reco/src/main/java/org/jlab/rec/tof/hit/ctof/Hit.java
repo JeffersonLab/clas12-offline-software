@@ -8,7 +8,6 @@ import java.text.DecimalFormat;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
-
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -127,11 +126,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
         );
         dir.unit();  
         Point3D startpoint = this.get_paddleLine().origin();
-        double L_2 = this.get_paddleLine().length()/2;
-        hitPosition.setX(startpoint.x() + (L_2+this.get_y())*dir.x());
-        hitPosition.setY(startpoint.y() + (L_2+this.get_y())*dir.y());
-        hitPosition.setZ(startpoint.z() + (L_2+this.get_y())*dir.z());
-        
+       // double L_2 = this.get_paddleLine().length()/2;
+       // hitPosition.setX(startpoint.x() + (L_2+this.get_y())*dir.x());
+       // hitPosition.setY(startpoint.y() + (L_2+this.get_y())*dir.y());
+       // hitPosition.setZ(startpoint.z() + (L_2+this.get_y())*dir.z());
+        hitPosition.setX(startpoint.x() + Constants.SCBARTHICKN[0]/2 *dir.x());
+        hitPosition.setY(startpoint.y() + Constants.SCBARTHICKN[0]/2 *dir.y());
+        hitPosition.setZ(this.get_y());
+      
         return hitPosition;
 	}
 	 

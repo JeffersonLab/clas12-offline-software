@@ -41,7 +41,8 @@ public class Constants {
 
 
 	public static final double DYHL = 0.8861;						// Shift along beam line between high and the low pitch angles counters
-	public static final double PCO = 19.4160;						// Constant put the center of the CTOF barrel in its design position
+//	public static final double PCO = 19.4160;						// Constant put the center of the CTOF barrel in its design position
+	public static final double PCO = 10.0;							// Constant put the center of the CTOF barrel in its design position according to GEMC
 
 	public static double CLSMATCHXPAR = 1 ;							// x-matching parameter between panels 1a and 1b
 	public static double CLSMATCHYPAR = 1 ;							// y-matching parameter between panels 1a and 1b

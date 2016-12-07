@@ -227,7 +227,7 @@ public class HitReader {
 				// create the hit object
 				Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i], TDCL[i], ADCR[i], TDCR[i]) ;				
 				hit.set_StatusWord(statusWord);
-				hit.setPaddleLine(geometry);
+				hit.setPaddleLine(geometry);  
 	    	    // add this hit
 	            hits.add(hit); 
 			}
@@ -241,7 +241,7 @@ public class HitReader {
 			for(Hit hit : updated_hits) {
 				// set the layer to get the paddle position from the geometry package				
 				hit.set_HitParameters(hit.get_Panel());
-				DetHits.get(hit.get_Panel()-1).add(hit);
+				DetHits.get(hit.get_Panel()-1).add(hit); 
 			}
 			if(DetHits.get(0).size()>0) {
 				Collections.sort(DetHits.get(0));
