@@ -9,8 +9,10 @@ import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.ctof.CalibrationConstantsLoader;
 import org.jlab.rec.ctof.Constants;
@@ -34,25 +36,27 @@ public class CTOFEngine extends ReconstructionEngine {
 		super("CTOFRec", "carman, ziegler", "0.3");
 	}
 	CTOFGeant4Factory geometry;
+	
+	int Run = -1;
+	
+	
 	@Override
 	public boolean init() {
 		// Load the Constants
 		//if (Constants.CSTLOADED == false) {
 			Constants.Load();
 		//}
-		// Load the Calibration Constants
-		//if (CalibrationConstantsLoader.CSTLOADED == false) {
-			DatabaseConstantProvider db = CCDBConstantsLoader.Load();
-			//}
-			
+		
 			geometry = new CTOFGeant4Factory();
-			CalibrationConstantsLoader.Load();
+			//CalibrationConstantsLoader.Load();
 		//}
 		return true;
 	}
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
+		setRunConditionsParameters( event) ;
+    	
 		if(geometry == null) {
     		System.err.println(" CTOF Geometry not loaded !!!");
     		return false;
@@ -122,6 +126,38 @@ public class CTOFEngine extends ReconstructionEngine {
 		
 	}
 	
+	public void setRunConditionsParameters(DataEvent event) {
+		if(event.hasBank("RUN::config")==false) {
+			System.err.println("RUN CONDITIONS NOT READ!");
+			return;
+		}
+		boolean isMC = false;
+		boolean isCosmics = false;
+		EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+        
+		if(bank.getByte("Type")[0]==0)
+			isMC = true;
+		if(bank.getByte("Mode")[0]==1)
+			isCosmics = true;
+		// force cosmics
+		//isCosmics = true;
+		//System.out.println(bank.getInt("Event")[0]);
+		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
+		//
+	
+		
+		// Load the constants
+		//-------------------
+		int newRun = bank.getInt("Run")[0];
+		
+		if(Run!=newRun) {
+			
+			DatabaseConstantProvider db = CalibrationConstantsLoader.Load(newRun);
+
+		}
+		Run = newRun;
+		
+	}
 	
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		 

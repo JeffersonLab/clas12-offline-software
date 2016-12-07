@@ -6,11 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.rec.ftof.CCDBConstantsLoader;
@@ -23,7 +22,6 @@ import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
-import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geometry.prim.Line3d;
 
 /**
@@ -39,6 +37,7 @@ public class FTOFEngine extends ReconstructionEngine {
 	
 	
 	FTOFGeant4Factory geometry;
+	int Run = -1;
 	
 	@Override	
 	public boolean init(){
@@ -50,12 +49,12 @@ public class FTOFEngine extends ReconstructionEngine {
 	
 		// Load the Calibration Constants
 		//if (CCDBConstantsLoader.CSTLOADED == false) {
-			DatabaseConstantProvider db = CCDBConstantsLoader.Load();
+			//DatabaseConstantProvider db = CCDBConstantsLoader.Load();
 		//}
 		//if(db!=null) {
 			//Detector ftofdet = GeometryFactory.getDetector(DetectorType.FTOF);
-			ConstantProvider  cp = GeometryFactory.getConstants(DetectorType.FTOF);
-			geometry = new FTOFGeant4Factory(db);
+			//ConstantProvider  cp = GeometryFactory.getConstants(DetectorType.FTOF);
+			//geometry = new FTOFGeant4Factory(db);
 			
 		//} 
 		return true;
@@ -65,7 +64,7 @@ public class FTOFEngine extends ReconstructionEngine {
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 		//System.out.println(" PROCESSING EVENT ....");
-		
+		setRunConditionsParameters( event) ;
     	if(geometry == null) {
     		System.err.println(" FTOF Geometry not loaded !!!");
     		return false;
@@ -162,6 +161,40 @@ public class FTOFEngine extends ReconstructionEngine {
 		return true;
 	}
 
+	public void setRunConditionsParameters(DataEvent event) {
+		if(event.hasBank("RUN::config")==false) {
+			System.err.println("RUN CONDITIONS NOT READ!");
+			return;
+		}
+		boolean isMC = false;
+		boolean isCosmics = false;
+		EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+        
+		if(bank.getByte("Type")[0]==0)
+			isMC = true;
+		if(bank.getByte("Mode")[0]==1)
+			isCosmics = true;
+		// force cosmics
+		//isCosmics = true;
+		//System.out.println(bank.getInt("Event")[0]);
+		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
+		//
+	
+		
+		// Load the constants
+		//-------------------
+		int newRun = bank.getInt("Run")[0];
+		
+		if(Run!=newRun) {
+			
+			DatabaseConstantProvider db = CCDBConstantsLoader.Load(newRun);
+			
+			geometry = new FTOFGeant4Factory(db);
+		}
+		Run = newRun;
+		
+	}
+	
 	public static void main (String arg[]) throws IOException {
 		FTOFEngine en = new FTOFEngine();
 		en.init();

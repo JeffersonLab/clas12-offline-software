@@ -38,13 +38,14 @@ public class CalibrationConstantsLoader {
 	public static int[][][] STATUSD 			= new int[1][1][48];
 	
 	 //Calibration parameters from DB    
-    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
     
     public static boolean areCalibConstantsLoaded = false;
     
-    public static synchronized DatabaseConstantProvider Load() {
-    	if (CSTLOADED == true) 
+    public static synchronized DatabaseConstantProvider Load(int Run){
+    	System.out.println(" LOADING CONSTANTS from RUN "+Run);
+		if (CSTLOADED == true) 
 			return null;
+		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(Run,"default");
 		
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/ctof/attenuation");
@@ -150,6 +151,6 @@ public class CalibrationConstantsLoader {
     
     
     public static void main (String arg[]) {
-    	CalibrationConstantsLoader.Load();
+    	CalibrationConstantsLoader.Load(10);
     }
 }

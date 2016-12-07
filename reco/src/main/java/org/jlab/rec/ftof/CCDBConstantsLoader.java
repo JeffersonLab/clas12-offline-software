@@ -53,11 +53,11 @@ public class CCDBConstantsLoader {
     //private Detector ftofDetector;
    // public static boolean areCalibConstantsLoaded = false;
    
-    public static synchronized DatabaseConstantProvider Load(){
-    	System.out.println(" LOADING CONSTANTS ");
+    public static synchronized DatabaseConstantProvider Load(int Run){
+    	System.out.println(" LOADING CONSTANTS from RUN "+Run);
 		if (CSTLOADED == true) 
 			return null;
-		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
+		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(Run,"default");
 		// load the geometry tables 
 		dbprovider.loadTable("/geometry/ftof/panel1a/paddles");
 		dbprovider.loadTable("/geometry/ftof/panel1a/panel");
@@ -169,7 +169,7 @@ public class CCDBConstantsLoader {
     
     
     public static void main (String arg[]) {
-    	CCDBConstantsLoader.Load();
+    	CCDBConstantsLoader.Load(10);
     	Random rnd = new Random();
     	FTOFGeant4Factory geometry = null;
     	/*
@@ -181,7 +181,7 @@ public class CCDBConstantsLoader {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-    	
+    	/*
     	for(int itrack=0; itrack<1000; itrack++){
 	        Line3d line = new Line3d(new Vector3d(rnd.nextDouble() * 10000 - 5000, rnd.nextDouble() * 10000 - 5000,  3000),
 	                                                new Vector3d(rnd.nextDouble() * 10000 - 5000, rnd.nextDouble() * 10000 - 5000,  9000));
@@ -193,6 +193,6 @@ public class CCDBConstantsLoader {
 	               System.out.println(fhit.toString());
 	        }
     	}
-
+    	 */
     }
 }
