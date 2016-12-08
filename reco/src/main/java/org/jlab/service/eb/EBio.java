@@ -249,4 +249,32 @@ public class EBio {
         }
         return ftof;
     }
+
+        public static List<CherenkovResponse> readHTCC(DataEvent event) {
+        List<CherenkovResponse> htcc = new ArrayList<CherenkovResponse>();
+        if(event.hasBank("HTCCRec::clusters")==true){
+            EvioDataBank bank = (EvioDataBank) event.getBank("HTCCRec::clusters");
+            int nrows = bank.rows();
+            for(int i = 0; i < nrows; i++){
+                int nphe  = bank.getInt("nphe", i);
+                double theta   = bank.getDouble("theta", i);
+                double dtheta = bank.getDouble("dtheta",i);
+                double phi = bank.getDouble("phi",i);
+                double dphi = bank.getDouble("dphi",i);
+                double x = bank.getDouble("X",i);
+                double y = bank.getDouble("Y",i);
+                double z = bank.getDouble("Z",i);
+                double time = bank.getDouble("time",i);
+        
+                    CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                    che.setHitPosition(x, y, z);
+                    che.setEnergy(nphe);
+                    che.setTime(time);
+                    htcc.add(che);
+              
+            }
+        }
+        return htcc;
+    }
+    
 }
