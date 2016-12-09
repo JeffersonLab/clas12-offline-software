@@ -7,8 +7,6 @@ package org.jlab.service.eb;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.detector.DetectorParticle;
-import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -69,6 +67,14 @@ public class EBio {
                         bank.getDouble("c3_uy", i),
                         bank.getDouble("c3_uz", i)
                 );
+                p.setLowerCross(
+                        bank.getDouble("c1_x", i),
+                        bank.getDouble("c1_y", i),
+                        bank.getDouble("c1_z", i),
+                        bank.getDouble("c1_ux", i),
+                        bank.getDouble("c1_uy", i),
+                        bank.getDouble("c1_uz", i)
+                );                       
                 p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
@@ -249,8 +255,8 @@ public class EBio {
         }
         return ftof;
     }
-
-        public static List<CherenkovResponse> readHTCC(DataEvent event) {
+    
+    public static List<CherenkovResponse> readHTCC(DataEvent event) {
         List<CherenkovResponse> htcc = new ArrayList<CherenkovResponse>();
         if(event.hasBank("HTCCRec::clusters")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("HTCCRec::clusters");
@@ -270,11 +276,11 @@ public class EBio {
                     che.setHitPosition(x, y, z);
                     che.setEnergy(nphe);
                     che.setTime(time);
+                    che.setCherenkovType(DetectorType.HTCC);
                     htcc.add(che);
               
             }
         }
         return htcc;
     }
-    
 }
