@@ -6,12 +6,11 @@
 package org.jlab.service.eb;
 
 import java.util.List;
-import org.jlab.clas.detector.DetectorParticle;
-import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
-import org.jlab.service.pid.AssignPid;
+import org.jlab.service.pid
+
 
 /**
  *
@@ -35,16 +34,18 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorParticle>  chargedParticles = EBio.readTracks(de, eventType);
         List<DetectorResponse>  ftofResponse     = EBio.readFTOF(de);
         List<DetectorResponse>  ecalResponse     = EBio.readECAL(de);
+        List<CherenkovResponse> htccResponse     = EBio.readHTCC(de);
         
         EBProcessor processor = new EBProcessor(chargedParticles);
         processor.addTOF(ftofResponse);
         processor.addECAL(ecalResponse);
+        processor.addHTCC(htccResponse);
         
         processor.matchTimeOfFlight();
         processor.matchCalorimeter();
+        processor.matchHTCC();
         processor.matchNeutral();
         
-        AssignPid.assignPid(processor.getParticles());
         List<DetectorParticle> centralParticles = EBio.readCentralTracks(de);
         
         /*
@@ -71,6 +72,37 @@ public class EBEngine extends ReconstructionEngine {
         for(DetectorParticle p : chargedParticles){
             System.out.println(p);
         }*/
+        
+         DetectorEvent  detectorEvent = new DetectorEvent();
+        
+        for(int i = 0 ; i < chargedParticles.size() ; i++){ 
+            detectorEvent.addParticle(chargedParticles.get(i));
+        }
+
+      
+        EventTrigger trigger = new EventTrigger();  
+        detectorEvent.setEventTrigger(trigger);
+        
+        EBTrigger triggerinfo = new EBTrigger();
+        triggerinfo.setEvent(detectorEvent);
+        triggerinfo.setDataEvent(de);
+        
+        triggerinfo.RFInformation(); //Obtain RF Time
+        triggerinfo.Trigger();//Use Trigger Particle Vertex Time and RF Time for Start Time
+        triggerinfo.CalcBetas(); //Calculate Speeds and Masses of Particles
+       
+        //System.out.println(detectorEvent.getEventTrigger());
+        
+        
+        EBPID pid = new EBPID();
+        if(EBio.isTimeBased(de)==true){
+           pid.setEvent(detectorEvent);
+           pid.PIDAssignment();//PID Assignment
+}
+        
+        
+        
+        
         EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(processor.getParticles(), eventType);
         EvioDataBank dBank = (EvioDataBank) EBio.writeResponses(processor.getResponses(), eventType);
 
