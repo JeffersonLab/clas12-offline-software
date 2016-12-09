@@ -14,6 +14,7 @@ import org.jlab.io.evio.EvioDataDescriptor;
 import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.evio.EvioSource;
 
 /**
  *
@@ -22,128 +23,154 @@ import org.jlab.io.evio.EvioFactory;
 public class EvioHipoEvent {
     
     
-    public static void addFTOF(HipoEvent hevent, EvioDataEvent event){
-        
-        EvioDataBank bank = (EvioDataBank) event.getBank("FTOF");
-
-        HipoNodeBuilder<Byte>   node_sector = new HipoNodeBuilder<Byte>();
-        HipoNodeBuilder<Byte>   node_layer  = new HipoNodeBuilder<Byte>();
-        HipoNodeBuilder<Short>  node_comp   = new HipoNodeBuilder<Short>();
-        
-        HipoNodeBuilder<Integer>   node_adcl = new HipoNodeBuilder<Integer>();
-        HipoNodeBuilder<Integer>   node_adcr = new HipoNodeBuilder<Integer>();
-        HipoNodeBuilder<Integer>   node_tdcl = new HipoNodeBuilder<Integer>();
-        HipoNodeBuilder<Integer>   node_tdcr = new HipoNodeBuilder<Integer>();
-        
-        for(int i = 0; i < bank.rows(); i++){
-            node_sector.push((byte) bank.getInt("sector",i));
-            node_layer.push((byte) bank.getInt("layer",i));
-            node_comp.push((short) bank.getInt("component",i));
-            node_adcl.push(bank.getInt("ADCL", i));
-            node_adcr.push(bank.getInt("ADCR", i));
-            node_adcl.push(bank.getInt("TDCL", i));
-            node_adcr.push(bank.getInt("TDCR", i));
-        }
-    }
-                
-    public static EvioDataBank getBankFTOF(EvioDataBank ftof1a, EvioDataBank ftof1b,
-            EvioDataBank ftof2){
-        int nrows = ftof1a.rows() + ftof1b.rows() + ftof2.rows();
-        
-        EvioDataBank  bankFTOF = (EvioDataBank) EvioFactory.getDictionary().createBank("FTOF::dgtz", nrows);
-        int crow = 0;
-        for(int i = 0; i < ftof1a.rows(); i++){
-            bankFTOF.setByte("sector", crow , (byte) ftof1a.getInt("sector", i));
-            bankFTOF.setByte("layer", crow , (byte) 1);
-            bankFTOF.setShort("component", crow , (short) ftof1a.getInt("paddle", i));
-            bankFTOF.setInt("ADCL", crow , (short) ftof1a.getInt("ADCL", i));
-            bankFTOF.setInt("ADCR", crow , (short) ftof1a.getInt("ADCR", i));
-            bankFTOF.setInt("TDCL", crow , (short) ftof1a.getInt("TDCL", i));
-            bankFTOF.setInt("TDCR", crow , (short) ftof1a.getInt("TDCR", i));
-            crow++;
-        }
-        
-        for(int i = 0; i < ftof1b.rows(); i++){
-            bankFTOF.setByte("sector", crow , (byte) ftof1b.getInt("sector", i));
-            bankFTOF.setByte("layer", crow , (byte) 2);
-            bankFTOF.setShort("component", crow , (short) ftof1b.getInt("paddle", i));
-            bankFTOF.setInt("ADCL", crow , (short) ftof1b.getInt("ADCL", i));
-            bankFTOF.setInt("ADCR", crow , (short) ftof1b.getInt("ADCR", i));
-            bankFTOF.setInt("TDCL", crow , (short) ftof1b.getInt("TDCL", i));
-            bankFTOF.setInt("TDCR", crow , (short) ftof1b.getInt("TDCR", i));
-            crow++;
-        }
-        
-        for(int i = 0; i < ftof2.rows(); i++){
-            bankFTOF.setByte("sector", crow , (byte) ftof2.getInt("sector", i));
-            bankFTOF.setByte("layer", crow , (byte) 3);
-            bankFTOF.setShort("component", crow , (short) ftof2.getInt("paddle", i));
-            bankFTOF.setInt("ADCL", crow , (short) ftof2.getInt("ADCL", i));
-            bankFTOF.setInt("ADCR", crow , (short) ftof2.getInt("ADCR", i));
-            bankFTOF.setInt("TDCL", crow , (short) ftof2.getInt("TDCL", i));
-            bankFTOF.setInt("TDCR", crow , (short) ftof2.getInt("TDCR", i));
-            crow++;
-        }
-        return bankFTOF;
+    
+    public HipoDataEvent getHipoEvent(HipoDataSync writer, EvioDataEvent event){        
+        HipoDataEvent hipoEvent = (HipoDataEvent) writer.createEvent();        
+        this.fillHipoEventFTOF(hipoEvent, event);
+        this.fillHipoEventECAL(hipoEvent, event);
+        this.fillHipoEventDC(hipoEvent, event);
+        this.fillHipoEventGenPart(hipoEvent, event);
+        return hipoEvent;
     }
     
-    public static EvioDataBank getBankFTOF(EvioDataEvent event){
-        List<EvioDataBank>  list = new ArrayList<EvioDataBank>();
-        
-        if(event.hasBank("FTOF1A::dgtz")==false){
-            list.add( (EvioDataBank) EvioFactory.getDictionary().createBank("FTOF1A::dgtz", 0));
-        } else {
-            list.add( (EvioDataBank) event.getBank("FTOF1A::dgtz"));
+    public void fillHipoEventDC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("DC::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("DC::dgtz");
+            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("DC::dgtz", evioBank.rows());
+            for(int i = 0; i < evioBank.rows(); i++){
+                hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
+                hipoBank.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
+                hipoBank.setShort("component",  i, (short) evioBank.getInt("wire",i));
+                hipoBank.setInt("TDC", i, evioBank.getInt("TDC", i));
+                hipoBank.setByte("LR", i, (byte) evioBank.getInt("LR", i));                
+            }
+            hipoEvent.appendBanks(hipoBank);
         }
-        
-        if(event.hasBank("FTOF1B::dgtz")==false){
-            list.add( (EvioDataBank) EvioFactory.getDictionary().createBank("FTOF1B::dgtz", 0));
-        } else {
-            list.add( (EvioDataBank) event.getBank("FTOF1B::dgtz"));
-        }
-        
-        if(event.hasBank("FTOF2B::dgtz")==false){
-            list.add( (EvioDataBank) EvioFactory.getDictionary().createBank("FTOF2B::dgtz", 0));
-        } else {
-            list.add( (EvioDataBank) event.getBank("FTOF2B::dgtz"));
-        }
-                
-        return EvioHipoEvent.getBankFTOF(list.get(0), list.get(1), list.get(2));
     }
     
-    
-    public static EvioDataBank  getBankEC(EvioDataEvent event){
+    public void fillHipoEventFTOF(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("FTOF::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("FTOF::dgtz");
+            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("FTOF::dgtz", evioBank.rows());
+            for(int i = 0; i < evioBank.rows(); i++){
+                hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
+                hipoBank.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
+                hipoBank.setShort("component",  i, (short) evioBank.getInt("paddle",i));
+                hipoBank.setInt("ADCL", i, evioBank.getInt("ADCL", i));
+                hipoBank.setInt("ADCR", i, evioBank.getInt("ADCR", i));
+                hipoBank.setInt("TDCL", i, evioBank.getInt("TDCL", i));
+                hipoBank.setInt("TDCR", i, evioBank.getInt("TDCR", i));                
+            }
+            hipoEvent.appendBanks(hipoBank);
+        }
+    }
+    /**
+     * Fill the ECAL EVENT combines PCAL with EC
+     * @param hipoEvent
+     * @param evioEvent 
+     */
+    public void fillHipoEventECAL(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         int nrows = 0;
-        List<EvioDataBank>  ecbanks = new ArrayList<EvioDataBank>();
-        boolean pcalExists = false;
-        boolean ecExists   = false;
+        EvioDataBank bankPCAL = null;
+        EvioDataBank bankECAL = null;        
         
-        if(event.hasBank("PCAL::dgtz")==true){
-            EvioDataBank bank = (EvioDataBank) event.getBank("PCAL::dgtz");
-            nrows += bank.rows();
-            ecbanks.add(bank);            
-            pcalExists = true;
-        } 
-        
-        if(event.hasBank("EC::dgtz")==true){
-            EvioDataBank bank = (EvioDataBank) event.getBank("EC::dgtz");
-            nrows += bank.rows();
-            ecbanks.add(bank);
-            ecExists = true;
+        if(evioEvent.hasBank("PCAL::dgtz")==true){
+            bankPCAL = (EvioDataBank) evioEvent.getBank("PCAL::dgtz");
+            nrows += bankPCAL.rows();
+        }
+        if(evioEvent.hasBank("EC::dgtz")==true){
+            bankECAL = (EvioDataBank) evioEvent.getBank("EC::dgtz");
+            nrows += bankECAL.rows();
         }
         
-        EvioDataBank ecuBank = EvioFactory.createBank("ECU::dgtz",nrows);
+        HipoDataBank hipoECAL = (HipoDataBank) hipoEvent.createBank("ECAL::dgtz",nrows);
         
-        //for(pcal)
+        int counter = 0;
+        if(bankPCAL!=null){
+            for(int i = 0; i < bankPCAL.rows(); i++){
+                hipoECAL.setByte("sector",     counter, (byte)  bankPCAL.getInt("sector",i));
+                hipoECAL.setByte("layer",      counter, (byte)  bankPCAL.getInt("view",i));
+                hipoECAL.setShort("component", counter, (short) bankPCAL.getInt("strip",i));
+                hipoECAL.setInt("ADC", counter, bankPCAL.getInt("ADC", i));
+                hipoECAL.setInt("TDC", counter, bankPCAL.getInt("TDC", i));                
+                counter++;
+            }
+        }
         
-        return ecuBank;
+        if(bankECAL!=null){
+            for(int i = 0; i < bankECAL.rows(); i++){
+                int stack = bankECAL.getInt("stack",i);
+                int view  = bankECAL.getInt("view",i);                
+                hipoECAL.setByte("sector",     counter, (byte)  bankECAL.getInt("sector",i));
+                hipoECAL.setByte("layer",      counter, (byte)  (view+stack*3));
+                hipoECAL.setShort("component", counter, (short) bankECAL.getInt("strip",i));
+                hipoECAL.setInt("ADC", counter, bankECAL.getInt("ADC", i));
+                hipoECAL.setInt("TDC", counter, bankECAL.getInt("TDC", i));                
+                counter++;
+            }
+        }
+        if(nrows>0){
+            hipoEvent.appendBanks(hipoECAL);
+        }
     }
+    
+    public void fillHipoEventGenPart(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("GenPart::true")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("GenPart::true");
+            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("MC::Particle", evioBank.rows());
+            for(int i = 0; i < evioBank.rows(); i++){
+                hipoBank.setInt("pid", i, evioBank.getInt("pid", i));
+                hipoBank.setFloat("px", i, (float) (evioBank.getDouble("px", i)/1000.0) );
+                hipoBank.setFloat("py", i, (float) (evioBank.getDouble("py", i)/1000.0) );
+                hipoBank.setFloat("pz", i, (float) (evioBank.getDouble("pz", i)/1000.0) );
+                hipoBank.setFloat("vx", i, (float) (evioBank.getDouble("vx", i)) );
+                hipoBank.setFloat("vy", i, (float) (evioBank.getDouble("vy", i)) );
+                hipoBank.setFloat("vz", i, (float) (evioBank.getDouble("vz", i)) );
+            }
+            if(evioBank.rows()>0) hipoEvent.appendBanks(hipoBank);
+        }
+    }
+    
         
     public static void main(String[] args){
+        
+        String outputFile = args[0];
+        List<String> inputFiles = new ArrayList<String>();
+        for(int i = 1; i < args.length; i++){
+            inputFiles.add(args[i]);
+        }
+        
+        
+        EvioHipoEvent convertor = new EvioHipoEvent();
+        
+        HipoDataSync  writer = new HipoDataSync();
+        writer.open(outputFile);
+        //writer.setCompressionType(2);
+        
+        for(String input : inputFiles){
+            System.out.println(">>>>>  appending file : " + input);
+            try {
+                EvioSource reader = new EvioSource();
+                reader.open(input);
+                
+                while(reader.hasEvent()==true){
+                    EvioDataEvent evioEvent = (EvioDataEvent) reader.getNextEvent();                    
+                    HipoDataEvent hipoEvent = convertor.getHipoEvent(writer, evioEvent);
+                    writer.writeEvent(hipoEvent);
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+                System.out.println(">>>>>  processing file :  failed ");
+            }
+            System.out.println(">>>>>  processing file :  success ");
+            System.out.println();            
+        }
+        writer.close();
+        /*
         EvioDataDictionary dictionary = new EvioDataDictionary("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/coatjava/etc/bankdefs/hipo");
         dictionary.show();
         
         EvioDataDescriptor desc = (EvioDataDescriptor) dictionary.getDescriptor("ECAL::dgtz");
-        desc.show();
+        desc.show();*/
     }
 }
