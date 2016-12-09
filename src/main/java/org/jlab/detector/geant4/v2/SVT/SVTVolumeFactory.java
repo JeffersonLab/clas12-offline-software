@@ -120,7 +120,7 @@ public class SVTVolumeFactory
 		double rmax = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.1;
 		double zlen = SVTConstants.SECTORLEN*1.5;
 		
-		motherVol = new G4Tubs("svt", 0, rmax*0.1, zlen*0.1, 0, 360 );
+		motherVol = new G4Tubs("svt", 0, rmax*0.1, zlen*0.1/2.0, 0, 360 );
 		
 		Geant4Basic top = new G4World("none");
 		motherVol.setMother( top );
@@ -187,7 +187,7 @@ public class SVTVolumeFactory
 		case "box":
 			return new G4Box( aName, dims[0]*0.1, dims[1]*0.1, dims[2]*0.1 ); // wid, thk, len
 		case "tube":
-			return new G4Tubs( aName, dims[0]*0.1, dims[1]*0.1, dims[2]*0.1, dims[3], dims[4] ); // rmin, rmax, zlen, phi0, dphi
+			return new G4Tubs( aName, dims[0]*0.1, dims[1]*0.1, dims[2]*0.1/2.0, dims[3], dims[4] ); // rmin, rmax, zlen, phi0, dphi
 		}
 		return null;
 	}
@@ -305,7 +305,7 @@ public class SVTVolumeFactory
 			System.out.println();
 		}
 		
-		Geant4Basic regionVol = new G4Tubs("region", rmin*0.1, rmax*0.1, zlen*0.1, 0, 360 );
+		Geant4Basic regionVol = new G4Tubs("region", rmin*0.1, rmax*0.1, zlen*0.1/2.0, 0, 360 );
 		
 		// create faraday cage here?
 		
@@ -818,7 +818,7 @@ public class SVTVolumeFactory
 				tubeName = "peekSupport_tube";
 		
 		Geant4Basic polyhedra = new G4Pgon(pgonName, 10, 0, 360 );
-		Geant4Basic tube = new G4Tubs(tubeName, 0, 62.39, 28, 0, 360 );
+		Geant4Basic tube = new G4Tubs(tubeName, 0, 62.39, 28/2.0, 0, 360 );
 		Geant4Basic op = new G4Operation("subtract", pgonName, tubeName );
 		tube.setMother(op);
 		polyhedra.setMother(op);

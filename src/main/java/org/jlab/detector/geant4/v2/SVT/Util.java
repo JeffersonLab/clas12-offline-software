@@ -347,7 +347,7 @@ public class Util
 		}
 		if( aDisplayPointer )
 		{
-			Geant4Basic pointerVol = new G4Tubs( aName+"_arrow2", 0, aPointerRadius*0.1, aLen*0.1, 0, 360 );
+			Geant4Basic pointerVol = new G4Tubs( aName+"_arrow2", 0, aPointerRadius*0.1, aLen*0.1/2.0, 0, 360 );
 			pointerVol.setMother( arrowVol );
 		}
 		if( aDisplayCapEnd )
@@ -473,8 +473,8 @@ public class Util
 	 */
 	public static void scaleDimensions( Geant4Basic aVol, double aFactor, boolean bRecursive )
 	{
-		//aVol.scaleDimensions( aFactor );
-		aVol.scale( aFactor );
+		aVol.scaleDimensions( aFactor );
+		//aVol.scale( aFactor );
 		
 		if( bRecursive )
 		{

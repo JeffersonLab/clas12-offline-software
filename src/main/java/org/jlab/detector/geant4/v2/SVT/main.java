@@ -253,7 +253,7 @@ public class main {
 					Vector3d[] layerCorners = svtIdealStripFactory.getLayerCorners( region, sector, module );
 					for( int i = 0; i < layerCorners.length; i++ )
 					{
-						Geant4Basic cornerDisc = new G4Tubs("cornerBall"+i+"_m"+module+"_s"+sector+"_r"+region, 0, cornerDiscRadius, cornerDiscRadius, 0, 360 ); // cm
+						Geant4Basic cornerDisc = new G4Tubs("cornerBall"+i+"_m"+module+"_s"+sector+"_r"+region, 0, cornerDiscRadius, cornerDiscRadius/2.0, 0, 360 ); // cm
 						cornerDisc.setPosition( layerCorners[i].times(0.1) ); // mm -> cm
 						//cornerDisc.setMother( svtIdealVolumeFactory.getMotherVolume() );
 					}
