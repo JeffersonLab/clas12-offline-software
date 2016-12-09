@@ -7,7 +7,6 @@ package org.jlab.service.eb;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
@@ -21,6 +20,7 @@ public class EBProcessor {
     List<DetectorParticle>      particles = new ArrayList<DetectorParticle>();
     List<DetectorResponse>  responsesFTOF = new ArrayList<DetectorResponse>();
     List<DetectorResponse>  responsesECAL = new ArrayList<DetectorResponse>();
+    List<CherenkovResponse> responsesHTCC = new ArrayList<CherenkovResponse>();
     
     public EBProcessor(){
         
@@ -38,10 +38,16 @@ public class EBProcessor {
         responsesECAL.addAll(det_ecal);
     }
     
+    public void addHTCC(List<CherenkovResponse> det_htcc){
+        responsesHTCC.addAll(det_htcc);
+    }
+    
     public List<DetectorResponse> getResponses(){
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        List<CherenkovResponse> cherenkovresponses = new ArrayList<CherenkovResponse>();
         responses.addAll(this.responsesFTOF);
         responses.addAll(this.responsesECAL);
+        cherenkovresponses.addAll(this.responsesHTCC);
         return responses;
     }
     
@@ -170,6 +176,26 @@ public class EBProcessor {
         }        
         
     }
+    
+    public void matchHTCC(){
+        
+        for(CherenkovResponse che : responsesHTCC){
+            che.setAssociation(-1);
+        }
+        
+        int iparticle = 0;
+        for(DetectorParticle p : particles){            
+            int matchflag = p.getCherenkovSignal(responsesHTCC);
+            if(matchflag>=0){
+                    CherenkovResponse che = responsesHTCC.get(matchflag);
+                    che.setAssociation(iparticle);
+                    p.addCherenkovResponse(che);
+                }
+            iparticle++;
+        }        
+        
+    }
+
     
     
     public void readCentralTracks(){
