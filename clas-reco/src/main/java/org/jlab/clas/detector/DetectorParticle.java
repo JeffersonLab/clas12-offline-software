@@ -5,6 +5,8 @@
  */
 package org.jlab.clas.detector;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -32,6 +34,7 @@ public class DetectorParticle implements Comparable {
     private Double  particleBeta    = 0.0;
     private Double  particleMass    = 0.0;
     private Double  particlePath    = 0.0;
+    private Boolean particleTiming = null;
     
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
@@ -398,6 +401,106 @@ public class DetectorParticle implements Comparable {
         return str.toString();
     }
 
+    //Joseph's additions
+    
+    public boolean getParticleTimeCheck(){
+        return this.particleTiming;
+    }
+    
+    public void setParticleTimeCheck(boolean truth){
+        this.particleTiming = truth;
+    }
+    
+     public double CalculatedSF() {
+                //System.out.println(this.getEnergy(DetectorType.EC)/this.vector().mag());
+                return this.getEnergy(DetectorType.EC)/this.vector().mag();
+            }
+            
+     public double ParametrizedSF() {
+                double sf = 0.0;
+                double p = this.vector().mag();
+                if(this.vector().mag()<=3){
+                    sf = -0.0035*pow(p,4) + 0.0271*pow(p,3) - 0.077*pow(p,2) + 0.0985*pow(p,1) + 0.2241;
+                }
+                
+                if(this.vector().mag()>3){
+                    sf = 0.0004*p + 0.2738;
+                }
+                return sf;
+            }   
+
+    public double ParametrizedSigma(){
+                double p = this.vector().mag();
+                double sigma = 0.02468*pow(p,-0.51);
+                
+           return sigma;
+                
+    }
+    
+     public double getTheoryBeta(int id){
+        double beta = 0.0;
+        if(id==11 || id==-11){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.00051*0.00051);
+            //beta = 1.0;
+            //System.out.println("Beta is  " + beta);
+        }
+        if(id==-211 || id==211){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.13957*0.13957);
+
+        }
+        if(id==2212 || id==-2212){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.938*0.938);
+            //System.out.println("Beta is  " + beta);
+        }
+        if(id==-321 || id==321){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.493667*0.493667);
+
+        }
+        return beta;
+    }   
+     
+     public int getNphe(String che){
+       int nphe = 0;
+            for(CherenkovResponse c : this.cherenkovStore){
+            if(c.getCherenkovType()==DetectorType.HTCC){
+                nphe = c.getEnergy();
+            }
+        }
+             return nphe;
+    }    
+
+    public double getVertexTime(DetectorType type, int layer){
+        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
+        return vertex_time;
+    }
+    
+    public int getCherenkovSignal(List<CherenkovResponse>  signalList){
+        
+            int bestIndex = -1;
+            
+            for(int loop = 0; loop < signalList.size(); loop++) {
+                    boolean matchtruth = signalList.get(loop).match(this);
+                    if(matchtruth==true){
+                        bestIndex = loop;
+                    }
+                }
+        
+        return bestIndex;
+    } 
+    
+    public double getTime(DetectorType type, int layer) {
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return response.getTime();
+    }
+    
+    public double  getPathLength(DetectorType type, int layer){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return this.getPathLength(response.getPosition());
+    }  
+    
+     
     public int compareTo(Object o) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
