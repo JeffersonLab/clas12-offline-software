@@ -45,7 +45,7 @@ public interface Primitive {
      * <b>Note:</b> this method computes the polygons each time this method is
      * called. The polygons can be cached inside a {@link CSG} object.
      *
-     * @return al list of polygons that define this primitive
+     * @return a list of polygons that define this primitive
      */
     public List<Polygon> toPolygons();
 

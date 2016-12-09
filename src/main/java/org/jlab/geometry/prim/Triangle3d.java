@@ -89,4 +89,32 @@ public class Triangle3d {
 
         return line;
     }
+
+    /**
+     * @author pdavies
+     */
+	public Vector3d center() {
+		double x = 0;
+		double y = 0;
+		double z = 0;
+		for( Vector3d v : vertices )
+		{
+			x += v.x;
+			y += v.y;
+			z += v.z;
+		}
+		return new Vector3d( x/3, y/3, z/3 );
+	}
+
+	/**
+	 * @author pdavies
+	 */
+	public Vector3d point(int index) {
+		if( index < 0 || index > 2 )
+		{
+			System.err.println("Warning: Triangle3d point(int index): invalid index=" + index );
+			return null;
+		}
+		return vertices[index];
+	}
 }

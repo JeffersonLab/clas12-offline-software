@@ -2,3 +2,11 @@
 /build/
 /.nb-gradle/
 /.gradle/
+/bin/
+/.classpath
+/.gitignore
+/.gradle/1.8/taskArtifacts/fileHashes.bin
+/.project
+/.travis.yml
+/.externalToolBuilders/
+/.settings/

@@ -636,4 +636,58 @@ public class Vector3d {
         
         return this;
     }
+    
+    /**
+     * Rotates the given vector clockwise around the axis produced by this
+     * vector by the given angle.
+     * 
+     * @param vector the vector to rotate
+     * @param angle the angle of rotation
+     * 
+     * @author pdavies
+     */
+	public void rotate( Vector3d vector, double angle ) {
+		double m = vector.magnitude();
+        Vector3d N = this.clone().normalized();
+        Vector3d A = N.cross(vector);
+        Vector3d B = A.cross(N);
+        A.set(A.times( Math.sin(angle) ));
+        B.set(B.times( Math.cos(angle) ));
+        double n = N.dot(vector);
+        vector.set(N.clone().times(n).add(A).add(B).normalized().times(m));
+        //System.out.printf("a: % 8.3f\n", Math.toDegrees(angle) );
+        //System.out.printf("n: % 8.3f\n", n );
+        //System.out.printf("N: % 8.3f % 8.3f % 8.3f\n", N.x, N.y, N.z );
+        //System.out.printf("A: % 8.3f % 8.3f % 8.3f\n", A.x, A.y, A.z );
+        //System.out.printf("B: % 8.3f % 8.3f % 8.3f\n", B.x, B.y, B.z );
+        //System.out.printf("V: % 8.3f % 8.3f % 8.3f\n", vector.x, vector.y, vector.z );
+	}
+
+	/**
+     * Constructs a new {@code Point3D} at the geometric mean of this point and the given
+     * point. This function behaves identically to lerp(point, 0.5).
+     * @param point the other point
+     * @return a point at the geometric mean of the two given points
+     * 
+     * @author pdavies
+     */
+	public Vector3d midpoint(Vector3d point) {
+		return lerp( point, 0.5 );
+	}
+	
+	/**	
+	 * @return theta elevation (angle between vector and z axis)
+	 * @author pdavies
+	 */
+	public double theta(){
+		return ( this.magnitude() < 2e-6 ) ? 1.0 : Math.acos(this.z/this.magnitude()); // special case at mag = 0
+	}
+	
+	/**
+	 * @return phi azimuth (angle between projection onto xy plane and x axis) 
+	 * @author pdavies
+	 */
+	public double phi(){
+		return Math.atan2(this.y, this.x);
+	}
 }

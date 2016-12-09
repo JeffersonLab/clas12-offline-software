@@ -6,6 +6,7 @@
 package org.jlab.detector.volume;
 
 import org.jlab.detector.units.Measurement;
+
 import eu.mihosoft.vrl.v3d.CSG;
 import org.jlab.geometry.prim.Straight;
 import eu.mihosoft.vrl.v3d.Primitive;
@@ -315,21 +316,58 @@ public abstract class Geant4Basic {
 
     public Line3d getLineX() {
         throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
-//        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
+        //return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
 
     public Line3d getLineY() {
         throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
-//        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
+        //return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
 
     public Line3d getLineZ() {
         throw new UnsupportedOperationException("Not implemented for that particular volume class, YET...");
-//        return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
+        //return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
 
-    public Vector3d getLocal(Vector3d vec) {
+    /**
+     * @author pdavies
+     */
+	public void setPosition( double x, double y, double z )
+	{
+		setPosition( new Vector3d(x,y,z) );
+	}
+
+	/**
+	 * @author pdavies
+	 */
+	public void setPosition( Vector3d position )
+	{
+		this.translate( position.minus(this.getLocalPosition()) );
+	}
+
+	
+	/**
+	 * Recursively multiplies each linear dimension with units of "cm" of the given volume and its children by the given scale factor.
+	 * 
+	 * @param aFactor scale factor
+	 * @author pdavies
+	 */
+	public void scaleDimensions( double aFactor )
+	{		
+		if( this.getType().toLowerCase().contains("tube") )
+		{
+			this.getDimensions().get(2).value *= aFactor; // only scale zlen, not radii or angles
+		}
+		else
+		{
+			for( Measurement m : this.getDimensions() ) // general case
+				if( m.unit == "cm" ) m.value *= aFactor; // check for length units
+		}
+	}
+	
+	public Vector3d getLocal(Vector3d vec) {
         Transform trans = getGlobalTransform().invert();
         return trans.transform(vec.clone());
+        //return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
 }

@@ -25,7 +25,7 @@ public class Box implements Primitive {
     public Box(double pDx, double pDy, double pDz) {
 
         if (pDx <= 0 || pDy <= 0 || pDz <= 0) {
-            throw new IllegalArgumentException("Illegal arguments for Trd Primitive!");
+            throw new IllegalArgumentException("Illegal arguments for Box Primitive!");
         }
 
         this.pDz = pDz;

@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import org.jlab.detector.geant4.v2.Geant4Factory;
 import org.jlab.detector.volume.G4Box;
 import org.jlab.detector.volume.G4World;
 
