@@ -473,8 +473,8 @@ public class Util
 	 */
 	public static void scaleDimensions( Geant4Basic aVol, double aFactor, boolean bRecursive )
 	{
-		//aVol.scaleDimensions( aFactor );
-		aVol.scale( aFactor );
+		aVol.scaleDimensions( aFactor );
+		//aVol.scale( aFactor );
 		
 		if( bRecursive )
 		{
