@@ -5,6 +5,8 @@
  */
 package org.jlab.clas.detector;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -16,12 +18,13 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
  * @author gavalian
  */
-public class DetectorParticle {
+public class DetectorParticle implements Comparable {
     
     private Vector3 particleMomenta = new Vector3();
     private Vector3 particleVertex  = new Vector3();
@@ -31,15 +34,22 @@ public class DetectorParticle {
     private Double  particleBeta    = 0.0;
     private Double  particleMass    = 0.0;
     private Double  particlePath    = 0.0;
+    private Boolean particleTiming = null;
+    
+    private int     particleScore     = 0; // scores are assigned detector hits
+    private double  particleScoreChi2 = 0.0; // chi2 for particle score 
+    
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
     
-    private List<DetectorResponse>  responseStore = new ArrayList<DetectorResponse>();
+    private Line3D  driftChamberEnter = new Line3D();
+    
+    private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
+    private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
+    
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
-    
-    
-    
+            
     
     public DetectorParticle(){
         
@@ -49,9 +59,27 @@ public class DetectorParticle {
         this.responseStore.clear();
     }
     
+    public List<CherenkovResponse> getCherenkovResponse(){
+        return this.cherenkovStore;
+    }
+    
+    public void addCherenkovResponse(CherenkovResponse res){
+        this.cherenkovStore.add(res);
+    }
+    
     public void addResponse(DetectorResponse res, boolean match){
-        if(match==false){
-            this.responseStore.add(res);
+        this.responseStore.add(res);
+        if(match==true){
+            Line3D distance = res.getDistance(this);
+            res.getMatchedPosition().setXYZ(distance.origin().x(),
+                    distance.origin().y(),distance.origin().z());
+            
+            /*Vector3D vec = new Vector3D(
+                    this.particleCrossPosition.x(),
+                    particleCrossPosition.y(),
+                    particleCrossPosition.z());
+            */
+            res.setPath(this.getPathLength(res.getPosition()));
         }
     }
     
@@ -71,37 +99,48 @@ public class DetectorParticle {
         return this.vector().compare(new Vector3(x,y,z));
     }
     
+    public void setLowerCross(double x, double y, double z, double ux, double uy, double uz){
+        this.driftChamberEnter.set(x, y, z, x+1000.0*ux, y+1000.0*uy, z + 1000.0*uz);
+    }
+    
+    public Line3D getLowerCross(){
+        return this.driftChamberEnter;
+    }
+    /**
+     * Particle score combined number that represents which detectors were hit
+     * HTCC - 1000, FTOF - 100, EC - 10
+     * SCORE = HTCC + FTOF + EC
+     * @param score 
+     */
+    public void setScore(int score){
+        this.particleScore = score;
+    }
+    /**
+     * Chi square of score determination.
+     * @param chi2 
+     */
+    public void setChi2(double chi2){
+        this.particleScoreChi2 = chi2;
+    }
+    /**
+     * returns particle score.
+     * @return 
+     */
+    public int getScore(){
+        return this.particleScore;
+    }
+    /**
+     * returns chi2 of score.
+     * @return 
+     */
+    public double getChi2(){
+        return this.particleScoreChi2;
+    }
+    /**
+     * add detector response to the particle
+     * @param res 
+     */
     public void addResponse(DetectorResponse res){
-        /*
-        double distance = Math.sqrt(
-                (this.particleCrossPosition.x()-res.getPosition().x())*
-                        (this.particleCrossPosition.x()-res.getPosition().x())
-                +
-                        (this.particleCrossPosition.y()-res.getPosition().y())*
-                                (this.particleCrossPosition.y()-res.getPosition().y())
-                +
-                        (this.particleCrossPosition.z()-res.getPosition().z())*
-                                (this.particleCrossPosition.z()-res.getPosition().z())
-        );
-        
-        Line3D   crossLine = new Line3D(this.particleCrossPosition.x(),
-                this.particleCrossPosition.y(),
-                this.particleCrossPosition.z(),
-                this.particleCrossDirection.x()*1500.0,
-                this.particleCrossDirection.y()*1500.0,
-                this.particleCrossDirection.z()*1500.0);
-        
-        Line3D distanceLine = crossLine.distance(new Point3D
-                (res.getPosition().x(), res.getPosition().y(),res.getPosition().z()));
-        
-        res.getMatchedPosition().setXYZ(
-                distanceLine.origin().x(),
-                distanceLine.origin().y(),
-                distanceLine.origin().z()
-                );
-        
-        res.setPath(distance+this.particlePath);
-        this.responseStore.add(res);*/
         this.responseStore.add(res);
     }
     
@@ -360,5 +399,109 @@ public class DetectorParticle {
         }
         
         return str.toString();
+    }
+
+    //Joseph's additions
+    
+    public boolean getParticleTimeCheck(){
+        return this.particleTiming;
+    }
+    
+    public void setParticleTimeCheck(boolean truth){
+        this.particleTiming = truth;
+    }
+    
+     public double CalculatedSF() {
+                //System.out.println(this.getEnergy(DetectorType.EC)/this.vector().mag());
+                return this.getEnergy(DetectorType.EC)/this.vector().mag();
+            }
+            
+     public double ParametrizedSF() {
+                double sf = 0.0;
+                double p = this.vector().mag();
+                if(this.vector().mag()<=3){
+                    sf = -0.0035*pow(p,4) + 0.0271*pow(p,3) - 0.077*pow(p,2) + 0.0985*pow(p,1) + 0.2241;
+                }
+                
+                if(this.vector().mag()>3){
+                    sf = 0.0004*p + 0.2738;
+                }
+                return sf;
+            }   
+
+    public double ParametrizedSigma(){
+                double p = this.vector().mag();
+                double sigma = 0.02468*pow(p,-0.51);
+                
+           return sigma;
+                
+    }
+    
+     public double getTheoryBeta(int id){
+        double beta = 0.0;
+        if(id==11 || id==-11){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.00051*0.00051);
+            //beta = 1.0;
+            //System.out.println("Beta is  " + beta);
+        }
+        if(id==-211 || id==211){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.13957*0.13957);
+
+        }
+        if(id==2212 || id==-2212){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.938*0.938);
+            //System.out.println("Beta is  " + beta);
+        }
+        if(id==-321 || id==321){
+            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.493667*0.493667);
+
+        }
+        return beta;
+    }   
+     
+     public int getNphe(String che){
+       int nphe = 0;
+            for(CherenkovResponse c : this.cherenkovStore){
+            if(c.getCherenkovType()==DetectorType.HTCC){
+                nphe = c.getEnergy();
+            }
+        }
+             return nphe;
+    }    
+
+    public double getVertexTime(DetectorType type, int layer){
+        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
+        return vertex_time;
+    }
+    
+    public int getCherenkovSignal(List<CherenkovResponse>  signalList){
+        
+            int bestIndex = -1;
+            
+            for(int loop = 0; loop < signalList.size(); loop++) {
+                    boolean matchtruth = signalList.get(loop).match(this);
+                    if(matchtruth==true){
+                        bestIndex = loop;
+                    }
+                }
+        
+        return bestIndex;
+    } 
+    
+    public double getTime(DetectorType type, int layer) {
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return response.getTime();
+    }
+    
+    public double  getPathLength(DetectorType type, int layer){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return this.getPathLength(response.getPosition());
+    }  
+    
+     
+    public int compareTo(Object o) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

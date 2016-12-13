@@ -9,6 +9,7 @@ package org.jlab.physics.base;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
+import org.jlab.clas.physics.ParticleNotFoundException;
 import org.jlab.clas.physics.PhysicsEvent;
 
 /**
@@ -20,6 +21,7 @@ public class EventSelector {
     private String  selectorFormat = "";
     private final String  openBracket     = "[";
     private final String  closeBracket    = "]";
+    
     public EventSelector(){
         
     }
@@ -30,6 +32,15 @@ public class EventSelector {
     
     public final void parse(String format){
         pSelectors.clear();
+        ParticleStringParser parser = new ParticleStringParser();
+        List<String>  operators = parser.parse(format);
+        selectorFormat = format.replaceAll("\\s+", "");
+        
+        for(String item : operators){
+            ParticleSelector selector = new ParticleSelector(item);
+            pSelectors.add(selector);
+        }
+        /*
         selectorFormat = format.replaceAll("\\s+", "");
         int position = selectorFormat.indexOf(this.closeBracket, 0);
         int lastposition = 0;
@@ -40,7 +51,7 @@ public class EventSelector {
             //System.err.println("SELECTOR : " + selectorFormat.substring(lastposition, position+1));
             lastposition = position+1;
             position = selectorFormat.indexOf(this.closeBracket, position+1);
-        }
+        }*/
     }
     
     public String getFormat(){
@@ -48,24 +59,31 @@ public class EventSelector {
     }
     
     public Particle get(PhysicsEvent event){
-        List<Particle>  plist = this.getParticleList(event);
-        if(plist.isEmpty()) return null;
-        
-        Particle part = new Particle();
-        part.copy(plist.get(0));
-        for(int loop =1 ; loop < plist.size(); loop++){
-            part.combine(plist.get(loop), 1);
+        try {
+            List<Particle>  plist = this.getParticleList(event);
+            if(plist.isEmpty()) return null;
+            
+            Particle part = new Particle();
+            part.copy(plist.get(0));
+            for(int loop =1 ; loop < plist.size(); loop++){
+                part.combine(plist.get(loop), 1);
+            }
+            return part;
+        } catch (ParticleNotFoundException e){
+            return new Particle();
         }
-        return part;
     }
     
-    public List getParticleList(PhysicsEvent event){
+    public List getParticleList(PhysicsEvent event) throws ParticleNotFoundException{
         ArrayList<Particle>  plist = new ArrayList<Particle>();
         for(ParticleSelector sel : pSelectors){
-            Particle part = sel.getParticle(event);
-            if(part==null){
-                System.err.println("[EventSelector::ERROR] event does no contain "
+            Particle part = new Particle();
+            boolean status = sel.getParticle(event,part);
+            if(status==false){
+                throw new ParticleNotFoundException("[EventSelector::ERROR] event does no contain "
                 + "particle for selector \n" + sel.toString());
+                /*System.err.println("[EventSelector::ERROR] event does no contain "
+                + "particle for selector \n" + sel.toString());*/
             } else {
                 plist.add(part);
             }
@@ -82,5 +100,10 @@ public class EventSelector {
             str.append("\n");
         }
         return str.toString();
+    }
+    
+    public static void main(String[] args){
+        EventSelector selector = new EventSelector("[b]+[t]+(211)-{2212,0}-[2212,1]");
+        System.out.println(selector);
     }
 }

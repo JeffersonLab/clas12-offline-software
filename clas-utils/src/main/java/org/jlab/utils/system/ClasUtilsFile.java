@@ -194,4 +194,36 @@ public class ClasUtilsFile {
         }
         return newList;
     }
+    
+    /**
+     * returns a new file name which is composed of the file name given and then by adding
+     * given string to it. if flag preservePath is true, then file name will have the same
+     * path as the original file name.
+     * @param filename
+     * @param addition
+     * @param preservePath
+     * @return 
+     */
+    public static String createFileName(String filename, String addition, boolean preservePath){
+        
+        String inputFile = filename;
+        
+        if(filename.contains("/")==true&&preservePath==false){
+            int index_slash = filename.lastIndexOf("/");
+            inputFile = filename.substring(index_slash+1,filename.length());
+        }
+        
+        StringBuilder str = new StringBuilder();
+        int index = inputFile.lastIndexOf(".");
+        //int index = filename.lastIndexOf(".");
+        str.append(inputFile.substring(0, index));
+        str.append(addition);
+        str.append(inputFile.substring(index, inputFile.length()));
+        return str.toString();
+    }
+    
+    public static void main(String[] args){
+        String output_file = ClasUtilsFile.createFileName("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/coatjava/../datasets/gemc/eklambda/gemc_eklambda_A0001_gen.evio", "_header", true);
+        System.out.println(output_file);
+    }
 }

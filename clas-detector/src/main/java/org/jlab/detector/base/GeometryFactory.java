@@ -10,6 +10,7 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.ec.ECFactory;
+import org.jlab.geom.detector.ftof.FTOFFactory;
 
 /**
  *
@@ -63,6 +64,22 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ftof/panel2/paddles");
             provider.loadTable("/geometry/ftof/panel2/panel");
         }
+        
+        if(type==DetectorType.BST){
+            provider.loadTable("/geometry/bst/region");
+            provider.loadTable("/geometry/bst/sector");
+            provider.loadTable("/geometry/bst/bst");
+        }
+        
+        if(type==DetectorType.CND){
+            provider.loadTable("/geometry/cnd/cnd");
+            provider.loadTable("/geometry/cnd/layer");
+        }
+        
+        if(type==DetectorType.FTCAL){
+            provider.loadTable("/geometry/ft/ftcal");
+        }
+        
         provider.disconnect();
         return provider;
     }
@@ -102,6 +119,12 @@ public class GeometryFactory {
             ECFactory factory = new ECFactory();
             Detector ec = factory.createDetectorCLAS(provider);
             return ec;
+        }
+        
+        if(type==DetectorType.FTOF){
+            FTOFFactory factory = new FTOFFactory();
+            Detector ftof = factory.getDetectorGeant4(provider);
+            return   ftof;
         }
         
         System.out.println("[GeometryFactory] --->  detector construction for " 

@@ -42,7 +42,7 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
     ViewWorld                                 world = new ViewWorld();
     DetectorShape2D                     activeShape = null;
     Color                               backgroundColor = Color.GRAY;
-    GraphicsAxis                        colorAxis   = new GraphicsAxis();
+    GraphicsAxis                        colorAxis   = new GraphicsAxis(1);
     List<DetectorListener>            detectorListeners = new ArrayList<DetectorListener>();
     
     private boolean  isMouseMotionListener = true;

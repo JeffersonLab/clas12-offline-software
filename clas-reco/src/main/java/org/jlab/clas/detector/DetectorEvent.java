@@ -17,9 +17,11 @@ import org.jlab.clas.physics.PhysicsEvent;
 public class DetectorEvent {
     
     private List<DetectorParticle>  particleList = new ArrayList<DetectorParticle>();
-    private PhysicsEvent   generatedEvent = new PhysicsEvent();
+    private PhysicsEvent       generatedEvent = new PhysicsEvent();
     private PhysicsEvent   reconstructedEvent = new PhysicsEvent();
-     
+    private EventTrigger trigger = new EventTrigger();
+    
+    
     public DetectorEvent(){
         
     }
@@ -58,10 +60,11 @@ public class DetectorEvent {
         this.particleList.clear();
     }
     
-    public void addParticle(DetectorParticle particle){
-        
+    public void addParticle(DetectorParticle particle){        
         this.particleList.add(particle);
     }
+    
+
     
     public List<DetectorParticle> getParticles(){ return this.particleList;}
     
@@ -72,6 +75,9 @@ public class DetectorEvent {
         particle.vertex().setXYZ(vx, vy, vz);
         this.addParticle(particle);
     }
+    
+    public void setEventTrigger(EventTrigger trig){this.trigger = trig;}
+    public EventTrigger getEventTrigger(){return this.trigger;}
     
     @Override
     public String toString(){

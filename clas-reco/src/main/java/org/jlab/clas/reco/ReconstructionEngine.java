@@ -66,12 +66,17 @@ public abstract class ReconstructionEngine implements Engine {
      * 
      * @param ed
      * @return 
-     */
-    
+     */   
     public EngineData configure(EngineData ed) {
         //EngineData data = new EngineData();
-        //System.out.println("--- engine configuration is called ");
-        this.init();
+        System.out.println("--- engine configuration is called " + this.getDescription());        
+        try {
+            this.init();
+        } catch (Exception e){
+            System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
+            e.printStackTrace();
+        }
+        System.out.println("----> I am doing nothing");
         return ed;
     }
 

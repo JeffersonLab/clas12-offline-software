@@ -176,11 +176,11 @@ public class Evio2HipoConverter {
                 EvioFactory.getDictionary().show();
             }
         }
-        
+        /*
         if(args.length<5){
             HipoDataSync.printUsage();
             System.exit(0);
-        }
+        }*/
          
         if(args[0].startsWith("-")==false){
             System.out.println("\n\n--> please provide compression type");

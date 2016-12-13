@@ -6,8 +6,11 @@
 package org.jlab.clas.detector;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
@@ -44,6 +47,27 @@ public class DetectorResponse {
     public Vector3 getMatchedPosition(){ return this.hitPositionMatched;}
     
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
+    
+    
+    public static List<DetectorResponse>  getListByLayer(List<DetectorResponse> list, DetectorType type, int layer){
+        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        for(DetectorResponse res : list){
+            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
+                result.add(res);
+            }
+        }
+        return result;
+    }
+    
+    public static List<DetectorResponse>  getListBySector(List<DetectorResponse> list, DetectorType type, int sector){
+        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        for(DetectorResponse res : list){
+            if(res.getDescriptor().getType()==type&&res.getDescriptor().getSector()==sector){
+                result.add(res);
+            }
+        }
+        return result;
+    }
     
     public int getAssociation(){ return this.association;}
     public void setAssociation(int asc){ this.association = asc;}

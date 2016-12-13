@@ -5,7 +5,10 @@
  */
 package org.jlab.clas.physics;
 
+import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
+import org.jlab.hipo.data.HipoEvent;
+import org.jlab.hipo.data.HipoNode;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
@@ -17,7 +20,7 @@ import org.jlab.io.evio.EvioDataEvent;
 public class GenericKinematicFitter {
     
     private final   EventFilter filter = new EventFilter();
-    private Double  beamEnergy  = 11.0;
+    protected Double  beamEnergy  = 11.0;
     
     
     public GenericKinematicFitter(double beam){
@@ -31,16 +34,18 @@ public class GenericKinematicFitter {
      * @return PhysicsEvent : event containing particles.
      */
     public PhysicsEvent  getPhysicsEvent(DataEvent  event){
-        if(event instanceof EvioDataEvent){
+        //if(event instanceof EvioDataEvent){
             //System.out.println("   CHECK FOR  PARTICLE = " + event.hasBank("EVENT::particle"));
-            if(event.hasBank("EVENTHB::particle")){
-                EvioDataBank evntBank = (EvioDataBank) event.getBank("EVENTHB::particle");
-                int nrows = evntBank.rows();
-                PhysicsEvent  physEvent = new PhysicsEvent();
+        if(event.hasBank("EVENTTB::particle")){
+            EvioDataBank evntBank = (EvioDataBank) event.getBank("EVENTTB::particle");
+            int nrows = evntBank.rows();
+            PhysicsEvent  physEvent = new PhysicsEvent();
                 physEvent.setBeam(this.beamEnergy);
                 for(int loop = 0; loop < nrows; loop++){
                     
                     int pid    = evntBank.getInt("pid", loop);
+                    int status = evntBank.getInt("status", loop);
+                    
                     if(PDGDatabase.isValidPid(pid)==true){
                         Particle part = new Particle(
                                 evntBank.getInt("pid", loop),
@@ -50,7 +55,9 @@ public class GenericKinematicFitter {
                                 evntBank.getFloat("vx", loop),
                                 evntBank.getFloat("vy", loop),
                                 evntBank.getFloat("vz", loop));
-                        physEvent.addParticle(part);
+                        if(status>0){
+                            physEvent.addParticle(part);
+                        }
                     } else {
                         Particle part = new Particle();
                         int charge = evntBank.getInt("charge", loop);
@@ -63,13 +70,17 @@ public class GenericKinematicFitter {
                                 evntBank.getFloat("vy", loop),
                                 evntBank.getFloat("vz", loop)
                         );
-                        physEvent.addParticle(part);
+                        
+                        if(status>0){
+                            physEvent.addParticle(part);
+                        }
                     }
+                   
                 }
                 return physEvent;
             }
             
-        }
+        //}
         return new PhysicsEvent(this.beamEnergy);
     }
     
@@ -95,5 +106,53 @@ public class GenericKinematicFitter {
             }
         }
         return physEvent;
+    }
+        
+    public PhysicsEvent createEvent(DataEvent event){
+        PhysicsEvent  recEvent = this.getPhysicsEvent(event);
+        PhysicsEvent  genEvent = this.getGeneratedEvent(event);
+        for(int i = 0; i < genEvent.count();i++){
+            recEvent.mc().add(genEvent.getParticle(i));
+        }
+        return recEvent;
+    }
+    
+    public PhysicsEvent createEvent(HipoEvent event){
+        PhysicsEvent physEvent = new PhysicsEvent();
+        physEvent.setBeam(this.beamEnergy);
+        if(event.hasGroup(20)==true){
+            Map<Integer,HipoNode>  items = event.getGroup(20);
+            int nentries = items.get(1).getDataSize();
+            for(int i = 0; i < nentries; i++){
+                int pid = items.get(1).getInt(i);
+                double px = items.get(2).getFloat(i*3+0);
+                double py = items.get(2).getFloat(i*3+1);
+                double pz = items.get(2).getFloat(i*3+2);
+                Particle particle = new Particle(pid,px,py,pz);
+                double vx = items.get(3).getShort(i*3+0)*100.0;
+                double vy = items.get(3).getShort(i*3+1)*100.0;
+                double vz = items.get(3).getShort(i*3+2)*100.0;
+                particle.vertex().setXYZ(vx, vy, vz);
+                physEvent.mc().add(particle);
+            }
+        }
+        return physEvent;
+    }
+    
+    public RecEvent getRecEvent(DataEvent event){
+        
+        PhysicsEvent rev = getPhysicsEvent(event);
+        PhysicsEvent gev = getGeneratedEvent(event);
+        RecEvent  recEvent = new RecEvent(this.beamEnergy);
+        
+        for(int i = 0; i < rev.count();i++){
+            recEvent.getReconstructed().addParticle(rev.getParticle(i));
+        }
+        
+        for(int i = 0; i < gev.count();i++){
+            recEvent.getGenerated().addParticle(gev.getParticle(i));
+        }
+        
+        return recEvent;
     }
 }

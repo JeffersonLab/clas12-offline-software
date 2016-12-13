@@ -32,7 +32,7 @@ public class PhysicsDataObject {
         addDescriptor(desc);
     }
     
-    public class DataObjectDescriptor{
+    public class DataObjectDescriptor {
         
         String dataObservable   = "";
         List<String>   dataCuts = new ArrayList<String>();

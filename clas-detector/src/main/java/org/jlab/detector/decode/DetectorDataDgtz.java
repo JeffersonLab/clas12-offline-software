@@ -91,6 +91,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         return this.tdcStore.size();
     }
     
+    @Override
     public int compareTo(DetectorDataDgtz o) {
         /*if(this.getDescriptor().getType().getDetectorId()
                 <o.getDescriptor().getType().getDetectorId()) return -1;
@@ -188,10 +189,6 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         public int  getTimeCourse(){
             return this.pulseTimeCourse;
         }
-        
-        
-        
-        
         
         public int   getOrder() { return adcOrder;}
         
