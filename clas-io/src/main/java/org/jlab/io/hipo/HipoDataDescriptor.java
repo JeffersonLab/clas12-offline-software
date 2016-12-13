@@ -16,6 +16,10 @@ public class HipoDataDescriptor implements DataDescriptor {
 
     private final Schema hipoSchema = new Schema();
     
+    public void init(Schema schema){
+        hipoSchema.copy(schema);
+    }
+    
     public void init(String s) {
         this.hipoSchema.setFromText(s);
     }

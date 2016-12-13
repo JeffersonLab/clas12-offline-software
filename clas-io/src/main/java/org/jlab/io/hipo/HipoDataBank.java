@@ -30,14 +30,14 @@ public class HipoDataBank implements DataBank  {
     
     public HipoDataBank(Map<Integer,HipoNode> nodes, Schema desc){
         descriptor = new HipoDataDescriptor();
-        descriptor.init(desc.getText());
+        descriptor.init(desc);
         hipoGroup = new HipoGroup(nodes,this.descriptor.getSchema());
     }
     
     public HipoDataBank(HipoGroup group){
         this.hipoGroup = group;
         descriptor = new HipoDataDescriptor();
-        descriptor.init(this.hipoGroup.getSchema().getText());
+        descriptor.init(this.hipoGroup.getSchema());
     }
     
     public HipoGroup getGroup(){
@@ -77,7 +77,7 @@ public class HipoDataBank implements DataBank  {
     }
 
     public float getFloat(String path, int index) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.hipoGroup.getNode(path).getFloat(index);
     }
 
     public void setFloat(String path, float[] arr) {

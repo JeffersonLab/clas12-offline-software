@@ -27,6 +27,7 @@ public class EvioHipoEvent {
     public HipoDataEvent getHipoEvent(HipoDataSync writer, EvioDataEvent event){        
         HipoDataEvent hipoEvent = (HipoDataEvent) writer.createEvent();        
         this.fillHipoEventFTOF(hipoEvent, event);
+        this.fillHipoEventCTOF(hipoEvent, event);        
         this.fillHipoEventECAL(hipoEvent, event);
         this.fillHipoEventDC(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
@@ -43,6 +44,23 @@ public class EvioHipoEvent {
                 hipoBank.setShort("component",  i, (short) evioBank.getInt("wire",i));
                 hipoBank.setInt("TDC", i, evioBank.getInt("TDC", i));
                 hipoBank.setByte("LR", i, (byte) evioBank.getInt("LR", i));                
+            }
+            hipoEvent.appendBanks(hipoBank);
+        }
+    }
+    
+    public void fillHipoEventCTOF(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("CTOF::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("CTOF::dgtz");
+            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("CTOF::dgtz", evioBank.rows());
+            for(int i = 0; i < evioBank.rows(); i++){
+                //hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
+                //hipoBank.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
+                hipoBank.setShort("component",  i, (short) evioBank.getInt("paddle",i));
+                hipoBank.setInt("ADCU", i, evioBank.getInt("ADCU", i));
+                hipoBank.setInt("ADCD", i, evioBank.getInt("ADCD", i));
+                hipoBank.setInt("TDCU", i, evioBank.getInt("TDCU", i));
+                hipoBank.setInt("TDCD", i, evioBank.getInt("TDCD", i));                
             }
             hipoEvent.appendBanks(hipoBank);
         }
