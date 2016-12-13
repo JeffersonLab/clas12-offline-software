@@ -42,12 +42,12 @@ public abstract class ReconstructionEngine implements Engine {
         engineName    = name;
         engineAuthor  = author;
         engineVersion = version;
+        //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
     }
 
     abstract public boolean processDataEvent(DataEvent event);        
-    abstract public boolean init();    
-    
-    
+    abstract public boolean init();
+        
     public synchronized void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
@@ -164,6 +164,10 @@ public abstract class ReconstructionEngine implements Engine {
         return this.engineDescription;
     }
 
+    public String getName(){
+        return this.engineName;
+    }
+    
     public String getVersion() {
         return this.engineVersion;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
