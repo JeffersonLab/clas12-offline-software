@@ -21,9 +21,10 @@ public class CherenkovResponse {
     private double        hitTime = 0.0;
     private double       hitTheta = 0.0;
     private double         hitPhi = 0.0;
-    private double        hitNphe = 0.0;
+    private int        hitNphe = 0;
     private double    hitDeltaPhi = 0.0;
     private double  hitDeltaTheta = 0.0;
+    private int     association = -1;
     
     private DetectorType  cherenkovType = DetectorType.HTCC;
     private Point3D         hitPosition = new Point3D();
@@ -38,13 +39,15 @@ public class CherenkovResponse {
     }
     
     public CherenkovResponse  setTime(double time) { hitTime = time; return this;}
-    public CherenkovResponse  setEnergy(double energy) { hitNphe = energy; return this;}
+    public CherenkovResponse  setEnergy(int energy) { hitNphe = energy; return this;}
+    public void setAssociation(int assoc) {this.association = assoc;}
     
     public double getTime(){ return hitTime;}
     
-    public double getEnergy(){ return hitNphe;}
+    public int getEnergy(){ return hitNphe;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
+    public int getAssociation() {return this.association;}
     
     public Point3D getHitPosition(){
         return this.hitPosition;
@@ -75,4 +78,13 @@ public class CherenkovResponse {
         
         return -1000.0;
     }
+    
+    public DetectorType getCherenkovType(){
+        return this.cherenkovType;
+    }
+    
+    public void setCherenkovType(DetectorType htcc){
+        this.cherenkovType = htcc;
+    }
+    
 }
