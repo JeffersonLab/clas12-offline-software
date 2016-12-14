@@ -5,6 +5,12 @@
 /bin/
 /.classpath
 /.gitignore
+<<<<<<< HEAD
+/.gradle/1.8/taskArtifacts/fileHashes.bin
 /.project
+/.travis.yml
+=======
+/.project
+>>>>>>> upstream/master
 /.externalToolBuilders/
 /.settings/

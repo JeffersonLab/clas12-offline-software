@@ -6,7 +6,7 @@ package org.jlab.detector.geant4.v2.SVT;
  * Universal class for simple matrix algebra and rotation conversions.
  * 
  * @author pdavies
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class Matrix
 {

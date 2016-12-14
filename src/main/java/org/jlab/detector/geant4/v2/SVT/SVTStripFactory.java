@@ -24,7 +24,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
  * </ul>
  * 
  * @author pdavies
- * @version 1.0.11
+ * @version 1.1.0
  */
 public class SVTStripFactory
 {
@@ -44,8 +44,12 @@ public class SVTStripFactory
 	 */
 	public SVTStripFactory( DatabaseConstantProvider cp, boolean applyAlignmentShifts )
 	{
-		//SVTConstants.load( cp );
-		if( applyAlignmentShifts ){ bShift = true; }
+		SVTConstants.load( cp );
+		setApplyAlignmentShifts( applyAlignmentShifts );
+		if( bShift == true && SVTConstants.getDataAlignmentSectorShift() == null ){
+			System.err.println("error: SVTStripFactory: no shifts loaded");
+			System.exit(-1);
+		}
 	}
 	
 	/**

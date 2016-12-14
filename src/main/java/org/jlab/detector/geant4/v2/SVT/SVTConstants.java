@@ -28,7 +28,7 @@ import eu.mihosoft.vrl.v3d.Transform;
  * </ul>
  * 
  * @author pdavies
- * @version 1.0.11
+ * @version 1.1.0
  */
 public class SVTConstants
 {
@@ -124,7 +124,7 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
 		cp.loadTable( ccdbPath +"alignment");
-		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector");
+		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector"); // possible future tables
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
 		cp.disconnect();
 		
