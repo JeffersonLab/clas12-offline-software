@@ -85,7 +85,8 @@ public class HitReader {
 		double[] stime = null ;
 		int[] tdc = null;
 		stime = bankDGTZ.getDouble("stime");
-		tdc = bankDGTZ.getInt("TDC");
+		if(event.getDictionary().getXML().contains("DC::dgtz.TDC"))
+			tdc = bankDGTZ.getInt("TDC");
 				
 		int size = layer.length;
 		int[] layerNum = new int[size];
@@ -106,7 +107,7 @@ public class HitReader {
 			
 			if(slayer!=null && slayer.length>0) {
 				layerNum[i] = layer[i];
-				superlayerNum[i] = slayer[i];
+				superlayerNum[i] = slayer[i]; 
 			} else {
 				superlayerNum[i]=(layer[i]-1)/6 + 1;
 				layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 

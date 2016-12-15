@@ -2,7 +2,6 @@ package org.jlab.service.dc;
 
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioCompactStructureHandler;
@@ -22,16 +21,16 @@ public class HeaderEngine extends ReconstructionEngine{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	int eventNb;
+	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		eventNb++;
 		
 		this.load((EvioDataEvent) event);
 		EvioDataBank bank =  (EvioDataBank) event.getDictionary().createBank("RUN::config", 1);
 		
+		
 		bank.setInt("Run",0,this.RunNb);
-		bank.setInt("Event", 0, eventNb);
+		bank.setInt("Event", 0, this.EventNb);
 		bank.setByte("Type", 0, (byte) 0);
 		int mode = 1;
 		if(this.SolenoidOn || this.TorusOn)
@@ -56,7 +55,7 @@ public class HeaderEngine extends ReconstructionEngine{
 	public boolean resetFields;
 
 	// the raw strings
-	public Vector<String> properties = new Vector<String>();
+	//private Vector<String> properties = new Vector<String>();
 
 
 	private String scaleString(String magnet, String key, String val) {
@@ -96,12 +95,12 @@ public class HeaderEngine extends ReconstructionEngine{
 	 *            the target num
 	 * @return the node, or null if not found
 	 */
-	public static EvioNode getNode(EvioDataEvent event, int tag, int num) {
+	private EvioNode getNode(EvioDataEvent event, int tag, int num) {
 		List<EvioNode> nodeList = null;
 
 		if (event != null) {
 			EvioCompactStructureHandler handler = event.getStructureHandler();
-
+			
 			if (handler != null) {
 				try {
 					nodeList = handler.getNodes();
@@ -140,17 +139,20 @@ public class HeaderEngine extends ReconstructionEngine{
 	private double SolenoidScale;
 	private double TorusScale;
 	private int RunNb;
+	private int EventNb;
 	
 	public void load(EvioDataEvent event) {
 		if (event == null) {
 			return;
 		}
-
+		
+		//this.EventNb = event.getEventBuffer().; System.out.println(this.EventNb);
+		
 		EvioNode node = this.getNode(event, GEMCMetaBankTag,
 				GEMCMetaBankNum);
 
 		if (node != null) {
-
+			
 //			System.err.println("Found GEMC metadata bank.");
 //			resetFields = true;
 
@@ -181,6 +183,7 @@ public class HeaderEngine extends ReconstructionEngine{
 												e.printStackTrace();
 											}
 									 }
+									 EventNb++;
 									 if(key != null && key.equalsIgnoreCase("ACTIVEFIELDS")) { 
 											if ((val.toUpperCase()).trim().contains("TORUS") ) {
 													System.out.println("TORUS ON");

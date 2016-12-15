@@ -35,9 +35,9 @@ import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 
-public class DCHBEngine extends ReconstructionEngine {
+public class DCHBEngineT2DConfig extends ReconstructionEngine {
 
-	public DCHBEngine() {
+	public DCHBEngineT2DConfig() {
 		super("DCHB","ziegler","3.0");
 	}
 
@@ -207,7 +207,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		if(bank.getByte("Mode")[0]==1)
 			isCosmics = true;
 		// force cosmics
-		//isCosmics = true;
+		isCosmics = true;
 		//System.out.println(bank.getInt("Event")[0]);
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
 		//
@@ -243,7 +243,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		 
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/out_1.ev";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/out_1.evio";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -252,7 +252,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		HeaderEngine enh = new HeaderEngine();
 		enh.init();
 		
-		DCHBEngine en = new DCHBEngine();
+		DCHBEngineT2DConfig en = new DCHBEngineT2DConfig();
 		en.init();
 		DCTBEngine en2 = new DCTBEngine();
 		//DCTBRasterEngine en2 = new DCTBRasterEngine();

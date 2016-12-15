@@ -41,7 +41,7 @@ public class CalibrationConstantsLoader {
     static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
     
     public static final synchronized void Load(int runNb, String var) {
-    	if(runNb!=10 || !var.equalsIgnoreCase("default"));
+    	if(runNb!=10 || !var.equalsIgnoreCase("default"))
 			dbprovider = new DatabaseConstantProvider(runNb, var); // reset using the new variation
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/dc/signal_generation/dc_resolution");

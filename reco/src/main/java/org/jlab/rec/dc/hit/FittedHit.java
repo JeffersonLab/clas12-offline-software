@@ -235,7 +235,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 				this.set_Time(this.get_Time()+deltatime_beta);   
 				
 				d = tde.interpolateOnGrid(0, Math.toDegrees(Math.acos(cosTrkAngle)), this.get_Time(), secIdx, slIdx)/this.get_Time();
-				
+				//System.out.println("USING T2D");
 			
 			}
 			
