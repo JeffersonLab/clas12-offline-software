@@ -31,6 +31,8 @@ public class HipoDataDictionary implements DataDictionary {
         return "<xml></xml>";
     }
 
+    
+    
     public String[] getDescriptorList() {
         Set<String>  list = this.descriptors.keySet();
         int counter = 0;

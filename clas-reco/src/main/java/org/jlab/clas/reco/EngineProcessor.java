@@ -6,7 +6,6 @@
 package org.jlab.clas.reco;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,10 +97,12 @@ public class EngineProcessor {
     public void processEvent(DataEvent event){
         for(Map.Entry<String,ReconstructionEngine>  engine : this.processorEngines.entrySet()){
             try {
+                //System.out.println("processing event");
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
-                System.out.println("[Exception] >>>>> engine : " + engine.getKey());
-                System.out.println();
+                //System.out.println("[Exception] >>>>> engine : " + engine.getKey());
+                //System.out.println();
+                //e.printStackTrace();
             }
         }
     }
@@ -112,6 +113,7 @@ public class EngineProcessor {
     public void processFile(String file){
         if(file.endsWith(".hipo")==true){
             HipoDataSource reader = new HipoDataSource();
+            reader.open(file);
             int eventCounter = 0;
             
             ProgressPrintout  progress = new ProgressPrintout();            

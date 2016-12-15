@@ -5,7 +5,10 @@
  */
 package org.jlab.detector.base;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.utils.groups.IndexedList;
@@ -49,6 +52,18 @@ public class DetectorCollection<T> {
     public T  get(int sector, int layer, int comp){
         return this.collection.getItem(sector,layer,comp);
                 //.get(DetectorDescriptor.generateHashCode(sector, layer, comp));
+    }
+    /**
+     * Returns a list of all values in the collection
+     * @return List of collection values
+     */
+    public List<T> getList(){
+        Collection<T> vc = this.collection.getMap().values();
+        List<T>  list = new ArrayList<T>();
+        for(T c : vc){
+            list.add(c);
+        }
+        return list;
     }
     /**
      * Returns Set of sectors defined in the map
