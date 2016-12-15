@@ -7,9 +7,6 @@ import org.jlab.detector.volume.G4Box;
 import org.jlab.detector.volume.G4Tubs;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.geometry.prim.Triangle3d;
-
-import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 public class main {
@@ -108,8 +105,9 @@ public class main {
 		
 		System.exit(0);*/
 		
-		Vector3d originPos = new Vector3d( 0.0, 1.0, 0.0 );
-		Vector3d[] fidPln0 = new Vector3d[]{ originPos, new Vector3d( 0.0, 1.0, 0.0 ) };
+		/*Vector3d originPos = new Vector3d( 0.0, 1.0, 0.0 );
+
+		Vector3d[] fidPln0 = new Vector3d[]{ originPos.clone(), new Vector3d( 0.0, 1.0, 0.0 ) };
 		Vector3d[] fidPln1 = new Vector3d[]{ new Vector3d( fidPln0[0].x + 1.0, fidPln0[0].y, fidPln0[0].z ), new Vector3d( 0.0, 0.0, 1.0 ) };
 		double[] translationShift = Util.toDoubleArray( fidPln1[0].minus( fidPln0[0] ) );
 		double[] rotationShift = Util.convertVectorDiffToAxisAngle( fidPln0[1], fidPln1[1] );
@@ -168,20 +166,7 @@ public class main {
 		arbPos1Vol.setPosition( arbPos1.times(0.1) );
 		//arbPos1Vol.setMother( topVol );
 		
-		/*GdmlExporter gdmlTest = VolumeExporterFactory.createGdmlFactory();
-		//gdmlTest.setVerbose( true ); // not useful for large numbers of volumes
-		gdmlTest.setPositionLoc("local");
-		gdmlTest.setRotationLoc("local");
-		gdmlTest.addTopVolume( topVol );
-		
-		gdmlTest.addMaterialPreset("mat_hide", "mat_vacuum");
-		
-		gdmlTest.replaceVolumeMaterial( "arrow0", "mat_hide");
-		//gdmlTest.replaceVolumeMaterial( "arrow0", "mat_half");
-		
-		gdmlTest.writeFile("test_shift");*/
-		
-		System.exit(0);
+		System.exit(0);*/
 		
 		SVTConstants.VERBOSE = true;
 		DatabaseConstantProvider cp = SVTConstants.connect();
