@@ -33,7 +33,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
  * </ul>
  * 
  * @author pdavies
- * @version 1.1.0
+ * @version 1.1.2
  */
 public class SVTVolumeFactory
 {
@@ -90,6 +90,7 @@ public class SVTVolumeFactory
 	/**
 	 * A switch to halve the dimensions of all boxes for geant4 format.
 	 * Default: false
+	 * @deprecated
 	 */
 	public boolean HALFBOXES = false;
 	
@@ -120,7 +121,7 @@ public class SVTVolumeFactory
 		double rmax = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.1;
 		double zlen = SVTConstants.SECTORLEN*1.5;
 		
-		motherVol = new G4Tubs("svt", 0, rmax*0.1, zlen*0.1, 0, 360 );
+		motherVol = new G4Tubs("svt", 0, rmax*0.1, zlen/2.0*0.1, 0, 360 );
 		
 		Geant4Basic top = new G4World("none");
 		motherVol.setMother( top );
@@ -185,9 +186,9 @@ public class SVTVolumeFactory
 		switch( SVTConstants.MATERIALTYPES.get( aName ) )
 		{
 		case "box":
-			return new G4Box( aName, dims[0]*0.1, dims[1]*0.1, dims[2]*0.1 ); // wid, thk, len
+			return new G4Box( aName, dims[0]/2.0*0.1, dims[1]/2.0*0.1, dims[2]/2.0*0.1 ); // wid/2, thk/2, len/2
 		case "tube":
-			return new G4Tubs( aName, dims[0]*0.1, dims[1]*0.1, dims[2]*0.1, dims[3], dims[4] ); // rmin, rmax, zlen, phi0, dphi
+			return new G4Tubs( aName, dims[0]*0.1, dims[1]*0.1, dims[2]/2.0*0.1, dims[3], dims[4] ); // rmin, rmax, zlen/2, phi0, dphi
 		}
 		return null;
 	}
@@ -213,19 +214,19 @@ public class SVTVolumeFactory
 		System.out.println("  build passive materials ? "+ BUILDPASSIVES );
 		System.out.println("  include physical sensors ? "+ BUILDSENSORS );
 		if( BUILDSENSORS ) System.out.println("  include sensor active and dead zones ? "+ BUILDSENSORZONES );
-		System.out.println("  halve dimensions of boxes ? "+ HALFBOXES );
+		//System.out.println("  halve dimensions of boxes ? "+ HALFBOXES );
 		
 		for( int region = regionMin-1; region < regionMax; region++ ) // NREGIONS
 		{
 			//if( VERBOSE ) System.out.println("r "+region);			
-			Geant4Basic regionVol = createRegion( region );
+			G4Tubs regionVol = (G4Tubs) createRegion( region );
 			regionVol.setMother( motherVol );
 			regionVol.setName( regionVol.getName() + (region+1) );
 			Util.appendChildrenName( regionVol, "_r"+ (region+1) );
 			
 			double zStartPhysical = SVTConstants.Z0ACTIVE[region] - SVTConstants.DEADZNLEN; // Cu edge of hybrid sensor's physical volume
 			double heatSinkCuZStart = 5.60; // CuStart from fidOriginZ
-			regionVol.translate( 0, 0, (zStartPhysical - SVTConstants.FIDORIGINZ - heatSinkCuZStart )*0.1 + regionVol.getDimensions().get(2).value/2 ); // central dowel hole
+			regionVol.translate( 0, 0, (zStartPhysical - SVTConstants.FIDORIGINZ - heatSinkCuZStart )*0.1 + regionVol.getZHalfLength() ); // central dowel hole
 			
 			if( bShift )
 			{
@@ -273,7 +274,7 @@ public class SVTVolumeFactory
 			}
 		}
 		
-		if( HALFBOXES ) Util.scaleDimensions(motherVol, 0.5, true);
+		//if( HALFBOXES ) Util.scaleDimensions(motherVol, 0.5, true);
 	}
 	
 	
@@ -288,8 +289,9 @@ public class SVTVolumeFactory
 	{
 		if( aRegion < 0 || aRegion > SVTConstants.NREGIONS-1 ){ throw new IllegalArgumentException("region out of bounds"); }
 		
+		double rfit = 4.0; // scale factor to encompass the entire volume of the sectors
 		double rcen = 0.5*(SVTConstants.LAYERRADIUS[aRegion][1] + SVTConstants.LAYERRADIUS[aRegion][0]);
-		double rthk = 0.5*(SVTConstants.LAYERRADIUS[aRegion][1] - SVTConstants.LAYERRADIUS[aRegion][0])*4; // scale factor to encompass the entire volume of the sectors
+		double rthk = rfit*0.5*(SVTConstants.LAYERRADIUS[aRegion][1] - SVTConstants.LAYERRADIUS[aRegion][0]);
 		double rmin = rcen - rthk;
 		double rmax = rcen + rthk;
 		double zlen = SVTConstants.SECTORLEN; // same length as dummy sector volume
@@ -305,7 +307,7 @@ public class SVTVolumeFactory
 			System.out.println();
 		}
 		
-		Geant4Basic regionVol = new G4Tubs("region", rmin*0.1, rmax*0.1, zlen*0.1, 0, 360 );
+		Geant4Basic regionVol = new G4Tubs("region", rmin*0.1, rmax*0.1, zlen/2.0*0.1, 0, 360 );
 		
 		// create faraday cage here?
 		
@@ -369,7 +371,7 @@ public class SVTVolumeFactory
 		double thk = rohacellThk + 2*(SVTConstants.PASSIVETHK + pcBoardAndChipsThk);
 		double len = SVTConstants.SECTORLEN;
 		
-		Geant4Basic sectorVol = new G4Box("sector", wid*0.1, thk*0.1, len*0.1 );
+		Geant4Basic sectorVol = new G4Box("sector", wid/2.0*0.1, thk/2.0*0.1, len/2.0*0.1 );
 		
 		// position components relative to fiducial layer
 		
@@ -417,27 +419,27 @@ public class SVTVolumeFactory
 			
 			if( BUILDPASSIVES )
 			{
-				Geant4Basic carbonFiberVol = createCarbonFiber();
+				G4Box carbonFiberVol = (G4Box) createCarbonFiber();
 				carbonFiberVol.setMother( sectorVol );
 				carbonFiberVol.setName( carbonFiberVol.getName() + "_m" + (module+1) );
 				Util.appendChildrenName( carbonFiberVol, "_m" + (module+1) );
 				
-				Geant4Basic busCableVol = createBusCable();
+				G4Box busCableVol = (G4Box) createBusCable();
 				busCableVol.setMother( sectorVol );
 				busCableVol.setName( busCableVol.getName() + "_m" + (module+1) );
 				Util.appendChildrenName( busCableVol, "_m" + (module+1) );
 				
-				Geant4Basic pitchAdaptorVol = createNamedVolume("pitchAdaptor");
+				G4Box pitchAdaptorVol = (G4Box) createNamedVolume("pitchAdaptor");
 				pitchAdaptorVol.setMother( sectorVol );
 				pitchAdaptorVol.setName( pitchAdaptorVol.getName() + "_m" + (module+1) );
 				Util.appendChildrenName( pitchAdaptorVol, "_m" + (module+1) );
 				
-				Geant4Basic pcBoardAndChipsVol = createPcBoardAndChips();
+				G4Box pcBoardAndChipsVol = (G4Box) createPcBoardAndChips();
 				pcBoardAndChipsVol.setMother( sectorVol );
 				pcBoardAndChipsVol.setName( pcBoardAndChipsVol.getName() + "_m" + (module+1) );
 				Util.appendChildrenName( pcBoardAndChipsVol, "_m" + (module+1) );
 				
-				Geant4Basic epoxyAndRailAndPadsVol = createEpoxyAndRailAndPads();
+				G4Box epoxyAndRailAndPadsVol = (G4Box) createEpoxyAndRailAndPads();
 				epoxyAndRailAndPadsVol.setMother( sectorVol );
 				epoxyAndRailAndPadsVol.setName( epoxyAndRailAndPadsVol.getName() + "_m" + (module+1) );
 				Util.appendChildrenName( epoxyAndRailAndPadsVol, "_m" + (module+1) );
@@ -455,7 +457,7 @@ public class SVTVolumeFactory
 					busCableY     = 0.0 + rohacellThk + carbonFiberThk + busCableThk/2;
 					epoxyY        = 0.0 + rohacellThk + carbonFiberThk + busCableThk + epoxyThk/2;
 					pitchAdaptorY = 0.0 + rohacellThk + SVTConstants.PASSIVETHK + pitchAdaptorThk/2;
-					pcBoardY      = 0.0 + rohacellThk + SVTConstants.PASSIVETHK + pcBoardAndChipsVol.getDimensions().get(1).value/2*10;
+					pcBoardY      = 0.0 + rohacellThk + SVTConstants.PASSIVETHK + pcBoardAndChipsVol.getYHalfLength()*10;
 					break;
 					
 				case 1: // V = outer
@@ -464,18 +466,18 @@ public class SVTVolumeFactory
 					busCableY     = 0.0 - carbonFiberThk - busCableThk/2;
 					epoxyY        = 0.0 - carbonFiberThk - busCableThk - epoxyThk/2;
 					pitchAdaptorY = 0.0 - SVTConstants.PASSIVETHK - pitchAdaptorThk/2;
-					pcBoardY      = 0.0 - SVTConstants.PASSIVETHK - pcBoardAndChipsVol.getDimensions().get(1).value/2*10;
+					pcBoardY      = 0.0 - SVTConstants.PASSIVETHK - pcBoardAndChipsVol.getYHalfLength()*10;
 					
 					epoxyAndRailAndPadsVol.rotate("xyz", 0.0, 0.0, Math.PI );
 					pcBoardAndChipsVol.rotate("xyz", 0.0, 0.0, Math.PI );
 					break;
 				}
 			
-				carbonFiberVol.setPosition(         0.0, carbonFiberY*0.1,  (0.0 - heatSinkCuZStart + heatSinkRidgeLen + carbonFiberZStart)*0.1 + carbonFiberVol.getDimensions().get(2).value/2 );
-				busCableVol.setPosition(            0.0, busCableY*0.1,     (0.0 - heatSinkCuZStart + heatSinkRidgeLen + carbonFiberZStart)*0.1 + busCableVol.getDimensions().get(2).value/2 ); // same Z position as carbonFiber
-				epoxyAndRailAndPadsVol.setPosition( 0.0, epoxyY*0.1,        (0.0 - heatSinkCuZStart + heatSinkRidgeLen + carbonFiberZStart)*0.1 + epoxyAndRailAndPadsVol.getDimensions().get(2).value/2 ); // same Z position as carbonFiber
-				pitchAdaptorVol.setPosition(        0.0, pitchAdaptorY*0.1, pitchAdaptorZEnd*0.1 - pitchAdaptorVol.getDimensions().get(2).value/2 );
-				pcBoardAndChipsVol.setPosition(     0.0, pcBoardY*0.1,      pcBoardZEnd*0.1 - pcBoardAndChipsVol.getDimensions().get(2).value/2 );
+				carbonFiberVol.setPosition(         0.0, carbonFiberY*0.1,  (0.0 - heatSinkCuZStart + heatSinkRidgeLen + carbonFiberZStart)*0.1 + carbonFiberVol.getZHalfLength() );
+				busCableVol.setPosition(            0.0, busCableY*0.1,     (0.0 - heatSinkCuZStart + heatSinkRidgeLen + carbonFiberZStart)*0.1 + busCableVol.getZHalfLength() ); // same Z position as carbonFiber
+				epoxyAndRailAndPadsVol.setPosition( 0.0, epoxyY*0.1,        (0.0 - heatSinkCuZStart + heatSinkRidgeLen + carbonFiberZStart)*0.1 + epoxyAndRailAndPadsVol.getZHalfLength() ); // same Z position as carbonFiber
+				pitchAdaptorVol.setPosition(        0.0, pitchAdaptorY*0.1, pitchAdaptorZEnd*0.1 - pitchAdaptorVol.getZHalfLength() );
+				pcBoardAndChipsVol.setPosition(     0.0, pcBoardY*0.1,      pcBoardZEnd*0.1 - pcBoardAndChipsVol.getZHalfLength() );
 			}
 			
 			/*for( int kapton = 0; kapton < 1; kapton++ ) // left, right
@@ -498,7 +500,7 @@ public class SVTVolumeFactory
 	 */
 	public Geant4Basic createModule()
 	{		
-		Geant4Basic moduleVol = new G4Box( "module", SVTConstants.PHYSSENWID*0.1, SVTConstants.SILICONTHK*0.1, SVTConstants.MODULELEN*0.1 );
+		Geant4Basic moduleVol = new G4Box( "module", SVTConstants.PHYSSENWID/2.0*0.1, SVTConstants.SILICONTHK/2.0*0.1, SVTConstants.MODULELEN/2.0*0.1 );
 		
 		if( BUILDSENSORS ) // gemc handles the physical sensors itself in the hit process algorithm
 		{
@@ -536,7 +538,7 @@ public class SVTVolumeFactory
 	 */
 	public Geant4Basic createSensorPhysical()
 	{		
-		Geant4Basic senPhysicalVol = new G4Box( "sensorPhysical", SVTConstants.PHYSSENWID*0.1, SVTConstants.SILICONTHK*0.1, SVTConstants.PHYSSENLEN*0.1 );
+		Geant4Basic senPhysicalVol = new G4Box( "sensorPhysical", SVTConstants.PHYSSENWID/2.0*0.1, SVTConstants.SILICONTHK/2.0*0.1, SVTConstants.PHYSSENLEN/2.0*0.1 );
 		
 		if( BUILDSENSORZONES ) // gemc handles the active and dead zones itself in the hit process algorithm
 		{
@@ -563,19 +565,19 @@ public class SVTVolumeFactory
 				{
 				case 0:
 					deadZnVol = createDeadZone("l");
-					deadZnVol.setPosition( -(SVTConstants.ACTIVESENWID + SVTConstants.DEADZNWID + VOLSPACER)/2*0.1, 0.0, 0.0 );
+					deadZnVol.setPosition( -(SVTConstants.ACTIVESENWID + SVTConstants.DEADZNWID + VOLSPACER)/2.0*0.1, 0.0, 0.0 );
 					break;
 				case 1:
 					deadZnVol = createDeadZone("l");
-					deadZnVol.setPosition(  (SVTConstants.ACTIVESENWID + SVTConstants.DEADZNWID + VOLSPACER)/2*0.1, 0.0, 0.0 );
+					deadZnVol.setPosition(  (SVTConstants.ACTIVESENWID + SVTConstants.DEADZNWID + VOLSPACER)/2.0*0.1, 0.0, 0.0 );
 					break;
 				case 2:
 					deadZnVol = createDeadZone("w");
-					deadZnVol.setPosition( 0.0, 0.0, -(SVTConstants.ACTIVESENLEN + SVTConstants.DEADZNLEN + VOLSPACER)/2*0.1 );
+					deadZnVol.setPosition( 0.0, 0.0, -(SVTConstants.ACTIVESENLEN + SVTConstants.DEADZNLEN + VOLSPACER)/2.0*0.1 );
 					break;
 				case 3:
 					deadZnVol = createDeadZone("w");
-					deadZnVol.setPosition( 0.0, 0.0,  (SVTConstants.ACTIVESENLEN + SVTConstants.DEADZNLEN + VOLSPACER)/2*0.1 );
+					deadZnVol.setPosition( 0.0, 0.0,  (SVTConstants.ACTIVESENLEN + SVTConstants.DEADZNLEN + VOLSPACER)/2.0*0.1 );
 					break;
 				}
 				
@@ -596,7 +598,7 @@ public class SVTVolumeFactory
 	 */
 	public Geant4Basic createSensorActive( )
 	{	
-		return new G4Box( "sensorActive", SVTConstants.ACTIVESENWID*0.1, SVTConstants.SILICONTHK*0.1, SVTConstants.ACTIVESENLEN*0.1 );
+		return new G4Box( "sensorActive", SVTConstants.ACTIVESENWID/2.0*0.1, SVTConstants.SILICONTHK/2.0*0.1, SVTConstants.ACTIVESENLEN/2.0*0.1 );
 	}
 	
 	
@@ -614,10 +616,10 @@ public class SVTVolumeFactory
 		switch( aType )
 		{
 		case "l":
-			deadZnVol = new G4Box( "deadZoneLen", SVTConstants.DEADZNWID*0.1, SVTConstants.SILICONTHK*0.1, (SVTConstants.ACTIVESENLEN + 2*SVTConstants.DEADZNLEN)*0.1 );
+			deadZnVol = new G4Box( "deadZoneLen", SVTConstants.DEADZNWID/2.0*0.1, SVTConstants.SILICONTHK/2.0*0.1, (SVTConstants.ACTIVESENLEN + 2*SVTConstants.DEADZNLEN)/2.0*0.1 );
 			break;
 		case "w":
-			deadZnVol = new G4Box( "deadZoneWid", SVTConstants.ACTIVESENWID*0.1, SVTConstants.SILICONTHK*0.1, SVTConstants.DEADZNLEN*0.1 );
+			deadZnVol = new G4Box( "deadZoneWid", SVTConstants.ACTIVESENWID/2.0*0.1, SVTConstants.SILICONTHK/2.0*0.1, SVTConstants.DEADZNLEN/2.0*0.1 );
 			break;
 		default:
 			throw new IllegalArgumentException("unknown dead zone type: "+ aType );
@@ -629,16 +631,16 @@ public class SVTVolumeFactory
 	
 	public Geant4Basic createHeatSink()
 	{
-		Geant4Basic mainVol = createNamedVolume("heatSink");
+		G4Box mainVol = (G4Box) createNamedVolume("heatSink");
 		
-		Geant4Basic cuVol = createNamedVolume("heatSinkCu");
+		G4Box cuVol = (G4Box) createNamedVolume("heatSinkCu");
 		cuVol.setMother( mainVol );
 		
-		Geant4Basic ridgeVol = createNamedVolume("heatSinkRidge"); // small protruding ridge
+		G4Box ridgeVol = (G4Box) createNamedVolume("heatSinkRidge"); // small protruding ridge
 		ridgeVol.setMother( mainVol );
 		
-		cuVol.setPosition(    0.0, -ridgeVol.getDimensions().get(1).value/2, 0.0 );
-		ridgeVol.setPosition( 0.0, cuVol.getDimensions().get(1).value/2, ridgeVol.getDimensions().get(2).value/2 - cuVol.getDimensions().get(2).value/2 );
+		cuVol.setPosition(    0.0, -ridgeVol.getYHalfLength(), 0.0 );
+		ridgeVol.setPosition( 0.0, cuVol.getYHalfLength(), ridgeVol.getZHalfLength() - cuVol.getZHalfLength() );
 		
 		return mainVol;
 	}
@@ -647,16 +649,16 @@ public class SVTVolumeFactory
 	
 	public Geant4Basic createCarbonFiber()
 	{
-		Geant4Basic mainVol = createNamedVolume("carbonFiber");
+		G4Box mainVol = (G4Box) createNamedVolume("carbonFiber");
 		
-		Geant4Basic cuVol = createNamedVolume("carbonFiberCu");
+		G4Box cuVol = (G4Box) createNamedVolume("carbonFiberCu");
 		cuVol.setMother( mainVol );
 		
-		Geant4Basic pkVol = createNamedVolume("carbonFiberPk");
+		G4Box pkVol = (G4Box) createNamedVolume("carbonFiberPk");
 		pkVol.setMother( mainVol );
 		
-		cuVol.setPosition( 0.0, 0.0, cuVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 );
-		pkVol.setPosition( 0.0, 0.0, pkVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 + cuVol.getDimensions().get(2).value );
+		cuVol.setPosition( 0.0, 0.0, cuVol.getZHalfLength() - mainVol.getZHalfLength() );
+		pkVol.setPosition( 0.0, 0.0, pkVol.getZHalfLength() - mainVol.getZHalfLength() + cuVol.getZHalfLength()*2.0 );
 		
 		//     + - - +
 		// + - +     |
@@ -671,16 +673,16 @@ public class SVTVolumeFactory
 	
 	public Geant4Basic createBusCable()
 	{
-		Geant4Basic mainVol = createNamedVolume("busCable");
+		G4Box mainVol = (G4Box) createNamedVolume("busCable");
 		
-		Geant4Basic cuVol = createNamedVolume("busCableCu");
+		G4Box cuVol = (G4Box) createNamedVolume("busCableCu");
 		cuVol.setMother( mainVol );
 		
-		Geant4Basic pkVol = createNamedVolume("busCablePk");
+		G4Box pkVol = (G4Box) createNamedVolume("busCablePk");
 		pkVol.setMother( mainVol );
 		
-		cuVol.setPosition( 0.0, 0.0, cuVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 );
-		pkVol.setPosition( 0.0, 0.0, pkVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 + cuVol.getDimensions().get(2).value );
+		cuVol.setPosition( 0.0, 0.0, cuVol.getZHalfLength() - mainVol.getZHalfLength() );
+		pkVol.setPosition( 0.0, 0.0, pkVol.getZHalfLength() - mainVol.getZHalfLength() + cuVol.getZHalfLength()*2.0 );
 		
 		return mainVol;
 	}
@@ -689,25 +691,25 @@ public class SVTVolumeFactory
 	
 	public Geant4Basic createPcBoardAndChips() // mmm, chips
 	{
-		Geant4Basic mainVol = createNamedVolume("pcBoardAndChips");
+		G4Box mainVol = (G4Box) createNamedVolume("pcBoardAndChips");
 		
-		Geant4Basic pcBoardVol = createNamedVolume("pcBoard");
+		G4Box pcBoardVol = (G4Box) createNamedVolume("pcBoard");
 		pcBoardVol.setMother( mainVol );
 		
-		Geant4Basic chipLVol = createNamedVolume("chip");
+		G4Box chipLVol = (G4Box) createNamedVolume("chip");
 		chipLVol.setMother( mainVol );
 		chipLVol.setName("chipL");
 		
-		Geant4Basic chipRVol = createNamedVolume("chip");
+		G4Box chipRVol = (G4Box) createNamedVolume("chip");
 		chipRVol.setMother( mainVol );
 		chipRVol.setName("chipR");
 		
 		double chipX = 13.74 - 7.50/2;
-		double chipZ = pcBoardVol.getDimensions().get(2).value/2*10 - 17.99 + 17.45 - chipLVol.getDimensions().get(2).value/2*10;
+		double chipZ = pcBoardVol.getZHalfLength()*10.0 - 17.99 + 17.45 - chipLVol.getZHalfLength()*10.0;
 				
-		pcBoardVol.setPosition( 0.0, -pcBoardVol.getDimensions().get(1).value/2, 0.0 );
-		chipLVol.setPosition(  chipX*0.1, chipLVol.getDimensions().get(1).value/2, chipZ*0.1 );
-		chipRVol.setPosition( -chipX*0.1, chipRVol.getDimensions().get(1).value/2, chipZ*0.1 );
+		pcBoardVol.setPosition( 0.0, -pcBoardVol.getYHalfLength(), 0.0 );
+		chipLVol.setPosition(  chipX*0.1, chipLVol.getYHalfLength(), chipZ*0.1 );
+		chipRVol.setPosition( -chipX*0.1, chipRVol.getYHalfLength(), chipZ*0.1 );
 		
 		return mainVol;
 	}
@@ -716,7 +718,7 @@ public class SVTVolumeFactory
 	
 	public Geant4Basic createEpoxyAndRailAndPads()
 	{
-		Geant4Basic mainVol = createNamedVolume("epoxyAndRailAndPads");
+		G4Box mainVol = (G4Box) createNamedVolume("epoxyAndRailAndPads");
 		
 		double railXStart = 6.0;
 		double railZStart = 19.320;
@@ -724,10 +726,10 @@ public class SVTVolumeFactory
 		double padZSpacingLong = 40.811;
 		double padZSpacingShort = 30.110;
 		
-		Geant4Basic epoxyMajorCuVol = createNamedVolume("epoxyMajorCu");
-		Geant4Basic epoxyMinorCuVol = createNamedVolume("epoxyMinorCu");
-		Geant4Basic epoxyMajorPkVol = createNamedVolume("epoxyMajorPk");
-		Geant4Basic epoxyMinorPkVol = createNamedVolume("epoxyMinorPk");
+		G4Box epoxyMajorCuVol = (G4Box) createNamedVolume("epoxyMajorCu");
+		G4Box epoxyMinorCuVol = (G4Box) createNamedVolume("epoxyMinorCu");
+		G4Box epoxyMajorPkVol = (G4Box) createNamedVolume("epoxyMajorPk");
+		G4Box epoxyMinorPkVol = (G4Box) createNamedVolume("epoxyMinorPk");
 		
 		epoxyMajorCuVol.setMother( mainVol );
 		epoxyMinorCuVol.setMother( mainVol );
@@ -735,31 +737,31 @@ public class SVTVolumeFactory
 		epoxyMinorPkVol.setMother( mainVol );
 		
 		epoxyMajorCuVol.setPosition(
-				SVTConstants.MATERIALDIMENSIONS.get("carbonFiberCu")[0]/2*0.1 - epoxyMajorCuVol.getDimensions().get(0).value/2,
+				SVTConstants.MATERIALDIMENSIONS.get("carbonFiberCu")[0]/2.0*0.1 - epoxyMajorCuVol.getXHalfLength(),
 				0.0,
-				epoxyMajorCuVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 );
+				epoxyMajorCuVol.getZHalfLength() - mainVol.getZHalfLength() );
 		
 		epoxyMinorCuVol.setPosition(
-				-(SVTConstants.MATERIALDIMENSIONS.get("carbonFiberCu")[0]/2*0.1 - epoxyMinorCuVol.getDimensions().get(0).value/2),
+				-(SVTConstants.MATERIALDIMENSIONS.get("carbonFiberCu")[0]/2.0*0.1 - epoxyMinorCuVol.getXHalfLength()),
 				0.0,
-				epoxyMinorCuVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 );
+				epoxyMinorCuVol.getZHalfLength() - mainVol.getZHalfLength() );
 		
 		epoxyMajorPkVol.setPosition( 
-				SVTConstants.MATERIALDIMENSIONS.get("carbonFiberPk")[0]/2*0.1 - epoxyMajorPkVol.getDimensions().get(0).value/2,
+				SVTConstants.MATERIALDIMENSIONS.get("carbonFiberPk")[0]/2.0*0.1 - epoxyMajorPkVol.getXHalfLength(),
 				0.0,
-				epoxyMajorPkVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 + epoxyMajorCuVol.getDimensions().get(2).value );
+				epoxyMajorPkVol.getZHalfLength() - mainVol.getZHalfLength() + epoxyMajorCuVol.getZHalfLength()*2.0 );
 		
 		epoxyMinorPkVol.setPosition(
-				-(SVTConstants.MATERIALDIMENSIONS.get("carbonFiberPk")[0]/2*0.1 - epoxyMinorPkVol.getDimensions().get(0).value/2), 
+				-(SVTConstants.MATERIALDIMENSIONS.get("carbonFiberPk")[0]/2.0*0.1 - epoxyMinorPkVol.getXHalfLength()),
 				0.0,
-				epoxyMinorPkVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 + epoxyMinorCuVol.getDimensions().get(2).value );
+				epoxyMinorPkVol.getZHalfLength() - mainVol.getZHalfLength() + epoxyMinorCuVol.getZHalfLength()*2.0 );
 		
-		Geant4Basic railVol = createNamedVolume("rail");
+		G4Box railVol = (G4Box) createNamedVolume("rail");
 		railVol.setMother( mainVol );
 		railVol.setPosition( 
 				-railXStart*0.1, 
-				railVol.getDimensions().get(1).value/2 - mainVol.getDimensions().get(1).value/2, 
-				railVol.getDimensions().get(2).value/2 - mainVol.getDimensions().get(2).value/2 );
+				railVol.getYHalfLength() - mainVol.getYHalfLength(), 
+				railVol.getZHalfLength() - mainVol.getZHalfLength() );
 		
 		double[] padZSpacingFromEnd = new double[]{
 				railZEnd,
@@ -776,7 +778,7 @@ public class SVTVolumeFactory
 		
 		for( int pad = 0; pad < SVTConstants.NPADS; pad++ )
 		{
-			Geant4Basic padVol = createNamedVolume("pad");
+			G4Tubs padVol = (G4Tubs) createNamedVolume("pad");
 			padVol.setMother( mainVol );
 			padVol.setName("pad"+pad);
 			padVol.rotate("xyz", -Math.PI/2, 0.0, 0.0 );
@@ -788,8 +790,8 @@ public class SVTVolumeFactory
 			
 			padVol.setPosition( 
 					-railXStart*0.1, 
-					padVol.getDimensions().get(2).value/2 + railVol.getDimensions().get(1).value - mainVol.getDimensions().get(1).value/2, 
-					mainVol.getDimensions().get(2).value/2 - padPos*0.1 );
+					padVol.getZHalfLength() + railVol.getYHalfLength()*2.0 - mainVol.getYHalfLength(),
+					mainVol.getZHalfLength() - padPos*0.1 );
 		}
 		
 		return mainVol;
@@ -818,7 +820,7 @@ public class SVTVolumeFactory
 				tubeName = "peekSupport_tube";
 		
 		Geant4Basic polyhedra = new G4Pgon(pgonName, 10, 0, 360 );
-		Geant4Basic tube = new G4Tubs(tubeName, 0, 62.39, 28, 0, 360 );
+		Geant4Basic tube = new G4Tubs(tubeName, 0, 62.390, 28.000/2.0, 0, 360 );
 		Geant4Basic op = new G4Operation("subtract", pgonName, tubeName );
 		tube.setMother(op);
 		polyhedra.setMother(op);

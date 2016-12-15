@@ -56,7 +56,7 @@ public abstract class Geant4Basic {
         volumeDimensions = Arrays.asList(pars);
     }
 
-    public final List<Measurement> getDimensions() {
+    protected final List<Measurement> getDimensions() {
         return volumeDimensions;
     }
 
@@ -137,7 +137,7 @@ public abstract class Geant4Basic {
         return globalTransform;
     }
 
-    protected final void updateCSGtransformation() {
+    private final void updateCSGtransformation() {
         children.stream()
                 .forEach(child -> child.updateCSGtransformation());
 
@@ -348,9 +348,11 @@ public abstract class Geant4Basic {
 	
 	/**
 	 * Recursively multiplies each linear dimension with units of "cm" of the given volume and its children by the given scale factor.
+	 * This is a bodge. DO NOT USE
 	 * 
 	 * @param aFactor scale factor
 	 * @author pdavies
+	 * @deprecated
 	 */
 	public void scaleDimensions( double aFactor )
 	{		

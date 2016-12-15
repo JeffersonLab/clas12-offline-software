@@ -32,7 +32,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
  * </ul>
  * 
  * @author pdavies
- * @version 1.1.0
+ * @version 1.1.2
  */
 public class Util
 {
@@ -347,7 +347,7 @@ public class Util
 		}
 		if( aDisplayPointer )
 		{
-			Geant4Basic pointerVol = new G4Tubs( aName+"_arrow2", 0, aPointerRadius*0.1, aLen*0.1, 0, 360 );
+			Geant4Basic pointerVol = new G4Tubs( aName+"_arrow2", 0, aPointerRadius*0.1, aLen/2.0*0.1, 0, 360 );
 			pointerVol.setMother( arrowVol );
 		}
 		if( aDisplayCapEnd )
@@ -470,6 +470,7 @@ public class Util
 	 * 
 	 * @param aVol volume
 	 * @param aFactor scale factor
+	 * @deprecated
 	 */
 	public static void scaleDimensions( Geant4Basic aVol, double aFactor, boolean bRecursive )
 	{
