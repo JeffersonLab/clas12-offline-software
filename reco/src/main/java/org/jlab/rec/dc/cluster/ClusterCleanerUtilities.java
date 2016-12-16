@@ -562,10 +562,11 @@ public class ClusterCleanerUtilities {
 				for(int j =0; j<hitsInLayer.size(); j++) {
 					docaSum+=hitsInLayer.get(j).get_Doca();
 				}
-				double passingCut = 1.75*hitsInLayer.get(0).get_CellSize()*Math.cos(Math.toRadians(30.));
+				double passingCut = 1.75*hitsInLayer.get(0).get_CellSize()*Math.cos(Math.toRadians(6.));
 				
 				if(docaSum<passingCut) { // reset LR to 0
 					for(int j =0; j<hitsInLayer.size(); j++) {
+						
 						hitsInLayer.get(j).set_LeftRightAmb(0);
 						hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B());
 					}
