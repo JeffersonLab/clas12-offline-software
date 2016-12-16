@@ -28,7 +28,7 @@ import eu.mihosoft.vrl.v3d.Transform;
  * </ul>
  * 
  * @author pdavies
- * @version 1.1.0
+ * @version 1.1.1
  */
 public class SVTConstants
 {
@@ -104,19 +104,16 @@ public class SVTConstants
 	public static double SECTORLEN;
 	
 	/**
-	 * Connects a DatabaseConstantProvider to CCDB with run 10 and default variation.
+	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
 	 * 
-	 * @param loadAlignmentTable a switch to load the tables containing alignment shifts for sectors
-	 * 
-	 * @return ConstantProvider a ConstantProvider that has loaded the necessary tables
+	 * @return DatabaseConstantProvider the same thing
 	 */
-	public static DatabaseConstantProvider connect()
+	public static DatabaseConstantProvider connect( DatabaseConstantProvider cp )
 	{
 		if( VERBOSE ) System.out.println("ENVIRONMENT:");
 		if( VERBOSE ) System.out.println(" CLAS12DIR="+System.getenv("CLAS12DIR") );
 		if( VERBOSE ) System.out.println(" CCDB_DATABASE="+System.getenv("CCDB_DATABASE") );
 		
-		DatabaseConstantProvider cp = new DatabaseConstantProvider( 10, "default");
 		cp.loadTable( ccdbPath +"svt");
 		cp.loadTable( ccdbPath +"region");
 		cp.loadTable( ccdbPath +"support");
@@ -126,7 +123,6 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"alignment");
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector"); // possible future tables
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
-		cp.disconnect();
 		
 		load( cp );
 		
