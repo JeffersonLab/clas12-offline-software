@@ -14,6 +14,8 @@ import org.jlab.detector.decode.DetectorDataDgtz.TDCData;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.utils.groups.IndexedList;
 
@@ -130,7 +132,7 @@ public class DetectorBankDgtz {
     }
     public static void main(String[] args){
         
-        DetectorBankDgtz bank = new DetectorBankDgtz();
+        /*DetectorBankDgtz bank = new DetectorBankDgtz();
         HipoDataSource reader = new HipoDataSource();
         reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/challenge/rec.short.hipo");
         int counter = 0;
@@ -141,6 +143,24 @@ public class DetectorBankDgtz {
             counter++;
             
             if(counter>10) break;
+        }*/
+        
+        EvioSource reader = new EvioSource();
+        reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/gagik/sector2_000233_mode7.evio.0");
+        CodaEventDecoder               decoder = new CodaEventDecoder();
+        DetectorEventDecoder   detectorDecoder = new DetectorEventDecoder();
+        
+        while(reader.hasEvent()==true){
+            EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
+            List<DetectorDataDgtz>  dataSet = decoder.getDataEntries((EvioDataEvent) event);
+            detectorDecoder.translate(dataSet);
+            //detectorDecoder.fitPulses(dataSet);
+            System.out.println("------------------ ######### ");
+            for(DetectorDataDgtz data : dataSet){
+                System.out.println(data);
+            }
         }
+        
+        
     }
 }
