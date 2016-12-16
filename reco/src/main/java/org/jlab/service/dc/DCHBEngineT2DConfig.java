@@ -283,9 +283,9 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			// Processing TB   
 			en2.processDataEvent(event);
 			
-			//if(counter>15) break;
-			//if(counter%100==0)
-			//	System.out.println("run "+counter+" events");
+			if(counter>150) break;
+			if(counter%10==0)
+				System.out.println("run "+counter+" events");
 			writer.writeEvent(event);
 		}
 		writer.close();

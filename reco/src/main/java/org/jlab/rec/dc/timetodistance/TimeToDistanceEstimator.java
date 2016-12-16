@@ -23,8 +23,8 @@ public class TimeToDistanceEstimator {
 	  */
 	 public double interpolateOnGrid(double B, double alpha, double t,  int SecIdx, int SlyrIdx) {
 		 // for a given value of B find the bin edges in Tesla and the corresponding index:
-		 if(alpha>30)
-			 alpha-=30;
+		// if(alpha>30)
+		//	 alpha-=30;
 		 
 		 int binlowB  = this.getBIdx(B);
 		 int binhighB = binlowB + 1; 
@@ -38,10 +38,11 @@ public class TimeToDistanceEstimator {
 		 double alpha2 = this.getAlphaFromAlphaIdx(binhighAlpha);
 		
 		 // get the time bin edges:
-		 int binlowT = this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha); 
+		 int binlowT = this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha);  
 		 int binhighT = binlowT + 1; 
 		 double t1 = binlowT*2.;
 		 double t2 = binhighT*2.;
+		
 		 if(t>t2)
 			 t=t2;
 		 
@@ -58,7 +59,6 @@ public class TimeToDistanceEstimator {
 		 double f_B_alpha2_t2 = interpolateLinear(B*B, B1*B1, B2*B2, 
 				 TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)+1],
 				 TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)+1]);
-
 		 // interpolate in d for 2 values of alpha:		 
 		 double f_B_alpha1_t = interpolateLinear(t, t1, t2, f_B_alpha1_t1, f_B_alpha1_t2);
 		 double f_B_alpha2_t = interpolateLinear(t, t1, t2, f_B_alpha2_t1, f_B_alpha2_t2);
@@ -98,7 +98,7 @@ public class TimeToDistanceEstimator {
 	private int getTimeIdx(double t1, int is, int ir, int ibfield, int icosalpha) {
 		DecimalFormat df = new DecimalFormat("#");
 		df.setRoundingMode(RoundingMode.CEILING);
-		int binIdx = Integer.parseInt(df.format(t1/2.) ) -1;
+		int binIdx = Integer.parseInt(df.format(t1/2.) ) -1; 
 		if(binIdx<0)
 			binIdx = TableLoader.minBinIdxT;
 		if(binIdx>TableLoader.maxBinIdxT[is][ir][ibfield][icosalpha])

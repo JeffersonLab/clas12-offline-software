@@ -34,7 +34,7 @@ public class TableLoader {
 			
 			DecimalFormat df = new DecimalFormat("#");
 			df.setRoundingMode(RoundingMode.CEILING);
-			for(int s = 0; s<2; s++ ){ // loop over sectors
+			for(int s = 0; s<6; s++ ){ // loop over sectors
 
 				for(int r = 0; r<6; r++ ){ //loop over slys
 					double dmax = CalibrationConstantsLoader.dmaxsuperlayer[r]; 
@@ -70,10 +70,10 @@ public class TableLoader {
 							     if(tbin<0)
 							    	 tbin=0;
 							     
-							     if(tbin>maxBinIdxT[s][r][ibfield][icosalpha])
-							    	 maxBinIdxT[s][r][ibfield][icosalpha] = tbin;
-							     
-							     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
+							     if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
+							    	  maxBinIdxT[s][r][ibfield][icosalpha] = tbin; 
+							     }
+							      if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
 							    	// firstbin = bin;
 							    	// bincount = 0;				    	 
 								     DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
@@ -88,6 +88,21 @@ public class TableLoader {
 					}
 				}
 			}	
+			
+			for(int s = 0; s<2; s++ ){ // loop over sectors
+
+				for(int r = 0; r<6; r++ ){ //loop over slys
+						
+					for(int ibfield =0; ibfield<6; ibfield++) {
+					   
+						for(int icosalpha =0; icosalpha<6; icosalpha++) {
+							System.out.println("s "+s+" r "+r+" ibfield "+ibfield+" icosalpha "+icosalpha+"tbin "+ "maxBinIdxT[s][r][ibfield][icosalpha] "+maxBinIdxT[s][r][ibfield][icosalpha]);
+					    	
+						}
+					}
+				}
+			}
+			
 			T2DLOADED = true;
 	 }
 	

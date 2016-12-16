@@ -212,7 +212,21 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		return _TimeToDistance;
 	}
 
+	/**
+	 * 
+	 * @param alpha the local angle of the track
+	 * @return the reduced angle in radians between the range of 0 and 30 deg.
+	 */
+	double reducedAngle(double alpha){
+	  double ralpha =0;
 
+	  ralpha=Math.abs(alpha);
+
+	  while(ralpha>Math.PI/3.)ralpha-=Math.PI/3.;
+	  if(ralpha>Math.PI/6.)ralpha=Math.PI/3.-ralpha;
+	  
+	  return ralpha;
+	}
 	/**
 	 * sets the calculated distance (in cm) from the time (in ns)
 	 */
@@ -227,6 +241,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 			
 			// chose method to get the distance from the time -- for now this is only used for cosmics so B =0
 			if(useTimeToDistanceGrid==true) {
+				double alpha = Math.acos(cosTrkAngle);
+				double ralpha = this.reducedAngle(alpha);
 				double beta =1;
 				double x = this.get_ClusFitDoca();
 				TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
@@ -235,9 +251,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 					deltatime_beta = (Math.sqrt(x*x+(CalibrationConstantsLoader.distbeta[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta)*(CalibrationConstantsLoader.distbeta[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta))-x)/CalibrationConstantsLoader.v0[this.get_Sector()-1][this.get_Superlayer()-1];
 				this.set_Time(this.get_Time()+deltatime_beta);   
 				
-				d = tde.interpolateOnGrid(B, Math.toDegrees(Math.acos(cosTrkAngle)), this.get_Time(), secIdx, slIdx)/this.get_Time();
-				//System.out.println("USING T2D");
-			
+				d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx)/this.get_Time();
+				
 			}
 			
 	//			TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
