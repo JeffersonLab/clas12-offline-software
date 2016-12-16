@@ -301,7 +301,7 @@ public class ClusterFinder  {
 				// update the hits
 				for(FittedHit fhit : clus) {
 					fhit.set_TrkgStatus(0);
-					fhit.updateHitPositionWithTime(1);	
+					fhit.updateHitPositionWithTime(1, fhit.get_B());	
 					fhit.set_AssociatedClusterID(clus.get_Id());	
 					fhit.set_AssociatedHBTrackID(clus.get(0).get_AssociatedHBTrackID());
 				}
@@ -359,12 +359,12 @@ public class ClusterFinder  {
 					
 					if(hit.get_LeftRightAmb()!=0) {
 						FittedHit newhit = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-								hit.get_Time(), hit.get_DocaErr(), hit.get_Id()) ;
+								hit.get_Time(), hit.get_DocaErr(),hit.get_B(), hit.get_Id()) ;
 						newhit.set_Doca(hit.get_Doca());
 						newhit.set_Id(hit.get_Id());
 						newhit.set_TrkgStatus(hit.get_TrkgStatus());						
 						newhit.set_LeftRightAmb(-hit.get_LeftRightAmb());
-						newhit.updateHitPositionWithTime(1); // assume the track angle is // to the layer						
+						newhit.updateHitPositionWithTime(1, hit.get_B()); // assume the track angle is // to the layer						
 						newhit.set_AssociatedClusterID(hit.get_AssociatedClusterID());
 						newhit.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
 						Clus2.add(newhit);
@@ -389,7 +389,7 @@ public class ClusterFinder  {
 			
 			// update the hits
 			for(FittedHit fhit : clus) {
-				fhit.updateHitPositionWithTime(cosTrkAngle);	
+				fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B());	
 			}
 			// iterate till convergence of trkAngle
 			double Chi2Diff=1;
@@ -403,7 +403,7 @@ public class ClusterFinder  {
 					cosTrkAngle = 1./Math.sqrt(1.+clus.get_clusterLineFitSlope()*clus.get_clusterLineFitSlope());					
 					// update the hits
 					for(FittedHit fhit : clus) {
-						fhit.updateHitPositionWithTime(cosTrkAngle);					
+						fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B());					
 					}
 					cosTrkAngleFinal = cosTrkAngle;
 	            }
@@ -414,7 +414,7 @@ public class ClusterFinder  {
 			cf.SetResidualDerivedParams(clus, false, false); //calcTimeResidual=false, resetLRAmbig=false 
 	           
 			for(FittedHit fhit : clus) {
-				fhit.updateHitPositionWithTime(cosTrkAngleFinal);					
+				fhit.updateHitPositionWithTime(cosTrkAngleFinal, fhit.get_B());					
 			}
 			cf.SetFitArray(clus, "TSC");
             cf.Fit(clus, true);

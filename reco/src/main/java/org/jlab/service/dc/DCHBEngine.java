@@ -268,7 +268,6 @@ public class DCHBEngine extends ReconstructionEngine {
 		
 		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/DCRBREC.evio";
 		String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/T2DRec15deg.ev";
-		
 		org.jlab.io.evio.EvioDataSync writer = new org.jlab.io.evio.EvioDataSync();
 		writer.open(outputFile);
 		

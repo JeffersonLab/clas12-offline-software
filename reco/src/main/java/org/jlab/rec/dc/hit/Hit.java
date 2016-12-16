@@ -24,28 +24,31 @@ public class Hit implements Comparable<Hit>{
 	 * @param time (for gemc output without digitization)
 	 * @param timeEr the error on the time
 	 */
-	public Hit(int sector, int superlayer, int layer, int wire, double time, double docaEr, int Id) {
+	public Hit(int sector, int superlayer, int layer, int wire, double time, double docaEr, double B, int Id) {
 		this._Sector = sector;
 		this._Superlayer = superlayer;
 		this._Layer = layer;
 		this._Wire = wire;
 		this._Time = time;
-		this._DocaErr = docaEr; 	
+		this._DocaErr = docaEr; 
+		this._B = B;
 		this._Id = Id; 	
 		
 	}
 	
 	
-	private int _Sector;      							//	   sector[1...6]
-	private int _Superlayer;    	 					//	   superlayer [1,...6]
-	private int _Layer;    	 							//	   layer [1,...6]
-	private int _Wire;    	 							//	   wire [1...112]
+	private int 	_Sector;      							//	   sector[1...6]
+	private int 	_Superlayer;    	 					//	   superlayer [1,...6]
+	private int 	_Layer;    	 							//	   layer [1,...6]
+	private int 	_Wire;    	 							//	   wire [1...112]
 
-	private double _Time;      							//	   Reconstructed time, for now it is the gemc time
-	private double _Doca;								//     Reconstructed doca, for now it is using the linear parametrization that is in  gemc 
-	private double _DocaErr;      						//	   Error on doca
+	private double 	_Time;      							//	   Reconstructed time, for now it is the gemc time
+	private double 	_Doca;									//     Reconstructed doca, for now it is using the linear parametrization that is in  gemc 
+	private double 	_DocaErr;      							//	   Error on doca
 	
-	private int _Id;									//		Hit Id
+	private double _B;										// 	   B-field at hit location
+	
+	private int _Id;										//		Hit Id
 	
 	public int _lr;
 	
@@ -256,6 +259,14 @@ public class Hit implements Comparable<Hit>{
 		
 		return cellSize;
 	}
+	public double get_B() {
+		return _B;
+	}
+
+	public void set_B(double _B) {
+		this._B = _B;
+	}
+
 	/**
 	 * 
 	 * @return print statement with hit information

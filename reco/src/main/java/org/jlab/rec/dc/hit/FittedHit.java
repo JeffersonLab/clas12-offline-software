@@ -1,11 +1,12 @@
 package org.jlab.rec.dc.hit;
 
-
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
+
 /**
  * A hit that was used in a fitted cluster.  It extends the Hit class and contains local and sector coordinate information at the MidPlane.  
  * An estimate for the Left-right Ambiguity is assigned based on the linear fit to the wire position residual.
@@ -16,7 +17,7 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 
 public class FittedHit extends Hit implements Comparable<Hit> {
 
-
+	
 	/**
 	 * 
 	 * @param sector  (1...6)
@@ -27,27 +28,27 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 */
 	
 	public FittedHit(int sector, int superlayer, int layer, int wire,
-			double time, double docaEr, int id) {
-		super(sector, superlayer, layer, wire, time, docaEr, id);
+			double time, double docaEr, double B, int id) {
+		super(sector, superlayer, layer, wire, time, docaEr, B, id);
 		
 		this.set_lX(layer);
 		this.set_lY(layer, wire);
 	}
 
-	private double _X;              // X at Z in local coord. system
-	private double _XMP;            // X at the MidPlane in sector coord. system
-	private double _Z;              // Z in the sector coord. system
-	private double _lX;				// X in local coordinate system used in hit-based fit to cluster line
-	private double _lY;				// Y in local coordinate system used in hit-based fit to cluster line
-	private double _Residual;		// cluster line  to the wire position resid
-	private double _TimeResidual=0;	// cluster line  to the wire position time-resid
-	private int _LeftRightAmb;		// Left-Right Ambiguity value	-1 --> y-fit <0 --> to the left of the wire ==> y = y-_leftRight*TimeToDist
+	private double 	_X;              	// X at Z in local coord. system
+	private double 	_XMP;            	// X at the MidPlane in sector coord. system
+	private double 	_Z;              	// Z in the sector coord. system
+	private double 	_lX;				// X in local coordinate system used in hit-based fit to cluster line
+	private double 	_lY;				// Y in local coordinate system used in hit-based fit to cluster line
+	private double 	_Residual;			// cluster line  to the wire position resid
+	private double 	_TimeResidual=0;	// cluster line  to the wire position time-resid
+	private int 	_LeftRightAmb;		// Left-Right Ambiguity value	-1 --> y-fit <0 --> to the left of the wire ==> y = y-_leftRight*TimeToDist
 	
-	private double _QualityFac ;	
-	private int _TrkgStatus = -1 ;	//  TrkgStatusFlag factor (-1: no fit; 0: hit-based trking fit; 1: time-based trking fit)
-	private double _ClusFitDoca =-1;
-	private double _TrkFitDoca =-1;
-	private double _TimeToDistance =0;
+	private double 	_QualityFac ;	
+	private int 	_TrkgStatus = -1 ;	//  TrkgStatusFlag factor (-1: no fit; 0: hit-based trking fit; 1: time-based trking fit)
+	private double 	_ClusFitDoca =-1;
+	private double 	_TrkFitDoca =-1;
+	private double 	_TimeToDistance =0;
 
 	/**
 	 * 
@@ -90,13 +91,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 * 
 	 * @return The approximate uncertainty on the hit position using the inverse of the gemc smearing function
 	 */
-	public double get_PosErr() {
+	public double get_PosErr(double B) {
 		
 		double err = this.get_DocaErr();
 		
 		if(this._TrkgStatus!=-1) {
 			if(this.get_TimeToDistance()==0) // if the time-to-dist is not set ... set it
-				set_TimeToDistance(0);
+				set_TimeToDistance(B,0);
 			
 			err = Constants.CELLRESOL; // default
 			//if(Constants.useParametricResol==true) {
@@ -216,7 +217,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 * sets the calculated distance (in cm) from the time (in ns)
 	 */
 	 
-	public void set_TimeToDistance(double cosTrkAngle) {
+	public void set_TimeToDistance(double cosTrkAngle, double B) {
 		boolean useTimeToDistanceGrid = Constants.isT2DGRID();
 		double d =0;
 		int slIdx = this.get_Superlayer()-1;
@@ -234,7 +235,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 					deltatime_beta = (Math.sqrt(x*x+(CalibrationConstantsLoader.distbeta[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta)*(CalibrationConstantsLoader.distbeta[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta))-x)/CalibrationConstantsLoader.v0[this.get_Sector()-1][this.get_Superlayer()-1];
 				this.set_Time(this.get_Time()+deltatime_beta);   
 				
-				d = tde.interpolateOnGrid(0, Math.toDegrees(Math.acos(cosTrkAngle)), this.get_Time(), secIdx, slIdx)/this.get_Time();
+				d = tde.interpolateOnGrid(B, Math.toDegrees(Math.acos(cosTrkAngle)), this.get_Time(), secIdx, slIdx)/this.get_Time();
 				//System.out.println("USING T2D");
 			
 			}
@@ -316,7 +317,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	/**
 	 * A method to update the hit position information after the fit to the local coord.sys. wire positions 
 	 */
-	public void updateHitPosition() {		
+	public void updateHitPosition() {
+		
+		DCSwimmer swimmer = new DCSwimmer();
+
 		double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
 		
 		double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
@@ -335,15 +339,19 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		this.set_X(x);
 		this.set_Z(z);
 		
+		Vector3D Bf = swimmer.Bfield(x, 0, z).toVector3D();
+		
+		this.set_B(Bf.mag());
+		
 	}
 
 	/**
 	 * A method to update the hit position information after the fit to the wire positions employing 
 	 * hit-based tracking algorithms has been performed.
 	 */
-	public void updateHitPositionWithTime(double cosTrkAngle) {
+	public void updateHitPositionWithTime(double cosTrkAngle, double B) {
 		if(this.get_Time()>0)
-			this.set_TimeToDistance(cosTrkAngle);
+			this.set_TimeToDistance(cosTrkAngle, B);
 		
 		double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
 		double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();

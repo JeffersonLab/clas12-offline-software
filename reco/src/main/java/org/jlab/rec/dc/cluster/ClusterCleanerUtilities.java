@@ -348,25 +348,25 @@ public class ClusterCleanerUtilities {
 		for(FittedHit hit : notLRClus) {
 
 			FittedHit newhitPos = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-					hit.get_Time(), hit.get_DocaErr(), hit.get_Id()) ;
+					hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id()) ;
 			newhitPos.set_Doca(hit.get_Doca());
 			newhitPos.set_Id(hit.get_Id());
 			newhitPos.set_TrkgStatus(0);
 			
 			newhitPos.set_LeftRightAmb(1);
-			newhitPos.updateHitPositionWithTime(1); // assume the track angle is // to the layer, so that cosTrkAng =1
+			newhitPos.updateHitPositionWithTime(1, hit.get_B()); // assume the track angle is // to the layer, so that cosTrkAng =1
 			
 			newhitPos.set_AssociatedClusterID(hit.get_AssociatedClusterID());
 			newhitPos.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
 			
 			FittedHit newhitNeg = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-					hit.get_Time(), hit.get_DocaErr(), hit.get_Id()) ;
+					hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id()) ;
 			newhitNeg.set_Doca(hit.get_Doca());
 			newhitNeg.set_Id(hit.get_Id());
 			newhitNeg.set_TrkgStatus(0);
 			
 			newhitNeg.set_LeftRightAmb(-1);
-			newhitNeg.updateHitPositionWithTime(1); // assume the track angle is // to the layer
+			newhitNeg.updateHitPositionWithTime(1, hit.get_B()); // assume the track angle is // to the layer
 			
 			newhitNeg.set_AssociatedClusterID(hit.get_AssociatedClusterID());
 			newhitNeg.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
@@ -554,7 +554,7 @@ public class ClusterCleanerUtilities {
 				baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster		
 				for(int j =0; j<hitsInLayer.size(); j++) {
 					hitsInLayer.get(j).set_LeftRightAmb(0);
-					hitsInLayer.get(j).updateHitPositionWithTime(1);
+					hitsInLayer.get(j).updateHitPositionWithTime(1,hitsInLayer.get(j).get_B() );
 				}
 			}
 			if(hitsInLayer.size() ==2) {
@@ -567,7 +567,7 @@ public class ClusterCleanerUtilities {
 				if(docaSum<passingCut) { // reset LR to 0
 					for(int j =0; j<hitsInLayer.size(); j++) {
 						hitsInLayer.get(j).set_LeftRightAmb(0);
-						hitsInLayer.get(j).updateHitPositionWithTime(1);
+						hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B());
 					}
 					hitsInSameLayerLists.add(hitsInLayer);
 				} else {

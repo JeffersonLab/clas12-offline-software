@@ -121,7 +121,7 @@ public class HitReader {
 		
 		for(int i = 0; i<size; i++) {	
 			if(wire[i]!=-1 && results.noise[i]==false && smearedTime[i]>=0.0){		
-				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, hitno[i]);			
+				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
 				double posError = hit.get_CellSize()/Math.sqrt(12.);
 				hit.set_DocaErr(posError);
 				hit.set_Id(hits.size()); 
@@ -156,7 +156,8 @@ public class HitReader {
 		int[] layer = bank.getInt("layer");
 		int[] wire = bank.getInt("wire");
 		double[] time = bank.getDouble("time");
-		int[] LR = bank.getInt("LR");		
+		int[] LR = bank.getInt("LR");	
+		double[] B = bank.getDouble("B");
 		int[] clusterID = bank.getInt("clusterID");
 		int[] trkID = bank.getInt("trkID");
 		int size = layer.length;
@@ -167,16 +168,16 @@ public class HitReader {
 			if(clusterID[i]==-1)
 				continue;
 			
-			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.T0, 0, id[i]);
+			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.T0, 0, B[i], id[i]);
 			hit.set_LeftRightAmb(LR[i]);
 			hit.set_TrkgStatus(0);
-			hit.set_TimeToDistance(1);
+			hit.set_TimeToDistance(1.0, B[i]);
 			hit.set_Doca(hit.get_TimeToDistance()); 
 			if(hit.get_Doca()>hit.get_CellSize()) {
 				//this.fix_TimeToDistance(this.get_CellSize());
 				hit.set_OutOfTimeFlag(true); 
 			}
-			hit.set_DocaErr(hit.get_PosErr());
+			hit.set_DocaErr(hit.get_PosErr(B[i]));
 			hit.set_AssociatedClusterID(clusterID[i]);
 			hit.set_AssociatedHBTrackID(trkID[i]);
 			hits.add(hit);

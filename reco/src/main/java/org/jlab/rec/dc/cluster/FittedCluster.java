@@ -27,7 +27,8 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
 		// adding the hits to the defined cluster
 		for(int i = 0; i<rawCluster.size(); i++) {
 			FittedHit fhit = new FittedHit(rawCluster.get(i).get_Sector(), rawCluster.get(i).get_Superlayer(),
-					rawCluster.get(i).get_Layer(),rawCluster.get(i).get_Wire(), rawCluster.get(i).get_Time(),rawCluster.get(i).get_DocaErr(),rawCluster.get(i).get_Id());
+					rawCluster.get(i).get_Layer(),rawCluster.get(i).get_Wire(), rawCluster.get(i).get_Time(),
+					rawCluster.get(i).get_DocaErr(), rawCluster.get(i).get_B(), rawCluster.get(i).get_Id());
 			fhit.set_Id(rawCluster.get(i).get_Id());
 			fhit.set_Doca(rawCluster.get(i).get_Doca());
 			

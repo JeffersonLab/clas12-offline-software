@@ -35,11 +35,11 @@ public class DCSwimmer {
 	
 	private  Swimmer swimmer;
 	public Swimmer getSwimmer() {
-		return labswimmer;
+		return swimmer;
 	}
 
-	public void setSwimmer(Swimmer labswimmer) {
-		this.labswimmer = labswimmer;
+	public void setSwimmer(Swimmer swimmer) {
+		this.swimmer = swimmer;
 	}
 	private  Swimmer labswimmer;
 	public Swimmer getLabswimmer() {

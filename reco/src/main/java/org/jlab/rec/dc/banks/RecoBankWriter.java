@@ -78,6 +78,7 @@ public class RecoBankWriter {
 			bank.setInt("LR",i, hitlist.get(i).get_LeftRightAmb());
 			bank.setInt("clusterID", i, hitlist.get(i).get_AssociatedClusterID());
 			bank.setInt("trkID", i, hitlist.get(i).get_AssociatedHBTrackID());
+			bank.setDouble("B", i, hitlist.get(i).get_B());
 		}
 		//System.out.println(" Created Bank "); bank.show();
 		return bank;
@@ -420,6 +421,8 @@ public class RecoBankWriter {
 			bank.setInt("trkID", i, hitlist.get(i).get_AssociatedTBTrackID());
 			bank.setDouble("timeResidual", i, hitlist.get(i).get_TimeResidual());
 			
+			bank.setDouble("B", i, hitlist.get(i).get_B());
+			
 		}
 		
 		return bank;
@@ -692,7 +695,8 @@ public class RecoBankWriter {
 		for(int i = 0; i<hits.size(); i++) {
 			
 			FittedHit fhit = new FittedHit(hits.get(i).get_Sector(), hits.get(i).get_Superlayer(),
-					hits.get(i).get_Layer(), hits.get(i).get_Wire(), hits.get(i).get_Time(),hits.get(i).get_DocaErr(), hits.get(i).get_Id());
+					hits.get(i).get_Layer(), hits.get(i).get_Wire(), hits.get(i).get_Time(),
+					hits.get(i).get_DocaErr(), hits.get(i).get_B(), hits.get(i).get_Id());
 			fhit.set_Doca(hits.get(i).get_Doca());
 			fhits.add(fhit);
 		}
