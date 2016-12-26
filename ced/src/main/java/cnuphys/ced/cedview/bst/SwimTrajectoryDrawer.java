@@ -52,7 +52,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 					return;
 				}
 				
-				System.err.println("BST SWIM DRAWER  A");
+//				System.err.println("BST SWIM DRAWER  A");
 				Rectangle sr = container.getInsetRectangle();
 				Graphics2D g2 = (Graphics2D) g;
 

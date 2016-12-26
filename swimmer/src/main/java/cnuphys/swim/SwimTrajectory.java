@@ -177,6 +177,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		return _genPartRec.getPhi();
 	}
 
+
 	/**
 	 * Get the average phi for this trajectory based on positions, not
 	 * directions
@@ -184,24 +185,28 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * @return the average phi value in degrees
 	 */
 	public double getAveragePhi() {
+		
+		double phi = getOriginalPhi();
 		if (size() < 6) {
-			return getOriginalPhi();
+			return phi;
 		}
-
-		double phi = 0;
-		double count = 0;
-		for (int i = 5; i < size(); i += 5) {
+		
+		double count = 1;
+		
+		int step = 1;
+		for (int i = step; i < size(); i += step) {
 			double pos[] = get(i);
 			double x = pos[X_IDX];
 			double y = pos[Y_IDX];
 			double tp = MagneticField.atan2Deg(y, x);
+			
 			phi += tp;
 			count++;
 		}
 
-		return Math.toDegrees(phi / count);
+		return phi / count;
 	}
-	
+		
 	/**
 	 * Get the last element
 	 * @return the last element

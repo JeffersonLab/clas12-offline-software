@@ -837,6 +837,26 @@ public class SectorView extends CedView implements ChangeListener {
 			return false;
 		}
 	}
+	
+	/**
+	 * Check whether this sect is on this view
+	 * @param sector the sector [1..6]
+	 * @return <code>true</code> if the sector is on the view.
+	 */
+	public boolean inThisView(int sector) {
+		switch (_displaySectors) {
+		case SECTORS14:
+			return ((sector == 1) || (sector == 4));
+
+		case SECTORS25:
+			return ((sector == 2) || (sector == 5));
+
+		case SECTORS36:
+			return ((sector == 3) || (sector == 6));
+		}
+		
+		return false;
+	}
 
 	/**
 	 * Check whether a give phi is included in this view's range.

@@ -94,7 +94,7 @@ public class BSTxyView extends CedXYView {
 	// 200., -200., -400., 400.);
 
 	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			400., -400., -800., 800.);
+			-400, -400, 800, 800);
 
 	// used to draw swum trajectories (if any) in the after drawer
 	private SwimTrajectoryDrawer _swimTrajectoryDrawer;
@@ -110,7 +110,7 @@ public class BSTxyView extends CedXYView {
 	 * 
 	 * @param keyVals
 	 */
-	public BSTxyView(Object... keyVals) {
+	private BSTxyView(Object... keyVals) {
 		super(keyVals);
 
 		_crossDrawer = new CrossDrawerXY(this);
@@ -153,13 +153,16 @@ public class BSTxyView extends CedXYView {
 		int height = width;
 
 		// create the view
-		final BSTxyView view = new BSTxyView(PropertySupport.WORLDSYSTEM,
-				_defaultWorldRectangle, PropertySupport.WIDTH, width,
-				PropertySupport.HEIGHT, height, PropertySupport.LEFTMARGIN,
-				LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
+		final BSTxyView view = new BSTxyView(
+				PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, 
+				PropertySupport.WIDTH, width,
+				PropertySupport.HEIGHT, height, 
+				PropertySupport.LEFTMARGIN, LMARGIN, 
+				PropertySupport.TOPMARGIN, TMARGIN,
 				PropertySupport.RIGHTMARGIN, RMARGIN,
-				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
-				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
+				PropertySupport.BOTTOMMARGIN, BMARGIN, 
+				PropertySupport.TOOLBAR, true, 
+				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, "Central XY",
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
@@ -181,7 +184,7 @@ public class BSTxyView extends CedXYView {
 				.setMagnificationDraw(new BSTxyMagDrawer(view));
 
 		// add quick zooms
-		view.addQuickZoom("BST & BMT", 190, -190, -190, 190);
+		view.addQuickZoom("BST & BMT", -190, -190, 190, 190);
 		return view;
 	}
 
@@ -221,6 +224,7 @@ public class BSTxyView extends CedXYView {
 	 */
 	@Override
 	protected void setAfterDraw() {
+		
 		IDrawable afterDraw = new DrawableAdapter() {
 
 			@Override
@@ -241,6 +245,7 @@ public class BSTxyView extends CedXYView {
 
 					Rectangle screenRect = getActiveScreenRectangle(container);
 					drawAxes(g, container, screenRect, true);
+
 				}
 
 			}
@@ -325,7 +330,9 @@ public class BSTxyView extends CedXYView {
 		// CND Polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				cndPoly[layer - 1][paddleId - 1].draw(g2, container);
+				if (cndPoly[layer - 1][paddleId - 1] != null) {
+					cndPoly[layer - 1][paddleId - 1].draw(g2, container);
+				}
 			}
 
 		}

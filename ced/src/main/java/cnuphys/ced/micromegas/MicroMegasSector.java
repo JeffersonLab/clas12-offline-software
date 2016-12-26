@@ -23,7 +23,7 @@ public class MicroMegasSector extends DonutItem {
 	private static final String[] sectorNames = {"A [2]", "B [1]", "C [3]"};
 	private static final double labelAngs[] = {90, 225, 325};
 	private static final double labelRad = 235;
-	private static final int xoff[] = {0, 4, -30};
+	private static final int xoff[] = {0, -30, 4};
 
 	private static double[][] startAngle = new double[3][6];
 	private static double[][] stopAngle = new double[3][6];

@@ -23,6 +23,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.metal.MetalIconFactory;
 
 import cnuphys.bCNU.graphics.ImageManager;
+import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
@@ -242,9 +243,13 @@ public final class Desktop extends JDesktopPane {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				Log.getInstance().info("Loaded a configuration file from [" + file.getPath() + "]");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+		}
+		else {
+			Log.getInstance().info("Did not load a configuration file from [" + file.getPath() + "]");
 		}
 	}
 
