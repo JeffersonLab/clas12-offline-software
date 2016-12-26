@@ -21,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
+import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.ced.ced3d.CentralView3D;
@@ -92,7 +93,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.98.02";
+	private static final String _release = "build 0.98.05";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -903,6 +904,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			@Override
 			public void run() {
 				Ced ced = getInstance();
+				Desktop.getInstance().configureViews();
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
 				splashWindow.writeCachedText();

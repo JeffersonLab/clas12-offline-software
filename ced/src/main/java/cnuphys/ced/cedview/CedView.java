@@ -813,6 +813,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			setTitle(title + evnumAppend + num + ")");
 		}
 	}
+	
+	/**
+	 * Override getName to return the title of the view.
+	 * 
+	 * @return the title of the view as the name of the view.
+	 */
+	@Override
+	public String getName() {
+		String title = getTitle();
+		int index = title.indexOf(evnumAppend);
+		if (index > 0) {
+			title = title.substring(0, index);
+		}
+		return title;
+	}
+
 
 	/**
 	 * Opened a new event file

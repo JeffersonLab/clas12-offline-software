@@ -134,8 +134,11 @@ public class SectorHTCCItem extends PolygonItem {
 							}
 						}
 					}
+					else {
+						fc = hitFillColor(hitIndex);
+					}
 
-					g.setColor(hitFillColor(hitIndex));
+					g.setColor(fc);
 					g.fillPolygon(_lastDrawnPolygon);
 					g.setColor(Color.black);
 					g.drawPolygon(_lastDrawnPolygon);

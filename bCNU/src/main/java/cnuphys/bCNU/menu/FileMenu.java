@@ -60,7 +60,7 @@ public class FileMenu extends JMenu {
 			}
 		};
 
-		JMenuItem item = new JMenuItem("Delete View Configuration...");
+		JMenuItem item = new JMenuItem("Delete View Configuration");
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit
 				.getDefaultToolkit().getMenuShortcutKeyMask()));
 		item.addActionListener(al);

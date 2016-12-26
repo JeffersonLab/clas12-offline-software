@@ -7,6 +7,8 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.geometry.GeometryManager;
+import cnuphys.magfield.MagneticField;
 import cnuphys.swim.SwimTrajectory;
 
 public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
@@ -44,16 +46,55 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	protected boolean veto(SwimTrajectory trajectory) {
+	//	if (true) return false;
+		
 		if ((trajectory.userObject != null)
 				&& (trajectory.userObject instanceof SectorView)) {
 			return (trajectory.userObject != _view);
 		}
 
-		double phi = trajectory.getOriginalPhi();
-		boolean onThisView = _view.inThisView(phi);
-	//	System.err.println("ORIG PHI SV: " + phi +  " on view: " + onThisView);
+		
+		
+		boolean onThisView = _view.inThisView(getMostCommonSector(trajectory));
+	//	System.err.println("On this view " + _view.getTitle() + "  " + onThisView);
 		return !onThisView;
 	}
+	
+	/**
+	 * Get the average phi for this trajectory based on positions, not
+	 * directions
+	 * 
+	 * @return the average phi value in degrees
+	 */
+	public int getMostCommonSector(SwimTrajectory traj) {
+		
+		int sector[] = {0,0,0,0,0,0,0};
+		
+	//	System.err.println("\n--------------");
+				
+		int step = 1;
+		for (int i = step; i < traj.size(); i += step) {
+			double pos[] = traj.get(i);
+			double x = pos[SwimTrajectory.X_IDX];
+			double y = pos[SwimTrajectory.Y_IDX];
+			double tp = MagneticField.atan2Deg(y, x);
+			
+	//		System.err.println("  >>  SECTOR: " + GeometryManager.getSector(tp));
+			sector[GeometryManager.getSector(tp)] += 1;
+		}
+
+		int maxSector = 1;
+		
+		for (int i = 2; i <= 6; i++) {
+			if (sector[i] > sector[maxSector]) {
+				maxSector = i;
+			}
+		}
+		
+	//	System.err.println("MAX SECTOR: " + maxSector);
+		return maxSector;
+	}
+	
 
 	/**
 	 * From detector xyz get the projected world point.
