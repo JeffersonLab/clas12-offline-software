@@ -4,13 +4,10 @@ import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.jlab.clas.physics.Vector3;
-import org.jlab.detector.base.DetectorDescriptor;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Path3D;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.detector.*;
+
+
 
 
 /**
@@ -23,6 +20,8 @@ public class EventTrigger {
  private double rftime=0.0;
  private double starttime=0.0;
  private double vertextime=0.0;
+ private double correctionterm=0.0;
+ public int     triggerid=-1;
 
  private DetectorParticle triggerparticle = new DetectorParticle();
  private HashMap<Integer,DetectorParticle> ElectronCandidates = new HashMap<Integer,DetectorParticle>();
@@ -38,10 +37,12 @@ public class EventTrigger {
     public void   setRFTime(double rf){this.rftime = rf;}
     public void   setVertexTime(double t){this.vertextime = t;}
     public void   setStartTime(double start){this.starttime = start;}
+    public void   setCorrectionTerm(double corr){this.correctionterm = corr;}
     public void   setTriggerParticle(DetectorParticle particle){this.triggerparticle=particle;}
     public void   setElectronCandidates(HashMap<Integer,DetectorParticle> ecandidates){this.ElectronCandidates = ecandidates;}
     public void   setPositronCandidates(HashMap<Integer,DetectorParticle> epluscandidates){this.PositronCandidates = epluscandidates;}
     public void   setNegativePionCandidates(HashMap<Integer,DetectorParticle> piminus){this.NegativePionCandidates = piminus;}
+    public void   setTriggerID(int i){this.triggerid = i;}
 
 
     public DetectorParticle GetBestTriggerParticle(HashMap<Integer,DetectorParticle> TriggerCandidates) {
@@ -138,12 +139,11 @@ public class EventTrigger {
     
        public double StartTime(DetectorParticle particle, int usertriggerid) {
 
-            double deltatr = this.getVertexTime() - this.getRFTime() - (this.getZt() - (-4.5))/(29.9792) + 800*2.0004+1.002;
-            
-            double t_0corr = deltatr%2.0004 - 2.0004/2;//RF correction term
-            
+            double deltatr = this.getVertexTime() - this.getRFTime() - (this.getZt() - (-4.5))/(29.9792)+800*2.004 + 1.3;
+            //+800*2.0004+1.002
+            double t_0corr = deltatr%2.004 - 2.004/2;//RF correction term
+            this.setCorrectionTerm(t_0corr);
             double t_0 = this.getVertexTime() + t_0corr;//RF-Corrected Start Time
-            
             return t_0;
             }
        
@@ -177,6 +177,8 @@ public int TriggerScenario() {
     public double getRFTime(){ return this.rftime; }
     public double getVertexTime(){return this.vertextime;}
     public double getStartTime(){ return this.starttime;}
+    public double getCorrectionTerm() {return this.correctionterm;}
+    public int    getTriggerID() {return this.triggerid;}
     public DetectorParticle getTriggerParticle(){return this.triggerparticle;}
     public HashMap<Integer,DetectorParticle> getElectronCandidates(){return this.ElectronCandidates;}
     public HashMap<Integer,DetectorParticle> getPositronCandidates(){return this.PositronCandidates;}
@@ -204,3 +206,4 @@ public int TriggerScenario() {
     }
 
 }
+
