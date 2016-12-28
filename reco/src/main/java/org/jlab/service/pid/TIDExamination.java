@@ -1,7 +1,7 @@
 package org.jlab.service.pid;
 
 
-
+import org.jlab.clas.detector.*;
 
 /**
  *
@@ -67,8 +67,9 @@ public class TIDExamination {
     public Boolean HTCCSignal(DetectorParticle particle){
         String str = "htcc";
         Boolean truth = false;
-        if(particle.getNphe(str)>0){
+        if(particle.getNphe()>0){
             truth = true;
+          //  System.out.println("more than zero!");
         }
         return truth;
     }
@@ -82,3 +83,4 @@ public class TIDExamination {
 
 
 }
+
