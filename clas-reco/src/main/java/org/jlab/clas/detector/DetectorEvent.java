@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.service.pid.EventTrigger;
+
 
 /**
  *
@@ -19,7 +21,7 @@ public class DetectorEvent {
     private List<DetectorParticle>  particleList = new ArrayList<DetectorParticle>();
     private PhysicsEvent       generatedEvent = new PhysicsEvent();
     private PhysicsEvent   reconstructedEvent = new PhysicsEvent();
-    //private EventTrigger trigger = new EventTrigger();
+    private EventTrigger trigger = new EventTrigger();
     
     
     public DetectorEvent(){
@@ -76,8 +78,8 @@ public class DetectorEvent {
         this.addParticle(particle);
     }
     
-    //public void setEventTrigger(EventTrigger trig){this.trigger = trig;}
-    //public EventTrigger getEventTrigger(){return this.trigger;}
+    public void setEventTrigger(EventTrigger trig){this.trigger = trig;}
+    public EventTrigger getEventTrigger(){return this.trigger;}
     
     @Override
     public String toString(){
