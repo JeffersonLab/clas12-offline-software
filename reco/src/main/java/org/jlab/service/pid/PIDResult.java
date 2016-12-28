@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public class PIDResult {
     
-   private int finalid=-1;
+   private int finalid=0;
    private PIDExamination pidexam = new PIDExamination();
    private double timingquality = 0.0;
    HashMap<Integer,Double> ECTimingCheck = new HashMap<Integer,Double>();
