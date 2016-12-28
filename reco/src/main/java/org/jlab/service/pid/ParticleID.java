@@ -5,6 +5,7 @@
  */
 package org.jlab.service.pid;
 
+import org.jlab.clas.detector.*;
 
 
 /**                                                                                                                                                            
@@ -15,3 +16,4 @@ public interface ParticleID {
    
     PIDResult getPIDResult(DetectorParticle particle);
 }
+
