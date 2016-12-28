@@ -10,6 +10,7 @@ import org.jlab.detector.base.DetectorType;
 import static java.lang.Math.abs;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
+import org.jlab.clas.detector.*;
 
 /**
  *
@@ -39,8 +40,9 @@ public class EBTrigger {
     public void Trigger() {
         for(int i = 0 ; i < this.event.getParticles().size() ; i++) {
             TIDResult result = new TIDResult();
-            result = EBTrigger.GetShoweringParticleEvidence(event.getParticles().get(i)); //How much does it resemble electron/positron?
+            result = EBTrigger.GetParticleScore(event.getParticles().get(i)); //How much does it resemble electron/positron?
             event.getParticles().get(i).setScore(result.getScore());//"score" is recorded for each DetectorParticle
+           // System.out.println("score" + result.getScore());
         }
     
         ElectronTriggerList electron = new ElectronTriggerList();
@@ -53,7 +55,7 @@ public class EBTrigger {
 
             switch(event.getEventTrigger().TriggerScenario()) { //Case 1 means electrons were found, Case 2 means positrons were found, Case 3 means negative pions were found
                 case 0:
-                System.out.println("No Trigger Found");
+                //System.out.println("No Trigger Found");
                 break;
                 case 1:
                 TriggerElectron telectron = new TriggerElectron();
@@ -76,10 +78,8 @@ public class EBTrigger {
             DetectorResponse res = p.getHit(DetectorType.FTOF, 2);
             double path = res.getPath();
             double time = res.getTime();
-          //  double beta = path/(time-e.getEventTrigger().getStartTime())/29.9792;
+
           double beta = p.getPathLength(DetectorType.FTOF)/(time-event.getEventTrigger().getStartTime())/29.9792;
-          //System.out.println(beta);
-           // System.out.println(e.getEventTrigger().getStartTime());
             p.setBeta(beta);
             double mom = p.vector().mag();
             double mass2 = (mom*mom - beta*beta*mom*mom)/(beta*beta);
@@ -99,7 +99,7 @@ public class EBTrigger {
 
 
     
-    public static TIDResult GetShoweringParticleEvidence(DetectorParticle particle) {  
+    public static TIDResult GetParticleScore(DetectorParticle particle) {  
                
         TIDExamination TID = new TIDExamination(); //This is the "DetectorParticle"s PID properties.
         TID.setCorrectSF(TID.SamplingFractionCheck(particle)); //Is the sampling fraction within +-5 Sigma?
@@ -167,7 +167,7 @@ class ElectronTriggerList implements TriggerCandidateList {
         HashMap<Integer,DetectorParticle> map = new HashMap<Integer,DetectorParticle>();
             int mapiteration = 0;
             for(int i = 0 ; i < event.getParticles().size() ; i++){
-                if(event.getParticles().get(i).getCharge()==-1 && event.getParticles().get(i).getNphe("htcc")>0
+                if(event.getParticles().get(i).getCharge()==-1 && event.getParticles().get(i).getNphe()>0
                         && event.getParticles().get(i).hasHit(DetectorType.FTOF, 2)){
                     map.put(mapiteration,event.getParticles().get(i));
                     mapiteration = mapiteration + 1;
@@ -182,7 +182,7 @@ class PositronTriggerList implements TriggerCandidateList {
         HashMap<Integer,DetectorParticle> map = new HashMap<Integer,DetectorParticle>();
             int mapiteration = 0;
             for(int i = 0 ; i < event.getParticles().size() ; i++){
-                if(event.getParticles().get(i).getCharge()==1 && event.getParticles().get(i).getNphe("htcc")>0
+                if(event.getParticles().get(i).getCharge()==1 && event.getParticles().get(i).getNphe()>0
                         && event.getParticles().get(i).hasHit(DetectorType.FTOF, 2)){
                     map.put(mapiteration,event.getParticles().get(i));
                     mapiteration = mapiteration + 1;
@@ -206,3 +206,4 @@ class NegativePionTriggerList implements TriggerCandidateList {
         return map;
     }
 }
+
