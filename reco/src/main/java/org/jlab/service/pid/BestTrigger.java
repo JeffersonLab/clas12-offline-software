@@ -5,7 +5,9 @@
  */
 package org.jlab.service.pid;
 
-import java.util.HashMap;
+
+import org.jlab.clas.detector.*;
+
 
 
 

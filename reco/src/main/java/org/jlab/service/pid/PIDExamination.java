@@ -2,7 +2,7 @@ package org.jlab.service.pid;
 
 import static java.lang.Math.abs;
 import java.util.HashMap;
-
+import org.jlab.clas.detector.*;
 
 
 
@@ -95,7 +95,7 @@ public class PIDExamination {
     public Boolean HTCCSignal(DetectorParticle particle) {
         String str = "htcc";
         Boolean truth = false;
-        if(particle.getNphe(str)>0){
+        if(particle.getNphe()>0){
             truth = true;
         }
         return truth;
@@ -104,7 +104,7 @@ public class PIDExamination {
     public Boolean LTCCSignal(DetectorParticle particle) {
         String str = "ltcc";
         Boolean truth = false;
-        if(particle.getNphe(str)>0){
+        if(particle.getNphe()>0){
             truth = true;
         }
         return truth;
@@ -136,12 +136,13 @@ public class PIDExamination {
             double min = dBetas.get(0);
             int index = 0,id=0;
             for (int i = 0; i <= 3; i++) {
-             //   System.out.println(dBetas.get(i));
+            //    System.out.println(dBetas.get(i));
                 if (dBetas.get(i) < min) {
                 min = dBetas.get(i);
                 index = i;
                 }
             }
+           // System.out.println(index);
             if(index==0){
                 id=11;
             }
@@ -156,6 +157,7 @@ public class PIDExamination {
             }
             if(id==pid){
                 truth = true;
+              //  System.out.println("The true beta has been found!!!!!");
             }
             if(particle.getBeta()==0.0){
                 truth = false;
@@ -181,7 +183,7 @@ public class PIDExamination {
                 PIDExamination test3 = new PIDExamination();
                 test3.setClosestBeta(true);
                 test3.setHTCC(false);
-                test3.setLTCC(false);
+                //test3.setLTCC(false);
                 
                 PIDExamination test4 = new PIDExamination();
                 test4.setClosestBeta(true);
@@ -226,23 +228,23 @@ public class PIDExamination {
                 test3.setCorrectSF(false);
                 test3.setHTCCThreshold(true);
                 
-                PIDExamination test4 = new PIDExamination();
-                test4.setClosestBeta(true);
-                test4.setHTCC(false);
-                test4.setLTCC(true);
-                test4.setLTCCThreshold(true);
-                
-                PIDExamination test5 = new PIDExamination();
-                test5.setClosestBeta(false);
-                test5.setHTCC(true);
-                test5.setLTCC(false);
-                test5.setLTCCThreshold(false);
+//                PIDExamination test4 = new PIDExamination();
+//                test4.setClosestBeta(true);
+//                test4.setHTCC(false);
+//              //  test4.setLTCC(true);
+//              //  test4.setLTCCThreshold(true);
+//                
+//                PIDExamination test5 = new PIDExamination();
+//                test5.setClosestBeta(false);
+//                test5.setHTCC(true);
+//                test5.setLTCC(false);
+//                test5.setLTCCThreshold(false);
                 
                 piontests.put(0,test1);
                 piontests.put(1,test2);
                 piontests.put(2,test3);
-                piontests.put(3,test4);
-                piontests.put(4,test5);
+//                piontests.put(3,test4);
+//                piontests.put(4,test5);
 
                 return piontests;
             }                
@@ -319,3 +321,4 @@ public class PIDExamination {
 
 
 }
+

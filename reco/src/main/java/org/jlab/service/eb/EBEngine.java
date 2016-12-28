@@ -5,11 +5,15 @@
  */
 package org.jlab.service.eb;
 
+import static java.lang.Math.abs;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
-import org.jlab.service.pid
+import org.jlab.clas.detector.*;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.service.pid.*;
+
 
 
 /**
@@ -45,7 +49,7 @@ public class EBEngine extends ReconstructionEngine {
         processor.matchCalorimeter();
         processor.matchHTCC();
         processor.matchNeutral();
-        
+       
         List<DetectorParticle> centralParticles = EBio.readCentralTracks(de);
         
         /*
@@ -77,6 +81,7 @@ public class EBEngine extends ReconstructionEngine {
         
         for(int i = 0 ; i < chargedParticles.size() ; i++){ 
             detectorEvent.addParticle(chargedParticles.get(i));
+          
         }
 
       
@@ -90,21 +95,24 @@ public class EBEngine extends ReconstructionEngine {
         triggerinfo.RFInformation(); //Obtain RF Time
         triggerinfo.Trigger();//Use Trigger Particle Vertex Time and RF Time for Start Time
         triggerinfo.CalcBetas(); //Calculate Speeds and Masses of Particles
-       
-        //System.out.println(detectorEvent.getEventTrigger());
-        
+
+
         
         EBPID pid = new EBPID();
         if(EBio.isTimeBased(de)==true){
            pid.setEvent(detectorEvent);
            pid.PIDAssignment();//PID Assignment
 }
+
         
+     //   for(int i = 0 ; i < chargedParticles.size() ; i++){ 
+     //       System.out.println(chargedParticles.get(i).getPid());
+     //     }
         
-        
-        
+
         EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(processor.getParticles(), eventType);
         EvioDataBank dBank = (EvioDataBank) EBio.writeResponses(processor.getResponses(), eventType);
+       // EvioDataBank tbank = (EvioDataBank) EBio.writeTrigger(detectorEvent);
 
         de.appendBanks(pBank,dBank);
         

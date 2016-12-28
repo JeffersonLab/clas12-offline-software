@@ -5,7 +5,9 @@
  */
 package org.jlab.service.pid;
 
+import org.jlab.clas.detector.*;
 import org.jlab.detector.base.DetectorType;
+
 
 /**
  *

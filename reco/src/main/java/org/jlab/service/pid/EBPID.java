@@ -11,6 +11,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
+import org.jlab.clas.detector.*;
 
 
 
@@ -21,7 +22,7 @@ import org.jlab.io.base.DataEvent;
 
 /**
  *
- * @author Joseph Newton
+ * @author jnewton
  */
 public class EBPID {
     
@@ -41,10 +42,10 @@ public class EBPID {
 
         for(int i = 0; i < event.getParticles().size(); i++) { 
                 Particleid(event.getParticles().get(i)); //Assigns PID
-                TimingChecks(event.getParticles().get(i)); //Checks timing and removes hits that fail
-                if(event.getParticles().get(i).getParticleTimeCheck()!=true) {
-                    Particleid(event.getParticles().get(i));
-                 }
+               // TimingChecks(event.getParticles().get(i)); //Checks timing and removes hits that fail
+               // if(event.getParticles().get(i).getParticleTimeCheck()!=true) {
+               //     Particleid(event.getParticles().get(i));
+               //  }
             }   
         }
     
@@ -54,14 +55,34 @@ public class EBPID {
                 TBKaon kaon = new TBKaon();
                 TBProton proton = new TBProton();
                 
-                int eid, piid, kid, prid;
+                int eid = 0, piid = 0, kid = 0, prid = 0;
+                
                 
                 eid = electron.getPIDResult(particle).getFinalID(); //Is it an electron/positron?
                 piid = pion.getPIDResult(particle).getFinalID();//Is it a charged pion?
                 kid = kaon.getPIDResult(particle).getFinalID();//Is it a charged kaon?
                 prid = proton.getPIDResult(particle).getFinalID();//Is it a proton/anti-proton?
                 
-                particle.setPid(eid + piid + kid + prid); //Only one value will be non-zero
+                int pidsum = eid + piid + kid + prid;
+                
+                particle.setPid(pidsum); //Only one value will be non-zero
+                
+                switch(abs(pidsum)) {
+                    case 11: 
+                    particle.setPIDResult(electron.getPIDResult(particle));
+                    break;
+                    case 211:
+                    particle.setPIDResult(pion.getPIDResult(particle));
+                    break;
+                    case 321:
+                    particle.setPIDResult(kaon.getPIDResult(particle));
+                    break;
+                    case 2212:
+                    particle.setPIDResult(proton.getPIDResult(particle));
+                    break;
+                   }
+                    
+                
          }
     
     public void TimingChecks(DetectorParticle particle) {
@@ -86,11 +107,11 @@ class TBElectron implements ParticleID {
             public PIDResult getPIDResult(DetectorParticle particle) {  
                
                 PIDExamination PID = new PIDExamination(); //This is the "DetectorParticle"s PID properties.
+              //  System.out.println("Electron PID in Progress");
                 PID.setClosestBeta(PID.GetBeta(particle, 11));
                 PID.setHTCC(PID.HTCCSignal(particle));
                 PID.setCorrectSF(PID.SamplingFractionCheck(particle));
                 PID.setHTCCThreshold(PID.HTCCThreshold(particle));
-                
 
                 
                 HashMap<Integer,PIDExamination> ElectronTests= new HashMap<Integer,PIDExamination>();
@@ -102,10 +123,7 @@ class TBElectron implements ParticleID {
                         Result.setPIDExamination(PID);
                         break;
                     }
-                    if(i == (ElectronTests.size()-1)){
-                        Result.setFinalID(0);
-                        Result.setPIDExamination(PID);
-                    }
+
                 }
                 
                 return Result;
@@ -119,10 +137,14 @@ class TBPion implements ParticleID {
             public PIDResult getPIDResult(DetectorParticle particle) {  
                
                 PIDExamination PID = new PIDExamination(); //This is the "DetectorParticle"s PID properties.
+             //   System.out.println("Pion PID in Progress");
                 PID.setClosestBeta(PID.GetBeta(particle, 211));
                 PID.setHTCC(PID.HTCCSignal(particle));
                 PID.setCorrectSF(PID.SamplingFractionCheck(particle));
                 PID.setHTCCThreshold(PID.HTCCThreshold(particle));
+                
+
+                
                 
                 HashMap<Integer,PIDExamination> PionTests= new HashMap<Integer,PIDExamination>();
                 PionTests = PID.getPionTests(particle);
@@ -134,10 +156,7 @@ class TBPion implements ParticleID {
                         Result.setPIDExamination(PID);
                         break;
                     }
-                    if(i == (PionTests.size()-1)){
-                        Result.setFinalID(0);
-                        Result.setPIDExamination(PID);
-                    }
+
                 }
                 
                 return Result;
@@ -150,9 +169,11 @@ class TBKaon implements ParticleID {
             public PIDResult getPIDResult(DetectorParticle particle) {  
                
                 PIDExamination PID = new PIDExamination(); //This is the "DetectorParticle"s PID properties.
+            //    System.out.println("Kaon PID in Progress");
                 PID.setClosestBeta(PID.GetBeta(particle, 321));
                 PID.setHTCC(PID.HTCCSignal(particle));
                 //PID.setLTCC(PIDAssignment.LTCCSignal(particle));
+
                 
                 HashMap<Integer,PIDExamination> KaonTests= new HashMap<Integer,PIDExamination>();
                 KaonTests = PID.getKaonTests(particle);
@@ -163,10 +184,7 @@ class TBKaon implements ParticleID {
                         Result.setPIDExamination(PID);
                         break;
                     }
-                    if(i == (KaonTests.size()-1)){
-                        Result.setFinalID(0);
-                        Result.setPIDExamination(PID);
-                    }
+
                 }
                 
                 return Result;
@@ -179,10 +197,12 @@ class TBProton implements ParticleID {
             public PIDResult getPIDResult(DetectorParticle particle) {  
                
                 PIDExamination PID = new PIDExamination(); //This is the "DetectorParticle"s PID properties.
+            //    System.out.println("Proton PID in Progress");
                 PID.setClosestBeta(PID.GetBeta(particle, 2212));
                 PID.setHTCC(PID.HTCCSignal(particle));
                 //PID.setLTCC(PIDAssignment.LTCCSignal(particle));
                 
+             
                 HashMap<Integer,PIDExamination> ProtonTests= new HashMap<Integer,PIDExamination>();
                 ProtonTests = PID.getProtonTests(particle);
                 PIDResult Result = new PIDResult();
@@ -192,10 +212,7 @@ class TBProton implements ParticleID {
                         Result.setPIDExamination(PID);
                         break;
                     }
-                    if(i == (ProtonTests.size()-1)){
-                        Result.setFinalID(0);
-                        Result.setPIDExamination(PID);
-                    }
+
                 }
                 
                 return Result;
@@ -220,4 +237,5 @@ class ECTiming implements ParticleTiming {
         }
     }
 }
+
 

@@ -12,6 +12,8 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioFactory;
+import org.jlab.clas.detector.*;
+
 
 /**
  *
@@ -74,7 +76,8 @@ public class EBio {
                         bank.getDouble("c1_ux", i),
                         bank.getDouble("c1_uy", i),
                         bank.getDouble("c1_uz", i)
-                );                       
+                );         
+             //   System.out.println(p.getLowerCross());
                 p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
@@ -158,6 +161,8 @@ public class EBio {
             bank.setInt("charge", i, p.getCharge());
             bank.setInt("pid", i, p.getPid());
             
+            bank.setFloat("beta",i, (float) p.getBeta());
+            
             bank.setFloat("px", i, (float) p.vector().x());
             bank.setFloat("py", i, (float) p.vector().y());
             bank.setFloat("pz", i, (float) p.vector().z());
@@ -204,6 +209,19 @@ public class EBio {
         return bank;
     }
     
+        public static DataBank writeTrigger(DetectorEvent event){
+        String bankName = "Trigger::info";
+        
+
+        EvioDataBank  bank = EvioFactory.createBank(bankName, 1);
+        bank.setDouble("starttime", 0, event.getEventTrigger().getStartTime());
+        bank.setDouble("vertextime",0, event.getEventTrigger().getVertexTime());
+        bank.setDouble("rftime", 0, event.getEventTrigger().getRFTime());
+        bank.setInt("id",0,event.getEventTrigger().getTriggerID());
+
+        return bank;
+    }
+    
     public static List<DetectorResponse> readECAL(DataEvent event){
         List<DetectorResponse> ecal = new ArrayList<DetectorResponse>();
         if(event.hasBank("ECDetector::clusters")==true){
@@ -222,6 +240,7 @@ public class EBio {
                     );
                     resp.setTime(bank.getDouble("time", i));
                     resp.setEnergy(bank.getDouble("energy", i));
+         
                     ecal.add(resp);
             }
         } else {
@@ -249,6 +268,7 @@ public class EBio {
                     );
                     resp.setTime(bank.getFloat("time", i));
                     resp.setEnergy(bank.getFloat("energy", i));
+                    
                     ftof.add(resp);
                 }
             }
@@ -259,6 +279,7 @@ public class EBio {
     public static List<CherenkovResponse> readHTCC(DataEvent event) {
         List<CherenkovResponse> htcc = new ArrayList<CherenkovResponse>();
         if(event.hasBank("HTCCRec::clusters")==true){
+            
             EvioDataBank bank = (EvioDataBank) event.getBank("HTCCRec::clusters");
             int nrows = bank.rows();
             for(int i = 0; i < nrows; i++){
@@ -267,16 +288,18 @@ public class EBio {
                 double dtheta = bank.getDouble("dtheta",i);
                 double phi = bank.getDouble("phi",i);
                 double dphi = bank.getDouble("dphi",i);
-                double x = bank.getDouble("X",i);
-                double y = bank.getDouble("Y",i);
-                double z = bank.getDouble("Z",i);
-                double time = bank.getDouble("time",i);
-        
+                double x = bank.getDouble("y",i)/10;
+                double y = -bank.getDouble("x",i)/10;
+                double z = bank.getDouble("z",i)/10;
+             //   System.out.println(bank.getFloat("x"));
+                double time = bank.getFloat("time",i);
+     //   System.out.println("nphe" + nphe);
                     CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
                     che.setHitPosition(x, y, z);
                     che.setEnergy(nphe);
                     che.setTime(time);
                     che.setCherenkovType(DetectorType.HTCC);
+                   // System.out.println(che.getHitPosition());
                     htcc.add(che);
               
             }
@@ -284,3 +307,4 @@ public class EBio {
         return htcc;
     }
 }
+
