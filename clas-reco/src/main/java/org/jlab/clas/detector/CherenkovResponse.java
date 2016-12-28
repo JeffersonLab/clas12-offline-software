@@ -12,6 +12,7 @@ import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
+
 /**
  *
  * @author gavalian
@@ -70,8 +71,15 @@ public class CherenkovResponse {
         Point3D intersection = this.getIntersection(particle.getLowerCross());
         Vector3D vecRec = intersection.toVector3D();
         Vector3D vecHit = this.hitPosition.toVector3D();
-        return (Math.abs(vecHit.theta()-vecRec.theta())<this.hitDeltaTheta
-                &&Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
+
+//        System.out.println("Expected dTheta = " + this.hitDeltaTheta*57.2958);
+//        System.out.println("Expected dPhi = " + this.hitDeltaPhi*57.2958);
+//        System.out.println("Real dTheta = " + Math.abs(vecHit.theta()-vecRec.theta())*57.2958);
+//        System.out.println("Real dPhi = " + Math.abs(vecHit.phi()-vecRec.phi())*57.2958);        
+
+        
+        return (Math.abs(vecHit.theta()-vecRec.theta())<20/57.2958
+                && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
     }
     
     public double getDistance(Line3D line){
