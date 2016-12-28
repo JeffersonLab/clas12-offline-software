@@ -7,7 +7,7 @@ package org.jlab.service.eb;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.detector.DetectorResponse;
+import org.jlab.clas.detector.*;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 
@@ -66,6 +66,7 @@ public class EBProcessor {
                 DetectorResponse response = pcal.get(index);
                 response.setAssociation(iparticle);
                 p.addResponse(response,true);
+               // System.out.println("EC Layer 1 found ");
             }
             iparticle++;
         }
@@ -93,6 +94,7 @@ public class EBProcessor {
                 DetectorResponse response = ecout.get(index);
                 response.setAssociation(iparticle);
                 p.addResponse(response,true);
+                
             }
             iparticle++;
         }
@@ -186,10 +188,13 @@ public class EBProcessor {
         int iparticle = 0;
         for(DetectorParticle p : particles){            
             int matchflag = p.getCherenkovSignal(responsesHTCC);
+            //System.out.println(matchflag);
             if(matchflag>=0){
                     CherenkovResponse che = responsesHTCC.get(matchflag);
                     che.setAssociation(iparticle);
+                    che.setCherenkovType(DetectorType.HTCC);
                     p.addCherenkovResponse(che);
+                  //  System.out.println("Found match");
                 }
             iparticle++;
         }        
@@ -209,3 +214,4 @@ public class EBProcessor {
         }
     }
 }
+
