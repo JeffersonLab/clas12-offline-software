@@ -19,6 +19,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.service.pid.PIDResult;
 
 /**
  *
@@ -49,7 +50,8 @@ public class DetectorParticle implements Comparable {
     
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
-            
+    
+    private PIDResult pidresult = new PIDResult();
     
     public DetectorParticle(){
         
@@ -459,7 +461,7 @@ public class DetectorParticle implements Comparable {
         return beta;
     }   
      
-     public int getNphe(String che){
+     public int getNphe(){
        int nphe = 0;
             for(CherenkovResponse c : this.cherenkovStore){
             if(c.getCherenkovType()==DetectorType.HTCC){
@@ -474,17 +476,19 @@ public class DetectorParticle implements Comparable {
         return vertex_time;
     }
     
-    public int getCherenkovSignal(List<CherenkovResponse>  signalList){
+    public int getCherenkovSignal(List<CherenkovResponse> cherenkovs){
         
             int bestIndex = -1;
-            
-            for(int loop = 0; loop < signalList.size(); loop++) {
-                    boolean matchtruth = signalList.get(loop).match(this);
+            if(cherenkovs.size()>0){
+               // System.out.println("There are here???");
+            for(int loop = 0; loop < cherenkovs.size(); loop++) {
+                    boolean matchtruth = cherenkovs.get(loop).match(this);
+                    //System.out.println(matchtruth);
                     if(matchtruth==true){
                         bestIndex = loop;
                     }
                 }
-        
+            }
         return bestIndex;
     } 
     
@@ -499,6 +503,14 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }  
+    
+    public void setPIDResult(PIDResult pid){
+        this.pidresult = pid;
+    }
+    
+    public PIDResult getPIDResult(){
+        return this.pidresult;
+    }
     
      
     public int compareTo(Object o) {
