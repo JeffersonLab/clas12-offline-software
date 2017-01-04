@@ -44,10 +44,14 @@ public class EBProcessor {
     
     public List<DetectorResponse> getResponses(){
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        List<CherenkovResponse> cherenkovresponses = new ArrayList<CherenkovResponse>();
         responses.addAll(this.responsesFTOF);
         responses.addAll(this.responsesECAL);
-        cherenkovresponses.addAll(this.responsesHTCC);
+        return responses;
+    }
+    
+    public List<CherenkovResponse> getCherenkovResponses(){
+        List<CherenkovResponse> responses = new ArrayList<CherenkovResponse>();
+        responses.addAll(this.responsesHTCC);
         return responses;
     }
     
