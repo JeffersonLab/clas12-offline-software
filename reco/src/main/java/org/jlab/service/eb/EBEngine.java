@@ -105,14 +105,16 @@ public class EBEngine extends ReconstructionEngine {
 }
 
         
-     //   for(int i = 0 ; i < chargedParticles.size() ; i++){ 
-     //       System.out.println(chargedParticles.get(i).getPid());
-     //     }
+//        for(int i = 0 ; i < chargedParticles.size() ; i++){ 
+//            System.out.println(chargedParticles.get(i).getPid());
+//            System.out.println(chargedParticles.get(i).getPIDResult().getPIDExamination());
+//          }
         
 
         EvioDataBank pBank = (EvioDataBank) EBio.writeTraks(processor.getParticles(), eventType);
         EvioDataBank dBank = (EvioDataBank) EBio.writeResponses(processor.getResponses(), eventType);
-       // EvioDataBank tbank = (EvioDataBank) EBio.writeTrigger(detectorEvent);
+        EvioDataBank cBank = (EvioDataBank) EBio.writeCherenkovResponses(processor.getCherenkovResponses(), eventType);
+        EvioDataBank tbank = (EvioDataBank) EBio.writeTrigger(detectorEvent);
 
         de.appendBanks(pBank,dBank);
         
