@@ -175,6 +175,8 @@ public class EBio {
         return bank;
     }
     
+    //write cherenkov responses
+    
     public static DataBank writeResponses(List<DetectorResponse> responses, int type ){
         String bankName = "EVENTHB::particle";
         
@@ -204,6 +206,31 @@ public class EBio {
             bank.setFloat("path", i, (float) responses.get(i).getPath());
             bank.setFloat("time", i, (float) responses.get(i).getTime());
             bank.setFloat("energy", i, (float) responses.get(i).getEnergy());
+            
+        }
+        return bank;
+    }
+    
+    public static DataBank writeCherenkovResponses(List<CherenkovResponse> responses, int type ) {
+         String bankName = "EVENTHB::particle";
+        
+        switch (type){
+            case 1 : bankName = "EVENTHB::cherenkov"; break;
+            case 2 : bankName = "EVENTTB::cherenkov"; break;
+            default: break;
+        }
+        EvioDataBank  bank = EvioFactory.createBank(bankName, responses.size());
+                for(int i = 0; i < responses.size();i++){
+            bank.setInt("pindex", i,responses.get(i).getAssociation());
+            bank.setInt("index", i,i);
+            
+            bank.setFloat("X", i, (float) responses.get(i).getHitPosition().x());
+            bank.setFloat("Y", i, (float) responses.get(i).getHitPosition().y());
+            bank.setFloat("Z", i, (float) responses.get(i).getHitPosition().z());
+           
+
+            bank.setFloat("time", i, (float) responses.get(i).getTime());
+            bank.setFloat("nphe", i, (float) responses.get(i).getEnergy());
             
         }
         return bank;
@@ -288,9 +315,9 @@ public class EBio {
                 double dtheta = bank.getDouble("dtheta",i);
                 double phi = bank.getDouble("phi",i);
                 double dphi = bank.getDouble("dphi",i);
-                double x = bank.getDouble("y",i)/10;
-                double y = -bank.getDouble("x",i)/10;
-                double z = bank.getDouble("z",i)/10;
+                double x = bank.getDouble("x",i);
+                double y = bank.getDouble("y",i);
+                double z = bank.getDouble("z",i);
              //   System.out.println(bank.getFloat("x"));
                 double time = bank.getFloat("time",i);
      //   System.out.println("nphe" + nphe);
