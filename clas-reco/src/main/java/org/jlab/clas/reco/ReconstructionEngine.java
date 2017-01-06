@@ -87,6 +87,8 @@ public abstract class ReconstructionEngine implements Engine {
         //return output;
         
         String mt = input.getMimeType();
+        System.out.println(" DATA TYPE = [" + mt + "]");
+        return input;
         /*
         if (!mt.equalsIgnoreCase()) {
             String msg = String.format("Wrong input type: %s", mt);
@@ -94,7 +96,7 @@ public abstract class ReconstructionEngine implements Engine {
             output.setDescription(msg);
             return output;
         }*/
-        
+        /*
         EvioDataEvent dataevent = null;
         
         try {
@@ -122,7 +124,7 @@ public abstract class ReconstructionEngine implements Engine {
         }
         
         return output;        
-        
+        */
     }
 
     public EngineData executeGroup(Set<EngineData> set) {
@@ -132,8 +134,9 @@ public abstract class ReconstructionEngine implements Engine {
 
     public Set<EngineDataType> getInputDataTypes() {
         return ClaraUtil.buildDataTypes(Clas12Types.EVIO,
-                                        EngineDataType.JSON,
-                                        EngineDataType.STRING);
+                Clas12Types.HIPO,
+                EngineDataType.JSON,
+                EngineDataType.STRING);
         //Set<EngineDataType> types = new HashSet<EngineDataType>();
         //types.add(EngineDataType.BYTES);
         //return types;
@@ -142,8 +145,9 @@ public abstract class ReconstructionEngine implements Engine {
 
     public Set<EngineDataType> getOutputDataTypes() {
         return ClaraUtil.buildDataTypes(Clas12Types.EVIO,
-                                        EngineDataType.JSON,
-                                        EngineDataType.STRING);
+                Clas12Types.HIPO,
+                EngineDataType.JSON,
+                EngineDataType.STRING);
         //Set<EngineDataType> types = new HashSet<EngineDataType>();
         //types.add(EngineDataType.BYTES);
         //return types;

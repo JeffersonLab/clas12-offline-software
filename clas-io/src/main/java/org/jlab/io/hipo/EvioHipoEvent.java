@@ -31,7 +31,6 @@ public class EvioHipoEvent {
         this.fillHipoEventDC(hipoEvent, event);
         //this.fillHipoEventCTOF(hipoEvent, event);        
         this.fillHipoEventECAL(hipoEvent, event);
-
         this.fillHipoEventGenPart(hipoEvent, event);
         return hipoEvent;
     }

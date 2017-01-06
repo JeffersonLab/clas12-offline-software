@@ -61,6 +61,7 @@ public class CodaEventDecoder {
      * @return 
      */
     public List<DetectorDataDgtz> getDataEntries(EvioDataEvent event, int crate){
+        
         List<EvioTreeBranch> branches = this.getEventBranches(event);
         List<DetectorDataDgtz>   bankEntries = new ArrayList<DetectorDataDgtz>();
         
@@ -83,9 +84,15 @@ public class CodaEventDecoder {
                 // FTCAL and EC/PCAL
                 return this.getDataEntries_57601(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
-            }                      
+            }
+            if(node.getTag()==57622){
+                //  This is regular integrated pulse mode, used for FTOF
+                // FTCAL and EC/PCAL
+                return this.getDataEntries_57622(crate, node, event);
+                //return this.getDataEntriesMode_7(crate,node, event);
+            }
         }
-        return bankEntries;       
+        return bankEntries;
     }
     
      /**
@@ -288,6 +295,56 @@ public class CodaEventDecoder {
     }
     
     /**
+     * Bank TAG=57622 used for DC (Drift Chambers) TDC values.
+     * @param crate
+     * @param node
+     * @param event
+     * @return 
+     */
+    public List<DetectorDataDgtz>  getDataEntries_57622(Integer crate, EvioNode node, EvioDataEvent event){
+        List<DetectorDataDgtz>  entries = new ArrayList<DetectorDataDgtz>();
+        if(node.getTag()==57622){
+            try {            
+                ByteBuffer     compBuffer = node.getByteData(true);
+                CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
+                List<DataType> cdatatypes = compData.getTypes();
+                List<Object>   cdataitems = compData.getItems();
+                
+                int  totalSize = cdataitems.size();
+                //System.out.println(" BANK 622 TOTAL SIZE = " + totalSize);                                                                                                       
+                int  position  = 0;
+                while( (position + 4) < totalSize){
+                    Byte    slot = (Byte)     cdataitems.get(position);
+                    Integer trig = (Integer)  cdataitems.get(position+1);
+                    Long    time = (Long)     cdataitems.get(position+2);
+                    //EvioRawDataBank  dataBank = new EvioRawDataBank(crate, slot.intValue(),trig,time);                                                                           
+                    Integer nchannels = (Integer) cdataitems.get(position+3);
+                    int counter  = 0;
+                    position = position + 4;
+                    while(counter<nchannels){
+                        //System.err.println("Position = " + position + " type =  "                                                                                                
+                        //+ cdatatypes.get(position));                                                                                                                             
+                        Byte   channel    = (Byte) cdataitems.get(position);
+                        Short  tdc     = (Short) cdataitems.get(position+1);
+                        
+                        position += 2;
+                        counter++;
+                        DetectorDataDgtz   entry = new DetectorDataDgtz(crate,slot,channel);
+                        entry.addTDC(new TDCData(tdc));
+                        entries.add(entry);
+
+                    }
+                }
+            } catch (EvioException ex) {
+                //Logger.getLogger(EvioRawDataSource.class.getName()).log(Level.SEVERE, null, ex);                                                                                 
+            } catch (IndexOutOfBoundsException ex){
+                //System.out.println("[ERROR] ----> ERROR DECODING COMPOSITE DATA FOR ONE EVENT");                                                                                 
+            }         
+            
+        }
+        return entries;
+    }
+    /**
      * reads the TDC values from the bank with tag = 57607, decodes
      * them and returns a list of digitized detector object.
      * @param event
@@ -318,6 +375,8 @@ public class CodaEventDecoder {
         }
         return tdcEntries;
     }
+    
+    
     
     public static void main(String[] args){
         EvioSource reader = new EvioSource();

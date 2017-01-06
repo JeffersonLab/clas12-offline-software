@@ -12,14 +12,13 @@ import java.util.List;
 import java.util.TreeMap;
 
 import org.jlab.clas.physics.Particle;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.service.pid.PIDResult;
+
+//import org.jlab.service.pid.PIDResult;
 
 /**
  *
@@ -51,7 +50,7 @@ public class DetectorParticle implements Comparable {
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
     
-    private PIDResult pidresult = new PIDResult();
+    //private PIDResult pidresult = new PIDResult();
     
     public DetectorParticle(){
         
@@ -456,45 +455,44 @@ public class DetectorParticle implements Comparable {
         }
         if(id==-321 || id==321){
             beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.493667*0.493667);
-
         }
         return beta;
     }   
      
      public int getNphe(){
-       int nphe = 0;
-            for(CherenkovResponse c : this.cherenkovStore){
-            if(c.getCherenkovType()==DetectorType.HTCC){
-                nphe = c.getEnergy();
-            }
-        }
-             return nphe;
-    }    
-
-    public double getVertexTime(DetectorType type, int layer){
-        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
-        return vertex_time;
-    }
-    
-    public int getCherenkovSignal(List<CherenkovResponse> cherenkovs){
-        
-            int bestIndex = -1;
-            if(cherenkovs.size()>0){
-               // System.out.println("There are here???");
-            for(int loop = 0; loop < cherenkovs.size(); loop++) {
-                    boolean matchtruth = cherenkovs.get(loop).match(this);
-                    //System.out.println(matchtruth);
-                    if(matchtruth==true){
-                        bestIndex = loop;
-                    }
-                }
-            }
-        return bestIndex;
-    } 
-    
-    public double getTime(DetectorType type, int layer) {
-        DetectorResponse response = this.getHit(type,layer);
-        if(response==null) return -1.0;
+         int nphe = 0;
+         for(CherenkovResponse c : this.cherenkovStore){
+             if(c.getCherenkovType()==DetectorType.HTCC){
+                 nphe = c.getEnergy();
+             }
+         }
+         return nphe;
+     }    
+     
+     public double getVertexTime(DetectorType type, int layer){
+         double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
+         return vertex_time;
+     }
+     
+     public int getCherenkovSignal(List<CherenkovResponse> cherenkovs){
+         
+         int bestIndex = -1;
+         if(cherenkovs.size()>0){
+             // System.out.println("There are here???");
+             for(int loop = 0; loop < cherenkovs.size(); loop++) {
+                 boolean matchtruth = cherenkovs.get(loop).match(this);
+                 //System.out.println(matchtruth);
+                 if(matchtruth==true){
+                     bestIndex = loop;
+                 }
+             }
+         }
+         return bestIndex;
+     } 
+     
+     public double getTime(DetectorType type, int layer) {
+         DetectorResponse response = this.getHit(type,layer);
+         if(response==null) return -1.0;
         return response.getTime();
     }
     
@@ -503,14 +501,14 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }  
-    
+    /*
     public void setPIDResult(PIDResult pid){
         this.pidresult = pid;
     }
     
     public PIDResult getPIDResult(){
         return this.pidresult;
-    }
+    }*/
     
      
     public int compareTo(Object o) {
