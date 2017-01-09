@@ -27,6 +27,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoRingSource;
 
 /**
  *
@@ -75,6 +76,10 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         JButton sourceFileHipo = new JButton("H");
         sourceFileHipo.setActionCommand("OpenFileHipo");
         sourceFileHipo.addActionListener(this);
+        
+        JButton sourceFileRing = new JButton("R");
+        sourceFileRing.setActionCommand("OpenFileRing");
+        sourceFileRing.addActionListener(this);
         //sourceFile.setBackground(this.paneBackground);
         
         JPanel mediaPane = this.createMediaPane();
@@ -85,6 +90,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         //sourcePane.setBackground(Color.LIGHT_GRAY);
         sourcePane.add(sourceFile);
         sourcePane.add(sourceFileHipo);
+        sourcePane.add(sourceFileRing);
         //this.add(openFile);
         //this.add(Box.createHorizontalStrut(30));
         //this.add(mediaPane);
@@ -222,6 +228,16 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             }
         }
         
+        if(e.getActionCommand().compareTo("OpenFileRing")==0){
+            HipoRingSource source = HipoRingSource.createSource();
+            
+            this.dataProcessor.setSource(source);
+            statusLabel.setText(dataProcessor.getStatusString());
+            mediaNext.setEnabled(true);
+            mediaPrev.setEnabled(true);
+            mediaPlay.setEnabled(true);
+        }
+        
         if(e.getActionCommand().compareTo("OpenFileHipo")==0){
             if(this.processTimer!=null){
                 this.processTimer.cancel();
@@ -309,6 +325,5 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         frame.pack();
         frame.setVisible(true);
     }
-
     
 }

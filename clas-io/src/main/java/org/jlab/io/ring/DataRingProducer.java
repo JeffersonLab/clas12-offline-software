@@ -26,7 +26,7 @@ public class DataRingProducer extends xMsg {
     private xMsgTopic           topic;
     private int              publishDelay = 0;
     private int            publishCounter = 0;
-    private boolean        producerDebug  = true;
+    private boolean        producerDebug  = false;
     
     public DataRingProducer(){
         super("DataRingProducer");
