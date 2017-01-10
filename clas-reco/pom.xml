@@ -62,6 +62,12 @@
      </dependency>
      
      <dependency>
+        <groupId>org.jlab.clas</groupId>
+        <artifactId>clas-utils</artifactId>
+        <version>3.0-SNAPSHOT</version>
+     </dependency>
+     
+     <dependency>
        <groupId>org.jlab.clas</groupId>
        <artifactId>clas-detector</artifactId>
        <version>3.0-SNAPSHOT</version>
