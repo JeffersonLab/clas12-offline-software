@@ -44,13 +44,14 @@ import org.jlab.io.base.DataSource;
 public class EvioETSource implements DataSource {
     
     private Boolean  connectionOK = false;
-    private String   etRingHost   = "";
+    private String   etRingHost   = "localhost";
     private Integer  etRingPort   = 11111;
     private EtSystem sys = null;
     private EtAttachment  myAttachment = null;
     private Boolean       remoteConnection = false;
     private Integer       MAX_NEVENTS = 20;
     private int           currentEventPosition = 0;
+    
     List<EvioDataEvent>   readerEvents     = new ArrayList<EvioDataEvent>();
     
     public EvioETSource(){
@@ -77,10 +78,10 @@ public class EvioETSource implements DataSource {
     }
 
     public void open(String filename) {
-        System.out.println("[ETSOURCE] --> connecting to host : [" +
+        System.out.println("[ETSOURCE] -->>> connecting to host : [" +
                 this.etRingHost + "]  FILE [" + filename + "]  PORT [" + 
                 this.etRingPort + "]");
-        System.out.println("[ETSOURCE] --> connecting remotely : " + this.remoteConnection);
+        System.out.println("[ETSOURCE] -->>> connecting remotely : " + this.remoteConnection);
         try {
             this.connectionOK = true;
             String etFile = filename;

@@ -26,18 +26,23 @@ import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
+import org.jlab.utils.options.OptionParser;
 
 /**
  *
  * @author gavalian
  */
-public class HipoRingSource  extends xMsg implements DataSource {
+public class HipoRingSource implements DataSource {
     
     private List<HipoDataEvent>  eventStore = new ArrayList<HipoDataEvent>();
     private int       eventStoreMaxCapacity = 50;
     private SchemaFactory        dictionary = new SchemaFactory();
+    private xMsg                 xmsgServer = null;
+    
+   
     
     public HipoRingSource(String host){
+        /*
         super("DataSource",
                 new xMsgProxyAddress(host, xMsgConstants.DEFAULT_PORT),
                 new xMsgRegAddress(host, xMsgConstants.REGISTRAR_PORT),
@@ -65,33 +70,19 @@ public class HipoRingSource  extends xMsg implements DataSource {
         System.out.printf("Subscribed to = %s%n", topic);
         
         this.dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        */
+        dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
     }
     
     public HipoRingSource(){
-        
-        super("DataSource",1);
-        
-        final String domain  = "clas12-domain";
-        final String subject = "clas12-data";
-        final String type    = "data";
-        final String description = "clas12 data distribution ring";
-        
-        xMsgTopic topic = xMsgTopic.build(domain, subject, type);
-
-        try {
-            // Register this subscriber
-            register(xMsgRegInfo.subscriber(topic, description));
-        } catch (xMsgException ex) {
-            Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        try {
-            // Subscribe to default proxy
-            subscribe(topic, new MyCallBack());
-        } catch (xMsgException ex) {
-            Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.printf("Subscribed to = %s%n", topic);
+        dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+    }
+    
+    public static HipoRingSource  createSourceDaq(){
+        String daqHosts = "129.57.167.107:129.57.167.109:129.57.167.226:129.57.167.227:129.57.167.41:129.57.167.60:129.57.68.135";
+        HipoRingSource  reader = new HipoRingSource();
+        reader.open(daqHosts);
+        return reader;
     }
     
     public static HipoRingSource createSource(){
@@ -133,8 +124,64 @@ public class HipoRingSource  extends xMsg implements DataSource {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private boolean createConnection(String host){
+        boolean result = true;
+        this.xmsgServer = new xMsg("DataSource",
+                new xMsgProxyAddress(host, xMsgConstants.DEFAULT_PORT),
+                new xMsgRegAddress(host, xMsgConstants.REGISTRAR_PORT),
+                2);
+        try {
+            if(this.xmsgServer.getConnection()!=null){
+                System.out.println("   >>> connection to server " + host + " : success");
+            } 
+
+        } catch (xMsgException ex) {
+            //Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("   >>> connection to server " + host + " : failed");
+            this.xmsgServer.destroy();
+            this.xmsgServer = null;
+            result = false;
+        }
+        //System.out.println("-----> connection estabilished...");
+        return result;
+    }
+    
     @Override
-    public void open(String filename) {
+    public void open(String filename) {        
+        
+        String[] hostList = filename.split(":");
+        
+        for(String host : hostList){
+            boolean result = this.createConnection(host);
+            if(result==true) break;
+        }
+        
+        if(this.xmsgServer==null){
+            System.out.println("----> error finding server.");
+            return;
+        }
+        System.out.println("   >>> subscribing  to topic : data-hipo");
+        
+        final String subject = "clas12-data";
+        final String type    = "data";
+        final String description = "clas12 data distribution ring";
+        final String domain  = "clas12-domain";
+        xMsgTopic topic = xMsgTopic.build(domain, subject, type);
+        try {
+            // Register this subscriber
+            this.xmsgServer.register(xMsgRegInfo.subscriber(topic, description));
+        } catch (xMsgException ex) {
+            Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            // Subscribe to default proxy
+            this.xmsgServer.subscribe(topic, new MyCallBack());
+        } catch (xMsgException ex) {
+            Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("   >>> subscription to topic : success\n\n");
+        
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -166,7 +213,7 @@ public class HipoRingSource  extends xMsg implements DataSource {
         }
         HipoDataEvent event = this.eventStore.get(0);
         System.out.println("   >>> success getting event : size = " + eventStore.size());
-        event.show();
+        //event.show();
 
         this.eventStore.remove(0);
         System.out.println("   >>>   FILO cleanup : size = " + eventStore.size());
@@ -196,11 +243,11 @@ public class HipoRingSource  extends xMsg implements DataSource {
     
     
     public void close() {
-        try {
+        /*try {
             this.getConnection().close();
         } catch (xMsgException ex) {
             Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
     private class MyCallBack implements xMsgCallBack {
 
@@ -213,14 +260,47 @@ public class HipoRingSource  extends xMsg implements DataSource {
             if(eventStore.size()<eventStoreMaxCapacity){
                 HipoDataEvent event = new HipoDataEvent(data,dictionary);
                 eventStore.add(event);
-                //System.out.printf("     >>>>>> adding event to the store : size = %d \n", eventStore.size());
+                System.out.printf("     >>>>>> adding event to the store : size = %d \n", eventStore.size());
             } else {
-                //System.out.printf("     >>>>>> event store is full : size = %d \n", eventStore.size());
+                System.out.printf("     >>>>>> event store is full : size = %d \n", eventStore.size());
             }
         }
     }
     
     public static void main(String[] args){
+        
+        OptionParser parser = new OptionParser();
+        parser.addOption("-s", "localhost");
+        parser.parse(args);
+        
+        HipoRingSource reader = new HipoRingSource();
+        reader.open(parser.getOption("-s").stringValue());
+        //reader.open("128.82.188.90:129.57.76.220:129.57.76.215:129.57.76.230");
+        
+        while(true){
+            if(reader.hasEvent()==true){
+                System.out.println("has event");
+                DataEvent event = reader.getNextEvent();
+                try {
+                    event.show();
+                } catch (Exception e) {
+                    System.out.println("something went wrong");
+                }
+            } else {
+                //System.out.println("no event");
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        //reader.open("localhost");
+        /*
+        OptionParser parser = new OptionParser();        
+        parser.addRequired("-s");
+        
+        
         HipoRingSource reader = HipoRingSource.createSource();
         
         while(reader.hasEvent()==true){
@@ -236,6 +316,7 @@ public class HipoRingSource  extends xMsg implements DataSource {
             
         }
         System.out.println("DONE");
+        */
         /*
         String host = args[0];
         try (HipoRingSource subscriber = new HipoRingSource(host)) {

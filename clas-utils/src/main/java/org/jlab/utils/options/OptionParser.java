@@ -19,6 +19,7 @@ public class OptionParser {
     private Map<String,OptionValue> optionsDescriptors = new TreeMap<String,OptionValue>();    
     private Map<String,OptionValue>    requiredOptions = new TreeMap<String,OptionValue>();
     private Map<String,OptionValue>      parsedOptions = new TreeMap<String,OptionValue>();
+    private List<String>               parsedInputList = new ArrayList<String>();
     
     public OptionParser(){
         
@@ -69,8 +70,19 @@ public class OptionParser {
         for(Map.Entry<String,OptionValue> entry : this.optionsDescriptors.entrySet()){
             boolean status = entry.getValue().parse(arguments);
             this.parsedOptions.put(entry.getKey(), entry.getValue());
-        }       
+        }
+        
+        parsedInputList.clear();
+        for(String item : arguments){
+            if(item.startsWith("-")==false){
+                this.parsedInputList.add(item);
+            }
+        }
         //this.show(arguments);
+    }
+    
+    public List<String> getInputList(){
+        return this.parsedInputList;
     }
     
     public static void main(String[] args){

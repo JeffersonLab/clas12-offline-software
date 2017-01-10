@@ -16,6 +16,8 @@ import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.utils.benchmark.ProgressPrintout;
+import org.jlab.utils.options.OptionParser;
 
 /**
  *
@@ -242,6 +244,44 @@ public class CLASDecoder {
     
     public static void main(String[] args){
         
+        OptionParser parser = new OptionParser();
+        parser.addRequired("-o");
+        parser.addOption("-c", "0");
+        
+        parser.parse(args);
+        
+        List<String> inputList = parser.getInputList();
+        
+        if(parser.hasOption("-o")==true){
+            
+            if(inputList.isEmpty()==true){
+                System.out.println("\n error : no input file is specified....");
+                System.exit(0);
+            }
+            
+            String outputFile = parser.getOption("-o").stringValue();
+            int compression = parser.getOption("-c").intValue();
+            
+            CLASDecoder decoder = new CLASDecoder();
+            HipoDataSync writer = new HipoDataSync();
+            writer.setCompressionType(compression);
+            
+            writer.open(outputFile);
+            ProgressPrintout progress = new ProgressPrintout();
+            System.out.println("INPUT LIST SIZE = " + inputList.size());
+            for(String inputFile : inputList){
+                EvioSource reader = new EvioSource();
+                reader.open(inputFile);
+                while(reader.hasEvent()==true){
+                    EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
+                    DataEvent  decodedEvent = decoder.getDataEvent(event);
+                    writer.writeEvent(decodedEvent);
+                    progress.updateStatus();
+                }
+            }
+            writer.close();
+        }
+        /*
         CLASDecoder decoder = new CLASDecoder();
         EvioSource reader = new EvioSource();
         reader.open("/Users/gavalian/Work/Software/Release-4a.0/DataSet/raw/sector2_000233_mode7.evio.0");
@@ -252,15 +292,16 @@ public class CLASDecoder {
             decoder.getEntriesADC(DetectorType.FTOF);
             decoder.getEntriesTDC(DetectorType.FTOF);
             System.out.println("----");
-            /*
+          
             DataBank  bankADC = decoder.getDataBankADC("FTOF::adc", DetectorType.FTOF);
             DataBank  bankTDC = decoder.getDataBankTDC("FTOF::tdc", DetectorType.FTOF);            
             bankADC.show();
-            bankTDC.show();*/
+            bankTDC.show();
             DataEvent  decodedEvent = decoder.getDataEvent();
             decodedEvent.show();
             icounter++;
         }
         System.out.println("done... processed events " + icounter);
+        */
     }
 }
