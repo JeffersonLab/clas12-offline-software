@@ -1,16 +1,9 @@
 package org.jlab.rec.ftof;
 
-import java.util.List;
 import java.util.Random;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.hits.DetHit;
-import org.jlab.detector.hits.FTOFDetHit;
-import org.jlab.geometry.prim.Line3d;
-
-import eu.mihosoft.vrl.v3d.Vector3d;
-
 /**
  * 
  * @author ziegler
@@ -47,18 +40,17 @@ public class CCDBConstantsLoader {
 	public static int[][][] STATUSL 			= new int[6][3][62];
 	public static int[][][] STATUSR 			= new int[6][3][62];
 	
-	
+	private static DatabaseConstantProvider DB;
 	 //Calibration parameters from DB    
    // public static final DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
     //private Detector ftofDetector;
    // public static boolean areCalibConstantsLoaded = false;
-   
-    public static synchronized DatabaseConstantProvider Load(int Run){
-    	System.out.println(" LOADING CONSTANTS from RUN "+Run);
-		if (CSTLOADED == true) 
-			return null;
-		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(Run,"default");
-		// load the geometry tables 
+	 //Calibration parameters from DB    
+    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
+    
+    public static final synchronized void Load(int runNb) {
+    	dbprovider = new DatabaseConstantProvider(runNb, "default"); // reset using the new run
+    	// load the geometry tables 
 		dbprovider.loadTable("/geometry/ftof/panel1a/paddles");
 		dbprovider.loadTable("/geometry/ftof/panel1a/panel");
 		dbprovider.loadTable("/geometry/ftof/panel1b/paddles");
@@ -72,6 +64,7 @@ public class CCDBConstantsLoader {
 	    dbprovider.loadTable("/calibration/ftof/timing_offset");
 	    dbprovider.loadTable("/calibration/ftof/time_walk");
 	    dbprovider.loadTable("/calibration/ftof/status");
+    		   
 	    //disconncect from database. Important to do this after loading tables.
 	    dbprovider.disconnect(); 
 
@@ -163,12 +156,24 @@ public class CCDBConstantsLoader {
 	    }
 	    CSTLOADED = true;
 	    System.out.println("SUCCESSFULLY LOADED FTOF CALIBRATION CONSTANTS....");
-		return dbprovider;
+		setDB(dbprovider);
     }
    
     
     
-    public static void main (String arg[]) {
+    public static final DatabaseConstantProvider getDB() {
+		return DB;
+	}
+
+
+
+	public static final void setDB(DatabaseConstantProvider dB) {
+		DB = dB;
+	}
+
+
+
+	public static void main (String arg[]) {
     	CCDBConstantsLoader.Load(10);
     	Random rnd = new Random();
     	FTOFGeant4Factory geometry = null;

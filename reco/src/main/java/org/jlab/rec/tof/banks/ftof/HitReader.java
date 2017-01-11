@@ -251,12 +251,12 @@ public class HitReader {
 			if(DetHits.get(1).size()>0) {
 				Collections.sort(DetHits.get(1));
 				// fill the list of TOF hits
-				this.set_FTOF1AHits(DetHits.get(1));
+				this.set_FTOF1BHits(DetHits.get(1));
 			}
 			if(DetHits.get(2).size()>0) {
 				Collections.sort(DetHits.get(2));
 				// fill the list of TOF hits
-				this.set_FTOF1AHits(DetHits.get(2));
+				this.set_FTOF2Hits(DetHits.get(2));
 			}
 		}
 	}
@@ -349,7 +349,7 @@ public class HitReader {
 					hit.set_TrkPathLen(paths[i]+deltaPath);
 					// get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
 					hit.set_TrkPosition(new Point3D(matchedHit.mid().x,matchedHit.mid().y,matchedHit.mid().z));
-					hit._AssociatedTrkId = i;
+					hit._AssociatedTrkId = i; 
 					// compute the local y at the middle of the bar :
 					//----------------------------------------------
 			        Point3D origPaddleLine = hit.get_paddleLine().origin();
@@ -362,9 +362,10 @@ public class HitReader {
 			        hitList.add(hit);	// add this hit to the output list 
 				}
 			}
-			if(isAssociatedWTrk == false )
+			if(isAssociatedWTrk == false ) {
+				fhit._AssociatedTrkId = -1;
 				hitList.add(fhit);	// add this hit to the output list anyway
-			
+			}
 		}
 			
 			

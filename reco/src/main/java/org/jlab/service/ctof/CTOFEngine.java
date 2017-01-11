@@ -151,8 +151,8 @@ public class CTOFEngine extends ReconstructionEngine {
 		int newRun = bank.getInt("Run")[0];
 		
 		if(Run!=newRun) {
-			
-			DatabaseConstantProvider db = CalibrationConstantsLoader.Load(newRun);
+			CCDBConstantsLoader.Load(newRun);
+			DatabaseConstantProvider db = CCDBConstantsLoader.getDB();
 
 		}
 		Run = newRun;

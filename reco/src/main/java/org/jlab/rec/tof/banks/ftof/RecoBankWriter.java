@@ -72,11 +72,13 @@ public class RecoBankWriter {
 			bank.setFloat("x",i, (float) hitlist.get(i).get_Position().x());
 			bank.setFloat("y",i, (float) hitlist.get(i).get_Position().y());
 			bank.setFloat("z",i, (float) hitlist.get(i).get_Position().z());
-			if(hitlist.get(i).get_TrkPosition()!=null) {
+			if(hitlist.get(i).get_TrkPosition()!=null && hitlist.get(i).get_TrkPosition().z()!=0) {
 				bank.setFloat("tx",i, (float) hitlist.get(i).get_TrkPosition().x());
 				bank.setFloat("ty",i, (float) hitlist.get(i).get_TrkPosition().y());
 				bank.setFloat("tz",i, (float) hitlist.get(i).get_TrkPosition().z());
 				bank.setInt("trkId", i, hitlist.get(i)._AssociatedTrkId);  
+			} else {
+				bank.setInt("trkId", i, -1);  
 			}
 			bank.setFloat("x_unc",i, 5); 			
 			bank.setFloat("y_unc",i, (float) hitlist.get(i).get_yUnc()); 			

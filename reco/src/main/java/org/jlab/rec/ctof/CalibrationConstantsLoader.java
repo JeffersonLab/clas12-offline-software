@@ -41,12 +41,11 @@ public class CalibrationConstantsLoader {
     
     public static boolean areCalibConstantsLoaded = false;
     
-    public static synchronized DatabaseConstantProvider Load(int Run){
-    	System.out.println(" LOADING CONSTANTS from RUN "+Run);
-		if (CSTLOADED == true) 
-			return null;
-		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(Run,"default");
-		
+    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
+    
+    public static final synchronized void Load(int runNb) {
+    	dbprovider = new DatabaseConstantProvider(runNb, "default"); // reset using the new run
+    
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/ctof/attenuation");
 	    dbprovider.loadTable("/calibration/ctof/effective_velocity");
@@ -145,10 +144,20 @@ public class CalibrationConstantsLoader {
 	      
 	    }
 	    CSTLOADED = true;
-		return dbprovider;
+	    setDB(dbprovider);
     }
    
+    private static DatabaseConstantProvider DB;
     
+    public static final DatabaseConstantProvider getDB() {
+		return DB;
+	}
+
+
+
+	public static final void setDB(DatabaseConstantProvider dB) {
+		DB = dB;
+	}
     
     public static void main (String arg[]) {
     	CalibrationConstantsLoader.Load(10);

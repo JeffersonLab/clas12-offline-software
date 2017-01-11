@@ -180,14 +180,13 @@ public class FTOFEngine extends ReconstructionEngine {
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
 		//
 	
-		
 		// Load the constants
 		//-------------------
 		int newRun = bank.getInt("Run")[0];
 		
 		if(Run!=newRun) {
-			
-			DatabaseConstantProvider db = CCDBConstantsLoader.Load(newRun);
+			CCDBConstantsLoader.Load(newRun);
+			DatabaseConstantProvider db = CCDBConstantsLoader.getDB();
 			
 			geometry = new FTOFGeant4Factory(db);
 		}
