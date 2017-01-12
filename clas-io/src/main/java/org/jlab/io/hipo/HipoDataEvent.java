@@ -172,7 +172,11 @@ public class HipoDataEvent implements DataEvent {
     }
     
     public DataBank createBank(String bank_name, int rows) {
-        if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==false) return null;
+        if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==false){
+            System.out.println(">>>>> error : descriptor not found : " + bank_name);
+            this.hipoEvent.getSchemaFactory().show();
+            return null;
+        }
         HipoGroup group = this.hipoEvent.getSchemaFactory().getSchema(bank_name).createGroup(rows);
         HipoDataBank bank = new HipoDataBank(group);
         return bank;

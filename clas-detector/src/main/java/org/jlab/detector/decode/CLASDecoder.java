@@ -245,6 +245,7 @@ public class CLASDecoder {
     public static void main(String[] args){
         
         OptionParser parser = new OptionParser();
+        parser.addOption("-n", "-1");        
         parser.addRequired("-o");
         parser.addOption("-c", "0");
         
@@ -269,6 +270,9 @@ public class CLASDecoder {
             writer.open(outputFile);
             ProgressPrintout progress = new ProgressPrintout();
             System.out.println("INPUT LIST SIZE = " + inputList.size());
+            int nevents = parser.getOption("-n").intValue();
+            int counter = 0;
+            
             for(String inputFile : inputList){
                 EvioSource reader = new EvioSource();
                 reader.open(inputFile);
@@ -276,7 +280,11 @@ public class CLASDecoder {
                     EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
                     DataEvent  decodedEvent = decoder.getDataEvent(event);
                     writer.writeEvent(decodedEvent);
+                    counter++;
                     progress.updateStatus();
+                    if(nevents>0){
+                        if(counter>nevents) break;
+                    }
                 }
             }
             writer.close();

@@ -13,6 +13,7 @@ import org.jlab.coda.xmsg.core.xMsgMessage;
 import org.jlab.coda.xmsg.core.xMsgTopic;
 import org.jlab.coda.xmsg.data.xMsgRegInfo;
 import org.jlab.coda.xmsg.excp.xMsgException;
+import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
@@ -23,7 +24,9 @@ import org.jlab.io.hipo.HipoDataSource;
 public class DataRingProducer extends xMsg {
     
     private xMsgConnection connection;
-    private xMsgTopic           topic;
+    private xMsgTopic           topicEvio;
+    private xMsgTopic           topicHipo;
+    
     private int              publishDelay = 0;
     private int            publishCounter = 0;
     private boolean        producerDebug  = false;
@@ -50,14 +53,21 @@ public class DataRingProducer extends xMsg {
         try {
             
             connection = getConnection();
-            final String domain  = "clas12-domain";
-            final String subject = "clas12-data";
-            final String type    = "data";
+            
+            final String domain   = "clas12domain";
+            final String subject  = "clas12data";
+            final String type     = "data-hipo";
+            final String typeEvio = "data-evio";
+            
             final String description = "clas12 data distribution ring";
             
-            topic = xMsgTopic.build(domain, subject, type);
+            topicHipo = xMsgTopic.build(domain, subject, type);
+            topicEvio = xMsgTopic.build(domain, subject, typeEvio);
             
-            register(xMsgRegInfo.publisher(topic, description));
+            register(xMsgRegInfo.publisher(topicHipo, description));
+            register(xMsgRegInfo.publisher(topicEvio, description));
+            
+            
         } catch (xMsgException ex) {
             Logger.getLogger(DataRingProducer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -66,11 +76,27 @@ public class DataRingProducer extends xMsg {
         System.out.println("    >>>>>> success port : " + this.connection.getAddress().pubPort());
     }
     
+    public void addEvioEvent(EvioDataEvent event){
+        byte[] b = event.getHandler().getStructure().getByteBuffer().array();
+        xMsgMessage  msg = new xMsgMessage(topicEvio,"data/evio",b);
+        try {
+            this.publish(connection, msg);
+        } catch (xMsgException ex) {
+            Logger.getLogger(DataRingProducer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if(this.producerDebug==true){
+            System.out.println("\n\n    >>>>>>  published message : # " + this.publishCounter);
+            System.out.println("    >>>>>>  published message : size = " + b.length);
+            System.out.println("    >>>>>>  delay " + publishDelay + "  ms");
+        }
+        //this.publishCounter++;
+    }
+    
     public void addEvent(HipoDataEvent event){
         
         byte[] b = event.getEventBuffer().array();
         
-        xMsgMessage  msg = new xMsgMessage(topic,"data/hipo",b);
+        xMsgMessage  msg = new xMsgMessage(topicHipo,"data/hipo",b);
         
         try {
             this.publish(connection, msg);
@@ -83,11 +109,6 @@ public class DataRingProducer extends xMsg {
             System.out.println("    >>>>>>  delay " + publishDelay + "  ms");
         }
         this.publishCounter++;
-        try {
-            Thread.sleep(publishDelay);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DataRingProducer.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     

@@ -181,8 +181,7 @@ public class EvioETSource implements DataSource {
                                         */
                                 //System.out.println("---> compact event buffer size = " + localBuffer.capacity());
                                 EvioDataEvent dataEvent = new EvioDataEvent(localBuffer,EvioFactory.getDictionary());
-                                this.readerEvents.add(dataEvent);
-                                
+                                this.readerEvents.add(dataEvent);                                
                             } catch (EvioException ex) {
                                 Logger.getLogger(EvioETSource.class.getName()).log(Level.SEVERE, null, ex);
                             }

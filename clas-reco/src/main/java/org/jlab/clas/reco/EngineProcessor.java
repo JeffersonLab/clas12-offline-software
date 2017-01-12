@@ -13,7 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.utils.benchmark.ProgressPrintout;
+import org.jlab.utils.options.OptionParser;
 
 /**
  *
@@ -97,33 +99,41 @@ public class EngineProcessor {
     public void processEvent(DataEvent event){
         for(Map.Entry<String,ReconstructionEngine>  engine : this.processorEngines.entrySet()){
             try {
+                //System.out.println("processing engine : " + engine.getKey());
                 //System.out.println("processing event");
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
-                //System.out.println("[Exception] >>>>> engine : " + engine.getKey());
-                //System.out.println();
-                //e.printStackTrace();
+                
+                System.out.println("[Exception] >>>>> engine : " + engine.getKey());
+                System.out.println();
+                e.printStackTrace();
             }
         }
     }
     /**
      * process entire file through engine chain.
      * @param file file name to process.
+     * @param output
      */
-    public void processFile(String file){
+    public void processFile(String file, String output){
         if(file.endsWith(".hipo")==true){
             HipoDataSource reader = new HipoDataSource();
             reader.open(file);
             int eventCounter = 0;
+            HipoDataSync   writer = new HipoDataSync();
+            writer.setCompressionType(2);
+            writer.open(output);
             
             ProgressPrintout  progress = new ProgressPrintout();            
             while(reader.hasEvent()==true){
                 DataEvent event = reader.getNextEvent();                
                 processEvent(event);
+                writer.writeEvent(event);
                 eventCounter++;
                 progress.updateStatus();
             }
             progress.showStatus();
+            writer.close();
         }
     }
     /**
@@ -138,24 +148,29 @@ public class EngineProcessor {
     
     public static void main(String[] args){
         
-        if(args.length==0){     
-            EngineProcessor proc = new EngineProcessor();
-            proc.addEngine("DUMMY", "org.jlab.clas.reco.DummyEngine");
-            proc.init();
-            proc.show();
-        } else {
-            String inputFile = args[0];
-            List<String> services = new ArrayList<String>();
+        OptionParser parser = new OptionParser();
+        parser.addRequired("-o");
+        parser.addRequired("-i");
+        
+        parser.parse(args);
+        
+        if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true){
+        
+            List<String> services = parser.getInputList();
+            
+            String  inputFile = parser.getOption("-i").stringValue();
+            String outputFile = parser.getOption("-o").stringValue();
+            
             for(int i =1; i < args.length; i++){
                 services.add(args[i]);
             }
-            
+                
             EngineProcessor proc = new EngineProcessor();
             for(String engine : services){
                 proc.addEngine(engine);
             }
             proc.init();
-            proc.processFile(inputFile);
+            proc.processFile(inputFile,outputFile);        
         }
     }
 }

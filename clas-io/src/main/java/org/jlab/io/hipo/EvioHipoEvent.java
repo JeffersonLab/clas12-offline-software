@@ -15,6 +15,7 @@ import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.utils.options.OptionParser;
 
 /**
  *
@@ -213,24 +214,45 @@ public class EvioHipoEvent {
         }
     }
     
-        
+    public HipoDataBank createHeaderBank(HipoDataEvent event, int nrun, int nevent, float torus, float solenoid){
+        HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);        
+        bank.setInt("run",        0, nrun);
+        bank.setInt("event",      0, nevent);
+        bank.setFloat("torus",    0, torus);
+        bank.setFloat("solenoid", 0, solenoid);        
+        return bank;
+    }
+    
     public static void main(String[] args){
         
-        String outputFile = args[0];
-        List<String> inputFiles = new ArrayList<String>();
-        for(int i = 1; i < args.length; i++){
-            inputFiles.add(args[i]);
-        }
+        OptionParser parser = new OptionParser();
+        parser.addRequired("-o");
+        parser.addOption("-r","10");
+        parser.addOption("-t","-1.0");
+        parser.addOption("-s","1.0");
+        
+        parser.parse(args);
+        
+        if(parser.hasOption("-o")==true){
+        
+            String outputFile = parser.getOption("-o").stringValue();
+        
+            List<String> inputFiles = parser.getInputList();
+            
+            /*for(int i = 1; i < args.length; i++){
+                inputFiles.add(args[i]);
+            }*/
         
         
-        EvioHipoEvent convertor = new EvioHipoEvent();
-        
-        HipoDataSync  writer = new HipoDataSync();
-        writer.open(outputFile);
-        writer.setCompressionType(2);
-        System.out.println(">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
-        for(String input : inputFiles){
-            System.out.println(">>>>>  appending file : " + input);
+            EvioHipoEvent convertor = new EvioHipoEvent();
+            
+            HipoDataSync  writer = new HipoDataSync();
+            writer.open(outputFile);
+            writer.setCompressionType(2);
+            System.out.println(">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
+            int nevent = 1;
+            for(String input : inputFiles){
+                System.out.println(">>>>>  appending file : " + input);
             try {
                 EvioSource reader = new EvioSource();
                 reader.open(input);
@@ -238,7 +260,13 @@ public class EvioHipoEvent {
                 while(reader.hasEvent()==true){
                     EvioDataEvent evioEvent = (EvioDataEvent) reader.getNextEvent();                    
                     HipoDataEvent hipoEvent = convertor.getHipoEvent(writer, evioEvent);
+                    int nrun = parser.getOption("-r").intValue();
+                    float torus    = (float) parser.getOption("-t").doubleValue();
+                    float solenoid = (float) parser.getOption("-s").doubleValue();
+                    HipoDataBank header = convertor.createHeaderBank(hipoEvent, nrun, nevent, torus, solenoid);
+                    hipoEvent.appendBanks(header);
                     writer.writeEvent(hipoEvent);
+                    nevent++;
                 }
             } catch (Exception e){
                 e.printStackTrace();
@@ -248,6 +276,7 @@ public class EvioHipoEvent {
             System.out.println();            
         }
         writer.close();
+        }
         /*
         EvioDataDictionary dictionary = new EvioDataDictionary("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/coatjava/etc/bankdefs/hipo");
         dictionary.show();

@@ -15,6 +15,7 @@ import org.jlab.coda.xmsg.net.xMsgProxyAddress;
 import org.jlab.coda.xmsg.net.xMsgRegAddress;
 import org.jlab.coda.xmsg.sys.xMsgProxy;
 import org.jlab.coda.xmsg.sys.xMsgRegistrar;
+import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
@@ -91,6 +92,10 @@ public class DataDistributionRing {
     
     public void addEvent(HipoDataEvent event){
         this.producer.addEvent(event);
+    }
+    
+    public void addEvioEvent(EvioDataEvent event){
+        this.producer.addEvioEvent(event);
     }
     
     public static void main(String[] args){

@@ -30,7 +30,6 @@ public class DataSourceProcessor {
     private int  listenerUpdateRate  = 20000;
     private long timeSpendOnReading     = 0L;
     private long timeSpendOnProcessing  = 0L;
-
     
     public DataSourceProcessor(){
         

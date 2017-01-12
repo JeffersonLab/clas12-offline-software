@@ -35,8 +35,8 @@ public class DataDistributionService {
         decoder = new CLASDecoder();
     }
     
-    public void connect(String file, boolean remote){
-        dataSource = new EvioETSource("localhost");
+    public void connect(String host,String file, boolean remote){
+        dataSource = new EvioETSource(host);
         ( (EvioETSource) dataSource).setRemote(remote);
         dataSource.open(file);        
     }
@@ -49,6 +49,50 @@ public class DataDistributionService {
     public void setDelay(int delay){
         this.decoderDelay = delay;
     }
+    /**
+     * service works off ET ring
+     */
+    public void startServiceEt(){
+        
+        ProgressPrintout progress = new ProgressPrintout();
+        ringProducer = new DataDistributionRing();
+        ringProducer.initProxy();
+        ringProducer.initRegistrar();
+        ringProducer.initRing();
+        ringProducer.setDelay(0);
+        
+        EvioETSource etSource = (EvioETSource) this.dataSource;
+        
+        while(true){
+            while(etSource.hasEvent()==false){
+                this.waitFor(200);
+                etSource.loadEvents();                
+            }
+            
+            while(etSource.hasEvent()==true){
+                DataEvent event = dataSource.getNextEvent();
+                
+                HipoDataEvent decodedEvent = (HipoDataEvent) decoder.getDataEvent(event);
+                ringProducer.addEvioEvent((EvioDataEvent) event);
+                ringProducer.addEvent(decodedEvent);
+                progress.updateStatus();
+            }
+        }
+    }
+    
+    /**
+     * Introduces delay
+     * @param ms 
+     */
+    private void waitFor(int ms){ 
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(DataDistributionService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
     
     public void startService(){
         
@@ -58,33 +102,66 @@ public class DataDistributionService {
         ringProducer.initRegistrar();
         ringProducer.initRing();
         ringProducer.setDelay(decoderDelay);
+        int counter = 0;
         
         while(true){
-            DataEvent event = dataSource.getNextEvent();
-            if(event!=null){
-                HipoDataEvent decodedEvent = (HipoDataEvent) decoder.getDataEvent(event);
-                ringProducer.addEvent(decodedEvent);
-                progress.updateStatus();
-            } else {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(DataDistributionService.class.getName()).log(Level.SEVERE, null, ex);
+            
+            while(dataSource.hasEvent()==true){
+                DataEvent event = dataSource.getNextEvent();                        
+                if(event!=null){
+                    HipoDataEvent decodedEvent = (HipoDataEvent) decoder.getDataEvent(event);
+                    ringProducer.addEvent(decodedEvent);
+                    progress.updateStatus();
+                } else {
+                    System.out.println(" error there are no events");
                 }
-                System.out.println(" error there are no events");
             }
+            counter++;
+            /*System.out.println();
+            System.out.println(">>>>> source is being reset interations : " + counter);
+            System.out.println();*/
+            dataSource.reset();
         }
     }
     
     public static void main(String[] args){
         OptionParser  parser = new OptionParser();
         
-        parser.addOption("-et","");
+        //parser.addOption("-et","");
         parser.addOption("-d","5");
+        parser.addRequired("-type");
         parser.addRequired("-file");
-        parser.addOption("-r","false");
+        parser.addOption("-r","true");
+        parser.addOption("-host", "localhost");
         
         parser.parse(args);
+        
+        if(parser.hasOption("-type")&&parser.hasOption("-file")){
+            
+            String    type = parser.getOption("-type").stringValue();
+            String    file = parser.getOption("-file").stringValue();
+            String  etHost = parser.getOption("-host").stringValue();
+            
+            int    delay = parser.getOption("-d").intValue();
+            
+            if(type.compareTo("evio")!=0&&type.compareTo("et")!=0){
+                System.out.println("\n\n TYPE parameter has to be evio or et");
+                System.exit(0);
+            }
+            
+            if(type.contains("et")==true){
+                DataDistributionService service = new DataDistributionService();
+                service.setDelay(delay);
+                service.connect(etHost,file, true);
+                service.startServiceEt();
+            } else {
+                DataDistributionService service = new DataDistributionService();
+                service.setDelay(delay);
+                service.connect(file);
+                service.startService();
+            }
+        }
+        
         /*
         if(parser.hasOption("-et")==true){
             DataDistributionService service = new DataDistributionService();
@@ -96,14 +173,6 @@ public class DataDistributionService {
             }
             service.connect(parser.getOption("-et").stringValue(),remote);
             service.startService();
-        }*/
-        
-        if(parser.hasOption("-file")==true){
-            int delay = parser.getOption("-d").intValue();
-            DataDistributionService service = new DataDistributionService();
-            service.setDelay(delay);
-            service.connect(parser.getOption("-file").stringValue());
-            service.startService();
-        }
+        }*/               
     }
 }
