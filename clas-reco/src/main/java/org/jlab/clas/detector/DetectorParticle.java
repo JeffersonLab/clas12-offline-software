@@ -344,14 +344,7 @@ public class DetectorParticle implements Comparable {
             int detectorLayer,
             double distanceThreshold){
         
-        Line3D   trajectory = new Line3D(
-                this.particleCrossPosition.x(),
-                this.particleCrossPosition.y(),
-                this.particleCrossPosition.z(),
-                this.particleCrossDirection.x()*1500.0,
-                this.particleCrossDirection.y()*1500.0,
-                this.particleCrossDirection.z()*1500.0
-        );
+        Line3D   trajectory = this.detectorTrack.getLastCross();
         
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
@@ -440,6 +433,7 @@ public class DetectorParticle implements Comparable {
                 this.particleCrossPosition.z(),this.particleCrossDirection.x(),
                 this.particleCrossDirection.y(),this.particleCrossDirection.z()));
         */
+        str.append(String.format("[particle] c = %2d, p = %6.2f \n", this.getCharge(),this.vector().mag()));
         for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");

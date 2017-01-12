@@ -115,6 +115,36 @@ public class DetectorResponse {
         }
         return responseList;
     }
+    /**
+     * Reads a HIPO event, constructs list of detector responses then returns only
+     * entries with energy above given threshold.
+     * @param event
+     * @param bankName
+     * @param type
+     * @param minEnergy
+     * @return 
+     */
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
+            String bankName, DetectorType type, double minEnergy){ 
+        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
+        return DetectorResponse.getListByEnergy(responses, minEnergy);
+    }
+    
+    /**
+     * Returns a list of detectorResponses where all entries have energy above given threshold.
+     * @param responses list of detector responses.
+     * @param minEnergy minimum energy accepted
+     * @return 
+     */
+    public static List<DetectorResponse>  getListByEnergy(List<DetectorResponse> responses, double minEnergy){
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        for(DetectorResponse r : responses){
+            if(r.getEnergy()>minEnergy){
+                responseList.add(r);
+            }
+        }
+        return responseList;
+    }
     
     public static List<DetectorResponse>  getListBySector(List<DetectorResponse> list, DetectorType type, int sector){
         List<DetectorResponse> result = new ArrayList<DetectorResponse>();

@@ -96,13 +96,14 @@ public class HipoRingSource implements DataSource {
                     "0.0.0.0");
         if(s!=null){
             System.out.println("----> connecting to host : " + s);
-            HipoRingSource source = new HipoRingSource(s);
+            HipoRingSource source = new HipoRingSource();
+            source.open(s);
             System.out.println("\n\n");
-            System.out.println("   |---->  caching ");
+            System.out.println("   |---->  caching connection ---> ");
             for(int i = 0; i < 5; i++){
                 try {
                     Thread.sleep(1000);
-                    System.out.println("   |---->  caching ");
+                    System.out.println("   |---->  caching connection ---- " + source.getSize());
                 } catch (InterruptedException ex) {
                     Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
                 }

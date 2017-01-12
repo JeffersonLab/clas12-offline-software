@@ -14,6 +14,7 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.ring.DataDistributionRing;
 import org.jlab.io.ring.DataRingProducer;
 import org.jlab.utils.benchmark.ProgressPrintout;
@@ -43,6 +44,11 @@ public class DataDistributionService {
     
     public void connect(String file){
         dataSource = new EvioSource();
+        dataSource.open(file);
+    }
+    
+    public void connectHipo(String file){
+        dataSource = new HipoDataSource();
         dataSource.open(file);
     }
     
@@ -102,6 +108,7 @@ public class DataDistributionService {
         ringProducer.initRegistrar();
         ringProducer.initRing();
         ringProducer.setDelay(decoderDelay);
+        
         int counter = 0;
         
         while(true){
@@ -124,6 +131,32 @@ public class DataDistributionService {
         }
     }
     
+    
+    public void startServiceHipo(){
+        
+        ProgressPrintout progress = new ProgressPrintout();
+        ringProducer = new DataDistributionRing();
+        ringProducer.initProxy();
+        ringProducer.initRegistrar();
+        ringProducer.initRing();
+        ringProducer.setDelay(decoderDelay);
+        int counter = 0;
+        
+        while(true){
+            
+            while(dataSource.hasEvent()==true){
+                HipoDataEvent event = (HipoDataEvent) dataSource.getNextEvent();                
+                ringProducer.addEvent(event);
+                progress.updateStatus();
+            }
+            counter++;
+            /*System.out.println();
+            System.out.println(">>>>> source is being reset interations : " + counter);
+            System.out.println();*/
+            dataSource.reset();
+        }
+    }
+        
     public static void main(String[] args){
         OptionParser  parser = new OptionParser();
         
@@ -144,8 +177,9 @@ public class DataDistributionService {
             
             int    delay = parser.getOption("-d").intValue();
             
-            if(type.compareTo("evio")!=0&&type.compareTo("et")!=0){
-                System.out.println("\n\n TYPE parameter has to be evio or et");
+            if(type.compareTo("evio")!=0&&type.compareTo("et")!=0&&
+                    type.compareTo("hipo")!=0){
+                System.out.println("\n\n TYPE parameter has to be evio or et or hipo");
                 System.exit(0);
             }
             
@@ -154,11 +188,21 @@ public class DataDistributionService {
                 service.setDelay(delay);
                 service.connect(etHost,file, true);
                 service.startServiceEt();
-            } else {
+            } 
+            if(type.contains("evio")==true){
+                System.out.println("   >>>> starting hipo service");
                 DataDistributionService service = new DataDistributionService();
                 service.setDelay(delay);
                 service.connect(file);
                 service.startService();
+            }
+            
+            if(type.contains("hipo")==true){
+                System.out.println("   >>>> starting hipo service");
+                DataDistributionService service = new DataDistributionService();
+                service.setDelay(delay);
+                service.connectHipo(file);
+                service.startServiceHipo();
             }
         }
         

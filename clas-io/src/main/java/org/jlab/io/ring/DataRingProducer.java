@@ -56,16 +56,16 @@ public class DataRingProducer extends xMsg {
             
             final String domain   = "clas12domain";
             final String subject  = "clas12data";
-            final String type     = "data-hipo";
+            final String typeHipo = "data-hipo";
             final String typeEvio = "data-evio";
             
             final String description = "clas12 data distribution ring";
             
-            topicHipo = xMsgTopic.build(domain, subject, type);
+            topicHipo = xMsgTopic.build(domain, subject, typeHipo);
             topicEvio = xMsgTopic.build(domain, subject, typeEvio);
             
             register(xMsgRegInfo.publisher(topicHipo, description));
-            register(xMsgRegInfo.publisher(topicEvio, description));
+            //register(xMsgRegInfo.publisher(topicEvio, description));
             
             
         } catch (xMsgException ex) {

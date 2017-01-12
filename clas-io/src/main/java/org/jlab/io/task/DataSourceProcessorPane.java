@@ -82,6 +82,10 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         sourceFileRing.addActionListener(this);
         //sourceFile.setBackground(this.paneBackground);
         
+        JButton resetListeners = new JButton("Reset");
+        resetListeners.setActionCommand("ResetListeners");
+        resetListeners.addActionListener(this);
+        
         JPanel mediaPane = this.createMediaPane();
         JPanel sourcePane = new JPanel();
                         
@@ -91,6 +95,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         sourcePane.add(sourceFile);
         sourcePane.add(sourceFileHipo);
         sourcePane.add(sourceFileRing);
+        sourcePane.add(resetListeners);
         //this.add(openFile);
         //this.add(Box.createHorizontalStrut(30));
         //this.add(mediaPane);
@@ -180,6 +185,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         return mediaPane;
     }
     
+    @Override
     public void actionPerformed(ActionEvent e) {
         System.out.println("[action] --> " + e.getActionCommand());
         
@@ -227,7 +233,16 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 
             }
         }
-        
+        if(e.getActionCommand().compareTo("ResetListeners")==0){
+            System.out.println("\n   >>>> resetting all listeners");
+            for(IDataEventListener listener : this.dataProcessor.getEventListeners()){
+                try {
+                    listener.resetEventListener();
+                } catch (Exception exc){
+                    System.out.println("\n   >>>> error resetting listener : " + listener.getClass().getName());
+                }
+            }
+        }
         if(e.getActionCommand().compareTo("OpenFileRing")==0){
             HipoRingSource source = HipoRingSource.createSource();
             

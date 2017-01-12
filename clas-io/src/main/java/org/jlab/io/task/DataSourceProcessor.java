@@ -119,10 +119,12 @@ public class DataSourceProcessor {
             //System.out.println("[DataSourceProcessor] error ---> data source has no events");
             return false;
         }
-               
         
         Long st = System.currentTimeMillis();
-        DataEvent event = dataSource.getNextEvent();        
+        DataEvent event = dataSource.getNextEvent(); 
+        if(event==null){
+            return false;
+        }
         event.setType(type);
         
         if(this.eventsProcessed==0){
