@@ -17,6 +17,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 //import org.jlab.service.pid.PIDResult;
 
@@ -26,9 +27,6 @@ import org.jlab.geom.prim.Point3D;
  */
 public class DetectorParticle implements Comparable {
     
-    private Vector3 particleMomenta = new Vector3();
-    private Vector3 particleVertex  = new Vector3();
-    private Integer particleCharge  = 0;
     private Integer particlePID     = 0;
     private Integer particleStatus  = 1;
     private Double  particleBeta    = 0.0;
@@ -52,9 +50,36 @@ public class DetectorParticle implements Comparable {
     
     //private PIDResult pidresult = new PIDResult();
     
+    private DetectorTrack detectorTrack = null;
+    
     public DetectorParticle(){
-        
+        detectorTrack = new DetectorTrack(-1);
     }
+    
+    public DetectorParticle(DetectorTrack track){
+        detectorTrack = track;
+    }
+    
+    public DetectorParticle(int charge, double px, double py, double pz){
+        detectorTrack = new DetectorTrack(charge,px,py,pz);
+    }
+    
+    public DetectorParticle(int charge, double px, double py, double pz,
+            double vx, double vy, double vz){
+        detectorTrack = new DetectorTrack(charge,px,py,pz,vx,vy,vz);
+    }
+    
+    public static DetectorParticle createNeutral(double x, double y, double z){
+        Vector3D dir = new Vector3D(x,y,z);
+        dir.unit();
+        DetectorTrack track = new DetectorTrack(0,1.0);
+        track.addCross(x, y, z, dir.x(),dir.y(),dir.z());
+        track.setVector(dir.x(), dir.y(), dir.z());
+        track.setPath(Math.sqrt(x*x+y*y+z*z));
+        track.setTrackEnd(x, y, z);
+        return new DetectorParticle(track);
+    }
+    
     
     public void clear(){
         this.responseStore.clear();
@@ -212,12 +237,13 @@ public class DetectorParticle implements Comparable {
         return path;
     }
     
-    public Vector3  vector(){return this.particleMomenta;}    
-    public Vector3  vertex(){return this.particleVertex;}    
+    public Vector3  vector(){return detectorTrack.getVector();}    
+    public Vector3  vertex(){return detectorTrack.getVertex();}
+    
     public Vector3  getCross(){ return this.particleCrossPosition;}    
     public Vector3  getCrossDir(){ return this.particleCrossDirection;}    
-    public double   getPathLength(){ return this.particlePath;}
-    public int      getCharge(){ return this.particleCharge;}
+    public double   getPathLength(){ return detectorTrack.getPath();}
+    public int      getCharge(){ return detectorTrack.getCharge();}
     
     
     
@@ -229,7 +255,7 @@ public class DetectorParticle implements Comparable {
     
     
     
-    public double   getPathLength(Vector3 vec){
+    public double   getPathLength(Vector3D vec){
         return this.getPathLength(vec.x(), vec.y(), vec.z());
     }
     
@@ -280,7 +306,8 @@ public class DetectorParticle implements Comparable {
     public double getMass2(DetectorType type){
         double beta   = this.getBeta(type);
         double energy = this.getEnergy(type);
-        double mass2  = this.particleMomenta.mag2()/(beta*beta) - this.particleMomenta.mag2();
+        double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
+                - this.detectorTrack.getVector().mag2();
         return mass2;
     }
     
@@ -288,7 +315,7 @@ public class DetectorParticle implements Comparable {
     public void setBeta(double beta){ this.particleBeta = beta;}
     public void setMass(double mass){ this.particleMass = mass;}
     public void setPid(int pid){this.particlePID = pid;}
-    public void setCharge(int charge) { this.particleCharge = charge;}
+    public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
     
     public void setCross(double x, double y, double z,
             double ux, double uy, double uz){
@@ -379,6 +406,7 @@ public class DetectorParticle implements Comparable {
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
+        /*
         str.append(String.format("status = %4d  charge = %3d [pid/beta/mass] %5d %8.4f %8.4f",                 
                 this.particleStatus,
                 this.particleCharge,
@@ -394,6 +422,7 @@ public class DetectorParticle implements Comparable {
                 this.particleCrossPosition.x(),this.particleCrossPosition.y(),
                 this.particleCrossPosition.z(),this.particleCrossDirection.x(),
                 this.particleCrossDirection.y(),this.particleCrossDirection.z()));
+        */
         for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");
@@ -436,25 +465,25 @@ public class DetectorParticle implements Comparable {
                 
            return sigma;
                 
-    }
+    }        
     
      public double getTheoryBeta(int id){
         double beta = 0.0;
+        double p    = detectorTrack.getVector().mag();
         if(id==11 || id==-11){
-            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.00051*0.00051);
+            beta = p/sqrt(p*p + 0.00051*0.00051);
             //beta = 1.0;
             //System.out.println("Beta is  " + beta);
         }
         if(id==-211 || id==211){
-            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.13957*0.13957);
-
+            beta = p/sqrt(p*p + 0.13957*0.13957);
         }
         if(id==2212 || id==-2212){
-            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.938*0.938);
+            beta = p/sqrt(p*p + 0.938*0.938);
             //System.out.println("Beta is  " + beta);
         }
         if(id==-321 || id==321){
-            beta = this.particleMomenta.mag()/sqrt(this.particleMomenta.mag()*this.particleMomenta.mag() + 0.493667*0.493667);
+            beta = p/sqrt(p*p + 0.493667*0.493667);
         }
         return beta;
     }   
