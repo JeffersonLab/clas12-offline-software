@@ -136,6 +136,19 @@ public class DetectorResponse {
         return result;
     }
         
+    public static List<DetectorResponse>  getListBySectorLayer(List<DetectorResponse> list, 
+            DetectorType type, int sector, int layer){
+        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        for(DetectorResponse res : list){
+            if(res.getDescriptor().getType()==type
+                    &&res.getDescriptor().getSector()==sector
+                    &&res.getDescriptor().getLayer()==layer){
+                result.add(res);
+            }
+        }
+        return result;
+    }
+    
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
