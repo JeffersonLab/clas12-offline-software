@@ -8,20 +8,16 @@ package org.jlab.service.ec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import org.jlab.detector.base.DetectorCollection;
-
 
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.base.Layer;
 import org.jlab.geom.component.ScintillatorPaddle;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.groot.data.H1F;
-import org.jlab.groot.data.H2F;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
-import org.jlab.service.ec.ECCluster.ECClusterIndex;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -35,32 +31,48 @@ public class ECCommon {
     public static float[]  clusterError = new float[3];
     public static Boolean         debug = false;
     public static Boolean   singleEvent = false;
-    public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
+    //public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
         
     public static void initHistos() {
+        /*
         for (int is=1; is<7; is++){
             for (int il=1; il<4; il++) {             
                 H1_ecEng.add(is,il,0, new H1F("Cluster Errors",55,-10.,100.));
                 H1_ecEng.add(is,il,1, new H1F("Cluster Errors",55,-10.,100.));
             }
-        }
+        }*/
     }
     
     public static void resetHistos() {
+        /*
         for (int is=1; is<7; is++){
             for (int il=1; il<4; il++) {             
                 H1_ecEng.get(is,il,0).reset();
                 H1_ecEng.get(is,il,1).reset();
             }
-        }       
+        } */      
     }
     
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
-        if (singleEvent) resetHistos();
-        List<ECStrip>  ecStrips = ECCommon.readStrips(event);
+        if (singleEvent) resetHistos();        
+        
+        List<ECStrip>  ecStrips = null;
+        
+        if(event instanceof EvioDataEvent) {
+            ecStrips = ECCommon.readStrips(event);
+        }
+        
+        if(event instanceof HipoDataEvent) {
+            ecStrips = ECCommon.readStripsHipo(event);
+        }
+        
+        if(ecStrips==null) return new ArrayList<ECStrip>();
+        
         Collections.sort(ecStrips);
+        
+        
         IndexedTable   atten  = manager.getConstants(run, "/calibration/ec/attenuation");
         for(ECStrip strip : ecStrips){
             int sector    = strip.getDescriptor().getSector();
@@ -81,7 +93,24 @@ public class ECCommon {
         }
         return ecStrips;
     }
-    
+        
+    public static List<ECStrip>  readStripsHipo(DataEvent event){        
+        List<ECStrip>  strips = new ArrayList<ECStrip>();
+        if(event.hasBank("ECAL::adc")==true){
+            DataBank ecalBank = event.getBank("ECAL::adc");
+            int rows = ecalBank.rows();
+            for(int loop = 0; loop < rows; loop++){
+                int sector    = (int) ecalBank.getByte("sector", loop);
+                int layer     = (int) ecalBank.getByte("layer", loop);
+                int component = (int) ecalBank.getShort("component", loop);
+                ECStrip  strip = new ECStrip(sector, layer, component);
+                strip.setADC(ecalBank.getInt("ADC", loop));
+                //strip.setTDC(ecalBank.getInt("TDC", loop));
+                if(strip.getADC()>ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);
+            }
+        }
+        return strips;
+    }
     /**
      * Read Strips from PCAL and EC and return all strips
      * @param event
@@ -225,9 +254,9 @@ public class ECCommon {
                             pV.get(bV).redoPeakLine();
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(pU.get(bU),pV.get(bV),pW.get(bW));
-                            H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
+                            //H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
-                                H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
+                                //H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
                                 clusters.add(cluster);
                             }
                         }

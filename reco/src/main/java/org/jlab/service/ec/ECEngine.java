@@ -17,10 +17,12 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.hipo.HipoDataEvent;
 /**
  *
  * @author gavalian
@@ -34,22 +36,39 @@ public class ECEngine extends ReconstructionEngine {
     public ECEngine(){
         super("EC","gavalian","1.0");
     }
-        
+    
     @Override
     public boolean processDataEvent(DataEvent de) {
            
         ECCommon.debug       = this.debug;
         ECCommon.singleEvent = this.singleEvent;
+        int runNo = 10;
+        //System.out.println(" PROCESSING EC EVENT ");
+        /*if(de.hasBank("RUN::config")==true){
+            DataBank bank = de.getBank("RUN::config");
+            runNo = bank.getInt("run", 0);
+        }*/
+    
         
-        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), 2);        
+        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), runNo);
+        //System.out.println(" EC STRIPS ARRAY SIZE = " + ecStrips.size());
+        /*for(ECStrip strip : ecStrips){
+            System.out.println(strip);
+        }*/
+        
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak>    ecPeaks = ECCommon.processPeaks(ecPeaksALL);
+        for(ECPeak p : ecPeaks) p.redoPeakLine();
+        
+        /*for(ECPeak peak : ecPeaks){
+            System.out.println(peak);
+        }*/
+        
         int       peaksOriginal = ecPeaks.size();
         
         ECPeakAnalysis.splitPeaks(ecPeaks);
         int peaksOriginalSplit = ecPeaks.size();
         
-        for(ECPeak p : ecPeaks) p.redoPeakLine();
                 
         List<ECCluster>  cPCAL  = ECCommon.createClusters(ecPeaks,1);
         List<ECCluster>  cECIN  = ECCommon.createClusters(ecPeaks,4);
@@ -71,23 +90,11 @@ public class ECEngine extends ReconstructionEngine {
             if(cEC.size()==2) {for(ECCluster c : cEC) System.out.println(c);}
         }
         
-        writeBanks(de,ecStrips,ecPeaks,cEC);
+        if(de instanceof HipoDataEvent){
+            this.writeHipoBanks(de, cEC);
+        }
+        //writeBanks(de,ecStrips,ecPeaks,cEC);        
         
-        //for(ECPeak p : ecPeaks){ System.out.println(p);}
-        /*
-        for(ECPeak peak : ecPeaks){
-            //peak.redoPeakLine();
-            if(peak.getMultiplicity()==4){
-                System.out.println(peak);
-                int stripSplit = peak.getSplitStrip();                
-                if(stripSplit>0){
-                    List<ECPeak>  twoPeaks = peak.splitPeak(stripSplit);
-                    for(ECPeak p : twoPeaks){
-                        System.out.println("\t SPLIT PEAK  = " + p);                        
-                    }
-                }
-            }
-        }*/
         return true;
     }
     
@@ -156,8 +163,37 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setDouble("recEW", c, clusters.get(c).getEnergy(2));            
         }
         
-        de.appendBanks(bankS,bankP,bankC,bankD);        
-       
+        de.appendBanks(bankS,bankP,bankC,bankD);       
+    }
+    
+    private void writeHipoBanks(DataEvent event, List<ECCluster> clusters){
+        
+        DataBank bankC = event.createBank("ECAL::clusters", clusters.size());
+        
+        if(bankC==null){
+            System.out.println("ERROR CREATING BANK : ECAL::clusters");
+            return;
+        }
+        
+        for(int c = 0; c < clusters.size(); c++){
+            bankC.setByte("sector", c, (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
+            bankC.setByte("layer", c, (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
+            bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());
+            bankC.setFloat("time", c, (float) clusters.get(c).getTime());
+            bankC.setByte("idU", c, (byte) clusters.get(c).UVIEW_ID);
+            bankC.setByte("idV", c, (byte) clusters.get(c).VVIEW_ID);
+            bankC.setByte("idW", c, (byte) clusters.get(c).WVIEW_ID);
+            bankC.setFloat("x", c, (float) clusters.get(c).getHitPosition().x());
+            bankC.setFloat("y", c, (float) clusters.get(c).getHitPosition().y());
+            bankC.setFloat("z", c, (float) clusters.get(c).getHitPosition().z());
+            bankC.setFloat("widthU", c, clusters.get(c).getPeak(0).getMultiplicity());
+            bankC.setFloat("widthV", c, clusters.get(c).getPeak(1).getMultiplicity());
+            bankC.setFloat("widthW", c, clusters.get(c).getPeak(2).getMultiplicity());
+            bankC.setInt("coordU", c, clusters.get(c).getPeak(0).getCoord());
+            bankC.setInt("coordV", c, clusters.get(c).getPeak(1).getCoord());
+            bankC.setInt("coordW", c, clusters.get(c).getPeak(2).getCoord());
+        }
+        event.appendBanks(bankC);
     }
     
     public void setStripThresholds(int thr0, int thr1, int thr2) {
@@ -180,10 +216,10 @@ public class ECEngine extends ReconstructionEngine {
         ECCommon.clusterError[1] = err1;
         ECCommon.clusterError[2] = err2;
     }
-    
+    /*
     public DetectorCollection<H1F>  getHist() {
         return ECCommon.H1_ecEng;
-    }
+    }*/
     
     @Override
     public boolean init() {
@@ -191,7 +227,7 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
         };
-               
+        
         requireConstants(Arrays.asList(ecTables));
         
         ecDetector =  GeometryFactory.getDetector(DetectorType.EC);
@@ -200,7 +236,7 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
         
-        ECCommon.initHistos();
+        //ECCommon.initHistos();
         return true;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
