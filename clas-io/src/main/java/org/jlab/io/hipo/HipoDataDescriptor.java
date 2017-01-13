@@ -5,6 +5,7 @@
  */
 package org.jlab.io.hipo;
 
+import java.util.List;
 import org.jlab.hipo.schema.Schema;
 import org.jlab.io.base.DataDescriptor;
 
@@ -32,11 +33,13 @@ public class HipoDataDescriptor implements DataDescriptor {
         this.hipoSchema.setFromText(s);
     }
 
+    @Override
     public String[] getEntryList() {
-        int nentries = hipoSchema.getEntries();        
-        String[] entries = new String[nentries];
-        for(int i = 0; i < nentries; i++){
-            entries[i] = hipoSchema.getEntry(i).getName();
+        List<String>  entryList = hipoSchema.schemaEntryList();
+        String[] entries = new String[entryList.size()];
+        int counter = 0;
+        for(int i = 0; i < entryList.size(); i++){
+            entries[i] = entryList.get(i);
         }
         return entries;
     }

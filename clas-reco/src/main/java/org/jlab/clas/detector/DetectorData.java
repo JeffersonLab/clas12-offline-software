@@ -22,7 +22,7 @@ public class DetectorData {
      * @param bank_name
      * @return 
      */
-    public static List<DetectorResponse>  readHipoEvent(DataEvent event, String bank_name){
+    public static List<DetectorResponse>  readDetectorResponses(DataEvent event, String bank_name){
         List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
@@ -85,7 +85,12 @@ public class DetectorData {
         }
         return particles;
     }
-    
+    /**
+     * reads Detector Event, detector particles and detector responses and 
+     * then adds all associated responses to each particle.
+     * @param event
+     * @return 
+     */
     public static DetectorEvent  readDetectorEvent(DataEvent event){
         return DetectorData.readDetectorEvent(event, "REC::Particle", "REC::Detector");
     }
@@ -98,7 +103,7 @@ public class DetectorData {
             detectorEvent.addParticle(p);
         }
         
-        List<DetectorResponse> responses = DetectorData.readHipoEvent(event, response_bank);
+        List<DetectorResponse> responses = DetectorData.readDetectorResponses(event, response_bank);
         for(DetectorResponse r : responses){
             int association = r.getAssociation();
             if(association>=0&&association<detectorEvent.getParticles().size()){
@@ -114,7 +119,7 @@ public class DetectorData {
      * @param bank_name
      * @return 
      */
-    public static DataBank getDetectorParticles(List<DetectorParticle> particles, DataEvent event, String bank_name){
+    public static DataBank getDetectorParticleBank(List<DetectorParticle> particles, DataEvent event, String bank_name){
         DataBank bank = event.createBank(bank_name, particles.size());
         for(int row = 0; row < particles.size(); row++){
             bank.setInt("pid",row,particles.get(row).getPid());
@@ -133,6 +138,33 @@ public class DetectorData {
         }
         return bank;
     }
-    
-   
+    /**
+     * creates a detector response bank
+     * @param responses
+     * @param event
+     * @param bank_name
+     * @return 
+     */
+   public static DataBank getDetectorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, responses.size());
+       for(int row = 0; row < responses.size(); row++){
+           DetectorResponse r = responses.get(row);
+           bank.setShort("pindex", row, (short) r.getAssociation());
+           bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
+           bank.setShort("sector", row, (short) r.getDescriptor().getSector());
+           bank.setShort("sector", row, (short) r.getDescriptor().getSector());
+           bank.setShort("layer", row, (short) r.getDescriptor().getLayer());
+           bank.setShort("component", row, (short) r.getDescriptor().getComponent());
+           bank.setFloat("x", row, (float) r.getPosition().x());
+           bank.setFloat("y", row, (float) r.getPosition().y());
+           bank.setFloat("z", row, (float) r.getPosition().z());
+           bank.setFloat("hx", row, (float) r.getMatchedPosition().x());
+           bank.setFloat("hy", row, (float) r.getMatchedPosition().y());
+           bank.setFloat("hz", row, (float) r.getMatchedPosition().z());
+           bank.setFloat("path", row, (float) r.getPath());
+           bank.setFloat("time", row, (float) r.getTime());
+           bank.setFloat("energy", row, (float) r.getEnergy());
+       }
+       return bank;
+   }
 }

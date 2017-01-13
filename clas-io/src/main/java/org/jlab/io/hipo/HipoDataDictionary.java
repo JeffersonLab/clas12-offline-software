@@ -30,10 +30,14 @@ public class HipoDataDictionary implements DataDictionary {
         SchemaFactory factory = new SchemaFactory();
         factory.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         List<Schema> entries = factory.getSchemaList();
+        //System.out.println(" schema size = " + entries.size());
         for(Schema sch : entries){
+
             HipoDataDescriptor desc = new HipoDataDescriptor(sch);
             descriptors.put(desc.getName(), desc);
+            //System.out.println("name = " + sch.getName() + "  desc = " + desc.getName());
         }
+        System.out.println("  >>>>> loading default dictionary : entries = " + descriptors.size());
     }
     
     @Override
@@ -72,4 +76,18 @@ public class HipoDataDictionary implements DataDictionary {
         return bank;
     }
     
+    public static void main(String[] args){
+        System.setProperty("CLAS12DIR", "/Users/gavalian/Work/Software/Release-9.0/COATJAVA/coatjava");
+        HipoDataDictionary dict = new HipoDataDictionary();
+        
+        String[] list = dict.getDescriptorList();
+        for(String item : list){
+            System.out.println("---> " + item);
+            HipoDataDescriptor desc = (HipoDataDescriptor) dict.getDescriptor(item);
+            String[] entries = desc.getEntryList();
+            for(int i = 0; i < entries.length; i++){
+                System.out.println("\t\t---> " + entries[i]);
+            }
+        }
+    }
 }

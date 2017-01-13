@@ -69,6 +69,25 @@ public class DetectorEvent {
 
     
     public List<DetectorParticle> getParticles(){ return this.particleList;}
+    public DetectorParticle  getParticle(int index) { return this.particleList.get(index);}
+    
+    public void moveUp(int index){
+        if(index>0 && index < this.particleList.size()){
+            DetectorParticle p = this.particleList.get(index);
+            this.particleList.remove(index);
+            this.particleList.add(0, p);
+            this.setAssociation();
+        }
+    }
+    
+    public void setAssociation(){
+        for(int index = 0; index < this.particleList.size(); index++){
+            List<DetectorResponse> responses = particleList.get(index).getDetectorResponses();
+            for(DetectorResponse r : responses){
+                r.setAssociation(index);
+            }
+        }
+    }
     
     public void addParticle(double px, double py, double pz,
             double vx, double vy, double vz){
