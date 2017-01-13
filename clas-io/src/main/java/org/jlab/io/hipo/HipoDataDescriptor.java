@@ -16,7 +16,15 @@ public class HipoDataDescriptor implements DataDescriptor {
 
     private final Schema hipoSchema = new Schema();
     
-    public void init(Schema schema){
+    public HipoDataDescriptor(){
+
+    }
+     
+    public HipoDataDescriptor(Schema schema){
+        this.init(schema);
+    }
+    
+    public final void init(Schema schema){
         hipoSchema.copy(schema);
     }
     
@@ -25,7 +33,11 @@ public class HipoDataDescriptor implements DataDescriptor {
     }
 
     public String[] getEntryList() {
-        String[] entries = new String[1];
+        int nentries = hipoSchema.getEntries();        
+        String[] entries = new String[nentries];
+        for(int i = 0; i < nentries; i++){
+            entries[i] = hipoSchema.getEntry(i).getName();
+        }
         return entries;
     }
 
@@ -61,7 +73,7 @@ public class HipoDataDescriptor implements DataDescriptor {
     }
 
     public void show() {
-        
+        System.out.println(this.hipoSchema.toString());
     }
 
     public String getName() {

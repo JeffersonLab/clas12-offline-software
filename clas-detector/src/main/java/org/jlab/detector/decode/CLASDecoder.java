@@ -30,8 +30,17 @@ public class CLASDecoder {
     private List<DetectorDataDgtz>       dataList = new ArrayList<DetectorDataDgtz>();    
     private HipoDataSync                   writer = null;
     private HipoDataEvent               hipoEvent = null;
+    private int                  decoderDebugMode = 0;
     
     private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
+    
+    public CLASDecoder(boolean development){
+        codaDecoder = new CodaEventDecoder();
+        detectorDecoder = new DetectorEventDecoder(development);
+        //dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        writer = new HipoDataSync();
+        hipoEvent = (HipoDataEvent) writer.createEvent();
+    }
     
     public CLASDecoder(){        
         codaDecoder = new CodaEventDecoder();
@@ -41,13 +50,39 @@ public class CLASDecoder {
         hipoEvent = (HipoDataEvent) writer.createEvent();
     }
     
+    public static CLASDecoder createDecoder(){
+        CLASDecoder decoder = new CLASDecoder();
+        return decoder;
+    }
+    
+    public static CLASDecoder createDecoderDevel(){
+        CLASDecoder decoder = new CLASDecoder(true);
+        return decoder;
+    }
+    
+    public void setDebugMode(int mode){
+        this.decoderDebugMode = mode;
+    }
+    
     public void initEvent(DataEvent event){
         
         if(event instanceof EvioDataEvent){
             try {
                 dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
+                if(this.decoderDebugMode>0){
+                    System.out.println("\n>>>>>>>>> RAW decoded data");
+                    for(DetectorDataDgtz data : dataList){
+                        System.out.println(data);
+                    }
+                }
                 detectorDecoder.translate(dataList);
                 detectorDecoder.fitPulses(dataList);
+                if(this.decoderDebugMode>0){
+                    System.out.println("\n>>>>>>>>> TRANSLATED data");
+                    for(DetectorDataDgtz data : dataList){
+                        System.out.println(data);
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -244,10 +279,12 @@ public class CLASDecoder {
     
     public static void main(String[] args){
         
-        OptionParser parser = new OptionParser();
-        parser.addOption("-n", "-1");        
-        parser.addRequired("-o");
-        parser.addOption("-c", "0");
+        OptionParser parser = new OptionParser("decoder");
+        parser.addOption("-n", "-1", "maximum number of events to process");        
+        parser.addOption("-c", "0", "compression type (0-NONE, 1-GZIP, 2-LZ4)");
+        parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
+        parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
+        parser.addRequired("-o","output.hipo");
         
         parser.parse(args);
         
@@ -256,14 +293,33 @@ public class CLASDecoder {
         if(parser.hasOption("-o")==true){
             
             if(inputList.isEmpty()==true){
-                System.out.println("\n error : no input file is specified....");
+                parser.printUsage();
+                System.out.println("\n >>>> error : no input file is specified....\n");
                 System.exit(0);
+            }
+            
+            String modeDevel = parser.getOption("-m").stringValue();
+            boolean developmentMode = false;
+            
+            if(modeDevel.compareTo("run")!=0&&modeDevel.compareTo("devel")!=0){
+                parser.printUsage();
+                System.out.println("\n >>>> error : mode has to be set to \"run\" or \"devel\" ");
+                System.exit(0);
+            }
+            
+            
+            if(modeDevel.compareTo("devel")==0){
+                developmentMode = true;
             }
             
             String outputFile = parser.getOption("-o").stringValue();
             int compression = parser.getOption("-c").intValue();
+            int debug = parser.getOption("-d").intValue();            
             
-            CLASDecoder decoder = new CLASDecoder();
+            CLASDecoder decoder = new CLASDecoder(developmentMode);
+            
+            decoder.setDebugMode(debug);
+            
             HipoDataSync writer = new HipoDataSync();
             writer.setCompressionType(compression);
             

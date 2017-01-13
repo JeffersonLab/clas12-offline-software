@@ -30,6 +30,7 @@ then
     echo "---> Building documentation ...."
     javadoc -d javadoc/clas-io -sourcepath clas-io/src/main/java/ -subpackages org
     javadoc -d javadoc/clas-geometry   -sourcepath clas-geometry/src/main/java/ -subpackages org
+    javadoc -d javadoc/clas-io         -sourcepath clas-io/src/main/java/  -subpackages org
     javadoc -d javadoc/clas-physics    -sourcepath clas-physics/src/main/java/  -subpackages org
     javadoc -d javadoc/clas-detector   -sourcepath clas-detector/src/main/java/ -subpackages org
     javadoc -d javadoc/clas-utils      -sourcepath clas-utils/src/main/java/    -subpackages org

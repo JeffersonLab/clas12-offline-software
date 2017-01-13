@@ -28,8 +28,7 @@ import org.jlab.utils.data.DataUtils;
  * @author gavalian
  */
 public class CodaEventDecoder {
-    
-    
+        
     
     public CodaEventDecoder(){
         
@@ -240,6 +239,7 @@ public class CodaEventDecoder {
                 }
 
                 int position = 0;
+                //System.out.println(">>>>>> decoding 57602 with data size = " + cdatatypes.size());
                 //System.out.println("N-VALUE = " + cdataitems.get(3).toString());
                 while((position+4)<cdatatypes.size()){                    
                 
@@ -286,6 +286,10 @@ public class CodaEventDecoder {
                         counter++;
                     }
                 }
+                //System.out.println(">>>>>> decoding 57602 final position = " + position);
+                //for(DetectorDataDgtz data : entries){
+                //    System.out.println(data);
+                //}
                 return entries;
             } catch (EvioException ex) {
                 Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);

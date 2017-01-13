@@ -38,8 +38,48 @@ public class DetectorEventDecoder {
     
     
     
+    public DetectorEventDecoder(boolean development){
+        if(development==true){
+            this.initDecoderDev();
+        } else {
+            this.initDecoder();
+        }
+    }
+    
     public DetectorEventDecoder(){
+        this.initDecoder();
+        /*
+        keysTrans = Arrays.asList(new String[]{
+            "FTCAL","FTHODO","LTCC","EC","FTOF","HTCC","DC"
+        });
         
+        tablesTrans = Arrays.asList(new String[]{
+            "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/ltcc",
+            "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc"
+        });
+        
+        translationManager.init(keysTrans,tablesTrans);
+        
+        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTOF","LTCC","EC","HTCC"});
+        tablesFitter = Arrays.asList(new String[]{
+            "/daq/fadc/ftcal","/daq/fadc/ftof","/daq/fadc/ltcc","/daq/fadc/ec",
+            "/daq/fadc/htcc"
+        });
+        fitterManager.init(keysFitter, tablesFitter);
+        */
+    }
+    
+    public final void initDecoderDev(){
+        keysTrans = Arrays.asList(new String[]{ "HTCC"} );
+        tablesTrans = Arrays.asList(new String[]{ "/daq/tt/clasdev/htcc" });
+        
+        keysFitter   = Arrays.asList(new String[]{"HTCC"});
+        tablesFitter = Arrays.asList(new String[]{"/daq/fadc/clasdev/htcc"});
+        translationManager.init(keysTrans,tablesTrans);
+        fitterManager.init(keysFitter, tablesFitter);
+    }
+    
+    public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
             "FTCAL","FTHODO","LTCC","EC","FTOF","HTCC","DC"
         });

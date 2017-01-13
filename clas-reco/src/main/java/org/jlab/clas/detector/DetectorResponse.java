@@ -115,6 +115,7 @@ public class DetectorResponse {
         }
         return responseList;
     }
+    
     /**
      * Reads a HIPO event, constructs list of detector responses then returns only
      * entries with energy above given threshold.
