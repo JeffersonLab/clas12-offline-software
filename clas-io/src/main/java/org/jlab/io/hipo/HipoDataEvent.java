@@ -7,6 +7,8 @@ package org.jlab.io.hipo;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.jlab.hipo.data.HipoEvent;
 import org.jlab.hipo.data.HipoGroup;
@@ -38,7 +40,18 @@ public class HipoDataEvent implements DataEvent {
     public HipoEvent  getHipoEvent(){return this.hipoEvent;}
     
     public String[] getBankList() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<Schema> schemaList = hipoEvent.getSchemaFactory().getSchemaList();
+        List<String> existingBanks = new ArrayList<String>();
+        for(Schema schema : schemaList){
+            int group = schema.getGroup();
+            if(hipoEvent.hasGroup(group)==true){
+                existingBanks.add(schema.getName());
+            }
+        }
+        
+        String[] list = new String[existingBanks.size()];
+        for(int i = 0; i < list.length; i++) list[i] = existingBanks.get(i);
+        return list;
     }
 
     public String[] getColumnList(String bank_name) {

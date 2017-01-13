@@ -39,7 +39,7 @@ public class HipoDataSource implements DataSource {
     }
 
     public void open(File file) {
-        
+        this.open(file.getAbsolutePath());
     }
 
     public void open(String filename) {

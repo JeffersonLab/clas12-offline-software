@@ -70,6 +70,21 @@ public class DetectorEvent {
     
     public List<DetectorParticle> getParticles(){ return this.particleList;}
     public DetectorParticle  getParticle(int index) { return this.particleList.get(index);}
+    /**
+     * returns detector response list contained in all the particles. first the association
+     * is ran to ensure that all detector responses have proper a
+     * @return 
+     */
+    public List<DetectorResponse>  getDetectorResponseList(){
+        this.setAssociation();
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        for(DetectorParticle p : this.particleList){
+            for(DetectorResponse r : p.getDetectorResponses()){
+                responses.add(r);
+            }
+        }
+        return responses;
+    }
     
     public void moveUp(int index){
         if(index>0 && index < this.particleList.size()){
