@@ -30,7 +30,7 @@ public class DataDistributionService {
     private DataDistributionRing ringProducer = null;
     private CLASDecoder decoder = null;
     private DataSource  dataSource  = null;
-    private int decoderDelay        = 5;
+    private int decoderDelay        = 1;
     
     public DataDistributionService(){
         decoder = new CLASDecoder();
@@ -82,6 +82,9 @@ public class DataDistributionService {
                 ringProducer.addEvioEvent((EvioDataEvent) event);
                 ringProducer.addEvent(decodedEvent);
                 progress.updateStatus();
+                if(this.decoderDelay>2){
+                    this.waitFor(decoderDelay);
+                }
             }
         }
     }
@@ -119,6 +122,9 @@ public class DataDistributionService {
                     HipoDataEvent decodedEvent = (HipoDataEvent) decoder.getDataEvent(event);
                     ringProducer.addEvent(decodedEvent);
                     progress.updateStatus();
+                    if(this.decoderDelay>2){
+                        this.waitFor(this.decoderDelay);
+                    }
                 } else {
                     System.out.println(" error there are no events");
                 }
@@ -148,6 +154,9 @@ public class DataDistributionService {
                 HipoDataEvent event = (HipoDataEvent) dataSource.getNextEvent();                
                 ringProducer.addEvent(event);
                 progress.updateStatus();
+                if(this.decoderDelay>0){
+                    this.waitFor(this.decoderDelay);
+                }
             }
             counter++;
             /*System.out.println();
@@ -158,10 +167,11 @@ public class DataDistributionService {
     }
         
     public static void main(String[] args){
+        
         OptionParser  parser = new OptionParser();
         
         //parser.addOption("-et","");
-        parser.addOption("-d","5");
+        parser.addOption("-d","1");
         parser.addRequired("-type");
         parser.addRequired("-file");
         parser.addOption("-r","true");

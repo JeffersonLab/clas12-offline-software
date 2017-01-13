@@ -8,6 +8,7 @@ package org.jlab.io.task;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -68,22 +69,37 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.RAISED));
         
-        sourceFile = new JButton();
-        sourceFile.setIcon(fileIcon);
-        sourceFile.setActionCommand("OpenFile");                
+        sourceFile = new JButton("E");
+        //sourceFile.setIcon(fileIcon);
+        sourceFile.setPreferredSize(new Dimension(35, 35));
+        sourceFile.setActionCommand("OpenFile"); 
+        sourceFile.setToolTipText("Open EVIO file.");        
         sourceFile.addActionListener(this);
         
+        JButton sourceFileEt = new JButton("Et");
+        //sourceFile.setIcon(fileIcon);
+        sourceFileEt.setPreferredSize(new Dimension(35, 35));
+        sourceFileEt.setActionCommand("OpenFileET");
+        sourceFileEt.setToolTipText("Connect to ET ring");        
+        sourceFileEt.addActionListener(this);
+        
         JButton sourceFileHipo = new JButton("H");
+        sourceFileHipo.setPreferredSize(new Dimension(35, 35));
         sourceFileHipo.setActionCommand("OpenFileHipo");
+        sourceFileHipo.setToolTipText("Open Hipo file");
         sourceFileHipo.addActionListener(this);
         
-        JButton sourceFileRing = new JButton("R");
+        JButton sourceFileRing = new JButton("HR");
         sourceFileRing.setActionCommand("OpenFileRing");
+        sourceFileRing.setToolTipText("Connect to xMsg Hipo ring");
+        sourceFileRing.setPreferredSize(new Dimension(35, 35));
         sourceFileRing.addActionListener(this);
         //sourceFile.setBackground(this.paneBackground);
         
         JButton resetListeners = new JButton("Reset");
         resetListeners.setActionCommand("ResetListeners");
+        resetListeners.setPreferredSize(new Dimension(55, 35));
+        resetListeners.setToolTipText("Reset data listeners");
         resetListeners.addActionListener(this);
         
         JPanel mediaPane = this.createMediaPane();
@@ -93,6 +109,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         sourcePane.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.LOWERED));
         //sourcePane.setBackground(Color.LIGHT_GRAY);
         sourcePane.add(sourceFile);
+        sourcePane.add(sourceFileEt);
         sourcePane.add(sourceFileHipo);
         sourcePane.add(sourceFileRing);
         sourcePane.add(resetListeners);
