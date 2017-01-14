@@ -6,7 +6,9 @@
 package org.jlab.io.hipo;
 
 import java.util.List;
+import org.jlab.hipo.data.HipoNodeType;
 import org.jlab.hipo.schema.Schema;
+import org.jlab.hipo.schema.Schema.SchemaEntry;
 import org.jlab.io.base.DataDescriptor;
 
 /**
@@ -60,7 +62,18 @@ public class HipoDataDescriptor implements DataDescriptor {
     }
 
     public int getProperty(String property_name, String entry_name) {
-        return 1;
+        if(property_name.compareTo("type")==0){
+            SchemaEntry entry = this.hipoSchema.getEntry(entry_name);
+            if(entry!=null){
+                if(entry.getType()==HipoNodeType.BYTE)  return 1;
+                if(entry.getType()==HipoNodeType.SHORT) return 2;
+                if(entry.getType()==HipoNodeType.INT) return 3;
+                if(entry.getType()==HipoNodeType.FLOAT) return 4;
+                if(entry.getType()==HipoNodeType.DOUBLE) return 5;
+                return 0;
+            }
+        }
+        return 0;
     }
 
     public int getProperty(String property_name) {
