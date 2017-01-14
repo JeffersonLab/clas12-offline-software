@@ -1,6 +1,6 @@
 package cnuphys.ced.clasio.queue;
 
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 public interface IEventProcessor {
 
@@ -8,5 +8,5 @@ public interface IEventProcessor {
      * Process an event. 
      * @param event the EvioDataEvent event to process.
      */
-    public void processEvent(EvioDataEvent event);
+    public void processEvent(DataEvent event);
 }

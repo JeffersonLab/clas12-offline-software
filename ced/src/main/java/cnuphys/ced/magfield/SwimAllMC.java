@@ -4,11 +4,12 @@ import java.util.Vector;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.StreamTimer;
 import cnuphys.lund.LundId;
@@ -33,7 +34,7 @@ public class SwimAllMC implements ISwimAll {
 	private static final double RMAX = 10.0;
 	private static final double PATHMAX = 10.0;
 
-	//get row data from FastMC even instead of evio
+	//get row data from FastMC event 
 	private Vector<TrajectoryRowData> getRowDataFastMC() {
 		PhysicsEvent event = FastMCManager.getInstance().getCurrentGenEvent();
 		if ((event == null) || (event.count() < 1)) {
@@ -74,29 +75,35 @@ public class SwimAllMC implements ISwimAll {
 	 */
 	@Override
 	public Vector<TrajectoryRowData> getRowData() {
+		
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		if (event == null) {
+			return null;
+		}
+		DataManager dm = DataManager.getInstance();
 
 		if (ClasIoEventManager.getInstance().isSourceFastMC()) {
 			return getRowDataFastMC();
 		}
 
-		int pid[] = ColumnData.getIntArray("GenPart::true.pid");
+		int pid[] = dm.getIntArray(event, "GenPart::true.pid");
 
 		int len = (pid == null) ? 0 : pid.length;
 		if (len < 1) {
 			return null;
 		}
 		
-		double px[] = ColumnData.getDoubleArray("GenPart::true.px");
+		float px[] = dm.getFloatArray(event, "GenPart::particle.px");
 		if (px == null) {
 			return null;
 		}
-		double py[] = ColumnData.getDoubleArray("GenPart::true.py");
-		double pz[] = ColumnData.getDoubleArray("GenPart::true.pz");
-		double vx[] = ColumnData.getDoubleArray("GenPart::true.vx");
-		double vy[] = ColumnData.getDoubleArray("GenPart::true.vy");
-		double vz[] = ColumnData.getDoubleArray("GenPart::true.vz");
-		
-		
+		float py[] = dm.getFloatArray(event, "GenPart::particle.py");
+		float pz[] = dm.getFloatArray(event, "GenPart::particle.pz");
+		float vx[] = dm.getFloatArray(event, "GenPart::particle.vx");
+		float vy[] = dm.getFloatArray(event, "GenPart::particle.vy");
+		float vz[] = dm.getFloatArray(event, "GenPart::particle.vz");
+
+				
 		Vector<TrajectoryRowData> v = new Vector<TrajectoryRowData>(len);
 
 		try {
@@ -179,22 +186,28 @@ public class SwimAllMC implements ISwimAll {
 
 		Swimming.clearMCTrajectories(); // clear all existing trajectories
 		
-		int pid[] = ColumnData.getIntArray("GenPart::true.pid");
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		if (event == null) {
+			return;
+		}
+		DataManager dm = DataManager.getInstance();
+
+		int pid[] = dm.getIntArray(event, "GenPart::true.pid");
 
 		int len = (pid == null) ? 0 : pid.length;
 		if (len < 1) {
 			return;
 		}
 		
-		double px[] = ColumnData.getDoubleArray("GenPart::true.px");
+		float px[] = dm.getFloatArray(event, "GenPart::particle.px");
 		if (px == null) {
 			return;
 		}
-		double py[] = ColumnData.getDoubleArray("GenPart::true.py");
-		double pz[] = ColumnData.getDoubleArray("GenPart::true.pz");
-		double vx[] = ColumnData.getDoubleArray("GenPart::true.vx");
-		double vy[] = ColumnData.getDoubleArray("GenPart::true.vy");
-		double vz[] = ColumnData.getDoubleArray("GenPart::true.vz");
+		float py[] = dm.getFloatArray(event, "GenPart::particle.py");
+		float pz[] = dm.getFloatArray(event, "GenPart::particle.pz");
+		float vx[] = dm.getFloatArray(event, "GenPart::particle.vx");
+		float vy[] = dm.getFloatArray(event, "GenPart::particle.vy");
+		float vz[] = dm.getFloatArray(event, "GenPart::particle.vz");
 
 
 		try {

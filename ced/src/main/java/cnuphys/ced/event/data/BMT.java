@@ -1,5 +1,7 @@
 package cnuphys.ced.event.data;
 
+import cnuphys.ced.alldata.DataManager;
+
 /**
  * static methods to centralize getting data arrays related to BMT
  * @author heddle
@@ -13,7 +15,7 @@ public class BMT {
 	 * @return the pid array
 	 */
 	public static int[] pid() {
-		return ColumnData.getIntArray("BMT::true.pid");
+		return DataManager.getInstance().getIntArray("BMT::true.pid");
 	}
 		
 	/**

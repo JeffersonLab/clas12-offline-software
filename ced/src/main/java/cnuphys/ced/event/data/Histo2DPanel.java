@@ -4,6 +4,8 @@ import java.awt.GridLayout;
 
 import javax.swing.JPanel;
 
+import cnuphys.ced.alldata.graphics.HistoPanel;
+import cnuphys.ced.alldata.graphics.SelectPanel;
 import cnuphys.splot.pdata.Histo2DData;
 
 public class Histo2DPanel extends JPanel {

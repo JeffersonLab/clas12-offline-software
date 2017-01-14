@@ -13,6 +13,7 @@ import org.jlab.io.hipo.HipoDataDictionary;
 import org.jlab.io.hipo.HipoDataSource;
 
 import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.clasio.RunData;
 
 public class HippoTest {
 
@@ -23,6 +24,7 @@ public class HippoTest {
 	//hippo dictionary
 //	private static HipoDataDictionary _dictionary;
 
+	private static RunData _runData = new RunData();
 	
 	private static boolean eventTest() {
 		HipoDataSource source = new HipoDataSource();
@@ -32,7 +34,9 @@ public class HippoTest {
 		
 		DetectorResponse response;
 
-		while(source.hasEvent()){
+		int eventCount = 0;
+		while((eventCount < 3) && source.hasEvent()){
+			eventCount++;
 			DataEvent dataEvent = source.getNextEvent();
 			System.out.println("GOT EVENT: " + source.getCurrentIndex() + "   with banks: ");
 			
@@ -46,6 +50,10 @@ public class HippoTest {
 			for (String ss : curentbankList) {
 				System.out.println("   " + ss);
 			}
+			
+//			if (_runData.set(dataEvent)) {
+//				System.out.println(_runData.toString());
+//			}
 		} 
 		
 		return true;
@@ -63,7 +71,7 @@ public class HippoTest {
 //			}
 //		}
 
-		DataManager dataManager = new DataManager(new HipoDataDictionary());
+		DataManager dataManager = DataManager.getInstance();
 //		_dictionary = new HipoDataDictionary();
 //		String hipoBanks[] = _dictionary.getDescriptorList();
 //		Arrays.sort(hipoBanks);
@@ -128,10 +136,10 @@ public class HippoTest {
 			System.exit(1);
 		}
 		
-//		if (!eventTest()) {
-//			System.out.println("Failed event test. Exiting.");
-//			System.exit(1);
-//		}
+		if (!eventTest()) {
+			System.out.println("Failed event test. Exiting.");
+			System.exit(1);
+		}
 
 	}
 }

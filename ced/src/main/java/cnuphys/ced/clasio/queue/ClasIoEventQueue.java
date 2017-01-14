@@ -2,7 +2,7 @@ package cnuphys.ced.clasio.queue;
 
 import java.util.Vector;
 
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 /**
  * A queue for holding events to be used in a wait-notify manner.
@@ -11,7 +11,7 @@ import org.jlab.io.evio.EvioDataEvent;
  * 
  */
 @SuppressWarnings("serial")
-public class ClasIoEventQueue extends Vector<EvioDataEvent> {
+public class ClasIoEventQueue extends Vector<DataEvent> {
 
 	// specifies whether new events are accepted
 	private boolean _accept = true;
@@ -29,7 +29,7 @@ public class ClasIoEventQueue extends Vector<EvioDataEvent> {
 	 * @param event
 	 *            the event to queue
 	 */
-	public synchronized void queue(EvioDataEvent event) {
+	public synchronized void queue(DataEvent event) {
 		add(event);
 	}
 
@@ -42,7 +42,7 @@ public class ClasIoEventQueue extends Vector<EvioDataEvent> {
 	 * @returns <code>true</true> as specified by JAVA.
 	 */
 	@Override
-	public synchronized boolean add(EvioDataEvent event) {
+	public synchronized boolean add(DataEvent event) {
 		if ((event != null) && _accept) {
 			super.add(event);
 			// notify any threads waiting for events
@@ -66,7 +66,7 @@ public class ClasIoEventQueue extends Vector<EvioDataEvent> {
 	 * 
 	 * @return a EvioDataEvent event for processing.
 	 */
-	public synchronized EvioDataEvent dequeue() {
+	public synchronized DataEvent dequeue() {
 		if (isEmpty()) {
 			try {
 				// wait until notified of arriving event

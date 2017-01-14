@@ -801,7 +801,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * @param event
 	 *            the new event
 	 */
-	protected void fixTitle(EvioDataEvent event) {
+	protected void fixTitle(DataEvent event) {
 		String title = getTitle();
 		int index = title.indexOf(evnumAppend);
 		if (index > 0) {

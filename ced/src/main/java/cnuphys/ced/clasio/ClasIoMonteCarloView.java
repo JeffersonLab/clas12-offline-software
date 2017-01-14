@@ -3,7 +3,7 @@ package cnuphys.ced.clasio;
 import java.util.Vector;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.lund.TrajectoryRowData;
@@ -42,7 +42,7 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		_trajectoryTable.clear(); // remove existing events
 
 		// now fill the table.

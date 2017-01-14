@@ -9,6 +9,8 @@ import org.jlab.io.evio.EvioDataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
@@ -39,16 +41,16 @@ public class Histogram2D extends PlotDialog {
 		String xname = histoData.getXName();
 		String yname = histoData.getYName();
 		
-		boolean isColumnX = ColumnData.validColumnName(xname);
-		boolean isColumnY = ColumnData.validColumnName(yname);
+		boolean isColumnX = DataManager.getInstance().validColumnName(xname);
+		boolean isColumnY = DataManager.getInstance().validColumnName(yname);
 
 		if (isColumnX) {
-			_colDatX = ColumnData.getColumnData(xname);
+			_colDatX = DataManager.getInstance().getColumnData(xname);
 		} else {
 			_namedExpressionNameX = xname;
 		}
 		if (isColumnY) {
-			_colDatY = ColumnData.getColumnData(yname);
+			_colDatY = DataManager.getInstance().getColumnData(yname);
 		} else {
 			_namedExpressionNameY = yname;
 		}
@@ -138,7 +140,7 @@ public class Histogram2D extends PlotDialog {
 	
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			
 			

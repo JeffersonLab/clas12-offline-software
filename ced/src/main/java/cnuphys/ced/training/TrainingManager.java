@@ -8,7 +8,7 @@ import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.geom.DetectorHit;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.fastmc.AcceptanceManager;
@@ -113,7 +113,7 @@ public class TrainingManager implements IClasIoEventListener {
 	}
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 	}
 
 	@Override

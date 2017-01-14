@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Environment;
+import cnuphys.ced.alldata.graphics.SelectPanel;
 
 public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 

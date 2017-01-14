@@ -1,6 +1,5 @@
 package cnuphys.ced.clasio;
 
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -11,26 +10,20 @@ import java.util.Vector;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
-import org.jlab.io.evio.EvioDataDictionary;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioFactory;
-import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
 
-import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
-import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.EC;
-import cnuphys.ced.event.data.GEMCMetaDataContainer;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.frame.Ced;
@@ -45,8 +38,8 @@ public class ClasIoEventManager {
 	public static JRadioButtonMenuItem fileRadioMenuItem; // file
 
 	/** check box for ET as event source */
-	public static JRadioButtonMenuItem etRadioMenuItem; // ET system
-	
+	public static JRadioButtonMenuItem ringRadioMenuItem; // ET system
+
 	/** check box for FastMC as an event source */
 	public static JRadioButtonMenuItem fastMCRadioMenuItem; // FastMC system
 
@@ -64,9 +57,9 @@ public class ClasIoEventManager {
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
-		FILE, ET, FASTMC
+		FILE, RING, FASTMC
 	}
-	
+
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
 
@@ -94,32 +87,22 @@ public class ClasIoEventManager {
 	private static ClasIoEventManager instance;
 
 	// the current event
-	private EvioDataEvent _currentEvent;
+	private DataEvent _currentEvent;
 
-	// the gemc metadata container
-	private GEMCMetaDataContainer _gemcMetaData;
 
 	// private constructor for singleton
 	private ClasIoEventManager() {
-		_dataSource = new EvioSource();
-		_gemcMetaData = new GEMCMetaDataContainer(this);
+		_dataSource = new HipoDataSource();
 	}
 
-	/**
-	 * Get the GEMCMetaData data
-	 * 
-	 * @return the GEMCMetaData data container
-	 */
-	public GEMCMetaDataContainer getGEMCMetaData() {
-		return _gemcMetaData;
-	}
 
 	/**
 	 * Get a collection of unique LundIds in the current event
+	 * 
 	 * @return a collection of unique LundIds
 	 */
 	public Vector<LundId> uniqueLundIds() {
-		
+
 		if (_uniqueLundIds != null) {
 			return _uniqueLundIds;
 		}
@@ -141,15 +124,16 @@ public class ClasIoEventManager {
 		} else {
 			if (_currentEvent != null) {
 				// use any bank with a true pid column
-				//String[] knownBanks = ClasIoEventManager.getInstance().getKnownBanks();
-				
+				// String[] knownBanks =
+				// ClasIoEventManager.getInstance().getKnownBanks();
+
 				String[] cbanks = _currentEvent.getBankList();
 				if (cbanks != null) {
 					for (String bankName : cbanks) {
 						if (bankName.contains("::true")) {
-							ColumnData cd = ColumnData.getColumnData(bankName, "pid");
+							ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
 							if (cd != null) {
-								int pid[] = (int[]) (cd.getDataArray());
+								int pid[] = (int[]) (cd.getDataArray(_currentEvent));
 								if (pid != null) {
 									for (int pdgid : pid) {
 										LundId lid = LundSupport.getInstance().get(pdgid);
@@ -165,7 +149,7 @@ public class ClasIoEventManager {
 				}
 			} // currentevent != null
 		}
-		
+
 		return _uniqueLundIds;
 	}
 
@@ -182,9 +166,9 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get the underlying clas-io EvioSource
+	 * Get the underlying clas-io data source
 	 * 
-	 * @return the EvioSource object
+	 * @return the DataSource object
 	 */
 	public DataSource getDataSource() {
 		return _dataSource;
@@ -198,7 +182,8 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * @param accumulating the accumulating to set
+	 * @param accumulating
+	 *            the accumulating to set
 	 */
 	public void setAccumulating(boolean accumulating) {
 		_accumulating = accumulating;
@@ -218,7 +203,7 @@ public class ClasIoEventManager {
 	 * 
 	 * @return the current event
 	 */
-	public EvioDataEvent getCurrentEvent() {
+	public DataEvent getCurrentEvent() {
 		return _currentEvent;
 	}
 
@@ -228,8 +213,7 @@ public class ClasIoEventManager {
 	 * @return the path of the current file
 	 */
 	public String getCurrentEventFilePath() {
-		return (_currentEventFile == null) ? "(none)"
-				: _currentEventFile.getPath();
+		return (_currentEventFile == null) ? "(none)" : _currentEventFile.getPath();
 	}
 
 	/**
@@ -246,8 +230,8 @@ public class ClasIoEventManager {
 		switch (estype) {
 		case FILE:
 			return (_currentEventFile == null) ? "(none)" : _currentEventFile.getName();
-		case ET:
-			return "ET";
+		case RING:
+			return "HIPPO Ring";
 		case FASTMC:
 			File lundFile = FastMCManager.getInstance().getCurrentFile();
 			return (lundFile == null) ? "(none)" : lundFile.getName();
@@ -255,81 +239,50 @@ public class ClasIoEventManager {
 
 		return s;
 	}
-	
+
 	/**
-	 * Set the clas-io evio source to read from an evio file
+	 * Set the source to read from an event file
 	 * 
-	 * @param path the full path to the file
-	 * @return the current compact reader (might be <code>null</code>);
+	 * @param path
+	 *            the full path to the file
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void openEvioFile(String path)
-			throws FileNotFoundException, IOException {
-		openEvioFile(new File(path));
+	public void openEventFile(String path) throws FileNotFoundException, IOException {
+		openEventFile(new File(path));
 	}
 
 	/**
-	 * Open an evio file
+	 * Open an event file
 	 * 
-	 * @param file the evio file
-	 * @return the current compact reader (might be <code>null</code>);
+	 * @param file
+	 *            the event file
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void openEvioFile(File file)
-			throws FileNotFoundException, IOException {
+	public void openEventFile(File file) throws FileNotFoundException, IOException {
 
 		if (!file.exists()) {
-			throw (new FileNotFoundException("Evio event file not found"));
+			throw (new FileNotFoundException("Event event file not found"));
 		}
 		if (!file.canRead()) {
-			throw (new FileNotFoundException("Evio file cannot be read"));
+			throw (new FileNotFoundException("Event file cannot be read"));
 		}
 
-		threadedOpenEvioFile(file);
-	}	
-	
-	//read in a separate thread
-	private void threadedOpenEvioFile(final File file) {
-
-		final BusyPanel busyPanel = Ced.getBusyPanel();
-		busyPanel.setText("Reading " + file.getPath());
-		busyPanel.setVisible(true);
+		_dataSource = new HipoDataSource();
+		_dataSource.open(file.getPath());
+		notifyEventListeners(file.getPath());
+		_currentEventFile = file;
 		
-		_dataSource.close();
-		_currentEvent = null;
-
-		class MyWorker extends SwingWorker<String, Void> {
-			@Override
-			protected String doInBackground() {
-				if (FileUtilities.getExtension(file).equals("hipo")) {
-					_dataSource = new HipoDataSource();
-				}
-				else {
-					_dataSource = new EvioSource();
-				}
-				_dataSource.open(file.getPath());
-				notifyEventListeners(file.getPath());
-				_currentEventFile = file;
-				return "Done.";
-			}
-
-			@Override
-			protected void done() {
-				
-				busyPanel.setVisible(false);
-				Ced.getCed().fixTitle();
-				try {
-					getNextEvent();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		new MyWorker().execute();
+		//TODO check if I need to skip the first event
+		
+//		try {
+//			getNextEvent();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
+
 
 	/**
 	 * Get the current event source type
@@ -337,20 +290,17 @@ public class ClasIoEventManager {
 	 * @return the current event source type
 	 */
 	public static EventSourceType getEventSourceType() {
-		if ((fileRadioMenuItem == null) || (etRadioMenuItem == null) || (fastMCRadioMenuItem == null)) {
+		if ((fileRadioMenuItem == null) || (ringRadioMenuItem == null) || (fastMCRadioMenuItem == null)) {
 			return EventSourceType.FILE;
 		}
 
 		if (fileRadioMenuItem.isSelected()) {
 			return EventSourceType.FILE;
-		}
-		else if (etRadioMenuItem.isSelected()) {
-			return EventSourceType.ET;
-		}
-		else if (fastMCRadioMenuItem.isSelected()) {
+		} else if (ringRadioMenuItem.isSelected()) {
+			return EventSourceType.RING;
+		} else if (fastMCRadioMenuItem.isSelected()) {
 			return EventSourceType.FASTMC;
-		}
-		else {
+		} else {
 			return EventSourceType.FILE;
 		}
 	}
@@ -358,7 +308,8 @@ public class ClasIoEventManager {
 	/**
 	 * Create the source *file, et) radio buttons
 	 * 
-	 * @param menu the menu to add them to (an event menu)
+	 * @param menu
+	 *            the menu to add them to (an event menu)
 	 */
 	public void createSourceItems(final ClasIoEventMenu menu) {
 
@@ -377,27 +328,30 @@ public class ClasIoEventManager {
 
 		};
 
-		//radio buttons for event source
-		fileRadioMenuItem = new JRadioButtonMenuItem("Events From EVIO or HIPO Files",
+		// radio buttons for event source
+		fileRadioMenuItem = new JRadioButtonMenuItem("Events From HIPPO File",
 				getEventSourceType() == EventSourceType.FILE);
-		etRadioMenuItem = new JRadioButtonMenuItem("Events From ET",
-				getEventSourceType() == EventSourceType.ET);
+		ringRadioMenuItem = new JRadioButtonMenuItem("Events From HIPPO Ring",
+				getEventSourceType() == EventSourceType.RING);
+
+		ringRadioMenuItem.setEnabled(false);
+
 		fastMCRadioMenuItem = new JRadioButtonMenuItem("Events From (FastMC) Lund Files",
 				getEventSourceType() == EventSourceType.FASTMC);
 
 		fileRadioMenuItem.addActionListener(sal);
-		etRadioMenuItem.addActionListener(sal);
+		ringRadioMenuItem.addActionListener(sal);
 		fastMCRadioMenuItem.addActionListener(sal);
 
-		etRadioMenuItem.setEnabled(false);
+		ringRadioMenuItem.setEnabled(false);
 
 		bg.add(fileRadioMenuItem);
-		bg.add(etRadioMenuItem);
+		bg.add(ringRadioMenuItem);
 		bg.add(fastMCRadioMenuItem);
 
 		menu.addSeparator();
 		menu.add(fileRadioMenuItem);
-		menu.add(etRadioMenuItem);
+		menu.add(ringRadioMenuItem);
 		menu.add(fastMCRadioMenuItem);
 	}
 
@@ -411,14 +365,14 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Check whether current event source type is ET
+	 * Check whether current event source type is the hippo ring
 	 * 
-	 * @return <code>true</code> is source type is ET.
+	 * @return <code>true</code> is source type is the hippo ring.
 	 */
-	public boolean isSourceET() {
-		return getEventSourceType() == EventSourceType.ET;
+	public boolean isSourceRing() {
+		return getEventSourceType() == EventSourceType.RING;
 	}
-	
+
 	/**
 	 * Check whether current event source type is FastMC
 	 * 
@@ -427,7 +381,6 @@ public class ClasIoEventManager {
 	public boolean isSourceFastMC() {
 		return getEventSourceType() == EventSourceType.FASTMC;
 	}
-
 
 	/**
 	 * Get the number of events available, 0 for ET since that is unknown.
@@ -439,10 +392,8 @@ public class ClasIoEventManager {
 		int evcount = 0;
 		if (isSourceFile()) {
 			evcount = _dataSource.getSize();
-		}
-		else if (isSourceET()) {
-		}
-		else if (isSourceFastMC()) {
+		} else if (isSourceRing()) {
+		} else if (isSourceFastMC()) {
 		}
 		return evcount;
 	}
@@ -456,8 +407,7 @@ public class ClasIoEventManager {
 		int evnum = 0;
 		if (isSourceFile()) {
 			evnum = _dataSource.getCurrentIndex() - 1;
-		}
-		else if (isSourceFastMC()) {
+		} else if (isSourceFastMC()) {
 			evnum = FastMCManager.getInstance().getEventNumber();
 		}
 		return evnum;
@@ -469,16 +419,15 @@ public class ClasIoEventManager {
 	 * @return <code>true</code> if any next event control should be enabled.
 	 */
 	public boolean isNextOK() {
-		
+
 		boolean isOK = true;
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
-		
+
 		switch (estype) {
 		case FILE:
-			isOK = (isSourceFile() && (getEventCount() > 0)
-					&& (getEventNumber() < getEventCount()));
+			isOK = (isSourceFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
 			break;
-		case ET:
+		case RING:
 			break;
 		case FASTMC:
 			isOK = (FastMCManager.getInstance().getCurrentFile() != null);
@@ -497,8 +446,7 @@ public class ClasIoEventManager {
 	public int getNumRemainingEvents() {
 		int numRemaining = 0;
 
-		if (isSourceFile() && (getEventCount() > 0)
-				&& (getEventNumber() < getEventCount())) {
+		if (isSourceFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount())) {
 			numRemaining = getEventCount() - getEventNumber();
 		}
 		return numRemaining;
@@ -534,7 +482,8 @@ public class ClasIoEventManager {
 	/**
 	 * Set the object that can swim all MonteCarlo particles
 	 * 
-	 * @param allSwimmer the object that can swim all MonteCarlo particles
+	 * @param allSwimmer
+	 *            the object that can swim all MonteCarlo particles
 	 */
 	public void setAllMCSwimmer(ISwimAll allSwimmer) {
 		_allMCSwimmer = allSwimmer;
@@ -552,7 +501,8 @@ public class ClasIoEventManager {
 	/**
 	 * Set the object that can swim all reconstructed particles
 	 * 
-	 * @param allSwimmer the object that can swim all reconstructed particles
+	 * @param allSwimmer
+	 *            the object that can swim all reconstructed particles
 	 */
 	public void setAllReconSwimmer(ISwimAll allSwimmer) {
 		_allReconSwimmer = allSwimmer;
@@ -563,22 +513,20 @@ public class ClasIoEventManager {
 	 * 
 	 * @return the next event, if possible
 	 */
-	public EvioDataEvent getNextEvent() {
-
+	public DataEvent getNextEvent() {
 
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
 		switch (estype) {
 		case FILE:
-			_currentEvent = (EvioDataEvent) _dataSource.getNextEvent();
-			
+			_currentEvent = _dataSource.getNextEvent();
+
 			if (!isAccumulating()) {
 				notifyEventListeners();
-			}
-			else {
+			} else {
 				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
 			}
 			break;
-		case ET:
+		case RING:
 			break;
 		case FASTMC:
 			FastMCManager.getInstance().nextEvent();
@@ -593,28 +541,29 @@ public class ClasIoEventManager {
 	 * 
 	 * @return the previous event, if possible.
 	 */
-	public EvioDataEvent getPreviousEvent() {
-		
+	public DataEvent getPreviousEvent() {
+
 		int evNum = getEventNumber();
-		_currentEvent = (EvioDataEvent) _dataSource.getPreviousEvent();
-		
-		//evioSource.getPreviousEvent() doesn't work at the end of the file
-		//so hack
+		_currentEvent = _dataSource.getPreviousEvent();
+
+		// evioSource.getPreviousEvent() doesn't work at the end of the file
+		// so hack
 		if ((_currentEvent == null) && (evNum > 0)) {
-			return gotoEvent(evNum-1);
+			return gotoEvent(evNum - 1);
 		}
-		
+
 		notifyEventListeners();
 		return _currentEvent;
 	}
 
 	/**
 	 * 
-	 * @param eventNumber a 1-based number 1..num events in file
+	 * @param eventNumber
+	 *            a 1-based number 1..num events in file
 	 * @return the event at the given number (if possible).
 	 */
-	public EvioDataEvent gotoEvent(int eventNumber) {
-		_currentEvent = (EvioDataEvent) _dataSource.gotoEvent(eventNumber);
+	public DataEvent gotoEvent(int eventNumber) {
+		_currentEvent = _dataSource.gotoEvent(eventNumber);
 		notifyEventListeners();
 		return _currentEvent;
 	}
@@ -624,14 +573,13 @@ public class ClasIoEventManager {
 	 * 
 	 * @return the same current event
 	 */
-	public EvioDataEvent reloadCurrentEvent() {
-		
+	public DataEvent reloadCurrentEvent() {
+
 		if (isSourceFastMC()) {
 			FastMCManager.getInstance().reloadCurrentEvent();
 			return null;
 		}
-		
-		
+
 		if (_currentEvent != null) {
 			notifyEventListeners();
 		}
@@ -641,13 +589,14 @@ public class ClasIoEventManager {
 	/**
 	 * Notify listeners we have opened a new file
 	 * 
-	 * @param path the path to the new file
+	 * @param path
+	 *            the path to the new file
 	 */
 	private void notifyEventListeners(EventSourceType source) {
 
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();
-		
+
 		if (_dataSource != null) {
 			_dataSource.close();
 			_currentEvent = null;
@@ -662,15 +611,14 @@ public class ClasIoEventManager {
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1])
-								.changedEventSource(source);
+						((IClasIoEventListener) listeners[i + 1]).changedEventSource(source);
 					}
 				}
 			}
 		}
 
 	}
-	
+
 	private void notifyEventListeners(String path) {
 
 		Swimming.clearMCTrajectories();
@@ -685,20 +633,17 @@ public class ClasIoEventManager {
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1])
-								.openedNewEventFile(path);
+						((IClasIoEventListener) listeners[i + 1]).openedNewEventFile(path);
 					}
 				}
 			}
 		}
 
 	}
-	
+
 	public void notifyListenersFastMCGenEvent(PhysicsEvent event) {
 
-
 		_uniqueLundIds = null;
-
 
 		for (int index = 0; index < 3; index++) {
 			if (_viewListenerList[index] != null) {
@@ -709,15 +654,13 @@ public class ClasIoEventManager {
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1])
-								.newFastMCGenEvent(event);;
+						((IClasIoEventListener) listeners[i + 1]).newFastMCGenEvent(event);
+						;
 					}
 				}
 			}
-		} //index loop
+		} // index loop
 	}
-
-
 
 	/**
 	 * Notify listeners we have a new event ready for display. All they may want
@@ -731,8 +674,7 @@ public class ClasIoEventManager {
 		Swimming.clearReconTrajectories();
 		_uniqueLundIds = null;
 
-		_currentBanks = (_currentEvent == null) ? null
-				: _currentEvent.getBankList();
+		_currentBanks = (_currentEvent == null) ? null : _currentEvent.getBankList();
 		if (_currentBanks != null) {
 			Arrays.sort(_currentBanks);
 		}
@@ -746,38 +688,34 @@ public class ClasIoEventManager {
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1])
-								.newClasIoEvent(_currentEvent);
+						((IClasIoEventListener) listeners[i + 1]).newClasIoEvent(_currentEvent);
 					}
 				}
 			}
 
 		} // index loop
-		
+
 		finalSteps();
 	}
-	
-	//final steps
+
+	// final steps
 	private void finalSteps() {
 		if (isAccumulating() || isSourceFastMC()) {
 			return;
 		}
-		
-		//System.err.println("FINAL STEPS");
+
+		// System.err.println("FINAL STEPS");
 		// some scaling factors for gradient displays
 		computeSomeScalingFactors();
 
 		// auto swim? (always for fast mc)
 		if (SwimMenu.getInstance().isAlwaysSwimMC()) {
-			//System.err.println("SWIMMING MC");
-			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0,
-					1);
+			// System.err.println("SWIMMING MC");
+			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0, 1);
 		}
 		if (SwimMenu.getInstance().isAlwaysSwimRecon()) {
-			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_RECON_PROP,
-					0, 1);
+			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_RECON_PROP, 0, 1);
 		}
-
 
 		Ced.setEventNumberLabel(getEventNumber());
 
@@ -785,7 +723,6 @@ public class ClasIoEventManager {
 
 	// compute some factors used in gradient displays
 	private void computeSomeScalingFactors() {
-
 
 		double[] pcalEdep = PCAL.totEdep();
 		double[] ecEdep = EC.totEdep();
@@ -813,7 +750,8 @@ public class ClasIoEventManager {
 	 * Get the maximum energy deposited in the cal for the current event. Might
 	 * be NaN if there are no "true" (gemc) banks
 	 * 
-	 * @param plane (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
+	 * @param plane
+	 *            (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
 	 * @return the max energy deposited in that cal plane in MeV
 	 */
 	public double getMaxEdepCal(int plane) {
@@ -824,7 +762,8 @@ public class ClasIoEventManager {
 	 * Remove a IClasIoEventListener. IClasIoEventListener listeners listen for
 	 * new events.
 	 * 
-	 * @param listener the IClasIoEventListener listener to remove.
+	 * @param listener
+	 *            the IClasIoEventListener listener to remove.
 	 */
 	public void removeClasIoEventListener(IClasIoEventListener listener) {
 
@@ -834,8 +773,7 @@ public class ClasIoEventManager {
 
 		for (int i = 0; i < 3; i++) {
 			if (_viewListenerList[i] != null) {
-				_viewListenerList[i].remove(IClasIoEventListener.class,
-						listener);
+				_viewListenerList[i].remove(IClasIoEventListener.class, listener);
 			}
 		}
 	}
@@ -844,15 +782,16 @@ public class ClasIoEventManager {
 	 * Add a IClasIoEventListener. IClasIoEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener the IClasIoEventListener listener to add.
-	 * @param index Determines gross notification order. Those in index 0 are
+	 * @param listener
+	 *            the IClasIoEventListener listener to add.
+	 * @param index
+	 *            Determines gross notification order. Those in index 0 are
 	 *            notified first. Then those in index 1. Finally those in index
 	 *            2. The Data containers should be in index 0. The trajectory
 	 *            and noise in index 1, and the regular views in index 2 (they
 	 *            are notified last)
 	 */
-	public void addClasIoEventListener(IClasIoEventListener listener,
-			int index) {
+	public void addClasIoEventListener(IClasIoEventListener listener, int index) {
 
 		if (listener == null) {
 			return;
@@ -878,14 +817,15 @@ public class ClasIoEventManager {
 	 * Checks if a bank, identified by a string such as "FTOF1B::dgtz", is in
 	 * the current event.
 	 * 
-	 * @param bankName the bank name
+	 * @param bankName
+	 *            the bank name
 	 * @return <code>true</code> if the bank is in the curent event.
 	 */
 	public boolean isBankInCurrentEvent(String bankName) {
 		if ((bankName == null) || (_currentBanks == null)) {
 			return false;
 		}
-		
+
 		if (this.isSourceFastMC()) {
 			return false;
 		}
@@ -900,22 +840,14 @@ public class ClasIoEventManager {
 	 * @return a sorted list of known banks
 	 */
 	public String[] getKnownBanks() {
-
-		if (_knownBanks == null) {
-			EvioDataDictionary dataDict = EvioFactory.getDictionary();
-			if (dataDict != null) {
-				_knownBanks = dataDict.getDescriptorList();
-				Arrays.sort(_knownBanks);
-			}
-		}
-
-		return _knownBanks;
+		return DataManager.getInstance().getKnownBanks();
 	}
 
 	/**
 	 * Check whether a given bank is a known bank
 	 * 
-	 * @param bankName the bank name
+	 * @param bankName
+	 *            the bank name
 	 * @return <code>true</code> if the name is recognized.
 	 */
 	public boolean isKnownBank(String bankName) {

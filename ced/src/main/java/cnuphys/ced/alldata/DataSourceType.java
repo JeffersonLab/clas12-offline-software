@@ -3,7 +3,7 @@ package cnuphys.ced.alldata;
 import java.util.EnumMap;
 
 public enum DataSourceType {
-EVIOFILE, HIPPOFILE, HIPPORING;
+HIPPOFILE, HIPPORING;
 	
 	/**
 	 * A map for the names of the event sources
@@ -11,7 +11,6 @@ EVIOFILE, HIPPOFILE, HIPPORING;
 	public static EnumMap<DataSourceType, String> names = new EnumMap<DataSourceType, String>(DataSourceType.class);
 
 	static {
-		names.put(EVIOFILE, "Evio File");
 		names.put(HIPPOFILE, "Hippo File");
 		names.put(HIPPORING, "Hippo Ring");
 	}

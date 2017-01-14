@@ -148,7 +148,7 @@ public class ScatterPlot extends PlotDialog {
 	
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			
 			NamedExpression expX = getNamedExpressionX();

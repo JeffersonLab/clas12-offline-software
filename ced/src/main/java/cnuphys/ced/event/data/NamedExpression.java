@@ -9,6 +9,7 @@ import javax.xml.stream.XMLStreamException;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.ced.alldata.ColumnData;
 import net.oh.exp4j.Expression;
 import net.oh.exp4j.ExpressionBuilder;
 import net.oh.exp4j.ValidationResult;
@@ -42,6 +43,14 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 		return lcv.compareTo(lco);
 	}
 
+	/**
+	 * Get the expression name
+	 * @return the expression name
+	 */
+	public String getExpressionName() {
+		return _expName;
+	}
+	
 	/**
 	 * Get the Expression for this NamedExpression
 	 * 

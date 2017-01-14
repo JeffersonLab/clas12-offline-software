@@ -25,7 +25,7 @@ import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.event.AccumulationManager;
@@ -37,7 +37,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// to find recently opened files from the preferences
-	private static String _recentFileKey = "RecentEvioFiles";
+	private static String _recentFileKey = "RecentEventFiles";
 
 	// the menu items
 	private JMenuItem quitItem;
@@ -65,11 +65,11 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	/** Last selected data file */
 	private static String dataFilePath;
 
-	public static String extensions[] = { "ev", "ev0", "ev1", "ev2", "ev3",
-			"ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "evio", "hipo" };
+	public static String extensions[] = { "hippo", "ev0", "ev1", "ev2", "ev3",
+			"ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "hipo" };
 
-	private static FileNameExtensionFilter _evioFileFilter = new FileNameExtensionFilter(
-			"EVIO Event Files", extensions);
+	private static FileNameExtensionFilter _eventFileFilter = new FileNameExtensionFilter(
+			"Event Files", extensions);
 
 	/**
 	 * The event menu used for the clasio package
@@ -90,17 +90,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 					KeyEvent.VK_A);
 			addSeparator();
 		}
-
-
-		// open
-//		_openEventFile = getOpenEventFileItem();
-//		_openEventFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-//				ActionEvent.CTRL_MASK));
-//		add(_openEventFile);
-
-		// recent
-//		add(getRecentEvioFileMenu());
-//		addSeparator();
 
 		// next
 		nextItem = addMenuItem("Next Event", KeyEvent.VK_N);
@@ -124,6 +113,10 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		fixState();
 	}
 
+	/** 
+	 * Get the menu item to open an event file
+	 * @return the menu item to open an event file
+	 */
 	public static JMenuItem getOpenEventFileItem() {
 		final JMenuItem item = new JMenuItem("Open Event File...");
 
@@ -203,12 +196,12 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
-		chooser.setFileFilter(_evioFileFilter);
+		chooser.setFileFilter(_eventFileFilter);
 		int returnVal = chooser.showOpenDialog(Ced.getFrame());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			selectedFile = chooser.getSelectedFile();
 			try {
-				eventManager.openEvioFile(selectedFile);
+				eventManager.openEventFile(selectedFile);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -224,7 +217,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 * 
 	 * @return the menu from which you can choose a recently opened file
 	 */
-	public static JMenu getRecentEvioFileMenu() {
+	public static JMenu getRecentEventFileMenu() {
 		if (_recentMenu != null) {
 			return _recentMenu;
 		}
@@ -264,7 +257,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 					File file = new File(fn);
 					if (file.exists()) {
 						try {
-							ClasIoEventManager.getInstance().openEvioFile(file);
+							ClasIoEventManager.getInstance().openEventFile(file);
 						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {
@@ -460,7 +453,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 *            the new current event
 	 */
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		fixState();
 	}
 

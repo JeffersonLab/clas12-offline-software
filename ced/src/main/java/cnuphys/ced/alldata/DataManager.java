@@ -2,10 +2,14 @@ package cnuphys.ced.alldata;
 
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 
+import org.jlab.clas.detector.DetectorResponse;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataDictionary;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataDictionary;
 
 import cnuphys.bCNU.log.Log;
 
@@ -21,16 +25,31 @@ public class DataManager {
 	//this maps bank name to a ColumnData object
 	private Hashtable<String, ColumnData> _columnData;
 
+	//singleton
+	private static DataManager _instance;
+	
 	/**
 	 * Create a DataManager
 	 * @param dictionary
 	 */
-	public DataManager(DataDictionary dictionary) {
-		_dictionary = dictionary;
-		_knownBanks = dictionary.getDescriptorList();
+	private DataManager() {
+		
+		_dictionary = new HipoDataDictionary();
+		_knownBanks = _dictionary.getDescriptorList();
 		Arrays.sort(_knownBanks);
 		
 		initializeColumnData();
+	}
+	
+	/**
+	 * public access to singleton
+	 * @return data manager singleton
+	 */
+	public static DataManager getInstance() {
+		if (_instance == null) {
+			_instance = new DataManager();
+		}
+		return _instance;
 	}
 	
 	//initialize the column data
@@ -51,8 +70,6 @@ public class DataManager {
 					String entries[] = dd.getEntryList();
 					for (String columnName : entries) {
 						int type = dd.getProperty("type", columnName);
-						
-						System.out.println("TYPE: " + type);
 
 						if ((type < 1) || (type > 6) || (type == 24)) {
 							Log.getInstance()
@@ -249,5 +266,17 @@ public class DataManager {
 	 */
 	public boolean validColumnName(String name) {
 		return ((name != null) && (name.length() > 4) && name.contains(":") && name.contains("."));
+	}
+	
+	/**
+	 * Get a list of detector responses
+	 * @param event the event
+	 * @param bankName the bank name
+	 * @param type the detector type
+	 * @return a list of detector responses
+	 */
+	public List<DetectorResponse> getDetectorResponse(DataEvent event, String bankName, DetectorType type) {
+		List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
+		return responses;
 	}
 }

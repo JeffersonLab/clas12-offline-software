@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.ced.alldata.graphics.SelectPanel;
 
 public class NameVariablePanel extends JPanel implements PropertyChangeListener {
 	

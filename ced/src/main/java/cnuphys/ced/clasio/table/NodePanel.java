@@ -9,11 +9,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -27,34 +22,23 @@ import javax.swing.JTextField;
 import javax.swing.MenuSelectionManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.coda.jevio.EvioNode;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
-import cnuphys.bCNU.component.filetree.FileDnDHandler;
-import cnuphys.bCNU.component.filetree.FileTreePanel;
-import cnuphys.bCNU.component.filetree.IFileTreeListener;
-import cnuphys.bCNU.file.IFileHandler;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
-import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.clasio.ClasIoEventMenu;
 import cnuphys.ced.clasio.ClasIoPresentBankPanel;
-import cnuphys.ced.clasio.EvioNodeSupport;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 
 public class NodePanel extends JPanel implements ActionListener,
-		ListSelectionListener, IClasIoEventListener, IFileTreeListener,
-		IFileHandler, IAccumulationListener {
-
-	// file tree width
-	private static final int FILE_PANEL_WIDTH = 220;
+		ListSelectionListener, IClasIoEventListener, 
+		IAccumulationListener {
 
 	// Text area shows data values for selected nodes.
 	private JTextArea _dataTextArea;
@@ -77,9 +61,6 @@ public class NodePanel extends JPanel implements ActionListener,
 	// the table
 	protected NodeTable _nodeTable;
 
-	// summary table
-	protected NodeSummaryPanel _nodeSummaryPanel;
-
 	// the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
@@ -87,13 +68,10 @@ public class NodePanel extends JPanel implements ActionListener,
 	private boolean _isReady;
 
 	// current selected node
-	private EvioNode _currentNode;
+	private ColumnData _currentColumnData;
 
 	// present banks
 	private ClasIoPresentBankPanel _presentPanel;
-
-	// file tree
-	private FileTreePanel _filePanel;
 
 	/**
 	 * Create a node panel for displaying events
@@ -101,12 +79,9 @@ public class NodePanel extends JPanel implements ActionListener,
 	public NodePanel() {
 		_eventManager.addClasIoEventListener(this, 1);
 
-		new FileDnDHandler(null, this, this);
-
 		setLayout(new BorderLayout());
 		addCenter();
 		addEast();
-		// addWest();
 
 		_isReady = true;
 		fixButtons();
@@ -168,10 +143,6 @@ public class NodePanel extends JPanel implements ActionListener,
 		npanel.add(_eventInfoPanel);
 		centerPanel.add(npanel, BorderLayout.NORTH);
 
-		// node summary
-		_nodeSummaryPanel = new NodeSummaryPanel();
-		centerPanel.add(_nodeSummaryPanel, BorderLayout.SOUTH);
-
 		_nodeTable = new NodeTable();
 		_nodeTable.getSelectionModel().addListSelectionListener(this);
 
@@ -183,36 +154,14 @@ public class NodePanel extends JPanel implements ActionListener,
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-//	// add the west components
-//	private void addWest() {
-//		_filePanel = createFileTreePanel();
-//		add(_filePanel, BorderLayout.WEST);
-//	}
 
 	/**
-	 * Creates the file tree panel.
-	 */
-	private FileTreePanel createFileTreePanel() {
-		// the file tree
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(
-				"EVIO Event Files", ClasIoEventMenu.extensions);
-		FileTreePanel fileTree = new FileTreePanel(filter);
-		Dimension size = fileTree.getPreferredSize();
-		size.width = FILE_PANEL_WIDTH;
-		fileTree.setPreferredSize(size);
-
-		// fileTree.setMaximumSize(new Dimension(10000, 10000));
-		fileTree.addFileTreeListener(this);
-		return fileTree;
-	}
-
-	/**
-	 * Set the model data based on a clasIO EvioDataEvent
+	 * Set the model data based on a clasIO DataEvent
 	 * 
 	 * @param event
 	 *            the event
 	 */
-	public void setData(EvioDataEvent event) {
+	public void setData(DataEvent event) {
 		_nodeTable.setData(event);
 	}
 
@@ -262,7 +211,7 @@ public class NodePanel extends JPanel implements ActionListener,
 
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
-				updateDataArea(_currentNode);
+				updateDataArea(_currentColumnData);
 			}
 
 		};
@@ -290,7 +239,6 @@ public class NodePanel extends JPanel implements ActionListener,
 		nextButton.setEnabled(_eventManager.isNextOK());
 		prevButton.setEnabled(_eventManager.isPrevOK());
 		eventNumberInput.setEnabled(_eventManager.isGotoOK());
-		setSummary(_eventManager.getCurrentEvent());
 	}
 
 	/**
@@ -350,25 +298,6 @@ public class NodePanel extends JPanel implements ActionListener,
 		return _eventInfoPanel.getNumberOfEvents();
 	}
 
-	/**
-	 * Set the fields in the panel based on the data in the root node.
-	 * 
-	 * @param event
-	 *            the event whose root node will be used
-	 */
-	public void setSummary(EvioDataEvent event) {
-		_nodeSummaryPanel.setSummary(EvioNodeSupport.getRootNode(event));
-	}
-
-	/**
-	 * Set the fields in the panel based on the data in the node.
-	 * 
-	 * @param node
-	 *            the node to use
-	 */
-	public void setSummary(EvioNode node) {
-		_nodeSummaryPanel.setSummary(node);
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -388,8 +317,8 @@ public class NodePanel extends JPanel implements ActionListener,
 		}
 		int row = _nodeTable.getSelectedRow();
 
-		_currentNode = _nodeTable.getNode(row);
-		updateDataArea(_currentNode);
+		_currentColumnData = _nodeTable.getColumnData(row);
+		updateDataArea(_currentColumnData);
 	}
 
 	/**
@@ -398,194 +327,166 @@ public class NodePanel extends JPanel implements ActionListener,
 	 * @param treeSelectionEvent
 	 *            the causal event.
 	 */
-	protected void updateDataArea(EvioNode node) {
-
-		_nodeSummaryPanel.setSummary(node);
+	protected void updateDataArea(ColumnData cd) {
 
 		_dataTextArea.setText("");
 		int blankLineEveryNth = 5; // put in a blank line after every Nth
-		// element listed
 
-		if (node == null) {
+		if (cd == null) {
+			return;
+		}
+		
+		DataEvent event = _nodeTable.getCurrentEvent();
+		if (event == null) {
 			return;
 		}
 
-		if (EvioNodeSupport.isLeaf(node)) {
+		DataManager dm = DataManager.getInstance();
+		String fullName = cd.getFullName();
+		
+		int lineCounter = 1;
+		int index = 1;
 
-			int lineCounter = 1, index = 1;
-
-			int tag = node.getTag();
-			int num = node.getNum();
-
-			switch (node.getDataTypeObj()) {
-			case DOUBLE64:
-				double doubledata[] = _eventManager.getCurrentEvent()
-						.getDouble(tag, num);
-				if (doubledata != null) {
-					for (double d : doubledata) {
-						String doubStr = DoubleFormat.doubleFormat(d, 6, 4);
-						String s = String
-								.format("[%02d]  %s", index++, doubStr);
-						_dataTextArea.append(s);
-						if (lineCounter < doubledata.length) {
-							if (lineCounter % blankLineEveryNth == 0) {
-								_dataTextArea.append("\n\n");
-							} else {
-								_dataTextArea.append("\n");
-							}
-							lineCounter++;
-						}
+		switch (cd.getType()) {
+		
+		case ColumnData.INT8:
+			byte bytes[] = dm.getByteArray(event, fullName);
+			if (bytes != null) {
+				for (byte i : bytes) {
+					String s;
+					if (intsInHexButton.isSelected()) {
+						s = String.format("[%02d]  %#06X", index++, i);
+					} else {
+						s = String.format("[%02d]  %d", index++, i);
 					}
-				} else {
-					_dataTextArea.append("null data\n");
-				}
-				break;
-
-			case FLOAT32:
-				float floatdata[] = _eventManager.getCurrentEvent().getFloat(
-						tag, num);
-				if (floatdata != null) {
-					for (float d : floatdata) {
-						String doubStr = DoubleFormat.doubleFormat(d, 6, 4);
-						String s = String
-								.format("[%02d]  %s", index++, doubStr);
-						_dataTextArea.append(s);
-						if (lineCounter < floatdata.length) {
-							if (lineCounter % blankLineEveryNth == 0) {
-								_dataTextArea.append("\n\n");
-							} else {
-								_dataTextArea.append("\n");
-							}
-							lineCounter++;
-						}
-					}
-				} else {
-					_dataTextArea.append("null data\n");
-				}
-				break;
-
-			case LONG64:
-			case ULONG64:
-				_dataTextArea.append("Not Supported");
-				break;
-
-			case INT32:
-			case UINT32:
-				int intdata[] = _eventManager.getCurrentEvent()
-						.getInt(tag, num);
-				if (intdata != null) {
-					for (int i : intdata) {
-						String s;
-						if (intsInHexButton.isSelected()) {
-							s = String.format("[%02d]  %#010X", index++, i);
+					_dataTextArea.append(s);
+					if (lineCounter < bytes.length) {
+						if (lineCounter % blankLineEveryNth == 0) {
+							_dataTextArea.append("\n\n");
 						} else {
-							s = String.format("[%02d]  %d", index++, i);
+							_dataTextArea.append("\n");
 						}
-						_dataTextArea.append(s);
-						if (lineCounter < intdata.length) {
-							if (lineCounter % blankLineEveryNth == 0) {
-								_dataTextArea.append("\n\n");
-							} else {
-								_dataTextArea.append("\n");
-							}
-							lineCounter++;
-						}
+						lineCounter++;
 					}
-				} else {
-					_dataTextArea.append("null data\n");
 				}
-				break;
-
-			case SHORT16:
-			case USHORT16:
-				short shortdata[] = _eventManager.getCurrentEvent().getShort(
-						tag, num);
-				if (shortdata != null) {
-					for (short i : shortdata) {
-						String s;
-						if (intsInHexButton.isSelected()) {
-							s = String.format("[%02d]  %#06X", index++, i);
+			}
+			else {
+				_dataTextArea.append("null data\n");
+			}
+			break;
+			
+		case ColumnData.INT16:
+			short shorts[] = dm.getShortArray(event, fullName);
+			if (shorts != null) {
+				for (short i : shorts) {
+					String s;
+					if (intsInHexButton.isSelected()) {
+						s = String.format("[%02d]  %#06X", index++, i);
+					} else {
+						s = String.format("[%02d]  %d", index++, i);
+					}
+					_dataTextArea.append(s);
+					if (lineCounter < shorts.length) {
+						if (lineCounter % blankLineEveryNth == 0) {
+							_dataTextArea.append("\n\n");
 						} else {
-							s = String.format("[%02d]  %d", index++, i);
+							_dataTextArea.append("\n");
 						}
-						_dataTextArea.append(s);
-						if (lineCounter < shortdata.length) {
-							if (lineCounter % blankLineEveryNth == 0) {
-								_dataTextArea.append("\n\n");
-							} else {
-								_dataTextArea.append("\n");
-							}
-							lineCounter++;
-						}
+						lineCounter++;
 					}
-				} else {
-					_dataTextArea.append("null data\n");
 				}
-				break;
-
-			case CHAR8:
-			case UCHAR8:
-				byte bytedata[] = _eventManager.getCurrentEvent().getByte(tag,
-						num);
-				if (bytedata != null) {
-					for (byte i : bytedata) {
-
-						String s;
-						if (intsInHexButton.isSelected()) {
-							s = String.format("[%02d]  %#06X", index++, i);
+			}
+			else {
+				_dataTextArea.append("null data\n");
+			}
+			break;
+			
+		case ColumnData.INT32:
+			int ints[] = dm.getIntArray(event, fullName);
+			if (ints != null) {
+				for (int i : ints) {
+					String s;
+					if (intsInHexButton.isSelected()) {
+						s = String.format("[%02d]  %#010X", index++, i);
+					} else {
+						s = String.format("[%02d]  %d", index++, i);
+					}
+					_dataTextArea.append(s);
+					if (lineCounter < ints.length) {
+						if (lineCounter % blankLineEveryNth == 0) {
+							_dataTextArea.append("\n\n");
 						} else {
-							s = String.format("[%02d]  %d", index++, i);
+							_dataTextArea.append("\n");
 						}
-
-						_dataTextArea.append(s);
-						if (lineCounter < bytedata.length) {
-							if (lineCounter % blankLineEveryNth == 0) {
-								_dataTextArea.append("\n\n");
-							} else {
-								_dataTextArea.append("\n");
-							}
-							lineCounter++;
-						}
+						lineCounter++;
 					}
-				} else {
-					_dataTextArea.append("null data\n");
 				}
-				break;
-
-			case CHARSTAR8:
-				// if ((tag == 5) && (num == 1)) {
-				// EvioDataEvent event = _eventManager.getCurrentEvent();
-				byte bytes[] = node.getStructureBuffer(true).array();
-
-				if (bytes != null) {
-					String ss = new String(bytes);
-
-					if (ss != null) {
-						String tokens[] = FileUtilities.tokens(ss, "\0");
-						if (tokens != null) {
-							for (String tok : tokens) {
-								_dataTextArea.append(tok + "\n");
-							}
+			}
+			else {
+				_dataTextArea.append("null data\n");
+			}
+			break;
+			
+		case ColumnData.FLOAT32:
+			float floats[] = dm.getFloatArray(event, fullName);
+			if (floats != null) {
+				for (float f : floats) {
+					String doubStr = DoubleFormat.doubleFormat(f, 6, 4);
+					String s = String
+							.format("[%02d]  %s", index++, doubStr);
+					_dataTextArea.append(s);
+					if (lineCounter < floats.length) {
+						if (lineCounter % blankLineEveryNth == 0) {
+							_dataTextArea.append("\n\n");
+						} else {
+							_dataTextArea.append("\n");
 						}
+						lineCounter++;
 					}
-					// }
-				} else {
-					_dataTextArea.append("Not Supported");
 				}
-				break;
+			}
+			else {
+				_dataTextArea.append("null data\n");
+			}
+			break;
+			
+		case ColumnData.FLOAT64:
+			double doubles[] = dm.getDoubleArray(event, fullName);
+			if (doubles != null) {
+				for (double d : doubles) {
+					String doubStr = DoubleFormat.doubleFormat(d, 6, 4);
+					String s = String
+							.format("[%02d]  %s", index++, doubStr);
+					_dataTextArea.append(s);
+					if (lineCounter < doubles.length) {
+						if (lineCounter % blankLineEveryNth == 0) {
+							_dataTextArea.append("\n\n");
+						} else {
+							_dataTextArea.append("\n");
+						}
+						lineCounter++;
+					}
+				}
 
-			case COMPOSITE:
-				break;
-
+			}
+			else {
+				_dataTextArea.append("null data\n");
+			}
+			break;
+			
 			default:
-			} // switch
-		} // isLeaf
+				_dataTextArea.append("null data\n");
+
+		}
+
+
 	}
 
 	/**
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 	
@@ -597,7 +498,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	 *            the new current event
 	 */
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 
 		if (!_eventManager.isAccumulating()) {
 			setData(event);
@@ -615,7 +516,6 @@ public class NodePanel extends JPanel implements ActionListener,
 	@Override
 	public void openedNewEventFile(String path) {
 		setEventNumber(0);
-		_nodeSummaryPanel.setSummary(null);
 
 		// set the text field
 		setSource(path);
@@ -631,33 +531,6 @@ public class NodePanel extends JPanel implements ActionListener,
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 	}
 
-
-	@Override
-	public void fileDoubleClicked(String fullPath) {
-		File file = new File(fullPath);
-		handleFile(null, file, null);
-	}
-
-	@Override
-	public void filesDoubleClicked(List<File> files) {
-	}
-
-	@Override
-	public void handleFile(Object parent, File file, HandleAction action) {
-		if (file.exists()) {
-			try {
-				ClasIoEventManager.getInstance().openEvioFile(file);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@Override
-	public void handleFiles(Object parent, File[] files, HandleAction action) {
-	}
 
 	@Override
 	public void accumulationEvent(int reason) {

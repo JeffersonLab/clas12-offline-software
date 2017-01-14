@@ -24,6 +24,7 @@ import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.ced3d.CentralView3D;
 import cnuphys.ced.ced3d.FTCalView3D;
 import cnuphys.ced.ced3d.ForwardView3D;
@@ -46,7 +47,6 @@ import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DefinitionManager;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.fastmc.FastMCManager;
@@ -548,11 +548,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		aboutItem.addActionListener(al0);
 		fmenu.add(aboutItem, 0);
 		
-		//some evio file menus
+		//some event file menus
 		
 		fmenu.insertSeparator(0);
 
-		fmenu.add(ClasIoEventMenu.getRecentEvioFileMenu(), 0);
+		fmenu.add(ClasIoEventMenu.getRecentEventFileMenu(), 0);
 		fmenu.add(ClasIoEventMenu.getOpenEventFileItem(), 0);
 
 		
@@ -733,11 +733,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		case FILE:
 			File file = ClasIoEventManager.getInstance().getCurrentEventFile();
 			if (file != null) {
-				title += "   [Evio: " + file.getName() + "]";
+				title += "   [Hippo: " + file.getName() + "]";
 			}
 			break;
-		case ET:
-			title += "   [ET]";
+		case RING:
+			title += "   [Hippo Ring]";
 			break;
 		case FASTMC:
 			file = FastMCManager.getInstance().getCurrentFile();
@@ -910,7 +910,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				splashWindow.writeCachedText();
 				ced.fixTitle();
 				//initialize data columns
-				ColumnData.intitialize();
+				DataManager.getInstance();
 			}
 
 		});
@@ -929,7 +929,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// IEventProcessor processor = new IEventProcessor() {
 		//
 		// @Override
-		// public void processEvent(EvioDataEvent event) {
+		// public void processEvent(DataEvent event) {
 		// System.err.println("GOT EVENT TO PROCESS");
 		// }
 		//
