@@ -8,10 +8,12 @@ import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
@@ -64,6 +66,7 @@ public class FTOFEngine extends ReconstructionEngine {
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 		//System.out.println(" PROCESSING EVENT ....");
+		//Constants.DEBUGMODE = true;
 		setRunConditionsParameters( event) ;
     	if(geometry == null) {
     		System.err.println(" FTOF Geometry not loaded !!!");
@@ -129,7 +132,7 @@ public class FTOFEngine extends ReconstructionEngine {
 			clusters.addAll(FTOF2Clusters);
 		//2.1) exit if cluster list is empty but save the hits
 		if(clusters.size()==0 ) {
-			RecoBankWriter.appendFTOFBanks((EvioDataEvent) event, hits, null, null);
+			RecoBankWriter.appendFTOFBanks(event, hits, null, null);
 			return true;
 		}
 		// continuing ... there are clusters
@@ -152,27 +155,28 @@ public class FTOFEngine extends ReconstructionEngine {
 		ClusterMatcher clsMatch = new ClusterMatcher();
 		ArrayList<ArrayList<Cluster>> matchedClusters =  clsMatch.MatchedClusters(clusters);
 		if(matchedClusters.size()==0 ) {
-			RecoBankWriter.appendFTOFBanks((EvioDataEvent) event, hits, clusters, null);
+			RecoBankWriter.appendFTOFBanks(event, hits, clusters, null);
 			return true;
 		}
 		
-		RecoBankWriter.appendFTOFBanks((EvioDataEvent) event, hits, clusters, matchedClusters);
+		RecoBankWriter.appendFTOFBanks(event, hits, clusters, matchedClusters);
 		
 		return true;
 	}
 
 	public void setRunConditionsParameters(DataEvent event) {
+		 
 		if(event.hasBank("RUN::config")==false) {
 			System.err.println("RUN CONDITIONS NOT READ!");
 			return;
 		}
 		boolean isMC = false;
 		boolean isCosmics = false;
-		EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+		DataBank bank = event.getBank("RUN::config");
         
-		if(bank.getByte("Type")[0]==0)
+		if(bank.getByte("type",0)==0)
 			isMC = true;
-		if(bank.getByte("Mode")[0]==1)
+		if(bank.getByte("mode",0)==1)
 			isCosmics = true;
 		// force cosmics
 		//isCosmics = true;
@@ -182,7 +186,7 @@ public class FTOFEngine extends ReconstructionEngine {
 	
 		// Load the constants
 		//-------------------
-		int newRun = bank.getInt("Run")[0];
+		int newRun = bank.getInt("run",0);
 		
 		if(Run!=newRun) {
 			CCDBConstantsLoader.Load(newRun);
@@ -197,10 +201,16 @@ public class FTOFEngine extends ReconstructionEngine {
 	public static void main (String arg[]) throws IOException {
 		FTOFEngine en = new FTOFEngine();
 		en.init();
-		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
-		String input = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/TestTOFBanks.evio";
-		EvioSource  reader = new EvioSource();
-		reader.open(input);
+		
+		String inputFile = "/Users/ziegler/Workdir/Files/Data/DecodedData/HipoTestFile.hipo";
+		//String inputFile = args[0];
+		//String outputFile = args[1];
+		
+		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+		
+		 HipoDataSource reader = new HipoDataSource();
+         reader.open(inputFile);
+          
 		while(reader.getNextEvent()!=null)
 			en.processDataEvent(reader.getNextEvent());
 		

@@ -3,20 +3,17 @@ package org.jlab.rec.tof.banks.ftof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-
-
-
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-//import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
+import org.jlab.rec.tof.banks.BaseHit;
+import org.jlab.rec.tof.banks.BaseHitReader;
+import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 
 /**
@@ -24,7 +21,7 @@ import org.jlab.rec.tof.hit.ftof.Hit;
  * @author ziegler
  *
  */
-public class HitReader {
+public class HitReader implements IMatchedHit {
 
 	public HitReader() {
 		// TODO Auto-generated constructor stub
@@ -64,8 +61,11 @@ public class HitReader {
 	 */
 	public void fetch_Hits(DataEvent event, FTOFGeant4Factory geometry, List<Line3d> trks, double[] paths) {
 		
-		//if(event.hasBank("FTOF1A::dgtz")==false && event.hasBank("FTOF1B::dgtz")==false && event.hasBank("FTOF2B::dgtz")==false) {
-		if(event.hasBank("FTOF::dgtz")==false ) {				
+		BaseHitReader hitReader = new BaseHitReader();
+		IMatchedHit MH = this;
+		List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH);
+		
+		if(hitList.size()==0) {				
 			//System.err.println("there is no FTOF bank ");
 			
 			_FTOF1AHits = new ArrayList<Hit>();
@@ -75,193 +75,80 @@ public class HitReader {
 			return;
 		}
 
-		if(event.getDictionary().getXML().contains("FTOF1A")) {
-			if(event.hasBank("FTOF1A::dgtz")==true) {
-				EvioDataBank bankDGTZ1A = (EvioDataBank) event.getBank("FTOF1A::dgtz");
-				
-				int[] id_1A 	= bankDGTZ1A.getInt("hitn");
-		        int[] sector_1A = bankDGTZ1A.getInt("sector");
-				int[] paddle_1A = bankDGTZ1A.getInt("paddle");
-				int[] ADCL_1A 	= bankDGTZ1A.getInt("ADCL");
-				int[] ADCR_1A 	= bankDGTZ1A.getInt("ADCR");
-				int[] TDCL_1A 	= bankDGTZ1A.getInt("TDCL");
-				int[] TDCR_1A 	= bankDGTZ1A.getInt("TDCR");
-				// Instantiates the list of hits
-				List<Hit> hits = new ArrayList<Hit>();
-				
-				for(int i = 0; i<id_1A.length; i++){
-					if( passADC(ADCL_1A[i])==0 || passADC(ADCR_1A[i])==0 || passTDC(TDCL_1A[i])==0 || passTDC(TDCR_1A[i])==0 )
-						continue;
+		
+		// Instantiates the lists of hits
+		List<Hit> hits = new ArrayList<Hit>();
 					
-				    // get the status
-					int statusL = CCDBConstantsLoader.STATUSL[sector_1A[i]-1][0][paddle_1A[i]-1];
-					int statusR = CCDBConstantsLoader.STATUSR[sector_1A[i]-1][0][paddle_1A[i]-1];
-					String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1A[i], TDCL_1A[i], ADCR_1A[i], TDCR_1A[i]);
-									
-					// create the hit object
-					Hit hit = new Hit(id_1A[i], 1, sector_1A[i], paddle_1A[i], ADCL_1A[i], TDCL_1A[i], ADCR_1A[i], TDCR_1A[i]) ;				
-					hit.set_StatusWord(statusWord);
-					hit.setPaddleLine(geometry);
-		    	    // add this hit
-		            hits.add(hit); 
-				}
-				
-				List<Hit> updated_hits= matchHitsToDCTrk(hits,  geometry, trks, paths);
-				
-				for(Hit hit : updated_hits) {
-					// set the superlayer to get the paddle position from the geometry package
-					// superlayer = 1;
-					hit.set_HitParameters(1);				
-				}
-				
-				Collections.sort(updated_hits);
-				// fill the list of TOF hits
-				this.set_FTOF1AHits(updated_hits);
-			}
-			if(event.hasBank("FTOF1B::dgtz")==true) {
-				EvioDataBank bankDGTZ1B = (EvioDataBank) event.getBank("FTOF1B::dgtz");
-				
-				int[] id_1B 	= bankDGTZ1B.getInt("hitn");
-		        int[] sector_1B = bankDGTZ1B.getInt("sector");
-				int[] paddle_1B = bankDGTZ1B.getInt("paddle");
-				int[] ADCL_1B 	= bankDGTZ1B.getInt("ADCL");
-				int[] ADCR_1B 	= bankDGTZ1B.getInt("ADCR");
-				int[] TDCL_1B 	= bankDGTZ1B.getInt("TDCL");
-				int[] TDCR_1B 	= bankDGTZ1B.getInt("TDCR");
-				// Instantiates the list of hits
-				List<Hit> hits = new ArrayList<Hit>();
-				
-				for(int i = 0; i<id_1B.length; i++){
-					if( passADC(ADCL_1B[i])==0 || passADC(ADCR_1B[i])==0 || passTDC(TDCL_1B[i])==0 || passTDC(TDCR_1B[i])==0 )
-						continue;
-					// get the status
-					int statusL = CCDBConstantsLoader.STATUSL[sector_1B[i]-1][1][paddle_1B[i]-1];
-					int statusR = CCDBConstantsLoader.STATUSR[sector_1B[i]-1][1][paddle_1B[i]-1];
-					String statusWord = this.set_StatusWord(statusL, statusR, ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]);			
-					
-					// create the hit object
-					Hit hit = new Hit(id_1B[i], 2, sector_1B[i], paddle_1B[i], ADCL_1B[i], TDCL_1B[i], ADCR_1B[i], TDCR_1B[i]) ;
-					hit.set_StatusWord(statusWord);
-					hit.setPaddleLine(geometry);
-					
-		    	    // add this hit
-		            hits.add(hit); 
-				}
-				
-				List<Hit> updated_hits= matchHitsToDCTrk(hits,  geometry, trks, paths);
-				
-				for(Hit hit : updated_hits) {
-					// set the superlayer to get the paddle position from the geometry package
-					// superlayer = 2;
-					hit.set_HitParameters(2);		
-				}
-				
-				Collections.sort(updated_hits);
-				// fill the list of TOF hits
-				this.set_FTOF1BHits(updated_hits);
-			}
-			if(event.hasBank("FTOF2B::dgtz")==true) {
-				EvioDataBank bankDGTZ2  = (EvioDataBank) event.getBank("FTOF2B::dgtz"); // not my fault it was 2B in the xml file ....
-				
-				int[] id_2 		= bankDGTZ2.getInt("hitn");
-		        int[] sector_2 	= bankDGTZ2.getInt("sector");
-				int[] paddle_2 	= bankDGTZ2.getInt("paddle");
-				int[] ADCL_2 	= bankDGTZ2.getInt("ADCL");
-				int[] ADCR_2 	= bankDGTZ2.getInt("ADCR");
-				int[] TDCL_2 	= bankDGTZ2.getInt("TDCL");
-				int[] TDCR_2 	= bankDGTZ2.getInt("TDCR");
-				
-				// Instantiates the list of hits
-				List<Hit> hits = new ArrayList<Hit>();
-				
-				for(int i = 0; i<id_2.length; i++){// get the status
-					if( passADC(ADCL_2[i])==0 || passADC(ADCR_2[i])==0 || passTDC(TDCL_2[i])==0 || passTDC(TDCR_2[i])==0 )
-						continue;
-					int statusL = CCDBConstantsLoader.STATUSL[sector_2[i]-1][2][paddle_2[i]-1];
-					int statusR = CCDBConstantsLoader.STATUSR[sector_2[i]-1][2][paddle_2[i]-1];
-					String statusWord = this.set_StatusWord(statusL, statusR, ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]);
-					
-					// create the hit object
-					Hit hit = new Hit(id_2[i], 3, sector_2[i], paddle_2[i], ADCL_2[i], TDCL_2[i], ADCR_2[i], TDCR_2[i]) ;
-					hit.setPaddleLine(geometry);
-					hit.set_StatusWord(statusWord);
-		    	    // add this hit
-		            hits.add(hit); 
-				}
-				
-				List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, trks, paths);
-				
-				for(Hit hit : updated_hits) {
-					// set the superlayer to get the paddle position from the geometry package
-					// superlayer = 3;
-					hit.set_HitParameters(3);				
-				}
-				Collections.sort(updated_hits);
-				// fill the list of TOF hits
-				this.set_FTOF2Hits(updated_hits);
-			}
+		int[] id 	= new int[hitList.size()];
+		int[] sector = new int[hitList.size()];
+		int[] panel  = new int[hitList.size()]; 
+		int[] paddle = new int[hitList.size()];
+		int[] ADCL 	= new int[hitList.size()];
+		int[] ADCR 	= new int[hitList.size()];
+		int[] TDCL 	= new int[hitList.size()];
+		int[] TDCR 	= new int[hitList.size()];
+		
+		for(int i = 0; i< hitList.size(); i++) {
+			id[i] 		= hitList.get(i).get_Id();
+			sector[i]	= hitList.get(i).get_Sector();
+	        panel[i]  	= hitList.get(i).get_Layer(); 
+			paddle[i]  	= hitList.get(i).get_Component();
+			ADCL[i] 	= hitList.get(i).ADC1;
+			ADCR[i] 	= hitList.get(i).ADC2;
+			TDCL[i] 	= hitList.get(i).TDC1;
+			TDCR[i] 	= hitList.get(i).TDC2;
+			
+			System.out.println("hit "+hitList.get(i).get_Id()+
+			" sector "+ hitList.get(i).get_Sector()+
+	        " panel "+ hitList.get(i).get_Layer()+
+			" paddle "+  hitList.get(i).get_Component()+
+			" ADCL "+  hitList.get(i).ADC1+
+			" ADCR "+ hitList.get(i).ADC2+
+			" TDCL "+ hitList.get(i).TDC1+
+			" TDCR "+  hitList.get(i).TDC2);
+			if( passADC(ADCL[i])==0 || passADC(ADCR[i])==0 || passTDC(TDCL[i])==0 || passTDC(TDCR[i])==0 )
+				continue;
+			
+		    // get the status
+			int statusL = CCDBConstantsLoader.STATUSL[sector[i]-1][panel[i]-1][paddle[i]-1];
+			int statusR = CCDBConstantsLoader.STATUSR[sector[i]-1][panel[i]-1][paddle[i]-1];
+			String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i], TDCL[i], ADCR[i], TDCR[i]);
+							
+			// create the hit object
+			Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i], TDCL[i], ADCR[i], TDCR[i]) ;				
+			hit.set_StatusWord(statusWord);
+			hit.setPaddleLine(geometry);  
+    	    // add this hit
+            hits.add(hit); 
 		}
-		if(event.hasBank("FTOF::dgtz")==true) {
-			EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("FTOF::dgtz");
-			
-			int[] id 	= bankDGTZ.getInt("hitn");
-	        int[] sector = bankDGTZ.getInt("sector");
-	        int[] panel  = bankDGTZ.getInt("layer"); 
-			int[] paddle = bankDGTZ.getInt("paddle");
-			int[] ADCL 	= bankDGTZ.getInt("ADCL");
-			int[] ADCR 	= bankDGTZ.getInt("ADCR");
-			int[] TDCL 	= bankDGTZ.getInt("TDCL");
-			int[] TDCR 	= bankDGTZ.getInt("TDCR");
-			// Instantiates the lists of hits
-			List<Hit> hits = new ArrayList<Hit>();
-			
-			for(int i = 0; i<id.length; i++){
-				if( passADC(ADCL[i])==0 || passADC(ADCR[i])==0 || passTDC(TDCL[i])==0 || passTDC(TDCR[i])==0 )
-					continue;
-				
-			    // get the status
-				int statusL = CCDBConstantsLoader.STATUSL[sector[i]-1][panel[i]-1][paddle[i]-1];
-				int statusR = CCDBConstantsLoader.STATUSR[sector[i]-1][panel[i]-1][paddle[i]-1];
-				String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i], TDCL[i], ADCR[i], TDCR[i]);
-								
-				// create the hit object
-				Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i], TDCL[i], ADCR[i], TDCR[i]) ;				
-				hit.set_StatusWord(statusWord);
-				hit.setPaddleLine(geometry);  
-	    	    // add this hit
-	            hits.add(hit); 
-			}
-			
-			List<Hit> updated_hits= matchHitsToDCTrk(hits, geometry, trks, paths);
-			
-			ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
-			for(int j =0; j<3; j++)
-				DetHits.add(j, new ArrayList<Hit>());
-			
-			for(Hit hit : updated_hits) {
-				// set the layer to get the paddle position from the geometry package				
-				hit.set_HitParameters(hit.get_Panel());
-				DetHits.get(hit.get_Panel()-1).add(hit); 
-			}
-			if(DetHits.get(0).size()>0) {
-				Collections.sort(DetHits.get(0));
-				// fill the list of TOF hits
-				this.set_FTOF1AHits(DetHits.get(0));
-			}
-			if(DetHits.get(1).size()>0) {
-				Collections.sort(DetHits.get(1));
-				// fill the list of TOF hits
-				this.set_FTOF1BHits(DetHits.get(1));
-			}
-			if(DetHits.get(2).size()>0) {
-				Collections.sort(DetHits.get(2));
-				// fill the list of TOF hits
-				this.set_FTOF2Hits(DetHits.get(2));
-			}
+		List<Hit> updated_hits= matchHitsToDCTrk(hits, geometry, trks, paths);
+		
+		ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
+		for(int j =0; j<3; j++)
+			DetHits.add(j, new ArrayList<Hit>());
+		
+		for(Hit hit : updated_hits) {
+			// set the layer to get the paddle position from the geometry package				
+			hit.set_HitParameters(hit.get_Panel());
+			DetHits.get(hit.get_Panel()-1).add(hit); 
 		}
-	}
-
-	 
+		if(DetHits.get(0).size()>0) {
+			Collections.sort(DetHits.get(0));
+			// fill the list of TOF hits
+			this.set_FTOF1AHits(DetHits.get(0));
+		}
+		if(DetHits.get(1).size()>0) {
+			Collections.sort(DetHits.get(1));
+			// fill the list of TOF hits
+			this.set_FTOF1BHits(DetHits.get(1));
+		}
+		if(DetHits.get(2).size()>0) {
+			Collections.sort(DetHits.get(2));
+			// fill the list of TOF hits
+			this.set_FTOF2Hits(DetHits.get(2));
+		}
+	}	
+	
 	
 	public String set_StatusWord(int statusL, int statusR, int ADCL, int TDCL, int ADCR, int TDCR) {
 		String statusWord = new String(); //ADCL TDCL ADCR TDCR
@@ -295,18 +182,20 @@ public class HitReader {
 	private int passTDC(int tDC) {
 		// selected ranges TDC 
 		int pass =0;
-		if(Constants.LSBCONVFAC*tDC>Constants.TDCMINSCALE &&  Constants.LSBCONVFAC*tDC<Constants.TDCMAXSCALE)
+		//if(Constants.LSBCONVFAC*tDC>Constants.TDCMINSCALE &&  Constants.LSBCONVFAC*tDC<Constants.TDCMAXSCALE)
+		//	pass = 1; 
+		if(tDC>0)
 			pass = 1; 
-		pass = 1; 
 		return pass;
 	}
 
 	private int passADC(int aDC) {
 		// selected ranges  ADC 
 		int pass =0;
-		if(aDC>Constants.ADCMIN && aDC<Constants.ADCMAX)
+		//if(aDC>Constants.ADCMIN && aDC<Constants.ADCMAX)
+		//	pass = 1; 
+		if(aDC>0)
 			pass = 1; 
-		pass = 1; 
 		return pass;
 	}
 
@@ -372,5 +261,128 @@ public class HitReader {
 		return hitList;
 	}
 
-	
+	@Override
+	public String DetectorName() {
+		return "FTOF";
+	}
+
+	@Override
+	public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists) {
+		ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
+		
+		if(ADCandTDCLists!=null) {
+			Collections.sort(ADCandTDCLists);
+			double t1 =-1;
+			double t2 =-1; // t1, t2 not yet used in selection
+			int adc1 = -1;
+			int adc2 = -1;
+			int tdc1 = -1;
+			int tdc2 = -1;
+			
+			List<ArrayList<BaseHit>> hitlists = new ArrayList<ArrayList<BaseHit>>();
+			for(int i =0; i< ADCandTDCLists.size(); i++) {
+				hitlists.add(new ArrayList<BaseHit>());
+			}
+			int index1 =0;int index2 =0;int index3 =0;int index4 =0;
+			
+			for(int i =0; i< ADCandTDCLists.size(); i++) {				
+				BaseHit h = ADCandTDCLists.get(i);
+				if(h.get_ADC1()>0) {
+					adc1 = h.get_ADC1();
+					if(h.get_ADCTime1()>0)
+						t1=h.get_ADCTime1();
+					
+					hitlists.get(index1).add(h);
+					index1++;
+				}
+				if(h.get_ADC2()>0) {					
+					adc2 = h.get_ADC2();
+					if(h.get_ADCTime2()>0)
+						t2=h.get_ADCTime2();
+					
+					if(adc1>0 && Math.abs(adc1-adc2)<8000) {
+						hitlists.get(index2).add(h); // matched hit
+						index2++;
+					} 
+					if(adc1==-1) {
+						hitlists.get(index2).add(h); // not matched hit
+						index2++;
+					}
+				}				
+				if(h.get_TDC1()>0) {
+					tdc1 = h.get_TDC1();
+					hitlists.get(index3).add(h);
+					index3++;
+				}
+				if(h.get_TDC2()>0) {
+					tdc2 = h.get_TDC2();
+					if(tdc1>0 && Math.abs(tdc1-tdc2)*24./1000.<35) {
+						hitlists.get(index4).add(h);
+						index4++;
+					}
+					if(tdc1==-1) {
+						hitlists.get(index4).add(h); // not matched hit
+						index4++;
+					}
+				}
+			}
+			int hitNb = 0;
+			for(int i =0; i< hitlists.size(); i++) {
+				if(hitlists.get(i).size()>0) {
+					// Make the new hit
+					BaseHit hit = new BaseHit(hitlists.get(i).get(0).get_Sector(), hitlists.get(i).get(0).get_Layer(), hitlists.get(i).get(0).get_Component());
+					hit.set_Id(hitNb++);
+					double t_1 =-1;
+					double t_2 =-1;
+					int ped_1 = -1;
+					int ped_2 = -1;
+					int adc_1 = -1;
+					int adc_2 = -1;
+					int tdc_1 = -1;
+					int tdc_2 = -1;
+					
+					for(BaseHit h : hitlists.get(i)) {
+						if(h.get_ADC1()>0) {							
+							adc_1 = h.get_ADC1();
+							if(h.get_ADCTime1()>0)
+								t_1=h.get_ADCTime1();
+							if(h.get_ADCpedestal1()>0)
+								ped_1=h.get_ADCpedestal1();
+						}
+						if(h.get_ADC2()>0) {						
+							adc_2 = h.get_ADC2();
+							if(h.get_ADCTime2()>0)
+								t_2=h.get_ADCTime2();
+							if(h.get_ADCpedestal2()>0)
+								ped_2=h.get_ADCpedestal2();
+						}						
+						if(h.get_TDC1()>0) {
+							tdc_1 = h.get_TDC1();
+						}
+						if(h.get_TDC2()>0) {
+							tdc_2 = h.get_TDC2();							
+						}
+					}
+					hit.ADC1 = adc_1;
+					hit.ADC2 = adc_2;
+					hit.TDC1 = tdc_1;
+					hit.TDC2 = tdc_2;
+					hit.ADCpedestal1 = ped_1;
+					hit.ADCpedestal2 = ped_2;
+					hit.ADCTime1 = t_1;
+					hit.ADCTime2 = t_2;
+					
+					matchLists.add(hit);
+					//System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+					//		hit.get_TDC1()+" tdcR "+hit.get_TDC2());
+					
+				}
+			}
+			
+		}
+			
+		return matchLists;
+	}
+
+	 
 }

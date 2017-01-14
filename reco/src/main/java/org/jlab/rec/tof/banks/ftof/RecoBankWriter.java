@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.io.base.DataBank;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.hit.ftof.Hit;
 
@@ -20,21 +19,23 @@ public class RecoBankWriter {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static EvioDataBank fillRawHitsBank(EvioDataEvent event, List<Hit> hitlist) {
+	public static DataBank fillRawHitsBank(DataEvent event, List<Hit> hitlist) {
 		if(hitlist==null)
 			return null;
 		if(hitlist.size()==0)
 			return null;
 		
-		EvioDataBank bank = (EvioDataBank)
-		          event.getDictionary().createBank("FTOFRec::rawhits", hitlist.size());
+		DataBank bank =  event.createBank("FTOF::rawhits", hitlist.size());
 
 		for(int i =0; i< hitlist.size(); i++) {
-			bank.setInt("id", i, hitlist.get(i).get_Id());
-			bank.setInt("sector",i, hitlist.get(i).get_Sector());
-			bank.setInt("panel_id",i, hitlist.get(i).get_Panel());
-			bank.setInt("paddle_id",i, hitlist.get(i).get_Paddle());
-			bank.setInt("paddle_status",i, Integer.parseInt(hitlist.get(i).get_StatusWord()));
+			bank.setShort("id", i, (short) hitlist.get(i).get_Id());
+			bank.setByte("sector",i, (byte) hitlist.get(i).get_Sector());
+			bank.setByte("layer",i, (byte) hitlist.get(i).get_Panel());
+			bank.setShort("component",i, (short) hitlist.get(i).get_Paddle());
+			int status = 0;
+			if(Integer.parseInt(hitlist.get(i).get_StatusWord())==1111)
+				status = 1;
+			bank.setShort("status",i, (short) status);
 			bank.setFloat("energy_left",i, (float) hitlist.get(i).get_Energy1());
 			bank.setFloat("energy_right",i, (float) hitlist.get(i).get_Energy2());
 			bank.setFloat("energy_left_unc",i, (float) hitlist.get(i).get_Energy1Unc()); 		
@@ -50,21 +51,23 @@ public class RecoBankWriter {
 
 	}
 	
-	public static EvioDataBank fillRecHitsBank(EvioDataEvent event, List<Hit> hitlist) {
+	public static DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist) {
 		if(hitlist==null)
 			return null;
 		if(hitlist.size()==0)
 			return null;
 		
-		EvioDataBank bank = (EvioDataBank)
-		          event.getDictionary().createBank("FTOFRec::ftofhits", hitlist.size());
+		DataBank bank =  event.createBank("FTOF::hits", hitlist.size());
 
 		for(int i =0; i< hitlist.size(); i++) {
-			bank.setInt("id", i, hitlist.get(i).get_Id());
-			bank.setInt("sector",i, hitlist.get(i).get_Sector());
-			bank.setInt("panel_id",i, hitlist.get(i).get_Panel());
-			bank.setInt("paddle_id",i, hitlist.get(i).get_Paddle());
-			bank.setInt("paddle_status",i, Integer.parseInt(hitlist.get(i).get_StatusWord()));
+			bank.setShort("id", i, (short) hitlist.get(i).get_Id());
+			bank.setByte("sector",i, (byte) hitlist.get(i).get_Sector());
+			bank.setByte("layer",i, (byte) hitlist.get(i).get_Panel());
+			bank.setShort("component",i, (short) hitlist.get(i).get_Paddle());
+			int status = 0;
+			if(Integer.parseInt(hitlist.get(i).get_StatusWord())==1111)
+				status = 1;
+			bank.setShort("status",i, (short) status);
 			bank.setFloat("energy",i, (float) hitlist.get(i).get_Energy());
 			bank.setFloat("energy_unc",i, (float) hitlist.get(i).get_EnergyUnc()); 				
 			bank.setFloat("time",i, (float) hitlist.get(i).get_t());
@@ -76,34 +79,36 @@ public class RecoBankWriter {
 				bank.setFloat("tx",i, (float) hitlist.get(i).get_TrkPosition().x());
 				bank.setFloat("ty",i, (float) hitlist.get(i).get_TrkPosition().y());
 				bank.setFloat("tz",i, (float) hitlist.get(i).get_TrkPosition().z());
-				bank.setInt("trkId", i, hitlist.get(i)._AssociatedTrkId);  
+				bank.setShort("trackid", i, (short) hitlist.get(i)._AssociatedTrkId);  
 			} else {
-				bank.setInt("trkId", i, -1);  
+				bank.setShort("trackid", i, (short) -1);  
 			}
 			bank.setFloat("x_unc",i, 5); 			
 			bank.setFloat("y_unc",i, (float) hitlist.get(i).get_yUnc()); 			
 			bank.setFloat("z_unc",i, 10); 						
 		}
-
+		
 		return bank;
 
 	}
 	
-	public static EvioDataBank fillClustersBank(EvioDataEvent event, List<Cluster> cluslist) {
+	public static DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist) {
 		if(cluslist==null)
 			return null;
 		if(cluslist.size()==0)
 			return null;
 		
-		EvioDataBank bank = (EvioDataBank)
-		          event.getDictionary().createBank("FTOFRec::ftofclusters", cluslist.size());
+		DataBank bank =  event.createBank("FTOF::clusters", cluslist.size());
 
-		for(int i =0; i< cluslist.size(); i++) {
-			bank.setInt("id", i, cluslist.get(i).get_Id());
-			bank.setInt("sector",i, cluslist.get(i).get_Sector());
-			bank.setInt("panel_id",i, cluslist.get(i).get_Panel());
-			bank.setInt("paddle_id",i, cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
-			bank.setInt("paddle_status",i, Integer.parseInt(cluslist.get(i).get_StatusWord()));
+		for(int i =0; i< cluslist.size(); i++) { 
+			bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+			bank.setByte("sector",i, (byte) cluslist.get(i).get_Sector());
+			bank.setByte("layer",i, (byte) cluslist.get(i).get_Panel());
+			bank.setShort("component",i, (short) cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
+			int status = 0;
+			if(Integer.parseInt(cluslist.get(i).get_StatusWord())==1111)
+				status = 1;
+			bank.setShort("status",i, (short) status);
 			bank.setFloat("energy",i, (float) cluslist.get(i).get_Energy());
 			bank.setFloat("energy_unc",i, (float) cluslist.get(i).get_EnergyUnc()); 										
 			bank.setFloat("time",i, (float) cluslist.get(i).get_t());
@@ -114,33 +119,31 @@ public class RecoBankWriter {
 			bank.setFloat("x_unc",i, 5); 											// At this stage the uncertainty is not calculated
 			bank.setFloat("y_unc",i, (float) cluslist.get(i).get_y_locUnc()); 		
 			bank.setFloat("z_unc",i, 10); 											// At this stage the uncertainty is not calculated
-
 		}
 
 		return bank;
 
 	}
 	
-	private static DataBank fillClustersBank(EvioDataEvent event,
+	private static DataBank fillClustersBank(DataEvent event,
 			ArrayList<ArrayList<Cluster>> matchedClusters) {
 		if(matchedClusters==null)
 			return null;
 		if(matchedClusters.size()==0)
 			return null;
 		
-		EvioDataBank bank = (EvioDataBank)
-		          event.getDictionary().createBank("FTOFRec::ftofmatchedclusters", matchedClusters.size());
+		DataBank bank =  event.createBank("FTOF::matchedclusters", matchedClusters.size());
 		
 		for(int i =0; i< matchedClusters.size(); i++) {
 			if(matchedClusters.get(i)== null)
 				continue;
-			bank.setInt("sector",i, matchedClusters.get(i).get(0).get_Sector());
-			bank.setInt("paddle_id1A",i,  matchedClusters.get(i).get(0).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
-			bank.setInt("paddle_id1B",i,  matchedClusters.get(i).get(1).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]			
-			bank.setInt("clusSize_1A",i,  matchedClusters.get(i).get(0).size());					  // size of cluster in 1a
-			bank.setInt("clusSize_1B",i,  matchedClusters.get(i).get(1).size());					  // size of cluster in 1b
-			bank.setInt("clus_1A",i,  matchedClusters.get(i).get(0).get_Id());					  	  // id of cluster in 1a
-			bank.setInt("clus_1B",i,  matchedClusters.get(i).get(1).get_Id());					  	  // id of cluster in 1b
+			bank.setByte("sector",i, (byte) matchedClusters.get(i).get(0).get_Sector());
+			bank.setShort("paddle_id1A",i,  (short) matchedClusters.get(i).get(0).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
+			bank.setShort("paddle_id1B",i,  (short) matchedClusters.get(i).get(1).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]			
+			bank.setShort("clusSize_1A",i,  (short) matchedClusters.get(i).get(0).size());					  // size of cluster in 1a
+			bank.setShort("clusSize_1B",i,  (short) matchedClusters.get(i).get(1).size());					  // size of cluster in 1b
+			bank.setShort("clus_1A",i,  (short) matchedClusters.get(i).get(0).get_Id());					  	  // id of cluster in 1a
+			bank.setShort("clus_1B",i,  (short) matchedClusters.get(i).get(1).get_Id());					  	  // id of cluster in 1b
 			bank.setFloat("tminAlgo_1B_tCorr",i,    (float) matchedClusters.get(i).get(1).get_tCorr()[0]);	  // uses tmin algorithm to compute the path length between counters
 			bank.setFloat("midbarAlgo_1B_tCorr",i,  (float) matchedClusters.get(i).get(1).get_tCorr()[1]);    // uses middle of bar algorithm to compute the path length between counters
 			bank.setFloat("EmaxAlgo_1B_tCorr",i,    (float) matchedClusters.get(i).get(1).get_tCorr()[2]);	  // uses Emax algorithm to compute the path length between counters
@@ -148,23 +151,23 @@ public class RecoBankWriter {
 		return bank;
 	}
 	
-	public static void appendFTOFBanks(EvioDataEvent event,
+	public static void appendFTOFBanks(DataEvent event,
 			List<Hit> hits, List<Cluster> clusters, ArrayList<ArrayList<Cluster>> matchedClusters) {
 		List<DataBank> fTOFBanks = new ArrayList<DataBank>();
 		
-		DataBank bank1 = RecoBankWriter.fillRawHitsBank((EvioDataEvent) event, hits);	
+		DataBank bank1 = RecoBankWriter.fillRawHitsBank((DataEvent) event, hits);	
 		if(bank1!=null)
 			fTOFBanks.add(bank1);
 		
-		DataBank bank2 = RecoBankWriter.fillRecHitsBank((EvioDataEvent) event, hits);	
+		DataBank bank2 = RecoBankWriter.fillRecHitsBank((DataEvent) event, hits);	
 		if(bank2!=null)
 			fTOFBanks.add(bank2);
 		
-		DataBank bank3 = RecoBankWriter.fillClustersBank((EvioDataEvent) event, clusters);
+		DataBank bank3 = RecoBankWriter.fillClustersBank((DataEvent) event, clusters);
 		if(bank3!=null)
 			fTOFBanks.add(bank3);
 				
-		DataBank bank4 = RecoBankWriter.fillClustersBank((EvioDataEvent) event, matchedClusters);
+		DataBank bank4 = RecoBankWriter.fillClustersBank((DataEvent) event, matchedClusters);
 		if(bank4!=null)
 			fTOFBanks.add(bank4);
 		
