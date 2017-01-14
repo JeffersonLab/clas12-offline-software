@@ -1,0 +1,249 @@
+package cnuphys.ced.alldata;
+
+import org.jlab.io.base.DataEvent;
+
+import cnuphys.bCNU.log.Log;
+
+public class ColumnData {
+
+	/** type is unknown*/
+	public static final int UNKNOWN = 0;
+
+	/** type is a byte */
+	public static final int INT8 = 1;
+
+	/** type is a short */
+	public static final int INT16 = 2;
+
+	/** type is an int */
+	public static final int INT32 = 3;
+
+	/** type is a float */
+	public static final int FLOAT32 = 5;
+
+	/** type is a double */
+	public static final int FLOAT64 = 6;
+	
+	/** type names */
+	public static String[] typeNames = {"Unknown", "byte", "short", "int", "Unknown", "float", "double"};
+
+	// the bank name
+	private String _bankName;
+
+	// the column name
+	private String _columnName;
+
+	// the data type
+	private int _type;
+
+	// the full name
+	private String _fullName;
+	
+	/**
+	 * Holds the data for one column, one event
+	 * 
+	 * @param bankName the bank name
+	 * @param columnName the column name
+	 * @param type the data type (one of the class constants)
+	 */
+	public ColumnData(String bankName, String columnName, int type) {
+		_bankName = bankName;
+		_columnName = columnName;
+		_fullName = bankName + "." + columnName;
+
+		if ((type < 1) || (type > 6) || (type == 24)) {
+			Log.getInstance()
+					.warning("Bank: [" + _bankName + "] Column: [" + columnName
+							+ "] bad data type in ColumnData constructor: ["
+							+ type + "]");
+			type = 0;
+		}
+		_type = type;
+	}
+	
+	@Override
+	public String toString() {
+		return "bank name: [" + _bankName + 
+				"] column name: [" + _columnName +
+				"] full name: [" + _fullName +
+				"] data type: " + typeNames[_type];
+	}
+
+	/**
+	 * Get the data array as an object. It is up tp the caller to cast it to the
+	 * correct type of array.
+	 * 
+	 * @return the data array corresponding to the type
+	 */
+	public Object getDataArray(DataEvent event) {
+
+		Object oa = null;
+		
+		if (event != null) {
+			try {
+				switch (_type) {
+				case INT8:
+					oa = event.getByte(_fullName);
+					break;
+
+				case INT16:
+					oa = event.getShort(_fullName);
+					break;
+
+				case INT32:
+					oa = event.getInt(_fullName);
+					break;
+
+				case FLOAT32:
+					oa = event.getFloat(_fullName);
+					break;
+
+				case FLOAT64:
+					oa = event.getDouble(_fullName);
+					break;
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage() + " Exception with fulName: " + _fullName);
+				e.printStackTrace();
+			}
+		}
+
+		return oa;
+	}
+	
+	/**
+	 * Get the array with double values regardless of type
+	 * @return the data as a double array
+	 */
+	public double[] getAsDoubleArray(DataEvent event) {
+		double da[] = null;
+		
+		if (event != null) {
+			switch (_type) {
+			case INT8:
+				byte b[] = event.getByte(_fullName);
+				int len = (b == null) ? 0 : b.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = b[j];
+					}
+				}
+				break;
+
+			case INT16:
+				short s[] = event.getShort(_fullName);
+				len = (s == null) ? 0 : s.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = s[j];
+					}
+				}
+				break;
+
+			case INT32:
+				int i[] = event.getInt(_fullName);
+				len = (i == null) ? 0 : i.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = i[j];
+					}
+				}
+				break;
+
+			case FLOAT32:
+				float f[] = event.getFloat(_fullName);
+				len = (f == null) ? 0 : f.length;
+				if (len > 0) {
+					da = new double[len];
+					for (int j = 0; j < len; j++) {
+						da[j] = f[j];
+					}
+				}
+				break;
+
+			case FLOAT64:
+				da = event.getDouble(_fullName);
+				break;
+			}
+		}
+
+		return da;
+	}
+	
+	/**
+	 * Get the length of the underlying data array
+	 * @return the length of the underlying data array
+	 */
+	public int length(DataEvent event) {
+		
+		int len = 0;
+		Object oa = getDataArray(event);
+		
+		if (oa != null) {
+			switch (_type) {
+			case INT8:
+				len = ((byte[]) oa).length;
+				break;
+
+			case INT16:
+				len = ((short[]) oa).length;
+				break;
+
+			case INT32:
+				len = ((int[]) oa).length;
+				break;
+
+			case FLOAT32:
+				len = ((float[]) oa).length;
+				break;
+
+			case FLOAT64:
+				len = ((double[]) oa).length;
+				break;
+			}
+		}
+		
+		return len;
+	}
+
+	/**
+	 * Get the bank name
+	 * 
+	 * @return the bank name
+	 */
+	public String getBankName() {
+		return _bankName;
+	}
+
+	/**
+	 * Get the column name
+	 * 
+	 * @return column name
+	 */
+	public String getColumnName() {
+		return _columnName;
+	}
+
+	/**
+	 * get the full name
+	 * 
+	 * @return the full name
+	 */
+	public String getFullName() {
+		return _fullName;
+	}
+
+	/**
+	 * Get the data type
+	 * 
+	 * @return the data type [0..6] (0 is error)
+	 */
+	public int getType() {
+		return _type;
+	}
+	
+
+}

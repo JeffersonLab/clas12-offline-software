@@ -1,0 +1,28 @@
+---
+services:
+  - class: org.jlab.service.dc.HeaderEngine
+    name: HEADER
+  - class: org.jlab.service.ft.FTCALRecEngine
+    name: FTCAL
+  - class: org.jlab.service.ft.FTHODORecEngine
+    name: FTHODO
+  - class: org.jlab.service.ft.FTMatchEngine
+    name: FTMATCH
+  - class: org.jlab.service.dc.DCHBEngine
+    name: DCHB
+  - class: org.jlab.service.ftof.FTOFEngine
+    name: FTOF
+  - class: org.jlab.rec.cvt.services.CVTReconstruction
+    name: CVT
+  - class: org.jlab.service.ctof.CTOFEngine
+    name: CTOF
+  - class: org.jlab.service.htcc.HTCCReconstructionService
+    name: HTCC
+  - class: org.jlab.service.ec.ECEngine
+    name: EC
+  - class: org.jlab.service.eb.EBEngine
+    name: EBHB
+  - class: org.jlab.service.dc.DCTBEngine
+    name: DCTB
+  - class: org.jlab.service.eb.EBEngine
+    name: EBTB

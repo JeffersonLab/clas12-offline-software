@@ -98,20 +98,20 @@
     <column name = "width"       num = "12" type = "float64" info = "width of the peak"/>
   </section>
   <section name="clusters" tag="1523" num="0" info="Reconstructed clusters">
-    <column name = "sector"      num = "1"  type = "int32"   info = "sector number"/>
-    <column name = "superlayer"  num = "2"  type = "int32"   info = "superlayer"/>
-    <column name = "energy"      num = "3"  type = "float64" info = "superlayer"/>
-    <column name = "time"        num = "4"  type = "float64" info = "superlayer"/>
-    <column name = "chi2"        num = "5"  type = "float64" info = "superlayer"/>
-    <column name = "widthU"      num = "6"  type = "float64" info = "width in U layer"/>
-    <column name = "widthV"      num = "7"  type = "float64" info = "width in V layer"/>
-    <column name = "widthW"      num = "8"  type = "float64" info = "width in W layer"/>
-    <column name = "X"           num = "9"  type = "float64" info = "x coordinate"/>
-    <column name = "Y"           num = "10" type = "float64" info = "y coordinate"/>
-    <column name = "Z"           num = "12" type = "float64" info = "z coordinate"/>
-    <column name = "dX"          num = "13" type = "float64" info = "x coordinate error"/>
-    <column name = "dY"          num = "14" type = "float64" info = "y coordinate error"/>
-    <column name = "dZ"          num = "15" type = "float64" info = "z coordinate error"/>
+    <column name = "sector"      num = "1"  type = "int8"   info = "sector number"/>
+    <column name = "superlayer"  num = "2"  type = "int8"   info = "superlayer"/>
+    <column name = "energy"      num = "3"  type = "float32" info = "superlayer"/>
+    <column name = "time"        num = "4"  type = "float32" info = "superlayer"/>
+    <column name = "chi2"        num = "5"  type = "float32" info = "superlayer"/>
+    <column name = "widthU"      num = "6"  type = "float32" info = "width in U layer"/>
+    <column name = "widthV"      num = "7"  type = "float32" info = "width in V layer"/>
+    <column name = "widthW"      num = "8"  type = "float32" info = "width in W layer"/>
+    <column name = "X"           num = "9"  type = "float32" info = "x coordinate"/>
+    <column name = "Y"           num = "10" type = "float32" info = "y coordinate"/>
+    <column name = "Z"           num = "12" type = "float32" info = "z coordinate"/>
+    <column name = "dX"          num = "13" type = "float32" info = "x coordinate error"/>
+    <column name = "dY"          num = "14" type = "float32" info = "y coordinate error"/>
+    <column name = "dZ"          num = "15" type = "float32" info = "z coordinate error"/>
   </section>
 </bank>
 
@@ -142,20 +142,20 @@
   </section>
 
   <section name="clusters" tag="1643" num="0" info="Reconstructed clusters">
-    <column name = "sector"      num = "1"  type = "int8"   info = "sector number"/>
-    <column name = "layer"       num = "2"  type = "int8"   info = "superlayer"/>
-    <column name = "energy"      num = "3"  type = "float32" info = "superlayer"/>
-    <column name = "time"        num = "4"  type = "float32" info = "superlayer"/>
-    <column name = "chi2"        num = "5"  type = "float32" info = "superlayer"/>
-    <column name = "widthU"      num = "6"  type = "float32" info = "width in U layer"/>
-    <column name = "widthV"      num = "7"  type = "float32" info = "width in V layer"/>
-    <column name = "widthW"      num = "8"  type = "float32" info = "width in W layer"/>
-    <column name = "X"           num = "9"  type = "float32" info = "x coordinate"/>
-    <column name = "Y"           num = "10" type = "float32" info = "y coordinate"/>
-    <column name = "Z"           num = "12" type = "float32" info = "z coordinate"/>
-    <column name = "dX"          num = "13" type = "float32" info = "x coordinate error"/>
-    <column name = "dY"          num = "14" type = "float32" info = "y coordinate error"/>
-    <column name = "dZ"          num = "15" type = "float32" info = "z coordinate error"/>
+    <column name = "sector"      num = "1"  type = "int32"   info = "sector number"/>
+    <column name = "layer"       num = "2"  type = "int32"   info = "superlayer"/>
+    <column name = "energy"      num = "3"  type = "float64" info = "superlayer"/>
+    <column name = "time"        num = "4"  type = "float64" info = "superlayer"/>
+    <column name = "chi2"        num = "5"  type = "float64" info = "superlayer"/>
+    <column name = "widthU"      num = "6"  type = "float64" info = "width in U layer"/>
+    <column name = "widthV"      num = "7"  type = "float64" info = "width in V layer"/>
+    <column name = "widthW"      num = "8"  type = "float64" info = "width in W layer"/>
+    <column name = "X"           num = "9"  type = "float64" info = "x coordinate"/>
+    <column name = "Y"           num = "10" type = "float64" info = "y coordinate"/>
+    <column name = "Z"           num = "12" type = "float64" info = "z coordinate"/>
+    <column name = "dX"          num = "13" type = "float64" info = "x coordinate error"/>
+    <column name = "dY"          num = "14" type = "float64" info = "y coordinate error"/>
+    <column name = "dZ"          num = "15" type = "float64" info = "z coordinate error"/>
     <column name = "uid"         num = "16" type = "int32"   info = "superlayer"/>
     <column name = "vid"         num = "17" type = "int32"   info = "superlayer"/>
     <column name = "wid"         num = "18" type = "int32"   info = "superlayer"/>
@@ -163,5 +163,18 @@
     <column name = "coordV"      num = "20" type = "int32"   info = "superlayer"/>
     <column name = "coordW"      num = "21" type = "int32"   info = "superlayer"/>
   </section>
+  
+  <section name="calib" tag="1644" num="0" info="Strip calibration">
+    <column name = "sector"      num = "1"  type = "int32"   info = "sector number"/>
+    <column name = "layer"       num = "2"  type = "int32"   info = "superlayer"/>
+    <column name = "energy"      num = "3"  type = "float64" info = "superlayer"/>
+    <column name = "rawEU"       num = "4" type = "float64" info = "raw U peak energy"/>
+    <column name = "rawEV"       num = "5" type = "float64" info = "raw V peak energy"/>
+    <column name = "rawEW"       num = "6" type = "float64" info = "raw W peak energy"/>
+    <column name = "recEU"       num = "7" type = "float64" info = "recon U peak energy"/>
+    <column name = "recEV"       num = "8" type = "float64" info = "recon V peak energy"/>
+    <column name = "recEW"       num = "9" type = "float64" info = "recon W peak energy"/>
+  </section>
+  
 </bank>
 </evio_dictionary>

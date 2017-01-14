@@ -1,0 +1,4 @@
+---
+services:
+  - class: org.jlab.service.swim.SwimEngine
+    name: SWIMMER
