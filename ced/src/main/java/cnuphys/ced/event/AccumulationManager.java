@@ -461,7 +461,7 @@ public class AccumulationManager
 	 * Here is an event, so increment the correct accumulation arrays
 	 */
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 
 		// only care if I am accumulating
 		if (!_eventManager.isAccumulating() || (event == null)) {

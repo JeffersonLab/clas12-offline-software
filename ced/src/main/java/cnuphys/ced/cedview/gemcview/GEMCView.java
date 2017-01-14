@@ -124,7 +124,7 @@ public class GEMCView extends BaseView implements IClasIoEventListener {
 	
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		GEMCMetaDataContainer gemcdata = _eventManager.getGEMCMetaData();
 
 		if (!gemcdata.resetFields) {

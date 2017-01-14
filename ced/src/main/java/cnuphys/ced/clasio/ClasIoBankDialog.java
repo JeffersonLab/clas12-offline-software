@@ -13,9 +13,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import org.jlab.io.base.DataDescriptor;
-import org.jlab.io.evio.EvioDataDictionary;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.base.DataEvent;
 import org.jlab.io.ui.BankEntryMasks;
 import org.jlab.io.ui.DataBankPanel;
 import org.jlab.io.base.DataBank;
@@ -23,6 +21,7 @@ import org.jlab.io.base.DataBank;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.properties.PropertiesManager;
 
@@ -30,8 +29,6 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 
 	// the event manager
 	private static ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-
-	private static EvioDataDictionary _dataDict = EvioFactory.getDictionary();
 
 	// visibility hashtable
 	private static Hashtable<String, JCheckBox[]> _visHash = new Hashtable<String, JCheckBox[]>();
@@ -78,7 +75,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	 */
 	public String[] colNames(String bankName) {
 		if (bankName != null) {
-			DataDescriptor dd = _dataDict.getDescriptor(bankName);
+			DataDescriptor dd = DataManager.getInstance().getDictionary().getDescriptor(bankName);
 			if (dd != null) {
 				String columns[] = dd.getEntryList();
 				// Arrays.sort(columns);
@@ -124,7 +121,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	}
 
 	public void update() {
-		EvioDataEvent evioEvent = _eventManager.getCurrentEvent();
+		DataEvent evioEvent = _eventManager.getCurrentEvent();
 		if (evioEvent == null) {
 			return;
 		}

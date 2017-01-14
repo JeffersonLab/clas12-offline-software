@@ -1,26 +1,28 @@
 package cnuphys.ced.clasio;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import org.jlab.coda.jevio.EvioNode;
-import org.jlab.io.evio.EvioDataEvent;
 
-import cnuphys.bCNU.util.Environment;
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.bCNU.util.FileUtilities;
 
 public class ClasIoTest {
 
 	public static void main(String arg[]) {
-		String testFile = Environment.getInstance().getHomeDirectory()
-				+ "/evioData/gmnElectrons.evio";
+		
+		File dataDir = new File("../../../data/HippoData");
+		File testFile = new File(dataDir, "test.hipo");
+
 		System.err.println("testFile: " + testFile);
 
 		ClasIoEventManager eventManager = ClasIoEventManager.getInstance();
 
 		try {
-			eventManager.openEvioFile(testFile);
+			eventManager.openEventFile(testFile);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -45,15 +47,6 @@ public class ClasIoTest {
 					done = true;
 				}
 
-				else if (s.equalsIgnoreCase("e")) { // evio nodes
-					EvioNode nodes[] = EvioNodeSupport.getNodes(eventManager
-							.getCurrentEvent());
-					if (nodes != null) {
-						for (EvioNode node : nodes) {
-							EvioNodeSupport.writeNode(System.out, node);
-						}
-					}
-				}
 
 				else if (s.equalsIgnoreCase("m")) { // map
 					String allBanks[] = eventManager.getKnownBanks();
@@ -65,17 +58,8 @@ public class ClasIoTest {
 					}
 				}
 
-				else if (s.equalsIgnoreCase("r")) { // root node
-					EvioNode root = EvioNodeSupport.getRootNode(eventManager
-							.getCurrentEvent());
-					if (root != null) {
-						System.out.println("Root node:");
-						EvioNodeSupport.writeNode(System.out, root);
-					}
-				}
-
 				else if (s.equalsIgnoreCase("n")) { // next event
-					EvioDataEvent event = eventManager.getNextEvent();
+					DataEvent event = eventManager.getNextEvent();
 					System.err.println("Event number: "
 							+ eventManager.getEventNumber() + "/"
 							+ eventManager.getEventCount());
@@ -83,7 +67,7 @@ public class ClasIoTest {
 					event.getDictionary().getDescriptorList();
 					event.show();
 				} else if (s.equalsIgnoreCase("p")) { // next event
-					EvioDataEvent event = eventManager.getPreviousEvent();
+					DataEvent event = eventManager.getPreviousEvent();
 					System.err.println("Event number: "
 							+ eventManager.getEventNumber() + "/"
 							+ eventManager.getEventCount());
@@ -92,7 +76,7 @@ public class ClasIoTest {
 				} else if (s.startsWith("goto ")) {
 					String tokens[] = FileUtilities.tokens(s);
 					int evnum = Integer.parseInt(tokens[1]);
-					EvioDataEvent event = eventManager.gotoEvent(evnum);
+					DataEvent event = eventManager.gotoEvent(evnum);
 					System.err.println("Event number: "
 							+ eventManager.getEventNumber() + "/"
 							+ eventManager.getEventCount());

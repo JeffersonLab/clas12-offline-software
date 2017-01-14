@@ -13,10 +13,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
-import org.jlab.coda.jevio.EvioNode;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
-import cnuphys.ced.clasio.EvioNodeSupport;
+import cnuphys.ced.alldata.ColumnData;
 import cnuphys.splot.plot.X11Colors;
 
 public class NodeTable extends JTable {
@@ -89,18 +88,18 @@ public class NodeTable extends JTable {
 	 *            the row in question
 	 * @return the corresponding node, or <code>null</code>
 	 */
-	public EvioNode getNode(int row) {
-		return getNodeModel().getNode(row);
+	public ColumnData getColumnData(int row) {
+		return getNodeModel().getColumnData(row);
 	}
 
 	/**
-	 * Set the model data based on a clasIO EvioDataEvent
+	 * Set the model data based on a clasIO DataEvent
 	 * 
 	 * @param event
 	 *            the event
 	 */
-	public void setData(EvioDataEvent event) {
-		getNodeModel().setData(EvioNodeSupport.getNodes(event));
+	public void setData(DataEvent event) {
+		getNodeModel().setData(event);
 	}
 
 	class CustomRenderer extends DefaultTableCellRenderer {
@@ -116,44 +115,39 @@ public class NodeTable extends JTable {
 		}
 
 		@Override
-		public Component getTableCellRendererComponent(JTable table,
-				Object value, boolean isSelected, boolean hasFocus, int row,
-				int column) {
-			Component cellComponent = super.getTableCellRendererComponent(
-					table, value, isSelected, hasFocus, row, column);
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+					column);
 
 			cellComponent.setFont(pfont);
 
-			EvioNode node = _table.getNode(row);
-			if (node == null) {
+			ColumnData cd = _table.getColumnData(row);
+			if (cd == null) {
 				cellComponent.setBackground(Color.red);
 				cellComponent.setForeground(Color.white);
 			} else {
-				if (EvioNodeSupport.bankOfBanks(node)) {
-					cellComponent.setFont(ifont);
-					// cellComponent.setBackground(Color.black);
-					// cellComponent.setForeground(Color.yellow);
-					cellComponent.setBackground(Color.lightGray);
-					cellComponent.setForeground(Color.darkGray);
-				} else { // not a bank of banks
-					if (isSelected) {
-						cellComponent.setBackground(Color.yellow);
-						cellComponent.setForeground(Color.black);
-					} else if (EvioNodeSupport.isLeaf(node)) {
-						cellComponent.setBackground(X11Colors
-								.getX11Color("alice blue"));
-						cellComponent.setForeground(X11Colors
-								.getX11Color("dark blue"));
-					} else { // shouldn't happen
-						cellComponent.setBackground(Color.darkGray);
-						cellComponent.setForeground(Color.lightGray);
-					}
-				} // end leaf
+				if (isSelected) {
+					cellComponent.setBackground(Color.yellow);
+					cellComponent.setForeground(Color.black);
+				} else {
+					cellComponent.setBackground(X11Colors.getX11Color("alice blue"));
+					cellComponent.setForeground(X11Colors.getX11Color("dark blue"));
+				}
 			}
 
 			return cellComponent;
 		}
 	}
+	
+	/**
+	 * Get the event being displayed
+	 * @return the event being displayed
+	 */
+	public DataEvent getCurrentEvent() {
+		return getNodeModel().getCurrentEvent();
+	}
+
 
 	/**
 	 * Make sure the row with the given name is visible

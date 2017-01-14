@@ -3,7 +3,7 @@ package cnuphys.ced.fastmc;
 import java.util.Vector;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
@@ -126,7 +126,7 @@ public class AcceptanceManager implements IClasIoEventListener {
 	}
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		_currentStatus = AcceptanceStatus.UNCHECKED;
 		acceptanceResult = "";
 	}

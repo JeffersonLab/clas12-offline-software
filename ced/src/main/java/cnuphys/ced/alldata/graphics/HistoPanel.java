@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -12,6 +12,8 @@ import java.text.NumberFormat;
 import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.jlab.io.base.DataDictionary;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Environment;
@@ -35,10 +37,10 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	private double _maxVal = 1;
 	private int _numComponents = 0;
 
-	public HistoPanel(String label) {
+	public HistoPanel(DataDictionary dictionary, String label) {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel(label, true);
+		_sp = new SelectPanel(dictionary, label, true);
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
@@ -65,31 +67,6 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 //		_componentCountTF = integerField(sp, "Set for Component Count", _numComponents);
 		_componentCountTF = numField(sp, "Set for Component Count", _numComponents);
 		
-//		KeyAdapter kl = new KeyAdapter() {
-//			@Override
-//			public void keyReleased(KeyEvent kev) {
-//				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
-////				if (Character.isDigit(kev.getKeyChar())) {
-//					try {
-//						_numComponents = ((Number) _componentCountTF.getValue()).intValue();
-//						_numComponents = Math.max(0, Math.min(_numComponents, 10000));
-//						_componentCountTF.setValue(_numComponents);
-//						
-//						if (_numComponents > 0) {
-//							_numBins = _numComponents;
-//							_minVal = 0.5;
-//							_maxVal = _numComponents + 0.5;
-//							_numBinsTF.setValue(_numBins);
-//							_minValTF.setValue(_minVal);
-//							_maxValTF.setValue(_maxVal);
-//						}
-//					} catch (Exception e) {
-//					}
-//				}
-//			}
-//		};
-//		_componentCountTF.addKeyListener(kl);
-
 		_numBinsTF.addPropertyChangeListener("value", this);
 		_minValTF.addPropertyChangeListener("value", this);
 		_maxValTF.addPropertyChangeListener("value", this);

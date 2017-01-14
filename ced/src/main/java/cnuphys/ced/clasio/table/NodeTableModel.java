@@ -1,35 +1,35 @@
 package cnuphys.ced.clasio.table;
 
+import java.util.Vector;
+
 import javax.swing.table.DefaultTableModel;
 
-import org.jlab.coda.jevio.DataType;
-import org.jlab.coda.jevio.EvioNode;
+import org.jlab.io.base.DataEvent;
 
-import cnuphys.ced.clasio.EvioNodeSupport;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 
 public class NodeTableModel extends DefaultTableModel {
 
 	// indices
-	private static final int TAG_INDEX = 0;
-	private static final int NUM_INDEX = 1;
-	private static final int NAME_INDEX = 2;
-	private static final int TYPE_INDEX = 3;
-	private static final int LENGTH_INDEX = 4;
+	private static final int NAME_INDEX = 0;
+	private static final int TYPE_INDEX = 1;
+	private static final int COUNT_INDEX = 2;
 
 	// the names of the columns
-	protected static final String colNames[] = { "Tag", "Num", "Name", "Type",
-			"Length" };
+	protected static final String colNames[] = { "Name", "Type", "Count" };
 
 	// the column widths
-	protected static final int columnWidths[] = { 75, // tag
-			70, // num
-			230, // name
+	protected static final int columnWidths[] = { 270, // name
 			110, // type
 			110, // length
 	};
 
 	// the model data
-	protected EvioNode _nodes[];
+	private Vector<ColumnData> _data = new Vector<ColumnData>();
+
+	// the current event
+	private DataEvent _event;
 
 	/**
 	 * Constructor
@@ -42,24 +42,30 @@ public class NodeTableModel extends DefaultTableModel {
 	 * Find the row by the value in the name column
 	 * 
 	 * @param name
-	 *            the name to search for
+	 *            the column name to search for
 	 * @return the row, or -1
 	 */
 	public int findRowByName(String name) {
-		int row = -1;
 
-		if ((name != null) && (_nodes != null) && (_nodes.length > 0)) {
+		if ((name != null) && (_data != null) && !_data.isEmpty()) {
 			int index = 0;
-			for (EvioNode node : _nodes) {
-				String nodeName = EvioNodeSupport.getName(node);
-				if (name.equals(nodeName)) {
+			for (ColumnData cd : _data) {
+				if (name.equals(cd.getFullName())) {
 					return index;
 				}
 				index++;
 			}
 		}
 
-		return row;
+		return -1;
+	}
+	
+	/**
+	 * Get the event being displayed
+	 * @return the event being displayed
+	 */
+	public DataEvent getCurrentEvent() {
+		return _event;
 	}
 
 	/**
@@ -79,7 +85,7 @@ public class NodeTableModel extends DefaultTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		return (_nodes == null) ? 0 : _nodes.length;
+		return (_data == null) ? 0 : _data.size();
 	}
 
 	/**
@@ -95,27 +101,21 @@ public class NodeTableModel extends DefaultTableModel {
 	public Object getValueAt(int row, int col) {
 
 		if (row < getRowCount()) {
-			EvioNode node = _nodes[row];
+			ColumnData cd = _data.elementAt(row);
 
-			// System.err.println("TYPE: " + node.getDataType() + "  " +
+			// System.err.println("TYPE: " + node.getDataType() + " " +
 			// DataType.getName(node.getDataType()));
 
-			if (node != null) {
+			if (cd != null) {
 				switch (col) {
-				case TAG_INDEX:
-					return "" + node.getTag();
-
-				case NUM_INDEX:
-					return "" + node.getNum();
-
 				case NAME_INDEX:
-					return EvioNodeSupport.getName(node);
+					return cd.getFullName();
 
 				case TYPE_INDEX:
-					return DataType.getName(node.getDataType());
+					return cd.getTypeName();
 
-				case LENGTH_INDEX:
-					return "" + 4 * node.getDataLength(); // bytes
+				case COUNT_INDEX:
+					return "" + cd.length(_event);
 
 				default:
 					return "?";
@@ -130,35 +130,45 @@ public class NodeTableModel extends DefaultTableModel {
 	 * Clear all the data
 	 */
 	public void clear() {
-		_nodes = null;
+		_data = new Vector<ColumnData>();
 	}
 
 	/**
 	 * @param data
 	 *            the data to set
 	 */
-	public void setData(EvioNode[] nodes) {
-		_nodes = nodes;
+	public void setData(DataEvent event) {
+		clear();
+		_event = event;
+
+		if (event != null) {
+			String banks[] = event.getBankList();
+			if (banks != null) {
+				for (String bank : banks) {
+					String columns[] = event.getColumnList(bank);
+					if (columns != null) {
+						for (String column : columns) {
+							ColumnData cd = DataManager.getInstance().getColumnData(bank, column);
+							if (cd != null) {
+								_data.add(cd);
+							}
+						}
+					}
+				}
+			}
+		}
 		fireTableDataChanged();
 	}
 
 	/**
-	 * Get the node corresponding to the givens row
+	 * Get the column name of the bank column at the given row
 	 * 
 	 * @param row
 	 *            the row in question
-	 * @return the corresponding node, or <code>null</code>
+	 * @return the corresponding data bank column name, or <code>null</code>
 	 */
-	public EvioNode getNode(int row) {
-		EvioNode node = null;
-
-		if ((row >= 0) && (_nodes != null)) {
-			if (row < _nodes.length) {
-				node = _nodes[row];
-			}
-		}
-
-		return node;
+	public ColumnData getColumnData(int row) {
+		return (_data == null) ? null : _data.elementAt(row);
 	}
 
 	/**

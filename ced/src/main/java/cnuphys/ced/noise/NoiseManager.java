@@ -3,7 +3,7 @@ package cnuphys.ced.noise;
 import java.awt.Color;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
@@ -94,7 +94,7 @@ public class NoiseManager implements IClasIoEventListener {
 	
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		noisePackage.clear();
 		_noiseResults.clear();
 		

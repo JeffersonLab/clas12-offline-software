@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.ced.alldata.graphics.HistoPanel;
 import cnuphys.splot.pdata.HistoData;
 
 public class DefineHistoDialog extends JDialog implements ActionListener, PropertyChangeListener {

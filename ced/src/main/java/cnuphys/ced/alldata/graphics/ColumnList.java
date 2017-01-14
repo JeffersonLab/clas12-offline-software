@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.Dimension;
 import java.util.Arrays;
@@ -9,8 +9,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 import org.jlab.io.base.DataDescriptor;
-import org.jlab.io.evio.EvioDataDictionary;
-import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.base.DataDictionary;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 
@@ -18,12 +17,13 @@ public class ColumnList extends JList<String> {
 
 	private static Dimension _size = new Dimension(220, 250);
 
-	private static EvioDataDictionary _dataDict = EvioFactory.getDictionary();
+	private DataDictionary _dictionary;
 
 	//the scroll pane
 	private JScrollPane _scrollPane;
 
-	public ColumnList() {
+	public ColumnList(DataDictionary dictionary) {
+		_dictionary = dictionary;
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		_scrollPane = new JScrollPane(this);
 		_scrollPane.setPreferredSize(_size);
@@ -41,7 +41,7 @@ public class ColumnList extends JList<String> {
 	 */
 	public void setList(String bankName) {
 		if (bankName != null) {
-			DataDescriptor dd = _dataDict.getDescriptor(bankName);
+			DataDescriptor dd = _dictionary.getDescriptor(bankName);
 			if (dd != null) {
 				String columns[] = dd.getEntryList();
 				Arrays.sort(columns);

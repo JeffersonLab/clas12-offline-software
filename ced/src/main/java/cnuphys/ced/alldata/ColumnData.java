@@ -68,6 +68,58 @@ public class ColumnData {
 				"] full name: [" + _fullName +
 				"] data type: " + typeNames[_type];
 	}
+	
+	/**
+	 * Get the name of the data type
+	 * @return the name of the data type
+	 */
+	public String getTypeName() {
+		if ((_type < 0) || (_type >= typeNames.length)) {
+			return "???";
+		}
+		else {
+			return typeNames[_type];
+		}
+	}
+	
+	/**
+	 * Get the length of the backing data array
+	 * @param event the current event
+	 * @return the length of the array
+	 */
+	public int getLength(DataEvent event) {
+		
+		if (event != null) {
+			try {
+				switch (_type) {
+				case INT8:
+					byte bytes[] = event.getByte(_fullName);
+					return (bytes == null) ? 0 : bytes.length;
+
+				case INT16:
+					short shorts[] = event.getShort(_fullName);
+					return (shorts == null) ? 0 : shorts.length;
+
+				case INT32:
+					int ints[] = event.getInt(_fullName);
+					return (ints == null) ? 0 : ints.length;
+
+				case FLOAT32:
+					float floats[] = event.getFloat(_fullName);
+					return (floats == null) ? 0 : floats.length;
+
+				case FLOAT64:
+					double doubles[] = event.getDouble(_fullName);
+					return (doubles == null) ? 0 : doubles.length;
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage() + " Exception (ColumnData.getLength) with fullName: " + _fullName);
+				e.printStackTrace();
+			}
+		}
+		
+		return 0;
+	}
 
 	/**
 	 * Get the data array as an object. It is up tp the caller to cast it to the
@@ -103,7 +155,7 @@ public class ColumnData {
 					break;
 				}
 			} catch (Exception e) {
-				System.err.println(e.getMessage() + " Exception with fulName: " + _fullName);
+				System.err.println(e.getMessage() + " Exception with fullName: " + _fullName);
 				e.printStackTrace();
 			}
 		}

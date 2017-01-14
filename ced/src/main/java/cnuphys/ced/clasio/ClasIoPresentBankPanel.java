@@ -12,7 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.component.ActionLabel;
 import cnuphys.ced.clasio.table.NodeTable;
@@ -173,7 +173,7 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	}
 	
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		if (!_eventManager.isAccumulating()) {
 			update();
 		}

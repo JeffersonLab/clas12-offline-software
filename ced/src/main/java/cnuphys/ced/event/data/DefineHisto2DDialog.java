@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.ced.alldata.graphics.SelectPanel;
 import cnuphys.splot.pdata.Histo2DData;
 
 public class DefineHisto2DDialog extends JDialog implements ActionListener, PropertyChangeListener {

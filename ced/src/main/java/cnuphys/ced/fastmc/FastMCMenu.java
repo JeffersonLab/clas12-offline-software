@@ -10,7 +10,7 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingWorker;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -101,7 +101,7 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	}
 	
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package cnuphys.ced.clasio.queue;
 
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 public class EventConsumer {
 
@@ -14,7 +14,7 @@ public class EventConsumer {
 		while (true) {
 		    // the dequeue method "waits" so no thread yielding is
 		    // necessary
-		    EvioDataEvent event = queue.dequeue();
+		    DataEvent event = queue.dequeue();
 		    processor.processEvent(event);
 		}
 	    }

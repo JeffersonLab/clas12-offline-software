@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.ced.alldata.graphics.SelectPanel;
 import cnuphys.splot.pdata.DataSet;
 
 public class DefineScatterDialog extends JDialog implements ActionListener, PropertyChangeListener {

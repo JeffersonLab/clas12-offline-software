@@ -6,13 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Box;
-import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.util.PrintUtilities;
@@ -111,7 +110,7 @@ public abstract class CedView3D extends BaseView implements
 
 
 	@Override
-	public void newClasIoEvent(EvioDataEvent event) {
+	public void newClasIoEvent(DataEvent event) {
 		if (!_eventManager.isAccumulating()) {
 			// setData(event);
 			// setEventNumber(_eventManager.getEventNumber());
