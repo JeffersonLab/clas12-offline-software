@@ -1,6 +1,6 @@
 <evio_dictionary>
-  <bank name="SIMEVENT" tag="30" info="EVNT bank for reconstructed CLAS6 Data">
-    <section name="particle" tag="31" num="0" info="Container Bank">
+  <bank name="SIMEVENT" tag="330" info="EVNT bank for reconstructed CLAS6 Data">
+    <section name="particle" tag="331" num="0" info="Container Bank">
       <column name="status"  type="int8"    num="1"   info="status of the particle"/>
       <column name="pid"     type="int32"   num="2"   info="particle ID"/>
       <column name="charge"  type="int8"    num="3"   info="charge of the particle"/>

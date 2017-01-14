@@ -21,4 +21,12 @@
       <column name="RF"        type="float32" num="7"   info="RF reference time"/>
     </section>
   </bank>
+
+  <bank name="RF" tag="30" info="RF information">
+    <section name="info" tag="31"  num="0"   info="RF information bank">
+      <column name="id"  type="int32"     num="1"   info="RF id number"/> 
+      <column name="rf"  type="float64"   num="2"   info="RF numbers. 4 usually"/>
+    </section>
+  </bank>
+
 </evio_dictionary>
