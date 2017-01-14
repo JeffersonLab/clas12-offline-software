@@ -68,8 +68,8 @@ public class HipoDataDescriptor implements DataDescriptor {
                 if(entry.getType()==HipoNodeType.BYTE)  return 1;
                 if(entry.getType()==HipoNodeType.SHORT) return 2;
                 if(entry.getType()==HipoNodeType.INT) return 3;
-                if(entry.getType()==HipoNodeType.FLOAT) return 4;
-                if(entry.getType()==HipoNodeType.DOUBLE) return 5;
+                if(entry.getType()==HipoNodeType.FLOAT) return 5;
+                if(entry.getType()==HipoNodeType.DOUBLE) return 6;
                 return 0;
             }
         }
