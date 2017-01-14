@@ -89,7 +89,7 @@ public class TableLoader {
 				}
 			}	
 			
-			for(int s = 0; s<2; s++ ){ // loop over sectors
+		/*	for(int s = 0; s<2; s++ ){ // loop over sectors
 
 				for(int r = 0; r<6; r++ ){ //loop over slys
 						
@@ -101,7 +101,7 @@ public class TableLoader {
 						}
 					}
 				}
-			}
+			} */
 			
 			T2DLOADED = true;
 	 }

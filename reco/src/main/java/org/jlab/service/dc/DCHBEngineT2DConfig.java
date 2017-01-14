@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataSync;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
@@ -106,7 +106,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		
 		
 		if(clusters.size()==0) {				
-			rbc.fillAllHBBanks((EvioDataEvent) event, rbc, fhits, null, null, null, null);
+			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, null, null, null, null);
 			return true;
 		}
 	
@@ -117,7 +117,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		segments =  segFinder.get_Segments(clusters, event);
  
 		if(segments.size()==0) { // need 6 segments to make a trajectory			
-			rbc.fillAllHBBanks((EvioDataEvent) event, rbc, fhits, clusters, null, null, null);
+			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, null, null, null);
 			return true;
 		}
 							
@@ -125,7 +125,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		crosses = crossMake.find_Crosses(segments);
  
 		if(crosses.size()==0 ) {			
-			rbc.fillAllHBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, null, null);
+			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
 
@@ -142,7 +142,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		
 		if(crosslist.size()==0) {
 			
-			rbc.fillAllHBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, null);
+			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
 
@@ -152,7 +152,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		 
 		if(trkcands.size()==0) {
 			
-			rbc.fillAllHBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		}
 		// track found		
@@ -165,8 +165,8 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			}
 		}
 	  
-		rbc.fillAllHBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, trkcands);
-		/* DataBank bank =  (EvioDataBank) event.getDictionary().createBank("HitBasedTrkg::HBHits",fhits.size());
+		rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, crosses, trkcands);
+		/* DataBank bank =  (DataBank) event.getDictionary().createBank("HitBasedTrkg::HBHits",fhits.size());
 	    
 		for(int i =0; i< fhits.size(); i++) {
 			bank.setInt("id",i, fhits.get(i).get_Id());
@@ -200,15 +200,15 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		}
 		boolean isMC = false;
 		boolean isCosmics = false;
-		EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-        
-		if(bank.getByte("Type")[0]==0)
+		
+	
+        DataBank bank = event.getBank("RUN::config");	
+		if(bank.getByte("type", 0)==0)
 			isMC = true;
-		if(bank.getByte("Mode")[0]==1)
+		if(bank.getByte("mode", 0)==1)
 			isCosmics = true;
-		// force cosmics
-		isCosmics = true;
-		//System.out.println(bank.getInt("Event")[0]);
+		
+		
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
 		//
 		
@@ -268,14 +268,14 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		
 		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/DCRBREC.evio";
 		String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/T2DRec15deg.ev";
-		org.jlab.io.evio.EvioDataSync writer = new org.jlab.io.evio.EvioDataSync();
-		writer.open(outputFile);
+		//DataSync writer = null ;
+		//writer.open(outputFile);
 		
 		
 		while(reader.hasEvent() ){
 			
 			counter++;
-			org.jlab.io.evio.EvioDataEvent event = (org.jlab.io.evio.EvioDataEvent) reader.getNextEvent();
+			DataEvent event =reader.getNextEvent();
 			enh.processDataEvent(event);
 			
 			en.processDataEvent(event);
@@ -286,9 +286,9 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			if(counter>150) break;
 			if(counter%10==0)
 				System.out.println("run "+counter+" events");
-			writer.writeEvent(event);
+			//writer.writeEvent(event);
 		}
-		writer.close();
+		//writer.close();
 		double t = System.currentTimeMillis()-t1;
 		System.out.println("TOTAL  PROCESSING TIME = "+t);
 	 }

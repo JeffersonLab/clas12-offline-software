@@ -481,7 +481,7 @@ public class DCSwimmer {
 		float result[] = new float[3];
 
 		rcompositeField.field((float)x_cm, (float)y_cm, (float)z_cm, result);
-
+		
 		return new Point3D(result[0]/10, result[1]/10, result[2]/10);
 		
 	}

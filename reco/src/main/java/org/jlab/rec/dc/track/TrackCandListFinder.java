@@ -70,7 +70,7 @@ public class TrackCandListFinder {
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
 			        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-			        
+			       
 			        double deltaTheta = theta3-theta1; 
 			       
 			        double iBdl = traj.get_IntegralBdl(); 
@@ -83,7 +83,7 @@ public class TrackCandListFinder {
 			        //positive charges bend outward for nominal GEMC field configuration
 					int q = (int) Math.signum(deltaTheta); 
 					
-					q*=-1*Constants.getTORSCALE();						
+					q*=-1*Math.signum(Constants.getTORSCALE()) ;						
 					
 					if(iBdl == 0 || (deltaTheta== 0)) {
 						System.err.print("Error in estimating track candidate trajectory: integral_B_dl not found, no trajectory...");
@@ -173,7 +173,7 @@ public class TrackCandListFinder {
 							continue; // fails if after KF chisq exceeds cutoff or if KF fails 
 						
 							
-						cand.set_Id(cands.size());
+						cand.set_Id(cands.size()+1);
 						
 						cands.add(cand); 
 					
@@ -310,7 +310,7 @@ public class TrackCandListFinder {
 		
 		cand.status = status;
 		cand.fit_Successful=true;
-		cand.set_TrackingInfoString(trking);
+		cand.set_TrackingInfoString(trking); 
 	}
 
 

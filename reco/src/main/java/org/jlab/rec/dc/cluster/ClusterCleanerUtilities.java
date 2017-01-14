@@ -219,7 +219,7 @@ public class ClusterCleanerUtilities {
 			FittedCluster bestCls = OverlappingClusterResolver(cluster, splitclusters);
 
 			if(bestCls!=null) {
-
+				//System.out.println(" bestclusters "+bestCls.printInfo());
 				if(!(selectedClusList.contains(bestCls)))
 					selectedClusList.add(bestCls);
 			}
@@ -228,7 +228,7 @@ public class ClusterCleanerUtilities {
 		int splitclusId =1;
 		if(selectedClusList.size()!=0) {
 			for(FittedCluster cl : selectedClusList) {
-				cl.set_Id(clus.get_Id()*1000+splitclusId);
+				//cl.set_Id(0);
 				splitclusId++;
 			}
 		}

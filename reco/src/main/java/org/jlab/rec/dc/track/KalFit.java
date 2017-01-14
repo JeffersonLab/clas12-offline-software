@@ -81,7 +81,6 @@ public class KalFit {
 			KF_q = trkcand.get_Q();			
 			
 			VecAtFirstMeasSite = dcSwim.SwimToPlane(measVecs[0][0]);
-			
 		}
 		
 		
@@ -185,7 +184,7 @@ public class KalFit {
 				return;
 			}
 			try {
-				Ci = covMat.inverse();
+				Ci = covMat.inverse(); 
 			} catch (Exception e) {
 				
 				return;
@@ -194,7 +193,7 @@ public class KalFit {
 			
 			Matrix Ca = null;
 			try {
-				Ca = Ci.plus(new Matrix(HTGH));
+				Ca = Ci.plus(new Matrix(HTGH)); 
 			} catch (Exception e) {
 				return;
 			}
@@ -206,7 +205,7 @@ public class KalFit {
 			if(Ca!=null) {
 				if(Ca.inverse()!=null) {
 				Matrix CaInv = Ca.inverse();
-				covMat = CaInv;
+				covMat = CaInv; 
 				//System.err.println("Error: e");
 				} else {
 				return;
@@ -217,13 +216,13 @@ public class KalFit {
 			
 			for(int j = 0; j < 5; j++) {
 				// the gain matrix
-				K[j] = this.GainScaleFac*(h[0]*covMat.get(j, 0) + h[1]*covMat.get(j, 1))/V;				
+				K[j] = this.GainScaleFac*(h[0]*covMat.get(j, 0) + h[1]*covMat.get(j, 1))/V;		
 			}
 			resVal = measVecs[1][i1] - get_Proj(stateVec, (int) measVecs[2][i1]);
 			
-			double c2 = ((1 - (h[0]*K[0] + h[1]*K[1]))*(1 - (h[0]*K[0] + h[1]*K[1]))*resVal*resVal/V);
+			double c2 = ((1 - (h[0]*K[0] + h[1]*K[1]))*(1 - (h[0]*K[0] + h[1]*K[1]))*resVal*resVal/V); 
 			if(c2<thehitChisq) {
-				thehitChisq = c2;
+				thehitChisq = c2; 
 				KF_p = 1./Math.abs(stateVec[4]); // temp patch ---> fix this.
 			}
 			chi2 += c2;
@@ -243,9 +242,11 @@ public class KalFit {
 	 * @param C matrix
 	 */
 	public void printMatrix(Matrix C) {
+		System.out.println("------------------------------------------");
 		for(int k = 0; k< 5; k++) {
 			System.out.println(C.get(k, 0)+"	"+C.get(k, 1)+"	"+C.get(k, 2)+"	"+C.get(k, 3)+"	"+C.get(k, 4));
 		}
+		System.out.println("------------------------------------------");
 	}
 	/**
 	 * The state projector - it projects the state onto the measurement
@@ -296,7 +297,7 @@ public class KalFit {
 			
 			propagateCovMat();
 			if(swimDir>0)
-				covMat.plusEquals(noiseMat);
+				covMat.plusEquals(noiseMat);  
 		}
 	}
 	
@@ -338,7 +339,7 @@ public class KalFit {
 		
 		Matrix Cpropagated = new Matrix(C);	
 		covMat = Cpropagated;	
-	
+		
 	}
 	/**
 	 * prints the stateVector at a given z - used for debugging
@@ -441,7 +442,7 @@ public class KalFit {
 	
 	private double[] getFieldAt(double x, double y, double z) {
 		Point3D bf = dcSwim.Bfield(x,y,z);
-	
+	//System.out.println("x "+x+" y "+y+" z "+z+ " B = " +bf.toString());
 		return new double[] {bf.x(), bf.y(),bf.z()};
 	}
 
@@ -721,7 +722,7 @@ public class KalFit {
 	    double pathLength = t_ov_X0/cosEntranceAngle;  
 	   
 	    double sctRMS = (0.0136/(beta*p))*Math.sqrt(pathLength)*(1+0.038*Math.log(pathLength)); // Highland-Lynch-Dahl formula
-	   
+	  
 	    double cov_txtx = (1+tx0*tx0)*(1 + tx0*tx0 + ty0*ty0)*sctRMS*sctRMS;
 	    double cov_tyty = (1+ty0*ty0)*(1 + tx0*tx0 + ty0*ty0)*sctRMS*sctRMS;
 	    double cov_txty = tx0*ty0*(1 + tx0*tx0 + ty0*ty0)*sctRMS*sctRMS;

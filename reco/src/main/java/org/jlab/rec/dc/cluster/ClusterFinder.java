@@ -274,6 +274,7 @@ public class ClusterFinder  {
 		for(FittedHit hit : fhits) {
 			if(hit.get_AssociatedClusterID()==-1)
 				continue;
+			//System.out.println("recomposing clusters "+hit.printInfo());
 			HitArray[index][hit.get_AssociatedClusterID()] = hit;
 			hit.updateHitPosition();
 			

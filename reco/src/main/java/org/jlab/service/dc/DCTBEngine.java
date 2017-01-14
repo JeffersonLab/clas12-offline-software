@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -69,16 +68,13 @@ public class DCTBEngine extends ReconstructionEngine {
 		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct);
 		
 		if(clusters.size()==0) {
-			rbc.fillAllTBBanks((EvioDataEvent) event, rbc, hits, null, null, null, null);
+			rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
 			return true;
 		}
 		
 		//3) find the segments from the fitted clusters
 		SegmentFinder segFinder = new SegmentFinder();
 		segments =  segFinder.get_Segments(clusters, event);
-		
-		
-	
 		
 		if(segments.size()==0) { // need 6 segments to make a trajectory
 			
@@ -89,7 +85,7 @@ public class DCTBEngine extends ReconstructionEngine {
 					fhits.add(hit);						
 				}
 			}
-			rbc.fillAllTBBanks((EvioDataEvent) event, rbc, fhits, clusters, null, null, null);
+			rbc.fillAllTBBanks( event, rbc, fhits, clusters, null, null, null);
 			return true;
 		}
 		
@@ -106,7 +102,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(crosses.size()==0 ) {
 			
-			rbc.fillAllTBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, null, null);
+			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
 		
@@ -117,7 +113,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(crosslist.size()==0) {			
 			
-			rbc.fillAllTBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, null);
+			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
 			
@@ -129,7 +125,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(trkcands.size()==0) {
 			
-			rbc.fillAllTBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+			rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		}
 		
@@ -139,13 +135,13 @@ public class DCTBEngine extends ReconstructionEngine {
 			for(Cross c : trk) {
 				for(Segment s : c) {
 					for(FittedHit h : s) {
-						h.set_AssociatedTBTrackID(trk.get_Id());
+						h.set_AssociatedTBTrackID(trk.get_Id()); 
 					}
 				}
 			}
 		}
 		
-		rbc.fillAllTBBanks((EvioDataEvent) event, rbc, fhits, clusters, segments, crosses, trkcands);
+		rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, trkcands);
 
 			
 		return true;

@@ -3,6 +3,7 @@ package org.jlab.rec.dc.banks;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -59,7 +60,7 @@ public class HitReader {
 	}
 	/**
 	 * reads the hits using clas-io methods to get the EvioBank for the DC and fill the values to instantiate the DChit and MChit classes.
-	 * This methods fills the DChit and MChit list of hits.  If the data is not MC, the MChit list remains empty
+	 * This methods fills the DChit list of hits.  
 	 * @param event DataEvent
 	 */
 	public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis,NoiseReductionParameters parameters,
@@ -72,22 +73,22 @@ public class HitReader {
 			return;
 		}
  
-				
+		DataBank bankDGTZ = event.getBank("DC::tdc");
 		
-		EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("DC::dgtz");
-        
-		int[] hitno = bankDGTZ.getInt("hitn");
-        int[] sector = bankDGTZ.getInt("sector");
-		int[] slayer = bankDGTZ.getInt("superlayer");
-		int[] layer = bankDGTZ.getInt("layer");
-		int[] wire = bankDGTZ.getInt("wire");
+		int rows = bankDGTZ.rows();
+		int[] sector = new int[rows];
+		int[] layer = new int[rows];
+		int[] wire = new int[rows];
+		int[] tdc = new int[rows];
 		
-		double[] stime = null ;
-		int[] tdc = null;
-		stime = bankDGTZ.getDouble("stime");
-		if(event.getDictionary().getXML().contains("DC::dgtz.TDC"))
-			tdc = bankDGTZ.getInt("TDC");
-				
+		for(int i = 0; i< rows; i++) {
+			sector[i] = bankDGTZ.getByte("sector", i);
+			layer[i] = bankDGTZ.getByte("layer", i);
+			wire[i] = bankDGTZ.getShort("component", i);
+			tdc[i] = bankDGTZ.getInt("TDC", i);		
+		}
+		
+		
 		int size = layer.length;
 		int[] layerNum = new int[size];
 		int[] superlayerNum =new int[size];
@@ -101,17 +102,17 @@ public class HitReader {
 			if(tdc!=null && tdc.length>0) {
 					smearedTime[i] = (double) tdc[i];
 			} 
-			if(stime!=null && stime.length>0) {
-				smearedTime[i] = stime[i];
-			}
+			//if(stime!=null && stime.length>0) {
+			//	smearedTime[i] = stime[i];
+			//}
 			
-			if(slayer!=null && slayer.length>0) {
-				layerNum[i] = layer[i];
-				superlayerNum[i] = slayer[i]; 
-			} else {
+			//if(slayer!=null && slayer.length>0) {
+			//	layerNum[i] = layer[i];
+			//	superlayerNum[i] = slayer[i]; 
+			//} else {
 				superlayerNum[i]=(layer[i]-1)/6 + 1;
 				layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 
-			}
+			//}
 	
 		}
 		results.clear();
@@ -121,10 +122,11 @@ public class HitReader {
 		
 		for(int i = 0; i<size; i++) {	
 			if(wire[i]!=-1 && results.noise[i]==false && smearedTime[i]>=0.0){		
-				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
+				//Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
+				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i+1));			
 				double posError = hit.get_CellSize()/Math.sqrt(12.);
 				hit.set_DocaErr(posError);
-				hit.set_Id(hits.size()); 
+				hit.set_Id(i+1); 
 				hits.add(hit); 
 			}	
 		}
@@ -147,19 +149,35 @@ public class HitReader {
 			return;
 		}
  
-		EvioDataBank bank = (EvioDataBank) event.getBank("HitBasedTrkg::HBHits");
+		DataBank bank = event.getBank("HitBasedTrkg::HBHits");
+		int rows = bank.rows();
 		
-		int[] id = bank.getInt("id");
+		int[] id = new int[rows];	
+        int[] sector = new int[rows];
+		int[] slayer = new int[rows];
+		int[] layer = new int[rows];
+		int[] wire = new int[rows];
+		double[] time = new double[rows];
+		int[] LR = new int[rows];
+		double[] B = new double[rows];
+		int[] clusterID = new int[rows];
+		int[] trkID = new int[rows];
 		
-        int[] sector = bank.getInt("sector");
-		int[] slayer = bank.getInt("superlayer");
-		int[] layer = bank.getInt("layer");
-		int[] wire = bank.getInt("wire");
-		double[] time = bank.getDouble("time");
-		int[] LR = bank.getInt("LR");	
-		double[] B = bank.getDouble("B");
-		int[] clusterID = bank.getInt("clusterID");
-		int[] trkID = bank.getInt("trkID");
+		
+		for(int i = 0; i< rows; i++) {
+			sector[i] = bank.getByte("sector", i);
+			slayer[i] = bank.getByte("superlayer", i);
+			layer[i] = bank.getByte("layer", i);
+			wire[i] = bank.getShort("wire", i);
+			time[i] = bank.getFloat("time", i);
+			id[i] = bank.getShort("id", i);
+			LR[i] = bank.getByte("LR", i);
+			B[i] = bank.getFloat("B", i);
+			clusterID[i] = bank.getShort("clusterID", i);
+			trkID[i] = bank.getByte("trkID", i);
+ 		}
+		
+		
 		int size = layer.length;
 
 		List<FittedHit> hits = new ArrayList<FittedHit>();
@@ -168,7 +186,7 @@ public class HitReader {
 			if(clusterID[i]==-1)
 				continue;
 			
-			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.T0, 0, B[i], id[i]);
+			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.T0, 0, B[i], id[i]); 
 			hit.set_LeftRightAmb(LR[i]);
 			hit.set_TrkgStatus(0);
 			hit.set_TimeToDistance(1.0, B[i]);

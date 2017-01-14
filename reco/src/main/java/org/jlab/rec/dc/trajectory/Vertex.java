@@ -5,8 +5,8 @@ import java.util.Random;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.track.Track;
 
 public class Vertex {
@@ -18,9 +18,9 @@ public class Vertex {
 	public Vertex() {
 		
 	}
-	public double vertexEstimator(EvioDataEvent event) {
+	public double vertexEstimator(DataEvent event) {
 
-		EvioDataBank bank = (EvioDataBank) event.getBank("GenPart::true");
+		DataBank bank = event.getBank("GenPart::true");
         
         double[] vx = bank.getDouble("vx");
         double[] vy = bank.getDouble("vy");
@@ -32,7 +32,7 @@ public class Vertex {
 		return smearedVal; 
 	}
 	
-	public void resetTrackAtRasterRadius(EvioDataEvent event, Track thecand) {
+	public void resetTrackAtRasterRadius(DataEvent event, Track thecand) {
 		
 		double r = vertexEstimator(event) ;
 		
