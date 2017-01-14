@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,6 +7,8 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
+
+import cnuphys.ced.event.data.ICut;
 
 public class CutTableScrollPane extends JScrollPane {
 

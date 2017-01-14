@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.util.Properties;
 import java.util.Vector;
@@ -6,10 +6,15 @@ import java.util.Vector;
 import javax.swing.text.JTextComponent;
 import javax.xml.stream.XMLStreamException;
 
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.event.data.NameBinding;
+import cnuphys.ced.event.data.XmlUtilities;
 import net.oh.exp4j.Expression;
 import net.oh.exp4j.ExpressionBuilder;
 import net.oh.exp4j.ValidationResult;
@@ -65,7 +70,7 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 					_columnData[i] = null;
 					NameBinding nb = DefinitionManager.getInstance().getNameBinding(_variables[i]);
 					if (nb != null) {
-						_columnData[i] = ColumnData.getColumnData(nb.bankColumnName);
+						_columnData[i] = DataManager.getInstance().getColumnData(nb.bankColumnName);
 					}
 					
 					System.err.println("var name: [" + _variables[i] + "]  columnData: " + _columnData[i]);
@@ -185,7 +190,7 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 		return expression;
 	}
 
-	public int minLength() {
+	public int minLength(DataEvent event) {
 		if (!readyToCompute()) {
 			return 0;
 		}
@@ -195,11 +200,11 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 			return 0;
 		}
 		
-		double a[] = _columnData[0].getAsDoubleArray();
+		double a[] = _columnData[0].getAsDoubleArray(event);
 		int dataLen = (a == null) ? 0 : a.length;
 		
 		for (int i = 1; i < len; i++) {
-			a = _columnData[i].getAsDoubleArray();
+			a = _columnData[i].getAsDoubleArray(event);
 			int alen = (a == null) ? 0 : a.length;
 			dataLen = Math.min(alen, dataLen);
 		}
@@ -239,11 +244,11 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 	 * @param index the index into the data arrays
 	 * @return the value
 	 */
-	public double value(int index) {
+	public double value(DataEvent event, int index) {
 		if (readyToCompute()) {
 			int vlen = (_variables == null) ? 0 : _variables.length;
 			for (int i = 0; i < vlen; i++) {
-				double val[] = _columnData[i].getAsDoubleArray();
+				double val[] = _columnData[i].getAsDoubleArray(event);
 				if (val == null) {
 					return Double.NaN;
 				}

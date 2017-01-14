@@ -19,15 +19,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jlab.io.base.DataDictionary;
-import org.jlab.io.hipo.HipoDataDictionary;
-
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.X11Colors;
-import cnuphys.ced.event.data.DefinitionManager;
-import cnuphys.ced.event.data.ExpressionTable;
-import cnuphys.ced.event.data.ExpressionTableScrollPane;
-import cnuphys.ced.event.data.NamedExpression;
 
 public class SelectPanel extends JPanel implements ListSelectionListener {
 	
@@ -48,15 +41,12 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	private ExpressionTable _expressionTable;
 	private DefaultListSelectionModel _expressionSelectionModel;
 
-	//the data dictionary
-	private DataDictionary _dictionary;
 	/**
 	 * 
 	 * @param label
 	 * @param addExpressionTable
 	 */
-	public SelectPanel(DataDictionary dictionary, String label, boolean addExpressionTable) {
-		_dictionary = dictionary;
+	public SelectPanel(String label, boolean addExpressionTable) {
 		setLayout(new BorderLayout(2,4));
 		addCenter(label);
 		
@@ -130,8 +120,8 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 	private void addCenter(String label) {
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(1, 2, 8, 8));
-		_blist = new AllBanksList(_dictionary);
-		_clist = new ColumnList(_dictionary);
+		_blist = new AllBanksList();
+		_clist = new ColumnList();
 		
 		addBankColumnListener(this);
 		
@@ -246,7 +236,7 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 		frame.setLayout(new BorderLayout());
 		
 //		HistoPanel hp = new HistoPanel();
-		SelectPanel hp = new SelectPanel(new HipoDataDictionary(), "Select", true);
+		SelectPanel hp = new SelectPanel("Select", true);
 		frame.add(hp);
 		
 		SwingUtilities.invokeLater(new Runnable() {

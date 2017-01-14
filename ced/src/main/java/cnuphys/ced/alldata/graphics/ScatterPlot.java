@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -6,11 +6,12 @@ import java.util.Collection;
 import javax.swing.BorderFactory;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
-
+import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataColumn;
@@ -49,16 +50,16 @@ public class ScatterPlot extends PlotDialog {
 		String xname = dataSet.getColumnName(0);
 		String yname = dataSet.getColumnName(1);
 		
-		boolean isColumnX = ColumnData.validColumnName(xname);
-		boolean isColumnY = ColumnData.validColumnName(yname);
+		boolean isColumnX = DataManager.getInstance().validColumnName(xname);
+		boolean isColumnY = DataManager.getInstance().validColumnName(yname);
 
 		if (isColumnX) {
-			_colDatX = ColumnData.getColumnData(xname);
+			_colDatX = DataManager.getInstance().getColumnData(xname);
 		} else {
 			_namedExpressionNameX = xname;
 		}
 		if (isColumnY) {
-			_colDatY = ColumnData.getColumnData(yname);
+			_colDatY =  DataManager.getInstance().getColumnData(yname);
 		} else {
 			_namedExpressionNameY = yname;
 		}
@@ -143,6 +144,7 @@ public class ScatterPlot extends PlotDialog {
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 	
@@ -155,13 +157,13 @@ public class ScatterPlot extends PlotDialog {
 			NamedExpression expY = getNamedExpressionY();
 
 			
-			int lenx = getMinLength(_colDatX, expX);
-			int leny = getMinLength(_colDatY, expY);
+			int lenx = getMinLength(event, _colDatX, expX);
+			int leny = getMinLength(event, _colDatY, expY);
 			int len = Math.min(lenx, leny);
 			
 			for (int index = 0; index < len; index++) {
-				double valx = getValue(index, _colDatX, expX);
-				double valy = getValue(index, _colDatY, expY);
+				double valx = getValue(event, index, _colDatX, expX);
+				double valy = getValue(event, index, _colDatY, expY);
 				if (!Double.isNaN(valx) && !Double.isNaN(valy)) {
 					try {
 						_dataSet.add(valx, valy);
@@ -187,19 +189,6 @@ public class ScatterPlot extends PlotDialog {
 	public String getPlotType() {
 		return PlotDialog.SCATTERPLOT;
 	}
-
-//	/** custom definitions */
-//	@Override
-//	protected  void customWrite(BufferedWriter out) {
-//		String xname = "" + _dataSet.getColumnName(0);
-//		String yname = "" + _dataSet.getColumnName(1);
-//		try {
-//			writeDelimitted(out, DATASET, xname, yname);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		
-//	}
 
 	@Override
 	public void customXml(XmlPrintStreamWriter writer) {

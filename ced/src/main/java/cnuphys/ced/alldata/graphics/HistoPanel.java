@@ -13,8 +13,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.jlab.io.base.DataDictionary;
-
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.splot.pdata.HistoData;
@@ -27,8 +25,6 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 
 	private JFormattedTextField _maxValTF;
 	
-//	private JFormattedTextField _componentCountTF;
-	private JTextField _componentCountTF;
 
 	private SelectPanel _sp;
 
@@ -37,10 +33,10 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	private double _maxVal = 1;
 	private int _numComponents = 0;
 
-	public HistoPanel(DataDictionary dictionary, String label) {
+	public HistoPanel(String label) {
 		setLayout(new BorderLayout(2, 2));
 
-		_sp = new SelectPanel(dictionary, label, true);
+		_sp = new SelectPanel(label, true);
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
@@ -64,8 +60,6 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		_numBinsTF = integerField(sp, "Number of Bins", _numBins);
 		_minValTF = decimalField(sp, "Min Value", _minVal);
 		_maxValTF = decimalField(sp, "Max Value", _maxVal);
-//		_componentCountTF = integerField(sp, "Set for Component Count", _numComponents);
-		_componentCountTF = numField(sp, "Set for Component Count", _numComponents);
 		
 		_numBinsTF.addPropertyChangeListener("value", this);
 		_minValTF.addPropertyChangeListener("value", this);

@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;

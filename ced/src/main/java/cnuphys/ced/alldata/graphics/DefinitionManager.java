@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +29,10 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.bCNU.xml.XmlSupport;
+import cnuphys.ced.event.data.Histogram;
+import cnuphys.ced.event.data.Histogram2D;
+import cnuphys.ced.event.data.NameBinding;
+import cnuphys.ced.event.data.XmlUtilities;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;
