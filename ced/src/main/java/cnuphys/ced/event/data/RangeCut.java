@@ -7,6 +7,8 @@ import javax.xml.stream.XMLStreamException;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
+import cnuphys.ced.alldata.graphics.DefinitionManager;
+import cnuphys.ced.alldata.graphics.NamedExpression;
 
 public class RangeCut implements ICut {
 	

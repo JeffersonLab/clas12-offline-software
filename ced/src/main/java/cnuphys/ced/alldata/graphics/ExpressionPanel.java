@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -11,17 +11,17 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class BoundVariablePanel extends JPanel implements ActionListener, ListSelectionListener {
+public class ExpressionPanel extends JPanel implements ActionListener, ListSelectionListener {
 
-	private BoundVariableTableScrollPane _scrollPane;
+	private ExpressionTableScrollPane _scrollPane;
 	
 	//remove bindings from the table
 	private JButton _remove;
 	
-	public BoundVariablePanel() {
+	public ExpressionPanel(int selectionMode) {
 		setLayout (new BorderLayout(4, 4));
 		
-		_scrollPane = new BoundVariableTableScrollPane("Bound Variables");
+		_scrollPane = new ExpressionTableScrollPane("Expressions", selectionMode);
 		add(_scrollPane, BorderLayout.CENTER);
 		
 		JPanel sp = new JPanel();
@@ -40,9 +40,9 @@ public class BoundVariablePanel extends JPanel implements ActionListener, ListSe
 	/**
 	 * Accessor for the underlying table.
 	 * 
-	 * @return the underlying bound variable table.
+	 * @return the underlying expression table.
 	 */
-	public BoundVariableTable getTable() {
+	public ExpressionTable getTable() {
 		return _scrollPane.getTable();
 	}
 
@@ -51,8 +51,8 @@ public class BoundVariablePanel extends JPanel implements ActionListener, ListSe
 	 * 
 	 * @return The underlying table model.
 	 */
-	public BoundVariableTableModel getBoundVariableModel() {
-		return _scrollPane.getBoundVariableModel();
+	public ExpressionTableModel getExpressionModel() {
+		return _scrollPane.getExpressionModel();
 	}
 
 	@Override
@@ -62,17 +62,31 @@ public class BoundVariablePanel extends JPanel implements ActionListener, ListSe
 			int rows[] = getTable().getSelectedRows();
 			if ((rows != null) && (rows.length > 0)) {
 				int len = rows.length;
-				Vector<NameBinding> nbv = new Vector<NameBinding>();
+				Vector<NamedExpression> nbv = new Vector<NamedExpression>();
 				for (int i = 0; i < len; i++) {
-					nbv.add(getBoundVariableModel().getNameBinding(rows[i]));
+					nbv.add(getExpressionModel().getNamedExpression(rows[i]));
 				}
 				
-				getBoundVariableModel().getData().removeAll(nbv);
-				getBoundVariableModel().fireTableRowsDeleted(0, 0);
+				getExpressionModel().getData().removeAll(nbv);
+				getExpressionModel().fireTableRowsDeleted(0, 0);
 
 			}
 		}
 		
+	}
+	
+	/**
+	 * Remove a row from the table
+	 * @param row the zero based row
+	 * @return the removed NamedExpression, or null
+	 */
+	public NamedExpression removeRow(int row) {
+		NamedExpression ne = getExpressionModel().getNamedExpression(row);
+		if (ne != null) {
+			getExpressionModel().getData().remove(ne);
+			getExpressionModel().fireTableRowsDeleted(0, 0);
+		}
+		return ne;
 	}
 
 	@Override

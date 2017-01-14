@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -12,36 +12,32 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
-import cnuphys.ced.alldata.graphics.SelectPanel;
-import cnuphys.splot.pdata.Histo2DData;
+import cnuphys.ced.alldata.DataManager;
+import cnuphys.splot.pdata.DataSet;
 
-public class DefineHisto2DDialog extends JDialog implements ActionListener, PropertyChangeListener {
-	
+public class DefineScatterDialog extends JDialog implements ActionListener, PropertyChangeListener {
 	private JButton _okButton;
 	private JButton _cancelButton;
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
-	private Histo2DPanel _histoPanel;
-	
-	//names resulting from selection
-	private String _xName;
-	private String _yName;
+	private ScatterPanel _scatterPanel;
 
-	public DefineHisto2DDialog() {
-		setTitle("Define a 2D Histogram");
+	public DefineScatterDialog() {
+		setTitle("Define a Scatter Plot");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		
-		_histoPanel = new Histo2DPanel();
-		add(_histoPanel, BorderLayout.CENTER);
-
-		_histoPanel.getSelectPanelX().addPropertyChangeListener(this);
-		_histoPanel.getSelectPanelY().addPropertyChangeListener(this);
+		_scatterPanel = new ScatterPanel();
+		add(_scatterPanel, BorderLayout.CENTER);
+		
+		SelectPanel sp[] = _scatterPanel.getScatterPanels();
+		sp[0].addPropertyChangeListener(this);
+		sp[1].addPropertyChangeListener(this);
 		
 		addSouth();
 		pack();
 		DialogUtilities.centerDialog(this);
 	}
-	
+		
 	//add the buttons
 	private void addSouth(){
 		JPanel sp = new JPanel();
@@ -58,25 +54,8 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 		sp.add(_cancelButton);
 		add(sp, BorderLayout.SOUTH);
 	}
+
 	
-	/**
-	 * Get the reason the dialog closed
-	 * @return the reason the dialog closed
-	 */
-	public int getReason() {
-		return _reason;
-	}
-	
-	/**
-	 * Return a HistoData ready for filling if the user hit ok
-	 * @return a HistoData or <code>null</code>.
-	 */
-	public Histo2DData getHistoData() {
-		if (_reason == DialogUtilities.OK_RESPONSE) {
-			return _histoPanel.getHisto2DData();
-		}
-		return null;
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -91,59 +70,58 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 		}
 	}
 
+	/**
+	 * Get the reason the dialog closed
+	 * @return the reason the dialog closed
+	 */
+	public int getReason() {
+		return _reason;
+	}
 	
+	/**
+	 * Return a DataSet ready for filling if the user hit ok
+	 * @return a DataSet or <code>null</code>.
+	 */
+	public DataSet getDataSeta() {
+		if (_reason == DialogUtilities.OK_RESPONSE) {
+			return _scatterPanel.createDataSet();
+		}
+		return null;
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		
-		
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
 		if ((prop.equals("newname")) || (prop.equals("expression"))) {
 
-			SelectPanel spx = _histoPanel.getSelectPanelX();
-			SelectPanel spy = _histoPanel.getSelectPanelY();
+			SelectPanel sp[] = _scatterPanel.getScatterPanels();
 			boolean xvalid = false;
 			boolean yvalid = false;
 
-			String xname = spx.getFullColumnName();
-			if (ColumnData.validColumnName(xname)) {
+			String xname = sp[0].getFullColumnName();
+			if (DataManager.getInstance().validColumnName(xname)) {
 				xvalid = true;
 			} else {
-				xname = spx.getExpressionName();
+				xname = sp[0].getExpressionName();
 				xvalid = ((xname != null) && !xname.isEmpty());
 			}
 
-			String yname = spy.getFullColumnName();
-			if (ColumnData.validColumnName(yname)) {
+			String yname = sp[1].getFullColumnName();
+			if (DataManager.getInstance().validColumnName(yname)) {
 				yvalid = true;
 			} else {
-				yname = spy.getExpressionName();
+				yname = sp[1].getExpressionName();
 				yvalid = ((yname != null) && !yname.isEmpty());
 			}
 
 			_okButton.setEnabled(xvalid && yvalid);
 		}
-	}
-	
-	/**
-	 * Get the name for the x axis variable
-	 * @return the name for the x axis variable
-	 */
-	public String getXName() {
-		return _xName;
-	}
 
-	
-	/**
-	 * Get the name for the y axis variable
-	 * @return the name for the y axis variable
-	 */
-	public String getYName() {
-		return _yName;
 	}
 
 	public static void main(String arg[]) {
-		DefineHisto2DDialog dialog = new DefineHisto2DDialog();
+		DefineScatterDialog dialog = new DefineScatterDialog();
 		dialog.setVisible(true);
 		int reason = dialog.getReason();
 		if (reason == DialogUtilities.OK_RESPONSE) {

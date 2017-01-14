@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -7,7 +7,6 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JPanel;
 
-import cnuphys.ced.alldata.graphics.SelectPanel;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.DataSetType;

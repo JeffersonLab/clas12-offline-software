@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -10,25 +10,26 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.ced.alldata.DataManager;
+import cnuphys.splot.pdata.HistoData;
 
-public class DefineRangeCutDialog extends JDialog implements ActionListener, PropertyChangeListener {
+public class DefineHistoDialog extends JDialog implements ActionListener, PropertyChangeListener {
 	
 	private JButton _okButton;
 	private JButton _cancelButton;
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
-	private RangeCutPanel _rangeCutPanel;
+	private HistoPanel _histoPanel;
 
-	public DefineRangeCutDialog() {
-		setTitle("Define a Cut Range");
+	public DefineHistoDialog() {
+		setTitle("Define a Histogram");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		
-		_rangeCutPanel = new RangeCutPanel();
-		add(_rangeCutPanel, BorderLayout.CENTER);
+		_histoPanel = new HistoPanel("Select a Variable");
+		add(_histoPanel, BorderLayout.CENTER);
 
-		_rangeCutPanel.getSelectPanel().addPropertyChangeListener(this);
+		_histoPanel.getSelectPanel().addPropertyChangeListener(this);
 		
 		addSouth();
 		pack();
@@ -61,12 +62,12 @@ public class DefineRangeCutDialog extends JDialog implements ActionListener, Pro
 	}
 	
 	/**
-	 * Return a RangeCut if the user hit ok
-	 * @return a Range or <code>null</code>.
+	 * Return a HistoData ready for filling if the user hit ok
+	 * @return a HistoData or <code>null</code>.
 	 */
-	public RangeCut getRangeCut() {
+	public HistoData getHistoData() {
 		if (_reason == DialogUtilities.OK_RESPONSE) {
-			return _rangeCutPanel.getRangeCut();
+			return _histoPanel.getHistoData();
 		}
 		return null;
 	}
@@ -87,13 +88,12 @@ public class DefineRangeCutDialog extends JDialog implements ActionListener, Pro
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
-		if (o == _rangeCutPanel.getSelectPanel()) {
+		if (o == _histoPanel.getSelectPanel()) {
 			if (prop.equals("newname")) {
 				String fn = (String) (evt.getNewValue());
-				_okButton.setEnabled(ColumnData.validColumnName(fn));
+				_okButton.setEnabled(DataManager.getInstance().validColumnName(fn));
 			} //newname (column)
 			else if (prop.equals("expression")) {
 				_okButton.setEnabled(true);
@@ -102,7 +102,13 @@ public class DefineRangeCutDialog extends JDialog implements ActionListener, Pro
 	}
 	
 	public static void main(String arg[]) {
-		DefineRangeCutDialog dialog = new DefineRangeCutDialog();
+		DefinitionManager.getInstance().addExpression("eee", "whatever");
+		DefinitionManager.getInstance().addExpression("ddd", "whatever");
+		DefinitionManager.getInstance().addExpression("bbb", "whatever");
+		DefinitionManager.getInstance().addExpression("ccc", "whatever");
+		DefinitionManager.getInstance().addExpression("aaa", "whatever");
+		
+		DefineHistoDialog dialog = new DefineHistoDialog();
 		dialog.setVisible(true);
 		int reason = dialog.getReason();
 		if (reason == DialogUtilities.OK_RESPONSE) {

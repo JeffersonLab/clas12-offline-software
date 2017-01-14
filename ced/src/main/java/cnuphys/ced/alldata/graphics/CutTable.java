@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -13,6 +13,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
+
+import cnuphys.ced.event.data.ICut;
 
 public class CutTable extends JTable implements ItemListener {
 

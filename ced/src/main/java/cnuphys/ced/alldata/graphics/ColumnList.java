@@ -9,21 +9,18 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 import org.jlab.io.base.DataDescriptor;
-import org.jlab.io.base.DataDictionary;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.ced.alldata.DataManager;
 
 public class ColumnList extends JList<String> {
 
 	private static Dimension _size = new Dimension(220, 250);
 
-	private DataDictionary _dictionary;
-
 	//the scroll pane
 	private JScrollPane _scrollPane;
 
-	public ColumnList(DataDictionary dictionary) {
-		_dictionary = dictionary;
+	public ColumnList() {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		_scrollPane = new JScrollPane(this);
 		_scrollPane.setPreferredSize(_size);
@@ -41,7 +38,7 @@ public class ColumnList extends JList<String> {
 	 */
 	public void setList(String bankName) {
 		if (bankName != null) {
-			DataDescriptor dd = _dictionary.getDescriptor(bankName);
+			DataDescriptor dd = DataManager.getInstance().getDictionary().getDescriptor(bankName);
 			if (dd != null) {
 				String columns[] = dd.getEntryList();
 				Arrays.sort(columns);

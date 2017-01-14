@@ -1,28 +1,28 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
 
-public class BoundVariableTableModel extends DefaultTableModel {
+public class ExpressionTableModel extends DefaultTableModel {
 
 	/**
 	 * Constant used to designate display column;
 	 */
-	public static final int VARNAME = 0;
+	public static final int ENAME = 0;
 
 	/**
 	 * Constant used to designate name column;
 	 */
-	public static final int BCNAME = 1;
+	public static final int ESTRING = 1;
 
 	// the names of the columns
-	protected static final String colNames[] = { "Variable", "Bank and Column" };
+	protected static final String colNames[] = { "Name", "Expression" };
 
 	// the widths of the columns
 	protected static final int columnWidths[] = { 90, 240 };
 
-	public BoundVariableTableModel() {
+	public ExpressionTableModel() {
 		super(colNames, 3);
 	}
 
@@ -43,7 +43,7 @@ public class BoundVariableTableModel extends DefaultTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		Vector<NameBinding> data = getData();
+		Vector<NamedExpression> data = getData();
 		if (data == null) {
 			return 0;
 		}
@@ -63,7 +63,7 @@ public class BoundVariableTableModel extends DefaultTableModel {
 	@Override
 	public Object getValueAt(int row, int col) {
 
-		NameBinding nb = getNameBinding(row);
+		NamedExpression nb = getNamedExpression(row);
 
 		if (nb == null) {
 			return null;
@@ -71,39 +71,40 @@ public class BoundVariableTableModel extends DefaultTableModel {
 
 		switch (col) {
 
-		case VARNAME:
-			return nb.varName;
+		case ENAME:
+			return nb._expName;
 
-		case BCNAME:
-			return nb.bankColumnName;
+		case ESTRING:
+			return nb._expString;
 		}
 
 		return null;
 	}
 	
 	
+
 	/**
-	 * Get the collection of bindings
+	 * Get the collection of expressions
 	 * 
-	 * @return the bindings
+	 * @return the expressions
 	 */
-	public Vector<NameBinding> getData() {
-		return DefinitionManager.getInstance().getBindings();
+	public Vector<NamedExpression> getData() {
+		return DefinitionManager.getInstance().getExpressions();
 	}
 
 	/**
-	 * Get the name binding at a given row
+	 * Get the named expression at a given row
 	 * 
 	 * @param row
 	 *            the zero based row
-	 * @return the NameBinding or null.
+	 * @return the NamedExpression or null.
 	 */
-	public NameBinding getNameBinding(int row) {
+	public NamedExpression getNamedExpression(int row) {
 		if (row < 0) {
 			return null;
 		}
 
-		Vector<NameBinding> data = getData();
+		Vector<NamedExpression> data = getData();
 		if ((data == null) || (row >= data.size())) {
 			return null;
 		}

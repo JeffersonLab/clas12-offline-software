@@ -1,8 +1,10 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
+
+import cnuphys.ced.event.data.ICut;
 
 public class CutTableModel extends DefaultTableModel {
 

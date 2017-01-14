@@ -7,9 +7,8 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import org.jlab.io.base.DataDictionary;
-
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.ced.alldata.DataManager;
 
 /**
  * Puts all known banks into a scrollable list
@@ -23,8 +22,8 @@ public class AllBanksList extends JList<String> {
 	//the scroll pane
 	private JScrollPane _scrollPane;
 	
-	public AllBanksList(DataDictionary dict) {
-		super(sorted(dict));
+	public AllBanksList() {
+		super(sorted(DataManager.getInstance().getKnownBanks()));
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		_scrollPane = new JScrollPane(this);
 		_scrollPane.setPreferredSize(_size);
@@ -32,8 +31,7 @@ public class AllBanksList extends JList<String> {
 	}
 		
 	//sort the known banks
-	private static String[] sorted(DataDictionary dict) {
-		String knownBanks[] = dict.getDescriptorList();
+	private static String[] sorted(String knownBanks[]) {
 		Arrays.sort(knownBanks);
 		return knownBanks;
 	}
