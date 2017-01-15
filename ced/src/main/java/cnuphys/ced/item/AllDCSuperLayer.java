@@ -68,8 +68,8 @@ public class AllDCSuperLayer extends RectangleItem {
 	private AllDCView _view;
 
 	// for hits cells
-	private static final Color defaultHitCellFill = Color.red;
-	private static final Color defaultHitCellLine = X11Colors
+	private static final Color _defaultHitCellFill = Color.red;
+	private static final Color _defaultHitCellLine = X11Colors
 			.getX11Color("Dark Red");
 
 	// this is the world rectangle that defines the super layer
@@ -314,8 +314,6 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		int hitCount = DC.hitCount();
 		
-		System.err.println("DC HIT COUNT: " + hitCount);
-
 		if (hitCount > 0)  {
 			byte sector[] = DC.sector();
 			byte superlayer[] = DC.superlayer();
@@ -331,8 +329,6 @@ public class AllDCSuperLayer extends RectangleItem {
 					int lay1 = layer[i]; // 1 based
 					int wire1 = wire[i]; // 1 based
 					
-					System.err.println("SECT: " + sect1 + "  SUPL: " + supl1 + "  LAY: " + lay1  + "  WIRE: " +wire1);
-
 					boolean noise = false;
 					if (_noiseManager.getNoise() != null) {
 						noise = _noiseManager.getNoise()[i];
@@ -423,11 +419,11 @@ public class AllDCSuperLayer extends RectangleItem {
 		// are we to show mc (MonteCarlo simulation) truth?
 		boolean showTruth = _view.showMcTruth();
 
-		Color hitFill = defaultHitCellFill;
-		Color hitLine = defaultHitCellLine;
+		Color hitFill = _defaultHitCellFill;
+		Color hitLine = _defaultHitCellLine;
 
 		// do we have simulated "truth" data?
-		if (showTruth) {
+		if (showTruth && (pid >= 0)) {
 			LundId lid = LundSupport.getInstance().get(pid);
 			if (lid != null) {
 				LundStyle style = lid.getStyle();
@@ -661,7 +657,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			DC.noiseFeedback(hitIndex, feedbackStrings);
 			DC.trueFeedback(hitIndex, feedbackStrings);
 			DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
-			DC.dgtzFeedback(hitIndex, feedbackStrings);
+			DC.dcBanksFeedback(hitIndex, feedbackStrings);
 		}
 
 	}

@@ -67,16 +67,28 @@ public class DataManager {
 	 */
 	public ArrayList<ColumnData> hasData(DataEvent event) {
 		ArrayList<ColumnData> list = new ArrayList<ColumnData>();
-
-		if (event != null) {
-			for (ColumnData cd : _columnData.values()) {
-				if (cd.getDataArray(event) != null) {
-					if (cd.length(event) > 0) {
-						list.add(cd);
+		
+		String banks[] = event.getBankList();
+		if (banks != null) {
+			for (String bankName : banks) {
+				String columns[] = event.getColumnList(bankName);
+				if (columns != null) {
+					for (String columnName : columns) {
+						list.add(getColumnData(bankName, columnName));
 					}
 				}
 			}
 		}
+
+//		if (event != null) {
+//			for (ColumnData cd : _columnData.values()) {
+//				if (cd.getDataArray(event) != null) {
+//					if (cd.length(event) > 0) {
+//						list.add(cd);
+//					}
+//				}
+//			}
+//		}
 		Collections.sort(list);
 		return list;
 	}

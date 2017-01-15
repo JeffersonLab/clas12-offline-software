@@ -83,6 +83,43 @@ public class DataSupport {
 	 * @param index the array index
 	 * @return a string for printing
 	 */
+	public static String safeString(byte[] array, int index) {
+		if (array == null) {
+			return "null";
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return "BADIDX: " + index;
+		}
+		else {
+			return "" + array[index];
+		}
+	}
+	/**
+	 * Safe way to get an integer element from an array for printing
+	 * 
+	 * @param array the array in question
+	 * @param index the array index
+	 * @return a string for printing
+	 */
+	public static String safeString(short[] array, int index) {
+		if (array == null) {
+			return "null";
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return "BADIDX: " + index;
+		}
+		else {
+			return "" + array[index];
+		}
+	}
+
+	/**
+	 * Safe way to get an integer element from an array for printing
+	 * 
+	 * @param array the array in question
+	 * @param index the array index
+	 * @return a string for printing
+	 */
 	public static String safeString(int[] array, int index) {
 		if (array == null) {
 			return "null";
@@ -94,6 +131,7 @@ public class DataSupport {
 			return "" + array[index];
 		}
 	}
+
 
 	/**
 	 * Safe way to get an double element from an array for printing
@@ -114,6 +152,27 @@ public class DataSupport {
 			return DoubleFormat.doubleFormat(array[index], numdec);
 		}
 	}
+	
+	/**
+	 * Safe way to get an double element from an array for printing
+	 * 
+	 * @param array the array in question
+	 * @param index the array index
+	 * @param numdec the number of decimal points
+	 * @return a string for printing
+	 */
+	public static String safeString(float[] array, int index, int numdec) {
+		if (array == null) {
+			return "null";
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return "BADIDX: " + index;
+		}
+		else {
+			return DoubleFormat.doubleFormat(array[index], numdec);
+		}
+	}
+
 
 	/**
 	 * Get a string for the particle Id

@@ -40,7 +40,7 @@ public class DC {
 	public static int[] pid() {
 		return ColumnData.getIntArray("DC::true.pid");
 	}
-		
+			
 	/**
 	 * Get the sector array from the dgtz array
 	 * @return the sector array
@@ -89,22 +89,6 @@ public class DC {
 	 */
 	public static short[] wire() {
 		return ColumnData.getShortArray("DC::tdc.component");
-	}
-
-	/**
-	 * Get the hitn array from the dgtz data
-	 * @return the hitn array
-	 */
-	public static int[] hitn() {
-		return ColumnData.getIntArray("DC::dgtz.hitn");
-	}
-		
-	/**
-	 * Get the LR array from the dgtz data
-	 * @return the LR array
-	 */
-	public static int[] LR() {
-		return ColumnData.getIntArray("DC::dgtz.LR");
 	}
 	
 	/**
@@ -224,36 +208,50 @@ public class DC {
 		return (sector == null) ? 0 : sector.length;
 	}
 	
+//	bank name: [DC::doca] column name: [LR] full name: [DC::doca.LR] data type: byte
+//	bank name: [DC::doca] column name: [doca] full name: [DC::doca.doca] data type: Unknown
+//	bank name: [DC::doca] column name: [sdoca] full name: [DC::doca.sdoca] data type: Unknown
+//	bank name: [DC::doca] column name: [time] full name: [DC::doca.time] data type: Unknown
+//	bank name: [DC::doca] column name: [stime] full name: [DC::doca.stime] data type: Unknown
+
+	/**
+	 * Get the LR array from the dgtz data
+	 * @return the LR array
+	 */
+	public static byte[] LR() {
+		return ColumnData.getByteArray("DC::doca.LR");
+	}
+	
 	/**
 	 * Get the doca array from the dgtz data
 	 * @return the doca array
 	 */
-	public static double[] doca() {
-		return ColumnData.getDoubleArray("DC::dgtz.doca");
+	public static float[] doca() {
+		return ColumnData.getFloatArray("DC::doca.doca");
 	}
 	
 	/**
 	 * Get the time array from the dgtz data
 	 * @return the time array
 	 */
-	public static double[] time() {
-		return ColumnData.getDoubleArray("DC::dgtz.time");
+	public static float[] time() {
+		return ColumnData.getFloatArray("DC::doca.time");
 	}
 	
 	/**
 	 * Get the sdoca array from the dgtz data
 	 * @return the sdoca array
 	 */
-	public static double[] sdoca() {
-		return ColumnData.getDoubleArray("DC::dgtz.sdoca");
+	public static float[] sdoca() {
+		return ColumnData.getFloatArray("DC::doca.sdoca");
 	}
 	
 	/**
 	 * Get the stime array from the dgtz data
 	 * @return the stime array
 	 */
-	public static double[] stime() {
-		return ColumnData.getDoubleArray("DC::dgtz.stime");
+	public static float[] stime() {
+		return ColumnData.getFloatArray("DC::doca.stime");
 	}
 	
 	/**
@@ -289,11 +287,11 @@ public class DC {
 	}
 		
 	/**
-	 * Get the tdc array from the dgtz data
+	 * Get the tdc array from the tdc data
 	 * @return the tdc array
 	 */
 	public static int[] tdc() {
-		return ColumnData.getIntArray("DC::dgtz.tdc");
+		return ColumnData.getIntArray("DC::tdc.TDC");
 	}
 	/**
 	 * Get the hit count 
@@ -563,7 +561,7 @@ public class DC {
 	 * @param hitIndex the hit index
 	 * @param feedbackStrings the collection of feedback strings
 	 */
-	public static void dgtzFeedback(int hitIndex,
+	public static void dcBanksFeedback(int hitIndex,
 			List<String> feedbackStrings) {
 
 		if (hitIndex < 0) {
@@ -576,25 +574,25 @@ public class DC {
 			byte superlayer[] = superlayer();
 			byte layer[] = layer();
 			short wire[] = wire();
-			int hitn[] = hitn();
-			int LR[] = LR();
-			double doca[] = doca();
-			double sdoca[] = sdoca();
-			double time[] = time();
-			double stime[] = stime();
+			int tdc[] = tdc();
+			byte LR[] = LR();
+			float doca[] = doca();
+			float sdoca[] = sdoca();
+			float time[] = time();
+			float stime[] = stime();
 
 			feedbackStrings.add(DataSupport.dgtzColor + "sector " + sector[hitIndex]
 					+ "  superlayer " + superlayer[hitIndex] + "  layer "
 					+ layer[hitIndex] + "  wire " + wire[hitIndex]);
 
 			String lraStr = DataSupport.safeString(LR, hitIndex);
-			String hitStr = DataSupport.safeString(hitn, hitIndex);
+			String tdcStr = DataSupport.safeString(tdc, hitIndex);
 			String docaStr = DataSupport.safeString(doca, hitIndex, 1);
 			String timeStr = DataSupport.safeString(time, hitIndex, 1);
 			String sdocaStr = DataSupport.safeString(sdoca, hitIndex, 1);
 			String stimeStr = DataSupport.safeString(stime, hitIndex, 1);
 
-			feedbackStrings.add(DataSupport.dgtzColor + "LRA " + lraStr + "  hit " + hitStr);
+			feedbackStrings.add(DataSupport.dgtzColor + "LRA " + lraStr + "  tdc " + tdcStr);
 			feedbackStrings.add(
 					DataSupport.dgtzColor + "doca " + docaStr + "  sdoca " + sdocaStr + " mm");
 			feedbackStrings.add(

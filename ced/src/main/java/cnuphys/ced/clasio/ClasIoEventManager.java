@@ -130,7 +130,7 @@ public class ClasIoEventManager {
 				String[] cbanks = _currentEvent.getBankList();
 				if (cbanks != null) {
 					for (String bankName : cbanks) {
-						if (bankName.contains("::true")) {
+						if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
 							ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
 							if (cd != null) {
 								int pid[] = (int[]) (cd.getDataArray(_currentEvent));

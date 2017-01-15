@@ -173,6 +173,9 @@ public class NodeTableModel extends DefaultTableModel {
 	 * @return the corresponding data bank column name, or <code>null</code>
 	 */
 	public ColumnData getColumnData(int row) {
+		if (row < 0) {
+			return null;
+		}
 		return (_data == null) ? null : _data.get(row);
 	}
 

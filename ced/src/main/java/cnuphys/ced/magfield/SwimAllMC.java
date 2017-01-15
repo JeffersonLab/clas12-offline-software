@@ -86,23 +86,22 @@ public class SwimAllMC implements ISwimAll {
 			return getRowDataFastMC();
 		}
 
-		int pid[] = dm.getIntArray(event, "GenPart::true.pid");
+		int pid[] = dm.getIntArray(event, "MC::Particle.pid");
 
 		int len = (pid == null) ? 0 : pid.length;
 		if (len < 1) {
 			return null;
 		}
 		
-		float px[] = dm.getFloatArray(event, "GenPart::particle.px");
+		float px[] = dm.getFloatArray(event, "MC::Particle.px");
 		if (px == null) {
 			return null;
 		}
-		float py[] = dm.getFloatArray(event, "GenPart::particle.py");
-		float pz[] = dm.getFloatArray(event, "GenPart::particle.pz");
-		float vx[] = dm.getFloatArray(event, "GenPart::particle.vx");
-		float vy[] = dm.getFloatArray(event, "GenPart::particle.vy");
-		float vz[] = dm.getFloatArray(event, "GenPart::particle.vz");
-
+		float py[] = dm.getFloatArray(event, "MC::Particle.py");
+		float pz[] = dm.getFloatArray(event, "MC::Particle.pz");
+		float vx[] = dm.getFloatArray(event, "MC::Particle.vx");
+		float vy[] = dm.getFloatArray(event, "MC::Particle.vy");
+		float vz[] = dm.getFloatArray(event, "MC::Particle.vz");
 				
 		Vector<TrajectoryRowData> v = new Vector<TrajectoryRowData>(len);
 
@@ -112,20 +111,23 @@ public class SwimAllMC implements ISwimAll {
 				LundId lid = LundSupport.getInstance().get(pid[index]);
 
 				if (lid != null) {
-					double pxo = px[index]; // leave in  MeV
-					double pyo = py[index]; 
-					double pzo = pz[index]; 
-
-					// note conversions from mm to cm
-					double x = vx[index] / 10.0;
-					double y = vy[index] / 10.0;
-					double z = vz[index] / 10.0;
-
+					double pxo = 1000*px[index]; // Convert to MeV
+					double pyo = 1000*py[index];
+					double pzo = 1000*pz[index];
 					double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
 					double theta = Math.toDegrees(Math.acos(pzo / p));
-					double phi = Math.toDegrees(Math.atan2(pyo, pxo));
+					// filter out 0 theta
+					if (theta > 1.) {
 
-					v.add(new TrajectoryRowData(lid, x, y, z, p, theta, phi, 0, "GEMC GenPart::true"));
+						// note conversions from mm to cm
+						double x = vx[index] / 10.0;
+						double y = vy[index] / 10.0;
+						double z = vz[index] / 10.0;
+
+						double phi = Math.toDegrees(Math.atan2(pyo, pxo));
+
+						v.add(new TrajectoryRowData(lid, x, y, z, p, theta, phi, 0, "MC::Particle"));
+					}
 				}
 
 			}
@@ -192,23 +194,22 @@ public class SwimAllMC implements ISwimAll {
 		}
 		DataManager dm = DataManager.getInstance();
 
-		int pid[] = dm.getIntArray(event, "GenPart::true.pid");
+		int pid[] = dm.getIntArray(event, "MC::Particle.pid");
 
 		int len = (pid == null) ? 0 : pid.length;
 		if (len < 1) {
 			return;
 		}
 		
-		float px[] = dm.getFloatArray(event, "GenPart::particle.px");
+		float px[] = dm.getFloatArray(event, "MC::Particle.px");
 		if (px == null) {
 			return;
 		}
-		float py[] = dm.getFloatArray(event, "GenPart::particle.py");
-		float pz[] = dm.getFloatArray(event, "GenPart::particle.pz");
-		float vx[] = dm.getFloatArray(event, "GenPart::particle.vx");
-		float vy[] = dm.getFloatArray(event, "GenPart::particle.vy");
-		float vz[] = dm.getFloatArray(event, "GenPart::particle.vz");
-
+		float py[] = dm.getFloatArray(event, "MC::Particle.py");
+		float pz[] = dm.getFloatArray(event, "MC::Particle.pz");
+		float vx[] = dm.getFloatArray(event, "MC::Particle.vx");
+		float vy[] = dm.getFloatArray(event, "MC::Particle.vy");
+		float vz[] = dm.getFloatArray(event, "MC::Particle.vz");
 
 		try {
 
@@ -219,19 +220,28 @@ public class SwimAllMC implements ISwimAll {
 				if (lid == null) {
 					System.err.println("null LundId object for id: " + pdgid);
 				} else {
-					// System.err.println("SWIM particle " + lid);
+					if (lid != null) {
+						double pxo = px[index]; // in Gev??
+						double pyo = py[index];
+						double pzo = pz[index];
+						double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
+						double theta = Math.toDegrees(Math.acos(pzo / p));
+						// filter out 0 theta
+						if (theta > 1.) {
 
-					// covert momenta to GeV/c from MeV/c
-					double pxo = px[index] / 1000.0;
-					double pyo = py[index] / 1000.0;
-					double pzo = pz[index] / 1000.0;
-					// note vertices are in mm must convert to meters
-					double x = vx[index] / 1000.0;
-					double y = vy[index] / 1000.0;
-					double z = vz[index] / 1000.0;
+							// covert momenta to GeV/c from MeV/c
+//							pxo /= 1000.0;
+//							pyo /= 1000.0;
+//							pzo /= 1000.0;
+							// note vertices are in mm must convert to meters
+							double x = vx[index] / 1000.0;
+							double y = vy[index] / 1000.0;
+							double z = vz[index] / 1000.0;
 
-					swim(lid, pxo, pyo, pzo, x, y, z);
-				} // lid != null
+							swim(lid, pxo, pyo, pzo, x, y, z);
+						}
+					} // lid != null
+				} //else
 
 			}
 		} catch (Exception e) {

@@ -19,7 +19,7 @@ public abstract class ClasIoTrajectoryInfoView extends BaseView implements
 		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
 				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
 				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 1050,
-				PropertySupport.HEIGHT, 250, PropertySupport.LEFT, 700,
+				PropertySupport.HEIGHT, 350, PropertySupport.LEFT, 700,
 				PropertySupport.TOP, 100, PropertySupport.VISIBLE, true);
 
 		_trajectoryTable = new TrajectoryTable();
