@@ -14,6 +14,7 @@ import org.jlab.hipo.data.HipoEvent;
 import org.jlab.hipo.data.HipoGroup;
 import org.jlab.hipo.data.HipoNode;
 import org.jlab.hipo.schema.Schema;
+import org.jlab.hipo.schema.Schema.SchemaEntry;
 import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDictionary;
@@ -109,7 +110,13 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public double[] getDouble(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HipoNode node = this.getHipoNodeByPath(path);        
+        if(node==null){
+            System.out.println("\n>>>>> error : getting node failed : " + path);
+            return new double[0];
+        }
+        return node.getDouble();
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setDouble(String path, double[] arr) {
@@ -121,7 +128,13 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public float[] getFloat(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HipoNode node = this.getHipoNodeByPath(path);        
+        if(node==null){
+            System.out.println("\n>>>>> error : getting node failed : " + path);
+            return new float[0];
+        }
+        return node.getFloat();
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setFloat(String path, float[] arr) {
@@ -133,7 +146,12 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public int[] getInt(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HipoNode node = this.getHipoNodeByPath(path);        
+        if(node==null){
+            System.out.println("\n>>>>> error : getting node failed : " + path);
+            return new int[0];
+        }
+        return node.getInt();
     }
 
     public void setInt(String path, int[] arr) {
@@ -145,7 +163,12 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public short[] getShort(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HipoNode node = this.getHipoNodeByPath(path);        
+        if(node==null){
+            System.out.println("\n>>>>> error : getting node failed : " + path);
+            return new short[0];
+        }
+        return node.getShort();
     }
 
     public void setShort(String path, short[] arr) {
@@ -156,8 +179,38 @@ public class HipoDataEvent implements DataEvent {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public HipoNode getHipoNodeByPath(String path){
+        String[] bank_and_item = path.split("[.]+");
+        if(bank_and_item.length<2){
+            System.out.println("\n>>>>> error : syntax error in path name : " + path);
+            return null;
+        }
+        Schema schema = this.hipoEvent.getSchemaFactory().getSchema(bank_and_item[0]);
+        if(schema==null){
+            System.out.println("\n>>>>> error : can not find schema with name : " 
+                    + bank_and_item[0]);
+            return null;
+        }
+        
+        SchemaEntry entry = schema.getEntry(bank_and_item[1]);
+        if(entry==null){
+            System.out.println("\n>>>>> error : schema  " + bank_and_item[0] +
+                    " dose not have an entry with name :"
+                    + bank_and_item[1]);
+            return null;
+        }
+        
+        HipoNode node = hipoEvent.getNode(schema.getGroup(), entry.getId());
+        return node;
+    }
+    
     public byte[] getByte(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HipoNode node = this.getHipoNodeByPath(path);        
+        if(node==null){
+            System.out.println("\n>>>>> error : getting node failed : " + path);
+            return new byte[0];
+        }
+        return node.getByte();
     }
 
     public void setByte(String path, byte[] arr) {

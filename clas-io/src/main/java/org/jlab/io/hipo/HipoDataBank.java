@@ -53,7 +53,7 @@ public class HipoDataBank implements DataBank  {
     }
 
     public double[] getDouble(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.hipoGroup.getNode(path).getDouble();
     }
 
     public double getDouble(String path, int index) {
@@ -73,7 +73,7 @@ public class HipoDataBank implements DataBank  {
     }
 
     public float[] getFloat(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.hipoGroup.getNode(path).getFloat();
     }
 
     public float getFloat(String path, int index) {
@@ -93,7 +93,7 @@ public class HipoDataBank implements DataBank  {
     }
 
     public int[] getInt(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getGroup().getNode(path).getInt();
     }
 
     public int getInt(String path, int index) {
@@ -113,7 +113,7 @@ public class HipoDataBank implements DataBank  {
     }
 
     public short[] getShort(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.hipoGroup.getNode(path).getShort();
     }
 
     public short getShort(String path, int index) {
@@ -133,7 +133,7 @@ public class HipoDataBank implements DataBank  {
     }
 
     public byte[] getByte(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.hipoGroup.getNode(path).getByte();
     }
 
     public byte getByte(String path, int index) {
