@@ -1,19 +1,15 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
-
+import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
-import cnuphys.ced.alldata.graphics.DefinitionManager;
-import cnuphys.ced.alldata.graphics.NamedExpression;
-import cnuphys.ced.alldata.graphics.PlotDialog;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
@@ -138,6 +134,7 @@ public class Histogram2D extends PlotDialog {
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 	
@@ -151,13 +148,13 @@ public class Histogram2D extends PlotDialog {
 			NamedExpression expY = getNamedExpressionY();
 
 			
-			int lenx = getMinLength(_colDatX, expX);
-			int leny = getMinLength(_colDatY, expY);
+			int lenx = getMinLength(event, _colDatX, expX);
+			int leny = getMinLength(event, _colDatY, expY);
 			int len = Math.min(lenx, leny);
 			
 			for (int index = 0; index < len; index++) {
-				double valx = getValue(index, _colDatX, expX);
-				double valy = getValue(index, _colDatY, expY);
+				double valx = getValue(event, index, _colDatX, expX);
+				double valy = getValue(event, index, _colDatY, expY);
 				if (!Double.isNaN(valx) && !Double.isNaN(valy)) {
 					_histoData.add(valx, valy);
 				}

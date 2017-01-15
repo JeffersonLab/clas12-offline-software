@@ -8,8 +8,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-import cnuphys.ced.event.data.ICut;
-
 public class CutTableScrollPane extends JScrollPane {
 
 	protected int width = 150;

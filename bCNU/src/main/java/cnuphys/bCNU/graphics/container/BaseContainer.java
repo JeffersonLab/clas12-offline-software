@@ -509,15 +509,6 @@ public class BaseContainer extends JComponent
 		worldToLocal(p0, wp0);
 		worldToLocal(p1, wp1);
 
-		// Old version
-		// Point2D.Double wp0 = new Point2D.Double(wr.x, wr.y);
-		// Point2D.Double wp1 = new Point2D.Double(wr.x + wr.width, wr.y +
-		// wr.height);
-		// Point p0 = new Point();
-		// Point p1 = new Point();
-		// worldToLocal(p0, wp0);
-		// worldToLocal(p1, wp1);
-
 		int x = Math.min(p0.x, p1.x);
 		int y = Math.min(p0.y, p1.y);
 		int w = Math.abs(p1.x - p0.x);
@@ -547,12 +538,6 @@ public class BaseContainer extends JComponent
 		double h = wp0.y - wp1.y;
 		wr.setFrame(x, y, w, h);
 
-		// Old version
-		// double x = Math.min(wp0.x, wp1.x);
-		// double y = Math.min(wp0.y, wp1.y);
-		// double w = Math.abs(wp1.x - wp0.x);
-		// double h = Math.abs(wp1.y - wp0.y);
-		// wr.setFrame(x, y, w, h);
 	}
 
 	/**

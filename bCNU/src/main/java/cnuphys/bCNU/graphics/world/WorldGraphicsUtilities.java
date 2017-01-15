@@ -1163,6 +1163,11 @@ public class WorldGraphicsUtilities {
 		return count;
 	}
 
+	/**
+	 * Get the convex hull of a path
+	 * @param path the path in question
+	 * @return the convex hull
+	 */
 	public static Path2D getConvexHull(Path2D path) {
 		int count = getPathPointCount(path);
 		if (count < 4) {
@@ -1202,6 +1207,39 @@ public class WorldGraphicsUtilities {
 		newPath.lineTo(wp[0].x, wp[0].y);
 
 		return newPath;
+	}
+	
+	/**
+	 * Convert a path to a collection of points. This is not a general method,
+	 * it only works for simple paths of line segments. It does not deal with curves.
+	 * @param path the path in question
+	 * @return a collection of vertices
+	 */
+	public static Vector<Point2D.Double> getPoints(Path2D path) {
+	    Vector<Point2D.Double> pointList = new Vector<Point2D.Double>();
+	    double[] coords = new double[2];
+	    int numSubPaths = 0;
+	    for (PathIterator pi = path.getPathIterator(null);
+	         ! pi.isDone();
+	         pi.next()) {
+	        switch (pi.currentSegment(coords)) {
+	        case PathIterator.SEG_MOVETO:
+	        	pointList.add(new Point2D.Double(coords[0], coords[1]));
+	            ++ numSubPaths;
+	            break;
+	        case PathIterator.SEG_LINETO:
+	        	pointList.add(new Point2D.Double(coords[0], coords[1]));
+	            break;
+	        case PathIterator.SEG_CLOSE:
+	            if (numSubPaths > 1) {
+	                throw new IllegalArgumentException("Path contains multiple subpaths");
+	            }
+	            return pointList;
+	        default:
+	            throw new IllegalArgumentException("Path contains curves");
+	        }
+	    }
+	    return pointList;
 	}
 
 	/**

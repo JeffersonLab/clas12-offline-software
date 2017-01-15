@@ -1,15 +1,8 @@
 package cnuphys.ced.hippo;
 
 import java.io.File;
-import java.util.Arrays;
-
 import org.jlab.clas.detector.DetectorResponse;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataDictionary;
-import org.jlab.io.evio.EvioFactory;
-import org.jlab.io.hipo.HipoDataDictionary;
 import org.jlab.io.hipo.HipoDataSource;
 
 import cnuphys.ced.alldata.DataManager;

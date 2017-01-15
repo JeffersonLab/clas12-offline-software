@@ -22,7 +22,6 @@ import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
-import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;

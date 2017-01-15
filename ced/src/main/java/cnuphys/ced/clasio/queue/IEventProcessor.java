@@ -6,7 +6,7 @@ public interface IEventProcessor {
 
     /**
      * Process an event. 
-     * @param event the EvioDataEvent event to process.
+     * @param event the DataEvent event to process.
      */
     public void processEvent(DataEvent event);
 }

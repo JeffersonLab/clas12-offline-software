@@ -9,7 +9,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.ced.geometry.GeometryManager;
 
 @SuppressWarnings("serial")
 public abstract class HexView extends CedView {

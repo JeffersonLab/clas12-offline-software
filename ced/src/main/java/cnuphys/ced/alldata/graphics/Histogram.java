@@ -1,18 +1,16 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
-
+import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
-import cnuphys.ced.alldata.graphics.DefinitionManager;
-import cnuphys.ced.alldata.graphics.NamedExpression;
-import cnuphys.ced.alldata.graphics.PlotDialog;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
@@ -44,10 +42,10 @@ public class Histogram extends PlotDialog {
 
 		// are we dealing with an expression or a column?
 		String name = _histoData.getName();
-		boolean isColumn = ColumnData.validColumnName(name);
+		boolean isColumn = DataManager.getInstance().validColumnName(name);
 
 		if (isColumn) {
-			_columnData = ColumnData.getColumnData(histoData.getName());
+			_columnData = DataManager.getInstance().getColumnData(histoData.getName());
 		} else {
 			_namedExpressionName = name;
 		}
@@ -121,6 +119,7 @@ public class Histogram extends PlotDialog {
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 	
@@ -131,9 +130,9 @@ public class Histogram extends PlotDialog {
 
 			NamedExpression namedExpression = getNamedExpression();
 
-			int len = getMinLength(_columnData, namedExpression);
+			int len = getMinLength(event, _columnData, namedExpression);
 			for (int index = 0; index < len; index++) {
-				double val = getValue(index, _columnData, namedExpression);
+				double val = getValue(event, index, _columnData, namedExpression);
 				if (!Double.isNaN(val)) {
 					_histoData.add(val);
 				}

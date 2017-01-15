@@ -604,7 +604,7 @@ public class SuperLayerDrawing {
 			Polygon poly = getLayerPolygon(data[0]);
 			int ymin = poly.ypoints[4];
 			int ymax = poly.ypoints[13];
-			double fract = ((double)(pp.y - ymin))/(ymax-ymin+1.);
+			double fract = (pp.y - ymin)/(ymax-ymin+1.);
 			int wguess = 1 + (int)((1.-fract)*112);
 			//System.err.println("WIRE GUESS: " + wguess);
 			

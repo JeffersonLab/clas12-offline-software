@@ -3,6 +3,7 @@ package cnuphys.ced.alldata;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.log.Log;
+import cnuphys.ced.clasio.ClasIoEventManager;
 
 public class ColumnData {
 
@@ -297,5 +298,54 @@ public class ColumnData {
 		return _type;
 	}
 	
+	/**
+	 * Obtain a byte array from the current event for the given full name
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public static byte[] getByteArray(String fullName) {
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		return (event == null) ? null : DataManager.getInstance().getByteArray(event, fullName);
+	}
+
+	/**
+	 * Obtain a short array from the current event for the given full name
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public static short[] getShortArray(String fullName) {
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		return (event == null) ? null : DataManager.getInstance().getShortArray(event, fullName);
+	}
+
+	/**
+	 * Obtain an int array from the current event for the given full name
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public static int[] getIntArray(String fullName) {
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		return (event == null) ? null : DataManager.getInstance().getIntArray(event, fullName);
+	}
+
+	/**
+	 * Obtain a float array from the current event for the given full name
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public static float[] getFloatArray(String fullName) {
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		return (event == null) ? null : DataManager.getInstance().getFloatArray(event, fullName);
+	}
+
+	/**
+	 * Obtain double array from the current event for the given full name
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public static double[] getDoubleArray(String fullName) {
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		return (event == null) ? null : DataManager.getInstance().getDoubleArray(event, fullName);
+	}
 
 }

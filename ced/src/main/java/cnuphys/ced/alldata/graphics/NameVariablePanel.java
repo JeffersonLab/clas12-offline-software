@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -21,11 +21,7 @@ import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
-import cnuphys.ced.alldata.graphics.BoundVariablePanel;
-import cnuphys.ced.alldata.graphics.DefinitionManager;
-import cnuphys.ced.alldata.graphics.EntryPanel;
-import cnuphys.ced.alldata.graphics.ExpressionPanel;
-import cnuphys.ced.alldata.graphics.SelectPanel;
+import cnuphys.ced.alldata.DataManager;
 
 public class NameVariablePanel extends JPanel implements PropertyChangeListener {
 	
@@ -153,7 +149,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		
 		//get the bank and column name
 		String fn = _selectPanel.getFullColumnName();
-		boolean valid = ColumnData.validColumnName(fn);
+		boolean valid = DataManager.getInstance().validColumnName(fn);
 		if (!valid) {
 			return;
 		}
@@ -172,7 +168,7 @@ public class NameVariablePanel extends JPanel implements PropertyChangeListener 
 		String prop = evt.getPropertyName();
 		if ((o == _selectPanel) && prop.equals("newname")) {
 			String fn = (String)(evt.getNewValue());
-			boolean valid = ColumnData.validColumnName(fn);
+			boolean valid = DataManager.getInstance().validColumnName(fn);
 			_VariableNameTextField.setEnabled(valid);
 		}	
 

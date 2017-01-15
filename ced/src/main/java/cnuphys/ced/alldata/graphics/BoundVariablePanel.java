@@ -11,8 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import cnuphys.ced.event.data.NameBinding;
-
 public class BoundVariablePanel extends JPanel implements ActionListener, ListSelectionListener {
 
 	private BoundVariableTableScrollPane _scrollPane;

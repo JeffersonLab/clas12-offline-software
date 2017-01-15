@@ -1,6 +1,7 @@
 package cnuphys.swim;
 
 import java.awt.Point;
+import java.awt.geom.Line2D;
 import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
@@ -123,35 +124,36 @@ public class SwimTrajectory2D {
 	return sb.toString();
     }
 
-    /**
-     * Get the minimum distance to the trajectory.
-     * 
-     * @param wp
-     *            the point in question.
-     * @return the minimum distance from the point to the trajectory.
-     */
-    public double closestDistance(Point.Double wp) {
-	if ((_path == null) || (_path.length == 0) || (wp == null)) {
-	    return Double.NaN;
+	/**
+	 * Get the minimum distance to the trajectory.
+	 * 
+	 * @param wp
+	 *            the point in question.
+	 * @return the minimum distance from the point to the trajectory.
+	 */
+	public double closestDistance(Point.Double wp) {
+		if ((_path == null) || (_path.length == 0) || (wp == null)) {
+			return Double.NaN;
+		}
+		if (_path.length == 1) {
+			return wp.distance(_path[0]);
+		}
+		
+		int len = _path.length;
+		Point.Double wpi = new Point.Double();
+		double minDist = Double.POSITIVE_INFINITY;
+		for (int i = 1; i < len; i++) {
+			Point.Double wp0 = _path[i-1];
+			Point.Double wp1 = _path[i];
+			double dist = Line2D.ptSegDist(wp0.x, wp0.y, wp1.x, wp1.y, wp.x, wp.y);
+	//		double dist = perpendicularDistance(wp0, wp1, wp, wpi);
+			if (dist < minDist) {
+				minDist = dist;
+			}
+			wp0 = wp1;
+		}
+		return minDist;
 	}
-	if (_path.length == 1) {
-	    return wp.distance(_path[0]);
-	}
-
-	int len = _path.length;
-	Point.Double wpi = new Point.Double();
-	Point.Double wp0 = _path[0];
-	double minDist = Double.POSITIVE_INFINITY;
-	for (int i = 1; i < len; i++) {
-	    Point.Double wp1 = _path[i];
-	    double dist = perpendicularDistance(wp0, wp1, wp, wpi);
-	    if (dist < minDist) {
-		minDist = dist;
-	    }
-	    wp0 = wp1;
-	}
-	return minDist;
-    }
 
     /**
      * @return the trajectory3D

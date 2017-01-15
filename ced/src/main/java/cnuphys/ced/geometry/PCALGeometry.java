@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSuperlayer;
-import org.jlab.geom.detector.ftof.FTOFLayer;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 

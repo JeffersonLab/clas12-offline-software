@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
+import cnuphys.ced.alldata.ColumnData;
+
 /**
  * static methods to centralize getting data arrays related to BST
  * @author heddle

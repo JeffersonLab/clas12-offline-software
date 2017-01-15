@@ -20,7 +20,6 @@ import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
 

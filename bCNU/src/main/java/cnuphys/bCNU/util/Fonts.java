@@ -13,7 +13,7 @@ import cnuphys.bCNU.log.Log;
  * 
  */
 public class Fonts {
-
+	
 	// the common font family for uniformity
 	private static String commonFamily;
 
@@ -23,8 +23,19 @@ public class Fonts {
 	// the bulletproof backup if the target is not found
 	private static String backupFamily = "SansSerif";
 
-	private static Hashtable<String, Font> fonts = new Hashtable<String, Font>(
-			41);
+	private static Hashtable<String, Font> fonts = new Hashtable<String, Font>(41);
+
+	// common medium font used for components
+	public static Font hugeFont = commonFont(Font.PLAIN, 18);
+
+	// common medium font used for components
+	public static Font largeFont = commonFont(Font.PLAIN, 14);
+	
+	// common font used for components
+	public static Font defaultFont = commonFont(Font.PLAIN, 12);
+	
+	// common font used for components
+	public static Font defaultBoldFont = commonFont(Font.BOLD, 12);
 
 	// common medium font used for components
 	public static Font mediumFont = commonFont(Font.PLAIN, 11);
@@ -47,6 +58,36 @@ public class Fonts {
 	// tiny monospaced font
 	public static Font tinyMono = new Font(Font.MONOSPACED, Font.PLAIN, 8);
 
+	
+	//attempt to scale the fonts
+	static {
+		float scaleFact = Environment.getInstance().getResolutionScaleFactor();
+		if (scaleFact < 0.1f) {
+			scaleFact = 1f;
+		}
+		if (Math.abs(scaleFact -1f) > 0.01) {
+			hugeFont = scaleFont(hugeFont, scaleFact);
+			largeFont = scaleFont(largeFont, scaleFact);
+			defaultFont = scaleFont(defaultFont, scaleFact);
+			mediumFont = scaleFont(mediumFont, scaleFact);
+			tweenFont = scaleFont(tweenFont, scaleFact);
+			tinyFont = scaleFont(tinyFont, scaleFact);
+			mono = scaleFont(mono, scaleFact);
+			smallMono = scaleFont(smallMono, scaleFact);
+			tinyMono = scaleFont(tinyMono, scaleFact);
+		}
+	}
+	
+	/**
+	 * Scale a font
+	 * @param font the font to scale
+	 * @param scaleFactor the multiplicative scale factor
+	 * @return the derived font
+	 */
+	public static Font scaleFont(Font font, float scaleFactor) {
+		return font.deriveFont(scaleFactor*font.getSize());
+	}
+	
 	/**
 	 * Obtain a font from the common family
 	 * 

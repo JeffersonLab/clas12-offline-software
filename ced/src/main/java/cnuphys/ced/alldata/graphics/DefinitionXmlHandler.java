@@ -9,9 +9,6 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
 import cnuphys.bCNU.xml.XmlSupport;
-import cnuphys.ced.event.data.ICut;
-import cnuphys.ced.event.data.RangeCut;
-import cnuphys.ced.event.data.XmlUtilities;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.DataSetType;

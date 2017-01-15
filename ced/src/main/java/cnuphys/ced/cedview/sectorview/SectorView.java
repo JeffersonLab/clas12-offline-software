@@ -23,7 +23,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.jlab.geom.prim.Plane3D;
-import org.jlab.geom.prim.Point3D;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.bst.BSTSupport;
 import cnuphys.ced.common.CrossDrawer;
@@ -745,6 +744,7 @@ public class SectorView extends CedView implements ChangeListener {
 		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
 				* mindist;
 
+		//TODO FIX THIS
 		_lastTrajStr = null;
 		if (pixlen < 25.0) {
 			SwimTrajectory2D traj2D = _swimTrajectoryDrawer

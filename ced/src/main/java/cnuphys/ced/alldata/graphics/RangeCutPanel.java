@@ -1,4 +1,4 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -12,7 +12,6 @@ import javax.swing.JPanel;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Environment;
-import cnuphys.ced.alldata.graphics.SelectPanel;
 
 public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 

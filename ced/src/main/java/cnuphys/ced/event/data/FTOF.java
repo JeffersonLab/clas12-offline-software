@@ -3,6 +3,7 @@ package cnuphys.ced.event.data;
 import java.util.List;
 
 import cnuphys.bCNU.log.Log;
+import cnuphys.ced.alldata.ColumnData;
 
 /**
  * static methods to centralize getting data arrays

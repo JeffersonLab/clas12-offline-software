@@ -64,7 +64,7 @@ public class ClasIoEventQueue extends Vector<DataEvent> {
 	/**
 	 * Dequeue an event. If queue is empty, wait.
 	 * 
-	 * @return a EvioDataEvent event for processing.
+	 * @return a DataEvent event for processing.
 	 */
 	public synchronized DataEvent dequeue() {
 		if (isEmpty()) {

@@ -13,8 +13,6 @@ import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.ced.alldata.DataManager;
-import cnuphys.ced.event.data.RangeCut;
-import cnuphys.ced.event.data.RangeCutPanel;
 
 public class DefineRangeCutDialog extends JDialog implements ActionListener, PropertyChangeListener {
 	

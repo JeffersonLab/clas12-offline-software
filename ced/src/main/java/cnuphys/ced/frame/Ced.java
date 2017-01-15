@@ -36,7 +36,6 @@ import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.cedview.bst.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.ft.FTCalXYView;
-import cnuphys.ced.cedview.gemcview.GEMCView;
 import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.DisplaySectors;
 import cnuphys.ced.cedview.sectorview.SectorView;
@@ -93,7 +92,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.98.05";
+	private static final String _release = "build 0.99.01";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -122,7 +121,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ClasIoMonteCarloView _monteCarloView;
 	private ClasIoReconEventView _reconEventView;
 	private ClasIoEventView _eventView;
-	private GEMCView _gemcView;
 	private BSTxyView _bstXyView;
 	private BSTzView _bstZView;
 	private FTCalXYView _ftcalXyView;
@@ -204,8 +202,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(ecHistoGrid, 17);
 			
 	    	_virtualView.moveTo(_allDCView, 3);
-			_virtualView.moveTo(_eventView, 6, VirtualView.BOTTOMRIGHT);
-			_virtualView.moveTo(_gemcView, 6, VirtualView.BOTTOMLEFT);
+			_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
 			_virtualView.moveTo(_bstXyView, 2, VirtualView.BOTTOMLEFT);
 			_virtualView.moveTo(_bstZView, 2, VirtualView.UPPERRIGHT);
 
@@ -253,9 +250,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// add a virtual view
 		_virtualView = VirtualView.createVirtualView(19);
 		ViewManager.getInstance().getViewMenu().addSeparator();
-
-		// add GEMC data view
-		_gemcView = new GEMCView();
 
 		// add event view
 		_eventView = ClasIoEventView.createEventView();
@@ -767,16 +761,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 */
 	public static BusyPanel getBusyPanel() {
 		return _busyPanel;
-	}
-
-
-	/**
-	 * Get the GEMC view
-	 * 
-	 * @return the GEMC view
-	 */
-	public GEMCView getGEMCView() {
-		return _gemcView;
 	}
 
 	/**

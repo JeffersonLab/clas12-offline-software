@@ -10,7 +10,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
-import cnuphys.ced.event.data.NameVariablePanel;
 
 public class DefineExpressionDialog extends JDialog implements ActionListener {
 	
