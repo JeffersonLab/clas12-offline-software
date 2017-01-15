@@ -6,16 +6,16 @@ public class NoiseData {
 	public int count;
 	
 	/** 1-based sector array */
-	public int sector[];
+	public byte sector[];
 
 	/** 1-based superlayer array */
-	public int superlayer[];
+	public byte superlayer[];
 
 	/** 1-based layer array */
-	public int layer[];
+	public byte layer[];
 
 	/** 1-based wire array */
-	public int wire[];
+	public short wire[];
 
 	
 	public NoiseData() {

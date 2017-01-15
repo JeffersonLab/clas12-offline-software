@@ -1,10 +1,13 @@
 package cnuphys.ced.hippo;
 
 import java.io.File;
+import java.util.List;
+
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
+import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.RunData;
 
@@ -39,13 +42,26 @@ public class HippoTest {
 //				System.out.println("  Data bank for [" + bankName + "]  found: " + (bank != null));
 //			}
 			
-			String curentbankList[] = dataEvent.getBankList();
-			for (String ss : curentbankList) {
-				System.out.println("   " + ss);
+			String currentbankList[] = dataEvent.getBankList();
+			for (String bankName : currentbankList) {
+				System.out.println("   " + bankName);
+//				String columnList[] = dataEvent.getColumnList(bankName);
+				List<ColumnData> columnsWithData = DataManager.getInstance().hasData(dataEvent);
+				
+				for (ColumnData cd : columnsWithData) {
+					System.out.println("        " + cd.getFullName() + "   count: " + cd.length(dataEvent));
+				}
+//				for (String columnName : columnList) {
+//					ColumnData cd = DataManager.getInstance().getColumnData(bankName, columnName);
+//					System.out.println("        " + columnName + "   count: " + cd.length(dataEvent));
+//				}
 			}
 			
 //			if (_runData.set(dataEvent)) {
 //				System.out.println(_runData.toString());
+//			}
+//			else {
+//				System.out.println("No Run Bank data");
 //			}
 		} 
 		

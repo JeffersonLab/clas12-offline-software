@@ -5,7 +5,7 @@ import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.clasio.ClasIoEventManager;
 
-public class ColumnData {
+public class ColumnData implements Comparable<ColumnData> {
 
 	/** type is unknown*/
 	public static final int UNKNOWN = 0;
@@ -305,7 +305,13 @@ public class ColumnData {
 	 */
 	public static byte[] getByteArray(String fullName) {
 		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
-		return (event == null) ? null : DataManager.getInstance().getByteArray(event, fullName);
+		if (event == null) {
+			return null;
+		}
+		byte[] byteArray = DataManager.getInstance().getByteArray(event, fullName);
+//		System.err.println("Fullname: [" + fullName + "]  byteArray null: " + (byteArray == null));
+		return byteArray;
+//		return (event == null) ? null : DataManager.getInstance().getByteArray(event, fullName);
 	}
 
 	/**
@@ -346,6 +352,12 @@ public class ColumnData {
 	public static double[] getDoubleArray(String fullName) {
 		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
 		return (event == null) ? null : DataManager.getInstance().getDoubleArray(event, fullName);
+	}
+
+
+	@Override
+	public int compareTo(ColumnData o) {
+		return _fullName.compareTo(o._fullName);
 	}
 
 }

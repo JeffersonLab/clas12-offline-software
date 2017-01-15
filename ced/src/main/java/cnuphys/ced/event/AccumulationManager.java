@@ -506,10 +506,10 @@ public class AccumulationManager
 		int dcHitCount = DC.hitCount();
 
 		if (dcHitCount > 0) {
-			int sector[] = DC.sector();
-			int superlayer[] = DC.superlayer();
-			int layer[] = DC.layer();
-			int wire[] = DC.wire();
+			byte sector[] = DC.sector();
+			byte superlayer[] = DC.superlayer();
+			byte layer[] = DC.layer();
+			short wire[] = DC.wire();
 
 			for (int i = 0; i < dcHitCount; i++) {
 				int sect0 = sector[i] - 1; // make 0 based

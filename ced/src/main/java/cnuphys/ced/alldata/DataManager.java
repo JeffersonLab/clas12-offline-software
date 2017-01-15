@@ -1,6 +1,8 @@
 package cnuphys.ced.alldata;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -21,7 +23,11 @@ public class DataManager {
 	//all the known banks
 	private  String[] _knownBanks; 
 
-	//the full set of column data. ALL columns for a bank name key
+	//the full set of column data. ALL columns for a full bank name key
+	//key is somethjing like DET::NAME.COLUMN e.g.
+	// DC::dgtz.doca,
+	//or
+	// HitBasedTrkg::HBTracks.Cross1_ID
 	//this maps bank name to a ColumnData object
 	private Hashtable<String, ColumnData> _columnData;
 
@@ -50,6 +56,29 @@ public class DataManager {
 			_instance = new DataManager();
 		}
 		return _instance;
+	}
+
+	/**
+	 * Get a list of all column data objects that have data in the given event
+	 * 
+	 * @param event
+	 *            the event in question
+	 * @return a list of all columns in all banks with data
+	 */
+	public ArrayList<ColumnData> hasData(DataEvent event) {
+		ArrayList<ColumnData> list = new ArrayList<ColumnData>();
+
+		if (event != null) {
+			for (ColumnData cd : _columnData.values()) {
+				if (cd.getDataArray(event) != null) {
+					if (cd.length(event) > 0) {
+						list.add(cd);
+					}
+				}
+			}
+		}
+		Collections.sort(list);
+		return list;
 	}
 	
 	//initialize the column data

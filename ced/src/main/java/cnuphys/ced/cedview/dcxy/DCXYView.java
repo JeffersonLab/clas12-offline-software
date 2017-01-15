@@ -296,10 +296,10 @@ public class DCXYView extends HexView {
 				int hitCount = DC.hitCount();
 				
 				if (hitCount > 0) {
-					int sector[] = DC.sector();
-					int superlayer[] = DC.superlayer();
-					int layer[] = DC.layer();
-					int wire[] = DC.wire();
+					byte sector[] = DC.sector();
+					byte superlayer[] = DC.superlayer();
+					byte layer[] = DC.layer();
+					short wire[] = DC.wire();
 					
 					Graphics2D g2 = (Graphics2D)g;
 					Stroke oldStroke = g2.getStroke();

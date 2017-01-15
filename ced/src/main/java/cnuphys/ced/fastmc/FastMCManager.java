@@ -267,19 +267,19 @@ public class FastMCManager {
 
 		NoiseData nd = new NoiseData();
 		nd.count = count;
-		nd.sector = new int[count];
-		nd.superlayer = new int[count];
-		nd.layer = new int[count];
-		nd.wire = new int[count];
+		nd.sector = new byte[count];
+		nd.superlayer = new byte[count];
+		nd.layer = new byte[count];
+		nd.wire = new short[count];
 		int index = 0;
 		for (ParticleHits phits : _particleHits) {
 			List<DetectorHit> ldh = phits.getDCHits();
 			if (ldh != null) {
 				for (DetectorHit hit : ldh) {
-					nd.sector[index] = hit.getSectorId() + 1;
-					nd.superlayer[index] = hit.getSuperlayerId() + 1;
-					nd.layer[index] = hit.getLayerId() + 1;
-					nd.wire[index] = hit.getComponentId() + 1;
+					nd.sector[index] = (byte) (hit.getSectorId() + 1);
+					nd.superlayer[index] = (byte) (hit.getSuperlayerId() + 1);
+					nd.layer[index] = (byte) (hit.getLayerId() + 1);
+					nd.wire[index] = (short) (hit.getComponentId() + 1);
 					index++;
 				}
 			}

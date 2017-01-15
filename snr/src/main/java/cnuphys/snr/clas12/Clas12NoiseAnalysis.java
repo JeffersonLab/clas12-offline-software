@@ -188,7 +188,7 @@ public class Clas12NoiseAnalysis {
 	 * @param results
 	 *            container for the results
 	 */
-	public void findNoise(int sector[], int superlayer[], int layer[], int wire[], Clas12NoiseResult results) {
+	public void findNoise(byte sector[], byte superlayer[], byte layer[], short wire[], Clas12NoiseResult results) {
 		if (sector == null) {
 			rawHitCount = 0;
 			return;

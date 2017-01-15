@@ -360,10 +360,10 @@ public class SuperLayerDrawing {
 
 		if (hitCount > 0) {
 			Point pp = new Point();
-			int sector[] = DC.sector();
-			int superlayer[] = DC.superlayer();
-			int layer[] = DC.layer();
-			int wire[] = DC.wire();
+			byte sector[] = DC.sector();
+			byte superlayer[] = DC.superlayer();
+			byte layer[] = DC.layer();
+			short wire[] = DC.wire();
 			int pid[] = DC.pid();
 			double doca[] = DC.doca();
 			double sdoca[] = DC.sdoca();
