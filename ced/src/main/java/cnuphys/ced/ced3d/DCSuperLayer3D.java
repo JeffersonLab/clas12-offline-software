@@ -120,7 +120,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 			double avgX[] = DC.avgX();
 			double avgY[] = DC.avgY();
 			double avgZ[] = DC.avgZ();
-			double docas[] = DC.doca();
+			float docas[] = DC.doca();
 
 			
 			for (int i = 0; i < hitCount; i++) {

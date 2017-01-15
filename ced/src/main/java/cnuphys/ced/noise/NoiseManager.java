@@ -87,9 +87,11 @@ public class NoiseManager implements IClasIoEventListener {
 		NoiseData noiseData = FastMCManager.getInstance().getNoiseData();
 		
 		if ((noiseData != null) && (noiseData.count > 0)) {
-			noisePackage.findNoise(noiseData.sector,
-					noiseData.superlayer, noiseData.layer,
-					noiseData.wire, _noiseResults);
+			noisePackage.findNoise(toIntArray(noiseData.sector),
+					toIntArray(noiseData.superlayer), 
+					toIntArray(noiseData.layer),
+					toIntArray(noiseData.wire), 
+					_noiseResults);
 		}
 	}
 	
@@ -102,16 +104,41 @@ public class NoiseManager implements IClasIoEventListener {
 		int hitCount = DC.hitCount();
 		
 		if (hitCount > 0) {
-			byte sector[] = DC.sector();
-			byte superlayer[] = DC.superlayer();
-			byte layer[] = DC.layer();
-			short wire[] = DC.wire();
+			int sector[] = toIntArray(DC.sector());
+			int superlayer[] = toIntArray(DC.superlayer());
+			int layer[] = toIntArray(DC.layer());
+			int wire[] = toIntArray(DC.wire());
 			
 			noisePackage.findNoise(sector,
 					superlayer, layer,
 					wire, _noiseResults);
 		}		
 	}
+	
+	//HACK
+	private int[] toIntArray(byte[] bytes) {
+		if (bytes == null) {
+			return null;
+		}
+		int ints[] = new int[bytes.length];
+		for (int i = 0; i < bytes.length; i++) {
+			ints[i]= bytes[i];
+		}
+		return ints;
+	}
+	
+	//HACK
+	private int[] toIntArray(short[] shorts) {
+		if (shorts == null) {
+			return null;
+		}
+		int ints[] = new int[shorts.length];
+		for (int i = 0; i < shorts.length; i++) {
+			ints[i]= shorts[i];
+		}
+		return ints;
+	}
+
 
 	@Override
 	public void openedNewEventFile(String path) {

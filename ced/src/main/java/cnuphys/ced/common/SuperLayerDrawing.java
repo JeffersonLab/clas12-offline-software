@@ -22,6 +22,7 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.MathUtilities;
 import cnuphys.bCNU.util.VectorSupport;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -365,8 +366,8 @@ public class SuperLayerDrawing {
 			byte layer[] = DC.layer();
 			short wire[] = DC.wire();
 			int pid[] = DC.pid();
-			double doca[] = DC.doca();
-			double sdoca[] = DC.sdoca();
+			float doca[] = DC.doca();
+			float sdoca[] = DC.sdoca();
 
 			for (int i = 0; i < hitCount; i++) {
 				try {
@@ -468,7 +469,7 @@ public class SuperLayerDrawing {
 	 *            the smeared distance of closest approach array in mm
 	 */
 	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid, int index,
-			double doca[], double sdoca[]) {
+			float doca[], float sdoca[]) {
 
 		// abort if hiding noise and this is noise
 		if (_view.hideNoise() && noise) {
@@ -488,7 +489,7 @@ public class SuperLayerDrawing {
 		Color hitLine = CedColors.defaultHitCellLine;
 
 		// do we have simulated "truth" data?
-		if (showTruth) {
+		if (showTruth && (pid >= 0)) {
 			LundId lid = LundSupport.getInstance().get(pid);
 			if (lid != null) {
 				LundStyle style = lid.getStyle();
@@ -662,6 +663,8 @@ public class SuperLayerDrawing {
 			g.setColor(Color.black);
 			g.drawPolygon(hexagon);
 		} else {
+			g.setColor(X11Colors.getX11Color("lavender blush"));
+			g.fillPolygon(hexagon);
 			g.setColor(Color.gray);
 			int x[] = hexagon.xpoints;
 			int y[] = hexagon.ypoints;
@@ -994,7 +997,7 @@ public class SuperLayerDrawing {
 					DC.noiseFeedback(hitIndex, feedbackStrings);
 					DC.trueFeedback(hitIndex, feedbackStrings);
 					DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
-					DC.dgtzFeedback(hitIndex, feedbackStrings);
+					DC.dcBanksFeedback(hitIndex, feedbackStrings);
 				}
 
 				// } // good wire

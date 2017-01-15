@@ -46,15 +46,15 @@ public class TrajectoryTable extends JTable {
 		}
 		return _scrollPane;
 	}
-
-	@Override
-	public Dimension getPreferredSize() {
-		int w = 0;
-		for (int i = 0; i < TrajectoryTableModel.columnWidths.length; i++) {
-			w += TrajectoryTableModel.columnWidths[i];
-		}
-		return new Dimension(w, 200);
-	}
+//
+//	@Override
+//	public Dimension getPreferredSize() {
+//		int w = 0;
+//		for (int i = 0; i < TrajectoryTableModel.columnWidths.length; i++) {
+//			w += TrajectoryTableModel.columnWidths[i];
+//		}
+//		return new Dimension(w, 200);
+//	}
 
 	/**
 	 * main program for testing.
