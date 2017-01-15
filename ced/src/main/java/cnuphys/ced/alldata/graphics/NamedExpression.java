@@ -13,8 +13,6 @@ import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
-import cnuphys.ced.event.data.NameBinding;
-import cnuphys.ced.event.data.XmlUtilities;
 import net.oh.exp4j.Expression;
 import net.oh.exp4j.ExpressionBuilder;
 import net.oh.exp4j.ValidationResult;

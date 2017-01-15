@@ -410,9 +410,20 @@ public class GraphicsUtilities {
 	 * @return the requested dimension.
 	 */
 	public static Dimension screenFraction(double fraction) {
+		Dimension d = getDisplaySize();
+		d.width = (int) (fraction * d.width);
+		d.height = (int) (fraction * d.height);
+		return d;
+	}
 
-		GraphicsEnvironment g = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+	/**
+	 * Get the screen size of the biggest display among the devices
+	 * 
+	 * @return the screen size of the biggest display among the devices
+	 */
+	public static Dimension getDisplaySize() {
+
+		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] devices = g.getScreenDevices();
 
 		int maxw = 0;
@@ -423,10 +434,7 @@ public class GraphicsUtilities {
 			maxh = Math.max(maxh, devices[i].getDisplayMode().getHeight());
 		}
 
-		Dimension d = new Dimension();
-		d.width = (int) (fraction * maxw);
-		d.height = (int) (fraction * maxh);
-		return d;
+		return new Dimension(maxw, maxh);
 	}
 
 	/**
@@ -467,7 +475,15 @@ public class GraphicsUtilities {
 
 	/**
 	 * Get a rectangle with the same apsect ratio. Useful for rubber banding
-	 * when you want to preserve the sapect ratio.
+	 * when you want to preserve the aspect ratio.
+	 * 
+	 * @param r
+	 *            the rectangle whose aspect ratio you want to match
+	 * @param p0
+	 *            one point
+	 * @param p
+	 *            a second point
+	 * @return a rectangle with the same aspect ratio
 	 */
 	public static Rectangle rectangleARFixed(Rectangle r, Point p0, Point p) {
 		rectangleARFixedAdjust(r, p0, p);
@@ -1317,9 +1333,13 @@ public class GraphicsUtilities {
 	 * Draw a string by breaking it into snippets
 	 * 
 	 * @param g
+	 *            The graphics object
 	 * @param x
+	 *            the x coordinate
 	 * @param y
+	 *            the x coordinate
 	 * @param font
+	 *            the font
 	 * @param text
 	 * @param component
 	 * @param azimuth
@@ -1617,6 +1637,12 @@ public class GraphicsUtilities {
 		return null;
 	}
 
+	/**
+	 * Draw a component as a png graphics file
+	 * 
+	 * @param component
+	 *            the component tp draw
+	 */
 	public static void saveAsPng(Component component) {
 		try {
 

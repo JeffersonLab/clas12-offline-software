@@ -24,6 +24,7 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 		_trajectoryTable.clear(); // remove existing events
 

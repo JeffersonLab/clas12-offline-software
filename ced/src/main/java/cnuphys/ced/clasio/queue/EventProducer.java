@@ -31,6 +31,7 @@ public class EventProducer implements IClasIoEventListener {
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 	

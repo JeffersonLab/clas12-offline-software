@@ -2,6 +2,7 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 
+import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.splot.plot.DoubleFormat;
 

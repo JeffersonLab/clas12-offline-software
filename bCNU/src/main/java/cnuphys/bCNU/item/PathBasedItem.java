@@ -190,6 +190,9 @@ public class PathBasedItem extends AItem {
 		switch (_modification.getType()) {
 
 		case DRAG:
+			if (!isDraggable()) {
+				break;
+			}
 			_path = (Path2D.Double) (_modification.getStartPath().clone());
 
 			Point2D.Double swp = _modification.getStartWorldPoint();

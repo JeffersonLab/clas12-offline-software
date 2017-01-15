@@ -1,6 +1,5 @@
 package cnuphys.ced.clasio;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -315,7 +314,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 		
-		sp.setBackground(Color.white);
+	//	sp.setBackground(Color.white);
 
 		JLabel label = new JLabel("Go To Event: ");
 
@@ -346,7 +345,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	// create the event every so many seconds widget
 	private JPanel createEventPeriodPanel() {
 		JPanel sp = new JPanel();
-		sp.setBackground(Color.white);
+//		sp.setBackground(Color.white);
 		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
 		_periodEvent = new JCheckBox("Auto Next-Event Every ");
@@ -442,6 +441,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 		
 	}

@@ -21,8 +21,6 @@ import javax.swing.event.TableModelListener;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
-import cnuphys.ced.event.data.ICut;
-import cnuphys.ced.event.data.RangeCut;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotParameters;
 

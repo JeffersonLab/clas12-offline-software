@@ -1,6 +1,5 @@
 package cnuphys.ced.cedview.projecteddc;
 
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

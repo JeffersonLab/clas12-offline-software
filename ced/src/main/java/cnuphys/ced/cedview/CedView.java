@@ -11,7 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.Box;
@@ -49,7 +48,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
@@ -117,6 +116,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	private long minHoverTrigger = 1000; // ms
 	private long hoverStartCheck = -1;
 	private MouseEvent hoverMouseEvent;
+	
 	// last trajectory hovering response
 	protected String _lastTrajStr;
 
@@ -634,7 +634,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
 		switch (estype) {
 		case FILE:
-		case ET:
+		case RING:
 			haveEvent = (_eventManager.getCurrentEvent() != null);
 			break;
 		case FASTMC:
@@ -777,6 +777,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * @param event
 	 *            the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 
@@ -787,7 +788,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 *            the new event.
 	 */
 	@Override
-	public void newClasIoEvent(final EvioDataEvent event) {
+	public void newClasIoEvent(final DataEvent event) {
 		if (!_eventManager.isAccumulating()) {
 			getUserComponent().repaint();
 			fixTitle(event);

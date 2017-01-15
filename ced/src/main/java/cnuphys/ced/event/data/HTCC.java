@@ -9,6 +9,7 @@ import org.jlab.geom.prim.Point3D;
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Bits;
+import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.geometry.Transformations;
 

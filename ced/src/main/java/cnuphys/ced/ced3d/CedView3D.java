@@ -1,7 +1,6 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.BorderLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -104,6 +103,7 @@ public abstract class CedView3D extends BaseView implements
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 		
 	}

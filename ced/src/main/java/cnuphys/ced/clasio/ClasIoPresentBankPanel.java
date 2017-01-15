@@ -166,6 +166,7 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 		if (!FastMCManager.getInstance().isStreaming()) {
 			update();

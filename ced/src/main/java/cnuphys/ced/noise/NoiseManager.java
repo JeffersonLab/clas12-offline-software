@@ -79,6 +79,7 @@ public class NoiseManager implements IClasIoEventListener {
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 		noisePackage.clear();
 		_noiseResults.clear();

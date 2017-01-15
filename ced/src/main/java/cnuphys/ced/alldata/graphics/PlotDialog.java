@@ -23,8 +23,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
-import cnuphys.ced.event.data.ICut;
-import cnuphys.ced.event.data.XmlUtilities;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.Histo2DData;
 import cnuphys.splot.pdata.HistoData;

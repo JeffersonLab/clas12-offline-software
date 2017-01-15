@@ -2,9 +2,12 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -258,20 +261,20 @@ public class DataSupport {
 
 	/**
 	 * Safe way to get an int value
-	 * 
+	 * @param event the data event
 	 * @param fullname the full name of the column
 	 * @param index the index
-	 * @return -2147483648 [0x80000000] or -2^31 on any error otherwise the
+	 * @return the int at the index or -2147483648 [0x80000000] or -2^31 on any error otherwise the
 	 *         value
 	 */
-	public static int getInt(String fullName, int index) {
+	public static int getInt(DataEvent event, String fullName, int index) {
 
-		ColumnData cd = ColumnData.getColumnData(fullName);
+		ColumnData cd = DataManager.getInstance().getColumnData(fullName);
 		if (cd == null) {
 			return Integer.MIN_VALUE;
 		}
 
-		Object oa = cd.getDataArray();
+		Object oa = cd.getDataArray(event);
 		if ((oa == null) || !(oa instanceof int[])) {
 			return Integer.MIN_VALUE;
 		}
@@ -286,19 +289,19 @@ public class DataSupport {
 
 	/**
 	 * Safe way to get an double value
-	 * 
+	 * @param event the data event
 	 * @param fullname the full name of the column
 	 * @param index the index
-	 * @return Double.NaN on any error otherwise the value
+	 * @return the double at the index or Double.NaN on any error otherwise the value
 	 */
-	public static double getDouble(String fullName, int index) {
+	public static double getDouble(DataEvent event, String fullName, int index) {
 
-		ColumnData cd = ColumnData.getColumnData(fullName);
+		ColumnData cd = DataManager.getInstance().getColumnData(fullName);
 		if (cd == null) {
 			return Double.NaN;
 		}
 
-		Object oa = cd.getDataArray();
+		Object oa = cd.getDataArray(event);
 		if ((oa == null) || !(oa instanceof double[])) {
 			return Double.NaN;
 		}

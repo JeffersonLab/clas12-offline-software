@@ -1,14 +1,17 @@
-package cnuphys.ced.event.data;
+package cnuphys.ced.alldata.graphics;
 
 import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
-import cnuphys.ced.alldata.graphics.DefinitionManager;
-import cnuphys.ced.alldata.graphics.NamedExpression;
+import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.clasio.ClasIoEventManager;
 
 public class RangeCut implements ICut {
 	
@@ -47,9 +50,9 @@ public class RangeCut implements ICut {
 	public RangeCut(String name, double minVal, double maxVal) {
 		_name = name;
 
-		boolean isColumn = ColumnData.validColumnName(name);
+		boolean isColumn = DataManager.getInstance().validColumnName(name);
 		if (isColumn) {
-			_columnData = ColumnData.getColumnData(name);
+			_columnData = DataManager.getInstance().getColumnData(name);
 			if (_columnData == null) {
 				Log.getInstance().warning(
 						"null ColumnData in RangeCut for [" + name + "]");
@@ -107,6 +110,11 @@ public class RangeCut implements ICut {
 
 	@Override
 	public boolean pass(int index) {
+		
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		if (event == null) {
+			return true;
+		}
 				
 		if (!_active) {
 			return true;
@@ -120,7 +128,7 @@ public class RangeCut implements ICut {
 
 		double val;
 		if (_columnData != null) {
-			double vals[] = _columnData.getAsDoubleArray();
+			double vals[] = _columnData.getAsDoubleArray(event);
 
 			if ((vals == null) || (index < 0)) {
 				return false;
@@ -133,7 +141,7 @@ public class RangeCut implements ICut {
 			val = vals[index];
 		}
 		else {
-			val = namedExpression.value(index);
+			val = namedExpression.value(event, index);
 		}
 		return pass(val);
 	}

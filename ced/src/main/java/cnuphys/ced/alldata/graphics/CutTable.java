@@ -14,8 +14,6 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import cnuphys.ced.event.data.ICut;
-
 public class CutTable extends JTable implements ItemListener {
 
 	private DefaultTableCellRenderer def_renderer = new DefaultTableCellRenderer();

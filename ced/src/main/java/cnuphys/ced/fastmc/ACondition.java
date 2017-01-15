@@ -1,6 +1,5 @@
 package cnuphys.ced.fastmc;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import org.jlab.geom.DetectorHit;

@@ -5,6 +5,7 @@ import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
+import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
@@ -15,14 +16,13 @@ import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.ColumnData;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
 
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataEvent;
 
 /**
  * Manages the accumulation of data
@@ -452,6 +452,7 @@ public class AccumulationManager
 	 * New fast mc event
 	 * @param event the generated physics event
 	 */
+	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 		
 	}

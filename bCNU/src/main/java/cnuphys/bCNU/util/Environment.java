@@ -15,13 +15,12 @@ import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.plaf.metal.MetalIconFactory;
 
-import cnuphys.bCNU.dialog.VerticalFlowLayout;
 import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 
 /**
@@ -67,13 +66,23 @@ public final class Environment {
 	private String _applicationName;
 
 	// default panel background color
-	private Color _defaultPanelBackgroundColor;
+	private static Color _defaultPanelBackgroundColor;
 
 	// properties from a preferences file
-	private Properties _preferences;
+	private Properties _properties;
 
 	// used to save lists as single strings
 	private static String LISTSEP = "$$";
+
+	// this is used to recommend to non AWT threads to wait to call for an
+	// update
+	private boolean _dragging;
+	
+	//for scaling things like fonts
+	private float _resolutionScaleFactor;
+	
+	//screen dots per inch
+	private int _dotsPerInch;
 
 	/**
 	 * Private constructor for the singleton.
@@ -99,32 +108,93 @@ public final class Environment {
 			_hostName = "???";
 			_hostAddress = "???";
 		}
+		
+		//screen information
+		getScreenInformation();
 
 		// any png image writers?
-		Iterator<ImageWriter> iterator = ImageIO
-				.getImageWritersByFormatName("png");
+		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
 			System.err.println("no png writer");
-		}
-		else {
+		} else {
 			_pngWriter = iterator.next(); // take the first
 		}
 
 		// read the preferences if the file exists
 		File pfile = this.getPreferencesFile();
-		_preferences = null;
+		_properties = null;
 		if (pfile.exists()) {
 			try {
-				_preferences = (Properties) SerialIO
-						.serialRead(pfile.getPath());
+				_properties = (Properties) SerialIO.serialRead(pfile.getPath());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		if (_preferences == null) {
-			_preferences = new Properties();
+		if (_properties == null) {
+			_properties = new Properties();
 		}
 	}
+
+	/**
+	 * Get the common panel background color
+	 * 
+	 * @return the common panel background color
+	 */
+	public static Color getCommonPanelBackground() {
+		return _defaultPanelBackgroundColor;
+	}
+
+	/**
+	 * Check whether we are dragging or modifying an item.
+	 * 
+	 * @return <code>true</code> if we are dragging or modifying an item.
+	 */
+	public boolean isDragging() {
+		return _dragging;
+	}
+
+	/**
+	 * Set whether or not dragging is occurring. This cam be used to pause
+	 * threads that might be affecting the screen.
+	 * 
+	 * @param dragging
+	 *            <code>true</code> if dragging is occuring.
+	 */
+	public void setDragging(boolean dragging) {
+		_dragging = dragging;
+	}
+	
+	//to help with resolution issues
+	private void getScreenInformation() {
+		_dotsPerInch=java.awt.Toolkit.getDefaultToolkit().getScreenResolution(); 
+		double dpcm = _dotsPerInch/2.54;
+		_resolutionScaleFactor = (float) (dpcm/42.91);
+	}
+	
+	/**
+	 * For scaling things like fonts. Their size should be multiplied by this.
+	 * @return the resolutionScaleFactor
+	 */
+	public float getResolutionScaleFactor() {
+		return _resolutionScaleFactor;
+	}
+	
+	/**
+	 * Get the dots per inch for the main display
+	 * @return the dots per inch
+	 */
+	public double getDotsPerInch() {
+		return _dotsPerInch;
+	}
+	
+	/**
+	 * Get the dots per inch for the main display
+	 * @return the dots per inch
+	 */
+	public double getDotsPerCentimeter() {
+		return getDotsPerInch()/2.54;
+	}
+
 
 	/**
 	 * Public access for the singleton.
@@ -141,7 +211,8 @@ public final class Environment {
 	/**
 	 * Convenience routine for getting a system property.
 	 * 
-	 * @param keyName the key name of the property
+	 * @param keyName
+	 *            the key name of the property
 	 * @return the property, or <code>null</null>.
 	 */
 	private String getProperty(String keyName) {
@@ -225,39 +296,6 @@ public final class Environment {
 	}
 
 	/**
-	 * Convert to a string representation.
-	 * 
-	 * @return a string representation of the <code>Environment</code> object.
-	 */
-
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer(1024);
-		sb.append("Environment: \n");
-		sb.append("Application: " + getApplicationName() + "\n");
-
-		File file = getConfigurationFile();
-		if (file == null) {
-			sb.append("Config File: null\n");
-		}
-		else {
-			sb.append("Config File: " + file.getAbsolutePath() + "\n");
-		}
-		sb.append("Host Name: " + getHostName() + "\n");
-		sb.append("Host Address: " + getHostAddress() + "\n");
-		sb.append("User Name: " + getUserName() + "\n");
-		sb.append("Temp Directory: " + getTempDirectory() + "\n");
-		sb.append("OS Name: " + getOsName() + "\n");
-		sb.append("Home Directory: " + getHomeDirectory() + "\n");
-		sb.append("Current Working Directory: " + getCurrentWorkingDirectory()
-				+ "\n");
-		sb.append("Class Path: " + getClassPath() + "\n");
-		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter)
-				+ "\n");
-		return sb.toString();
-	}
-
-	/**
 	 * Check whether we are running on linux
 	 * 
 	 * @return <code>true</code> if we are running on linux
@@ -291,18 +329,6 @@ public final class Environment {
 		return _pngWriter;
 	}
 	
-	public void say(String s) {
-		if (s == null) {
-			return;
-		}
-		if (isMac()) {
-			try {
-				Process p = Runtime.getRuntime().exec("say -v Samantha " + s);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	/**
 	 * Get the application name. This is the simple part of the name of the
@@ -366,6 +392,25 @@ public final class Environment {
 	}
 
 	/**
+	 * On Mac, uses the say command to say something.
+	 * 
+	 * @param sayThis
+	 *            the string to say
+	 */
+	public void say(String sayThis) {
+		if (sayThis == null) {
+			return;
+		}
+		if (isMac()) {
+			try {
+				Runtime.getRuntime().exec("say -v Samantha " + sayThis);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
 	 * Singleton objects cannot be cloned, so we override clone to throw a
 	 * CloneNotSupportedException.
 	 */
@@ -381,27 +426,13 @@ public final class Environment {
 	 */
 	public Color getDefaultPanelBackgroundColor() {
 		if (_defaultPanelBackgroundColor == null) {
-			_defaultPanelBackgroundColor = UIManager
-					.getColor("Panel.background");
+			_defaultPanelBackgroundColor = UIManager.getColor("Panel.background");
 			if (_defaultPanelBackgroundColor == null) {
 				_defaultPanelBackgroundColor = new Color(238, 238, 238);
 			}
 		}
 
 		return _defaultPanelBackgroundColor;
-	}
-
-	// this is used to recommend to non AWT threads to wait to call for an
-	// update
-	private boolean _dragging;
-
-	/**
-	 * Check whether we are dragging or modifying an item.
-	 * 
-	 * @return <code>true</code> if we are dragging or modifying an item.
-	 */
-	public boolean isDragging() {
-		return _dragging;
 	}
 
 	/**
@@ -411,7 +442,7 @@ public final class Environment {
 	 * @return a File object representing the preferences file.
 	 */
 	private File getPreferencesFile() {
-		String bareName = getApplicationName() + ".pref";
+		String bareName = "hermes.pref";
 		String dirName = getHomeDirectory();
 		File file = new File(dirName, bareName);
 		return file;
@@ -420,15 +451,26 @@ public final class Environment {
 	/**
 	 * Obtain a preference from the key
 	 * 
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return the String corresponding to the key, or <code>null</code>.
 	 */
 	public String getPreference(String key) {
-		if (_preferences == null) {
+		if (_properties == null) {
 			return null;
 		}
 
-		return _preferences.getProperty(key);
+		return _properties.getProperty(key);
+	}
+
+	/**
+	 * Get the properties, which start out as the user preferences (or null) but
+	 * which can be added to.
+	 * 
+	 * @return the properties
+	 */
+	public Properties getProperties() {
+		return _properties;
 	}
 
 	/**
@@ -436,8 +478,11 @@ public final class Environment {
 	 * preferences file. For example, it might be a Vector of recently visited
 	 * files.
 	 * 
-	 * @param key the key
-	 * @param value the vector holding the strings
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the vector holding the strings
+	 * @return a Vector of preferences
 	 */
 	public Vector<String> getPreferenceList(String key) {
 		String s = getPreference(key);
@@ -460,8 +505,10 @@ public final class Environment {
 	/**
 	 * Save a value in the preferences and write the preferneces file.
 	 * 
-	 * @param key the key
-	 * @param value the value
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public void savePreference(String key, String value) {
 
@@ -469,11 +516,11 @@ public final class Environment {
 			return;
 		}
 
-		if (_preferences == null) {
-			_preferences = new Properties();
+		if (_properties == null) {
+			_properties = new Properties();
 		}
 
-		_preferences.put(key, value);
+		_properties.put(key, value);
 		writePreferences();
 	}
 
@@ -482,8 +529,10 @@ public final class Environment {
 	 * preferences file. For example, it might be a Vector of recently visited
 	 * files.
 	 * 
-	 * @param key the key
-	 * @param value the vector holding the strings
+	 * @param key
+	 *            the key
+	 * @param values
+	 *            the vector holding the strings
 	 */
 	public void savePreferenceList(String key, Vector<String> values) {
 		if ((key == null) || (values == null) || (values.isEmpty())) {
@@ -511,8 +560,8 @@ public final class Environment {
 				file.delete();
 			}
 
-			if ((_preferences != null) && !_preferences.isEmpty()) {
-				SerialIO.serialWrite(_preferences, file.getPath());
+			if ((_properties != null) && !_properties.isEmpty()) {
+				SerialIO.serialWrite(_properties, file.getPath());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -520,20 +569,12 @@ public final class Environment {
 	}
 
 	/**
-	 * Set whether or not dragging is occurring. This cam be used to pause
-	 * threads that might be affecting the screen.
-	 * 
-	 * @param dragging <code>true</code> if dragging is occuring.
-	 */
-	public void setDragging(boolean dragging) {
-		_dragging = dragging;
-	}
-	
-	/**
 	 * Useful for making common look components
 	 * 
-	 * @param component the component
-	 * @param color the background color--if <code>null</code> use default.
+	 * @param component
+	 *            the component
+	 * @param color
+	 *            the background color--if <code>null</code> use default.
 	 */
 	public void commonize(JComponent component, Color color) {
 		component.setOpaque(true);
@@ -544,45 +585,27 @@ public final class Environment {
 	/**
 	 * Print a memory report
 	 * 
-	 * @param message a message to add on
+	 * @param message
+	 *            a message to add on
 	 */
-	public static void memoryReport(String message) {
+	public static String memoryReport(String message) {
 		System.gc();
 		System.gc();
+
+		StringBuilder sb = new StringBuilder(1024);
 		double total = (Runtime.getRuntime().totalMemory()) / 1048576.;
 		double free = Runtime.getRuntime().freeMemory() / 1048576.;
 		double used = total - free;
-		System.out.println("\n==== Memory Report =====");
+		sb.append("==== Memory Report =====\n");
 		if (message != null) {
-			System.out.println(message);
+			sb.append(message + "\n");
 		}
-		System.out.println("Total memory in JVM: "
-				+ DoubleFormat.doubleFormat(total, 1) + "MB");
-		System.out.println(" Free memory in JVM: "
-				+ DoubleFormat.doubleFormat(free, 1) + "MB");
-		System.out.println(" Used memory in JVM: "
-				+ DoubleFormat.doubleFormat(used, 1) + "MB");
-		System.out.println();
-	}
+		sb.append("Total memory in JVM: " + DoubleFormat.doubleFormat(total, 1) + "MB\n");
+		sb.append(" Free memory in JVM: " + DoubleFormat.doubleFormat(free, 1) + "MB\n");
+		sb.append(" Used memory in JVM: " + DoubleFormat.doubleFormat(used, 1) + "MB\n");
 
-	public static JPanel getEnvironmentPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new VerticalFlowLayout());
+		return sb.toString();
 
-		panel.setBorder(new CommonBorder("User Environment"));
-		panel.add(panelLabel("User", getInstance().getUserName()));
-		panel.add(panelLabel("Host", getInstance().getHostName()));
-		panel.add(panelLabel("OS", getInstance().getOsName()));
-		panel.add(
-				panelLabel("CWD", getInstance().getCurrentWorkingDirectory()));
-
-		return panel;
-	}
-
-	private static JLabel panelLabel(String prompt, String value) {
-		JLabel label = new JLabel(prompt + ": " + value);
-		label.setFont(Fonts.mediumFont);
-		return label;
 	}
 
 	/**
@@ -591,13 +614,135 @@ public final class Environment {
 	 * @return a short summary string
 	 */
 	public String summaryString() {
-		return " [" + _userName + "]" + " [" + _osName + "]" + " [" + _hostName
-				+ "]" + " [" + _currentWorkingDirectory + "]";
+		return " [" + _userName + "]" + " [" + _osName + "]" + " [" + _hostName + "]" + " [" + _currentWorkingDirectory
+				+ "]";
 	}
 
+	/**
+	 * Initialize the look and feel
+	 */
+	public void initializeLookAndFeel() {
+
+		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
+
+		String preferredLnF[];
+
+		if (Environment.getInstance().isWindows()) {
+			String arry[] = {  UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus",
+					UIManager.getCrossPlatformLookAndFeelClassName() };
+			preferredLnF = arry;
+		} else {
+			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Windows",
+					UIManager.getCrossPlatformLookAndFeelClassName() };
+			preferredLnF = arry;
+		}
+
+		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
+			System.err.println("No installed look and feels");
+			return;
+		}
+		// else {
+		// for (LookAndFeelInfo linfo : lnfinfo) {
+		// System.err.println(" ****** [" + linfo.getName() + "]");
+		// }
+		// }
+
+		for (String targetLnF : preferredLnF) {
+			for (int i = 0; i < lnfinfo.length; i++) {
+				String linfoName = lnfinfo[i].getClassName();
+				if (linfoName.indexOf(targetLnF) >= 0) {
+					try {
+						UIManager.setLookAndFeel(lnfinfo[i].getClassName());
+						UIDefaults defaults = UIManager.getDefaults();
+
+						defaults.put("RadioButtonMenuItem.checkIcon", MetalIconFactory.getRadioButtonMenuItemIcon());
+						return;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} // end for
+
+		//UIManager.put("TextArea.font", UIManager.get("Label.font"));
+
+		// for tabbed pane
+		// UIManager.put("TabbedPane.foreground", Color.blue);
+		// UIManager.put("TabbedPane.selectedForeground", Color.red);
+		// UIManager.put("TabbedPane.foreground", Color.cyan);
+		// UIManager.put("TabbedPane.unselectedTabForeground", Color.magenta);
+	}
+
+	/**
+	 * Split the class path into directories and jar files
+	 * 
+	 * @return an array of the class path segments
+	 */
+	public String[] splitClassPath() {
+		String cp = new String(_classPath);
+		cp = cp.replace(".", File.separator);
+		// cp = FileUtilities.fixPathSeparator(cp);
+		return FileUtilities.tokens(cp, File.pathSeparator);
+	}
+
+	/**
+	 * Convert to a string representation.
+	 * 
+	 * @return a string representation of the <code>Environment</code> object.
+	 */
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(2048);
+		sb.append("Environment: \n");
+		
+		File file = getConfigurationFile();
+		if (file == null) {
+			sb.append("Config File: null\n");
+		}
+		else {
+			sb.append("Config File: " + file.getAbsolutePath() + "\n");
+		}
+
+
+		sb.append("Host Name: " + getHostName() + "\n");
+		sb.append("Host Address: " + getHostAddress() + "\n");
+		sb.append("User Name: " + getUserName() + "\n");
+		sb.append("Temp Directory: " + getTempDirectory() + "\n");
+		sb.append("OS Name: " + getOsName() + "\n");
+		sb.append("Home Directory: " + getHomeDirectory() + "\n");
+		sb.append("Current Working Directory: " + getCurrentWorkingDirectory() + "\n");
+		sb.append("Class Path: " + getClassPath() + "\n");
+
+		// not the tokenized class path
+		String cptokens[] = splitClassPath();
+		if (cptokens != null) {
+			sb.append("Class Path Token Count: " + cptokens.length + "\n");
+			for (int index = 0; index < cptokens.length; index++) {
+				sb.append("  Class Path Token [" + index + "] = " + cptokens[index] + "\n");
+			}
+		}
+
+		sb.append("Dots per Inch: " + _dotsPerInch + "\n");
+		sb.append("Dots per Centimeter: " + DoubleFormat.doubleFormat(getDotsPerCentimeter(), 2) + "\n");
+		sb.append("Resolution Scale Factor: " + DoubleFormat.doubleFormat(getResolutionScaleFactor(), 2) + "\n");
+		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter) + "\n");
+
+		sb.append("\n" + memoryReport(null));
+		return sb.toString();
+	}
+
+	/**
+	 * Main program for testing.
+	 * 
+	 * @param arg
+	 *            command line arguments (ignored).
+	 */
 	public static void main(String arg[]) {
-		System.out.println(Environment.getInstance().toString());
-		Environment.memoryReport(null);
-	}
+		Environment env = Environment.getInstance();
+		env.say("Hello " + env.getUserName() + ", this is the Hermes Environment test.");
+		System.out.println(env);
+		System.out.println("Done.");
 
+	}
 }
