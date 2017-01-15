@@ -5,6 +5,7 @@
  */
 package org.jlab.io.hipo;
 
+import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableModel;
 import org.jlab.hipo.data.HipoGroup;
@@ -45,7 +46,10 @@ public class HipoDataBank implements DataBank  {
     }
     
     public String[] getColumnList() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<String> columnsList = this.hipoGroup.getSchema().schemaEntryList();
+        String[] columns = new String[columnsList.size()];
+        for(int i = 0; i < columns.length; i++) columns[i] = columnsList.get(i);
+        return columns;
     }
 
     public DataDescriptor getDescriptor() {
