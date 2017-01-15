@@ -619,61 +619,6 @@ public final class Environment {
 	}
 
 	/**
-	 * Initialize the look and feel
-	 */
-	public void initializeLookAndFeel() {
-
-		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
-
-		String preferredLnF[];
-
-		if (Environment.getInstance().isWindows()) {
-			String arry[] = {  UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus",
-					UIManager.getCrossPlatformLookAndFeelClassName() };
-			preferredLnF = arry;
-		} else {
-			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Windows",
-					UIManager.getCrossPlatformLookAndFeelClassName() };
-			preferredLnF = arry;
-		}
-
-		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
-			System.err.println("No installed look and feels");
-			return;
-		}
-		// else {
-		// for (LookAndFeelInfo linfo : lnfinfo) {
-		// System.err.println(" ****** [" + linfo.getName() + "]");
-		// }
-		// }
-
-		for (String targetLnF : preferredLnF) {
-			for (int i = 0; i < lnfinfo.length; i++) {
-				String linfoName = lnfinfo[i].getClassName();
-				if (linfoName.indexOf(targetLnF) >= 0) {
-					try {
-						UIManager.setLookAndFeel(lnfinfo[i].getClassName());
-						UIDefaults defaults = UIManager.getDefaults();
-
-						defaults.put("RadioButtonMenuItem.checkIcon", MetalIconFactory.getRadioButtonMenuItemIcon());
-						return;
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		} // end for
-
-		//UIManager.put("TextArea.font", UIManager.get("Label.font"));
-
-		// for tabbed pane
-		// UIManager.put("TabbedPane.foreground", Color.blue);
-		// UIManager.put("TabbedPane.selectedForeground", Color.red);
-		// UIManager.put("TabbedPane.foreground", Color.cyan);
-		// UIManager.put("TabbedPane.unselectedTabForeground", Color.magenta);
-	}
-
-	/**
 	 * Split the class path into directories and jar files
 	 * 
 	 * @return an array of the class path segments

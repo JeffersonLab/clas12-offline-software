@@ -351,7 +351,7 @@ public final class Desktop extends JDesktopPane {
 		String preferredLnF[];
 		
 		if (Environment.getInstance().isWindows()) {
-			String arry[] = { "Metal", "CDE/Motif", "Nimbus", UIManager.getSystemLookAndFeelClassName(),
+			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus", 
 					UIManager.getCrossPlatformLookAndFeelClassName() };
 			preferredLnF = arry;
 		}
