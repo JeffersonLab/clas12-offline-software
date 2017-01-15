@@ -56,7 +56,10 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public String[] getColumnList(String bank_name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       List<String> columnsList = this.hipoEvent.getSchemaFactory().getSchema(bank_name).schemaEntryList();       
+        String[] columns = new String[columnsList.size()];
+        for(int i = 0; i < columns.length; i++) columns[i] = columnsList.get(i);
+        return columns;
     }
 
     public DataDictionary getDictionary() {
