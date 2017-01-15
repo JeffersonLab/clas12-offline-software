@@ -39,25 +39,31 @@ public class RunData {
 	 * @return true if a run config bank was found and successfully parsed
 	 */
 	public boolean set(DataEvent dataEvent) {
-		if ((dataEvent != null) && dataEvent.hasBank("RUN::config")) {
-			try {
-				DataManager dm = DataManager.getInstance();
-				run = dm.getIntArray(dataEvent, "RUN::config.run")[0];
-				event = dm.getIntArray(dataEvent, "RUN::config.event")[0];
-				trigger = dm.getIntArray(dataEvent, "RUN::config.trigger")[0];
-				type = dm.getByteArray(dataEvent, "RUN::config.type")[0];
-				mode = dm.getByteArray(dataEvent, "RUN::config.mode")[0];
-				solenoid = dm.getFloatArray(dataEvent, "RUN::config.solenoid")[0];
-				torus = dm.getFloatArray(dataEvent, "RUN::config.torus")[0];
-				rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
-				startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
-				return true;
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
+		if (dataEvent == null) {
+			return false;
 		}
-		
+
+		boolean hasRunBank = dataEvent.hasBank("RUN::config");
+		if (!hasRunBank) {
+			return false;
+		}
+
+		try {
+			DataManager dm = DataManager.getInstance();
+			run = dm.getIntArray(dataEvent, "RUN::config.run")[0];
+			event = dm.getIntArray(dataEvent, "RUN::config.event")[0];
+			trigger = dm.getIntArray(dataEvent, "RUN::config.trigger")[0];
+			type = dm.getByteArray(dataEvent, "RUN::config.type")[0];
+			mode = dm.getByteArray(dataEvent, "RUN::config.mode")[0];
+			solenoid = dm.getFloatArray(dataEvent, "RUN::config.solenoid")[0];
+			torus = dm.getFloatArray(dataEvent, "RUN::config.torus")[0];
+			rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
+			startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return false;
 	}
 	

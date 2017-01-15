@@ -1,5 +1,7 @@
 package cnuphys.ced.clasio.table;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
@@ -26,7 +28,7 @@ public class NodeTableModel extends DefaultTableModel {
 	};
 
 	// the model data
-	private Vector<ColumnData> _data = new Vector<ColumnData>();
+	private ArrayList<ColumnData> _data = new ArrayList<ColumnData>();
 
 	// the current event
 	private DataEvent _event;
@@ -101,7 +103,7 @@ public class NodeTableModel extends DefaultTableModel {
 	public Object getValueAt(int row, int col) {
 
 		if (row < getRowCount()) {
-			ColumnData cd = _data.elementAt(row);
+			ColumnData cd = _data.get(row);
 
 			// System.err.println("TYPE: " + node.getDataType() + " " +
 			// DataType.getName(node.getDataType()));
@@ -130,7 +132,7 @@ public class NodeTableModel extends DefaultTableModel {
 	 * Clear all the data
 	 */
 	public void clear() {
-		_data = new Vector<ColumnData>();
+		_data = new ArrayList<ColumnData>();
 	}
 
 	/**
@@ -145,15 +147,18 @@ public class NodeTableModel extends DefaultTableModel {
 			String banks[] = event.getBankList();
 			if (banks != null) {
 				for (String bank : banks) {
-					String columns[] = event.getColumnList(bank);
-					if (columns != null) {
-						for (String column : columns) {
-							ColumnData cd = DataManager.getInstance().getColumnData(bank, column);
-							if (cd != null) {
-								_data.add(cd);
-							}
-						}
-					}
+					
+					_data = DataManager.getInstance().hasData(event);
+					
+//					String columns[] = event.getColumnList(bank);
+//					if (columns != null) {
+//						for (String column : columns) {
+//							ColumnData cd = DataManager.getInstance().getColumnData(bank, column);
+//							if (cd != null) {
+//								_data.add(cd);
+//							}
+//						}
+//					}
 				}
 			}
 		}
@@ -168,7 +173,7 @@ public class NodeTableModel extends DefaultTableModel {
 	 * @return the corresponding data bank column name, or <code>null</code>
 	 */
 	public ColumnData getColumnData(int row) {
-		return (_data == null) ? null : _data.elementAt(row);
+		return (_data == null) ? null : _data.get(row);
 	}
 
 	/**

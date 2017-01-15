@@ -112,10 +112,10 @@ public class DCSuperLayer3D extends DetectorItem3D {
 		int hitCount = DC.hitCount();
 		
 		if (hitCount > 0) {
-			int sector[] = DC.sector();
-			int superlayer[] = DC.superlayer();
-			int layer[] = DC.layer();
-			int wire[] = DC.wire();
+			byte sector[] = DC.sector();
+			byte superlayer[] = DC.superlayer();
+			byte layer[] = DC.layer();
+			short wire[] = DC.wire();
 			int pid[] = DC.pid();
 			double avgX[] = DC.avgX();
 			double avgY[] = DC.avgY();

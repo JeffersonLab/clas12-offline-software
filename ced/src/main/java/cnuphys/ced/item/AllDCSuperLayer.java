@@ -313,12 +313,14 @@ public class AllDCSuperLayer extends RectangleItem {
 		}
 
 		int hitCount = DC.hitCount();
+		
+		System.err.println("DC HIT COUNT: " + hitCount);
 
 		if (hitCount > 0)  {
-			int sector[] = DC.sector();
-			int superlayer[] = DC.superlayer();
-			int layer[] = DC.layer();
-			int wire[] = DC.wire();
+			byte sector[] = DC.sector();
+			byte superlayer[] = DC.superlayer();
+			byte layer[] = DC.layer();
+			short wire[] = DC.wire();
 			int pid[] = DC.pid();
 			
 			for (int i = 0; i < hitCount; i++) {
@@ -328,6 +330,8 @@ public class AllDCSuperLayer extends RectangleItem {
 				if ((sect1 == _sector) && (supl1 == _superLayer)) {
 					int lay1 = layer[i]; // 1 based
 					int wire1 = wire[i]; // 1 based
+					
+					System.err.println("SECT: " + sect1 + "  SUPL: " + supl1 + "  LAY: " + lay1  + "  WIRE: " +wire1);
 
 					boolean noise = false;
 					if (_noiseManager.getNoise() != null) {

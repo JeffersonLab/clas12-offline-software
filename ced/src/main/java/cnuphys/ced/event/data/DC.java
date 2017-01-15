@@ -2,7 +2,11 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.ced.alldata.ColumnData;
+import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.splot.plot.DoubleFormat;
 
@@ -12,6 +16,22 @@ import cnuphys.splot.plot.DoubleFormat;
  *
  */
 public class DC {
+	
+//	bank name: [DC::dgtz] column name: [sector] full name: [DC::dgtz.sector] data type: byte
+//	bank name: [DC::dgtz] column name: [layer] full name: [DC::dgtz.layer] data type: byte
+//	bank name: [DC::dgtz] column name: [component] full name: [DC::dgtz.component] data type: short
+//	bank name: [DC::dgtz] column name: [TDC] full name: [DC::dgtz.TDC] data type: int
+//	bank name: [DC::dgtz] column name: [LR] full name: [DC::dgtz.LR] data type: byte
+//	bank name: [DC::doca] column name: [LR] full name: [DC::doca.LR] data type: byte
+//	bank name: [DC::doca] column name: [doca] full name: [DC::doca.doca] data type: Unknown
+//	bank name: [DC::doca] column name: [sdoca] full name: [DC::doca.sdoca] data type: Unknown
+//	bank name: [DC::doca] column name: [time] full name: [DC::doca.time] data type: Unknown
+//	bank name: [DC::doca] column name: [stime] full name: [DC::doca.stime] data type: Unknown
+//	bank name: [DC::tdc] column name: [sector] full name: [DC::tdc.sector] data type: byte
+//	bank name: [DC::tdc] column name: [layer] full name: [DC::tdc.layer] data type: byte
+//	bank name: [DC::tdc] column name: [component] full name: [DC::tdc.component] data type: short
+//	bank name: [DC::tdc] column name: [order] full name: [DC::tdc.order] data type: byte
+//	bank name: [DC::tdc] column name: [TDC] full name: [DC::tdc.TDC] data type: int
 
 	/**
 	 * Get the pid array from the true data
@@ -25,32 +45,50 @@ public class DC {
 	 * Get the sector array from the dgtz array
 	 * @return the sector array
 	 */
-	public static int[] sector() {
-		return ColumnData.getIntArray("DC::dgtz.sector");
+	public static byte[] sector() {
+		return ColumnData.getByteArray("DC::tdc.sector");
 	}
 
 	/**
 	 * Get the superlayer array from the dgtz array
 	 * @return the superlayer array
 	 */
-	public static int[] superlayer() {
-		return ColumnData.getIntArray("DC::dgtz.superlayer");
+	public static byte[] superlayer() {
+		byte fulllayer[] =  ColumnData.getByteArray("DC::tdc.layer");
+		if (fulllayer == null) {
+			return null;
+		}
+		
+		for (int index = 0; index < fulllayer.length; index++) {
+			fulllayer[index] = (byte) (1 + ((fulllayer[index]-1) / 6));
+		}
+		
+		return fulllayer;
 	}
 
 	/**
 	 * Get the layer array from the dgtz array
-	 * @return the layer array
+	 * @return the layer array with layers [1..6]
 	 */
-	public static int[] layer() {
-		return ColumnData.getIntArray("DC::dgtz.layer");
+	public static byte[] layer() {
+		byte fulllayer[] =  ColumnData.getByteArray("DC::tdc.layer");
+		if (fulllayer == null) {
+			return null;
+		}
+		
+		for (int index = 0; index < fulllayer.length; index++) {
+			fulllayer[index] = (byte) (1 + ((fulllayer[index]-1) % 6));
+		}
+		
+		return fulllayer;
 	}
 
 	/**
 	 * Get the wire array from the dgtz array
 	 * @return the wire array
 	 */
-	public static int[] wire() {
-		return ColumnData.getIntArray("DC::dgtz.wire");
+	public static short[] wire() {
+		return ColumnData.getShortArray("DC::tdc.component");
 	}
 
 	/**
@@ -262,7 +300,7 @@ public class DC {
 	 * @return the hit count
 	 */
 	public static int hitCount() {
-		int sector[] = sector();
+		byte sector[] = sector();
 		return (sector == null) ? 0 : sector.length;
 	}
 	
@@ -534,10 +572,10 @@ public class DC {
 		
 		int hitCount = hitCount();
 		if ((hitCount > 0) && (hitIndex < hitCount)) {
-			int sector[] = sector();
-			int superlayer[] = superlayer();
-			int layer[] = layer();
-			int wire[] = wire();
+			byte sector[] = sector();
+			byte superlayer[] = superlayer();
+			byte layer[] = layer();
+			short wire[] = wire();
 			int hitn[] = hitn();
 			int LR[] = LR();
 			double doca[] = doca();
@@ -579,10 +617,10 @@ public class DC {
 
 		int hitCount = hitCount();
 		if (hitCount > 0) {
-			int sector[] = DC.sector();
-			int superlayer[] = DC.superlayer();
-			int layer[] = DC.layer();
-			int wire[] = DC.wire();
+			byte sector[] = DC.sector();
+			byte superlayer[] = DC.superlayer();
+			byte layer[] = DC.layer();
+			short wire[] = DC.wire();
 			
 			for (int i = 0; i < hitCount; i++) {
 				if ((sect == sector[i]) && (supl == superlayer[i])
