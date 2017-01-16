@@ -25,6 +25,7 @@ import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.base.DataSourceType;
 import org.jlab.utils.options.OptionParser;
 
 /**
@@ -247,6 +248,17 @@ public class HipoRingSource implements DataSource {
         } catch (xMsgException ex) {
             Logger.getLogger(HipoRingSource.class.getName()).log(Level.SEVERE, null, ex);
         }*/
+    }
+
+    @Override
+    public DataSourceType getType() {
+        return DataSourceType.STREAM;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void waitForEvents() {
+        
     }
     private class MyCallBack implements xMsgCallBack {
 

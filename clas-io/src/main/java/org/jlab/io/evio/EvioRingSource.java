@@ -24,6 +24,7 @@ import org.jlab.coda.xmsg.net.xMsgRegAddress;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.base.DataSourceType;
 import org.jlab.io.hipo.HipoRingSource;
 import org.jlab.utils.options.OptionParser;
 
@@ -165,6 +166,17 @@ public class EvioRingSource implements DataSource {
     @Override
     public int getCurrentIndex() {
         return 0;
+    }
+
+    @Override
+    public DataSourceType getType() {
+        return DataSourceType.STREAM;
+        //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void waitForEvents() {
+        // For the Ring source, waiting for the events        
     }
     
     

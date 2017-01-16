@@ -11,6 +11,7 @@ public interface DataSource {
     void open(ByteBuffer buff);
     void close();
     int getSize();
+    void waitForEvents();
     DataEventList getEventList(int start, int stop);
     DataEventList getEventList(int nrecords);
     DataEvent     getNextEvent();
@@ -18,4 +19,5 @@ public interface DataSource {
     DataEvent     gotoEvent(int index);
     void reset();
     int getCurrentIndex();
+    DataSourceType  getType();
 }

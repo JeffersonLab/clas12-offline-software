@@ -24,7 +24,9 @@ import org.jlab.io.evio.EvioFactory;
 public class DataSourceProcessor {
     
     DataSource dataSource = null;
+    
     List<IDataEventListener>  eventListeners = new ArrayList<IDataEventListener>();
+    
     private int  eventProcessorDelay = 0;
     private int  eventsProcessed     = 0;
     private int  listenerUpdateRate  = 20000;

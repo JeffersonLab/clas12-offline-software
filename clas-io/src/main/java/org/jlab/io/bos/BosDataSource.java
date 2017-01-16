@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.base.DataSourceType;
 
 /**
  *
@@ -296,5 +297,15 @@ public class BosDataSource implements DataSource {
 	public DataEvent gotoEvent(int index) {
 		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose Tools | Templates.
 	}
+
+    @Override
+    public DataSourceType getType() {
+        return DataSourceType.FILE;
+    }
+
+    @Override
+    public void waitForEvents() {
+        
+    }
 
 }

@@ -16,6 +16,7 @@ import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.hipo.io.HipoReader;
 import org.jlab.hipo.io.HipoRecord;
+import org.jlab.io.base.DataSourceType;
 
 /**
  *
@@ -126,5 +127,16 @@ public class HipoDataSource implements DataSource {
             event.show();
             counter++;
         }
+    }
+
+    @Override
+    public DataSourceType getType() {
+        return DataSourceType.FILE;        
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void waitForEvents() {
+        
     }
 }

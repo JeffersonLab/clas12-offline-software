@@ -35,6 +35,7 @@ import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.base.DataSourceType;
 
 
 /**
@@ -305,6 +306,20 @@ public class EvioETSource implements DataSource {
             }
         }*/
         //}
+    }
+
+    @Override
+    public DataSourceType getType() {
+        return DataSourceType.STREAM;
+    }
+
+    @Override
+    public void waitForEvents() {
+        try {
+            this.loadEvents();
+        } catch (Exception e){
+            System.out.println("\n   >>>>> [evioETsource] error loading events\n");
+        }
     }
 }
           

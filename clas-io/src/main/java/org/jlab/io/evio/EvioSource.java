@@ -12,6 +12,7 @@ import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.base.DataSourceType;
 
 public class EvioSource implements DataSource {
 
@@ -217,4 +218,15 @@ public class EvioSource implements DataSource {
 	public static void main(String[] args) {
 
 	}
+
+    @Override
+    public DataSourceType getType() {
+        return DataSourceType.FILE;
+    }
+
+    @Override
+    public void waitForEvents() {
+        // This method does nothing for source associated with
+        // a file.
+    }
 }
