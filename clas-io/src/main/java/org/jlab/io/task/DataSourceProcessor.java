@@ -8,14 +8,11 @@ package org.jlab.io.task;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.paint.Color;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.base.DataSource;
-import org.jlab.io.evio.EvioFactory;
 
 /**
  *
