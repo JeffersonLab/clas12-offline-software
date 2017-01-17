@@ -22,6 +22,7 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.clasio.datatable.BankDataTable;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.properties.PropertiesManager;
 
@@ -37,7 +38,10 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	private String _bankName;
 
 	// the panel from Gagik
-	private DataBankPanel _dataBankPanel;
+//	private DataBankPanel _dataBankPanel;
+	
+	//table to hold the data
+	private BankDataTable _table;
 
 	private JPanel _checkboxPanel;
 
@@ -121,36 +125,38 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	}
 
 	public void update() {
-		DataEvent evioEvent = _eventManager.getCurrentEvent();
-		if (evioEvent == null) {
+		DataEvent event = _eventManager.getCurrentEvent();
+		if (event == null) {
 			return;
 		}
 		
-		// Gagik's data panel
-		DataBank db = _eventManager.getCurrentEvent().getBank(_bankName);
-
-		if (db == null) {
-			setVisible(false);
-			return;
-		}
-
-		BankEntryMasks mask = getMask(_bankName);
-		try {
-			if (mask == null) {
-				_dataBankPanel.setBank(db);
-			} else {
-				_dataBankPanel.setBank(db, mask);
-			}
-		} catch (Exception e) {
-			Log.getInstance().error("Exception in ClasIoBankDialog.update() " + e.getMessage());
-		}
+		_table.setEvent(event);
+		
+//		// Gagik's data panel
+//		DataBank db = _eventManager.getCurrentEvent().getBank(_bankName);
+//
+//		if (db == null) {
+//			setVisible(false);
+//			return;
+//		}
+//
+//		BankEntryMasks mask = getMask(_bankName);
+//		try {
+//			if (mask == null) {
+//				_dataBankPanel.setBank(db);
+//			} else {
+//				_dataBankPanel.setBank(db, mask);
+//			}
+//		} catch (Exception e) {
+//			Log.getInstance().error("Exception in ClasIoBankDialog.update() " + e.getMessage());
+//		}
 	}
 
 	private void setup() {
 
-		//add Gagik's panel;
-		_dataBankPanel = new DataBankPanel();
-		add(_dataBankPanel, BorderLayout.CENTER);
+		//add the table
+		_table = new BankDataTable(_bankName);
+		add(_table.getScrollPane(), BorderLayout.CENTER);
 
 		// add the visibility checkbox panel
 		_checkboxPanel = new JPanel();

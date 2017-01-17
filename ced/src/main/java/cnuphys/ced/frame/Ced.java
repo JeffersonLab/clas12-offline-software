@@ -202,7 +202,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(ecHistoGrid, 17);
 			
 	    	_virtualView.moveTo(_allDCView, 3);
-			_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
+			_virtualView.moveTo(_eventView, 6, VirtualView.BOTTOMRIGHT);
 			_virtualView.moveTo(_bstXyView, 2, VirtualView.BOTTOMLEFT);
 			_virtualView.moveTo(_bstZView, 2, VirtualView.UPPERRIGHT);
 
@@ -253,7 +253,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add event view
 		_eventView = ClasIoEventView.createEventView();
-
+		
 		// add monte carlo view
 		_monteCarloView = new ClasIoMonteCarloView();
 

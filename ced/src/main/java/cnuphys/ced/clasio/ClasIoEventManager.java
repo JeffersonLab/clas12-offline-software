@@ -46,14 +46,14 @@ public class ClasIoEventManager {
 	// Unique lund ids in the event (if any)
 	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
 
-	// A list of known, sorted banks from the dictionary
-	private String _knownBanks[];
-
 	// A sorted list of banks present in the current event
 	private String _currentBanks[];
 
 	// used in pcal and ec hex gradient displays
 	private double maxEDepCal[] = { Double.NaN, Double.NaN, Double.NaN };
+	
+	//Data from the special run bank
+	private RunData _runData = new RunData();
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
@@ -95,7 +95,14 @@ public class ClasIoEventManager {
 		_dataSource = new HipoDataSource();
 	}
 
-
+	/**
+	 * Get the run data, changed everytime a run bank is encountered
+	 * @return the run data
+	 */
+	public RunData getRunData() {
+		return _runData;
+	}
+	
 	/**
 	 * Get a collection of unique LundIds in the current event
 	 * 
@@ -276,11 +283,11 @@ public class ClasIoEventManager {
 		
 		//TODO check if I need to skip the first event
 		
-//		try {
-//			getNextEvent();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		try {
+			getNextEvent();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 
@@ -517,16 +524,17 @@ public class ClasIoEventManager {
 
 		EventSourceType estype = ClasIoEventManager.getEventSourceType();
 		switch (estype) {
-		case FILE:
+		case FILE: case RING:
 			_currentEvent = _dataSource.getNextEvent();
+			
+			//look for the run bank
+			_runData.set(_currentEvent);
 
 			if (!isAccumulating()) {
 				notifyEventListeners();
 			} else {
 				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
 			}
-			break;
-		case RING:
 			break;
 		case FASTMC:
 			FastMCManager.getInstance().nextEvent();

@@ -3,6 +3,7 @@ package cnuphys.ced.clasio;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.alldata.DataManager;
+import cnuphys.magfield.MagneticFields;
 
 /**
  * Information in the run bank
@@ -23,7 +24,7 @@ import cnuphys.ced.alldata.DataManager;
 //bank name: [RUN::rf] column name: [time] full name: [RUN::rf.time] data type: float
 public class RunData {
 
-	public int run;
+	public int run = -1;
 	public int event;
 	public int trigger;
 	public byte type;
@@ -48,6 +49,8 @@ public class RunData {
 			return false;
 		}
 
+		int oldRun = run;
+		
 		try {
 			DataManager dm = DataManager.getInstance();
 			run = dm.getIntArray(dataEvent, "RUN::config.run")[0];
@@ -59,6 +62,12 @@ public class RunData {
 			torus = dm.getFloatArray(dataEvent, "RUN::config.torus")[0];
 			rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
 			startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
+			
+			
+			if (oldRun != run) {
+				//set the mag field and menus
+				boolean changed = MagneticFields.getInstance().changeFieldsAndMenus(torus, solenoid);
+			}
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

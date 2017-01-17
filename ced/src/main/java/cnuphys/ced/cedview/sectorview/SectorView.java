@@ -678,8 +678,6 @@ public class SectorView extends CedView implements ChangeListener {
 		double y = result[1];
 		double z = result[2];
 
-		// System.err.println("SECTOR: " + GeometryManager.getSector(x, y));
-
 		String xyz = "xyz " + vecStr(result) + " cm";
 
 		feedbackStrings.add(xyz);

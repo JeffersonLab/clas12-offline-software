@@ -40,6 +40,9 @@ public class ColumnData implements Comparable<ColumnData> {
 	// the full name
 	private String _fullName;
 	
+	//used for table rendering
+	public int bankIndex;
+	
 	/**
 	 * Holds the data for one column, one event
 	 * 
@@ -121,6 +124,7 @@ public class ColumnData implements Comparable<ColumnData> {
 		
 		return 0;
 	}
+	
 
 	/**
 	 * Get the data array as an object. It is up tp the caller to cast it to the

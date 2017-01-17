@@ -43,19 +43,19 @@ public class MCHitDrawer3D extends Item3D {
 						FTOF.avgX(FTOF.PANEL_1A),
 						FTOF.avgY(FTOF.PANEL_1A), 
 						FTOF.avgZ(FTOF.PANEL_1A),
-						FTOF.pid(FTOF.PANEL_1A), 
+						null, 
 						0);
 				showGemcXYZHits(drawable, 
 						FTOF.avgX(FTOF.PANEL_1B),
 						FTOF.avgY(FTOF.PANEL_1B), 
 						FTOF.avgZ(FTOF.PANEL_1B),
-						FTOF.pid(FTOF.PANEL_1B), 
+						null, 
 						1);
 				showGemcXYZHits(drawable, 
 						FTOF.avgX(FTOF.PANEL_2),
 						FTOF.avgY(FTOF.PANEL_2), 
 						FTOF.avgZ(FTOF.PANEL_2),
-						FTOF.pid(FTOF.PANEL_2), 
+						null, 
 						2);
 			}
 

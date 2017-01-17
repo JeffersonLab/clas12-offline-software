@@ -111,20 +111,28 @@ public class NodePanel extends JPanel implements ActionListener,
 	 */
 	private JScrollPane createDataTextArea() {
 
-		_dataTextArea = new JTextArea();
+		_dataTextArea = new JTextArea(3, 40) {
+			public Dimension getMinimumSize() {
+				return new Dimension(180, 200);
+			}
+		};
 		_dataTextArea.setFont(Fonts.mediumFont);
 		// _dataTextArea.setBorder(BorderFactory.createTitledBorder(null,
 		// "Data",
 		// TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
 		_dataTextArea.setEditable(false);
 
-		JScrollPane scrollPane = new JScrollPane();
+		JScrollPane scrollPane = new JScrollPane() {
+			public Dimension getMinimumSize() {
+				return new Dimension(180, 200);
+			}
+		};
 		scrollPane.getViewport().setView(_dataTextArea);
 		// Borderlayout respects preferred width in east/west,
 		// but ignores height -- so use this to set width only.
 		// Don't use "setPreferredSize" on textArea or it messes up the
 		// scrolling.
-		scrollPane.setPreferredSize(new Dimension(180, 600));
+		scrollPane.setPreferredSize(new Dimension(200, 600));
 
 		return scrollPane;
 	}
@@ -148,7 +156,7 @@ public class NodePanel extends JPanel implements ActionListener,
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				false, createDataTextArea(), _nodeTable.getScrollPane());
-		splitPane.setResizeWeight(0.0);
+		splitPane.setResizeWeight(0.1);
 		centerPanel.add(splitPane, BorderLayout.CENTER);
 
 		add(centerPanel, BorderLayout.CENTER);
@@ -195,7 +203,7 @@ public class NodePanel extends JPanel implements ActionListener,
 					try {
 						int enumber = Integer.parseInt(eventNumberInput
 								.getText());
-						_eventManager.gotoEvent(enumber);
+						_eventManager.gotoEvent(enumber+1);
 					} catch (Exception e) {
 						eventNumberInput.setText("");
 					}
@@ -220,13 +228,17 @@ public class NodePanel extends JPanel implements ActionListener,
 		sourcePanel.add(Box.createHorizontalStrut(4));
 		sourcePanel.add(intsInHexButton);
 
-		numPanel.add(Box.createHorizontalStrut(2));
-		numPanel.add(prevButton);
-		numPanel.add(Box.createHorizontalStrut(2));
-		numPanel.add(nextButton);
-		numPanel.add(Box.createHorizontalStrut(2));
-		numPanel.add(label);
-		numPanel.add(eventNumberInput);
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 2));
+		panel.add(Box.createHorizontalStrut(2));
+		panel.add(prevButton);
+		panel.add(Box.createHorizontalStrut(2));
+		panel.add(nextButton);
+		panel.add(Box.createHorizontalStrut(2));
+		panel.add(label);
+		panel.add(eventNumberInput);
+		
+		numPanel.add(panel, 0);
 	}
 
 	/**
@@ -269,6 +281,17 @@ public class NodePanel extends JPanel implements ActionListener,
 	public void setEventNumber(int eventNumber) {
 		_eventInfoPanel.setEventNumber(eventNumber);
 	}
+	
+	/**
+	 * Set the displayed run number value.
+	 * 
+	 * @param runNumber
+	 *            run number.
+	 */
+	public void setRunNumber(int runNumber) {
+		_eventInfoPanel.setRunNumber(runNumber);
+	}
+
 
 	/**
 	 * Get the displayed event number value.
@@ -349,13 +372,13 @@ public class NodePanel extends JPanel implements ActionListener,
 
 		switch (cd.getType()) {
 		
-		case ColumnData.INT8:
+		case ColumnData.INT8: //byte
 			byte bytes[] = dm.getByteArray(event, fullName);
 			if (bytes != null) {
 				for (byte i : bytes) {
 					String s;
 					if (intsInHexButton.isSelected()) {
-						s = String.format("[%02d]  %#06X", index++, i);
+						s = String.format("[%02d]  %#04X", index++, i);
 					} else {
 						s = String.format("[%02d]  %d", index++, i);
 					}
@@ -381,7 +404,7 @@ public class NodePanel extends JPanel implements ActionListener,
 				for (short i : shorts) {
 					String s;
 					if (intsInHexButton.isSelected()) {
-						s = String.format("[%02d]  %#06X", index++, i);
+						s = String.format("[%02d]  %#05X", index++, i);
 					} else {
 						s = String.format("[%02d]  %d", index++, i);
 					}
@@ -503,6 +526,7 @@ public class NodePanel extends JPanel implements ActionListener,
 		if (!_eventManager.isAccumulating()) {
 			setData(event);
 			setEventNumber(_eventManager.getEventNumber());
+			setRunNumber(_eventManager.getRunData().run);
 			fixButtons();
 		}
 	}
@@ -516,6 +540,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	@Override
 	public void openedNewEventFile(String path) {
 		setEventNumber(0);
+		setRunNumber(-1);
 
 		// set the text field
 		setSource(path);
@@ -544,6 +569,7 @@ public class NodePanel extends JPanel implements ActionListener,
 		case AccumulationManager.ACCUMULATION_FINISHED:
 			setData(_eventManager.getCurrentEvent());
 			setEventNumber(_eventManager.getEventNumber());
+			setRunNumber(_eventManager.getRunData().run);
 			fixButtons();
 			break;
 		}

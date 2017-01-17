@@ -327,7 +327,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 					MenuSelectionManager.defaultManager().clearSelectedPath();
 					try {
 						int enumber = Integer.parseInt(evnum.getText());
-						_eventManager.gotoEvent(enumber);
+						_eventManager.gotoEvent(enumber+1);
 					} catch (Exception e) {
 
 					}

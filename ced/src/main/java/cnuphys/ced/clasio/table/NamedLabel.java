@@ -69,9 +69,10 @@ public class NamedLabel extends JPanel {
 		variableLabel.setPreferredSize(d);
 		variableLabel.setEditable(false);
 		add(variableLabel);
-		setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createEtchedBorder(),
-				BorderFactory.createEmptyBorder(3, 5, 3, 5)));
+		setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+//		setBorder(BorderFactory.createCompoundBorder(
+//				BorderFactory.createEtchedBorder(),
+//				BorderFactory.createEmptyBorder(3, 5, 3, 5)));
 	}
 
 	/**
