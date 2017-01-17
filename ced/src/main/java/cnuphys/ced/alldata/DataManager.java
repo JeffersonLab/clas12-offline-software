@@ -41,7 +41,21 @@ public class DataManager {
 	private DataManager() {
 		
 		_dictionary = new HipoDataDictionary();
-		_knownBanks = _dictionary.getDescriptorList();
+		
+		//HACK filter out dgtz banks
+		String allBanks[] = _dictionary.getDescriptorList();
+		ArrayList<String> okbanks = new ArrayList<String>();
+		for (String s : allBanks) {
+			if (!s.contains("::dgtz")) {
+				okbanks.add(s);
+			}
+		}
+		_knownBanks = new String[okbanks.size()];
+		for (int i = 0; i < okbanks.size(); i++) {
+			_knownBanks[i] = okbanks.get(i);
+		}
+		
+	//	_knownBanks = _dictionary.getDescriptorList();
 		Arrays.sort(_knownBanks);
 		
 		initializeColumnData();
@@ -56,6 +70,30 @@ public class DataManager {
 			_instance = new DataManager();
 		}
 		return _instance;
+	}
+	
+	/**
+	 * Get a list of all column data objects that have data in the given event
+	 * for a specific bank
+	 * 
+	 * @param event
+	 *            the event in question
+	 * @param bankName the bank
+	 * @return a list of all columns in the given bank with data
+	 */
+
+	public ArrayList<ColumnData> hasData(DataEvent event, String bankName) {
+		ArrayList<ColumnData> list = new ArrayList<ColumnData>();
+
+		String columns[] = event.getColumnList(bankName);
+		if (columns != null) {
+			for (String columnName : columns) {
+				list.add(getColumnData(bankName, columnName));
+			}
+		}
+
+		return list;
+		
 	}
 
 	/**
@@ -90,7 +128,27 @@ public class DataManager {
 //			}
 //		}
 		Collections.sort(list);
+		
+		String bankName = "";
+		int bankIndex = 1;
+		for (ColumnData cd : list) {
+			if (!cd.getBankName().equals(bankName)) {
+				bankIndex++;
+				bankName = cd.getBankName();
+			}
+			cd.bankIndex = bankIndex;
+		}
 		return list;
+	}
+	
+	/**
+	 * Get the list of column names for a bank name
+	 * @param bankName the bank name
+	 * @return the list of column names
+	 */
+	public String[] getColumnNames(String bankName) {
+		DataDescriptor dd = _dictionary.getDescriptor(bankName);
+		return dd.getEntryList();
 	}
 	
 	//initialize the column data
@@ -126,7 +184,7 @@ public class DataManager {
 							_columnData.put(cd.getFullName(), cd);
 						}
 					}
-				}
+				} //bank names
 			} // known banks not null
 		Log.getInstance().info("Number of column definitions: " + _columnData.size());
 	}
@@ -317,6 +375,8 @@ public class DataManager {
 	 * @return a list of detector responses
 	 */
 	public List<DetectorResponse> getDetectorResponse(DataEvent event, String bankName, DetectorType type) {
+//		DetectorResponse resp;
+//		resp.getDescriptor().
 		List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
 		return responses;
 	}

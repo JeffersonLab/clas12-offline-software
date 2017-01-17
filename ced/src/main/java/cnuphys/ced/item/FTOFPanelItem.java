@@ -201,13 +201,9 @@ public class FTOFPanelItem extends PolygonItem {
 		if (hitCount < 1) {
 			return;
 		}
-		int pid[] = FTOF.pid(panelType);
 		int sector[] = FTOF.sector(panelType);
 		int paddles[] = FTOF.paddle(panelType);
 
-		if (!_view.showMcTruth()) {
-			pid = null;
-		}
 
 		if ((sector == null) || (paddles == null)) {
 			return;
@@ -218,12 +214,12 @@ public class FTOFPanelItem extends PolygonItem {
 		for (int i = 0; i < hitCount; i++) {
 			if (sector[i] == _sector) {
 				Color fc = default_fc;
-				if (pid != null) {
-					LundId lid = LundSupport.getInstance().get(pid[i]);
-					if (lid != null) {
-						fc = lid.getStyle().getFillColor();
-					}
-				}
+//				if (pid != null) {
+//					LundId lid = LundSupport.getInstance().get(pid[i]);
+//					if (lid != null) {
+//						fc = lid.getStyle().getFillColor();
+//					}
+//				}
 
 				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
 
@@ -357,7 +353,7 @@ public class FTOFPanelItem extends PolygonItem {
 						feedbackStrings
 								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 					} else {
-						DataSupport.truePidFeedback(FTOF.pid(panelType), hitIndex, feedbackStrings);
+	//					DataSupport.truePidFeedback(FTOF.pid(panelType), hitIndex, feedbackStrings);
 						FTOF.dgtzFeedback(hitIndex, panelType, feedbackStrings);
 					}
 

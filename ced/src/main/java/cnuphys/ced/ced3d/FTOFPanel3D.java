@@ -75,7 +75,6 @@ public class FTOFPanel3D extends DetectorItem3D {
 		}
 
 
-		int pid[] = FTOF.pid(_superLayer);
 		int sector[] = FTOF.sector(_superLayer);
 		int paddleId[] = FTOF.paddle(_superLayer);;
 		double x[] = FTOF.avgX(_superLayer);
@@ -90,18 +89,20 @@ public class FTOFPanel3D extends DetectorItem3D {
 		for (int i = 0; i < hitCount; i++) {
 			if (sector[i] == _sector) {
 				try {
-					if (showMCTruth() && (pid != null)) {
-						Color color = truthColor(pid, i);
-						getPaddle(paddleId[i]).drawPaddle(drawable, color);
-						// convert mm to cm
-						double xcm = x[i] / 10;
-						double ycm = y[i] / 10;
-						double zcm = z[i] / 10;
-						drawMCPoint(drawable, xcm, ycm, zcm, color);
+//					if (showMCTruth() && (pid != null)) {
+//						Color color = truthColor(pid, i);
+//						getPaddle(paddleId[i]).drawPaddle(drawable, color);
+//						// convert mm to cm
+//						double xcm = x[i] / 10;
+//						double ycm = y[i] / 10;
+//						double zcm = z[i] / 10;
+//						drawMCPoint(drawable, xcm, ycm, zcm, color);
+//
+//					} else {
+//						getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
+//					}
+					getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
 
-					} else {
-						getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
-					}
 				} catch (ArrayIndexOutOfBoundsException oob) {
 					System.err.println("sector: " + _sector);
 					System.err.println("superLayer: " + _superLayer);

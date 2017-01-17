@@ -22,7 +22,7 @@ public class ScaleFieldPanel extends JPanel {
 	public ScaleFieldPanel(final MagneticFields.FieldType type,
 			final String name, double defaultVal) {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
-		setBackground(Color.white);
+//		setBackground(Color.white);
 		_fieldType = type;
 
 		// label
@@ -52,27 +52,6 @@ public class ScaleFieldPanel extends JPanel {
 		};
 		_textField.addFocusListener(fl);
 
-		// FocusListener fl = new FocusListener() {
-		//
-		// @Override
-		// public void focusGained(FocusEvent arg0) {
-		// }
-		//
-		// @Override
-		// public void focusLost(FocusEvent arg0) {
-		// MenuSelectionManager.defaultManager().clearSelectedPath();
-		// try {
-		// double sf = Double.parseDouble(_textField.getText());
-		// getField().setScaleFactor(sf);
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// _textField.setText(String.format("%5.2f", getField()
-		// .getScaleFactor()));
-		// MagneticFields.notifyListeners();
-		// }
-		// };
-		// _textField.addFocusListener(fl);
 
 		add(_label);
 		add(_textField);
@@ -95,6 +74,10 @@ public class ScaleFieldPanel extends JPanel {
 
 	private MagneticField getField() {
 		return (MagneticField) MagneticFields.getInstance().getIField(_fieldType);
+	}
+	
+	public void fixText() {
+		_textField.setText(String.format("%7.3f", getField().getScaleFactor()));
 	}
 
 	@Override

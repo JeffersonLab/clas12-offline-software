@@ -61,7 +61,6 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 				HTCC.avgX(), 
 				HTCC.avgY(), 
 				HTCC.avgZ(), 
-				HTCC.pid(), 
 				0);
 	}
 	
@@ -71,7 +70,6 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 				DC.avgX(), 
 				DC.avgY(), 
 				DC.avgZ(), 
-				DC.pid(), 
 				0);
 	}
 	
@@ -80,27 +78,24 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 				FTOF.avgX(FTOF.PANEL_1A),
 				FTOF.avgY(FTOF.PANEL_1A), 
 				FTOF.avgZ(FTOF.PANEL_1A),
-				FTOF.pid(FTOF.PANEL_1A), 
 				FTOF.PANEL_1A);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
 				ColumnData.getDoubleArray("FTOF1B::true.avgX"),
 				ColumnData.getDoubleArray("FTOF1B::true.avgY"), 
 				ColumnData.getDoubleArray("FTOF1B::true.avgZ"), 
-				ColumnData.getIntArray("FTOF1B::true.pid"),
 				FTOF.PANEL_1B);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
 				ColumnData.getDoubleArray("FTOF2B::true.avgX"),
 				ColumnData.getDoubleArray("FTOF2B::true.avgY"), 
 				ColumnData.getDoubleArray("FTOF2B::true.avgZ"), 
-				ColumnData.getIntArray("FTOF2B::true.pid"),
 				FTOF.PANEL_2);
 	}
 
 	protected void showGemcXYZHits(Graphics g, IContainer container,
 			FeedbackRect.Dtype dtype,
-			double x[], double y[], double z[], int pid[],
+			double x[], double y[], double z[],
 			int option) {
 
 		
@@ -129,21 +124,10 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 				_view.projectClasToWorld(labXYZ[0], labXYZ[1], labXYZ[2],  _view.getProjectionPlane(), wp);
 				container.worldToLocal(pp, wp);
 
-				String pidstr = "";
-				if (pid != null) {
-					LundId lid = LundSupport.getInstance().get(pid[hitIndex]);
-					if (lid != null) {
-						pidstr = " [" + lid.getName() + "] ";
-					}
-					else {
-						pidstr = " [??] (" + pid[hitIndex] + ") ";
-					}
-				}
 
 				// display 1-based hit index
 
-				pidstr += "  sect: " + sector + "  ";
-				String s = vecStr("Gemc Hit [" + (hitIndex + 1) + "] " + pidstr,
+				String s = vecStr("Gemc Hit [" + (hitIndex + 1) + "] " + "  sect: " + sector + "  ",
 						labXYZ[0], labXYZ[1], labXYZ[2]) + " cm";
 				FeedbackRect rr = new FeedbackRect(dtype, pp.x - 4, pp.y - 4, 8, 8,
 						hitIndex, option, s);

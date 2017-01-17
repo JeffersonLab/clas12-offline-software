@@ -2,6 +2,7 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 
+import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.alldata.ColumnData;
@@ -39,6 +40,10 @@ public class DC {
 	 */
 	public static int[] pid() {
 		return ColumnData.getIntArray("DC::true.pid");
+	}
+	
+	public List<DetectorResponse> getDetectorResponses() {
+		return null;
 	}
 			
 	/**

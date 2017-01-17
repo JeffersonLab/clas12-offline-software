@@ -15,6 +15,7 @@ import javax.swing.table.TableColumn;
 
 import org.jlab.io.base.DataEvent;
 
+import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.splot.plot.X11Colors;
 
@@ -37,6 +38,9 @@ public class NodeTable extends JTable {
 		DefaultTableCellRenderer dtcr = (DefaultTableCellRenderer) header
 				.getDefaultRenderer();
 		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
+		dtcr.setBackground(X11Colors.getX11Color("wheat"));
+		dtcr.setBackground(Color.black);
+		dtcr.setFont(Fonts.defaultBoldFont);
 		header.setDefaultRenderer(dtcr);
 
 		getTableHeader().setResizingAllowed(true);
@@ -131,8 +135,14 @@ public class NodeTable extends JTable {
 					cellComponent.setBackground(Color.yellow);
 					cellComponent.setForeground(Color.black);
 				} else {
-					cellComponent.setBackground(X11Colors.getX11Color("alice blue"));
-					cellComponent.setForeground(X11Colors.getX11Color("dark blue"));
+					if ((cd.bankIndex % 2) == 0) {
+						cellComponent.setBackground(X11Colors.getX11Color("alice blue"));
+						cellComponent.setForeground(X11Colors.getX11Color("dark blue"));
+					}
+					else {
+						cellComponent.setBackground(X11Colors.getX11Color("misty rose"));
+						cellComponent.setForeground(X11Colors.getX11Color("dark red"));
+					}
 				}
 			}
 

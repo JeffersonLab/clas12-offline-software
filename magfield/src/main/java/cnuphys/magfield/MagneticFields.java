@@ -57,31 +57,6 @@ public class MagneticFields {
 	
 	//singleton
 	private static MagneticFields instance;
-	
-	private MagneticFields() {
-		
-	}
-	
-	public static MagneticFields getInstance() {
-		if (instance == null) {
-			instance = new MagneticFields();
-		}
-		return instance;
-	}
-
-	// optional full path to solenoid set by command line argument in ced
-
-
-	private String sysPropOrEnvVar(String key) {
-		String s = System.getProperty(key);
-		if (s == null) {
-			s = System.getenv(key);
-		}
-
-		System.out.println("***  For key: \"" + key + "\" found value: " + s);
-
-		return s;
-	}
 
 	// which field is active
 	private IField _activeField;
@@ -98,17 +73,172 @@ public class MagneticFields {
 	private JRadioButtonMenuItem _torusItem;
 	private JRadioButtonMenuItem _solenoidItem;
 	private JRadioButtonMenuItem _bothItem;
-	private JRadioButtonMenuItem _bothRotatedItem;
+//	private JRadioButtonMenuItem _bothRotatedItem;
 	private JRadioButtonMenuItem _zeroItem;
-	private JRadioButtonMenuItem _perfectSolenoidItem;
-	private JRadioButtonMenuItem _uniformItem;
-	private JRadioButtonMenuItem _macTestItem;
+//	private JRadioButtonMenuItem _perfectSolenoidItem;
+//	private JRadioButtonMenuItem _uniformItem;
+//	private JRadioButtonMenuItem _macTestItem;
 
 	private JRadioButtonMenuItem _interpolateItem;
 	private JRadioButtonMenuItem _nearestNeighborItem;
 
 	private ScaleFieldPanel _scaleTorusPanel;
 	private ScaleFieldPanel _scaleSolenoidPanel;
+	
+	//private constructor for singleton
+	private MagneticFields() {
+		
+	}
+	
+	/**
+	 * public access to the singleton
+	 * @return the MagneticFields singleton
+	 */
+	public static MagneticFields getInstance() {
+		if (instance == null) {
+			instance = new MagneticFields();
+		}
+		return instance;
+	}
+
+	/**
+	 * This programatically adjusts everything for new scale factors.
+	 * @param torusScale the torus scale factor
+	 * @param solenoidScale the solenoid scale facter
+	 */
+	public boolean changeFieldsAndMenus(
+			double torusScale,
+			double solenoidScale) {
+	
+		boolean solenoidScaleChange = false;
+		boolean torusScaleChange = false;
+		
+		//see if fieldtype changed;
+		FieldType currentType = getActiveFieldType();
+		boolean wantTorus = Math.abs(torusScale) > 0.01;
+		boolean wantSolenoid = Math.abs(solenoidScale) > 0.01;
+		FieldType desiredFieldType = FieldType.ZEROFIELD;
+		
+		if (wantTorus && wantSolenoid) {
+			desiredFieldType = FieldType.COMPOSITE;
+		}
+		else if (wantTorus && !wantSolenoid) {
+			desiredFieldType = FieldType.TORUS;
+		} else if (!wantTorus && wantSolenoid) {
+			desiredFieldType = FieldType.SOLENOID;
+		}
+		boolean fieldChange = desiredFieldType != currentType;
+		
+		// torus scale change?
+		if (_torus != null) {
+			double currentScale = _torus.getScaleFactor();
+			torusScaleChange = (Math.abs(currentScale - torusScale) > 0.001);
+		}
+
+		// solenoid scale change?
+		if (_solenoid != null) {
+			double currentScale = _solenoid.getScaleFactor();
+			solenoidScaleChange = (Math.abs(currentScale - solenoidScale) > 0.001);
+		}
+
+		if (torusScaleChange) {
+			//don't change scale if we aren't using torus
+			if ((desiredFieldType == FieldType.TORUS) || (desiredFieldType == FieldType.COMPOSITE)) {
+				_torus.setScaleFactor(torusScale);
+				_scaleTorusPanel.fixText();
+			}
+		}
+		if (solenoidScaleChange) {
+			//don't change scale if we aren't using solenoid
+			if ((desiredFieldType == FieldType.SOLENOID) || (desiredFieldType == FieldType.COMPOSITE)) {
+				_solenoid.setScaleFactor(torusScale);
+			}
+			_scaleSolenoidPanel.fixText();
+		}
+		if (fieldChange) {
+			setActiveField(desiredFieldType);
+			_torusItem.setSelected(desiredFieldType == FieldType.TORUS);
+			_solenoidItem.setSelected(desiredFieldType == FieldType.SOLENOID);
+			_bothItem.setSelected(desiredFieldType == FieldType.COMPOSITE);
+			_zeroItem.setSelected(desiredFieldType == FieldType.ZEROFIELD);
+		}
+		
+		boolean changed = solenoidScaleChange || torusScaleChange || fieldChange;
+		return changed;
+	}
+	
+	/**
+	 * Get the field type of the active field
+	 * @return the field type of the active field
+	 */
+	public FieldType getActiveFieldType() {
+		if (_activeField != null) {
+			
+			if (_activeField == _torus) {
+				return FieldType.TORUS;
+			}
+			else if (_activeField == _solenoid) {
+				return FieldType.SOLENOID;
+			}
+			else if (_activeField == _compositeField) {
+				return FieldType.COMPOSITE;
+			}
+			else if (_activeField == _rotatedCompositeField) {
+				return FieldType.COMPOSITEROTATED;
+			}
+			else if (_activeField == _uniform) {
+				return FieldType.UNIFORM;
+			}
+			else if (_activeField == _perfectSolenoid) {
+				return FieldType.PERFECTSOLENOID;
+			}
+			else if (_activeField == _macTest) {
+				return FieldType.MACTEST;
+			}
+		}
+		
+		return FieldType.ZEROFIELD;
+	}
+	
+	/**
+	 * Is the active field solenoid only
+	 * @return <code>true</code> of the active field is solenoid only
+	 */
+	public boolean isSolenoidOnly() {
+		return ((_activeField != null) && (_activeField == _solenoid));
+	}
+	
+	/**
+	 * Is the active field torus only
+	 * @return <code>true</code> of the active field is torus only
+	 */
+	public boolean isTorusOnly() {
+		return ((_activeField != null) && (_activeField == _torus));
+	}
+
+	/**
+	 * Is the active field solenoid and torus composite
+	 * @return <code>true</code> of the active field is solenoid and torus composite
+	 */
+	public boolean isCompositeField() {
+		return ((_activeField != null) && (_activeField == _compositeField));
+	}
+
+	
+	// optional full path to solenoid set by command line argument in ced
+
+
+	private String sysPropOrEnvVar(String key) {
+		String s = System.getProperty(key);
+		if (s == null) {
+			s = System.getenv(key);
+		}
+
+		System.out.println("***  For key: \"" + key + "\" found value: " + s);
+
+		return s;
+	}
+
 
 	/**
 	 * Sets the full path to the torus map. If this is set before a call to
@@ -606,7 +736,7 @@ public class MagneticFields {
 		_torusItem = createRadioMenuItem(_torus, "Torus", menu, bg, al);
 		_solenoidItem = createRadioMenuItem(_solenoid, "Solenoid", menu, bg, al);
 		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
-		_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
+//		_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
 
 		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
 
@@ -632,21 +762,21 @@ public class MagneticFields {
 			menu.add(_scaleSolenoidPanel);
 		}
 
-		if (includeTestFields) {
-			menu.addSeparator();
-			_uniformItem = createRadioMenuItem(_uniform, "Constant 5 Tesla Field", menu, bg, al);
-			_perfectSolenoidItem = createRadioMenuItem(_perfectSolenoid,"Perfect 5 Tesla Solenoid", menu, bg, al);
-			_macTestItem = createRadioMenuItem(_macTest, "Mac's 1/r Test Field", menu, bg, al);
-		}
+//		if (includeTestFields) {
+//			menu.addSeparator();
+//			_uniformItem = createRadioMenuItem(_uniform, "Constant 5 Tesla Field", menu, bg, al);
+//			_perfectSolenoidItem = createRadioMenuItem(_perfectSolenoid,"Perfect 5 Tesla Solenoid", menu, bg, al);
+//			_macTestItem = createRadioMenuItem(_macTest, "Mac's 1/r Test Field", menu, bg, al);
+//		}
 
 		_torusItem.setEnabled(_torus != null);
 		_solenoidItem.setEnabled(_solenoid != null);
 		_bothItem.setEnabled((_torus != null) && (_solenoid != null));
 
-		if (_macTestItem != null) {
-			_macTestItem.setEnabled(_macTest != null);
-			_macTestItem.setEnabled(_uniform != null);
-		}
+//		if (_macTestItem != null) {
+//			_macTestItem.setEnabled(_macTest != null);
+//			_macTestItem.setEnabled(_uniform != null);
+//		}
 
 		return menu;
 	}
@@ -665,21 +795,21 @@ public class MagneticFields {
 		else if (source == _bothItem) {
 			_activeField = _compositeField;
 		}
-		else if (source == _bothRotatedItem) {
-			_activeField = _rotatedCompositeField;
-		}
 		else if (source == _zeroItem) {
 			_activeField = null;
 		}
-		else if (source == _macTestItem) {
-			_activeField = _macTest;
-		}
-		else if (source == _perfectSolenoidItem) {
-			_activeField = _perfectSolenoid;
-		}
-		else if (source == _uniformItem) {
-			_activeField = _uniform;
-		}
+//		else if (source == _bothRotatedItem) {
+//			_activeField = _rotatedCompositeField;
+//		}
+//		else if (source == _macTestItem) {
+//			_activeField = _macTest;
+//		}
+//		else if (source == _perfectSolenoidItem) {
+//			_activeField = _perfectSolenoid;
+//		}
+//		else if (source == _uniformItem) {
+//			_activeField = _uniform;
+//		}
 		else if (source == _interpolateItem) {
 			MagneticField.setInterpolate(true);
 		}
@@ -712,6 +842,7 @@ public class MagneticFields {
 		notifyListeners();
 	}
 
+	//mag field changed scale
 	protected void changedScale(MagneticField field) {
 		if (field != null) {
 			if (field == _torus) {

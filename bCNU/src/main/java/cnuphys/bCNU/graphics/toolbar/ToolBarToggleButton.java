@@ -178,6 +178,7 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 	@Override
 	public void popupTrigger(MouseEvent mouseEvent) {
 
+		
 		BaseView view = getView();
 		if (view == null) {
 			return;
