@@ -17,7 +17,7 @@ public class HeaderRenderer extends JTextField implements TableCellRenderer {
 	public HeaderRenderer() {
 		setBackground(X11Colors.getX11Color("wheat"));
 		setForeground(Color.black);
-		setFont(Fonts.defaultBoldFont);
+		setFont(Fonts.tweenBoldFont);
 		setHorizontalAlignment(JTextField.CENTER);
 		Border lineBorder = BorderFactory.createLineBorder(Color.black);
 		Border emptyBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);

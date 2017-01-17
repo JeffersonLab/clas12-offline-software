@@ -29,7 +29,7 @@ import cnuphys.ced.fastmc.FastMCManager;
 @SuppressWarnings("serial")
 public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 		IClasIoEventListener, IAccumulationListener {
-
+	
 	// the event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 

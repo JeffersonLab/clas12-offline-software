@@ -2,6 +2,7 @@ package cnuphys.ced.clasio.datatable;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -9,13 +10,15 @@ import javax.swing.table.TableColumn;
 
 import org.jlab.io.base.DataEvent;
 
+import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.table.HeaderRenderer;
+import cnuphys.ced.clasio.table.SimpleRenderer;
 
 public class BankDataTable extends JTable {
 	
 	private JScrollPane _scrollPane;
 	
-	private static final int COLWIDTH = 100;
+	public static final int COLWIDTH = 100;
 
 	/**
 	 * Create a bank table
@@ -26,14 +29,23 @@ public class BankDataTable extends JTable {
 		getBankTableModel().setTable(this);
 		
 		HeaderRenderer hrender = new HeaderRenderer();
+		SimpleRenderer renderer = new SimpleRenderer();
+		setFont(Fonts.tweenFont);
 		
 		// set preferred widths
 		for (int i = 0; i < getColumnCount(); i++) {
 			TableColumn column = getColumnModel().getColumn(i);
-	//		column.setCellRenderer(renderer);
+			column.setCellRenderer(renderer);
 			column.setHeaderRenderer(hrender);
-			column.setPreferredWidth(COLWIDTH);
-//			column.setMinWidth(HermesMSELTableModel.columnWidths[i]);
+			if (i == 0) {
+				FontMetrics fm = getFontMetrics(getFont());
+				int sw = fm.stringWidth("999999");
+				column.setPreferredWidth(sw);
+				column.setMaxWidth(sw);
+				column.setResizable(false);
+			} else {
+				column.setPreferredWidth(COLWIDTH);
+			}
 		}
 
 //		this.setAutoResizeMode(AUTO_RESIZE_OFF);
@@ -41,6 +53,24 @@ public class BankDataTable extends JTable {
 		setShowGrid(true);
 		setGridColor(Color.gray);
 
+	}
+	
+	/**
+	 * Get all the TableColumns in an array
+	 * @return all the table columns
+	 */
+	public TableColumn[] getTableColumns() {
+		int size = getColumnCount();
+		if (size < 1) {
+			return null;
+		}
+		
+		TableColumn cols[] = new TableColumn[size];
+		for (int i = 0; i < size; i++) {
+			cols[i] = getColumnModel().getColumn(i);
+		}
+		
+		return cols;
 	}
 	
 	/**

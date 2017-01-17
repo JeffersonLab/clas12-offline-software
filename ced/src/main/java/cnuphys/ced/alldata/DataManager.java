@@ -369,15 +369,28 @@ public class DataManager {
 	
 	/**
 	 * Get a list of detector responses
-	 * @param event the event
-	 * @param bankName the bank name
-	 * @param type the detector type
+	 * 
+	 * @param event
+	 *            the event
+	 * @param bankName
+	 *            the bank name
+	 * @param type
+	 *            the detector type
 	 * @return a list of detector responses
 	 */
 	public List<DetectorResponse> getDetectorResponse(DataEvent event, String bankName, DetectorType type) {
-//		DetectorResponse resp;
-//		resp.getDescriptor().
-		List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
+		if (event == null) {
+			return null;
+		}
+
+		List<DetectorResponse> responses = null;
+		if (event.hasBank(bankName)) {
+			System.err.println("Event is null: " + (event == null));
+			System.err.println("bankName: [" + bankName + "]");
+			System.err.println("event has bank: " + event.hasBank(bankName));
+			System.err.println("detector type: [" + type + "]");
+			responses = DetectorResponse.readHipoEvent(event, bankName, type);
+		}
 		return responses;
 	}
 }
