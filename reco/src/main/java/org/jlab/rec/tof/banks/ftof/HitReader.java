@@ -97,7 +97,7 @@ public class HitReader implements IMatchedHit {
 			ADCR[i] 	= hitList.get(i).ADC2;
 			TDCL[i] 	= hitList.get(i).TDC1;
 			TDCR[i] 	= hitList.get(i).TDC2;
-			
+/*			
 			System.out.println("hit "+hitList.get(i).get_Id()+
 			" sector "+ hitList.get(i).get_Sector()+
 	        " panel "+ hitList.get(i).get_Layer()+
@@ -105,7 +105,7 @@ public class HitReader implements IMatchedHit {
 			" ADCL "+  hitList.get(i).ADC1+
 			" ADCR "+ hitList.get(i).ADC2+
 			" TDCL "+ hitList.get(i).TDC1+
-			" TDCR "+  hitList.get(i).TDC2);
+			" TDCR "+  hitList.get(i).TDC2);*/
 			if( passADC(ADCL[i])==0 || passADC(ADCR[i])==0 || passTDC(TDCL[i])==0 || passTDC(TDCR[i])==0 )
 				continue;
 			
