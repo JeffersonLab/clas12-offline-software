@@ -24,8 +24,7 @@ public class BankTableModel extends DefaultTableModel {
 	public BankTableModel(String bankName) {
 		super(getColumnNames(bankName), 2);
 		_bankName = bankName;
-		_columnNames = DataManager.getInstance().getColumnNames(bankName);
-		
+		_columnNames =getColumnNames(bankName);
 	}
 	
 	/**
@@ -86,6 +85,11 @@ public class BankTableModel extends DefaultTableModel {
 		if ((row < 0) || (col < 0)) {
 			return null;
 		}
+		
+		if (col == 0) {
+			return " " + (row+1);
+		}
+		
 		ColumnData cd = DataManager.getInstance().getColumnData(_bankName, _columnNames[col]);
 		if (cd == null) {
 			return "???";
@@ -137,7 +141,15 @@ public class BankTableModel extends DefaultTableModel {
 		return _columnNames;
 	}
 		
+	//add an extra column name for index
 	private static String[] getColumnNames(String bankName) {
-		return DataManager.getInstance().getColumnNames(bankName);
+		String cnames[] = DataManager.getInstance().getColumnNames(bankName);;		
+		String expNames[] = new String[cnames.length + 1];
+		expNames[0] = "";
+		for (int i = 0; i < cnames.length; i++) {
+			expNames[i+1] = cnames[i];
+		}
+
+		return expNames;
 	}
 }

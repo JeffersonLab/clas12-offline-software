@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Vector;
 
+import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.geom.DetectorHit;
 
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -195,42 +196,72 @@ public class FTOFPanelItem extends PolygonItem {
 
 
 		int panelType = _ftofPanel.getPanelType();
-
-		int hitCount = FTOF.hitCount(panelType);
-
-		if (hitCount < 1) {
-			return;
-		}
-		int sector[] = FTOF.sector(panelType);
-		int paddles[] = FTOF.paddle(panelType);
-
-
-		if ((sector == null) || (paddles == null)) {
+		
+		
+		List<DetectorResponse> list = FTOF.getFTOFResponseTDC();
+		if (list == null) {
 			return;
 		}
 
 		Color default_fc = Color.red;
 
-		for (int i = 0; i < hitCount; i++) {
-			if (sector[i] == _sector) {
-				Color fc = default_fc;
-//				if (pid != null) {
-//					LundId lid = LundSupport.getInstance().get(pid[i]);
-//					if (lid != null) {
-//						fc = lid.getStyle().getFillColor();
-//					}
-//				}
+		int targetLayer = panelType + 1;
+		for (int index = 0; index < list.size(); index++) {
+			DetectorResponse response = list.get(index);
+			int drsect = response.getDescriptor().getSector();
+			if (drsect == _sector) {
+				int dlayer = response.getDescriptor().getLayer();
+				if (dlayer == targetLayer) {
+					int dpaddle = response.getDescriptor().getComponent();
+					Point2D.Double wp[] = getPaddle(_view, (dpaddle - 1), _ftofPanel, _sector);
 
-				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
-
-				if (wp != null) {
-					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
-							true);
+					if (wp != null) {
+						Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+						WorldGraphicsUtilities.drawPath2D(g, container, path, default_fc, _style.getLineColor(), 0, LineStyle.SOLID,
+								true);
+					}
 				}
-
 			}
 		}
+
+		
+//		
+//
+//		int hitCount = FTOF.hitCount(panelType);
+//
+//		if (hitCount < 1) {
+//			return;
+//		}
+//		int sector[] = FTOF.sector(panelType);
+//		int paddles[] = FTOF.paddle(panelType);
+//
+//
+//		if ((sector == null) || (paddles == null)) {
+//			return;
+//		}
+//
+//		Color default_fc = Color.red;
+//
+//		for (int i = 0; i < hitCount; i++) {
+//			if (sector[i] == _sector) {
+//				Color fc = default_fc;
+////				if (pid != null) {
+////					LundId lid = LundSupport.getInstance().get(pid[i]);
+////					if (lid != null) {
+////						fc = lid.getStyle().getFillColor();
+////					}
+////				}
+//
+//				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
+//
+//				if (wp != null) {
+//					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+//					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
+//							true);
+//				}
+//
+//			}
+//		}
 
 	}
 
@@ -354,7 +385,7 @@ public class FTOFPanelItem extends PolygonItem {
 								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 					} else {
 	//					DataSupport.truePidFeedback(FTOF.pid(panelType), hitIndex, feedbackStrings);
-						FTOF.dgtzFeedback(hitIndex, panelType, feedbackStrings);
+						FTOF.dgtzFeedback(hitIndex, feedbackStrings);
 					}
 
 					//test

@@ -1,6 +1,9 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.Color;
+import java.util.List;
+
+import org.jlab.clas.detector.DetectorResponse;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -69,48 +72,63 @@ public class FTOFPanel3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		int hitCount = FTOF.hitCount(_superLayer);
-		if (hitCount < 1) {
+		
+		List<DetectorResponse> list = FTOF.getFTOFResponseTDC();
+		if (list == null) {
 			return;
 		}
 
-
-		int sector[] = FTOF.sector(_superLayer);
-		int paddleId[] = FTOF.paddle(_superLayer);;
-		double x[] = FTOF.avgX(_superLayer);
-		double y[] = FTOF.avgY(_superLayer);
-		double z[] = FTOF.avgZ(_superLayer);
-
-		if (paddleId == null) {
-			Log.getInstance().warning("null paddleId array in FTOFPanel3D");
-			return;
-		}
-
-		for (int i = 0; i < hitCount; i++) {
-			if (sector[i] == _sector) {
-				try {
-//					if (showMCTruth() && (pid != null)) {
-//						Color color = truthColor(pid, i);
-//						getPaddle(paddleId[i]).drawPaddle(drawable, color);
-//						// convert mm to cm
-//						double xcm = x[i] / 10;
-//						double ycm = y[i] / 10;
-//						double zcm = z[i] / 10;
-//						drawMCPoint(drawable, xcm, ycm, zcm, color);
-//
-//					} else {
-//						getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
-//					}
-					getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
-
-				} catch (ArrayIndexOutOfBoundsException oob) {
-					System.err.println("sector: " + _sector);
-					System.err.println("superLayer: " + _superLayer);
-					System.err.println("paddleId: " + paddleId[i]);
-					oob.printStackTrace();
+		int targetLayer = _superLayer + 1;
+		for (int index = 0; index < list.size(); index++) {
+			DetectorResponse response = list.get(index);
+			int drsect = response.getDescriptor().getSector();
+			if (drsect == _sector) {
+				int dlayer = response.getDescriptor().getLayer();
+				if (dlayer == targetLayer) {
+					int dpaddle = response.getDescriptor().getComponent();
+					getPaddle(dpaddle).drawPaddle(drawable, dgtzColor);
 				}
 			}
 		}
+
+
+
+//		int sector[] = FTOF.sector(_superLayer);
+//		int paddleId[] = FTOF.paddle(_superLayer);;
+//		double x[] = FTOF.avgX(_superLayer);
+//		double y[] = FTOF.avgY(_superLayer);
+//		double z[] = FTOF.avgZ(_superLayer);
+//
+//		if (paddleId == null) {
+//			Log.getInstance().warning("null paddleId array in FTOFPanel3D");
+//			return;
+//		}
+//
+//		for (int i = 0; i < hitCount; i++) {
+//			if (sector[i] == _sector) {
+//				try {
+////					if (showMCTruth() && (pid != null)) {
+////						Color color = truthColor(pid, i);
+////						getPaddle(paddleId[i]).drawPaddle(drawable, color);
+////						// convert mm to cm
+////						double xcm = x[i] / 10;
+////						double ycm = y[i] / 10;
+////						double zcm = z[i] / 10;
+////						drawMCPoint(drawable, xcm, ycm, zcm, color);
+////
+////					} else {
+////						getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
+////					}
+//					getPaddle(paddleId[i]).drawPaddle(drawable, dgtzColor);
+//
+//				} catch (ArrayIndexOutOfBoundsException oob) {
+//					System.err.println("sector: " + _sector);
+//					System.err.println("superLayer: " + _superLayer);
+//					System.err.println("paddleId: " + paddleId[i]);
+//					oob.printStackTrace();
+//				}
+//			}
+//		}
 	}
 
 	/**

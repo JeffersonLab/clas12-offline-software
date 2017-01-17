@@ -15,11 +15,7 @@ import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.swing.JComponent;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.plaf.metal.MetalIconFactory;
-
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.log.Log;
 
@@ -434,7 +430,7 @@ public final class Environment {
 
 		return _defaultPanelBackgroundColor;
 	}
-
+	
 	/**
 	 * Get a File object representing the preferences file. No guarantee that it
 	 * exists.
@@ -442,7 +438,7 @@ public final class Environment {
 	 * @return a File object representing the preferences file.
 	 */
 	private File getPreferencesFile() {
-		String bareName = "hermes.pref";
+		String bareName = getApplicationName() + ".pref";
 		String dirName = getHomeDirectory();
 		File file = new File(dirName, bareName);
 		return file;
@@ -685,7 +681,7 @@ public final class Environment {
 	 */
 	public static void main(String arg[]) {
 		Environment env = Environment.getInstance();
-		env.say("Hello " + env.getUserName() + ", this is the Hermes Environment test.");
+		env.say("Hello " + env.getUserName() + ", this is the bCNU Environment test.");
 		System.out.println(env);
 		System.out.println("Done.");
 

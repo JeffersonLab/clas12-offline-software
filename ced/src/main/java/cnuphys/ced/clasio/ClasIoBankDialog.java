@@ -6,21 +6,17 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Hashtable;
-
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.table.TableColumn;
 
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.ui.BankEntryMasks;
-import org.jlab.io.ui.DataBankPanel;
-import org.jlab.io.base.DataBank;
-
 import cnuphys.bCNU.graphics.component.CommonBorder;
-import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.FileUtilities;
+import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.datatable.BankDataTable;
 import cnuphys.ced.frame.Ced;
@@ -32,7 +28,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	private static ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// visibility hashtable
-	private static Hashtable<String, JCheckBox[]> _visHash = new Hashtable<String, JCheckBox[]>();
+	//private static Hashtable<String, JCheckBox[]> _visHash = new Hashtable<String, JCheckBox[]>();
 
 	// bank name
 	private String _bankName;
@@ -43,7 +39,9 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	//table to hold the data
 	private BankDataTable _table;
 
+	//check boxes
 	private JPanel _checkboxPanel;
+	private JCheckBox _cbarray[];
 
 	// counter
 	private static int count = 0;
@@ -68,6 +66,9 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		setLocation(x, y);
 		count++;
 
+	//	BankEntryMasks mask = getMask(_bankName);
+		
+		readVisibility();
 		pack();
 	}
 
@@ -88,40 +89,50 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		}
 		return null;
 	}
+	
+	//persist the visibility selections
+	private void writeVisibility() {
+		long val = 1;
+		for (int i = 0; i < Math.min(_cbarray.length, 63); i++) {
+			int bit = i+1;  //because of index column
+			if (_cbarray[i].isSelected()) {
+				val = Bits.setBitAtLocation(val, bit);
+			}
+		}
+		
+		System.out.println("bankName = [" + _bankName + "] val out = " + Long.toBinaryString(val));
 
-	private BankEntryMasks getMask(String bankName) {
-		BankEntryMasks mask = null;
-		String columns[] = colNames(bankName);
+		PropertiesManager.getInstance().putAndWrite(_bankName, ""+val);
+	}
+	
+	//get visibility from properties
+	private void readVisibility() {
+		String vs = PropertiesManager.getInstance().get(_bankName);
+		if (vs != null) {
+			try {
+				long val = Long.parseLong(vs);
+				System.out.println("bankName = [" + _bankName + "] val in  = " + Long.toBinaryString(val));
 
-		if ((columns != null) && (columns.length > 0)) {
-			mask = new BankEntryMasks();
-
-			// get vis array
-			// visibility already hashed?
-			JCheckBox cb[] = _visHash.get(bankName);
-
-			String maskString = "";
-//			boolean first = true;
-
-			for (int i = 0; i < columns.length; i++) {
-				if (cb[i].isSelected()) {
-//					if (first) {
-//						first = false;
-//					} else {
-//						maskString += ":";
-//					}
-					maskString += columns[i];
-					maskString += ":";
+				for (int i = 0; i < Math.min(_cbarray.length, 63); i++) {
+					int bit = i+1;  //because of index column
+					if (!Bits.checkBitAtLocation(val, bit)) {
+						_cbarray[i].setSelected(false);
+						TableColumn column = _table.getColumnModel().getColumn(bit);
+						column.setMinWidth(0);
+						column.setMaxWidth(0);
+						column.setResizable(false);
+//						column.setWidth(0);
+						column.setPreferredWidth(0);
+					}
+					else {
+						_cbarray[i].setSelected(true);
+					}
 				}
 			}
-
-//			System.err.println(bankName + "," + maskString);
-			mask.setMask(bankName, maskString);
-
-			PropertiesManager.getInstance().putAndWrite(bankName, maskString);
-		} // have columns
-
-		return mask;
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void update() {
@@ -131,25 +142,6 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		}
 		
 		_table.setEvent(event);
-		
-//		// Gagik's data panel
-//		DataBank db = _eventManager.getCurrentEvent().getBank(_bankName);
-//
-//		if (db == null) {
-//			setVisible(false);
-//			return;
-//		}
-//
-//		BankEntryMasks mask = getMask(_bankName);
-//		try {
-//			if (mask == null) {
-//				_dataBankPanel.setBank(db);
-//			} else {
-//				_dataBankPanel.setBank(db, mask);
-//			}
-//		} catch (Exception e) {
-//			Log.getInstance().error("Exception in ClasIoBankDialog.update() " + e.getMessage());
-//		}
 	}
 
 	private void setup() {
@@ -168,7 +160,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 
 		if ((columns != null) && (columns.length > 0)) {
 
-			JCheckBox cbarray[] = new JCheckBox[columns.length];
+			_cbarray = new JCheckBox[columns.length];
 			
 			//get the mask (if there is one) from the user preferences (persistance)
 			String maskName = PropertiesManager.getInstance().get(_bankName);
@@ -194,13 +186,14 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 					}
 				}
 				
-				cbarray[i] = new JCheckBox(columns[i], selected);
-				cbarray[i].addItemListener(this);
-				_checkboxPanel.add(cbarray[i]);
+				_cbarray[i] = new JCheckBox(columns[i], selected);
+				_cbarray[i].setFont(Fonts.tweenFont);
+				_cbarray[i].addItemListener(this);
+				_checkboxPanel.add(_cbarray[i]);
 			}
 			
 			//cache the checbox array
-			_visHash.put(_bankName, cbarray);
+			//_visHash.put(_bankName, cbarray);
 		}
 
 		add(_checkboxPanel, BorderLayout.SOUTH);
@@ -209,7 +202,36 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		update();
+		JCheckBox cb = (JCheckBox)(e.getSource());
+		int index = -1;
+		
+		for (int i = 0; i < _cbarray.length; i++) {
+			if (cb == _cbarray[i]) {
+				index = i;
+				break;
+			}
+		}
+		
+		if (index >= 0) {
+			//plus 1 for row column
+			TableColumn column = _table.getColumnModel().getColumn(index+1);
+			if (cb.isSelected()) {
+				column.setMinWidth(20);
+				column.setMaxWidth(500);
+//				column.setWidth(BankDataTable.COLWIDTH);
+				column.setPreferredWidth(BankDataTable.COLWIDTH);
+				column.setResizable(true);
+			}
+			else {
+				column.setMinWidth(0);
+				column.setMaxWidth(0);
+//				column.setWidth(0);
+				column.setPreferredWidth(0);
+				column.setResizable(false);
+			}
+			_table.revalidate();
+			writeVisibility();
+		}
 	}
 
 

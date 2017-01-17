@@ -28,6 +28,7 @@ public class Bits {
 		bits |= b;
 		return bits;
 	}
+	
 
 	/**
 	 * Clear the given control bit.
@@ -42,6 +43,21 @@ public class Bits {
 		bits &= (~b);
 		return bits;
 	}
+	
+	/**
+	 * Clear the given control bit.
+	 * 
+	 * @param bits
+	 *            the lonh that holds the bits.
+	 * @param b
+	 *            the bit to clear.
+	 * @return the modified bits.
+	 */
+	public static long clearBit(long bits, int b) {
+		bits &= (~b);
+		return bits;
+	}
+
 
 	/**
 	 * Toggle the given control bit.
@@ -117,6 +133,21 @@ public class Bits {
 	public static long setBitAtLocation(long bits, long bitIndex) {
 		bits |= (1L << bitIndex);
 		return bits;
+	}
+
+
+	/**
+	 * Checks the given control bit.
+	 * 
+	 * @param bits
+	 *            the long that holds the bits.
+	 * @param bitIndex
+	 *            the bit index [0..63] to set.
+	 * @return <code>true</code> if the given bit is set
+	 */
+	public static boolean checkBitAtLocation(long bits, int bitIndex) {
+		long bit  = (1L << bitIndex);
+		return checkBit(bits, bit);
 	}
 
 
