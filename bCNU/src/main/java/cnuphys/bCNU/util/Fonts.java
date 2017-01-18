@@ -81,15 +81,15 @@ public class Fonts {
 			scaleFact = 1f;
 		}
 		if (Math.abs(scaleFact -1f) > 0.01) {
-			hugeFont = scaleFont(hugeFont, scaleFact);
-			largeFont = scaleFont(largeFont, scaleFact);
-			defaultFont = scaleFont(defaultFont, scaleFact);
-			mediumFont = scaleFont(mediumFont, scaleFact);
-			tweenFont = scaleFont(tweenFont, scaleFact);
-			tinyFont = scaleFont(tinyFont, scaleFact);
-			mono = scaleFont(mono, scaleFact);
-			smallMono = scaleFont(smallMono, scaleFact);
-			tinyMono = scaleFont(tinyMono, scaleFact);
+//			hugeFont = scaleFont(hugeFont, scaleFact);
+//			largeFont = scaleFont(largeFont, scaleFact);
+//			defaultFont = scaleFont(defaultFont, scaleFact);
+//			mediumFont = scaleFont(mediumFont, scaleFact);
+//			tweenFont = scaleFont(tweenFont, scaleFact);
+//			tinyFont = scaleFont(tinyFont, scaleFact);
+//			mono = scaleFont(mono, scaleFact);
+//			smallMono = scaleFont(smallMono, scaleFact);
+//			tinyMono = scaleFont(tinyMono, scaleFact);
 		}
 	}
 	

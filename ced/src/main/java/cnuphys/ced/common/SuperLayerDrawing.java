@@ -512,7 +512,7 @@ public class SuperLayerDrawing {
 		// draw gems docas?
 		if (showTruth && (WorldGraphicsUtilities
 				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()])) {
-			if ((doca != null) && (doca[index] > 1.0e-6)) {
+			if ((doca != null) && (doca.length > 0) && (doca[index] > 1.0e-6)) {
 				drawDOCA(g, container, layer, wire, doca[index], CedColors.docaFill,
 						CedColors.docaLine);
 			}

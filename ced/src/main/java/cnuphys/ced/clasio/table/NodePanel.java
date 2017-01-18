@@ -213,6 +213,7 @@ public class NodePanel extends JPanel implements ActionListener,
 		eventNumberInput.addKeyListener(ka);
 
 		intsInHexButton = new JCheckBox("Show ints in hex", false);
+		intsInHexButton.setFont(Fonts.defaultFont);
 		GraphicsUtilities.setSizeSmall(intsInHexButton);
 
 		ItemListener il = new ItemListener() {

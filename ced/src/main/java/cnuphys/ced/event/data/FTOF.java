@@ -1,5 +1,6 @@
 package cnuphys.ced.event.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.clas.detector.DetectorResponse;
@@ -18,7 +19,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
  * @author heddle
  *
  */
-public class FTOF {
+public class FTOF extends DetectorData {
 
 	// ftof constants
 	public static final int PANEL_1A = 0;
@@ -100,62 +101,151 @@ public class FTOF {
 
 //	public List<DetectorResponse> getDetectorResponse(DataEvent event, String bankName, DetectorType type) {
 
-	public static List<DetectorResponse> getFTOFResponseTDC() {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
-		return DataManager.getInstance().getDetectorResponse(event, "FTOF::tdc", DetectorType.FTOF);
+//	public static List<DetectorResponse> getFTOFResponseTDC() {
+//		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+//		return DataManager.getInstance().getDetectorResponse(event, "FTOF::hits", DetectorType.FTOF);
+//	}
+	
+	private static FTOF _instance;
+	
+	//the sector and paddle arrays for each "layer"
+	private int[][] _sector = new int[3][];
+	private int[][] _paddle = new int[3][];
+
+	
+	/**
+	 * Public access to the singleton
+	 * @return the FTOF singleton
+	 */
+	public static FTOF getInstance() {
+		if (_instance == null) {
+			_instance = new FTOF();
+		}
+		return _instance;
 	}
-//
-//	/**
-//	 * Get the sector array from the dgtz data
-//	 * 
-//	 * @param panelType
-//	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-//	 * @return the sector array
-//	 */
-//	public static int[] sector(int panelType) {
-//
-//		int sector[] = null;
-//		switch (panelType) {
-//		case PANEL_1A:
-//			sector = ColumnData.getIntArray("FTOF1A::dgtz.sector");
-//			break;
-//
-//		case PANEL_1B:
-//			sector = ColumnData.getIntArray("FTOF1B::dgtz.sector");
-//			break;
-//
-//		case PANEL_2:
-//			sector = ColumnData.getIntArray("FTOF2B::dgtz.sector");
-//			break;
-//		}
-//		return sector;
-//	}
-//
-//	/**
-//	 * Get the paddle array from the dgtz data
-//	 * 
-//	 * @param panelType
-//	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-//	 * @return the paddle array
-//	 */
-//	public static int[] paddle(int panelType) {
-//
-//		int paddle[] = null;
-//		switch (panelType) {
-//		case PANEL_1A:
-//			paddle = ColumnData.getIntArray("FTOF1A::dgtz.paddle");
-//			break;
-//
-//		case PANEL_1B:
-//			paddle = ColumnData.getIntArray("FTOF1B::dgtz.paddle");
-//			break;
-//
-//		case PANEL_2:
-//			paddle = ColumnData.getIntArray("FTOF2B::dgtz.paddle");
-//			break;
-//		}
-//		return paddle;
-//	}
+	
+
+	
+	@Override
+	public void newClasIoEvent(DataEvent event) {
+		extractSectorArrays();
+		extractPaddleArrays();
+	}
+	
+	//get the sector data from the event
+	private void extractSectorArrays() {
+		DataList lists[] = new DataList[3];
+		for (int i = 0; i < 3; i++) {
+			lists[i] = new DataList();
+		}
+		
+		//get all the sector data from tdc
+		byte[] tdcsect = ColumnData.getByteArray("FTOF::tdc.sector");
+		byte[] adcsect = ColumnData.getByteArray("FTOF::adc.sector");
+		byte[] tdclay = ColumnData.getByteArray("FTOF::tdc.layer");
+		byte[] adclay = ColumnData.getByteArray("FTOF::adc.layer");
+		
+		if (tdcsect != null) {
+			for (int i = 0; i < tdcsect.length; i++) {
+				int panel = tdclay[i] - 1;
+				lists[panel].add((int)tdcsect[i]);
+			}
+		}
+		if (adcsect != null) {
+			for (int i = 0; i < adcsect.length; i++) {
+				int panel = adclay[i] - 1;
+				lists[panel].add((int)adcsect[i]);
+			}
+		}
+
+		for (int i = 0; i < 3; i++) {
+			_sector[i] = lists[i] == null ? null : lists[i].toIntArray();
+			System.err.println(" PANEL: " + i + "   SECT LEN: " + (_sector[i] == null ? 0 : _sector[i].length));
+		}
+	}
+	
+	//get the paddle data from the event
+	private void extractPaddleArrays() {
+		
+		DataList lists[] = new DataList[3];
+		for (int i = 0; i < 3; i++) {
+			lists[i] = new DataList();
+		}
+		
+		//get all the sector data from tdc
+		short[] tdcpaddle = ColumnData.getShortArray("FTOF::tdc.component");
+		short[] adcpaddle = ColumnData.getShortArray("FTOF::adc.component");
+		byte[] tdclay = ColumnData.getByteArray("FTOF::tdc.layer");
+		byte[] adclay = ColumnData.getByteArray("FTOF::adc.layer");
+		
+		if (tdcpaddle != null) {
+			for (int i = 0; i < tdcpaddle.length; i++) {
+				int panel = tdclay[i] - 1;
+				lists[panel].add((int)tdcpaddle[i]);
+			}
+		}
+		if (adcpaddle != null) {
+			for (int i = 0; i < adcpaddle.length; i++) {
+				int panel = adclay[i] - 1;
+				lists[panel].add((int)adcpaddle[i]);
+			}
+		}
+
+		for (int i = 0; i < 3; i++) {
+			_paddle[i] = lists[i] == null ? null : lists[i].toIntArray();
+			System.err.println(" PANEL: " + i + "   PADD LEN: " + (_paddle[i] == null ? 0 : _paddle[i].length));
+		}
+	}
+
+
+	/**
+	 * Get the pid array from the true data
+	 * 
+	 * @param panelType
+	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
+	 * @return the pid array
+	 */
+	public int[] pid(int panelType) {
+
+		int pid[] = null;
+		switch (panelType) {
+		case PANEL_1A:
+			pid = ColumnData.getIntArray("FTOF1A::true.pid");
+			break;
+
+		case PANEL_1B:
+			pid = ColumnData.getIntArray("FTOF1B::true.pid");
+			break;
+
+		case PANEL_2:
+			pid = ColumnData.getIntArray("FTOF2B::true.pid");
+			break;
+		}
+		return pid;
+	}
+
+	/**
+	 * Get the sector array from the dgtz data
+	 * 
+	 * @param panelType
+	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
+	 * @return the sector array
+	 */
+	public int[] sector(int panelType) {
+		return _sector[panelType];
+	}
+	
+
+	/**
+	 * Get the paddle array from the dgtz data
+	 * 
+	 * @param panelType
+	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
+	 * @return the paddle array
+	 */
+	public int[] paddle(int panelType) {
+		return _paddle[panelType];
+    }
 
 	/**
 	 * Get the ADCL array from the dgtz data
@@ -164,7 +254,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the ADCL array
 	 */
-	public static int[] ADCL(int panelType) {
+	public int[] ADCL(int panelType) {
 
 		int ADCL[] = null;
 		switch (panelType) {
@@ -190,7 +280,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the ADCR array
 	 */
-	public static int[] ADCR(int panelType) {
+	public int[] ADCR(int panelType) {
 
 		int ADCR[] = null;
 		switch (panelType) {
@@ -216,7 +306,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the TDCL array
 	 */
-	public static int[] TDCL(int panelType) {
+	public int[] TDCL(int panelType) {
 
 		int TDCL[] = null;
 		switch (panelType) {
@@ -242,7 +332,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the TDCR array
 	 */
-	public static int[] TDCR(int panelType) {
+	public int[] TDCR(int panelType) {
 
 		int TDCR[] = null;
 		switch (panelType) {
@@ -268,7 +358,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the avgX array
 	 */
-	public static double[] avgX(int panelType) {
+	public double[] avgX(int panelType) {
 		double avgX[] = null;
 		switch (panelType) {
 
@@ -295,7 +385,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the avgY array
 	 */
-	public static double[] avgY(int panelType) {
+	public double[] avgY(int panelType) {
 		double avgY[] = null;
 		switch (panelType) {
 
@@ -322,7 +412,7 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the avgZ array
 	 */
-	public static double[] avgZ(int panelType) {
+	public double[] avgZ(int panelType) {
 		double avgZ[] = null;
 		switch (panelType) {
 
@@ -346,7 +436,7 @@ public class FTOF {
 	 * 
 	 * @return the reconstructed sector array
 	 */
-	public static int[] reconSector() {
+	public int[] reconSector() {
 		return ColumnData.getIntArray("FTOFRec::ftofhits.sector");
 	}
 
@@ -355,7 +445,7 @@ public class FTOF {
 	 * 
 	 * @return the reconstructed panel array
 	 */
-	public static int[] reconPanel() {
+	public int[] reconPanel() {
 		return ColumnData.getIntArray("FTOFRec::ftofhits.panel_id");
 	}
 
@@ -364,7 +454,7 @@ public class FTOF {
 	 * 
 	 * @return the reconstructed sector array
 	 */
-	public static int[] reconPaddle() {
+	public int[] reconPaddle() {
 		return ColumnData.getIntArray("FTOFRec::ftofhits.paddle_id");
 	}
 
@@ -373,7 +463,7 @@ public class FTOF {
 	 * 
 	 * @return the reconstructed x array
 	 */
-	public static float[] reconX() {
+	public float[] reconX() {
 		return ColumnData.getFloatArray("FTOFRec::ftofhits.x");
 	}
 
@@ -382,7 +472,7 @@ public class FTOF {
 	 * 
 	 * @return the reconstructed y array
 	 */
-	public static float[] reconY() {
+	public float[] reconY() {
 		return ColumnData.getFloatArray("FTOFRec::ftofhits.y");
 	}
 
@@ -391,7 +481,7 @@ public class FTOF {
 	 * 
 	 * @return the reconstructed z array
 	 */
-	public static float[] reconZ() {
+	public float[] reconZ() {
 		return ColumnData.getFloatArray("FTOFRec::ftofhits.z");
 	}
 	
@@ -405,38 +495,32 @@ public class FTOF {
 	 * @param feedbackStrings
 	 *            the collection of feedback strings
 	 */
-	public static void dgtzFeedback(int hitIndex,
+	public void dgtzFeedback(int hitIndex, int panelType,
 			List<String> feedbackStrings) {
 
 		if (hitIndex < 0) {
 			return;
 		}
 
-		List<DetectorResponse> list = getFTOFResponseTDC();
-		if (list == null) {
+		int sector[] = sector(panelType);
+		int paddle[] = paddle(panelType);
+		int ADCL[] = ADCL(panelType);
+		int ADCR[] = ADCR(panelType);
+		int TDCL[] = TDCL(panelType);
+		int TDCR[] = TDCR(panelType);
+		if ((sector == null) || (paddle == null) || (ADCL == null)
+				|| (ADCR == null) || (TDCL == null) || (TDCR == null)) {
 			return;
 		}
 
-		try {
-			DetectorResponse response = list.get(hitIndex);
-			if (response != null) {
-				DetectorDescriptor descriptor = response.getDescriptor();
-				if (descriptor != null) {
+		String pname = name(panelType);
+		feedbackStrings.add(DataSupport.dgtzColor + pname + " sector "
+				+ sector[hitIndex] + "  paddle " + paddle[hitIndex]);
 
-					feedbackStrings.add(DataSupport.dgtzColor + "sector " + descriptor.getSector() + "  panel "
-							+ panelNames[descriptor.getLayer() - 1] + "  paddle " + descriptor.getComponent());
-
-					// feedbackStrings.add(DataSupport.dgtzColor + "adc_left "
-					// + ADCL[hitIndex] + " adc_right " + ADCR[hitIndex]);
-					// feedbackStrings.add(DataSupport.dgtzColor + "tdc_left "
-					// + TDCL[hitIndex] + " tdc_right " + TDCR[hitIndex]);
-				}
-
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		feedbackStrings.add(DataSupport.dgtzColor + "adc_left "
+				+ ADCL[hitIndex] + "  adc_right " + ADCR[hitIndex]);
+		feedbackStrings.add(DataSupport.dgtzColor + "tdc_left "
+				+ TDCL[hitIndex] + "  tdc_right " + TDCR[hitIndex]);
 
 	}
 
@@ -467,28 +551,28 @@ public class FTOF {
 	 * @return the index of a hit in a panel with these parameters, or -1 if not
 	 *         found
 	 */
-	public static int hitIndex(int sect, int paddle, int panelType) {
-		
-		List<DetectorResponse> list = getFTOFResponseTDC();
-		if (list == null) {
+	public int hitIndex(int sect, int paddle, int panelType) {
+
+		int sector[] = sector(panelType);
+		int paddles[] = paddle(panelType);
+
+		if (sector == null) {
 			return -1;
 		}
-		
-		int targetLayer = panelType + 1;
-		for (int index = 0; index < list.size(); index++) {
-			DetectorResponse response = list.get(index);
-			int drsect = response.getDescriptor().getSector();
-			if (drsect == sect) {
-				int dlayer = response.getDescriptor().getLayer();
-				if (dlayer == targetLayer) {
-					int dpaddle = response.getDescriptor().getComponent();
-					if (dpaddle == paddle) {
-						return index;
-					}
-				}
-			}
+
+		if (paddles == null) {
+			Log.getInstance().warning(
+					"null paddles array in hitIndex for panelType: "
+							+ panelType + " sector: " + sect + " paddle: "
+							+ paddle);
+			return -1;
 		}
 
+		for (int i = 0; i < hitCount(panelType); i++) {
+			if ((sect == sector[i]) && (paddle == paddles[i])) {
+				return i;
+			}
+		}
 		return -1;
 	}
 
@@ -499,11 +583,23 @@ public class FTOF {
 	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the hit count for panel 1A
 	 */
-	public static int hitCount() {
-		List<DetectorResponse> list = getFTOFResponseTDC();
-		return (list == null) ? 0 : list.size();
-//		int sector[] = sector(panelType);
-//		return (sector == null) ? 0 : sector.length;
+	public int hitCount(int panelType) {
+		int sector[] = sector(panelType);
+		return (sector == null) ? 0 : sector.length;
 	}
 
+
+	class DataList extends ArrayList<Integer> {
+		public int[] toIntArray() {
+			if (isEmpty()) {
+				return null;
+			}
+			
+			int array[] = new int[size()];
+			for (int i = 0; i < size(); i++) {
+				array[i] = get(i);
+			}
+			return array;
+		}
+	}
 }

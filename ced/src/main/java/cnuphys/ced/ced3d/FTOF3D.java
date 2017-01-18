@@ -89,13 +89,13 @@ public class FTOF3D extends DetectorItem3D {
 	public void drawData(GLAutoDrawable drawable) {
 		
 		// arggh this sector array is zero based
-		int sector[] = FTOF.reconSector();
+		int sector[] = FTOF.getInstance().reconSector();
 		if (sector == null) {
 			return;
 		}
-		float recX[] = FTOF.reconX();
-		float recY[] = FTOF.reconY();
-		float recZ[] = FTOF.reconZ();
+		float recX[] = FTOF.getInstance().reconX();
+		float recY[] = FTOF.getInstance().reconY();
+		float recZ[] = FTOF.getInstance().reconZ();
 
 		int numHits = sector.length;
 		// System.err.println("FTOF DRAWDATA NUM HITS: " + numHits);

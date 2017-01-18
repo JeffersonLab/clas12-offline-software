@@ -37,6 +37,7 @@ import cnuphys.ced.item.FTOFPanelItem;
 import cnuphys.ced.item.MagFieldItem;
 import cnuphys.ced.item.SectorECItem;
 import cnuphys.ced.item.SectorHTCCItem;
+import cnuphys.ced.item.SectorLTCCItem;
 import cnuphys.ced.item.SectorPCALItem;
 import cnuphys.ced.item.SectorSuperLayer;
 import cnuphys.magfield.IField;
@@ -99,6 +100,10 @@ public class SectorView extends CedView implements ChangeListener {
 
 	// HTCC Items, 8 per sector, not geometrically realistic
 	private SectorHTCCItem _htcc[][] = new SectorHTCCItem[4][2];
+	
+	// LTCC Items, 36 per sector, not geometrically realistic
+	private SectorLTCCItem _ltcc[][] = new SectorLTCCItem[18][2];
+
 	
 	// superlayer (graphical) items. The first index [0..1] is for upper and
 	// lower sectors.
@@ -263,6 +268,37 @@ public class SectorView extends CedView implements ChangeListener {
 		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
 				_detectorLayerName);
 		new BeamLineItem(detectorLayer);
+		
+		//add the ltcc items
+		for (int ring = 1; ring <= 18; ring++) {
+			for (int half = 1; half <= 2; half++) {
+				
+				switch (_displaySectors) {
+				case SECTORS14:
+					_ltcc[ring-1][half-1] = new SectorLTCCItem(detectorLayer, 
+							this, 1, ring, half);
+					_ltcc[ring-1][half-1] = new SectorLTCCItem(detectorLayer, 
+									this, 4, ring, half);
+					break;
+
+				case SECTORS25:
+					_ltcc[ring-1][half-1] = new SectorLTCCItem(detectorLayer, 
+							this, 2, ring, half);
+					_ltcc[ring-1][half-1] = new SectorLTCCItem(detectorLayer, 
+									this, 5, ring, half);
+					break;
+
+				case SECTORS36:
+					_ltcc[ring-1][half-1] = new SectorLTCCItem(detectorLayer, 
+							this, 3, ring, half);
+					_ltcc[ring-1][half-1] = new SectorLTCCItem(detectorLayer, 
+									this, 6, ring, half);
+					break;
+				}
+				
+			}
+		}
+
 		
 		//add the htcc items
 		for (int ring = 1; ring <= 4; ring++) {
