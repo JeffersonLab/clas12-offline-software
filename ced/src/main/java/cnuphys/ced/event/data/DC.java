@@ -18,17 +18,8 @@ import cnuphys.splot.plot.DoubleFormat;
  */
 public class DC {
 	
-//	bank name: [DC::doca] column name: [LR] full name: [DC::doca.LR] data type: byte
-//	bank name: [DC::doca] column name: [doca] full name: [DC::doca.doca] data type: Unknown
-//	bank name: [DC::doca] column name: [sdoca] full name: [DC::doca.sdoca] data type: Unknown
-//	bank name: [DC::doca] column name: [time] full name: [DC::doca.time] data type: Unknown
-//	bank name: [DC::doca] column name: [stime] full name: [DC::doca.stime] data type: Unknown
-//	bank name: [DC::tdc] column name: [sector] full name: [DC::tdc.sector] data type: byte
-//	bank name: [DC::tdc] column name: [layer] full name: [DC::tdc.layer] data type: byte
-//	bank name: [DC::tdc] column name: [component] full name: [DC::tdc.component] data type: short
-//	bank name: [DC::tdc] column name: [order] full name: [DC::tdc.order] data type: byte
-//	bank name: [DC::tdc] column name: [TDC] full name: [DC::tdc.TDC] data type: int
-
+	
+	
 	/**
 	 * Get the pid array from the true data
 	 * @return the pid array
@@ -223,13 +214,13 @@ public class DC {
 	}
 	
 	/**
-	 * Get the doca array from the dgtz data
-	 * @return the doca array
+	 * Get the unsmeared doca array from the dgtz data
+	 * @return the unsmeared simulation doca array
 	 */
 	public static float[] doca() {
 		return ColumnData.getFloatArray("DC::doca.doca");
 	}
-	
+		
 	/**
 	 * Get the time array from the dgtz data
 	 * @return the time array

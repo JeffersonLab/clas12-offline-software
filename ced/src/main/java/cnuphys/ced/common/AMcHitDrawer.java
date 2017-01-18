@@ -75,9 +75,9 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 	
 	protected void drawGemCXYZHits_FTOF(Graphics g, IContainer container) {
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 
-				FTOF.avgX(FTOF.PANEL_1A),
-				FTOF.avgY(FTOF.PANEL_1A), 
-				FTOF.avgZ(FTOF.PANEL_1A),
+				FTOF.getInstance().avgX(FTOF.PANEL_1A),
+				FTOF.getInstance().avgY(FTOF.PANEL_1A), 
+				FTOF.getInstance().avgZ(FTOF.PANEL_1A),
 				FTOF.PANEL_1A);
 
 		showGemcXYZHits(g, container, FeedbackRect.Dtype.FTOF, 

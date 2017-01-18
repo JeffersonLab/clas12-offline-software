@@ -48,12 +48,12 @@ public class ReconDrawer extends SectorViewDrawer {
 	private void drawFTOFReconHits(Graphics g, IContainer container) {
 
 		// arggh this sector array is zero based
-		int sector[] = FTOF.reconSector();
-		int panel[] = FTOF.reconPanel();
-		int paddle[] = FTOF.reconPaddle();
-		float recX[] = FTOF.reconX();
-		float recY[] = FTOF.reconY();
-		float recZ[] = FTOF.reconZ();
+		int sector[] = FTOF.getInstance().reconSector();
+		int panel[] = FTOF.getInstance().reconPanel();
+		int paddle[] = FTOF.getInstance().reconPaddle();
+		float recX[] = FTOF.getInstance().reconX();
+		float recY[] = FTOF.getInstance().reconY();
+		float recZ[] = FTOF.getInstance().reconZ();
 
 		// _view.getWorldFromDetectorXYZ(100 * v3d[0], 100 *v3d[1],
 		// 100 * v3d[2], wp);

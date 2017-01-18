@@ -381,7 +381,7 @@ public class DataManager {
 	public List<DetectorResponse> getDetectorResponse(DataEvent event, String bankName, DetectorType type) {
 		
 		//TODO remove aftergagik fixes
-		if (true) return null;
+		//if (true) return null;
 		
 		
 		if (event == null) {
