@@ -48,6 +48,9 @@ public class GeometryManager {
 		
 		//HTCC Geometry
 		HTCCGeometry.initialize();
+		
+		//LTCC Geometry
+		LTCCGeometry.initialize();
 
 		// DC Geometry
 		DCGeometry.initialize();
