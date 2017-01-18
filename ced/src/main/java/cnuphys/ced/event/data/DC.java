@@ -18,11 +18,6 @@ import cnuphys.splot.plot.DoubleFormat;
  */
 public class DC {
 	
-//	bank name: [DC::dgtz] column name: [sector] full name: [DC::dgtz.sector] data type: byte
-//	bank name: [DC::dgtz] column name: [layer] full name: [DC::dgtz.layer] data type: byte
-//	bank name: [DC::dgtz] column name: [component] full name: [DC::dgtz.component] data type: short
-//	bank name: [DC::dgtz] column name: [TDC] full name: [DC::dgtz.TDC] data type: int
-//	bank name: [DC::dgtz] column name: [LR] full name: [DC::dgtz.LR] data type: byte
 //	bank name: [DC::doca] column name: [LR] full name: [DC::doca.LR] data type: byte
 //	bank name: [DC::doca] column name: [doca] full name: [DC::doca.doca] data type: Unknown
 //	bank name: [DC::doca] column name: [sdoca] full name: [DC::doca.sdoca] data type: Unknown
