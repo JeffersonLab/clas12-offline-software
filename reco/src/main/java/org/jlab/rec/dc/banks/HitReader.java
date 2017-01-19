@@ -66,7 +66,7 @@ public class HitReader {
 	public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis,NoiseReductionParameters parameters,
 			Clas12NoiseResult results) {
 		
-		if(event.hasBank("DC::dgtz")==false) {
+		if(event.hasBank("DC::tdc")==false) {
 			//System.err.println("there is no dc bank ");
 			_DCHits= new ArrayList<Hit>();
 			
@@ -80,6 +80,7 @@ public class HitReader {
 		int[] layer = new int[rows];
 		int[] wire = new int[rows];
 		int[] tdc = new int[rows];
+		int[] useMChit = new int[rows];
 		
 		for(int i = 0; i< rows; i++) {
 			sector[i] = bankDGTZ.getByte("sector", i);
@@ -88,7 +89,13 @@ public class HitReader {
 			tdc[i] = bankDGTZ.getInt("TDC", i);		
 		}
 		
-		
+		if(event.hasBank("DC::doca")==true) {
+			DataBank bankD = event.getBank("DC::doca");
+			for(int i = 0; i< bankD.rows(); i++) {
+			if(bankD.getFloat("stime", i)<0)
+				useMChit[i]=-1;
+			}
+		}
 		int size = layer.length;
 		int[] layerNum = new int[size];
 		int[] superlayerNum =new int[size];
@@ -102,18 +109,10 @@ public class HitReader {
 			if(tdc!=null && tdc.length>0) {
 					smearedTime[i] = (double) tdc[i];
 			} 
-			//if(stime!=null && stime.length>0) {
-			//	smearedTime[i] = stime[i];
-			//}
 			
-			//if(slayer!=null && slayer.length>0) {
-			//	layerNum[i] = layer[i];
-			//	superlayerNum[i] = slayer[i]; 
-			//} else {
 				superlayerNum[i]=(layer[i]-1)/6 + 1;
 				layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 
-			//}
-	
+			
 		}
 		results.clear();
 		noiseAnalysis.clear();
@@ -121,7 +120,7 @@ public class HitReader {
 		noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
 		
 		for(int i = 0; i<size; i++) {	
-			if(wire[i]!=-1 && results.noise[i]==false && smearedTime[i]>=0.0){		
+			if(wire[i]!=-1 && results.noise[i]==false && useMChit[i]!=-1){		
 				//Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
 				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i+1));			
 				double posError = hit.get_CellSize()/Math.sqrt(12.);

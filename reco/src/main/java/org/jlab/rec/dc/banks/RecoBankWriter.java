@@ -77,7 +77,7 @@ public class RecoBankWriter {
 			bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
 			bank.setFloat("B", i, (float) hitlist.get(i).get_B());
 		}
-		//System.out.println(" Created Bank "); bank.show();
+		
 		return bank;
 
 	}
@@ -215,7 +215,7 @@ public class RecoBankWriter {
 				bank.setFloat("trkDoca", index, (float) trj.getTrkDoca()[l]);
 				index++;
 			}
-		}
+		} 
 		return bank;
 	}
 	/**
@@ -291,7 +291,7 @@ public class RecoBankWriter {
 			bank.setShort("Cross3_ID", i,(short) candlist.get(i).get(2).get_Id());		
 			bank.setShort("status", i, (short) candlist.get(i).status);
 		}
-		
+		//bank.show();
 		return bank;
 		
 	}
@@ -332,7 +332,7 @@ public class RecoBankWriter {
 			bank.setFloat("B", i, (float) hitlist.get(i).get_B());
 			
 		}
-		
+		//System.out.println(" Created Bank "); bank.show();
 		return bank;
 
 	}
@@ -670,26 +670,21 @@ public class RecoBankWriter {
 						rbc.fillTBClustersBank(event, clusters),
 						rbc.fillTBSegmentsBank(event, segments),
 						rbc.fillTBCrossesBank(event, crosses), 
-						rbc.fillTBTracksBank(event, trkcands));
+						rbc.fillTBTracksBank(event, trkcands)); 
 				
 		}
 		if(crosses!=null && trkcands == null) {
 			event.appendBanks(rbc.fillTBHitsBank(event, fhits),
 						rbc.fillTBClustersBank(event, clusters),
 						rbc.fillTBSegmentsBank(event, segments),
-						rbc.fillTBCrossesBank(event, crosses));
+						rbc.fillTBCrossesBank(event, crosses)); 
 		}
 		if(segments!=null && crosses == null) {
 		event.appendBanks(rbc.fillTBHitsBank(event, fhits),
 						rbc.fillTBClustersBank(event, clusters),
-						rbc.fillTBSegmentsBank(event, segments));
+						rbc.fillTBSegmentsBank(event, segments)); 
 		}
-		if(segments!=null && crosses == null) {
-
-			event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-					rbc.fillTBClustersBank(event, clusters),
-					rbc.fillTBSegmentsBank(event, segments));
-		}
+		
 		if(clusters!=null && segments == null) {
 			event.appendBanks(rbc.fillTBHitsBank(event, fhits),
 					rbc.fillTBClustersBank(event, clusters));

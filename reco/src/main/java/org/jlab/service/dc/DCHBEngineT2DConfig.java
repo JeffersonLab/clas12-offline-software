@@ -8,7 +8,7 @@ import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.base.DataSync;
+import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
@@ -106,7 +106,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		
 		
 		if(clusters.size()==0) {				
-			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, null, null, null, null);
+			rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
 			return true;
 		}
 	
@@ -117,7 +117,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		segments =  segFinder.get_Segments(clusters, event);
  
 		if(segments.size()==0) { // need 6 segments to make a trajectory			
-			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, null, null, null);
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
 			return true;
 		}
 							
@@ -125,7 +125,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		crosses = crossMake.find_Crosses(segments);
  
 		if(crosses.size()==0 ) {			
-			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, null, null);
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
 
@@ -142,7 +142,7 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		
 		if(crosslist.size()==0) {
 			
-			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, crosses, null);
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
 
@@ -152,12 +152,12 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		 
 		if(trkcands.size()==0) {
 			
-			rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		}
 		// track found		
 		for(Track trk: trkcands) {				
-			for(Cross c : trk) {
+			for(Cross c : trk) { 
 				for(FittedHit h1 : c.get_Segment1())
 					h1.set_AssociatedHBTrackID(trk.get_Id());
 			  	for(FittedHit h2 : c.get_Segment2())
@@ -165,31 +165,8 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			}
 		}
 	  
-		rbc.fillAllHBBanks((DataEvent) event, rbc, fhits, clusters, segments, crosses, trkcands);
-		/* DataBank bank =  (DataBank) event.getDictionary().createBank("HitBasedTrkg::HBHits",fhits.size());
-	    
-		for(int i =0; i< fhits.size(); i++) {
-			bank.setInt("id",i, fhits.get(i).get_Id());
-			bank.setInt("superlayer",i, fhits.get(i).get_Superlayer());
-			bank.setInt("layer",i, fhits.get(i).get_Layer());
-			bank.setInt("sector",i, fhits.get(i).get_Sector());
-			bank.setInt("wire",i, fhits.get(i).get_Wire());
-			bank.setDouble("time",i, fhits.get(i).get_Time());
-			bank.setDouble("doca",i, fhits.get(i).get_Doca());
-			bank.setDouble("docaError",i, fhits.get(i).get_DocaErr());
-			bank.setDouble("trkDoca", i, fhits.get(i).get_ClusFitDoca());
-			bank.setDouble("locX",i, fhits.get(i).get_lX());
-			bank.setDouble("locY",i, fhits.get(i).get_lY());
-			bank.setDouble("X",i, fhits.get(i).get_X());
-			bank.setDouble("Z",i, fhits.get(i).get_Z());
-			bank.setInt("LR",i, fhits.get(i).get_LeftRightAmb());
-			bank.setInt("clusterID", i, fhits.get(i).get_AssociatedClusterID());
-			bank.setInt("trkID", i, fhits.get(i).get_AssociatedHBTrackID());
-		}
-		//bank.show();
-		event.appendBanks(bank); */
-		//event.getBank("HitBasedTrkg::HBHits").show();
-	
+		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
+
 		return true;
 	}
 
@@ -207,27 +184,29 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			isMC = true;
 		if(bank.getByte("mode", 0)==1)
 			isCosmics = true;
-		
-		
+		// force cosmics
+		//isCosmics = true;
+		//System.out.println(bank.getInt("Event")[0]);
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
 		//
-		
+		boolean timeToDistanceGridSetting=true;
+		boolean calibRun =true;
 		// Load the fields
 		//-----------------
-		String newConfig = "SOLENOID"+bank.getFloat("Solenoid")[0]+"TORUS"+bank.getFloat("Torus")[0];		
-		
+		String newConfig = "SOLENOID"+bank.getFloat("solenoid",0)+"TORUS"+bank.getFloat("torus",0);		
+		//System.out.println(" fields "+newConfig);
 		if (FieldsConfig.equals(newConfig)==false) {
 			// Load the Constants
-			Constants.Load(isCosmics, isCalib, (double)bank.getFloat("Torus")[0]); // set the T2D Grid for Cosmics data only so far....
+			Constants.Load(timeToDistanceGridSetting, calibRun, (double)bank.getFloat("torus",0)); // set the T2D Grid for Cosmics data only so far....
 			// Load the Fields
 			//DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... 
-			DCSwimmer.setMagneticFieldsScales(bank.getFloat("Solenoid")[0], bank.getFloat("Torus")[0]); // something changed in the configuration ... 
+			DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid",0), bank.getFloat("torus",0)); // something changed in the configuration ... 
 		}
 		FieldsConfig = newConfig;
 		
 		// Load the constants
 		//-------------------
-		int newRun = bank.getInt("Run")[0];
+		int newRun = bank.getInt("run", 0);
 		
 		if(Run!=newRun) {
 			//CalibrationConstantsLoader.Load(newRun, "default");
@@ -243,7 +222,8 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		 
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/out_1.evio";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/gemc_generated.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/file0000.hipo";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -257,40 +237,47 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		DCTBEngine en2 = new DCTBEngine();
 		//DCTBRasterEngine en2 = new DCTBRasterEngine();
 		en2.init();
-		org.jlab.io.evio.EvioSource reader = new org.jlab.io.evio.EvioSource();
+		//org.jlab.io.evio.EvioSource reader = new org.jlab.io.evio.EvioSource();
 		
 		int counter = 0;
 		
-		reader.open(inputFile);
-		long t1 = System.currentTimeMillis();
+		//reader.open(inputFile);
+		//long t1 = System.currentTimeMillis();
+		
+		 HipoDataSource reader = new HipoDataSource();
+         reader.open(inputFile);
 		
 		//Writer
 		
 		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/DCRBREC.evio";
-		String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/T2DRec15deg.ev";
-		//DataSync writer = null ;
+		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/T2DRec15deg.ev";
+		//org.jlab.io.evio.DataSync writer = new org.jlab.io.evio.DataSync();
 		//writer.open(outputFile);
 		
-		
+		long t1=0;
 		while(reader.hasEvent() ){
 			
 			counter++;
-			DataEvent event =reader.getNextEvent();
-			enh.processDataEvent(event);
+		
+			DataEvent event = reader.getNextEvent();
+			if(counter>0)
+				t1 = System.currentTimeMillis();
+			
+			//enh.processDataEvent(event);
 			
 			en.processDataEvent(event);
 			
 			// Processing TB   
 			en2.processDataEvent(event);
-			
-			if(counter>150) break;
-			if(counter%10==0)
-				System.out.println("run "+counter+" events");
+			System.out.println("  EVENT "+counter);
+			if(counter>1000) break;
+			//if(counter%100==0)
+			//	System.out.println("run "+counter+" events");
 			//writer.writeEvent(event);
 		}
 		//writer.close();
 		double t = System.currentTimeMillis()-t1;
-		System.out.println("TOTAL  PROCESSING TIME = "+t);
+		System.out.println(t1+" TOTAL  PROCESSING TIME = "+(t/(float)counter));
 	 }
 	
 }

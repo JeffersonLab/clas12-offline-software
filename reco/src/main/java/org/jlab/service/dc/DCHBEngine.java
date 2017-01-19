@@ -221,7 +221,8 @@ public class DCHBEngine extends ReconstructionEngine {
 		 
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/gemc_generated.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/gemc_generated.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/gemc_GagiksTest.hipo";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -267,10 +268,10 @@ public class DCHBEngine extends ReconstructionEngine {
 			
 			// Processing TB   
 			en2.processDataEvent(event);
-			System.out.println("  EVENT "+counter);
-			if(counter>6) break;
+			//System.out.println("  EVENT "+counter);
+			if(counter>1) break;
 			//if(counter%100==0)
-			//	System.out.println("run "+counter+" events");
+				System.out.println("run "+counter+" events");
 			//writer.writeEvent(event);
 		}
 		//writer.close();

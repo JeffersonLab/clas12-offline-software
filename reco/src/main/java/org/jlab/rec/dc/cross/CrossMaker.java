@@ -27,7 +27,7 @@ public class CrossMaker {
 	{ 
 		List<Cross> crosses = new ArrayList<Cross>();
 
-		int rid = 0;  // rsegment id
+		int crid = 1;  //  id
 
 		for(int s=0; s<Constants.NSECT; s++)  // loop over sectors
 		{
@@ -47,7 +47,7 @@ public class CrossMaker {
 							{   //wire proximity
 								if(seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1))
 								{
-									Cross cross = new Cross(s+1, r+1, rid++);
+									Cross cross = new Cross(s+1, r+1, crid++); 
 									
 									cross.add(seg1);
 									cross.add(seg2);

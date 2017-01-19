@@ -3,6 +3,7 @@ package org.jlab.rec.dc.segment;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.rec.dc.Constants;
@@ -37,48 +38,24 @@ public class SegmentFinder {
 			seg.set_fitPlane();	
 			
 			if(Constants.isCALIB()) {
-				// get all the hits to obtain layer efficiency
-				EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("DC::dgtz");
-				int[] hitno = bankDGTZ.getInt("hitn");
-		        int[] sector = bankDGTZ.getInt("sector");
-				int[] slayer = bankDGTZ.getInt("superlayer");
-				int[] layer = bankDGTZ.getInt("layer");
-				int[] wire = bankDGTZ.getInt("wire");
 				
-				double[] stime = null ;
-				int[] tdc = null;
-				stime = bankDGTZ.getDouble("stime");
-				tdc = bankDGTZ.getInt("TDC");
-						
-				int size = layer.length;
-				int[] layerNum = new int[size];
-				int[] superlayerNum =new int[size];
-				double[] smearedTime = new double[size];
+				DataBank bankDGTZ = event.getBank("DC::tdc");
 				
-				for(int i = 0; i<size; i++) {
-				
-					if(tdc!=null && tdc.length>0) {
-						
-						if(tdc[i]<0)
-							continue;
-							smearedTime[i] = (double) tdc[i];
-						} else {
-						if(stime!=null && stime.length>0)
-							smearedTime[i] = stime[i];
-					}
-					
-					if(slayer!=null && slayer.length>0) {
-						layerNum[i] = layer[i];
-						superlayerNum[i] = slayer[i];
-					} else {
-						superlayerNum[i]=(layer[i]-1)/6 + 1;
-						layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 
-					}
-			
+				int rows = bankDGTZ.rows();
+				int[] sector = new int[rows];
+				int[] layer = new int[rows];
+				int[] wire = new int[rows];
+				int[] tdc = new int[rows];
+				int[] layerNum = new int[rows];
+				int[] superlayerNum =new int[rows];
+				for(int i = 0; i< rows; i++) {
+					sector[i] = bankDGTZ.getByte("sector", i);
+					layer[i] = bankDGTZ.getByte("layer", i);
+					wire[i] = bankDGTZ.getShort("component", i);
+					tdc[i] = bankDGTZ.getInt("TDC", i);		
+					superlayerNum[i]=(layer[i]-1)/6 + 1;
+					layerNum[i] = layer[i] - (superlayerNum[i] - 1)*6; 
 				}
-				
-			
-				
 				
 				
 				// Get the Segment Trajectory
@@ -108,12 +85,12 @@ public class SegmentFinder {
 					double calc_doca = (x-trkX)*cosTrkAngle;
 					trkDocas[l] = calc_doca;
 					
-					for(int j = 0; j< hitno.length; j++) {
+					for(int j = 0; j< rows; j++) {
 						if(sector[j]== seg.get_Sector() && superlayerNum[j]== seg.get_Superlayer()) {
-							if(layer[j]==l+1) {
+							if(layerNum[j]==l+1) {
 								for(int wo =0; wo<2; wo++)
-									if( Math.abs(trjWire-wire[j])==wo)
-										matchedHits[wo][l] = j;
+									if( Math.abs(trjWire-wire[j])==wo && tdc[j]>0)
+										matchedHits[wo][l] = (j+1);
 							}
 						}
 					}

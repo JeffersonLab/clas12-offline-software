@@ -92,7 +92,7 @@ public class TrackCandListFinder {
 					if(iBdl != 0 || (deltaTheta != 0)) {
 						
 						double p = Math.sqrt(pxz*pxz+py*py);
-						
+				
 						if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
 							continue;
 						

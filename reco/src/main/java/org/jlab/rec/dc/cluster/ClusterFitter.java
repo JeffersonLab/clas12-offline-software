@@ -144,9 +144,9 @@ public class ClusterFitter {
 	    	Point3D Wire = new Point3D(zWire, xWire,0);
 	    	
 	    	
-	    	//double trkDocaMP = -xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept());
+	    	double trkDocaMPSign = Math.signum(-xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept())); 
 	    	double trkDocaMP = FitLine.distance(Wire).length();
-	    	double trkDoca = trkDocaMP*Math.cos(Math.toRadians(6.));
+	    	double trkDoca = trkDocaMPSign*trkDocaMP*Math.cos(Math.toRadians(6.));
 	    	
 	    	clus.get(i).set_ClusFitDoca(trkDoca);
 
