@@ -102,7 +102,6 @@ public class DetectorEvent {
     }
     
 
-    
     public List<DetectorParticle> getParticles(){ return this.particleList;}
     public DetectorParticle  getParticle(int index) { return this.particleList.get(index);}
     /**
