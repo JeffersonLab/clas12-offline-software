@@ -38,6 +38,20 @@ public class EngineProcessor {
     public void addEngine(String name, ReconstructionEngine engine){
         this.processorEngines.put(name, engine);
     }
+    
+    public void initDefault(){
+        //String[] names = new String[]{"DCHB","FTOF","EC","DCTB","EBTB"};
+        String[] services = new String[]{
+            "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.ftof.FTOFEngine",
+            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ec.ECEngine",
+            "org.jlab.service.eb.EBEngine"
+        };
+        for(String service : services){
+            this.addEngine(service);
+        }
+    }
     /**
      * Adding engine to the map the order of the services matters, since they will 
      * be executed in order added.
@@ -110,12 +124,16 @@ public class EngineProcessor {
             }
         }
     }
+    
+    public void processFile(String file, String output){
+        this.processFile(file, output, -1);
+    }
     /**
      * process entire file through engine chain.
      * @param file file name to process.
      * @param output
      */
-    public void processFile(String file, String output){
+    public void processFile(String file, String output, int nevents){
         if(file.endsWith(".hipo")==true){
             HipoDataSource reader = new HipoDataSource();
             reader.open(file);
@@ -130,6 +148,9 @@ public class EngineProcessor {
                 processEvent(event);
                 writer.writeEvent(event);
                 eventCounter++;
+                if(nevents>0){
+                    if(eventCounter>nevents) break;
+                }
                 progress.updateStatus();
             }
             progress.showStatus();
@@ -148,9 +169,12 @@ public class EngineProcessor {
     
     public static void main(String[] args){
         
-        OptionParser parser = new OptionParser();
-        parser.addRequired("-o");
-        parser.addRequired("-i");
+        OptionParser parser = new OptionParser("notsouseful-util");
+        parser.addRequired("-o","output.hipo");
+        parser.addRequired("-i","input.hipo");
+        parser.setRequiresInputList(false);
+        parser.addOption("-c","0","use default configuration [1 - yes, 0 - no] ");
+        parser.addOption("-n","-1","number of events to process");
         
         parser.parse(args);
         
@@ -161,16 +185,22 @@ public class EngineProcessor {
             String  inputFile = parser.getOption("-i").stringValue();
             String outputFile = parser.getOption("-o").stringValue();
             
-            for(int i =1; i < args.length; i++){
+            /*for(int i =1; i < args.length; i++){
                 services.add(args[i]);
-            }
-                
+            }*/
+            
             EngineProcessor proc = new EngineProcessor();
-            for(String engine : services){
-                proc.addEngine(engine);
+            int config  = parser.getOption("-c").intValue();
+            int nevents = parser.getOption("-n").intValue();
+            if(config>0){
+                proc.initDefault();
+            } else {
+                for(String engine : services){
+                    proc.addEngine(engine);
+                }
             }
             proc.init();
-            proc.processFile(inputFile,outputFile);        
+            proc.processFile(inputFile,outputFile,nevents);        
         }
     }
 }

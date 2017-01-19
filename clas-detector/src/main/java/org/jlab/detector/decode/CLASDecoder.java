@@ -276,6 +276,14 @@ public class CLASDecoder {
         
         return event;
     }
+    public HipoDataBank createHeaderBank(DataEvent event, int nrun, int nevent, float torus, float solenoid){
+        HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);        
+        bank.setInt("run",        0, nrun);
+        bank.setInt("event",      0, nevent);
+        bank.setFloat("torus",    0, torus);
+        bank.setFloat("solenoid", 0, solenoid);        
+        return bank;
+    }
     
     public static void main(String[] args){
         
@@ -285,6 +293,11 @@ public class CLASDecoder {
         parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
         parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
         parser.addRequired("-o","output.hipo");
+        
+        
+        parser.addOption("-r", "10","run number in the header bank");
+        parser.addOption("-t", "-0.5","torus current in the header bank");
+        parser.addOption("-s", "0.5","solenoid current in the header bank");
         
         parser.parse(args);
         
@@ -323,6 +336,11 @@ public class CLASDecoder {
             HipoDataSync writer = new HipoDataSync();
             writer.setCompressionType(compression);
             
+            int nrun = parser.getOption("-r").intValue();
+            double torus = parser.getOption("-t").doubleValue();
+            double solenoid = parser.getOption("-s").doubleValue();
+            
+            
             writer.open(outputFile);
             ProgressPrintout progress = new ProgressPrintout();
             System.out.println("INPUT LIST SIZE = " + inputList.size());
@@ -335,6 +353,8 @@ public class CLASDecoder {
                 while(reader.hasEvent()==true){
                     EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
                     DataEvent  decodedEvent = decoder.getDataEvent(event);
+                    DataBank   header = decoder.createHeaderBank(decodedEvent, nrun, counter, (float) torus, (float) solenoid);
+                    decodedEvent.appendBanks(header);
                     writer.writeEvent(decodedEvent);
                     counter++;
                     progress.updateStatus();

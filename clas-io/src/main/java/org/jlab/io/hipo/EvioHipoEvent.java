@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.hipo.data.HipoEvent;
 import org.jlab.hipo.data.HipoNodeBuilder;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataDescriptor;
 import org.jlab.io.evio.EvioDataDictionary;
@@ -26,14 +27,55 @@ public class EvioHipoEvent {
     
     
     public HipoDataEvent getHipoEvent(HipoDataSync writer, EvioDataEvent event){        
-        HipoDataEvent hipoEvent = (HipoDataEvent) writer.createEvent();        
+        HipoDataEvent hipoEvent = (HipoDataEvent) writer.createEvent();
+        this.fillHipoEventRF(hipoEvent, event);
         this.fillHipoEventFTOF(hipoEvent, event);
         this.fillHipoEventFTCAL(hipoEvent, event);
         this.fillHipoEventDC(hipoEvent, event);
         //this.fillHipoEventCTOF(hipoEvent, event);        
         this.fillHipoEventECAL(hipoEvent, event);
+        this.fillHipoEventLTCC(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
         return hipoEvent;
+    }
+    
+    
+    public void fillHipoEventRF(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("RF::info")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RF::info");
+            int nrows = evioBank.rows();
+            DataBank  hipoBank = hipoEvent.createBank("RUN::rf", nrows);
+            for(int i = 0; i < nrows; i++){
+                hipoBank.setShort("id", i, (short) evioBank.getInt("id", i));
+                double rf_time = evioBank.getDouble("time", i);
+                //System.out.println(" RF time = " + rf_time);
+                hipoBank.setFloat("time", i, (float) evioBank.getDouble("rf", i));
+            }
+            hipoEvent.appendBanks(hipoBank);
+        }
+    }
+    public void fillHipoEventLTCC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("LTCC::dgtz")==true){
+            //System.out.println("LTCC bank is present");
+            try {
+                EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("LTCC::dgtz");
+                //evioBank.show();
+                
+                int nrows = evioBank.rows();
+                DataBank  hipoBank = hipoEvent.createBank("LTCC::adc", nrows);
+                for(int i = 0; i < nrows; i++){
+                    hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
+                    hipoBank.setByte("layer", i, (byte) evioBank.getInt("side",i));
+                    hipoBank.setShort("component", i, (short) evioBank.getInt("segment",i));
+                    hipoBank.setInt("ADC", i, evioBank.getInt("npheD", i)*100);
+                    hipoBank.setFloat("time", i, (float) 0.0);
+                    hipoBank.setShort("ped", i, (short) 0);
+                }
+                hipoEvent.appendBanks(hipoBank);
+            } catch (Exception e) {
+                System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
+            }
+        }
     }
     
     public void fillHipoEventDC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){

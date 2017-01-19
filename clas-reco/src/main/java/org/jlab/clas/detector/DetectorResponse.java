@@ -54,6 +54,14 @@ public class DetectorResponse {
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}
     
+    public double   getMatchedDistance(){ 
+        return Math.sqrt( 
+                (this.hitPosition.x()-this.hitPositionMatched.x()) * (this.hitPosition.x()-this.hitPositionMatched.x())
+                        + (this.hitPosition.y()-this.hitPositionMatched.y()) * (this.hitPosition.y()-this.hitPositionMatched.y())
+                        + (this.hitPosition.z()-this.hitPositionMatched.z()) * (this.hitPosition.z()-this.hitPositionMatched.z())
+        );
+    }
+    
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     
     
@@ -115,7 +123,32 @@ public class DetectorResponse {
         }
         return responseList;
     }
-    
+    /*
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
+            String bankName, DetectorType type, double energyThreshold){
+        
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        if(event.hasBank(bankName)==true){
+            DataBank bank = event.getBank(bankName);
+            int nrows = bank.rows();
+            for(int row = 0; row < nrows; row++){
+                int sector = bank.getByte("sector", row);
+                int  layer = bank.getByte("layer",  row);
+                DetectorResponse  response = new DetectorResponse(sector,layer,0);
+                response.getDescriptor().setType(type);
+                float x = bank.getFloat("x", row);
+                float y = bank.getFloat("y", row);
+                float z = bank.getFloat("z", row);
+                response.setPosition(x, y, z);
+                response.setEnergy(bank.getFloat("energy", row));
+                response.setTime(bank.getFloat("time", row));
+                if(response.getEnergy()>energyThreshold){
+                    responseList.add(response);
+                }
+            }
+        }
+        return responseList;
+    }*/
     /**
      * Reads a HIPO event, constructs list of detector responses then returns only
      * entries with energy above given threshold.
@@ -192,16 +225,17 @@ public class DetectorResponse {
         str.append(String.format(" PINDX [%3d] ", 
                 this.getAssociation()
                 ));
-        str.append(String.format(" T/P/E %8.4f %8.4f %8.4f", this.detectorTime,
+        str.append(String.format(" T/P/E %6.2f %6.2f %6.2f", this.detectorTime,
                 this.particlePath,
                 this.detectorEnergy));
-        str.append(String.format(" POS [ %9.3f %9.3f %9.3f ]", 
+        str.append(String.format(" POS [ %8.2f %8.2f %8.2f ]", 
                 this.hitPosition.x(),this.hitPosition.y(),this.hitPosition.z()));
-        str.append(String.format(" ACCURACY [ %9.3f %9.3f %9.3f ] ",
+        str.append(String.format(" ACCURACY [ %8.3f %8.3f %8.3f ] ",
                 this.hitPosition.x()-this.hitPositionMatched.x(),
                 this.hitPosition.y()-this.hitPositionMatched.y(),
                 this.hitPosition.z()-this.hitPositionMatched.z()
                 ));
+        str.append(String.format(" %8.4f", this.getMatchedDistance()));
         return str.toString();
     }
 }

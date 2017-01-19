@@ -8,6 +8,7 @@ package org.jlab.clas.detector;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
@@ -166,5 +167,41 @@ public class DetectorData {
            bank.setFloat("energy", row, (float) r.getEnergy());
        }
        return bank;
+   }
+   
+   public static Vector3D  readVector(DataBank bank, int row, String xc, String yc, String zc){
+       Vector3D vec = new Vector3D();
+       vec.setXYZ(bank.getFloat(xc, row), bank.getFloat(yc, row),bank.getFloat(zc, row));
+       return vec;
+   }
+   
+   public static List<DetectorTrack>  readDetectorTracks(DataEvent event, String bank_name){
+       List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
+       if(event.hasBank(bank_name)==true){
+           DataBank bank = event.getBank(bank_name);
+           int nrows = bank.rows();
+           
+           for(int row = 0; row < nrows; row++){
+               int    charge = bank.getByte("q", row);
+               Vector3D pvec = DetectorData.readVector(bank, row, "p0_x", "p0_y", "p0_z");
+               Vector3D vertex = DetectorData.readVector(bank, row, "Vtx0_x", "Vtx0_y", "Vtx0_z");
+               
+               DetectorTrack  track = new DetectorTrack(charge,pvec.mag());
+               track.setVector(pvec.x(), pvec.y(), pvec.z());
+               track.setVertex(vertex.x(), vertex.y(), vertex.z());
+               track.setPath(bank.getFloat("pathlength", row));
+               
+               Vector3D lc_vec = DetectorData.readVector(bank, row, "c1_x", "c1_y", "c1_z");
+               Vector3D lc_dir = DetectorData.readVector(bank, row, "c1_ux", "c1_uy", "c1_uz");
+               
+               Vector3D hc_vec = DetectorData.readVector(bank, row, "c3_x", "c3_y", "c3_z");
+               Vector3D hc_dir = DetectorData.readVector(bank, row, "c3_ux", "c3_uy", "c3_uz");
+               track.addCross(lc_vec.x(), lc_vec.y(), lc_vec.z(), lc_dir.x(), lc_dir.y(), lc_dir.z());
+               track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
+               
+               tracks.add(track);
+           }
+       }
+       return tracks;
    }
 }

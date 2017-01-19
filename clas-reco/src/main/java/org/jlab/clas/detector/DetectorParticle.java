@@ -113,9 +113,11 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res, boolean match){
         this.responseStore.add(res);
         if(match==true){
-            Line3D distance = res.getDistance(this);
-            res.getMatchedPosition().setXYZ(distance.origin().x(),
-                    distance.origin().y(),distance.origin().z());
+            Line3D distance = this.getDistance(res);
+            
+            res.getMatchedPosition().setXYZ(
+                    distance.midpoint().x(),
+                    distance.midpoint().y(),distance.midpoint().z());
             
             /*Vector3D vec = new Vector3D(
                     this.particleCrossPosition.x(),
@@ -278,17 +280,26 @@ public class DetectorParticle implements Comparable {
     
     public double   getPathLength(double x, double y, double z){
         double crosspath = Math.sqrt(
-                (this.particleCrossPosition.x()-x)*(this.particleCrossPosition.x()-x)
-                        + (this.particleCrossPosition.y()-y)*(this.particleCrossPosition.y()-y)
-                        + (this.particleCrossPosition.z()-z)*(this.particleCrossPosition.z()-z)
+                (this.detectorTrack.getLastCross().origin().x()-x)*
+                        (this.detectorTrack.getLastCross().origin().x()-x)
+                        + (this.detectorTrack.getLastCross().origin().y()-y)*
+                                (this.detectorTrack.getLastCross().origin().y()-y)
+                        + (this.detectorTrack.getLastCross().origin().z()-z)*
+                                (this.detectorTrack.getLastCross().origin().z()-z)
         );
-        return this.particlePath + crosspath;
+        return this.detectorTrack.getPath() + crosspath;
     }
     
     public double getTime(DetectorType type){
         DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         return response.getTime();
+    }
+    
+    public double getEnergyFraction(DetectorType type){
+        double energy = this.getEnergy(type);
+        if(this.vector().mag()<0.00001) return 0.0;
+        return energy/this.vector().mag();
     }
     
     public double getEnergy(DetectorType type){
@@ -305,6 +316,17 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
     
+    
+    public double getBeta(DetectorType type, double startTime){
+        DetectorResponse response = this.getHit(type);
+        if(response==null) return -1.0;
+        double cpath = this.getPathLength(response.getPosition());
+        double ctime = response.getTime() - startTime;
+        double beta  = cpath/ctime/30.0;
+        return beta;
+    }
+    
+    
     public double getBeta(DetectorType type){
         DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
@@ -314,10 +336,24 @@ public class DetectorParticle implements Comparable {
         return beta;
     }
     
+    public double getMass(DetectorType type,double startTime){
+        double mass2 = this.getMass2(type,startTime);
+        if(mass2<0) return Math.sqrt(-mass2);
+        return Math.sqrt(mass2);
+    }
+    
     public double getMass(DetectorType type){
         double mass2 = this.getMass2(type);
         if(mass2<0) return Math.sqrt(-mass2);
         return Math.sqrt(mass2);
+    }
+    
+    public double getMass2(DetectorType type,double startTime){
+        double beta   = this.getBeta(type,startTime);
+        double energy = this.getEnergy(type);
+        double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
+                - this.detectorTrack.getVector().mag2();
+        return mass2;
     }
     
     public double getMass2(DetectorType type){
@@ -345,15 +381,21 @@ public class DetectorParticle implements Comparable {
             double distanceThreshold){
         
         Line3D   trajectory = this.detectorTrack.getLastCross();
-        
+        //System.out.println("find hit in array size = "+ hitList.size());
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
         for(int loop = 0; loop < hitList.size(); loop++){
+           
             //for(DetectorResponse response : hitList){
             DetectorResponse response = hitList.get(loop);
+            
+            //System.out.println("analyzing response " + loop + " type = " + 
+            //       response.getDescriptor().getType() + " " + response.getDescriptor().getLayer() +
+            //        "  " + response.getAssociation());
             if(response.getDescriptor().getType()==type&&
-                    response.getDescriptor().getLayer()==detectorLayer){
+                    response.getDescriptor().getLayer()==detectorLayer
+                    &&response.getAssociation()<0){
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),
@@ -403,10 +445,12 @@ public class DetectorParticle implements Comparable {
     }
     
     public Line3D  getDistance(DetectorResponse  response){
-        Path3D trajectory = this.getTrajectory();
-        Point3D hitPoint = new Point3D(
-                response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
-        return trajectory.distance(hitPoint);
+        Line3D cross = this.detectorTrack.getLastCross();
+        Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
+        //Path3D trajectory = this.getTrajectory();
+        //Point3D hitPoint = new Point3D(
+        //response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
+        return dist;
     }
     
     public void setPath(double path){
@@ -433,7 +477,9 @@ public class DetectorParticle implements Comparable {
                 this.particleCrossPosition.z(),this.particleCrossDirection.x(),
                 this.particleCrossDirection.y(),this.particleCrossDirection.z()));
         */
-        str.append(String.format("[particle] c = %2d, p = %6.2f \n", this.getCharge(),this.vector().mag()));
+        str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, beta = %6.3f, mass2 = %8.3f\n",                
+                this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.EC),
+                this.getBeta(),this.getMass()));
         for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");
