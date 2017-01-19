@@ -105,14 +105,24 @@ public class DataManager {
 	 */
 	public ArrayList<ColumnData> hasData(DataEvent event) {
 		ArrayList<ColumnData> list = new ArrayList<ColumnData>();
-		
+
 		String banks[] = event.getBankList();
 		if (banks != null) {
 			for (String bankName : banks) {
 				String columns[] = event.getColumnList(bankName);
 				if (columns != null) {
 					for (String columnName : columns) {
-						list.add(getColumnData(bankName, columnName));
+						ColumnData cd = getColumnData(bankName, columnName);
+						
+						if ("HitBasedTrkg::HBCrosses.Cluster_ID".equals(bankName + "." + columnName)) {
+							(new Throwable()).printStackTrace();
+						}
+						if (cd == null) {
+							Log.getInstance().warning("Dictionary does not seem to know about bank named [" + bankName
+									+ "." + columnName + "] May be a disconnect with json files");
+						} else {
+							list.add(cd);
+						}
 					}
 				}
 			}

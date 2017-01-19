@@ -109,45 +109,62 @@ public class JsonToJava extends JFrame implements ActionListener {
 					banks[i] = JsonBank.fromJsonObject(jobj);
 				}
 				
-				//declarations
-				_textArea.setText("//Array declarations\n");
+//				//declarations
+//				_textArea.setText("//Array declarations\n");
+//				for (JsonBank bank : banks) {
+//					for (JsonColumn column : bank.columns) {
+//						_textArea.append(column.declaration());
+//					}
+//				}
+//				
+//				_textArea.append("\n\n");
+//				
+//				//getters
+//				for (JsonBank bank : banks) {
+//					for (JsonColumn column : bank.columns) {
+//						_textArea.append(column.getter());
+//					}
+//				}
+//				
+//				_textArea.append("\n\n");
+//				
+//				//clear
+//				_textArea.append("//Nullify the arrays\n");
+//				_textArea.append("  public void clear() {\n");
+//				for (JsonBank bank : banks) {
+//					for (JsonColumn column : bank.columns) {
+//						_textArea.append(column.nullify());
+//					}
+//				}
+//				_textArea.append("  }\n");
+//				_textArea.append("\n\n");
+//			
+//				//read
+//				_textArea.append("//Read the arrays\n");
+//				_textArea.append("  public void read() {\n");
+//				for (JsonBank bank : banks) {
+//					for (JsonColumn column : bank.columns) {
+//						_textArea.append(column.read());
+//					}
+//				}
+//				_textArea.append("  }\n");
+//				_textArea.append("\n\n");
+				
+				//raw getters
 				for (JsonBank bank : banks) {
 					for (JsonColumn column : bank.columns) {
-						_textArea.append(column.declaration());
+						_textArea.append(column.rawGetter()  + "\n");
 					}
 				}
 				
 				_textArea.append("\n\n");
-				
-				//getters
+				//static raw getters
 				for (JsonBank bank : banks) {
 					for (JsonColumn column : bank.columns) {
-						_textArea.append(column.getter());
+						_textArea.append(column.staticRawGetter()  + "\n");
 					}
 				}
-				
-				_textArea.append("\n\n");
-				
-				//clear
-				_textArea.append("//Nullify the arrays\n");
-				_textArea.append("  public void clear() {\n");
-				for (JsonBank bank : banks) {
-					for (JsonColumn column : bank.columns) {
-						_textArea.append(column.nullify());
-					}
-				}
-				_textArea.append("  }\n");
-				_textArea.append("\n\n");
-			
-				//read
-				_textArea.append("//Read the arrays\n");
-				_textArea.append("  public void read() {\n");
-				for (JsonBank bank : banks) {
-					for (JsonColumn column : bank.columns) {
-						_textArea.append(column.read());
-					}
-				}
-				_textArea.append("  }\n");
+
 
 			}
 		}

@@ -13,7 +13,47 @@
        {"name":"vz",  "id":7, "type":"float", "info":"z component of the vertex"}
     ]
   },
-
+ {
+     "bank": "RECHB::Particle",
+     "group": 22,
+     "info": "Reconstructed Particle Information",
+     "items": [
+       {"name":"pid", "id":1, "type":"int32", "info":"particle id in LUND conventions"},
+       {"name":"px",  "id":2, "type":"float", "info":"x component of the momentum"},
+       {"name":"py",  "id":3, "type":"float", "info":"y component of the momentum"},
+       {"name":"pz",  "id":4, "type":"float", "info":"z component of the momentum"},
+       {"name":"vx",  "id":5, "type":"float", "info":"x component of the vertex"},
+       {"name":"vy",  "id":6, "type":"float", "info":"y component of the vertex"},
+       {"name":"vz",  "id":7, "type":"float", "info":"z component of the vertex"},
+       {"name":"charge",  "id":8,  "type":"int8",  "info":"particle charge"},
+       {"name":"mass",    "id":9,  "type":"float", "info":"particle mass measured by TOF"},
+       {"name":"beta",    "id":10, "type":"float", "info":"particle beta measured by TOF"},
+       {"name":"chi2pid", "id":11, "type":"float", "info":"Chi2 of assigned PID"},
+       {"name":"status",  "id":12, "type":"int8",  "info":"particle status (represents detector collection it passed)"}
+     ]
+  },  
+  {
+     "bank": "RECHB::Detector",
+     "group": 23,
+     "info": "Detector Responses for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the array"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"number of row in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int16", "info":"Sector of the Detector Hit"},
+         {"name":"layer",     "id":5, "type":"int16", "info":"Layer of the detector hit"},
+         {"name":"component", "id":6, "type":"int16", "info":"Component of the Detector"},
+         {"name":"x",  "id":7,  "type":"float", "info":"X coordinate of the hit"},
+         {"name":"y",  "id":8,  "type":"float", "info":"Y coordinate of the hit"},
+         {"name":"z",  "id":9,  "type":"float", "info":"Z coordinate of the hit"},
+         {"name":"hx", "id":10, "type":"float", "info":"X coordinate of the matched hit"},
+         {"name":"hy", "id":11, "type":"float", "info":"Y coordinate of the mathced hit"},
+         {"name":"hz", "id":12, "type":"float", "info":"Z coordinate of the matched hit"},
+         {"name":"path",   "id":13, "type":"float", "info":"Path from vertex to the hit position"}, 
+         {"name":"time",   "id":14, "type":"float", "info":"Time associated with the hit"}, 
+         {"name":"energy", "id":15, "type":"float", "info":"Energy associated with the hit"}                   
+     ]
+  },
   {
      "bank": "REC::Particle",
      "group": 24,
