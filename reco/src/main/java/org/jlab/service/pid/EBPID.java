@@ -14,12 +14,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.*;
 
 
-
-
-
-
-
-
 /**
  *
  * @author jnewton
@@ -69,16 +63,16 @@ public class EBPID {
                 
                 switch(abs(pidsum)) {
                     case 11: 
-                    particle.setPIDResult(electron.getPIDResult(particle));
+                    //particle.setPIDResult(electron.getPIDResult(particle));
                     break;
                     case 211:
-                    particle.setPIDResult(pion.getPIDResult(particle));
+                    //particle.setPIDResult(pion.getPIDResult(particle));
                     break;
                     case 321:
-                    particle.setPIDResult(kaon.getPIDResult(particle));
+                    //particle.setPIDResult(kaon.getPIDResult(particle));
                     break;
                     case 2212:
-                    particle.setPIDResult(proton.getPIDResult(particle));
+                    //particle.setPIDResult(proton.getPIDResult(particle));
                     break;
                    }
                     
@@ -223,7 +217,7 @@ class TBProton implements ParticleID {
 class ECTiming implements ParticleTiming {
     public void CoincidenceCheck(DetectorEvent event, DetectorParticle particle, DetectorType type, int layer){
         if(particle.hasHit(type,layer)==true){
-        double delta = particle.getVertexTime(type,layer) - event.getEventTrigger().getStartTime();
+        double delta = 0.0;// particle.getVertexTime(type,layer) - event.getEventTrigger().getStartTime();
         if(abs(delta)>2){
             particle.getHit(type, layer).setEnergy(0.0);
             particle.setParticleTimeCheck(false);

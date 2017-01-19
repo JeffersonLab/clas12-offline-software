@@ -18,7 +18,7 @@ done
 if [[ ! -z $mopt ]]
 then
     mvn install
-    cp target/clas12detector-eb-1.0-SNAPSHOT.jar $COATJAVA/lib/plugins/.
+    cp target/clas12detector-eb-1.0-SNAPSHOT.jar $COATJAVA/lib/services/.
 #    cd ..
     echo "\n"
     echo "*****************************************"

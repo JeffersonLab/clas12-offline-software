@@ -241,10 +241,10 @@ public class EBio {
         
 
         EvioDataBank  bank = EvioFactory.createBank(bankName, 1);
-        bank.setDouble("starttime", 0, event.getEventTrigger().getStartTime());
-        bank.setDouble("vertextime",0, event.getEventTrigger().getVertexTime());
-        bank.setDouble("rftime", 0, event.getEventTrigger().getRFTime());
-        bank.setInt("id",0,event.getEventTrigger().getTriggerID());
+        //bank.setDouble("starttime", 0, event.getEventTrigger().getStartTime());
+        //bank.setDouble("vertextime",0, event.getEventTrigger().getVertexTime());
+        //bank.setDouble("rftime", 0, event.getEventTrigger().getRFTime());
+        //bank.setInt("id",0,event.getEventTrigger().getTriggerID());
 
         return bank;
     }

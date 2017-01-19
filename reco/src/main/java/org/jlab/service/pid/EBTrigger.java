@@ -32,7 +32,7 @@ public class EBTrigger {
       
           if(de.hasBank("RF::info")==true){
             EvioDataBank bank = (EvioDataBank) de.getBank("RF::info");
-            event.getEventTrigger().setRFTime(bank.getDouble("rf",0));//Obtain a TDC value
+            //event.getEventTrigger().setRFTime(bank.getDouble("rf",0));//Obtain a TDC value
         }
     }
             
@@ -48,7 +48,7 @@ public class EBTrigger {
         ElectronTriggerList electron = new ElectronTriggerList();
         PositronTriggerList positron = new PositronTriggerList();
         NegativePionTriggerList negativepion = new NegativePionTriggerList();
-        
+        /*
         event.getEventTrigger().setElectronCandidates(electron.getCandidates(event));
         event.getEventTrigger().setPositronCandidates(positron.getCandidates(event));
         event.getEventTrigger().setNegativePionCandidates(negativepion.getCandidates(event));
@@ -69,7 +69,7 @@ public class EBTrigger {
                 TriggerNegativePion tnegativepion = new TriggerNegativePion();
                 tnegativepion.CollectBestTriggerInformation(event);
                 break;
-              }
+              }*/
         }
        
      
@@ -79,7 +79,7 @@ public class EBTrigger {
             double path = res.getPath();
             double time = res.getTime();
 
-          double beta = p.getPathLength(DetectorType.FTOF)/(time-event.getEventTrigger().getStartTime())/29.9792;
+          double beta = 0.0;// p.getPathLength(DetectorType.FTOF)/(time-event.getEventTrigger().getStartTime())/29.9792;
             p.setBeta(beta);
             double mom = p.vector().mag();
             double mass2 = (mom*mom - beta*beta*mom*mom)/(beta*beta);
@@ -121,6 +121,7 @@ public class EBTrigger {
 class TriggerElectron implements BestTrigger {
     
     public void CollectBestTriggerInformation(DetectorEvent event){
+        /*
                    EventTrigger Trigger = new EventTrigger();
                    Trigger = event.getEventTrigger();
                    DetectorParticle BestTrigger = Trigger.GetBestTriggerParticle(Trigger.getElectronCandidates());
@@ -128,20 +129,20 @@ class TriggerElectron implements BestTrigger {
                    Trigger.setzt(BestTrigger.vertex().z());
                    Trigger.setVertexTime(Trigger.VertexTime(BestTrigger, 11));
                    Trigger.setStartTime(Trigger.StartTime(BestTrigger,11)); //calculate start time using speed of an electron
-                   
+          */         
     }
 }
 
 class TriggerPositron implements BestTrigger {
     
     public void CollectBestTriggerInformation(DetectorEvent event){
-                   EventTrigger Trigger = new EventTrigger();
+                /*   EventTrigger Trigger = new EventTrigger();
                    Trigger = event.getEventTrigger();
                    DetectorParticle BestTrigger = Trigger.GetBestTriggerParticle(Trigger.getPositronCandidates());
                    Trigger.setTriggerParticle(BestTrigger);
                    Trigger.setVertexTime(Trigger.VertexTime(BestTrigger, 11));
                    Trigger.setStartTime(Trigger.StartTime(BestTrigger,11));
-                   Trigger.setzt(BestTrigger.vertex().z());
+                   Trigger.setzt(BestTrigger.vertex().z());*/
                    
     }
 }
@@ -149,14 +150,14 @@ class TriggerPositron implements BestTrigger {
 class TriggerNegativePion implements BestTrigger {
     
     public void CollectBestTriggerInformation(DetectorEvent event){
-                   EventTrigger Trigger = new EventTrigger();
+                  /* EventTrigger Trigger = new EventTrigger();
                    Trigger = event.getEventTrigger();
                    DetectorParticle BestTrigger = Trigger.GetBestTriggerParticle(Trigger.getNegativePionCandidates());
                    Trigger.setTriggerParticle(BestTrigger);
                    Trigger.setVertexTime(Trigger.VertexTime(BestTrigger, 211));
                    Trigger.setStartTime(Trigger.StartTime(BestTrigger,211));
                    Trigger.setzt(BestTrigger.vertex().z());
-                   
+                   */
     }
 }
 
