@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -164,6 +165,28 @@ public class DetectorEventDecoder {
                     //}
                     int nsa = daq.getIntValue("nsa", crate,slot,channel);
                     int nsb = daq.getIntValue("nsb", crate,slot,channel);
+                    int tet = daq.getIntValue("tet", crate,slot,channel);
+                    if(data.getADCSize()>0){
+                        for(int i = 0; i < data.getADCSize(); i++){
+                            ADCData adc = data.getADCData(i);
+                            if(adc.getPulseSize()>0){
+                                //System.out.println("-----");
+                                //System.out.println(" FITTING PULSE " + 
+                                //        crate + " / " + slot + " / " + channel);
+                                try {
+                                    extendedFitter.fit(nsa, nsb, tet, 0, adc.getPulseArray());
+                                } catch (Exception e) {
+                                    System.out.println(">>>> error : fitting pulse "
+                                    +  crate + " / " + slot + " / " + channel);
+                                }
+                                //System.out.println(" FIT RESULT = " + extendedFitter.adc + " / "
+                                //        + this.extendedFitter.t0 + " / " + this.extendedFitter.ped);
+                                adc.setIntegral(extendedFitter.adc);
+                                adc.setTimeWord(this.extendedFitter.t0);
+                                adc.setPedestal((short) this.extendedFitter.ped);                                
+                            }
+                        }
+                    }
                     //System.out.println(" apply nsa nsb " + nsa + " " + nsb);
                     if(data.getADCSize()>0){
                         for(int i = 0; i < data.getADCSize(); i++){

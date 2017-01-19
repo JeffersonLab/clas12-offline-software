@@ -145,6 +145,13 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             return adcPulse.get(0).length;
         }
         /**
+         * returns array of the ADC pulse
+         * @return 
+         */
+        public short[] getPulseArray(){
+            return this.adcPulse.get(0);
+        }
+        /**
          * returns adc value from the pulse
          * @param bin pulse bin
          * @return 
