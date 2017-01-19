@@ -56,7 +56,7 @@ public class EvioHipoEvent {
         }
     }
     
-        public void fillHipoEventHTCC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+    public void fillHipoEventHTCC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("HTCC::dgtz")==true){
             //System.out.println("LTCC bank is present");
             try {
@@ -79,7 +79,7 @@ public class EvioHipoEvent {
             }
         }
     }
-        
+    
     public void fillHipoEventLTCC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("LTCC::dgtz")==true){
             //System.out.println("LTCC bank is present");
@@ -113,6 +113,7 @@ public class EvioHipoEvent {
                 hipoTDC.setByte("sector", i, (byte) evioBank.getInt("sector",i));
                 hipoTDC.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoTDC.setShort("component",  i, (short) evioBank.getInt("wire",i));
+                hipoTDC.setByte("order", i, (byte) 2);
                 hipoTDC.setInt("TDC", i, evioBank.getInt("TDC", i));
                 hipoDOCA.setByte("LR", i, (byte) evioBank.getInt("LR", i));
                 hipoDOCA.setFloat("doca", i, (float) evioBank.getDouble("doca", i));
@@ -235,7 +236,7 @@ public class EvioHipoEvent {
                 hipoTDC.setByte("sector",     counter, (byte)  bankPCAL.getInt("sector",i));
                 hipoTDC.setByte("layer",      counter, (byte)  bankPCAL.getInt("view",i));
                 hipoTDC.setShort("component", counter, (short) bankPCAL.getInt("strip",i));
-                hipoTDC.setByte("order", counter, (byte) 1);
+                hipoTDC.setByte("order", counter, (byte) 2);
                 hipoTDC.setInt("TDC", counter, bankPCAL.getInt("TDC", i));
                 counter++;
             }
