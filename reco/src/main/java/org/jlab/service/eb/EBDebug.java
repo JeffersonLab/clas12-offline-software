@@ -6,6 +6,7 @@
 package org.jlab.service.eb;
 
 import org.jlab.clas.detector.DetectorData;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -36,9 +37,13 @@ public class EBDebug {
             //if()
             if(event.hasBank("REC::Particle")==true){
                 DataBank bank = event.getBank("REC::Particle");
+                DetectorEvent  detEvent = DetectorEvent.readDetectorEvent(event);
+                if(debug>2){
+                    System.out.println(detEvent.toString());
+                }
                 if(bank!=null){
                     if(bank.rows()>0){
-                        if(bank.getInt("pid", 0)==11&&debug>0){
+                        if(bank.getInt("pid", 0)==11&&debug>0&&debug<3){
                             bank.show();
                         }
                         if(bank.getInt("pid", 0)==11){
