@@ -316,6 +316,14 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
     
+    public double getBeta(DetectorType type, int layer, double startTime){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        double cpath = this.getPathLength(response.getPosition());
+        double ctime = response.getTime() - startTime;
+        double beta  = cpath/ctime/30.0;
+        return beta;
+    }
     
     public double getBeta(DetectorType type, double startTime){
         DetectorResponse response = this.getHit(type);
@@ -342,10 +350,24 @@ public class DetectorParticle implements Comparable {
         return Math.sqrt(mass2);
     }
     
+    public double getMass(DetectorType type,int layer, double startTime){
+        double mass2 = this.getMass2(type,layer,startTime);
+        if(mass2<0) return Math.sqrt(-mass2);
+        return Math.sqrt(mass2);
+    }
+    
     public double getMass(DetectorType type){
         double mass2 = this.getMass2(type);
         if(mass2<0) return Math.sqrt(-mass2);
         return Math.sqrt(mass2);
+    }
+    
+    public double getMass2(DetectorType type,int layer, double startTime){
+        double beta   = this.getBeta(type,layer,startTime);
+        double energy = this.getEnergy(type);
+        double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
+                - this.detectorTrack.getVector().mag2();
+        return mass2;
     }
     
     public double getMass2(DetectorType type,double startTime){
