@@ -18,8 +18,740 @@ import cnuphys.splot.plot.DoubleFormat;
  */
 public class DC {
 	
-	
-	
+
+
+	//id of the hit
+	  static public short[] get_id_HBHits() {return ColumnData.getShortArray("HitBasedTrkg::HBHits.id");}
+
+	//id of the hit
+	  static public short[] get_status_HBHits() {return ColumnData.getShortArray("HitBasedTrkg::HBHits.status");}
+
+	//DC sector
+	  static public byte[] get_sector_HBHits() {return ColumnData.getByteArray("HitBasedTrkg::HBHits.sector");}
+
+	//DC superlayer (1...6)
+	  static public byte[] get_superlayer_HBHits() {return ColumnData.getByteArray("HitBasedTrkg::HBHits.superlayer");}
+
+	//DC layer in superlayer (1...6)
+	  static public byte[] get_layer_HBHits() {return ColumnData.getByteArray("HitBasedTrkg::HBHits.layer");}
+
+	//wire id of DC
+	  static public short[] get_wire_HBHits() {return ColumnData.getShortArray("HitBasedTrkg::HBHits.wire");}
+
+	//raw time of the hit
+	  static public float[] get_time_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.time");}
+
+	//track doca of the hit (in cm)
+	  static public float[] get_trkDoca_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.trkDoca");}
+
+	//error on track doca of the hit
+	  static public float[] get_docaError_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.docaError");}
+
+	//Left/Right ambiguity of the hit
+	  static public byte[] get_LR_HBHits() {return ColumnData.getByteArray("HitBasedTrkg::HBHits.LR");}
+
+	//x in planar local coordinate system
+	  static public float[] get_LocX_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.LocX");}
+
+	//y in planar local coordinate system
+	  static public float[] get_LocY_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.LocY");}
+
+	//wire x-coordinate  in tilted-sector
+	  static public float[] get_X_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.X");}
+
+	//wire z-coordinate  in tilted-sector
+	  static public float[] get_Z_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.Z");}
+
+	//B-field intensity at hit position in tilted-sector system
+	  static public float[] get_B_HBHits() {return ColumnData.getFloatArray("HitBasedTrkg::HBHits.B");}
+
+	//ID of associated cluster
+	  static public short[] get_clusterID_HBHits() {return ColumnData.getShortArray("HitBasedTrkg::HBHits.clusterID");}
+
+	//ID of associated track
+	  static public byte[] get_trkID_HBHits() {return ColumnData.getByteArray("HitBasedTrkg::HBHits.trkID");}
+
+	//id of the cluster
+	  static public short[] get_id_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.id");}
+
+	//status of the cluster
+	  static public short[] get_status_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.status");}
+
+	//sector of the cluster
+	  static public byte[] get_sector_HBClusters() {return ColumnData.getByteArray("HitBasedTrkg::HBClusters.sector");}
+
+	//superlayer of the cluster
+	  static public byte[] get_superlayer_HBClusters() {return ColumnData.getByteArray("HitBasedTrkg::HBClusters.superlayer");}
+
+	//id of hit1 in cluster
+	  static public short[] get_Hit1_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit1_ID");}
+
+	//id of hit2 in cluster
+	  static public short[] get_Hit2_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit2_ID");}
+
+	//id of hit3 in cluster
+	  static public short[] get_Hit3_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit3_ID");}
+
+	//id of hit4 in cluster
+	  static public short[] get_Hit4_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit4_ID");}
+
+	//id of hit5 in cluster
+	  static public short[] get_Hit5_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit5_ID");}
+
+	//id of hit6 in cluster
+	  static public short[] get_Hit6_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit6_ID");}
+
+	//id of hit7 in cluster
+	  static public short[] get_Hit7_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit7_ID");}
+
+	//id of hit8 in cluster
+	  static public short[] get_Hit8_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit8_ID");}
+
+	//id of hit9 in cluster
+	  static public short[] get_Hit9_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit9_ID");}
+
+	//id of hit10 in cluster
+	  static public short[] get_Hit10_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit10_ID");}
+
+	//id of hit11 in cluster
+	  static public short[] get_Hit11_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit11_ID");}
+
+	//id of hit12 in cluster
+	  static public short[] get_Hit12_ID_HBClusters() {return ColumnData.getShortArray("HitBasedTrkg::HBClusters.Hit12_ID");}
+
+	//average wire number
+	  static public float[] get_avgWire_HBClusters() {return ColumnData.getFloatArray("HitBasedTrkg::HBClusters.avgWire");}
+
+	//fit chisq prob.
+	  static public float[] get_fitChisqProb_HBClusters() {return ColumnData.getFloatArray("HitBasedTrkg::HBClusters.fitChisqProb");}
+
+	//line fit slope
+	  static public float[] get_fitSlope_HBClusters() {return ColumnData.getFloatArray("HitBasedTrkg::HBClusters.fitSlope");}
+
+	//error on slope
+	  static public float[] get_fitSlopeErr_HBClusters() {return ColumnData.getFloatArray("HitBasedTrkg::HBClusters.fitSlopeErr");}
+
+	//line fit intercept
+	  static public float[] get_fitInterc_HBClusters() {return ColumnData.getFloatArray("HitBasedTrkg::HBClusters.fitInterc");}
+
+	//error on the intercept
+	  static public float[] get_fitIntercErr_HBClusters() {return ColumnData.getFloatArray("HitBasedTrkg::HBClusters.fitIntercErr");}
+
+	//cluster size
+	  static public byte[] get_size_HBClusters() {return ColumnData.getByteArray("HitBasedTrkg::HBClusters.size");}
+
+	//id of the segment
+	  static public short[] get_id_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.id");}
+
+	//status of the segment
+	  static public short[] get_status_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.status");}
+
+	//sector of the segment
+	  static public byte[] get_sector_HBSegments() {return ColumnData.getByteArray("HitBasedTrkg::HBSegments.sector");}
+
+	//superlayer of superlayer
+	  static public byte[] get_superlayer_HBSegments() {return ColumnData.getByteArray("HitBasedTrkg::HBSegments.superlayer");}
+
+	//associated cluster id
+	  static public short[] get_Cluster_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Cluster_ID");}
+
+	//id of hit1 in cluster
+	  static public short[] get_Hit1_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit1_ID");}
+
+	//id of hit2 in cluster
+	  static public short[] get_Hit2_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit2_ID");}
+
+	//id of hit3 in cluster
+	  static public short[] get_Hit3_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit3_ID");}
+
+	//id of hit4 in cluster
+	  static public short[] get_Hit4_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit4_ID");}
+
+	//id of hit5 in cluster
+	  static public short[] get_Hit5_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit5_ID");}
+
+	//id of hit6 in cluster
+	  static public short[] get_Hit6_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit6_ID");}
+
+	//id of hit7 in cluster
+	  static public short[] get_Hit7_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit7_ID");}
+
+	//id of hit8 in cluster
+	  static public short[] get_Hit8_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit8_ID");}
+
+	//id of hit9 in cluster
+	  static public short[] get_Hit9_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit9_ID");}
+
+	//id of hit10 in cluster
+	  static public short[] get_Hit10_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit10_ID");}
+
+	//id of hit11 in cluster
+	  static public short[] get_Hit11_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit11_ID");}
+
+	//id of hit12 in cluster
+	  static public short[] get_Hit12_ID_HBSegments() {return ColumnData.getShortArray("HitBasedTrkg::HBSegments.Hit12_ID");}
+
+	//average wire number
+	  static public float[] get_avgWire_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.avgWire");}
+
+	//fit chisq prob.
+	  static public float[] get_fitChisqProb_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.fitChisqProb");}
+
+	//line fit slope
+	  static public float[] get_fitSlope_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.fitSlope");}
+
+	//error on slope
+	  static public float[] get_fitSlopeErr_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.fitSlopeErr");}
+
+	//line fit intercept
+	  static public float[] get_fitInterc_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.fitInterc");}
+
+	//error on the intercept
+	  static public float[] get_fitIntercErr_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.fitIntercErr");}
+
+	//Segment 1st endpoint x coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint1X_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.SegEndPoint1X");}
+
+	//Segment 1st endpoint z coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint1Z_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.SegEndPoint1Z");}
+
+	//Segment 2nd endpoint x coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint2X_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.SegEndPoint2X");}
+
+	//Segment 2nd endpoint z coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint2Z_HBSegments() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegments.SegEndPoint2Z");}
+
+	//size of segment
+	  static public byte[] get_size_HBSegments() {return ColumnData.getByteArray("HitBasedTrkg::HBSegments.size");}
+
+	//id of the segment
+	  static public short[] get_segmentID_HBSegmentTrajectory() {return ColumnData.getShortArray("HitBasedTrkg::HBSegmentTrajectory.segmentID");}
+
+	//sector of FTOF
+	  static public byte[] get_sector_HBSegmentTrajectory() {return ColumnData.getByteArray("HitBasedTrkg::HBSegmentTrajectory.sector");}
+
+	//superlayer
+	  static public byte[] get_superlayer_HBSegmentTrajectory() {return ColumnData.getByteArray("HitBasedTrkg::HBSegmentTrajectory.superlayer");}
+
+	//layer
+	  static public byte[] get_layer_HBSegmentTrajectory() {return ColumnData.getByteArray("HitBasedTrkg::HBSegmentTrajectory.layer");}
+
+	//matched hit id
+	  static public short[] get_matchedHitID_HBSegmentTrajectory() {return ColumnData.getShortArray("HitBasedTrkg::HBSegmentTrajectory.matchedHitID");}
+
+	//calculated track doca
+	  static public float[] get_trkDoca_HBSegmentTrajectory() {return ColumnData.getFloatArray("HitBasedTrkg::HBSegmentTrajectory.trkDoca");}
+
+	//id of the cross
+	  static public short[] get_id_HBCrosses() {return ColumnData.getShortArray("HitBasedTrkg::HBCrosses.id");}
+
+	//status of the cross
+	  static public short[] get_status_HBCrosses() {return ColumnData.getShortArray("HitBasedTrkg::HBCrosses.status");}
+
+	//sector of the cross
+	  static public byte[] get_sector_HBCrosses() {return ColumnData.getByteArray("HitBasedTrkg::HBCrosses.sector");}
+
+	//region of the cross
+	  static public byte[] get_region_HBCrosses() {return ColumnData.getByteArray("HitBasedTrkg::HBCrosses.region");}
+
+	//DC track cross x-coordinate (in the DC tilted sector coordinate system)
+	  static public float[] get_x_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.x");}
+
+	//DC track cross y-coordinate (in the DC tilted sector coordinate system)
+	  static public float[] get_y_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.y");}
+
+	//DC track cross z-coordinate (in the DC tilted sector coordinate system)
+	  static public float[] get_z_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.z");}
+
+	//DC track cross x-coordinate uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_x_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.err_x");}
+
+	//DC track cross y-coordinate uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_y_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.err_y");}
+
+	//DC track cross z-coordinate uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_z_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.err_z");}
+
+	//DC track cross x-direction (in the DC tilted sector coordinate system)
+	  static public float[] get_ux_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.ux");}
+
+	//DC track cross y-direction (in the DC tilted sector coordinate system)
+	  static public float[] get_uy_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.uy");}
+
+	//DC track cross z-direction (in the DC tilted sector coordinate system)
+	  static public float[] get_uz_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.uz");}
+
+	//DC track cross x-direction uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_ux_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.err_ux");}
+
+	//DC track cross y-direction uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_uy_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.err_uy");}
+
+	//DC track cross z-direction uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_uz_HBCrosses() {return ColumnData.getFloatArray("HitBasedTrkg::HBCrosses.err_uz");}
+
+	//id of first superlater used in segment
+	  static public short[] get_Segment1_ID_HBCrosses() {return ColumnData.getShortArray("HitBasedTrkg::HBCrosses.Segment1_ID");}
+
+	//id of second superlater used in segment
+	  static public short[] get_Segment2_ID_HBCrosses() {return ColumnData.getShortArray("HitBasedTrkg::HBCrosses.Segment2_ID");}
+
+	//id of the track
+	  static public short[] get_id_HBTracks() {return ColumnData.getShortArray("HitBasedTrkg::HBTracks.id");}
+
+	//status of the track
+	  static public short[] get_status_HBTracks() {return ColumnData.getShortArray("HitBasedTrkg::HBTracks.status");}
+
+	//sector of the track
+	  static public byte[] get_sector_HBTracks() {return ColumnData.getByteArray("HitBasedTrkg::HBTracks.sector");}
+
+	//Upstream Region 1 cross x-position in the lab (in cm)
+	  static public float[] get_c1_x_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c1_x");}
+
+	//Upstream Region 1 cross y-position in the lab (in cm)
+	  static public float[] get_c1_y_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c1_y");}
+
+	//Upstream Region 1 cross z-position in the lab (in cm)
+	  static public float[] get_c1_z_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c1_z");}
+
+	//Upstream Region 1 cross unit x-direction vector in the lab
+	  static public float[] get_c1_ux_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c1_ux");}
+
+	//Upstream Region 1 cross unit y-direction vector in the lab
+	  static public float[] get_c1_uy_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c1_uy");}
+
+	//Upstream Region 1 cross unit z-direction vector in the lab
+	  static public float[] get_c1_uz_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c1_uz");}
+
+	//Downstream Region 3 cross x-position in the lab (in cm)
+	  static public float[] get_c3_x_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c3_x");}
+
+	//Downstream Region 3 cross y-position in the lab (in cm)
+	  static public float[] get_c3_y_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c3_y");}
+
+	//Downstream Region 3 cross z-position in the lab (in cm)
+	  static public float[] get_c3_z_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c3_z");}
+
+	//Downstream Region 3 cross unit x-direction vector in the lab
+	  static public float[] get_c3_ux_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c3_ux");}
+
+	//Downstream Region 3 cross unit y-direction vector in the lab
+	  static public float[] get_c3_uy_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c3_uy");}
+
+	//Downstream Region 3 cross unit z-direction vector in the lab
+	  static public float[] get_c3_uz_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.c3_uz");}
+
+	//Upstream Region 1 track x-position in the lab (in cm)
+	  static public float[] get_t1_x_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.t1_x");}
+
+	//Upstream Region 1 track y-position in the lab (in cm)
+	  static public float[] get_t1_y_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.t1_y");}
+
+	//Upstream Region 1 track z-position in the lab (in cm)
+	  static public float[] get_t1_z_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.t1_z");}
+
+	//Upstream Region 1 track unit x-momentum vector in the lab
+	  static public float[] get_t1_px_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.t1_px");}
+
+	//Upstream Region 1 track unit y-momentum vector in the lab
+	  static public float[] get_t1_py_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.t1_py");}
+
+	//Upstream Region 1 track unit z-momentum vector in the lab
+	  static public float[] get_t1_pz_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.t1_pz");}
+
+	//Vertex x-position of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_Vtx0_x_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.Vtx0_x");}
+
+	//Vertex y-position of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_Vtx0_y_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.Vtx0_y");}
+
+	//Vertex z-position of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_Vtx0_z_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.Vtx0_z");}
+
+	//3-momentum x-coordinate of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_p0_x_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.p0_x");}
+
+	//3-momentum y-coordinate of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_p0_y_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.p0_y");}
+
+	//3-momentum z-coordinate of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_p0_z_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.p0_z");}
+
+	//id of first cross on track
+	  static public short[] get_Cross1_ID_HBTracks() {return ColumnData.getShortArray("HitBasedTrkg::HBTracks.Cross1_ID");}
+
+	//id of second cross on track
+	  static public short[] get_Cross2_ID_HBTracks() {return ColumnData.getShortArray("HitBasedTrkg::HBTracks.Cross2_ID");}
+
+	//id of third cross on track
+	  static public short[] get_Cross3_ID_HBTracks() {return ColumnData.getShortArray("HitBasedTrkg::HBTracks.Cross3_ID");}
+
+	//charge of the track
+	  static public byte[] get_q_HBTracks() {return ColumnData.getByteArray("HitBasedTrkg::HBTracks.q");}
+
+	//pathlength of the track
+	  static public float[] get_pathlength_HBTracks() {return ColumnData.getFloatArray("HitBasedTrkg::HBTracks.pathlength");}
+
+	//id of the hit
+	  static public short[] get_id_TBHits() {return ColumnData.getShortArray("TimeBasedTrkg::TBHits.id");}
+
+	//id of the hit
+	  static public short[] get_status_TBHits() {return ColumnData.getShortArray("TimeBasedTrkg::TBHits.status");}
+
+	//DC sector
+	  static public byte[] get_sector_TBHits() {return ColumnData.getByteArray("TimeBasedTrkg::TBHits.sector");}
+
+	//DC superlayer (1...6)
+	  static public byte[] get_superlayer_TBHits() {return ColumnData.getByteArray("TimeBasedTrkg::TBHits.superlayer");}
+
+	//DC layer in superlayer (1...6)
+	  static public byte[] get_layer_TBHits() {return ColumnData.getByteArray("TimeBasedTrkg::TBHits.layer");}
+
+	//wire id of DC
+	  static public short[] get_wire_TBHits() {return ColumnData.getShortArray("TimeBasedTrkg::TBHits.wire");}
+
+	//raw time of the hit
+	  static public float[] get_time_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.time");}
+
+	//doca of the hit calculated from TDC (in cm)
+	  static public float[] get_doca_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.doca");}
+
+	//uncertainty on doca of the hit calculated from TDC (in cm)
+	  static public float[] get_docaError_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.docaError");}
+
+	//track doca of the hit (in cm)
+	  static public float[] get_trkDoca_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.trkDoca");}
+
+	//time residual of the hit (in cm)
+	  static public float[] get_timeResidual_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.timeResidual");}
+
+	//Left/Right ambiguity of the hit
+	  static public byte[] get_LR_TBHits() {return ColumnData.getByteArray("TimeBasedTrkg::TBHits.LR");}
+
+	//wire x-coordinate  in tilted-sector
+	  static public float[] get_X_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.X");}
+
+	//wire z-coordinate  in tilted-sector
+	  static public float[] get_Z_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.Z");}
+
+	//B-field intensity at hit position in tilted-sector system
+	  static public float[] get_B_TBHits() {return ColumnData.getFloatArray("TimeBasedTrkg::TBHits.B");}
+
+	//ID of associated cluster
+	  static public short[] get_clusterID_TBHits() {return ColumnData.getShortArray("TimeBasedTrkg::TBHits.clusterID");}
+
+	//ID of associated track
+	  static public byte[] get_trkID_TBHits() {return ColumnData.getByteArray("TimeBasedTrkg::TBHits.trkID");}
+
+	//id of the cluster
+	  static public short[] get_id_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.id");}
+
+	//status of the cluster
+	  static public short[] get_status_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.status");}
+
+	//sector of the cluster
+	  static public byte[] get_sector_TBClusters() {return ColumnData.getByteArray("TimeBasedTrkg::TBClusters.sector");}
+
+	//superlayer of the cluster
+	  static public byte[] get_superlayer_TBClusters() {return ColumnData.getByteArray("TimeBasedTrkg::TBClusters.superlayer");}
+
+	//id of hit1 in cluster
+	  static public short[] get_Hit1_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit1_ID");}
+
+	//id of hit2 in cluster
+	  static public short[] get_Hit2_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit2_ID");}
+
+	//id of hit3 in cluster
+	  static public short[] get_Hit3_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit3_ID");}
+
+	//id of hit4 in cluster
+	  static public short[] get_Hit4_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit4_ID");}
+
+	//id of hit5 in cluster
+	  static public short[] get_Hit5_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit5_ID");}
+
+	//id of hit6 in cluster
+	  static public short[] get_Hit6_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit6_ID");}
+
+	//id of hit7 in cluster
+	  static public short[] get_Hit7_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit7_ID");}
+
+	//id of hit8 in cluster
+	  static public short[] get_Hit8_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit8_ID");}
+
+	//id of hit9 in cluster
+	  static public short[] get_Hit9_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit9_ID");}
+
+	//id of hit10 in cluster
+	  static public short[] get_Hit10_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit10_ID");}
+
+	//id of hit11 in cluster
+	  static public short[] get_Hit11_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit11_ID");}
+
+	//id of hit12 in cluster
+	  static public short[] get_Hit12_ID_TBClusters() {return ColumnData.getShortArray("TimeBasedTrkg::TBClusters.Hit12_ID");}
+
+	//average wire number
+	  static public float[] get_avgWire_TBClusters() {return ColumnData.getFloatArray("TimeBasedTrkg::TBClusters.avgWire");}
+
+	//fit chisq prob.
+	  static public float[] get_fitChisqProb_TBClusters() {return ColumnData.getFloatArray("TimeBasedTrkg::TBClusters.fitChisqProb");}
+
+	//line fit slope
+	  static public float[] get_fitSlope_TBClusters() {return ColumnData.getFloatArray("TimeBasedTrkg::TBClusters.fitSlope");}
+
+	//error on slope
+	  static public float[] get_fitSlopeErr_TBClusters() {return ColumnData.getFloatArray("TimeBasedTrkg::TBClusters.fitSlopeErr");}
+
+	//line fit intercept
+	  static public float[] get_fitInterc_TBClusters() {return ColumnData.getFloatArray("TimeBasedTrkg::TBClusters.fitInterc");}
+
+	//error on the intercept
+	  static public float[] get_fitIntercErr_TBClusters() {return ColumnData.getFloatArray("TimeBasedTrkg::TBClusters.fitIntercErr");}
+
+	//cluster size
+	  static public byte[] get_size_TBClusters() {return ColumnData.getByteArray("TimeBasedTrkg::TBClusters.size");}
+
+	//id of the segment
+	  static public short[] get_id_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.id");}
+
+	//status of the segment
+	  static public short[] get_status_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.status");}
+
+	//sector of the segment
+	  static public byte[] get_sector_TBSegments() {return ColumnData.getByteArray("TimeBasedTrkg::TBSegments.sector");}
+
+	//superlayer of superlayer
+	  static public byte[] get_superlayer_TBSegments() {return ColumnData.getByteArray("TimeBasedTrkg::TBSegments.superlayer");}
+
+	//associated cluster id
+	  static public short[] get_Cluster_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Cluster_ID");}
+
+	//id of hit1 in cluster
+	  static public short[] get_Hit1_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit1_ID");}
+
+	//id of hit2 in cluster
+	  static public short[] get_Hit2_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit2_ID");}
+
+	//id of hit3 in cluster
+	  static public short[] get_Hit3_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit3_ID");}
+
+	//id of hit4 in cluster
+	  static public short[] get_Hit4_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit4_ID");}
+
+	//id of hit5 in cluster
+	  static public short[] get_Hit5_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit5_ID");}
+
+	//id of hit6 in cluster
+	  static public short[] get_Hit6_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit6_ID");}
+
+	//id of hit7 in cluster
+	  static public short[] get_Hit7_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit7_ID");}
+
+	//id of hit8 in cluster
+	  static public short[] get_Hit8_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit8_ID");}
+
+	//id of hit9 in cluster
+	  static public short[] get_Hit9_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit9_ID");}
+
+	//id of hit10 in cluster
+	  static public short[] get_Hit10_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit10_ID");}
+
+	//id of hit11 in cluster
+	  static public short[] get_Hit11_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit11_ID");}
+
+	//id of hit12 in cluster
+	  static public short[] get_Hit12_ID_TBSegments() {return ColumnData.getShortArray("TimeBasedTrkg::TBSegments.Hit12_ID");}
+
+	//average wire number
+	  static public float[] get_avgWire_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.avgWire");}
+
+	//fit chisq prob.
+	  static public float[] get_fitChisqProb_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.fitChisqProb");}
+
+	//line fit slope
+	  static public float[] get_fitSlope_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.fitSlope");}
+
+	//error on slope
+	  static public float[] get_fitSlopeErr_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.fitSlopeErr");}
+
+	//line fit intercept
+	  static public float[] get_fitInterc_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.fitInterc");}
+
+	//error on the intercept
+	  static public float[] get_fitIntercErr_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.fitIntercErr");}
+
+	//Segment 1st endpoint x coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint1X_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.SegEndPoint1X");}
+
+	//Segment 1st endpoint z coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint1Z_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.SegEndPoint1Z");}
+
+	//Segment 2nd endpoint x coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint2X_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.SegEndPoint2X");}
+
+	//Segment 2nd endpoint z coordinate in the sector coordinate system (for ced display)
+	  static public float[] get_SegEndPoint2Z_TBSegments() {return ColumnData.getFloatArray("TimeBasedTrkg::TBSegments.SegEndPoint2Z");}
+
+	//size of segment
+	  static public byte[] get_size_TBSegments() {return ColumnData.getByteArray("TimeBasedTrkg::TBSegments.size");}
+
+	//id of the cross
+	  static public short[] get_id_TBCrosses() {return ColumnData.getShortArray("TimeBasedTrkg::TBCrosses.id");}
+
+	//status of the cross
+	  static public short[] get_status_TBCrosses() {return ColumnData.getShortArray("TimeBasedTrkg::TBCrosses.status");}
+
+	//sector of the cross
+	  static public byte[] get_sector_TBCrosses() {return ColumnData.getByteArray("TimeBasedTrkg::TBCrosses.sector");}
+
+	//region of the cross
+	  static public byte[] get_region_TBCrosses() {return ColumnData.getByteArray("TimeBasedTrkg::TBCrosses.region");}
+
+	//Energy of the hit
+	  static public float[] get_Cluster_ID_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.Cluster_ID");}
+
+	//DC track cross x-coordinate (in the DC tilted sector coordinate system)
+	  static public float[] get_x_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.x");}
+
+	//DC track cross y-coordinate (in the DC tilted sector coordinate system)
+	  static public float[] get_y_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.y");}
+
+	//DC track cross z-coordinate (in the DC tilted sector coordinate system)
+	  static public float[] get_z_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.z");}
+
+	//DC track cross x-coordinate uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_x_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.err_x");}
+
+	//DC track cross y-coordinate uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_y_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.err_y");}
+
+	//DC track cross z-coordinate uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_z_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.err_z");}
+
+	//DC track cross x-direction (in the DC tilted sector coordinate system)
+	  static public float[] get_ux_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.ux");}
+
+	//DC track cross y-direction (in the DC tilted sector coordinate system)
+	  static public float[] get_uy_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.uy");}
+
+	//DC track cross z-direction (in the DC tilted sector coordinate system)
+	  static public float[] get_uz_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.uz");}
+
+	//DC track cross x-direction uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_ux_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.err_ux");}
+
+	//DC track cross y-direction uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_uy_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.err_uy");}
+
+	//DC track cross z-direction uncertainty (in the DC tilted sector coordinate system)
+	  static public float[] get_err_uz_TBCrosses() {return ColumnData.getFloatArray("TimeBasedTrkg::TBCrosses.err_uz");}
+
+	//id of first superlater used in segment
+	  static public short[] get_Segment1_ID_TBCrosses() {return ColumnData.getShortArray("TimeBasedTrkg::TBCrosses.Segment1_ID");}
+
+	//id of second superlater used in segment
+	  static public short[] get_Segment2_ID_TBCrosses() {return ColumnData.getShortArray("TimeBasedTrkg::TBCrosses.Segment2_ID");}
+
+	//id of the track
+	  static public short[] get_id_TBTracks() {return ColumnData.getShortArray("TimeBasedTrkg::TBTracks.id");}
+
+	//status of the track
+	  static public short[] get_status_TBTracks() {return ColumnData.getShortArray("TimeBasedTrkg::TBTracks.status");}
+
+	//sector of the track
+	  static public byte[] get_sector_TBTracks() {return ColumnData.getByteArray("TimeBasedTrkg::TBTracks.sector");}
+
+	//Upstream Region 1 cross x-position in the lab (in cm)
+	  static public float[] get_c1_x_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c1_x");}
+
+	//Upstream Region 1 cross y-position in the lab (in cm)
+	  static public float[] get_c1_y_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c1_y");}
+
+	//Upstream Region 1 cross z-position in the lab (in cm)
+	  static public float[] get_c1_z_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c1_z");}
+
+	//Upstream Region 1 cross unit x-direction vector in the lab
+	  static public float[] get_c1_ux_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c1_ux");}
+
+	//Upstream Region 1 cross unit y-direction vector in the lab
+	  static public float[] get_c1_uy_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c1_uy");}
+
+	//Upstream Region 1 cross unit z-direction vector in the lab
+	  static public float[] get_c1_uz_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c1_uz");}
+
+	//Downstream Region 3 cross x-position in the lab (in cm)
+	  static public float[] get_c3_x_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c3_x");}
+
+	//Downstream Region 3 cross y-position in the lab (in cm)
+	  static public float[] get_c3_y_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c3_y");}
+
+	//Downstream Region 3 cross z-position in the lab (in cm)
+	  static public float[] get_c3_z_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c3_z");}
+
+	//Downstream Region 3 cross unit x-direction vector in the lab
+	  static public float[] get_c3_ux_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c3_ux");}
+
+	//Downstream Region 3 cross unit y-direction vector in the lab
+	  static public float[] get_c3_uy_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c3_uy");}
+
+	//Downstream Region 3 cross unit z-direction vector in the lab
+	  static public float[] get_c3_uz_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.c3_uz");}
+
+	//Upstream Region 1 track x-position in the lab (in cm)
+	  static public float[] get_t1_x_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.t1_x");}
+
+	//Upstream Region 1 track y-position in the lab (in cm)
+	  static public float[] get_t1_y_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.t1_y");}
+
+	//Upstream Region 1 track z-position in the lab (in cm)
+	  static public float[] get_t1_z_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.t1_z");}
+
+	//Upstream Region 1 track unit x-momentum vector in the lab
+	  static public float[] get_t1_px_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.t1_px");}
+
+	//Upstream Region 1 track unit y-momentum vector in the lab
+	  static public float[] get_t1_py_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.t1_py");}
+
+	//Upstream Region 1 track unit z-momentum vector in the lab
+	  static public float[] get_t1_pz_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.t1_pz");}
+
+	//Vertex x-position of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_Vtx0_x_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.Vtx0_x");}
+
+	//Vertex y-position of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_Vtx0_y_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.Vtx0_y");}
+
+	//Vertex z-position of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_Vtx0_z_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.Vtx0_z");}
+
+	//3-momentum x-coordinate of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_p0_x_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.p0_x");}
+
+	//3-momentum y-coordinate of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_p0_y_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.p0_y");}
+
+	//3-momentum z-coordinate of the swam track to the DOCA to the beamline (in cm)
+	  static public float[] get_p0_z_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.p0_z");}
+
+	//id of first cross on track
+	  static public short[] get_Cross1_ID_TBTracks() {return ColumnData.getShortArray("TimeBasedTrkg::TBTracks.Cross1_ID");}
+
+	//id of second cross on track
+	  static public short[] get_Cross2_ID_TBTracks() {return ColumnData.getShortArray("TimeBasedTrkg::TBTracks.Cross2_ID");}
+
+	//id of third cross on track
+	  static public short[] get_Cross3_ID_TBTracks() {return ColumnData.getShortArray("TimeBasedTrkg::TBTracks.Cross3_ID");}
+
+	//charge of the track
+	  static public byte[] get_q_TBTracks() {return ColumnData.getByteArray("TimeBasedTrkg::TBTracks.q");}
+
+	//pathlength of the track
+	  static public float[] get_pathlength_TBTracks() {return ColumnData.getFloatArray("TimeBasedTrkg::TBTracks.pathlength");}
+
+	//id of the track
+	  static public short[] get_id_TBCovMat() {return ColumnData.getShortArray("TimeBasedTrkg::TBCovMat.id");}
+	  
 	/**
 	 * Get the pid array from the true data
 	 * @return the pid array
@@ -87,8 +819,8 @@ public class DC {
 	 * 
 	 * @return the sectors of time based segments
 	 */
-	public static int[] timeBasedSegmentSector() {
-		return ColumnData.getIntArray("TimeBasedTrkg::TBSegments.sector");
+	public static byte[] timeBasedSegmentSector() {
+		return get_sector_TBSegments();
 	}
 
 	/**
@@ -96,24 +828,24 @@ public class DC {
 	 * 
 	 * @return the superlayers of time based segments
 	 */
-	public static int[] timeBasedSegmentSuperlayer() {
-		return ColumnData.getIntArray("TimeBasedTrkg::TBSegments.superlayer");
+	public static byte[] timeBasedSegmentSuperlayer() {
+		return get_superlayer_TBSegments();
 	}
 	
 	/**
 	 * Get the start x coordinates in the midplane in sector system
 	 * @return the start x coordinates
 	 */
-	public static double[] timeBasedSegment1X() {
-		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint1X");
+	public static float[] timeBasedSegment1X() {
+		return get_SegEndPoint1X_TBSegments();
 	}
 
 	/**
 	 * Get the start z coordinates in the midplane in sector system
 	 * @return the start z coordinates
 	 */
-	public static double[] timeBasedSegment1Z() {
-		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint1Z");
+	public static float[] timeBasedSegment1Z() {
+		return get_SegEndPoint1Z_TBSegments();
 	}
 	
 	
@@ -121,16 +853,16 @@ public class DC {
 	 * Get the end x coordinates in the midplane in sector system
 	 * @return the end x coordinates
 	 */
-	public static double[] timeBasedSegment2X() {
-		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint2X");
+	public static float[] timeBasedSegment2X() {
+		return get_SegEndPoint2X_TBSegments();
 	}
 
 	/**
 	 * Get the end z coordinates in the midplane in sector system
 	 * @return the end z coordinates
 	 */
-	public static double[] timeBasedSegment2Z() {
-		return ColumnData.getDoubleArray("TimeBasedTrkg::TBSegments.SegEndPoint2Z");
+	public static float[] timeBasedSegment2Z() {
+		return get_SegEndPoint2Z_TBSegments();
 	}
 
 	
@@ -140,7 +872,7 @@ public class DC {
 	 * @return the number of time based segments
 	 */
 	public static int timeBasedSegmentCount() {
-		int sector[] = timeBasedSegmentSector();
+		byte sector[] = timeBasedSegmentSector();
 		return (sector == null) ? 0 : sector.length;
 	}
 

@@ -145,10 +145,10 @@ public class HippoTest {
 			System.exit(1);
 		}
 		
-		if (!eventTest()) {
-			System.out.println("Failed event test. Exiting.");
-			System.exit(1);
-		}
+//		if (!eventTest()) {
+//			System.out.println("Failed event test. Exiting.");
+//			System.exit(1);
+//		}
 
 	}
 }

@@ -848,13 +848,13 @@ public class SuperLayerDrawing {
 		int segCount = DC.timeBasedSegmentCount();
 
 		if (segCount > 0) {
-			int sector[] = DC.timeBasedSegmentSector();
-			int superlayer[] = DC.timeBasedSegmentSuperlayer();
+			byte sector[] = DC.timeBasedSegmentSector();
+			byte superlayer[] = DC.timeBasedSegmentSuperlayer();
 
-			double x1[] = DC.timeBasedSegment1X();
-			double z1[] = DC.timeBasedSegment1Z();
-			double x2[] = DC.timeBasedSegment2X();
-			double z2[] = DC.timeBasedSegment2Z();
+			float x1[] = DC.timeBasedSegment1X();
+			float z1[] = DC.timeBasedSegment1Z();
+			float x2[] = DC.timeBasedSegment2X();
+			float z2[] = DC.timeBasedSegment2Z();
 
 			if ((x1 == null) || (z1 == null) || (x2 == null) || (z2 == null)) {
 				return;

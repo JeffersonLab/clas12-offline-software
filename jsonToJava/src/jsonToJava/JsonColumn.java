@@ -23,6 +23,10 @@ public class JsonColumn {
 		return name + "_" + bank.secondName();
 	}
 	
+	public String fullName() {
+		return bank.bank + "." + name;
+	}
+	
 	public static JsonColumn fromJsonObject(JsonObject jobj) {
 		String name = jobj.getString("name");
 		int id = jobj.getInt("id");
@@ -54,6 +58,71 @@ public class JsonColumn {
 		return s;
 	}
 	
+	public String rawGetter() {
+		String s = "\n//" + info + "\n";
+	    s += "  ";
+	    
+	    String array = "";
+		if (type.equalsIgnoreCase("int8")) {
+			s += "public byte[] get_";
+			array = "getByteArray(";
+		}
+		else if (type.equalsIgnoreCase("int16")) {
+			s += "public short[] get_";
+			array = "getShortArray(";
+		}
+		else if (type.equalsIgnoreCase("int32")) {
+			s += "public int[] get_";
+			array = "getIntArray(";
+		}
+		else if (type.equalsIgnoreCase("float")) {
+			s += "public float[] get_";
+			array = "getFloatArray(";
+		}
+		else {
+			System.err.println("UNKNOWN TYPE: [" + type + "] in JsonColumn.rawGetter." );
+			System.exit(1);
+		}
+		
+		s += (varName() + "() {return ColumnData." + array + "\"" +
+		fullName() + "\");}");
+
+		return s;
+	}
+	
+	public String staticRawGetter() {
+		String s = "\n//" + info + "\n";
+	    s += "  ";
+	    
+	    String array = "";
+		if (type.equalsIgnoreCase("int8")) {
+			s += "static public byte[] get_";
+			array = "getByteArray(";
+		}
+		else if (type.equalsIgnoreCase("int16")) {
+			s += "static public short[] get_";
+			array = "getShortArray(";
+		}
+		else if (type.equalsIgnoreCase("int32")) {
+			s += "static public int[] get_";
+			array = "getIntArray(";
+		}
+		else if (type.equalsIgnoreCase("float")) {
+			s += "static public float[] get_";
+			array = "getFloatArray(";
+		}
+		else {
+			System.err.println("UNKNOWN TYPE: [" + type + "] in JsonColumn.rawGetter." );
+			System.exit(1);
+		}
+		
+		s += (varName() + "() {return ColumnData." + array + "\"" +
+		fullName() + "\");}");
+
+		return s;
+	}
+
+	
 	public String getter() {
 		String s = "\n//" + info + "\n";
 	    s += "  ";
@@ -70,7 +139,7 @@ public class JsonColumn {
 			s += "public float[] get_";
 		}
 		else {
-			System.err.println("UNKNOWN TYPE: [" + type + "] in JsonColumn.declaration." );
+			System.err.println("UNKNOWN TYPE: [" + type + "] in JsonColumn.getter." );
 			System.exit(1);
 		}
 		

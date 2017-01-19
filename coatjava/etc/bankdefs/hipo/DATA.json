@@ -130,6 +130,20 @@
     ]
   },
   {
+    "bank": "LTCC::adc",
+    "group": 701,
+    "info": "digitized bank LTCC",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of LTCC"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"half sector LTCC (1 or 2)"},
+       {"name":"component", "id":3, "type":"int16", "info":"ring of LTCC (1,2,3,4)"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},       
+       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+    ]
+  },
+  {
     "bank": "RAW::adc",
     "group": 801,
     "info": "digitized bank ADC for untranslated",
