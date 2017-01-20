@@ -106,6 +106,10 @@ public class FTOF extends DetectorData {
 //		return DataManager.getInstance().getDetectorResponse(event, "FTOF::hits", DetectorType.FTOF);
 //	}
 	
+	
+	//sim hit list
+	SimHitList _simHits = new SimHitList("FTOF::tdc", "FTOF::adc");
+	
 	private static FTOF _instance;
 	
 	//the sector and paddle arrays for each "layer"
@@ -130,6 +134,11 @@ public class FTOF extends DetectorData {
 	public void newClasIoEvent(DataEvent event) {
 		extractSectorArrays();
 		extractPaddleArrays();
+		_simHits =  new SimHitList("FTOF::tdc", "FTOF::adc");
+		System.err.println("SIM HIT SIZE: " + _simHits.size());
+		for (SimHit hit : _simHits) {
+			System.err.println("  " + hit);
+		}
 	}
 	
 	//get the sector data from the event
@@ -160,7 +169,7 @@ public class FTOF extends DetectorData {
 
 		for (int i = 0; i < 3; i++) {
 			_sector[i] = lists[i] == null ? null : lists[i].toIntArray();
-			System.err.println(" PANEL: " + i + "   SECT LEN: " + (_sector[i] == null ? 0 : _sector[i].length));
+//			System.err.println(" PANEL: " + i + "   SECT LEN: " + (_sector[i] == null ? 0 : _sector[i].length));
 		}
 	}
 	
@@ -193,7 +202,7 @@ public class FTOF extends DetectorData {
 
 		for (int i = 0; i < 3; i++) {
 			_paddle[i] = lists[i] == null ? null : lists[i].toIntArray();
-			System.err.println(" PANEL: " + i + "   PADD LEN: " + (_paddle[i] == null ? 0 : _paddle[i].length));
+//			System.err.println(" PANEL: " + i + "   PADD LEN: " + (_paddle[i] == null ? 0 : _paddle[i].length));
 		}
 	}
 

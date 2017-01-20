@@ -347,6 +347,8 @@ public class FTOFPanelItem extends PolygonItem {
 				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
 				if (path.contains(worldPoint)) {
+					feedbackStrings
+					.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 
 					// hit?
 
@@ -355,8 +357,8 @@ public class FTOFPanelItem extends PolygonItem {
 					int hitIndex = FTOF.getInstance().hitIndex(_sector, index + 1, panelType);
 
 					if (hitIndex < 0) {
-						feedbackStrings
-								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
+//						feedbackStrings
+//								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 					} else {
 						DataSupport.truePidFeedback(FTOF.getInstance().pid(panelType), hitIndex, feedbackStrings);
 						FTOF.getInstance().dgtzFeedback(hitIndex, panelType, feedbackStrings);

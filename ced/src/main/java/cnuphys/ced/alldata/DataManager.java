@@ -114,12 +114,12 @@ public class DataManager {
 					for (String columnName : columns) {
 						ColumnData cd = getColumnData(bankName, columnName);
 						
-						if ("HitBasedTrkg::HBCrosses.Cluster_ID".equals(bankName + "." + columnName)) {
-							(new Throwable()).printStackTrace();
-						}
+//						if ("HitBasedTrkg::HBCrosses.Cluster_ID".equals(bankName + "." + columnName)) {
+//							(new Throwable()).printStackTrace();
+//						}
 						if (cd == null) {
-							Log.getInstance().warning("Dictionary does not seem to know about bank named [" + bankName
-									+ "." + columnName + "] May be a disconnect with json files");
+//							Log.getInstance().warning("Dictionary does not seem to know about bank named [" + bankName
+//									+ "." + columnName + "] May be a disconnect with json files");
 						} else {
 							list.add(cd);
 						}

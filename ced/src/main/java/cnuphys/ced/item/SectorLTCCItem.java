@@ -10,6 +10,7 @@ import java.util.Vector;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
@@ -27,6 +28,7 @@ import cnuphys.lund.LundSupport;
 
 public class SectorLTCCItem extends PolygonItem {
 
+	private static Color _fillColors[] = {Color.white, X11Colors.getX11Color("alice blue")};
 
 	// convenient access to the event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -89,7 +91,7 @@ public class SectorLTCCItem extends PolygonItem {
 		setPath(getWorldPolygon());
 
 
-		getStyle().setFillColor(Color.white);
+		getStyle().setFillColor(_fillColors[_ring % 2]);
 		super.drawItem(g, container); // draws shell
 		
 		// hits
