@@ -1,6 +1,11 @@
 package cnuphys.ced.event.data;
 
-public class SimHit implements Comparable<SimHit> {
+import java.util.List;
+
+public class TdcAdcHit implements Comparable<TdcAdcHit> {
+	
+	//for feedback strings
+	private static final String _fbColor = "$Orange Red$";
 	
 	public byte sector;
 	public byte layer;
@@ -11,7 +16,7 @@ public class SimHit implements Comparable<SimHit> {
 	public int adcR = -1;
 	
 
-	public SimHit(byte sector, byte layer, short component) {
+	public TdcAdcHit(byte sector, byte layer, short component) {
 		super();
 		this.sector = sector;
 		this.layer = layer;
@@ -19,7 +24,7 @@ public class SimHit implements Comparable<SimHit> {
 	}
 
 	@Override
-	public int compareTo(SimHit hit) {
+	public int compareTo(TdcAdcHit hit) {
 		int c = Integer.valueOf(sector).compareTo(Integer.valueOf(hit.sector));
 		if (c == 0) {
 			c = Integer.valueOf(layer).compareTo(Integer.valueOf(hit.layer));
@@ -29,6 +34,29 @@ public class SimHit implements Comparable<SimHit> {
 		}
 		return c;
 	}
+	
+	/**
+	 * Get the average ADC value
+	 * @return the average of left and right
+	 */
+	public int averageADC() {
+		int count = 0;
+		int sum = 0;
+		if (adcL >= 0) {
+			count++;
+			sum += adcL;
+		}
+		if (adcR >= 0) {
+			count++;
+			sum += adcR;
+		}
+		if (count == 0) {
+			return -1;
+		}
+		
+		return sum/count;
+	}
+	
 	public String tdcString() {
 		if ((tdcL < 0) && (tdcR < 0)) {
 			return "";
@@ -65,4 +93,21 @@ public class SimHit implements Comparable<SimHit> {
 		return "sector = " + sector + " layer " + layer + 
 				" component: " + component + tdcString() + adcString();
 	}
+	
+	public void tdcAdcFeedback(String layerName, String componentName,
+			List<String> feedbackStrings) {
+		
+		feedbackStrings.add(_fbColor + layerName + " sector "
+				+ sector + "  " + componentName + " " + component);
+
+		String tdcStr = tdcString();
+		String adcStr = adcString();
+		String dataStr = tdcStr + adcStr;
+		if (dataStr.length() > 3) {
+			feedbackStrings.add(_fbColor + dataStr);
+		}
+
+	}
+	
+
 }

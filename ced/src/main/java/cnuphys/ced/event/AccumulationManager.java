@@ -18,8 +18,11 @@ import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
@@ -155,8 +158,6 @@ public class AccumulationManager
 	public void clear() {
 		_eventCount = 0;
 
-		// System.err.println("AccumMgr clear");
-		
 		//clear accumulated HTCC
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			for (int ring = 0; ring < 4; ring++) {
@@ -620,33 +621,42 @@ public class AccumulationManager
 		
 
 		// ftof data
-		int sector1A[] = ColumnData.getIntArray("FTOF1A::dgtz.sector");
-		int paddle1A[] = ColumnData.getIntArray("FTOF1A::dgtz.paddle");
-		int sector1B[] = ColumnData.getIntArray("FTOF1B::dgtz.sector");
-		int paddle1B[] = ColumnData.getIntArray("FTOF1B::dgtz.paddle");
-		int sector2B[] = ColumnData.getIntArray("FTOF2B::dgtz.sector");
-		int paddle2B[] = ColumnData.getIntArray("FTOF2B::dgtz.paddle");
+		TdcAdcHitList list = FTOF.getInstance().updateTdcAdcList();
 
-		accumFtof(sector1A, paddle1A, _ftof1aDgtzAccumulatedData);
-		accumFtof(sector1B, paddle1B, _ftof1bDgtzAccumulatedData);
-		accumFtof(sector2B, paddle2B, _ftof2DgtzAccumulatedData);
+		accumFtof(list);
 
 
 	}
 
 	// for ftot accumulating
-	private void accumFtof(int sector[], int paddle[], int[][] hitHolder) {
+	private void accumFtof(TdcAdcHitList list) {
 
-		if ((sector == null) || (paddle == null)) {
+		if ((list == null) || list.isEmpty()) {
 			return;
 		}
-
-		for (int hit = 0; hit < sector.length; hit++) {
-			int sect0 = sector[hit] - 1;
-			int paddle0 = paddle[hit] - 1;
-			hitHolder[sect0][paddle0] += 1;
-			_maxDgtzFtofCount = Math.max(hitHolder[sect0][paddle0],
-					_maxDgtzFtofCount);
+		
+		for (TdcAdcHit hit : list) {
+			if (hit != null) {
+				int sect0 = hit.sector-1;
+				int paddle0 = hit.component-1;
+				
+				if (hit.layer == 1) {
+					_ftof1aDgtzAccumulatedData[sect0][paddle0] += 1;
+					_maxDgtzFtofCount = Math.max(_ftof1aDgtzAccumulatedData[sect0][paddle0],
+							_maxDgtzFtofCount);
+				}
+				else if (hit.layer == 2) {
+					_ftof1bDgtzAccumulatedData[sect0][paddle0] += 1;
+					_maxDgtzFtofCount = Math.max(_ftof1bDgtzAccumulatedData[sect0][paddle0],
+							_maxDgtzFtofCount);
+				}
+				if (hit.layer == 3) {
+					_ftof2DgtzAccumulatedData[sect0][paddle0] += 1;
+					_maxDgtzFtofCount = Math.max(_ftof2DgtzAccumulatedData[sect0][paddle0],
+							_maxDgtzFtofCount);
+				}
+			}
+			
 		}
 
 	}

@@ -17,6 +17,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.bCNU.dialog.ButtonPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -109,7 +111,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 		_remainingLabel = new JLabel();
 
 		if (_numRemaining > 0) {
-			_pathLabel.setText(_eventManager.getCurrentEventFilePath());
+			_pathLabel.setText(_eventManager.getCurrentSourceDescription());
 			_totalLabel.setText("Total number: "
 					+ _eventManager.getEventCount());
 			_remainingLabel.setText("Remaining: " + _numRemaining);
@@ -245,16 +247,23 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 						int modCount = Math.max(2, fcount / 100);
 
-						for (int i = 0; i < fcount; i++) {
+						int count = 0;
+						while (count < fcount) {
 							try {
-								_eventManager.getNextEvent();
+							    DataEvent event = _eventManager.getNextEvent();
+							    if (event == null) {
+							    	Thread.sleep(100);
+							    }
+							    else {
+							    	count++;
+							    }
 							} catch (Exception e) {
 								e.printStackTrace();
 								break;
 							}
 
-							if (((i + 1) % modCount) == 0) {
-								int value = (int) ((100.0 * i) / fcount);
+							if (((count + 1) % modCount) == 0) {
+								int value = (int) ((100.0 * count) / fcount);
 								_progressBar.setValue(value);
 							}
 						}

@@ -14,6 +14,7 @@ import org.jlab.geom.prim.Path3D;
 import org.jlab.physics.io.LundReader;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.splot.plot.Environment;
@@ -121,8 +122,14 @@ public class FastMCManager {
 			// while (_genEvent != null) nextEvent();
 		}
 
+		ClasIoEventManager.getInstance().setEventSourceType(EventSourceType.FASTMC);
+
 		Ced.getCed().fixTitle();
 		return _currentFile;
+	}
+	
+	public String getSourceDescription() {
+		return "Lund File: " +  ((_currentFile == null) ? "(none)" : _currentFile.getName());
 	}
 
 	public void reloadCurrentEvent() {

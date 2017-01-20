@@ -21,6 +21,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.FTOF;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.FTOFPanel;
@@ -194,48 +196,67 @@ public class FTOFPanelItem extends PolygonItem {
 			return;
 		}
 
+		// draw tdc adc hits
+		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
+		if (!hits.isEmpty()) {
+			byte sect = (byte) _sector;
+			byte layer = (byte) (_ftofPanel.getPanelType() + 1);
+			for (TdcAdcHit hit : hits) {
+				if ((hit.sector == _sector) && (hit.layer == layer)) {
+					Point2D.Double wp[] = getPaddle(_view, hit.component - 1, _ftofPanel, _sector);
 
-		int panelType = _ftofPanel.getPanelType();
-
-		int hitCount = FTOF.getInstance().hitCount(panelType);
-
-		if (hitCount < 1) {
-			return;
-		}
-		int pid[] = FTOF.getInstance().pid(panelType);
-		int sector[] = FTOF.getInstance().sector(panelType);
-		int paddles[] = FTOF.getInstance().paddle(panelType);
-
-		if (!_view.showMcTruth()) {
-			pid = null;
-		}
-
-		if ((sector == null) || (paddles == null)) {
-			return;
-		}
-
-		Color default_fc = Color.red;
-
-		for (int i = 0; i < hitCount; i++) {
-			if (sector[i] == _sector) {
-				Color fc = default_fc;
-				if (pid != null) {
-					LundId lid = LundSupport.getInstance().get(pid[i]);
-					if (lid != null) {
-						fc = lid.getStyle().getFillColor();
+					if (wp != null) {
+						Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+						WorldGraphicsUtilities.drawPath2D(g, container, path, Color.white, _style.getLineColor(), 0,
+								LineStyle.SOLID, true);
+						WorldGraphicsUtilities.drawPath2D(g, container, path, hits.adcColor(hit), _style.getLineColor(),
+								0, LineStyle.SOLID, true);
 					}
 				}
-
-				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
-
-				if (wp != null) {
-					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
-							true);
-				}
-
 			}
 		}
+
+//		int panelType = _ftofPanel.getPanelType();
+//
+//		int hitCount = FTOF.getInstance().hitCount(panelType);
+//
+//		if (hitCount < 1) {
+//			return;
+//		}
+//		int pid[] = FTOF.getInstance().pid(panelType);
+//		int sector[] = FTOF.getInstance().sector(panelType);
+//		int paddles[] = FTOF.getInstance().paddle(panelType);
+//
+//		if (!_view.showMcTruth()) {
+//			pid = null;
+//		}
+//
+//		if ((sector == null) || (paddles == null)) {
+//			return;
+//		}
+//
+//		Color default_fc = Color.red;
+//
+//		for (int i = 0; i < hitCount; i++) {
+//			if (sector[i] == _sector) {
+//				Color fc = default_fc;
+//				if (pid != null) {
+//					LundId lid = LundSupport.getInstance().get(pid[i]);
+//					if (lid != null) {
+//						fc = lid.getStyle().getFillColor();
+//					}
+//				}
+//
+//				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
+//
+//				if (wp != null) {
+//					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+//					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
+//							true);
+//				}
+//
+//			}
+//		}
 
 	}
 
@@ -347,26 +368,19 @@ public class FTOFPanelItem extends PolygonItem {
 				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
 				if (path.contains(worldPoint)) {
-					feedbackStrings
-					.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 
-					// hit?
-
-					int panelType = _ftofPanel.getPanelType();
-
-					int hitIndex = FTOF.getInstance().hitIndex(_sector, index + 1, panelType);
-
-					if (hitIndex < 0) {
-//						feedbackStrings
-//								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
+					// have a tdc adc hit?
+					TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
+					byte sect = (byte) _sector;
+					byte layer = (byte) (_ftofPanel.getPanelType() + 1);
+					short paddle = (short) (index + 1);
+					TdcAdcHit hit = hits.get(sect, layer, paddle);
+					if (hit != null) {
+						hit.tdcAdcFeedback(getName(), "paddle", feedbackStrings);
 					} else {
-						DataSupport.truePidFeedback(FTOF.getInstance().pid(panelType), hitIndex, feedbackStrings);
-						FTOF.getInstance().dgtzFeedback(hitIndex, panelType, feedbackStrings);
+						feedbackStrings
+								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 					}
-
-					//test
-//					boolean isects = doesPaddleFullIntersectPlane(_view, index, _ftofPanel);
-//					feedbackStrings.add("$Orange Red$paddle fully intersects: " + isects);
 					
 					break;
 				} // path contains wp

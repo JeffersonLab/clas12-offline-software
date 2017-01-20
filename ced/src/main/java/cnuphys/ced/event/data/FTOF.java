@@ -1,17 +1,6 @@
 package cnuphys.ced.event.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jlab.clas.detector.DetectorResponse;
-import org.jlab.detector.base.DetectorDescriptor;
-import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
-
-import cnuphys.bCNU.log.Log;
-import cnuphys.ced.alldata.ColumnData;
-import cnuphys.ced.alldata.DataManager;
-import cnuphys.ced.clasio.ClasIoEventManager;
 
 /**
  * static methods to centralize getting data arrays
@@ -107,15 +96,11 @@ public class FTOF extends DetectorData {
 //	}
 	
 	
-	//sim hit list
-	SimHitList _simHits = new SimHitList("FTOF::tdc", "FTOF::adc");
+	//tdc adc hit list
+	TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("FTOF::tdc", "FTOF::adc");
 	
 	private static FTOF _instance;
 	
-	//the sector and paddle arrays for each "layer"
-	private int[][] _sector = new int[3][];
-	private int[][] _paddle = new int[3][];
-
 	
 	/**
 	 * Public access to the singleton
@@ -132,78 +117,12 @@ public class FTOF extends DetectorData {
 	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
-		extractSectorArrays();
-		extractPaddleArrays();
-		_simHits =  new SimHitList("FTOF::tdc", "FTOF::adc");
-		System.err.println("SIM HIT SIZE: " + _simHits.size());
-		for (SimHit hit : _simHits) {
-			System.err.println("  " + hit);
-		}
+		_tdcAdcHits =  new TdcAdcHitList("FTOF::tdc", "FTOF::adc");
 	}
 	
-	//get the sector data from the event
-	private void extractSectorArrays() {
-		DataList lists[] = new DataList[3];
-		for (int i = 0; i < 3; i++) {
-			lists[i] = new DataList();
-		}
-		
-		//get all the sector data from tdc
-		byte[] tdcsect = ColumnData.getByteArray("FTOF::tdc.sector");
-		byte[] adcsect = ColumnData.getByteArray("FTOF::adc.sector");
-		byte[] tdclay = ColumnData.getByteArray("FTOF::tdc.layer");
-		byte[] adclay = ColumnData.getByteArray("FTOF::adc.layer");
-		
-		if (tdcsect != null) {
-			for (int i = 0; i < tdcsect.length; i++) {
-				int panel = tdclay[i] - 1;
-				lists[panel].add((int)tdcsect[i]);
-			}
-		}
-		if (adcsect != null) {
-			for (int i = 0; i < adcsect.length; i++) {
-				int panel = adclay[i] - 1;
-				lists[panel].add((int)adcsect[i]);
-			}
-		}
-
-		for (int i = 0; i < 3; i++) {
-			_sector[i] = lists[i] == null ? null : lists[i].toIntArray();
-//			System.err.println(" PANEL: " + i + "   SECT LEN: " + (_sector[i] == null ? 0 : _sector[i].length));
-		}
-	}
-	
-	//get the paddle data from the event
-	private void extractPaddleArrays() {
-		
-		DataList lists[] = new DataList[3];
-		for (int i = 0; i < 3; i++) {
-			lists[i] = new DataList();
-		}
-		
-		//get all the sector data from tdc
-		short[] tdcpaddle = ColumnData.getShortArray("FTOF::tdc.component");
-		short[] adcpaddle = ColumnData.getShortArray("FTOF::adc.component");
-		byte[] tdclay = ColumnData.getByteArray("FTOF::tdc.layer");
-		byte[] adclay = ColumnData.getByteArray("FTOF::adc.layer");
-		
-		if (tdcpaddle != null) {
-			for (int i = 0; i < tdcpaddle.length; i++) {
-				int panel = tdclay[i] - 1;
-				lists[panel].add((int)tdcpaddle[i]);
-			}
-		}
-		if (adcpaddle != null) {
-			for (int i = 0; i < adcpaddle.length; i++) {
-				int panel = adclay[i] - 1;
-				lists[panel].add((int)adcpaddle[i]);
-			}
-		}
-
-		for (int i = 0; i < 3; i++) {
-			_paddle[i] = lists[i] == null ? null : lists[i].toIntArray();
-//			System.err.println(" PANEL: " + i + "   PADD LEN: " + (_paddle[i] == null ? 0 : _paddle[i].length));
-		}
+	public TdcAdcHitList updateTdcAdcList() {
+		_tdcAdcHits =  new TdcAdcHitList("FTOF::tdc", "FTOF::adc");
+		return _tdcAdcHits;
 	}
 
 
@@ -215,150 +134,10 @@ public class FTOF extends DetectorData {
 	 * @return the pid array
 	 */
 	public int[] pid(int panelType) {
-
-		int pid[] = null;
-		switch (panelType) {
-		case PANEL_1A:
-			pid = ColumnData.getIntArray("FTOF1A::true.pid");
-			break;
-
-		case PANEL_1B:
-			pid = ColumnData.getIntArray("FTOF1B::true.pid");
-			break;
-
-		case PANEL_2:
-			pid = ColumnData.getIntArray("FTOF2B::true.pid");
-			break;
-		}
-		return pid;
+		return null;
 	}
 
-	/**
-	 * Get the sector array from the dgtz data
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the sector array
-	 */
-	public int[] sector(int panelType) {
-		return _sector[panelType];
-	}
-	
 
-	/**
-	 * Get the paddle array from the dgtz data
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the paddle array
-	 */
-	public int[] paddle(int panelType) {
-		return _paddle[panelType];
-    }
-
-	/**
-	 * Get the ADCL array from the dgtz data
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the ADCL array
-	 */
-	public int[] ADCL(int panelType) {
-
-		int ADCL[] = null;
-		switch (panelType) {
-		case PANEL_1A:
-			ADCL = ColumnData.getIntArray("FTOF1A::dgtz.ADCL");
-			break;
-
-		case PANEL_1B:
-			ADCL = ColumnData.getIntArray("FTOF1B::dgtz.ADCL");
-			break;
-
-		case PANEL_2:
-			ADCL = ColumnData.getIntArray("FTOF2B::dgtz.ADCL");
-			break;
-		}
-		return ADCL;
-	}
-
-	/**
-	 * Get the ADCR array from the dgtz data
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the ADCR array
-	 */
-	public int[] ADCR(int panelType) {
-
-		int ADCR[] = null;
-		switch (panelType) {
-		case PANEL_1A:
-			ADCR = ColumnData.getIntArray("FTOF1A::dgtz.ADCR");
-			break;
-
-		case PANEL_1B:
-			ADCR = ColumnData.getIntArray("FTOF1B::dgtz.ADCR");
-			break;
-
-		case PANEL_2:
-			ADCR = ColumnData.getIntArray("FTOF2B::dgtz.ADCR");
-			break;
-		}
-		return ADCR;
-	}
-
-	/**
-	 * Get the TDCL array from the dgtz data
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the TDCL array
-	 */
-	public int[] TDCL(int panelType) {
-
-		int TDCL[] = null;
-		switch (panelType) {
-		case PANEL_1A:
-			TDCL = ColumnData.getIntArray("FTOF1A::dgtz.TDCL");
-			break;
-
-		case PANEL_1B:
-			TDCL = ColumnData.getIntArray("FTOF1B::dgtz.TDCL");
-			break;
-
-		case PANEL_2:
-			TDCL = ColumnData.getIntArray("FTOF2B::dgtz.TDCL");
-			break;
-		}
-		return TDCL;
-	}
-
-	/**
-	 * Get the TDCR array from the dgtz data
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the TDCR array
-	 */
-	public int[] TDCR(int panelType) {
-
-		int TDCR[] = null;
-		switch (panelType) {
-		case PANEL_1A:
-			TDCR = ColumnData.getIntArray("FTOF1A::dgtz.TDCR");
-			break;
-
-		case PANEL_1B:
-			TDCR = ColumnData.getIntArray("FTOF1B::dgtz.TDCR");
-			break;
-
-		case PANEL_2:
-			TDCR = ColumnData.getIntArray("FTOF2B::dgtz.TDCR");
-			break;
-		}
-		return TDCR;
-	}
 	
 	/**
 	 * Get the avgX array from the true data
@@ -368,22 +147,7 @@ public class FTOF extends DetectorData {
 	 * @return the avgX array
 	 */
 	public double[] avgX(int panelType) {
-		double avgX[] = null;
-		switch (panelType) {
-
-		case PANEL_1A:
-			avgX = ColumnData.getDoubleArray("FTOF1A::true.avgX");
-			break;
-
-		case PANEL_1B:
-			avgX = ColumnData.getDoubleArray("FTOF1B::true.avgX");
-			break;
-
-		case PANEL_2:
-			avgX = ColumnData.getDoubleArray("FTOF2B::true.avgX");
-			break;
-		}
-		return avgX;
+		return null;
 	}
 	
 	
@@ -395,22 +159,7 @@ public class FTOF extends DetectorData {
 	 * @return the avgY array
 	 */
 	public double[] avgY(int panelType) {
-		double avgY[] = null;
-		switch (panelType) {
-
-		case PANEL_1A:
-			avgY = ColumnData.getDoubleArray("FTOF1A::true.avgY");
-			break;
-
-		case PANEL_1B:
-			avgY = ColumnData.getDoubleArray("FTOF1B::true.avgY");
-			break;
-
-		case PANEL_2:
-			avgY = ColumnData.getDoubleArray("FTOF2B::true.avgY");
-			break;
-		}
-		return avgY;
+		return null;
 	}
 	
 	
@@ -422,22 +171,7 @@ public class FTOF extends DetectorData {
 	 * @return the avgZ array
 	 */
 	public double[] avgZ(int panelType) {
-		double avgZ[] = null;
-		switch (panelType) {
-
-		case PANEL_1A:
-			avgZ = ColumnData.getDoubleArray("FTOF1A::true.avgZ");
-			break;
-
-		case PANEL_1B:
-			avgZ = ColumnData.getDoubleArray("FTOF1B::true.avgZ");
-			break;
-
-		case PANEL_2:
-			avgZ = ColumnData.getDoubleArray("FTOF2B::true.avgZ");
-			break;
-		}
-		return avgZ;
+		return null;
 	}
 	
 	/**
@@ -446,7 +180,7 @@ public class FTOF extends DetectorData {
 	 * @return the reconstructed sector array
 	 */
 	public int[] reconSector() {
-		return ColumnData.getIntArray("FTOFRec::ftofhits.sector");
+		return null;
 	}
 
 	/**
@@ -455,7 +189,7 @@ public class FTOF extends DetectorData {
 	 * @return the reconstructed panel array
 	 */
 	public int[] reconPanel() {
-		return ColumnData.getIntArray("FTOFRec::ftofhits.panel_id");
+		return null;
 	}
 
 	/**
@@ -464,7 +198,7 @@ public class FTOF extends DetectorData {
 	 * @return the reconstructed sector array
 	 */
 	public int[] reconPaddle() {
-		return ColumnData.getIntArray("FTOFRec::ftofhits.paddle_id");
+		return null;
 	}
 
 	/**
@@ -473,7 +207,7 @@ public class FTOF extends DetectorData {
 	 * @return the reconstructed x array
 	 */
 	public float[] reconX() {
-		return ColumnData.getFloatArray("FTOFRec::ftofhits.x");
+		return null;
 	}
 
 	/**
@@ -482,7 +216,7 @@ public class FTOF extends DetectorData {
 	 * @return the reconstructed y array
 	 */
 	public float[] reconY() {
-		return ColumnData.getFloatArray("FTOFRec::ftofhits.y");
+		return null;
 	}
 
 	/**
@@ -491,47 +225,9 @@ public class FTOF extends DetectorData {
 	 * @return the reconstructed z array
 	 */
 	public float[] reconZ() {
-		return ColumnData.getFloatArray("FTOFRec::ftofhits.z");
+		return null;
 	}
 	
-	/**
-	 * Add some dgtz hit feedback for ftof
-	 * 
-	 * @param hitIndex
-	 *            the hit index
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @param feedbackStrings
-	 *            the collection of feedback strings
-	 */
-	public void dgtzFeedback(int hitIndex, int panelType,
-			List<String> feedbackStrings) {
-
-		if (hitIndex < 0) {
-			return;
-		}
-
-		int sector[] = sector(panelType);
-		int paddle[] = paddle(panelType);
-		int ADCL[] = ADCL(panelType);
-		int ADCR[] = ADCR(panelType);
-		int TDCL[] = TDCL(panelType);
-		int TDCR[] = TDCR(panelType);
-		if ((sector == null) || (paddle == null) || (ADCL == null)
-				|| (ADCR == null) || (TDCL == null) || (TDCR == null)) {
-			return;
-		}
-
-		String pname = name(panelType);
-		feedbackStrings.add(DataSupport.dgtzColor + pname + " sector "
-				+ sector[hitIndex] + "  paddle " + paddle[hitIndex]);
-
-		feedbackStrings.add(DataSupport.dgtzColor + "adc_left "
-				+ ADCL[hitIndex] + "  adc_right " + ADCR[hitIndex]);
-		feedbackStrings.add(DataSupport.dgtzColor + "tdc_left "
-				+ TDCL[hitIndex] + "  tdc_right " + TDCR[hitIndex]);
-
-	}
 
 	/**
 	 * Get the name from the panel type
@@ -548,67 +244,13 @@ public class FTOF extends DetectorData {
 		}
 	}
 
-	/**
-	 * Get the index of the ftof hit
-	 * 
-	 * @param sect
-	 *            the 1-based sector
-	 * @param paddle
-	 *            the 1-based paddle
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the index of a hit in a panel with these parameters, or -1 if not
-	 *         found
-	 */
-	public int hitIndex(int sect, int paddle, int panelType) {
 
-		int sector[] = sector(panelType);
-		int paddles[] = paddle(panelType);
-
-		if (sector == null) {
-			return -1;
-		}
-
-		if (paddles == null) {
-			Log.getInstance().warning(
-					"null paddles array in hitIndex for panelType: "
-							+ panelType + " sector: " + sect + " paddle: "
-							+ paddle);
-			return -1;
-		}
-
-		for (int i = 0; i < hitCount(panelType); i++) {
-			if ((sect == sector[i]) && (paddle == paddles[i])) {
-				return i;
-			}
-		}
-		return -1;
-	}
 
 	/**
-	 * Get the hit count for panel 1A panel
-	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
-	 * @return the hit count for panel 1A
+	 * Get the tdc and adc hit list
+	 * @return the tdc adc hit list
 	 */
-	public int hitCount(int panelType) {
-		int sector[] = sector(panelType);
-		return (sector == null) ? 0 : sector.length;
-	}
-
-
-	class DataList extends ArrayList<Integer> {
-		public int[] toIntArray() {
-			if (isEmpty()) {
-				return null;
-			}
-			
-			int array[] = new int[size()];
-			for (int i = 0; i < size(); i++) {
-				array[i] = get(i);
-			}
-			return array;
-		}
+	public TdcAdcHitList getTdcAdcHits() {
+		return _tdcAdcHits;
 	}
 }

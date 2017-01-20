@@ -62,11 +62,13 @@ public class BankTableModel extends DefaultTableModel {
 		}
 		ArrayList<ColumnData> cds = DataManager.getInstance().hasData(_event, _bankName);
 		int rowCount = 0;
-		
+
 		for (ColumnData cd : cds) {
-			rowCount = Math.max(rowCount, cd.getLength(_event));
+			if (cd != null) {
+				rowCount = Math.max(rowCount, cd.getLength(_event));
+			}
 		}
-		
+
 		return rowCount;
 	}
 	
