@@ -117,7 +117,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 * @return the menu item to open an event file
 	 */
 	public static JMenuItem getOpenEventFileItem() {
-		final JMenuItem item = new JMenuItem("Open Event File...");
+		final JMenuItem item = new JMenuItem("Open Hipo File...");
 
 		ActionListener al = new ActionListener() {
 
@@ -130,6 +130,26 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		item.addActionListener(al);
 		return item;
 	}
+	
+	/** 
+	 * Get the menu item to connect to any DAQ ring
+	 * @return the menu item to open any DAQ ring
+	 */
+	public static JMenuItem getConnectAnyRingItem() {
+		final JMenuItem item = new JMenuItem("Connect to Hipo Ring...");
+
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ClasIoEventManager.getInstance().ConnectToHipoRing();
+			}
+
+		};
+		item.addActionListener(al);
+		return item;
+	}
+	
 
 	// convenience method to add menu item
 	private JMenuItem addMenuItem(String label, int accelKey) {
@@ -191,16 +211,16 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	public static File openEventFile() {
 
 		ClasIoEventManager eventManager = ClasIoEventManager.getInstance();
-		File selectedFile = eventManager.getCurrentEventFile();
 
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
 		chooser.setFileFilter(_eventFileFilter);
 		int returnVal = chooser.showOpenDialog(Ced.getFrame());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			selectedFile = chooser.getSelectedFile();
+			File file = chooser.getSelectedFile();
 			try {
-				eventManager.openEventFile(selectedFile);
+				dataFilePath = file.getPath();
+				eventManager.openHipoEventFile(file);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -208,7 +228,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 			}
 		}
 
-		return selectedFile;
+		return null;
 	}
 
 	/**
@@ -256,7 +276,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 					File file = new File(fn);
 					if (file.exists()) {
 						try {
-							ClasIoEventManager.getInstance().openEventFile(file);
+							ClasIoEventManager.getInstance().openHipoEventFile(file);
 						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {

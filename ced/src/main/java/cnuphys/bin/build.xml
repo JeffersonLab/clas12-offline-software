@@ -21,7 +21,7 @@
 		<!-- copying  necessary stuff-->
 		<!-- copy coatjava from home dir-->
 		<copy todir="${destdir}">
-			<fileset includes="coatjava/etc/bankdefs/clas12/*.xml, coatjava/lib/clas/coat*.jar"  
+			<fileset includes="coatjava/etc/bankdefs/hipo/*.json, coatjava/lib/clas/coat*.jar"  
 							dir="${cnudir}" />
 		</copy>
 		

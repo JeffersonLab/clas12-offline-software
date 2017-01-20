@@ -102,8 +102,6 @@ public class PointerButton extends ToolBarToggleButton
 			return;
 		}
 		
-		System.err.println("MP B");
-
 		// get the topmost item
 		_modifiedItem = container.getItemAtPoint(mouseEvent.getPoint());
 		if (_modifiedItem != null) {

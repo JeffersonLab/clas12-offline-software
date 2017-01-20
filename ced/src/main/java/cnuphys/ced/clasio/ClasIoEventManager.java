@@ -8,7 +8,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.EventListenerList;
 
@@ -17,7 +21,10 @@ import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoRingSource;
 
+import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.component.IpField;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.alldata.ColumnData;
@@ -29,19 +36,12 @@ import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.frame.Ced;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.splot.plot.GraphicsUtilities;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
 
 public class ClasIoEventManager {
 
-	/** check box for file as event source */
-	public static JRadioButtonMenuItem fileRadioMenuItem; // file
-
-	/** check box for ET as event source */
-	public static JRadioButtonMenuItem ringRadioMenuItem; // ET system
-
-	/** check box for FastMC as an event source */
-	public static JRadioButtonMenuItem fastMCRadioMenuItem; // FastMC system
 
 	// Unique lund ids in the event (if any)
 	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
@@ -54,12 +54,24 @@ public class ClasIoEventManager {
 	
 	//Data from the special run bank
 	private RunData _runData = new RunData();
+	
+	//for HIPO ring
+	public IpField _ipField;
+	
+	//connect to ring
+	public JButton _connectButton;
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
-		FILE, RING, FASTMC
+		HIPOFILE, RING, FASTMC
 	}
 
+	//the current source type
+	private EventSourceType _sourceType = EventSourceType.HIPOFILE;
+	
+	//hipo ring dialog
+	private RingDialog _ringDialog;
+	
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
 
@@ -77,8 +89,11 @@ public class ClasIoEventManager {
 	// someone who can swim all recon particles
 	private ISwimAll _allReconSwimmer;
 
-	// the current event file (meaningless if reading from ET)
-	private File _currentEventFile;
+	// the current hipo event file
+	private File _currentHipoFile;
+
+	//current ip address of HIPO ring
+	private String _currentIPAddress;
 
 	// the clas_io source of events
 	private DataSource _dataSource;
@@ -96,7 +111,7 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get the run data, changed everytime a run bank is encountered
+	 * Get the run data, changed every time a run bank is encountered
 	 * @return the run data
 	 */
 	public RunData getRunData() {
@@ -196,14 +211,14 @@ public class ClasIoEventManager {
 		_accumulating = accumulating;
 	}
 
-	/**
-	 * Get the current event file
-	 * 
-	 * @return the current file
-	 */
-	public File getCurrentEventFile() {
-		return _currentEventFile;
-	}
+//	/**
+//	 * Get the current event file
+//	 * 
+//	 * @return the current file
+//	 */
+//	public File getCurrentEventFile() {
+//		return _currentEventFile;
+//	}
 
 	/**
 	 * Get the current event
@@ -214,38 +229,29 @@ public class ClasIoEventManager {
 		return _currentEvent;
 	}
 
-	/**
-	 * Get the path of the current file
-	 * 
-	 * @return the path of the current file
-	 */
-	public String getCurrentEventFilePath() {
-		return (_currentEventFile == null) ? "(none)" : _currentEventFile.getPath();
-	}
-
-	/**
-	 * Get the base simple name of the current file
-	 * 
-	 * @return the path of the current file
-	 */
-	public String getCurrentEventFileName() {
-
-		String s = "(none)";
-
-		EventSourceType estype = ClasIoEventManager.getEventSourceType();
-
-		switch (estype) {
-		case FILE:
-			return (_currentEventFile == null) ? "(none)" : _currentEventFile.getName();
-		case RING:
-			return "HIPPO Ring";
-		case FASTMC:
-			File lundFile = FastMCManager.getInstance().getCurrentFile();
-			return (lundFile == null) ? "(none)" : lundFile.getName();
+//	/**
+//	 * Get the path of the current file
+//	 * 
+//	 * @return the path of the current file
+//	 */
+//	public String getCurrentEventFilePath() {
+//		return (_currentEventFile == null) ? "(none)" : _currentEventFile.getPath();
+//	}
+	
+	public String getCurrentSourceDescription() {
+		
+		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
+			return "Hipo File: " + _currentHipoFile.getName();
 		}
-
-		return s;
+		else if (_sourceType == EventSourceType.FASTMC) {
+			return FastMCManager.getInstance().getSourceDescription();
+		}
+		else if ((_sourceType == EventSourceType.RING) && (_currentIPAddress != null)) {
+			return "Hipo Ring: " + _currentIPAddress;
+		}
+		return "(none)";
 	}
+
 
 	/**
 	 * Set the source to read from an event file
@@ -255,8 +261,8 @@ public class ClasIoEventManager {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void openEventFile(String path) throws FileNotFoundException, IOException {
-		openEventFile(new File(path));
+	public void openHipoEventFile(String path) throws FileNotFoundException, IOException {
+		openHipoEventFile(new File(path));
 	}
 
 	/**
@@ -267,7 +273,7 @@ public class ClasIoEventManager {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void openEventFile(File file) throws FileNotFoundException, IOException {
+	public void openHipoEventFile(File file) throws FileNotFoundException, IOException {
 
 		if (!file.exists()) {
 			throw (new FileNotFoundException("Event event file not found"));
@@ -276,10 +282,12 @@ public class ClasIoEventManager {
 			throw (new FileNotFoundException("Event file cannot be read"));
 		}
 
+		_currentHipoFile = file;
+		
 		_dataSource = new HipoDataSource();
 		_dataSource.open(file.getPath());
-		notifyEventListeners(file.getPath());
-		_currentEventFile = file;
+		notifyEventListeners(_currentHipoFile);
+		setEventSourceType(EventSourceType.HIPOFILE);
 		
 		//TODO check if I need to skip the first event
 		
@@ -289,86 +297,66 @@ public class ClasIoEventManager {
 			e.printStackTrace();
 		}
 	}
-
-
+	
+	
+	public void ConnectToHipoRing() {
+		if (_ringDialog == null) {
+			_ringDialog = new RingDialog();
+		}
+		_ringDialog.setVisible(true);
+		if (_ringDialog.reason() == DialogUtilities.OK_RESPONSE) {
+			_dataSource = null;
+			_currentIPAddress = "";
+			int connType = _ringDialog.getConnectionType();
+			if (connType == RingDialog.CONNECTSPECIFIC) {
+				_dataSource = new HipoRingSource();
+				_currentIPAddress = _ringDialog.getIpAddress();
+				_dataSource.open(_currentIPAddress);
+			}
+			else if (connType == RingDialog.CONNECTDAQ) {
+				_dataSource = HipoRingSource.createSourceDaq();
+				_currentIPAddress = " DAQ ";
+			}
+			
+			if (_dataSource != null) {
+				setEventSourceType(EventSourceType.RING);
+				try {
+					getNextEvent();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 	/**
 	 * Get the current event source type
 	 * 
 	 * @return the current event source type
 	 */
-	public static EventSourceType getEventSourceType() {
-		if ((fileRadioMenuItem == null) || (ringRadioMenuItem == null) || (fastMCRadioMenuItem == null)) {
-			return EventSourceType.FILE;
-		}
-
-		if (fileRadioMenuItem.isSelected()) {
-			return EventSourceType.FILE;
-		} else if (ringRadioMenuItem.isSelected()) {
-			return EventSourceType.RING;
-		} else if (fastMCRadioMenuItem.isSelected()) {
-			return EventSourceType.FASTMC;
-		} else {
-			return EventSourceType.FILE;
-		}
+	public EventSourceType getEventSourceType() {
+		return _sourceType;
 	}
-
+	
 	/**
-	 * Create the source *file, et) radio buttons
-	 * 
-	 * @param menu
-	 *            the menu to add them to (an event menu)
+	 * Set the soure type
+	 * @param type the new source type
 	 */
-	public void createSourceItems(final ClasIoEventMenu menu) {
-
-		Log.getInstance().info("Adding late items to the event menu.");
-
-		ButtonGroup bg = new ButtonGroup();
-
-		ActionListener sal = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				notifyEventListeners(getEventSourceType());
-				Ced.getCed().fixTitle();
-				menu.fixState();
-			}
-
-		};
-
-		// radio buttons for event source
-		fileRadioMenuItem = new JRadioButtonMenuItem("Events From HIPPO File",
-				getEventSourceType() == EventSourceType.FILE);
-		ringRadioMenuItem = new JRadioButtonMenuItem("Events From HIPPO Ring",
-				getEventSourceType() == EventSourceType.RING);
-
-		ringRadioMenuItem.setEnabled(false);
-
-		fastMCRadioMenuItem = new JRadioButtonMenuItem("Events From (FastMC) Lund Files",
-				getEventSourceType() == EventSourceType.FASTMC);
-
-		fileRadioMenuItem.addActionListener(sal);
-		ringRadioMenuItem.addActionListener(sal);
-		fastMCRadioMenuItem.addActionListener(sal);
-
-		ringRadioMenuItem.setEnabled(false);
-
-		bg.add(fileRadioMenuItem);
-		bg.add(ringRadioMenuItem);
-		bg.add(fastMCRadioMenuItem);
-
-		menu.addSeparator();
-		menu.add(fileRadioMenuItem);
-		menu.add(ringRadioMenuItem);
-		menu.add(fastMCRadioMenuItem);
+	public void setEventSourceType(EventSourceType type) {
+		if (_sourceType != type) {
+			_sourceType = type;
+			notifyEventListeners(_sourceType);
+		}
 	}
+
+
 
 	/**
 	 * Check whether current event source type is a file
 	 * 
 	 * @return <code>true</code> is source type is a file.
 	 */
-	public boolean isSourceFile() {
-		return getEventSourceType() == EventSourceType.FILE;
+	public boolean isSourceHipoFile() {
+		return getEventSourceType() == EventSourceType.HIPOFILE;
 	}
 
 	/**
@@ -397,9 +385,10 @@ public class ClasIoEventManager {
 	public int getEventCount() {
 
 		int evcount = 0;
-		if (isSourceFile()) {
+		if (isSourceHipoFile()) {
 			evcount = _dataSource.getSize();
 		} else if (isSourceRing()) {
+			return Integer.MAX_VALUE;
 		} else if (isSourceFastMC()) {
 		}
 		return evcount;
@@ -412,7 +401,7 @@ public class ClasIoEventManager {
 	 */
 	public int getEventNumber() {
 		int evnum = 0;
-		if (isSourceFile()) {
+		if (isSourceHipoFile()) {
 			evnum = _dataSource.getCurrentIndex() - 1;
 		} else if (isSourceFastMC()) {
 			evnum = FastMCManager.getInstance().getEventNumber();
@@ -428,11 +417,11 @@ public class ClasIoEventManager {
 	public boolean isNextOK() {
 
 		boolean isOK = true;
-		EventSourceType estype = ClasIoEventManager.getEventSourceType();
+		EventSourceType estype = getEventSourceType();
 
 		switch (estype) {
-		case FILE:
-			isOK = (isSourceFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
+		case HIPOFILE:
+			isOK = (isSourceHipoFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
 			break;
 		case RING:
 			break;
@@ -452,10 +441,18 @@ public class ClasIoEventManager {
 	 */
 	public int getNumRemainingEvents() {
 		int numRemaining = 0;
+		EventSourceType estype = getEventSourceType();
 
-		if (isSourceFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount())) {
+		switch (estype) {
+		case HIPOFILE:
 			numRemaining = getEventCount() - getEventNumber();
+			break;
+		case RING:
+			numRemaining = Integer.MAX_VALUE;
+		case FASTMC:
+			break;
 		}
+
 		return numRemaining;
 	}
 
@@ -465,7 +462,7 @@ public class ClasIoEventManager {
 	 * @return <code>true</code> if any prev event control should be enabled.
 	 */
 	public boolean isPrevOK() {
-		return isSourceFile() && (getEventNumber() > 1);
+		return isSourceHipoFile() && (getEventNumber() > 1);
 	}
 
 	/**
@@ -474,7 +471,7 @@ public class ClasIoEventManager {
 	 * @return <code>true</code> if any prev event control should be enabled.
 	 */
 	public boolean isGotoOK() {
-		return isSourceFile() && (getEventCount() > 0);
+		return isSourceHipoFile() && (getEventCount() > 0);
 	}
 
 	/**
@@ -514,6 +511,24 @@ public class ClasIoEventManager {
 	public void setAllReconSwimmer(ISwimAll allSwimmer) {
 		_allReconSwimmer = allSwimmer;
 	}
+	
+	public DataEvent waitForEvent() {
+		EventSourceType estype = getEventSourceType();
+		switch (estype) {
+		case RING:
+			_dataSource.waitForEvents();
+			getNextEvent();
+			break;
+		case HIPOFILE:
+			getNextEvent();
+			break;
+		case FASTMC:
+			FastMCManager.getInstance().nextEvent();
+			break;
+		}
+
+		return _currentEvent;
+	}
 
 	/**
 	 * Get the next event from the current compact reader
@@ -522,9 +537,9 @@ public class ClasIoEventManager {
 	 */
 	public DataEvent getNextEvent() {
 
-		EventSourceType estype = ClasIoEventManager.getEventSourceType();
+		EventSourceType estype = getEventSourceType();
 		switch (estype) {
-		case FILE: case RING:
+		case HIPOFILE: case RING:
 			_currentEvent = _dataSource.getNextEvent();
 			
 			//look for the run bank
@@ -625,9 +640,10 @@ public class ClasIoEventManager {
 			}
 		}
 
+		Ced.getCed().fixTitle();
 	}
 
-	private void notifyEventListeners(String path) {
+	private void notifyEventListeners(File file) {
 
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();
@@ -641,11 +657,12 @@ public class ClasIoEventManager {
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1]).openedNewEventFile(path);
+						((IClasIoEventListener) listeners[i + 1]).openedNewEventFile(file.getAbsolutePath());
 					}
 				}
 			}
 		}
+		Ced.getCed().fixTitle();
 
 	}
 

@@ -1,17 +1,20 @@
 package cnuphys.ced.event.data;
 
 
+import java.awt.Color;
 import java.util.Collections;
 import java.util.Vector;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.alldata.ColumnData;
 
-public class SimHitList extends Vector<SimHit> {
+public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	
 	private String _error;
+	
+	private int _maxADC;
 
-	public SimHitList(String tdcBankName, String adcBankName) {
+	public TdcAdcHitList(String tdcBankName, String adcBankName) {
 		super();
 		
 		/*
@@ -48,7 +51,7 @@ public class SimHitList extends Vector<SimHit> {
 			//Step 1 build basic list
 			for (int index = 0; index < length; index++) {
 				if (order[index] != 3) { //left tdc
-					SimHit hit = new SimHit(sector[index], layer[index], component[index]);
+					TdcAdcHit hit = new TdcAdcHit(sector[index], layer[index], component[index]);
 					hit.tdcL = TDC[index];
 					add(hit);
 				}
@@ -59,8 +62,6 @@ public class SimHitList extends Vector<SimHit> {
 		if (size() > 1) {
 			Collections.sort(this);
 		}
-		
-		System.err.println("SIZE AFTER 1st SORT: " + size());
 		
 		//step 3 merge in right tdc
 		for (int index = 0; index < length; index++) {
@@ -98,11 +99,24 @@ public class SimHitList extends Vector<SimHit> {
 			}
 		}
 		
+		
+		_maxADC = -1;
+		for (TdcAdcHit hit : this) {
+			_maxADC = Math.max(_maxADC, hit.averageADC());
+		}
 
 	}
 	
+	/**
+	 * Get the max average adc
+	 * @return the max average adc
+	 */
+	public int maxADC() {
+		return _maxADC;
+	}
+	
 	public void modifyInsert(byte sector, byte layer, short component, int tdcL, int tdcR, int adcL, int adcR) {
-		SimHit hit = new SimHit(sector, layer, component);
+		TdcAdcHit hit = new TdcAdcHit(sector, layer, component);
 		int index = Collections.binarySearch(this, hit);
 		if (index >= 0) {
 			hit = this.elementAt(index);
@@ -160,5 +174,63 @@ public class SimHitList extends Vector<SimHit> {
 		}
 
 		return sector.length;
+	}
+	
+	/**
+	 * Find the index of a hit
+	 * @param sector the 1-based sector
+	 * @param layer the 1-based layer
+	 * @param component the 1-based component
+	 * @return the index, or -1 if not found
+	 */
+	public int getIndex(byte sector, byte layer, short component) {
+		if (isEmpty()) {
+			return -1;
+		}
+		TdcAdcHit hit = new TdcAdcHit(sector, layer, component);
+		int index = Collections.binarySearch(this, hit);
+		if (index >= 0) {
+			return index;
+		} 
+		else { //not found
+			return -1;
+		}
+	}
+	
+	/**
+	 * Find the hit
+	 * @param sector the 1-based sector
+	 * @param layer the 1-based layer
+	 * @param component the 1-based component
+	 * @return the hit, or null if not found
+	 */
+	public TdcAdcHit get(byte sector, byte layer, short component) {
+		int index = getIndex(sector, layer, component);
+		return (index < 0) ? null : elementAt(index);
+	}
+	
+	/**
+	 * Get a color with apha based of relative adc 
+	 * @param hit the hit
+	 * @return a fill color for sim hits 
+	 */
+	public Color adcColor(TdcAdcHit hit) {
+		if (hit == null) {
+			return Color.white;
+		}
+		
+		int avgADC = hit.averageADC();
+		if (avgADC < 1) {
+			return Color.white;
+		}
+		if (_maxADC < 1) {
+			return Color.black;  //should not happen
+		}
+		
+		double fract = ((double)avgADC)/((double)(_maxADC));
+		fract = Math.max(0.1, Math.min(1.0, fract));
+		int alpha = (int)(254*fract);
+		
+		return new Color(255, 0, 0, alpha);
 	}
 }

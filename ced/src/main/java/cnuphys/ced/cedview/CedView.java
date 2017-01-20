@@ -631,9 +631,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 		boolean haveEvent = false;
 
-		EventSourceType estype = ClasIoEventManager.getEventSourceType();
+		EventSourceType estype = ClasIoEventManager.getInstance().getEventSourceType();
 		switch (estype) {
-		case FILE:
+		case HIPOFILE:
 		case RING:
 			haveEvent = (_eventManager.getCurrentEvent() != null);
 			break;
@@ -647,7 +647,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			feedbackStrings.add("$orange red$No event");
 		} else {
 			feedbackStrings.add("$orange red$" + "event " + _eventManager.getEventNumber());
-			feedbackStrings.add("$orange red$" + _eventManager.getCurrentEventFileName());
+			feedbackStrings.add("$orange red$" + _eventManager.getCurrentSourceDescription());
 		}
 
 		// acceptance for fast MC

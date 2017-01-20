@@ -545,11 +545,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//some event file menus
 		
 		fmenu.insertSeparator(0);
+		fmenu.add(ClasIoEventMenu.getConnectAnyRingItem(), 0);
+		fmenu.insertSeparator(0);
 
 		fmenu.add(ClasIoEventMenu.getRecentEventFileMenu(), 0);
 		fmenu.add(ClasIoEventMenu.getOpenEventFileItem(), 0);
-
-		
 	}
 
 	// create the options menu
@@ -601,8 +601,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// add to the event menu
 	private void addToEventMenu() {
-
-		ClasIoEventManager.getInstance().createSourceItems(_eventMenu);
 
 		// add the noise parameter menu item
 		ActionListener al2 = new ActionListener() {
@@ -722,27 +720,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				+ MagneticFields.getInstance().getActiveFieldDescription();
 		title += "]";
 		
-		EventSourceType estype = ClasIoEventManager.getEventSourceType();
-		switch (estype) {
-		case FILE:
-			File file = ClasIoEventManager.getInstance().getCurrentEventFile();
-			if (file != null) {
-				title += "   [Hippo: " + file.getName() + "]";
-			}
-			break;
-		case RING:
-			title += "   [Hippo Ring]";
-			break;
-		case FASTMC:
-			file = FastMCManager.getInstance().getCurrentFile();
-			if (file != null) {
-				title += "   [FastMC: " + file.getName() + "]";
-			}
-			break;
-		}
-		
-		//current event file?
-		
+		title += ("  " + ClasIoEventManager.getInstance().getCurrentSourceDescription());
 		setTitle(title);
 	}
 
