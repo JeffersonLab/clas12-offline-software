@@ -194,7 +194,7 @@ public class ColorScaleModel {
 
 		int index = Arrays.binarySearch(values, value);
 		// unlikely, but maybe we are exactly on a value
-		if (index > 0) {
+		if (index >= 0) {
 			return colors[index];
 		}
 		index = -(index + 1); // now the insertion point.

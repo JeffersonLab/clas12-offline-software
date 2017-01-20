@@ -302,20 +302,33 @@ public class ColumnData implements Comparable<ColumnData> {
 		return _type;
 	}
 	
+	//a check to avoid null messages and errors
+	private static DataEvent hasData(String fullName) {
+		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		if (event == null) {
+			return null;
+		}
+		
+		ColumnData cd = DataManager.getInstance().getColumnData(fullName);
+		if (cd == null) {
+			return null;
+		}
+		
+		if (!event.hasBank(cd.getBankName())) {
+			return null;
+		}
+		
+		return event;
+	}
+	
 	/**
 	 * Obtain a byte array from the current event for the given full name
 	 * @param fullName the full name 
 	 * @return the array, or <code>null</code>
 	 */
-	public static byte[] getByteArray(String fullName) {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
-		if (event == null) {
-			return null;
-		}
-		byte[] byteArray = DataManager.getInstance().getByteArray(event, fullName);
-//		System.err.println("Fullname: [" + fullName + "]  byteArray null: " + (byteArray == null));
-		return byteArray;
-//		return (event == null) ? null : DataManager.getInstance().getByteArray(event, fullName);
+	public static byte[] getByteArray(String fullName) {	
+		DataEvent event = hasData(fullName);
+		return (event == null) ? null : DataManager.getInstance().getByteArray(event, fullName);
 	}
 
 	/**
@@ -324,7 +337,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	 * @return the array, or <code>null</code>
 	 */
 	public static short[] getShortArray(String fullName) {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getShortArray(event, fullName);
 	}
 
@@ -334,7 +347,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	 * @return the array, or <code>null</code>
 	 */
 	public static int[] getIntArray(String fullName) {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getIntArray(event, fullName);
 	}
 
@@ -344,7 +357,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	 * @return the array, or <code>null</code>
 	 */
 	public static float[] getFloatArray(String fullName) {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getFloatArray(event, fullName);
 	}
 
@@ -354,7 +367,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	 * @return the array, or <code>null</code>
 	 */
 	public static double[] getDoubleArray(String fullName) {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getDoubleArray(event, fullName);
 	}
 

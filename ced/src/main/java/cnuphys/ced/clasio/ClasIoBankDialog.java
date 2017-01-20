@@ -14,6 +14,7 @@ import javax.swing.table.TableColumn;
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
@@ -130,7 +131,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				Log.getInstance().warning("ClasIoBankDialog could not parse: [" + vs + "]");
 			}
 		}
 	}
