@@ -63,6 +63,7 @@ public class EBAnalyzer {
     public void assignMasses(DetectorEvent event){
         
         int np = event.getParticles().size();
+        //System.out.println("======================= ANALYSIS");
         for(int i = 1; i < np; i++){
             DetectorParticle p = event.getParticle(i);
             double start_time  = event.getStartTime();
@@ -71,11 +72,16 @@ public class EBAnalyzer {
             if(p.hasHit(DetectorType.FTOF, 1)==true){
                 beta = p.getBeta(DetectorType.FTOF,1, start_time);
                 mass = p.getMass2(DetectorType.FTOF,1, start_time);
+                //System.out.println(String.format("PARTICLE %3d (Layer 1) p = %8.3f beta = %8.3f mass2 = %8.3f", 
+                //        i,p.vector().mag(),beta,mass));
             }
             if(p.hasHit(DetectorType.FTOF, 2)==true){
                 beta = p.getBeta(DetectorType.FTOF, 2,start_time);
                 mass = p.getMass2(DetectorType.FTOF, 2,start_time);
+                //System.out.println(String.format("PARTICLE %3d (Layer 2) p = %8.3f beta = %8.3f mass2 = %8.3f", 
+                //        i,p.vector().mag(),beta,mass));
             }
+            //System.out.println("----------------");
             /*
             if(p.hasHit(DetectorType.FTOF, 3)==true){
                 beta = p.getBeta(DetectorType.FTOF, 3, start_time);

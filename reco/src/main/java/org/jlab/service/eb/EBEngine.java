@@ -75,7 +75,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.processHitMatching();
         eb.processNeutralTracks();        
         eb.assignPid();
-        eb.getEvent().setRfTime(rf);
+        //eb.getEvent().setRfTime(rf);
         
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");

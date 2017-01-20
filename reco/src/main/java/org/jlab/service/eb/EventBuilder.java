@@ -157,7 +157,7 @@ public class EventBuilder {
             if((p.hasHit(DetectorType.FTOF, 2)|| p.hasHit(DetectorType.FTOF, 1))&&
                     (p.hasHit(DetectorType.EC, 1)&&p.hasHit(DetectorType.EC, 4))){
                 double sfraction = p.getEnergyFraction(DetectorType.EC);
-                if(sfraction>EBConstants.ECAL_SAMPLINGFRACTION){
+                if(sfraction>EBConstants.ECAL_SAMPLINGFRACTION_CUT){
                     if(p.getCharge()<0)
                         p.setPid(11);
                 }

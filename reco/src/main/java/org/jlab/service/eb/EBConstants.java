@@ -18,7 +18,9 @@ public class EBConstants {
     public static final double  FTOF_MATCHING_1A = 18.0; // matching for layer 1A of FTOF
     public static final double  FTOF_MATCHING_1B = 18.0; // matching for layer 1A of FTOF
     
-    public static final double ECAL_SAMPLINGFRACTION = 0.218;
+    public static final double ECAL_SAMPLINGFRACTION = 0.24;
+    public static final double ECAL_SAMPLINGFRACTION_CUT = 0.218;
+    
     public static final double      RF_BUCKET_LENGTH = 2.004;
     public static final double             RF_OFFSET = 0.0;
     public static final int                 RF_SHIFT = 800;
