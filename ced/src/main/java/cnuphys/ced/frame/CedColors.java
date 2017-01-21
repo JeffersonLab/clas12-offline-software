@@ -19,7 +19,10 @@ public class CedColors {
 
 	//tb segment color
 	public static final Color tbSegmentLine = X11Colors.getX11Color("Navy");
-	
+
+	//tb segment color
+	public static final Color hbSegmentLine = X11Colors.getX11Color("brown");
+
 	// for hits cells
 	public static final Color defaultHitCellFill = Color.red;
 	public static final Color defaultHitCellLine = X11Colors.getX11Color("Dark Red");

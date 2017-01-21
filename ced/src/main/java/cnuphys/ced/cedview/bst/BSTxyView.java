@@ -174,7 +174,7 @@ public class BSTxyView extends CedXYView {
 				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
 						+ DisplayBits.BSTHITS + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
-				2, 6);
+				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();

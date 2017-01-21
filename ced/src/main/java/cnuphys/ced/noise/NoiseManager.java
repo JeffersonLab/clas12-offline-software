@@ -8,6 +8,9 @@ import org.jlab.io.base.DataEvent;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DCTdcHit;
+import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.NoiseData;
 import cnuphys.snr.NoiseReductionParameters;
@@ -52,15 +55,15 @@ public class NoiseManager implements IClasIoEventListener {
 		return instance;
 	}
 
-	/**
-	 * Get the noise array which is parallel to the other dc_dgtz arrays such as
-	 * dgtz_sector etc.
-	 * 
-	 * @return the noise array
-	 */
-	public boolean[] getNoise() {
-		return _noiseResults.noise;
-	}
+//	/**
+//	 * Get the noise array which is parallel to the other dc_dgtz arrays such as
+//	 * dgtz_sector etc.
+//	 * 
+//	 * @return the noise array
+//	 */
+//	public boolean[] getNoise() {
+//		return _noiseResults.noise;
+//	}
 
 	/**
 	 * Get the parameters for a given 0-based superlayer
@@ -101,17 +104,24 @@ public class NoiseManager implements IClasIoEventListener {
 		noisePackage.clear();
 		_noiseResults.clear();
 		
-		int hitCount = DC.hitCount();
+		DCTdcHitList hits = DC2.getInstance().getHits();
 		
-		if (hitCount > 0) {
-			int sector[] = toIntArray(DC.sector());
-			int superlayer[] = toIntArray(DC.superlayer());
-			int layer[] = toIntArray(DC.layer());
-			int wire[] = toIntArray(DC.wire());
+		if ((hits != null) && !hits.isEmpty()) {
+			int sector[] = hits.sectorArray();
+			int superlayer[] = hits.superlayerArray();
+			int layer[] = hits.layer6Array();
+			int wire[] = hits.wireArray();
 			
 			noisePackage.findNoise(sector,
 					superlayer, layer,
 					wire, _noiseResults);
+			
+			//mark the hits
+			int index = 0;
+			for (DCTdcHit hit : hits) {
+				hit.noise = _noiseResults.noise[index];
+				index++;
+			}
 		}		
 	}
 	

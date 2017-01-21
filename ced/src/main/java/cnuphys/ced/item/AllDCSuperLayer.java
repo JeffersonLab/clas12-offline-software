@@ -20,6 +20,9 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.test.TestParameters;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DCTdcHit;
+import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
@@ -202,36 +205,6 @@ public class AllDCSuperLayer extends RectangleItem {
 		g.drawPolygon(_lastDrawnPolygon);
 	}
 	
-//	/**
-//	 * Draw hits (and other data) when we are in single hit mode
-//	 * 
-//	 * @param g
-//	 *            The graphics object
-//	 * @param container
-//	 *            the drawing container
-//	 */
-//	private void drawFastMCSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
-//		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-//		if ((phits == null) || phits.isEmpty()) {
-//			return;
-//		}
-//		
-//		for (ParticleHits hits : phits) {
-//			List<DetectorHit> dchits = hits.getDCHits();
-//			if (dchits != null) {
-//				for (DetectorHit hit : dchits) {
-//					int sect1 = hit.getSectorId() + 1;
-//					int supl1 = hit.getSuperlayerId() + 1;
-//					if ((sect1 == _iSupl.sector()) && (supl1 == _iSupl.superlayer())) {
-//						int lay1 = hit.getLayerId() + 1;
-//						int wire1 = hit.getComponentId() + 1;
-//						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), -1, null, null);
-//					}
-//				}
-//			}
-//		}
-//	}
-
 	
 	//draw a fast MC even rather than an evio event
 	private void fastMCDraw(Graphics g, IContainer container) {
@@ -303,44 +276,50 @@ public class AllDCSuperLayer extends RectangleItem {
 		// (which have the results)
 		NoiseReductionParameters parameters = _noiseManager.getParameters(
 				_sector - 1, _superLayer - 1);
-		// NoiseReductionParameters parameters =
-		// NoiseEventListener.getInstance()
-		// .getNoiseParameters(_sector - 1, _superLayer - 1);
 
 		// show the noise segment masks?
 		if (_view.showMasks()) {
 			drawMasks(g, container, parameters);
 		}
 
-		int hitCount = DC.hitCount();
-		
-		if (hitCount > 0)  {
-			byte sector[] = DC.sector();
-			byte superlayer[] = DC.superlayer();
-			byte layer[] = DC.layer();
-			short wire[] = DC.wire();
-			int pid[] = DC.pid();
-			
-			for (int i = 0; i < hitCount; i++) {
-				int sect1 = sector[i]; // 1 based
-				int supl1 = superlayer[i]; // 1 based
-
-				if ((sect1 == _sector) && (supl1 == _superLayer)) {
-					int lay1 = layer[i]; // 1 based
-					int wire1 = wire[i]; // 1 based
-					
-					boolean noise = false;
-					if (_noiseManager.getNoise() != null) {
-						noise = _noiseManager.getNoise()[i];
-					}
-
-					int pdgid = (pid == null) ? -1
-							: pid[i];
-					drawDCHit(g, container, lay1, wire1, noise, pdgid, wr);
+		DCTdcHitList hits = DC2.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (DCTdcHit hit : hits) {
+				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
+					drawDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, wr);
 				}
-			} // for
-
+			}
 		}
+		
+//		int hitCount = DC.hitCount();
+//		
+//		if (hitCount > 0)  {
+//			byte sector[] = DC.sector();
+//			byte superlayer[] = DC.superlayer();
+//			byte layer[] = DC.layer();
+//			short wire[] = DC.wire();
+//			int pid[] = DC.pid();
+//			
+//			for (int i = 0; i < hitCount; i++) {
+//				int sect1 = sector[i]; // 1 based
+//				int supl1 = superlayer[i]; // 1 based
+//
+//				if ((sect1 == _sector) && (supl1 == _superLayer)) {
+//					int lay1 = layer[i]; // 1 based
+//					int wire1 = wire[i]; // 1 based
+//					
+//					boolean noise = false;
+//					if (_noiseManager.getNoise() != null) {
+//						noise = _noiseManager.getNoise()[i];
+//					}
+//
+//					int pdgid = (pid == null) ? -1
+//							: pid[i];
+//					drawDCHit(g, container, lay1, wire1, noise, pdgid, wr);
+//				}
+//			} // for
+//
+//		}
 		
 	}
 
@@ -648,18 +627,21 @@ public class AllDCSuperLayer extends RectangleItem {
 						+ DoubleFormat.doubleFormat(
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");
+		
+		DCTdcHitList hits = DC2.getInstance().getHits();
 
-		int hitIndex = DC.hitIndex(_sector, _superLayer, layer, wire);
-		if (hitIndex < 0) {
+		DCTdcHit hit = null;
+		if ((hits != null) && !hits.isEmpty()) {
+			hit = hits.getHit(_sector, _superLayer, layer, wire);
+		}
+		
+		if (hit == null) {
 			feedbackStrings.add("superlayer " + _superLayer + "  layer "
 					+ layer + "  wire " + wire);
-		} else {
-			DC.noiseFeedback(hitIndex, feedbackStrings);
-			DC.trueFeedback(hitIndex, feedbackStrings);
-			DataSupport.truePidFeedback(DC.pid(), hitIndex, feedbackStrings);
-			DC.dcBanksFeedback(hitIndex, feedbackStrings);
 		}
-
+		else {
+			hit.tdcAdcFeedback(_view.showNoiseAnalysis(), _view.showMcTruth(), feedbackStrings);
+		}
 	}
 		
 	/**

@@ -13,47 +13,21 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 	
 	private String DCBank = "DC::tdc";
 	private String DocaBank = "DC::doca";  //only in sim data
-	
-	
-//	bank name: [DC::tdc] column name: [sector] full name: [DC::tdc.sector] data type: byte
-//	bank name: [DC::tdc] column name: [layer] full name: [DC::tdc.layer] data type: byte
-//	bank name: [DC::tdc] column name: [component] full name: [DC::tdc.component] data type: short
-//	bank name: [DC::tdc] column name: [order] full name: [DC::tdc.order] data type: byte
-//	bank name: [DC::tdc] column name: [TDC] full name: [DC::tdc.TDC] data type: int
-	
-	//NOT present in real data
-//	bank name: [DC::doca] column name: [LR] full name: [DC::doca.LR] data type: byte
-//	bank name: [DC::doca] column name: [doca] full name: [DC::doca.doca] data type: float
-//	bank name: [DC::doca] column name: [sdoca] full name: [DC::doca.sdoca] data type: float
-//	bank name: [DC::doca] column name: [time] full name: [DC::doca.time] data type: float
-//	bank name: [DC::doca] column name: [stime] full name: [DC::doca.stime] data type: float
 
 	public DCTdcHitList() {
 		
-		byte[] sector = null;
-		byte[] layer = null;
-		short[] wire = null;
 		
-//I think order is not relevant for DC
-//		byte[] order = null; 
-		int[] TDC = null;
 		int length = 0;
-		
-		byte[] lr = null;
-		float[] doca = null;
-		float[] time = null;
-		float[] sdoca = null;
-		float[] stime = null;
-		
-		sector = ColumnData.getByteArray(DCBank + ".sector");
+				
+		byte[] sector = ColumnData.getByteArray(DCBank + ".sector");
 		if ((sector == null) || (sector.length < 1)) {
 			return;
 		}
 
-		layer = ColumnData.getByteArray(DCBank + ".layer");
-		wire = ColumnData.getShortArray(DCBank + ".component");
-		// order = ColumnData.getByteArray(DCBank + ".order");
-		TDC = ColumnData.getIntArray(DCBank + ".TDC");
+		byte[] layer = ColumnData.getByteArray(DCBank + ".layer");
+		short[] wire = ColumnData.getShortArray(DCBank + ".component");
+		//byte[] order = ColumnData.getByteArray(DCBank + ".order");
+		int[] TDC = ColumnData.getIntArray(DCBank + ".TDC");
 
 		length = checkArrays(sector, layer, wire, TDC);
 		if (length < 0) {
@@ -62,7 +36,12 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		}
 		
 		//see if there are doca arrays of the same length
-		lr = ColumnData.getByteArray(DocaBank + ".LR");
+		byte[] lr = ColumnData.getByteArray(DocaBank + ".LR");
+		float[] doca = null;
+		float[] time = null;
+		float[] sdoca = null;
+		float[] stime = null;
+
 		int docalen = -1;
 		if (lr != null) {
 			doca = ColumnData.getFloatArray(DocaBank + ".doca");
@@ -97,9 +76,9 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		}
 
 
-		for (DCTdcHit hit : this) {
-			System.out.println(hit.toString());
-		}
+//		for (DCTdcHit hit : this) {
+//			System.out.println(hit.toString());
+//		}
 	}
 	
 	private int checkArrays(byte[] lr, float[] doca, float[] time, float[] sdoca, float[] stime) {
@@ -208,6 +187,101 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 	public DCTdcHit get(byte sector, byte layer, short wire) {
 		int index = getIndex(sector, layer, wire);
 		return (index < 0) ? null : elementAt(index);
+	}
+	
+	
+	/**
+	 * Find the hit
+	 * @param sector the 1-based sector
+	 * @param layer the 1-based layer 1..36
+	 * @param component the 1-based component
+	 * @return the hit, or null if not found
+	 */
+	public DCTdcHit getHit(int sector, int layer, int wire) {
+		return get((byte)sector, (byte)layer, (short)wire);
+	}
+
+	/**
+	 * Find the hit
+	 * @param sector the 1-based sector
+	 * @param superlayer the 1-based superlayer 1..6
+	 * @param layer6 the 1-based layer 1..36
+	 * @param component the 1-based component
+	 * @return the hit, or null if not found
+	 */
+	public DCTdcHit getHit(int sector, int superlayer, int layer6, int wire) {
+		int layer = (superlayer-1)*6 + layer6;
+		return get((byte)sector, (byte)layer, (short)wire);
+	}
+
+
+	
+	/**
+	 * Extract the sectors as an array. Used by the Noise package
+	 * @return the sectors as an array.
+	 */
+	public int[] sectorArray() {
+		if (isEmpty()) {
+			return null;
+		}
+		int array[] = new int[size()];
+		int index = 0;
+		for (DCTdcHit hit : this) {
+			array[index] = hit.sector;
+			index++;
+		}
+		return array;
+	}
+	
+	/**
+	 * Extract the superlayers as an array. Used by the Noise package
+	 * @return the superlayers as an array.
+	 */
+	public int[] superlayerArray() {
+		if (isEmpty()) {
+			return null;
+		}
+		int array[] = new int[size()];
+		int index = 0;
+		for (DCTdcHit hit : this) {
+			array[index] = hit.superlayer;
+			index++;
+		}
+		return array;
+	}
+	
+	/**
+	 * Extract the layer6's as an array. Used by the Noise package
+	 * @return the layer6's [1..6] as an array.
+	 */
+	public int[] layer6Array() {
+		if (isEmpty()) {
+			return null;
+		}
+		int array[] = new int[size()];
+		int index = 0;
+		for (DCTdcHit hit : this) {
+			array[index] = hit.layer6;
+			index++;
+		}
+		return array;
+	}
+
+	/**
+	 * Extract the wires as an array. Used by the Noise package
+	 * @return the wires as an array.
+	 */
+	public int[] wireArray() {
+		if (isEmpty()) {
+			return null;
+		}
+		int array[] = new int[size()];
+		int index = 0;
+		for (DCTdcHit hit : this) {
+			array[index] = hit.wire;
+			index++;
+		}
+		return array;
 	}
 
 }

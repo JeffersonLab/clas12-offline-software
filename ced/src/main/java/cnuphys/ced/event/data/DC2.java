@@ -13,7 +13,7 @@ public class DC2 extends DetectorData {
 	
 	/**
 	 * Public access to the singleton
-	 * @return the FTOF singleton
+	 * @return the singleton
 	 */
 	public static DC2 getInstance() {
 		if (_instance == null) {
@@ -27,8 +27,20 @@ public class DC2 extends DetectorData {
 		_tdcHits =  new DCTdcHitList();
 	}
 	
+	/**
+	 * Update the list. This is probably needed only during accumulation
+	 * @return the update l;ist
+	 */
 	public DCTdcHitList updateTdcAdcList() {
 		_tdcHits =  new DCTdcHitList();
+		return _tdcHits;
+	}
+	
+	/**
+	 * Get the tdc  hit list
+	 * @return the tdc hit list
+	 */
+	public DCTdcHitList getHits() {
 		return _tdcHits;
 	}
 

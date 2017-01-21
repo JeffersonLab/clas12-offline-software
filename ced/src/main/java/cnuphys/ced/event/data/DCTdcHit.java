@@ -46,6 +46,18 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 		layer6 = (byte) (((layer - 1) % 6) + 1);
 	}
 	
+	/**
+	 * Checks whether the indices are valid
+	 * @return <code>true</code> if the hit has valid indices
+	 */
+	public boolean inRange() {
+		return (valInRange(sector, 1, 6) && valInRange(layer, 1, 36) && valInRange(wire, 1, 112));
+	}
+	
+	private boolean valInRange(int val, int min, int max) {
+		return ((val >= min) && (val <= max));
+	}
+	
 	public DCTdcHit(byte sector, byte layer, short wire, int tdc,
 			byte lr, float doca, float sdoca, float time, float stime) {
 		this(sector, layer, wire, tdc);
@@ -78,7 +90,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 			return "";
 		}
 		else {
-			return " tdc: " + tdc;
+			return "tdc: " + tdc;
 		}
 	}
 	
@@ -88,7 +100,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 		String s =  "sector = " + sector + " layer " + layer + 
 				"  superlayer " + superlayer +
 				"  layer6 " + layer6 +
-				" wire: " + wire + tdcString();
+				" wire: " + wire + " " + tdcString();
 		
 		String dStr = docaString(doca, time);
 		if (dStr.length() > 3) {
@@ -120,10 +132,10 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	 */
 	public void tdcAdcFeedback(boolean showNoise, boolean showDoca, List<String> feedbackStrings) {
 		
-		feedbackStrings.add(_fbColor  + " sector "
+		feedbackStrings.add(_fbColor  + "sector "
 				+ sector + 
 				" layer " + layer +
-				"  wire + "  + wire);
+				" wire + "  + wire);
 
 		String tdcStr = tdcString();
 		if (tdcStr.length() > 3) {
@@ -131,17 +143,17 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 		}
 		
 		if (showNoise) {
-			feedbackStrings.add(_fbColor + "Is noise " + noise);
+			feedbackStrings.add(_fbColor + "Noise guess " + (noise ? "noise" : "not noise"));
 		}
 		
 		if (showDoca) {
 			String dstr = docaString(doca, time);
 			if (dstr.length() > 3) {
-				feedbackStrings.add(_fbColor + " SIM (doca, time) " + dstr);
+				feedbackStrings.add(_fbColor + "SIM (doca, time) " + dstr);
 			}
 			String sdstr = docaString(sdoca, stime);
 			if (dstr.length() > 3) {
-				feedbackStrings.add(_fbColor + " SIM (sdoca, stime) " + sdstr);
+				feedbackStrings.add(_fbColor + "SIM (sdoca, stime) " + sdstr);
 			}
 		}
 

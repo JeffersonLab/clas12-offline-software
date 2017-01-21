@@ -17,6 +17,9 @@ import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DCTdcHit;
+import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC;
@@ -504,38 +507,44 @@ public class AccumulationManager
 		} // htcc hit count > 0
 
 		// dc data
-		int dcHitCount = DC.hitCount();
+		DCTdcHitList dclist = DC2.getInstance().updateTdcAdcList();
+		accumDC(dclist);
 
-		if (dcHitCount > 0) {
-			byte sector[] = DC.sector();
-			byte superlayer[] = DC.superlayer();
-			byte layer[] = DC.layer();
-			short wire[] = DC.wire();
-
-			for (int i = 0; i < dcHitCount; i++) {
-				int sect0 = sector[i] - 1; // make 0 based
-				int supl0 = superlayer[i] - 1; // make 0 based
-				int lay0 = layer[i] - 1; // make 0 based
-				int wire0 = wire[i] - 1; // make 0 based
-				try {
-					_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
-
-					_maxDgtzDcCount = Math.max(
-							_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
-							_maxDgtzDcCount);
-
-				} catch (ArrayIndexOutOfBoundsException e) {
-					String msg = String.format(
-							"DC index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
-							_eventManager.getEventNumber(), sector[i],
-							superlayer[i], layer[i], wire[i]);
-					Log.getInstance().warning(msg);
-					System.err.println(msg);
-				}
-
-			} // end loop hits
-
-		} // dcHitCount > 0
+		
+		
+		
+//		int dcHitCount = DC.hitCount();
+//
+//		if (dcHitCount > 0) {
+//			byte sector[] = DC.sector();
+//			byte superlayer[] = DC.superlayer();
+//			byte layer[] = DC.layer();
+//			short wire[] = DC.wire();
+//
+//			for (int i = 0; i < dcHitCount; i++) {
+//				int sect0 = sector[i] - 1; // make 0 based
+//				int supl0 = superlayer[i] - 1; // make 0 based
+//				int lay0 = layer[i] - 1; // make 0 based
+//				int wire0 = wire[i] - 1; // make 0 based
+//				try {
+//					_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
+//
+//					_maxDgtzDcCount = Math.max(
+//							_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
+//							_maxDgtzDcCount);
+//
+//				} catch (ArrayIndexOutOfBoundsException e) {
+//					String msg = String.format(
+//							"DC index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
+//							_eventManager.getEventNumber(), sector[i],
+//							superlayer[i], layer[i], wire[i]);
+//					Log.getInstance().warning(msg);
+//					System.err.println(msg);
+//				}
+//
+//			} // end loop hits
+//
+//		} // dcHitCount > 0
 
 
 		// ec data
@@ -619,44 +628,63 @@ public class AccumulationManager
 			} // for on hits
 		} //hitcount > 0
 		
-
+		
 		// ftof data
-		TdcAdcHitList list = FTOF.getInstance().updateTdcAdcList();
-
-		accumFtof(list);
+		TdcAdcHitList ftoflist = FTOF.getInstance().updateTdcAdcList();
+		accumFtof(ftoflist);
 
 
 	}
 
-	// for ftot accumulating
+	// accumulate dc data
+	private void accumDC(DCTdcHitList list) {
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+
+		for (DCTdcHit hit : list) {
+			if (hit.inRange()) {
+				_dcDgtzAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1] += 1;
+
+				_maxDgtzDcCount = Math.max(
+						_dcDgtzAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1],
+						_maxDgtzDcCount);
+			} else {
+				Log.getInstance().warning("In accumulation, DC hit has bad indices: " + hit);
+			}
+
+		}
+	}
+
+	// for ftof accumulating
 	private void accumFtof(TdcAdcHitList list) {
 
 		if ((list == null) || list.isEmpty()) {
 			return;
 		}
-		
+
 		for (TdcAdcHit hit : list) {
 			if (hit != null) {
-				int sect0 = hit.sector-1;
-				int paddle0 = hit.component-1;
-				
-				if (hit.layer == 1) {
-					_ftof1aDgtzAccumulatedData[sect0][paddle0] += 1;
-					_maxDgtzFtofCount = Math.max(_ftof1aDgtzAccumulatedData[sect0][paddle0],
-							_maxDgtzFtofCount);
-				}
-				else if (hit.layer == 2) {
-					_ftof1bDgtzAccumulatedData[sect0][paddle0] += 1;
-					_maxDgtzFtofCount = Math.max(_ftof1bDgtzAccumulatedData[sect0][paddle0],
-							_maxDgtzFtofCount);
-				}
-				if (hit.layer == 3) {
-					_ftof2DgtzAccumulatedData[sect0][paddle0] += 1;
-					_maxDgtzFtofCount = Math.max(_ftof2DgtzAccumulatedData[sect0][paddle0],
-							_maxDgtzFtofCount);
+				try {
+					int sect0 = hit.sector - 1;
+					int paddle0 = hit.component - 1;
+
+					if (hit.layer == 1) {
+						_ftof1aDgtzAccumulatedData[sect0][paddle0] += 1;
+						_maxDgtzFtofCount = Math.max(_ftof1aDgtzAccumulatedData[sect0][paddle0], _maxDgtzFtofCount);
+					} else if (hit.layer == 2) {
+						_ftof1bDgtzAccumulatedData[sect0][paddle0] += 1;
+						_maxDgtzFtofCount = Math.max(_ftof1bDgtzAccumulatedData[sect0][paddle0], _maxDgtzFtofCount);
+					}
+					if (hit.layer == 3) {
+						_ftof2DgtzAccumulatedData[sect0][paddle0] += 1;
+						_maxDgtzFtofCount = Math.max(_ftof2DgtzAccumulatedData[sect0][paddle0], _maxDgtzFtofCount);
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {
+					Log.getInstance().warning("In accumulation, FTOF hit has bad indices: " + hit);
 				}
 			}
-			
+
 		}
 
 	}

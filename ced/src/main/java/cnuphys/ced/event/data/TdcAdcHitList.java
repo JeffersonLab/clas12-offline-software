@@ -30,22 +30,18 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		//step 1: basic list from left tdc
 		
 		byte[] sector = null;
-		byte[] layer = null;
-		short[] component = null;
-		byte[] order = null;
-		int[] TDC = null;
-		int[] ADC = null;
-		int length = 0;
 		
 		sector = ColumnData.getByteArray(tdcBankName + ".sector");
 		if ((sector == null) || (sector.length < 1)) {
 			return;
 		}
 		
-		layer = ColumnData.getByteArray(tdcBankName + ".layer");
-		component = ColumnData.getShortArray(tdcBankName + ".component");
-		order = ColumnData.getByteArray(tdcBankName + ".order");
-		TDC = ColumnData.getIntArray(tdcBankName + ".TDC");
+		int length = 0;
+
+		byte[] layer = ColumnData.getByteArray(tdcBankName + ".layer");
+		short[] component = ColumnData.getShortArray(tdcBankName + ".component");
+		byte[] order = ColumnData.getByteArray(tdcBankName + ".order");
+		int[] TDC = ColumnData.getIntArray(tdcBankName + ".TDC");
 
 		length = checkArrays(sector, layer, component, order, TDC);
 		if (length < 0) {
@@ -75,6 +71,8 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		}
 		
 		//on to the adcs
+		int[] ADC = null;
+
 		sector = ColumnData.getByteArray(adcBankName + ".sector");
 		if (sector != null) {
 			layer = ColumnData.getByteArray(adcBankName + ".layer");
@@ -205,7 +203,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Find the hit
 	 * @param sector the 1-based sector
-	 * @param layer the 1-based layer
+	 * @param layer the 1-based layer 1..36
 	 * @param component the 1-based component
 	 * @return the hit, or null if not found
 	 */

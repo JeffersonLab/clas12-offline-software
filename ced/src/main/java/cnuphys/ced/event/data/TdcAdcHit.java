@@ -66,13 +66,13 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 			return "";
 		}
 		if ((tdcL >= 0) && (tdcR >= 0)) {
-			return " tdc: [" + tdcL + ", " + tdcR + "]";
+			return "tdc: [" + tdcL + ", " + tdcR + "]";
 		}
 		if ((tdcL >= 0) && (tdcR < 0)) {
-			return " tdc: " + tdcL;
+			return "tdc: " + tdcL;
 		}
 		else {
-			return " tdc: " + tdcR;
+			return "tdc: " + tdcR;
 		}
 	}
 
@@ -86,13 +86,13 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 			return "";
 		}
 		if ((adcL >= 0) && (adcR >= 0)) {
-			return " adc: [" + adcL + ", " + adcR + "]";
+			return "adc: [" + adcL + ", " + adcR + "]";
 		}
 		if ((adcL >= 0) && (adcR < 0)) {
-			return " adc: " + adcL;
+			return "adc: " + adcL;
 		}
 		else {
-			return " adc: " + adcR;
+			return "adc: " + adcR;
 		}
 	}
 	
@@ -102,15 +102,21 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 				" component: " + component + tdcString() + adcString();
 	}
 	
+	public void tdcAdcFeedback(List<String> feedbackStrings) {
+		tdcAdcFeedback("layer " + layer, "component", feedbackStrings);
+	}
+	
 	public void tdcAdcFeedback(String layerName, String componentName,
 			List<String> feedbackStrings) {
 		
-		feedbackStrings.add(_fbColor + layerName + " sector "
-				+ sector + "  " + componentName + " " + component);
+		feedbackStrings.add(_fbColor + layerName +
+				"sector " + sector + 
+				" " + layerName +
+				"  " + componentName + " " + component);
 
 		String tdcStr = tdcString();
 		String adcStr = adcString();
-		String dataStr = tdcStr + adcStr;
+		String dataStr = tdcStr + " " + adcStr;
 		if (dataStr.length() > 3) {
 			feedbackStrings.add(_fbColor + dataStr);
 		}

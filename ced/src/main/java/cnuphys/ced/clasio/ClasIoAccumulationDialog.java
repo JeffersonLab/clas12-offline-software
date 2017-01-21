@@ -23,6 +23,7 @@ import cnuphys.bCNU.dialog.ButtonPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.ced.event.AccumulationManager;
 
@@ -241,8 +242,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 					@Override
 					public void run() {
-						AccumulationManager.getInstance().notifyListeners(
-								AccumulationManager.ACCUMULATION_STARTED);
+						AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_STARTED);
 						_eventManager.setAccumulating(true);
 
 						int modCount = Math.max(2, fcount / 100);
@@ -250,13 +250,17 @@ public class ClasIoAccumulationDialog extends JDialog {
 						int count = 0;
 						while (count < fcount) {
 							try {
-							    DataEvent event = _eventManager.getNextEvent();
-							    if (event == null) {
-							    	Thread.sleep(100);
-							    }
-							    else {
-							    	count++;
-							    }
+								if (_eventManager.hasEvent()) {
+									DataEvent event = _eventManager.getNextEvent();
+									if (event == null) {
+										Log.getInstance().warning("A \"should not have happened\" null event in the accumulator.");
+										Thread.sleep(50);
+									} else {
+										count++;
+									}
+								} else {
+									Thread.sleep(50);
+								}
 							} catch (Exception e) {
 								e.printStackTrace();
 								break;

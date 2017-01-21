@@ -47,6 +47,12 @@ import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC2;
 import cnuphys.ced.event.data.FTOF;
+import cnuphys.ced.event.data.HBCrosses;
+import cnuphys.ced.event.data.HBHits;
+import cnuphys.ced.event.data.HBSegments;
+import cnuphys.ced.event.data.TBCrosses;
+import cnuphys.ced.event.data.TBHits;
+import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.FastMCMenu;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -861,6 +867,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//Initialize data collectors
 		DC2.getInstance();
 		FTOF.getInstance();
+		TBCrosses.getInstance();
+		HBCrosses.getInstance();
+		TBSegments.getInstance();
+		HBSegments.getInstance();
+		TBHits.getInstance();
+		HBHits.getInstance();
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {

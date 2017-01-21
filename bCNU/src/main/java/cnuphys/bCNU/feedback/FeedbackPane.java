@@ -29,7 +29,7 @@ public class FeedbackPane extends TextPaneScrollPane {
 	/**
 	 * Default fontsize for feedback text.
 	 */
-	private static int _fontSize = 9;
+	private static int _fontSize = 10;
 
 	/**
 	 * Background for feedback panel

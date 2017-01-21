@@ -545,15 +545,17 @@ public class ClasIoEventManager {
 		switch (estype) {
 		case HIPOFILE:
 		case RING:
-			_currentEvent = _dataSource.getNextEvent();
+			if (_dataSource.hasEvent()) {
+				_currentEvent = _dataSource.getNextEvent();
 
-			// look for the run bank
-			_runData.set(_currentEvent);
+				// look for the run bank
+				_runData.set(_currentEvent);
 
-			if (!isAccumulating()) {
-				notifyEventListeners();
-			} else {
-				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+				if (!isAccumulating()) {
+					notifyEventListeners();
+				} else {
+					AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+				}
 			}
 			break;
 		case FASTMC:
@@ -562,6 +564,21 @@ public class ClasIoEventManager {
 		}
 
 		return _currentEvent;
+	}
+	
+	/**
+	 * See if another event is available
+	 * @return <code>true</code> if another event is available
+	 */
+	public boolean hasEvent() {
+		EventSourceType estype = getEventSourceType();
+		switch (estype) {
+		case HIPOFILE:
+		case RING:
+			return ((_dataSource != null) && _dataSource.hasEvent());
+		default:
+			return true;
+		}
 	}
 
 	/**
