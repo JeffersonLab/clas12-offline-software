@@ -10,8 +10,10 @@ import cnuphys.ced.alldata.ColumnData;
 
 public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	
+	//used to log erors
 	private String _error;
 	
+	//for color scaling
 	private int _maxADC;
 
 	public TdcAdcHitList(String tdcBankName, String adcBankName) {
@@ -36,25 +38,27 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		int length = 0;
 		
 		sector = ColumnData.getByteArray(tdcBankName + ".sector");
-		if (sector != null) {
-			layer = ColumnData.getByteArray(tdcBankName + ".layer");
-			component = ColumnData.getShortArray(tdcBankName + ".component");
-			order = ColumnData.getByteArray(tdcBankName + ".order");
-			TDC = ColumnData.getIntArray(tdcBankName + ".TDC");
+		if ((sector == null) || (sector.length < 1)) {
+			return;
+		}
+		
+		layer = ColumnData.getByteArray(tdcBankName + ".layer");
+		component = ColumnData.getShortArray(tdcBankName + ".component");
+		order = ColumnData.getByteArray(tdcBankName + ".order");
+		TDC = ColumnData.getIntArray(tdcBankName + ".TDC");
 
-			length = checkArrays(sector, layer, component, order, TDC);
-			if (length < 0) {
-				Log.getInstance().warning("[" + tdcBankName + "] " + _error);
-				return;
-			}
-						
-			//Step 1 build basic list
-			for (int index = 0; index < length; index++) {
-				if (order[index] != 3) { //left tdc
-					TdcAdcHit hit = new TdcAdcHit(sector[index], layer[index], component[index]);
-					hit.tdcL = TDC[index];
-					add(hit);
-				}
+		length = checkArrays(sector, layer, component, order, TDC);
+		if (length < 0) {
+			Log.getInstance().warning("[" + tdcBankName + "] " + _error);
+			return;
+		}
+
+		// Step 1 build basic list
+		for (int index = 0; index < length; index++) {
+			if (order[index] != 3) { // left tdc
+				TdcAdcHit hit = new TdcAdcHit(sector[index], layer[index], component[index]);
+				hit.tdcL = TDC[index];
+				add(hit);
 			}
 		}
 		
@@ -141,35 +145,36 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		}
 	}
 	
+	//check arrays are not null and have same length
 	private int checkArrays(byte[] sector, byte[] layer, short[] component, byte[] order, int[] data) {
 		if ((sector == null) || (layer == null) || (component == null)) {
-			_error = "Unexpected null array when creating SimHitList: " + "sector = null: " + (sector == null)
+			_error = "Unexpected null array when creating TdcAdcHitList: " + "sector = null: " + (sector == null)
 					+ " layer == null: " + (layer == null) + " component == null: " + (component == null);
 			return -1;
 		}
 		
 		if (sector.length < 1) {
-			_error = "Sector array has 0 length when creating SimHitList";
+			_error = "Sector array has 0 length when creating TdcAdcHitList";
 			return -1;
 		}
 		
 		if (layer.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match layer length: " + layer.length + " when creating SimHitList";
+			_error = "Sector length: " + sector.length + " does not match layer length: " + layer.length + " when creating TdcAdcHitList";
 			return -1;
 		}
 		
 		if (component.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match component length: " + component.length + " when creating SimHitList";
+			_error = "Sector length: " + sector.length + " does not match component length: " + component.length + " when creating TdcAdcHitList";
 			return -1;
 		}
 		
 		if (order.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match order length: " + order.length + " when creating SimHitList";
+			_error = "Sector length: " + sector.length + " does not match order length: " + order.length + " when creating TdcAdcHitList";
 			return -1;
 		}
 
 		if (data.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match data (tdc or adc) length: " + data.length + " when creating SimHitList";
+			_error = "Sector length: " + sector.length + " does not match data (tdc or adc) length: " + data.length + " when creating TdcAdcHitList";
 			return -1;
 		}
 
@@ -212,7 +217,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Get a color with apha based of relative adc 
 	 * @param hit the hit
-	 * @return a fill color for sim hits 
+	 * @return a fill color for adc hits 
 	 */
 	public Color adcColor(TdcAdcHit hit) {
 		if (hit == null) {

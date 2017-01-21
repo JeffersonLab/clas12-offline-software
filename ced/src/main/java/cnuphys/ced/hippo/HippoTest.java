@@ -1,6 +1,8 @@
 package cnuphys.ced.hippo;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jlab.clas.detector.DetectorResponse;
@@ -22,6 +24,7 @@ public class HippoTest {
 
 	private static RunData _runData = new RunData();
 	
+	//test peeking at some events
 	private static boolean eventTest() {
 		HipoDataSource source = new HipoDataSource();
 		System.out.println("TEST FILE: " + _testFile.getAbsolutePath());
@@ -81,6 +84,15 @@ public class HippoTest {
 //		}
 
 		DataManager dataManager = DataManager.getInstance();
+		ArrayList<ColumnData> columns = dataManager.getColumnData();
+		if (columns != null) {
+			for (ColumnData cd : columns) {
+				System.out.println(cd.toString());
+			}
+		}
+		else {
+			System.out.println("NO COLUMNS!");
+		}
 //		_dictionary = new HipoDataDictionary();
 //		String hipoBanks[] = _dictionary.getDescriptorList();
 //		Arrays.sort(hipoBanks);
