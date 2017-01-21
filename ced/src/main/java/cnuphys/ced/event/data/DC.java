@@ -931,11 +931,6 @@ public class DC {
 		return (sector == null) ? 0 : sector.length;
 	}
 	
-//	bank name: [DC::doca] column name: [LR] full name: [DC::doca.LR] data type: byte
-//	bank name: [DC::doca] column name: [doca] full name: [DC::doca.doca] data type: Unknown
-//	bank name: [DC::doca] column name: [sdoca] full name: [DC::doca.sdoca] data type: Unknown
-//	bank name: [DC::doca] column name: [time] full name: [DC::doca.time] data type: Unknown
-//	bank name: [DC::doca] column name: [stime] full name: [DC::doca.stime] data type: Unknown
 
 	/**
 	 * Get the LR array from the dgtz data

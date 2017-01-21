@@ -9,7 +9,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -43,10 +42,10 @@ import cnuphys.ced.clasio.ClasIoEventMenu;
 import cnuphys.ced.clasio.ClasIoEventView;
 import cnuphys.ced.clasio.ClasIoMonteCarloView;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.DC2;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.FastMCMenu;
@@ -92,7 +91,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.01";
+	private static final String _release = "build 0.99.02";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -353,7 +352,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		dcHistoGrid = HistoGridView.createHistoGridView("DC Wire Histograms", 36, 6, 260, 240, 0.7, maker);
 	}
 	
-	//ftof wire histogram
+	//ftof paddle histogram
 	private void addFtofHistogram() {
 		IHistogramMaker maker = new IHistogramMaker() {
 
@@ -856,9 +855,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//initialize magnetic fields
 		MagneticFields.getInstance().initializeMagneticFields();
 
-
 		// initialize geometry
 		GeometryManager.getInstance();
+		
+		//Initialize data collectors
+		DC2.getInstance();
+		FTOF.getInstance();
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {

@@ -57,6 +57,10 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 		return sum/count;
 	}
 	
+	/**
+	 * Get a string for just the tdc data
+	 * @return a string for just the tdc data
+	 */
 	public String tdcString() {
 		if ((tdcL < 0) && (tdcR < 0)) {
 			return "";
@@ -73,6 +77,10 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	}
 
 	
+	/**
+	 * Get a string for just the tdc data
+	 * @return a string for just the tdc data
+	 */
 	public String adcString() {
 		if ((adcL < 0) && (adcR < 0)) {
 			return "";

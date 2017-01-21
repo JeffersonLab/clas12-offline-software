@@ -42,7 +42,6 @@ import cnuphys.swim.Swimming;
 
 public class ClasIoEventManager {
 
-
 	// Unique lund ids in the event (if any)
 	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
 
@@ -51,14 +50,14 @@ public class ClasIoEventManager {
 
 	// used in pcal and ec hex gradient displays
 	private double maxEDepCal[] = { Double.NaN, Double.NaN, Double.NaN };
-	
-	//Data from the special run bank
+
+	// Data from the special run bank
 	private RunData _runData = new RunData();
-	
-	//for HIPO ring
+
+	// for HIPO ring
 	public IpField _ipField;
-	
-	//connect to ring
+
+	// connect to ring
 	public JButton _connectButton;
 
 	// sources of events (the type, not the actual source)
@@ -66,12 +65,12 @@ public class ClasIoEventManager {
 		HIPOFILE, RING, FASTMC
 	}
 
-	//the current source type
+	// the current source type
 	private EventSourceType _sourceType = EventSourceType.HIPOFILE;
-	
-	//hipo ring dialog
+
+	// hipo ring dialog
 	private RingDialog _ringDialog;
-	
+
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
 
@@ -92,7 +91,7 @@ public class ClasIoEventManager {
 	// the current hipo event file
 	private File _currentHipoFile;
 
-	//current ip address of HIPO ring
+	// current ip address of HIPO ring
 	private String _currentIPAddress;
 
 	// the clas_io source of events
@@ -104,7 +103,6 @@ public class ClasIoEventManager {
 	// the current event
 	private DataEvent _currentEvent;
 
-
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_dataSource = new HipoDataSource();
@@ -112,12 +110,13 @@ public class ClasIoEventManager {
 
 	/**
 	 * Get the run data, changed every time a run bank is encountered
+	 * 
 	 * @return the run data
 	 */
 	public RunData getRunData() {
 		return _runData;
 	}
-	
+
 	/**
 	 * Get a collection of unique LundIds in the current event
 	 * 
@@ -211,14 +210,14 @@ public class ClasIoEventManager {
 		_accumulating = accumulating;
 	}
 
-//	/**
-//	 * Get the current event file
-//	 * 
-//	 * @return the current file
-//	 */
-//	public File getCurrentEventFile() {
-//		return _currentEventFile;
-//	}
+	// /**
+	// * Get the current event file
+	// *
+	// * @return the current file
+	// */
+	// public File getCurrentEventFile() {
+	// return _currentEventFile;
+	// }
 
 	/**
 	 * Get the current event
@@ -229,29 +228,27 @@ public class ClasIoEventManager {
 		return _currentEvent;
 	}
 
-//	/**
-//	 * Get the path of the current file
-//	 * 
-//	 * @return the path of the current file
-//	 */
-//	public String getCurrentEventFilePath() {
-//		return (_currentEventFile == null) ? "(none)" : _currentEventFile.getPath();
-//	}
-	
+	// /**
+	// * Get the path of the current file
+	// *
+	// * @return the path of the current file
+	// */
+	// public String getCurrentEventFilePath() {
+	// return (_currentEventFile == null) ? "(none)" :
+	// _currentEventFile.getPath();
+	// }
+
 	public String getCurrentSourceDescription() {
-		
+
 		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
 			return "Hipo File: " + _currentHipoFile.getName();
-		}
-		else if (_sourceType == EventSourceType.FASTMC) {
+		} else if (_sourceType == EventSourceType.FASTMC) {
 			return FastMCManager.getInstance().getSourceDescription();
-		}
-		else if ((_sourceType == EventSourceType.RING) && (_currentIPAddress != null)) {
+		} else if ((_sourceType == EventSourceType.RING) && (_currentIPAddress != null)) {
 			return "Hipo Ring: " + _currentIPAddress;
 		}
 		return "(none)";
 	}
-
 
 	/**
 	 * Set the source to read from an event file
@@ -283,22 +280,21 @@ public class ClasIoEventManager {
 		}
 
 		_currentHipoFile = file;
-		
+
 		_dataSource = new HipoDataSource();
 		_dataSource.open(file.getPath());
 		notifyEventListeners(_currentHipoFile);
 		setEventSourceType(EventSourceType.HIPOFILE);
-		
-		//TODO check if I need to skip the first event
-		
+
+		// TODO check if I need to skip the first event
+
 		try {
 			getNextEvent();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	public void ConnectToHipoRing() {
 		if (_ringDialog == null) {
 			_ringDialog = new RingDialog();
@@ -308,16 +304,23 @@ public class ClasIoEventManager {
 			_dataSource = null;
 			_currentIPAddress = "";
 			int connType = _ringDialog.getConnectionType();
-			if (connType == RingDialog.CONNECTSPECIFIC) {
-				_dataSource = new HipoRingSource();
-				_currentIPAddress = _ringDialog.getIpAddress();
-				_dataSource.open(_currentIPAddress);
+
+			// let's try to connect
+			try {
+				if (connType == RingDialog.CONNECTSPECIFIC) {
+					_dataSource = new HipoRingSource();
+					_currentIPAddress = _ringDialog.getIpAddress();
+					_dataSource.open(_currentIPAddress);
+				} else if (connType == RingDialog.CONNECTDAQ) {
+					_dataSource = HipoRingSource.createSourceDaq();
+					_currentIPAddress = " DAQ ";
+				}
+			} catch (Exception e) {
+				_dataSource = null;
+				_currentIPAddress = "";
+				Log.getInstance().warning(e.getMessage());
 			}
-			else if (connType == RingDialog.CONNECTDAQ) {
-				_dataSource = HipoRingSource.createSourceDaq();
-				_currentIPAddress = " DAQ ";
-			}
-			
+
 			if (_dataSource != null) {
 				setEventSourceType(EventSourceType.RING);
 				try {
@@ -328,6 +331,7 @@ public class ClasIoEventManager {
 			}
 		}
 	}
+
 	/**
 	 * Get the current event source type
 	 * 
@@ -336,10 +340,12 @@ public class ClasIoEventManager {
 	public EventSourceType getEventSourceType() {
 		return _sourceType;
 	}
-	
+
 	/**
 	 * Set the soure type
-	 * @param type the new source type
+	 * 
+	 * @param type
+	 *            the new source type
 	 */
 	public void setEventSourceType(EventSourceType type) {
 		if (_sourceType != type) {
@@ -347,8 +353,6 @@ public class ClasIoEventManager {
 			notifyEventListeners(_sourceType);
 		}
 	}
-
-
 
 	/**
 	 * Check whether current event source type is a file
@@ -511,7 +515,7 @@ public class ClasIoEventManager {
 	public void setAllReconSwimmer(ISwimAll allSwimmer) {
 		_allReconSwimmer = allSwimmer;
 	}
-	
+
 	public DataEvent waitForEvent() {
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
@@ -539,10 +543,11 @@ public class ClasIoEventManager {
 
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
-		case HIPOFILE: case RING:
+		case HIPOFILE:
+		case RING:
 			_currentEvent = _dataSource.getNextEvent();
-			
-			//look for the run bank
+
+			// look for the run bank
 			_runData.set(_currentEvent);
 
 			if (!isAccumulating()) {

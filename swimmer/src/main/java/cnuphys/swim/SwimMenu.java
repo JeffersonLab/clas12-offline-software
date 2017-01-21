@@ -176,8 +176,8 @@ public class SwimMenu extends JMenu implements ActionListener {
 
 		// convert to cm
 
-		System.err.println("Current Max Stepsize  (cm): " + 100
-				* RungeKutta4.getMaxStepSize());
+//		System.err.println("Current Max Stepsize  (cm): " + 100
+//				* RungeKutta4.getMaxStepSize());
 		String s = DoubleFormat.doubleFormat(
 				100 * RungeKutta4.getMaxStepSize(), 2, false);
 		final JTextField maxSStf = new JTextField(s, 10);

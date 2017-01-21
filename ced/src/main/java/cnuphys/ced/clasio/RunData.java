@@ -11,17 +11,6 @@ import cnuphys.magfield.MagneticFields;
  *
  */
 
-//bank name: [RUN::config] column name: [run] full name: [RUN::config.run] data type: int
-//bank name: [RUN::config] column name: [event] full name: [RUN::config.event] data type: int
-//bank name: [RUN::config] column name: [trigger] full name: [RUN::config.trigger] data type: int
-//bank name: [RUN::config] column name: [type] full name: [RUN::config.type] data type: byte
-//bank name: [RUN::config] column name: [mode] full name: [RUN::config.mode] data type: byte
-//bank name: [RUN::config] column name: [torus] full name: [RUN::config.torus] data type: float
-//bank name: [RUN::config] column name: [solenoid] full name: [RUN::config.solenoid] data type: float
-//bank name: [RUN::config] column name: [rf] full name: [RUN::config.rf] data type: float
-//bank name: [RUN::config] column name: [startTime] full name: [RUN::config.startTime] data type: float
-//bank name: [RUN::rf] column name: [id] full name: [RUN::rf.id] data type: short
-//bank name: [RUN::rf] column name: [time] full name: [RUN::rf.time] data type: float
 public class RunData {
 
 	public int run = -1;

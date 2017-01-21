@@ -2,6 +2,7 @@ package cnuphys.ced.alldata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
@@ -17,6 +18,10 @@ import cnuphys.bCNU.log.Log;
 
 public class DataManager {
 	
+	//EXCLUSION LIST
+	private String _exclusions[] = {"::dgtz", "DETECTOR::", "RAW::"};
+
+	
 	//the data dictionary
 	private DataDictionary _dictionary;
 	
@@ -24,7 +29,7 @@ public class DataManager {
 	private  String[] _knownBanks; 
 
 	//the full set of column data. ALL columns for a full bank name key
-	//key is somethjing like DET::NAME.COLUMN e.g.
+	//key is something like DET::NAME.COLUMN e.g.
 	// DC::dgtz.doca,
 	//or
 	// HitBasedTrkg::HBTracks.Cross1_ID
@@ -40,13 +45,15 @@ public class DataManager {
 	 */
 	private DataManager() {
 		
+		
 		_dictionary = new HipoDataDictionary();
 		
 		//HACK filter out dgtz banks
 		String allBanks[] = _dictionary.getDescriptorList();
 		ArrayList<String> okbanks = new ArrayList<String>();
 		for (String s : allBanks) {
-			if (!s.contains("::dgtz")) {
+			//check for exclusions
+			if (include(s)) {
 				okbanks.add(s);
 			}
 		}
@@ -59,6 +66,37 @@ public class DataManager {
 		Arrays.sort(_knownBanks);
 		
 		initializeColumnData();
+	}
+	
+	//check exclusions
+	private boolean include(String bankName) {
+		if ((_exclusions != null) && (_exclusions.length > 0)) {
+			for (String es : _exclusions) {
+				if (bankName.contains(es)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Get the collection of recognized columns
+	 * @return the collection of recognized columns
+	 */
+	public ArrayList<ColumnData> getColumnData() {
+		if (_columnData == null) {
+			return null;
+		}
+		if (_columnData.size() < 1)  {
+			return null;
+		}
+		ArrayList<ColumnData> columns = new ArrayList<ColumnData>();
+		for (ColumnData cd : _columnData.values()) {
+			columns.add(cd);
+		}
+		Collections.sort(columns);
+		return columns;
 	}
 	
 	/**
@@ -190,13 +228,11 @@ public class DataManager {
 						else {
 							ColumnData cd = new ColumnData(bankName, columnName,
 									type);
-							System.out.println(cd.toString());
 							_columnData.put(cd.getFullName(), cd);
 						}
 					}
 				} //bank names
 			} // known banks not null
-		Log.getInstance().info("Number of column definitions: " + _columnData.size());
 	}
 	
 	/**
