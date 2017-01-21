@@ -76,7 +76,7 @@ public class DrawingLegend extends JComponent {
 		DataDrawSupport.drawReconHit(g, pp);
 		x += quickString(g, x + 6, yc, "Reconstructed hit ") + 20;
 
-		yc += 12;
+		yc += 18;
 		x = 8;
 
 		// view dependent drawing
@@ -99,7 +99,7 @@ public class DrawingLegend extends JComponent {
 		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
 		
-		yc += 16;
+		yc += 18;
 		SymbolDraw.drawUpTriangle(g, xo, yc, 3, 
 				X11Colors.getX11Color("Dark Green"), X11Colors.getX11Color("Aquamarine"));
 
@@ -113,18 +113,28 @@ public class DrawingLegend extends JComponent {
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
 		x = drawCircle(g, x, yc, CedColors.tbDocaLine, "TB Doca");
-		yc += 16;
+		yc += 18;
 		
-		//segment line
+		
+		//segment lines
 		x = xo;
-		g.setColor(CedColors.docaFill);
+		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, Color.yellow, "HB Segment");
+		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, Color.orange, "TB Segment");
+
+	}
+	
+	private int drawSegLine(Graphics2D g2, int x, int yc, Color lineColor, Color endColor, String str) {
+		g2.setColor(CedColors.docaFill);
 		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
-		g.drawLine(x, yc, x+30, yc);
-		g.setColor(CedColors.tbSegmentLine);
+		g2.drawLine(x, yc, x+30, yc);
+		g2.setColor(lineColor);
 		g2.setStroke(GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID));
-		g.drawLine(x, yc, x+30, yc);
+		g2.drawLine(x, yc, x+30, yc);
+		
+		SymbolDraw.drawOval(g2, x, yc, 2, 2, endColor, endColor);
+		SymbolDraw.drawOval(g2, x+30, yc, 2, 2, endColor, endColor);
 		x += 40;
-		x = quickString(g, x, yc-2, "TB Segment") + 16;
+		return quickString(g2, x, yc-2, str) + 18;
 	}
 
 	private int drawCross(Graphics g, int x, int y, int mode) {
@@ -132,7 +142,7 @@ public class DrawingLegend extends JComponent {
 		
 		x += (2*DataDrawSupport.CROSSHALF);
 		String s = DataDrawSupport.prefix[mode] + "cross";
-		return quickString(g, x, y, s) + 16;
+		return quickString(g, x, y, s) + 18;
 	}
 	
 	private int drawCircle(Graphics g, int x, int y, Color color, String s) {

@@ -79,7 +79,7 @@ public class ECView extends HexView {
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
 				DisplayBits.ACCUMULATION
 				+ DisplayBits.MCTRUTH + DisplayBits.INNEROUTER
-				+ DisplayBits.UVWSTRIPS, 2, 8);
+				+ DisplayBits.UVWSTRIPS, 3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();

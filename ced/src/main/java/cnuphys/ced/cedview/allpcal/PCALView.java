@@ -82,7 +82,7 @@ public class PCALView extends HexView {
 		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
 				DisplayBits.ACCUMULATION
-				+ DisplayBits.MCTRUTH + DisplayBits.UVWSTRIPS, 2, 8);
+				+ DisplayBits.MCTRUTH + DisplayBits.UVWSTRIPS, 3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();

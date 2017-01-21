@@ -3,7 +3,7 @@ package cnuphys.snr.clas12;
 public class Clas12NoiseResult {
 
 	/**
-	 * noise array, parallel to the sc_dgtz_sector etc array. Should be thread
+	 * noise array, parallel to the dc tdc sector array. Should be thread
 	 * safe
 	 */
 	public boolean noise[];

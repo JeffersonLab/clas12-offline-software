@@ -42,7 +42,17 @@ public class DisplayBits {
 	public static final int DC_TB_RECONS_DOCA = 040000;
 
 	/** dc hit based reconstructed doca */
-	public static final int DC_TB_RECONS_SEGMENTS = 0100000;
+	public static final int DC_HB_RECONS_SEGMENTS = 0100000;
+	
+	/** dc hit based reconstructed doca */
+	public static final int DC_TB_RECONS_SEGMENTS = 0200000;
+
+	/** global display of hb data */
+	public static final int GLOBAL_HB = 0400000;
+	
+	/** global display of hb data */
+	public static final int GLOBAL_TB = 01000000;
+
 
 	// max octal for ints 20000000000
 

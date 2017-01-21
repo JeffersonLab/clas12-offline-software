@@ -427,6 +427,21 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showDCtbDoca();
 	}
 
+	/**
+	 * Should we draw hit based segments
+	 * @return whether we should draw hits based segments
+	 */
+	public boolean showDChbSegments() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDChbSegments();
+	}
+
+	/**
+	 * Should we draw time based segments
+	 * @return whether we should draw time based segments
+	 */
 	public boolean showDCtbSegments() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;

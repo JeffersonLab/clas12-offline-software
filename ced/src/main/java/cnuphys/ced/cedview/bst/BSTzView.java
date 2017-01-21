@@ -151,7 +151,7 @@ public class BSTzView extends CedView implements ChangeListener {
 				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
 						+ DisplayBits.BSTRECONS_CROSSES + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
-				2, 6);
+				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();

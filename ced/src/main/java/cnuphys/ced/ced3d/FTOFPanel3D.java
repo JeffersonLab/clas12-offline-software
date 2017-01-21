@@ -75,7 +75,7 @@ public class FTOFPanel3D extends DetectorItem3D {
 	public void drawData(GLAutoDrawable drawable) {
 		
 		//draw tdc adc hits
-			TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
+			TdcAdcHitList hits = FTOF.getInstance().getHits();
 			if (!hits.isEmpty()) {
 				byte layer = (byte) (_panelId + 1);
 				for (TdcAdcHit hit : hits) {

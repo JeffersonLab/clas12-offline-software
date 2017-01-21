@@ -197,7 +197,7 @@ public class FTOFPanelItem extends PolygonItem {
 		}
 
 		// draw tdc adc hits
-		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
+		TdcAdcHitList hits = FTOF.getInstance().getHits();
 		if (!hits.isEmpty()) {
 			byte sect = (byte) _sector;
 			byte layer = (byte) (_ftofPanel.getPanelType() + 1);
@@ -370,7 +370,7 @@ public class FTOFPanelItem extends PolygonItem {
 				if (path.contains(worldPoint)) {
 
 					// have a tdc adc hit?
-					TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
+					TdcAdcHitList hits = FTOF.getInstance().getHits();
 					byte sect = (byte) _sector;
 					byte layer = (byte) (_ftofPanel.getPanelType() + 1);
 					short paddle = (short) (index + 1);

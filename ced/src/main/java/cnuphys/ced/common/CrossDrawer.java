@@ -15,8 +15,13 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.Cross;
+import cnuphys.ced.event.data.CrossList;
+import cnuphys.ced.event.data.Crosses;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.HBCrosses;
+import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.fastmc.FastMCManager;
 
 public class CrossDrawer extends CedViewDrawer {
@@ -71,95 +76,79 @@ public class CrossDrawer extends CedViewDrawer {
 			return;
 		}
 
+		_fbRects[_mode].rects = null;
+
+
+		// any crosses?
+		CrossList crosses = null;
+		if (_mode == HB) {
+			crosses = HBCrosses.getInstance().getCrosses();
+		}
+		else if (_mode == TB) {
+			crosses = TBCrosses.getInstance().getCrosses();
+		}
+		if ((crosses == null) || crosses.isEmpty()) {
+			return;
+		}
+
 		Graphics2D g2 = (Graphics2D) g;
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
+		_fbRects[_mode].rects = new Rectangle[crosses.size()];
+		double result[] = new double[3];
+		Point pp = new Point();
+		Point2D.Double wp = new Point2D.Double();
+		
+		int index = 0;
+		for (Cross cross : crosses) {
+			result[0] = cross.x;
+			result[1] = cross.y;
+			result[2] = cross.z;
+			_view.tiltedToSector(result, result);
+			_view.sectorToWorld(_view.getProjectionPlane(), wp, result, cross.sector);
+			
+			// right sector?
+			int mySector = _view.getSector(container, null, wp);
+			if (mySector == cross.sector) {
 
-		// dc crosses?
-		int crossCount = 0;
-		if (_mode == HB) {
-			crossCount = DC.hitBasedCrossCount();
-		}
-		else if (_mode == TB) {
-			crossCount = DC.timeBasedCrossCount();
-		}
+				container.worldToLocal(pp, wp);
 
-		_fbRects[_mode].rects = null;
+				// arrows
+				Point2D.Double wp2 = new Point2D.Double();
+				Point pp2 = new Point();
 
-		if (crossCount > 0) {
-			double result[] = new double[3];
-			Point pp = new Point();
-			Point2D.Double wp = new Point2D.Double();
-			if (_mode == HB) {
-				sector = DC.hitBasedCrossSector();
-				tiltedx = DC.hitBasedCrossX();
-				tiltedy = DC.hitBasedCrossY();
-				tiltedz = DC.hitBasedCrossZ();
-				unitx = DC.hitBasedCrossUx();
-				unity = DC.hitBasedCrossUy();
-				unitz = DC.hitBasedCrossUz();
-			}
-			else if (_mode == TB) {
-				sector = DC.timeBasedCrossSector();
-				tiltedx = DC.timeBasedCrossX();
-				tiltedy = DC.timeBasedCrossY();
-				tiltedz = DC.timeBasedCrossZ();
-				unitx = DC.timeBasedCrossUx();
-				unity = DC.timeBasedCrossUy();
-				unitz = DC.timeBasedCrossUz();
-			}
+				int pixlen = ARROWLEN;
+				double r = pixlen / WorldGraphicsUtilities
+						.getMeanPixelDensity(container);
 
-			_fbRects[_mode].rects = new Rectangle[crossCount];
-
-			for (int i = 0; i < crossCount; i++) {
-				result[0] = tiltedx[i];
-				result[1] = tiltedy[i];
-				result[2] = tiltedz[i];
+				result[0] = cross.x + r * cross.ux;
+				result[1] = cross.y + r * cross.uy;
+				result[2] = cross.z + r * cross.uz;
 				_view.tiltedToSector(result, result);
-				_view.sectorToWorld(_view.getProjectionPlane(), wp, result, sector[i]);
 
-				// right sector?
-				int mySector = _view.getSector(container, null, wp);
-				if (mySector == sector[i]) {
+				_view.sectorToWorld(_view.getProjectionPlane(), wp2, result, cross.sector);
+				container.worldToLocal(pp2, wp2);
 
-					container.worldToLocal(pp, wp);
+				g.setColor(Color.orange);
+				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+				g.setColor(Color.darkGray);
+				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
-					// arrows
-					Point2D.Double wp2 = new Point2D.Double();
-					Point pp2 = new Point();
+				// the circles and crosses
+				DataDrawSupport.drawCross(g2, pp.x, pp.y, _mode);
 
-					int pixlen = ARROWLEN;
-					double r = pixlen / WorldGraphicsUtilities
-							.getMeanPixelDensity(container);
+				// fbrects for quick feedback
+				_fbRects[_mode].rects[index] = new Rectangle(
+						pp.x - DataDrawSupport.CROSSHALF,
+						pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF);
+			} //sector match;	
+			index++;
+		} //loop over crosses
 
-					result[0] = tiltedx[i] + r * unitx[i];
-					result[1] = tiltedy[i] + r * unity[i];
-					result[2] = tiltedz[i] + r * unitz[i];
-					_view.tiltedToSector(result, result);
-
-					_view.sectorToWorld(_view.getProjectionPlane(), wp2, result, sector[i]);
-					container.worldToLocal(pp2, wp2);
-
-					g.setColor(Color.orange);
-					g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
-					g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
-					g.setColor(Color.darkGray);
-					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
-
-					// the circles and crosses
-					DataDrawSupport.drawCross(g2, pp.x, pp.y, _mode);
-
-					// fbrects for quick feedback
-					_fbRects[_mode].rects[i] = new Rectangle(
-							pp.x - DataDrawSupport.CROSSHALF,
-							pp.y - DataDrawSupport.CROSSHALF,
-							2 * DataDrawSupport.CROSSHALF,
-							2 * DataDrawSupport.CROSSHALF);
-				}
-
-			} // end for
-		} // hbcrosscount > 0
 
 		g2.setStroke(oldStroke);
 	}
@@ -180,108 +169,53 @@ public class CrossDrawer extends CedViewDrawer {
 		if (_fbRects[_mode].rects == null) {
 			return;
 		}
-
-		// hit based dc crosses?
-		int hbcrosscount = DC.hitBasedCrossCount();
-
-		if (hbcrosscount < 1) {
+		
+		// any crosses?
+		CrossList crosses = null;
+		if (_mode == HB) {
+			crosses = HBCrosses.getInstance().getCrosses();
+		}
+		else if (_mode == TB) {
+			crosses = TBCrosses.getInstance().getCrosses();
+		}
+		if ((crosses == null) || crosses.isEmpty()) {
 			return;
 		}
-
-		int sectarray[];
-		int regarray[];
-		int idarray[];
-		double cross_x[];
-		double cross_y[];
-		double cross_z[];
-		double uxarray[];
-		double uyarray[];
-		double uzarray[];
-		double errxarray[];
-		double erryarray[];
-		double errzarray[];
-
-		if (_mode == HB) {
-			sectarray = DC.hitBasedCrossSector();
-			regarray = DC.hitBasedCrossRegion();
-			idarray = DC.hitBasedCrossID();
-			cross_x = DC.hitBasedCrossX();
-			cross_y = DC.hitBasedCrossY();
-			cross_z = DC.hitBasedCrossZ();
-			uxarray = DC.hitBasedCrossUx();
-			uyarray = DC.hitBasedCrossUy();
-			uzarray = DC.hitBasedCrossUz();
-			errxarray = DC.hitBasedCrossErrX();
-			erryarray = DC.hitBasedCrossErrY();
-			errzarray = DC.hitBasedCrossErrZ();
-		}
-		else { // TB
-			sectarray = DC.timeBasedCrossSector();
-			regarray = DC.timeBasedCrossRegion();
-			idarray = DC.timeBasedCrossID();
-			cross_x = DC.timeBasedCrossX();
-			cross_y = DC.timeBasedCrossY();
-			cross_z = DC.timeBasedCrossZ();
-			uxarray = DC.timeBasedCrossUx();
-			uyarray = DC.timeBasedCrossUy();
-			uzarray = DC.timeBasedCrossUz();
-			errxarray = DC.timeBasedCrossErrX();
-			erryarray = DC.timeBasedCrossErrY();
-			errzarray = DC.timeBasedCrossErrZ();
-		}
-
+		
 		for (int i = 0; i < _fbRects[_mode].rects.length; i++) {
 			if ((_fbRects[_mode].rects[i] != null)
 					&& _fbRects[_mode].rects[i].contains(screenPoint)) {
+				Cross cross = crosses.elementAt(i);
+				if (cross != null) {
+					feedbackStrings.add(fbcolors[_mode]
+							+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
+							+ "  sect: " + cross.sector + "  reg: " + cross.region);
 
-				double tiltedx = cross_x[i];
-				double tiltedy = cross_y[i];
-				double tiltedz = cross_z[i];
+					feedbackStrings.add(
+							vecStr("cross loc tilted", cross.x, cross.y, cross.z));
+					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+					feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
 
-				int id = idarray[i];
-				int sect = sectarray[i];
-				int reg = regarray[i];
-				// int track = trackarray[i];
+					double result[] = new double[3];
+					result[0] = cross.x;
+					result[1] = cross.y;
+					result[2] = cross.z;
+					_view.tiltedToSector(result, result);
+					feedbackStrings.add(vecStr("cross loc vector", result[0],
+							result[1], result[2]));
 
-				double xerr = errxarray[i];
-				double yerr = erryarray[i];
-				double zerr = errzarray[i];
-
-				double ux = uxarray[i];
-				double uy = uyarray[i];
-				double uz = uzarray[i];
-
-				// feedbackStrings.add(fbcolors[_mode] + prefix[_mode] +
-				// "cross ID: " + id
-				// + " sect: " + sect + " reg: " + reg
-				// + " track: " + track);
-				feedbackStrings.add(fbcolors[_mode]
-						+ DataDrawSupport.prefix[_mode] + "cross ID: " + id
-						+ "  sect: " + sect + "  reg: " + reg);
-
-				feedbackStrings.add(
-						vecStr("cross loc tilted", tiltedx, tiltedy, tiltedz));
-				feedbackStrings.add(vecStr("cross error", xerr, yerr, zerr));
-				feedbackStrings.add(vecStr("cross direc tilted", ux, uy, uz));
-
-				double result[] = new double[3];
-				result[0] = tiltedx;
-				result[1] = tiltedy;
-				result[2] = tiltedz;
-				_view.tiltedToSector(result, result);
-				feedbackStrings.add(vecStr("cross loc sector", result[0],
-						result[1], result[2]));
-
-				result[0] = ux;
-				result[1] = uy;
-				result[2] = uz;
-				_view.tiltedToSector(result, result);
-				feedbackStrings.add(vecStr("cross direc sector", result[0],
-						result[1], result[2]));
-
+					result[0] = cross.ux;
+					result[1] = cross.uy;
+					result[2] = cross.uz;
+					_view.tiltedToSector(result, result);
+					feedbackStrings.add(vecStr("cross direc vector", result[0],
+							result[1], result[2]));
+				}
 				break;
 			}
-		}
+		} //for
+
+
 	}
 
 	// for writing out a vector

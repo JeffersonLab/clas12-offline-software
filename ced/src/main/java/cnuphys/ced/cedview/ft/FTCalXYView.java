@@ -87,7 +87,7 @@ public class FTCalXYView extends CedXYView {
 		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
 				DisplayBits.ACCUMULATION
-				+ DisplayBits.MCTRUTH, 2, 6);
+				+ DisplayBits.MCTRUTH, 3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();

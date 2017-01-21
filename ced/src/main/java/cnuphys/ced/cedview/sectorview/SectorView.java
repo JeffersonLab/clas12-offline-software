@@ -238,9 +238,11 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
 				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.FTOFHITS
-				+ DisplayBits.DC_TB_RECONS_DOCA + DisplayBits.DC_TB_RECONS_SEGMENTS
+				+ DisplayBits.DC_TB_RECONS_DOCA + DisplayBits.DC_HB_RECONS_SEGMENTS 
+				+ DisplayBits.DC_TB_RECONS_SEGMENTS
+				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
 				+ DisplayBits.ACCUMULATION + DisplayBits.SCALE
-				+ DisplayBits.MCTRUTH, 2, 6);
+				+ DisplayBits.MCTRUTH, 3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 
