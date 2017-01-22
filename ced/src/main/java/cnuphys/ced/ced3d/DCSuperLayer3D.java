@@ -8,7 +8,7 @@ import org.jlab.geom.DetectorHit;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
@@ -110,7 +110,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 		
 		float coords[] = new float[6];
 		
-		DCTdcHitList hits = DC2.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {

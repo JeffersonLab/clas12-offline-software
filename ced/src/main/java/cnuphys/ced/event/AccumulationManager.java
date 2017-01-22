@@ -16,7 +16,7 @@ import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.FTOF;
@@ -504,7 +504,7 @@ public class AccumulationManager
 		} // htcc hit count > 0
 
 		// dc data
-		DCTdcHitList dclist = DC2.getInstance().updateTdcAdcList();
+		DCTdcHitList dclist = DC.getInstance().updateTdcAdcList();
 		accumDC(dclist);
 
 		

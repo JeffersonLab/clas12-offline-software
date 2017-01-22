@@ -2,7 +2,12 @@ package cnuphys.ced.event.data;
 
 import java.util.Collections;
 
-public class DCHit implements Comparable<DCHit> {
+/**
+ * This is not the basic TdcAdc hit, this is the base for Hit Based and Time based hits.
+ * @author heddle
+ *
+ */
+public class TbHbHit implements Comparable<TbHbHit> {
 
 	public byte sector;
 	public byte superlayer;
@@ -16,7 +21,7 @@ public class DCHit implements Comparable<DCHit> {
 	
 	
 	
-	public DCHit(byte sector, byte superlayer, byte layer6, short wire, short id, short status, float time, float doca, float trkDoca) {
+	public TbHbHit(byte sector, byte superlayer, byte layer6, short wire, short id, short status, float time, float doca, float trkDoca) {
 		super();
 		this.sector = sector;
 		this.superlayer = superlayer;
@@ -30,13 +35,13 @@ public class DCHit implements Comparable<DCHit> {
 	}
 	
 	//used for indexing and binary search
-	public DCHit(byte sector, byte superlayer, byte layer6, short wire) {
+	public TbHbHit(byte sector, byte superlayer, byte layer6, short wire) {
 		this(sector, superlayer, layer6, wire, (short)(-1), (short)(-1), -1f, -1f, -1f);
 	}
 
 	
 	@Override
-	public int compareTo(DCHit hit) {
+	public int compareTo(TbHbHit hit) {
 		int c = Integer.valueOf(sector).compareTo(Integer.valueOf(hit.sector));
 		if (c == 0) {
 			c = Integer.valueOf(superlayer).compareTo(Integer.valueOf(hit.superlayer));

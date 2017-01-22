@@ -19,7 +19,7 @@ import cnuphys.bCNU.log.Log;
 public class DataManager {
 	
 	//EXCLUSION LIST
-	private String _exclusions[] = {"::dgtz", "DETECTOR::", "RAW::"};
+	private String _exclusions[] = null;
 
 	
 	//the data dictionary

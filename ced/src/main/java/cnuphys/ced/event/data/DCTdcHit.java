@@ -7,7 +7,7 @@ import cnuphys.lund.DoubleFormat;
 public class DCTdcHit implements Comparable<DCTdcHit> {
 	
 	//for feedback strings
-	private static final String _fbColor = "$Orange Red$";
+	private static final String _fbColor = "$Orange$";
 	
 	public byte sector;
 	public byte layer; //1..36
@@ -90,7 +90,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 			return "";
 		}
 		else {
-			return "tdc: " + tdc;
+			return "tdc " + tdc;
 		}
 	}
 	
@@ -135,7 +135,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 		feedbackStrings.add(_fbColor  + "sector "
 				+ sector + 
 				" layer " + layer +
-				" wire + "  + wire);
+				" wire "  + wire);
 
 		String tdcStr = tdcString();
 		if (tdcStr.length() > 3) {

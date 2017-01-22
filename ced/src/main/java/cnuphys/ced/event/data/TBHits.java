@@ -1,6 +1,6 @@
 package cnuphys.ced.event.data;
 
-public class TBHits extends DCHits {
+public class TBHits extends TbHbHits {
 	
 	private static TBHits _instance;
 	

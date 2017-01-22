@@ -16,7 +16,7 @@ import cnuphys.lund.LundId;
  */
 public class SwimTrajectory2D {
 
-    private static final String fbColor = "$coral$";
+    private static final String fbColor = "$cornsilk$";
 
     public static final String SMALL_THETA = "\u03B8";
     public static final String SMALL_PHI = "\u03C6";

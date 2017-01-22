@@ -129,7 +129,7 @@ public class FastMCManager {
 	}
 	
 	public String getSourceDescription() {
-		return "Lund File: " +  ((_currentFile == null) ? "(none)" : _currentFile.getName());
+		return "Lund File " +  ((_currentFile == null) ? "(none)" : _currentFile.getName());
 	}
 
 	public void reloadCurrentEvent() {
