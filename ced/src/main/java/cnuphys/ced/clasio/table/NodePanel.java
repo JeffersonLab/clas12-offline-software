@@ -112,6 +112,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	private JScrollPane createDataTextArea() {
 
 		_dataTextArea = new JTextArea(3, 40) {
+			@Override
 			public Dimension getMinimumSize() {
 				return new Dimension(180, 200);
 			}
@@ -123,6 +124,7 @@ public class NodePanel extends JPanel implements ActionListener,
 		_dataTextArea.setEditable(false);
 
 		JScrollPane scrollPane = new JScrollPane() {
+			@Override
 			public Dimension getMinimumSize() {
 				return new Dimension(180, 200);
 			}

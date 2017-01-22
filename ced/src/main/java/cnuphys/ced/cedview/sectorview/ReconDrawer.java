@@ -10,8 +10,6 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.fastmc.FastMCManager;
 
 public class ReconDrawer extends SectorViewDrawer {

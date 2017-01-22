@@ -1,19 +1,12 @@
 package cnuphys.ced.clasio;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.Particle;
@@ -36,7 +29,6 @@ import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.frame.Ced;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
-import cnuphys.splot.plot.GraphicsUtilities;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
 

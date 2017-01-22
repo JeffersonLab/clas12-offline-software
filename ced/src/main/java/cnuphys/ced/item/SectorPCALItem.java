@@ -6,8 +6,6 @@ import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
@@ -18,15 +16,10 @@ import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
-import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.HitRecord;
-import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.PCALGeometry;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 import cnuphys.lund.X11Colors;
 
 public class SectorPCALItem extends PolygonItem {

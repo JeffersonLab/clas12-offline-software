@@ -1,5 +1,5 @@
 package cnuphys.ced.event.data;
 
-public class LTCC {
+public class LTCC extends DetectorData {
 
 }

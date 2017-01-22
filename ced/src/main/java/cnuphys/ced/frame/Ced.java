@@ -51,6 +51,7 @@ import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.HBHits;
 import cnuphys.ced.event.data.HBSegments;
+import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
@@ -875,6 +876,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		TBHits.getInstance();
 		HBHits.getInstance();
 		AllEC.getInstance();
+		HTCC2.getInstance();
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {

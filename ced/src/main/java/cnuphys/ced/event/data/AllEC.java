@@ -55,7 +55,7 @@ public class AllEC extends DetectorData {
 	
 	/**
 	 * Update the list. This is probably needed only during accumulation
-	 * @return the update l;ist
+	 * @return the updated list
 	 */
 	public TdcAdcHitList updateTdcAdcList() {
 		_tdcAdcHits =  new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
