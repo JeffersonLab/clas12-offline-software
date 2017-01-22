@@ -30,14 +30,16 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DCHit;
+import cnuphys.ced.event.data.DCHitList;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.Segment;
 import cnuphys.ced.event.data.SegmentList;
+import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
@@ -385,60 +387,33 @@ public class SuperLayerDrawing {
 		drawTimeBasedHits(g, container);
 		drawTimeBasedSegments(g, container);
 		
-		
-//		int hitCount = DC.hitCount();
-//		
-//	//	System.err.println("SINGLEMODEHITS HC: " + hitCount);
-//
-//		if (hitCount > 0) {
-//			Point pp = new Point();
-//			byte sector[] = DC.sector();
-//			byte superlayer[] = DC.superlayer();
-//			byte layer[] = DC.layer();
-//			short wire[] = DC.wire();
-//			int pid[] = DC.pid();
-//			float doca[] = DC.doca();
-//			float sdoca[] = DC.sdoca();
-//
-//			for (int i = 0; i < hitCount; i++) {
-//				try {
-//					int sect1 = sector[i]; // 1 based
-//					int supl1 = superlayer[i]; // 1 based
-//
-//					if ((sect1 == _iSupl.sector()) && (supl1 == _iSupl.superlayer())) {
-//						int lay1 = layer[i]; // 1 based
-//						int wire1 = wire[i]; // 1 based
-//
-//						boolean noise = false;
-//						if (_noiseManager.getNoise() != null) {
-//							if (i < _noiseManager.getNoise().length) {
-//								noise = _noiseManager.getNoise()[i];
-//							} else {
-//								String ws = " hit index = " + i + " noise length = " + _noiseManager.getNoise().length;
-//								Log.getInstance().warning(ws);
-//							}
-//						}
-//
-//						int pdgid = (pid == null) ? -1 : pid[i];
-//
-//						drawDCHit(g, container, lay1, wire1, noise, pdgid, i, doca, sdoca);
-//						
-//						//just draw the wire again
-//						drawOneWire(g, container, lay1, wire1, reallyClose, pp);
-//					}
-//				} catch (NullPointerException e) {
-//					System.err.println("null pointer in SectorSuperLayer hit drawing");
-//					e.printStackTrace();
-//				}
-//			} // for loop on hit count
-//
-//		} // hitcount > 0
 
 	}
 	
 	
 	//draw time based reconstruction hits
 	private void drawTimeBasedHits(Graphics g, IContainer container) {
+		
+		DCHitList hits = TBHits.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (DCHit hit : hits) {
+
+				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
+
+					// drawDOCA(Graphics g, IContainer container, int layer,
+					// int wire, double doca2d, Color fillColor, Color
+					// lineColor) {
+
+					// note conversion to mm
+					if (_view.showDCtbDoca()) {
+						drawDOCA(g, container, hit.layer6, hit.wire, 
+								10 *hit.doca, CedColors.tbDocaFill, CedColors.tbDocaLine);
+					}
+				}
+			}
+		}
+		
+		
 //		int hitCount = DC.timeBasedTrkgHitCount();
 //
 //		if (hitCount > 0) {
@@ -1099,19 +1074,19 @@ public class SuperLayerDrawing {
 
 	// add time based recons fb
 	private void addReconstructedFeedback(List<String> feedbackStrings) {
-
-		double p[] = DC.timeBasedTrackP();
-		if (p != null) {
-			int reconTrackCount = p.length;
-			if (reconTrackCount > 0) {
-				feedbackStrings.add(DataSupport.reconColor + "TB #reconstructed tracks " + reconTrackCount);
-				for (int i = 0; i < reconTrackCount; i++) {
-
-					feedbackStrings.add(DataSupport.reconColor + "TB trk# " + (i + 1) + " recon p "
-							+ DoubleFormat.doubleFormat(p[i], 5) + " Gev/c");
-				}
-			}
-		} // p != null
+//
+//		double p[] = DC.timeBasedTrackP();
+//		if (p != null) {
+//			int reconTrackCount = p.length;
+//			if (reconTrackCount > 0) {
+//				feedbackStrings.add(DataSupport.reconColor + "TB #reconstructed tracks " + reconTrackCount);
+//				for (int i = 0; i < reconTrackCount; i++) {
+//
+//					feedbackStrings.add(DataSupport.reconColor + "TB trk# " + (i + 1) + " recon p "
+//							+ DoubleFormat.doubleFormat(p[i], 5) + " Gev/c");
+//				}
+//			}
+//		} // p != null
 	}
 
 }

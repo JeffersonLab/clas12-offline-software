@@ -23,6 +23,10 @@ public class RunData {
 	public float rf;
 	public float startTime;
 	
+	public void reset() {
+		run = -1;
+	}
+	
 	/**
 	 * Change the fields if the event contains the run bank
 	 * @param event the data event

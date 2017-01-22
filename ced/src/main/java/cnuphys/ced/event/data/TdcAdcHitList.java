@@ -52,9 +52,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		// Step 1 build basic list
 		for (int index = 0; index < length; index++) {
 			if (order[index] != 3) { // left tdc
-				TdcAdcHit hit = new TdcAdcHit(sector[index], layer[index], component[index]);
-				hit.tdcL = TDC[index];
-				add(hit);
+				modifyInsert(sector[index], layer[index], component[index], TDC[index], -1, -1, -1);
 			}
 		}
 		
@@ -74,23 +72,24 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		int[] ADC = null;
 
 		sector = ColumnData.getByteArray(adcBankName + ".sector");
-		if (sector != null) {
-			layer = ColumnData.getByteArray(adcBankName + ".layer");
-			component = ColumnData.getShortArray(adcBankName + ".component");
-			order = ColumnData.getByteArray(adcBankName + ".order");
-			ADC = ColumnData.getIntArray(adcBankName + ".ADC");
+		if (sector == null) {
+			return;
+		}
+		layer = ColumnData.getByteArray(adcBankName + ".layer");
+		component = ColumnData.getShortArray(adcBankName + ".component");
+		order = ColumnData.getByteArray(adcBankName + ".order");
+		ADC = ColumnData.getIntArray(adcBankName + ".ADC");
 
-			length = checkArrays(sector, layer, component, order, ADC);
-			if (length < 0) {
-				Log.getInstance().warning("[" + adcBankName + "] " + _error);
-				return;
-			}
-						
-			//Step 4 merge left adc
-			for (int index = 0; index < length; index++) {
-				if (order[index] == 0) { //left adc
-					modifyInsert(sector[index], layer[index], component[index], -1, -1, ADC[index], -1);
-				}
+		length = checkArrays(sector, layer, component, order, ADC);
+		if (length < 0) {
+			Log.getInstance().warning("[" + adcBankName + "] " + _error);
+			return;
+		}
+
+		// Step 4 merge left adc
+		for (int index = 0; index < length; index++) {
+			if (order[index] == 0) { // left adc
+				modifyInsert(sector[index], layer[index], component[index], -1, -1, ADC[index], -1);
 			}
 		}
 				
@@ -106,6 +105,12 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		for (TdcAdcHit hit : this) {
 			_maxADC = Math.max(_maxADC, hit.averageADC());
 		}
+		
+//		if (adcBankName.contains("ECAL")) {
+//			for (TdcAdcHit hit : this) {
+//				System.out.println(hit);
+//			}
+//		}
 
 	}
 	
@@ -124,7 +129,6 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 			hit = this.elementAt(index);
 		} 
 		else {
-			System.err.println("INSERT INDEX: " + index + "   SIZE: " + size());
 			index = -(index + 1); // now the insertion point.
 			add(index, hit);
 		}
@@ -213,6 +217,18 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	}
 	
 	/**
+	 * Find the hit
+	 * @param sector the 1-based sector
+	 * @param layer the 1-based layer 1..36
+	 * @param component the 1-based component
+	 * @return the hit, or null if not found
+	 */
+	public TdcAdcHit get(int sector, int layer, int component) {
+		return get((byte)sector, (byte)layer, (short)component);
+	}
+
+	
+	/**
 	 * Get a color with apha based of relative adc 
 	 * @param hit the hit
 	 * @return a fill color for adc hits 
@@ -224,14 +240,14 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		
 		int avgADC = hit.averageADC();
 		if (avgADC < 1) {
-			return Color.white;
+			return new Color(255, 0, 0, 30);
 		}
 		if (_maxADC < 1) {
 			return Color.black;  //should not happen
 		}
 		
 		double fract = ((double)avgADC)/((double)(_maxADC));
-		fract = Math.max(0.1, Math.min(1.0, fract));
+		fract = Math.max(0.15, Math.min(1.0, fract));
 		int alpha = (int)(254*fract);
 		
 		return new Color(255, 0, 0, alpha);

@@ -152,26 +152,6 @@ public class DataSupport {
 			return DoubleFormat.doubleFormat(array[index], numdec);
 		}
 	}
-	
-	/**
-	 * Safe way to get an double element from an array for printing
-	 * 
-	 * @param array the array in question
-	 * @param index the array index
-	 * @param numdec the number of decimal points
-	 * @return a string for printing
-	 */
-	public static String safeString(float[] array, int index, int numdec) {
-		if (array == null) {
-			return "null";
-		}
-		else if ((index < 0) || (index >= array.length)) {
-			return "BADIDX: " + index;
-		}
-		else {
-			return DoubleFormat.doubleFormat(array[index], numdec);
-		}
-	}
 
 
 	/**
@@ -318,60 +298,6 @@ public class DataSupport {
 		return sb.toString();
 	}
 
-	/**
-	 * Safe way to get an int value
-	 * @param event the data event
-	 * @param fullname the full name of the column
-	 * @param index the index
-	 * @return the int at the index or -2147483648 [0x80000000] or -2^31 on any error otherwise the
-	 *         value
-	 */
-	public static int getInt(DataEvent event, String fullName, int index) {
-
-		ColumnData cd = DataManager.getInstance().getColumnData(fullName);
-		if (cd == null) {
-			return Integer.MIN_VALUE;
-		}
-
-		Object oa = cd.getDataArray(event);
-		if ((oa == null) || !(oa instanceof int[])) {
-			return Integer.MIN_VALUE;
-		}
-
-		int[] array = (int[]) oa;
-
-		if ((index < 0) || (index >= array.length)) {
-			return Integer.MIN_VALUE;
-		}
-		return array[index];
-	}
-
-	/**
-	 * Safe way to get an double value
-	 * @param event the data event
-	 * @param fullname the full name of the column
-	 * @param index the index
-	 * @return the double at the index or Double.NaN on any error otherwise the value
-	 */
-	public static double getDouble(DataEvent event, String fullName, int index) {
-
-		ColumnData cd = DataManager.getInstance().getColumnData(fullName);
-		if (cd == null) {
-			return Double.NaN;
-		}
-
-		Object oa = cd.getDataArray(event);
-		if ((oa == null) || !(oa instanceof double[])) {
-			return Double.NaN;
-		}
-
-		double[] array = (double[]) oa;
-
-		if ((index < 0) || (index >= array.length)) {
-			return Double.NaN;
-		}
-		return array[index];
-	}
 
 
 }

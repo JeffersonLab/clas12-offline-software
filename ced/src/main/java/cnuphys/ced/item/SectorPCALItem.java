@@ -17,13 +17,17 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.event.data.PCAL;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.lund.X11Colors;
 
 public class SectorPCALItem extends PolygonItem {
 
@@ -33,11 +37,11 @@ public class SectorPCALItem extends PolygonItem {
 	// the container sector view
 	private SectorView _view;
 
-	// should be PCLAGeometry.PCAL_U, PCAL_V, or PCAL_W
-	private int _stripType;
+	// should be PCALGeometry.PCAL_U, PCAL_V, or PCAL_W
+	private int _stripType; //0,1,2
 
 	private static final String _stripNames[] = { "U", "V", "W" };
-	private static final Color _pcalFill = new Color(215, 225, 215);
+	private static final Color _pcalFill = X11Colors.getX11Color("mint cream");
 	private static final Color _pcalLine = new Color(140, 140, 140);
 	
 	private static int[] _stripCounts = {68, 62, 62}; //u,v,w
@@ -159,44 +163,27 @@ public class SectorPCALItem extends PolygonItem {
 	//single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
 		
-		int hitCount = PCAL.hitCount();
-		if (hitCount > 0) {
-			Color default_fc = Color.red;
-
-			int pid[] = PCAL.pid();
-			int sector[] = PCAL.sector();
-			int view[] = PCAL.view();
-			int strip[] = PCAL.strip();
-			
-			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-				if ((sector[hitIndex] == _sector)
-						&& (view[hitIndex] == (_stripType + 1))) {
-					Color fc = default_fc;
+		TdcAdcHitList hits = AllEC.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (TdcAdcHit hit : hits) {
+				if ((hit.sector == _sector) && (hit.layer == (_stripType + 1))) {
+					int strip0 = hit.component - 1;
 					
-					if (_view.showMcTruth()) {
-						if (pid != null) {
-							LundId lid = LundSupport.getInstance()
-									.get(pid[hitIndex]);
-							if (lid != null) {
-								fc = lid.getStyle().getFillColor();
-							}
-						}
-					}
-
-					int strip0 = strip[hitIndex] - 1;
-
 					Point2D.Double wp[] = getStrip(strip0);
 
 					if (wp != null) {
 						Path2D.Double path = WorldGraphicsUtilities
 								.worldPolygonToPath(wp);
+						
+						Color fc = hits.adcColor(hit);
 						WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
 								fc, 0, LineStyle.SOLID, true);
 					}
 
 				}
-			} // loop hits
-		} //hitcount > 0
+			}
+		}
+		
 	}
 	
 	//accumulated drawer
@@ -300,19 +287,29 @@ public class SectorPCALItem extends PolygonItem {
 					feedbackStrings.add("$white$type "
 							+ _stripNames[_stripType] + " strip "
 							+ (stripId + 1));
-
-					// on a hit?
-					// the data container
-					Vector<HitRecord> hits = PCAL.matchingHits(_sector,
-							_stripType + 1, stripId + 1);
-
-					if (hits != null) {
-						for (HitRecord hit : hits) {
-							PCAL.preliminaryFeedback(hit.hitIndex, feedbackStrings);
-							DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
-							PCAL.dgtzFeedback(hit.hitIndex, feedbackStrings);
+					
+					//on a hit?
+					TdcAdcHitList hits = AllEC.getInstance().getHits();
+					if ((hits != null) && !hits.isEmpty()) {
+						TdcAdcHit hit = hits.get(_sector, _stripType + 1, stripId + 1);
+						if (hit != null) {
+							hit.tdcAdcFeedback(AllEC.layerNames[hit.layer], "strip", feedbackStrings);
 						}
+
 					}
+
+//					// on a hit?
+//					// the data container
+//					Vector<HitRecord> hits = PCAL.matchingHits(_sector,
+//							_stripType + 1, stripId + 1);
+//
+//					if (hits != null) {
+//						for (HitRecord hit : hits) {
+//							PCAL.preliminaryFeedback(hit.hitIndex, feedbackStrings);
+//							DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
+//							PCAL.dgtzFeedback(hit.hitIndex, feedbackStrings);
+//						}
+//					}
 
 					return;
 				}

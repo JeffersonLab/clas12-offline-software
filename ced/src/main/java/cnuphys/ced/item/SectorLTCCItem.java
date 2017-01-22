@@ -28,7 +28,8 @@ import cnuphys.lund.LundSupport;
 
 public class SectorLTCCItem extends PolygonItem {
 
-	private static Color _fillColors[] = {Color.white, X11Colors.getX11Color("alice blue")};
+	private static Color _fillColors[] = {X11Colors.getX11Color("mint cream"), 
+			X11Colors.getX11Color("alice blue")};
 
 	// convenient access to the event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -207,22 +208,24 @@ public class SectorLTCCItem extends PolygonItem {
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {
 		if (contains(container, screenPoint)) {
-//			feedbackStrings.add(DataSupport.prelimColor + "HTCC sect " + _sector + 
-//					" ring " + _ring + " half " + _half);
-//			
-//			// on a hit?
-//			// the data container
-//			Vector<HitRecord> hits = HTCC.matchingHits(_sector,
-//					_ring, _half);
+			if (contains(container, screenPoint)) {
+				feedbackStrings.add(DataSupport.prelimColor + "LTCC sect " + _sector + 
+						" ring " + _ring + " half " + _half);
+				
+				// on a hit?
+				// the data container
+//				Vector<HitRecord> hits = HTCC.matchingHits(_sector,
+//						_ring, _half);
 //
-//			if (hits != null) {
-//				for (HitRecord hit : hits) {
-//					HTCC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
-//					DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
-//					HTCC.dgtzFeedback(hit.hitIndex, feedbackStrings);
+//				if (hits != null) {
+//					for (HitRecord hit : hits) {
+//						HTCC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
+//						DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
+//						HTCC.dgtzFeedback(hit.hitIndex, feedbackStrings);
+//					}
 //				}
-//			}
-//
+
+			}
 		}
 		
 	}

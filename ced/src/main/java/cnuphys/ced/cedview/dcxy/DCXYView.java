@@ -38,7 +38,6 @@ import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DC2;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
@@ -49,6 +48,7 @@ import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.DCHexSectorItem;
 import cnuphys.ced.item.HexSectorItem;
 
+@SuppressWarnings("serial")
 public class DCXYView extends HexView {
 
 	// sector items

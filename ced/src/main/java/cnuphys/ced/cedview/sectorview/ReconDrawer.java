@@ -46,49 +46,49 @@ public class ReconDrawer extends SectorViewDrawer {
 
 	// draw reconstructed hits
 	private void drawFTOFReconHits(Graphics g, IContainer container) {
-
-		// arggh this sector array is zero based
-		int sector[] = FTOF.getInstance().reconSector();
-		int panel[] = FTOF.getInstance().reconPanel();
-		int paddle[] = FTOF.getInstance().reconPaddle();
-		float recX[] = FTOF.getInstance().reconX();
-		float recY[] = FTOF.getInstance().reconY();
-		float recZ[] = FTOF.getInstance().reconZ();
-
-		// _view.getWorldFromDetectorXYZ(100 * v3d[0], 100 *v3d[1],
-		// 100 * v3d[2], wp);
-
-		if ((recX != null) && (recY != null) && (recZ != null)) {
-			Point2D.Double wp = new Point2D.Double();
-			Point pp = new Point();
-			int hitCount = recX.length;
-			// System.err.println("Drawing " + hitCount + " ftof recons hits");
-			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-				int sect = sector[hitIndex] + 1; // 1-based
-				if (_view.isSectorOnView(sect)) {
-
-					_view.projectClasToWorld(recX[hitIndex], recY[hitIndex], recZ[hitIndex],
-							 _view.getProjectionPlane(), wp);
-					
-					
-					// _view.sectorToWorld(wp, sectXYZ, sect);
-					container.worldToLocal(pp, wp);
-
-					String s1 = "$Orange Red$" + vecStr("FTOF hit (lab)",
-							recX[hitIndex], recY[hitIndex], recZ[hitIndex]);
-					String s2 = "$Orange Red$FTOF panel: "
-							+ FTOF.panelNames[panel[hitIndex] - 1]
-							+ " paddle: " + (paddle[hitIndex] + 1);
-
-					container.worldToLocal(pp, wp);
-					FeedbackRect fbr = new FeedbackRect(FeedbackRect.Dtype.FTOF, pp.x - 4, pp.y - 4, 8,
-							8, hitIndex, panel[hitIndex], s1, s2);
-					_fbRects.add(fbr);
-
-					DataDrawSupport.drawReconHit(g, pp);
-				}
-			}
-		}
+//
+//		// arggh this sector array is zero based
+//		int sector[] = FTOF.getInstance().reconSector();
+//		int panel[] = FTOF.getInstance().reconPanel();
+//		int paddle[] = FTOF.getInstance().reconPaddle();
+//		float recX[] = FTOF.getInstance().reconX();
+//		float recY[] = FTOF.getInstance().reconY();
+//		float recZ[] = FTOF.getInstance().reconZ();
+//
+//		// _view.getWorldFromDetectorXYZ(100 * v3d[0], 100 *v3d[1],
+//		// 100 * v3d[2], wp);
+//
+//		if ((recX != null) && (recY != null) && (recZ != null)) {
+//			Point2D.Double wp = new Point2D.Double();
+//			Point pp = new Point();
+//			int hitCount = recX.length;
+//			// System.err.println("Drawing " + hitCount + " ftof recons hits");
+//			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
+//				int sect = sector[hitIndex] + 1; // 1-based
+//				if (_view.isSectorOnView(sect)) {
+//
+//					_view.projectClasToWorld(recX[hitIndex], recY[hitIndex], recZ[hitIndex],
+//							 _view.getProjectionPlane(), wp);
+//					
+//					
+//					// _view.sectorToWorld(wp, sectXYZ, sect);
+//					container.worldToLocal(pp, wp);
+//
+//					String s1 = "$Orange Red$" + vecStr("FTOF hit (lab)",
+//							recX[hitIndex], recY[hitIndex], recZ[hitIndex]);
+//					String s2 = "$Orange Red$FTOF panel: "
+//							+ FTOF.panelNames[panel[hitIndex] - 1]
+//							+ " paddle: " + (paddle[hitIndex] + 1);
+//
+//					container.worldToLocal(pp, wp);
+//					FeedbackRect fbr = new FeedbackRect(FeedbackRect.Dtype.FTOF, pp.x - 4, pp.y - 4, 8,
+//							8, hitIndex, panel[hitIndex], s1, s2);
+//					_fbRects.add(fbr);
+//
+//					DataDrawSupport.drawReconHit(g, pp);
+//				}
+//			}
+//		}
 	}
 
 

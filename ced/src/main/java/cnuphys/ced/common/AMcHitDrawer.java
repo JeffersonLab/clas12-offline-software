@@ -12,7 +12,6 @@ import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
-import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
@@ -66,11 +65,11 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 	
 
 	protected void drawGemCXYZHits_DC(Graphics g, IContainer container) {
-		showGemcXYZHits(g, container, FeedbackRect.Dtype.DC, 
-				DC.avgX(), 
-				DC.avgY(), 
-				DC.avgZ(), 
-				0);
+//		showGemcXYZHits(g, container, FeedbackRect.Dtype.DC, 
+//				DC.avgX(), 
+//				DC.avgY(), 
+//				DC.avgZ(), 
+//				0);
 	}
 	
 	protected void drawGemCXYZHits_FTOF(Graphics g, IContainer container) {

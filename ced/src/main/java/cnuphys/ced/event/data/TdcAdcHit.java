@@ -35,6 +35,24 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 		return c;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+	    if (this == obj)
+	        return true;
+	    if (obj == null)
+	        return false;
+	    if (getClass() != obj.getClass())
+	        return false;
+	    TdcAdcHit other = (TdcAdcHit) obj;
+	    if (sector != other.sector)
+	        return false;
+	    if (layer != other.layer)
+	        return false;
+	    if (component != other.component)
+	        return false;
+	    return true;
+	}
+	
 	/**
 	 * Get the average ADC value
 	 * @return the average of left and right
@@ -99,7 +117,7 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	@Override
 	public String toString() {
 		return "sector = " + sector + " layer " + layer + 
-				" component: " + component + tdcString() + adcString();
+				" component: " + component + " " + tdcString() + " " + adcString();
 	}
 	
 	public void tdcAdcFeedback(List<String> feedbackStrings) {
@@ -109,7 +127,7 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	public void tdcAdcFeedback(String layerName, String componentName,
 			List<String> feedbackStrings) {
 		
-		feedbackStrings.add(_fbColor + layerName +
+		feedbackStrings.add(_fbColor +
 				"sector " + sector + 
 				" " + layerName +
 				"  " + componentName + " " + component);

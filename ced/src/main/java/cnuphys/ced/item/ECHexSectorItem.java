@@ -6,8 +6,6 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -16,9 +14,9 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
-import cnuphys.ced.event.data.HitRecord;
+import cnuphys.ced.event.data.AllEC;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
@@ -81,9 +79,7 @@ public class ECHexSectorItem extends HexSectorItem {
 
 		drawOutlines(g, container, plane, Color.lightGray);
 
-		if (EC.hitCount() > 0) {
-			drawECHits(g, container, plane);
-		}
+		drawECHits(g, container, plane);
 
 		drawIJKOrigin(g, container);
 
@@ -119,47 +115,28 @@ public class ECHexSectorItem extends HexSectorItem {
 
 	// draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container, int plane) {
+		
+		
+		TdcAdcHitList hits = AllEC.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (TdcAdcHit hit : hits) {
+				if ((hit.sector == getSector()) && (hit.layer > 3)) {
+					int layer = hit.layer - 4; // 0..5
+					int stack0 = layer / 3; // 000,111
+					if (stack0 == plane) {
+						int view0 = layer % 3; // 012012
+						int strip0 = hit.component - 1;
 
-		int hitCount = EC.hitCount();
-		if (hitCount > 0) {
-			int sector[] = EC.sector();
-			int stack[] = EC.stack();
-			int view[] = EC.view();
-			int strip[] = EC.strip();
-			double totEdep[] = EC.totEdep();
-
-			for (int i = 0; i < hitCount; i++) {
-				if (sector[i] == getSector()) {
-					if (plane == (stack[i] - 1)) { // inner outer
-						int view0 = view[i] - 1; // uvw
-						int strip0 = strip[i] - 1;
-						if (_ecView.showStrips(view0)) {
-
-							// Polygon poly = _stripPoly[view0][strip0];
-
-							Polygon poly = stripPolygon(container, plane, view0,
-									strip0);
-
-							// if mctruth and have energy deposited, use it
-							if (_ecView.showMcTruth() && (totEdep != null)) {
-
-								int alpha = (int) ((255 * totEdep[i])
-										/ (ClasIoEventManager.getInstance()
-												.getMaxEdepCal(plane + 1)));
-
-								alpha = Math.max(60, Math.min(255, alpha));
-								g.setColor(new Color(255, 0, 0, alpha));
-							}
-							else {
-								g.setColor(baseFillColor);
-							}
-							g.fillPolygon(poly);
-							g.drawPolygon(poly);
-						}
+						Polygon poly = stripPolygon(container, plane, view0, strip0);
+						g.setColor(hits.adcColor(hit));
+						g.fillPolygon(poly);
+						g.drawPolygon(poly);
 					}
+
 				}
-			} // end for loop
-		} // hitcount > 0
+			}
+		}
+
 	}
 
 	// draw accumulated hits
@@ -351,28 +328,40 @@ public class ECHexSectorItem extends HexSectorItem {
 
 					int pixel = ECGeometry.pixelFromUVW(uvw[0], uvw[1], uvw[2]);
 					feedbackStrings.add("$lime green$pixel " + pixel);
-				}
-
-				// any hits?
-				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
-					for (int stripType = 0; stripType < 3; stripType++) {
-						if (_ecView.showStrips(stripType)) {
-							Vector<HitRecord> hits = EC.matchingHits(getSector(), plane + 1,
-											stripType + 1, uvw[stripType]);
-
-							if (hits != null) {
-								for (HitRecord hit : hits) {
-									EC.preliminaryFeedback(
-											hit.hitIndex,
-											feedbackStrings);
-									DataSupport.truePidFeedback(EC.pid(),
-											hit.hitIndex, feedbackStrings);
-									EC.dgtzFeedback(hit.hitIndex, feedbackStrings);
-								}
+					
+					TdcAdcHitList hits = AllEC.getInstance().getHits();
+					if ((hits != null) && !hits.isEmpty()) {
+						for (int stype = 0; stype < 3; stype++) {
+							int layer = 4 + 3*plane + stype;
+							TdcAdcHit hit = hits.get(getSector(), layer, uvw[stype]);
+							if (hit != null) {
+								hit.tdcAdcFeedback(AllEC.layerNames[layer], "strip", feedbackStrings);
 							}
 						}
 					}
+
 				}
+
+//				// any hits?
+//				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
+//					for (int stripType = 0; stripType < 3; stripType++) {
+//						if (_ecView.showStrips(stripType)) {
+//							Vector<HitRecord> hits = EC.matchingHits(getSector(), plane + 1,
+//											stripType + 1, uvw[stripType]);
+//
+//							if (hits != null) {
+//								for (HitRecord hit : hits) {
+//									EC.preliminaryFeedback(
+//											hit.hitIndex,
+//											feedbackStrings);
+//									DataSupport.truePidFeedback(EC.pid(),
+//											hit.hitIndex, feedbackStrings);
+//									EC.dgtzFeedback(hit.hitIndex, feedbackStrings);
+//								}
+//							}
+//						}
+//					}
+//				}
 			}
 		} // end contains
 
