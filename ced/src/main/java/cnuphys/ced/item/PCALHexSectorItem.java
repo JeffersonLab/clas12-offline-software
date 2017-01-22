@@ -6,8 +6,6 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -16,9 +14,9 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.HitRecord;
-import cnuphys.ced.event.data.PCAL;
+import cnuphys.ced.event.data.AllEC;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
@@ -72,9 +70,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 		drawOutlines(g, container, Color.lightGray);
 
-		if (PCAL.hitCount() > 0) {
-			drawPCALHits(g, container);
-		}
+		drawPCALHits(g, container);
 
 		drawIJKOrigin(g, container);
 
@@ -109,40 +105,37 @@ public class PCALHexSectorItem extends HexSectorItem {
 	//draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container) {
 		
-		int hitCount = PCAL.hitCount();
-		if (hitCount > 0) {
-			int sector[] = PCAL.sector();
-			int view[] = PCAL.view();
-			int strip[] = PCAL.strip();
-			double totEdep[] = PCAL.totEdep();
-			
-			for (int i = 0; i < hitCount; i++) {
-				if (sector[i] == getSector()) {
-					int view0 = view[i] - 1; // uvw
-					int strip0 = strip[i] - 1;
-					if (_pcalView.showStrips(view0)) {
-						Polygon poly = stripPolygon(container, view0, strip0);
+		TdcAdcHitList hits = AllEC.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (TdcAdcHit hit : hits) {
+				if ((hit.sector == getSector()) && (hit.layer < 4)) {
+					int view0 = hit.layer - 1; // uvw
+					int strip0 = hit.component - 1;
 
-						// Polygon poly = _stripPoly[view0][strip0];
+					Polygon poly = stripPolygon(container, view0, strip0);
 
-						// if mctruth and have energy deposited, use it
-						if (_pcalView.showMcTruth() && (totEdep != null)) {
+					// Polygon poly = _stripPoly[view0][strip0];
 
-							int alpha = (int) ((255 * totEdep[i])
-									/ (ClasIoEventManager.getInstance()
-											.getMaxEdepCal(0)));
-							alpha = Math.max(60, Math.min(255, alpha));
-							g.setColor(new Color(255, 0, 0, alpha));
-						}
-						else {
-							g.setColor(baseFillColor);
-						}
-						g.fillPolygon(poly);
-						g.drawPolygon(poly);
-					}
+//					// if mctruth and have energy deposited, use it
+//					if (_pcalView.showMcTruth() && (totEdep != null)) {
+//
+//						int alpha = (int) ((255 * totEdep[i])
+//								/ (ClasIoEventManager.getInstance()
+//										.getMaxEdepCal(0)));
+//						alpha = Math.max(60, Math.min(255, alpha));
+//						g.setColor(new Color(255, 0, 0, alpha));
+//					}
+//					else {
+//						g.setColor(baseFillColor);
+//					}
+					g.setColor(hits.adcColor(hit));
+					g.fillPolygon(poly);
+					g.drawPolygon(poly);
+
 				}
-			} //end for loop
-		} // hitCount > 0
+			}
+		}
+		
 	}
 	
 	//draw accumulated hits
@@ -313,32 +306,22 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 			// now add the strings
 			// if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
-			if (true) {
 
-				String locStr = "$lime green$loc xyz " + point3DString(lp) + " cm";
-				feedbackStrings.add(locStr);
+			String locStr = "$lime green$loc xyz " + point3DString(lp) + " cm";
+			feedbackStrings.add(locStr);
 
-				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
-					String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1] + ", " + uvw[2] + "]";
-					feedbackStrings.add(uvwStr);
-				}
+			if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
+				String uvwStr = "$lime green$U V W [" + uvw[0] + ", " + uvw[1] + ", " + uvw[2] + "]";
+				feedbackStrings.add(uvwStr);
 
 				// any hits?
 
-				if ((uvw[0] > 0) && (uvw[1] > 0) && (uvw[2] > 0)) {
-					for (int stripType = 0; stripType < 3; stripType++) {
-						if (_pcalView.showStrips(stripType)) {
-							Vector<HitRecord> hits = PCAL.matchingHits(
-									getSector(), stripType + 1,
-									uvw[stripType]);
-
-							if (hits != null) {
-								for (HitRecord hit : hits) {
-									PCAL.preliminaryFeedback(hit.hitIndex, feedbackStrings);
-									DataSupport.truePidFeedback(PCAL.pid(), hit.hitIndex, feedbackStrings);
-									PCAL.dgtzFeedback(hit.hitIndex, feedbackStrings);
-								}
-							}
+				TdcAdcHitList hits = AllEC.getInstance().getHits();
+				if ((hits != null) && !hits.isEmpty()) {
+					for (int stype = 0; stype < 3; stype++) {
+						TdcAdcHit hit = hits.get(getSector(), stype + 1, uvw[stype]);
+						if (hit != null) {
+							hit.tdcAdcFeedback(AllEC.layerNames[hit.layer], "strip", feedbackStrings);
 						}
 					}
 				}

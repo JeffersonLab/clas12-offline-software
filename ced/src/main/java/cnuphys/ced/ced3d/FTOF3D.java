@@ -88,30 +88,30 @@ public class FTOF3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 		
-		// arggh this sector array is zero based
-		int sector[] = FTOF.getInstance().reconSector();
-		if (sector == null) {
-			return;
-		}
-		float recX[] = FTOF.getInstance().reconX();
-		float recY[] = FTOF.getInstance().reconY();
-		float recZ[] = FTOF.getInstance().reconZ();
-
-		int numHits = sector.length;
-		// System.err.println("FTOF DRAWDATA NUM HITS: " + numHits);
-
-		float xyz[] = new float[3];
-		for (int i = 0; i < numHits; i++) {
-			if (_sector == sector[i]) {
-				xyz[0] = recX[i];
-				xyz[1] = recY[i];
-				xyz[2] = recZ[i];
-
-				 Support3D.drawPoints(drawable, xyz, Color.cyan, Color.black,
-				 10, true);
-
-			}
-		}
+//		// arggh this sector array is zero based
+//		int sector[] = FTOF.getInstance().reconSector();
+//		if (sector == null) {
+//			return;
+//		}
+//		float recX[] = FTOF.getInstance().reconX();
+//		float recY[] = FTOF.getInstance().reconY();
+//		float recZ[] = FTOF.getInstance().reconZ();
+//
+//		int numHits = sector.length;
+//		// System.err.println("FTOF DRAWDATA NUM HITS: " + numHits);
+//
+//		float xyz[] = new float[3];
+//		for (int i = 0; i < numHits; i++) {
+//			if (_sector == sector[i]) {
+//				xyz[0] = recX[i];
+//				xyz[1] = recY[i];
+//				xyz[2] = recZ[i];
+//
+//				 Support3D.drawPoints(drawable, xyz, Color.cyan, Color.black,
+//				 10, true);
+//
+//			}
+//		}
 	}
 
 	// show FTOFs?

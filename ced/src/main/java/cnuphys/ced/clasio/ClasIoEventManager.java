@@ -285,6 +285,9 @@ public class ClasIoEventManager {
 		_dataSource.open(file.getPath());
 		notifyEventListeners(_currentHipoFile);
 		setEventSourceType(EventSourceType.HIPOFILE);
+		
+		_runData.reset();
+
 
 		// TODO check if I need to skip the first event
 
@@ -301,6 +304,8 @@ public class ClasIoEventManager {
 		}
 		_ringDialog.setVisible(true);
 		if (_ringDialog.reason() == DialogUtilities.OK_RESPONSE) {
+			_runData.reset();
+
 			_dataSource = null;
 			_currentIPAddress = "";
 			int connType = _ringDialog.getConnectionType();
@@ -543,7 +548,6 @@ public class ClasIoEventManager {
 
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
-		case HIPOFILE:
 		case RING:
 			if (_dataSource.hasEvent()) {
 				_currentEvent = _dataSource.getNextEvent();
@@ -558,6 +562,22 @@ public class ClasIoEventManager {
 				}
 			}
 			break;
+		case HIPOFILE:
+			if (_dataSource.hasEvent()) {
+				_currentEvent = _dataSource.getNextEvent();
+				_runData.set(_currentEvent);
+			} else {
+				_currentEvent = null;
+			}
+
+			if (!isAccumulating()) {
+				notifyEventListeners();
+			}
+			else {
+				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+			}
+			break;
+
 		case FASTMC:
 			FastMCManager.getInstance().nextEvent();
 			break;

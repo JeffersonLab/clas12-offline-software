@@ -17,9 +17,12 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.HitRecord;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.lund.LundId;
@@ -164,47 +167,33 @@ public class SectorECItem extends PolygonItem {
 	
 	//single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
-		
-		int hitCount = EC.hitCount();
-		if (hitCount > 0) {
-			Color default_fc = Color.red;
+		TdcAdcHitList hits = AllEC.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (TdcAdcHit hit : hits) {
+				if (hit.sector == _sector) {
+					int layer = hit.layer - 4; // 0..5
+					int stack0 = layer / 3; // 000,111
+					int view0 = layer % 3; // 012012
+					if ((stack0 == _plane) && (view0 == _stripType)) {
+						int strip0 = hit.component - 1;
+						
+						Point2D.Double wp[] = getStrip(strip0);
 
-			int pid[] = EC.pid();
-			int sector[] = EC.sector();
-			int stack[] = EC.stack();
-			int view[] = EC.view();
-			int strip[] = EC.strip();
-			
-			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-				if ((sector[hitIndex] == _sector)
-						&& (stack[hitIndex] == (_plane + 1))
-						&& (view[hitIndex] == (_stripType + 1))) {
-					Color fc = default_fc;
-					
-					if (_view.showMcTruth()) {
-						if (pid != null) {
-							LundId lid = LundSupport.getInstance()
-									.get(pid[hitIndex]);
-							if (lid != null) {
-								fc = lid.getStyle().getFillColor();
-							}
+						if (wp != null) {
+							Path2D.Double path = WorldGraphicsUtilities
+									.worldPolygonToPath(wp);
+							
+							Color fc = hits.adcColor(hit);
+							WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
+									fc, 0, LineStyle.SOLID, true);
 						}
 					}
 
-					int strip0 = strip[hitIndex] - 1;
-
-					Point2D.Double wp[] = getStrip(strip0);
-
-					if (wp != null) {
-						Path2D.Double path = WorldGraphicsUtilities
-								.worldPolygonToPath(wp);
-						WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
-								_style.getLineColor(), 0, LineStyle.SOLID, true);
-					}
 
 				}
-			} //end for loop
-		} // hitCount > 0
+			}
+		}
+
 	}
 	
 	// accumulated drawer
@@ -310,19 +299,32 @@ public class SectorECItem extends PolygonItem {
 					feedbackStrings.add("$white$plane " + _ecNames[_plane]
 							+ " type " + _ecStripNames[_stripType] + " strip "
 							+ (stripId + 1));
+					
+					//on a hit?
+					TdcAdcHitList hits = AllEC.getInstance().getHits();
+					if ((hits != null) && !hits.isEmpty()) {
+						
+						int layer = 4 + 3*_plane + _stripType;
 
-					// on a hit?
-					// the data container
-					Vector<HitRecord> hits = EC.matchingHits(_sector,
-							_plane + 1, _stripType + 1, stripId + 1);
-
-					if (hits != null) {
-						for (HitRecord hit : hits) {
-							EC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
-							DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
-							EC.dgtzFeedback(hit.hitIndex, feedbackStrings);
+						TdcAdcHit hit = hits.get(_sector, layer, stripId + 1);
+						if (hit != null) {
+							hit.tdcAdcFeedback(AllEC.layerNames[hit.layer], "strip", feedbackStrings);
 						}
+
 					}
+
+//					// on a hit?
+//					// the data container
+//					Vector<HitRecord> hits = EC.matchingHits(_sector,
+//							_plane + 1, _stripType + 1, stripId + 1);
+//
+//					if (hits != null) {
+//						for (HitRecord hit : hits) {
+//							EC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
+//							DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
+//							EC.dgtzFeedback(hit.hitIndex, feedbackStrings);
+//						}
+//					}
 
 					return;
 				}

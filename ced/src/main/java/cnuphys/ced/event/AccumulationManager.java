@@ -5,7 +5,6 @@ import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
-import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.cedview.bst.BSTxyView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
@@ -15,15 +14,13 @@ import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
+import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DC2;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
-import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC;
-import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 
@@ -511,79 +508,13 @@ public class AccumulationManager
 		accumDC(dclist);
 
 		
-		
-		
-//		int dcHitCount = DC.hitCount();
-//
-//		if (dcHitCount > 0) {
-//			byte sector[] = DC.sector();
-//			byte superlayer[] = DC.superlayer();
-//			byte layer[] = DC.layer();
-//			short wire[] = DC.wire();
-//
-//			for (int i = 0; i < dcHitCount; i++) {
-//				int sect0 = sector[i] - 1; // make 0 based
-//				int supl0 = superlayer[i] - 1; // make 0 based
-//				int lay0 = layer[i] - 1; // make 0 based
-//				int wire0 = wire[i] - 1; // make 0 based
-//				try {
-//					_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0] += 1;
-//
-//					_maxDgtzDcCount = Math.max(
-//							_dcDgtzAccumulatedData[sect0][supl0][lay0][wire0],
-//							_maxDgtzDcCount);
-//
-//				} catch (ArrayIndexOutOfBoundsException e) {
-//					String msg = String.format(
-//							"DC index out of bounds. Event# %d sect %d supl %d lay %d wire %d",
-//							_eventManager.getEventNumber(), sector[i],
-//							superlayer[i], layer[i], wire[i]);
-//					Log.getInstance().warning(msg);
-//					System.err.println(msg);
-//				}
-//
-//			} // end loop hits
-//
-//		} // dcHitCount > 0
+		// ftof data
+		TdcAdcHitList ftoflist = FTOF.getInstance().updateTdcAdcList();
+		accumFtof(ftoflist);
 
-
-		// ec data
-		int ecHitCount = EC.hitCount();
-		if (ecHitCount > 0) {
-			int sect[] = EC.sector();
-			int stack[] = EC.stack();
-			int view[] = EC.view();
-			int strip[] = EC.strip();
-			
-			for (int i = 0; i < ecHitCount; i++) {
-				int sect0 = sect[i] - 1; // make 0 based
-				int stack0 = stack[i] - 1; // make 0 based
-				int view0 = view[i] - 1; // make 0 based
-				int strip0 = strip[i] - 1; // make 0 based
-				_ecDgtzAccumulatedData[sect0][stack0][view0][strip0] += 1;
-
-				_maxDgtzEcCount = Math.max(
-						_ecDgtzAccumulatedData[sect0][stack0][view0][strip0],
-						_maxDgtzEcCount);
-			}
-		}
-		
-		int pcalHitCount = PCAL.hitCount();
-		if (pcalHitCount > 0) {
-			int sect[] = PCAL.sector();
-			int view[] = PCAL.view();
-			int strip[] = PCAL.strip();
-			for (int i = 0; i < pcalHitCount; i++) {
-				int sect0 = sect[i] - 1; // make 0 based
-				int view0 = view[i] - 1; // make 0 based
-				int strip0 = strip[i] - 1; // make 0 based
-				_pcalDgtzAccumulatedData[sect0][view0][strip0] += 1;
-
-				_maxDgtzPcalCount = Math.max(
-						_pcalDgtzAccumulatedData[sect0][view0][strip0],
-						_maxDgtzPcalCount);
-			}
-		}
+		// all ec
+		TdcAdcHitList allEClist = AllEC.getInstance().updateTdcAdcList();
+		accumAllEC(allEClist);
 
 
 		//bst
@@ -628,14 +559,51 @@ public class AccumulationManager
 			} // for on hits
 		} //hitcount > 0
 		
-		
-		// ftof data
-		TdcAdcHitList ftoflist = FTOF.getInstance().updateTdcAdcList();
-		accumFtof(ftoflist);
-
 
 	}
 
+	//accumulate all ec
+	private void accumAllEC(TdcAdcHitList list) {
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+		
+		for (TdcAdcHit hit : list) {
+			if (hit != null) {
+				try {
+					int sect0 = hit.sector - 1;
+					int layer = hit.layer;
+					int strip0 = hit.component - 1;
+
+					if (layer < 4) { // pcal
+						int view0 = layer - 1;
+						_pcalDgtzAccumulatedData[sect0][view0][strip0] += 1;
+
+						_maxDgtzPcalCount = Math.max(_pcalDgtzAccumulatedData[sect0][view0][strip0], _maxDgtzPcalCount);
+					} else { // ec
+						layer -= 4; // convert to 0..5
+						int stack0 = layer / 3; // 000,111
+						int view0 = layer % 3; // 012012
+
+						_ecDgtzAccumulatedData[sect0][stack0][view0][strip0] += 1;
+
+						_maxDgtzEcCount = Math.max(_ecDgtzAccumulatedData[sect0][stack0][view0][strip0],
+								_maxDgtzEcCount);
+
+					}
+					
+					
+				} catch (ArrayIndexOutOfBoundsException e) {
+					e.printStackTrace();
+					Log.getInstance().warning("In accumulation, ECAL hit has bad indices: " + hit);
+				}
+			}
+
+		}
+
+	}
+	
+	
 	// accumulate dc data
 	private void accumDC(DCTdcHitList list) {
 		if ((list == null) || list.isEmpty()) {

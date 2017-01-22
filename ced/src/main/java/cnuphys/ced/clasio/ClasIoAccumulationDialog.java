@@ -25,6 +25,7 @@ import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.view.ViewManager;
+import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.event.AccumulationManager;
 
 public class ClasIoAccumulationDialog extends JDialog {
@@ -250,17 +251,29 @@ public class ClasIoAccumulationDialog extends JDialog {
 						int count = 0;
 						while (count < fcount) {
 							try {
-								if (_eventManager.hasEvent()) {
-									DataEvent event = _eventManager.getNextEvent();
-									if (event == null) {
-										Log.getInstance().warning("A \"should not have happened\" null event in the accumulator.");
-										Thread.sleep(50);
+								EventSourceType estype = _eventManager.getEventSourceType();
+								switch (estype) {
+								case RING:
+									if (_eventManager.hasEvent()) {
+										DataEvent event = _eventManager.getNextEvent();
+										if (event == null) {
+											Log.getInstance().warning(
+													"A \"should not have happened\" null event in the accumulator.");
+											Thread.sleep(50);
+										} else {
+											count++;
+										}
 									} else {
-										count++;
+										Thread.sleep(50);
 									}
-								} else {
-									Thread.sleep(50);
+									break;
+								default:
+									_eventManager.getNextEvent();
+									count++;
+									break;
 								}
+
+
 							} catch (Exception e) {
 								e.printStackTrace();
 								break;

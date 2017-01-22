@@ -1,5 +1,7 @@
 package cnuphys.ced.event.data;
 
+import java.util.Collections;
+
 public class DCHit implements Comparable<DCHit> {
 
 	public byte sector;
@@ -10,10 +12,11 @@ public class DCHit implements Comparable<DCHit> {
 	public short status;
 	public float time;
 	public float doca;
+	public float trkDoca;
 	
 	
 	
-	public DCHit(byte sector, byte superlayer, byte layer6, short wire, short id, short status, float time, float doca) {
+	public DCHit(byte sector, byte superlayer, byte layer6, short wire, short id, short status, float time, float doca, float trkDoca) {
 		super();
 		this.sector = sector;
 		this.superlayer = superlayer;
@@ -23,7 +26,14 @@ public class DCHit implements Comparable<DCHit> {
 		this.status = status;
 		this.time = time;
 		this.doca = doca;
+		this.trkDoca = trkDoca;
 	}
+	
+	//used for indexing and binary search
+	public DCHit(byte sector, byte superlayer, byte layer6, short wire) {
+		this(sector, superlayer, layer6, wire, (short)(-1), (short)(-1), -1f, -1f, -1f);
+	}
+
 	
 	@Override
 	public int compareTo(DCHit hit) {
@@ -39,6 +49,7 @@ public class DCHit implements Comparable<DCHit> {
 		}
 		return c;
 	}
+	
 
 
 }

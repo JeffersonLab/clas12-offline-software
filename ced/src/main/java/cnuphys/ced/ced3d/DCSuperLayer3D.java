@@ -8,14 +8,11 @@ import org.jlab.geom.DetectorHit;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DC2;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
-import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
-import cnuphys.ced.frame.CedColors;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.lund.X11Colors;
 

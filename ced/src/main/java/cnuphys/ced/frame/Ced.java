@@ -45,6 +45,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.DC2;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
@@ -873,6 +874,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		HBSegments.getInstance();
 		TBHits.getInstance();
 		HBHits.getInstance();
+		AllEC.getInstance();
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
