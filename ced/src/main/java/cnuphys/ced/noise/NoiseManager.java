@@ -7,7 +7,7 @@ import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
-import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
@@ -103,7 +103,7 @@ public class NoiseManager implements IClasIoEventListener {
 		noisePackage.clear();
 		_noiseResults.clear();
 		
-		DCTdcHitList hits = DC2.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getHits();
 		
 		if ((hits != null) && !hits.isEmpty()) {
 			int sector[] = hits.sectorArray();

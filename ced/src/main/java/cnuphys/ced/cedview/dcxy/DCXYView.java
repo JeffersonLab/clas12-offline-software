@@ -38,7 +38,7 @@ import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
@@ -294,7 +294,7 @@ public class DCXYView extends HexView {
 				return;
 			}
 			
-			DCTdcHitList hits = DC2.getInstance().getHits();
+			DCTdcHitList hits = DC.getInstance().getHits();
 			if ((hits != null) && !hits.isEmpty()) {
 				
 				Graphics2D g2 = (Graphics2D)g;

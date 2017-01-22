@@ -46,7 +46,7 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
-import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.HBHits;
@@ -866,7 +866,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		GeometryManager.getInstance();
 		
 		//Initialize data collectors
-		DC2.getInstance();
+		DC.getInstance();
 		FTOF.getInstance();
 		TBCrosses.getInstance();
 		HBCrosses.getInstance();

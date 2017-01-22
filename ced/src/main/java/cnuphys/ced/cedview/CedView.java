@@ -678,8 +678,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			feedbackStrings.add("Sector " + sector);
 		}
 
-		String pixStr = "$Sky Blue$ScreenXY: [" + pp.x + ", " + pp.y + "]";
-		feedbackStrings.add(pixStr);
+//		String pixStr = "$Sky Blue$ScreenXY: [" + pp.x + ", " + pp.y + "]";
+//		feedbackStrings.add(pixStr);
 	}
 
 	/**

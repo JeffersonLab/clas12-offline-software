@@ -61,6 +61,9 @@ public class GeometryManager {
 		// get the FTOF geometry
 		FTOFGeometry.initialize();
 
+		// get the FTOF geometry
+		CTOFGeometry.initialize();
+
 		// get BST data
 		BSTGeometry.initialize();
 		getBSTPanels();

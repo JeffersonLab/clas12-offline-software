@@ -2,21 +2,21 @@ package cnuphys.ced.event.data;
 
 import org.jlab.io.base.DataEvent;
 
-public class DCHits  extends DetectorData {
+public class TbHbHits  extends DetectorData {
 
 	protected String _bankName;
 	
-	protected DCHitList _hits;
+	protected TbHbHitList _hits;
 	
-	public DCHits(String bankName) {
+	public TbHbHits(String bankName) {
 		_bankName = bankName;
-		_hits = new DCHitList(_bankName);
+		_hits = new TbHbHitList(_bankName);
 	}
 	
 	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
-		_hits =  new DCHitList(_bankName);
+		_hits =  new TbHbHitList(_bankName);
 	}
 	
 
@@ -24,7 +24,7 @@ public class DCHits  extends DetectorData {
 	 * Get the cross list
 	 * @return the cross list
 	 */
-	public DCHitList getHits() {
+	public TbHbHitList getHits() {
 		return _hits;
 	}
 

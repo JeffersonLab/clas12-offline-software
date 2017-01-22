@@ -6,11 +6,11 @@ import java.util.Vector;
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.alldata.ColumnData;
 
-public class DCHitList extends Vector<DCHit> {
+public class TbHbHitList extends Vector<TbHbHit> {
 
 	private String _error;
 
-	public DCHitList(String bankName) {
+	public TbHbHitList(String bankName) {
 
 		byte sector[] = ColumnData.getByteArray(bankName + ".sector");
 		if ((sector == null) || (sector.length < 1)) {
@@ -39,7 +39,7 @@ public class DCHitList extends Vector<DCHit> {
         
         for (int i = 0; i < length; i++) {
         	float fdoca = (doca == null) ? -1f : doca[i];
-        	add(new DCHit(sector[i], superlayer[i], layer6[i], wire[i], id[i], status[i], time[i], fdoca, trkDoca[i]));
+        	add(new TbHbHit(sector[i], superlayer[i], layer6[i], wire[i], id[i], status[i], time[i], fdoca, trkDoca[i]));
         }
         
 		if (size() > 1) {
@@ -119,7 +119,7 @@ public class DCHitList extends Vector<DCHit> {
 		
 //		public DCHit(byte sector, byte superlayer, byte layer6, short wire, short id, short status, float time, float doca, float trkDoca) {
 
-		DCHit hit = new DCHit(sector, superlayer, layer6, wire);
+		TbHbHit hit = new TbHbHit(sector, superlayer, layer6, wire);
 		int index = Collections.binarySearch(this, hit);
 		if (index >= 0) {
 			return index;
@@ -137,7 +137,7 @@ public class DCHitList extends Vector<DCHit> {
 	 * @param wire the 1-based wire
 	 * @return the index, or -1 if not found
 	 */
-	public DCHit get(byte sector, byte superlayer, byte layer6, short wire) {
+	public TbHbHit get(byte sector, byte superlayer, byte layer6, short wire) {
 		int index = getIndex(sector, superlayer, layer6, wire);
 		return (index < 0) ? null : elementAt(index);
 	}

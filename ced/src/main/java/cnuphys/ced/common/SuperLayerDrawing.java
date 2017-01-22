@@ -30,9 +30,9 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DC2;
-import cnuphys.ced.event.data.DCHit;
-import cnuphys.ced.event.data.DCHitList;
+import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.TbHbHit;
+import cnuphys.ced.event.data.TbHbHitList;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -367,7 +367,7 @@ public class SuperLayerDrawing {
 			return;
 		}
 		
-		DCTdcHitList hits = DC2.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			
 			Point pp = new Point();
@@ -394,9 +394,9 @@ public class SuperLayerDrawing {
 	//draw time based reconstruction hits
 	private void drawTimeBasedHits(Graphics g, IContainer container) {
 		
-		DCHitList hits = TBHits.getInstance().getHits();
+		TbHbHitList hits = TBHits.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			for (DCHit hit : hits) {
+			for (TbHbHit hit : hits) {
 
 				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
 
@@ -1045,7 +1045,7 @@ public class SuperLayerDrawing {
 			int layer = data[0];
 			int wire = data[1];
 
-			DCTdcHitList hits = DC2.getInstance().getHits();
+			DCTdcHitList hits = DC.getInstance().getHits();
 
 			if ((layer > 0) && (wire > 0)) {
 				

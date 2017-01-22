@@ -19,7 +19,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
 //import cnuphys.ced.dcnoise.test.TestParameters;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DC2;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -281,7 +281,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			drawMasks(g, container, parameters);
 		}
 
-		DCTdcHitList hits = DC2.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
@@ -627,7 +627,7 @@ public class AllDCSuperLayer extends RectangleItem {
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");
 		
-		DCTdcHitList hits = DC2.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getHits();
 
 		DCTdcHit hit = null;
 		if ((hits != null) && !hits.isEmpty()) {

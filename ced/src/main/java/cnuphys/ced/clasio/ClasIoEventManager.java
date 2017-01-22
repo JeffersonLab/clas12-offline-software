@@ -241,11 +241,11 @@ public class ClasIoEventManager {
 	public String getCurrentSourceDescription() {
 
 		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
-			return "Hipo File: " + _currentHipoFile.getName();
+			return "Hipo File " + _currentHipoFile.getName();
 		} else if (_sourceType == EventSourceType.FASTMC) {
 			return FastMCManager.getInstance().getSourceDescription();
 		} else if ((_sourceType == EventSourceType.RING) && (_currentIPAddress != null)) {
-			return "Hipo Ring: " + _currentIPAddress;
+			return "Hipo Ring " + _currentIPAddress;
 		}
 		return "(none)";
 	}

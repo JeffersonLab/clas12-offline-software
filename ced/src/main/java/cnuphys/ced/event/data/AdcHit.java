@@ -2,27 +2,20 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 
-public class TdcAdcHit implements Comparable<TdcAdcHit> {
+public class AdcHit implements Comparable<AdcHit> {
 	
 	//for feedback strings
-	private static final String _fbColor = "$Light Coral$";
+	private static final String _fbColor = "$Light Blue$";
 	
 	public byte sector;
 	public byte layer;
 	public short component;
-	public int tdcL = -1;
-	public int tdcR = -1;
 	public int adcL = -1;
 	public int adcR = -1;
 	
-	public int pedL = -1;
-	public int pedR = -1;
-	public float timeL = Float.NaN;
-	public float timeR = Float.NaN;
-	
 	
 
-	public TdcAdcHit(byte sector, byte layer, short component) {
+	public AdcHit(byte sector, byte layer, short component) {
 		super();
 		this.sector = sector;
 		this.layer = layer;
@@ -30,7 +23,7 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	}
 
 	@Override
-	public int compareTo(TdcAdcHit hit) {
+	public int compareTo(AdcHit hit) {
 		int c = Integer.valueOf(sector).compareTo(Integer.valueOf(hit.sector));
 		if (c == 0) {
 			c = Integer.valueOf(layer).compareTo(Integer.valueOf(hit.layer));
@@ -81,25 +74,6 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 		return sum/count;
 	}
 	
-	/**
-	 * Get a string for just the tdc data
-	 * @return a string for just the tdc data
-	 */
-	public String tdcString() {
-		if ((tdcL < 0) && (tdcR < 0)) {
-			return "";
-		}
-		if ((tdcL >= 0) && (tdcR >= 0)) {
-			return "tdc: [" + tdcL + ", " + tdcR + "]";
-		}
-		if ((tdcL >= 0) && (tdcR < 0)) {
-			return "tdc: " + tdcL;
-		}
-		else {
-			return "tdc: " + tdcR;
-		}
-	}
-
 	
 	/**
 	 * Get a string for just the tdc data
@@ -123,10 +97,10 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	@Override
 	public String toString() {
 		return "sector = " + sector + " layer " + layer + 
-				" component: " + component + " " + tdcString() + " " + adcString();
+				" component: " + component + " "  + adcString();
 	}
 	
-	public void tdcAdcFeedback(List<String> feedbackStrings) {
+	public void adcFeedback(List<String> feedbackStrings) {
 		tdcAdcFeedback("layer " + layer, "component", feedbackStrings);
 	}
 	
@@ -138,11 +112,9 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 				" " + layerName +
 				"  " + componentName + " " + component);
 
-		String tdcStr = tdcString();
 		String adcStr = adcString();
-		String dataStr = tdcStr + " " + adcStr;
-		if (dataStr.length() > 3) {
-			feedbackStrings.add(_fbColor + dataStr);
+		if (adcStr.length() > 3) {
+			feedbackStrings.add(_fbColor + adcStr);
 		}
 
 	}

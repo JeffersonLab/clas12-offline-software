@@ -43,7 +43,7 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		float[] stime = null;
 
 		int docalen = -1;
-		if (lr != null) {
+		if ((lr != null) && (lr.length != 0)) {
 			doca = ColumnData.getFloatArray(DocaBank + ".doca");
 			time = ColumnData.getFloatArray(DocaBank + ".time");
 			sdoca = ColumnData.getFloatArray(DocaBank + ".sdoca");
