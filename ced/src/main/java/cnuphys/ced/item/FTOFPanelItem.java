@@ -8,7 +8,6 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Vector;
 
-import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.geom.DetectorHit;
 
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -19,7 +18,6 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
@@ -27,8 +25,6 @@ import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 
 public class FTOFPanelItem extends PolygonItem {
 

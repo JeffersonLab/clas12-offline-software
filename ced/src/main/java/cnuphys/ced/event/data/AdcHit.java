@@ -2,6 +2,8 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 
+import cnuphys.lund.DoubleFormat;
+
 public class AdcHit implements Comparable<AdcHit> {
 	
 	//for feedback strings
@@ -12,6 +14,11 @@ public class AdcHit implements Comparable<AdcHit> {
 	public short component;
 	public int adcL = -1;
 	public int adcR = -1;
+	
+	public short pedL = -1;
+	public short pedR = -1;
+	public float timeL = Float.NaN;
+	public float timeR = Float.NaN;
 	
 	
 
@@ -42,7 +49,7 @@ public class AdcHit implements Comparable<AdcHit> {
 	        return false;
 	    if (getClass() != obj.getClass())
 	        return false;
-	    TdcAdcHit other = (TdcAdcHit) obj;
+	    AdcHit other = (AdcHit) obj;
 	    if (sector != other.sector)
 	        return false;
 	    if (layer != other.layer)
@@ -74,36 +81,84 @@ public class AdcHit implements Comparable<AdcHit> {
 		return sum/count;
 	}
 	
+	//make a sensible doca string
+	private String timeString() {
+		if (Float.isNaN(timeL) && Float.isNaN(timeR)) {
+			return "";
+		}
+		
+		if (Float.isNaN(timeL)) {
+			return "time " + DoubleFormat.doubleFormat(timeR, 3);
+		}
+		else if (Float.isNaN(timeR)) {
+			return "time " + DoubleFormat.doubleFormat(timeL, 3);
+		}
+		else {
+			return "time [" + DoubleFormat.doubleFormat(timeL, 3) +
+					", " + DoubleFormat.doubleFormat(timeL, 3) + "]";
+		}
+		
+	}
+
+	
+	/**
+	 * Get a string for just the tdc data
+	 * @return a string for just the tdc data
+	 */
+	private String valString(int valL, int valR, String name) {
+		if ((valL < 0) && (valR < 0)) {
+			return "";
+		}
+		else if ((valL >= 0) && (valR >= 0)) {
+			return name + " [" + valL + ", " + valR + "]";
+		}
+		else if (valL >= 0) {
+			return name + " " + valL;
+		}
+		else {
+			return name + " " + valR;
+		}
+	}
+
+	
+	/**
+	 * Get a string for just the ped data
+	 * @return a string for just the ped data
+	 */
+	public String pedString() {
+		return valString(pedL, pedR, "ped");
+	}
+
 	
 	/**
 	 * Get a string for just the tdc data
 	 * @return a string for just the tdc data
 	 */
 	public String adcString() {
-		if ((adcL < 0) && (adcR < 0)) {
-			return "";
-		}
-		if ((adcL >= 0) && (adcR >= 0)) {
-			return "adc: [" + adcL + ", " + adcR + "]";
-		}
-		if ((adcL >= 0) && (adcR < 0)) {
-			return "adc: " + adcL;
-		}
-		else {
-			return "adc: " + adcR;
-		}
+		return valString(adcL, adcR, "adc");
 	}
 	
 	@Override
 	public String toString() {
 		return "sector = " + sector + " layer " + layer + 
-				" component: " + component + " "  + adcString();
+				" component: " + component + " " + adcString() + 
+				" " + pedString() + " " + timeString();
 	}
 	
-	public void adcFeedback(List<String> feedbackStrings) {
+	/**
+	 * Add this hit to the feedback list
+	 * @param feedbackStrings the list of strings
+	 */
+	public void tdcAdcFeedback(List<String> feedbackStrings) {
 		tdcAdcFeedback("layer " + layer, "component", feedbackStrings);
 	}
 	
+	/**
+	 * Add this hit to the feedback list
+	 * @param layerName a nice name for the layer
+	 * @param componentName a nice name for the component
+	 * @param feedbackStrings
+	 */
 	public void tdcAdcFeedback(String layerName, String componentName,
 			List<String> feedbackStrings) {
 		
@@ -115,6 +170,14 @@ public class AdcHit implements Comparable<AdcHit> {
 		String adcStr = adcString();
 		if (adcStr.length() > 3) {
 			feedbackStrings.add(_fbColor + adcStr);
+		}
+		
+		String pedStr = pedString();
+		String timeStr = timeString();
+		String data2Str = pedStr + " " + timeStr;
+		
+		if (data2Str.length() > 3) {
+			feedbackStrings.add(_fbColor + data2Str);
 		}
 
 	}

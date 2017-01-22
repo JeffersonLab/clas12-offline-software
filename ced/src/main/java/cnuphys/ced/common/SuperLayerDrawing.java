@@ -15,7 +15,6 @@ import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 
-import bCNU3D.Support3D;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.SymbolDraw;

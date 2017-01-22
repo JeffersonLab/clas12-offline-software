@@ -14,13 +14,15 @@ import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.FTOF;
-import cnuphys.ced.event.data.HTCC;
+import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 
@@ -472,41 +474,14 @@ public class AccumulationManager
 
 		_eventCount++;
 		
+
 		//htcc data
-		int htccHitCount = HTCC.hitCount();
-		if (htccHitCount > 0) {
-			int sector[] = HTCC.sector();
-			int ring[] = HTCC.ring();
-			int half[] = HTCC.half();
-			
-			for (int i = 0; i < htccHitCount; i++) {
-				int sect0 = sector[i] - 1; // make 0 based
-				int ring0 = ring[i] - 1; // make 0 based
-				int half0 = half[i] - 1; // make 0 based
-
-				if (sect0 >= 0) {
-					try {
-						_htccDgtzAccumulatedData[sect0][ring0][half0] += 1;
-						
-						_maxDgtzHTCCCount = Math.max(_htccDgtzAccumulatedData[sect0][ring0][half0],
-								_maxDgtzHTCCCount);
-
-					} catch (ArrayIndexOutOfBoundsException e) {
-						String msg = String.format("HTCC index out of bounds. Event# %d sect %d ring %d half %d",
-								_eventManager.getEventNumber(), sector[i], ring[i], half[i]);
-						Log.getInstance().warning(msg);
-						System.err.println(msg);
-					}
-				}
-
-			} // end loop hits
-
-		} // htcc hit count > 0
-
+		AdcHitList htccList = HTCC2.getInstance().updateAdcList();
+		accumHTCC(htccList);
+		
 		// dc data
 		DCTdcHitList dclist = DC.getInstance().updateTdcAdcList();
 		accumDC(dclist);
-
 		
 		// ftof data
 		TdcAdcHitList ftoflist = FTOF.getInstance().updateTdcAdcList();
@@ -560,6 +535,36 @@ public class AccumulationManager
 		} //hitcount > 0
 		
 
+	}
+	
+	//accumulate htcc
+	private void accumHTCC(AdcHitList list) {
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+
+		for (AdcHit hit : list) {
+			if (hit != null) {
+				int sect0 = hit.sector - 1; // make 0 based
+				int ring0 = hit.layer - 1; // make 0 based
+				int half0 = hit.component - 1; // make 0 based
+
+				if (sect0 >= 0) {
+					try {
+						_htccDgtzAccumulatedData[sect0][ring0][half0] += 1;
+						
+						_maxDgtzHTCCCount = Math.max(_htccDgtzAccumulatedData[sect0][ring0][half0],
+								_maxDgtzHTCCCount);
+
+					} catch (ArrayIndexOutOfBoundsException e) {
+						String msg = String.format("HTCC index out of bounds. Event# %d sect %d ring %d half %d",
+								_eventManager.getEventNumber(), hit.sector, hit.layer, hit.component);
+						Log.getInstance().warning(msg);
+						System.err.println(msg);
+					}
+				}
+			}
+		}
 	}
 
 	//accumulate all ec

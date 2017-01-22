@@ -20,8 +20,6 @@ import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 
 public abstract class AMcHitDrawer extends CedViewDrawer {
 

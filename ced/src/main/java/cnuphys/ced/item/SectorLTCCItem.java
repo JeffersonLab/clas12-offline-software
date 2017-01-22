@@ -5,8 +5,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -14,17 +12,10 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
-import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
-import cnuphys.ced.event.data.HTCC;
-import cnuphys.ced.event.data.HitRecord;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.ced.geometry.HTCCGeometry;
 import cnuphys.ced.geometry.LTCCGeometry;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 
 public class SectorLTCCItem extends PolygonItem {
 

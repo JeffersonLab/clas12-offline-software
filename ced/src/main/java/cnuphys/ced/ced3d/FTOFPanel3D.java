@@ -1,13 +1,7 @@
 package cnuphys.ced.ced3d;
 
-import java.awt.Color;
-import java.util.List;
-
-import org.jlab.clas.detector.DetectorResponse;
-
 import com.jogamp.opengl.GLAutoDrawable;
 
-import cnuphys.bCNU.log.Log;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;

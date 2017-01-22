@@ -5,8 +5,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -14,15 +12,13 @@ import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
-import cnuphys.ced.event.data.HTCC;
-import cnuphys.ced.event.data.HitRecord;
+import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.HTCCGeometry;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 
 public class SectorHTCCItem extends PolygonItem {
 
@@ -33,10 +29,10 @@ public class SectorHTCCItem extends PolygonItem {
 	// sector 1-based 1..6
 	private int _sector;
 
-	// 1-based ring 1..4
+	// 1-based ring 1..4 (hipo: layer)
 	private int _ring;
 	
-	// 1-based half, 1..2
+	// 1-based half, 1..2 (hipo: component)
 	private int _half;
 
 	// cache the outline
@@ -109,55 +105,67 @@ public class SectorHTCCItem extends PolygonItem {
 	//single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
 		
-		int hitCount = HTCC.hitCount();
-		if (hitCount > 0) {
-			Color default_fc = Color.red;
-
-			int pid[] = HTCC.pid();
-			int sector[] = HTCC.sector();
-			int ring[] = HTCC.ring();
-			int half[] = HTCC.half();
-			
-			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-				if ((sector[hitIndex] == _sector)
-						&& (ring[hitIndex] == _ring)
-						&& (half[hitIndex] == _half)) {
-					Color fc = default_fc;
-					
-					if (_view.showMcTruth()) {
-						if (pid != null) {
-							LundId lid = LundSupport.getInstance()
-									.get(pid[hitIndex]);
-							if (lid != null) {
-								fc = lid.getStyle().getFillColor();
-							}
-						}
-					}
-					else {
-						fc = hitFillColor(hitIndex);
-					}
-
-					g.setColor(fc);
+		AdcHitList hits = HTCC2.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (AdcHit hit : hits) {
+				if ((hit != null) && (hit.sector == _sector) && (hit.layer == _ring) && (hit.component == _half)) {
+					g.setColor(hits.adcColor(hit));
 					g.fillPolygon(_lastDrawnPolygon);
 					g.setColor(Color.black);
 					g.drawPolygon(_lastDrawnPolygon);
 				}
-			} //end for loop
-		} // hitCount > 0
-	}
-	
-	private Color hitFillColor(int hitIndex) {
-		Color color = Color.red;
-		if (hitIndex >= 0) {
-			int nphe[] = HTCC.nphe();
-			if ((nphe != null) && (hitIndex < nphe.length)) {
-				double numphe = nphe[hitIndex];
-				color = HTCC.colorScaleModel.getColor(numphe);
 			}
 		}
 		
-		return color;
+//		int hitCount = HTCC.hitCount();
+//		if (hitCount > 0) {
+//			Color default_fc = Color.red;
+//
+//			int pid[] = HTCC.pid();
+//			int sector[] = HTCC.sector();
+//			int ring[] = HTCC.ring();
+//			int half[] = HTCC.half();
+//			
+//			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
+//				if ((sector[hitIndex] == _sector)
+//						&& (ring[hitIndex] == _ring)
+//						&& (half[hitIndex] == _half)) {
+//					Color fc = default_fc;
+//					
+//					if (_view.showMcTruth()) {
+//						if (pid != null) {
+//							LundId lid = LundSupport.getInstance()
+//									.get(pid[hitIndex]);
+//							if (lid != null) {
+//								fc = lid.getStyle().getFillColor();
+//							}
+//						}
+//					}
+//					else {
+//						fc = hitFillColor(hitIndex);
+//					}
+//
+//					g.setColor(fc);
+//					g.fillPolygon(_lastDrawnPolygon);
+//					g.setColor(Color.black);
+//					g.drawPolygon(_lastDrawnPolygon);
+//				}
+//			} //end for loop
+//		} // hitCount > 0
 	}
+	
+//	private Color hitFillColor(int hitIndex) {
+//		Color color = Color.red;
+//		if (hitIndex >= 0) {
+//			int nphe[] = HTCC.nphe();
+//			if ((nphe != null) && (hitIndex < nphe.length)) {
+//				double numphe = nphe[hitIndex];
+//				color = HTCC.colorScaleModel.getColor(numphe);
+//			}
+//		}
+//		
+//		return color;
+//	}
 		
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
@@ -204,21 +212,35 @@ public class SectorHTCCItem extends PolygonItem {
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {
 		if (contains(container, screenPoint)) {
-			feedbackStrings.add(DataSupport.prelimColor + "HTCC sect " + _sector + 
-					" ring " + _ring + " half " + _half);
 			
-			// on a hit?
-			// the data container
-			Vector<HitRecord> hits = HTCC.matchingHits(_sector,
-					_ring, _half);
-
-			if (hits != null) {
-				for (HitRecord hit : hits) {
-					HTCC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
-					DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
-					HTCC.dgtzFeedback(hit.hitIndex, feedbackStrings);
-				}
+			AdcHitList hits = HTCC2.getInstance().getHits();
+			AdcHit hit = null;
+			
+			if ((hits != null) && !hits.isEmpty()) {
+				hit = hits.get(_sector, _ring, _half);
 			}
+			
+			if (hit == null) {
+				feedbackStrings.add(DataSupport.prelimColor + "HTCC sect " + _sector + 
+						" ring " + _ring + " half " + _half);
+			}
+			else {
+				hit.tdcAdcFeedback("ring " + _ring, "half", feedbackStrings);
+			}
+
+			
+//			// on a hit?
+//			// the data container
+//			Vector<HitRecord> hits = HTCC.matchingHits(_sector,
+//					_ring, _half);
+//
+//			if (hits != null) {
+//				for (HitRecord hit : hits) {
+//					HTCC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
+//					DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
+//					HTCC.dgtzFeedback(hit.hitIndex, feedbackStrings);
+//				}
+//			}
 
 		}
 		

@@ -2,12 +2,8 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.io.base.DataEvent;
-
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
-import cnuphys.ced.alldata.ColumnData;
-import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;

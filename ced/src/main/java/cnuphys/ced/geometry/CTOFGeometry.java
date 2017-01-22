@@ -1,7 +1,5 @@
 package cnuphys.ced.geometry;
 
-import org.jlab.geom.detector.ftof.FTOFDetector;
-
 public class CTOFGeometry {
 
 

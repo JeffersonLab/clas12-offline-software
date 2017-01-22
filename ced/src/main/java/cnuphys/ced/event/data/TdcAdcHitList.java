@@ -28,10 +28,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
         */
 
 		//step 1: basic list from left tdc
-		
-		byte[] sector = null;
-		
-		sector = ColumnData.getByteArray(tdcBankName + ".sector");
+		byte[] sector = ColumnData.getByteArray(tdcBankName + ".sector");
 		if ((sector == null) || (sector.length < 1)) {
 			return;
 		}
@@ -52,7 +49,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		// Step 1 build basic list
 		for (int index = 0; index < length; index++) {
 			if (order[index] != 3) { // left tdc
-				modifyInsert(sector[index], layer[index], component[index], TDC[index], -1, -1, -1);
+				modifyInsert(sector[index], layer[index], component[index], TDC[index], -1, -1, -1, -1, -1, Float.NaN, Float.NaN);
 			}
 		}
 		
@@ -64,12 +61,14 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		//step 3 merge in right tdc
 		for (int index = 0; index < length; index++) {
 			if (order[index] == 3) { //right
-				modifyInsert(sector[index], layer[index], component[index], -1, TDC[index], -1, -1);
+				modifyInsert(sector[index], layer[index], component[index], -1, TDC[index], -1, -1, -1, -1, Float.NaN, Float.NaN);
 			}
 		}
 		
 		//on to the adcs
 		int[] ADC = null;
+		short[] ped = null;
+		float[] time = null;
 
 		sector = ColumnData.getByteArray(adcBankName + ".sector");
 		if (sector == null) {
@@ -79,24 +78,33 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		component = ColumnData.getShortArray(adcBankName + ".component");
 		order = ColumnData.getByteArray(adcBankName + ".order");
 		ADC = ColumnData.getIntArray(adcBankName + ".ADC");
+		ped = ColumnData.getShortArray(adcBankName + ".ped");
+		time = ColumnData.getFloatArray(adcBankName + ".time");
 
 		length = checkArrays(sector, layer, component, order, ADC);
 		if (length < 0) {
 			Log.getInstance().warning("[" + adcBankName + "] " + _error);
 			return;
 		}
+		//check more
+		int clen = checkArrays(length, ped, time);
+		if (clen < 0) {
+			Log.getInstance().warning("[" + adcBankName + "] " + _error);
+			return;
+		}
+		
 
-		// Step 4 merge left adc
+		// Step 4 merge left adc, ped, and time
 		for (int index = 0; index < length; index++) {
 			if (order[index] == 0) { // left adc
-				modifyInsert(sector[index], layer[index], component[index], -1, -1, ADC[index], -1);
+				modifyInsert(sector[index], layer[index], component[index], -1, -1, ADC[index], -1, ped[index], -1, time[index], Float.NaN);
 			}
 		}
 				
-		//step 5 merge in right adc
+		//step 5 merge in right adc, ped, and time
 		for (int index = 0; index < length; index++) {
 			if (order[index] == 1) { //right
-				modifyInsert(sector[index], layer[index], component[index], -1, -1, -1, ADC[index]);
+				modifyInsert(sector[index], layer[index], component[index], -1, -1, -1, ADC[index], -1, ped[index], Float.NaN, time[index]);
 			}
 		}
 		
@@ -122,7 +130,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		return _maxADC;
 	}
 	
-	public void modifyInsert(byte sector, byte layer, short component, int tdcL, int tdcR, int adcL, int adcR) {
+	public void modifyInsert(byte sector, byte layer, short component, int tdcL, int tdcR, int adcL, int adcR, int pedL, int pedR, float timeL, float timeR) {
 		TdcAdcHit hit = new TdcAdcHit(sector, layer, component);
 		int index = Collections.binarySearch(this, hit);
 		if (index >= 0) {
@@ -145,13 +153,27 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		if (adcR >= 0) {
 			hit.adcR = adcR;
 		}
+		if (pedL >= 0) {
+			hit.pedL = (short)pedL;
+		}
+		if (pedR >= 0) {
+			hit.pedR = (short)pedR;
+		}
+		if (!Float.isNaN(timeL)) {
+			hit.timeL = timeL;
+		}
+		if (!Float.isNaN(timeR)) {
+			hit.timeR = timeR;
+		}
+
 	}
 	
 	//check arrays are not null and have same length
 	private int checkArrays(byte[] sector, byte[] layer, short[] component, byte[] order, int[] data) {
-		if ((sector == null) || (layer == null) || (component == null)) {
+		if ((sector == null) || (layer == null) || (component == null) || (order == null) || (data == null)) {
 			_error = "Unexpected null array when creating TdcAdcHitList: " + "sector = null: " + (sector == null)
-					+ " layer == null: " + (layer == null) + " component == null: " + (component == null);
+					+ " layer = null: " + (layer == null) + " component = null: " + (component == null) +
+					 " order = null: " + (order == null) + " data (tdc or adc) == null: " + (data == null);
 			return -1;
 		}
 		
@@ -181,6 +203,28 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		}
 
 		return sector.length;
+	}
+	
+	//check more arrays
+	private int checkArrays(int length, short[] ped, float[] time) {
+		if ((ped == null) || (time == null)) {
+			_error = "Unexpected null array when creating TdcAdcHitList: " + "ped = null: " + (ped == null)
+					+ " time = null: " +  (time == null);
+			return -1;
+		}
+		
+		
+		if (ped.length != length) {
+			_error = "Expected length: " + length + " does not match ped length: " + ped.length + " when creating TdcAdcHitList";
+			return -1;
+		}
+		
+		if (time.length != length) {
+			_error = "Expected length: " + length + " does not match time length: " + time.length + " when creating TdcAdcHitList";
+			return -1;
+		}
+
+		return length;
 	}
 	
 	/**

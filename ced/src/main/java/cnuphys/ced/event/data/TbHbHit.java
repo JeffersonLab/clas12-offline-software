@@ -1,7 +1,5 @@
 package cnuphys.ced.event.data;
 
-import java.util.Collections;
-
 /**
  * This is not the basic TdcAdc hit, this is the base for Hit Based and Time based hits.
  * @author heddle
