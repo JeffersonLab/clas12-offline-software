@@ -1031,9 +1031,9 @@ public class SuperLayerDrawing {
 			String wds = "wire dir: " + VectorSupport.toString(getWireDirection(), 3);
 			feedbackStrings.add(wds);
 
-			feedbackStrings.add(DataSupport.prelimColor + "Raw Occupancy "
+			feedbackStrings.add(DataSupport.prelimColor + "Raw Superlayer Occ "
 					+ DoubleFormat.doubleFormat(100.0 * parameters.getRawOccupancy(), 2) + "%");
-			feedbackStrings.add(DataSupport.prelimColor + "Reduced Occupancy "
+			feedbackStrings.add(DataSupport.prelimColor + "Reduced Superlayer Occ "
 					+ DoubleFormat.doubleFormat(100.0 * parameters.getNoiseReducedOccupancy(), 2) + "%");
 
 			// getLayer returns a 1 based index (-1 on failure)

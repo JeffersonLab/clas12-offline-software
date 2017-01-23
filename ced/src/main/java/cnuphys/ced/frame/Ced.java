@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -99,7 +100,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.02";
+	private static final String _release = "build 0.99.03";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -156,6 +157,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	// the about string
 	private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
+	
+	//"play" dc occupancy?
+	private JCheckBoxMenuItem _playDCOccupancy;
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -621,6 +625,21 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_eventMenu.addSeparator();
 		MenuManager.addMenuItem("Noise Algorithm Parameters...", _eventMenu,
 				al2);
+		_eventMenu.addSeparator();
+
+		_playDCOccupancy = new JCheckBoxMenuItem("\"Play\" Drift Chamber Ocupancy", false);
+		_eventMenu.add(_playDCOccupancy);
+	}
+	
+	/**
+	 * Flag controlling whether a tone indicating the DC occupancy is played
+	 * @return <code>true</code> if the tone should be played
+	 */
+	public boolean playDCOccupancy() {
+		if (_playDCOccupancy != null) {
+			return _playDCOccupancy.getState();
+		}
+		return false;
 	}
 
 	/**

@@ -28,6 +28,7 @@ import cnuphys.ced.cedview.bst.BSTSupport;
 import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
@@ -790,6 +791,15 @@ public class SectorView extends CedView implements ChangeListener {
 				_lastTrajStr = traj2D.summaryString();
 			}
 		}
+		
+		//DC Occupancy
+		int sector = getSector(container, pp, wp);
+
+		double totalOcc = 100.*DC.getInstance().totalOccupancy();
+		double sectorOcc = 100.*DC.getInstance().totalSectorOccupancy(sector);
+		String occStr = "total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
+				" occ " + DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
+		feedbackStrings.add("$aqua$" + occStr);
 
 		// reconstructed feedback?
 		if (showDChbCrosses()) {

@@ -12,7 +12,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.fastmc.FastMCManager;
 
-public class ReconDrawer extends SectorViewDrawer {
+public class ReconDrawer extends SectorViewDrawer  {
 
 	// cached rectangles for feedback
 	private Vector<FeedbackRect> _fbRects = new Vector<FeedbackRect>();

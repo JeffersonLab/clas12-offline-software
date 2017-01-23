@@ -557,6 +557,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
+		fixButtons();
 	}
 
 

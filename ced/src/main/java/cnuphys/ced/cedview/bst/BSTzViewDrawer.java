@@ -9,7 +9,7 @@ import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 
-public abstract class BSTzViewDrawer implements IDrawable {
+public abstract class BSTzViewDrawer implements IDrawable  {
 
 	// convenient access to the event manager
 	protected ClasIoEventManager _eventManager = ClasIoEventManager

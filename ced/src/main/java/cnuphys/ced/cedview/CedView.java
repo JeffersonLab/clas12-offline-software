@@ -23,6 +23,7 @@ import cnuphys.bCNU.feedback.IFeedbackProvider;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
+import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.graphics.toolbar.UserToolBarComponent;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.UnicodeSupport;
@@ -628,6 +629,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		sectorXYZ[0] = sectx;
 		sectorXYZ[1] = secty;
 		sectorXYZ[2] = sectz;
+	}
+	
+	/**
+	 * Check whether the pointer bar is active on the tool bar
+	 * 
+	 * @return <code>true</code> if the Pointer button is active.
+	 */
+	protected boolean isPointerButtonActive() {
+		if (getContainer() == null) {
+			return false;
+		}
+		ToolBarToggleButton mtb = getContainer().getActiveButton();
+		return (mtb == getContainer().getToolBar().getPointerButton());
 	}
 
 	/**

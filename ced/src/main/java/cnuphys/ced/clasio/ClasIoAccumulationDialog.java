@@ -27,6 +27,8 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.DC;
+import cnuphys.ced.frame.Ced;
 
 public class ClasIoAccumulationDialog extends JDialog {
 
@@ -225,7 +227,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 			// clear data?
 			boolean lastState = _clearButton.isSelected();
 			if (lastState) {
-				System.err.println("ClasIoAccum Clear");
+	//			System.err.println("ClasIoAccum Clear");
 				_accumulator.clear();
 			}
 
@@ -249,7 +251,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 						int modCount = Math.max(2, fcount / 100);
 
 						int count = 0;
-						while (count < fcount) {
+						while (isVisible() && (count < fcount)) {
 							try {
 								EventSourceType estype = _eventManager.getEventSourceType();
 								switch (estype) {
@@ -282,6 +284,10 @@ public class ClasIoAccumulationDialog extends JDialog {
 							if (((count + 1) % modCount) == 0) {
 								int value = (int) ((100.0 * count) / fcount);
 								_progressBar.setValue(value);
+
+								if (Ced.getCed().playDCOccupancy()) {
+									DC.getInstance().playOccupancyTone(75);
+								}
 							}
 						}
 						
@@ -313,7 +319,8 @@ public class ClasIoAccumulationDialog extends JDialog {
 			}
 
 			ViewManager.getInstance().refreshAllContainerViews();
-		} else {
+		} //ok
+		else {
 			setVisible(false);
 		}
 	}
