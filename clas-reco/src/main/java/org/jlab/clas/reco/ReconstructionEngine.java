@@ -18,9 +18,11 @@ import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineStatus;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
+import org.jlab.io.hipo.HipoDataEvent;
 
 /**
  *
@@ -37,11 +39,13 @@ public abstract class ReconstructionEngine implements Engine {
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
     String             engineDescription = "CLARA Engine";
-    
+    SchemaFactory      engineDictionary  = new SchemaFactory();
+            
     public ReconstructionEngine(String name, String author, String version){
         engineName    = name;
         engineAuthor  = author;
         engineVersion = version;
+        engineDictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
     }
 
@@ -88,6 +92,62 @@ public abstract class ReconstructionEngine implements Engine {
         
         String mt = input.getMimeType();
         System.out.println(" DATA TYPE = [" + mt + "]");
+        HipoDataEvent dataEventHipo = null;
+        if(mt.compareTo("binary/data-hipo")==0){
+            try {
+                ByteBuffer bb = (ByteBuffer) input.getData();
+                dataEventHipo = new HipoDataEvent(bb.array(),this.engineDictionary);                
+            } catch (Exception e) {
+                String msg = String.format("Error reading input event%n%n%s", ClaraUtil.reportException(e));
+                output.setStatus(EngineStatus.ERROR);
+                output.setDescription(msg);
+                return output;
+            }
+            
+            try {
+                this.processDataEvent(dataEventHipo);
+                ByteBuffer  bbo = dataEventHipo.getEventBuffer();
+                //byte[] buffero = bbo.array();
+                output.setData(mt, bbo);
+            } catch (Exception e) {
+                String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));
+                output.setStatus(EngineStatus.ERROR);
+                output.setDescription(msg);
+                return output;
+            }
+            
+            return output;
+        }
+        
+        EvioDataEvent dataevent = null;
+        
+        if(mt.compareTo("binary/data-evio")==0){
+            try {
+                ByteBuffer bb = (ByteBuffer) input.getData();
+                byte[] buffer = bb.array();
+                ByteOrder endianness = bb.order();
+                dataevent = new EvioDataEvent(buffer, endianness, EvioFactory.getDictionary());
+            } catch (Exception e) {
+                String msg = String.format("Error reading input event%n%n%s", ClaraUtil.reportException(e));
+                output.setStatus(EngineStatus.ERROR);
+                output.setDescription(msg);
+                return output;
+            }
+            
+            try {
+                this.processDataEvent(dataevent);
+                ByteBuffer  bbo = dataevent.getEventBuffer();
+                //byte[] buffero = bbo.array();
+                output.setData(mt, bbo);
+            } catch (Exception e) {
+                String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));
+                output.setStatus(EngineStatus.ERROR);
+                output.setDescription(msg);
+                return output;
+            }
+            return output;
+        }
+        
         return input;
         /*
         if (!mt.equalsIgnoreCase()) {
