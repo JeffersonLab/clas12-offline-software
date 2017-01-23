@@ -112,7 +112,8 @@ public abstract class ReconstructionEngine implements Engine {
                 this.processDataEvent(dataEventHipo);
                 ByteBuffer  bbo = dataEventHipo.getEventBuffer();
                 //byte[] buffero = bbo.array();
-                output.setData(mt, bbo);
+                //output.setData(mt, bbo);
+                output.setData(mt, dataEventHipo.getHipoEvent());
             } catch (Exception e) {
                 String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));
                 output.setStatus(EngineStatus.ERROR);
