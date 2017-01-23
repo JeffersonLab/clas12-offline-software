@@ -40,6 +40,10 @@ public class HipoDataEvent implements DataEvent {
     
     public HipoEvent  getHipoEvent(){return this.hipoEvent;}
     
+    public void initDictionary(SchemaFactory factory){
+        this.hipoEvent.getSchemaFactory().copy(factory);
+    }
+    
     public String[] getBankList() {
         List<Schema> schemaList = hipoEvent.getSchemaFactory().getSchemaList();
         List<String> existingBanks = new ArrayList<String>();

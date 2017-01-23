@@ -164,7 +164,7 @@ public class EvioETSource implements DataSource {
                             evioBuffer.order(buffer.order());                                                    
                             //EvioReader reader;
                             //System.out.println("------> parsing event # " + nevent + 
-                             //       " width length = " + length);
+                            //        " width length = " + length);
                             try {
                                 //reader = new EvioReader(buffer);
                                 EvioCompactReader reader = new EvioCompactReader(buffer);
