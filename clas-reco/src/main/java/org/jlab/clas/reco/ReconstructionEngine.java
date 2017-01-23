@@ -92,7 +92,7 @@ public abstract class ReconstructionEngine implements Engine {
         //return output;
         
         String mt = input.getMimeType();
-        System.out.println(" DATA TYPE = [" + mt + "]");
+        //System.out.println(" DATA TYPE = [" + mt + "]");
         HipoDataEvent dataEventHipo = null;
         if(mt.compareTo("binary/data-hipo")==0){
             try {
