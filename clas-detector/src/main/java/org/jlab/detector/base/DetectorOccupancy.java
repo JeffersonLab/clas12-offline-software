@@ -53,7 +53,17 @@ public class DetectorOccupancy {
         }
     }
     
+    public int getTDC(int sector, int layer, int component){
+        if(this.occupancyCollection.hasEntry(sector, layer, component)==false)
+            return 0;
+        return this.occupancyCollection.get(sector, layer, component).TDCCount;
+    }
     
+    public int getADC(int sector, int layer, int component){
+        if(this.occupancyCollection.hasEntry(sector, layer, component)==false)
+            return 0;
+        return this.occupancyCollection.get(sector, layer, component).ADCCount;
+    }
     
     public int getMaxADC(){
         int max = 0;
@@ -85,6 +95,7 @@ public class DetectorOccupancy {
     }
     
     public static class DetectorMeasurement {
+        
         int ADCCount = 0;
         int TDCCount = 0;
         
