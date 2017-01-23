@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JInternalFrame;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.Particle;
@@ -16,12 +17,14 @@ import org.jlab.io.base.DataSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoRingSource;
 
+import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.component.IpField;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.EC;
 import cnuphys.ced.event.data.PCAL;
@@ -425,6 +428,7 @@ public class ClasIoEventManager {
 			isOK = (isSourceHipoFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
 			break;
 		case RING:
+			isOK = true;
 			break;
 		case FASTMC:
 			isOK = (FastMCManager.getInstance().getCurrentFile() != null);
@@ -778,6 +782,12 @@ public class ClasIoEventManager {
 
 		Ced.setEventNumberLabel(getEventNumber());
 
+		for (JInternalFrame jif : Desktop.getInstance().getAllFrames()) {
+			if (jif instanceof CedView) {
+				((CedView)jif).getContainer().redoFeedback();
+			}
+		}
+		
 	}
 
 	// compute some factors used in gradient displays

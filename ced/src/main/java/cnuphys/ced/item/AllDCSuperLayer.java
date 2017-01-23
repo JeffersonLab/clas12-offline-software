@@ -617,12 +617,12 @@ public class AllDCSuperLayer extends RectangleItem {
 				_sector - 1, _superLayer - 1);
 
 		feedbackStrings.add(DataSupport.prelimColor
-				+ "Raw Occupancy "
+				+ "Raw Superlayer Occ "
 				+ DoubleFormat.doubleFormat(
 						100.0 * parameters.getRawOccupancy(), 2) + "%");
 		feedbackStrings
 				.add(DataSupport.prelimColor
-						+ "Reduced Occupancy "
+						+ "Reduced Superlayer Occ "
 						+ DoubleFormat.doubleFormat(
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");

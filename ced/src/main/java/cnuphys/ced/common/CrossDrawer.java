@@ -22,7 +22,7 @@ import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.fastmc.FastMCManager;
 
-public class CrossDrawer extends CedViewDrawer {
+public class CrossDrawer extends CedViewDrawer  {
 
 	public static final int HB = 0;
 	public static final int TB = 1;

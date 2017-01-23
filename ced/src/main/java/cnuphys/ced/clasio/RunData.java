@@ -2,6 +2,7 @@ package cnuphys.ced.clasio;
 
 import org.jlab.io.base.DataEvent;
 
+import cnuphys.bCNU.log.Log;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.magfield.MagneticFields;
 
@@ -46,15 +47,62 @@ public class RunData {
 		
 		try {
 			DataManager dm = DataManager.getInstance();
-			run = dm.getIntArray(dataEvent, "RUN::config.run")[0];
-			event = dm.getIntArray(dataEvent, "RUN::config.event")[0];
-			trigger = dm.getIntArray(dataEvent, "RUN::config.trigger")[0];
-			type = dm.getByteArray(dataEvent, "RUN::config.type")[0];
-			mode = dm.getByteArray(dataEvent, "RUN::config.mode")[0];
-			solenoid = dm.getFloatArray(dataEvent, "RUN::config.solenoid")[0];
-			torus = dm.getFloatArray(dataEvent, "RUN::config.torus")[0];
-			rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
-			startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
+			
+			run = safeInt(dataEvent, "run");
+			if (run < 0) {
+				return false;
+			}
+			
+			event = safeInt(dataEvent, "event");
+			if (event < 0) {
+				return false;
+			}
+			
+			trigger = safeInt(dataEvent, "trigger");
+			if (trigger < 0) {
+				return false;
+			}
+
+			type = safeByte(dataEvent, "type");
+			if (type < 0) {
+				return false;
+			}
+
+			mode = safeByte(dataEvent, "mode");
+			if (mode < 0) {
+				return false;
+			}
+			
+			solenoid = safeFloat(dataEvent, "solenoid");
+			if (Float.isNaN(solenoid)) {
+				return false;
+			}
+
+			torus = safeFloat(dataEvent, "torus");
+			if (Float.isNaN(torus)) {
+				return false;
+			}
+			
+			rf = safeFloat(dataEvent, "rf");
+			if (Float.isNaN(rf)) {
+				return false;
+			}
+			
+			startTime = safeFloat(dataEvent, "startTime");
+			if (Float.isNaN(startTime)) {
+				return false;
+			}
+			
+			
+//			run = dm.getIntArray(dataEvent, "RUN::config.run")[0];
+//			event = dm.getIntArray(dataEvent, "RUN::config.event")[0];
+//			trigger = dm.getIntArray(dataEvent, "RUN::config.trigger")[0];
+//			type = dm.getByteArray(dataEvent, "RUN::config.type")[0];
+//			mode = dm.getByteArray(dataEvent, "RUN::config.mode")[0];
+//			solenoid = dm.getFloatArray(dataEvent, "RUN::config.solenoid")[0];
+//			torus = dm.getFloatArray(dataEvent, "RUN::config.torus")[0];
+//			rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
+//			startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
 			
 			
 			if (oldRun != run) {
@@ -63,12 +111,41 @@ public class RunData {
 			}
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.getInstance().warning("Exception in RunData det method");
 		}
 
 		return false;
 	}
 	
+	private int safeInt(DataEvent event, String colName) {
+		DataManager dm = DataManager.getInstance();
+	    int[] data = dm.getIntArray(event, "RUN::config." + colName);	
+	    if ((data == null) || (data.length < 1)) {
+	    	return -1;
+	    }
+	    return data[0];
+	}
+	
+	private byte safeByte(DataEvent event, String colName) {
+		DataManager dm = DataManager.getInstance();
+	    byte[] data = dm.getByteArray(event, "RUN::config." + colName);	
+	    if ((data == null) || (data.length < 1)) {
+	    	return -1;
+	    }
+	    return data[0];
+	}
+	
+	private float safeFloat(DataEvent event, String colName) {
+		DataManager dm = DataManager.getInstance();
+	    float[] data = dm.getFloatArray(event, "RUN::config." + colName);	
+	    if ((data == null) || (data.length < 1)) {
+	    	return Float.NaN;
+	    }
+	    return data[0];
+	}
+
+
+		
 	@Override
 	public String toString() {
 		String s = "run: " + run;

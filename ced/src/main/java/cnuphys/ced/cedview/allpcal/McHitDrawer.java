@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Vector;
 
 import org.jlab.geom.prim.Point3D;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
@@ -143,4 +142,5 @@ public class McHitDrawer extends PCALViewDrawer {
 		}
 
 	}
+
 }

@@ -73,4 +73,5 @@ public abstract class CedViewDrawer implements IDrawable {
 	 */
 	public abstract void vdrawFeedback(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings, int option);
+	
 }

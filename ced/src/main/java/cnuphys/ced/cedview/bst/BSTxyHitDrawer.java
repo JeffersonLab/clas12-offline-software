@@ -300,5 +300,5 @@ public class BSTxyHitDrawer implements IDrawable {
 	@Override
 	public void prepareForRemoval() {
 	}
-
+	
 }

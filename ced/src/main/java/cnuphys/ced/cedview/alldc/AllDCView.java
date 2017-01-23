@@ -13,10 +13,12 @@ import java.util.List;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.item.AllDCSuperLayer;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
+import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.Styled;
@@ -120,7 +122,7 @@ public class AllDCView extends CedView {
 				+ ControlPanel.ACCUMULATIONLEGEND,
 				DisplayBits.ACCUMULATION 
 						 + DisplayBits.MCTRUTH,
-				2, 10);
+				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
@@ -302,6 +304,14 @@ public class AllDCView extends CedView {
 				feedbackStrings);
 		// feedbackStrings.add("#DC hits: " + _numHits);
 		
+		int sector = getSector(container, screenPoint, worldPoint);
+
+		double totalOcc = 100.*DC.getInstance().totalOccupancy();
+		double sectorOcc = 100.*DC.getInstance().totalSectorOccupancy(sector);
+		String occStr = "total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
+				" occ " + DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
+		feedbackStrings.add("$aqua$" + occStr);
+
 	}
 
 	/**

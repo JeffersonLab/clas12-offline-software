@@ -119,5 +119,5 @@ public class McHitDrawer extends DCXYViewDrawer {
 				+ DoubleFormat.doubleFormat(vy, 3) + ", "
 				+ DoubleFormat.doubleFormat(vz, 3) + ")";
 	}
-
+	
 }

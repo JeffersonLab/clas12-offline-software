@@ -13,6 +13,8 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 	
 	private String DCBank = "DC::tdc";
 	private String DocaBank = "DC::doca";  //only in sim data
+	
+	public int[] sectorCounts = {-1, 0, 0, 0, 0, 0, 0}; //use 7 no off by one
 
 	public DCTdcHitList() {
 		
@@ -68,6 +70,10 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 			}
 			else {
 				add(new DCTdcHit(sector[i], layer[i], wire[i], TDC[i]));
+			}
+			
+			if ((sector[i] > 0) && (sector[i] < 7)) {
+				sectorCounts[sector[i]] += 1;
 			}
 		}
 		
