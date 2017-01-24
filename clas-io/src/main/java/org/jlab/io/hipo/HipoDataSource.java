@@ -105,6 +105,7 @@ public class HipoDataSource implements DataSource {
         if(index>=this.minEventNumber&&index<this.numberOfEvent){
             this.currentEventNumber = index;
             byte[] array             = this.reader.readEvent(this.currentEventNumber);
+            this.currentEventNumber++;
             HipoDataEvent  evioEvent = new HipoDataEvent(array,this.reader.getSchemaFactory());
             //EvioDataEvent  evioEvent = new EvioDataEvent(array,ByteOrder.LITTLE_ENDIAN,this.dictionary);        
             return evioEvent;
