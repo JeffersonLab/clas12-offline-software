@@ -43,14 +43,9 @@ public class CrossDrawer extends CedViewDrawer  {
 	protected double unity[];
 	protected double unitz[];
 
-	// cached rectangles for feedback
-	protected FeedbackRects[] _fbRects = new FeedbackRects[2];
 
 	public CrossDrawer(CedView view) {
 		super(view);
-		for (int i = 0; i < _fbRects.length; i++) {
-			_fbRects[i] = new FeedbackRects();
-		}
 	}
 
 	/**
@@ -74,9 +69,6 @@ public class CrossDrawer extends CedViewDrawer  {
 			return;
 		}
 
-		_fbRects[_mode].rects = null;
-
-
 		// any crosses?
 		CrossList crosses = null;
 		if (_mode == HB) {
@@ -93,7 +85,7 @@ public class CrossDrawer extends CedViewDrawer  {
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
-		_fbRects[_mode].rects = new Rectangle[crosses.size()];
+
 		double result[] = new double[3];
 		Point pp = new Point();
 		Point2D.Double wp = new Point2D.Double();
@@ -111,6 +103,7 @@ public class CrossDrawer extends CedViewDrawer  {
 			if (mySector == cross.sector) {
 
 				container.worldToLocal(pp, wp);
+				cross.setLocation(pp);
 
 				// arrows
 				Point2D.Double wp2 = new Point2D.Double();
@@ -137,12 +130,6 @@ public class CrossDrawer extends CedViewDrawer  {
 				// the circles and crosses
 				DataDrawSupport.drawCross(g2, pp.x, pp.y, _mode);
 
-				// fbrects for quick feedback
-				_fbRects[_mode].rects[index] = new Rectangle(
-						pp.x - DataDrawSupport.CROSSHALF,
-						pp.y - DataDrawSupport.CROSSHALF,
-						2 * DataDrawSupport.CROSSHALF,
-						2 * DataDrawSupport.CROSSHALF);
 			} //sector match;	
 			index++;
 		} //loop over crosses
@@ -164,9 +151,6 @@ public class CrossDrawer extends CedViewDrawer  {
 			Point2D.Double worldPoint, List<String> feedbackStrings,
 			int option) {
 
-		if (_fbRects[_mode].rects == null) {
-			return;
-		}
 		
 		// any crosses?
 		CrossList crosses = null;
@@ -180,40 +164,35 @@ public class CrossDrawer extends CedViewDrawer  {
 			return;
 		}
 		
-		for (int i = 0; i < _fbRects[_mode].rects.length; i++) {
-			if ((_fbRects[_mode].rects[i] != null)
-					&& _fbRects[_mode].rects[i].contains(screenPoint)) {
-				Cross cross = crosses.elementAt(i);
-				if (cross != null) {
-					feedbackStrings.add(fbcolors[_mode]
-							+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
-							+ "  sect: " + cross.sector + "  reg: " + cross.region);
+		for (Cross cross : crosses) {
+			if (cross.contains(screenPoint)) {
+				feedbackStrings.add(fbcolors[_mode]
+						+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
+						+ "  sect: " + cross.sector + "  reg: " + cross.region);
 
-					feedbackStrings.add(
-							vecStr("cross loc tilted", cross.x, cross.y, cross.z));
-					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
+				feedbackStrings.add(
+						vecStr("cross loc tilted", cross.x, cross.y, cross.z));
+				feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+				feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
 
-					double result[] = new double[3];
-					result[0] = cross.x;
-					result[1] = cross.y;
-					result[2] = cross.z;
-					_view.tiltedToSector(result, result);
-					feedbackStrings.add(vecStr("cross loc vector", result[0],
-							result[1], result[2]));
+				double result[] = new double[3];
+				result[0] = cross.x;
+				result[1] = cross.y;
+				result[2] = cross.z;
+				_view.tiltedToSector(result, result);
+				feedbackStrings.add(vecStr("cross loc vector", result[0],
+						result[1], result[2]));
 
-					result[0] = cross.ux;
-					result[1] = cross.uy;
-					result[2] = cross.uz;
-					_view.tiltedToSector(result, result);
-					feedbackStrings.add(vecStr("cross direc vector", result[0],
-							result[1], result[2]));
-				}
+				result[0] = cross.ux;
+				result[1] = cross.uy;
+				result[2] = cross.uz;
+				_view.tiltedToSector(result, result);
+				feedbackStrings.add(vecStr("cross direc vector", result[0],
+						result[1], result[2]));
 				break;
 			}
-		} //for
-
-
+		}
+		
 	}
 
 	// for writing out a vector
@@ -222,10 +201,6 @@ public class CrossDrawer extends CedViewDrawer  {
 				+ DoubleFormat.doubleFormat(vx, 2) + ", "
 				+ DoubleFormat.doubleFormat(vy, 2) + ", "
 				+ DoubleFormat.doubleFormat(vz, 2) + ")";
-	}
-
-	class FeedbackRects {
-		public Rectangle rects[];
 	}
 
 }

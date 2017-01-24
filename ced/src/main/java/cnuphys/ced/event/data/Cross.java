@@ -1,5 +1,7 @@
 package cnuphys.ced.event.data;
 
+import java.awt.Point;
+
 public class Cross {
 
 	public byte sector;
@@ -17,6 +19,9 @@ public class Cross {
 	public float err_ux;
 	public float err_uy;
 	public float err_uz;
+	
+	//used for mouse over feedback
+	private Point _screenLocation = new Point();
 	
 	public Cross(byte sector, byte region, short id, float x, float y, float z, float ux, float uy, float uz,
 			float err_x, float err_y, float err_z, float err_ux, float err_uy, float err_uz) {
@@ -36,6 +41,16 @@ public class Cross {
 		this.err_ux = err_ux;
 		this.err_uy = err_uy;
 		this.err_uz = err_uz;
+	}
+	
+	public void setLocation(Point pp) {
+		_screenLocation.x = pp.x;
+		_screenLocation.y = pp.y;
+	}
+	
+	public boolean contains(Point pp) {
+		return ((Math.abs(_screenLocation.x - pp.x) <= DataDrawSupport.CROSSHALF) &&
+				(Math.abs(_screenLocation.y - pp.y) <= DataDrawSupport.CROSSHALF));
 	}
 
 }

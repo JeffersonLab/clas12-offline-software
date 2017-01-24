@@ -1,7 +1,7 @@
 [ 
   {
      "bank": "DETECTOR::Hits",
-     "group": 25,
+     "group": 12556,
      "info": "Detector Responses for Particles bank",
      "items": [
          {"name":"detector",      "id":1, "type":"int16",    "info":"Detector ID, defined in COATJAVA DetectorType"},

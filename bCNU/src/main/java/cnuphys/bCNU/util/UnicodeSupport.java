@@ -2,6 +2,8 @@ package cnuphys.bCNU.util;
 
 public class UnicodeSupport {
 
+	public static final String THINSPACE = "\u2009";
+
 	public static final String SUPERPLUS = "\u207A";
 	public static final String SUPERMINUS = "\u207B";
 	public static final String DEGREE = "\u00B0";
