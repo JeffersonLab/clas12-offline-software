@@ -21,7 +21,7 @@ public class DetectorOccupancy {
         
     }
     
-    public void addADC(DataBank bank){
+    public void addADCBank(DataBank bank){
         int nrows = bank.rows();
         for(int row = 0; row < nrows; row++){
             int    sector = bank.getByte(  "sector",    row);
@@ -37,7 +37,7 @@ public class DetectorOccupancy {
         }
     }
     
-    public void addTDC(DataBank bank){
+    public void addTDCBank(DataBank bank){
         int nrows = bank.rows();
         for(int row = 0; row < nrows; row++){
             int    sector = bank.getByte(  "sector",    row);

@@ -90,10 +90,13 @@ public class HipoDataSource implements DataSource {
     }
 
     public DataEvent getPreviousEvent() {
-        if(this.currentEventNumber>this.minEventNumber){
-            this.currentEventNumber--;           
+        
+        if(this.currentEventNumber>this.minEventNumber+1){
+            this.currentEventNumber--; 
+            this.currentEventNumber--; 
         }
         byte[] array             = this.reader.readEvent(this.currentEventNumber);
+        this.currentEventNumber++;
         HipoDataEvent  evioEvent = new HipoDataEvent(array,this.reader.getSchemaFactory());
         return evioEvent;
     }
