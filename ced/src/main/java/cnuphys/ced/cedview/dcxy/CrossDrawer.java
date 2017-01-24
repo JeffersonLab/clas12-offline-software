@@ -35,15 +35,9 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 	private int _mode = HB;
 
-	// cached rectangles for feedback
-	private FeedbackRects[] _fbRects = new FeedbackRects[2];
-
 
 	public CrossDrawer(DCXYView view) {
 		super(view);
-		for (int i = 0; i < _fbRects.length; i++) {
-			_fbRects[i] = new FeedbackRects();
-		}
 	}
 
 	/**
@@ -67,9 +61,6 @@ public class CrossDrawer extends DCXYViewDrawer {
 			return;
 		}
 
-		_fbRects[_mode].rects = null;
-
-
 		// any crosses?
 		CrossList crosses = null;
 		if (_mode == HB) {
@@ -86,7 +77,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 		
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
-		_fbRects[_mode].rects = new Rectangle[crosses.size()];
+
 		double result[] = new double[3];
 		Point pp = new Point();
 		
@@ -109,6 +100,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 			// only care about xy
 			Point2D.Double sp = new Point2D.Double(result[0], result[1]);
 			hsItem.sector2DToLocal(container, pp, sp);
+			cross.setLocation(pp);
 
 			// arrows
 			Point pp2 = new Point();
@@ -138,13 +130,6 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 			// the circles and crosses
 			DataDrawSupport.drawCross(g, pp.x, pp.y, _mode);
-
-			// fbrects for quick feedback
-			_fbRects[_mode].rects[index] = new Rectangle(
-					pp.x - DataDrawSupport.CROSSHALF,
-					pp.y - DataDrawSupport.CROSSHALF,
-					2 * DataDrawSupport.CROSSHALF,
-					2 * DataDrawSupport.CROSSHALF);			
 			
 			index++;
 		}		
@@ -164,9 +149,6 @@ public class CrossDrawer extends DCXYViewDrawer {
 	public void feedback(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
-		if (_fbRects[_mode].rects == null) {
-			return;
-		}
 
 		// any crosses?
 		CrossList crosses = null;
@@ -179,43 +161,37 @@ public class CrossDrawer extends DCXYViewDrawer {
 		if ((crosses == null) || crosses.isEmpty()) {
 			return;
 		}
+		
+		for (Cross cross : crosses) {
+			if (cross.contains(screenPoint)) {
+				feedbackStrings.add(fbcolors[_mode]
+						+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
+						+ "  sect: " + cross.sector + "  reg: " + cross.region);
 
-		for (int i = 0; i < _fbRects[_mode].rects.length; i++) {
-			if ((_fbRects[_mode].rects[i] != null)
-					&& _fbRects[_mode].rects[i].contains(screenPoint)) {
+				feedbackStrings.add(
+						vecStr("cross loc tilted", cross.x, cross.y, cross.z));
+				feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+				feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
 
-				
-				Cross cross = crosses.elementAt(i);
-				if (cross != null) {
-					feedbackStrings.add(fbcolors[_mode]
-							+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
-							+ "  sect: " + cross.sector + "  reg: " + cross.region);
+				double result[] = new double[3];
+				result[0] = cross.x;
+				result[1] = cross.y;
+				result[2] = cross.z;
+				_view.tiltedToSector(result, result);
+				feedbackStrings.add(vecStr("cross loc vector", result[0],
+						result[1], result[2]));
 
-					feedbackStrings.add(
-							vecStr("cross loc tilted", cross.x, cross.y, cross.z));
-					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
-
-					double result[] = new double[3];
-					result[0] = cross.x;
-					result[1] = cross.y;
-					result[2] = cross.z;
-					_view.tiltedToSector(result, result);
-					feedbackStrings.add(vecStr("cross loc vector", result[0],
-							result[1], result[2]));
-
-					result[0] = cross.ux;
-					result[1] = cross.uy;
-					result[2] = cross.uz;
-					_view.tiltedToSector(result, result);
-					feedbackStrings.add(vecStr("cross direc vector", result[0],
-							result[1], result[2]));
-				}
-
+				result[0] = cross.ux;
+				result[1] = cross.uy;
+				result[2] = cross.uz;
+				_view.tiltedToSector(result, result);
+				feedbackStrings.add(vecStr("cross direc vector", result[0],
+						result[1], result[2]));
 				break;
 			}
 		}
 	}
+
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {

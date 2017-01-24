@@ -161,10 +161,10 @@ public class DrawingLegend extends JComponent {
 		return x + fm.stringWidth(s);
 	}
 
-	@Override
-	public Dimension getPreferredSize() {
-		return new Dimension(width, height);
-	}
+//	@Override
+//	public Dimension getPreferredSize() {
+//		return new Dimension(width, height);
+//	}
 
 	public static JPanel getLegendPanel(BaseView view) {
 		JPanel panel = new JPanel();

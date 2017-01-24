@@ -105,7 +105,7 @@ public class ControlPanel extends JPanel {
 	// colums and gaps for display array
 	private int _nc;
 	private int _hgap;
-
+	
 	/**
 	 * Create a view control panel
 	 * 
@@ -127,26 +127,28 @@ public class ControlPanel extends JPanel {
 		setLayout(new BorderLayout(0, 2));
 
 		Box box = Box.createVerticalBox();
+		
 		box.add(addTabbedPane(view, controlPanelBits, displayArrayBits));
 
 		// feedback
 		if (Bits.checkBit(controlPanelBits, FEEDBACK)) {
 			_feedbackPane = new FeedbackPane(FEEDBACKWIDTH);
 			view.getContainer().setFeedbackPane(_feedbackPane);
-			box.add(_feedbackPane);
-			box.add(Box.createVerticalGlue());
+//			box.add(_feedbackPane);
+//			box.add(Box.createVerticalGlue());
 		}
 
-		add(box, BorderLayout.CENTER);
+		add(box, BorderLayout.NORTH);
 
+		add(_feedbackPane, BorderLayout.CENTER);
 	}
 	
 	/**
-	 * Add a component to the north, above the tabbed pane.
+	 * Add a component to the south, below the feedback.
 	 * @param component the added component
 	 */
-	public void addNorth(JComponent component) {
-		add(component, BorderLayout.NORTH);
+	public void addSouth(JComponent component) {
+		add(component, BorderLayout.SOUTH);
 	}
 
 	// use a tabbed pane to save space
@@ -193,6 +195,9 @@ public class ControlPanel extends JPanel {
 		}
 
 		// every thing else on a "general" panel
+
+
+		boolean addBasic = false;
 		JPanel basic = new JPanel();
 		basic.setLayout(new BorderLayout(2, 2));
 	//	Box box = Box.createVerticalBox();
@@ -202,12 +207,13 @@ public class ControlPanel extends JPanel {
 		if (Bits.checkBit(controlPanelBits, PHISLIDER)) {
 			boolean isBig = Bits.checkBit(controlPanelBits, PHI_SLIDER_BIG);
 			basic.add(createPhiSlider(isBig), BorderLayout.NORTH);
+			addBasic = true;
 		}
 
 		// drawing legend
-		if (Bits.checkBit(controlPanelBits, DRAWLEGEND)) {
-			
+		if (Bits.checkBit(controlPanelBits, DRAWLEGEND)) {		
 			basic.add(DrawingLegend.getLegendPanel(_view), BorderLayout.CENTER);
+			addBasic = true;
 		}
 
 		// target z slider
@@ -221,7 +227,10 @@ public class ControlPanel extends JPanel {
 		if (_displayArray != null) {
 			JPanel sp = new JPanel();
 			sp.setLayout(new BorderLayout(2, 2));
-			sp.add(_displayArray, BorderLayout.CENTER);
+			
+			
+			_displayArray.setBorder(new CommonBorder("Visibility"));
+			sp.add(_displayArray, BorderLayout.NORTH);
 			// accumulation
 			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
 				sp.add(new ColorModelLegend(
@@ -232,7 +241,9 @@ public class ControlPanel extends JPanel {
 			tabbedPane.add(sp, "display");
 		}
 
-		tabbedPane.add(basic, "basic");
+		if (addBasic) {
+			tabbedPane.add(basic, "basic");
+		}
 
 		if (magFieldPanel != null) {
 			tabbedPane.add(magFieldPanel, "field");

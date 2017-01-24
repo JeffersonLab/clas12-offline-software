@@ -133,7 +133,7 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 		
 		//select which sector
 		SectorSelectorPanel ssp = new SectorSelectorPanel(view);
-		view._controlPanel.addNorth(ssp);
+		view._controlPanel.addSouth(ssp);
 
 		view.pack();
 

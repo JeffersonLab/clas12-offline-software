@@ -97,7 +97,7 @@ public class ClasIoEventManager {
 
 	// the current event
 	private DataEvent _currentEvent;
-
+	
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_dataSource = new HipoDataSource();
@@ -603,14 +603,12 @@ public class ClasIoEventManager {
 	 * @return the previous event, if possible.
 	 */
 	public DataEvent getPreviousEvent() {
-
-		int evNum = getEventNumber();
 		_currentEvent = _dataSource.getPreviousEvent();
-
+		
 		// evioSource.getPreviousEvent() doesn't work at the end of the file
 		// so hack
-		if ((_currentEvent == null) && (evNum > 0)) {
-			return gotoEvent(evNum - 1);
+		if ((_currentEvent == null) && (getEventNumber() > 0)) {
+			return gotoEvent(getEventNumber() - 1);
 		}
 
 		notifyEventListeners();

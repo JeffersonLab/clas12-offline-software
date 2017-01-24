@@ -83,17 +83,18 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * A string that has r-theta-phi using unicode greek characters
 	 */
-	public static final String rThetaPhi = "r" + UnicodeSupport.SMALL_THETA + UnicodeSupport.SMALL_PHI;
+	public static final String rThetaPhi = "r" + UnicodeSupport.THINSPACE +
+			UnicodeSupport.SMALL_THETA + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-theta-phi using unicode greek characters
 	 */
-	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + "z" + UnicodeSupport.SMALL_PHI;
+	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + "z" +  UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-phi using unicode greek characters for hex views
 	 */
-	public static final String rhoPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.SMALL_PHI;
+	public static final String rhoPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
 	private static final String evnumAppend = "  (Event# ";
 
@@ -821,6 +822,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		if (!_eventManager.isAccumulating()) {
 			getUserComponent().repaint();
 			fixTitle(event);
+			getContainer().redoFeedback();
 		}
 	}
 

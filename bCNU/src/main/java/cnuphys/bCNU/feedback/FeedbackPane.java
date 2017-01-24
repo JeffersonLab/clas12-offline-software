@@ -61,7 +61,7 @@ public class FeedbackPane extends TextPaneScrollPane {
 	 *            the preferred width.
 	 */
 	public FeedbackPane(int width, int height) {
-		setPreferredSize(new Dimension(width, height));
+//		setPreferredSize(new Dimension(width, height));
 		setBorder(BorderFactory.createEtchedBorder());
 
 		setBackground(_background);
