@@ -9,6 +9,7 @@ package org.jlab.detector.decode;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.utils.data.DataUtils;
 
 /**
@@ -104,6 +105,32 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         return 1;
     }
    
+    public static List<DetectorDataDgtz>  getDataADC(List<DetectorDataDgtz> list,DetectorType type, int sector){
+        List<DetectorDataDgtz> filtered = new ArrayList<DetectorDataDgtz>();
+        for(DetectorDataDgtz dgtz : list){
+            if(dgtz.getDescriptor().getType()==type&&dgtz.getDescriptor().getSector()==sector){
+                filtered.add(dgtz);
+                if(dgtz.getADCSize()>0){
+                    filtered.add(dgtz);
+                }
+            }
+        }
+        return filtered;        
+    }
+    
+    public static List<DetectorDataDgtz>  getDataADC(List<DetectorDataDgtz> list,DetectorType type, int sector, int layer){
+        List<DetectorDataDgtz> filtered = new ArrayList<DetectorDataDgtz>();
+        for(DetectorDataDgtz dgtz : list){
+            if(dgtz.getDescriptor().getType()==type&&dgtz.getDescriptor().getSector()==sector&&
+                    dgtz.getDescriptor().getLayer()==layer){
+                if(dgtz.getADCSize()>0){
+                    filtered.add(dgtz);
+                }
+            }
+        }
+        return filtered;        
+    }
+    
     /**
      * a class to hold ADC values
      */

@@ -51,7 +51,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     private JButton              mediaEject    = null;
     private JButton              sourceFile    = null;
     private JButton              sourceEt      = null;
-    
+    private int                  eventDelay    = 0;
     private Color paneBackground        = Color.GRAY;
         
     public DataSourceProcessorPane(){
@@ -131,6 +131,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         this.add(statusLabelPane,BorderLayout.CENTER);
         this.add(mediaPane,BorderLayout.LINE_START);
         this.add(sourcePane,BorderLayout.LINE_END);
+    }
+    
+    public void setDelay(int delay){
+        this.dataProcessor.setDelay(delay);
+        this.eventDelay = delay;
     }
     
     public void addEventListener(IDataEventListener del){
@@ -310,7 +315,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 }*/
                 //System.out.println("running");
                 for (int i=1 ; i<5000 ; i++) {
-                    boolean status = dataProcessor.processNextEvent(0,DataEventType.EVENT_ACCUMULATE);
+                    boolean status = dataProcessor.processNextEvent(eventDelay,DataEventType.EVENT_ACCUMULATE);
                     if(status==false&&hasFinished==false){
                         hasFinished = true;
                         System.out.println("[DataProcessingPane] ----> task is done...");

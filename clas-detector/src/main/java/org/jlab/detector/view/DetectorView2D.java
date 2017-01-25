@@ -101,6 +101,8 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
         
     }
     
+    
+    
     public List<String> getLayerNames(){ return this.viewLayerNames;}
     
     public void drawLayers(Graphics2D g2d){
