@@ -100,7 +100,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.04";
+	private static final String _release = "build 0.99.06";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -686,11 +686,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	public void propertyChange(PropertyChangeEvent pev) {
 		String pname = pev.getPropertyName();
 
-		if (pname.equals(SwimMenu.TRAJ_CLEARED_MC_PROP)) {
-		}
-		else if (pname.equals(SwimMenu.TRAJ_CLEARED_RECON_PROP)) {
-		}
-		else if (pname.equals(SwimMenu.SWIM_ALL_MC_PROP)) {
+		if (pname.equals(ClasIoEventManager.SWIM_ALL_MC_PROP)) {
 	//		System.err.println("Curent Thread: " + Thread.currentThread().getName());
 			ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 					.getMCSwimmer();
@@ -698,7 +694,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				allSwimmer.swimAll();
 			}
 		}
-		else if (pname.equals(SwimMenu.SWIM_ALL_RECON_PROP)) {
+		else if (pname.equals(ClasIoEventManager.SWIM_ALL_RECON_PROP)) {
 			ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 					.getReconSwimmer();
 			if (allSwimmer != null) {

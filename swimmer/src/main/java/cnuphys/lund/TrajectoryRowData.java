@@ -1,7 +1,9 @@
 package cnuphys.lund;
 
 public class TrajectoryRowData {
-
+	
+	protected int trackId;  //track id
+	
 	// the lund id
 	protected LundId lundId;
 
@@ -47,9 +49,10 @@ public class TrajectoryRowData {
 	 * @param phi
 	 *            the initial azimuthal angle (degrees)
 	 */
-	public TrajectoryRowData(LundId lundId, double xo, double yo, double zo, double p, double theta, double phi,
+	public TrajectoryRowData(int trackId, LundId lundId, double xo, double yo, double zo, double p, double theta, double phi,
 			int status, String source) {
 		super();
+		this.trackId = trackId;
 		this.lundId = lundId;
 		this.xo = xo;
 		this.yo = yo;
@@ -61,9 +64,24 @@ public class TrajectoryRowData {
 		this.source = source;
 
 		if (lundId == null) {
-			(new Throwable()).printStackTrace();
-			System.exit(1);
+			lundId = LundSupport.getInstance().get(0);
 		}
+	}
+ 
+	/**
+	 * Get the track id
+	 * @return the track id
+	 */
+	public int getTrackId() {
+		return trackId;
+	}
+	
+	/**
+	 * Get the charge in units of e.
+	 * @return the charge. -99 on failure.
+	 */
+	public int getCharge() {
+		return (lundId == null) ? -99 : lundId.getCharge();
 	}
 	
 	/**

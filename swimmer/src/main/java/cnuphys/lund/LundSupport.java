@@ -74,6 +74,42 @@ public class LundSupport {
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Obtain the LundID object for a track based particle
+	 * 
+	 * @return the LundID object for an geantino
+	 */
+	public static LundId getTrackbased(int q) {
+		if (q < 0) {
+			return LundSupport.getInstance().get(-101);
+		}
+		if (q > 0) {
+			return LundSupport.getInstance().get(-99);
+		}
+		else {
+			return LundSupport.getInstance().get(-100);
+		}
+	}
+	
+	/**
+	 * Obtain the LundID object for a hit based particle
+	 * 
+	 * @return the LundID object for a hit based particle
+	 */
+	public static LundId getHitbased(int q) {
+		if (q < 0) {
+			return LundSupport.getInstance().get(-201);
+		}
+		if (q > 0) {
+			return LundSupport.getInstance().get(-199);
+		}
+		else {
+			return LundSupport.getInstance().get(-200);
+		}
+	}
+
+
 
 	/**
 	 * Obtain the LundID object for an electron
@@ -113,6 +149,16 @@ public class LundSupport {
 		_lundIds.add(new LundId("Lepton", "G" + SUPERMINUS, -1, 0, -3, 0));
 		_lundIds.add(new LundId("Lepton", "G" + SUPERZERO,   -2, 0, 0, 0));
 		
+		//unknowns (orange--track based)
+		_lundIds.add(new LundId("Lepton", "?TB" + SUPERPLUS,   -99,  0,  3, 0));
+		_lundIds.add(new LundId("Lepton", "?TB" + SUPERMINUS, -101,  0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "?TB" + SUPERZERO,   -100, 0, 0, 0));
+		
+		//unknowns (yellow--hit based)
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERPLUS,   -199,  0,  3, 0));
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERMINUS, -201,  0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -300, 0, 0, 0));
+
 		
 		_lundIds.add(new LundId("InterBoson", "g", 21, 0, 0, 2));
 		// 510998910
@@ -867,6 +913,15 @@ public class LundSupport {
 	private void initStyles() {
 		//Geatininos
 		setStyle(0, Color.pink);
+		
+		
+		//recon tracks
+		setStyle(-99, Color.orange);
+		setStyle(-100, Color.orange);
+		setStyle(-101, Color.orange);
+		setStyle(-199, Color.yellow);
+		setStyle(-200, Color.yellow);
+		setStyle(-201, Color.yellow);
 		
 		
 		setStyle(11, orangeRed); // e-

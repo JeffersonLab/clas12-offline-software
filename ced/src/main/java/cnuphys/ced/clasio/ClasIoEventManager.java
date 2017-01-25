@@ -59,6 +59,10 @@ public class ClasIoEventManager {
 	public enum EventSourceType {
 		HIPOFILE, RING, FASTMC
 	}
+	
+	//for firing property changes
+	public static final String SWIM_ALL_MC_PROP = "SWIM ALL MC";
+	public static final String SWIM_ALL_RECON_PROP = "SWIM ALL RECON";
 
 	// the current source type
 	private EventSourceType _sourceType = EventSourceType.HIPOFILE;
@@ -769,14 +773,9 @@ public class ClasIoEventManager {
 		// some scaling factors for gradient displays
 		computeSomeScalingFactors();
 
-		// auto swim? (always for fast mc)
-		if (SwimMenu.getInstance().isAlwaysSwimMC()) {
-			// System.err.println("SWIMMING MC");
-			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0, 1);
-		}
-		if (SwimMenu.getInstance().isAlwaysSwimRecon()) {
-			SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_RECON_PROP, 0, 1);
-		}
+		
+		SwimMenu.getInstance().firePropertyChange(SWIM_ALL_MC_PROP, 0, 1);
+		SwimMenu.getInstance().firePropertyChange(SWIM_ALL_RECON_PROP, 0, 1);
 
 		Ced.setEventNumberLabel(getEventNumber());
 
