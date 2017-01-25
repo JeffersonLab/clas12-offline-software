@@ -28,7 +28,7 @@ public class CedPanel3D extends Panel3D {
 
 	// labels for the check box
 	public static final String SHOW_VOLUMES = "Volumes";
-	public static final String SHOW_TRUTH = "GEMC Truth";
+	public static final String SHOW_TRUTH = "Truth";
 	public static final String SHOW_DC = "DC";
 	public static final String SHOW_EC = "EC";
 	public static final String SHOW_PCAL = "PCAL";

@@ -387,6 +387,32 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showDChbCrosses();
 	}
+	
+	
+	/**
+	 * Convenience method global hit based display
+	 * 
+	 * @return <code>true</code> if we are to show hb globally
+	 */
+	public boolean showHB() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showHB();
+	}
+
+	/**
+	 * Convenience method global time based display
+	 * 
+	 * @return <code>true</code> if we are to show tb globally
+	 */
+	public boolean showTB() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showTB();
+	}
+
 
 	/**
 	 * Convenience method to see it we show the the ftof reconstructed hits.

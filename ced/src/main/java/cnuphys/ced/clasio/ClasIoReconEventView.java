@@ -56,130 +56,69 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 		_trajectoryTable.clear(); // remove existing events
 		data.clear();
 
-		DataManager dm = DataManager.getInstance();
 		if (!_eventManager.isAccumulating()) {
 
 			// now fill the table.
 			TrajectoryTableModel model = _trajectoryTable.getTrajectoryModel();
 
-			int pid[] = dm.getIntArray(event, "REC::particle.pid");
-			int numTracks = (pid == null) ? 0 : pid.length;
-
-			if (numTracks > 0) {
-				float vx[] = dm.getFloatArray(event, "REC::particle.vx");
-				float vy[] = dm.getFloatArray(event, "REC::particle.vy");
-				float vz[] = dm.getFloatArray(event, "REC::particle.vz");
-				float px[] = dm.getFloatArray(event, "REC::particle.px");
-				float py[] = dm.getFloatArray(event, "REC::particle.py");
-				float pz[] = dm.getFloatArray(event, "REC::particle.pz");
-				byte charge[] = dm.getByteArray(event, "REC::particle.charge");
-				int status[] = dm.getIntArray(event, "REC::particle.status");
-				float mass[] = dm.getFloatArray(event, "REC::particle.mass");
-				float beta[] = dm.getFloatArray(event, "REC::particle.beta");
-				float chisqpid[] = dm.getFloatArray(event, "REC::particle.chisqpid");
-
-				for (int i = 0; i < numTracks; i++) {
-
-					// hack for 0 pid
-					int thePid = pid[i];
-					if (thePid == 0) {
-						int q = charge[i];
-						if (q == -1) {
-							thePid = 11;
-						} else if (q == 1) {
-							thePid = 0; // Geantino+
-						} else {
-							thePid = 22; // photon
-						}
-					}
-					LundId lid = LundSupport.getInstance().get(thePid);
-
-					if (lid != null) {
-						double xo = vx[i]; // cm
-						double yo = vy[i]; // cm
-						double zo = vz[i]; // cm
-
-						double pxo = px[i]; // GeV/c
-						double pyo = py[i];
-						double pzo = pz[i];
-
-						double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo); // GeV
-						double phi = Math.atan2(pyo, pxo);
-						double theta = Math.acos(pzo / p);
-
-						// note conversions to degrees and MeV
-						TrajectoryRowData row = new TrajectoryRowData(lid, xo, yo, zo, 1000 * p, Math.toDegrees(theta),
-								Math.toDegrees(phi), status[i], "REC::particle");
-						data.add(row);
-					} else {
-						Log.getInstance().warning("Bad pid: " + pid[i] + " in ClasIoReconEventView");
-					}
-				} // loop over num hb tracks
-
-				model.setData(data);
-				model.fireTableDataChanged();
-				_trajectoryTable.repaint();
-			} // numTracks > 0
-
-			// //cvt tracks?
-			// int q[] = ColumnData.getIntArray("CVTRec::Tracks.q");
-			//
-			// numTracks = (q == null) ? 0 : q.length;
-			//
-			// if (numTracks > 0) {
-			// double zz0[] = ColumnData
-			// .getDoubleArray("CVTRec::Tracks.z0");
-			// double d0[] = ColumnData
-			// .getDoubleArray("CVTRec::Tracks.d0");
-			// double phi0[] = ColumnData
-			// .getDoubleArray("CVTRec::Tracks.phi0");
-			// double tandip[] = ColumnData
-			// .getDoubleArray("CVTRec::Tracks.tandip");
-			// double pt[] = ColumnData
-			// .getDoubleArray("CVTRec::Tracks.pt");
-			//
-			//
-			// for (int i = 0; i < numTracks; i++) {
-			// int thePid = 22; //photon
-			// if (q[i] > 0) {
-			// thePid = 2212; //assume proton for pos charge
-			// }
-			// else if (q[i] < 0) {
-			// thePid = 11; //assume electron for neg charge
-			// }
-			//
-			// LundId lid = LundSupport.getInstance().get(thePid);
-			//
-			//
-			// //convert mm to cm
-			// double x0 = d0[i]*Math.cos(phi0[i])/10;
-			// double y0 = d0[i]*Math.sin(phi0[i])/10;
-			// double z0 = zz0[i]/10;
-			//
-			// double px = pt[i]*Math.cos(phi0[i]);
-			// double py = pt[i]*Math.sin(phi0[i]);
-			// double pz = pt[i]*tandip[i];
-			//
-			// double p = Math.sqrt(px * px + py * py + pz * pz); // GeV
-			// double phi = Math.atan2(py, px);
-			// double theta = Math.acos(pz / p);
-			//
-			// // note conversions to degrees and MeV
-			// TrajectoryRowData row = new TrajectoryRowData(lid, x0,
-			// y0, z0, 1000 * p, Math.toDegrees(theta),
-			// Math.toDegrees(phi), 0, "CVTRec::Tracks");
-			// data.add(row);
-			//
-			//
-			// }
+			addTracks(event, data, "HitBasedTrkg::HBTracks");
+			addTracks(event, data, "TimeBasedTrkg::TBTracks");
 
 			model.setData(data);
 			model.fireTableDataChanged();
 			_trajectoryTable.repaint();
-
+			_trajectoryTable.repaint();
 		} // !accumulating
 	}
+	
+	//add tracks
+	private void addTracks(DataEvent event, Vector<TrajectoryRowData> data, String bankName) {
+		try {
+			
+			boolean hitBased = bankName.contains("HitBased");
+			DataManager dm = DataManager.getInstance();
+			float[] vx = dm.getFloatArray(event, bankName + "." + "Vtx0_x"); //vertex x cm
+			if ((vx != null) && (vx.length > 0)) {
+				float[] vy = dm.getFloatArray(event, bankName + "." + "Vtx0_y"); //vertex y cm
+				float[] vz = dm.getFloatArray(event, bankName + "." + "Vtx0_z"); //vertex z cm
+				float px[] = dm.getFloatArray(event, bankName + "." + "p0_x");
+				float py[] = dm.getFloatArray(event, bankName + "." + "p0_y");
+				float pz[] = dm.getFloatArray(event, bankName + "." + "p0_z");
+				byte q[] = dm.getByteArray(event, bankName + "." + "q");
+				short status[] = dm.getShortArray(event, bankName + "." + "status");
+				short id[] = dm.getShortArray(event, bankName + "." + "id");
+				
+				
+				for (int i = 0; i < vx.length; i++) {
+					
+					LundId lid = (hitBased ? LundSupport.getHitbased(q[i]) : LundSupport.getTrackbased(q[i]));
+					
+					double xo = vx[i]; // cm
+					double yo = vy[i]; // cm
+					double zo = vz[i]; // cm
 
+					double pxo = px[i]; // GeV/c
+					double pyo = py[i];
+					double pzo = pz[i];
+
+					double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo); // GeV
+					double phi = Math.atan2(pyo, pxo);
+					double theta = Math.acos(pzo / p);
+
+					// note conversions to degrees and MeV
+					TrajectoryRowData row = new TrajectoryRowData(id[i], lid, xo, yo, zo, 1000 * p, Math.toDegrees(theta),
+							Math.toDegrees(phi), status[i], bankName);
+					data.add(row);
+					
+				}
+			}
+		}
+		catch (Exception e) {
+			String warning = "[ClasIoReconEventView.addTracks] " + e.getMessage();
+			Log.getInstance().warning(warning);
+		}
+	}
+	
 	@Override
 	public void openedNewEventFile(String path) {
 	}

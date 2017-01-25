@@ -17,6 +17,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
+import cnuphys.splot.plot.X11Colors;
 import cnuphys.swim.IProjector;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
@@ -34,6 +35,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	
 	protected static final Color tracerColor = new Color(0, 0, 0, 50);
 	protected static final Stroke tracerStroke = GraphicsUtilities.getStroke(3f, LineStyle.SOLID);
+	protected static final Stroke planeStroke = GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID);
 
 	private static RenderingHints renderHints = new RenderingHints(
 			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -93,6 +95,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 			if (trajectories != null) {
 
 				for (SwimTrajectory trajectory : trajectories) {
+										
 					// give a chance to veto a trajectory, e.g. no chance it
 					// will
 					// appear on this view (for example)
@@ -135,6 +138,34 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	 */
 	private void drawSwimTrajectory(Graphics g, IContainer container,
 			SwimTrajectory2D trajectory) {
+		
+		if (!acceptSimpleTrack(trajectory)) {
+			return;
+		}
+		
+//		//unknowns (orange--track based)
+//		_lundIds.add(new LundId("Lepton", "?TB" + SUPERPLUS,   -99,  0,  3, 0));
+//		_lundIds.add(new LundId("Lepton", "?TB" + SUPERMINUS, -101,  0, -3, 0));
+//		_lundIds.add(new LundId("Lepton", "?TB" + SUPERZERO,   -100, 0, 0, 0));
+//		
+//		//unknowns (yellow--hit based)
+//		_lundIds.add(new LundId("Lepton", "?HB" + SUPERPLUS,   -199,  0,  3, 0));
+//		_lundIds.add(new LundId("Lepton", "?HB" + SUPERMINUS, -201,  0, -3, 0));
+//		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -300, 0, 0, 0));
+		
+		LundId lid = trajectory.getTrajectory3D().getLundId();
+		int id = lid.getId();
+		
+		//FUGLY hack
+		if ((id == -99) || (id == -100) || (id == -101)) { //time based
+			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark orange"));
+			return;
+		}
+
+		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+			plainDrawSwimTrajectory(g, container, trajectory, Color.yellow);
+			return;
+		}
 
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHints(renderHints);
@@ -164,20 +195,58 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 			g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 			
 			
-			LundId lid = trajectory.getTrajectory3D().getLundId();
 			LundStyle style = LundStyle.getStyle(lid);
 			g.setColor(style.getLineColor());
 			g2.setStroke(style.getStroke());
 			// g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 
-			if ((lid != null)) {
-				GraphicsUtilities.drawHighlightedPolyline(g2, poly.xpoints,
-						poly.ypoints, poly.npoints, style.getLineColor(),
-						getHighlightColor(lid));
-			} else {
-				g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
-			}
+			GraphicsUtilities.drawHighlightedPolyline(g2, poly.xpoints,
+					poly.ypoints, poly.npoints, style.getLineColor(),
+					getHighlightColor(lid));
 
+		}
+
+		g2.setStroke(oldStroke);
+	}
+	
+	public abstract boolean acceptSimpleTrack(SwimTrajectory2D trajectory); 
+	
+	/**
+	 * Draw a trajectory
+	 * 
+	 * @param g
+	 *            the graphics object
+	 * @param container
+	 *            the rendering container
+	 * @param trajectory
+	 *            the 2D (already projected) trajectory to draw
+	 */
+	private void plainDrawSwimTrajectory(Graphics g, IContainer container, SwimTrajectory2D trajectory, Color color) {
+
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setRenderingHints(renderHints);
+
+		Stroke oldStroke = g2.getStroke();
+
+		Polygon poly = new Polygon();
+		Point2D.Double path[] = trajectory.getPath();
+
+		if (path == null) {
+			System.err.println("Null path");
+			return;
+		}
+
+		Point pp = new Point();
+
+		for (Point2D.Double wp : path) {
+			container.worldToLocal(pp, wp);
+			poly.addPoint(pp.x, pp.y);
+		}
+
+		if (poly.npoints > 1) {
+			g2.setColor(color);
+			g2.setStroke(planeStroke);
+			g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 		}
 
 		g2.setStroke(oldStroke);

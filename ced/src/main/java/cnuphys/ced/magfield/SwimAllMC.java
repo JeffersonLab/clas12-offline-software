@@ -59,8 +59,7 @@ public class SwimAllMC implements ISwimAll {
 			double theta = Math.toDegrees(Math.acos(pzo / p));
 			double phi = Math.toDegrees(Math.atan2(pyo, pxo));
 
-			v.add(new TrajectoryRowData(lid, x, y, z, p, theta, phi, 0, "LUND File"));
-
+			v.add(new TrajectoryRowData(index, lid, x, y, z, p, theta, phi, 0, "LUND File"));
 		}
 
 		return v;
@@ -126,7 +125,7 @@ public class SwimAllMC implements ISwimAll {
 
 						double phi = Math.toDegrees(Math.atan2(pyo, pxo));
 
-						v.add(new TrajectoryRowData(lid, x, y, z, p, theta, phi, 0, "MC::Particle"));
+						v.add(new TrajectoryRowData(index, lid, x, y, z, p, theta, phi, 0, "MC::Particle"));
 					}
 				}
 

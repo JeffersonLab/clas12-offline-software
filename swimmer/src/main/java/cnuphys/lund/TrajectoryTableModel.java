@@ -11,13 +11,16 @@ public class TrajectoryTableModel extends DefaultTableModel {
 	private static final String SMALL_PHI = "\u03C6";
 
 	// the names of the columns
-	protected static final String colNames[] = { "Id", "name", "m (MeV)", "x" + SUBZERO + " (cm)",
+	protected static final String colNames[] = { "Id", "PID", "name", "m (MeV)", "q", "x" + SUBZERO + " (cm)",
 			"y" + SUBZERO + " (cm)", "z" + SUBZERO + " (cm)", "p (MeV)", SMALL_THETA + " (deg)", SMALL_PHI + " (deg)",
 			"KE (MeV)", "Et (MeV)", "status", "source" };
 
-	protected static final int columnWidths[] = { 70, // lund id
+	protected static final int columnWidths[] = {
+			70, // track id
+			70, // lund id
 			82, // name
 			137, // mass
+			60,  // charge
 			122, // xo
 			122, // yo
 			122, // zo
@@ -75,43 +78,56 @@ public class TrajectoryTableModel extends DefaultTableModel {
 			TrajectoryRowData traj = data.get(row);
 			if (traj != null) {
 				switch (col) {
+
 				case 0:
-					return "" + traj.getId();
+					return "" + traj.getTrackId();
 
 				case 1:
-					return traj.getName();
+					// HACK for HB, TB tracks with no pid
+					int id = traj.getId();
+					if ((id == -99) || (id == -100) || (id == -101) || (id == -199) || (id == -200) || (id == -201)) {
+						return "---";
+					} else {
+						return "" + id;
+					}
 
 				case 2:
-					return getStr(traj.getMass(), 3);
+					return traj.getName();
 
 				case 3:
-					return getStr(traj.getXo(), 3);
-
+					return getStr(traj.getMass(), 3);
+					
 				case 4:
-					return getStr(traj.getYo(), 3);
+					return "" + traj.getCharge();
 
 				case 5:
-					return getStr(traj.getZo(), 3);
+					return getStr(traj.getXo(), 3);
 
 				case 6:
-					return getStr(traj.getMomentum(), 3);
+					return getStr(traj.getYo(), 3);
 
 				case 7:
-					return getStr(traj.getTheta(), 3);
+					return getStr(traj.getZo(), 3);
 
 				case 8:
-					return getStr(traj.getPhi(), 3);
+					return getStr(traj.getMomentum(), 3);
 
 				case 9:
-					return getStr(traj.getKineticEnergy(), 3);
+					return getStr(traj.getTheta(), 3);
 
 				case 10:
+					return getStr(traj.getPhi(), 3);
+
+				case 11:
+					return getStr(traj.getKineticEnergy(), 3);
+
+				case 12:
 					return getStr(traj.getMass() + traj.getKineticEnergy(), 3);
 					
-				case 11:
+				case 13:
 					return "" + traj.getStatus();
 					
-				case 12:
+				case 14:
 					return traj.getSource();
 				}
 			}

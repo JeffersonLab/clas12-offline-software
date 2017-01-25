@@ -26,7 +26,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public static final String SHOWINNER_PROPERTY = "DisplayInner";
 
 	/** Label and access to the monte carlo truth checkbox */
-	public static final String MCTRUTH_LABEL = "GEMC Truth";
+	public static final String MCTRUTH_LABEL = "Truth";
 
 	/** Label and access to the single event button */
 	public static final String SINGLEEVENT_LABEL = "Single";

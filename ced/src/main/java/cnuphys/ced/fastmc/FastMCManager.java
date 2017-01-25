@@ -180,7 +180,7 @@ public class FastMCManager {
 		}
 
 		// always swim fastMC MC tracks, that is needed to get the hits
-		SwimMenu.getInstance().firePropertyChange(SwimMenu.SWIM_ALL_MC_PROP, 0, 1);
+		SwimMenu.getInstance().firePropertyChange(ClasIoEventManager.SWIM_ALL_MC_PROP, 0, 1);
 
 		// how many trajectories?
 		List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();

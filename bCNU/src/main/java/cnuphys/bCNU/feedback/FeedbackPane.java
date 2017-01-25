@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 import javax.swing.text.SimpleAttributeSet;
 
 import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
@@ -62,7 +63,10 @@ public class FeedbackPane extends TextPaneScrollPane {
 	 */
 	public FeedbackPane(int width, int height) {
 //		setPreferredSize(new Dimension(width, height));
-		setBorder(BorderFactory.createEtchedBorder());
+		
+		Border etchedBorder = BorderFactory.createEtchedBorder();
+		Border lineBorder = BorderFactory.createLineBorder(Color.black, 2);
+		setBorder(BorderFactory.createCompoundBorder(etchedBorder, lineBorder));
 
 		setBackground(_background);
 	}

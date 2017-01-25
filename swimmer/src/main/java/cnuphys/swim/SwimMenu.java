@@ -30,31 +30,16 @@ import cnuphys.rk4.RungeKutta4;
 @SuppressWarnings("serial")
 public class SwimMenu extends JMenu implements ActionListener {
 
-	// swim all particles in the generated bank
-	private JMenuItem _swimAllMCItem;
-
-	// always swim
-	private JCheckBoxMenuItem _alwaysSwimMCItem;
 
 	// show or hide
 	private JRadioButtonMenuItem _showMonteCarloTracks;
 	private JRadioButtonMenuItem _hideMonteCarloTracks;
 
-	// swim all particles in the recon bank
-	private JMenuItem _swimAllReconItem;
-
-	// always swim
-	private JCheckBoxMenuItem _alwaysSwimReconItem;
 
 	// show or hide
 	private JRadioButtonMenuItem _showReconTracks;
 	private JRadioButtonMenuItem _hideReconTracks;
 
-	// interested parties can listen for property changes
-	public static final String TRAJ_CLEARED_MC_PROP = "MC Trajectories Cleared";
-	public static final String TRAJ_CLEARED_RECON_PROP = "Recon Trajectories Cleared";
-	public static final String SWIM_ALL_MC_PROP = "Swim all MC";
-	public static final String SWIM_ALL_RECON_PROP = "Swim all Recon";
 
 	private boolean _showMonteCarlo = true;
 	private boolean _showRecon = true;
@@ -74,34 +59,21 @@ public class SwimMenu extends JMenu implements ActionListener {
 		add(getLundDialogMenuItem());
 		addSeparator();
 
-		// MC related
-		_alwaysSwimMCItem = new JCheckBoxMenuItem(
-				"Always Swim all Monte Carlo Tracks", true);
-		add(_alwaysSwimMCItem);
-		add(getSwimAllMenuMCItem());
 
-		// hide or show
+		// hide or show MC
 		ButtonGroup bgmc = new ButtonGroup();
 		_showMonteCarloTracks = createRadioMenuItem("Show Monte Carlo Tracks",
 				bgmc, _showMonteCarlo);
 		_hideMonteCarloTracks = createRadioMenuItem("Hide Monte Carlo Tracks",
 				bgmc, !_showMonteCarlo);
-		add(getClearAllMCMenuItem());
 		addSeparator();
 
-		// Rcecon related
-		_alwaysSwimReconItem = new JCheckBoxMenuItem(
-				"Always Swim all Reconstructed Tracks", true);
-		add(_alwaysSwimReconItem);
-		add(getSwimAllMenuReconItem());
-
-		// hide or show
+		// hide or show recon
 		ButtonGroup bgrecon = new ButtonGroup();
 		_showReconTracks = createRadioMenuItem("Show Reconstructed Tracks",
 				bgrecon, _showRecon);
 		_hideReconTracks = createRadioMenuItem("Hide Reconstructed Tracks",
 				bgrecon, !_showRecon);
-		add(getClearAllReconMenuItem());
 		addSeparator();
 		add(createEpsPanel());
 		add(createMaxSSPanel());
@@ -128,6 +100,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return mi;
 	}
 
+	//swimming tolerance
 	private JPanel createEpsPanel() {
 		JPanel sp = new JPanel();
 		sp.setBackground(Color.white);
@@ -167,6 +140,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return sp;
 	}
 
+	//step size
 	private JPanel createMaxSSPanel() {
 		JPanel sp = new JPanel();
 		sp.setBackground(Color.white);
@@ -212,44 +186,6 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return sp;
 	}
 
-	/**
-	 * Always swim montecarlo particles
-	 * 
-	 * @return <code>true</code> if we should swim all montecarlo particles
-	 */
-	public boolean isAlwaysSwimMC() {
-		return _alwaysSwimMCItem.isSelected();
-	}
-
-	/**
-	 * Always swim reconstructed particles
-	 * 
-	 * @return <code>true</code> if we should swim all reconstructed particles
-	 */
-	public boolean isAlwaysSwimRecon() {
-		return _alwaysSwimReconItem.isSelected();
-	}
-
-	/**
-	 * Control with the swim all MC item is enabled. The mc dialog item goes
-	 * along with it: they should be enabled or disabled together.
-	 * 
-	 * @param enabled
-	 *            if <code>true</code> then it is enabled.
-	 */
-	public void setSwimAllMCEnabled(boolean enabled) {
-		_swimAllMCItem.setEnabled(enabled);
-	}
-
-	/**
-	 * Control with the swim all recon item is enabled.
-	 * 
-	 * @param enabled
-	 *            if <code>true</code> then it is enabled.
-	 */
-	public void setSwimAllReconEnabled(boolean enabled) {
-		_swimAllReconItem.setEnabled(enabled);
-	}
 
 	/**
 	 * Get the menu item for the lund track dialog used to swim a particle
@@ -272,100 +208,6 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return mi;
 	}
 
-	/**
-	 * Get the menu item to swim all MonteCarlo particles
-	 * 
-	 * @return the menu item for swimming all MonteCarlo particles
-	 */
-	private JMenuItem getSwimAllMenuMCItem() {
-		_swimAllMCItem = new JMenuItem("Swim all Monte Carlo Tracks");
-
-		final SwimMenu menu = this;
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Swimming.clearMCTrajectories();
-				menu.firePropertyChange(TRAJ_CLEARED_MC_PROP, 0, 1);
-				menu.firePropertyChange(SWIM_ALL_MC_PROP, 0, 1);
-			}
-
-		};
-
-		_swimAllMCItem.addActionListener(al);
-		// _swimAllGeneratedItem.setEnabled(false);
-		return _swimAllMCItem;
-	}
-
-	/**
-	 * Get the menu item to swim all recon particles
-	 * 
-	 * @return the menu item for swimming all MonteCarlo particles
-	 */
-	private JMenuItem getSwimAllMenuReconItem() {
-		_swimAllReconItem = new JMenuItem("Swim all Reconstructed Tracks");
-
-		final SwimMenu menu = this;
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Swimming.clearReconTrajectories();
-				menu.firePropertyChange(TRAJ_CLEARED_RECON_PROP, 0, 1);
-				menu.firePropertyChange(SWIM_ALL_RECON_PROP, 0, 1);
-			}
-
-		};
-
-		_swimAllReconItem.addActionListener(al);
-		return _swimAllReconItem;
-	}
-
-	/**
-	 * Get the menu item to clear mc trajectories
-	 * 
-	 * @return the menu item for swimming all MonteCarlo particles
-	 */
-	private JMenuItem getClearAllMCMenuItem() {
-		JMenuItem mi = new JMenuItem("Clear All Monte Carlo Trajectories");
-
-		final SwimMenu menu = this;
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Swimming.clearMCTrajectories();
-				menu.firePropertyChange(TRAJ_CLEARED_MC_PROP, 0, 1);
-			}
-
-		};
-
-		mi.addActionListener(al);
-		return mi;
-	}
-
-	/**
-	 * Get the menu item to clear reconstructed trajectories
-	 * 
-	 * @return the menu item for swimming all MonteCarlo particles
-	 */
-	private JMenuItem getClearAllReconMenuItem() {
-		JMenuItem mi = new JMenuItem("Clear All Reconstructed Trajectories");
-
-		final SwimMenu menu = this;
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Swimming.clearReconTrajectories();
-				menu.firePropertyChange(TRAJ_CLEARED_RECON_PROP, 0, 1);
-			}
-
-		};
-
-		mi.addActionListener(al);
-		return mi;
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

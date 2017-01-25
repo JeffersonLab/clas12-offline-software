@@ -1,26 +1,36 @@
 package cnuphys.lund;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.Color;
+import java.awt.Font;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
 public class TrajectoryTable extends JTable {
-
+	
 	// a scroll pane for this table
 	private JScrollPane _scrollPane;
 
 	public TrajectoryTable() {
 		super(new TrajectoryTableModel());
 
+		setFont(new Font("SansSerif", Font.PLAIN, 10));
+		HeaderRenderer hrender = new HeaderRenderer();
+		SimpleRenderer renderer = new SimpleRenderer();
+
 		// set preferred widths
 		TableColumn column = null;
 		for (int i = 0; i < getColumnCount(); i++) {
 			column = getColumnModel().getColumn(i);
+			column.setCellRenderer(renderer);
+			column.setHeaderRenderer(hrender);
 			column.setPreferredWidth(TrajectoryTableModel.columnWidths[i]);
 		}
+
+		setGridColor(Color.lightGray);
+		showVerticalLines = true;
 
 	}
 

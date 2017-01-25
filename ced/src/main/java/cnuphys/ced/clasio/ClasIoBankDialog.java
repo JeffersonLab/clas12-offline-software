@@ -101,7 +101,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 			}
 		}
 		
-		System.out.println("bankName = [" + _bankName + "] val out = " + Long.toBinaryString(val));
+	//	System.out.println("bankName = [" + _bankName + "] val out = " + Long.toBinaryString(val));
 
 		PropertiesManager.getInstance().putAndWrite(_bankName, ""+val);
 	}
@@ -112,7 +112,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		if (vs != null) {
 			try {
 				long val = Long.parseLong(vs);
-				System.out.println("bankName = [" + _bankName + "] val in  = " + Long.toBinaryString(val));
+		//		System.out.println("bankName = [" + _bankName + "] val in  = " + Long.toBinaryString(val));
 
 				for (int i = 0; i < Math.min(_cbarray.length, 63); i++) {
 					int bit = i+1;  //because of index column

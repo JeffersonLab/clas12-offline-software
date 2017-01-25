@@ -10,8 +10,10 @@ import java.util.List;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.lund.LundId;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
+import cnuphys.swim.SwimTrajectory2D;
 import cnuphys.swim.Swimming;
 
 public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
@@ -125,6 +127,25 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
 	@Override
 	public void setVisible(boolean visible) {
+	}
+
+	@Override
+	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
+		//this is a fugly hack. Check to see if it is hit based ot time based 
+		//then check the display flags
+		LundId lid = trajectory.getTrajectory3D().getLundId();
+		int id = lid.getId();
+		
+		//FUGLY hack
+		if ((id == -99) || (id == -100) || (id == -101)) { //time based
+			return _view.showTB();
+		}
+		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+			return _view.showHB();
+		}
+
+		
+		return true;
 	}
 
 }
