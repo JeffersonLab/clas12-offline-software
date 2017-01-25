@@ -92,6 +92,14 @@ public class DataRingProducer extends xMsg {
         //this.publishCounter++;
     }
     
+    
+    public void shutdown(){
+
+        this.unsubscribeAll();
+        this.connection.close();
+        this.destroy();
+    }
+    
     public void addEvent(HipoDataEvent event){
         
         byte[] b = event.getEventBuffer().array();

@@ -32,7 +32,7 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
     CodaEventDecoder               decoder = new CodaEventDecoder();
     DetectorEventDecoder   detectorDecoder = new DetectorEventDecoder();    
     DataSourceProcessorPane processorPane = null;
-    EmbeddedCanvasTabbed        canvasTab = new EmbeddedCanvasTabbed(true);
+    EmbeddedCanvasTabbed        canvasTab = new EmbeddedCanvasTabbed();
     
     
     public DetectorTiming(){

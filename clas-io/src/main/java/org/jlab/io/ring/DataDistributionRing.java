@@ -44,13 +44,13 @@ public class DataDistributionRing {
             System.out.println("\n   >>>>> starting xmsg proxy : " + host + "/" + xMsgConstants.DEFAULT_PORT);
             proxy = new xMsgProxy(xMsgContext.getContext(), address);
             
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+           /* Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
                     xMsgContext.destroyContext();
                     proxy.shutdown();
                 }
-            });            
+            });*/            
             proxy.start();
             System.out.println("\n   >>>>> starting xmsg proxy : success");
         } catch (xMsgException ex) {
@@ -69,13 +69,13 @@ public class DataDistributionRing {
         try {
             xMsgRegAddress address = new xMsgRegAddress("localhost", xMsgConstants.REGISTRAR_PORT);
             xMsgRegistrar registrar = new xMsgRegistrar(xMsgContext.getContext(), address);
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+            /* Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
                     xMsgContext.destroyContext();
                     registrar.shutdown();
                 }
-            });
+            });*/
 
             registrar.start();
             System.out.println("\n   >>>>> starting xmsg registrar : success");
@@ -87,7 +87,41 @@ public class DataDistributionRing {
     public void initRing(){
         producer = new DataRingProducer();
         producer.setDelay(3000);
-        producer.start();        
+        producer.start();
+        /*
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+
+                    System.out.println("\n\n\n");
+                    System.out.println("   ********* Graceful exit initiated");
+                    producer.shutdown();
+                    xMsgContext.destroyContext();
+                    System.out.println("   ********* Destroying xMsg context : done");
+                    registrar.shutdown();
+                    System.out.println("   ********* Registrar shudown  : done");
+                    proxy.shutdown();
+                    System.out.println("   ********* Proxy service  shudown  : done");
+                    System.out.println("   ********* Exiting Data Distribution\n\n");
+                    System.exit(0);
+                }
+        });*/
+    }
+    
+    public void shutdown(){
+        System.out.println("\n\n\n");
+        System.out.println("   ********* Graceful exit initiated");
+        producer.shutdown();
+        xMsgContext.destroyContext();
+        System.out.println("   ********* Destroying xMsg context : done");
+        
+        registrar.shutdown();
+        
+        System.out.println("   ********* Registrar shudown  : done");
+        proxy.shutdown();
+        System.out.println("   ********* Proxy service  shudown  : done");
+        System.out.println("   ********* Exiting Data Distribution\n\n");
+        System.exit(0);
     }
     
     public void addEvent(HipoDataEvent event){

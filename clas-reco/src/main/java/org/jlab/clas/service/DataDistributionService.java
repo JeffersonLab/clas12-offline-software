@@ -147,12 +147,23 @@ public class DataDistributionService {
         ringProducer.initRing();
         ringProducer.setDelay(decoderDelay);
         int counter = 0;
-        
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    ringProducer.shutdown();
+                    
+                    System.exit(0);
+                }
+        });
         while(true){
             
             while(dataSource.hasEvent()==true){
-                HipoDataEvent event = (HipoDataEvent) dataSource.getNextEvent();                
-                ringProducer.addEvent(event);
+                HipoDataEvent event = (HipoDataEvent) dataSource.getNextEvent(); 
+                try {
+                    ringProducer.addEvent(event);
+                } catch (Exception e) {
+                    
+                }
                 progress.updateStatus();
                 if(this.decoderDelay>0){
                     this.waitFor(this.decoderDelay);
