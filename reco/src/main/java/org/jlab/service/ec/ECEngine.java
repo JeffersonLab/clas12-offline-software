@@ -45,22 +45,22 @@ public class ECEngine extends ReconstructionEngine {
         ECCommon.singleEvent = this.singleEvent;
         int runNo = 10;
         //System.out.println(" PROCESSING EC EVENT ");
-        /*if(de.hasBank("RUN::config")==true){
+        if(de.hasBank("RUN::config")==true){
             DataBank bank = de.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
-        }*/
+        }
     
         
         List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), runNo);
+        
         //System.out.println(" EC STRIPS ARRAY SIZE = " + ecStrips.size());
         /*for(ECStrip strip : ecStrips){
             System.out.println(strip);
         }*/
-        
-<<<<<<< HEAD
-=======
+        /*
         List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), calrun);        
->>>>>>> b636851cfb1c3cf4d190439691776adb8f10dff0
+        */
+        
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak>    ecPeaks = ECCommon.processPeaks(ecPeaksALL);
         for(ECPeak p : ecPeaks) p.redoPeakLine();
