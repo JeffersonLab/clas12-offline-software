@@ -7,7 +7,6 @@ package org.jlab.service.htcc;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.htcc.HTCCReconstruction;
 
 /**
@@ -24,7 +23,7 @@ public class HTCCReconstructionService extends ReconstructionEngine{
     public boolean processDataEvent(DataEvent event) {
         try {
             HTCCReconstruction reco = new HTCCReconstruction();
-            reco.processEvent((EvioDataEvent) event);
+            reco.processEvent(event);
         } catch (Exception e){
             System.out.println("----> error with HTCC reconstruction..");
             e.printStackTrace();

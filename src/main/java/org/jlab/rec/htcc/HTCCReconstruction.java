@@ -3,11 +3,11 @@ package org.jlab.rec.htcc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
 
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataDictionary;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
+
 
 /**
  * Performs hit clustering for HTTC reconstruction.
@@ -48,7 +48,7 @@ public class HTCCReconstruction {
      * Clusters hits in the given event.
      * @param event the event containing hits to cluster
      */
-    public void processEvent(EvioDataEvent event) {
+    public void processEvent(DataEvent event) {
         // Load the raw data about the event
         readBankInput(event);
 
@@ -69,22 +69,34 @@ public class HTCCReconstruction {
      * Reads hit information from the given event out of the bank.
      * @param event the event under analysis
      */
-    void readBankInput(EvioDataEvent event) {
-        if (!event.hasBank("HTCC::dgtz"))
+    void readBankInput(DataEvent event) {
+        if (!event.hasBank("HTCC::adc"))
             return;
-        EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("HTCC::dgtz");
+        DataBank bankDGTZ = event.getBank("HTCC::adc");
 
         if (bankDGTZ.rows() == 0)
             return;
-        
-        hitnArray   = bankDGTZ.getInt("hitn");
-        sectorArray = bankDGTZ.getInt("sector");
-        ringArray   = bankDGTZ.getInt("ring");
-        halfArray   = bankDGTZ.getInt("half");
-        npheArray   = bankDGTZ.getInt("nphe");
-        timeArray   = bankDGTZ.getDouble("time");
-        
-        numHits = hitnArray.length;
+        int rows = bankDGTZ.rows();
+
+        hitnArray = new int[rows];
+     sectorArray = new int[rows];;
+    ringArray = new int[rows];;
+    halfArray = new int[rows];;
+     npheArray = new int[rows];;
+     timeArray = new double[rows];
+     ithetaArray = new int[rows];
+    iphiArray = new int[rows];
+        for(int i = 0; i < bankDGTZ.rows(); i++){
+  //      hitnArray[i]   = bankDGTZ.getInt("hitn", i);
+        System.out.println(bankDGTZ.getByte("sector", i));
+        sectorArray[i] = bankDGTZ.getByte("sector", i);
+
+        ringArray[i]   = bankDGTZ.getShort("component", i);
+        halfArray[i]   = bankDGTZ.getByte("layer", i);
+        npheArray[i]   = bankDGTZ.getInt("ADC", i);
+        timeArray[i]   = bankDGTZ.getFloat("time", i);
+        }
+        numHits = sectorArray.length;
         
         // Create and fill ithetaArray and iphiArray so that the itheta and iphi
         // values are not calculated more than once
@@ -109,7 +121,7 @@ public class HTCCReconstruction {
         
         // Find all hits above the photoelectron threshold
         for (int hit=0; hit<numHits; ++hit) {
-            if (npheArray[hit] > parameters.npheminhit) {
+            if (npheArray[hit] > parameters.npheminhit && sectorArray[hit] > 0) {
                 remainingHits.add(hit);
             }
         }
@@ -272,7 +284,7 @@ public class HTCCReconstruction {
      * @param clusters the output clusters
      * @param event the event under analysis
      */
-    void fillBankResults(List<HTCCCluster> clusters, EvioDataEvent event) {
+    void fillBankResults(List<HTCCCluster> clusters, DataEvent event) {
         // Determine the size of the output
         int size = clusters.size();
         
@@ -280,34 +292,36 @@ public class HTCCReconstruction {
             return;
         
         // Create the output bank
-        EvioDataDictionary dict = (EvioDataDictionary) event.getDictionary();
-        EvioDataBank bankClusters = (EvioDataBank) dict.createBank("HTCCRec::clusters", size);
+       
+        DataBank bankClusters = event.createBank("HTCC::rec", size);
 
         // Fill the output bank
         for (int i = 0; i < size; ++i) {
             HTCCCluster cluster = clusters.get(i);
-            bankClusters.setInt("nhits", i, cluster.getNHitClust());
-            bankClusters.setInt("ntheta", i, cluster.getNThetaClust());
-            bankClusters.setInt("nphi", i, cluster.getNPhiClust());
-            bankClusters.setInt("mintheta", i, cluster.getIThetaMin());
-            bankClusters.setInt("maxtheta", i, cluster.getIThetaMax());
-            bankClusters.setInt("minphi", i, cluster.getIPhiMin());
-            bankClusters.setInt("maxphi", i, cluster.getIPhiMax());
-            bankClusters.setInt("nphe", i, cluster.getNPheTot());
-            bankClusters.setDouble("time", i, cluster.getTime());
-            bankClusters.setDouble("theta", i, cluster.getTheta());
-            bankClusters.setDouble("phi", i, cluster.getPhi());
-            bankClusters.setDouble("dtheta", i, cluster.getDTheta());
-            bankClusters.setDouble("dphi", i, cluster.getDPhi());
-            bankClusters.setDouble("x", i, cluster.getX());
-            bankClusters.setDouble("y", i, cluster.getY());
-            bankClusters.setDouble("z", i, cluster.getZ());
+            bankClusters.setInt("id", i, 0);
+            bankClusters.setShort("nhits", i, (short) cluster.getNHitClust());
+            bankClusters.setShort("ntheta", i, (short)cluster.getNThetaClust());
+            bankClusters.setShort("nphi", i, (short)cluster.getNPhiClust());
+            bankClusters.setShort("mintheta", i,(short) cluster.getIThetaMin());
+            bankClusters.setShort("maxtheta", i, (short)cluster.getIThetaMax());
+            bankClusters.setShort("minphi", i, (short)cluster.getIPhiMin());
+            bankClusters.setShort("maxphi", i,(short) cluster.getIPhiMax());
+            bankClusters.setShort("nphe", i, (short)cluster.getNPheTot());
+            bankClusters.setFloat("time", i, (float) cluster.getTime());
+            bankClusters.setFloat("theta", i, (float) cluster.getTheta());
+            bankClusters.setFloat("phi", i, (float) cluster.getPhi());
+            bankClusters.setFloat("dtheta", i, (float) cluster.getDTheta());
+            bankClusters.setFloat("dphi", i, (float) cluster.getDPhi());
+            bankClusters.setFloat("x", i, (float) 0.1*cluster.getX());
+            bankClusters.setFloat("y", i, (float) 0.1*cluster.getY());
+            bankClusters.setFloat("z", i, (float) 0.1*cluster.getZ());
+
         }
         
         // Push the results into the bank
         event.appendBanks(bankClusters);
         // Display the results
-//        System.out.printf("\n[Detector-HTCC] >>>> Input hits %8d Output Clusters %8d\n", numHits, clusters.size());
+//        System.out.printSystef("\n[Detector-HTCC] >>>> Input hits %8d Output Clusters %8d\n", numHits, clusters.size());
 //        bankClusters.show();
     }
     
@@ -373,12 +387,12 @@ public class HTCCReconstruction {
      */
     public static void main(String[] args){
         String inputfile = "out.ev";
-        EvioSource reader = new EvioSource();
+        HipoDataSource reader = new HipoDataSource();
         reader.open(inputfile);
         
         HTCCReconstruction htccRec = new HTCCReconstruction();
         while(reader.hasEvent()){
-            EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
+            DataEvent event = reader.getNextEvent();
             htccRec.processEvent(event);
         }
     }

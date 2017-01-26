@@ -23,9 +23,9 @@ class HTCCCluster {
     private int iphimax;
 
     private int nphetot;
-    private double x;
-    private double y;
-    private double z;
+    private float x;
+    private float y;
+    private float z;
     
     private double theta;
     private double dtheta;
@@ -148,9 +148,9 @@ class HTCCCluster {
         Geom.Ellipse ellipse1 = new Geom.Ellipse(Geom.eXR[mirror], Geom.eYR[mirror], Geom.eZR[mirror], 0,0.0,0.0,Geom.fXR[mirror], Geom.fYR[mirror], Geom.fZR[mirror]);
         Geom.FindIntersect intersect1 = new Geom.FindIntersect(theta, ellipse1.cY, ellipse1.cZ, ellipse1.b, ellipse1.c);
         Geom.Rotate3D rot = new Geom.Rotate3D(phi, 0.0, intersect1.getyIntersect(), intersect1.getzIntersect());
-        x = rot.getXPrime();
-        y = rot.getYPrime();
-        z = rot.getZPrime();
+        x = (float) rot.getXPrime();
+        y = (float) rot.getYPrime();
+        z = (float) rot.getZPrime();
 
         dtheta = Math.pow(dtheta, -0.5);
         dphi = Math.pow(dphi, -0.5);
@@ -171,13 +171,13 @@ class HTCCCluster {
     public int getNHitClust() {
         return nhitclust;
     }
-    public double getX(){
+    public float getX(){
         return x;
     }
-    public double getY(){
+    public float getY(){
         return y;
     }
-    public double getZ(){
+    public float getZ(){
         return z;      
     }
     public int getIThetaMin() {

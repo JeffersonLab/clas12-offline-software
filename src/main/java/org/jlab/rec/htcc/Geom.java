@@ -73,10 +73,10 @@ public Rotate3D(double angleI, double xI, double yI, double zI){
         angle = angleI;
     }
 double getXPrime(){
-    return x*Math.cos(angle) - y*Math.sin(angle);
+    return x*Math.sin(angle) + y*Math.cos(angle);
 }
 double getYPrime(){
-    return x*Math.sin(angle) + y*Math.cos(angle);
+    return - x*Math.cos(angle) + y*Math.sin(angle);
 }
 double getZPrime(){
     return z;
