@@ -20,9 +20,9 @@ import cnuphys.splot.plot.DoubleFormat;
 
 public class MicroMegasSector extends DonutItem {
 	
-	private static final String[] sectorNames = {"A [2]", "B [1]", "C [3]"};
+	private static final String[] sectorNames = {"A[2]", "B[1]", "C[3]"};
 	private static final double labelAngs[] = {90, 225, 325};
-	private static final double labelRad = 235;
+	private static final double labelRad[] = {230, 220, 225};
 	private static final int xoff[] = {0, -30, 4};
 
 	private static double[][] startAngle = new double[3][6];
@@ -99,13 +99,14 @@ public class MicroMegasSector extends DonutItem {
 		super.drawItem(g, container);
 		
 		if (_layer == 6) {
-			g.setFont(Fonts.mediumFont);
+			g.setFont(Fonts.smallFont);
 			g.setColor(Color.black);
+			int sm1 = _sector -1;
 			String s = sectorNames[_sector - 1];
 
 			Point2D.Double wp = new Point2D.Double();
-			wp.x = labelRad*Math.cos(Math.toRadians(labelAngs[_sector-1]));
-			wp.y = labelRad*Math.sin(Math.toRadians(labelAngs[_sector-1]));
+			wp.x = labelRad[sm1]*Math.cos(Math.toRadians(labelAngs[sm1]));
+			wp.y = labelRad[sm1]*Math.sin(Math.toRadians(labelAngs[sm1]));
 			Point pp = new Point();
 			container.worldToLocal(pp, wp);
 			g.drawString(s, pp.x+xoff[_sector-1], pp.y);

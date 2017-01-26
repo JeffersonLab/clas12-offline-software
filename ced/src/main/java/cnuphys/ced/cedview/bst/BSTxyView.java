@@ -85,6 +85,9 @@ public class BSTxyView extends CedXYView {
 	// the CND xy polygons
 	CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
 	
+	//the CTOF polygons
+	CTOFPolygon ctofPoly[] = new CTOFPolygon[48];
+	
 	//Micro megas [sector][layer]
 	private MicroMegasSector microMegasSector[][];
 
@@ -126,6 +129,12 @@ public class BSTxyView extends CedXYView {
 						paddleId);
 			}
 		}
+		
+		//ad the ctof polygons
+		for (int paddleId = 1; paddleId <= 48; paddleId++) {
+			ctofPoly[paddleId - 1] = new CTOFPolygon(paddleId);
+		}
+
 	}
 	
 	/**
@@ -336,6 +345,14 @@ public class BSTxyView extends CedXYView {
 			}
 
 		}
+		
+		// CTOF Polys
+		for (int paddleId = 1; paddleId <= 48; paddleId++) {
+			if (ctofPoly[paddleId - 1] != null) {
+				ctofPoly[paddleId - 1].draw(g2, container);
+			}
+		}
+		
 
 		g.setClip(oldClip);
 	}
