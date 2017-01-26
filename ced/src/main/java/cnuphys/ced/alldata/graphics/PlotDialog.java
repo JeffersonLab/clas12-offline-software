@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.jlab.io.base.DataEvent;
 
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
@@ -70,6 +71,7 @@ public abstract class PlotDialog extends JDialog
 		setTitle(name);
 		setModal(false);
 		setSize(width, height);
+		setIconImage(ImageManager.cnuIcon.getImage());
 
 		addMenus();
 

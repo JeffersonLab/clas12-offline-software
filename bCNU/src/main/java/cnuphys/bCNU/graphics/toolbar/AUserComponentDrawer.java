@@ -22,7 +22,8 @@ import cnuphys.splot.plot.GraphicsUtilities;
 public abstract class AUserComponentDrawer extends DrawableAdapter {
 
 	// STring used when no PIDs found (e.g., a raw event)
-	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
+//	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
+	private static final String NO_PIDS = "";
 
 	// the component on the toolbar being drawn upon
 	private UserToolBarComponent _component;

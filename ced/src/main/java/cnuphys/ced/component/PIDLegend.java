@@ -27,7 +27,8 @@ public class PIDLegend extends JComponent {
 			.getInstance();
 
 	// STring used when no PIDs found (e.g., a raw event)
-	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
+//	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
+	private static final String NO_PIDS = "";
 
 	// used to get the text in the right place
 	private static int _ytext = -1;

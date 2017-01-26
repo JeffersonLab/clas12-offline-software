@@ -177,6 +177,29 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		return _genPartRec.getPhi();
 	}
 
+	
+	/**
+	 * Get the r coordinate in cm for the given index
+	 * @param index the index
+	 * @return the r coordinate
+	 */
+	public double getR(int index) {
+		if ((index < 0) || (index > size())) {
+			return Double.NaN;
+		}
+		
+		double v[] = get(index);
+		if (v == null) {
+			return Double.NaN;
+		}
+		
+		double x = v[0];
+		double y = v[1];
+		double z = v[2];
+		
+		//convert to cm
+		return Math.sqrt(x*x + y*y + z*z)*100.;
+	}
 
 	/**
 	 * Get the average phi for this trajectory based on positions, not

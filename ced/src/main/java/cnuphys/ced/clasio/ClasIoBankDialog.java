@@ -13,6 +13,8 @@ import javax.swing.table.TableColumn;
 
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataEvent;
+
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Bits;
@@ -52,6 +54,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		_bankName = bankName;
 		setLayout(new BorderLayout(4, 4));
 		setup();
+		setIconImage(ImageManager.cnuIcon.getImage());
 
 		// close is like a cancel
 		WindowAdapter wa = new WindowAdapter() {

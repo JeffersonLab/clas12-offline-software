@@ -21,6 +21,8 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
+import cnuphys.bCNU.graphics.ImageManager;
+
 /**
  * A simple dialog template. The dialog is given a Border layout, and component
  * creators for the different directions are called. They should be overridden
@@ -62,6 +64,7 @@ public class SimpleDialog extends JDialog implements ActionListener {
 		super();
 		setTitle(title);
 		setModal(modal);
+		setIconImage(ImageManager.cnuIcon.getImage());
 		_closeout = closeout;
 
 		// close is like a close

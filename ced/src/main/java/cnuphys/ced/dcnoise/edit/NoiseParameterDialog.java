@@ -24,6 +24,7 @@ import javax.swing.event.ChangeListener;
 import cnuphys.bCNU.dialog.ButtonPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -84,6 +85,7 @@ public class NoiseParameterDialog extends JDialog {
 	public NoiseParameterDialog() {
 		setTitle("DC Noise Algorithm Parameters");
 		setModal(true);
+		setIconImage(ImageManager.cnuIcon.getImage());
 
 		// close is like a cancel
 		WindowAdapter wa = new WindowAdapter() {

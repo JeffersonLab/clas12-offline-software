@@ -10,6 +10,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 
 public class DefineExpressionDialog extends JDialog implements ActionListener {
 	
@@ -23,6 +24,7 @@ public class DefineExpressionDialog extends JDialog implements ActionListener {
 		setTitle("Define a 2D Histogram");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
+		setIconImage(ImageManager.cnuIcon.getImage());
 		
 		_namedVariablePanel = new NameVariablePanel();
 		add(_namedVariablePanel, BorderLayout.CENTER);

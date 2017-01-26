@@ -291,7 +291,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		}
 		
 		double fract = ((double)avgADC)/((double)(_maxADC));
-		fract = Math.max(0.15, Math.min(1.0, fract));
+		fract = Math.max(0.5, Math.min(1.0, fract));
 		int alpha = (int)(254*fract);
 		
 		return new Color(255, 0, 0, alpha);

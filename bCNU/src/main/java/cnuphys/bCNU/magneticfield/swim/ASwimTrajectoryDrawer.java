@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.lund.LundId;
@@ -33,6 +34,8 @@ import cnuphys.swim.Swimming;
 public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 		IProjector {
 	
+	//colors
+	protected static final Color sectChangeColor = X11Colors.getX11Color("purple", 128);
 	protected static final Color tracerColor = new Color(0, 0, 0, 50);
 	protected static final Stroke tracerStroke = GraphicsUtilities.getStroke(3f, LineStyle.SOLID);
 	protected static final Stroke planeStroke = GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID);
@@ -49,6 +52,10 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 			20);
 
 	protected SwimTrajectory2D _closestTrajectory;
+	
+	/** mark sector changes? */
+	protected boolean _markSectChanges = false;
+	protected double _minMarkR = 25; //cm
 
 	/**
 	 * Actual drawing method
@@ -83,6 +90,9 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 
 				for (SwimTrajectory2D trajectory2D : _trajectories2D) {
 					drawSwimTrajectory(g, container, trajectory2D);
+					if (_markSectChanges) {
+						markSectorChanges(g, container, trajectory2D);
+					}
 				}
 			}
 		}
@@ -107,6 +117,9 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 
 				for (SwimTrajectory2D trajectory2D : _trajectories2D) {
 					drawSwimTrajectory(g, container, trajectory2D);
+					if (_markSectChanges) {
+						markSectorChanges(g, container, trajectory2D);
+					}
 				}
 			}
 		}
@@ -124,6 +137,29 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	 */
 	protected boolean veto(SwimTrajectory trajectory) {
 		return false;
+	}
+	
+	//denote sector changes
+	private void markSectorChanges(Graphics g, IContainer container,
+			SwimTrajectory2D trajectory) {
+		
+		
+		int[] indices = trajectory.sectChangeIndices();
+		if (indices == null) {
+			return;
+		}
+		
+		SwimTrajectory traj3D = trajectory.getTrajectory3D();
+		Point pp = new Point();
+		for (int idx : indices) {
+
+			double r = traj3D.getR(idx);
+			if (r > _minMarkR) {
+				Point2D.Double wp = trajectory.getPath()[idx];
+				container.worldToLocal(pp, wp);
+				SymbolDraw.drawDiamond(g, pp.x, pp.y, 5, Color.cyan, sectChangeColor);
+			}
+		}
 	}
 
 	/**

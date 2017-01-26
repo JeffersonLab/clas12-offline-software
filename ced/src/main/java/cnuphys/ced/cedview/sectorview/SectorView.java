@@ -786,6 +786,22 @@ public class SectorView extends CedView implements ChangeListener {
 		if (pixlen < 25.0) {
 			SwimTrajectory2D traj2D = _swimTrajectoryDrawer
 					.getClosestTrajectory();
+			
+			//in a sector change diamond
+			int sectChangeIndices[] = traj2D.sectChangeIndices();
+			if (sectChangeIndices != null) {
+				Point scpp = new Point();
+				Rectangle crect = new Rectangle();
+				for (int idx : sectChangeIndices) {
+					Point2D.Double scwp = traj2D.getPath()[idx];
+					container.worldToLocal(scpp, scwp);
+					crect.setBounds(scpp.x-4, scpp.y-4, 8, 8);
+					if (crect.contains(pp)) {
+						feedbackStrings.add(SwimTrajectory2D.fbColor + traj2D.sectorChangeString(idx));
+					}
+				}
+			}
+			
 			if (traj2D != null) {
 				traj2D.addToFeedback(feedbackStrings);
 				_lastTrajStr = traj2D.summaryString();

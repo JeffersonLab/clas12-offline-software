@@ -8,17 +8,22 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoRingSource;
 
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.IpField;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
@@ -54,10 +59,13 @@ public class ClasIoEventManager {
 
 	// connect to ring
 	public JButton _connectButton;
+	
+	//decode evio to hipo
+	private CLASDecoder _decoder;
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
-		HIPOFILE, RING, FASTMC
+		HIPOFILE, HIPORING, FASTMC, ET
 	}
 	
 	//for firing property changes
@@ -66,7 +74,10 @@ public class ClasIoEventManager {
 
 	// the current source type
 	private EventSourceType _sourceType = EventSourceType.HIPOFILE;
-
+   
+	//ET dialog
+	private ETDialog _etDialog;
+	
 	// hipo ring dialog
 	private RingDialog _ringDialog;
 
@@ -91,7 +102,14 @@ public class ClasIoEventManager {
 	private File _currentHipoFile;
 
 	// current ip address of HIPO ring
-	private String _currentIPAddress;
+	private String _currentHIPOAddress;
+	
+	// current ip address of ET ring
+	private String _currentETAddress;
+	
+	//current ET file
+	private String _currentETFile;
+
 
 	// the clas_io source of events
 	private DataSource _dataSource;
@@ -154,7 +172,7 @@ public class ClasIoEventManager {
 							ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
 							if (cd != null) {
 								int pid[] = (int[]) (cd.getDataArray(_currentEvent));
-								if (pid != null) {
+								if ((pid != null) && (pid.length > 0)) {
 									for (int pdgid : pid) {
 										LundId lid = LundSupport.getInstance().get(pdgid);
 										if (lid != null) {
@@ -241,10 +259,15 @@ public class ClasIoEventManager {
 
 		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
 			return "Hipo File " + _currentHipoFile.getName();
-		} else if (_sourceType == EventSourceType.FASTMC) {
+		} 
+		else if (_sourceType == EventSourceType.FASTMC) {
 			return FastMCManager.getInstance().getSourceDescription();
-		} else if ((_sourceType == EventSourceType.RING) && (_currentIPAddress != null)) {
-			return "Hipo Ring " + _currentIPAddress;
+		} 
+		else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress != null)) {
+			return "Hipo Ring " + _currentHIPOAddress;
+		}
+		else if ((_sourceType == EventSourceType.ET) && (_currentETAddress != null) && (_currentETFile != null)) {
+			return "ET " + _currentETAddress + " " + _currentETFile;
 		}
 		return "(none)";
 	}
@@ -296,7 +319,58 @@ public class ClasIoEventManager {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Connect to an ET ring
+	 */
+	public void ConnectToETRing() {
+		if (_etDialog == null) {
+			_etDialog = new ETDialog();
+		}
+		_etDialog.setVisible(true);
+		
+		if (_etDialog.reason() == DialogUtilities.OK_RESPONSE) {
+			_runData.reset();
 
+			_dataSource = null;
+			_currentETAddress = _etDialog.getIpAddress();
+			_currentETFile = _etDialog.getFileName();
+		
+			//does the file exist?
+			
+			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
+			File file = new File(_currentETFile);
+			if (!file.exists()) {
+				JOptionPane.showMessageDialog
+				(null, "The file: " + file.getAbsolutePath() + " does not exist.",
+						"ET File not Found", 
+						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+				return;
+			}
+
+			try {
+				_dataSource = new EvioETSource(_currentETAddress);
+				if (_dataSource == null) {
+					JOptionPane.showMessageDialog
+					(null, "The ET Data Source is null, used IP: " + _currentETAddress,
+							"ET null Data Source", 
+							JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+					return;
+				}
+				
+				System.err.println("trying to connect using et file: " + _currentETFile);
+				setEventSourceType(EventSourceType.ET);
+				_dataSource.open(_currentETFile);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} //end ok
+	}
+
+	/**
+	 * Connect to a HIPO ring
+	 */
 	public void ConnectToHipoRing() {
 		if (_ringDialog == null) {
 			_ringDialog = new RingDialog();
@@ -306,34 +380,34 @@ public class ClasIoEventManager {
 			_runData.reset();
 
 			_dataSource = null;
-			_currentIPAddress = "";
+			_currentHIPOAddress = "";
 			int connType = _ringDialog.getConnectionType();
 
 			// let's try to connect
 			try {
 				if (connType == RingDialog.CONNECTSPECIFIC) {
 					_dataSource = new HipoRingSource();
-					_currentIPAddress = _ringDialog.getIpAddress();
-					_dataSource.open(_currentIPAddress);
+					_currentHIPOAddress = _ringDialog.getIpAddress();
+					_dataSource.open(_currentHIPOAddress);
 				} else if (connType == RingDialog.CONNECTDAQ) {
 					_dataSource = HipoRingSource.createSourceDaq();
-					_currentIPAddress = " DAQ ";
+					_currentHIPOAddress = " DAQ ";
 				}
 			} catch (Exception e) {
 				_dataSource = null;
-				_currentIPAddress = "";
+				_currentHIPOAddress = "";
 				Log.getInstance().warning(e.getMessage());
 			}
 
 			if (_dataSource != null) {
-				setEventSourceType(EventSourceType.RING);
+				setEventSourceType(EventSourceType.HIPORING);
 				try {
 					getNextEvent();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}
+		} //end ok
 	}
 
 	/**
@@ -372,9 +446,19 @@ public class ClasIoEventManager {
 	 * 
 	 * @return <code>true</code> is source type is the hippo ring.
 	 */
-	public boolean isSourceRing() {
-		return getEventSourceType() == EventSourceType.RING;
+	public boolean isSourceHipoRing() {
+		return getEventSourceType() == EventSourceType.HIPORING;
 	}
+	
+	/**
+	 * Check whether current event source type is the ET ring
+	 * 
+	 * @return <code>true</code> is source type is the ET ring.
+	 */
+	public boolean isSourceET() {
+		return getEventSourceType() == EventSourceType.ET;
+	}
+
 
 	/**
 	 * Check whether current event source type is FastMC
@@ -395,9 +479,14 @@ public class ClasIoEventManager {
 		int evcount = 0;
 		if (isSourceHipoFile()) {
 			evcount = _dataSource.getSize();
-		} else if (isSourceRing()) {
+		} 
+		else if (isSourceHipoRing()) {
 			return Integer.MAX_VALUE;
-		} else if (isSourceFastMC()) {
+		} 
+		else if (isSourceET()) {
+			return Integer.MAX_VALUE;
+		} 
+		else if (isSourceFastMC()) {
 		}
 		return evcount;
 	}
@@ -431,7 +520,8 @@ public class ClasIoEventManager {
 		case HIPOFILE:
 			isOK = (isSourceHipoFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
 			break;
-		case RING:
+		case HIPORING:
+		case ET:
 			isOK = true;
 			break;
 		case FASTMC:
@@ -456,7 +546,8 @@ public class ClasIoEventManager {
 		case HIPOFILE:
 			numRemaining = getEventCount() - getEventNumber();
 			break;
-		case RING:
+		case HIPORING:
+		case ET:
 			numRemaining = Integer.MAX_VALUE;
 		case FASTMC:
 			break;
@@ -521,24 +612,6 @@ public class ClasIoEventManager {
 		_allReconSwimmer = allSwimmer;
 	}
 
-	public DataEvent waitForEvent() {
-		EventSourceType estype = getEventSourceType();
-		switch (estype) {
-		case RING:
-			_dataSource.waitForEvents();
-			getNextEvent();
-			break;
-		case HIPOFILE:
-			getNextEvent();
-			break;
-		case FASTMC:
-			FastMCManager.getInstance().nextEvent();
-			break;
-		}
-
-		return _currentEvent;
-	}
-
 	/**
 	 * Get the next event from the current compact reader
 	 * 
@@ -548,7 +621,7 @@ public class ClasIoEventManager {
 
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
-		case RING:
+		case HIPORING:
 			if (_dataSource.hasEvent()) {
 				_currentEvent = _dataSource.getNextEvent();
 
@@ -581,8 +654,45 @@ public class ClasIoEventManager {
 		case FASTMC:
 			FastMCManager.getInstance().nextEvent();
 			break;
-		}
+			
+		case ET:
+			int maxTries = 30;
+			_currentEvent = null;
+			
+			int iTry = 1;
+			while((_currentEvent == null) && (iTry <= maxTries)) {
+				if (_dataSource.hasEvent()) {
+					_currentEvent = _dataSource.getNextEvent();
+					if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+						
+						if (_decoder == null) {
+							_decoder = new CLASDecoder();
+						}
+						_currentEvent = _decoder.getDataEvent(_currentEvent);
+//						System.err.println("Decoded to HIPO");
+//						_currentEvent.show();
+					}
+				}
+				else {
+					_dataSource.waitForEvents();
+					iTry++;
+				}
+			} //while
+			
+			if (_currentEvent == null) {
+				System.err.println("Got a null data event from ET after " + iTry + " tries.");
+			}
+			
+			if (!isAccumulating()) {
+				notifyEventListeners();
+			}
+			else {
+				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+			}
 
+			break;
+		}
+		
 		return _currentEvent;
 	}
 	
@@ -594,7 +704,8 @@ public class ClasIoEventManager {
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-		case RING:
+		case HIPORING:
+		case ET:
 			return ((_dataSource != null) && _dataSource.hasEvent());
 		default:
 			return true;

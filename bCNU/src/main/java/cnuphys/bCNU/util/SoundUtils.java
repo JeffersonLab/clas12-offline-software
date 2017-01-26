@@ -2,6 +2,13 @@ package cnuphys.bCNU.util;
 
 import java.util.Random;
 
+import javax.sound.midi.Instrument;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Synthesizer;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -87,12 +94,40 @@ public class SoundUtils {
 	  
 
 	  public static void main(String[] args) {
+//		  
+//		  Synthesizer synthesizer = null;
+//		  try {
+//			synthesizer = MidiSystem.getSynthesizer();
+//			Instrument[] instruments = synthesizer.getAvailableInstruments();
+//			for (Instrument instrument : instruments) {
+//				System.out.println(instrument.getName());
+//			}
+//			synthesizer.loadInstrument(instruments[0]);
+//		    Receiver synthRcvr = synthesizer.getReceiver();
+//		    
+//			ShortMessage myMsg = new ShortMessage();
+//		    // Play the note Middle C (60) moderately loud
+//		    // (velocity = 93)on channel 4 (zero-based).
+//		    try {
+//				myMsg.setMessage(ShortMessage.NOTE_ON, 4, 60, 93);
+//			} catch (InvalidMidiDataException e) {
+//				e.printStackTrace();
+//			} 
+//		    synthRcvr.send(myMsg, -1); // -1 means no time stamp			
+//
+//
+//		} catch (MidiUnavailableException e) {
+//			e.printStackTrace();
+//		}
+//		  
+
 		  
-		  Random random = new Random();
-		  for (int i = 0; i < 100; i++) {
-			  double val = random.nextDouble();
-			  playData(2000, 3000, 200, 0.1, 0.9, val, 600, 5000, 1.);
-		  }
+		  
+//		  Random random = new Random();
+//		  for (int i = 0; i < 100; i++) {
+//			  double val = random.nextDouble();
+//			  playData(2000, 3000, 200, 0.1, 0.9, val, 600, 5000, 1.);
+//		  }
 		  
 		  
 //		  try {

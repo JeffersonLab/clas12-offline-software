@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.splot.pdata.Histo2DData;
 
@@ -30,6 +31,7 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 		setTitle("Define a 2D Histogram");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
+		setIconImage(ImageManager.cnuIcon.getImage());
 		
 		_histoPanel = new Histo2DPanel();
 		add(_histoPanel, BorderLayout.CENTER);
