@@ -71,20 +71,20 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         
         sourceFile = new JButton("E");
         //sourceFile.setIcon(fileIcon);
-        sourceFile.setPreferredSize(new Dimension(35, 35));
+        //sourceFile.setPreferredSize(new Dimension(35, 35));
         sourceFile.setActionCommand("OpenFile"); 
         sourceFile.setToolTipText("Open EVIO file.");        
         sourceFile.addActionListener(this);
         
         JButton sourceFileEt = new JButton("Et");
         //sourceFile.setIcon(fileIcon);
-        sourceFileEt.setPreferredSize(new Dimension(35, 35));
+        //sourceFileEt.setPreferredSize(new Dimension(35, 35));
         sourceFileEt.setActionCommand("OpenFileET");
         sourceFileEt.setToolTipText("Connect to ET ring");        
         sourceFileEt.addActionListener(this);
         
         JButton sourceFileHipo = new JButton("H");
-        sourceFileHipo.setPreferredSize(new Dimension(35, 35));
+        //sourceFileHipo.setPreferredSize(new Dimension(35, 35));
         sourceFileHipo.setActionCommand("OpenFileHipo");
         sourceFileHipo.setToolTipText("Open Hipo file");
         sourceFileHipo.addActionListener(this);
@@ -92,13 +92,13 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         JButton sourceFileRing = new JButton("HR");
         sourceFileRing.setActionCommand("OpenFileRing");
         sourceFileRing.setToolTipText("Connect to xMsg Hipo ring");
-        sourceFileRing.setPreferredSize(new Dimension(35, 35));
+        //sourceFileRing.setPreferredSize(new Dimension(35, 35));
         sourceFileRing.addActionListener(this);
         //sourceFile.setBackground(this.paneBackground);
         
         JButton resetListeners = new JButton("Reset");
         resetListeners.setActionCommand("ResetListeners");
-        resetListeners.setPreferredSize(new Dimension(55, 35));
+        //resetListeners.setPreferredSize(new Dimension(55, 35));
         resetListeners.setToolTipText("Reset data listeners");
         resetListeners.addActionListener(this);
         

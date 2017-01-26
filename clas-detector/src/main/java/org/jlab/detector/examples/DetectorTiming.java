@@ -6,6 +6,7 @@
 package org.jlab.detector.examples;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -16,6 +17,7 @@ import org.jlab.detector.decode.DetectorEventDecoder;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorShape2D;
 import org.jlab.groot.data.H1F;
+import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -43,7 +45,7 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
         }
         
         processorPane = new DataSourceProcessorPane();
-        processorPane.setDelay(500);
+        processorPane.setDelay(1500);
         pane.add(canvasTab,BorderLayout.CENTER);
         pane.add(processorPane,BorderLayout.PAGE_END);
         this.processorPane.addEventListener(this);
@@ -55,34 +57,65 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
         detectorDecoder.translate(dataSet);
         detectorDecoder.fitPulses(dataSet);
         
-        List<DetectorDataDgtz>   PCAL = DetectorDataDgtz.getDataADC(dataSet, DetectorType.EC, 2, 1);
-        List<DetectorDataDgtz>  ECIN = DetectorDataDgtz.getDataADC(dataSet, DetectorType.EC, 2, 4);
-        System.out.println("SIZE = " + dataSet.size() + "  PCAL = " + PCAL.size() + " ECIN = " + ECIN.size());
-        this.canvasTab.getCanvas("Sector 2").clear();
-        this.canvasTab.getCanvas("Sector 2").divide(1, 4);
-        this.canvasTab.getCanvas("Sector 2").cd(2);
+        
+        for(int sector = 1; sector <=6 ; sector++){
+            String name = "Sector " + sector;
+            EmbeddedCanvas canvas = this.canvasTab.getCanvas(name);
+            canvas.clear();
+            canvas.divide(1, 5);
+            List<H1F> hPCAL = this.getHistograms(dataSet, DetectorType.EC, sector, 1);
+            canvas.cd(0);
+            for(H1F h : hPCAL){ canvas.draw(h, "same");}
+            canvas.cd(1);
+            List<H1F> hECIN = this.getHistograms(dataSet, DetectorType.EC, sector, 4);
+            for(H1F h : hECIN){ canvas.draw(h, "same");}
+            canvas.cd(2);
+            List<H1F> hFTOF1A = this.getHistograms(dataSet, DetectorType.FTOF, sector, 1);
+            for(H1F h : hFTOF1A){ canvas.draw(h, "same");}
+            canvas.cd(3);
+            List<H1F> hFTOF1B = this.getHistograms(dataSet, DetectorType.FTOF, sector, 1);
+            for(H1F h : hFTOF1B){ canvas.draw(h, "same");}
+            canvas.cd(4);
+            List<H1F> hHTCC = this.getHistograms(dataSet, DetectorType.HTCC, sector);
+            for(H1F h : hHTCC){ canvas.draw(h, "same");}            
+        }                        
+    }
+    
+    public List<H1F>  getHistograms(List<DetectorDataDgtz>  dataSet, DetectorType type, int sector){
+        List<DetectorDataDgtz>   PCAL = DetectorDataDgtz.getDataADC(dataSet, type,sector);
+        List<H1F>  histograms = new ArrayList<H1F>();
         int counter = 1;
         for(DetectorDataDgtz data : PCAL){
             short[] array = data.getADCData(0).getPulseArray();
-            H1F h = new H1F("PCAL_"+counter,"",array.length,0.0,(double) array.length);
+            H1F h = new H1F(type.getName()+"_S_" + sector + "_I_" + counter,
+                    "",array.length,0.0,(double) array.length);
             for(int i = 0; i < array.length; i++){
                 h.setBinContent(i, array[i]);
             }
-            this.canvasTab.getCanvas("Sector 2").draw(h, "same");
+            //this.canvasTab.getCanvas("Sector 2").draw(h, "same");
+            histograms.add(h);
             counter++;
         }
-        
-        this.canvasTab.getCanvas("Sector 2").cd(3);
-        counter = 1;
-        for(DetectorDataDgtz data : ECIN){
+        return histograms;
+    }
+    
+    public List<H1F>  getHistograms(List<DetectorDataDgtz>  dataSet, DetectorType type, int sector, int layer){
+        List<DetectorDataDgtz>   PCAL = DetectorDataDgtz.getDataADC(dataSet, type,sector,layer);
+        List<H1F>  histograms = new ArrayList<H1F>();
+        int counter = 1;
+        for(DetectorDataDgtz data : PCAL){
             short[] array = data.getADCData(0).getPulseArray();
-            H1F h = new H1F("ECIN_"+counter,"",array.length,0.0,(double) array.length);
+            H1F h = new H1F(type.getName()+"_S_" + sector + "_L_" + layer + "_I_" + counter,
+                    "",array.length,0.0,(double) array.length);
             for(int i = 0; i < array.length; i++){
                 h.setBinContent(i, array[i]);
             }
-            this.canvasTab.getCanvas("Sector 2").draw(h, "same");
+            //this.canvasTab.getCanvas("Sector 2").draw(h, "same");
+            h.setTitle("ADC PULSES ["+type.getName()+"]");
+            histograms.add(h);
             counter++;
         }
+        return histograms;
     }
     
     @Override

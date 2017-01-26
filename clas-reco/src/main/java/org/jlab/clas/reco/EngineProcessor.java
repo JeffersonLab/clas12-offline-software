@@ -40,17 +40,28 @@ public class EngineProcessor {
     }
     
     public void initDefault(){
-        //String[] names = new String[]{"DCHB","FTOF","EC","DCTB","EBTB"};
+        
+        String[] names = new String[]{
+            "DCHB","FTOF","EC",
+            //"EBHB" , 
+            "DCTB","EBTB"};
+        
         String[] services = new String[]{
             "org.jlab.service.dc.DCHBEngine",
             "org.jlab.service.ftof.FTOFEngine",
-            "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.ec.ECEngine",
+            //"org.jlab.service.eb.EBEngine",
+            "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.eb.EBEngine"
         };
+        
+        for(int i = 0; i < names.length; i++){
+            this.addEngine(names[i], services[i]);
+        }
+        /*
         for(String service : services){
             this.addEngine(service);
-        }
+        }*/
     }
     /**
      * Adding engine to the map the order of the services matters, since they will 
@@ -102,9 +113,13 @@ public class EngineProcessor {
      * Initialize all the engines in the chain.
      */
     public void init(){
+        System.out.println("\n\n\n ");
         for(Map.Entry<String,ReconstructionEngine> entry : this.processorEngines.entrySet()){
+            System.out.println(String.format("   >>>>>> (*) initializing : %8s : %s",entry.getKey(),
+                    entry.getValue().getClass().getName()));
             entry.getValue().init();
         }
+        System.out.println("\n\n");
     }
     /**
      * process a single event through the chain.

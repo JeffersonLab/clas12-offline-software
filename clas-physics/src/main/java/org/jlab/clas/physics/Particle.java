@@ -46,7 +46,19 @@ public class Particle {
 		particleID = pid;
 		particleCharge = (byte) charge;
 	}
-
+        
+        public static Particle createWithMassCharge(double mass, int charge ,double px, double py, double pz, double vx, double vy, double vz){
+            Particle p = new Particle();
+            p.initParticleWithMass(mass, px, py, pz, vx, vy, vz);
+            p.particleCharge = (byte) charge;
+            return p;
+        }
+        
+        public static Particle createWithPid(int pid ,double px, double py, double pz, double vx, double vy, double vz){
+            Particle p = new Particle(pid,px,py,pz,vx,vy,vz);
+            return p;
+        }
+        
 	public final void initParticleWithMass(double mass, double px, double py, double pz, double vx, double vy, double vz) {
 		particleCharge = 0;
 		partVector = new LorentzVector();

@@ -43,8 +43,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
             }
         }
     }
-    
-    
+        
     
     private double findPedistal(DetectorDataDgtz.ADCData data){
         int ped = 0;

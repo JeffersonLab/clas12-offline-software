@@ -299,6 +299,7 @@ public class EvioHipoEvent {
         parser.addOption("-r","10");
         parser.addOption("-t","-1.0");
         parser.addOption("-s","1.0");
+        parser.addOption("-n", "-1");
         
         parser.parse(args);
         
@@ -320,22 +321,30 @@ public class EvioHipoEvent {
             writer.setCompressionType(2);
             System.out.println(">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
             int nevent = 1;
+            int maximumEvents = parser.getOption("-n").intValue();
+            
             for(String input : inputFiles){
                 System.out.println(">>>>>  appending file : " + input);
-            try {
-                EvioSource reader = new EvioSource();
-                reader.open(input);
-                
-                while(reader.hasEvent()==true){
-                    EvioDataEvent evioEvent = (EvioDataEvent) reader.getNextEvent();                    
-                    HipoDataEvent hipoEvent = convertor.getHipoEvent(writer, evioEvent);
-                    int nrun = parser.getOption("-r").intValue();
-                    float torus    = (float) parser.getOption("-t").doubleValue();
-                    float solenoid = (float) parser.getOption("-s").doubleValue();
-                    HipoDataBank header = convertor.createHeaderBank(hipoEvent, nrun, nevent, torus, solenoid);
-                    hipoEvent.appendBanks(header);
-                    writer.writeEvent(hipoEvent);
-                    nevent++;
+                try {
+                    EvioSource reader = new EvioSource();
+                    reader.open(input);
+                    
+                    while(reader.hasEvent()==true){
+                        EvioDataEvent evioEvent = (EvioDataEvent) reader.getNextEvent();                    
+                        HipoDataEvent hipoEvent = convertor.getHipoEvent(writer, evioEvent);
+                        int nrun = parser.getOption("-r").intValue();
+                        float torus    = (float) parser.getOption("-t").doubleValue();
+                        float solenoid = (float) parser.getOption("-s").doubleValue();
+                        HipoDataBank header = convertor.createHeaderBank(hipoEvent, nrun, nevent, torus, solenoid);
+                        hipoEvent.appendBanks(header);
+                        writer.writeEvent(hipoEvent);
+                        nevent++;
+                        if(maximumEvents>0&&nevent>=maximumEvents) {
+                            reader.close();
+                            writer.close();
+                            System.out.println("\n\n\n Finished output file at event count = " + nevent);
+                            System.exit(0);
+                        }
                 }
             } catch (Exception e){
                 e.printStackTrace();

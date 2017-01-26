@@ -111,6 +111,23 @@ public class DetectorData {
                 detectorEvent.getParticles().get(association).addResponse(r);
             }
         }
+        
+        if(event.hasBank("MC::Particle")==true){
+            DataBank  bank = event.getBank("MC::Particle");
+            detectorEvent.getGeneratedEvent().clear();
+            int nrows = bank.rows();
+            for(int row = 0; row < nrows; row++){
+                detectorEvent.getGeneratedEvent().addGeneratedParticle(
+                        bank.getInt("pid", row),
+                        bank.getFloat("px", row),
+                        bank.getFloat("py", row),
+                        bank.getFloat("pz", row),
+                        bank.getFloat("vx", row),
+                        bank.getFloat("vy", row),
+                        bank.getFloat("vz", row)
+                );
+            }
+        }
         return detectorEvent;
     }
     /**
