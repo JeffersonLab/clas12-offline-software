@@ -94,6 +94,9 @@ public class DetectorOccupancy {
         }
     }
     
+    
+    public DetectorCollection getCollection(){ return this.occupancyCollection;}
+    
     public static class DetectorMeasurement {
         
         int ADCCount = 0;

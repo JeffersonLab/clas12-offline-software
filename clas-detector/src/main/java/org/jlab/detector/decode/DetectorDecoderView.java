@@ -102,6 +102,7 @@ public class DetectorDecoderView extends JPanel implements IDataEventListener {
                 for(int i = 0; i < nbins; i++){
                     dh.setBinContent(i, detectorData.get(index).getADCData(0).getPulseValue(i));
                 }
+                this.dataCanvas.clear();
                 this.dataCanvas.divide(1, 1);
                 this.dataCanvas.getPad(0).getAxisFrame().getAxisX().setTitle(xTitle);
                 //this.dataCanvas.getPad(0).getAxisFrame().getAxisX().setAxisFontSize(18);

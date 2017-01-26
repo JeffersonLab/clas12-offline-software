@@ -181,7 +181,8 @@ public class DetectorEventDecoder {
                                 }
                                 //System.out.println(" FIT RESULT = " + extendedFitter.adc + " / "
                                 //        + this.extendedFitter.t0 + " / " + this.extendedFitter.ped);
-                                adc.setIntegral(extendedFitter.adc);
+                                int adc_corrected = extendedFitter.adc + extendedFitter.ped*(nsa+nsb);
+                                adc.setIntegral(adc_corrected);
                                 adc.setTimeWord(this.extendedFitter.t0);
                                 adc.setPedestal((short) this.extendedFitter.ped);                                
                             }
