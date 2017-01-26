@@ -13,7 +13,7 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.bst.BSTzView;
+import cnuphys.ced.cedview.central.BSTzView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;

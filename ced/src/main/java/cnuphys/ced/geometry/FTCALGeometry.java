@@ -32,9 +32,9 @@ public class FTCALGeometry {
 	// z offset is a shift in z (cm) to place the 3d view at the origin
 	public static final float FTCAL_Z0 = 200f;
 
-	// there are 332 paddles but the IDs are not 1..332
+	// there are 332 paddles but the IDs are not 1..332 they are 1..475
 	private static ScintillatorPaddle paddles[];
-	private static int goodIds[];
+	private static short goodIds[];
 
 	/**
 	 * Initialize the FTCAL Geometry by loading all the wires
@@ -61,16 +61,21 @@ public class FTCALGeometry {
 			paddles[i] = null;
 		}
 
-		// there are 332 good ids, not sequentioal
-		goodIds = new int[332];
+        
+		
+		
+		// there are 332 good ids, not sequential, first is 8, last is 475
+		goodIds = new short[332];
 
 		int count = 0;
 		List<ScintillatorPaddle> padlist = ftCalLayer.getAllComponents();
+		
+		
 		for (ScintillatorPaddle sp : padlist) {
 
 			int id = sp.getComponentId();
 			paddles[id] = sp;
-			goodIds[count] = id;
+			goodIds[count] = (short)id;
 
 			// System.err.println("** PADDLE ID: " + id + "   good paddle: " +
 			// (paddles[id] != null));
@@ -189,8 +194,12 @@ public class FTCALGeometry {
 	 * 
 	 * @return all the good ids
 	 */
-	public static int[] getGoodIds() {
+	public static short[] getGoodIds() {
 		return goodIds;
+	}
+	
+	public static short getGoodId(int index) {
+		return goodIds[index];
 	}
 
 	public static void main(String arg[]) {
@@ -222,6 +231,7 @@ public class FTCALGeometry {
 		System.out.println("ymax: " + ymax);
 		System.out.println("zmax: " + zmax);
 		System.out.println("zmin: " + zmin);
+		
 
 	}
 

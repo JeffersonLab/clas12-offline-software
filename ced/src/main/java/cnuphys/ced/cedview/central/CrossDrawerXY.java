@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -31,7 +31,7 @@ public class CrossDrawerXY extends BSTxyViewDrawer {
 	// cached rectangles for feedback
 	private Rectangle _fbRects[];
 
-	public CrossDrawerXY(BSTxyView view) {
+	public CrossDrawerXY(CentralXYView view) {
 		super(view);
 	}
 

@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.Graphics;
 import java.awt.Point;
@@ -9,16 +9,16 @@ import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 
-public abstract class BSTxyViewDrawer implements IDrawable {
+public abstract class BSTzViewDrawer implements IDrawable  {
 
 	// convenient access to the event manager
 	protected ClasIoEventManager _eventManager = ClasIoEventManager
 			.getInstance();
 
-	// the BSTXYView being rendered.
-	protected BSTxyView _view;
+	// the BSTZView being rendered.
+	protected BSTzView _view;
 
-	public BSTxyViewDrawer(BSTxyView view) {
+	public BSTzViewDrawer(BSTzView view) {
 		_view = view;
 	}
 

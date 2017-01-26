@@ -18,7 +18,7 @@ import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.bst.BSTzView;
+import cnuphys.ced.cedview.central.BSTzView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.item.MagFieldItem;
 

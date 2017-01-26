@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -56,19 +56,6 @@ public class CTOFPolygon extends Polygon {
 		g.setColor(Color.black);
 		g.drawPolygon(this);
 
-	}
-
-	public boolean getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
-//
-//		if (!contains(screenPoint)) {
-//			return false;
-//		}
-//
-//		fbString("red", "cnd layer " + layer, feedbackStrings);
-//		fbString("red", "cnd paddle " + paddleId, feedbackStrings);
-
-		return true;
 	}
 
 	// convenience method to create a feedback string

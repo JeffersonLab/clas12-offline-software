@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -20,7 +20,7 @@ import cnuphys.ced.geometry.BSTxyPanel;
 public class BSTxyMagDrawer extends DrawableAdapter {
 
 	// the owner view
-	private final BSTxyView _view;
+	private final CentralXYView _view;
 
 	private static Font _font = Fonts.smallFont;
 
@@ -28,7 +28,7 @@ public class BSTxyMagDrawer extends DrawableAdapter {
 
 	private Rectangle2D.Double _layerRect = new Rectangle2D.Double();
 
-	public BSTxyMagDrawer(BSTxyView view) {
+	public BSTxyMagDrawer(CentralXYView view) {
 		_view = view;
 	}
 

@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.List;
 import java.awt.geom.Point2D;
@@ -20,6 +21,11 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
+import cnuphys.ced.event.data.FTCAL;
+import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.geometry.FTCALGeometry;
 
 public class FTCalXYView extends CedXYView {
@@ -30,28 +36,25 @@ public class FTCalXYView extends CedXYView {
 
 	// the CND xy polygons
 	FTCalXYPolygon ftCalPoly[] = new FTCalXYPolygon[332];
+	
+	private short[] indices = new short[476];
 
 	/**
 	 * Create a BST View
 	 * 
-	 * @param keyVals
 	 */
 	public FTCalXYView(Object... keyVals) {
 		super(keyVals);
+		
+		for (int i = 0; i < indices.length; i++) {
+			indices[i] = -1;
+		}
 
-		//
-		// _crossDrawer = new CrossDrawerXY(this);
-		//
-		// // draws any swum trajectories (in the after draw)
-		// _swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
-		//
-		// // default properties
-		// setBooleanProperty(DisplayArray.HITCROSS_PROPERTY, true);
-		//
-		// //add the polys
-		int goodIds[] = FTCALGeometry.getGoodIds();
+		//good IDs are the component ids
+		short goodIds[] = FTCALGeometry.getGoodIds();
 		for (int i = 0; i < 332; i++) {
 			int id = goodIds[i];
+			indices[id] = (short)i; //reverse mapping
 			ftCalPoly[i] = new FTCalXYPolygon(id);
 		}
 
@@ -138,19 +141,12 @@ public class FTCalXYView extends CedXYView {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-				//
-				// if (!_eventManager.isAccumulating()) {
-				// drawBSTHits(g, container);
-				//
-				// if (showReconsBSTCrosses()) {
-				// _crossDrawer.draw(g, container);
-				// }
-				//
-				// if (showCosmics()) {
-				// drawCosmicTracks(g, container);
-				// }
-				//
-				// _swimTrajectoryDrawer.draw(g, container);
+				if (isSingleEventMode()) {
+					drawSingleEventHits(g, container);
+				}
+				else {
+					drawAccumulatedHits(g, container);
+				}
 				Rectangle screenRect = getActiveScreenRectangle(container);
 				drawAxes(g, container, screenRect, false);
 				// }
@@ -160,6 +156,90 @@ public class FTCalXYView extends CedXYView {
 		};
 		getContainer().setAfterDraw(afterDraw);
 	}
+	
+	
+	//single event drawer
+	private void drawSingleEventHits(Graphics g, IContainer container) {
+		
+		AdcHitList hits = FTCAL.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					short id = hit.component;
+					short index = indices[id];
+					if (index >= 0) {
+						FTCalXYPolygon poly = ftCalPoly[index];
+						Color color = hits.adcColor(hit);
+						g.setColor(color);
+						g.fillPolygon(poly);
+						g.setColor(Color.black);
+						g.drawPolygon(poly);
+					}
+					else {
+						System.err.println("indexing problem in FT");
+					}
+				}
+			}
+		}
+	}
+	
+	//accumulated hits drawer
+	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		
+//		int maxHit = AccumulationManager.getInstance().getMaxDgtzHTCCCount();
+//		if (maxHit < 1) {
+//			return;
+//		}
+//
+//		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzHTCCData();
+//
+//		int hit = hits[_sector - 1][_ring - 1][_half - 1];
+//
+//		double fract;
+//		if (_view.isSimpleAccumulatedMode()) {
+//			fract = ((double) hit) / maxHit;
+//		} else {
+//			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
+//		}
+//
+		// Color color = AccumulationManager.getInstance().getColor(fract);
+		//
+		// g.setColor(color);
+		// g.fillPolygon(_lastDrawnPolygon);l
+		// g.setColor(Color.black);
+		// g.drawPolygon(_lastDrawnPolygon);
+
+		int maxHit = AccumulationManager.getInstance().getMaxFTCALCount();
+		if (maxHit < 1) {
+			return;
+		}
+		int acchits[] = AccumulationManager.getInstance().getAccumulatedFTCALData();
+		for (int i = 0; i < acchits.length; i++) {
+			if (acchits[i] > 0) {
+				int index = indices[i];
+				if (index >= 0) {
+					FTCalXYPolygon poly = ftCalPoly[index];
+					double fract;
+					if (isSimpleAccumulatedMode()) {
+						fract = ((double) acchits[i]) / maxHit;
+					} else {
+						fract = Math.log((double) acchits[i] + 1.) / Math.log(maxHit + 1.);
+					}
+
+					Color color = AccumulationManager.getInstance().getColor(fract);
+					g.setColor(color);
+					g.fillPolygon(poly);
+					g.setColor(Color.black);
+					g.drawPolygon(poly);
+				}
+				else {
+					System.err.println("indexing problem in FT");
+				}
+			}
+		}
+		
+	}
+
 
 	/**
 	 * This adds the detector items. The AllDC view is not faithful to geometry.
@@ -192,10 +272,22 @@ public class FTCalXYView extends CedXYView {
 
 		if ((rad > 4.6) && (rad < 18)) {
 
-			for (FTCalXYPolygon poly : ftCalPoly) {
-				found = poly.getFeedbackStrings(container, screenPoint,
-						worldPoint, feedbackStrings);
+			for (int index = 0; index < ftCalPoly.length; index++) {
+				FTCalXYPolygon poly = ftCalPoly[index];
+				found = poly.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
+
 				if (found) {
+					
+					AdcHitList hits = FTCAL.getInstance().getHits();
+					if ((hits != null) && !hits.isEmpty()) {
+						short component = FTCALGeometry.getGoodId(index);
+						AdcHit hit = hits.get(1, 1, component);
+						if (hit != null) {
+							hit.tdcAdcFeedback(feedbackStrings);
+						}
+					}
+					
+					
 					break;
 				}
 			}

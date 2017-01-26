@@ -196,5 +196,33 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 
 	}
 	
+	/**
+	 * Add this hit to the feedback list
+	 * @param componentName a nice name for the component
+	 * @param feedbackStrings
+	 */
+	public void tdcAdcFeedback(String componentName,
+			List<String> feedbackStrings) {
+		
+		feedbackStrings.add(_fbColor +
+				componentName + " " + component);
+
+		String tdcStr = tdcString();
+		String adcStr = adcString();
+		String dataStr = tdcStr + " " + adcStr;
+		if (dataStr.length() > 3) {
+			feedbackStrings.add(_fbColor + dataStr);
+		}
+		
+		String pedStr = pedString();
+		String timeStr = timeString();
+		String data2Str = pedStr + " " + timeStr;
+		
+		if (data2Str.length() > 3) {
+			feedbackStrings.add(_fbColor + data2Str);
+		}
+
+	}
+	
 
 }

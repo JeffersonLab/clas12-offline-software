@@ -32,8 +32,8 @@ import cnuphys.ced.ced3d.ForwardView3D;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
-import cnuphys.ced.cedview.bst.BSTxyView;
-import cnuphys.ced.cedview.bst.BSTzView;
+import cnuphys.ced.cedview.central.CentralXYView;
+import cnuphys.ced.cedview.central.BSTzView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.ft.FTCalXYView;
 import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
@@ -100,7 +100,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.07";
+	private static final String _release = "build 0.99.90";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -129,7 +129,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ClasIoMonteCarloView _monteCarloView;
 	private ClasIoReconEventView _reconEventView;
 	private ClasIoEventView _eventView;
-	private BSTxyView _bstXyView;
+	private CentralXYView _bstXyView;
 	private BSTzView _bstZView;
 	private FTCalXYView _ftcalXyView;
 	private DCXYView _dcXyView;
@@ -141,7 +141,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ForwardView3D _forward3DView;
 	private CentralView3D _central3DView;
 	private FTCalView3D _ftCal3DView;
-	private GeometryReportView _geoReportView;
 	
 	//sector views
 	private SectorView _sectorView14;
@@ -227,9 +226,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 			_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
 			_virtualView.moveTo(_plotView, 12, VirtualView.BOTTOMLEFT);
-			_virtualView.moveTo(_geoReportView, 18, VirtualView.CENTER);
 
-			_virtualView.moveTo(_ftcalXyView, 10, VirtualView.BOTTOMLEFT);
+			_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
 
 			if (_use3D) {
 				_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
@@ -271,8 +269,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// add a reconstructed tracks view
 		_reconEventView = ClasIoReconEventView.getInstance();
 
-		//geometry report view
-		_geoReportView = new GeometryReportView();
 		
 		if (!pluginsOnly()) {
 			ViewManager.getInstance().getViewMenu().addSeparator();
@@ -284,7 +280,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_bstZView = BSTzView.createBSTzView();
 
 			// add a bstXYView
-			_bstXyView = BSTxyView.createBSTxyView();
+			_bstXyView = CentralXYView.createCentralXYView();
 
 			// add a ftcalxyYView
 			_ftcalXyView = FTCalXYView.createFTCalXYView();

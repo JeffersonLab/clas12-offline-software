@@ -24,7 +24,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jlab.geom.prim.Plane3D;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.bst.BSTSupport;
+import cnuphys.ced.cedview.central.BSTSupport;
 import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
