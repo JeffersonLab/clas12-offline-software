@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -21,7 +21,10 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -29,7 +32,7 @@ import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.splot.style.SymbolDraw;
 
-public class BSTxyHitDrawer implements IDrawable {
+public class CentralXYHitDrawer implements IDrawable {
 
 	// the event manager
 	private final ClasIoEventManager _eventManager = ClasIoEventManager
@@ -41,9 +44,9 @@ public class BSTxyHitDrawer implements IDrawable {
 	private Vector<FeedbackRect> _fbRects = new Vector<FeedbackRect>();
 
 	// owner view
-	private BSTxyView _view;
+	private CentralXYView _view;
 
-	public BSTxyHitDrawer(BSTxyView view) {
+	public CentralXYHitDrawer(CentralXYView view) {
 		_view = view;
 	}
 
@@ -124,7 +127,7 @@ public class BSTxyHitDrawer implements IDrawable {
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
-				BSTxyPanel panel = BSTxyView.getPanel(lay0 + 1, sect0 + 1);
+				BSTxyPanel panel = CentralXYView.getPanel(lay0 + 1, sect0 + 1);
 
 				if (panel != null) {
 					int hitCount = bstData[lay0][sect0];
@@ -150,6 +153,29 @@ public class BSTxyHitDrawer implements IDrawable {
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
 		drawBSTHitsSingleMode(g, container);
 		drawMicroMegasHitsSingleMode(g, container);
+		drawCTOFSingleHitsMode(g, container);
+	}
+	
+	// draw micromegas hits
+	private void drawCTOFSingleHitsMode(Graphics g,
+			IContainer container) {
+		
+		TdcAdcHitList hits = CTOF.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (TdcAdcHit hit : hits) {
+				if (hit != null) {
+					CTOFPolygon poly = _view.getCTOFPolygon(hit.component);
+					if (poly != null) {
+						Color color = hits.adcColor(hit);
+						g.setColor(color);
+						g.fillPolygon(poly);
+						g.setColor(Color.black);
+						g.drawPolygon(poly);
+					}
+				}
+			}
+		}
+		
 	}
 
 	// draw micromegas hits
@@ -203,7 +229,7 @@ public class BSTxyHitDrawer implements IDrawable {
 				if (hackSect == 0) hackSect = numSect;
 				
 				
-				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+				BSTxyPanel panel = CentralXYView.getPanel(bstlayer[i],
 						hackSect);
 				
 //				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],

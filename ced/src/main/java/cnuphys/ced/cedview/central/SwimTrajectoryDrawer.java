@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -18,9 +18,9 @@ import cnuphys.swim.Swimming;
 
 public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
-	private BSTxyView _view;
+	private CentralXYView _view;
 
-	public SwimTrajectoryDrawer(BSTxyView view) {
+	public SwimTrajectoryDrawer(CentralXYView view) {
 		_view = view;
 	}
 

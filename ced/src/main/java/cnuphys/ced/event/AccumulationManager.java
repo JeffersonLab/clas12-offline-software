@@ -5,7 +5,7 @@ import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
-import cnuphys.ced.cedview.bst.BSTxyView;
+import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
@@ -21,6 +21,7 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
+import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.TdcAdcHit;
@@ -63,6 +64,9 @@ public class AccumulationManager
 	private int _htccDgtzAccumulatedData[][][];
 	private int _maxDgtzHTCCCount;
 	
+	//ftcc accumulated data
+	private int _ftcalAccumulatedData[];
+	private int _maxFTCALCount;
 	
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _dcDgtzAccumulatedData[][][][];
@@ -113,6 +117,9 @@ public class AccumulationManager
 		addAccumulationListener(this);
 		_eventManager.addClasIoEventListener(this, 1);
 		
+		//FTCAL data
+		_ftcalAccumulatedData = new int[476];
+		
 		//htcc data
 		_htccDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
 		
@@ -159,6 +166,12 @@ public class AccumulationManager
 	@Override
 	public void clear() {
 		_eventCount = 0;
+		
+		// clear ftcal
+		for (int i = 0; i < _ftcalAccumulatedData.length; i++) {
+			_ftcalAccumulatedData[i] = 0;
+		}
+		_maxFTCALCount = 0;
 
 		//clear accumulated HTCC
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
@@ -253,6 +266,16 @@ public class AccumulationManager
 	}
 	
 	/**
+	 * Get the accumulated FTCAL data
+	 * 
+	 * @return the accumulated FTCAL data
+	 */
+
+	public int[] getAccumulatedFTCALData() {
+		return _ftcalAccumulatedData;
+	}
+	
+	/**
 	 * Get the accumulated dgtz HTCC data
 	 * 
 	 * @return the accumulated HTCC data
@@ -314,6 +337,10 @@ public class AccumulationManager
 	 */
 	public int[][][] getAccumulatedDgtzFullBstData() {
 		return _bstDgtzFullAccumulatedData;
+	}
+	
+	public int getMaxFTCALCount() {
+		return _maxFTCALCount;
 	}
 
 	/**
@@ -474,6 +501,9 @@ public class AccumulationManager
 
 		_eventCount++;
 		
+		//FTCal Data
+		AdcHitList ftcalList = FTCAL.getInstance().updateAdcList();
+		accumFTCAL(ftcalList);
 
 		//htcc data
 		AdcHitList htccList = HTCC2.getInstance().updateAdcList();
@@ -500,7 +530,7 @@ public class AccumulationManager
 			int bststrip[] = BST.strip();
 			
 			for (int i = 0; i < hitCount; i++) {
-				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+				BSTxyPanel panel = CentralXYView.getPanel(bstlayer[i],
 						bstsector[i]);
 				if (panel != null) {
 					int lay0 = bstlayer[i] - 1;
@@ -535,6 +565,18 @@ public class AccumulationManager
 		} //hitcount > 0
 		
 
+	}
+	
+	//accumulate ftcal
+	private void accumFTCAL(AdcHitList list) {
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+
+		for (AdcHit hit : list) {
+			_ftcalAccumulatedData[hit.component] += 1;
+			_maxFTCALCount = Math.max(_maxFTCALCount, _ftcalAccumulatedData[hit.component]);
+		}
 	}
 	
 	//accumulate htcc

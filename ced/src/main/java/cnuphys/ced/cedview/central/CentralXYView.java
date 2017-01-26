@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.BorderLayout;
 
@@ -37,6 +37,9 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.CTOF;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
@@ -46,37 +49,7 @@ import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
-public class BSTxyView extends CedXYView {
-
-	// Comments on the Geometry of the BST from Veronique
-	// ------------------------------------
-	// The BST geometry consists of 3 (or 4) superlayers of modules.
-	// Each superlayer contains two layers of modules, labeled A and B.
-	// Layer B corresponds to the top layer as seen from the outside of the
-	// detector,
-	// and Layer A to the layer underneath Layer B looking from the outside.
-	// Each module contains 3 sensors (hybrid, intermediate, far).
-	// The hybrid, intermediate and far sensors are aligned in the direction of
-	// the beam
-	// corresponding to the positive z-axis in the laboratory frame.
-	// The coordinate system in the lab frame (center of the target) is a right
-	// handed system, with
-	// the z unit vector in the direction of the beam, and the y unit vector
-	// pointing up;
-	// the x unit vector points therefore to the left when looking in the
-	// direction of the beam.
-	// The numbering convention for the sectors is as follows:
-	// sector 1 modules oriented at 90 deg (80 deg) with respect to the y-axis
-	// for superlayers 1,2,4 (3);
-	// sector numbers increase in the clockwise direction (viewed in the
-	// direction of the beam).
-	// The strips in the hybrid sensor of Layer B are connected to the pitch
-	// adapter and
-	// and implanted with 156 micron pitch. There are 256 strips oriented at
-	// graded angle
-	// from 0 to +3 deg with respect to the bottom edge of layer B which
-	// corresponds to the z-direction.
-	// Strip number 1 in Layer B is parallel to the bottom of the sensor.
+public class CentralXYView extends CedXYView {
 
 	private BSTxyPanel _closestPanel;
 
@@ -106,18 +79,18 @@ public class BSTxyView extends CedXYView {
 	private CrossDrawerXY _crossDrawer;
 	
 	//draws hits
-	private BSTxyHitDrawer _hitDrawer;
+	private CentralXYHitDrawer _hitDrawer;
 
 	/**
 	 * Create a BST View
 	 * 
 	 * @param keyVals
 	 */
-	private BSTxyView(Object... keyVals) {
+	private CentralXYView(Object... keyVals) {
 		super(keyVals);
 
 		_crossDrawer = new CrossDrawerXY(this);
-		_hitDrawer = new BSTxyHitDrawer(this);
+		_hitDrawer = new CentralXYHitDrawer(this);
 		
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
@@ -152,7 +125,7 @@ public class BSTxyView extends CedXYView {
 	 * 
 	 * @return a BSTXy View
 	 */
-	public static BSTxyView createBSTxyView() {
+	public static CentralXYView createCentralXYView() {
 
 		// set to a fraction of screen
 		Dimension d = GraphicsUtilities.screenFraction(0.35);
@@ -162,7 +135,7 @@ public class BSTxyView extends CedXYView {
 		int height = width;
 
 		// create the view
-		final BSTxyView view = new BSTxyView(
+		final CentralXYView view = new CentralXYView(
 				PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, 
 				PropertySupport.WIDTH, width,
 				PropertySupport.HEIGHT, height, 
@@ -530,6 +503,33 @@ public class BSTxyView extends CedXYView {
 
 				}
 			}
+			
+			//ctof
+			else if ((rad > 250) && (rad < 260)) {
+				
+	
+				for (int index = 0; index < 48; index++) {
+					if (ctofPoly[index].contains(screenPoint)) {
+						int paddle = index+1;
+						TdcAdcHit hit = null;
+			  		    TdcAdcHitList hits = CTOF.getInstance().getHits();
+						if ((hits != null) && !hits.isEmpty()) {
+							hit = hits.get(0, 0, paddle);
+						}
+						
+						if (hit == null) {
+							feedbackStrings.add("$dodger blue$" + "CTOF paddle " + paddle);
+						}
+						else {
+							hit.tdcAdcFeedback("CTOF paddle", feedbackStrings);
+						}
+
+						break;
+					}
+					
+					
+				}
+			}
 
 		}
 
@@ -640,6 +640,14 @@ public class BSTxyView extends CedXYView {
 
 		} // end for loop
 
+	}
+	
+	public CTOFPolygon getCTOFPolygon(int index1) {
+		int index0 = index1-1;
+		if ((index0 < 0) || (index0 > 47)) {
+			return null;
+		}
+		return ctofPoly[index0];
 	}
 
 	/**

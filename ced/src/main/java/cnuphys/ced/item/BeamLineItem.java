@@ -6,7 +6,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import cnuphys.ced.cedview.bst.BSTzView;
+import cnuphys.ced.cedview.central.BSTzView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;

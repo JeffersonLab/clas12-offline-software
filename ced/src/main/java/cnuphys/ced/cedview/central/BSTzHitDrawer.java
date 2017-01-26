@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.bst;
+package cnuphys.ced.cedview.central;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -175,7 +175,7 @@ public class BSTzHitDrawer implements IDrawable {
 				
 
 //				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
-				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], hackSect);
+				BSTxyPanel panel = CentralXYView.getPanel(bstlayer[i], hackSect);
 				if (panel != null) {
 					for (int zopt = 0; zopt < 3; zopt++) {
 						if (panel.hit[zopt]) {
