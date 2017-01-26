@@ -32,6 +32,7 @@ public class ECEngine extends ReconstructionEngine {
     Detector        ecDetector = null;
     public Boolean       debug = false;
     public Boolean singleEvent = false;
+    int                 calrun = 2;
     
     public ECEngine(){
         super("EC","gavalian","1.0");
@@ -56,6 +57,10 @@ public class ECEngine extends ReconstructionEngine {
             System.out.println(strip);
         }*/
         
+<<<<<<< HEAD
+=======
+        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), calrun);        
+>>>>>>> b636851cfb1c3cf4d190439691776adb8f10dff0
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak>    ecPeaks = ECCommon.processPeaks(ecPeaksALL);
         for(ECPeak p : ecPeaks) p.redoPeakLine();
@@ -196,6 +201,10 @@ public class ECEngine extends ReconstructionEngine {
         event.appendBanks(bankC);
     }
     
+    public void setCalRun(int runno) {
+        this.calrun = runno;
+    }
+    
     public void setStripThresholds(int thr0, int thr1, int thr2) {
         System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
         ECCommon.stripThreshold[0] = thr0;
@@ -231,7 +240,8 @@ public class ECEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(ecTables));
         
         ecDetector =  GeometryFactory.getDetector(DetectorType.EC);
-        
+
+	setCalRun(2);
         setStripThresholds(10,9,8);
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
