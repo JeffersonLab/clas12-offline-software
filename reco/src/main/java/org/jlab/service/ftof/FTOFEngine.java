@@ -10,10 +10,8 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
@@ -24,6 +22,7 @@ import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
+import org.jlab.service.dc.DCHBEngine;
 import org.jlab.geometry.prim.Line3d;
 
 /**
@@ -199,10 +198,15 @@ public class FTOFEngine extends ReconstructionEngine {
 	}
 	
 	public static void main (String arg[]) throws IOException {
+		
+		DCHBEngine en0 = new DCHBEngine();
+		en0.init();
+		
 		FTOFEngine en = new FTOFEngine();
 		en.init();
 		
-		String inputFile = "/Users/ziegler/Workdir/Files/Data/DecodedData/HipoTestFile.hipo";
+		int counter=0;
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/RaffaNewTOF.hipo";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -210,9 +214,32 @@ public class FTOFEngine extends ReconstructionEngine {
 		
 		 HipoDataSource reader = new HipoDataSource();
          reader.open(inputFile);
-          
-		while(reader.getNextEvent()!=null)
-			en.processDataEvent(reader.getNextEvent());
 		
-	}
+         HipoDataSync writer = new HipoDataSync();
+		//Writer
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCRBREC.hipo";
+		 writer.open(outputFile);
+		
+		long t1=0;
+		while(reader.hasEvent() ){
+			
+			counter++;
+		
+			DataEvent event = reader.getNextEvent();
+			if(counter>0)
+				t1 = System.currentTimeMillis();
+			
+			en0.processDataEvent(event);
+
+			en.processDataEvent(event);
+			//System.out.println("  EVENT "+counter);
+			if(counter>7) break;
+			//if(counter%100==0)
+				System.out.println("run "+counter+" events");
+			writer.writeEvent(event);
+		}
+		writer.close();
+		double t = System.currentTimeMillis()-t1;
+		System.out.println(t1+" TOTAL  PROCESSING TIME = "+(t/(float)counter));
+	 }
 }

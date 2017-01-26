@@ -131,7 +131,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		this.set_paddleLine(paddleLine);
 	 }	
 
-	private Point3D calc_hitPosition() {
+	public Point3D calc_hitPosition() {
 		Point3D hitPosition = new Point3D();
         Vector3D dir = new Vector3D(
                 this.get_paddleLine().end().x() - this.get_paddleLine().origin().x(),

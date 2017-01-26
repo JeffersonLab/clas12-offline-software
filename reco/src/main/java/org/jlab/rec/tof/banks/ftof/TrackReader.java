@@ -63,7 +63,7 @@ public class TrackReader {
 		double[] uy		= new double[rows]; 		// Region 3 cross y-unit-dir in the lab
 		double[] uz		= new double[rows]; 		// Region 3 cross z-unit-dir in the lab
 		double[] p		= new double[rows]; 		// pathlength of the track from origin to DC R3
-		
+		int[] tid   	= new int[rows];			// track id in HB bank
 		if(event.hasBank("HitBasedTrkg::HBTracks")==true) {
 			// instanciates the list 
 			// each arraylist corresponds to the tracks for a given sector
@@ -74,6 +74,7 @@ public class TrackReader {
 			for(int i = 0; i<rows; i++){
 				//if(fitChisq[i]>1)
 				//	continue; // check this
+				tid[i] = bankDC.getShort("id", i);
 				x[i] = bankDC.getFloat("c3_x", i);
 				y[i] = bankDC.getFloat("c3_y", i);
 				z[i] = bankDC.getFloat("c3_z", i);

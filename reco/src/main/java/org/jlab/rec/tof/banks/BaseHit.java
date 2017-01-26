@@ -2,10 +2,10 @@ package org.jlab.rec.tof.banks;
 
 public class BaseHit implements Comparable<BaseHit>, IBaseHit{
 
+	private int _Id;
 	private int _Sector;
 	private int _Layer;
 	private int _Component;
-	private int _Id;
 	public int ADC1 = -1;
 	public int ADC2 = -1 ;
 	public int TDC1 = -1;
@@ -15,10 +15,15 @@ public class BaseHit implements Comparable<BaseHit>, IBaseHit{
 	public double ADCTime2 = -1;
 	public int ADCpedestal2= -1;
 	
+	public int ADCbankHitIdx1 = -1;
+	public int ADCbankHitIdx2 = -1;
+	public int TDCbankHitIdx1 = -1;
+	public int TDCbankHitIdx2 = -1;
+	
 	public BaseHit(int sector, int layer, int component) {
 		_Sector		=	 sector;
 		_Layer		=	 layer; 
-		_Component	=	 component;
+		_Component	=	 component; 
 	}
 	
 	@Override

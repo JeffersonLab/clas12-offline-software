@@ -66,13 +66,16 @@ public class BaseHitReader{
 		int[] pedestalADC1 	= null;
 		double[] time2 		= null;
 		int[] pedestalADC2 	= null;
+		int[] ADCIdx1 		= null;
+		int[] ADCIdx2 		= null;
 		
 		int[] sectorTDC 	= null;
 	    int[] layerTDC  	= null;
 		int[] componentTDC  = null;
 		int[] TDC1 			= null;
 		int[] TDC2 			= null;
-
+		int[] TDCIdx1 		= null;
+		int[] TDCIdx2 		= null;
 		
 		if(event.hasBank(detADC)==true) {
 			DataBank bank = event.getBank(detADC);
@@ -87,6 +90,8 @@ public class BaseHitReader{
 			pedestalADC1 	= new int[bankSize];
 			time2 			= new double[bankSize];
 			pedestalADC2 	= new int[bankSize];
+			ADCIdx1			= new int[bankSize];
+			ADCIdx2			= new int[bankSize];
 			
 			for(int i = 0; i<bankSize; i++) {
 				sectorADC[i] 	= bank.getByte("sector", i);
@@ -103,17 +108,21 @@ public class BaseHitReader{
 				pedestalADC1[i]	= -1;
 				time2[i]		= -1;
 				pedestalADC2[i]	= -1;
-				
+								
 				if(order == 0) {
 					ADC1[i] = ADC;
 					time1[i]		= time;
 					pedestalADC1[i]	= pedestalADC;
+					ADCIdx1[i] = i;
 				}
 				if(order == 1) {
 					ADC2[i] = ADC;
 					time2[i]		= time;
 					pedestalADC2[i]	= pedestalADC;
+					ADCIdx2[i] = i;
 				}
+				
+				
 				
 				BaseHit newHit = new BaseHit(sectorADC[i], layerADC[i], componentADC[i]);
 				
@@ -123,6 +132,8 @@ public class BaseHitReader{
 				newHit.ADCTime1=time1[i];
 				newHit.ADCpedestal2=pedestalADC2[i];
 				newHit.ADCTime2=time2[i];
+				newHit.ADCbankHitIdx1 = ADCIdx1[i];
+				newHit.ADCbankHitIdx2 = ADCIdx2[i];
 				
 				int[] _SLC = {newHit.get_Sector(), newHit.get_Layer(), newHit.get_Component()};
 				DetectorLocation DL = new DetectorLocation(_SLC);
@@ -139,6 +150,8 @@ public class BaseHitReader{
 			componentTDC 	= new int[bankSize];
 			TDC1 			= new int[bankSize];
 			TDC2 			= new int[bankSize];
+			TDCIdx1			= new int[bankSize];
+			TDCIdx2			= new int[bankSize];
 			
 			for(int i = 0; i<bankSize; i++) {
 				sectorTDC[i] 	= bank.getByte("sector", i);
@@ -147,16 +160,23 @@ public class BaseHitReader{
 				int order  		= bank.getByte("order", i);
 				int TDC 		= bank.getInt("TDC", i); 
 				
-				TDC1[i] = -1;
-				TDC2[i] = -1;
-				if(order == 2)
+				TDC1[i]   = -1;
+				TDC2[i]   = -1;								
+				
+				if(order == 2) {
 					TDC1[i] = TDC;
-				if(order == 3)
+					TDCIdx1[i] = i;
+				}
+				if(order == 3) {
 					TDC2[i] = TDC;
+					TDCIdx2[i] = i;
+				}
 				
 				BaseHit newHit = new BaseHit(sectorTDC[i], layerTDC[i], componentTDC[i]);
 				newHit.TDC1=TDC1[i];
 				newHit.TDC2=TDC2[i];
+				newHit.TDCbankHitIdx1 = TDCIdx1[i];
+				newHit.TDCbankHitIdx2 = TDCIdx2[i];
 				
 				int[] _SLC = {newHit.get_Sector(), newHit.get_Layer(), newHit.get_Component()};
 				DetectorLocation DL = new DetectorLocation(_SLC);

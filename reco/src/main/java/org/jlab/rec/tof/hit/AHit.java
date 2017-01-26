@@ -26,6 +26,11 @@ public abstract class AHit implements Comparable<AHit>{
 	private int _TDC1;
 	private int _TDC2;
 	
+	private int _ADCbankHitIdx1 = -1;
+	private int _ADCbankHitIdx2 = -1;
+	private int _TDCbankHitIdx1 = -1;
+	private int _TDCbankHitIdx2 = -1;
+	
 	public AHit(int id, int panel, int sector, int paddle, int aDC1, int tDC1, int aDC2, int tDC2) {
 		_Id	=	 id;
 		_Panel	=	 panel;
@@ -357,6 +362,38 @@ public abstract class AHit implements Comparable<AHit>{
 	private double  _yTrkUnc = 0.0500;	// hit coordinate uncertainty [with respect to the center of the scintillator bar from track] --> Guess of 500 microns ... error needs to be propagated... to do
 	private double  _TrkPathLen;		// pathlength of the track matched to the hit
  
+	public int get_ADCbankHitIdx1() {
+		return _ADCbankHitIdx1;
+	}
+
+	public void set_ADCbankHitIdx1(int _ADCbankHitIdx1) {
+		this._ADCbankHitIdx1 = _ADCbankHitIdx1;
+	}
+
+	public int get_ADCbankHitIdx2() {
+		return _ADCbankHitIdx2;
+	}
+
+	public void set_ADCbankHitIdx2(int _ADCbankHitIdx2) {
+		this._ADCbankHitIdx2 = _ADCbankHitIdx2;
+	}
+
+	public int get_TDCbankHitIdx1() {
+		return _TDCbankHitIdx1;
+	}
+
+	public void set_TDCbankHitIdx1(int _TDCbankHitIdx1) {
+		this._TDCbankHitIdx1 = _TDCbankHitIdx1;
+	}
+
+	public int get_TDCbankHitIdx2() {
+		return _TDCbankHitIdx2;
+	}
+
+	public void set_TDCbankHitIdx2(int _TDCbankHitIdx2) {
+		this._TDCbankHitIdx2 = _TDCbankHitIdx2;
+	}
+
 	/**
 	 * Sets the hit parameters based on the set calibration constants ( for FTOF 1=L, 2=R;  for CTOF 1=U, 2=D )
 	 * @param superlayer

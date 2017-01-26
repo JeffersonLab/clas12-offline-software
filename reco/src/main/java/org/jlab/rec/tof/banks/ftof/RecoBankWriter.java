@@ -43,8 +43,7 @@ public class RecoBankWriter {
 			bank.setFloat("time_left",i, (float) hitlist.get(i).get_t1());
 			bank.setFloat("time_right",i, (float) hitlist.get(i).get_t2());
 			bank.setFloat("time_left_unc",i, (float) hitlist.get(i).get_t1Unc()); 			
-			bank.setFloat("time_right_unc",i, (float) hitlist.get(i).get_t2Unc()); 			
-			
+			bank.setFloat("time_right_unc",i, (float) hitlist.get(i).get_t2Unc()); 					
 		}
 
 		return bank;
@@ -85,9 +84,13 @@ public class RecoBankWriter {
 			}
 			bank.setFloat("x_unc",i, 5); 			
 			bank.setFloat("y_unc",i, (float) hitlist.get(i).get_yUnc()); 			
-			bank.setFloat("z_unc",i, 10); 						
+			bank.setFloat("z_unc",i, 10); 		
+			bank.setShort("adc_idx1",i, (short) hitlist.get(i).get_ADCbankHitIdx1()); 		
+			bank.setShort("adc_idx2",i, (short) hitlist.get(i).get_ADCbankHitIdx2()); 		
+			bank.setShort("tdc_idx1",i, (short) hitlist.get(i).get_TDCbankHitIdx1()); 		
+			bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 		
 		}
-		
+		//bank.show();
 		return bank;
 
 	}

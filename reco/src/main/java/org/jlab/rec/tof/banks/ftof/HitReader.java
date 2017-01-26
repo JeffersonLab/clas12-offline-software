@@ -3,6 +3,7 @@ package org.jlab.rec.tof.banks.ftof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
@@ -10,7 +11,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.ftof.CCDBConstantsLoader;
-import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
@@ -54,12 +54,14 @@ public class HitReader implements IMatchedHit {
 	public void set_FTOF2Hits(List<Hit> _FTOF2Hits) {
 		this._FTOF2Hits = _FTOF2Hits;
 	}
+	private int _numTrks;
 	/**
 	 * 
 	 * @param event the evio event
 	 * @param geometry the FTOF geometry from package
 	 */
 	public void fetch_Hits(DataEvent event, FTOFGeant4Factory geometry, List<Line3d> trks, double[] paths) {
+		_numTrks = trks.size();
 		
 		BaseHitReader hitReader = new BaseHitReader();
 		IMatchedHit MH = this;
@@ -87,9 +89,13 @@ public class HitReader implements IMatchedHit {
 		int[] ADCR 	= new int[hitList.size()];
 		int[] TDCL 	= new int[hitList.size()];
 		int[] TDCR 	= new int[hitList.size()];
+		int[] ADCLIdx 	= new int[hitList.size()];
+		int[] ADCRIdx 	= new int[hitList.size()];
+		int[] TDCLIdx 	= new int[hitList.size()];
+		int[] TDCRIdx 	= new int[hitList.size()];
 		
 		for(int i = 0; i< hitList.size(); i++) {
-			id[i] 		= hitList.get(i).get_Id();
+			id[i] 		= (i+1);
 			sector[i]	= hitList.get(i).get_Sector();
 	        panel[i]  	= hitList.get(i).get_Layer(); 
 			paddle[i]  	= hitList.get(i).get_Component();
@@ -97,15 +103,19 @@ public class HitReader implements IMatchedHit {
 			ADCR[i] 	= hitList.get(i).ADC2;
 			TDCL[i] 	= hitList.get(i).TDC1;
 			TDCR[i] 	= hitList.get(i).TDC2;
-/*			
-			System.out.println("hit "+hitList.get(i).get_Id()+
+			ADCLIdx[i] 	= hitList.get(i).ADCbankHitIdx1;
+			ADCRIdx[i] 	= hitList.get(i).ADCbankHitIdx2;
+			TDCLIdx[i] 	= hitList.get(i).TDCbankHitIdx1;
+			TDCRIdx[i] 	= hitList.get(i).TDCbankHitIdx2;
+			
+			/*System.out.println("hit "+hitList.get(i).get_Id()+
 			" sector "+ hitList.get(i).get_Sector()+
 	        " panel "+ hitList.get(i).get_Layer()+
 			" paddle "+  hitList.get(i).get_Component()+
 			" ADCL "+  hitList.get(i).ADC1+
 			" ADCR "+ hitList.get(i).ADC2+
 			" TDCL "+ hitList.get(i).TDC1+
-			" TDCR "+  hitList.get(i).TDC2);*/
+			" TDCR "+  hitList.get(i).TDC2); */
 			if( passADC(ADCL[i])==0 || passADC(ADCR[i])==0 || passTDC(TDCL[i])==0 || passTDC(TDCR[i])==0 )
 				continue;
 			
@@ -115,7 +125,11 @@ public class HitReader implements IMatchedHit {
 			String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i], TDCL[i], ADCR[i], TDCR[i]);
 							
 			// create the hit object
-			Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i], TDCL[i], ADCR[i], TDCR[i]) ;				
+			Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i], TDCL[i], ADCR[i], TDCR[i]) ;		
+			hit.set_ADCbankHitIdx1(ADCLIdx[i]);
+			hit.set_ADCbankHitIdx2(ADCRIdx[i]);
+			hit.set_TDCbankHitIdx1(TDCLIdx[i]);
+			hit.set_TDCbankHitIdx2(TDCRIdx[i]);
 			hit.set_StatusWord(statusWord);
 			hit.setPaddleLine(geometry);  
     	    // add this hit
@@ -130,6 +144,11 @@ public class HitReader implements IMatchedHit {
 		for(Hit hit : updated_hits) {
 			// set the layer to get the paddle position from the geometry package				
 			hit.set_HitParameters(hit.get_Panel());
+			//DetHits.get(hit.get_Panel()-1).add(hit); 
+		}
+		List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
+		
+		for(Hit hit : unique_hits) {
 			DetHits.get(hit.get_Panel()-1).add(hit); 
 		}
 		if(DetHits.get(0).size()>0) {
@@ -150,6 +169,40 @@ public class HitReader implements IMatchedHit {
 	}	
 	
 	
+	private List<Hit> removeDuplicatedHits(List<Hit> updated_hits) {
+		
+		List<Hit> unique_hits = new ArrayList<Hit>();
+		
+		ArrayList<ArrayList<Hit>> lists = new ArrayList<ArrayList<Hit>>();
+		for(int j =0; j< this._numTrks; j++)
+			lists.add(new ArrayList<Hit>());
+		
+		for(Hit h : updated_hits) {
+			if(h._AssociatedTrkId==-1)
+				unique_hits.add(h);
+			if(h._AssociatedTrkId!=-1)
+				lists.get(h._AssociatedTrkId-1).add(h);
+		}
+		for(int j =0; j< this._numTrks; j++) {
+			if(lists.get(j).size()>0) {
+				Hit bestMatch = null;
+				double delta = Double.POSITIVE_INFINITY;
+				double delta_new = Double.POSITIVE_INFINITY;
+				for(Hit h : lists.get(j)) {
+					delta_new = h.get_TrkPosition().distance(h.get_Position()); 
+					if(delta_new<delta) {
+						bestMatch = h;
+						delta = delta_new;
+					}
+				}
+				
+				if(bestMatch!=null)
+					unique_hits.add(bestMatch);
+			}
+		}
+		return unique_hits;
+	}
+
 	public String set_StatusWord(int statusL, int statusR, int ADCL, int TDCL, int ADCR, int TDCR) {
 		String statusWord = new String(); //ADCL TDCL ADCR TDCR
 		// selected ranges TDC in [0,1000], ADC in [0, 8192] requirement given by passTDC and passADC methods
@@ -212,17 +265,18 @@ public class HitReader implements IMatchedHit {
 			List<DetHit> hits = ftofDetector.getIntersections(trk);
 			
 			if(hits != null && hits.size()>0) {
-				for(DetHit hit: hits){
+				for(DetHit hit: hits){ 
 					FTOFDetHit fhit = new FTOFDetHit(hit); 
 					HitArray[fhit.getSector()-1][fhit.getLayer()-1][fhit.getPaddle()-1][i] = fhit;
 				}
 			}
 		}
-		for(Hit fhit : FTOFhits) {
+		for(Hit fhit : FTOFhits) { 
 			boolean isAssociatedWTrk = false;
+			// for a given hit find the 
 			for(int i = 0; i<trks.size(); i++) {
-				
-				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i]!=null) {
+				isAssociatedWTrk = false; // reset association for each trk
+				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i]!=null) { 
 					isAssociatedWTrk = true;
 					FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i];
 					
@@ -238,7 +292,7 @@ public class HitReader implements IMatchedHit {
 					hit.set_TrkPathLen(paths[i]+deltaPath);
 					// get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
 					hit.set_TrkPosition(new Point3D(matchedHit.mid().x,matchedHit.mid().y,matchedHit.mid().z));
-					hit._AssociatedTrkId = i; 
+					hit._AssociatedTrkId = (i+1); 
 					// compute the local y at the middle of the bar :
 					//----------------------------------------------
 			        Point3D origPaddleLine = hit.get_paddleLine().origin();
@@ -340,10 +394,15 @@ public class HitReader implements IMatchedHit {
 					int adc_2 = -1;
 					int tdc_1 = -1;
 					int tdc_2 = -1;
+					int adc_idx1 = -1;
+					int adc_idx2 = -1;
+					int tdc_idx1 = -1;
+					int tdc_idx2 = -1;
 					
 					for(BaseHit h : hitlists.get(i)) {
 						if(h.get_ADC1()>0) {							
 							adc_1 = h.get_ADC1();
+							adc_idx1 = h.ADCbankHitIdx1;
 							if(h.get_ADCTime1()>0)
 								t_1=h.get_ADCTime1();
 							if(h.get_ADCpedestal1()>0)
@@ -351,6 +410,7 @@ public class HitReader implements IMatchedHit {
 						}
 						if(h.get_ADC2()>0) {						
 							adc_2 = h.get_ADC2();
+							adc_idx2 = h.ADCbankHitIdx2;
 							if(h.get_ADCTime2()>0)
 								t_2=h.get_ADCTime2();
 							if(h.get_ADCpedestal2()>0)
@@ -358,9 +418,11 @@ public class HitReader implements IMatchedHit {
 						}						
 						if(h.get_TDC1()>0) {
 							tdc_1 = h.get_TDC1();
+							tdc_idx1 = h.TDCbankHitIdx1;
 						}
 						if(h.get_TDC2()>0) {
-							tdc_2 = h.get_TDC2();							
+							tdc_2 = h.get_TDC2();	
+							tdc_idx2 = h.TDCbankHitIdx2;
 						}
 					}
 					hit.ADC1 = adc_1;
@@ -371,6 +433,10 @@ public class HitReader implements IMatchedHit {
 					hit.ADCpedestal2 = ped_2;
 					hit.ADCTime1 = t_1;
 					hit.ADCTime2 = t_2;
+					hit.ADCbankHitIdx1 = adc_idx1;
+					hit.ADCbankHitIdx2 = adc_idx2;
+					hit.TDCbankHitIdx1 = tdc_idx1;
+					hit.TDCbankHitIdx2 = tdc_idx2;
 					
 					matchLists.add(hit);
 					//System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
