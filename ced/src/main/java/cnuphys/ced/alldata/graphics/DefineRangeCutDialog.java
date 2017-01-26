@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.ced.alldata.DataManager;
 
 public class DefineRangeCutDialog extends JDialog implements ActionListener, PropertyChangeListener {
@@ -25,6 +26,7 @@ public class DefineRangeCutDialog extends JDialog implements ActionListener, Pro
 		setTitle("Define a Cut Range");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
+		setIconImage(ImageManager.cnuIcon.getImage());
 		
 		_rangeCutPanel = new RangeCutPanel();
 		add(_rangeCutPanel, BorderLayout.CENTER);

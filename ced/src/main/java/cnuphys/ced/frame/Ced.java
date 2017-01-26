@@ -100,7 +100,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.06";
+	private static final String _release = "build 0.99.07";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -556,6 +556,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//some event file menus
 		
 		fmenu.insertSeparator(0);
+		fmenu.add(ClasIoEventMenu.getConnectETItem(), 0);
 		fmenu.add(ClasIoEventMenu.getConnectAnyRingItem(), 0);
 		fmenu.insertSeparator(0);
 
@@ -651,7 +652,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		if (_instance == null) {
 			_instance = new Ced(PropertySupport.TITLE, "ced " + versionString(),
 					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
-					PropertySupport.FRACTION, 0.85);
+					PropertySupport.FRACTION, 0.9);
 
 			_instance.addInitialViews();
 			_instance.createMenus();

@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.splot.pdata.DataSet;
 
@@ -25,6 +26,7 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		setTitle("Define a Scatter Plot");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
+		setIconImage(ImageManager.cnuIcon.getImage());
 		
 		_scatterPanel = new ScatterPanel();
 		add(_scatterPanel, BorderLayout.CENTER);

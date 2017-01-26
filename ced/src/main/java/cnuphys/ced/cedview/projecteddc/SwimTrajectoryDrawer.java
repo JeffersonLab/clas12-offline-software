@@ -16,6 +16,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	public SwimTrajectoryDrawer(ProjectedDCView view) {
 		_view = view;
+		_markSectChanges = true;
 	}
 
 	/**

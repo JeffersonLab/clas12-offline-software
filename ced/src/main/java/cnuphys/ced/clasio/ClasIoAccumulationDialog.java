@@ -22,6 +22,7 @@ import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.dialog.ButtonPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.view.ViewManager;
@@ -77,6 +78,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 	public ClasIoAccumulationDialog(IAccumulator accumulator) {
 		setTitle("Accumulate Events");
 		setModal(true);
+		setIconImage(ImageManager.cnuIcon.getImage());
 
 		_accumulator = accumulator;
 
@@ -255,7 +257,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 							try {
 								EventSourceType estype = _eventManager.getEventSourceType();
 								switch (estype) {
-								case RING:
+								case HIPORING:
 									if (_eventManager.hasEvent()) {
 										DataEvent event = _eventManager.getNextEvent();
 										if (event == null) {

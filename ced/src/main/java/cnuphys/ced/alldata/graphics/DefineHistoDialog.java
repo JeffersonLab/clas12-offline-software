@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.splot.pdata.HistoData;
 
@@ -25,6 +26,7 @@ public class DefineHistoDialog extends JDialog implements ActionListener, Proper
 		setTitle("Define a Histogram");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
+		setIconImage(ImageManager.cnuIcon.getImage());
 		
 		_histoPanel = new HistoPanel("Select a Variable");
 		add(_histoPanel, BorderLayout.CENTER);

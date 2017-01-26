@@ -29,6 +29,7 @@ import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.frame.Ced;
+import cnuphys.splot.plot.ImageManager;
 
 public class ClasIoEventMenu extends JMenu implements ActionListener,
 		IClasIoEventListener {
@@ -137,12 +138,29 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 */
 	public static JMenuItem getConnectAnyRingItem() {
 		final JMenuItem item = new JMenuItem("Connect to Hipo Ring...");
+		item.setIcon(ImageManager.getInstance().loadImageIcon("images/hipo2.png"));
 
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ClasIoEventManager.getInstance().ConnectToHipoRing();
+			}
+
+		};
+		item.addActionListener(al);
+		return item;
+	}
+	
+	public static JMenuItem getConnectETItem() {
+		final JMenuItem item = new JMenuItem("Connect to ET Ring...");
+		item.setIcon(ImageManager.getInstance().loadImageIcon("images/et.png"));
+
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ClasIoEventManager.getInstance().ConnectToETRing();
 			}
 
 		};

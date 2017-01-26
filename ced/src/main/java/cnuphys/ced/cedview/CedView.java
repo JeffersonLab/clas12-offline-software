@@ -690,7 +690,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		EventSourceType estype = ClasIoEventManager.getInstance().getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-		case RING:
+		case HIPORING:
+		case ET:
 			haveEvent = (_eventManager.getCurrentEvent() != null);
 			break;
 		case FASTMC:

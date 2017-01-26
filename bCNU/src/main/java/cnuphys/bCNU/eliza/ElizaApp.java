@@ -3,6 +3,8 @@ package cnuphys.bCNU.eliza;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import javax.swing.JFrame;
 
@@ -46,7 +48,22 @@ public class ElizaApp extends JFrame {
 			return;
 
 		try {
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			
+			Dimension screenSize = null;
+			try {
+				GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+				int width = gd.getDisplayMode().getWidth();
+				int height = gd.getDisplayMode().getHeight();
+				if ((width > 100) && (height > 100)) {
+					screenSize = new Dimension(width, height);
+				}
+			}
+			catch (Exception e) {	
+			}
+
+			if (screenSize == null) {
+				screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			}
 			Dimension componentSize = component.getSize();
 			if (componentSize.height > screenSize.height) {
 				componentSize.height = screenSize.height;

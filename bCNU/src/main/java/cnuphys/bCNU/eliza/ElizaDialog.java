@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.dialog.DialogUtilities;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.util.Fonts;
 
 public class ElizaDialog extends JDialog implements ActionListener {
@@ -25,6 +26,7 @@ public class ElizaDialog extends JDialog implements ActionListener {
 	private ElizaDialog(JFrame owner) {
 		super(owner, "Eliza", false);
 		setLayout(new BorderLayout(2, 2));
+		setIconImage(ImageManager.cnuIcon.getImage());
 		addCenter();
 		addSouth();
 		pack();

@@ -430,10 +430,11 @@ public class GraphicsUtilities {
 		int maxh = 0;
 
 		for (int i = 0; i < devices.length; i++) {
-			maxw = Math.max(maxw, devices[i].getDisplayMode().getWidth());
+//			maxw = Math.max(maxw, devices[i].getDisplayMode().getWidth());
 			maxh = Math.max(maxh, devices[i].getDisplayMode().getHeight());
 		}
 
+		maxw = (16*maxh)/9;
 		return new Dimension(maxw, maxh);
 	}
 

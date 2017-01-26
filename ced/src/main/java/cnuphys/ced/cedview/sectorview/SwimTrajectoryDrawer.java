@@ -21,6 +21,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	public SwimTrajectoryDrawer(SectorView view) {
 		_view = view;
+		_markSectChanges = true;
 	}
 
 	/**
