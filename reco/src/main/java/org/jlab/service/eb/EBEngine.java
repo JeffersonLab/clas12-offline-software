@@ -32,8 +32,13 @@ public class EBEngine extends ReconstructionEngine {
                 
         int eventType = EBio.TRACKS_HB;
         
+        String particleBank = "RECHB::Particle";
+        String detectorBank = "RECHB::Detector";
+        
         if(EBio.isTimeBased(de)==true){
             eventType = EBio.TRACKS_TB;
+            particleBank = "REC::Particle";
+            detectorBank = "REC::Detector";
         }
         
         int run   = 10;
@@ -75,16 +80,16 @@ public class EBEngine extends ReconstructionEngine {
         eb.processHitMatching();
         eb.processNeutralTracks();        
         eb.assignPid();
-        //eb.getEvent().setRfTime(rf);
+        eb.getEvent().setRfTime(rf);
         
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
         
         if(eb.getEvent().getParticles().size()>0){
-            DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, "REC::Particle");
+            DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             List<DetectorResponse>  responses = eb.getEvent().getDetectorResponseList();
-            DataBank bankD = DetectorData.getDetectorResponseBank(responses, de, "REC::Detector");
+            DataBank bankD = DetectorData.getDetectorResponseBank(responses, de, detectorBank);
             de.appendBanks(bankP,bankD);
             if(eb.getEvent().getParticle(0).getPid()==11){
                

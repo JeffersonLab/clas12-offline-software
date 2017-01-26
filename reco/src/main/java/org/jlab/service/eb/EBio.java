@@ -119,11 +119,9 @@ public class EBio {
     }
     
     public static boolean isTimeBased(DataEvent de){
-        boolean tb = true;
-        if(de.hasBank("TimeBasedTrkg::TBTracks")==false){
-            if(de.hasBank("EVENTHB::particle")==false){
-                tb = false;
-            }
+        boolean tb = false;
+        if(de.hasBank("TimeBasedTrkg::TBHits")==true){
+            return true;
         }
         return tb;
     }
