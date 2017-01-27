@@ -7,6 +7,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.utils.groups.IndexedTable;
 
 
 /**
@@ -19,7 +20,7 @@ import org.jlab.io.hipo.HipoDataSource;
 public class HTCCReconstruction {
     // HTCC geometry parameters
     private final ReconstructionParameters parameters;
-    
+    public IndexedTable gain;
     // Raw HTCC data from the bank
     private int[] hitnArray;
     private int[] sectorArray;
@@ -51,7 +52,6 @@ public class HTCCReconstruction {
     public void processEvent(DataEvent event) {
         // Load the raw data about the event
         readBankInput(event);
-
         // Initialize the remaining hits list
         List<Integer> remainingHits = intiRemainingHitList();
         
@@ -86,14 +86,13 @@ public class HTCCReconstruction {
      timeArray = new double[rows];
      ithetaArray = new int[rows];
     iphiArray = new int[rows];
-        for(int i = 0; i < bankDGTZ.rows(); i++){
+    for(int i = 0; i < bankDGTZ.rows(); i++){
   //      hitnArray[i]   = bankDGTZ.getInt("hitn", i);
-        System.out.println(bankDGTZ.getByte("sector", i));
         sectorArray[i] = bankDGTZ.getByte("sector", i);
 
         ringArray[i]   = bankDGTZ.getShort("component", i);
         halfArray[i]   = bankDGTZ.getByte("layer", i);
-        npheArray[i]   = bankDGTZ.getInt("ADC", i);
+        npheArray[i]   = bankDGTZ.getInt("ADC", i)/((int)gain.getDoubleValue("gain", sectorArray[i] ,halfArray[i], ringArray[i]));
         timeArray[i]   = bankDGTZ.getFloat("time", i);
         }
         numHits = sectorArray.length;
