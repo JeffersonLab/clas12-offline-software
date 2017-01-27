@@ -164,7 +164,7 @@ public class CentralXYHitDrawer implements IDrawable {
 		if ((hits != null) && !hits.isEmpty()) {
 			for (TdcAdcHit hit : hits) {
 				if (hit != null) {
-					CTOFPolygon poly = _view.getCTOFPolygon(hit.component);
+					CTOFXYPolygon poly = _view.getCTOFPolygon(hit.component);
 					if (poly != null) {
 						Color color = hits.adcColor(hit);
 						g.setColor(color);

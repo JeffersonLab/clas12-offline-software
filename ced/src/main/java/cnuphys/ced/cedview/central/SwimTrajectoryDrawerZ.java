@@ -18,9 +18,9 @@ import cnuphys.swim.Swimming;
 
 public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
-	private BSTzView _view;
+	private CentralZView _view;
 
-	public SwimTrajectoryDrawerZ(BSTzView bsTzView) {
+	public SwimTrajectoryDrawerZ(CentralZView bsTzView) {
 		_view = bsTzView;
 	}
 

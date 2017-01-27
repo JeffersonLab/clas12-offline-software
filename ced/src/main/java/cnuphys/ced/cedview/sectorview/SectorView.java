@@ -24,7 +24,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jlab.geom.prim.Plane3D;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.central.BSTSupport;
+import cnuphys.ced.cedview.central.CentralSupport;
 import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
@@ -1347,7 +1347,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// there are 132 panels
 		// mark the hits if there is data
-		BSTSupport.markPanelHits(this, panels);
+		CentralSupport.markPanelHits(this, panels);
 
 		int index = 0;
 		for (BSTxyPanel panel : panels) {

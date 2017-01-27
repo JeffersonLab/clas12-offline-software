@@ -18,7 +18,7 @@ import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DataDrawSupport;
 
-public class CrossDrawerZ extends BSTzViewDrawer  {
+public class CrossDrawerZ extends CentralZViewDrawer  {
 
 	private static final int ARROWLEN = 30; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
@@ -34,7 +34,7 @@ public class CrossDrawerZ extends BSTzViewDrawer  {
 	 * A BST Cross drawer
 	 * @param view the owner vie
 	 */
-	public CrossDrawerZ(BSTzView view) {
+	public CrossDrawerZ(CentralZView view) {
 		super(view);
 	}
 

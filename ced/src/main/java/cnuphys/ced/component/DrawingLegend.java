@@ -20,7 +20,7 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.central.CentralXYView;
-import cnuphys.ced.cedview.central.BSTzView;
+import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.SectorView;
@@ -86,7 +86,7 @@ public class DrawingLegend extends JComponent {
 				paintSectorViewLegend(g, x, yc);
 			}
 			
-			else if ((_view instanceof CentralXYView) || (_view instanceof BSTzView)) {
+			else if ((_view instanceof CentralXYView) || (_view instanceof CentralZView)) {
 				paintCentralViewLegend(g, x, yc);
 			}
 		}

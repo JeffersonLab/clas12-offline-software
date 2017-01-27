@@ -19,7 +19,7 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 
-public class BSTzHitDrawer implements IDrawable {
+public class CentralZHitDrawer implements IDrawable {
 
 	// the event manager
 	private final ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
@@ -30,9 +30,9 @@ public class BSTzHitDrawer implements IDrawable {
 	private Vector<FeedbackRect> _fbRects = new Vector<FeedbackRect>();
 
 	// owner view
-	private BSTzView _view;
+	private CentralZView _view;
 
-	public BSTzHitDrawer(BSTzView view) {
+	public CentralZHitDrawer(CentralZView view) {
 		_view = view;
 	}
 

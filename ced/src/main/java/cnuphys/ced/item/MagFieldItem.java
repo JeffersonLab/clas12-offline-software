@@ -13,7 +13,7 @@ import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.central.BSTzView;
+import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;
@@ -112,7 +112,7 @@ public class MagFieldItem extends AItem {
 		if (_view instanceof SectorView) {
 			drawItemSectorView(g, container, displayOption, hasTorus,
 					hasSolenoid);
-		} else if (_view instanceof BSTzView) {
+		} else if (_view instanceof CentralZView) {
 			drawItemBSTzView(g, container, displayOption, hasTorus, hasSolenoid);
 		}
 
@@ -153,7 +153,7 @@ public class MagFieldItem extends AItem {
 				container.localToWorld(pp, wp);
 
 				// get the true Cartesian coordinates
-				((BSTzView) (_view)).getCLASCordinates(container, pp, wp,
+				((CentralZView) (_view)).getCLASCordinates(container, pp, wp,
 						coords);
 
 				double z = coords[2];

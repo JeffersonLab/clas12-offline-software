@@ -14,7 +14,7 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.geometry.CNDGeometry;
 import cnuphys.ced.geometry.CTOFGeometry;
 
-public class CTOFPolygon extends Polygon {
+public class CTOFXYPolygon extends Polygon {
 
 	/**
 	 * The paddleId 1..48
@@ -30,7 +30,7 @@ public class CTOFPolygon extends Polygon {
 	 * @param paddleId
 	 *            the paddle ID 1..48
 	 */
-	public CTOFPolygon(int paddleId) {
+	public CTOFXYPolygon(int paddleId) {
 		this.paddleId = paddleId;
 		wp = CTOFGeometry.getQuad(paddleId);
 	}

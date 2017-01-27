@@ -54,7 +54,7 @@ import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
-public class BSTzView extends CedView implements ChangeListener {
+public class CentralZView extends CedView implements ChangeListener {
 
 	private static Geometry geo;
 
@@ -98,12 +98,12 @@ public class BSTzView extends CedView implements ChangeListener {
 	private CrossDrawerZ _crossDrawer;
 
 	// draws hits
-	private BSTzHitDrawer _hitDrawer;
+	private CentralZHitDrawer _hitDrawer;
 
-	public BSTzView(Object... keyVals) {
+	public CentralZView(Object... keyVals) {
 		super(keyVals);
 		_crossDrawer = new CrossDrawerZ(this);
-		_hitDrawer = new BSTzHitDrawer(this);
+		_hitDrawer = new CentralZHitDrawer(this);
 
 		setBeforeDraw();
 		setAfterDraw();
@@ -118,8 +118,8 @@ public class BSTzView extends CedView implements ChangeListener {
 	 * 
 	 * @return the new view
 	 */
-	public static BSTzView createBSTzView() {
-		BSTzView view = null;
+	public static CentralZView createBSTzView() {
+		CentralZView view = null;
 
 		// set to a fraction of screen
 		Dimension d = GraphicsUtilities.screenFraction(0.35);
@@ -129,7 +129,7 @@ public class BSTzView extends CedView implements ChangeListener {
 		int height = width;
 
 		// create the view
-		view = new BSTzView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle,
+		view = new CentralZView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle,
 				PropertySupport.WIDTH, width, // container width, not total view
 											  // width
 				PropertySupport.HEIGHT, height, // container height, not total
@@ -368,7 +368,7 @@ public class BSTzView extends CedView implements ChangeListener {
 
 		// there are 132 panels
 		// mark the hits if there is gemc data
-		BSTSupport.markPanelHits(this, panels);
+		CentralSupport.markPanelHits(this, panels);
 
 		int index = 0;
 		for (BSTxyPanel panel : panels) {

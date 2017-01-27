@@ -6,7 +6,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import cnuphys.ced.cedview.central.BSTzView;
+import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;
@@ -52,8 +52,8 @@ public class BeamLineItem extends BaseBeamLineItem {
 		double targetZ = Double.NaN;
 		if (view instanceof SectorView) {
 			targetZ = ((SectorView) view).getTargetZ();
-		} else if (view instanceof BSTzView) {
-			targetZ = ((BSTzView) view).getTargetZ();
+		} else if (view instanceof CentralZView) {
+			targetZ = ((CentralZView) view).getTargetZ();
 		}
 
 		// draw it?

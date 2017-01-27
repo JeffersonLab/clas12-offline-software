@@ -19,7 +19,7 @@ import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DataDrawSupport;
 
-public class CrossDrawerXY extends BSTxyViewDrawer {
+public class CrossDrawerXY extends CentralXYViewDrawer {
 
 
 	private static final int ARROWLEN = 30; // pixels
