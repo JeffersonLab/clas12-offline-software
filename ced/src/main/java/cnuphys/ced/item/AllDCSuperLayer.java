@@ -510,8 +510,8 @@ public class AllDCSuperLayer extends RectangleItem {
 		
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzDcData();
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
+				.getAccumulatedDCData();
+		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
 		if (maxHit < 1) {
 			return;
 		}

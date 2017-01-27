@@ -112,18 +112,18 @@ public class FTOFPanelItem extends PolygonItem {
 
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int hits[][] = null;
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzFtofCount();
+		int maxHit = AccumulationManager.getInstance().getMaxFTOFCount();
 
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
 		case FTOF.PANEL_1A:
-			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1aData();
+			hits = AccumulationManager.getInstance().getAccumulatedFTOF1AData();
 			break;
 		case FTOF.PANEL_1B:
-			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1bData();
+			hits = AccumulationManager.getInstance().getAccumulatedFTOF1BData();
 			break;
 		case FTOF.PANEL_2:
-			hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof2Data();
+			hits = AccumulationManager.getInstance().getAccumulatedFTOF2Data();
 			break;
 		}
 

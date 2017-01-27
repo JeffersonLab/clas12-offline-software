@@ -19,7 +19,7 @@ public class CentralPanel3D extends CedPanel3D {
 	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH,
 			SHOW_SVT, SHOW_SVT_LAYER_1, SHOW_SVT_LAYER_2, SHOW_SVT_LAYER_3,
 			SHOW_SVT_LAYER_4, SHOW_SVT_LAYER_5, SHOW_SVT_LAYER_6,
-			SHOW_SVT_LAYER_7, SHOW_SVT_LAYER_8, SHOW_SVT_HITS, SHOW_CND,
+			SHOW_SVT_LAYER_7, SHOW_SVT_LAYER_8, SHOW_SVT_HITS, SHOW_CTOF, SHOW_CND,
 			SHOW_CND_LAYER_1, SHOW_CND_LAYER_2, SHOW_CND_LAYER_3,
 			SHOW_RECON_CROSSES, SHOW_COSMICS };
 
@@ -50,13 +50,16 @@ public class CentralPanel3D extends CedPanel3D {
 			// geom service uses 0-based superlayer [0,1,2,3] and layer [0,1]
 			int supl = ((layer - 1) / 2); // 0, 1, 2, 3
 			for (int sector = 1; sector <= BSTGeometry.sectorsPerSuperlayer[supl]; sector++) {
-				SVTPanel3D svt = new SVTPanel3D(this, sector, layer);
+				BSTPanel3D svt = new BSTPanel3D(this, sector, layer);
 				addItem(svt);
 			}
 		}
 
 		// cnd
 		addItem(new CND3D(this));
+		
+		//ctof
+		addItem(new CTOF3D(this));
 
 	}
 

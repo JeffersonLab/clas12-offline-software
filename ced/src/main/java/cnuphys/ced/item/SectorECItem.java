@@ -191,13 +191,13 @@ public class SectorECItem extends PolygonItem {
 	
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzEcCount();
+		int maxHit = AccumulationManager.getInstance().getMaxECALCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		int hits[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzEcData();
+				.getAccumulatedECALData();
 		for (int strip0 = 0; strip0 < 36; strip0++) {
 			int hit = hits[_sector - 1][_plane][_stripType][strip0];
 			double fract;

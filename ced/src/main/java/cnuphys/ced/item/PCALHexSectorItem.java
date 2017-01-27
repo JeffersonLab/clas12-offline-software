@@ -141,13 +141,13 @@ public class PCALHexSectorItem extends HexSectorItem {
 	//draw accumulated hits
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzPcalCount();
+		int maxHit = AccumulationManager.getInstance().getMaxPCALCount();
 		if (maxHit < 1) {
 			return;
 		}
 		
 		int hits[][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzPcalData();
+				.getAccumulatedPCALData();
 
 		int sect0 = getSector() - 1;
 

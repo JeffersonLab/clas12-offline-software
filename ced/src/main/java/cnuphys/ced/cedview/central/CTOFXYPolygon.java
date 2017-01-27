@@ -58,8 +58,4 @@ public class CTOFXYPolygon extends Polygon {
 
 	}
 
-	// convenience method to create a feedback string
-	private void fbString(String color, String str, List<String> fbstrs) {
-		fbstrs.add("$" + color + "$" + str);
-	}
 }

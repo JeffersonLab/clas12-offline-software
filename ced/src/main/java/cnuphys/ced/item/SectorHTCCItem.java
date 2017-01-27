@@ -170,12 +170,12 @@ public class SectorHTCCItem extends PolygonItem {
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzHTCCCount();
+		int maxHit = AccumulationManager.getInstance().getMaxHTCCCount();
 		if (maxHit < 1) {
 			return;
 		}
 
-		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzHTCCData();
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedHTCCData();
 
 		int hit = hits[_sector - 1][_ring - 1][_half - 1];
 

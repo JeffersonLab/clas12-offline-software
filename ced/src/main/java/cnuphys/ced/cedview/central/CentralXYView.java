@@ -642,6 +642,11 @@ public class CentralXYView extends CedXYView {
 
 	}
 	
+	/**
+	 * Get a CTOF scintillator polygon
+	 * @param index1 the 1=based index [1..48]
+	 * @return the most recently drawn polygon
+	 */
 	public CTOFXYPolygon getCTOFPolygon(int index1) {
 		int index0 = index1-1;
 		if ((index0 < 0) || (index0 > 47)) {

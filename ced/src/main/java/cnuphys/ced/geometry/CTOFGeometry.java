@@ -52,7 +52,40 @@ public class CTOFGeometry {
 		return _quads[paddle-1];
 	}
 
-	
+	public static void paddleVertices(int paddleId, float[] coords) {
+		Point2D.Double quad[] = getQuad(paddleId);
+		//convert mm to cm
+		float x1 = (float) quad[0].x/10;
+		float x2 = (float) quad[3].x/10;
+		float x3 = (float) quad[2].x/10;
+		float x4 = (float) quad[1].x/10;
+		float y1 = (float) quad[0].y/10;
+		float y2 = (float) quad[3].y/10;
+		float y3 = (float) quad[2].y/10;
+		float y4 = (float) quad[1].y/10;
+		
+		
+		//approx
+		float len = (float) (35.4*2.54); //cm
+		float z1 = -len/2;
+		float z2 =  len/2;
+				
+		setCoords(1, x1, y1, z1, coords);
+		setCoords(2, x2, y2, z1, coords);
+		setCoords(3, x3, y3, z1, coords);
+		setCoords(4, x4, y4, z1, coords);
+		setCoords(5, x1, y1, z2, coords);
+		setCoords(6, x2, y2, z2, coords);
+		setCoords(7, x3, y3, z2, coords);
+		setCoords(8, x4, y4, z2, coords);
+	}
+
+	private static void setCoords(int corner, float x, float y, float z, float[] coords) {
+		int i = (corner-1)*3;
+		coords[i] = x;
+		coords[i+1] = y;
+		coords[i+2] = z;
+	}
 	
 	public static void main(String arg[]) {
 		initialize();

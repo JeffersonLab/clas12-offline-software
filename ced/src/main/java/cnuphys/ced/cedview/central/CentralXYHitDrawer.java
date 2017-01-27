@@ -112,18 +112,26 @@ public class CentralXYHitDrawer implements IDrawable {
 		}
 	}
 
-	// draw accumulated hits (panels)
+	// only called in single event mode
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		drawBSTAccumulatedHits(g, container);
+	//	drawMicroMegasAccumulateHitsHits(g, container);
+		drawCTOFAccumulatedHits(g, container);
+	}
+
+	
+	// draw accumulated BST hits (panels)
+	private void drawBSTAccumulatedHits(Graphics g, IContainer container) {
 		// panels
 
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzBstCount();
+		int maxHit = AccumulationManager.getInstance().getMaxBSTCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		// first index is layer 0..7, second is sector 0..23
 		int bstData[][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzBstData();
+				.getAccumulatedBSTData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
@@ -148,6 +156,41 @@ public class CentralXYHitDrawer implements IDrawable {
 			}
 		}
 	}
+	
+	// draw CTOF accumulated hits
+	private void drawCTOFAccumulatedHits(Graphics g, IContainer container) {
+		int maxHit = AccumulationManager.getInstance().getMaxCTOFCount();
+		if (maxHit < 1) {
+			return;
+		}
+
+		int ctofData[] = AccumulationManager.getInstance()
+				.getAccumulatedCTOFData();
+		
+		for (int index = 0; index < 48; index++) {
+			CTOFXYPolygon poly = _view.getCTOFPolygon(index+1);
+			if (poly != null) {
+				int hitCount = ctofData[index];
+				
+				double fract;
+				if (_view.isSimpleAccumulatedMode()) {
+					fract = ((double) hitCount) / maxHit;
+				}
+				else {
+					fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
+				}
+
+				Color color = AccumulationManager.getInstance()
+						.getColor(fract);
+				g.setColor(color);
+				g.fillPolygon(poly);
+				g.setColor(Color.black);
+				g.drawPolygon(poly);
+			}
+		}
+	}
+	
+
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {

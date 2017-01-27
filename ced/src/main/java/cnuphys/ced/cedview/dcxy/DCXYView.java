@@ -428,8 +428,8 @@ public class DCXYView extends HexView {
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzDcData();
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
+				.getAccumulatedDCData();
+		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
 		if (maxHit < 1) {
 			return;
 		}
