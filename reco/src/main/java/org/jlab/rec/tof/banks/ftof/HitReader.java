@@ -283,6 +283,10 @@ public class HitReader implements IMatchedHit {
 					// create a new FTOF hit for each intersecting track with this hit counter 
 					// create the hit object
 					Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2()) ;
+					hit.set_ADCbankHitIdx1(fhit.get_ADCbankHitIdx1());
+					hit.set_ADCbankHitIdx2(fhit.get_ADCbankHitIdx2());
+					hit.set_TDCbankHitIdx1(fhit.get_TDCbankHitIdx1());
+					hit.set_TDCbankHitIdx2(fhit.get_TDCbankHitIdx2());
 					hit.set_StatusWord(fhit.get_StatusWord());			
 					hit.set_paddleLine(fhit.get_paddleLine());
 					hit.set_matchedTrackHit(matchedHit);
