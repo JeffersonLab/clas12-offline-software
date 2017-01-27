@@ -20,18 +20,23 @@ public class KeyBindings3D {
 
 	
 	public KeyBindings3D(JComponent panel) {
-		InputMap inputMap = panel.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
+		InputMap inputMap = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		ActionMap actionMap = panel.getActionMap();
 		
 
+		inputMap.put(KeyStroke.getKeyStroke("W"),"forward");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0),"backward");
+
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter");
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "RightArrow");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "right");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "LeftArrow");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "UpArrow");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "DownArrow");
 
+		actionMap.put("forward", new KeyAction("forward"));
+		actionMap.put("backward", new KeyAction("backward"));
 		actionMap.put("Enter", new KeyAction("Enter"));
-		actionMap.put("RightArrow", new KeyAction("RightArrow"));
+		actionMap.put("right", new KeyAction("right"));
 		actionMap.put("LeftArrow", new KeyAction("LeftArrow"));
 		actionMap.put("UpArrow", new KeyAction("UpArrow"));
 		actionMap.put("DownArrow", new KeyAction("DownArrow"));	
@@ -50,7 +55,7 @@ public class KeyBindings3D {
 
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-	    	System.err.println("KEY BINDINGS");
+	    	System.err.println("KEY BINDINGS " + e.getActionCommand());
 	        if (cmd.equalsIgnoreCase("LeftArrow")) {
 	            System.out.println("The left arrow was pressed!");
 	        } else if (cmd.equalsIgnoreCase("RightArrow")) {
