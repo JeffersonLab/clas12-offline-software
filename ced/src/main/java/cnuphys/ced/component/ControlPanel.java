@@ -18,7 +18,7 @@ import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.central.BSTzView;
+import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.item.MagFieldItem;
 
@@ -174,7 +174,7 @@ public class ControlPanel extends JPanel {
 			mfbox.add(_magFieldDisplayArray);
 
 			if (Bits.checkBit(controlPanelBits, FIELDLEGEND)) {
-				if (_view instanceof BSTzView) {
+				if (_view instanceof CentralZView) {
 					mfbox.add(new ColorModelLegend(
 							MagFieldItem._colorScaleModelSolenoid, FULLWIDTH,
 							"Field Magnitude (T)"));

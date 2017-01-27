@@ -59,7 +59,7 @@ public class CentralXYView extends CedXYView {
 	CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
 	
 	//the CTOF polygons
-	CTOFPolygon ctofPoly[] = new CTOFPolygon[48];
+	CTOFXYPolygon ctofPoly[] = new CTOFXYPolygon[48];
 	
 	//Micro megas [sector][layer]
 	private MicroMegasSector microMegasSector[][];
@@ -105,7 +105,7 @@ public class CentralXYView extends CedXYView {
 		
 		//ad the ctof polygons
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
-			ctofPoly[paddleId - 1] = new CTOFPolygon(paddleId);
+			ctofPoly[paddleId - 1] = new CTOFXYPolygon(paddleId);
 		}
 
 	}
@@ -163,7 +163,7 @@ public class CentralXYView extends CedXYView {
 
 		// add a specialized magview drawer
 		((BaseContainer) (view.getContainer()))
-				.setMagnificationDraw(new BSTxyMagDrawer(view));
+				.setMagnificationDraw(new CentralXYMagDrawer(view));
 
 		// add quick zooms
 		view.addQuickZoom("BST & BMT", -190, -190, 190, 190);
@@ -642,7 +642,7 @@ public class CentralXYView extends CedXYView {
 
 	}
 	
-	public CTOFPolygon getCTOFPolygon(int index1) {
+	public CTOFXYPolygon getCTOFPolygon(int index1) {
 		int index0 = index1-1;
 		if ((index0 < 0) || (index0 > 47)) {
 			return null;

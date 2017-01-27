@@ -17,7 +17,7 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 
-public class BSTxyMagDrawer extends DrawableAdapter {
+public class CentralXYMagDrawer extends DrawableAdapter {
 
 	// the owner view
 	private final CentralXYView _view;
@@ -28,7 +28,7 @@ public class BSTxyMagDrawer extends DrawableAdapter {
 
 	private Rectangle2D.Double _layerRect = new Rectangle2D.Double();
 
-	public BSTxyMagDrawer(CentralXYView view) {
+	public CentralXYMagDrawer(CentralXYView view) {
 		_view = view;
 	}
 

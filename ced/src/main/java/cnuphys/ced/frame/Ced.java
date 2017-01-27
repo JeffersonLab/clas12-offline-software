@@ -33,7 +33,7 @@ import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.cedview.central.CentralXYView;
-import cnuphys.ced.cedview.central.BSTzView;
+import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.ft.FTCalXYView;
 import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
@@ -130,7 +130,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ClasIoReconEventView _reconEventView;
 	private ClasIoEventView _eventView;
 	private CentralXYView _bstXyView;
-	private BSTzView _bstZView;
+	private CentralZView _bstZView;
 	private FTCalXYView _ftcalXyView;
 	private DCXYView _dcXyView;
 	private ProjectedDCView _projectedDCView;
@@ -277,7 +277,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_allDCView = AllDCView.createAllDCView();
 
 			// add a bstZView
-			_bstZView = BSTzView.createBSTzView();
+			_bstZView = CentralZView.createBSTzView();
 
 			// add a bstXYView
 			_bstXyView = CentralXYView.createCentralXYView();

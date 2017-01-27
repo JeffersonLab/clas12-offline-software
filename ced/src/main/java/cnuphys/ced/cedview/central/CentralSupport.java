@@ -7,7 +7,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.geometry.BSTxyPanel;
 
-public class BSTSupport {
+public class CentralSupport {
 
 	/**
 	 * Mark which panels have hits. Used by BSTzView and SectorView(s).
