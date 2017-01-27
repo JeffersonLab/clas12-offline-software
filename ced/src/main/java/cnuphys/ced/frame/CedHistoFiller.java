@@ -68,7 +68,7 @@ public class CedHistoFiller implements IAccumulationListener {
 		}
 
 		//sect, plane (view) uvw, strip
-		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzPcalData();
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedPCALData();
 
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			int row = sect0+1;
@@ -97,7 +97,7 @@ public class CedHistoFiller implements IAccumulationListener {
 
 		// sect, stack inner-outer, plane (view) uvw, strip
 		int hits[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzEcData();
+				.getAccumulatedECALData();
 
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			int row = sect0 + 1;
@@ -126,7 +126,7 @@ public class CedHistoFiller implements IAccumulationListener {
 			return;
 		}
 		
-		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzFullBstData();
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedFullBSTData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int row = lay0+1;
 			int supl0 = lay0/2;
@@ -166,13 +166,13 @@ public class CedHistoFiller implements IAccumulationListener {
 
 				
 				if (panelType == 0) {
-					hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1aData();
+					hits = AccumulationManager.getInstance().getAccumulatedFTOF1AData();
 				}
 				else if (panelType == 1) {
-					hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof1bData();
+					hits = AccumulationManager.getInstance().getAccumulatedFTOF1BData();
 				}
 				else if (panelType == 2) {
-					hits = AccumulationManager.getInstance().getAccumulatedDgtzFtof2Data();
+					hits = AccumulationManager.getInstance().getAccumulatedFTOF2Data();
 				}
 				
 				for (int paddle0 = 0; paddle0 < FTOFGeometry.numPaddles[panelType]; paddle0++) {
@@ -194,7 +194,7 @@ public class CedHistoFiller implements IAccumulationListener {
 		}
 		
 		int dchits[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzDcData();
+				.getAccumulatedDCData();
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			for (int supl0 = 0; supl0 < 6; supl0++) {
 				int row = 6 * sect0 + supl0 + 1;

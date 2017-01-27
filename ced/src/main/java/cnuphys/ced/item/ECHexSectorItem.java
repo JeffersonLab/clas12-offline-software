@@ -143,13 +143,13 @@ public class ECHexSectorItem extends HexSectorItem {
 	private void drawAccumulatedHits(Graphics g, IContainer container,
 			int plane) {
 
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzEcCount();
+		int maxHit = AccumulationManager.getInstance().getMaxECALCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		int hits[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDgtzEcData();
+				.getAccumulatedECALData();
 
 		int sect0 = getSector() - 1;
 

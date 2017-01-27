@@ -9,7 +9,7 @@ import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
-public class SVTPanel3D extends DetectorItem3D {
+public class BSTPanel3D extends DetectorItem3D {
 
 	protected static final Color outlineHitColor = new Color(0, 255, 64, 24);
 
@@ -23,7 +23,7 @@ public class SVTPanel3D extends DetectorItem3D {
 	// the 1-based "biglayer" [1..8] used by the data
 	private int _layer;
 
-	public SVTPanel3D(Panel3D panel3d, int sector, int layer) {
+	public BSTPanel3D(Panel3D panel3d, int sector, int layer) {
 		super(panel3d);
 		_sector = sector;
 		_layer = layer;

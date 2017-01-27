@@ -105,13 +105,13 @@ public class CentralZHitDrawer implements IDrawable {
 
 	private void drawBSTHitsAccumulatedMode(Graphics g, IContainer container) {
 
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzFullBstCount();
+		int maxHit = AccumulationManager.getInstance().getMaxFullBSTCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		// first index is layer 0..7, second is sector 0..23
-		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedDgtzFullBstData();
+		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedFullBSTData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {

@@ -283,8 +283,8 @@ public class SuperLayerDrawing {
 	//draw hits in accumulated mode
 	private void drawAccumulatedHits(Graphics g, IContainer container, boolean reallyClose) {
 
-		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDgtzDcData();
-		int maxHit = AccumulationManager.getInstance().getMaxDgtzDcCount();
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
+		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
 		if (maxHit < 1) {
 			return;
 		}

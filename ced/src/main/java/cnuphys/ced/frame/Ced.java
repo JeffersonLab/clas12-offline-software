@@ -100,7 +100,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.90";
+	private static final String _release = "build 0.99.91";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -231,8 +231,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			if (_use3D) {
 				_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
-				_virtualView.moveTo(_central3DView, 10, VirtualView.CENTER);
-				_virtualView.moveTo(_ftCal3DView, 11, VirtualView.BOTTOMRIGHT);
+				_virtualView.moveTo(_central3DView, 10, VirtualView.BOTTOMLEFT);
+				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
 			}
 			Log.getInstance().config("reset views on virtual dekstop");
 //			_virtualView.reportVisibility();
@@ -262,6 +262,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add event view
 		_eventView = ClasIoEventView.createEventView();
+		
+		// add three sector views
+		ViewManager.getInstance().getViewMenu().addSeparator();
+		_sectorView36=SectorView.createSectorView(DisplaySectors.SECTORS36);
+		_sectorView25=SectorView.createSectorView(DisplaySectors.SECTORS25);
+		_sectorView14=SectorView.createSectorView(DisplaySectors.SECTORS14);
+		ViewManager.getInstance().getViewMenu().addSeparator();
+
 		
 		// add monte carlo view
 		_monteCarloView = new ClasIoMonteCarloView();
@@ -300,16 +308,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			// 3D view?
 			if (_use3D) {
+				ViewManager.getInstance().getViewMenu().addSeparator();
 				_forward3DView = new ForwardView3D();
 				_central3DView = new CentralView3D();
 				_ftCal3DView = new FTCalView3D();
 			}
 
-			// add three sector views
-			ViewManager.getInstance().getViewMenu().addSeparator();
-			_sectorView36=SectorView.createSectorView(DisplaySectors.SECTORS36);
-			_sectorView25=SectorView.createSectorView(DisplaySectors.SECTORS25);
-			_sectorView14=SectorView.createSectorView(DisplaySectors.SECTORS14);
 		}
 
 		// add logview

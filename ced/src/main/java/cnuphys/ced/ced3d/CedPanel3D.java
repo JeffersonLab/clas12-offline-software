@@ -38,16 +38,16 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_RECON_FTOF = "Rec-FTOF";
 	public static final String SHOW_RECON_CROSSES = "Crosses";
 	public static final String SHOW_COSMICS = "Cosmics";
-	public static final String SHOW_SVT = "SVT";
-	public static final String SHOW_SVT_LAYER_1 = "SVT Layer 1";
-	public static final String SHOW_SVT_LAYER_2 = "SVT Layer 2";
-	public static final String SHOW_SVT_LAYER_3 = "SVT Layer 3";
-	public static final String SHOW_SVT_LAYER_4 = "SVT Layer 4";
-	public static final String SHOW_SVT_LAYER_5 = "SVT Layer 5";
-	public static final String SHOW_SVT_LAYER_6 = "SVT Layer 6";
-	public static final String SHOW_SVT_LAYER_7 = "SVT Layer 7";
-	public static final String SHOW_SVT_LAYER_8 = "SVT Layer 8";
-	public static final String SHOW_SVT_HITS = "SVT Hits";
+	public static final String SHOW_SVT = "BST";
+	public static final String SHOW_SVT_LAYER_1 = "BST Layer 1";
+	public static final String SHOW_SVT_LAYER_2 = "BST Layer 2";
+	public static final String SHOW_SVT_LAYER_3 = "BST Layer 3";
+	public static final String SHOW_SVT_LAYER_4 = "BST Layer 4";
+	public static final String SHOW_SVT_LAYER_5 = "BST Layer 5";
+	public static final String SHOW_SVT_LAYER_6 = "BST Layer 6";
+	public static final String SHOW_SVT_LAYER_7 = "BST Layer 7";
+	public static final String SHOW_SVT_LAYER_8 = "BST Layer 8";
+	public static final String SHOW_SVT_HITS = "BST Hits";
 
 	public static final String SHOW_SECTOR_1 = "Sector 1";
 	public static final String SHOW_SECTOR_2 = "Sector 2";
@@ -55,6 +55,8 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_SECTOR_4 = "Sector 4";
 	public static final String SHOW_SECTOR_5 = "Sector 5";
 	public static final String SHOW_SECTOR_6 = "Sector 6";
+
+	public static final String SHOW_CTOF = "CTOF";
 
 	public static final String SHOW_CND = "CND";
 	public static final String SHOW_CND_LAYER_1 = "CND Layer 1";

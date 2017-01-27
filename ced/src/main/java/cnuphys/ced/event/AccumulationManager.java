@@ -18,6 +18,7 @@ import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
@@ -61,38 +62,42 @@ public class AccumulationManager
 	private static final Color NULLCOLOR = new Color(128, 128, 128);
 
 	// HTCC accumulated accumulated data indices are sector, ring, half
-	private int _htccDgtzAccumulatedData[][][];
-	private int _maxDgtzHTCCCount;
+	private int _HTCCAccumulatedData[][][];
+	private int _maxHTCCCount;
 	
 	//ftcc accumulated data
-	private int _ftcalAccumulatedData[];
+	private int _FTCALAccumulatedData[];
 	private int _maxFTCALCount;
 	
 	// dc accumulated data indices are sector, superlayer, layer, wire
-	private int _dcDgtzAccumulatedData[][][][];
-	private int _maxDgtzDcCount;
+	private int _DCAccumulatedData[][][][];
+	private int _maxDCCount;
 
 	// BST accumulated data (layer[0..7], sector[0..23])
-	private int _bstDgtzAccumulatedData[][];
-	private int _maxDgtzBstCount;
+	private int _BSTAccumulatedData[][];
+	private int _maxBSTCount;
 
 	// BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
-	private int _bstDgtzFullAccumulatedData[][][];
-	private int _maxDgtzFullBstCount;
+	private int _BSTFullAccumulatedData[][][];
+	private int _maxFullBSTCount;
+	
+	//CTOF accumulated data
+	private int _CTOFAccumulatedData[];
+	private int _maxCTOFCount;
 
 	// FTOF accumulated Data
-	private int _ftof1aDgtzAccumulatedData[][];
-	private int _ftof1bDgtzAccumulatedData[][];
-	private int _ftof2DgtzAccumulatedData[][];
-	private int _maxDgtzFtofCount;
+	private int _FTOF1AAccumulatedData[][];
+	private int _FTOF1BAccumulatedData[][];
+	private int _FTOF2AccumulatedData[][];
+	private int _maxFTOFCount;
 
 	// EC [sector, stack (inner, outer), view (uvw), strip]
-	private int _ecDgtzAccumulatedData[][][][];
-	private int _maxDgtzEcCount;
+	private int _ECALAccumulatedData[][][][];
+	private int _maxECALCount;
 
 	// PCAL [sector, view (uvw), strip]
-	private int _pcalDgtzAccumulatedData[][][];
-	private int _maxDgtzPcalCount;
+	private int _PCALAccumulatedData[][][];
+	private int _maxPCALCount;
 
 	// overall event count
 	private long _eventCount;
@@ -118,42 +123,45 @@ public class AccumulationManager
 		_eventManager.addClasIoEventListener(this, 1);
 		
 		//FTCAL data
-		_ftcalAccumulatedData = new int[476];
+		_FTCALAccumulatedData = new int[476];
 		
 		//htcc data
-		_htccDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
+		_HTCCAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
 		
 		//dc data
-		_dcDgtzAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
+		_DCAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 
 		// down to layer
-		_bstDgtzAccumulatedData = new int[8][];
+		_BSTAccumulatedData = new int[8][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_bstDgtzAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
+			_BSTAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
 		}
 
 		// _bstDgtzAccumulatedData = new int[8][24];
 
 		// down to strip
-		_bstDgtzFullAccumulatedData = new int[8][][];
+		_BSTFullAccumulatedData = new int[8][][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_bstDgtzFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
+			_BSTFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
 		}
+		
+		//ctof storage
+		_CTOFAccumulatedData = new int[48];
 
-		// ftop storage
-		_ftof1aDgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[0]];
-		_ftof1bDgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[1]];
-		_ftof2DgtzAccumulatedData = new int[6][FTOFGeometry.numPaddles[2]];
+		// ftof storage
+		_FTOF1AAccumulatedData = new int[6][FTOFGeometry.numPaddles[0]];
+		_FTOF1BAccumulatedData = new int[6][FTOFGeometry.numPaddles[1]];
+		_FTOF2AccumulatedData = new int[6][FTOFGeometry.numPaddles[2]];
 
 		// ec and pcal storage
-		_ecDgtzAccumulatedData = new int[6][2][3][36];
+		_ECALAccumulatedData = new int[6][2][3][36];
 
-		_pcalDgtzAccumulatedData = new int[6][3][];
+		_PCALAccumulatedData = new int[6][3][];
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			for (int view0 = 0; view0 < 3; view0++) {
-				_pcalDgtzAccumulatedData[sect0][view0] = new int[PCALGeometry.PCAL_NUMSTRIP[view0]];
+				_PCALAccumulatedData[sect0][view0] = new int[PCALGeometry.PCAL_NUMSTRIP[view0]];
 			}
 		}
 
@@ -168,8 +176,8 @@ public class AccumulationManager
 		_eventCount = 0;
 		
 		// clear ftcal
-		for (int i = 0; i < _ftcalAccumulatedData.length; i++) {
-			_ftcalAccumulatedData[i] = 0;
+		for (int i = 0; i < _FTCALAccumulatedData.length; i++) {
+			_FTCALAccumulatedData[i] = 0;
 		}
 		_maxFTCALCount = 0;
 
@@ -177,11 +185,11 @@ public class AccumulationManager
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			for (int ring = 0; ring < 4; ring++) {
 				for (int half = 0; half < 2; half++) {
-						_htccDgtzAccumulatedData[sector][ring][half] = 0;
+						_HTCCAccumulatedData[sector][ring][half] = 0;
 				}
 			}
 		}
-		_maxDgtzHTCCCount = 0;
+		_maxHTCCCount = 0;
 		
 		// clear accumulated gemc dc data
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
@@ -189,61 +197,67 @@ public class AccumulationManager
 				avgDcOccupancy[sector][superLayer] = 0;
 				for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 					for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
-						_dcDgtzAccumulatedData[sector][superLayer][layer][wire] = 0;
+						_DCAccumulatedData[sector][superLayer][layer][wire] = 0;
 					}
 				}
 			}
 		}
-		_maxDgtzDcCount = 0;
+		_maxDCCount = 0;
 
 		// clear ec data
 		for (int sector = 0; sector < 6; sector++) {
 			for (int stack = 0; stack < 2; stack++) {
 				for (int view = 0; view < 3; view++) {
 					for (int strip = 0; strip < 36; strip++) {
-						_ecDgtzAccumulatedData[sector][stack][view][strip] = 0;
+						_ECALAccumulatedData[sector][stack][view][strip] = 0;
 					}
 				}
 			}
 		}
-		_maxDgtzEcCount = 0;
+		_maxECALCount = 0;
 
 		// clear pcal data
 		for (int sector = 0; sector < 6; sector++) {
 			for (int view = 0; view < 3; view++) {
 				for (int strip = 0; strip < PCALGeometry.PCAL_NUMSTRIP[view]; strip++) {
-					_pcalDgtzAccumulatedData[sector][view][strip] = 0;
+					_PCALAccumulatedData[sector][view][strip] = 0;
 				}
 			}
 		}
-		_maxDgtzPcalCount = 0;
+		_maxPCALCount = 0;
 
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
 			int supl0 = layer / 2;
 			for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
-				_bstDgtzAccumulatedData[layer][sector] = 0;
+				_BSTAccumulatedData[layer][sector] = 0;
 				for (int strip = 0; strip < 256; strip++) {
-					_bstDgtzFullAccumulatedData[layer][sector][strip] = 0;
+					_BSTFullAccumulatedData[layer][sector][strip] = 0;
 				}
 			}
 		}
-		_maxDgtzBstCount = 0;
-		_maxDgtzFullBstCount = 0;
+		_maxBSTCount = 0;
+		_maxFullBSTCount = 0;
+		
+		//clear CTOF data
+		for (int i = 1; i < 48; i++) {
+			_CTOFAccumulatedData[i] = 0;
+		}
+		_maxCTOFCount = 0;
 
 		// clear ftof data
 		for (int sector = 0; sector < 6; sector++) {
-			for (int paddle = 0; paddle < _ftof1aDgtzAccumulatedData[0].length; paddle++) {
-				_ftof1aDgtzAccumulatedData[sector][paddle] = 0;
+			for (int paddle = 0; paddle < _FTOF1AAccumulatedData[0].length; paddle++) {
+				_FTOF1AAccumulatedData[sector][paddle] = 0;
 			}
-			for (int paddle = 0; paddle < _ftof1bDgtzAccumulatedData[0].length; paddle++) {
-				_ftof1bDgtzAccumulatedData[sector][paddle] = 0;
+			for (int paddle = 0; paddle < _FTOF1BAccumulatedData[0].length; paddle++) {
+				_FTOF1BAccumulatedData[sector][paddle] = 0;
 			}
-			for (int paddle = 0; paddle < _ftof2DgtzAccumulatedData[0].length; paddle++) {
-				_ftof2DgtzAccumulatedData[sector][paddle] = 0;
+			for (int paddle = 0; paddle < _FTOF2AccumulatedData[0].length; paddle++) {
+				_FTOF2AccumulatedData[sector][paddle] = 0;
 			}
 		}
-		_maxDgtzFtofCount = 0;
+		_maxFTOFCount = 0;
 
 		// growable arrays used for canned histograms
 		// _tbPResolutionHistoData.clear();
@@ -266,50 +280,61 @@ public class AccumulationManager
 	}
 	
 	/**
+	 * Get the accumulated CTOF data
+	 * 
+	 * @return the accumulated FTCAL data
+	 */
+
+	public int[] getAccumulatedCTOFData() {
+		return _CTOFAccumulatedData;
+	}
+
+	
+	/**
 	 * Get the accumulated FTCAL data
 	 * 
 	 * @return the accumulated FTCAL data
 	 */
 
 	public int[] getAccumulatedFTCALData() {
-		return _ftcalAccumulatedData;
+		return _FTCALAccumulatedData;
 	}
 	
 	/**
-	 * Get the accumulated dgtz HTCC data
+	 * Get the accumulated HTCC data
 	 * 
 	 * @return the accumulated HTCC data
 	 */
-	public int[][][] getAccumulatedDgtzHTCCData() {
-		return _htccDgtzAccumulatedData;
+	public int[][][] getAccumulatedHTCCData() {
+		return _HTCCAccumulatedData;
 	}
 
 
 	/**
-	 * Get the accumulated dgtz EC data
+	 * Get the accumulated EC data
 	 * 
 	 * @return the accumulated ec data
 	 */
-	public int[][][][] getAccumulatedDgtzEcData() {
-		return _ecDgtzAccumulatedData;
+	public int[][][][] getAccumulatedECALData() {
+		return _ECALAccumulatedData;
 	}
 
 	/**
-	 * Get the accumulated dgtz PCAL data
+	 * Get the accumulated PCAL data
 	 * 
 	 * @return the accumulated PCAL data
 	 */
-	public int[][][] getAccumulatedDgtzPcalData() {
-		return _pcalDgtzAccumulatedData;
+	public int[][][] getAccumulatedPCALData() {
+		return _PCALAccumulatedData;
 	}
 
 	/**
-	 * Get the accumulated dgtz DC data
+	 * Get the accumulated DC data
 	 * 
 	 * @return the accumulated dc data
 	 */
-	public int[][][][] getAccumulatedDgtzDcData() {
-		return _dcDgtzAccumulatedData;
+	public int[][][][] getAccumulatedDCData() {
+		return _DCAccumulatedData;
 	}
 
 	/**
@@ -317,26 +342,26 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for any DC wire.
 	 */
-	public int getMaxDgtzDcCount() {
-		return _maxDgtzDcCount;
+	public int getMaxDCCount() {
+		return _maxDCCount;
 	}
 
 	/**
-	 * Get the accumulated dgtz Bst panel data
+	 * Get the accumulated Bst panel data
 	 * 
 	 * @return the accumulated bst panel data
 	 */
-	public int[][] getAccumulatedDgtzBstData() {
-		return _bstDgtzAccumulatedData;
+	public int[][] getAccumulatedBSTData() {
+		return _BSTAccumulatedData;
 	}
 
 	/**
-	 * Get the accumulated dgtz full Bst strip data
+	 * Get the accumulated full Bst strip data
 	 * 
 	 * @return the accumulated bst strip data
 	 */
-	public int[][][] getAccumulatedDgtzFullBstData() {
-		return _bstDgtzFullAccumulatedData;
+	public int[][][] getAccumulatedFullBSTData() {
+		return _BSTFullAccumulatedData;
 	}
 	
 	public int getMaxFTCALCount() {
@@ -348,8 +373,8 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for ec strips.
 	 */
-	public int getMaxDgtzEcCount() {
-		return _maxDgtzEcCount;
+	public int getMaxECALCount() {
+		return _maxECALCount;
 	}
 
 	/**
@@ -357,8 +382,8 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for ec strips.
 	 */
-	public int getMaxDgtzHTCCCount() {
-		return _maxDgtzHTCCCount;
+	public int getMaxHTCCCount() {
+		return _maxHTCCCount;
 	}
 
 	/**
@@ -366,8 +391,8 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for pcal strips.
 	 */
-	public int getMaxDgtzPcalCount() {
-		return _maxDgtzPcalCount;
+	public int getMaxPCALCount() {
+		return _maxPCALCount;
 	}
 
 	/**
@@ -375,8 +400,8 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for any bst panel.
 	 */
-	public int getMaxDgtzBstCount() {
-		return _maxDgtzBstCount;
+	public int getMaxBSTCount() {
+		return _maxBSTCount;
 	}
 
 	/**
@@ -384,35 +409,44 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for any bst strip.
 	 */
-	public int getMaxDgtzFullBstCount() {
-		return _maxDgtzFullBstCount;
+	public int getMaxFullBSTCount() {
+		return _maxFullBSTCount;
 	}
 
 	/**
-	 * Get the accumulated dgtz ftof panel 1a
+	 * Get the accumulated ftof panel 1a
 	 * 
 	 * @return the accumulated ftof panel 1a
 	 */
-	public int[][] getAccumulatedDgtzFtof1aData() {
-		return _ftof1aDgtzAccumulatedData;
+	public int[][] getAccumulatedFTOF1AData() {
+		return _FTOF1AAccumulatedData;
 	}
 
 	/**
-	 * Get the accumulated dgtz ftof panel 1b
+	 * Get the accumulated ftof panel 1b
 	 * 
 	 * @return the accumulated ftof panel 1b
 	 */
-	public int[][] getAccumulatedDgtzFtof1bData() {
-		return _ftof1bDgtzAccumulatedData;
+	public int[][] getAccumulatedFTOF1BData() {
+		return _FTOF1BAccumulatedData;
 	}
 
 	/**
-	 * Get the accumulated dgtz ftof panel 2
+	 * Get the accumulated ftof panel 2
 	 * 
 	 * @return the accumulated ftof panel 2
 	 */
-	public int[][] getAccumulatedDgtzFtof2Data() {
-		return _ftof2DgtzAccumulatedData;
+	public int[][] getAccumulatedFTOF2Data() {
+		return _FTOF2AccumulatedData;
+	}
+
+	/**
+	 * Get the max counts for CTOFf panel
+	 * 
+	 * @return the max counts for any CTOF paddle.
+	 */
+	public int getMaxCTOFCount() {
+		return _maxCTOFCount;
 	}
 
 	/**
@@ -420,8 +454,8 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for any ftof panel.
 	 */
-	public int getMaxDgtzFtofCount() {
-		return _maxDgtzFtofCount;
+	public int getMaxFTOFCount() {
+		return _maxFTOFCount;
 	}
 
 	//
@@ -513,9 +547,14 @@ public class AccumulationManager
 		DCTdcHitList dclist = DC.getInstance().updateTdcAdcList();
 		accumDC(dclist);
 		
+		// ctof data
+		TdcAdcHitList ctoflist = CTOF.getInstance().updateTdcAdcList();
+		accumCTOF(ctoflist);
+
+		
 		// ftof data
 		TdcAdcHitList ftoflist = FTOF.getInstance().updateTdcAdcList();
-		accumFtof(ftoflist);
+		accumFTOF(ftoflist);
 
 		// all ec
 		TdcAdcHitList allEClist = AllEC.getInstance().updateTdcAdcList();
@@ -537,16 +576,16 @@ public class AccumulationManager
 					int sect0 = bstsector[i] - 1;
 					int strip0 = bststrip[i] - 1;
 					try {
-						_bstDgtzAccumulatedData[lay0][sect0] += 1;
-						_maxDgtzBstCount = Math.max(
-								_bstDgtzAccumulatedData[lay0][sect0],
-								_maxDgtzBstCount);
+						_BSTAccumulatedData[lay0][sect0] += 1;
+						_maxBSTCount = Math.max(
+								_BSTAccumulatedData[lay0][sect0],
+								_maxBSTCount);
 
 						if (strip0 >= 0) {
-							_bstDgtzFullAccumulatedData[lay0][sect0][strip0] += 1;
-							_maxDgtzFullBstCount = Math.max(
-									_bstDgtzFullAccumulatedData[lay0][sect0][strip0],
-									_maxDgtzFullBstCount);
+							_BSTFullAccumulatedData[lay0][sect0][strip0] += 1;
+							_maxFullBSTCount = Math.max(
+									_BSTFullAccumulatedData[lay0][sect0][strip0],
+									_maxFullBSTCount);
 						}
 
 					} catch (ArrayIndexOutOfBoundsException e) {
@@ -574,8 +613,8 @@ public class AccumulationManager
 		}
 
 		for (AdcHit hit : list) {
-			_ftcalAccumulatedData[hit.component] += 1;
-			_maxFTCALCount = Math.max(_maxFTCALCount, _ftcalAccumulatedData[hit.component]);
+			_FTCALAccumulatedData[hit.component] += 1;
+			_maxFTCALCount = Math.max(_maxFTCALCount, _FTCALAccumulatedData[hit.component]);
 		}
 	}
 	
@@ -593,10 +632,10 @@ public class AccumulationManager
 
 				if (sect0 >= 0) {
 					try {
-						_htccDgtzAccumulatedData[sect0][ring0][half0] += 1;
+						_HTCCAccumulatedData[sect0][ring0][half0] += 1;
 						
-						_maxDgtzHTCCCount = Math.max(_htccDgtzAccumulatedData[sect0][ring0][half0],
-								_maxDgtzHTCCCount);
+						_maxHTCCCount = Math.max(_HTCCAccumulatedData[sect0][ring0][half0],
+								_maxHTCCCount);
 
 					} catch (ArrayIndexOutOfBoundsException e) {
 						String msg = String.format("HTCC index out of bounds. Event# %d sect %d ring %d half %d",
@@ -624,18 +663,18 @@ public class AccumulationManager
 
 					if (layer < 4) { // pcal
 						int view0 = layer - 1;
-						_pcalDgtzAccumulatedData[sect0][view0][strip0] += 1;
+						_PCALAccumulatedData[sect0][view0][strip0] += 1;
 
-						_maxDgtzPcalCount = Math.max(_pcalDgtzAccumulatedData[sect0][view0][strip0], _maxDgtzPcalCount);
+						_maxPCALCount = Math.max(_PCALAccumulatedData[sect0][view0][strip0], _maxPCALCount);
 					} else { // ec
 						layer -= 4; // convert to 0..5
 						int stack0 = layer / 3; // 000,111
 						int view0 = layer % 3; // 012012
 
-						_ecDgtzAccumulatedData[sect0][stack0][view0][strip0] += 1;
+						_ECALAccumulatedData[sect0][stack0][view0][strip0] += 1;
 
-						_maxDgtzEcCount = Math.max(_ecDgtzAccumulatedData[sect0][stack0][view0][strip0],
-								_maxDgtzEcCount);
+						_maxECALCount = Math.max(_ECALAccumulatedData[sect0][stack0][view0][strip0],
+								_maxECALCount);
 
 					}
 					
@@ -659,20 +698,42 @@ public class AccumulationManager
 
 		for (DCTdcHit hit : list) {
 			if (hit.inRange()) {
-				_dcDgtzAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1] += 1;
+				_DCAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1] += 1;
 
-				_maxDgtzDcCount = Math.max(
-						_dcDgtzAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1],
-						_maxDgtzDcCount);
+				_maxDCCount = Math.max(
+						_DCAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1],
+						_maxDCCount);
 			} else {
 				Log.getInstance().warning("In accumulation, DC hit has bad indices: " + hit);
 			}
 
 		}
 	}
+	
+	// for ctof accumulating
+	private void accumCTOF(TdcAdcHitList list) {
+
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+
+		for (TdcAdcHit hit : list) {
+			if (hit != null) {
+				try {
+					_CTOFAccumulatedData[hit.component-1] += 1; 
+					_maxCTOFCount = Math.max(_CTOFAccumulatedData[hit.component-1], _maxCTOFCount);
+				} catch (ArrayIndexOutOfBoundsException e) {
+					Log.getInstance().warning("In accumulation, CTOF hit has bad indices: " + hit);
+				}
+			}
+
+		}
+
+	}
+
 
 	// for ftof accumulating
-	private void accumFtof(TdcAdcHitList list) {
+	private void accumFTOF(TdcAdcHitList list) {
 
 		if ((list == null) || list.isEmpty()) {
 			return;
@@ -685,15 +746,15 @@ public class AccumulationManager
 					int paddle0 = hit.component - 1;
 
 					if (hit.layer == 1) {
-						_ftof1aDgtzAccumulatedData[sect0][paddle0] += 1;
-						_maxDgtzFtofCount = Math.max(_ftof1aDgtzAccumulatedData[sect0][paddle0], _maxDgtzFtofCount);
+						_FTOF1AAccumulatedData[sect0][paddle0] += 1;
+						_maxFTOFCount = Math.max(_FTOF1AAccumulatedData[sect0][paddle0], _maxFTOFCount);
 					} else if (hit.layer == 2) {
-						_ftof1bDgtzAccumulatedData[sect0][paddle0] += 1;
-						_maxDgtzFtofCount = Math.max(_ftof1bDgtzAccumulatedData[sect0][paddle0], _maxDgtzFtofCount);
+						_FTOF1BAccumulatedData[sect0][paddle0] += 1;
+						_maxFTOFCount = Math.max(_FTOF1BAccumulatedData[sect0][paddle0], _maxFTOFCount);
 					}
 					if (hit.layer == 3) {
-						_ftof2DgtzAccumulatedData[sect0][paddle0] += 1;
-						_maxDgtzFtofCount = Math.max(_ftof2DgtzAccumulatedData[sect0][paddle0], _maxDgtzFtofCount);
+						_FTOF2AccumulatedData[sect0][paddle0] += 1;
+						_maxFTOFCount = Math.max(_FTOF2AccumulatedData[sect0][paddle0], _maxFTOFCount);
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
 					Log.getInstance().warning("In accumulation, FTOF hit has bad indices: " + hit);
@@ -856,7 +917,7 @@ public class AccumulationManager
 
 						for (int lay0 = 0; lay0 < 6; lay0++) {
 							for (int wire0 = 0; wire0 < 112; wire0++) {
-								count += _dcDgtzAccumulatedData[sect0][supl0][lay0][wire0];
+								count += _DCAccumulatedData[sect0][supl0][lay0][wire0];
 							}
 						} // lay0
 

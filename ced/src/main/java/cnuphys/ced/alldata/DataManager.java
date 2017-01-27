@@ -218,11 +218,11 @@ public class DataManager {
 						int type = dd.getProperty("type", columnName);
 
 						if ((type < 1) || (type > 6) || (type == 24)) {
-							Log.getInstance()
-									.warning("Bank: [" + bankName
-											+ "] Column: [" + columnName
-											+ "] bad data type in ColumnData initialization: ["
-											+ type + "]");
+//							Log.getInstance()
+//									.warning("Bank: [" + bankName
+//											+ "] Column: [" + columnName
+//											+ "] bad data type in ColumnData initialization: ["
+//											+ type + "]");
 						}
 						else {
 							ColumnData cd = new ColumnData(bankName, columnName,
