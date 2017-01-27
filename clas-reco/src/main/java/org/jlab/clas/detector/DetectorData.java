@@ -7,6 +7,7 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.physics.Particle;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -112,12 +113,40 @@ public class DetectorData {
             }
         }
         
+        detectorEvent.getPhysicsEvent().clear();
+        
+        for(DetectorParticle p : particles){
+            if(p.getPid()==0){
+                Particle part = Particle.createWithMassCharge(
+                        p.getMass(),p.getCharge(),
+                        p.vector().x(),p.vector().y(),p.vector().z(),
+                        p.vertex().x(),p.vertex().y(),p.vertex().z()
+                );
+                detectorEvent.getPhysicsEvent().addParticle(part);
+            } else {
+                Particle part = Particle.createWithPid(p.getPid(), 
+                        p.vector().x(),p.vector().y(),p.vector().z(),
+                        p.vertex().x(),p.vertex().y(),p.vertex().z()
+                        );
+                detectorEvent.getPhysicsEvent().addParticle(part);
+            }
+        }
+        
         if(event.hasBank("MC::Particle")==true){
             DataBank  bank = event.getBank("MC::Particle");
             detectorEvent.getGeneratedEvent().clear();
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
                 detectorEvent.getGeneratedEvent().addGeneratedParticle(
+                        bank.getInt("pid", row),
+                        bank.getFloat("px", row),
+                        bank.getFloat("py", row),
+                        bank.getFloat("pz", row),
+                        bank.getFloat("vx", row),
+                        bank.getFloat("vy", row),
+                        bank.getFloat("vz", row)
+                );
+                detectorEvent.getPhysicsEvent().addGeneratedParticle(
                         bank.getInt("pid", row),
                         bank.getFloat("px", row),
                         bank.getFloat("py", row),

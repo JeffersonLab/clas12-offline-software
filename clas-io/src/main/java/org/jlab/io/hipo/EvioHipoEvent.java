@@ -32,7 +32,7 @@ public class EvioHipoEvent {
         this.fillHipoEventFTOF(hipoEvent, event);
         this.fillHipoEventFTCAL(hipoEvent, event);
         this.fillHipoEventDC(hipoEvent, event);
-        //this.fillHipoEventCTOF(hipoEvent, event);        
+        this.fillHipoEventCTOF(hipoEvent, event);        
         this.fillHipoEventECAL(hipoEvent, event);
         this.fillHipoEventLTCC(hipoEvent, event);
         this.fillHipoEventHTCC(hipoEvent, event);
@@ -67,8 +67,8 @@ public class EvioHipoEvent {
                 DataBank  hipoBank = hipoEvent.createBank("HTCC::adc", nrows);
                 for(int i = 0; i < nrows; i++){
                     hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
-                    hipoBank.setByte("layer", i, (byte) evioBank.getInt("ring",i));
-                    hipoBank.setShort("component", i, (short) evioBank.getInt("half",i));
+                    hipoBank.setByte("layer", i, (byte) evioBank.getInt("half",i));
+                    hipoBank.setShort("component", i, (short) evioBank.getInt("ring",i));
                     hipoBank.setInt("ADC", i, evioBank.getInt("nphe", i)*100);
                     hipoBank.setFloat("time", i, (float) evioBank.getDouble("time", i));
                     hipoBank.setShort("ped", i, (short) 0);
@@ -128,17 +128,37 @@ public class EvioHipoEvent {
     public void fillHipoEventCTOF(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("CTOF::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("CTOF::dgtz");
-            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("CTOF::dgtz", evioBank.rows());
+            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("CTOF::adc", evioBank.rows()*2);
+            HipoDataBank hipoTDC = (HipoDataBank) hipoEvent.createBank("CTOF::tdc", evioBank.rows()*2);
             for(int i = 0; i < evioBank.rows(); i++){
-                //hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
-                //hipoBank.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
-                hipoBank.setShort("component",  i, (short) evioBank.getInt("paddle",i));
-                hipoBank.setInt("ADCU", i, evioBank.getInt("ADCU", i));
-                hipoBank.setInt("ADCD", i, evioBank.getInt("ADCD", i));
-                hipoBank.setInt("TDCU", i, evioBank.getInt("TDCU", i));
-                hipoBank.setInt("TDCD", i, evioBank.getInt("TDCD", i));                
+                int index = i*2;
+                
+                hipoADC.setByte("sector", index,      (byte)  0);
+                hipoADC.setByte("layer",  index,      (byte)  0);
+                hipoADC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
+                hipoADC.setByte("order", index,(byte) 0);
+                hipoADC.setInt("ADC", index, evioBank.getInt("ADCU", i));
+                
+                hipoADC.setByte("sector", index+1,      (byte)  0);
+                hipoADC.setByte("layer",  index+1,      (byte)  0);
+                hipoADC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
+                hipoADC.setByte("order", index+1,(byte) 1);
+                hipoADC.setInt("ADC", index+1, evioBank.getInt("ADCD", i));
+                
+                hipoTDC.setByte("sector", index,      (byte)  0);
+                hipoTDC.setByte("layer",  index,      (byte)  0);
+                hipoTDC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
+                hipoTDC.setByte("order", index,(byte) 2);
+                hipoTDC.setInt("TDC", index, evioBank.getInt("TDCU", i));
+                
+                hipoTDC.setByte("sector", index+1,      (byte)  0);
+                hipoTDC.setByte("layer",  index+1,      (byte)  0);
+                hipoTDC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
+                hipoTDC.setByte("order", index+1,(byte) 3);
+                hipoTDC.setInt("TDC", index+1, evioBank.getInt("TDCD", i));
+                             
             }
-            hipoEvent.appendBanks(hipoBank);
+            hipoEvent.appendBanks(hipoADC,hipoTDC);
         }
     }
     

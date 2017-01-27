@@ -53,6 +53,14 @@ public class DetectorCollection<T> {
         return this.collection.getItem(sector,layer,comp);
                 //.get(DetectorDescriptor.generateHashCode(sector, layer, comp));
     }
+    
+    public Set<Long>  getKeys(){
+        return this.collection.getMap().keySet();
+    }
+    
+    public T getObjectForKey(Long key){
+        return this.collection.getMap().get(key);
+    }
     /**
      * Returns a list of all values in the collection
      * @return List of collection values

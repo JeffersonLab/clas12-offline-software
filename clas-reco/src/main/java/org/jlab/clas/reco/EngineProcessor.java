@@ -42,7 +42,7 @@ public class EngineProcessor {
     public void initDefault(){
         
         String[] names = new String[]{
-            "DCHB","FTOF","EC",
+            "DCHB","FTOF","EC","HTCC",
             //"EBHB" , 
             "DCTB","EBTB"};
         
@@ -50,6 +50,7 @@ public class EngineProcessor {
             "org.jlab.service.dc.DCHBEngine",
             "org.jlab.service.ftof.FTOFEngine",
             "org.jlab.service.ec.ECEngine",
+            "org.jlab.service.htcc.HTCCReconstructionService",
             //"org.jlab.service.eb.EBEngine",
             "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.eb.EBEngine"
