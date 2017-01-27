@@ -2,7 +2,6 @@ package org.jlab.service.ltcc;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.base.DataBank;
 import java.util.List;
 
 /**
@@ -27,7 +26,7 @@ public class LTCCEngine extends ReconstructionEngine {
                         LTCCHit.loadHits(event, this.getConstantsManager());
                 List<LTCCCluster> clusters =
                         LTCCClusterFinder.findClusters(hits);
-                LTCCCluster.writeClusters(event, clusters);
+                LTCCCluster.saveClusters(event, clusters);
                 if (DEBUG) {
                     event.getBank("LTCC::clusters").show();
                 }

@@ -8,7 +8,7 @@ package org.jlab.service.ltcc;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-//import org.jlab.utils.groups.IndexedTable;
+import org.jlab.utils.groups.IndexedTable;
 import org.jMath.Vector.threeVec;
 
 import java.util.LinkedList;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public final class LTCCHit {
     // nphe requirements for a good hit
-    static private final double NPHE_MIN_HIT = 0.001;
+    static private final double NPHE_MIN_HIT = 0;
     static private final double NPHE_MAX_HIT = 10000.;
 
     // raw LTCC info
@@ -47,33 +47,42 @@ public final class LTCCHit {
 
     // load a list of all good hits
     public static List<LTCCHit> loadHits(DataEvent event, ConstantsManager ccdb) {
-        int run = 11; // TODO how to get run number?
-        //IndexedTable gain = ccdb.getConstants(run, "/calibration/ltcc/gain");
-        //IndexedTable timing_offset = ccdb.getConstants(run, "/calibration/ltcc/timing_offset");
-        DataBank ltccADC = event.getBank("LTCC::adc");
+        int run = 11; // TODO how to get run number?\
+        IndexedTable gain = null;
+        IndexedTable timing_offset = null;
+        if (ccdb != null) {
+            //gain = ccdb.getConstants(run, "/calibration/ltcc/gain");
+            //timing_offset = ccdb.getConstants(run, "/calibration/ltcc/timing_offset");
+        }
+        DataBank bank = event.getBank("LTCC::adc");
         
         List<LTCCHit> hits = new LinkedList<>();
-        for (int i = 0; i < ltccADC.rows(); ++i) {
-            LTCCHit hit = new LTCCHit(ltccADC, i);
+        for (int i = 0; i < bank.rows(); ++i) {
+            LTCCHit hit = new LTCCHit(bank, i, gain, timing_offset);
             if (hit.getNphe() > NPHE_MIN_HIT && hit.getNphe() < NPHE_MAX_HIT) {
-                hits.add(new LTCCHit(ltccADC, i));
+                hits.add(new LTCCHit(bank, i));
             }
         }
         return hits;
     }
+    public static List <LTCCHit> loadHits(DataEvent event) {
+        return loadHits(event, null);
+    }
     
-    // TODO: add timing calibration
-    LTCCHit(DataBank ltccADC, int index/*, IndexedTable gain*/) {
-       this.sector = ltccADC.getByte("sector", index);
-       this.side = ltccADC.getByte("layer", index);
-       this.segment = ltccADC.getShort("component", index);
-       this.adc = ltccADC.getInt("ADC", index);
-       this.rawTime = ltccADC.getFloat("time", index);
-       this.pedestal = ltccADC.getShort("ped", index);
-       this.nphe = calcNphe(/* gain */);
-       this.time = calcTime(/* timing */);
+    LTCCHit(DataBank bank, int index, IndexedTable gain, IndexedTable timing_offset) {
+       this.sector = bank.getByte("sector", index);
+       this.side = bank.getByte("layer", index);
+       this.segment = bank.getShort("component", index);
+       this.adc = bank.getInt("ADC", index);
+       this.rawTime = bank.getFloat("time", index);
+       this.pedestal = bank.getShort("ped", index);
+       this.nphe = calcNphe(gain);
+       this.time = calcTime(timing_offset);
        this.iLTCCPhi = calcLTCCPhiIndex();
     }        
+    LTCCHit(DataBank bank, int index) {
+        this(bank, index, null, null);
+    }
    
     public int getThetaIndex() {
         return this.segment - 1;
@@ -135,14 +144,24 @@ public final class LTCCHit {
     }
     
     
-    private double calcNphe(/*IndexedTable gain*/) {
+    private double calcNphe(IndexedTable gain) {
         // TODO: verify with Maurizio if this is indeed the format
         //gain.getDoubleValue("gain", sector, side, segment);
-        return this.adc / 100; // hard-coded for now
+        if (gain != null) {
+            return (this.adc > 0 ? this.adc / 100 : -1); // hard-coded for now
+        } else {
+            // fallback
+            return (this.adc > 0 ? this.adc / 100 : -1);
+        }
     }
     
-    private double calcTime(/* IndexedTable timing */) {
-        return this.rawTime;
+    private double calcTime(IndexedTable timing) {
+        if (timing != null) {
+            return this.rawTime;
+        } else {
+            // fallback
+            return this.rawTime;
+        }
     }
     
     private int calcLTCCPhiIndex() {
