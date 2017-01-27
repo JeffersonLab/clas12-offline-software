@@ -136,7 +136,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 //		gljpanel.addKeyListener(_keyAdapter);
 		
 		new KeyBindings3D(this);
-		new KeyBindings3D(gljpanel);
+//		new KeyBindings3D(gljpanel);
 
 		_mouseAdapter = new MouseAdapter3D(this);
 		gljpanel.addMouseListener(_mouseAdapter);
