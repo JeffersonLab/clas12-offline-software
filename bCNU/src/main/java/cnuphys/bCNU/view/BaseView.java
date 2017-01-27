@@ -11,6 +11,8 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyVetoException;
@@ -43,7 +45,7 @@ import cnuphys.bCNU.util.PropertySupport;
  * 
  */
 @SuppressWarnings("serial")
-public class BaseView extends JInternalFrame {
+public class BaseView extends JInternalFrame implements FocusListener {
 
 	// use to stack views as added
 	private static int LASTLEFT = 0;
@@ -131,6 +133,7 @@ public class BaseView extends JInternalFrame {
 			LASTTOP += DEL_V;
 		}
 
+		addFocusListener(this);
 		setFrameIcon(null);
 		ViewManager.getInstance().add(this);
 
@@ -731,6 +734,14 @@ public class BaseView extends JInternalFrame {
 	 */
 	public JScrollPane getScrollPane() {
 		return _scrollPane;
+	}
+
+	@Override
+	public void focusGained(FocusEvent e) {
+	}
+
+	@Override
+	public void focusLost(FocusEvent e) {
 	}
 
 }

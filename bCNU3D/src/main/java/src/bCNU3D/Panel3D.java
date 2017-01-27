@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import adapter3D.KeyAdapter3D;
+import adapter3D.KeyBindings3D;
 import adapter3D.MouseAdapter3D;
 
 import com.jogamp.opengl.GL;
@@ -130,8 +131,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 		// GLJPanel in the center
 		add(gljpanel, BorderLayout.CENTER);
 				
-		_keyAdapter = new KeyAdapter3D(this);
-		gljpanel.addKeyListener(_keyAdapter);
+//		_keyAdapter = new KeyAdapter3D(this);
+//		addKeyListener(_keyAdapter);
+//		gljpanel.addKeyListener(_keyAdapter);
+		
+		new KeyBindings3D(this);
+		new KeyBindings3D(gljpanel);
 
 		_mouseAdapter = new MouseAdapter3D(this);
 		gljpanel.addMouseListener(_mouseAdapter);
@@ -141,7 +146,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 		createInitialItems();
 		setupMaintenanceTimer();
 		
-		gljpanel.requestFocus();
+	//	gljpanel.requestFocus();
 	}
 	
 
@@ -199,6 +204,15 @@ public class Panel3D extends JPanel implements GLEventListener {
 	private JComponent addWest() {
 		return null;
 	}
+	
+	/**
+	 * Get the opengl panel
+	 * @return the opengl panel
+	 */
+	public GLJPanel getGLJPanel() {
+		return gljpanel;
+	}
+
 
 	@Override
 	public void display(GLAutoDrawable drawable) {

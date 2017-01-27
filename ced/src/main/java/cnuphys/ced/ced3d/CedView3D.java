@@ -3,6 +3,10 @@ package cnuphys.ced.ced3d;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.Box;
 import javax.swing.JMenu;
@@ -12,6 +16,7 @@ import javax.swing.JMenuItem;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
+import adapter3D.KeyBindings3D;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.bCNU.util.PropertySupport;
@@ -76,6 +81,7 @@ public abstract class CedView3D extends BaseView implements
 		add(Box.createHorizontalStrut(1), BorderLayout.WEST);
 		pack();
 		AccumulationManager.getInstance().addAccumulationListener(this);
+		
 	}
 
 	protected abstract CedPanel3D make3DPanel(float angleX, float angleY,
@@ -168,5 +174,13 @@ public abstract class CedView3D extends BaseView implements
 			_panel3D.refresh();
 		}
 	}
+	
+	@Override
+	public void focusGained(FocusEvent e) {
+		if (_panel3D != null) {
+			_panel3D.requestFocus();
+		}
+	}
+
 
 }
