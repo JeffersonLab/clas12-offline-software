@@ -114,7 +114,7 @@ class HTCCCluster {
   
         double cosphi = 0.0;
         double sinphi = 0.0;
-
+ //      System.out.println("calc sums " + nhitclust);
         for(int i=0; i<nhitclust; i++){
             if( i == 0 || hititheta.get(i) > ithetamax ) ithetamax = hititheta.get(i);
             if( i == 0 || hititheta.get(i) < ithetamin ) ithetamin = hititheta.get(i);
@@ -123,7 +123,7 @@ class HTCCCluster {
 
             nphetot += hitnphe.get(i);
             time += hittime.get(i) * hitnphe.get(i);
-
+ //           System.out.println("theta " + theta/Math.pow( hitdtheta.get(i), -2. ) +  " hittheta " + hittheta.get(i));
             theta += hittheta.get(i) * Math.pow( hitdtheta.get(i), -2. );
             dtheta += Math.pow( hitdtheta.get(i), -2. );
 
@@ -135,6 +135,7 @@ class HTCCCluster {
         time /= nphetot; // weighted average
 
         theta /= dtheta;
+  //      System.out.println("theta final " + theta);
         cosphi /= dphi;
         sinphi /= dphi;
         for (int u = 0; u < 4; u++){

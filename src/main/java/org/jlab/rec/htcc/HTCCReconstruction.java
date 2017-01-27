@@ -87,16 +87,20 @@ public class HTCCReconstruction {
      ithetaArray = new int[rows];
     iphiArray = new int[rows];
     for(int i = 0; i < bankDGTZ.rows(); i++){
+ //       System.out.println("rows " + bankDGTZ.rows());
   //      hitnArray[i]   = bankDGTZ.getInt("hitn", i);
         sectorArray[i] = bankDGTZ.getByte("sector", i);
 
         ringArray[i]   = bankDGTZ.getShort("component", i);
-        halfArray[i]   = bankDGTZ.getByte("layer", i);
-        npheArray[i]   = bankDGTZ.getInt("ADC", i)/((int)gain.getDoubleValue("gain", sectorArray[i] ,halfArray[i], ringArray[i]));
+        halfArray[i]   = bankDGTZ.getByte("layer", i);    
+        if (sectorArray[i] > 0) npheArray[i]   = (bankDGTZ.getInt("ADC", i)*4)/((int)gain.getDoubleValue("gain", sectorArray[i] ,halfArray[i], ringArray[i]));
+   //            System.out.println("npe " + npheArray[i]);
+
         timeArray[i]   = bankDGTZ.getFloat("time", i);
         }
         numHits = sectorArray.length;
-        
+//        System.out.println("numHits " + numHits);
+
         // Create and fill ithetaArray and iphiArray so that the itheta and iphi
         // values are not calculated more than once
         ithetaArray = new int[numHits];
@@ -168,7 +172,7 @@ public class HTCCReconstruction {
             // Create a new cluster and add the maximum hit
             HTCCCluster cluster = new HTCCCluster();
             cluster.addHit(itheta, iphi, nphe, time, theta, phi, dtheta, dphi);
-                    
+ //            System.out.println("created cluster");       
             // Recursively grow the cluster by adding nearby hits
             growCluster(cluster, remainingHits);
             
@@ -236,6 +240,7 @@ public class HTCCReconstruction {
         // For each hit in the cluster:
         for (int currHit=0; currHit<cluster.getNHitClust(); ++currHit) {
             // Get the hits coordinates
+//            System.out.println("grow cluster " + cluster.getNHitClust());
             int ithetaCurr = cluster.getHitITheta(currHit);
             int iphiCurr   = cluster.getHitIPhi(currHit);
             // For each of the remaining hits:
