@@ -23,8 +23,8 @@ public class BSTPanel3D extends DetectorItem3D {
 	// the 1-based "biglayer" [1..8] used by the data
 	private int _layer;
 
-	public BSTPanel3D(Panel3D panel3d, int sector, int layer) {
-		super(panel3d);
+	public BSTPanel3D(CedPanel3D panel3D, int sector, int layer) {
+		super(panel3D);
 		_sector = sector;
 		_layer = layer;
 	}
@@ -70,7 +70,7 @@ public class BSTPanel3D extends DetectorItem3D {
 
 				BSTGeometry.getStrip(sector, layer, strip, coords6);
 
-				if (showMCTruth() && (pid != null)) {
+				if (_cedPanel3D.showMCTruth() && (pid != null)) {
 					Color color = truthColor(pid, i);
 
 					if (showHits()) {
@@ -96,34 +96,10 @@ public class BSTPanel3D extends DetectorItem3D {
 			Support3D.drawQuads(drawable, coords36, outlineHitColor, 1f, true);
 		}
 
-		// cosmics?
-		int ids[] = BST.cosmicID();
-		if (showCosmics() && (ids != null)) {
-			double yx_interc[] = BST.cosmicYxInterc();
-			double yx_slope[] = BST.cosmicYxSlope();
-			double yz_interc[] = BST.cosmicYzInterc();
-			double yz_slope[] = BST.cosmicYzSlope();
-
-			for (int i = 0; i < ids.length; i++) {
-				double y1 = 2000;
-				double y2 = -2000;
-				// note conversion mm to cm
-				double yx_int = yx_interc[i] / 10;
-				double yz_int = yz_interc[i] / 10;
-				double x1 = yx_slope[i] * y1 + yx_int;
-				double x2 = yx_slope[i] * y2 + yx_int;
-				double z1 = yz_slope[i] * y1 + yz_int;
-				double z2 = yz_slope[i] * y2 + yz_int;
-				Support3D.drawLine(drawable, (float) x1, (float) y1,
-						(float) z1, (float) x2, (float) y2, (float) z2,
-						cosmicColor, 1.5f);
-
-			}
-		}
 
 		// reconstructed crosses?
 		double labx[] = BST.crossX();
-		if (showCrosses() && (labx != null)) {
+		if (_cedPanel3D.showReconCrosses() && (labx != null)) {
 			// these arrays are in mm
 			double laby[] = BST.crossY();
 			double labz[] = BST.crossZ();
@@ -173,51 +149,30 @@ public class BSTPanel3D extends DetectorItem3D {
 	// show SVT?
 	@Override
 	protected boolean show() {
-		boolean showme = ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_SVT);
-
-		if (showme) {
-			switch (_layer) {
-			case 1:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_1);
-				break;
-			case 2:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_2);
-				break;
-			case 3:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_3);
-				break;
-			case 4:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_4);
-				break;
-			case 5:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_5);
-				break;
-			case 6:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_6);
-				break;
-			case 7:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_7);
-				break;
-			case 8:
-				showme = ((CentralPanel3D) _panel3D)
-						.show(CedPanel3D.SHOW_SVT_LAYER_8);
-				break;
-			}
+		switch (_layer) {
+		case 1:
+			return _cedPanel3D.showBSTLayer1();
+		case 2:
+			return _cedPanel3D.showBSTLayer2();
+		case 3:
+			return _cedPanel3D.showBSTLayer3();
+		case 4:
+			return _cedPanel3D.showBSTLayer4();
+		case 5:
+			return _cedPanel3D.showBSTLayer5();
+		case 6:
+			return _cedPanel3D.showBSTLayer6();
+		case 7:
+			return _cedPanel3D.showBSTLayer7();
+		case 8:
+			return _cedPanel3D.showBSTLayer8();
 		}
-
-		return showme;
+		return false;
 	}
 
 	// show strip hits?
 	protected boolean showHits() {
-		return ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_SVT_HITS);
+		return show() && _cedPanel3D.showBSTHits();
 	}
 
 }

@@ -41,11 +41,6 @@ public class LTCCGeometry {
 			_delX = (_xf - _xo)/18.;
 			_delY = (_yf - _yo)/18.;
 			
-			System.out.println("Xo = " + _xo);
-			System.out.println("Yo = " + _yo);
-			System.out.println("Xf = " + _xf);
-			System.out.println("Yf = " + _yf);
-			System.out.println("Rf = " + _rf);
 		}
 		
 		System.out.println("=====================================");

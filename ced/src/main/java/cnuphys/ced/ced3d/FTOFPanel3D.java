@@ -29,8 +29,8 @@ public class FTOFPanel3D extends DetectorItem3D {
 	 * @param panelId
 	 *            the super layer [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
 	 */
-	public FTOFPanel3D(Panel3D panel3d, int sector, int panelId) {
-		super(panel3d);
+	public FTOFPanel3D(CedPanel3D panel3D, int sector, int panelId) {
+		super(panel3D);
 		_sector = sector;
 		_panelId = panelId;
 
@@ -139,7 +139,7 @@ public class FTOFPanel3D extends DetectorItem3D {
 	// show FTOFs?
 	@Override
 	protected boolean show() {
-		return ((FTOF3D) getParent()).show();
+		return _cedPanel3D.showFTOF();
 	}
 
 }

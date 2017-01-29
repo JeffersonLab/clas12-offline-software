@@ -9,9 +9,6 @@ public class CedColors {
 	public static final Color docaLine = Color.lightGray;
 	public static final Color docaFill = new Color(255, 255, 255, 60);
 
-	// for gemc smeared doca's
-	private static final Color sdocaLine = Color.gray;
-	private static final Color sdocaFill = new Color(255, 128, 255, 60);
 
 	// track fit docas
 	public static final Color tbDocaLine = Color.green;
@@ -38,5 +35,10 @@ public class CedColors {
 	public static final Color senseWireColor = X11Colors.getX11Color("Dodger Blue");
 	
 
+	//hit based
+	public static final Color HB_COLOR = X11Colors.getX11Color("yellow");
+	
+	//track based
+	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
 
 }

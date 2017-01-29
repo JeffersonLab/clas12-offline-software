@@ -24,8 +24,8 @@ public class ECViewPlane3D extends DetectorItem3D {
 	// the triangle coordinates
 	private float _coords[];
 
-	public ECViewPlane3D(Panel3D panel3d, int sector, int stack, int view) {
-		super(panel3d);
+	public ECViewPlane3D(CedPanel3D panel3D, int sector, int stack, int view) {
+		super(panel3D);
 		_sector = sector;
 		_stack = stack;
 		_view = view;
@@ -85,7 +85,7 @@ public class ECViewPlane3D extends DetectorItem3D {
 						&& (_view == view[i])) {
 					ECGeometry.getStrip(_sector, _stack, _view, strip[i],
 							coords);
-					if (showMCTruth() && (pid != null)) {
+					if (_cedPanel3D.showMCTruth() && (pid != null)) {
 						Color color = truthColor(pid, i);
 						drawStrip(drawable, color, coords);
 						double xcm = avgX[i] / 10;
@@ -107,8 +107,8 @@ public class ECViewPlane3D extends DetectorItem3D {
 	// show ECs?
 	@Override
 	protected boolean show() {
-		boolean showec = ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_EC);
-		return showec && showSector(_sector);
+		boolean showec = _cedPanel3D.showECAL();
+		return showec && _cedPanel3D.showSector(_sector);
 	}
 
 }

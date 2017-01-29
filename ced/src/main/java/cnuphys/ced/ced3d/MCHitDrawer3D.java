@@ -20,15 +20,17 @@ public class MCHitDrawer3D extends Item3D {
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	private static final float POINTSIZE = 3f;
+	private CedPanel3D _cedPanel3D;
 
-	public MCHitDrawer3D(Panel3D panel3d) {
-		super(panel3d);
+	public MCHitDrawer3D(CedPanel3D panel3D) {
+		super(panel3D);
+		_cedPanel3D = panel3D;
 	}
 
 	@Override
 	public void draw(GLAutoDrawable drawable) {
 
-		if (!showMCTruth()) {
+		if (!_cedPanel3D.showMCTruth()) {
 			return;
 		}
 
@@ -38,7 +40,7 @@ public class MCHitDrawer3D extends Item3D {
 			// if (showDC()) {
 			// }
 
-			if (showFTOF()) {
+			if (_cedPanel3D.showFTOF()) {
 				showGemcXYZHits(drawable, 
 						FTOF.getInstance().avgX(FTOF.PANEL_1A),
 						FTOF.getInstance().avgY(FTOF.PANEL_1A), 
@@ -59,13 +61,13 @@ public class MCHitDrawer3D extends Item3D {
 						2);
 			}
 
-			if (showEC()) {
+			if (_cedPanel3D.showECAL()) {
 				showGemcXYZHits(drawable, EC.avgX(),
 						EC.avgY(), EC.avgZ(),
 						EC.pid(), 0);
 			}
 
-			if (showPCAL()) {
+			if (_cedPanel3D.showPCAL()) {
 				showGemcXYZHits(drawable, PCAL.avgX(),
 						PCAL.avgY(), PCAL.avgZ(),
 						PCAL.pid(), 0);
@@ -73,7 +75,7 @@ public class MCHitDrawer3D extends Item3D {
 
 		} else if (_panel3D instanceof CentralPanel3D) { // central detectors
 
-			if (showSVT()) {
+			if (_cedPanel3D.showBST()) {
 				showGemcXYZHits(drawable, 
 						BST.avgX(),
 						BST.avgY(),
@@ -85,38 +87,6 @@ public class MCHitDrawer3D extends Item3D {
 
 	}
 
-	private boolean showEC() {
-		if (_panel3D instanceof ForwardPanel3D) {
-			return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_EC);
-		}
-		return false;
-	}
-
-	private boolean showPCAL() {
-		if (_panel3D instanceof ForwardPanel3D) {
-			return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_PCAL);
-		}
-		return false;
-	}
-
-	private boolean showFTOF() {
-		if (_panel3D instanceof ForwardPanel3D) {
-			return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_FTOF);
-		}
-		return false;
-	}
-
-	private boolean showSVT() {
-		if (_panel3D instanceof CentralPanel3D) {
-			return ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_FTOF);
-		}
-		return false;
-	}
-
-	// show MC Truth?
-	protected boolean showMCTruth() {
-		return ((CedPanel3D) _panel3D).show(CedPanel3D.SHOW_TRUTH);
-	}
 
 	// draw all the MC hits at once
 	private void showGemcXYZHits(GLAutoDrawable drawable,

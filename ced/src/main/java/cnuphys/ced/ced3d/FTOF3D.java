@@ -26,7 +26,7 @@ public class FTOF3D extends DetectorItem3D {
 	 * @param sector
 	 *            the 1-based sector [1..6]
 	 */
-	public FTOF3D(Panel3D panel3d, int sector) {
+	public FTOF3D(CedPanel3D panel3d, int sector) {
 		super(panel3d);
 		_sector = sector;
 
@@ -40,7 +40,7 @@ public class FTOF3D extends DetectorItem3D {
 
 	@Override
 	public void drawShape(GLAutoDrawable drawable) {
-
+		
 		// GL2 gl = drawable.getGL().getGL2();
 		Color outlineColor = X11Colors.getX11Color("Light Sky Blue",
 				getVolumeAlpha());
@@ -115,9 +115,8 @@ public class FTOF3D extends DetectorItem3D {
 	// show FTOFs?
 	@Override
 	protected boolean show() {
-		boolean showtof = ((ForwardPanel3D) _panel3D)
-				.show(CedPanel3D.SHOW_FTOF);
-		return showtof && showSector(_sector);
+		boolean showtof = _cedPanel3D.showFTOF();
+		return showtof && _cedPanel3D.showSector(_sector);
 	}
 
 	/**

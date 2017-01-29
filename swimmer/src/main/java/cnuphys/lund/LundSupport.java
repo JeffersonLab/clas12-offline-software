@@ -109,7 +109,33 @@ public class LundSupport {
 		}
 	}
 
+	/**
+	 * Is this a track based "particle"
+	 * @param lid the id
+	 * @return <code>true</code> if track based
+	 */
+	public static boolean isTB(LundId lid) {
+		if (lid == null) {
+			return false;
+		}
+		int id = lid.getId();
+		return((id == -101) || (id == -99) || (id == -100));
+				
+	}
 
+	/**
+	 * Is this a hit based "particle"
+	 * @param lid the id
+	 * @return <code>true</code> if hit based
+	 */
+	public static boolean isHB(LundId lid) {
+		if (lid == null) {
+			return false;
+		}
+		int id = lid.getId();
+		return((id == -201) || (id == -199) || (id == -200));
+				
+	}
 
 	/**
 	 * Obtain the LundID object for an electron
@@ -916,19 +942,19 @@ public class LundSupport {
 		
 		
 		//recon tracks
-		setStyle(-99, Color.orange);
-		setStyle(-100, Color.orange);
-		setStyle(-101, Color.orange);
+		setStyle(-99, darkOrange);
+		setStyle(-100, darkOrange);
+		setStyle(-101, darkOrange);
 		setStyle(-199, Color.yellow);
 		setStyle(-200, Color.yellow);
 		setStyle(-201, Color.yellow);
 		
 		
-		setStyle(11, orangeRed); // e-
+		setStyle(11, Color.red); // e-
 		setStyle(-11, Color.magenta); // e+
 		setStyle(111, wheat); // pi0
-		setStyle(211, cadetBlue); // pi+
-		setStyle(-211, darkOrange); // pi-
+		setStyle(211, X11Colors.getX11Color("purple")); // pi+
+		setStyle(-211, X11Colors.getX11Color("medium purple")); // pi-
 		setStyle(321, Color.green); // K+
 		setStyle(-321, olive); // K-
 		setStyle(213, Color.yellow); // rho+

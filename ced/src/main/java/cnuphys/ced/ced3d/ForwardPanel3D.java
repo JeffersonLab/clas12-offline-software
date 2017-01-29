@@ -5,6 +5,7 @@ import item3D.Axes3D;
 import java.awt.Color;
 import java.awt.Font;
 
+import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.lund.X11Colors;
 
 public class ForwardPanel3D extends CedPanel3D {
@@ -15,8 +16,8 @@ public class ForwardPanel3D extends CedPanel3D {
 
 	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH,
 			SHOW_SECTOR_1, SHOW_SECTOR_2, SHOW_SECTOR_3, SHOW_SECTOR_4,
-			SHOW_SECTOR_5, SHOW_SECTOR_6, SHOW_DC, SHOW_EC, SHOW_PCAL,
-			SHOW_FTOF, SHOW_GEMC_DOCA, SHOW_TB_DOCA };
+			SHOW_SECTOR_5, SHOW_SECTOR_6, SHOW_DC, SHOW_ECAL, SHOW_PCAL,
+			SHOW_FTOF, SHOW_HB_CROSS, SHOW_TB_CROSS , SHOW_HB_TRACK, SHOW_TB_TRACK };
 	
 
 	public ForwardPanel3D(CedView3D view, float angleX, float angleY, float angleZ,
@@ -32,15 +33,20 @@ public class ForwardPanel3D extends CedPanel3D {
 				X11Colors.getX11Color("Dark Green"), new Font("SansSerif",
 						Font.PLAIN, 12), 0);
 		addItem(axes);
+		
+		 //cross drawer
+		 CrossDrawer3D cdraw = new CrossDrawer3D(this);
+		 addItem(cdraw);
 
+		
 		// trajectory drawer
 		TrajectoryDrawer3D trajDrawer = new TrajectoryDrawer3D(this);
 		addItem(trajDrawer);
 		
-
 //		 mc hit drawer
 		 MCHitDrawer3D mchd = new MCHitDrawer3D(this);
 		 addItem(mchd);
+		 
 
 		// dc super layers
 		for (int sector = 1; sector <= 6; sector++) {
@@ -74,6 +80,7 @@ public class ForwardPanel3D extends CedPanel3D {
 				}
 			}
 		}
+
 	} // create initial items
 
 	/**

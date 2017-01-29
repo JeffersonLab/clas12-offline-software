@@ -21,13 +21,13 @@ public class CND3D extends DetectorItem3D {
 	 * @param panel3d
 	 *            the 3D panel owner
 	 */
-	public CND3D(Panel3D panel3d) {
-		super(panel3d);
+	public CND3D(CedPanel3D panel3D) {
+		super(panel3D);
 
 		// add the three layers as child items
 		_layers = new CNDLayer3D[3];
 		for (int layer = 1; layer <= 3; layer++) {
-			_layers[layer - 1] = new CNDLayer3D(panel3d, layer);
+			_layers[layer - 1] = new CNDLayer3D(panel3D, layer);
 			addChild(_layers[layer - 1]);
 		}
 
@@ -47,7 +47,7 @@ public class CND3D extends DetectorItem3D {
 
 	@Override
 	protected boolean show() {
-		return ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_CND);
+		return _cedPanel3D.showCND();
 	}
 
 }

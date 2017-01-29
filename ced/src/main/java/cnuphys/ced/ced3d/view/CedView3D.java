@@ -1,4 +1,4 @@
-package cnuphys.ced.ced3d;
+package cnuphys.ced.ced3d.view;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -8,10 +8,14 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.ActionMap;
 import javax.swing.Box;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
@@ -21,6 +25,7 @@ import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
+import cnuphys.ced.ced3d.CedPanel3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
@@ -81,9 +86,9 @@ public abstract class CedView3D extends BaseView implements
 		add(Box.createHorizontalStrut(1), BorderLayout.WEST);
 		pack();
 		AccumulationManager.getInstance().addAccumulationListener(this);
-		
 	}
 
+	//make the 3d panel
 	protected abstract CedPanel3D make3DPanel(float angleX, float angleY,
 			float angleZ, float xDist, float yDist, float zDist);
 

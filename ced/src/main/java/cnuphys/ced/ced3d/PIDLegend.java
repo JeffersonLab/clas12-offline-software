@@ -1,4 +1,4 @@
-package cnuphys.ced.component;
+package cnuphys.ced.ced3d;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,8 +17,12 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
+import cnuphys.splot.plot.GraphicsUtilities;
+import cnuphys.splot.plot.X11Colors;
+import cnuphys.splot.style.LineStyle;
 
 public class PIDLegend extends JComponent {
 
@@ -43,10 +47,13 @@ public class PIDLegend extends JComponent {
 	private static int _yodd = -1;
 
 	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 11);
+	
+	private static Stroke _stroke = GraphicsUtilities.getStroke(2, LineStyle.SOLID);
 
 	// the owner
 	protected JComponent _component;
 
+	private static final Color _bgColor = new Color(240, 240, 240);
 	private final int prefHeight;
 
 	/**
@@ -60,6 +67,7 @@ public class PIDLegend extends JComponent {
 
 		prefHeight = _component.getFontMetrics(labelFont).getHeight() * 2;
 
+		setBackground(_bgColor);
 		setBorder(new CommonBorder());
 	}
 
@@ -104,24 +112,18 @@ public class PIDLegend extends JComponent {
 			int yc = b.height / 2;
 
 			_yeven = yc - _fh / 2;
-			_yodd = yc + _fh / 2;
+			_yodd = yc + _fh / 2 + 4;
 		}
 
-		if (numMC == 0) {
-			g.setFont(Fonts.smallFont);
-			g.setColor(Color.red);
+		int x = 4;
+		int xoff = -15;
+		x += drawLineForLegend(g, x, _yeven, "HB", CedColors.HB_COLOR);
+		x += drawLineForLegend(g, x, _yodd, "TB", CedColors.TB_COLOR);
+		
+		if (numMC != 0) {
 
-			if (_ytext < 0) {
-				FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
-				_ytext = (b.height + fm.getHeight()) / 2 - 2;
-			}
-
-			g.drawString(NO_PIDS, 2, _ytext);
-		} else {
 			// now draw all of them. Sort so order stays the same
 			Collections.sort(lids);
-			int x = 4;
-			int xoff = -15;
 			int index = 0;
 			for (LundId lid : lids) {
 				if ((index % 2) == 0) {
@@ -148,19 +150,29 @@ public class PIDLegend extends JComponent {
 	 */
 	public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
 
+		LundStyle style = LundStyle.getStyle(lid);
+		return drawLineForLegend(g, x, yc, lid.getName(), style.getLineColor());
+	}
+	
+	/**
+	 * Draw a line for use on a toolbar user component, most likely
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param x
+	 *            the horizontal staring point
+	 * @param yc
+	 *            the central vertical position
+	 * @return the offset
+	 */
+	public int drawLineForLegend(Graphics g, int x, int yc, String name, Color color) {
 		Graphics2D g2 = (Graphics2D) g;
 		Stroke oldStroke = g2.getStroke();
-		LundStyle style = LundStyle.getStyle(lid);
 
 		int linelen = 30;
 
-		Color color1 = Color.lightGray;
-
-		if (style != null) {
-			g2.setStroke(style.getStroke());
-			color1 = style.getFillColor();
-		}
-		g.setColor(color1);
+		g2.setStroke(_stroke);
+		g.setColor(color);
 
 		g2.drawLine(x, yc, x + linelen, yc);
 
@@ -172,9 +184,9 @@ public class PIDLegend extends JComponent {
 		g.setFont(labelFont);
 		FontMetrics fm = g.getFontMetrics(labelFont);
 		g.setColor(Color.black);
-		g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);
+		g.drawString(name, x, yc + fm.getAscent() / 2 - 3);
 
-		return linelen + fm.stringWidth(lid.getName()) + 9;
+		return linelen + fm.stringWidth(name) + 9;
 	}
 
 	/**
