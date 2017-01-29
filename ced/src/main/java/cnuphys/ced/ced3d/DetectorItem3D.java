@@ -20,9 +20,12 @@ public abstract class DetectorItem3D extends Item3D {
 
 	// the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
+	
+	protected CedPanel3D _cedPanel3D;
 
-	public DetectorItem3D(Panel3D panel3d) {
-		super(panel3d);
+	public DetectorItem3D(CedPanel3D panel3D) {
+		super(panel3D);
+		_cedPanel3D = panel3D;
 	}
 
 	@Override
@@ -32,7 +35,7 @@ public abstract class DetectorItem3D extends Item3D {
 			return;
 		}
 
-		if (showVolumes() && (getVolumeAlpha() > 2)) {
+		if (_cedPanel3D.showVolumes() && (getVolumeAlpha() > 2)) {
 			drawShape(drawable);
 		}
 
@@ -58,28 +61,8 @@ public abstract class DetectorItem3D extends Item3D {
 	 */
 	public abstract void drawData(GLAutoDrawable drawable);
 
-	// show MC Truth?
-	protected boolean showMCTruth() {
-		return ((CedPanel3D) _panel3D).show(CedPanel3D.SHOW_TRUTH);
-	}
-
-	// show Volumes?
-	protected boolean showVolumes() {
-		return ((CedPanel3D) _panel3D).show(CedPanel3D.SHOW_VOLUMES);
-	}
-
 	// an overall show
 	protected abstract boolean show();
-
-	// show reconstructed crosses?
-	protected boolean showCrosses() {
-		return ((CedPanel3D) _panel3D).show(CedPanel3D.SHOW_RECON_CROSSES);
-	}
-
-	// show cosmic tracks?
-	protected boolean showCosmics() {
-		return ((CedPanel3D) _panel3D).show(CedPanel3D.SHOW_COSMICS);
-	}
 
 	/**
 	 * Get the alpha value used for drawing detector outlines
@@ -154,25 +137,5 @@ public abstract class DetectorItem3D extends Item3D {
 
 	}
 
-	public boolean showSector(int sector) {
-
-		CedPanel3D p3d = (CedPanel3D) _panel3D;
-
-		if (sector == 1) {
-			return p3d.show(CedPanel3D.SHOW_SECTOR_1);
-		} else if (sector == 2) {
-			return p3d.show(CedPanel3D.SHOW_SECTOR_2);
-		} else if (sector == 3) {
-			return p3d.show(CedPanel3D.SHOW_SECTOR_3);
-		} else if (sector == 4) {
-			return p3d.show(CedPanel3D.SHOW_SECTOR_4);
-		} else if (sector == 5) {
-			return p3d.show(CedPanel3D.SHOW_SECTOR_5);
-		} else if (sector == 6) {
-			return p3d.show(CedPanel3D.SHOW_SECTOR_6);
-		}
-
-		return false;
-	}
 
 }

@@ -20,8 +20,8 @@ public class PCALViewPlane3D extends DetectorItem3D {
 	// the triangle coordinates
 	private float _coords[];
 
-	public PCALViewPlane3D(Panel3D panel3d, int sector, int view) {
-		super(panel3d);
+	public PCALViewPlane3D(CedPanel3D panel3D, int sector, int view) {
+		super(panel3D);
 		_sector = sector;
 		_view = view;
 		_coords = new float[9];
@@ -72,7 +72,7 @@ public class PCALViewPlane3D extends DetectorItem3D {
 				if ((_sector == sector[i]) && (_view == view[i])) {
 					PCALGeometry.getStrip(_sector, _view, strip[i],
 							coords);
-					if (showMCTruth() && (pid != null)) {
+					if (_cedPanel3D.showMCTruth() && (pid != null)) {
 						Color color = truthColor(pid, i);
 						drawStrip(drawable, color, coords);
 						double xcm = avgX[i] / 10;
@@ -92,9 +92,8 @@ public class PCALViewPlane3D extends DetectorItem3D {
 	// show PCALs?
 	@Override
 	protected boolean show() {
-		boolean showpcal = ((ForwardPanel3D) _panel3D)
-				.show(CedPanel3D.SHOW_PCAL);
-		return showpcal && showSector(_sector);
+		boolean showpcal = _cedPanel3D.showPCAL();
+		return showpcal && _cedPanel3D.showSector(_sector);
 	}
 
 }

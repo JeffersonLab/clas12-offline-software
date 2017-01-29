@@ -8,6 +8,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
+import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimming;
@@ -18,8 +19,11 @@ import item3D.Item3D;
 
 public class TrajectoryDrawer3D extends Item3D {
 
-	public TrajectoryDrawer3D(Panel3D panel3d) {
-		super(panel3d);
+	private CedPanel3D _cedPanel3D;
+	
+	public TrajectoryDrawer3D(CedPanel3D panel3D) {
+		super(panel3D);
+		_cedPanel3D = panel3D;
 	}
 
 	@Override
@@ -43,13 +47,18 @@ public class TrajectoryDrawer3D extends Item3D {
 
 		// reconstructed?
 		if (SwimMenu.getInstance().showReconstructedTracks()) {
-			List<SwimTrajectory> trajectories = Swimming
-					.getReconTrajectories();
+			List<SwimTrajectory> trajectories = Swimming.getReconTrajectories();
 
 			if (trajectories != null) {
 
+				boolean showHB = _cedPanel3D.showHBTrack();
+				boolean showTB = _cedPanel3D.showTBTrack();
+
 				for (SwimTrajectory trajectory : trajectories) {
-					drawSwimTrajectory(drawable, trajectory);
+					LundId lid = trajectory.getLundId();
+					if ((showHB && LundSupport.isHB(lid)) || (showTB && LundSupport.isTB(lid))) {
+						drawSwimTrajectory(drawable, trajectory);
+					}
 				}
 
 			}

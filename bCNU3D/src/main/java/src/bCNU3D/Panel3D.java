@@ -131,12 +131,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 		// GLJPanel in the center
 		add(gljpanel, BorderLayout.CENTER);
 				
-//		_keyAdapter = new KeyAdapter3D(this);
-//		addKeyListener(_keyAdapter);
-//		gljpanel.addKeyListener(_keyAdapter);
-		
 		new KeyBindings3D(this);
-//		new KeyBindings3D(gljpanel);
 
 		_mouseAdapter = new MouseAdapter3D(this);
 		gljpanel.addMouseListener(_mouseAdapter);
@@ -146,7 +141,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 		createInitialItems();
 		setupMaintenanceTimer();
 		
-	//	gljpanel.requestFocus();
 	}
 	
 
@@ -304,7 +298,10 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		// Global settings.
 		// gl.glClearColor(0f, 0f,0f, 1.0f); // set background (clear) color
-		gl.glClearColor(1f, 1f, 1f, 1f); // set background (clear) color
+//		gl.glClearColor(1f, 1f, 1f, 1f); // set background (clear) color
+//		gl.glClearColor(.9804f, .9216f, .8431f, 1f); // set background (clear) color
+//		gl.glClearColor(0.9412f, 1f, 1f, 1f); // set background (clear) color
+		gl.glClearColor(0.9804f, 0.9804f, 0.9804f, 1f); // set background (clear) color
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
 		gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do
@@ -338,7 +335,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width,
 			int height) {
-		System.err.println("called reshape");
+//		System.err.println("called reshape");
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 
 		if (height == 0) {
@@ -556,9 +553,9 @@ public class Panel3D extends JPanel implements GLEventListener {
 		final float ydist = 0f;
 		final float zdist = -1600f;
 
-		final float thetax = 0f;
-		final float thetay = 90f;
-		final float thetaz = 90f;
+		final float thetax = 45f;
+		final float thetay = 45f;
+		final float thetaz = 45f;
 
 		Panel3D p3d = new Panel3D(thetax, thetay, thetaz, xdist, ydist, zdist) {
 			@Override
@@ -596,7 +593,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 				// point set test
 				int numPnt = 100;
-				Color color = Color.orange;
+				Color color = Color.yellow;
 				float pntSize = 10;
 				float coords[] = new float[3 * numPnt];
 				for (int i = 0; i < numPnt; i++) {

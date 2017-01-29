@@ -11,14 +11,20 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.InputMap;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+
+import com.jogamp.newt.event.KeyEvent;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
@@ -26,9 +32,9 @@ import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.alldata.graphics.DefinitionManager;
-import cnuphys.ced.ced3d.CentralView3D;
-import cnuphys.ced.ced3d.FTCalView3D;
-import cnuphys.ced.ced3d.ForwardView3D;
+import cnuphys.ced.ced3d.view.CentralView3D;
+import cnuphys.ced.ced3d.view.FTCalView3D;
+import cnuphys.ced.ced3d.view.ForwardView3D;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
@@ -202,7 +208,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// arrange the views on the virtual desktop
 	private void placeViewsOnVirtualDesktop() {
 		if (_firstTime == 1) {
-			// reaarange some views in virtual space
+			// rearrange some views in virtual space
 			_virtualView.reconfigure();
 						
 			_virtualView.moveTo(dcHistoGrid, 13);

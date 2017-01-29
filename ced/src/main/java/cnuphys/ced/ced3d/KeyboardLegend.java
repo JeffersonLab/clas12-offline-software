@@ -14,18 +14,14 @@ public class KeyboardLegend extends JPanel {
 
 	public KeyboardLegend() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add("Refresh", "F5");
-		add("Print, Snapshot", "F6", "F7");
-		add("Move in/out", UnicodeSupport.UARROW, UnicodeSupport.DARROW);
+		add("Move in/out", "J", "K");
 		add("Move left or right", "L", "R");
 		add("Move up or down", "U", "D");
-		add("Make [x,y,z] out", "1", "2");
-		add("Make z out, in", "3", "4");
+		add("Make [x,y] out", "1", "2");
+		add("Make z axis out, in", "3", "4");
 		add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) x", "x", "X");
 		add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) y", "y", "Y");
 		add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) z", "z", "Z");
-		add("Rotate " + UnicodeSupport.PLUSMINUS + " (original) z",
-				UnicodeSupport.LARROW, UnicodeSupport.RARROW);
 		// add("Drag: free rotation");
 		// add("Alter free rotation", "Shift ", "Ctl");
 		// add("Accelerates some actions", "Shift ");

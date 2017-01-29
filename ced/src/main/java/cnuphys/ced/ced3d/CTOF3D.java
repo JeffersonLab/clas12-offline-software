@@ -21,8 +21,8 @@ public class CTOF3D extends DetectorItem3D {
 	 * @param panel3d
 	 *            the 3D panel owner
 	 */
-	public CTOF3D(Panel3D panel3d) {
-		super(panel3d);
+	public CTOF3D(CedPanel3D panel3D) {
+		super(panel3D);
 
 		_paddles = new CTOFPaddle3D[48];
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
@@ -33,6 +33,7 @@ public class CTOF3D extends DetectorItem3D {
 
 	@Override
 	public void drawShape(GLAutoDrawable drawable) {
+		
 		Color noHitColor = X11Colors.getX11Color("Dodger blue", getVolumeAlpha());
 		Color hitColor = X11Colors.getX11Color("red", getVolumeAlpha());
 		TdcAdcHitList hits = CTOF.getInstance().getHits();
@@ -57,7 +58,7 @@ public class CTOF3D extends DetectorItem3D {
 
 	@Override
 	protected boolean show() {
-		return ((CentralPanel3D) _panel3D).show(CedPanel3D.SHOW_CTOF);
+		return _cedPanel3D.showCTOF();
 	}
 
 }

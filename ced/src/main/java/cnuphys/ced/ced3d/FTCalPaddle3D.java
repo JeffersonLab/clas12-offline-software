@@ -23,8 +23,8 @@ public class FTCalPaddle3D extends DetectorItem3D {
 	// frame the paddle?
 	private static boolean _frame = true;
 
-	public FTCalPaddle3D(Panel3D panel3d, int id) {
-		super(panel3d);
+	public FTCalPaddle3D(CedPanel3D panel3D, int id) {
+		super(panel3D);
 		_id = id;
 
 		FTCALGeometry.paddleVertices(_id, _coords);

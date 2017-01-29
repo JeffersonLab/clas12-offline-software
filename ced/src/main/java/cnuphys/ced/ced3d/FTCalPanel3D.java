@@ -3,6 +3,7 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import java.awt.Font;
 
+import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.geometry.FTCALGeometry;
 import cnuphys.lund.X11Colors;
 import item3D.Axes3D;
@@ -19,8 +20,7 @@ public class FTCalPanel3D extends CedPanel3D {
 	private final float zmin = -50f;
 
 	// labels for the check box
-	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH,
-			SHOW_RECON_CROSSES, SHOW_COSMICS };
+	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH};
 
 	public FTCalPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist,
 			float yDist, float zDist) {

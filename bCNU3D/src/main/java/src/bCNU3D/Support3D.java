@@ -144,6 +144,7 @@ public class Support3D {
 	 * 
 	 * @param color the color
 	 * @param size the points size
+	 * @param circular 
 	 */
 	public static void drawPoint(GLAutoDrawable drawable, float x, float y,
 			float z, Color color, float size, boolean circular) {
@@ -163,40 +164,7 @@ public class Support3D {
 		gl.glEnd();
 	}
 
-	/**
-	 * Draw a set of sprite points
-	 * 
-	 * @param drawable the OpenGL drawable
-	 * @param coords the vertices as [x, y, z, x, y, z, ...]
-	 * @param color the color
-	 * @param size the points size
-	 */
-	public static void drawSprites(GLAutoDrawable drawable, float coords[],
-			Texture sprite, float size) {
-		GL2 gl = drawable.getGL().getGL2();
-		gl.glPointSize(size);
-		setColor(gl, Color.blue);
-		sprite.bind(gl);
-		// sprite.enable(gl);
 
-		loadShader(gl, vshader1, fshader1);
-
-		// how many points?
-		int np = coords.length / 3;
-
-		int vertShader = gl.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
-		gl.glCompileShader(vertShader);
-
-		gl.glBegin(GL.GL_POINTS);
-		// gl.glEnable(GL2.GL_POINT_SMOOTH);
-
-		for (int i = 0; i < np; i++) {
-			int j = i * 3;
-			gl.glVertex3f(coords[j], coords[j + 1], coords[j + 2]);
-		}
-		gl.glEnd();
-		// sprite.disable(gl);
-	}
 
 	public static final String vshader1 = "void main {\n"
 			+ "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n" + "}";

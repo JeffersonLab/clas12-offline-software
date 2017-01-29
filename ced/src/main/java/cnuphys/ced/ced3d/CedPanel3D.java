@@ -20,8 +20,8 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.bCNU.view.VirtualView;
+import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.component.PIDLegend;
 import bCNU3D.Panel3D;
 
 public class CedPanel3D extends Panel3D {
@@ -30,24 +30,23 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_VOLUMES = "Volumes";
 	public static final String SHOW_TRUTH = "Truth";
 	public static final String SHOW_DC = "DC";
-	public static final String SHOW_EC = "EC";
+	public static final String SHOW_ECAL = "ECAL";
 	public static final String SHOW_PCAL = "PCAL";
 	public static final String SHOW_FTOF = "FTOF";
-	public static final String SHOW_GEMC_DOCA = "GEMC DOCA";
-	public static final String SHOW_TB_DOCA = "TB DOCA";
+//	public static final String SHOW_SIM_SDOCA = "SDOCA";
+//	public static final String SHOW_TB_DOCA = "TB DOCA";
 	public static final String SHOW_RECON_FTOF = "Rec-FTOF";
 	public static final String SHOW_RECON_CROSSES = "Crosses";
-	public static final String SHOW_COSMICS = "Cosmics";
-	public static final String SHOW_SVT = "BST";
-	public static final String SHOW_SVT_LAYER_1 = "BST Layer 1";
-	public static final String SHOW_SVT_LAYER_2 = "BST Layer 2";
-	public static final String SHOW_SVT_LAYER_3 = "BST Layer 3";
-	public static final String SHOW_SVT_LAYER_4 = "BST Layer 4";
-	public static final String SHOW_SVT_LAYER_5 = "BST Layer 5";
-	public static final String SHOW_SVT_LAYER_6 = "BST Layer 6";
-	public static final String SHOW_SVT_LAYER_7 = "BST Layer 7";
-	public static final String SHOW_SVT_LAYER_8 = "BST Layer 8";
-	public static final String SHOW_SVT_HITS = "BST Hits";
+	public static final String SHOW_BST = "BST";
+	public static final String SHOW_BST_LAYER_1 = "BST Layer 1";
+	public static final String SHOW_BST_LAYER_2 = "BST Layer 2";
+	public static final String SHOW_BST_LAYER_3 = "BST Layer 3";
+	public static final String SHOW_BST_LAYER_4 = "BST Layer 4";
+	public static final String SHOW_BST_LAYER_5 = "BST Layer 5";
+	public static final String SHOW_BST_LAYER_6 = "BST Layer 6";
+	public static final String SHOW_BST_LAYER_7 = "BST Layer 7";
+	public static final String SHOW_BST_LAYER_8 = "BST Layer 8";
+	public static final String SHOW_BST_HITS = "BST Hits";
 
 	public static final String SHOW_SECTOR_1 = "Sector 1";
 	public static final String SHOW_SECTOR_2 = "Sector 2";
@@ -62,6 +61,12 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_CND_LAYER_1 = "CND Layer 1";
 	public static final String SHOW_CND_LAYER_2 = "CND Layer 2";
 	public static final String SHOW_CND_LAYER_3 = "CND Layer 3";
+	
+	public static final String SHOW_TB_CROSS = "TB Cross";
+	public static final String SHOW_HB_CROSS = "HB Cross";
+	public static final String SHOW_TB_TRACK = "TB Track";
+	public static final String SHOW_HB_TRACK = "HB Track";
+
 
 	// alpha value for volumes
 	protected int volumeAlpha = 28;
@@ -120,10 +125,11 @@ public class CedPanel3D extends Panel3D {
 		for (String s : _cbaLabels) {
 			AbstractButton ab = _checkBoxArray.getButton(s);
 			ab.setFont(Fonts.smallFont);
+			ab.setSelected(true);
 
-			if (!SHOW_GEMC_DOCA.equals(s)) {
-				ab.setSelected(true);
-			}
+//			if (!SHOW_SIM_SDOCA.equals(s)) {
+//				ab.setSelected(true);
+//			}
 			ab.addActionListener(al);
 		}
 		fixSize();
@@ -177,7 +183,7 @@ public class CedPanel3D extends Panel3D {
 		JPanel ep = new JPanel();
 		ep.setLayout(new VerticalFlowLayout());
 
-//		ep.add(new KeyboardLegend());
+		ep.add(new KeyboardLegend());
 		_checkBoxArray = new CheckBoxArray(2, 4, 4, _cbaLabels);
 		_checkBoxArray.setBorder(new CommonBorder());
 		ep.add(_checkBoxArray);
@@ -214,17 +220,6 @@ public class CedPanel3D extends Panel3D {
 		gljpanel.setPreferredSize(d);
 	}
 
-	/**
-	 * Check if a feature should be drawn
-	 * 
-	 * @param label
-	 *            the label for the check box on the option array
-	 * @return <code>true</code> if the feature should be drawn
-	 */
-	public boolean show(String label) {
-		AbstractButton ab = _checkBoxArray.getButton(label);
-		return (ab == null) ? false : ab.isSelected();
-	}
 
 	/**
 	 * Get the alpha for volume drawing
@@ -270,6 +265,308 @@ public class CedPanel3D extends Panel3D {
 		}
 
 		return buttons;
+	}
+
+	/**
+	 * Check if a feature should be drawn
+	 * 
+	 * @param label
+	 *            the label for the check box on the option array
+	 * @return <code>true</code> if the feature should be drawn
+	 */
+	private boolean show(String label) {
+		AbstractButton ab = _checkBoxArray.getButton(label);
+		return (ab == null) ? false : ab.isSelected();
+	}
+
+	/**
+	 * Show ECAL?
+	 * @return <code>true</code> if we are to show ECAL
+	 */
+	public boolean showECAL() {
+		return show(CedPanel3D.SHOW_ECAL);
+	}
+
+	/**
+	 * Show PCAL?
+	 * @return <code>true</code> if we are to show PCAL
+	 */
+	public boolean showPCAL() {
+		return show(CedPanel3D.SHOW_PCAL);
+	}
+
+	/**
+	 * Show forward TOF?
+	 * @return <code>true</code> if we are to show FTOF
+	 */
+	public boolean showFTOF() {
+		return show(CedPanel3D.SHOW_FTOF);
+	}
+	
+	/**
+	 * Show CTOF?
+	 * @return <code>true</code> if we are to show CTOF
+	 */
+	public boolean showCTOF() {
+		return show(CedPanel3D.SHOW_CTOF);
+	}
+
+
+	/**
+	 * Show BST (SVT) ?
+	 * @return <code>true</code> if we are to show BST
+	 */
+	public boolean showBST() {
+		return show(CedPanel3D.SHOW_BST);
+	}
+
+	
+	/**
+	 * Show CND?
+	 * @return <code>true</code> if we are to show CND
+	 */
+	public boolean showCND() {
+		return show(CedPanel3D.SHOW_CND);
+	}
+
+	/**
+	 * Show CND Layer 1?
+	 * @return <code>true</code> if we are to show CND Layer 1
+	 */
+	public boolean showCNDLayer1() {
+		return showCND() && show(CedPanel3D.SHOW_CND_LAYER_1);
+	}
+
+	/**
+	 * Show CND Layer 2?
+	 * @return <code>true</code> if we are to show CND Layer 2
+	 */
+	public boolean showCNDLayer2() {
+		return showCND() && show(CedPanel3D.SHOW_CND_LAYER_2);
+	}
+
+	/**
+	 * Show CND Layer 3?
+	 * @return <code>true</code> if we are to show CND Layer 3
+	 */
+	public boolean showCNDLayer3() {
+		return showCND() && show(CedPanel3D.SHOW_CND_LAYER_3);
+	}
+	
+	/**
+	 * Show reconstructed Crosses?
+	 * @return <code>true</code> if we are to show reconstructed crosses
+	 */
+	public boolean showReconCrosses() {
+		return show(CedPanel3D.SHOW_RECON_CROSSES);
+	}
+
+	/**
+	 * Show reconstructed FTOF?
+	 * @return <code>true</code> if we are to show reconstructed ftof
+	 */
+	public boolean showReconFTOF() {
+		return show(CedPanel3D.SHOW_RECON_FTOF);
+	}
+
+	/**
+	 * Show time based track?
+	 * @return <code>true</code> if we are to show time based track
+	 */
+	public boolean showTBTrack() {
+		return show(CedPanel3D.SHOW_TB_TRACK);
+	}
+	
+	/**
+	 * Show hit based track?
+	 * @return <code>true</code> if we are to show hit based track
+	 */
+	public boolean showHBTrack() {
+		return show(CedPanel3D.SHOW_HB_TRACK);
+	}
+
+
+	/**
+	 * Show time based cross?
+	 * @return <code>true</code> if we are to show time based cross
+	 */
+	public boolean showTBCross() {
+		return show(CedPanel3D.SHOW_TB_CROSS);
+	}
+	
+	/**
+	 * Show hit based cross?
+	 * @return <code>true</code> if we are to show hit based cross
+	 */
+	public boolean showHBCross() {
+		return show(CedPanel3D.SHOW_HB_CROSS);
+	}
+
+	/**
+	 * Show BST Hits?
+	 * @return <code>true</code> if we are to show BST Hits
+	 */
+	public boolean showBSTHits() {
+		return show(CedPanel3D.SHOW_BST_HITS);
+	}
+	
+	/**
+	 * Show DC?
+	 * @return <code>true</code> if we are to show DC
+	 */
+	public boolean showDC() {
+		return show(CedPanel3D.SHOW_DC);
+	}
+	
+	/**
+	 * Show BST Layer 1?
+	 * @return <code>true</code> if we are to show BST Layer 1
+	 */
+	public boolean showBSTLayer1() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_1);
+	}
+
+	/**
+	 * Show BST Layer 2?
+	 * @return <code>true</code> if we are to show BST Layer 2
+	 */
+	public boolean showBSTLayer2() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_2);
+	}
+
+	/**
+	 * Show BST Layer 3?
+	 * @return <code>true</code> if we are to show BST Layer 3
+	 */
+	public boolean showBSTLayer3() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_3);
+	}
+
+	/**
+	 * Show BST Layer 4?
+	 * @return <code>true</code> if we are to show BST Layer 4
+	 */
+	public boolean showBSTLayer4() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_4);
+	}
+
+	/**
+	 * Show BST Layer 5?
+	 * @return <code>true</code> if we are to show BST Layer 5
+	 */
+	public boolean showBSTLayer5() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_5);
+	}
+
+	/**
+	 * Show BST Layer 6?
+	 * @return <code>true</code> if we are to show BST Layer 6
+	 */
+	public boolean showBSTLayer6() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_6);
+	}
+
+	/**
+	 * Show BST Layer 7?
+	 * @return <code>true</code> if we are to show BST Layer 7
+	 */
+	public boolean showBSTLayer7() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_7);
+	}
+
+	/**
+	 * Show BST Layer 8?
+	 * @return <code>true</code> if we are to show BST Layer 8
+	 */
+	public boolean showBSTLayer8() {
+		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_8);
+	}
+
+	/**
+	 * Show sector 1?
+	 * @return <code>true</code> if we are to show sector 1
+	 */
+	public boolean showSector1() {
+		return show(CedPanel3D.SHOW_SECTOR_1);
+	}
+
+	/**
+	 * Show sector 2?
+	 * @return <code>true</code> if we are to show sector 2
+	 */
+	public boolean showSector2() {
+		return show(CedPanel3D.SHOW_SECTOR_2);
+	}
+
+	/**
+	 * Show sector 3?
+	 * @return <code>true</code> if we are to show sector 3
+	 */
+	public boolean showSector3() {
+		return show(CedPanel3D.SHOW_SECTOR_3);
+	}
+
+	/**
+	 * Show sector 4?
+	 * @return <code>true</code> if we are to show sector 4
+	 */
+	public boolean showSector4() {
+		return show(CedPanel3D.SHOW_SECTOR_4);
+	}
+
+	/**
+	 * Show sector 5?
+	 * @return <code>true</code> if we are to show sector 5
+	 */
+	public boolean showSector5() {
+		return show(CedPanel3D.SHOW_SECTOR_5);
+	}
+
+	/**
+	 * Show sector 6?
+	 * @return <code>true</code> if we are to show sector 6
+	 */
+	public boolean showSector6() {
+		return show(CedPanel3D.SHOW_SECTOR_6);
+	}
+
+	/**
+	 * Show we show the 1-based sector?
+	 * @param sector the sector [1..6]
+	 * @return <code>true</code> if we are to show the sector
+	 */
+	public boolean showSector(int sector) {
+		switch (sector) {
+		case 1:
+			return showSector1();
+		case 2:
+			return showSector2();
+		case 3:
+			return showSector3();
+		case 4:
+			return showSector4();
+		case 5:
+			return showSector5();
+		case 6:
+			return showSector6();
+		}
+		return false;
+	}
+
+	/** 
+	 * Show MC truth?
+	 * @return <code>true</code> if we are to show simulation truth
+	 */
+	public boolean showMCTruth() {
+		return show(CedPanel3D.SHOW_TRUTH);
+	}
+
+	/** 
+	 * Show Volumes?
+	 * @return <code>true</code> if we are to show volumes
+	 */
+	public boolean showVolumes() {
+		return show(CedPanel3D.SHOW_VOLUMES);
 	}
 
 }

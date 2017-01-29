@@ -42,8 +42,8 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	 * @param superLayer
 	 *            one based superlayer [1..6]
 	 */
-	public DCSuperLayer3D(Panel3D panel3d, int sector, int superLayer) {
-		super(panel3d);
+	public DCSuperLayer3D(CedPanel3D panel3D, int sector, int superLayer) {
+		super(panel3D);
 		_sector = sector;
 		_superLayer = superLayer;
 		DCGeometry.superLayerVertices(_sector, _superLayer, coords);
@@ -251,18 +251,8 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	// show DCs?
 	@Override
 	protected boolean show() {
-		boolean showdc = ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_DC);
-		return showdc && showSector(_sector);
-	}
-
-	// show GEMC DOCAs?
-	private boolean showGemcDOCA() {
-		return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_GEMC_DOCA);
-	}
-
-	// show Time based DOCAs?
-	private boolean showTBDOCA() {
-		return ((ForwardPanel3D) _panel3D).show(CedPanel3D.SHOW_TB_DOCA);
+		boolean showdc = _cedPanel3D.showDC();
+		return showdc && _cedPanel3D.showSector(_sector);
 	}
 
 }

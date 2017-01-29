@@ -15,7 +15,7 @@ public class DataDrawSupport {
 	public static final int BMT_CROSS = 3;
 	
 	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
-	private static final Color TRANSORANGE = new Color(255, 128, 0, 240);
+	private static final Color TRANSORANGE = X11Colors.getX11Color("dark orange", 240);
 	private static final Color TRANSGREEN = X11Colors.getX11Color("lawn green", 250);
 
 	public static Color transColors[] = { TRANSYELLOW, TRANSORANGE, TRANSYELLOW, TRANSGREEN };
@@ -37,9 +37,6 @@ public class DataDrawSupport {
 	public static final String[] EC_PLANE_NAMES = { "?", "Inner", "Outer" };
 	public static final String[] EC_VIEW_NAMES = { "?", "U", "V", "W" };
 
-	// some colors
-	public static final Color DC_TB_COLOR = X11Colors.getX11Color("Orange Red");
-	public static final Color DC_HB_COLOR = Color.yellow;
 
 	/**
 	 * Draw a GEMC truth hit at the given screen location

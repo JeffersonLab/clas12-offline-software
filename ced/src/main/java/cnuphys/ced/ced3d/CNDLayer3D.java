@@ -15,8 +15,8 @@ public class CNDLayer3D extends DetectorItem3D {
 	// the paddles
 	private CNDPaddle3D _paddles[];
 
-	public CNDLayer3D(Panel3D panel3d, int layer) {
-		super(panel3d);
+	public CNDLayer3D(CedPanel3D panel3D, int layer) {
+		super(panel3D);
 		_layer = layer;
 
 		_paddles = new CNDPaddle3D[48];
@@ -40,20 +40,15 @@ public class CNDLayer3D extends DetectorItem3D {
 
 	@Override
 	protected boolean show() {
-		CentralPanel3D cpan = (CentralPanel3D) _panel3D;
-		if (!cpan.show(CedPanel3D.SHOW_CND)) {
-			return false;
-		}
-
 		switch (_layer) {
 		case 1:
-			return cpan.show(CedPanel3D.SHOW_CND_LAYER_1);
+			return _cedPanel3D.showCNDLayer1();
 
 		case 2:
-			return cpan.show(CedPanel3D.SHOW_CND_LAYER_2);
+			return _cedPanel3D.showCNDLayer2();
 
 		case 3:
-			return cpan.show(CedPanel3D.SHOW_CND_LAYER_3);
+			return _cedPanel3D.showCNDLayer3();
 		}
 		return false;
 	}
