@@ -74,6 +74,7 @@ public class ECCommon {
         
         
         IndexedTable   atten  = manager.getConstants(run, "/calibration/ec/attenuation");
+        IndexedTable    gain  = manager.getConstants(run, "/calibration/ec/gain");
         for(ECStrip strip : ecStrips){
             int sector    = strip.getDescriptor().getSector();
             int layer     = strip.getDescriptor().getLayer();
@@ -90,6 +91,7 @@ public class ECCommon {
             strip.setAttenuation( atten.getDoubleValue("A", sector,layer,component),
                                   atten.getDoubleValue("B", sector,layer,component),
                                   atten.getDoubleValue("C", sector,layer,component));
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component));            
         }
         return ecStrips;
     }
