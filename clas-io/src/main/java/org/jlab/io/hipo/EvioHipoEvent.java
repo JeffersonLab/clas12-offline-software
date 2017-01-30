@@ -94,11 +94,12 @@ public class EvioHipoEvent {
                     hipoBank.setByte("layer", i, (byte) evioBank.getInt("side",i));
                     hipoBank.setShort("component", i, (short) evioBank.getInt("segment",i));
                     hipoBank.setInt("ADC", i, evioBank.getInt("npheD", i)*100);
-                    hipoBank.setFloat("time", i, (float) 0.0);
+                    hipoBank.setFloat("time", i, (float) evioBank.getDouble("time",i));
                     hipoBank.setShort("ped", i, (short) 0);
                 }
                 hipoEvent.appendBanks(hipoBank);
             } catch (Exception e) {
+                e.printStackTrace();
                 System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
             }
         }
