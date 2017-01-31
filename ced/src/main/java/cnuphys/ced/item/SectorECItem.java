@@ -157,36 +157,42 @@ public class SectorECItem extends PolygonItem {
 			drawAccumulatedHits(g, container);
 		}
 	}
-	
-	//single event drawer
+
+	// single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
 		TdcAdcHitList hits = AllEC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (TdcAdcHit hit : hits) {
-				if (hit.sector == _sector) {
-					int layer = hit.layer - 4; // 0..5
-					int stack0 = layer / 3; // 000,111
-					int view0 = layer % 3; // 012012
-					if ((stack0 == _plane) && (view0 == _stripType)) {
-						int strip0 = hit.component - 1;
-						
-						Point2D.Double wp[] = getStrip(strip0);
+				if (hit != null) {
+					try {
+						if (hit.sector == _sector) {
+							int layer = hit.layer - 4; // 0..5
+							int stack0 = layer / 3; // 000,111
+							int view0 = layer % 3; // 012012
+							if ((stack0 == _plane) && (view0 == _stripType)) {
+								int strip0 = hit.component - 1;
 
-						if (wp != null) {
-							Path2D.Double path = WorldGraphicsUtilities
-									.worldPolygonToPath(wp);
-							
-							Color fc = hits.adcColor(hit);
-							WorldGraphicsUtilities.drawPath2D(g, container, path, fc,
-									fc, 0, LineStyle.SOLID, true);
+								Point2D.Double wp[] = getStrip(strip0);
+
+								if (wp != null) {
+									Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+
+									Color fc = hits.adcColor(hit);
+									WorldGraphicsUtilities.drawPath2D(g, container, path, fc, fc, 0, LineStyle.SOLID,
+											true);
+								}
+							}
+
 						}
+					} catch (Exception e) {
+						Log.getInstance().exception(e);
 					}
-
-
+				} // hit not null
+				else {
+					Log.getInstance().warning("[SectorECItem] null hit in ECAll hit list");
 				}
 			}
 		}
-
 	}
 	
 	// accumulated drawer

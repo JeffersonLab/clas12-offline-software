@@ -10,6 +10,7 @@ import org.jlab.geom.prim.Point3D;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.layer.LogicalLayer;
+import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.allpcal.PCALView;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -104,40 +105,32 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 	//draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container) {
-		
+
 		TdcAdcHitList hits = AllEC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (TdcAdcHit hit : hits) {
-				if ((hit.sector == getSector()) && (hit.layer < 4)) {
-					int view0 = hit.layer - 1; // uvw
-					int strip0 = hit.component - 1;
-
-					Polygon poly = stripPolygon(container, view0, strip0);
-
-					// Polygon poly = _stripPoly[view0][strip0];
-
-//					// if mctruth and have energy deposited, use it
-//					if (_pcalView.showMcTruth() && (totEdep != null)) {
-//
-//						int alpha = (int) ((255 * totEdep[i])
-//								/ (ClasIoEventManager.getInstance()
-//										.getMaxEdepCal(0)));
-//						alpha = Math.max(60, Math.min(255, alpha));
-//						g.setColor(new Color(255, 0, 0, alpha));
-//					}
-//					else {
-//						g.setColor(baseFillColor);
-//					}
-					g.setColor(hits.adcColor(hit));
-					g.fillPolygon(poly);
-					g.drawPolygon(poly);
-
+				if (hit != null) {
+					try {
+						if ((hit.sector == getSector()) && (hit.layer < 4)) {
+							int view0 = hit.layer - 1; // uvw
+							int strip0 = hit.component - 1;
+							Polygon poly = stripPolygon(container, view0, strip0);
+							g.setColor(hits.adcColor(hit));
+							g.fillPolygon(poly);
+							g.drawPolygon(poly);
+						}
+					} catch (Exception e) {
+						Log.getInstance().exception(e);
+					}
+				} // hit not null
+				else {
+					Log.getInstance().warning("[PCALHexSectorItem] null hit in ECAll hit list");
 				}
 			}
 		}
-		
+
 	}
-	
+
 	//draw accumulated hits
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		

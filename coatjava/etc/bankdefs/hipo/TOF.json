@@ -42,7 +42,12 @@
        {"name":"z_unc",       "id":16, "type":"float", "info":"Z coordinate of the hit"},
        {"name":"tx",          "id":17, "type":"float", "info":"X coordinate of the hit"},
        {"name":"ty",          "id":18, "type":"float", "info":"Y coordinate of the hit"},
-       {"name":"tz",          "id":19, "type":"float", "info":"Z coordinate of the hit"}
+       {"name":"tz",          "id":19, "type":"float", "info":"Z coordinate of the hit"},
+       {"name":"adc_idx1",    "id":20, "type":"int16", "info":"index of hit with ADCLeft in adc bank, starts at zero"},
+       {"name":"adc_idx2",    "id":21, "type":"int16", "info":"index of hit with ADCRight in adc bank, starts at zero"},
+       {"name":"tdc_idx1",    "id":22, "type":"int16", "info":"index of hit with TDCLeft in tdc bank, starts at zero"},
+       {"name":"tdc_idx2",    "id":23, "type":"int16", "info":"index of hit with TDCRight in tdc bank, starts at zero"}
+
     ]
   },
  {
