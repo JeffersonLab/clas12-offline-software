@@ -10,6 +10,7 @@ import org.jlab.geom.prim.Point3D;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.layer.LogicalLayer;
+import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -115,28 +116,35 @@ public class ECHexSectorItem extends HexSectorItem {
 
 	// draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container, int plane) {
-		
-		
+
 		TdcAdcHitList hits = AllEC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (TdcAdcHit hit : hits) {
-				if ((hit.sector == getSector()) && (hit.layer > 3)) {
-					int layer = hit.layer - 4; // 0..5
-					int stack0 = layer / 3; // 000,111
-					if (stack0 == plane) {
-						int view0 = layer % 3; // 012012
-						int strip0 = hit.component - 1;
+				if (hit != null) {
+					try {
+						if ((hit.sector == getSector()) && (hit.layer > 3)) {
+							int layer = hit.layer - 4; // 0..5
+							int stack0 = layer / 3; // 000,111
+							if (stack0 == plane) {
+								int view0 = layer % 3; // 012012
+								int strip0 = hit.component - 1;
 
-						Polygon poly = stripPolygon(container, plane, view0, strip0);
-						g.setColor(hits.adcColor(hit));
-						g.fillPolygon(poly);
-						g.drawPolygon(poly);
+								Polygon poly = stripPolygon(container, plane, view0, strip0);
+								g.setColor(hits.adcColor(hit));
+								g.fillPolygon(poly);
+								g.drawPolygon(poly);
+							}
+
+						}
+					} catch (Exception e) {
+						Log.getInstance().exception(e);
 					}
-
+				} // hit not null
+				else {
+					Log.getInstance().warning("[ECHexSectorItem] null hit in ECAll hit list");
 				}
 			}
 		}
-
 	}
 
 	// draw accumulated hits

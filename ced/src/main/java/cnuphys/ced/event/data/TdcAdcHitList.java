@@ -29,41 +29,42 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 
 		//step 1: basic list from left tdc
 		byte[] sector = ColumnData.getByteArray(tdcBankName + ".sector");
-		if ((sector == null) || (sector.length < 1)) {
-			return;
-		}
-		
-		int length = 0;
+		if ((sector != null) && (sector.length >= 1)) {
 
-		byte[] layer = ColumnData.getByteArray(tdcBankName + ".layer");
-		short[] component = ColumnData.getShortArray(tdcBankName + ".component");
-		byte[] order = ColumnData.getByteArray(tdcBankName + ".order");
-		int[] TDC = ColumnData.getIntArray(tdcBankName + ".TDC");
+			int length = 0;
 
-		length = checkArrays(sector, layer, component, order, TDC);
-		if (length < 0) {
-			Log.getInstance().warning("[" + tdcBankName + "] " + _error);
-			return;
-		}
+			byte[] layer = ColumnData.getByteArray(tdcBankName + ".layer");
+			short[] component = ColumnData.getShortArray(tdcBankName + ".component");
+			byte[] order = ColumnData.getByteArray(tdcBankName + ".order");
+			int[] TDC = ColumnData.getIntArray(tdcBankName + ".TDC");
 
-		// Step 1 build basic list
-		for (int index = 0; index < length; index++) {
-			if (order[index] != 3) { // left tdc
-				modifyInsert(sector[index], layer[index], component[index], TDC[index], -1, -1, -1, -1, -1, Float.NaN, Float.NaN);
+			length = checkArrays(sector, layer, component, order, TDC);
+			if (length < 0) {
+				Log.getInstance().warning("[" + tdcBankName + "] " + _error);
+				return;
 			}
-		}
-		
-		//step 2: sort
-		if (size() > 1) {
-			Collections.sort(this);
-		}
-		
-		//step 3 merge in right tdc
-		for (int index = 0; index < length; index++) {
-			if (order[index] == 3) { //right
-				modifyInsert(sector[index], layer[index], component[index], -1, TDC[index], -1, -1, -1, -1, Float.NaN, Float.NaN);
+
+			// Step 1 build basic list
+			for (int index = 0; index < length; index++) {
+				if (order[index] != 3) { // left tdc
+					modifyInsert(sector[index], layer[index], component[index], TDC[index], -1, -1, -1, -1, -1,
+							Float.NaN, Float.NaN);
+				}
 			}
-		}
+
+			// step 2: sort
+			if (size() > 1) {
+				Collections.sort(this);
+			}
+
+			// step 3 merge in right tdc
+			for (int index = 0; index < length; index++) {
+				if (order[index] == 3) { // right
+					modifyInsert(sector[index], layer[index], component[index], -1, TDC[index], -1, -1, -1, -1,
+							Float.NaN, Float.NaN);
+				}
+			}
+		} // end sector not null tdc
 		
 		//on to the adcs
 		int[] ADC = null;
@@ -74,14 +75,14 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		if (sector == null) {
 			return;
 		}
-		layer = ColumnData.getByteArray(adcBankName + ".layer");
-		component = ColumnData.getShortArray(adcBankName + ".component");
-		order = ColumnData.getByteArray(adcBankName + ".order");
+		byte [] layer = ColumnData.getByteArray(adcBankName + ".layer");
+		short[] component = ColumnData.getShortArray(adcBankName + ".component");
+		byte[] order = ColumnData.getByteArray(adcBankName + ".order");
 		ADC = ColumnData.getIntArray(adcBankName + ".ADC");
 		ped = ColumnData.getShortArray(adcBankName + ".ped");
 		time = ColumnData.getFloatArray(adcBankName + ".time");
 
-		length = checkArrays(sector, layer, component, order, ADC);
+		int length = checkArrays(sector, layer, component, order, ADC);
 		if (length < 0) {
 			Log.getInstance().warning("[" + adcBankName + "] " + _error);
 			return;
