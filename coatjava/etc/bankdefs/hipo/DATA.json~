@@ -130,7 +130,7 @@
     ]
   },
  {
-    "bank": "CTOF::tdc",
+    "bank": "HTCC::tdc",
     "group": 602,
     "info": "digitized bank for HTCC TDC",
     "items": [

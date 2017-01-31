@@ -145,7 +145,7 @@ public class SectorLTCCItem extends PolygonItem {
 			List<String> feedbackStrings) {
 		if (contains(container, screenPoint)) {
 			
-			AdcHitList hits = HTCC2.getInstance().getHits();
+			AdcHitList hits = LTCC.getInstance().getHits();
 			AdcHit hit = null;
 			
 			if ((hits != null) && !hits.isEmpty()) {
