@@ -101,6 +101,9 @@ public class SplashWindow extends JWindow {
 				"images/spinglobe.gif",
 				"images/runner.gif",
 				"images/sun2.gif",
+				"images/push.gif",
+				"images/walker.gif",
+				"images/rooftop.gif",
 				"images/bee2.gif"};
 		
 		

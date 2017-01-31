@@ -72,7 +72,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		float[] time = null;
 
 		sector = ColumnData.getByteArray(adcBankName + ".sector");
-		if (sector == null) {
+		if ((sector == null) || (sector.length < 1)) {
 			return;
 		}
 		byte [] layer = ColumnData.getByteArray(adcBankName + ".layer");
