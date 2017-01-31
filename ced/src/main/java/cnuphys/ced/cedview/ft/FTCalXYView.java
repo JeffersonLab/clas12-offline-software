@@ -282,6 +282,11 @@ public class FTCalXYView extends CedXYView {
 					if ((hits != null) && !hits.isEmpty()) {
 						short component = FTCALGeometry.getGoodId(index);
 						AdcHit hit = hits.get(1, 1, component);
+						
+						//hack
+						if (hit == null) {
+							hit = hits.get(0, 0, component);
+						}
 						if (hit != null) {
 							hit.tdcAdcFeedback(feedbackStrings);
 						}

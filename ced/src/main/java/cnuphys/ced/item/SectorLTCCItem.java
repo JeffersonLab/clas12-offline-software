@@ -12,7 +12,11 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.event.data.HTCC2;
+import cnuphys.ced.event.data.LTCC;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.LTCCGeometry;
@@ -103,83 +107,24 @@ public class SectorLTCCItem extends PolygonItem {
 	
 	//single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
-//		
-//		int hitCount = HTCC.hitCount();
-//		if (hitCount > 0) {
-//			Color default_fc = Color.red;
-//
-//			int pid[] = HTCC.pid();
-//			int sector[] = HTCC.sector();
-//			int ring[] = HTCC.ring();
-//			int half[] = HTCC.half();
-//			
-//			for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-//				if ((sector[hitIndex] == _sector)
-//						&& (ring[hitIndex] == _ring)
-//						&& (half[hitIndex] == _half)) {
-//					Color fc = default_fc;
-//					
-//					if (_view.showMcTruth()) {
-//						if (pid != null) {
-//							LundId lid = LundSupport.getInstance()
-//									.get(pid[hitIndex]);
-//							if (lid != null) {
-//								fc = lid.getStyle().getFillColor();
-//							}
-//						}
-//					}
-//					else {
-//						fc = hitFillColor(hitIndex);
-//					}
-//
-//					g.setColor(fc);
-//					g.fillPolygon(_lastDrawnPolygon);
-//					g.setColor(Color.black);
-//					g.drawPolygon(_lastDrawnPolygon);
-//				}
-//			} //end for loop
-//		} // hitCount > 0
+		AdcHitList hits = LTCC.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (AdcHit hit : hits) {
+				//arggh opposite of htcc
+				if ((hit != null) && (hit.sector == _sector) && (hit.layer == _half) && (hit.component == _ring)) {
+					g.setColor(hits.adcColor(hit));
+					g.fillPolygon(_lastDrawnPolygon);
+					g.setColor(Color.black);
+					g.drawPolygon(_lastDrawnPolygon);
+				}
+			}
+		}
+
 	}
-	
-	private Color hitFillColor(int hitIndex) {
-		Color color = Color.red;
-//		if (hitIndex >= 0) {
-//			int nphe[] = HTCC.nphe();
-//			if ((nphe != null) && (hitIndex < nphe.length)) {
-//				double numphe = nphe[hitIndex];
-//				color = HTCC.colorScaleModel.getColor(numphe);
-//			}
-//		}
-		
-		return color;
-	}
+
 		
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		
-//		int maxHit = AccumulationManager.getInstance().getMaxDgtzHTCCCount();
-//		if (maxHit < 1) {
-//			return;
-//		}
-//
-//		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzHTCCData();
-//
-//		int hit = hits[_sector - 1][_ring - 1][_half - 1];
-//
-//		double fract;
-//		if (_view.isSimpleAccumulatedMode()) {
-//			fract = ((double) hit) / maxHit;
-//		} else {
-//			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-//		}
-//
-//		Color color = AccumulationManager.getInstance().getColor(fract);
-//
-//		g.setColor(color);
-//		g.fillPolygon(_lastDrawnPolygon);
-//		g.setColor(Color.black);
-//		g.drawPolygon(_lastDrawnPolygon);
-		
 	}
 
 	/**
@@ -199,26 +144,23 @@ public class SectorLTCCItem extends PolygonItem {
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {
 		if (contains(container, screenPoint)) {
-			if (contains(container, screenPoint)) {
+			
+			AdcHitList hits = HTCC2.getInstance().getHits();
+			AdcHit hit = null;
+			
+			if ((hits != null) && !hits.isEmpty()) {
+				//arggh opposite of htcc
+				hit = hits.get(_sector, _half, _ring);
+			}
+			
+			if (hit == null) {
 				feedbackStrings.add(DataSupport.prelimColor + "LTCC sect " + _sector + 
 						" ring " + _ring + " half " + _half);
-				
-				// on a hit?
-				// the data container
-//				Vector<HitRecord> hits = HTCC.matchingHits(_sector,
-//						_ring, _half);
-//
-//				if (hits != null) {
-//					for (HitRecord hit : hits) {
-//						HTCC.preliminaryFeedback(hit.hitIndex, feedbackStrings);
-//						DataSupport.truePidFeedback(EC.pid(), hit.hitIndex, feedbackStrings);
-//						HTCC.dgtzFeedback(hit.hitIndex, feedbackStrings);
-//					}
-//				}
-
 			}
-		}
-		
+			else {
+				hit.tdcAdcFeedback("ring " + _ring, "half", feedbackStrings);
+			}
+		}		
 	}
 
 	// get the world polygon corresponding to the boundary of the superlayer
