@@ -10,7 +10,7 @@ import java.util.List;
  * @author S. Joosten
  */
 public class LTCCEngine extends ReconstructionEngine {
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
     
     public LTCCEngine() {
     	super("LTCC", "joosten", "1.0");
