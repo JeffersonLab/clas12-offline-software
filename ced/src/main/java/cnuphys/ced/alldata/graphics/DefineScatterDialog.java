@@ -16,6 +16,11 @@ import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.splot.pdata.DataSet;
 
+/**
+ * Used to define a scatter plot
+ * @author heddle
+ *
+ */
 public class DefineScatterDialog extends JDialog implements ActionListener, PropertyChangeListener {
 	private JButton _okButton;
 	private JButton _cancelButton;

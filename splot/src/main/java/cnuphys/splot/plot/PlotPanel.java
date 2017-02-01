@@ -3,16 +3,20 @@ package cnuphys.splot.plot;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 
 import cnuphys.splot.toolbar.CommonToolBar;
 
@@ -106,7 +110,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		PlotParameters parameters = _canvas.getParameters();
 
 		// axes labels
-		_xLabel = makeJLabel(_canvas.getParameters().getXLabel(),
+		_xLabel = makeJLabel(parameters.getXLabel(),
 				parameters.getAxesFont(), SwingConstants.CENTER, Color.white,
 				null, false);
 		_xLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -114,16 +118,20 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 
 		// status label
 		if (_decorations == STANDARD) {
-			_status = makeJLabel("  ", parameters.getStatusFont(),
-					SwingConstants.CENTER, new Color(240, 240, 240),
-					Color.blue, true);
-			_status.setBorder(new CommonBorder());
+			
+			_status = makeStatusLabel();
+			
+//			_status = makeJLabel("  ", parameters.getStatusFont(),
+//					SwingConstants.CENTER, new Color(240, 240, 240),
+//					Color.blue, true);
+			
 			_status.setAlignmentX(Component.CENTER_ALIGNMENT);
 			spanel.add(_status, BorderLayout.SOUTH);
 		}
 
 		add(spanel, BorderLayout.SOUTH);
 	}
+	
 
 	// add the north component
 	private void addNorth() {
@@ -169,6 +177,60 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 				parameters.getAxesFont(), Color.white, null);
 		add(_yLabel, BorderLayout.WEST);
 	}
+	
+	private JLabel makeStatusLabel() {
+		Font font = _canvas.getParameters().getStatusFont();
+		FontMetrics fm = getFontMetrics(font);
+		final int height = 4 + 2*(fm.getHeight()+2);
+		Color bg = X11Colors.getX11Color("alice blue");
+		
+		JLabel label = new JLabel() {
+			@Override
+			public void paint(Graphics g) {
+				// exclude from print
+				if (!PrintUtilities.isPrinting()) {
+					super.paint(g);
+				}
+			}
+
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension d = super.getPreferredSize();
+				d.height = height;
+				return d;
+			}
+			
+			@Override
+			public Dimension getMinimumSize() {
+				Dimension d = super.getMinimumSize();
+				d.height = height;
+				return d;
+			}
+
+			@Override
+			public Dimension getMaximumSize() {
+				Dimension d = super.getMaximumSize();
+				d.height = height;
+				return d;
+			}
+
+		};
+		
+		label.setFont(font);
+		label.setOpaque(true);
+		label.setBackground(bg);
+		label.setForeground(Color.black);
+		label.setHorizontalAlignment(SwingConstants.LEFT);
+		label.setVerticalAlignment(SwingConstants.CENTER);
+		
+		Border commonBorder = new CommonBorder();
+		Border emptyBorder = BorderFactory.createLineBorder(bg, 2);
+		
+		label.setBorder(BorderFactory.createCompoundBorder(commonBorder, emptyBorder));
+
+		return label;
+	}
+
 
 	// convenience function for making a label
 	private JLabel makeJLabel(String text, Font font, int alignment, Color bg,

@@ -15,6 +15,11 @@ import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.splot.pdata.HistoData;
 
+/**
+ * Define a 1-D histogram
+ * @author heddle
+ *
+ */
 public class DefineHistoDialog extends JDialog implements ActionListener, PropertyChangeListener {
 	
 	private JButton _okButton;
