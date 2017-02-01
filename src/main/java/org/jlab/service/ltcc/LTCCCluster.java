@@ -49,7 +49,7 @@ public final class LTCCCluster {
             }
         }
         private boolean readOnly() {
-            return (this != READ_AND_GOOD && this != READ_AND_BAD);
+            return (this == READ_AND_GOOD || this == READ_AND_BAD);
         }
         private boolean isGood() {
             return (this != BAD && this != READ_AND_BAD);
@@ -233,8 +233,8 @@ public final class LTCCCluster {
         this.segment += hit.getSegment() * hit.getNphe();
     }
     private void updateStatus() {
-        int dTheta = this.iThetaMax - this.iThetaMin;
-        int dPhi = this.iLTCCPhiMax - this.iLTCCPhiMin;
+        int dTheta = this.iThetaMax - this.iThetaMin + 1;
+        int dPhi = this.iLTCCPhiMax - this.iLTCCPhiMin + 1;
         if ((this.nphe >= GOOD_CLUSTER_NPHE_MIN)
                 && (this.nphe <= GOOD_CLUSTER_NPHE_MAX)
                 && (dTheta >= GOOD_CLUSTER_N_SEGMENT_MIN)
