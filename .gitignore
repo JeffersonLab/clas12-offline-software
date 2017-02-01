@@ -8,3 +8,5 @@ buildNumber.properties
 .mvn/timing.properties
 classes
 pom.properties
+*.swp
+*.swo
