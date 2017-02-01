@@ -25,7 +25,7 @@
     * set the ```LTCCEngine.DEBUG``` flag to ```true``` in netbeans (defined in ```org.jlab.service.ltcc.LTCCEngine.java```)
     * rebuild/re-install
     
-## Diagnostic histograms
+## Diagnostic histograms using netbeans
 ### Generating/viewing the histograms
   * in netbeans, open the source file ```org.jlab.service.ltcc.LTCCViewer```
   * on line 100, modify ```String inputfile = "/path/to/your/reconstructed/file.hipo;"``` to point to the relevant file
