@@ -205,15 +205,17 @@ public class BaseHitReader{
 		List<BaseHit> finalHitList = new ArrayList<BaseHit>();
 		
 		Map<DetectorLocation, ArrayList<BaseHit>> hitMap = this.get_Hits(event, MH.DetectorName());
-		Set entrySet = hitMap.entrySet();		 
-	    Iterator it = entrySet.iterator();
-	   
-	    while(it.hasNext()){
-	       Map.Entry me = (Map.Entry)it.next();
-	       ArrayList<BaseHit> hitList = (ArrayList<BaseHit>) me.getValue();	       
-	       finalHitList.addAll(MH.MatchHits(hitList));
-	   }
-		
+		if(hitMap != null) {
+				
+			Set entrySet = hitMap.entrySet();		 
+		    Iterator it = entrySet.iterator();
+		   
+		    while(it.hasNext()){
+		       Map.Entry me = (Map.Entry)it.next();
+		       ArrayList<BaseHit> hitList = (ArrayList<BaseHit>) me.getValue();	       
+		       finalHitList.addAll(MH.MatchHits(hitList));
+		   }
+		}
 		
 		return finalHitList;
 	}
