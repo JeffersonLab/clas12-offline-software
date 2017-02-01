@@ -26,6 +26,13 @@ public final class LTCCHit {
     // nphe requirements for a good hit
     static private final double NPHE_MIN_HIT = 0;
     static private final double NPHE_MAX_HIT = 10000.;
+    
+    private enum Status {
+        GOOD, BAD;
+        private boolean isGood() {
+            return (this == GOOD);
+        }
+    }
 
     // raw LTCC info
     private final int sector;     // CLAS12 sector (1-6)
@@ -33,7 +40,10 @@ public final class LTCCHit {
     private final int segment;    // LTCC segment (1-18)
     private final int adc;        // integrated ADC
     private final double rawTime;// hit time
-    private final short pedestal; // pedestal (unused, already in ADC)
+    //private final short pedestal; // pedestal (unused, already in ADC)
+    
+    // hit status
+    private final Status status;
 
     // calibrated quantities
     private final double nphe;       // number of photo-electrons
@@ -59,8 +69,8 @@ public final class LTCCHit {
         List<LTCCHit> hits = new LinkedList<>();
         for (int i = 0; i < bank.rows(); ++i) {
             LTCCHit hit = new LTCCHit(bank, i, gain, timing_offset);
-            if (hit.getNphe() > NPHE_MIN_HIT && hit.getNphe() < NPHE_MAX_HIT) {
-                hits.add(new LTCCHit(bank, i));
+            if (hit.isGood()) {
+                hits.add(hit);
             }
         }
         return hits;
@@ -75,10 +85,11 @@ public final class LTCCHit {
        this.segment = bank.getShort("component", index);
        this.adc = bank.getInt("ADC", index);
        this.rawTime = bank.getFloat("time", index);
-       this.pedestal = bank.getShort("ped", index);
+       //this.pedestal = bank.getShort("ped", index);
        this.nphe = calcNphe(gain);
        this.time = calcTime(timing_offset);
        this.iLTCCPhi = calcLTCCPhiIndex();
+       this.status = calcStatus();
     }        
     LTCCHit(DataBank bank, int index) {
         this(bank, index, null, null);
@@ -121,13 +132,22 @@ public final class LTCCHit {
         return v;
     }
     public int getSector() {
-        return sector;
+        return this.sector;
     }
     public int getSegment() {
-        return segment;
+        return this.segment;
     }
     public int getSide() {
-        return side;
+        return this.side;
+    }
+    public int getADC() {
+        return this.adc;
+    }
+    public double getRawTime() {
+        return this.rawTime;
+    }
+    public boolean isGood() {
+        return this.status.isGood();
     }
 
     
@@ -166,6 +186,13 @@ public final class LTCCHit {
     
     private int calcLTCCPhiIndex() {
         return 2 * (this.sector - 1) + (this.side - 1);
+    }
+    
+    private Status calcStatus() {
+        return 
+            (this.adc >= 0 && this.nphe > NPHE_MIN_HIT && this.nphe < NPHE_MAX_HIT) 
+                ? Status.GOOD
+                : Status.BAD;
     }
 
     // LTCC specs

@@ -29,11 +29,35 @@ public final class LTCCCluster {
             GOOD_CLUSTER_N_SEGMENT_MAX * GOOD_CLUSTER_N_SIDE_MAX;
     
     private enum Status {
-        BAD, GOOD, READ_FROM_FILE
+        GOOD (0), 
+        BAD (1), 
+        READ_AND_GOOD (2),
+        READ_AND_BAD (3);        
+        public final int code;         
+        Status(int b) {
+            this.code = b;
+        }
+        private static Status read(int i) {
+            switch (i) {
+                case 0:
+                case 2:
+                    return READ_AND_GOOD;
+                case 1:
+                case 3:
+                default:
+                    return READ_AND_BAD;
+            }
+        }
+        private boolean readOnly() {
+            return (this != READ_AND_GOOD && this != READ_AND_BAD);
+        }
+        private boolean isGood() {
+            return (this != BAD && this != READ_AND_BAD);
+        }
     }
-        
+    
     // cluster sector
-    private int sector;
+    private int sector = -1;
     
     // theta range of the cluster
     private int iThetaMin = 99;     // minimum theta index [0-17]
@@ -64,17 +88,20 @@ public final class LTCCCluster {
         add(center);
     }
     
+    // read a cluster from a file
     LTCCCluster(DataBank bank, int index) {
         // we cannot meaningfully load the theta and phi boundary indices
-        this.status = Status.READ_FROM_FILE;
         this.sector = bank.getByte("sector", index);
-        this.segment = bank.getShort("segment", index);
+        this.status = Status.read(bank.getByte("status", index));
+        this.nphe = bank.getFloat("nphe", index);
+        // multiply segment/position/time with nphe because the 
+        // respective getter will re-average the value
+        this.segment = bank.getShort("segment", index) * this.nphe;
         this.position = new threeVec(
                 bank.getFloat("x", index), 
                 bank.getFloat("y", index), 
-                bank.getFloat("z", index));
-        this.nphe = bank.getFloat("nphe", index);
-        this.time = bank.getFloat("time", index);
+                bank.getFloat("z", index)).mult(this.nphe);
+        this.time = bank.getFloat("time", index) * this.nphe;
         this.nHits = bank.getShort("nHits", index);
         this.thetaMin = bank.getFloat("minTheta", index);
         this.thetaMax = bank.getFloat("maxTheta", index);
@@ -90,7 +117,8 @@ public final class LTCCCluster {
         
         List<LTCCCluster> clusters = new ArrayList<>();
         for (int i = 0; i < bank.rows(); ++i) {
-            if (requireGood && bank.getByte("status", i) == 0) {
+            LTCCCluster cluster = new LTCCCluster(bank, i);
+            if (requireGood && !cluster.isGood()) {
                 continue;
             }
             clusters.add(new LTCCCluster(bank, i));
@@ -100,7 +128,7 @@ public final class LTCCCluster {
     
     public void add(LTCCHit hit) {
         // don't update clusters read from a file
-        if (status == Status.READ_FROM_FILE) {
+        if (status.readOnly()) {
             return;
         }
         this.nHits += 1;
@@ -144,28 +172,32 @@ public final class LTCCCluster {
         return this.phiMax;
     }
     public boolean isGood() {
-        return (status != Status.BAD);
+        return this.status.isGood();
+    }
+    public boolean readOnly() {
+        return this.status.readOnly();
     }
     
-    public void save(DataBank clusterBank, int index) {
+    public void save(DataBank bank, int index) {
         // calculate average position
         threeVec xyz = this.getPosition();
                 // set the bank entries
-        clusterBank.setShort("id", index, (short) index);
-        clusterBank.setByte("status", index, (byte) (isGood() ? 1 : 0));
-        clusterBank.setByte("sector", index, (byte) getSector());
-        clusterBank.setShort("segment", index, (short) getSegment());
-        clusterBank.setFloat("x", index, (float) xyz.x());
-        clusterBank.setFloat("y", index, (float) xyz.y());
-        clusterBank.setFloat("z", index, (float) xyz.z());
-        clusterBank.setFloat("nphe", index, (float) getNphe());
-        clusterBank.setFloat("time", index, (float) this.getTime());
-        clusterBank.setShort("nHits", index, (short) getNHits());
-        clusterBank.setFloat("minTheta", index, (float) Math.toDegrees(this.thetaMin));
-        clusterBank.setFloat("maxTheta", index, (float) Math.toDegrees(this.thetaMax));
-        clusterBank.setFloat("minPhi", index, (float) Math.toDegrees(this.phiMin));
-        clusterBank.setFloat("maxPhi", index, (float) Math.toDegrees(this.phiMax));
+        bank.setShort("id", index, (short) index);
+        bank.setByte("status", index, (byte) this.status.code);
+        bank.setByte("sector", index, (byte) getSector());
+        bank.setShort("segment", index, (short) getSegment());
+        bank.setFloat("x", index, (float) xyz.x());
+        bank.setFloat("y", index, (float) xyz.y());
+        bank.setFloat("z", index, (float) xyz.z());
+        bank.setFloat("nphe", index, (float) getNphe());
+        bank.setFloat("time", index, (float) this.getTime());
+        bank.setShort("nHits", index, (short) getNHits());
+        bank.setFloat("minTheta", index, (float) Math.toDegrees(this.thetaMin));
+        bank.setFloat("maxTheta", index, (float) Math.toDegrees(this.thetaMax));
+        bank.setFloat("minPhi", index, (float) Math.toDegrees(this.phiMin));
+        bank.setFloat("maxPhi", index, (float) Math.toDegrees(this.phiMax));
     }
+    
     public static void saveClusters(DataEvent event, List<LTCCCluster> clusters) {
         if (!clusters.isEmpty()) {
             DataBank clusterBank = event.createBank("LTCC::clusters", clusters.size());
