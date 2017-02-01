@@ -29,6 +29,8 @@ import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
+import cnuphys.ced.alldata.graphics.DefinitionManager;
+import cnuphys.ced.alldata.graphics.PlotDialog;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.EC;
@@ -612,6 +614,22 @@ public class ClasIoEventManager {
 		_allReconSwimmer = allSwimmer;
 	}
 
+	// During accumulation, notify any plots
+	// define through the Define menu
+	private void notifyAllDefinedPlots(DataEvent event) {
+		if (isAccumulating() && (event != null)) {
+			Vector<PlotDialog> plots = DefinitionManager.getInstance().getAllPlots();
+
+			if ((plots != null) && !plots.isEmpty()) {
+				for (PlotDialog plot : plots) {
+					if (plot != null) {
+						plot.newClasIoEvent(event);
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Get the next event from the current compact reader
 	 * 
@@ -632,6 +650,7 @@ public class ClasIoEventManager {
 					notifyEventListeners();
 				} else {
 					AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+					notifyAllDefinedPlots(_currentEvent);
 				}
 			}
 			break;
@@ -648,6 +667,7 @@ public class ClasIoEventManager {
 			}
 			else {
 				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+				notifyAllDefinedPlots(_currentEvent);
 			}
 			break;
 
@@ -685,6 +705,7 @@ public class ClasIoEventManager {
 			
 			if (!isAccumulating()) {
 				notifyEventListeners();
+				notifyAllDefinedPlots(_currentEvent);
 			}
 			else {
 				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);

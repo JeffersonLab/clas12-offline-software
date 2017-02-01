@@ -28,7 +28,7 @@ public class Histogram extends PlotDialog {
 	private String  _namedExpressionName;
     private NamedExpression _namedExpression;
 
-	// the histgram data
+	// the histogram data
 	private HistoData _histoData;
 
 	/**
@@ -90,8 +90,6 @@ public class Histogram extends PlotDialog {
 		canvas.getParameters().setAxesFont(Fonts.smallFont);
 		canvas.getParameters().setMinExponentY(5);
 		canvas.getParameters().setMinExponentX(4);
-		// System.err.println("MIN X: " + h1.getMinX());
-		// System.err.println("MAX X: " + h1.getMaxX());
 		canvas.getParameters().setXRange(h1.getMinX(), h1.getMaxX());
 		canvas.getParameters().setTextFont(Fonts.smallFont);
 

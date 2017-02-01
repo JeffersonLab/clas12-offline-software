@@ -358,7 +358,7 @@ public abstract class PlotDialog extends JDialog
 
 		return len;
 	}
-
+	
 	/**
 	 * Get a value for either the column data or the named expression
 	 * @param index the index
@@ -376,7 +376,6 @@ public abstract class PlotDialog extends JDialog
 		
 		double val = Double.NaN;
 
-		
 		if (cd != null) {
 			double vals[] = cd.getAsDoubleArray(event);
 			if ((vals != null) && (index < vals.length)) {

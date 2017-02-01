@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/clasJlib/numRec/v3.3/lib/numRec.jar" sourcepath="/numericalRec"/>
-	<classpathentry kind="lib" path="/clasJlib/numRec/v3.3/lib/f2jutil.jar"/>
+	<classpathentry kind="lib" path="/numericalRec/lib/f2jutil.jar"/>
+	<classpathentry kind="lib" path="/numericalRec/lib/numRec.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

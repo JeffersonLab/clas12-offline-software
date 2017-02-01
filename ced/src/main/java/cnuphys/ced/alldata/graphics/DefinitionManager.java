@@ -422,6 +422,7 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 		}
 	}
 	
+	//container for the plots
 	class Holder {
 		public String name;
 		public PlotDialog dialog;
@@ -437,7 +438,7 @@ public class DefinitionManager implements ActionListener, XmlPrintStreamWritable
 	 * Get all the current plots
 	 * @return all the plots
 	 */
-	public static Vector<PlotDialog> getAllPlots() {
+	public Vector<PlotDialog> getAllPlots() {
 		if ((_instance._plots == null) || _instance._plots.isEmpty()) {
 			return null;
 		}
