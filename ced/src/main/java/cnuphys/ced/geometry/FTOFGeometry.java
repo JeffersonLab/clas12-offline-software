@@ -195,6 +195,20 @@ public class FTOFGeometry {
 		return GeometryManager.getProjectedPolygon(paddle, projectionPlane, 6, 4, wp, null);
 	}
 
+	/**
+	 * Get the length of a paddle in cm
+	 * @param superlayer
+	 *            0, 1 or 2 for 1A, 1B, 2
+	 * @param paddleid
+	 *            the 0-based paddle id
+	 * @return the length of the paddle
+	 */
+	public static double getLength(int superlayer, int paddleId) {
+		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(0);
+		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleId);
+		return paddle.getLength();
+	}
+	
 	public static void main(String arg[]) {
 		FTOFGeometry.initialize();
 
