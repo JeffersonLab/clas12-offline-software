@@ -29,7 +29,7 @@ import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
@@ -1302,7 +1302,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 	// draw the BST panels
 	private void drawBSTPanels(Graphics g, IContainer container) {
-		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
+		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return;
 		}
@@ -1327,7 +1327,7 @@ public class SectorView extends CedView implements ChangeListener {
 		double sinphi = Math.sin(Math.toRadians(phi));
 
 		// set the perp distance
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 			Point2D.Double avgXY = panel.getXyAverage();
 			double perp = avgXY.y * cosphi - avgXY.x * sinphi;
 			panel.setPerp(perp);
@@ -1350,7 +1350,7 @@ public class SectorView extends CedView implements ChangeListener {
 		CentralSupport.markPanelHits(this, panels);
 
 		int index = 0;
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 
 			int alpha = 10 + index / 3;
 			Color col = new Color(128, 128, 128, alpha);
@@ -1389,7 +1389,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 	}
 
-	private WorldPolygon[] getFromBSTPanel(BSTxyPanel panel, double cosphi,
+	private WorldPolygon[] getFromBSTPanel(SVTxyPanel panel, double cosphi,
 			double sinphi) {
 
 		WorldPolygon polys[] = new WorldPolygon[3];

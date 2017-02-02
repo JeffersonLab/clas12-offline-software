@@ -126,7 +126,7 @@ public class CedHistoFiller implements IAccumulationListener {
 			return;
 		}
 		
-		int hits[][][] = AccumulationManager.getInstance().getAccumulatedFullBSTData();
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedSVTFullData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int row = lay0+1;
 			int supl0 = lay0/2;

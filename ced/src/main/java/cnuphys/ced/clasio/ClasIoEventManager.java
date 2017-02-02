@@ -20,6 +20,8 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoRingSource;
+import org.jlab.io.ui.ConnectionDialog;
+import org.jlab.io.ui.ConnectionDialogHipo;
 
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.dialog.DialogUtilities;
@@ -41,6 +43,7 @@ import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
+
 
 public class ClasIoEventManager {
 
@@ -78,10 +81,12 @@ public class ClasIoEventManager {
 	private EventSourceType _sourceType = EventSourceType.HIPOFILE;
    
 	//ET dialog
-	private ETDialog _etDialog;
+	//private ETDialog _etDialog;
+	private ConnectionDialog _connectionDialog;
 	
 	// hipo ring dialog
-	private RingDialog _ringDialog;
+	//private RingDialog _ringDialog;
+	private ConnectionDialogHipo _hipoDialog;
 
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
@@ -326,17 +331,19 @@ public class ClasIoEventManager {
 	 * Connect to an ET ring
 	 */
 	public void ConnectToETRing() {
-		if (_etDialog == null) {
-			_etDialog = new ETDialog();
+		if (_connectionDialog == null) {
+			_connectionDialog = new ConnectionDialog();
+			_connectionDialog.setTitle("Connect to ET Ring");
+			_connectionDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/et.png").getImage());
 		}
-		_etDialog.setVisible(true);
+		_connectionDialog.setVisible(true);
 		
-		if (_etDialog.reason() == DialogUtilities.OK_RESPONSE) {
+		if (_connectionDialog.reason() == DialogUtilities.OK_RESPONSE) {
 			_runData.reset();
 
 			_dataSource = null;
-			_currentETAddress = _etDialog.getIpAddress();
-			_currentETFile = _etDialog.getFileName();
+			_currentETAddress = _connectionDialog.getIpAddress();
+			_currentETFile = _connectionDialog.getFileName();
 		
 			//does the file exist?
 			
@@ -374,22 +381,25 @@ public class ClasIoEventManager {
 	 * Connect to a HIPO ring
 	 */
 	public void ConnectToHipoRing() {
-		if (_ringDialog == null) {
-			_ringDialog = new RingDialog();
+		if (_hipoDialog == null) {
+			_hipoDialog = new ConnectionDialogHipo();
+			_hipoDialog.setTitle("Connect to Hipo Ring");
+		//	_hipoDialog.setIconImage(ImageManager.cnuIcon.getImage());
+			_hipoDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/hipo2.png").getImage());
 		}
-		_ringDialog.setVisible(true);
-		if (_ringDialog.reason() == DialogUtilities.OK_RESPONSE) {
+		_hipoDialog.setVisible(true);
+		if (_hipoDialog.reason() == DialogUtilities.OK_RESPONSE) {
 			_runData.reset();
 
 			_dataSource = null;
 			_currentHIPOAddress = "";
-			int connType = _ringDialog.getConnectionType();
+			int connType = _hipoDialog.getConnectionType();
 
 			// let's try to connect
 			try {
 				if (connType == RingDialog.CONNECTSPECIFIC) {
 					_dataSource = new HipoRingSource();
-					_currentHIPOAddress = _ringDialog.getIpAddress();
+					_currentHIPOAddress = _hipoDialog.getIpAddress();
 					_dataSource.open(_currentHIPOAddress);
 				} else if (connType == RingDialog.CONNECTDAQ) {
 					_dataSource = HipoRingSource.createSourceDaq();

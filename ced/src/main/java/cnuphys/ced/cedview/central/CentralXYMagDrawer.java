@@ -15,7 +15,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 
 public class CentralXYMagDrawer extends DrawableAdapter {
 
@@ -39,7 +39,7 @@ public class CentralXYMagDrawer extends DrawableAdapter {
 			return;
 		}
 
-		BSTxyPanel closestPanel = _view.closestPanel();
+		SVTxyPanel closestPanel = _view.closestPanel();
 
 		if (closestPanel == null) {
 			return;
@@ -99,7 +99,7 @@ public class CentralXYMagDrawer extends DrawableAdapter {
 
 	}
 
-	private void setWorld(IContainer container, BSTxyPanel closestPanel) {
+	private void setWorld(IContainer container, SVTxyPanel closestPanel) {
 		// get the limits to create an appropriate world system
 		// use sector 1 (which has constant y) limits
 		double vals[] = new double[10];

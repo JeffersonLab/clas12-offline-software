@@ -238,7 +238,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		}
 
 		// BST hits as midpoints of hit strips
-		if (Bits.checkBit(bits, DisplayBits.BSTHITS)) {
+		if (Bits.checkBit(bits, DisplayBits.SVTHITS)) {
 			_stripMidpointsButton = add(MIDPOINTS_LABEL, false, true,
 					this, X11Colors.getX11Color("maroon")).getCheckBox();
 
@@ -305,7 +305,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		}
 
 
-		if (Bits.checkBit(bits, DisplayBits.BSTRECONS_CROSSES)) {
+		if (Bits.checkBit(bits, DisplayBits.SVTRECONS_CROSSES)) {
 			_reconsBSTCrossButton = add(RECONS_CROSS_LABEL,
 					showBSTreconsCrosses, true, this, _buttonColor)
 					.getCheckBox();

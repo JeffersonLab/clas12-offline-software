@@ -15,9 +15,12 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 
 public class CentralZHitDrawer implements IDrawable {
 
@@ -99,11 +102,11 @@ public class CentralZHitDrawer implements IDrawable {
 
 	// draw accumulated hits (panels)
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		drawBSTHitsAccumulatedMode(g, container);
+		drawSVTHitsAccumulatedMode(g, container);
 		drawMicroMegasHitsAccumulatedMode(g, container);
 	}
 
-	private void drawBSTHitsAccumulatedMode(Graphics g, IContainer container) {
+	private void drawSVTHitsAccumulatedMode(Graphics g, IContainer container) {
 
 		int maxHit = AccumulationManager.getInstance().getMaxFullBSTCount();
 		if (maxHit < 1) {
@@ -111,7 +114,7 @@ public class CentralZHitDrawer implements IDrawable {
 		}
 
 		// first index is layer 0..7, second is sector 0..23
-		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedFullBSTData();
+		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedSVTFullData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
@@ -141,7 +144,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
-		drawBSTHitsSingleMode(g, container);
+		drawSVTHitsSingleMode(g, container);
 		drawMicroMegasHitsSingleMode(g, container);
 	}
 
@@ -150,49 +153,78 @@ public class CentralZHitDrawer implements IDrawable {
 	}
 
 	// draw gemc simulated hits single event mode
-	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
-
-		int hitCount = BST.hitCount();
-//		System.err.println("BST HIT COUNT: " + hitCount);
-		if (hitCount > 0) {
-			int bstsector[] = BST.sector();
-			int bstlayer[] = BST.layer();
-			int bststrip[] = BST.strip();
-
+	private void drawSVTHitsSingleMode(Graphics g, IContainer container) {
+		
+		AdcHitList hits = SVT.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			
+//			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
 
-			// panels
-			for (int i = 0; i < hitCount; i++) {
-				
-				
-				//HACK GEO SECTOR DOESN"T MATCH REAL
-				//TODO Undo hack when geometry fixed
-				
-				int superlayer = (bstlayer[i] - 1) / 2;
-                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
-				if (hackSect == 0) hackSect = numSect;
-				
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					//HACK GEO SECTOR DOESN"T MATCH REAL
+					//TODO Undo hack when geometry fixed
+					
+					int superlayer = (hit.layer - 1) / 2;
+	                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+					int hackSect = (hit.sector + (numSect/2)) % numSect;
+					if (hackSect == 0) hackSect = numSect;
 
-//				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
-				BSTxyPanel panel = CentralXYView.getPanel(bstlayer[i], hackSect);
-				if (panel != null) {
-					for (int zopt = 0; zopt < 3; zopt++) {
-						if (panel.hit[zopt]) {
-//							System.err.println("drawing panel");
-							_view.drawSVTStrip(g2, container, Color.red, bstsector[i], bstlayer[i], bststrip[i]);
-						}
-//						else {
-//							System.err.println("!panel hit for zopt == " + zopt);
-//						}
+					
+					SVTxyPanel panel = CentralXYView.getPanel(hit.layer, hackSect);
+					if (panel != null) {
+						_view.drawSVTStrip(g2, container, Color.red, hit.sector, hit.layer, hit.component);					}
+					else {
+						System.err.println("null SVTZ panel");
 					}
-				}
-				else {
-					System.err.println("null BSTZ panel");
-				}
-			} // for loop on hits
 
-		} // hotcount > 0
+				}
+			}
+		}
+
+//		int hitCount = BST.hitCount();
+////		System.err.println("BST HIT COUNT: " + hitCount);
+//		if (hitCount > 0) {
+//			int bstsector[] = BST.sector();
+//			int bstlayer[] = BST.layer();
+//			int bststrip[] = BST.strip();
+//
+//			Graphics2D g2 = (Graphics2D) g;
+//
+//			// panels
+//			for (int i = 0; i < hitCount; i++) {
+//				
+//				
+//				//HACK GEO SECTOR DOESN"T MATCH REAL
+//				//TODO Undo hack when geometry fixed
+//				
+//				int superlayer = (bstlayer[i] - 1) / 2;
+//                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+//				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
+//				if (hackSect == 0) hackSect = numSect;
+//				
+//
+////				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
+//				SVTxyPanel panel = CentralXYView.getPanel(bstlayer[i], hackSect);
+//				if (panel != null) {
+//					for (int zopt = 0; zopt < 3; zopt++) {
+//						if (panel.hit[zopt]) {
+
+////							System.err.println("drawing panel");
+//							_view.drawSVTStrip(g2, container, Color.red, bstsector[i], bstlayer[i], bststrip[i]);
+//						}
+////						else {
+////							System.err.println("!panel hit for zopt == " + zopt);
+////						}
+//					}
+//				}
+//				else {
+//					System.err.println("null BSTZ panel");
+//				}
+//			} // for loop on hits
+//
+//		} // hotcount > 0
 
 	}
 

@@ -28,7 +28,7 @@ public class GeometryManager {
 	private static GeometryManager instance;
 
 	// BSTxy panels
-	private static Vector<BSTxyPanel> _bstXYpanels;
+	private static Vector<SVTxyPanel> _bstXYpanels;
 
 	// cal sector 0 in clas coordinates
 	public static ECSector clas_Cal_Sector0;
@@ -120,9 +120,9 @@ public class GeometryManager {
 				// int layer, double vals[]) {
 				BSTGeometry.getLimitValues(sector - 1, supl, lay, vals);
 				if (_bstXYpanels == null) {
-					_bstXYpanels = new Vector<BSTxyPanel>();
+					_bstXYpanels = new Vector<SVTxyPanel>();
 				}
-				_bstXYpanels.add(new BSTxyPanel(sector, bigLayer, vals));
+				_bstXYpanels.add(new SVTxyPanel(sector, bigLayer, vals));
 			}
 		}
 
@@ -193,7 +193,7 @@ public class GeometryManager {
 		return absPhi;
 	}
 
-	public static List<BSTxyPanel> getBSTxyPanels() {
+	public static List<SVTxyPanel> getSVTxyPanels() {
 		return _bstXYpanels;
 	}
 

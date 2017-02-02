@@ -1,4 +1,4 @@
-package cnuphys.ced.hippo;
+package cnuphys.ced.hipo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.RunData;
 
-public class HippoTest {
+public class HipoTest {
 
 	//data directory
 	private static File _dataDir;

@@ -10,7 +10,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
@@ -25,6 +25,8 @@ import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC2;
+import cnuphys.ced.event.data.LTCC;
+import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 
@@ -65,6 +67,12 @@ public class AccumulationManager
 	private int _HTCCAccumulatedData[][][];
 	private int _maxHTCCCount;
 	
+	// LTCC accumulated accumulated data indices are sector, half, ring
+	//NOTICE THE DIFFERENT ORDER FROM HTCC
+	private int _LTCCAccumulatedData[][][];
+	private int _maxLTCCCount;
+
+
 	//ftcc accumulated data
 	private int _FTCALAccumulatedData[];
 	private int _maxFTCALCount;
@@ -73,13 +81,13 @@ public class AccumulationManager
 	private int _DCAccumulatedData[][][][];
 	private int _maxDCCount;
 
-	// BST accumulated data (layer[0..7], sector[0..23])
-	private int _BSTAccumulatedData[][];
-	private int _maxBSTCount;
+	// SVT accumulated data (layer[0..7], sector[0..23])
+	private int _SVTAccumulatedData[][];
+	private int _maxSVTCount;
 
-	// BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
-	private int _BSTFullAccumulatedData[][][];
-	private int _maxFullBSTCount;
+	// SVT accumulated data (layer[0..7], sector[0..23], strip [0..254])
+	private int _SVTFullAccumulatedData[][][];
+	private int _maxSVTFullCount;
 	
 	//CTOF accumulated data
 	private int _CTOFAccumulatedData[];
@@ -128,23 +136,26 @@ public class AccumulationManager
 		//htcc data
 		_HTCCAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
 		
+		//ltcc data NOTICE THE DIFFERENT ORDER FROM HTCC
+		_LTCCAccumulatedData = new int[GeoConstants.NUM_SECTOR][2][18];
+
 		//dc data
 		_DCAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 
 		// down to layer
-		_BSTAccumulatedData = new int[8][];
+		_SVTAccumulatedData = new int[8][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_BSTAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
+			_SVTAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
 		}
 
 		// _bstDgtzAccumulatedData = new int[8][24];
 
 		// down to strip
-		_BSTFullAccumulatedData = new int[8][][];
+		_SVTFullAccumulatedData = new int[8][][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_BSTFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
+			_SVTFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
 		}
 		
 		//ctof storage
@@ -185,13 +196,24 @@ public class AccumulationManager
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			for (int ring = 0; ring < 4; ring++) {
 				for (int half = 0; half < 2; half++) {
-						_HTCCAccumulatedData[sector][ring][half] = 0;
+					_HTCCAccumulatedData[sector][ring][half] = 0;
 				}
 			}
 		}
 		_maxHTCCCount = 0;
+
+		// clear accumulated LTCC
+		// NOTICE THE DIFFERENT ORDER FROM HTCC
+		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
+			for (int half = 0; half < 2; half++) {
+				for (int ring = 0; ring < 18; ring++) {
+					_LTCCAccumulatedData[sector][half][ring] = 0;
+				}
+			}
+		}
+		_maxLTCCCount = 0;
 		
-		// clear accumulated gemc dc data
+		// clear accumulated dc data
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
 				avgDcOccupancy[sector][superLayer] = 0;
@@ -204,7 +226,7 @@ public class AccumulationManager
 		}
 		_maxDCCount = 0;
 
-		// clear ec data
+		// clear ecal data
 		for (int sector = 0; sector < 6; sector++) {
 			for (int stack = 0; stack < 2; stack++) {
 				for (int view = 0; view < 3; view++) {
@@ -230,14 +252,14 @@ public class AccumulationManager
 		for (int layer = 0; layer < 8; layer++) {
 			int supl0 = layer / 2;
 			for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
-				_BSTAccumulatedData[layer][sector] = 0;
+				_SVTAccumulatedData[layer][sector] = 0;
 				for (int strip = 0; strip < 256; strip++) {
-					_BSTFullAccumulatedData[layer][sector][strip] = 0;
+					_SVTFullAccumulatedData[layer][sector][strip] = 0;
 				}
 			}
 		}
-		_maxBSTCount = 0;
-		_maxFullBSTCount = 0;
+		_maxSVTCount = 0;
+		_maxSVTFullCount = 0;
 		
 		//clear CTOF data
 		for (int i = 1; i < 48; i++) {
@@ -258,11 +280,6 @@ public class AccumulationManager
 			}
 		}
 		_maxFTOFCount = 0;
-
-		// growable arrays used for canned histograms
-		// _tbPResolutionHistoData.clear();
-		// _tbThetaResolutionHistoData.clear();
-		// _tbPhiResolutionHistoData.clear();
 
 		notifyListeners(ACCUMULATION_CLEAR);
 	}
@@ -309,6 +326,14 @@ public class AccumulationManager
 		return _HTCCAccumulatedData;
 	}
 
+	/**
+	 * Get the accumulated LTCC data
+	 * 
+	 * @return the accumulated LTCC data
+	 */
+	public int[][][] getAccumulatedLTCCData() {
+		return _LTCCAccumulatedData;
+	}
 
 	/**
 	 * Get the accumulated EC data
@@ -351,8 +376,8 @@ public class AccumulationManager
 	 * 
 	 * @return the accumulated bst panel data
 	 */
-	public int[][] getAccumulatedBSTData() {
-		return _BSTAccumulatedData;
+	public int[][] getAccumulatedSVTData() {
+		return _SVTAccumulatedData;
 	}
 
 	/**
@@ -360,8 +385,8 @@ public class AccumulationManager
 	 * 
 	 * @return the accumulated bst strip data
 	 */
-	public int[][][] getAccumulatedFullBSTData() {
-		return _BSTFullAccumulatedData;
+	public int[][][] getAccumulatedSVTFullData() {
+		return _SVTFullAccumulatedData;
 	}
 	
 	public int getMaxFTCALCount() {
@@ -378,13 +403,23 @@ public class AccumulationManager
 	}
 
 	/**
-	 * Get the max counts for ec strips
+	 * Get the max counts for HTCC
 	 * 
-	 * @return the max counts for ec strips.
+	 * @return the max counts for HTCC
 	 */
 	public int getMaxHTCCCount() {
 		return _maxHTCCCount;
 	}
+	
+	/**
+	 * Get the max counts for LTCC
+	 * 
+	 * @return the max counts for LTCC
+	 */
+	public int getMaxLTCCCount() {
+		return _maxLTCCCount;
+	}
+
 
 	/**
 	 * Get the max counts for pcal strips
@@ -400,8 +435,8 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for any bst panel.
 	 */
-	public int getMaxBSTCount() {
-		return _maxBSTCount;
+	public int getMaxSVTCount() {
+		return _maxSVTCount;
 	}
 
 	/**
@@ -410,7 +445,7 @@ public class AccumulationManager
 	 * @return the max counts for any bst strip.
 	 */
 	public int getMaxFullBSTCount() {
-		return _maxFullBSTCount;
+		return _maxSVTFullCount;
 	}
 
 	/**
@@ -543,6 +578,11 @@ public class AccumulationManager
 		AdcHitList htccList = HTCC2.getInstance().updateAdcList();
 		accumHTCC(htccList);
 		
+		//ltcc data
+		AdcHitList ltccList = LTCC.getInstance().updateAdcList();
+		accumLTCC(ltccList);
+
+		
 		// dc data
 		DCTdcHitList dclist = DC.getInstance().updateTdcAdcList();
 		accumDC(dclist);
@@ -561,51 +601,52 @@ public class AccumulationManager
 		accumAllEC(allEClist);
 
 
-		//bst
-		int hitCount = BST.hitCount();
-		if (hitCount > 0) {
-			int bstsector[] = BST.sector();
-			int bstlayer[] = BST.layer();
-			int bststrip[] = BST.strip();
-			
-			for (int i = 0; i < hitCount; i++) {
-				BSTxyPanel panel = CentralXYView.getPanel(bstlayer[i],
-						bstsector[i]);
-				if (panel != null) {
-					int lay0 = bstlayer[i] - 1;
-					int sect0 = bstsector[i] - 1;
-					int strip0 = bststrip[i] - 1;
-					try {
-						_BSTAccumulatedData[lay0][sect0] += 1;
-						_maxBSTCount = Math.max(
-								_BSTAccumulatedData[lay0][sect0],
-								_maxBSTCount);
-
-						if (strip0 >= 0) {
-							_BSTFullAccumulatedData[lay0][sect0][strip0] += 1;
-							_maxFullBSTCount = Math.max(
-									_BSTFullAccumulatedData[lay0][sect0][strip0],
-									_maxFullBSTCount);
-						}
-
-					} catch (ArrayIndexOutOfBoundsException e) {
-						String msg = String.format(
-								"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
-								_eventManager.getEventNumber(),
-								bstlayer[i],
-								bstsector[i],
-								bststrip[i]);
-						Log.getInstance().warning(msg);
-						System.err.println(msg);
-					}
-
-				}
-			} // for on hits
-		} //hitcount > 0
-		
+		//SVT
+		AdcHitList svtList = SVT.getInstance().updateAdcList();
+		accumSVT(svtList);
 
 	}
 	
+	//accumulate svt
+	private void accumSVT(AdcHitList list) {
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+
+		for (AdcHit hit : list) {
+			SVTxyPanel panel = CentralXYView.getPanel(hit.layer,
+					hit.sector);
+			if (panel != null) {
+				int lay0 = hit.layer - 1;
+				int sect0 = hit.sector - 1;
+				int strip0 = hit.component - 1;
+				try {
+					_SVTAccumulatedData[lay0][sect0] += 1;
+					_maxSVTCount = Math.max(
+							_SVTAccumulatedData[lay0][sect0],
+							_maxSVTCount);
+
+					if (strip0 >= 0) {
+						_SVTFullAccumulatedData[lay0][sect0][strip0] += 1;
+						_maxSVTFullCount = Math.max(
+								_SVTFullAccumulatedData[lay0][sect0][strip0],
+								_maxSVTFullCount);
+					}
+
+				} catch (ArrayIndexOutOfBoundsException e) {
+					String msg = String.format(
+							"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
+							_eventManager.getEventNumber(),
+							hit.layer,
+							hit.sector,
+							hit.component);
+					Log.getInstance().warning(msg);
+				}
+
+			}
+		}
+	}
+
 	//accumulate ftcal
 	private void accumFTCAL(AdcHitList list) {
 		if ((list == null) || list.isEmpty()) {
@@ -639,6 +680,38 @@ public class AccumulationManager
 
 					} catch (ArrayIndexOutOfBoundsException e) {
 						String msg = String.format("HTCC index out of bounds. Event# %d sect %d ring %d half %d",
+								_eventManager.getEventNumber(), hit.sector, hit.layer, hit.component);
+						Log.getInstance().warning(msg);
+						System.err.println(msg);
+					}
+				}
+			}
+		}
+	}
+	
+	//accumulate ltcc
+	private void accumLTCC(AdcHitList list) {
+		if ((list == null) || list.isEmpty()) {
+			return;
+		}
+
+		for (AdcHit hit : list) {
+			if (hit != null) {
+				int sect0 = hit.sector - 1; // make 0 based
+				
+				// argggh opposite order from HTCC
+				int half0 = hit.layer - 1; // make 0 based
+				int ring0 = hit.component - 1; // make 0 based
+
+				if (sect0 >= 0) {
+					try {
+						_LTCCAccumulatedData[sect0][half0][ring0] += 1;
+						
+						_maxLTCCCount = Math.max(_LTCCAccumulatedData[sect0][half0][ring0],
+								_maxLTCCCount);
+
+					} catch (ArrayIndexOutOfBoundsException e) {
+						String msg = String.format("LTCC index out of bounds. Event# %d sect %d ring %d half %d",
 								_eventManager.getEventNumber(), hit.sector, hit.layer, hit.component);
 						Log.getInstance().warning(msg);
 						System.err.println(msg);
@@ -814,9 +887,12 @@ public class AccumulationManager
 		// int g[] = { 224, 252, 255, 255, 255, 165, 69, 0, 0 };
 		// int b[] = { 230, 0, 0, 47, 0, 0, 0, 0, 0 };
 
-		int r[] = { 240, 176, 124, 173, 255, 255, 255, 255, 139 };
-		int g[] = { 248, 224, 255, 255, 255, 165, 69, 0, 0 };
-		int b[] = { 255, 230, 0, 47, 0, 0, 0, 0, 0 };
+//		int r[] = { 240, 176, 124, 173, 255, 255, 255, 255, 139 };
+		int r[] = { 0, 173, 255, 255, 255, 255, 139 };
+//		int g[] = { 248, 224, 255, 255, 255, 165, 69, 0, 0 };
+		int g[] = { 127, 255, 255, 165, 69, 0, 0 };
+	//	int b[] = { 255, 230, 0, 47, 0, 0, 0, 0, 0 };
+		int b[] = { 0, 47, 0, 0, 0, 0, 0 };
 
 		int n = 8;
 

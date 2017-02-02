@@ -19,14 +19,17 @@ import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.DataDrawSupport;
+import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
@@ -114,31 +117,34 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	// only called in single event mode
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		drawBSTAccumulatedHits(g, container);
+		drawSVTAccumulatedHits(g, container);
 	//	drawMicroMegasAccumulateHitsHits(g, container);
 		drawCTOFAccumulatedHits(g, container);
 	}
 
 	
 	// draw accumulated BST hits (panels)
-	private void drawBSTAccumulatedHits(Graphics g, IContainer container) {
+	private void drawSVTAccumulatedHits(Graphics g, IContainer container) {
 		// panels
 
-		int maxHit = AccumulationManager.getInstance().getMaxBSTCount();
+		int maxHit = AccumulationManager.getInstance().getMaxSVTCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		// first index is layer 0..7, second is sector 0..23
 		int bstData[][] = AccumulationManager.getInstance()
-				.getAccumulatedBSTData();
+				.getAccumulatedSVTData();
+		
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
-				BSTxyPanel panel = CentralXYView.getPanel(lay0 + 1, sect0 + 1);
+				SVTxyPanel panel = CentralXYView.getPanel(lay0 + 1, sect0 + 1);
 
 				if (panel != null) {
 					int hitCount = bstData[lay0][sect0];
+					
+//					System.err.println("SVT layer: " + (lay0+1) +  " sect: " + (sect0+0) + "   hit count " + hitCount);
 
 					double fract;
 					if (_view.isSimpleAccumulatedMode()) {
@@ -152,6 +158,9 @@ public class CentralXYHitDrawer implements IDrawable {
 							.getColor(fract);
 					_view.drawSVTPanel((Graphics2D) g, container, panel, color);
 
+				}
+				else {
+					System.err.println("Got a null panel in drawSVTAccumulatedHits.");
 				}
 			}
 		}
@@ -194,7 +203,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
-		drawBSTHitsSingleMode(g, container);
+		drawSVTHitsSingleMode(g, container);
 		drawMicroMegasHitsSingleMode(g, container);
 		drawCTOFSingleHitsMode(g, container);
 	}
@@ -247,115 +256,149 @@ public class CentralXYHitDrawer implements IDrawable {
 		} // hitcount > 0
 	}
 
+	
+	private Color baseColor = new Color(255, 0, 0, 60);
 	// draw gemc simulated hits single event mode
-	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
-
-		int hitCount = BST.hitCount();
-		if (hitCount > 0) {
-
-			int bstsector[] = BST.sector();
-			int bstlayer[] = BST.layer();
-			int bststrip[] = BST.strip();
-
-			Shape oldClip = g.getClip();
-			Graphics2D g2 = (Graphics2D) g;
+	private void drawSVTHitsSingleMode(Graphics g, IContainer container) {
+		
+		AdcHitList hits = SVT.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
 			
-			// panels
-			for (int i = 0; i < hitCount; i++) {
-				
-				//HACK GEO SECTOR DOESN"T MATCH REAL
-				//TODO Undo hack when geometry fixed
-				
-				int superlayer = (bstlayer[i] - 1) / 2;
-                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
-				if (hackSect == 0) hackSect = numSect;
-				
-				
-				BSTxyPanel panel = CentralXYView.getPanel(bstlayer[i],
-						hackSect);
-				
-//				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
-//						bstsector[i]);
-				
-				if (panel != null) {
-					_view.drawSVTPanel(g2, container, panel, Color.red);
-				}
-			} // for on hits
+//			Shape oldClip = g.getClip();
+			Graphics2D g2 = (Graphics2D) g;
 
-			// desginate the hits by strip midpoints?
-			if (_view.showStripMidpoints()) {
-				// System.err.println("DISPLAY MIDPOINTS");
-				Point pp = new Point();
-				for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-					// covert all to zero based indices
-					int sector = bstsector[hitIndex] - 1;
-					int complayer = bstlayer[hitIndex];
-					int superlayer = (complayer - 1) / 2;
-					int layer = (complayer - 1) % 2;
-					int strip = bststrip[hitIndex] - 1;
-
-					if ((strip > 255) || (strip < 0)) {
-						Log.getInstance()
-								.warning("In BST dgtz data, bad strip Id:"
-										+ bststrip[hitIndex]);
-					}
-					else {
-						// System.err.println("Drawing strip midpoint ");
-						Point2D.Double wp = BSTGeometry.getStripMidpoint(sector,
-								superlayer, layer, strip);
-
-						container.worldToLocal(pp, 10 * wp.x, 10 * wp.y);
-
-						SymbolDraw.drawUpTriangle(g2, pp.x, pp.y, 3,
-								X11Colors.getX11Color("Dark Green"),
-								X11Colors.getX11Color("Aquamarine"));
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					//HACK GEO SECTOR DOESN"T MATCH REAL
+					//TODO Undo hack when geometry fixed
+					
+					int superlayer = (hit.layer - 1) / 2;
+	                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+					int hackSect = (hit.sector + (numSect/2)) % numSect;
+					if (hackSect == 0) hackSect = numSect;
+					
+					SVTxyPanel panel = CentralXYView.getPanel(hit.layer,
+							hackSect);
+					
+					if (panel != null) {
+						_view.drawSVTPanel(g2, container, panel, baseColor);
+						_view.drawSVTPanel(g2, container, panel, hits.adcColor(hit));
+	//					_view.drawSVTPanel(g2, container, panel, Color.red);
 					}
 
-					// System.out.println("sect " + sector + " supl " +
-					// superlayer + " lay " + layer + " strip " + strip);
+
 				}
 			}
+			
+//			g.setClip(oldClip);
+		}
 
-			// draw GEMC nearest x and y
-
-			if (_view.showMcTruth()) {
-				int pid[] = BST.pid();
-				double avgX[] = BST.avgX();
-				double avgY[] = BST.avgY();
-				if (avgX != null) {
-
-					Rectangle sr = container.getInsetRectangle();
-					g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-
-					Point p1 = new Point();
-					Point2D.Double wp1 = new Point2D.Double();
-					Color default_fc = Color.red;
-
-					Stroke oldStroke = g2.getStroke();
-					g2.setStroke(CedXYView.stroke);
-
-					for (int i = 0; i < avgX.length; i++) {
-						Color fc = default_fc;
-						if (pid != null) {
-							LundId lid = LundSupport.getInstance().get(pid[i]);
-							if (lid != null) {
-								fc = lid.getStyle().getFillColor();
-							}
-						}
-						g2.setColor(fc);
-
-						wp1.setLocation(avgX[i], avgY[i]);
-						container.worldToLocal(p1, wp1);
-
-						DataDrawSupport.drawGemcHit(g, p1);
-					}
-					g2.setStroke(oldStroke);
-				} // avgx != null
-			} // show mc truth
-
-			g.setClip(oldClip);
-		} // hotcount > 0
+//		int hitCount = BST.hitCount();
+//		if (hitCount > 0) {
+//
+//			int bstsector[] = BST.sector();
+//			int bstlayer[] = BST.layer();
+//			int bststrip[] = BST.strip();
+//
+//			Shape oldClip = g.getClip();
+//			Graphics2D g2 = (Graphics2D) g;
+//			
+//			// panels
+//			for (int i = 0; i < hitCount; i++) {
+//				
+//				//HACK GEO SECTOR DOESN"T MATCH REAL
+//				//TODO Undo hack when geometry fixed
+//				
+//				int superlayer = (bstlayer[i] - 1) / 2;
+//                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+//				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
+//				if (hackSect == 0) hackSect = numSect;
+//				
+//				
+//					SVTxyPanel panel = CentralXYView.getPanel(bstlayer[i],
+//						hackSect);
+//								
+////				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
+////						bstsector[i]);
+//				
+//				if (panel != null) {
+//					_view.drawSVTPanel(g2, container, panel, Color.red);
+//				}
+//			} // for on hits
+//
+//			// desginate the hits by strip midpoints?
+//			if (_view.showStripMidpoints()) {
+//				// System.err.println("DISPLAY MIDPOINTS");
+//				Point pp = new Point();
+//				for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
+//					// covert all to zero based indices
+//					int sector = bstsector[hitIndex] - 1;
+//					int complayer = bstlayer[hitIndex];
+//					int superlayer = (complayer - 1) / 2;
+//					int layer = (complayer - 1) % 2;
+//					int strip = bststrip[hitIndex] - 1;
+//
+//					if ((strip > 255) || (strip < 0)) {
+//						Log.getInstance()
+//								.warning("In BST dgtz data, bad strip Id:"
+//										+ bststrip[hitIndex]);
+//					}
+//					else {
+//						// System.err.println("Drawing strip midpoint ");
+//						Point2D.Double wp = BSTGeometry.getStripMidpoint(sector,
+//								superlayer, layer, strip);
+//
+//						container.worldToLocal(pp, 10 * wp.x, 10 * wp.y);
+//
+//						SymbolDraw.drawUpTriangle(g2, pp.x, pp.y, 3,
+//								X11Colors.getX11Color("Dark Green"),
+//								X11Colors.getX11Color("Aquamarine"));
+//					}
+//
+//					// System.out.println("sect " + sector + " supl " +
+//					// superlayer + " lay " + layer + " strip " + strip);
+//				}
+//			}
+//
+//			// draw GEMC nearest x and y
+//
+//			if (_view.showMcTruth()) {
+//				int pid[] = BST.pid();
+//				double avgX[] = BST.avgX();
+//				double avgY[] = BST.avgY();
+//				if (avgX != null) {
+//
+//					Rectangle sr = container.getInsetRectangle();
+//					g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+//
+//					Point p1 = new Point();
+//					Point2D.Double wp1 = new Point2D.Double();
+//					Color default_fc = Color.red;
+//
+//					Stroke oldStroke = g2.getStroke();
+//					g2.setStroke(CedXYView.stroke);
+//
+//					for (int i = 0; i < avgX.length; i++) {
+//						Color fc = default_fc;
+//						if (pid != null) {
+//							LundId lid = LundSupport.getInstance().get(pid[i]);
+//							if (lid != null) {
+//								fc = lid.getStyle().getFillColor();
+//							}
+//						}
+//						g2.setColor(fc);
+//
+//						wp1.setLocation(avgX[i], avgY[i]);
+//						container.worldToLocal(p1, wp1);
+//
+//						DataDrawSupport.drawGemcHit(g, p1);
+//					}
+//					g2.setStroke(oldStroke);
+//				} // avgx != null
+//			} // show mc truth
+//
+//			g.setClip(oldClip);
+//		} // hitcount > 0
 
 	}
 

@@ -41,7 +41,7 @@ import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
@@ -114,11 +114,11 @@ public class CentralZView extends CedView implements ChangeListener {
 	}
 
 	/**
-	 * Create a BSTzView object
+	 * Create a SVTzView object
 	 * 
 	 * @return the new view
 	 */
-	public static CentralZView createBSTzView() {
+	public static CentralZView createCentralZView() {
 		CentralZView view = null;
 
 		// set to a fraction of screen
@@ -149,7 +149,7 @@ public class CentralZView extends CedView implements ChangeListener {
 						+ ControlPanel.PHI_SLIDER_BIG + ControlPanel.FIELDLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
-						+ DisplayBits.BSTRECONS_CROSSES + DisplayBits.MCTRUTH
+						+ DisplayBits.SVTRECONS_CROSSES + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
 
@@ -336,13 +336,13 @@ public class CentralZView extends CedView implements ChangeListener {
 
 	// draw the panels
 	private void drawPanels(Graphics g, IContainer container) {
-		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
+		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return;
 		}
 
 		// set the perp distance
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 			Point2D.Double avgXY = panel.getXyAverage();
 			double perp = avgXY.y * _cosphi - avgXY.x * _sinphi;
 			panel.setPerp(perp);
@@ -371,7 +371,7 @@ public class CentralZView extends CedView implements ChangeListener {
 		CentralSupport.markPanelHits(this, panels);
 
 		int index = 0;
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 
 			int alpha = 10 + index / 3;
 			Color col = new Color(128, 128, 128, alpha);
@@ -391,7 +391,7 @@ public class CentralZView extends CedView implements ChangeListener {
 		g2.setClip(oldClip);
 	}
 
-	private WorldPolygon[] getFromPanel(BSTxyPanel panel) {
+	private WorldPolygon[] getFromPanel(SVTxyPanel panel) {
 
 		WorldPolygon polys[] = new WorldPolygon[3];
 
