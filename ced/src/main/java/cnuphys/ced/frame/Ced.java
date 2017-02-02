@@ -109,7 +109,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.95";
+	private static final String _release = "build 0.99.96";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -138,8 +138,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ClasIoMonteCarloView _monteCarloView;
 	private ClasIoReconEventView _reconEventView;
 	private ClasIoEventView _eventView;
-	private CentralXYView _bstXyView;
-	private CentralZView _bstZView;
+	private CentralXYView _centralXYView;
+	private CentralZView _centralZView;
 	private FTCalXYView _ftcalXyView;
 	private DCXYView _dcXyView;
 	private ProjectedDCView _projectedDCView;
@@ -222,8 +222,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			
 	    	_virtualView.moveTo(_allDCView, 3);
 			_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
-			_virtualView.moveTo(_bstXyView, 2, VirtualView.BOTTOMLEFT);
-			_virtualView.moveTo(_bstZView, 2, VirtualView.UPPERRIGHT);
+			_virtualView.moveTo(_centralXYView, 2, VirtualView.BOTTOMLEFT);
+			_virtualView.moveTo(_centralZView, 2, VirtualView.UPPERRIGHT);
 
 			// note no constraint means "center"
 			_virtualView.moveTo(_dcXyView, 7);
@@ -297,10 +297,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_allDCView = AllDCView.createAllDCView();
 
 			// add a bstZView
-			_bstZView = CentralZView.createCentralZView();
+			_centralZView = CentralZView.createCentralZView();
 
 			// add a bstXYView
-			_bstXyView = CentralXYView.createCentralXYView();
+			_centralXYView = CentralXYView.createCentralXYView();
 
 			// add a ftcalxyYView
 			_ftcalXyView = FTCalXYView.createFTCalXYView();

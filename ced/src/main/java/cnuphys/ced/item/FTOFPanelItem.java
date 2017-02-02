@@ -23,6 +23,7 @@ import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
+import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
 
@@ -377,6 +378,7 @@ public class FTOFPanelItem extends PolygonItem {
 						feedbackStrings
 								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 					}
+					feedbackStrings.add("$Orange Red$paddle length " + FTOFGeometry.getLength(_ftofPanel.getPanelType(), index) + " cm");
 					
 					break;
 				} // path contains wp
