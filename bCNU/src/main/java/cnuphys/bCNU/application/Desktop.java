@@ -98,8 +98,6 @@ public final class Desktop extends JDesktopPane {
 			}
 		}
 
-		// get the configuration properties
-		loadConfigurationFile();
 	}
 
 	/**

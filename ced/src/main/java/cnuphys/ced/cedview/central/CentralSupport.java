@@ -5,7 +5,7 @@ import java.util.List;
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 
 public class CentralSupport {
 
@@ -15,13 +15,13 @@ public class CentralSupport {
 	 * @param panels
 	 *            the list of panels
 	 */
-	public static void markPanelHits(CedView view,  List<BSTxyPanel> panels) {
+	public static void markPanelHits(CedView view,  List<SVTxyPanel> panels) {
 		
 		if (panels == null) {
 			return;
 		}
 
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 			if (panel != null) {
 				panel.hit[0] = false;
 				panel.hit[1] = false;
@@ -47,7 +47,7 @@ public class CentralSupport {
 		if ((bstsector != null) && (bstlayer != null)) {
 			int len = (bstsector == null) ? 0 : bstsector.length;
 			for (int i = 0; i < len; i++) {
-				for (BSTxyPanel panel : panels) {
+				for (SVTxyPanel panel : panels) {
 
 					if ((panel.getLayer() == bstlayer[i]) && (panel.getSector() == bstsector[i])) {
 
@@ -68,8 +68,6 @@ public class CentralSupport {
 				}
 			}
 		}
-		
-
 
 	} //markPanelHits
 

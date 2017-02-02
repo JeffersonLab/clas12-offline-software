@@ -12,6 +12,7 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -32,7 +33,7 @@ public class SectorLTCCItem extends PolygonItem {
 	// sector 1-based 1..6
 	private int _sector;
 
-	// 1-based ring 1..4
+	// 1-based ring 1..18
 	private int _ring;
 	
 	// 1-based half, 1..2
@@ -125,6 +126,29 @@ public class SectorLTCCItem extends PolygonItem {
 		
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
+		int maxHit = AccumulationManager.getInstance().getMaxLTCCCount();
+		if (maxHit < 1) {
+			return;
+		}
+
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedLTCCData();
+
+		//arggh opposite of htcc
+		int hit = hits[_sector - 1][_half - 1][_ring - 1];
+
+		double fract;
+		if (_view.isSimpleAccumulatedMode()) {
+			fract = ((double) hit) / maxHit;
+		} else {
+			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
+		}
+
+		Color color = AccumulationManager.getInstance().getColor(fract);
+
+		g.setColor(color);
+		g.fillPolygon(_lastDrawnPolygon);
+		g.setColor(Color.black);
+		g.drawPolygon(_lastDrawnPolygon);
 	}
 
 	/**

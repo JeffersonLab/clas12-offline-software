@@ -41,19 +41,21 @@ import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.lund.X11Colors;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class CentralXYView extends CedXYView {
 
-	private BSTxyPanel _closestPanel;
+	private SVTxyPanel _closestPanel;
 
-	private static Color _panelColors[] = { Color.black, Color.darkGray };
+	private static Color _panelColors[] = { X11Colors.getX11Color("sky blue"),
+			X11Colors.getX11Color("light blue") };
 
 	// the CND xy polygons
 	CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
@@ -82,7 +84,7 @@ public class CentralXYView extends CedXYView {
 	private CentralXYHitDrawer _hitDrawer;
 
 	/**
-	 * Create a BST View
+	 * Create a Central detector XY View
 	 * 
 	 * @param keyVals
 	 */
@@ -121,9 +123,9 @@ public class CentralXYView extends CedXYView {
 	}
 
 	/**
-	 * Create a BstXY view
+	 * Create a Central detector XY view
 	 * 
-	 * @return a BSTXy View
+	 * @return a Central detector XY View
 	 */
 	public static CentralXYView createCentralXYView() {
 
@@ -153,8 +155,8 @@ public class CentralXYView extends CedXYView {
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
-						+ DisplayBits.BSTHITS + DisplayBits.MCTRUTH
+				DisplayBits.ACCUMULATION + DisplayBits.SVTRECONS_CROSSES
+						+ DisplayBits.SVTHITS + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
 
@@ -166,7 +168,7 @@ public class CentralXYView extends CedXYView {
 				.setMagnificationDraw(new CentralXYMagDrawer(view));
 
 		// add quick zooms
-		view.addQuickZoom("BST & BMT", -190, -190, 190, 190);
+		view.addQuickZoom("SVT & BMT", -190, -190, 190, 190);
 		return view;
 	}
 
@@ -214,9 +216,9 @@ public class CentralXYView extends CedXYView {
 
 				if (!_eventManager.isAccumulating()) {
 					_swimTrajectoryDrawer.draw(g, container);
-					if (showCosmics()) {
-						drawCosmicTracks(g, container);
-					}
+//					if (showCosmics()) {
+//						drawCosmicTracks(g, container);
+//					}
 					
 					_hitDrawer.draw(g, container);
 
@@ -236,34 +238,34 @@ public class CentralXYView extends CedXYView {
 		getContainer().setAfterDraw(afterDraw);
 	}
 
-	// draw cosmic ray tracks
-	private void drawCosmicTracks(Graphics g, IContainer container) {
-
-
-		Shape oldClip = clipView(g);
-
-		int ids[] = BST.cosmicID();
-		if (ids != null) {
-			double yx_interc[] = BST.cosmicYxInterc();
-			double yx_slope[] = BST.cosmicYxSlope();
-
-			g.setColor(Color.red);
-			Point p1 = new Point();
-			Point p2 = new Point();
-
-			for (int i = 0; i < ids.length; i++) {
-				double y1 = 1000;
-				double y2 = -1000;
-				double x1 = yx_slope[i] * y1 + yx_interc[i];
-				double x2 = yx_slope[i] * y2 + yx_interc[i];
-				container.worldToLocal(p1, x1, y1);
-				container.worldToLocal(p2, x2, y2);
-				g.drawLine(p1.x, p1.y, p2.x, p2.y);
-			}
-		}
-
-		g.setClip(oldClip);
-	}
+//	// draw cosmic ray tracks
+//	private void drawCosmicTracks(Graphics g, IContainer container) {
+//
+//
+//		Shape oldClip = clipView(g);
+//
+//		int ids[] = BST.cosmicID();
+//		if (ids != null) {
+//			double yx_interc[] = BST.cosmicYxInterc();
+//			double yx_slope[] = BST.cosmicYxSlope();
+//
+//			g.setColor(Color.red);
+//			Point p1 = new Point();
+//			Point p2 = new Point();
+//
+//			for (int i = 0; i < ids.length; i++) {
+//				double y1 = 1000;
+//				double y2 = -1000;
+//				double x1 = yx_slope[i] * y1 + yx_interc[i];
+//				double x2 = yx_slope[i] * y2 + yx_interc[i];
+//				container.worldToLocal(p1, x1, y1);
+//				container.worldToLocal(p2, x2, y2);
+//				g.drawLine(p1.x, p1.y, p2.x, p2.y);
+//			}
+//		}
+//
+//		g.setClip(oldClip);
+//	}
 
 	/**
 	 * Get the panel based on the layer and sector
@@ -271,14 +273,14 @@ public class CentralXYView extends CedXYView {
 	 * @param sector 1..24
 	 * @return the panel
 	 */
-	public static BSTxyPanel getPanel(int layer, int sector) {
-		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
+	public static SVTxyPanel getPanel(int layer, int sector) {
+		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return null;
 		}
 
 		synchronized (panels) {
-			for (BSTxyPanel panel : panels) {
+			for (SVTxyPanel panel : panels) {
 				if ((panel.getLayer() == layer) && (panel.getSector() == sector)) {
 					return panel;
 				}
@@ -293,7 +295,7 @@ public class CentralXYView extends CedXYView {
 
 		Shape oldClip = g.getClip();
 
-		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
+		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return;
 		}
@@ -304,7 +306,7 @@ public class CentralXYView extends CedXYView {
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
 		// SVT panels
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 			drawSVTPanel(g2, container, panel,
 					_panelColors[(panel.getSector()) % 2]);
 		}
@@ -332,7 +334,8 @@ public class CentralXYView extends CedXYView {
 
 	// draw one SVT panel
 	public void drawSVTPanel(Graphics2D g2, IContainer container,
-			BSTxyPanel panel, Color color) {
+			SVTxyPanel panel, Color color) {
+		
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
 		Point p1 = new Point();
@@ -364,7 +367,8 @@ public class CentralXYView extends CedXYView {
 			pmid.y = (p1.y + p2.y) / 2;
 //			String s = "" + panel.getSector();
 			//TODO fix HACK
-			String s = "" + svtSectorHack(panel.getLayer(), panel.getSector());
+//			String s = "" + svtSectorHack(panel.getLayer(), panel.getSector());
+			String s = "" +  panel.getSector();
 			extendLine(porig, pmid, 4 + panel.getLayer() / 2, fm.stringWidth(s),
 					fm.getHeight());
 			g2.drawString(s, pmid.x, pmid.y);
@@ -443,7 +447,7 @@ public class CentralXYView extends CedXYView {
 	 * 
 	 * @return the panel closest to the mouse
 	 */
-	protected BSTxyPanel closestPanel() {
+	protected SVTxyPanel closestPanel() {
 		return _closestPanel;
 	}
 
@@ -463,7 +467,7 @@ public class CentralXYView extends CedXYView {
 				feedbackStrings);
 
 		if (!Environment.getInstance().isDragging()) {
-			BSTxyPanel newClosest = getClosest(worldPoint);
+			SVTxyPanel newClosest = getClosest(worldPoint);
 			if (newClosest != _closestPanel) {
 				_closestPanel = newClosest;
 				container.refresh();
@@ -535,18 +539,18 @@ public class CentralXYView extends CedXYView {
 
 		// hits data
 
-		int hitCount = BST.hitCount();
-		if ((_closestPanel != null) && (hitCount > 0)) {
-			Vector<int[]> stripADCData = BST.allStripsForSectorAndLayer(
-					_closestPanel.getSector(), _closestPanel.getLayer());
-			if (!stripADCData.isEmpty()) {
-				for (int sdtdat[] : stripADCData) {
-					fbString("orange",
-							"strip:  " + sdtdat[0] + " adc: " + +sdtdat[1],
-							feedbackStrings);
-				}
-			}
-		}
+//		int hitCount = BST.hitCount();
+//		if ((_closestPanel != null) && (hitCount > 0)) {
+//			Vector<int[]> stripADCData = BST.allStripsForSectorAndLayer(
+//					_closestPanel.getSector(), _closestPanel.getLayer());
+//			if (!stripADCData.isEmpty()) {
+//				for (int sdtdat[] : stripADCData) {
+//					fbString("orange",
+//							"strip:  " + sdtdat[0] + " adc: " + +sdtdat[1],
+//							feedbackStrings);
+//				}
+//			}
+//		}
 
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
@@ -576,16 +580,16 @@ public class CentralXYView extends CedXYView {
 	}
 
 	// get the panel closest to a given point
-	private BSTxyPanel getClosest(Point2D.Double wp) {
-		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
+	private SVTxyPanel getClosest(Point2D.Double wp) {
+		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return null;
 		}
 
-		BSTxyPanel closest = null;
+		SVTxyPanel closest = null;
 		double minDistance = Double.MAX_VALUE;
 
-		for (BSTxyPanel panel : panels) {
+		for (SVTxyPanel panel : panels) {
 			double dist = panel.pointToLineDistance(wp);
 			if (dist < minDistance) {
 				closest = panel;
@@ -604,41 +608,41 @@ public class CentralXYView extends CedXYView {
 	private void getGemcFeedback(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
-		String cstr = "$orange$";
-
-		double x[] = BST.avgX();
-
-		int len = (x == null) ? 0 : x.length;
-		if (len == 0) {
-			feedbackStrings.add(cstr + "No GEMC hits");
-			return;
-		}
-
-		double y[] = BST.avgY();
-		int pid[] = BST.pid();
-		Point p1 = new Point();
-		Point2D.Double wp1 = new Point2D.Double();
-		Rectangle rr = new Rectangle();
-		for (int index = len - 1; index >= 0; index--) {
-
-			wp1.setLocation(x[index], y[index]);
-			container.worldToLocal(p1, wp1);
-			rr.setFrame(p1.x - 3, p1.y - 3, 6, 6);
-
-			if (rr.contains(screenPoint)) {
-				if (pid != null) {
-					LundId lid = LundSupport.getInstance()
-							.get(pid[index]);
-					feedbackStrings.add(cstr + "GEMC pid: " + lid.getName());
-
-					String hitXYstr = cstr + String.format(
-							"GEMC [x,y]: (%-6.2f, %-6.2f)", x[index], y[index]);
-					feedbackStrings.add(hitXYstr);
-				}
-				break;
-			}
-
-		} // end for loop
+//		String cstr = "$orange$";
+//
+//		double x[] = BST.avgX();
+//
+//		int len = (x == null) ? 0 : x.length;
+//		if (len == 0) {
+//			feedbackStrings.add(cstr + "No GEMC hits");
+//			return;
+//		}
+//
+//		double y[] = BST.avgY();
+//		int pid[] = BST.pid();
+//		Point p1 = new Point();
+//		Point2D.Double wp1 = new Point2D.Double();
+//		Rectangle rr = new Rectangle();
+//		for (int index = len - 1; index >= 0; index--) {
+//
+//			wp1.setLocation(x[index], y[index]);
+//			container.worldToLocal(p1, wp1);
+//			rr.setFrame(p1.x - 3, p1.y - 3, 6, 6);
+//
+//			if (rr.contains(screenPoint)) {
+//				if (pid != null) {
+//					LundId lid = LundSupport.getInstance()
+//							.get(pid[index]);
+//					feedbackStrings.add(cstr + "GEMC pid: " + lid.getName());
+//
+//					String hitXYstr = cstr + String.format(
+//							"GEMC [x,y]: (%-6.2f, %-6.2f)", x[index], y[index]);
+//					feedbackStrings.add(hitXYstr);
+//				}
+//				break;
+//			}
+//
+//		} // end for loop
 
 	}
 	

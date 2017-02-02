@@ -53,12 +53,15 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
+import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.HBHits;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.HTCC2;
+import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
@@ -106,7 +109,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.94";
+	private static final String _release = "build 0.99.95";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -241,7 +244,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
 			}
 			Log.getInstance().config("reset views on virtual dekstop");
-//			_virtualView.reportVisibility();
+			
+			//now load configuration
+			Desktop.getInstance().loadConfigurationFile();
+			Desktop.getInstance().configureViews();
 		}
 		_firstTime++;
 	}
@@ -291,7 +297,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_allDCView = AllDCView.createAllDCView();
 
 			// add a bstZView
-			_bstZView = CentralZView.createBSTzView();
+			_bstZView = CentralZView.createCentralZView();
 
 			// add a bstXYView
 			_bstXyView = CentralXYView.createCentralXYView();
@@ -899,6 +905,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		HBHits.getInstance();
 		AllEC.getInstance();
 		HTCC2.getInstance();
+		FTCAL.getInstance();
+		CTOF.getInstance();
+		SVT.getInstance();
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
@@ -906,7 +915,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			@Override
 			public void run() {
 				Ced ced = getInstance();
-				Desktop.getInstance().configureViews();
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
 				splashWindow.writeCachedText();

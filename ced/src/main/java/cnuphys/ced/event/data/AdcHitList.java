@@ -235,6 +235,7 @@ public class AdcHitList extends Vector<AdcHit> {
 			return new Color(255, 0, 0, 30);
 		}
 		if (_maxADC < 1) {
+			System.err.println("Max ADC < 1. That's rarely a good sign.");
 			return Color.black;  //should not happen
 		}
 		

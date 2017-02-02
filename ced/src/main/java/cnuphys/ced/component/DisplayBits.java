@@ -21,7 +21,7 @@ public class DisplayBits {
 	public static final int DC_HB_RECONS_CROSSES = 0100;
 
 	/** bst reconstructed crosses */
-	public static final int BSTRECONS_CROSSES = 0200;
+	public static final int SVTRECONS_CROSSES = 0200;
 
 	/** dc hit based reconstructed crosses */
 	public static final int DC_TB_RECONS_CROSSES = 01000;
@@ -30,7 +30,7 @@ public class DisplayBits {
 	public static final int MAGFIELD = 02000;
 
 	/** midpoints or crosses for BST */
-	public static final int BSTHITS = 04000;
+	public static final int SVTHITS = 04000;
 
 	/** hits FTOF Recons */
 	public static final int FTOFHITS = 010000;
