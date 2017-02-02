@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.base.DataSource;
+import org.jlab.io.base.DataSourceType;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
 
@@ -191,9 +192,24 @@ public class DataSourceProcessor {
             //System.out.println("[DataSourceProcessor] error ---> data source is not set");
             return false;
         }
-        if(dataSource.hasEvent()==false){
+        
+        if(dataSource.hasEvent()==false&&dataSource.getType()==DataSourceType.FILE){
             //System.out.println("[DataSourceProcessor] error ---> data source has no events");
             return false;
+        }
+        
+        if(dataSource.getType()==DataSourceType.STREAM){
+            while(dataSource.hasEvent()==false){
+                dataSource.waitForEvents();
+                if(dataSource.hasEvent()==false){
+                    System.out.println("[data source] >>>> waiting for events... sleep timer activated");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(DataSourceProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
         }
         
         Long st = System.currentTimeMillis();

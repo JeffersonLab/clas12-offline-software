@@ -70,6 +70,14 @@ public class CodaEventDecoder {
         for(EvioNode node : cbranch.getNodes()){ 
             //System.out.println(" analyzing tag = " + node.getTag());      
             
+            if(node.getTag()==57617){
+                //  This is regular integrated pulse mode, used for FTOF
+                // FTCAL and EC/PCAL
+                //return this.getDataEntries_57602(crate, node, event);
+                return this.getDataEntries_57617(crate, node, event);
+                //return this.getDataEntriesMode_7(crate,node, event);
+            }
+            
             if(node.getTag()==57602){
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
@@ -142,6 +150,76 @@ public class CodaEventDecoder {
             if(branch.getTag()==tag) return branch;
         }
         return null;
+    }
+    /**
+     * SVT decoding
+     * @param crate
+     * @param node
+     * @param event
+     * @return 
+     */
+    public ArrayList<DetectorDataDgtz>  getDataEntries_57617(Integer crate, EvioNode node, EvioDataEvent event){
+        ArrayList<DetectorDataDgtz>  rawdata = new ArrayList<DetectorDataDgtz>();
+        
+        if(node.getTag()==57617){
+            try {
+                ByteBuffer     compBuffer = node.getByteData(true);
+                CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());                
+                List<DataType> cdatatypes = compData.getTypes();
+                List<Object>   cdataitems = compData.getItems();
+                int  totalSize = cdataitems.size();
+                //ArrayList<EvioRawDataBank> bankArray = new ArrayList<EvioRawDataBank>();
+                int  position  = 0;
+                while( (position + 4) < totalSize){
+                    Byte    slot = (Byte)     cdataitems.get(position);
+                    Integer trig = (Integer)  cdataitems.get(position+1);
+                    Long    time = (Long)     cdataitems.get(position+2);
+                    //EvioRawDataBank  dataBank = new EvioRawDataBank(crate, slot.intValue(),trig,time);
+                    Integer nchannels = (Integer) cdataitems.get(position+3);
+                    int counter  = 0;
+                    position = position + 4;
+                    while(counter<nchannels){
+                        //System.err.println("Position = " + position + " type =  "
+                        //+ cdatatypes.get(position));
+                        Byte   half    = (Byte) cdataitems.get(position);
+                        Byte   channel = (Byte) cdataitems.get(position+1);
+                        Byte   tdc     = (Byte) cdataitems.get(position+2);
+                        //Short   adc     = (Short)  cdataitems.get(position+3);
+                        Byte   adc     = (Byte)  cdataitems.get(position+3);
+                        
+                        int halfWord = DataUtils.getIntFromByte(half);
+                        int   chipID = DataUtils.getInteger(halfWord, 0, 2);
+                        int   halfID = DataUtils.getInteger(halfWord, 3, 3);
+                        
+                        Integer channelKey = (half<<8)|channel;
+                        
+                        //System.err.println( "CHIP = " + chipID + " HALF = " + halfID + "  CHANNEL = " + channel + " KEY = " + channelKey  );
+                        //dataBank.addChannel(channelKey);
+                        //dataBank.addData(channelKey, new RawData(channelKey,tdc,adc));
+                        //int channelID = chipID*10000 + halfID*1000 + channel;
+                        int channelID = halfID*10000 + chipID*1000 + channel;
+                        position += 4;
+                        counter++;
+                        DetectorDataDgtz entry = new DetectorDataDgtz(crate,slot,channelID);
+                        ADCData adcData = new ADCData();
+                        adcData.setIntegral(adc);
+                        adcData.setPedestal( (short) 0);
+                        adcData.setTimeWord(tdc);
+                        entry.addADC(adcData);
+                        //RawDataEntry  entry = new RawDataEntry(crate,slot,channelKey);
+                        //entry.setSVT(half, channel, tdc, adc);
+                        rawdata.add(entry);
+                    }
+                    //bankArray.add(dataBank);
+                }
+                
+            } catch (EvioException ex) {
+                //Logger.getLogger(EvioRawDataSource.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IndexOutOfBoundsException ex){
+                //System.out.println("[ERROR] ----> ERROR DECODING COMPOSITE DATA FOR ONE EVENT");
+            }
+        }
+        return rawdata;
     }
     /**
      * decoding bank in Mode 1 - full ADC pulse.

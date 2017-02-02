@@ -2,6 +2,7 @@ package org.jlab.utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileUtils {
 
@@ -25,6 +26,32 @@ public class FileUtils {
             }
         }
         return file_list;
+    }
+    
+    public static List<String> dirListStartsWith(File folder, String starts)
+    {
+        List<String> file_list = new ArrayList<String>();
+        for (File f : folder.listFiles())
+        {
+            if (f.isDirectory())
+            {
+                //file_list.addAll(FileUtils.dirListStartsWith(folder, starts));
+            }
+            else
+            {          
+                if (f.getName().startsWith(starts)==true)
+                {
+                    file_list.add(f.getAbsolutePath());
+                }
+            }
+        }
+        return file_list;
+    }
+    
+    public static List<String> dirListStartsWith(String dir, String starts){
+        File f = new File(dir);
+        if(f==null) return new ArrayList<String>();
+        return FileUtils.dirListStartsWith(f, starts);
     }
     
     public static ArrayList<String> filesInFolder(File folder, String ext, ArrayList<String> ignore_prefixes)

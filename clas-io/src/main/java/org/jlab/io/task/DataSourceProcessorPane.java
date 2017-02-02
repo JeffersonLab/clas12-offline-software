@@ -26,9 +26,12 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
+import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoRingSource;
+import org.jlab.io.ui.ConnectionDialog;
+import org.jlab.io.ui.DialogUtilities;
 
 /**
  *
@@ -229,6 +232,20 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         if(e.getActionCommand().compareTo("PlayNext")==0){
             this.dataProcessor.processNextEvent();
         }
+        if(e.getActionCommand().compareTo("OpenFileET")==0){
+            ConnectionDialog dialog = new ConnectionDialog();
+            dialog.setVisible(true);
+            if(dialog.reason()==DialogUtilities.OK_RESPONSE){
+                String ip   = dialog.getIpAddress();
+                String file = dialog.getFileName();
+                EvioETSource source = new EvioETSource(ip);
+                source.open(file);
+                this.dataProcessor.setSource(source);
+                mediaNext.setEnabled(true);
+                mediaPrev.setEnabled(true);
+                mediaPlay.setEnabled(true);
+            }
+        }
         
         if(e.getActionCommand().compareTo("OpenFile")==0){
 
@@ -255,6 +272,8 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 
             }
         }
+        
+        
         if(e.getActionCommand().compareTo("ResetListeners")==0){
             System.out.println("\n   >>>> resetting all listeners");
             for(IDataEventListener listener : this.dataProcessor.getEventListeners()){

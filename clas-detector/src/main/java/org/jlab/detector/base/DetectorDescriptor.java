@@ -35,11 +35,12 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     public DetectorDescriptor(String name){
         this.detectorType = DetectorType.getType(name);
     }
-        
+    
     public DetectorDescriptor getCopy(){
         DetectorDescriptor newDesc = new DetectorDescriptor(this.detectorType);
         newDesc.setCrateSlotChannel(this.getCrate(), this.getSlot(), this.getChannel());
         newDesc.setSectorLayerComponent(this.getSector(), this.getLayer(), this.getComponent());
+
         return newDesc;
     }
     

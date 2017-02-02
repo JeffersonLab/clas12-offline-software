@@ -90,7 +90,7 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public boolean hasBank(String name) {
-        return (this.hipoEvent.getGroup(name)!=null);
+        return (this.hipoEvent.hasGroup(name));
     }
 
     public DataBank getBank(String bank_name) {

@@ -237,7 +237,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
         for(int i = 0; i < nindex; i++){
             table.setIndexName(i, typecolumn.get(i).getName());
         }
-        table.show();
+        //table.show();
                 
         
         List< Vector<String> >  tableRows = new ArrayList< Vector<String> >();

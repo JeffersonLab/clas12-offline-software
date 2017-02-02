@@ -43,15 +43,16 @@ public class EngineProcessor {
         
         String[] names = new String[]{
             "DCHB","FTOF","EC","HTCC",
-            //"EBHB" , 
-            "DCTB","EBTB"};
+            "EBHB",
+            "DCTB","EBTB"
+        };
         
         String[] services = new String[]{
             "org.jlab.service.dc.DCHBEngine",
             "org.jlab.service.ftof.FTOFEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
-            //"org.jlab.service.eb.EBEngine",
+            "org.jlab.service.eb.EBEngine",
             "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.eb.EBEngine"
         };

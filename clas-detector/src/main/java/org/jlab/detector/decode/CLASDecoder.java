@@ -191,7 +191,7 @@ public class CLASDecoder {
         for(int i = 0; i < adcDGTZ.size(); i++){
             adcBANK.setByte("crate", i, (byte) adcDGTZ.get(i).getDescriptor().getCrate());
             adcBANK.setByte("slot", i, (byte) adcDGTZ.get(i).getDescriptor().getSlot());
-            adcBANK.setShort("channel", i, (byte) adcDGTZ.get(i).getDescriptor().getChannel());
+            adcBANK.setShort("channel", i, (short) adcDGTZ.get(i).getDescriptor().getChannel());
             adcBANK.setInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
             adcBANK.setFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
             adcBANK.setShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());            
@@ -224,8 +224,9 @@ public class CLASDecoder {
                 
         HipoDataEvent event = (HipoDataEvent) writer.createEvent();
         
-        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","HTCC::adc"};
-        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.FTCAL,DetectorType.HTCC};
+        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","HTCC::adc","SVT::adc"};
+        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.FTCAL,
+            DetectorType.HTCC,DetectorType.SVT};
         
         String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.DC};
