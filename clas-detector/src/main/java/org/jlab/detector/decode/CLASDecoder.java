@@ -280,9 +280,17 @@ public class CLASDecoder {
         return event;
     }
     public HipoDataBank createHeaderBank(DataEvent event, int nrun, int nevent, float torus, float solenoid){
-        HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);        
-        bank.setInt("run",        0, nrun);
-        bank.setInt("event",      0, nevent);
+        HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);
+        
+        int   localRun = this.codaDecoder.getRunNumber();
+        int localEvent = this.codaDecoder.getEventNumber();
+        
+        if(nrun>0){
+            localRun = nrun;
+            localEvent = nevent;
+        }
+        bank.setInt("run",        0, localRun);
+        bank.setInt("event",      0, localEvent);
         bank.setFloat("torus",    0, torus);
         bank.setFloat("solenoid", 0, solenoid);        
         return bank;
@@ -298,7 +306,7 @@ public class CLASDecoder {
         parser.addRequired("-o","output.hipo");
         
         
-        parser.addOption("-r", "10","run number in the header bank");
+        parser.addOption("-r", "-1","run number in the header bank (-1 means use CODA run)");
         parser.addOption("-t", "-0.5","torus current in the header bank");
         parser.addOption("-s", "0.5","solenoid current in the header bank");
         

@@ -28,7 +28,9 @@ import org.jlab.utils.data.DataUtils;
  * @author gavalian
  */
 public class CodaEventDecoder {
-        
+    
+    private int   runNumber = 0;
+    private int eventNumber = 0;    
     
     public CodaEventDecoder(){
         
@@ -54,6 +56,16 @@ public class CodaEventDecoder {
         
         return rawEntries;
     }
+    
+    public int getRunNumber(){
+        return this.runNumber;
+    }
+    
+    public int getEventNumber(){
+        return this.eventNumber;
+    }
+    
+    
     /**
      * returns list of decoded data in the event for given crate.
      * @param event
@@ -70,6 +82,14 @@ public class CodaEventDecoder {
         for(EvioNode node : cbranch.getNodes()){ 
             //System.out.println(" analyzing tag = " + node.getTag());      
             
+            if(node.getTag()==57615){
+                //  This is regular integrated pulse mode, used for FTOF
+                // FTCAL and EC/PCAL
+                //return this.getDataEntries_57602(crate, node, event);
+                this.readHeaderBank(crate, node, event);
+                //return this.getDataEntriesMode_7(crate,node, event);
+            }
+            
             if(node.getTag()==57617){
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
@@ -77,6 +97,7 @@ public class CodaEventDecoder {
                 return this.getDataEntries_57617(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
             }
+            
             
             if(node.getTag()==57602){
                 //  This is regular integrated pulse mode, used for FTOF
@@ -150,6 +171,24 @@ public class CodaEventDecoder {
             if(branch.getTag()==tag) return branch;
         }
         return null;
+    }
+    
+    public void readHeaderBank(Integer crate, EvioNode node, EvioDataEvent event){
+        
+        if(node.getDataTypeObj()==DataType.INT32||node.getDataTypeObj()==DataType.UINT32){
+            int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(false));
+            this.runNumber = intData[3];
+            this.eventNumber = intData[4];
+            /*System.out.println(" set run number and event nubmber = " 
+                    + this.runNumber + "  " + this.eventNumber                    
+            );
+            System.out.println(" EVENT BUFFER LENGTH = " + intData.length);
+            for(int i = 0; i < intData.length; i++){
+                System.out.println( i + " " + intData[i]);
+            }*/
+        } else {
+            System.out.println("[error] can not read header bank");
+        }
     }
     /**
      * SVT decoding
