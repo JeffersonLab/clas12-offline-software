@@ -224,12 +224,14 @@ public class CLASDecoder {
                 
         HipoDataEvent event = (HipoDataEvent) writer.createEvent();
         
-        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","HTCC::adc","SVT::adc"};
+        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc",
+            "FTCAL::adc","HTCC::adc","SVT::adc","CTOF::adc","LTCC::adc"};
         DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.FTCAL,
-            DetectorType.HTCC,DetectorType.SVT};
+            DetectorType.HTCC,DetectorType.SVT,DetectorType.CTOF,DetectorType.LTCC};
         
-        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc"};
-        DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.DC};
+        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","RF::tdc"};
+        DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,
+            DetectorType.DC,DetectorType.CTOF,DetectorType.RF};
         
         for(int i = 0; i < adcBankTypes.length; i++){
             DataBank adcBank = getDataBankADC(adcBankNames[i],adcBankTypes[i]);

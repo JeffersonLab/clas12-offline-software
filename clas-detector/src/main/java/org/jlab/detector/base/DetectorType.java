@@ -28,6 +28,7 @@ public enum DetectorType {
     PCAL      (15, "PCAL"),
     EC        (16, "EC"),
     FTOF      (17, "FTOF"),
+    RF        (21,"RF"),
     ECIN      (110, "ECIN"),
     ECOUT     (111, "ECOUT"),
     ECTOT     (112, "ECTOT"),
