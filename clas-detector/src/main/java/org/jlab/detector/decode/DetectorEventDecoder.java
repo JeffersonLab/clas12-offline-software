@@ -47,6 +47,10 @@ public class DetectorEventDecoder {
         }
     }
     
+    public void setRunNumber(int run){
+        this.runNumber = run;
+    }
+    
     public DetectorEventDecoder(){
         this.initDecoder();
         /*

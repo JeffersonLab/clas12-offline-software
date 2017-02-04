@@ -64,6 +64,10 @@ public class CLASDecoder {
         this.decoderDebugMode = mode;
     }
     
+    public void setRunNumber(int run){
+        this.detectorDecoder.setRunNumber(run);
+    }
+    
     public void initEvent(DataEvent event){
         
         if(event instanceof EvioDataEvent){
@@ -285,6 +289,7 @@ public class CLASDecoder {
         int   localRun = this.codaDecoder.getRunNumber();
         int localEvent = this.codaDecoder.getEventNumber();
         
+        
         if(nrun>0){
             localRun = nrun;
             localEvent = nevent;
@@ -293,6 +298,7 @@ public class CLASDecoder {
         bank.setInt("event",      0, localEvent);
         bank.setFloat("torus",    0, torus);
         bank.setFloat("solenoid", 0, solenoid);        
+        
         return bank;
     }
     
@@ -357,6 +363,10 @@ public class CLASDecoder {
             System.out.println("INPUT LIST SIZE = " + inputList.size());
             int nevents = parser.getOption("-n").intValue();
             int counter = 0;
+            
+            if(nrun>0){
+                decoder.setRunNumber(nrun);
+            }
             
             for(String inputFile : inputList){
                 EvioSource reader = new EvioSource();

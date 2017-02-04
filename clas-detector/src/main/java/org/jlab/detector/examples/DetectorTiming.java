@@ -65,16 +65,19 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
             canvas.divide(1, 5);
             List<H1F> hPCAL = this.getHistograms(dataSet, DetectorType.EC, sector, 1);
             canvas.cd(0);
-            for(H1F h : hPCAL){ canvas.draw(h, "same");}
+            for(H1F h : hPCAL){ 
+                h.setTitle("ADC PULSES [PCAL]");
+                canvas.draw(h, "same");
+            }
             canvas.cd(1);
             List<H1F> hECIN = this.getHistograms(dataSet, DetectorType.EC, sector, 4);
-            for(H1F h : hECIN){ canvas.draw(h, "same");}
+            for(H1F h : hECIN){ h.setTitle("ADC PULSES [EC]"); canvas.draw(h, "same");}
             canvas.cd(2);
             List<H1F> hFTOF1A = this.getHistograms(dataSet, DetectorType.FTOF, sector, 1);
-            for(H1F h : hFTOF1A){ canvas.draw(h, "same");}
+            for(H1F h : hFTOF1A){ h.setTitle("ADC PULSES [FTOF 1A]"); canvas.draw(h, "same");}
             canvas.cd(3);
-            List<H1F> hFTOF1B = this.getHistograms(dataSet, DetectorType.FTOF, sector, 1);
-            for(H1F h : hFTOF1B){ canvas.draw(h, "same");}
+            List<H1F> hFTOF1B = this.getHistograms(dataSet, DetectorType.FTOF, sector, 2);
+            for(H1F h : hFTOF1B){ h.setTitle("ADC PULSES [FTOF 1B]"); canvas.draw(h, "same");}
             canvas.cd(4);
             List<H1F> hHTCC = this.getHistograms(dataSet, DetectorType.HTCC, sector);
             for(H1F h : hHTCC){ canvas.draw(h, "same");}            
@@ -93,6 +96,8 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
                 h.setBinContent(i, array[i]);
             }
             //this.canvasTab.getCanvas("Sector 2").draw(h, "same");
+            h.setTitle("ADC PULSES ["+type.getName()+"]");
+            h.setTitleX("ADC channels (4 ns)");
             histograms.add(h);
             counter++;
         }
@@ -112,6 +117,7 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
             }
             //this.canvasTab.getCanvas("Sector 2").draw(h, "same");
             h.setTitle("ADC PULSES ["+type.getName()+"]");
+            h.setTitleX("ADC channels (4 ns)");
             histograms.add(h);
             counter++;
         }
