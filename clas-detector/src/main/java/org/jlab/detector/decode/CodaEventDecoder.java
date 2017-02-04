@@ -176,16 +176,21 @@ public class CodaEventDecoder {
     public void readHeaderBank(Integer crate, EvioNode node, EvioDataEvent event){
         
         if(node.getDataTypeObj()==DataType.INT32||node.getDataTypeObj()==DataType.UINT32){
-            int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(false));
-            this.runNumber = intData[3];
-            this.eventNumber = intData[4];
-            /*System.out.println(" set run number and event nubmber = " 
-                    + this.runNumber + "  " + this.eventNumber                    
-            );
-            System.out.println(" EVENT BUFFER LENGTH = " + intData.length);
-            for(int i = 0; i < intData.length; i++){
+            try {
+                int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(false));
+                this.runNumber = intData[3];
+                this.eventNumber = intData[4];
+                /*System.out.println(" set run number and event nubmber = " 
+                + this.runNumber + "  " + this.eventNumber                    
+                );
+                System.out.println(" EVENT BUFFER LENGTH = " + intData.length);
+                for(int i = 0; i < intData.length; i++){
                 System.out.println( i + " " + intData[i]);
-            }*/
+                }*/
+            } catch (Exception e) {
+                this.runNumber = 10;
+                this.eventNumber = 1;
+            }
         } else {
             System.out.println("[error] can not read header bank");
         }
