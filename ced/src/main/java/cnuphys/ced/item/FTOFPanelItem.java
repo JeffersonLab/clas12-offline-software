@@ -130,7 +130,7 @@ public class FTOFPanelItem extends PolygonItem {
 
 		if (hits != null) {
 			int sect0 = _sector - 1;
-			for (int paddle0 = 0; paddle0 < hits[0].length; paddle0++) {
+			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
 				int hit = hits[sect0][paddle0];
 				double fract;

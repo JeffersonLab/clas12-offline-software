@@ -111,7 +111,6 @@ public class SectorLTCCItem extends PolygonItem {
 		AdcHitList hits = LTCC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
-				//arggh opposite of htcc
 				if ((hit != null) && (hit.sector == _sector) && (hit.layer == _half) && (hit.component == _ring)) {
 					g.setColor(hits.adcColor(hit));
 					g.fillPolygon(_lastDrawnPolygon);
@@ -133,7 +132,6 @@ public class SectorLTCCItem extends PolygonItem {
 
 		int hits[][][] = AccumulationManager.getInstance().getAccumulatedLTCCData();
 
-		//arggh opposite of htcc
 		int hit = hits[_sector - 1][_half - 1][_ring - 1];
 
 		double fract;
@@ -182,7 +180,7 @@ public class SectorLTCCItem extends PolygonItem {
 						" ring " + _ring + " half " + _half);
 			}
 			else {
-				hit.tdcAdcFeedback("ring " + _ring, "half", feedbackStrings);
+				hit.tdcAdcFeedback("half " + _half, "ring", feedbackStrings);
 			}
 		}		
 	}

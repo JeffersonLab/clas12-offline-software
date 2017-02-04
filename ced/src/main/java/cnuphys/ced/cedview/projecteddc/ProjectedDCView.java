@@ -31,7 +31,15 @@ import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.swim.SwimTrajectory2D;
 
-public class ProjectedDCView extends CedView implements ChangeListener {
+/**
+ * “Projected Drift Chambers” view. 
+ * Instead of the entire detector projected onto a constant phi plane, each superlayer is projected onto a plane perpendicular to its wires. 
+ * This reduces distortion and makes visualization of tracks and segments wrt DOCAs more accurate and, consequently, more useful.
+
+ * @author heddle
+ *
+ */
+public class ProjectedDCView extends CedView implements ISector {
 	
 	//what sector 1..6
 	private int _sector = 1;
@@ -228,17 +236,13 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 	 * Set the sector
 	 * @param sector the new sector
 	 */
+	@Override
 	public void setSector(int sector) {
 		_sector = sector;
 		_wiresDirty = true;
 		getContainer().setDirty(true);
 		getContainer().refresh();
 	}
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-	}
-
 	
 	/**
 	 * Every view should be able to say what sector the current point location
@@ -261,6 +265,7 @@ public class ProjectedDCView extends CedView implements ChangeListener {
 	 * Get the sector 1..6
 	 * @return the sector
 	 */
+	@Override
 	public int getSector() {
 		return _sector;
 	}

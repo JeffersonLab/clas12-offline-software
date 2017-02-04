@@ -14,12 +14,12 @@ import cnuphys.splot.plot.GraphicsUtilities;
 public class SectorSelectorPanel extends JPanel implements ActionListener {
 	
 	//parent view
-	private ProjectedDCView _view;
+	private ISector _view;
 	
 	//the sector buttons
 	private JRadioButton sectorButtons[] = new JRadioButton[6];
 
-	public SectorSelectorPanel(ProjectedDCView view) {
+	public SectorSelectorPanel(ISector view) {
 		_view = view;
 		
 		setLayout(new GridLayout(2, 3));

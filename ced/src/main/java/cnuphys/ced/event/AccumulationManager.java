@@ -668,8 +668,8 @@ public class AccumulationManager
 		for (AdcHit hit : list) {
 			if (hit != null) {
 				int sect0 = hit.sector - 1; // make 0 based
-				int ring0 = hit.layer - 1; // make 0 based
-				int half0 = hit.component - 1; // make 0 based
+				int ring0 = hit.component - 1; // make 0 based
+				int half0 = hit.layer - 1; // make 0 based
 
 				if (sect0 >= 0) {
 					try {
@@ -699,7 +699,6 @@ public class AccumulationManager
 			if (hit != null) {
 				int sect0 = hit.sector - 1; // make 0 based
 				
-				// argggh opposite order from HTCC
 				int half0 = hit.layer - 1; // make 0 based
 				int ring0 = hit.component - 1; // make 0 based
 
