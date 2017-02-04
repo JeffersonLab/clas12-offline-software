@@ -163,17 +163,26 @@ public class FTOFGeometry {
 	}
 	
 	/**
-	 * 
+	 * Chech paddle intersection
+	 * @param superlayer the 0 based superlayer for 1A, 1B, 2
+	 * @param paddleid the 0 based paddle id
 	 * @return if the projected polygon fully intersects the plane
 	 */
-	public static boolean doesProjectedPolyFullyIntersect(int superlayer,
-			int paddleid, 
-			Plane3D projectionPlane) {
-		
-		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(
-				0);
+	public static boolean doesProjectedPolyFullyIntersect(int superlayer, int paddleid, Plane3D projectionPlane) {
+
+		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleid);
-		return GeometryManager.doesProjectedPolyIntersect(paddle, projectionPlane, 6, 4);
+		boolean isects = false;
+
+		try {
+			isects = GeometryManager.doesProjectedPolyIntersect(paddle, projectionPlane, 6, 4);
+		} catch (Exception e) {
+
+			System.err.println("Exception in FTOFGeometry doesProjectedPolyFullyIntersect");
+			System.err.println("panel: " + ftofNames[superlayer] + " paddleID: " + paddleid);
+		}
+
+		return isects;
 	}
 
 	/**
@@ -207,6 +216,20 @@ public class FTOFGeometry {
 		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleId);
 		return paddle.getLength();
+	}
+	
+	/**
+	 * Get an array of all the lengths
+	 * @param superlayer
+	 *            0, 1 or 2 for 1A, 1B, 2
+	 * @return an array of all the paddle lengths
+	 */
+	public static double[] getLengths(int superlayer) {
+		double[] length = new double[numPaddles[superlayer]];
+		for (int i = 0; i < length.length; i++) {
+			length[i] = getLength(superlayer, i);
+		}
+		return length;
 	}
 	
 	public static void main(String arg[]) {

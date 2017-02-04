@@ -9,9 +9,9 @@ public class AdcHit implements Comparable<AdcHit> {
 	//for feedback strings
 	private static final String _fbColor = "$Light Blue$";
 	
-	public byte sector;
-	public byte layer;
-	public short component;
+	public final byte sector;
+	public final byte layer;
+	public final short component;
 	public int adcL = -1;
 	public int adcR = -1;
 	

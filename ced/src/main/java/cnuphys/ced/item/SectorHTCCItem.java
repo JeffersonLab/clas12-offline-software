@@ -108,7 +108,7 @@ public class SectorHTCCItem extends PolygonItem {
 		AdcHitList hits = HTCC2.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
-				if ((hit != null) && (hit.sector == _sector) && (hit.layer == _ring) && (hit.component == _half)) {
+				if ((hit != null) && (hit.sector == _sector) && (hit.layer == _half) && (hit.component == _ring)) {
 					g.setColor(hits.adcColor(hit));
 					g.fillPolygon(_lastDrawnPolygon);
 					g.setColor(Color.black);
@@ -217,15 +217,15 @@ public class SectorHTCCItem extends PolygonItem {
 			AdcHit hit = null;
 			
 			if ((hits != null) && !hits.isEmpty()) {
-				hit = hits.get(_sector, _ring, _half);
+				hit = hits.get(_sector, _half, _ring);
 			}
 			
 			if (hit == null) {
 				feedbackStrings.add(DataSupport.prelimColor + "HTCC sect " + _sector + 
-						" ring " + _ring + " half " + _half);
+						" half (layer) " + _half + " ring (component) " + _ring);
 			}
 			else {
-				hit.tdcAdcFeedback("ring " + _ring, "half", feedbackStrings);
+				hit.tdcAdcFeedback("half " + _half, "ring", feedbackStrings);
 			}
 
 			

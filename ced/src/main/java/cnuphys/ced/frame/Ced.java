@@ -38,6 +38,7 @@ import cnuphys.ced.ced3d.view.ForwardView3D;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
+import cnuphys.ced.cedview.alltof.TOFView;
 import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
@@ -116,6 +117,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	// using 3D?
 	private static boolean _use3D = true;
+	
+	//use experimental code?
+	private static boolean _useExperimental = false;
 
 	// if plugin only, do not create initial detector views
 	private static boolean _pluginOnly;
@@ -150,6 +154,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ForwardView3D _forward3DView;
 	private CentralView3D _central3DView;
 	private FTCalView3D _ftCal3DView;
+	private TOFView _tofView;
 	
 	//sector views
 	private SectorView _sectorView14;
@@ -237,12 +242,17 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(_plotView, 12, VirtualView.BOTTOMLEFT);
 
 			_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
+			_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
 
 			if (_use3D) {
 				_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
 				_virtualView.moveTo(_central3DView, 10, VirtualView.BOTTOMLEFT);
 				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
 			}
+			
+			if (_useExperimental) {
+			}
+			
 			Log.getInstance().config("reset views on virtual dekstop");
 			
 			//now load configuration
@@ -295,6 +305,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			// add an alldc view
 			_allDCView = AllDCView.createAllDCView();
+			
+			_tofView = TOFView.createTOFView();
 
 			// add a bstZView
 			_centralZView = CentralZView.createCentralZView();
@@ -324,6 +336,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				_forward3DView = new ForwardView3D();
 				_central3DView = new CentralView3D();
 				_ftCal3DView = new FTCalView3D();
+			}
+			
+			//Any experimental views?
+			if (_useExperimental) {
 			}
 
 		}
@@ -784,6 +800,16 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	public static boolean use3D() {
 		return _use3D;
 	}
+	
+	/**
+	 * Check whether we use experimental code
+	 * 
+	 * @return <code>true</code> if we use experimental code
+	 */
+	public static boolean useExperimental() {
+		return _useExperimental;
+	}
+
 
 	/**
 	 * Check whether we use Plugins onlyD
@@ -878,6 +904,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 					_use3D = false;
 					System.err.println("Not using 3D");
 				}
+				else if (arg[i].contains("USEEXP")) {
+					_useExperimental = true;
+					System.err.println("Using Experimental code");
+				}
+
 				else if (arg[i].contains("PLUGINONLY")) {
 					_pluginOnly = true;
 					System.err.println("Using Plugins Only");

@@ -9,9 +9,9 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	//for feedback strings
 	private static final String _fbColor = "$Light Coral$";
 	
-	public byte sector;
-	public byte layer;
-	public short component;
+	public final byte sector;
+	public final byte layer;
+	public final short component;
 	public int tdcL = -1;
 	public int tdcR = -1;
 	public int adcL = -1;
