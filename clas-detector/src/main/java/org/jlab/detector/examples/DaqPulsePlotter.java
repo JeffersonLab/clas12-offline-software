@@ -94,8 +94,8 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
         //buttonPane.add(comboDetector);
         //buttonPane.add(comboSector);
         //buttonPane.add(comboLayer);
-        buttonPane.add(new JLabel("Page Number"));
-        buttonPane.add(comboBunch);
+        //buttonPane.add(new JLabel("Page Number"));
+        //buttonPane.add(comboBunch);
         
         //JButton drawButton = new JButton("Draw");
         //drawButton.addActionListener(this);
