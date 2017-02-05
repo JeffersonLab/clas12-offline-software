@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,9 @@ import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
 import org.jlab.detector.view.DetectorView2D;
 import org.jlab.groot.data.H1F;
+import org.jlab.groot.data.IDataSet;
 import org.jlab.groot.graphics.EmbeddedCanvas;
+import org.jlab.groot.graphics.EmbeddedCanvasGroup;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -51,7 +54,9 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     CodaEventDecoder               decoder = new CodaEventDecoder();
     DetectorEventDecoder   detectorDecoder = new DetectorEventDecoder();    
     DataSourceProcessorPane processorPane = null;
-    EmbeddedCanvasTabbed        canvasTab = new EmbeddedCanvasTabbed(true);
+    
+    //EmbeddedCanvasTabbed        canvasTab = new EmbeddedCanvasTabbed(true);
+    EmbeddedCanvasGroup        canvasTab = new EmbeddedCanvasGroup();
     
     JComboBox  comboDetector = null;
     JComboBox  comboSector = null;
@@ -73,7 +78,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
         
         pane = new JPanel();
         pane.setLayout(new BorderLayout());
-        canvasTab.addCanvas("DAQ");
+        //canvasTab.addCanvas("DAQ");
         processorPane = new DataSourceProcessorPane();
         processorPane.setDelay(2);
         
@@ -214,24 +219,24 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
             System.out.println(" plotting type = " + type);
             DetectorCollection<H1F> collection = this.detectorMap.get(type.getDetectorId());
             Set<Integer> components = collection.getComponents(sector, layer);
-            EmbeddedCanvas c = this.canvasTab.getCanvas();
-            c.clear();
-            c.divide(3, 4);
+            //EmbeddedCanvas c = this.canvasTab.getCanvas();
+            //c.clear();
+            //c.divide(3, 4);
             int counter = 0;
             int counterCanvas = 0;
             
             System.out.println("COLLECTION HAS " + collection.getList().size() 
                     + "  COMPONENTS = " + components.size());
             int   bunch = Integer.parseInt(this.comboBunch.getSelectedItem().toString());
+            List<IDataSet> datasetList = new ArrayList<IDataSet>();
             for(Integer key : components){
-                if(counter>=(bunch-1)*this.nDetectorsPerBunch&&counter<(bunch)*this.nDetectorsPerBunch){
-                    c.cd(counterCanvas);
-                    H1F h = collection.get(sector,layer,key);
-                    c.draw(h);
-                    counterCanvas++;
-                }
-                counter++;
+                //c.cd(counterCanvas);
+                H1F h = collection.get(sector,layer,key);
+                datasetList.add(h);
+                //c.draw(h);
             }
+            counter++;
+            this.canvasTab.setData(datasetList);
         }
     }
     
@@ -240,6 +245,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().compareTo("Draw")==0){
+            /*
             String name = this.comboDetector.getSelectedItem().toString();
             int  sector = Integer.parseInt(this.comboSector.getSelectedItem().toString());
             int   layer = Integer.parseInt(this.comboLayer.getSelectedItem().toString());
@@ -248,7 +254,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
             if(this.detectorMap.containsKey(DetectorType.getType(name).getDetectorId())==true){
                 DetectorCollection<H1F> collection = this.detectorMap.get(DetectorType.getType(name).getDetectorId());                
                 Set<Integer> components = collection.getComponents(sector, layer);
-                EmbeddedCanvas c = this.canvasTab.getCanvas();
+                //EmbeddedCanvas c = this.canvasTab.getCanvas();
                 c.clear();
                 c.divide(3, 4);
                 int counter = 0;
@@ -265,7 +271,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
                     }
                     counter++;
                 }
-            }
+            }*/
         }
     }
     
