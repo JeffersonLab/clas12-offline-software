@@ -6,6 +6,7 @@
 package org.jlab.detector.examples;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,14 +17,19 @@ import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.decode.CodaEventDecoder;
 import org.jlab.detector.decode.DetectorDataDgtz;
+import org.jlab.detector.decode.DetectorDecoderView;
 import org.jlab.detector.decode.DetectorEventDecoder;
 import org.jlab.detector.view.DetectorListener;
+import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
+import org.jlab.detector.view.DetectorView2D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
@@ -59,6 +65,10 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     
     int nDetectorsPerBunch = 12;
     
+    
+    DetectorPane2D            detectorView        = null;
+    DetectorDecoderView       detectorDecoderView = null;
+    
     public DaqPulsePlotter(){
         
         pane = new JPanel();
@@ -76,19 +86,45 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
         comboBunch = new JComboBox(this.detectorBunch);
         
         
-        buttonPane.add(comboDetector);
-        buttonPane.add(comboSector);
-        buttonPane.add(comboLayer);
+        //buttonPane.add(comboDetector);
+        //buttonPane.add(comboSector);
+        //buttonPane.add(comboLayer);
+        buttonPane.add(new JLabel("Page Number"));
         buttonPane.add(comboBunch);
         
-        JButton drawButton = new JButton("Draw");
-        drawButton.addActionListener(this);
-        buttonPane.add(drawButton);
+        //JButton drawButton = new JButton("Draw");
+        //drawButton.addActionListener(this);
+        //buttonPane.add(drawButton);
         
-        pane.add(buttonPane,BorderLayout.PAGE_START);                
-        pane.add(canvasTab,BorderLayout.CENTER);
+        pane.add(buttonPane,BorderLayout.PAGE_START);
+        
+        JSplitPane   splitPane = new JSplitPane();
+        
+        detectorView = new DetectorPane2D();
+        detectorView.getView().addDetectorListener(this);
+        this.updateDetectorView();
+        splitPane.setLeftComponent(detectorView);
+        splitPane.setRightComponent(canvasTab);
+        
+        pane.add(splitPane,BorderLayout.CENTER);
+        //pane.add(canvasTab,BorderLayout.CENTER);
         pane.add(processorPane,BorderLayout.PAGE_END);
         this.processorPane.addEventListener(this);
+    }
+   
+    
+    public void updateDetectorView(){
+        
+        for(int sector = 1 ; sector < 7; sector++){
+            List<DetectorShape2D> shapesECAL = DetectorView2D.createSector(DetectorType.EC, sector, 9, Color.yellow, 200, 10);
+            for(DetectorShape2D shape : shapesECAL) { this.detectorView.getView().addShape("CLAS12", shape);}
+            
+            List<DetectorShape2D> shapesFTOF = DetectorView2D.createSector(DetectorType.FTOF, sector, 3, Color.blue, 100, 20);
+            for(DetectorShape2D shape : shapesFTOF) { this.detectorView.getView().addShape("CLAS12", shape);}
+        
+            List<DetectorShape2D> shapesHTCC = DetectorView2D.createSector(DetectorType.HTCC, sector, 2, Color.GREEN, 20, 20);
+            for(DetectorShape2D shape : shapesHTCC) { this.detectorView.getView().addShape("CLAS12", shape);}
+        }
     }
     
     @Override
@@ -166,7 +202,37 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
 
     @Override
     public void processShape(DetectorShape2D shape) {
-        
+        System.out.println(" doing somethig");
+        this.drawSectorLayer(shape.getDescriptor().getType(), 
+                shape.getDescriptor().getSector(), 
+                shape.getDescriptor().getLayer());
+    }
+    
+    public void drawSectorLayer(DetectorType type, int sector, int layer){
+        System.out.println(" looking for type = " + type);
+        if(this.detectorMap.containsKey(type.getDetectorId())==true){
+            System.out.println(" plotting type = " + type);
+            DetectorCollection<H1F> collection = this.detectorMap.get(type.getDetectorId());
+            Set<Integer> components = collection.getComponents(sector, layer);
+            EmbeddedCanvas c = this.canvasTab.getCanvas();
+            c.clear();
+            c.divide(3, 4);
+            int counter = 0;
+            int counterCanvas = 0;
+            
+            System.out.println("COLLECTION HAS " + collection.getList().size() 
+                    + "  COMPONENTS = " + components.size());
+            int   bunch = Integer.parseInt(this.comboBunch.getSelectedItem().toString());
+            for(Integer key : components){
+                if(counter>=(bunch-1)*this.nDetectorsPerBunch&&counter<(bunch)*this.nDetectorsPerBunch){
+                    c.cd(counterCanvas);
+                    H1F h = collection.get(sector,layer,key);
+                    c.draw(h);
+                    counterCanvas++;
+                }
+                counter++;
+            }
+        }
     }
     
     public JPanel getPanel(){return pane;}
@@ -183,6 +249,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
                 DetectorCollection<H1F> collection = this.detectorMap.get(DetectorType.getType(name).getDetectorId());                
                 Set<Integer> components = collection.getComponents(sector, layer);
                 EmbeddedCanvas c = this.canvasTab.getCanvas();
+                c.clear();
                 c.divide(3, 4);
                 int counter = 0;
                 int counterCanvas = 0;
