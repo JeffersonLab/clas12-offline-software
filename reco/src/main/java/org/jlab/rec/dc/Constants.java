@@ -101,14 +101,14 @@ public class Constants {
 	public static final int MAXCLUSSIZE = 14;
 	
 	public static final double MAXCHI2 = 10;
-
-	public static final boolean LAYEREFFS = false;
 	
 	public static final boolean OUTOFTIMEFLAG = true;
 
 	private static boolean T2DGRID ;
 	private static boolean CALIB;
 	private static double TORSCALE;
+	
+	private static boolean runLAYEREFFS = false;
 	
 	// SNR parameters -- can be optimized
 	public static final  int[] SNR_RIGHTSHIFTS = {0,1,2,2,4,4};
@@ -120,7 +120,7 @@ public class Constants {
 
 	public static final boolean useRaster = false;
 
-	public static final double T0 =0;
+	private static double T0 =0;
 	
 	//public static final boolean isCalibrationRun = false;
 	public static final boolean useTimeToDistanceGrid = true;
@@ -187,6 +187,15 @@ public class Constants {
 		CALIB = cALIB;
 	}
 
+	public static final boolean LAYEREFFS() {
+		return runLAYEREFFS;
+	}
+
+
+	public static final void setLAYEREFFS(final boolean le) {
+		runLAYEREFFS = le;
+	}
+
 
 	public static final double getTORSCALE() {
 		return TORSCALE;
@@ -195,5 +204,15 @@ public class Constants {
 
 	public static final void setTORSCALE(double tORSCALE) {
 		TORSCALE = tORSCALE;
+	}
+
+
+	public static final double getT0() {
+		return T0;
+	}
+
+
+	public static final void setT0(double t0) {
+		T0 = t0;
 	}
 }

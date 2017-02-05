@@ -274,7 +274,6 @@ public class ClusterFinder  {
 		for(FittedHit hit : fhits) {
 			if(hit.get_AssociatedClusterID()==-1)
 				continue;
-			//System.out.println("recomposing clusters "+hit.printInfo());
 			HitArray[index][hit.get_AssociatedClusterID()] = hit;
 			hit.updateHitPosition();
 			
@@ -317,10 +316,10 @@ public class ClusterFinder  {
 		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
 				
 		List<FittedCluster> rclusters = RecomposeClusters(fhits);
-		//System.out.println(" Clusters TimeBased Step 1");
-        // for(FittedCluster c : rclusters)
-        //	for(FittedHit h : c)
-        //		System.out.println(h.printInfo());
+	//	System.out.println(" Clusters TimeBased Step 1");
+    //     for(FittedCluster c : rclusters)
+    //    	for(FittedHit h : c)
+    //    		System.out.println(h.printInfo());
         
 		for(FittedCluster clus : rclusters) {
 			// clean them up
@@ -328,18 +327,22 @@ public class ClusterFinder  {
 				FittedCluster cleanClus = ct.SecondariesRemover(clus, cf) ;
 				clus = cleanClus;
 			//}
-			//System.out.println(" Clusters TimeBased Step 2ndaries rem");
-        	//for(FittedHit h : clus)
-        	//	System.out.println(h.printInfo());
+			
 			if(clus==null)
 				continue;
+			
+		//	System.out.println(" Clusters TimeBased Step 2ndaries rem");
+        //	for(FittedHit h : clus)
+        //		System.out.println(h.printInfo());
+        	
 			FittedCluster LRresolvClus = ct.LRAmbiguityResolver(clus, cf);
 			clus = LRresolvClus;
 			if(clus==null)
 				continue;
-			//System.out.println(" Clusters TimeBased Step LR res");
-        	//for(FittedHit h : clus)
-        	//	System.out.println(h.printInfo());
+			
+		//	System.out.println(" Clusters TimeBased Step LR res");
+        //	for(FittedHit h : clus)
+        //		System.out.println(h.printInfo());
         	
 			
 			// resolves segments where there are only single hits in layers thereby resulting in a two-fold LR ambiguity
@@ -447,5 +450,82 @@ public class ClusterFinder  {
 		return true;
 	}
 
+	public EvioDataBank getLayerEfficiencies(List<FittedCluster> fclusters, List<Hit> allhits, ClusterCleanerUtilities ct, ClusterFitter cf, EvioDataEvent event) {
+
+		ArrayList<Hit> clusteredHits = new ArrayList<Hit>();
+		for(FittedCluster fclus : fclusters) {
+			for(int k =0; k< fclus.size(); k++) {
+				clusteredHits.add(fclus.get(k)); 
+			}
+		}
+		int[][][] EffArray = new int[6][6][6]; //6 sectors,  6 superlayers, 6 layers
+		for(int i=0; i<6; i++)
+			for(int j=0; j<6; j++)
+				for(int k=0; k<6; k++)
+					EffArray[i][j][k]=-1;
+		
+		for(int rejLy=1; rejLy<=6; rejLy++) {
+			
+			//fill array of hit
+			this.fillHitArray(clusteredHits, rejLy);		
+			//find clumps of hits
+			List<Cluster> clusters = this.findClumps(clusteredHits, ct);
+			// create cluster list to be fitted
+			List<FittedCluster> selectedClusList =  new ArrayList<FittedCluster>();
 	
+			for(Cluster clus : clusters) {
+				//System.out.println(" I passed this cluster "+clus.printInfo());
+				FittedCluster fclus = new FittedCluster(clus);			
+				selectedClusList.add(fclus);
+				
+			}
+	
+			
+			for(FittedCluster clus : selectedClusList) {
+				if(clus!=null) {
+					
+					int status = 0;
+					//fit
+					cf.SetFitArray(clus, "LC");
+		            cf.Fit(clus, true);
+		            
+					for(Hit hit : allhits) {
+						
+						if(hit.get_Sector()!=clus.get_Sector() || hit.get_Superlayer()!=clus.get_Superlayer() || hit.get_Layer()!=rejLy)
+							continue;
+						
+						double locX = hit.calcLocY(hit.get_Layer(), hit.get_Wire());
+						double locZ = hit.get_Layer();
+						
+						double calc_doca = Math.abs(locX-clus.get_clusterLineFitSlope()*locZ-clus.get_clusterLineFitIntercept());
+						
+						if(calc_doca<2*Math.tan(Math.PI/6.))
+							status =1; //found a hit close enough to the track to assume that the layer is live
+						
+						int sec = clus.get_Sector()-1;
+						int slay = clus.get_Superlayer()-1;
+						int lay = rejLy -1;
+						
+						EffArray[sec][slay][lay] = status;
+						
+					}
+				}
+			}
+		}
+		// now fill the bank
+		int bankSize =6*6*6;
+		EvioDataBank bank =  (EvioDataBank) event.getDictionary().createBank("HitBasedTrkg::LayerEffs",bankSize);
+		int bankEntry = 0;
+		for(int i=0; i<6; i++)
+			for(int j=0; j<6; j++)
+				for(int k=0; k<6; k++) {
+					bank.setInt("sector",bankEntry, i+1);
+					bank.setInt("superlayer",bankEntry, j+1);
+					bank.setInt("layer",bankEntry, k+1);
+					bank.setInt("status", bankEntry,EffArray[i][j][k]);
+					bankEntry++;
+				}
+		return bank;
+		
+	}
 }

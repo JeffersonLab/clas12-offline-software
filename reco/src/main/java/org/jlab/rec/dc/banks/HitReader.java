@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.DCTranslationTable;
 
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
@@ -81,12 +81,14 @@ public class HitReader {
 		int[] wire = new int[rows];
 		int[] tdc = new int[rows];
 		int[] useMChit = new int[rows];
+		double[] T0 = new double[rows];
 		
 		for(int i = 0; i< rows; i++) {
 			sector[i] = bankDGTZ.getByte("sector", i);
 			layer[i] = bankDGTZ.getByte("layer", i);
 			wire[i] = bankDGTZ.getShort("component", i);
-			tdc[i] = bankDGTZ.getInt("TDC", i);		
+			tdc[i] = bankDGTZ.getInt("TDC", i);	
+			//T0[i] = this.getT0(sector[i], layer[i], wire[i], true);
 		}
 		
 		if(event.hasBank("DC::doca")==true) {
@@ -107,7 +109,9 @@ public class HitReader {
 			
 			//if(Constants.isSimulation == false) {
 			if(tdc!=null && tdc.length>0) {
-					smearedTime[i] = (double) tdc[i];
+					smearedTime[i] = (double) tdc[i] ;
+					if(smearedTime[i]<0)
+						smearedTime[i] = 1;
 			} 
 			
 				superlayerNum[i]=(layer[i]-1)/6 + 1;
@@ -134,7 +138,20 @@ public class HitReader {
 
 		}
 		
-
+/*
+	private double getT0(int sector, int layer, int wire, boolean use) {
+		int channel = DCTranslationTable.reverseTable.get(sector,layer,wire).getChannel();
+		int slot = DCTranslationTable.reverseTable.get(sector,layer,wire).getSlot();
+		
+		int connector = (int)(channel/16)+1;
+	    int icableID = (connector-1)*20+slot-1; //20 slots
+		int cable_id = DCTranslationTable.cableid[icableID];
+		double t0 = DCTranslationTable.cableT0[icableID];
+		//double t0 =0; 
+		t0 = 180;
+		return t0;
+	}
+*/
 	/**
 	 * Reads HB DC hits written to the DC bank
 	 * @param event
@@ -185,7 +202,7 @@ public class HitReader {
 			if(clusterID[i]==-1)
 				continue;
 			
-			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.T0, 0, B[i], id[i]); 
+			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.getT0(), 0, B[i], id[i]); 
 			hit.set_LeftRightAmb(LR[i]);
 			hit.set_TrkgStatus(0);
 			hit.set_TimeToDistance(1.0, B[i]);
@@ -196,8 +213,8 @@ public class HitReader {
 			}
 			hit.set_DocaErr(hit.get_PosErr(B[i]));
 			hit.set_AssociatedClusterID(clusterID[i]);
-			hit.set_AssociatedHBTrackID(trkID[i]);
-			hits.add(hit);
+			hit.set_AssociatedHBTrackID(trkID[i]); //System.out.println(" read "+hit.printInfo());
+			hits.add(hit);  
 			
 		}
 		

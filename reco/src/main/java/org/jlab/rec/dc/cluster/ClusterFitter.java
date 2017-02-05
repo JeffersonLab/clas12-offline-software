@@ -7,6 +7,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.GeometryLoader;
+import org.jlab.rec.dc.hit.FittedHit;
 
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
@@ -74,7 +75,7 @@ public class ClusterFitter {
 			if(SaveFitPars)
 				this.SetClusterFitParameters(clus);
 		} else {
-			System.err.println("Cluster Fit array not set!!!");
+			//System.err.println("Cluster Fit array not set!!!");
 		}
 	}
 	
@@ -89,7 +90,7 @@ public class ClusterFitter {
 	        clus.set_Chisq(FitPars.chisq());
 			
 		} else {
-			System.err.println("Cluster Fit Params not set!!!");
+			//System.err.println("Cluster Fit Params not set!!!");
 		}
 	}
 	
@@ -112,7 +113,8 @@ public class ClusterFitter {
 	        clus.set_clusterLineFitInterceptErrMP(FitPars.interceptErr());	        
 	        
 		} else {
-			System.err.println("Cluster Fit Params not set!!!");
+			//System.err.println("Cluster Fit Params not set!!!");
+			
 		}
 	}
 	
@@ -144,9 +146,9 @@ public class ClusterFitter {
 	    	Point3D Wire = new Point3D(zWire, xWire,0);
 	    	
 	    	
-	    	double trkDocaMPSign = Math.signum(-xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept())); 
+	    	//double trkDocaMP = -xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept());
 	    	double trkDocaMP = FitLine.distance(Wire).length();
-	    	double trkDoca = trkDocaMPSign*trkDocaMP*Math.cos(Math.toRadians(6.));
+	    	double trkDoca = trkDocaMP*Math.cos(Math.toRadians(6.));
 	    	
 	    	clus.get(i).set_ClusFitDoca(trkDoca);
 

@@ -89,20 +89,22 @@ public class TableLoader {
 				}
 			}	
 			
-		/*	for(int s = 0; s<2; s++ ){ // loop over sectors
+	/*		for(int s = 1; s<2; s++ ){ // loop over sectors
 
 				for(int r = 0; r<6; r++ ){ //loop over slys
 						
 					for(int ibfield =0; ibfield<6; ibfield++) {
 					   
 						for(int icosalpha =0; icosalpha<6; icosalpha++) {
-							System.out.println("s "+s+" r "+r+" ibfield "+ibfield+" icosalpha "+icosalpha+"tbin "+ "maxBinIdxT[s][r][ibfield][icosalpha] "+maxBinIdxT[s][r][ibfield][icosalpha]);
+							
+							for (int tb = 0; tb< maxBinIdxT[s][r][ibfield][icosalpha]; tb++)
+								System.out.println("s "+(s+1)+" sl "+(r+1)+" ibfield "+ibfield+" icosalpha "+icosalpha+"tbin "+ tb + " val "+ DISTFROMTIME[s][r][ibfield][icosalpha][tb]);
 					    	
 						}
 					}
 				}
-			} */
-			
+			}
+	*/		
 			T2DLOADED = true;
 	 }
 	

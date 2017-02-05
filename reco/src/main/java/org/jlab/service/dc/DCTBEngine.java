@@ -129,8 +129,23 @@ public class DCTBEngine extends ReconstructionEngine {
 			return true;
 		}
 		
-		trkcandFinder.removeOverlappingTracks(trkcands);		
+		trkcandFinder.removeOverlappingTracks(trkcands);	
 		
+		int trkId = 1;
+		for(Track trk: trkcands) {
+			// reset the id
+			trk.set_Id(trkId);
+			for(Cross c : trk) { 
+				for(FittedHit h1 : c.get_Segment1())
+					h1.set_AssociatedTBTrackID(trk.get_Id());
+			  	for(FittedHit h2 : c.get_Segment2())
+			  		h2.set_AssociatedTBTrackID(trk.get_Id());	
+			}
+			trkId++;
+		}
+		
+		
+		/*
 		for(Track trk : trkcands) {
 			for(Cross c : trk) {
 				for(Segment s : c) {
@@ -139,7 +154,7 @@ public class DCTBEngine extends ReconstructionEngine {
 					}
 				}
 			}
-		}
+		} */
 		
 		rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, trkcands);
 

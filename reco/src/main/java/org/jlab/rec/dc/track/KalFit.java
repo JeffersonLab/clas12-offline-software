@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -80,8 +81,10 @@ public class KalFit {
 			KF_q = trkcand.get_Q();			
 			
 			VecAtFirstMeasSite = dcSwim.SwimToPlane(measVecs[0][0]);
+			
 		}
-
+		
+		
 		if(VecAtFirstMeasSite==null) {
 			KalFitFail = true;
 			
@@ -164,7 +167,7 @@ public class KalFit {
 			if(i1>measVecs[0].length-1) 
 				i1 = measVecs[0].length-2;
 			
-			double V = measVecErrs[0][i1] * measVecErrs[0][i1];
+			double V = measVecErrs[0][i1] ;
 			double[] h =  h(stateVec, (int) measVecs[2][i1]);
 			
 			double[][] HTGH =  new double[][] {
@@ -241,6 +244,7 @@ public class KalFit {
 	 */
 	public void printMatrix(Matrix C) {
 		for(int k = 0; k< 5; k++) {
+			System.out.println(C.get(k, 0)+"	"+C.get(k, 1)+"	"+C.get(k, 2)+"	"+C.get(k, 3)+"	"+C.get(k, 4));
 		}
 	}
 	/**
@@ -775,7 +779,7 @@ public class KalFit {
 	private boolean isNonsingular(Matrix mat) {
 		
 	      for (int j = 0; j < mat.getColumnDimension(); j++) {
-	         if (mat.get(j, j) == 0)
+	         if (mat.get(j, j) < 0.00000000001)
 	            return false;
 	      }
 	      return true;

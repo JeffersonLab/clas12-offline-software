@@ -37,7 +37,7 @@ public class RecoBankWriter {
 	public void updateListsListWithClusterInfo(List<FittedHit> fhits,
 			List<FittedCluster> clusters) {
 		for(int i = 0; i<clusters.size(); i++) {
-			
+			clusters.get(i).set_Id(i+1);
 			for(int j = 0; j<clusters.get(i).size(); j++) {
 				
 				clusters.get(i).get(j).set_AssociatedClusterID(clusters.get(i).get_Id());
@@ -216,6 +216,7 @@ public class RecoBankWriter {
 				index++;
 			}
 		} 
+		bank.show();
 		return bank;
 	}
 	/**
@@ -472,6 +473,7 @@ public class RecoBankWriter {
 				index++;
 			}
 		}
+		bank.show();
 		return bank;
 	}
 	/**
@@ -519,7 +521,6 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("TimeBasedTrkg::TBTracks",candlist.size());
     
 		for(int i =0; i< candlist.size(); i++) { 
-			
 			bank.setShort("id",i, (short) candlist.get(i).get_Id());
 			bank.setShort("status",i, (short) 1);
 			bank.setByte("sector",i, (byte) candlist.get(i).get_Sector());	
@@ -594,6 +595,7 @@ public class RecoBankWriter {
 			bank.setFloat("C55", i, (float) c[4][4]);
 			*/
 			//bank.setFloat("fitChisq", i, (float) candlist.get(i).get_FitChi2());
+			
 		}
 		//bank.show();
 		return bank;

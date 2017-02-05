@@ -3,6 +3,8 @@ package org.jlab.rec.dc.timetodistance;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import org.jlab.rec.dc.CalibrationConstantsLoader;
+
 public class TimeToDistanceEstimator {
 
 	public TimeToDistanceEstimator() {
@@ -11,6 +13,8 @@ public class TimeToDistanceEstimator {
 
 	 private double interpolateLinear(double x, double xa, double xb, double ya, double yb) {
 		 double y = ya*(xb - x)/(xb - xa) + yb*(x - xa)/(xb - xa);
+		 if(xb - xa == 0)
+			 y = ya + yb;
 		 return y;
 	 }
 	 /**
@@ -28,23 +32,39 @@ public class TimeToDistanceEstimator {
 		 
 		 int binlowB  = this.getBIdx(B);
 		 int binhighB = binlowB + 1; 
+		 
+		 if(binhighB > TableLoader.maxBinIdxB-1) {
+			 binhighB = TableLoader.maxBinIdxB-1;
+		 }
+			 
+		 
 		 double B1 = binlowB*0.5;
 		 double B2 = binhighB*0.5;
 		
 		 // for alpha ranges		
 		 int binlowAlpha  = this.getAlphaIdx(alpha);
 		 int binhighAlpha = binlowAlpha + 1;
+		 
+		 if(binhighAlpha > TableLoader.maxBinIdxAlpha-1) {
+			 binhighAlpha = TableLoader.maxBinIdxAlpha-1;
+		 }
+		 
 		 double alpha1 = this.getAlphaFromAlphaIdx(binlowAlpha);	 
 		 double alpha2 = this.getAlphaFromAlphaIdx(binhighAlpha);
 		
 		 // get the time bin edges:
 		 int binlowT = this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha);  
 		 int binhighT = binlowT + 1; 
+		 
+		 if(binhighT>TableLoader.maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha]-1)
+			 binhighT=TableLoader.maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha]-1;
+		 
 		 double t1 = binlowT*2.;
 		 double t2 = binhighT*2.;
 		
 		 if(t>t2)
 			 t=t2;
+		
 		 
 		 // interpolate in B:
 		 double f_B_alpha1_t1 = interpolateLinear(B*B, B1*B1, B2*B2, 
@@ -79,6 +99,9 @@ public class TimeToDistanceEstimator {
 						TableLoader.DISTFROMTIME[RegIdx][binhighB][binhighAlpha][this.getTimeIdx(t, RegIdx, binhighB, binhighAlpha)+1]
 								+"  --  "+f_B_alpha1_t1+"  :  "+f_B_alpha2_t1+"  :  "+f_B_alpha1_t2+"  :  "+f_B_alpha2_t2
 								+"  ---  "+f_B_alpha1_t+"  :  "+f_B_alpha2_t+" === "+f_B_alpha_t); */
+		 if(f_B_alpha_t>CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx])
+			 f_B_alpha_t = CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx];                                                      
+			// System.out.println(SlyrIdx+" t "+t+" "+f_B_alpha_t+" tmax "+CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx]);
 		return f_B_alpha_t;
 	 }
 	
@@ -124,7 +147,9 @@ public class TimeToDistanceEstimator {
 		if(binIdx<0)
 			binIdx = TableLoader.minBinIdxAlpha;
 		if(binIdx>TableLoader.maxBinIdxAlpha)
-			binIdx = TableLoader.maxBinIdxAlpha-1;
+			binIdx = TableLoader.maxBinIdxAlpha-1; 
+		
+		
 		return binIdx;
 	}
 	

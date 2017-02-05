@@ -57,8 +57,8 @@ public class DCSwimmer {
 	private  double _phi;
 	private  double _theta;
 	private  double _pTot;
-	public  double _rMax = 5;
-	public  double _maxPathLength = 9;
+	public  double _rMax = 5 + 3; //increase to allow swimming to outer detectors
+	public  double _maxPathLength = 9 ;
 	private  int _charge;
 		
 	//public boolean isRotatedCoordinateSystem = true;
@@ -481,7 +481,7 @@ public class DCSwimmer {
 		float result[] = new float[3];
 
 		rcompositeField.field((float)x_cm, (float)y_cm, (float)z_cm, result);
-		
+
 		return new Point3D(result[0]/10, result[1]/10, result[2]/10);
 		
 	}

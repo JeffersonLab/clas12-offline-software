@@ -219,7 +219,7 @@ public class ClusterCleanerUtilities {
 			FittedCluster bestCls = OverlappingClusterResolver(cluster, splitclusters);
 
 			if(bestCls!=null) {
-				//System.out.println(" bestclusters "+bestCls.printInfo());
+
 				if(!(selectedClusList.contains(bestCls)))
 					selectedClusList.add(bestCls);
 			}
@@ -228,7 +228,7 @@ public class ClusterCleanerUtilities {
 		int splitclusId =1;
 		if(selectedClusList.size()!=0) {
 			for(FittedCluster cl : selectedClusList) {
-				//cl.set_Id(0);
+				cl.set_Id(clus.get_Id()*1000+splitclusId);
 				splitclusId++;
 			}
 		}
@@ -309,7 +309,7 @@ public class ClusterCleanerUtilities {
 	//	}
 		
 		int index=0;
-		for(FittedHit hit : fClus) { 	
+		for(FittedHit hit : fClus) { 
 			if(hit.get_Doca()<0.4*hit.get_CellSize()) {
 				hit.set_LeftRightAmb(0);
 			}
@@ -509,6 +509,7 @@ public class ClusterCleanerUtilities {
 									newClus.add(totNotLRClus.get(i3));
 									newClus.add(totNotLRClus.get(i4));
 									newClus.add(totNotLRClus.get(i5));
+									newClus.add(totNotLRClus.get(i6));
 									arrayOfClus.add(newClus);
 								}
 							}

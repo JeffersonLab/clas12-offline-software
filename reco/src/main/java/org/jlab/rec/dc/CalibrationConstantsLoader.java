@@ -11,6 +11,13 @@ public class CalibrationConstantsLoader {
 	public CalibrationConstantsLoader() {
 		// TODO Auto-generated constructor stub
 	}
+	public static final int[] cableid = 
+	    {0,0,1,7, 13,19,25,31,37,0,0,0,0,43,49,55,61,67,73,79,
+  		 0,0,2,8, 14,20,26,32,38,0,0,0,0,44,50,56,62,68,74,80,
+		 0,0,3,9, 15,21,27,33,39,0,0,0,0,45,51,57,63,69,75,81,
+		 0,0,4,10,16,22,28,34,40,0,0,0,0,46,52,58,64,70,76,82,
+		 0,0,5,11,17,23,29,35,41,0,0,0,0,47,53,59,65,71,77,83,
+		 0,0,6,12,18,24,30,36,42,0,0,0,0,48,54,60,66,72,78,84};
 	
 	// T2D
 	public static final double[][] deltanm = new double[6][6];
@@ -42,7 +49,7 @@ public class CalibrationConstantsLoader {
     
     public static final synchronized void Load(int runNb, String var) {
     	if(runNb!=10 || !var.equalsIgnoreCase("default"))
-			dbprovider = new DatabaseConstantProvider(runNb, var); // reset using the new variation
+		dbprovider = new DatabaseConstantProvider(runNb, var); // reset using the new variation
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/dc/signal_generation/dc_resolution");
 	    dbprovider.loadTable("/calibration/dc/time_to_distance/tvsx_devel_v2");
@@ -101,8 +108,8 @@ public class CalibrationConstantsLoader {
 	    	
 	    	distbeta[iSec-1][iSly-1] = idistbeta;
 	    	
-	    	System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
-	    	"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
+	    	//System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
+	    	//"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
 	    }
 	   
     }

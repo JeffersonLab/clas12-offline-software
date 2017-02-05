@@ -9,8 +9,10 @@ import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.DCTranslationTable;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
@@ -155,16 +157,35 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		}
-		// track found		
-		for(Track trk: trkcands) {				
+		// track found	
+
+		int trkId = 1;
+		for(Track trk: trkcands) {						
 			for(Cross c : trk) { 
 				for(FittedHit h1 : c.get_Segment1())
 					h1.set_AssociatedHBTrackID(trk.get_Id());
 			  	for(FittedHit h2 : c.get_Segment2())
 			  		h2.set_AssociatedHBTrackID(trk.get_Id());	
 			}
+			
 		}
 	  
+		trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
+		
+		for(Track trk: trkcands) {		
+			// reset the id
+				trk.set_Id(trkId);
+				for(Cross c : trk) { 
+					for(FittedHit h1 : c.get_Segment1())
+						h1.set_AssociatedHBTrackID(trk.get_Id());
+				  	for(FittedHit h2 : c.get_Segment2())
+				  		h2.set_AssociatedHBTrackID(trk.get_Id());	
+				}
+				trkId++;
+			}
+		  
+			
+  
 		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
 
 		return true;
@@ -190,7 +211,10 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
 		//
 		boolean timeToDistanceGridSetting=true;
-		boolean calibRun =true;
+		boolean calibRun =false;
+		
+		Constants.setT0(0);
+		
 		// Load the fields
 		//-----------------
 		String newConfig = "SOLENOID"+bank.getFloat("solenoid",0)+"TORUS"+bank.getFloat("torus",0);		
@@ -198,6 +222,8 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		if (FieldsConfig.equals(newConfig)==false) {
 			// Load the Constants
 			Constants.Load(timeToDistanceGridSetting, calibRun, (double)bank.getFloat("torus",0)); // set the T2D Grid for Cosmics data only so far....
+			//DCTranslationTable tran = new DCTranslationTable();
+			 // tran.createInvertedTable();
 			// Load the Fields
 			//DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... 
 			DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid",0), bank.getFloat("torus",0)); // something changed in the configuration ... 
@@ -222,37 +248,26 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 		 
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/gemc_generated.hipo";
-		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/file0000.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
 		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 		
-		HeaderEngine enh = new HeaderEngine();
-		enh.init();
-		
 		DCHBEngineT2DConfig en = new DCHBEngineT2DConfig();
 		en.init();
-		DCTBEngine en2 = new DCTBEngine();
-		//DCTBRasterEngine en2 = new DCTBRasterEngine();
+		DCTBEngine en2 = new DCTBEngine(); 
 		en2.init();
-		//org.jlab.io.evio.EvioSource reader = new org.jlab.io.evio.EvioSource();
-		
 		int counter = 0;
 		
-		//reader.open(inputFile);
-		//long t1 = System.currentTimeMillis();
-		
 		 HipoDataSource reader = new HipoDataSource();
-         reader.open(inputFile);
+        reader.open(inputFile);
 		
+        HipoDataSync writer = new HipoDataSync();
 		//Writer
-		
-		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/DCRBREC.evio";
-		//String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-3.0.4/T2DRec15deg.ev";
-		//org.jlab.io.evio.DataSync writer = new org.jlab.io.evio.DataSync();
-		//writer.open(outputFile);
+		 String outputFile="/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758Reco.hipo";
+		 writer.open(outputFile);
 		
 		long t1=0;
 		while(reader.hasEvent() ){
@@ -263,21 +278,25 @@ public class DCHBEngineT2DConfig extends ReconstructionEngine {
 			if(counter>0)
 				t1 = System.currentTimeMillis();
 			
-			//enh.processDataEvent(event);
-			
 			en.processDataEvent(event);
 			
 			// Processing TB   
 			en2.processDataEvent(event);
 			System.out.println("  EVENT "+counter);
-			if(counter>1000) break;
+			//if(counter>1046) break;
 			//if(counter%100==0)
-			//	System.out.println("run "+counter+" events");
-			//writer.writeEvent(event);
+				//System.out.println("run "+counter+" events");
+				//event.getBank("RUN::config").show();
+				if(event.hasBank("TimeBasedTrkg::TBTracks")) {
+					writer.writeEvent(event);
+					//event.getBank("RUN::config").show();
+					event.show();
+				}
 		}
-		//writer.close();
+		writer.close();
 		double t = System.currentTimeMillis()-t1;
 		System.out.println(t1+" TOTAL  PROCESSING TIME = "+(t/(float)counter));
 	 }
+	
 	
 }

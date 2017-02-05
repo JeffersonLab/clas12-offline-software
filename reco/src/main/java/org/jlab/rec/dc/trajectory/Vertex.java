@@ -20,16 +20,18 @@ public class Vertex {
 	}
 	public double vertexEstimator(DataEvent event) {
 
-		DataBank bank = event.getBank("GenPart::true");
-        
-        double[] vx = bank.getDouble("vx");
-        double[] vy = bank.getDouble("vy");
-        
-		double val = Math.sqrt(vx[0]*vx[0]+vy[0]*vy[0])/10.; // analysis done in cm, gemc vtx units = mm
+		double smearedVal = Double.NEGATIVE_INFINITY;
 		
-		double smearedVal = val + SMEARING_FAC * rn.nextGaussian();
+		if(event.hasBank("MC::Particle")) {
+			DataBank bank = event.getBank("MC::Particle");
+        
+			double val = Math.sqrt(bank.getFloat("vx", 0)*bank.getFloat("vx", 0)+bank.getFloat("vy", 0)*bank.getFloat("vy", 0))/10.; // analysis done in cm, gemc vtx units = mm
+			
+			smearedVal = val + SMEARING_FAC * rn.nextGaussian();
 		
+		}
 		return smearedVal; 
+		
 	}
 	
 	public void resetTrackAtRasterRadius(DataEvent event, Track thecand) {

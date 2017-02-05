@@ -2,6 +2,12 @@ package org.jlab.rec.dc;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+
+import org.jlab.detector.base.DetectorCollection;
+import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Converts DC readout board (crate, slot, channel) to DC wire hit (sector, layer, wire)
@@ -59,6 +65,22 @@ public class DCTranslationTable  {
   //int[] slot_locsuplayer = {0,0,0,1,1,1,1,1,1,1,0,0,2,2,2,2,2,2,2,0};
   int[] slot_locsuplayer = {0,0,1,1,1,1,1,1,1,0,0,0,0,2,2,2,2,2,2,2};
 
+  public static final int[] cableid = 
+	    {0,0,1,7, 13,19,25,31,37,0,0,0,0,43,49,55,61,67,73,79,
+   		 0,0,2,8, 14,20,26,32,38,0,0,0,0,44,50,56,62,68,74,80,
+ 		 0,0,3,9, 15,21,27,33,39,0,0,0,0,45,51,57,63,69,75,81,
+ 		 0,0,4,10,16,22,28,34,40,0,0,0,0,46,52,58,64,70,76,82,
+ 		 0,0,5,11,17,23,29,35,41,0,0,0,0,47,53,59,65,71,77,83,
+ 		 0,0,6,12,18,24,30,36,42,0,0,0,0,48,54,60,66,72,78,84};
+  
+  public static final double[] cableT0 = 
+	    { 0,0,180,180,180,180,180,180,180,0,0,0,0,180,180,180,180,180,180,180,
+		  0,0,180,180,180,180,180,180,180,0,0,0,0,180,180,180,180,180,180,180,
+		  0,0,180,180,180,180,180,180,180,0,0,0,0,180,180,180,180,180,180,180,
+		  0,0,180,180,180,180,180,180,180,0,0,0,0,180,180,180,180,180,180,180,
+		  0,0,180,180,180,180,180,180,180,0,0,0,0,180,180,180,180,180,180,180,
+		  0,0,180,180,180,180,180,180,180,0,0,0,0,180,180,180,180,180,180,180};
+  
   public DCTranslationTable(){
     
   }
@@ -117,9 +139,62 @@ public class DCTranslationTable  {
      return wire;
      //return 0;
   }
+  public static DetectorCollection<DetectorDescriptor> reverseTable;
+  static DetectorDescriptor desc ;
+
+  public void createInvertedTable() {
+	  reverseTable = new DetectorCollection<DetectorDescriptor>();
+	  
+	  DCTranslationTable tran = new DCTranslationTable();
+	  for(int crate =41; crate<=58; crate++)
+		  for(int slot =1; slot<=20; slot++)
+			  for(int channel =0; channel<96; channel++) {
+				    int crateIdx = crate - 41;
+				    int sector = tran.crate_sector[crateIdx];
+				    int slotIdx = slot -1;
+				  
+				    int channelIdx = channel; // channel runs from 0 to 95
+					
+				    int region = tran.crate_region[crateIdx];
+				    int loclayer=tran.chan_loclayer[channelIdx];
+				    int locsuplayer=tran.slot_locsuplayer[slotIdx];
+				    int suplayer=(region-1)*2 + locsuplayer;
+				    int layer=(suplayer-1)*6 + loclayer;
+				   // DetectorDescriptor desc = new DetectorDescriptor();
+				  //	desc.setCrateSlotChannel(crateIdx, slotIdx, channelIdx);
+
+					 int locwire = tran.chan_locwire[channelIdx];
+				     int nstb=tran.slot_stb[slotIdx];
+				     int wire=(nstb-1)*16+locwire;
+				     
+				     DetectorDescriptor desc = new DetectorDescriptor();
+				     desc.setCrateSlotChannel(crate, slot, channel);
+				     
+				     reverseTable.add(sector,layer,wire,desc);
+				     
+				     int connector = (int)(channel/16)+1;
+				     int icableID = (connector-1)*20+slot-1; //20 slots
+					 int cable_id = tran.cableid[icableID];
+					 double t0 = tran.cableT0[icableID];
+					 
+					 
+				     if(sector<=0 || layer<=0 || wire<=0) 
+				    	 continue;
+				    
+				    
+				 // System.out.println((crate)+"  "+(slot)+"  "+(channel)+" sector "+sector
+					//	  +" region "+region+" layer "+layer+" wire "+wire+" connector "+connector);
+			  }
+	 
+	  //reverseTable.get(sector,layer,component).getCrate();
+  }
+	  
   
   public static void main (String arg[]) throws FileNotFoundException {
+	  
+	  
 	  DCTranslationTable tran = new DCTranslationTable();
+	  tran.createInvertedTable();
 		/*
 		 *  Crate number can be only 1-18 (1 crate per chamber)
 		 *  Slot number can be only the following: (4-10 or 13-19)
@@ -134,7 +209,8 @@ public class DCTranslationTable  {
 
 
 	  //PrintWriter pw = new PrintWriter(new File("/Users/ziegler/Workdir/Files/TranslationTables/DC/DC.table"));
-	  PrintWriter pw = new PrintWriter(new File("/Users/ziegler/Workdir/Files/TranslationTables/DC/DCtable2.txt"));
+	  PrintWriter pw = new PrintWriter(new File("/Users/ziegler/Workdir/Files/TranslationTables/DC/DCtable2.txt.log"));
+	
 	  int order =0;
 	  for(int crate =41; crate<=58; crate++)
 		  for(int slot =1; slot<=20; slot++)
@@ -150,21 +226,27 @@ public class DCTranslationTable  {
 				    int locsuplayer=tran.slot_locsuplayer[slotIdx];
 				    int suplayer=(region-1)*2 + locsuplayer;
 				    int layer=(suplayer-1)*6 + loclayer;
-				  
-				     
+				 //  DetectorDescriptor desc = new DetectorDescriptor();
+				  //	desc.setCrateSlotChannel(crateIdx, slotIdx, channelIdx);
+
 					 int locwire = tran.chan_locwire[channelIdx];
 				     int nstb=tran.slot_stb[slotIdx];
 				     int wire=(nstb-1)*16+locwire;
-				     
+				   //  reverseTable.add(sector,layer,wire,desc);
+				     int connector = (int)(channel/16)+1;
+				     int icableID = (connector-1)*20+slot-1; //20 slots
+					 int cable_id = tran.cableid[icableID];
+						
 				     if(sector<=0 || layer<=0 || wire<=0) 
 				    	 continue;
 				    
 				     //pw.printf("DC\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t\n", crate, slot, channel, sector, layer, wire, order);
 				     pw.printf("%d\t %d\t %d\t %d\t %d\t %d\t %d\t\n", crate, slot, channel, sector, layer, wire, order);
 				  System.out.println((crate)+"  "+(slot)+"  "+(channel)+" sector "+sector
-						  +" region "+region+" layer "+layer+" wire "+wire);
+						  +" region "+region+" layer "+layer+" wire "+wire+" connector "+connector+" "+" CH "+reverseTable.get(sector,layer,wire).getChannel());
 			  }
 	  pw.close();
+	  //reverseTable.get(sector,layer,component).getCrate();
   }
   
 

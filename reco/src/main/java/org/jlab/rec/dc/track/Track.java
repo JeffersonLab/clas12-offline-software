@@ -210,13 +210,48 @@ public class Track extends Trajectory implements Comparable<Track>{
 	}
 	@Override
 	public int compareTo(Track arg) {
+		/*
 		// Sort by cross in R1, R2, R3
 		int idtrk = this.get(0).get_Segment1().get(0).get_AssociatedHBTrackID();
 		int idtrk0 = arg.get(0).get_Segment1().get(0).get_AssociatedHBTrackID();
 		 
 		int return_val = idtrk < idtrk0   ? -1 : idtrk  == idtrk0   ? 0 : 1;		
 		
-		return return_val;
+		return return_val; 
+		*/
+		int idtrkSeg1 = this.get(0).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg1a = arg.get(0).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg2 = this.get(0).get_Segment2().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg2a = arg.get(0).get_Segment2().get(0).get_AssociatedHBTrackID();
+		
+		int idtrkSeg3 = this.get(1).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg3a = arg.get(1).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg4 = this.get(1).get_Segment2().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg4a = arg.get(1).get_Segment2().get(0).get_AssociatedHBTrackID();
+		
+		int idtrkSeg5 = this.get(2).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg5a = arg.get(2).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg6 = this.get(2).get_Segment2().get(0).get_AssociatedHBTrackID();
+		int idtrkSeg6a = arg.get(2).get_Segment2().get(0).get_AssociatedHBTrackID();
+		
+		
+		int return_val1 = idtrkSeg1 < idtrkSeg1a   ? -1 : idtrkSeg1  == idtrkSeg1a   ? 0 : 1;		
+		int return_val2 = idtrkSeg2 < idtrkSeg2a   ? -1 : idtrkSeg2  == idtrkSeg2a   ? 0 : 1;
+		int return_val3 = idtrkSeg3 < idtrkSeg3a   ? -1 : idtrkSeg3  == idtrkSeg3a   ? 0 : 1;
+		int return_val4 = idtrkSeg4 < idtrkSeg4a   ? -1 : idtrkSeg4  == idtrkSeg4a   ? 0 : 1;
+		int return_val5 = idtrkSeg5 < idtrkSeg5a   ? -1 : idtrkSeg5  == idtrkSeg5a   ? 0 : 1;
+		int return_val6 = idtrkSeg6 < idtrkSeg6a   ? -1 : idtrkSeg6  == idtrkSeg6a   ? 0 : 1;
+		
+		int return_val_a1 = ((return_val1 ==0) ? return_val2 : return_val1);  
+		int return_val_a2 = ((return_val2 ==0) ? return_val_a1 : return_val2);
+		int return_val_a3 = ((return_val3 ==0) ? return_val_a2 : return_val3);
+		int return_val_a4 = ((return_val4 ==0) ? return_val_a3 : return_val4);
+		int return_val_a5 = ((return_val5 ==0) ? return_val_a4 : return_val5);
+		int return_val_a6 = ((return_val6 ==0) ? return_val_a5 : return_val6);
+		
+		int returnSec = this.get_Sector() < arg.get_Sector() ? -1 : this.get_Sector() == arg.get_Sector() ? 0 : 1; 
+		
+		return ((returnSec ==0) ? return_val_a6 : returnSec);
 	}
 	
 }

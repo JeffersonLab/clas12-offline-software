@@ -8,13 +8,19 @@ import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossList;
+import org.jlab.rec.dc.hit.FittedHit;
+import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 import org.jlab.rec.dc.trajectory.Vertex;
+
+import trackfitter.fitter.LineFitPars;
+import trackfitter.fitter.LineFitter;
 
 /**
  * A class with a method implementing an algorithm that finds lists of track candidates in the DC
@@ -70,29 +76,34 @@ public class TrackCandListFinder {
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
 			        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-			       
+			        
 			        double deltaTheta = theta3-theta1; 
 			       
 			        double iBdl = traj.get_IntegralBdl(); 
 			        
-			        double pxz = Math.abs(Constants.LIGHTVEL*iBdl/deltaTheta);
-			        double thX = (cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z());
-			        double thY = (cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
-			        double py = Math.sqrt( (thX*thX+thY*thY+1)/(thX*thX+1) - 1 )*pxz;
-			          
-			        //positive charges bend outward for nominal GEMC field configuration
-					int q = (int) Math.signum(deltaTheta); 
-					
-					q*=-1*Math.signum(Constants.getTORSCALE()) ;						
-					
-					if(iBdl == 0 || (deltaTheta== 0)) {
-						System.err.print("Error in estimating track candidate trajectory: integral_B_dl not found, no trajectory...");
-					}
-
-					if(iBdl != 0 || (deltaTheta != 0)) {
+			        if(iBdl == 0) {
+						//no field --> fit straight track
+			        	//System.out.println(trking+" FitChisq "+cand.get_FitChi2());	
+			        	this.getStraightTrack(cand);
+			        	if(cand.get_pAtOrig()!=null) {
+			        		cand.set_Id(cands.size()+1);						
+			        		cands.add(cand); 
+			        	}
+					}			        
+			        if(iBdl != 0 || (deltaTheta != 0)) {
+			        	
+				        double pxz = Math.abs(Constants.LIGHTVEL*iBdl/deltaTheta);
+				        double thX = (cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z());
+				        double thY = (cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
+				        double py = Math.sqrt( (thX*thX+thY*thY+1)/(thX*thX+1) - 1 )*pxz;
+				          
+				        //positive charges bend outward for nominal GEMC field configuration
+						int q = (int) Math.signum(deltaTheta); 
 						
+						q*= (int)-1*Math.signum(Constants.getTORSCALE());						
+							
 						double p = Math.sqrt(pxz*pxz+py*py);
-				
+						
 						if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
 							continue;
 						
@@ -116,7 +127,7 @@ public class TrackCandListFinder {
 							if(trking == "TimeBased") {
 								totNbOfIterations = 20;
 							} else {
-								totNbOfIterations = 10;
+								totNbOfIterations = 20;
 							}
 								
 							while(iterationNb < totNbOfIterations) {
@@ -129,7 +140,7 @@ public class TrackCandListFinder {
 								
 								kf.runKalFit(); 
 								
-								if(kf.chi2>fitChisq || kf.chi2>Constants.MAXCHI2+1 || Math.abs(kf.chi2-fitChisq)<0.0000001) {
+								if(kf.chi2>fitChisq || kf.chi2>Constants.MAXCHI2+1 || Math.abs(kf.chi2-fitChisq)<0.0001) { //0.0000001
 									iterationNb = totNbOfIterations;
 									continue;
 								}
@@ -172,7 +183,7 @@ public class TrackCandListFinder {
 								(iterationNb!=0 && cand.get_FitChi2()==0))
 							continue; // fails if after KF chisq exceeds cutoff or if KF fails 
 						
-							
+						//System.out.println(trking+" FitChisq "+cand.get_FitChi2());	
 						cand.set_Id(cands.size()+1);
 						
 						cands.add(cand); 
@@ -185,6 +196,80 @@ public class TrackCandListFinder {
 		return cands;
 	}
 	
+	private void getStraightTrack(Track cand) {
+		
+			double[] x = new double[3];
+			double[] y1 = new double[3];
+			double[] y2 = new double[3];
+			double[] ex = new double[3];
+			double[] ey1 = new double[3];
+			double[] ey2 = new double[3];
+			
+			for(int i = 0; i < 3; i++) {
+				
+				Point3D X = cand.get(i).getCoordsInLab(cand.get(i).get_Point().x(), cand.get(i).get_Point().y(), cand.get(i).get_Point().z());
+				Point3D eX = cand.get(i).getCoordsInLab(cand.get(i).get_PointErr().x(), cand.get(i).get_PointErr().y(), cand.get(i).get_PointErr().z());
+				
+				x[i] 	= X.z();
+				ex[i] 	= eX.z();
+				
+				y1[i] 	= X.x();
+				ey1[i] 	= eX.x();
+				
+				y2[i] 	= X.y();
+				ey2[i] 	= eX.y();
+			}
+			
+	
+			if(x!=null) {
+			
+				LineFitter linefit = new LineFitter();
+				boolean linefitstatusOK1 = linefit.fitStatus(x, y1, ex, ey1, 3);
+				
+				LineFitPars FitPars1 = null;
+				LineFitPars FitPars2 = null;
+				if(linefitstatusOK1)		
+			      //  Get the results of the fits
+					FitPars1 = linefit.getFit();
+				
+				boolean linefitstatusOK2 = linefit.fitStatus(x, y2, ex, ey2, 3);
+				if(linefitstatusOK2)		
+				      //  Get the results of the fits
+					FitPars2 = linefit.getFit();
+				
+				double X0 = -99999;
+				double Y0 = -99999;
+				
+				if(FitPars1 != null && FitPars2!=null) {
+					
+					X0 = FitPars1.intercept();
+					Y0 = FitPars2.intercept();
+					
+					Point3D trkR1X = new Point3D(FitPars1.slope()*x[0]+FitPars1.intercept(), FitPars2.slope()*x[0]+FitPars2.intercept(), x[0]);
+					Point3D trkR3X = new Point3D(FitPars1.slope()*x[2]+FitPars1.intercept(), FitPars2.slope()*x[2]+FitPars2.intercept(), x[2]);
+					
+					Vector3D trkDir = new Vector3D(trkR3X.x()-trkR1X.x(), trkR3X.y()-trkR1X.y(), trkR3X.z()-trkR1X.z()).asUnit();
+					trkDir.scale(10);
+					
+					Point3D trkVtx = new Point3D(X0, Y0, 0);
+					
+					cand.set_P(10);
+					cand.set_Q(-1); // assume it's a muon
+					cand.set_pAtOrig(trkDir);
+					cand.set_Vtx0(trkVtx);
+					cand.set_PreRegion1CrossPoint(new Point3D(trkR1X.x()-trkDir.x(), trkR1X.y()-trkDir.y(), trkR1X.z()-trkDir.z()) );
+					cand.set_PostRegion3CrossPoint(new Point3D(trkR3X.x()+trkDir.x(), trkR3X.y()+trkDir.y(), trkR3X.z()+trkDir.z()));
+					cand.set_PreRegion1CrossDir(new Point3D(trkDir.x(), trkDir.y(), trkDir.z()));
+					cand.set_PostRegion3CrossDir(new Point3D(trkDir.x(), trkDir.y(), trkDir.z()));
+					cand.set_Region1TrackX(trkR1X);
+					cand.set_Region1TrackP(new Point3D(trkDir.x(), trkDir.y(), trkDir.z()));
+					cand.status = 0;
+					cand.set_PathLength(trkR3X.distance(trkVtx));
+				}
+			}
+			
+	}
+
 	private int getSector(double x, double y) {
 		double phi = Math.toDegrees(FastMath.atan2(y, x));
 		double ang = phi + 30;
@@ -275,12 +360,26 @@ public class TrackCandListFinder {
 		//Vt = new double[]{VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5],0};
 		int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
 		
-		int status = -1;
-		if(sectorNearTarget==cand.get(0).get_Sector()) {
+		int status = 99999;
+	/*	if(sectorNearTarget==cand.get(0).get_Sector()) {
 			status = 1;
 		} else {
 			status = 0;
 		}
+		*/
+		int LR = 0;
+		for(Cross crs : cand) {		
+			Segment s1 = crs.get_Segment1();
+			Segment s2 = crs.get_Segment2();
+			
+			for(FittedHit h : s1) 
+				LR+=h._lr;
+			for(FittedHit h : s2) 
+				LR+=h._lr;
+			
+		}
+		
+		status = LR;
 		
 		double xOrFix = Vt[0];
 		double yOrFix = Vt[1];
@@ -310,13 +409,14 @@ public class TrackCandListFinder {
 		
 		cand.status = status;
 		cand.fit_Successful=true;
-		cand.set_TrackingInfoString(trking); 
+		cand.set_TrackingInfoString(trking);
 	}
 
 
 
 	public void removeOverlappingTracks(List<Track> trkcands) {
 		
+		/*
 		Collections.sort(trkcands);
 		
 		
@@ -351,7 +451,61 @@ public class TrackCandListFinder {
 		
 		trkcands.removeAll(trkcands);
 		trkcands.addAll(selectedTracks);
+		*/
 		
+		
+		Collections.sort(trkcands);
+		List<Track> selectedTracks =new ArrayList<Track>();
+		
+		ArrayList<ArrayList<Track>> lists = new ArrayList<ArrayList<Track>>();
+		ArrayList<Track> list = new ArrayList<Track>();
+		
+		int id1 = trkcands.get(0).get(0).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int id2 = trkcands.get(0).get(0).get_Segment2().get(0).get_AssociatedHBTrackID();
+		int id3 = trkcands.get(0).get(1).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int id4 = trkcands.get(0).get(1).get_Segment2().get(0).get_AssociatedHBTrackID();
+		int id5 = trkcands.get(0).get(2).get_Segment1().get(0).get_AssociatedHBTrackID();
+		int id6 = trkcands.get(0).get(2).get_Segment2().get(0).get_AssociatedHBTrackID();
+		
+		for(int i =0; i<trkcands.size(); i++) { 
+			
+			int tid1 = trkcands.get(i).get(0).get_Segment1().get(0).get_AssociatedHBTrackID();
+			int tid2 = trkcands.get(i).get(0).get_Segment2().get(0).get_AssociatedHBTrackID();
+			int tid3 = trkcands.get(i).get(1).get_Segment1().get(0).get_AssociatedHBTrackID();
+			int tid4 = trkcands.get(i).get(1).get_Segment2().get(0).get_AssociatedHBTrackID();
+			int tid5 = trkcands.get(i).get(2).get_Segment1().get(0).get_AssociatedHBTrackID();
+			int tid6 = trkcands.get(i).get(2).get_Segment2().get(0).get_AssociatedHBTrackID();
+			
+			if(tid1==id1 || tid2==id2 || tid3==id3 || tid4==id4 || tid5==id5 || tid6==id6 ) {
+				list.add(trkcands.get(i)); 
+				id1 = tid1;
+				id2 = tid2;
+				id3 = tid3;
+				id4 = tid4;
+				id5 = tid5;
+				id6 = tid6;
+			} else {
+				lists.add(list); 
+				list = new ArrayList<Track>();
+				list.add(trkcands.get(i));	
+				id1 = tid1;
+			}
+			
+			
+		}
+		lists.add(list);
+		if(lists.size()==0)
+			lists.add(list);
+		
+		for(int i =0; i<lists.size(); i++) {
+			
+			Track bestTrk = this.FindBestTrack(lists.get(i));
+			if(bestTrk!=null)
+				selectedTracks.add(bestTrk);
+		}
+
+		trkcands.removeAll(trkcands);
+		trkcands.addAll(selectedTracks);
 	}
 
 

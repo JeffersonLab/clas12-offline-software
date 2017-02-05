@@ -27,7 +27,7 @@ public class CrossMaker {
 	{ 
 		List<Cross> crosses = new ArrayList<Cross>();
 
-		int crid = 1;  //  id
+		int rid = 0;  // rsegment id
 
 		for(int s=0; s<Constants.NSECT; s++)  // loop over sectors
 		{
@@ -47,7 +47,7 @@ public class CrossMaker {
 							{   //wire proximity
 								if(seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1))
 								{
-									Cross cross = new Cross(s+1, r+1, crid++); 
+									Cross cross = new Cross(s+1, r+1, rid++);
 									
 									cross.add(seg1);
 									cross.add(seg2);
@@ -58,9 +58,10 @@ public class CrossMaker {
                                     Point3D CS =cross.getCoordsInSector(cross.get_Point().x(),cross.get_Point().y(),cross.get_Point().z());
                                     
                                     if(CS.x()>0)
-                                    	if(Math.abs(CS.y())/CS.x()<Math.tan(Math.toRadians(30.)))
+                                    	if(Math.abs(CS.y())/CS.x()<Math.tan(Math.toRadians(30.))) {
+                                    		cross.set_Id(crosses.size()+1);
                                     		crosses.add(cross);  //insures the cross is correctly reconstructed in the sector
-
+                                    	}
 								}
 							}
 						}

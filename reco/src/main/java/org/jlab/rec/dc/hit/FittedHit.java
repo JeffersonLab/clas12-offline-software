@@ -466,14 +466,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		this._AssociatedClusterID = _AssociatedClusterID;
 	}
 
-	private int _AssociatedHBTrackID =-1;
+	private int _AssociatedHBTrackID;
 	public void set_AssociatedHBTrackID(int _id) {
 		_AssociatedHBTrackID = _id;	
 	}
 	public int get_AssociatedHBTrackID() {
 		return _AssociatedHBTrackID ;	
 	}
-	private int _AssociatedTBTrackID =-1;
+	private int _AssociatedTBTrackID;
 	public void set_AssociatedTBTrackID(int _id) {
 		_AssociatedTBTrackID = _id;	
 	}

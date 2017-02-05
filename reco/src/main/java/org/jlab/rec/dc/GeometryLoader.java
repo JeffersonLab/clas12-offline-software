@@ -32,9 +32,9 @@ public class GeometryLoader {
 
 		GeometryLoader.Load(10, "default");
 		
-		Point3D ep1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(111).getLine().origin();
-		Point3D ep2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(111).getLine().end();
-		System.out.println(ep1.toString()+", "+ep2.toString());
+		Point3D ep1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(0).getMidpoint();
+		Point3D ep2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(1).getComponent(0).getMidpoint();
+		System.out.println(ep1.toString()+", "+ep2.toString()+" - "+0.03*Math.cos(Math.toRadians(6.)));
 		//pw.close();
 	/*	System.out.println("dx; = "+(GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(0).getMidpoint().x()-
 				GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(1).getMidpoint().x())*Math.cos(Math.toRadians(6.)));
