@@ -20,12 +20,15 @@ import org.jlab.hipo.data.HipoNodeBuilder;
 import org.jlab.hipo.io.HipoReader;
 import org.jlab.hipo.io.HipoWriter;
 import org.jlab.hipo.schema.Schema;
+import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.physics.io.LundReader;
+import org.jlab.utils.benchmark.ProgressPrintout;
+import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.CommandLineParser;
 
 /**
@@ -44,6 +47,53 @@ public class HipoFileUtils {
         
     }
     
+     
+     public static void writeHipo(String outputName, int compression, String keep, List<String> files){
+         HipoWriter writer = new HipoWriter();
+         writer.open(outputName);
+         int nFiles = files.size();
+         writer.setCompressionType(compression);
+         
+         String[] keepSchema = keep.split(":");
+         SchemaFactory writerFactory = new SchemaFactory();
+         ProgressPrintout  progress = new ProgressPrintout();
+         
+         
+         for(int i = 0; i < nFiles; i++){
+             HipoReader reader = new HipoReader();
+             reader.open(files.get(i));
+             if(i==0){
+                 SchemaFactory factory = reader.getSchemaFactory();
+
+                 System.out.println(" OPENNING FIRST FILE : " + files.get(i));
+                 System.out.println(" Scanning Schema FACTORY");
+                 List<Schema> list = factory.getSchemaList();
+         
+                 for(Schema schema : list){
+                     for(String key : keepSchema){
+                         if(schema.getName().contains(key)==true||keep.compareTo("ALL")==0){
+                             writerFactory.addSchema(schema);
+                             writerFactory.addFilter(schema.getName());
+                             writer.defineSchema(schema);
+                             System.out.println("\t >>>>> adding schema to writer : " + schema.getName());
+                         }
+                     }
+                 }
+                 writerFactory.show();
+                 //writeFactory.getSchemaEvent()
+             }
+             int nEvents = reader.getEventCount();
+             for(int nev = 0; nev < nEvents; nev++){
+                 HipoEvent    event = reader.readHipoEvent(nev);
+                 HipoEvent outEvent = writerFactory.getFilteredEvent(event);
+                 //outEvent.show();
+                 writer.writeEvent(outEvent);
+                 progress.updateStatus();
+             }
+         }
+         writer.close();
+     }
+     
     public static EvioDataBank getGenPart(PhysicsEvent event){
         EvioDataBank bank = EvioFactory.createBank("GenPart::true", event.count());
         for(int i = 0; i < event.count(); i++){
@@ -201,55 +251,19 @@ public class HipoFileUtils {
     
     public static void main(String[] args){
         
-        CommandLineParser parser = new CommandLineParser();
-        
-        parser.addCommand("-lund");
-        parser.addCommand("-show");
-                
-        parser.getCommand("-lund").addRequiredParameter("-o", "Output HIPO file");
-        
-        
-        
-        parser.getCommand("-show").addRequiredParameter("-filter", "Event filter (example 11:2212:X+:X-:Xn)");
-        parser.getCommand("-show").addRequiredParameter("-i", "Input HIPO file");
-        parser.getCommand("-show").addRequiredParameter("-p", "particle to from the event (example \"[22,0]+[22,1]\")");
-        parser.getCommand("-show").addRequiredParameter("-v", "property of the particle to display (example mass, px, theta)");
-        parser.getCommand("-show").addOptionalParameter("-b","100", "number of bins on the plot");
-        
-        //parser.getCommand("-lund").addRequiredParameter("-o", "Output hipo File");
-        //parser.getCommand("-lund").printUsage("hipo-utils");
+        OptionParser parser = new OptionParser();
+        parser.addRequired("-o");
+        parser.addOption("-keep", "ALL", "Selection of banks to keep in the output");
+        parser.addOption("-c", "2","Compression algorithm (0-none, 1-gzip, 2-lz4)");
         
         parser.parse(args);
         
-        if(parser.getCommand().getCommand().compareTo("-lund")==0){
-            if(parser.getCommand().containsRequired()==false){
-                parser.getCommand().explainMissing();
-                parser.getCommand().printUsage("hipo-utils");
-            } else {
-                String output = parser.getCommand().getAsString("-o");
-                System.out.println(" output file = " + output);
-                List<String> inputList = parser.getCommand().getInputList();
-                //HipoFileUtils.writeLundFiles(output, inputList);
-                HipoFileUtils.writeLundFilesHipo(output, inputList);
-            }
-        }
+        String outputFile = parser.getOption("-o").stringValue();
+        List<String> inputFileList = parser.getInputList();
+        int  compression = parser.getOption("-c").intValue();
+        String keepBanks = parser.getOption("-keep").stringValue();
         
-        if(parser.getCommand().getCommand().compareTo("-show")==0){
-            if(parser.getCommand().containsRequired()==false){
-                parser.getCommand().explainMissing();
-                parser.getCommand().printUsage("hipo-utils");
-            } else {
-                //System.out.println(" Lanching display command");
-                String filter = parser.getCommand().getAsString("-filter");
-                String  input = parser.getCommand().getAsString("-i");
-                String  particle = parser.getCommand().getAsString("-p");
-                String  property = parser.getCommand().getAsString("-v");
-                Integer  nbins  = parser.getCommand().getAsInt("-b");
-                System.out.println("NUMBER OF BINS = " + nbins);
-                HipoFileUtils.eventShowHipo(input, filter, particle, property, nbins);
-            }
-        }
-        parser.getCommand().show();
+        HipoFileUtils.writeHipo(outputFile, compression, keepBanks, inputFileList);
         /*
         if(parser.getCommand().getCommand().compareTo("-lund")==0){
             String output = parser.getCommand().getAsString("-o");
