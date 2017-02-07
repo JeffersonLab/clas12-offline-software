@@ -95,14 +95,14 @@ public class ECPionFinder {
                     best_mass = mass;
                     best_distance = Math.abs(mass-0.135);
                 }
-                /*System.out.println(String.format("%8.3f %8.3f %8.5f", 
+              /*  System.out.println(String.format("%8.3f %8.3f %8.5f", 
                         mom,g2.vector().p(),g1.vector().mass()));
-                        */
+                */        
             }            
         }
-        /*if(best_distance<50.0)
+        if(best_distance<50.0)
             System.out.println(String.format("%8.3f %8.3f %8.5f", 
-                        1.0,1.0,best_mass));*/
+                        1.0,1.0,best_mass));
         return best_mass;
     }
     
@@ -129,7 +129,7 @@ public class ECPionFinder {
     }
     
     public static void main(String[] args){
-        String inputFile = "/Users/gavalian/Work/Software/Release-9.0/COATJAVA/bench/dis_pion_rec_full.hipo";
+        String inputFile = args[0];//"/Users/gavalian/Work/Software/Release-9.0/COATJAVA/bench/dis_pion_rec_full.hipo";
         HipoDataSource reader = new HipoDataSource();        
         reader.open(inputFile);
         
