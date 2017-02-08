@@ -13,7 +13,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	// the "sector" 1 .. max, max depends on layer,
 	// max = {10, 14, 18, 24} for layers {(1,2), (3,4), (5,6), (7,8)}
 	// respectively
-	private int sector;
+	private int _sector;
 
 	// used in z view for ordering
 	private double perp;
@@ -35,7 +35,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	 *            should be an array of 10 numbers x y x y z0..z5
 	 */
 	public SVTxyPanel(int sect, int lay, double vals[]) {
-		sector = sect;
+		_sector = sect;
 		layer = lay;
 		double x1 = vals[0];
 		double y1 = vals[1];
@@ -99,7 +99,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	 * @return the sector
 	 */
 	public int getSector() {
-		return sector;
+		return _sector;
 	}
 
 	/**

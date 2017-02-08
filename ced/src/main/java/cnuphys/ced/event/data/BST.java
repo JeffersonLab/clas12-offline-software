@@ -199,47 +199,6 @@ public class BST {
 		return ColumnData.getIntArray("BSTRec::Crosses.region");
 	}
 	
-	
-	/**
-	 * Get the yx intercept from the reconstructed cosmics data
-	 * @return the yx intercept array
-	 */
-	public static double[] cosmicYxInterc() {
-		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_interc");
-	}
-	
-	/**
-	 * Get the yx slope from the reconstructed cosmics data
-	 * @return the yx slope array
-	 */
-	public static double[] cosmicYxSlope() {
-		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yx_slope");
-	}
-	
-	/**
-	 * Get the yz intercept from the reconstructed cosmics data
-	 * @return the yz intercept array
-	 */
-	public static double[] cosmicYzInterc() {
-		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_interc");
-	}
-	
-	/**
-	 * Get the yz slope from the reconstructed cosmics data
-	 * @return the yz slope array
-	 */
-	public static double[] cosmicYzSlope() {
-		return ColumnData.getDoubleArray("BSTRec::Cosmics.trkline_yz_slope");
-	}
-	
-	/**
-	 * Get the IDs from the reconstructed cosmics data
-	 * @return the ID array
-	 */
-	public static int[] cosmicID() {
-		return ColumnData.getIntArray("BSTRec::Cosmics.ID");
-	}
-	
 	/**
 	 * Get a collection of all strip, adc doublets for a given sector and layer
 	 * 

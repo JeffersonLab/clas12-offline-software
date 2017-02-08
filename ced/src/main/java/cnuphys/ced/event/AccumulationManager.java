@@ -9,7 +9,7 @@ import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
@@ -146,7 +146,7 @@ public class AccumulationManager
 		_SVTAccumulatedData = new int[8][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_SVTAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
+			_SVTAccumulatedData[lay0] = new int[SVTGeometry.sectorsPerSuperlayer[supl0]];
 		}
 
 		// _bstDgtzAccumulatedData = new int[8][24];
@@ -155,7 +155,7 @@ public class AccumulationManager
 		_SVTFullAccumulatedData = new int[8][][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_SVTFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
+			_SVTFullAccumulatedData[lay0] = new int[SVTGeometry.sectorsPerSuperlayer[supl0]][256];
 		}
 		
 		//ctof storage
@@ -251,7 +251,7 @@ public class AccumulationManager
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
 			int supl0 = layer / 2;
-			for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
+			for (int sector = 0; sector < SVTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
 				_SVTAccumulatedData[layer][sector] = 0;
 				for (int strip = 0; strip < 256; strip++) {
 					_SVTFullAccumulatedData[layer][sector][strip] = 0;

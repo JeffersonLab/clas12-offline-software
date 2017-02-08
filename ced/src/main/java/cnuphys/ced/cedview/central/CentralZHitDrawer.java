@@ -19,7 +19,7 @@ import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.SVT;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 
 public class CentralZHitDrawer implements IDrawable {
@@ -117,7 +117,7 @@ public class CentralZHitDrawer implements IDrawable {
 		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedSVTFullData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+			for (int sect0 = 0; sect0 < SVTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
 				for (int strip0 = 0; strip0 < 255; strip0++) {
 					int hitCount = bstFullData[lay0][sect0][strip0];
 
@@ -167,7 +167,7 @@ public class CentralZHitDrawer implements IDrawable {
 					//TODO Undo hack when geometry fixed
 					
 					int superlayer = (hit.layer - 1) / 2;
-	                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+	                int numSect = SVTGeometry.sectorsPerSuperlayer[superlayer];
 					int hackSect = (hit.sector + (numSect/2)) % numSect;
 					if (hackSect == 0) hackSect = numSect;
 

@@ -11,7 +11,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
-public class BSTGeometry {
+public class SVTGeometry {
 
 	// use coat java or peter's
 	public static final boolean USECOATJAVA = true;
@@ -184,7 +184,7 @@ public class BSTGeometry {
 
 		double vals[] = new double[10];
 
-		BSTGeometry.getLimitValues(sector - 1, supl, lay, vals);
+		SVTGeometry.getLimitValues(sector - 1, supl, lay, vals);
 		// covert to cm
 		for (int i = 0; i < 10; i++) {
 			vals[i] /= 10;

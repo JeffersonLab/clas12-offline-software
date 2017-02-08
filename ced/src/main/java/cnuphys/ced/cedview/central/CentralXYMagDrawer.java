@@ -14,7 +14,7 @@ import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 
 public class CentralXYMagDrawer extends DrawableAdapter {
@@ -105,7 +105,7 @@ public class CentralXYMagDrawer extends DrawableAdapter {
 		double vals[] = new double[10];
 		int supl = (closestPanel.getLayer() - 1) / 2; // [0,1,2,3]
 		int layer = (closestPanel.getLayer() - 1) % 2; // [0, 1]
-		BSTGeometry.getLimitValues(0, supl, layer, vals);
+		SVTGeometry.getLimitValues(0, supl, layer, vals);
 
 		// values are in mm
 		_xmax = Math.max(Math.abs(vals[0]), Math.abs(vals[2]));
@@ -170,7 +170,7 @@ public class CentralXYMagDrawer extends DrawableAdapter {
 						hitString += "(" + layer + "," + strip + ") ";
 
 						// //always get coords for sector 1
-						BSTGeometry.getStrip(1, layer, strip, coords);
+						SVTGeometry.getStrip(1, layer, strip, coords);
 						wp0.setLocation(10 * coords[2], 10 * coords[0]);
 						wp1.setLocation(10 * coords[5], 10 * coords[3]);
 						container.worldToLocal(pp0, wp0);
@@ -193,19 +193,5 @@ public class CentralXYMagDrawer extends DrawableAdapter {
 
 		g.setColor(Color.cyan);
 		g.drawString(hitString, 4, y);
-
-		// crosses?
-		double labx[] = BST.crossX();
-		if (labx != null) {
-			double laby[] = BST.crossY();
-			double labz[] = BST.crossZ();
-			// bstData.bstrec
-			// for (int i = 0; i < labx.length; i++) {
-			// Point3D p3d = new Point3D(labx[i], laby[i], labz[i]);
-			// Point3D rotPnt = BSTGeometry.inverseRotate(sector, superlayer,
-			// layer, p3d);
-			// }
-
-		}
 	}
 }
