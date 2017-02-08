@@ -47,7 +47,8 @@ public class ECEngine extends ReconstructionEngine {
         //System.out.println(" PROCESSING EC EVENT ");
         if(de.hasBank("RUN::config")==true){
             DataBank bank = de.getBank("RUN::config");
-           // runNo = bank.getInt("run", 0);
+            runNo = bank.getInt("run", 0);
+            //System.out.println("------- The bank exists. run = " + runNo );
         }
     
         
