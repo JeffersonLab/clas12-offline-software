@@ -174,6 +174,13 @@ public class DetectorParticle implements Comparable {
     public int getScore(){
         return this.particleScore;
     }
+    
+    public int getSector(){
+        if(this.hasHit(DetectorType.EC, 1)==true){
+            return getHit(DetectorType.EC, 1).getDescriptor().getSector();
+        }
+        return 0;
+    }
     /**
      * returns chi2 of score.
      * @return 
