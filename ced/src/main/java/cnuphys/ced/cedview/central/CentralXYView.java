@@ -27,6 +27,7 @@ import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
+import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Environment;
@@ -36,11 +37,17 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.CTOF;
+import cnuphys.ced.event.data.Cosmic;
+import cnuphys.ced.event.data.CosmicList;
+import cnuphys.ced.event.data.Cosmics;
+import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
@@ -56,6 +63,7 @@ public class CentralXYView extends CedXYView {
 
 	private static Color _panelColors[] = { X11Colors.getX11Color("sky blue"),
 			X11Colors.getX11Color("light blue") };
+	
 
 	// the CND xy polygons
 	CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
@@ -72,7 +80,7 @@ public class CentralXYView extends CedXYView {
 	// 200., -200., -400., 400.);
 
 	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			-400, -400, 800, 800);
+			400, -400, -800, 800);
 
 	// used to draw swum trajectories (if any) in the after drawer
 	private SwimTrajectoryDrawer _swimTrajectoryDrawer;
@@ -216,9 +224,9 @@ public class CentralXYView extends CedXYView {
 
 				if (!_eventManager.isAccumulating()) {
 					_swimTrajectoryDrawer.draw(g, container);
-//					if (showCosmics()) {
-//						drawCosmicTracks(g, container);
-//					}
+					if (showCosmics()) {
+						drawCosmicTracks(g, container);
+					}
 					
 					_hitDrawer.draw(g, container);
 
@@ -238,34 +246,35 @@ public class CentralXYView extends CedXYView {
 		getContainer().setAfterDraw(afterDraw);
 	}
 
-//	// draw cosmic ray tracks
-//	private void drawCosmicTracks(Graphics g, IContainer container) {
-//
-//
-//		Shape oldClip = clipView(g);
-//
-//		int ids[] = BST.cosmicID();
-//		if (ids != null) {
-//			double yx_interc[] = BST.cosmicYxInterc();
-//			double yx_slope[] = BST.cosmicYxSlope();
-//
-//			g.setColor(Color.red);
-//			Point p1 = new Point();
-//			Point p2 = new Point();
-//
-//			for (int i = 0; i < ids.length; i++) {
-//				double y1 = 1000;
-//				double y2 = -1000;
-//				double x1 = yx_slope[i] * y1 + yx_interc[i];
-//				double x2 = yx_slope[i] * y2 + yx_interc[i];
-//				container.worldToLocal(p1, x1, y1);
-//				container.worldToLocal(p2, x2, y2);
-//				g.drawLine(p1.x, p1.y, p2.x, p2.y);
-//			}
-//		}
-//
-//		g.setClip(oldClip);
-//	}
+	// draw cosmic ray tracks
+	private void drawCosmicTracks(Graphics g, IContainer container) {
+
+		CosmicList cosmics;
+		cosmics = Cosmics.getInstance().getCosmics();
+		
+		if ((cosmics == null) || cosmics.isEmpty()) {
+			return;
+		}
+
+		Shape oldClip = clipView(g);
+		
+		Point p1 = new Point();
+		Point p2 = new Point();
+		for (Cosmic cosmic : cosmics) {
+			double y1 = 1000;
+			double y2 = -1000;
+			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
+			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
+			container.worldToLocal(p1, x1, y1);
+			container.worldToLocal(p2, x2, y2);
+			
+			g.setColor(Color.red);
+			g.drawLine(p1.x, p1.y, p2.x, p2.y);
+
+		}
+
+		g.setClip(oldClip);
+	}
 
 	/**
 	 * Get the panel based on the layer and sector
@@ -375,14 +384,14 @@ public class CentralXYView extends CedXYView {
 		}
 	}
 	
-	/**
-	 * Rotates the sector number by 180 degrees
-	 * @param layer the layer 1..8
-	 * @param sector the sector 1..N
-	 */
+//	/**
+//	 * Rotates the sector number by 180 degrees
+//	 * @param layer the layer 1..8
+//	 * @param sector the sector 1..N
+//	 */
 	public int svtSectorHack(int layer, int sector) {
 		int superlayer = (layer-1) / 2; //zero based
-		int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+		int numSect = SVTGeometry.sectorsPerSuperlayer[superlayer];
 		int n2 = numSect/2;
 		int hackSect = (sector + n2) % numSect;
 		if (hackSect == 0) {
@@ -475,6 +484,7 @@ public class CentralXYView extends CedXYView {
 		}
 
 		if (_closestPanel != null) {
+			
 			int region = (_closestPanel.getLayer() + 1) / 2;
 			fbString("red", "svt layer " + _closestPanel.getLayer(),
 					feedbackStrings);
@@ -538,6 +548,19 @@ public class CentralXYView extends CedXYView {
 		}
 
 		// hits data
+
+		if (_closestPanel != null) {
+			AdcHitList hits = SVT.getInstance().getHits();
+			if ((hits != null) && !hits.isEmpty()) {
+				Vector<int[]> stripADCData = SVT.getInstance().allStripsForSectorAndLayer(_closestPanel.getSector(),
+						_closestPanel.getLayer());
+				for (int sdtdat[] : stripADCData) {
+					fbString("orange", "strip  " + sdtdat[0] + " adc: " + +sdtdat[1], feedbackStrings);
+				}
+			}
+		}
+
+		
 
 //		int hitCount = BST.hitCount();
 //		if ((_closestPanel != null) && (hitCount > 0)) {

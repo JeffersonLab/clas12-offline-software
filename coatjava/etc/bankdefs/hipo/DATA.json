@@ -192,5 +192,31 @@
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
        {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
     ]
+  },
+    {
+    "bank": "RF::adc",
+    "group": 1001,
+    "info": "digitized adc bank RF",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of RF"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"half sector LTCC (1 or 2)"},
+       {"name":"component", "id":3, "type":"int16", "info":"ring of LTCC (1,2,3,4)"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},
+       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+    ]
+  },
+  {
+    "bank": "RF::tdc",
+    "group": 1002,
+    "info": "digitized bank for RF TDC",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of RF"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"layer RF (=1) "},
+       {"name":"component", "id":3, "type":"int16", "info":"RF id (1 or 2)"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (2 - TDCL , 3 - TDCR)"},
+       {"name":"TDC",       "id":5, "type":"int32", "info":"TDC value (25 ps per channel)"}
+    ]
   }
 ]

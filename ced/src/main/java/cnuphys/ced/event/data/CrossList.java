@@ -78,7 +78,7 @@ public class CrossList extends Vector<Cross> {
 		}
 		
 		if (sector.length < 1) {
-			_error = "Sector array has 0 length when creating SegmentList";
+			_error = "Sector array has 0 length when creating CrossList";
 			return -1;
 		}
 		

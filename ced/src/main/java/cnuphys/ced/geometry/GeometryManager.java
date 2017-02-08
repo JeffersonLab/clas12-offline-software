@@ -65,7 +65,7 @@ public class GeometryManager {
 		CTOFGeometry.initialize();
 
 		// get BST data
-		BSTGeometry.initialize();
+		SVTGeometry.initialize();
 		getBSTPanels();
 
 		ConstantProvider ecDataProvider = 
@@ -114,19 +114,51 @@ public class GeometryManager {
 			// geom service uses superlayer and layer
 			int supl = ((bigLayer - 1) / 2); // 0, 1, 2, 3
 			int lay = ((bigLayer - 1) % 2); // 0, 1, 0, 1
+			
+			int numSect = SVTGeometry.sectorsPerSuperlayer[supl];
 
-			for (int sector = 1; sector <= BSTGeometry.sectorsPerSuperlayer[supl]; sector++) {
+			for (int sector = 1; sector <= numSect; sector++) {
+				
 				// public static void getLimitValues(int sector, int superlayer,
 				// int layer, double vals[]) {
-				BSTGeometry.getLimitValues(sector - 1, supl, lay, vals);
+				SVTGeometry.getLimitValues(sector - 1, supl, lay, vals);
 				if (_bstXYpanels == null) {
 					_bstXYpanels = new Vector<SVTxyPanel>();
 				}
-				_bstXYpanels.add(new SVTxyPanel(sector, bigLayer, vals));
+				
+//				if (bigLayer == 6) {
+//				System.err.println("NUMSECT: " + SVTGeometry.sectorsPerSuperlayer[supl] + "    SECTOR: " + sector + "   HACKED SECTOR: " + svtSectorHack(numSect, sector));
+//				}
+				int hackSector = svtSectorHack(numSect, sector);
+//				hackSector = sector;
+				_bstXYpanels.add(new SVTxyPanel(hackSector, bigLayer, vals));
 			}
 		}
 
 	}
+	
+	//convert from geometry sectors to actual sectors. They disagree.
+//	/**
+//	 * Rotates the sector number by 180 degrees
+//	 * @param numSect the number of sectors
+//	 * @param sector the sector 1..N
+//	 */
+	private int svtSectorHack(int numSect, int sector) {
+		int n2 = numSect/2;
+		int hackSect = 2 + n2 - sector;
+		if (hackSect <= 0) {
+			hackSect += numSect;
+		}
+	//	System.err.println("LAY: " + layer + "  SUPL: " + superlayer + " SECT " + sector + "  NUMSECT: " + 
+	//	numSect + "  hackSect: " + hackSect);
+		return hackSect;
+	}
+
+	
+	
+	
+	
+	
 
 	/**
 	 * Get the sector [1..6] from the phi value
@@ -193,6 +225,10 @@ public class GeometryManager {
 		return absPhi;
 	}
 
+	/**
+	 * Get the list of SVT XY panels
+	 * @return the panels
+	 */
 	public static List<SVTxyPanel> getSVTxyPanels() {
 		return _bstXYpanels;
 	}

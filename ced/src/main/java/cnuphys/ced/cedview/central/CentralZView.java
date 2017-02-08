@@ -39,8 +39,11 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.Cosmic;
+import cnuphys.ced.event.data.CosmicList;
+import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
@@ -86,6 +89,7 @@ public class CentralZView extends CedView implements ChangeListener {
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
 			LineStyle.SOLID);
+
 
 	// units are mm
 	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
@@ -302,37 +306,41 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		g2.setClip(oldClip);
 	}
-
+	
+	// draw cosmic ray tracks
 	private void drawCosmicTracks(Graphics g, IContainer container) {
 
+		CosmicList cosmics;
+		cosmics = Cosmics.getInstance().getCosmics();
+		
+		if ((cosmics == null) || cosmics.isEmpty()) {
+			return;
+		}
+
 		Shape oldClip = clipView(g);
-		int ids[] = BST.cosmicID();
-		if (ids != null) {
-			double yx_interc[] = BST.cosmicYxInterc();
-			double yx_slope[] = BST.cosmicYxSlope();
-			double yz_interc[] = BST.cosmicYzInterc();
-			double yz_slope[] = BST.cosmicYzSlope();
-
+		
+		Point p1 = new Point();
+		Point p2 = new Point();
+		for (Cosmic cosmic : cosmics) {
+			double y1 = 1000;
+			double y2 = -1000;
+			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
+			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
+			double z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
+			double z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
+			
+			labToLocal(x1, y1, z1, p1);
+			labToLocal(x2, y2, z2, p2);
+			
 			g.setColor(Color.red);
-			Point p1 = new Point();
-			Point p2 = new Point();
+			g.drawLine(p1.x, p1.y, p2.x, p2.y);
 
-			for (int i = 0; i < ids.length; i++) {
-				double y1 = 1000;
-				double y2 = -1000;
-				double x1 = yx_slope[i] * y1 + yx_interc[i];
-				double x2 = yx_slope[i] * y2 + yx_interc[i];
-				double z1 = yz_slope[i] * y1 + yz_interc[i];
-				double z2 = yz_slope[i] * y2 + yz_interc[i];
-
-				labToLocal(x1, y1, z1, p1);
-				labToLocal(x2, y2, z2, p2);
-				g.drawLine(p1.x, p1.y, p2.x, p2.y);
-			}
 		}
 
 		g.setClip(oldClip);
 	}
+
+
 
 	// draw the panels
 	private void drawPanels(Graphics g, IContainer container) {
@@ -850,7 +858,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		float coords[] = new float[6];
 
-		BSTGeometry.getStrip(sector, layer, strip, coords);
+		SVTGeometry.getStrip(sector, layer, strip, coords);
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);

@@ -4,7 +4,13 @@ import java.awt.Color;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.event.data.Cosmic;
+import cnuphys.ced.event.data.CosmicList;
+import cnuphys.ced.event.data.Cosmics;
+import cnuphys.ced.event.data.Cross2;
+import cnuphys.ced.event.data.CrossList2;
+import cnuphys.ced.event.data.SVTCrosses;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -33,7 +39,7 @@ public class BSTPanel3D extends DetectorItem3D {
 	public void drawShape(GLAutoDrawable drawable) {
 		float coords[] = new float[36];
 
-		BSTGeometry.getLayerQuads(_sector, _layer, coords);
+		SVTGeometry.getLayerQuads(_sector, _layer, coords);
 
 		Color color = ((_layer % 2) == 0) ? X11Colors.getX11Color("coral", getVolumeAlpha())
 			: X11Colors.getX11Color("Powder Blue", getVolumeAlpha());
@@ -68,7 +74,7 @@ public class BSTPanel3D extends DetectorItem3D {
 				// strip 1..256
 				int strip = bststrip[i];
 
-				BSTGeometry.getStrip(sector, layer, strip, coords6);
+				SVTGeometry.getStrip(sector, layer, strip, coords6);
 
 				if (_cedPanel3D.showMCTruth() && (pid != null)) {
 					Color color = truthColor(pid, i);
@@ -92,57 +98,115 @@ public class BSTPanel3D extends DetectorItem3D {
 		} // hitcount
 
 		if (drawOutline) { // if any hits, draw it once
-			BSTGeometry.getLayerQuads(_sector, _layer, coords36);
+			SVTGeometry.getLayerQuads(_sector, _layer, coords36);
 			Support3D.drawQuads(drawable, coords36, outlineHitColor, 1f, true);
 		}
-
+		
 
 		// reconstructed crosses?
-		double labx[] = BST.crossX();
-		if (_cedPanel3D.showReconCrosses() && (labx != null)) {
-			// these arrays are in mm
-			double laby[] = BST.crossY();
-			double labz[] = BST.crossZ();
-			double ux[] = BST.crossUx();
-			double uy[] = BST.crossUy();
-			double uz[] = BST.crossUz();
-
-			int len = (labx == null) ? 0 : labx.length;
-
+		if (_cedPanel3D.showReconCrosses()) {
+			CrossList2 crosses = SVTCrosses.getInstance().getCrosses();
+			int len = (crosses == null) ? 0 : crosses.size();
 			for (int i = 0; i < len; i++) {
-				// convert to cm
-				float x1 = (float) labx[i] / 10;
-				float y1 = (float) laby[i] / 10;
-				float z1 = (float) labz[i] / 10;
+				Cross2 cross = crosses.elementAt(i);
+				if (cross != null) {
+					//convert to cm
+					float x1 = cross.x / 10;
+					float y1 = cross.y / 10;
+					float z1 = cross.z / 10;
 
-				Support3D.drawLine(drawable, x1, y1, z1, (float) (ux[i]),
-						(float) (uy[i]), (float) (uz[i]), CROSS_LEN,
-						crossColor, 3f);
-				Support3D.drawLine(drawable, x1, y1, z1, (float) (ux[i]),
-						(float) (uy[i]), (float) (uz[i]),
-						(float) (1.1 * CROSS_LEN), Color.black, 1f);
+					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
+							cross.uy, cross.uz, CROSS_LEN,
+							crossColor, 3f);
+					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
+							cross.uy, cross.uz,
+							(float) (1.1 * CROSS_LEN), Color.black, 1f);
 
-				drawCrossPoint(drawable, x1, y1, z1, crossColor);
+					drawCrossPoint(drawable, x1, y1, z1, crossColor);
+				}
+			}
+		}
+		
+		//cosmics?
+		if (_cedPanel3D.showCosmics()) {
+			CosmicList cosmics;
+			cosmics = Cosmics.getInstance().getCosmics();
+			
+			if ((cosmics != null) && !cosmics.isEmpty()) {
+				for (Cosmic cosmic : cosmics) {
+					float y1 = 1000;
+					float y2 = -1000;
+					float x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
+					float x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
+					float z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
+					float z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
+					
+					x1 /= 10;
+					x2 /= 10;
+					y1 /= 10;
+					y2 /= 10;
+					z1 /= 10;
+					z2 /= 10;
+					
+					Support3D.drawLine(drawable, x1, y1, z1, x2, y2, z2, Color.red, 1f);
 
-				// float x2 = (float) (x1 + CROSS_LEN * ux[i]);
-				// float y2 = (float) (y1 + CROSS_LEN * uy[i]);
-				// float z2 = (float) (z1 + CROSS_LEN * uz[i]);
-				//
-				// // System.err.println("BST crosses at (" + x1 + ", " + y1 +
-				// ", " + z1 + ")");
-				//
-				// Support3D.drawCone(drawable, x1, y1, z1, x2, y2, z2, 1.0f,
-				// coneColor);
-				//
-				// x2 = (float) (x1 + 1.1*CROSS_LEN * ux[i]);
-				// y2 = (float) (y1 + 1.1*CROSS_LEN * uy[i]);
-				// z2 = (float) (z1 + 1.1*CROSS_LEN * uz[i]);
-				//
-				// Support3D.drawLine(drawable, x1, y1, z1,
-				// x2, y2, z2, coneLineColor, 2f);
+				}
 			}
 
 		}
+		
+//		
+//		
+//		
+//		double labx[] = BST.crossX();
+//		if (_cedPanel3D.showReconCrosses() && (labx != null)) {
+//			// these arrays are in mm
+//			double laby[] = BST.crossY();
+//			double labz[] = BST.crossZ();
+//			double ux[] = BST.crossUx();
+//			double uy[] = BST.crossUy();
+//			double uz[] = BST.crossUz();
+//
+//			int len = (labx == null) ? 0 : labx.length;
+//
+//			for (int i = 0; i < len; i++) {
+//				// convert to cm
+//				float x1 = (float) labx[i] / 10;
+//				float y1 = (float) laby[i] / 10;
+//				float z1 = (float) labz[i] / 10;
+//
+//				Support3D.drawLine(drawable, x1, y1, z1, (float) (ux[i]),
+//						(float) (uy[i]), (float) (uz[i]), CROSS_LEN,
+//						crossColor, 3f);
+//				Support3D.drawLine(drawable, x1, y1, z1, (float) (ux[i]),
+//						(float) (uy[i]), (float) (uz[i]),
+//						(float) (1.1 * CROSS_LEN), Color.black, 1f);
+//
+//				drawCrossPoint(drawable, x1, y1, z1, crossColor);
+//
+//				// float x2 = (float) (x1 + CROSS_LEN * ux[i]);
+//				// float y2 = (float) (y1 + CROSS_LEN * uy[i]);
+//				// float z2 = (float) (z1 + CROSS_LEN * uz[i]);
+//				//
+//				// // System.err.println("BST crosses at (" + x1 + ", " + y1 +
+//				// ", " + z1 + ")");
+//				//
+//				// Support3D.drawCone(drawable, x1, y1, z1, x2, y2, z2, 1.0f,
+//				// coneColor);
+//				//
+//				// x2 = (float) (x1 + 1.1*CROSS_LEN * ux[i]);
+//				// y2 = (float) (y1 + 1.1*CROSS_LEN * uy[i]);
+//				// z2 = (float) (z1 + 1.1*CROSS_LEN * uz[i]);
+//				//
+//				// Support3D.drawLine(drawable, x1, y1, z1,
+//				// x2, y2, z2, coneLineColor, 2f);
+//			}
+
+//		}
+		
+		
+		
+		//cosmics
 
 	}
 

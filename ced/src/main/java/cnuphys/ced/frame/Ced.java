@@ -55,6 +55,7 @@ import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.CTOF;
+import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
@@ -63,12 +64,13 @@ import cnuphys.ced.event.data.HBHits;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.SVT;
+import cnuphys.ced.event.data.SVTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.FastMCMenu;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
@@ -110,7 +112,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.96";
+	private static final String _release = "build 0.99.98";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -438,7 +440,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				
 				int supl0 = (layer-1) / 2;
 				
-				int maxSector = BSTGeometry.sectorsPerSuperlayer[supl0];
+				int maxSector = SVTGeometry.sectorsPerSuperlayer[supl0];
 				if (sector > maxSector) {
 					return null;
 				}
@@ -928,6 +930,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//Initialize data collectors
 		DC.getInstance();
 		FTOF.getInstance();
+		SVTCrosses.getInstance();
 		TBCrosses.getInstance();
 		HBCrosses.getInstance();
 		TBSegments.getInstance();
@@ -939,6 +942,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		FTCAL.getInstance();
 		CTOF.getInstance();
 		SVT.getInstance();
+		Cosmics.getInstance();
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {

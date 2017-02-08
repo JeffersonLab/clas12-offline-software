@@ -67,6 +67,7 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_TB_TRACK = "TB Track";
 	public static final String SHOW_HB_TRACK = "HB Track";
 
+	public static final String SHOW_COSMIC = "Cosmics";
 
 	// alpha value for volumes
 	protected int volumeAlpha = 28;
@@ -529,6 +530,16 @@ public class CedPanel3D extends Panel3D {
 	public boolean showSector6() {
 		return show(CedPanel3D.SHOW_SECTOR_6);
 	}
+	
+	/**
+	 * Show Cosmics?
+	 * @return <code>true</code> if we are to show Cosmics
+	 */
+	public boolean showCosmics() {
+		return show(CedPanel3D.SHOW_COSMIC);
+	}
+
+
 
 	/**
 	 * Show we show the 1-based sector?

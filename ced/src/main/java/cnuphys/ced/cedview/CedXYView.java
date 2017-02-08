@@ -162,14 +162,15 @@ public abstract class CedXYView extends CedView {
 
 		g.setColor(X11Colors.getX11Color("dark red"));
 		g.drawLine(left, bottom, right, bottom);
-		g.drawLine(left, bottom, left, top);
+//		g.drawLine(left, bottom, left, top);
+		g.drawLine(right, bottom, right, top);
 
-//		g.drawString("y", right + 3, top + fm.getHeight() / 2 - 1);
-//		g.drawString("x", left - fm.stringWidth("x") - 2,
-//				bottom + fm.getHeight() / 2);
-		g.drawString("y", left - fm.stringWidth("y") - 2, top + fm.getHeight() / 2 - 1);
-		g.drawString("x", right+3,
+		g.drawString("y", right + 3, top + fm.getHeight() / 2 - 1);
+		g.drawString("x", left - fm.stringWidth("x") - 2,
 				bottom + fm.getHeight() / 2);
+//		g.drawString("y", left - fm.stringWidth("y") - 2, top + fm.getHeight() / 2 - 1);
+//		g.drawString("x", right+3,
+//				bottom + fm.getHeight() / 2);
 
 	}
 

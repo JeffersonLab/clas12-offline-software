@@ -28,7 +28,7 @@ import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.LundId;
@@ -138,7 +138,7 @@ public class CentralXYHitDrawer implements IDrawable {
 		
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+			for (int sect0 = 0; sect0 < SVTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
 				SVTxyPanel panel = CentralXYView.getPanel(lay0 + 1, sect0 + 1);
 
 				if (panel != null) {
@@ -208,7 +208,7 @@ public class CentralXYHitDrawer implements IDrawable {
 		drawCTOFSingleHitsMode(g, container);
 	}
 	
-	// draw micromegas hits
+	// draw CTOF hits
 	private void drawCTOFSingleHitsMode(Graphics g,
 			IContainer container) {
 		
@@ -269,16 +269,9 @@ public class CentralXYHitDrawer implements IDrawable {
 
 			for (AdcHit hit : hits) {
 				if (hit != null) {
-					//HACK GEO SECTOR DOESN"T MATCH REAL
-					//TODO Undo hack when geometry fixed
-					
-					int superlayer = (hit.layer - 1) / 2;
-	                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-					int hackSect = (hit.sector + (numSect/2)) % numSect;
-					if (hackSect == 0) hackSect = numSect;
 					
 					SVTxyPanel panel = CentralXYView.getPanel(hit.layer,
-							hackSect);
+							hit.sector);
 					
 					if (panel != null) {
 						_view.drawSVTPanel(g2, container, panel, baseColor);
