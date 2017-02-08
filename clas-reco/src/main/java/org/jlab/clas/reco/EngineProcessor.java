@@ -65,6 +65,25 @@ public class EngineProcessor {
             this.addEngine(service);
         }*/
     }
+     public void initCaloDebug(){
+        
+        String[] names = new String[]{
+            "EC","EB"
+        };
+        
+        String[] services = new String[]{
+            "org.jlab.service.ec.ECEngine",
+            "org.jlab.service.eb.EBEngine",
+        };
+        
+        for(int i = 0; i < names.length; i++){
+            this.addEngine(names[i], services[i]);
+        }
+        /*
+        for(String service : services){
+            this.addEngine(service);
+        }*/
+    }
     /**
      * Adding engine to the map the order of the services matters, since they will 
      * be executed in order added.
@@ -210,7 +229,11 @@ public class EngineProcessor {
             int config  = parser.getOption("-c").intValue();
             int nevents = parser.getOption("-n").intValue();
             if(config>0){
-                proc.initDefault();
+                if(config>2){
+                    proc.initCaloDebug();
+                } else {
+                    proc.initDefault();
+                }
             } else {
                 for(String engine : services){
                     proc.addEngine(engine);
