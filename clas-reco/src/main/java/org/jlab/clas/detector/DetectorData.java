@@ -26,6 +26,7 @@ public class DetectorData {
      */
     public static List<DetectorResponse>  readDetectorResponses(DataEvent event, String bank_name){
         List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
+        //System.out.println(" RESPONESE BANK EXISTS = " + event.hasBank(bank_name));
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
 
@@ -106,6 +107,7 @@ public class DetectorData {
         }
         
         List<DetectorResponse> responses = DetectorData.readDetectorResponses(event, response_bank);
+        //System.out.println(" SIZE = " + responses.size());
         for(DetectorResponse r : responses){
             int association = r.getAssociation();
             if(association>=0&&association<detectorEvent.getParticles().size()){
