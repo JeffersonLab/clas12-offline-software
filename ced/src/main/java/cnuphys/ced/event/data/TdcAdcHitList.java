@@ -279,22 +279,29 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	 * @return a fill color for adc hits 
 	 */
 	public Color adcColor(TdcAdcHit hit) {
+		return adcColor(hit, _maxADC);
+	}
+	
+	/**
+	 * Get a color with apha based of relative adc 
+	 * @param hit the hit
+	 * @param maxAdc the max adc value
+	 * @return a fill color for adc hits 
+	 */
+	public Color adcColor(TdcAdcHit hit, int maxAdc) {
 		if (hit == null) {
 			return Color.white;
 		}
 		
 		int avgADC = hit.averageADC();
-		if (avgADC < 1) {
-			return new Color(255, 0, 0, 30);
-		}
-		if (_maxADC < 1) {
-			return Color.black;  //should not happen
-		}
 		
-		double fract = ((double)avgADC)/((double)(_maxADC));
-		fract = Math.max(0.5, Math.min(1.0, fract));
-		int alpha = (int)(254*fract);
+		double fract = ((double)avgADC)/((double)(maxAdc));
+		fract = Math.max(0, Math.min(1.0, fract));
 		
-		return new Color(255, 0, 0, alpha);
+		int alpha = 128 + (int)(127*fract);
+		alpha = Math.min(255,  alpha);
+
+		
+		return AdcColorScale.getInstance().getAlphaColor(fract, alpha);
 	}
 }

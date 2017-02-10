@@ -14,7 +14,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
@@ -153,9 +153,9 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 			return;
 		}
 		
-		int ecstrip[] = EC.strip();
-		int ecstack[] = EC.stack();
-		int ecview[] = EC.view();
+		int ecstrip[] = ECAL.strip();
+		int ecstack[] = ECAL.stack();
+		int ecview[] = ECAL.view();
 		
 		int pcalstrip[] = PCAL.strip();
 		int pcalstack[] = PCAL.stack(); //all 1s

@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -67,17 +67,17 @@ public class ECViewPlane3D extends DetectorItem3D {
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
 
-		int hitCount = EC.hitCount();
+		int hitCount = ECAL.hitCount();
 		
 		if (hitCount > 0) {
-			int sector[] = EC.sector();
-			int stack[] = EC.stack();
-			int view[] = EC.view();
-			int strip[] = EC.strip();
-			int pid[] = EC.pid();
-			double avgX[] = EC.avgX();
-			double avgY[] = EC.avgY();
-			double avgZ[] = EC.avgZ();
+			int sector[] = ECAL.sector();
+			int stack[] = ECAL.stack();
+			int view[] = ECAL.view();
+			int strip[] = ECAL.strip();
+			int pid[] = ECAL.pid();
+			double avgX[] = ECAL.avgX();
+			double avgY[] = ECAL.avgY();
+			double avgZ[] = ECAL.avgZ();
 			
 			float coords[] = new float[24];
 			for (int i = 0; i < hitCount; i++) {

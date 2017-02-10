@@ -91,7 +91,7 @@ public class ECView extends HexView {
 	 * @return the view
 	 */
 	public static ECView createECView() {
-		ECView view = new ECView("EC");
+		ECView view = new ECView("ECAL");
 
 		return view;
 	}

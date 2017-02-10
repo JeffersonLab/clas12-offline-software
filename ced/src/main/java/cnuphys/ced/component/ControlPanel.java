@@ -235,7 +235,7 @@ public class ControlPanel extends JPanel {
 			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
 				sp.add(new ColorModelLegend(
 						AccumulationManager.colorScaleModel, 160,
-						"Relative Accumulation"), BorderLayout.SOUTH);
+						"Relative Accumulation or ADC Value"), BorderLayout.SOUTH);
 			}
 
 			tabbedPane.add(sp, "display");

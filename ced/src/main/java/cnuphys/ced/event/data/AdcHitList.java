@@ -231,18 +231,17 @@ public class AdcHitList extends Vector<AdcHit> {
 		}
 		
 		int avgADC = hit.averageADC();
-		if (avgADC < 1) {
-			return new Color(255, 0, 0, 30);
-		}
-		if (_maxADC < 1) {
-			System.err.println("Max ADC < 1. That's rarely a good sign.");
-			return Color.black;  //should not happen
-		}
 		
 		double fract = ((double)avgADC)/((double)(_maxADC));
-		fract = Math.max(0.5, Math.min(1.0, fract));
-		int alpha = (int)(254*fract);
+//		fract = Math.max(0.5, Math.min(1.0, fract));
+		fract = Math.max(0, Math.min(1.0, fract));
 		
-		return new Color(255, 0, 0, alpha);
+		int alpha = 128 + (int)(127*fract);
+		alpha = Math.min(255,  alpha);
+		
+		return AdcColorScale.getInstance().getAlphaColor(fract, alpha);
+//		int alpha = (int)(254*fract);
+//		
+//		return new Color(255, 0, 0, alpha);
 	}
 }
