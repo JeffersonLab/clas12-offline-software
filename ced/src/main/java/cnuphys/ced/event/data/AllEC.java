@@ -34,7 +34,10 @@ public class AllEC extends DetectorData {
 //	bank name: [ECAL::tdc] column name: [sector] full name: [ECAL::tdc.sector] data type: byte
 	
 	TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
-
+	
+	private int _maxPCALAdc;
+	private int _maxECALAdc;
+	
 	private static AllEC _instance;
 
 	/**
@@ -51,7 +54,28 @@ public class AllEC extends DetectorData {
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_tdcAdcHits =  new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
+		computeADCMax();
 	}
+	
+	//compte the max for PCAL and ECAL separately. Fugly.
+	private void computeADCMax() {
+		_maxPCALAdc = 0;
+		_maxECALAdc = 0;
+		
+		if ((_tdcAdcHits != null) && !_tdcAdcHits.isEmpty()) {
+			for (TdcAdcHit hit : _tdcAdcHits) {
+				if (hit != null) {
+					if (hit.layer < 4) {
+						_maxPCALAdc = Math.max(_maxPCALAdc, hit.averageADC());
+					}
+					else {
+						_maxECALAdc = Math.max(_maxECALAdc, hit.averageADC());
+					}
+				}
+			}
+		}
+	}
+	
 	
 	/**
 	 * Update the list. This is probably needed only during accumulation
@@ -61,6 +85,24 @@ public class AllEC extends DetectorData {
 		_tdcAdcHits =  new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
 		return _tdcAdcHits;
 	}
+	
+	/**
+	 * Get the max adc for just the PCAL
+	 * @return the max adc for just the PCAL
+	 */
+	public int getMaxPCALAdc() {
+		return _maxPCALAdc;
+	}
+	
+	/**
+	 * Get the max adc for just the ECAL
+	 * @return the max adc for just the ECAL
+	 */
+	public int getMaxECALAdc() {
+		return _maxECALAdc;
+	}
+
+
 
 	/**
 	 * Get the tdc and adc hit list
@@ -69,4 +111,6 @@ public class AllEC extends DetectorData {
 	public TdcAdcHitList getHits() {
 		return _tdcAdcHits;
 	}
+	
+
 }

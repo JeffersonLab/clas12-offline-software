@@ -6,7 +6,7 @@ import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.PCAL;
 
@@ -62,9 +62,9 @@ public class MCHitDrawer3D extends Item3D {
 			}
 
 			if (_cedPanel3D.showECAL()) {
-				showGemcXYZHits(drawable, EC.avgX(),
-						EC.avgY(), EC.avgZ(),
-						EC.pid(), 0);
+				showGemcXYZHits(drawable, ECAL.avgX(),
+						ECAL.avgY(), ECAL.avgZ(),
+						ECAL.pid(), 0);
 			}
 
 			if (_cedPanel3D.showPCAL()) {

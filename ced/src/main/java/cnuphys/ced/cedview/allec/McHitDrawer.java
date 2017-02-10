@@ -12,7 +12,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 
@@ -48,10 +48,10 @@ public class McHitDrawer extends ECViewDrawer {
 	// the actual hit drawing
 	private void showGemcXYZHits(Graphics g, IContainer container) {
 
-		double x[] = EC.avgX();
-		double y[] = EC.avgY();
-		double z[] = EC.avgZ();
-		int stack[] = EC.stack();
+		double x[] = ECAL.avgX();
+		double y[] = ECAL.avgY();
+		double z[] = ECAL.avgZ();
+		int stack[] = ECAL.stack();
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)
 				|| (stack == null)) {
@@ -88,7 +88,7 @@ public class McHitDrawer extends ECViewDrawer {
 				int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 				localP.setZ(0);
 
-				List<String> fbs = EC.gemcHitFeedback(hitIndex, 
+				List<String> fbs = ECAL.gemcHitFeedback(hitIndex, 
 						DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
 						+ DataSupport.FB_LOCAL_XYZ
 						+ DataSupport.FB_TOTEDEP, 
@@ -127,9 +127,9 @@ public class McHitDrawer extends ECViewDrawer {
 			return;
 		}
 
-		int strips[] = EC.strip();
-		int stacks[] = EC.stack();
-		int views[] = EC.view();
+		int strips[] = ECAL.strip();
+		int stacks[] = ECAL.stack();
+		int views[] = ECAL.view();
 		
 		if ((strips == null) || (stacks == null) || (views == null)) {
 			return;

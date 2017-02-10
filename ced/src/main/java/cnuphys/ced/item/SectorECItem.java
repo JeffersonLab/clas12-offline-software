@@ -177,7 +177,7 @@ public class SectorECItem extends PolygonItem {
 								if (wp != null) {
 									Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
-									Color fc = hits.adcColor(hit);
+									Color fc = hits.adcColor(hit, AllEC.getInstance().getMaxECALAdc());
 									WorldGraphicsUtilities.drawPath2D(g, container, path, fc, fc, 0, LineStyle.SOLID,
 											true);
 								}

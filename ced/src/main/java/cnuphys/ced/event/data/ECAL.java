@@ -16,7 +16,7 @@ import cnuphys.ced.geometry.Transformations;
  * @author heddle
  *
  */
-public class EC {
+public class ECAL {
 
 	/**
 	 * Get the pid array from the true data

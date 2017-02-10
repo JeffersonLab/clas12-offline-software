@@ -35,7 +35,7 @@ import cnuphys.ced.alldata.graphics.DefinitionManager;
 import cnuphys.ced.alldata.graphics.PlotDialog;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.data.EC;
+import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.frame.Ced;
@@ -933,8 +933,8 @@ public class ClasIoEventManager {
 	private void computeSomeScalingFactors() {
 
 		double[] pcalEdep = PCAL.totEdep();
-		double[] ecEdep = EC.totEdep();
-		int stack[] = EC.stack();
+		double[] ecEdep = ECAL.totEdep();
+		int stack[] = ECAL.stack();
 		// pcal (plane = 0)
 		if (pcalEdep != null) {
 			maxEDepCal[0] = 0;

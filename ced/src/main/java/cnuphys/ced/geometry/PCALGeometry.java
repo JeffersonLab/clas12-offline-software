@@ -53,7 +53,7 @@ public class PCALGeometry {
 	private static Point3D[] _triangleIJK = new Point3D[3];
 
 	// The strips.
-	// First index if for strip stype EC_U, EC_V or EC_W,
+	// First index if for strip type U, V or W,
 	// 2nd index is for the strip index [0..(62 or 68)]
 	// and the third index is the point index [0..3]
 	private static Point3D[][][] _strips = new Point3D[3][68][4];
