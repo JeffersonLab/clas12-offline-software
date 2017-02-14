@@ -1,13 +1,6 @@
 package org.jlab.rec.ft.hodo;
 
 
-import java.util.ArrayList;
-
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.rec.ft.hodo.FTHODOConstantsLoader;
-import org.jlab.rec.ft.hodo.FTHODOHit;
-
-
 public class FTHODOHit implements Comparable<FTHODOHit>{
 	// class implements Comparable interface to allow for sorting a collection of hits by Edep values
 	
@@ -28,10 +21,27 @@ public class FTHODOHit implements Comparable<FTHODOHit>{
 		this.set_Dy(FTHODOConstantsLoader.py[Sector-1][Layer-1][ID-1]);
 		this.set_Dz(FTHODOConstantsLoader.pz[Sector-1][Layer-1][ID-1]);
 		this.set_DGTZIndex(i);
-		this.set_SignalIndex(0);
+		this.set_ClusterIndex(0);
 //		System.out.println(this._Dx + " " + this._Dy);
 	}
 
+	public FTHODOHit(int i, int Sector, int Layer, int ID, int ADC, float time) {
+		this._Sector = Sector;
+		this._Layer = Layer;
+		this._ID    = ID;
+		this._ADC   = ADC;
+		this._Time  = time;
+				
+		this.set_Edep(((double) this._ADC)*FTHODOConstantsLoader.FADC_TO_CHARGE
+				                          *FTHODOConstantsLoader.mips_energy[Sector-1][Layer-1][ID-1]
+			                         	  /FTHODOConstantsLoader.mips_charge[Sector-1][Layer-1][ID-1]);
+		this.set_Dx(FTHODOConstantsLoader.px[Sector-1][Layer-1][ID-1]);
+		this.set_Dy(FTHODOConstantsLoader.py[Sector-1][Layer-1][ID-1]);
+		this.set_Dz(FTHODOConstantsLoader.pz[Sector-1][Layer-1][ID-1]);
+		this.set_DGTZIndex(i);
+		this.set_ClusterIndex(0);
+//		System.out.println(this._Dx + " " + this._Dy);
+	}
 	
 
 	private int _ID;    	 				//	   ID
@@ -46,7 +56,7 @@ public class FTHODOHit implements Comparable<FTHODOHit>{
 	private double _Dy;						//	   	Y position (corresponds to tile centroid) 
 	private double _Dz;						//	   	Z position (corresponds to tile centroid) 
 	private int    _DGTZIndex;				//		Pointer to cluster
-	private int    _SignalIndex;			//		Pointer to cluster
+	private int    _ClusterIndex;			//		Pointer to cluster
 
 
 	
@@ -176,41 +186,41 @@ public class FTHODOHit implements Comparable<FTHODOHit>{
 
 
 
-	public int get_SignalIndex() {
-		return _SignalIndex;
+	public int get_ClusterIndex() {
+		return _ClusterIndex;
 	}
 
 
 
-	public void set_SignalIndex(int _SignalIndex) {
-		this._SignalIndex = _SignalIndex;
+	public void set_ClusterIndex(int _SignalIndex) {
+		this._ClusterIndex = _SignalIndex;
 	}
 
 
 
-	public static  ArrayList<FTHODOHit> getRawHits(EvioDataBank bank) {
-
-	     int[] id     = bank.getInt("component");
-	     int[] sector = bank.getInt("sector");
-	     int[] layer  = bank.getInt("layer");
-	     int[] adc    = bank.getInt("ADC");
-	     int[] tdc    = bank.getInt("TDC");
-	     
-	     int size = id.length;
-
-	     ArrayList<FTHODOHit> hits = new ArrayList<FTHODOHit>();
-	      
-	      for(int i = 0; i<size; i++){
-	  
-	          if(adc[i]!=-1 && tdc[i]!=-1 ){
-	        	 FTHODOHit hit = new FTHODOHit(i,sector[i], layer[i], id[i], adc[i], tdc[i]);
-	             hits.add(hit); 
-	          }
-	          
-	      }
-	      return hits;
-	      
-	}
+//	public static  ArrayList<FTHODOHit> getRawHits(EvioDataBank bank) {
+//
+//	     int[] id     = bank.getInt("component");
+//	     int[] sector = bank.getInt("sector");
+//	     int[] layer  = bank.getInt("layer");
+//	     int[] adc    = bank.getInt("ADC");
+//	     int[] tdc    = bank.getInt("TDC");
+//	     
+//	     int size = id.length;
+//
+//	     ArrayList<FTHODOHit> hits = new ArrayList<FTHODOHit>();
+//	      
+//	      for(int i = 0; i<size; i++){
+//	  
+//	          if(adc[i]!=-1 && tdc[i]!=-1 ){
+//	        	 FTHODOHit hit = new FTHODOHit(i,sector[i], layer[i], id[i], adc[i], tdc[i]);
+//	             hits.add(hit); 
+//	          }
+//	          
+//	      }
+//	      return hits;
+//	      
+//	}
 	
 	
 	
@@ -234,5 +244,14 @@ public class FTHODOHit implements Comparable<FTHODOHit>{
 		}
 	}
 
+        public void showHit() {
+            System.out.println(this.get_Layer()     + "\t" 
+                        + this.get_Sector()    + "\t " 
+                        + this.get_ID()        + "\t"
+                        + this.get_Edep()      + "\t"
+                        + this.get_Time()      + "\t"
+                        + this.get_DGTZIndex() + "\t"
+                        + this.get_ClusterIndex());
+        }
 		
 }

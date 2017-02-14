@@ -45,12 +45,18 @@ public class FTHODOConstantsLoader {
 	public static double[][][] py             = new double[8][2][20];
 	public static double[][][] pz             = new double[8][2][20];
 
-    // RECONSTRUCTION CONSTANTS
-    public static double TIMECONVFAC = 100./4.;                            // conversion factor from TDC channel to time (ns^-1)
+        // RECONSTRUCTION CONSTANTS
+        public static double TIMECONVFAC = 100./4.;                            // conversion factor from TDC channel to time (ns^-1)
 	public static double EN_THRES = 0.5;                                                   // energy threshold in GeV	
 	public static double FADC_TO_CHARGE = 4*0.4884/50.;
 
-	public static synchronized DatabaseConstantProvider Load(int runno) {
+	// CLUSTER RECONSTRUCTION PARAMETERS
+	public static double cluster_min_energy = 1.;			       // minimum number of crystals in a cluster in MeV
+	public static int    cluster_min_size   = 2;			       // minimum number of crystals in a cluster 
+	public static double time_window        = 8;                           // time window of hits forming a cluster
+	public static double hit_distance       = 3;                           // max distance of hits forming a cluster in cm
+
+        public static synchronized DatabaseConstantProvider Load(int runno) {
 
     	System.out.println(" LOADING CONSTANTS ");
 		if (CSTLOADED == true) 

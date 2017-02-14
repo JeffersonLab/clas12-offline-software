@@ -1,10 +1,5 @@
 package org.jlab.rec.ft.cal;
 
-import java.util.ArrayList;
-
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.rec.ft.cal.FTCALConstantsLoader;
-
 
 
 public class FTCALHit implements Comparable<FTCALHit>{
@@ -33,6 +28,24 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		this.set_ClusIndex(0);
 	}
 
+	public FTCALHit(int i, int ICOMPONENT, int ADC, float time) {
+		this._COMPONENT = ICOMPONENT;
+		this._IDY = ((int) ICOMPONENT/22) + 1;
+		this._IDX = ICOMPONENT + 1 - (this._IDY-1)*22;
+		this._ADC = ADC;
+		this._Time = time;
+		
+		this.set_Edep(((double) this._ADC)*FTCALConstantsLoader.fadc_to_charge[0][0][ICOMPONENT-1]
+										  *FTCALConstantsLoader.mips_energy[0][0][ICOMPONENT-1]
+										  /FTCALConstantsLoader.mips_charge[0][0][ICOMPONENT-1]/1000.);
+//		if(this.get_Edep()>0.1) System.out.println(ICOMPONENT + " " + this._TDC + " " + 
+//				FTCALConstantsLoader.TIMECONVFAC + " " + FTCALConstantsLoader.time_offset[0][0][ICOMPONENT-1] + " " +
+//				this.get_Time());
+		this.set_Dx( (this._IDX-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
+		this.set_Dy( (this._IDY-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
+		this.set_DGTZIndex(i);
+		this.set_ClusIndex(0);
+	}
 
 	private int _COMPONENT;		         	//	   Component number
 	private int _IDX;    	 				//	   Crystal ID: X
@@ -166,33 +179,6 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		this._ClusIndex = _ClusIndex;
 	}
 	
-	
-	public static  ArrayList<FTCALHit> getRawHits(EvioDataBank bank) {
-
-	     int[] isector     = bank.getInt("sector");
-	     int[] ilayer      = bank.getInt("layer");
-	     int[] icomponent  = bank.getInt("component");
-	     int[] adc = bank.getInt("ADC");
-	     int[] tdc = bank.getInt("TDC");
-	     
-	     int size = icomponent.length;
-	      ArrayList<FTCALHit> hits = new ArrayList<FTCALHit>();
-	      
-	      for(int i = 0; i<size; i++){
-	  
-	    	  FTCALHit hit = new FTCALHit(i,icomponent[i], adc[i], tdc[i]);
-	    	  
-	          if(adc[i]!=-1 && tdc[i]!=-1){
-	             hits.add(hit); 
-	          }
-	          
-	      }
-	      return hits;
-	      
-	}
-	
-	
-	
 	public static boolean passHitSelection(FTCALHit hit) {
 		// a selection cut to pass the hit. 
 		if(hit.get_Edep() > FTCALConstantsLoader.EN_THRES) {
@@ -209,5 +195,16 @@ public class FTCALHit implements Comparable<FTCALHit>{
 			return -1;
 		}
 	}
+        
+        public void showHit() {
+            System.out.println(
+                        + this.get_COMPONENT() + "\t" 
+                        + this.get_IDX()       + "\t " 
+                        + this.get_IDY()       + "\t"
+                        + this.get_Edep()      + "\t"
+                        + this.get_Time()      + "\t"
+                        + this.get_DGTZIndex() + "\t"
+                        + this.get_ClusIndex());
+        }
 		
 }

@@ -40,9 +40,9 @@ public class FTCALConstantsLoader {
 	public static double[][][] time_offset    = new double[1][1][484];
 	public static int[][][]    status         = new int[1][1][484];
  
-    // RECONSTRUCTION CONSTANTS
-    public static final double TIMECONVFAC = 100./4.;                            // conversion factor from TDC channel to time (ns^-1)
-    public static final double VEFF        = 150.;                            // conversion factor from TDC channel to time (ns^-1)
+        // RECONSTRUCTION CONSTANTS
+        public static final double TIMECONVFAC = 100./4.;                            // conversion factor from TDC channel to time (ns^-1)
+        public static final double VEFF        = 150.;                            // conversion factor from TDC channel to time (ns^-1)
     
 	// CLUSTER RECONSTRUCTION PARAMETERS
 	public static double seed_min_energy;											      // minimum cluster reconstructed energy
