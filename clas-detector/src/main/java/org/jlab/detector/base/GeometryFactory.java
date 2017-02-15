@@ -80,6 +80,17 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ft/ftcal");
         }
         
+        if(type==DetectorType.SVT){
+            provider.loadTable("/geometry/cvt/svt/svt");
+            provider.loadTable("/geometry/cvt/svt/region");
+            provider.loadTable("/geometry/cvt/svt/support");
+            provider.loadTable("/geometry/cvt/svt/fiducial");
+            provider.loadTable("/geometry/cvt/svt/material/box");
+            provider.loadTable("/geometry/cvt/svt/material/tube");
+            provider.loadTable("/geometry/cvt/svt/alignment");
+
+        }
+        
         provider.disconnect();
         return provider;
     }
