@@ -110,10 +110,6 @@ public class SVTConstants
 	 */
 	public static DatabaseConstantProvider connect( DatabaseConstantProvider cp )
 	{
-		if( VERBOSE ) System.out.println("ENVIRONMENT:");
-		if( VERBOSE ) System.out.println(" CLAS12DIR="+System.getenv("CLAS12DIR") );
-		if( VERBOSE ) System.out.println(" CCDB_DATABASE="+System.getenv("CCDB_DATABASE") );
-		
 		cp.loadTable( ccdbPath +"svt");
 		cp.loadTable( ccdbPath +"region");
 		cp.loadTable( ccdbPath +"support");
