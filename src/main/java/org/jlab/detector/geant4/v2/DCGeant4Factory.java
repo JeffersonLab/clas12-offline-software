@@ -177,7 +177,7 @@ final class Wire {
 
     private void findEnds() {
         Vector3d vnum = new Vector3d(0, dbref.xdist(ireg), 0);
-        vnum.set(vnum.minus(midpoint));
+        vnum.sub(midpoint);
 
         double copen = Math.cos(dbref.thopen(ireg) / 2.0);
         double sopen = Math.sin(dbref.thopen(ireg) / 2.0);
@@ -215,6 +215,9 @@ final class Wire {
         double dw2 = dw / cster;
 
         double hh = (iwire + (ilayer % 2) / 2.0) * dw2;
+//        if(ireg==THIRDREGION && isSensitiveWire())
+//                hh += pow(-1, ilayer%2)*dministagger;
+                
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
         double ll = ilayer * tt;
 
@@ -341,11 +344,9 @@ public final class DCGeant4Factory extends Geant4Factory {
                 Vector3d lcenter = layerVolume.getLocalPosition();
                 Vector3d lshift = lcenter.minus(reg_position0);
                 lshift.rotateX(reg_thtilt);
-                lshift = lshift.minus(lcenter);
 
-                System.err.println(lcenter);
                 layerVolume.rotate("zxy", dbref.thster(isuper), 0.0, 0.0);
-                layerVolume.translate(lshift.x, lshift.y, lshift.z);
+                layerVolume.setPosition(lshift.x, lshift.y, lshift.z);
                 layerVolume.setMother(regionVolume);
                 layerVolume.setId(isector + 1, iregion + 1, isuper + 1, ilayer);
             }
@@ -371,8 +372,7 @@ public final class DCGeant4Factory extends Geant4Factory {
                 lay_dz, -dbref.thtilt(isuper / 2), Math.toRadians(90.0),
                 lay_dy, lay_dx0, lay_dx1, lay_skew,
                 lay_dy, lay_dx0, lay_dx1, lay_skew);
-        layerVolume.translate(lcent.x, lcent.y, lcent.z);
-        System.err.println(lcent);
+        layerVolume.setPosition(lcent.x, lcent.y, lcent.z);
 
         return layerVolume;
     }
