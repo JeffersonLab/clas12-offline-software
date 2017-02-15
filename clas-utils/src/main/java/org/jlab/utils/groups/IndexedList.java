@@ -58,7 +58,7 @@ public class IndexedList<T> {
                     IndexGenerator.getString(entry.getKey())) + entry.getValue());
         }
     }
-        
+    
     /**
      * Index Generator class for generating a Long number out of 
      * up to 4 indecies.
