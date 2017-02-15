@@ -6,8 +6,6 @@
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Trap;

@@ -270,7 +270,7 @@ public abstract class Geant4Basic {
 
     //returns original component before transformation (important for STL volumes)
     //use it to export volumes to STL files before transformation for GEMC
-    public Primitive getPrimitive(){
+    public Primitive getPrimitive() {
         return volumeSolid;
     }
 
@@ -332,42 +332,18 @@ public abstract class Geant4Basic {
     /**
      * @author pdavies
      */
-	public void setPosition( double x, double y, double z )
-	{
-		setPosition( new Vector3d(x,y,z) );
-	}
+    public void setPosition(double x, double y, double z) {
+        setPosition(new Vector3d(x, y, z));
+    }
 
-	/**
-	 * @author pdavies
-	 */
-	public void setPosition( Vector3d position )
-	{
-		this.translate( position.minus(this.getLocalPosition()) );
-	}
+    /**
+     * @author pdavies
+     */
+    public void setPosition(Vector3d position) {
+        this.translate(position.minus(this.getLocalPosition()));
+    }
 
-	
-	/**
-	 * Recursively multiplies each linear dimension with units of "cm" of the given volume and its children by the given scale factor.
-	 * This is a bodge. DO NOT USE
-	 * 
-	 * @param aFactor scale factor
-	 * @author pdavies
-	 * @deprecated
-	 */
-	public void scaleDimensions( double aFactor )
-	{		
-		if( this.getType().toLowerCase().contains("tube") )
-		{
-			this.getDimensions().get(2).value *= aFactor; // only scale zlen, not radii or angles
-		}
-		else
-		{
-			for( Measurement m : this.getDimensions() ) // general case
-				if( m.unit == "cm" ) m.value *= aFactor; // check for length units
-		}
-	}
-	
-	public Vector3d getLocal(Vector3d vec) {
+    public Vector3d getLocal(Vector3d vec) {
         Transform trans = getGlobalTransform().invert();
         return trans.transform(vec.clone());
         //return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));

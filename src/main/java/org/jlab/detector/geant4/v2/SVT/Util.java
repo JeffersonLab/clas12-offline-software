@@ -472,6 +472,7 @@ public class Util
 	 * @param aFactor scale factor
 	 * @deprecated
 	 */
+        /*
 	public static void scaleDimensions( Geant4Basic aVol, double aFactor, boolean bRecursive )
 	{
 		aVol.scaleDimensions( aFactor );
@@ -486,7 +487,7 @@ public class Util
 			}
 		}
 	}
-	
+	*/
 	
 	/**
 	 * Translates the given volume's position by the given shifts. 
