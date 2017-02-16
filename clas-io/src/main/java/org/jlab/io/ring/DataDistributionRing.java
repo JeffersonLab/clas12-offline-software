@@ -42,7 +42,7 @@ public class DataDistributionRing {
             String host = xMsgUtil.localhost();
             xMsgProxyAddress address = new xMsgProxyAddress(host,xMsgConstants.DEFAULT_PORT);            
             System.out.println("\n   >>>>> starting xmsg proxy : " + host + "/" + xMsgConstants.DEFAULT_PORT);
-            proxy = new xMsgProxy(xMsgContext.getContext(), address);
+            proxy = new xMsgProxy(xMsgContext.newContext(), address);
             
            /* Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
@@ -68,7 +68,7 @@ public class DataDistributionRing {
     public void initRegistrar(){
         try {
             xMsgRegAddress address = new xMsgRegAddress("localhost", xMsgConstants.REGISTRAR_PORT);
-            xMsgRegistrar registrar = new xMsgRegistrar(xMsgContext.getContext(), address);
+            xMsgRegistrar registrar = new xMsgRegistrar(xMsgContext.newContext(), address);
             /* Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
@@ -112,7 +112,7 @@ public class DataDistributionRing {
         System.out.println("\n\n\n");
         System.out.println("   ********* Graceful exit initiated");
         producer.shutdown();
-        xMsgContext.destroyContext();
+        
         System.out.println("   ********* Destroying xMsg context : done");
         
         registrar.shutdown();
