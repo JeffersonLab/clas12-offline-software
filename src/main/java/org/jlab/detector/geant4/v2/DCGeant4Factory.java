@@ -376,13 +376,6 @@ public final class DCGeant4Factory extends Geant4Factory {
     }
 }
 
-/*
-for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
-	paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
-	paddles.get(ipaddle).setMother(panelVolume);
-}
- */
-
 
 
 
