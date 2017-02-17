@@ -224,7 +224,7 @@ final class Wire {
 
         midpoint = new Vector3d(0, ym, zm);
         direction = new Vector3d(1, 0, 0);
-        direction.rotateZ(-dbref.thster(isuper));
+        direction.rotateZ(dbref.thster(isuper));
         direction.rotateX(-dbref.thtilt(ireg));
 
         findEnds();
@@ -343,7 +343,8 @@ public final class DCGeant4Factory extends Geant4Factory {
                 Vector3d lshift = lcenter.minus(reg_position0);
                 lshift.rotateX(reg_thtilt);
 
-                layerVolume.rotate("zxy", dbref.thster(isuper), 0.0, 0.0);
+                layerVolume.rotate("zxy", -dbref.thster(isuper), 0.0, 0.0);
+
                 layerVolume.setPosition(lshift.x, lshift.y, lshift.z);
                 layerVolume.setMother(regionVolume);
                 layerVolume.setId(isector + 1, iregion + 1, isuper + 1, ilayer);
@@ -370,10 +371,24 @@ public final class DCGeant4Factory extends Geant4Factory {
                 lay_dz, -dbref.thtilt(isuper / 2), Math.toRadians(90.0),
                 lay_dy, lay_dx0, lay_dx1, lay_skew,
                 lay_dy, lay_dx0, lay_dx1, lay_skew);
+
         layerVolume.setPosition(lcent.x, lcent.y, lcent.z);
 
         return layerVolume;
     }
+
+    /*
+    public void printWires(){
+        System.out.println("hello");
+        for(int isup=0;isup<2;isup++)
+        for(int il=0;il<8;il+=7)
+            for(int iwire=0;iwire<nsgwires+1;iwire+=nsgwires/30){
+        Wire regw = new Wire(isup,il,iwire);
+        System.out.println("line("+regw.left()+", "+regw.right()+");");
+
+            }
+    }
+    */
 }
 
 
