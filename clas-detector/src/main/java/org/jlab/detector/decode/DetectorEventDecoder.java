@@ -138,6 +138,11 @@ public class DetectorEventDecoder {
                     int layer     = tt.getIntValue("layer", crate,slot,channel);
                     int component = tt.getIntValue("component", crate,slot,channel);
                     int order     = tt.getIntValue("order", crate,slot,channel);
+                    
+                    /*if(crate>60&&crate<64){
+                        System.out.println(" SVT " + sector + " " + layer + 
+                                "  " + component);
+                    }*/
                     data.getDescriptor().setSectorLayerComponent(sector, layer, component);
                     data.getDescriptor().setOrder(order);
                     data.getDescriptor().setType(type);

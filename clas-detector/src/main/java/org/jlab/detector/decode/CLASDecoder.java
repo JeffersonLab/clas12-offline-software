@@ -161,7 +161,7 @@ public class CLASDecoder {
         for(int i = 0; i < adcDGTZ.size(); i++){
             adcBANK.setByte("sector", i, (byte) adcDGTZ.get(i).getDescriptor().getSector());
             adcBANK.setByte("layer", i, (byte) adcDGTZ.get(i).getDescriptor().getLayer());
-            adcBANK.setShort("component", i, (byte) adcDGTZ.get(i).getDescriptor().getComponent());
+            adcBANK.setShort("component", i, (short) adcDGTZ.get(i).getDescriptor().getComponent());
             adcBANK.setByte("order", i, (byte) adcDGTZ.get(i).getDescriptor().getOrder());
             adcBANK.setInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
             adcBANK.setFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
