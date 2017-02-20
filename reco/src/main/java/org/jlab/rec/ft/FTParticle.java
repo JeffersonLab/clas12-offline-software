@@ -1,6 +1,7 @@
 package org.jlab.rec.ft;
 
 import java.util.List;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.ft.cal.FTCALConstantsLoader;
 
@@ -82,16 +83,16 @@ public class FTParticle {
         public Vector3D getDirection() {
             Vector3D direction = new Vector3D();
             // for charged particle correct theta and phi of the impact point for the bend in the solenoid field according to the field scale
-            if(this.getCharge()==-1) {
-                double energy    = this.getEnergy();
+            if(this._Charge==-1) {
+                double energy    = this._Energy;
                 double thetaCorr = Math.exp(FTCALConstantsLoader.theta_corr[0]+FTCALConstantsLoader.theta_corr[1]*energy)+
 			     	   Math.exp(FTCALConstantsLoader.theta_corr[2]+FTCALConstantsLoader.theta_corr[3]*energy);
-                thetaCorr        = thetaCorr * this._field;
+                thetaCorr        = Math.toRadians(thetaCorr * this._field);
 		double phiCorr   = Math.exp(FTCALConstantsLoader.phi_corr[0]+FTCALConstantsLoader.phi_corr[1]*energy)+
 			     	   Math.exp(FTCALConstantsLoader.phi_corr[2]+FTCALConstantsLoader.phi_corr[3]*energy)+
 			     	   Math.exp(FTCALConstantsLoader.phi_corr[4]+FTCALConstantsLoader.phi_corr[5]*energy);
-                phiCorr          = phiCorr * this._field;
-                direction.setMagThetaPhi(1, this.getPosition().theta()+thetaCorr, this.getPosition().phi()+phiCorr);
+                phiCorr          = Math.toRadians(phiCorr * this._field);
+                direction.setMagThetaPhi(1, this.getPosition().theta()+thetaCorr, this.getPosition().phi()-phiCorr);
             }
             else {
                 direction = this.getPosition().asUnit();
@@ -99,7 +100,13 @@ public class FTParticle {
             return direction;
         }
 
-	public int getCalorimeterIndex() {
+	public Line3D getLastCross() {
+            Line3D track = new Line3D();
+            track.set(this._Position.toPoint3D(), this._Position);
+            return track;
+        }
+        
+        public int getCalorimeterIndex() {
 		return _Cluster;
 	}
 
@@ -130,21 +137,16 @@ public class FTParticle {
 
         public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThresholds){
         
-            Vector3D  hitPoint     = this.getPosition().clone();
-            Vector3D  matchedPoint = new Vector3D();
+            Line3D cross = this.getLastCross();
             double   minimumDistance = 500.0;
             int      bestIndex       = -1;
             for(int loop = 0; loop < hitList.size(); loop++){
                 FTResponse response = hitList.get(loop);
                 if(response.getAssociation()<0 && response.getType() == detectorType){
-                    matchedPoint.setXYZ(
-                            response.getPosition().x(),
-                            response.getPosition().y(),
-                            response.getPosition().z()
-                            );
-                    double hitdistance = hitPoint.sub(matchedPoint).mag();
+                    Line3D  dist = cross.distance(response.getPosition().toPoint3D());
+                    double hitdistance = dist.length();
                     double timedistance = this.getTime()-response.getTime();
-                    //System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
+ //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
                     if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
                         bestIndex       = loop;
@@ -157,7 +159,10 @@ public class FTParticle {
         public void show() {
             System.out.println( "FT Particle info " +
                                 " Charge = "+ this.getCharge() +
-                                " E = "     + this.getEnergy() +
+                                " E = "     + this.getEnergy() +                    
+                                " X = "     + this.getPosition().x() +
+                                " Y = "     + this.getPosition().y() +
+                                " Z = "     + this.getPosition().z() +
                                 " Theta = " + Math.toDegrees(this.getDirection().theta()) +
                                 " Phi = "   + Math.toDegrees(this.getDirection().phi()) +
                                 " Time = "  + this.getTime());

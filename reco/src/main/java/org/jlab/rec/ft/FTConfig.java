@@ -45,7 +45,7 @@ public class FTConfig {
             if(bank.getByte("mode")[0]==1)
                 isCosmics = true;
             newRun = bank.getInt("run")[0];
-            fieldScale = bank.getFloat("Solenoid")[0];
+            fieldScale = bank.getFloat("solenoid")[0];
         }
 		
         // Load the constants

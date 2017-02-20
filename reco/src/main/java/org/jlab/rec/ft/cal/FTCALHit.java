@@ -17,13 +17,14 @@ public class FTCALHit implements Comparable<FTCALHit>{
 										  *FTCALConstantsLoader.mips_energy[0][0][ICOMPONENT-1]
 										  /FTCALConstantsLoader.mips_charge[0][0][ICOMPONENT-1]/1000.);
 		this.set_Time(((double) this._TDC)/FTCALConstantsLoader.TIMECONVFAC
-										  -(FTCALConstantsLoader.CRYS_LENGTH-FTCALConstantsLoader.depth_z)/FTCALConstantsLoader.VEFF
+                                                                                  -(FTCALConstantsLoader.CRYS_LENGTH-FTCALConstantsLoader.depth_z)/FTCALConstantsLoader.VEFF
 										  -FTCALConstantsLoader.time_offset[0][0][ICOMPONENT-1]); 
 //		if(this.get_Edep()>0.1) System.out.println(ICOMPONENT + " " + this._TDC + " " + 
 //				FTCALConstantsLoader.TIMECONVFAC + " " + FTCALConstantsLoader.time_offset[0][0][ICOMPONENT-1] + " " +
 //				this.get_Time());
 		this.set_Dx( (this._IDX-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
 		this.set_Dy( (this._IDY-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
+		this.set_Dz(FTCALConstantsLoader.CRYS_ZPOS);
 		this.set_DGTZIndex(i);
 		this.set_ClusIndex(0);
 	}
@@ -43,6 +44,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 //				this.get_Time());
 		this.set_Dx( (this._IDX-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
 		this.set_Dy( (this._IDY-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
+		this.set_Dz(FTCALConstantsLoader.CRYS_ZPOS);
 		this.set_DGTZIndex(i);
 		this.set_ClusIndex(0);
 	}
@@ -57,6 +59,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	private double _Time;      				//	   Reconstructed time, for now it is the gemc time
 	private double _Dx;
 	private double _Dy;
+	private double _Dz;
 	private int    _DGTZIndex;				//		Pointer to cluster
 	private int    _ClusIndex;				//		Pointer to cluster
 	
@@ -157,6 +160,16 @@ public class FTCALHit implements Comparable<FTCALHit>{
 
 	public void set_Dy(double Dy) {
 		this._Dy = Dy;
+	}
+
+
+	public double get_Dz() {
+		return _Dz;
+	}
+
+
+	public void set_Dz(double Dz) {
+		this._Dz = Dz;
 	}
 
 

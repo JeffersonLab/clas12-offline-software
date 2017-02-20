@@ -73,7 +73,7 @@ public class FTEventBuilder{
                     resp.setId(bank.getInt("clusterID", i));
                     resp.setEnergy(bank.getDouble("clusterEnergy", i));
                     resp.setTime(bank.getDouble("clusterTime", i));
-                    resp.setPosition(bank.getDouble("clusterX", i),bank.getDouble("clusterY", i),FTCALConstantsLoader.CRYS_ZPOS+FTCALConstantsLoader.depth_z );                    
+                    resp.setPosition(bank.getDouble("clusterX", i),bank.getDouble("clusterY", i),bank.getDouble("clusterZ", i));                    
                     this.FTresponses.add(resp);  
                 }
             }
@@ -184,13 +184,15 @@ public class FTEventBuilder{
                     banktrack.setFloat("energy", i, (float) FTparticles.get(i).getEnergy());
                     banktrack.setFloat("cx",     i, (float) FTparticles.get(i).getDirection().x());
                     banktrack.setFloat("cy",     i, (float) FTparticles.get(i).getDirection().y());
-                    banktrack.setFloat("cx",     i, (float) FTparticles.get(i).getDirection().z());
+                    banktrack.setFloat("cz",     i, (float) FTparticles.get(i).getDirection().z());
                     banktrack.setFloat("time",   i, (float) FTparticles.get(i).getTime());
                     banktrack.setShort("calID",  i, (short) FTparticles.get(i).getCalorimeterIndex());
                     banktrack.setShort("hodoID", i, (short) FTparticles.get(i).getHodoscopeIndex());
                     banktrack.setShort("trkID",  i, (short) FTparticles.get(i).getTrackerIndex());
                     if(debugMode>=1) {
                             FTparticles.get(i).show();
+                            FTparticles.get(i).show();
+                            System.out.println(FTparticles.get(i).getDirection().x() + " " + FTparticles.get(i).getDirection().y() + " " + FTparticles.get(i).getDirection().z());
                    }
                 }
         	if(banktrack!=null) event.appendBanks(banktrack);                

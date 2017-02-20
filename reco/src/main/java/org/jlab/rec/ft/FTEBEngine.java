@@ -16,6 +16,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.ft.cal.FTCALEngine;
 import org.jlab.rec.ft.hodo.FTHODOEngine;
 
@@ -56,8 +57,10 @@ public class FTEBEngine extends ReconstructionEngine {
 		hodo.init();
 		FTEBEngine en = new FTEBEngine();
 		en.init();
-		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
-		EvioSource  reader = new EvioSource();
+//		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
+//		EvioSource  reader = new EvioSource();
+		String input = "/Users/devita/Work/clas12/simulations/tests/detectors.ftm/clas12/ft/test.hipo";
+		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
 		
 		// initialize histos
@@ -103,7 +106,7 @@ public class FTEBEngine extends ReconstructionEngine {
                     for(int i=0; i<nrows;i++) {
                         h1.fill(bank.getFloat("energy",i));
                         h2.fill(bank.getFloat("energy",i)-gen.getGeneratedParticle(0).vector().p());
-                        Vector3D part = new Vector3D(bank.getFloat("x",i),bank.getFloat("y",i),bank.getFloat("z",i));  
+                        Vector3D part = new Vector3D(bank.getFloat("cx",i),bank.getFloat("cy",i),bank.getFloat("cz",i));  
                         h3.fill(Math.toDegrees(part.theta()-gen.getGeneratedParticle(0).theta()));
                         h4.fill(Math.toDegrees(part.phi()-gen.getGeneratedParticle(0).phi()));
                         h5.fill(bank.getFloat("time",i));
