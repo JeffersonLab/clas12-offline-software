@@ -232,13 +232,16 @@ public class AdcHitList extends Vector<AdcHit> {
 		
 		int avgADC = hit.averageADC();
 		
-		double fract = ((double)avgADC)/((double)(_maxADC));
+		double maxadc = Math.max(1.0, (double)_maxADC);
+		
+		double fract = ((double)avgADC)/maxadc;
 //		fract = Math.max(0.5, Math.min(1.0, fract));
 		fract = Math.max(0, Math.min(1.0, fract));
 		
 		int alpha = 128 + (int)(127*fract);
 		alpha = Math.min(255,  alpha);
 		
+//		System.err.println("AVG ADC: " + avgADC + "   fract: " + fract + "   maxADC: "  + _maxADC);
 		return AdcColorScale.getInstance().getAlphaColor(fract, alpha);
 //		int alpha = (int)(254*fract);
 //		
