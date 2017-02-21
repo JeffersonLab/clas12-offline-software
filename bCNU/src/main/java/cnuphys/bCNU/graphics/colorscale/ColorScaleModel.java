@@ -27,6 +27,9 @@ public class ColorScaleModel {
 	 * Constant used for "smallness" check
 	 */
 	private static final double TINY = 1.0e-8;
+	
+	//null color
+	private static final Color NULLCOLOR = new Color(0, 0, 0, 16);
 
 	// Color returned for a too-small value (default: null)
 	private Color _tooSmallColor = new Color(64, 64, 64, 64);
@@ -175,8 +178,8 @@ public class ColorScaleModel {
 	public Color getColor(double value, boolean useColorInterpolation) {
 
 		if (Double.isNaN(value)) {
-			// System.err.println("NULL COLOR");
-			return null;
+			//System.err.println("NULL COLOR");
+			return NULLCOLOR;
 		}
 
 		double minv = getMinValue();
