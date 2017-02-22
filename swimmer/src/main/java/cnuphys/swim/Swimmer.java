@@ -335,7 +335,7 @@ public final class Swimmer {
 		// if no magnetic field or no charge, then simple straight line tracks.
 		// the path will consist of just two points
 		if ((_field == null) || (charge == 0)) {
-			System.out.println("Original Swimmer, straight line");
+			System.out.println("Original Swimmer, straight line field is null: " + (_field == null) + "  charge: " + charge);
 			GeneratedParticleRecord genPartRec = new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi);
 			return straightLineTrajectoryFixedZ(genPartRec, fixedZ);
 
