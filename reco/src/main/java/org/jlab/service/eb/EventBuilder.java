@@ -100,6 +100,7 @@ public class EventBuilder {
     }
     
     public void processNeutralTracks(){
+        
         List<DetectorResponse>  responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 1);
         
         List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
@@ -115,9 +116,9 @@ public class EventBuilder {
         for(int i = 0; i < particles.size(); i++){
             DetectorParticle p = particles.get(i);
             int index = p.getDetectorHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
-            if(index>=0){ p.addResponse(responsesECIN.get(index), true);}
+            if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
             index = p.getDetectorHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
-            if(index>=0){ p.addResponse(responsesECOUT.get(index), true);}
+            if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
         }
         
         for(DetectorParticle p : particles){
@@ -134,6 +135,8 @@ public class EventBuilder {
                 detectorEvent.addParticle(p);
             }
         }
+        
+        detectorEvent.setAssociation();
         //System.out.println(" PCAL RESPONSES = " + responsesPCAL.size());
     }
     

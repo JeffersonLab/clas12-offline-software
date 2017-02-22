@@ -120,7 +120,10 @@ public class EBio {
     
     public static boolean isTimeBased(DataEvent de){
         boolean tb = false;
+        //System.out.println(" HAS BANK = " + de.hasBank("TimeBasedTrkg::TBHits")
+        //+ "  HB = " + de.hasBank("HitBasedTrkg::HBTracks"));
         if(de.hasBank("TimeBasedTrkg::TBHits")==true){
+            //de.show();
             return true;
         }
         return tb;

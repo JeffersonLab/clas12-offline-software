@@ -35,6 +35,8 @@ public class EBEngine extends ReconstructionEngine {
         String particleBank = "RECHB::Particle";
         String detectorBank = "RECHB::Detector";
         
+        
+        //System.out.println(" EVENT BUILDER = " + EBio.isTimeBased(de));
         if(EBio.isTimeBased(de)==true){
             eventType = EBio.TRACKS_TB;
             particleBank = "REC::Particle";
@@ -71,6 +73,7 @@ public class EBEngine extends ReconstructionEngine {
         
         if(eventType==EBio.TRACKS_HB){
             List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, "HitBasedTrkg::HBTracks");
+            //System.out.println("LOADING HIT BASED TRACKS SIZE = " + tracks.size());
             eb.addTracks(tracks);
         } else {
             List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, "TimeBasedTrkg::TBTracks");
