@@ -1,5 +1,7 @@
 package cnuphys.swimZ;
 
+import java.io.File;
+
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -36,11 +38,30 @@ public class SwimZTest {
 	private static Swimmer swimmer;
 
 	public static void main(String arg[]) {
+		
+//		File file;
+//		file = new File("ced/data/clas12_torus_fieldmap_binary.dat");
+//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
+//		file = new File("../ced/data/clas12_torus_fieldmap_binary.dat");
+//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
+//		file = new File("../../ced/data/clas12_torus_fieldmap_binary.dat");
+//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
+//		file = new File("../../../ced/data/clas12_torus_fieldmap_binary.dat");
+//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
+//		file = new File("../../../../ced/data/clas12_torus_fieldmap_binary.dat");
+//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
+//		
+//		
+//		if (true) System.exit(0);
+		
+		//use "../../../../ced/data/clas12_torus_fieldmap_binary.dat"
+		
+		
+		MagneticFields.getInstance().initializeMagneticFields();
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
-		System.out.println("Active Field Description: "
-				+ MagneticFields.getInstance().getActiveFieldDescription());
+		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
 		int numTest = 1000;
 		// testParabolicApproximation(numTest);
@@ -77,14 +98,12 @@ public class SwimZTest {
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
-				result = sz.parabolicEstimate(Q, p, start, zf,
-						parabolicStepSize);
+				result = sz.parabolicEstimate(Q, p, start, zf, parabolicStepSize);
 			} catch (SwimZException e) {
 				e.printStackTrace();
 			}
 		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime))
-				/ numTimes;
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
 		partialReport(result, timePerSwim, "PARABOLIC APPROX");
 		footer("SwimZ PARABOLIC APPROX");
 	}
@@ -109,8 +128,7 @@ public class SwimZTest {
 				e.printStackTrace();
 			}
 		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime))
-				/ numTimes;
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
 		partialReport(result, timePerSwim, "Z UNIFORM");
 		footer("SwimZ UNIFORM");
 	}
@@ -128,14 +146,12 @@ public class SwimZTest {
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
-				result = sz.adaptiveRK(Q, p, start, zf, adaptiveInitStepSize,
-						adaptiveAbsError, hdata);
+				result = sz.adaptiveRK(Q, p, start, zf, adaptiveInitStepSize, adaptiveAbsError, hdata);
 			} catch (SwimZException e) {
 				e.printStackTrace();
 			}
 		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime))
-				/ numTimes;
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
 		partialReport(result, timePerSwim, "Z ADAPTIVE");
 		hdataReport(hdata, 1);
 		footer("SwimZ ADAPTIVE");
@@ -147,11 +163,9 @@ public class SwimZTest {
 		header("Old Swimmer ADAPTIVE");
 		long startTime = System.currentTimeMillis();
 		for (int i = 1; i <= numTimes; i++) {
-			oldAdaptive(Q, xo / 100, yo / 100, zo / 100, zf / 100, p, theta,
-					phi, i == numTimes);
+			oldAdaptive(Q, xo / 100, yo / 100, zo / 100, zf / 100, p, theta, phi, i == numTimes);
 		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime))
-				/ numTimes;
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
 		System.out.println("Old adaptive swimmer time to swim: " + timePerSwim);
 		footer("Old Swimmer ADAPTIVE");
 	}
@@ -161,21 +175,17 @@ public class SwimZTest {
 		header("Old Swimmer UNIFORM");
 		long startTime = System.currentTimeMillis();
 		for (int i = 1; i <= numTimes; i++) {
-			oldUniform(Q, xo / 100, yo / 100, zo / 100, zf / 100, p, theta,
-					phi, i == numTimes);
+			oldUniform(Q, xo / 100, yo / 100, zo / 100, zf / 100, p, theta, phi, i == numTimes);
 		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime))
-				/ numTimes;
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
 		System.out.println("Old uniform swimmer time to swim: " + timePerSwim);
 		footer("Old Swimmer UNIFORM");
 	}
 
-	private static void partialReport(SwimZResult result, double timePerSwim,
-			String name) {
+	private static void partialReport(SwimZResult result, double timePerSwim, String name) {
 		double p3v[] = result.getFinalThreeMomentum();
 		// check
-		double pf = Math.sqrt(p3v[0] * p3v[0] + p3v[1] * p3v[1] + p3v[2]
-				* p3v[2]);
+		double pf = Math.sqrt(p3v[0] * p3v[0] + p3v[1] * p3v[1] + p3v[2] * p3v[2]);
 
 		printVect(result.getInitialThreeMomentum(), "po");
 		printVect(result.getFinalThreeMomentum(), "pf");
@@ -184,26 +194,19 @@ public class SwimZTest {
 		System.out.println("Final state vector: " + result.last());
 
 		double thetaPhi[] = result.getInitialThetaAndPhi();
-		System.out.println(String.format(
-				"Initial theta = %-8.2f phi = %-8.2f deg", thetaPhi[0],
-				thetaPhi[1]));
+		System.out.println(String.format("Initial theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
 		thetaPhi = result.getFinalThetaAndPhi();
-		System.out.println(String.format(
-				"Final theta = %-8.2f phi = %-8.2f deg", thetaPhi[0],
-				thetaPhi[1]));
+		System.out.println(String.format("Final theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
 
-		System.out.println("p: " + pf + " GeV/c" + " time/swim: " + timePerSwim
-				+ " ms");
+		System.out.println("p: " + pf + " GeV/c" + " time/swim: " + timePerSwim + " ms");
 	}
 
 	private static void printVect(double v[], String s) {
-		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0],
-				v[1], v[2]);
+		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
 		System.out.println(out);
 	}
 
-	private static void printSummary(String message, int nstep,
-			double momentum, double Q[], double hdata[]) {
+	private static void printSummary(String message, int nstep, double momentum, double Q[], double hdata[]) {
 		System.out.println(message);
 		double R = Math.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
 		double norm = Math.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
@@ -216,11 +219,9 @@ public class SwimZTest {
 			System.out.println("avg stepsize: " + hdata[1]);
 			System.out.println("max stepsize: " + hdata[2]);
 		}
-		System.out
-				.println(String
-						.format("R = [%8.5f, %8.5f, %8.5f] |R| = %7.4f cm\nP = [%7.4e, %7.4e, %7.4e] |P| =  %9.6e GeV/c",
-								100 * Q[0], 100 * Q[1], 100 * Q[2], 100 * R, P
-										* Q[3], P * Q[4], P * Q[5], P));
+		System.out.println(
+				String.format("R = [%8.5f, %8.5f, %8.5f] |R| = %7.4f cm\nP = [%7.4e, %7.4e, %7.4e] |P| =  %9.6e GeV/c",
+						100 * Q[0], 100 * Q[1], 100 * Q[2], 100 * R, P * Q[3], P * Q[4], P * Q[5], P));
 		System.out.println("norm (should be 1): " + norm);
 		if (hdata != null) {
 			hdataReport(hdata, 100.);
@@ -246,21 +247,19 @@ public class SwimZTest {
 	 * @param phi
 	 *            degrees
 	 */
-	private static void oldUniform(int Q, double xo, double yo, double zo,
-			double zf, double p, double theta, double phi, boolean printSumm) {
+	private static void oldUniform(int Q, double xo, double yo, double zo, double zf, double p, double theta,
+			double phi, boolean printSumm) {
 
 		// save about every 20th step
 		double distanceBetweenSaves = 20 * oldUniformStepSize;
 
-		SwimTrajectory traj = swimmer.swim(Q, xo, yo, zo, p, theta, phi, zf,
-				oldAccuracy, 10.0, 10.0, oldUniformStepSize,
-				distanceBetweenSaves);
+		SwimTrajectory traj = swimmer.swim(Q, xo, yo, zo, p, theta, phi, zf, oldAccuracy, 10.0, 10.0,
+				oldUniformStepSize, distanceBetweenSaves);
 
 		if (printSumm) {
 			double lastY[] = traj.lastElement();
-			printSummary(
-					"\nOLD SWIMMER result from fixed stepsize method with storage and Z cutoff at "
-							+ zf, 20 * traj.size(), p, lastY, null);
+			printSummary("\nOLD SWIMMER result from fixed stepsize method with storage and Z cutoff at " + zf,
+					20 * traj.size(), p, lastY, null);
 		}
 	}
 
@@ -282,21 +281,19 @@ public class SwimZTest {
 	 * @param phi
 	 *            degrees
 	 */
-	private static void oldAdaptive(int Q, double xo, double yo, double zo,
-			double zf, double p, double theta, double phi, boolean printSumm) {
+	private static void oldAdaptive(int Q, double xo, double yo, double zo, double zf, double p, double theta,
+			double phi, boolean printSumm) {
 
 		double hdata[] = new double[3];
 
 		try {
-			SwimTrajectory traj = swimmer.swim(Q, xo, yo, zo, p, theta, phi,
-					zf, oldAccuracy, 10, 10, oldAdaptiveInitStepSize,
-					Swimmer.CLAS_Tolerance, hdata);
+			SwimTrajectory traj = swimmer.swim(Q, xo, yo, zo, p, theta, phi, zf, oldAccuracy, 10, 10,
+					oldAdaptiveInitStepSize, Swimmer.CLAS_Tolerance, hdata);
 
 			if (printSumm) {
 				double lastY[] = traj.lastElement();
-				printSummary(
-						"\nOLD SWIMMER result from fixed stepsize method with storage and Z cutoff at "
-								+ zf, 20 * traj.size(), p, lastY, hdata);
+				printSummary("\nOLD SWIMMER result from fixed stepsize method with storage and Z cutoff at " + zf,
+						20 * traj.size(), p, lastY, hdata);
 			}
 
 		} catch (RungeKuttaException e) {
@@ -306,9 +303,8 @@ public class SwimZTest {
 	}
 
 	private static void hdataReport(double hdata[], double toCM) {
-		String s = String.format(
-				"Min step: %-12.5e   Avg Step: %-12.5f   Max Step: %-12.5f cm",
-				toCM * hdata[0], toCM * hdata[1], toCM * hdata[2]);
+		String s = String.format("Min step: %-12.5e   Avg Step: %-12.5f   Max Step: %-12.5f cm", toCM * hdata[0],
+				toCM * hdata[1], toCM * hdata[2]);
 		System.out.println(s);
 	}
 
