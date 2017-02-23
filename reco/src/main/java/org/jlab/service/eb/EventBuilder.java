@@ -12,6 +12,7 @@ import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.detector.CherenkovResponse;
 
 /**
  *
@@ -21,6 +22,7 @@ public class EventBuilder {
     
     private DetectorEvent              detectorEvent = new DetectorEvent();
     private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
+    private List<CherenkovResponse> cherenkovResponses = new ArrayList<CherenkovResponse>();
     
     public EventBuilder(){
         
@@ -28,6 +30,10 @@ public class EventBuilder {
     
     public void addDetectorResponses(List<DetectorResponse> responses){
         detectorResponses.addAll(responses);
+    }
+    
+    public void addCherenkovResponses(List<CherenkovResponse> responses){
+        cherenkovResponses.addAll(responses);
     }
 
     /**
@@ -96,6 +102,12 @@ public class EventBuilder {
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
+            
+            index = p.getCherenkovSignal(this.cherenkovResponses);
+            if(index>=0){
+                p.addCherenkovResponse(cherenkovResponses.get(index));
+                cherenkovResponses.get(index).setAssociation(n);
+            } 
         }
     }
     
@@ -152,21 +164,22 @@ public class EventBuilder {
     /**
      * Assigns PID and sets start time
      */
-    public void assignPid(){
+     public void assignTrigger()  {
         int npart = this.detectorEvent.getParticles().size();
-        
+       
         for(int i = 0; i < npart; i++){
             DetectorParticle p = detectorEvent.getParticle(i);
-            if((p.hasHit(DetectorType.FTOF, 2)|| p.hasHit(DetectorType.FTOF, 1))&&
+            if((p.hasHit(DetectorType.FTOF, 2)|| p.hasHit(DetectorType.FTOF, 1))||
                     (p.hasHit(DetectorType.EC, 1)&&p.hasHit(DetectorType.EC, 4))){
                 double sfraction = p.getEnergyFraction(DetectorType.EC);
+                //System.out.println(sfraction);
                 if(sfraction>EBConstants.ECAL_SAMPLINGFRACTION_CUT){
                     if(p.getCharge()<0)
                         p.setPid(11);
                 }
             }
         }
-        
+       
         int    index = -1;
         double best_p = 0.0;
         for(int i = 0; i < npart; i++){
@@ -177,13 +190,13 @@ public class EventBuilder {
                 }
             }
         }
-        
+       
         if(index>0){
             this.detectorEvent.moveUp(index);
         }
-        
-        
-    }
+       
+       
+}
     
     
     public DetectorEvent  getEvent(){return this.detectorEvent;}
