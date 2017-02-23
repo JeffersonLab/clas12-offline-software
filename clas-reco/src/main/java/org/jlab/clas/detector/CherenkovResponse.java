@@ -5,12 +5,16 @@
  */
 package org.jlab.clas.detector;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
 
 
 /**
@@ -67,19 +71,24 @@ public class CherenkovResponse {
         return intersect;
     }
     
-    public boolean match(DetectorParticle particle){
-        Point3D intersection = this.getIntersection(particle.getLowerCross());
+    public boolean match(Line3D particletrack){
+        Point3D intersection = this.getIntersection(particletrack);
         Vector3D vecRec = intersection.toVector3D();
         Vector3D vecHit = this.hitPosition.toVector3D();
+        //System.out.println(particletrack);
+        //System.out.println(this.hitPosition);
+//        System.out.println("Calculated Theta Difference (Degrees)" + Math.abs(vecHit.theta()-vecRec.theta())*57.2958);
+//        System.out.println("Expected Theta Difference (Degrees)" + this.hitDeltaTheta*57.2958);
+//        System.out.println(" ");
+//        System.out.println("Calculated Phi Difference (Degrees)" + Math.abs(vecHit.phi()-vecRec.phi())*57.2958);
+//        System.out.println("Expected Phi Difference (Degrees)" + this.hitDeltaPhi*57.2958);
+//        System.out.println(" ");
 
-//        System.out.println("Expected dTheta = " + this.hitDeltaTheta*57.2958);
-//        System.out.println("Expected dPhi = " + this.hitDeltaPhi*57.2958);
-//        System.out.println("Real dTheta = " + Math.abs(vecHit.theta()-vecRec.theta())*57.2958);
-//        System.out.println("Real dPhi = " + Math.abs(vecHit.phi()-vecRec.phi())*57.2958);        
-
+//System.out.println(Math.abs(vecHit.theta()-vecRec.theta())*57.2958 + "  " + 
+//        Math.abs(vecHit.phi()-vecRec.phi())*57.2958);
         
-        return (Math.abs(vecHit.theta()-vecRec.theta())<20/57.2958
-                && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
+        return (Math.abs(vecHit.theta()-vecRec.theta())<10.0
+        && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
     }
     
     public double getDistance(Line3D line){
@@ -93,6 +102,36 @@ public class CherenkovResponse {
     
     public void setCherenkovType(DetectorType htcc){
         this.cherenkovType = htcc;
+    }
+    
+    public static List<CherenkovResponse>  readHipoEvent(DataEvent event, 
+        String bankName, DetectorType type){        
+        List<CherenkovResponse> responseList = new ArrayList<CherenkovResponse>();
+        if(event.hasBank(bankName)==true){
+            DataBank bank = event.getBank(bankName);
+            int nrows = bank.rows();
+            for(int row = 0; row < nrows; row++){
+                int nphe  = bank.getInt("nphe", row);
+                double theta   = bank.getFloat("theta", row);
+                double dtheta = bank.getFloat("dtheta",row);
+                double phi = bank.getFloat("phi",row);
+                double dphi = bank.getFloat("dphi",row);
+                double x = bank.getFloat("x",row);
+                double y = bank.getFloat("y",row);
+                double z = bank.getFloat("z",row);
+                double time = bank.getFloat("time",row);
+                    CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                    che.setHitPosition(x, y, z);
+                   //System.out.println(che.getHitPosition());
+                   //System.out.println("hello there is cherenkov");
+                    che.setEnergy(nphe);
+                    che.setTime(time);
+                    che.setCherenkovType(DetectorType.HTCC);
+
+                responseList.add(che);
+            }
+        }
+        return responseList;
     }
     
 }
