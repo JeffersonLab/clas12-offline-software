@@ -13,6 +13,7 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.clas.detector.*;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
+import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.service.pid.*;
 
 
@@ -62,6 +63,7 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorResponse>  responseECAL = DetectorResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
         List<DetectorResponse>  responseFTOF = DetectorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,8.0);
+        List<CherenkovResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         /*
         System.out.println("---------");
         for(DetectorResponse r : responseFTOF ){
@@ -70,6 +72,7 @@ public class EBEngine extends ReconstructionEngine {
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseECAL);
+        eb.addCherenkovResponses(responseHTCC);
         
         if(eventType==EBio.TRACKS_HB){
             List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, "HitBasedTrkg::HBTracks");
@@ -82,12 +85,14 @@ public class EBEngine extends ReconstructionEngine {
         
         eb.processHitMatching();
         eb.processNeutralTracks();        
-        eb.assignPid();
+        eb.assignTrigger();
         eb.getEvent().setRfTime(rf);
         
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
+        
+        //System.out.println(eb.getEvent().toString());
         
         if(eb.getEvent().getParticles().size()>0){
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
@@ -101,6 +106,11 @@ public class EBEngine extends ReconstructionEngine {
                 bank.show();*/
             }
         }
+        
+//        for(int i = 0 ; i < eb.getEvent().getParticles().size() ; i++) {
+//            System.out.println("Particle ID  " + eb.getEvent().getParticles().get(i).getPid());
+//        }
+        
         /*
         
         List<DetectorParticle>  chargedParticles = EBio.readTracks(de, eventType);
@@ -183,7 +193,6 @@ public class EBEngine extends ReconstructionEngine {
         EvioDataBank dBank = (EvioDataBank) EBio.writeResponses(processor.getResponses(), eventType);
         EvioDataBank cBank = (EvioDataBank) EBio.writeCherenkovResponses(processor.getCherenkovResponses(), eventType);
         EvioDataBank tbank = (EvioDataBank) EBio.writeTrigger(detectorEvent);
-
         de.appendBanks(pBank,dBank);
         */
         return true;
