@@ -595,7 +595,7 @@ public class DetectorParticle implements Comparable {
          if(cherenkovs.size()>0){
              // System.out.println("There are here???");
              for(int loop = 0; loop < cherenkovs.size(); loop++) {
-                 boolean matchtruth = cherenkovs.get(loop).match(this);
+                 boolean matchtruth = cherenkovs.get(loop).match(this.detectorTrack.getFirstCross());
                  //System.out.println(matchtruth);
                  if(matchtruth==true){
                      bestIndex = loop;
