@@ -136,8 +136,7 @@ public class EventTree extends Tree implements TreeProvider {
         this.resetBranches(-1000.0);
         EventFilter  filter = new EventFilter("11:2112:321:Xn:X-:X+");
         for(Map.Entry<String,EventTreeBranch> entry : treeBranches.entrySet()){
-            if(entry.getValue().getFilter().isValid(recEvent.getReconstructed())==true
-                    &&filter.isValid(recEvent.getGenerated())){
+            if(entry.getValue().getFilter().isValid(recEvent.getReconstructed())){
                 //System.out.println("passed the filter");
                 Map<String,EventTreeLeaf>  leafs = entry.getValue().getLeafs();
                 for(Map.Entry<String,EventTreeLeaf> item : leafs.entrySet()){
