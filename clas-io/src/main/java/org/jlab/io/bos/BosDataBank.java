@@ -120,10 +120,23 @@ public class BosDataBank implements DataBank {
 
 	public int rows() {
 		int nrows = 0;
+
+		if( !floatContainer.isEmpty() ){
+			return floatContainer.entrySet().iterator().next().getValue().length;
+		}
+		if( !intContainer.isEmpty() ){
+			return intContainer.entrySet().iterator().next().getValue().length;
+		}
+		if( !shortContainer.isEmpty() ){
+			return shortContainer.entrySet().iterator().next().getValue().length;
+		}
+
+/*
 		for (Map.Entry<String, float[]> item : floatContainer.entrySet()) {
 			float[] itemdata = item.getValue();
 			nrows = itemdata.length;
 		}
+*/
 		/*
 		 * for(Map.Entry<String,short[]> item : shortContainer.entrySet()){ short[] itemdata = item.getValue(); nrows = itemdata.length; }
 		 */
