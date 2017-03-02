@@ -45,18 +45,18 @@ public class EBEngine extends ReconstructionEngine {
         }
         
         int run   = 10;
-        double rf = -100.0;
+//        double rf = -100.0;
         
         if(de.hasBank("RUN::config")==true){
             
         }
-        
-        if(de.hasBank("RUN::rf")==true){
-            DataBank bank = de.getBank("RUN::rf");
-            if(bank.rows()>0){
-                rf = bank.getFloat("time", 0);
-            }
-        }
+                
+//        if(de.hasBank("RUN::rf")==true){
+//            DataBank bank = de.getBank("RUN::rf");
+//            if(bank.rows()>0){
+//                rf = bank.getFloat("time", 0);
+//            }
+//        }
         
         
         EventBuilder eb = new EventBuilder();
@@ -86,7 +86,9 @@ public class EBEngine extends ReconstructionEngine {
         eb.processHitMatching();
         eb.processNeutralTracks();        
         eb.assignTrigger();
-        eb.getEvent().setRfTime(rf);
+
+        EBRadioFrequency rf = new EBRadioFrequency();
+        eb.getEvent().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
         
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
