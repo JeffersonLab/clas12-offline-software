@@ -73,115 +73,127 @@ public class Bos2HipoEventBank {
             BosDataBank bEVNT = (BosDataBank) this.bosDataBanks.get("EVNT");
             int nrows = bEVNT.rows();
             
-            DataBank  evioEVNTp = hipoEvent.createBank("EVENT::particle", nrows);
+            DataBank  hipoEVNTp = hipoEvent.createBank("EVENT::particle", nrows);
             for(int loop = 0; loop < nrows; loop++){
-                evioEVNTp.setByte("status", loop, (byte) bEVNT.getInt("Status")[loop]);
-                evioEVNTp.setByte("charge", loop, (byte) bEVNT.getInt("Charge")[loop]);
+                hipoEVNTp.setByte("status", loop, (byte) bEVNT.getInt("Status")[loop]);
+                hipoEVNTp.setByte("charge", loop, (byte) bEVNT.getInt("Charge")[loop]);
                 
-                evioEVNTp.setByte("dcstat", loop, (byte) bEVNT.getInt("DCstat")[loop]);
-                evioEVNTp.setByte("ecstat", loop, (byte) bEVNT.getInt("ECstat")[loop]);
-                evioEVNTp.setByte("lcstat", loop, (byte) bEVNT.getInt("LCstat")[loop]);
-                evioEVNTp.setByte("scstat", loop, (byte) bEVNT.getInt("SCstat")[loop]);
-                evioEVNTp.setByte("ccstat", loop, (byte) bEVNT.getInt("CCstat")[loop]);
+                hipoEVNTp.setByte("dcstat", loop, (byte) bEVNT.getInt("DCstat")[loop]);
+                hipoEVNTp.setByte("ecstat", loop, (byte) bEVNT.getInt("ECstat")[loop]);
+                hipoEVNTp.setByte("lcstat", loop, (byte) bEVNT.getInt("LCstat")[loop]);
+                hipoEVNTp.setByte("scstat", loop, (byte) bEVNT.getInt("SCstat")[loop]);
+                hipoEVNTp.setByte("ccstat", loop, (byte) bEVNT.getInt("CCstat")[loop]);
                 
-                evioEVNTp.setInt("pid",loop, bEVNT.getInt("ID")[loop]);
-                evioEVNTp.setFloat("mass", loop,bEVNT.getFloat("Mass")[loop]);
-                evioEVNTp.setFloat("px", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("Cx")[loop]);
-                evioEVNTp.setFloat("py", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("cy")[loop]);
-                evioEVNTp.setFloat("pz", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("cz")[loop]);
-                evioEVNTp.setFloat("vx", loop,bEVNT.getFloat("X")[loop]);
-                evioEVNTp.setFloat("vy", loop,bEVNT.getFloat("Y")[loop]);
-                evioEVNTp.setFloat("vz", loop,bEVNT.getFloat("Z")[loop]);
+                hipoEVNTp.setInt("pid",loop, bEVNT.getInt("ID")[loop]);
+                hipoEVNTp.setFloat("mass", loop,bEVNT.getFloat("Mass")[loop]);
+                hipoEVNTp.setFloat("px", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("Cx")[loop]);
+                hipoEVNTp.setFloat("py", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("cy")[loop]);
+                hipoEVNTp.setFloat("pz", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("cz")[loop]);
+                hipoEVNTp.setFloat("vx", loop,bEVNT.getFloat("X")[loop]);
+                hipoEVNTp.setFloat("vy", loop,bEVNT.getFloat("Y")[loop]);
+                hipoEVNTp.setFloat("vz", loop,bEVNT.getFloat("Z")[loop]);
             }
-            this.hipoDataBanks.put("EVNT", evioEVNTp);
+            this.hipoDataBanks.put("EVNT", hipoEVNTp);
         }
         
         if(this.bosDataBanks.containsKey("TAGR")==true){            
             BosDataBank tagr = (BosDataBank) this.bosDataBanks.get("TAGR");            
-            DataBank evioTGPBp = hipoEvent.createBank("TAGGER::tgpb",tagr.rows());
+            DataBank hipoTGPBp = hipoEvent.createBank("TAGGER::tgpb",tagr.rows());
             int nrows = tagr.rows();
             for(int loop = 0; loop < nrows; loop++){
-                evioTGPBp.setByte("status", loop , (byte) tagr.getInt("STAT")[loop]);
-                evioTGPBp.setFloat("energy", loop, tagr.getFloat("ERG")[loop]);
-                //evioTGPBp.setFloat("time", loop, tagr.getFloat("TPHO")[loop]-startTime[0]);
-                evioTGPBp.setFloat("time", loop, tagr.getFloat("TPHO")[loop]);
-                evioTGPBp.setShort("tid", loop, (short) tagr.getInt("T_id")[loop]);
-                evioTGPBp.setShort("eid", loop, (short) tagr.getInt("E_id")[loop]);
+                hipoTGPBp.setByte("status", loop , (byte) tagr.getInt("STAT")[loop]);
+                hipoTGPBp.setFloat("energy", loop, tagr.getFloat("ERG")[loop]);
+                //hipoTGPBp.setFloat("time", loop, tagr.getFloat("TPHO")[loop]-startTime[0]);
+                hipoTGPBp.setFloat("time", loop, tagr.getFloat("TPHO")[loop]);
+                hipoTGPBp.setShort("tid", loop, (short) tagr.getInt("T_id")[loop]);
+                hipoTGPBp.setShort("eid", loop, (short) tagr.getInt("E_id")[loop]);
             }
-            this.hipoDataBanks.put("TAGR", evioTGPBp);
+            this.hipoDataBanks.put("TAGR", hipoTGPBp);
         }
-        
+        if(this.bosDataBanks.containsKey("ICPB")){
+            BosDataBank bICPB = (BosDataBank) this.bosDataBanks.get("ICPB");
+            int rows = bICPB.rows();
+            DataBank hipoICPB = hipoEvent.createBank("DETECTOR::icpb", rows);
+            for(int loop = 0; loop < rows; loop++){
+                hipoICPB.setFloat("etc", loop, bICPB.getFloat("Etot")[loop]);
+                hipoICPB.setFloat("ecc", loop, bICPB.getFloat("Ecen")[loop]);
+                hipoICPB.setFloat("tc", loop, bICPB.getFloat("Time")[loop]);
+                hipoICPB.setFloat("xc", loop, bICPB.getFloat("X")[loop]);
+                hipoICPB.setFloat("yc", loop, bICPB.getFloat("Y")[loop]);
+            }
+            this.hipoDataBanks.put("ICPB", hipoICPB);
+        }
          if(this.bosDataBanks.containsKey("ECPB")==true){
             BosDataBank bECPB = (BosDataBank) this.bosDataBanks.get("ECPB");
             int rows = bECPB.rows();
-            DataBank evioECPB = hipoEvent.createBank("DETECTOR::ecpb", rows);
+            DataBank hipoECPB = hipoEvent.createBank("DETECTOR::ecpb", rows);
             for(int loop = 0; loop < rows; loop++){
                 int scht = bECPB.getInt("ScHt")[loop];
                 int sector = (int) scht/100;
-                evioECPB.setByte("sector", loop, (byte) sector);
-                evioECPB.setFloat("etot", loop, bECPB.getFloat("Etot")[loop]);
-                evioECPB.setFloat("ein" , loop, bECPB.getFloat("Ein")[loop]);
-                evioECPB.setFloat("eout", loop, bECPB.getFloat("Eout")[loop]);
-                evioECPB.setFloat("time", loop, bECPB.getFloat("Time") [loop]);
-                evioECPB.setFloat("path", loop, bECPB.getFloat("Path") [loop]);
-                evioECPB.setFloat("x", loop, bECPB.getFloat("X") [loop]);
-                evioECPB.setFloat("y", loop, bECPB.getFloat("Y") [loop]);
-                evioECPB.setFloat("z", loop, bECPB.getFloat("Z") [loop]);
+                hipoECPB.setByte("sector", loop, (byte) sector);
+                hipoECPB.setFloat("etot", loop, bECPB.getFloat("Etot")[loop]);
+                hipoECPB.setFloat("ein" , loop, bECPB.getFloat("Ein")[loop]);
+                hipoECPB.setFloat("eout", loop, bECPB.getFloat("Eout")[loop]);
+                hipoECPB.setFloat("time", loop, bECPB.getFloat("Time") [loop]);
+                hipoECPB.setFloat("path", loop, bECPB.getFloat("Path") [loop]);
+                hipoECPB.setFloat("x", loop, bECPB.getFloat("X") [loop]);
+                hipoECPB.setFloat("y", loop, bECPB.getFloat("Y") [loop]);
+                hipoECPB.setFloat("z", loop, bECPB.getFloat("Z") [loop]);
             }
-            this.hipoDataBanks.put("ECPB", evioECPB);
-            //banklist.add(evioECPB);
+            this.hipoDataBanks.put("ECPB", hipoECPB);
+            //banklist.add(hipoECPB);
         }
          if(this.bosDataBanks.containsKey("LCPB")==true){
             BosDataBank bLCPB = (BosDataBank) this.bosDataBanks.get("LCPB");
             int rows = bLCPB.rows();
-            DataBank evioLCPB = hipoEvent.createBank("DETECTOR::lcpb", rows);
+            DataBank hipoLCPB = hipoEvent.createBank("DETECTOR::lcpb", rows);
             for(int loop = 0; loop < rows; loop++){
                 int scht = bLCPB.getInt("ScHt")[loop];
                 int sector = (int) scht/100;
-                evioLCPB.setByte("sector", loop, (byte) sector);
-                evioLCPB.setFloat("etot", loop, bLCPB.getFloat("Etot")[loop]);
-                evioLCPB.setFloat("ein" , loop, bLCPB.getFloat("Ein")[loop]);
-                evioLCPB.setFloat("time", loop, bLCPB.getFloat("Time") [loop]);
-                evioLCPB.setFloat("path", loop, bLCPB.getFloat("Path") [loop]);
-                evioLCPB.setFloat("x", loop, bLCPB.getFloat("X") [loop]);
-                evioLCPB.setFloat("y", loop, bLCPB.getFloat("Y") [loop]);
-                evioLCPB.setFloat("z", loop, bLCPB.getFloat("Z") [loop]);
+                hipoLCPB.setByte("sector", loop, (byte) sector);
+                hipoLCPB.setFloat("etot", loop, bLCPB.getFloat("Etot")[loop]);
+                hipoLCPB.setFloat("ein" , loop, bLCPB.getFloat("Ein")[loop]);
+                hipoLCPB.setFloat("time", loop, bLCPB.getFloat("Time") [loop]);
+                hipoLCPB.setFloat("path", loop, bLCPB.getFloat("Path") [loop]);
+                hipoLCPB.setFloat("x", loop, bLCPB.getFloat("X") [loop]);
+                hipoLCPB.setFloat("y", loop, bLCPB.getFloat("Y") [loop]);
+                hipoLCPB.setFloat("z", loop, bLCPB.getFloat("Z") [loop]);
             }
-            this.hipoDataBanks.put("LCPB", evioLCPB);
-            //banklist.add(evioECPB);
+            this.hipoDataBanks.put("LCPB", hipoLCPB);
+            //banklist.add(hipoECPB);
         }
          if(this.bosDataBanks.containsKey("SCPB")){
             BosDataBank bSCPB = (BosDataBank) this.bosDataBanks.get("SCPB");
             int rows = bSCPB.rows();
-            DataBank evioSCPB = hipoEvent.createBank("DETECTOR::scpb", rows);
+            DataBank hipoSCPB = hipoEvent.createBank("DETECTOR::scpb", rows);
             for(int loop = 0; loop < rows; loop++){
                 int sector = bSCPB.getInt("ScPdHt")[loop]/10000;
                 int paddle = bSCPB.getInt("ScPdHt")[loop]/100 - sector*100;
                 //System.err.println(" " + bSCPB.getInt("ScPdHt")[loop] +
                 //        "  sector = " + sector + " " + paddle);
                 //int paddle = bSCPB.getInt("ScPdHt")[loop]/10000;
-                evioSCPB.setByte("sector", loop, (byte) sector);
-                evioSCPB.setByte("paddle", loop, (byte) paddle);
-                evioSCPB.setFloat("edep", loop, bSCPB.getFloat("Edep") [loop]);
-                evioSCPB.setFloat("time", loop, bSCPB.getFloat("Time") [loop]);
-                evioSCPB.setFloat("path", loop, bSCPB.getFloat("Path") [loop]);
+                hipoSCPB.setByte("sector", loop, (byte) sector);
+                hipoSCPB.setByte("paddle", loop, (byte) paddle);
+                hipoSCPB.setFloat("edep", loop, bSCPB.getFloat("Edep") [loop]);
+                hipoSCPB.setFloat("time", loop, bSCPB.getFloat("Time") [loop]);
+                hipoSCPB.setFloat("path", loop, bSCPB.getFloat("Path") [loop]);
             }
-            this.hipoDataBanks.put("SCPB", evioSCPB);
+            this.hipoDataBanks.put("SCPB", hipoSCPB);
          }
          
          if(this.bosDataBanks.containsKey("CCPB")){
             BosDataBank bCCPB = (BosDataBank) this.bosDataBanks.get("CCPB");
             int rows = bCCPB.rows();
-            DataBank evioCCPB = hipoEvent.createBank("DETECTOR::ccpb", rows);
+            DataBank hipoCCPB = hipoEvent.createBank("DETECTOR::ccpb", rows);
             for(int loop = 0; loop < rows; loop++){
                 int sector = bCCPB.getInt("ScSgHt")[loop]/100;
                 //int paddle = bSCPB.getInt("ScPdHt")[loop]/10000;
-                evioCCPB.setByte("sector", loop, (byte) sector);
-                evioCCPB.setFloat("nphe", loop, bCCPB.getFloat("Nphe") [loop]);
-                evioCCPB.setFloat("time", loop, bCCPB.getFloat("Time") [loop]);
-                evioCCPB.setFloat("path", loop, bCCPB.getFloat("Path") [loop]);
+                hipoCCPB.setByte("sector", loop, (byte) sector);
+                hipoCCPB.setFloat("nphe", loop, bCCPB.getFloat("Nphe") [loop]);
+                hipoCCPB.setFloat("time", loop, bCCPB.getFloat("Time") [loop]);
+                hipoCCPB.setFloat("path", loop, bCCPB.getFloat("Path") [loop]);
             }
-            this.hipoDataBanks.put("CCPB", evioCCPB);
+            this.hipoDataBanks.put("CCPB", hipoCCPB);
         }
     }
     
@@ -221,7 +233,10 @@ public class Bos2HipoEventBank {
             BosDataBank bECPB = (BosDataBank) bosEvent.getBank("ECPB");
             this.bosDataBanks.put(bECPB.getDescriptor().getName(), bECPB);
         }
-        
+        if(bosEvent.hasBank("ICPB")){
+            BosDataBank bICPB = (BosDataBank) bosEvent.getBank("ICPB");
+            this.bosDataBanks.put(bICPB.getDescriptor().getName(), bICPB);
+        }
         if(bosEvent.hasBank("LCPB")){
             BosDataBank bLCPB = (BosDataBank) bosEvent.getBank("LCPB");
             this.bosDataBanks.put(bLCPB.getDescriptor().getName(), bLCPB);
@@ -277,7 +292,7 @@ public class Bos2HipoEventBank {
         String  bosFileName  = args[2];
         
         
-        Bos2HipoEventBank bos2evio = new Bos2HipoEventBank();
+        Bos2HipoEventBank bos2hipo = new Bos2HipoEventBank();
         
         HipoDataSync  writer = new HipoDataSync();
         writer.open(hipoFileName);
@@ -299,10 +314,10 @@ public class Bos2HipoEventBank {
             try{
                 DataEvent hipoEvent = writer.createEvent();
 
-                bos2evio.initBosBanks(bosEvent);
-                bos2evio.initHipoBank(hipoEvent);
+                bos2hipo.initBosBanks(bosEvent);
+                bos2hipo.initHipoBank(hipoEvent);
                 
-                TreeMap<String,DataBank>  hipoBanks = bos2evio.getHipoBankStore();
+                TreeMap<String,DataBank>  hipoBanks = bos2hipo.getHipoBankStore();
                 
                 if(hipoBanks.containsKey("HEVT")==true){
                     hipoEvent.appendBanks(hipoBanks.get("HEVT"));
@@ -313,6 +328,9 @@ public class Bos2HipoEventBank {
                 
                 List<DataBank>  detectorBanks = new ArrayList<DataBank>();
                 
+                if(hipoBanks.containsKey("ICPB")==true){
+                    detectorBanks.add(hipoBanks.get("ICPB"));
+                }
                 if(hipoBanks.containsKey("ECPB")==true){
                     detectorBanks.add(hipoBanks.get("ECPB"));
                 }
