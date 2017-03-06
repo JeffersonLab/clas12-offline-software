@@ -39,6 +39,10 @@ public class CCDBConstantsLoader {
 	public static double[][][] PADDLE2PADDLE 	= new double[6][3][62];
 	public static int[][][] STATUSL 			= new int[6][3][62];
 	public static int[][][] STATUSR 			= new int[6][3][62];
+	public static double[][][] MIPL 			= new double[6][3][62];
+	public static double[][][] MIPR 			= new double[6][3][62];
+	public static double[][][] MIPLU 			= new double[6][3][62];
+	public static double[][][] MIPRU 			= new double[6][3][62];
 	
 	private static DatabaseConstantProvider DB;
 	 //Calibration parameters from DB    
@@ -64,7 +68,10 @@ public class CCDBConstantsLoader {
 	    dbprovider.loadTable("/calibration/ftof/timing_offset");
 	    dbprovider.loadTable("/calibration/ftof/time_walk");
 	    dbprovider.loadTable("/calibration/ftof/status");
-    		   
+	    
+    	// load MIP constants
+	    dbprovider.loadTable("/calibration/ftof/gain_balance");
+	    
 	    //disconncect from database. Important to do this after loading tables.
 	    dbprovider.disconnect(); 
 
@@ -140,6 +147,21 @@ public class CCDBConstantsLoader {
 	        LAMBDALU[iSec-1][iPan-1][iPad-1] = atlLU;
 	        LAMBDARU[iSec-1][iPan-1][iPad-1] = atlRU;
 	       
+	    }
+	    // Getting the ADC_MIP values
+	    for(int i=0; i<dbprovider.length("/calibration/ftof/gain_balance/sector"); i++)  {
+	        int iSec 	 = dbprovider.getInteger("/calibration/ftof/status/sector", i);
+		    int iPan 	 = dbprovider.getInteger("/calibration/ftof/gain_balance/layer", i);
+		    int iPad 	 = dbprovider.getInteger("/calibration/ftof/gain_balance/component", i);
+		    double mipL  = dbprovider.getDouble("/calibration/ftof/gain_balance/mipa_left", i);
+		    double mipR  = dbprovider.getDouble("/calibration/ftof/gain_balance/mipa_right", i);
+		    double mipLU = dbprovider.getDouble("/calibration/ftof/gain_balance/mipa_left_err", i);
+		    double mipRU = dbprovider.getDouble("/calibration/ftof/gain_balance/mipa_right_err", i);
+		         
+		    MIPL[iSec-1][iPan-1][iPad-1]  = mipL;
+		    MIPR[iSec-1][iPan-1][iPad-1]  = mipR; 
+		    MIPLU[iSec-1][iPan-1][iPad-1] = mipLU;
+		    MIPRU[iSec-1][iPan-1][iPad-1] = mipRU; 
 	    }
 	    
 	    // Getting the status

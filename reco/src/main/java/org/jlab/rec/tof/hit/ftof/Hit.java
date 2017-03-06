@@ -339,12 +339,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	
 	@Override
 	public double ADC_MIP() {
-		return Constants.ADC_MIP[this.get_Panel()-1];
+		//return Constants.ADC_MIP[this.get_Panel()-1];
+		return CCDBConstantsLoader.MIPL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 	
 	@Override
 	public double ADC_MIPUnc() {
-		return Constants.ADC_MIP_UNC[this.get_Panel()-1];
+		//return Constants.ADC_MIP_UNC[this.get_Panel()-1];
+		return CCDBConstantsLoader.MIPLU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 	
 	@Override

@@ -17,13 +17,13 @@ public class Constants {
 	
 	public static final double[] SCBARTHICKN 	= new double[3]; 	// 5 cm for 1A and 2, 6cm 1B
 	public static final double LSBCONVFAC 		= 24./1000.;		// ns/bin
-	public static final double[] ADC_MIP 		= new double[3]; 	// From DB 800 A1 & 2 2000 for 1B
+	//public static final double[] ADC_MIP 		= new double[3]; 	// From DB 800 A1 & 2 2000 for 1B
 	public static final double DEDX_MIP 		= 1.956; 			// units = MeV/g/cm^2 	
 	public static final double[] PEDL = new double[3];				// L pedestal
 	public static final double[] PEDR = new double[3];				// R pedestal
 	public static final double[] PEDLUNC = new double[3];			// uncertainty in L pedestal
 	public static final double[] PEDRUNC = new double[3];			// uncertainty in R pedestal
-	public static final double[] ADC_MIP_UNC = new double[3];		// ADC MIP uncertainty
+	//public static final double[] ADC_MIP_UNC = new double[3];		// ADC MIP uncertainty
 	public static final double ADCJITTERL = 1;						// ADC jitter
 	public static final double ADCJITTERR = 1;						// ADC jitter
 	public static final double TDCJITTERL = 0;						// TDC jitter
@@ -70,9 +70,9 @@ public class Constants {
 		SCBARTHICKN[1] = 6;
 		SCBARTHICKN[2] = 5;
 		
-		ADC_MIP[0] = 800;
-		ADC_MIP[1] = 2000;
-		ADC_MIP[2] = 800;
+		//ADC_MIP[0] = 800;
+		//ADC_MIP[1] = 2000;
+		//ADC_MIP[2] = 800;
 		
 		DELTA_T[0][0] = 5.45;
 		DELTA_T[0][1] = 74.55;
