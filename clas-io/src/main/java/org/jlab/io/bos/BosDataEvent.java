@@ -442,6 +442,17 @@ public class BosDataEvent implements DataEvent {
 		 */
 		String[] entryNames = desc.getEntryList();
 		for (String entry : entryNames) {
+			if (desc.getProperty("type", entry) == 2) {
+				int entry_offset = desc.getProperty("offset", entry);
+				short[] short_data = new short[nrows];
+				for (int loop = 0; loop < nrows; loop++) {
+
+					int entry_index = entry_offset + loop * banksize + dataFirstByte;
+					short_data[loop] = bcsBank.getShort(entry_index);
+				}
+				bank.setShort(entry, short_data);
+			}
+
 			if (desc.getProperty("type", entry) == 3) {
 				int entry_offset = desc.getProperty("offset", entry);
 				int[] int_data = new int[nrows];

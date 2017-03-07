@@ -50,6 +50,8 @@ public class CherenkovResponse {
     public double getTime(){ return hitTime;}
     
     public int getEnergy(){ return hitNphe;}
+    public double getTheta() {return this.hitTheta;}
+    public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
     public int getAssociation() {return this.association;}
@@ -87,7 +89,7 @@ public class CherenkovResponse {
 //System.out.println(Math.abs(vecHit.theta()-vecRec.theta())*57.2958 + "  " + 
 //        Math.abs(vecHit.phi()-vecRec.phi())*57.2958);
         
-        return (Math.abs(vecHit.theta()-vecRec.theta())<10.0
+        return (Math.abs(vecHit.theta()-vecRec.theta())<10.0/57.2958
         && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
     }
     
