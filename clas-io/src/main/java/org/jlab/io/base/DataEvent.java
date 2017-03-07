@@ -11,6 +11,9 @@ public interface DataEvent {
     
     void     appendBank(DataBank bank);
     void     appendBanks(DataBank... bank);
+    void     removeBank(String bankName);
+    void     removeBanks(String... bankNames);
+    
     boolean  hasBank(String name);
     
     DataBank createBank(String bank_name, int rows);    

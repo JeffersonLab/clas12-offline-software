@@ -254,4 +254,15 @@ public class HipoDataEvent implements DataEvent {
         HipoDataBank bank = new HipoDataBank(group);
         return bank;
     }
+
+    @Override
+    public void removeBank(String bankName) {
+        this.hipoEvent.removeGroup(bankName);
+    }
+
+    @Override
+    public void removeBanks(String... bankNames) {
+        
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

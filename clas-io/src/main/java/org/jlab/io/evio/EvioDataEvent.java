@@ -853,5 +853,15 @@ public class EvioDataEvent implements DataEvent {
         return this.dictionary.createBank(bank_name, rows);
     }
 
+    @Override
+    public void removeBank(String bankName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeBanks(String... bankNames) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     
 }

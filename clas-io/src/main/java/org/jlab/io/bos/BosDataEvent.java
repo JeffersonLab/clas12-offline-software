@@ -662,6 +662,16 @@ public class BosDataEvent implements DataEvent {
         System.out.println("[BosDataEvent]  show is not implemented");
     }
 
+    @Override
+    public void removeBank(String bankName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeBanks(String... bankNames) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     
 
 }
