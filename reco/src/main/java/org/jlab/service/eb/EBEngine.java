@@ -45,18 +45,18 @@ public class EBEngine extends ReconstructionEngine {
         }
         
         int run   = 10;
-//        double rf = -100.0;
+      //  double rf = -100.0;
         
         if(de.hasBank("RUN::config")==true){
             
         }
                 
-//        if(de.hasBank("RUN::rf")==true){
-//            DataBank bank = de.getBank("RUN::rf");
-//            if(bank.rows()>0){
-//                rf = bank.getFloat("time", 0);
-//            }
-//        }
+      //  if(de.hasBank("RUN::rf")==true){
+     //       DataBank bank = de.getBank("RUN::rf");
+     //       if(bank.rows()>0){
+     //           rf = bank.getFloat("time", 0);
+     //       }
+    //    }
         
         
         EventBuilder eb = new EventBuilder();
@@ -89,6 +89,7 @@ public class EBEngine extends ReconstructionEngine {
 
         EBRadioFrequency rf = new EBRadioFrequency();
         eb.getEvent().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
+        //eb.getEvent().setRfTime(rf);
         
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
@@ -99,8 +100,12 @@ public class EBEngine extends ReconstructionEngine {
         if(eb.getEvent().getParticles().size()>0){
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             List<DetectorResponse>  responses = eb.getEvent().getDetectorResponseList();
+            //List<CherenkovResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
             DataBank bankD = DetectorData.getDetectorResponseBank(responses, de, detectorBank);
+            //DataBank bankC = DetectorData.getCherenkovResponseBank(cherenkovs, de, detectorBank);
+            //DataBank bankE = DetectorData.getEventBank(eb.getEvent(), de, detectorBank);
             de.appendBanks(bankP,bankD);
+            //de.appendBanks(bankP,bankD,bankE);
             if(eb.getEvent().getParticle(0).getPid()==11){
                
                /* eb.show();
