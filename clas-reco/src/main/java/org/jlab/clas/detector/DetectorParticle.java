@@ -228,6 +228,10 @@ public class DetectorParticle implements Comparable {
         return this.responseStore;
     }
     
+    public List<CherenkovResponse> getCherenkovResponses(){
+        return this.cherenkovStore;
+    }
+    
     public DetectorResponse getHit(DetectorType type){
         for(DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type) return res;
@@ -506,9 +510,9 @@ public class DetectorParticle implements Comparable {
                 this.particleCrossPosition.z(),this.particleCrossDirection.x(),
                 this.particleCrossDirection.y(),this.particleCrossDirection.z()));
         */
-        str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, beta = %6.3f, mass2 = %8.3f\n",                
+        str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, htcc = %5d, beta = %6.3f, mass2 = %8.3f\n",                
                 this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.EC),
-                this.getBeta(),this.getMass()));
+                this.getNphe(),this.getBeta(),this.getMass()));
         for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");
