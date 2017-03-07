@@ -201,7 +201,6 @@ public class DetectorData {
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
            bank.setShort("sector", row, (short) r.getDescriptor().getSector());
-           bank.setShort("sector", row, (short) r.getDescriptor().getSector());
            bank.setShort("layer", row, (short) r.getDescriptor().getLayer());
            bank.setShort("component", row, (short) r.getDescriptor().getComponent());
            bank.setFloat("x", row, (float) r.getPosition().x());
@@ -214,6 +213,33 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
        }
+       return bank;
+   }
+   
+      public static DataBank getCherenkovResponseBank(List<CherenkovResponse> responses, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, responses.size());
+       for(int row = 0; row < responses.size(); row++){
+           CherenkovResponse c = responses.get(row);
+           bank.setShort("pindex", row, (short) c.getAssociation());
+           bank.setShort("detector", row, (short) c.getCherenkovType().getDetectorId());
+           bank.setFloat("x", row, (float) c.getHitPosition().x());
+           bank.setFloat("y", row, (float) c.getHitPosition().y());
+           bank.setFloat("z", row, (float) c.getHitPosition().z());
+           bank.setFloat("theta", row, (float) c.getTheta());
+           bank.setFloat("phi", row, (float) c.getPhi());
+           bank.setFloat("dtheta", row, (float) c.getDeltaTheta());
+           bank.setFloat("dphi", row, (float) c.getDeltaPhi());
+           bank.setFloat("time", row, (float) c.getTime());
+           bank.setInt("nphe", row, (int) c.getEnergy());
+       }
+       return bank;
+   }
+      
+      public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, 1);
+           bank.setFloat("STTime", 0, (float) detectorEvent.getStartTime());
+           bank.setFloat("RFTime", 0, (float) detectorEvent.getRfTime());
+     
        return bank;
    }
    
