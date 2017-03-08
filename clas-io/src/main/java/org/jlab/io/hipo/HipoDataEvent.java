@@ -257,7 +257,7 @@ public class HipoDataEvent implements DataEvent {
 
     @Override
     public void removeBank(String bankName) {
-        this.hipoEvent.removeGroup(bankName);
+        //this.hipoEvent.removeGroup(bankName);
     }
 
     @Override
