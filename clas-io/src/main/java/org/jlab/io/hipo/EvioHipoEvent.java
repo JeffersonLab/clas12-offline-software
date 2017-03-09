@@ -110,7 +110,7 @@ public class EvioHipoEvent {
     public void fillHipoEventSVT(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("BST::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BST::dgtz");
-            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("SVT::tdc", evioBank.rows());
+            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("SVT::adc", evioBank.rows());
             for(int i = 0; i < evioBank.rows(); i++){
                 hipoADC.setByte("sector", i, (byte) evioBank.getInt("sector",i));
                 hipoADC.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
