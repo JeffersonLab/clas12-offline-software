@@ -33,6 +33,7 @@ public class EvioHipoEvent {
         this.fillHipoEventFTCAL(hipoEvent, event);
         this.fillHipoEventFTHODO(hipoEvent, event);
         this.fillHipoEventDC(hipoEvent, event);
+        this.fillHipoEventSVT(hipoEvent, event);
         this.fillHipoEventCTOF(hipoEvent, event);        
         this.fillHipoEventECAL(hipoEvent, event);
         this.fillHipoEventLTCC(hipoEvent, event);
@@ -103,6 +104,22 @@ public class EvioHipoEvent {
                 e.printStackTrace();
                 System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
             }
+        }
+    }
+    
+    public void fillHipoEventSVT(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("BST::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BST::dgtz");
+            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("SVT::tdc", evioBank.rows());
+            for(int i = 0; i < evioBank.rows(); i++){
+                hipoADC.setByte("sector", i, (byte) evioBank.getInt("sector",i));
+                hipoADC.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
+                hipoADC.setShort("component",  i, (short) evioBank.getInt("strip",i));
+                hipoADC.setInt("ADC",  i, (byte) evioBank.getInt("ADC",i));
+                hipoADC.setFloat("time",  i, (float) evioBank.getInt("bco",i));
+                
+            }
+            hipoEvent.appendBanks(hipoADC);
         }
     }
     
