@@ -33,8 +33,10 @@ public class EBEngine extends ReconstructionEngine {
                 
         int eventType = EBio.TRACKS_HB;
         
-        String particleBank = "RECHB::Particle";
-        String detectorBank = "RECHB::Detector";
+        String particleBank  = "RECHB::Particle";
+        String detectorBank  = "RECHB::Detector";
+        String cherenkovBank = "RECHB::Detector";
+        String eventBank     = "REC::Event";
         
         
         //System.out.println(" EVENT BUILDER = " + EBio.isTimeBased(de));
@@ -42,6 +44,7 @@ public class EBEngine extends ReconstructionEngine {
             eventType = EBio.TRACKS_TB;
             particleBank = "REC::Particle";
             detectorBank = "REC::Detector";
+            cherenkovBank = "REC::Detector";
         }
         
         int run   = 10;
@@ -62,7 +65,7 @@ public class EBEngine extends ReconstructionEngine {
         EventBuilder eb = new EventBuilder();
         
         List<DetectorResponse>  responseECAL = DetectorResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
-        List<DetectorResponse>  responseFTOF = DetectorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,8.0);
+        List<DetectorResponse>  responseFTOF = DetectorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,5.0);
         List<CherenkovResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         /*
         System.out.println("---------");

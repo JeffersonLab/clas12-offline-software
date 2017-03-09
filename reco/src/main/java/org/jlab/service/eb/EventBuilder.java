@@ -82,6 +82,15 @@ public class EventBuilder {
                 detectorResponses.get(index).setAssociation(n);
             }
             /**
+             * Matching tracks to FTOF layer 1B detector. Added to the particle and association is
+             */
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
+            //System.out.println("index FTOF-1B = " + index);
+            if(index>=0){
+                p.addResponse(detectorResponses.get(index), true);
+                detectorResponses.get(index).setAssociation(n);
+            }
+            /**
              * Matching tracks to PCAL (first layer of ECAL) and adding to the particle if reasonable match
              * is found, and proper association is set.
              */
