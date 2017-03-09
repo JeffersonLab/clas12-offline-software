@@ -81,7 +81,7 @@ public class DetectorData {
                         bank.getFloat("vy", row),
                         bank.getFloat("vz", row));
                 particle.setCharge((int) bank.getByte("charge", row));
-                particle.setMass(bank.getFloat("mass", row));
+                //particle.setMass(bank.getFloat("mass", row));
                 particle.setBeta(bank.getFloat("beta", row));
                 particles.add(particle);
             }
@@ -181,7 +181,7 @@ public class DetectorData {
             bank.setFloat("vy", row, (float) particles.get(row).vertex().y());
             bank.setFloat("vz", row, (float) particles.get(row).vertex().z());
             
-            bank.setFloat("mass", row, (float) particles.get(row).getMass());
+            //bank.setFloat("mass", row, (float) particles.get(row).getMass());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
             bank.setByte("status", row, (byte) particles.get(row).getStatus());
         }
