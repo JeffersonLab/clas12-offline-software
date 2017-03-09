@@ -77,6 +77,7 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public void appendBank(DataBank bank) {
+        if(bank==null) return;
         if(bank instanceof HipoDataBank){
             HipoGroup group =  ((HipoDataBank) bank).getGroup();
             this.hipoEvent.addNodes(group.getNodes());

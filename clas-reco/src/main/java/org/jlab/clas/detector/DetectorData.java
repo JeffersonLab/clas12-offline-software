@@ -196,6 +196,7 @@ public class DetectorData {
      */
    public static DataBank getDetectorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
+       if(bank==null) return null;
        for(int row = 0; row < responses.size(); row++){
            DetectorResponse r = responses.get(row);
            bank.setShort("pindex", row, (short) r.getAssociation());
