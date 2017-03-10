@@ -71,6 +71,18 @@ public class Vector3d {
     }
 
     /**
+     * Creates a new vector based on provided vector (copy constructor)
+     *
+     * @param vec vector for copy constructor
+     */
+    public Vector3d(Vector3d vec) {
+
+        this.x = vec.x;
+        this.y = vec.y;
+        this.z = vec.z;
+    }
+
+    /**
      * Creates a new vector with specified {@code x}, {@code y} and
      * {@code z = 0}.
      *

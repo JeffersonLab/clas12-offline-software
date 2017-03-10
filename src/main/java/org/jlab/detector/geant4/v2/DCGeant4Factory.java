@@ -150,6 +150,13 @@ final class DCdatabase {
         return nguardwires;
     }
 
+    public int nsuperlayers() {
+        return nSupers;
+    }
+
+    public int nregions() {
+        return nRegions;
+    }
 }
 
 final class Wire {
@@ -242,27 +249,27 @@ final class Wire {
     }
 
     public Vector3d mid() {
-        return midpoint;
+        return new Vector3d(midpoint);
     }
 
     public Vector3d left() {
-        return leftend;
+        return new Vector3d(leftend);
     }
 
     public Vector3d right() {
-        return rightend;
+        return new Vector3d(rightend);
     }
 
     public Vector3d dir() {
-        return direction;
+        return new Vector3d(direction);
     }
 
     public Vector3d top() {
-        return topend;
+        return new Vector3d(topend);
     }
 
     public Vector3d bottom() {
-        return bottomend;
+        return new Vector3d(bottomend);
     }
 
     public double length() {
@@ -270,7 +277,7 @@ final class Wire {
     }
 
     public Vector3d center() {
-        return center;
+        return new Vector3d(center);
     }
 }
 
@@ -286,6 +293,10 @@ public final class DCGeant4Factory extends Geant4Factory {
     private final double z_enlargement = -2.96;
     private final double microgap = 0.01;
     
+    private final Vector3d[][][] wireMids;
+    private final Vector3d[][] layerMids;
+    private final Vector3d[] regionMids;
+
     ///////////////////////////////////////////////////
     public DCGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
@@ -303,8 +314,50 @@ public final class DCGeant4Factory extends Geant4Factory {
         properties.put("email", "mestayer@jlab.org");
         properties.put("author", "mestayer");
         properties.put("date", "05/08/16");
+
+        wireMids = new Vector3d[dbref.nsuperlayers()][][];
+        layerMids = new Vector3d[dbref.nsuperlayers()][];
+        for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
+            wireMids[isuper] = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            layerMids[isuper] = new Vector3d[dbref.nsenselayers(isuper)];
+
+            for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
+                Wire firstWire = new Wire(isuper, ilayer+1, 1);
+                Wire lastWire = new Wire(isuper, ilayer+1, dbref.nsensewires());
+                Vector3d firstMid = firstWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                Vector3d lastMid = lastWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                layerMids[isuper][ilayer] = firstMid.plus(lastMid).dividedBy(2.0);
+
+                for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
+                    Wire ww = new Wire(isuper, ilayer+1, iwire+1);
+                    wireMids[isuper][ilayer][iwire] = ww.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                }
+            }
+        }
+
+        regionMids = new Vector3d[dbref.nregions()];
+        for(int iregion=0; iregion<dbref.nregions(); iregion++) {
+            regionMids[iregion] = new Vector3d(layerMids[iregion*2][dbref.nsenselayers(iregion*2)-1]);
+            regionMids[iregion] = regionMids[iregion].plus(layerMids[iregion*2+1][0]).dividedBy(2.0);
+        }
+
     }
 
+    public Vector3d getWireMidpoint(int isuper, int ilayer, int iwire) {
+        return wireMids[isuper][ilayer][iwire];
+    }
+
+    public Vector3d getRegionMidpoint(int iregion) {
+        return regionMids[iregion];
+    }
+
+    public Vector3d getLayerMidpoint(int isuper, int ilayer) {
+        return layerMids[isuper][ilayer];
+    }
+
+    public Geant4Basic getRegion(int ireg) {
+        return motherVolume.getChildren().get(ireg*6);
+    }
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {
         Wire regw0 = new Wire(iregion * 2, 0, 0);
