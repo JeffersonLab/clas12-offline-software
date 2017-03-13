@@ -139,7 +139,8 @@ public class KalFit {
 		
 		//transPortToPlane((int) (measVecs[0][0]/stepSize),  measVecs[0][0], 0);
 		// transport the parameters to Region 3 middle plane
-		double zR3MP = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(2).point().z();
+		//double zR3MP = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(2).point().z();
+		double zR3MP = GeometryLoader.dcDetector.getRegionMidpoint(2).z;
 		
 		//transPortToPlane((int) (Math.abs(measVecs[0][0]-zR3MP)/stepSize),  measVecs[0][0], zR3MP);
 		transPortToPlane((int) (Math.abs(measVecs[0][measVecs[0].length-1]-zR3MP)/stepSize),  measVecs[0][measVecs[0].length-1], zR3MP);

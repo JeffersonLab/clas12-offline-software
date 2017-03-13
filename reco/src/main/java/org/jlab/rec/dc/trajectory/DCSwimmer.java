@@ -123,7 +123,8 @@ public class DCSwimmer {
 		double z0 =0;
 		
 		if(superlayerIdx!=-1 && layerIdx!=-1) 
-			z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+			//z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+			z0 = GeometryLoader.dcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;
 		
 		// x,y,z in m = swimmer units
 		 _x0  = x0/100;
