@@ -219,7 +219,7 @@ final class Wire {
         double dw = 4 * Math.cos(Math.toRadians(30)) * dbref.wpdist(isuper);
         double dw2 = dw / cster;
 
-        double hh = (iwire + (ilayer % 2) / 2.0) * dw2;
+        double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
 //        if(ireg==THIRDREGION && isSensitiveWire())
 //                hh += pow(-1, ilayer%2)*dministagger;
                 
@@ -345,6 +345,24 @@ public final class DCGeant4Factory extends Geant4Factory {
 
     public Vector3d getWireMidpoint(int isuper, int ilayer, int iwire) {
         return wireMids[isuper][ilayer][iwire];
+    }
+
+    //this methods should be optimized if we decide to use them in reconstruction
+    public Vector3d getWireLeftend(int isuper, int ilayer, int iwire) {
+        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
+        return ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+    }
+
+    //this methods should be optimized if we decide to use them in reconstruction
+    public Vector3d getWireRightend(int isuper, int ilayer, int iwire) {
+        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
+        return ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+    }
+
+    //this methods should be optimized if we decide to use them in reconstruction
+    public Vector3d getWireDirection(int isuper, int ilayer, int iwire) {
+        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
+        return ww.dir().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
     }
 
     public Vector3d getRegionMidpoint(int iregion) {
