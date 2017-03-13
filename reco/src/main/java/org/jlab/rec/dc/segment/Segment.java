@@ -186,13 +186,15 @@ public class Segment extends ArrayList<FittedHit> {
 	 */
 	public void set_SegmentEndPointsSecCoordSys() {
 		
-		double Z_1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().z();
+		//double Z_1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().z();
+		double Z_1 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 0, 0).z;
 		double X_1 = this.get_fittedCluster().get_clusterLineFitSlope()*Z_1 + this.get_fittedCluster().get_clusterLineFitIntercept();
 		
 		double x1 = Math.cos(Math.toRadians(25.))*X_1 + Math.sin(Math.toRadians(25.))*Z_1;
 		double z1 = -Math.sin(Math.toRadians(25.))*X_1 + Math.cos(Math.toRadians(25.))*Z_1;
 		
-		double Z_2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(5).getComponent(0).getMidpoint().z();
+		//double Z_2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(5).getComponent(0).getMidpoint().z();
+		double Z_2 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 5, 0).z;
 		double X_2 = this.get_fittedCluster().get_clusterLineFitSlope()*Z_2 + this.get_fittedCluster().get_clusterLineFitIntercept();
 		
 		double x2 = Math.cos(Math.toRadians(25.))*X_2 + Math.sin(Math.toRadians(25.))*Z_2;

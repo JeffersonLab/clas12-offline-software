@@ -218,8 +218,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 	 * Sets the cross parameters: the position and direction unit vector
 	 */
 	public void set_CrossParams() {
-		
-		double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
+		//double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
+		double z = GeometryLoader.dcDetector.getRegionMidpoint(this.get_Region()-1).z;
 		
 		double wy_over_wx = (Math.cos(Math.toRadians(6.))/Math.sin(Math.toRadians(6.)));
 				

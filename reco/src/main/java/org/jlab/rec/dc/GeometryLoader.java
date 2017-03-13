@@ -1,14 +1,14 @@
 package org.jlab.rec.dc;
 
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.FileNotFoundException;
 
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.geom.base.ConstantProvider;
-import org.jlab.geom.detector.dc.DCDetector;
-import org.jlab.geom.detector.dc.DCFactoryUpdated;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 /**
  * A class to load the geometry constants used in the DC reconstruction.  The coordinate system used in the Tilted Sector coordinate system.
@@ -18,13 +18,13 @@ import org.jlab.geom.prim.Point3D;
 public class GeometryLoader {
 
 	public static boolean isGeometryLoaded = false;
-	public static DCDetector dcDetector;
+	public static DCGeant4Factory dcDetector;
 
 	public static synchronized void Load(int runNb, String var) {
 		// the geometry is different is hardware and geometry... until GEMC gets updated we need to run with this flag
 		ConstantProvider  provider = GeometryFactory.getConstants(DetectorType.DC, runNb, var);
-        dcDetector = (new DCFactoryUpdated()).createDetectorTilted(provider);
-       
+                dcDetector = new DCGeant4Factory(provider);
+
 		System.out.println(" -- DC Geometry constants are Loaded for RUN   "+runNb+" with VARIATION "+var);
 	}
 	
@@ -32,8 +32,11 @@ public class GeometryLoader {
 
 		GeometryLoader.Load(10, "default");
 		
-		Point3D ep1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(0).getMidpoint();
-		Point3D ep2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(1).getComponent(0).getMidpoint();
+                Vector3d wmid0 = GeometryLoader.dcDetector.getWireMidpoint(0,0,0);
+		Point3D ep1 = new Point3D(wmid0.x, wmid0.y, wmid0.z);
+                Vector3d wmid1 = GeometryLoader.dcDetector.getWireMidpoint(0,1,0);
+		Point3D ep2 = new Point3D(wmid1.x, wmid1.y, wmid1.z);
+
 		System.out.println(ep1.toString()+", "+ep2.toString()+" - "+0.03*Math.cos(Math.toRadians(6.)));
 		//pw.close();
 	/*	System.out.println("dx; = "+(GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(0).getMidpoint().x()-

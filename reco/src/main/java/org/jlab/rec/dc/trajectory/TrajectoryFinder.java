@@ -75,8 +75,10 @@ public class TrajectoryFinder {
 	int counter =0;
 	public double integralBdl() {
 		
-		double z1 = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(0).point().z();
-		double z3 = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(2).point().z();
+		//double z1 = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(0).point().z();
+		//double z3 = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(2).point().z();
+		double z1 = GeometryLoader.dcDetector.getRegionMidpoint(0).z;
+		double z3 = GeometryLoader.dcDetector.getRegionMidpoint(2).z;
 		
 		double z = z1;
 
@@ -130,8 +132,9 @@ public class TrajectoryFinder {
 		double[] Z = new double[36];
 		double[] thX = new double[36];
 		double[] thY = new double[36];
-		
-		Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
+
+		//Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
+		Z[0] = GeometryLoader.dcDetector.getLayerMidpoint(0, 0).z;
 		double[] swamPars = dcSwim.SwimToPlane(Z[0]) ;
 		X[0] = swamPars[0];
 		Y[0] = swamPars[1];
@@ -153,7 +156,8 @@ public class TrajectoryFinder {
 					continue;
 				
 				dcSwim.SetSwimParameters(lastSupLyrIdx, lastLyrIdx,  X[planeIdx-1],  Y[planeIdx-1],  thX[planeIdx-1],  thY[planeIdx-1],  p,  q);
-				Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+				//Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+				Z[layerIdx] = GeometryLoader.dcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;
 				swamPars = dcSwim.SwimToPlane(Z[layerIdx]) ;
 				X[layerIdx] = swamPars[0];
 				Y[layerIdx] = swamPars[1];
@@ -183,7 +187,8 @@ public class TrajectoryFinder {
 		for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
 			for(int layerIdx =0; layerIdx<6; layerIdx++) {
 				
-				double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+				//double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+				double z = GeometryLoader.dcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;
 				double x = x_fitCoeff[0]*z*z+x_fitCoeff[1]*z+x_fitCoeff[2];
 				double y = y_fitCoeff[0]*z*z+y_fitCoeff[1]*z+y_fitCoeff[2];
 				double tanTheta_x = x_fitCoeff[0]*z+x_fitCoeff[1];
