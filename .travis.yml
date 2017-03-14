@@ -9,7 +9,8 @@ script:
   - echo attempting to build
   - echo "here it goes..."
   - ls -lthr
-  - ./common-tools/build.sh -m
+  - cd common-tools
+  - ./build.sh -m
 
 jdk:
 - oraclejdk8
