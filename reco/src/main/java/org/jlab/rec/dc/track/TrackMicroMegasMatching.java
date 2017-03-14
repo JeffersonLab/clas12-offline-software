@@ -250,44 +250,6 @@ public class TrackMicroMegasMatching {
 		
 	}
 	
-	public void reFitTrackWithMicroMegas(Track cand, TrackCandListFinder candFind,int totNbOfIterations) {
-		
-		if(cand.get_MicroMegasPointsList()==null || cand.get_MicroMegasPointsList().size()<3)
-			return;
-		
-		int iterationNb =0;
-		double fitChisq = Double.POSITIVE_INFINITY;
-		StateVec VecAtReg3MiddlePlane = new StateVec();
-		
-		while(iterationNb < totNbOfIterations) {
-			
-			KalFit kf = new KalFit(cand, "wires");
-			if(kf.KalFitFail==true) {
-				break;
-			}
-			kf.runKalFit(); 
-			if(kf.chi2>fitChisq) {
-				iterationNb = totNbOfIterations;
-				continue;
-			}
-			if(!Double.isNaN(kf.KF_p) && kf.KF_p>Constants.MINTRKMOM) {
-				cand.set_P(kf.KF_p);								
-				cand.set_Q(kf.KF_q);
-				cand.set_CovMat(kf.covMat);
-				
-				VecAtReg3MiddlePlane = new StateVec(kf.stateVec[0],kf.stateVec[1],kf.stateVec[2],kf.stateVec[3]);
-				
-				
-			}
-			fitChisq = kf.chi2;
-			iterationNb++;
-			
-			cand.set_FitChi2(fitChisq);
-		}
-			
-		
-		candFind.setTrackPars(cand, null, null, VecAtReg3MiddlePlane, cand.get(2).get_Point().z());
-	}
 	
 	
 }

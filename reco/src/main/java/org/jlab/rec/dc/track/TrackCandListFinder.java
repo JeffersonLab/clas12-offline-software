@@ -8,11 +8,11 @@ import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
@@ -107,87 +107,35 @@ public class TrackCandListFinder {
 						if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
 							continue;
 						
-						int totNbOfIterations = 10;
-						int iterationNb = 0;
-						
 						cand.set_Q(q);
 						// momentum correction using the swam trajectory iBdl
 						cand.set_P(p);
-						
-						double fitChisq = Double.POSITIVE_INFINITY ;
-						
-						StateVec VecAtReg3MiddlePlane = new StateVec(cand.get(2).get_Point().x(),cand.get(2).get_Point().y(),
-								cand.get(2).get_Dir().x()/cand.get(2).get_Dir().z(), cand.get(2).get_Dir().y()/cand.get(2).get_Dir().z());
-						
+											
 						StateVec VecAtReg1MiddlePlane = new StateVec(cand.get(0).get_Point().x(),cand.get(0).get_Point().y(),
 								cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z(), cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
-												
+						cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
 						
-						if(VecAtReg1MiddlePlane!=null) {
-							if(trking == "TimeBased") {
-								totNbOfIterations = 20;
-							} else {
-								totNbOfIterations = 20;
-							}
-								
-							while(iterationNb < totNbOfIterations) {
-								cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
-								
-								KalFit kf = new KalFit(cand, "wires");
-								if(kf.KalFitFail==true) {
-									break;
-								}
-								
-								kf.runKalFit(); 
-								
-								if(kf.chi2>fitChisq || kf.chi2>Constants.MAXCHI2+1 || Math.abs(kf.chi2-fitChisq)<0.0001) { //0.0000001
-									iterationNb = totNbOfIterations;
-									continue;
-								}
-								if(!Double.isNaN(kf.KF_p) && kf.KF_p>Constants.MINTRKMOM) {
-									cand.set_P(kf.KF_p);								
-									cand.set_Q(kf.KF_q);
-									cand.set_CovMat(kf.covMat);
-									
-									VecAtReg3MiddlePlane = new StateVec(kf.stateVec[0],kf.stateVec[1],kf.stateVec[2],kf.stateVec[3]);
-									
-									double pz = cand.get_P() / Math.sqrt(kf.stateVec[2]*kf.stateVec[2] + kf.stateVec[3]*kf.stateVec[3] + 1);
-									
-									dcSwim.SetSwimParameters(kf.stateVec[0],kf.stateVec[1],cand.get(2).get_Point().z(),
-											-pz*kf.stateVec[2],-pz*kf.stateVec[3],-pz,
-											 -cand.get_Q());
-
-									double[] VecAtR1 = dcSwim.SwimToPlane(cand.get(0).get_Point().z());
-									double xOr = VecAtR1[0];
-									double yOr = VecAtR1[1];								
-									double pxOr = -VecAtR1[3];
-									double pyOr = -VecAtR1[4];
-									double pzOr = -VecAtR1[5];
-									VecAtReg1MiddlePlane = new StateVec(xOr,yOr,pxOr/pzOr,pyOr/pzOr);
-									
-								}
-								fitChisq = kf.chi2;
-								iterationNb++;
-								
-								cand.set_FitChi2(fitChisq); 
-							}
+						KFitter kFit = new KFitter(cand);
+						if(this.trking=="TimeBased")
+							kFit.totNumIter=30;
+						
+						StateVec fn = new StateVec();
+						kFit.runFitter();
+						
+						
+						if(kFit.chi2/(double) kFit.NDF<1000) {
+						
+							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
 							
-						}	
-						
-						this.setTrackPars(cand, traj, trjFind, VecAtReg3MiddlePlane, cand.get(2).get_Point().z());
-						
-						if(cand.fit_Successful==false)
-							continue;
-						
-						if((iterationNb>0 && cand.get_FitChi2()>Constants.MAXCHI2) || 
-								(iterationNb!=0 && cand.get_FitChi2()==0))
-							continue; // fails if after KF chisq exceeds cutoff or if KF fails 
-						
-						//System.out.println(trking+" FitChisq "+cand.get_FitChi2());	
-						cand.set_Id(cands.size()+1);
-						
-						cands.add(cand); 
-					
+							cand.set_P(1./Math.abs(kFit.finalStateVec.Q));
+							this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z);
+													
+							cand.set_FitChi2(kFit.chi2);
+							
+							cand.set_Id(cands.size()+1);
+							
+							cands.add(cand); 
+						}
 					}
 				}
 			}
@@ -290,7 +238,7 @@ public class TrackCandListFinder {
 	public void setTrackPars(Track cand, Trajectory traj, TrajectoryFinder trjFind, StateVec stateVec, double z) {
 		double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX()*stateVec.tanThetaX() + stateVec.tanThetaY()*stateVec.tanThetaY() + 1);
 		
-		
+		//System.out.println("Setting track params for ");stateVec.printInfo();
 		dcSwim.SetSwimParameters(stateVec.x(),stateVec.y(),z,
 				pz*stateVec.tanThetaX(),pz*stateVec.tanThetaY(),pz,
 				 cand.get_Q());
