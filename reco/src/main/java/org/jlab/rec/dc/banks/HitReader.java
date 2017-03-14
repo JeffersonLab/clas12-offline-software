@@ -7,8 +7,8 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
+import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.DCTranslationTable;
 
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
@@ -81,14 +81,12 @@ public class HitReader {
 		int[] wire = new int[rows];
 		int[] tdc = new int[rows];
 		int[] useMChit = new int[rows];
-		double[] T0 = new double[rows];
 		
 		for(int i = 0; i< rows; i++) {
 			sector[i] = bankDGTZ.getByte("sector", i);
 			layer[i] = bankDGTZ.getByte("layer", i);
 			wire[i] = bankDGTZ.getShort("component", i);
 			tdc[i] = bankDGTZ.getInt("TDC", i);	
-			//T0[i] = this.getT0(sector[i], layer[i], wire[i], true);
 		}
 		
 		if(event.hasBank("DC::doca")==true) {
@@ -124,7 +122,7 @@ public class HitReader {
 		noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
 		
 		for(int i = 0; i<size; i++) {	
-			if(wire[i]!=-1 && results.noise[i]==false && useMChit[i]!=-1){		
+			if(wire[i]!=-1 && results.noise[i]==false && useMChit[i]!=-1 && !(superlayerNum[i]==0)){		
 				//Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
 				Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i+1));			
 				double posError = hit.get_CellSize()/Math.sqrt(12.);
@@ -138,20 +136,7 @@ public class HitReader {
 
 		}
 		
-/*
-	private double getT0(int sector, int layer, int wire, boolean use) {
-		int channel = DCTranslationTable.reverseTable.get(sector,layer,wire).getChannel();
-		int slot = DCTranslationTable.reverseTable.get(sector,layer,wire).getSlot();
-		
-		int connector = (int)(channel/16)+1;
-	    int icableID = (connector-1)*20+slot-1; //20 slots
-		int cable_id = DCTranslationTable.cableid[icableID];
-		double t0 = DCTranslationTable.cableT0[icableID];
-		//double t0 =0; 
-		t0 = 180;
-		return t0;
-	}
-*/
+
 	/**
 	 * Reads HB DC hits written to the DC bank
 	 * @param event
@@ -202,7 +187,7 @@ public class HitReader {
 			if(clusterID[i]==-1)
 				continue;
 			
-			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-Constants.getT0(), 0, B[i], id[i]); 
+			FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]); 
 			hit.set_LeftRightAmb(LR[i]);
 			hit.set_TrkgStatus(0);
 			hit.set_TimeToDistance(1.0, B[i]);
@@ -222,7 +207,42 @@ public class HitReader {
 		
 		this.set_HBHits(hits);
 	}
-	
 
+	private double[] get_T0(int sector, int superlayer, int layer, int wire, boolean applyCorr) {
+		double[] T0Corr = new double[2];
+		
+		if(applyCorr == false) {
+			T0Corr[0] = 0;			
+			T0Corr[1] = 0;			
+			
+		} else {
+			
+			double t0  = 0;
+			double t0E = 0;
+			int cable = this.getCableID1to6(layer, wire) ;
+			int slot  = this.getSlotID1to7(wire);
+			
+			t0  = CalibrationConstantsLoader.T0[sector-1][superlayer-1][slot-1][cable-1];      //nSec*nSL*nSlots*nCables
+			t0E = CalibrationConstantsLoader.T0Err[sector-1][superlayer-1][slot-1][cable-1];      
+			
+			T0Corr[0] = t0;
+			T0Corr[1] = t0E;	
+		}
+		//System.out.println(" t0 correction "+T0Corr[0]);
+		return T0Corr;
+	}
+	
+	 private int getSlotID1to7(int wire1to112) {
+		 int iSlot = (int)((wire1to112 - 1) / 16) + 1;         
+	     return iSlot;
+	 }
+	    
+     private int getCableID1to6(int layer1to6, int wire1to112) {
+        /*96 channels are grouped into 6 groups of 16 channels and each group 
+            joins with a connector & a corresponding cable (with IDs 1,2,3,4,& 6)*/
+        int wire1to16 = (int)((wire1to112 - 1) % 16 + 1); 
+        int cable_id = CalibrationConstantsLoader.CableID[layer1to6 - 1][wire1to16 - 1];
+        return cable_id;
+     }  
    
 }
