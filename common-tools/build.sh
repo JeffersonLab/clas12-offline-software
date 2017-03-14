@@ -20,7 +20,8 @@ then
     mvn install
     cd coat-lib
     mvn package
-    cp target/coat-libs-3.0-SNAPSHOT.jar $COATJAVA/lib/clas/
+    #cp target/coat-libs-3.0-SNAPSHOT.jar $COATJAVA/lib/clas/
+    ls -lthr target/coat-libs-*
     cd ..
 fi
 #=================================================================
