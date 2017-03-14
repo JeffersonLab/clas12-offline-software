@@ -27,7 +27,6 @@ public class CrossListFinder  {
 	 * @return the list of crosses determined to be consistent with belonging to a track in the DC
 	 */
 	public CrossList candCrossLists(List<Cross> dccrosslist) {
-		//
 		List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
 
 		if(dccrosslist.size()>0) {
@@ -48,6 +47,7 @@ public class CrossListFinder  {
 
 			int index =0;
 			// need 3 crosses
+			
 			if(dccrosslistRg1.size()!=0 && dccrosslistRg2.size()!=0 && dccrosslistRg3.size()!=0) {
 				for(Cross c1 : dccrosslistRg1) {
 					for(Cross c2 : dccrosslistRg2) {
@@ -77,12 +77,12 @@ public class CrossListFinder  {
 							errX[2] = c3.get_PointErr().x();
 							errY[2] = c3.get_PointErr().y();
 							// ignore point errors and assume the track vertex is close to the origin
-							QuadraticFit qf = new QuadraticFit();
-							qf.evaluate(Z, X, errX,Y,errY);
+							TrajectoryParametriz qf1 = new TrajectoryParametriz();
+							qf1.evaluate(Z, X, errX,Y,errY);
 					        
-							Vector3D traj1 = new Vector3D(qf.fitResult[3][0],qf.fitResult[4][0],qf.fitResult[5][0]);
-							Vector3D traj2 = new Vector3D(qf.fitResult[3][1],qf.fitResult[4][1],qf.fitResult[5][1]);
-							Vector3D traj3 = new Vector3D(qf.fitResult[3][2],qf.fitResult[4][2],qf.fitResult[5][2]);
+							Vector3D traj1 = new Vector3D(qf1.fitResult[3][0],qf1.fitResult[4][0],qf1.fitResult[5][0]);
+							Vector3D traj2 = new Vector3D(qf1.fitResult[3][1],qf1.fitResult[4][1],qf1.fitResult[5][1]);
+							Vector3D traj3 = new Vector3D(qf1.fitResult[3][2],qf1.fitResult[4][2],qf1.fitResult[5][2]);
 							
 							double cosTh1 = traj1.dot(c1.get_Dir().toVector3D());
 							double cosTh2 = traj2.dot(c2.get_Dir().toVector3D());
@@ -92,18 +92,18 @@ public class CrossListFinder  {
 							if(cosTh1<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh2<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh3<Constants.TRACKDIRTOCROSSDIRCOSANGLE) 
 								continue;
 							
-							/*
 							// fit the  projection with a line -- the track is ~ constant in phi
 							LineFitter linefit = new LineFitter();
 							boolean linefitstatusOK = linefit.fitStatus(X, Y, errX, errY, Z.length);
 							if(!linefitstatusOK)
 								continue; // fit failed
+							//if(linefit.getFit().chisq() > Constants.TRACKSELECTQFMINCHSQ) 
+							//	continue;
+							
+							//if(linefit.getFit().chisq() > Constants.TRACKSELECTQFMINCHSQ) 
+							//	System.out.println(" failed chisq selection   "+linefit.getFit().chisq() );
 							// require that the fit be successful
-							if(linefit.getFit().chisq() > Constants.TRACKSELECTQFMINCHSQ) 
-								continue;
-							if(Constants.DEBUGPRINTMODE==true)
-								System.out.println(" Passed chisq selection   ");
-							*/
+							
 							// Recalculate Dir 
 							
 							//RecalculateCrossDir(c1, linefit.getFit().slope());
@@ -135,7 +135,6 @@ public class CrossListFinder  {
 		crossList.addAll(trkCnds);
 		return crossList;
 	}
-
 
 
 	@SuppressWarnings("unused")
@@ -179,7 +178,8 @@ public class CrossListFinder  {
 	}
 
 
-	private class QuadraticFit {
+
+	private class TrajectoryParametriz {
 		
 		private double[][] fitResult = { {0.,0.,0.},
 				                         {0.,0.,0.},
