@@ -1,0 +1,14 @@
+---
+language: java
+
+before_install:
+  - echo this is the
+  - echo before_install option
+
+script:
+  - echo attempting to draw face
+  - echo "here it goes..."
+  - ls -lthr
+
+jdk:
+- oraclejdk8
