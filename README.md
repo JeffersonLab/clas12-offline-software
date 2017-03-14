@@ -9,4 +9,11 @@ https://www.smashingmagazine.com/2014/05/moving-git-repository-new-server/
 stuff to do:
 
 remove jar files from lib/ directory (https://help.github.com/articles/removing-files-from-a-repository-s-history/) these should be built from source, not saved in the repo
-...
+
+get travis working properly with maven
+
+make sure submodule permissions are correct (travis seems to be complaining about it)
+
+consider changing permissions and/or creating teams for development
+
+continue to migrate code
