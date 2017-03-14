@@ -36,7 +36,6 @@ public class CrossMaker {
 				// looping over all segments
 				for(Segment seg1 : allSegments)
 				{ // first segment
-
 					if(seg1.get_Sector()==s+1 && seg1.get_RegionSlayer() == 1 && seg1.get_Region() == r+1)
 					{
 						for(Segment seg2 : allSegments)
@@ -45,6 +44,7 @@ public class CrossMaker {
 								continue;
 							if(seg2.get_Sector() == s+1 && seg2.get_RegionSlayer() == 2 && seg2.get_Region() == r+1)
 							{   //wire proximity
+								
 								if(seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1))
 								{
 									Cross cross = new Cross(s+1, r+1, rid++);
@@ -56,10 +56,13 @@ public class CrossMaker {
 									cross.set_CrossParams();
 									
                                     Point3D CS =cross.getCoordsInSector(cross.get_Point().x(),cross.get_Point().y(),cross.get_Point().z());
-                                    
+                                   
                                     if(CS.x()>0)
                                     	if(Math.abs(CS.y())/CS.x()<Math.tan(Math.toRadians(30.))) {
+                                    		
                                     		cross.set_Id(crosses.size()+1);
+                                    		if(cross.isPseudoCross)
+                                    			cross.set_Id(-1);
                                     		crosses.add(cross);  //insures the cross is correctly reconstructed in the sector
                                     	}
 								}
