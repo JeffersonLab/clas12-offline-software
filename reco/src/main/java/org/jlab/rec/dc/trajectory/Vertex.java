@@ -42,7 +42,7 @@ public class Vertex {
 		double x0 = thecand.get_Vtx0().x();
 		double y0 = thecand.get_Vtx0().y();
 		double z0 = thecand.get_Vtx0().z();
-		if(thecand.get_Vtx0().toVector3D().mag()>r)
+		if(Math.sqrt(x0*x0+y0*y0)>r)
 			return;
 		
 		double p0x = thecand.get_pAtOrig().x();

@@ -132,7 +132,7 @@ public class TrajectoryFinder {
 		double[] Z = new double[36];
 		double[] thX = new double[36];
 		double[] thY = new double[36];
-
+		
 		//Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
 		Z[0] = GeometryLoader.dcDetector.getLayerMidpoint(0, 0).z;
 		double[] swamPars = dcSwim.SwimToPlane(Z[0]) ;
