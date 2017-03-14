@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+# local-reconstruction: run a CLAS12 file reconstruction using the standard
+# chain of services or a chain user-defined services.
+#
+# The reconstruction services can be replaced with a custom YAML file.
+#
+# Author: Sebastián Mancilla <smancill@jlab.org>
+##############################################################################
+# Environment
+##############################################################################
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+##############################################################################
+# Helper Functions
+##############################################################################
+cleanup() {
+trap '' INT TERM EXIT
+# Remove temp dir
+    rm -rf "${workdir}"
+if [[ -n "${orch_pid}" ]]; then
+echo "Shutting down..."
+fi
+kill -TERM 0
+if [[ -n "${dpe_pid}" ]]; then
+wait "${dpe_pid}"
+fi
+}
+usage() {
+    cat << EOF
+Usage:
+$0 [ OPTIONS ] <input-file> <output-file>
+Options:
+  -t <threads>                  - the number of processing threads
+  -r <services.yaml>            - replace the default chain (advanced)
+  -l                            - print the default chain and quit
+EOF
+}
+workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'tmp')
+trap cleanup EXIT SIGINT SIGTERM
+##############################################################################
+# Define working directories, CLARA_HOME where clara distribution is located
+##############################################################################
+CLARA_HOME=$SCRIPT_DIR/../lib/clara ; export CLARA_HOME
+CLAS12DIR=$SCRIPT_DIR/.. ; export CLAS12DIR
+##############################################################################
+# Get parameters
+##############################################################################
+input_file=""
+output_file=""
+n_threads=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+list_services=false
+run_rec=true
+user_yaml=""
+while getopts "lr:t:h" OPTION; do
+case $OPTION in
+        l)
+            list_services=true
+            run_rec=false
+            ;;
+        r)
+            user_yaml="$OPTARG"
+            ;;
+        t)
+            n_threads="$OPTARG"
+            ;;
+        h)
+            usage
+exit
+            ;;
+?)
+echo
+            usage
+exit 1
+            ;;
+esac
+done
+shift $((OPTIND-1))
+##############################################################################
+# Validate parameters
+##############################################################################
+# Check if we have reconstruction arguments (files).
+if [[ ${run_rec} == true ]]; then
+if [[ $# -le 1 ]]; then
+echo "Missing <file> arguments."
+echo
+        usage
+exit 1
+elif [[ $# -eq 2 ]]; then
+        input_file="$1"
+        output_file="$2"
+else
+echo "Wrong number of arguments."
+echo
+        usage
+exit 1
+fi
+fi
+# Location of services.yaml
+services_file="${workdir}/services.yaml"
+# Default services.yaml
+if [[ -z ${user_yaml} ]]; then
+    cat << EOF > "${services_file}"
+---
+services:
+  - class: org.jlab.rec.ec.ECReconstruction
+    name: EC
+  - class: org.jlab.rec.ftof.SCReconstruction
+    name: FTOF
+  - class: org.jlab.rec.dc.services.HitBasedTracking
+    name: DCHB
+  - class: org.jlab.rec.dc.services.TimeBasedTracking
+    name: DCTB
+  - class: org.jlab.rec.eb.CLASEventBuilder
+    name: EB
+EOF
+# User provided services.yaml
+elif [[ -f "${user_yaml}" ]]; then
+    cp "${user_yaml}" "${services_file}"
+else
+echo "Custom '${user_yaml}' services file doesn't exist!"
+echo
+    usage
+exit 1
+fi
+# List services
+if [[ ${list_services} == true ]]; then
+    cat "${services_file}"
+exit
+fi
+##############################################################################
+# Run CLARA
+##############################################################################
+echo "CLARA_HOME=${CLARA_HOME}"
+export CLASSPATH="${CLARA_HOME}/lib/*:${CLARA_HOME}/services/*"
+# Run front-end
+java -Xmx4096m -Xms2048m -XX:+UseNUMA -XX:+UseBiasedLocking org.jlab.clara.sys.Dpe &
+dpe_pid=$!
+sleep 1
+# Run local-orchestrator
+java -Xmx2048m -Xms1048m org.jlab.clas.std.orchestrators.LocalOrchestrator \
+    -t "${n_threads}" \
+"${services_file}" \
+"${input_file}" \
+"${output_file}" &
+orch_pid=$!
+##############################################################################
+# Exit
+##############################################################################
+wait ${orch_pid}
+wait ${orch_pid}
+exit $?
