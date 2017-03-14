@@ -7,7 +7,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.GeometryLoader;
-import org.jlab.rec.dc.hit.FittedHit;
 
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
@@ -49,7 +48,8 @@ public class ClusterFitter {
 				x[i] = clus.get(i).get_Z();
 				ex[i] = 0;
 				y[i] = clus.get(i).get_X();
-				ey[i]= clus.get(i).get_DocaErr(); 
+				//ey[i]= clus.get(i).get_DocaErr(); //CODEFIX1
+				ey[i]= clus.get(i).get_DocaErr()/Math.cos(Math.toRadians(6.));
 			}
 			
 			
@@ -86,6 +86,7 @@ public class ClusterFitter {
 	        clus.set_clusterLineFitSlopeErr(FitPars.slopeErr());
 	        clus.set_clusterLineFitIntercept(FitPars.intercept());
 	        clus.set_clusterLineFitInterceptErr(FitPars.interceptErr());
+	        clus.set_clusterLineFitSlIntCov(FitPars.SlopeIntercCov());
 	        clus.set_fitProb(FitPars.getProb());
 	        clus.set_Chisq(FitPars.chisq());
 			

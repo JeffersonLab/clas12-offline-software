@@ -49,6 +49,7 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
 	private double _clusterLineFitintercept;
 	private double _clusterLineFitSlopeErr;
 	private double _clusterLineFitinterceptErr;
+	private double _clusterLineFitSlIntCov;
 	
 	private double _clusterLineFitSlopeMP;
 	private double _clusterLineFitInterceptMP;
@@ -257,6 +258,14 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
 
 	
 	
+	public double get_clusterLineFitSlIntCov() {
+		return _clusterLineFitSlIntCov;
+	}
+
+	public void set_clusterLineFitSlIntCov(double _clusterLineFitSlIntCov) {
+		this._clusterLineFitSlIntCov = _clusterLineFitSlIntCov;
+	}
+
 	public double get_clusterLineFitInterceptErr() {
 		return _clusterLineFitinterceptErr;
 	}
