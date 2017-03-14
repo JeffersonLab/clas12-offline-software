@@ -1,0 +1,6 @@
+[submodule "common-tools/hipo-io"]
+	path = common-tools/hipo-io
+	url = git@github.com:JeffersonLab/hipo-io.git
+[submodule "common-tools/groot"]
+	path = common-tools/groot
+	url = git@github.com:JeffersonLab/groot.git
