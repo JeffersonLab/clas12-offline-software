@@ -37,7 +37,7 @@ public class GeometryLoader {
                 Vector3d wmid1 = GeometryLoader.dcDetector.getWireMidpoint(0,1,0);
 		Point3D ep2 = new Point3D(wmid1.x, wmid1.y, wmid1.z);
 
-		System.out.println(ep1.toString()+", "+ep2.toString()+" - "+0.03*Math.cos(Math.toRadians(6.)));
+		System.out.println(ep1.toString()+", "+ep2.toString());
 		//pw.close();
 	/*	System.out.println("dx; = "+(GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(0).getMidpoint().x()-
 				GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(1).getMidpoint().x())*Math.cos(Math.toRadians(6.)));
