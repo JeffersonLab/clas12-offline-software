@@ -220,8 +220,8 @@ public class Hit implements Comparable<Hit>{
 		//double  brickwallPattern = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(1).getComponent(1).getMidpoint().x()
 		//		- GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(1).getMidpoint().x();
 		double  brickwallPattern = GeometryLoader.dcDetector.getWireMidpoint(0, 1, 1).x
-				- GeometryLoader.dcDetector.getWireMidpoint(0, 0, 1).x;
-		
+						- GeometryLoader.dcDetector.getWireMidpoint(0, 0, 1).x;
+						
 		double brickwallSign = Math.signum(brickwallPattern);
 		
 		//center of the cell asfcn wire num
@@ -254,7 +254,7 @@ public class Hit implements Comparable<Hit>{
 	public double get_CellSize() {
 		// fix cell size = w_{i+1} -w_{i}
 		//double layerDiffAtMPln  = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().x()
-	        //             - GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(1).getMidpoint().x();
+	    //             - GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(1).getMidpoint().x();
 		double layerDiffAtMPln  = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 0, 0).x
 	                     - GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 0, 1).x;
 		
