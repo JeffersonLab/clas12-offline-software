@@ -76,7 +76,7 @@ public class Constants {
 	public static final int NBENDCELLSTOKEEPMORETHAN4HITSINCOLUMN = 2;
 
 
-	public static final double TRACKSELECTQFMINCHSQ = 600; 
+	public static final double TRACKSELECTQFMINCHSQ = 10000; 
 	public static final double TCHISQPROBFITXZ = 0.01;
 
 	//------------
@@ -100,7 +100,7 @@ public class Constants {
 
 	public static final int MAXCLUSSIZE = 14;
 	
-	public static final double MAXCHI2 = 10;
+	public static final double MAXCHI2 = 10000;
 	
 	public static final boolean OUTOFTIMEFLAG = true;
 
@@ -120,7 +120,7 @@ public class Constants {
 
 	public static final boolean useRaster = false;
 
-	private static double T0 =0;
+	private static boolean T0 = false;
 	
 	//public static final boolean isCalibrationRun = false;
 	public static final boolean useTimeToDistanceGrid = true;
@@ -207,12 +207,13 @@ public class Constants {
 	}
 
 
-	public static final double getT0() {
+	public static final boolean getT0() {
 		return T0;
 	}
 
 
-	public static final void setT0(double t0) {
+	public static final void setT0(boolean t0) {
 		T0 = t0;
 	}
+	
 }
