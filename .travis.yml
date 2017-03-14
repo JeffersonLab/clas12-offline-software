@@ -6,9 +6,12 @@ before_install:
   - echo before_install option
 
 script:
-  - echo attempting to draw face
+  - echo attempting to build
   - echo "here it goes..."
   - ls -lthr
+  - cd common-tools
+  - lst -lthr
+  - ./build.sh -m
 
 jdk:
 - oraclejdk8
