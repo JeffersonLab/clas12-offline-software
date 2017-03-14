@@ -42,6 +42,8 @@ final class DCdatabase {
     private int nsensewires;
     private int nguardwires;
 
+    private boolean ministaggerStatus = false;
+
     private final String dcdbpath = "/geometry/dc/";
     private static DCdatabase instance = null;
 
@@ -157,6 +159,14 @@ final class DCdatabase {
     public int nregions() {
         return nRegions;
     }
+
+    public void setMinistaggerStatus(boolean ministaggerStatus) {
+        this.ministaggerStatus = ministaggerStatus;
+    }
+
+    public boolean getMinistaggerStatus(){
+        return ministaggerStatus;
+    }
 }
 
 final class Wire {
@@ -220,8 +230,8 @@ final class Wire {
         double dw2 = dw / cster;
 
         double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
-//        if(ireg==THIRDREGION && isSensitiveWire())
-//                hh += pow(-1, ilayer%2)*dministagger;
+        if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
+                hh += ((ilayer%2)*2-1)*0.03;
                 
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
         double ll = ilayer * tt;
@@ -246,6 +256,11 @@ final class Wire {
 
         length = leftend.minus(rightend).magnitude();
         center = leftend.plus(rightend).dividedBy(2.0);
+    }
+
+    private boolean isSensitiveWire(int isuper, int ilayer, int iwire) {
+        return iwire>0 && iwire<=dbref.nsensewires() &&
+                ilayer>0 && ilayer<=dbref.nsenselayers(isuper);
     }
 
     public Vector3d mid() {
@@ -297,8 +312,18 @@ public final class DCGeant4Factory extends Geant4Factory {
     private final Vector3d[][] layerMids;
     private final Vector3d[] regionMids;
 
+    public static boolean MINISTAGGERON=true;
+    public static boolean MINISTAGGEROFF=false;
+
     ///////////////////////////////////////////////////
     public DCGeant4Factory(ConstantProvider provider) {
+        this(provider, MINISTAGGEROFF);
+    }
+
+    ///////////////////////////////////////////////////
+    public DCGeant4Factory(ConstantProvider provider, boolean ministaggerStatus) {
+        dbref.setMinistaggerStatus(ministaggerStatus);
+
         motherVolume = new G4World("fc");
 
         dbref.connect(provider);
