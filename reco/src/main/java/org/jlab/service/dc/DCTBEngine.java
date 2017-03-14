@@ -20,6 +20,7 @@ import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
+import org.jlab.rec.dc.trajectory.RoadFinder;
 
 public class DCTBEngine extends ReconstructionEngine {
 
@@ -35,7 +36,7 @@ public class DCTBEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		
+		//System.out.println(" RUNNING TIME BASED....................................");
 		ClusterFitter cf = new ClusterFitter();
 	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 	    
@@ -95,7 +96,16 @@ public class DCTBEngine extends ReconstructionEngine {
 				fhits.add(hit);						
 			}
 		}
+		//RoadFinder
+		//
+		RoadFinder pcrossLister = new RoadFinder();
+		List<ArrayList<Segment>> selectedSegments =pcrossLister.findRoads(segments);
 		
+		segments = new ArrayList<Segment>();
+		for(int k = 0; k<selectedSegments.size(); k++) {
+			segments.addAll(selectedSegments.get(k));
+		}
+		//
 		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments);
 		
@@ -112,7 +122,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		CrossList crosslist = crossLister.candCrossLists(crosses);
 		
 		if(crosslist.size()==0) {			
-			
+			//System.out.println(" Failed on cross list !");
 			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
@@ -134,7 +144,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		int trkId = 1;
 		for(Track trk: trkcands) {
 			// reset the id
-			trk.set_Id(trkId);
+			trk.set_Id(trkId); 
 			for(Cross c : trk) { 
 				for(FittedHit h1 : c.get_Segment1())
 					h1.set_AssociatedTBTrackID(trk.get_Id());
