@@ -181,6 +181,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
 	private Segment _seg1;
 	private Segment _seg2;
+	public boolean isPseudoCross = false;
+	public int recalc;
 	
 	/**
 	 * Set the first segment (corresponding to the first superlayer in a region)
@@ -218,11 +220,11 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 	 * Sets the cross parameters: the position and direction unit vector
 	 */
 	public void set_CrossParams() {
+		
 		//double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
 		double z = GeometryLoader.dcDetector.getRegionMidpoint(this.get_Region()-1).z;
-		
-		double wy_over_wx = (Math.cos(Math.toRadians(6.))/Math.sin(Math.toRadians(6.)));
 				
+		double wy_over_wx = (Math.cos(Math.toRadians(6.))/Math.sin(Math.toRadians(6.)));				
 		double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
 		double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
 		double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();
@@ -255,12 +257,17 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 		double err_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlopeErr();
 		double err_it1 = this._seg1.get_fittedCluster().get_clusterLineFitInterceptErr();
 		double err_it2 = this._seg2.get_fittedCluster().get_clusterLineFitInterceptErr();
+		double err_cov1 = this._seg1.get_fittedCluster().get_clusterLineFitSlIntCov();
+		double err_cov2 = this._seg2.get_fittedCluster().get_clusterLineFitSlIntCov();
 
-		double err_x = 0.5*Math.sqrt(err_it1*err_it1+err_it2*err_it2 + z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
-		double err_y = 0.5*wy_over_wx*Math.sqrt(err_it1*err_it1+err_it2*err_it2 +z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
+		//double err_x = 0.5*Math.sqrt(err_it1*err_it1+err_it2*err_it2 + z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
+		//double err_y = 0.5*wy_over_wx*Math.sqrt(err_it1*err_it1+err_it2*err_it2 +z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
+		
+		double err_x_fix = 0.5*Math.sqrt(err_it1*err_it1+err_it2*err_it2 + z*z*(err_sl1*err_sl1+err_sl2*err_sl2) +2*z*err_cov1+2*z*err_cov2);
+		double err_y_fix = 0.5*wy_over_wx*Math.sqrt(err_it1*err_it1+err_it2*err_it2 +z*z*(err_sl1*err_sl1+err_sl2*err_sl2) +2*z*err_cov1+2*z*err_cov2);
 		
 		
-		this.set_PointErr(new Point3D(err_x,err_y,0));		
+		this.set_PointErr(new Point3D(err_x_fix,err_y_fix,0));		
 		
 		double inv_N_sq = 1./(0.25*val_sl1*val_sl1*(1+wy_over_wx*wy_over_wx) + 0.25*val_sl2*val_sl2*(1+wy_over_wx*wy_over_wx) +0.5*val_sl1*val_sl2*(1-wy_over_wx*wy_over_wx) +1); 
 		double inv_N = Math.sqrt(inv_N_sq); 
@@ -284,6 +291,9 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 		
 		this.set_DirErr(estimDirErr);
 		
+		if(this._seg1.get_Id()==-1 || this._seg2.get_Id()==-1) {
+			this.isPseudoCross  = true;
+		}
 	}
 
 	
@@ -325,7 +335,33 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
        
         return new Point3D(rx,ry,PointInSec.z());
 	}
+/*
+	public double[] ReCalcPseudoCross(Cross c2, Cross c3) {
 	
+		double[] XY = new double[2];
+		Vector3D fitLine = new Vector3D(c3.get_Point().x()-c2.get_Point().x(), c3.get_Point().y()-c2.get_Point().y(), 0);
+		fitLine.unit();
+		
+		Vector3D pseuLine = new Vector3D(this.get_Point().x()-c2.get_Point().x(), this.get_Point().y()-c2.get_Point().y(), 0);
+		pseuLine.unit();
+		
+		double alpha = Math.acos(fitLine.dot(pseuLine));
+		
+		double X = (this.get_Point().x()-c2.get_Point().x())*Math.cos(alpha) + (this.get_Point().y()-c2.get_Point().y())*Math.sin(alpha) + c2.get_Point().x();
+		double Y = -(this.get_Point().x()-c2.get_Point().x())*Math.sin(alpha) + (this.get_Point().y()-c2.get_Point().y())*Math.cos(alpha) + c2.get_Point().y();
+		
+		if(this.recalc==0) {
+			
+			System.out.println(this.recalc+"] "+this.printInfo()+" alpha "+Math.toDegrees(alpha)+" X "+X+" Y "+Y+c2.printInfo()+" "+c3.printInfo());
+			this.set_Point(new Point3D(X, Y, this.get_Point().z()));
+		}
+		XY[0] = X;
+		XY[1] = Y;
+		
+		return XY;
+		//System.out.println(this.recalc+"] "+this.printInfo()+" alpha "+Math.toDegrees(alpha)+" X "+X+" Y "+Y+c2.printInfo()+" "+c3.printInfo());
+	}
+	*/
 	
 	
 	
