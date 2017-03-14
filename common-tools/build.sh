@@ -35,7 +35,7 @@ then
     javadoc -d javadoc/clas-physics    -sourcepath clas-physics/src/main/java/  -subpackages org
     javadoc -d javadoc/clas-detector   -sourcepath clas-detector/src/main/java/ -subpackages org
     javadoc -d javadoc/clas-utils      -sourcepath clas-utils/src/main/java/    -subpackages org
-    scp -r javadoc clas12@ifarm65:/group/clas/www/clasweb/html/clas12offline/docs/.
+    #scp -r javadoc clas12@ifarm65:/group/clas/www/clasweb/html/clas12offline/docs/.
 fi
 
 #=================================================================
