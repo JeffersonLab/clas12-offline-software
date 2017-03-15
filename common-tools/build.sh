@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #=================================================================
 # BUILDING SCRIPT for COATJAVA PROJECT (first maven build)
 # then the documentatoin is build from the sources and commited
