@@ -6,6 +6,8 @@ useful links:
 http://scottwb.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/
 https://www.smashingmagazine.com/2014/05/moving-git-repository-new-server/
 
+sparse checkout: http://stackoverflow.com/questions/600079/how-do-i-clone-a-subdirectory-only-of-a-git-repository/28039894#28039894
+
 stuff to do:
 
 remove jar files from lib/ directory (https://help.github.com/articles/removing-files-from-a-repository-s-history/) these should be built from source, not saved in the repo
