@@ -30,18 +30,16 @@ import org.jlab.io.hipo.HipoDataEvent;
  * @author gavalian
  */
 public abstract class ReconstructionEngine implements Engine {
-    
-    static ConstantsManager   constantsManager  = new ConstantsManager();
-    
-    static volatile ConcurrentMap<String,ConstantsManager> constManagerMap
-            = new ConcurrentHashMap<String,ConstantsManager>();
-    
+
+    volatile ConstantsManager                       constantsManager;
+    volatile ConcurrentMap<String,ConstantsManager> constManagerMap;
+    volatile SchemaFactory                          engineDictionary;
+
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
     String             engineDescription = "CLARA Engine";
-    SchemaFactory      engineDictionary  = new SchemaFactory();
-            
+
     public ReconstructionEngine(String name, String author, String version){
         engineName    = name;
         engineAuthor  = author;
@@ -53,7 +51,7 @@ public abstract class ReconstructionEngine implements Engine {
     abstract public boolean processDataEvent(DataEvent event);        
     abstract public boolean init();
         
-    public synchronized void requireConstants(List<String> tables){
+    public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
             ConstantsManager manager = new ConstantsManager();
@@ -73,6 +71,8 @@ public abstract class ReconstructionEngine implements Engine {
      * @return 
      */   
     public EngineData configure(EngineData ed) {
+        constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
+        engineDictionary  = new SchemaFactory();
         //EngineData data = new EngineData();
         System.out.println("--- engine configuration is called " + this.getDescription());        
         try {
