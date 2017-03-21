@@ -39,14 +39,14 @@ public class FTOFEngine extends ReconstructionEngine {
 	
 	FTOFGeant4Factory geometry;
 	int Run = -1;
-	
+	RecoBankWriter rbc;
 	@Override	
 	public boolean init(){
 		
 		// Load the Constants
 		//if (Constants.CSTLOADED == false) {
 			Constants.Load();
-		
+			rbc = new RecoBankWriter();
 	
 		// Load the Calibration Constants
 		//if (CCDBConstantsLoader.CSTLOADED == false) {
@@ -131,7 +131,7 @@ public class FTOFEngine extends ReconstructionEngine {
 			clusters.addAll(FTOF2Clusters);
 		//2.1) exit if cluster list is empty but save the hits
 		if(clusters.size()==0 ) {
-			RecoBankWriter.appendFTOFBanks(event, hits, null, null);
+			rbc.appendFTOFBanks(event, hits, null, null);
 			return true;
 		}
 		// continuing ... there are clusters
@@ -154,11 +154,11 @@ public class FTOFEngine extends ReconstructionEngine {
 		ClusterMatcher clsMatch = new ClusterMatcher();
 		ArrayList<ArrayList<Cluster>> matchedClusters =  clsMatch.MatchedClusters(clusters);
 		if(matchedClusters.size()==0 ) {
-			RecoBankWriter.appendFTOFBanks(event, hits, clusters, null);
+			rbc.appendFTOFBanks(event, hits, clusters, null);
 			return true;
 		}
 		
-		RecoBankWriter.appendFTOFBanks(event, hits, clusters, matchedClusters);
+		rbc.appendFTOFBanks(event, hits, clusters, matchedClusters);
 		
 		return true;
 	}
@@ -206,7 +206,7 @@ public class FTOFEngine extends ReconstructionEngine {
 		en.init();
 		
 		int counter=0;
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/RaffaNewTOF.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
@@ -217,7 +217,7 @@ public class FTOFEngine extends ReconstructionEngine {
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 String outputFile="/Users/ziegler/Workdir/Distribution/DCRBREC.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCRBREC2.hipo";
 		 writer.open(outputFile);
 		
 		long t1=0;
@@ -232,11 +232,14 @@ public class FTOFEngine extends ReconstructionEngine {
 			en0.processDataEvent(event);
 
 			en.processDataEvent(event);
-			//System.out.println("  EVENT "+counter);
-			if(counter>7) break;
+			System.out.println("  EVENT "+counter);
+			if(counter>90) break;
+			//event.show();
 			//if(counter%100==0)
-				System.out.println("run "+counter+" events");
-			writer.writeEvent(event);
+			System.out.println("run "+counter+" events");
+			if(event.hasBank("HitBasedTrkg::HBTracks")) {
+				writer.writeEvent(event); 
+			}
 		}
 		writer.close();
 		double t = System.currentTimeMillis()-t1;

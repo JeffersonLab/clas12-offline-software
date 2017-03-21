@@ -23,7 +23,7 @@ import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.rec.ftof.CCDBConstantsLoader;
+import org.jlab.rec.ftof.CCDBConstants;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.hit.AHit;
@@ -52,6 +52,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	private FTOFDetHit _matchedTrackHit;  // matched hit information from tracking; this contains the information of the entrance and exit point of the track with the FTOF hit counter
 	private Line3d _matchedTrack;
 	public int _AssociatedTrkId = -1;
+	public int trkAssociated_Paddle;
 	
 	public Line3D get_paddleLine() {
 		return _paddleLine;
@@ -194,7 +195,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW01() {
-		double TW0L = CCDBConstantsLoader.TW0L[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW0L = CCDBConstants.getTW0L()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW0L;
 	}
@@ -202,7 +203,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW02() {
-		double TW0R = CCDBConstantsLoader.TW0R[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW0R = CCDBConstants.getTW0R()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW0R;
 	}
@@ -210,7 +211,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW11() {
-		double TW1L = CCDBConstantsLoader.TW1L[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW1L = CCDBConstants.getTW1L()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW1L;
 	}
@@ -218,7 +219,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double TW12() {
-		double TW1R = CCDBConstantsLoader.TW1R[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		double TW1R = CCDBConstants.getTW1R()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 		
 		return TW1R;
 	}
@@ -226,55 +227,55 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 	@Override
 	public double lambda1() {
-		return CCDBConstantsLoader.LAMBDAL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getLAMBDAL()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double lambda2() {
-		return CCDBConstantsLoader.LAMBDAR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getLAMBDAR()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double lambda1Unc() {
-		return CCDBConstantsLoader.LAMBDALU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getLAMBDALU()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double lambda2Unc() {
-		return CCDBConstantsLoader.LAMBDARU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getLAMBDARU()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double yOffset() {
-		return CCDBConstantsLoader.YOFF[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getYOFF()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v1() {
-		return CCDBConstantsLoader.EFFVELL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getEFFVELL()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v2() {
-		return CCDBConstantsLoader.EFFVELR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getEFFVELR()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v1Unc() {
-		return CCDBConstantsLoader.EFFVELLU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getEFFVELLU()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
 	@Override
 	public double v2Unc() {
-		return CCDBConstantsLoader.EFFVELRU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getEFFVELRU()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 
 
@@ -319,12 +320,12 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	}
 	@Override
 	public double PaddleToPaddle(){
-		return CCDBConstantsLoader.PADDLE2PADDLE[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];	
+		return CCDBConstants.getPADDLE2PADDLE()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];	
 	}
 	
 	@Override
 	public double TimeOffset() {
-		return CCDBConstantsLoader.LR[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getLR()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 	
 	@Override
@@ -340,13 +341,13 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	@Override
 	public double ADC_MIP() {
 		//return Constants.ADC_MIP[this.get_Panel()-1];
-		return CCDBConstantsLoader.MIPL[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getMIPL()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 	
 	@Override
 	public double ADC_MIPUnc() {
 		//return Constants.ADC_MIP_UNC[this.get_Panel()-1];
-		return CCDBConstantsLoader.MIPLU[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
+		return CCDBConstants.getMIPLU()[this.get_Sector()-1][this.get_Panel()-1][this.get_Paddle()-1];
 	}
 	
 	@Override
@@ -389,8 +390,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
 	    FTOFGeant4Factory factory = new FTOFGeant4Factory(provider);
 
 
-		int statusL = CCDBConstantsLoader.STATUSL[sector-1][0][paddle-1];
-		int statusR = CCDBConstantsLoader.STATUSR[sector-1][0][paddle-1];
+		int statusL = CCDBConstants.getSTATUSL()[sector-1][0][paddle-1];
+		int statusR = CCDBConstants.getSTATUSR()[sector-1][0][paddle-1];
 		
 		Random rnd = new Random();
 
@@ -423,6 +424,37 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		// read the hit object
 		//System.out.println(" hit "); hit.printInfo();
 		
+	}
+
+	public boolean isAssociatedWTrk(FTOFDetHit[][][][] hitArray, int i) {
+		boolean isAssoc = false;
+		
+		int jIdxUp = this.get_Paddle()-1;
+		int jIdxDown = this.get_Paddle()-1;
+		int rIdx = 1;				// how many counters from the track that hits a particular counter : 2 for finer granularity of panel 1b
+		if(this.get_Panel()==2)
+			rIdx=2;					//                                                                 : 1 for coarser granularity of panel 1a
+		for(int r = rIdx; r >= 0; r--) {
+			jIdxUp   = this.get_Paddle()-1 + r;
+			jIdxDown = this.get_Paddle()-1 - r;
+			if(jIdxDown<0)
+				jIdxDown = 0;
+			if(jIdxUp>=61)
+				jIdxUp = 61;
+			if(hitArray[this.get_Sector()-1][this.get_Panel()-1][jIdxUp][i]!=null) {
+				isAssoc = true;
+				this.trkAssociated_Paddle = jIdxUp+1;	
+				
+				//System.out.println(r+") sector "+this.get_Sector()+" panel "+this.get_Panel()+" track associated index "+jIdxUp+" hit panel idx "+(this.get_Paddle()-1));
+			}
+			if(hitArray[this.get_Sector()-1][this.get_Panel()-1][jIdxDown][i]!=null) {
+				isAssoc = true;
+				this.trkAssociated_Paddle = jIdxDown+1;	
+				
+				//System.out.println(r+") sector "+this.get_Sector()+" panel "+this.get_Panel()+" track associated index "+jIdxDown+" hit panel idx "+(this.get_Paddle()-1));
+			}
+		}
+		return isAssoc;
 	}
 
 

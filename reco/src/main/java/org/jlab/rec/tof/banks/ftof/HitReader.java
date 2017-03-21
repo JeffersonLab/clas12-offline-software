@@ -10,7 +10,7 @@ import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.ftof.CCDBConstantsLoader;
+import org.jlab.rec.ftof.CCDBConstants;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
@@ -120,8 +120,8 @@ public class HitReader implements IMatchedHit {
 				continue;
 			
 		    // get the status
-			int statusL = CCDBConstantsLoader.STATUSL[sector[i]-1][panel[i]-1][paddle[i]-1];
-			int statusR = CCDBConstantsLoader.STATUSR[sector[i]-1][panel[i]-1][paddle[i]-1];
+			int statusL = CCDBConstants.getSTATUSL()[sector[i]-1][panel[i]-1][paddle[i]-1];
+			int statusR = CCDBConstants.getSTATUSR()[sector[i]-1][panel[i]-1][paddle[i]-1];
 			String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i], TDCL[i], ADCR[i], TDCR[i]);
 							
 			// create the hit object
@@ -146,9 +146,9 @@ public class HitReader implements IMatchedHit {
 			hit.set_HitParameters(hit.get_Panel());
 			//DetHits.get(hit.get_Panel()-1).add(hit); 
 		}
-		List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
+		//List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
 		
-		for(Hit hit : unique_hits) {
+		for(Hit hit : updated_hits) {
 			DetHits.get(hit.get_Panel()-1).add(hit); 
 		}
 		if(DetHits.get(0).size()>0) {
@@ -180,7 +180,7 @@ public class HitReader implements IMatchedHit {
 		for(Hit h : updated_hits) {
 			if(h._AssociatedTrkId==-1)
 				unique_hits.add(h);
-			if(h._AssociatedTrkId!=-1)
+			if(h._AssociatedTrkId!=-1) 
 				lists.get(h._AssociatedTrkId-1).add(h);
 		}
 		for(int j =0; j< this._numTrks; j++) {
@@ -276,10 +276,11 @@ public class HitReader implements IMatchedHit {
 			// for a given hit find the 
 			for(int i = 0; i<trks.size(); i++) {
 				isAssociatedWTrk = false; // reset association for each trk
-				if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i]!=null) { 
-					isAssociatedWTrk = true;
-					FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i];
-					
+				//if(HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i]!=null) { 
+				if(fhit.isAssociatedWTrk(HitArray, i) == true) { 
+					isAssociatedWTrk = true; 
+					//FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.get_Paddle()-1][i];
+					FTOFDetHit matchedHit = HitArray[fhit.get_Sector()-1][fhit.get_Panel()-1][fhit.trkAssociated_Paddle-1][i]; 
 					// create a new FTOF hit for each intersecting track with this hit counter 
 					// create the hit object
 					Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2()) ;
@@ -307,6 +308,7 @@ public class HitReader implements IMatchedHit {
 			        hit.set_yTrk(barOrigToTrkPos-Lov2);
 			        //---------------------------------------
 			        hitList.add(hit);	// add this hit to the output list 
+			       
 				}
 			}
 			if(isAssociatedWTrk == false ) {
@@ -330,6 +332,8 @@ public class HitReader implements IMatchedHit {
 		
 		if(ADCandTDCLists!=null) {
 			Collections.sort(ADCandTDCLists);
+			//for(BaseHit h : ADCandTDCLists)
+			//	System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.TDC1+"; "+h.TDC2+"; ");
 			double t1 =-1;
 			double t2 =-1; // t1, t2 not yet used in selection
 			int adc1 = -1;
@@ -443,7 +447,7 @@ public class HitReader implements IMatchedHit {
 					hit.TDCbankHitIdx2 = tdc_idx2;
 					
 					matchLists.add(hit);
-					//System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+				//	System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
 					//		hit.get_TDC1()+" tdcR "+hit.get_TDC2());
 					
 				}

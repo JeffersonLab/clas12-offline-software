@@ -15,35 +15,10 @@ public class CCDBConstantsLoader {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public static boolean CSTLOADED = false;
+	static boolean CSTLOADED = false;
 	
     //static FTOFGeant4Factory geometry ;
-	
-	// Instantiating the constants arrays
-	public static double[][][] YOFF 			= new double[6][3][62];
-	public static double[][][] LAMBDAL 			= new double[6][3][62];
-	public static double[][][] LAMBDAR 			= new double[6][3][62];
-	public static double[][][] LAMBDALU 		= new double[6][3][62];
-	public static double[][][] LAMBDARU 		= new double[6][3][62];
-	public static double[][][] EFFVELL 			= new double[6][3][62];
-	public static double[][][] EFFVELR 			= new double[6][3][62];
-	public static double[][][] EFFVELLU 		= new double[6][3][62];
-	public static double[][][] EFFVELRU 		= new double[6][3][62];
-	public static double[][][] TW0L 			= new double[6][3][62];
-	public static double[][][] TW1L 			= new double[6][3][62];
-	public static double[][][] TW2L 			= new double[6][3][62];
-	public static double[][][] TW0R 			= new double[6][3][62];
-	public static double[][][] TW1R 			= new double[6][3][62];
-	public static double[][][] TW2R 			= new double[6][3][62];
-	public static double[][][] LR 				= new double[6][3][62];
-	public static double[][][] PADDLE2PADDLE 	= new double[6][3][62];
-	public static int[][][] STATUSL 			= new int[6][3][62];
-	public static int[][][] STATUSR 			= new int[6][3][62];
-	public static double[][][] MIPL 			= new double[6][3][62];
-	public static double[][][] MIPR 			= new double[6][3][62];
-	public static double[][][] MIPLU 			= new double[6][3][62];
-	public static double[][][] MIPRU 			= new double[6][3][62];
-	
+
 	private static DatabaseConstantProvider DB;
 	 //Calibration parameters from DB    
    // public static final DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
@@ -53,6 +28,32 @@ public class CCDBConstantsLoader {
     static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
     
     public static final synchronized void Load(int runNb) {
+    	//initialize the constants
+    	double[][][] YOFF 			= new double[6][3][62];
+    	double[][][] LAMBDAL 		= new double[6][3][62];
+    	double[][][] LAMBDAR 		= new double[6][3][62];
+    	double[][][] LAMBDALU 		= new double[6][3][62];
+    	double[][][] LAMBDARU 		= new double[6][3][62];
+    	double[][][] EFFVELL 		= new double[6][3][62];
+    	double[][][] EFFVELR 		= new double[6][3][62];
+    	double[][][] EFFVELLU 		= new double[6][3][62];
+    	double[][][] EFFVELRU 		= new double[6][3][62];
+    	double[][][] TW0L 			= new double[6][3][62];
+    	double[][][] TW1L 			= new double[6][3][62];
+    	double[][][] TW2L 			= new double[6][3][62];
+    	double[][][] TW0R 			= new double[6][3][62];
+    	double[][][] TW1R 			= new double[6][3][62];
+    	double[][][] TW2R 			= new double[6][3][62];
+    	double[][][] LR 			= new double[6][3][62];
+    	double[][][] PADDLE2PADDLE 	= new double[6][3][62];
+    	int[][][] STATUSL 			= new int[6][3][62];
+    	int[][][] STATUSR 			= new int[6][3][62];
+    	double[][][] MIPL 			= new double[6][3][62];
+    	double[][][] MIPR 			= new double[6][3][62];
+    	double[][][] MIPLU 			= new double[6][3][62];
+    	double[][][] MIPRU 			= new double[6][3][62];
+    	
+    	//Load the tables
     	dbprovider = new DatabaseConstantProvider(runNb, "default"); // reset using the new run
     	// load the geometry tables 
 		dbprovider.loadTable("/geometry/ftof/panel1a/paddles");
@@ -176,6 +177,32 @@ public class CCDBConstantsLoader {
 	        STATUSR[iSec-1][iPan-1][iPad-1] = statR;
 	       
 	    }
+	    CCDBConstants.setEFFVELL(EFFVELL);
+	    CCDBConstants.setTW0L(TW0L); 
+	    CCDBConstants.setTW1L(TW1L);
+	    CCDBConstants.setTW2L(TW2L);
+	    CCDBConstants.setTW0R(TW0R);
+	    CCDBConstants.setTW1R(TW1R);
+	    CCDBConstants.setTW2R(TW2R); 
+	    CCDBConstants.setLR(LR);
+	    CCDBConstants.setPADDLE2PADDLE(PADDLE2PADDLE); 
+	    CCDBConstants.setEFFVELL(EFFVELL);  
+	    CCDBConstants.setEFFVELR(EFFVELR);
+	    CCDBConstants.setEFFVELLU(EFFVELLU);
+	    CCDBConstants.setEFFVELRU(EFFVELRU);
+	    CCDBConstants.setYOFF(YOFF);
+	    CCDBConstants.setLAMBDAL(LAMBDAL);
+	    CCDBConstants.setLAMBDAR(LAMBDAR);
+	    CCDBConstants.setLAMBDALU(LAMBDALU);
+	    CCDBConstants.setLAMBDARU(LAMBDARU);
+	    CCDBConstants.setMIPL(MIPL);
+	    CCDBConstants.setMIPR(MIPR); 
+	    CCDBConstants.setMIPLU(MIPLU);
+	    CCDBConstants.setMIPRU(MIPRU); 
+	    CCDBConstants.setSTATUSL(STATUSL);
+	    CCDBConstants.setSTATUSR(STATUSR);
+       
+	    
 	    CSTLOADED = true;
 	    System.out.println("SUCCESSFULLY LOADED FTOF CALIBRATION CONSTANTS....");
 		setDB(dbprovider);
@@ -183,13 +210,13 @@ public class CCDBConstantsLoader {
    
     
     
-    public static final DatabaseConstantProvider getDB() {
+    public static final synchronized DatabaseConstantProvider getDB() {
 		return DB;
 	}
 
 
 
-	public static final void setDB(DatabaseConstantProvider dB) {
+	public static final synchronized void setDB(DatabaseConstantProvider dB) {
 		DB = dB;
 	}
 

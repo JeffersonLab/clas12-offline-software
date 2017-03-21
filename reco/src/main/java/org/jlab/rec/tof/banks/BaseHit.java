@@ -45,15 +45,62 @@ public class BaseHit implements Comparable<BaseHit>, IBaseHit{
     }
 	@Override
 	public int compareTo(BaseHit arg) {
-		int return_val = 0 ;
+		//int return_val = 0 ;
 		int CompSec = this._Sector < arg._Sector  ? -1 : this._Sector  == arg._Sector  ? 0 : 1;
 		int CompLay = this._Layer  < arg._Layer  ? -1 : this._Layer   == arg._Layer   ? 0 : 1;
 		int CompId = this._Component < arg._Component  ? -1 : this._Component  == arg._Component  ? 0 : 1;
 		
-		int return_val1 = ((CompLay ==0) ? CompId : CompLay); 
-		return_val = ((CompSec ==0) ? return_val1 : CompSec);
+		int adc_hit =-1;
+		int adc_arg =-1;
 		
-		return return_val;
+		if(this.ADC1!=-1)
+			adc_hit = this.ADC1;
+		if(this.ADC2!=-1)
+			adc_hit = this.ADC2;
+		if(arg.ADC1!=-1)
+			adc_arg = arg.ADC1;
+		if(arg.ADC2!=-1)
+			adc_arg = arg.ADC2;
+		
+		int tdc_hit =-1;
+		int tdc_arg =-1;
+		
+		if(this.TDC1!=-1)
+			tdc_hit = this.TDC1;
+		if(this.TDC2!=-1)
+			tdc_hit = this.TDC2;
+		if(arg.TDC1!=-1)
+			tdc_arg = arg.TDC1;
+		if(this.TDC2!=-1)
+			tdc_arg = arg.TDC2;
+		
+		int CompADC = adc_hit < adc_arg  ? -1 : adc_hit  == adc_arg  ? 0 : 1;
+		int CompTDC = tdc_hit < tdc_arg  ? -1 : tdc_hit  == tdc_arg  ? 0 : 1;
+		
+		int return_val1 = ((CompLay ==0) ? CompId : CompLay); 
+		int return_val2 = ((CompSec ==0) ? return_val1 : CompSec);
+		
+		int return_val3 = ((CompADC ==0) ? return_val2 : CompADC);
+		int return_val4 = ((CompTDC ==0) ? return_val3 : CompTDC);
+		
+		return return_val4;
+		
+		/*
+		int CompADC1 = this.ADC1 < arg.ADC1  ? -1 : this.ADC1  == arg.ADC1  ? 0 : 1;
+		int CompADC2 = this.ADC2 < arg.ADC2  ? -1 : this.ADC2  == arg.ADC2  ? 0 : 1;
+		int CompTDC1 = this.TDC1 < arg.TDC1  ? -1 : this.TDC1  == arg.TDC1  ? 0 : 1;
+		int CompTDC2 = this.TDC2 < arg.TDC2  ? -1 : this.TDC2  == arg.TDC2  ? 0 : 1;
+		
+		int return_val1 = ((CompLay ==0) ? CompId : CompLay); 
+		int return_val2 = ((CompSec ==0) ? return_val1 : CompSec);
+		
+		int return_val3 = ((CompADC1 ==0) ? return_val2 : CompADC1);
+		int return_val4 = ((CompADC2 ==0) ? return_val3 : CompADC2);
+		int return_val5 = ((CompTDC1 ==0) ? return_val4 : CompTDC1);
+		int return_val6 = ((CompTDC2 ==0) ? return_val5 : CompTDC2);
+		
+		return return_val6; */
+		
 	}
 
 	

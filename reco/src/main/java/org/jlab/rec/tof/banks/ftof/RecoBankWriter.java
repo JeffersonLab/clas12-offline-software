@@ -19,15 +19,18 @@ public class RecoBankWriter {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static DataBank fillRawHitsBank(DataEvent event, List<Hit> hitlist) {
+	public DataBank fillRawHitsBank(DataEvent event, List<Hit> hitlist) {
 		if(hitlist==null)
 			return null;
 		if(hitlist.size()==0)
 			return null;
 		
 		DataBank bank =  event.createBank("FTOF::rawhits", hitlist.size());
-
-		for(int i =0; i< hitlist.size(); i++) {
+		if(bank==null) {
+			System.err.println("COULD NOT CREATE A BANK!!!!!! for hitlist of size "+hitlist.size() );
+			return null;
+		}
+		for(int i =0; i< hitlist.size(); i++) { 			
 			bank.setShort("id", i, (short) hitlist.get(i).get_Id());
 			bank.setByte("sector",i, (byte) hitlist.get(i).get_Sector());
 			bank.setByte("layer",i, (byte) hitlist.get(i).get_Panel());
@@ -50,14 +53,17 @@ public class RecoBankWriter {
 
 	}
 	
-	public static DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist) {
+	public DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist) {
 		if(hitlist==null)
 			return null;
 		if(hitlist.size()==0)
 			return null;
 		
 		DataBank bank =  event.createBank("FTOF::hits", hitlist.size());
-
+		if(bank==null) {
+			System.err.println("COULD NOT CREATE A BANK!!!!!!");
+			return null;
+		}
 		for(int i =0; i< hitlist.size(); i++) {
 			bank.setShort("id", i, (short) hitlist.get(i).get_Id());
 			bank.setByte("sector",i, (byte) hitlist.get(i).get_Sector());
@@ -95,14 +101,17 @@ public class RecoBankWriter {
 
 	}
 	
-	public static DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist) {
+	public DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist) {
 		if(cluslist==null)
 			return null;
 		if(cluslist.size()==0)
 			return null;
 		
 		DataBank bank =  event.createBank("FTOF::clusters", cluslist.size());
-
+		if(bank==null) {
+			System.err.println("COULD NOT CREATE A BANK!!!!!!");
+			return null;
+		}
 		for(int i =0; i< cluslist.size(); i++) { 
 			bank.setShort("id", i, (short) cluslist.get(i).get_Id());
 			bank.setByte("sector",i, (byte) cluslist.get(i).get_Sector());
@@ -128,7 +137,7 @@ public class RecoBankWriter {
 
 	}
 	
-	private static DataBank fillClustersBank(DataEvent event,
+	private DataBank fillClustersBank(DataEvent event,
 			ArrayList<ArrayList<Cluster>> matchedClusters) {
 		if(matchedClusters==null)
 			return null;
@@ -136,7 +145,10 @@ public class RecoBankWriter {
 			return null;
 		
 		DataBank bank =  event.createBank("FTOF::matchedclusters", matchedClusters.size());
-		
+		if(bank==null) {
+			System.err.println("COULD NOT CREATE A BANK!!!!!!");
+			return null;
+		}
 		for(int i =0; i< matchedClusters.size(); i++) {
 			if(matchedClusters.get(i)== null)
 				continue;
@@ -154,23 +166,23 @@ public class RecoBankWriter {
 		return bank;
 	}
 	
-	public static void appendFTOFBanks(DataEvent event,
+	public void appendFTOFBanks(DataEvent event,
 			List<Hit> hits, List<Cluster> clusters, ArrayList<ArrayList<Cluster>> matchedClusters) {
 		List<DataBank> fTOFBanks = new ArrayList<DataBank>();
 		
-		DataBank bank1 = RecoBankWriter.fillRawHitsBank((DataEvent) event, hits);	
+		DataBank bank1 = this.fillRawHitsBank((DataEvent) event, hits);	
 		if(bank1!=null)
 			fTOFBanks.add(bank1);
 		
-		DataBank bank2 = RecoBankWriter.fillRecHitsBank((DataEvent) event, hits);	
+		DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits);	
 		if(bank2!=null)
 			fTOFBanks.add(bank2);
 		
-		DataBank bank3 = RecoBankWriter.fillClustersBank((DataEvent) event, clusters);
+		DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters);
 		if(bank3!=null)
 			fTOFBanks.add(bank3);
 				
-		DataBank bank4 = RecoBankWriter.fillClustersBank((DataEvent) event, matchedClusters);
+		DataBank bank4 = this.fillClustersBank((DataEvent) event, matchedClusters);
 		if(bank4!=null)
 			fTOFBanks.add(bank4);
 		
