@@ -3,6 +3,7 @@ package org.jlab.rec.dc.timetodistance;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 
 public class TimeToDistanceEstimator {
@@ -99,8 +100,8 @@ public class TimeToDistanceEstimator {
 						TableLoader.DISTFROMTIME[RegIdx][binhighB][binhighAlpha][this.getTimeIdx(t, RegIdx, binhighB, binhighAlpha)+1]
 								+"  --  "+f_B_alpha1_t1+"  :  "+f_B_alpha2_t1+"  :  "+f_B_alpha1_t2+"  :  "+f_B_alpha2_t2
 								+"  ---  "+f_B_alpha1_t+"  :  "+f_B_alpha2_t+" === "+f_B_alpha_t); */
-		 if(f_B_alpha_t>CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx])
-			 f_B_alpha_t = CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx];                                                      
+		 if(f_B_alpha_t>CCDBConstants.getDMAXSUPERLAYER()[SlyrIdx])
+			 f_B_alpha_t = CCDBConstants.getDMAXSUPERLAYER()[SlyrIdx];                                                      
 			// System.out.println(SlyrIdx+" t "+t+" "+f_B_alpha_t+" tmax "+CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx]);
 		return f_B_alpha_t;
 	 }

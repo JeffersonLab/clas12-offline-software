@@ -3,6 +3,7 @@ package org.jlab.rec.dc.timetodistance;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 
 public class TableLoader {
@@ -37,8 +38,8 @@ public class TableLoader {
 			for(int s = 0; s<6; s++ ){ // loop over sectors
 
 				for(int r = 0; r<6; r++ ){ //loop over slys
-					double dmax = CalibrationConstantsLoader.dmaxsuperlayer[r]; 
-					double tmax = CalibrationConstantsLoader.tmaxsuperlayer[s][r];
+					double dmax = CCDBConstants.getDMAXSUPERLAYER()[r]; 
+					double tmax = CCDBConstants.getTMAXSUPERLAYER()[s][r];
 						
 					for(int ibfield =0; ibfield<6; ibfield++) {
 					    double bfield = (double)ibfield*0.5;
@@ -124,11 +125,11 @@ public class TableLoader {
 		 // Assume a functional form (time=x/v0+a*(x/dmax)**n+b*(x/dmax)**m)
 		 // for time as a function of x for theta = 30 deg.
 		 // first, calculate n
-		 double n = ( 1.+ (CalibrationConstantsLoader.deltanm[s][r]-1.)*Math.pow(FracDmaxAtMinVel, CalibrationConstantsLoader.deltanm[s][r]) )/( 1.- Math.pow(FracDmaxAtMinVel, CalibrationConstantsLoader.deltanm[s][r]));
+		 double n = ( 1.+ (CCDBConstants.getDELTANM()[s][r]-1.)*Math.pow(FracDmaxAtMinVel, CCDBConstants.getDELTANM()[s][r]) )/( 1.- Math.pow(FracDmaxAtMinVel, CCDBConstants.getDELTANM()[s][r]));
 		 //now, calculate m
-		 double m = n + CalibrationConstantsLoader.deltanm[s][r];
+		 double m = n + CCDBConstants.getDELTANM()[s][r];
 		 // determine b from the requirement that the time = tmax at dist=dmax
-		 double b = (tmax - dmax/CalibrationConstantsLoader.v0[s][r])/(1.- m/n);
+		 double b = (tmax - dmax/CCDBConstants.getV0()[s][r])/(1.- m/n);
 		 // determine a from the requirement that the derivative at
 		 // d=dmax equal the derivative at d=0
 		 double a = -b*m/n;
@@ -145,16 +146,16 @@ public class TableLoader {
 	     //     of the function at dmax*cos30minusalpha is equal to tmax
 	     
 	     //     parameter balpha (function of the 30 degree paramters a,n,m)
-	     double balpha = ( tmax - dmaxalpha/CalibrationConstantsLoader.v0[s][r] - a*Math.pow(cos30minusalpha,n))/Math.pow(cos30minusalpha, m);
+	     double balpha = ( tmax - dmaxalpha/CCDBConstants.getV0()[s][r] - a*Math.pow(cos30minusalpha,n))/Math.pow(cos30minusalpha, m);
 	     
 	    //      now calculate function    
-	     double time = x/CalibrationConstantsLoader.v0[s][r] + a*Math.pow(xhat, n) + balpha*Math.pow(xhat, m);
+	     double time = x/CCDBConstants.getV0()[s][r] + a*Math.pow(xhat, n) + balpha*Math.pow(xhat, m);
 	
 		//     and here's a parameterization of the change in time due to a non-zero
 		//     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
 		//	   a track with local angle alpha (for local angle = alpha)
-	     double deltatime_bfield = CalibrationConstantsLoader.delt_bfield_coefficient[s][r]*Math.pow(bfield,2)*tmax*(CalibrationConstantsLoader.deltatime_bfield_par1[s][r]*xhatalpha+CalibrationConstantsLoader.deltatime_bfield_par2[s][r]*Math.pow(xhatalpha, 2)+
-	    		 CalibrationConstantsLoader.deltatime_bfield_par3[s][r]*Math.pow(xhatalpha, 3)+CalibrationConstantsLoader.deltatime_bfield_par4[s][r]*Math.pow(xhatalpha, 4));
+	     double deltatime_bfield = CCDBConstants.getDELT_BFIELD_COEFFICIENT()[s][r]*Math.pow(bfield,2)*tmax*(CCDBConstants.getDELTATIME_BFIELD_PAR1()[s][r]*xhatalpha+CCDBConstants.getDELTATIME_BFIELD_PAR2()[s][r]*Math.pow(xhatalpha, 2)+
+	    		 CCDBConstants.getDELTATIME_BFIELD_PAR3()[s][r]*Math.pow(xhatalpha, 3)+CCDBConstants.getDELTATIME_BFIELD_PAR4()[s][r]*Math.pow(xhatalpha, 4));
 	     
 	     //calculate the time at alpha deg. and at a non-zero bfield	          
 	     time += deltatime_bfield;

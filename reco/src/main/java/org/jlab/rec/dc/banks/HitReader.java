@@ -7,6 +7,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
+import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
 
@@ -222,8 +223,8 @@ public class HitReader {
 			int cable = this.getCableID1to6(layer, wire) ;
 			int slot  = this.getSlotID1to7(wire);
 			
-			t0  = CalibrationConstantsLoader.T0[sector-1][superlayer-1][slot-1][cable-1];      //nSec*nSL*nSlots*nCables
-			t0E = CalibrationConstantsLoader.T0Err[sector-1][superlayer-1][slot-1][cable-1];      
+			t0  = CCDBConstants.getT0()[sector-1][superlayer-1][slot-1][cable-1];      //nSec*nSL*nSlots*nCables
+			t0E = CCDBConstants.getT0ERR()[sector-1][superlayer-1][slot-1][cable-1];      
 			
 			T0Corr[0] = t0;
 			T0Corr[1] = t0E;	

@@ -18,7 +18,7 @@ public class CalibrationConstantsLoader {
 		 0,0,4,10,16,22,28,34,40,0,0,0,0,46,52,58,64,70,76,82,
 		 0,0,5,11,17,23,29,35,41,0,0,0,0,47,53,59,65,71,77,83,
 		 0,0,6,12,18,24,30,36,42,0,0,0,0,48,54,60,66,72,78,84};*/
-	
+	/*
 	// T2D
 	public static final double[][] deltanm = new double[6][6];
 	public static final double[][] v0 = new double[6][6];					    // staturated drift velocity in cm/ns
@@ -46,7 +46,7 @@ public class CalibrationConstantsLoader {
 	//T0s
 	public static final double[][][][] T0			= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
 	public static final double[][][][] T0Err		= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-	
+	*/
 	  //Map of Cable ID (1, .., 6) in terms of Layer number (1, ..., 6) and localWire# (1, ..., 16)
     public static final int [][] CableID = { //[nLayer][nLocWire] => nLocWire=16, 7 groups of 16 wires in each layer
         {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 1
@@ -57,8 +57,7 @@ public class CalibrationConstantsLoader {
         {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 6  
         //===> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 (Local wire ID: 0 for 1st, 16th, 32th, 48th, 64th, 80th, 96th wires)
     };  
-   
-	
+   	
 	 //Calibration parameters from DB    
     static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(10,"default");
     static DatabaseConstantProvider dbprovider_Test = new DatabaseConstantProvider(10,"dc_test1");
@@ -66,8 +65,35 @@ public class CalibrationConstantsLoader {
     
     
     public static final synchronized void Load(int runNb, String var) {
+    	// T2D
+    	double[][] DELTANM = new double[6][6];
+    	double[][] V0 = new double[6][6];					    // staturated drift velocity in cm/ns
+    	double[][] DELT_BFIELD_COEFFICIENT = new double[6][6]; //coefficient of the bfield part of the increase in time
+    	
+    	double[][] TMAXSUPERLAYER = new double[6][6];
+
+    	double DELTATIME_BFIELD_PAR1[][] = new double[6][6];
+    	double DELTATIME_BFIELD_PAR2[][] = new double[6][6];
+    	double DELTATIME_BFIELD_PAR3[][] = new double[6][6];
+    	double DELTATIME_BFIELD_PAR4[][] = new double[6][6];
+    	
+    	double DISTBETA[][] = new double[6][6];
+    	
+    	//RMS
+    	// Instantiating the constants arrays
+    	double[][] PAR1 			= new double[6][6];
+    	double[][] PAR2 			= new double[6][6];
+    	double[][] PAR3 			= new double[6][6];
+    	double[][] PAR4 			= new double[6][6];
+    	double[][] SCAL 			= new double[6][6];
+    	
+    	//T0s
+    	double[][][][] T0		= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+    	double[][][][] T0ERR	= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+    	
+    	
     	if(runNb!=10 || !var.equalsIgnoreCase("default"))
-    		dbprovider = new DatabaseConstantProvider(runNb, var); // reset using the new variation
+    	dbprovider = new DatabaseConstantProvider(runNb, var); // reset using the new variation
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/dc/signal_generation/dc_resolution");
 	    dbprovider.loadTable("/calibration/dc/time_to_distance/tvsx_devel_v2");
@@ -114,18 +140,18 @@ public class CalibrationConstantsLoader {
 	        double ib4 = dbprovider.getDouble("/calibration/dc/time_to_distance/tvsx_devel_v2/b4", i);
 	        double idistbeta = dbprovider.getDouble("/calibration/dc/time_to_distance/tvsx_devel_v2/distbeta", i);
 	        
-	        deltanm[iSec-1][iSly-1] = ideltanm;
-	    	v0[iSec-1][iSly-1] = iv0;					    
-	    	delt_bfield_coefficient[iSec-1][iSly-1] = idelta_bfield_coefficient; 
+	        DELTANM[iSec-1][iSly-1] = ideltanm;
+	    	V0[iSec-1][iSly-1] = iv0;					    
+	    	DELT_BFIELD_COEFFICIENT[iSec-1][iSly-1] = idelta_bfield_coefficient; 
 	    	
-	    	tmaxsuperlayer[iSec-1][iSly-1] = itmax;
+	    	TMAXSUPERLAYER[iSec-1][iSly-1] = itmax;
 
-	    	deltatime_bfield_par1[iSec-1][iSly-1] = ib1;
-	    	deltatime_bfield_par2[iSec-1][iSly-1] = ib2;
-	    	deltatime_bfield_par3[iSec-1][iSly-1] = ib3;
-	    	deltatime_bfield_par4[iSec-1][iSly-1] = ib4;
+	    	DELTATIME_BFIELD_PAR1[iSec-1][iSly-1] = ib1;
+	    	DELTATIME_BFIELD_PAR2[iSec-1][iSly-1] = ib2;
+	    	DELTATIME_BFIELD_PAR3[iSec-1][iSly-1] = ib3;
+	    	DELTATIME_BFIELD_PAR4[iSec-1][iSly-1] = ib4;
 	    	
-	    	distbeta[iSec-1][iSly-1] = idistbeta;
+	    	DISTBETA[iSec-1][iSly-1] = idistbeta;
 	    	
 	    	//System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
 	    	//"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
@@ -141,11 +167,53 @@ public class CalibrationConstantsLoader {
 	    	double t0Error 	= dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
 	    	
 	    	T0[iSec-1][iSly-1][iSlot-1][iCab-1] = t0;
-	    	T0Err[iSec-1][iSly-1][iSlot-1][iCab-1] = t0Error;
+	    	T0ERR[iSec-1][iSly-1][iSlot-1][iCab-1] = t0Error;
 	    }
+	    CCDBConstants.setDELTANM(DELTANM);
+	    CCDBConstants.setV0(V0) ;
+	    CCDBConstants.setDELT_BFIELD_COEFFICIENT(DELT_BFIELD_COEFFICIENT) ;
+	    CCDBConstants.setTMAXSUPERLAYER(TMAXSUPERLAYER);
+	    CCDBConstants.setDELTATIME_BFIELD_PAR1(DELTATIME_BFIELD_PAR1) ;
+	    CCDBConstants.setDELTATIME_BFIELD_PAR2(DELTATIME_BFIELD_PAR2) ;
+	    CCDBConstants.setDELTATIME_BFIELD_PAR3(DELTATIME_BFIELD_PAR3) ;
+	    CCDBConstants.setDELTATIME_BFIELD_PAR4(DELTATIME_BFIELD_PAR4) ;
+	    CCDBConstants.setDISTBETA(DISTBETA) ;
+	    CCDBConstants.setPAR1(PAR1) ;
+	    CCDBConstants.setPAR2(PAR2) ;
+	    CCDBConstants.setPAR3(PAR3) ;
+	    CCDBConstants.setPAR4(PAR4) ;
+	    CCDBConstants.setSCAL(SCAL) ;
+	    CCDBConstants.setT0(T0) ;
+	    CCDBConstants.setT0ERR(T0ERR) ;
     }
     
     public static final synchronized void LoadDevel(int runNb, String var, String var2) {
+    	
+    	double[][] DELTANM = new double[6][6];
+    	double[][] V0 = new double[6][6];					    // staturated drift velocity in cm/ns
+    	double[][] DELT_BFIELD_COEFFICIENT = new double[6][6]; //coefficient of the bfield part of the increase in time
+    	
+    	double[][] TMAXSUPERLAYER = new double[6][6];
+
+    	double DELTATIME_BFIELD_PAR1[][] = new double[6][6];
+    	double DELTATIME_BFIELD_PAR2[][] = new double[6][6];
+    	double DELTATIME_BFIELD_PAR3[][] = new double[6][6];
+    	double DELTATIME_BFIELD_PAR4[][] = new double[6][6];
+    	
+    	double DISTBETA[][] = new double[6][6];
+    	
+    	//RMS
+    	// Instantiating the constants arrays
+    	double[][] PAR1 			= new double[6][6];
+    	double[][] PAR2 			= new double[6][6];
+    	double[][] PAR3 			= new double[6][6];
+    	double[][] PAR4 			= new double[6][6];
+    	double[][] SCAL 			= new double[6][6];
+    	
+    	//T0s
+    	double[][][][] T0		= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+    	double[][][][] T0ERR	= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+    	
     	dbprovider 		= new DatabaseConstantProvider(runNb, var); // reset using the new variation
     	dbprovider_Test = new DatabaseConstantProvider(runNb, var2); // reset using the new variation
 	    // load table reads entire table and makes an array of variables for each column in the table.
@@ -194,21 +262,21 @@ public class CalibrationConstantsLoader {
 	        double ib4 = dbprovider_Test.getDouble("/calibration/dc/time_to_distance/tvsx_devel_v2/b4", i);
 	        double idistbeta = dbprovider_Test.getDouble("/calibration/dc/time_to_distance/tvsx_devel_v2/distbeta", i);
 	        
-	        deltanm[iSec-1][iSly-1] = ideltanm;
-	    	v0[iSec-1][iSly-1] = iv0;					    
-	    	delt_bfield_coefficient[iSec-1][iSly-1] = idelta_bfield_coefficient; 
+	        DELTANM[iSec-1][iSly-1] = ideltanm;
+	    	V0[iSec-1][iSly-1] = iv0;					    
+	    	DELT_BFIELD_COEFFICIENT[iSec-1][iSly-1] = idelta_bfield_coefficient; 
 	    	
-	    	tmaxsuperlayer[iSec-1][iSly-1] = itmax;
+	    	TMAXSUPERLAYER[iSec-1][iSly-1] = itmax;
 
-	    	deltatime_bfield_par1[iSec-1][iSly-1] = ib1;
-	    	deltatime_bfield_par2[iSec-1][iSly-1] = ib2;
-	    	deltatime_bfield_par3[iSec-1][iSly-1] = ib3;
-	    	deltatime_bfield_par4[iSec-1][iSly-1] = ib4;
+	    	DELTATIME_BFIELD_PAR1[iSec-1][iSly-1] = ib1;
+	    	DELTATIME_BFIELD_PAR2[iSec-1][iSly-1] = ib2;
+	    	DELTATIME_BFIELD_PAR3[iSec-1][iSly-1] = ib3;
+	    	DELTATIME_BFIELD_PAR4[iSec-1][iSly-1] = ib4;
 	    	
-	    	distbeta[iSec-1][iSly-1] = idistbeta;
+	    	DISTBETA[iSec-1][iSly-1] = idistbeta;
 	    	
-	    	System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
-	    	"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
+	    	System.out.println(" T2D Constants :  deltanm "+DELTANM[iSec-1][iSly-1] +"  v0 "+V0[iSec-1][iSly-1]+" delt_bfield_coefficient " +DELT_BFIELD_COEFFICIENT[iSec-1][iSly-1]+
+	    	"  b1 "+DELTATIME_BFIELD_PAR1[iSec-1][iSly-1]+" b2 "+DELTATIME_BFIELD_PAR2[iSec-1][iSly-1]+" b3 "+DELTATIME_BFIELD_PAR3[iSec-1][iSly-1]+" b4 "+DELTATIME_BFIELD_PAR4[iSec-1][iSly-1]);
 	    }
 	    // T0-subtraction
 	    for(int i =0; i< dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
@@ -221,10 +289,26 @@ public class CalibrationConstantsLoader {
 	    	double t0Error 	= dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
 	    	
 	    	T0[iSec-1][iSly-1][iSlot-1][iCab-1] = t0;
-	    	T0Err[iSec-1][iSly-1][iSlot-1][iCab-1] = t0Error;
+	    	T0ERR[iSec-1][iSly-1][iSlot-1][iCab-1] = t0Error;
 	    	//System.out.println(iCab+" T0 = "+t0);
 	    }
-	   
+	    CCDBConstants.setDELTANM(DELTANM);
+	    CCDBConstants.setV0(V0) ;
+	    CCDBConstants.setDELT_BFIELD_COEFFICIENT(DELT_BFIELD_COEFFICIENT) ;
+	    CCDBConstants.setTMAXSUPERLAYER(TMAXSUPERLAYER);
+	    CCDBConstants.setDELTATIME_BFIELD_PAR1(DELTATIME_BFIELD_PAR1) ;
+	    CCDBConstants.setDELTATIME_BFIELD_PAR2(DELTATIME_BFIELD_PAR2) ;
+	    CCDBConstants.setDELTATIME_BFIELD_PAR3(DELTATIME_BFIELD_PAR3) ;
+	    CCDBConstants.setDELTATIME_BFIELD_PAR4(DELTATIME_BFIELD_PAR4) ;
+	    CCDBConstants.setDISTBETA(DISTBETA) ;
+	    CCDBConstants.setPAR1(PAR1) ;
+	    CCDBConstants.setPAR2(PAR2) ;
+	    CCDBConstants.setPAR3(PAR3) ;
+	    CCDBConstants.setPAR4(PAR4) ;
+	    CCDBConstants.setSCAL(SCAL) ;
+	    CCDBConstants.setT0(T0) ;
+	    CCDBConstants.setT0ERR(T0ERR) ;
+		
     }
     
     

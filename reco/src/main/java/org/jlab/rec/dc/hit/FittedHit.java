@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.hit;
 
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
@@ -102,11 +103,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 			err = Constants.CELLRESOL; // default
 			//if(Constants.useParametricResol==true) {
 				double x = this.get_Doca()/this.get_CellSize();
-				double p1 = CalibrationConstantsLoader.PAR1[this.get_Sector()-1][this.get_Superlayer()-1];
-				double p2 = CalibrationConstantsLoader.PAR2[this.get_Sector()-1][this.get_Superlayer()-1];
-				double p3 = CalibrationConstantsLoader.PAR3[this.get_Sector()-1][this.get_Superlayer()-1];
-				double p4 = CalibrationConstantsLoader.PAR4[this.get_Sector()-1][this.get_Superlayer()-1];
-				double scale = CalibrationConstantsLoader.SCAL[this.get_Sector()-1][this.get_Superlayer()-1];
+				double p1 = CCDBConstants.getPAR1()[this.get_Sector()-1][this.get_Superlayer()-1];
+				double p2 = CCDBConstants.getPAR2()[this.get_Sector()-1][this.get_Superlayer()-1];
+				double p3 = CCDBConstants.getPAR3()[this.get_Sector()-1][this.get_Superlayer()-1];
+				double p4 = CCDBConstants.getPAR4()[this.get_Sector()-1][this.get_Superlayer()-1];
+				double scale = CCDBConstants.getSCAL()[this.get_Sector()-1][this.get_Superlayer()-1];
 				err = (p1 + p2/((p3+x)*(p3+x)) + p4*Math.pow(x, 8))*scale*0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
 				
 			//}
@@ -248,7 +249,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 				TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
 				double deltatime_beta = 0;
 				if(x!=-1)
-					deltatime_beta = (Math.sqrt(x*x+(CalibrationConstantsLoader.distbeta[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta)*(CalibrationConstantsLoader.distbeta[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta))-x)/CalibrationConstantsLoader.v0[this.get_Sector()-1][this.get_Superlayer()-1];
+					deltatime_beta = (Math.sqrt(x*x+(CCDBConstants.getDISTBETA()[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta)*(CCDBConstants.getDISTBETA()[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta))-x)/CCDBConstants.getV0()[this.get_Sector()-1][this.get_Superlayer()-1];
 				this.set_Time(this.get_Time()+deltatime_beta);   
 				
 				d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx)/this.get_Time();

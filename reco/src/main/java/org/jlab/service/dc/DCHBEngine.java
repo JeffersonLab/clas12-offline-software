@@ -286,7 +286,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTestMiniStagger.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797.hipo";
 		
 		 writer.open(outputFile);
 		
@@ -306,7 +306,7 @@ public class DCHBEngine extends ReconstructionEngine {
 			// Processing TB   
 			en2.processDataEvent(event);
 			//System.out.println("  EVENT "+counter);
-			//if(counter>1000) break;
+			if(counter>1000) break;
 			//event.show();
 			//if(counter%100==0)
 			System.out.println("run "+counter+" events");
