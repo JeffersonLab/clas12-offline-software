@@ -76,7 +76,11 @@ public class TrackCandListFinder {
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
 			        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-			        
+			        if(cand.get(0).get_Segment2().get_Id()==-1) 
+			        	theta1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
+			        if(cand.get(2).get_Segment2().get_Id()==-1) 
+			        	theta3 = Math.atan(cand.get(2).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
+			       
 			        double deltaTheta = theta3-theta1; 
 			       
 			        double iBdl = traj.get_IntegralBdl(); 
