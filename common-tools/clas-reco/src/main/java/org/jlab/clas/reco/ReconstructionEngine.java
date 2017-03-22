@@ -41,6 +41,8 @@ public abstract class ReconstructionEngine implements Engine {
     String             engineDescription = "CLARA Engine";
 
     public ReconstructionEngine(String name, String author, String version){
+        constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
+        engineDictionary  = new SchemaFactory();
         engineName    = name;
         engineAuthor  = author;
         engineVersion = version;
@@ -71,8 +73,6 @@ public abstract class ReconstructionEngine implements Engine {
      * @return 
      */   
     public EngineData configure(EngineData ed) {
-        constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
-        engineDictionary  = new SchemaFactory();
         //EngineData data = new EngineData();
         System.out.println("--- engine configuration is called " + this.getDescription());        
         try {
