@@ -228,14 +228,15 @@ public class DCHBEngine extends ReconstructionEngine {
 		if(Run!=newRun) {
 			if(newRun>751 && newRun<912) {
 				T2DCalc = true;
-				Constants.setT0(true);				
+				Constants.setT0(true);		
+				Constants.setUseMiniStagger(true);
 			}
 			if(newRun==9)
 				T2DCalc = true;
 			
-			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0());
+			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0()+ " use ministagger "+Constants.getUseMiniStagger());
 			CalibrationConstantsLoader.Load(newRun, "default");
-			//CalibrationConstantsLoader.Load(newRun, "dc_test1");
+			
 			TableLoader.Fill();
 			
 			GeometryLoader.Load(newRun, "default");
@@ -263,7 +264,8 @@ public class DCHBEngine extends ReconstructionEngine {
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/e2to6hipo.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/e2to6hipo.hipo";
 		// String inputFile="/Users/ziegler/Downloads/out.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
@@ -284,7 +286,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTestMissingSL1.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTestMiniStagger.hipo";
 		
 		 writer.open(outputFile);
 		
@@ -304,13 +306,13 @@ public class DCHBEngine extends ReconstructionEngine {
 			// Processing TB   
 			en2.processDataEvent(event);
 			//System.out.println("  EVENT "+counter);
-			//if(counter>8) break;
+			//if(counter>1000) break;
 			//event.show();
 			//if(counter%100==0)
 			System.out.println("run "+counter+" events");
-			//if(event.hasBank("HitBasedTrkg::HBTracks")) {
+			if(event.hasBank("HitBasedTrkg::HBTracks")) {
 				writer.writeEvent(event); 
-			//}
+			}
 		}
 		writer.close();
 		double t = System.currentTimeMillis()-t1;

@@ -23,9 +23,12 @@ public class GeometryLoader {
 	public static synchronized void Load(int runNb, String var) {
 		// the geometry is different is hardware and geometry... until GEMC gets updated we need to run with this flag
 		ConstantProvider  provider = GeometryFactory.getConstants(DetectorType.DC, runNb, var);
-                dcDetector = new DCGeant4Factory(provider);
+		dcDetector = new DCGeant4Factory(provider);
+		if(Constants.getUseMiniStagger()==true)
+			dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        
 
-		System.out.println(" -- DC Geometry constants are Loaded for RUN   "+runNb+" with VARIATION "+var);
+		System.out.println(" -- DC Geometry constants are Loaded for RUN   "+runNb+" with VARIATION "+" Use ministagger ?"+Constants.getUseMiniStagger());
 	}
 	
 	public static void main (String arg[]) throws FileNotFoundException {

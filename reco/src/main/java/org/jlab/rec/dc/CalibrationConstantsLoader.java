@@ -207,8 +207,8 @@ public class CalibrationConstantsLoader {
 	    	
 	    	distbeta[iSec-1][iSly-1] = idistbeta;
 	    	
-	    	//System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
-	    	//"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
+	    	System.out.println(" T2D Constants :  deltanm "+deltanm[iSec-1][iSly-1] +"  v0 "+v0[iSec-1][iSly-1]+" delt_bfield_coefficient " +delt_bfield_coefficient[iSec-1][iSly-1]+
+	    	"  b1 "+deltatime_bfield_par1[iSec-1][iSly-1]+" b2 "+deltatime_bfield_par2[iSec-1][iSly-1]+" b3 "+deltatime_bfield_par3[iSec-1][iSly-1]+" b4 "+deltatime_bfield_par4[iSec-1][iSly-1]);
 	    }
 	    // T0-subtraction
 	    for(int i =0; i< dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {

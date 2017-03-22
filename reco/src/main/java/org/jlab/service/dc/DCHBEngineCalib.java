@@ -2,17 +2,10 @@ package org.jlab.service.dc;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.detector.base.DetectorCollection;
-import org.jlab.detector.base.DetectorDescriptor;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.calib.utils.ConstantsManager;
-import org.jlab.detector.decode.CLASDecoder;
-import org.jlab.detector.decode.DetectorDataDgtz;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -38,7 +31,7 @@ import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
-import org.jlab.utils.groups.IndexedTable;
+import org.jlab.rec.dc.trajectory.RoadFinder;
 
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
@@ -75,7 +68,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 		NoiseReductionParameters parameters = new NoiseReductionParameters (
 				2,leftShifts,
 				rightShifts);
-		
+		//System.out.println("RUNING HITBASED_________________________________________");
 	  
 		ClusterFitter cf = new ClusterFitter();
 	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -129,7 +122,16 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
 			return true;
 		}
-							
+		//RoadFinder
+		//
+		RoadFinder pcrossLister = new RoadFinder();
+		List<ArrayList<Segment>> selectedSegments =pcrossLister.findRoads(segments);
+		
+		segments = new ArrayList<Segment>();
+		for(int k = 0; k<selectedSegments.size(); k++) {
+			segments.addAll(selectedSegments.get(k));
+		}
+		//
 		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments);
  
@@ -137,7 +139,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
-
+		
 		CrossListFinder crossLister = new CrossListFinder();
 		
 		List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
@@ -226,15 +228,15 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 		if(Run!=newRun) {
 			if(newRun>751 && newRun<912) {
 				T2DCalc = true;
-				Constants.setT0(true);				
+				Constants.setT0(true);		
+				Constants.setUseMiniStagger(true);
 			}
 			if(newRun==9)
 				T2DCalc = true;
 			
-			
-			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0());
+			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0()+ " use ministagger "+Constants.getUseMiniStagger());
+			//CalibrationConstantsLoader.Load(newRun, "default");
 			CalibrationConstantsLoader.LoadDevel(newRun, "default","dc_test1");
-			//CalibrationConstantsLoader.Load(newRun, "dc_test1");
 			TableLoader.Fill();
 			
 			GeometryLoader.Load(newRun, "default");
@@ -261,7 +263,10 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 	}
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/e2to6hipo.hipo";
+		// String inputFile="/Users/ziegler/Downloads/out.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
 		//String inputFile = args[0];
@@ -281,7 +286,8 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTestOrig.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTestMiniStagger.hipo";
+		
 		 writer.open(outputFile);
 		
 		long t1=0;
@@ -300,12 +306,12 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 			// Processing TB   
 			en2.processDataEvent(event);
 			//System.out.println("  EVENT "+counter);
-			if(counter>101) break;
+			//if(counter>1000) break;
 			//event.show();
 			//if(counter%100==0)
-			//System.out.println("run "+counter+" events");
+			System.out.println("run "+counter+" events");
 			if(event.hasBank("HitBasedTrkg::HBTracks")) {
-				writer.writeEvent(event); //event.show();
+				writer.writeEvent(event); 
 			}
 		}
 		writer.close();

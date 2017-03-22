@@ -57,14 +57,18 @@ public class CrossMaker {
 									
                                     Point3D CS =cross.getCoordsInSector(cross.get_Point().x(),cross.get_Point().y(),cross.get_Point().z());
                                    
-                                    if(CS.x()>0)
-                                    	if(Math.abs(CS.y())/CS.x()<Math.tan(Math.toRadians(30.))) {
+                                    if(CS.x()>0) {
+                                    	double jitter = 2;
+                                    	if(cross.isPseudoCross)
+                                    		jitter = 10;
+                                    	if(Math.abs(Math.toDegrees(Math.atan2(CS.y(),CS.x())))<30.+jitter) { //2 degrees jitter
                                     		
                                     		cross.set_Id(crosses.size()+1);
                                     		if(cross.isPseudoCross)
                                     			cross.set_Id(-1);
                                     		crosses.add(cross);  //insures the cross is correctly reconstructed in the sector
                                     	}
+                                    }
 								}
 							}
 						}

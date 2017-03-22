@@ -122,6 +122,8 @@ public class Constants {
 
 	private static boolean T0 = false;
 	
+	private static boolean UseMiniStagger = false;
+	
 	//public static final boolean isCalibrationRun = false;
 	public static final boolean useTimeToDistanceGrid = true;
 	//public static final boolean DEBUGCROSSES = false;
@@ -216,4 +218,12 @@ public class Constants {
 		T0 = t0;
 	}
 	
+	public static final boolean getUseMiniStagger() {
+		return UseMiniStagger;
+	}
+
+
+	public static final void setUseMiniStagger(boolean useMiniStagger) {
+		UseMiniStagger = useMiniStagger;
+	}
 }
