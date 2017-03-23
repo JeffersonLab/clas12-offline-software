@@ -20,183 +20,254 @@ public class RecoBankWriter {
 	}
 
 	public DataBank fillRawHitsBank(DataEvent event, List<Hit> hitlist) {
-		if(hitlist==null)
+		if (hitlist == null)
 			return null;
-		if(hitlist.size()==0)
+		if (hitlist.size() == 0)
 			return null;
-		
-		DataBank bank =  event.createBank("FTOF::rawhits", hitlist.size());
-		if(bank==null) {
-			System.err.println("COULD NOT CREATE A BANK!!!!!! for hitlist of size "+hitlist.size() );
+
+		DataBank bank = event.createBank("FTOF::rawhits", hitlist.size());
+		if (bank == null) {
+			System.err
+					.println("COULD NOT CREATE A BANK!!!!!! for hitlist of size "
+							+ hitlist.size());
 			return null;
 		}
-		for(int i =0; i< hitlist.size(); i++) { 			
+		for (int i = 0; i < hitlist.size(); i++) {
 			bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-			bank.setByte("sector",i, (byte) hitlist.get(i).get_Sector());
-			bank.setByte("layer",i, (byte) hitlist.get(i).get_Panel());
-			bank.setShort("component",i, (short) hitlist.get(i).get_Paddle());
+			bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
+			bank.setByte("layer", i, (byte) hitlist.get(i).get_Panel());
+			bank.setShort("component", i, (short) hitlist.get(i).get_Paddle());
 			int status = 0;
-			if(Integer.parseInt(hitlist.get(i).get_StatusWord())==1111)
+			if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111)
 				status = 1;
-			bank.setShort("status",i, (short) status);
-			bank.setFloat("energy_left",i, (float) hitlist.get(i).get_Energy1());
-			bank.setFloat("energy_right",i, (float) hitlist.get(i).get_Energy2());
-			bank.setFloat("energy_left_unc",i, (float) hitlist.get(i).get_Energy1Unc()); 		
-			bank.setFloat("energy_right_unc",i, (float) hitlist.get(i).get_Energy2Unc()); 		
-			bank.setFloat("time_left",i, (float) hitlist.get(i).get_t1());
-			bank.setFloat("time_right",i, (float) hitlist.get(i).get_t2());
-			bank.setFloat("time_left_unc",i, (float) hitlist.get(i).get_t1Unc()); 			
-			bank.setFloat("time_right_unc",i, (float) hitlist.get(i).get_t2Unc()); 					
+			bank.setShort("status", i, (short) status);
+			bank.setFloat("energy_left", i, (float) hitlist.get(i)
+					.get_Energy1());
+			bank.setFloat("energy_right", i, (float) hitlist.get(i)
+					.get_Energy2());
+			bank.setFloat("energy_left_unc", i, (float) hitlist.get(i)
+					.get_Energy1Unc());
+			bank.setFloat("energy_right_unc", i, (float) hitlist.get(i)
+					.get_Energy2Unc());
+			bank.setFloat("time_left", i, (float) hitlist.get(i).get_t1());
+			bank.setFloat("time_right", i, (float) hitlist.get(i).get_t2());
+			bank.setFloat("time_left_unc", i, (float) hitlist.get(i)
+					.get_t1Unc());
+			bank.setFloat("time_right_unc", i, (float) hitlist.get(i)
+					.get_t2Unc());
 		}
 
 		return bank;
 
 	}
-	
+
 	public DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist) {
-		if(hitlist==null)
+		if (hitlist == null)
 			return null;
-		if(hitlist.size()==0)
+		if (hitlist.size() == 0)
 			return null;
-		
-		DataBank bank =  event.createBank("FTOF::hits", hitlist.size());
-		if(bank==null) {
+
+		DataBank bank = event.createBank("FTOF::hits", hitlist.size());
+		if (bank == null) {
 			System.err.println("COULD NOT CREATE A BANK!!!!!!");
 			return null;
 		}
-		for(int i =0; i< hitlist.size(); i++) {
+		for (int i = 0; i < hitlist.size(); i++) {
 			bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-			bank.setByte("sector",i, (byte) hitlist.get(i).get_Sector());
-			bank.setByte("layer",i, (byte) hitlist.get(i).get_Panel());
-			bank.setShort("component",i, (short) hitlist.get(i).get_Paddle());
+			bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
+			bank.setByte("layer", i, (byte) hitlist.get(i).get_Panel());
+			bank.setShort("component", i, (short) hitlist.get(i).get_Paddle());
 			int status = 0;
-			if(Integer.parseInt(hitlist.get(i).get_StatusWord())==1111)
+			if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111)
 				status = 1;
-			bank.setShort("status",i, (short) status);
-			bank.setFloat("energy",i, (float) hitlist.get(i).get_Energy());
-			bank.setFloat("energy_unc",i, (float) hitlist.get(i).get_EnergyUnc()); 				
-			bank.setFloat("time",i, (float) hitlist.get(i).get_t());
-			bank.setFloat("time_unc",i, (float) hitlist.get(i).get_tUnc()); 				
-			bank.setFloat("x",i, (float) hitlist.get(i).get_Position().x());
-			bank.setFloat("y",i, (float) hitlist.get(i).get_Position().y());
-			bank.setFloat("z",i, (float) hitlist.get(i).get_Position().z());
-			if(hitlist.get(i).get_TrkPosition()!=null && hitlist.get(i).get_TrkPosition().z()!=0) {
-				bank.setFloat("tx",i, (float) hitlist.get(i).get_TrkPosition().x());
-				bank.setFloat("ty",i, (float) hitlist.get(i).get_TrkPosition().y());
-				bank.setFloat("tz",i, (float) hitlist.get(i).get_TrkPosition().z());
-				bank.setShort("trackid", i, (short) hitlist.get(i)._AssociatedTrkId);  
+			bank.setShort("status", i, (short) status);
+			bank.setFloat("energy", i, (float) hitlist.get(i).get_Energy());
+			bank.setFloat("energy_unc", i, (float) hitlist.get(i)
+					.get_EnergyUnc());
+			bank.setFloat("time", i, (float) hitlist.get(i).get_t());
+			bank.setFloat("time_unc", i, (float) hitlist.get(i).get_tUnc());
+			bank.setFloat("x", i, (float) hitlist.get(i).get_Position().x());
+			bank.setFloat("y", i, (float) hitlist.get(i).get_Position().y());
+			bank.setFloat("z", i, (float) hitlist.get(i).get_Position().z());
+			if (hitlist.get(i).get_TrkPosition() != null
+					&& hitlist.get(i).get_TrkPosition().z() != 0) {
+				bank.setFloat("tx", i, (float) hitlist.get(i).get_TrkPosition()
+						.x());
+				bank.setFloat("ty", i, (float) hitlist.get(i).get_TrkPosition()
+						.y());
+				bank.setFloat("tz", i, (float) hitlist.get(i).get_TrkPosition()
+						.z());
+				bank.setShort("trackid", i,
+						(short) hitlist.get(i)._AssociatedTrkId);
 			} else {
-				bank.setShort("trackid", i, (short) -1);  
+				bank.setShort("trackid", i, (short) -1);
 			}
-			bank.setFloat("x_unc",i, 5); 			
-			bank.setFloat("y_unc",i, (float) hitlist.get(i).get_yUnc()); 			
-			bank.setFloat("z_unc",i, 10); 		
-			bank.setShort("adc_idx1",i, (short) hitlist.get(i).get_ADCbankHitIdx1()); 		
-			bank.setShort("adc_idx2",i, (short) hitlist.get(i).get_ADCbankHitIdx2()); 		
-			bank.setShort("tdc_idx1",i, (short) hitlist.get(i).get_TDCbankHitIdx1()); 		
-			bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 		
+			bank.setFloat("x_unc", i, 5);
+			bank.setFloat("y_unc", i, (float) hitlist.get(i).get_yUnc());
+			bank.setFloat("z_unc", i, 10);
+			bank.setShort("adc_idx1", i, (short) hitlist.get(i)
+					.get_ADCbankHitIdx1());
+			bank.setShort("adc_idx2", i, (short) hitlist.get(i)
+					.get_ADCbankHitIdx2());
+			bank.setShort("tdc_idx1", i, (short) hitlist.get(i)
+					.get_TDCbankHitIdx1());
+			bank.setShort("tdc_idx2", i, (short) hitlist.get(i)
+					.get_TDCbankHitIdx2());
 		}
-		//bank.show();
+		// bank.show();
 		return bank;
 
 	}
-	
+
 	public DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist) {
-		if(cluslist==null)
+		if (cluslist == null)
 			return null;
-		if(cluslist.size()==0)
+		if (cluslist.size() == 0)
 			return null;
-		
-		DataBank bank =  event.createBank("FTOF::clusters", cluslist.size());
-		if(bank==null) {
+
+		DataBank bank = event.createBank("FTOF::clusters", cluslist.size());
+		if (bank == null) {
 			System.err.println("COULD NOT CREATE A BANK!!!!!!");
 			return null;
 		}
-		for(int i =0; i< cluslist.size(); i++) { 
+		for (int i = 0; i < cluslist.size(); i++) {
 			bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-			bank.setByte("sector",i, (byte) cluslist.get(i).get_Sector());
-			bank.setByte("layer",i, (byte) cluslist.get(i).get_Panel());
-			bank.setShort("component",i, (short) cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
+			bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+			bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
+			bank.setShort("component", i, (short) cluslist.get(i).get(0)
+					.get_Paddle()); // paddle id of hit with lowest paddle id in
+									// cluster [Check the sorting!!!]
 			int status = 0;
-			if(Integer.parseInt(cluslist.get(i).get_StatusWord())==1111)
+			if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111)
 				status = 1;
-			bank.setShort("status",i, (short) status);
-			bank.setFloat("energy",i, (float) cluslist.get(i).get_Energy());
-			bank.setFloat("energy_unc",i, (float) cluslist.get(i).get_EnergyUnc()); 										
-			bank.setFloat("time",i, (float) cluslist.get(i).get_t());
-			bank.setFloat("time_unc",i, (float) cluslist.get(i).get_tUnc()); 										
-			bank.setFloat("x",i, (float) cluslist.get(i).get_x());
-			bank.setFloat("y",i, (float) cluslist.get(i).get_y());
-			bank.setFloat("z",i, (float) cluslist.get(i).get_z());
-			bank.setFloat("x_unc",i, 5); 											// At this stage the uncertainty is not calculated
-			bank.setFloat("y_unc",i, (float) cluslist.get(i).get_y_locUnc()); 		
-			bank.setFloat("z_unc",i, 10); 											// At this stage the uncertainty is not calculated
+			bank.setShort("status", i, (short) status);
+			bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
+			bank.setFloat("energy_unc", i, (float) cluslist.get(i)
+					.get_EnergyUnc());
+			bank.setFloat("time", i, (float) cluslist.get(i).get_t());
+			bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
+			bank.setFloat("x", i, (float) cluslist.get(i).get_x());
+			bank.setFloat("y", i, (float) cluslist.get(i).get_y());
+			bank.setFloat("z", i, (float) cluslist.get(i).get_z());
+			bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
+											// not calculated
+			bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
+			bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
+											// not calculated
 		}
 
 		return bank;
 
 	}
-	
+
 	private DataBank fillClustersBank(DataEvent event,
 			ArrayList<ArrayList<Cluster>> matchedClusters) {
-		if(matchedClusters==null)
+		if (matchedClusters == null)
 			return null;
-		if(matchedClusters.size()==0)
+		if (matchedClusters.size() == 0)
 			return null;
-		
-		DataBank bank =  event.createBank("FTOF::matchedclusters", matchedClusters.size());
-		if(bank==null) {
+
+		DataBank bank = event.createBank("FTOF::matchedclusters",
+				matchedClusters.size());
+		if (bank == null) {
 			System.err.println("COULD NOT CREATE A BANK!!!!!!");
 			return null;
 		}
-		for(int i =0; i< matchedClusters.size(); i++) {
-			if(matchedClusters.get(i)== null)
+		for (int i = 0; i < matchedClusters.size(); i++) {
+			if (matchedClusters.get(i) == null)
 				continue;
-			bank.setByte("sector",i, (byte) matchedClusters.get(i).get(0).get_Sector());
-			bank.setShort("paddle_id1A",i,  (short) matchedClusters.get(i).get(0).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
-			bank.setShort("paddle_id1B",i,  (short) matchedClusters.get(i).get(1).get(0).get_Paddle());		  // paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]			
-			bank.setShort("clusSize_1A",i,  (short) matchedClusters.get(i).get(0).size());					  // size of cluster in 1a
-			bank.setShort("clusSize_1B",i,  (short) matchedClusters.get(i).get(1).size());					  // size of cluster in 1b
-			bank.setShort("clus_1A",i,  (short) matchedClusters.get(i).get(0).get_Id());					  	  // id of cluster in 1a
-			bank.setShort("clus_1B",i,  (short) matchedClusters.get(i).get(1).get_Id());					  	  // id of cluster in 1b
-			bank.setFloat("tminAlgo_1B_tCorr",i,    (float) matchedClusters.get(i).get(1).get_tCorr()[0]);	  // uses tmin algorithm to compute the path length between counters
-			bank.setFloat("midbarAlgo_1B_tCorr",i,  (float) matchedClusters.get(i).get(1).get_tCorr()[1]);    // uses middle of bar algorithm to compute the path length between counters
-			bank.setFloat("EmaxAlgo_1B_tCorr",i,    (float) matchedClusters.get(i).get(1).get_tCorr()[2]);	  // uses Emax algorithm to compute the path length between counters
+			bank.setByte("sector", i, (byte) matchedClusters.get(i).get(0)
+					.get_Sector());
+			bank.setShort("paddle_id1A", i,
+					(short) matchedClusters.get(i).get(0).get(0).get_Paddle()); // paddle
+																				// id
+																				// of
+																				// hit
+																				// with
+																				// lowest
+																				// paddle
+																				// id
+																				// in
+																				// cluster
+																				// [Check
+																				// the
+																				// sorting!!!]
+			bank.setShort("paddle_id1B", i,
+					(short) matchedClusters.get(i).get(1).get(0).get_Paddle()); // paddle
+																				// id
+																				// of
+																				// hit
+																				// with
+																				// lowest
+																				// paddle
+																				// id
+																				// in
+																				// cluster
+																				// [Check
+																				// the
+																				// sorting!!!]
+			bank.setShort("clusSize_1A", i,
+					(short) matchedClusters.get(i).get(0).size()); // size of
+																	// cluster
+																	// in 1a
+			bank.setShort("clusSize_1B", i,
+					(short) matchedClusters.get(i).get(1).size()); // size of
+																	// cluster
+																	// in 1b
+			bank.setShort("clus_1A", i, (short) matchedClusters.get(i).get(0)
+					.get_Id()); // id of cluster in 1a
+			bank.setShort("clus_1B", i, (short) matchedClusters.get(i).get(1)
+					.get_Id()); // id of cluster in 1b
+			bank.setFloat("tminAlgo_1B_tCorr", i, (float) matchedClusters
+					.get(i).get(1).get_tCorr()[0]); // uses tmin algorithm to
+													// compute the path length
+													// between counters
+			bank.setFloat("midbarAlgo_1B_tCorr", i, (float) matchedClusters
+					.get(i).get(1).get_tCorr()[1]); // uses middle of bar
+													// algorithm to compute the
+													// path length between
+													// counters
+			bank.setFloat("EmaxAlgo_1B_tCorr", i, (float) matchedClusters
+					.get(i).get(1).get_tCorr()[2]); // uses Emax algorithm to
+													// compute the path length
+													// between counters
 		}
 		return bank;
 	}
-	
-	public void appendFTOFBanks(DataEvent event,
-			List<Hit> hits, List<Cluster> clusters, ArrayList<ArrayList<Cluster>> matchedClusters) {
-		List<DataBank> fTOFBanks = new ArrayList<DataBank>();
-		
-		DataBank bank1 = this.fillRawHitsBank((DataEvent) event, hits);	
-		if(bank1!=null)
-			fTOFBanks.add(bank1);
-		
-		DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits);	
-		if(bank2!=null)
-			fTOFBanks.add(bank2);
-		
-		DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters);
-		if(bank3!=null)
-			fTOFBanks.add(bank3);
-				
-		DataBank bank4 = this.fillClustersBank((DataEvent) event, matchedClusters);
-		if(bank4!=null)
-			fTOFBanks.add(bank4);
-		
-		if(fTOFBanks.size()==4) 
-			event.appendBanks(fTOFBanks.get(0),fTOFBanks.get(1), fTOFBanks.get(2), fTOFBanks.get(3));
-		if(fTOFBanks.size()==3) 
-			event.appendBanks(fTOFBanks.get(0),fTOFBanks.get(1), fTOFBanks.get(2));
-		if(fTOFBanks.size()==2)
-			event.appendBanks(fTOFBanks.get(0),fTOFBanks.get(1));
-		if(fTOFBanks.size()==1)
-			event.appendBanks(fTOFBanks.get(0));
-		
-	}
 
-	
+	public void appendFTOFBanks(DataEvent event, List<Hit> hits,
+			List<Cluster> clusters,
+			ArrayList<ArrayList<Cluster>> matchedClusters) {
+		List<DataBank> fTOFBanks = new ArrayList<DataBank>();
+
+		DataBank bank1 = this.fillRawHitsBank((DataEvent) event, hits);
+		if (bank1 != null)
+			fTOFBanks.add(bank1);
+
+		DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits);
+		if (bank2 != null)
+			fTOFBanks.add(bank2);
+
+		DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters);
+		if (bank3 != null)
+			fTOFBanks.add(bank3);
+
+		DataBank bank4 = this.fillClustersBank((DataEvent) event,
+				matchedClusters);
+		if (bank4 != null)
+			fTOFBanks.add(bank4);
+
+		if (fTOFBanks.size() == 4)
+			event.appendBanks(fTOFBanks.get(0), fTOFBanks.get(1),
+					fTOFBanks.get(2), fTOFBanks.get(3));
+		if (fTOFBanks.size() == 3)
+			event.appendBanks(fTOFBanks.get(0), fTOFBanks.get(1),
+					fTOFBanks.get(2));
+		if (fTOFBanks.size() == 2)
+			event.appendBanks(fTOFBanks.get(0), fTOFBanks.get(1));
+		if (fTOFBanks.size() == 1)
+			event.appendBanks(fTOFBanks.get(0));
+
+	}
 
 }
