@@ -3,12 +3,9 @@ package org.jlab.rec.tof.banks.ctof;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jlab.geom.prim.Path3D;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 
@@ -51,29 +48,24 @@ public class TrackReader {
 
 			return;
 		}
-
-		EvioDataBank bank = (EvioDataBank) event.getBank("CVTRec::Tracks");
-
-		double[] fitChisq = bank.getDouble("circlefit_chi2_per_ndf"); // use
-																		// this
-																		// to
-																		// select
-																		// good
-																		// tracks
-
-		double[] x = bank.getDouble("c_x"); // cross x-position in the lab at
+		
+		DataBank bank = event.getBank("CVTRec::Tracks");
+		int rows = bank.rows();
+		
+		
+		double[] x = new double[rows]; // cross x-position in the lab at
 											// the CTOF face
-		double[] y = bank.getDouble("c_y"); // cross y-position in the lab at
+		double[] y = new double[rows]; // cross y-position in the lab at
 											// the CTOF face
-		double[] z = bank.getDouble("c_z"); // cross z-position in the lab at
+		double[] z = new double[rows]; // cross z-position in the lab at
 											// the CTOF face
-		double[] ux = bank.getDouble("c_ux"); // cross x-unit-dir in the lab at
+		double[] ux = new double[rows]; // cross x-unit-dir in the lab at
 												// the CTOF face
-		double[] uy = bank.getDouble("c_uy"); // cross y-unit-dir in the lab at
+		double[] uy = new double[rows]; // cross y-unit-dir in the lab at
 												// the CTOF face
-		double[] uz = bank.getDouble("c_uz"); // cross z-unit-dir in the lab at
+		double[] uz = new double[rows]; // cross z-unit-dir in the lab at
 												// the CTOF face
-		double[] p = bank.getDouble("pathlength"); // pathlength
+		double[] p = new double[rows]; // pathlength
 
 		if (event.hasBank("CVTRec::Tracks") == true) {
 			// instanciates the list
@@ -83,11 +75,17 @@ public class TrackReader {
 			List<Line3d> trkLines = new ArrayList<Line3d>();
 			// each array of paths likewise corresponds to the tracks for a
 			// given sector
-			double[] paths = new double[x.length];
+			double[] paths = new double[rows];
 
-			for (int i = 0; i < x.length; i++) {
-				// if(fitChisq[i]>1)
-				// continue; // check this
+			for (int i = 0; i < rows; i++) {
+				
+				x[i] = bank.getFloat("c_x", i);
+				y[i] = bank.getFloat("c_y", i);
+				z[i] = bank.getFloat("c_z", i);
+				ux[i] = bank.getFloat("c_ux", i);
+				uy[i] = bank.getFloat("c_uy", i);
+				uz[i] = bank.getFloat("c_uz", i);
+				p[i] = bank.getFloat("pathlength", i);
 
 				Line3d trk_path = new Line3d(new Vector3d(x[i], y[i], z[i]),
 						new Vector3d(x[i] + 5.0 * ux[i], y[i] + 5.0 * uy[i],
