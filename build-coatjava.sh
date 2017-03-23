@@ -4,8 +4,11 @@ mkdir coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
 cp -r lib coatjava/
+rm coatjava/lib/services/*.*
 
 # coat-libs
+rm -rf ~/.m2/repository/org/hep/hipo
+rm -rf ~/.m2/repository/org/jlab/groot
 cd common-tools
 ./build.sh -m
 cd -
@@ -16,7 +19,6 @@ cp common-tools/target/coat-libs*.jar coatjava/lib/clas/
 cd reconstruction/cvt
 mvn install
 cd -
-rm coatjava/lib/services/clasrec-cvt.jar
 cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
 
 #tar and clean up
