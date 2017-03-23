@@ -9,8 +9,8 @@ script:
   - echo attempting to build
   - echo "here it goes..."
   - ls -lthr
-  - cd common-tools
-  - ./build.sh -m
+  - ./build-coatjava.csh
+  - ls -lthr
 
 jdk:
 - oraclejdk8
