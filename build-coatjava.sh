@@ -4,6 +4,7 @@ mkdir coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
 cp -r lib coatjava/
+ls coatjava/lib/services/
 rm coatjava/lib/services/*.*
 
 # coat-libs
