@@ -1,6 +1,0 @@
-[submodule "common-tools/hipo-io"]
-	path = common-tools/hipo-io
-	url = https://github.com/JeffersonLab/hipo-io.git
-[submodule "common-tools/groot"]
-	path = common-tools/groot
-	url = https://github.com/JeffersonLab/groot.git
