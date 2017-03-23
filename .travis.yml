@@ -9,7 +9,7 @@ script:
   - echo attempting to build
   - echo "here it goes..."
   - ls -lthr
-  - ./build-coatjava.csh
+  - ./build-coatjava.sh
   - ls -lthr
 
 jdk:
