@@ -5,7 +5,8 @@ cp -r bin coatjava/
 cp -r etc coatjava/
 cp -r lib coatjava/
 ls coatjava/lib/services/
-rm coatjava/lib/services/*.*
+rm coatjava/lib/services/*.jar
+ls coatjava/lib/services/
 
 # coat-libs
 rm -rf ~/.m2/repository/org/hep/hipo
