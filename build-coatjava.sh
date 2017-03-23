@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/bash -f
 
 mkdir coatjava
 cp -r bin coatjava/
