@@ -22,7 +22,7 @@ export COATJAVA=$PWD/coatjava/
 cd common-tools/clas-jcsg
 ./gradlew assemble
 cd -
-exit
+cp common-tools/clas-jcsg/build/libs/jcsg-0.3.2.jar coatjava/lib/clas/
 
 # cvt
 cd reconstruction/cvt
@@ -31,5 +31,6 @@ cd -
 cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
 
 #tar and clean up
+find coatjava -name "*"
 tar -zcvf coatjava.tar.gz coatjava
 rm -rf coatjava
