@@ -17,6 +17,13 @@ cd -
 rm coatjava/lib/clas/coat-libs*.jar
 cp common-tools/target/coat-libs*.jar coatjava/lib/clas/
 
+# jcsg
+export COATJAVA=$PWD/coatjava/
+cd common-tools/clas-jcsg
+./gradlew assemble
+cd -
+exit
+
 # cvt
 cd reconstruction/cvt
 mvn install
