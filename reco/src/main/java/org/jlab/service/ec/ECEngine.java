@@ -95,16 +95,18 @@ public class ECEngine extends ReconstructionEngine {
             System.out.println("\n\n\n\n\nEC CLUSTERS SIZE = " + cEC.size());
             if(cEC.size()==2) {for(ECCluster c : cEC) System.out.println(c);}
         }
-        
+	    
         if(de instanceof HipoDataEvent){
-            this.writeHipoBanks(de, cEC);
-        }
+            this.writeHipoBanks(de,ecStrips,ecPeaks,cEC);
+        } else {
+            this.writeEvioBanks(de,ecStrips,ecPeaks,cEC);            
+        }  
         //writeBanks(de,ecStrips,ecPeaks,cEC);        
         
         return true;
     }
     
-    public void writeBanks(DataEvent de, 
+    public void writeEvioBanks(DataEvent de, 
                            List<ECStrip>   strips, 
                            List<ECPeak>    peaks, 
                            List<ECCluster> clusters) {
@@ -171,35 +173,69 @@ public class ECEngine extends ReconstructionEngine {
         
         de.appendBanks(bankS,bankP,bankC,bankD);       
     }
-    
-    private void writeHipoBanks(DataEvent event, List<ECCluster> clusters){
-        
-        DataBank bankC = event.createBank("ECAL::clusters", clusters.size());
-        
-        if(bankC==null){
-            System.out.println("ERROR CREATING BANK : ECAL::clusters");
-            return;
+    private void writeHipoBanks(DataEvent de, 
+                                List<ECStrip>   strips, 
+                                List<ECPeak>    peaks, 
+                                List<ECCluster> clusters){
+	    
+        DataBank bankS = de.createBank("ECAL::hits", strips.size());
+        for(int h = 0; h < strips.size(); h++){
+            bankS.setByte("sector",  h,  (byte) strips.get(h).getDescriptor().getSector());
+            bankS.setByte("layer",   h,  (byte) strips.get(h).getDescriptor().getLayer());
+            bankS.setByte("strip",   h,  (byte) strips.get(h).getDescriptor().getComponent());
+            bankS.setByte("peakid",  h,  (byte) strips.get(h).getPeakId());
+            bankS.setFloat("energy", h, (float) strips.get(h).getEnergy());
+            bankS.setFloat("time",   h, (float) strips.get(h).getTime());                
         }
+       
+        DataBank  bankP =  de.createBank("ECAL::peaks", peaks.size());
+        for(int p = 0; p < peaks.size(); p++){
+            bankP.setByte("sector",  p,  (byte) peaks.get(p).getDescriptor().getSector());
+            bankP.setByte("layer",   p,  (byte) peaks.get(p).getDescriptor().getLayer());
+            bankP.setFloat("xo",     p, (float) peaks.get(p).getLine().origin().x());
+            bankP.setFloat("xo",     p, (float) peaks.get(p).getLine().origin().y());
+            bankP.setFloat("zo",     p, (float) peaks.get(p).getLine().origin().z());
+            bankP.setFloat("xe",     p, (float) peaks.get(p).getLine().end().x());
+            bankP.setFloat("ye",     p, (float) peaks.get(p).getLine().end().y());
+            bankP.setFloat("ze",     p, (float) peaks.get(p).getLine().end().z());
+            bankP.setFloat("energy", p, (float) peaks.get(p).getEnergy());
+            bankP.setFloat("time",   p, (float) peaks.get(p).getTime());
+        }   
         
+        DataBank bankC = de.createBank("ECAL::clusters", clusters.size());      
         for(int c = 0; c < clusters.size(); c++){
-            bankC.setByte("sector", c, (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
-            bankC.setByte("layer", c, (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
+            bankC.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
+            bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());
-            bankC.setFloat("time", c, (float) clusters.get(c).getTime());
-            bankC.setByte("idU", c, (byte) clusters.get(c).UVIEW_ID);
-            bankC.setByte("idV", c, (byte) clusters.get(c).VVIEW_ID);
-            bankC.setByte("idW", c, (byte) clusters.get(c).WVIEW_ID);
-            bankC.setFloat("x", c, (float) clusters.get(c).getHitPosition().x());
-            bankC.setFloat("y", c, (float) clusters.get(c).getHitPosition().y());
-            bankC.setFloat("z", c, (float) clusters.get(c).getHitPosition().z());
-            bankC.setFloat("widthU", c, clusters.get(c).getPeak(0).getMultiplicity());
-            bankC.setFloat("widthV", c, clusters.get(c).getPeak(1).getMultiplicity());
-            bankC.setFloat("widthW", c, clusters.get(c).getPeak(2).getMultiplicity());
-            bankC.setInt("coordU", c, clusters.get(c).getPeak(0).getCoord());
-            bankC.setInt("coordV", c, clusters.get(c).getPeak(1).getCoord());
-            bankC.setInt("coordW", c, clusters.get(c).getPeak(2).getCoord());
+            bankC.setFloat("time",   c, (float) clusters.get(c).getTime());
+            bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
+            bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
+            bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
+            bankC.setFloat("x",      c, (float) clusters.get(c).getHitPosition().x());
+            bankC.setFloat("y",      c, (float) clusters.get(c).getHitPosition().y());
+            bankC.setFloat("z",      c, (float) clusters.get(c).getHitPosition().z());
+            bankC.setFloat("widthU", c,         clusters.get(c).getPeak(0).getMultiplicity());
+            bankC.setFloat("widthV", c,         clusters.get(c).getPeak(1).getMultiplicity());
+            bankC.setFloat("widthW", c,         clusters.get(c).getPeak(2).getMultiplicity());
+            bankC.setInt("coordU",   c,         clusters.get(c).getPeak(0).getCoord());
+            bankC.setInt("coordV",   c,         clusters.get(c).getPeak(1).getCoord());
+            bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
         }
-        event.appendBanks(bankC);
+               
+        DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
+         for(int c = 0; c < clusters.size(); c++){
+            bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
+            bankD.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
+            bankD.setFloat("energy", c, (float) clusters.get(c).getEnergy());
+            bankD.setFloat("rawEU",  c, (float) clusters.get(c).getRawEnergy(0));
+            bankD.setFloat("rawEV",  c, (float) clusters.get(c).getRawEnergy(1));
+            bankD.setFloat("rawEW",  c, (float) clusters.get(c).getRawEnergy(2));
+            bankD.setFloat("recEU",  c, (float) clusters.get(c).getEnergy(0));
+            bankD.setFloat("recEV",  c, (float) clusters.get(c).getEnergy(1));
+            bankD.setFloat("recEW",  c, (float) clusters.get(c).getEnergy(2));            
+        }
+         
+        de.appendBanks(bankS,bankP,bankC,bankD);        
     }
     
     public void setCalRun(int runno) {
