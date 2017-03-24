@@ -23,7 +23,7 @@ cd common-tools/clas-jcsg
 ./gradlew assemble
 cd -
 cp common-tools/clas-jcsg/build/libs/jcsg-0.3.2.jar coatjava/lib/clas/
-exit
+
 # cvt
 cd reconstruction/cvt
 mvn install
