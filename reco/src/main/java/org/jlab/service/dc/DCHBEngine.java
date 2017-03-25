@@ -113,7 +113,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 	
 		rbc.updateListsListWithClusterInfo(fhits, clusters);
-				
+		
 		//3) find the segments from the fitted clusters
 		SegmentFinder segFinder = new SegmentFinder();
 		segments =  segFinder.get_Segments(clusters, event);
@@ -124,14 +124,13 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 		//RoadFinder
 		//
-		RoadFinder pcrossLister = new RoadFinder();
-		List<ArrayList<Segment>> selectedSegments =pcrossLister.findRoads(segments);
 		
-		segments = new ArrayList<Segment>();
-		for(int k = 0; k<selectedSegments.size(); k++) {
-			segments.addAll(selectedSegments.get(k));
-		}
+		RoadFinder pcrossLister = new RoadFinder();
+		List<Segment> pSegments =pcrossLister.findRoads(segments);
+		segments.addAll(pSegments);
+		
 		//
+		//System.out.println("nb trk segs "+pSegments.size());
 		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments);
  
@@ -192,8 +191,6 @@ public class DCHBEngine extends ReconstructionEngine {
 			trkId++;
 		}
 	  
-		
-		
 		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
 
 		return true;
@@ -286,7 +283,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
 		
 		 writer.open(outputFile);
 		
@@ -306,13 +303,13 @@ public class DCHBEngine extends ReconstructionEngine {
 			// Processing TB   
 			en2.processDataEvent(event);
 			//System.out.println("  EVENT "+counter);
-			if(counter>1000) break;
+			if(counter>9) break;
 			//event.show();
 			//if(counter%100==0)
-			System.out.println("run "+counter+" events");
-			if(event.hasBank("HitBasedTrkg::HBTracks")) {
+			System.out.println("*************************************************************run "+counter+" events");
+			//if(event.hasBank("HitBasedTrkg::HBTracks")) {
 				writer.writeEvent(event); 
-			}
+			//}
 		}
 		writer.close();
 		double t = System.currentTimeMillis()-t1;

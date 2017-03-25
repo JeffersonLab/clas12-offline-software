@@ -177,10 +177,11 @@ public class Track extends Trajectory implements Comparable<Track>{
 	}
 	
 	
-	
+	private int _FitNDF;
 	private double _fitChisq;
 	public boolean fit_Successful;
 	public int status;
+	
 	
 	
 	
@@ -190,6 +191,12 @@ public class Track extends Trajectory implements Comparable<Track>{
 	
 	public double  get_FitChi2() {
 		return _fitChisq;		
+	}
+	public int get_FitNDF() {
+		return _FitNDF;
+	}
+	public void set_FitNDF(int _FitNDF) {
+		this._FitNDF = _FitNDF;
 	}
 	public Matrix get_CovMat() {
 		return _CovMat;

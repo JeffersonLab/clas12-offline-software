@@ -61,7 +61,7 @@ public class TrackCandListFinder {
             	continue;
             
 			if(crossesInTrk.size()==3) {
-							
+					
 				cand.addAll(crossesInTrk);
 				
 				cand.set_Sector(crossesInTrk.get(0).get_Sector());
@@ -107,7 +107,8 @@ public class TrackCandListFinder {
 						q*= (int)-1*Math.signum(Constants.getTORSCALE());						
 							
 						double p = Math.sqrt(pxz*pxz+py*py);
-						
+						if(p>11)
+							p=11;
 						if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
 							continue;
 						
@@ -126,7 +127,6 @@ public class TrackCandListFinder {
 						StateVec fn = new StateVec();
 						kFit.runFitter();
 						
-						
 						if(kFit.chi2/(double) kFit.NDF<1000) {
 						
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
@@ -135,7 +135,7 @@ public class TrackCandListFinder {
 							this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z);
 													
 							cand.set_FitChi2(kFit.chi2);
-							
+							cand.set_FitNDF(kFit.NDF);
 							cand.set_Id(cands.size()+1);
 							
 							cands.add(cand); 

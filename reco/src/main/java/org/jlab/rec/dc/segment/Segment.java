@@ -16,7 +16,7 @@ import org.jlab.rec.dc.trajectory.SegmentTrajectory;
  * @author ziegler
  *
  */
-public class Segment extends ArrayList<FittedHit> {
+public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>{
 
 	
 	/**
@@ -187,14 +187,14 @@ public class Segment extends ArrayList<FittedHit> {
 	public void set_SegmentEndPointsSecCoordSys() {
 		
 		//double Z_1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().z();
-		double Z_1 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 0, 0).z;
+		double Z_1 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 0, 0).z;
 		double X_1 = this.get_fittedCluster().get_clusterLineFitSlope()*Z_1 + this.get_fittedCluster().get_clusterLineFitIntercept();
 		
 		double x1 = Math.cos(Math.toRadians(25.))*X_1 + Math.sin(Math.toRadians(25.))*Z_1;
 		double z1 = -Math.sin(Math.toRadians(25.))*X_1 + Math.cos(Math.toRadians(25.))*Z_1;
 		
 		//double Z_2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(5).getComponent(0).getMidpoint().z();
-		double Z_2 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 5, 0).z;
+		double Z_2 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 5, 0).z;
 		double X_2 = this.get_fittedCluster().get_clusterLineFitSlope()*Z_2 + this.get_fittedCluster().get_clusterLineFitIntercept();
 		
 		double x2 = Math.cos(Math.toRadians(25.))*X_2 + Math.sin(Math.toRadians(25.))*Z_2;
@@ -295,6 +295,23 @@ public class Segment extends ArrayList<FittedHit> {
 	public String printInfo() {
 		String s = "Segment: ID "+this.get_Id()+" Sector "+this.get_Sector()+" Superlayer "+this.get_Superlayer()+" Size "+this.size() ;
 		return s;
+	}
+
+	@Override
+	public int compareTo(Segment arg) {
+
+		// int return_val = 0 ;
+		int CompSec = this._Sector < arg._Sector ? -1
+				: this._Sector == arg._Sector ? 0 : 1;
+		int CompLay = this._Superlayer < arg._Superlayer ? -1
+				: this._Superlayer == arg._Superlayer ? 0 : 1;
+		int CompId = this._Id < arg._Id ? -1
+				: this._Id == arg._Id ? 0 : 1;
+
+		int return_val1 = ((CompId == 0) ? CompLay : CompId);
+		int return_val2 = ((CompSec == 0) ? return_val1 : CompSec);
+
+		return return_val2;
 	}
     
 

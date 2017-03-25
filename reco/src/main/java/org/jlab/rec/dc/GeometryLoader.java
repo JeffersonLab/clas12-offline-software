@@ -17,8 +17,16 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
  */
 public class GeometryLoader {
 
-	public static boolean isGeometryLoaded = false;
-	public static DCGeant4Factory dcDetector;
+	boolean isGeometryLoaded = false;
+	private static DCGeant4Factory dcDetector;
+
+	public static synchronized final DCGeant4Factory getDcDetector() {
+		return dcDetector;
+	}
+
+	public static synchronized final void setDcDetector(DCGeant4Factory dcDetector) {
+		GeometryLoader.dcDetector = dcDetector;
+	}
 
 	public static synchronized void Load(int runNb, String var) {
 		// the geometry is different is hardware and geometry... until GEMC gets updated we need to run with this flag

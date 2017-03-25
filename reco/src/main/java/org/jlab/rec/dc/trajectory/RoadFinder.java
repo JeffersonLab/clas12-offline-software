@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.trajectory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.rec.dc.Constants;
@@ -62,7 +63,7 @@ public class RoadFinder  {
 								sLyr.add(s2);
 							if(s3.get_Id()!=-10) 
 								sLyr.add(s3);
-							if(sLyr.size()>1)
+							if(sLyr.size()>1 && sLyr.size()<3)
 								test.add(sLyr);
 							
 						}
@@ -77,16 +78,17 @@ public class RoadFinder  {
 	
 	private ClusterFitter cf = new ClusterFitter();
 
-	public List<ArrayList<Segment>> findRoads(List<Segment> segs)  {
+	public List<Segment> findRoads(List<Segment> segs)  {
 		List<ArrayList<Segment>> seg0Lists = this.findSegLists(segs);
-		List<ArrayList<Segment>> segLists = new ArrayList<ArrayList<Segment>>();
+		List<Segment> segLists = new ArrayList<Segment>();
 		
 		for(int i =0; i<seg0Lists.size(); i++) {
 			QuadraticFit qf = new QuadraticFit();
 			ArrayList<Segment> segList = seg0Lists.get(i);
-			this.fitRoad(segList, qf);
-		
-	        if(segList.size()<3) { // make pseudo-segment for missing segment
+			//System.out.println("try to fit "+segList.get(0).printInfo()+":"+segList.get(1).printInfo()+":"+segList.get(segList.size()-1).printInfo());
+			
+			
+	        if(this.fitRoad(segList, qf)) { // make pseudo-segment for missing segment
 	        	// find missing segment superlayer
 	        	int s1 = (segList.get(0).get_Superlayer()-(segList.get(0).get_Superlayer()+1)%2-1)/2;
 	        	int s2 = (segList.get(1).get_Superlayer()-(segList.get(1).get_Superlayer()+1)%2-1)/2;
@@ -106,7 +108,7 @@ public class RoadFinder  {
 				FittedCluster fpseudoCluster = new FittedCluster(pseudoCluster);
 	        	for(int l = 0; l<6; l++) {
 	        		int layer = l+1;
-	        		double z = GeometryLoader.dcDetector.getWireMidpoint(slyr-1,layer-1,0).z;
+	        		double z = GeometryLoader.getDcDetector().getWireMidpoint(slyr-1,layer-1,0).z;
 	        		double trkX = qf.a[0]*z*z+qf.a[1]*z+qf.a[2]; 
 	        		int calcWire = segTrj.getWireOnTrajectory(slyr, layer, trkX) ;
 	        		FittedHit pseudoHit = new FittedHit(segList.get(0).get_Sector(),slyr, layer, calcWire,
@@ -123,7 +125,9 @@ public class RoadFinder  {
 	             Segment pseudoSeg = new Segment(fpseudoCluster);
 	             
 	             pseudoSeg.set_fitPlane();	
-	             segList.add(pseudoSeg);
+	             segLists.add(pseudoSeg);
+	             
+	            
 	            /* 
 	             for (int loop=0; loop<3; loop++) {
 	            	 pseudoSeg = this.reFit(pseudoSeg, segList); 
@@ -135,14 +139,15 @@ public class RoadFinder  {
 	             } */
 	        }
 	        
-	        segLists.add(segList);
 		}
+		
 		return segLists;
 	}
 
 	private Segment reFit(Segment pseudoSeg, ArrayList<Segment> segList ) {
 		QuadraticFit qf = new QuadraticFit();
 		this.fitRoad(segList, qf);
+		
 		Cluster pseudoCluster = new Cluster(segList.get(0).get_Sector(),pseudoSeg.get_Superlayer(),-1);
 		FittedCluster fpseudoCluster = new FittedCluster(pseudoCluster);
 		
@@ -150,7 +155,7 @@ public class RoadFinder  {
 		
 		for(int l = 0; l<6; l++) {
     		int layer = l+1;
-    		double z = GeometryLoader.dcDetector.getWireMidpoint(pseudoSeg.get_Superlayer()-1,layer-1,0).z;
+    		double z = GeometryLoader.getDcDetector().getWireMidpoint(pseudoSeg.get_Superlayer()-1,layer-1,0).z;
     		double trkX = qf.a[0]*z*z+qf.a[1]*z+qf.a[2]; 
     		double delta = (trkX-pseudoSeg.get(l).get_X())/pseudoSeg.get(l).get_CellSize()/Math.cos(Math.toRadians(6.)) ;
     		int calcWire = segTrj.getWireOnTrajectory(pseudoSeg.get_Superlayer(), layer, trkX);
@@ -174,11 +179,11 @@ public class RoadFinder  {
          return pseudoSeg1;
 	}
 
-	private void fitRoad(ArrayList<Segment> segList, QuadraticFit qf) {
+	private boolean fitRoad(ArrayList<Segment> segList, QuadraticFit qf) {
 		
 		int NbHits =0;		
 		if(segList.size()<2)
-			return;
+			return false;
 		
 		for(Segment s : segList)
 			NbHits+=s.size();
@@ -208,8 +213,11 @@ public class RoadFinder  {
         		WChi2+=(h.get_Wire()-calcWire)*(h.get_Wire()-calcWire);
         	} 
         }
+       
         if(WChi2/qf.NDF>1)
-        	return;
+        	return false;
+        
+        return true;
 	}
 
 	private class QuadraticFit {

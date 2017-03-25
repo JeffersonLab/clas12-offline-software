@@ -14,7 +14,7 @@ import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 
 import trackfitter.fitter.utilities.*;
-import Jama.Matrix;
+
 /**
  * A class to fill the reconstructed DC banks
  * @author ziegler
@@ -59,6 +59,8 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("HitBasedTrkg::HBHits",hitlist.size());
     
 		for(int i =0; i< hitlist.size(); i++) { 
+			if(hitlist.get(i).get_Id()==-1)
+				continue;
 			bank.setShort("id",i, (short) hitlist.get(i).get_Id());
 			bank.setShort("status",i, (short) 1);
 			bank.setByte("superlayer",i, (byte) hitlist.get(i).get_Superlayer());
@@ -94,6 +96,8 @@ public class RecoBankWriter {
 		int[] hitIdxArray= new int[12];
 		
 		for(int i =0; i< cluslist.size(); i++) {
+			if(cluslist.get(i).get_Id()==-1)
+				continue;
 			for(int j =0; j<hitIdxArray.length; j++) {
 				hitIdxArray[j] = -1;
 			}
@@ -148,6 +152,10 @@ public class RecoBankWriter {
 		int[] hitIdxArray= new int[12]; // only saving 12 hits for now
 				
 		for(int i =0; i< seglist.size(); i++) {
+			
+			if(seglist.get(i).get_Id()==-1)
+				continue;
+			
 			for(int j =0; j<hitIdxArray.length; j++) {
 				hitIdxArray[j] = -1;
 			}
@@ -175,6 +183,8 @@ public class RecoBankWriter {
 			bank.setFloat("SegEndPoint2Z", i, (float)  seglist.get(i).get_SegmentEndPoints()[3]);
 			
 			for(int j = 0; j<seglist.get(i).size(); j++) {	
+				if(seglist.get(i).get_Id()==-1)
+					continue;
 				if(j<hitIdxArray.length)
 					hitIdxArray[j] = seglist.get(i).get(j).get_Id();
 				
@@ -205,6 +215,8 @@ public class RecoBankWriter {
 	   		
 		int index =0;
 		for(int i =0; i< seglist.size(); i++) {
+			if(seglist.get(i).get_Id()==-1)
+				continue;
 			SegmentTrajectory trj = seglist.get(i).get_Trajectory();
 			for(int l =0; l<6; l++) {
 				bank.setShort("segmentID",index, (short) trj.get_SegmentId());
@@ -229,6 +241,8 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("HitBasedTrkg::HBCrosses", crosslist.size());
     
 		for(int i =0; i< crosslist.size(); i++) {
+			if(crosslist.get(i).get_Id()==-1)
+				continue;
 			bank.setShort("id",i, (short) crosslist.get(i).get_Id());
 			bank.setShort("status",i, (short) 1);
 			bank.setByte("sector",i, (byte) crosslist.get(i).get_Sector());	
@@ -291,6 +305,8 @@ public class RecoBankWriter {
 			bank.setShort("Cross2_ID", i,(short) candlist.get(i).get(1).get_Id());
 			bank.setShort("Cross3_ID", i,(short) candlist.get(i).get(2).get_Id());		
 			bank.setShort("status", i, (short) candlist.get(i).status);
+			bank.setFloat("chi2", i, (short) candlist.get(i).get_FitChi2());
+			bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
 		}
 		//bank.show();
 		return bank;
@@ -310,6 +326,8 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
       
 		for(int i =0; i< hitlist.size(); i++) {
+			if(hitlist.get(i).get_Id()==-1)
+				continue;
 			bank.setShort("id",i, (short) hitlist.get(i).get_Id());
 			bank.setShort("status",i, (short) 1);
 			bank.setByte("superlayer",i, (byte) hitlist.get(i).get_Superlayer());
@@ -350,6 +368,8 @@ public class RecoBankWriter {
 		int[] hitIdxArray= new int[12];
 		
 		for(int i =0; i< cluslist.size(); i++) {
+			if(cluslist.get(i).get_Id()==-1)
+				continue;
 			for(int j =0; j<hitIdxArray.length; j++) {
 				hitIdxArray[j] = -1;
 			}
@@ -405,6 +425,9 @@ public class RecoBankWriter {
 		int[] hitIdxArray= new int[12];
 				
 		for(int i =0; i< seglist.size(); i++) {
+			if(seglist.get(i).get_Id()==-1)
+				continue;
+			
 			for(int j =0; j<hitIdxArray.length; j++) {
 				hitIdxArray[j] = -1;
 			}
@@ -462,6 +485,8 @@ public class RecoBankWriter {
 	   	
 		int index =0;
 		for(int i =0; i< seglist.size(); i++) {
+			if(seglist.get(i).get_Id()==-1)
+				continue;
 			SegmentTrajectory trj = seglist.get(i).get_Trajectory();
 			for(int l =0; l<6; l++) {
 				bank.setShort("segmentID",index, (short) trj.get_SegmentId());
@@ -486,6 +511,8 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("TimeBasedTrkg::TBCrosses", crosslist.size());
     
 		for(int i =0; i< crosslist.size(); i++) {
+			if(crosslist.get(i).get_Id()==-1)
+				continue;
 			bank.setShort("id",i, (short) crosslist.get(i).get_Id());
 			bank.setShort("status",i, (short) crosslist.get(i).get_Id());
 			bank.setByte("sector",i, (byte) crosslist.get(i).get_Sector());	
@@ -554,6 +581,8 @@ public class RecoBankWriter {
 			bank.setShort("Cross1_ID", i,(short) candlist.get(i).get(0).get_Id());
 			bank.setShort("Cross2_ID", i,(short) candlist.get(i).get(1).get_Id());
 			bank.setShort("Cross3_ID", i,(short) candlist.get(i).get(2).get_Id());
+			bank.setFloat("chi2", i, (short) candlist.get(i).get_FitChi2());
+			bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
 			
 			// save to a separate bank
 			/*

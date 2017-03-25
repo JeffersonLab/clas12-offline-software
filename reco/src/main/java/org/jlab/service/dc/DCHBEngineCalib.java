@@ -123,15 +123,12 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 			return true;
 		}
 		//RoadFinder
-		//
+				
 		RoadFinder pcrossLister = new RoadFinder();
-		List<ArrayList<Segment>> selectedSegments =pcrossLister.findRoads(segments);
-		
-		segments = new ArrayList<Segment>();
-		for(int k = 0; k<selectedSegments.size(); k++) {
-			segments.addAll(selectedSegments.get(k));
-		}
+		List<Segment> pSegments =pcrossLister.findRoads(segments);
+		segments.addAll(pSegments);		
 		//
+		//System.out.println("nb trk segs "+pSegments.size());
 		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments);
  

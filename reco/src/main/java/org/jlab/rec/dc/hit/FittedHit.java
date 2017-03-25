@@ -338,15 +338,15 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		DCSwimmer swimmer = new DCSwimmer();
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
-		double z = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
+		double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
 
         //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
-		double z1 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 1, this.get_Wire()-1).z;
-		double z0 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 0, this.get_Wire()-1).z;
+		double z1 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 1, this.get_Wire()-1).z;
+		double z0 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 0, this.get_Wire()-1).z;
 		double deltaz = Math.abs(z1-z0);
         //double xMin = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(0).getMidpoint().x();
-        double xMin = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 1, 0).x;
+        double xMin = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 1, 0).x;
 
         double x = xMin + (this.get_Wire()-1)*2*deltaz*Math.tan(Math.PI/6);
         if(this.get_Layer()%2==1)
@@ -354,7 +354,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         //
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-        x = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+        x = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
 
         //
 		this.set_X(x);
@@ -376,11 +376,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		
 		//double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
 		//double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
-		double z1 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 1, this.get_Wire()-1).z;
-		double z0 = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 0, this.get_Wire()-1).z;
+		double z1 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 1, this.get_Wire()-1).z;
+		double z0 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 0, this.get_Wire()-1).z;
 		double deltaz = Math.abs(z1-z0);
 		//double xMin = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(0).getMidpoint().x();
-		double xMin = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, 1, 0).x;		
+		double xMin = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, 1, 0).x;		
 		
 		double x = xMin + (this.get_Wire()-1)*2*deltaz*Math.tan(Math.PI/6);
 		
@@ -389,8 +389,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 		
 		//double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
 		//x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-		double z = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
-		x = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+		double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
+		x = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
 
 		//this.set_X(x+this.get_LeftRightAmb()*this.get_TimeToDistance());
 		 double MPCorr =1;
@@ -405,8 +405,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	public void projectToMidPlane(boolean Timebased) {
 		//double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
 		//double x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-		double z = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
-		double x = GeometryLoader.dcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+		double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
+		double x = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
 
 		double TB =0;
 		if(Timebased==true)

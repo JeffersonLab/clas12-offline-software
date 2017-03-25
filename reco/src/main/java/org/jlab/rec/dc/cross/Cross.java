@@ -222,7 +222,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 	public void set_CrossParams() {
 		
 		//double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
-		double z = GeometryLoader.dcDetector.getRegionMidpoint(this.get_Region()-1).z;
+		double z = GeometryLoader.getDcDetector().getRegionMidpoint(this.get_Region()-1).z;
 				
 		double wy_over_wx = (Math.cos(Math.toRadians(6.))/Math.sin(Math.toRadians(6.)));				
 		double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
