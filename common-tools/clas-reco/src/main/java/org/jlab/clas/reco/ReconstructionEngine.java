@@ -41,18 +41,18 @@ public abstract class ReconstructionEngine implements Engine {
     String             engineDescription = "CLARA Engine";
 
     public ReconstructionEngine(String name, String author, String version){
-        constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
-        engineDictionary  = new SchemaFactory();
         engineName    = name;
         engineAuthor  = author;
         engineVersion = version;
+        constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
+        engineDictionary  = new SchemaFactory();
         engineDictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
     }
 
-    abstract public boolean processDataEvent(DataEvent event);        
+    abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
-        
+
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
@@ -61,20 +61,24 @@ public abstract class ReconstructionEngine implements Engine {
             constManagerMap.put(this.getClass().getName(), manager);
         }
     }
-    
-    
+
+
     public ConstantsManager  getConstantsManager(){
         return constManagerMap.get(this.getClass().getName());
     }
-    
+
     /**
-     * 
+     *
      * @param ed
-     * @return 
-     */   
+     * @return
+     */
     public EngineData configure(EngineData ed) {
+      if(constManagerMap == null)
+      constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
+      if(engineDictionary == null)
+      engineDictionary  = new SchemaFactory();
         //EngineData data = new EngineData();
-        System.out.println("--- engine configuration is called " + this.getDescription());        
+        System.out.println("--- engine configuration is called " + this.getDescription());
         try {
             this.init();
         } catch (Exception e){
@@ -86,11 +90,11 @@ public abstract class ReconstructionEngine implements Engine {
     }
 
     public EngineData execute(EngineData input) {
-        
+
         EngineData output = input;
-        
+
         //return output;
-        
+
         String mt = input.getMimeType();
         //System.out.println(" DATA TYPE = [" + mt + "]");
         HipoDataEvent dataEventHipo = null;
@@ -107,7 +111,7 @@ public abstract class ReconstructionEngine implements Engine {
                 output.setDescription(msg);
                 return output;
             }
-            
+
             try {
                 this.processDataEvent(dataEventHipo);
                 ByteBuffer  bbo = dataEventHipo.getEventBuffer();
@@ -120,12 +124,12 @@ public abstract class ReconstructionEngine implements Engine {
                 output.setDescription(msg);
                 return output;
             }
-            
+
             return output;
         }
-        
+
         EvioDataEvent dataevent = null;
-        
+
         if(mt.compareTo("binary/data-evio")==0){
             try {
                 ByteBuffer bb = (ByteBuffer) input.getData();
@@ -138,7 +142,7 @@ public abstract class ReconstructionEngine implements Engine {
                 output.setDescription(msg);
                 return output;
             }
-            
+
             try {
                 this.processDataEvent(dataevent);
                 ByteBuffer  bbo = dataevent.getEventBuffer();
@@ -152,7 +156,7 @@ public abstract class ReconstructionEngine implements Engine {
             }
             return output;
         }
-        
+
         return input;
         /*
         if (!mt.equalsIgnoreCase()) {
@@ -163,7 +167,7 @@ public abstract class ReconstructionEngine implements Engine {
         }*/
         /*
         EvioDataEvent dataevent = null;
-        
+
         try {
             ByteBuffer bb = (ByteBuffer) input.getData();
             byte[] buffer = bb.array();
@@ -175,7 +179,7 @@ public abstract class ReconstructionEngine implements Engine {
             output.setDescription(msg);
             return output;
         }
-        
+
         try {
             this.processDataEvent(dataevent);
             ByteBuffer  bbo = dataevent.getEventBuffer();
@@ -187,8 +191,8 @@ public abstract class ReconstructionEngine implements Engine {
             output.setDescription(msg);
             return output;
         }
-        
-        return output;        
+
+        return output;
         */
     }
 
@@ -228,7 +232,7 @@ public abstract class ReconstructionEngine implements Engine {
         this.engineDescription = desc;
         return this;
     }
-    
+
     public String getDescription() {
         return this.engineDescription;
     }
@@ -236,7 +240,7 @@ public abstract class ReconstructionEngine implements Engine {
     public String getName(){
         return this.engineName;
     }
-    
+
     public String getVersion() {
         return this.engineVersion;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
