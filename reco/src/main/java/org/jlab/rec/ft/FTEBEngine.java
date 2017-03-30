@@ -15,7 +15,6 @@ import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.ft.cal.FTCALEngine;
 import org.jlab.rec.ft.hodo.FTHODOEngine;
@@ -23,7 +22,7 @@ import org.jlab.rec.ft.hodo.FTHODOEngine;
 public class FTEBEngine extends ReconstructionEngine {
 
 	public FTEBEngine() {
-		super("FTMATCH", "devita", "3.0");
+		super("FTEB", "devita", "3.0");
 	}
 
 	FTEventBuilder reco;
@@ -40,7 +39,7 @@ public class FTEBEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		Run = config.setRunConditionsParameters(event, "FTMATCH", Run);
+		Run = config.setRunConditionsParameters(event, "FTEB", Run);
                 reco.init(config.getSolenoid());
 		reco.addResponses(event);
                 reco.initFTparticles();

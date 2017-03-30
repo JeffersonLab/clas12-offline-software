@@ -103,42 +103,46 @@ public class FTHODOReconstruction {
     private void writeHipoBanks(DataEvent event, List<FTHODOHit> hits, List<FTHODOCluster> clusters){
         
         // hits banks
-        DataBank bankHits = event.createBank("FTHODO::hits", hits.size());    
-        if(bankHits==null){
-            System.out.println("ERROR CREATING BANK : FTHODO::hits");
-            return;
+        if(hits.size()!=0) {
+            DataBank bankHits = event.createBank("FTHODO::hits", hits.size());    
+            if(bankHits==null){
+                System.out.println("ERROR CREATING BANK : FTHODO::hits");
+                return;
+            }
+            for(int i = 0; i < hits.size(); i++){
+                bankHits.setByte("sector",i,(byte) hits.get(i).get_Sector());
+                bankHits.setByte("layer",i,(byte) hits.get(i).get_Layer());
+                bankHits.setShort("component",i,(short) hits.get(i).get_ID());
+                bankHits.setFloat("x",i,(float) hits.get(i).get_Dx());
+                bankHits.setFloat("y",i,(float) hits.get(i).get_Dy());
+                bankHits.setFloat("z",i,(float) hits.get(i).get_Dz());
+                bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
+                bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
+                bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
+                bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusterIndex());				
+            }
         }
-        for(int i = 0; i < hits.size(); i++){
-            bankHits.setByte("sector",i,(byte) hits.get(i).get_Sector());
-            bankHits.setByte("layer",i,(byte) hits.get(i).get_Layer());
-            bankHits.setShort("component",i,(short) hits.get(i).get_ID());
-            bankHits.setFloat("x",i,(float) hits.get(i).get_Dx());
-            bankHits.setFloat("y",i,(float) hits.get(i).get_Dy());
-            bankHits.setFloat("z",i,(float) hits.get(i).get_Dz());
-            bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
-            bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
-            bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
-            bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusterIndex());				
-        }	
         // cluster bank
-        DataBank bankCluster = event.createBank("FTHODO::clusters", clusters.size());    
-        if(bankCluster==null){
-            System.out.println("ERROR CREATING BANK : FTHODO::clusters");
-            return;
+        if(clusters.size()!=0){
+            DataBank bankCluster = event.createBank("FTHODO::clusters", clusters.size());    
+            if(bankCluster==null){
+                System.out.println("ERROR CREATING BANK : FTHODO::clusters");
+                return;
+            }
+            for(int i = 0; i < clusters.size(); i++){
+                            bankCluster.setShort("id", i,(short) clusters.get(i).getID());
+                            bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
+                            bankCluster.setFloat("x",i,(float) clusters.get(i).getX());
+                            bankCluster.setFloat("y",i,(float) clusters.get(i).getY());
+                            bankCluster.setFloat("z",i,(float) clusters.get(i).getZ());
+                            bankCluster.setFloat("widthX",i,(float) clusters.get(i).getWidthX());
+                            bankCluster.setFloat("widthY",i,(float) clusters.get(i).getWidthY());
+                            bankCluster.setFloat("radius",i,(float) clusters.get(i).getRadius());
+                            bankCluster.setFloat("time",i,(float) clusters.get(i).getTime());
+                            bankCluster.setFloat("energy",i,(float) clusters.get(i).getEnergy());
+            }
+            event.appendBanks(bankCluster);
         }
-        for(int i = 0; i < clusters.size(); i++){
-                        bankCluster.setShort("id", i,(short) clusters.get(i).getID());
-                        bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
-                        bankCluster.setFloat("x",i,(float) clusters.get(i).getX());
-                        bankCluster.setFloat("y",i,(float) clusters.get(i).getY());
-                        bankCluster.setFloat("z",i,(float) clusters.get(i).getZ());
-                        bankCluster.setFloat("widthX",i,(float) clusters.get(i).getWidthX());
-                        bankCluster.setFloat("widthY",i,(float) clusters.get(i).getWidthY());
-                        bankCluster.setFloat("radius",i,(float) clusters.get(i).getRadius());
-                        bankCluster.setFloat("time",i,(float) clusters.get(i).getTime());
-                        bankCluster.setFloat("energy",i,(float) clusters.get(i).getEnergy());
-        }
-        event.appendBanks(bankCluster);
     }
     
 
@@ -179,15 +183,16 @@ public class FTHODOReconstruction {
                             bankclust.setDouble("clusterTheta",i,clusters.get(i).getTheta());
                             bankclust.setDouble("clusterPhi",i,clusters.get(i).getPhi());
                 }
-
-                // If there are no clusters, punt here but save the reconstructed hits 
-                if(bankclust!=null) {
-                        event.appendBanks(bankhits,bankclust);
-                }
-                else if (bankhits!=null) {
-                        event.appendBank(bankhits);
-                }
         }
+
+        // If there are no clusters, punt here but save the reconstructed hits 
+        if(bankclust!=null) {
+                event.appendBanks(bankhits,bankclust);
+        }
+        else if (bankhits!=null) {
+                event.appendBank(bankhits);
+        }
+        
     }
     public List<FTHODOHit> readRawHits(DataEvent event) {
         // getting raw data bank

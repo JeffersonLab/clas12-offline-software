@@ -113,43 +113,47 @@ public class FTCALReconstruction {
     private void writeHipoBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters){
         
         // hits banks
-        DataBank bankHits = event.createBank("FTCAL::hits", hits.size());    
-        if(bankHits==null){
-            System.out.println("ERROR CREATING BANK : FTCAL::hits");
-            return;
+        if(hits.size()!=0) {
+            DataBank bankHits = event.createBank("FTCAL::hits", hits.size());    
+            if(bankHits==null){
+                System.out.println("ERROR CREATING BANK : FTCAL::hits");
+                return;
+            }
+            for(int i = 0; i < hits.size(); i++){
+                bankHits.setByte("idx",i,(byte) hits.get(i).get_IDX());
+                bankHits.setByte("idy",i,(byte) hits.get(i).get_IDY());
+                bankHits.setFloat("x",i,(float) hits.get(i).get_Dx());
+                bankHits.setFloat("y",i,(float) hits.get(i).get_Dy());
+                bankHits.setFloat("z",i,(float) hits.get(i).get_Dz());
+                bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
+                bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
+                bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
+                bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusIndex());				
+            }	
         }
-        for(int i = 0; i < hits.size(); i++){
-            bankHits.setByte("idx",i,(byte) hits.get(i).get_IDX());
-            bankHits.setByte("idy",i,(byte) hits.get(i).get_IDY());
-            bankHits.setFloat("x",i,(float) hits.get(i).get_Dx());
-            bankHits.setFloat("y",i,(float) hits.get(i).get_Dy());
-            bankHits.setFloat("z",i,(float) hits.get(i).get_Dz());
-            bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
-            bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
-            bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
-            bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusIndex());				
-        }	
         // cluster bank
-        DataBank bankCluster = event.createBank("FTCAL::clusters", clusters.size());    
-        if(bankCluster==null){
-            System.out.println("ERROR CREATING BANK : FTCAL::clusters");
-            return;
+        if(clusters.size()!=0) {
+            DataBank bankCluster = event.createBank("FTCAL::clusters", clusters.size());    
+            if(bankCluster==null){
+                System.out.println("ERROR CREATING BANK : FTCAL::clusters");
+                return;
+            }
+            for(int i = 0; i < clusters.size(); i++){
+                            bankCluster.setInt("id", i,clusters.get(i).getID());
+                            bankCluster.setInt("size", i,clusters.get(i).getSize());
+                            bankCluster.setFloat("x",i,(float) clusters.get(i).getX());
+                            bankCluster.setFloat("y",i, (float) clusters.get(i).getY());
+                            bankCluster.setFloat("z",i, (float) clusters.get(i).getZ());
+                            bankCluster.setFloat("widthX",i, (float) clusters.get(i).getWidthX());
+                            bankCluster.setFloat("widthY",i, (float) clusters.get(i).getWidthY());
+                            bankCluster.setFloat("radius",i, (float) clusters.get(i).getRadius());
+                            bankCluster.setFloat("time",i, (float) clusters.get(i).getTime());
+                            bankCluster.setFloat("energy",i, (float) clusters.get(i).getFullEnergy());
+                            bankCluster.setFloat("recEnergy",i, (float) clusters.get(i).getEnergy());
+                            bankCluster.setFloat("maxEnergy",i, (float) clusters.get(i).getSeedEnergy());
+            }
+            event.appendBanks(bankCluster);
         }
-        for(int i = 0; i < clusters.size(); i++){
-                        bankCluster.setInt("id", i,clusters.get(i).getID());
-                        bankCluster.setInt("size", i,clusters.get(i).getSize());
-                        bankCluster.setFloat("x",i,(float) clusters.get(i).getX());
-                        bankCluster.setFloat("y",i, (float) clusters.get(i).getY());
-                        bankCluster.setFloat("z",i, (float) clusters.get(i).getZ());
-                        bankCluster.setFloat("widthX",i, (float) clusters.get(i).getWidthX());
-                        bankCluster.setFloat("widthY",i, (float) clusters.get(i).getWidthY());
-                        bankCluster.setFloat("radius",i, (float) clusters.get(i).getRadius());
-                        bankCluster.setFloat("time",i, (float) clusters.get(i).getTime());
-                        bankCluster.setFloat("energy",i, (float) clusters.get(i).getFullEnergy());
-                        bankCluster.setFloat("recEnergy",i, (float) clusters.get(i).getEnergy());
-                        bankCluster.setFloat("maxEnergy",i, (float) clusters.get(i).getSeedEnergy());
-        }
-        event.appendBanks(bankCluster);
     }
     
 
