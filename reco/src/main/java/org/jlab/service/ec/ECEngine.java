@@ -193,7 +193,7 @@ public class ECEngine extends ReconstructionEngine {
             bankP.setByte("sector",  p,  (byte) peaks.get(p).getDescriptor().getSector());
             bankP.setByte("layer",   p,  (byte) peaks.get(p).getDescriptor().getLayer());
             bankP.setFloat("xo",     p, (float) peaks.get(p).getLine().origin().x());
-            bankP.setFloat("xo",     p, (float) peaks.get(p).getLine().origin().y());
+            bankP.setFloat("yo",     p, (float) peaks.get(p).getLine().origin().y());
             bankP.setFloat("zo",     p, (float) peaks.get(p).getLine().origin().z());
             bankP.setFloat("xe",     p, (float) peaks.get(p).getLine().end().x());
             bankP.setFloat("ye",     p, (float) peaks.get(p).getLine().end().y());
