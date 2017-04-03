@@ -62,6 +62,7 @@ public class EventBuilder {
         
         for(int n = 0; n < np; n++){
             DetectorParticle  p = this.detectorEvent.getParticle(n);
+            double quality = 0.0;
             /**
              * Matching tracks to FTOF layer 1A detector. Added to the particle and association is
              * set with a particle needed.
@@ -82,7 +83,7 @@ public class EventBuilder {
                 detectorResponses.get(index).setAssociation(n);
             }
             /**
-             * Matching tracks to FTOF layer 1B detector. Added to the particle and association is
+             * Matching tracks to FTOF layer 2 detector. Added to the particle and association is
              */
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
             //System.out.println("index FTOF-1B = " + index);
@@ -98,21 +99,28 @@ public class EventBuilder {
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
+                //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.PCAL_hitRes);
+                //detectorResponses.get(index).setHitQuality(quality);
             }
             
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 4, EBConstants.PCAL_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
+                //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.ECOUT_hitRes);
+                //detectorResponses.get(index).setHitQuality(quality);
             }
             
             index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 7, EBConstants.PCAL_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
+                //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.ECOUT_hitRes);
+                //detectorResponses.get(index).setHitQuality(quality);
             }
             
             index = p.getCherenkovSignal(this.cherenkovResponses);
+            //double = p.getCherenkovSignalQuality()
             if(index>=0){
                 p.addCherenkovResponse(cherenkovResponses.get(index));
                 cherenkovResponses.get(index).setAssociation(n);
