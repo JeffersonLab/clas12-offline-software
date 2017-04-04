@@ -24,13 +24,19 @@ cd common-tools/clas-jcsg
 cd -
 cp common-tools/clas-jcsg/build/libs/jcsg-0.3.2.jar coatjava/lib/clas/
 
+# dc
+cd reconstruction/dc
+mvn install
+cd -
+cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 # cvt
 cd reconstruction/cvt
 mvn install
 cd -
 cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
 
-#tar and clean up
-find coatjava -name "*"
-tar -zcvf coatjava.tar.gz coatjava
-rm -rf coatjava
+# #tar and clean up
+# find coatjava -name "*"
+# tar -zcvf coatjava.tar.gz coatjava
+# rm -rf coatjava
