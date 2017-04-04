@@ -24,11 +24,17 @@ cd common-tools/clas-jcsg
 cd -
 cp common-tools/clas-jcsg/build/libs/jcsg-0.3.2.jar coatjava/lib/clas/
 
-# dc
+# dc (depends on jcsg)
 cd reconstruction/dc
 mvn install
 cd -
 cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar coatjava/lib/services/
+
+# tof (depends on jcsg and dc)
+cd reconstruction/tof
+mvn install
+cd -
+cp reconstruction/tof/target/tof-1.0-SNAPSHOT.jar coatjava/lib/services/
 
 # cvt
 cd reconstruction/cvt
