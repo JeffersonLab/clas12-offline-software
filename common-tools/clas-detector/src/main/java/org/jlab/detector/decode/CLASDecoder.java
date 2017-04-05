@@ -29,7 +29,6 @@ public class CLASDecoder {
     private DetectorEventDecoder  detectorDecoder = null;
     private List<DetectorDataDgtz>       dataList = new ArrayList<DetectorDataDgtz>();    
     private HipoDataSync                   writer = null;
-    abcdefg;
     private HipoDataEvent               hipoEvent = null;
     private int                  decoderDebugMode = 0;
     
