@@ -39,8 +39,60 @@ import cnuphys.snr.clas12.Clas12NoiseResult;
 
 public class DCHBEngine extends ReconstructionEngine {
 
+	 // init  
+    private Clas12NoiseResult results; 
+    private Clas12NoiseAnalysis noiseAnalysis;
+    private int[] rightShifts;
+    private int[] leftShifts;	
+    private NoiseReductionParameters parameters;
+	
+    private ClusterFitter cf;
+    private ClusterCleanerUtilities ct;    
+    private List<FittedHit> fhits;
+    private List<FittedCluster> clusters;
+    private List<Segment> segments;
+    private List<Cross> crosses;
+    private List<Track> trkcands;
+    private RecoBankWriter rbc;
+    private HitReader hitRead;	
+    private List<Hit> hits;
+    private ClusterFinder clusFinder;	
+    private SegmentFinder segFinder;
+    private RoadFinder pcrossLister;
+    private CrossMaker crossMake;
+    private CrossListFinder crossLister;	
+    private List<List<Cross>> CrossesInSector;	
+    private CrossList crosslist;	
+    private TrackCandListFinder trkcandFinder;
+	
 	public DCHBEngine() {
-		super("DCHB","ziegler","3.0");
+		super("DCHB","ziegler","4.0");
+		 // init  
+	    results = new Clas12NoiseResult(); 
+		noiseAnalysis = new Clas12NoiseAnalysis();
+		rightShifts = Constants.SNR_RIGHTSHIFTS;
+		leftShifts  = Constants.SNR_LEFTSHIFTS;	
+		parameters = new NoiseReductionParameters (
+				2,leftShifts,
+				rightShifts);
+		cf = new ClusterFitter();
+	    ct = new ClusterCleanerUtilities();    
+	    fhits = new ArrayList<FittedHit>();
+		clusters = new ArrayList<FittedCluster>();
+		segments = new ArrayList<Segment>();
+		crosses = new ArrayList<Cross>();
+		trkcands = new ArrayList<Track>();
+		rbc = new RecoBankWriter();
+		hitRead = new HitReader();	
+		hits = new ArrayList<Hit>();
+		clusFinder = new ClusterFinder();	
+		segFinder = new SegmentFinder();
+		pcrossLister = new RoadFinder();	
+		crossMake = new CrossMaker();
+		crossLister = new CrossListFinder();	
+		CrossesInSector = new ArrayList<List<Cross>>();	
+		crosslist = new CrossList();	
+		trkcandFinder = new TrackCandListFinder("HitBased");
 	}
 
 	String FieldsConfig="";
@@ -59,37 +111,20 @@ public class DCHBEngine extends ReconstructionEngine {
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 		setRunConditionsParameters( event) ;
-		 // init SNR 
-	    Clas12NoiseResult results = new Clas12NoiseResult(); 
-		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
-
-		int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
-		int[] leftShifts  = Constants.SNR_LEFTSHIFTS;
-		NoiseReductionParameters parameters = new NoiseReductionParameters (
-				2,leftShifts,
-				rightShifts);
-		//System.out.println("RUNING HITBASED_________________________________________");
-	  
-		ClusterFitter cf = new ClusterFitter();
-	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
-	    
-	    List<FittedHit> fhits = new ArrayList<FittedHit>();
-		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-		List<Segment> segments = new ArrayList<Segment>();
-		List<Cross> crosses = new ArrayList<Cross>();
 		
-		List<Track> trkcands = new ArrayList<Track>();
+		results.clear();
+		noiseAnalysis.clear();
+		fhits.clear();
+		clusters.clear();
+		hits.clear();	
+		CrossesInSector.clear();	
+		crosslist.clear();	
+		segments.clear();
+		crosses.clear();
+		trkcands.clear();
 		
-		//instantiate bank writer
-		RecoBankWriter rbc = new RecoBankWriter();
-		
-		//if(Constants.DEBUGCROSSES)
-		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
-		
-		HitReader hitRead = new HitReader();
 		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
 
-		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
 		hits = hitRead.get_DCHits();
 		
@@ -100,13 +135,10 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 
 		fhits = rbc.createRawHitList(hits);
-				
-		
+						
 		//2) find the clusters from these hits
-		ClusterFinder clusFinder = new ClusterFinder();
 		clusters = clusFinder.FindHitBasedClusters(hits, ct, cf);
-		
-		
+			
 		if(clusters.size()==0) {				
 			rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
 			return true;
@@ -115,7 +147,6 @@ public class DCHBEngine extends ReconstructionEngine {
 		rbc.updateListsListWithClusterInfo(fhits, clusters);
 		
 		//3) find the segments from the fitted clusters
-		SegmentFinder segFinder = new SegmentFinder();
 		segments =  segFinder.get_Segments(clusters, event);
  
 		if(segments.size()==0) { // need 6 segments to make a trajectory			
@@ -124,44 +155,34 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 		//RoadFinder
 		//
-		
-		RoadFinder pcrossLister = new RoadFinder();
-		List<Segment> pSegments =pcrossLister.findRoads(segments);
-		segments.addAll(pSegments);
+		segments.addAll(pcrossLister.findRoads(segments));
 		
 		//
-		//System.out.println("nb trk segs "+pSegments.size());
-		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments);
  
 		if(crosses.size()==0 ) {			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
-		
-		CrossListFinder crossLister = new CrossListFinder();
-		
-		List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
+		CrossesInSector = crossLister.get_CrossesInSectors(crosses);
 		for(int s =0; s< 6; s++) {
 			if(CrossesInSector.get(s).size()>Constants.MAXNBCROSSES) {
+				rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 				return true;
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
-		
-		if(crosslist.size()==0) {
-			
+		crosslist = crossLister.candCrossLists(crosses);		
+		if(crosslist.size()==0) {			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
 
 		//6) find the list of  track candidates
-		TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
+		trkcandFinder = new TrackCandListFinder("HitBased");		
 		trkcands = trkcandFinder.getTrackCands(crosslist) ;
 		 
-		if(trkcands.size()==0) {
-			
+		if(trkcands.size()==0) {			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		}
@@ -261,7 +282,7 @@ public class DCHBEngine extends ReconstructionEngine {
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Distribution/CLARA/CLARA_INSTALL/data/in/clas12_000797_a00000.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/e2to6hipo.hipo";
 		// String inputFile="/Users/ziegler/Downloads/out.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";
@@ -283,7 +304,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D2GC.hipo";
 		
 		 writer.open(outputFile);
 		

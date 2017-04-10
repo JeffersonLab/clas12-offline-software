@@ -6,3 +6,7 @@
 /DCSwimmer$CylinderBoundarySwimStopper.class
 /Vertex.class
 /SegmentTrajectory.class
+/DCSwimmer$PlaneBoundarySwimStopper.class
+/DCSwimmer$SphericalBoundarySwimStopper.class
+/RoadFinder$QuadraticFit.class
+/RoadFinder.class
