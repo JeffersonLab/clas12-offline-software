@@ -4,9 +4,7 @@ mkdir coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
 cp -r lib coatjava/
-ls coatjava/lib/services/
-rm coatjava/lib/services/*.jar
-ls coatjava/lib/services/
+mkdir coatjava/lib/services
 
 ### coat-libs ###
 rm -rf ~/.m2/repository/org/hep/hipo
@@ -27,7 +25,6 @@ then
 	exit 1
 fi
 cd -
-rm coatjava/lib/clas/coat-libs*.jar
 cp common-tools/coat-lib/target/coat-libs*.jar coatjava/lib/clas/
 
 ### jcsg ###
