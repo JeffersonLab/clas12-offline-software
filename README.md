@@ -29,7 +29,7 @@ When build-coatjava.sh runs, it first goes into common-tools and uses Maven to b
 A modified version of https://github.com/miho/JCSG. This is the next thing built by build-coatjava.sh (using Gradle). After the build, the jcsg jar is also added to the aforementioned local repository. Andrey is the expert on jcsg.
 
 ### Reconstruction
-The reconstruction subdirectory contains the reconstruction code for each CLAS12 detector subsystem (in progress). Many of these codes depend on coat-libs, jcsg, and/or other reconstruction codes. build-coatjava.sh goes through each subsystem and builds the reconstruction code, adding the resulting jar files to the aforementioned local repository when necessary.
+The reconstruction subdirectory contains the reconstruction code for each CLAS12 detector subsystem (in progress). Many of these codes depend on coat-libs, jcsg, and/or other reconstruction codes. build-coatjava.sh goes through each subsystem and builds the reconstruction code, adding the resulting jar files to the aforementioned local repository when necessary. Developers of the reconstruction code should also keep their bank definitions up-to-date inside the etc/bankdefs/ subdirectories.
 
 ### Other Stuff
 After a successful build, you should have a new coatjava/ directory in your working directory which contains all of the CLAS Offline Analysis Tools. In a few cases, the jar files in coatjava/ are simply hard copied from this repository (e.g. lib/clas/* and lib/utils/*). This is probably not a very good practice and will hopefully be fixed in the future.
