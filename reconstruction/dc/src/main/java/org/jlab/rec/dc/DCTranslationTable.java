@@ -2,12 +2,9 @@ package org.jlab.rec.dc;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorDescriptor;
-import org.jlab.detector.calib.utils.ConstantsManager;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Converts DC readout board (crate, slot, channel) to DC wire hit (sector, layer, wire)
