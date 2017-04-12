@@ -305,8 +305,8 @@ public class RecoBankWriter {
 			bank.setShort("Cross2_ID", i,(short) candlist.get(i).get(1).get_Id());
 			bank.setShort("Cross3_ID", i,(short) candlist.get(i).get(2).get_Id());		
 			bank.setShort("status", i, (short) candlist.get(i).status);
-			//bank.setFloat("chi2", i, (short) candlist.get(i).get_FitChi2());
-			//bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+			bank.setFloat("chi2", i, (short) candlist.get(i).get_FitChi2());
+			bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
 		}
 		//bank.show();
 		return bank;
@@ -581,8 +581,8 @@ public class RecoBankWriter {
 			bank.setShort("Cross1_ID", i,(short) candlist.get(i).get(0).get_Id());
 			bank.setShort("Cross2_ID", i,(short) candlist.get(i).get(1).get_Id());
 			bank.setShort("Cross3_ID", i,(short) candlist.get(i).get(2).get_Id());
-			//bank.setFloat("chi2", i, (short) candlist.get(i).get_FitChi2());
-			//bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+			bank.setFloat("chi2", i, (short) candlist.get(i).get_FitChi2());
+			bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
 			
 			// save to a separate bank
 			/*
