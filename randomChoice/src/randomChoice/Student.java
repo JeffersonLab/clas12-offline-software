@@ -65,6 +65,7 @@ public class Student extends JComponent {
 		
 		g.setFont(font);
 		g.setColor(Color.white);		
+		g.drawString(name, (size.width - sw)/2-2, size.height - 22);
 		g.drawString(name, (size.width - sw)/2-1, size.height - 21);
 		g.setColor(Color.black);		
 		g.drawString(name, (size.width - sw)/2, size.height - 20);
