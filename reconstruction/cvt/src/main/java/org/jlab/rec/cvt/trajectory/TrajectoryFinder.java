@@ -408,7 +408,7 @@ public class TrajectoryFinder {
 	 * @param stVec stateVec
 	 */
 	
-	private void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
+	public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
 			StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
 		int l = layer -1;
 		

@@ -12,7 +12,7 @@ import org.jlab.rec.cvt.hit.Hit;
  * @author ziegler
  *
  */
-public class Cluster extends ArrayList<FittedHit> {
+public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster> {
 
 	private static final long serialVersionUID = 9153980362683755204L;
 
@@ -403,6 +403,31 @@ public class Cluster extends ArrayList<FittedHit> {
 	public void set_AssociatedTrackID(int associatedTrackID) {
 		AssociatedTrackID = associatedTrackID;
 	}
+	@Override
+	public int compareTo(Cluster arg) {
+		//sort by phi of strip implant of first strip in the cluster, then by layer, then by seed strip number
+		double this_phi = PhiInRange(this.get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
+		double arg_phi  = PhiInRange(arg.get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
+		
+		int CompPhi = this_phi < arg_phi  ? -1 : this_phi  == arg_phi  ? 0 : 1;
+		int CompLay = this._Layer  < arg._Layer  ? -1 : this._Layer   == arg._Layer   ? 0 : 1;
+		int CompId = this._SeedStrip < arg._SeedStrip  ? -1 : this._SeedStrip  == arg._SeedStrip  ? 0 : 1;
+		
+		int return_val1 = ((CompLay ==0) ? CompId : CompLay); 
+		int return_val = ((CompPhi == 0) ? return_val1 : CompPhi); 
+		
+		return return_val;
+		
+	}
+	
+	
+	private double PhiInRange(double phi) {
+		if(phi<0)
+			phi+=Math.PI*2;
+		return phi;
+	}
+
+	
 
 }
 

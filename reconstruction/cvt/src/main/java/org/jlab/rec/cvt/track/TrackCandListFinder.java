@@ -1,17 +1,21 @@
 package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.StraightTrackFitter;
+import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Ray;
+import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
@@ -862,5 +866,30 @@ public class TrackCandListFinder {
 					crossesToFit.remove(j);
 				}
 		}
+
+
+	public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal,
+			ArrayList<StateVec> trajectory, int k) {
+		
+		Collections.sort(sVTclusters);
+		for(StateVec st : trajectory) {
+			for(Cluster cls : sVTclusters) {
+				if(cls.get_AssociatedTrackID()!=-1)
+					continue;
+				if(st.get_SurfaceSector() != cls.get_Sector())
+					continue;
+				if(st.get_SurfaceLayer() != cls.get_Layer())
+					continue;
+				if(Math.abs(st.get_CalcCentroidStrip()-cls.get_Centroid())<4) {
+					tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls,
+							st, svt_geo, bmt_geo,  trajFinal);
+					//System.out.println("trying to associate a cluster ");cls.printInfo(); System.out.println(" to "+st.get_CalcCentroidStrip()+" dStp = "+(st.get_CalcCentroidStrip()-cls.get_Centroid()));
+					cls.set_AssociatedTrackID(k);
+					for(FittedHit h : cls)
+						h.set_AssociatedTrackID(k);
+				}
+			}
+		}
+	}
 
 }

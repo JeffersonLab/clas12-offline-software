@@ -6,10 +6,8 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.cvt.banks.HitReader;
@@ -25,6 +23,8 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.TrackCandListFinder;
+import org.jlab.rec.cvt.trajectory.StateVec;
+import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio format
@@ -57,7 +57,7 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 		RecoBankWriter rbc = new RecoBankWriter();
 		
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_SVTHits(event,adcConv,-1,-1);
+		hitRead.fetch_SVTHits(event,adcConv,-1,-1, SVTGeom);
 		hitRead.fetch_BMTHits(event, adcConv, BMTGeom);
 		
 		List<Hit> hits = new ArrayList<Hit>();
@@ -183,10 +183,12 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 						cosmics.get(k1).get(k2).get_Cluster2().get(k4).set_AssociatedTrackID(cosmics.get(k1).get_Id());
 					}
 				}
+				trkcandFinder.matchClusters(SVTclusters, new TrajectoryFinder(), SVTGeom, BMTGeom, true,
+						cosmics.get(k1).get_Trajectory(), k1+1);
 			}
+			
 			//4)  ---  write out the banks			
 			rbc.appendCVTCosmicsBanks( event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
-
 		}
 		return true;
 	}
@@ -231,14 +233,11 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 		 writer.open(outputFile);
 		
 		long t1=0;
-		for(int k = 0; k < inputFiles.size(); k++)
-		{
-		        HipoDataSource reader = new HipoDataSource();
-		        reader.open(inputFiles.get(k));
-
+		for(int k = 0; k < inputFiles.size(); k++) {
+			HipoDataSource reader = new HipoDataSource();
+		    reader.open(inputFiles.get(k));
 		        
-		    while(reader.hasEvent() ){
-			
+		    while(reader.hasEvent() ){		
 			counter++;
 		
 			DataEvent event = reader.getNextEvent();
@@ -249,22 +248,22 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 			
 			en.processDataEvent(event);
 			
-			//System.out.println("  EVENT "+counter);
-			if(counter>11) break;
+			System.out.println("  EVENT "+counter);
+		//	if(counter>17) break;
 			//event.show();
 			//if(counter%100==0)
 			//System.out.println("run "+counter+" events");
 			
 					
-			if(event.hasBank("BSTRec::Crosses") ) {
-				DataBank bnk = event.getBank("BSTRec::Crosses");
-				if(bnk.rows()>2) {
+			//if(event.hasBank("BSTRec::Crosses") ) {
+			//	DataBank bnk = event.getBank("BSTRec::Crosses");
+				//if(bnk.rows()>2) {
 				
 					//event.show();
 					writer.writeEvent(event); 
 					event.show();
-				}
-			}
+				//}
+			//}
 		    }
 		}
 		writer.close();

@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.cvt.banks.HitReader;
@@ -22,8 +20,6 @@ import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.track.StraightTrack;
-import org.jlab.rec.cvt.track.TrackCandListFinder;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio format
@@ -56,7 +52,7 @@ public class CVTKPP extends ReconstructionEngine {
 		RecoBankWriter rbc = new RecoBankWriter();
 		
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_SVTHits(event,adcConv,-1,-1);
+		hitRead.fetch_SVTHits(event,adcConv,-1,-1, SVTGeom);
 		
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
