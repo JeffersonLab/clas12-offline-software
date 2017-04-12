@@ -179,8 +179,8 @@ public class DCTranslationTable  {
 				    	 continue;
 				    
 				    
-				 // System.out.println((crate)+"  "+(slot)+"  "+(channel)+" sector "+sector
-					//	  +" region "+region+" layer "+layer+" wire "+wire+" connector "+connector);
+				// System.out.println((crate)+"  "+(slot)+"  "+(channel)+" sector "+sector
+				//		  +" region "+region+" layer "+layer+" wire "+wire+" connector "+connector);
 			  }
 	 
 	  //reverseTable.get(sector,layer,component).getCrate();
