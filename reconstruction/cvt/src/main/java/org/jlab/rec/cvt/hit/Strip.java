@@ -1,5 +1,8 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
+
 public class Strip {
 
 	public Strip(int strip, double edep) {
@@ -18,12 +21,34 @@ public class Strip {
 	private double _ZErr;  
 	private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
 	
+	private Point3D _ImplantPoint;						// 	   the end-point of the strip at implant (lab frame)
+	private Point3D _MidPoint;							//	   the mid-point of the strip (lab frame)
+	private Vector3D _StripDir;							// 	   unit direction vector along the strip (lab frame)
+	
 	
 	public int get_Strip() {
 		return _Strip;
 	}
 	public void set_Strip(int _Strip) {
 		this._Strip = _Strip;
+	}
+	public Point3D get_ImplantPoint() {
+		return _ImplantPoint;
+	}
+	public void set_ImplantPoint(Point3D _ImplantPoint) {
+		this._ImplantPoint = _ImplantPoint;
+	}
+	public Point3D get_MidPoint() {
+		return _MidPoint;
+	}
+	public void set_MidPoint(Point3D _MidPoint) {
+		this._MidPoint = _MidPoint;
+	}
+	public Vector3D get_StripDir() {
+		return _StripDir;
+	}
+	public void set_StripDir(Vector3D _StripDir) {
+		this._StripDir = _StripDir;
 	}
 	public int get_LCStrip() {
 		return _LCStrip;

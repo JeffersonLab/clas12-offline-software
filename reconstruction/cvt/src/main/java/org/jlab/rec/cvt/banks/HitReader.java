@@ -3,10 +3,11 @@ package org.jlab.rec.cvt.banks;
 import java.util.ArrayList;
 import java.util.List; 
 
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.bmt.Geometry;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
@@ -66,9 +67,9 @@ public class HitReader {
 	 * @param adcConv converter from adc to values used in the analysis (i.e. Edep for gemc, adc for cosmics)
 	 * @param geo the BMT geometry
 	 */
-	public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, Geometry geo) {
+	public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.Geometry geo) {
 		// return if there is no BMT bank
-		if(event.hasBank("BMT::dgtz")==false ) {
+		if(event.hasBank("BMT::adc")==false ) {
 			//System.err.println("there is no BMT bank ");
 			_BMTHits= new ArrayList<Hit>();
 			
@@ -135,7 +136,7 @@ public class HitReader {
 	 * @param adcConv converter from adc to daq values
 	 * @param geo the SVT geometry
 	 */
-	public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere) {
+	public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, org.jlab.rec.cvt.svt.Geometry geo ) {
 		
 		if(event.hasBank("SVT::adc")==false) {
 			//System.err.println("there is no BST bank ");
@@ -187,14 +188,25 @@ public class HitReader {
 					continue;
 				// create the strip object with the adc value converted to daq value used for cluster-centroid estimate
 				Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i]));
-				
+				// get the strip endPoints
+				double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i]-1)%2);
+		    	Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
+		    	Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
+		    	Point3D MP = new Point3D((EP1.x()+EP2.x())/2.,(EP1.y()+EP2.y())/2.,(EP1.z()+EP2.z())/2.);
+		    	Vector3D Dir = new Vector3D((-EP1.x()+EP2.x()),(-EP1.y()+EP2.y()),(-EP1.z()+EP2.z()));
+		    	SvtStrip.set_ImplantPoint(EP1);
+		    	SvtStrip.set_MidPoint(MP);
+		    	SvtStrip.set_StripDir(Dir);
+		    	
 				// create the hit object
 				Hit hit = new Hit("SVT", "", sector[i], layer[i], SvtStrip);
 				// if the hit is useable in the analysis its status is 1
 				hit.set_Status(1);
 				if(SvtStrip.get_Edep()==0)
 					hit.set_Status(-1);
+				
 				hit.set_Id(id[i]);
+				
 	    	    // add this hit
 	            hits.add(hit); 
 			}
