@@ -24,7 +24,7 @@ public class Fonts {
 	private static Hashtable<String, Font> fonts = new Hashtable<String, Font>(41);
 
 	// common medium font used for components
-	public static Font hugeFont = commonFont(Font.PLAIN, 24);
+	public static Font hugeFont = commonFont(Font.BOLD, 24);
 
 	// common medium font used for components
 	public static Font largeFont = commonFont(Font.PLAIN, 14);

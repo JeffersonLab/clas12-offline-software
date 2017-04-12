@@ -178,6 +178,14 @@ public class RandomChoice extends JFrame implements ActionListener, ISoundDone {
 	private void next() {
 		_done = false;
 		_nextButton.setEnabled(false);
+		
+		if (_teams.size() <=2) {
+			loadTeam(_teams.get(_teams.size()-1));
+			soundDone();
+			return;
+		}
+		
+		
 		SoundUtils.randomize(this, 5);
 
 		Runnable update = new Runnable() {
@@ -242,9 +250,11 @@ public class RandomChoice extends JFrame implements ActionListener, ISoundDone {
 	public void soundDone() {
 		_done = true;
 		_nextButton.setEnabled(true);
-		_teams.remove(_currentTeam);
 
-		fixTitle();
+		if (_teams.size() > 1) {
+			_teams.remove(_currentTeam);
+			fixTitle();
+		}
 	}
 	
 	
@@ -265,6 +275,7 @@ public class RandomChoice extends JFrame implements ActionListener, ISoundDone {
 		
 		//load the 0th team, hulk and Catherine
 		loadTeam(_teams.get(0));
+		fixTitle();
 	}
 	
 	private Team randomTeam() {
