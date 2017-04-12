@@ -171,8 +171,8 @@ public class DCTranslationTable  {
 				     
 				     int connector = (int)(channel/16)+1;
 				     int icableID = (connector-1)*20+slot-1; //20 slots
-					 int cable_id = tran.cableid[icableID];
-					 double t0 = tran.cableT0[icableID];
+				//	 int cable_id = tran.cableid[icableID];
+				//	 double t0 = tran.cableT0[icableID];
 					 
 					 
 				     if(sector<=0 || layer<=0 || wire<=0) 
