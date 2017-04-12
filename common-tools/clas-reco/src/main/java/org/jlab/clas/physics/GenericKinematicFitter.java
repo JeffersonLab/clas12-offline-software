@@ -10,8 +10,8 @@ import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.hipo.data.HipoEvent;
 import org.jlab.hipo.data.HipoNode;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
 
 /**
  *
@@ -34,10 +34,10 @@ public class GenericKinematicFitter {
      * @return PhysicsEvent : event containing particles.
      */
     public PhysicsEvent  getPhysicsEvent(DataEvent  event){
-        //if(event instanceof EvioDataEvent){
+        //if(event instanceof DataEvent){
             //System.out.println("   CHECK FOR  PARTICLE = " + event.hasBank("EVENT::particle"));
         if(event.hasBank("REC::Particle")){
-            EvioDataBank evntBank = (EvioDataBank) event.getBank("REC::Particle");
+            DataBank evntBank = (DataBank) event.getBank("REC::Particle");
             int nrows = evntBank.rows();
             PhysicsEvent  physEvent = new PhysicsEvent();
                 physEvent.setBeam(this.beamEnergy);
@@ -88,21 +88,18 @@ public class GenericKinematicFitter {
         PhysicsEvent physEvent = new PhysicsEvent();
         physEvent.setBeam(this.beamEnergy);
         if(event.hasBank("MC::Particle")){
-            EvioDataBank evntBank = (EvioDataBank) event.getBank("MC::Particle");
+            DataBank evntBank = (DataBank) event.getBank("MC::Particle");
             int nrows = evntBank.rows();
             for(int loop = 0; loop < nrows; loop++){
                 Particle genParticle = new Particle(
                         evntBank.getInt("pid", loop),
-                        evntBank.getDouble("px", loop)*0.001,
-                        evntBank.getDouble("py", loop)*0.001,
-                        evntBank.getDouble("pz", loop)*0.001,
-                        evntBank.getDouble("vx", loop),
-                        evntBank.getDouble("vy", loop),
-                        evntBank.getDouble("vz", loop));
-                if(genParticle.p()<10.999&&
-                        Math.toDegrees(genParticle.theta())>2.0){
-                    physEvent.addParticle(genParticle);    
-                }
+                        evntBank.getFloat("px", loop)*0.001,
+                        evntBank.getFloat("py", loop)*0.001,
+                        evntBank.getFloat("pz", loop)*0.001,
+                        evntBank.getFloat("vx", loop),
+                        evntBank.getFloat("vy", loop),
+                        evntBank.getFloat("vz", loop));
+                    		physEvent.addParticle(genParticle);    
             }
         }
         return physEvent;
