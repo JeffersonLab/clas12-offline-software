@@ -218,7 +218,7 @@ public class FTOFEngine extends ReconstructionEngine {
 		en.init();
 
 		int counter = 0;
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
+		String inputFile = "/Users/ziegler/data/hipo/sidis_0100.hipo";
 		// String inputFile = args[0];
 		// String outputFile = args[1];
 
@@ -229,7 +229,7 @@ public class FTOFEngine extends ReconstructionEngine {
 
 		HipoDataSync writer = new HipoDataSync();
 		// Writer
-		String outputFile = "/Users/ziegler/Workdir/Distribution/DCRBREC2.hipo";
+		String outputFile = "/Users/ziegler/Workdir/Distribution/sidis.hipo";
 		writer.open(outputFile);
 
 		long t1 = 0;
