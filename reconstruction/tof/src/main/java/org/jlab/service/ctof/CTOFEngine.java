@@ -106,7 +106,7 @@ public class CTOFEngine extends ReconstructionEngine {
 			return true;
 		}
 		// continuing ... there are clusters
-		//if (Constants.DEBUGMODE) { // if running in DEBUG MODE print out the
+		if (Constants.DEBUGMODE) { // if running in DEBUG MODE print out the
 									// reconstructed info about the hits and the
 									// clusters
 			System.out.println("=============== All Hits ===============");
@@ -122,7 +122,7 @@ public class CTOFEngine extends ReconstructionEngine {
 				System.out
 						.println("---------------------------------------------");
 			}
-		//}
+		}
 		//rbc.appendCTOFBanks( event, hits, clusters);
 		rbc.appendCTOFBanks( event, hits, null); // json file needs clusters...
 		return true;
@@ -165,7 +165,7 @@ public class CTOFEngine extends ReconstructionEngine {
 	public static void main(String[] args) throws FileNotFoundException,
 			EvioException {
 
-		String inputFile = "/Users/ziegler/Workdir/Distribution/pro_pim_000.rec.hipo";
+		String inputFile = "/Users/ziegler/data/hipo/sidis_0100.hipo";
 		// String inputFile = args[0];
 		// String outputFile = args[1];
 
