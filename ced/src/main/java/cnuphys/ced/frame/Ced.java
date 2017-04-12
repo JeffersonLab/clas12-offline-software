@@ -658,7 +658,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				al2);
 		_eventMenu.addSeparator();
 
-		_playDCOccupancy = new JCheckBoxMenuItem("\"Play\" Drift Chamber Ocupancy", false);
+		_playDCOccupancy = new JCheckBoxMenuItem("\"Play\" Drift Chamber Occupancy", false);
 		_eventMenu.add(_playDCOccupancy);
 	}
 	

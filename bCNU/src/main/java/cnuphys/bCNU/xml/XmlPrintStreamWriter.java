@@ -213,6 +213,12 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 				"writeProcessingInstruction(String arg0, String arg1) not implemented yet");
 	}
 	
+	/**
+	 * Write out a double array
+	 * @param name
+	 * @param array
+	 * @throws XMLStreamException
+	 */
 	public void writeArray(String name, double array[]) throws XMLStreamException {
 		writeArray(name, array, (array == null) ? 0 :  array.length);
 	}
@@ -330,6 +336,13 @@ public class XmlPrintStreamWriter implements XMLStreamWriter {
 	public void writeEndElement() throws XMLStreamException {
 		String currentElement = elements.pop();
 		out.println("</" + currentElement + ">");
+	}
+	
+	/**
+	 * Write a new line character
+	 */
+	public void newLine() {
+		out.println();
 	}
 
 	@Override
