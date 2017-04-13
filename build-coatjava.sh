@@ -127,5 +127,16 @@ fi
 cd -
 cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
 
+### htcc ###
+cd reconstruction/htcc
+mvn install
+if [ $? != 0 ]
+then
+	echo "htcc failure"
+	exit 1
+fi
+cd -
+cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 ### end ###
 echo "COATJAVA SUCCESSFULLY BUILT !"
