@@ -1,19 +1,20 @@
 ---
 language: java
 
-before_install:
-  - echo this is the
-  - echo before_install option
-
-script:
-  - echo attempting to build
-  - echo "here it goes..."
-  - ls -lthr
-  - ./build-coatjava.sh
-  - ls -lthr
-
 jdk:
 - oraclejdk8
+
+before_install:
+  - ls -lthra
+  - java -version
+  - echo "starting build..."
+
+install:
+  - ./build-coatjava.sh
+
+script:
+  - ls -lthra
+  - which groovy
 
 notifications:
   emails: false
