@@ -6,12 +6,12 @@ import java.util.List;
 import javax.swing.JFrame;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.rec.ft.FTConfig;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
 
@@ -24,11 +24,9 @@ public class FTHODOEngine extends ReconstructionEngine {
 
 	FTHODOReconstruction reco;
 	int Run = -1;
-	FTConfig config;
 	
 	@Override
 	public boolean init() {
-		config = new FTConfig();
 		reco = new FTHODOReconstruction();
 		reco.debugMode=0;
 		return true;
@@ -41,7 +39,7 @@ public class FTHODOEngine extends ReconstructionEngine {
             List<FTHODOCluster> clusters = new ArrayList();
             
             // update calibration constants based on run number if changed
-            Run = config.setRunConditionsParameters(event, "FTHODO", Run);
+            setRunConditionsParameters(event);
             // get hits fron banks
             allHits = reco.initFTHODO(event);
             // select good hits and order them by energy
@@ -53,6 +51,31 @@ public class FTHODOEngine extends ReconstructionEngine {
             return true;
 	}
 
+    public void setRunConditionsParameters(DataEvent event) {
+        if(event.hasBank("RUN::config")==false) {
+                System.err.println("RUN CONDITIONS NOT READ!");
+        }
+
+        int newRun = Run;        
+    
+        if(event instanceof EvioDataEvent) {
+            EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+            newRun = bank.getInt("Run")[0];
+        }
+        else {
+            DataBank bank = event.getBank("RUN::config");
+            newRun = bank.getInt("run")[0];
+        }
+		
+        // Load the constants
+        //-------------------
+        if(Run!=newRun) {
+            FTHODOConstantsLoader.Load(newRun,"default"); 
+            Run = newRun;
+        }
+    }
+
+    
     public static void main (String arg[]) throws IOException {
 		FTHODOEngine cal = new FTHODOEngine();
 		cal.init();

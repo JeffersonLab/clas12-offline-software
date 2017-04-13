@@ -56,14 +56,15 @@ public class FTHODOConstantsLoader {
 	public static double time_window        = 8;                           // time window of hits forming a cluster
 	public static double hit_distance       = 3;                           // max distance of hits forming a cluster in cm
 
-        public static synchronized DatabaseConstantProvider Load(int runno) {
+	static DatabaseConstantProvider dbprovider = null;
 
-    	System.out.println(" LOADING CONSTANTS ");
-		if (CSTLOADED == true) 
-			return null;
-		
-		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(runno,"default");
-		
+        public static synchronized void Load(int runno, String var) {
+
+            System.out.println(" LOADING CONSTANTS ");
+//		if (CSTLOADED == true) 
+//			return null;
+            dbprovider = new DatabaseConstantProvider(runno, var); // reset using the new variation
+				
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/ft/fthodo/charge_to_energy");
 	    dbprovider.loadTable("/calibration/ft/fthodo/time_offsets");
@@ -127,7 +128,7 @@ public class FTHODOConstantsLoader {
 	    }
 	CSTLOADED = true;
     System.out.println("SUCCESSFULLY LOADED FTHODO CALIBRATION CONSTANTS....");
-	return dbprovider;
+//	return dbprovider;
 	
 	}
 	

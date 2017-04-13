@@ -4,8 +4,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.rec.ft.cal.FTCALConstantsLoader;
-import org.jlab.rec.ft.hodo.FTHODOConstantsLoader;
 
 public class FTConfig {
 
@@ -22,8 +20,7 @@ public class FTConfig {
         }
 
         int Run    = iRun;
-        int newRun = Run;
-        
+        int newRun = Run;        
         double fieldScale = 0;
         
         boolean isMC = false;
@@ -48,14 +45,6 @@ public class FTConfig {
             fieldScale = bank.getFloat("solenoid")[0];
         }
 		
-        // Load the constants
-        //-------------------
-        if(Run!=newRun) {
-                if(Detector.equals("FTCAL") ) 
-                        FTCALConstantsLoader.Load(newRun); 
-                if(Detector.equals("FTHODO") ) 
-                        FTHODOConstantsLoader.Load(newRun); 
-        }
         Run = newRun;
         this.setRun(Run);
         this.setSolenoid(fieldScale);

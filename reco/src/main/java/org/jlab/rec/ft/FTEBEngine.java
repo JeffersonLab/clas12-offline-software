@@ -1,6 +1,8 @@
 package org.jlab.rec.ft;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import org.jlab.clas.detector.DetectorData;
@@ -39,13 +41,16 @@ public class FTEBEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		Run = config.setRunConditionsParameters(event, "FTEB", Run);
-                reco.init(config.getSolenoid());
-		reco.addResponses(event);
-                reco.initFTparticles();
-                reco.matchToHODO();
-                reco.writeBanks(event);
-		return true;
+            List<FTParticle> FTparticles = new ArrayList<FTParticle>();
+            List<FTResponse> FTresponses = new ArrayList<FTResponse>();
+
+            Run = config.setRunConditionsParameters(event, "FTEB", Run);
+            reco.init(config.getSolenoid());
+            FTresponses = reco.addResponses(event);
+            FTparticles = reco.initFTparticles(FTresponses);
+            reco.matchToHODO(FTresponses, FTparticles);
+            reco.writeBanks(event, FTparticles);
+            return true;
 	}
 	
         

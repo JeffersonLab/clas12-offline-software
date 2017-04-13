@@ -13,26 +13,23 @@ public class FTEventBuilder{
 
     public int debugMode = 0;
 
-    private List<FTParticle> FTparticles = new ArrayList<FTParticle>();
-    private List<FTResponse> FTresponses = new ArrayList<FTResponse>();
-
     private double solenoidField;
     
     
     public FTEventBuilder() {
     }
  
-    public List<FTParticle> getFTparticles() {
-        return FTparticles;
-    }
-
-    public List<FTResponse> getFTresponses() {
-        return FTresponses;
-    }
-
-    public void setFTresponses(List<FTResponse> FTresponses) {
-        this.FTresponses = FTresponses;
-    }
+//    public List<FTParticle> getFTparticles() {
+//        return FTparticles;
+//    }
+//
+//    public List<FTResponse> getFTresponses() {
+//        return FTresponses;
+//    }
+//
+//    public void setFTresponses(List<FTResponse> FTresponses) {
+//        this.FTresponses = FTresponses;
+//    }
 
     public double getField() {
         return solenoidField;
@@ -43,12 +40,14 @@ public class FTEventBuilder{
     }
 
     public void init(double field) {
+        if(debugMode>=1)  System.out.println("New event");
         this.solenoidField = field;
-        this.FTparticles.clear();
-        this.FTresponses.clear();
+//        this.FTparticles.clear();
+//        this.FTresponses.clear();
     }
     
-    public void addResponses(DataEvent event) {
+    public List<FTResponse> addResponses(DataEvent event) {
+        List<FTResponse> responses = new ArrayList<FTResponse>();
         if(event instanceof EvioDataEvent) {
             if(event.hasBank("FTCALRec::clusters")==true) {
                 EvioDataBank bank = (EvioDataBank) event.getBank("FTCALRec::clusters");
@@ -61,7 +60,7 @@ public class FTEventBuilder{
                     resp.setEnergy(bank.getDouble("clusEnergy", i));
                     resp.setTime(bank.getDouble("clusTime", i));
                     resp.setPosition(bank.getDouble("clusX", i),bank.getDouble("clusY", i),FTCALConstantsLoader.CRYS_ZPOS+FTCALConstantsLoader.depth_z );
-                    this.FTresponses.add(resp); 
+                    responses.add(resp); 
                 }
             }
             if(event.hasBank("FTHODORec::clusters")==true) {
@@ -74,7 +73,7 @@ public class FTEventBuilder{
                     resp.setEnergy(bank.getDouble("clusterEnergy", i));
                     resp.setTime(bank.getDouble("clusterTime", i));
                     resp.setPosition(bank.getDouble("clusterX", i),bank.getDouble("clusterY", i),bank.getDouble("clusterZ", i));                    
-                    this.FTresponses.add(resp);  
+                    responses.add(resp);  
                 }
             }
         }
@@ -90,7 +89,7 @@ public class FTEventBuilder{
                     resp.setEnergy(bank.getFloat("energy", i));
                     resp.setTime(bank.getFloat("time", i));
                     resp.setPosition(bank.getFloat("x", i),bank.getFloat("y", i),bank.getFloat("z", i));
-                    this.FTresponses.add(resp); 
+                    responses.add(resp); 
                 }
             }
             if(event.hasBank("FTHODO::clusters")==true) {
@@ -104,95 +103,98 @@ public class FTEventBuilder{
                     resp.setEnergy(bank.getFloat("energy", i));
                     resp.setTime(bank.getFloat("time", i));
                     resp.setPosition(bank.getFloat("x", i),bank.getFloat("y", i),bank.getFloat("z", i));
-                    this.FTresponses.add(resp); 
+                    responses.add(resp); 
                 }
             }
         }
-        if(debugMode>=1) this.showResponses();
+        if(debugMode>=1) this.showResponses(responses);
+        return responses;
     }
     
-    public void initFTparticles() {
-        this.FTparticles.clear();
-        for(int i=0; i<this.FTresponses.size(); i++) {
-            if(this.FTresponses.get(i).getType() == "FTCAL") {
+    public List<FTParticle>  initFTparticles(List<FTResponse> responses) {
+        List<FTParticle> particles = new ArrayList<FTParticle>();
+//        this.FTparticles.clear();
+        for(int i=0; i<responses.size(); i++) {
+            if(responses.get(i).getType() == "FTCAL") {
                 FTParticle track = new FTParticle(i);        
                 // start assuming the cluster to be associated to a photon
                 track.setCharge(0);
                 track.setField(this.solenoidField);
-                track.setEnergy(this.FTresponses.get(i).getEnergy());
-                track.setPosition(this.FTresponses.get(i).getPosition());
-                track.setTime(this.FTresponses.get(i).getTime()-this.FTresponses.get(i).getPosition().mag()/297.);
+                track.setEnergy(responses.get(i).getEnergy());
+                track.setPosition(responses.get(i).getPosition());
+                track.setTime(responses.get(i).getTime()-responses.get(i).getPosition().mag()/297.);
                 track.setCalorimeterIndex(i);
                 track.setHodoscopeIndex(-1);
                 track.setTrackerIndex(-1);    
-                this.FTparticles.add(track);
-                this.FTresponses.get(i).setAssociation(i);
+                particles.add(track);
+                responses.get(i).setAssociation(i);
             }
         }
-        if(debugMode >= 1) for(int i=0; i<this.FTparticles.size(); i++) this.FTparticles.get(i).show();
+        if(debugMode >= 1) for(int i=0; i<particles.size(); i++) particles.get(i).show();
+        return particles;
     }
     
-    public void matchToHODO() {
-        for(int i=0; i<this.FTparticles.size(); i++) {
-            FTParticle track = this.FTparticles.get(i);
+    public void matchToHODO(List<FTResponse> responses, List<FTParticle> particles) {
+        for(int i=0; i<particles.size(); i++) {
+            FTParticle track = particles.get(i);
             if(debugMode>=1) System.out.println("Searching for matching signal in the hodoscope:");
-            int iHodo = track.getDetectorHit(this.FTresponses,"FTHODO",FTConstants.CAL_HODO_DISTANCE_MATCHING,FTConstants.CAL_HODO_TIME_MATCHING);
+            int iHodo = track.getDetectorHit(responses,"FTHODO",FTConstants.CAL_HODO_DISTANCE_MATCHING,FTConstants.CAL_HODO_TIME_MATCHING);
             if(iHodo>0) {
                 if(debugMode>=1) System.out.println("found signal " + iHodo);
                 track.setCharge(-1);
-                track.setHodoscopeIndex(this.FTresponses.get(iHodo).getId());
-                this.FTresponses.get(iHodo).setAssociation(i);
+                track.setHodoscopeIndex(responses.get(iHodo).getId());
+                responses.get(iHodo).setAssociation(i);
             }
             if(debugMode>= 1) track.show();
         }
     }
     
-    public void showResponses() {
-        System.out.println("\nFound " + this.FTresponses.size() + " clusters in FT detector");
-        for(int i=0; i<this.FTresponses.size(); i++) this.FTresponses.get(i).show();
+    public void showResponses(List<FTResponse> responses) {
+        System.out.println("\nFound " + responses.size() + " clusters in FT detector");
+        for(int i=0; i<responses.size(); i++) responses.get(i).show();
     }
     
-    public void writeBanks(DataEvent event) {
-		
-	if(FTparticles.size()!=0){
+    public void writeBanks(DataEvent event, List<FTParticle> particles) {
+	if(debugMode>=1) System.out.println("Preparing to output track bank with " + particles.size() + " FTparticles");
+	if(particles.size()!=0){
             if(event instanceof EvioDataEvent) {
-                EvioDataBank banktrack = (EvioDataBank) event.getDictionary().createBank("FTRec::tracks",FTparticles.size());
-                if(debugMode>=1) System.out.println("Creating output track bank with " + FTparticles.size() + " FTparticles");
-		for(int i =0; i< FTparticles.size(); i++) {
-                    banktrack.setInt("ID", i,FTparticles.get(i).get_ID());
-                    banktrack.setInt("Charge", i,FTparticles.get(i).getCharge());
-                    banktrack.setDouble("Energy", i,FTparticles.get(i).getEnergy());
-                    banktrack.setDouble("Cx", i,FTparticles.get(i).getDirection().x());
-                    banktrack.setDouble("Cy", i,FTparticles.get(i).getDirection().y());
-                    banktrack.setDouble("Cz", i,FTparticles.get(i).getDirection().z());
-                    banktrack.setDouble("Time", i,FTparticles.get(i).getTime());
-                    banktrack.setInt("CalID",i,FTparticles.get(i).getCalorimeterIndex());
-                    banktrack.setInt("HodoID",i,FTparticles.get(i).getHodoscopeIndex());
-                    banktrack.setInt("TrkID", i,FTparticles.get(i).getTrackerIndex());
+                EvioDataBank banktrack = (EvioDataBank) event.getDictionary().createBank("FTRec::tracks",particles.size());
+                if(debugMode>=1) System.out.println("Creating output track bank with " + particles.size() + " FTparticles");
+		for(int i =0; i< particles.size(); i++) {
+                    banktrack.setInt("ID", i,particles.get(i).get_ID());
+                    banktrack.setInt("Charge", i,particles.get(i).getCharge());
+                    banktrack.setDouble("Energy", i,particles.get(i).getEnergy());
+                    banktrack.setDouble("Cx", i,particles.get(i).getDirection().x());
+                    banktrack.setDouble("Cy", i,particles.get(i).getDirection().y());
+                    banktrack.setDouble("Cz", i,particles.get(i).getDirection().z());
+                    banktrack.setDouble("Time", i,particles.get(i).getTime());
+                    banktrack.setInt("CalID",i,particles.get(i).getCalorimeterIndex());
+                    banktrack.setInt("HodoID",i,particles.get(i).getHodoscopeIndex());
+                    banktrack.setInt("TrkID", i,particles.get(i).getTrackerIndex());
                     if(debugMode>=1) {
-                            FTparticles.get(i).show();
+                       particles.get(i).show();
                     }
                 }
         	if(banktrack!=null) event.appendBanks(banktrack);
             }
             else {
-                DataBank banktrack = event.createBank("FT::particles",FTparticles.size());
-                if(debugMode>=1) System.out.println("Creating output track bank with " + FTparticles.size() + " FTparticles");
-		for(int i =0; i< FTparticles.size(); i++) {
-                    banktrack.setShort("id",     i, (short) FTparticles.get(i).get_ID());
-                    banktrack.setByte("charge",  i, (byte)  FTparticles.get(i).getCharge());
-                    banktrack.setFloat("energy", i, (float) FTparticles.get(i).getEnergy());
-                    banktrack.setFloat("cx",     i, (float) FTparticles.get(i).getDirection().x());
-                    banktrack.setFloat("cy",     i, (float) FTparticles.get(i).getDirection().y());
-                    banktrack.setFloat("cz",     i, (float) FTparticles.get(i).getDirection().z());
-                    banktrack.setFloat("time",   i, (float) FTparticles.get(i).getTime());
-                    banktrack.setShort("calID",  i, (short) FTparticles.get(i).getCalorimeterIndex());
-                    banktrack.setShort("hodoID", i, (short) FTparticles.get(i).getHodoscopeIndex());
-                    banktrack.setShort("trkID",  i, (short) FTparticles.get(i).getTrackerIndex());
+                DataBank banktrack = event.createBank("FT::particles",particles.size());
+                if(debugMode>=1) System.out.println("Creating output track bank with " + particles.size() + " FTparticles");
+		for(int i =0; i< particles.size(); i++) {
+                    banktrack.setShort("id",     i, (short) particles.get(i).get_ID());
+                    banktrack.setByte("charge",  i, (byte)  particles.get(i).getCharge());
+                    banktrack.setFloat("energy", i, (float) particles.get(i).getEnergy());
+                    banktrack.setFloat("cx",     i, (float) particles.get(i).getDirection().x());
+                    banktrack.setFloat("cy",     i, (float) particles.get(i).getDirection().y());
+                    banktrack.setFloat("cz",     i, (float) particles.get(i).getDirection().z());
+                    banktrack.setFloat("time",   i, (float) particles.get(i).getTime());
+                    banktrack.setShort("calID",  i, (short) particles.get(i).getCalorimeterIndex());
+                    banktrack.setShort("hodoID", i, (short) particles.get(i).getHodoscopeIndex());
+                    banktrack.setShort("trkID",  i, (short) particles.get(i).getTrackerIndex());
                     if(debugMode>=1) {
-                            FTparticles.get(i).show();
-                            FTparticles.get(i).show();
-                            System.out.println(FTparticles.get(i).getDirection().x() + " " + FTparticles.get(i).getDirection().y() + " " + FTparticles.get(i).getDirection().z());
+                            particles.get(i).show();
+                            particles.get(i).show();
+                            System.out.println(particles.get(i).getDirection().x() + " " + particles.get(i).getDirection().y() + " " + particles.get(i).getDirection().z());
                    }
                 }
         	if(banktrack!=null) event.appendBanks(banktrack);                

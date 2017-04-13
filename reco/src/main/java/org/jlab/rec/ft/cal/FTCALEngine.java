@@ -8,13 +8,13 @@ import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.rec.ft.FTConfig;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
@@ -27,11 +27,9 @@ public class FTCALEngine extends ReconstructionEngine {
 
 	FTCALReconstruction reco;
 	int Run = -1;
-	FTConfig config;
 	
 	@Override
 	public boolean init() {
-		config = new FTConfig();
 		reco = new FTCALReconstruction();
 		reco.debugMode=0;
 		return true;
@@ -45,7 +43,7 @@ public class FTCALEngine extends ReconstructionEngine {
             List<FTCALCluster> selectedClusters = new ArrayList();
             
             // update calibration constants based on run number if changed
-            Run = config.setRunConditionsParameters(event, "FTCAL", Run);
+            setRunConditionsParameters(event);
             // get hits fron banks
             allHits = reco.initFTCAL(event);
             // select good hits and order them by energy
@@ -59,6 +57,31 @@ public class FTCALEngine extends ReconstructionEngine {
             return true;
 	}
 
+    public void setRunConditionsParameters(DataEvent event) {
+        if(event.hasBank("RUN::config")==false) {
+                System.err.println("RUN CONDITIONS NOT READ!");
+        }
+
+        int newRun = Run;        
+    
+        if(event instanceof EvioDataEvent) {
+            EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+            newRun = bank.getInt("Run")[0];
+        }
+        else {
+            DataBank bank = event.getBank("RUN::config");
+            newRun = bank.getInt("run")[0];
+        }
+		
+        // Load the constants
+        //-------------------
+        if(Run!=newRun) {
+            FTCALConstantsLoader.Load(newRun,"default"); 
+            Run = newRun;
+        }
+    }
+
+    
     public static void main (String arg[]) throws IOException {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();

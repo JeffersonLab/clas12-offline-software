@@ -66,15 +66,16 @@ public class FTCALConstantsLoader {
 	public static double CRYS_LENGTH = 200.;													  // crystal length in mm
 	public static double CRYS_ZPOS   = 1898.;                                           // position of the crystal front face
 	
+	static DatabaseConstantProvider dbprovider = null;
 	
-		public static synchronized DatabaseConstantProvider Load(int runno) {
+        public static synchronized void Load(int runno, String var) {
 
-    	System.out.println(" LOADING CONSTANTS ");
-		if (CSTLOADED == true) 
-			return null;
-		
-		DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(runno,"default");
-		
+            System.out.println(" LOADING CONSTANTS ");
+//		if (CSTLOADED == true) 
+//			return null;
+            dbprovider = new DatabaseConstantProvider(runno, var); // reset using the new variation
+	    
+            	
 	    // load table reads entire table and makes an array of variables for each column in the table.
 	    dbprovider.loadTable("/calibration/ft/ftcal/charge_to_energy");
 	    dbprovider.loadTable("/calibration/ft/ftcal/time_offsets");
@@ -223,8 +224,8 @@ public class FTCALConstantsLoader {
 	*/
 	
 	CSTLOADED = true;
-    System.out.println("SUCCESSFULLY LOADED FTCAL CALIBRATION CONSTANTS....");
-	return dbprovider;
+        System.out.println("SUCCESSFULLY LOADED FTCAL CALIBRATION CONSTANTS....");
+//	return dbprovider;
 	
 	}
 		
