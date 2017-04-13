@@ -99,7 +99,7 @@ cd reconstruction/ft
 mvn install
 if [ $? != 0 ]
 then
-	echo "cvt failure"
+	echo "ft failure"
 	exit 1
 fi
 cd -
