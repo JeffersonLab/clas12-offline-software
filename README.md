@@ -10,6 +10,24 @@ cd clas12-offline-softwre
 ./build-coatjava.sh
 ```
 
+If git clone doesn't work, try
+
+```tcsh
+git clone https://github.com/JeffersonLab/clas12-offline-software.git
+```
+
+or
+
+```tcsh
+git -c http.sslVerify=false clone https://github.com/JeffersonLab/clas12-offline-software.git
+```
+
+or
+
+```tcsh
+git -c http.sslVerify=false clone git@github.com:JeffersonLab/clas12-offline-software.git
+```
+
 ## Repository Structure and Dependency Management
 ### Common Tools
 The heart and soul of coatjava is the common tools, or coat-libs, the source code for which can be found in the common-tools subdirectory. coat-libs has 6 modules - clas-utils, clas-physics, clas-io, clas-geometry, clas-detector, and clas-reco - each of which is contained in a subdirectory of common-tools and has the following dependencies. The order of the modules matters and a module can depend on previous modules.
