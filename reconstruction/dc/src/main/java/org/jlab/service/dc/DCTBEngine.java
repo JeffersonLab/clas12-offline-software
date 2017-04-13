@@ -24,46 +24,8 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 
 public class DCTBEngine extends ReconstructionEngine {
 
-	private ClusterFitter cf;
-    private ClusterCleanerUtilities ct;    
-    private List<FittedHit> hits;
-    private List<FittedHit> fhits;
-    private List<FittedCluster> clusters;
-    private List<Segment> segments;
-    private List<Cross> crosses;
-    private List<Track> trkcands;
-    private RecoBankWriter rbc;
-    private HitReader hitRead;	
-    private ClusterFinder clusFinder;	
-    private SegmentFinder segFinder;
-    private RoadFinder pcrossLister;
-    private CrossMaker crossMake;
-    private CrossListFinder crossLister;	
-    private List<List<Cross>> CrossesInSector;	
-    private CrossList crosslist;	
-    private TrackCandListFinder trkcandFinder;
-	
 	public DCTBEngine() {
-		super("DCTB","ziegler","4.0");
-		
-		cf = new ClusterFitter();
-	    ct = new ClusterCleanerUtilities();    
-	    hits = new ArrayList<FittedHit>();
-	    fhits = new ArrayList<FittedHit>();
-		clusters = new ArrayList<FittedCluster>();
-		segments = new ArrayList<Segment>();
-		crosses = new ArrayList<Cross>();
-		trkcands = new ArrayList<Track>();
-		rbc = new RecoBankWriter();
-		hitRead = new HitReader();	
-		clusFinder = new ClusterFinder();	
-		segFinder = new SegmentFinder();
-		pcrossLister = new RoadFinder();	
-		crossMake = new CrossMaker();
-		crossLister = new CrossListFinder();	
-		CrossesInSector = new ArrayList<List<Cross>>();	
-		crosslist = new CrossList();	
-		trkcandFinder = new TrackCandListFinder("TimeBased");
+		super("DCTB","ziegler","3.0");
 	}
 
 	@Override
@@ -75,17 +37,22 @@ public class DCTBEngine extends ReconstructionEngine {
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 		//System.out.println(" RUNNING TIME BASED....................................");
-		hits.clear();	
-		fhits.clear();	
-		clusters.clear();		
-		CrossesInSector.clear();	
-		crosslist.clear();	
-		segments.clear();
-		crosses.clear();
-		trkcands.clear();
+		ClusterFitter cf = new ClusterFitter();
+	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+	    
+		List<FittedHit> fhits = new ArrayList<FittedHit>();	
+		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+		List<Segment> segments = new ArrayList<Segment>();
+		List<Cross> crosses = new ArrayList<Cross>();
+		List<Track> trkcands = new ArrayList<Track>();
 		
+		//instantiate bank writer
+		RecoBankWriter rbc = new RecoBankWriter();
+		
+		HitReader hitRead = new HitReader();
 		hitRead.read_HBHits(event);
 
+		List<FittedHit> hits = new ArrayList<FittedHit>();
 		//I) get the hits
 		hits = hitRead.get_HBHits();
 		
@@ -97,6 +64,8 @@ public class DCTBEngine extends ReconstructionEngine {
 		}
 		
 		//2) find the clusters from these hits
+		ClusterFinder clusFinder = new ClusterFinder();
+		
 		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct);
 		
 		if(clusters.size()==0) {
@@ -105,7 +74,11 @@ public class DCTBEngine extends ReconstructionEngine {
 		}
 		
 		//3) find the segments from the fitted clusters
-		segments =  segFinder.get_Segments(segFinder.selectTimeBasedSegments(clusters), event);
+		SegmentFinder segFinder = new SegmentFinder();
+		
+		List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
+		
+		segments =  segFinder.get_Segments(pclusters, event);
 		
 		if(segments.size()==0) { // need 6 segments to make a trajectory
 			
@@ -121,25 +94,33 @@ public class DCTBEngine extends ReconstructionEngine {
 		}
 		
 		for(Segment seg : segments) {					
-			for(FittedHit hit : seg.get_fittedCluster()) {						
+			for(FittedHit hit : seg.get_fittedCluster()) {		
+				
 				fhits.add(hit);						
 			}
 		}
 		
 		//RoadFinder
 		//
-		segments.addAll(pcrossLister.findRoads(segments));		
+		RoadFinder pcrossLister = new RoadFinder();
+		List<Segment> pSegments =pcrossLister.findRoads(segments);
+		segments.addAll(pSegments);		
 		//
 		//System.out.println("nb trk segs "+pSegments.size());
+		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments);
-				
-		if(crosses.size()==0 ) {			
+		
+		
+		if(crosses.size()==0 ) {
+			
 			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
 		
 		//5) make list of crosses consistent with a track candidate
-		crosslist = crossLister.candCrossLists(crosses);
+		CrossListFinder crossLister = new CrossListFinder();		
+		
+		CrossList crosslist = crossLister.candCrossLists(crosses);
 		
 		if(crosslist.size()==0) {			
 			//System.out.println(" Failed on cross list !");
@@ -149,9 +130,12 @@ public class DCTBEngine extends ReconstructionEngine {
 			
 		
 		//6) find the list of  track candidates
-		trkcandFinder = new TrackCandListFinder("TimeBased");
-		trkcands = trkcandFinder.getTrackCands(crosslist) ;				
-		if(trkcands.size()==0) {			
+		TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
+		trkcands = trkcandFinder.getTrackCands(crosslist) ;
+		
+		
+		if(trkcands.size()==0) {
+			
 			rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		}

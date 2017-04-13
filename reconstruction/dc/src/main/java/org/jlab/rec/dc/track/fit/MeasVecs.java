@@ -70,6 +70,9 @@ public class MeasVecs {
 					double Z = hitOnTrk.get_Z(); 
 					double X = sl1*Z + it1;
 					
+					//exclude hits that have poor segment
+					if( (trkcand.get(c).get(s).get(h).get_X()- X)/trkcand.get(c).get(s).get(h).get_CellSize()/Math.cos(Math.toRadians(6.)) >1.5)
+						continue;
 					HitOnTrack hot = new HitOnTrack(slayr, X, Z);
 					double err_sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
 					
