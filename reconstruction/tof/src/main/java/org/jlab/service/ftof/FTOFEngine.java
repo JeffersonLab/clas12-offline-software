@@ -33,7 +33,7 @@ import org.jlab.geometry.prim.Line3d;
 public class FTOFEngine extends ReconstructionEngine {
 
 	public FTOFEngine() {
-		super("FTOFRec", "golovach, gavalian, carman, ziegler", "0.3");
+		super("FTOFRec", "carman, ziegler", "0.4");
 	}
 
 	FTOFGeant4Factory geometry;
@@ -241,12 +241,12 @@ public class FTOFEngine extends ReconstructionEngine {
 			if (counter > 0)
 				t1 = System.currentTimeMillis();
 
-			en0.processDataEvent(event);
-
-			en.processDataEvent(event);
+			//en0.processDataEvent(event);
+		//	if (counter > 3062)
+				en.processDataEvent(event);
 			System.out.println("  EVENT " + counter);
-			if (counter > 90)
-				break;
+			//if (counter > 3066)
+			//	break;
 			// event.show();
 			// if(counter%100==0)
 			System.out.println("run " + counter + " events");
