@@ -105,7 +105,7 @@ fi
 cd -
 cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar coatjava/lib/services/
 
-### ft ###
+### ec ###
 cd reconstruction/ec
 mvn install
 if [ $? != 0 ]
