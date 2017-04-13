@@ -61,37 +61,69 @@ public class BaseHit implements Comparable<BaseHit>, IBaseHit {
 		int adc_hit = -1;
 		int adc_arg = -1;
 
-		if (this.ADC1 != -1)
+		int adcI_hit = -1;
+		int adcI_arg = -1;
+		
+		if (this.ADC1 != -1) {
 			adc_hit = this.ADC1;
-		if (this.ADC2 != -1)
+			adcI_hit = this.ADCbankHitIdx1;
+		}
+		if (this.ADC2 != -1) {
 			adc_hit = this.ADC2;
-		if (arg.ADC1 != -1)
+			adcI_hit = this.ADCbankHitIdx2;
+		}
+		if (arg.ADC1 != -1) {
 			adc_arg = arg.ADC1;
-		if (arg.ADC2 != -1)
+			adcI_arg = arg.ADCbankHitIdx1;
+		}
+		if (arg.ADC2 != -1) {
 			adc_arg = arg.ADC2;
+			adcI_arg = arg.ADCbankHitIdx2;
+		}
 
 		int tdc_hit = -1;
 		int tdc_arg = -1;
-
-		if (this.TDC1 != -1)
+		
+		int tdcI_hit = -1;
+		int tdcI_arg = -1;
+		
+		if (this.TDC1 != -1) {
 			tdc_hit = this.TDC1;
-		if (this.TDC2 != -1)
+			tdcI_hit = this.TDCbankHitIdx1;
+		}
+		if (this.TDC2 != -1) {
 			tdc_hit = this.TDC2;
-		if (arg.TDC1 != -1)
+			tdcI_hit = this.TDCbankHitIdx2;
+		}
+		if (arg.TDC1 != -1) {
 			tdc_arg = arg.TDC1;
-		if (this.TDC2 != -1)
+			tdcI_arg = arg.TDCbankHitIdx1;
+		}
+		if (this.TDC2 != -1) {
 			tdc_arg = arg.TDC2;
+			tdcI_arg = arg.TDCbankHitIdx2;
+		}
 
-		int CompADC = adc_hit < adc_arg ? -1 : adc_hit == adc_arg ? 0 : 1;
-		int CompTDC = tdc_hit < tdc_arg ? -1 : tdc_hit == tdc_arg ? 0 : 1;
+		//int CompADC = adc_hit < adc_arg ? -1 : adc_hit == adc_arg ? 0 : 1;
+		//int CompTDC = tdc_hit < tdc_arg ? -1 : tdc_hit == tdc_arg ? 0 : 1;
+		int CompADC = this.ADC1+this.ADC2 < arg.ADC1+arg.ADC2 ? -1 : this.ADC1+this.ADC2 == arg.ADC1+arg.ADC2 ? 0 : 1;
+		int CompTDC = this.TDC1+this.TDC2 < arg.TDC1+arg.TDC2 ? -1 : this.TDC1+this.TDC2 == arg.TDC1+arg.TDC2 ? 0 : 1;
 
-		int return_val1 = ((CompLay == 0) ? CompId : CompLay);
-		int return_val2 = ((CompSec == 0) ? return_val1 : CompSec);
+		//int return_val1 = ((CompLay == 0) ? CompId : CompLay);
+		//int return_val2 = ((CompSec == 0) ? return_val1 : CompSec);
 
-		int return_val3 = ((CompADC == 0) ? return_val2 : CompADC);
-		int return_val4 = ((CompTDC == 0) ? return_val3 : CompTDC);
+		//int return_val3 = ((CompADC == 0) ? return_val2 : CompADC);
+		//int return_val4 = ((CompTDC == 0) ? return_val3 : CompTDC);
+        
+		//int CompADCI = adcI_hit < adcI_arg ? -1 : adcI_hit == adcI_arg ? 0 : 1;
+		//int CompTDCI = tdcI_hit < tdcI_arg ? -1 : tdcI_hit == tdcI_arg ? 0 : 1;
 
-		return return_val4;
+		//int return_val5 = ((CompADCI == 0) ? return_val4 : CompADCI);
+		//int return_val6 = ((CompTDCI == 0) ? return_val5 : CompTDCI);
+		
+		
+		
+		return ((CompTDC == 0) ? CompADC : CompTDC);
 
 		/*
 		 * int CompADC1 = this.ADC1 < arg.ADC1 ? -1 : this.ADC1 == arg.ADC1 ? 0

@@ -137,7 +137,7 @@ public class BaseHitReader {
 				int[] _SLC = { newHit.get_Sector(), newHit.get_Layer(),
 						newHit.get_Component() };
 				DetectorLocation DL = new DetectorLocation(_SLC);
-				hmap.put(newHit, DL);
+				hmap.put(newHit, DL); 
 
 			}
 		}
@@ -215,6 +215,7 @@ public class BaseHitReader {
 			while (it.hasNext()) {
 				Map.Entry me = (Map.Entry) it.next();
 				ArrayList<BaseHit> hitList = (ArrayList<BaseHit>) me.getValue();
+				
 				finalHitList.addAll(MH.MatchHits(hitList));
 			}
 		}

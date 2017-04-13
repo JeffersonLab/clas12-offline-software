@@ -71,7 +71,7 @@ public class HitReader implements IMatchedHit {
 		BaseHitReader hitReader = new BaseHitReader();
 		IMatchedHit MH = this;
 		List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH);
-
+		
 		if (hitList.size() == 0) {
 			// System.err.println("there is no FTOF bank ");
 
@@ -367,18 +367,21 @@ public class HitReader implements IMatchedHit {
 	@Override
 	public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists) {
 		ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
-
+		
 		if (ADCandTDCLists != null) {
 			Collections.sort(ADCandTDCLists);
-			// for(BaseHit h : ADCandTDCLists)
-			// System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.TDC1+"; "+h.TDC2+"; ");
+	/*		System.out.println("Sorted");
+			for(BaseHit h : ADCandTDCLists)
+				System.out.println(" : "+h.get_Sector()+" "+h.get_Layer()+" "+h.get_Component()+" "
+			+h.ADC1+" "+h.ADC2+" "+h.TDC1+" "+h.TDC2+" i: "+h.ADCbankHitIdx1+" "+h.ADCbankHitIdx2
+			+" "+h.TDCbankHitIdx1+" "+h.TDCbankHitIdx2); */
 			double t1 = -1;
 			double t2 = -1; // t1, t2 not yet used in selection
 			int adc1 = -1;
 			int adc2 = -1;
 			int tdc1 = -1;
 			int tdc2 = -1;
-
+			
 			List<ArrayList<BaseHit>> hitlists = new ArrayList<ArrayList<BaseHit>>();
 			for (int i = 0; i < ADCandTDCLists.size(); i++) {
 				hitlists.add(new ArrayList<BaseHit>());
