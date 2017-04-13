@@ -105,5 +105,16 @@ fi
 cd -
 cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar coatjava/lib/services/
 
+### ft ###
+cd reconstruction/ec
+mvn install
+if [ $? != 0 ]
+then
+	echo "ec failure"
+	exit 1
+fi
+cd -
+cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 ### end ###
 echo "COATJAVA SUCCESSFULLY BUILT !"
