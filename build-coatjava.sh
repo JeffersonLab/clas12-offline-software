@@ -116,5 +116,16 @@ fi
 cd -
 cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar coatjava/lib/services/
 
+### ltcc ###
+cd reconstruction/ltcc
+mvn install
+if [ $? != 0 ]
+then
+	echo "ltcc failure"
+	exit 1
+fi
+cd -
+cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 ### end ###
 echo "COATJAVA SUCCESSFULLY BUILT !"
