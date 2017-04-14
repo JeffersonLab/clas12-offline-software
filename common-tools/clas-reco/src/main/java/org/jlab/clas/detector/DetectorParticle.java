@@ -5,9 +5,11 @@
  */
 package org.jlab.clas.detector;
 
+import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -477,6 +479,28 @@ public class DetectorParticle implements Comparable {
         return bestIndex;
     }
     
+    public double getDetectorHitQuality(List<DetectorResponse>  hitList, int index, Vector3D hitRes){
+        
+        Line3D   trajectory = this.detectorTrack.getLastCross();
+        Point3D  hitPoint = new Point3D();
+        double   chi2 = 0.0;
+
+            DetectorResponse response = hitList.get(index);
+                hitPoint.set(
+                        response.getPosition().x(),
+                        response.getPosition().y(),
+                        response.getPosition().z()
+                        );
+        Point3D poca = trajectory.distance(hitPoint).origin(); //Point of Closest Approach
+        double dx = poca.x() - hitPoint.x();
+        double dy = poca.y() - hitPoint.y();
+        double dz = poca.z() - hitPoint.z();
+        
+        chi2 = pow(dx,2)/pow(hitRes.x(),2) + pow(dy,2)/pow(hitRes.y(),2) + pow(dz,2)/pow(hitRes.z(),2);
+
+        return chi2;
+    }
+    
     public Line3D  getDistance(DetectorResponse  response){
         Line3D cross = this.detectorTrack.getLastCross();
         Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
@@ -593,6 +617,11 @@ public class DetectorParticle implements Comparable {
          return vertex_time;
      }
      
+    public double getVertexTime(DetectorType type, int layer, int pid){
+         double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(pid)*29.9792);
+         return vertex_time;
+     }
+     
      public int getCherenkovSignal(List<CherenkovResponse> cherenkovs){
          
          int bestIndex = -1;
@@ -628,6 +657,22 @@ public class DetectorParticle implements Comparable {
     public PIDResult getPIDResult(){
         return this.pidresult;
     }*/
+    
+    public int MinBetaAssociation(int pid) {
+            HashMap<Integer,Double> betaDiffs = new HashMap<Integer,Double>(); //Beta Differences
+            betaDiffs.put(0,abs(this.getTheoryBeta(2212) - this.getBeta()));//How close is track beta to a pion's?
+            betaDiffs.put(1,abs(this.getTheoryBeta(211) - this.getBeta()));//How close is track beta to a kaon's?
+            betaDiffs.put(2,abs(this.getTheoryBeta(321) - this.getBeta()));//How close is track beta to a proton's?
+            double min = betaDiffs.get(0);
+            int beta_index = 0;
+            for (int i = 0; i <= 2; i++) {
+                if (betaDiffs.get(i) < min) {
+                min = betaDiffs.get(i);
+                beta_index = i;
+                }
+            }
+            return beta_index;
+        }
     
      
     public int compareTo(Object o) {

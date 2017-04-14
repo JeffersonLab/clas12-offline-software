@@ -28,6 +28,7 @@ public class BasicDataBank implements DataBank {
     private Map<String,float[]>   floatContainer   = new LinkedHashMap<String,float[]>();
     private Map<String,double[]>  doubleContainer  = new LinkedHashMap<String,double[]>();
     private Map<String,byte[]>    byteContainer    = new LinkedHashMap<String,byte[]>();
+    private Map<String,long[]>    longContainer    = new LinkedHashMap<String,long[]>();
     private DataDescriptor            bankDescriptor;
     
     public BasicDataBank(DataDescriptor desc){
@@ -298,6 +299,39 @@ public class BasicDataBank implements DataBank {
     }
 
     
+    public long[] getLong(String path) {
+        if(longContainer.containsKey(path)==true){
+            return longContainer.get(path);
+        }
+        return new long[0];
+    }
+
+    public void setLong(String path, long[] arr) {
+        if(longContainer.containsKey(path)==true){
+            this.printWarningColumnExists("setLong", path);
+        } else {
+            longContainer.put(path, arr);
+        }
+    }
+
+    public void setLong(String path, int row, long value) {
+        if(longContainer.containsKey(path)==false){
+            this.printWarningColumnDoesNotExist("setLong", path);
+            return;
+        }
+        
+        if(row>=0 && row<longContainer.get(path).length){
+            longContainer.get(path)[row] = value;
+        } else {
+            this.printOutOfBoundsWarning("setLong", path, row,
+                    longContainer.get(path).length);
+        }
+    }
+
+    public void appendLong(String path, long[] arr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     public int columns() {
         int ic = 0;
         ic += shortContainer.size();
@@ -305,6 +339,7 @@ public class BasicDataBank implements DataBank {
         ic += intContainer.size();
         ic += floatContainer.size();
         ic += doubleContainer.size();
+        ic += longContainer.size();
         return ic;
     }
 
@@ -373,6 +408,13 @@ public class BasicDataBank implements DataBank {
                 System.out.print(String.format(" %12.5f  ", itemdata[loop]));
             System.out.println();
         }
+        for(Map.Entry<String,long[]> item : longContainer.entrySet()){
+            System.out.print(String.format("%14s (long) : ",item.getKey()));
+            long[] itemdata = item.getValue();
+            for(int loop = 0; loop < itemdata.length;loop++) 
+                System.out.print(String.format(" %12.5f  ", itemdata[loop]));
+            System.out.println();
+        }
     }
 
     
@@ -382,6 +424,7 @@ public class BasicDataBank implements DataBank {
         intContainer.clear();
         floatContainer.clear();
         doubleContainer.clear();
+        longContainer.clear();
     }
 
     
@@ -409,7 +452,7 @@ public class BasicDataBank implements DataBank {
     public float getFloat(String path, int index) {
         if(floatContainer.containsKey(path)==true){
             if(floatContainer.get(path).length<=index){
-                System.err.println("[BasicDataBank::getDouble] ERROR : variable " +
+                System.err.println("[BasicDataBank::getFloat] ERROR : variable " +
                         this.getDescriptor().getName() + "." + path + 
                         " array length is " + floatContainer.get(path).length
                 + " requested index="+index);
@@ -425,7 +468,7 @@ public class BasicDataBank implements DataBank {
     public int getInt(String path, int index) {
         if(intContainer.containsKey(path)==true){
             if(intContainer.get(path).length<=index){
-                System.err.println("[BasicDataBank::getDouble] ERROR : variable " +
+                System.err.println("[BasicDataBank::getInt] ERROR : variable " +
                         this.getDescriptor().getName() + "." + path + 
                         " array length is " + intContainer.get(path).length
                 + " requested index="+index);
@@ -438,10 +481,25 @@ public class BasicDataBank implements DataBank {
     }
 
     
+    public long getLong(String path, int index) {
+        if(longContainer.containsKey(path)==true){
+            if(longContainer.get(path).length<=index){
+                System.err.println("[BasicDataBank::getLong] ERROR : variable " +
+                        this.getDescriptor().getName() + "." + path + 
+                        " array length is " + longContainer.get(path).length
+                + " requested index="+index);
+                return 0;
+            } else {
+                return longContainer.get(path)[index];
+            }
+        }
+        return 0;
+    }
+
     public short getShort(String path, int index) {
         if(shortContainer.containsKey(path)==true){
             if(shortContainer.get(path).length<=index){
-                System.err.println("[BasicDataBank::getDouble] ERROR : variable " +
+                System.err.println("[BasicDataBank::getShort] ERROR : variable " +
                         this.getDescriptor().getName() + "." + path + 
                         " array length is " + shortContainer.get(path).length
                 + " requested index="+index);
@@ -457,7 +515,7 @@ public class BasicDataBank implements DataBank {
     public byte getByte(String path, int index) {
          if(byteContainer.containsKey(path)==true){
             if(byteContainer.get(path).length<=index){
-                System.err.println("[BasicDataBank::getDouble] ERROR : variable " +
+                System.err.println("[BasicDataBank::getByte] ERROR : variable " +
                         this.getDescriptor().getName() + "." + path + 
                         " array length is " + byteContainer.get(path).length
                 + " requested index="+index);
@@ -499,6 +557,9 @@ public class BasicDataBank implements DataBank {
                     }
                     if(this.doubleContainer.containsKey(columns[loop])==true){
                         objects[row][loop] = String.format("%12.5f",this.getDouble(columns[loop], row));
+                    }
+                    if(this.longContainer.containsKey(columns[loop])==true){
+                        objects[row][loop] = new Long(this.getLong(columns[loop], row));
                     }
                 }
             }

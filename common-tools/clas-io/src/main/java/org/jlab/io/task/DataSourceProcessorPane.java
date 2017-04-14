@@ -268,6 +268,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 mediaNext.setEnabled(true);
                 mediaPrev.setEnabled(true);
                 mediaPlay.setEnabled(true);
+                this.setDataFile(fileName);
             } else {
                 
             }
@@ -347,6 +348,14 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         processTimer.schedule(new CrunchifyReminder(),1,1);        
     }
     
+    public String getDataFile() {
+        return dataFile;
+    }
+
+    public void setDataFile(String dataFile) {
+        this.dataFile = dataFile;
+    }
+
     public static void main(String[] args){
         JFrame frame = new JFrame();
         JPanel panel = new JPanel();
