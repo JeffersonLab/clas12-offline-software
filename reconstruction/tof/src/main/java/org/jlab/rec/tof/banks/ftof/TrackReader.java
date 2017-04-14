@@ -64,7 +64,7 @@ public class TrackReader {
 		double[] p = new double[rows]; // pathlength of the track from origin to
 										// DC R3
 		int[] tid = new int[rows]; // track id in HB bank
-		if (event.hasBank("HitBasedTrkg::HBTracks") == true) {
+		if (event.hasBank("TimeBasedTrkg::TBTracks") == true) {
 			// instanciates the list
 			// each arraylist corresponds to the tracks for a given sector
 			List<Line3d> trkLines = new ArrayList<Line3d>();
