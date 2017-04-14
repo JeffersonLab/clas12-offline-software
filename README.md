@@ -56,6 +56,8 @@ The reconstruction subdirectory contains the reconstruction code for each CLAS12
 ### Other Stuff
 After a successful build, you should have a new coatjava/ directory in your working directory which contains all of the CLAS Offline Analysis Tools. In a few cases, the jar files in coatjava/ are simply hard copied from this repository (e.g. lib/clas/* and lib/utils/*). This is probably not a very good practice and will hopefully be fixed in the future.
 
+Merging of the various reconstruction codes was finished on April 14, 2017. The commit histories were preserved; however, take note of github's method of displaying commit histories: https://help.github.com/articles/differences-between-commit-views/
+
 ## some useful links:
 http://scottwb.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/ <br>
 https://www.smashingmagazine.com/2014/05/moving-git-repository-new-server/ <br>
