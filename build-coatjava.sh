@@ -138,5 +138,16 @@ fi
 cd -
 cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
 
+### eb ###
+cd reconstruction/eb
+mvn install
+if [ $? != 0 ]
+then
+	echo "eb failure"
+	exit 1
+fi
+cd -
+cp reconstruction/eb/target/clas12detector-eb-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 ### end ###
 echo "COATJAVA SUCCESSFULLY BUILT !"
