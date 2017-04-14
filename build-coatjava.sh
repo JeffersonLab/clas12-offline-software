@@ -13,6 +13,7 @@ rm -rf ~/.m2/repository/org/jlab/service/dc
 rm -rf ~/.m2/repository/org/jlab/clas/clas-jcsg
 rm -rf ~/.m2/repository/org/jlab/clas/coat-libs
 rm -rf ~/.m2/repository/org/jlab/clas/common-tools
+rm -rf ~/.m2/repository/org/jlab/coda
 
 ### coat-libs ###
 cd common-tools
