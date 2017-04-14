@@ -41,14 +41,14 @@ public class TrackReader {
 
 	public void fetch_Trks(DataEvent event) {
 
-		if (event.hasBank("HitBasedTrkg::HBTracks") == false) {
+		if (event.hasBank("TimeBasedTrkg::TBTracks") == false) {
 			// System.err.println("there is no DC bank ");
 			_TrkLines = new ArrayList<Line3d>();
 
 			return;
 		}
 
-		DataBank bankDC = event.getBank("HitBasedTrkg::HBTracks");
+		DataBank bankDC = event.getBank("TimeBasedTrkg::TBTracks");
 
 		// double[] fitChisq = bankDC.getDouble("fitChisq"); // use this to
 		// select good tracks
