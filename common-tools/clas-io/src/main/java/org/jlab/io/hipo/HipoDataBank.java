@@ -136,6 +136,26 @@ public class HipoDataBank implements DataBank  {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public long[] getLong(String path) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public long getLong(String path, int index) {
+        return this.hipoGroup.getNode(path).getLong(index);
+    }
+
+    public void setLong(String path, long[] arr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setLong(String path, int row, long value) {
+        this.hipoGroup.getNode(path).setLong(row, value);
+    }
+
+    public void appendLong(String path, long[] arr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     public byte[] getByte(String path) {
         return this.hipoGroup.getNode(path).getByte();
     }

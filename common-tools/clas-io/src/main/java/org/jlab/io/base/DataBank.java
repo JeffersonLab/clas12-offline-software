@@ -62,6 +62,12 @@ public interface DataBank {
     void setByte(String path, byte[] arr);
     void setByte(String path, int row, byte value);
     void appendByte(String path, byte[] arr);
+    
+    long[] getLong(String path);
+    long   getLong(String path, int index);
+    void setLong(String path, long[] arr);
+    void setLong(String path, int row, long value);
+    void appendLong(String path, long[] arr);
     /**
      * Returns the number of columns in the bank. columns are number of
      * variables.

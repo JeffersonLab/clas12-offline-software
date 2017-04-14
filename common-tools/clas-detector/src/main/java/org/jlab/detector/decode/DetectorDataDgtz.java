@@ -247,8 +247,10 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         }
         
         public ADCData setTimeWord(int timeWord){
-            pulseTimeCourse = DataUtils.getInteger(timeWord, 0, 5);
-            int timeFine    = DataUtils.getInteger(timeWord, 6, 16);
+//            pulseTimeCourse = DataUtils.getInteger(timeWord, 0, 5);
+//            int timeFine    = DataUtils.getInteger(timeWord, 6, 16);
+            int timeFine    = DataUtils.getInteger(timeWord, 0, 5);
+            pulseTimeCourse = DataUtils.getInteger(timeWord, 6, 15);
             pulseTime = pulseTimeCourse*4.0 + timeFine*0.0625;
             return this;
         }

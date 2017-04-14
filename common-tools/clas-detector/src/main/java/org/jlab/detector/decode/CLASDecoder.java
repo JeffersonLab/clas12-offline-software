@@ -286,9 +286,10 @@ public class CLASDecoder {
     public HipoDataBank createHeaderBank(DataEvent event, int nrun, int nevent, float torus, float solenoid){
         HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);
         
-        int   localRun = this.codaDecoder.getRunNumber();
-        int localEvent = this.codaDecoder.getEventNumber();
-        
+        int    localRun = this.codaDecoder.getRunNumber();
+        int  localEvent = this.codaDecoder.getEventNumber();
+        long  timeStamp = this.codaDecoder.getTimeStamp();
+        int triggerBits = this.codaDecoder.getTriggerBits();
         
         if(nrun>0){
             localRun = nrun;
@@ -296,8 +297,11 @@ public class CLASDecoder {
         }
         bank.setInt("run",        0, localRun);
         bank.setInt("event",      0, localEvent);
+        bank.setInt("trigger",    0, triggerBits);        
         bank.setFloat("torus",    0, torus);
         bank.setFloat("solenoid", 0, solenoid);        
+        bank.setLong("timestamp", 0, timeStamp);        
+        
         
         return bank;
     }

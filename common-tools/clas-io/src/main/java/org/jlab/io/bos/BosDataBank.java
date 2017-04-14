@@ -22,8 +22,9 @@ public class BosDataBank implements DataBank {
 
 	private BosDataDescriptor bankDescriptor = null;
 	private HashMap<String, short[]> shortContainer = new HashMap<String, short[]>();
-	private HashMap<String, int[]> intContainer = new HashMap<String, int[]>();
+	private HashMap<String, int[]>   intContainer = new HashMap<String, int[]>();
 	private HashMap<String, float[]> floatContainer = new HashMap<String, float[]>();
+	private HashMap<String, long[]>  longContainer = new HashMap<String, long[]>();
 
 	public BosDataBank(BosDataDescriptor d) {
 		bankDescriptor = d;
@@ -85,6 +86,18 @@ public class BosDataBank implements DataBank {
 		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose Tools | Templates.
 	}
 
+        public long[] getLong(String path) {
+            return longContainer.get(path);
+        }
+
+        public void setLong(String path, long[] arr) {
+		longContainer.put(path, arr);
+        }
+
+        public void appendLong(String path, long[] arr) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
 	public void show() {
 		int size = shortContainer.size() + intContainer.size() + floatContainer.size();
 		System.out.println("*****>>>>> BANK " + this.bankDescriptor.getName() + "  >>>> SIZE = " + size);
@@ -129,6 +142,9 @@ public class BosDataBank implements DataBank {
 		}
 		if( !shortContainer.isEmpty() ){
 			return shortContainer.entrySet().iterator().next().getValue().length;
+		}
+		if( !longContainer.isEmpty() ){
+			return longContainer.entrySet().iterator().next().getValue().length;
 		}
 
 /*
@@ -176,6 +192,9 @@ public class BosDataBank implements DataBank {
 		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose Tools | Templates.
 	}
 
+        public void setLong(String path, int row, long value) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
 	public void reset() {
 		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose Tools | Templates.
 	}
@@ -203,6 +222,10 @@ public class BosDataBank implements DataBank {
 	public byte getByte(String path, int index) {
 		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose Tools | Templates.
 	}
+
+        public long getLong(String path, int index) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
 
 	public TableModel getTableModel(String mask) {
 		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose Tools | Templates.

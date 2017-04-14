@@ -65,6 +65,38 @@ public class EngineProcessor {
             this.addEngine(service);
         }*/
     }
+    public void initAll(){
+        
+        String[] names = new String[]{
+            "FTCAL", "FTHODO", "FTEB",
+            "DCHB","CVT",
+            "FTOF","EC","HTCC",
+            "EBHB",
+            "DCTB","EBTB"
+        };
+        
+        String[] services = new String[]{
+            "org.jlab.rec.ft.cal.FTCALEngine",
+            "org.jlab.rec.ft.hodo.FTHODOEngine",
+            "org.jlab.rec.ft.FTEBEngine",
+            "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.rec.cvt.services.CVTReconstruction",
+            "org.jlab.service.ftof.FTOFEngine",
+            "org.jlab.service.ec.ECEngine",
+            "org.jlab.service.htcc.HTCCReconstructionService",
+            "org.jlab.service.eb.EBEngine",
+            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.eb.EBEngine"
+        };
+        
+        for(int i = 0; i < names.length; i++){
+            this.addEngine(names[i], services[i]);
+        }
+        /*
+        for(String service : services){
+            this.addEngine(service);
+        }*/
+    }
      public void initCaloDebug(){
         
         String[] names = new String[]{
@@ -209,7 +241,7 @@ public class EngineProcessor {
         parser.addRequired("-o","output.hipo");
         parser.addRequired("-i","input.hipo");
         parser.setRequiresInputList(false);
-        parser.addOption("-c","0","use default configuration [1 - yes, 0 - no] ");
+        parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
         parser.addOption("-n","-1","number of events to process");
         
         parser.parse(args);
@@ -231,11 +263,14 @@ public class EngineProcessor {
             if(config>0){
                 if(config>2){
                     proc.initCaloDebug();
+                } else if(config==2){
+                    proc.initAll();
                 } else {
                     proc.initDefault();
                 }
             } else {
                 for(String engine : services){
+                    System.out.println("Adding reconstruction engine " + engine);
                     proc.addEngine(engine);
                 }
             }
