@@ -6,9 +6,15 @@ cp -r etc coatjava/
 cp -r lib coatjava/
 mkdir coatjava/lib/services
 
-### coat-libs ###
+### clean up any cache copies ###
 rm -rf ~/.m2/repository/org/hep/hipo
 rm -rf ~/.m2/repository/org/jlab/groot
+rm -rf ~/.m2/repository/org/jlab/service/dc
+rm -rf ~/.m2/repository/org/jlab/clas/clas-jcsg
+rm -rf ~/.m2/repository/org/jlab/clas/coat-libs
+rm -rf ~/.m2/repository/org/jlab/clas/common-tools
+
+### coat-libs ###
 cd common-tools
 mvn install
 if [ $? != 0 ]
