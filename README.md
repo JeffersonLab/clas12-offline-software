@@ -10,23 +10,7 @@ cd clas12-offline-softwre
 ./build-coatjava.sh
 ```
 
-If git clone doesn't work, try
-
-```tcsh
-git clone https://github.com/JeffersonLab/clas12-offline-software.git
-```
-
-or
-
-```tcsh
-git -c http.sslVerify=false clone https://github.com/JeffersonLab/clas12-offline-software.git
-```
-
-or
-
-```tcsh
-git -c http.sslVerify=false clone git@github.com:JeffersonLab/clas12-offline-software.git
-```
+See the [troubleshooting](https://github.com/JeffersonLab/clas12-offline-software/wiki/Troubleshooting) wiki page if you experience any issues.
 
 ## Repository Structure and Dependency Management
 ### Common Tools
