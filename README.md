@@ -10,7 +10,7 @@ cd clas12-offline-softwre
 ./build-coatjava.sh
 ```
 
-See the [troubleshooting](https://github.com/JeffersonLab/clas12-offline-software/wiki/Troubleshooting) wiki page if you experience any issues.
+See the [troubleshooting](https://github.com/JeffersonLab/clas12-offline-software/wiki/Troubleshooting) wiki page if you experience any issues. Javadocs can be found at the repository's [gh-page](https://jeffersonlab.github.io/clas12-offline-software/).
 
 ## Repository Structure and Dependency Management
 ### Common Tools
