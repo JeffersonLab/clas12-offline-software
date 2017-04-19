@@ -273,10 +273,12 @@ public class CodaEventDecoder {
                         ADCData adcData = new ADCData();
                         adcData.setIntegral(adc);
                         adcData.setPedestal( (short) 0);
+                        adcData.setADC(0,0);
                         adcData.setTimeWord(tdc);
                         entry.addADC(adcData);
                         //RawDataEntry  entry = new RawDataEntry(crate,slot,channelKey);
                         //entry.setSVT(half, channel, tdc, adc);
+//                        System.out.println(crate + " " + slot+ " " + channelID+ " " + adcData.getIntegral()+ " " + adcData.getADC()+ " " + adcData.getTime());
                         rawdata.add(entry);
                     }
                     //bankArray.add(dataBank);
