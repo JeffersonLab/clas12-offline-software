@@ -1,0 +1,29 @@
+[ 
+ {
+    "bank": "CND::hits",
+    "group": 311,
+    "info": "reconstructed hit info from CND",
+    "items": [
+       {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
+       {"name":"status",      "id":2, "type":"int16",  "info":"status of the hit"},
+       {"name":"trkID",       "id":3, "type":"int16",  "info":"match CVT track id"},
+       {"name":"sector",      "id":4, "type":"int8",   "info":"sector of CND"},
+       {"name":"layer",       "id":5, "type":"int8",  "info":"panel id of CND"},
+       {"name":"component",   "id":6, "type":"int16", "info":"paddle id of CND"},
+       {"name":"energy",      "id":7, "type":"float", "info":"E dep (MeV) of hit"},
+       {"name":"time",        "id":8, "type":"float", "info":"Hit time (ns)"},
+       {"name":"energy_unc",  "id":9, "type":"float", "info":"E dep unc (MeV) of hit"},
+       {"name":"time_unc",    "id":10, "type":"float", "info":"Hit time unc (ns)"},
+       {"name":"x",           "id":11, "type":"float", "info":"Global X coor (cm) of hit"},
+       {"name":"y",           "id":12, "type":"float", "info":"Global Y coor (cm) of hit"},
+       {"name":"z",           "id":13, "type":"float", "info":"Global Z coor (cm) of hit"},
+       {"name":"x_unc",       "id":14, "type":"float", "info":"Global X coor unc (cm) of hit"},
+       {"name":"y_unc",       "id":15, "type":"float", "info":"Global Y coor unc (cm) of hit"},
+       {"name":"z_unc",       "id":16, "type":"float", "info":"Global Z coor unc (cm) of hit"},
+       {"name":"tx",          "id":17, "type":"float", "info":"Global X coor (cm) of hit from CVT info -trkID index"},
+       {"name":"ty",          "id":18, "type":"float", "info":"Global Y coor (cm) of hit from CVT info - trkID index"},
+       {"name":"tz",          "id":19, "type":"float", "info":"Global Z coor (cm) of hit from CVT info - trkID index"}
+    ]
+  } 
+]
+
