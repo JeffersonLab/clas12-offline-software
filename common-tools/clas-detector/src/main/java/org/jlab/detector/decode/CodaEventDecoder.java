@@ -275,6 +275,7 @@ public class CodaEventDecoder {
                         adcData.setPedestal( (short) 0);
                         adcData.setADC(0,0);
                         adcData.setTimeWord(tdc);
+                        adcData.setTimeStamp(time);
                         entry.addADC(adcData);
                         //RawDataEntry  entry = new RawDataEntry(crate,slot,channelKey);
                         //entry.setSVT(half, channel, tdc, adc);
