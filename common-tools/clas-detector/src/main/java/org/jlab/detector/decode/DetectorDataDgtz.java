@@ -144,6 +144,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         private double pulseTime       = 0;
         private int    pulseTimeCourse = 0;
         private short  pulseHeight     = 0;
+        private long   pulseTimeStamp  = 0L;
 
         
         private List<short[]>   adcPulse = new ArrayList<short[]>();
@@ -224,6 +225,10 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             return this.pulseTimeCourse;
         }
         
+        public long  getTimeStamp(){
+            return this.pulseTimeStamp;
+        }
+        
         public int   getOrder() { return adcOrder;}
         
         public ADCData setADC(int nsa, int nsb){
@@ -243,6 +248,11 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         
         public ADCData setIntegral(int integral){
             this.pulseIntegral = integral;
+            return this;
+        }
+        
+        public ADCData setTimeStamp(long timeStamp){
+            this.pulseTimeStamp = timeStamp;
             return this;
         }
         
