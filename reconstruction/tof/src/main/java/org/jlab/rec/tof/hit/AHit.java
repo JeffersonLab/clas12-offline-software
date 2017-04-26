@@ -447,7 +447,7 @@ public abstract class AHit implements Comparable<AHit> {
 			double TW11, double TW12, double lambda1, double lambda2,
 			double yOffset, double v1, double v2, double v1Unc, double v2Unc,
 			double PED1, double PED2, double PED1Unc, double PED2Unc,
-			double paddle2paddle, double timeOffset, double LSBConv,
+			double paddle2paddle, double RFPad, double timeOffset, double LSBConv,
 			double LSBConvErr, double ADC1Err, double ADC2Err, double TDC1Err,
 			double TDC2Err, double ADC_MIP, double ADC_MIPErr, double DEDX_MIP,
 			double ScinBarThickn, double pl) {
@@ -474,7 +474,7 @@ public abstract class AHit implements Comparable<AHit> {
 			this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
 					(int) (this.get_ADC2() - PED2)));
 			// 2. Compute corrected hit times & errors:
-			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv);
+			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv, RFPad);
 			this.set_t1(t12[0]);
 			this.set_t2(t12[1]);
 			tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
@@ -539,7 +539,7 @@ public abstract class AHit implements Comparable<AHit> {
 			this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
 					(int) (this.get_ADC2() - PED2)));
 			// 4. Compute corrected hit times & uncertainties:
-			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv);
+			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv, RFPad);
 			this.set_t1(t12[0]);
 			this.set_t2(t12[1]);
 			// this.set_t( 0.5*(this.get_t1() - y/v1 + this.get_t2() + y/v2));
@@ -625,7 +625,7 @@ public abstract class AHit implements Comparable<AHit> {
 				return;
 
 			// 3. Compute corrected hit times & uncertainties:
-			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv);
+			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv, RFPad);
 			this.set_t1(t12[0]);
 			this.set_t2(t12[1]);
 			if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
@@ -696,7 +696,7 @@ public abstract class AHit implements Comparable<AHit> {
 			this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
 					(int) (this.get_ADC2() - PED2)));
 			// 4. Compute corrected hit times & uncertainties:
-			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv);
+			t12 = this.calc_t12(paddle2paddle, timeOffset, LSBConv, RFPad);
 			this.set_t1(t12[0]);
 			this.set_t2(t12[1]);
 			if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
@@ -960,7 +960,7 @@ public abstract class AHit implements Comparable<AHit> {
 	 *         1,2 TDCs
 	 */
 	private double[] calc_t12(double paddle2paddle, double timeOffset,
-			double LSBConv) {
+			double LSBConv, double RFPad) {
 		double[] t12 = new double[2];
 
 		// check status of TDCs and then calc t12 --> if TDC is not valid, set t
@@ -971,12 +971,12 @@ public abstract class AHit implements Comparable<AHit> {
 																				// is
 																				// valid
 			t1 = this.get_TDC1() * LSBConv - timeOffset / 2.
-					- this.get_timeWalk1() + paddle2paddle;
+					- this.get_timeWalk1() + paddle2paddle + RFPad;
 		if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
 																				// is
 																				// valid
 			t2 = this.get_TDC2() * LSBConv + timeOffset / 2.
-					- this.get_timeWalk2() + paddle2paddle;
+					- this.get_timeWalk2() + paddle2paddle + RFPad;
 
 		// for small values of TDCs the t12 can be negative
 		if (t1 < 0)

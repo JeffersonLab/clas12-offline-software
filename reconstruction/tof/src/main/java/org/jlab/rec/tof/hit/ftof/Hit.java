@@ -108,6 +108,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		double PEDLUnc = this.PED1Unc();
 		double PEDRUnc = this.PED2Unc();
 		double paddle2paddle = this.PaddleToPaddle();
+		double RFPad = this.RFPad();
 		double timeOffset = this.TimeOffset();
 		double LSBConv = this.LSBConversion();
 		double LSBConvErr = this.LSBConversionUnc();
@@ -122,13 +123,15 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
 		this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, lambdaL,
 				lambdaR, yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
-				PEDRUnc, paddle2paddle, timeOffset, LSBConv, LSBConvErr,
+				PEDRUnc, paddle2paddle, RFPad, timeOffset, LSBConv, LSBConvErr,
 				ADCLErr, ADCRErr, TDCLErr, TDCRErr, ADC_MIP, ADC_MIPErr,
 				DEDX_MIP, ScinBarThickn, pl);
 		// Set the hit position in the local coordinate of the bar
 		this.set_Position(this.calc_hitPosition());
 
 	}
+
+	
 
 	public void setPaddleLine(FTOFGeant4Factory geometry) {
 		// get the line in the middle of the paddle
@@ -340,7 +343,12 @@ public class Hit extends AHit implements IGetCalibrationParams {
 		return CCDBConstants.getPADDLE2PADDLE()[this.get_Sector() - 1][this
 				.get_Panel() - 1][this.get_Paddle() - 1];
 	}
-
+    
+	private double RFPad() {
+		// TODO Auto-generated method stub
+		return CCDBConstants.getRFPAD()[this.get_Sector() - 1][this
+		        .get_Panel() - 1][this.get_Paddle() - 1];
+	}
 	@Override
 	public double TimeOffset() {
 		return CCDBConstants.getLR()[this.get_Sector() - 1][this.get_Panel() - 1][this
