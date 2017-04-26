@@ -14,6 +14,8 @@ services:
     name: FTEB
   - class: org.jlab.service.dc.DCHBEngine
     name: DCHB
+  - class: org.jlab.service.dc.DCTBEngine
+    name: DCTB
   - class: org.jlab.service.ftof.FTOFEngine
     name: FTOF
   - class: org.jlab.rec.cvt.services.CVTReconstruction
@@ -29,8 +31,6 @@ services:
     name: EC
   - class: org.jlab.service.eb.EBEngine
     name: EBHB
-  - class: org.jlab.service.dc.DCTBEngine
-    name: DCTB
   - class: org.jlab.service.eb.EBEngine
     name: EBTB
 mime-types:

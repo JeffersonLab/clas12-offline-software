@@ -10,23 +10,7 @@ cd clas12-offline-softwre
 ./build-coatjava.sh
 ```
 
-If git clone doesn't work, try
-
-```tcsh
-git clone https://github.com/JeffersonLab/clas12-offline-software.git
-```
-
-or
-
-```tcsh
-git -c http.sslVerify=false clone https://github.com/JeffersonLab/clas12-offline-software.git
-```
-
-or
-
-```tcsh
-git -c http.sslVerify=false clone git@github.com:JeffersonLab/clas12-offline-software.git
-```
+See the [troubleshooting](https://github.com/JeffersonLab/clas12-offline-software/wiki/Troubleshooting) wiki page if you experience any issues. Javadocs can be found at the repository's [gh-page](https://jeffersonlab.github.io/clas12-offline-software/). A build history can be found at [Travis CI](https://travis-ci.org/JeffersonLab/clas12-offline-software).
 
 ## Repository Structure and Dependency Management
 ### Common Tools
@@ -55,6 +39,8 @@ The reconstruction subdirectory contains the reconstruction code for each CLAS12
 
 ### Other Stuff
 After a successful build, you should have a new coatjava/ directory in your working directory which contains all of the CLAS Offline Analysis Tools. In a few cases, the jar files in coatjava/ are simply hard copied from this repository (e.g. lib/clas/* and lib/utils/*). This is probably not a very good practice and will hopefully be fixed in the future.
+
+Merging of the various reconstruction codes was finished on April 14, 2017. The commit histories were preserved; however, take note of github's method of displaying commit histories: https://help.github.com/articles/differences-between-commit-views/
 
 ## some useful links:
 http://scottwb.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/ <br>
