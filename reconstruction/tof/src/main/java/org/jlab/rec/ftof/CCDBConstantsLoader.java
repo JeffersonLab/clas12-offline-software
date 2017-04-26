@@ -49,6 +49,7 @@ public class CCDBConstantsLoader {
 		double[][][] TW2R = new double[6][3][62];
 		double[][][] LR = new double[6][3][62];
 		double[][][] PADDLE2PADDLE = new double[6][3][62];
+		double[][][] RFPAD = new double[6][3][62];
 		int[][][] STATUSL = new int[6][3][62];
 		int[][][] STATUSR = new int[6][3][62];
 		double[][][] MIPL = new double[6][3][62];
@@ -74,7 +75,7 @@ public class CCDBConstantsLoader {
 		// each column in the table.
 		dbprovider.loadTable("/calibration/ftof/attenuation");
 		dbprovider.loadTable("/calibration/ftof/effective_velocity");
-		dbprovider.loadTable("/calibration/ftof/timing_offset");
+		dbprovider.loadTable("/calibration/ftof/time_offsets");
 		dbprovider.loadTable("/calibration/ftof/time_walk");
 		dbprovider.loadTable("/calibration/ftof/status");
 
@@ -120,21 +121,24 @@ public class CCDBConstantsLoader {
 		}
 		// 2) Offsets : TIME_OFFSET = TDCL-TDCR - left_right
 		for (int i = 0; i < dbprovider
-				.length("/calibration/ftof/timing_offset/left_right"); i++) {
+				.length("/calibration/ftof/time_offsets/left_right"); i++) {
 
 			int iSec = dbprovider.getInteger(
-					"/calibration/ftof/timing_offset/sector", i);
+					"/calibration/ftof/time_offsets/sector", i);
 			int iPan = dbprovider.getInteger(
-					"/calibration/ftof/timing_offset/layer", i);
+					"/calibration/ftof/time_offsets/layer", i);
 			int iPad = dbprovider.getInteger(
-					"/calibration/ftof/timing_offset/component", i);
+					"/calibration/ftof/time_offsets/component", i);
 			double iLR = dbprovider.getDouble(
-					"/calibration/ftof/timing_offset/left_right", i);
+					"/calibration/ftof/time_offsets/left_right", i);
 			double iPaddle2Paddle = dbprovider.getDouble(
-					"/calibration/ftof/timing_offset/paddle2paddle", i);
+					"/calibration/ftof/time_offsets/paddle2paddle", i);
+			double iRFPad = dbprovider.getDouble(
+					"/calibration/ftof/time_offsets/paddle2paddle", i);
 
 			LR[iSec - 1][iPan - 1][iPad - 1] = iLR;
 			PADDLE2PADDLE[iSec - 1][iPan - 1][iPad - 1] = iPaddle2Paddle;
+			RFPAD[iSec - 1][iPan - 1][iPad - 1] = iRFPad;
 		}
 
 		// Getting the effective velocities constants
@@ -240,6 +244,7 @@ public class CCDBConstantsLoader {
 		CCDBConstants.setTW2R(TW2R);
 		CCDBConstants.setLR(LR);
 		CCDBConstants.setPADDLE2PADDLE(PADDLE2PADDLE);
+		CCDBConstants.setRFPAD(RFPAD);
 		CCDBConstants.setEFFVELL(EFFVELL);
 		CCDBConstants.setEFFVELR(EFFVELR);
 		CCDBConstants.setEFFVELLU(EFFVELLU);

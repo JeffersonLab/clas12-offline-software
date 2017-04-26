@@ -218,7 +218,7 @@ public class FTOFEngine extends ReconstructionEngine {
 		en.init();
 
 		int counter = 0;
-		String inputFile = "/Users/ziegler/data/hipo/sidis_0100.hipo";
+		String inputFile = "/Users/ziegler/data/hipo/dvcs_35.hipo";
 		// String inputFile = args[0];
 		// String outputFile = args[1];
 
@@ -240,7 +240,7 @@ public class FTOFEngine extends ReconstructionEngine {
 			DataEvent event = reader.getNextEvent();
 			if (counter > 0)
 				t1 = System.currentTimeMillis();
-
+			
 			//en0.processDataEvent(event);
 		//	if (counter > 3062)
 				en.processDataEvent(event);
