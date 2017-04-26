@@ -52,7 +52,10 @@ public class Bos2HipoEventBank {
             bankHEVT.setInt("nevt", 0, this.bosDataBanks.get("HEVT").getInt("NEVENT")[0]);
             bankHEVT.setFloat("stt" , 0, this.bosDataBanks.get("HEVT").getFloat("STT")[0]);
             bankHEVT.setFloat("fc"  , 0, this.bosDataBanks.get("HEVT").getFloat("FC")[0]);
-            bankHEVT.setByte("helicity" , 0, helicity);
+            int evtclass = this.bosDataBanks.get("HEVT").getInt("EVTCLASS")[0];
+            byte ihelicity = 0;
+            if(evtclass<0) ihelicity = 1;
+            bankHEVT.setByte("helicity" , 0, ihelicity);
             bankHEVT.setFloat("fcg" , 0, this.bosDataBanks.get("HEVT").getFloat("FCG")[0]);
 
             // FBPM bank for raster
