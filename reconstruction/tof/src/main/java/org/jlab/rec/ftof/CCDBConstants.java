@@ -24,6 +24,7 @@ public final class CCDBConstants {
 	private static double[][][] TW2R = new double[6][3][62];
 	private static double[][][] LR = new double[6][3][62];
 	private static double[][][] PADDLE2PADDLE = new double[6][3][62];
+	private static double[][][] RFPAD = new double[6][3][62];
 	private static int[][][] STATUSL = new int[6][3][62];
 	private static int[][][] STATUSR = new int[6][3][62];
 	private static double[][][] MIPL = new double[6][3][62];
@@ -167,6 +168,14 @@ public final class CCDBConstants {
 		PADDLE2PADDLE = pADDLE2PADDLE;
 	}
 
+	public static synchronized double[][][] getRFPAD() {
+		return RFPAD;
+	}
+
+	public static synchronized void setRFPAD(double[][][] rFPAD) {
+		RFPAD = rFPAD;
+	}
+	
 	public static synchronized int[][][] getSTATUSL() {
 		return STATUSL;
 	}
