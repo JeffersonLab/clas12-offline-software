@@ -134,7 +134,7 @@ public class CCDBConstantsLoader {
 			double iPaddle2Paddle = dbprovider.getDouble(
 					"/calibration/ftof/time_offsets/paddle2paddle", i);
 			double iRFPad = dbprovider.getDouble(
-					"/calibration/ftof/time_offsets/paddle2paddle", i);
+					"/calibration/ftof/time_offsets/rfpad", i);
 
 			LR[iSec - 1][iPan - 1][iPad - 1] = iLR;
 			PADDLE2PADDLE[iSec - 1][iPan - 1][iPad - 1] = iPaddle2Paddle;
