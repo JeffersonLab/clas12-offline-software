@@ -20,7 +20,7 @@ if [ $? != 0 ] ; then echo "DCReconstructionTest compilation failure" ; exit 1 ;
 
 # run dc junit tests
 java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore dc.DCReconstructionTest
-if [ $? != 0 ] ; then echo "dc unit test failure" ; exit 1 ; else ; echo "dc passed unit tests" ; fi
+if [ $? != 0 ] ; then echo "dc unit test failure" ; exit 1 ; else echo "dc passed unit tests" ; fi
 
 
 # run event generator
