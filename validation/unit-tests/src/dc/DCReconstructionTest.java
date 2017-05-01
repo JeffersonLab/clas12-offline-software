@@ -9,6 +9,10 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.service.dc.DCHBEngine;
 import org.jlab.service.dc.DCTBEngine;
 
+/**
+ *
+ * @author naharrison
+ */
 public class DCReconstructionTest {
 	
 	@Test

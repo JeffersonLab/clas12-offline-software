@@ -4,6 +4,10 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSync;
 
+/**
+ *
+ * @author naharrison
+ */
 public class TestEvent {
 	
 	public static HipoDataEvent getDCSector1ElectronEvent() {
