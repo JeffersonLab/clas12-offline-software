@@ -56,7 +56,11 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
         public double getFullEnergy() {
             // return energy corrected for leakage and threshold effects
             double clusterEnergy  = this.getEnergy();
-            double energyCorr = FTCALConstantsLoader.energy_corr[0] + FTCALConstantsLoader.energy_corr[1]*clusterEnergy + FTCALConstantsLoader.energy_corr[2]*clusterEnergy*clusterEnergy;
+            double energyCorr = FTCALConstantsLoader.energy_corr[0] 
+                              + FTCALConstantsLoader.energy_corr[1]*clusterEnergy 
+                              + FTCALConstantsLoader.energy_corr[2]*clusterEnergy*clusterEnergy
+                              + FTCALConstantsLoader.energy_corr[3]*clusterEnergy*clusterEnergy*clusterEnergy
+                              + FTCALConstantsLoader.energy_corr[4]*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy;
             clusterEnergy+=energyCorr;
             return clusterEnergy;
 	}
