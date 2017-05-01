@@ -53,7 +53,7 @@ public class FTCALConstantsLoader {
 	public static double depth_z;                                                  // time window of hits forming a cluster
 
 	// CONSTANTS USED IN CORRECTIONS
-	public static double[] energy_corr = new double[3] ;
+	public static double[] energy_corr = new double[5] ;
 	public static double[] theta_corr = new double[4] ;
 	public static double[] phi_corr = new double[6] ;
 //    public static final int NUMBER_CRYSTALS = 4000;
@@ -160,7 +160,12 @@ public class FTCALConstantsLoader {
 	       
 	        energy_corr[0]    = ecorr0;
 	        energy_corr[1]    = ecorr1;
-	        energy_corr[2]    = ecorr2;
+	        energy_corr[2]    = ecorr2;                     
+	        energy_corr[0]    =  0.0507040;
+	        energy_corr[1]    =  0.0782326;
+	        energy_corr[2]    = -0.00446163;
+                energy_corr[3]    =  0.000169353;
+	        energy_corr[4]    = 0;
 	        if(debugMode>=1) System.out.println("energy correction: " + ecorr0 + " " + ecorr1 + " " + ecorr2);
 	    }
 	    // 6) Theta Corrections : THETACORR 
