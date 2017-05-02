@@ -1,4 +1,4 @@
-# clas12-offline-software [![Build Status](https://travis-ci.org/JeffersonLab/class12-offline-software.svg?branch=master)](https://travis-ci.org/JeffersonLab/clas12-offline-software)
+# clas12-offline-software [![Build Status](https://travis-ci.org/JeffersonLab/clas12-offline-software.svg?branch=master)](https://travis-ci.org/JeffersonLab/clas12-offline-software)
 CLAS12 Offline Software (work in progress)
 
 ## Quick Start
