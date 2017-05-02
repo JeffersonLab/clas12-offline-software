@@ -161,7 +161,7 @@ class HTCCCluster {
     }
     
     public int getNPheTot() {
-        return nphetot;
+        return nphetot/100;
     }
     public int getNThetaClust() {
         return nthetaclust;
