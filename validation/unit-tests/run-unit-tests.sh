@@ -17,10 +17,17 @@ if [ $? != 0 ] ; then echo "RandomEventGenerator compilation failure" ; exit 1 ;
 javac -cp $classPath src/dc/DCReconstructionTest.java
 if [ $? != 0 ] ; then echo "DCReconstructionTest compilation failure" ; exit 1 ; fi
 
+javac -cp $classPath src/ec/ECReconstructionTest.java
+if [ $? != 0 ] ; then echo "ECReconstructionTest compilation failure" ; exit 1 ; fi
+
 
 # run dc junit tests
 java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore dc.DCReconstructionTest
 if [ $? != 0 ] ; then echo "dc unit test failure" ; exit 1 ; else echo "dc passed unit tests" ; fi
+
+# run ec junit tests
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore ec.ECReconstructionTest
+if [ $? != 0 ] ; then echo "ec unit test failure" ; exit 1 ; else echo "ec passed unit tests" ; fi
 
 
 # run event generator
