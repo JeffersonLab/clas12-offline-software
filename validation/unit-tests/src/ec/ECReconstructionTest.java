@@ -7,6 +7,7 @@ import events.TestEvent;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.service.ec.ECEngine;
+import org.jlab.service.eb.EBEngine;
 
 /**
  *
@@ -19,12 +20,22 @@ public class ECReconstructionTest {
 		
 		DataEvent testEvent = TestEvent.getECSector1PhotonEvent();
 
-		ECEngine engine = new ECEngine();
-		engine.init();
-		engine.processDataEvent(testEvent);
+		ECEngine engineEC = new ECEngine();
+		engineEC.init();
+		engineEC.processDataEvent(testEvent);
 
-		testEvent.show();
+		EBEngine engineEB = new EBEngine();
+		engineEB.init();
+		engineEB.processDataEvent(testEvent);
 
+		//testEvent.show();
+		//testEvent.getBank("ECAL::clusters").show();
+		//testEvent.getBank("RECHB::Particle").show();
+		//testEvent.getBank("RECHB::Detector").show();
+
+		assertEquals(testEvent.hasBank("FAKE::Bank"), false);
+		assertEquals(testEvent.hasBank("RECHB::Particle"), true);
+		assertEquals(testEvent.hasBank("RECHB::Detector"), true);
 	}
 	
 	
