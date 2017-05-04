@@ -10,8 +10,7 @@ import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
-import org.jlab.service.pid.EventTrigger;
-//import org.jlab.service.pid.EventTrigger;
+
 
 
 /**
@@ -30,7 +29,7 @@ public class DetectorEvent {
     private double            RF_OFFSET = 0.0;
     private double             RF_BUNCH = 2.004;
     private int                RF_SHIFT = 800;
-    private EventTrigger trigger = new EventTrigger();
+
     
     
     public DetectorEvent(){
@@ -180,9 +179,7 @@ public class DetectorEvent {
         this.addParticle(particle);
     }
     
-    
-    public void setEventTrigger(EventTrigger trig){this.trigger = trig;}
-    public EventTrigger getEventTrigger(){return this.trigger;}
+
     
     
     @Override
