@@ -1,210 +1,210 @@
-
 package org.jlab.service.pid;
 
 import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.jlab.detector.base.DetectorType;
-import static java.lang.Math.abs;
-import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 import org.jlab.clas.detector.*;
+
+
+
 
 /**
  *
  * @author jnewton
  */
-public class EBTrigger {
+public class EventTrigger {
+    
+ private double zt=0.0;
+ private double rftime=0.0;
+ private double starttime=0.0;
+ private double vertextime=0.0;
+ private double correctionterm=0.0;
+ public int     triggerid=-1;
 
-    DetectorEvent event = new DetectorEvent();
-    DataEvent de;
+ private DetectorParticle triggerparticle = new DetectorParticle();
+ private HashMap<Integer,DetectorParticle> ElectronCandidates = new HashMap<Integer,DetectorParticle>();
+ private HashMap<Integer,DetectorParticle> PositronCandidates = new HashMap<Integer,DetectorParticle>();
+ private HashMap<Integer,DetectorParticle> NegativePionCandidates = new HashMap<Integer,DetectorParticle>();
 
-    public EBTrigger(){
+    
+    public EventTrigger(){
         
     }
     
-    public void setEvent(DetectorEvent e){this.event = e;}
-    public void setDataEvent(DataEvent data){this.de = data;}
-    
-    public void RFInformation() {
-      
-          if(de.hasBank("RF::info")==true){
-            EvioDataBank bank = (EvioDataBank) de.getBank("RF::info");
-            //event.getEventTrigger().setRFTime(bank.getDouble("rf",0));//Obtain a TDC value
-        }
-    }
+    public void   setzt(double z_t){ this.zt = z_t;}
+    public void   setRFTime(double rf){this.rftime = rf;}
+    public void   setVertexTime(double t){this.vertextime = t;}
+    public void   setStartTime(double start){this.starttime = start;}
+    public void   setCorrectionTerm(double corr){this.correctionterm = corr;}
+    public void   setTriggerParticle(DetectorParticle particle){this.triggerparticle=particle;}
+    public void   setElectronCandidates(HashMap<Integer,DetectorParticle> ecandidates){this.ElectronCandidates = ecandidates;}
+    public void   setPositronCandidates(HashMap<Integer,DetectorParticle> epluscandidates){this.PositronCandidates = epluscandidates;}
+    public void   setNegativePionCandidates(HashMap<Integer,DetectorParticle> piminus){this.NegativePionCandidates = piminus;}
+    public void   setTriggerID(int i){this.triggerid = i;}
+
+
+    public DetectorParticle GetBestTriggerParticle(HashMap<Integer,DetectorParticle> TriggerCandidates) {
+            DetectorParticle BestTrigger = new DetectorParticle();
+            int SizeOfMap = TriggerCandidates.size();
+            HashMap<Integer,Integer> Scores = new HashMap<Integer,Integer>();
+
+            for(int i = 0 ; i < SizeOfMap; i++){
+              Scores.put(i,TriggerCandidates.get(i).getScore()); 
+            }
+            int HighestScore = GetHighestScore(Scores);
+            int SizeofMap = TriggerCandidates.size();
+            List<Integer> IndicesThatMatchWithHighestScore = new ArrayList<Integer>();
+            for(int i = 0 ; i < SizeofMap; i++){ 
+                if(Scores.get(i)==HighestScore){
+                    IndicesThatMatchWithHighestScore.add(i);
+                }
+            }
+            HashMap<Integer,Double> Momenta = new HashMap<Integer,Double>();
+            HashMap<Integer,Integer> IndexTranslation = new HashMap<Integer,Integer>();
+            for(int i = 0 ; i < IndicesThatMatchWithHighestScore.size() ; i++){
+                int index = IndicesThatMatchWithHighestScore.get(i);
+                Momenta.put(i,TriggerCandidates.get(index).vector().mag());
+                IndexTranslation.put(i,index);
+            }
+            int HighestMomentumIndex = GetHighestMomentumIndex(Momenta);
+            int CorrectHighestMomentumIndex = IndexTranslation.get(HighestMomentumIndex);
+            BestTrigger = TriggerCandidates.get(CorrectHighestMomentumIndex);
             
+            return BestTrigger;
+        }
         
-    public void Trigger() {
-        for(int i = 0 ; i < this.event.getParticles().size() ; i++) {
-            TIDResult result = new TIDResult();
-            result = EBTrigger.GetParticleScore(event.getParticles().get(i)); //How much does it resemble electron/positron?
-            event.getParticles().get(i).setScore(result.getScore());//"score" is recorded for each DetectorParticle
-           // System.out.println("score" + result.getScore());
+    public DetectorParticle GetFastestTrack(HashMap<Integer,DetectorParticle> TriggerCandidates) {
+            DetectorParticle FastestParticle = new DetectorParticle();
+            HashMap<Integer,Double> momenta = new HashMap<Integer,Double>();
+            int SizeOfMap = TriggerCandidates.size();
+            for(int i = 0 ; i < SizeOfMap ; i++){
+                momenta.put(i,TriggerCandidates.get(i).vector().mag());
+            }
+            FastestParticle = TriggerCandidates.get(GetHighestMomentumIndex(momenta));
+            return FastestParticle;
+        }
+            
+    public int GetHighestScore(HashMap<Integer,Integer> Sc) {
+           int max = Sc.get(0);
+
+            for (int i = 1; i < Sc.size(); i++) {
+                if (Sc.get(i) > max) {
+                max = Sc.get(i);
+                }
+            }
+            
+            return max;
+        }
+        
+    public int GetHighestMomentumIndex(HashMap<Integer,Double> momentum) {
+            Double max = momentum.get(0);
+            int MaximumIndex = 0;
+            for (int i = 1; i < momentum.size(); i++) {
+                if (momentum.get(i) > max) {
+                max = momentum.get(i);
+                MaximumIndex = i;
+                }
+            }
+            
+            return MaximumIndex;
         }
     
-        ElectronTriggerList electron = new ElectronTriggerList();
-        PositronTriggerList positron = new PositronTriggerList();
-        NegativePionTriggerList negativepion = new NegativePionTriggerList();
-        /*
-        event.getEventTrigger().setElectronCandidates(electron.getCandidates(event));
-        event.getEventTrigger().setPositronCandidates(positron.getCandidates(event));
-        event.getEventTrigger().setNegativePionCandidates(negativepion.getCandidates(event));
-
-            switch(event.getEventTrigger().TriggerScenario()) { //Case 1 means electrons were found, Case 2 means positrons were found, Case 3 means negative pions were found
-                case 0:
-                //System.out.println("No Trigger Found");
-                break;
-                case 1:
-                TriggerElectron telectron = new TriggerElectron();
-                telectron.CollectBestTriggerInformation(event); 
-                break;
-                case 2:
-                TriggerPositron tpositron = new TriggerPositron();
-                tpositron.CollectBestTriggerInformation(event);
-                break;
-                case 3:
-                TriggerNegativePion tnegativepion = new TriggerNegativePion();
-                tnegativepion.CollectBestTriggerInformation(event);
-                break;
-              }*/
-        }
-       
-     
-    public void CalcBeta2(DetectorParticle p){ //Maybe you can modify this so that speed of track can be calculated by any detector based off availabilitiy
-        if(p.hasHit(DetectorType.FTOF, 2)==true){
-            DetectorResponse res = p.getHit(DetectorType.FTOF, 2);
-            double path = res.getPath();
-            double time = res.getTime();
-
-          double beta = 0.0;// p.getPathLength(DetectorType.FTOF)/(time-event.getEventTrigger().getStartTime())/29.9792;
-            p.setBeta(beta);
-            double mom = p.vector().mag();
-            double mass2 = (mom*mom - beta*beta*mom*mom)/(beta*beta);
-            p.setMass(mass2);
-        }
-    }
-    
-    public void CalcBetas(){
-        for(int i = 0; i < event.getParticles().size() ; i++){
-            DetectorParticle p = new DetectorParticle();
-            p = event.getParticles().get(i);
-            CalcBeta2(p);
-        }
-    }
-       
-    
-
-
-    
-    public static TIDResult GetParticleScore(DetectorParticle particle) {  
-               
-        TIDExamination TID = new TIDExamination(); //This is the "DetectorParticle"s PID properties.
-        TID.setCorrectSF(TID.SamplingFractionCheck(particle)); //Is the sampling fraction within +-5 Sigma?
-        TID.setHTCC(TID.HTCCSignal(particle)); //Is there a signal in HTCC?
-        TID.setFTOF(particle.hasHit(DetectorType.FTOF, 2));//Is there a hit in FTOF1B?
-               
-        TIDResult Result = new TIDResult();
-        Result.setScore(TID.getTriggerScore());//Trigger Score for Electron/Positron
-        Result.setTIDExamination(TID);
-                
+       public double VertexTime(DetectorParticle particle, int usertriggerid) {
+            double t_0r = 0.0;
+            
+            if(particle.hasHit(DetectorType.FTOF, 2)==true){
            
-        return Result;
-      }
+            double beta = 0.0;
+            
+            if(abs(usertriggerid)==11){
+                beta = 1;//We assign electron beta if at least one track has responses in FTOF/HTCC
+            }
+            if(abs(usertriggerid)==211){
+                beta = particle.getTheoryBeta(211); //We Assign Pion mass to the fastest negative track
+            }
+            if(abs(usertriggerid)==22){
+                beta = particle.getTheoryBeta(22);
+            }
+
+            
+            t_0r = particle.getTime(DetectorType.FTOF) - (particle.getPathLength(DetectorType.FTOF))/(29.9792*beta);//vertex time
+
+            }
+   
+      
+            return t_0r;
+       }
     
+       public double StartTime(DetectorParticle particle, int usertriggerid) {
+
+            double deltatr = this.getVertexTime() - this.getRFTime() - (this.getZt() - (-4.5))/(29.9792)+800*2.004 + 1.3;
+            //+800*2.0004+1.002
+            double t_0corr = deltatr%2.004 - 2.004/2;//RF correction term
+            this.setCorrectionTerm(t_0corr);
+            double t_0 = this.getVertexTime() + t_0corr;//RF-Corrected Start Time
+            return t_0;
+            }
+       
+public int TriggerScenario() {
+    int i = 0;
+    int j = 1;
+    boolean stop = false;
+    while(stop!=true){
+        if(j==1 && ElectronCandidates.size()>0){
+            i = 1;
+            stop = true;
+          }
+        if(j==2 && PositronCandidates.size()>0){
+            i = 2;
+            stop = true;
+        }
+        if(j==3 && NegativePionCandidates.size()>0){
+            i = 3;
+            stop = true;
+        }
+        if(j==4){
+            stop = true;
+        }
+        j=j+1;
+       }
+    
+      return i;
+    }
+
+    public double getZt(){ return this.zt;}
+    public double getRFTime(){ return this.rftime; }
+    public double getVertexTime(){return this.vertextime;}
+    public double getStartTime(){ return this.starttime;}
+    public double getCorrectionTerm() {return this.correctionterm;}
+    public int    getTriggerID() {return this.triggerid;}
+    public DetectorParticle getTriggerParticle(){return this.triggerparticle;}
+    public HashMap<Integer,DetectorParticle> getElectronCandidates(){return this.ElectronCandidates;}
+    public HashMap<Integer,DetectorParticle> getPositronCandidates(){return this.PositronCandidates;}
+    public HashMap<Integer,DetectorParticle> getNegativePionCandidates(){return this.NegativePionCandidates;}
+
+
+    @Override
+	public String toString(){
+        StringBuilder str = new StringBuilder();
+        str.append(String.format("\t [RF Time/Start Time/Vertex Time/Vertex Position] [%8f %3f %3f %3f] ", 
+				 this.rftime,
+				 this.starttime,
+				 this.vertextime,
+				 this.zt
+				 ));
+
+        return str.toString();
+    }
         
-}
-
-
-class TriggerElectron implements BestTrigger {
-    
-    public void CollectBestTriggerInformation(DetectorEvent event){
-        /*
-                   EventTrigger Trigger = new EventTrigger();
-                   Trigger = event.getEventTrigger();
-                   DetectorParticle BestTrigger = Trigger.GetBestTriggerParticle(Trigger.getElectronCandidates());
-                   Trigger.setTriggerParticle(BestTrigger);
-                   Trigger.setzt(BestTrigger.vertex().z());
-                   Trigger.setVertexTime(Trigger.VertexTime(BestTrigger, 11));
-                   Trigger.setStartTime(Trigger.StartTime(BestTrigger,11)); //calculate start time using speed of an electron
-          */         
+    public void Print(){
+            System.out.println("RF Time = " + this.rftime);
+            System.out.println("Event Start Time = " + this.starttime);
+            System.out.println("Trigger Vertex Time" + this.vertextime);
+            System.out.println("Z Position of Vertex = " + this.zt);
     }
+
 }
 
-class TriggerPositron implements BestTrigger {
-    
-    public void CollectBestTriggerInformation(DetectorEvent event){
-                /*   EventTrigger Trigger = new EventTrigger();
-                   Trigger = event.getEventTrigger();
-                   DetectorParticle BestTrigger = Trigger.GetBestTriggerParticle(Trigger.getPositronCandidates());
-                   Trigger.setTriggerParticle(BestTrigger);
-                   Trigger.setVertexTime(Trigger.VertexTime(BestTrigger, 11));
-                   Trigger.setStartTime(Trigger.StartTime(BestTrigger,11));
-                   Trigger.setzt(BestTrigger.vertex().z());*/
-                   
-    }
-}
-
-class TriggerNegativePion implements BestTrigger {
-    
-    public void CollectBestTriggerInformation(DetectorEvent event){
-                  /* EventTrigger Trigger = new EventTrigger();
-                   Trigger = event.getEventTrigger();
-                   DetectorParticle BestTrigger = Trigger.GetBestTriggerParticle(Trigger.getNegativePionCandidates());
-                   Trigger.setTriggerParticle(BestTrigger);
-                   Trigger.setVertexTime(Trigger.VertexTime(BestTrigger, 211));
-                   Trigger.setStartTime(Trigger.StartTime(BestTrigger,211));
-                   Trigger.setzt(BestTrigger.vertex().z());
-                   */
-    }
-}
-
-
-
-class ElectronTriggerList implements TriggerCandidateList {
-    public HashMap<Integer,DetectorParticle>  getCandidates(DetectorEvent event) {
-        HashMap<Integer,DetectorParticle> map = new HashMap<Integer,DetectorParticle>();
-            int mapiteration = 0;
-            for(int i = 0 ; i < event.getParticles().size() ; i++){
-                if(event.getParticles().get(i).getCharge()==-1 && event.getParticles().get(i).getNphe()>0
-                        && event.getParticles().get(i).hasHit(DetectorType.FTOF, 2)){
-                    map.put(mapiteration,event.getParticles().get(i));
-                    mapiteration = mapiteration + 1;
-                }
-            }
-        return map;
-    }
-}
-
-class PositronTriggerList implements TriggerCandidateList {
-    public HashMap<Integer,DetectorParticle>  getCandidates(DetectorEvent event) {
-        HashMap<Integer,DetectorParticle> map = new HashMap<Integer,DetectorParticle>();
-            int mapiteration = 0;
-            for(int i = 0 ; i < event.getParticles().size() ; i++){
-                if(event.getParticles().get(i).getCharge()==1 && event.getParticles().get(i).getNphe()>0
-                        && event.getParticles().get(i).hasHit(DetectorType.FTOF, 2)){
-                    map.put(mapiteration,event.getParticles().get(i));
-                    mapiteration = mapiteration + 1;
-                }
-            }
-        return map;
-    }
-}
-
-class NegativePionTriggerList implements TriggerCandidateList {
-    public HashMap<Integer,DetectorParticle>  getCandidates(DetectorEvent event) {
-        HashMap<Integer,DetectorParticle> map = new HashMap<Integer,DetectorParticle>();
-            int mapiteration = 0;
-            for(int i = 0 ; i < event.getParticles().size() ; i++){
-                if(event.getParticles().get(i).getCharge()==-1 && event.getParticles().get(i).getScore()>=10 &&
-                        event.getParticles().get(i).getScore()<=11 && event.getParticles().get(i).vector().mag()>3){
-                    map.put(mapiteration,event.getParticles().get(i));
-                    mapiteration = mapiteration + 1;
-                }
-            }
-        return map;
-    }
-}
 
