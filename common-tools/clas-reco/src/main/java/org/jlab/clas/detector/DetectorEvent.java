@@ -10,6 +10,8 @@ import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
+//import org.jlab.service.pid.EventTrigger;
+//import org.jlab.service.pid.EventTrigger;
 
 
 /**
@@ -28,7 +30,7 @@ public class DetectorEvent {
     private double            RF_OFFSET = 0.0;
     private double             RF_BUNCH = 2.004;
     private int                RF_SHIFT = 800;
-    //private EventTrigger trigger = new EventTrigger();
+    private EventTrigger trigger = new EventTrigger();
     
     
     public DetectorEvent(){
@@ -130,6 +132,28 @@ public class DetectorEvent {
         return responses;
     }
     
+    public List<CalorimeterResponse>  getCalorimeterResponseList(){
+        this.setAssociation();
+        List<CalorimeterResponse> responses = new ArrayList<CalorimeterResponse>();
+        for(DetectorParticle p : this.particleList){
+            for(CalorimeterResponse r : p.getCalorimeterResponses()){
+                responses.add(r);
+            }
+        }
+        return responses;
+    }
+    
+    public List<ScintillatorResponse>  getScintillatorResponseList(){
+        this.setAssociation();
+        List<ScintillatorResponse> responses = new ArrayList<ScintillatorResponse>();
+        for(DetectorParticle p : this.particleList){
+            for(ScintillatorResponse r : p.getScintillatorResponses()){
+                responses.add(r);
+            }
+        }
+        return responses;
+    }
+    
     public void moveUp(int index){
         if(index>0 && index < this.particleList.size()){
             DetectorParticle p = this.particleList.get(index);
@@ -157,8 +181,8 @@ public class DetectorEvent {
     }
     
     
-    //public void setEventTrigger(EventTrigger trig){this.trigger = trig;}
-    //public EventTrigger getEventTrigger(){return this.trigger;}
+    public void setEventTrigger(EventTrigger trig){this.trigger = trig;}
+    public EventTrigger getEventTrigger(){return this.trigger;}
     
     
     @Override
