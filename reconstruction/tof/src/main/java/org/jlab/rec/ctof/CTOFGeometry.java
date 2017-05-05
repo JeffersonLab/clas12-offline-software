@@ -24,7 +24,7 @@ public class CTOFGeometry {
 
 		for (int i = 0; i < 8; i++)
 			cornerPoints.get(i).rotateZ(
-					(paddle - 1) * Math.toRadians(7.5) + Math.toRadians(180.));
+					(paddle - 1) * Math.toRadians(7.5) + Math.toRadians(90.));
 
 		ScintillatorPaddle geomPaddle = new ScintillatorPaddle(paddle - 1,
 				cornerPoints.get(0), cornerPoints.get(1), cornerPoints.get(2),
