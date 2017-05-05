@@ -6,20 +6,9 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.service.pid.*;
 
 /**
  *
@@ -106,6 +95,14 @@ public class EBAnalyzer {
                 //System.out.println(String.format("PARTICLE %3d (Layer 2) p = %8.3f beta = %8.3f mass2 = %8.3f", 
                 //        i,p.vector().mag(),beta,mass));
             }
+//            if(p.hasHit(DetectorType.CTOF, 0)==true){
+//                //System.out.println("1B");
+//                beta = p.getBeta(DetectorType.CTOF ,start_time);
+//                mass = p.getMass2(DetectorType.CTOF,start_time);
+//                p.setBeta(beta);
+//                //System.out.println(String.format("PARTICLE %3d (Layer 2) p = %8.3f beta = %8.3f mass2 = %8.3f", 
+//                //        i,p.vector().mag(),beta,mass));
+//            }
             //System.out.println("----------------");
 
             
@@ -173,11 +170,11 @@ public class PIDHypothesis{
             
             switch(abs(pid)) {
                 case 11:
-                    if(betaCheck==true && htccSignalCheck==true && sfCheck==true){
+                    if(htccSignalCheck==true && sfCheck==true){
                         this.finalizePID(p, pid);
                         break;
                     }
-                    if(betaCheck==false && htccSignalCheck==true && sfCheck==true){
+                    if(htccSignalCheck==true && sfCheck==true){
                         this.finalizePID(p, pid);
                         break;
                     }
