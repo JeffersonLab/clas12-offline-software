@@ -3,7 +3,6 @@ io-services:
     class: org.jlab.clas.std.services.convertors.HipoToHipoReader
     name: HipoToHipoReader
   writer:
-    compression: 2
     class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
     name: HipoToHipoWriter
 services:
@@ -34,5 +33,9 @@ services:
     name: EBHB
   - class: org.jlab.service.eb.EBEngine
     name: EBTB
+configuration:
+  io-services:
+    writer:
+      compression: 2
 mime-types:
   - binary/data-hipo
