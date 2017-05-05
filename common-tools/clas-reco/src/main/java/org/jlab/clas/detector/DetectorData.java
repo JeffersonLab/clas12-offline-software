@@ -201,7 +201,7 @@ public class DetectorData {
        for(int row = 0; row < responses.size(); row++){
            CalorimeterResponse r = responses.get(row);
            
-           bank.setShort("index", row, (short) 0);
+           bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
            bank.setShort("sector", row, (short) r.getDescriptor().getSector());
@@ -233,6 +233,7 @@ public class DetectorData {
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
            ScintillatorResponse r = responses.get(row);
+           bank.setShort("index",row,(short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
            bank.setShort("sector", row, (short) r.getDescriptor().getSector());
@@ -256,7 +257,7 @@ public class DetectorData {
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
            CherenkovResponse c = responses.get(row);
-           bank.setShort("index", row, (short) 0);
+           bank.setShort("index", row, (short) c.getHitIndex());
            bank.setShort("pindex", row, (short) c.getAssociation());
            bank.setShort("detector", row, (short) c.getCherenkovType().getDetectorId());
            bank.setFloat("x", row, (float) c.getHitPosition().x());
