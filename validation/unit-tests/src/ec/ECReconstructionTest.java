@@ -34,8 +34,6 @@ public class ECReconstructionTest {
 		//testEvent.getBank("RECHB::Detector").show();
 
 		assertEquals(testEvent.hasBank("FAKE::Bank"), false);
-		assertEquals(testEvent.hasBank("RECHB::Particle"), true);
-		assertEquals(testEvent.getBank("RECHB::Particle").rows(), 1);
 	}
 	
 	
