@@ -34,6 +34,7 @@ public class CalorimeterResponse {
     private int              association    = -1;
     private int             component = -1;
     private double              hitQuality = 0.0;
+    private int             hitIndex = -1;
     
     public CalorimeterResponse(){
         
@@ -50,12 +51,14 @@ public class CalorimeterResponse {
     public void   setEnergy(double energy) { this.detectorEnergy = energy; }
     public void   setComponent(int paddle) {this.component = paddle;}
     public void   setHitQuality(double q) {this.hitQuality = q;}
+    public void   setHitIndex(int index) {this.hitIndex = index;}
     
     public int    getComponent() {return this.component;}
     public double getTime(){ return this.detectorTime;}
     public double getEnergy(){ return this.detectorEnergy; }
     public double getPath(){ return this.particlePath;}
     public double getHitQuality() {return this.hitQuality;}
+    public int  getHitIndex() {return this.hitIndex;}
     
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}
