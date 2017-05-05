@@ -34,6 +34,7 @@ public class HTCCReconstructionService extends ReconstructionEngine{
         try {
             HTCCReconstruction reco = new HTCCReconstruction();
               reco.gain  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/gain");
+              reco.time  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/time");
               reco.processEvent(event);
         } catch (Exception e){
             System.out.println("----> error with HTCC reconstruction..");
@@ -47,15 +48,14 @@ public class HTCCReconstructionService extends ReconstructionEngine{
     @Override
     public boolean init() {
         
-  //       String[]  ecTables = new String[]{
-  //          "/calibration/htcc/gain", 
-  //      };
+
             String[]  htccTables = new String[]{
             "/calibration/htcc/gain", 
+            "/calibration/htcc/time", 
+    
         };
         
         requireConstants(Arrays.asList(htccTables));
-  //      gain.show();
         System.out.println("-----> INITIALIZING HTCC as a SERVICE...");
         return true;
     }

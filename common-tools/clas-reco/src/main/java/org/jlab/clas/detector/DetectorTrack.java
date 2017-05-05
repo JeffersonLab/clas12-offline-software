@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -20,25 +21,50 @@ public class DetectorTrack {
     private int     trackCharge = 0;
     private double     trackMom = 0.0;
     private double    trackPath = 0.0;
+    private double    taggerTime = 0.0;
+    private int       taggerID = 0;
     private Vector3D   trackEnd = new Vector3D();
     
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
+    private Point3D trackIntersect = new Point3D();
+    
+    
+    private double variable1 = 0.0;
+    private int variable2 = -1;
     
     
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
+    private List<Point3D> ctofIntersects = new ArrayList<Point3D>();
+    
     private double    MAX_LINE_LENGTH = 1500.0;
     
      public DetectorTrack(int charge){
         this.trackCharge = charge;
     }
     
+    public double getVariable1() {
+        return variable1;
+    } 
+     
     public DetectorTrack(int charge, double mom){
         this.trackMom = mom;
         this.trackCharge = charge;
     }
+    
+        public DetectorTrack(int charge, double mom, Point3D ctofintersect){
+        this.trackMom = mom;
+        this.trackCharge = charge;
+        this.trackIntersect = ctofintersect;
+    }
 
     public DetectorTrack(int charge, double px, double py, double pz){
+        this.trackCharge = charge;
+        this.trackP.setXYZ(px, py, pz);
+    }
+    
+    public DetectorTrack(int id, int charge, double px, double py, double pz){
+        this.taggerID = id;
         this.trackCharge = charge;
         this.trackP.setXYZ(px, py, pz);
     }
@@ -75,9 +101,27 @@ public class DetectorTrack {
         return this;
     }
     
+    public DetectorTrack setTime(double time){
+        this.taggerTime = time;
+        return this;
+    }
+
+    public DetectorTrack setID(int id){
+        this.taggerID = id;
+        return this;
+    }
+    
     public DetectorTrack setTrackEnd(double x, double y, double z){
         this.trackEnd.setXYZ(x, y, z);
         return this;
+    }
+    
+    public void setTrackIntersect(Point3D inter) {
+        this.trackIntersect = inter;
+    }
+    
+    public Point3D getTrackIntersect() {
+        return this.ctofIntersects.get(0);
     }
     
     public int      getCharge()   { return trackCharge;}
@@ -98,7 +142,13 @@ public class DetectorTrack {
         this.trackCrosses.add(line);
     }
     
+    public void addCTOFPoint(double x, double y, double z){
+        Point3D line = new Point3D(x,y,z);
+        this.ctofIntersects.add(line);
+    }
+    
     public int getCrossCount(){ return this.trackCrosses.size();}
+    public int getCTOFCount() {return this.ctofIntersects.size();}
     
     public Line3D getCross(int index){
         return this.trackCrosses.get(index);
@@ -111,6 +161,8 @@ public class DetectorTrack {
     public Line3D getLastCross(){
         return this.trackCrosses.get(this.trackCrosses.size()-1);
     }
+    
+    
     
     @Override
     public String toString(){

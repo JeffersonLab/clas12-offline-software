@@ -6,6 +6,7 @@
 package org.jlab.service.eb;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
@@ -34,17 +35,21 @@ public class EBEngine extends ReconstructionEngine {
         int eventType = EBio.TRACKS_HB;
         
         String particleBank  = "RECHB::Particle";
-        String detectorBank  = "RECHB::Detector";
+        String calorimeterBank  = "RECHB::Calorimeter";
+        String scintillatorBank = "RECHB::Scintillator";
         String cherenkovBank = "RECHB::Cherenkov";
         String eventBank     = "REC::Event";
-        
+        //String matrixBank    = "REC::TBCovMat";
         
         //System.out.println(" EVENT BUILDER = " + EBio.isTimeBased(de));
         if(EBio.isTimeBased(de)==true){
             eventType = EBio.TRACKS_TB;
             particleBank = "REC::Particle";
-            detectorBank = "REC::Detector";
+            calorimeterBank = "REC::Calorimeter";
+            scintillatorBank = "REC::Scintillator";
             cherenkovBank = "REC::Cherenkov";
+            eventBank =  "REC::Event";
+            //matrixBank    = "REC::TBCovMat";
         }
         
         int run   = 10;
@@ -64,29 +69,43 @@ public class EBEngine extends ReconstructionEngine {
         
         EventBuilder eb = new EventBuilder();
         
-        List<DetectorResponse>  responseECAL = DetectorResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
-        List<DetectorResponse>  responseFTOF = DetectorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,5.0);
+        List<CalorimeterResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
+        List<ScintillatorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,5.0);
+        List<ScintillatorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF,5.0);
         List<CherenkovResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        /*
-        System.out.println("---------");
-        for(DetectorResponse r : responseFTOF ){
-            System.out.println(r);
-        }*/
+        List<TaggerResponse> ft_tracks = TaggerResponse.readHipoEvent(de, "FT::particles");
+
         
-        eb.addDetectorResponses(responseFTOF);
-        eb.addDetectorResponses(responseECAL);
+//        System.out.println("---------");
+//        for(ScintillatorResponse r : responseCTOF ){
+//            System.out.println(r);
+//        }
+        
+        eb.addScintillatorResponses(responseFTOF);
+        eb.addScintillatorResponses(responseCTOF);
+        eb.addCalorimeterResponses(responseECAL);
         eb.addCherenkovResponses(responseHTCC);
+
         
+        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
+        eb.addCentralTracks(ctracks);
+
         if(eventType==EBio.TRACKS_HB){
             List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, "HitBasedTrkg::HBTracks");
+
             //System.out.println("LOADING HIT BASED TRACKS SIZE = " + tracks.size());
-            eb.addTracks(tracks);
+            eb.addHBTracks(tracks);
         } else {
             List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, "TimeBasedTrkg::TBTracks");
-            eb.addTracks(tracks);
+            //List<double[]> covariant_matrices = DetectorData.readTBCovMat(de, "TimeBasedTrkg::TBCovMat");
+            eb.addTBTracks(tracks);
+            //System.out.println("LOADING TIME BASED TRACKS SIZE = " + tracks.size());
         }
         
+        //System.out.println("Number of particles before matching  " + eb.getEvent().getParticles().size());
+        
         eb.processHitMatching();
+        eb.addTaggerTracks(ft_tracks);
         eb.processNeutralTracks();        
         eb.assignTrigger();
 
@@ -97,29 +116,36 @@ public class EBEngine extends ReconstructionEngine {
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
+
         
-        //System.out.println(eb.getEvent().toString());
+       //System.out.println(eb.getEvent().toString());
+        
         
         if(eb.getEvent().getParticles().size()>0){
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
-            List<DetectorResponse>  responses = eb.getEvent().getDetectorResponseList();
-            //List<CherenkovResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
-            DataBank bankD = DetectorData.getDetectorResponseBank(responses, de, detectorBank);
-            //DataBank bankC = DetectorData.getCherenkovResponseBank(cherenkovs, de, detectorBank);
-            //DataBank bankE = DetectorData.getEventBank(eb.getEvent(), de, detectorBank);
-            de.appendBanks(bankP,bankD);
-            //de.appendBanks(bankP,bankD,bankE);
-            if(eb.getEvent().getParticle(0).getPid()==11){
-               
-               /* eb.show();
-                DataBank bank = de.getBank("MC::Particle");
-                bank.show();*/
+            List<CalorimeterResponse>  calorimeters = eb.getEvent().getCalorimeterResponseList();
+            List<ScintillatorResponse> scintillators = eb.getEvent().getScintillatorResponseList();
+            List<CherenkovResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
+            DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
+            DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
+            DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
+            //DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
+            //DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
+            de.appendBanks(bankP,bankCal,bankSci,bankChe);
+            if(EBio.isTimeBased(de)==true){
+                //de.appendBanks(bankMat);
             }
+//            if(eb.getEvent().getParticle(0).getPid()==11){
+//               
+//                eb.show();
+//                DataBank bank = de.getBank("MC::Particle");
+//                bank.show();
+//            }
         }
 
             
-//        for(int i = 0 ; i < eb.getEvent().getParticles().size() ; i++) {
-//            System.out.println("Particle ID  " + eb.getEvent().getParticles().get(i).getPid());
+//       for(int i = 0 ; i < eb.getEvent().getParticles().size() ; i++) {
+//            System.out.println("Momentum  " + eb.getEvent().getParticles().get(i).vector().mag());
 //        }
 
 /*
