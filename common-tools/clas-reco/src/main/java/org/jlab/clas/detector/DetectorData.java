@@ -182,9 +182,9 @@ public class DetectorData {
             bank.setFloat("vy", row, (float) particles.get(row).vertex().y());
             bank.setFloat("vz", row, (float) particles.get(row).vertex().z());
             
-            bank.setFloat("mass", row, (float) particles.get(row).getMass());
+//            bank.setFloat("mass", row, (float) particles.get(row).getMass());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
-            bank.setByte("status", row, (byte) particles.get(row).getStatus());
+            bank.setShort("status", row, (short) particles.get(row).getStatus());
             bank.setFloat("chi2pid", row, (float) 0.0);
         }
         return bank;
@@ -204,8 +204,8 @@ public class DetectorData {
            bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
-           bank.setShort("sector", row, (short) r.getDescriptor().getSector());
-           bank.setShort("layer", row, (short) r.getDescriptor().getLayer());
+           bank.setByte("sector", row, (byte) r.getDescriptor().getSector());
+           bank.setByte("layer", row, (byte) r.getDescriptor().getLayer());
            bank.setFloat("x", row, (float) r.getPosition().x());
            bank.setFloat("y", row, (float) r.getPosition().y());
            bank.setFloat("z", row, (float) r.getPosition().z());
@@ -236,8 +236,8 @@ public class DetectorData {
            bank.setShort("index",row,(short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
-           bank.setShort("sector", row, (short) r.getDescriptor().getSector());
-           bank.setShort("layer", row, (short) r.getDescriptor().getLayer());
+           bank.setByte("sector", row, (byte) r.getDescriptor().getSector());
+           bank.setByte("layer", row, (byte) r.getDescriptor().getLayer());
            bank.setShort("component", row, (short) r.getDescriptor().getComponent());
            bank.setFloat("x", row, (float) r.getPosition().x());
            bank.setFloat("y", row, (float) r.getPosition().y());

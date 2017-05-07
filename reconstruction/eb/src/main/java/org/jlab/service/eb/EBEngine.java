@@ -131,7 +131,10 @@ public class EBEngine extends ReconstructionEngine {
             DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
             //DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
             //DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
-            de.appendBanks(bankP,bankCal,bankSci,bankChe);
+            de.appendBanks(bankP);
+            if(bankCal.rows()>0) de.appendBanks(bankCal);
+            if(bankSci.rows()>0) de.appendBanks(bankSci);
+            if(bankChe.rows()>0) de.appendBanks(bankChe);
             if(EBio.isTimeBased(de)==true){
                 //de.appendBanks(bankMat);
             }
