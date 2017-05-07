@@ -32,7 +32,7 @@ public class ScintillatorResponse {
     private Double           detectorEnergy = 0.0;
     private Double           particlePath   = 0.0;
     private int              association    = -1;
-    private int             component = -1;
+//    private int             component = -1;
     private double              hitQuality = 0.0;
     private int                 hitIndex = -1;
     
@@ -49,11 +49,11 @@ public class ScintillatorResponse {
     public void   setMatchPosition(double x, double y, double z){this.hitPositionMatched.setXYZ(x, y, z);}
     public void   setPath(double path){ this.particlePath = path;}
     public void   setEnergy(double energy) { this.detectorEnergy = energy; }
-    public void   setComponent(int paddle) {this.component = paddle;}
+//    public void   setComponent(int paddle) {this.component = paddle;}
     public void   setHitQuality(double q) {this.hitQuality = q;}
     public void   setHitIndex(int index) {this.hitIndex = index;}
     
-    public int    getComponent() {return this.component;}
+//    public int    getComponent() {return this.component;}
     public int      getHitIndex(){return this.hitIndex;}
     public double getTime(){ return this.detectorTime;}
     public double getEnergy(){ return this.detectorEnergy; }
@@ -119,16 +119,14 @@ public class ScintillatorResponse {
             for(int row = 0; row < nrows; row++){
                 int sector = bank.getByte("sector", row);
                 int  layer = bank.getByte("layer",  row);
+                int component = bank.getShort("component",row);                
                 
-                
-                ScintillatorResponse  response = new ScintillatorResponse(sector,layer,0);
+                ScintillatorResponse  response = new ScintillatorResponse(sector,layer,component);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
                 float z = bank.getFloat("z", row);
-                int component = bank.getShort("component",row);
                 response.setHitIndex(row);
-                response.setComponent(component);
                 response.setPosition(x, y, z);
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
