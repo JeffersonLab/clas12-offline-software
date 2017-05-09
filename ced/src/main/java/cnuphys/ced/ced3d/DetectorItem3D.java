@@ -3,7 +3,6 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 
 import item3D.Item3D;
-import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.fastmc.FastMCManager;

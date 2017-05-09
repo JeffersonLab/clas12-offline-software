@@ -33,6 +33,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
@@ -58,6 +59,13 @@ import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class CentralZView extends CedView implements ChangeListener {
+
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "Central Z";
 
 	private static Geometry geo;
 
@@ -131,6 +139,9 @@ public class CentralZView extends CedView implements ChangeListener {
 		// make it square
 		int width = d.width;
 		int height = width;
+		
+		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
+
 
 		// create the view
 		view = new CentralZView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle,
@@ -143,7 +154,7 @@ public class CentralZView extends CedView implements ChangeListener {
 				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
 				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
-				PropertySupport.TITLE, "Central Z",
+				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view,
@@ -908,5 +919,30 @@ public class CentralZView extends CedView implements ChangeListener {
 			getContainer().setDirty(true);
 			getContainer().refresh();
 		}
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		CentralZView view = createCentralZView();
+		view.setBounds(vr);
+		return view;
+
 	}
 }

@@ -65,6 +65,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 
@@ -104,6 +105,9 @@ public class SectorView extends CedView implements ChangeListener {
 	
 	// LTCC Items, 36 per sector, not geometrically realistic
 	private SectorLTCCItem _ltcc[][] = new SectorLTCCItem[18][2];
+	
+	//for naming clones
+	private static int CLONE_COUNT[] = {0, 0, 0};
 
 	
 	// superlayer (graphical) items. The first index [0..1] is for upper and
@@ -155,7 +159,7 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param keyVals
 	 *            variable set of arguments.
 	 */
-	public SectorView(DisplaySectors displaySectors, Object... keyVals) {
+	private SectorView(DisplaySectors displaySectors, Object... keyVals) {
 		super(keyVals);
 		_displaySectors = displaySectors;
 		
@@ -212,6 +216,10 @@ public class SectorView extends CedView implements ChangeListener {
 		case SECTORS36:
 			title += "3 and 6";
 			break;
+		}
+		
+		if (CLONE_COUNT[displaySectors.ordinal()] > 0) {
+			title += "_(" + CLONE_COUNT[displaySectors.ordinal()] + ")";
 		}
 
 		// create the view
@@ -1477,6 +1485,31 @@ public class SectorView extends CedView implements ChangeListener {
 		polys[2] = new WorldPolygon(x, y, 5);
 
 		return polys;
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT[_displaySectors.ordinal()]++;
+		
+		//limit
+		if (CLONE_COUNT[_displaySectors.ordinal()] > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		SectorView view = createSectorView(_displaySectors);
+		view.setBounds(vr);
+		return view;
+
 	}
 	
 }

@@ -13,6 +13,9 @@ import java.util.Arrays;
  */
 public class GridCoordinate {
 
+	private boolean _isUniform = true;
+	
+	
 	/**
 	 * The minimum value.
 	 */
@@ -76,6 +79,13 @@ public class GridCoordinate {
 	public int getIndex(double val) {
 		if ((val < _min) || (val > _max)) {
 			return -1;
+		}
+		
+		
+		if (_isUniform) {
+			int uindex = (int) ((val-_min)/_delta);
+			uindex = Math.max(0,  Math.min(uindex, (_numPoints - 2)));
+			return uindex;
 		}
 
 		int index = Arrays.binarySearch(_values, val);
@@ -155,9 +165,14 @@ public class GridCoordinate {
 	 *            the value
 	 * @return the fraction of spacing.
 	 */
-	public double getFraction(double val) {
-		double vv = (val - _min) / _delta;
-		return vv - Math.floor(vv);
+	public double getFraction(double val, int index) {
+		
+		double mv = _min + index*_delta;
+		return (val - mv)/_delta;
+//		
+//		
+//		double vv = (val - _min) / _delta;
+//		return vv - Math.floor(vv);
 	}
 
 	/**

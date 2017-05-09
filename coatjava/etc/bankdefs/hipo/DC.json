@@ -94,7 +94,7 @@
     "info": "reconstructed segment trajectory from hit-based tracking",
     "items": [
        {"name":"segmentID",    "id":1, "type":"int16", "info":"id of the segment"},
-       {"name":"sector",       "id":2, "type":"int8",  "info":"sector of FTOF"},
+       {"name":"sector",       "id":2, "type":"int8",  "info":"sector of DC"},
        {"name":"superlayer",   "id":3, "type":"int8",  "info":"superlayer"},
        {"name":"layer",        "id":4, "type":"int8",  "info":"layer"},
        {"name":"matchedHitID", "id":5, "type":"int16", "info":"matched hit id"},
@@ -162,7 +162,9 @@
         {"name":"Cross2_ID",     "id":29, "type":"int16",  "info":"id of second cross on track"},
         {"name":"Cross3_ID",     "id":30, "type":"int16",  "info":"id of third cross on track"},
         {"name":"q",        	 "id":31, "type":"int8",   "info":"charge of the track"},
-        {"name":"pathlength",    "id":32, "type":"float",   "info":"pathlength of the track"}
+        {"name":"pathlength",    "id":32, "type":"float",   "info":"pathlength of the track"},
+        {"name":"chi2",          "id":33, "type":"float",   "info":"fit chi2 of the track"},
+        {"name":"ndf",           "id":34, "type":"int16",   "info":"fit ndf of the track"}
     ]
  },
  
@@ -316,7 +318,9 @@
         {"name":"Cross2_ID",     "id":29, "type":"int16",  "info":"id of second cross on track"},
         {"name":"Cross3_ID",     "id":30, "type":"int16",  "info":"id of third cross on track"},
         {"name":"q",        	 "id":31, "type":"int8",   "info":"charge of the track"},
-        {"name":"pathlength",    "id":32, "type":"float",   "info":"pathlength of the track"}
+        {"name":"pathlength",    "id":32, "type":"float",   "info":"pathlength of the track"},
+        {"name":"chi2",          "id":33, "type":"float",   "info":"fit chi2 of the track"},
+        {"name":"ndf",           "id":34, "type":"int16",   "info":"fit ndf of the track"}
     ]
  },
  {

@@ -27,19 +27,17 @@ import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
-import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
-import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
@@ -51,13 +49,19 @@ import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.micromegas.MicroMegasSector;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 import cnuphys.lund.X11Colors;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class CentralXYView extends CedXYView {
+	
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "Central XY";
+
 
 	private SVTxyPanel _closestPanel;
 
@@ -143,6 +147,8 @@ public class CentralXYView extends CedXYView {
 		// make it square
 		int width = d.width;
 		int height = width;
+		
+		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
 		// create the view
 		final CentralXYView view = new CentralXYView(
@@ -156,7 +162,7 @@ public class CentralXYView extends CedXYView {
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
-				PropertySupport.TITLE, "Central XY",
+				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view,
@@ -694,5 +700,30 @@ public class CentralXYView extends CedXYView {
 			Point2D.Double wp) {
 		wp.x = x;
 		wp.y = y;
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		CentralXYView view = createCentralXYView();
+		view.setBounds(vr);
+		return view;
+
 	}
 }

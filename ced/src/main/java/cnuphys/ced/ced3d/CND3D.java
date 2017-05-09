@@ -1,7 +1,5 @@
 package cnuphys.ced.ced3d;
 
-import bCNU3D.Panel3D;
-
 import com.jogamp.opengl.GLAutoDrawable;
 
 /**

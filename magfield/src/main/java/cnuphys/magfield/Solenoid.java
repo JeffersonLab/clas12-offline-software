@@ -291,8 +291,8 @@ public final class Solenoid extends MagneticField {
 			return;
 		}
 
-		double f1 = q2Coordinate.getFraction(q2);
-		double f2 = q3Coordinate.getFraction(q3);
+		double f1 = q2Coordinate.getFraction(q2, n1);
+		double f2 = q3Coordinate.getFraction(q3, n2);
 
 		if (!_interpolate) {
 			f1 = (f1 < 0.5) ? 0 : 1;
@@ -364,8 +364,8 @@ public final class Solenoid extends MagneticField {
 			return 0f;
 		}
 
-		double f1 = q2Coordinate.getFraction(q2);
-		double f2 = q3Coordinate.getFraction(q3);
+		double f1 = q2Coordinate.getFraction(q2, n1);
+		double f2 = q3Coordinate.getFraction(q3, n2);
 
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;

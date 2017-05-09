@@ -34,29 +34,27 @@
 	    <column name="side"    num = "2"   type = "int32"  info = "left or right index"/>
 	    <column name="segment" num = "3"   type = "int32"  info = "segment"/>
 	    <column name="nphe"    num = "4"   type = "int32"  info = "number of photons arrived"/>
-	    <column name="npheD"   num = "5"   type = "int32"  info = "number of photoelectrons detected"/>
-		  <column name="time"    num = "6"   type = "float64"  info = "average time of the hit"/>
+	    <column name="npheD"   num = "5"   type = "int32"  info = "number of photo-electrons"/>
+		  <column name="time"    num = "6"   type = "float64" info = "average time of the hit"/>
 	    <column name="hitn"    num = "99"  type = "int32"  info = "number of hits"/>
 	  </section>
 	</bank>
-	<bank name="LTCCRec" tag="1410" info="LTCC Reconstructed Bank">
+	<bank name="LTCC" tag="1410" info="reconstructed clusters from the LTCC">
 	  <section name="clusters" tag="1411" num="0" info="LTCC reconstructed clusters">
-	    <column name="nhits"    num="1"  type="int32"   info="number of hits in the cluster"/>
-	    <column name="nphe"     num="2"  type="int32"   info="number of hpotoelectrons"/>
-	    <column name="ntheta"   num="3"  type="int32"   info="ntheta"/>
-	    <column name="nphi"     num="4"  type="int32"   info="nphi"/>
-	    <column name="mintheta" num="5"  type="int32"   info="minimum theta angle"/>
-	    <column name="maxtheta" num="6"  type="int32"   info="maximum theta angle"/>
-	    <column name="minphi"   num="7"  type="int32"   info="minimum phi angle"/>
-	    <column name="maxphi"   num="8"  type="int32"   info="maximum phi angle"/>
-	    <column name="time"     num="9"  type="float64" info="cluster time"/>
-	    <column name="theta"    num="10" type="float64" info="theta angle"/>
-	    <column name="dtheta"   num="11" type="float64" info="error on theta angle"/>
-	    <column name="phi"      num="12" type="float64" info="phi angle"/>
-	    <column name="dphi"     num="13" type="float64" info="error on phi angle"/>
-      <column name="x"        num="14" type="float64" info="cluster x"/>
-      <column name="y"        num="15" type="float64" info="cluster y"/>
-      <column name="z"        num="16" type="float64" info="cluster z"/>
+	    <column name="id"       num="1"  type="int16"   info="id of the cluster"/>
+	    <column name="status"   num="2"  type="int8"    info="good (1) or bad (0)"/>
+	    <column name="sector"   num="3"  type="int8"    info="sector of LTCC"/>
+	    <column name="segment"  num="4"  type="int16"   info="weighted central cluster segment"/>
+      <column name="x"        num="5"  type="float"   info="crude cluster x (cm)"/>
+      <column name="y"        num="6"  type="float"   info="crude cluster y (cm)"/>
+      <column name="z"        num="7"  type="float"   info="crude cluster z (cm)"/>
+	    <column name="nphe"     num="8"  type="float"   info="number of photo-electrons"/>
+	    <column name="time"     num="9"  type="float"   info="cluster time"/>
+	    <column name="nHits"    num="10" type="in16"   info="number of hits in this cluster"/>
+	    <column name="minTheta" num="11" type="float"   info="minimum theta angle (deg)"/>
+	    <column name="maxTheta" num="12" type="float"   info="maximum theta angle (deg)"/>
+	    <column name="minPhi"   num="13" type="float"   info="minimum phi angle (deg)"/>
+	    <column name="maxPhi"   num="14" type="float"   info="maximum phi angle (deg)"/>
 	  </section>
 	</bank>
 </evio_dictionary>

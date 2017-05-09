@@ -17,13 +17,13 @@ import java.util.StringTokenizer;
  * @author Nicole Schumacher
  * @version 1.0
  */
-public final class Torus extends MagneticField {
+public class Torus extends MagneticField {
 
 	// private constructor
 	/**
 	 * Instantiates a new torus.
 	 */
-	private Torus() {
+	public Torus() {
 		setCoordinateNames("phi", "rho", "z");
 		_scaleFactor = -1; // default
 	}
@@ -123,16 +123,16 @@ public final class Torus extends MagneticField {
 	 * @param v the vector (float array) to represent.
 	 * @return a string representation of the vector (array).
 	 */
-	@Override
-	protected String vectorToString(float v[]) {
-		float vx = v[X] / 10;
-		float vy = v[Y] / 10;
-		float vz = v[Z] / 10;
-		float vLen = vectorLength(v) / 10;
-		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T", vx,
-				vy, vz, vLen);
-		return s;
-	}
+//	@Override
+//	protected String vectorToString(float v[]) {
+//		float vx = v[X] / 10;
+//		float vy = v[Y] / 10;
+//		float vz = v[Z] / 10;
+//		float vLen = vectorLength(v) / 10;
+//		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T", vx,
+//				vy, vz, vLen);
+//		return s;
+//	}
 
 	/**
 	 * @return the phiCoordinate
@@ -160,13 +160,13 @@ public final class Torus extends MagneticField {
 //		String cwd = System.getProperty("user.dir");
 //		System.out.println("CWD: " + cwd);
 
-		String asciiFileName = "../../../data/clas12TorusOriginalMap.dat.txt"; 
+		String asciiFileName = "../../../data/largeAsciiMap.txt"; 
 
 		File file = new File(asciiFileName);
 		long numMB = file.length() / 1000000;
 		System.out.println("Size of ascii file in MB: " + numMB);
 
-		String binaryFileName = "../../../data/clas12TorusOriginalMap.binary.dat";
+		String binaryFileName = "../../../data/clas12TorusOriginalMap.binary.v2.dat";
 		
 		int nPhi = 121;
 		int nRho = 251;
@@ -267,7 +267,8 @@ public final class Torus extends MagneticField {
 		}
 	}
 
-	private static String[] tokens(String str, String delimiter) {
+	//simple tokenizer
+	protected static String[] tokens(String str, String delimiter) {
 
 		StringTokenizer t = new StringTokenizer(str, delimiter);
 		int num = t.countTokens();
@@ -279,52 +280,76 @@ public final class Torus extends MagneticField {
 
 		return lines;
 	}
-//
-//	/**
-//	 * main method used for testing.
-//	 *
-//	 * @param arg command line arguments
-//	 */
-//	public static void main(String arg[]) {
-//
-//		boolean convert = true;
-//		if (convert) {
-//			asciiToBinary();
-//			System.exit(0);
-//		}
-//
-//		String path = null;
-//
-//		if ((arg != null) && (arg.length > 0)) {
-//			path = arg[0];
-//		}
-//
-//		if (path == null) {
-//			path = "data/clas12_torus_fieldmap_binary.dat";
-//		}
-//
-//		File file = new File(path);
-//
-//		Torus torus = null;
-//		try {
-//			torus = fromBinaryFile(file);
-//			System.out.println("Created field object.");
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//			System.exit(1);
-//		}
-//
-//		float x = 32.60f;
-//		float y = 106.62f;
-//		float z = 410.0f;
-//		float result[] = new float[3];
-//		torus.field(x, y, z, result);
-//
-//		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
-//
-//		String fieldStr = torus.vectorToString(result);
-//		System.out.println("Field: " + fieldStr);
-//	}
+
+	/**
+	 * main method used for testing.
+	 *
+	 * @param arg command line arguments
+	 */
+	public static void main(String arg[]) {
+
+		boolean convert = false;
+		if (convert) {
+			asciiToBinary();
+			System.exit(0);
+		}
+
+		String path = null;
+
+		if ((arg != null) && (arg.length > 0)) {
+			path = arg[0];
+		}
+
+		if (path == null) {
+			path = "../../../data/clas12_torus_fieldmap_binary.dat";
+		}
+
+		File file = new File(path);
+
+		Torus torus = null;
+		try {
+			torus = fromBinaryFile(file);
+			System.out.println("Created field object.");
+			setInterpolate(false);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		float x = 32.60f;
+		float y = 106.62f;
+		float z = 410.0f;
+		float result[] = new float[3];
+		torus.field(x, y, z, result);
+
+		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+
+		String fieldStr = torus.vectorToString(result);
+		System.out.println("Field: " + fieldStr);
+		
+		
+		x = (float) (44f*Math.cos(Math.toRadians(30)));
+		y = (float) (44f*Math.sin(Math.toRadians(30)));
+		z = 314f;
+		torus.field(-x, -y, z, result);
+
+		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+
+		fieldStr = torus.vectorToString(result);
+		System.out.println("Field: " + fieldStr);
+		
+		
+		x = 0f;
+		y = 39.93f;
+		z = 388.10f;
+		torus.field(-x, -y, z, result);
+
+		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+
+		fieldStr = torus.vectorToString(result);
+		System.out.println("Field: " + fieldStr);
+
+	}
 
 	/**
 	 * Get the name of the field

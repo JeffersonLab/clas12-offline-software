@@ -28,6 +28,7 @@ import cnuphys.bCNU.graphics.toolbar.UserToolBarComponent;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.BaseView;
+import cnuphys.bCNU.view.ViewManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
@@ -54,11 +55,15 @@ import org.jlab.io.base.DataEvent;
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
 		MagneticFieldChangeListener, IAccumulationListener, IClasIoEventListener {
+	
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
 		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
 	};
+	
+	//to add separator for first clone
+	private static boolean _firstClone = true;
 
 	// used for computing world circles
 	private static final int NUMCIRCPNTS = 40;
@@ -692,6 +697,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		case HIPOFILE:
 		case HIPORING:
 		case ET:
+		case EVIOFILE:
 			haveEvent = (_eventManager.getCurrentEvent() != null);
 			break;
 		case FASTMC:
@@ -1058,6 +1064,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		wp.x = pisect.z();
 		wp.y = Math.hypot(pisect.x(), pisect.y());
 		return pisect;
+	}
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		if (_firstClone) {
+			ViewManager.getInstance().getViewMenu().addSeparator();
+			_firstClone = false;
+		}
+		return null;
 	}
 
 }

@@ -11,21 +11,14 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.InputMap;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-
-import com.jogamp.newt.event.KeyEvent;
-
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
@@ -74,7 +67,6 @@ import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.ced.geometry.GeometryReportView;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
@@ -112,7 +104,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.992";
+	private static final String _release = "build 0.99.995";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -591,7 +583,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		fmenu.insertSeparator(0);
 
 		fmenu.add(ClasIoEventMenu.getRecentEventFileMenu(), 0);
-		fmenu.add(ClasIoEventMenu.getOpenEventFileItem(), 0);
+		fmenu.add(ClasIoEventMenu.getOpenEvioEventFileItem(), 0);
+		fmenu.add(ClasIoEventMenu.getOpenHipoEventFileItem(), 0);
 	}
 
 	// create the options menu

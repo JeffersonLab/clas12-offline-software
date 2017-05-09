@@ -33,6 +33,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
@@ -50,6 +51,14 @@ import cnuphys.ced.item.HexSectorItem;
 
 @SuppressWarnings("serial")
 public class DCXYView extends HexView {
+	
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "DC XY";
+
 
 	// sector items
 	private DCHexSectorItem _hexItems[];
@@ -173,7 +182,8 @@ public class DCXYView extends HexView {
 	 * @return the view
 	 */
 	public static DCXYView createDCXYView() {
-		DCXYView view = new DCXYView("Drift Chambers XY");
+		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
+		DCXYView view = new DCXYView(title);
 
 		return view;
 	}
@@ -545,6 +555,31 @@ public class DCXYView extends HexView {
 	 */
 	public HexSectorItem getHexSectorItem(int sector) {
 		return _hexItems[sector - 1];
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		DCXYView view = createDCXYView();
+		view.setBounds(vr);
+		return view;
+
 	}
 
 }

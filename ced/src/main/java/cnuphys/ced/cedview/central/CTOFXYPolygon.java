@@ -5,13 +5,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Point2D;
-import java.util.List;
-
-import org.jlab.geom.component.ScintillatorPaddle;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.cedview.CedXYView;
-import cnuphys.ced.geometry.CNDGeometry;
 import cnuphys.ced.geometry.CTOFGeometry;
 
 public class CTOFXYPolygon extends Polygon {

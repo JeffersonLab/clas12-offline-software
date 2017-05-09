@@ -1,8 +1,6 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.Color;
-import java.util.List;
-
 import com.jogamp.opengl.GLAutoDrawable;
 
 import bCNU3D.Support3D;

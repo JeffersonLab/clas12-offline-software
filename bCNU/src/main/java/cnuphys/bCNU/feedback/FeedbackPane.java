@@ -1,7 +1,6 @@
 package cnuphys.bCNU.feedback;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.BorderFactory;

@@ -13,6 +13,35 @@
        {"name":"vz",  "id":7, "type":"float", "info":"z component of the vertex"}
     ]
   },
+  {
+     "bank": "REC::Event",
+     "group": 21,
+     "info": "Event Header Bank",
+     "items": [
+       {"name":"NRUN", "id":1, "type":"int32", "info":"Run Number"},
+       {"name":"NEVENT",  "id":2, "type":"int32", "info":"Event Number"},
+       {"name":"EVNTime",  "id":3, "type":"float", "info":"Event Time"},       
+       {"name":"TYPE",  "id":3, "type":"int8", "info":"Event Type (Data or MC)"},
+       {"name":"EvCAT", "id":4, "type":"int16", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
+       {"name":"NPGP",  "id":5, "type":"int16", "info":"Number of Final (Timed-based) Reconstructed Particles*100 + Number of Geometrically Reconstructed Particles"},
+       {"name":"TRG",  "id":6, "type":"int16", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
+       {"name":"L1", "id":7, "type":"int16", "info":"L1 Trigger Bits & Prescale Factor"},
+       {"name":"L2",  "id":8, "type":"int16", "info":"L2 Trigger Bits & Prescale Factor"},
+       {"name":"L3",  "id":9, "type":"int16", "info":"L3 Trigger Bits & Prescale Factor"},
+       {"name":"FC", "id":10, "type":"float", "info":"Faraday Cup (Coulomb)"},
+       {"name":"FCG",  "id":11, "type":"float", "info":"Faraday Cup Gated (Coulomb)"},
+       {"name":"CLOCK",  "id":12, "type":"double", "info":"Clock"},
+       {"name":"CLOCKG", "id":13, "type":"double", "info":"Clock Gated"},
+       {"name":"STTime",  "id":14, "type":"float", "info":"Event Start Time (ns)"},
+       {"name":"RFTime",  "id":15, "type":"float", "info":"RF Time (ns)"},
+       {"name":"Helic", "id":16, "type":"int8", "info":"Helicity of Event"},
+       {"name":"PSync",  "id":17, "type":"int8", "info":"Pair Sync, basically helicity clock (0,1)"},
+       {"name":"TSett",  "id":18, "type":"int8", "info":"T_settle, if set, helicity is uncertain"},
+       {"name":"Pattern",  "id":19, "type":"int8", "info":"Start of each pattern for beam helicity"},
+       {"name":"HelicD",  "id":20, "type":"int8", "info":"Actual reported helicity, delayed by n-windows"},
+       {"name":"PTIME",  "id":21, "type":"float", "info":"Event Processing Time (UNIX Time = seconds)"}
+     ]
+  },
  {
      "bank": "RECHB::Particle",
      "group": 22,
@@ -26,23 +55,22 @@
        {"name":"vy",  "id":6, "type":"float", "info":"y component of the vertex"},
        {"name":"vz",  "id":7, "type":"float", "info":"z component of the vertex"},
        {"name":"charge",  "id":8,  "type":"int8",  "info":"particle charge"},
-       {"name":"mass",    "id":9,  "type":"float", "info":"particle mass measured by TOF"},
-       {"name":"beta",    "id":10, "type":"float", "info":"particle beta measured by TOF"},
-       {"name":"chi2pid", "id":11, "type":"float", "info":"Chi2 of assigned PID"},
-       {"name":"status",  "id":12, "type":"int8",  "info":"particle status (represents detector collection it passed)"}
+       {"name":"beta",    "id":9, "type":"float",  "info":"particle beta measured by TOF"},
+       {"name":"chi2pid", "id":10, "type":"float", "info":"Chi2 of assigned PID"},
+       {"name":"status",  "id":11, "type":"int16",  "info":"particle status (represents detector collection it passed)"}
      ]
   },  
   {
-     "bank": "RECHB::Detector",
+     "bank": "RECHB::Scintillator",
      "group": 23,
-     "info": "Detector Responses for Particles bank",
+     "info": "Scintillator Responses for Particles bank",
      "items": [
-         {"name":"index",     "id":1, "type":"int16", "info":"index of the array"},
-         {"name":"pindex",    "id":2, "type":"int16", "info":"number of row in the particle bank hit is associated with"},
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the hit in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"row number in the particle bank hit is associated with"},
          {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
-         {"name":"sector",    "id":4, "type":"int16", "info":"Sector of the Detector Hit"},
-         {"name":"layer",     "id":5, "type":"int16", "info":"Layer of the detector hit"},
-         {"name":"component", "id":6, "type":"int16", "info":"Component of the Detector"},
+         {"name":"sector",    "id":4, "type":"int8",  "info":"Sector of the Detector hit"},
+         {"name":"layer",     "id":5, "type":"int8",  "info":"Layer of the Detector hit"},
+         {"name":"component", "id":6, "type":"int16", "info":"Component of the Detector hit"},
          {"name":"x",  "id":7,  "type":"float", "info":"X coordinate of the hit"},
          {"name":"y",  "id":8,  "type":"float", "info":"Y coordinate of the hit"},
          {"name":"z",  "id":9,  "type":"float", "info":"Z coordinate of the hit"},
@@ -51,12 +79,127 @@
          {"name":"hz", "id":12, "type":"float", "info":"Z coordinate of the matched hit"},
          {"name":"path",   "id":13, "type":"float", "info":"Path from vertex to the hit position"}, 
          {"name":"time",   "id":14, "type":"float", "info":"Time associated with the hit"}, 
-         {"name":"energy", "id":15, "type":"float", "info":"Energy associated with the hit"}                   
+         {"name":"energy", "id":15, "type":"float", "info":"Energy associated with the hit"},                   
+         {"name":"chi2", "id":16, "type":"float", "info":"Chi2 (or quality) of hit-track matching"}                   
+     ]
+  },
+{
+     "bank": "RECHB::Cherenkov",
+     "group": 24,
+     "info": "Cherenkov Responses for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the hit in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int8",  "info":"Sector of the Detector hit"},
+         {"name":"x",         "id":5, "type":"float", "info":"X coordinate of the hit"},
+         {"name":"y",         "id":6, "type":"float", "info":"Y coordinate of the hit"},
+         {"name":"z",         "id":7, "type":"float", "info":"Z coordinate of the hit"},
+         {"name":"theta",     "id":8, "type":"float", "info":"Theta of the matched hit"},
+         {"name":"phi",       "id":9, "type":"float", "info":"Phi of the mathced hit"},
+         {"name":"dtheta",    "id":10, "type":"float", "info":"Expected Theta Resolution"},
+         {"name":"dphi",      "id":11, "type":"float", "info":"Expected Phi Resolution"},   
+         {"name":"path",      "id":12, "type":"float", "info":"Path from vertex to the hit position"}, 
+         {"name":"time",      "id":13, "type":"float", "info":"Time associated with the hit"}, 
+         {"name":"nphe",      "id":14, "type":"int16", "info":"Number of photoelectrons from Cherenkov radiation"},   
+         {"name":"chi2",      "id":15, "type":"float", "info":"Chi2 (or quality) of hit-track matching"}                  
+     ]
+    },
+  {
+     "bank": "RECHB::Calorimeter",
+     "group": 25,
+     "info": "Calorimeter Responses for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the hit in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int8",  "info":"Sector of the Detector hit"},
+         {"name":"layer",     "id":5, "type":"int8",  "info":"Layer of the Detector hit"},
+         {"name":"x",  "id":6,  "type":"float", "info":"X coordinate of the hit"},
+         {"name":"y",  "id":7,  "type":"float", "info":"Y coordinate of the hit"},
+         {"name":"z",  "id":8,  "type":"float", "info":"Z coordinate of the hit"},
+         {"name":"hx", "id":9,  "type":"float", "info":"X coordinate of the matched hit"},
+         {"name":"hy", "id":10, "type":"float", "info":"Y coordinate of the mathced hit"},
+         {"name":"hz", "id":11, "type":"float", "info":"Z coordinate of the matched hit"},
+         {"name":"lu", "id":12, "type":"float", "info":"distance on U-side"},
+         {"name":"lv", "id":13, "type":"float", "info":"distance on V-side"},
+         {"name":"lw", "id":14, "type":"float", "info":"distance on W-side"},
+         {"name":"du", "id":15, "type":"float", "info":"shower width on U-side"},
+         {"name":"dv", "id":16, "type":"float", "info":"shower width on V-side"},
+         {"name":"dw", "id":17, "type":"float", "info":"shower width on w-side"},
+         {"name":"m2u", "id":18, "type":"float", "info":"2nd moment of the shower on U-side"},
+         {"name":"m2v", "id":19, "type":"float", "info":"2nd moment of the shower on V-side"},
+         {"name":"m2w", "id":20, "type":"float", "info":"2nd moment of the shower on W-side"},
+         {"name":"path",   "id":21, "type":"float", "info":"Path from vertex to the hit position"}, 
+         {"name":"time",   "id":22, "type":"float", "info":"Time associated with the hit"}, 
+         {"name":"energy", "id":23, "type":"float", "info":"Energy associated with the hit"},                   
+         {"name":"chi2", "id":24, "type":"float", "info":"Chi2 (or quality) of hit-track matching"}                   
+     ]
+  },
+  {
+     "bank": "RECHB::Tracks",
+     "group": 26,
+     "info": "Track information for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16",  "info":"index of the track in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16",  "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"status",    "id":4, "type":"int16",  "info":"status of the track"},
+         {"name":"q",         "id":5, "type":"int8",  "info":"charge of the track"},
+         {"name":"px_nomm",  "id":6, "type":"float", "info":"x component of the momentum with no MM"},
+         {"name":"py_nomm",  "id":7, "type":"float", "info":"y component of the momentum with no MM"},
+         {"name":"pz_nomm",  "id":8, "type":"float", "info":"z component of the momentum with no MM"},
+         {"name":"vx_nomm",  "id":9, "type":"float", "info":"x component of the vertex"},
+         {"name":"vy_nomm",  "id":10, "type":"float", "info":"y component of the vertex"},
+         {"name":"vz_nomm",  "id":11, "type":"float", "info":"z component of the vertex"},
+         {"name":"NDF_nomm", "id":12, "type":"float", "info":"number of degrees of freedom in track fitting with no MM"},
+         {"name":"NDF",      "id":13, "type":"float", "info":"number of degrees of freedom in track fitting"},
+         {"name":"chi2_nomm", "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
+         {"name":"chi2",      "id":15, "type":"float", "info":"Chi2 (or quality) track fitting"}
+     ]
+  },
+  {
+     "bank": "RECHB::TrackCross",
+     "group": 27,
+     "info": "Track Cross information for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16",  "info":"index of the cross in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16",  "info":"row number in the track bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int8",   "info":"sector of the track"},
+         {"name":"layer",     "id":5, "type":"int8",   "info":"layer of the track"},
+         {"name":"c_x",       "id":6, "type":"float",  "info":"Cross x-position in the lab (in cm)"},
+         {"name":"c_y",       "id":7, "type":"float",  "info":"Cross y-position in the lab (in cm)"},
+         {"name":"c_z",       "id":8, "type":"float",  "info":"Cross z-position in the lab (in cm)"},
+         {"name":"c_ux",      "id":9, "type":"float",  "info":"Cross unit x-direction vector in the lab"},
+         {"name":"c_uy",      "id":10, "type":"float", "info":"Cross unit y-direction vector in the lab"},
+         {"name":"c_uz",      "id":11, "type":"float", "info":"Cross unit z-direction vector in the lab"}
+     ]
+  },
+  {
+     "bank": "RECHB::ForwardTagger",
+     "group": 28,
+     "info": "Forward Tagger information for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16",  "info":"index of the cluster in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16",  "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"size",      "id":4, "type":"int16",  "info":"size of the cluster"},
+         {"name":"x",         "id":5,  "type":"float", "info":"X coordinate of the cluster"},
+         {"name":"y",         "id":6,  "type":"float", "info":"Y coordinate of the cluster"},
+         {"name":"z",         "id":7,  "type":"float", "info":"Z coordinate of the cluster"},
+         {"name":"dx",        "id":8,  "type":"float", "info":"Cluster width in x" },
+         {"name":"dy",        "id":9,  "type":"float", "info":"Cluster width in y" },
+         {"name":"radius",    "id":10, "type":"float", "info":"Cluster radius" },
+         {"name":"path",      "id":11, "type":"float", "info":"Path from vertex to the cluster position"}, 
+         {"name":"time",      "id":12, "type":"float", "info":"Time associated with the cluster"}, 
+         {"name":"energy",    "id":13, "type":"float", "info":"Energy associated with the cluster"},                   
+         {"name":"chi2",      "id":14, "type":"float", "info":"Chi2 (or quality) of cluster-particle matching"} 
      ]
   },
   {
      "bank": "REC::Particle",
-     "group": 24,
+     "group": 29,
      "info": "Reconstructed Particle Information",
      "items": [
        {"name":"pid", "id":1, "type":"int32", "info":"particle id in LUND conventions"},
@@ -67,23 +210,22 @@
        {"name":"vy",  "id":6, "type":"float", "info":"y component of the vertex"},
        {"name":"vz",  "id":7, "type":"float", "info":"z component of the vertex"},
        {"name":"charge",  "id":8,  "type":"int8",  "info":"particle charge"},
-       {"name":"mass",    "id":9,  "type":"float", "info":"particle mass measured by TOF"},
-       {"name":"beta",    "id":10, "type":"float", "info":"particle beta measured by TOF"},
-       {"name":"chi2pid", "id":11, "type":"float", "info":"Chi2 of assigned PID"},
-       {"name":"status",  "id":12, "type":"int8",  "info":"particle status (represents detector collection it passed)"}
+       {"name":"beta",    "id":9, "type":"float", "info":"particle beta measured by TOF"},
+       {"name":"chi2pid", "id":10, "type":"float", "info":"Chi2 of assigned PID"},
+       {"name":"status",  "id":11, "type":"int16", "info":"particle status (represents detector collection it passed)"}
      ]
   },  
   {
-     "bank": "REC::Detector",
-     "group": 25,
-     "info": "Detector Responses for Particles bank",
+     "bank": "REC::Scintillator",
+     "group": 30,
+     "info": "Scintillator Responses for Particles bank",
      "items": [
-         {"name":"index",     "id":1, "type":"int16", "info":"index of the array"},
-         {"name":"pindex",    "id":2, "type":"int16", "info":"number of row in the particle bank hit is associated with"},
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the hit in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"row number in the particle bank hit is associated with"},
          {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
-         {"name":"sector",    "id":4, "type":"int16", "info":"Sector of the Detector Hit"},
-         {"name":"layer",     "id":5, "type":"int16", "info":"Layer of the detector hit"},
-         {"name":"component", "id":6, "type":"int16", "info":"Component of the Detector"},
+         {"name":"sector",    "id":4, "type":"int8",  "info":"Sector of the Detector hit"},
+         {"name":"layer",     "id":5, "type":"int8",  "info":"Layer of the Detector hit"},
+         {"name":"component", "id":6, "type":"int16", "info":"Component of the Detector hit"},
          {"name":"x",  "id":7,  "type":"float", "info":"X coordinate of the hit"},
          {"name":"y",  "id":8,  "type":"float", "info":"Y coordinate of the hit"},
          {"name":"z",  "id":9,  "type":"float", "info":"Z coordinate of the hit"},
@@ -92,7 +234,145 @@
          {"name":"hz", "id":12, "type":"float", "info":"Z coordinate of the matched hit"},
          {"name":"path",   "id":13, "type":"float", "info":"Path from vertex to the hit position"}, 
          {"name":"time",   "id":14, "type":"float", "info":"Time associated with the hit"}, 
-         {"name":"energy", "id":15, "type":"float", "info":"Energy associated with the hit"}                   
+         {"name":"energy", "id":15, "type":"float", "info":"Energy associated with the hit"},                   
+         {"name":"chi2", "id":16, "type":"float", "info":"Chi2 (or quality) of hit-track matching"}                   
      ]
-  }
+  },
+{
+     "bank": "REC::Cherenkov",
+     "group": 31,
+     "info": "Cherenkov Responses for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the hit in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int8",  "info":"Sector of the Detector hit"},
+         {"name":"x",         "id":5, "type":"float", "info":"X coordinate of the hit"},
+         {"name":"y",         "id":6, "type":"float", "info":"Y coordinate of the hit"},
+         {"name":"z",         "id":7, "type":"float", "info":"Z coordinate of the hit"},
+         {"name":"theta",     "id":8, "type":"float", "info":"Theta of the matched hit"},
+         {"name":"phi",       "id":9, "type":"float", "info":"Phi of the mathced hit"},
+         {"name":"dtheta",    "id":10, "type":"float", "info":"Expected Theta Resolution"},
+         {"name":"dphi",      "id":11, "type":"float", "info":"Expected Phi Resolution"},   
+         {"name":"path",      "id":12, "type":"float", "info":"Path from vertex to the hit position"}, 
+         {"name":"time",      "id":13, "type":"float", "info":"Time associated with the hit"}, 
+         {"name":"nphe",      "id":14, "type":"int16", "info":"Number of photoelectrons from Cherenkov radiation"},   
+         {"name":"chi2",      "id":15, "type":"float", "info":"Chi2 (or quality) of hit-track matching"}                  
+     ]
+},
+  {
+     "bank": "REC::Calorimeter",
+     "group": 32,
+     "info": "Calorimeter Responses for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16", "info":"index of the hit"},
+         {"name":"pindex",    "id":2, "type":"int16", "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16", "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int8",  "info":"Sector of the Detector hit"},
+         {"name":"layer",     "id":5, "type":"int8",  "info":"Layer of the Detector hit"},
+         {"name":"x",  "id":6,  "type":"float", "info":"X coordinate of the hit"},
+         {"name":"y",  "id":7,  "type":"float", "info":"Y coordinate of the hit"},
+         {"name":"z",  "id":8,  "type":"float", "info":"Z coordinate of the hit"},
+         {"name":"hx", "id":9, "type":"float", "info":"X coordinate of the matched hit"},
+         {"name":"hy", "id":10, "type":"float", "info":"Y coordinate of the mathced hit"},
+         {"name":"hz", "id":11, "type":"float", "info":"Z coordinate of the matched hit"},
+         {"name":"lu", "id":12, "type":"float", "info":"distance on U-side"},
+         {"name":"lv", "id":13, "type":"float", "info":"distance on V-side"},
+         {"name":"lw", "id":14, "type":"float", "info":"distance on W-side"},
+         {"name":"du", "id":15, "type":"float", "info":"shower width on U-side"},
+         {"name":"dv", "id":16, "type":"float", "info":"shower width on V-side"},
+         {"name":"dw", "id":17, "type":"float", "info":"shower width on w-side"},
+         {"name":"m2u", "id":18, "type":"float", "info":"2nd moment of the shower on U-side"},
+         {"name":"m2v", "id":19, "type":"float", "info":"2nd moment of the shower on V-side"},
+         {"name":"m2w", "id":20, "type":"float", "info":"2nd moment of the shower on W-side"},
+         {"name":"path",   "id":21, "type":"float", "info":"Path from vertex to the hit position"}, 
+         {"name":"time",   "id":22, "type":"float", "info":"Time associated with the hit"}, 
+         {"name":"energy", "id":23, "type":"float", "info":"Energy associated with the hit"},                   
+         {"name":"chi2", "id":24, "type":"float", "info":"Chi2 (or quality) of hit-track matching"}                   
+     ]
+  },
+  {
+     "bank": "REC::Tracks",
+     "group": 33,
+     "info": "Track information for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16",  "info":"index of the track in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16",  "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"status",    "id":4, "type":"int16",  "info":"status of the track"},
+         {"name":"q",         "id":5, "type":"int8",  "info":"charge of the track"},
+         {"name":"px_nomm",  "id":6, "type":"float", "info":"x component of the momentum with no MM"},
+         {"name":"py_nomm",  "id":7, "type":"float", "info":"y component of the momentum with no MM"},
+         {"name":"pz_nomm",  "id":8, "type":"float", "info":"z component of the momentum with no MM"},
+         {"name":"vx_nomm",  "id":9, "type":"float", "info":"x component of the vertex"},
+         {"name":"vy_nomm",  "id":10, "type":"float", "info":"y component of the vertex"},
+         {"name":"vz_nomm",  "id":11, "type":"float", "info":"z component of the vertex"},
+         {"name":"NDF_nomm", "id":12, "type":"float", "info":"number of degrees of freedom in track fitting with no MM"},
+         {"name":"NDF",      "id":13, "type":"float", "info":"number of degrees of freedom in track fitting"},
+         {"name":"chi2_nomm", "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
+         {"name":"chi2",      "id":15, "type":"float", "info":"Chi2 (or quality) track fitting"}
+     ]
+  },
+  {
+     "bank": "REC::TrackCross",
+     "group": 34,
+     "info": "Track Cross information for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16",  "info":"index of the cross in the specific detector bank"},
+         {"name":"pindex",    "id":2, "type":"int16",  "info":"row number in the track bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"sector",    "id":4, "type":"int8",   "info":"sector of the track"},
+         {"name":"layer",     "id":5, "type":"int8",   "info":"sector of the track"},
+         {"name":"c_x",       "id":6, "type":"float",  "info":"Cross x-position in the lab (in cm)"},
+         {"name":"c_y",       "id":7, "type":"float",  "info":"Cross y-position in the lab (in cm)"},
+         {"name":"c_z",       "id":8, "type":"float",  "info":"Cross z-position in the lab (in cm)"},
+         {"name":"c_ux",      "id":9, "type":"float",  "info":"Cross unit x-direction vector in the lab"},
+         {"name":"c_uy",      "id":10, "type":"float", "info":"Cross unit y-direction vector in the lab"},
+         {"name":"c_uz",      "id":11, "type":"float", "info":"Cross unit z-direction vector in the lab"}
+     ]
+  },
+  {
+     "bank": "REC::ForwardTagger",
+     "group": 35,
+     "info": "Forward Tagger information for Particles bank",
+     "items": [
+         {"name":"index",     "id":1, "type":"int16",  "info":"index of the cluster in the specific FT bank"},
+         {"name":"pindex",    "id":2, "type":"int16",  "info":"row number in the particle bank hit is associated with"},
+         {"name":"detector",  "id":3, "type":"int16",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+         {"name":"size",      "id":4, "type":"int16",   "info":"size of the cluster"},
+         {"name":"x",         "id":5,  "type":"float", "info":"X coordinate of the cluster"},
+         {"name":"y",         "id":6,  "type":"float", "info":"Y coordinate of the cluster"},
+         {"name":"z",         "id":7,  "type":"float", "info":"Z coordinate of the cluster"},
+         {"name":"dx",        "id":8,  "type":"float", "info":"Cluster width in x" },
+         {"name":"dy",        "id":9,  "type":"float", "info":"Cluster width in y" },
+         {"name":"radius",    "id":10,  "type":"float", "info":"Cluster radius" },
+         {"name":"path",      "id":11, "type":"float", "info":"Path from vertex to the cluster position"}, 
+         {"name":"time",      "id":12, "type":"float", "info":"Time associated with the cluster"}, 
+         {"name":"energy",    "id":13, "type":"float", "info":"Energy associated with the cluster"},                   
+         {"name":"chi2",      "id":14, "type":"float", "info":"Chi2 (or quality) of cluster-particle matching"}  
+     ]
+     },
+     {
+     "bank": "REC::TBCovMat",
+     "group": 36,
+     "info": "reconstructed track covariance matrix",
+     "items": [
+        {"name":"index",  "id":1, "type":"int16", "info":"index of the track"},
+        {"name":"C11",    "id":2, "type":"float",  "info":"C11 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C12",    "id":3, "type":"float",  "info":"C12 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C13",    "id":4, "type":"float",  "info":"C13 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C14",    "id":5, "type":"float",  "info":"C14 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C15",    "id":6, "type":"float",  "info":"C15 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C22",    "id":7, "type":"float",  "info":"C22 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C23",    "id":8, "type":"float",  "info":"C23 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C24",    "id":9, "type":"float",  "info":"C24 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C25",    "id":10, "type":"float",  "info":"C25 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C33",    "id":11, "type":"float",  "info":"C33 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C34",    "id":12, "type":"float",  "info":"C34 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C35",    "id":13, "type":"float",  "info":"C35 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C44",    "id":14, "type":"float",  "info":"C44 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C45",    "id":15, "type":"float",  "info":"C45 covariance matrix element at last superlayer used in the fit"},
+        {"name":"C55",    "id":16, "type":"float",  "info":"C55 covariance matrix element at last superlayer used in the fit"}
+     ]
+    }
 ]

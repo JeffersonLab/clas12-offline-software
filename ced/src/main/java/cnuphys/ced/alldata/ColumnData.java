@@ -161,7 +161,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				}
 			} catch (Exception e) {
 				System.err.println(e.getMessage() + " Exception with fullName: " + _fullName);
-				e.printStackTrace();
+	//			e.printStackTrace();
 			}
 		}
 

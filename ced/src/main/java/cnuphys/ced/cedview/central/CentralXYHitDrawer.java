@@ -6,34 +6,26 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.X11Colors;
-import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BMT;
-import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.CTOF;
-import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.micromegas.MicroMegasSector;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
-import cnuphys.splot.style.SymbolDraw;
 
 public class CentralXYHitDrawer implements IDrawable {
 

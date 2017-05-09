@@ -46,6 +46,7 @@ public class BaseToolBar extends CommonToolBar
 	public static final int MAGNIFYBUTTON = 010000;
 	
 	public static final int NOZOOM = 020000;
+	public static final int CLONEBUTTON  = 040000;
 
 	public static final int PANBUTTON = 0100000;
 	public static final int UNDOZOOMBUTTON = 0100000;
@@ -64,7 +65,7 @@ public class BaseToolBar extends CommonToolBar
 	public static final int EVERYTHING = 07777777777 & ~NOCAMERABUTTON
 			& ~NOPRINTERBUTTON & ~NOZOOM ;
 	public static final int STANDARD = EVERYTHING & ~CONTROLPANELBUTTON
-			& ~USERCOMPONENT;
+			& ~USERCOMPONENT & ~CLONEBUTTON;
 
 	public static final int NODRAWING = EVERYTHING & ~DRAWING;
 
@@ -79,6 +80,9 @@ public class BaseToolBar extends CommonToolBar
 	 * Text field used for messages
 	 */
 	private JTextField _textField;
+	
+	//the clone button
+	private CloneButton _cloneButton;
 
 	// Zoom int by a fixed percentage
 	private ZoomInButton _zoomInButton;
@@ -229,6 +233,10 @@ public class BaseToolBar extends CommonToolBar
 			if (Bits.checkBit(bits, PANBUTTON)) {
 				_panButton = new PanButton(_container);
 			}
+			
+			if (Bits.checkBit(bits, CLONEBUTTON)) {
+				_cloneButton = new CloneButton(_container);
+			}
 		}
 
 		if (notNothing && Bits.checkBit(bits, RANGEBUTTON)) {
@@ -314,6 +322,8 @@ public class BaseToolBar extends CommonToolBar
 		add(_textButton);
 		add(_deleteButton);
 		add(_rectgridButton);
+		add(_cloneButton);
+
 
 		// add the text field?
 
@@ -619,6 +629,16 @@ public class BaseToolBar extends CommonToolBar
 	public WorldButton getWorldButton() {
 		return _worldButton;
 	}
+	
+	/**
+	 * Get the toolbar's clone button.
+	 * 
+	 * @return the toolbar's zoom-in button.
+	 */
+	public CloneButton getCloneButton() {
+		return _cloneButton;
+	}
+
 
 	/**
 	 * Get the toolbar's zoom-in button.

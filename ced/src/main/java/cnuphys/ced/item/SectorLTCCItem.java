@@ -16,7 +16,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.LTCC;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;

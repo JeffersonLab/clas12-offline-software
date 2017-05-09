@@ -743,5 +743,12 @@ public class BaseView extends JInternalFrame implements FocusListener {
 	@Override
 	public void focusLost(FocusEvent e) {
 	}
+	
+	/**
+	 * Clone the view. Default implementation does nothing.
+	 */
+	public BaseView cloneView() {
+		return null;
+	}
 
 }
