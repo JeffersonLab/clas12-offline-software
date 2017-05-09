@@ -1,7 +1,12 @@
 package events;
 
+import java.io.PrintWriter;
+import java.io.IOException;
+
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.groot.data.GraphErrors;
@@ -83,32 +88,20 @@ public class RandomEventGenerator {
 	public static void main(String[] args) {
 		 RandomEventGenerator gen = new RandomEventGenerator();
 
-		 for(int k = 0; k < 8000; k++)
-		 {
-		 	  gen.includeParticle(11, 0.5, 10.5, 2.5, 42.5, -180, 180);
+		 ArrayList<Integer> pids = new ArrayList<>(Arrays.asList(2212, 22, -13, 13, 211, -211, 2112));
 
-			  if(k%4 == 0) {
-		 	  		gen.includeParticle(2212, 0.25, 10.25, 2.5, 162.5, -180, 180);
-		 	  		gen.includeParticle(22, 0.25, 10.25, 2.5, 162.5, -180, 180);
-			  }
-			  else if(k%4 == 1) {
-		 	  		gen.includeParticle(-13, 0.25, 10.25, 2.5, 162.5, -180, 180);
-		 	  		gen.includeParticle(22, 0.25, 10.25, 2.5, 162.5, -180, 180);
-			  }
-			  else if(k%4 == 2) {
-		 	  		gen.includeParticle(13, 0.25, 10.25, 2.5, 162.5, -180, 180);
-		 	  		gen.includeParticle(211, 0.25, 10.25, 2.5, 162.5, -180, 180);
-			  }
-			  else if(k%4 == 3) {
-		 	  		gen.includeParticle(211, 0.25, 10.25, 2.5, 162.5, -180, 180);
-		 	  		gen.includeParticle(-211, 0.25, 10.25, 2.5, 162.5, -180, 180);
-		 	  		gen.includeParticle(2112, 0.25, 10.25, 2.5, 162.5, -180, 180);
-			  }
+		 for(int pid : pids) {
+		 	gen.includeParticle(11, 0.5, 10.5, 2.5, 42.5, -180, 180);
+		 	gen.includeParticle(pid, 0.25, 10.25, 2.5, 162.5, -180, 180);
 
-			  System.out.print(gen.getPhysicsEvent().toLundString());
+			try {
+			PrintWriter pwriter = new PrintWriter(String.format("gen.pid_%d.dat", pid), "UTF-8");
+		 	for(int k = 0; k < 2000; k++) pwriter.print(gen.getPhysicsEvent().toLundString());
+			pwriter.close();
+			} catch (IOException e) {}
 
-			  gen.clearAllParticles();
+		 	gen.clearAllParticles();
+			System.out.println("finished " + pid + "...");
 		 }
 	}
-
 }
