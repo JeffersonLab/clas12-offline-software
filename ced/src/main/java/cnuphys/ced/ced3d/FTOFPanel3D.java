@@ -6,7 +6,6 @@ import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.FTOFGeometry;
-import bCNU3D.Panel3D;
 
 public class FTOFPanel3D extends DetectorItem3D {
 

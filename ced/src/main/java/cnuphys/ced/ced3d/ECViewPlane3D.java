@@ -2,7 +2,6 @@ package cnuphys.ced.ced3d;
 
 import java.awt.Color;
 
-import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.geometry.ECGeometry;

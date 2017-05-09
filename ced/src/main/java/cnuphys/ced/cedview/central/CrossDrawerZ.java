@@ -14,8 +14,6 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.BMT;
-import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
 import cnuphys.ced.event.data.DataDrawSupport;

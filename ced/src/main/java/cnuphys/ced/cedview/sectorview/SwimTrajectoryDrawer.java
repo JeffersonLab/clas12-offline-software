@@ -1,6 +1,5 @@
 package cnuphys.ced.cedview.sectorview;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
 
@@ -11,7 +10,6 @@ import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.LundId;
 import cnuphys.magfield.MagneticField;
-import cnuphys.splot.plot.X11Colors;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.SwimTrajectory2D;
 

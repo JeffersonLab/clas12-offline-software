@@ -19,6 +19,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.projecteddc.ISector;
 import cnuphys.ced.cedview.projecteddc.SectorSelectorPanel;
@@ -34,6 +35,14 @@ import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.FTOFGeometry;
 
 public class TOFView extends CedView implements ISector {
+	
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "CTOF and FTOF";
+
 	
 	// offset left and top
 	private static int LEFT = 40;
@@ -83,8 +92,7 @@ public class TOFView extends CedView implements ISector {
 		int height = d.height;
 		int width = (int) ((wwidth * height) / wheight);
 
-		// give the view a title based on what sectors are displayed
-		String title = "CTOF and FTOF";
+		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
 		// create the view
 		view = new TOFView(PropertySupport.WORLDSYSTEM,
@@ -366,6 +374,31 @@ public class TOFView extends CedView implements ISector {
 	@Override
 	public int getSector() {
 		return _sector;
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		TOFView view = createTOFView();
+		view.setBounds(vr);
+		return view;
+
 	}
 	
 }

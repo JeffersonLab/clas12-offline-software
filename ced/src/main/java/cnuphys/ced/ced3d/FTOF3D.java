@@ -2,7 +2,6 @@ package cnuphys.ced.ced3d;
 
 import java.awt.Color;
 
-import bCNU3D.Panel3D;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;

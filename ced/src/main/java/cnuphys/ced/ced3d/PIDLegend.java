@@ -21,7 +21,6 @@ import cnuphys.ced.frame.CedColors;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.splot.plot.GraphicsUtilities;
-import cnuphys.splot.plot.X11Colors;
 import cnuphys.splot.style.LineStyle;
 
 public class PIDLegend extends JComponent {

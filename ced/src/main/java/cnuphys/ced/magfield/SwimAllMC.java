@@ -184,6 +184,8 @@ public class SwimAllMC implements ISwimAll {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
+		
+
 
 		Swimming.clearMCTrajectories(); // clear all existing trajectories
 		
@@ -191,6 +193,13 @@ public class SwimAllMC implements ISwimAll {
 		if (event == null) {
 			return;
 		}
+		
+		
+//		if (ClasIoEventManager.getInstance().isSourceEvioFile()) {
+//			System.err.println("not swimming for evio file");
+//			return;
+//		}
+
 		DataManager dm = DataManager.getInstance();
 
 		int pid[] = dm.getIntArray(event, "MC::Particle.pid");

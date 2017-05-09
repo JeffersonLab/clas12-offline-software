@@ -4,14 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D.Double;
 import java.util.List;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.jlab.geom.prim.Plane3D;
 import cnuphys.bCNU.drawable.DrawableAdapter;
@@ -24,6 +22,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
@@ -40,6 +39,14 @@ import cnuphys.swim.SwimTrajectory2D;
  *
  */
 public class ProjectedDCView extends CedView implements ISector {
+	
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "Projected Drift Chambers";
+
 	
 	//what sector 1..6
 	private int _sector = 1;
@@ -108,8 +115,7 @@ public class ProjectedDCView extends CedView implements ISector {
 		int height = d.height;
 		int width = (int) ((wwidth * height) / wheight);
 
-		// give the view a title based on what sectors are displayed
-		String title = "Projected Drift Chambers";
+		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
 		// create the view
 		view = new ProjectedDCView(PropertySupport.WORLDSYSTEM,
@@ -469,6 +475,31 @@ public class ProjectedDCView extends CedView implements ISector {
 		int sector =  1 + ((int) (phi+30.)) / 60;
 
 		return (sector == _sector);
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		ProjectedDCView view = createProjectedDCView();
+		view.setBounds(vr);
+		return view;
+
 	}
 	
 }

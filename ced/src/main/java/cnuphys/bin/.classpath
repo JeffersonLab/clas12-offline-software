@@ -6,12 +6,12 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/magfield"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/numericalRec"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/snr"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/bCNU3D"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JOGL"/>
 	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/exp4j"/>
 	<classpathentry kind="lib" path="/coatjava/lib/clas/coat-libs-3.0-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

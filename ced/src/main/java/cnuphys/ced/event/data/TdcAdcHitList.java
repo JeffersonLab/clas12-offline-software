@@ -295,10 +295,10 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		
 		int avgADC = hit.averageADC();
 		
-		double maxadc = Math.max(1.0, (double)maxAdc);
+		double maxadc = Math.max(1.0, maxAdc);
 
 		
-		double fract = ((double)avgADC)/maxadc;
+		double fract = (avgADC)/maxadc;
 		fract = Math.max(0, Math.min(1.0, fract));
 		
 		int alpha = 128 + (int)(127*fract);

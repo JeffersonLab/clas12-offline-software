@@ -1299,9 +1299,9 @@
         <enties name="Status" type="int32"/>
     </banks>
     <banks name="FBPM">
-        <enties name="ID" type="int32"/>
-        <enties name="TDC" type="int32"/>
-        <enties name="ADC" type="int32"/>
+        <enties name="ID" type="int16"/>
+        <enties name="TDC" type="int16"/>
+        <enties name="ADC" type="int16"/>
     </banks>
     <banks name="G1SL">
         <enties name="G1T1" type="int32"/>

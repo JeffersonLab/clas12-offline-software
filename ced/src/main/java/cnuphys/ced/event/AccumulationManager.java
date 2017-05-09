@@ -17,7 +17,6 @@ import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.AllEC;
-import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;

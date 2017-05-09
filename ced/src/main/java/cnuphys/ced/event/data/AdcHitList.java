@@ -232,9 +232,9 @@ public class AdcHitList extends Vector<AdcHit> {
 		
 		int avgADC = hit.averageADC();
 		
-		double maxadc = Math.max(1.0, (double)_maxADC);
+		double maxadc = Math.max(1.0, _maxADC);
 		
-		double fract = ((double)avgADC)/maxadc;
+		double fract = (avgADC)/maxadc;
 //		fract = Math.max(0.5, Math.min(1.0, fract));
 		fract = Math.max(0, Math.min(1.0, fract));
 		

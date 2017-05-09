@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -27,6 +28,7 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 
 /**
  * The AllDC view is a non-faithful representation of all six sectors of
@@ -37,6 +39,15 @@ import cnuphys.bCNU.util.X11Colors;
  */
 @SuppressWarnings("serial")
 public class AllDCView extends CedView {
+	
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "All Drift Chambers";
+
+
 
 	/**
 	 * A sector rectangle for each sector
@@ -114,7 +125,7 @@ public class AllDCView extends CedView {
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
-				PropertySupport.TITLE, "All Drift Chambers",
+				PropertySupport.TITLE, _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
@@ -352,6 +363,31 @@ public class AllDCView extends CedView {
 	public void getCell(int sector, int superLayer, int layer, int wire,
 			Rectangle2D.Double wr) {
 		_superLayerItems[sector - 1][superLayer - 1].getCell(layer, wire, wr);
+	}
+	
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		AllDCView view = createAllDCView();
+		view.setBounds(vr);
+		return view;
+
 	}
 
 }

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -19,6 +20,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
+import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
 import cnuphys.ced.component.ControlPanel;
@@ -31,6 +33,12 @@ public class ECView extends HexView {
 
 	// sector items
 	private ECHexSectorItem _hexItems[];
+	
+	//for naming clones
+	private static int CLONE_COUNT = 0;
+	
+	//base title
+	private static final String _baseTitle = "ECAL";
 
 	// for drawing MC hits
 	private McHitDrawer _mcHitDrawer;
@@ -91,7 +99,7 @@ public class ECView extends HexView {
 	 * @return the view
 	 */
 	public static ECView createECView() {
-		ECView view = new ECView("ECAL");
+		ECView view = new ECView(_baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")));
 
 		return view;
 	}
@@ -267,6 +275,30 @@ public class ECView extends HexView {
 	 */
 	public ECHexSectorItem getHexSectorItem(int sector) {
 		return _hexItems[sector - 1];
+	}
+	
+	/**
+	 * Clone the view. 
+	 * @return the cloned view
+	 */
+	@Override
+	public BaseView cloneView() {
+		super.cloneView();
+		CLONE_COUNT++;
+		
+		//limit
+		if (CLONE_COUNT > 2) {
+			return null;
+		}
+		
+		Rectangle vr = getBounds();
+		vr.x += 40;
+		vr.y += 40;
+		
+		ECView view = createECView();
+		view.setBounds(vr);
+		return view;
+
 	}
 
 }

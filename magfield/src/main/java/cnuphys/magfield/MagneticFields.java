@@ -25,6 +25,8 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
+	private boolean USE_BIG_TORUS = false;
+	
 	//initialize only once
 	private boolean _initialized = false;
 
@@ -37,14 +39,14 @@ public class MagneticFields {
 	// perfect solenoid
 	private PerfectSolenoid _perfectSolenoid;
 
-	// mac test field
-	private MacTestField _macTest;
-
 	// 1 tesla uniform
 	private ConstantField _uniform;
 
 	// composite field
 	private CompositeField _compositeField;
+	
+	//small torus
+	private SmallTorus _smallTorus;
 
 	// composite rotated
 	private RotatedCompositeField _rotatedCompositeField;
@@ -55,6 +57,7 @@ public class MagneticFields {
 	// optional full path to torus set by command line argument in ced
 	private String _solenoidFullPath = sysPropOrEnvVar("SOLENOIDMAP");
 	
+
 	//singleton
 	private static MagneticFields instance;
 
@@ -63,7 +66,7 @@ public class MagneticFields {
 
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, PERFECTSOLENOID, ZEROFIELD, MACTEST, UNIFORM
+		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, PERFECTSOLENOID, ZEROFIELD, SMALLTORUS, UNIFORM
 	}
 
 	// List of magnetic field change listeners
@@ -192,8 +195,8 @@ public class MagneticFields {
 			else if (_activeField == _perfectSolenoid) {
 				return FieldType.PERFECTSOLENOID;
 			}
-			else if (_activeField == _macTest) {
-				return FieldType.MACTEST;
+			else if (_activeField == _smallTorus) {
+				return FieldType.SMALLTORUS;
 			}
 		}
 		
@@ -228,6 +231,7 @@ public class MagneticFields {
 	// optional full path to solenoid set by command line argument in ced
 
 
+	//get a property or environment variable
 	private String sysPropOrEnvVar(String key) {
 		String s = System.getProperty(key);
 		if (s == null) {
@@ -260,6 +264,7 @@ public class MagneticFields {
 		_solenoidFullPath = fullPath;
 	}
 	
+	
 	/**
 	 * Sets the active field
 	 * 
@@ -289,8 +294,8 @@ public class MagneticFields {
 		case COMPOSITEROTATED:
 			_activeField = _rotatedCompositeField;
 			break;
-		case MACTEST:
-			_activeField = _macTest;
+		case SMALLTORUS:
+			_activeField = _smallTorus;
 			break;
 		case PERFECTSOLENOID:
 			_activeField = _perfectSolenoid;
@@ -345,8 +350,8 @@ public class MagneticFields {
 		case COMPOSITEROTATED:
 			ifield = _rotatedCompositeField;
 			break;
-		case MACTEST:
-			ifield = _macTest;
+		case SMALLTORUS:
+			ifield = _smallTorus;
 			break;
 		case PERFECTSOLENOID:
 			ifield = _perfectSolenoid;
@@ -442,8 +447,8 @@ public class MagneticFields {
 		case COMPOSITEROTATED:
 			ifield = _rotatedCompositeField;
 			break;
-		case MACTEST:
-			ifield = _macTest;
+		case SMALLTORUS:
+			ifield = _smallTorus;
 			break;
 		case PERFECTSOLENOID:
 			ifield = _perfectSolenoid;
@@ -465,6 +470,80 @@ public class MagneticFields {
 		}
 
 	}
+	
+	//try to get a torus, big or small
+	private Torus getTorus(String baseName) {
+		
+		System.err.println("Attempting to use the " + (USE_BIG_TORUS ? "big" : "small") + " torus map.");
+		
+		Torus torus = null;
+		
+		// first try any supplied full path
+		if (_torusFullPath != null) {
+			System.out.println(
+					"Will try to read torus from [" + _torusFullPath + "]");
+			File file = new File(_torusFullPath);
+
+			if (file.exists()) {
+				try {
+					if (USE_BIG_TORUS) {
+						torus = Torus.fromBinaryFile(file);					
+					}
+					else {
+						torus = SmallTorus.fromBinaryFile(file);
+					}
+					System.out.println("Read torus from: " + _torusFullPath);
+				} catch (FileNotFoundException e) {
+					System.err.println(
+							"TORUS map not found in [" + _torusFullPath + "]");
+				}
+			}
+		}
+				
+		if (torus == null) {
+			_torusFullPath = "../../../data/" + baseName;
+			System.out.println(
+					"Will try to read torus from [" + _torusFullPath + "]");
+			File file = new File(_torusFullPath);
+			if (file.exists()) {
+				try {
+					if (USE_BIG_TORUS) {
+						torus = Torus.fromBinaryFile(file);					
+					}
+					else {
+						torus = SmallTorus.fromBinaryFile(file);
+					}
+					System.out.println("Read torus from: " + _torusFullPath);
+				} catch (FileNotFoundException e) {
+					System.err.println(
+							"TORUS map not found in [" + _torusFullPath + "]");
+				}
+			}
+		}
+
+		if (torus == null) {
+			_torusFullPath = "data/" + baseName;
+			System.out.println(
+					"Will try to read torus from [" + _torusFullPath + "]");
+			File file = new File(_torusFullPath);
+			if (file.exists()) {
+				try {
+					if (USE_BIG_TORUS) {
+						torus = Torus.fromBinaryFile(file);					
+					}
+					else {
+						torus = SmallTorus.fromBinaryFile(file);
+					}
+					System.out.println("Read torus from: " + _torusFullPath);
+				} catch (Exception e) {
+					System.err.println(
+							"TORUS map not found in [" + _torusFullPath + "]");
+				}
+			}
+		}	
+		
+		return torus;
+	}
 
 	/**
 	 * Tries to load the magnetic fields from fieldmaps
@@ -480,62 +559,17 @@ public class MagneticFields {
 		System.out.println("======  Initializing Magnetic Fields  =====");
 		System.out.println("===========================================");
 		// can always make a mac test field and uniform
-		_macTest = new MacTestField();
 		_perfectSolenoid = new PerfectSolenoid();
 		_uniform = new ConstantField(50);
-
-		System.out.println("CWD: " + System.getProperty("user.dir"));
-
-		// first try any supplied full path
-		if (_torusFullPath != null) {
-			System.out.println(
-					"Will try to read torus from [" + _torusFullPath + "]");
-			File file = new File(_torusFullPath);
-
-			if (file.exists()) {
-				try {
-					_torus = Torus.fromBinaryFile(file);
-					System.out.println("Read torus from: " + _torusFullPath);
-				} catch (FileNotFoundException e) {
-					System.err.println(
-							"TORUS map not found in [" + _torusFullPath + "]");
-				}
-			}
-		}
 		
-		if (_torus == null) {
-			_torusFullPath = "../../../data/clas12_torus_fieldmap_binary.dat";
-			System.out.println(
-					"Will try to read torus from [" + _torusFullPath + "]");
-			File file = new File(_torusFullPath);
-			if (file.exists()) {
-				try {
-					_torus = Torus.fromBinaryFile(file);
-					System.out.println("Read torus from: " + _torusFullPath);
-				} catch (FileNotFoundException e) {
-					System.err.println(
-							"TORUS map not found in [" + _torusFullPath + "]");
-				}
-			}
+		if (USE_BIG_TORUS) {
+			_torus = getTorus("clas12_torus_fieldmap_binary.dat");
+		}		
+		else {
+			_torus = getTorus("clas12_small_torus.dat");
 		}
 
-		if (_torus == null) {
-			_torusFullPath = "data/clas12_torus_fieldmap_binary.dat";
-			System.out.println(
-					"Will try to read torus from [" + _torusFullPath + "]");
-			File file = new File(_torusFullPath);
-			if (file.exists()) {
-				try {
-					_torus = Torus.fromBinaryFile(file);
-					System.out.println("Read torus from: " + _torusFullPath);
-				} catch (Exception e) {
-					System.err.println(
-							"TORUS map not found in [" + _torusFullPath + "]");
-				}
-			}
-		}
-
-		// ditto
+		// ditto for solenoid
 		if (_solenoidFullPath != null) {
 			System.out.println("Will try to read solenoid from ["
 					+ _solenoidFullPath + "]");

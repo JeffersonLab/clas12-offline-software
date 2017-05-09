@@ -65,11 +65,17 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	/** Last selected data file */
 	private static String dataFilePath;
 
-	public static String extensions[] = { "hippo", "ev0", "ev1", "ev2", "ev3",
-			"ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "hipo" };
+//	public static String evioExtensions[] = { "evio", "ev", "evio.*"};
 
-	private static FileNameExtensionFilter _eventFileFilter = new FileNameExtensionFilter(
-			"Event Files", extensions);
+	public static String hipoExtensions[] = { "hippo", "hipo" };
+
+//	private static FileNameExtensionFilter _evioEventFileFilter = new FileNameExtensionFilter(
+//			"Event Files", evioExtensions);
+
+	private static FileNameExtensionFilter _hipoEventFileFilter = new FileNameExtensionFilter(
+			"Hipo Event Files", hipoExtensions);
+	
+	private static EvioFileFilter _evioEventFileFilter = new EvioFileFilter();
 
 	/**
 	 * The event menu used for the clasio package
@@ -114,23 +120,43 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	}
 
 	/** 
-	 * Get the menu item to open an event file
+	 * Get the menu item to open a HIPO event file
 	 * @return the menu item to open an event file
 	 */
-	public static JMenuItem getOpenEventFileItem() {
+	public static JMenuItem getOpenHipoEventFileItem() {
 		final JMenuItem item = new JMenuItem("Open Hipo File...");
 
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				openEventFile();
+				openHipoEventFile();
 			}
 
 		};
 		item.addActionListener(al);
 		return item;
 	}
+	
+	/** 
+	 * Get the menu item to open an evio event file
+	 * @return the menu item to open an event file
+	 */
+	public static JMenuItem getOpenEvioEventFileItem() {
+		final JMenuItem item = new JMenuItem("Open Evio File...");
+
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				openEvioEventFile();
+			}
+
+		};
+		item.addActionListener(al);
+		return item;
+	}
+
 	
 	/** 
 	 * Get the menu item to connect to any DAQ ring
@@ -226,18 +252,21 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 *
 	 * @return the opened file reader, or <code>null</code>
 	 */
-	public static File openEventFile() {
+	private static File openHipoEventFile() {
 
 		ClasIoEventManager eventManager = ClasIoEventManager.getInstance();
 
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
-		chooser.setFileFilter(_eventFileFilter);
+		chooser.setFileFilter(_hipoEventFileFilter);
 		int returnVal = chooser.showOpenDialog(Ced.getFrame());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = chooser.getSelectedFile();
 			try {
 				dataFilePath = file.getPath();
+				
+				System.err.println("(A) opening hipo file " + file.getPath());
+
 				eventManager.openHipoEventFile(file);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -248,6 +277,38 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 		return null;
 	}
+	
+	/**
+	 * Select and open an event file.
+	 *
+	 * @return the opened file reader, or <code>null</code>
+	 */
+	private static File openEvioEventFile() {
+
+		ClasIoEventManager eventManager = ClasIoEventManager.getInstance();
+
+		JFileChooser chooser = new JFileChooser(dataFilePath);
+		chooser.setSelectedFile(null);
+		chooser.setFileFilter(_evioEventFileFilter);
+		int returnVal = chooser.showOpenDialog(Ced.getFrame());
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+			try {
+				dataFilePath = file.getPath();
+				
+				System.err.println("(A) opening evio file " + file.getPath());
+
+				eventManager.openEvioEventFile(file);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return null;
+	}
+
 
 	/**
 	 * Get the menu from which you can choose a recently opened file
@@ -292,9 +353,15 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 				try {
 					String fn = ae.getActionCommand();
 					File file = new File(fn);
+					
 					if (file.exists()) {
 						try {
-							ClasIoEventManager.getInstance().openHipoEventFile(file);
+							if (_hipoEventFileFilter.accept(file)) {
+								ClasIoEventManager.getInstance().openHipoEventFile(file);
+							}
+							else if (_evioEventFileFilter.accept(file)) {
+								ClasIoEventManager.getInstance().openEvioEventFile(file);
+							}
 						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {

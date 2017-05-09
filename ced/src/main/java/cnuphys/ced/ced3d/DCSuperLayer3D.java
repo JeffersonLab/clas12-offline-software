@@ -6,7 +6,6 @@ import java.util.Vector;
 
 import org.jlab.geom.DetectorHit;
 
-import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;

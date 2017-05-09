@@ -432,12 +432,18 @@ public abstract class MagneticField implements IField {
 		// xyz[1] = 15.7716f;
 		// xyz[2] = 0.372474f;
 		// -31.7007, 31.1478, 28.158
-		xyz[0] = -31.7007f;
-		xyz[1] = 31.1478f;
-		xyz[2] = 28.158f;
+//		xyz[0] = -31.7007f;
+//		xyz[1] = 31.1478f;
+//		xyz[2] = 28.158f;
+		xyz[0] = 32.6f;
+		xyz[1] = 106.62f;
+		xyz[2] = 410.0f;
 
 		float vals[] = new float[3];
 		field(xyz[0], xyz[1], xyz[2], vals);
+		
+		String vs = vectorToString(xyz);
+		
 		sb.append("test location (XYZ): " + vectorToString(xyz) + "\n");
 		sb.append("test Field Vector (XYZ): " + vectorToString(vals) + "\n");
 
@@ -577,6 +583,25 @@ public abstract class MagneticField implements IField {
 			e.printStackTrace();
 		}
 	}
+	
+	protected int indexOfNearestNeighbor(double q1, double q2, double q3) {
+		int n0 = q1Coordinate.getIndex(q1);
+		if (n0 < 0) {
+			return -1;
+		}
+		int n1 = q2Coordinate.getIndex(q2);
+		if (n1 < 0) {
+			return -1;
+		}
+		int n2 = q3Coordinate.getIndex(q3);
+		if (n2 < 0) {
+			return -1;
+		}
+		
+		int index =  getCompositeIndex(n0, n1, n2);
+		
+		return index;
+	}
 
 	/**
 	 * Interpolates a vector by trilinear interpolation.
@@ -610,14 +635,29 @@ public abstract class MagneticField implements IField {
 			return;
 		}
 
-		double f0 = q1Coordinate.getFraction(q1);
-		double f1 = q2Coordinate.getFraction(q2);
-		double f2 = q3Coordinate.getFraction(q3);
+		double f0 = q1Coordinate.getFraction(q1, n0);
+		
+	//	System.err.println("  q1 = " + q1 + "  n1 = " + n0 + "   f1 = " + f0);
+		
+		
+		double f1 = q2Coordinate.getFraction(q2, n1);
+		double f2 = q3Coordinate.getFraction(q3, n2);
 
 		if (!_interpolate) {
 			f0 = (f0 < 0.5) ? 0 : 1;
 			f1 = (f1 < 0.5) ? 0 : 1;
 			f2 = (f2 < 0.5) ? 0 : 1;
+//			int compIndex = indexOfNearestNeighbor(q1, q2, q3);
+//			System.err.println("q1 = " + q1 + "  q2 = " + q2 + "  q3 = " + q3 + "  n0: " + n0 + " n1: " + n1 + "  n2: " + n2 + " index: " + compIndex);
+//			
+//			int cindx[] = new int[3];
+//            getCoordinateIndices(compIndex, cindx);
+//            System.err.println("invert to indices: [" + cindx[0] + ", " + cindx[1] + ", " + cindx[2] + "]");
+//            double qq1 = q1Coordinate.getMin() + (cindx[0] + f0)*q1Coordinate.getDelta();
+//            double qq2 = q2Coordinate.getMin() + (cindx[1] + f1)*q2Coordinate.getDelta();
+//            double qq3 = q3Coordinate.getMin() + (cindx[2] + f2)*q3Coordinate.getDelta();
+//            System.err.println("qq1 = " + qq1 + "  qq2 = " + qq2 + "  qq3 = " + qq3);
+//            System.err.println("f1 = " + f0 + "  f2 = " + f1 + "  f3 = " + f2);
 		}
 
 		double g0 = 1 - f0;
@@ -710,9 +750,9 @@ public abstract class MagneticField implements IField {
 			return 0f;
 		}
 
-		double f0 = q1Coordinate.getFraction(q1);
-		double f1 = q2Coordinate.getFraction(q2);
-		double f2 = q3Coordinate.getFraction(q3);
+		double f0 = q1Coordinate.getFraction(q1, n0);
+		double f1 = q2Coordinate.getFraction(q2, n1);
+		double f2 = q3Coordinate.getFraction(q3, n2);
 
 		double g0 = 1 - f0;
 		double g1 = 1 - f1;
@@ -786,7 +826,14 @@ public abstract class MagneticField implements IField {
 	 */
 	protected final float getB1(int index) {
 		int i = 3 * index;
-		return field.get(i);
+
+		try {
+			return field.get(i);
+		} catch (IndexOutOfBoundsException e) {
+			System.err.println("error in mag field index1 = " + index);
+			e.printStackTrace();
+			return 0;
+		}
 	}
 
 	/**

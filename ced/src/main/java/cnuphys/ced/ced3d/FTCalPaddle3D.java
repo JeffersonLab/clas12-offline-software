@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
-import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;

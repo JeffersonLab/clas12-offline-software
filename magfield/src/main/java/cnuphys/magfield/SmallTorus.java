@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
  * @author Nicole Schumacher
  * @version 1.0
  */
-public final class SmallTorus extends MagneticField {
+public final class SmallTorus extends Torus {
 
 	// private constructor
 	/**
@@ -42,131 +42,46 @@ public final class SmallTorus extends MagneticField {
 		return torus;
 	}
 
-	/**
-	 * Must deal with the fact that we only have the field between 0 and 30
-	 * degrees.
-	 *
-	 * @param absolutePhi the absolute phi
-	 * @return the relative phi (-30, 30) from the nearest middle of a sector in
-	 *         degrees.
-	 */
-	private double relativePhi(double absolutePhi) {
-		if (absolutePhi < 0.0) {
-			absolutePhi += 360.0;
-		}
 
-		// make relative phi between 0 -30 and 30
-		double relativePhi = absolutePhi;
-		while (Math.abs(relativePhi) > 30.0) {
-			relativePhi -= 60.0;
-		}
-		return relativePhi;
-	}
-
-	/**
-	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
-	 * @param result the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
-	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
-			float result[]) {
-		if (isZeroField()) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-
-		if (phi < 0.0) {
-			phi += 360.0;
-		}
-
-		// relativePhi (-30, 30) phi relative to middle of sector
-		double relativePhi = relativePhi(phi);
-
-		boolean flip = (relativePhi < 0.0);
-
-		interpolateField(Math.abs(relativePhi), rho, z, result);
-
-		// negate change x and z components
-		if (flip) {
-			result[X] = -result[X];
-			result[Z] = -result[Z];
-		}
-
-		// rotate onto to proper sector?
-
-		double diff = (phi - relativePhi);
-		if (diff > 0.001) {
-			double rdiff = Math.toRadians(diff);
-			double cos = Math.cos(rdiff);
-			double sin = Math.sin(rdiff);
-			double bx = result[0];
-			double by = result[1];
-			result[X] = (float) (bx * cos - by * sin);
-			result[Y] = (float) (bx * sin + by * cos);
-		}
-
-		result[X] *= _scaleFactor;
-		result[Y] *= _scaleFactor;
-		result[Z] *= _scaleFactor;
-	}
-
-	/**
-	 * Convert a array used as a vector to a readable string.
-	 *
-	 * @param v the vector (float array) to represent.
-	 * @return a string representation of the vector (array).
-	 */
-	@Override
-	protected String vectorToString(float v[]) {
-		float vx = v[X] / 10;
-		float vy = v[Y] / 10;
-		float vz = v[Z] / 10;
-		float vLen = vectorLength(v) / 10;
-		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T", vx,
-				vy, vz, vLen);
-		return s;
-	}
-
-	/**
-	 * @return the phiCoordinate
-	 */
-	public GridCoordinate getPhiCoordinate() {
-		return q1Coordinate;
-	}
-
-	/**
-	 * @return the rCoordinate
-	 */
-	public GridCoordinate getRCoordinate() {
-		return q2Coordinate;
-	}
-
-	/**
-	 * @return the zCoordinate
-	 */
-	public GridCoordinate getZCoordinate() {
-		return q3Coordinate;
-	}
-
+	//convert the ascii to a binary file
 	public static void asciiToBinary() {
+		
+//		Hi Mac, Veronique, Dave,
+//
+//		Following Mac suggestions, I produced a torus map that is:
+//
+//		a. coarser in phi (steps of 1.75 degrees, or 1/8 of the original)
+//		b. in gauss units instead of kgauss: these are INT so anything < 1 will be 0, which saves a lot of space too.
+//
+//		You can find this map here:
+//
+//		/lustre/expphy/work/hallb/clas12/ungaro/clas12TorusSmallMap.dat
+//
+//		Same structure as before: phi, r, z, bx, by, bz
+//
+//		Let me know how you want to test it.
+//
+//		Regards,
+//
+//		Mauri
 
 //		String cwd = System.getProperty("user.dir");
 //		System.out.println("CWD: " + cwd);
 
-		String asciiFileName = "../../ced/data/smallAsciiMap.txt"; 
+		String asciiFileName = "../../../data/smallAsciiMap.txt"; 
 
 		File file = new File(asciiFileName);
+		
+		System.err.println("ascii file path: " + file.getAbsolutePath());
+		System.err.println("ascii file exists: " + file.exists());
+		
+		if (!file.exists()) return;
+		
+		
 		long numMB = file.length() / 1000000;
 		System.out.println("Size of ascii file in MB: " + numMB);
 
-		String binaryFileName = "../../ced/data/clas12_small_torus.dat";
+		String binaryFileName = "../../../data/clas12_small_torus.dat";
 		
 		int nPhi = 18;
 		int nRho = 251;
@@ -214,51 +129,48 @@ public final class SmallTorus extends MagneticField {
 				dos.writeInt(0);
 
 				int nLine = 0;
-				boolean readheader = false;
 				while (true) {
 					String line = null;
 
 					try {
 						line = lnr.readLine();
 
-						if (!readheader) {
-							readheader = line.contains("</mfield>");
-							if (readheader) {
-								line = lnr.readLine();
-							}
-						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 
-					if (readheader) {
-
-						// detection of EOF
-						if (line == null) {
-							break;
-						}
-
-						String tokens[] = tokens(line, " ");
-						try {
-							dos.writeFloat(Float.parseFloat(tokens[3]));
-							dos.writeFloat(Float.parseFloat(tokens[4]));
-							dos.writeFloat(Float.parseFloat(tokens[5]));
-						} catch (ArrayIndexOutOfBoundsException aeobe) {
-							System.err.println("line: " + line);
-							aeobe.printStackTrace();
-							System.exit(1);
-						}
-
-						nLine++;
+					// detection of EOF
+					if (line == null) {
+						break;
 					}
+
+					String tokens[] = tokens(line);
+					try {
+						//convert to KG from G
+						double bx = Double.parseDouble(tokens[3])/1000.;
+						double by = Double.parseDouble(tokens[4])/1000.;
+						double bz = Double.parseDouble(tokens[5])/1000.;
+						
+						dos.writeFloat((float)bx);
+						dos.writeFloat((float)by);
+						dos.writeFloat((float)bz);
+					} catch (ArrayIndexOutOfBoundsException aeobe) {
+						System.err.println("line: " + line);
+						aeobe.printStackTrace();
+						System.exit(1);
+					}
+
+					nLine++;
 				}
+				
+				lnr.close();
+				dos.close();
 
 				long elapsedTime = System.nanoTime() - startTime;
 				double seconds = elapsedTime / 1.0e9;
 				System.out.println(
 						"read " + nLine + " lines in " + seconds + " seconds");
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -267,65 +179,11 @@ public final class SmallTorus extends MagneticField {
 		}
 	}
 
-	private static String[] tokens(String str, String delimiter) {
-
-		StringTokenizer t = new StringTokenizer(str, delimiter);
-		int num = t.countTokens();
-		String lines[] = new String[num];
-
-		for (int i = 0; i < num; i++) {
-			lines[i] = t.nextToken();
-		}
-
-		return lines;
+	//tokenizer
+	private static String[] tokens(String str) {
+		return tokens(str, null);
 	}
-//
-//	/**
-//	 * main method used for testing.
-//	 *
-//	 * @param arg command line arguments
-//	 */
-//	public static void main(String arg[]) {
-//
-//		boolean convert = true;
-//		if (convert) {
-//			asciiToBinary();
-//			System.exit(0);
-//		}
-//
-//		String path = null;
-//
-//		if ((arg != null) && (arg.length > 0)) {
-//			path = arg[0];
-//		}
-//
-//		if (path == null) {
-//			path = "data/clas12_torus_fieldmap_binary.dat";
-//		}
-//
-//		File file = new File(path);
-//
-//		Torus torus = null;
-//		try {
-//			torus = fromBinaryFile(file);
-//			System.out.println("Created field object.");
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//			System.exit(1);
-//		}
-//
-//		float x = 32.60f;
-//		float y = 106.62f;
-//		float z = 410.0f;
-//		float result[] = new float[3];
-//		torus.field(x, y, z, result);
-//
-//		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
-//
-//		String fieldStr = torus.vectorToString(result);
-//		System.out.println("Field: " + fieldStr);
-//	}
-
+	
 	/**
 	 * Get the name of the field
 	 * 
@@ -333,7 +191,89 @@ public final class SmallTorus extends MagneticField {
 	 */
 	@Override
 	public String getName() {
-		return "Torus";
+		return "Small Torus";
 	}
+	
+	/**
+	 * main method used for testing.
+	 *
+	 * @param arg command line arguments
+	 */
+	public static void main(String arg[]) {
+
+		boolean convert = false;
+		if (convert) {
+			asciiToBinary();
+			System.exit(0);
+		}
+
+		String path = null;
+
+		if ((arg != null) && (arg.length > 0)) {
+			path = arg[0];
+		}
+
+		if (path == null) {
+			path = "../../../data/clas12_small_torus.dat";
+		}
+
+		File file = new File(path);
+
+		SmallTorus torus = null;
+		try {
+			torus = fromBinaryFile(file);
+			System.out.println("Created field object.");
+			setInterpolate(false);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		float x = 32.60f;
+		float y = 106.62f;
+		float z = 410.0f;
+		float result[] = new float[3];
+		String fieldStr;
+		
+//		torus.field(x, y, z, result);
+//
+//		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+//
+//		fieldStr = torus.vectorToString(result);
+//		System.out.println("Field: " + fieldStr);
+//		
+//		
+//		x = (float) (44f*Math.cos(Math.toRadians(29.75)));
+//		y = (float) (44f*Math.sin(Math.toRadians(29.75)));
+//		z = 280f;
+//		torus.field(-x, -y, z, result);>
+//
+//		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+//
+//		fieldStr = torus.vectorToString(result);
+//		System.out.println("Field: " + fieldStr);
+//		
+		x = (float) (462f*Math.cos(Math.toRadians(15.75)));
+		y = (float) (462f*Math.sin(Math.toRadians(15.75)));
+		z = 436f;
+		torus.field(x, y, z, result);
+		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+
+		fieldStr = torus.vectorToString(result);
+		System.out.println("Field: " + fieldStr);
+
+		
+		x = 0f;
+		y = 39.93f;
+		z = 388.10f;
+		torus.field(-x, -y, z, result);
+
+		System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
+
+		fieldStr = torus.vectorToString(result);
+		System.out.println("Field: " + fieldStr);
+
+	}
+
 
 }
