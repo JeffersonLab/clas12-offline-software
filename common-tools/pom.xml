@@ -19,5 +19,6 @@
     <module>clas-geometry</module>
     <module>clas-detector</module>
     <module>clas-reco</module> 
+    <module>clas-analysis</module> 
   </modules>
 </project>
