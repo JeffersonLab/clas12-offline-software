@@ -46,7 +46,6 @@ public class RunData {
 		int oldRun = run;
 		
 		try {
-			DataManager dm = DataManager.getInstance();
 			
 			run = safeInt(dataEvent, "run");
 			if (run < 0) {
@@ -54,6 +53,9 @@ public class RunData {
 			}
 			
 			event = safeInt(dataEvent, "event");
+			
+			System.err.println("In Set Data event num: " + event + "    event: " + dataEvent);
+			
 			if (event < 0) {
 				return false;
 			}

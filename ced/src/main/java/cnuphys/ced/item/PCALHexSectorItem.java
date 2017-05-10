@@ -134,7 +134,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 							double fract = ((double)hit.averageADC()/(double)AllEC.getInstance().getMaxPCALAdc());
 							fract = Math.max(0.15, Math.min(1.0,  fract));
 							poly = extensionPolygon(container, view0, strip0, fract);
-							g.setColor(Color.red);
+							g.setColor(Color.yellow);
 							g.fillPolygon(poly);
 							g.setColor(X11Colors.getX11Color("dark red"));
 							g.drawPolygon(poly);
@@ -290,7 +290,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 			Point2D.Double work[], Point2D.Double extension[], double fract) {
 		
 		double gap = 1.;
-		double len = fract*13;
+		double len = fract*17;
 		stripWorldPolygon(stripType, stripIndex, work);
 		
 		double d1 = work[1].distance(work[2]);

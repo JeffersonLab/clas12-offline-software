@@ -46,7 +46,7 @@ public class PCALView extends HexView {
 	// for drawing MC hits
 	private McHitDrawer _mcHitDrawer;
 
-	private static final double _xsize = 400.0;
+	private static final double _xsize = 410.0;
 	private static final double _ysize = _xsize * 1.154734;
 	// private static final double _ysize = 1.0;
 	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(
