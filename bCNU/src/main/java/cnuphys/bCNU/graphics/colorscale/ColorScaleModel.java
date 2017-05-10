@@ -391,5 +391,41 @@ public class ColorScaleModel {
 
 		return new Color(r3, g3, b3, a3);
 	}
+	
+	/**
+	 * Get a scale such as you might find on a weather map.
+	 * @param n the number of "in between colors"
+	 * @return a set of colors for a weather map
+	 */
+	public static Color[] getWeatherMapColors(int n) {
+		
+		
+		int r[] = { 151, 89,   45,  63,  64,  43,  39, 116, 241, 238, 234};
+		int g[] = {   0, 36,   61,  97, 179, 131, 144, 185, 177, 125,  42};
+		int b[] = { 163, 176, 170, 255, 205, 116,  10,  45,   0,   0,  15};
+
+		n = Math.max(2,  Math.min(20, n));
+
+
+		double f = 1.0 / n;
+
+		int len = r.length;
+		int colorlen = (len - 1) * n + 1;
+		Color colors[] = new Color[colorlen];
+
+		int k = 0;
+		for (int i = 0; i < (len - 1); i++) {
+			for (int j = 0; j < n; j++) {
+				int rr = r[i] + (int) (j * f * (r[i + 1] - r[i]));
+				int gg = g[i] + (int) (j * f * (g[i + 1] - g[i]));
+				int bb = b[i] + (int) (j * f * (b[i + 1] - b[i]));
+				colors[k] = new Color(rr, gg, bb);
+				k++;
+			}
+		}
+
+		colors[(len - 1) * n] = new Color(r[len - 1], g[len - 1], b[len - 1]);
+		return colors;
+	}
 
 }

@@ -144,6 +144,28 @@ public class ClasIoEventManager {
 	public RunData getRunData() {
 		return _runData;
 	}
+	
+	/**
+	 * Set the next event (after a getNextEvent)
+	 * @param event the new event
+	 */
+	protected void setNextEvent(DataEvent event) {
+		_currentEvent = event;
+		
+		if (event != null) {
+//			_runData.set(_currentEvent);
+
+			if (isAccumulating()) {
+				AccumulationManager.getInstance().newClasIoEvent(event);
+			}
+			else {
+				_runData.set(_currentEvent);
+				notifyEventListeners();
+				notifyAllDefinedPlots(event);
+			}
+		}
+	}
+	
 
 	/**
 	 * Get a collection of unique LundIds in the current event
@@ -221,6 +243,19 @@ public class ClasIoEventManager {
 	 */
 	public DataSource getDataSource() {
 		return _dataSource;
+	}
+	
+	/**
+	 * Get the HIPO decoder
+	 * @return the decoder
+	 */
+	public CLASDecoder getDecoder() {
+		
+		if (_decoder == null) {
+			_decoder = new CLASDecoder();
+		}
+
+		return _decoder;
 	}
 
 	/**
@@ -682,7 +717,7 @@ public class ClasIoEventManager {
 
 	// During accumulation, notify any plots
 	// define through the Define menu
-	private void notifyAllDefinedPlots(DataEvent event) {
+	protected void notifyAllDefinedPlots(DataEvent event) {
 		if (isAccumulating() && (event != null)) {
 			Vector<PlotDialog> plots = DefinitionManager.getInstance().getAllPlots();
 
@@ -702,6 +737,7 @@ public class ClasIoEventManager {
 	 * @return the next event, if possible
 	 */
 	public DataEvent getNextEvent() {
+		
 
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
@@ -710,31 +746,14 @@ public class ClasIoEventManager {
 				_currentEvent = _dataSource.getNextEvent();
 
 				// look for the run bank
-				_runData.set(_currentEvent);
-
-				if (!isAccumulating()) {
-					notifyEventListeners();
-				} else {
-					AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
-					notifyAllDefinedPlots(_currentEvent);
-				}
+				setNextEvent(_currentEvent);
 			}
 			break;
 		case HIPOFILE:
 			if (_dataSource.hasEvent()) {
 				_currentEvent = _dataSource.getNextEvent();
-				_runData.set(_currentEvent);
-			} else {
-				_currentEvent = null;
-			}
-
-			if (!isAccumulating()) {
-				notifyEventListeners();
-			}
-			else {
-				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
-				notifyAllDefinedPlots(_currentEvent);
-			}
+				setNextEvent(_currentEvent);
+			} 
 			break;
 			
 		case EVIOFILE:
@@ -742,27 +761,14 @@ public class ClasIoEventManager {
 				_currentEvent = _dataSource.getNextEvent();
 				
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-					
-					if (_decoder == null) {
-						_decoder = new CLASDecoder();
-					}
-					_currentEvent = _decoder.getDataEvent(_currentEvent);
-					System.err.println("Decoded to HIPO");
+					_currentEvent = getDecoder().getDataEvent(_currentEvent);
+	//				System.err.println("Decoded to HIPO");
 	//				_currentEvent.show();
+					
+					setNextEvent(_currentEvent);
 				}
+			} 
 
-				_runData.set(_currentEvent);
-			} else {
-				_currentEvent = null;
-			}
-
-			if (!isAccumulating()) {
-				notifyEventListeners();
-			}
-			else {
-				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
-				notifyAllDefinedPlots(_currentEvent);
-			}
 			break;
 
 
@@ -771,43 +777,154 @@ public class ClasIoEventManager {
 			break;
 			
 		case ET:
-			int maxTries = 30;
+//			int maxTries = 30;
 			_currentEvent = null;
 			
-			int iTry = 1;
-			while((_currentEvent == null) && (iTry <= maxTries)) {
-				if (_dataSource.hasEvent()) {
-					_currentEvent = _dataSource.getNextEvent();
-					if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-						
-						if (_decoder == null) {
-							_decoder = new CLASDecoder();
-						}
-						_currentEvent = _decoder.getDataEvent(_currentEvent);
-//						System.err.println("Decoded to HIPO");
-//						_currentEvent.show();
-					}
+			if (_dataSource.hasEvent()) {
+				_currentEvent = _dataSource.getNextEvent();
+				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+					_currentEvent = getDecoder().getDataEvent(_currentEvent);
+//					System.err.println("Decoded to HIPO");
+//					_currentEvent.show();
+					setNextEvent(_currentEvent);
 				}
 				else {
-					_dataSource.waitForEvents();
-					iTry++;
+					_currentEvent = null;
+//					Toolkit.getDefaultToolkit().beep();
 				}
-			} //while
-			
-			if (_currentEvent == null) {
-				System.err.println("Got a null data event from ET after " + iTry + " tries.");
 			}
 			
-			if (!isAccumulating()) {
-				notifyEventListeners();
-				notifyAllDefinedPlots(_currentEvent);
-			}
-			else {
-				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
-			}
-
+			
+			//use waitforevents but this is problematic in the gui thread
+//			int iTry = 1;
+//			while((_currentEvent == null) && (iTry <= maxTries)) {
+//				if (_dataSource.hasEvent()) {
+//					_currentEvent = _dataSource.getNextEvent();
+//					if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+//						_currentEvent = getDecoder().getDataEvent(_currentEvent);
+////						System.err.println("Decoded to HIPO");
+////						_currentEvent.show();
+//						setNextEvent(_currentEvent);
+//					}
+//				}
+//				else { //data source has no event
+//					_dataSource.waitForEvents();
+//					iTry++;
+//				}
+//			} //while
+//			
+//			if (_currentEvent == null) {
+//				System.err.println("Got a null data event from ET after " + iTry + " tries.");
+//			}
 			break;
+			
 		}
+
+//		EventSourceType estype = getEventSourceType();
+//		switch (estype) {
+//		case HIPORING:
+//			if (_dataSource.hasEvent()) {
+//				_currentEvent = _dataSource.getNextEvent();
+//
+//				// look for the run bank
+//				_runData.set(_currentEvent);
+//
+//				if (!isAccumulating()) {
+//					notifyEventListeners();
+//				} else {
+//					AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+//					notifyAllDefinedPlots(_currentEvent);
+//				}
+//			}
+//			break;
+//		case HIPOFILE:
+//			if (_dataSource.hasEvent()) {
+//				_currentEvent = _dataSource.getNextEvent();
+//				_runData.set(_currentEvent);
+//			} else {
+//				_currentEvent = null;
+//			}
+//
+//			if (!isAccumulating()) {
+//				notifyEventListeners();
+//			}
+//			else {
+//				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+//				notifyAllDefinedPlots(_currentEvent);
+//			}
+//			break;
+//			
+//		case EVIOFILE:
+//			if (_dataSource.hasEvent()) {
+//				_currentEvent = _dataSource.getNextEvent();
+//				
+//				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+//					
+//					if (_decoder == null) {
+//						_decoder = new CLASDecoder();
+//					}
+//					_currentEvent = _decoder.getDataEvent(_currentEvent);
+//					System.err.println("Decoded to HIPO");
+//	//				_currentEvent.show();
+//				}
+//
+//				_runData.set(_currentEvent);
+//			} else {
+//				_currentEvent = null;
+//			}
+//
+//			if (!isAccumulating()) {
+//				notifyEventListeners();
+//			}
+//			else {
+//				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+//				notifyAllDefinedPlots(_currentEvent);
+//			}
+//			break;
+//
+//
+//		case FASTMC:
+//			FastMCManager.getInstance().nextEvent();
+//			break;
+//			
+//		case ET:
+//			int maxTries = 30;
+//			_currentEvent = null;
+//			
+//			int iTry = 1;
+//			while((_currentEvent == null) && (iTry <= maxTries)) {
+//				if (_dataSource.hasEvent()) {
+//					_currentEvent = _dataSource.getNextEvent();
+//					if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+//						
+//						if (_decoder == null) {
+//							_decoder = new CLASDecoder();
+//						}
+//						_currentEvent = _decoder.getDataEvent(_currentEvent);
+////						System.err.println("Decoded to HIPO");
+////						_currentEvent.show();
+//					}
+//				}
+//				else {
+//					_dataSource.waitForEvents();
+//					iTry++;
+//				}
+//			} //while
+//			
+//			if (_currentEvent == null) {
+//				System.err.println("Got a null data event from ET after " + iTry + " tries.");
+//			}
+//			
+//			if (!isAccumulating()) {
+//				notifyEventListeners();
+//				notifyAllDefinedPlots(_currentEvent);
+//			}
+//			else {
+//				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+//			}
+//
+//			break;
+//		}
 		
 		return _currentEvent;
 	}
@@ -835,6 +952,12 @@ public class ClasIoEventManager {
 	 * @return the previous event, if possible.
 	 */
 	public DataEvent getPreviousEvent() {
+		
+		
+		if (isSourceHipoFile()) {
+			return gotoEvent(getEventNumber()-1);
+		}
+		
 		_currentEvent = _dataSource.getPreviousEvent();
 		
 		if (isSourceEvioFile()) {
@@ -844,8 +967,8 @@ public class ClasIoEventManager {
 					_decoder = new CLASDecoder();
 				}
 				_currentEvent = _decoder.getDataEvent(_currentEvent);
-				System.err.println("Decoded to HIPO");
-	//			_currentEvent.show();
+	//			System.err.println("Decoded to HIPO");
+				_currentEvent.show();
 			}
 		}
 
@@ -855,8 +978,10 @@ public class ClasIoEventManager {
 		if ((_currentEvent == null) && (getEventNumber() > 0)) {
 			return gotoEvent(getEventNumber() - 1);
 		}
+		
+		setNextEvent(_currentEvent);
 
-		notifyEventListeners();
+//		notifyEventListeners();
 		return _currentEvent;
 	}
 
@@ -867,6 +992,12 @@ public class ClasIoEventManager {
 	 * @return the event at the given number (if possible).
 	 */
 	public DataEvent gotoEvent(int eventNumber) {
+		
+		if (isSourceHipoFile()) {
+			_dataSource.close();
+			_dataSource.open(_currentHipoFile);
+		}
+		
 		_currentEvent = _dataSource.gotoEvent(eventNumber);
 		
 		if (isSourceEvioFile()) {
@@ -876,12 +1007,14 @@ public class ClasIoEventManager {
 					_decoder = new CLASDecoder();
 				}
 				_currentEvent = _decoder.getDataEvent(_currentEvent);
-				System.err.println("Decoded to HIPO");
+//				System.err.println("Decoded to HIPO");
 //				_currentEvent.show();
 			}
 		}
 		
-		notifyEventListeners();
+		setNextEvent(_currentEvent);
+
+//		notifyEventListeners();
 		return _currentEvent;
 	}
 
@@ -987,7 +1120,7 @@ public class ClasIoEventManager {
 	 * passed along.
 	 * 
 	 */
-	private void notifyEventListeners() {
+	protected void notifyEventListeners() {
 
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();

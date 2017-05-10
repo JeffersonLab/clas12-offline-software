@@ -43,7 +43,8 @@ public class ECView extends HexView {
 	// for drawing MC hits
 	private McHitDrawer _mcHitDrawer;
 
-	private static final double _xsize = 420.0;
+//	private static final double _xsize = 420.0;
+	private static final double _xsize = 430.0;
 	private static final double _ysize = _xsize * 1.154734;
 
 	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(

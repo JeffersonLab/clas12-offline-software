@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -1676,6 +1677,23 @@ public class GraphicsUtilities {
 		} catch (Exception e) {
 			Log.getInstance().exception(e);
 		}
+	}
+	
+	/**
+	 * Run a runnable directly if this is not the EDT (AWT) thread. If
+	 * it is, run on the invokeLater method. Note in either case the runnable
+	 * WILL be run on the EDT.
+	 * @param runnable the runnable to run
+	 */
+	public static void invokeInDispatchThreadIfNeeded(Runnable runnable) {
+	    if (EventQueue.isDispatchThread()) {
+	    	//run directly
+	        runnable.run();
+	    } 
+	    else {
+	    	//do all gui events, then run on EDT
+	        SwingUtilities.invokeLater(runnable);
+	    }
 	}
 
 	public static void main(String arg[]) {
