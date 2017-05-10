@@ -31,6 +31,11 @@ public class ECCommon {
     public static float[]  clusterError = new float[3];
     public static Boolean         debug = false;
     public static Boolean   singleEvent = false;
+    public static String      variation = "default";
+
+    private static double[] AtoE  = {15,10,10};    // SCALED ADC to Energy in MeV
+    private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
+    
     //public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
@@ -61,7 +66,7 @@ public class ECCommon {
         List<ECStrip>  ecStrips = null;
         
         if(event instanceof EvioDataEvent) {
-            ecStrips = ECCommon.readStrips(event);
+            ecStrips = ECCommon.readStripsEvio(event);
         }
         
         if(event instanceof HipoDataEvent) {
@@ -72,9 +77,11 @@ public class ECCommon {
         
         Collections.sort(ecStrips);
         
+        manager.setVariation(variation);
         
         IndexedTable   atten  = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable    gain  = manager.getConstants(run, "/calibration/ec/gain");
+        
         for(ECStrip strip : ecStrips){
             int sector    = strip.getDescriptor().getSector();
             int layer     = strip.getDescriptor().getLayer();
@@ -99,16 +106,18 @@ public class ECCommon {
     public static List<ECStrip>  readStripsHipo(DataEvent event){        
         List<ECStrip>  strips = new ArrayList<ECStrip>();
         if(event.hasBank("ECAL::adc")==true){
-            DataBank ecalBank = event.getBank("ECAL::adc");
-            int rows = ecalBank.rows();
+            DataBank bank = event.getBank("ECAL::adc");
+            int rows = bank.rows();
             for(int loop = 0; loop < rows; loop++){
-                int sector    = (int) ecalBank.getByte("sector", loop);
-                int layer     = (int) ecalBank.getByte("layer", loop);
-                int component = (int) ecalBank.getShort("component", loop);
+                int sector    = bank.getByte("sector", loop);
+                int layer     = bank.getByte("layer", loop);
+                int component = bank.getShort("component", loop);
                 ECStrip  strip = new ECStrip(sector, layer, component);
-                strip.setADC(ecalBank.getInt("ADC", loop));
-                //strip.setTDC(ecalBank.getInt("TDC", loop));
-                if(strip.getADC()>ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);
+                strip.setADC(bank.getInt("ADC", loop));
+                strip.setTDC(bank.getInt("TDC", loop));
+                double sca = (sector==5)?AtoE5[ind[layer-1]]:AtoE[ind[layer-1]]; 
+                if (variation=="clas6") sca = 1.0;
+                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);
             }
         }
         return strips;
@@ -118,10 +127,10 @@ public class ECCommon {
      * @param event
      * @return 
      */
-    public static List<ECStrip> readStrips(DataEvent event){
+    public static List<ECStrip> readStripsEvio(DataEvent event){
         List<ECStrip>  strips = new ArrayList<ECStrip>();
-        strips.addAll(ECCommon.readEvent("PCAL",event));
-        strips.addAll(ECCommon.readEvent("EC",event));
+        strips.addAll(ECCommon.readEvioEvent("PCAL",event));
+        strips.addAll(ECCommon.readEvioEvent("EC",event));
         return strips;
     }
     
@@ -131,20 +140,20 @@ public class ECCommon {
      * @param event
      * @return 
      */
-    public static List<ECStrip>  readEvent(String det, DataEvent event){
+    public static List<ECStrip>  readEvioEvent(String det, DataEvent event){
         List<ECStrip>  strips = new ArrayList<ECStrip>();
          if(event.hasBank(det+"::dgtz")==true){
-            EvioDataBank ecBank = (EvioDataBank) event.getBank(det+"::dgtz");
-            int nrows = ecBank.rows();
+            EvioDataBank bank = (EvioDataBank) event.getBank(det+"::dgtz");
+            int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
-                int     sector = ecBank.getInt("sector", row);
-                int      stack = det.equals("PCAL") ? 0:ecBank.getInt("stack", row);
-                int       view = ecBank.getInt("view", row);
-                int  component = ecBank.getInt("strip", row);
+                int     sector = bank.getInt("sector", row);
+                int      stack = det.equals("PCAL") ? 0:bank.getInt("stack", row);
+                int       view = bank.getInt("view", row);
+                int  component = bank.getInt("strip", row);
                 int      layer = stack*3 + view;
                 ECStrip  strip = new ECStrip(sector, layer, component);
-                strip.setADC(ecBank.getInt("ADC", row));
-                strip.setTDC(ecBank.getInt("TDC", row));
+                strip.setADC(bank.getInt("ADC", row));
+                strip.setTDC(bank.getInt("TDC", row));
                 if(strip.getADC()>ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);                       
             }
          }
@@ -180,9 +189,10 @@ public class ECCommon {
         for(ECPeak p : peaks){
             int adc = p.getADC();
             int lay = p.getDescriptor().getLayer();
-            if(adc>ECCommon.peakThreshold[ind[lay-1]]){
-                ecPeaks.add(p);
-            }
+            int sec = p.getDescriptor().getSector();
+            double sca = (sec==5)?AtoE5[ind[lay-1]]:AtoE[ind[lay-1]]; 
+            if (variation=="clas6") sca = 1.0;
+            if(adc>sca*ECCommon.peakThreshold[ind[lay-1]]) ecPeaks.add(p);
         }
         return ecPeaks;
     }
