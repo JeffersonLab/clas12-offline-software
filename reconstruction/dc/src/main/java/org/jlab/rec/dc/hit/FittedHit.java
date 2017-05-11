@@ -249,8 +249,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 				TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
 				double deltatime_beta = 0;
 				if(x!=-1)
-					deltatime_beta = (Math.sqrt(x*x+(CCDBConstants.getDISTBETA()[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta)*(CCDBConstants.getDISTBETA()[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta))-x)/CCDBConstants.getV0()[this.get_Sector()-1][this.get_Superlayer()-1];
-				this.set_Time(this.get_Time()+deltatime_beta);   
+                                    deltatime_beta = (Math.sqrt(x*x+(CCDBConstants.getDISTBETA()[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta)*(CCDBConstants.getDISTBETA()[this.get_Sector()-1][this.get_Superlayer()-1]*beta*beta))-x)/CCDBConstants.getV0()[this.get_Sector()-1][this.get_Superlayer()-1];
+				this.set_Time(this.get_Time()-deltatime_beta);   
 				
 				d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx)/this.get_Time();
 				
