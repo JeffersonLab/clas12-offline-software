@@ -11,7 +11,7 @@ public class CCDBConstants {
 	private static double[][] V0 = new double[6][6];					    // staturated drift velocity in cm/ns
 	private static double[][] DELT_BFIELD_COEFFICIENT = new double[6][6]; //coefficient of the bfield part of the increase in time
 	
-	private static double[] DMAXSUPERLAYER = {0.77665,0.81285,1.25065,1.32446,1.72947,1.80991};
+	private static double[] DMAXSUPERLAYER   = new double[6];
 	private static double[][] TMAXSUPERLAYER = new double[6][6];
 
 	private static double DELTATIME_BFIELD_PAR1[][] = new double[6][6];
@@ -58,9 +58,9 @@ public class CCDBConstants {
 	public static synchronized double[] getDMAXSUPERLAYER() {
 		return DMAXSUPERLAYER;
 	}
-//	public static synchronized void setDMAXSUPERLAYER(double[] dMAXSUPERLAYER) {
-//		DMAXSUPERLAYER = dMAXSUPERLAYER;
-//	}
+	public static synchronized void setDMAXSUPERLAYER(double[] dMAXSUPERLAYER) {
+		DMAXSUPERLAYER = dMAXSUPERLAYER;
+	}
 	public static synchronized double[][] getTMAXSUPERLAYER() {
 		return TMAXSUPERLAYER;
 	}
