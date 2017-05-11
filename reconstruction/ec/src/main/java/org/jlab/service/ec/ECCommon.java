@@ -114,7 +114,7 @@ public class ECCommon {
                 int component = bank.getShort("component", loop);
                 ECStrip  strip = new ECStrip(sector, layer, component);
                 strip.setADC(bank.getInt("ADC", loop));
-                strip.setTDC(bank.getInt("TDC", loop));
+                strip.setTDC(0);
                 double sca = (sector==5)?AtoE5[ind[layer-1]]:AtoE[ind[layer-1]]; 
                 if (variation=="clas6") sca = 1.0;
                 if(strip.getADC()>sca*ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);
@@ -153,7 +153,7 @@ public class ECCommon {
                 int      layer = stack*3 + view;
                 ECStrip  strip = new ECStrip(sector, layer, component);
                 strip.setADC(bank.getInt("ADC", row));
-                strip.setTDC(bank.getInt("TDC", row));
+                strip.setTDC(0);
                 if(strip.getADC()>ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);                       
             }
          }
