@@ -252,7 +252,9 @@ public class CodaEventDecoder {
                         //+ cdatatypes.get(position));
                         Byte   half    = (Byte) cdataitems.get(position);
                         Byte   channel = (Byte) cdataitems.get(position+1);
-                        Byte   tdc     = (Byte) cdataitems.get(position+2);
+                        Byte   tdcbyte = (Byte) cdataitems.get(position+2);
+                        Short  tdc     = DataUtils.getShortFromByte(tdcbyte);
+                        //Byte   tdc     = (Byte) cdataitems.get(position+2);
                         //Short   adc     = (Short)  cdataitems.get(position+3);
                         Byte   adc     = (Byte)  cdataitems.get(position+3);
                         
@@ -274,7 +276,7 @@ public class CodaEventDecoder {
                         adcData.setIntegral(adc);
                         adcData.setPedestal( (short) 0);
                         adcData.setADC(0,0);
-                        adcData.setTimeWord(tdc);
+                        adcData.setTime(tdc);
                         adcData.setTimeStamp(time);
                         entry.addADC(adcData);
                         //RawDataEntry  entry = new RawDataEntry(crate,slot,channelKey);
