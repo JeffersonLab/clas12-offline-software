@@ -320,6 +320,7 @@ public class ClasIoEventManager {
 		}
 		return "(none)";
 	}
+	
 
 	/**
 	 * Open an event file
@@ -330,6 +331,8 @@ public class ClasIoEventManager {
 	 * @throws IOException
 	 */
 	public void openHipoEventFile(File file) throws FileNotFoundException, IOException {
+		
+		
 
 		System.err.println("opening hipo file " + file.getPath());
 

@@ -583,8 +583,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		fmenu.insertSeparator(0);
 
 		fmenu.add(ClasIoEventMenu.getRecentEventFileMenu(), 0);
-		fmenu.add(ClasIoEventMenu.getOpenEvioEventFileItem(), 0);
-		fmenu.add(ClasIoEventMenu.getOpenHipoEventFileItem(), 0);
+		fmenu.add(ClasIoEventMenu.getOpenEventFileItem(), 0);
 	}
 
 	// create the options menu

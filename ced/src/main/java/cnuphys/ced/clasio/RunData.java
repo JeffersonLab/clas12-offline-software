@@ -46,15 +46,17 @@ public class RunData {
 		int oldRun = run;
 		
 		try {
+			System.out.println("-- GETTING Run:Config...");
 			
 			run = safeInt(dataEvent, "run");
 			if (run < 0) {
+
 				return false;
 			}
 			
 			event = safeInt(dataEvent, "event");
 			
-			System.err.println("In Set Data event num: " + event + "    event: " + dataEvent);
+//			System.err.println("In Set Data event num: " + event + "    event: " + dataEvent);
 			
 			if (event < 0) {
 				return false;
@@ -70,10 +72,12 @@ public class RunData {
 				return false;
 			}
 
+			System.out.println("---- GETTING Run:Config.mode...");
 			mode = safeByte(dataEvent, "mode");
 			if (mode < 0) {
 				return false;
 			}
+			System.out.println("---- Done");
 			
 			solenoid = safeFloat(dataEvent, "solenoid");
 			if (Float.isNaN(solenoid)) {
@@ -106,6 +110,7 @@ public class RunData {
 //			rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
 //			startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
 			
+
 			
 			if (oldRun != run) {
 				//set the mag field and menus
