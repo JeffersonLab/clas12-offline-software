@@ -420,7 +420,7 @@ public class DetectorData {
            int nrows = bank.rows();
            
            for(int row = 0; row < nrows; row++){
-               int charge = bank.getByte("q", row);
+               int charge = bank.getInt("q", row);
                
                double p = bank.getFloat("p",row);
                //System.out.println("Central Detector MOmentum  " + p);
