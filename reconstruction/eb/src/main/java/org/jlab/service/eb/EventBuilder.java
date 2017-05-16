@@ -210,23 +210,23 @@ public class EventBuilder {
     
     public void processNeutralTracks(){
         
-        List<DetectorResponse>  responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 1);
+        List<CalorimeterResponse>  responsesPCAL = this.getUnmatchedResponses(calorimeterResponses, DetectorType.EC, 1);
         
         List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
         
-        for(DetectorResponse r : responsesPCAL){
+        for(CalorimeterResponse r : responsesPCAL){
             DetectorParticle p = DetectorParticle.createNeutral(r);
             particles.add(p);
         }
         
-        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 4);
-        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 7);
+        List<CalorimeterResponse>   responsesECIN = this.getUnmatchedResponses(calorimeterResponses, DetectorType.EC, 4);
+        List<CalorimeterResponse>  responsesECOUT = this.getUnmatchedResponses(calorimeterResponses, DetectorType.EC, 7);
         
         for(int i = 0; i < particles.size(); i++){
             DetectorParticle p = particles.get(i);
-            int index = p.getDetectorHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
+            int index = p.getCalorimeterHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
-            index = p.getDetectorHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
+            index = p.getCalorimeterHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
         }
         
@@ -249,9 +249,9 @@ public class EventBuilder {
         //System.out.println(" PCAL RESPONSES = " + responsesPCAL.size());
     }
     
-    public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
-        List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
-        for(DetectorResponse r : list){
+    public List<CalorimeterResponse> getUnmatchedResponses(List<CalorimeterResponse> list, DetectorType type, int layer){
+        List<CalorimeterResponse>  responses = new ArrayList<CalorimeterResponse>();
+        for(CalorimeterResponse r : list){
             if(r.getDescriptor().getType()==type&&r.getDescriptor().getLayer()==layer&&r.getAssociation()<0){
                 responses.add(r);
             }
