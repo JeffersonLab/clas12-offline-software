@@ -35,6 +35,18 @@ public class H1FCollection1D {
 			histos.get(k).setTitleX(title);
 		}
 	}
+
+	public void setLineColor(int color) {
+		for(int k = 0; k < histos.size(); k++) {
+			histos.get(k).setLineColor(color);
+		}
+	}
+
+	public void setLineWidth(int width) {
+		for(int k = 0; k < histos.size(); k++) {
+			histos.get(k).setLineWidth(width);
+		}
+	}
 	
 	public static int getBinNumber(double value, ArrayList<Double> limits) {
 		if(limits.size() < 2) return -1;

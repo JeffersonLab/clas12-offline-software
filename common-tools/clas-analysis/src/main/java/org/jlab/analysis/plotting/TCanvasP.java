@@ -55,6 +55,14 @@ public class TCanvasP extends TCanvas {
 			this.draw(histos.getListOfHistograms().get(k));
 		}
 	}
+
+	public void draw(H1FCollection1D histos, String sameOpt) {
+		int n = histos.getListOfHistograms().size();
+		for(int k = 0; k < n; k++) {
+			this.cd(k);
+			this.draw(histos.getListOfHistograms().get(k), "same");
+		}
+	}
 	
 	public void draw(H1FCollection2D histos) {
 		int nx = histos.getListOfH1FCollection1Ds().get(0).getListOfHistograms().size();
@@ -64,6 +72,17 @@ public class TCanvasP extends TCanvas {
 			for(int y = 0; y < ny; y++) {
 				this.cd(x, y);
 				this.draw(histos.getListOfH1FCollection1Ds().get(y).getListOfHistograms().get(x));
+			}
+		}
+	}
+
+	public void draw(H1FCollection2D histos, String sameOpt) {
+		int nx = histos.getListOfH1FCollection1Ds().get(0).getListOfHistograms().size();
+		int ny = histos.getListOfH1FCollection1Ds().size();
+		for(int x = 0; x < nx; x++) {
+			for(int y = 0; y < ny; y++) {
+				this.cd(x, y);
+				this.draw(histos.getListOfH1FCollection1Ds().get(y).getListOfHistograms().get(x), "same");
 			}
 		}
 	}
