@@ -120,6 +120,24 @@ public class DetectorParticle implements Comparable {
         particle.addResponse(resp);
         return particle;
     }
+
+    public static DetectorParticle createNeutral(CalorimeterResponse resp){
+        Vector3D dir = new Vector3D(resp.getPosition().x(),
+                resp.getPosition().y(),resp.getPosition().z());
+        dir.unit();
+        DetectorTrack track = new DetectorTrack(0,1.0);
+        track.addCross(resp.getPosition().x(),
+                resp.getPosition().y(),resp.getPosition().z(),
+                dir.x(),dir.y(),dir.z());
+        track.setVector(dir.x(), dir.y(), dir.z());
+        track.setVertex(0.0, 0.0, 0.0);
+        track.setPath(resp.getPosition().mag());
+        track.setTrackEnd(resp.getPosition().x(),
+                resp.getPosition().y(),resp.getPosition().z());
+        DetectorParticle particle = new DetectorParticle(track);
+        particle.addCalorimeterResponse(resp);
+        return particle;
+    }
     
     public void clear(){
         this.responseStore.clear();
@@ -139,6 +157,10 @@ public class DetectorParticle implements Comparable {
     
     public void addCherenkovResponse(CherenkovResponse res){
         this.cherenkovStore.add(res);
+    }
+    
+        public void addCalorimeterResponse(CalorimeterResponse res){
+        this.calorimeterStore.add(res);
     }
     
     public void addResponse(DetectorResponse res, boolean match){
@@ -866,3 +888,4 @@ public class DetectorParticle implements Comparable {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
+
