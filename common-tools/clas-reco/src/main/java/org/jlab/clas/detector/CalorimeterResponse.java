@@ -8,12 +8,10 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -100,7 +98,7 @@ public class CalorimeterResponse {
     }
     
     /**
-     * reads DetectorResponse List from DataEvent class. it has to contain
+     * reads CalorimeterResponse List from DataEvent class. it has to contain
      * branches:
      *   sector and layer (type BYTE), 
      *   x,y,z (type FLOAT)
@@ -172,21 +170,21 @@ public class CalorimeterResponse {
      * @param minEnergy
      * @return 
      */
-    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
+    public static List<CalorimeterResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, double minEnergy){ 
-        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
-        return DetectorResponse.getListByEnergy(responses, minEnergy);
+        List<CalorimeterResponse> responses = CalorimeterResponse.readHipoEvent(event, bankName, type);
+        return CalorimeterResponse.getListByEnergy(responses, minEnergy);
     }
     
     /**
-     * Returns a list of detectorResponses where all entries have energy above given threshold.
+     * Returns a list of CalorimeterResponses where all entries have energy above given threshold.
      * @param responses list of detector responses.
      * @param minEnergy minimum energy accepted
      * @return 
      */
-    public static List<DetectorResponse>  getListByEnergy(List<DetectorResponse> responses, double minEnergy){
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
-        for(DetectorResponse r : responses){
+    public static List<CalorimeterResponse>  getListByEnergy(List<CalorimeterResponse> responses, double minEnergy){
+        List<CalorimeterResponse> responseList = new ArrayList<CalorimeterResponse>();
+        for(CalorimeterResponse r : responses){
             if(r.getEnergy()>minEnergy){
                 responseList.add(r);
             }
@@ -194,9 +192,9 @@ public class CalorimeterResponse {
         return responseList;
     }
     
-    public static List<DetectorResponse>  getListBySector(List<DetectorResponse> list, DetectorType type, int sector){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
-        for(DetectorResponse res : list){
+    public static List<CalorimeterResponse>  getListBySector(List<CalorimeterResponse> list, DetectorType type, int sector){
+        List<CalorimeterResponse> result = new ArrayList<CalorimeterResponse>();
+        for(CalorimeterResponse res : list){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getSector()==sector){
                 result.add(res);
             }
@@ -204,9 +202,9 @@ public class CalorimeterResponse {
         return result;
     }
     
-    public static List<DetectorResponse>  getListByLayer(List<DetectorResponse> list, DetectorType type, int layer){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
-        for(DetectorResponse res : list){
+    public static List<CalorimeterResponse>  getListByLayer(List<CalorimeterResponse> list, DetectorType type, int layer){
+        List<CalorimeterResponse> result = new ArrayList<CalorimeterResponse>();
+        for(CalorimeterResponse res : list){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
                 result.add(res);
             }
@@ -214,10 +212,10 @@ public class CalorimeterResponse {
         return result;
     }
         
-    public static List<DetectorResponse>  getListBySectorLayer(List<DetectorResponse> list, 
+    public static List<CalorimeterResponse>  getListBySectorLayer(List<CalorimeterResponse> list, 
             DetectorType type, int sector, int layer){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
-        for(DetectorResponse res : list){
+        List<CalorimeterResponse> result = new ArrayList<CalorimeterResponse>();
+        for(CalorimeterResponse res : list){
             if(res.getDescriptor().getType()==type
                     &&res.getDescriptor().getSector()==sector
                     &&res.getDescriptor().getLayer()==layer){

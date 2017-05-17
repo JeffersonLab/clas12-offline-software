@@ -26,7 +26,7 @@ import org.jlab.geom.prim.Vector3D;
 public class EventBuilder {
     
     private DetectorEvent              detectorEvent = new DetectorEvent();
-    private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
+//    private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse> cherenkovResponses = new ArrayList<CherenkovResponse>();
     private List<ScintillatorResponse> scintillatorResponses = new ArrayList<ScintillatorResponse>();
     private List<CalorimeterResponse> calorimeterResponses = new ArrayList<CalorimeterResponse>();
@@ -37,9 +37,9 @@ public class EventBuilder {
         
     }
     
-    public void addDetectorResponses(List<DetectorResponse> responses){
-        detectorResponses.addAll(responses);
-    }
+//    public void addDetectorResponses(List<DetectorResponse> responses){
+//        detectorResponses.addAll(responses);
+//    }
     
     public void addCherenkovResponses(List<CherenkovResponse> responses){
         cherenkovResponses.addAll(responses);
@@ -191,7 +191,7 @@ public class EventBuilder {
                 //detectorResponses.get(index).setHitQuality(quality);
             }
             
-            index = p.getCalorimeterHit(this.calorimeterResponses, DetectorType.EC, 7, EBConstants.PCAL_MATCHING);
+            index = p.getCalorimeterHit(this.calorimeterResponses, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){
                 p.addResponse(calorimeterResponses.get(index), true);
                 calorimeterResponses.get(index).setAssociation(n);
@@ -240,7 +240,7 @@ public class EventBuilder {
             p.vector().setXYZ(px*energy/EBConstants.ECAL_SAMPLINGFRACTION, 
                     py*energy/EBConstants.ECAL_SAMPLINGFRACTION,
                     pz*energy/EBConstants.ECAL_SAMPLINGFRACTION);
-            if(p.getDetectorResponses().size()>1){
+            if(p.getCalorimeterResponses().size()>1){
                 detectorEvent.addParticle(p);
             }
         }

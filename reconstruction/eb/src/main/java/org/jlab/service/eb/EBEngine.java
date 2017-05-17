@@ -34,12 +34,11 @@ public class EBEngine extends ReconstructionEngine {
         
         int eventType = EBio.TRACKS_HB;
         
-        String particleBank  = "RECHB::Particle";
+        String particleBank     = "RECHB::Particle";
         String calorimeterBank  = "RECHB::Calorimeter";
         String scintillatorBank = "RECHB::Scintillator";
-        String cherenkovBank = "RECHB::Cherenkov";
-        String eventBank     = "REC::Event";
-        //String matrixBank    = "REC::TBCovMat";
+        String cherenkovBank    = "RECHB::Cherenkov";
+        String eventBank        = "REC::Event";
         
         //System.out.println(" EVENT BUILDER = " + EBio.isTimeBased(de));
         if(EBio.isTimeBased(de)==true){
@@ -69,11 +68,11 @@ public class EBEngine extends ReconstructionEngine {
         
         EventBuilder eb = new EventBuilder();
         
-        List<CalorimeterResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
+        List<CalorimeterResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
         List<ScintillatorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,5.0);
-        List<ScintillatorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF,5.0);
-        List<CherenkovResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        List<TaggerResponse> ft_tracks = TaggerResponse.readHipoEvent(de, "FT::particles");
+        List<ScintillatorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF,5.0);
+        List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
+        List<TaggerResponse>           ft_tracks = TaggerResponse.readHipoEvent(de, "FT::particles");
 
         
 //        System.out.println("---------");
@@ -108,7 +107,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.addTaggerTracks(ft_tracks);
         eb.processNeutralTracks();        
         eb.assignTrigger();
-
+ 
         EBRadioFrequency rf = new EBRadioFrequency();
         eb.getEvent().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
         //eb.getEvent().setRfTime(rf);
