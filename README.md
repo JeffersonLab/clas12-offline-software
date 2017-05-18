@@ -12,6 +12,12 @@ cd clas12-offline-softwre
 ./build-coatjava.sh
 ```
 
+This will create a new directory called "coatjava" which is your complete coatjava build. Point COATJAVA to this directory:
+
+```tcsh
+setenv COATJAVA /path/to/clas12-offline-software/coatjava/
+```
+
 See the [troubleshooting](https://github.com/JeffersonLab/clas12-offline-software/wiki/Troubleshooting) wiki page if you experience any issues. Javadocs can be found at the repository's [gh-page](https://jeffersonlab.github.io/clas12-offline-software/). A build history can be found at [Travis CI](https://travis-ci.org/JeffersonLab/clas12-offline-software).
 
 ## Repository Structure and Dependency Management
