@@ -1,8 +1,8 @@
 package cnuphys.swim;
 
-import cnuphys.rk4.IRk4Listener;
+import cnuphys.rk4.IRkListener;
 
-public class DefaultListener implements IRk4Listener {
+public class DefaultListener implements IRkListener {
 
     // value of independent variable (e.g., time or path length)
     private double independentVar;

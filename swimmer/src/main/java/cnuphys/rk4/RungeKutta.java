@@ -9,7 +9,7 @@ import java.util.List;
  * @author heddle
  * 
  */
-public class RungeKutta4 {
+public class RungeKutta {
 
 	// for adaptive stepsize, this is how much h will grow
 	private static final double HGROWTH = 1.5;
@@ -26,9 +26,9 @@ public class RungeKutta4 {
 	}
 
 	/**
-	 * Create a RungeKutta4 object that can be used for integration
+	 * Create a RungeKutta object that can be used for integration
 	 */
-	public RungeKutta4() {
+	public RungeKutta() {
 	}
 
 	/**
@@ -70,8 +70,12 @@ public class RungeKutta4 {
 	 * @return the number of steps used--may be less than the space provided if
 	 *         the integration ended early as a result of an exit condition.
 	 */
-	public int uniformStep(double yo[], double to, double tf,
-			final double y[][], final double t[], IDerivative deriv,
+	public int uniformStep(double yo[],
+			double to,
+			double tf,
+			final double y[][],
+			final double t[],
+			IDerivative deriv,
 			IStopper stopper) {
 		int nstep = t.length; // the number of steps to store
 
@@ -87,7 +91,7 @@ public class RungeKutta4 {
 			y[i][0] = yo[i];
 		}
 
-		IRk4Listener listener = new IRk4Listener() {
+		IRkListener listener = new IRkListener() {
 
 			int step = 1;
 
@@ -135,8 +139,13 @@ public class RungeKutta4 {
 	 *            listens for each step
 	 * @return the number of steps used.
 	 */
-	public int uniformStep(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener) {
+	public int uniformStep(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener) {
 
 		UniformAdvance advancer = new UniformAdvance();
 		return driver(yo, to, tf, h, deriv, stopper, listener, advancer);
@@ -172,8 +181,13 @@ public class RungeKutta4 {
 	 *            the Butcher Tableau
 	 * @return the number of steps used.
 	 */
-	public int uniformStep(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
+	public int uniformStep(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
 			ButcherTableau tableau) {
 
 		ButcherTableauAdvance advancer = new ButcherTableauAdvance(tableau);
@@ -221,16 +235,22 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	public int adaptiveStepToTf(double yo[], double to, double tf, double h,
-			final List<Double> t, final List<double[]> y, IDerivative deriv,
-			IStopper stopper, double relTolerance[], double hdata[])
-			throws RungeKuttaException {
+	public int adaptiveStepToTf(double yo[],
+			double to,
+			double tf,
+			double h,
+			final List<Double> t,
+			final List<double[]> y,
+			IDerivative deriv,
+			IStopper stopper,
+			double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
 
 		// put starting step in
 		t.add(to);
 		y.add(copy(yo));
 
-		IRk4Listener listener = new IRk4Listener() {
+		IRkListener listener = new IRkListener() {
 
 			@Override
 			public void nextStep(double tNext, double yNext[], double h) {
@@ -239,13 +259,12 @@ public class RungeKutta4 {
 				t.add(tNext);
 				y.add(copy(yNext));
 
-				// System.err.println("next Step:   " + tNext + "  [" + yNext[0]
+				// System.err.println("next Step: " + tNext + " [" + yNext[0]
 				// + ", " + yNext[1] + "]");
 			}
 
 		};
-		return adaptiveStepToTf(yo, to, tf, h, deriv, stopper, listener,
-				relTolerance, hdata);
+		return adaptiveStepToTf(yo, to, tf, h, deriv, stopper, listener, relTolerance, hdata);
 	}
 
 	/**
@@ -291,16 +310,23 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	public int adaptiveStep(double yo[], double to, double tf, double h,
-			final List<Double> t, final List<double[]> y, IDerivative deriv,
-			IStopper stopper, ButcherTableau tableau, double relTolerance[],
+	public int adaptiveStep(double yo[],
+			double to,
+			double tf,
+			double h,
+			final List<Double> t,
+			final List<double[]> y,
+			IDerivative deriv,
+			IStopper stopper,
+			ButcherTableau tableau,
+			double relTolerance[],
 			double hdata[]) throws RungeKuttaException {
 
 		// put starting step in
 		t.add(to);
 		y.add(copy(yo));
 
-		IRk4Listener listener = new IRk4Listener() {
+		IRkListener listener = new IRkListener() {
 
 			@Override
 			public void nextStep(double tNext, double yNext[], double h) {
@@ -312,8 +338,7 @@ public class RungeKutta4 {
 
 		};
 
-		return adaptiveStep(yo, to, tf, h, deriv, stopper, listener, tableau,
-				relTolerance, hdata);
+		return adaptiveStep(yo, to, tf, h, deriv, stopper, listener, tableau, relTolerance, hdata);
 	}
 
 	/**
@@ -354,15 +379,20 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	public int adaptiveStepToTf(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
-			double relTolerance[], double hdata[]) throws RungeKuttaException {
+	public int adaptiveStepToTf(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
+			double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
 
 		// use a simple half-step advance
 		IAdvance advancer = new HalfStepAdvance();
 
-		return driverToTf(yo, to, tf, h, deriv, stopper, listener, advancer,
-				relTolerance, hdata);
+		return driverToTf(yo, to, tf, h, deriv, stopper, listener, advancer, relTolerance, hdata);
 	}
 
 	/**
@@ -405,16 +435,21 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	public int adaptiveStep(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
-			ButcherTableau tableau, double relTolerance[], double hdata[])
-			throws RungeKuttaException {
+	public int adaptiveStep(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
+			ButcherTableau tableau,
+			double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
 
 		// ButcherTableauAdvance advancer = new ButcherTableauAdvance(tableau);
 		// use a simple half-step advance
 		IAdvance advancer = new HalfStepAdvance();
-		return driver(yo, to, tf, h, deriv, stopper, listener, advancer,
-				relTolerance, hdata);
+		return driver(yo, to, tf, h, deriv, stopper, listener, advancer, relTolerance, hdata);
 	}
 
 	/**
@@ -464,16 +499,24 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	public int adaptiveStep(double yo[], double to, double tf, double h,
-			final List<Double> t, final List<double[]> y, IDerivative deriv,
-			IStopper stopper, ButcherTableau tableau, double eps,
-			double yscale[], double hdata[]) throws RungeKuttaException {
+	public int adaptiveStep(double yo[],
+			double to,
+			double tf,
+			double h,
+			final List<Double> t,
+			final List<double[]> y,
+			IDerivative deriv,
+			IStopper stopper,
+			ButcherTableau tableau,
+			double eps,
+			double yscale[],
+			double hdata[]) throws RungeKuttaException {
 
 		// put starting step in
 		t.add(to);
 		y.add(copy(yo));
 
-		IRk4Listener listener = new IRk4Listener() {
+		IRkListener listener = new IRkListener() {
 
 			@Override
 			public void nextStep(double tNext, double yNext[], double h) {
@@ -483,8 +526,7 @@ public class RungeKutta4 {
 
 		};
 
-		return adaptiveStep(yo, to, tf, h, deriv, stopper, listener, tableau,
-				eps, yscale, hdata);
+		return adaptiveStep(yo, to, tf, h, deriv, stopper, listener, tableau, eps, yscale, hdata);
 	}
 
 	/**
@@ -532,16 +574,22 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	public int adaptiveStep(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
-			ButcherTableau tableau, double eps, double yscale[], double hdata[])
-			throws RungeKuttaException {
+	public int adaptiveStep(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
+			ButcherTableau tableau,
+			double eps,
+			double yscale[],
+			double hdata[]) throws RungeKuttaException {
 
 		// ButcherTableauAdvance advancer = new ButcherTableauAdvance(tableau);
 		// use a simple half-step advance
 		IAdvance advancer = new HalfStepAdvance();
-		return driver(yo, to, tf, h, deriv, stopper, listener, advancer, eps,
-				yscale, hdata);
+		return driver(yo, to, tf, h, deriv, stopper, listener, advancer, eps, yscale, hdata);
 	}
 
 	// copy a vector
@@ -581,8 +629,13 @@ public class RungeKutta4 {
 	 *            early because some condition has been reached.
 	 * @return the number of steps used.
 	 */
-	private int driver(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
+	private int driver(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
 			IAdvance advancer) {
 		int nstep = (int) (1 + (tf - to) / h); // the number of steps to store
 
@@ -660,14 +713,19 @@ public class RungeKutta4 {
 	 *            min stepsize used, hdata[1] is the average stepsize used, and
 	 *            hdata[2] is the max stepsize used
 	 * @return the number of steps used.
-	 * @throw(new 
-	 *            RungeKuttaException("Step size too small in Runge Kutta driver"
-	 *            ));
+	 * @throw(new RungeKuttaException("Step size too small in Runge Kutta
+	 *            driver" ));
 	 */
-	private int driverToTf(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
-			IAdvance advancer, double absError[], double hdata[])
-			throws RungeKuttaException {
+	private int driverToTf(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
+			IAdvance advancer,
+			double absError[],
+			double hdata[]) throws RungeKuttaException {
 
 		// if our advancer does not compute error we can't use adaptive stepsize
 		if (!advancer.computesError()) {
@@ -735,10 +793,10 @@ public class RungeKutta4 {
 			if (decreaseStep) {
 				h = h / 2;
 				if (h < MINSTEPSIZE) {
-					throw (new RungeKuttaException(
-							"Step size too small in Runge Kutta driver (A)"));
+					throw (new RungeKuttaException("Step size too small in Runge Kutta driver (A)"));
 				}
-			} else { // accepted this step
+			}
+			else { // accepted this step
 
 				if (hdata != null) {
 					hdata[0] = Math.min(hdata[0], h);
@@ -821,14 +879,19 @@ public class RungeKutta4 {
 	 *            min stepsize used, hdata[1] is the average stepsize used, and
 	 *            hdata[2] is the max stepsize used
 	 * @return the number of steps used.
-	 * @throw(new 
-	 *            RungeKuttaException("Step size too small in Runge Kutta driver"
-	 *            ));
+	 * @throw(new RungeKuttaException("Step size too small in Runge Kutta
+	 *            driver" ));
 	 */
-	private int driver(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
-			IAdvance advancer, double relTolerance[], double hdata[])
-			throws RungeKuttaException {
+	private int driver(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
+			IAdvance advancer,
+			double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
 
 		// if our advancer does not compute error we can't use adaptive stepsize
 		if (!advancer.computesError()) {
@@ -869,8 +932,8 @@ public class RungeKutta4 {
 			boolean decreaseStep = false;
 			for (int i = 0; i < nDim; i++) {
 				decreaseStep = error[i] > relTolerance[i];
-				// System.err.println("error " + error[i] + "  reltol: " +
-				// relTolerance[i] + "   dec: " + decreaseStep);
+				// System.err.println("error " + error[i] + " reltol: " +
+				// relTolerance[i] + " dec: " + decreaseStep);
 				if (decreaseStep) {
 					break;
 				}
@@ -879,10 +942,10 @@ public class RungeKutta4 {
 			if (decreaseStep) {
 				h = h / 2;
 				if (h < MINSTEPSIZE) {
-					throw (new RungeKuttaException(
-							"Step size too small in Runge Kutta driver (A)"));
+					throw (new RungeKuttaException("Step size too small in Runge Kutta driver (A)"));
 				}
-			} else { // accepted this step
+			}
+			else { // accepted this step
 
 				if (hdata != null) {
 					hdata[0] = Math.min(hdata[0], h);
@@ -972,10 +1035,17 @@ public class RungeKutta4 {
 	 * @return the number of steps used.
 	 * @throws RungeKuttaException
 	 */
-	private int driver(double yo[], double to, double tf, double h,
-			IDerivative deriv, IStopper stopper, IRk4Listener listener,
-			IAdvance advancer, double eps, double yscale[], double hdata[])
-			throws RungeKuttaException {
+	private int driver(double yo[],
+			double to,
+			double tf,
+			double h,
+			IDerivative deriv,
+			IStopper stopper,
+			IRkListener listener,
+			IAdvance advancer,
+			double eps,
+			double yscale[],
+			double hdata[]) throws RungeKuttaException {
 
 		// if our advancer does not compute error we can't use adaptive stepsize
 		if (!advancer.computesError()) {
@@ -1021,8 +1091,7 @@ public class RungeKutta4 {
 
 			double errMax = 0.0;
 			for (int i = 0; i < nDim; i++) {
-				errMax = Math.max(errMax,
-						Math.abs(error[i] / Math.max(1.0e-20, yscale[i])));
+				errMax = Math.max(errMax, Math.abs(error[i] / Math.max(1.0e-20, yscale[i])));
 			}
 			errMax /= eps;
 
@@ -1030,10 +1099,10 @@ public class RungeKutta4 {
 				double hnew = 0.9 * h * Math.pow(errMax, -0.25);
 				h = Math.max(hnew, 0.1 * h); // limit reduction
 				if (h < MINSTEPSIZE) {
-					throw (new RungeKuttaException(
-							"Step size too small in Runge Kutta driver (B)"));
+					throw (new RungeKuttaException("Step size too small in Runge Kutta driver (B)"));
 				}
-			} else { // accepted this step
+			}
+			else { // accepted this step
 
 				if (hdata != null) {
 					hdata[0] = Math.min(hdata[0], h);
@@ -1066,7 +1135,8 @@ public class RungeKutta4 {
 
 				if (errMax > 1.89e-4) {
 					h = 0.9 * h * Math.pow(errMax, 0.2);
-				} else {
+				}
+				else {
 					h = 5.0 * h; // limit growth
 				}
 
@@ -1104,8 +1174,13 @@ public class RungeKutta4 {
 	class UniformAdvance implements IAdvance {
 
 		@Override
-		public void advance(double t, double[] y, double[] dydt, double h,
-				IDerivative deriv, double[] yout, double[] error) {
+		public void advance(double t,
+				double[] y,
+				double[] dydt,
+				double h,
+				IDerivative deriv,
+				double[] yout,
+				double[] error) {
 			int nDim = y.length;
 
 			// note that dydt (input) is k1
@@ -1143,8 +1218,7 @@ public class RungeKutta4 {
 			deriv.derivative(t + h, ytemp, k4);
 
 			for (int i = 0; i < nDim; i++) {
-				yout[i] = y[i] + h6
-						* (k1[i] + +2.0 * k2[i] + 2 * k3[i] + k4[i]);
+				yout[i] = y[i] + h6 * (k1[i] + +2.0 * k2[i] + 2 * k3[i] + k4[i]);
 			}
 
 			// return the work arrays to the pool
@@ -1172,8 +1246,13 @@ public class RungeKutta4 {
 		}
 
 		@Override
-		public void advance(double t, double[] y, double[] dydt, double h,
-				IDerivative deriv, double[] yout, double[] error) {
+		public void advance(double t,
+				double[] y,
+				double[] dydt,
+				double h,
+				IDerivative deriv,
+				double[] yout,
+				double[] error) {
 
 			// System.err.println("HALF STEP ADVANCE");
 			// advance the full step
@@ -1213,8 +1292,13 @@ public class RungeKutta4 {
 		}
 
 		@Override
-		public void advance(double t, double[] y, double[] dydt, double h,
-				IDerivative deriv, double[] yout, double[] error) {
+		public void advance(double t,
+				double[] y,
+				double[] dydt,
+				double h,
+				IDerivative deriv,
+				double[] yout,
+				double[] error) {
 
 			// System.err.println("TABLEAU ADVANCE");
 			int nDim = y.length;
@@ -1279,7 +1363,7 @@ public class RungeKutta4 {
 				// }
 
 				// for (int i = 0; i < nDim; i++) {
-				// System.out.print(String.format("[%-12.5e]   ", error[i]));
+				// System.out.print(String.format("[%-12.5e] ", error[i]));
 				// }
 				// System.out.println();
 

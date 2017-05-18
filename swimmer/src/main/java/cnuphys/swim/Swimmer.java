@@ -6,9 +6,9 @@ import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.ButcherTableau;
-import cnuphys.rk4.IRk4Listener;
+import cnuphys.rk4.IRkListener;
 import cnuphys.rk4.IStopper;
-import cnuphys.rk4.RungeKutta4;
+import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
 /**
@@ -180,7 +180,7 @@ public final class Swimmer {
 
 		// Integrate
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
-		ntotal = (new RungeKutta4()).uniformStep(uo, 0, maxPathLength, u, s, deriv, stopper);
+		ntotal = (new RungeKutta()).uniformStep(uo, 0, maxPathLength, u, s, deriv, stopper);
 
 		// now cycle through and get the save points
 		for (int i = 0; i < ntotal; i++) {
@@ -268,7 +268,7 @@ public final class Swimmer {
 	 * @return the total number of steps taken
 	 */
 	public int swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			IStopper stopper, IRk4Listener listener, double maxPathLength, double stepSize) {
+			IStopper stopper, IRkListener listener, double maxPathLength, double stepSize) {
 
 		if (momentum < MINMOMENTUM) {
 			System.err.println("Skipping low momentum swim (B)");
@@ -280,7 +280,7 @@ public final class Swimmer {
 
 		// Integrate
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
-		return (new RungeKutta4()).uniformStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener);
+		return (new RungeKutta()).uniformStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener);
 	}
 
 	/**
@@ -617,7 +617,7 @@ public final class Swimmer {
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
 
 		// integrate
-		(new RungeKutta4()).adaptiveStep(uo, 0, maxPathLength, stepSize, s, u, deriv, stopper, _defaultTableau,
+		(new RungeKutta()).adaptiveStep(uo, 0, maxPathLength, stepSize, s, u, deriv, stopper, _defaultTableau,
 				relTolerance, hdata);
 		// now cycle through and get the save points
 		for (int i = 0; i < u.size(); i++) {
@@ -671,7 +671,7 @@ public final class Swimmer {
 	 * @throws RungeKuttaException
 	 */
 	public int swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			IStopper stopper, IRk4Listener listener, double maxPathLength, double stepSize, double relTolerance[],
+			IStopper stopper, IRkListener listener, double maxPathLength, double stepSize, double relTolerance[],
 			double hdata[]) throws RungeKuttaException {
 
 		if (momentum < MINMOMENTUM) {
@@ -685,7 +685,7 @@ public final class Swimmer {
 		// Integrate
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
 
-		int nstep = (new RungeKutta4()).adaptiveStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener,
+		int nstep = (new RungeKutta()).adaptiveStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener,
 				_defaultTableau, relTolerance, hdata);
 
 		return nstep;
@@ -751,7 +751,7 @@ public final class Swimmer {
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
 
 		// integrate
-		(new RungeKutta4()).adaptiveStep(uo, 0, maxPathLength, stepSize, t, y, deriv, stopper, _defaultTableau,
+		(new RungeKutta()).adaptiveStep(uo, 0, maxPathLength, stepSize, t, y, deriv, stopper, _defaultTableau,
 				tolerance, yscale, hdata);
 		// now cycle through and get the save points
 
@@ -802,7 +802,7 @@ public final class Swimmer {
 	 * @throws RungeKuttaException
 	 */
 	public int swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			IStopper stopper, IRk4Listener listener, double maxPathLength, double stepSize, double tolerance,
+			IStopper stopper, IRkListener listener, double maxPathLength, double stepSize, double tolerance,
 			double hdata[]) throws RungeKuttaException {
 
 		if (momentum < MINMOMENTUM) {
@@ -821,7 +821,7 @@ public final class Swimmer {
 		// Integrate
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
 
-		int nstep = (new RungeKutta4()).adaptiveStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener,
+		int nstep = (new RungeKutta()).adaptiveStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener,
 				_defaultTableau, tolerance, yscale, hdata);
 
 		return nstep;
@@ -860,7 +860,7 @@ public final class Swimmer {
 	 * @return the total number of steps taken
 	 */
 	public int swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			IRk4Listener listener, double rmax, double maxPathLength, double stepSize) {
+			IRkListener listener, double rmax, double maxPathLength, double stepSize) {
 
 		IStopper stopper = new DefaultSwimStopper(rmax);
 

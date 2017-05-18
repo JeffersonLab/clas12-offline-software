@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import cnuphys.magfield.IField;
 import cnuphys.rk4.DefaultStopper;
 import cnuphys.rk4.IStopper;
-import cnuphys.rk4.RungeKutta4;
+import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
 /**
@@ -97,7 +97,7 @@ public class SwimZ {
 		SwimZDerivative deriv = new SwimZDerivative(Q, p, _field);
 
 		// need a RK4 object
-		RungeKutta4 rk4 = new RungeKutta4();
+		RungeKutta rk4 = new RungeKutta();
 
 		double yo[] = { start.x, start.y, start.tx, start.ty };
 
@@ -201,7 +201,7 @@ public class SwimZ {
 		SwimZDerivative deriv = new SwimZDerivative(Q, p, _field);
 
 		// need a RK4 object
-		RungeKutta4 rk4 = new RungeKutta4();
+		RungeKutta rk4 = new RungeKutta();
 
 		// obtain a range
 		SwimZRange swimZrange = new SwimZRange(start.z, zf, stepSize);
