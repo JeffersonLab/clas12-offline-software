@@ -9,22 +9,22 @@ package cnuphys.rk4;
 
 public class DefaultStopper implements IStopper {
 
-    // final value of the independent variable
-    private double _tf;
+	// final value of the independent variable
+	private double _tf;
 
-    @Override
-    public boolean stopIntegration(double t, double[] y) {
-	return false;
-    }
+	@Override
+	public boolean stopIntegration(double t, double[] y) {
+		return false;
+	}
 
-    @Override
-    public double getFinalT() {
-	return _tf;
-    }
+	@Override
+	public double getFinalT() {
+		return _tf;
+	}
 
-    @Override
-    public void setFinalT(double finalT) {
-	_tf = finalT;
-    }
+	@Override
+	public void setFinalT(double finalT) {
+		_tf = finalT;
+	}
 
 }
