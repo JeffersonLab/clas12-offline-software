@@ -5,7 +5,8 @@ import java.awt.geom.Point2D;
 public class CTOFGeometry {
 
 	//fake geomety
-	private static final double THETA0 = -90 - 3.75;
+	private static final double THETA0 = -90 - 7.5;
+//	private static final double THETA0 = -90 - 3.75;
 	private static final double DTHETA = -7.5; //360/48
 	private static final double RINNER = 250.; //mm
 	private static final double ROUTER = 260.; //mm
