@@ -27,7 +27,7 @@ public class DetectorTrack {
     
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
-    private Point3D trackIntersect = new Point3D();
+//    private Point3D trackIntersect = new Point3D();
     
     
     private double variable1 = 0.0;
@@ -35,7 +35,7 @@ public class DetectorTrack {
     
     
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
-    private List<Point3D> ctofIntersects = new ArrayList<Point3D>();
+//    private List<Point3D> ctofIntersects = new ArrayList<Point3D>();
     
     private double    MAX_LINE_LENGTH = 1500.0;
     
@@ -52,11 +52,11 @@ public class DetectorTrack {
         this.trackCharge = charge;
     }
     
-        public DetectorTrack(int charge, double mom, Point3D ctofintersect){
-        this.trackMom = mom;
-        this.trackCharge = charge;
-        this.trackIntersect = ctofintersect;
-    }
+//        public DetectorTrack(int charge, double mom, Point3D ctofintersect){
+//        this.trackMom = mom;
+//        this.trackCharge = charge;
+//        this.trackIntersect = ctofintersect;
+//    }
 
     public DetectorTrack(int charge, double px, double py, double pz){
         this.trackCharge = charge;
@@ -116,13 +116,13 @@ public class DetectorTrack {
         return this;
     }
     
-    public void setTrackIntersect(Point3D inter) {
-        this.trackIntersect = inter;
-    }
+//    public void setTrackIntersect(Point3D inter) {
+//        this.trackIntersect = inter;
+//    }
     
-    public Point3D getTrackIntersect() {
-        return this.ctofIntersects.get(0);
-    }
+//    public Point3D getTrackIntersect() {
+//        return this.ctofIntersects.get(0);
+//    }
     
     public int      getCharge()   { return trackCharge;}
     public double   getP()        { return trackP.mag();}    
@@ -142,13 +142,13 @@ public class DetectorTrack {
         this.trackCrosses.add(line);
     }
     
-    public void addCTOFPoint(double x, double y, double z){
-        Point3D line = new Point3D(x,y,z);
-        this.ctofIntersects.add(line);
-    }
+//    public void addCTOFPoint(double x, double y, double z){
+//        Point3D line = new Point3D(x,y,z);
+//        this.ctofIntersects.add(line);
+//    }
     
     public int getCrossCount(){ return this.trackCrosses.size();}
-    public int getCTOFCount() {return this.ctofIntersects.size();}
+//    public int getCTOFCount() {return this.ctofIntersects.size();}
     
     public Line3D getCross(int index){
         return this.trackCrosses.get(index);

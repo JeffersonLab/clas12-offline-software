@@ -203,7 +203,7 @@ public class DetectorData {
            
            bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
-           bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
+           bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
            bank.setByte("sector", row, (byte) r.getDescriptor().getSector());
            bank.setByte("layer", row, (byte) r.getDescriptor().getLayer());
            bank.setFloat("x", row, (float) r.getPosition().x());
@@ -235,7 +235,7 @@ public class DetectorData {
            ScintillatorResponse r = responses.get(row);
            bank.setShort("index",row,(short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
-           bank.setShort("detector", row, (short) r.getDescriptor().getType().getDetectorId());
+           bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
            bank.setByte("sector", row, (byte) r.getDescriptor().getSector());
            bank.setByte("layer", row, (byte) r.getDescriptor().getLayer());
            bank.setShort("component", row, (short) r.getDescriptor().getComponent());
@@ -259,7 +259,7 @@ public class DetectorData {
            CherenkovResponse c = responses.get(row);
            bank.setShort("index", row, (short) c.getHitIndex());
            bank.setShort("pindex", row, (short) c.getAssociation());
-           bank.setShort("detector", row, (short) c.getCherenkovType().getDetectorId());
+           bank.setByte("detector", row, (byte) c.getCherenkovType().getDetectorId());
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());
@@ -298,10 +298,11 @@ public class DetectorData {
 
       public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-           bank.setFloat("STTime", 0, (float) detectorEvent.getStartTime());
-           bank.setFloat("RFTime", 0, (float) detectorEvent.getRfTime());
-
-     
+           bank.setInt("NRUN", 0, detectorEvent.getEventHeader().getRun());
+           bank.setInt("NEVENT", 0, detectorEvent.getEventHeader().getEvent());
+           bank.setInt("TRG", 0, detectorEvent.getEventHeader().getTrigger());
+           bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
+           bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());     
        return bank;
    }
       
@@ -413,36 +414,44 @@ public class DetectorData {
    }
    
    
-   public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name){
-       List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
-       if(event.hasBank(bank_name)==true){
-           DataBank bank = event.getBank(bank_name);
-           int nrows = bank.rows();
+    public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name){
+        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
+        if(event.hasBank(bank_name)==true){
+            DataBank bank = event.getBank(bank_name);
+            int nrows = bank.rows();
            
-           for(int row = 0; row < nrows; row++){
-               int charge = bank.getInt("q", row);
+            for(int row = 0; row < nrows; row++){
+                int charge  = bank.getInt("q", row);               
+                double p    = bank.getFloat("p",row);
+                double pt   = bank.getFloat("pt",row);
+                double phi0 = bank.getFloat("phi0",row);
+                double tandip = bank.getFloat("tandip", row);
+                double z0 = bank.getFloat("z0", row);
+                double d0 = bank.getFloat("d0", row);
+                
+                double pz = pt*tandip;
+                double py = pt*Math.sin(phi0);
+                double px = pt*Math.cos(phi0);
+                
+                double vx = d0*Math.cos(phi0);
+                double vy = d0*Math.sin(phi0);
+                
+                DetectorTrack  track = new DetectorTrack(charge,p);
+                track.setVector(px, py, pz);
+                track.setVertex(vx, vy, z0);
+                track.setPath(bank.getFloat("pathlength", row));
                
-               double p = bank.getFloat("p",row);
-               //System.out.println("Central Detector MOmentum  " + p);
-               float x = bank.getFloat("c_x", row);
-               float y = bank.getFloat("c_y" , row);
-               float z = bank.getFloat("c_z", row);
-               Point3D trackIntersect = new Point3D(x,y,z);
-               //System.out.println("Cx is " + x);
-               DetectorTrack  track = new DetectorTrack(charge,p,trackIntersect);
-               track.setPath(bank.getFloat("pathlength", row));
-               track.addCTOFPoint(x,y,z);
+               //track.addCTOFPoint(x,y,z);
                //System.out.println("track intersect is..." + trackIntersect);
-               Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
-               Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
+                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
+                Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
+                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
 
-               track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
-
-               tracks.add(track);
-           }
-       }
-       return tracks;
-   }
+                tracks.add(track);
+            }
+        }
+        return tracks;
+    }
    
     public static List<DetectorTrack>  readTaggerTracks(DataEvent event, String bank_name){
        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();

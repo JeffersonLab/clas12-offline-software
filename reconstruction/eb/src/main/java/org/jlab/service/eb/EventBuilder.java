@@ -9,6 +9,7 @@ import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.detector.CalorimeterResponse;
+import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
@@ -37,6 +38,14 @@ public class EventBuilder {
         
     }
     
+    public void initEvent() {
+        detectorEvent.clear();
+    }
+
+    public void initEvent(DetectorHeader head) {
+        detectorEvent.clear();
+        detectorEvent.addEventHeader(head);
+    }
 //    public void addDetectorResponses(List<DetectorResponse> responses){
 //        detectorResponses.addAll(responses);
 //    }
@@ -65,34 +74,10 @@ public class EventBuilder {
     //public void addTracks(List<DetectorTrack> tracks){
     
         
-    public void addHBTracks(List<DetectorTrack> tracks) {
-        detectorEvent.clear();
+    public void addTracks(List<DetectorTrack> tracks) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            detectorEvent.addParticle(particle);
-        }
-    }
-    
-    
-    public void addCentralTracks(List<DetectorTrack> tracks) {
-        detectorEvent.clear();
-        //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            //System.out.println("Central Track CTOF intersection....." + tracks.get(i).getTrackIntersect());
-            detectorEvent.addParticle(particle);
-        }
-    }
-    
-    public void addTaggerTracks(List<TaggerResponse> taggers) {
-        //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < taggers.size(); i++){
-            int charge = taggers.get(i).getCharge();
-            int id = taggers.get(i).getID();
-            Vector3D momentum = taggers.get(i).getMomentum();
-            DetectorParticle particle = new DetectorParticle(id,charge,momentum.x(),momentum.y(),momentum.z());
-            //System.out.println("Central Track CTOF intersection....." + tracks.get(i).getTrackIntersect());
             detectorEvent.addParticle(particle);
         }
     }
@@ -108,15 +93,17 @@ public class EventBuilder {
         
     }*/
     
-    public void addTBTracks(List<DetectorTrack> tracks) {
+    public void addTaggerTracks(List<TaggerResponse> taggers) {
         //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i));
+        for(int i = 0 ; i < taggers.size(); i++){
+            int charge = taggers.get(i).getCharge();
+            int id = taggers.get(i).getID();
+            Vector3D momentum = taggers.get(i).getMomentum();
+            DetectorParticle particle = new DetectorParticle(id,charge,momentum.x(),momentum.y(),momentum.z());
             detectorEvent.addParticle(particle);
         }
-        
     }
-
+    
 
     /**
      * processes all particles and associating detector responses with given cuts to each particle.
@@ -163,14 +150,14 @@ public class EventBuilder {
                 scintillatorResponses.get(index).setAssociation(n);
             }
             /**
-             * Matching tracks to FTOF layer 2 detector. Added to the particle and association is
+             * Matching tracks to CTOF detector. Added to the particle and association is
              */
-//            index = p.getScintillatorHit(this.scintillatorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
+            index = p.getScintillatorHit(this.scintillatorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
 //            //System.out.println("index CTOF = " + index);
-//            if(index>=0){
-//                p.addResponse(scintillatorResponses.get(index), true);
-//                scintillatorResponses.get(index).setAssociation(n);
-//            }
+            if(index>=0){
+                p.addResponse(scintillatorResponses.get(index), true);
+                scintillatorResponses.get(index).setAssociation(n);
+            }
             /**
              * Matching tracks to PCAL (first layer of ECAL) and adding to the particle if reasonable match
              * is found, and proper association is set.
@@ -288,7 +275,7 @@ public class EventBuilder {
 //          
 //        }
         
-       public void assignTrigger()  {
+    public void assignTrigger()  {
         int npart = this.detectorEvent.getParticles().size();
        
         for(int i = 0; i < npart; i++){
@@ -318,9 +305,8 @@ public class EventBuilder {
         if(index>0){
             this.detectorEvent.moveUp(index);
         }
-       
-       
-}
+      
+    }
        
 
         

@@ -30,11 +30,10 @@ public class EBConstants {
     
     public static final double      RF_BUCKET_LENGTH = 2.004;
     public static final double             RF_OFFSET = 0.0;
-    public static final int                 RF_SHIFT = 800;   // NOT USED
     public static final int                RF_CYCLES = 80;   
     public static final int                    RF_ID = 1;     // signal ID that will be used in reconstruction
     public static final double           RF_TDC2TIME = 0.0234358;
-    public static final int             RF_LARGE_INTEGER = 800;
+    public static final int         RF_LARGE_INTEGER = 800;
     
     public static final double        SPEED_OF_LIGHT = 29.9792;
     
