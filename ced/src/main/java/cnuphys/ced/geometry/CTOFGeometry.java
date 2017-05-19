@@ -2,6 +2,10 @@ package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
 
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.volume.Geant4Basic;
+import org.jlab.geometry.prim.Line3d;
+
 public class CTOFGeometry {
 
 	//fake geomety
@@ -90,5 +94,22 @@ public class CTOFGeometry {
 	
 	public static void main(String arg[]) {
 		initialize();
+		realGeoTest();
+	}
+	
+	private static void realGeoTest() {
+		CTOFGeant4Factory factory = new CTOFGeant4Factory();
+		for(int ipad=11;ipad<=48;ipad++){
+			Geant4Basic pad = factory.getPaddle(ipad);
+			
+			System.err.println();
+//			Line3d lineX = pad.getLineX();
+//			System.err.println("X: " + lineX.toString());
+//			Line3d lineY = pad.getLineY();
+//			System.err.println("Y: " + lineY.toString());
+			Line3d lineZ = pad.getLineZ();
+			System.err.println("Z: " + lineZ.toString());
+		}
+
 	}
 }

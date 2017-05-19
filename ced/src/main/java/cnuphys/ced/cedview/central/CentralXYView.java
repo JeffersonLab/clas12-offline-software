@@ -177,9 +177,6 @@ public class CentralXYView extends CedXYView {
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
 
-		// add a specialized magview drawer
-		((BaseContainer) (view.getContainer()))
-				.setMagnificationDraw(new CentralXYMagDrawer(view));
 
 		// add quick zooms
 		view.addQuickZoom("SVT & BMT", -190, -190, 190, 190);

@@ -2,12 +2,14 @@ package cnuphys.ced.ced3d;
 
 import java.awt.Color;
 import bCNU3D.Support3D;
-import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.AdcHit;
+import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
+import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.SVTCrosses;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.lund.X11Colors;
@@ -47,54 +49,78 @@ public class BSTPanel3D extends DetectorItem3D {
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-
-		int hitCount = BST.hitCount();
+		
 		float coords6[] = new float[6];
 		float coords36[] = new float[36];
-		int bstsector[] = BST.sector();
-		int bstlayer[] = BST.layer();
-		int bststrip[] = BST.strip();
-        int pid[] = BST.pid();
-		double avgX[] = BST.avgX();
-		double avgY[] = BST.avgY();
-		double avgZ[] = BST.avgZ();
+		boolean drawOutline = false;
 
 		
-		boolean drawOutline = false;
-		// now strips
-		for (int i = 0; i < hitCount; i++) {
-			// 1 based sector
-			int sector = bstsector[i];
-			// "big layer" ..8
-			int layer = bstlayer[i];
+		AdcHitList hits = SVT.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					int sector = hit.sector;
+					int layer = hit.layer;
+					if ((_sector == sector) && (_layer == layer)) {
+						drawOutline = true;
+						int strip = hit.component;
+						SVTGeometry.getStrip(sector, layer, strip, coords6);
+						
+						if (showHits()) {
+							Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
+						}
 
-			if ((_sector == sector) && (_layer == layer)) {
-				drawOutline = true;
-				// strip 1..256
-				int strip = bststrip[i];
+					}  //match sector and layer
+				}  //hit not null
+			} //loop on hits
+		} //hits not null
+		
 
-				SVTGeometry.getStrip(sector, layer, strip, coords6);
+//		int hitCount = BST.hitCount();
+//		int bstsector[] = BST.sector();
+//		int bstlayer[] = BST.layer();
+//		int bststrip[] = BST.strip();
+//        int pid[] = BST.pid();
+//		double avgX[] = BST.avgX();
+//		double avgY[] = BST.avgY();
+//		double avgZ[] = BST.avgZ();
 
-				if (_cedPanel3D.showMCTruth() && (pid != null)) {
-					Color color = truthColor(pid, i);
-
-					if (showHits()) {
-						Support3D.drawLine(drawable, coords6, color, 2f);
-					}
-					double xcm = avgX[i] / 10;
-					double ycm = avgY[i] / 10;
-					double zcm = avgZ[i] / 10;
-
-					drawMCPoint(drawable, xcm, ycm, zcm, color);
-
-				} // mc truth
-				else {
-					if (showHits()) {
-						Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
-					}
-				}
-			}
-		} // hitcount
+		
+//		boolean drawOutline = false;
+//		// now strips
+//		for (int i = 0; i < hitCount; i++) {
+//			// 1 based sector
+//			int sector = bstsector[i];
+//			// "big layer" ..8
+//			int layer = bstlayer[i];
+//
+//			if ((_sector == sector) && (_layer == layer)) {
+//				drawOutline = true;
+//				// strip 1..256
+//				int strip = bststrip[i];
+//
+//				SVTGeometry.getStrip(sector, layer, strip, coords6);
+//
+//				if (_cedPanel3D.showMCTruth() && (pid != null)) {
+//					Color color = truthColor(pid, i);
+//
+//					if (showHits()) {
+//						Support3D.drawLine(drawable, coords6, color, 2f);
+//					}
+//					double xcm = avgX[i] / 10;
+//					double ycm = avgY[i] / 10;
+//					double zcm = avgZ[i] / 10;
+//
+//					drawMCPoint(drawable, xcm, ycm, zcm, color);
+//
+//				} // mc truth
+//				else {
+//					if (showHits()) {
+//						Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
+//					}
+//				}
+//			}
+//		} // hitcount
 
 		if (drawOutline) { // if any hits, draw it once
 			SVTGeometry.getLayerQuads(_sector, _layer, coords36);

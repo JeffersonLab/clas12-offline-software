@@ -39,7 +39,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.BMT;
-import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
@@ -506,46 +505,46 @@ public class CentralZView extends CedView implements ChangeListener {
 
 	private void drawGEMCHits(Graphics g, IContainer container) {
 
-		double x[] = BST.avgX();
-		if (x == null) {
-			return;
-		}
-
-		double y[] = BST.avgY();
-		double z[] = BST.avgZ();
-		int pid[] = BST.pid();
-
-		Graphics2D g2 = (Graphics2D) g;
-		Shape oldClip = g2.getClip();
-		// clip the active area
-		Rectangle sr = container.getInsetRectangle();
-		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-
-		Stroke oldStroke = g2.getStroke();
-		g2.setStroke(stroke);
-
-		Point p1 = new Point();
-		Point2D.Double wp1 = new Point2D.Double();
-		Color default_fc = Color.red;
-
-		for (int i = 0; i < x.length; i++) {
-			Color fc = default_fc;
-			if (pid != null) {
-				LundId lid = LundSupport.getInstance().get(pid[i]);
-				if (lid != null) {
-					fc = lid.getStyle().getFillColor();
-				}
-			}
-			g2.setColor(fc);
-
-			wp1.setLocation(z[i], x[i] * _cosphi + y[i] * _sinphi);
-			container.worldToLocal(p1, wp1);
-
-			DataDrawSupport.drawGemcHit(g, p1);
-		}
-
-		g2.setStroke(oldStroke);
-		g2.setClip(oldClip);
+//		double x[] = BST.avgX();
+//		if (x == null) {
+//			return;
+//		}
+//
+//		double y[] = BST.avgY();
+//		double z[] = BST.avgZ();
+//		int pid[] = BST.pid();
+//
+//		Graphics2D g2 = (Graphics2D) g;
+//		Shape oldClip = g2.getClip();
+//		// clip the active area
+//		Rectangle sr = container.getInsetRectangle();
+//		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+//
+//		Stroke oldStroke = g2.getStroke();
+//		g2.setStroke(stroke);
+//
+//		Point p1 = new Point();
+//		Point2D.Double wp1 = new Point2D.Double();
+//		Color default_fc = Color.red;
+//
+//		for (int i = 0; i < x.length; i++) {
+//			Color fc = default_fc;
+//			if (pid != null) {
+//				LundId lid = LundSupport.getInstance().get(pid[i]);
+//				if (lid != null) {
+//					fc = lid.getStyle().getFillColor();
+//				}
+//			}
+//			g2.setColor(fc);
+//
+//			wp1.setLocation(z[i], x[i] * _cosphi + y[i] * _sinphi);
+//			container.worldToLocal(p1, wp1);
+//
+//			DataDrawSupport.drawGemcHit(g, p1);
+//		}
+//
+//		g2.setStroke(oldStroke);
+//		g2.setClip(oldClip);
 	}
 
 	private void drawCoordinateSystem(Graphics g, IContainer container) {

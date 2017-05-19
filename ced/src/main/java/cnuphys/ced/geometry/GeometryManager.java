@@ -143,7 +143,7 @@ public class GeometryManager {
 //	 * @param numSect the number of sectors
 //	 * @param sector the sector 1..N
 //	 */
-	private int svtSectorHack(int numSect, int sector) {
+	public int svtSectorHack(int numSect, int sector) {
 		int n2 = numSect/2;
 		int hackSect = 2 + n2 - sector;
 		if (hackSect <= 0) {
