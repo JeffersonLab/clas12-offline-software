@@ -56,7 +56,7 @@ public class CalorimeterResponse {
     public double getEnergy(){ return this.detectorEnergy; }
     public double getPath(){ return this.particlePath;}
     public double getHitQuality() {return this.hitQuality;}
-    public int  getHitIndex() {return this.hitIndex;}
+    public int    getHitIndex() {return this.hitIndex;}
     
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}
@@ -124,6 +124,7 @@ public class CalorimeterResponse {
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
                 float z = bank.getFloat("z", row);
+                response.setHitIndex(row);
                 response.setPosition(x, y, z);
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));

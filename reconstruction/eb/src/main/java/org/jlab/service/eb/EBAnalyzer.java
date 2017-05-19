@@ -45,14 +45,14 @@ public class EBAnalyzer {
                     path = trigger.getPathLength(DetectorType.FTOF, 2);
                 }
 
-                double t_of_f = path/EBConstants.SPEED_OF_LIGHT;
-                double start_time = time - t_of_f;
-                double deltatr = start_time - event.getRfTime() - (trigger.vertex().z() 
-                        - (EBConstants.TARGET_POSITION))/(EBConstants.SPEED_OF_LIGHT)
-                        +EBConstants.RF_LARGE_INTEGER*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
-                double t_0corr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
-                event.setStartTime(start_time + t_0corr);
-                ///System.out.println(start_time);
+                double tof = path/EBConstants.SPEED_OF_LIGHT;
+                double start_time = time - tof;
+                double deltatr = - start_time + event.getEventHeader().getRfTime() /* - (trigger.vertex().z() 
+                        - (EBConstants.TARGET_POSITION))/(EBConstants.SPEED_OF_LIGHT)*/
+                        + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
+                double rfcorr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
+                event.getEventHeader().setStartTime(start_time + rfcorr);
+                //System.out.println(rfcorr + " " + (124.25- time + tof));
                 //System.out.println(" TIME = " + t_of_f + "  time from TOF = " + time);
                 //System.out.println(" PATH = " + path + " " );
                 //System.out.println(" SET START TIME = " + start_time + "  ACTUAL TIME = " + event.getStartTime());
@@ -74,7 +74,7 @@ public class EBAnalyzer {
         //System.out.println("======================= ANALYSIS");
         for(int i = 1; i < np; i++) {
             DetectorParticle p = event.getParticle(i);
-            double start_time  = event.getStartTime();
+            double start_time  = event.getEventHeader().getStartTime();
             double beta = 0.0;
             double mass = 0.0;
             
@@ -95,14 +95,14 @@ public class EBAnalyzer {
                 //System.out.println(String.format("PARTICLE %3d (Layer 2) p = %8.3f beta = %8.3f mass2 = %8.3f", 
                 //        i,p.vector().mag(),beta,mass));
             }
-//            if(p.hasHit(DetectorType.CTOF, 0)==true){
-//                //System.out.println("1B");
-//                beta = p.getBeta(DetectorType.CTOF ,start_time);
-//                mass = p.getMass2(DetectorType.CTOF,start_time);
-//                p.setBeta(beta);
+            if(p.hasHit(DetectorType.CTOF, 0)==true){
+//                //System.out.println("CTOF");
+                beta = p.getBeta(DetectorType.CTOF ,start_time);
+                mass = p.getMass2(DetectorType.CTOF,start_time);
+                p.setBeta(beta);
 //                //System.out.println(String.format("PARTICLE %3d (Layer 2) p = %8.3f beta = %8.3f mass2 = %8.3f", 
 //                //        i,p.vector().mag(),beta,mass));
-//            }
+            }
             //System.out.println("----------------");
 
             

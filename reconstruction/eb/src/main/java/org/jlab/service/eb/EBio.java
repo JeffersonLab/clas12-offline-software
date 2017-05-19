@@ -24,6 +24,18 @@ public class EBio {
     public static int  TRACKS_HB = 1;
     public static int  TRACKS_TB = 2;
     
+    // read header bank information 
+    public static DetectorHeader readHeader(DataEvent event) {
+        DetectorHeader dHeader = new DetectorHeader();
+        if(event.hasBank("RUN::config")==true){
+            DataBank bank = event.getBank("RUN::config");
+            dHeader.setRun(bank.getInt("run", 0));
+            dHeader.setEvent(bank.getInt("event", 0));
+            dHeader.setTrigger(bank.getInt("trigger", 0));
+        }
+        return dHeader;
+    }
+    
     /**
      * Read tracks from tracking.
      * @param event

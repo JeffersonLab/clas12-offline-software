@@ -44,7 +44,7 @@ public class DetectorParticle implements Comparable {
     
     private Line3D  driftChamberEnter = new Line3D();
     
-    private Point3D ctofIntersection = new Point3D();
+//    private Point3D ctofIntersection = new Point3D();
     
     private double[]  covMAT = new double[15];
     
@@ -310,6 +310,7 @@ public class DetectorParticle implements Comparable {
         if(hits>1) System.out.println("[Warning] Too many hits for detector type = " + type);
         return true;
     }
+    
     public boolean hasHit(DetectorType type, int layer){
         int hits = 0;
         for( ScintillatorResponse res : this.scintillatorStore){
