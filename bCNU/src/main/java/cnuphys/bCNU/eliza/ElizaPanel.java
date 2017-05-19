@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
+import cnuphys.bCNU.util.Environment;
 
 /**
  * A panel to hold an Eliza dialog
@@ -73,6 +74,7 @@ public class ElizaPanel extends JPanel {
 	 *            what she is saying
 	 */
 	public void doctor(String s) {
+		Environment.getInstance().say(s);
 		_textPane.append("Eliza:  ", TextPaneScrollPane.BLUE_SS_12_B);
 		_textPane.append(s + "\n", TextPaneScrollPane.BLUE_SS_12_B);
 	}

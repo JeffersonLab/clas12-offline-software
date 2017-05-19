@@ -82,7 +82,7 @@ public class SVTGeometry {
 	 */
 	public static Line3D getStrip(int sector, int superlayer, int layer, int strip) {
 		if ((strip < 0) || (strip > 255)) {
-			System.err.println("Bad strip ID " + (strip + 1) + " in BST bank.");
+//			System.err.println("Bad strip ID " + (strip + 1) + " in BST bank.");
 			return null;
 		}
 
@@ -148,6 +148,16 @@ public class SVTGeometry {
 		// geom service uses 0-based superlayer and layer
 		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
 		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
+		
+		int numSect = SVTGeometry.sectorsPerSuperlayer[supl];
+
+		//HACK fix mismatch reality vs. Geo database
+		sector = GeometryManager.getInstance().svtSectorHack(numSect, sector);
+
+//		System.err.print("STRIP: " + strip);
+//		//HACK on STrip
+//		strip = 256-strip;
+//		System.err.println("    HACK STRIP: " + strip);
 
 		// note supl and lay just computed as zero based
 		Line3D line = getStrip(sector - 1, supl, lay, strip - 1);
@@ -178,10 +188,17 @@ public class SVTGeometry {
 	 */
 
 	public static void getLayerQuads(int sector, int layer, float coords[]) {
+		
 		// geom service uses 0-based superlayer and layer
 		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
 		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
 
+		int numSect = SVTGeometry.sectorsPerSuperlayer[supl];
+
+		//HACK fix mismatch reality vs. Geo database
+		sector = GeometryManager.getInstance().svtSectorHack(numSect, sector);
+		
+		
 		double vals[] = new double[10];
 
 		SVTGeometry.getLimitValues(sector - 1, supl, lay, vals);

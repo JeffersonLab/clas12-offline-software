@@ -399,7 +399,7 @@ public final class Environment {
 		}
 		if (isMac()) {
 			try {
-				Runtime.getRuntime().exec("say -v Samantha " + sayThis);
+				Runtime.getRuntime().exec("say -v Karen " + sayThis);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.PCAL;
@@ -74,13 +73,13 @@ public class MCHitDrawer3D extends Item3D {
 
 		} else if (_panel3D instanceof CentralPanel3D) { // central detectors
 
-			if (_cedPanel3D.showBST()) {
-				showGemcXYZHits(drawable, 
-						BST.avgX(),
-						BST.avgY(),
-						BST.avgZ(),
-						BST.pid(), 0);
-			}
+//			if (_cedPanel3D.showBST()) {
+//				showGemcXYZHits(drawable, 
+//						BST.avgX(),
+//						BST.avgY(),
+//						BST.avgZ(),
+//						BST.pid(), 0);
+//			}
 
 		}
 
