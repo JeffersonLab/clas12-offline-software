@@ -392,7 +392,7 @@ public class CodaEventDecoder {
                     + " bank. tag = " + node.getTag() + " num = " + node.getNum());
                     return null;
                 }
-                System.out.println(cdatatypes.size());
+               
                 int position = 0;
                 
                 while(position<cdatatypes.size()-4){                     
@@ -415,8 +415,7 @@ public class CodaEventDecoder {
                         short[] shortbuffer = new short[length];
                         for(int loop = 0; loop < length; loop++){
                             Short sample    = (Short) cdataitems.get(position+2+loop);
-			    System.out.println(sample);
-                            shortbuffer[loop] = sample;
+			    shortbuffer[loop] = sample;
                           
                         }
                         
