@@ -17,12 +17,15 @@ import java.nio.FloatBuffer;
  */
 public abstract class MagneticField implements IField {
 	
-	//use table lookup for atan2
-	private static boolean USEFASTMATH = true;
+	/** Which atan2, etc. algorithms to use */
+	public enum MathLib {DEFAULT, FAST, SUPERFAST}
 	
+	// controls which algorithms to use
+	private static MathLib _mathLib = MathLib.SUPERFAST;
+		
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
-
+	
 	/**
 	 * Index where max field magnitude resides
 	 */
@@ -148,6 +151,7 @@ public abstract class MagneticField implements IField {
 	 * 
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
+	@Override
 	public final boolean isZeroField() {
 		return (Math.abs(_scaleFactor) < 1.0e-6);
 	}
@@ -181,7 +185,7 @@ public abstract class MagneticField implements IField {
 	 */
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
-	//	float rho = (float) Math.hypot(x, y);
+	//	float rho = (float) hypot(x, y);
 		float rho = (float) Math.sqrt(x*x + y*y);
 		
 		float phi = (float) atan2Deg(y, x);
@@ -196,13 +200,18 @@ public abstract class MagneticField implements IField {
 	 * @return atan2(y, x)
 	 */
 	public static double atan2Deg(double y, double x) {
-		if (USEFASTMATH) {
+		
+		switch (_mathLib) {
+		case FAST:
 			double phirad =  org.apache.commons.math3.util.FastMath.atan2(y, x);
 			return Math.toDegrees(phirad);
-		}
-		else {
+		case SUPERFAST:
+			phirad =  Icecore.atan2((float)y, (float)x);
+			return Math.toDegrees(phirad);
+		default:
 			return Math.toDegrees(Math.atan2(y, x));
 		}
+
 	}
 
 	/**
@@ -212,13 +221,38 @@ public abstract class MagneticField implements IField {
 	 * @return
 	 */
 	public static double hypot(double x, double y) {
-		if (USEFASTMATH) {
-			return org.apache.commons.math3.util.FastMath.hypot(x, y);
-		}
-		else {
-			return Math.sqrt(x*x + y*y);
-		}
+		return Math.sqrt(x*x + y*y);
 	}
+	
+
+	/**
+	 * 
+	 * @param x
+	 * @return
+	 */
+	public static double acos(double x) {
+		
+		switch (_mathLib) {
+		case FAST:
+			return org.apache.commons.math3.util.FastMath.acos(x);
+		case SUPERFAST:
+			return org.apache.commons.math3.util.FastMath.acos(x);
+		default:
+			return Math.acos(x);
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * @param x
+	 * @return
+	 */
+	public static double acos2Deg(double x) {
+		return Math.toDegrees(acos(x));
+	}
+
+
 
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
@@ -360,20 +394,21 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * Set whether to use the fast (less accurate) math functions
-	 * @param useFast the value of the flag.
+	 * Get the math lib being used
+	 * @return the math lib being used
 	 */
-	public static void setUseFastMath(boolean useFast) {
-		USEFASTMATH = useFast;
+	public static MathLib getMathLib() {
+		return _mathLib;
 	}
 	
 	/**
-	 * Check whether we are using the fast (less accurate) math functions
-	 * @return <code>true</code> if we will use the fast (less accurate) version of atan2
+	 * Set the math library to use
+	 * @param lib the math library enum
 	 */
-	public static boolean useFastMath() {
-		return USEFASTMATH;
+	public static void setMathLib(MathLib lib) {
+		_mathLib = lib;
 	}
+
 
 	/**
 	 * Get the vector for a given index.

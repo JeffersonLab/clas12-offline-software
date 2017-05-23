@@ -44,6 +44,24 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		result[2] = bz;
 	}
 	
+	/**
+	 * Checks whether the field has been set to always return zero.
+	 * 
+	 * @return <code>true</code> if the field is set to return zero.
+	 */
+	@Override
+	public final boolean isZeroField() {
+
+		for (IField ifield : this) {
+			if (!(ifield.isZeroField())) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	
 	@Override
 	public boolean add(IField field) {
 		if (field instanceof CompositeField) {

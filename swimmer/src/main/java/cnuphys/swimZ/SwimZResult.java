@@ -235,7 +235,7 @@ public class SwimZResult {
 		if (sv != null) {
 			double p3[] = getThreeMomentum(sv);
 			if (Math.abs(_p) > 1.0e-20) {
-				thetaPhi[0] = Math.toDegrees(Math.acos(p3[2] / _p)); // theta
+				thetaPhi[0] = MagneticField.acos2Deg(p3[2] / _p); // theta
 				thetaPhi[1] = MagneticField.atan2Deg(p3[1], p3[0]);
 			}
 		}

@@ -25,7 +25,7 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
-	private boolean USE_BIG_TORUS = false;
+	private boolean USE_BIG_TORUS = true;
 	
 	//initialize only once
 	private boolean _initialized = false;

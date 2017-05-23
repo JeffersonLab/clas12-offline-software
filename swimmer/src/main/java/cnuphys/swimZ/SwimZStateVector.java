@@ -7,19 +7,19 @@ public class SwimZStateVector {
 	// SwimZResult object
 
 	/** the x coordinate (cm) */
-	public final double x;
+	public double x;
 
 	/** the y coordinate (cm) */
-	public final double y;
+	public double y;
 
 	/** the z coordinate (cm) */
-	public final double z;
+	public double z;
 
 	/** the x track slope, px/pz */
-	public final double tx;
+	public double tx;
 
 	/** the y track slope, py/pz */
-	public final double ty;
+	public double ty;
 
 	/**
 	 * Constructor

@@ -384,7 +384,7 @@ public final class Swimmer {
 
 			stopper = zStopper(maxR, fixedZ, normalDirection);
 
-			theta = Math.toDegrees(Math.acos(pz));
+			theta = MagneticField.acos2Deg(pz);
 			phi = MagneticField.atan2Deg(py, px);
 
 			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
@@ -511,7 +511,7 @@ public final class Swimmer {
 			stopper = zStopper(maxR, fixedZ, normalDirection);
 
 			// momentum = traj.getFinalMomentum();
-			theta = Math.toDegrees(Math.acos(pz));
+			theta = MagneticField.acos2Deg(pz);
 			phi = MagneticField.atan2Deg(py, px);
 
 
@@ -970,7 +970,7 @@ public final class Swimmer {
 		// get the angles
 		double pt = MagneticField.hypot(px, py);
 		double p = MagneticField.hypot(pt, pz);
-		double theta = Math.toDegrees(Math.acos(pz / p));
+		double theta = MagneticField.acos2Deg(pz);
 		double phi = MagneticField.atan2Deg(py, px);
 
 		// accuracy to z = 0 (m)
