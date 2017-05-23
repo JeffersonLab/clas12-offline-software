@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
@@ -22,17 +21,15 @@ import cnuphys.bCNU.util.Environment;
  * @author heddle
  * 
  */
+@SuppressWarnings("serial")
 public class ElizaOverride implements Serializable {
 
-	private static String overrideFile = Environment.getInstance()
-			.getHomeDirectory()
+	private static String overrideFile = Environment.getInstance().getHomeDirectory()
 			+ "/git/cnuphys/bCNU/src/main/resources/data/elizaSub";
 
 	private static Vector<ElizaOverride> _overRides;
 
-	static {
-		loadOverrides();
-	}
+	private static boolean _loaded;
 
 	protected static final int MATCH_ANY = 0;
 	protected static final int MATCH_ALL = 1;
@@ -56,19 +53,31 @@ public class ElizaOverride implements Serializable {
 	}
 
 	private static void loadOverrides() {
+		
+		if (_loaded) {
+			return;
+		}
+		
 		// first try from file
 		try {
 			_overRides = (Vector<ElizaOverride>) serialRead(overrideFile);
 			if (_overRides != null) {
-				System.err.println("Read " + _overRides.size()
-						+ " eliza overrides");
+				System.err.println("Read " + _overRides.size() + " eliza overrides");
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			_overRides = null;
 		}
+		
+		_loaded = true;
 	}
 
 	public static String getResponse(String phrase) {
+		
+		if (!_loaded) {
+			loadOverrides();
+		}
+		
 		if ((_overRides == null) || (_overRides.size() < 1)) {
 			return null;
 		}
@@ -190,12 +199,15 @@ public class ElizaOverride implements Serializable {
 		Object obj = null;
 		try {
 			obj = s.readObject();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			try {
 				s.close();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -212,25 +224,25 @@ public class ElizaOverride implements Serializable {
 	 */
 	private static Object serialRead(String fullfn) {
 
-		FileInputStream f = null;
-		ObjectInput s = null;
 		Object obj = null;
 
 		try {
 			obj = serialRead(new ObjectInputStream(new FileInputStream(fullfn)));
-		} catch (FileNotFoundException e1) {
+		}
+		catch (FileNotFoundException e1) {
 			// e1.printStackTrace();
-		} catch (IOException e1) {
+		}
+		catch (IOException e1) {
 			// e1.printStackTrace();
 		}
 
 		// from jar?
 		if (obj == null) {
 			try {
-				InputStream inStream = ClassLoader.getSystemClassLoader()
-						.getResourceAsStream(overrideFile);
+				InputStream inStream = ClassLoader.getSystemClassLoader().getResourceAsStream(overrideFile);
 				obj = serialRead(new ObjectInputStream(inStream));
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -279,7 +291,8 @@ public class ElizaOverride implements Serializable {
 			if (f != null) {
 				try {
 					f.close();
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -288,7 +301,8 @@ public class ElizaOverride implements Serializable {
 
 				try {
 					s.close();
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -296,89 +310,89 @@ public class ElizaOverride implements Serializable {
 	}
 
 	public static void main(String arg[]) {
-		if (_overRides == null) {
-			_overRides = new Vector<ElizaOverride>(10, 10);
-		}
+		_overRides = new Vector<ElizaOverride>(100, 10);
 
-		_overRides
-				.add(new ElizaOverride(
-						MATCH_ALL,
-						"It must be operator error. ced never crashes. But report it to heddle@jlab.org. He will most likely mock you.",
-						"ced", "crashes"));
+		_overRides.add(new ElizaOverride(MATCH_ALL,
+				"It must be operator error. c e d never crashes. But report it to heddle@jlab.org. He will most likely mock you.",
+				"ced", "crashes"));
 
-		_overRides
-				.add(new ElizaOverride(
-						MATCH_ALL,
-						"It must be operator error. ced never crashes. But report it to heddle@jlab.org. He will most likely mock you.",
-						"ced", "sucks"));
+		_overRides.add(new ElizaOverride(MATCH_ALL,
+				"It must be operator error. c e d never crashes. But report it to heddle@jlab.org. He will most likely mock you.",
+				"ced", "sucks"));
 
-		_overRides
-				.add(new ElizaOverride(
-						MATCH_ALL,
-						"It must be operator error. ced never crashes. But report it to heddle@jlab.org. He will most likely mock you.",
-						"ced", "crashed"));
+		_overRides.add(new ElizaOverride(MATCH_ALL,
+				"It must be operator error. c e d never crashes. But report it to heddle@jlab.org. He will most likely mock you.",
+				"ced", "crashed"));
 
-		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Bite me!", "you're",
-				"annoying"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Bite me!", "you're", "annoying"));
 
-		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Bite me!", "you",
-				"are", "annoying"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Bite me!", "you", "are", "annoying"));
 
 		_overRides.add(new ElizaOverride(MATCH_PHRASE,
-				"I'm sick and tired of waking up sick and tired.", "how",
-				"are", "you"));
+				"Who is the one looking for advice from a 200 line Java program written by a 40 year old living in his mother's basement?",
+				"you're", "stupid"));
 
 		_overRides.add(new ElizaOverride(MATCH_PHRASE,
-				"You're talking about the CLAS software meeting, right?", "go",
+				"Who is the one looking for advice from a 200 line Java program written by a 40 year old living in his mother's basement?",
+				"you", "are", "stupid"));
+
+		_overRides.add(new ElizaOverride(MATCH_PHRASE,
+				"That is a microagression. I'm reporting you to HR.",
+				"you're", "dumb"));
+
+		_overRides.add(new ElizaOverride(MATCH_PHRASE,
+				"That is a microagression. I'm reporting you to HR.",
+				"you", "are", "dumb"));
+		
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Oh for crying out loud stop whining.", "I", "am",
+				"tired"));
+
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Oh for crying out loud stop whining.", "I'm",
+				"tired"));
+
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "I'm sick and tired of waking up sick and tired.", "how", "are",
+				"you"));
+
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "You're talking about the CLAS software meeting, right?", "go",
 				"to", "hell"));
 
-		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Did you say \"tracking\"? Do I look like Veronique?",
-				"tracking"));
+		_overRides.add(new ElizaOverride(MATCH_ANY, "Did you say \"tracking\"? Do I look like Veronique?", "tracking"));
+
+		_overRides.add(
+				new ElizaOverride(MATCH_ANY, "Did you say \"geometry\"? Do I look like Gagik or Andrey?", "geometry"));
+
+		_overRides.add(new ElizaOverride(MATCH_ANY, "Did you say \"clara\"? Do I look like Vardan?", "geometry"));
+
+		_overRides.add(new ElizaOverride(MATCH_ANY, "Did you say \"simulation\"? Do I look like Mauri?", "simulation"));
+
+		_overRides.add(new ElizaOverride(MATCH_ANY, "Are you talking about the SVT? Do I look like Yuri?", "svt"));
+
+		_overRides.add(new ElizaOverride(MATCH_ANY, "Are you talking about the BST? Do I look like Yuri?", "bst"));
 
 		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Did you say \"geometry\"? Do I look like Gagik?", "geometry"));
+				"We don't need no stinking experiments. Software tells us all we need to know.", "software"));
+
+		_overRides.add(
+				new ElizaOverride(MATCH_ANY, "All I know about CNU is that it has a great physics department.", "cnu"));
 
 		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Did you say \"clara\"? Do I look like Vardan?", "geometry"));
+				"All I know about Christopher Newport is that it has a great physics faculty.", "Christopher Newport"));
 
-		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Did you say \"simulation\"? Do I look like Mauri?",
-				"simulation"));
+		_overRides.add(new ElizaOverride(MATCH_ALL, "Talk to Mac about the DCs", "Drift", "Chamber"));
 
-		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Are you talking about the SVT? Do I look like Yuri?", "bst",
-				"svt"));
+		_overRides.add(new ElizaOverride(MATCH_ALL, "Talk to Mac about the DCs", "Drift", "Chambers"));
 
-		_overRides
-				.add(new ElizaOverride(
-						MATCH_ANY,
-						"All I know about CNU is that it has a great physics department",
-						"cnu"));
+		_overRides.add(new ElizaOverride(MATCH_ALL, "I would call Dan to discuss FTOF", "FTOF"));
 
-		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Did you say \"geometry\"? Do I look like Gagik?", "geometry"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "I will now execute \"sudo rm -fr ~\\*\"", "you", "suck"));
 
-		_overRides.add(new ElizaOverride(MATCH_ALL,
-				"Talk to Mac about the DCs", "Drift", "Chamber"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "I will now execute \"sudo rm  -fr ~\\*\"", "I", "hate", "you"));
 
-		_overRides.add(new ElizaOverride(MATCH_ALL,
-				"Talk to Mac about the DCs", "Drift", "Chambers"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "'Ya' is not a proper word in English.", "ya"));
 
-		_overRides.add(new ElizaOverride(MATCH_ALL,
-				"I would call Dan to discuss FTOF", "FTOF"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "No, YOU shut up.", "shut up"));
 
-		_overRides.add(new ElizaOverride(MATCH_PHRASE,
-				"I will now execute \"sudo rm -fr ~\\*\"", "you", "suck"));
-
-		_overRides.add(new ElizaOverride(MATCH_PHRASE,
-				"I will now execute \"sudo rm -fr ~\\*\"", "I", "hate", "you"));
-
-		_overRides.add(new ElizaOverride(MATCH_PHRASE,
-				" 'Ya' is not a proper word in English.", "ya"));
-
-		_overRides.add(new ElizaOverride(MATCH_ANY,
-				"Hey that's not nice. I'm telling Volker!", "shit", "fuck",
+		_overRides.add(new ElizaOverride(MATCH_ANY, "Hey that's not nice. I'm telling Volker!", "shit", "fuck",
 				"asshole", "fucker"));
 
 		serialWrite(_overRides, overrideFile);

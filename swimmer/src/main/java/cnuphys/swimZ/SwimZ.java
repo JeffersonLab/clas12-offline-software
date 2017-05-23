@@ -1,12 +1,16 @@
 package cnuphys.swimZ;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import Jama.Matrix;
 import cnuphys.magfield.IField;
 import cnuphys.rk4.DefaultStopper;
+import cnuphys.rk4.IRkListener;
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
+
 
 /**
  * This static class holds the parameters and static methods for the swimZ
@@ -34,7 +38,7 @@ import cnuphys.rk4.RungeKuttaException;
  *
  */
 public class SwimZ {
-
+	
 	/** The speed of light in these units: (GeV/c)(1/kG)(1/cm) */
 	public static final double V = 0.000299792458;
 
@@ -88,7 +92,7 @@ public class SwimZ {
 		}
 
 		// straight line?
-		if (Q == 0) {
+		if ((Q == 0) || (_field == null) || _field.isZeroField()) {
 			System.out.println("Z adaptive swimmer detected straight line.");
 			return straightLineResult(Q, p, start, zf);
 		}
@@ -125,6 +129,155 @@ public class SwimZ {
 		}
 
 		return result;
+
+	}
+	
+
+	/**
+	 * Swim to a fixed z over short distances using RK adaptive stepsize
+	 * 
+	 * @param Q
+	 *            the integer charge of the particle (-1 for electron)
+	 * @param p
+	 *            the momentum in Gev/c
+	 * @param start
+	 *            the starting state vector
+	 * @param stop
+	 *            will hold the final state vector
+	 * @param zf
+	 *            the final z value
+	 * @param stepSize
+	 *            the initial step size
+	 * @param relTolerance
+	 *            the absolute tolerances on each state variable [x, y, tx, ty]
+	 *            (q = const). So it is an array with four entries, like [1.0e-4
+	 *            cm, 1.0e-4 cm, 1.0e-5, 1.0e05]
+	 * @param hdata
+	 *            An array with three elements. Upon return it will have the
+	 *            min, average, and max step size (in that order).
+	 * @return the number of steps
+	 * @throws SwimZException
+	 */
+	public int adaptiveRK(int Q, double p, SwimZStateVector start, SwimZStateVector stop, final double zf, double stepSize,
+			double absError[], double hdata[]) throws SwimZException {
+		if (start == null) {
+			throw new SwimZException("Null starting state vector.");
+		}
+
+		// straight line?
+		if ((Q == 0) || (_field == null) || _field.isZeroField()) {
+			System.out.println("Z adaptive swimmer detected straight line.");
+			straightLineResult(Q, p, start, stop, zf);
+			return 2;
+		}
+
+		// need a new derivative
+		SwimZDerivative deriv = new SwimZDerivative(Q, p, _field);
+
+		// need a RK4 object
+		RungeKutta rk4 = new RungeKutta();
+
+		double yo[] = { start.x, start.y, start.tx, start.ty };
+		
+		IRkListener listener = new IRkListener() {
+
+			@Override
+			public void nextStep(double newZ, double[] newStateVec, double h) {
+				stop.x = newStateVec[0];
+				stop.y = newStateVec[1];
+				stop.tx = newStateVec[2];
+				stop.tx = newStateVec[3];
+				stop.z = newZ;
+			}
+			
+		};
+
+		int nStep = 0;
+		try {
+			nStep = rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, deriv, _stopper, listener, absError, hdata);
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
+
+		return nStep;
+	}
+	
+	/**
+	 * Transport to a fixed z over short distances using RK adaptive stepsize
+	 * 
+	 * @param Q
+	 *            the integer charge of the particle (-1 for electron)
+	 * @param p
+	 *            the momentum in Gev/c
+	 * @param start
+	 *            the starting state vector
+	 * @param initCovMat
+	 *            the initial covariance matrix
+	 * @param zf
+	 *            the final z value
+	 * @param stepSize
+	 *            the initial step size
+	 * @param relTolerance
+	 *            the absolute tolerances on each state variable [x, y, tx, ty]
+	 *            (q = const). So it is an array with four entries, like [1.0e-4
+	 *            cm, 1.0e-4 cm, 1.0e-5, 1.0e05]
+	 * @param hdata
+	 *            An array with three elements. Upon return it will have the
+	 *            min, average, and max step size (in that order).
+	 * @return the swim result
+	 * @throws SwimZException
+	 */
+
+	public void transport(int Q, double p, SwimZStateVector start, Matrix initCovMat, final double zf, double stepSize,
+			double absError[], double hdata[],
+			List<B> fieldList, 
+			List<SwimZStateVector> stateVectList,
+			List<Matrix> covMatList)  throws SwimZException {
+
+		if (start == null) {
+			throw new SwimZException("Null starting state vector.");
+		}
+		
+		if (initCovMat == null) {
+			throw new SwimZException("Null starting covariance matrix.");
+		}
+		
+		//initialize
+		fieldList.clear();
+		stateVectList.clear();
+		covMatList.clear();
+		
+		stateVectList.add(start);
+		covMatList.add(initCovMat);
+		fieldList.add(new B(start));
+		
+
+		// need a new derivative
+		SwimZDerivative deriv = new SwimZDerivative(Q, p, _field);
+
+		// need a RK4 object
+		RungeKutta rk4 = new RungeKutta();
+
+		double yo[] = { start.x, start.y, start.tx, start.ty };
+		
+		IRkListener listener = new IRkListener() {
+
+			@Override
+			public void nextStep(double newZ, double[] newStateVec, double h) {
+				SwimZStateVector sv = new SwimZStateVector(newZ, newStateVec);
+				stateVectList.add(sv);
+//				covMatList.add(initCovMat);
+				fieldList.add(new B(sv));
+			}
+			
+		};
+
+		int nStep = 0;
+		try {
+			nStep = rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, deriv, _stopper, listener, absError, hdata);
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -246,6 +399,7 @@ public class SwimZ {
 	 * @return the swim result
 	 * @throws SwimZException
 	 */
+	
 	public SwimZResult parabolicEstimate(int Q, double p, SwimZStateVector start, double zf, double stepSize)
 			throws SwimZException {
 
@@ -267,7 +421,7 @@ public class SwimZ {
 		SwimZResult result = new SwimZResult(Q, p, start.z, zf, swimZrange.getNumStep() + 1);
 		result.add(start);
 		SwimZStateVector v0 = start;
-
+		
 		for (int i = 0; i < swimZrange.getNumStep(); i++) {
 			// get the field
 			float B[] = new float[3];
@@ -307,7 +461,10 @@ public class SwimZ {
 
 		return result;
 	}
+	
 
+
+	//straight line
 	private SwimZResult straightLineResult(int Q, double p, SwimZStateVector start, double zf) {
 		SwimZResult result = new SwimZResult(Q, p, start.z, zf, 2);
 		result.add(start);
@@ -318,5 +475,80 @@ public class SwimZ {
 		result.add(v);
 		return result;
 	}
+	
+	//straight line
+	private void straightLineResult(int Q, double p, SwimZStateVector start, SwimZStateVector stop, double zf) {
+		double s = zf - start.z;
+		stop.x = start.x + start.tx * s;
+		stop.y = start.y + start.ty * s;
+		stop.z = zf;
+		stop.tx = start.tx;
+		stop.ty = start.ty;
+	}
+	
+	private double[] A(double tx, double ty, double Bx, double By, double Bz) {
+
+		double C = Math.sqrt(1 + tx * tx + ty * ty);
+		double Ax = C * (ty * (tx * Bx + Bz) - (1 + tx * tx) * By);
+		double Ay = C * (-tx * (ty * By + Bz) + (1 + ty * ty) * Bx);
+
+		return new double[] { Ax, Ay };
+	}
+
+	private double[] delA_delt(double tx, double ty, double Bx, double By, double Bz) {
+
+		double C2 = 1 + tx * tx + ty * ty;
+		double C = Math.sqrt(C2);
+		double Ax = C * (ty * (tx * Bx + Bz) - (1 + tx * tx) * By);
+		double Ay = C * (-tx * (ty * By + Bz) + (1 + ty * ty) * Bx);
+
+		double delAx_deltx = tx * Ax / C2 + C * (ty * Bx - 2 * tx * By);
+		double delAx_delty = ty * Ax / C2 + C * (tx * Bx + Bz);
+		double delAy_deltx = tx * Ay / C2 + C * (-ty * By - Bz);
+		double delAy_delty = ty * Ay / C2 + C * (-tx * By + 2 * ty * Bx);
+
+		return new double[] { delAx_deltx, delAx_delty, delAy_deltx, delAy_delty };
+	}
+
+
+	//container for mag field
+	private class B {
+		final double z;
+		double x;
+		double y;
+		double tx;
+		double ty;
+		float result[] = new float[3];
+		
+		public double Bx;
+		public double By;
+		public double Bz;
+		
+		public B(SwimZStateVector sv) {
+			this(sv.z, sv.x, sv.y, sv.tx, sv.ty);
+		}
+		
+		public B(double z, double x, double y, double tx, double ty) {
+			this.z = z; 
+			this.x = x;
+			this.y = y;
+			this.tx = tx; 
+			this.ty = ty;
+			
+			if ((_field == null) || _field.isZeroField()) {
+				this.Bx = 0;
+				this.By = 0;
+				this.Bz = 0;
+			}
+			else {
+				_field.field((float)x, (float)y, (float)z, result);
+			}
+			
+			this.Bx = result[0];
+			this.By = result[1];
+			this.Bz = result[2];
+		}		
+	}
+
 
 }

@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
@@ -367,8 +368,8 @@ public class LundTrackDialog extends JDialog {
 		double px = P * Q[3];
 		double py = P * Q[4];
 		double pz = P * Q[5];
-		double theta = Math.toDegrees(Math.acos(pz / P));
-		double phi = Math.toDegrees(Math.atan2(py, px));
+		double theta = MagneticField.acos2Deg(pz / P);
+		double phi = MagneticField.atan2Deg(py, px);
 
 		System.out.println("Number of steps: " + nstep);
 
@@ -390,8 +391,8 @@ public class LundTrackDialog extends JDialog {
 		px = -px;
 		py = -py;
 		pz = -pz;
-		theta = Math.toDegrees(Math.acos(pz / P));
-		phi = Math.toDegrees(Math.atan2(py, px));
+		theta = MagneticField.acos2Deg(pz / P);
+		phi = MagneticField.atan2Deg(py, px);
 		System.out.println(String.format(
 				"Swim backards use theta: %9.6f  phi: %9.6f", theta, phi));
 

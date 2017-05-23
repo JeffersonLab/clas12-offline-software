@@ -95,4 +95,11 @@ public interface IField {
      */
     public void readBinaryMagneticField(File binaryFile)
 	    throws FileNotFoundException;
+    
+    /**
+     * Check whether this field is the zero field (possibly
+     * because the scale factor is set to 0)
+     * @return <code>true</code> if this field is a zero field
+     */
+    public boolean isZeroField();
 }

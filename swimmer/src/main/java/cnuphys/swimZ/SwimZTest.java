@@ -2,6 +2,7 @@ package cnuphys.swimZ;
 
 import java.io.File;
 
+import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -39,36 +40,22 @@ public class SwimZTest {
 
 	public static void main(String arg[]) {
 		
-//		File file;
-//		file = new File("ced/data/clas12_torus_fieldmap_binary.dat");
-//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
-//		file = new File("../ced/data/clas12_torus_fieldmap_binary.dat");
-//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
-//		file = new File("../../ced/data/clas12_torus_fieldmap_binary.dat");
-//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
-//		file = new File("../../../ced/data/clas12_torus_fieldmap_binary.dat");
-//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
-//		file = new File("../../../../ced/data/clas12_torus_fieldmap_binary.dat");
-//		System.err.println("File: [" + file.getPath() + " exists: " + file.exists());
-//		
-//		
-//		if (true) System.exit(0);
-		
-		//use "../../../../ced/data/clas12_torus_fieldmap_binary.dat"
-		
-		
+
 		MagneticFields.getInstance().initializeMagneticFields();
-		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
 		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
+		
+		MagneticField.setMathLib(MagneticField.MathLib.SUPERFAST);
 
 		int numTest = 1000;
-		// testParabolicApproximation(numTest);
-		testOldUniform(numTest);
-		testOldAdaptive(numTest);
-		testUniform(numTest);
+//		testParabolicApproximation(numTest);
+//		testOldUniform(numTest);
+//		testOldAdaptive(numTest);
+		testAdaptiveEndpointOnly(numTest);
 		testAdaptive(numTest);
+		testUniform(numTest);
 	}
 
 	private static void header(String s) {
@@ -156,9 +143,35 @@ public class SwimZTest {
 		hdataReport(hdata, 1);
 		footer("SwimZ ADAPTIVE");
 	}
+	
+	private static void testAdaptiveEndpointOnly(int numTimes) {
+		header("SwimZ ADAPTIVE ENDPOINT ONLY");
 
+		// the new swimmer
+		SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta, phi);
+		SwimZStateVector stop = new SwimZStateVector(xo, yo, zo, p, theta, phi);
+
+		double hdata[] = new double[3];
+		int numStep = 0;
+
+		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < numTimes; i++) {
+			try {
+				numStep = sz.adaptiveRK(Q, p, start, stop, zf, adaptiveInitStepSize, adaptiveAbsError, hdata);
+			} catch (SwimZException e) {
+				e.printStackTrace();
+			}
+		}
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
+		System.out.println("Number of steps: " + numStep);
+		partialReport(start, stop, timePerSwim, "Z ADAPTIVE");
+		hdataReport(hdata, 1);
+		footer("SwimZ ADAPTIVE ENDPOINT ONLY");
+
+	}
+	
 	// test the old swimmer adaptive
-	// test the old swimmer uniform
 	private static void testOldAdaptive(int numTimes) {
 		header("Old Swimmer ADAPTIVE");
 		long startTime = System.currentTimeMillis();
@@ -200,6 +213,26 @@ public class SwimZTest {
 
 		System.out.println("p: " + pf + " GeV/c" + " time/swim: " + timePerSwim + " ms");
 	}
+	
+	private static void partialReport(SwimZStateVector start, SwimZStateVector stop, double timePerSwim, String name) {
+//		double p3v[] = result.getFinalThreeMomentum();
+//		// check
+//		double pf = Math.sqrt(p3v[0] * p3v[0] + p3v[1] * p3v[1] + p3v[2] * p3v[2]);
+
+//		printVect(result.getInitialThreeMomentum(), "po");
+//		printVect(result.getFinalThreeMomentum(), "pf");
+		System.out.println("Initial state vector: " + start);
+		System.out.println("Final state vector: " + stop);
+
+//		double thetaPhi[] = result.getInitialThetaAndPhi();
+//		System.out.println(String.format("Initial theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
+//		thetaPhi = result.getFinalThetaAndPhi();
+//		System.out.println(String.format("Final theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
+
+//		System.out.println("p: " + pf + " GeV/c" + " time/swim: " + timePerSwim + " ms");
+		System.out.println("time/swim: " + timePerSwim + " ms");
+	}
+
 
 	private static void printVect(double v[], String s) {
 		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
