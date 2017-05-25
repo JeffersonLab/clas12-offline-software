@@ -15,8 +15,8 @@ public final class RotatedCompositeField extends CompositeField {
 	 */
 	public void setRotationAngle(float angle) {
 		_angle = angle;
-		_sin = (float) Math.sin(Math.toRadians(_angle));
-		_cos = (float) Math.cos(Math.toRadians(_angle));
+		_sin = (float) MagneticField.sin(Math.toRadians(_angle));
+		_cos = (float) MagneticField.cos(Math.toRadians(_angle));
 	}
 	
 	@Override

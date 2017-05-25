@@ -1,9 +1,9 @@
 package cnuphys.swimZ;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import Jama.Matrix;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IField;
 import cnuphys.rk4.DefaultStopper;
 import cnuphys.rk4.IRkListener;
@@ -52,7 +52,7 @@ public class SwimZ {
 
 	// create a do nothing stopper for now
 	private IStopper _stopper = new DefaultStopper();
-
+	
 	/**
 	 * SwimZ constructor. Here we create a Swimmer that will use the given
 	 * magnetic field.
@@ -61,8 +61,10 @@ public class SwimZ {
 	 *            interface into a magnetic field
 	 */
 	public SwimZ(IField field) {
-		_field = field;
+		FieldProbe probe = FieldProbe.factory(field);
+		_field = (probe != null) ? probe : field;
 	}
+	
 
 	/**
 	 * Swim to a fixed z over short distances using RK adaptive stepsize
@@ -490,6 +492,72 @@ public class SwimZ {
 
 		return result;
 	}
+	
+	/**
+	 * Swim to a fixed z over short distances using uniform stepsize RK4
+	 * 
+	 * This version only returns the end points
+	 * 
+	 * @param Q
+	 *            the integer charge of the particle (-1 for electron)
+	 * @param p
+	 *            the momentum in Gev/c
+	 * @param start
+	 *            the starting state vector
+	 * @param zf
+	 *            the final z value
+	 * @param stepSize
+	 *            the step size
+	 * @return the swim result
+	 * @throws SwimZException
+	 */
+	public SwimZResult uniformRK4EPOnly(int Q, double p, SwimZStateVector start, double zf, double stepSize)
+			throws SwimZException {
+		if (start == null) {
+			throw new SwimZException("Null starting state vector.");
+		}
+
+		// straight line?
+		if (Q == 0) {
+			System.out.println("Z uniform swimmer detected straight line.");
+			return straightLineResult(Q, p, start, zf);
+		}
+
+		// need a new derivative
+		SwimZDerivative deriv = new SwimZDerivative(Q, p, _field);
+
+		// need a RK4 object
+		RungeKutta rk4 = new RungeKutta();
+
+		// obtain a range
+		SwimZRange swimZrange = new SwimZRange(start.z, zf, stepSize);
+
+		// create a do nothing stopper for now
+		IStopper stopper = new DefaultStopper();
+
+		// RK4 storage
+		int nDim = 4; // should be able to make 4 since q = const
+		int nStep = swimZrange.getNumStep();
+//System.err.println("NSTEP = " + nStep);
+		double yo[] = { start.x, start.y, start.tx, start.ty };
+		double z[] = new double[2];
+		double y[][] = new double[nDim][2];
+		nStep = rk4.uniformStepEPOnly(nStep, yo, start.z, zf, y, z, deriv, stopper);
+
+		SwimZResult result = new SwimZResult(Q, p, start.z, zf, 2);
+		result.add(start);
+		for (int i = 0; i < nStep; i++) {
+//System.err.println("MAKING RESULT: i = " +  i);
+			if (i == (nStep - 1)) {
+				double v[] = { y[0][1], y[1][1], y[2][1], y[3][1] };
+				SwimZStateVector sv = new SwimZStateVector(z[1], v);
+				result.add(sv);
+			}
+		}
+
+		return result;
+	}
+
 
 	/**
 	 * Swim to a fixed z over short distances using a parabolic estimate

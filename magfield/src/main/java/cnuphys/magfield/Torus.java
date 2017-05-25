@@ -23,46 +23,10 @@ public class Torus extends MagneticField {
 	 * Instantiates a new torus.
 	 */
 	public Torus() {
-		_probe = new FieldProbe3D();
 		setCoordinateNames("phi", "rho", "z");
 		_scaleFactor = -1; // default
 	}
 	
-	@Override
-	public void setProbe(FieldProbe probe) {
-		if (probe instanceof FieldProbe3D) {
-			_probe = probe;
-		}
-		else {
-			System.err.println("Warning: Torus requires a 3D probe.");
-		}
-	}
-
-	
-	/**
-	 * Interpolates a vector by trilinear interpolation.
-	 * 
-	 * @param q1
-	 *            the q1 coordinate
-	 * @param q2
-	 *            the q2 coordinate
-	 * @param q3
-	 *            the q3 coordinate
-	 * @param result
-	 *            will hold the result
-	 */
-	@Override
-	protected void interpolateField(double q1, double q2, double q3, float result[]) {
-		
-		if (_probe != null) {
-			calculate(q1, q2, q3, (FieldProbe3D)_probe, result);
-			return;
-		}
-		else {
-			super.interpolateField(q1, q2, q3, result);
-		}
-
-	}
 
 	/**
 	 * Obtain a torus object from a binary file, probably
@@ -108,8 +72,7 @@ public class Torus extends MagneticField {
 	 * @param result the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
+	public void fieldCylindrical(TorusProbe probe, double phi, double rho, double z,
 			float result[]) {
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -127,7 +90,12 @@ public class Torus extends MagneticField {
 
 		boolean flip = (relativePhi < 0.0);
 
-		interpolateField(Math.abs(relativePhi), rho, z, result);
+		if ((probe == null) || !FieldProbe.CACHE) {
+			interpolateField(Math.abs(relativePhi), rho, z, result);
+		}
+		else {
+			calculate(Math.abs(relativePhi), rho, z, probe, result);
+		}
 
 		// negate change x and z components
 		if (flip) {
@@ -169,6 +137,21 @@ public class Torus extends MagneticField {
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;
 		result[Z] *= _scaleFactor;
+	}
+	
+	/**
+	 * Get the field by trilinear interpolation.
+	 *
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z,
+			float result[]) {
+		fieldCylindrical(null, phi, rho, z, result);
 	}
 
 	/**
