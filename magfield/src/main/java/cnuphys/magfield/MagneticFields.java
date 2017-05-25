@@ -36,12 +36,6 @@ public class MagneticFields {
 	// torus field
 	private Torus _torus;
 
-	// perfect solenoid
-	private PerfectSolenoid _perfectSolenoid;
-
-	// 1 tesla uniform
-	private ConstantField _uniform;
-
 	// composite field
 	private CompositeField _compositeField;
 	
@@ -66,7 +60,7 @@ public class MagneticFields {
 
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, PERFECTSOLENOID, ZEROFIELD, SMALLTORUS, UNIFORM
+		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD, SMALLTORUS
 	}
 
 	// List of magnetic field change listeners
@@ -189,12 +183,6 @@ public class MagneticFields {
 			else if (_activeField == _rotatedCompositeField) {
 				return FieldType.COMPOSITEROTATED;
 			}
-			else if (_activeField == _uniform) {
-				return FieldType.UNIFORM;
-			}
-			else if (_activeField == _perfectSolenoid) {
-				return FieldType.PERFECTSOLENOID;
-			}
 			else if (_activeField == _smallTorus) {
 				return FieldType.SMALLTORUS;
 			}
@@ -297,12 +285,6 @@ public class MagneticFields {
 		case SMALLTORUS:
 			_activeField = _smallTorus;
 			break;
-		case PERFECTSOLENOID:
-			_activeField = _perfectSolenoid;
-			break;
-		case UNIFORM:
-			_activeField = _uniform;
-			break;
 		case ZEROFIELD:
 			_activeField = null;
 			break;
@@ -352,12 +334,6 @@ public class MagneticFields {
 			break;
 		case SMALLTORUS:
 			ifield = _smallTorus;
-			break;
-		case PERFECTSOLENOID:
-			ifield = _perfectSolenoid;
-			break;
-		case UNIFORM:
-			ifield = _uniform;
 			break;
 		case ZEROFIELD:
 			ifield = null;
@@ -449,12 +425,6 @@ public class MagneticFields {
 			break;
 		case SMALLTORUS:
 			ifield = _smallTorus;
-			break;
-		case PERFECTSOLENOID:
-			ifield = _perfectSolenoid;
-			break;
-		case UNIFORM:
-			ifield = _uniform;
 			break;
 		default:
 			break;
@@ -559,8 +529,6 @@ public class MagneticFields {
 		System.out.println("======  Initializing Magnetic Fields  =====");
 		System.out.println("===========================================");
 		// can always make a mac test field and uniform
-		_perfectSolenoid = new PerfectSolenoid();
-		_uniform = new ConstantField(50);
 		
 		if (USE_BIG_TORUS) {
 			_torus = getTorus("clas12_torus_fieldmap_binary.dat");
