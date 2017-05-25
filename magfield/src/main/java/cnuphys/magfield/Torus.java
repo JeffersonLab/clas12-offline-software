@@ -18,14 +18,50 @@ import java.util.StringTokenizer;
  * @version 1.0
  */
 public class Torus extends MagneticField {
-
-	// private constructor
+	
 	/**
 	 * Instantiates a new torus.
 	 */
 	public Torus() {
+		_probe = new FieldProbe3D();
 		setCoordinateNames("phi", "rho", "z");
 		_scaleFactor = -1; // default
+	}
+	
+	@Override
+	public void setProbe(FieldProbe probe) {
+		if (probe instanceof FieldProbe3D) {
+			_probe = probe;
+		}
+		else {
+			System.err.println("Warning: Torus requires a 3D probe.");
+		}
+	}
+
+	
+	/**
+	 * Interpolates a vector by trilinear interpolation.
+	 * 
+	 * @param q1
+	 *            the q1 coordinate
+	 * @param q2
+	 *            the q2 coordinate
+	 * @param q3
+	 *            the q3 coordinate
+	 * @param result
+	 *            will hold the result
+	 */
+	@Override
+	protected void interpolateField(double q1, double q2, double q3, float result[]) {
+		
+		if (_probe != null) {
+			calculate(q1, q2, q3, (FieldProbe3D)_probe, result);
+			return;
+		}
+		else {
+			super.interpolateField(q1, q2, q3, result);
+		}
+
 	}
 
 	/**
@@ -85,7 +121,7 @@ public class Torus extends MagneticField {
 		if (phi < 0.0) {
 			phi += 360.0;
 		}
-
+		
 		// relativePhi (-30, 30) phi relative to middle of sector
 		double relativePhi = relativePhi(phi);
 
@@ -99,17 +135,35 @@ public class Torus extends MagneticField {
 			result[Z] = -result[Z];
 		}
 
-		// rotate onto to proper sector?
+		// rotate onto to proper sector
+		
+		double bx = result[X];
+		double by = result[Y];
 
-		double diff = (phi - relativePhi);
-		if (diff > 0.001) {
-			double rdiff = Math.toRadians(diff);
-			double cos = Math.cos(rdiff);
-			double sin = Math.sin(rdiff);
-			double bx = result[0];
-			double by = result[1];
-			result[X] = (float) (bx * cos - by * sin);
-			result[Y] = (float) (bx * sin + by * cos);
+		int sector = getSector(phi);
+		switch (sector) {
+		case 2:
+			result[X] = (float) (bx * 0.5 - by * ROOT3OVER2);
+			result[Y] = (float) (bx * ROOT3OVER2 + by * 0.5);
+			break;
+		case 3:
+			result[X] = (float) (-bx * 0.5 - by * ROOT3OVER2);
+			result[Y] = (float) (bx * ROOT3OVER2 - by * 0.5);
+			break;
+		case 4:
+			result[X] = (float) (-bx);
+			result[Y] = (float) (-by);
+			break;
+		case 5:
+			result[X] = (float) (-bx * 0.5 + by * ROOT3OVER2);
+			result[Y] = (float) (-bx * ROOT3OVER2 - by * 0.5);
+			break;
+		case 6:
+			result[X] = (float) (bx * 0.5 + by * ROOT3OVER2);
+			result[Y] = (float) (-bx * ROOT3OVER2 + by * 0.5);
+			break;
+		default:
+			break;
 		}
 
 		result[X] *= _scaleFactor;
@@ -360,5 +414,6 @@ public class Torus extends MagneticField {
 	public String getName() {
 		return "Torus";
 	}
+
 
 }

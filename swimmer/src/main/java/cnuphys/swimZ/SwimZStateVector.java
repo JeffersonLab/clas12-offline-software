@@ -56,6 +56,38 @@ public class SwimZStateVector {
 	public SwimZStateVector(double z, double v[]) {
 		this(v[0], v[1], z, v[2], v[3]);
 	}
+	
+	/**
+	 * Create a state variable from another (copy)
+	 * 
+	 * @param sv
+	 *            the state vector to copy
+	 * @param v
+	 *            the array with, in order, x,y,tx,ty,q
+	 */
+	public SwimZStateVector(SwimZStateVector sv) {
+		this(sv.x, sv.y, sv.z, sv.tx, sv.ty);
+	}
+
+	/**
+	 * Copy from another state vector
+	 * @param sv the state vector to copy
+	 */
+	public void copy(SwimZStateVector sv) {
+		x = sv.x;
+		y = sv.y;
+		z = sv.z;
+		tx = sv.tx;
+		ty = sv.ty;
+	}
+	
+	public void set(double z, double v[]) {
+		this.z = z;
+		x = v[0];
+		y = v[1];
+		tx = v[0];
+		ty = v[1];
+	}
 
 	/**
 	 * Constructor

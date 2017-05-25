@@ -9,6 +9,8 @@ public class ConstantsLoader {
 	}
 
 	static boolean CSTLOADED = false;
+	
+	public static boolean DEBUG = true;
 
 	// static FTOFGeant4Factory geometry ;
 
@@ -27,10 +29,10 @@ public class ConstantsLoader {
 		double[] CRZLENGTH = new double[NREGIONS]; 		// the strip length in mm
 		double[] CRZZMIN = new double[NREGIONS]; 		// PCB upstream extremity mm
 		double[] CRZZMAX = new double[NREGIONS]; 		// PCB downstream extremity mm
-		double[] CRZOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
+//		double[] CRZOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
 		double[][] CRZEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
 		double[][] CRZEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
-		double[] CRZXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
+//		double[] CRZXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
 
 		//C detector characteristics
 		double[] CRCRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm
@@ -39,12 +41,12 @@ public class ConstantsLoader {
 		double[] CRCLENGTH = new double[NREGIONS]; 		// the strip length in mm
 		double[] CRCZMIN = new double[NREGIONS]; 		// PCB upstream extremity mm
 		double[] CRCZMAX = new double[NREGIONS]; 		// PCB downstream extremity mm
-		double[] CRCOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
+	//	double[] CRCOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
 		int[][] CRCGROUP = new int[NREGIONS][100]; 		// Number of strips with same width
 		double[][] CRCWIDTH = new double[NREGIONS][100];	// the width of the corresponding group of strips 
 		double[][] CRCEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
 		double[][] CRCEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
-		double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
+//		double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
 
 		// Load the tables
 		dbprovider = new DatabaseConstantProvider(runNb, "default"); // reset
@@ -132,6 +134,18 @@ public class ConstantsLoader {
 		
 		Constants.setCRCRADIUS(CRCRADIUS);
 		Constants.setCRZRADIUS(CRZRADIUS);
+		
+		if (DEBUG) {
+			System.out.println("-- [CSTRIPS] --");
+			for (int i = 0; i < CRCRADIUS.length; i++) {
+				System.out.println("[DEBUG] CRCRADIUS[" + i + "] = " + CRCRADIUS[i]);
+			}
+			System.out.println("----");
+			for (int i = 0; i < CRZRADIUS.length; i++) {
+				System.out.println("[DEBUG] CRZRADIUS[" + i + "] = " + CRZRADIUS[i]);
+			}
+		}
+		
 		Constants.setCRZNSTRIPS(CRZNSTRIPS);
 		Constants.setCRZZMIN(CRZZMIN);
 		Constants.setCRZZMAX(CRZZMAX);

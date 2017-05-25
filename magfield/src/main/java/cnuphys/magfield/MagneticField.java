@@ -16,16 +16,18 @@ import java.nio.FloatBuffer;
  * @version 1.0
  */
 public abstract class MagneticField implements IField {
-	
+
 	/** Which atan2, etc. algorithms to use */
-	public enum MathLib {DEFAULT, FAST, SUPERFAST}
-	
+	public enum MathLib {
+		DEFAULT, FAST, SUPERFAST
+	}
+
 	// controls which algorithms to use
 	private static MathLib _mathLib = MathLib.SUPERFAST;
-		
+
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
-	
+
 	/**
 	 * Index where max field magnitude resides
 	 */
@@ -85,6 +87,12 @@ public abstract class MagneticField implements IField {
 	/** The coordinate 3 name. (ced: 'z' ded: 'rho') */
 	private String _q3Name = "z";
 
+	// for rotating field
+	protected static final double ROOT3OVER2 = Math.sqrt(3) / 2;
+	
+	// optional probe for faster interpolation
+	protected FieldProbe _probe;
+	
 	/**
 	 * Holds the grid info for the slowest changing coordinate (as stored in the
 	 * file).
@@ -107,10 +115,10 @@ public abstract class MagneticField implements IField {
 	protected int numFieldPoints;
 
 	// used internally for index calculations
-	//private int N23 = -1;
+	// private int N23 = -1;
 
 	// used internally for index calculations
-	//private int N3;
+	// private int N3;
 
 	// scale factor always treated as positive
 	protected double _scaleFactor = 1.0;
@@ -185,28 +193,28 @@ public abstract class MagneticField implements IField {
 	 */
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
-	//	float rho = (float) hypot(x, y);
-		float rho = (float) Math.sqrt(x*x + y*y);
-		
+		// float rho = (float) hypot(x, y);
+		float rho = (float) Math.sqrt(x * x + y * y);
+
 		float phi = (float) atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
-	
-	
+
 	/**
 	 * Might use standard or fast atan2
+	 * 
 	 * @param y
 	 * @param x
 	 * @return atan2(y, x)
 	 */
 	public static double atan2Deg(double y, double x) {
-		
+
 		switch (_mathLib) {
 		case FAST:
-			double phirad =  org.apache.commons.math3.util.FastMath.atan2(y, x);
+			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
 			return Math.toDegrees(phirad);
 		case SUPERFAST:
-			phirad =  Icecore.atan2((float)y, (float)x);
+			phirad = Icecore.atan2((float) y, (float) x);
 			return Math.toDegrees(phirad);
 		default:
 			return Math.toDegrees(Math.atan2(y, x));
@@ -221,9 +229,8 @@ public abstract class MagneticField implements IField {
 	 * @return
 	 */
 	public static double hypot(double x, double y) {
-		return Math.sqrt(x*x + y*y);
+		return Math.sqrt(x * x + y * y);
 	}
-	
 
 	/**
 	 * 
@@ -231,7 +238,7 @@ public abstract class MagneticField implements IField {
 	 * @return
 	 */
 	public static double acos(double x) {
-		
+
 		switch (_mathLib) {
 		case FAST:
 			return org.apache.commons.math3.util.FastMath.acos(x);
@@ -240,9 +247,9 @@ public abstract class MagneticField implements IField {
 		default:
 			return Math.acos(x);
 		}
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @param x
@@ -251,8 +258,6 @@ public abstract class MagneticField implements IField {
 	public static double acos2Deg(double x) {
 		return Math.toDegrees(acos(x));
 	}
-
-
 
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
@@ -305,14 +310,13 @@ public abstract class MagneticField implements IField {
 	 * @return the composite index (buffer offset)
 	 */
 	protected final int getCompositeIndex(int n1, int n2, int n3) {
-//		if (N23 < 1) { // first time
-//			N3 = q3Coordinate.getNumPoints();
-//			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
-//		}
-//
-//		return n1 * N23 + n2 * N3 + n3;
-		return n1 * (q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints()) 
-				+ n2 * q3Coordinate.getNumPoints() + n3;
+		// if (N23 < 1) { // first time
+		// N3 = q3Coordinate.getNumPoints();
+		// N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
+		// }
+		//
+		// return n1 * N23 + n2 * N3 + n3;
+		return n1 * (q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints()) + n2 * q3Coordinate.getNumPoints() + n3;
 	}
 
 	/**
@@ -395,20 +399,22 @@ public abstract class MagneticField implements IField {
 
 	/**
 	 * Get the math lib being used
+	 * 
 	 * @return the math lib being used
 	 */
 	public static MathLib getMathLib() {
 		return _mathLib;
 	}
-	
+
 	/**
 	 * Set the math library to use
-	 * @param lib the math library enum
+	 * 
+	 * @param lib
+	 *            the math library enum
 	 */
 	public static void setMathLib(MathLib lib) {
 		_mathLib = lib;
 	}
-
 
 	/**
 	 * Get the vector for a given index.
@@ -449,47 +455,41 @@ public abstract class MagneticField implements IField {
 		sb.append("field Unit: " + fieldUnit + "\n");
 
 		sb.append("max field at index: " + maxFieldIndex + "\n");
-		sb.append(String.format("Max Field Magnitude: %f %s\n", maxField,
-				fieldUnit));
+		sb.append(String.format("Max Field Magnitude: %f %s\n", maxField, fieldUnit));
 		sb.append("Max Field Vector:" + vectorToString(maxVectorField) + "\n");
 
-		sb.append(String.format(
-				"Max Field Location: (%s, %s, %s) = (%8.5f, %8.5f, %8.5f)\n",
-				q1Coordinate.getName(), q2Coordinate.getName(),
-				q3Coordinate.getName(), maxFieldLocation[0],
-				maxFieldLocation[1], maxFieldLocation[2]));
+		sb.append(String.format("Max Field Location: (%s, %s, %s) = (%8.5f, %8.5f, %8.5f)\n", q1Coordinate.getName(),
+				q2Coordinate.getName(), q3Coordinate.getName(), maxFieldLocation[0], maxFieldLocation[1],
+				maxFieldLocation[2]));
 
-		sb.append(String.format("Avg Field Magnitude: %f %s\n", avgField,
-				fieldUnit));
+		sb.append(String.format("Avg Field Magnitude: %f %s\n", avgField, fieldUnit));
 
 		float xyz[] = new float[3];
 		// xyz[0] = 27.4412f;
 		// xyz[1] = 15.7716f;
 		// xyz[2] = 0.372474f;
 		// -31.7007, 31.1478, 28.158
-//		xyz[0] = -31.7007f;
-//		xyz[1] = 31.1478f;
-//		xyz[2] = 28.158f;
+		// xyz[0] = -31.7007f;
+		// xyz[1] = 31.1478f;
+		// xyz[2] = 28.158f;
 		xyz[0] = 32.6f;
 		xyz[1] = 106.62f;
 		xyz[2] = 410.0f;
 
 		float vals[] = new float[3];
 		field(xyz[0], xyz[1], xyz[2], vals);
-		
+
 		String vs = vectorToString(xyz);
-		
+
 		sb.append("test location (XYZ): " + vectorToString(xyz) + "\n");
 		sb.append("test Field Vector (XYZ): " + vectorToString(vals) + "\n");
 
 		// convert to cylindrical
 		double phi = Math.atan2(xyz[1], xyz[0]);
 		double rho = Math.hypot(xyz[0], xyz[1]);
-		
-		
+
 		double cyl[] = { phi, rho, xyz[2] };
-		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f",
-				Math.toDegrees(cyl[0]), cyl[1], cyl[2],
+		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f", Math.toDegrees(cyl[0]), cyl[1], cyl[2],
 				Math.hypot(cyl[1], cyl[2]));
 		sb.append("test location (CYL): " + s + "\n");
 
@@ -516,8 +516,7 @@ public abstract class MagneticField implements IField {
 	 * @return a string representation of the vector (array).
 	 */
 	protected String vectorToString(float v[]) {
-		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f",
-				v[0], v[1], v[2], vectorLength(v));
+		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f", v[0], v[1], v[2], vectorLength(v));
 		return s;
 	}
 
@@ -545,14 +544,12 @@ public abstract class MagneticField implements IField {
 	 *             the file not found exception
 	 */
 	@Override
-	public final void readBinaryMagneticField(File binaryFile)
-			throws FileNotFoundException {
+	public final void readBinaryMagneticField(File binaryFile) throws FileNotFoundException {
 
-	//	N23 = -1;
+		// N23 = -1;
 
 		try {
-			DataInputStream dos = new DataInputStream(new FileInputStream(
-					binaryFile));
+			DataInputStream dos = new DataInputStream(new FileInputStream(binaryFile));
 
 			boolean swap = false;
 			int magicnum = dos.readInt(); // magic number
@@ -560,8 +557,7 @@ public abstract class MagneticField implements IField {
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
 			if (swap) {
-				System.err
-						.println("byte swapping required but not yet implemented.");
+				System.err.println("byte swapping required but not yet implemented.");
 				dos.close();
 				return;
 			}
@@ -609,16 +605,17 @@ public abstract class MagneticField implements IField {
 			dos.read(bytes);
 			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
 			field = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
-			
+
 			computeMaxField();
 
 			System.out.println(toString());
 			dos.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	protected int indexOfNearestNeighbor(double q1, double q2, double q3) {
 		int n0 = q1Coordinate.getIndex(q1);
 		if (n0 < 0) {
@@ -632,9 +629,9 @@ public abstract class MagneticField implements IField {
 		if (n2 < 0) {
 			return -1;
 		}
-		
-		int index =  getCompositeIndex(n0, n1, n2);
-		
+
+		int index = getCompositeIndex(n0, n1, n2);
+
 		return index;
 	}
 
@@ -650,8 +647,7 @@ public abstract class MagneticField implements IField {
 	 * @param result
 	 *            will hold the result
 	 */
-	protected final void interpolateField(double q1, double q2, double q3,
-			float result[]) {
+	protected void interpolateField(double q1, double q2, double q3, float result[]) {
 
 		result[0] = 0f;
 		result[1] = 0f;
@@ -671,28 +667,16 @@ public abstract class MagneticField implements IField {
 		}
 
 		double f0 = q1Coordinate.getFraction(q1, n0);
-		
-	//	System.err.println("  q1 = " + q1 + "  n1 = " + n0 + "   f1 = " + f0);
-		
-		
+
+		// System.err.println(" q1 = " + q1 + " n1 = " + n0 + " f1 = " + f0);
+
 		double f1 = q2Coordinate.getFraction(q2, n1);
 		double f2 = q3Coordinate.getFraction(q3, n2);
 
-		if (!_interpolate) {
+		if (!_interpolate) { // nearest neighbor
 			f0 = (f0 < 0.5) ? 0 : 1;
 			f1 = (f1 < 0.5) ? 0 : 1;
 			f2 = (f2 < 0.5) ? 0 : 1;
-//			int compIndex = indexOfNearestNeighbor(q1, q2, q3);
-//			System.err.println("q1 = " + q1 + "  q2 = " + q2 + "  q3 = " + q3 + "  n0: " + n0 + " n1: " + n1 + "  n2: " + n2 + " index: " + compIndex);
-//			
-//			int cindx[] = new int[3];
-//            getCoordinateIndices(compIndex, cindx);
-//            System.err.println("invert to indices: [" + cindx[0] + ", " + cindx[1] + ", " + cindx[2] + "]");
-//            double qq1 = q1Coordinate.getMin() + (cindx[0] + f0)*q1Coordinate.getDelta();
-//            double qq2 = q2Coordinate.getMin() + (cindx[1] + f1)*q2Coordinate.getDelta();
-//            double qq3 = q3Coordinate.getMin() + (cindx[2] + f2)*q3Coordinate.getDelta();
-//            System.err.println("qq1 = " + qq1 + "  qq2 = " + qq2 + "  qq3 = " + qq3);
-//            System.err.println("f1 = " + f0 + "  f2 = " + f1 + "  f3 = " + f2);
 		}
 
 		double g0 = 1 - f0;
@@ -721,9 +705,8 @@ public abstract class MagneticField implements IField {
 		double b110 = getB1(i110);
 		double b111 = getB1(i111);
 
-		double x = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1
-				* g2 + b011 * g0 * f1 * f2 + b100 * f0 * g1 * g2 + b101 * f0
-				* g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
+		double x = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
+				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
 
 		// now y
 		b000 = getB2(i000);
@@ -735,9 +718,8 @@ public abstract class MagneticField implements IField {
 		b110 = getB2(i110);
 		b111 = getB2(i111);
 
-		double y = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1
-				* g2 + b011 * g0 * f1 * f2 + b100 * f0 * g1 * g2 + b101 * f0
-				* g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
+		double y = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
+				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
 
 		// now z
 		b000 = getB3(i000);
@@ -749,13 +731,16 @@ public abstract class MagneticField implements IField {
 		b110 = getB3(i110);
 		b111 = getB3(i111);
 
-		double z = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1
-				* g2 + b011 * g0 * f1 * f2 + b100 * f0 * g1 * g2 + b101 * f0
-				* g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
+		double z = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
+				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
 
 		result[0] = (float) x;
 		result[1] = (float) y;
 		result[2] = (float) z;
+
+		// System.err.println(" reg: [ " + result[0] + ", " + result[1] + ", " +
+		// result[2] + "] ");
+
 	}
 
 	/**
@@ -772,52 +757,57 @@ public abstract class MagneticField implements IField {
 	 */
 	protected final float interpolateFieldMagnitude(double q1, double q2, double q3) {
 
-		int n0 = q1Coordinate.getIndex(q1);
-		if (n0 < 0) {
-			return 0f;
-		}
-		int n1 = q2Coordinate.getIndex(q2);
-		if (n1 < 0) {
-			return 0f;
-		}
-		int n2 = q3Coordinate.getIndex(q3);
-		if (n2 < 0) {
-			return 0f;
-		}
+		float result[] = new float[3];
+		interpolateField(q1, q2, q3, result);
+		return (float) Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
 
-		double f0 = q1Coordinate.getFraction(q1, n0);
-		double f1 = q2Coordinate.getFraction(q2, n1);
-		double f2 = q3Coordinate.getFraction(q3, n2);
-
-		double g0 = 1 - f0;
-		double g1 = 1 - f1;
-		double g2 = 1 - f2;
-
-		// get the neighbor indices
-		int i000 = getCompositeIndex(n0, n1, n2);
-		int i001 = i000 + 1;
-
-		int i010 = getCompositeIndex(n0, n1 + 1, n2);
-		int i011 = i010 + 1;
-
-		int i100 = getCompositeIndex(n0 + 1, n1, n2);
-		int i101 = i100 + 1;
-
-		int i110 = getCompositeIndex(n0 + 1, n1 + 1, n2);
-		int i111 = i110 + 1;
-
-		double b000 = fieldMagnitude(i000);
-		double b001 = fieldMagnitude(i001);
-		double b010 = fieldMagnitude(i010);
-		double b011 = fieldMagnitude(i011);
-		double b100 = fieldMagnitude(i100);
-		double b101 = fieldMagnitude(i101);
-		double b110 = fieldMagnitude(i110);
-		double b111 = fieldMagnitude(i111);
-
-		return (float) (b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0
-				* f1 * g2 + b011 * g0 * f1 * f2 + b100 * f0 * g1 * g2 + b101
-				* f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2);
+		// int n0 = q1Coordinate.getIndex(q1);
+		// if (n0 < 0) {
+		// return 0f;
+		// }
+		// int n1 = q2Coordinate.getIndex(q2);
+		// if (n1 < 0) {
+		// return 0f;
+		// }
+		// int n2 = q3Coordinate.getIndex(q3);
+		// if (n2 < 0) {
+		// return 0f;
+		// }
+		//
+		// double f0 = q1Coordinate.getFraction(q1, n0);
+		// double f1 = q2Coordinate.getFraction(q2, n1);
+		// double f2 = q3Coordinate.getFraction(q3, n2);
+		//
+		// double g0 = 1 - f0;
+		// double g1 = 1 - f1;
+		// double g2 = 1 - f2;
+		//
+		// // get the neighbor indices
+		// int i000 = getCompositeIndex(n0, n1, n2);
+		// int i001 = i000 + 1;
+		//
+		// int i010 = getCompositeIndex(n0, n1 + 1, n2);
+		// int i011 = i010 + 1;
+		//
+		// int i100 = getCompositeIndex(n0 + 1, n1, n2);
+		// int i101 = i100 + 1;
+		//
+		// int i110 = getCompositeIndex(n0 + 1, n1 + 1, n2);
+		// int i111 = i110 + 1;
+		//
+		// double b000 = fieldMagnitude(i000);
+		// double b001 = fieldMagnitude(i001);
+		// double b010 = fieldMagnitude(i010);
+		// double b011 = fieldMagnitude(i011);
+		// double b100 = fieldMagnitude(i100);
+		// double b101 = fieldMagnitude(i101);
+		// double b110 = fieldMagnitude(i110);
+		// double b111 = fieldMagnitude(i111);
+		//
+		// return (float) (b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0
+		// * f1 * g2 + b011 * g0 * f1 * f2
+		// + b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 +
+		// b111 * f0 * f1 * f2);
 
 	}
 
@@ -864,7 +854,8 @@ public abstract class MagneticField implements IField {
 
 		try {
 			return field.get(i);
-		} catch (IndexOutOfBoundsException e) {
+		}
+		catch (IndexOutOfBoundsException e) {
 			System.err.println("error in mag field index1 = " + index);
 			e.printStackTrace();
 			return 0;
@@ -978,5 +969,188 @@ public abstract class MagneticField implements IField {
 	public int capacity() {
 		return field.capacity();
 	}
+
+	/**
+	 * Get the sector [1..6] from the phi value
+	 * 
+	 * @param phi
+	 *            the value of phi in degrees
+	 * @return the sector [1..6]
+	 */
+	public static int getSector(double phi) {
+		// convert phi to [0..360]
+
+		while (phi < 0) {
+			phi += 360.0;
+		}
+		while (phi > 360.0) {
+			phi -= 360.0;
+		}
+
+		if ((phi > 30.0) && (phi <= 90.0)) {
+			return 2;
+		}
+		if ((phi > 90.0) && (phi <= 150.0)) {
+			return 3;
+		}
+		if ((phi > 150.0) && (phi <= 210.0)) {
+			return 4;
+		}
+		if ((phi > 210.0) && (phi <= 270.0)) {
+			return 5;
+		}
+		if ((phi > 270.0) && (phi <= 330.0)) {
+			return 6;
+		}
+		return 1;
+	}
+
+	/**
+	 * Calculate using a 3D probe
+	 * 
+	 * @param q1
+	 * @param q2
+	 * @param q3
+	 * @param probe
+	 */
+	public void calculate(double q1, double q2, double q3, FieldProbe3D probe, float[] result) {
+
+		result[0] = 0f;
+		result[1] = 0f;
+		result[2] = 0f;
+
+		if (!probe.contains(q1, q2, q3)) {
+			int n0 = q1Coordinate.getIndex(q1);
+			if (n0 < 0) {
+				return;
+			}
+			int n1 = q2Coordinate.getIndex(q2);
+			if (n1 < 0) {
+				return;
+			}
+			int n2 = q3Coordinate.getIndex(q3);
+			if (n2 < 0) {
+				return;
+			}
+
+			probe.q1_min = q1Coordinate.getMin(n0);
+			probe.q1_max = q1Coordinate.getMax(n0);
+
+			probe.q2_min = q2Coordinate.getMin(n1);
+			probe.q2_max = q2Coordinate.getMax(n1);
+
+			probe.q3_min = q3Coordinate.getMin(n2);
+			probe.q3_max = q3Coordinate.getMax(n2);
+
+			int i000 = getCompositeIndex(n0, n1, n2);
+			int i001 = i000 + 1;
+
+			int i010 = getCompositeIndex(n0, n1 + 1, n2);
+			int i011 = i010 + 1;
+
+			int i100 = getCompositeIndex(n0 + 1, n1, n2);
+			int i101 = i100 + 1;
+
+			int i110 = getCompositeIndex(n0 + 1, n1 + 1, n2);
+			int i111 = i110 + 1;
+
+			probe.b1_000 = getB1(i000);
+			probe.b1_001 = getB1(i001);
+			probe.b1_010 = getB1(i010);
+			probe.b1_011 = getB1(i011);
+			probe.b1_100 = getB1(i100);
+			probe.b1_101 = getB1(i101);
+			probe.b1_110 = getB1(i110);
+			probe.b1_111 = getB1(i111);
+
+			probe.b2_000 = getB2(i000);
+			probe.b2_001 = getB2(i001);
+			probe.b2_010 = getB2(i010);
+			probe.b2_011 = getB2(i011);
+			probe.b2_100 = getB2(i100);
+			probe.b2_101 = getB2(i101);
+			probe.b2_110 = getB2(i110);
+			probe.b2_111 = getB2(i111);
+
+			probe.b3_000 = getB3(i000);
+			probe.b3_001 = getB3(i001);
+			probe.b3_010 = getB3(i010);
+			probe.b3_011 = getB3(i011);
+			probe.b3_100 = getB3(i100);
+			probe.b3_101 = getB3(i101);
+			probe.b3_110 = getB3(i110);
+			probe.b3_111 = getB3(i111);
+		}
+
+		probe.evaluate(q1, q2, q3, result);
+
+	}
+
+	/**
+	 * Calculate using a 2D probe
+	 * 
+	 * @param q2
+	 * @param q3
+	 * @param probe
+	 */
+	public void calculate(double q2, double q3, FieldProbe2D probe, float[] result) {
+
+		result[0] = 0f;
+		result[1] = 0f;
+		result[2] = 0f;
+
+		if (!probe.contains(q2, q3)) {
+			int n1 = q2Coordinate.getIndex(q2);
+			if (n1 < 0) {
+				return;
+			}
+			int n2 = q3Coordinate.getIndex(q3);
+			if (n2 < 0) {
+				return;
+			}
+
+			probe.q2_min = q2Coordinate.getMin(n1);
+			probe.q2_max = q2Coordinate.getMax(n1);
+
+			probe.q3_min = q3Coordinate.getMin(n2);
+			probe.q3_max = q3Coordinate.getMax(n2);
+
+
+			// get the neighbor indices
+			int i000 = getCompositeIndex(0, n1, n2);
+			int i001 = i000 + 1;
+
+			int i010 = getCompositeIndex(0, n1 + 1, n2);
+			int i011 = i010 + 1;
+
+			probe.b1_b000 = 0;
+			probe.b1_b001 = 0;
+			probe.b1_b010 = 0;
+			probe.b1_b011 = 0;
+//			probe.b1_b000 = getB1(i000);
+//			probe.b1_b001 = getB1(i001);
+//			probe.b1_b010 = getB1(i010);
+//			probe.b1_b011 = getB1(i011);
+			probe.b2_b000 = getB2(i000);
+			probe.b2_b001 = getB2(i001);
+			probe.b2_b010 = getB2(i010);
+			probe.b2_b011 = getB2(i011);
+			probe.b3_b000 = getB3(i000);
+			probe.b3_b001 = getB3(i001);
+			probe.b3_b010 = getB3(i010);
+			probe.b3_b011 = getB3(i011);
+			
+		}
+
+		probe.evaluate(q2, q3, result);
+
+	}
+	
+	/**
+	 * Set this field's probe 
+	 * @param probe the appropriate probe
+	 */
+	public abstract void setProbe(FieldProbe probe);
+
 
 }

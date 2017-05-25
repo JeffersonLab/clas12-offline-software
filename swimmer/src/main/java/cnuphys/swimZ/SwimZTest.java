@@ -2,6 +2,8 @@ package cnuphys.swimZ;
 
 import java.io.File;
 
+import Jama.Matrix;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
@@ -42,18 +44,21 @@ public class SwimZTest {
 		
 
 		MagneticFields.getInstance().initializeMagneticFields();
-		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
+//		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
+		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 		
 		MagneticField.setMathLib(MagneticField.MathLib.SUPERFAST);
 
-		int numTest = 1000;
+		FieldProbe.cache(false);
+		int numTest = 3000;
 //		testParabolicApproximation(numTest);
 //		testOldUniform(numTest);
 //		testOldAdaptive(numTest);
-		testAdaptiveEndpointOnly(numTest);
+//		testAdaptiveEndpointOnly(numTest);
+//		testCovMatProp(numTest);
 		testAdaptive(numTest);
 		testUniform(numTest);
 	}
@@ -94,6 +99,7 @@ public class SwimZTest {
 		partialReport(result, timePerSwim, "PARABOLIC APPROX");
 		footer("SwimZ PARABOLIC APPROX");
 	}
+	
 
 	// test the new SwimZ uniform integrator
 	private static void testUniform(int numTimes) {
@@ -143,7 +149,35 @@ public class SwimZTest {
 		hdataReport(hdata, 1);
 		footer("SwimZ ADAPTIVE");
 	}
-	
+	private static void testCovMatProp(int numTimes) {
+		header("SwimZ COV MAT PROP");
+
+		// the new swimmer
+		SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta, phi);
+		SwimZStateVector stop = new SwimZStateVector(xo, yo, zo, p, theta, phi);
+
+		double hdata[] = new double[3];
+		int numStep = 0;
+
+		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
+		long startTime = System.currentTimeMillis();
+		
+		
+		Matrix covMat = new Matrix(5, 5);
+		
+		for (int i = 0; i < numTimes; i++) {
+			try {
+				numStep = sz.transport(Q, p, start, stop, covMat, zf, adaptiveInitStepSize, adaptiveAbsError, hdata);
+			} catch (SwimZException e) {
+				e.printStackTrace();
+			}
+		}
+		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
+		System.out.println("Number of steps: " + numStep);
+		partialReport(start, stop, timePerSwim, "Z ADAPTIVE");
+		hdataReport(hdata, 1);
+		footer("SwimZ COV MAT PROP");
+	}
 	private static void testAdaptiveEndpointOnly(int numTimes) {
 		header("SwimZ ADAPTIVE ENDPOINT ONLY");
 
