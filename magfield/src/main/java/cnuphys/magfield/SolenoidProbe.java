@@ -1,6 +1,9 @@
 package cnuphys.magfield;
 
-public class FieldProbe2D extends FieldProbe {
+import java.io.File;
+import java.io.FileNotFoundException;
+
+public class SolenoidProbe extends FieldProbe {
 
 	double q2_min = 0.0;
 	double q2_max = 0.0;
@@ -19,6 +22,10 @@ public class FieldProbe2D extends FieldProbe {
 	double b3_b001 = 0.0;
 	double b3_b010 = 0.0;
 	double b3_b011 = 0.0;
+	
+	public SolenoidProbe(Solenoid field) {
+		super(field);
+	}
 
 	/**
 	 * Check whether the point is contained in this
@@ -63,5 +70,13 @@ public class FieldProbe2D extends FieldProbe {
 		result[1] = (float) brho;
 		result[2] = (float) bz;
 	}
+
+
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
+		((Solenoid)_field).fieldCylindrical(this, phi, rho, z, result);
+	}
+
+
 
 }

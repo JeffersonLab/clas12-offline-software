@@ -1,5 +1,7 @@
 package cnuphys.swimZ;
 
+import cnuphys.magfield.MagneticField;
+
 public class SwimZStateVector {
 
 	// NOTE: not including q = Q/p as an element because it is a constant. It is
@@ -111,10 +113,10 @@ public class SwimZStateVector {
 		this.z = z;
 		theta = Math.toRadians(theta);
 		phi = Math.toRadians(phi);
-		double pz = p * Math.cos(theta);
-		double pt = p * Math.sin(theta);
-		double px = pt * Math.cos(phi);
-		double py = pt * Math.sin(phi);
+		double pz = p * MagneticField.cos(theta);
+		double pt = p * MagneticField.sin(theta);
+		double px = pt * MagneticField.cos(phi);
+		double py = pt * MagneticField.sin(phi);
 		tx = px / pz;
 		ty = py / pz;
 	}

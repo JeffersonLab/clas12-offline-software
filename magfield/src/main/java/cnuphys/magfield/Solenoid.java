@@ -25,20 +25,9 @@ public final class Solenoid extends MagneticField {
 	 * Instantiates a new solenoid.
 	 */
 	private Solenoid() {
-		_probe = new FieldProbe2D();
 		setCoordinateNames("phi", "rho", "z");
 	}
 	
-	@Override
-	public void setProbe(FieldProbe probe) {
-		if (probe instanceof FieldProbe2D) {
-			_probe = probe;
-		}
-		else {
-			System.err.println("Warning: Solenoid requires a 2D probe.");
-		}
-	}
-
 
 	/**
 	 * Obtain a solenoid object from a binary file, probably
@@ -55,19 +44,24 @@ public final class Solenoid extends MagneticField {
 		// is the field ready to use?
 		return solenoid;
 	}
-
+	
 	/**
 	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
-	 * @param result the result
+	 * 
+	 * @param probe
+	 *            for faster results
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @param result
+	 *            the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
-			float result[]) {
+	public void fieldCylindrical(SolenoidProbe probe, double phi, double rho, double z, float result[]) {
+
 		if (isZeroField()) {
 			result[X] = 0f;
 			result[Y] = 0f;
@@ -79,14 +73,17 @@ public final class Solenoid extends MagneticField {
 			phi += 360.0;
 		}
 
-		interpolateField(rho, z, result); // if the field is cylindrically
-		// symmetric, then there is no need
-		// for interpolation in phi
+		if ((probe == null) || !FieldProbe.CACHE) {
+			interpolateField(rho, z, result);
+		}
+		else {
+			calculate(rho, z, probe, result);
+		}
 
 		// rotate onto to proper sector
 		double bphi = result[0];
 		double brho = result[1];
-		
+
 		int sector = getSector(phi);
 		switch (sector) {
 		case 2:
@@ -113,21 +110,36 @@ public final class Solenoid extends MagneticField {
 			break;
 		}
 
-//
-//		if (phi > 0.001) {
-//			double rphi = Math.toRadians(phi);
-//			double cos = Math.cos(rphi);
-//			double sin = Math.sin(rphi);
-//			double bphi = result[0];
-//			double brho = result[1];
-//			result[X] = (float) (brho * cos - bphi * sin);
-//			result[Y] = (float) (brho * sin + bphi * cos);
-//		}
+		//
+		// if (phi > 0.001) {
+		// double rphi = Math.toRadians(phi);
+		// double cos = Math.cos(rphi);
+		// double sin = Math.sin(rphi);
+		// double bphi = result[0];
+		// double brho = result[1];
+		// result[X] = (float) (brho * cos - bphi * sin);
+		// result[Y] = (float) (brho * sin + bphi * cos);
+		// }
 
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;
 		result[Z] *= _scaleFactor;
+	}
 
+	/**
+	 * Get the field by trilinear interpolation.
+	 *
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z,
+			float result[]) {
+		
+		fieldCylindrical(null, phi, rho, z, result);
 	}
 
 	/**
@@ -317,10 +329,6 @@ public final class Solenoid extends MagneticField {
 	 */
 	protected void interpolateField(double q2, double q3, float result[]) {
 		
-		if (_probe != null) {
-			calculate(q2, q3, (FieldProbe2D)_probe, result);
-			return;
-		}
 
 		result[0] = 0f;
 		result[1] = 0f;

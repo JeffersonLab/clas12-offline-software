@@ -27,8 +27,8 @@ public class SwimZTest {
 	static double p = 1.0; // GeV
 	static double theta = 30; // deg
 	static double phi = 10; // deg
-	static double uniformStepSize = .1; // cm
-	static double parabolicStepSize = .001; // cm
+	static double uniformStepSize = .02; // cm
+	static double parabolicStepSize = .01; // cm
 	static double adaptiveInitStepSize = 0.01;
 
 	static double[] adaptiveAbsError = { 1.0e-5, 1.0e-5, 1.0e-5, 1.0e-5 };
@@ -44,22 +44,22 @@ public class SwimZTest {
 		
 
 		MagneticFields.getInstance().initializeMagneticFields();
-//		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
-		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+//		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
+//		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 		
 		MagneticField.setMathLib(MagneticField.MathLib.SUPERFAST);
-
-		FieldProbe.cache(false);
-		int numTest = 3000;
+//		MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
+		FieldProbe.cache(true);
+		int numTest = 20000;
 //		testParabolicApproximation(numTest);
 //		testOldUniform(numTest);
 //		testOldAdaptive(numTest);
 //		testAdaptiveEndpointOnly(numTest);
 //		testCovMatProp(numTest);
-		testAdaptive(numTest);
+//		testAdaptive(numTest);
 		testUniform(numTest);
 	}
 

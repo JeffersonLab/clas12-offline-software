@@ -4,7 +4,7 @@ package cnuphys.magfield;
  *
  * @author gavalian
  */
-public class FieldProbe3D extends FieldProbe {
+public class TorusProbe extends FieldProbe {
 
 	double q1_min = 0.0;
 	double q1_max = 0.0;
@@ -39,6 +39,10 @@ public class FieldProbe3D extends FieldProbe {
 	double b3_110 = 0.0;
 	double b3_101 = 0.0;
 	double b3_111 = 0.0;
+	
+	public TorusProbe(Torus field) {
+		super(field);
+	}
 
 	/**
 	 * Check whether the point is contained in this
@@ -81,6 +85,12 @@ public class FieldProbe3D extends FieldProbe {
 		result[0] = (float) x;
 		result[1] = (float) y;
 		result[2] = (float) z;
+	}
+
+
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
+		((Torus)_field).fieldCylindrical(this, phi, rho, z, result);
 	}
 
 

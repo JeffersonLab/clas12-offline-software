@@ -3,6 +3,7 @@ package cnuphys.swim;
 import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.ButcherTableau;
@@ -47,7 +48,7 @@ public final class Swimmer {
 	// Tesla)
 	// so care has to be taken when using the field object
 	private IField _field;
-
+	
 	/**
 	 * Swimmer constructor. Here we create a Swimmer that will use the given
 	 * magnetic field.
@@ -56,8 +57,11 @@ public final class Swimmer {
 	 *            interface into a magnetic field
 	 */
 	public Swimmer(IField field) {
-		_field = field;
+		FieldProbe probe = FieldProbe.factory(field);
+		_field = (probe != null) ? probe : field;
 	}
+	
+
 
 	/**
 	 * Compute the radius of curvature in cm
@@ -879,10 +883,10 @@ public final class Swimmer {
 		// the the initial six vector
 		double uo[] = intitialState(xo, yo, zo, theta, phi);
 
-		double costheta = Math.cos(Math.toRadians(theta));
-		double sintheta = Math.sin(Math.toRadians(theta));
-		double cosphi = Math.cos(Math.toRadians(phi));
-		double sinphi = Math.sin(Math.toRadians(phi));
+		double costheta = MagneticField.cos(Math.toRadians(theta));
+		double sintheta = MagneticField.sin(Math.toRadians(theta));
+		double cosphi = MagneticField.cos(Math.toRadians(phi));
+		double sinphi = MagneticField.sin(Math.toRadians(phi));
 
 		// all in meters
 		double delz = pathLen * costheta;
@@ -1011,10 +1015,10 @@ public final class Swimmer {
 	 */
 	private static double[] intitialState(double xo, double yo, double zo, double theta, double phi) {
 		// initial values
-		double costheta = Math.cos(Math.toRadians(theta));
-		double sintheta = Math.sin(Math.toRadians(theta));
-		double cosphi = Math.cos(Math.toRadians(phi));
-		double sinphi = Math.sin(Math.toRadians(phi));
+		double costheta = MagneticField.cos(Math.toRadians(theta));
+		double sintheta = MagneticField.sin(Math.toRadians(theta));
+		double cosphi = MagneticField.cos(Math.toRadians(phi));
+		double sinphi = MagneticField.sin(Math.toRadians(phi));
 
 		// the the initial six vector
 		double Q[] = new double[6];
