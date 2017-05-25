@@ -6,12 +6,12 @@ package cnuphys.magfield;
  */
 public class TorusProbe extends FieldProbe {
 
-	double q1_min = 0.0;
-	double q1_max = 0.0;
-	double q2_min = 0.0;
-	double q2_max = 0.0;
-	double q3_min = 0.0;
-	double q3_max = 0.0;
+	double q1_min = Double.POSITIVE_INFINITY;
+	double q1_max = Double.NEGATIVE_INFINITY;
+	double q2_min = Double.POSITIVE_INFINITY;
+	double q2_max = Double.NEGATIVE_INFINITY;
+	double q3_min = Double.POSITIVE_INFINITY;
+	double q3_max = Double.NEGATIVE_INFINITY;
 
 	double b1_000 = 0.0;
 	double b1_001 = 0.0;
@@ -65,7 +65,6 @@ public class TorusProbe extends FieldProbe {
 	 * @param q1
 	 * @param q2
 	 * @param q3
-	 * @param scale scale factor
 	 * @return the field
 	 */
 	public void evaluate(double q1, double q2, double q3, float[] result) {

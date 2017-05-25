@@ -73,6 +73,7 @@ import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.properties.PropertiesManager;
 import cnuphys.ced.training.TrainingManager;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.splot.example.MemoryUsageDialog;
@@ -832,6 +833,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
+		FieldProbe.cache(true);
+		
+		
 		//read in userprefs
 		PropertiesManager.getInstance();
 		
@@ -915,7 +919,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		//initialize magnetic fields
 		MagneticFields.getInstance().initializeMagneticFields();
-
+		
 		// initialize geometry
 		GeometryManager.getInstance();
 		

@@ -1120,6 +1120,18 @@ public abstract class MagneticField implements IField {
 		}
 
 		probe.evaluate(q1, q2, q3, result);
+		
+//		boolean stop = Double.isNaN(result[0]);
+//		System.err.print("PROBE: [" + result[0] + ", " + result[1] + ", " +
+//		result[2] + "]   ");
+//		
+//		MagneticFields.getInstance().getActiveField().fieldCylindrical(q1, q2, q3, result);
+//		System.err.println("TRAD: [" + result[0] + ", " + result[1] + ", " +
+//		result[2] + "]   ");
+//		
+//		if (stop) {
+//			System.exit(0);
+//		}
 
 	}
 
