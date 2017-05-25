@@ -26,6 +26,14 @@ public abstract class FieldProbe implements IField {
 		CACHE = cacheOn;
 	}
 	
+	/**
+	 * Check whether cache is on
+	 * @return <code>true</code> if cache is on
+	 */
+	public static boolean isCache() {
+		return CACHE;
+	}
+	
 	@Override
 	public String getName() {
 		return _field.getName();
@@ -67,9 +75,13 @@ public abstract class FieldProbe implements IField {
 	
 	public static FieldProbe factory(IField field) {
 		
+		if (field == null) {
+			System.err.println("null field in probe factory");
+		}
+		
 		if (field != null) {
 
-			System.err.println("Will create probe for " + field.getName());
+//			System.err.println("Will create probe for " + field.getName());
 			
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus)field);
@@ -89,6 +101,7 @@ public abstract class FieldProbe implements IField {
 		}
 
 		System.err.println("WARNING: null probe");
+		(new Throwable()).printStackTrace();
 		return null;
 	}
 

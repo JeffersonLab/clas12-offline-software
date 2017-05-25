@@ -2,7 +2,9 @@ package cnuphys.swim;
 
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
 
 /**
@@ -17,9 +19,7 @@ public class Example {
 	private static final LundId electron = LundSupport.getElectron();
 
 	// create a swimmer for the torus field
-	private static final Swimmer swimmer = new Swimmer(
-			MagneticFields.getInstance().getIField(MagneticFields.FieldType.TORUS));
-
+	private static Swimmer swimmer;
 	// vertex position
 	private static final double xo = 0.0;
 	private static final double yo = 0.0;
@@ -43,16 +43,24 @@ public class Example {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
+		MagneticFields.getInstance().initializeMagneticFields();
+		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
+		swimmer = new Swimmer(
+					MagneticFields.getInstance().getIField(MagneticFields.getInstance().getActiveFieldType()));
 
-		// example1();
-		// example2();
-		// example3();
-		// example4();
-		// example5();
-		// example6();
-//		example7();
-//		example8();
-		// example9();
+		
+		FieldProbe.cache(true);
+
+		 example1();
+		 example2();
+		 example3();
+		 example4();
+		 example5();
+		 example6();
+		example7();
+		example8();
+		 example9();
 		example10();
 
 		System.out.println("\nDONE.");
@@ -208,7 +216,7 @@ public class Example {
 	// example 7 adaptive fixed z stop
 	private static void example7() {
 		System.out.println("\n=== EXAMPLE 7 ===");
-		System.err.println("[Adaptive] Fixed Z cutoff");
+		System.out.println("[Adaptive] Fixed Z cutoff");
 		double ztarget = 2.75; // where integration should stop
 		double accuracy = 10e-6; // 10 microns
 		double stepSize = 5e-4; // m
@@ -231,7 +239,7 @@ public class Example {
 	private static void example8() {
 
 		System.out.println("\n=== EXAMPLE 8 ===");
-		System.err.println("[Uniform] Fixed Z cutoff");
+		System.out.println("[Uniform] Fixed Z cutoff");
 		double ztarget = 2.75; // where integration should stop
 		double accuracy = 10e-6; // 10 microns
 		double stepSize = 5e-3; // m
@@ -254,7 +262,7 @@ public class Example {
 	// low momentum test
 	private static void example9() {
 		System.out.println("\n=== EXAMPLE 9 ===");
-		System.err.println("[Adaptive] Fixed Z cutoff LOW MOMENTUM");
+		System.out.println("[Adaptive] Fixed Z cutoff LOW MOMENTUM");
 		// _charge _x0 _y0 _z0 _pTot _theta _phi z accuracy _rMax,
 		// _maxPathLength, stepSize
 		// 1 0.3336477532980491 -0.04022817961833376 2.3746720000000003
@@ -295,7 +303,7 @@ public class Example {
 	// example 7 adaptive fixed z stop
 	private static void example10() {
 		System.out.println("\n=== EXAMPLE 10 ===");
-		System.err.println("[Adaptive] Fixed Z cutoff");
+		System.out.println("[Adaptive] Fixed Z cutoff");
 		double ztarget = 2.75; // where integration should stop
 		double accuracy = 10e-6; // 10 microns
 		double stepSize = 5e-4; // m
@@ -318,7 +326,7 @@ public class Example {
 		}
 		double totTime = (System.nanoTime()-start)/1.0e9;
 
-		System.err.println("\nApprox run time: " + totTime);
+		System.out.println("\nApprox run time: " + totTime);
 	}
 
 

@@ -5,10 +5,10 @@ import java.io.FileNotFoundException;
 
 public class SolenoidProbe extends FieldProbe {
 
-	double q2_min = 0.0;
-	double q2_max = 0.0;
-	double q3_min = 0.0;
-	double q3_max = 0.0;
+	double q2_min = Double.POSITIVE_INFINITY;
+	double q2_max = Double.NEGATIVE_INFINITY;
+	double q3_min = Double.POSITIVE_INFINITY;
+	double q3_max = Double.NEGATIVE_INFINITY;
 
 	double b1_b000 = 0.0;
 	double b1_b001 = 0.0;
@@ -47,7 +47,6 @@ public class SolenoidProbe extends FieldProbe {
 	 * Interpolate the field
 	 * @param q2
 	 * @param q3
-	 * @param scale scale factor
 	 * @return the field
 	 */
 	public void evaluate(double q2, double q3, float[] result) {
