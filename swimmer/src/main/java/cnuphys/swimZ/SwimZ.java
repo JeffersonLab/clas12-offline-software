@@ -11,7 +11,6 @@ import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
-
 /**
  * This static class holds the parameters and static methods for the swimZ
  * integration. The swimZ integration follows the method described for the
@@ -38,9 +37,12 @@ import cnuphys.rk4.RungeKuttaException;
  *
  */
 public class SwimZ {
-	
+
 	/** The speed of light in these units: (GeV/c)(1/kG)(1/cm) */
 	public static final double V = 0.000299792458;
+
+	/** Argon radiation length in cm */
+	public static final double ARGONRADLEN = 14.;
 
 	// Min momentum to swim in GeV/c
 	public static final double MINMOMENTUM = 5e-05;
@@ -85,8 +87,13 @@ public class SwimZ {
 	 * @return the swim result
 	 * @throws SwimZException
 	 */
-	public SwimZResult adaptiveRK(int Q, double p, SwimZStateVector start, final double zf, double stepSize,
-			double absError[], double hdata[]) throws SwimZException {
+	public SwimZResult adaptiveRK(int Q,
+			double p,
+			SwimZStateVector start,
+			final double zf,
+			double stepSize,
+			double absError[],
+			double hdata[]) throws SwimZException {
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
 		}
@@ -112,7 +119,8 @@ public class SwimZ {
 		int nStep = 0;
 		try {
 			nStep = rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, z, y, deriv, _stopper, absError, hdata);
-		} catch (RungeKuttaException e) {
+		}
+		catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
@@ -131,7 +139,6 @@ public class SwimZ {
 		return result;
 
 	}
-	
 
 	/**
 	 * Swim to a fixed z over short distances using RK adaptive stepsize
@@ -158,8 +165,14 @@ public class SwimZ {
 	 * @return the number of steps
 	 * @throws SwimZException
 	 */
-	public int adaptiveRK(int Q, double p, SwimZStateVector start, SwimZStateVector stop, final double zf, double stepSize,
-			double absError[], double hdata[]) throws SwimZException {
+	public int adaptiveRK(int Q,
+			double p,
+			SwimZStateVector start,
+			SwimZStateVector stop,
+			final double zf,
+			double stepSize,
+			double absError[],
+			double hdata[]) throws SwimZException {
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
 		}
@@ -178,7 +191,7 @@ public class SwimZ {
 		RungeKutta rk4 = new RungeKutta();
 
 		double yo[] = { start.x, start.y, start.tx, start.ty };
-		
+
 		IRkListener listener = new IRkListener() {
 
 			@Override
@@ -189,19 +202,20 @@ public class SwimZ {
 				stop.tx = newStateVec[3];
 				stop.z = newZ;
 			}
-			
+
 		};
 
 		int nStep = 0;
 		try {
 			nStep = rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, deriv, _stopper, listener, absError, hdata);
-		} catch (RungeKuttaException e) {
+		}
+		catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
 		return nStep;
 	}
-	
+
 	/**
 	 * Transport to a fixed z over short distances using RK adaptive stepsize
 	 * 
@@ -211,7 +225,7 @@ public class SwimZ {
 	 *            the momentum in Gev/c
 	 * @param start
 	 *            the starting state vector
-	 * @param initCovMat
+	 * @param covMat
 	 *            the initial covariance matrix
 	 * @param zf
 	 *            the final z value
@@ -224,33 +238,29 @@ public class SwimZ {
 	 * @param hdata
 	 *            An array with three elements. Upon return it will have the
 	 *            min, average, and max step size (in that order).
-	 * @return the swim result
 	 * @throws SwimZException
 	 */
 
-	public void transport(int Q, double p, SwimZStateVector start, Matrix initCovMat, final double zf, double stepSize,
-			double absError[], double hdata[],
-			List<B> fieldList, 
-			List<SwimZStateVector> stateVectList,
-			List<Matrix> covMatList)  throws SwimZException {
+	public int transport(int Q,
+			double p,
+			final SwimZStateVector start,
+			SwimZStateVector stop,
+			Matrix covMat,
+			final double zf,
+			double stepSize,
+			double absError[],
+			double hdata[]) throws SwimZException {
 
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
 		}
-		
-		if (initCovMat == null) {
+
+		if (covMat == null) {
 			throw new SwimZException("Null starting covariance matrix.");
 		}
-		
-		//initialize
-		fieldList.clear();
-		stateVectList.clear();
-		covMatList.clear();
-		
-		stateVectList.add(start);
-		covMatList.add(initCovMat);
-		fieldList.add(new B(start));
-		
+
+		// initialize
+		stop.copy(start);
 
 		// need a new derivative
 		SwimZDerivative deriv = new SwimZDerivative(Q, p, _field);
@@ -259,26 +269,124 @@ public class SwimZ {
 		RungeKutta rk4 = new RungeKutta();
 
 		double yo[] = { start.x, start.y, start.tx, start.ty };
-		
+
+		// listens for each step
 		IRkListener listener = new IRkListener() {
 
 			@Override
-			public void nextStep(double newZ, double[] newStateVec, double h) {
-				SwimZStateVector sv = new SwimZStateVector(newZ, newStateVec);
-				stateVectList.add(sv);
-//				covMatList.add(initCovMat);
-				fieldList.add(new B(sv));
+			public void nextStep(double newZ, double[] newStateVec, double s) {
+
+				double x = stop.x;
+				double y = stop.y;
+				double z = stop.z;
+				double tx = stop.tx;
+				double ty = stop.ty;
+
+				B bf = new B(z, x, y, tx, ty);
+
+				double[] A = A(tx, ty, bf.Bx, bf.By, bf.Bz);
+				double[] dA = delA_delt(tx, ty, bf.Bx, bf.By, bf.Bz);
+
+				// transport covMat
+				double delx_deltx0 = s;
+				double dely_deltx0 = 0.5 * Q * V * s * s * dA[2];
+				double deltx_delty0 = Q * V * s * dA[1];
+				double delx_delQ = 0.5 * V * s * s * A[0];
+				double deltx_delQ = V * s * A[0];
+				double delx_delty0 = 0.5 * Q * V * s * s * dA[1];
+				double dely_delty0 = s;
+				double delty_deltx0 = Q * V * s * dA[2];
+				double dely_delQ = 0.5 * V * s * s * A[1];
+				double delty_delQ = V * s * A[1];
+
+				double[][] transpStateJacobian = new double[][] { { 1, 0, delx_deltx0, delx_delty0, delx_delQ },
+						{ 0, 1, dely_deltx0, dely_delty0, dely_delQ }, { 0, 0, 1, deltx_delty0, deltx_delQ },
+						{ 0, 0, delty_deltx0, 1, delty_delQ }, { 0, 0, 0, 0, 1 } };
+
+				double[][] u = new double[5][5];
+				double[][] c = new double[covMat.getRowDimension()][covMat.getColumnDimension()];
+				double[][] C = new double[covMat.getRowDimension()][covMat.getColumnDimension()];
+
+				for (int rw = 0; rw < covMat.getRowDimension(); rw++) {
+					for (int cl = 0; cl < covMat.getColumnDimension(); cl++) {
+						c[rw][cl] = covMat.get(rw, cl);
+					}
+				}
+				
+				 //covMat = FCF^T; u = FC;
+				for(int j1 = 0; j1 < 5; j1++) {
+					u[0][j1] = c[0][j1] + c[2][j1]*transpStateJacobian[0][2] + c[3][j1]*transpStateJacobian[0][3] + c[4][j1]*transpStateJacobian[0][4];
+					u[1][j1] = c[1][j1] + c[2][j1]*transpStateJacobian[1][2] + c[3][j1]*transpStateJacobian[1][3] + c[4][j1]*transpStateJacobian[1][4];
+					u[2][j1] = c[2][j1] + c[3][j1]*transpStateJacobian[2][3] + c[4][j1]*transpStateJacobian[2][4];
+					u[3][j1] = c[2][j1]*transpStateJacobian[3][2] + c[3][j1] + c[4][j1]*transpStateJacobian[3][4];
+					u[4][j1] = c[4][j1];		
+				}
+				
+				for(int i1 = 0; i1 < 5; i1++) {
+					C[i1][0] = u[i1][0] + u[i1][2]*transpStateJacobian[0][2] + u[i1][3]*transpStateJacobian[0][3] + u[i1][4]*transpStateJacobian[0][4];
+					C[i1][1] = u[i1][1] + u[i1][2]*transpStateJacobian[1][2] + u[i1][3]*transpStateJacobian[1][3] + u[i1][4]*transpStateJacobian[1][4];
+					C[i1][2] = u[i1][2] + u[i1][3]*transpStateJacobian[2][3] + u[i1][4]*transpStateJacobian[2][4];
+					C[i1][3] = u[i1][2]*transpStateJacobian[3][2] + u[i1][3] + u[i1][4]*transpStateJacobian[3][4];
+					C[i1][4] = u[i1][4];
+				}
+
+
+				// Q	
+				double p = Math.abs(1./Q);
+			    double pz = p/Math.sqrt(1 + tx*tx + ty*ty);
+			    double px = tx*pz;
+			    double py = ty*pz;
+			    
+			    double t_ov_X0 = Math.signum(zf-start.z)*s/ARGONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
+			    
+			    //double mass = this.MassHypothesis(this.massHypo); // assume given mass hypothesis
+			    double mass = MassHypothesis("electron"); // assume given mass hypothesis
+			    if(Q>0)
+			    	mass = MassHypothesis("proton");
+			    
+			    double beta = p/Math.sqrt(p*p+mass*mass); // use particle momentum
+			    double cosEntranceAngle = Math.abs((x*px+y*py+z*pz)/(Math.sqrt(x*x+y*y+z*z)*p));
+			    double pathLength = t_ov_X0/cosEntranceAngle;  
+			   
+			    double sctRMS = (0.0136/(beta*p))*Math.sqrt(pathLength)*(1+0.038*Math.log(pathLength)); // Highland-Lynch-Dahl formula
+			   
+			    double cov_txtx = (1+tx*tx)*(1 + tx*tx + ty*ty)*sctRMS*sctRMS;
+			    double cov_tyty = (1+ty*ty)*(1 + tx*tx + ty*ty)*sctRMS*sctRMS;
+			    double cov_txty = tx*ty*(1 + tx*tx + ty*ty)*sctRMS*sctRMS;
+			    
+			    if(s>0) { 
+			    	C[2][2]+=cov_txtx;
+			    	C[2][3]+=cov_txty;
+			    	C[3][2]+=cov_txty;
+			    	C[3][3]+=cov_tyty;
+			    }
+			    
+			    Matrix Cpropagated = new Matrix(C);	
+			    matrixCopy(Cpropagated, covMat);
+			    
+			    stop.set(newZ, newStateVec);
+
+
 			}
-			
 		};
 
 		int nStep = 0;
 		try {
 			nStep = rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, deriv, _stopper, listener, absError, hdata);
-		} catch (RungeKuttaException e) {
+		}
+		catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
+		return nStep;
+	}
+	
+	private void matrixCopy(Matrix source, Matrix dest) {
+		for (int rw = 0; rw < source.getRowDimension(); rw++) {
+			for (int cl = 0; cl < source.getColumnDimension(); cl++) {
+				dest.set(rw, cl, source.get(rw, cl));
+			}
+		}
 	}
 
 	// /**
@@ -399,7 +507,7 @@ public class SwimZ {
 	 * @return the swim result
 	 * @throws SwimZException
 	 */
-	
+
 	public SwimZResult parabolicEstimate(int Q, double p, SwimZStateVector start, double zf, double stepSize)
 			throws SwimZException {
 
@@ -421,7 +529,7 @@ public class SwimZ {
 		SwimZResult result = new SwimZResult(Q, p, start.z, zf, swimZrange.getNumStep() + 1);
 		result.add(start);
 		SwimZStateVector v0 = start;
-		
+
 		for (int i = 0; i < swimZrange.getNumStep(); i++) {
 			// get the field
 			float B[] = new float[3];
@@ -461,10 +569,8 @@ public class SwimZ {
 
 		return result;
 	}
-	
 
-
-	//straight line
+	// straight line
 	private SwimZResult straightLineResult(int Q, double p, SwimZStateVector start, double zf) {
 		SwimZResult result = new SwimZResult(Q, p, start.z, zf, 2);
 		result.add(start);
@@ -475,8 +581,8 @@ public class SwimZ {
 		result.add(v);
 		return result;
 	}
-	
-	//straight line
+
+	// straight line
 	private void straightLineResult(int Q, double p, SwimZStateVector start, SwimZStateVector stop, double zf) {
 		double s = zf - start.z;
 		stop.x = start.x + start.tx * s;
@@ -485,7 +591,7 @@ public class SwimZ {
 		stop.tx = start.tx;
 		stop.ty = start.ty;
 	}
-	
+
 	private double[] A(double tx, double ty, double Bx, double By, double Bz) {
 
 		double C = Math.sqrt(1 + tx * tx + ty * ty);
@@ -510,8 +616,7 @@ public class SwimZ {
 		return new double[] { delAx_deltx, delAx_delty, delAy_deltx, delAy_delty };
 	}
 
-
-	//container for mag field
+	// container for mag field
 	private class B {
 		final double z;
 		double x;
@@ -519,36 +624,57 @@ public class SwimZ {
 		double tx;
 		double ty;
 		float result[] = new float[3];
-		
+
 		public double Bx;
 		public double By;
 		public double Bz;
-		
+
 		public B(SwimZStateVector sv) {
 			this(sv.z, sv.x, sv.y, sv.tx, sv.ty);
 		}
-		
+
 		public B(double z, double x, double y, double tx, double ty) {
-			this.z = z; 
+			this.z = z;
 			this.x = x;
 			this.y = y;
-			this.tx = tx; 
+			this.tx = tx;
 			this.ty = ty;
-			
+
 			if ((_field == null) || _field.isZeroField()) {
 				this.Bx = 0;
 				this.By = 0;
 				this.Bz = 0;
 			}
 			else {
-				_field.field((float)x, (float)y, (float)z, result);
+				_field.field((float) x, (float) y, (float) z, result);
 			}
-			
+
 			this.Bx = result[0];
 			this.By = result[1];
 			this.Bz = result[2];
-		}		
+		}
 	}
 
+	public String massHypo = "electron";
+
+	public double MassHypothesis(String H) {
+		double piMass = 0.13957018;
+		double KMass = 0.493677;
+		double muMass = 0.105658369;
+		double eMass = 0.000510998;
+		double pMass = 0.938272029;
+		double value = piMass; // default
+		if (H.equals("proton"))
+			value = pMass;
+		if (H.equals("electron"))
+			value = eMass;
+		if (H.equals("pion"))
+			value = piMass;
+		if (H.equals("kaon"))
+			value = KMass;
+		if (H.equals("muon"))
+			value = muMass;
+		return value;
+	}
 
 }

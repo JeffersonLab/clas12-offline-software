@@ -407,7 +407,7 @@ public class Geometry {
 		
 	public static void main (String arg[])  {
 		
-//		ConstantsLoader.Load(runNb);
+		ConstantsLoader.Load(10);
 		Constants.Load();		
 		Geometry geo = new Geometry();
 		
@@ -508,4 +508,6 @@ public class Geometry {
 			axis = 1;
 		return axis;
 	}
+	
+
 }

@@ -17,12 +17,12 @@ public class GridCoordinate {
 	
 	
 	/**
-	 * The minimum value.
+	 * The overall minimum value.
 	 */
 	private double _min;
 
 	/**
-	 * The maximum value.
+	 * The overll maximum value.
 	 */
 	private double _max;
 
@@ -211,5 +211,23 @@ public class GridCoordinate {
 	public void setName(String name) {
 		_name = name;
 	}
+	
+	/**
+	 * Get the minimum for a given index
+	 * @param index the index
+	 * @return the min for the given index
+	 */
+    public double getMin(int index){
+        return _min + index*_delta;
+    }
+
+	/**
+	 * Get the maximum for a given index
+	 * @param index the index
+	 * @return the max for the given index
+	 */
+   public double getMax(int index){
+        return _min + (index+1)*_delta;
+    }
 
 }

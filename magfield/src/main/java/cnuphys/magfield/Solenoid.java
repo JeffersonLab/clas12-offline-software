@@ -19,14 +19,26 @@ import java.util.StringTokenizer;
  * @version 1.0
  */
 public final class Solenoid extends MagneticField {
-
+	
 	// private constructor
 	/**
 	 * Instantiates a new solenoid.
 	 */
 	private Solenoid() {
+		_probe = new FieldProbe2D();
 		setCoordinateNames("phi", "rho", "z");
 	}
+	
+	@Override
+	public void setProbe(FieldProbe probe) {
+		if (probe instanceof FieldProbe2D) {
+			_probe = probe;
+		}
+		else {
+			System.err.println("Warning: Solenoid requires a 2D probe.");
+		}
+	}
+
 
 	/**
 	 * Obtain a solenoid object from a binary file, probably
@@ -71,19 +83,46 @@ public final class Solenoid extends MagneticField {
 		// symmetric, then there is no need
 		// for interpolation in phi
 
-		// rotate onto to proper sector?
-
-		if (phi > 0.001) {
-			double rphi = Math.toRadians(phi);
-			double cos = Math.cos(rphi);
-			double sin = Math.sin(rphi);
-			double bphi = result[0];
-			double brho = result[1];
-			// result[X] = (float) (bphi * cos - brho * sin);
-			// result[Y] = (float) (bphi * sin + brho * cos);
-			result[X] = (float) (brho * cos - bphi * sin);
-			result[Y] = (float) (brho * sin + bphi * cos);
+		// rotate onto to proper sector
+		double bphi = result[0];
+		double brho = result[1];
+		
+		int sector = getSector(phi);
+		switch (sector) {
+		case 2:
+			result[X] = (float) (brho * 0.5 - bphi * ROOT3OVER2);
+			result[Y] = (float) (brho * ROOT3OVER2 + bphi * 0.5);
+			break;
+		case 3:
+			result[X] = (float) (-brho * 0.5 - bphi * ROOT3OVER2);
+			result[Y] = (float) (brho * ROOT3OVER2 - bphi * 0.5);
+			break;
+		case 4:
+			result[X] = (float) (-brho);
+			result[Y] = (float) (-bphi);
+			break;
+		case 5:
+			result[X] = (float) (-brho * 0.5 + bphi * ROOT3OVER2);
+			result[Y] = (float) (-brho * ROOT3OVER2 - bphi * 0.5);
+			break;
+		case 6:
+			result[X] = (float) (brho * 0.5 + bphi * ROOT3OVER2);
+			result[Y] = (float) (-brho * ROOT3OVER2 + bphi * 0.5);
+			break;
+		default:
+			break;
 		}
+
+//
+//		if (phi > 0.001) {
+//			double rphi = Math.toRadians(phi);
+//			double cos = Math.cos(rphi);
+//			double sin = Math.sin(rphi);
+//			double bphi = result[0];
+//			double brho = result[1];
+//			result[X] = (float) (brho * cos - bphi * sin);
+//			result[Y] = (float) (brho * sin + bphi * cos);
+//		}
 
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;
@@ -277,6 +316,11 @@ public final class Solenoid extends MagneticField {
 	 * @param result will hold the result
 	 */
 	protected void interpolateField(double q2, double q3, float result[]) {
+		
+		if (_probe != null) {
+			calculate(q2, q3, (FieldProbe2D)_probe, result);
+			return;
+		}
 
 		result[0] = 0f;
 		result[1] = 0f;
@@ -340,7 +384,6 @@ public final class Solenoid extends MagneticField {
 		result[1] = (float) brho;
 		result[2] = (float) bz;
 
-		// System.out.println("" + x + ", " + y + ", " + z);
 	}
 
 	/**
@@ -355,35 +398,39 @@ public final class Solenoid extends MagneticField {
 	 */
 	protected float interpolateFieldMagnitude(double q2, double q3) {
 
-		int n1 = q2Coordinate.getIndex(q2);
-		if (n1 < 0) {
-			return 0f;
-		}
-		int n2 = q3Coordinate.getIndex(q3);
-		if (n2 < 0) {
-			return 0f;
-		}
+		float result[] = new float[3];
+		interpolateField(q2, q3, result);
+		return (float) Math.sqrt(result[0]*result[0] + result[1]*result[1] + result[2]*result[2]);
 
-		double f1 = q2Coordinate.getFraction(q2, n1);
-		double f2 = q3Coordinate.getFraction(q3, n2);
-
-		double g1 = 1 - f1;
-		double g2 = 1 - f2;
-
-		// get the neighbor indices
-		int i000 = getCompositeIndex(0, n1, n2);
-		int i001 = i000 + 1;
-
-		int i010 = getCompositeIndex(0, n1 + 1, n2);
-		int i011 = i010 + 1;
-
-		double b000 = fieldMagnitude(i000);
-		double b001 = fieldMagnitude(i001);
-		double b010 = fieldMagnitude(i010);
-		double b011 = fieldMagnitude(i011);
-
-		return (float) (b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2);
+//		int n1 = q2Coordinate.getIndex(q2);
+//		if (n1 < 0) {
+//			return 0f;
+//		}
+//		int n2 = q3Coordinate.getIndex(q3);
+//		if (n2 < 0) {
+//			return 0f;
+//		}
+//
+//		double f1 = q2Coordinate.getFraction(q2, n1);
+//		double f2 = q3Coordinate.getFraction(q3, n2);
+//
+//		double g1 = 1 - f1;
+//		double g2 = 1 - f2;
+//
+//		// get the neighbor indices
+//		int i000 = getCompositeIndex(0, n1, n2);
+//		int i001 = i000 + 1;
+//
+//		int i010 = getCompositeIndex(0, n1 + 1, n2);
+//		int i011 = i010 + 1;
+//
+//		double b000 = fieldMagnitude(i000);
+//		double b001 = fieldMagnitude(i001);
+//		double b010 = fieldMagnitude(i010);
+//		double b011 = fieldMagnitude(i011);
+//
+//		return (float) (b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
+//				+ b011 * f1 * f2);
 
 	}
 
