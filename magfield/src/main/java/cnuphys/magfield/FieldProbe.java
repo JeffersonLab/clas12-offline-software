@@ -42,7 +42,6 @@ public abstract class FieldProbe implements IField {
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
 		float rho = (float) Math.sqrt(x * x + y * y);
-
 		float phi = (float) MagneticField.atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
@@ -50,12 +49,16 @@ public abstract class FieldProbe implements IField {
 
 	@Override
 	public float fieldMagnitudeCylindrical(double phi, double r, double z) {
-		return _field.fieldMagnitudeCylindrical(phi, r, z);
+		float result[] = new float[3];
+		fieldCylindrical(phi, r, z, result);
+		return vectorLength(result);
 	}
 
 	@Override
 	public float fieldMagnitude(float x, float y, float z) {
-		return _field.fieldMagnitude(x, y, z);
+		float result[] = new float[3];
+		field(x, y, z, result);
+		return vectorLength(result);
 	}
 
 	@Override
@@ -73,11 +76,23 @@ public abstract class FieldProbe implements IField {
 		return _field.isZeroField();
 	}
 	
+	/**
+	 * Get the appropriate probe for the active field
+	 * @return the probe for the active field
+	 */
+	public static FieldProbe factory() {
+		return factory(MagneticFields.getInstance().getActiveField());
+	}
+	
+	/**
+	 * Get the appropriate probe for the given field
+	 * @return the probe for the givev field
+	 */
 	public static FieldProbe factory(IField field) {
 		
-		if (field == null) {
-			System.err.println("null field in probe factory");
-		}
+//		if (field == null) {
+//			System.err.println("null field in probe factory");
+//		}
 		
 		if (field != null) {
 
@@ -100,9 +115,23 @@ public abstract class FieldProbe implements IField {
 			}
 		}
 
-		System.err.println("WARNING: null probe");
-		(new Throwable()).printStackTrace();
+//		System.err.println("WARNING: null probe");
 		return null;
 	}
+	
+	/**
+	 * Vector length.
+	 *
+	 * @param v
+	 *            the v
+	 * @return the float
+	 */
+	protected final float vectorLength(float v[]) {
+		float vx = v[0];
+		float vy = v[1];
+		float vz = v[2];
+		return (float) Math.sqrt(vx * vx + vy * vy + vz * vz);
+	}
+
 
 }

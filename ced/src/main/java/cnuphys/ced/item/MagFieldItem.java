@@ -18,6 +18,7 @@ import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.fastmc.FastMCManager;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
@@ -60,7 +61,6 @@ public class MagFieldItem extends AItem {
 	 */
 	public MagFieldItem(LogicalLayer layer, CedView view) {
 		super(layer);
-		MagneticFields.getInstance().getActiveField();
 		_view = view;
 		_style.setFillColor(null);
 		_style.setLineColor(Color.red);
@@ -141,7 +141,7 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		IField activeField = MagneticFields.getInstance().getActiveField();
+		FieldProbe probe = FieldProbe.factory();
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
@@ -162,7 +162,7 @@ public class MagFieldItem extends AItem {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					// note conversion to cm from mm
-					double bmag = activeField.fieldMagnitudeCylindrical(phi,
+					double bmag = probe.fieldMagnitudeCylindrical(phi,
 							rho / 10, z / 10) / 10.;
 
 					Color color = _colorScaleModelSolenoid.getColor(bmag);
@@ -171,7 +171,7 @@ public class MagFieldItem extends AItem {
 							pixelStep);
 				} else { // one of the components
 					// note conversion to cm from mm
-					activeField.fieldCylindrical(phi, rho / 10, z / 10, result);
+					probe.fieldCylindrical(phi, rho / 10, z / 10, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:
@@ -244,7 +244,11 @@ public class MagFieldItem extends AItem {
 	private void drawItemSectorView(Graphics g, IContainer container,
 			int displayOption, boolean hasTorus, boolean hasSolenoid) {
 
+		//get the boundary
 		Rectangle fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
+		
+		//get a probe
+		FieldProbe probe = FieldProbe.factory();
 
 		Rectangle bounds = container.getComponent().getBounds();
 		bounds.x = 0;
@@ -259,7 +263,6 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		IField activeField = MagneticFields.getInstance().getActiveField();
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
@@ -279,7 +282,7 @@ public class MagFieldItem extends AItem {
 				double phi = coords[4];
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-					double bmag = activeField.fieldMagnitudeCylindrical(phi,
+					double bmag = probe.fieldMagnitudeCylindrical(phi,
 							rho, z) / 10.;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
@@ -287,7 +290,7 @@ public class MagFieldItem extends AItem {
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep,
 							pixelStep);
 				} else { // one of the components
-					activeField.fieldCylindrical(phi, rho, z, result);
+					probe.fieldCylindrical(phi, rho, z, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:
@@ -311,12 +314,15 @@ public class MagFieldItem extends AItem {
 							.getColor(Math.abs(comp));
 					g.setColor(color);
 
+					//distinguish positive and negative
 					if (comp > 0) {
 						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep,
 								pixelStep);
 					} else {
-						g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep - 1,
-								pixelStep - 1);
+//						g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep - 1,
+//								pixelStep - 1);
+						g.fillOval(pp.x - pstep2, pp.y - pstep2, pixelStep,
+								pixelStep);
 					}
 
 				}
@@ -374,7 +380,8 @@ public class MagFieldItem extends AItem {
 			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
 
 			double del = (max - min) / (len - 1);
-			double speedup = 5.0;
+//			double speedup = 5.0;
+			double speedup = 6.0;
 			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
 
 			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
@@ -393,7 +400,7 @@ public class MagFieldItem extends AItem {
 		int len = getTorusColors().length + 1;
 
 		double values[] = new double[len];
-		double min = 3.0;
+		double min = 0.1;
 		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
 		// double del = (max-min)/(values.length-1);
 
@@ -407,7 +414,7 @@ public class MagFieldItem extends AItem {
 			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
 
 			double del = (max - min) / (len - 1);
-			double speedup = 5.0;
+			double speedup = 6.0;
 			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
 
 			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
@@ -426,9 +433,12 @@ public class MagFieldItem extends AItem {
 		// int r[] = {255, 176, 37, 132, 253, 205, 130, 127};
 		// int g[] = {254, 224, 162, 155, 189, 94, 0, 0};
 		// int b[] = {227, 230, 42, 51, 6, 5, 2, 127};
-		int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
-		int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
-		int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
+//		int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
+//		int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
+//		int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
+		int r[] = { 255, 216, 176, 106, 37,  132, 193, 255, 255, 255, 255, 127 };
+		int g[] = { 255, 239, 224, 193, 162, 155, 205, 255, 191, 128,   0,   0 };
+		int b[] = { 255, 242, 230, 136,  42,  51,  25,   0,   0,   0,   0, 127 };
 
 		int n = r.length;
 		int nm1 = n - 1;
@@ -470,9 +480,15 @@ public class MagFieldItem extends AItem {
 		// int r[] = {255, 176, 37, 132, 253, 205, 130, 127};
 		// int g[] = {254, 224, 162, 155, 189, 94, 0, 0};
 		// int b[] = {227, 230, 42, 51, 6, 5, 2, 127};
-		int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
-		int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
-		int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
+//		int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
+//		int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
+//		int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
+//		int r[] = { 255, 216, 176, 106, 37,  132, 255, 255, 255, 127 };
+//		int g[] = { 255, 239, 224, 193, 162, 155, 255, 128,   0,   0 };
+//		int b[] = { 255, 242, 230, 136, 42,  51,    0,   0,   0, 127 };
+		int r[] = { 255, 106, 37,  132, 255, 255, 255, 127 };
+		int g[] = { 255, 193, 162, 155, 255, 128,   0,   0 };
+		int b[] = { 255, 136, 42,  51,    0,   0,   0, 127 };
 
 		int n = r.length;
 		int nm1 = n - 1;

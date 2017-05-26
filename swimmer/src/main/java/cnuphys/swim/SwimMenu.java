@@ -40,6 +40,8 @@ public class SwimMenu extends JMenu implements ActionListener {
 	private JRadioButtonMenuItem _showReconTracks;
 	private JRadioButtonMenuItem _hideReconTracks;
 
+	//clear
+	private JMenuItem _clearTracks;
 
 	private boolean _showMonteCarlo = true;
 	private boolean _showRecon = true;
@@ -66,6 +68,10 @@ public class SwimMenu extends JMenu implements ActionListener {
 				bgmc, _showMonteCarlo);
 		_hideMonteCarloTracks = createRadioMenuItem("Hide Monte Carlo Tracks",
 				bgmc, !_showMonteCarlo);
+		addSeparator();
+		_clearTracks = new JMenuItem("Clear all Tracks");
+		_clearTracks.addActionListener(this);
+		add(_clearTracks);
 		addSeparator();
 
 		// hide or show recon
@@ -211,10 +217,21 @@ public class SwimMenu extends JMenu implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if (e.getSource() == _clearTracks) {
+			clearTracks();
+			return;
+		}
 		_showMonteCarlo = _showMonteCarloTracks.isSelected();
 		_showRecon = _showReconTracks.isSelected();
 
 		Swimming.notifyListeners();
+	}
+	
+	//clear all the tracks
+	private void clearTracks() {
+		Swimming.clearMCTrajectories();
+		Swimming.clearReconTrajectories();
 	}
 
 	/**

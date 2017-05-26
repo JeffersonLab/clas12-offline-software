@@ -41,8 +41,11 @@ import cnuphys.ced.item.SectorHTCCItem;
 import cnuphys.ced.item.SectorLTCCItem;
 import cnuphys.ced.item.SectorPCALItem;
 import cnuphys.ced.item.SectorSuperLayer;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.magfield.Torus;
 import cnuphys.splot.fit.FitType;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
@@ -768,10 +771,11 @@ public class SectorView extends CedView implements ChangeListener {
 				+ " cm";
 		feedbackStrings.add(tiltsectxyz);
 
-		IField activeField = MagneticFields.getInstance().getActiveField();
-		if (activeField != null) {
+//		IField activeField = MagneticFields.getInstance().getActiveField();
+				
+		if (probe != null) {
 			float field[] = new float[3];
-			activeField.fieldCylindrical(absphi, rho, z, field);
+			probe.fieldCylindrical(absphi, rho, z, field);
 			// convert to Tesla from kG
 			field[0] /= 10.0;
 			field[1] /= 10.0;
@@ -780,8 +784,32 @@ public class SectorView extends CedView implements ChangeListener {
 			double bmag = VectorSupport.length(field);
 			feedbackStrings.add("$Lawn Green$"
 					+ MagneticFields.getInstance().getActiveFieldDescription());
+			
+			boolean hasTorus = MagneticFields.getInstance().hasTorus();
+			boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+			
+			//scale factors
+			if (hasTorus || hasSolenoid) {
+				String scaleStr = "";
+				if (hasTorus) {
+					double torusScale = MagneticFields.getInstance().getScaleFactor(FieldType.TORUS);
+					scaleStr += "Torus scale " + valStr(torusScale, 3) + " ";
+				}
+				if (hasSolenoid) {
+					double solenScale = MagneticFields.getInstance().getScaleFactor(FieldType.SOLENOID);
+					scaleStr += "Solenoid scale " + valStr(solenScale, 3) + " ";
+				}
+				feedbackStrings.add("$Lawn Green$" + scaleStr);
+			}
+
+			
 			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
 					+ vecStr(field) + " T");
+		}
+		else {
+			feedbackStrings.add("$Lawn Green$"
+					+ MagneticFields.getInstance().getActiveFieldDescription());
+			feedbackStrings.add("$Lawn Green$Field is Zero");
 		}
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(wp);

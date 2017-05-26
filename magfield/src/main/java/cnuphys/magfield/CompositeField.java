@@ -193,5 +193,37 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		}
 		return maxField;
 	}
+	
+
+	/**
+	 * Check whether we have a torus field
+	 * 
+	 * @return <code>true</code> if we have a torus
+	 */
+	public boolean hasTorus() {
+		for (IField field : this) {
+			if (field instanceof Torus) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check whether we have a solenoid field
+	 * 
+	 * @return <code>true</code> if we have a solenoid
+	 */
+	public boolean hasSolenoid() {
+		for (IField field : this) {
+			if (field instanceof Solenoid) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 
 }

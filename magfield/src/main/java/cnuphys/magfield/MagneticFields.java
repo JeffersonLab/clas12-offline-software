@@ -289,6 +289,8 @@ public class MagneticFields {
 			_activeField = null;
 			break;
 		}
+		
+		notifyListeners();
 	}
 
 	/**
@@ -341,6 +343,43 @@ public class MagneticFields {
 		}
 
 		return ifield;
+	}
+	
+	/**
+	 * Get the scale factor got the field type.
+	 * @param ftype the field type
+	 * @return the scale factor got the field type. Composite fields return NaN.
+	 */
+	public double getScaleFactor(FieldType ftype) {
+		
+		double scale = Double.NaN;
+
+		switch (ftype) {
+		case TORUS:
+			if (_torus != null); {
+				scale = _torus.getScaleFactor();
+			}
+			break;
+		case SOLENOID:
+			if (_solenoid != null); {
+				scale = _solenoid.getScaleFactor();
+			}
+			break;
+		case COMPOSITE:
+			break;
+		case COMPOSITEROTATED:
+			break;
+		case SMALLTORUS:
+			if (_smallTorus != null); {
+				scale = _smallTorus.getScaleFactor();
+			}
+			break;
+		case ZEROFIELD:
+			scale = 0;
+			break;
+		}
+		
+		return scale;
 	}
 	
 	/**
@@ -952,21 +991,39 @@ public class MagneticFields {
 
 
 	/**
-	 * Check whether we have a torus field
+	 * Check whether we have an active torus field
 	 * 
 	 * @return <code>true</code> if we have a torus
 	 */
 	public boolean hasTorus() {
-		return (_torus != null);
+		if (_activeField != null) {
+			if (_activeField instanceof Torus) {
+				return true;
+			}
+			else if (_activeField instanceof CompositeField) {
+				return ((CompositeField)_activeField).hasTorus();
+			}
+		}
+		
+		return false;
 	}
 
 	/**
-	 * Check whether we have a solenoid field
+	 * Check whether we have an active solenoid field
 	 * 
 	 * @return <code>true</code> if we have a solenoid
 	 */
 	public boolean hasSolenoid() {
-		return (_solenoid != null);
+		if (_activeField != null) {
+			if (_activeField instanceof Solenoid) {
+				return true;
+			}
+			else if (_activeField instanceof CompositeField) {
+				return ((CompositeField)_activeField).hasSolenoid();
+			}
+		}
+		
+		return false;
 	}
 
 	/**

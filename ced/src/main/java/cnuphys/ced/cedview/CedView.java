@@ -41,6 +41,7 @@ import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.SwimTrajectoryListener;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.Swimming;
@@ -61,6 +62,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	public enum Mode {
 		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
 	};
+	
+	//field probe for fast retrieval of mag field
+	protected FieldProbe probe;
 	
 	//to add separator for first clone
 	private static boolean _firstClone = true;
@@ -159,6 +163,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 		// listen for trajectory changes
 		Swimming.addSwimTrajectoryListener(this);
+
+		probe = FieldProbe.factory();
 
 		MagneticFields.getInstance().addMagneticFieldChangeListener(this);
 
@@ -598,6 +604,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	@Override
 	public void magneticFieldChanged() {
 		getContainer().refresh();
+		probe = FieldProbe.factory();
 	}
 
 	// we are hovering

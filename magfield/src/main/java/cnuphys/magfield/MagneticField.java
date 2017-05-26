@@ -1055,6 +1055,13 @@ public abstract class MagneticField implements IField {
 		result[0] = 0f;
 		result[1] = 0f;
 		result[2] = 0f;
+		
+		boolean inRange = q1Coordinate.inRange(q1) && q2Coordinate.inRange(q2) && q3Coordinate.inRange(q3);
+		
+		if (!inRange) {
+			return;
+		}
+
 
 		if (!probe.contains(q1, q2, q3)) {
 			int n0 = q1Coordinate.getIndex(q1);
@@ -1147,6 +1154,13 @@ public abstract class MagneticField implements IField {
 		result[0] = 0f;
 		result[1] = 0f;
 		result[2] = 0f;
+		
+		boolean inRange = q2Coordinate.inRange(q2) && q3Coordinate.inRange(q3);
+		
+		if (!inRange) {
+			return;
+		}
+		
 
 		if (!probe.contains(q2, q3)) {
 			int n1 = q2Coordinate.getIndex(q2);
