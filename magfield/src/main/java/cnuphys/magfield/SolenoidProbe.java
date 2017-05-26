@@ -76,6 +76,4 @@ public class SolenoidProbe extends FieldProbe {
 		((Solenoid)_field).fieldCylindrical(this, phi, rho, z, result);
 	}
 
-
-
 }

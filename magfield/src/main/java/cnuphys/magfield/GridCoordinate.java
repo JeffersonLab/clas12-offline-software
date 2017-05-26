@@ -229,5 +229,14 @@ public class GridCoordinate {
    public double getMax(int index){
         return _min + (index+1)*_delta;
     }
+   
+   /**
+    * Check whether a value is in range
+    * @param q the value
+    * @return <code>true</code> if the value is between min and max
+    */
+   public boolean inRange(double q) {
+	   return (q >= _min) && (q <= _max);
+   }
 
 }
