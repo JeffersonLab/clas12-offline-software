@@ -839,7 +839,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		FieldProbe.cache(true);
 		MagneticField.setMathLib(MathLib.FAST);
 		
-		
 		//read in userprefs
 		PropertiesManager.getInstance();
 		
