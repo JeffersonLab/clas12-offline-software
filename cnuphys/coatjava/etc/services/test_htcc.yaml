@@ -1,4 +1,0 @@
----
-services:
-  - class: org.jlab.service.htcc.HTCCReconstructionService
-    name: HTCC
