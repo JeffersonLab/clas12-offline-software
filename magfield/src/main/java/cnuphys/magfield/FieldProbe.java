@@ -95,9 +95,6 @@ public abstract class FieldProbe implements IField {
 //		}
 		
 		if (field != null) {
-
-			System.err.println("Will create probe for " + field.getName());
-//			(new Throwable()).printStackTrace();
 			
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus)field);
@@ -106,11 +103,9 @@ public abstract class FieldProbe implements IField {
 				return new SolenoidProbe((Solenoid)field);
 			}
 			else if (field instanceof RotatedCompositeField) {
-				System.err.println("Creating rotated composite probe");
 				return new RotatedCompositeProbe((RotatedCompositeField)field);
 			}
 			else if (field instanceof CompositeField) {
-				System.err.println("Creating composite probe");
 				return new CompositeProbe((CompositeField)field);
 			}
 			else {

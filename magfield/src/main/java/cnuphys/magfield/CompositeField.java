@@ -32,8 +32,6 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	 */
 	@Override
 	public void field(float x, float y, float z, float[] result) {
-		System.err.println("DUDETTE " );
-
 
 		float bx = 0, by = 0, bz = 0;
 		for (IField field : this) {

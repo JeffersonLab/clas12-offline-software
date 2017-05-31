@@ -88,7 +88,9 @@ public abstract class MagneticField implements IField {
 	private String _q3Name = "z";
 
 	// for rotating field
-	protected static final double ROOT3OVER2 = Math.sqrt(3) / 2;
+	protected static final double ROOT3OVER2 = 0.866025403784439;
+	protected static final double cosSect[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
+	protected static final double sinSect[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
 	
 	/**
 	 * Holds the grid info for the slowest changing coordinate (as stored in the
