@@ -764,7 +764,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			title = title.substring(0, index);
 		}
 
-		title += "   [Magnetic Field: "
+		title += "   [Magnetic Field (" +
+		MagneticFields.getInstance().getVersion() + ") "
 				+ MagneticFields.getInstance().getActiveFieldDescription();
 		title += "]";
 		
