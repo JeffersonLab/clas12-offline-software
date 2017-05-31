@@ -1,0 +1,330 @@
+Numerical Recipes ver 3.04 Java Ports by Huang Wen Hui
+------------------------------------------------------
+C++ to Java Naming Correspondences
+----------------------------------
+
+This file tells where to find the Java translations by Huang Wen Hui
+of Numerical Recipes C++ routines within the distribution.
+
+Book Chapter to Java Package:
+
+chapter1	-> com.nr.util
+chapter2 	-> com.nr.la
+chapter3 	-> com.nr.interp
+chapter4 	-> com.nr.fi
+chapter5 	-> com.nr.fe
+chapter6 	-> com.nr.sf
+chapter7 	-> com.nr.ran
+chapter8 	-> com.nr.sort
+chapter9 	-> com.nr.root
+chapter10 	-> com.nr.min
+chapter11 	-> com.nr.eig
+chapter12 	-> com.nr.fft
+chapter13 	-> com.nr.sp
+chapter14 	-> com.nr.stat
+chapter15 	-> com.nr.model
+chapter16 	-> com.nr.ci
+chapter17 	-> com.nr.ode
+chapter18 	-> com.nr.bvp
+chapter19 	-> com.nr.inv
+chapter20 	-> com.nr.pde
+chapter21 	-> com.nr.cg
+chapter22 	-> com.nr.lna
+
+
+C++ Include File to Java Class:
+
+(Note that, as printed in the book, each C++ routine
+show its C++ include file name in the page margin.)
+
+adapt.h		-> com.nr.fi.Adapt
+amebsa.h	-> com.nr.min.Amebsa
+amoeba.h	-> com.nr.min.Amoeba
+anneal.h	-> com.nr.min.Anneal
+arithcode.h	-> com.nr.lna.Arithcode
+asolve.h	-> com.nr.la.NRsparseLinbcg
+banded.h	-> com.nr.la.Bandec
+bessel.h	-> com.nr.sf.Bessjy
+		-> com.nr.sf.Bessik
+
+besselfrac.h	-> com.nr.sf.Bessel
+calendar.h	-> com.nr.util.Calendar
+chebyshev.h	-> com.nr.fe.Chebyshev
+cholesky.h	-> com.nr.la.Cholesky
+circumcircle.h	-> com.nr.cg.Circle
+cisi.h		-> com.nr.sf.Integrals.cisi
+convlv.h	-> com.nr.sp.Fourier.convlv
+correl.h	-> com.nr.sp.Fourier.correl
+dawson.h	-> com.nr.sf.Integrals.dawson
+decchk.h	-> com.nr.lna.Icrc.decchk
+delaunay.h	-> com.nr.cg.Triel
+		-> com.nr.cg.Delaunay
+		-> com.nr.cg.Convexhull
+		-> com.nr.cg.Minspantree
+
+derule.h	-> com.nr.fi.DErule
+deviates.h	-> com.nr.ran.Expondev
+		-> com.nr.ran.Logisticdev
+		-> com.nr.ran.Normaldev_BM
+		-> com.nr.ran.Cauchydev
+		-> com.nr.ran.Normaldev
+		-> com.nr.ran.Gammadev
+		-> com.nr.ran.Poissondev
+		-> com.nr.ran.Binomialdev
+
+dfridr.h	-> com.nr.fe.Dfridr
+dftintegrate.h	-> com.nr.sp.Fourier.dftcor
+difeq.h		-> com.nr.bvp.Difeq
+distributions.h	-> com.nr.sf.Cauchydist
+		-> com.nr.sf.Expondist
+		-> com.nr.sf.Logisticdist
+
+dynpro.h	-> com.nr.min.Dynpro
+eclass.h	-> com.nr.sort.EClass
+eigen_sym.h	-> com.nr.eig.Jacobi
+		-> com.nr.eig.Symmeig
+
+eigen_unsym.h	-> com.nr.eig.Unsymmeig
+elliptint.h	-> com.nr.sf.Elliptic
+erf.h		-> com.nr.sf.Erf
+		-> com.nr.sf.Normaldist
+		-> com.nr.sf.Lognormaldist
+
+expint.h	-> com.nr.sf.Integrals.expint
+fasper.h	-> com.nr.sp.Fourier.Fasper
+fermi.h		-> com.nr.sf.Fermi
+fit_examples.h	-> NOT translated
+fitab.h		-> com.nr.model.Fitab
+fitexy.h	-> com.nr.model.Fitexy
+fitlin.h	-> com.nr.model.Fitlin
+fitmed.h	-> com.nr.model.Fitmed
+fitmrq.h	-> com.nr.model.Fitmrq
+fitsvd.h	-> com.nr.model.Fitsvd
+fourfs.h	-> com.nr.fft.FFT.fourfs
+fourier.h	-> com.nr.ftt.FFT
+		-> com.nr.fft.WrapVecDoub
+fourier_ndim.h	-> com.nr.ftt.FFT
+fred2.h		-> com.nr.inv.Fred2
+fred_singular.h	-> com.nr.inv.Wwghts
+		-> com.nr.inv.Quad_matrix
+
+frenel.h	-> com.nr.sf.Integrals.frenel
+gamma.h		-> com.nr.sf.Gamma
+gaumixmod.h	-> com.nr.ci.Gaumixmod
+gauss_wgts.h	-> com.nr.fi.GaussianWeights
+gauss_wgts2.h	-> com.nr.fi.GaussianWeights
+gaussj.h	-> com.nr.la.GaussJordan.gaussj
+hash.h		-> com.nr.Hashfn1
+		-> com.nr.Hashfn2
+		-> com.nr.Hashtable
+		-> com.nr.Hash
+		-> com.nr.Mhash
+
+hashall.h	-> com.nr.HashAll
+hmm.h		-> com.nr.ci.HMM
+huffcode.h	-> com.nr.lna.Huffcode
+hypgeo.h	-> com.nr.sf.Hypergeo
+icrc.h		-> com.nr.lna.Icrc
+igray.h		-> com.nr.lna.Gray
+incgammabeta.h	-> com.nr.sf.Gamma
+		-> com.nr.sf.Beta
+		-> com.nr.sf.Gammadist
+		-> com.nr.sf.Betadist
+		-> com.nr.sf.Studenttdist
+		-> com.nr.sf.Poissondist
+		-> com.nr.sf.Binomialdist
+		-> com.nr.sf.Chisqdist
+		-> com.nr.sf.Fdist
+
+interior.h	-> NOT translated
+interp_1d.h	-> com.nr.interp.Base_interp
+		-> com.nr.interp.Poly_interp
+		-> com.nr.interp.Rat_interp
+		-> com.nr.interp.Spline_interp
+		-> com.nr.interp.BaryRat_interp
+
+interp_2d.h	-> com.nr.interp.Bilin_interp
+		-> com.nr.interp.Poly2D_interp
+		-> com.nr.interp.Spline2D_interp
+
+interp_curve.h	-> com.nr.interp.Curve_interp
+interp_laplace.h-> com.nr.interp.Laplace_interp
+interp_linear.h	-> com.nr.interp.Linear_interp
+interp_rbf.h	-> com.nr.interp.RBF_fn
+		-> com.nr.interp.RBF_interp
+		-> com.nr.interp.RBF_multiquadric
+		-> com.nr.interp.RBF_thinplate
+		-> com.nr.interp.RBF_gauss
+		-> com.nr.interp.RBF_inversemultiquadric
+		-> com.nr.interp.Shep_interp
+
+iqagent.h	-> com.nr.sort.IQagent
+kdtree.h	-> com.nr.cg.KDtree
+kmeans.h	-> com.nr.ci.Kmeans
+krig.h		-> com.nr.interp.interp.Krig
+ksdist.h	-> com.nr.sf.KSdist
+kstests.h	-> com.nr.stat.Stattests
+kstests_2d.h	-> com.nr.stat.Stattests
+levex.h		-> com.nr.fe.Levin
+linbcg.h	-> com.nr.la.Linbcg
+linpredict.h	-> com.nr.sp.Fourier
+ludcmp.h	-> com.nr.la.LUdcmp
+machar.h	-> com.nr.lna.Machar
+markovgen.h	-> com.nr.ci.HMM.markovgen
+mcintegrate.h	-> com.nr.ran.MCintegrate
+mcmc.h		-> com.nr.model.State
+		-> com.nr.model.Plog
+		-> com.nr.model.Proposal
+
+mgfas.h		-> com.nr.pde.Mgfas
+mglin.h		-> com.nr.pde.Mglin
+mins.h		-> com.nr.min.Bracketmethod
+		-> com.nr.min.Golden
+		-> com.nr.min.Brent
+		-> com.nr.min.Dbrent
+
+mins_ndim.h	-> com.nr.min.F1dim 
+		-> com.nr.min.Linemethod
+		-> com.nr.min.Df1dim
+		-> com.nr.min.Dlinemethod
+		-> com.nr.min.Powell
+		-> com.nr.min.Frprmn
+
+miser.h		-> com.nr.ran.Miser
+mnewt.h		-> com.nr.root.MNEWT
+moment.h	-> com.nr.stat.Moment
+mparith.h	-> com.nr.lna.MParith
+multinormaldev.h-> com.nr.ran.Multinormaldev
+nr3.h		-> com.nr.NRUtil
+odeint.h	-> com.nr.ode.Output
+		-> com.nr.ode.Odeint
+
+pade.h		-> com.nr.fe.Ratfn
+pcshft.h	-> com.nr.fe.Chebyshev
+period.h	-> com.nr.sp.Fourier.Period
+phylo.h		-> com.nr.ci.Phylagglomnode
+		-> com.nr.ci.Phylagglom
+		-> com.nr.ci.Phylo_wpgma
+		-> com.nr.ci.Phylo_upgma
+		-> com.nr.ci.Phylo_slc
+		-> com.nr.ci.Phylo_clc
+		-> com.nr.ci.Phylo_nj
+
+plegendre.h	-> com.nr.sf.Legendre
+pointbox.h	-> com.nr.cg.Point
+		-> com.nr.cg.Box
+
+polcoef.h	-> com.nr.interp.PolCoef
+poly.h		-> com.nr.fe.Poly
+		-> com.nr.fe.Ratfn
+
+polygon.h	-> com.nr.cg.Polygon
+primpolytest.h	-> com.nr.ran.Primpolytest
+psplot.h	-> com.nr.lna.PSpage
+		-> com.nr.lna.PSplot
+
+psplotexample.h	-> NOT translated
+qgaus.h		-> com.nr.fi.GaussianWeights.qgaus
+qotree.h	-> com.nr.cg.Qotree
+		-> com.nr.cg.Nearpoints
+
+qrdcmp.h	-> com.nr.la.QRdcmp
+qroot.h		-> com.nr.root.Roots.qroot
+quad3d.h	-> com.nr.fi.NRf3
+		-> com.nr.fi.NRf2
+		-> com.nr.fi.NRf1
+
+quadrature.h	-> com.nr.fi.Quadrature
+		-> com.nr.fi.Trapzd
+		-> com.nr.fi.Midpnt
+		-> com.nr.fi.Midinf
+		-> com.nr.fi.Midsql
+		-> com.nr.fi.Midsqu
+		-> com.nr.fi.Midexp
+
+quadvl.h	-> com.nr.stat.Quadvl
+quasinewton.h	-> com.nr.min.QuasiNewton
+ran.h		-> com.nr.ran.Ran
+		-> com.nr.ran.Ranq1
+		-> com.nr.ran.Ranq2
+		-> com.nr.ran.Ranhash
+		-> com.nr.ran.Ranbyte
+		-> com.nr.ran.Ranfib
+		-> com.nr.ran.Ranlim32
+
+ranpt.h		-> com.nr.ran.Miser
+ratlsq.h	-> com.nr.fe.Ratfn
+rebin.h		-> com.nr.ran.VEGAS.rebin
+rk4.h		-> com.nr.ode.Odeint.rk4
+rlft3_sharpen.h	-> NOT translated
+romberg.h	-> com.nr.fi.Trapzd
+roots.h		-> com.nr.root.Roots
+roots_multidim.h-> com.nr.root.Roots
+		-> com.nr.root.NRfdjac
+		-> com.nr.root.NRfmin
+
+roots_poly.h	-> com.nr.root.Roots
+savgol.h	-> com.nr.stat.SavitzkyGolayFilter
+scrsho.h	-> com.nr.lna.PSplot
+selip.h		-> com.nr.sort.Sorter
+series.h	-> com.nr.fe.Eulsum
+		-> com.nr.fe.Epsalg
+		-> com.nr.fe.Levin
+
+sfroid.h	-> NOT translated
+shoot.h		-> com.nr.bvp.Shoot
+shootf.h	-> com.nr.bvp.Shootf
+simplex.h	-> NOT translated
+sobseq.h	-> com.nr.ran.Sobol
+solvde.h	-> com.nr.bvp.Solvde
+sor.h		-> com.nr.pde.Relaxation
+sort.h		-> com.nr.sort.Sorter
+		-> com.nr.sort.Indexx
+		-> com.nr.sort.Heapselect
+
+sparse.h	-> com.nr.la.NRsparseCol
+		-> com.nr.la.NRsparseMat
+		-> com.nr.la.ADAT
+
+spectrum.h	-> com.nr.sp.Spectreg
+		-> com.nr.sp.Spectolap
+		-> com.nr.sp.Slepian
+		-> com.nr.sp.Slepwindow
+		-> com.nr.sp.Hann
+
+sphcirc.h	-> com.nr.cg.Sphcirc
+sphfpt.h	-> NOT translated
+sphoot.h	-> NOT translated
+stattests.h	-> com.nr.stat.Stattests
+stepper.h	-> com.nr.ode.StepperBase
+stepperbs.h	-> com.nr.ode.StepperBS
+stepperdopr5.h	-> com.nr.ode.StepperDopr5
+stepperdopr853.h-> com.nr.ode.StepperDopr853
+stepperross.h	-> com.nr.ode.StepperRoss
+steppersie.h	-> com.nr.ode.StepperSie
+stepperstoerm.h	-> com.nr.ode.StepperStoerm
+stiel.h		-> com.nr.fi.Stiel
+stochsim.h	-> com.nr.ode.Stochsim
+stringalign.h	-> com.nr.min.StringAlign
+svd.h		-> com.nr.la.SVD
+svm.h		-> com.nr.ci.Svmlinkernel
+		-> com.nr.ci.Svmlinkernel
+		-> com.nr.ci.Svmpolykernel
+		-> com.nr.ci.Svmgausskernel
+		-> com.nr.ci.Svm
+
+toeplz.h	-> com.nr.la.Toepltz
+tridag.h	-> com.nr.la.Tridag
+vander.h	-> com.nr.la.Vander
+vegas.h		-> com.nr.ran.VEGAS
+voltra.h	-> com.nr.inv.Volterra
+voronoi.h	-> com.nr.cg.Voronoi
+		-> com.nr.cg.Voredge
+
+wavelet.h	-> com.nr.sp.Wavelet
+		-> com.nr.sp.Daub4
+		-> com.nr.sp.Daubs
+		-> com.nr.sp.Daub4i
+
+weights.h	-> com.nr.pde.Weights
+zrhqr.h		-> com.nr.root.Roots

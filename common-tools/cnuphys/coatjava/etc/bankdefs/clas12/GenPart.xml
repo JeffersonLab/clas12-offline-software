@@ -1,0 +1,13 @@
+<evio_dictionary>
+<bank name="GenPart" tag="20" info="Generated Particles">
+   <section name="true" tag="20" num="0" info="Generated Particles">
+       <column name="pid"   num="1"  type="int32"   info="ID of the particle"/>
+       <column name="px"    num="2"  type="float64"   info="x component of momentum Mev/c^2"/>
+       <column name="py"    num="3"  type="float64"   info="y component of momentum Mev/c^2"/>
+       <column name="pz"    num="4"  type="float64"   info="z component of momentum Mev/c^2"/>
+       <column name="vx"    num="5"  type="float64"   info="x position of vertex mm"/>
+       <column name="vy"    num="6"  type="float64"   info="y position of vertex mm"/>
+       <column name="vz"    num="7"  type="float64"   info="z position of vertex mm"/>
+   </section>
+</bank>
+</evio_dictionary>
