@@ -1,0 +1,15 @@
+/ButcherTableau.class
+/DefaultStopper.class
+/IAdvance.class
+/IDerivative.class
+/IRk4Listener.class
+/IStopper.class
+/RungeKutta4$1.class
+/RungeKutta4$2.class
+/RungeKutta4$3.class
+/RungeKutta4$4.class
+/RungeKutta4$ButcherTableauAdvance.class
+/RungeKutta4$HalfStepAdvance.class
+/RungeKutta4$UniformAdvance.class
+/RungeKutta4.class
+/RungeKuttaException.class

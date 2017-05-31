@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="tinyMS" default="jar" basedir=".">
+
+
+	<!-- ================================= 
+          target: jar 
+          jar up tiny MS jar          
+         ================================= -->
+	<target name="jar">
+		<echo>Building tinyMS jar</echo>
+		<jar destfile="lib/tinyms.jar" basedir="bin"></jar>
+	</target>
+
+</project>
+

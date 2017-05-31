@@ -1,0 +1,104 @@
+INSTALLATION
+
+Java Source Code Translations of Numerical Recipes C++ Source Code
+------------------------------------------------------------------
+ver. 3.04
+---------
+
+This directory tree contains translations to Java source code by Huang
+Wen Hui of copyrighted Numerical Recipes Third Edition C++ source
+code.  Please see the file LICENSE.txt for copyright and license
+information.  Your use of these files is subject to the terms given
+there, including the Disclaimer of Warranty.
+
+Note that these Java translations are not a supported product of
+Numerical Recipes Software, but are provided only as a convenience to
+our users.
+
+The file NAMES.txt gives the correspondence between C++ routines as
+printed in the Numerical Recipes Third Edition book or ebook and the
+Java packages and classes in this distribution.  For information about
+the book or ebook, see http://www.nr.com .
+
+All the translations are in the directory src/ .  If you want to
+discover on your own how to use them, just dig in!  However, for the
+rest of us, this distribution is packaged as a self-contained full
+test suite.  By running this test suite, you can verify that all the
+translations run correctly in your environment.  Then, you can examine
+any specific test routines in the test/ directory to learn how the
+translation's packages and classes may be invoked.
+
+PREREQUISITES
+
+To run the test suite you need:
+
+1. Java SE (Java Platform Standard Edition) ver. 6 or later.  If
+already installed, then the command "java -version" should produce
+output something like this:
+  java version "1.6.0_32"
+  Java(TM) SE Runtime Environment (build 1.6.0_32-b05)
+  Java HotSpot(TM) Client VM (build 20.7-b02, mixed mode, sharing)
+
+We downloaded Java SE from http://java.com/en/download/index.jsp
+
+2. JDK (Java SE Development Kit) ver. 6 or later.  If already
+installed, then the command "javac -version" should produce
+output something like this:
+ javac 1.6.0_32
+(Note, however, that you might need to add the jdk bin/ directory
+to your path for this check to work.  It is not necessary to do
+this to run the test suite.)
+ 
+We downloaded JDK from
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+3. Apache Ant, a test suite driver written in Java.  If already
+installed, then the command "ant -version" should produce output
+something like this:
+  Apache Ant(TM) version 1.8.3 compiled on February 26 2012
+You may need to add the ant bin/ directory to your path, and you may
+need to set the environment variables ANT_HOME to the top-level ant
+directory; and JAVA_HOME to the top-level JDK directory.  For
+example, on our Windows machine, the set command indicates:
+ANT_HOME=C:\ant
+JAVA_HOME=c:\Program Files\Java\jdk1.6.0_32
+
+We downloaded Ant from http://ant.apache.org/
+
+RUNNING THE TEST SUITE
+
+1. From the Java_304 directory, which contains the file build.xml,
+first try the command "ant clean".  You should get output like:
+  Buildfile: [your directory]/build.xml
+  clean:
+  BUILD SUCCESSFUL
+  Total time: 0 seconds
+
+2. Next try the command "ant build".  The output should resemble:
+
+Buildfile: [your directory]/build.xml
+init:
+    [mkdir] Created dir: [whatever]/Java_304/build/classes
+    [mkdir] Created dir: [whatever]/Java_304/build/test
+build:
+     [echo] NR3: [whatever]/Java_304/build.xml
+    [javac] Compiling 257 source files to [whatever]/Java_304/build/classes
+    [javac] Compiling 308 source files to [whatever]/Java_304/build/test
+BUILD SUCCESSFUL
+Total time: 3 seconds
+
+3. Now for the big test.  Try the command "ant AllTests".  You will
+get a lot of output, hopefully interspersed with many lines that say:
+    [junit] Passed
+These lines indicate that the individual test routines gave the
+expected results.  To see if *all* the test routines give expected
+results, locate the file junit/TEST-com.nr.test.AllTests.xml that was
+produced by AllTests.  Compare this to the provided file
+ExpectedAllTests.xml.  Your AllTests.xml file will have many extra
+irrelevant lines that have been deleted from ExpectedAllTests.xml, but
+all lines in common should agree.  (Note that end-of-line conventions
+may be different on different machines and are not significant.)
+
+If all of the above went well, then you are now ready to use the Java
+translations of the Numerical Recipes Third Edition routines in your
+own programming.

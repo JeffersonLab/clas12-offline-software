@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bCNU"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/magfield"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/numericalRec"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/snr"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/swimmer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bCNU3D"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JOGL"/>
+	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/exp4j"/>
+	<classpathentry kind="lib" path="/coatjava/lib/clas/coat-libs-3.0-SNAPSHOT.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
+	<classpathentry kind="lib" path="/coatjava/lib/clas/jcsg-0.3.2.jar"/>
+	<classpathentry kind="lib" path="/coatjava/lib/clas/vecmath-1.3.1-2.jar"/>
+	<classpathentry kind="output" path="cnuphys/bin"/>
+</classpath>
