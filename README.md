@@ -4,7 +4,7 @@ CLAS12 Offline Software (work in progress)
 ## Quick Start
 If you just want to use the software without modifying/building it, you can download the pre-built package from the [releases](https://github.com/JeffersonLab/clas12-offline-software/releases) page (download coatjava.tar.gz from the Downloads section).
 
-To build coatjava, your system must have Maven and Java JDK 1.8 or greater installed. If those requirements are met, then to build coatjava simply do:
+To build coatjava, your system must have Maven and Java JDK 1.8 or greater installed. Depending on your OS and Java installation, you may also have to install JavaFX (on some systems it will already be installed). If those requirements are met, then to build coatjava simply do:
 
 ```tcsh
 git clone git@github.com:JeffersonLab/clas12-offline-software.git
