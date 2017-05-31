@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="NR3">
+    <property environment="env"/>
+    <property name="junit.output.dir" value="junit"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.5"/>
+    <property name="source" value="1.5"/>
+
+    <path id="f2jutil.userclasspath">
+        <pathelement location="lib/f2jutil.jar"/>
+    </path>
+    <path id="JUnit 4.libraryclasspath">
+        <pathelement location="lib/junit.jar"/>
+
+    </path>
+    <path id="NR3.test">
+        <pathelement location="build/test"/>
+        <pathelement location="build/classes"/>
+        <path refid="f2jutil.userclasspath"/>
+        <path refid="JUnit 4.libraryclasspath"/>
+    </path>
+    <target name="init">
+        <mkdir dir="build/classes"/>
+        <mkdir dir="build/test"/>
+        <copy includeemptydirs="false" todir="build/classes">
+            <fileset dir="src">
+                <exclude name="**/*.cpp"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="build/test">
+            <fileset dir="test">
+                <exclude name="**/*.cpp"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="${junit.output.dir}"/>
+	<delete>
+    		<fileset dir="." includes="*.ps"/>
+    		<fileset dir="." includes="*.dat"/>
+    		<fileset dir="." includes="*.txt"/>
+  	</delete>
+    </target>
+
+    <target depends="init" name="build">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac includeantruntime="false" debug="false" debuglevel="${debuglevel}" destdir="build/classes" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="f2jutil.userclasspath"/>
+        </javac>
+        <javac includeantruntime="false" debug="false" debuglevel="${debuglevel}" destdir="build/test" source="${source}" target="${target}">
+            <src path="test"/>
+            <classpath refid="NR3.test"/>
+        </javac>
+    </target>
+
+    <target depends="build" name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/lib/nr3.jar" basedir="build/classes">
+        </jar>
+    </target>
+
+
+    <target depends="build" name="AllTests">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="com.nr.test.AllTests" todir="${junit.output.dir}"/>
+            <classpath refid="NR3.test"/>
+        </junit>
+    </target>
+	
+	<target name="clasJlib">
+		<echo>Building the jar for clasJlib</echo>
+		<property name="version" value="v3.3"/>
+		<property name="vdir" value="../clasJlib/numRec/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<echo>Building numRec jar</echo>
+		<jar destfile="${vdir}/numRec.jar" basedir="./bin"></jar>
+		<copy file="lib/f2jutil.jar" todir="${vdir}"/>
+	</target>
+
+</project>

@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>cnuphys</groupId>
+  <artifactId>cnuphys-clas12</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <repositories>
+      <repository>
+        <id>clas12maven</id>
+        <url>https://clasweb.jlab.org/clas12maven</url> 
+      </repository>
+  </repositories>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>2.8</version>
+      </extension>
+    </extensions>
+  </build>
+  
+  <distributionManagement>
+    <repository>
+      <id>ssh-clasweb</id>
+      <url>scpexe://clas12@jlabl1.jlab.org/group/clas/www/clasweb/html/clas12maven</url>
+    </repository>
+  </distributionManagement>
+
+<!-- project Dependencies -->
+<!-- BUILD section for creating one JAR -->
+</project>
