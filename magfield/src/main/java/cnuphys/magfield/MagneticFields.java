@@ -25,6 +25,8 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
+	private static String VERSION = "1.01";
+	
 	private boolean USE_BIG_TORUS = true;
 	
 	//initialize only once
@@ -85,6 +87,14 @@ public class MagneticFields {
 	//private constructor for singleton
 	private MagneticFields() {
 		
+	}
+	
+	/**
+	 * Get the version of the magfield package
+	 * @return the version of the magfield package
+	 */
+	public String getVersion() {
+		return VERSION;
 	}
 	
 	/**
@@ -659,6 +669,8 @@ public class MagneticFields {
 			_activeField = _solenoid;
 		}
 
+		
+		System.err.println("Magfield package version: " + VERSION);
 	}
 
 

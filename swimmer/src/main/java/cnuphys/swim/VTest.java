@@ -33,12 +33,12 @@ public class VTest {
 		System.out.println("[" + result[0]+ ", " + result[1] + ", " + result[2] + "]");
 		
 		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-		FieldProbe.cache(true);
+		FieldProbe.cache(false);
 		
 		DCSwimmer swim = new DCSwimmer();
-		swim.SetSwimParameters(0, 0., 0., 2*Math.sin(Math.toRadians(20.0)), 0, 2*Math.cos(Math.toRadians(20.0)), -1);
-	      double[]swimVal =swim.SwimToPlane(700);
-	        for(int i = 0; i<swimVal.length; i++)
+		swim.SetSwimParameters(0, 0, 0, -0.13, -0.62, 2.66, -1);
+        double[]swimVal =swim.SwimToPlane(400);
+        for(int i = 0; i<swimVal.length; i++)
 	            System.out.println("swimVal["+i+"]= "+swimVal[i]);
 	 
 	}
