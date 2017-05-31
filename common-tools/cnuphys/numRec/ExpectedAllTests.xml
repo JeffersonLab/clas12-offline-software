@@ -1,0 +1,1306 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="0" hostname="quartz" name="com.nr.test.AllTests" tests="306" time="31.328">
+  <system-out><![CDATA[Testing caldat
+Passed
+
+Testing flmoon
+Passed
+
+Testing julday
+Passed
+
+Testing Amebsa
+Passed
+
+Testing Amoeba, interface1
+Testing Amoeba, interface2
+Testing Amoeba, interface3
+Passed
+
+Testing Anneal
+Passed
+
+Testing Bracketmethod
+Passed
+
+Testing Brent
+Passed
+
+Testing Dbrent
+Passed
+
+Testing Frprmn
+Passed
+
+Testing Golden
+Passed
+
+Testing Linemethod
+Passed
+
+Testing Powell, interface1
+Testing Powell, interface2
+Passed
+
+Testing dfpmin
+Passed
+
+Testing dynpro
+Passed
+
+Testing fdfunc
+Passed
+
+Testing stringalign
+Passed
+
+Testing Jacobi
+Passed
+
+Testing Symmeig, interface1
+Testing Symmeig, interface2
+Passed
+
+Testing Unsymmeig, symmetric, interface1
+Testing Unsymmeig, non-symmetric, interface1
+Testing Unsymmeig, non-symmetric, interface2
+Passed
+
+Testing WrapVecDoub[], interface1
+Testing WrapVecDoub[], interface2
+Passed
+
+Testing cosft1
+Passed
+
+Testing cosft2
+Passed
+
+Testing four1
+Passed
+
+Testing fourfs
+Passed
+
+Testing fourn
+Passed
+
+Testing realft
+Passed
+
+Testing rlft3, interface1
+Testing rlft3, interface2
+Passed
+
+Testing sinft
+Passed
+
+Testing Daub4
+Passed
+
+Testing Daub4i
+Passed
+
+Testing Daubs
+Passed
+
+Testing Hann
+Passed
+
+Testing Slepian
+Passed
+
+Testing Spectolap
+Passed
+
+Testing Spectreg
+Passed
+
+Testing square
+Passed
+
+Testing bartlett
+Passed
+
+Testing convlv
+Passed
+
+Testing correl
+Passed
+
+Testing dftint
+Passed
+
+Testing evlmem
+Passed
+
+Testing fasper
+Passed
+
+Testing fixrts
+   Original roots outside unit circle: 3
+   Fixed roots outside unit circle: 0
+Passed
+
+Testing memcof
+Passed
+
+Testing period
+Passed
+
+Testing predic
+Passed
+
+Testing spread
+Passed
+
+Testing welch
+Passed
+
+Testing wt1
+Passed
+
+Testing wtn
+Passed
+
+Testing avevar
+Passed
+
+Testing chsone
+Passed
+
+Testing chstwo
+Passed
+
+Testing cntab
+Passed
+
+Testing crank
+Passed
+
+Testing ftest
+Passed
+
+Testing kendl1
+Passed
+
+Testing kendl2
+Passed
+
+Testing ks2d1s
+rms: 0.041838
+ave: 0.028519
+Passed
+
+Testing ks2d2s
+rms: 0.076418
+ave: 0.092870
+Passed
+
+Testing ksone
+Passed
+
+Testing kstwo
+Passed
+
+Testing moment
+Passed
+
+Testing pearsn
+Passed
+
+Testing quadct
+Passed
+
+Testing quadvl
+Passed
+
+Testing savgol
+Passed
+
+Testing spear
+Passed
+
+Testing tptest
+Passed
+
+Testing ttest
+Passed
+
+Testing tutest
+Passed
+
+Testing Fitab
+Passed
+
+Testing Fitexy
+Passed
+
+Testing Fitlin
+Passed
+
+Testing Fitmed
+Passed
+
+Testing Fitmrq
+Passed
+
+Testing Fitsvd
+Passed
+
+Testing fleg
+Passed
+
+Testing fpoly
+Passed
+
+Testing mcmc
+Passed
+
+Testing Gaumixmod
+0.009414 -0.001136
+-0.001136 0.010111
+
+0.000341 -0.000263
+-0.000263 0.037704
+
+0.018586 -0.018633
+-0.018633 0.019431
+
+0.023205 0.015524
+0.015524 0.026703
+
+Passed
+
+Testing HMM
+Fraction correct: 0.766000
+Fraction correct: 0.961000
+Fraction correct after Baum-Welch: 0.969000
+Passed
+
+Testing Kmeans
+Passed
+
+Testing Phylo_clc
+Passed
+
+Testing Phylo_nj
+Passed
+
+Testing Phylo_slc
+Passed
+
+Testing Phylo_upgma
+Passed
+
+Testing Phylo_wpgma
+Passed
+
+Testing Svm
+Errors: 0
+Errors: 0
+Errors: 0
+Errors: 502 505    502 502    477 466    404 402    402 398    598 589    502 502    
+Errors: 73 114    56 80    74 97    136 168    313 301    201 198    85 110    
+Errors: 501 507    139 136    36 52    39 53    220 222    166 182    325 337    
+Passed
+
+Testing markovgen
+Passed
+
+Testing newick
+Passed
+
+Testing StepperBS
+0.223891  0.223891
+0.576725  0.576725
+0.352834  0.352834
+0.128943  0.128943
+2.3337174137605388E-9
+Passed
+
+Testing StepperDopr5
+0.223891  0.223891
+0.576725  0.576725
+0.352834  0.352834
+0.128943  0.128943
+2.4780933377543946E-7
+Passed
+
+Testing StepperDopr853
+0.223891  0.223891
+0.576725  0.576725
+0.352834  0.352834
+0.128943  0.128943
+4.472173437131133E-9
+Passed
+
+Testing StepperRoss
+4.440892098500626E-16
+6.279185353896821E-7
+Passed
+
+Testing StepperSie
+1.7763568394002505E-15
+3.733150089058057E-7
+Passed
+
+Testing StepperStoerm
+0.135292  0.135292
+1.207424  1.207424
+7.015281244804328E-9
+0.535561  0.535561
+0.103997  0.103997
+1.0334004207912528E-9
+Passed
+
+Testing Stochsim
+Passed
+
+Testing rk4
+0.719622  0.719622
+0.470902  0.470902
+0.136564  0.136564
+0.025694  0.025695
+1.609359146920175E-7
+Passed
+
+Testing Shoot
+6.014266313941593
+6.140948990542279
+6.542495274390575
+30.436145386272454
+36.99626749742437
+131.56008091940691
+72.0
+110.13023799620377
+155.8887625168093
+Passed
+
+Testing Shootf
+6.014266313941586
+6.140948990565129
+6.54249527439058
+30.436145386283474
+36.99626750084795
+131.56008091940697
+72.0
+110.13023799620377
+155.8887625168093
+Passed
+
+Testing Solvde
+   m = 2  n = 2  c**2 = 0.100000  lamda = 6.014266
+   m = 2  n = 2  c**2 = 1.000000  lamda = 6.140949
+   m = 2  n = 2  c**2 = 4.000000  lamda = 6.542500
+   m = 2  n = 5  c**2 = 1.000000  lamda = 30.436321
+   m = 2  n = 5  c**2 = 16.000000  lamda = 36.999018
+   m = 4  n = 11  c**2 = -1.000000  lamda = 131.558982
+   m = 7  n = 8  c**2 = 0.000000  lamda = 72.000000
+   m = 9  n = 10  c**2 = 1.000000  lamda = 110.130260
+   m = 11  n = 12  c**2 = -1.000000  lamda = 155.888740
+Passed
+
+Testing sfroid
+
+ m = 3  n = 5  c**2 = 16.000000 lamda = 35.461008
+
+ m = 3  n = 5  c**2 = 20.000000 lamda = 36.771167
+
+ m = 3  n = 5  c**2 = -16.000000 lamda = 24.310977
+
+ m = 3  n = 5  c**2 = -20.000000 lamda = 22.893073
+Passed
+
+Testing Fred2
+3.4858097685730788E-6
+1.9146568499467886E-6
+1.1397578825178556E-6
+1.1427036394895396E-6
+Passed
+
+Testing Fredex
+1  0.000000  -0.063255
+2  0.080554  0.033699
+3  0.161107  0.109477
+4  0.241661  0.176189
+5  0.322215  0.237881
+6  0.402768  0.296796
+7  0.483322  0.354348
+8  0.563876  0.411460
+9  0.644429  0.468716
+10  0.724983  0.526425
+11  0.805537  0.584636
+12  0.886090  0.643137
+13  0.966644  0.701435
+14  1.047198  0.758731
+15  1.127751  0.813895
+16  1.208305  0.865458
+17  1.288859  0.911626
+18  1.369412  0.950341
+19  1.449966  0.979382
+20  1.530519  0.996528
+21  1.611073  0.999778
+22  1.691627  0.987590
+23  1.772180  0.959132
+24  1.852734  0.914471
+25  1.933288  0.854672
+26  2.013841  0.781766
+27  2.094395  0.698572
+28  2.174949  0.608409
+29  2.255502  0.514738
+30  2.336056  0.420807
+31  2.416610  0.329374
+32  2.497163  0.242517
+33  2.577717  0.161587
+34  2.658271  0.087246
+35  2.738824  0.019590
+36  2.819378  -0.041694
+37  2.899932  -0.097171
+38  2.980485  -0.147497
+39  3.061039  -0.193227
+40  3.141593  -0.234328
+Passed
+
+Testing Wwghts
+Passed
+
+Testing voltra
+8.715601893823921E-4
+0.0019996500826493513
+Passed
+
+Testing ADAT (and NRsparseMat)
+Passed
+
+Testing bandec and banmul
+Passed
+
+Testing cholesky
+Passed
+
+Testing ludcmp
+Passed
+
+Testing Linbcg (and NRsparseMat)
+Passed
+
+Testing NRsparseCol
+Passed
+
+Testing NRsparseMat
+Passed
+
+Testing QRdcmp
+Passed
+
+Testing SVD
+Passed
+
+Testing cyclic
+Passed
+
+Testing gaussj
+Passed
+
+Testing mprove
+Passed
+
+Testing toeplz
+Passed
+
+Testing tridag
+Passed
+
+Testing vander
+Passed
+
+Testing Mgfas
+max difference = 0.005255
+rms error = 0.000327
+Passed
+
+Testing Mglin
+Passed
+
+Testing sor
+Passed
+
+Testing weights
+Passed
+
+Testing Box
+Passed
+
+Testing Boxnode
+Passed
+
+Testing Circle
+Passed
+
+Testing Convexhull
+Passed
+
+Testing Delaunay
+   Random Point falls outside of tesselation
+   Random Point falls outside of tesselation
+Passed
+
+Testing KDtree
+Passed
+
+Testing Minspantree
+Passed
+
+Testing Nearpoints
+Passed
+
+Testing Point
+Passed
+
+Testing Qotree
+4
+0.343750 0.656250  0.250000
+0.656250 0.656250  0.250000
+0.656250 0.343750  0.250000
+0.343750 0.343750  0.250000
+Passed
+
+Testing Sphcirc
+Passed
+
+Testing Triel
+Passed
+
+Testing Voredge
+Passed
+
+Testing Voronoi
+Passed
+
+Testing circumcircle
+Passed
+
+Testing dist
+Passed
+
+Testing incircle
+Passed
+
+Testing ispolysimple (note: CW = Clockwise)
+Passed
+
+Testing polywind (note: CW = Clockwise)
+Passed
+
+Testing Arithcode
+Passed
+
+Testing Gray
+Testing invgray
+Passed
+
+Testing Huffcode
+Number of bits used: 2129
+Compression ratio: 1.442931
+Passed
+
+Testing Icrc
+42400
+0
+Passed
+
+Testing MParith
+  Test mpadd()
+  Test mpsub()
+  Test mpsad()
+  Test mpsmu()
+  Test mpsdv()
+  Test mpneg()
+  Test mpmov()
+  Test mplsh()
+  Test mpmul()
+  Test mpinv()
+  Test mpdiv()
+  Test mpsqrt()
+  Test mp2dfr()
+  Test mppi()
+Passed
+
+Testing Machar
+Passed
+
+Testing PSpage
+Passed
+
+Testing PSplot
+Passed
+
+Testing decchk
+Passed
+
+Testing BaryRat_interp
+     BaryRat_interp: Order: 0  Max. error:    0.003262
+     BaryRat_interp: Order: 1  Max. error:    0.000237
+     BaryRat_interp: Order: 2  Max. error:    0.000024
+     BaryRat_interp: Order: 3  Max. error:    0.000017
+     BaryRat_interp: Order: 4  Max. error:    0.000002
+     BaryRat_interp: Order: 5  Max. error:    0.000002
+Passed
+
+Testing Bilin_interp
+     Bilin_interp: Max. actual error:    0.000000
+Passed
+
+Testing Curve_interp
+     Discrepancy (straight line): 0.000000
+     Discrepancy (circle): 0.000019
+Passed
+
+Testing Krig (and Powvargram)
+     Discrepancy: 0.004491
+Passed
+
+Laplace_interp
+     Initial discrepancy: 1.00000e+99
+     Final discrepancy: 0.00256894
+Passed
+
+Testing Linear_interp
+Passed
+
+Testing Poly2D_interp
+Passed
+
+Testing Poly_interp
+     Poly_interp: Max. estimated error: 0.006325
+     Poly_interp: Max. actual error:    0.000249
+Passed
+
+Testing RBF_interp with multiquadric function
+     Discrepancy: 0.004979
+Testing RBF_interp with thinplate function
+     Discrepancy: 0.021131
+Testing RBF_interp with gauss function
+     Discrepancy: 0.000030
+Testing RBF_interp with inversemultiquadric function
+     Discrepancy: 0.013370
+Testing RBF_interp with multiquadric function
+     Discrepancy: 0.002277
+Testing RBF_interp with thinplate function
+     Discrepancy: 0.003661
+Testing RBF_interp with gauss function
+     Discrepancy: 0.000000
+Testing RBF_interp with inversemultiquadric function
+     Discrepancy: 0.004639
+Passed
+
+Testing Rat_interp
+     Rat_interp: Max. estimated error: 0.000012
+     Rat_interp: Max. actual error:    0.000002
+Passed
+
+Testing Shep_interp
+     Discrepancy: 0.022569
+Passed
+
+Testing Spline2D_interp
+Passed
+
+Testing Spline_interp
+     Spline_interp: Max. actual error:    0.000002
+Passed
+
+Testing bcucof and bcuint
+Passed
+
+Testing polcoe
+     polcoe: Max. actual error:    0.000000
+Passed
+
+Testing polcof
+     polcof: Max. actual error:    0.000000
+Passed
+
+Testing Adapt
+Adapt: Maximum discrepancy = 0.000000
+Passed
+
+Testing Stiel
+Passed
+
+Testing DErule
+DErule,case 1: Maximum discrepancy = 0.000000
+DErule,case 2: Maximum discrepancy = 0.000000
+Passed
+
+Testing gaucof
+Passed
+
+Testing gauher
+gauher: Maximum discrepancy = 3.10862e-15
+Passed
+
+Testing gaujac
+gaujac: Maximum discrepancy = 0.000000
+Passed
+
+Testing gaulag
+gaulag: Maximum discrepancy = 0.000000
+Passed
+
+Testing gauleg
+gauleg: Maximum discrepancy = 0.000000
+Passed
+
+Testing lobatto
+Passed
+
+Testing midexp
+midexp: Maximum discrepancy = 0.000001
+Passed
+
+Testing midinf
+midinf,case 1: Maximum discrepancy = 0.000001
+midinf,case 2: Maximum discrepancy = 0.000001
+Passed
+
+Testing midpnt
+midpnt: Maximum discrepancy = 0.000000
+Passed
+
+Testing Midsql
+Midsql: Maximum discrepancy = 0.000000
+Passed
+
+Testing midsqu
+midsqu: Maximum discrepancy = 0.000000
+Passed
+
+Testing qgaus
+qgaus: Maximum discrepancy = 0.000000
+Passed
+
+Testing qromb
+qromb: Maximum discrepancy = 0.000000
+Passed
+
+Testing qromo
+qromo: Maximum discrepancy = 0.000000
+Passed
+
+Testing qsimp
+qsimp: Maximum discrepancy = 0.000000
+Passed
+
+Testing qtrap
+qtrap: Maximum discrepancy = 0.000000
+Passed
+
+Testing quad3d
+Passed
+
+Testing radau
+Passed
+
+Testing trapzd
+trapzd: Maximum discrepancy = 0.000000
+Passed
+
+Testing Chebyshev (eval)
+Chebyshev (eval): Maximum discrepancy = 0.000000
+Testing Chebyshev (polycofs)
+Chebyshev (polycofs): Maximum discrepancy = 0.000000
+Testing Chebyshev (derivative)
+Chebyshev (derivative): Maximum discrepancy = 0.000001
+Testing Chebyshev (integral)
+Chebyshev (integral): Maximum discrepancy = 0.000001
+Testing Chebyshev (construct from polynomial)
+Chebyshev (construct from polynomial): Maximum discrepancy = 0.000000
+Passed
+
+Testing Epsalg
+Epsalg: Maximum discrepancy = 0.000000
+Passed
+
+Testing Eulsum
+Eulsum: Maximum discrepancy = 0.000000
+Passed
+
+Testing Levin
+Levin: Maximum discrepancy = 0.000000
+Passed
+
+Testing Poly
+Poly: Maximum discrepancy = 0.000000
+Passed
+
+Testing Ratfn: constructor #1
+Ratfn: Maximum discrepancy = 0.000000
+Testing Ratfn: constructor #2
+Ratfn: Maximum discrepancy = 0.000000
+Passed
+
+Testing ddpoly
+ddpoly: Maximum discrepancy = 0.000000
+Passed
+
+Testing dfridr
+dfridr (function): Maximum discrepancy = 0.000000
+dfridr (functor): Maximum discrepancy = 0.000000
+Passed
+
+Testing ipcshft
+ipcshft: Maximum discrepancy = 0.000000
+Passed
+
+Testing levex
+0.525533   0.525533
+0.381227   0.432383
+0.442571   0.420979
+0.407200   0.421492
+0.430808   0.421050
+0.413649   0.421025
+0.426834   0.421024
+0.416298   0.421024
+0.424966   0.421024
+0.417673   0.421024
+0.423919   0.421024
+0.418491   0.421024
+0.423265   0.421024
+Passed
+
+Testing pade
+pade: Maximum error of Pade approximant = 0.000000
+pade: Maximum discrepancy of power series = 33.383376
+Passed
+
+Testing pcshft
+pcshft: Maximum discrepancy = 0.000000
+Passed
+
+Testing poldiv
+poldiv: Maximum discrepancy in quotient = 0.000000
+poldiv: Maximum discrepancy in remainder = 0.000000
+Passed
+
+Testing ratlsq
+ratlsq: Maximum error of ratlsq rational function approximation = 0.000000
+ratlsq: Reported maximum absolute deviation from ratlsq = 0.000000
+Passed
+
+Testing Bessel (besseljy)
+Testing Bessel (besseljy),jnu
+Bessel (besseljy),jnu: Maximum discrepancy = 0.000000
+Testing Bessel (besseljy),ynu
+Bessel (besseljy),ynu: Maximum discrepancy = 0.000000
+Testing Bessel (besselik),inu
+Bessel (besselik),inu: Maximum discrepancy = 0.000000
+Testing Bessel (besselik),knu
+Bessel (besselik),knu: Maximum discrepancy = 0.000000
+Passed
+
+Testing Bessik (i0)
+Testing Bessik (i1)
+Testing Bessik (k0)
+Testing Bessik (k1)
+Testing Bessik (in)
+Testing Bessik (kn)
+Passed
+
+Testing Bessjy (j0)
+Bessjy: Maximum discrepancy = 0.000000
+Testing Bessjy (j1)
+Bessjy: Maximum discrepancy = 0.000000
+Testing Bessjy (y0)
+Bessjy: Maximum discrepancy = 0.000000
+Testing Bessjy (y1)
+Bessjy: Maximum discrepancy = 0.000000
+Testing Bessjy (jn)
+Testing Bessjy (yn)
+Passed
+
+Testing Betadist
+Passed
+
+Testing Binomialdist
+Passed
+
+Testing Cauchydist
+Passed
+
+Testing Chisqdist
+Passed
+
+Testing Erf
+Erf, erf(): Maximum discrepancy = 0.000000
+Erf, erfc(): Maximum discrepancy = 0.000000
+Erf, inverf(): Maximum discrepancy = 0.000000
+Erf, inverfc(): Maximum discrepancy = 0.000000
+Passed
+
+Testing Expondist
+Passed
+
+Testing Fdist
+Passed
+
+Testing Fermi
+Fermi: Maximum discrepancy = 0.000000
+Passed
+
+Testing Gamma (gammp, gammq, gser, gcf, invgammp)
+Gamma.gammp: Maximum discrepancy = 0.000000
+Gamma.gammq: Maximum discrepancy = 0.000000
+Gamma.invgammp: Maximum discrepancy = 0.000000
+Gamma.gammp from gammpapprox: Maximum discrepancy = 0.000000
+Gamma.gammq from gammpapprox: Maximum discrepancy = 0.000000
+Gamma.invgammp: Maximum discrepancy = 0.000000
+Passed
+
+Testing Gammadist
+Passed
+
+Testing KSdist
+Passed
+
+Testing Logisticdist
+Passed
+
+Testing Lognormaldist
+Passed
+
+Testing Normaldist
+Passed
+
+Testing Poissondist
+Passed
+
+Testing Studenttdist
+Passed
+
+Testing beta
+beta: Maximum fractional discrepancy = 0.000000
+Passed
+
+Testing betai, invbetai
+betai: Maximum discrepancy = 0.000000
+Passed
+
+Testing bico
+Passed
+
+Testing cisi
+cisi: Maximum discrepancy of cosine integral = 0.000000
+cisi: Maximum discrepancy of sine integral = 0.000000
+Passed
+
+Testing dawson
+dawson: Maximum discrepancy = 0.000000
+Passed
+
+Testing ei
+ei: Maximum fractional discrepancy = 0.000000
+Passed
+
+Testing elle
+Passed
+
+Testing ellf
+Passed
+
+Testing ellpi
+Passed
+
+Testing erfcc
+erfcc: Maximum discrepancy = 0.000000
+Passed
+
+Testing expint
+expint: Maximum discrepancy = 0.000000
+Passed
+
+Testing factln
+factln: Maximum discrepancy = 0.000000
+Passed
+
+Testing factrl
+factrl: Maximum fractional discrepancy = 0.000000
+Passed
+
+Testing frenel
+frenel: Maximum discrepancy in C(x) = 0.000000
+frenel: Maximum discrepancy in S(x) = 0.000000
+Passed
+
+Testing gammln
+gammln: Maximum discrepancy = 0.000000
+Passed
+
+Testing hypgeo
+Passed
+
+Testing invxlogx
+Passed
+
+Testing plegendre
+plegendre: Maximum discrepancy = 0.000000
+Passed
+
+Testing rc
+rc: Maximum discrepancy = 0.000000
+rc: Fingerprint discrepancy = 0.000000
+Passed
+
+Testing rd
+rd: Maximum discrepancy = 0.000000
+rd: Fingerprint discrepancy = 0.000000
+Passed
+
+Testing rf
+rf: Rule 1, maximum discrepancy = 0.000000
+rf: Rule 2, maximum discrepancy = 0.000000
+rf: Rule 3: maximum discrepancy = 0.000000
+rf: maximum discrepance with swap of x,y = 0.000000
+rf: maximum discrepance with swap of y,z = 0.000000
+rf: Fingerprint discrepancy = 0.000000
+Passed
+
+Testing rj
+rj: Maximum discrepancy = 0.000000
+rj: maximum discrepance with swap of x,y = 0.000000
+rj: maximum discrepance with swap of y,z = 0.000000
+rj: maximum discrepance with x,y,p symmetry = 0.000000
+rj: maximum discrepance with y,z,p symmetry = 0.000000
+rj: Fingerprint discrepancy = 0.000000
+Passed
+
+Testing sncndn
+test1: Maximum discrepancy = 0.000000
+test2: Maximum discrepancy = 0.000000
+sncndn (sn): Maximum discrepancy = 0.000000
+sncndn (cn): Maximum discrepancy = 0.000000
+sncndn (dn): Maximum discrepancy = 0.000000
+Passed
+
+Testing Binomialdev
+     chisq,dev(): 19.142978
+  prob: 0.447699
+Passed
+
+Testing Cauchydev
+     chisq,dev(): 951.280764  prob: 0.857709
+Passed
+
+Testing Expondev
+     chisq,dev(): 889.812951  prob: 0.994179
+Passed
+
+Testing Gammadev
+     chisq,dev(): 994.261078  prob: 0.536359
+Passed
+
+Testing Hash
+Passed
+
+Testing Hashtable
+Passed
+
+Testing Logisticdev
+     chisq,dev(): 972.506416  prob: 0.720082
+Passed
+
+Testing MCintegrate
+Passed
+
+Testing Mhash
+Passed
+
+Testing Multinormaldev
+Passed
+
+Testing Normaldev
+     chisq,dev(): 1066.679284  prob: 0.067321
+Passed
+
+Testing Normaldev_BM
+     chisq,dev(): 993.558085  prob: 0.542624
+Passed
+
+Testing Poissondev
+     chisq,dev(): 12.174036  prob: 0.203675
+Passed
+
+Testing Primpolytest
+Passed
+
+Testing Ran
+     chisq,int32(): 968.412000  prob: 0.750628
+     chisq,int64(): 954.074000  prob: 0.842691
+     chisq,doub(): 961.996000
+  prob: 0.794841
+Passed
+
+Testing Ranbyte
+     chisq,int8(): 248.320000  prob: 0.605969
+     chisq,int32(): 240.573440  prob: 0.732902
+     chisq,doub(): 207.324160  prob: 0.987100
+Passed
+
+Testing Ranfib
+     chisq,int32(): 1016.500000  prob: 0.343055
+     chisq,doub(): 960.160000  prob: 0.806613
+Passed
+
+Testing Ranhash
+     chisq,int32(): 1029.480000  prob: 0.437351
+     chisq,int32(): 1036.080000  prob: 0.381070
+     chisq,int32(): 953.520000  prob: 0.940319
+Passed
+
+Testing Ranlim32
+     chisq,int32(): 1049.300000  prob: 0.130972
+     chisq,int32(): 968.340000  prob: 0.751150
+Passed
+
+Testing Ranq1
+     chisq,int32(): 1009.820000  prob: 0.398938
+     chisq,int64(): 1029.960000  prob: 0.241813
+     chisq,doub(): 1057.520000  prob: 0.096917
+Passed
+
+Testing Ranq2
+     chisq,int32(): 1031.380000  prob: 0.232208
+     chisq,int32(): 1016.180000  prob: 0.345661
+     chisq,int32(): 959.840000  prob: 0.808623
+Passed
+
+Testing hashall
+     chisq,int32(): 989.640000  prob: 0.767584
+Passed
+
+Testing mcmc
+Passed
+
+Testing miser
+Passed
+
+Testing psdes
+     chisq,int32(): 1013.680000  prob: 0.576099
+Passed
+
+Testing sobseq
+Passed
+
+Testing vegas
+Passed
+
+Testing Heapselect
+Passed
+
+Testing IQagent
+Passed
+
+Testing Indexx
+Passed
+
+Testing eclass
+Passed
+
+Testing eclazz
+Passed
+
+Testing hpsort
+Passed
+
+Testing piksr2
+Passed
+
+Testing piksrt
+Passed
+
+Testing select
+Passed
+
+Testing selip
+Passed
+
+Testing shell
+Passed
+
+Testing sort
+Passed
+
+Testing sort2
+Passed
+
+Testing broydn
+broydn: Maximum discrepancy = 0.000000
+Passed
+
+Testing laguer
+laguer: Maximum discrepancy = 0.000000
+Passed
+
+Testing lnsrch
+lnsrch: Maximum discrepancy = 0.000000
+Passed
+
+Testing mnewt
+mnewt: Maximum discrepancy = 0.000000
+Passed
+
+Testing newt
+newt: Maximum discrepancy = 0.000000
+Passed
+
+Testing qroot
+qroot: Discrepancy = 0.000000
+qroot: Discrepancy = 0.000000
+Passed
+
+Testing rtbis
+rtbis: Maximum discrepancy = 0.000000
+Passed
+
+Testing rtflsp
+rtflsp: Maximum discrepancy = 0.000000
+Passed
+
+Testing rtnewt
+rtnewt: Maximum discrepancy = 0.000000
+Passed
+
+Testing rtsafe
+rtsafe: Maximum discrepancy = 0.000000
+Passed
+
+Testing rtsec
+rtsec: Maximum discrepancy = 0.000000
+Passed
+
+Testing zbrac
+Passed
+
+Testing zbrak
+Passed
+
+Testing zbrent
+zbrent: Maximum discrepancy = 0.000000
+Passed
+
+Testing zrhqr
+zrhqr: Maximum discrepancy = 0.000000
+Passed
+
+Testing zriddr
+zriddr: Maximum discrepancy = 0.000000
+Passed
+
+Testing zroots
+zroots: Maximum discrepancy = 0.000000
+Passed
+
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

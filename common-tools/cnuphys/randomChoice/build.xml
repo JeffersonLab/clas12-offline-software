@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="randomChoice" default="export" basedir=".">
+	<!-- export -->
+	<target name="export">
+		<echo>${user.dir}</echo>
+		<property name="destdir" value="${user.home}/rcbuild"/>		
+		
+		<!-- deleted existing dir -->
+		<delete dir="${destdir}"/>
+		
+		<!-- copying  necessary stuff-->
+		
+		
+		<!-- the rc jar-->
+		<jar destfile="${destdir}/rc.jar">
+			<fileset dir="./bin">
+				<include name="**/*.class"/>
+			</fileset>
+			
+			
+			<!-- images -->
+			<fileset dir=".">
+				<include name="**/*png"/>
+			</fileset>
+						
+			<!-- make it executable -->
+		    <manifest>
+		        <attribute name="Main-Class" value="randomChoice.RandomChoice"/>
+		    </manifest>
+		</jar>
+		
+
+
+	</target>
+	
+</project>
+
