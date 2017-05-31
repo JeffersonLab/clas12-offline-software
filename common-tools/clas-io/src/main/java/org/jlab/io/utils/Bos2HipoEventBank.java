@@ -52,11 +52,12 @@ public class Bos2HipoEventBank {
             bankHEVT.setInt("nevt", 0, this.bosDataBanks.get("HEVT").getInt("NEVENT")[0]);
             bankHEVT.setFloat("stt" , 0, this.bosDataBanks.get("HEVT").getFloat("STT")[0]);
             bankHEVT.setFloat("fc"  , 0, this.bosDataBanks.get("HEVT").getFloat("FC")[0]);
-            int evtclass = this.bosDataBanks.get("HEVT").getInt("EVTCLASS")[0];
+            bankHEVT.setFloat("fcg" , 0, this.bosDataBanks.get("HEVT").getFloat("FCG")[0]);
+
+            int evtclass = this.bosDataBanks.get("HEVT").getInt("TRGPRS")[0];
             byte ihelicity = 0;
             if(evtclass<0) ihelicity = 1;
             bankHEVT.setByte("helicity" , 0, ihelicity);
-            bankHEVT.setFloat("fcg" , 0, this.bosDataBanks.get("HEVT").getFloat("FCG")[0]);
 
             // FBPM bank for raster
             if(this.bosDataBanks.containsKey("FBPM")){
@@ -223,8 +224,8 @@ public class Bos2HipoEventBank {
         }
 
         if(bosEvent.hasBank("HEVT")){
-            BosDataBank bHEAD = (BosDataBank) bosEvent.getBank("HEVT");
-            this.bosDataBanks.put(bHEAD.getDescriptor().getName(), bHEAD);
+            BosDataBank bHEVT = (BosDataBank) bosEvent.getBank("HEVT");
+            this.bosDataBanks.put(bHEVT.getDescriptor().getName(), bHEVT);
         }
         
         if(bosEvent.hasBank("EVNT")){
