@@ -1,5 +1,0 @@
----
-services:
-  - class: org.jlab.service.ec.ECEngine
-    name: EC
-
