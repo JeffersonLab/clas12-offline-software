@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="magfield" default="jar" basedir=".">
+
+
+	<!-- ================================= 
+          target: jar 
+          jar up images, etc             
+         ================================= -->
+	<target name="jar">
+		<echo>Building the mag field jar</echo>
+		<property name="version" value="v1.0"/>
+		<property name="vdir" value="../clasJlib/magfield/${version}/lib"/>
+		<mkdir dir="${vdir}" />
+		<echo>Building magfield jar</echo>
+		<jar destfile="${vdir}/magfield.jar" basedir="./bin"></jar>		
+	</target>
+
+</project>
+
