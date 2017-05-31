@@ -887,13 +887,15 @@ public class MagneticFields {
 	protected void changedScale(MagneticField field) {
 		if (field != null) {
 			if (field == _torus) {
-				_scaleTorusPanel._textField.setText(
-						String.format("%7.3f", field.getScaleFactor()));
+				if (_scaleTorusPanel != null) {
+					_scaleTorusPanel._textField.setText(String.format("%7.3f", field.getScaleFactor()));
+				}
 				notifyListeners();
 			}
 			else if (field == _solenoid) {
-				_scaleSolenoidPanel._textField.setText(
-						String.format("%7.3f", field.getScaleFactor()));
+				if (_scaleTorusPanel != null) {
+					_scaleSolenoidPanel._textField.setText(String.format("%7.3f", field.getScaleFactor()));
+				}
 				notifyListeners();
 			}
 		}
