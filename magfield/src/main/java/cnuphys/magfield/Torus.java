@@ -106,17 +106,24 @@ public class Torus extends MagneticField {
 		}
 
 		// rotate onto to proper sector
+		
+		int sector = getSector(phi);
 
-		double diff = (phi - relativePhi);
-		if (diff > 0.001) {
-			double rdiff = Math.toRadians(diff);
-			double cos = Math.cos(rdiff);
-			double sin = Math.sin(rdiff);
+		if (sector > 1) {
+	//	double diff = (phi - relativePhi);
+	//	if (diff > 0.001) {
+	//		System.err.println("Diff: " + diff + "  sector: " + sector);
+	//		double rdiff = Math.toRadians(diff);
+	//		double cos = Math.cos(rdiff);
+	//		double sin = Math.sin(rdiff);
+			double cos = cosSect[sector];
+			double sin = sinSect[sector];
 			double bx = result[X];
 			double by = result[Y];
 			result[X] = (float) (bx * cos - by * sin);
 			result[Y] = (float) (bx * sin + by * cos);
 		}
+		
 
 
 		result[X] *= _scaleFactor;
