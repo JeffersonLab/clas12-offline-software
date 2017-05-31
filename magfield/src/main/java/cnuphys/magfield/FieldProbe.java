@@ -40,7 +40,7 @@ public abstract class FieldProbe implements IField {
 	}
 
 	@Override
-	public final void field(float x, float y, float z, float result[]) {
+	public void field(float x, float y, float z, float result[]) {
 		float rho = (float) Math.sqrt(x * x + y * y);
 		float phi = (float) MagneticField.atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
@@ -96,7 +96,8 @@ public abstract class FieldProbe implements IField {
 		
 		if (field != null) {
 
-//			System.err.println("Will create probe for " + field.getName());
+			System.err.println("Will create probe for " + field.getName());
+//			(new Throwable()).printStackTrace();
 			
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus)field);
@@ -104,11 +105,13 @@ public abstract class FieldProbe implements IField {
 			else if (field instanceof Solenoid) {
 				return new SolenoidProbe((Solenoid)field);
 			}
-			else if (field instanceof CompositeField) {
-				return new CompositeProbe((CompositeField)field);
-			}
 			else if (field instanceof RotatedCompositeField) {
+				System.err.println("Creating rotated composite probe");
 				return new RotatedCompositeProbe((RotatedCompositeField)field);
+			}
+			else if (field instanceof CompositeField) {
+				System.err.println("Creating composite probe");
+				return new CompositeProbe((CompositeField)field);
 			}
 			else {
 				System.err.println("WARNING: cannot create probe for " + field.getName());

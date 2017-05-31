@@ -32,6 +32,9 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	 */
 	@Override
 	public void field(float x, float y, float z, float[] result) {
+		System.err.println("DUDETTE " );
+
+
 		float bx = 0, by = 0, bz = 0;
 		for (IField field : this) {
 			field.field(x, y, z, result);
@@ -120,6 +123,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 
 	@Override
 	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
+
 		float bx = 0, by = 0, bz = 0;
 		for (IField field : this) {
 			field.fieldCylindrical(phi, rho, z, result);

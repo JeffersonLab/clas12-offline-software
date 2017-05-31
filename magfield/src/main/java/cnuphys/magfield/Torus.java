@@ -62,6 +62,8 @@ public class Torus extends MagneticField {
 		}
 		return relativePhi;
 	}
+	
+
 
 	/**
 	 * Get the field by trilinear interpolation.
@@ -104,35 +106,18 @@ public class Torus extends MagneticField {
 		}
 
 		// rotate onto to proper sector
-		
-		double bx = result[X];
-		double by = result[Y];
 
-		int sector = getSector(phi);
-		switch (sector) {
-		case 2:
-			result[X] = (float) (bx * 0.5 - by * ROOT3OVER2);
-			result[Y] = (float) (bx * ROOT3OVER2 + by * 0.5);
-			break;
-		case 3:
-			result[X] = (float) (-bx * 0.5 - by * ROOT3OVER2);
-			result[Y] = (float) (bx * ROOT3OVER2 - by * 0.5);
-			break;
-		case 4:
-			result[X] = (float) (-bx);
-			result[Y] = (float) (-by);
-			break;
-		case 5:
-			result[X] = (float) (-bx * 0.5 + by * ROOT3OVER2);
-			result[Y] = (float) (-bx * ROOT3OVER2 - by * 0.5);
-			break;
-		case 6:
-			result[X] = (float) (bx * 0.5 + by * ROOT3OVER2);
-			result[Y] = (float) (-bx * ROOT3OVER2 + by * 0.5);
-			break;
-		default:
-			break;
+		double diff = (phi - relativePhi);
+		if (diff > 0.001) {
+			double rdiff = Math.toRadians(diff);
+			double cos = Math.cos(rdiff);
+			double sin = Math.sin(rdiff);
+			double bx = result[X];
+			double by = result[Y];
+			result[X] = (float) (bx * cos - by * sin);
+			result[Y] = (float) (bx * sin + by * cos);
 		}
+
 
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;

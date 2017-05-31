@@ -44,6 +44,7 @@ public final class Solenoid extends MagneticField {
 		// is the field ready to use?
 		return solenoid;
 	}
+
 	
 	/**
 	 * Get the field by trilinear interpolation.
@@ -61,7 +62,7 @@ public final class Solenoid extends MagneticField {
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	public void fieldCylindrical(SolenoidProbe probe, double phi, double rho, double z, float result[]) {
-
+		
 		if (isZeroField()) {
 			result[X] = 0f;
 			result[Y] = 0f;
@@ -81,45 +82,16 @@ public final class Solenoid extends MagneticField {
 		}
 
 		// rotate onto to proper sector
-		double bphi = result[0];
-		double brho = result[1];
-
-		int sector = getSector(phi);
-		switch (sector) {
-		case 2:
-			result[X] = (float) (brho * 0.5 - bphi * ROOT3OVER2);
-			result[Y] = (float) (brho * ROOT3OVER2 + bphi * 0.5);
-			break;
-		case 3:
-			result[X] = (float) (-brho * 0.5 - bphi * ROOT3OVER2);
-			result[Y] = (float) (brho * ROOT3OVER2 - bphi * 0.5);
-			break;
-		case 4:
-			result[X] = (float) (-brho);
-			result[Y] = (float) (-bphi);
-			break;
-		case 5:
-			result[X] = (float) (-brho * 0.5 + bphi * ROOT3OVER2);
-			result[Y] = (float) (-brho * ROOT3OVER2 - bphi * 0.5);
-			break;
-		case 6:
-			result[X] = (float) (brho * 0.5 + bphi * ROOT3OVER2);
-			result[Y] = (float) (-brho * ROOT3OVER2 + bphi * 0.5);
-			break;
-		default:
-			break;
+		
+		if (phi > 0.001) {
+			double rphi = Math.toRadians(phi);
+			double cos = MagneticField.cos(rphi);
+			double sin = MagneticField.sin(rphi);
+			double bphi = result[0];
+			double brho = result[1];
+			result[X] = (float) (brho * cos - bphi * sin);
+			result[Y] = (float) (brho * sin + bphi * cos);
 		}
-
-		//
-		// if (phi > 0.001) {
-		// double rphi = Math.toRadians(phi);
-		// double cos = Math.cos(rphi);
-		// double sin = Math.sin(rphi);
-		// double bphi = result[0];
-		// double brho = result[1];
-		// result[X] = (float) (brho * cos - bphi * sin);
-		// result[Y] = (float) (brho * sin + bphi * cos);
-		// }
 
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;

@@ -55,7 +55,7 @@ public final class RotatedCompositeField extends CompositeField {
 	 */
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
-
+		
 		float x = xs * _cos - zs * _sin;
 		float y = ys;
 		float z = zs * _cos + xs * _sin;
@@ -80,7 +80,7 @@ public final class RotatedCompositeField extends CompositeField {
 		phi = Math.toRadians(phi);
 		double x = rho*Math.cos(phi);
 		double y = rho*Math.sin(phi);
-//		System.err.println("Cannot use cylindrical call for rotated field");
+		System.err.println("Cannot use cylindrical call for rotated field");
 		field((float)x, (float)y, (float)z, result);
 	}
 
