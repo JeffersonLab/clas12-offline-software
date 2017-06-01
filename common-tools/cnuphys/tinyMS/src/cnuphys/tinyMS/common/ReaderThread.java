@@ -7,8 +7,8 @@ import cnuphys.tinyMS.message.IMessenger;
 import cnuphys.tinyMS.message.Message;
 
 /**
- * This thread uses a IMessenger object to read messages, and then places
- * the messages on the IMessenger's inbound queue.
+ * This thread uses a IMessenger object to read messages, and then places the
+ * messages on the IMessenger's inbound queue.
  * 
  * @author heddle
  * 
@@ -22,14 +22,15 @@ public class ReaderThread extends Thread {
 	// used to kill the thread
 	private volatile boolean _running = false;
 
-	//the socket
+	// the socket
 	private Socket _socket;
 
 	/**
-	 * Create a reader thread. This thread will be used to read messages off
-	 * a message queue.
+	 * Create a reader thread. This thread will be used to read messages off a
+	 * message queue.
 	 * 
-	 * @param socket the underlying socket
+	 * @param socket
+	 *            the underlying socket
 	 * @param messenger
 	 *            the messenger with the queue
 	 * @throws IOException

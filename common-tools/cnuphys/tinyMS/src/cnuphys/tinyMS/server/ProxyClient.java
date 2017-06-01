@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,11 +21,11 @@ import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.Messenger;
 
 public class ProxyClient extends Messenger {
-	
-	//environmental strings sent from the client at handshake
+
+	// environmental strings sent from the client at handshake
 	private String[] _envStr;
-	
-	//time in seconds that a client has to get itself verified
+
+	// time in seconds that a client has to get itself verified
 	private static final int VERIFY_SECONDS = 20;
 
 	// the next available remote client Id. These are assigned
@@ -37,37 +38,37 @@ public class ProxyClient extends Messenger {
 
 	// the underlying socket
 	private Socket _socket;
-	
-	//the stream used to write messages to the real client
+
+	// the stream used to write messages to the real client
 	private DataOutputStream _outputStream;
 
-	//the stream used to read messages from the real client
+	// the stream used to read messages from the real client
 	private DataInputStream _inputStream;
-	
-	//if true, the client was verified by sending
-	//the required handshake.
+
+	// if true, the client was verified by sending
+	// the required handshake.
 	private boolean _verified;
-	
+
 	// the reader thread for reading messages from the real client
 	// the messages are placed in the server's shared inbound message
 	// queue
 	private ReaderThread _reader;
-	
+
 	// the writer thread for writing messages to the real client
 	private WriterThread _writer;
-	
-	//outbound queue where server will place messages
-	//ready for transmission. The writer thread will dequeue
-	//them and send them to the real client
+
+	// outbound queue where server will place messages
+	// ready for transmission. The writer thread will dequeue
+	// them and send them to the real client
 	private MessageQueue _outboundQueue;
 
 	// the server
 	private TinyMessageServer _server;
-	
-	//the system time of the last ping from this client
+
+	// the system time of the last ping from this client
 	private long _lastPing = -1;
-	
-	//to avoid multiple closings
+
+	// to avoid multiple closings
 	private boolean _alreadyClosed = false;
 
 	/**
@@ -79,51 +80,51 @@ public class ProxyClient extends Messenger {
 	public ProxyClient(Socket socket) throws IOException {
 		_socket = socket;
 		_id = (NEXTID++);
-		
-		//start unverified. If the client is not verified
-		//his messages (except the required handshake) will
-		//be ignored and eventually he'll be killed.
+
+		// start unverified. If the client is not verified
+		// his messages (except the required handshake) will
+		// be ignored and eventually he'll be killed.
 		_verified = false;
-		
-		//to read inbound messages from the remote real client
+
+		// to read inbound messages from the remote real client
 		_reader = new ReaderThread(_socket, this);
-		
-		//to write (transmit) outbound messages to the 
-		//remote real client "self"
+
+		// to write (transmit) outbound messages to the
+		// remote real client "self"
 		_writer = new WriterThread(_socket, this);
-		
-		//where server will place message for transmission
+
+		// where server will place message for transmission
 		_outboundQueue = new MessageQueue(100, 20);
-		
+
 		_inputStream = new DataInputStream(_socket.getInputStream());
 		_outputStream = new DataOutputStream(_socket.getOutputStream());
-		
-		//start a timer which will kill the client if
-		//not verified
-		
+
+		// start a timer which will kill the client if
+		// not verified
+
 		TimerTask task = new TimerTask() {
 
 			@Override
 			public void run() {
 				if (!_verified) {
-					System.err.println("Closing unverified client");
+					System.err.println("Closing unverified client [" + _id + "]");
 					try {
 						close();
 					}
 					catch (IOException e) {
 						e.printStackTrace();
 					}
-				} //end not verified
+				} // end not verified
 			}
-			
+
 		};
-		
+
 		Timer timer = new Timer();
-		//one time schedule
-		timer.schedule(task, VERIFY_SECONDS*1000L);
-		
+		// one time schedule
+		timer.schedule(task, VERIFY_SECONDS * 1000L);
+
 	}
-	
+
 	/**
 	 * Start a ping timer to monitor the connection
 	 */
@@ -133,16 +134,16 @@ public class ProxyClient extends Messenger {
 			@Override
 			public void run() {
 				if (_verified && !_alreadyClosed) {
-					//queue the message for my remote (real client) self
+					// queue the message for my remote (real client) self
 					Message message = Message.createPingMessageMessage(_id);
 					_outboundQueue.queue(message);
-				} //end if verified
+				} // end if verified
 			}
-			
+
 		};
-		
+
 		Timer timer = new Timer();
-		//repeat schedule after initial delay
+		// repeat schedule after initial delay
 		timer.schedule(pingTask, 500, TinyMessageServer.PINGINTERVAL);
 	}
 
@@ -150,13 +151,14 @@ public class ProxyClient extends Messenger {
 	 * A ping has arrived, which is the end of a successful round trip.
 	 */
 	protected void pingArrived(Message message) {
+		System.err.println("PING arrived at server");
 		_lastPing = System.nanoTime();
-		
-		//let's check the round trip time
+
+		// let's check the round trip time
 		long longArray[] = message.getLongArray();
 		long sentTime = longArray[0];
 		long duration = _lastPing - sentTime;
-		String pdstr = String.format(name() + " server round trip ping: %7.3f ms", duration/1.0e6);
+		String pdstr = String.format(name() + " server round trip ping: %7.3f ms", duration / 1.0e6);
 		System.err.println(pdstr);
 	}
 
@@ -223,16 +225,16 @@ public class ProxyClient extends Messenger {
 	 * @throws IOException
 	 */
 	@Override
-	public void close() throws IOException {		
-		
+	public void close() throws IOException {
+
 		if (_alreadyClosed) {
 			return;
 		}
-		
+
 		_alreadyClosed = true;
 		_outboundQueue.setAccept(false);
-		
-		//try to wait for outbound queue to flush
+
+		// try to wait for outbound queue to flush
 		for (int i = 0; i < 5; i++) {
 			if (_outboundQueue.isEmpty()) {
 				System.err.println("Outbound queue for proxy is empty");
@@ -242,31 +244,33 @@ public class ProxyClient extends Messenger {
 				System.err.println("Outbound queue for proxy not empty");
 				try {
 					Thread.sleep(1000);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 				}
 			}
 		}
-		
-		
+
+		_server.removeProxyClient(this);
 		_reader.stopReader();
 		_writer.stopWriter();
 		_socket.close();
 	}
-	
+
 	/**
-	 * Shuts down the proxy client and notifies the remote (real) client.
-	 * This is done when the server is shutting down, or if for some
-	 * reason the server wants to manually remove a client.
+	 * Shuts down the proxy client and notifies the remote (real) client. This
+	 * is done when the server is shutting down, or if for some reason the
+	 * server wants to manually remove a client.
 	 */
 	public void shutdown() {
-		
-		//send a shutdown
+
+		// send a shutdown
 		Message message = Message.createShutdownMessage(getId());
 		_outboundQueue.queue(message);
-		
+
 		try {
 			close();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -293,7 +297,7 @@ public class ProxyClient extends Messenger {
 	public void startWriter() {
 		_writer.start();
 	}
-	
+
 	/**
 	 * Set the message server
 	 * 
@@ -314,9 +318,9 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Get the data input stream. Messages will be
-	 * read from this stream and placed on the server's inbound queue,
-	 * which is shared by all clients.
+	 * Get the data input stream. Messages will be read from this stream and
+	 * placed on the server's inbound queue, which is shared by all clients.
+	 * 
 	 * @return the data input stream
 	 */
 	@Override
@@ -325,8 +329,9 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Get the data output stream. Messages will be removed from
-	 * the outbound queue and sent on this stream.
+	 * Get the data output stream. Messages will be removed from the outbound
+	 * queue and sent on this stream.
+	 * 
 	 * @return the data output stream
 	 */
 	@Override
@@ -335,10 +340,11 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * A ReaderThread will be putting messages in this queue. 
-	 * It is owned by the server, and shared by all remote clients.
-	 * @return  the queue where we place inbound messages for
-	 * the server to grab and process.
+	 * A ReaderThread will be putting messages in this queue. It is owned by the
+	 * server, and shared by all remote clients.
+	 * 
+	 * @return the queue where we place inbound messages for the server to grab
+	 *         and process.
 	 */
 	@Override
 	public MessageQueue getInboundQueue() {
@@ -346,13 +352,14 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Get the queue where we place outbound messages. A WriterThread
-	 * will be grabbing the messages and sending them to their
-	 * destination (to the client on the other end). The server will
-	 * be the object that puts message on this queue when it has
-	 * one that needs to be sent to the connected client.
+	 * Get the queue where we place outbound messages. A WriterThread will be
+	 * grabbing the messages and sending them to their destination (to the
+	 * client on the other end). The server will be the object that puts message
+	 * on this queue when it has one that needs to be sent to the connected
+	 * client.
+	 * 
 	 * @return the queue where we place outbound messages ready for
-	 * transmission.
+	 *         transmission.
 	 */
 	@Override
 	public MessageQueue getOutboundQueue() {
@@ -361,6 +368,7 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Check whether the client wwas verified.
+	 * 
 	 * @return the verified flag.
 	 */
 	public boolean isVerified() {
@@ -369,7 +377,9 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Set the verified flag.
-	 * @param verified the verified to set
+	 * 
+	 * @param verified
+	 *            the verified to set
 	 */
 	public void setVerified(boolean verified) {
 		_verified = verified;
@@ -377,19 +387,20 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Set by the server when the handshake is received.
-	 * @param array the array of environment strings which should be:
-	 * [0] descriptive user name
-	 * [1] login user name
-	 * [2] os name
-	 * [3] host name
+	 * 
+	 * @param array
+	 *            the array of environment strings which should be: [0]
+	 *            descriptive user name [1] login user name [2] os name [3] host
+	 *            name
 	 */
 	protected void setEnvStrings(String array[]) {
 		_envStr = array;
 	}
-	
+
 	/**
-	 * Get a descriptive name (e.g., "ced"). It might be
-	 * the same as the login name
+	 * Get a descriptive name (e.g., "ced"). It might be the same as the login
+	 * name
+	 * 
 	 * @return a name of the messenger
 	 */
 	@Override
@@ -397,9 +408,30 @@ public class ProxyClient extends Messenger {
 		if (_envStr == null) {
 			return "???";
 		}
-		
+
 		String s = _envStr[0];
 		return (s != null) ? s : "???";
 	}
-	
+
+	/**
+	 * Convert a list of ProxyClients into an array
+	 * 
+	 * @param pclist
+	 *            the list
+	 * @return the array
+	 */
+	public synchronized static ProxyClient[] toArray(List<ProxyClient> pclist) {
+
+		ProxyClient[] array = null;
+
+		if ((pclist != null) && (pclist.size() > 0)) {
+			array = new ProxyClient[pclist.size()];
+			for (int i = 0; i < pclist.size(); i++) {
+				array[i] = pclist.get(i);
+			}
+		}
+
+		return array;
+	}
+
 }

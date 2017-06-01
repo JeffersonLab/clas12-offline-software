@@ -1,6 +1,7 @@
-package cnuphys.tinyMS.streamCapture;
+package cnuphys.tinyMS.graphics;
 
 import java.awt.Color;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.AttributeSet;
@@ -11,17 +12,57 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+import cnuphys.tinyMS.Environment.DateString;
+import cnuphys.tinyMS.log.Log;
+
 @SuppressWarnings("serial")
-public class StreamCapturePane extends JScrollPane {
+public class TextPaneScrollPane extends JScrollPane {
 
 	private static final Color transparent = new Color(0, 0, 0, 0);
 
-	// red terminal
-	public static SimpleAttributeSet RED_TERMINAL = createStyle(Color.red, transparent, "monospaced", 11, false, false);
+	// blue monospaced
+	public static SimpleAttributeSet BLUE_M_10_B = createStyle(Color.blue, X11Colors.getX11Color("Alice Blue"),
+			"monospaced", 10, false, true);
 
-	// black terminal
-	public static SimpleAttributeSet BLACK_TERMINAL = createStyle(Color.black, transparent, "monospaced", 11, false,
-			false);
+	// red terminal
+	public static SimpleAttributeSet RED_TERMINAL = createStyle(Color.red, transparent, "monospaced", 11, false, true);
+
+	// red terminal
+	public static SimpleAttributeSet YELLOW_TERMINAL = createStyle(Color.yellow, transparent, "monospaced", 11, false,
+			true);
+
+	// blue terminal
+	public static SimpleAttributeSet CYAN_TERMINAL = createStyle(Color.cyan, transparent, "monospaced", 11, false,
+			true);
+
+	// green terminal
+	public static SimpleAttributeSet GREEN_TERMINAL = createStyle(X11Colors.getX11Color("Light Green"), transparent,
+			"monospaced", 11, false, true);
+
+	// blue sans serif
+	public static SimpleAttributeSet BLUE_SS_12_B = createStyle(Color.blue, X11Colors.getX11Color("Alice Blue"),
+			"sansserif", 12, false, true);
+
+	// green sans serif
+	public static SimpleAttributeSet GREEN_SS_12_B = createStyle(X11Colors.getX11Color("Dark Green"),
+			X11Colors.getX11Color("wheat"), "sansserif", 12, false, true);
+
+	// red sans serif
+	public static SimpleAttributeSet RED_SS_12_P = createStyle(Color.red, "sansserif", 12, false, false);
+
+	public static SimpleAttributeSet GREEN_SS_12_P = createStyle(X11Colors.getX11Color("Dark Green"),
+			X11Colors.getX11Color("wheat"), "sansserif", 12, false, false);
+
+	public static SimpleAttributeSet BLACK_SS_12_P = createStyle(Color.black, "sansserif", 12, false, false);
+	public static SimpleAttributeSet BLUE_SS_10_B = createStyle(Color.blue, X11Colors.getX11Color("Alice Blue"),
+			"sansserif", 10, false, true);
+
+	public static SimpleAttributeSet RED_SS_10_P = createStyle(Color.red, "sansserif", 10, false, false);
+
+	public static SimpleAttributeSet GREEN_SS_10_P = createStyle(X11Colors.getX11Color("Dark Green"), Color.yellow,
+			"sansserif", 10, false, false);
+
+	public static SimpleAttributeSet BLACK_SS_10_P = createStyle(Color.black, "sansserif", 10, false, false);
 
 	/**
 	 * The text area that will be on this scroll pane.
@@ -30,52 +71,29 @@ public class StreamCapturePane extends JScrollPane {
 
 	protected StyledDocument document;
 
-	protected SimpleAttributeSet defaultStyle = BLACK_TERMINAL;
+	protected SimpleAttributeSet defaultStyle = BLACK_SS_12_P;
 
-	// captured printstreams for err and out
-	private CapturedPrintStream _outCps;
-	private CapturedPrintStream _errCps;
+	/**
+	 * Constructor will also create the text pane itself.
+	 */
+	public TextPaneScrollPane() {
+		this(null);
+	}
 
 	/**
 	 * Constructor will also create the text pane itself.
 	 * 
+	 * @param label
+	 *            if not null, will use for a border.
 	 */
-	public StreamCapturePane() {
+	public TextPaneScrollPane(String label) {
 		super();
+		if (label != null) {
+			this.setBorder(new CommonBorder(label));
+		}
 		createTextPane();
 		textPane.setBackground(Color.white);
 		getViewport().add(textPane);
-
-		// capture stdout and stdin
-		_outCps = new CapturedPrintStream() {
-
-			@Override
-			public void println(String s) {
-				baseAppend(s + "\n", BLACK_TERMINAL);
-			}
-
-			@Override
-			public void print(String s) {
-				baseAppend(s, BLACK_TERMINAL);
-			}
-		};
-
-		// capture stdout and stdin
-		_errCps = new CapturedPrintStream() {
-
-			@Override
-			public void println(String s) {
-				baseAppend(s + "\n", RED_TERMINAL);
-			}
-
-			@Override
-			public void print(String s) {
-				baseAppend(s, RED_TERMINAL);
-			}
-		};
-
-		System.setOut(_outCps);
-		System.setErr(_errCps);
 	}
 
 	/**
@@ -225,8 +243,37 @@ public class StreamCapturePane extends JScrollPane {
 	 *            the style to use, can be one of the class constants such as
 	 *            BOLD_RED.
 	 */
-	public void append(final String text, final AttributeSet style) {
-		baseAppend(text, style);
+	public void append(String text, AttributeSet style) {
+		append(text, style, false);
+	}
+
+	/**
+	 * Append some text with a specific style.
+	 * 
+	 * @param text
+	 *            the text to append.
+	 * @param style
+	 *            the style to use, can be one of the class constants such as
+	 *            BOLD_RED.
+	 * @param writeTime
+	 *            if <code>true</code> writes out a time stamp.
+	 */
+	public void append(final String text, final AttributeSet style, final boolean writeTime) {
+
+		baseAppend(text, style, writeTime);
+		// if (SwingUtilities.isEventDispatchThread()) {
+		// baseAppend(text, style, writeTime);
+		// }
+		// else {
+		// Runnable doRun = new Runnable() {
+		// @Override
+		// public void run() {
+		// baseAppend(text, style, writeTime);
+		// }
+		// };
+		//
+		// SwingUtilities.invokeLater(doRun);
+		// }
 	}
 
 	// SwingUtilities.isEventDispatchThread()
@@ -242,7 +289,7 @@ public class StreamCapturePane extends JScrollPane {
 	 * @param writeTime
 	 *            if <code>true</code> writes out a time stamp.
 	 */
-	private void baseAppend(final String text, final AttributeSet style) {
+	private void baseAppend(String text, final AttributeSet style, final boolean writeTime) {
 		if (text == null) {
 			return;
 		}
@@ -252,11 +299,23 @@ public class StreamCapturePane extends JScrollPane {
 		}
 
 		try {
+			if (writeTime) {
+				String s = DateString.dateStringSS();
+				text = "[" + s + "] " + text;
+			}
 			document.insertString(document.getLength(), text, style);
 		}
 		catch (BadLocationException e) {
+			Log.getInstance().exception(e);
 		}
-		textPane.setCaretPosition(Math.max(0, document.getLength() - 1));
+
+		try {
+			textPane.setCaretPosition(Math.max(0, document.getLength() - 1));
+		}
+		catch (Exception e) {
+			// System.err.println("TextPaneScrollPane exception " +
+			// e.getMessage());
+		}
 	}
 
 	/**

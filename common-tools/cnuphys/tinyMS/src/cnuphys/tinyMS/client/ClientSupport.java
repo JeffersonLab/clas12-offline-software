@@ -6,8 +6,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import cnuphys.tinyMS.log.Log;
+import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.server.TinyMessageServer;
-import cnuphys.tinyMS.server.gui.ServerFrame;
 
 public class ClientSupport {
 
@@ -45,6 +46,7 @@ public class ClientSupport {
 	/**
 	 * Try to find any TinyMessageServer running on the provided IP address. If
 	 * successful, return a Client connected to the found server.
+	 * 
 	 * @param userName
 	 *            the name for the client. If <code>null</code>, the actual
 	 *            login-username will be used.
@@ -62,6 +64,7 @@ public class ClientSupport {
 	/**
 	 * Try to find any TinyMessageServer running on the provided IP address. If
 	 * successful, return a Client connected to the found server.
+	 * 
 	 * @param userName
 	 *            the name for the client. If <code>null</code>, the actual
 	 *            login-username will be used.
@@ -70,17 +73,18 @@ public class ClientSupport {
 	 *            "daisy.jlab.org", or a textual representation of its IP
 	 *            address. IPv6 address format is accepted. If the hostname is
 	 *            null, a server on the local machine will be searched for.
-	 * @param startServer if this is <code>true</code>, and if this is a request for
-	 * a local server, and if a local server is not found, this will try to
-	 * start a local server with name "Server started by " + userName.
+	 * @param startServer
+	 *            if this is <code>true</code>, and if this is a request for a
+	 *            local server, and if a local server is not found, this will
+	 *            try to start a local server with name "Server started by " +
+	 *            userName.
 	 * @return a client connecting to a TinyMessageServer or <code>null</code>
 	 */
-	private static Client findServer(String userName, String hostName,
-			boolean startServer) {
+	private static Client findServer(String userName, String hostName, boolean startServer) {
 		// tries to find a TinyMessageServer on the local machine
 
 		boolean local = hostName == null;
-		
+
 		InetAddress host = null;
 		try {
 			if (local) {
@@ -103,9 +107,8 @@ public class ClientSupport {
 			try {
 				Socket socket = new Socket(host, ports[i]);
 				if (socket != null) {
-					System.err.println("Found server at "
-							+ socket.getInetAddress().getHostAddress()
-							+ " on port: " + socket.getPort());
+					System.err.println("Found server at " + socket.getInetAddress().getHostAddress() + " on port: "
+							+ socket.getPort());
 					return new Client(userName, socket);
 				}
 
@@ -117,15 +120,13 @@ public class ClientSupport {
 			catch (IOException e) {
 			}
 		}
-		
-		//if here no server found. Might try to start one.
+
+		// if here no server found. Might try to start one.
 		if (local && startServer) {
 			String sname = "Server started by " + userName;
 			System.err.println("Attempting to start a local server named: " + sname);
 			try {
 				TinyMessageServer server = new TinyMessageServer(sname);
-				//create a gui
-				ServerFrame.createServerFrame(server);
 				return findServer(userName, null, false);
 			}
 			catch (IOException e) {
@@ -135,5 +136,21 @@ public class ClientSupport {
 
 		return null;
 	}
+	
+	/**
+	 * Send a message to be logged on the server log
+	 * @param client the client source
+	 * @param level the log level of the message
+	 * @param logStr the string to be logged
+	 */
+	public static void serverLog(Client client, Log.Level level, String logStr) {
+	    if (client.isClosed()) {
+	    	System.err.println("client is closed.");
+	    	return;
+	    }
+		Message message = Message.createServerLogMessage(client.getId(), level, logStr);
+		client.getOutboundQueue().queue(message);
+	}
+	
 
 }
