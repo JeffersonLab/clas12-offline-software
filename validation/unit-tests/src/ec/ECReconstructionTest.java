@@ -7,7 +7,7 @@ import events.TestEvent;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.service.ec.ECEngine;
-import org.jlab.service.eb.EBEngine;
+import org.jlab.service.eb.EBHBEngine;
 
 /**
  *
@@ -24,9 +24,9 @@ public class ECReconstructionTest {
 		engineEC.init();
 		engineEC.processDataEvent(testEvent);
 
-		EBEngine engineEB = new EBEngine();
-		engineEB.init();
-		engineEB.processDataEvent(testEvent);
+		EBHBEngine engineEBHB = new EBHBEngine();
+		engineEBHB.init();
+		engineEBHB.processDataEvent(testEvent);
 
 		//testEvent.show();
 		//testEvent.getBank("ECAL::clusters").show();

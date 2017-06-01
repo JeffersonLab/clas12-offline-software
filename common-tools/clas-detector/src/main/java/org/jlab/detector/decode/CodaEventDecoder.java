@@ -138,6 +138,12 @@ public class CodaEventDecoder {
                 return this.getDataEntries_57601(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
             }
+	    if(node.getTag()==57627){
+                //  This is regular integrated pulse mode, used for FTOF
+                // FTCAL and EC/PCAL
+                return this.getDataEntries_57627(crate, node, event);
+                //return this.getDataEntriesMode_7(crate,node, event);
+            }
             if(node.getTag()==57622){
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
@@ -252,7 +258,9 @@ public class CodaEventDecoder {
                         //+ cdatatypes.get(position));
                         Byte   half    = (Byte) cdataitems.get(position);
                         Byte   channel = (Byte) cdataitems.get(position+1);
-                        Byte   tdc     = (Byte) cdataitems.get(position+2);
+                        Byte   tdcbyte = (Byte) cdataitems.get(position+2);
+                        Short  tdc     = DataUtils.getShortFromByte(tdcbyte);
+                        //Byte   tdc     = (Byte) cdataitems.get(position+2);
                         //Short   adc     = (Short)  cdataitems.get(position+3);
                         Byte   adc     = (Byte)  cdataitems.get(position+3);
                         
@@ -274,7 +282,7 @@ public class CodaEventDecoder {
                         adcData.setIntegral(adc);
                         adcData.setPedestal( (short) 0);
                         adcData.setADC(0,0);
-                        adcData.setTimeWord(tdc);
+                        adcData.setTime(tdc);
                         adcData.setTimeStamp(time);
                         entry.addADC(adcData);
                         //RawDataEntry  entry = new RawDataEntry(crate,slot,channelKey);
@@ -346,6 +354,69 @@ public class CodaEventDecoder {
                             shortbuffer[loop] = sample;
                             //dataBank.addData(channel.intValue(), 
                             //        new RawData(tdc,adc,pmin,pmax));
+                        }
+                        
+                        bank.addPulse(shortbuffer);
+                        bank.setTimeStamp(time);
+                        //dataBank.addData(channel.intValue(), 
+                        //            new RawData(shortbuffer));
+                        entries.add(bank);
+                        position += 2+length;
+                        counter++;
+                    }
+                }
+                return entries;
+                
+            } catch (EvioException ex) {
+                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return entries;
+    }
+
+    public List<DetectorDataDgtz>  getDataEntries_57627(Integer crate, EvioNode node, EvioDataEvent event){
+        
+        ArrayList<DetectorDataDgtz>  entries = new ArrayList<DetectorDataDgtz>();
+        
+        if(node.getTag()==57627){
+            try {
+                
+                ByteBuffer     compBuffer = node.getByteData(true);
+                CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
+                
+                List<DataType> cdatatypes = compData.getTypes();
+                List<Object>   cdataitems = compData.getItems();
+
+                if(cdatatypes.get(3) != DataType.NVALUE){
+                    System.err.println("[EvioRawDataSource] ** error ** corrupted "
+                    + " bank. tag = " + node.getTag() + " num = " + node.getNum());
+                    return null;
+                }
+               
+                int position = 0;
+                
+                while(position<cdatatypes.size()-4){                     
+                    Byte    slot = (Byte)     cdataitems.get(position+0);
+                    Integer trig = (Integer)  cdataitems.get(position+1);
+                    Long    time = (Long)     cdataitems.get(position+2);
+                    //EvioRawDataBank  dataBank = new EvioRawDataBank(crate, slot.intValue(),trig,time);
+                    
+                    Integer nchannels = (Integer) cdataitems.get(position+3);
+                    //System.out.println("Retrieving the data size = " + cdataitems.size()
+                    //+ "  " + cdatatypes.get(3) + " number of channels = " + nchannels);
+                    position += 4;
+                    int counter  = 0;
+                    while(counter<nchannels){
+                        
+                        Short channel   = (Short) cdataitems.get(position);
+			Integer length = (Integer) cdataitems.get(position+1);
+                        DetectorDataDgtz bank = new DetectorDataDgtz(crate,slot.intValue(),channel.intValue());
+                       
+                        short[] shortbuffer = new short[length];
+                        for(int loop = 0; loop < length; loop++){
+                            Short sample    = (Short) cdataitems.get(position+2+loop);
+			    shortbuffer[loop] = sample;
+                          
                         }
                         
                         bank.addPulse(shortbuffer);

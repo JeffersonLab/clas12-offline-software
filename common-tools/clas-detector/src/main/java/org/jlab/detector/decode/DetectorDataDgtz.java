@@ -266,6 +266,11 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         }
         
 
+        public ADCData setTime(int time){
+            this.pulseTime = ((double) time);
+            this.pulseTimeCourse = time;
+            return this;
+        }
         
         public ADCData setOrder(int order){ adcOrder = order; return this;}
         

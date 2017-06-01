@@ -1,0 +1,62 @@
+COPYRIGHT AND LICENSE INFORMATION
+
+This directory tree contains translations to Java(TM) source code of
+copyrighted Numerical Recipes(TM) Third Edition C++ source code.  For
+copyright purposes, the Java translations are derivative works of the
+Numerical Recipes C++ source code.
+
+Unless otherwise indicated in individual files, all the Java source
+files in this distribution are:
+
+Copyright (C) Numerical Recipes Software 1986-2007
+Java translations Copyright (C) Huang Wen Hui 2012
+
+LICENSE
+
+Numerical Recipes Software grants to any licensed user of the
+Numerical Recipes Third Edition source code in C++ an additional,
+non-exclusive license to use these Java translations under terms and
+conditions identical to that user's existing license to use the
+Numerical Recipes C++ source code.  This grant does not modify any
+existing terms and conditions, nor does it grant any new C++ or Java
+code license to users who are not already licensed to use Numerical
+Recipes Third Edition source code in C++.  This grant is subject to,
+and conditional on, the license grant by Huang Wen Hui given below.
+
+For information on Numerical Recipes licenses, including both personal
+single-user licenses and institutional subscriber licenses, see
+http://www.nr.com/aboutNR3license.html .
+
+Note that owning a copy of the Numerical Recipes book, or purchasing a
+subscription to the electronic book, is not the same as a code
+license.  A code license comes with the purchase of one of (i) a
+Numerical Recipes Code CDROM as published by Cambridge University
+Press, or (ii) a Code Download package as purchased from Numerical
+Recipes Software (see http://www.nr.com/com/storefront.html), or (iii)
+an institutional subscription (see further information at
+http://www.nr.com/aboutNR3institutional.html).
+
+Huang Wen Hui represents to Numerical Recipes Software that he is the
+author of these Java translations and has the right to license them.
+Numerical Recipes Software itself makes no warranty or representation
+as to the ownership of the translations (other than their being
+derivative works of Numerical Recipes C++ source code).
+
+Subject to the above conditions and representations, and subject to
+the Disclaimer of Warranty below, Huang Wen Hui grants to all users a
+perpetual, non-exclusive, royalty-free license to use these Java
+translations in any manner whatsoever.
+
+DISCLAIMER OF WARRANTY
+
+These Java translations are an unsupported product.  Numerical Recipes
+Software, the authors and publisher of the Numerical Recipes books,
+and Huang Wen Hui make no warranty, express or implied, that the
+computer code contained herein is free of error, or is consistent with
+any particular standard of merchantability, or that it will meet your
+requirements for any particular application. The code should not be
+relied on for solving a problem whose incorrect solution could result
+in injury to a person or loss of property. If you do use the code in
+such a manner, it is entirely at your own risk. The authors and
+publisher disclaim all liability for direct or consequential damages
+resulting from your use of the code.

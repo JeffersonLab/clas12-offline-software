@@ -86,13 +86,13 @@ public class DetectorEventDecoder {
     
     public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
-            "FTCAL","FTHODO","LTCC","EC","FTOF","HTCC","DC","CTOF","SVT","RF"
+		"FTCAL","FTHODO","LTCC","EC","FTOF","HTCC","DC","CTOF","SVT","RF","BMT","FMT"
         });
         
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc","/daq/tt/ctof","/daq/tt/svt",
-            "/daq/tt/rf"
+            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt"
         });
         
         translationManager.init(keysTrans,tablesTrans);
@@ -126,13 +126,16 @@ public class DetectorEventDecoder {
             int crate    = data.getDescriptor().getCrate();
             int slot     = data.getDescriptor().getSlot();
             int channel  = data.getDescriptor().getChannel();
-            
+            //if(crate==69){
+	    //System.out.println(" MVT " + crate + " " + slot + 
+	    //  "  " + channel);
+	// }
             boolean hasBeenAssigned = false;
             
             for(String table : keysTrans){
                 IndexedTable  tt = translationManager.getConstants(runNumber, table);
                 DetectorType  type = DetectorType.getType(table);
-                
+	
                 if(tt.hasEntry(crate,slot,channel)==true){
                     int sector    = tt.getIntValue("sector", crate,slot,channel);
                     int layer     = tt.getIntValue("layer", crate,slot,channel);
@@ -164,7 +167,7 @@ public class DetectorEventDecoder {
             int slot     = data.getDescriptor().getSlot();
             int channel  = data.getDescriptor().getChannel();
             //System.out.println(" looking for " + crate + "  " 
-            //        + slot + " " + channel);
+            //       + slot + " " + channel);
             for(String table : keysFitter){
                 IndexedTable  daq = fitterManager.getConstants(runNumber, table);
                 DetectorType  type = DetectorType.getType(table);
