@@ -13,6 +13,7 @@ import java.io.Serializable;
 /**
  * Contains static methods for serializing and deserializing from byte arrays
  * and files.
+ * 
  * @author heddle
  *
  */
@@ -21,7 +22,8 @@ public class SerialIO {
 	/**
 	 * Deserializes a serializable object from a file.
 	 * 
-	 * @param fullfn the full path of the file containing the serialized object.
+	 * @param fullfn
+	 *            the full path of the file containing the serialized object.
 	 * @return the deserialized object.
 	 */
 	public static Object serialRead(String fullfn) {
@@ -65,7 +67,8 @@ public class SerialIO {
 	/**
 	 * Deserializes a serializable object from a byte array
 	 * 
-	 * @param bytes the byte array containing the serialized object
+	 * @param bytes
+	 *            the byte array containing the serialized object
 	 * @return the deserialized object
 	 */
 	public static Object serialRead(byte[] bytes) {
@@ -111,9 +114,11 @@ public class SerialIO {
 	/**
 	 * Serializes a serializable object to a file.
 	 * 
-	 * @param obj the serializable object.
+	 * @param obj
+	 *            the serializable object.
 	 * 
-	 * @param fullfn the full path.
+	 * @param fullfn
+	 *            the full path.
 	 */
 	public static void serialWrite(Serializable obj, String fullfn) {
 
@@ -158,7 +163,8 @@ public class SerialIO {
 	/**
 	 * Serializes a serializable object to a byte array.
 	 * 
-	 * @param obj the serializable object.
+	 * @param obj
+	 *            the serializable object.
 	 * @return the array of bytes.
 	 */
 	public static byte[] serialWrite(Serializable obj) {

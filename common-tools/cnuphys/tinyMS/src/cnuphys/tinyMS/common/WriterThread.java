@@ -7,8 +7,8 @@ import cnuphys.tinyMS.message.IMessenger;
 import cnuphys.tinyMS.message.Message;
 
 /**
- * This thread uses a IMessenger object to write (transmit) messages that it dequeues
- * from the Imessenger's outbound queue.
+ * This thread uses a IMessenger object to write (transmit) messages that it
+ * dequeues from the Imessenger's outbound queue.
  * 
  * @author heddle
  * 
@@ -21,14 +21,16 @@ public class WriterThread extends Thread {
 
 	// used to kill the thread
 	private volatile boolean _running = false;
-	
-	//the socket
+
+	// the socket
 	private Socket _socket;
 
 	/**
 	 * Create a writer thread. This thread will be used to transmit messages off
 	 * a message queue.
-	 * @param socket the underlying socket
+	 * 
+	 * @param socket
+	 *            the underlying socket
 	 * @param messenger
 	 *            the messenger with the queue
 	 * @throws IOException
@@ -38,7 +40,7 @@ public class WriterThread extends Thread {
 		_socket = socket;
 		_messenger = messenger;
 	}
-	
+
 	/**
 	 * Start the thread
 	 */
@@ -55,7 +57,7 @@ public class WriterThread extends Thread {
 	public void run() {
 		while (_running) {
 			try {
-				//dequeue will wait until there is a message
+				// dequeue will wait until there is a message
 				Message message = _messenger.getOutboundQueue().dequeue();
 
 				// did I get a good read? If so write it
@@ -68,7 +70,7 @@ public class WriterThread extends Thread {
 			}
 		}
 	}
-	
+
 	private boolean safeToUse(Message message) {
 		return (message != null) && (_socket != null) && (!_socket.isClosed());
 	}

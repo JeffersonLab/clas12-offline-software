@@ -7,19 +7,22 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Vector;
 
+import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
-import cnuphys.tinyMS.message.MessageType;
+import cnuphys.tinyMS.server.gui.ServerFrame;
 
 public class TinyMessageServer {
 
-	//clients will ping the server to monitor health
+	// the log
+	private Log _log = Log.getInstance();
+
+	// clients will ping the server to monitor health
 	protected static final long PINGINTERVAL = 5000;
 
 	// the default ports
-	public static final int DEFAULT_PORTS[] = { 5377, 2953, 3310, 3976, 4720,
-			9173, 3916, 7571 };
+	public static final int DEFAULT_PORTS[] = { 5377, 2953, 3310 };
 
 	// accepting connections?
 	private boolean acceptConnections = true;
@@ -39,18 +42,21 @@ public class TinyMessageServer {
 
 	// name of the server
 	private String _name;
-	
-	//will process the inbound messages
+
+	// will process the inbound messages
 	private MessageProcessor _messageProcessor;
-	
-	//to avoid multiple shutdowns resulting possible resulting from
-	//the shutdown hook thread
+
+	// to avoid multiple shutdowns resulting possible resulting from
+	// the shutdown hook thread
 	private boolean _alreadyShutDown = false;
-	
+
 	/**
 	 * Create a message server on a specific port.
-	 * @param name descriptive name of the server
-	 * @param port the port to try
+	 * 
+	 * @param name
+	 *            descriptive name of the server
+	 * @param port
+	 *            the port to try
 	 * @throws IOException
 	 */
 	public TinyMessageServer(String name, int port) throws IOException {
@@ -61,23 +67,24 @@ public class TinyMessageServer {
 			_serverSocket = startServer(port);
 		}
 		catch (BindException e) {
-			System.out.println("Port " + port + " appears to be busy.");
+			System.err.println("Port " + port + " appears to be busy.");
 		}
 
 		initialize();
-		
+
 	}
 
 	/**
 	 * Create a message server, trying the default ports.
 	 * 
-	 * @param name descriptive name of the server
+	 * @param name
+	 *            descriptive name of the server
 	 * @throws IOException
 	 */
 	public TinyMessageServer(String name) throws IOException {
 		_name = name;
 
-		//try to start on any of the default ports
+		// try to start on any of the default ports
 		for (int i = 0; i < DEFAULT_PORTS.length; i++) {
 			try {
 				_serverSocket = startServer(DEFAULT_PORTS[i]);
@@ -87,34 +94,36 @@ public class TinyMessageServer {
 				}
 			}
 			catch (BindException e) {
-				System.out.println("Port " + DEFAULT_PORTS[i]
-						+ " appears to be busy.");
+				System.err.println("Port " + DEFAULT_PORTS[i] + " appears to be busy.");
 			}
 		}
 
 		initialize();
 	}
-	
-	//intialize-- create the message processor, the shared
-	//inbound queue and the connection accept thread.
+
+	// intialize-- create the message processor, the shared
+	// inbound queue and the connection accept thread.
 	private void initialize() {
-		
+		System.err.print("Creating gui...");
+		// create a gui
+		ServerFrame.createServerFrame(this);
+		System.err.println("done.");
+
 		if (_serverSocket == null) {
-			System.err.println("No Message Server started");
+			_log.warning("No Tiny Message Server started");
 			return;
 		}
-		
-		System.err.println("Message Server started on " + getHostName()
-				+ " " + getHostAddress() + " port: " + getLocalPort());
 
+		_log.config("Tiny Message Server started on " + getHostName() + " " + getHostAddress() + " port: "
+				+ getLocalPort());
 
-		//create a message processor
-		_messageProcessor = createMessageProcessor();
-		
+		// create a message processor
+		_messageProcessor = new ServerMessageProcessor(this);
+
 		// create an input queue and a thread to dequeue
 		// inbound data from remote clients
 		createInboundQueue();
-		
+
 		// wait for connections in another thread, since
 		// the accept method blocks.
 		Runnable acceptThread = new Runnable() {
@@ -123,9 +132,8 @@ public class TinyMessageServer {
 				while (acceptConnections) {
 					try {
 						// the accept() blocks
-						ProxyClient newClient = new ProxyClient(
-								_serverSocket.accept());
-						System.err.println("Adding a new proxy client.");
+						ProxyClient newClient = new ProxyClient(_serverSocket.accept());
+						_log.info("Adding a new proxy client.");
 						addClient(newClient);
 					}
 					catch (IOException e) {
@@ -135,167 +143,48 @@ public class TinyMessageServer {
 			}
 		};
 		new Thread(acceptThread).start();
-		
-		//create a shutdown thread so we can die gracefully even if
-		//killed by a ctrl-c
-		
+
+		// create a shutdown thread so we can die gracefully even if
+		// killed by a ctrl-c
+
 		Runnable shutDown = new Runnable() {
 
 			@Override
 			public void run() {
-				System.err.println("Server is shutting down");
+				_log.warning("Server is shutting down");
 				try {
 					shutdown();
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 				}
 			}
-			
+
 		};
-		
+
 		Thread shutDownThread = new Thread(shutDown);
 		Runtime.getRuntime().addShutdownHook(shutDownThread);
 	}
-	
+
 	/**
 	 * Try to start a server on a given port.
-	 * @param port the port to try
+	 * 
+	 * @param port
+	 *            the port to try
 	 * @return the serverSocket if successful, otherwise <code>null</code>
 	 */
 	protected ServerSocket startServer(int port) throws IOException, BindException {
 		ServerSocket serverSocket = null;
 		try {
-			serverSocket = new ServerSocket(port, 50,
-					InetAddress.getLocalHost());
+			System.err.print("Ready to create server socket...");
+			serverSocket = new ServerSocket(port, 50, InetAddress.getLocalHost());
+			System.err.println("done.");
 		}
 		catch (UnknownHostException e) {
 		}
-		
-		return  serverSocket;
+
+		return serverSocket;
 	}
 
-	//create the message processor
-	private MessageProcessor createMessageProcessor() {
-		MessageProcessor processor = new  MessageProcessor() {
-
-			//this message is a client voluntarily logging out.
-			//That is, the message originated from the client
-			@Override
-			public void processLogoutMessage(Message message) {
-				ProxyClient proxyClient = getSender(message);
-				if (proxyClient == null) {
-					return;
-				}
-
-				try {
-					System.err.println("closing a connection for client: " + proxyClient.name());
-					//call close, not closeAndNotify. The latter is
-					//for a server forced logout of a client (e.g., 
-					//at shutdown)
-					proxyClient.close();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			//this message is a client being shutdown.
-			//That is, the message originated from the server
-			@Override
-			public void processShutdownMessage(Message message) {
-				System.err.println("It is rarely a good sign that a shutdown message has arrived at the server.");
-			}
-
-
-			/**
-			 * Process a handshake message. This is used to verify the client.
-			 * @message the handshake message
-			 */
-			@Override
-			public void processHandshakeMessage(Message message) {
-				System.err.println("Server Received Handshake!");
-				
-				ProxyClient sender = getSender(message);
-				if (sender == null) {
-					System.err.println("Could not get sender of handshake");
-				}
-				else {
-					System.err.println("remote client verified");
-					sender.setVerified(true);
-					
-					//get username
-					String env[] = message.getStringArray();
-					System.err.println("*********");
-					System.err.println("Client id: " + sender.getId());
-					System.err.println("USER NAME: " + env[0]);
-					System.err.println("LOGIN NAME: " + env[1]);
-					System.err.println("OS NAME: " + env[2]);
-					System.err.println("HOST NAME: " + env[3]);
-					
-					sender.setEnvStrings(env);
-					sender.startPingTimer();
-				}
-			}
-
-			@Override
-			//ping has made a round trip
-			public void processPingMessage(Message message) {
-				ProxyClient sender = getSender(message);
-				sender.pingArrived(message);
-			}
-			
-			@Override
-			public void processDataMessage(Message message) {
-				dataMessage(message);
-			}
-
-			@Override
-			public boolean accept(Message message) {
-				
-				//handshakes are accepted and used to verify
-				//a client. Otherwise the client must be verified.
-				
-				if (message.getMessageType() == MessageType.HANDSHAKE) {
-					return true;
-				}
-				
-				ProxyClient sender = getSender(message);
-				if (sender == null) {
-					System.err.println("Could not match a remote client to message sender.");
-					return false;
-				}
-				
-				if (sender.isVerified()) {
-					
-					//if someone else if the destination, try to forward
-					if (message.getDestinationId() != Message.SERVER) {
-						forwardMessage(message);
-						return false;
-					}
-					
-					return true;
-				}
-				else {
-					System.err.println("Message from unverified client");
-					return false;
-				}
-
-			}
-
-			
-		};
-		return processor;
-	}
-	
-	/**
-	 * This is the only non-admininistrative message. Just forward it to the destination(s).
-	 * @param message the data message
-	 */
-	protected void dataMessage(Message message) {
-		//TODO implement the fowarding. Check if the destination
-		
-		//if the destination is Message.BROADCAST, forward to every client except the source (sender)
-	}
-	
 	// a queue for holding data messages arriving from clients
 	// every remote client has a reader thread that will dump
 	// inbound messages to this queue
@@ -322,13 +211,13 @@ public class TinyMessageServer {
 	 * @param proxyClient
 	 *            the new proxy client, which corresponds to an actual client.
 	 */
-	protected void addClient(ProxyClient proxyClient) {
+	protected synchronized void addClient(ProxyClient proxyClient) {
 		ProxyClient rc = getProxyClient(proxyClient.getId());
 
 		// bad error if duplicate
 		if (rc != null) {
-			System.err.println("SEVERE ERROR tried to add remote client with"
-					+ " Id already being used: " + proxyClient.getId());
+			_log.error(
+					"SEVERE ERROR tried to add remote client with" + " Id already being used: " + proxyClient.getId());
 			return;
 		}
 
@@ -336,10 +225,23 @@ public class TinyMessageServer {
 		_proxyClients.add(proxyClient);
 		proxyClient.startReader();
 		proxyClient.startWriter();
-		
-		//send client a handshake
+
+		// send client a handshake
 		Message message = Message.createHandshakeMessage(proxyClient.getId());
 		proxyClient.getOutboundQueue().queue(message);
+		_log.config("There are now " + _proxyClients.size() + " proxy clients");
+	}
+
+	/**
+	 * All this does is remove the proxy client from the collection.
+	 * 
+	 * @param proxyClient
+	 */
+	protected synchronized void removeProxyClient(ProxyClient proxyClient) {
+		if (proxyClient != null) {
+			_proxyClients.remove(proxyClient);
+			_log.config("There are now " + _proxyClients.size() + " proxy clients");
+		}
 	}
 
 	/**
@@ -364,7 +266,6 @@ public class TinyMessageServer {
 		return null;
 	}
 
-
 	/**
 	 * Convenience routine the gets the remote client who sent the message.
 	 * 
@@ -380,53 +281,51 @@ public class TinyMessageServer {
 		return getProxyClient(message.getSourceId());
 	}
 
-	// a message arrived whose source was not the server
-	protected void forwardMessage(Message message) {
-		//try to find a remote client for the destination
-		ProxyClient client = getProxyClient(message.getDestinationId());
-		if (client != null) {
-			System.err.println("forwarding");
-			try {
-				client.writeMessage(message);
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	/**
+	 * Get an array of proxy clients
+	 * 
+	 * @return an array of proxy clients
+	 */
+	protected ProxyClient[] getProxyClients() {
+		return ProxyClient.toArray(_proxyClients);
 	}
 
-
 	/**
-	 * Shutdown the server. As a courtesy, notify all the
-	 * clients.
+	 * Shutdown the server. As a courtesy, notify all the clients.
 	 */
 	public void shutdown() throws IOException {
-		
+
 		if (_alreadyShutDown) {
 			System.err.println("Server already shut down");
 			return;
 		}
 
 		_alreadyShutDown = true;
-		
+
 		acceptConnections = false;
 
 		// close and notify the proxy clients
-		for (ProxyClient proxyClient : _proxyClients) {
-			try {
-				proxyClient.shutdown();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
+		// put in array to avoid concurrent violations
+		ProxyClient[] array = ProxyClient.toArray(_proxyClients);
+		if (array != null) {
+			for (ProxyClient proxyClient : array) {
+				try {
+					proxyClient.shutdown();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
+
+		// close the socket
 		if (_serverSocket != null) {
 			_serverSocket.close();
 		}
 
 		System.err.println("Server shutdown");
 	}
-	
+
 	/**
 	 * Get the server's data inputQueue
 	 * 
@@ -475,9 +374,10 @@ public class TinyMessageServer {
 		}
 		return _serverSocket.getInetAddress().getHostAddress();
 	}
-	
+
 	/**
 	 * Get the common inbound queue shared by all remote clients.
+	 * 
 	 * @return the common inbound queue.
 	 */
 	public MessageQueue getInboundQueue() {

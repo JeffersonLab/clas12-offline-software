@@ -1,11 +1,10 @@
 package cnuphys.tinyMS.streamCapture;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 
 public abstract class CapturedPrintStream extends PrintStream {
-	
+
 	public CapturedPrintStream() {
 		super(new ByteArrayOutputStream());
 	}
@@ -20,7 +19,8 @@ public abstract class CapturedPrintStream extends PrintStream {
 	public void println(Object o) {
 		if (o != null) {
 			println(o.toString());
-		} else {
+		}
+		else {
 			println("null");
 		}
 	}
@@ -29,7 +29,8 @@ public abstract class CapturedPrintStream extends PrintStream {
 	public void print(Object o) {
 		if (o != null) {
 			print(o.toString());
-		} else {
+		}
+		else {
 			print("null");
 		}
 	}
@@ -98,7 +99,8 @@ public abstract class CapturedPrintStream extends PrintStream {
 	public void println(char[] ca) {
 		if (ca != null) {
 			println(new String(ca));
-		} else {
+		}
+		else {
 			println("null");
 		}
 	}
@@ -107,7 +109,8 @@ public abstract class CapturedPrintStream extends PrintStream {
 	public void print(char[] ca) {
 		if (ca != null) {
 			print(new String(ca));
-		} else {
+		}
+		else {
 			print("null");
 		}
 	}

@@ -2,7 +2,6 @@ package cnuphys.tinyMS.message;
 
 import java.util.Vector;
 
-
 /**
  * A queue for holding message data
  * 
@@ -11,22 +10,24 @@ import java.util.Vector;
  */
 @SuppressWarnings("serial")
 public class MessageQueue extends Vector<Message> {
-	
-	//specifies whether new messages are accepted
+
+	// specifies whether new messages are accepted
 	private boolean _accept = true;
 
 	/**
 	 * Create a MessageQueue
-	 * @param capacity the original capacity
-	 * @param increment the capacity increment
+	 * 
+	 * @param capacity
+	 *            the original capacity
+	 * @param increment
+	 *            the capacity increment
 	 */
 	public MessageQueue(int capacity, int increment) {
 		super(capacity, increment);
 	}
 
 	/**
-	 * Queue a MessageData object. Notify threads that are
-	 * waiting.
+	 * Queue a MessageData object. Notify threads that are waiting.
 	 * 
 	 * @param message
 	 *            the data to queue
@@ -40,26 +41,28 @@ public class MessageQueue extends Vector<Message> {
 		if (message == null) {
 			return true;
 		}
-		
+
 		if (!_accept) {
 			return true;
 		}
-		
+
 		boolean b = super.add(message);
-		
+
 		// notify any threads waiting for data
 		notifyAll();
 		return b;
 	}
-	
+
 	/**
 	 * Determines whether queue will accept any new messages.
-	 * @param accept if false, will no longer queue messages
+	 * 
+	 * @param accept
+	 *            if false, will no longer queue messages
 	 */
 	public void setAccept(boolean accept) {
 		_accept = accept;
 	}
-	
+
 	/**
 	 * Dequeue a MessageData object. If queue is empty, wait.
 	 * 
