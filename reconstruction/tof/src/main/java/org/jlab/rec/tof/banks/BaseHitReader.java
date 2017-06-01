@@ -12,214 +12,216 @@ import org.jlab.io.base.DataEvent;
 
 public class BaseHitReader {
 
-	public BaseHitReader() {
-		// TODO Auto-generated constructor stub
-	}
+    public BaseHitReader() {
+        // TODO Auto-generated constructor stub
+    }
 
-	class DetectorLocation {
-		int[] SLC = new int[3];
+    class DetectorLocation {
 
-		DetectorLocation(int[] SecLayComp) {
-			SLC = SecLayComp;
-		}
+        int[] SLC = new int[3];
 
-		@Override
-		public int hashCode() {
-			int hc = this.SLC[0] * 10000 + this.SLC[1] * 1000 + this.SLC[2];
-			return hc;
-		}
+        DetectorLocation(int[] SecLayComp) {
+            SLC = SecLayComp;
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof DetectorLocation) {
-				DetectorLocation loc = (DetectorLocation) obj;
-				return (loc.SLC[0] == this.SLC[0] && loc.SLC[1] == this.SLC[1] && loc.SLC[2] == this.SLC[2]);
-			} else {
-				return false;
-			}
-		}
+        @Override
+        public int hashCode() {
+            int hc = this.SLC[0] * 10000 + this.SLC[1] * 1000 + this.SLC[2];
+            return hc;
+        }
 
-	}
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof DetectorLocation) {
+                DetectorLocation loc = (DetectorLocation) obj;
+                return (loc.SLC[0] == this.SLC[0] && loc.SLC[1] == this.SLC[1] && loc.SLC[2] == this.SLC[2]);
+            } else {
+                return false;
+            }
+        }
 
-	public Map<DetectorLocation, ArrayList<BaseHit>> get_Hits(DataEvent event,
-			String detector) {
+    }
 
-		String detADC = "";
-		detADC += detector;
-		detADC += "::adc";
-		String detTDC = "";
-		detTDC += detector;
-		detTDC += "::tdc";
+    public Map<DetectorLocation, ArrayList<BaseHit>> get_Hits(DataEvent event,
+            String detector) {
 
-		if (event.hasBank(detADC) == false && event.hasBank(detTDC) == false) {
-			return null;
-		}
+        String detADC = "";
+        detADC += detector;
+        detADC += "::adc";
+        String detTDC = "";
+        detTDC += detector;
+        detTDC += "::tdc";
 
-		Map<BaseHit, DetectorLocation> hmap = new HashMap<BaseHit, DetectorLocation>();
+        if (event.hasBank(detADC) == false && event.hasBank(detTDC) == false) {
+            return null;
+        }
 
-		int[] sectorADC = null;
-		int[] layerADC = null;
-		int[] componentADC = null;
-		int[] ADC1 = null;
-		int[] ADC2 = null;
-		double[] time1 = null;
-		int[] pedestalADC1 = null;
-		double[] time2 = null;
-		int[] pedestalADC2 = null;
-		int[] ADCIdx1 = null;
-		int[] ADCIdx2 = null;
+        Map<BaseHit, DetectorLocation> hmap = new HashMap<BaseHit, DetectorLocation>();
 
-		int[] sectorTDC = null;
-		int[] layerTDC = null;
-		int[] componentTDC = null;
-		int[] TDC1 = null;
-		int[] TDC2 = null;
-		int[] TDCIdx1 = null;
-		int[] TDCIdx2 = null;
+        int[] sectorADC = null;
+        int[] layerADC = null;
+        int[] componentADC = null;
+        int[] ADC1 = null;
+        int[] ADC2 = null;
+        double[] time1 = null;
+        int[] pedestalADC1 = null;
+        double[] time2 = null;
+        int[] pedestalADC2 = null;
+        int[] ADCIdx1 = null;
+        int[] ADCIdx2 = null;
 
-		if (event.hasBank(detADC) == true) {
-			DataBank bank = event.getBank(detADC);
-			int bankSize = bank.rows();
+        int[] sectorTDC = null;
+        int[] layerTDC = null;
+        int[] componentTDC = null;
+        int[] TDC1 = null;
+        int[] TDC2 = null;
+        int[] TDCIdx1 = null;
+        int[] TDCIdx2 = null;
 
-			sectorADC = new int[bankSize];
-			layerADC = new int[bankSize];
-			componentADC = new int[bankSize];
-			ADC1 = new int[bankSize];
-			ADC2 = new int[bankSize];
-			time1 = new double[bankSize];
-			pedestalADC1 = new int[bankSize];
-			time2 = new double[bankSize];
-			pedestalADC2 = new int[bankSize];
-			ADCIdx1 = new int[bankSize];
-			ADCIdx2 = new int[bankSize];
+        if (event.hasBank(detADC) == true) {
+            DataBank bank = event.getBank(detADC);
+            int bankSize = bank.rows();
 
-			for (int i = 0; i < bankSize; i++) {
-				sectorADC[i] = bank.getByte("sector", i);
-				layerADC[i] = bank.getByte("layer", i);
-				componentADC[i] = bank.getShort("component", i);
-				int order = bank.getByte("order", i);
-				int ADC = bank.getInt("ADC", i);
-				double time = bank.getFloat("time", i);
-				int pedestalADC = bank.getShort("ped", i);
+            sectorADC = new int[bankSize];
+            layerADC = new int[bankSize];
+            componentADC = new int[bankSize];
+            ADC1 = new int[bankSize];
+            ADC2 = new int[bankSize];
+            time1 = new double[bankSize];
+            pedestalADC1 = new int[bankSize];
+            time2 = new double[bankSize];
+            pedestalADC2 = new int[bankSize];
+            ADCIdx1 = new int[bankSize];
+            ADCIdx2 = new int[bankSize];
 
-				ADC1[i] = -1;
-				ADC2[i] = -1;
-				time1[i] = -1;
-				pedestalADC1[i] = -1;
-				time2[i] = -1;
-				pedestalADC2[i] = -1;
+            for (int i = 0; i < bankSize; i++) {
+                sectorADC[i] = bank.getByte("sector", i);
+                layerADC[i] = bank.getByte("layer", i);
+                componentADC[i] = bank.getShort("component", i);
+                int order = bank.getByte("order", i);
+                int ADC = bank.getInt("ADC", i);
+                double time = bank.getFloat("time", i);
+                int pedestalADC = bank.getShort("ped", i);
 
-				if (order == 0) {
-					ADC1[i] = ADC;
-					time1[i] = time;
-					pedestalADC1[i] = pedestalADC;
-					ADCIdx1[i] = i;
-				}
-				if (order == 1) {
-					ADC2[i] = ADC;
-					time2[i] = time;
-					pedestalADC2[i] = pedestalADC;
-					ADCIdx2[i] = i;
-				}
+                ADC1[i] = -1;
+                ADC2[i] = -1;
+                time1[i] = -1;
+                pedestalADC1[i] = -1;
+                time2[i] = -1;
+                pedestalADC2[i] = -1;
 
-				BaseHit newHit = new BaseHit(sectorADC[i], layerADC[i],
-						componentADC[i]);
+                if (order == 0) {
+                    ADC1[i] = ADC;
+                    time1[i] = time;
+                    pedestalADC1[i] = pedestalADC;
+                    ADCIdx1[i] = i;
+                }
+                if (order == 1) {
+                    ADC2[i] = ADC;
+                    time2[i] = time;
+                    pedestalADC2[i] = pedestalADC;
+                    ADCIdx2[i] = i;
+                }
 
-				newHit.ADC1 = ADC1[i];
-				newHit.ADC2 = ADC2[i];
-				newHit.ADCpedestal1 = pedestalADC1[i];
-				newHit.ADCTime1 = time1[i];
-				newHit.ADCpedestal2 = pedestalADC2[i];
-				newHit.ADCTime2 = time2[i];
-				newHit.ADCbankHitIdx1 = ADCIdx1[i];
-				newHit.ADCbankHitIdx2 = ADCIdx2[i];
+                BaseHit newHit = new BaseHit(sectorADC[i], layerADC[i],
+                        componentADC[i]);
 
-				int[] _SLC = { newHit.get_Sector(), newHit.get_Layer(),
-						newHit.get_Component() };
-				DetectorLocation DL = new DetectorLocation(_SLC);
-				hmap.put(newHit, DL); 
+                newHit.ADC1 = ADC1[i];
+                newHit.ADC2 = ADC2[i];
+                newHit.ADCpedestal1 = pedestalADC1[i];
+                newHit.ADCTime1 = time1[i];
+                newHit.ADCpedestal2 = pedestalADC2[i];
+                newHit.ADCTime2 = time2[i];
+                newHit.ADCbankHitIdx1 = ADCIdx1[i];
+                newHit.ADCbankHitIdx2 = ADCIdx2[i];
 
-			}
-		}
-		if (event.hasBank(detTDC) == true) {
-			DataBank bank = event.getBank(detTDC);
-			int bankSize = bank.rows();
+                int[] _SLC = {newHit.get_Sector(), newHit.get_Layer(),
+                    newHit.get_Component()};
+                DetectorLocation DL = new DetectorLocation(_SLC);
+                hmap.put(newHit, DL);
 
-			sectorTDC = new int[bankSize];
-			layerTDC = new int[bankSize];
-			componentTDC = new int[bankSize];
-			TDC1 = new int[bankSize];
-			TDC2 = new int[bankSize];
-			TDCIdx1 = new int[bankSize];
-			TDCIdx2 = new int[bankSize];
+            }
+        }
+        if (event.hasBank(detTDC) == true) {
+            DataBank bank = event.getBank(detTDC);
+            int bankSize = bank.rows();
 
-			for (int i = 0; i < bankSize; i++) {
-				sectorTDC[i] = bank.getByte("sector", i);
-				layerTDC[i] = bank.getByte("layer", i);
-				componentTDC[i] = bank.getShort("component", i);
-				int order = bank.getByte("order", i);
-				int TDC = bank.getInt("TDC", i);
+            sectorTDC = new int[bankSize];
+            layerTDC = new int[bankSize];
+            componentTDC = new int[bankSize];
+            TDC1 = new int[bankSize];
+            TDC2 = new int[bankSize];
+            TDCIdx1 = new int[bankSize];
+            TDCIdx2 = new int[bankSize];
 
-				TDC1[i] = -1;
-				TDC2[i] = -1;
+            for (int i = 0; i < bankSize; i++) {
+                sectorTDC[i] = bank.getByte("sector", i);
+                layerTDC[i] = bank.getByte("layer", i);
+                componentTDC[i] = bank.getShort("component", i);
+                int order = bank.getByte("order", i);
+                int TDC = bank.getInt("TDC", i);
 
-				if (order == 2) {
-					TDC1[i] = TDC;
-					TDCIdx1[i] = i;
-				}
-				if (order == 3) {
-					TDC2[i] = TDC;
-					TDCIdx2[i] = i;
-				}
+                TDC1[i] = -1;
+                TDC2[i] = -1;
 
-				BaseHit newHit = new BaseHit(sectorTDC[i], layerTDC[i],
-						componentTDC[i]);
-				newHit.TDC1 = TDC1[i];
-				newHit.TDC2 = TDC2[i];
-				newHit.TDCbankHitIdx1 = TDCIdx1[i];
-				newHit.TDCbankHitIdx2 = TDCIdx2[i];
+                if (order == 2) {
+                    TDC1[i] = TDC;
+                    TDCIdx1[i] = i;
+                }
+                if (order == 3) {
+                    TDC2[i] = TDC;
+                    TDCIdx2[i] = i;
+                }
 
-				int[] _SLC = { newHit.get_Sector(), newHit.get_Layer(),
-						newHit.get_Component() };
-				DetectorLocation DL = new DetectorLocation(_SLC);
-				hmap.put(newHit, DL);
-			}
-		}
+                BaseHit newHit = new BaseHit(sectorTDC[i], layerTDC[i],
+                        componentTDC[i]);
+                newHit.TDC1 = TDC1[i];
+                newHit.TDC2 = TDC2[i];
+                newHit.TDCbankHitIdx1 = TDCIdx1[i];
+                newHit.TDCbankHitIdx2 = TDCIdx2[i];
 
-		Map<DetectorLocation, ArrayList<BaseHit>> reverseMap = new HashMap<>();
+                int[] _SLC = {newHit.get_Sector(), newHit.get_Layer(),
+                    newHit.get_Component()};
+                DetectorLocation DL = new DetectorLocation(_SLC);
+                hmap.put(newHit, DL);
+            }
+        }
 
-		for (Map.Entry<BaseHit, DetectorLocation> entry : hmap.entrySet()) {
+        Map<DetectorLocation, ArrayList<BaseHit>> reverseMap = new HashMap<>();
 
-			if (!reverseMap.containsKey(entry.getValue()))
-				reverseMap.put(entry.getValue(), new ArrayList<BaseHit>());
+        for (Map.Entry<BaseHit, DetectorLocation> entry : hmap.entrySet()) {
 
-			ArrayList<BaseHit> keys = reverseMap.get(entry.getValue());
-			keys.add(entry.getKey());
-			reverseMap.put(entry.getValue(), keys);
-		}
+            if (!reverseMap.containsKey(entry.getValue())) {
+                reverseMap.put(entry.getValue(), new ArrayList<BaseHit>());
+            }
 
-		return reverseMap;
+            ArrayList<BaseHit> keys = reverseMap.get(entry.getValue());
+            keys.add(entry.getKey());
+            reverseMap.put(entry.getValue(), keys);
+        }
 
-	}
+        return reverseMap;
 
-	public List<BaseHit> get_MatchedHits(DataEvent event, IMatchedHit MH) {
-		List<BaseHit> finalHitList = new ArrayList<BaseHit>();
+    }
 
-		Map<DetectorLocation, ArrayList<BaseHit>> hitMap = this.get_Hits(event,
-				MH.DetectorName());
-		if (hitMap != null) {
+    public List<BaseHit> get_MatchedHits(DataEvent event, IMatchedHit MH) {
+        List<BaseHit> finalHitList = new ArrayList<BaseHit>();
 
-			Set entrySet = hitMap.entrySet();
-			Iterator it = entrySet.iterator();
+        Map<DetectorLocation, ArrayList<BaseHit>> hitMap = this.get_Hits(event,
+                MH.DetectorName());
+        if (hitMap != null) {
 
-			while (it.hasNext()) {
-				Map.Entry me = (Map.Entry) it.next();
-				ArrayList<BaseHit> hitList = (ArrayList<BaseHit>) me.getValue();
-				
-				finalHitList.addAll(MH.MatchHits(hitList));
-			}
-		}
+            Set entrySet = hitMap.entrySet();
+            Iterator it = entrySet.iterator();
 
-		return finalHitList;
-	}
+            while (it.hasNext()) {
+                Map.Entry me = (Map.Entry) it.next();
+                ArrayList<BaseHit> hitList = (ArrayList<BaseHit>) me.getValue();
+
+                finalHitList.addAll(MH.MatchHits(hitList));
+            }
+        }
+
+        return finalHitList;
+    }
 }

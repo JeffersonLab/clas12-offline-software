@@ -5,8 +5,8 @@ import java.util.List;
 
 public interface IMatchedHit {
 
-	public String DetectorName();
+    public String DetectorName();
 
-	public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists);
+    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists);
 
 }
