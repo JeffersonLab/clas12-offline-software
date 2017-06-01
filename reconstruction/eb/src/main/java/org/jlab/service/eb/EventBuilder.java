@@ -9,6 +9,7 @@ import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.detector.CalorimeterResponse;
+import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
@@ -26,7 +27,7 @@ import org.jlab.geom.prim.Vector3D;
 public class EventBuilder {
     
     private DetectorEvent              detectorEvent = new DetectorEvent();
-    private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
+//    private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse> cherenkovResponses = new ArrayList<CherenkovResponse>();
     private List<ScintillatorResponse> scintillatorResponses = new ArrayList<ScintillatorResponse>();
     private List<CalorimeterResponse> calorimeterResponses = new ArrayList<CalorimeterResponse>();
@@ -37,9 +38,17 @@ public class EventBuilder {
         
     }
     
-    public void addDetectorResponses(List<DetectorResponse> responses){
-        detectorResponses.addAll(responses);
+    public void initEvent() {
+        detectorEvent.clear();
     }
+
+    public void initEvent(DetectorHeader head) {
+        detectorEvent.clear();
+        detectorEvent.addEventHeader(head);
+    }
+//    public void addDetectorResponses(List<DetectorResponse> responses){
+//        detectorResponses.addAll(responses);
+//    }
     
     public void addCherenkovResponses(List<CherenkovResponse> responses){
         cherenkovResponses.addAll(responses);
@@ -65,34 +74,10 @@ public class EventBuilder {
     //public void addTracks(List<DetectorTrack> tracks){
     
         
-    public void addHBTracks(List<DetectorTrack> tracks) {
-        detectorEvent.clear();
+    public void addTracks(List<DetectorTrack> tracks) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            detectorEvent.addParticle(particle);
-        }
-    }
-    
-    
-    public void addCentralTracks(List<DetectorTrack> tracks) {
-        detectorEvent.clear();
-        //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            //System.out.println("Central Track CTOF intersection....." + tracks.get(i).getTrackIntersect());
-            detectorEvent.addParticle(particle);
-        }
-    }
-    
-    public void addTaggerTracks(List<TaggerResponse> taggers) {
-        //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < taggers.size(); i++){
-            int charge = taggers.get(i).getCharge();
-            int id = taggers.get(i).getID();
-            Vector3D momentum = taggers.get(i).getMomentum();
-            DetectorParticle particle = new DetectorParticle(id,charge,momentum.x(),momentum.y(),momentum.z());
-            //System.out.println("Central Track CTOF intersection....." + tracks.get(i).getTrackIntersect());
             detectorEvent.addParticle(particle);
         }
     }
@@ -108,15 +93,17 @@ public class EventBuilder {
         
     }*/
     
-    public void addTBTracks(List<DetectorTrack> tracks) {
+    public void addTaggerTracks(List<TaggerResponse> taggers) {
         //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i));
+        for(int i = 0 ; i < taggers.size(); i++){
+            int charge = taggers.get(i).getCharge();
+            int id = taggers.get(i).getID();
+            Vector3D momentum = taggers.get(i).getMomentum();
+            DetectorParticle particle = new DetectorParticle(id,charge,momentum.x(),momentum.y(),momentum.z());
             detectorEvent.addParticle(particle);
         }
-        
     }
-
+    
 
     /**
      * processes all particles and associating detector responses with given cuts to each particle.
@@ -163,14 +150,14 @@ public class EventBuilder {
                 scintillatorResponses.get(index).setAssociation(n);
             }
             /**
-             * Matching tracks to FTOF layer 2 detector. Added to the particle and association is
+             * Matching tracks to CTOF detector. Added to the particle and association is
              */
-//            index = p.getScintillatorHit(this.scintillatorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
+            index = p.getScintillatorHit(this.scintillatorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
 //            //System.out.println("index CTOF = " + index);
-//            if(index>=0){
-//                p.addResponse(scintillatorResponses.get(index), true);
-//                scintillatorResponses.get(index).setAssociation(n);
-//            }
+            if(index>=0){
+                p.addResponse(scintillatorResponses.get(index), true);
+                scintillatorResponses.get(index).setAssociation(n);
+            }
             /**
              * Matching tracks to PCAL (first layer of ECAL) and adding to the particle if reasonable match
              * is found, and proper association is set.
@@ -191,7 +178,7 @@ public class EventBuilder {
                 //detectorResponses.get(index).setHitQuality(quality);
             }
             
-            index = p.getCalorimeterHit(this.calorimeterResponses, DetectorType.EC, 7, EBConstants.PCAL_MATCHING);
+            index = p.getCalorimeterHit(this.calorimeterResponses, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){
                 p.addResponse(calorimeterResponses.get(index), true);
                 calorimeterResponses.get(index).setAssociation(n);
@@ -210,23 +197,23 @@ public class EventBuilder {
     
     public void processNeutralTracks(){
         
-        List<DetectorResponse>  responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 1);
+        List<CalorimeterResponse>  responsesPCAL = this.getUnmatchedResponses(calorimeterResponses, DetectorType.EC, 1);
         
         List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
         
-        for(DetectorResponse r : responsesPCAL){
+        for(CalorimeterResponse r : responsesPCAL){
             DetectorParticle p = DetectorParticle.createNeutral(r);
             particles.add(p);
         }
         
-        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 4);
-        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 7);
+        List<CalorimeterResponse>   responsesECIN = this.getUnmatchedResponses(calorimeterResponses, DetectorType.EC, 4);
+        List<CalorimeterResponse>  responsesECOUT = this.getUnmatchedResponses(calorimeterResponses, DetectorType.EC, 7);
         
         for(int i = 0; i < particles.size(); i++){
             DetectorParticle p = particles.get(i);
-            int index = p.getDetectorHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
+            int index = p.getCalorimeterHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
-            index = p.getDetectorHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
+            index = p.getCalorimeterHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
         }
         
@@ -240,7 +227,7 @@ public class EventBuilder {
             p.vector().setXYZ(px*energy/EBConstants.ECAL_SAMPLINGFRACTION, 
                     py*energy/EBConstants.ECAL_SAMPLINGFRACTION,
                     pz*energy/EBConstants.ECAL_SAMPLINGFRACTION);
-            if(p.getDetectorResponses().size()>1){
+            if(p.getCalorimeterResponses().size()>1){
                 detectorEvent.addParticle(p);
             }
         }
@@ -249,9 +236,9 @@ public class EventBuilder {
         //System.out.println(" PCAL RESPONSES = " + responsesPCAL.size());
     }
     
-    public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
-        List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
-        for(DetectorResponse r : list){
+    public List<CalorimeterResponse> getUnmatchedResponses(List<CalorimeterResponse> list, DetectorType type, int layer){
+        List<CalorimeterResponse>  responses = new ArrayList<CalorimeterResponse>();
+        for(CalorimeterResponse r : list){
             if(r.getDescriptor().getType()==type&&r.getDescriptor().getLayer()==layer&&r.getAssociation()<0){
                 responses.add(r);
             }
@@ -288,7 +275,7 @@ public class EventBuilder {
 //          
 //        }
         
-       public void assignTrigger()  {
+    public void assignTrigger()  {
         int npart = this.detectorEvent.getParticles().size();
        
         for(int i = 0; i < npart; i++){
@@ -318,9 +305,8 @@ public class EventBuilder {
         if(index>0){
             this.detectorEvent.moveUp(index);
         }
-       
-       
-}
+      
+    }
        
 
         

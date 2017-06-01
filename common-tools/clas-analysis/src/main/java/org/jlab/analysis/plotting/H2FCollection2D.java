@@ -34,4 +34,10 @@ public class H2FCollection2D {
 			histoCollections.get(k).setTitleX(title);
 		}
 	}
+
+	public void setTitleY(String title) {
+		for(int k = 0; k < histoCollections.size(); k++) {
+			histoCollections.get(k).setTitleY(title);
+		}
+	}
 }

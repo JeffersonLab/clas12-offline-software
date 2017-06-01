@@ -1,0 +1,123 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>cnuphys</groupId>
+  <artifactId>cnuphys</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <!--
+  <parent>
+        <groupId>org.jlab.coat</groupId>
+        <artifactId>coat-clas-parent</artifactId>
+        <relativePath>../parent/pom.xml</relativePath>
+        <version>1.0-SNAPSHOT</version>
+  </parent>  
+  -->
+
+  <repositories>
+    <repository>
+      <id>local-build</id>
+      <url>https://clasweb.jlab.org/clas12maven</url>
+    </repository>
+  </repositories>
+
+<!-- project Dependencies -->
+
+<dependencies>
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>swimmer</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>magfield</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>snr</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>  
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>bCNU</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>
+
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>bCNU3D</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>splot</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </dependency>
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>f2jutil</artifactId>
+    <version>1.0</version>
+  </dependency>
+
+  <dependency>
+    <groupId>cnuphys</groupId>
+    <artifactId>numRec</artifactId>
+    <version>1.0</version>
+  </dependency>
+
+</dependencies>
+
+<!-- BUILD section for creating one JAR -->
+<build>
+  <finalName>cnuphys</finalName>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>2.3</version>
+      <configuration>
+	<outputFile>target/cnuphys-${project.version}.jar</outputFile>
+	<filters>
+	  <filter>
+	    <artifact>*:*</artifact>
+	    <excludes>
+	      <exclude>META-INF/*.SF</exclude>
+	      <exclude>META-INF/*.DSA</exclude>
+	      <exclude>META-INF/*.RSA</exclude>
+	    </excludes>
+	  </filter>
+	</filters>
+	
+	<artifactSet>
+          <excludes>
+            <exclude>cnuphys:gluegen</exclude>
+            <exclude>cnuphys:jogl</exclude>
+            <exclude>cnuphys:jogl-all</exclude>
+            <exclude>org.jlab.coda:jevio</exclude>
+          </excludes>
+        </artifactSet>
+
+      </configuration>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals>
+            <goal>shade</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+
+</project>

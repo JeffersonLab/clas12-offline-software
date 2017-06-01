@@ -42,19 +42,18 @@ public class EngineProcessor {
     public void initDefault(){
         
         String[] names = new String[]{
-            "DCHB","FTOF","EC","HTCC",
-            "EBHB",
-            "DCTB","EBTB"
+            "DCHB","DCTB","FTOF","EC","HTCC",
+            "EBTB","EBTB"
         };
         
         String[] services = new String[]{
             "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.ftof.FTOFEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
-            "org.jlab.service.eb.EBEngine",
-            "org.jlab.service.dc.DCTBEngine",
-            "org.jlab.service.eb.EBEngine"
+            "org.jlab.service.eb.EBHBEngine",
+            "org.jlab.service.eb.EBTBEngine"
         };
         
         for(int i = 0; i < names.length; i++){
@@ -69,10 +68,9 @@ public class EngineProcessor {
         
         String[] names = new String[]{
             "FTCAL", "FTHODO", "FTEB",
-            "DCHB","CVT",
-            "FTOF","EC","HTCC",
-            "EBHB",
-            "DCTB","EBTB"
+            "DCHB","DCTB","CVT",
+            "FTOF", "CTOF","EC","HTCC","LTCC",
+            "EBHB","EBTB"
         };
         
         String[] services = new String[]{
@@ -80,13 +78,15 @@ public class EngineProcessor {
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.FTEBEngine",
             "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.dc.DCTBEngine",
             "org.jlab.rec.cvt.services.CVTReconstruction",
             "org.jlab.service.ftof.FTOFEngine",
+            "org.jlab.service.ctof.CTOFEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
-            "org.jlab.service.eb.EBEngine",
-            "org.jlab.service.dc.DCTBEngine",
-            "org.jlab.service.eb.EBEngine"
+            "org.jlab.service.ltcc.LTCCEngine",
+            "org.jlab.service.eb.EBHBEngine",
+            "org.jlab.service.eb.EBTBEngine"
         };
         
         for(int i = 0; i < names.length; i++){

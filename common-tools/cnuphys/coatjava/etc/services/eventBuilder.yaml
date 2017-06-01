@@ -1,0 +1,4 @@
+---
+services:
+  - class: org.jlab.service.eb.EBEngine
+    name: EB

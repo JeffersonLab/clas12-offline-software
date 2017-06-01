@@ -177,7 +177,7 @@ public class ScintillatorResponse {
     }
     
     /**
-     * Returns a list of detectorResponses where all entries have energy above given threshold.
+     * Returns a list of ScintillatorResponse where all entries have energy above given threshold.
      * @param responses list of detector responses.
      * @param minEnergy minimum energy accepted
      * @return 

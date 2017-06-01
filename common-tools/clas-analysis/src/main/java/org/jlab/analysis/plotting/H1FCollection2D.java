@@ -34,4 +34,17 @@ public class H1FCollection2D {
 			histoCollections.get(k).setTitleX(title);
 		}
 	}
+
+	public void setLineColor(int color) {
+		for(int k = 0; k < histoCollections.size(); k++) {
+			histoCollections.get(k).setLineColor(color);
+		}
+	}
+
+	public void setLineWidth(int width) {
+		for(int k = 0; k < histoCollections.size(); k++) {
+			histoCollections.get(k).setLineWidth(width);
+		}
+	}
+
 }
