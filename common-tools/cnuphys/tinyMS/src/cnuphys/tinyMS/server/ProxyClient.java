@@ -14,17 +14,34 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import cnuphys.tinyMS.Environment.DateString;
 import cnuphys.tinyMS.common.ReaderThread;
 import cnuphys.tinyMS.common.WriterThread;
+import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.Messenger;
 
 public class ProxyClient extends Messenger {
+	
+	//log
+	private Log _log = Log.getInstance();
+	
+	/** Remote client's descriptive name, e.g. "ced" */
+	private String _clientName = "???";
+	
+	/** Remote client's user name, e.g. "heddle" */
+	private String _userName = "???";
 
-	// environmental strings sent from the client at handshake
-	private String[] _envStr;
+	/** Remote client's operating system */
+	private String _osName = "???";
+	
+	/** Remote client's host name" */
+	private String _hostName = "???";
 
+    /** number of messages arriving at server */
+	private long _messageCount = 0;
+		
 	// time in seconds that a client has to get itself verified
 	private static final int VERIFY_SECONDS = 20;
 
@@ -67,6 +84,9 @@ public class ProxyClient extends Messenger {
 
 	// the system time of the last ping from this client
 	private long _lastPing = -1;
+	
+	//the round trip time of the last ping
+	private long _duration = -1;
 
 	// to avoid multiple closings
 	private boolean _alreadyClosed = false;
@@ -107,7 +127,7 @@ public class ProxyClient extends Messenger {
 			@Override
 			public void run() {
 				if (!_verified) {
-					System.err.println("Closing unverified client [" + _id + "]");
+					_log.warning("Closing unverified client [" + _id + "]");
 					try {
 						close();
 					}
@@ -151,15 +171,49 @@ public class ProxyClient extends Messenger {
 	 * A ping has arrived, which is the end of a successful round trip.
 	 */
 	protected void pingArrived(Message message) {
-		System.err.println("PING arrived at server");
 		_lastPing = System.nanoTime();
 
 		// let's check the round trip time
 		long longArray[] = message.getLongArray();
 		long sentTime = longArray[0];
-		long duration = _lastPing - sentTime;
-		String pdstr = String.format(name() + " server round trip ping: %7.3f ms", duration / 1.0e6);
-		System.err.println(pdstr);
+		_duration = _lastPing - sentTime;
+		_log.info(getLastPingDuration());
+	}
+	
+	/**
+	 * Get a string representation of the time since the last ping 
+	 * @return a string representation of the the last ping 
+	 */
+	public String getTimeSinceLastPing() {
+		if (_lastPing < 0) {
+			return "";
+		}
+		double lapse = (System.nanoTime() - _lastPing) / 1.0e9;
+		return String.format("%5.1f s", lapse);
+	}
+	
+	/**
+	 * Get a string representation of the the last ping 
+	 * @return a string representation of the the last ping 
+	 */
+	public String getLastPing() {
+		return DateString.dateStringSS(_lastPing);
+	}
+	
+	/**
+	 * Get a minimal string representation of the duration of the last ping.
+	 * @return a small string representation of the duration of the last ping.
+	 */
+	public String getLastPingDurationSmall() {
+		return String.format("%6.2f ms", _duration/1.0e6);
+	}
+	
+	/**
+	 * Get a string representation of the duration of the last ping.
+	 * @return a string representation of the duration of the last ping.
+	 */
+	public String getLastPingDuration() {
+		return String.format("[id: " + getId() + "]  [cnt: " + getMessageCount() + "] " + getClientName() + " server round trip ping: %7.3f ms", _duration / 1.0e6);
 	}
 
 	/**
@@ -192,23 +246,6 @@ public class ProxyClient extends Messenger {
 		return _socket.getInetAddress();
 	}
 
-	/**
-	 * Get the underlying host name of the client
-	 * 
-	 * @return the underlying host name
-	 */
-	public String getHostName() {
-		return _socket.getInetAddress().getHostName();
-	}
-
-	/**
-	 * Get the underlying host address of the client
-	 * 
-	 * @return the underlying host address
-	 */
-	public String getHostAddress() {
-		return _socket.getInetAddress().getHostAddress();
-	}
 
 	/**
 	 * Get the "closed" state of the remote client.
@@ -262,6 +299,8 @@ public class ProxyClient extends Messenger {
 	 * server wants to manually remove a client.
 	 */
 	public void shutdown() {
+		
+		_log.config("Server sending a shudown to: " + getClientName());
 
 		// send a shutdown
 		Message message = Message.createShutdownMessage(getId());
@@ -385,33 +424,77 @@ public class ProxyClient extends Messenger {
 		_verified = verified;
 	}
 
-	/**
-	 * Set by the server when the handshake is received.
-	 * 
-	 * @param array
-	 *            the array of environment strings which should be: [0]
-	 *            descriptive user name [1] login user name [2] os name [3] host
-	 *            name
-	 */
-	protected void setEnvStrings(String array[]) {
-		_envStr = array;
-	}
 
 	/**
-	 * Get a descriptive name (e.g., "ced"). It might be the same as the login
-	 * name
+	 * Get a descriptive name (e.g., "ced") of the remote client.
+	 * It might be the same as the juser name.
 	 * 
 	 * @return a name of the messenger
 	 */
 	@Override
-	public String name() {
-		if (_envStr == null) {
-			return "???";
-		}
-
-		String s = _envStr[0];
-		return (s != null) ? s : "???";
+	public String getClientName() {
+		return _clientName;
 	}
+	
+	/**
+	 * Get the username of the remote client.
+	 * 
+	 * @return the username name of the remote client
+	 */
+	public String getUserName() {
+		return _userName;
+	}
+
+	/**
+	 * Get the OS name of the remote client.
+	 * 
+	 * @return the operating system name of the remote client
+	 */
+	public String getOSName() {
+		return _osName;
+	}
+	
+	/**
+	 * Get the host name of the remote client.
+	 * 
+	 * @return the operating system name of the remote client
+	 */
+	public String getHostName() {
+		return _hostName;
+	}
+	
+	/**
+	 * Set the client name of the remote client
+	 * @param name client name of the remote client
+	 */
+	protected void setClientName(String name) {
+		_clientName = (name != null) ? name : "???";
+	}
+	
+	/**
+	 * Set the user name of the remote client
+	 * @param name user name of the remote client
+	 */
+	protected void setUserName(String name) {
+		_userName = (name != null) ? name : "???";
+	}
+
+	/**
+	 * Set the name of the remote client
+	 * @param operating system name of the remote client
+	 */
+	protected void setOSName(String name) {
+		_osName = (name != null) ? name : "???";
+	}
+
+	/**
+	 * Set the host name of the remote client
+	 * @param name host name of the remote client
+	 */
+	protected void setHostName(String name) {
+		_hostName = (name != null) ? name : "???";
+	}
+
 
 	/**
 	 * Convert a list of ProxyClients into an array
@@ -433,5 +516,21 @@ public class ProxyClient extends Messenger {
 
 		return array;
 	}
+	
+	/**
+	 * Increment the message count. The Server does this.
+	 */
+	protected void incrementMessageCount() {
+		_messageCount++;
+	}
+	
+	/**
+	 * Get the number of messages this remote client has sent to the server
+	 * @return the number of messages this remote client has sent to the server
+	 */
+	public long getMessageCount() {
+		return _messageCount;
+	}
+
 
 }

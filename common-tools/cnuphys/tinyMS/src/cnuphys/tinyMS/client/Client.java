@@ -200,7 +200,7 @@ public class Client extends Messenger {
 	 * @return a name of the client
 	 */
 	@Override
-	public String name() {
+	public String getClientName() {
 		return (_userName != null) ? _userName : Environment.getInstance().getUserName();
 	}
 
@@ -248,7 +248,7 @@ public class Client extends Messenger {
 		}
 		_alreadyClosed = true;
 
-		System.err.println("Closing " + name());
+		System.err.println("Closing " + getClientName());
 		_reader.stopReader();
 		_writer.stopWriter();
 		_socket.close();

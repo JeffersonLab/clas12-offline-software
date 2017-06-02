@@ -13,7 +13,7 @@ public interface IMessenger {
 	 * 
 	 * @return a name of the messenger
 	 */
-	public String name();
+	public String getClientName();
 
 	/**
 	 * Get the data input stream. Messages will be read from this stream and

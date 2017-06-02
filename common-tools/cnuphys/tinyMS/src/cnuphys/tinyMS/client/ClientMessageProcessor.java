@@ -2,7 +2,6 @@ package cnuphys.tinyMS.client;
 
 import java.io.IOException;
 import cnuphys.tinyMS.Environment.Environment;
-import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageProcessor;
 import cnuphys.tinyMS.message.MessageType;
@@ -19,6 +18,15 @@ public class ClientMessageProcessor extends MessageProcessor {
 	public ClientMessageProcessor(Client client) {
 		_client = client;
 	}
+	
+	/**
+	 * A message is about to be farmed out to the appropriate handler.
+	 * This allows you to take a peek at it first.
+	 * @param message the message
+	 */
+	public void peekAtMessage(Message message) {
+		//default: do nothing
+	}
 
 	// A logout message should be from client to server
 	@Override
@@ -32,12 +40,14 @@ public class ClientMessageProcessor extends MessageProcessor {
 	// as part of the server shutting down gracefully.
 	@Override
 	public void processShutdownMessage(Message message) {
+		System.err.println("!!! [" + _client.getClientName() + "] " + " received a SHUTDOWN!");
 		try {
 			_client.getOutboundQueue().setAccept(false);
 			
 			//give it time to send last message
 			try {
-				Thread.currentThread().sleep(2000);
+				Thread.currentThread();
+				Thread.sleep(2000);
 			}
 			catch (InterruptedException e) {
 				e.printStackTrace();
@@ -86,7 +96,7 @@ public class ClientMessageProcessor extends MessageProcessor {
 		long ct = System.nanoTime();
 		if (_client.getLastPing() > 0) {
 			long duration = ct - _client.getLastPing();
-			String pdstr = String.format("Time since last ping: %7.3f ms", duration / 1.0e6);
+			String pdstr = String.format("[" + _client.getClientName() + "] " + "Time since last ping: %7.3f ms", duration / 1.0e6);
 			System.err.println(pdstr);
 		}
 
@@ -137,12 +147,12 @@ public class ClientMessageProcessor extends MessageProcessor {
 	 * 
 	 * @return the environment string array
 	 */
-	protected String[] envStringArray() {
+	private String[] envStringArray() {
 		String array[] = new String[4];
 		
 		Environment env = Environment.getInstance();
 
-		array[0] = _client.name();
+		array[0] = _client.getClientName();
 		array[1] = env.getUserName();
 		array[2] = env.getOsName();
 		array[3] = env.getHostName();
