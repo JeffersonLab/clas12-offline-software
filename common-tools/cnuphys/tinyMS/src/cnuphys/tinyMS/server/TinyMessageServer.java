@@ -5,6 +5,7 @@ import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Vector;
 
 import cnuphys.tinyMS.log.Log;
@@ -42,6 +43,9 @@ public class TinyMessageServer {
 
 	// name of the server
 	private String _name;
+	
+	//the GUI
+	private ServerFrame _serverFrame;
 
 	// will process the inbound messages
 	private MessageProcessor _messageProcessor;
@@ -49,7 +53,7 @@ public class TinyMessageServer {
 	// to avoid multiple shutdowns resulting possible resulting from
 	// the shutdown hook thread
 	private boolean _alreadyShutDown = false;
-
+	
 	/**
 	 * Create a message server on a specific port.
 	 * 
@@ -71,7 +75,6 @@ public class TinyMessageServer {
 		}
 
 		initialize();
-
 	}
 
 	/**
@@ -106,7 +109,7 @@ public class TinyMessageServer {
 	private void initialize() {
 		System.err.print("Creating gui...");
 		// create a gui
-		ServerFrame.createServerFrame(this);
+		_serverFrame = ServerFrame.createServerFrame(this);
 		System.err.println("done.");
 
 		if (_serverSocket == null) {
@@ -143,7 +146,7 @@ public class TinyMessageServer {
 			}
 		};
 		new Thread(acceptThread).start();
-
+		
 		// create a shutdown thread so we can die gracefully even if
 		// killed by a ctrl-c
 
@@ -164,6 +167,7 @@ public class TinyMessageServer {
 		Thread shutDownThread = new Thread(shutDown);
 		Runtime.getRuntime().addShutdownHook(shutDownThread);
 	}
+	
 
 	/**
 	 * Try to start a server on a given port.
@@ -286,8 +290,16 @@ public class TinyMessageServer {
 	 * 
 	 * @return an array of proxy clients
 	 */
-	protected ProxyClient[] getProxyClients() {
+	public ProxyClient[] getProxyClientArray() {
 		return ProxyClient.toArray(_proxyClients);
+	}
+	
+	/**
+	 * Get the list of proxy clients
+	 * @return the list of proxy clients
+	 */
+	public List<ProxyClient> getProxyClients() {
+		return _proxyClients;
 	}
 
 	/**
@@ -391,6 +403,14 @@ public class TinyMessageServer {
 	 */
 	public String getName() {
 		return _name;
+	}
+	
+	/**
+	 * Get the Gui
+	 * @return the server frame gui
+	 */
+	public ServerFrame getGui() {
+		return _serverFrame;
 	}
 
 }

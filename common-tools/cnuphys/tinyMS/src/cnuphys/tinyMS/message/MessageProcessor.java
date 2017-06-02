@@ -1,7 +1,5 @@
 package cnuphys.tinyMS.message;
 
-import cnuphys.tinyMS.server.ServerMessageProcessor;
-
 /**
  * This object is used by clients and servers to direct messages to their proper
  * handler based on message type. The allowed types are enumerated in
@@ -24,10 +22,10 @@ public abstract class MessageProcessor {
 			return;
 		}
 		
-		if (this instanceof ServerMessageProcessor) {
-			System.err.println("*** SERVER received message of type: " + message.getMessageType() + "  frm: " + message.getSourceId());
-		}
-		// CLOSE, DATA, HANDSHAKE, PING, USER;
+		//first peek at message
+		peekAtMessage(message);
+		
+		// CLOSE, DATA, HANDSHAKE, PING, USER, SHUTDOWN, SERVERLOG;
 
 		switch (message.getMessageType()) {
 		case LOGOUT:
@@ -56,6 +54,13 @@ public abstract class MessageProcessor {
 
 		}
 	}
+	
+	/**
+	 * A message is about to be farmed out to the appropriate handler.
+	 * This allows you to take a peek at it first.
+	 * @param message the message
+	 */
+	public abstract void peekAtMessage(Message message);
 
 	/**
 	 * Process a LOGOUT message. This is a message that a client sends signaling

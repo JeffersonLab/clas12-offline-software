@@ -6,6 +6,7 @@ import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageProcessor;
 import cnuphys.tinyMS.message.MessageType;
+import cnuphys.tinyMS.server.gui.ServerFrame;
 
 public class ServerMessageProcessor extends MessageProcessor {
 
@@ -23,6 +24,18 @@ public class ServerMessageProcessor extends MessageProcessor {
 		_server = server;
 	}
 
+	/**
+	 * A message is about to be farmed out to the appropriate handler.
+	 * This allows you to take a peek at it first.
+	 * @param message the message
+	 */
+	public void peekAtMessage(Message message) {
+		ProxyClient proxyClient = _server.getSender(message);
+		if (proxyClient != null) {
+			proxyClient.incrementMessageCount();
+		}
+	}
+
 	// this message is a client voluntarily logging out.
 	// That is, the message originated from the client
 	@Override
@@ -33,10 +46,11 @@ public class ServerMessageProcessor extends MessageProcessor {
 		}
 
 		try {
-			System.err.println("closing a connection for client: " + proxyClient.name());
+			_log.info("closing a connection for client: " + proxyClient.getClientName());
 			// call close, not shutdown. The latter is
 			// for a server forced logout of a client.
 			proxyClient.close();
+			fireTableDataChanged();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -64,20 +78,24 @@ public class ServerMessageProcessor extends MessageProcessor {
 			_log.warning("Could not get sender of handshake");
 		}
 		else {
-			_log.config("remote client verified");
+			_log.config("remote client verified: " + sender.getClientName());
 			sender.setVerified(true);
 
 			// get username
 			String env[] = message.getStringArray();
-			_log.info("*********");
-			_log.info("Client id: " + sender.getId());
-			_log.info("USER NAME: " + env[0]);
-			_log.info("LOGIN NAME: " + env[1]);
-			_log.info("OS NAME: " + env[2]);
-			_log.info("HOST NAME: " + env[3]);
-
-			sender.setEnvStrings(env);
 			sender.startPingTimer();
+			sender.setClientName(env[0]);
+			sender.setUserName(env[1]);
+			sender.setOSName(env[2]);
+			sender.setHostName(env[3]);
+			
+			_log.info("*********");
+			_log.info("CLIENT ID: " + sender.getId());
+			_log.info("CLIENT NAME: " + sender.getClientName());
+			_log.info("USER NAME: " + sender.getUserName());
+			_log.info("OS NAME: " + sender.getOSName());
+			_log.info("HOST NAME: " + sender.getHostName());
+			fireTableDataChanged();			
 		}
 	}
 
@@ -104,7 +122,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 		_log.config("Server got a SERVERLOG message");
 		Log.Level level = Log.Level.values()[message.getTag()];
 		String lstr = message.getString();
-		String nstr = _server.getProxyClient(message.getSourceId()).name();
+		String nstr = _server.getProxyClient(message.getSourceId()).getClientName();
 		String s = "[Client: " + nstr + "] " + lstr;
 		
 		//ERROR, CONFIG, WARNING, INFO, EXCEPTION
@@ -170,7 +188,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 	 *            the message to broadcast
 	 */
 	protected void broadcastMessage(Message message) {
-		ProxyClient[] array = _server.getProxyClients();
+		ProxyClient[] array = _server.getProxyClientArray();
 
 		if (array != null) {
 			for (ProxyClient client : array) {
@@ -207,5 +225,17 @@ public class ServerMessageProcessor extends MessageProcessor {
 			}
 		}
 	}
+	
+	/**
+	 * Convenience routine to fire a data changed event
+	 * so that the table (if present)  updates
+	 */
+	public void fireTableDataChanged() {
+		ServerFrame gui = _server.getGui();
+		if (gui != null) {
+			gui.fireTableDataChanged();
+		}
+	}
+
 
 }
