@@ -15,9 +15,12 @@ import java.util.TimerTask;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -25,6 +28,8 @@ import javax.swing.border.Border;
 
 import cnuphys.tinyMS.Environment.Environment;
 import cnuphys.tinyMS.graphics.GraphicsUtilities;
+import cnuphys.tinyMS.graphics.ImageManager;
+import cnuphys.tinyMS.graphics.MemoryStripChart;
 import cnuphys.tinyMS.log.SimpleLogPane;
 import cnuphys.tinyMS.server.TinyMessageServer;
 import cnuphys.tinyMS.table.ClientTable;
@@ -54,7 +59,10 @@ public class ServerFrame extends JFrame implements ActionListener {
 	
 	//table stuff
 	private ClientTable _table;
-
+	
+	//Memory strip chart
+	private MemoryStripChart _chart;
+	
 	/**
 	 * Create a frame that will monitor the given server
 	 */
@@ -98,7 +106,6 @@ public class ServerFrame extends JFrame implements ActionListener {
 		_timer = new Timer();
 		_timer.scheduleAtFixedRate(task, 10000, 1000);
 	}
-
 
 	// add the content to the frame
 	private void addContent() {
@@ -154,7 +161,7 @@ public class ServerFrame extends JFrame implements ActionListener {
 	// add the component in the north
 	private void addNorth() {
 		JPanel nPanel = new JPanel();
-		nPanel.setLayout(new BorderLayout(2, 2));
+		nPanel.setLayout(new BorderLayout(15, 6));
 
 		// labels
 
@@ -178,7 +185,11 @@ public class ServerFrame extends JFrame implements ActionListener {
 		lPanel.add(_durationLabel);
 
 
-		nPanel.add(lPanel, BorderLayout.WEST);
+		nPanel.add(lPanel, BorderLayout.CENTER);
+		
+		//memory strip chart
+		_chart = new MemoryStripChart(_server);
+		nPanel.add(_chart, BorderLayout.WEST);
 		
 		Border emptyBorder = BorderFactory
 				.createEmptyBorder(4, 4, 4, 4);
@@ -273,7 +284,9 @@ public class ServerFrame extends JFrame implements ActionListener {
 
 		}
 		else if (source == _stopButton) {
-			shutDown();
+			if (reallyStop()) {
+				shutDown();
+			}
 		}
 		else if (source == _logoutButton) {
 			
@@ -287,19 +300,32 @@ public class ServerFrame extends JFrame implements ActionListener {
 	 * @param count running index of housekeeping calls.
 	 */
 	public void houseKeeping(long count) {	
-		System.err.println("GUI housekeeping");
 		uptime();
 		
-		if (_table != null) {
-			_table.fireTableDataChanged();
+		if (_server.isShutDown()) {
+			_timer.cancel();
+			System.err.println("Frame detected server shutdown.");
 		}
 		
-		//do something every five seconds
-		if ((count % 5) == 0) {
+//		if (_table != null) {
+//			_table.fireTableDataChanged();
+//		}
+		
+		//do something every two seconds
+		if ((count % 2) == 0) {
+			if (_table != null) {
+				_table.fireTableDataChanged();
+			}
 		}
 	}
 	
 	private void uptime() {
+		
+		if (_server.isShutDown()) {
+			_durationLabel.setText("Server has stopped.");
+			return;
+		}
+		
 		long del = (System.currentTimeMillis() - _startTime)/1000;
 		
 		long days = del / 86400;
@@ -323,6 +349,21 @@ public class ServerFrame extends JFrame implements ActionListener {
 		if (_table != null) {
 			_table.fireTableDataChanged();
 		}
+	}
+	
+	/**
+	 * Do i really want to stop the server?
+	 * @return <code>true</code> if I really want to stop
+	 */
+	public boolean reallyStop() {
+		ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
+		int answer = JOptionPane.showConfirmDialog(null,
+				"Do you really want to stop the server?",
+				"Stop the server?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
+				icon);
+		
+		return (answer == JFileChooser.APPROVE_OPTION);
+
 	}
 
 }
