@@ -52,7 +52,7 @@ public class TinyMessageServer {
 
 	// to avoid multiple shutdowns resulting possible resulting from
 	// the shutdown hook thread
-	private boolean _alreadyShutDown = false;
+	private boolean _shutDown = false;
 	
 	/**
 	 * Create a message server on a specific port.
@@ -301,18 +301,26 @@ public class TinyMessageServer {
 	public List<ProxyClient> getProxyClients() {
 		return _proxyClients;
 	}
+	
+	/**
+	 * See if the server has been shut down
+	 * @return <code>true</code> if the server has been shut down
+	 */
+	public boolean isShutDown() {
+		return _shutDown;
+	}
 
 	/**
 	 * Shutdown the server. As a courtesy, notify all the clients.
 	 */
 	public void shutdown() throws IOException {
 
-		if (_alreadyShutDown) {
+		if (_shutDown) {
 			System.err.println("Server already shut down");
 			return;
 		}
 
-		_alreadyShutDown = true;
+		_shutDown = true;
 
 		acceptConnections = false;
 
