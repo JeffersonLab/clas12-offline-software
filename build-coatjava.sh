@@ -3,17 +3,19 @@
 mkdir coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
-cp -r lib coatjava/
-mkdir coatjava/lib/services
+mkdir -p coatjava/lib/clas
+cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
+cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
+mkdir -p coatjava/lib/utils
+cp external-dependencies/clas-update-1.0-SNAPSHOT.jar coatjava/lib/utils
+cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
+cp external-dependencies/KPP-Monitoring-1.0.jar coatjava/lib/utils
+cp external-dependencies/KPP-Plots-1.0.jar coatjava/lib/utils
+mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
 rm -rf ~/.m2/repository/org/hep/hipo
-rm -rf ~/.m2/repository/org/jlab/groot
-rm -rf ~/.m2/repository/org/jlab/service/dc
-rm -rf ~/.m2/repository/org/jlab/clas/clas-jcsg
-rm -rf ~/.m2/repository/org/jlab/clas/coat-libs
-rm -rf ~/.m2/repository/org/jlab/clas/common-tools
-rm -rf ~/.m2/repository/org/jlab/coda
+rm -rf ~/.m2/repository/org/jlab
 
 ### coat-libs ###
 cd common-tools
