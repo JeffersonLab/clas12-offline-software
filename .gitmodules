@@ -1,0 +1,6 @@
+[submodule "groot"]
+	path = groot
+	url = https://github.com/gavalian/groot
+[submodule "hipo-io"]
+	path = hipo-io
+	url = https://github.com/gavalian/hipo-io
