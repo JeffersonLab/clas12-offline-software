@@ -37,7 +37,7 @@ public abstract class CedView3D extends BaseView implements
 			.getInstance();
 
 	// the 3D panel
-	private final CedPanel3D _panel3D;
+	protected final CedPanel3D _panel3D;
 
 	// menu
 	private JMenuItem _printMenuItem;
@@ -174,6 +174,13 @@ public abstract class CedView3D extends BaseView implements
 	public void focusGained(FocusEvent e) {
 		if (_panel3D != null) {
 			_panel3D.requestFocus();
+		}
+	}
+	
+	@Override
+	public void refresh() {
+		if (_panel3D != null) {
+			_panel3D.refresh();
 		}
 	}
 

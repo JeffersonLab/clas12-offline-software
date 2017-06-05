@@ -32,7 +32,7 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 	private Rectangle _svtFBRects[];
 
 	/**
-	 * A BST Cross drawer
+	 * An SVT Cross drawer
 	 * @param view the owner vie
 	 */
 	public CrossDrawerZ(CentralZView view) {
@@ -55,7 +55,7 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
-		drawBSTCrosses(g, container);
+		drawSVTCrosses(g, container);
 		drawBMTCrosses(g, container);
 		g2.setStroke(oldStroke);
 	}
@@ -65,7 +65,7 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 	 * @param g the graphics context
 	 * @param container the drawing container
 	 */
-	public void drawBSTCrosses(Graphics g, IContainer container) {
+	public void drawSVTCrosses(Graphics g, IContainer container) {
 		
 		
 		
@@ -128,94 +128,13 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
 				// the circles and crosses
-				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.SVT_CROSS);
 
 				// fbrects for quick feedback
 				_svtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
 						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 			}
 		} //len > 0
-		
-		
-		
-		
-//		
-//		// bst crosses?
-//		if (BST.crossCount() == 0) {
-//			return;
-//		}
-//
-//		Point2D.Double wp = new Point2D.Double();
-//		Point pp = new Point();
-//		Point2D.Double wp2 = new Point2D.Double();
-//		Point pp2 = new Point();
-//		Point2D.Double wp3 = new Point2D.Double();
-//		Point2D.Double wp4 = new Point2D.Double();
-//
-//		double labx[] = BST.crossX();
-//
-//		if (labx != null) {
-//			double laby[] = BST.crossY();
-//			double labz[] = BST.crossZ();
-//			double errz[] = BST.crossZerr();
-//			double unitx[] = BST.crossUx();
-//			double unity[] = BST.crossUy();
-//			double unitz[] = BST.crossUz();
-//			
-//			int len = (labx == null) ? 0 : labx.length;
-//
-//			if (len == 0) {
-//				_fbRects = null;
-//			} else {
-//				_fbRects = new Rectangle[len];
-//			}
-//
-//			// error bars
-//			if (errz != null) {
-//				for (int i = 0; i < len; i++) {
-//					// System.err.println("Draw Z error bars");
-//					_view.labToWorld(labx[i], laby[i], labz[i], wp);
-//					wp3.setLocation(wp.x - errz[i], wp.y);
-//					wp4.setLocation(wp.x + errz[i], wp.y);
-//					container.worldToLocal(pp, wp3);
-//					container.worldToLocal(pp2, wp4);
-//					g.setColor(ERROR);
-//					g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x,
-//							2 * DataDrawSupport.CROSSHALF);
-//				}
-//			}
-//			
-//			for (int i = 0; i < len; i++) {
-//				_view.labToWorld(labx[i], laby[i], labz[i], wp);
-//
-//				// arrows
-//
-//				int pixlen = ARROWLEN;
-//				double r = pixlen
-//						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
-//
-//				double xa = labx[i] + r * unitx[i];
-//				double ya = laby[i] + r * unity[i];
-//				double za = labz[i] + r * unitz[i];
-//				_view.labToWorld(xa, ya, za, wp2);
-//
-//				container.worldToLocal(pp, wp);
-//				container.worldToLocal(pp2, wp2);
-//
-//				g.setColor(Color.orange);
-//				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
-//				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
-//				g.setColor(Color.darkGray);
-//				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
-//
-//				// the circles and crosses
-//				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
-//
-//				// fbrects for quick feedback
-//				_fbRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
-//						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
-//			}
-//		}
 	}
 	
 	public void drawBMTCrosses(Graphics g, IContainer container) {

@@ -322,7 +322,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 							public void run() {
 								setVisible(false);
 								ViewManager.getInstance()
-										.refreshAllContainerViews();
+										.refreshAllViews();
 							}
 						});
 
@@ -336,7 +336,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 				_reason = DialogUtilities.CANCEL_RESPONSE;
 			}
 
-			ViewManager.getInstance().refreshAllContainerViews();
+			ViewManager.getInstance().refreshAllViews();
 		} //ok
 		else {
 			setVisible(false);

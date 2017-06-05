@@ -16,7 +16,7 @@ public class Constants {
  */
 	// THE GEOMETRY CONSTANTS
 	public static final int NREGIONS = 3;							// 3 regions of MM 
-	//public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
+	//public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost SVT ring)
 	
 	//Z detector characteristics
 	private static double[] CRZRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm

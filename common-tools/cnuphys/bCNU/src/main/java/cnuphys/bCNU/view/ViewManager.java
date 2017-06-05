@@ -146,13 +146,11 @@ public class ViewManager extends Vector<BaseView>
 	}
 
 	/**
-	 * Refresh all the views with containers.
+	 * Refresh all the views
 	 */
-	public void refreshAllContainerViews() {
+	public void refreshAllViews() {
 		for (BaseView view : this) {
-			if (view.getContainer() != null) {
-				view.getContainer().refresh();
-			}
+			view.refresh();
 		}
 	}
 

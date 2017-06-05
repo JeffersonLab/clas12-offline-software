@@ -15,7 +15,7 @@ public abstract class CentralXYViewDrawer implements IDrawable {
 	protected ClasIoEventManager _eventManager = ClasIoEventManager
 			.getInstance();
 
-	// the BSTXYView being rendered.
+	// the CentralXYView being rendered.
 	protected CentralXYView _view;
 
 	public CentralXYViewDrawer(CentralXYView view) {

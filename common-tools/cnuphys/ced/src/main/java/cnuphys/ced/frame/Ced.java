@@ -47,6 +47,8 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
+import cnuphys.ced.event.data.BMT;
+import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.DC;
@@ -170,6 +172,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//"play" dc occupancy?
 	private JCheckBoxMenuItem _playDCOccupancy;
+	
+	//use old SVT geometry
+	private JCheckBoxMenuItem _oldSVTGeometry;
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -441,13 +446,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				}
 				
 				PlotPanel panel;
-				String title = "BST layer_" + layer + " sector_" + sector;
+				String title = "SVT layer_" + layer + " sector_" + sector;
 				panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "strip", "count", -0.5, 256-0.5, 256);
 				return panel;
 			}
 			
 		};
-		bstHistoGrid = HistoGridView.createHistoGridView("BST Histograms", 8, 24, 300, 240, 0.7, maker);
+		bstHistoGrid = HistoGridView.createHistoGridView("SVT Histograms", 8, 24, 300, 240, 0.7, maker);
 	}
 	
 	//pcal strip histogram
@@ -609,13 +614,26 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		};
 		memPlot.addActionListener(al);
 		omenu.add(memPlot);
+		omenu.addSeparator();
+		
+		ActionListener al2 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				refresh();
+			}			
+		};
+		
+		_oldSVTGeometry = new JCheckBoxMenuItem("Use old (four-region) SVT"
+				+ " Geometry", false);
+		_oldSVTGeometry.addActionListener(al2);
+		omenu.add(_oldSVTGeometry);
 	}
 
 	/**
 	 * Refresh all views (with containers)
 	 */
 	public static void refresh() {
-		ViewManager.getInstance().refreshAllContainerViews();
+		ViewManager.getInstance().refreshAllViews();
 	}
 
 	/**
@@ -667,6 +685,18 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 		return false;
 	}
+	
+	/**
+	 * Flag controlling whether we use the old SVT geometry
+	 * @return <code>true</code> if the tone should be played
+	 */
+	public boolean useOldSVTGeometry() {
+		if (_oldSVTGeometry != null) {
+			return _oldSVTGeometry.getState();
+		}
+		return false;
+	}
+
 
 	/**
 	 * private access to the Ced singleton.
@@ -929,6 +959,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//Initialize data collectors
 		DC.getInstance();
 		FTOF.getInstance();
+		BMTCrosses.getInstance();
 		SVTCrosses.getInstance();
 		TBCrosses.getInstance();
 		HBCrosses.getInstance();
@@ -941,6 +972,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		FTCAL.getInstance();
 		CTOF.getInstance();
 		SVT.getInstance();
+		BMT.getInstance();
 		Cosmics.getInstance();
 
 		// now make the frame visible, in the AWT thread

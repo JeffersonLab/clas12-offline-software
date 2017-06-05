@@ -383,7 +383,7 @@ public class NoiseParameterDialog extends JDialog {
 									_clonedParameters[superLayer]);
 				}
 			}
-			ViewManager.getInstance().refreshAllContainerViews();
+			ViewManager.getInstance().refreshAllViews();
 
 			if (reason == DialogUtilities.OK_RESPONSE) {
 				setVisible(false);
