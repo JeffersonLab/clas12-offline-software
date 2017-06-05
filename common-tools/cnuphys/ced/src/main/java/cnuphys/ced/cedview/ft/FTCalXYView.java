@@ -47,7 +47,7 @@ public class FTCalXYView extends CedXYView {
 	private short[] indices = new short[476];
 
 	/**
-	 * Create a BST View
+	 * Create a FTCalXYView View
 	 * 
 	 */
 	public FTCalXYView(Object... keyVals) {

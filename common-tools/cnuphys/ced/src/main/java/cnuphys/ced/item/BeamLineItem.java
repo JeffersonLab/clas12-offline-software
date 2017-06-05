@@ -73,28 +73,6 @@ public class BeamLineItem extends BaseBeamLineItem {
 			g.drawLine(xc - 3, yc, xc + 3, yc);
 		}
 
-		// if ((_targetIcon != null) && (view instanceof SectorView) ) {
-		// Point targetPP = new Point();
-		// container.worldToLocal(targetPP, ((SectorView) view).getTargetZ(),
-		// 0.0);
-		//
-		// int halfy = (_targetIcon.getIconHeight() / 2);
-		// int halfx = (_targetIcon.getIconWidth() / 2);
-		//
-		// g.drawImage(_targetIcon.getImage(), targetPP.x - halfx, targetPP.y
-		// - halfy, container.getComponent());
-		// }
-		// if ((_targetIcon != null) && (view instanceof BSTzView) ) {
-		// Point targetPP = new Point();
-		// container.worldToLocal(targetPP, ((BSTzView) view).getTargetZ(),
-		// 0.0);
-		//
-		// int halfy = (_targetIcon.getIconHeight() / 2);
-		// int halfx = (_targetIcon.getIconWidth() / 2);
-		//
-		// g.drawImage(_targetIcon.getImage(), targetPP.x - halfx, targetPP.y
-		// - halfy, container.getComponent());
-		// }
 	}
 
 	// no feedback for beamline
