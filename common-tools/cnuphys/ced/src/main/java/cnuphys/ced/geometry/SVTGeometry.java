@@ -17,7 +17,7 @@ public class SVTGeometry {
 	public static final boolean USECOATJAVA = true;
 
 	/*
-	 * The BST Geometry is complicated. Currently from the geometry manager in
+	 * The SVT Geometry is complicated. Currently from the geometry manager in
 	 * coatjava the get routines (e.g., getLine(sector, superlayer, layer) take
 	 * the three arguments <ul> <li>sector goes around a ring, the number of
 	 * sectors varies depending on the superlayer. The number of sectors are
@@ -37,8 +37,8 @@ public class SVTGeometry {
 	private static BSTFactory bstFactory = new BSTFactory();
 
 	// the base layer that we will transform to get what we need
-	private static BSTLayer _bstLayer0;
-	private static BSTLayer _bstLayer1;
+	private static BSTLayer _svtLayer0;
+	private static BSTLayer _svtLayer1;
 
 	// for putting in dead zone
 	public static final double ZGAP = 1.67; // mm
@@ -47,7 +47,7 @@ public class SVTGeometry {
 	public static final int[] sectorsPerSuperlayer = { 10, 14, 18, 24 };
 
 	/**
-	 * Initialize the BST Geometry
+	 * Initialize the SVT Geometry
 	 */
 	public static void initialize() {
 
@@ -57,8 +57,8 @@ public class SVTGeometry {
 
 		if (USECOATJAVA) {
 			// create a ring layer
-			_bstLayer0 = bstFactory.createRingLayer(bstDataProvider, 0, 0, 0);
-			_bstLayer1 = bstFactory.createRingLayer(bstDataProvider, 0, 0, 1);
+			_svtLayer0 = bstFactory.createRingLayer(bstDataProvider, 0, 0, 0);
+			_svtLayer1 = bstFactory.createRingLayer(bstDataProvider, 0, 0, 1);
 
 			// create a detector transform
 			_transform = bstFactory.getDetectorTransform(bstDataProvider);
@@ -89,9 +89,9 @@ public class SVTGeometry {
 		Line3D tempLine;
 		try {
 			if (layer == 0) {
-				tempLine = _bstLayer0.getComponent(strip).getLine();
+				tempLine = _svtLayer0.getComponent(strip).getLine();
 			} else {
-				tempLine = _bstLayer1.getComponent(strip).getLine();
+				tempLine = _svtLayer1.getComponent(strip).getLine();
 			}
 
 			Transformation3D t3d = _transform.get(sector, superlayer, layer);
@@ -100,7 +100,7 @@ public class SVTGeometry {
 			return line;
 
 		} catch (NullPointerException npe) {
-			System.err.println("BST GetStrip " + npe.getMessage());
+			System.err.println("SVT GetStrip " + npe.getMessage());
 			System.err.println("sector: " + sector);
 			System.err.println("superlayer: " + superlayer);
 			System.err.println("layer: " + layer);
@@ -244,7 +244,7 @@ public class SVTGeometry {
 
 	/**
 	 * Get the points in the geometry service that were in the old file for
-	 * drawing in the BST views
+	 * drawing in the SVT views
 	 * 
 	 * @param sector
 	 *            the 0-based sector

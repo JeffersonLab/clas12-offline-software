@@ -27,8 +27,9 @@ public class GeometryManager {
 	 */
 	private static GeometryManager instance;
 
-	// BSTxy panels
-	private static Vector<SVTxyPanel> _bstXYpanels;
+	// SVTxy panels
+	private static Vector<SVTxyPanel> _bstXYpanels8Layers = new Vector<SVTxyPanel>(); //old
+	private static Vector<SVTxyPanel> _bstXYpanels6Layers = new Vector<SVTxyPanel>(); //new
 
 	// cal sector 0 in clas coordinates
 	public static ECSector clas_Cal_Sector0;
@@ -64,9 +65,9 @@ public class GeometryManager {
 		// get the FTOF geometry
 		CTOFGeometry.initialize();
 
-		// get BST data
+		// get SVT data
 		SVTGeometry.initialize();
-		getBSTPanels();
+		getSVTPanels();
 
 		ConstantProvider ecDataProvider = 
 				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.EC);
@@ -105,7 +106,7 @@ public class GeometryManager {
 	}
 
 	// read the bst geometry
-	private void getBSTPanels() {
+	private void getSVTPanels() {
 
 		// use the geometry service
 
@@ -122,16 +123,14 @@ public class GeometryManager {
 				// public static void getLimitValues(int sector, int superlayer,
 				// int layer, double vals[]) {
 				SVTGeometry.getLimitValues(sector - 1, supl, lay, vals);
-				if (_bstXYpanels == null) {
-					_bstXYpanels = new Vector<SVTxyPanel>();
-				}
-				
-//				if (bigLayer == 6) {
-//				System.err.println("NUMSECT: " + SVTGeometry.sectorsPerSuperlayer[supl] + "    SECTOR: " + sector + "   HACKED SECTOR: " + svtSectorHack(numSect, sector));
-//				}
 				int hackSector = svtSectorHack(numSect, sector);
 //				hackSector = sector;
-				_bstXYpanels.add(new SVTxyPanel(hackSector, bigLayer, vals));
+				
+				SVTxyPanel svtPanel= new SVTxyPanel(hackSector, bigLayer, vals);
+				if (bigLayer < 7) {
+					_bstXYpanels6Layers.add(new SVTxyPanel(hackSector, bigLayer, vals));
+				}
+				_bstXYpanels8Layers.add(new SVTxyPanel(hackSector, bigLayer, vals));
 			}
 		}
 
@@ -230,7 +229,10 @@ public class GeometryManager {
 	 * @return the panels
 	 */
 	public static List<SVTxyPanel> getSVTxyPanels() {
-		return _bstXYpanels;
+		if (Ced.getCed().useOldSVTGeometry()) {
+			return _bstXYpanels8Layers;
+		}
+		return _bstXYpanels6Layers;
 	}
 
 	/**

@@ -25,7 +25,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	private Line2D.Double line;
 
 	/**
-	 * Create a BSTxyPanel. The panel is really just a thick line
+	 * Create an SVTxyPanel. The panel is really just a thick line
 	 * 
 	 * @param sect
 	 *            1-based

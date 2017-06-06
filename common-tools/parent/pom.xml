@@ -37,12 +37,14 @@
     -->
   </build>
 
+  <!--
   <distributionManagement>
     <repository>
       <id>ssh-clasweb</id>
       <url>scpexe://clas12@jlabl1.jlab.org/group/clas/www/clasweb/html/clas12maven</url>
     </repository>
   </distributionManagement>
+  -->
 
 <!-- project Dependencies -->
 <!-- BUILD section for creating one JAR -->
