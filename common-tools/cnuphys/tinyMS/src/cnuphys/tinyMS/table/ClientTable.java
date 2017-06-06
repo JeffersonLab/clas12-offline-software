@@ -109,7 +109,12 @@ public class ClientTable extends JTable {
 	 * Convenience routine to fire a data changed event
 	 */
 	public void fireTableDataChanged() {
+		int row = getSelectedRow();
 		getClientModel().fireTableDataChanged();
+		if ((row >= 0) && (row < _server.getProxyClients().size())) {
+			getSelectionModel().setSelectionInterval(row, row);
+		}
+
 	}
 
 }

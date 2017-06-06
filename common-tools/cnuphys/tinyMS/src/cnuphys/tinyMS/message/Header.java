@@ -22,14 +22,13 @@ import cnuphys.tinyMS.common.DataType;
  * 
  */
 public class Header {
+	
+	public static final String SERVER_CHANNEL = "Server";
 
 	// Id of the source, 0 for the server.
-	private int _sourceId;
+	private int _clientId;
 
-	// Id of the destination, 0 for the server.
-	private int _destinationId;
-
-	// Id of the source, 0 for the server.
+	// The message type. Never used by clients.
 	private MessageType _messageType;
 
 	// for further differentiation
@@ -46,76 +45,55 @@ public class Header {
 	// If true, had to swap bytes when read to get
 	// magic number right
 	private boolean _swap = false;
+	
+	//the channel. For admininstrative mesages it is
+	//always the constant SERVER_CHANNEL
+	private String _channel = SERVER_CHANNEL;
 
 	/**
 	 * Create a dataless Header with no user data
 	 * 
-	 * @param srcId
+	 * @param clientId
 	 *            the id of the source. The server ID is 0. Client IDs start at
 	 *            +1 and are handed out sequentially.
-	 * @param destId
-	 *            the id of the destination.
 	 * @param mtype
 	 *            the message type
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int srcId, int destId, MessageType mtype) {
-		this(srcId, destId, mtype, (short) 0);
+	public Header(int clientId,  MessageType mtype) {
+		this(clientId, mtype, (short) 0, SERVER_CHANNEL);
 	}
 
 	/**
 	 * Create a message header
 	 * 
-	 * @param srcId
+	 * @param clientId
 	 *            the id of the source. The server ID is 0. Client IDs start at
 	 *            +1 and are handed out sequentially.
-	 * @param destId
-	 *            the id of the destination.
 	 * @param mtype
 	 *            the message type
-	 * @param user1
-	 *            for any purpose
-	 * @param user2
+	 * @param tag
 	 *            for any purpose
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int srcId, int destId, MessageType mtype, short tag) {
-
-		_sourceId = srcId;
-		_destinationId = destId;
+	public Header(int clientId,  MessageType mtype, short tag, String channel) {
+		_clientId = clientId;
 		_messageType = mtype;
 		_tag = tag;
+		_channel = (channel == null) ? SERVER_CHANNEL : new String(channel);
 		_dataType = DataType.NO_DATA; // updated when payload added
 		_length = 0; // will be updated when payload added
 	}
 
 	/**
-	 * Get the Id of the source. The server itself has an Id of zero.
+	 * Get the Id of the client. The server itself has an Id of zero.
 	 * 
-	 * @return the sourceId
+	 * @return the clientId
 	 */
-	public int getSourceId() {
-		return _sourceId;
+	public int getClientId() {
+		return _clientId;
 	}
 
-	/**
-	 * Get the Id of the destination. The server itself has an Id of zero.
-	 * 
-	 * @return the destinationId
-	 */
-	public int getDestinationId() {
-		return _destinationId;
-	}
-
-	/**
-	 * This method exchanges the source and destination. It is convenient for
-	 * messages like handshakes and pings.
-	 */
-	public void invert() {
-		int tid = _sourceId;
-		_sourceId = _destinationId;
-		_destinationId = tid;
-	}
 
 	/**
 	 * Get the type of the message as a MessageType enum.
@@ -138,6 +116,14 @@ public class Header {
 	 */
 	public short getTag() {
 		return _tag;
+	}
+	
+	/**
+	 * Get the message channel
+	 * @return the message channel
+	 */
+	public String getChannel() {
+		return _channel;
 	}
 
 	/**
@@ -221,22 +207,21 @@ public class Header {
 			}
 		}
 
-		int srcId = inputStream.readInt();
-		int destId = inputStream.readInt();
+		int clientId = inputStream.readInt();
 		short mtype = inputStream.readShort();
 		short tag = inputStream.readShort();
+		String channel = inputStream.readUTF();
 		short dtype = inputStream.readShort();
 		int len = inputStream.readInt();
 
 		if (swap) {
-			srcId = ByteSwap.swapInt(srcId);
-			destId = ByteSwap.swapInt(destId);
+			clientId = ByteSwap.swapInt(clientId);
 			mtype = ByteSwap.swapShort(mtype);
 			dtype = ByteSwap.swapShort(dtype);
 			len = ByteSwap.swapInt(len);
 		}
 
-		Header header = new Header(srcId, destId, MessageType.getMessageType(mtype), tag);
+		Header header = new Header(clientId, MessageType.getMessageType(mtype), tag, channel);
 
 		// set data type for payload reader
 		header.setDataType(DataType.getDataType(dtype));
@@ -262,10 +247,10 @@ public class Header {
 
 		try {
 			outputStream.writeInt(Message.MAGIC_WORD);
-			outputStream.writeInt(_sourceId);
-			outputStream.writeInt(_destinationId);
+			outputStream.writeInt(_clientId);
 			outputStream.writeShort((short) _messageType.ordinal());
 			outputStream.writeShort(_tag);
+			outputStream.writeUTF((_channel == null) ? SERVER_CHANNEL : _channel);
 			outputStream.writeShort((short) _dataType.ordinal());
 			outputStream.writeInt(_length);
 		}
@@ -282,9 +267,10 @@ public class Header {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("     source: " + _sourceId + "\n");
-		sb.append("destination: " + _destinationId + "\n");
+		sb.append("     client: " + _clientId + "\n");
 		sb.append("   msg type: " + _messageType + "\n");
+		sb.append("        tag: " + _tag + "\n");
+		sb.append("    channel: " + _channel + "\n");
 		sb.append("  data type: " + _dataType + "\n");
 		sb.append("     length: " + _length + "\n");
 		return sb.toString();
