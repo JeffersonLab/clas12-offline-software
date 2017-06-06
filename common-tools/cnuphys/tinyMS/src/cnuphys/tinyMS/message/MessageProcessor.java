@@ -25,7 +25,7 @@ public abstract class MessageProcessor {
 		//first peek at message
 		peekAtMessage(message);
 		
-		// CLOSE, DATA, HANDSHAKE, PING, USER, SHUTDOWN, SERVERLOG;
+		// LOGOUT, CLIENT, HANDSHAKE, PING, USER, SHUTDOWN, SERVERLOG;
 
 		switch (message.getMessageType()) {
 		case LOGOUT:
@@ -36,8 +36,8 @@ public abstract class MessageProcessor {
 			processShutdownMessage(message);
 			break;
 
-		case DATA:
-			processDataMessage(message);
+		case CLIENT:
+			processClientMessage(message);
 			break;
 
 		case HANDSHAKE:
@@ -111,7 +111,7 @@ public abstract class MessageProcessor {
 	 * @param message
 	 *            the message to process
 	 */
-	public abstract void processDataMessage(Message message);
+	public abstract void processClientMessage(Message message);
 
 	/**
 	 * Can be used to toss away messages for example they have the wrong

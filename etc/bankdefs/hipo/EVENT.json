@@ -97,7 +97,7 @@
         "items": [
             {"name":"index",        "id":1,  "type":"int16",  "info":"index of the cluster in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"int16",  "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"int8 ",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+            {"name":"detector",     "id":3,  "type":"int8",   "info":"Detector ID, defined in COATJAVA DetectorType"},
             {"name":"energy",       "id":4,  "type":"float",  "info":"Energy associated with the cluster"},
             {"name":"time",         "id":5,  "type":"float",  "info":"Time associated with the cluster"},
             {"name":"path",         "id":6,  "type":"float",  "info":"Path from vertex to the cluster position"},

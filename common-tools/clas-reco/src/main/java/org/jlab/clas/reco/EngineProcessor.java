@@ -43,7 +43,7 @@ public class EngineProcessor {
         
         String[] names = new String[]{
             "DCHB","DCTB","FTOF","EC","HTCC",
-            "EBTB","EBTB"
+            "EBHB","EBTB"
         };
         
         String[] services = new String[]{
