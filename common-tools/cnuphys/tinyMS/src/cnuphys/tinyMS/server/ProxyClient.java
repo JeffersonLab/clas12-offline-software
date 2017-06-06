@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import cnuphys.tinyMS.Environment.DateString;
 import cnuphys.tinyMS.common.ReaderThread;
@@ -21,6 +22,7 @@ import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.Messenger;
+import cnuphys.tinyMS.table.ClientTable;
 
 public class ProxyClient extends Messenger {
 	
@@ -41,9 +43,13 @@ public class ProxyClient extends Messenger {
 
     /** number of messages arriving at server */
 	private long _messageCount = 0;
+	
+	/** list of channels the client is subscribed to */
+	private Vector<String> _subscriptions = new Vector<String>();
+
 		
 	// time in seconds that a client has to get itself verified
-	private static final int VERIFY_SECONDS = 20;
+	private static final int VERIFY_SECONDS = 30;
 
 	// the next available remote client Id. These are assigned
 	// sequentially starting at 1. It is assumed that no single
@@ -178,6 +184,11 @@ public class ProxyClient extends Messenger {
 		long sentTime = longArray[0];
 		_duration = _lastPing - sentTime;
 		_log.info(getLastPingDuration());
+
+		ClientTable table = _server.getClientTable();
+		if (table != null) {
+			table.fireTableDataChanged();
+		}
 	}
 	
 	/**
@@ -290,6 +301,10 @@ public class ProxyClient extends Messenger {
 		_server.removeProxyClient(this);
 		_reader.stopReader();
 		_writer.stopWriter();
+		
+		System.err.println("** CLOSING PROXYCLIENT STREAMS");
+		_inputStream.close();
+		_outputStream.close();
 		_socket.close();
 	}
 
@@ -532,5 +547,55 @@ public class ProxyClient extends Messenger {
 		return _messageCount;
 	}
 
+	
+	/**
+	 * Subscribe to a channel
+	 * @param channel the channel to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., channels are 
+	 * NOT case sensitive.
+	 */
+	protected void subscribe(String channel) {
+		if (channel != null) {
+			channel = channel.trim().toLowerCase();
+			if (channel.length() > 0) {
+				_subscriptions.remove(channel);
+				_subscriptions.add(channel);
+			}
+		}
+	}
+	
+	/**
+	 * Unsubscribe to a channel
+	 * @param channel the channel to unsubscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., channels are 
+	 * NOT case sensitive.
+	 */
+	protected void unsubscribe(String channel) {
+		if (channel != null) {
+			channel = channel.trim().toLowerCase();
+			if (channel.length() > 0) {
+				_subscriptions.remove(channel);
+			}
+		}
+	}
+	
+	/**
+	 * Check whether this client subscribes to a channel
+	 * @param channel the channel to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., channels are 
+	 * NOT case sensitive.
+	 * @return <code>true</code> if this channel is subscribed to the channel
+	 */
+	protected boolean isSubscribed(String channel) {
+		if (channel != null) {
+			channel = channel.trim().toLowerCase();
+			if (channel.length() > 0) {
+				return _subscriptions.contains(channel);
+			}
+		}
+		return false;
+	}
+
+	
 
 }

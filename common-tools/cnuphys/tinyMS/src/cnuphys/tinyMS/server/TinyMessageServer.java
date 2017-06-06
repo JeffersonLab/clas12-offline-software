@@ -13,6 +13,7 @@ import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.server.gui.ServerFrame;
+import cnuphys.tinyMS.table.ClientTable;
 
 public class TinyMessageServer {
 
@@ -234,6 +235,7 @@ public class TinyMessageServer {
 		Message message = Message.createHandshakeMessage(proxyClient.getId());
 		proxyClient.getOutboundQueue().queue(message);
 		_log.config("There are now " + _proxyClients.size() + " proxy clients");
+		_serverFrame.fireTableDataChanged();
 	}
 
 	/**
@@ -245,6 +247,7 @@ public class TinyMessageServer {
 		if (proxyClient != null) {
 			_proxyClients.remove(proxyClient);
 			_log.config("There are now " + _proxyClients.size() + " proxy clients");
+			_serverFrame.fireTableDataChanged();
 		}
 	}
 
@@ -282,7 +285,7 @@ public class TinyMessageServer {
 			return null;
 		}
 
-		return getProxyClient(message.getSourceId());
+		return getProxyClient(message.getClientId());
 	}
 
 	/**
@@ -419,6 +422,14 @@ public class TinyMessageServer {
 	 */
 	public ServerFrame getGui() {
 		return _serverFrame;
+	}
+	
+	/**
+	 * Get the client table
+	 * @return the client table
+	 */
+	public ClientTable getClientTable() {
+		return (_serverFrame == null) ? null : _serverFrame.getClientTable();
 	}
 
 }

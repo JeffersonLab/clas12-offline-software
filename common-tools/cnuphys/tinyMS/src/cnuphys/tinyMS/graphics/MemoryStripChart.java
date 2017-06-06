@@ -39,7 +39,7 @@ public class MemoryStripChart extends JComponent {
 	private TinyMessageServer _server;
 
 	// data
-	private float _maxVal = 1.0f; // MB
+//	private float _maxVal = 1.0f; // MB
 	private int _capacity = 1 + (RANGE / INTERVAL);
 	private Vector<Float> _data = new Vector<Float>(_capacity);
 
@@ -73,6 +73,15 @@ public class MemoryStripChart extends JComponent {
 		d.width = PREF_WIDTH;
 		return d;
 	}
+	
+	// get max val of current data
+	private float getMaxVal() {
+		float mv = 2;
+		for (float val : _data) {
+			mv = Math.max(mv, val);
+		}
+		return mv;
+	}
 
 	// update the chart
 	private void update() {
@@ -84,16 +93,17 @@ public class MemoryStripChart extends JComponent {
 		}
 
 		float used = memoryReport();
-		float delta = used - _maxVal;
-		_maxVal = Math.max(_maxVal, used);
-
+		
 		if (_data.size() >= _capacity) {
 			_data.remove(0);
 		}
 		_data.add(used);
 
+		float maxVal = getMaxVal();
+		float delta = used - maxVal;
+
 		System.err
-				.println("*** USED: " + used + "  size: " + _data.size() + "   max: " + _maxVal + "   DELTA: " + delta);
+				.println("*** USED: " + used + "  size: " + _data.size() + "   max: " + maxVal + "   DELTA: " + delta);
 
 		// repaint the chart
 		repaint();
@@ -108,8 +118,7 @@ public class MemoryStripChart extends JComponent {
 		g.fillRect(0, 0, b.width, b.height);
 
 		// max value of chart
-		double maxPlotVal = Math.pow(2, Math.floor(log2(_maxVal)) + 1);
-		System.err.println("Max plot value: " + maxPlotVal);
+		double maxPlotVal = Math.pow(2, Math.floor(log2(getMaxVal())) + 1);
 
 		// plotrect
 		String maxstr = DoubleFormat.doubleFormat(maxPlotVal, 1);
@@ -128,13 +137,15 @@ public class MemoryStripChart extends JComponent {
 
 		Rectangle dataRect = new Rectangle();
 //		int numData = _data.size();
-		int delX = plotRect.width / _capacity;
+		double delX = plotRect.getWidth() / _capacity;
+		double right = plotRect.getX();
 		// now the data
 		for (int i = 0; i < _data.size(); i++) {
-			int x = plotRect.x + i * delX;
+			int x = (int)right;
+			right += delX;
 			float val = _data.get(i);
 			int h = (int) (plotRect.height * (val / maxPlotVal));
-			dataRect.setBounds(x, plotRect.y + plotRect.height - h, delX, h);
+			dataRect.setBounds(x, plotRect.y + plotRect.height - h, (int)(right-x), h);
 
 			g.setColor(rectColors[(i + _timerUpdateIndex) % 4]);
 			g.fillRect(dataRect.x, dataRect.y, dataRect.width, dataRect.height);

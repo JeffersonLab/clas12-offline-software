@@ -34,6 +34,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 		if (proxyClient != null) {
 			proxyClient.incrementMessageCount();
 		}
+		System.err.println("MESSAGE CHANNEL: [" + message.getChannel() + "]");
 	}
 
 	// this message is a client voluntarily logging out.
@@ -46,7 +47,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 		}
 
 		try {
-			_log.info("closing a connection for client: " + proxyClient.getClientName());
+			_log.info("Logging out client: " + proxyClient.getClientName());
 			// call close, not shutdown. The latter is
 			// for a server forced logout of a client.
 			proxyClient.close();
@@ -106,9 +107,13 @@ public class ServerMessageProcessor extends MessageProcessor {
 		sender.pingArrived(message);
 	}
 
+	/**
+	 * A non-administrative message has arrived. This should
+	 * be broadcast to other clients subscribed to the channel
+	 */
 	@Override
-	public void processDataMessage(Message message) {
-		_log.warning("It is rarely a good sign that a data message has arrived for the server.");
+	public void processClientMessage(Message message) {
+		broadcastMessage(message);
 	}
 	
 	/**
@@ -122,7 +127,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 		_log.config("Server got a SERVERLOG message");
 		Log.Level level = Log.Level.values()[message.getTag()];
 		String lstr = message.getString();
-		String nstr = _server.getProxyClient(message.getSourceId()).getClientName();
+		String nstr = _server.getProxyClient(message.getClientId()).getClientName();
 		String s = "[Client: " + nstr + "] " + lstr;
 		
 		//ERROR, CONFIG, WARNING, INFO, EXCEPTION
@@ -163,15 +168,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 			_log.warning("Could not match a remote client to message sender.");
 			return false;
 		}
-
-		if (sender.isVerified()) {
-
-			// if someone else if the destination, try to forward
-			if (message.getDestinationId() != Message.SERVER) {
-				forwardMessage(message);
-				return false;
-			}
-
+		else if (sender.isVerified()) {
 			return true;
 		}
 		else {
@@ -182,7 +179,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 	}
 
 	/**
-	 * Broadcast a message to all clients (except the server)
+	 * Broadcast a message to all clients (except the sender)
 	 * 
 	 * @param message
 	 *            the message to broadcast
@@ -194,8 +191,8 @@ public class ServerMessageProcessor extends MessageProcessor {
 			for (ProxyClient client : array) {
 				try {
 
-					// don't send to sender!
-					if (client.getId() != message.getSourceId()) {
+					// don't send back to sender!
+					if (client.getId() != message.getClientId()) {
 						client.writeMessage(message);
 					}
 				}
@@ -206,25 +203,6 @@ public class ServerMessageProcessor extends MessageProcessor {
 		}
 	}
 
-	// a message arrived whose source was not the server
-	protected void forwardMessage(Message message) {
-
-		if (message.getDestinationId() == Message.BROADCAST) {
-			broadcastMessage(message);
-			return;
-		}
-
-		// point to point! try to find a remote client for the destination
-		ProxyClient client = _server.getProxyClient(message.getDestinationId());
-		if (client != null) {
-			try {
-				client.writeMessage(message);
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 	
 	/**
 	 * Convenience routine to fire a data changed event

@@ -25,6 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import cnuphys.tinyMS.Environment.Environment;
 import cnuphys.tinyMS.graphics.GraphicsUtilities;
@@ -35,7 +37,7 @@ import cnuphys.tinyMS.server.TinyMessageServer;
 import cnuphys.tinyMS.table.ClientTable;
 
 @SuppressWarnings("serial")
-public class ServerFrame extends JFrame implements ActionListener {
+public class ServerFrame extends JFrame implements ActionListener, ListSelectionListener {
 
 	//the server
 	private TinyMessageServer _server;
@@ -87,6 +89,9 @@ public class ServerFrame extends JFrame implements ActionListener {
 
 		addContent();
 		fixGuiState();
+		
+		//listen for table selections
+		_table.getSelectionModel().addListSelectionListener(this);
 		
 		//setup a housekeeping maintenance thread
 		setupMaintenanceTimer();
@@ -312,11 +317,11 @@ public class ServerFrame extends JFrame implements ActionListener {
 //		}
 		
 		//do something every two seconds
-		if ((count % 2) == 0) {
-			if (_table != null) {
-				_table.fireTableDataChanged();
-			}
-		}
+//		if ((count % 2) == 0) {
+//			if (_table != null) {
+//				_table.fireTableDataChanged();
+//			}
+//		}
 	}
 	
 	private void uptime() {
@@ -364,6 +369,23 @@ public class ServerFrame extends JFrame implements ActionListener {
 		
 		return (answer == JFileChooser.APPROVE_OPTION);
 
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent lse) {
+		if (!lse.getValueIsAdjusting()) {
+	//		System.err.println(x);
+		}
+		
+	}
+
+
+	/**
+	 * Get the client table
+	 * @return the client table
+	 */
+	public ClientTable getClientTable() {
+		return _table;
 	}
 
 }
