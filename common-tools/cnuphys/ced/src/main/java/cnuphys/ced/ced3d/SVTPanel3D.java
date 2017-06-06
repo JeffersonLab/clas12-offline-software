@@ -4,7 +4,6 @@ import java.awt.Color;
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
-import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
@@ -108,28 +107,6 @@ public class SVTPanel3D extends DetectorItem3D {
 				}
 			} //svt
 			
-			//BMT
-			crosses = BMTCrosses.getInstance().getCrosses();
-			len = (crosses == null) ? 0 : crosses.size();
-			for (int i = 0; i < len; i++) {
-				Cross2 cross = crosses.elementAt(i);
-				if (cross != null) {
-					//convert to cm
-					float x1 = cross.x / 10;
-					float y1 = cross.y / 10;
-					float z1 = cross.z / 10;
-
-					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
-							cross.uy, cross.uz, CROSS_LEN,
-							crossColor, 3f);
-					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
-							cross.uy, cross.uz,
-							(float) (1.1 * CROSS_LEN), Color.black, 1f);
-
-					drawCrossPoint(drawable, x1, y1, z1, crossColor);
-				}
-			} //bmt
-		
 			
 		}
 		
