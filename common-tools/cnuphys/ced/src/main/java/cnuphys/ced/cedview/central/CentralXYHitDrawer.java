@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.IDrawable;
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -23,11 +25,15 @@ import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
+import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 
 public class CentralXYHitDrawer implements IDrawable {
+	
+	private static Color _baseColor = new Color(255, 0, 0, 60);
+
 
 	// the event manager
 	private final ClasIoEventManager _eventManager = ClasIoEventManager
@@ -196,7 +202,7 @@ public class CentralXYHitDrawer implements IDrawable {
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
 		drawSVTHitsSingleMode(g, container);
-		drawMicroMegasHitsSingleMode(g, container);
+		drawBMTHitsSingleMode(g, container);
 		drawCTOFSingleHitsMode(g, container);
 	}
 	
@@ -222,35 +228,49 @@ public class CentralXYHitDrawer implements IDrawable {
 		
 	}
 
-	// draw micromegas hits
-	private void drawMicroMegasHitsSingleMode(Graphics g,
+	// draw BMT hits
+	private void drawBMTHitsSingleMode(Graphics g,
 			IContainer container) {
-//
-//		int hitCount = BMT.hitCount();
-//		if (hitCount > 0) {
-//			int sect[] = BMT.sector();
-//			int layer[] = BMT.layer();
-//
-//			for (int hit = 0; hit < hitCount; hit++) {
-//				int geoSector = MicroMegasSector
-//						.geoSectorFromDataSector(sect[hit]);
-//				MicroMegasSector mms = _view.getMicroMegasSector(geoSector,
-//						layer[hit]);
-//				if (mms != null) {
-//					FeedbackRect fbr = mms.drawHit(g, container, hit,
-//							X11Colors.getX11Color("lawn green"), Color.black);
-//
-//					if (fbr != null) {
-//						_fbRects.add(fbr);
-//					}
-//				}
-//			} // for
-//		} // hitcount > 0
+		
+		Point pp = new Point();
+		Point2D.Double wp = new Point2D.Double();
+		
+		AdcHitList hits = BMT.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			
+//			Shape oldClip = g.getClip();
+			Graphics2D g2 = (Graphics2D) g;
+
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					BMTSectorItem bmtItem = _view.getBMTSectorItem(hit.sector, hit.layer);
+
+					if (bmtItem.isZLayer()) {
+						double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(hit.sector, 
+								hit.layer, hit.component);
+						
+						double rad = bmtItem.getInnerRadius()  + BMTSectorItem.FAKEWIDTH/2.;
+						wp.x = rad*Math.cos(phi);
+						wp.y = rad*Math.sin(phi);
+						container.worldToLocal(pp, wp);
+						
+						Color color = hits.adcColor(hit);
+						g.setColor(color);
+						
+						Polygon poly = bmtItem.getStripPolygon(container, hit.component);
+						if (poly != null) {
+							g.fillPolygon(poly);
+						}
+						
+		//				SymbolDraw.drawX(g2, pp.x, pp.y, 4, Color.black);
+					}
+				}
+			}
+		}
 	}
 
 	
-	private Color baseColor = new Color(255, 0, 0, 60);
-	// draw gemc simulated hits single event mode
+	// draw SVT hits single event mode
 	private void drawSVTHitsSingleMode(Graphics g, IContainer container) {
 		
 		AdcHitList hits = SVT.getInstance().getHits();
@@ -266,7 +286,7 @@ public class CentralXYHitDrawer implements IDrawable {
 							hit.sector);
 					
 					if (panel != null) {
-						_view.drawSVTPanel(g2, container, panel, baseColor);
+						_view.drawSVTPanel(g2, container, panel, _baseColor);
 						_view.drawSVTPanel(g2, container, panel, hits.adcColor(hit));
 	//					_view.drawSVTPanel(g2, container, panel, Color.red);
 					}

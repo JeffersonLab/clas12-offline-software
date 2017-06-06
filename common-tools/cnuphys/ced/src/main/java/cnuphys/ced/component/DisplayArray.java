@@ -64,9 +64,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Distance scale label */
 	public static final String SCALE_LABEL = "Scale";
 
-	/** SVT Hits as points */
-	public static final String MIDPOINTS_LABEL = "Strip Midpoints";
-
 	/** SVT Hits as crosses */
 	public static final String COSMIC_LABEL = "Cosmic Tracks";
 	
@@ -151,9 +148,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls whether inner plane displayed for ec
 	private AbstractButton _outerButton;
 
-	// controls whether hits in SVT are shown as midpoints of strips
-	private AbstractButton _stripMidpointsButton;
-
 	// controls whether we draw u strips
 	private AbstractButton _uButton;
 
@@ -234,13 +228,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 					view.isLogAccumulatedMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
-
-		}
-
-		// SVT hits as midpoints of hit strips
-		if (Bits.checkBit(bits, DisplayBits.SVTHITS)) {
-			_stripMidpointsButton = add(MIDPOINTS_LABEL, false, true,
-					this, X11Colors.getX11Color("maroon")).getCheckBox();
 
 		}
 
@@ -362,16 +349,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		return (_mcTruthButton != null) && _mcTruthButton.isSelected();
 	}
 	
-	/**
-	 * Convenience method to see it we show thestrip midpoints.
-	 * 
-	 * @return <code>true</code> if we are to show the strip midpoints
-	 * for hit strips.
-	 */
-	public boolean showStripMidpoints() {
-		return (_stripMidpointsButton != null) && _stripMidpointsButton.isSelected();
-	}
-
 	/**
 	 * Convenience method to see it we show the cosmic tracks.
 	 * 
