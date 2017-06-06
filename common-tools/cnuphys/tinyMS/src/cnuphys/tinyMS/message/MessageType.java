@@ -3,7 +3,7 @@ package cnuphys.tinyMS.message;
 /**
  * Enumerates the allowable message types. They are
  * <ul>
- * <li><code>DATA</code> The only non-administrative message. Used to send
+ * <li><code>CLIENT</code> The only non-administrative message. Used to send
  * arrays of any primitive type, and serialized java objects.
  * <li><code>HANDSHAKE</code> This is the first message sent from the server to
  * a new client. It will contain the client's unique Id. The client sends a
@@ -26,7 +26,7 @@ package cnuphys.tinyMS.message;
  */
 public enum MessageType {
 
-	DATA, HANDSHAKE, LOGOUT, PING, SERVERLOG, SHUTDOWN;
+	CLIENT, HANDSHAKE, LOGOUT, PING, SERVERLOG, SUBSCRIBE, SHUTDOWN, UNSUBSCRIBE;
 
 	/**
 	 * Obtain the name from the value.

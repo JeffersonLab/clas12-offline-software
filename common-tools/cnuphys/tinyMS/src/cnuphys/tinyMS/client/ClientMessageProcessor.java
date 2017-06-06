@@ -71,14 +71,13 @@ public class ClientMessageProcessor extends MessageProcessor {
 		}
 
 		// now I can learn my id
-		int id = message.getDestinationId();
+		int id = message.getClientId();
 		System.err.println("Acquired client ID: " + id);
 		_client.setId(id);
 
-		message.invert(); // prepare to send it back
 
 		// add some environmental strings (and my user name)
-
+		//then send it back
 		message.addPayload(envStringArray());
 		_client.getOutboundQueue().queue(message);
 
@@ -102,12 +101,16 @@ public class ClientMessageProcessor extends MessageProcessor {
 
 		_client.setLastPing(ct);
 
-		message.invert(); // prepare to send it back
+		// send it back
 		_client.getOutboundQueue().queue(message);
 	}
 
+	/**
+	 * This is a non-administrative message that has arrived
+	 * from some other client
+	 */
 	@Override
-	public void processDataMessage(Message message) {
+	public void processClientMessage(Message message) {
 	}
 	
 	/**
@@ -130,7 +133,7 @@ public class ClientMessageProcessor extends MessageProcessor {
 			return true;
 		}
 
-		if (message.getDestinationId() != _client.getId()) {
+		if (message.getClientId() != _client.getId()) {
 			System.err.println("Client recieved a message with wrong Id");
 			return false;
 		}
