@@ -100,7 +100,7 @@ public class SectorView extends CedView implements ChangeListener {
 			LineStyle.SOLID);
 
 	// fill color
-	private static final Color BSTHITFILL = new Color(255, 128, 0, 64);
+	private static final Color SVTHITFILL = new Color(255, 128, 0, 64);
 	// private static final Color TRANS = new Color(192, 192, 192, 128);
 
 	// HTCC Items, 8 per sector, not geometrically realistic
@@ -549,7 +549,7 @@ public class SectorView extends CedView implements ChangeListener {
 				_reconDrawer.draw(g, container);
 
 				// draw bst panels
-				drawBSTPanels(g, container);
+				drawSVTPanels(g, container);
 
 				// draw reconstructed dc crosses
 				if (showDChbCrosses()) {
@@ -1336,8 +1336,8 @@ public class SectorView extends CedView implements ChangeListener {
 		return false;
 	}
 
-	// draw the BST panels
-	private void drawBSTPanels(Graphics g, IContainer container) {
+	// draw the SVT panels
+	private void drawSVTPanels(Graphics g, IContainer container) {
 		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return;
@@ -1391,13 +1391,13 @@ public class SectorView extends CedView implements ChangeListener {
 			int alpha = 10 + index / 3;
 			Color col = new Color(128, 128, 128, alpha);
 			Color col2 = new Color(128, 128, 128, alpha + 40);
-			WorldPolygon poly[] = getFromBSTPanel(panel, cosphi, sinphi);
+			WorldPolygon poly[] = getFromSVTPanel(panel, cosphi, sinphi);
 
 			for (int j = 0; j < 3; j++) {
 				boolean hit = panel.hit[j];
 
 				WorldGraphicsUtilities.drawWorldPolygon(g2, container, poly[j],
-						hit ? BSTHITFILL : col, col2, 0, LineStyle.SOLID);
+						hit ? SVTHITFILL : col, col2, 0, LineStyle.SOLID);
 			}
 		}
 
@@ -1418,14 +1418,14 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param wp
 	 *            the world point
 	 */
-	private void labToWorldBST(double x, double y, double z, Point2D.Double wp,
+	private void labToWorldSVT(double x, double y, double z, Point2D.Double wp,
 			double cosphi, double sinphi) {
 		wp.x = z;
 		wp.y = x * cosphi + y * sinphi;
 
 	}
 
-	private WorldPolygon[] getFromBSTPanel(SVTxyPanel panel, double cosphi,
+	private WorldPolygon[] getFromSVTPanel(SVTxyPanel panel, double cosphi,
 			double sinphi) {
 
 		WorldPolygon polys[] = new WorldPolygon[3];
@@ -1449,19 +1449,19 @@ public class SectorView extends CedView implements ChangeListener {
 
 		Point2D.Double wp = new Point2D.Double();
 
-		labToWorldBST(x1, y1, z0, wp, cosphi, sinphi);
+		labToWorldSVT(x1, y1, z0, wp, cosphi, sinphi);
 		x[0] = wp.x;
 		y[0] = wp.y;
 
-		labToWorldBST(x2, y2, z0, wp, cosphi, sinphi);
+		labToWorldSVT(x2, y2, z0, wp, cosphi, sinphi);
 		x[1] = wp.x;
 		y[1] = wp.y;
 
-		labToWorldBST(x2, y2, z1, wp, cosphi, sinphi);
+		labToWorldSVT(x2, y2, z1, wp, cosphi, sinphi);
 		x[2] = wp.x;
 		y[2] = wp.y;
 
-		labToWorldBST(x1, y1, z1, wp, cosphi, sinphi);
+		labToWorldSVT(x1, y1, z1, wp, cosphi, sinphi);
 		x[3] = wp.x;
 		y[3] = wp.y;
 
@@ -1470,19 +1470,19 @@ public class SectorView extends CedView implements ChangeListener {
 
 		polys[0] = new WorldPolygon(x, y, 5);
 
-		labToWorldBST(x1, y1, z2, wp, cosphi, sinphi);
+		labToWorldSVT(x1, y1, z2, wp, cosphi, sinphi);
 		x[0] = wp.x;
 		y[0] = wp.y;
 
-		labToWorldBST(x2, y2, z2, wp, cosphi, sinphi);
+		labToWorldSVT(x2, y2, z2, wp, cosphi, sinphi);
 		x[1] = wp.x;
 		y[1] = wp.y;
 
-		labToWorldBST(x2, y2, z3, wp, cosphi, sinphi);
+		labToWorldSVT(x2, y2, z3, wp, cosphi, sinphi);
 		x[2] = wp.x;
 		y[2] = wp.y;
 
-		labToWorldBST(x1, y1, z3, wp, cosphi, sinphi);
+		labToWorldSVT(x1, y1, z3, wp, cosphi, sinphi);
 		x[3] = wp.x;
 		y[3] = wp.y;
 
@@ -1491,19 +1491,19 @@ public class SectorView extends CedView implements ChangeListener {
 
 		polys[1] = new WorldPolygon(x, y, 5);
 
-		labToWorldBST(x1, y1, z4, wp, cosphi, sinphi);
+		labToWorldSVT(x1, y1, z4, wp, cosphi, sinphi);
 		x[0] = wp.x;
 		y[0] = wp.y;
 
-		labToWorldBST(x2, y2, z4, wp, cosphi, sinphi);
+		labToWorldSVT(x2, y2, z4, wp, cosphi, sinphi);
 		x[1] = wp.x;
 		y[1] = wp.y;
 
-		labToWorldBST(x2, y2, z5, wp, cosphi, sinphi);
+		labToWorldSVT(x2, y2, z5, wp, cosphi, sinphi);
 		x[2] = wp.x;
 		y[2] = wp.y;
 
-		labToWorldBST(x1, y1, z5, wp, cosphi, sinphi);
+		labToWorldSVT(x1, y1, z5, wp, cosphi, sinphi);
 		x[3] = wp.x;
 		y[3] = wp.y;
 

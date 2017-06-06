@@ -21,10 +21,10 @@ public class Transformations {
 	public Transformations(DetectorType dtype) {
 		_detectorType = dtype;
 
-		// BST, DC, EC_INNER, EC_OUTER, FTOT, PCAL
+		// SVT, DC, EC_INNER, EC_OUTER, FTOT, PCAL
 		switch (dtype) {
 
-		case BST:
+		case SVT:
 			break;
 
 		case DC:

@@ -15,7 +15,7 @@ public abstract class CentralZViewDrawer implements IDrawable  {
 	protected ClasIoEventManager _eventManager = ClasIoEventManager
 			.getInstance();
 
-	// the BSTZView being rendered.
+	// the CentralZView being rendered.
 	protected CentralZView _view;
 
 	public CentralZViewDrawer(CentralZView view) {

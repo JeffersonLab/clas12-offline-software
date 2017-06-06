@@ -23,5 +23,13 @@ public class CentralView3D extends CedView3D {
 			float xDist, float yDist, float zDist) {
 		return new CentralPanel3D(this, angleX, angleY, angleZ, xDist, yDist, zDist);
 	}
+	
+
+	@Override
+	public void refresh() {
+		super.refresh();
+		((CentralPanel3D)_panel3D).enableSVTOuterLayers();
+	}
+
 
 }

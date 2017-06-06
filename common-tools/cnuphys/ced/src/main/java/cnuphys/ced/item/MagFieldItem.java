@@ -113,13 +113,13 @@ public class MagFieldItem extends AItem {
 			drawItemSectorView(g, container, displayOption, hasTorus,
 					hasSolenoid);
 		} else if (_view instanceof CentralZView) {
-			drawItemBSTzView(g, container, displayOption, hasTorus, hasSolenoid);
+			drawItemCentralZView(g, container, displayOption, hasTorus, hasSolenoid);
 		}
 
 	}
 
-	// drawer for BSTz views
-	private void drawItemBSTzView(Graphics g, IContainer container,
+	// drawer for Central Z views
+	private void drawItemCentralZView(Graphics g, IContainer container,
 			int displayOption, boolean hasTorus, boolean hasSolenoid) {
 
 		if (!hasSolenoid) {

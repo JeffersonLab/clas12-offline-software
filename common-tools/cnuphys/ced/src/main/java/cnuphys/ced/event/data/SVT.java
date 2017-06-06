@@ -14,7 +14,7 @@ public class SVT extends DetectorData {
 
 	/**
 	 * Public access to the singleton
-	 * @return the FTOF singleton
+	 * @return the SVT singleton
 	 */
 	public static SVT getInstance() {
 		if (_instance == null) {

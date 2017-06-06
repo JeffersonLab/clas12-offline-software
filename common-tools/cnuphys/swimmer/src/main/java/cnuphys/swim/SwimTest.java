@@ -46,7 +46,7 @@ public class SwimTest {
 		MagneticField.setMathLib(MagneticField.MathLib.SUPERFAST);
 		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
 		FieldProbe.cache(true);
-		int numTest = 1000;
+		int numTest = 10000;
 		// testParabolicApproximation(numTest);
 		// testOldUniform(numTest);
 		// testOldAdaptive(numTest);

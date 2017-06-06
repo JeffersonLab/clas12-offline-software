@@ -10,6 +10,11 @@
         <id>clas12maven</id>
         <url>https://clasweb.jlab.org/clas12maven</url> 
       </repository>
+
+      <repository>
+        <id>mvnrepository</id>
+        <url>http://central.maven.org/maven2/</url> 
+      </repository>
   </repositories>
 
   <build>
