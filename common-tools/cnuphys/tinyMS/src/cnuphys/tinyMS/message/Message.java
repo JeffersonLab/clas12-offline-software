@@ -182,7 +182,7 @@ public class Message {
 	 * @return the message
 	 */
 	public static Message createServerLogMessage(int clientId, Log.Level level, String logStr) {
-		Header header = new Header(clientId, MessageType.SERVERLOG, (short)level.ordinal(), Header.SERVER_CHANNEL);
+		Header header = new Header(clientId, MessageType.SERVERLOG, (short)level.ordinal(), Header.SERVER_TOPIC);
 		Message message = new Message(header);
 		message.addPayload(logStr);
 		return message;
@@ -393,11 +393,11 @@ public class Message {
 	}
 	
 	/**
-	 * Get the channel of the message
-	 * @return the message channel
+	 * Get the topic of the message
+	 * @return the message topic
 	 */
-	public String getChannel() {
-		return _header.getChannel();
+	public String getTopic() {
+		return _header.getTopic();
 	}
 
 	/**

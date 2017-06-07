@@ -13,7 +13,7 @@ import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.server.gui.ServerFrame;
-import cnuphys.tinyMS.table.ClientTable;
+import cnuphys.tinyMS.table.ConnectionTable;
 
 public class TinyMessageServer {
 
@@ -428,7 +428,7 @@ public class TinyMessageServer {
 	 * Get the client table
 	 * @return the client table
 	 */
-	public ClientTable getClientTable() {
+	public ConnectionTable getClientTable() {
 		return (_serverFrame == null) ? null : _serverFrame.getClientTable();
 	}
 

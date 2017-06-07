@@ -33,8 +33,9 @@ import cnuphys.tinyMS.graphics.GraphicsUtilities;
 import cnuphys.tinyMS.graphics.ImageManager;
 import cnuphys.tinyMS.graphics.MemoryStripChart;
 import cnuphys.tinyMS.log.SimpleLogPane;
+import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
-import cnuphys.tinyMS.table.ClientTable;
+import cnuphys.tinyMS.table.ConnectionTable;
 
 @SuppressWarnings("serial")
 public class ServerFrame extends JFrame implements ActionListener, ListSelectionListener {
@@ -45,12 +46,12 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	//buttons
 	private JButton _clearButton;
 	private JButton _stopButton;
-	private JButton _logoutButton;
+	private JButton _shutdownButton;
 
 	//holds the log
 	private SimpleLogPane _logPane;
 	
-	//when the gui (and approcimately the server) started
+	//when the gui (and approximately the server) started
 	private long _startTime;
 	
 	// maintenance timer
@@ -60,7 +61,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	private JLabel _durationLabel;
 	
 	//table stuff
-	private ClientTable _table;
+	private ConnectionTable _table;
 	
 	//Memory strip chart
 	private MemoryStripChart _chart;
@@ -139,10 +140,10 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		
 		_clearButton = makeButton("Clear Log");
 		_stopButton = makeButton("Stop the Server");
-		_logoutButton = makeButton("Logout Client");
+		_shutdownButton = makeButton("Shutdown Client");
 		panel.add(_clearButton);
 		panel.add(_stopButton);
-		panel.add(_logoutButton);
+		panel.add(_shutdownButton);
 		
 		add(panel, BorderLayout.SOUTH);
 	}
@@ -155,7 +156,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		_logPane.setPreferredSize(d);
 				
 		//the table
-		_table = new ClientTable(_server);
+		_table = new ConnectionTable(_server);
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, _logPane, _table.getScrollPane());
 		splitPane.setResizeWeight(0.8);
@@ -222,7 +223,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		_stopButton.setEnabled(haveServer);
 		
 		boolean rowSelected = false;
-		_logoutButton.setEnabled(rowSelected);
+		_shutdownButton.setEnabled(rowSelected);
 	}
 
 	/**
@@ -293,11 +294,32 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 				shutDown();
 			}
 		}
-		else if (source == _logoutButton) {
-			
+		else if (source == _shutdownButton) {
+			shutdownClient();
 		}
 
 		fixGuiState();
+	}
+	
+	//shutdown a client
+	private void shutdownClient() {
+		
+		if (_table != null) {
+			ProxyClient client = _table.getSelectedClient();
+			if (client != null) {
+				ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
+				int answer = JOptionPane.showConfirmDialog(null,
+						"Do you really want to shutdown client: " + client.getClientName() + "?",
+						"Shutdown a client?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
+						icon);
+				
+				if (answer == JFileChooser.APPROVE_OPTION) {
+					client.shutdown();
+				}
+			}
+		}
+
+
 	}
 	
 	/**
@@ -312,16 +334,13 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 			System.err.println("Frame detected server shutdown.");
 		}
 		
-//		if (_table != null) {
-//			_table.fireTableDataChanged();
-//		}
 		
-		//do something every two seconds
-//		if ((count % 2) == 0) {
-//			if (_table != null) {
-//				_table.fireTableDataChanged();
-//			}
-//		}
+		//do something every 4 seconds
+		if ((count % 2) == 0) {
+			if (_table != null) {
+				_table.fireTableDataChanged();
+			}
+		}
 	}
 	
 	private void uptime() {
@@ -377,6 +396,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	//		System.err.println(x);
 		}
 		
+		_shutdownButton.setEnabled(_table.getSelectedRow() >= 0);
 	}
 
 
@@ -384,7 +404,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	 * Get the client table
 	 * @return the client table
 	 */
-	public ClientTable getClientTable() {
+	public ConnectionTable getClientTable() {
 		return _table;
 	}
 

@@ -22,7 +22,7 @@ import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.Messenger;
-import cnuphys.tinyMS.table.ClientTable;
+import cnuphys.tinyMS.table.ConnectionTable;
 
 public class ProxyClient extends Messenger {
 	
@@ -185,7 +185,7 @@ public class ProxyClient extends Messenger {
 		_duration = _lastPing - sentTime;
 		_log.info(getLastPingDuration());
 
-		ClientTable table = _server.getClientTable();
+		ConnectionTable table = _server.getClientTable();
 		if (table != null) {
 			table.fireTableDataChanged();
 		}

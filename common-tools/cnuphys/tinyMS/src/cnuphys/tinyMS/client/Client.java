@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import cnuphys.tinyMS.Environment.Environment;
+import cnuphys.tinyMS.common.BadSocketException;
 import cnuphys.tinyMS.common.ReaderThread;
 import cnuphys.tinyMS.common.WriterThread;
 import cnuphys.tinyMS.message.Message;
@@ -54,10 +55,22 @@ public class Client extends Messenger {
 	private long _lastPing = -1L;
 	
 	// Descriptive user name. If null, actual login username will be used
-	private String _userName;
+	private String _clientName;
 
 	// to avoid multiple calls to close
 	private boolean _alreadyClosed = false;
+	
+
+	/**
+	 * Create a client that will connect to a {@link TinyMessageServer}.
+	 * @param clientName the 
+	 * @param hostName
+	 * @param port
+	 * @throws BadSocketException 
+	 */
+	public Client (String clientName, String hostName, int port) throws BadSocketException {
+		this(clientName, ClientSupport.getSocket(hostName, port));
+	}
 
 	/**
 	 * Create a client that will connect to a {@link TinyMessageServer}. Most
@@ -65,15 +78,19 @@ public class Client extends Messenger {
 	 * a socket) but rather the static convenience methods in
 	 * {@link ClientSupport}.
 	 * 
-	 * @param userName
+	 * @param clientName
 	 *            descriptive user name. If null, the actual login username will
 	 *            be used.
 	 * @param socket
 	 *            the underlying socket
 	 * @see ClientSupport
 	 */
-	public Client(String userName, Socket socket) {
-		_userName = userName;
+	public Client(String clientName, Socket socket) throws BadSocketException {
+		
+		if (socket == null) {
+			throw new BadSocketException("null socket in Client constructor");
+		}
+		_clientName = (clientName != null) ? clientName : Environment.getInstance().getUserName();
 		_socket = socket;
 
 		// create a message processor
@@ -117,8 +134,67 @@ public class Client extends Messenger {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//optional initializations
+		try {
+			initialize();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * This is a good place for clients to do custom initializations
+	 * such as subscriptions. It is not necessary, but convenient. It
+	 * is called at the end of the constructor.
+	 */
+	public void initialize() {
+		//base implementation does nothing
 	}
 
+	/**
+	 * Subscribe to a topic
+	 * @param topic the topic to subscribe to
+	 */
+	public void subscribe(String topic) {
+		if (topic != null) {
+			String topics[] = {topic};
+			subscribe(topics);
+		}
+	}
+	
+	/**
+	 * Subscribe to an array of topics
+	 * @param topics an array of topics
+	 */
+	public void subscribe(String[] topics) {
+		if ((topics != null) && (topics.length > 0)) {
+			
+		}
+	}
+	
+
+	/**
+	 * Unsubscribe to a topic
+	 * @param topic the topic to subscribe to
+	 */
+	public void unsubscribe(String topic) {
+		if (topic != null) {
+			String topics[] = {topic};
+			unsubscribe(topics);
+		}
+	}
+	
+	/**
+	 * Unsubscribe to an array of topics
+	 * @param topics an array of topics
+	 */
+	public void unsubscribe(String[] topics) {
+		if ((topics != null) && (topics.length > 0)) {
+			
+		}
+	}
 
 
 	/**
@@ -201,7 +277,7 @@ public class Client extends Messenger {
 	 */
 	@Override
 	public String getClientName() {
-		return (_userName != null) ? _userName : Environment.getInstance().getUserName();
+		return _clientName;
 	}
 
 	/**

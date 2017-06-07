@@ -7,7 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
 
-public class ClientTableModel extends DefaultTableModel {
+public class ConnectionTableModel extends DefaultTableModel {
 	
 
 	/** Constant used to designate id column */
@@ -46,13 +46,13 @@ public class ClientTableModel extends DefaultTableModel {
 	private TinyMessageServer _server;
 	
 	//the table
-	private ClientTable _table;
+	private ConnectionTable _table;
 	
 	/**
 	 * Create a model for the table data
 	 * @param server the controlling server
 	 */
-	public ClientTableModel(TinyMessageServer server) {
+	public ConnectionTableModel(TinyMessageServer server) {
 		super(colNames, 3);
 		_server = server;
 	}
@@ -61,7 +61,7 @@ public class ClientTableModel extends DefaultTableModel {
 	 * Set the client table
 	 * @param table the client table
 	 */
-	protected void setTable(ClientTable table) {
+	protected void setTable(ConnectionTable table) {
 		_table = table;
 	}
 	
@@ -75,7 +75,7 @@ public class ClientTableModel extends DefaultTableModel {
 	 * @param row the zero-cased row
 	 * @return the client for the given row, or null
 	 */
-	private ProxyClient getProxyClient(int row) {
+	protected ProxyClient getProxyClient(int row) {
 		if (row < 0) {
 			return null;
 		}
