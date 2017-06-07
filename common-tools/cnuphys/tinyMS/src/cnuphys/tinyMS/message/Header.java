@@ -23,7 +23,8 @@ import cnuphys.tinyMS.common.DataType;
  */
 public class Header {
 	
-	public static final String SERVER_CHANNEL = "Server";
+	/** A reserved topic used by all administrative messages */
+	public static final String SERVER_TOPIC = "Server";
 
 	// Id of the source, 0 for the server.
 	private int _clientId;
@@ -46,9 +47,9 @@ public class Header {
 	// magic number right
 	private boolean _swap = false;
 	
-	//the channel. For admininstrative mesages it is
-	//always the constant SERVER_CHANNEL
-	private String _channel = SERVER_CHANNEL;
+	//the channel. For administrative messages it is
+	//always the constant (reserved) SERVER_TOPIC
+	private String _topic = SERVER_TOPIC;
 
 	/**
 	 * Create a dataless Header with no user data
@@ -61,7 +62,7 @@ public class Header {
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
 	public Header(int clientId,  MessageType mtype) {
-		this(clientId, mtype, (short) 0, SERVER_CHANNEL);
+		this(clientId, mtype, (short) 0, SERVER_TOPIC);
 	}
 
 	/**
@@ -74,13 +75,14 @@ public class Header {
 	 *            the message type
 	 * @param tag
 	 *            for any purpose
+	 * @channel the topic
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int clientId,  MessageType mtype, short tag, String channel) {
+	public Header(int clientId,  MessageType mtype, short tag, String topic) {
 		_clientId = clientId;
 		_messageType = mtype;
 		_tag = tag;
-		_channel = (channel == null) ? SERVER_CHANNEL : new String(channel);
+		_topic = (topic == null) ? SERVER_TOPIC : new String(topic);
 		_dataType = DataType.NO_DATA; // updated when payload added
 		_length = 0; // will be updated when payload added
 	}
@@ -105,6 +107,10 @@ public class Header {
 		return _messageType;
 	}
 
+	/**
+	 * Get the name of the message type
+	 * @return the name of the message type
+	 */
 	public String getMessageTypeName() {
 		return MessageType.getName(_messageType.ordinal());
 	}
@@ -119,11 +125,11 @@ public class Header {
 	}
 	
 	/**
-	 * Get the message channel
-	 * @return the message channel
+	 * Get the message topic
+	 * @return the message topic
 	 */
-	public String getChannel() {
-		return _channel;
+	public String getTopic() {
+		return _topic;
 	}
 
 	/**
@@ -250,7 +256,7 @@ public class Header {
 			outputStream.writeInt(_clientId);
 			outputStream.writeShort((short) _messageType.ordinal());
 			outputStream.writeShort(_tag);
-			outputStream.writeUTF((_channel == null) ? SERVER_CHANNEL : _channel);
+			outputStream.writeUTF((_topic == null) ? SERVER_TOPIC : _topic);
 			outputStream.writeShort((short) _dataType.ordinal());
 			outputStream.writeInt(_length);
 		}
@@ -270,7 +276,7 @@ public class Header {
 		sb.append("     client: " + _clientId + "\n");
 		sb.append("   msg type: " + _messageType + "\n");
 		sb.append("        tag: " + _tag + "\n");
-		sb.append("    channel: " + _channel + "\n");
+		sb.append("      topic: " + _topic + "\n");
 		sb.append("  data type: " + _dataType + "\n");
 		sb.append("     length: " + _length + "\n");
 		return sb.toString();

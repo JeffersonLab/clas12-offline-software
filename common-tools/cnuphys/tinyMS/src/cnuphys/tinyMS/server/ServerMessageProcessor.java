@@ -34,7 +34,7 @@ public class ServerMessageProcessor extends MessageProcessor {
 		if (proxyClient != null) {
 			proxyClient.incrementMessageCount();
 		}
-		System.err.println("MESSAGE CHANNEL: [" + message.getChannel() + "]");
+		System.err.println("MESSAGE TOPIC: [" + message.getTopic() + "]");
 	}
 
 	// this message is a client voluntarily logging out.

@@ -50,12 +50,12 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_SVT_HITS = "SVT Hits";
 	
 	public static final String SHOW_BMT = "BMT";
-	public static final String SHOW_BMT_LAYER_1 = "SVT Layer 1";
-	public static final String SHOW_BMT_LAYER_2 = "SVT Layer 2";
-	public static final String SHOW_BMT_LAYER_3 = "SVT Layer 3";
-	public static final String SHOW_BMT_LAYER_4 = "SVT Layer 4";
-	public static final String SHOW_BMT_LAYER_5 = "SVT Layer 5";
-	public static final String SHOW_BMT_LAYER_6 = "SVT Layer 6";
+	public static final String SHOW_BMT_LAYER_1 = "BMT Layer 1";
+	public static final String SHOW_BMT_LAYER_2 = "BMT Layer 2";
+	public static final String SHOW_BMT_LAYER_3 = "BMT Layer 3";
+	public static final String SHOW_BMT_LAYER_4 = "BMT Layer 4";
+	public static final String SHOW_BMT_LAYER_5 = "BMT Layer 5";
+	public static final String SHOW_BMT_LAYER_6 = "BMT Layer 6";
 	public static final String SHOW_BMT_HITS = "BMT Hits";
 
 

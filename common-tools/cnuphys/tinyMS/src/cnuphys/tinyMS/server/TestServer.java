@@ -6,6 +6,8 @@ import java.util.TimerTask;
 
 import cnuphys.tinyMS.client.Client;
 import cnuphys.tinyMS.client.ClientSupport;
+import cnuphys.tinyMS.client.TestClient;
+import cnuphys.tinyMS.common.BadSocketException;
 
 /**
  * A Test program for the TinyMessageServer
@@ -22,12 +24,18 @@ public class TestServer {
 			final TinyMessageServer server = new TinyMessageServer("Test_Server");
 
 			// try to find a local server
-			final Client client1 = ClientSupport.findLocalServer("client 1");
-			final Client client2 = ClientSupport.findLocalServer("client 2");
-			final Client client3 = ClientSupport.findLocalServer("client 3");
+			try {
+				final Client client1 = ClientSupport.findLocalServer("client 1");
+				final Client client2 = ClientSupport.findLocalServer("client 2");
+				final Client client3 = ClientSupport.findLocalServer("client 3");
+				final TestClient client4 = new TestClient();
+				testShutdown(server, client2);
+				testLogout(server, client3);
+			}
+			catch (BadSocketException e) {
+				e.printStackTrace();
+			}
 			
-			testShutdown(server, client2);
-			testLogout(server, client3);
 
 
 		}

@@ -494,6 +494,34 @@ public class Geometry {
 
 	}
 	
+	public void getCRCEndPoints(int sector, int layer, int strip, float[] coords) {
+//		int region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+//		int numStrips =  Constants.getCRZNSTRIPS()[region];
+//		
+//		if ((strip < 1) || (strip > numStrips)) {
+//			for (int i = 0; i < 6; i++) {
+//				coords[i] = Float.NaN;
+//			}
+//			return;
+//		}
+//		
+//		double phi1 = CRC_GetBeginStrip(sector, layer);
+//		double phi2 = CRC_GetEndStrip(sector, layer);
+//		double r = Constants.getCRCRADIUS()[region] + Constants.LYRTHICKN/2;
+//		double x = r*Math.cos(phi)/10;
+//		double y = r*Math.sin(phi)/10;
+//		double zMin = Constants.getCRZZMIN()[region]/10;
+//		double zMax = Constants.getCRZZMAX()[region]/10;
+//		coords[0] =(float)x;
+//		coords[1] =(float)y;
+//		coords[2] = (float)zMin;
+//		coords[3] =(float)x;
+//		coords[4] =(float)y;
+//		coords[5] = (float)zMax;
+
+	}
+
+	
 	
 public static void main (String arg[])  {
 	
