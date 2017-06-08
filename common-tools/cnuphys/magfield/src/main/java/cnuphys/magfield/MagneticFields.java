@@ -25,7 +25,7 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
-	private static String VERSION = "1.01";
+	private static String VERSION = "1.02";
 	
 	private boolean USE_BIG_TORUS = true;
 	
