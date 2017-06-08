@@ -167,12 +167,10 @@ public class GridCoordinate {
 	 */
 	public double getFraction(double val, int index) {
 		
-		double mv = _min + index*_delta;
-		return (val - mv)/_delta;
-//		
-//		
-//		double vv = (val - _min) / _delta;
-//		return vv - Math.floor(vv);
+//		double mv = _min + index*_delta;
+//		return (val - mv)/_delta;
+		double vv = (val - _min) / _delta;
+		return vv - Math.floor(vv);
 	}
 
 	/**

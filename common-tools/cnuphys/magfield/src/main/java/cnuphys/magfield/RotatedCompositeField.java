@@ -3,9 +3,9 @@ package cnuphys.magfield;
 public final class RotatedCompositeField extends CompositeField {
 
 	// the angle in degrees
-	private float _angle = -25.0f;
-	private float _sin = (float) Math.sin(Math.toRadians(_angle));
-	private float _cos = (float) Math.cos(Math.toRadians(_angle));
+	private double _angle = -25.0;
+	private double _sin = Math.sin(Math.toRadians(_angle));
+	private double _cos = Math.cos(Math.toRadians(_angle));
 
 	/**
 	 * Set the rotation angle
@@ -13,10 +13,10 @@ public final class RotatedCompositeField extends CompositeField {
 	 * @param angle
 	 *            the rotation angle in degrees
 	 */
-	public void setRotationAngle(float angle) {
+	public void setRotationAngle(double angle) {
 		_angle = angle;
-		_sin = (float) MagneticField.sin(Math.toRadians(_angle));
-		_cos = (float) MagneticField.cos(Math.toRadians(_angle));
+		_sin = Math.sin(Math.toRadians(_angle));
+		_cos = Math.cos(Math.toRadians(_angle));
 	}
 	
 	@Override
@@ -56,20 +56,25 @@ public final class RotatedCompositeField extends CompositeField {
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
 		
-		float x = xs * _cos - zs * _sin;
-		float y = ys;
-		float z = zs * _cos + xs * _sin;
+		double x = xs * _cos - zs * _sin;
+		double y = ys;
+		double z = zs * _cos + xs * _sin;
 
 		float bx = 0, by = 0, bz = 0;
 		for (IField field : this) {
-			field.field(x, y, z, result);
+			field.field((float)x, (float)y, (float)z, result);
 			bx += result[0];
 			by += result[1];
 			bz += result[2];
 		}
-		result[0] = bx * _cos + bz * _sin;
-		result[1] = by;
-		result[2] = bz * _cos - bx * _sin;
+
+//		System.out.println(" NEW: [ " + bx + ", " + by + ", " + bz + "] ");
+
+		result[0] = (float)(bx * _cos + bz * _sin);
+		result[1] = (float)(by);
+		result[2] = (float)(bz * _cos - bx * _sin);
+//		System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
+//		result[2] + "] ");
 	}
 
 

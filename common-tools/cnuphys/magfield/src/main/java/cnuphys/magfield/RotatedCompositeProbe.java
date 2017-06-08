@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class RotatedCompositeProbe extends FieldProbe {
 
 	// the angle in degrees
-	private float _angle = -25.0f;
-	private float _sin = (float) Math.sin(Math.toRadians(_angle));
-	private float _cos = (float) Math.cos(Math.toRadians(_angle));
+	private double _angle = -25.0;
+	private double _sin = Math.sin(Math.toRadians(_angle));
+	private double _cos = Math.cos(Math.toRadians(_angle));
 
 	private ArrayList<FieldProbe> probes = new ArrayList<FieldProbe>();
 
@@ -37,20 +37,29 @@ public class RotatedCompositeProbe extends FieldProbe {
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
 		
-		float x = xs * _cos - zs * _sin;
-		float y = ys;
-		float z = zs * _cos + xs * _sin;
+		double x = xs * _cos - zs * _sin;
+		double y = ys;
+		double z = zs * _cos + xs * _sin;
+
+//		System.out.println("NEW R: [" + x + ", " + y + ", " + z + "]");
 
 		float bx = 0, by = 0, bz = 0;
 		for (FieldProbe probe : probes) {
-			probe.field(x, y, z, result);
+			probe.field((float) x, (float) y, (float) z, result);
 			bx += result[0];
 			by += result[1];
 			bz += result[2];
 		}
-		result[0] = bx * _cos + bz * _sin;
-		result[1] = by;
-		result[2] = bz * _cos - bx * _sin;
+		
+//		System.out.println(" NEW: [ " + bx + ", " + by + ", " + bz + "] ");
+
+		result[0] = (float) (bx * _cos + bz * _sin);
+		result[1] = (float) (by);
+		result[2] = (float) (bz * _cos - bx * _sin);
+		
+//		System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
+//		result[2] + "] ");
+
 	}
 
 
