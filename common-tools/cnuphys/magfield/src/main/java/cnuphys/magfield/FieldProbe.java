@@ -105,7 +105,6 @@ public abstract class FieldProbe implements IField {
 		phi = Math.toRadians(phi);
     	double x = rho*Math.cos(phi);
     	double y = rho*Math.sin(phi);
-//    	System.err.println("phi = " + phi);
     	gradient((float)x, (float)y, (float)z, result);
     }
 

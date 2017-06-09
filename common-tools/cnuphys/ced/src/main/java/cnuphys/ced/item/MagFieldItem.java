@@ -379,14 +379,21 @@ public class MagFieldItem extends AItem {
 	}
 
 	private static double[] getGradientValues() {
-		double max = 10; //T/m
 		int len = getGradientColors().length + 1;
+
+		double min = 0.05;
+		double max = 15; //T/m
+		double del = (max-min) / (len - 1);
 		double values[] = new double[len];
-		values[0] = 0;
+		values[0] = min;
 		values[len - 1] = max;
-		double del = max / (len - 1);
 		for (int i = 1; i < len - 1; i++) {
-			values[i] = i*del;
+			// double speedup = 5.0;
+			double speedup = 6.0;
+			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
+
+			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
+			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
 		}
 		return values;
 	}
@@ -403,24 +410,15 @@ public class MagFieldItem extends AItem {
 		double values[] = new double[len];
 		double min = 0.05;
 		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
-		// double del = (max-min)/(values.length-1);
+		double del = (max - min) / (len - 1);
 
 		values[0] = min;
 		values[len - 1] = max;
 
 		for (int i = 1; i < len - 1; i++) {
-			// values[i] = i*del;
-			// use nonlinear cosine scale
-			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
-			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
-
-			double del = (max - min) / (len - 1);
 			// double speedup = 5.0;
 			double speedup = 6.0;
 			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
-
-			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
-			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
 		}
 		return values;
 	}
