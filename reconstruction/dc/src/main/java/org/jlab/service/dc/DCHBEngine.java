@@ -228,9 +228,9 @@ public class DCHBEngine extends ReconstructionEngine {
                 Constants.setT0(true);
                 Constants.setUseMiniStagger(true);
             }
-            if (newRun == 9) {
+          //  if (newRun == 9) {
                 T2DCalc = true;
-            }
+           // }
 
             System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = " + Constants.getT0() + " use ministagger " + Constants.getUseMiniStagger());
             CalibrationConstantsLoader.Load(newRun, "default");
@@ -269,9 +269,9 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-       // String inputFile = "/Users/ziegler/Workdir/Files/GEMC/DC/output_p005_p13_p230_kpp.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12.hipo";
-        System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+        String inputFile="/Users/ziegler/Workdir/Files/GEMC/DC/ele_S0.hipo";
+        //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12.hipo";
+        //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         DCHBEngine en = new DCHBEngine();
         en.init();
@@ -286,8 +286,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-       // String outputFile = "/Users/ziegler/Workdir/Files/GEMC/DC/output_p005_p13_p230_kpp_rec_newStateVecHB.hipo";
-        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12_rec_slow.hipo";
+        String outputFile="/Users/ziegler/Workdir/Files/GEMC/DC/ele_S0_rec_opti.hipo";
+       // String outputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12_rec_slow.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -305,7 +305,7 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB   
             en2.processDataEvent(event);
             //System.out.println("  EVENT "+counter);
-            if (counter > 500) {
+            if (counter > 1000) {
                 break;
             }
             //event.show();
