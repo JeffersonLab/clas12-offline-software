@@ -85,8 +85,8 @@ public final class Solenoid extends MagneticField {
 		
 		if (phi > 0.001) {
 			double rphi = Math.toRadians(phi);
-			double cos = MagneticField.cos(rphi);
-			double sin = MagneticField.sin(rphi);
+			double cos = Math.cos(rphi);
+			double sin = Math.sin(rphi);
 			double bphi = result[0];
 			double brho = result[1];
 			result[X] = (float) (brho * cos - bphi * sin);
@@ -322,9 +322,16 @@ public final class Solenoid extends MagneticField {
 			f1 = (f1 < 0.5) ? 0 : 1;
 			f2 = (f2 < 0.5) ? 0 : 1;
 		}
+		
 
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
+
+//		System.out.println("NEW q2 = " + q2 + "  q3 = " + q3);
+//		System.out.println("NEW n1 = " + n1 + "  n2 = " + n2);
+//		System.out.println("NEW    f1 = " + f1 + "  f2 = " + f2);
+//		System.out.println("NEW    g1 = " + g1 + "  g2 = " + g2);
+
 
 		// get the neighbor indices
 		int i000 = getCompositeIndex(0, n1, n2);
@@ -363,6 +370,8 @@ public final class Solenoid extends MagneticField {
 		result[0] = (float) bphi;
 		result[1] = (float) brho;
 		result[2] = (float) bz;
+//		 System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
+//		 result[2] + "] ");
 
 	}
 

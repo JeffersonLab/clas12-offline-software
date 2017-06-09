@@ -22,6 +22,7 @@ import cnuphys.bCNU.util.PrintUtilities;
 import cnuphys.bCNU.view.VirtualView;
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.frame.Ced;
 import bCNU3D.Panel3D;
 
 public class CedPanel3D extends Panel3D {
@@ -37,16 +38,26 @@ public class CedPanel3D extends Panel3D {
 //	public static final String SHOW_TB_DOCA = "TB DOCA";
 	public static final String SHOW_RECON_FTOF = "Rec-FTOF";
 	public static final String SHOW_RECON_CROSSES = "Crosses";
-	public static final String SHOW_BST = "BST";
-	public static final String SHOW_BST_LAYER_1 = "BST Layer 1";
-	public static final String SHOW_BST_LAYER_2 = "BST Layer 2";
-	public static final String SHOW_BST_LAYER_3 = "BST Layer 3";
-	public static final String SHOW_BST_LAYER_4 = "BST Layer 4";
-	public static final String SHOW_BST_LAYER_5 = "BST Layer 5";
-	public static final String SHOW_BST_LAYER_6 = "BST Layer 6";
-	public static final String SHOW_BST_LAYER_7 = "BST Layer 7";
-	public static final String SHOW_BST_LAYER_8 = "BST Layer 8";
-	public static final String SHOW_BST_HITS = "BST Hits";
+	public static final String SHOW_SVT = "SVT";
+	public static final String SHOW_SVT_LAYER_1 = "SVT Layer 1";
+	public static final String SHOW_SVT_LAYER_2 = "SVT Layer 2";
+	public static final String SHOW_SVT_LAYER_3 = "SVT Layer 3";
+	public static final String SHOW_SVT_LAYER_4 = "SVT Layer 4";
+	public static final String SHOW_SVT_LAYER_5 = "SVT Layer 5";
+	public static final String SHOW_SVT_LAYER_6 = "SVT Layer 6";
+	public static final String SHOW_SVT_LAYER_7 = "SVT Layer 7";
+	public static final String SHOW_SVT_LAYER_8 = "SVT Layer 8";
+	public static final String SHOW_SVT_HITS = "SVT Hits";
+	
+	public static final String SHOW_BMT = "BMT";
+	public static final String SHOW_BMT_LAYER_1 = "BMT Layer 1";
+	public static final String SHOW_BMT_LAYER_2 = "BMT Layer 2";
+	public static final String SHOW_BMT_LAYER_3 = "BMT Layer 3";
+	public static final String SHOW_BMT_LAYER_4 = "BMT Layer 4";
+	public static final String SHOW_BMT_LAYER_5 = "BMT Layer 5";
+	public static final String SHOW_BMT_LAYER_6 = "BMT Layer 6";
+	public static final String SHOW_BMT_HITS = "BMT Hits";
+
 
 	public static final String SHOW_SECTOR_1 = "Sector 1";
 	public static final String SHOW_SECTOR_2 = "Sector 2";
@@ -134,6 +145,8 @@ public class CedPanel3D extends Panel3D {
 			ab.addActionListener(al);
 		}
 		fixSize();
+		
+		enableSVTOuterLayers();
 	}
 	
 	@Override
@@ -279,6 +292,19 @@ public class CedPanel3D extends Panel3D {
 		AbstractButton ab = _checkBoxArray.getButton(label);
 		return (ab == null) ? false : ab.isSelected();
 	}
+	
+	public void enableLabel(String label, boolean enabled) {
+		AbstractButton ab = _checkBoxArray.getButton(label);
+		if (ab != null) {
+			ab.setEnabled(enabled);
+		}
+	}
+	
+	public void enableSVTOuterLayers() {
+		boolean oldGeo = Ced.getCed().useOldSVTGeometry();
+		enableLabel(SHOW_SVT_LAYER_7, oldGeo);
+		enableLabel(SHOW_SVT_LAYER_8, oldGeo);
+	}
 
 	/**
 	 * Show ECAL?
@@ -314,14 +340,22 @@ public class CedPanel3D extends Panel3D {
 
 
 	/**
-	 * Show BST (SVT) ?
-	 * @return <code>true</code> if we are to show BST
+	 * Show SVT?
+	 * @return <code>true</code> if we are to show SVT
 	 */
-	public boolean showBST() {
-		return show(CedPanel3D.SHOW_BST);
+	public boolean showSVT() {
+		return show(CedPanel3D.SHOW_SVT);
 	}
 
-	
+
+	/**
+	 * Show BMT?
+	 * @return <code>true</code> if we are to show BMT
+	 */
+	public boolean showBMT() {
+		return show(CedPanel3D.SHOW_BMT);
+	}
+
 	/**
 	 * Show CND?
 	 * @return <code>true</code> if we are to show CND
@@ -404,12 +438,22 @@ public class CedPanel3D extends Panel3D {
 	}
 
 	/**
-	 * Show BST Hits?
-	 * @return <code>true</code> if we are to show BST Hits
+	 * Show SVT Hits?
+	 * @return <code>true</code> if we are to show SVT Hits
 	 */
-	public boolean showBSTHits() {
-		return show(CedPanel3D.SHOW_BST_HITS);
+	public boolean showSVTHits() {
+		return show(CedPanel3D.SHOW_SVT_HITS);
 	}
+	
+
+	/**
+	 * Show BMT Hits?
+	 * @return <code>true</code> if we are to show BMT Hits
+	 */
+	public boolean showBMTHits() {
+		return show(CedPanel3D.SHOW_BMT_HITS);
+	}
+
 	
 	/**
 	 * Show DC?
@@ -420,67 +464,118 @@ public class CedPanel3D extends Panel3D {
 	}
 	
 	/**
-	 * Show BST Layer 1?
-	 * @return <code>true</code> if we are to show BST Layer 1
+	 * Show SVT Layer 1?
+	 * @return <code>true</code> if we are to show SVT Layer 1
 	 */
-	public boolean showBSTLayer1() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_1);
+	public boolean showSVTLayer1() {
+		return showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_1);
 	}
 
 	/**
-	 * Show BST Layer 2?
-	 * @return <code>true</code> if we are to show BST Layer 2
+	 * Show SVT Layer 2?
+	 * @return <code>true</code> if we are to show SVT Layer 2
 	 */
-	public boolean showBSTLayer2() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_2);
+	public boolean showSVTLayer2() {
+		return showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_2);
 	}
 
 	/**
-	 * Show BST Layer 3?
-	 * @return <code>true</code> if we are to show BST Layer 3
+	 * Show SVT Layer 3?
+	 * @return <code>true</code> if we are to show SVT Layer 3
 	 */
-	public boolean showBSTLayer3() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_3);
+	public boolean showSVTLayer3() {
+		return showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_3);
 	}
 
 	/**
-	 * Show BST Layer 4?
-	 * @return <code>true</code> if we are to show BST Layer 4
+	 * Show SVT Layer 4?
+	 * @return <code>true</code> if we are to show SVT Layer 4
 	 */
-	public boolean showBSTLayer4() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_4);
+	public boolean showSVTLayer4() {
+		return showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_4);
 	}
 
 	/**
-	 * Show BST Layer 5?
-	 * @return <code>true</code> if we are to show BST Layer 5
+	 * Show SVT Layer 5?
+	 * @return <code>true</code> if we are to show SVT Layer 5
 	 */
-	public boolean showBSTLayer5() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_5);
+	public boolean showSVTLayer5() {
+		return showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_5);
 	}
 
 	/**
-	 * Show BST Layer 6?
-	 * @return <code>true</code> if we are to show BST Layer 6
+	 * Show SVT Layer 6?
+	 * @return <code>true</code> if we are to show SVT Layer 6
 	 */
-	public boolean showBSTLayer6() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_6);
+	public boolean showSVTLayer6() {
+		return showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_6);
 	}
 
 	/**
-	 * Show BST Layer 7?
-	 * @return <code>true</code> if we are to show BST Layer 7
+	 * Show SVT Layer 7?
+	 * @return <code>true</code> if we are to show SVT Layer 7
 	 */
-	public boolean showBSTLayer7() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_7);
+	public boolean showSVTLayer7() {
+		boolean oldSVTGeometry = Ced.getCed().useOldSVTGeometry();
+		return oldSVTGeometry && showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_7);
 	}
 
 	/**
-	 * Show BST Layer 8?
-	 * @return <code>true</code> if we are to show BST Layer 8
+	 * Show SVT Layer 8?
+	 * @return <code>true</code> if we are to show SVT Layer 8
 	 */
-	public boolean showBSTLayer8() {
-		return showBST() && show(CedPanel3D.SHOW_BST_LAYER_8);
+	public boolean showSVTLayer8() {
+		boolean oldSVTGeometry = Ced.getCed().useOldSVTGeometry();
+		return oldSVTGeometry && showSVT() && show(CedPanel3D.SHOW_SVT_LAYER_8);
+	}
+	
+	
+	/**
+	 * Show BMT Layer 1?
+	 * @return <code>true</code> if we are to show BMT Layer 1
+	 */
+	public boolean showBMTLayer1() {
+		return showBMT() && show(CedPanel3D.SHOW_BMT_LAYER_1);
+	}
+
+	/**
+	 * Show BMT Layer 2?
+	 * @return <code>true</code> if we are to show BMT Layer 2
+	 */
+	public boolean showBMTLayer2() {
+		return showBMT() && show(CedPanel3D.SHOW_BMT_LAYER_2);
+	}
+
+	/**
+	 * Show BMT Layer 3?
+	 * @return <code>true</code> if we are to show BMT Layer 3
+	 */
+	public boolean showBMTLayer3() {
+		return showBMT() && show(CedPanel3D.SHOW_BMT_LAYER_3);
+	}
+
+	/**
+	 * Show BMT Layer 4?
+	 * @return <code>true</code> if we are to show BMT Layer 4
+	 */
+	public boolean showBMTLayer4() {
+		return showBMT() && show(CedPanel3D.SHOW_BMT_LAYER_4);
+	}
+
+	/**
+	 * Show BMT Layer 5?
+	 * @return <code>true</code> if we are to show BMT Layer 5
+	 */
+	public boolean showBMTLayer5() {
+		return showBMT() && show(CedPanel3D.SHOW_BMT_LAYER_5);
+	}
+
+	/**
+	 * Show BMT Layer 6?
+	 * @return <code>true</code> if we are to show BMT Layer 6
+	 */
+	public boolean showBMTLayer6() {
+		return showBMT() && show(CedPanel3D.SHOW_BMT_LAYER_6);
 	}
 
 	/**

@@ -12,29 +12,27 @@ import cnuphys.tinyMS.common.DataType;
 /**
  * The header for a message. The header consists of
  * 
- * 1: (int) the magic word TinyMessageServer.MAGIC_WORD=0xCEBAF 
- * 2: (int) id of the source of the message (0 if server) 
- * 3: (int) id of the destination of the message (0 if server) 
- * 4: (short) value of a MessageType enum 
- * 5: (short) a tag for further differentiation
- * 6: (short) value of the DataType enum
- * 7: (int) the length of the data array in the body (might be 0) 
+ * 1: (int) the magic word TinyMessageServer.MAGIC_WORD=0xCEBAF 2: (int) id of
+ * the source of the message (0 if server) 3: (int) id of the destination of the
+ * message (0 if server) 4: (short) value of a MessageType enum 5: (short) a tag
+ * for further differentiation 6: (short) value of the DataType enum 7: (int)
+ * the length of the data array in the body (might be 0)
  * 
  * @author heddle
  * 
  */
 public class Header {
-
-	// Id of the source, 0 for the server.
-	private int _sourceId;
-
-	// Id of the destination, 0 for the server.
-	private int _destinationId;
-
-	// Id of the source, 0 for the server.
-	private MessageType _messageType;
 	
-	//for further differentiation
+	/** A reserved topic used by all administrative messages */
+	public static final String SERVER_TOPIC = "Server";
+
+	// Id of the source, 0 for the server.
+	private int _clientId;
+
+	// The message type. Never used by clients.
+	private MessageType _messageType;
+
+	// for further differentiation
 	private short _tag;
 
 	// the type of data in the payload. Will be set when
@@ -48,73 +46,54 @@ public class Header {
 	// If true, had to swap bytes when read to get
 	// magic number right
 	private boolean _swap = false;
+	
+	//the channel. For administrative messages it is
+	//always the constant (reserved) SERVER_TOPIC
+	private String _topic = SERVER_TOPIC;
 
 	/**
 	 * Create a dataless Header with no user data
 	 * 
-	 * @param srcId
+	 * @param clientId
 	 *            the id of the source. The server ID is 0. Client IDs start at
 	 *            +1 and are handed out sequentially.
-	 * @param destId
-	 *            the id of the destination.
 	 * @param mtype
 	 *            the message type
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int srcId, int destId, MessageType mtype) {
-		this(srcId, destId, mtype, (short)0);
+	public Header(int clientId,  MessageType mtype) {
+		this(clientId, mtype, (short) 0, SERVER_TOPIC);
 	}
 
 	/**
 	 * Create a message header
 	 * 
-	 * @param srcId
+	 * @param clientId
 	 *            the id of the source. The server ID is 0. Client IDs start at
 	 *            +1 and are handed out sequentially.
-	 * @param destId
-	 *            the id of the destination.
 	 * @param mtype
 	 *            the message type
-	 * @param user1 for any purpose
-	 * @param user2 for any purpose
+	 * @param tag
+	 *            for any purpose
+	 * @channel the topic
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int srcId, int destId, MessageType mtype, short tag) {
-
-		_sourceId = srcId;
-		_destinationId = destId;
+	public Header(int clientId,  MessageType mtype, short tag, String topic) {
+		_clientId = clientId;
 		_messageType = mtype;
 		_tag = tag;
+		_topic = (topic == null) ? SERVER_TOPIC : new String(topic);
 		_dataType = DataType.NO_DATA; // updated when payload added
 		_length = 0; // will be updated when payload added
 	}
 
 	/**
-	 * Get the Id of the source. The server itself has an Id of zero.
+	 * Get the Id of the client. The server itself has an Id of zero.
 	 * 
-	 * @return the sourceId
+	 * @return the clientId
 	 */
-	public int getSourceId() {
-		return _sourceId;
-	}
-
-	/**
-	 * Get the Id of the destination. The server itself has an Id of zero.
-	 * 
-	 * @return the destinationId
-	 */
-	public int getDestinationId() {
-		return _destinationId;
-	}
-	
-	/**
-	 * This method exchanges the source and destination. It
-	 * is convenient for messages like handshakes and pings.
-	 */
-	public void invert() {
-		int tid = _sourceId;
-		_sourceId = _destinationId;
-		_destinationId = tid;
+	public int getClientId() {
+		return _clientId;
 	}
 
 
@@ -127,17 +106,30 @@ public class Header {
 	public MessageType getMessageType() {
 		return _messageType;
 	}
-	
+
+	/**
+	 * Get the name of the message type
+	 * @return the name of the message type
+	 */
 	public String getMessageTypeName() {
 		return MessageType.getName(_messageType.ordinal());
 	}
-	
+
 	/**
 	 * Get the message tag.
+	 * 
 	 * @return the message tag.
 	 */
 	public short getTag() {
 		return _tag;
+	}
+	
+	/**
+	 * Get the message topic
+	 * @return the message topic
+	 */
+	public String getTopic() {
+		return _topic;
 	}
 
 	/**
@@ -156,8 +148,8 @@ public class Header {
 	 * If true, the bytes were swapped when creating this header from a read of
 	 * a DataInputStream.
 	 * 
-	 * @return <code>true</code> if the header required a swap to match the magic
-	 * word. If so, the payload will require swapping too.
+	 * @return <code>true</code> if the header required a swap to match the
+	 *         magic word. If so, the payload will require swapping too.
 	 */
 	public boolean isSwap() {
 		return _swap;
@@ -202,8 +194,7 @@ public class Header {
 	 * @return the Header if it is successful.
 	 * @throws IOException
 	 */
-	protected static Header readHeader(DataInputStream inputStream)
-			throws IOException, EOFException, SocketException {
+	protected static Header readHeader(DataInputStream inputStream) throws IOException, EOFException, SocketException {
 		int word = inputStream.readInt();
 
 		boolean swap = false;
@@ -222,23 +213,21 @@ public class Header {
 			}
 		}
 
-		int srcId = inputStream.readInt();
-		int destId = inputStream.readInt();
+		int clientId = inputStream.readInt();
 		short mtype = inputStream.readShort();
 		short tag = inputStream.readShort();
+		String channel = inputStream.readUTF();
 		short dtype = inputStream.readShort();
 		int len = inputStream.readInt();
 
 		if (swap) {
-			srcId = ByteSwap.swapInt(srcId);
-			destId = ByteSwap.swapInt(destId);
+			clientId = ByteSwap.swapInt(clientId);
 			mtype = ByteSwap.swapShort(mtype);
 			dtype = ByteSwap.swapShort(dtype);
 			len = ByteSwap.swapInt(len);
 		}
 
-		Header header = new Header(srcId, destId,
-				MessageType.getMessageType(mtype), tag);
+		Header header = new Header(clientId, MessageType.getMessageType(mtype), tag, channel);
 
 		// set data type for payload reader
 		header.setDataType(DataType.getDataType(dtype));
@@ -260,31 +249,36 @@ public class Header {
 	 *            the output stream to write to.
 	 * @throws IOException
 	 */
-	protected void writeHeader(DataOutputStream outputStream)
-			throws IOException {
-		
-//		System.err.println(""+this);
-		outputStream.writeInt(Message.MAGIC_WORD);
-		outputStream.writeInt(_sourceId);
-		outputStream.writeInt(_destinationId);
-		outputStream.writeShort((short) _messageType.ordinal());
-		outputStream.writeShort(_tag);
-		outputStream.writeShort((short) _dataType.ordinal());
-		outputStream.writeInt(_length);
+	protected void writeHeader(DataOutputStream outputStream) throws IOException {
+
+		try {
+			outputStream.writeInt(Message.MAGIC_WORD);
+			outputStream.writeInt(_clientId);
+			outputStream.writeShort((short) _messageType.ordinal());
+			outputStream.writeShort(_tag);
+			outputStream.writeUTF((_topic == null) ? SERVER_TOPIC : _topic);
+			outputStream.writeShort((short) _dataType.ordinal());
+			outputStream.writeInt(_length);
+		}
+		catch (SocketException e) {
+
+		}
 	}
-	
+
 	/**
 	 * Get a nice String representation
+	 * 
 	 * @return a nice String representation
 	 */
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("     source: " + _sourceId + "\n");
-		sb.append("destination: " + _destinationId+ "\n");
-		sb.append("   msg type: " + _messageType+ "\n");
-		sb.append("  data type: " + _dataType+ "\n");
-		sb.append("     length: " + _length+ "\n"); 
+		sb.append("     client: " + _clientId + "\n");
+		sb.append("   msg type: " + _messageType + "\n");
+		sb.append("        tag: " + _tag + "\n");
+		sb.append("      topic: " + _topic + "\n");
+		sb.append("  data type: " + _dataType + "\n");
+		sb.append("     length: " + _length + "\n");
 		return sb.toString();
 	}
 }

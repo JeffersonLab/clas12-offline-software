@@ -750,5 +750,14 @@ public class BaseView extends JInternalFrame implements FocusListener {
 	public BaseView cloneView() {
 		return null;
 	}
+	
+	/**
+	 * Refresh the view. Base implementation works only for container views.
+	 */
+	public void refresh() {
+		if (_container != null) {
+			_container.refresh();
+		}
+	}
 
 }

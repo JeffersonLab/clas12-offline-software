@@ -17,10 +17,11 @@ public class CentralPanel3D extends CedPanel3D {
 	private final float zmin = -50f;
 
 	// labels for the check box
-	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH, SHOW_BST, SHOW_BST_LAYER_1, SHOW_BST_LAYER_2,
-			SHOW_BST_LAYER_3, SHOW_BST_LAYER_4, SHOW_BST_LAYER_5, SHOW_BST_LAYER_6, SHOW_BST_LAYER_7, SHOW_BST_LAYER_8,
-			SHOW_BST_HITS, SHOW_CTOF, SHOW_CND, SHOW_CND_LAYER_1, SHOW_CND_LAYER_2, SHOW_CND_LAYER_3,
-			SHOW_RECON_CROSSES, SHOW_TB_TRACK, SHOW_HB_TRACK, SHOW_COSMIC };
+	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH, SHOW_SVT, SHOW_SVT_LAYER_1, SHOW_SVT_LAYER_2,
+			SHOW_SVT_LAYER_3, SHOW_SVT_LAYER_4, SHOW_SVT_LAYER_5, SHOW_SVT_LAYER_6, SHOW_SVT_LAYER_7, SHOW_SVT_LAYER_8,
+			SHOW_SVT_HITS, SHOW_BMT, SHOW_BMT_LAYER_1, SHOW_BMT_LAYER_2, SHOW_BMT_LAYER_3, SHOW_BMT_LAYER_4,
+			SHOW_BMT_LAYER_5, SHOW_BMT_LAYER_6, SHOW_BMT_HITS, SHOW_CTOF, SHOW_CND, SHOW_CND_LAYER_1, SHOW_CND_LAYER_2,
+			SHOW_CND_LAYER_3, SHOW_RECON_CROSSES, SHOW_TB_TRACK, SHOW_HB_TRACK, SHOW_COSMIC };
 
 	/**
 	 * 
@@ -57,8 +58,16 @@ public class CentralPanel3D extends CedPanel3D {
 			// geom service uses 0-based superlayer [0,1,2,3] and layer [0,1]
 			int supl = ((layer - 1) / 2); // 0, 1, 2, 3
 			for (int sector = 1; sector <= SVTGeometry.sectorsPerSuperlayer[supl]; sector++) {
-				BSTPanel3D svt = new BSTPanel3D(this, sector, layer);
+				SVTPanel3D svt = new SVTPanel3D(this, sector, layer);
 				addItem(svt);
+			}
+		}
+
+		// BMT
+		for (int sector = 1; sector <= 3; sector++) {
+			for (int layer = 1; layer <= 6; layer++) {
+				BMTLayer3D bmt = new BMTLayer3D(this, sector, layer);
+				addItem(bmt);
 			}
 		}
 

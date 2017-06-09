@@ -8,13 +8,10 @@ package cnuphys.tinyMS.common;
  */
 public enum DataType {
 
-	NO_DATA, BYTE_ARRAY, SHORT_ARRAY, 
-	INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, 
-	STRING_ARRAY, STRING, SERIALIZED_OBJECT;
+	NO_DATA, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY, STRING, SERIALIZED_OBJECT;
 
 	/**
-	 * Obtain the name of the DataType enum from 
-	 * the ordinal value.
+	 * Obtain the name of the DataType enum from the ordinal value.
 	 * 
 	 * @param value
 	 *            the ordinal value to match.

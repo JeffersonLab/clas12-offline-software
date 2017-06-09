@@ -34,61 +34,35 @@ public class MCHitDrawer3D extends Item3D {
 
 		if (_panel3D instanceof ForwardPanel3D) { // forward detectors
 
-
 			// if (showDC()) {
 			// }
 
 			if (_cedPanel3D.showFTOF()) {
-				showGemcXYZHits(drawable, 
-						FTOF.getInstance().avgX(FTOF.PANEL_1A),
-						FTOF.getInstance().avgY(FTOF.PANEL_1A), 
-						FTOF.getInstance().avgZ(FTOF.PANEL_1A),
-						null, 
-						0);
-				showGemcXYZHits(drawable, 
-						FTOF.getInstance().avgX(FTOF.PANEL_1B),
-						FTOF.getInstance().avgY(FTOF.PANEL_1B), 
-						FTOF.getInstance().avgZ(FTOF.PANEL_1B),
-						null, 
-						1);
-				showGemcXYZHits(drawable, 
-						FTOF.getInstance().avgX(FTOF.PANEL_2),
-						FTOF.getInstance().avgY(FTOF.PANEL_2), 
-						FTOF.getInstance().avgZ(FTOF.PANEL_2),
-						null, 
-						2);
+				showGemcXYZHits(drawable, FTOF.getInstance().avgX(FTOF.PANEL_1A),
+						FTOF.getInstance().avgY(FTOF.PANEL_1A), FTOF.getInstance().avgZ(FTOF.PANEL_1A), null, 0);
+				showGemcXYZHits(drawable, FTOF.getInstance().avgX(FTOF.PANEL_1B),
+						FTOF.getInstance().avgY(FTOF.PANEL_1B), FTOF.getInstance().avgZ(FTOF.PANEL_1B), null, 1);
+				showGemcXYZHits(drawable, FTOF.getInstance().avgX(FTOF.PANEL_2), FTOF.getInstance().avgY(FTOF.PANEL_2),
+						FTOF.getInstance().avgZ(FTOF.PANEL_2), null, 2);
 			}
 
 			if (_cedPanel3D.showECAL()) {
-				showGemcXYZHits(drawable, ECAL.avgX(),
-						ECAL.avgY(), ECAL.avgZ(),
-						ECAL.pid(), 0);
+				showGemcXYZHits(drawable, ECAL.avgX(), ECAL.avgY(), ECAL.avgZ(), ECAL.pid(), 0);
 			}
 
 			if (_cedPanel3D.showPCAL()) {
-				showGemcXYZHits(drawable, PCAL.avgX(),
-						PCAL.avgY(), PCAL.avgZ(),
-						PCAL.pid(), 0);
+				showGemcXYZHits(drawable, PCAL.avgX(), PCAL.avgY(), PCAL.avgZ(), PCAL.pid(), 0);
 			}
 
-		} else if (_panel3D instanceof CentralPanel3D) { // central detectors
-
-//			if (_cedPanel3D.showBST()) {
-//				showGemcXYZHits(drawable, 
-//						BST.avgX(),
-//						BST.avgY(),
-//						BST.avgZ(),
-//						BST.pid(), 0);
-//			}
+		}
+		else if (_panel3D instanceof CentralPanel3D) { // central detectors
 
 		}
 
 	}
 
-
 	// draw all the MC hits at once
-	private void showGemcXYZHits(GLAutoDrawable drawable,
-			double x[], double y[], double z[], int pid[], int option) {
+	private void showGemcXYZHits(GLAutoDrawable drawable, double x[], double y[], double z[], int pid[], int option) {
 
 		if ((x == null) || (y == null) || (z == null) || (x.length < 1)) {
 			return;
@@ -103,14 +77,12 @@ public class MCHitDrawer3D extends Item3D {
 			return;
 		}
 
-		
 		for (int hitIndex = 0; hitIndex < len; hitIndex++) {
 			Color truthColor = DetectorItem3D.truthColor(pid, hitIndex);
 			float xcm = (float) (x[hitIndex] / 10); // convert mm to cm
 			float ycm = (float) (y[hitIndex] / 10); // convert mm to cm
 			float zcm = (float) (z[hitIndex] / 10); // convert mm to cm
-			Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.black,
-					POINTSIZE + 2, true);
+			Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.black, POINTSIZE + 2, true);
 			Support3D.drawPoint(drawable, xcm, ycm, zcm, truthColor, POINTSIZE, true);
 
 		}

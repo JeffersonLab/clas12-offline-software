@@ -286,11 +286,13 @@ public class Torus extends MagneticField {
 				double seconds = elapsedTime / 1.0e9;
 				System.out.println(
 						"read " + nLine + " lines in " + seconds + " seconds");
+				
+				dos.close();
+				lnr.close();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

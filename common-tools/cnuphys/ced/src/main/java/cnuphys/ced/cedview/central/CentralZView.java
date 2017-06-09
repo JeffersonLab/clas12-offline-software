@@ -38,20 +38,17 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
-import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
-import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.bmt.BMTSectorItem;
+import cnuphys.ced.geometry.bmt.Constants;
+import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
-import cnuphys.ced.micromegas.Constants;
-import cnuphys.ced.micromegas.Geometry;
-import cnuphys.lund.LundId;
-import cnuphys.lund.LundSupport;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimTrajectory2D;
@@ -65,13 +62,6 @@ public class CentralZView extends CedView implements ChangeListener {
 	
 	//base title
 	private static final String _baseTitle = "Central Z";
-
-	private static Geometry geo;
-
-	static {
-		Constants.Load();
-		geo = new Geometry();
-	}
 
 	private double _targetZ = 0;
 	private double _phi = 0; // the cross-sectional phi value
@@ -207,10 +197,10 @@ public class CentralZView extends CedView implements ChangeListener {
 
 				_swimTrajectoryDrawer.draw(g, container);
 				drawGEMCHits(g, container);
-				drawPanels(g, container);
+				drawSVTPanels(g, container);
 
 				// not very sophisticated
-				denoteMicroMegas(g, container);
+				denoteBMT(g, container);
 
 				_hitDrawer.draw(g, container);
 
@@ -228,37 +218,49 @@ public class CentralZView extends CedView implements ChangeListener {
 		getContainer().setAfterDraw(afterDraw);
 	}
 
-	private void denoteMicroMegas(Graphics g, IContainer container) {
-		// hardwire for now layers 5 and 6
-
-		double zmin = -166.51;
-		double zmax = 272.09;
-		double r5 = 205.8;
-		double r6 = 220.8;
-		double w = zmax - zmin;
-		double h = 4;
-
+	//not real items
+	private void denoteBMT(Graphics g, IContainer container) {
+		
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();
+		
 		// clip the active area
 		Rectangle sr = container.getInsetRectangle();
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
-		Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r5, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
 
-		wr.setFrame(zmin, -r5 - h, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
+		for (int layer = 1; layer <= 6; layer++) {
+			double r = BMTSectorItem.innerRadius[layer-1];
+			int region = (int) (layer+1)/2 - 1;
+			double zmin;
+			double zmax;
+			Color color;
+			
+			if (BMTGeometry.getGeometry().isZLayer(layer)) {
+				zmin = Constants.getCRZZMIN()[region];
+				zmax = Constants.getCRZZMAX()[region];
+				color = BMTSectorItem.zColor;
+			}
+			else {
+				zmin = Constants.getCRCZMIN()[region];
+				zmax = Constants.getCRCZMAX()[region];
+				color = BMTSectorItem.cColor;
+		}
+			
+			double w = zmax - zmin;
+			double h = BMTSectorItem.FAKEWIDTH;
+			
+			Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r, w, h);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color,
+					Color.gray, 1, LineStyle.SOLID);
 
-		wr.setFrame(zmin, r6, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
+			wr.setFrame(zmin, -r - h, w, h);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color,
+					Color.gray, 1, LineStyle.SOLID);
 
-		wr.setFrame(zmin, -r6 - h, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
+
+		}
+		
 
 		// hits?
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
@@ -266,51 +268,51 @@ public class CentralZView extends CedView implements ChangeListener {
 		}
 		else {
 			if (isSingleEventMode()) {
-
-				int hitCount = BMT.hitCount();
-				if (hitCount > 0) {
-					int sect[] = BMT.sector();
-					int layer[] = BMT.layer();
-					int strip[] = BMT.strip();
-
-					Point2D.Double wp = new Point2D.Double();
-					Point pp = new Point();
-					for (int hit = 0; hit < hitCount; hit++) {
-
-						if ((layer[hit] == 5) || (layer[hit] == 6)) {
-							if (strip[hit] > 0) {
-								double z = geo.CRC_GetZStrip(sect[hit],
-										layer[hit], strip[hit]);
-								wp.x = z;
-
-								if (layer[hit] == 6) {
-									wp.y = r6 + 2;
-									container.worldToLocal(pp, wp);
-									g.setColor(X11Colors
-											.getX11Color("lawn green"));
-									g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
-									g.setColor(Color.black);
-									g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
-
-									wp.y = -r6 - 2;
-									container.worldToLocal(pp, wp);
-									g.setColor(X11Colors
-											.getX11Color("lawn green"));
-									g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
-									g.setColor(Color.black);
-									g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
-
-								}
-
-							}
-						} // layer == 5 or 6
-					} // for
-
-					if (showMcTruth()) {
-
-					}
-
-				} // hit count > 0
+//
+//				int hitCount = BMT.hitCount();
+//				if (hitCount > 0) {
+//					int sect[] = BMT.sector();
+//					int layer[] = BMT.layer();
+//					int strip[] = BMT.strip();
+//
+//					Point2D.Double wp = new Point2D.Double();
+//					Point pp = new Point();
+//					for (int hit = 0; hit < hitCount; hit++) {
+//
+//						if ((layer[hit] == 5) || (layer[hit] == 6)) {
+//							if (strip[hit] > 0) {
+//								double z = geo.CRC_GetZStrip(sect[hit],
+//										layer[hit], strip[hit]);
+//								wp.x = z;
+//
+//								if (layer[hit] == 6) {
+//									wp.y = r6 + 2;
+//									container.worldToLocal(pp, wp);
+//									g.setColor(X11Colors
+//											.getX11Color("lawn green"));
+//									g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
+//									g.setColor(Color.black);
+//									g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
+//
+//									wp.y = -r6 - 2;
+//									container.worldToLocal(pp, wp);
+//									g.setColor(X11Colors
+//											.getX11Color("lawn green"));
+//									g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
+//									g.setColor(Color.black);
+//									g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
+//
+//								}
+//
+//							}
+//						} // layer == 5 or 6
+//					} // for
+//
+//					if (showMcTruth()) {
+//
+//					}
+//
+//				} // hit count > 0
 			} // single event mode
 		}
 
@@ -353,7 +355,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 
 	// draw the panels
-	private void drawPanels(Graphics g, IContainer container) {
+	private void drawSVTPanels(Graphics g, IContainer container) {
 		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
 		if (panels == null) {
 			return;
@@ -367,13 +369,6 @@ public class CentralZView extends CedView implements ChangeListener {
 		}
 
 		Collections.sort(panels);
-
-		// System.err.println("panel count: " + panels.size());
-		// for (BSTxyPanel panel : panels) {
-		// System.err.println("Lay: " + panel.getLayer() + " sect: " +
-		// panel.getSector() + " PERP: " + panel.getPerp());
-		// }
-
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();
 		// clip the active area
@@ -505,46 +500,6 @@ public class CentralZView extends CedView implements ChangeListener {
 
 	private void drawGEMCHits(Graphics g, IContainer container) {
 
-//		double x[] = BST.avgX();
-//		if (x == null) {
-//			return;
-//		}
-//
-//		double y[] = BST.avgY();
-//		double z[] = BST.avgZ();
-//		int pid[] = BST.pid();
-//
-//		Graphics2D g2 = (Graphics2D) g;
-//		Shape oldClip = g2.getClip();
-//		// clip the active area
-//		Rectangle sr = container.getInsetRectangle();
-//		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-//
-//		Stroke oldStroke = g2.getStroke();
-//		g2.setStroke(stroke);
-//
-//		Point p1 = new Point();
-//		Point2D.Double wp1 = new Point2D.Double();
-//		Color default_fc = Color.red;
-//
-//		for (int i = 0; i < x.length; i++) {
-//			Color fc = default_fc;
-//			if (pid != null) {
-//				LundId lid = LundSupport.getInstance().get(pid[i]);
-//				if (lid != null) {
-//					fc = lid.getStyle().getFillColor();
-//				}
-//			}
-//			g2.setColor(fc);
-//
-//			wp1.setLocation(z[i], x[i] * _cosphi + y[i] * _sinphi);
-//			container.worldToLocal(p1, wp1);
-//
-//			DataDrawSupport.drawGemcHit(g, p1);
-//		}
-//
-//		g2.setStroke(oldStroke);
-//		g2.setClip(oldClip);
 	}
 
 	private void drawCoordinateSystem(Graphics g, IContainer container) {

@@ -1,8 +1,10 @@
 # clas12-offline-software [![Build Status](https://travis-ci.org/JeffersonLab/clas12-offline-software.svg?branch=master)](https://travis-ci.org/JeffersonLab/clas12-offline-software)
-CLAS12 Offline Software (work in progress)
+CLAS12 Offline Software
 
 ## Quick Start
 If you just want to use the software without modifying/building it, you can download the pre-built package from the [releases](https://github.com/JeffersonLab/clas12-offline-software/releases) page (download coatjava.tar.gz from the Downloads section).
+
+If you plan to use coatjava as a plugin of clara for running CLAS12 reconstruction, you can skip downloading it; installing clara will automatically download coatjava for you. Coatjava can then be found at $CLARA_HOME/plugins/clas12/. See the [clara documentation](https://claraweb.jlab.org/clara/docs/clas/installation.html) for more information.
 
 To build coatjava, your system must have Maven and Java JDK 1.8 or greater installed. Depending on your OS and Java installation, you may also have to install JavaFX (on some systems it will already be installed). If those requirements are met, then to build coatjava simply do:
 

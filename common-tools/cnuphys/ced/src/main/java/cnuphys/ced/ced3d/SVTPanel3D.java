@@ -16,7 +16,7 @@ import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
-public class BSTPanel3D extends DetectorItem3D {
+public class SVTPanel3D extends DetectorItem3D {
 
 	protected static final Color outlineHitColor = new Color(0, 255, 64, 24);
 
@@ -30,7 +30,7 @@ public class BSTPanel3D extends DetectorItem3D {
 	// the 1-based "biglayer" [1..8] used by the data
 	private int _layer;
 
-	public BSTPanel3D(CedPanel3D panel3D, int sector, int layer) {
+	public SVTPanel3D(CedPanel3D panel3D, int sector, int layer) {
 		super(panel3D);
 		_sector = sector;
 		_layer = layer;
@@ -76,51 +76,6 @@ public class BSTPanel3D extends DetectorItem3D {
 		} //hits not null
 		
 
-//		int hitCount = BST.hitCount();
-//		int bstsector[] = BST.sector();
-//		int bstlayer[] = BST.layer();
-//		int bststrip[] = BST.strip();
-//        int pid[] = BST.pid();
-//		double avgX[] = BST.avgX();
-//		double avgY[] = BST.avgY();
-//		double avgZ[] = BST.avgZ();
-
-		
-//		boolean drawOutline = false;
-//		// now strips
-//		for (int i = 0; i < hitCount; i++) {
-//			// 1 based sector
-//			int sector = bstsector[i];
-//			// "big layer" ..8
-//			int layer = bstlayer[i];
-//
-//			if ((_sector == sector) && (_layer == layer)) {
-//				drawOutline = true;
-//				// strip 1..256
-//				int strip = bststrip[i];
-//
-//				SVTGeometry.getStrip(sector, layer, strip, coords6);
-//
-//				if (_cedPanel3D.showMCTruth() && (pid != null)) {
-//					Color color = truthColor(pid, i);
-//
-//					if (showHits()) {
-//						Support3D.drawLine(drawable, coords6, color, 2f);
-//					}
-//					double xcm = avgX[i] / 10;
-//					double ycm = avgY[i] / 10;
-//					double zcm = avgZ[i] / 10;
-//
-//					drawMCPoint(drawable, xcm, ycm, zcm, color);
-//
-//				} // mc truth
-//				else {
-//					if (showHits()) {
-//						Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
-//					}
-//				}
-//			}
-//		} // hitcount
 
 		if (drawOutline) { // if any hits, draw it once
 			SVTGeometry.getLayerQuads(_sector, _layer, coords36);
@@ -130,6 +85,7 @@ public class BSTPanel3D extends DetectorItem3D {
 
 		// reconstructed crosses?
 		if (_cedPanel3D.showReconCrosses()) {
+			//SVT
 			CrossList2 crosses = SVTCrosses.getInstance().getCrosses();
 			int len = (crosses == null) ? 0 : crosses.size();
 			for (int i = 0; i < len; i++) {
@@ -149,7 +105,9 @@ public class BSTPanel3D extends DetectorItem3D {
 
 					drawCrossPoint(drawable, x1, y1, z1, crossColor);
 				}
-			}
+			} //svt
+			
+			
 		}
 		
 		//cosmics?
@@ -180,56 +138,7 @@ public class BSTPanel3D extends DetectorItem3D {
 
 		}
 		
-//		
-//		
-//		
-//		double labx[] = BST.crossX();
-//		if (_cedPanel3D.showReconCrosses() && (labx != null)) {
-//			// these arrays are in mm
-//			double laby[] = BST.crossY();
-//			double labz[] = BST.crossZ();
-//			double ux[] = BST.crossUx();
-//			double uy[] = BST.crossUy();
-//			double uz[] = BST.crossUz();
-//
-//			int len = (labx == null) ? 0 : labx.length;
-//
-//			for (int i = 0; i < len; i++) {
-//				// convert to cm
-//				float x1 = (float) labx[i] / 10;
-//				float y1 = (float) laby[i] / 10;
-//				float z1 = (float) labz[i] / 10;
-//
-//				Support3D.drawLine(drawable, x1, y1, z1, (float) (ux[i]),
-//						(float) (uy[i]), (float) (uz[i]), CROSS_LEN,
-//						crossColor, 3f);
-//				Support3D.drawLine(drawable, x1, y1, z1, (float) (ux[i]),
-//						(float) (uy[i]), (float) (uz[i]),
-//						(float) (1.1 * CROSS_LEN), Color.black, 1f);
-//
-//				drawCrossPoint(drawable, x1, y1, z1, crossColor);
-//
-//				// float x2 = (float) (x1 + CROSS_LEN * ux[i]);
-//				// float y2 = (float) (y1 + CROSS_LEN * uy[i]);
-//				// float z2 = (float) (z1 + CROSS_LEN * uz[i]);
-//				//
-//				// // System.err.println("BST crosses at (" + x1 + ", " + y1 +
-//				// ", " + z1 + ")");
-//				//
-//				// Support3D.drawCone(drawable, x1, y1, z1, x2, y2, z2, 1.0f,
-//				// coneColor);
-//				//
-//				// x2 = (float) (x1 + 1.1*CROSS_LEN * ux[i]);
-//				// y2 = (float) (y1 + 1.1*CROSS_LEN * uy[i]);
-//				// z2 = (float) (z1 + 1.1*CROSS_LEN * uz[i]);
-//				//
-//				// Support3D.drawLine(drawable, x1, y1, z1,
-//				// x2, y2, z2, coneLineColor, 2f);
-//			}
 
-//		}
-		
-		
 		
 		//cosmics
 
@@ -240,28 +149,28 @@ public class BSTPanel3D extends DetectorItem3D {
 	protected boolean show() {
 		switch (_layer) {
 		case 1:
-			return _cedPanel3D.showBSTLayer1();
+			return _cedPanel3D.showSVTLayer1();
 		case 2:
-			return _cedPanel3D.showBSTLayer2();
+			return _cedPanel3D.showSVTLayer2();
 		case 3:
-			return _cedPanel3D.showBSTLayer3();
+			return _cedPanel3D.showSVTLayer3();
 		case 4:
-			return _cedPanel3D.showBSTLayer4();
+			return _cedPanel3D.showSVTLayer4();
 		case 5:
-			return _cedPanel3D.showBSTLayer5();
+			return _cedPanel3D.showSVTLayer5();
 		case 6:
-			return _cedPanel3D.showBSTLayer6();
+			return _cedPanel3D.showSVTLayer6();
 		case 7:
-			return _cedPanel3D.showBSTLayer7();
+			return _cedPanel3D.showSVTLayer7();
 		case 8:
-			return _cedPanel3D.showBSTLayer8();
+			return _cedPanel3D.showSVTLayer8();
 		}
 		return false;
 	}
 
 	// show strip hits?
 	protected boolean showHits() {
-		return show() && _cedPanel3D.showBSTHits();
+		return show() && _cedPanel3D.showSVTHits();
 	}
 
 }

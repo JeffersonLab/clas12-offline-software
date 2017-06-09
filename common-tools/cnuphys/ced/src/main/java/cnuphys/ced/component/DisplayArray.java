@@ -43,7 +43,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Tag and access to the inner/outer button group */
 	public static final String INNEROUTER_BUTTONGROUP = "InnerOuterButtonGroup";
 
-	/** Tag and access to the BST ispoint/cross button group */
+	/** Tag and access to the SVT ispoint/cross button group */
 	public static final String MIDPOINTCROSS_BUTTONGROUP = "MidpointCrossButtonGroup";
 
 	/** Label for inner plane of ec */
@@ -64,10 +64,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Distance scale label */
 	public static final String SCALE_LABEL = "Scale";
 
-	/** BST Hits as points */
-	public static final String MIDPOINTS_LABEL = "Strip Midpoints";
-
-	/** BST Hits as crosses */
+	/** SVT Hits as crosses */
 	public static final String COSMIC_LABEL = "Cosmic Tracks";
 	
 	private static final Color _buttonColor = X11Colors.getX11Color("Dark Red");
@@ -88,7 +85,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	private static final String DC_TB_SEGMENT_LABEL = "TB Segments";
 
 	/** Label for bst reconstructed crosses button */
-	private static final String RECONS_CROSS_LABEL = "BST/BMT Crosses";
+	private static final String RECONS_CROSS_LABEL = "SVT/BMT Crosses";
 
 	/** Label for ftof reconstructed hits button */
 	private static final String FTOFRECONS_HIT_LABEL = "FTOF Hits";
@@ -120,8 +117,8 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls whether dc HB reconstructed segments are displayed
 	private AbstractButton _dcHBSegmentButton;
 
-	// controls whether bst reconstructed crosses are displayed
-	private AbstractButton _reconsBSTCrossButton;
+	// controls whether SVT reconstructed crosses are displayed
+	private AbstractButton _reconsSVTCrossButton;
 
 	// controls whether FTOF reconstructed hits are displayed
 	private AbstractButton _reconsFTOFHitButton;
@@ -130,7 +127,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls mc truth is displayed (when available)
 	private AbstractButton _mcTruthButton;
 
-	// controls cosmic tracks in BST (when available)
+	// controls cosmic tracks in SVT (when available)
 	private AbstractButton _cosmicButton;
 
 	// controls whether distance scale displayed
@@ -150,9 +147,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether inner plane displayed for ec
 	private AbstractButton _outerButton;
-
-	// controls whether hits in BST are shown as midpoints of strips
-	private AbstractButton _stripMidpointsButton;
 
 	// controls whether we draw u strips
 	private AbstractButton _uButton;
@@ -190,7 +184,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		boolean showDChbCrosses = true;
 		boolean showDCtbCrosses = true;
 		boolean showDCtbDoca = true;
-		boolean showBSTreconsCrosses = true;
+		boolean showSVTreconsCrosses = true;
 		boolean showFTOFreconsHits = true;
 		
 		boolean showDChbSegs = true;
@@ -234,13 +228,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 					view.isLogAccumulatedMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
-
-		}
-
-		// BST hits as midpoints of hit strips
-		if (Bits.checkBit(bits, DisplayBits.SVTHITS)) {
-			_stripMidpointsButton = add(MIDPOINTS_LABEL, false, true,
-					this, X11Colors.getX11Color("maroon")).getCheckBox();
 
 		}
 
@@ -306,8 +293,8 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 
 		if (Bits.checkBit(bits, DisplayBits.SVTRECONS_CROSSES)) {
-			_reconsBSTCrossButton = add(RECONS_CROSS_LABEL,
-					showBSTreconsCrosses, true, this, _buttonColor)
+			_reconsSVTCrossButton = add(RECONS_CROSS_LABEL,
+					showSVTreconsCrosses, true, this, _buttonColor)
 					.getCheckBox();
 		}
 
@@ -362,16 +349,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		return (_mcTruthButton != null) && _mcTruthButton.isSelected();
 	}
 	
-	/**
-	 * Convenience method to see it we show thestrip midpoints.
-	 * 
-	 * @return <code>true</code> if we are to show the strip midpoints
-	 * for hit strips.
-	 */
-	public boolean showStripMidpoints() {
-		return (_stripMidpointsButton != null) && _stripMidpointsButton.isSelected();
-	}
-
 	/**
 	 * Convenience method to see it we show the cosmic tracks.
 	 * 
@@ -496,9 +473,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 * 
 	 * @return <code>true</code> if we are to show bst reconstructed crosses.
 	 */
-	public boolean showBSTReconsCrosses() {
-		return (_reconsBSTCrossButton != null)
-				&& _reconsBSTCrossButton.isSelected();
+	public boolean showSVTReconsCrosses() {
+		return (_reconsSVTCrossButton != null)
+				&& _reconsSVTCrossButton.isSelected();
 	}
 
 }

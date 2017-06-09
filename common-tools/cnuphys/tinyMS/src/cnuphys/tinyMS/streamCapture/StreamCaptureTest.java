@@ -23,7 +23,7 @@ public class StreamCaptureTest {
 
 		testFrame.setLayout(new BorderLayout());
 		testFrame.add(new StreamCapturePane(), BorderLayout.CENTER);
-		
+
 		testFrame.setSize(600, 600);
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -31,12 +31,11 @@ public class StreamCaptureTest {
 				testFrame.setVisible(true);
 			}
 		});
-		
+
 		System.out.println("Hey man (out)");
 		System.err.println("Hey man (err)");
 		System.out.print("out followed by ");
 		System.err.println("err");
 	}
-	
 
 }

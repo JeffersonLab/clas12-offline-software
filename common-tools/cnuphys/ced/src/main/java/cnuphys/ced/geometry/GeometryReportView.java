@@ -25,7 +25,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 	
 	//report buttons
 	private JButton _clearButton;
-	private JButton _bstButton;
+	private JButton _svtButton;
 	private JButton _dcButton;
 
 	public GeometryReportView() {
@@ -42,7 +42,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 		
 		//add the buttons
 		_clearButton = addButton(panel, " Clear ");
-		_bstButton = addButton(panel, " BST ");
+		_svtButton = addButton(panel, " SVT ");
 		_dcButton = addButton(panel, " DC ");
 
 		add(panel, BorderLayout.SOUTH);
@@ -94,7 +94,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 		if (o == _clearButton) {
 			clear();
 		}
-		else if (o == _bstButton) {
+		else if (o == _svtButton) {
 			bstReport();
 		}
 		else if (o == _dcButton) {
@@ -143,7 +143,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 	//report bst geometry
 	private void bstReport() {
 		clear();
-		header("BST Geometry\n");
+		header("SVT Geometry\n");
 		
 		println(MCOLOR.M_BLACK, "layer\t|\t#sectors");
 		println(MCOLOR.M_BLACK, "---------------------------------");
