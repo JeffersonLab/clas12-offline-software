@@ -20,7 +20,6 @@ import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
-import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 
 /**
@@ -40,10 +39,12 @@ public class MagFieldItem extends AItem {
 	private static boolean _failedToLoad = false;
 
 	// common colorscale
-	public static ColorScaleModel _colorScaleModelTorus = new ColorScaleModel(
-			getTorusValues(), getTorusColors());
-	public static ColorScaleModel _colorScaleModelSolenoid = new ColorScaleModel(
-			getSolenoidValues(), getSolenoidColors());
+	public static ColorScaleModel _colorScaleModelTorus = new ColorScaleModel("", getTorusValues(), getTorusColors(), 2,
+			1);
+	public static ColorScaleModel _colorScaleModelSolenoid = new ColorScaleModel("", getSolenoidValues(),
+			getSolenoidColors(), 2, 1);
+	public static ColorScaleModel _colorScaleModelGradient = new ColorScaleModel("", getGradientValues(),
+			getGradientColors(), 2, 1);
 
 	// pixel step size
 	private int pixelStep = 3;
@@ -110,17 +111,20 @@ public class MagFieldItem extends AItem {
 		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
 
 		if (_view instanceof SectorView) {
-			drawItemSectorView(g, container, displayOption, hasTorus,
-					hasSolenoid);
-		} else if (_view instanceof CentralZView) {
-			drawItemBSTzView(g, container, displayOption, hasTorus, hasSolenoid);
+			drawItemSectorView(g, container, displayOption, hasTorus, hasSolenoid);
+		}
+		else if (_view instanceof CentralZView) {
+			drawItemCentralZView(g, container, displayOption, hasTorus, hasSolenoid);
 		}
 
 	}
 
-	// drawer for BSTz views
-	private void drawItemBSTzView(Graphics g, IContainer container,
-			int displayOption, boolean hasTorus, boolean hasSolenoid) {
+	// drawer for Central Z views
+	private void drawItemCentralZView(Graphics g,
+			IContainer container,
+			int displayOption,
+			boolean hasTorus,
+			boolean hasSolenoid) {
 
 		if (!hasSolenoid) {
 			return;
@@ -153,8 +157,7 @@ public class MagFieldItem extends AItem {
 				container.localToWorld(pp, wp);
 
 				// get the true Cartesian coordinates
-				((CentralZView) (_view)).getCLASCordinates(container, pp, wp,
-						coords);
+				((CentralZView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
 				double z = coords[2];
 				double rho = coords[3];
@@ -162,14 +165,24 @@ public class MagFieldItem extends AItem {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					// note conversion to cm from mm
-					double bmag = probe.fieldMagnitudeCylindrical(phi,
-							rho / 10, z / 10) / 10.;
+					double bmag = probe.fieldMagnitudeCylindrical(phi, rho / 10, z / 10) / 10.;
 
 					Color color = _colorScaleModelSolenoid.getColor(bmag);
 					g.setColor(color);
-					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep,
-							pixelStep);
-				} else { // one of the components
+					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+				}
+				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
+					probe.gradientCylindrical(phi, rho, z, result);
+					double gmag = Math.sqrt(result[0]*result[0] +
+							result[1]*result[1] + result[2]*result[2]);
+					
+					//convert to T/m
+					gmag *= 10;
+					Color color = _colorScaleModelGradient.getColor(gmag);
+					g.setColor(color);
+					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+				}
+				else { // one of the components
 					// note conversion to cm from mm
 					probe.fieldCylindrical(phi, rho / 10, z / 10, result);
 					double comp = 0.0;
@@ -191,16 +204,14 @@ public class MagFieldItem extends AItem {
 						comp = (-result[0] * sinp + result[1] * cosp) / 10.;
 						break;
 					}
-					Color color = _colorScaleModelSolenoid.getColor(Math
-							.abs(comp));
+					Color color = _colorScaleModelSolenoid.getColor(Math.abs(comp));
 					g.setColor(color);
 
 					if (comp > 0) {
-						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep,
-								pixelStep);
-					} else {
-						g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep - 1,
-								pixelStep - 1);
+						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+					}
+					else {
+						g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep - 1, pixelStep - 1);
 					}
 
 				}
@@ -211,8 +222,7 @@ public class MagFieldItem extends AItem {
 		} // end for (xsteps)
 	}
 
-	private Rectangle getFieldRect(IContainer container, boolean hasTorus,
-			boolean hasSolenoid) {
+	private Rectangle getFieldRect(IContainer container, boolean hasTorus, boolean hasSolenoid) {
 
 		fieldBoundary = new Rectangle2D.Double();
 		GridCoordinate rCoordinate = null;
@@ -220,15 +230,15 @@ public class MagFieldItem extends AItem {
 		if (hasTorus) {
 			rCoordinate = MagneticFields.getInstance().getTorus().getRCoordinate();
 			zCoordinate = MagneticFields.getInstance().getTorus().getZCoordinate();
-		} else {
+		}
+		else {
 			rCoordinate = MagneticFields.getInstance().getSolenoid().getRCoordinate();
 			zCoordinate = MagneticFields.getInstance().getSolenoid().getZCoordinate();
 		}
 
 		fieldBoundary.x = zCoordinate.getMin();
 		if (hasSolenoid) {
-			fieldBoundary.x = MagneticFields.getInstance().getSolenoid().getZCoordinate()
-					.getMin();
+			fieldBoundary.x = MagneticFields.getInstance().getSolenoid().getZCoordinate().getMin();
 		}
 		fieldBoundary.width = (zCoordinate.getMax() - fieldBoundary.x);
 
@@ -241,13 +251,16 @@ public class MagFieldItem extends AItem {
 	}
 
 	// drawer for sector views
-	private void drawItemSectorView(Graphics g, IContainer container,
-			int displayOption, boolean hasTorus, boolean hasSolenoid) {
+	private void drawItemSectorView(Graphics g,
+			IContainer container,
+			int displayOption,
+			boolean hasTorus,
+			boolean hasSolenoid) {
 
-		//get the boundary
+		// get the boundary
 		Rectangle fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
-		
-		//get a probe
+
+		// get a probe
 		FieldProbe probe = FieldProbe.factory();
 
 		Rectangle bounds = container.getComponent().getBounds();
@@ -274,22 +287,31 @@ public class MagFieldItem extends AItem {
 				container.localToWorld(pp, wp);
 
 				// get the true Cartesian coordinates
-				((SectorView) (_view)).getCLASCordinates(container, pp, wp,
-						coords);
+				((SectorView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
 				double z = coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-					double bmag = probe.fieldMagnitudeCylindrical(phi,
-							rho, z) / 10.;
+					double bmag = probe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
 					g.setColor(color);
-					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep,
-							pixelStep);
-				} else { // one of the components
+					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+				}
+				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
+					probe.gradientCylindrical(phi, rho, z, result);
+					double gmag = Math.sqrt(result[0]*result[0] +
+							result[1]*result[1] + result[2]*result[2]);
+					
+					//convert to T/m
+					gmag *= 10;
+					Color color = _colorScaleModelGradient.getColor(gmag);
+					g.setColor(color);
+					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+				}
+				else { // one of the components
 					probe.fieldCylindrical(phi, rho, z, result);
 					double comp = 0.0;
 					switch (displayOption) {
@@ -309,23 +331,23 @@ public class MagFieldItem extends AItem {
 						double cosp = Math.cos(Math.toRadians(phi));
 						comp = (-result[0] * sinp + result[1] * cosp) / 10.;
 						break;
+
 					}
-					Color color = _colorScaleModelTorus
-							.getColor(Math.abs(comp));
+					Color color = _colorScaleModelTorus.getColor(Math.abs(comp));
 					g.setColor(color);
 
-					//distinguish positive and negative
+					// distinguish positive and negative
 					if (comp > 0) {
-						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep,
-								pixelStep);
-					} else {
-//						g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep - 1,
-//								pixelStep - 1);
-						g.fillOval(pp.x - pstep2, pp.y - pstep2, pixelStep,
-								pixelStep);
+						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+					}
+					else {
+						// g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep -
+						// 1,
+						// pixelStep - 1);
+						g.fillOval(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 					}
 
-				}
+				} //a component
 
 				pp.y += pixelStep;
 			}
@@ -356,31 +378,17 @@ public class MagFieldItem extends AItem {
 		return container.getComponent().getBounds().intersects(r);
 	}
 
-	/**
-	 * Get the values array for the plot.
-	 * 
-	 * @return the values array.
-	 */
-	private static double getTorusValues()[] {
+	private static double[] getGradientValues() {
+		int len = getGradientColors().length + 1;
 
-		int len = getTorusColors().length + 1;
-
+		double min = 0.05;
+		double max = 15; //T/m
+		double del = (max-min) / (len - 1);
 		double values[] = new double[len];
-		double min = 0.0;
-		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
-		// double del = (max-min)/(values.length-1);
-
 		values[0] = min;
 		values[len - 1] = max;
-
 		for (int i = 1; i < len - 1; i++) {
-			// values[i] = i*del;
-			// use nonlinear cosine scale
-			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
-			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
-
-			double del = (max - min) / (len - 1);
-//			double speedup = 5.0;
+			// double speedup = 5.0;
 			double speedup = 6.0;
 			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
 
@@ -395,7 +403,32 @@ public class MagFieldItem extends AItem {
 	 * 
 	 * @return the values array.
 	 */
-	private static double getSolenoidValues()[] {
+	private static double[] getTorusValues() {
+
+		int len = getTorusColors().length + 1;
+
+		double values[] = new double[len];
+		double min = 0.05;
+		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
+		double del = (max - min) / (len - 1);
+
+		values[0] = min;
+		values[len - 1] = max;
+
+		for (int i = 1; i < len - 1; i++) {
+			// double speedup = 5.0;
+			double speedup = 6.0;
+			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
+		}
+		return values;
+	}
+
+	/**
+	 * Get the values array for the plot.
+	 * 
+	 * @return the values array.
+	 */
+	private static double[] getSolenoidValues() {
 
 		int len = getTorusColors().length + 1;
 
@@ -423,22 +456,26 @@ public class MagFieldItem extends AItem {
 		return values;
 	}
 
+	private static Color[] getGradientColors() {
+		return getTorusColors();
+	}
+
 	/**
 	 * Get the color array for the plot.
 	 * 
 	 * @return the color array for the plot.
 	 */
-	private static Color getTorusColors()[] {
+	private static Color[] getTorusColors() {
 
 		// int r[] = {255, 176, 37, 132, 253, 205, 130, 127};
 		// int g[] = {254, 224, 162, 155, 189, 94, 0, 0};
 		// int b[] = {227, 230, 42, 51, 6, 5, 2, 127};
-//		int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
-//		int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
-//		int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
-		int r[] = { 255, 216, 176, 106, 37,  132, 193, 255, 255, 255, 255, 127 };
-		int g[] = { 255, 239, 224, 193, 162, 155, 205, 255, 191, 128,   0,   0 };
-		int b[] = { 255, 242, 230, 136,  42,  51,  25,   0,   0,   0,   0, 127 };
+		// int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
+		// int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
+		// int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
+		int r[] = { 255, 216, 176, 106, 37, 132, 193, 255, 255, 255, 255, 127 };
+		int g[] = { 255, 239, 224, 193, 162, 155, 205, 255, 191, 128, 0, 0 };
+		int b[] = { 255, 242, 230, 136, 42, 51, 25, 0, 0, 0, 0, 127 };
 
 		int n = r.length;
 		int nm1 = n - 1;
@@ -458,7 +495,8 @@ public class MagFieldItem extends AItem {
 				if (k < 2) {
 					// colors[k] = Color.cyan;
 					colors[k] = new Color(rr, gg, bb, 64);
-				} else {
+				}
+				else {
 					colors[k] = new Color(rr, gg, bb);
 				}
 				k++;
@@ -475,20 +513,20 @@ public class MagFieldItem extends AItem {
 	 * 
 	 * @return the color array for the plot.
 	 */
-	private static Color getSolenoidColors()[] {
+	private static Color[] getSolenoidColors() {
 
 		// int r[] = {255, 176, 37, 132, 253, 205, 130, 127};
 		// int g[] = {254, 224, 162, 155, 189, 94, 0, 0};
 		// int b[] = {227, 230, 42, 51, 6, 5, 2, 127};
-//		int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
-//		int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
-//		int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
-//		int r[] = { 255, 216, 176, 106, 37,  132, 255, 255, 255, 127 };
-//		int g[] = { 255, 239, 224, 193, 162, 155, 255, 128,   0,   0 };
-//		int b[] = { 255, 242, 230, 136, 42,  51,    0,   0,   0, 127 };
-		int r[] = { 255, 106, 37,  132, 255, 255, 255, 127 };
-		int g[] = { 255, 193, 162, 155, 255, 128,   0,   0 };
-		int b[] = { 255, 136, 42,  51,    0,   0,   0, 127 };
+		// int r[] = { 176, 255, 176, 37, 132, 255, 255, 255, 127 };
+		// int g[] = { 176, 254, 224, 162, 155, 255, 128, 0, 0 };
+		// int b[] = { 176, 227, 230, 42, 51, 0, 0, 0, 127 };
+		// int r[] = { 255, 216, 176, 106, 37, 132, 255, 255, 255, 127 };
+		// int g[] = { 255, 239, 224, 193, 162, 155, 255, 128, 0, 0 };
+		// int b[] = { 255, 242, 230, 136, 42, 51, 0, 0, 0, 127 };
+		int r[] = { 255, 106, 37, 132, 255, 255, 255, 127 };
+		int g[] = { 255, 193, 162, 155, 255, 128, 0, 0 };
+		int b[] = { 255, 136, 42, 51, 0, 0, 0, 127 };
 
 		int n = r.length;
 		int nm1 = n - 1;
@@ -508,7 +546,8 @@ public class MagFieldItem extends AItem {
 				if (k < 2) {
 					// colors[k] = Color.cyan;
 					colors[k] = new Color(rr, gg, bb, 64);
-				} else {
+				}
+				else {
 					colors[k] = new Color(rr, gg, bb);
 				}
 				k++;

@@ -440,11 +440,11 @@ public class AccumulationManager
 	}
 
 	/**
-	 * Get the max counts on any bst strip
+	 * Get the max counts on any SVT strip
 	 * 
-	 * @return the max counts for any bst strip.
+	 * @return the max counts for any SVT strip.
 	 */
-	public int getMaxFullBSTCount() {
+	public int getMaxFullSVTCount() {
 		return _maxSVTFullCount;
 	}
 
@@ -635,7 +635,7 @@ public class AccumulationManager
 
 				} catch (ArrayIndexOutOfBoundsException e) {
 					String msg = String.format(
-							"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
+							"Index out of bounds (SVT). Event# %d lay %d sect %d  strip %d",
 							_eventManager.getEventNumber(),
 							hit.layer,
 							hit.sector,

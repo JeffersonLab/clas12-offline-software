@@ -20,5 +20,6 @@
     <module>clas-detector</module>
     <module>clas-reco</module> 
     <module>clas-analysis</module> 
+    <module>cnuphys</module>
   </modules>
 </project>

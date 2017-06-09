@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.IDrawable;
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -23,11 +25,15 @@ import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.SVT;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
+import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
-import cnuphys.ced.micromegas.MicroMegasSector;
+import cnuphys.ced.geometry.bmt.BMTSectorItem;
 
 public class CentralXYHitDrawer implements IDrawable {
+	
+	private static Color _baseColor = new Color(255, 0, 0, 60);
+
 
 	// the event manager
 	private final ClasIoEventManager _eventManager = ClasIoEventManager
@@ -67,7 +73,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	@Override
 	public String getName() {
-		return "BSTxyHitDrawer";
+		return "CentralXYHitDrawer";
 	}
 
 	@Override
@@ -115,7 +121,7 @@ public class CentralXYHitDrawer implements IDrawable {
 	}
 
 	
-	// draw accumulated BST hits (panels)
+	// draw accumulated SVT hits (panels)
 	private void drawSVTAccumulatedHits(Graphics g, IContainer container) {
 		// panels
 
@@ -196,7 +202,7 @@ public class CentralXYHitDrawer implements IDrawable {
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
 		drawSVTHitsSingleMode(g, container);
-		drawMicroMegasHitsSingleMode(g, container);
+		drawBMTHitsSingleMode(g, container);
 		drawCTOFSingleHitsMode(g, container);
 	}
 	
@@ -222,35 +228,49 @@ public class CentralXYHitDrawer implements IDrawable {
 		
 	}
 
-	// draw micromegas hits
-	private void drawMicroMegasHitsSingleMode(Graphics g,
+	// draw BMT hits
+	private void drawBMTHitsSingleMode(Graphics g,
 			IContainer container) {
+		
+		Point pp = new Point();
+		Point2D.Double wp = new Point2D.Double();
+		
+		AdcHitList hits = BMT.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			
+//			Shape oldClip = g.getClip();
+			Graphics2D g2 = (Graphics2D) g;
 
-		int hitCount = BMT.hitCount();
-		if (hitCount > 0) {
-			int sect[] = BMT.sector();
-			int layer[] = BMT.layer();
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					BMTSectorItem bmtItem = _view.getBMTSectorItem(hit.sector, hit.layer);
 
-			for (int hit = 0; hit < hitCount; hit++) {
-				int geoSector = MicroMegasSector
-						.geoSectorFromDataSector(sect[hit]);
-				MicroMegasSector mms = _view.getMicroMegasSector(geoSector,
-						layer[hit]);
-				if (mms != null) {
-					FeedbackRect fbr = mms.drawHit(g, container, hit,
-							X11Colors.getX11Color("lawn green"), Color.black);
-
-					if (fbr != null) {
-						_fbRects.add(fbr);
+					if (bmtItem.isZLayer()) {
+						double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(hit.sector, 
+								hit.layer, hit.component);
+						
+						double rad = bmtItem.getInnerRadius()  + BMTSectorItem.FAKEWIDTH/2.;
+						wp.x = rad*Math.cos(phi);
+						wp.y = rad*Math.sin(phi);
+						container.worldToLocal(pp, wp);
+						
+						Color color = hits.adcColor(hit);
+						g.setColor(color);
+						
+						Polygon poly = bmtItem.getStripPolygon(container, hit.component);
+						if (poly != null) {
+							g.fillPolygon(poly);
+						}
+						
+		//				SymbolDraw.drawX(g2, pp.x, pp.y, 4, Color.black);
 					}
 				}
-			} // for
-		} // hitcount > 0
+			}
+		}
 	}
 
 	
-	private Color baseColor = new Color(255, 0, 0, 60);
-	// draw gemc simulated hits single event mode
+	// draw SVT hits single event mode
 	private void drawSVTHitsSingleMode(Graphics g, IContainer container) {
 		
 		AdcHitList hits = SVT.getInstance().getHits();
@@ -266,7 +286,7 @@ public class CentralXYHitDrawer implements IDrawable {
 							hit.sector);
 					
 					if (panel != null) {
-						_view.drawSVTPanel(g2, container, panel, baseColor);
+						_view.drawSVTPanel(g2, container, panel, _baseColor);
 						_view.drawSVTPanel(g2, container, panel, hits.adcColor(hit));
 	//					_view.drawSVTPanel(g2, container, panel, Color.red);
 					}
@@ -274,117 +294,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 				}
 			}
-			
-//			g.setClip(oldClip);
 		}
-
-//		int hitCount = BST.hitCount();
-//		if (hitCount > 0) {
-//
-//			int bstsector[] = BST.sector();
-//			int bstlayer[] = BST.layer();
-//			int bststrip[] = BST.strip();
-//
-//			Shape oldClip = g.getClip();
-//			Graphics2D g2 = (Graphics2D) g;
-//			
-//			// panels
-//			for (int i = 0; i < hitCount; i++) {
-//				
-//				//HACK GEO SECTOR DOESN"T MATCH REAL
-//				//TODO Undo hack when geometry fixed
-//				
-//				int superlayer = (bstlayer[i] - 1) / 2;
-//                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-//				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
-//				if (hackSect == 0) hackSect = numSect;
-//				
-//				
-//					SVTxyPanel panel = CentralXYView.getPanel(bstlayer[i],
-//						hackSect);
-//								
-////				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i],
-////						bstsector[i]);
-//				
-//				if (panel != null) {
-//					_view.drawSVTPanel(g2, container, panel, Color.red);
-//				}
-//			} // for on hits
-//
-//			// desginate the hits by strip midpoints?
-//			if (_view.showStripMidpoints()) {
-//				// System.err.println("DISPLAY MIDPOINTS");
-//				Point pp = new Point();
-//				for (int hitIndex = 0; hitIndex < hitCount; hitIndex++) {
-//					// covert all to zero based indices
-//					int sector = bstsector[hitIndex] - 1;
-//					int complayer = bstlayer[hitIndex];
-//					int superlayer = (complayer - 1) / 2;
-//					int layer = (complayer - 1) % 2;
-//					int strip = bststrip[hitIndex] - 1;
-//
-//					if ((strip > 255) || (strip < 0)) {
-//						Log.getInstance()
-//								.warning("In BST dgtz data, bad strip Id:"
-//										+ bststrip[hitIndex]);
-//					}
-//					else {
-//						// System.err.println("Drawing strip midpoint ");
-//						Point2D.Double wp = BSTGeometry.getStripMidpoint(sector,
-//								superlayer, layer, strip);
-//
-//						container.worldToLocal(pp, 10 * wp.x, 10 * wp.y);
-//
-//						SymbolDraw.drawUpTriangle(g2, pp.x, pp.y, 3,
-//								X11Colors.getX11Color("Dark Green"),
-//								X11Colors.getX11Color("Aquamarine"));
-//					}
-//
-//					// System.out.println("sect " + sector + " supl " +
-//					// superlayer + " lay " + layer + " strip " + strip);
-//				}
-//			}
-//
-//			// draw GEMC nearest x and y
-//
-//			if (_view.showMcTruth()) {
-//				int pid[] = BST.pid();
-//				double avgX[] = BST.avgX();
-//				double avgY[] = BST.avgY();
-//				if (avgX != null) {
-//
-//					Rectangle sr = container.getInsetRectangle();
-//					g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-//
-//					Point p1 = new Point();
-//					Point2D.Double wp1 = new Point2D.Double();
-//					Color default_fc = Color.red;
-//
-//					Stroke oldStroke = g2.getStroke();
-//					g2.setStroke(CedXYView.stroke);
-//
-//					for (int i = 0; i < avgX.length; i++) {
-//						Color fc = default_fc;
-//						if (pid != null) {
-//							LundId lid = LundSupport.getInstance().get(pid[i]);
-//							if (lid != null) {
-//								fc = lid.getStyle().getFillColor();
-//							}
-//						}
-//						g2.setColor(fc);
-//
-//						wp1.setLocation(avgX[i], avgY[i]);
-//						container.worldToLocal(p1, wp1);
-//
-//						DataDrawSupport.drawGemcHit(g, p1);
-//					}
-//					g2.setStroke(oldStroke);
-//				} // avgx != null
-//			} // show mc truth
-//
-//			g.setClip(oldClip);
-//		} // hitcount > 0
-
 	}
 
 	private void drawMCTruth(Graphics g, IContainer container) {

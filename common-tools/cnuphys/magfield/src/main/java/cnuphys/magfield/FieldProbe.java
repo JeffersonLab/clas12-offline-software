@@ -84,6 +84,74 @@ public abstract class FieldProbe implements IField {
 		return factory(MagneticFields.getInstance().getActiveField());
 	}
 	
+
+    /**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+     *
+     * @param phi
+     *            azimuthal angle in degrees.
+     * @param rho
+     *            the cylindrical rho coordinate in cm.
+     * @param z
+     *            coordinate in cm
+     * @param result
+     *            the result
+     * @result a Cartesian vector holding the calculated field in kiloGauss.
+     */
+	@Override
+    public void gradientCylindrical(double phi, double rho, double z,
+    	    float result[]) {
+		phi = Math.toRadians(phi);
+    	double x = rho*Math.cos(phi);
+    	double y = rho*Math.sin(phi);
+    	gradient((float)x, (float)y, (float)z, result);
+    }
+
+
+    /**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+     *
+     * @param x
+     *            the x coordinate in cm
+     * @param y
+     *            the y coordinate in cm
+     * @param z
+     *            the z coordinate in cm
+     * @param result
+     *            a float array holding the retrieved field in kiloGauss. The
+     *            0,1 and 2 indices correspond to x, y, and z components.
+     */
+     public void gradient(float x, float y, float z, float result[]) {
+ 		
+  		//TODO improve
+  		float[] fr1 = new float[3];
+ 		float[] fr2 = new float[3];
+ 		float del = 10f; //cm 
+  		
+ 		field(x-del, y, z, fr1);
+ 		field(x+del, y, z, fr2);
+ 		result[0] = (fr2[0]-fr1[0])/(2*del);
+// 		System.err.println("---------");
+// 		System.err.println("x = " + x + " y = " + y + " z = " + z);
+// 		System.err.println(" f1z = " + fr1[0]);
+//		System.err.println(" f2z = " + fr2[0]);
+
+ 		field(x, y-del, z, fr1);
+ 		field(x, y+del, z, fr2);
+ 		result[1] = (fr2[1]-fr1[1])/(2*del);
+ 		
+ 		field(x, y, z-del, fr1);
+ 		field(x, y, z+del, fr2);
+ 		
+// 		System.err.println("---------");
+// 		System.err.println(" f1z = " + fr1[2]);
+//		System.err.println(" f2z = " + fr2[2]);
+		result[2] = (fr2[2]-fr1[2])/(2*del);	
+     }
+
+	
 	/**
 	 * Get the appropriate probe for the given field
 	 * @return the probe for the givev field

@@ -23,23 +23,6 @@ public class CloneButton extends ToolBarButton {
 		super(container, "images/dolly.png", "Clone the view");
 	}
 	
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		Rectangle bb = getBounds();
-		
-		int l = 0;
-		int r = l + bb.width-1;
-		int t = 0;
-		int b = t + bb.height-1;
-		
-		g.setColor (Color.white);
-		g.drawLine(l, b, l, t);
-		g.drawLine(l, t, r, t);
-		g.setColor (Color.black);
-		g.drawLine(r, t, r, b);
-		g.drawLine(r, b, l, b);
-	}
 
 	/**
 	 * This is what I do if I am pressed

@@ -3,7 +3,7 @@ package cnuphys.ced.cedview.central;
 import java.awt.BorderLayout;
 
 /**
- * Note this view started out as just the XY view for the BST (SVT). But it has evolved into the xy view for 
+ * Note this view started out as just the XY view for the SVT. But it has evolved into the xy view for 
  * all central detectors. 
  */
 
@@ -25,7 +25,6 @@ import java.util.Vector;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
-import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -47,8 +46,8 @@ import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.ced.micromegas.MicroMegasSector;
 import cnuphys.lund.X11Colors;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -76,7 +75,7 @@ public class CentralXYView extends CedXYView {
 	CTOFXYPolygon ctofPoly[] = new CTOFXYPolygon[48];
 	
 	//Micro megas [sector][layer]
-	private MicroMegasSector microMegasSector[][];
+	private BMTSectorItem _bmtItems[][];
 
 	// units are mm
 	// private static Rectangle2D.Double _defaultWorldRectangle = new
@@ -124,15 +123,15 @@ public class CentralXYView extends CedXYView {
 
 	}
 	
-	/**
-	 * Get the Micromegas sector item
-	 * @param sector [1..3]
-	 * @param layer [1..6]
-	 * @return the Micromegas sector item
-	 */
-	public MicroMegasSector getMicroMegasSector(int sector, int layer) {
-		return microMegasSector[sector-1][layer-1];
-	}
+//	/**
+//	 * Get the Micromegas sector item
+//	 * @param sector [1..3]
+//	 * @param layer [1..6]
+//	 * @return the Micromegas sector item
+//	 */
+//	public MicroMegasSector getMicroMegasSector(int sector, int layer) {
+//		return microMegasSector[sector-1][layer-1];
+//	}
 
 	/**
 	 * Create a Central detector XY view
@@ -170,7 +169,7 @@ public class CentralXYView extends CedXYView {
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.SVTRECONS_CROSSES
-						+ DisplayBits.SVTHITS + DisplayBits.MCTRUTH
+						+ DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
 
@@ -206,7 +205,7 @@ public class CentralXYView extends CedXYView {
 				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
 						screenRect.height);
 
-				drawPanels(g, container);
+				drawSVTPanels(g, container);
 			}
 
 		};
@@ -303,7 +302,7 @@ public class CentralXYView extends CedXYView {
 	}
 
 	// draw the panels
-	private void drawPanels(Graphics g, IContainer container) {
+	private void drawSVTPanels(Graphics g, IContainer container) {
 
 		Shape oldClip = g.getClip();
 
@@ -316,6 +315,7 @@ public class CentralXYView extends CedXYView {
 
 		Rectangle sr = container.getInsetRectangle();
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+		
 
 		// SVT panels
 		for (SVTxyPanel panel : panels) {
@@ -442,16 +442,29 @@ public class CentralXYView extends CedXYView {
 	 */
 	@Override
 	protected void addItems() {
-		//micromegas sectors for now only layers 5 & 6		
+		//BMT sectors for now only layers 5 & 6		
 		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
 				_detectorLayerName);
 		
-		microMegasSector = new MicroMegasSector[3][6];
+		_bmtItems = new BMTSectorItem[3][6];
 	    for (int sect = 1; sect <= 3; sect++) {
-	    	for (int lay = 5; lay <= 6; lay++) {
-	    		microMegasSector[sect-1][lay-1] = new MicroMegasSector(detectorLayer, sect, lay);
+	    	for (int lay = 1; lay <= 6; lay++) {
+	    		_bmtItems[sect-1][lay-1] = new BMTSectorItem(detectorLayer, sect, lay);
 	    	}
 	    }
+	}
+	
+	/**
+	 * Get the BMT Sector item
+	 * @param sector the geo sector  1..3
+	 * @param layer the layer 1..6
+	 * @return the BMS Sector Item
+	 */
+	public BMTSectorItem getBMTSectorItem(int sector, int layer) {
+		if ((sector < 1) || (sector > 3) || (layer < 1) || (layer > 6)) {
+			return null;
+		}
+		return _bmtItems[sector-1][layer-1];
 	}
 
 	/**
@@ -564,20 +577,6 @@ public class CentralXYView extends CedXYView {
 		}
 
 		
-
-//		int hitCount = BST.hitCount();
-//		if ((_closestPanel != null) && (hitCount > 0)) {
-//			Vector<int[]> stripADCData = BST.allStripsForSectorAndLayer(
-//					_closestPanel.getSector(), _closestPanel.getLayer());
-//			if (!stripADCData.isEmpty()) {
-//				for (int sdtdat[] : stripADCData) {
-//					fbString("orange",
-//							"strip:  " + sdtdat[0] + " adc: " + +sdtdat[1],
-//							feedbackStrings);
-//				}
-//			}
-//		}
-
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
 		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
@@ -633,42 +632,6 @@ public class CentralXYView extends CedXYView {
 	// feedback from simulated data
 	private void getGemcFeedback(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
-
-//		String cstr = "$orange$";
-//
-//		double x[] = BST.avgX();
-//
-//		int len = (x == null) ? 0 : x.length;
-//		if (len == 0) {
-//			feedbackStrings.add(cstr + "No GEMC hits");
-//			return;
-//		}
-//
-//		double y[] = BST.avgY();
-//		int pid[] = BST.pid();
-//		Point p1 = new Point();
-//		Point2D.Double wp1 = new Point2D.Double();
-//		Rectangle rr = new Rectangle();
-//		for (int index = len - 1; index >= 0; index--) {
-//
-//			wp1.setLocation(x[index], y[index]);
-//			container.worldToLocal(p1, wp1);
-//			rr.setFrame(p1.x - 3, p1.y - 3, 6, 6);
-//
-//			if (rr.contains(screenPoint)) {
-//				if (pid != null) {
-//					LundId lid = LundSupport.getInstance()
-//							.get(pid[index]);
-//					feedbackStrings.add(cstr + "GEMC pid: " + lid.getName());
-//
-//					String hitXYstr = cstr + String.format(
-//							"GEMC [x,y]: (%-6.2f, %-6.2f)", x[index], y[index]);
-//					feedbackStrings.add(hitXYstr);
-//				}
-//				break;
-//			}
-//
-//		} // end for loop
 
 	}
 	

@@ -29,9 +29,6 @@ public class DisplayBits {
 	/** mag field */
 	public static final int MAGFIELD = 02000;
 
-	/** midpoints or crosses for BST */
-	public static final int SVTHITS = 04000;
-
 	/** hits FTOF Recons */
 	public static final int FTOFHITS = 010000;
 

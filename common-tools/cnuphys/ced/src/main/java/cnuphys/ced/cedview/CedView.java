@@ -382,7 +382,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showBSTReconsCrosses();
+		return _controlPanel.getDisplayArray().showSVTReconsCrosses();
 	}
 
 	/**
@@ -511,19 +511,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showMcTruth();
-	}
-
-	/**
-	 * Convenience method to see it we show thestrip midpoints.
-	 * 
-	 * @return <code>true</code> if we are to show the strip midpoints for hit
-	 *         strips.
-	 */
-	public boolean showStripMidpoints() {
-		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
-			return false;
-		}
-		return _controlPanel.getDisplayArray().showStripMidpoints();
 	}
 
 	/**

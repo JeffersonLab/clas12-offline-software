@@ -17,12 +17,11 @@ public class StreamCapturePane extends JScrollPane {
 	private static final Color transparent = new Color(0, 0, 0, 0);
 
 	// red terminal
-	public static SimpleAttributeSet RED_TERMINAL = createStyle(Color.red,
-			transparent, "monospaced", 11, false, false);
+	public static SimpleAttributeSet RED_TERMINAL = createStyle(Color.red, transparent, "monospaced", 11, false, false);
 
 	// black terminal
-	public static SimpleAttributeSet BLACK_TERMINAL = createStyle(Color.black,
-			transparent, "monospaced", 11, false, false);
+	public static SimpleAttributeSet BLACK_TERMINAL = createStyle(Color.black, transparent, "monospaced", 11, false,
+			false);
 
 	/**
 	 * The text area that will be on this scroll pane.
@@ -33,9 +32,10 @@ public class StreamCapturePane extends JScrollPane {
 
 	protected SimpleAttributeSet defaultStyle = BLACK_TERMINAL;
 
-	//captured printstreams for err and out
+	// captured printstreams for err and out
 	private CapturedPrintStream _outCps;
 	private CapturedPrintStream _errCps;
+
 	/**
 	 * Constructor will also create the text pane itself.
 	 * 
@@ -45,8 +45,8 @@ public class StreamCapturePane extends JScrollPane {
 		createTextPane();
 		textPane.setBackground(Color.white);
 		getViewport().add(textPane);
-		
-		//capture stdout and stdin
+
+		// capture stdout and stdin
 		_outCps = new CapturedPrintStream() {
 
 			@Override
@@ -59,8 +59,8 @@ public class StreamCapturePane extends JScrollPane {
 				baseAppend(s, BLACK_TERMINAL);
 			}
 		};
-		
-		//capture stdout and stdin
+
+		// capture stdout and stdin
 		_errCps = new CapturedPrintStream() {
 
 			@Override
@@ -73,11 +73,11 @@ public class StreamCapturePane extends JScrollPane {
 				baseAppend(s, RED_TERMINAL);
 			}
 		};
-		
+
 		System.setOut(_outCps);
 		System.setErr(_errCps);
 	}
-	
+
 	/**
 	 * Set the background, by setting the underlying text pane's background.
 	 * 
@@ -107,10 +107,12 @@ public class StreamCapturePane extends JScrollPane {
 	 *            if <code>true</code>, make bold.
 	 * @return the style.
 	 */
-	public static SimpleAttributeSet createStyle(Color fg, String fontFamily,
-			int fontSize, boolean italic, boolean bold) {
-		return createStyle(fg, Color.white, fontFamily, fontSize, italic, bold,
-				false, 0, 2);
+	public static SimpleAttributeSet createStyle(Color fg,
+			String fontFamily,
+			int fontSize,
+			boolean italic,
+			boolean bold) {
+		return createStyle(fg, Color.white, fontFamily, fontSize, italic, bold, false, 0, 2);
 	}
 
 	/**
@@ -130,10 +132,13 @@ public class StreamCapturePane extends JScrollPane {
 	 *            if <code>true</code>, make bold.
 	 * @return the style.
 	 */
-	public static SimpleAttributeSet createStyle(Color fg, Color bg,
-			String fontFamily, int fontSize, boolean italic, boolean bold) {
-		return createStyle(fg, bg, fontFamily, fontSize, italic, bold, false,
-				0, 2);
+	public static SimpleAttributeSet createStyle(Color fg,
+			Color bg,
+			String fontFamily,
+			int fontSize,
+			boolean italic,
+			boolean bold) {
+		return createStyle(fg, bg, fontFamily, fontSize, italic, bold, false, 0, 2);
 	}
 
 	/**
@@ -159,9 +164,15 @@ public class StreamCapturePane extends JScrollPane {
 	 *            space below.
 	 * @return the style.
 	 */
-	public static SimpleAttributeSet createStyle(Color fg, Color bg,
-			String fontFamily, int fontSize, boolean italic, boolean bold,
-			boolean underline, int spaceAbove, int spaceBelow) {
+	public static SimpleAttributeSet createStyle(Color fg,
+			Color bg,
+			String fontFamily,
+			int fontSize,
+			boolean italic,
+			boolean bold,
+			boolean underline,
+			int spaceAbove,
+			int spaceBelow) {
 		SimpleAttributeSet style = new SimpleAttributeSet();
 		StyleConstants.setForeground(style, fg);
 		StyleConstants.setBackground(style, bg);
@@ -242,7 +253,8 @@ public class StreamCapturePane extends JScrollPane {
 
 		try {
 			document.insertString(document.getLength(), text, style);
-		} catch (BadLocationException e) {
+		}
+		catch (BadLocationException e) {
 		}
 		textPane.setCaretPosition(Math.max(0, document.getLength() - 1));
 	}

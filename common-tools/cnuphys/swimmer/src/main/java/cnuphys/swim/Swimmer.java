@@ -883,10 +883,10 @@ public final class Swimmer {
 		// the the initial six vector
 		double uo[] = intitialState(xo, yo, zo, theta, phi);
 
-		double costheta = MagneticField.cos(Math.toRadians(theta));
-		double sintheta = MagneticField.sin(Math.toRadians(theta));
-		double cosphi = MagneticField.cos(Math.toRadians(phi));
-		double sinphi = MagneticField.sin(Math.toRadians(phi));
+		double costheta = Math.cos(Math.toRadians(theta));
+		double sintheta = Math.sin(Math.toRadians(theta));
+		double cosphi = Math.cos(Math.toRadians(phi));
+		double sinphi = Math.sin(Math.toRadians(phi));
 
 		// all in meters
 		double delz = pathLen * costheta;
@@ -1015,10 +1015,10 @@ public final class Swimmer {
 	 */
 	private static double[] intitialState(double xo, double yo, double zo, double theta, double phi) {
 		// initial values
-		double costheta = MagneticField.cos(Math.toRadians(theta));
-		double sintheta = MagneticField.sin(Math.toRadians(theta));
-		double cosphi = MagneticField.cos(Math.toRadians(phi));
-		double sinphi = MagneticField.sin(Math.toRadians(phi));
+		double costheta = Math.cos(Math.toRadians(theta));
+		double sintheta = Math.sin(Math.toRadians(theta));
+		double cosphi = Math.cos(Math.toRadians(phi));
+		double sinphi = Math.sin(Math.toRadians(phi));
 
 		// the the initial six vector
 		double Q[] = new double[6];

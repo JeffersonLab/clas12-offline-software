@@ -60,7 +60,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 	@Override
 	public String getName() {
-		return "BSTzHitDrawer";
+		return "CentralZHitDrawer";
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 	private void drawSVTHitsAccumulatedMode(Graphics g, IContainer container) {
 
-		int maxHit = AccumulationManager.getInstance().getMaxFullBSTCount();
+		int maxHit = AccumulationManager.getInstance().getMaxFullSVTCount();
 		if (maxHit < 1) {
 			return;
 		}
@@ -181,49 +181,6 @@ public class CentralZHitDrawer implements IDrawable {
 				}
 			}
 		}
-
-//		int hitCount = BST.hitCount();
-////		System.err.println("BST HIT COUNT: " + hitCount);
-//		if (hitCount > 0) {
-//			int bstsector[] = BST.sector();
-//			int bstlayer[] = BST.layer();
-//			int bststrip[] = BST.strip();
-//
-//			Graphics2D g2 = (Graphics2D) g;
-//
-//			// panels
-//			for (int i = 0; i < hitCount; i++) {
-//				
-//				
-//				//HACK GEO SECTOR DOESN"T MATCH REAL
-//				//TODO Undo hack when geometry fixed
-//				
-//				int superlayer = (bstlayer[i] - 1) / 2;
-//                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-//				int hackSect = (bstsector[i] + (numSect/2)) % numSect;
-//				if (hackSect == 0) hackSect = numSect;
-//				
-//
-////				BSTxyPanel panel = BSTxyView.getPanel(bstlayer[i], bstsector[i]);
-//				SVTxyPanel panel = CentralXYView.getPanel(bstlayer[i], hackSect);
-//				if (panel != null) {
-//					for (int zopt = 0; zopt < 3; zopt++) {
-//						if (panel.hit[zopt]) {
-
-////							System.err.println("drawing panel");
-//							_view.drawSVTStrip(g2, container, Color.red, bstsector[i], bstlayer[i], bststrip[i]);
-//						}
-////						else {
-////							System.err.println("!panel hit for zopt == " + zopt);
-////						}
-//					}
-//				}
-//				else {
-//					System.err.println("null BSTZ panel");
-//				}
-//			} // for loop on hits
-//
-//		} // hotcount > 0
 
 	}
 

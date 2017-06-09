@@ -8,7 +8,7 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
 
 public class DonutItem extends PolygonItem {
-
+	
 	/**
 	 * Create a donut item.
 	 * 

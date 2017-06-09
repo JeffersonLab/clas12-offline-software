@@ -72,9 +72,20 @@ public class TorusProbe extends FieldProbe {
 		double f0 = (q1 - q1_min) / (q1_max - q1_min);
 		double f1 = (q2 - q2_min) / (q2_max - q2_min);
 		double f2 = (q3 - q3_min) / (q3_max - q3_min);
+		
+		f0 = f0 - Math.floor(f0);
+		f1 = f1 - Math.floor(f1);
+		f2 = f2 - Math.floor(f2);
+		
+		
 		double g0 = 1 - f0;
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
+		
+//		System.out.println("NEW PROBE  f0 = " + f0 + "  f1 = " + f1 + "  f2 = " + f2);
+//		System.out.println("NEW PROBE  g0 = " + g0 + "  g1 = " + g1 + "  g2 = " + g2);
+
+		
 		double x = b1_000 * g0 * g1 * g2 + b1_001 * g0 * g1 * f2 + b1_010 * g0 * f1 * g2 + b1_011 * g0 * f1 * f2
 				+ b1_100 * f0 * g1 * g2 + b1_101 * f0 * g1 * f2 + b1_110 * f0 * f1 * g2 + b1_111 * f0 * f1 * f2;
 		double y = b2_000 * g0 * g1 * g2 + b2_001 * g0 * g1 * f2 + b2_010 * g0 * f1 * g2 + b2_011 * g0 * f1 * f2
