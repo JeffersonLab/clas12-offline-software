@@ -9,7 +9,8 @@ import org.jlab.geom.prim.Vector3D;
 
 import cnuphys.magfield.CompositeField;
 import cnuphys.magfield.MagneticField;
-//import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeField;
 import cnuphys.magfield.Solenoid;
 import cnuphys.magfield.Torus;
@@ -32,8 +33,8 @@ public class DCSwimmer {
 
     private static RotatedCompositeField rcompositeField;
     private static CompositeField compositeField;
-    //private static FieldProbe rprob;
-    //private static FieldProbe prob;
+    private static FieldProbe rprob;
+    private static FieldProbe prob;
     
     private Swimmer swimmer;
 
@@ -189,8 +190,8 @@ public class DCSwimmer {
                     _theta, _phi, z, accuracy, _rMax,
                     _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 
-            traj.computeBDL(rcompositeField);
-
+            traj.computeBDL(rprob);
+            //traj.computeBDL(rcompositeField);
             double lastY[] = traj.lastElement();
 
             value[0] = lastY[0] * 100; // convert back to cm
@@ -227,7 +228,8 @@ public class DCSwimmer {
                     _theta, _phi, z, accuracy, _rMax,
                     _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 
-            traj.computeBDL(compositeField);
+            traj.computeBDL(prob);
+            //traj.computeBDL(compositeField);
 
             double lastY[] = traj.lastElement();
 
@@ -306,7 +308,9 @@ public class DCSwimmer {
         double stepSize = 1e-4; // m
 
         SwimTrajectory st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
-        st.computeBDL(compositeField);
+        st.computeBDL(prob);
+        //st.computeBDL(compositeField);
+        
         double[] lastY = st.lastElement();
 
         value[0] = lastY[0] * 100; // convert back to cm
@@ -385,7 +389,9 @@ public class DCSwimmer {
 
         SwimTrajectory st = null;
         st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.000001);
-        st.computeBDL(compositeField);
+        st.computeBDL(prob);
+        //st.computeBDL(compositeField);
+        
         double[] lastY = st.lastElement();
 
         value[0] = lastY[0] * 100; // convert back to cm
@@ -456,7 +462,9 @@ public class DCSwimmer {
         double stepSize = 1e-4; // m
 
         SwimTrajectory st = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
-        st.computeBDL(compositeField);
+        st.computeBDL(prob);
+       // st.computeBDL(compositeField);
+        
         double[] lastY = st.lastElement();
 
         value[0] = lastY[0] * 100; // convert back to cm
@@ -569,9 +577,7 @@ public class DCSwimmer {
         rcompositeField = new RotatedCompositeField();
         compositeField = new CompositeField();
         //System.out.println("***** ****** CREATED A COMPOSITE ROTATED FIELD ****** **** ");
-        // rprob = FieldProbe.factory(rcompositeField);
-        // prob =  FieldProbe.factory(compositeField);
-
+       
         if (torus != null) {
 
             rcompositeField.add(torus);
@@ -583,10 +589,12 @@ public class DCSwimmer {
             compositeField.add(solenoid);
 
         }
-        
+        rprob = FieldProbe.factory(rcompositeField);
+        prob =  FieldProbe.factory(compositeField);
+
         System.out.println("Rotated Composite "+rcompositeField.getName());
         System.out.println("Torus "+torus.getName());
-        System.out.println("Solenoid "+solenoid.getName());
+        System.out.println("Solenoid "+solenoid.getName()+" version "+MagneticFields.getInstance().getVersion());
         
         FieldsLoaded = true;
     }
