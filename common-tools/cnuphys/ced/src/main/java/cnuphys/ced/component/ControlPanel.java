@@ -2,6 +2,7 @@ package cnuphys.ced.component;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 
 import javax.swing.Box;
 import javax.swing.JComponent;
@@ -167,24 +168,56 @@ public class ControlPanel extends JPanel {
 		JPanel magFieldPanel = null;
 		if (Bits.checkBit(displayArrayBits, DisplayBits.MAGFIELD)) {
 			magFieldPanel = new JPanel();
-			Box mfbox = Box.createVerticalBox();
-
+			
+			JPanel panel = new JPanel();
+			panel.setLayout(new GridLayout(2, 1, 0, 8));
+			
+			magFieldPanel.setLayout(new BorderLayout(4, 4));
 			_magFieldDisplayArray = new MagFieldDisplayArray(_view,
-					displayArrayBits);
-			mfbox.add(_magFieldDisplayArray);
-
+			displayArrayBits);
+			magFieldPanel.add(_magFieldDisplayArray, BorderLayout.NORTH);
+			
 			if (Bits.checkBit(controlPanelBits, FIELDLEGEND)) {
-				if (_view instanceof CentralZView) {
-					mfbox.add(new ColorModelLegend(
-							MagFieldItem._colorScaleModelSolenoid, FULLWIDTH,
-							"Field Magnitude (T)"));
-				} else {
-					mfbox.add(new ColorModelLegend(
-							MagFieldItem._colorScaleModelTorus, FULLWIDTH,
-							"Field Magnitude (T)"));
-				}
+				ColorModelLegend legend;
+				int gap = 30;
+			if (_view instanceof CentralZView) {
+				legend = new ColorModelLegend(
+						MagFieldItem._colorScaleModelSolenoid, FULLWIDTH-2*gap,
+						"Field (T)", gap);
+			} else {
+				legend = new ColorModelLegend(
+						MagFieldItem._colorScaleModelTorus, FULLWIDTH-2*gap,
+						"Field (T)", gap);
 			}
-			magFieldPanel.add(mfbox);
+			
+			ColorModelLegend glegend = new ColorModelLegend(
+					MagFieldItem._colorScaleModelGradient, FULLWIDTH-2*gap,
+					"Gradient Magnitude (T/m)", gap);
+			
+			panel.add(legend);
+			panel.add(glegend);
+			magFieldPanel.add(panel, BorderLayout.SOUTH);
+		}
+			
+			
+//			Box mfbox = Box.createVerticalBox();
+//
+//			_magFieldDisplayArray = new MagFieldDisplayArray(_view,
+//					displayArrayBits);
+//			mfbox.add(_magFieldDisplayArray);
+//
+//			if (Bits.checkBit(controlPanelBits, FIELDLEGEND)) {
+//				if (_view instanceof CentralZView) {
+//					mfbox.add(new ColorModelLegend(
+//							MagFieldItem._colorScaleModelSolenoid, FULLWIDTH,
+//							"Field Magnitude (T)"));
+//				} else {
+//					mfbox.add(new ColorModelLegend(
+//							MagFieldItem._colorScaleModelTorus, FULLWIDTH,
+//							"Field Magnitude (T)"));
+//				}
+//			}
+//			magFieldPanel.add(mfbox);
 		}
 
 		// options
@@ -235,7 +268,7 @@ public class ControlPanel extends JPanel {
 			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
 				sp.add(new ColorModelLegend(
 						AccumulationManager.colorScaleModel, 160,
-						"Relative Accumulation or ADC Value"), BorderLayout.SOUTH);
+						"Relative Accumulation or ADC Value", 20), BorderLayout.SOUTH);
 			}
 
 			tabbedPane.add(sp, "display");
