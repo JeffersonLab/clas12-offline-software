@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 
@@ -322,6 +323,10 @@ public class BaseToolBar extends CommonToolBar
 		add(_textButton);
 		add(_deleteButton);
 		add(_rectgridButton);
+		
+		if (_cloneButton != null) {
+			add(Box.createHorizontalStrut(8));
+		}
 		add(_cloneButton);
 
 

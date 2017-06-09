@@ -42,6 +42,8 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	/** Flag for displaying the perp component of the magnetic field */
 	public static final int BPERPDISPLAY = 5;
 
+	/** Flag for displaying the perp component of the magnetic field */
+	public static final int BGRADDISPLAY = 6;
 	// current option
 	private int _magFieldDisplayOption = NOMAGDISPLAY;
 
@@ -80,6 +82,9 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	 */
 	public static final String BPERP_LABEL = "<html>B&perp;";
 
+	/** string for grad magnitude */
+	public static final String BGRAD_LABEL = "<html>|&nabla;B|";
+
 	// controls whether any mag field is displayed
 	private AbstractButton _noMagButton;
 
@@ -95,8 +100,11 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	// controls whether z component of the mag field is displayed
 	private AbstractButton _showBzButton;
 
-	// controls whether z component of the mag field is displayed
+	// controls whether perpendicular component of the mag field is displayed
 	private AbstractButton _showBperpButton;
+
+	// controls whether z component of the mag field is displayed
+	private AbstractButton _showBgradButton;
 
 	// the parent view
 	private CedView _view;
@@ -111,34 +119,32 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	 *            controls what flags are added
 	 */
 	public MagFieldDisplayArray(CedView view, int bits) {
-		super(3, 15, 0);
+		super(4, 15, 0);
 		_view = view;
 
 		// display magnetic field?
 		if (Bits.checkBit(bits, DisplayBits.MAGFIELD)) {
-			_noMagButton = add(NOFIELD_LABEL,
-					_magFieldDisplayOption == NOMAGDISPLAY, true,
-					MAGFIELD_BUTTONGROUP, this, Color.black).getCheckBox();
+			_noMagButton = add(NOFIELD_LABEL, _magFieldDisplayOption == NOMAGDISPLAY, true, MAGFIELD_BUTTONGROUP, this,
+					Color.black).getCheckBox();
 
-			_showBmagButton = add(FIELD_LABEL,
-					_magFieldDisplayOption == BMAGDISPLAY, true,
-					MAGFIELD_BUTTONGROUP, this, Color.black).getCheckBox();
+			_showBmagButton = add(FIELD_LABEL, _magFieldDisplayOption == BMAGDISPLAY, true, MAGFIELD_BUTTONGROUP, this,
+					Color.black).getCheckBox();
 
-			_showBxButton = add(BX_LABEL, _magFieldDisplayOption == BXDISPLAY,
-					true, MAGFIELD_BUTTONGROUP, this, Color.black)
-					.getCheckBox();
+			_showBxButton = add(BX_LABEL, _magFieldDisplayOption == BXDISPLAY, true, MAGFIELD_BUTTONGROUP, this,
+					Color.black).getCheckBox();
 
-			_showByButton = add(BY_LABEL, _magFieldDisplayOption == BYDISPLAY,
-					true, MAGFIELD_BUTTONGROUP, this, Color.black)
-					.getCheckBox();
+			_showByButton = add(BY_LABEL, _magFieldDisplayOption == BYDISPLAY, true, MAGFIELD_BUTTONGROUP, this,
+					Color.black).getCheckBox();
 
-			_showBzButton = add(BZ_LABEL, _magFieldDisplayOption == BZDISPLAY,
-					true, MAGFIELD_BUTTONGROUP, this, Color.black)
-					.getCheckBox();
+			_showBzButton = add(BZ_LABEL, _magFieldDisplayOption == BZDISPLAY, true, MAGFIELD_BUTTONGROUP, this,
+					Color.black).getCheckBox();
 
-			_showBperpButton = add(BPERP_LABEL,
-					_magFieldDisplayOption == BPERPDISPLAY, true,
-					MAGFIELD_BUTTONGROUP, this, Color.black).getCheckBox();
+			_showBperpButton = add(BPERP_LABEL, _magFieldDisplayOption == BPERPDISPLAY, true, MAGFIELD_BUTTONGROUP,
+					this, Color.black).getCheckBox();
+
+			_showBgradButton = add(BGRAD_LABEL, _magFieldDisplayOption == BPERPDISPLAY, true, MAGFIELD_BUTTONGROUP,
+					this, Color.black).getCheckBox();
+
 		}
 
 		setBorder(new CommonBorder("Field Display Options"));
@@ -158,30 +164,41 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 			if (button.isSelected()) {
 				_magFieldDisplayOption = NOMAGDISPLAY;
 			}
-		} else if (button == _showBmagButton) {
+		}
+		else if (button == _showBmagButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BMAGDISPLAY;
 			}
-		} else if (button == _showBxButton) {
+		}
+		else if (button == _showBxButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BXDISPLAY;
 			}
-		} else if (button == _showByButton) {
+		}
+		else if (button == _showByButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BYDISPLAY;
 			}
-		} else if (button == _showBzButton) {
+		}
+		else if (button == _showBzButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BZDISPLAY;
 			}
-		} else if (button == _showBperpButton) {
+		}
+		else if (button == _showBperpButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BPERPDISPLAY;
+			}
+		}
+		else if (button == _showBgradButton) {
+			_view.getMagneticFieldLayer().setVisible(button.isSelected());
+			if (button.isSelected()) {
+				_magFieldDisplayOption = BGRADDISPLAY;
 			}
 		}
 		// repaint the container
