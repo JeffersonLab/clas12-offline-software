@@ -812,15 +812,15 @@ public class DetectorParticle implements Comparable {
         return beta;
     }   
      
-     public int getNphe(){
+     public int getNphe(DetectorType type){
          int nphe = 0;
          for(CherenkovResponse c : this.cherenkovStore){
-             if(c.getCherenkovType()==DetectorType.HTCC){
+             if(c.getCherenkovType()==type){
                  nphe = c.getEnergy();
              }
          }
          return nphe;
-     }    
+     }   
      
      public double getVertexTime(DetectorType type, int layer){
          double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
@@ -832,16 +832,18 @@ public class DetectorParticle implements Comparable {
          return vertex_time;
      }
      
-     public int getCherenkovSignal(List<CherenkovResponse> cherenkovs){
+     public int getCherenkovSignal(List<CherenkovResponse> cherenkovs, DetectorType type){
          
          int bestIndex = -1;
          if(cherenkovs.size()>0){
              // System.out.println("There are here???");
              for(int loop = 0; loop < cherenkovs.size(); loop++) {
+                 if(cherenkovs.get(loop).getCherenkovType()==type){
                  boolean matchtruth = cherenkovs.get(loop).match(this.detectorTrack.getFirstCross());
                  //System.out.println(matchtruth);
                  if(matchtruth==true){
                      bestIndex = loop;
+                 }
                  }
              }
          }
@@ -883,6 +885,21 @@ public class DetectorParticle implements Comparable {
             }
             return beta_index;
         }
+    
+    public int getSoftwareTriggerScore() {
+        int score = 0;
+        if(this.getNphe(DetectorType.HTCC)>5){
+            score = score + 1000;
+        }
+        if(this.getEnergyFraction(DetectorType.EC)>EBConstants.ECAL_SAMPLINGFRACTION_CUT){
+            score = score + 100;
+        }
+        if(this.hasHit(DetectorType.FTOF,1)==true || this.hasHit(DetectorType.FTOF,2)==true){
+            score = score + 10;
+        }
+        //System.out.println(score);
+        return score;
+    }
     
      
     public int compareTo(Object o) {
