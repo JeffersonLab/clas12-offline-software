@@ -29,6 +29,7 @@ public class TestServer {
 				final Client client2 = ClientSupport.findLocalServer("client 2");
 				final Client client3 = ClientSupport.findLocalServer("client 3");
 				final TestClient client4 = new TestClient();
+				final TestClient client5 = new TestClient();
 				testShutdown(server, client2);
 				testLogout(server, client3);
 			}

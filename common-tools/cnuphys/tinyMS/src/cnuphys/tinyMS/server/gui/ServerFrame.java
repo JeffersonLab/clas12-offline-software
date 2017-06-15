@@ -66,6 +66,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	//Memory strip chart
 	private MemoryStripChart _chart;
 	
+	//list of topics
+	private TopicList _topicList;
+	
 	/**
 	 * Create a frame that will monitor the given server
 	 */
@@ -123,6 +126,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		addNorth();
 		addCenter();
 		addSouth();
+		addEast();
 
 		// add a split pane with a capture pane
 		
@@ -147,18 +151,30 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		
 		add(panel, BorderLayout.SOUTH);
 	}
+	
+	//add the component in the east
+	private void addEast() {
+	}
 
 	//add the components in the center
 	private void addCenter() {
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+
 		_logPane = new SimpleLogPane();
 		Dimension d = _logPane.getPreferredSize();
 		d.height = 350;
 		_logPane.setPreferredSize(d);
+		
+		panel.add(_logPane, BorderLayout.CENTER);
+		_topicList = new TopicList(_server);
+		panel.add(_topicList.getScrollPane(), BorderLayout.EAST);
 				
 		//the table
 		_table = new ConnectionTable(_server);
 		
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, _logPane, _table.getScrollPane());
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, panel, _table.getScrollPane());
 		splitPane.setResizeWeight(0.8);
 
 		add(splitPane, BorderLayout.CENTER);
@@ -204,8 +220,6 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	//	CommonBorder cborder = new CommonBorder("");
 
 	//	nPanel.setBorder(BorderFactory.createCompoundBorder(emptyBorder, cborder));
-
-
 
 		add(nPanel, BorderLayout.NORTH);
 	}
@@ -331,7 +345,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		
 		if (_server.isShutDown()) {
 			_timer.cancel();
-			System.err.println("Frame detected server shutdown.");
+			System.err.println("Application GUI (Server Frame) detected server shutdown.");
 		}
 		
 		
@@ -343,6 +357,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		}
 	}
 	
+	//how long has the server been running?
 	private void uptime() {
 		
 		if (_server.isShutDown()) {
@@ -373,6 +388,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		if (_table != null) {
 			_table.fireTableDataChanged();
 		}
+		else {
+			System.err.println("DID NOT FIRE TABLE DATA CHANGE (Frame)");
+		}
 	}
 	
 	/**
@@ -393,12 +411,17 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	@Override
 	public void valueChanged(ListSelectionEvent lse) {
 		if (!lse.getValueIsAdjusting()) {
-	//		System.err.println(x);
+			_shutdownButton.setEnabled(_table.getSelectedRow() >= 0);
 		}
-		
-		_shutdownButton.setEnabled(_table.getSelectedRow() >= 0);
 	}
 
+	/**
+	 * Get the topic list
+	 * @return the topic list
+	 */
+	public TopicList getTopicList() {
+		return _topicList;
+	}
 
 	/**
 	 * Get the client table

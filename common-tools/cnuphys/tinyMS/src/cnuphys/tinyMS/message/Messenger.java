@@ -73,4 +73,6 @@ public abstract class Messenger implements IMessenger {
 	public Message readMessage() throws SocketException, EOFException, IOException {
 		return Message.readMessage(getDataInputStream());
 	}
+	
+	
 }

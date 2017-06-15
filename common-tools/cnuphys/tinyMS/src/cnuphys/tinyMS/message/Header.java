@@ -47,7 +47,7 @@ public class Header {
 	// magic number right
 	private boolean _swap = false;
 	
-	//the channel. For administrative messages it is
+	//the message topic. For administrative messages it is
 	//always the constant (reserved) SERVER_TOPIC
 	private String _topic = SERVER_TOPIC;
 
@@ -75,7 +75,7 @@ public class Header {
 	 *            the message type
 	 * @param tag
 	 *            for any purpose
-	 * @channel the topic
+	 * @param topic the topic
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
 	public Header(int clientId,  MessageType mtype, short tag, String topic) {
@@ -216,7 +216,7 @@ public class Header {
 		int clientId = inputStream.readInt();
 		short mtype = inputStream.readShort();
 		short tag = inputStream.readShort();
-		String channel = inputStream.readUTF();
+		String topic = inputStream.readUTF();
 		short dtype = inputStream.readShort();
 		int len = inputStream.readInt();
 
@@ -227,7 +227,7 @@ public class Header {
 			len = ByteSwap.swapInt(len);
 		}
 
-		Header header = new Header(clientId, MessageType.getMessageType(mtype), tag, channel);
+		Header header = new Header(clientId, MessageType.getMessageType(mtype), tag, topic);
 
 		// set data type for payload reader
 		header.setDataType(DataType.getDataType(dtype));
@@ -280,5 +280,29 @@ public class Header {
 		sb.append("  data type: " + _dataType + "\n");
 		sb.append("     length: " + _length + "\n");
 		return sb.toString();
+	}
+	
+	/**
+	 * Check whether a topic is acceptable
+	 * @param topic the topic to check
+	 * @return <code>true</code> if the topic is acceptable
+	 */
+	public static boolean acceptableTopic(String topic) {
+		if (topic == null) {
+			return false;
+		}
+		
+		topic = topic.trim();
+		
+		if (topic.length() < 1) {
+			return false;
+		}
+		
+		//check any reserved
+		if (SERVER_TOPIC.equalsIgnoreCase(topic)) {
+			return false;
+		}
+		
+		return true;
 	}
 }

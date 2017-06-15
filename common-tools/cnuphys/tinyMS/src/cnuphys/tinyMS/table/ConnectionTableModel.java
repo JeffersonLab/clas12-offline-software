@@ -53,7 +53,7 @@ public class ConnectionTableModel extends DefaultTableModel {
 	 * @param server the controlling server
 	 */
 	public ConnectionTableModel(TinyMessageServer server) {
-		super(colNames, 3);
+		super(colNames, 0);
 		_server = server;
 	}
 	
@@ -67,7 +67,7 @@ public class ConnectionTableModel extends DefaultTableModel {
 	
 	// the data is the list maintained by the server
 	protected List<ProxyClient> getData() {
-		return _server.getProxyClients();
+		return (_server == null) ? null : _server.getProxyClients();
 	}
 	
 	/**
@@ -88,6 +88,18 @@ public class ConnectionTableModel extends DefaultTableModel {
 	}
 	
 
+	@Override
+	public int getRowCount() {
+		List<ProxyClient> clients = getData();
+		return (clients == null) ? 0 : clients.size();
+	}
+	
+	@Override
+	public int getColumnCount() {
+		return colNames.length;
+	}
+
+	
 	/**
 	 * Get the value at a given row and column
 	 * 
