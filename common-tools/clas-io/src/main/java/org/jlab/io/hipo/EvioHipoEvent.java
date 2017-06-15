@@ -75,7 +75,7 @@ public class EvioHipoEvent {
                 for(int i = 0; i < nrows; i++){
                 	// RICH ADC Hipo Bank
                     hipoBankADC.setByte("sector",   i,    (byte) evioBank.getInt("sector", i));
-                    hipoBankADC.setShort("pmt",      i,    (short)  evioBank.getInt("pmt",i));
+                    hipoBankADC.setShort("pmt",     i,   (short)  evioBank.getInt("pmt",i));
                     hipoBankADC.setShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
                     hipoBankADC.setByte("order",    i,    (byte) 0);
                     hipoBankADC.setInt("ADC",       i,    (int) evioBank.getInt("ADC", i));
@@ -86,7 +86,7 @@ public class EvioHipoEvent {
                     
                     // RICH TDC Hipo Bank
                     hipoBankTDC.setByte("sector",   i,    (byte) evioBank.getInt("sector", i));
-                    hipoBankTDC.setShort("pmt",      i,    (short)  evioBank.getInt("pmt",i));
+                    hipoBankTDC.setShort("pmt",     i,   (short)  evioBank.getInt("pmt",i));
                     hipoBankTDC.setShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
                     hipoBankTDC.setInt("TDC1",      i,    (int) evioBank.getInt("TDC1",i));
                     hipoBankTDC.setInt("TDC2",      i,    (int) evioBank.getInt("TDC2", i));                                      
