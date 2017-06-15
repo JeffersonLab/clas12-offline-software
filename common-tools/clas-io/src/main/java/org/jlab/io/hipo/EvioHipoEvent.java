@@ -64,17 +64,81 @@ public class EvioHipoEvent {
         }
     }
 
+    /*
+    public void fillHipoEventFTOF(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("RICH::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RICH::dgtz");
+            int rows = evioBank.rows();
+            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("RICH::adc", rows*2);
+            HipoDataBank hipoTDC = (HipoDataBank) hipoEvent.createBank("RICH::tdc", rows*2);            
+
+            for(int i = 0; i < evioBank.rows(); i++){
+                int index = i*2;
+                
+                hipoADC.setByte("sector", index,      (byte)  evioBank.getInt("sector",i));
+                hipoADC.setByte("pmt",  index,      (byte)  evioBank.getInt("layer",i));
+                hipoADC.setShort("pixel",  index, (short) evioBank.getInt("paddle",i));
+                hipoADC.setByte("order", index,(byte) 0);
+                hipoADC.setInt("ADC", index, evioBank.getInt("ADCL", i));
+                // At the moment these variables are not in used
+                hipoADC.setFloat("time", i, (float) (0.0));
+                hipoADC.setInt("ped", i, (int) (0.0));
+     
+              
+                hipoADC.setByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
+                hipoADC.setByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
+                hipoADC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
+                hipoADC.setByte("order", index+1,(byte) 1);
+                hipoADC.setInt("ADC", index+1, evioBank.getInt("ADCR", i));
+                double tdcr = (double) evioBank.getInt("TDCR", i);
+                hipoADC.setFloat("time", i, (float) (tdcr*24.0/1000));
+                
+                hipoTDC.setByte("sector", index,      (byte)  evioBank.getInt("sector",i));
+                hipoTDC.setByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
+                hipoTDC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
+                hipoTDC.setByte("order", index,(byte) 2);
+                hipoTDC.setInt("TDC", index, evioBank.getInt("TDCL", i));
+                
+                hipoTDC.setByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
+                hipoTDC.setByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
+                hipoTDC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
+                hipoTDC.setByte("order", index+1,(byte) 3);
+                hipoTDC.setInt("TDC", index+1, evioBank.getInt("TDCR", i));
+                
+                         
+            }
+            hipoEvent.appendBanks(hipoADC,hipoTDC);
+        }
+    }
+    */
     public void fillHipoEventRICH(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("RICH::dgtz")==true){
             try {
                 EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RICH::dgtz");
                 
                 int nrows = evioBank.rows();
-                DataBank  hipoBank = hipoEvent.createBank("RICH::adc", nrows);
+                DataBank  hipoBankADC = hipoEvent.createBank("RICH::adc", nrows);
+                DataBank  hipoBankTDC = hipoEvent.createBank("RICH::tdc", nrows);
                 for(int i = 0; i < nrows; i++){
-                    hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector", i));
+                	// RICH ADC Hipo Bank
+                    hipoBankADC.setByte("sector",   i,    (byte) evioBank.getInt("sector", i));
+                    hipoBankADC.setByte("pmt",      i,    (byte)  evioBank.getInt("pmt",i));
+                    hipoBankADC.setShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
+                    hipoBankADC.setByte("order",    i,    (byte) 0);
+                    hipoBankADC.setInt("ADC",       i,    (int) evioBank.getInt("ADC", i));
+                    // At the moment these variables are not in used
+                    hipoBankADC.setFloat("time",    i,    (float) (0.0));
+                    hipoBankADC.setInt("ped",       i,    (int) (0.0));
+                    
+                    
+                    // RICH TDC Hipo Bank
+                    hipoBankTDC.setByte("sector",   i,    (byte) evioBank.getInt("sector", i));
+                    hipoBankTDC.setByte("pmt",      i,    (byte)  evioBank.getInt("pmt",i));
+                    hipoBankTDC.setShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
+                    hipoBankTDC.setInt("TDC1",    i,    (int) evioBank.getInt("TDC1",i));
+                    hipoBankTDC.setInt("TDC2",       i,    (int) evioBank.getInt("TDC2", i));                                      
                 }
-                hipoEvent.appendBanks(hipoBank);
+                hipoEvent.appendBanks(hipoBankADC,hipoBankTDC);
             } catch (Exception e) {
                 System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
             }
