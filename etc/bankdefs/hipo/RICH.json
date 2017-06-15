@@ -1,0 +1,12 @@
+
+[ 
+ {
+    "bank": "RICH::adc",
+    "group": 1801,
+    "info": "digitized bank Ring Imaging CHerenkov",
+    "items": [
+       {"name":"sector",      "id":1, "type":"int8",  "info":"sector of RICH"},
+       {"name":"pmt",         "id":2, "type":"int8",  "info":"pmt id of RICH"}
+    ]
+  }
+]

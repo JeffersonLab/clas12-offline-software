@@ -43,6 +43,9 @@ import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.geometry.SVTGeometry;
 import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.bmt.BMTSectorItem;
+import cnuphys.ced.geometry.bmt.Constants;
+import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
@@ -197,7 +200,7 @@ public class CentralZView extends CedView implements ChangeListener {
 				drawSVTPanels(g, container);
 
 				// not very sophisticated
-				denoteMicroMegas(g, container);
+				denoteBMT(g, container);
 
 				_hitDrawer.draw(g, container);
 
@@ -215,37 +218,49 @@ public class CentralZView extends CedView implements ChangeListener {
 		getContainer().setAfterDraw(afterDraw);
 	}
 
-	private void denoteMicroMegas(Graphics g, IContainer container) {
-		// hardwire for now layers 5 and 6
-
-		double zmin = -166.51;
-		double zmax = 272.09;
-		double r5 = 205.8;
-		double r6 = 220.8;
-		double w = zmax - zmin;
-		double h = 4;
-
+	//not real items
+	private void denoteBMT(Graphics g, IContainer container) {
+		
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();
+		
 		// clip the active area
 		Rectangle sr = container.getInsetRectangle();
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
-		Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r5, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
 
-		wr.setFrame(zmin, -r5 - h, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
+		for (int layer = 1; layer <= 6; layer++) {
+			double r = BMTSectorItem.innerRadius[layer-1];
+			int region = (int) (layer+1)/2 - 1;
+			double zmin;
+			double zmax;
+			Color color;
+			
+			if (BMTGeometry.getGeometry().isZLayer(layer)) {
+				zmin = Constants.getCRZZMIN()[region];
+				zmax = Constants.getCRZZMAX()[region];
+				color = BMTSectorItem.zColor;
+			}
+			else {
+				zmin = Constants.getCRCZMIN()[region];
+				zmax = Constants.getCRCZMAX()[region];
+				color = BMTSectorItem.cColor;
+		}
+			
+			double w = zmax - zmin;
+			double h = BMTSectorItem.FAKEWIDTH;
+			
+			Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r, w, h);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color,
+					Color.gray, 1, LineStyle.SOLID);
 
-		wr.setFrame(zmin, r6, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
+			wr.setFrame(zmin, -r - h, w, h);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color,
+					Color.gray, 1, LineStyle.SOLID);
 
-		wr.setFrame(zmin, -r6 - h, w, h);
-		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, TRANS2,
-				Color.gray, 1, LineStyle.SOLID);
+
+		}
+		
 
 		// hits?
 		if (ClasIoEventManager.getInstance().isAccumulating()) {

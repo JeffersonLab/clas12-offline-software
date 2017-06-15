@@ -10,11 +10,13 @@ import java.util.Vector;
 
 import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
-import cnuphys.tinyMS.message.MessageProcessor;
+import cnuphys.tinyMS.message.IMessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
+import cnuphys.tinyMS.message.MessageType;
 import cnuphys.tinyMS.server.gui.ServerFrame;
+import cnuphys.tinyMS.table.ConnectionTable;
 
-public class TinyMessageServer {
+public class TinyMessageServer implements IMessageProcessor, Runnable {
 
 	// the log
 	private Log _log = Log.getInstance();
@@ -40,15 +42,15 @@ public class TinyMessageServer {
 	// unique sequential Ids starting at 1 and never reused, so they
 	// will always be in order of Id
 	private Vector<ProxyClient> _proxyClients = new Vector<ProxyClient>();
+	
+	// All known topics
+	private Vector<String> _allTopics = new Vector<String>();
 
 	// name of the server
 	private String _name;
 	
 	//the GUI
 	private ServerFrame _serverFrame;
-
-	// will process the inbound messages
-	private MessageProcessor _messageProcessor;
 
 	// to avoid multiple shutdowns resulting possible resulting from
 	// the shutdown hook thread
@@ -107,10 +109,8 @@ public class TinyMessageServer {
 	// intialize-- create the message processor, the shared
 	// inbound queue and the connection accept thread.
 	private void initialize() {
-		System.err.print("Creating gui...");
 		// create a gui
 		_serverFrame = ServerFrame.createServerFrame(this);
-		System.err.println("done.");
 
 		if (_serverSocket == null) {
 			_log.warning("No Tiny Message Server started");
@@ -120,8 +120,6 @@ public class TinyMessageServer {
 		_log.config("Tiny Message Server started on " + getHostName() + " " + getHostAddress() + " port: "
 				+ getLocalPort());
 
-		// create a message processor
-		_messageProcessor = new ServerMessageProcessor(this);
 
 		// create an input queue and a thread to dequeue
 		// inbound data from remote clients
@@ -194,17 +192,69 @@ public class TinyMessageServer {
 	// inbound messages to this queue
 	private void createInboundQueue() {
 		_sharedInboundQueue = new MessageQueue(200, 50);
-		Runnable dequerer = new Runnable() {
+		new Thread(this).start();
+	}
+	
+	@Override
+	public void run() {
+		while (true) {
+			Message message = _sharedInboundQueue.dequeue();
+			message.process(this);
+		}
+	}
 
-			@Override
-			public void run() {
-				while (true) {
-					Message message = _sharedInboundQueue.dequeue();
-					_messageProcessor.processMessage(message);
-				}
-			}
-		};
-		new Thread(dequerer).start();
+	
+	/**
+	 * Process a message based on its type.
+	 * 
+	 * @param message
+	 *            the message to process
+	 * @see Message
+	 */
+	public void processMessage(Message message) {
+		if ((message == null) || !accept(message)) {
+			return;
+		}
+		
+		//first peek at message
+		peekAtMessage(message);
+		
+		// LOGOUT, CLIENT, HANDSHAKE, PING, USER, SHUTDOWN, SERVERLOG;
+
+		switch (message.getMessageType()) {
+		case LOGOUT:
+			processLogoutMessage(message);
+			break;
+
+		case SHUTDOWN:
+			processShutdownMessage(message);
+			break;
+
+		case CLIENT:
+			processClientMessage(message);
+			break;
+
+		case HANDSHAKE:
+			processHandshakeMessage(message);
+			break;
+
+		case PING:
+			processPingMessage(message);
+			break;
+
+		case SERVERLOG:
+			processServerLogMessage(message);
+			break;
+			
+		case SUBSCRIBE:
+			processSubscribeMessage(message);
+			break;
+
+		case UNSUBSCRIBE:
+			processUnsubscribeMessage(message);
+			break;
+
+		}
 	}
 
 	/**
@@ -234,6 +284,7 @@ public class TinyMessageServer {
 		Message message = Message.createHandshakeMessage(proxyClient.getId());
 		proxyClient.getOutboundQueue().queue(message);
 		_log.config("There are now " + _proxyClients.size() + " proxy clients");
+		_serverFrame.fireTableDataChanged();
 	}
 
 	/**
@@ -245,6 +296,7 @@ public class TinyMessageServer {
 		if (proxyClient != null) {
 			_proxyClients.remove(proxyClient);
 			_log.config("There are now " + _proxyClients.size() + " proxy clients");
+			_serverFrame.fireTableDataChanged();
 		}
 	}
 
@@ -282,7 +334,7 @@ public class TinyMessageServer {
 			return null;
 		}
 
-		return getProxyClient(message.getSourceId());
+		return getProxyClient(message.getClientId());
 	}
 
 	/**
@@ -420,5 +472,284 @@ public class TinyMessageServer {
 	public ServerFrame getGui() {
 		return _serverFrame;
 	}
+	
+	/**
+	 * Get the client table
+	 * @return the client table
+	 */
+	public ConnectionTable getClientTable() {
+		return (_serverFrame == null) ? null : _serverFrame.getClientTable();
+	}
+
+	
+	/**
+	 * Add a topic to the list of known topics. Do knowthing if allready known.
+	 * @param topic the topic to add.
+	 */
+	protected void addTopic(String topic)  {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				if (!_allTopics.contains(topic)) {
+					_allTopics.add(topic);
+					_serverFrame.getTopicList().addTopic(topic);
+				}
+			}
+		}
+	}
+	
+
+	/**
+	 * A message is about to be farmed out to the appropriate handler.
+	 * This allows you to take a peek at it first.
+	 * @param message the message
+	 */
+	public void peekAtMessage(Message message) {
+		ProxyClient proxyClient = getSender(message);
+		if (proxyClient != null) {
+			proxyClient.incrementMessageCount();
+		}
+	}
+
+	// this message is a client voluntarily logging out.
+	// That is, the message originated from the client
+	@Override
+	public void processLogoutMessage(Message message) {
+		ProxyClient proxyClient = getSender(message);
+		if (proxyClient == null) {
+			return;
+		}
+
+		try {
+			_log.info("Logging out client: " + proxyClient.getClientName());
+			// call close, not shutdown. The latter is
+			// for a server forced logout of a client.
+			proxyClient.close();
+			fireTableDataChanged();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// this message is a client being shutdown.
+	// That is, the message originated from the server
+	@Override
+	public void processShutdownMessage(Message message) {
+		_log.warning("It is rarely a good sign that a shutdown message has arrived at the server.");
+	}
+
+	/**
+	 * Process a handshake message. This is used to verify the client.
+	 * 
+	 * @message the handshake message
+	 */
+	@Override
+	public void processHandshakeMessage(Message message) {
+		_log.info("Server Received Handshake.");
+
+		ProxyClient sender = getSender(message);
+		if (sender == null) {
+			_log.warning("Could not get sender of handshake");
+		} else {
+			try {
+				_log.config("remote client verified: " + sender.getClientName());
+				sender.setVerified(true);
+
+				// get username
+				String env[] = message.getStringArray();
+				sender.startPingTimer();
+				sender.setClientName(env[0]);
+				sender.setUserName(env[1]);
+				sender.setOSName(env[2]);
+				sender.setHostName(env[3]);
+
+				_log.info("*********");
+				_log.info("CLIENT ID: " + sender.getId());
+				_log.info("CLIENT NAME: " + sender.getClientName());
+				_log.info("USER NAME: " + sender.getUserName());
+				_log.info("OS NAME: " + sender.getOSName());
+				_log.info("HOST NAME: " + sender.getHostName());
+				fireTableDataChanged();
+			} catch (Exception e) {
+				_log.exception(e);
+			}
+		}
+	}
+
+	@Override
+	// ping has made a round trip
+	public void processPingMessage(Message message) {
+		ProxyClient sender = getSender(message);
+		sender.pingArrived(message);
+	}
+
+	/**
+	 * A non-administrative message has arrived. This should
+	 * be broadcast to other clients subscribed to the topic
+	 */
+	@Override
+	public void processClientMessage(Message message) {
+		broadcastMessage(message);
+	}
+	
+	/**
+	 * Process a SERVERLOG message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	@Override
+	public void processServerLogMessage(Message message) {
+		_log.config("Server got a SERVERLOG message");
+		Log.Level level = Log.Level.values()[message.getTag()];
+		String lstr = message.getString();
+		String nstr = getProxyClient(message.getClientId()).getClientName();
+		String s = "[Client: " + nstr + "] " + lstr;
+		
+		//ERROR, CONFIG, WARNING, INFO, EXCEPTION
+		switch (level) {
+		case INFO:
+			_log.info(s);
+			break;
+			
+		case CONFIG:
+			_log.config(s);
+			break;
+			
+		case ERROR:
+		case EXCEPTION:
+			_log.error(s);
+			break;
+			
+		case WARNING:
+			_log.warning(s);
+			break;
+			
+		}
+	}
+
+	/**
+	 * Process a SUBSCRIBE message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	@Override
+	public void processSubscribeMessage(Message message) {
+		ProxyClient sender = getSender(message);
+		if (sender == null) {
+			_log.warning("Could not get sender of subscribe message");
+		} else {
+			try {
+				String topic = message.getString();
+				topic = topic.trim().toLowerCase();
+				if (topic.length() > 0) {
+					addTopic(topic);
+					_log.config("client subscription: " + sender.getClientName() + "  topic: " + topic);
+					sender.subscribe(topic);
+
+					// send back as confirmation
+					sender.send(message);
+				}
+			} catch (Exception e) {
+				_log.exception(e);
+			}
+
+		}
+	}
+
+
+	/**
+	 * Process a UNSUBSCRIBE message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	@Override
+	public void processUnsubscribeMessage(Message message) {
+		ProxyClient sender = getSender(message);
+		if (sender == null) {
+			_log.warning("Could not get sender of unsubscribe message");
+		} else {
+			try {
+				String topic = message.getString();
+				topic = topic.trim().toLowerCase();
+				_log.config("client unsubscription: " + sender.getClientName() + "  topic: " + topic);
+				sender.unsubscribe(topic);
+				
+				//send back as confirmation
+				sender.send(message);
+			} catch (Exception e) {
+				_log.exception(e);
+			}
+
+		}
+	}
+
+
+	@Override
+	public boolean accept(Message message) {
+
+		// handshakes are accepted and used to verify
+		// a client. Otherwise the client must be verified.
+
+		if (message.getMessageType() == MessageType.HANDSHAKE) {
+			return true;
+		}
+
+		ProxyClient sender = getSender(message);
+		if (sender == null) {
+			_log.warning("Could not match a remote client to message sender.");
+			return false;
+		}
+		else if (sender.isVerified()) {
+			return true;
+		}
+		else {
+			_log.warning("Message from unverified client");
+			return false;
+		}
+
+	}
+
+	/**
+	 * Broadcast a message to all clients (except the sender)
+	 * 
+	 * @param message
+	 *            the message to broadcast
+	 */
+	protected void broadcastMessage(Message message) {
+		ProxyClient[] array = getProxyClientArray();
+
+		if (array != null) {
+			for (ProxyClient client : array) {
+				try {
+
+					// don't send back to sender!
+					if (client.getId() != message.getClientId()) {
+						client.writeMessage(message);
+					}
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	
+	/**
+	 * Convenience routine to fire a data changed event
+	 * so that the table (if present)  updates
+	 */
+	public void fireTableDataChanged() {
+		ServerFrame gui = getGui();
+		if (gui != null) {
+			gui.fireTableDataChanged();
+		}
+	}
+
+
 
 }

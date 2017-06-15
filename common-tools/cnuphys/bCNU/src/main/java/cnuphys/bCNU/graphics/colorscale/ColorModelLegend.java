@@ -21,11 +21,11 @@ public class ColorModelLegend extends JComponent {
 	private ColorScaleModel _model;
 
 	private Dimension size;
-	
-	private int gap = 2;
+
+	private int _gap = 2;
 	private int left;
 	private int right;
-	private int top; 
+	private int top;
 	private int bottom;
 
 	/**
@@ -33,13 +33,33 @@ public class ColorModelLegend extends JComponent {
 	 * 
 	 * @param model
 	 *            the model to display as a legend.
+	 * @param desiredWidth the width of the component (not including gap)
+	 * @param name the border text
+	 * @param gap left and right gap
 	 */
-	public ColorModelLegend(ColorScaleModel model, int desiredWidth, String name) {
-		size = new Dimension(desiredWidth + 2*gap, 50);
+	public ColorModelLegend(ColorScaleModel model, int desiredWidth, String name, int gap) {
+
+		_gap = gap;
+		
+		if (desiredWidth > 0) {
+			size = new Dimension(desiredWidth + 2 * gap, 50);
+		}
 		setLayout(new BorderLayout(2, 4));
 		_model = model;
 		setBorder(new CommonBorder(name));
 		setOpaque(true);
+	}
+	
+	/**
+	 * Create a color legend with the given color model.
+	 * 
+	 * @param model
+	 *            the model to display as a legend.
+	 * @param desiredWidth the width of the component (not including gap)
+	 * @param name the border text
+	 */
+	public ColorModelLegend(ColorScaleModel model, int desiredWidth, String name) {
+		this(model, desiredWidth, name, 2);
 	}
 
 	@Override
@@ -47,27 +67,29 @@ public class ColorModelLegend extends JComponent {
 		Color colors[] = _model.getColors();
 		double values[] = _model.getValues();
 		Rectangle bounds = getBounds();
-				
-		int useableW = bounds.width-2*gap;
-		int dx = useableW / colors.length;
 
-		// make sure it fits
-		if ((colors.length * dx) > (useableW - 8)) {
-			dx -= 1;
-		}
+		double useableW = bounds.width - 2 * _gap;
+		double dx = useableW / colors.length;
 
-		left = gap + (useableW - (colors.length * dx)) / 2;
-		top = bounds.height - 30;
+//		// make sure it fits
+//		if ((colors.length * dx) > (useableW - 8)) {
+//			dx -= 1;
+//		}
+		
+		double left = _gap + (useableW - (colors.length * dx)) / 2;
+		double right = left + dx;
 		int height = 12;
 		int ytext = bounds.height - 6;
+		top = bounds.height - 30;
 		bottom = top + height;
-		right = left + colors.length * dx;
 
 		for (int i = 0; i < colors.length; i++) {
-			int xt = left + i * dx;
 			g.setColor(colors[i]);
 			g.setFont(Fonts.smallFont);
-			g.fillRect(xt, top, dx, height);
+			int xt = (int)left;
+			g.fillRect(xt, top, (int)(right-left), height);
+			g.drawRect(xt, top, (int)(right-left), height);
+			
 			if (i == 0) {
 				double val = _model.getMinValue();
 
@@ -76,55 +98,54 @@ public class ColorModelLegend extends JComponent {
 					g.drawString("0", xt - 1, ytext);
 				}
 				else {
-					g.drawString(DoubleFormat.doubleFormat(val,
-							_model.getPrecision()), xt - 3, ytext);
+					g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 3, ytext);
 				}
 			}
 
 			else if (i == (colors.length / 2)) {
 				double val = values[values.length / 2];
 				g.setColor(Color.black);
-				g.drawString(
-						DoubleFormat.doubleFormat(val, _model.getPrecision()),
-						xt - 4, ytext);
+				g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 4, ytext);
 			}
 
 			else if (i == (colors.length / 4)) {
 				double val = values[values.length / 4];
 				g.setColor(Color.black);
-				g.drawString(
-						DoubleFormat.doubleFormat(val, _model.getPrecision()),
-						xt - 4, ytext);
+				g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 4, ytext);
 			}
 
 			else if (i == (3 * colors.length / 4)) {
 				double val = values[3 * values.length / 4];
 				g.setColor(Color.black);
-				g.drawString(
-						DoubleFormat.doubleFormat(val, _model.getPrecision()),
-						xt - 4, ytext);
+				g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 4, ytext);
 			}
 
 			else if (i == (colors.length - 1)) {
 				double val = _model.getMaxValue();
 				g.setColor(Color.black);
-				if (Math.abs(val-1) < 1.0e-5) {
+				if (Math.abs(val - 1) < 1.0e-5) {
 					g.drawString("1", xt - 3, ytext);
 				}
 				else {
-					g.drawString(DoubleFormat.doubleFormat(val,
-							_model.getPrecision()), xt - 5, ytext);
+					g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 5, ytext);
 				}
-			}
-		}
+			}			
+			
+			left = right;
+			right += dx;
+		}		
 
-		GraphicsUtilities.drawSimple3DRect(g, left, top, right - left, bottom
-				- top, true);
-		
+		right = left;
+		left = _gap + (useableW - (colors.length * dx)) / 2;
+		GraphicsUtilities.drawSimple3DRect(g, (int)left, top-1, (int)(right - left), bottom - top + 1, false);
+
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
+		if (size == null) {
+			return super.getPreferredSize();
+		}
 		return size;
 	}
 

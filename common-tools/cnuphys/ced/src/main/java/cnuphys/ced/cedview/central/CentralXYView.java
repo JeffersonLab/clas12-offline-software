@@ -25,7 +25,6 @@ import java.util.Vector;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
-import cnuphys.bCNU.graphics.container.BaseContainer;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -76,7 +75,7 @@ public class CentralXYView extends CedXYView {
 	CTOFXYPolygon ctofPoly[] = new CTOFXYPolygon[48];
 	
 	//Micro megas [sector][layer]
-	private BMTSectorItem microMegasSector[][];
+	private BMTSectorItem _bmtItems[][];
 
 	// units are mm
 	// private static Rectangle2D.Double _defaultWorldRectangle = new
@@ -170,7 +169,7 @@ public class CentralXYView extends CedXYView {
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.SVTRECONS_CROSSES
-						+ DisplayBits.SVTHITS + DisplayBits.MCTRUTH
+						+ DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
 
@@ -443,16 +442,29 @@ public class CentralXYView extends CedXYView {
 	 */
 	@Override
 	protected void addItems() {
-		//micromegas sectors for now only layers 5 & 6		
+		//BMT sectors for now only layers 5 & 6		
 		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
 				_detectorLayerName);
 		
-		microMegasSector = new BMTSectorItem[3][6];
+		_bmtItems = new BMTSectorItem[3][6];
 	    for (int sect = 1; sect <= 3; sect++) {
 	    	for (int lay = 1; lay <= 6; lay++) {
-	    		microMegasSector[sect-1][lay-1] = new BMTSectorItem(detectorLayer, sect, lay);
+	    		_bmtItems[sect-1][lay-1] = new BMTSectorItem(detectorLayer, sect, lay);
 	    	}
 	    }
+	}
+	
+	/**
+	 * Get the BMT Sector item
+	 * @param sector the geo sector  1..3
+	 * @param layer the layer 1..6
+	 * @return the BMS Sector Item
+	 */
+	public BMTSectorItem getBMTSectorItem(int sector, int layer) {
+		if ((sector < 1) || (sector > 3) || (layer < 1) || (layer > 6)) {
+			return null;
+		}
+		return _bmtItems[sector-1][layer-1];
 	}
 
 	/**

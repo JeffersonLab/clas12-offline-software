@@ -76,6 +76,41 @@ public interface IField {
      * @return the magnitude of the field in kiloGauss.
      */
     public float fieldMagnitude(float x, float y, float z);
+    
+    /**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+    *
+     * @param phi
+     *            azimuthal angle in degrees.
+     * @param rho
+     *            the cylindrical rho coordinate in cm.
+     * @param z
+     *            coordinate in cm
+     * @param result
+     *            the result
+     * @result a Cartesian vector holding the calculated field in kiloGauss.
+     */
+    public void gradientCylindrical(double phi, double rho, double z,
+    	    float result[]);
+
+
+    /**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+     *
+     * @param x
+     *            the x coordinate in cm
+     * @param y
+     *            the y coordinate in cm
+     * @param z
+     *            the z coordinate in cm
+     * @param result
+     *            a float array holding the retrieved field in kiloGauss. The
+     *            0,1 and 2 indices correspond to x, y, and z components.
+     */
+     public void gradient(float x, float y, float z, float result[]);
+    
 
     /**
      * Get the maximum field magnitude in kiloGauss

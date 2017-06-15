@@ -776,12 +776,22 @@ public class SectorView extends CedView implements ChangeListener {
 		if (probe != null) {
 			float field[] = new float[3];
 			probe.fieldCylindrical(absphi, rho, z, field);
+			
+			float grad[] = new float[3];
+			probe.gradientCylindrical(absphi, rho, z, grad);
+			
 			// convert to Tesla from kG
 			field[0] /= 10.0;
 			field[1] /= 10.0;
 			field[2] /= 10.0;
+			
+			//convert kG/cm to T/m
+			grad[0] *= 10.0;
+			grad[1] *= 10.0;
+			grad[2] *= 10.0;
 
 			double bmag = VectorSupport.length(field);
+			double gmag = VectorSupport.length(grad);
 			feedbackStrings.add("$Lawn Green$"
 					+ MagneticFields.getInstance().getActiveFieldDescription());
 			
@@ -805,6 +815,8 @@ public class SectorView extends CedView implements ChangeListener {
 			
 			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
 					+ vecStr(field) + " T");
+			feedbackStrings.add("$Lawn Green$Grad " + valStr(gmag, 4) + " T/m "
+					+ vecStr(grad) + " T/m");
 		}
 		else {
 			feedbackStrings.add("$Lawn Green$"

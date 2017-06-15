@@ -43,6 +43,7 @@ public class EvioHipoEvent {
         this.fillHipoEventECAL(hipoEvent, event);
         this.fillHipoEventLTCC(hipoEvent, event);
         this.fillHipoEventHTCC(hipoEvent, event);
+        this.fillHipoEventRICH(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
         return hipoEvent;
     }
@@ -62,7 +63,24 @@ public class EvioHipoEvent {
             hipoEvent.appendBanks(hipoBank);
         }
     }
-    
+
+    public void fillHipoEventRICH(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("RICH::dgtz")==true){
+            try {
+                EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RICH::dgtz");
+                
+                int nrows = evioBank.rows();
+                DataBank  hipoBank = hipoEvent.createBank("RICH::adc", nrows);
+                for(int i = 0; i < nrows; i++){
+                    hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector", i));
+                }
+                hipoEvent.appendBanks(hipoBank);
+            } catch (Exception e) {
+                System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
+            }
+        }
+    }
+
     public void fillHipoEventHTCC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("HTCC::dgtz")==true){
             //System.out.println("LTCC bank is present");

@@ -81,10 +81,10 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		double thetRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
 
-		double pz = MagneticField.cos(thetRad);
-		double rho = MagneticField.sin(thetRad);
-		double px = rho * MagneticField.cos(phiRad);
-		double py = rho * MagneticField.sin(phiRad);
+		double pz = Math.cos(thetRad);
+		double rho = Math.sin(thetRad);
+		double px = rho * Math.cos(phiRad);
+		double py = rho * Math.sin(phiRad);
 		double v[] = new double[6];
 		v[0] = xo;
 		v[1] = yo;

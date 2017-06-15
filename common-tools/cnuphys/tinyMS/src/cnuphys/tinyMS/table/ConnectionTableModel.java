@@ -7,7 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
 
-public class ClientTableModel extends DefaultTableModel {
+public class ConnectionTableModel extends DefaultTableModel {
 	
 
 	/** Constant used to designate id column */
@@ -46,14 +46,14 @@ public class ClientTableModel extends DefaultTableModel {
 	private TinyMessageServer _server;
 	
 	//the table
-	private ClientTable _table;
+	private ConnectionTable _table;
 	
 	/**
 	 * Create a model for the table data
 	 * @param server the controlling server
 	 */
-	public ClientTableModel(TinyMessageServer server) {
-		super(colNames, 3);
+	public ConnectionTableModel(TinyMessageServer server) {
+		super(colNames, 0);
 		_server = server;
 	}
 	
@@ -61,13 +61,13 @@ public class ClientTableModel extends DefaultTableModel {
 	 * Set the client table
 	 * @param table the client table
 	 */
-	protected void setTable(ClientTable table) {
+	protected void setTable(ConnectionTable table) {
 		_table = table;
 	}
 	
 	// the data is the list maintained by the server
 	protected List<ProxyClient> getData() {
-		return _server.getProxyClients();
+		return (_server == null) ? null : _server.getProxyClients();
 	}
 	
 	/**
@@ -75,7 +75,7 @@ public class ClientTableModel extends DefaultTableModel {
 	 * @param row the zero-cased row
 	 * @return the client for the given row, or null
 	 */
-	private ProxyClient getProxyClient(int row) {
+	protected ProxyClient getProxyClient(int row) {
 		if (row < 0) {
 			return null;
 		}
@@ -88,6 +88,18 @@ public class ClientTableModel extends DefaultTableModel {
 	}
 	
 
+	@Override
+	public int getRowCount() {
+		List<ProxyClient> clients = getData();
+		return (clients == null) ? 0 : clients.size();
+	}
+	
+	@Override
+	public int getColumnCount() {
+		return colNames.length;
+	}
+
+	
 	/**
 	 * Get the value at a given row and column
 	 * 

@@ -8,52 +8,7 @@ package cnuphys.tinyMS.message;
  * @author heddle
  *
  */
-public abstract class MessageProcessor {
-
-	/**
-	 * Process a message based on its type.
-	 * 
-	 * @param message
-	 *            the message to process
-	 * @see Message
-	 */
-	public void processMessage(Message message) {
-		if ((message == null) || !accept(message)) {
-			return;
-		}
-		
-		//first peek at message
-		peekAtMessage(message);
-		
-		// CLOSE, DATA, HANDSHAKE, PING, USER, SHUTDOWN, SERVERLOG;
-
-		switch (message.getMessageType()) {
-		case LOGOUT:
-			processLogoutMessage(message);
-			break;
-
-		case SHUTDOWN:
-			processShutdownMessage(message);
-			break;
-
-		case DATA:
-			processDataMessage(message);
-			break;
-
-		case HANDSHAKE:
-			processHandshakeMessage(message);
-			break;
-
-		case PING:
-			processPingMessage(message);
-			break;
-
-		case SERVERLOG:
-			processServerLogMessage(message);
-			break;
-
-		}
-	}
+public interface IMessageProcessor {
 	
 	/**
 	 * A message is about to be farmed out to the appropriate handler.
@@ -106,12 +61,29 @@ public abstract class MessageProcessor {
 
 
 	/**
+	 * Process a SUBSCRIBE message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	public abstract void processSubscribeMessage(Message message);
+
+
+	/**
+	 * Process a UNSUBSCRIBE message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	public abstract void processUnsubscribeMessage(Message message);
+	
+	/**
 	 * Process a DATA message
 	 * 
 	 * @param message
 	 *            the message to process
 	 */
-	public abstract void processDataMessage(Message message);
+	public abstract void processClientMessage(Message message);
 
 	/**
 	 * Can be used to toss away messages for example they have the wrong

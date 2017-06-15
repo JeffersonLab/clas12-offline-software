@@ -514,19 +514,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method to see it we show thestrip midpoints.
-	 * 
-	 * @return <code>true</code> if we are to show the strip midpoints for hit
-	 *         strips.
-	 */
-	public boolean showStripMidpoints() {
-		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
-			return false;
-		}
-		return _controlPanel.getDisplayArray().showStripMidpoints();
-	}
-
-	/**
 	 * Convenience method to see it we show the cosmic tracks.
 	 * 
 	 * @return <code>true</code> if we are to show the cosmic tracks, if it is
