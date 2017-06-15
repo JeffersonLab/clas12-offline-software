@@ -113,10 +113,10 @@ public class SwimZStateVector {
 		this.z = z;
 		theta = Math.toRadians(theta);
 		phi = Math.toRadians(phi);
-		double pz = p * MagneticField.cos(theta);
-		double pt = p * MagneticField.sin(theta);
-		double px = pt * MagneticField.cos(phi);
-		double py = pt * MagneticField.sin(phi);
+		double pz = p * Math.cos(theta);
+		double pt = p * Math.sin(theta);
+		double px = pt * Math.cos(phi);
+		double py = pt * Math.sin(phi);
 		tx = px / pz;
 		ty = py / pz;
 	}

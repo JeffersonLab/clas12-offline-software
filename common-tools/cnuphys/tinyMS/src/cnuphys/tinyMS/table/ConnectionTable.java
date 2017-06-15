@@ -3,6 +3,7 @@ package cnuphys.tinyMS.table;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -14,10 +15,11 @@ import cnuphys.tinyMS.graphics.CommonBorder;
 import cnuphys.tinyMS.graphics.Fonts;
 import cnuphys.tinyMS.graphics.MultilineHeaderRenderer;
 import cnuphys.tinyMS.graphics.RowHeightController;
+import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
 
 
-public class ClientTable extends JTable {
+public class ConnectionTable extends JTable {
 	
 	private static final Font _tableFont = Fonts.defaultFont;
 	
@@ -36,10 +38,10 @@ public class ClientTable extends JTable {
 	 * Create the client table
 	 * @param server the servwer owner
 	 */
-	public ClientTable(TinyMessageServer server) {
-		super(new ClientTableModel(server));
+	public ConnectionTable(TinyMessageServer server) {
+		super(new ConnectionTableModel(server));
 		_server = server;
-		getClientModel().setTable(this);
+		getConnectionModel().setTable(this);
 		setFont(_tableFont);
 
 		// single selection
@@ -54,7 +56,7 @@ public class ClientTable extends JTable {
 			TableColumn column = getColumnModel().getColumn(i);
 //			column.setCellRenderer(renderer);
 			column.setHeaderRenderer(headerRenderer);
-			column.setPreferredWidth(ClientTableModel.columnWidths[i]);
+			column.setPreferredWidth(ConnectionTableModel.columnWidths[i]);
 //			column.setMinWidth(HermesMSELTableModel.columnWidths[i]);
 		}
 
@@ -100,8 +102,8 @@ public class ClientTable extends JTable {
 	 * Get the ClientDataModel
 	 * @return he ClientDataModel
 	 */
-	protected ClientTableModel getClientModel() {
-		return (ClientTableModel)getModel();
+	protected ConnectionTableModel getConnectionModel() {
+		return (ConnectionTableModel)getModel();
 	}
 	
 
@@ -109,7 +111,21 @@ public class ClientTable extends JTable {
 	 * Convenience routine to fire a data changed event
 	 */
 	public void fireTableDataChanged() {
-		getClientModel().fireTableDataChanged();
+		int row = getSelectedRow();
+		getConnectionModel().fireTableDataChanged();
+		if ((row >= 0) && (row < _server.getProxyClients().size())) {
+			getSelectionModel().setSelectionInterval(row, row);
+		}
+
+	}
+	
+	/**
+	 * Get the selected client
+	 * @return the selected client (or null)
+	 */
+	public ProxyClient getSelectedClient() {
+		int row = this.getSelectedRow();
+		return getConnectionModel().getProxyClient(row);
 	}
 
 }

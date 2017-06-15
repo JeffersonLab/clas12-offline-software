@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import cnuphys.tinyMS.Environment.DateString;
 import cnuphys.tinyMS.common.ReaderThread;
@@ -21,6 +22,7 @@ import cnuphys.tinyMS.log.Log;
 import cnuphys.tinyMS.message.Message;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.Messenger;
+import cnuphys.tinyMS.table.ConnectionTable;
 
 public class ProxyClient extends Messenger {
 	
@@ -41,9 +43,13 @@ public class ProxyClient extends Messenger {
 
     /** number of messages arriving at server */
 	private long _messageCount = 0;
+	
+	/** list of topics the client is subscribed to */
+	private Vector<String> _subscriptions = new Vector<String>();
+
 		
 	// time in seconds that a client has to get itself verified
-	private static final int VERIFY_SECONDS = 20;
+	private static final int VERIFY_SECONDS = 30;
 
 	// the next available remote client Id. These are assigned
 	// sequentially starting at 1. It is assumed that no single
@@ -178,6 +184,11 @@ public class ProxyClient extends Messenger {
 		long sentTime = longArray[0];
 		_duration = _lastPing - sentTime;
 		_log.info(getLastPingDuration());
+
+		ConnectionTable table = _server.getClientTable();
+		if (table != null) {
+			table.fireTableDataChanged();
+		}
 	}
 	
 	/**
@@ -290,6 +301,10 @@ public class ProxyClient extends Messenger {
 		_server.removeProxyClient(this);
 		_reader.stopReader();
 		_writer.stopWriter();
+		
+		System.err.println("** CLOSING PROXYCLIENT STREAMS");
+		_inputStream.close();
+		_outputStream.close();
 		_socket.close();
 	}
 
@@ -532,5 +547,66 @@ public class ProxyClient extends Messenger {
 		return _messageCount;
 	}
 
+	
+	/**
+	 * Subscribe to a topic
+	 * @param topic the topic to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
+	 * NOT case sensitive.
+	 */
+	protected void subscribe(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				_subscriptions.remove(topic);
+				_subscriptions.add(topic);
+			}
+		}
+	}
+	
+	/**
+	 * Unsubscribe to a topic
+	 * @param topic the topic to unsubscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
+	 * NOT case sensitive.
+	 */
+	protected void unsubscribe(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				_subscriptions.remove(topic);
+			}
+		}
+	}
+	
+	/**
+	 * Check whether this client subscribes to a topic
+	 * @param topic the topic to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
+	 * NOT case sensitive.
+	 * @return <code>true</code> if this client is subscribed to the topic
+	 */
+	protected boolean isSubscribed(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				return _subscriptions.contains(topic);
+			}
+		}
+		return false;
+	}
+
+	
+	/**
+	 * Send a message 
+	 * @param message the message to send
+	 */
+	protected void send(Message message) {
+		if (message != null) {
+			if (_outboundQueue != null) {
+				_outboundQueue.queue(message);
+			}
+		}
+	}
 
 }

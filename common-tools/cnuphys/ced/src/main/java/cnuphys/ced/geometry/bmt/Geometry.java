@@ -2,6 +2,8 @@ package cnuphys.ced.geometry.bmt;
 
 import java.util.Random;
 
+import org.jlab.geom.prim.Point3D;
+
 public class Geometry {
 
 	public Geometry() {
@@ -42,7 +44,7 @@ public class Geometry {
 	 * @param sector the sector in CLAS12 1...3
 	 * @param layer the layer 1...6
 	 * @param strip the strip number (starts at 1)
-	 * @return the angle to localize the  center of strip
+	 * @return the angle to localize the  center of strip in radians
 	 */
 	public double CRZStrip_GetPhi(int sector, int layer, int strip){
 
@@ -452,11 +454,73 @@ public class Geometry {
 	}
 
 	public static final synchronized int getZorC(int layer) {
-		int axis = 0;
+		int axis = 0; //C
 		if(layer==2 || layer==3 || layer==5)
-			axis = 1;
+			axis = 1; //Z
 		return axis;
 	}
+	
+	public boolean isCLayer(int layer) {
+		return !isZLayer(layer);
+	}
+	
+	public boolean isZLayer(int layer) {
+		return ((layer == 2) || (layer == 3) || (layer == 5));
+	}
+	
+	public void getCRZEndPoints(int sector, int layer, int strip, float[] coords) {
+		int region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int numStrips =  Constants.getCRZNSTRIPS()[region];
+		
+		if ((strip < 1) || (strip > numStrips)) {
+			for (int i = 0; i < 6; i++) {
+				coords[i] = Float.NaN;
+			}
+			return;
+		}
+		
+		double phi = CRZStrip_GetPhi(sector, layer, strip);
+		double r = Constants.getCRZRADIUS()[region] + Constants.LYRTHICKN/2;
+		double x = r*Math.cos(phi)/10;
+		double y = r*Math.sin(phi)/10;
+		double zMin = Constants.getCRZZMIN()[region]/10;
+		double zMax = Constants.getCRZZMAX()[region]/10;
+		coords[0] =(float)x;
+		coords[1] =(float)y;
+		coords[2] = (float)zMin;
+		coords[3] =(float)x;
+		coords[4] =(float)y;
+		coords[5] = (float)zMax;
+
+	}
+	
+	public void getCRCEndPoints(int sector, int layer, int strip, float[] coords) {
+//		int region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+//		int numStrips =  Constants.getCRZNSTRIPS()[region];
+//		
+//		if ((strip < 1) || (strip > numStrips)) {
+//			for (int i = 0; i < 6; i++) {
+//				coords[i] = Float.NaN;
+//			}
+//			return;
+//		}
+//		
+//		double phi1 = CRC_GetBeginStrip(sector, layer);
+//		double phi2 = CRC_GetEndStrip(sector, layer);
+//		double r = Constants.getCRCRADIUS()[region] + Constants.LYRTHICKN/2;
+//		double x = r*Math.cos(phi)/10;
+//		double y = r*Math.sin(phi)/10;
+//		double zMin = Constants.getCRZZMIN()[region]/10;
+//		double zMax = Constants.getCRZZMAX()[region]/10;
+//		coords[0] =(float)x;
+//		coords[1] =(float)y;
+//		coords[2] = (float)zMin;
+//		coords[3] =(float)x;
+//		coords[4] =(float)y;
+//		coords[5] = (float)zMax;
+
+	}
+
 	
 	
 public static void main (String arg[])  {

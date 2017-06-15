@@ -193,11 +193,73 @@ public abstract class MagneticField implements IField {
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
 		// float rho = (float) hypot(x, y);
-		float rho = (float) Math.sqrt(x * x + y * y);
+		double rho = Math.sqrt(x * x + y * y);
 
-		float phi = (float) atan2Deg(y, x);
+		double phi = atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
+	
+    /**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+     *
+     * @param x
+     *            the x coordinate in cm
+     * @param y
+     *            the y coordinate in cm
+     * @param z
+     *            the z coordinate in cm
+     * @param result
+     *            a float array holding the retrieved field in kiloGauss. The
+     *            0,1 and 2 indices correspond to x, y, and z components.
+     */
+	@Override
+     public void gradient(float x, float y, float z, float result[]) {
+ 		
+ 		//TODO improve
+ 		float[] fr1 = new float[3];
+		float[] fr2 = new float[3];
+		float del = 10f; //cm 
+ 		
+		field(x-del, y, z, fr1);
+		field(x+del, y, z, fr2);
+		result[0] = (fr2[0]-fr1[0])/(2*del);
+
+		field(x, y-del, z, fr1);
+		field(x, y+del, z, fr2);
+		result[1] = (fr2[1]-fr1[1])/(2*del);
+		
+		field(x, y, z-del, fr1);
+		field(x, y, z+del, fr2);
+		
+		result[2] = (fr2[2]-fr1[2])/(2*del);	
+    }
+	
+	/**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+     *
+     * @param phi
+     *            azimuthal angle in degrees.
+     * @param rho
+     *            the cylindrical rho coordinate in cm.
+     * @param z
+     *            coordinate in cm
+     * @param result
+     *            the result
+     * @result a Cartesian vector holding the calculated field in kiloGauss.
+     */
+	@Override
+    public void gradientCylindrical(double phi, double rho, double z,
+    	    float result[]) {
+		phi = Math.toRadians(phi);
+		double x = rho*Math.cos(phi);
+    	double y = rho*Math.sin(phi);
+    	gradient((float)x, (float)y, (float)z, result);
+    }
+
+
+
 
 	/**
 	 * Might use standard or fast atan2
@@ -213,49 +275,11 @@ public abstract class MagneticField implements IField {
 			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
 			return Math.toDegrees(phirad);
 		case SUPERFAST:
-			phirad = Icecore.atan2((float) y, (float) x);
+			phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
+	//		phirad = Icecore.atan2((float) y, (float) x);
 			return Math.toDegrees(phirad);
 		default:
 			return Math.toDegrees(Math.atan2(y, x));
-		}
-
-	}
-	
-	/**
-	 * Might use standard or fast sin
-	 * 
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static double sin(double x) {
-
-		switch (_mathLib) {
-		case FAST:
-			return org.apache.commons.math3.util.FastMath.sin(x);
-		case SUPERFAST:
-			return Riven.sin((float) x);
-		default:
-			return Math.sin(x);
-		}
-
-	}
-
-	
-	/**
-	 * Might use standard or fast sin
-	 * 
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static double cos(double x) {
-
-		switch (_mathLib) {
-		case FAST:
-			return org.apache.commons.math3.util.FastMath.cos(x);
-		case SUPERFAST:
-			return Riven.cos((float) x);
-		default:
-			return Math.cos(x);
 		}
 
 	}
@@ -705,10 +729,8 @@ public abstract class MagneticField implements IField {
 			return;
 		}
 
+	//	System.out.println("NEW q1 = " + q1);
 		double f0 = q1Coordinate.getFraction(q1, n0);
-
-		// System.err.println(" q1 = " + q1 + " n1 = " + n0 + " f1 = " + f0);
-
 		double f1 = q2Coordinate.getFraction(q2, n1);
 		double f2 = q3Coordinate.getFraction(q3, n2);
 
@@ -721,6 +743,10 @@ public abstract class MagneticField implements IField {
 		double g0 = 1 - f0;
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
+		
+//		System.out.println("NEW n0 = " + n0 + " n1 = " + n1 + " n2 = " + n2);
+//		System.out.println("NEW  f0 = " + f0 + "  f1 = " + f1 + "  f2 = " + f2);
+//		System.out.println("NEW  g0 = " + g0 + "  g1 = " + g1 + "  g2 = " + g2);
 
 		// get the neighbor indices
 		int i000 = getCompositeIndex(n0, n1, n2);
@@ -769,6 +795,11 @@ public abstract class MagneticField implements IField {
 		b101 = getB3(i101);
 		b110 = getB3(i110);
 		b111 = getB3(i111);
+		
+//		System.out.println("NEW  b000 = " + b000 + "  b001 = " + b001 + "  b010 = " + b010);
+//		System.out.println("NEW  b011 = " + b011 + "  b100 = " + b100 + "  b101 = " + b010);
+//		System.out.println("NEW  b110 = " + b110 + "  b111 = " + b111);
+
 
 		double z = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
 				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
@@ -777,8 +808,8 @@ public abstract class MagneticField implements IField {
 		result[1] = (float) y;
 		result[2] = (float) z;
 
-		// System.err.println(" reg: [ " + result[0] + ", " + result[1] + ", " +
-		// result[2] + "] ");
+//		 System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
+//		 result[2] + "] ");
 
 	}
 
@@ -799,55 +830,6 @@ public abstract class MagneticField implements IField {
 		float result[] = new float[3];
 		interpolateField(q1, q2, q3, result);
 		return (float) Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
-
-		// int n0 = q1Coordinate.getIndex(q1);
-		// if (n0 < 0) {
-		// return 0f;
-		// }
-		// int n1 = q2Coordinate.getIndex(q2);
-		// if (n1 < 0) {
-		// return 0f;
-		// }
-		// int n2 = q3Coordinate.getIndex(q3);
-		// if (n2 < 0) {
-		// return 0f;
-		// }
-		//
-		// double f0 = q1Coordinate.getFraction(q1, n0);
-		// double f1 = q2Coordinate.getFraction(q2, n1);
-		// double f2 = q3Coordinate.getFraction(q3, n2);
-		//
-		// double g0 = 1 - f0;
-		// double g1 = 1 - f1;
-		// double g2 = 1 - f2;
-		//
-		// // get the neighbor indices
-		// int i000 = getCompositeIndex(n0, n1, n2);
-		// int i001 = i000 + 1;
-		//
-		// int i010 = getCompositeIndex(n0, n1 + 1, n2);
-		// int i011 = i010 + 1;
-		//
-		// int i100 = getCompositeIndex(n0 + 1, n1, n2);
-		// int i101 = i100 + 1;
-		//
-		// int i110 = getCompositeIndex(n0 + 1, n1 + 1, n2);
-		// int i111 = i110 + 1;
-		//
-		// double b000 = fieldMagnitude(i000);
-		// double b001 = fieldMagnitude(i001);
-		// double b010 = fieldMagnitude(i010);
-		// double b011 = fieldMagnitude(i011);
-		// double b100 = fieldMagnitude(i100);
-		// double b101 = fieldMagnitude(i101);
-		// double b110 = fieldMagnitude(i110);
-		// double b111 = fieldMagnitude(i111);
-		//
-		// return (float) (b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0
-		// * f1 * g2 + b011 * g0 * f1 * f2
-		// + b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 +
-		// b111 * f0 * f1 * f2);
-
 	}
 
 	/**

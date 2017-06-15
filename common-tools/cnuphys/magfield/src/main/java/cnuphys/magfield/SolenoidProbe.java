@@ -53,8 +53,20 @@ public class SolenoidProbe extends FieldProbe {
 				
 		double f1 = (q2 - q2_min) / (q2_max - q2_min);
 		double f2 = (q3 - q3_min) / (q3_max - q3_min);
+		
+		f1 = f1 - Math.floor(f1);
+		f2 = f2 - Math.floor(f2);
+
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
+		
+		
+//		System.out.println("NEWPROBE q2 = " + q2 + "  q3 = " + q3);
+//		System.out.println("NEW PROBE    f1 = " + f1 + "  f2 = " + f2);
+//		System.out.println("NEW PROBE    g1 = " + g1 + "  g2 = " + g2);
+//
+		
+		
 //		double bphi = b1_b000 * g1 * g2 + b1_b001 * g1 * f2 + b1_b010 * f1 * g2
 //				+ b1_b011 * f1 * f2;
 		

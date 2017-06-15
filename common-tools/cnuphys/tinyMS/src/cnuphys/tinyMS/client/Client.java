@@ -4,12 +4,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Vector;
+
 import cnuphys.tinyMS.Environment.Environment;
+import cnuphys.tinyMS.common.BadSocketException;
 import cnuphys.tinyMS.common.ReaderThread;
 import cnuphys.tinyMS.common.WriterThread;
+import cnuphys.tinyMS.message.Header;
 import cnuphys.tinyMS.message.Message;
-import cnuphys.tinyMS.message.MessageProcessor;
+import cnuphys.tinyMS.message.IMessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
+import cnuphys.tinyMS.message.MessageType;
 import cnuphys.tinyMS.message.Messenger;
 
 /**
@@ -19,7 +24,7 @@ import cnuphys.tinyMS.message.Messenger;
  * @author heddle
  * 
  */
-public class Client extends Messenger {
+public class Client extends Messenger implements IMessageProcessor, Runnable {
 
 	// the underlying socket
 	private Socket _socket;
@@ -47,17 +52,28 @@ public class Client extends Messenger {
 	// the writer thread
 	private WriterThread _writer;
 
-	// will process the inbound messages
-	private MessageProcessor _messageProcessor;
-
 	// last ping from server
 	private long _lastPing = -1L;
 	
 	// Descriptive user name. If null, actual login username will be used
-	private String _userName;
+	private String _clientName;
 
 	// to avoid multiple calls to close
 	private boolean _alreadyClosed = false;
+	
+	/** list of topics the client is subscribed to */
+	private Vector<String> _subscriptions = new Vector<String>();
+
+	/**
+	 * Create a client that will connect to a {@link TinyMessageServer}.
+	 * @param clientName the 
+	 * @param hostName
+	 * @param port
+	 * @throws BadSocketException 
+	 */
+	public Client (String clientName, String hostName, int port) throws BadSocketException {
+		this(clientName, ClientSupport.getSocket(hostName, port));
+	}
 
 	/**
 	 * Create a client that will connect to a {@link TinyMessageServer}. Most
@@ -65,19 +81,21 @@ public class Client extends Messenger {
 	 * a socket) but rather the static convenience methods in
 	 * {@link ClientSupport}.
 	 * 
-	 * @param userName
+	 * @param clientName
 	 *            descriptive user name. If null, the actual login username will
 	 *            be used.
 	 * @param socket
 	 *            the underlying socket
 	 * @see ClientSupport
 	 */
-	public Client(String userName, Socket socket) {
-		_userName = userName;
+	public Client(String clientName, Socket socket) throws BadSocketException {
+		
+		if (socket == null) {
+			throw new BadSocketException("null socket in Client constructor");
+		}
+		_clientName = (clientName != null) ? clientName : Environment.getInstance().getUserName();
 		_socket = socket;
 
-		// create a message processor
-		_messageProcessor = new ClientMessageProcessor(this);
 
 		// where to place message for transmission
 		_outboundQueue = new MessageQueue(100, 20);
@@ -99,26 +117,65 @@ public class Client extends Messenger {
 			_reader.start();
 			_writer.start();
 
-			Runnable dequerer = new Runnable() {
-
-				@Override
-				public void run() {
-					while (true) {
-						// the dequeue method "waits" so no thread yielding is
-						// necessary
-						Message message = _inboundQueue.dequeue();
-						_messageProcessor.processMessage(message);
-					}
-				}
-			};
-			new Thread(dequerer).start();
-
+			new Thread(this).start();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+	
+	@Override
+	public void run() {
+		while (true) {
+			// the dequeue method "waits" so no thread yielding is
+			// necessary
+			Message message = _inboundQueue.dequeue();
+			message.process(this);
+		}
 	}
 
+	
+	/**
+	 * This is a good place for clients to do custom initializations
+	 * such as subscriptions. It is not necessary, but convenient. It
+	 * is called at the end of the constructor.
+	 */
+	public void initialize() {
+		//base implementation does nothing
+	}
+
+	/**
+	 * Subscribe to a topic
+	 * 
+	 * @param topic
+	 *            the topic to subscribe to
+	 */
+	public void subscribe(String topic) {
+		if (Header.acceptableTopic(topic)) {
+
+			topic = topic.trim().toLowerCase();
+			if (!isSubscribed(topic)) {
+				Message message = Message.createSubscribeMessage(getId(), topic);
+				send(message);
+			}
+		}
+	}
+
+	/**
+	 * Unsubscribe to a topic
+	 * @param topic the topic to subscribe to
+	 */
+	public void unsubscribe(String topic) {
+		if (Header.acceptableTopic(topic)) {
+
+			topic = topic.trim().toLowerCase();
+			if (isSubscribed(topic)) {
+				Message message = Message.createUnsubscribeMessage(getId(), topic);
+				send(message);
+			}
+		}
+	}
 
 
 	/**
@@ -201,7 +258,7 @@ public class Client extends Messenger {
 	 */
 	@Override
 	public String getClientName() {
-		return (_userName != null) ? _userName : Environment.getInstance().getUserName();
+		return _clientName;
 	}
 
 	/**
@@ -210,7 +267,7 @@ public class Client extends Messenger {
 	public void logout() {
 
 		Message message = Message.createLogoutMessage(getId());
-		_outboundQueue.queue(message);
+		send(message);
 		_outboundQueue.setAccept(false);
 
 		// try to wait for the message to be sent
@@ -277,6 +334,271 @@ public class Client extends Messenger {
 	 */
 	public boolean isClosed() {
 		return (_socket == null) || _socket.isClosed();
+	}
+	
+	
+	
+	/**
+	 * Check whether this client subscribes to a topic
+	 * @param topic the topic to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
+	 * NOT case sensitive.
+	 * @return <code>true</code> if this client is subscribed to the topic
+	 */
+	protected boolean isSubscribed(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				return _subscriptions.contains(topic);
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the list of subscriptions that client subscribes to
+	 * @return the list of subscriptions
+	 */
+	protected Vector<String> getSubscriptions() {
+		return _subscriptions;
+	}
+
+	
+	/**
+	 * Send a message 
+	 * @param message the message to send
+	 */
+	protected void send(Message message) {
+		if (message != null) {
+			if (_outboundQueue != null) {
+				_outboundQueue.queue(message);
+			}
+		}
+	}
+	
+	/**
+	 * A message is about to be farmed out to the appropriate handler.
+	 * This allows you to take a peek at it first.
+	 * @param message the message
+	 */
+	public void peekAtMessage(Message message) {
+		//default: do nothing
+	}
+
+	// A logout message should be from client to server
+	@Override
+	public void processLogoutMessage(Message message) {
+		System.err.println("It is rarely a good sign that a logout message arrives at a client.");
+	}
+
+	// A shutdown message arriving at the client means the server is
+	// telling the client he will be logged out. Probably something of a
+	// courtesy,
+	// as part of the server shutting down gracefully.
+	@Override
+	public void processShutdownMessage(Message message) {
+		System.err.println("!!! [" + getClientName() + "] " + " received a SHUTDOWN!");
+		try {
+			getOutboundQueue().setAccept(false);
+			
+			//give it time to send last message
+			try {
+				Thread.currentThread();
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// A handshake is the first message sent by the server.
+	// From it I can get my Id.
+	@Override
+	public void processHandshakeMessage(Message message) {
+		System.err.println("Client Received Handshake! [Client " + getId() + "]");
+
+		if (getId() > 0) {
+			System.err.println("Already have a good Id. Should not have gotten a handshake.");
+			return;
+		}
+
+		// now I can learn my id
+		int id = message.getClientId();
+		System.err.println("Acquired client ID: " + id);
+		setId(id);
+
+
+		// add some environmental strings (and my user name)
+		//then send it back
+		message.addPayload(envStringArray());
+		getOutboundQueue().queue(message);
+		
+		//call the client initialization
+		initialize();
+
+	}
+
+	/**
+	 * A ping has arrived from the server. Log the last ping time and
+	 * send the message back.
+	 * 
+	 * @param message
+	 *            the ping message
+	 */
+	@Override
+	public void processPingMessage(Message message) {
+		long ct = System.nanoTime();
+		if (getLastPing() > 0) {
+			long duration = ct - getLastPing();
+			String pdstr = String.format("[" + getClientName() + "] " + "Time since last ping: %7.3f ms", duration / 1.0e6);
+			System.err.println(pdstr);
+		}
+
+		setLastPing(ct);
+
+		// send it back
+		getOutboundQueue().queue(message);
+	}
+
+	//NO_DATA, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY, STRING, SERIALIZED_OBJECT;
+
+	/**
+	 * This is a non-administrative message that has arrived
+	 * from some other client
+	 */
+	@Override
+	public void processClientMessage(Message message) {
+		if (message != null) {
+			switch (message.getDataType()) {
+			
+			case NO_DATA:
+				break;
+				
+			case BYTE_ARRAY:
+				break;
+
+			case SHORT_ARRAY:
+				break;
+
+			case INT_ARRAY:
+				int [] iarray = message.getIntArray();
+				System.err.println("Client: " + getClientName() + " got int array");
+				break;
+
+			case LONG_ARRAY:
+				break;
+
+			case FLOAT_ARRAY:
+				break;
+
+			case DOUBLE_ARRAY:
+				double [] darray = message.getDoubleArray();
+				System.err.println("Client: " + getClientName() + " got double array");
+				break;
+
+			case STRING_ARRAY:
+				break;
+
+			case STRING:
+				String s = message.getString();
+				System.err.println("Client: " + getClientName() + " got string: [" + s + "]");
+				break;
+
+			case SERIALIZED_OBJECT:
+				break;
+				
+			case STREAMED:
+				break;
+
+			}
+		}
+	}
+	
+	
+	/**
+	 * Process a SERVERLOG message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	@Override
+	public void processServerLogMessage(Message message) {
+		System.err.println("It is rarely a good sign that a logout message arrives at a client.");
+	}
+	
+
+	/**
+	 * Process a SUBSCRIBE message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	@Override
+	public void processSubscribeMessage(Message message) {
+		String topic = message.getString();
+		topic = topic.trim().toLowerCase();
+		System.err.println(getClientName() + " subscribed to topic: " + topic);
+		
+		if (!isSubscribed(topic)) {
+			getSubscriptions().add(topic);
+		}
+	}
+
+
+	/**
+	 * Process a UNSUBSCRIBE message
+	 * 
+	 * @param message
+	 *            the message to process
+	 */
+	@Override
+	public void processUnsubscribeMessage(Message message) {
+		String topic = message.getString();
+		topic = topic.trim().toLowerCase();
+		System.err.println(getClientName() + " unsubscribed to topic: " + topic);
+		
+		if (isSubscribed(topic)) {
+			getSubscriptions().remove(topic);
+		}
+	}
+
+
+	// can be used as a filter
+	@Override
+	public boolean accept(Message message) {
+		// handshakes are accepted and used to get my Id
+
+		if (message.getMessageType() == MessageType.HANDSHAKE) {
+			return true;
+		}
+
+		return true;
+	}
+	
+	/**
+	 * Get the environment string array, getting strings at these indices:<br>
+	 * [0] the descriptive user name<br>
+	 * [1] the login user name<br>
+	 * [2] the os name<br>
+	 * [3] the host name
+	 * 
+	 * @return the environment string array
+	 */
+	private String[] envStringArray() {
+		String array[] = new String[4];
+		
+		Environment env = Environment.getInstance();
+
+		array[0] = getClientName();
+		array[1] = env.getUserName();
+		array[2] = env.getOsName();
+		array[3] = env.getHostName();
+		return array;
 	}
 
 }

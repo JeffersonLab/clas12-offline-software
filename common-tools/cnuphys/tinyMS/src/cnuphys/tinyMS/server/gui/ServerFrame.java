@@ -25,17 +25,20 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import cnuphys.tinyMS.Environment.Environment;
 import cnuphys.tinyMS.graphics.GraphicsUtilities;
 import cnuphys.tinyMS.graphics.ImageManager;
 import cnuphys.tinyMS.graphics.MemoryStripChart;
 import cnuphys.tinyMS.log.SimpleLogPane;
+import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
-import cnuphys.tinyMS.table.ClientTable;
+import cnuphys.tinyMS.table.ConnectionTable;
 
 @SuppressWarnings("serial")
-public class ServerFrame extends JFrame implements ActionListener {
+public class ServerFrame extends JFrame implements ActionListener, ListSelectionListener {
 
 	//the server
 	private TinyMessageServer _server;
@@ -43,12 +46,12 @@ public class ServerFrame extends JFrame implements ActionListener {
 	//buttons
 	private JButton _clearButton;
 	private JButton _stopButton;
-	private JButton _logoutButton;
+	private JButton _shutdownButton;
 
 	//holds the log
 	private SimpleLogPane _logPane;
 	
-	//when the gui (and approcimately the server) started
+	//when the gui (and approximately the server) started
 	private long _startTime;
 	
 	// maintenance timer
@@ -58,10 +61,13 @@ public class ServerFrame extends JFrame implements ActionListener {
 	private JLabel _durationLabel;
 	
 	//table stuff
-	private ClientTable _table;
+	private ConnectionTable _table;
 	
 	//Memory strip chart
 	private MemoryStripChart _chart;
+	
+	//list of topics
+	private TopicList _topicList;
 	
 	/**
 	 * Create a frame that will monitor the given server
@@ -87,6 +93,9 @@ public class ServerFrame extends JFrame implements ActionListener {
 
 		addContent();
 		fixGuiState();
+		
+		//listen for table selections
+		_table.getSelectionModel().addListSelectionListener(this);
 		
 		//setup a housekeeping maintenance thread
 		setupMaintenanceTimer();
@@ -117,6 +126,7 @@ public class ServerFrame extends JFrame implements ActionListener {
 		addNorth();
 		addCenter();
 		addSouth();
+		addEast();
 
 		// add a split pane with a capture pane
 		
@@ -134,25 +144,37 @@ public class ServerFrame extends JFrame implements ActionListener {
 		
 		_clearButton = makeButton("Clear Log");
 		_stopButton = makeButton("Stop the Server");
-		_logoutButton = makeButton("Logout Client");
+		_shutdownButton = makeButton("Shutdown Client");
 		panel.add(_clearButton);
 		panel.add(_stopButton);
-		panel.add(_logoutButton);
+		panel.add(_shutdownButton);
 		
 		add(panel, BorderLayout.SOUTH);
+	}
+	
+	//add the component in the east
+	private void addEast() {
 	}
 
 	//add the components in the center
 	private void addCenter() {
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+
 		_logPane = new SimpleLogPane();
 		Dimension d = _logPane.getPreferredSize();
 		d.height = 350;
 		_logPane.setPreferredSize(d);
+		
+		panel.add(_logPane, BorderLayout.CENTER);
+		_topicList = new TopicList(_server);
+		panel.add(_topicList.getScrollPane(), BorderLayout.EAST);
 				
 		//the table
-		_table = new ClientTable(_server);
+		_table = new ConnectionTable(_server);
 		
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, _logPane, _table.getScrollPane());
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, panel, _table.getScrollPane());
 		splitPane.setResizeWeight(0.8);
 
 		add(splitPane, BorderLayout.CENTER);
@@ -199,8 +221,6 @@ public class ServerFrame extends JFrame implements ActionListener {
 
 	//	nPanel.setBorder(BorderFactory.createCompoundBorder(emptyBorder, cborder));
 
-
-
 		add(nPanel, BorderLayout.NORTH);
 	}
 
@@ -217,7 +237,7 @@ public class ServerFrame extends JFrame implements ActionListener {
 		_stopButton.setEnabled(haveServer);
 		
 		boolean rowSelected = false;
-		_logoutButton.setEnabled(rowSelected);
+		_shutdownButton.setEnabled(rowSelected);
 	}
 
 	/**
@@ -288,11 +308,32 @@ public class ServerFrame extends JFrame implements ActionListener {
 				shutDown();
 			}
 		}
-		else if (source == _logoutButton) {
-			
+		else if (source == _shutdownButton) {
+			shutdownClient();
 		}
 
 		fixGuiState();
+	}
+	
+	//shutdown a client
+	private void shutdownClient() {
+		
+		if (_table != null) {
+			ProxyClient client = _table.getSelectedClient();
+			if (client != null) {
+				ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
+				int answer = JOptionPane.showConfirmDialog(null,
+						"Do you really want to shutdown client: " + client.getClientName() + "?",
+						"Shutdown a client?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
+						icon);
+				
+				if (answer == JFileChooser.APPROVE_OPTION) {
+					client.shutdown();
+				}
+			}
+		}
+
+
 	}
 	
 	/**
@@ -304,14 +345,11 @@ public class ServerFrame extends JFrame implements ActionListener {
 		
 		if (_server.isShutDown()) {
 			_timer.cancel();
-			System.err.println("Frame detected server shutdown.");
+			System.err.println("Application GUI (Server Frame) detected server shutdown.");
 		}
 		
-//		if (_table != null) {
-//			_table.fireTableDataChanged();
-//		}
 		
-		//do something every two seconds
+		//do something every 4 seconds
 		if ((count % 2) == 0) {
 			if (_table != null) {
 				_table.fireTableDataChanged();
@@ -319,6 +357,7 @@ public class ServerFrame extends JFrame implements ActionListener {
 		}
 	}
 	
+	//how long has the server been running?
 	private void uptime() {
 		
 		if (_server.isShutDown()) {
@@ -349,6 +388,9 @@ public class ServerFrame extends JFrame implements ActionListener {
 		if (_table != null) {
 			_table.fireTableDataChanged();
 		}
+		else {
+			System.err.println("DID NOT FIRE TABLE DATA CHANGE (Frame)");
+		}
 	}
 	
 	/**
@@ -364,6 +406,29 @@ public class ServerFrame extends JFrame implements ActionListener {
 		
 		return (answer == JFileChooser.APPROVE_OPTION);
 
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent lse) {
+		if (!lse.getValueIsAdjusting()) {
+			_shutdownButton.setEnabled(_table.getSelectedRow() >= 0);
+		}
+	}
+
+	/**
+	 * Get the topic list
+	 * @return the topic list
+	 */
+	public TopicList getTopicList() {
+		return _topicList;
+	}
+
+	/**
+	 * Get the client table
+	 * @return the client table
+	 */
+	public ConnectionTable getClientTable() {
+		return _table;
 	}
 
 }

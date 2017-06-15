@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
@@ -19,37 +20,33 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BMTGeometry;
-import cnuphys.lund.X11Colors;
 
 public class BMTSectorItem extends DonutItem {
 	
 	public enum LAYERTYPE {C, Z};
 	
-	public static final Color cColor = X11Colors.getX11Color("sea green", 96);
-	public static final Color zColor = X11Colors.getX11Color("orange", 96);
+	public static final Color cColor = new Color(220, 255, 220);
+	public static final Color zColor = new Color(240, 240, 240);
 	
 	private static LAYERTYPE[] layerTypes = 
 		{LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.Z, 
 				LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.C};
 	
-	private static final String[] sectorNames = {"A[2]", "B[1]", "C[3]"};
-//	private static final String[] sectorNames = {"C[3]", "A[2]", "B[1]"};
-//	private static final double labelAngs[] = {90, 225, 325};
-//	private static final double labelRad[] = {230, 255, 250};
+	private static final String[] sectorNames = {"A", "B", "C"};
 	private static final double labelAngs[] = {225, 325, 90};
 	private static final double labelRad[] = {255, 250, 230};
-//	private static final int xoff[] = {0, -30, 4};
 	private static final int xoff[] = {-30, 4, 0};
 
 	private static double[][] startAngle = new double[3][6];
-	private static double[][] stopAngle = new double[3][6];
+	private static double[][] endAngle = new double[3][6];
 	private static double[][] delAngle = new double[3][6];
 
-	private static double[] innerRadius = new double[6];
-	private static double[] outerRadius = new double[6];
-	
+	public static double[] innerRadius = new double[6];
+	public static double[] outerRadius = new double[6];
+		
 	private LAYERTYPE _layerType;
 	
+	public static final double FAKEWIDTH = Constants.LYRTHICKN; 
 
 	public static final String microMegasStr = UnicodeSupport.SMALL_MU + "megas";
 	
@@ -59,30 +56,12 @@ public class BMTSectorItem extends DonutItem {
 		for (int sector = 1; sector <= 3; sector++) {
 			for (int layer = 1; layer <= 6; layer++) {
 				
-//				double beginAng = Math
-//						.toDegrees(geo.CRC_GetBeginStrip(sector, layer));
-//				double endAng = Math
-//						.toDegrees(geo.CRC_GetEndStrip(sector, layer));
 
 				double beginAng = Math.toDegrees(geo.GetStartAngle(sector, layer));
 				double endAng = Math.toDegrees(geo.GetEndAngle(sector, layer));
-				
-				
-//				if (sector == 1) {
-//					beginAng = 0;
-//					endAng = 30;
-//				}
-//				else if (sector == 2) {
-//					beginAng = 90;
-//					endAng = 120;
-//				}
-//				else if (sector == 3) {
-//					beginAng = 230;
-//					endAng = 260;
-//				}
-				
+								
 				startAngle[sector - 1][layer - 1] = beginAng;
-				stopAngle[sector - 1][layer - 1] = endAng;
+				endAngle[sector - 1][layer - 1] = endAng;
 
 				delAngle[sector - 1][layer - 1] = endAng - beginAng;
 				if (delAngle[sector - 1][layer - 1] < 0) {
@@ -103,7 +82,7 @@ public class BMTSectorItem extends DonutItem {
 		innerRadius[5] = Constants.getCRCRADIUS()[2];
 		
 		for (int layer0 = 0; layer0 < 6; layer0++) {
-			outerRadius[layer0] = innerRadius[layer0] + 4;
+			outerRadius[layer0] = innerRadius[layer0] + FAKEWIDTH; //mm
 		}
 
 ////		innerRadius[4] = 205.8; // layer 5 mm
@@ -112,6 +91,41 @@ public class BMTSectorItem extends DonutItem {
 //		outerRadius[5] = innerRadius[5] + 4; // layer 6 mm
 	}
 	
+	/**
+	 * Get the inner radius in mm
+	 * @return the inner radius in mm
+	 */
+	public double getInnerRadius() {
+		return innerRadius[_layer-1];
+	}
+	
+	/**
+	 * Get the start angle in degrees
+	 * @return the start angle in degrees
+	 */
+	public double getStartAngle() {
+		return startAngle[_sector-1][_layer-1];
+	}
+	
+	/**
+	 * Get the end angle in degrees
+	 * @return the end angle in degrees
+	 */
+	public double getEndAngle() {
+		return endAngle[_sector-1][_layer-1];
+	}
+
+	
+	/**
+	 * Get the outer radius in mm
+	 * @return the outer radius in mm
+	 */
+	public double getOuterRadius() {
+		return outerRadius[_layer-1];
+	}
+	
+	
+
 	// sector and layer are one based
 	private int _sector;
 	private int _layer;
@@ -136,7 +150,6 @@ public class BMTSectorItem extends DonutItem {
 		else {
 			style.setFillColor(zColor);
 		}
-		
 	}
 	
 	/**
@@ -257,6 +270,23 @@ public class BMTSectorItem extends DonutItem {
 //				microMegasStr + " hit " + hit  + " strip " + strip + edepStr);
 		return null;
 	}
+	
+	/**
+	 * Convenience method to check if this is a Z layer
+	 * @return <code>true</code> if this is a Z layer
+	 */
+	public boolean isZLayer() {
+		return _layerType == LAYERTYPE.Z;
+	}
+	
+	/**
+	 * Convenience method to check if this is a C layer
+	 * @return <code>true</code> if this is a C layer
+	 */
+	public boolean isCLayer() {
+		return _layerType == LAYERTYPE.C;
+	}
+
 
 	/**
 	 * Add any appropriate feedback strings for the headsup display or feedback
@@ -271,12 +301,80 @@ public class BMTSectorItem extends DonutItem {
 	public void getFeedbackStrings(IContainer container, Point screenPoint,
 			Point2D.Double wp, List<String> feedbackStrings) {
 		if (contains(container, screenPoint)) {
-			double ang  = Math.PI-Math.atan2(wp.y, wp.x);
-			int zstrip = BMTGeometry.getGeometry().getZStrip(_layer, ang);
+	//		double ang  = Math.PI-Math.atan2(wp.y, wp.x);
+			double ang  = Math.atan2(wp.y, wp.x);
+
+			int zstrip = -1;
+
+			if (isZLayer()) {
+				zstrip = BMTGeometry.getGeometry().getZStrip(_layer, ang);
+			}
 
 			feedbackStrings.add("$lawn green$" + microMegasStr + " type " + _layerType);
 			feedbackStrings.add("$lawn green$" + microMegasStr + " sector " + _sector + " = "
-					+ sectorNames[_sector - 1] + " layer " + _layer + " strip " + zstrip);			
+					+ sectorNames[_sector - 1] + " layer " + _layer + " strip " + 
+					((zstrip < 0) ? " N/A " : zstrip) );
+			
+			feedbackStrings.add("$lawn green$inner radius " + getInnerRadius() + "mm");
+			feedbackStrings.add("$lawn green$startAngle " + DoubleFormat.doubleFormat(getStartAngle(), 1) + UnicodeSupport.DEGREE + 
+			" endAngle " + DoubleFormat.doubleFormat(getEndAngle(), 1) + UnicodeSupport.DEGREE);
+			feedbackStrings.add("$lawn green$number of strips " + getNumStrips());
 		}
+	}
+	
+	/**
+	 * Get the number of strips
+	 * @return the number of strips
+	 */
+	public int getNumStrips () {
+		int region = (int) (_layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+
+		if (isZLayer()) {
+			return Constants.getCRZNSTRIPS()[region];
+		}
+		else { //C
+			return Constants.getCRCNSTRIPS()[region];
+		}
+	}
+	
+	public Polygon getStripPolygon(IContainer container, int strip) {
+		Polygon poly = null;
+		if (isZLayer()) {
+			Point pp = new Point();
+			double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
+					_layer, strip);
+			
+			double phi2;
+			if (strip < (getNumStrips()/2)) {
+				phi2 = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
+						_layer, strip+1);
+			}
+			else {
+				phi2 = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
+						_layer, strip-1);
+			}
+			double delPhi = (Math.abs(phi2-phi))/2;
+			
+			double phiMin = phi - delPhi;
+			double phiMax = phi + delPhi;
+			double cmin = Math.cos(phiMin);
+			double cmax = Math.cos(phiMax);
+			double smin = Math.sin(phiMin);
+			double smax = Math.sin(phiMax);
+			
+			poly = new Polygon();
+			
+			container.worldToLocal(pp, getInnerRadius()*cmin, getInnerRadius()*smin);
+			poly.addPoint(pp.x, pp.y);
+			container.worldToLocal(pp, getOuterRadius()*cmin, getOuterRadius()*smin);
+			poly.addPoint(pp.x, pp.y);
+			container.worldToLocal(pp, getOuterRadius()*cmax, getOuterRadius()*smax);
+			poly.addPoint(pp.x, pp.y);
+			container.worldToLocal(pp, getInnerRadius()*cmax, getInnerRadius()*smax);
+			poly.addPoint(pp.x, pp.y);
+			
+		}
+		
+		return poly;
 	}
 }

@@ -16,12 +16,6 @@ public class Message {
 	// used to validate a message and to see if byte swapping is necessary
 	public static final int MAGIC_WORD = 0xCEBAF; // 846767
 
-	// the server uses ID=0
-	public static final int SERVER = 0;
-
-	// broadcast to all clients (except sender)
-	public static final int BROADCAST = -1001;
-
 	// the message header
 	private Header _header;
 
@@ -170,6 +164,12 @@ public class Message {
 			len = bytes.length;
 			payload = bytes;
 		}
+		else if (payload instanceof StreamedOutputPayload) {
+			StreamedOutputPayload so = (StreamedOutputPayload)payload;
+			byte[] bytes = so.getBytes();
+			len = bytes.length;
+			payload = bytes;
+		}
 		else {
 			System.err.println("UNKNOWN payload type in Message.addPayload");
 			payload = null;
@@ -182,29 +182,29 @@ public class Message {
 	
 	/**
 	 * Send a message to the server to be logged
-	 * @param srcId the client id
+	 * @param clientId the client id
 	 * @param level the level of the log message
 	 * @param logStr the actual string to log at the server
 	 * @return the message
 	 */
-	public static Message createServerLogMessage(int srcId, Log.Level level, String logStr) {
-		Header header = new Header(srcId, Message.SERVER, MessageType.SERVERLOG, (short)level.ordinal());
+	public static Message createServerLogMessage(int clientId, Log.Level level, String logStr) {
+		Header header = new Header(clientId, MessageType.SERVERLOG, (short)level.ordinal(), Header.SERVER_TOPIC);
 		Message message = new Message(header);
 		message.addPayload(logStr);
 		return message;
 	}
 
 	/**
-	 * Convenience routine to create a ping message. The ping message originates
+	 * Convenience routine for the server to create a ping message. The ping message originates
 	 * on the server. The client sends it back.
 	 * 
-	 * @param destId
+	 * @param clientId
 	 *            the id of the destination client
 	 * @return a Message with type MessageType.PING. These are initiated by the
 	 *         server.
 	 */
-	public static Message createPingMessageMessage(int destId) {
-		Message message = new Message(new Header(SERVER, destId, MessageType.PING));
+	public static Message createPingMessageMessage(int clientId) {
+		Message message = new Message(new Header(clientId, MessageType.PING));
 
 		// send one piece of data, the current time in nansec
 		message.addPayload(System.nanoTime());
@@ -218,12 +218,12 @@ public class Message {
 	 * when it arrives at the client, will also serve to notify the client of
 	 * his own Id.
 	 * 
-	 * @param destId
+	 * @param clientId
 	 *            the id of the destination client
 	 * @return a message of type Message.HANDSHAKE
 	 */
-	public static Message createHandshakeMessage(int destId) {
-		Header header = new Header(SERVER, destId, MessageType.HANDSHAKE);
+	public static Message createHandshakeMessage(int clientId) {
+		Header header = new Header(clientId, MessageType.HANDSHAKE);
 		return new Message(header);
 	}
 
@@ -231,42 +231,88 @@ public class Message {
 	 * Convenience routine to create a logout message. It should only originate
 	 * from a client, the client is telling the server he is logging out.
 	 * 
-	 * @param srcId
-	 *            the id of the source
+	 * @param clientId
+	 *            the id of the client logging out
 	 * @return a message of type Message.LOGOUT
 	 */
-	public static Message createLogoutMessage(int srcId) {
-		Header header = new Header(srcId, Message.SERVER, MessageType.LOGOUT);
+	public static Message createLogoutMessage(int clientId) {
+		Header header = new Header(clientId, MessageType.LOGOUT);
 		return new Message(header);
+	}
+	
+
+	/**
+	 * Convenience routine to create a subscribe message. 
+	 * 
+	 * @param clientId
+	 *            the id of the client subscribing
+	 * @param topic the topic
+	 * @return a message of type Message.SUBSCRIBE
+	 */
+	public static Message createSubscribeMessage(int clientId, String topic) {
+		Header header = new Header(clientId, MessageType.SUBSCRIBE);
+		Message message = new Message(header);
+		message.addPayload(topic);
+		return message;
+	}
+
+	
+	/**
+	 * Convenience routine to create an unsubscribe message. 
+	 * 
+	 * @param clientId
+	 *            the id of the client unsubscribing
+	 * @param topic the topic
+	 * @return a message of type Message.UNSUBSCRIBE
+	 */
+	public static Message createUnsubscribeMessage(int clientId, String topic) {
+		Header header = new Header(clientId, MessageType.UNSUBSCRIBE);
+		Message message = new Message(header);
+		message.addPayload(topic);
+		return message;
 	}
 
 	/**
 	 * Convenience routine to create a shutdown message. It should only
 	 * originate from the server, telling the client to shutdown.
 	 * 
-	 * @param destId
-	 *            the id of the client
+	 * @param clientId
+	 *            the id of the client being shut down
 	 * @return a message of type Message.SHUTDOWN
 	 */
-	public static Message createShutdownMessage(int destId) {
-		Header header = new Header(Message.SERVER, destId, MessageType.SHUTDOWN);
+	public static Message createShutdownMessage(int clientId) {
+		Header header = new Header(clientId, MessageType.SHUTDOWN);
 		return new Message(header);
 	}
 
 	/**
-	 * Convenience routine to create a data message with no payload. You can
-	 * then add a payload with {@link addPayload}.
+	 * Convenience routine to create a client message with no payload. You can
+	 * then add a payload with {@link addPayload}. This uses the default tag of 0.
 	 * 
-	 * @param srcId
-	 *            the id of the source
-	 * @param destId
-	 *            the id of the destination
+	 * @param clientId
+	 *            the id of the client sending the message
+	 * @param topic the topic of the message 
 	 * @return a message of type Message.DATA
 	 */
-	public static Message createDataMessage(int srcId, int destId) {
-		Header header = new Header(srcId, destId, MessageType.DATA);
+	public static Message createMessage(int clientId, String topic) {
+		return createMessage(clientId, (short)0, topic);
+	}
+	
+	/**
+	 * Convenience routine to create a client message with no payload. You can
+	 * then add a payload with {@link addPayload}.
+	 * 
+	 * @param clientId
+	 *            the id of the client sending the message
+	 * @param tag an optional tag
+	 * @param topic the topic of the message 
+	 * @return a message of type Message.DATA
+	 */
+	public static Message createMessage(int clientId, short tag, String topic) {
+		Header header = new Header(clientId, MessageType.CLIENT, tag, topic);
 		return new Message(header);
 	}
+
 
 	/**
 	 * Get the byte array if the payload is a byte array.
@@ -384,23 +430,22 @@ public class Message {
 	public short getTag() {
 		return _header.getTag();
 	}
-
+	
 	/**
-	 * Get the Id of the source. The server itself has an Id of zero.
-	 * 
-	 * @return the sourceId
+	 * Get the topic of the message
+	 * @return the message topic
 	 */
-	public int getSourceId() {
-		return _header.getSourceId();
+	public String getTopic() {
+		return _header.getTopic();
 	}
 
 	/**
-	 * Get the Id of the destination. The server itself has an Id of zero.
+	 * Get the Id of the client. The server itself has an Id of zero.
 	 * 
-	 * @return the destinationId
+	 * @return the client Id, or 0 for the server
 	 */
-	public int getDestinationId() {
-		return _header.getDestinationId();
+	public int getClientId() {
+		return _header.getClientId();
 	}
 
 	/**
@@ -529,19 +574,16 @@ public class Message {
 			Object object = SerialIO.serialRead(bytes);
 			return object;
 			
+		case STREAMED:
+			bytes = new byte[len];
+			inputStream.readFully(bytes);
+			return StreamedInputPayload.fromBytes(bytes);
+			
 		case NO_DATA:
 			return null;
 		}
 
 		return null;
-	}
-
-	/**
-	 * This method exchanges the source and destination. It is convenient for
-	 * messages like handshakes and pings.
-	 */
-	public void invert() {
-		_header.invert();
 	}
 
 	/**
@@ -563,18 +605,6 @@ public class Message {
 		outputStream.flush();
 	}
 
-	// for prettier prints
-	private static String idString(int id) {
-		if (id == SERVER) {
-			return "SERVER";
-		}
-		else if (id == BROADCAST) {
-			return "BROADCAST";
-		}
-		else {
-			return "Client [" + id + "]";
-		}
-	}
 
 	// write the payload to an output stream
 	private void writePayload(DataOutputStream outputStream) throws IOException {
@@ -625,10 +655,66 @@ public class Message {
 			outputStream.writeChars(str);
 			break;
 			
+		case STREAMED:
+			break;
+			
 		case NO_DATA:
 			break;
 		} // end switch
 
+	}
+	
+	/**
+	 * Farm out a message for a processor
+	 * @param processor the processor
+	 */
+	public void process(IMessageProcessor processor) {
+		
+		if (processor == null) {
+			return;
+		}
+		
+		if (!processor.accept(this)) {
+			return;
+		}
+		
+		//first peek at message
+		processor.peekAtMessage(this);
+		
+		switch (getMessageType()) {
+		case LOGOUT:
+			processor.processLogoutMessage(this);
+			break;
+
+		case SHUTDOWN:
+			processor.processShutdownMessage(this);
+			break;
+
+		case CLIENT:
+			processor.processClientMessage(this);
+			break;
+
+		case HANDSHAKE:
+			processor.processHandshakeMessage(this);
+			break;
+
+		case PING:
+			processor.processPingMessage(this);
+			break;
+
+		case SERVERLOG:
+			processor.processServerLogMessage(this);
+			break;
+			
+		case SUBSCRIBE:
+			processor.processSubscribeMessage(this);
+			break;
+
+		case UNSUBSCRIBE:
+			processor.processUnsubscribeMessage(this);
+			break;
+
+		}
 	}
 
 }
