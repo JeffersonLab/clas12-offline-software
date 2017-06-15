@@ -21,6 +21,7 @@ public class ColumnList extends JList<String> {
 	private JScrollPane _scrollPane;
 
 	public ColumnList() {
+		super(new DefaultListModel());
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		_scrollPane = new JScrollPane(this);
 		_scrollPane.setPreferredSize(_size);

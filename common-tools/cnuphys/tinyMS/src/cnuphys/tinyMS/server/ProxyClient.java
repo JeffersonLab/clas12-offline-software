@@ -44,7 +44,7 @@ public class ProxyClient extends Messenger {
     /** number of messages arriving at server */
 	private long _messageCount = 0;
 	
-	/** list of channels the client is subscribed to */
+	/** list of topics the client is subscribed to */
 	private Vector<String> _subscriptions = new Vector<String>();
 
 		
@@ -549,53 +549,64 @@ public class ProxyClient extends Messenger {
 
 	
 	/**
-	 * Subscribe to a channel
-	 * @param channel the channel to subscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., channels are 
+	 * Subscribe to a topic
+	 * @param topic the topic to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
 	 * NOT case sensitive.
 	 */
-	protected void subscribe(String channel) {
-		if (channel != null) {
-			channel = channel.trim().toLowerCase();
-			if (channel.length() > 0) {
-				_subscriptions.remove(channel);
-				_subscriptions.add(channel);
+	protected void subscribe(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				_subscriptions.remove(topic);
+				_subscriptions.add(topic);
 			}
 		}
 	}
 	
 	/**
-	 * Unsubscribe to a channel
-	 * @param channel the channel to unsubscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., channels are 
+	 * Unsubscribe to a topic
+	 * @param topic the topic to unsubscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
 	 * NOT case sensitive.
 	 */
-	protected void unsubscribe(String channel) {
-		if (channel != null) {
-			channel = channel.trim().toLowerCase();
-			if (channel.length() > 0) {
-				_subscriptions.remove(channel);
+	protected void unsubscribe(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				_subscriptions.remove(topic);
 			}
 		}
 	}
 	
 	/**
-	 * Check whether this client subscribes to a channel
-	 * @param channel the channel to subscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., channels are 
+	 * Check whether this client subscribes to a topic
+	 * @param topic the topic to subscribe to. This will be trimmed
+	 * of white space and converted to lower case, i.e., topics are 
 	 * NOT case sensitive.
-	 * @return <code>true</code> if this channel is subscribed to the channel
+	 * @return <code>true</code> if this client is subscribed to the topic
 	 */
-	protected boolean isSubscribed(String channel) {
-		if (channel != null) {
-			channel = channel.trim().toLowerCase();
-			if (channel.length() > 0) {
-				return _subscriptions.contains(channel);
+	protected boolean isSubscribed(String topic) {
+		if (topic != null) {
+			topic = topic.trim().toLowerCase();
+			if (topic.length() > 0) {
+				return _subscriptions.contains(topic);
 			}
 		}
 		return false;
 	}
 
 	
+	/**
+	 * Send a message 
+	 * @param message the message to send
+	 */
+	protected void send(Message message) {
+		if (message != null) {
+			if (_outboundQueue != null) {
+				_outboundQueue.queue(message);
+			}
+		}
+	}
 
 }

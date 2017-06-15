@@ -164,6 +164,12 @@ public class Message {
 			len = bytes.length;
 			payload = bytes;
 		}
+		else if (payload instanceof StreamedOutputPayload) {
+			StreamedOutputPayload so = (StreamedOutputPayload)payload;
+			byte[] bytes = so.getBytes();
+			len = bytes.length;
+			payload = bytes;
+		}
 		else {
 			System.err.println("UNKNOWN payload type in Message.addPayload");
 			payload = null;
@@ -226,12 +232,44 @@ public class Message {
 	 * from a client, the client is telling the server he is logging out.
 	 * 
 	 * @param clientId
-	 *            the id of the client loggong out
+	 *            the id of the client logging out
 	 * @return a message of type Message.LOGOUT
 	 */
 	public static Message createLogoutMessage(int clientId) {
 		Header header = new Header(clientId, MessageType.LOGOUT);
 		return new Message(header);
+	}
+	
+
+	/**
+	 * Convenience routine to create a subscribe message. 
+	 * 
+	 * @param clientId
+	 *            the id of the client subscribing
+	 * @param topic the topic
+	 * @return a message of type Message.SUBSCRIBE
+	 */
+	public static Message createSubscribeMessage(int clientId, String topic) {
+		Header header = new Header(clientId, MessageType.SUBSCRIBE);
+		Message message = new Message(header);
+		message.addPayload(topic);
+		return message;
+	}
+
+	
+	/**
+	 * Convenience routine to create an unsubscribe message. 
+	 * 
+	 * @param clientId
+	 *            the id of the client unsubscribing
+	 * @param topic the topic
+	 * @return a message of type Message.UNSUBSCRIBE
+	 */
+	public static Message createUnsubscribeMessage(int clientId, String topic) {
+		Header header = new Header(clientId, MessageType.UNSUBSCRIBE);
+		Message message = new Message(header);
+		message.addPayload(topic);
+		return message;
 	}
 
 	/**
@@ -249,17 +287,17 @@ public class Message {
 
 	/**
 	 * Convenience routine to create a client message with no payload. You can
-	 * then add a payload with {@link addPayload}.
+	 * then add a payload with {@link addPayload}. This uses the default tag of 0.
 	 * 
 	 * @param clientId
 	 *            the id of the client sending the message
-	 * @param channel the channel of the message 
+	 * @param topic the topic of the message 
 	 * @return a message of type Message.DATA
 	 */
-	public static Message createMessage(int clientId, String channel) {
-		return createMessage(clientId, (short)0, channel);
+	public static Message createMessage(int clientId, String topic) {
+		return createMessage(clientId, (short)0, topic);
 	}
-
+	
 	/**
 	 * Convenience routine to create a client message with no payload. You can
 	 * then add a payload with {@link addPayload}.
@@ -267,13 +305,14 @@ public class Message {
 	 * @param clientId
 	 *            the id of the client sending the message
 	 * @param tag an optional tag
-	 * @param channel the channel of the message 
+	 * @param topic the topic of the message 
 	 * @return a message of type Message.DATA
 	 */
-	public static Message createMessage(int clientId, short tag, String channel) {
-		Header header = new Header(clientId, MessageType.CLIENT, tag, channel);
+	public static Message createMessage(int clientId, short tag, String topic) {
+		Header header = new Header(clientId, MessageType.CLIENT, tag, topic);
 		return new Message(header);
 	}
+
 
 	/**
 	 * Get the byte array if the payload is a byte array.
@@ -535,6 +574,11 @@ public class Message {
 			Object object = SerialIO.serialRead(bytes);
 			return object;
 			
+		case STREAMED:
+			bytes = new byte[len];
+			inputStream.readFully(bytes);
+			return StreamedInputPayload.fromBytes(bytes);
+			
 		case NO_DATA:
 			return null;
 		}
@@ -611,10 +655,66 @@ public class Message {
 			outputStream.writeChars(str);
 			break;
 			
+		case STREAMED:
+			break;
+			
 		case NO_DATA:
 			break;
 		} // end switch
 
+	}
+	
+	/**
+	 * Farm out a message for a processor
+	 * @param processor the processor
+	 */
+	public void process(IMessageProcessor processor) {
+		
+		if (processor == null) {
+			return;
+		}
+		
+		if (!processor.accept(this)) {
+			return;
+		}
+		
+		//first peek at message
+		processor.peekAtMessage(this);
+		
+		switch (getMessageType()) {
+		case LOGOUT:
+			processor.processLogoutMessage(this);
+			break;
+
+		case SHUTDOWN:
+			processor.processShutdownMessage(this);
+			break;
+
+		case CLIENT:
+			processor.processClientMessage(this);
+			break;
+
+		case HANDSHAKE:
+			processor.processHandshakeMessage(this);
+			break;
+
+		case PING:
+			processor.processPingMessage(this);
+			break;
+
+		case SERVERLOG:
+			processor.processServerLogMessage(this);
+			break;
+			
+		case SUBSCRIBE:
+			processor.processSubscribeMessage(this);
+			break;
+
+		case UNSUBSCRIBE:
+			processor.processUnsubscribeMessage(this);
+			break;
+
+		}
 	}
 
 }
