@@ -18,7 +18,6 @@ import cnuphys.tinyMS.message.IMessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.MessageType;
 import cnuphys.tinyMS.message.Messenger;
-import cnuphys.tinyMS.message.StreamedInputPayload;
 
 /**
  * This is the base class for the actual client. This is different from the
@@ -70,14 +69,24 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Create a client that will connect to a {@link TinyMessageServer}.
 	 * 
-	 * @param clientName
-	 *            the
-	 * @param hostName
-	 * @param port
+	 * @param clientName the name of the client
+	 * @param hostName the name of the server machine
+	 * @param port the port the server listens on
 	 * @throws BadSocketException
 	 */
 	public DefaultClient(String clientName, String hostName, int port) throws BadSocketException {
 		this(clientName, ClientSupport.getSocket(hostName, port));
+	}
+	
+	/**
+	 * Create a client that will connect to a {@link TinyMessageServer}.
+	 * 
+	 * @param clientName the name of the client. Since the host name and port are not given, this looks for 
+	 * a server on the same local machine using one of the default ports.
+	 * @throws BadSocketException
+	 */
+	public DefaultClient(String clientName) throws BadSocketException {
+		this(clientName, null, -1);
 	}
 
 	/**
