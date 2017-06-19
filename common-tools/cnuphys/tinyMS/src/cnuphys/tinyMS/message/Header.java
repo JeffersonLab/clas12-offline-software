@@ -8,6 +8,7 @@ import java.net.SocketException;
 
 import cnuphys.tinyMS.common.ByteSwap;
 import cnuphys.tinyMS.common.DataType;
+import cnuphys.tinyMS.log.Log;
 
 /**
  * The header for a message. The header consists of
@@ -22,6 +23,9 @@ import cnuphys.tinyMS.common.DataType;
  * 
  */
 public class Header {
+	
+	// used to validate a message and to see if byte swapping is necessary
+	public static final int MAGIC_WORD = 0xCEBAF; // 846767
 	
 	/** A reserved topic used by all administrative messages */
 	public static final String SERVER_TOPIC = "Server";
@@ -198,18 +202,19 @@ public class Header {
 		int word = inputStream.readInt();
 
 		boolean swap = false;
-		boolean foundMagic = word == Message.MAGIC_WORD;
+		boolean foundMagic = word == MAGIC_WORD;
 
 		// swap?
 		if (!foundMagic) {
 			word = ByteSwap.swapInt(word);
-			foundMagic = word == Message.MAGIC_WORD;
+			foundMagic = (word == MAGIC_WORD);
 
 			if (foundMagic) {
 				swap = true;
 			}
 			else {
-				throw new IOException("Expected to find MAGIC WORD 0xCEBAF");
+				Log.getInstance().error("Did not get magic word 0xCEBAF");
+	//			throw new IOException("Expected to find MAGIC WORD 0xCEBAF");
 			}
 		}
 
@@ -252,7 +257,7 @@ public class Header {
 	protected void writeHeader(DataOutputStream outputStream) throws IOException {
 
 		try {
-			outputStream.writeInt(Message.MAGIC_WORD);
+			outputStream.writeInt(MAGIC_WORD);
 			outputStream.writeInt(_clientId);
 			outputStream.writeShort((short) _messageType.ordinal());
 			outputStream.writeShort(_tag);
@@ -261,7 +266,7 @@ public class Header {
 			outputStream.writeInt(_length);
 		}
 		catch (SocketException e) {
-
+			e.printStackTrace();
 		}
 	}
 

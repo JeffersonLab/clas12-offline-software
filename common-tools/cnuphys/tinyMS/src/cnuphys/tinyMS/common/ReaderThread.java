@@ -64,15 +64,14 @@ public class ReaderThread extends Thread {
 					_messenger.getInboundQueue().queue(message);
 				}
 			}
-			catch (IOException e) {
-				try {
-					_messenger.close();
-				}
-				catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
 			catch (Exception e) {
+//				e.printStackTrace();
+//				try {
+//				_messenger.close();
+//				}
+//				catch (IOException e1) {
+//					e1.printStackTrace();
+//				}
 			}
 		}
 	}
