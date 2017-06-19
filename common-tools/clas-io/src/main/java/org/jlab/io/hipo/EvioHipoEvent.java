@@ -70,11 +70,28 @@ public class EvioHipoEvent {
                 EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RICH::dgtz");
                 
                 int nrows = evioBank.rows();
-                DataBank  hipoBank = hipoEvent.createBank("RICH::adc", nrows);
+                DataBank  hipoBankADC = hipoEvent.createBank("RICH::adc", nrows);
+                DataBank  hipoBankTDC = hipoEvent.createBank("RICH::tdc", nrows);
                 for(int i = 0; i < nrows; i++){
-                    hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector", i));
+                	// RICH ADC Hipo Bank
+                    hipoBankADC.setByte("sector",   i,    (byte) evioBank.getInt("sector", i));
+                    hipoBankADC.setShort("pmt",     i,   (short)  evioBank.getInt("pmt",i));
+                    hipoBankADC.setShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
+                    hipoBankADC.setByte("order",    i,    (byte) 0);
+                    hipoBankADC.setInt("ADC",       i,    (int) evioBank.getInt("ADC", i));
+                    // At the moment these variables are not in used
+                    hipoBankADC.setFloat("time",    i,    (float) (0.0));
+                    hipoBankADC.setInt("ped",       i,    (int) (0.0));
+                    
+                    
+                    // RICH TDC Hipo Bank
+                    hipoBankTDC.setByte("sector",   i,    (byte) evioBank.getInt("sector", i));
+                    hipoBankTDC.setShort("pmt",     i,   (short)  evioBank.getInt("pmt",i));
+                    hipoBankTDC.setShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
+                    hipoBankTDC.setInt("TDC1",      i,    (int) evioBank.getInt("TDC1",i));
+                    hipoBankTDC.setInt("TDC2",      i,    (int) evioBank.getInt("TDC2", i));                                      
                 }
-                hipoEvent.appendBanks(hipoBank);
+                hipoEvent.appendBanks(hipoBankADC,hipoBankTDC);
             } catch (Exception e) {
                 System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
             }
