@@ -32,7 +32,7 @@ public class EventBuilder {
     private List<ScintillatorResponse> scintillatorResponses = new ArrayList<ScintillatorResponse>();
     private List<CalorimeterResponse> calorimeterResponses = new ArrayList<CalorimeterResponse>();
     private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
-    private int[]  NegativeTriggerList = new int[]{11};
+    private int[]  TriggerList = new int[]{11,-11,0};
     
     public EventBuilder(){
         
@@ -186,12 +186,20 @@ public class EventBuilder {
                 //detectorResponses.get(index).setHitQuality(quality);
             }
             
-            index = p.getCherenkovSignal(this.cherenkovResponses);
+            index = p.getCherenkovSignal(this.cherenkovResponses,DetectorType.HTCC);
             //double = p.getCherenkovSignalQuality()
             if(index>=0){
                 p.addCherenkovResponse(cherenkovResponses.get(index));
                 cherenkovResponses.get(index).setAssociation(n);
             } 
+
+            index = p.getCherenkovSignal(this.cherenkovResponses,DetectorType.LTCC);
+            //double = p.getCherenkovSignalQuality()
+            if(index>=0){
+                p.addCherenkovResponse(cherenkovResponses.get(index));
+                cherenkovResponses.get(index).setAssociation(n);
+            }             
+
         }
     }
     
@@ -245,124 +253,40 @@ public class EventBuilder {
         }
         return responses;
     }
-    /**
-     * Assigns PID and sets start time
-     */
-//     public void assignTrigger()  {
-//        int npart = this.detectorEvent.getParticles().size();
-//        Trigger trigger = new Trigger();
-// 
-//        for(int i = 0; i < npart; i++){
-//                if(this.detectorEvent.getParticles().get(i).getCharge()<0) {
-//                for(int b = 0 ; b < this.NegativeTriggerList.length ; b++){
-//                    trigger.TriggerCheck(this.detectorEvent.getParticles().get(i), this.NegativeTriggerList[b]);
-//                }
-//                }
-//        }
-//       
-//        int best_trigger_index = -1;
-//        int best_score = 0;
-//        
-//        for(int i = 0; i < npart; i++){
-//       
-//            if(detectorEvent.getParticle(i).getScore()>=110 && detectorEvent.getParticles().get(i).getCharge()<0){ //Find the highest trigger score
-//                if(detectorEvent.getParticle(i).getScore()>best_score){
-//                    detectorEvent.getParticle(i).setPid(11);
-//                    best_score = detectorEvent.getParticle(i).getScore();
-//                    best_trigger_index = i;
-//                }
-//            }
-//          
-//        }
+
         
     public void assignTrigger()  {
-        int npart = this.detectorEvent.getParticles().size();
-       
-        for(int i = 0; i < npart; i++){
-            DetectorParticle p = detectorEvent.getParticle(i);
-            if((p.hasHit(DetectorType.FTOF, 2)|| p.hasHit(DetectorType.FTOF, 1))||
-                    (p.hasHit(DetectorType.EC, 1)&&p.hasHit(DetectorType.EC, 4))){
-                double sfraction = p.getEnergyFraction(DetectorType.EC);
-                //System.out.println(sfraction);
-                if(sfraction>EBConstants.ECAL_SAMPLINGFRACTION_CUT){
-                    if(p.getCharge()<0)
-                        p.setPid(11);
-                }
-            }
+        int i = 0;
+        boolean hasTrigger=false;
+        while(hasTrigger==false) {
+              
+                    if(TriggerList[i]==11){
+                    ElectronTriggerOption electron = new ElectronTriggerOption();
+                    hasTrigger = electron.assignSoftwareTrigger(detectorEvent);
+                    }
+                    if(TriggerList[i]==-11){
+                    PositronTriggerOption positron = new PositronTriggerOption();
+                    hasTrigger= positron.assignSoftwareTrigger(detectorEvent);
+                    }
+                    if(TriggerList[i]==-211){
+                    NegPionTriggerOption negpion = new NegPionTriggerOption();
+                    hasTrigger = negpion.assignSoftwareTrigger(detectorEvent);
+                    }
+                    if(TriggerList[i]==211){
+                    PosPionTriggerOption pospion = new PosPionTriggerOption();
+                    hasTrigger = pospion.assignSoftwareTrigger(detectorEvent);
+                    }
+                    if(TriggerList[i]==0){
+                    hasTrigger = true;
+                    }
+                        
+               
+                i = i + 1;
         }
-       
-        int    index = -1;
-        double best_p = 0.0;
-        for(int i = 0; i < npart; i++){
-            if(detectorEvent.getParticle(i).getPid()==11){
-                if(detectorEvent.getParticle(i).vector().mag()>best_p){
-                    best_p = detectorEvent.getParticle(i).vector().mag();
-                    index = i;
-                }
-            }
-        }
-       
-        if(index>0){
-            this.detectorEvent.moveUp(index);
-        }
-      
     }
        
 
-        
-//       
-//        int highest_p_index = -1;
-//        double highest_p = 0.0;
-//        
-//        for(int i = 0; i < npart; i++){
-//                if(detectorEvent.getParticle(i).vector().mag()>highest_p){  //Find the highest momentum track
-//                    highest_p = detectorEvent.getParticle(i).vector().mag();
-//                    highest_p_index = i;
-//                }
-//            }
-//        
-//        if(detectorEvent.getParticle(highest_p_index).getScore() ==         
-//                detectorEvent.getParticle(best_trigger_index).getScore()){  //If two are tied with same trigger
-//            this.detectorEvent.moveUp(highest_p_index);                     //score, the track with the higher
-//        }                                                                   //momentum is assigned as the trigger
 
-    
-    
-    public static class Trigger implements Comparable {
-            private Boolean htccSignalCheck;
-            private Boolean sfCheck;
-            private Boolean hasFTOF;
-            
-            public Trigger(){
-            }
-                
-            public void TriggerCheck(DetectorParticle p, int tid){
-                    
-            htccSignalCheck = p.getNphe()>EBConstants.HTCC_NPHE_CUT;
-            sfCheck = p.getEnergyFraction(DetectorType.EC)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
-            hasFTOF = p.hasHit(DetectorType.FTOF, 2)|| p.hasHit(DetectorType.FTOF, 1);
-            
-            switch(tid) {
-                case 11:
-                    int triggerScore = 0;
-                    if(htccSignalCheck==true){
-                        triggerScore = triggerScore + 1000;
-                    }
-                    if(sfCheck==true){
-                        triggerScore = triggerScore + 100;
-                    }
-                    if(hasFTOF==true){
-                        triggerScore = triggerScore + 10;
-                    }
-                    p.setScore(triggerScore);
-                    //System.out.println("The trigger score is ....  " + triggerScore);
-                    }
-
-            }
-            public int compareTo(Object o) {
-                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-    }
     
     public DetectorEvent  getEvent(){return this.detectorEvent;}
     
@@ -377,3 +301,113 @@ public class EventBuilder {
         }*/
     }
 }
+
+    class TriggerOptions {
+        
+        public int id;
+        public int score_requirement;
+        public int charge;
+        
+        TriggerOptions() {
+            initID();
+        }
+        
+        public void initID() {
+            //Initialize parameters
+        }
+        
+        public void setID(int pid) {
+            this.id = pid;
+        }
+        
+        public void setScoreRequirement(int sc) {
+            this.score_requirement = sc;
+        }
+        
+        public void setCharge(int ch) {
+            this.charge = ch;
+        }
+        
+        public boolean assignSoftwareTrigger(DetectorEvent event) {
+            boolean flag = false;
+            int npart = event.getParticles().size();
+            for(int i = 0; i < npart; i++){
+                DetectorParticle p = event.getParticle(i);
+                if(p.getSoftwareTriggerScore()>=this.score_requirement) { //Possible Electron
+                    //System.out.println("The requirements is " + this.score_requirement);
+                    if(this.charge==p.getCharge()){
+                        p.setPid(this.id);
+                            }
+
+
+                    }
+                }
+
+       
+            int    index = -1;
+            double best_p = 0.0;
+            for(int i = 0; i < npart; i++){
+                if(event.getParticle(i).getPid()==this.id){
+                    if(event.getParticle(i).vector().mag()>best_p){ //Sorting the Momentum
+                        best_p = event.getParticle(i).vector().mag();
+                        index = i;
+                    }
+                }
+            }
+       
+                if(index>0){
+                    event.moveUp(index);
+                    if(event.getParticle(0).getPid()==this.id){
+                        flag = true;
+                    }
+                }
+            
+
+                return flag;
+            }
+
+        }
+
+    class ElectronTriggerOption extends TriggerOptions {
+
+         @Override
+         public void initID() {
+             this.setID(11);
+             this.setScoreRequirement(110);
+             this.setCharge(-1);
+         }
+         
+    }    
+
+    class PositronTriggerOption extends TriggerOptions {
+
+         @Override
+         public void initID() {
+             this.setID(-11);
+             this.setScoreRequirement(110);
+             this.setCharge(1);
+         }
+         
+    }  
+ 
+    class NegPionTriggerOption extends TriggerOptions {
+
+         @Override
+         public void initID() {
+             this.setID(-211);
+             this.setScoreRequirement(10);
+             this.setCharge(-1);
+         }
+         
+    }    
+
+    class PosPionTriggerOption extends TriggerOptions {
+
+         @Override
+         public void initID() {
+             this.setID(211);
+             this.setScoreRequirement(10);
+             this.setCharge(1);
+         }
+         
+    }  

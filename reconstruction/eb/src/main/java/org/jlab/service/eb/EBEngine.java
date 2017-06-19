@@ -19,7 +19,7 @@ import org.jlab.clas.detector.CherenkovResponse;
  * @author gavalian
  */
 public class EBEngine extends ReconstructionEngine {
-    
+
     String eventBank        = null;
     String particleBank     = null;
     String calorimeterBank  = null;
@@ -38,6 +38,7 @@ public class EBEngine extends ReconstructionEngine {
     public void initBankNames() {
         //Initialize bank names
     }
+    
 
     public boolean processDataEvent(DataEvent de) {
         
@@ -51,11 +52,13 @@ public class EBEngine extends ReconstructionEngine {
         List<ScintillatorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF,5.0);
         List<ScintillatorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF,2.0);
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
+        List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::rec",DetectorType.LTCC);
         List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FT::particles");
         eb.addScintillatorResponses(responseFTOF);
         eb.addScintillatorResponses(responseCTOF);
         eb.addCalorimeterResponses(responseECAL);
         eb.addCherenkovResponses(responseHTCC);
+        eb.addCherenkovResponses(responseLTCC);
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
@@ -74,10 +77,14 @@ public class EBEngine extends ReconstructionEngine {
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
         //eb.getEvent().setRfTime(rf);
         
+
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
 
+        
+
+        
         if(eb.getEvent().getParticles().size()>0){
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             de.appendBanks(bankP);
@@ -140,6 +147,7 @@ public class EBEngine extends ReconstructionEngine {
         this.trackType = trackType;
     }
 
+
     
     @Override
     public boolean init() {
@@ -148,3 +156,4 @@ public class EBEngine extends ReconstructionEngine {
     }
     
 }
+
