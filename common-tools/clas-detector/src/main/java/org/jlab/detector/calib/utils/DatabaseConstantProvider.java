@@ -92,6 +92,11 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         String envCCDB   = System.getenv("CCDB_DATABASE");
         String envCLAS12 = System.getenv("CLAS12DIR");
+        String connection = System.getenv("CCDB_CONNECTION");
+        
+        if(connection!=null){
+            return connection;
+        }
         
         String propCLAS12 = System.getProperty("CLAS12DIR");
         String propCCDB   = System.getProperty("CCDB_DATABASE");
