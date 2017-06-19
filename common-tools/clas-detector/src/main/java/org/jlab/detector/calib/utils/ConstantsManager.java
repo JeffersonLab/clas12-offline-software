@@ -89,7 +89,7 @@ public class ConstantsManager {
                         + tableName);
             }
         }
-            
+        provider.disconnect();
         this.runConstants.put(run, desc);
         //System.out.println(this.toString());
     }
