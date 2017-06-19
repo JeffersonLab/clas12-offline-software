@@ -73,13 +73,20 @@ public class MemoryStripChart extends JComponent {
 		d.width = PREF_WIDTH;
 		return d;
 	}
-	
+
 	// get max val of current data
 	private float getMaxVal() {
 		float mv = 2;
-		for (float val : _data) {
-			mv = Math.max(mv, val);
+
+		try {
+			synchronized (_data) {
+				for (float val : _data) {
+					mv = Math.max(mv, val);
+				}
+			}
+		} catch (Exception e) {
 		}
+
 		return mv;
 	}
 
@@ -101,9 +108,6 @@ public class MemoryStripChart extends JComponent {
 
 		float maxVal = getMaxVal();
 		float delta = used - maxVal;
-
-		System.err
-				.println("*** USED: " + used + "  size: " + _data.size() + "   max: " + maxVal + "   DELTA: " + delta);
 
 		// repaint the chart
 		repaint();

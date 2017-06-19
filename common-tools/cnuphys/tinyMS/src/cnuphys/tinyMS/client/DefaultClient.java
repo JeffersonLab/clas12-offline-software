@@ -1,5 +1,7 @@
 package cnuphys.tinyMS.client;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import cnuphys.tinyMS.message.IMessageProcessor;
 import cnuphys.tinyMS.message.MessageQueue;
 import cnuphys.tinyMS.message.MessageType;
 import cnuphys.tinyMS.message.Messenger;
+import cnuphys.tinyMS.message.StreamedInputPayload;
 
 /**
  * This is the base class for the actual client. This is different from the
@@ -24,7 +27,7 @@ import cnuphys.tinyMS.message.Messenger;
  * @author heddle
  * 
  */
-public class Client extends Messenger implements IMessageProcessor, Runnable {
+public class DefaultClient extends Messenger implements IMessageProcessor, Runnable {
 
 	// the underlying socket
 	private Socket _socket;
@@ -54,24 +57,26 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 
 	// last ping from server
 	private long _lastPing = -1L;
-	
+
 	// Descriptive user name. If null, actual login username will be used
 	private String _clientName;
 
 	// to avoid multiple calls to close
 	private boolean _alreadyClosed = false;
-	
+
 	/** list of topics the client is subscribed to */
 	private Vector<String> _subscriptions = new Vector<String>();
 
 	/**
 	 * Create a client that will connect to a {@link TinyMessageServer}.
-	 * @param clientName the 
+	 * 
+	 * @param clientName
+	 *            the
 	 * @param hostName
 	 * @param port
-	 * @throws BadSocketException 
+	 * @throws BadSocketException
 	 */
-	public Client (String clientName, String hostName, int port) throws BadSocketException {
+	public DefaultClient(String clientName, String hostName, int port) throws BadSocketException {
 		this(clientName, ClientSupport.getSocket(hostName, port));
 	}
 
@@ -88,14 +93,13 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 	 *            the underlying socket
 	 * @see ClientSupport
 	 */
-	public Client(String clientName, Socket socket) throws BadSocketException {
-		
+	public DefaultClient(String clientName, Socket socket) throws BadSocketException {
+
 		if (socket == null) {
 			throw new BadSocketException("null socket in Client constructor");
 		}
 		_clientName = (clientName != null) ? clientName : Environment.getInstance().getUserName();
 		_socket = socket;
-
 
 		// where to place message for transmission
 		_outboundQueue = new MessageQueue(100, 20);
@@ -106,8 +110,8 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		// grab the streams, create the reader and writer and a thread to
 		// dequeue messages.
 		try {
-			_inputStream = new DataInputStream(socket.getInputStream());
-			_outputStream = new DataOutputStream(socket.getOutputStream());
+			_inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+			_outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			// to read inbound messages from server
 			_reader = new ReaderThread(_socket, this);
 
@@ -118,13 +122,12 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 			_writer.start();
 
 			new Thread(this).start();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	@Override
 	public void run() {
 		while (true) {
@@ -135,14 +138,13 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		}
 	}
 
-	
 	/**
-	 * This is a good place for clients to do custom initializations
-	 * such as subscriptions. It is not necessary, but convenient. It
-	 * is called at the end of the constructor.
+	 * This is a good place for clients to do custom initializations such as
+	 * subscriptions. It is not necessary, but convenient. It is called at the
+	 * end of the constructor.
 	 */
 	public void initialize() {
-		//base implementation does nothing
+		// base implementation does nothing
 	}
 
 	/**
@@ -164,7 +166,9 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 
 	/**
 	 * Unsubscribe to a topic
-	 * @param topic the topic to subscribe to
+	 * 
+	 * @param topic
+	 *            the topic to subscribe to
 	 */
 	public void unsubscribe(String topic) {
 		if (Header.acceptableTopic(topic)) {
@@ -177,7 +181,6 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		}
 	}
 
-
 	/**
 	 * Return the id which should be > 0 as provided by the server.
 	 * 
@@ -187,10 +190,12 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 	public int getId() {
 		return _id;
 	}
-	
+
 	/**
 	 * Set the client id
-	 * @param id the client id
+	 * 
+	 * @param id
+	 *            the client id
 	 */
 	protected void setId(int id) {
 		_id = id;
@@ -275,21 +280,19 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 			if (_outboundQueue.isEmpty()) {
 				System.err.println("Outbound queue is empty");
 				break;
-			}
-			else {
+			} else {
 				System.err.println("Outbound queue not empty");
 				try {
 					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 				}
 			}
 		}
 
 		try {
+			System.err.println("\n------\nlogout method called for " + getClientName() + "\n-----");
 			close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 		}
 	}
 
@@ -305,7 +308,9 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		}
 		_alreadyClosed = true;
 
-		System.err.println("Closing " + getClientName());
+		(new Throwable()).printStackTrace();
+		
+		System.err.println("\n------\nClosing " + getClientName() + "\n-----");
 		_reader.stopReader();
 		_writer.stopWriter();
 		_socket.close();
@@ -314,15 +319,18 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 
 	/**
 	 * Get the last ping time
+	 * 
 	 * @return the last ping time (-1 if never pinged)
 	 */
 	protected long getLastPing() {
 		return _lastPing;
 	}
-	
+
 	/**
 	 * Set the last ping time
-	 * @param ping the last ping time
+	 * 
+	 * @param ping
+	 *            the last ping time
 	 */
 	protected void setLastPing(long ping) {
 		_lastPing = ping;
@@ -330,19 +338,20 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 
 	/**
 	 * Check if the client's socket is closed
+	 * 
 	 * @return <code>true</code> if the clients socket id closed
 	 */
 	public boolean isClosed() {
 		return (_socket == null) || _socket.isClosed();
 	}
-	
-	
-	
+
 	/**
 	 * Check whether this client subscribes to a topic
-	 * @param topic the topic to subscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., topics are 
-	 * NOT case sensitive.
+	 * 
+	 * @param topic
+	 *            the topic to subscribe to. This will be trimmed of white space
+	 *            and converted to lower case, i.e., topics are NOT case
+	 *            sensitive.
 	 * @return <code>true</code> if this client is subscribed to the topic
 	 */
 	protected boolean isSubscribed(String topic) {
@@ -354,19 +363,21 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Get the list of subscriptions that client subscribes to
+	 * 
 	 * @return the list of subscriptions
 	 */
 	protected Vector<String> getSubscriptions() {
 		return _subscriptions;
 	}
 
-	
 	/**
-	 * Send a message 
-	 * @param message the message to send
+	 * Send a message
+	 * 
+	 * @param message
+	 *            the message to send
 	 */
 	protected void send(Message message) {
 		if (message != null) {
@@ -375,14 +386,16 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 			}
 		}
 	}
-	
+
 	/**
-	 * A message is about to be farmed out to the appropriate handler.
-	 * This allows you to take a peek at it first.
-	 * @param message the message
+	 * A message is about to be farmed out to the appropriate handler. This
+	 * allows you to take a peek at it first.
+	 * 
+	 * @param message
+	 *            the message
 	 */
 	public void peekAtMessage(Message message) {
-		//default: do nothing
+		// default: do nothing
 	}
 
 	// A logout message should be from client to server
@@ -400,18 +413,16 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		System.err.println("!!! [" + getClientName() + "] " + " received a SHUTDOWN!");
 		try {
 			getOutboundQueue().setAccept(false);
-			
-			//give it time to send last message
+
+			// give it time to send last message
 			try {
 				Thread.currentThread();
 				Thread.sleep(2000);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -432,20 +443,19 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		System.err.println("Acquired client ID: " + id);
 		setId(id);
 
-
 		// add some environmental strings (and my user name)
-		//then send it back
-		message.addPayload(envStringArray());
+		// then send it back
+		message.setPayload(envStringArray());
 		getOutboundQueue().queue(message);
-		
-		//call the client initialization
+
+		// call the client initialization
 		initialize();
 
 	}
 
 	/**
-	 * A ping has arrived from the server. Log the last ping time and
-	 * send the message back.
+	 * A ping has arrived from the server. Log the last ping time and send the
+	 * message back.
 	 * 
 	 * @param message
 	 *            the ping message
@@ -455,8 +465,9 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		long ct = System.nanoTime();
 		if (getLastPing() > 0) {
 			long duration = ct - getLastPing();
-			String pdstr = String.format("[" + getClientName() + "] " + "Time since last ping: %7.3f ms", duration / 1.0e6);
-			System.err.println(pdstr);
+//			String pdstr = String.format("[" + getClientName() + "] " + "Time since last ping: %7.3f ms",
+//					duration / 1.0e6);
+//			System.err.println(pdstr);
 		}
 
 		setLastPing(ct);
@@ -465,20 +476,22 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		getOutboundQueue().queue(message);
 	}
 
-	//NO_DATA, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY, STRING, SERIALIZED_OBJECT;
+	// NO_DATA, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY,
+	// DOUBLE_ARRAY, STRING_ARRAY, STRING, SERIALIZED_OBJECT;
 
 	/**
-	 * This is a non-administrative message that has arrived
-	 * from some other client
+	 * This is a non-administrative message that has arrived from some other
+	 * client. This is what every client will override to deal with messages.
+	 * Only messages for which the client is subscribed will end up here.
 	 */
 	@Override
 	public void processClientMessage(Message message) {
 		if (message != null) {
 			switch (message.getDataType()) {
-			
+
 			case NO_DATA:
 				break;
-				
+
 			case BYTE_ARRAY:
 				break;
 
@@ -486,8 +499,6 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 				break;
 
 			case INT_ARRAY:
-				int [] iarray = message.getIntArray();
-				System.err.println("Client: " + getClientName() + " got int array");
 				break;
 
 			case LONG_ARRAY:
@@ -497,29 +508,24 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 				break;
 
 			case DOUBLE_ARRAY:
-				double [] darray = message.getDoubleArray();
-				System.err.println("Client: " + getClientName() + " got double array");
 				break;
 
 			case STRING_ARRAY:
 				break;
 
 			case STRING:
-				String s = message.getString();
-				System.err.println("Client: " + getClientName() + " got string: [" + s + "]");
 				break;
 
 			case SERIALIZED_OBJECT:
 				break;
-				
+
 			case STREAMED:
 				break;
 
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Process a SERVERLOG message
 	 * 
@@ -530,7 +536,6 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 	public void processServerLogMessage(Message message) {
 		System.err.println("It is rarely a good sign that a logout message arrives at a client.");
 	}
-	
 
 	/**
 	 * Process a SUBSCRIBE message
@@ -543,12 +548,11 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		String topic = message.getString();
 		topic = topic.trim().toLowerCase();
 		System.err.println(getClientName() + " subscribed to topic: " + topic);
-		
+
 		if (!isSubscribed(topic)) {
 			getSubscriptions().add(topic);
 		}
 	}
-
 
 	/**
 	 * Process a UNSUBSCRIBE message
@@ -561,12 +565,11 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 		String topic = message.getString();
 		topic = topic.trim().toLowerCase();
 		System.err.println(getClientName() + " unsubscribed to topic: " + topic);
-		
+
 		if (isSubscribed(topic)) {
 			getSubscriptions().remove(topic);
 		}
 	}
-
 
 	// can be used as a filter
 	@Override
@@ -579,7 +582,7 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 
 		return true;
 	}
-	
+
 	/**
 	 * Get the environment string array, getting strings at these indices:<br>
 	 * [0] the descriptive user name<br>
@@ -591,7 +594,7 @@ public class Client extends Messenger implements IMessageProcessor, Runnable {
 	 */
 	private String[] envStringArray() {
 		String array[] = new String[4];
-		
+
 		Environment env = Environment.getInstance();
 
 		array[0] = getClientName();

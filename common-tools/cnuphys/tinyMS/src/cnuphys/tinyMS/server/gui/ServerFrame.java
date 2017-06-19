@@ -9,6 +9,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,6 +31,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import cnuphys.tinyMS.Environment.Environment;
+import cnuphys.tinyMS.graphics.Fonts;
 import cnuphys.tinyMS.graphics.GraphicsUtilities;
 import cnuphys.tinyMS.graphics.ImageManager;
 import cnuphys.tinyMS.graphics.MemoryStripChart;
@@ -59,6 +62,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 
 	//how long we've been running
 	private JLabel _durationLabel;
+	
+	// average bandwidth
+	private JLabel _bandwidthLabel;
 	
 	//table stuff
 	private ConnectionTable _table;
@@ -195,17 +201,12 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		String hostName = env.getHostName() + " (" +
 				env.getHostAddress() + ":" + _server.getLocalPort() + ")";
 
-		JLabel hostLabel = new JLabel("Host: " + hostName);
-		lPanel.add(hostLabel);
-		
-		lPanel.add(Box.createVerticalStrut(6));
-		JLabel nameLabel = new JLabel("Server: " + _server.getName());
-		lPanel.add(nameLabel);
-		
-		lPanel.add(Box.createVerticalStrut(6));
-		_durationLabel = new JLabel("Running:");
-		lPanel.add(_durationLabel);
-
+		addLabel(lPanel, "Host: " + hostName, 0);
+		addLabel(lPanel, "Server: " + _server.getName() + 
+				"   Port: " + _server.getPort() +
+				"   Version: " + _server.getVersion(), 6);
+		_durationLabel = addLabel(lPanel, "Running:" + _server.getName(), 6);
+		_bandwidthLabel = addLabel(lPanel, "Average bandwidth:", 6);
 
 		nPanel.add(lPanel, BorderLayout.CENTER);
 		
@@ -224,6 +225,19 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		add(nPanel, BorderLayout.NORTH);
 	}
 
+	//add a label
+	private JLabel addLabel(JPanel lPanel, String s, int gap) {
+		if (gap > 0) {
+			lPanel.add(Box.createVerticalStrut(gap));
+		}
+		
+		JLabel label = new JLabel(s);
+		label.setFont(Fonts.mediumBoldFont);
+		lPanel.add(label);
+
+		return label;
+	}
+	
 	// convenience function to create a button
 	private JButton makeButton(String label) {
 		JButton button = new JButton(label);
@@ -279,6 +293,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	private void shutDown() {
 		if (_server != null) {
 			try {
+				System.err.println("\n===========================================");
+				System.err.println("***** Server is shutting down from the server GUI. *****");
+				System.err.println("\n===========================================");
 				_server.shutdown();
 			}
 			catch (IOException e) {
@@ -348,9 +365,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 			System.err.println("Application GUI (Server Frame) detected server shutdown.");
 		}
 		
-		
-		//do something every 4 seconds
-		if ((count % 2) == 0) {
+		int n = 2;
+		//do something every n seconds
+		if ((count % n) == 0) {
 			if (_table != null) {
 				_table.fireTableDataChanged();
 			}
@@ -365,7 +382,11 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 			return;
 		}
 		
+		//uptime in seconds
 		long del = (System.currentTimeMillis() - _startTime)/1000;
+		
+		//compute bandwidth
+		int bandwidth = (int)((double)_server.getBytesTransferred()/((double)Math.max(1, del)));
 		
 		long days = del / 86400;
 		del = del % 86400;
@@ -378,6 +399,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		
 		String s = String.format("Running: %d days and %02d:%02d:%02d", days, hours, minutes, seconds);
 		_durationLabel.setText(s);
+		
+		String bwstr = NumberFormat.getNumberInstance(Locale.US).format(bandwidth);
+		_bandwidthLabel.setText("Average bandwidth: " + bwstr + " bytes/s");
 	}
 	
 

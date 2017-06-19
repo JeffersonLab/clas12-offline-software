@@ -13,90 +13,92 @@ import cnuphys.tinyMS.log.Log;
 
 public class Message {
 
-	// used to validate a message and to see if byte swapping is necessary
-	public static final int MAGIC_WORD = 0xCEBAF; // 846767
-
 	// the message header
 	private Header _header;
 
 	// the payload is always stored as an object, but it is written and
-	// restored by type, e.g. and array of atomics or a serialized object.
+	// restored by type, e.g. and array of atomics or a serialized object
+	// or a StreamedOutputPayload
 	private Object _payload;
 
+	// for data types that use serialization
+	private byte[] _serializedBytes;
+
 	/**
-	 * create a message with just a header
+	 * Create a message with just a header. This is private. The clients should
+	 * use the static createMessage methods.
 	 * 
 	 * @param header
 	 *            the header of the message
 	 */
-	public Message(Header header) {
+	private Message(Header header) {
 		_header = header;
 	}
 
 	/**
-	 * Add a payload made of a single byte.
+	 * Set a payload made of a single byte.
 	 * 
 	 * @param v
 	 *            the byte to use as the payload.
 	 */
-	public void addPayload(byte v) {
+	public void setPayload(byte v) {
 		byte vals[] = { v };
-		addPayload(vals);
+		setPayload(vals);
 	}
 
 	/**
-	 * Add a payload made of a single short.
+	 * Set a payload made of a single short.
 	 * 
 	 * @param v
 	 *            the short to use as the payload.
 	 */
-	public void addPayload(short v) {
+	public void setPayload(short v) {
 		short vals[] = { v };
-		addPayload(vals);
+		setPayload(vals);
 	}
 
 	/**
-	 * Add a payload made of a single int.
+	 * Set a payload made of a single int.
 	 * 
 	 * @param v
 	 *            the int to use as the payload.
 	 */
-	public void addPayload(int v) {
+	public void setPayload(int v) {
 		int vals[] = { v };
-		addPayload(vals);
+		setPayload(vals);
 	}
 
 	/**
-	 * Add a payload made of a single long.
+	 * Set a payload made of a single long.
 	 * 
 	 * @param v
 	 *            the long to use as the payload.
 	 */
-	public void addPayload(long v) {
+	public void setPayload(long v) {
 		long vals[] = { v };
-		addPayload(vals);
+		setPayload(vals);
 	}
 
 	/**
-	 * Add a payload made of a single float.
+	 * Set a payload made of a single float.
 	 * 
 	 * @param v
 	 *            the float to use as the payload.
 	 */
-	public void addPayload(float v) {
+	public void setPayload(float v) {
 		float vals[] = { v };
-		addPayload(vals);
+		setPayload(vals);
 	}
 
 	/**
-	 * Add a payload made of a single double.
+	 * Set a payload made of a single double.
 	 * 
 	 * @param v
 	 *            the double to use as the payload.
 	 */
-	public void addPayload(double v) {
+	public void setPayload(double v) {
 		double vals[] = { v };
-		addPayload(vals);
+		setPayload(vals);
 	}
 
 	/**
@@ -107,96 +109,86 @@ public class Message {
 	 *            the payload to add to the message. Should be one of the known
 	 *            data types. @see cnuphys.tinyMS.common.DataType
 	 */
-	public void addPayload(Object payload) {
+	public void setPayload(Object payload) {
 
 		int len = 0;
 		DataType dtype = DataType.NO_DATA;
 
+		_payload = payload;
+
 		if (payload == null) {
-		}
-		else if (payload instanceof byte[]) {
+		} else if (payload instanceof byte[]) {
 			dtype = DataType.BYTE_ARRAY;
 			// for a byte array, len is the number of elements
 			len = ((byte[]) payload).length;
-		}
-		else if (payload instanceof short[]) {
+		} else if (payload instanceof short[]) {
 			dtype = DataType.SHORT_ARRAY;
 			// for a short array, len is the number of elements
 			len = ((short[]) payload).length;
-		}
-		else if (payload instanceof int[]) {
+		} else if (payload instanceof int[]) {
 			dtype = DataType.INT_ARRAY;
 			// for an int array, len is the number of elements
 			len = ((int[]) payload).length;
-		}
-		else if (payload instanceof long[]) {
+		} else if (payload instanceof long[]) {
 			dtype = DataType.LONG_ARRAY;
 			// for a long array, len is the number of elements
 			len = ((long[]) payload).length;
-		}
-		else if (payload instanceof float[]) {
+		} else if (payload instanceof float[]) {
 			dtype = DataType.FLOAT_ARRAY;
 			// for a float array, len is the number of elements
 			len = ((float[]) payload).length;
-		}
-		else if (payload instanceof double[]) {
+		} else if (payload instanceof double[]) {
 			dtype = DataType.DOUBLE_ARRAY;
 			// for a double array, len is the number of elements
 			len = ((double[]) payload).length;
-		}
-		else if (payload instanceof String) {
+		} else if (payload instanceof String) {
 			dtype = DataType.STRING;
 			// for a single string, len is the char length of the string
 			len = ((String) payload).length();
-		}
-		else if (payload instanceof String[]) {
+		} else if (payload instanceof String[]) {
 			dtype = DataType.STRING_ARRAY;
-			byte bytes[] = SerialIO.serialWrite((String[]) payload);
-			// for a string array, len is the length of the serialized bytes
-			len = bytes.length;
-			payload = bytes;
-		}
-		else if (payload instanceof Serializable) {
+			_serializedBytes = SerialIO.serialWrite((Serializable) _payload);
+			len = _serializedBytes.length;
+		} else if (payload instanceof Serializable) {
 			dtype = DataType.SERIALIZED_OBJECT;
-			// for a serialized object, len is the length of the serialized
-			// bytes
-			byte bytes[] = SerialIO.serialWrite((Serializable) payload);
-			len = bytes.length;
-			payload = bytes;
-		}
-		else if (payload instanceof StreamedOutputPayload) {
-			StreamedOutputPayload so = (StreamedOutputPayload)payload;
-			byte[] bytes = so.getBytes();
-			len = bytes.length;
-			payload = bytes;
-		}
-		else {
-			System.err.println("UNKNOWN payload type in Message.addPayload");
-			payload = null;
+			_serializedBytes = SerialIO.serialWrite((Serializable) _payload);
+			len = _serializedBytes.length;
+			System.err.println("SENDING SERIALIZED OBJECT bytes len: " + len);
+		} else if (payload instanceof StreamedOutputPayload) {
+			dtype = DataType.STREAMED;
+			_serializedBytes = ((StreamedOutputPayload) payload).getBytes();
+			len = _serializedBytes.length;
+			System.err.println("SENDING STREAMED OBJECT bytes len: " + len);
+		} else {
+			System.err.println("UNKNOWN payload type in Message.setPayload");
+			_payload = null;
 		}
 
 		_header.setDataType(dtype);
 		_header.setDataLength(len);
-		_payload = payload;
 	}
-	
+
 	/**
 	 * Send a message to the server to be logged
-	 * @param clientId the client id
-	 * @param level the level of the log message
-	 * @param logStr the actual string to log at the server
+	 * 
+	 * @param clientId
+	 *            the client id
+	 * @param level
+	 *            the level of the log message
+	 * @param logStr
+	 *            the actual string to log at the server
 	 * @return the message
 	 */
 	public static Message createServerLogMessage(int clientId, Log.Level level, String logStr) {
-		Header header = new Header(clientId, MessageType.SERVERLOG, (short)level.ordinal(), Header.SERVER_TOPIC);
+		Header header = new Header(clientId, MessageType.SERVERLOG, (short) level.ordinal(), Header.SERVER_TOPIC);
 		Message message = new Message(header);
-		message.addPayload(logStr);
+		message.setPayload(logStr);
 		return message;
 	}
 
 	/**
-	 * Convenience routine for the server to create a ping message. The ping message originates
-	 * on the server. The client sends it back.
+	 * Convenience routine for the server to create a ping message. The ping
+	 * message originates on the server. The client sends it back.
 	 * 
 	 * @param clientId
 	 *            the id of the destination client
@@ -207,7 +199,7 @@ public class Message {
 		Message message = new Message(new Header(clientId, MessageType.PING));
 
 		// send one piece of data, the current time in nansec
-		message.addPayload(System.nanoTime());
+		message.setPayload(System.nanoTime());
 		return message;
 	}
 
@@ -239,36 +231,36 @@ public class Message {
 		Header header = new Header(clientId, MessageType.LOGOUT);
 		return new Message(header);
 	}
-	
 
 	/**
-	 * Convenience routine to create a subscribe message. 
+	 * Convenience routine to create a subscribe message.
 	 * 
 	 * @param clientId
 	 *            the id of the client subscribing
-	 * @param topic the topic
+	 * @param topic
+	 *            the topic
 	 * @return a message of type Message.SUBSCRIBE
 	 */
 	public static Message createSubscribeMessage(int clientId, String topic) {
 		Header header = new Header(clientId, MessageType.SUBSCRIBE);
 		Message message = new Message(header);
-		message.addPayload(topic);
+		message.setPayload(topic);
 		return message;
 	}
 
-	
 	/**
-	 * Convenience routine to create an unsubscribe message. 
+	 * Convenience routine to create an unsubscribe message.
 	 * 
 	 * @param clientId
 	 *            the id of the client unsubscribing
-	 * @param topic the topic
+	 * @param topic
+	 *            the topic
 	 * @return a message of type Message.UNSUBSCRIBE
 	 */
 	public static Message createUnsubscribeMessage(int clientId, String topic) {
 		Header header = new Header(clientId, MessageType.UNSUBSCRIBE);
 		Message message = new Message(header);
-		message.addPayload(topic);
+		message.setPayload(topic);
 		return message;
 	}
 
@@ -287,32 +279,35 @@ public class Message {
 
 	/**
 	 * Convenience routine to create a client message with no payload. You can
-	 * then add a payload with {@link addPayload}. This uses the default tag of 0.
+	 * then Set a payload with {@link setPayload}. This uses the default tag of
+	 * 0.
 	 * 
 	 * @param clientId
 	 *            the id of the client sending the message
-	 * @param topic the topic of the message 
+	 * @param topic
+	 *            the topic of the message
 	 * @return a message of type Message.DATA
 	 */
 	public static Message createMessage(int clientId, String topic) {
-		return createMessage(clientId, (short)0, topic);
+		return createMessage(clientId, (short) 0, topic);
 	}
-	
+
 	/**
 	 * Convenience routine to create a client message with no payload. You can
-	 * then add a payload with {@link addPayload}.
+	 * then Set a payload with {@link setPayload}.
 	 * 
 	 * @param clientId
 	 *            the id of the client sending the message
-	 * @param tag an optional tag
-	 * @param topic the topic of the message 
+	 * @param tag
+	 *            an optional tag
+	 * @param topic
+	 *            the topic of the message
 	 * @return a message of type Message.DATA
 	 */
 	public static Message createMessage(int clientId, short tag, String topic) {
 		Header header = new Header(clientId, MessageType.CLIENT, tag, topic);
 		return new Message(header);
 	}
-
 
 	/**
 	 * Get the byte array if the payload is a byte array.
@@ -411,28 +406,70 @@ public class Message {
 	}
 
 	/**
-	 * Get the payload as a serializable object--which is really just the same
-	 * as getting the payload.
+	 * Get the payload as a serializable object.
 	 * 
-	 * @return the payload as a single String object.
+	 * @return the payload as a serialized object.
 	 */
-	public Serializable getSerializedObjed() {
+	public Object getSerializedObject() {
 		if ((getDataType() != DataType.SERIALIZED_OBJECT) || (getDataLength() < 1) || (_payload == null)) {
 			return null;
 		}
-		return (Serializable) _payload;
+
+		return _payload;
+		// byte[] bytes = (byte[]) _payload;
+		// if ((bytes == null) || (bytes.length < 1)) {
+		// return null;
+		// }
+		//
+		// try {
+		// Object obj = SerialIO.serialRead(bytes);
+		// return obj;
+		// } catch (Exception e) {
+		// Log.getInstance().exception(e);
+		// }
+		// return null;
 	}
-	
+
 	/**
-	 * Get the tag of the message
+	 * Get the payload as a StreamedInputPayload.
+	 * 
+	 * @return the payload as a StreamedInputPayload
+	 */
+
+	public StreamedInputPayload getStreamedInputPayload() {
+		return (StreamedInputPayload) _payload;
+		// if ((getDataType() != DataType.STREAMED) || (getDataLength() < 1) ||
+		// (_payload == null)) {
+		// return null;
+		// }
+		//
+		// byte[] bytes = (byte[]) _payload;
+		// if ((bytes == null) || (bytes.length < 1)) {
+		// return null;
+		// }
+		//
+		// try {
+		// return StreamedInputPayload.fromBytes(bytes);
+		// } catch (Exception e) {
+		// Log.getInstance().exception(e);
+		// }
+		// return null;
+
+	}
+
+	/**
+	 * Get the tag of the message. The tag is not used internally. It is an
+	 * extra (and optional) id hook that can be used by clients.
+	 * 
 	 * @return the message tag
 	 */
 	public short getTag() {
 		return _header.getTag();
 	}
-	
+
 	/**
 	 * Get the topic of the message
+	 * 
 	 * @return the message topic
 	 */
 	public String getTopic() {
@@ -512,78 +549,93 @@ public class Message {
 			return message;
 		}
 
-		message._payload = readPayload(inputStream, dtype, len);
+		readPayload(message, inputStream, dtype, len);
 		return message;
 	}
 
 	// read the payload
-	private static Object readPayload(DataInputStream inputStream, DataType dtype, int len) throws IOException {
+	private static void readPayload(Message message, DataInputStream inputStream, DataType dtype, int len)
+			throws IOException {
 		switch (dtype) {
 		case BYTE_ARRAY:
 			byte bytes[] = new byte[len];
 			inputStream.readFully(bytes);
-			return bytes;
+			message._payload = bytes;
+			break;
 
 		case SHORT_ARRAY:
 			short shorts[] = new short[len];
 			for (int i = 0; i < len; i++) {
 				shorts[i] = inputStream.readShort();
 			}
-			return shorts;
+			message._payload = shorts;
+			break;
 
 		case INT_ARRAY:
 			int ints[] = new int[len];
 			for (int i = 0; i < len; i++) {
 				ints[i] = inputStream.readInt();
 			}
-			return ints;
+			message._payload = ints;
+			break;
 
 		case LONG_ARRAY:
 			long longs[] = new long[len];
 			for (int i = 0; i < len; i++) {
 				longs[i] = inputStream.readLong();
 			}
-			return longs;
+			message._payload = longs;
+			break;
 
 		case FLOAT_ARRAY:
 			float floats[] = new float[len];
 			for (int i = 0; i < len; i++) {
 				floats[i] = inputStream.readFloat();
 			}
-			return floats;
+			message._payload = floats;
+			break;
 
 		case DOUBLE_ARRAY:
 			double doubles[] = new double[len];
 			for (int i = 0; i < len; i++) {
 				doubles[i] = inputStream.readDouble();
 			}
-			return doubles;
+			message._payload = doubles;
+			break;
 
 		case STRING:
 			char chars[] = new char[len];
 			for (int i = 0; i < len; i++) {
 				chars[i] = inputStream.readChar();
 			}
-			return new String(chars);
+			message._payload = new String(chars);
+			break;
 
 		// treat a string array as a serialized object
 		case STRING_ARRAY:
-		case SERIALIZED_OBJECT:
-			bytes = new byte[len];
-			inputStream.readFully(bytes);
-			Object object = SerialIO.serialRead(bytes);
-			return object;
-			
-		case STREAMED:
-			bytes = new byte[len];
-			inputStream.readFully(bytes);
-			return StreamedInputPayload.fromBytes(bytes);
-			
-		case NO_DATA:
-			return null;
-		}
+			message._serializedBytes = new byte[len];
+			inputStream.readFully(message._serializedBytes);
+			Object object = SerialIO.serialRead(message._serializedBytes);
+			message._payload = object;
+			break;
 
-		return null;
+		case SERIALIZED_OBJECT:
+			message._serializedBytes = new byte[len];
+			inputStream.readFully(message._serializedBytes);
+			object = SerialIO.serialRead(message._serializedBytes);
+			message._payload = object;
+			break;
+
+		case STREAMED:
+			message._serializedBytes = new byte[len];
+			inputStream.readFully(message._serializedBytes);
+			message._payload = StreamedInputPayload.fromBytes(message._serializedBytes);
+			break;
+
+		case NO_DATA:
+			message._payload = null;
+			break;
+		}
 	}
 
 	/**
@@ -595,92 +647,109 @@ public class Message {
 	 */
 	protected void writeMessage(DataOutputStream outputStream) throws IOException {
 
-//		Log.getInstance().info("Writing message type: " + _header.getMessageTypeName() + " source: "
-//				+ idString(_header.getSourceId()) + "  destination: " + idString(_header.getDestinationId()));
+		// Log.getInstance().info("Writing message type: " +
+		// _header.getMessageTypeName() + " source: "
+		// + idString(_header.getSourceId()) + " destination: " +
+		// idString(_header.getDestinationId()));
 		_header.writeHeader(outputStream);
 		if ((getDataType() != DataType.NO_DATA) && (getDataLength() > 0) && (_payload != null)) {
 			writePayload(outputStream);
 		}
-		
+
 		outputStream.flush();
 	}
 
-
 	// write the payload to an output stream
 	private void writePayload(DataOutputStream outputStream) throws IOException {
-		switch (getDataType()) {
-		case BYTE_ARRAY:
-		case STRING_ARRAY:
-		case SERIALIZED_OBJECT:
-			outputStream.write((byte[]) _payload);
-			break;
+		try {
+			switch (getDataType()) {
+			case BYTE_ARRAY:
+				outputStream.write((byte[]) _payload);
+				break;
 
-		case SHORT_ARRAY:
-			short shorts[] = (short[]) _payload;
-			for (int i = 0; i < getDataLength(); i++) {
-				outputStream.writeShort(shorts[i]);
-			}
-			break;
+			case SHORT_ARRAY:
+				short shorts[] = (short[]) _payload;
+				for (int i = 0; i < getDataLength(); i++) {
+					outputStream.writeShort(shorts[i]);
+				}
+				break;
 
-		case INT_ARRAY:
-			int ints[] = (int[]) _payload;
-			for (int i = 0; i < getDataLength(); i++) {
-				outputStream.writeInt(ints[i]);
-			}
-			break;
+			case INT_ARRAY:
+				int ints[] = (int[]) _payload;
+				for (int i = 0; i < getDataLength(); i++) {
+					outputStream.writeInt(ints[i]);
+				}
+				break;
 
-		case LONG_ARRAY:
-			long longs[] = (long[]) _payload;
-			for (int i = 0; i < getDataLength(); i++) {
-				outputStream.writeLong(longs[i]);
-			}
-			break;
+			case LONG_ARRAY:
+				long longs[] = (long[]) _payload;
+				for (int i = 0; i < getDataLength(); i++) {
+					outputStream.writeLong(longs[i]);
+				}
+				break;
 
-		case FLOAT_ARRAY:
-			float floats[] = (float[]) _payload;
-			for (int i = 0; i < getDataLength(); i++) {
-				outputStream.writeFloat(floats[i]);
-			}
-			break;
+			case FLOAT_ARRAY:
+				float floats[] = (float[]) _payload;
+				for (int i = 0; i < getDataLength(); i++) {
+					outputStream.writeFloat(floats[i]);
+				}
+				break;
 
-		case DOUBLE_ARRAY:
-			double doubles[] = (double[]) _payload;
-			for (int i = 0; i < getDataLength(); i++) {
-				outputStream.writeDouble(doubles[i]);
-			}
-			break;
+			case DOUBLE_ARRAY:
+				double doubles[] = (double[]) _payload;
+				for (int i = 0; i < getDataLength(); i++) {
+					outputStream.writeDouble(doubles[i]);
+				}
+				break;
 
-		case STRING:
-			String str = (String) _payload;
-			outputStream.writeChars(str);
-			break;
-			
-		case STREAMED:
-			break;
-			
-		case NO_DATA:
-			break;
-		} // end switch
+			case STRING:
+				String str = (String) _payload;
+				outputStream.writeChars(str);
+				break;
 
+			case STRING_ARRAY:
+				outputStream.write(_serializedBytes);
+				break;
+
+			case SERIALIZED_OBJECT:
+				outputStream.write(_serializedBytes);
+				break;
+
+			case STREAMED:
+				outputStream.write(_serializedBytes);
+				break;
+
+			case NO_DATA:
+				break;
+			} // end switch
+		} catch (SocketException e) {
+
+			String ms = "Socket exception when writing a mesage payload." + 
+			"\nThe message data type is " + getDataType();
+			System.err.println(ms);
+			e.printStackTrace();
+		}
 	}
-	
+
 	/**
 	 * Farm out a message for a processor
-	 * @param processor the processor
+	 * 
+	 * @param processor
+	 *            the processor
 	 */
 	public void process(IMessageProcessor processor) {
-		
+
 		if (processor == null) {
 			return;
 		}
-		
+
 		if (!processor.accept(this)) {
 			return;
 		}
-		
-		//first peek at message
+
+		// first peek at message
 		processor.peekAtMessage(this);
-		
+
 		switch (getMessageType()) {
 		case LOGOUT:
 			processor.processLogoutMessage(this);
@@ -705,7 +774,7 @@ public class Message {
 		case SERVERLOG:
 			processor.processServerLogMessage(this);
 			break;
-			
+
 		case SUBSCRIBE:
 			processor.processSubscribeMessage(this);
 			break;

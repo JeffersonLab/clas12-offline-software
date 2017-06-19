@@ -61,7 +61,13 @@ public abstract class Messenger implements IMessenger {
 	 */
 	@Override
 	public void writeMessage(Message message) throws IOException {
-		message.writeMessage(getDataOutputStream());
+		try {
+			message.writeMessage(getDataOutputStream());
+		} catch (Exception e) {
+			System.err.println("Exception in write Message Messenger class " + getClass().getName());
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
@@ -73,6 +79,5 @@ public abstract class Messenger implements IMessenger {
 	public Message readMessage() throws SocketException, EOFException, IOException {
 		return Message.readMessage(getDataInputStream());
 	}
-	
 	
 }

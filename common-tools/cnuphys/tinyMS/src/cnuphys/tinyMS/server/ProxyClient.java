@@ -1,5 +1,7 @@
 package cnuphys.tinyMS.server;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 /**
  * A ProxyClient is actually server side object. There is one of these objects
  * maintained by the server for each actual client. It holds the inbound and 
@@ -122,8 +124,8 @@ public class ProxyClient extends Messenger {
 		// where server will place message for transmission
 		_outboundQueue = new MessageQueue(100, 20);
 
-		_inputStream = new DataInputStream(_socket.getInputStream());
-		_outputStream = new DataOutputStream(_socket.getOutputStream());
+		_inputStream = new DataInputStream(new BufferedInputStream(_socket.getInputStream()));
+		_outputStream = new DataOutputStream(new BufferedOutputStream(_socket.getOutputStream()));
 
 		// start a timer which will kill the client if
 		// not verified

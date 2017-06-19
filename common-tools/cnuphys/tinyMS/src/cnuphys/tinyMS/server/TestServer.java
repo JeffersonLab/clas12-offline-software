@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import cnuphys.tinyMS.client.Client;
+import cnuphys.tinyMS.client.DefaultClient;
 import cnuphys.tinyMS.client.ClientSupport;
 import cnuphys.tinyMS.client.TestClient;
 import cnuphys.tinyMS.common.BadSocketException;
@@ -25,13 +25,13 @@ public class TestServer {
 
 			// try to find a local server
 			try {
-				final Client client1 = ClientSupport.findLocalServer("client 1");
-				final Client client2 = ClientSupport.findLocalServer("client 2");
-				final Client client3 = ClientSupport.findLocalServer("client 3");
-				final TestClient client4 = new TestClient();
-				final TestClient client5 = new TestClient();
-				testShutdown(server, client2);
-				testLogout(server, client3);
+				final DefaultClient client1 = ClientSupport.findLocalServer("client 1");
+				final DefaultClient client2 = ClientSupport.findLocalServer("client 2");
+				final DefaultClient client3 = ClientSupport.findLocalServer("client 3");
+				final TestClient client4 = new TestClient(false);
+				final TestClient client5 = new TestClient(true);
+//				testShutdown(server, client2);
+//				testLogout(server, client3);
 			}
 			catch (BadSocketException e) {
 				e.printStackTrace();
@@ -46,7 +46,7 @@ public class TestServer {
 
 	}
 	
-	private static void testShutdown(TinyMessageServer server, Client client) {
+	private static void testShutdown(TinyMessageServer server, DefaultClient client) {
 		TimerTask task = new TimerTask() {
 
 			@Override
@@ -67,7 +67,7 @@ public class TestServer {
 	}
 
 	
-	private static void testLogout(TinyMessageServer server, Client client) {
+	private static void testLogout(TinyMessageServer server, DefaultClient client) {
 		TimerTask task = new TimerTask() {
 
 			@Override

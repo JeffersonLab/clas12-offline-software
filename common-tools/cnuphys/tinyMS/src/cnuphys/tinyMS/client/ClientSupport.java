@@ -23,7 +23,7 @@ public class ClientSupport {
 	 * @return a client connecting to a TinyMessageServer or <code>null</code>
 	 * @throws BadSocketException 
 	 */
-	public static Client findLocalServer(String userName) throws BadSocketException {
+	public static DefaultClient findLocalServer(String userName) throws BadSocketException {
 		// tries to find a TinyMessageServer on the local machine
 		return findServer(userName, null, false);
 	}
@@ -40,7 +40,7 @@ public class ClientSupport {
 	 * @return a client connecting to a TinyMessageServer or <code>null</code>
 	 * @throws BadSocketException 
 	 */
-	public static Client findOrStartLocalServer(String userName) throws BadSocketException {
+	public static DefaultClient findOrStartLocalServer(String userName) throws BadSocketException {
 		// tries to find a TinyMessageServer on the local machine
 		// if can't fine one, it will start one
 		return findServer(userName, null, true);
@@ -61,7 +61,7 @@ public class ClientSupport {
 	 * @return a client connecting to a TinyMessageServer or <code>null</code>
 	 * @throws BadSocketException 
 	 */
-	public static Client findServer(String userName, String hostName) throws BadSocketException {
+	public static DefaultClient findServer(String userName, String hostName) throws BadSocketException {
 		return findServer(userName, hostName, false);
 	}
 
@@ -85,7 +85,7 @@ public class ClientSupport {
 	 * @return a client connecting to a TinyMessageServer or <code>null</code>
 	 * @throws BadSocketException 
 	 */
-	private static Client findServer(String clientName, String hostName, boolean startServer) throws BadSocketException {
+	private static DefaultClient findServer(String clientName, String hostName, boolean startServer) throws BadSocketException {
 		// tries to find a TinyMessageServer on the local machine
 
 		boolean local = (hostName == null);
@@ -108,7 +108,7 @@ public class ClientSupport {
 		// return the first one we find
 		Socket socket = getSocket(hostName, -1);
 		if (socket != null) {
-			return new Client(clientName, socket);
+			return new DefaultClient(clientName, socket);
 		}
 
 		// if here no server found. Might try to start one.
@@ -183,7 +183,7 @@ public class ClientSupport {
 	 * @param level the log level of the message
 	 * @param logStr the string to be logged
 	 */
-	public static void serverLog(Client client, Log.Level level, String logStr) {
+	public static void serverLog(DefaultClient client, Log.Level level, String logStr) {
 	    if (client.isClosed()) {
 	    	System.err.println("client is closed.");
 	    	return;
