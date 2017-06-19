@@ -25,7 +25,7 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
-	private static String VERSION = "1.02";
+	private static String VERSION = "1.03";
 	
 	private boolean USE_BIG_TORUS = true;
 	
@@ -490,8 +490,72 @@ public class MagneticFields {
 
 	}
 	
+	private Solenoid getSolenoid(String baseName) {
+		
+		if (_solenoid != null) {
+			return _solenoid;
+		}
+		
+		Solenoid solenoid = null;
+		// ditto for solenoid
+		if (_solenoidFullPath != null) {
+			System.out.println("Will try to read solenoid from ["
+					+ _solenoidFullPath + "]");
+			File file = new File(_solenoidFullPath);
+			if (file.exists()) {
+				try {
+					solenoid = Solenoid.fromBinaryFile(file);
+					System.out.println(
+							"Read solenoid from: " + _solenoidFullPath);
+				} catch (FileNotFoundException e) {
+					System.err.println("SOLENIOD map not found in ["
+							+ _solenoidFullPath + "]");
+				}
+			}
+		}
+		
+		if (solenoid == null) {
+			_solenoidFullPath = "../../../data/solenoid-srr.dat";
+			System.out.println("Will try to read solenoid from ["
+					+ _solenoidFullPath + "]");
+			File file = new File(_solenoidFullPath);
+			if (file.exists()) {
+				try {
+					solenoid = Solenoid.fromBinaryFile(file);
+					System.out.println(
+							"Read solenoid from: " + _solenoidFullPath);
+				} catch (FileNotFoundException e) {
+					System.err.println("SOLENIOD map not found in ["
+							+ _solenoidFullPath + "]");
+				}
+			}
+		}
+		if (solenoid == null) {
+			_solenoidFullPath = "data/solenoid-srr.dat";
+			System.out.println("Will try to read solenoid from ["
+					+ _solenoidFullPath + "]");
+			File file = new File(_solenoidFullPath);
+			if (file.exists()) {
+				try {
+					solenoid = Solenoid.fromBinaryFile(file);
+					System.out.println(
+							"Read solenoid from: " + _solenoidFullPath);
+				} catch (FileNotFoundException e) {
+					System.err.println("SOLENIOD map not found in ["
+							+ _solenoidFullPath + "]");
+				}
+			}
+		}
+		
+		return solenoid;
+	}
+		
 	//try to get a torus, big or small
 	private Torus getTorus(String baseName) {
+		
+		if (_torus != null) {
+			return _torus;
+		}
 		
 		System.err.println("Attempting to use the " + (USE_BIG_TORUS ? "big" : "small") + " torus map.");
 		
@@ -563,6 +627,30 @@ public class MagneticFields {
 		
 		return torus;
 	}
+	
+	/**
+	 * Tries to load the magnetic fields from fieldmaps
+	 */
+	public void initializeMagneticFields(String fullTorusPath, String fullSolenoidPath) {
+		
+		if (_initialized) {
+			return;
+		}
+		_initialized = true;
+		
+		System.out.println("===========================================");
+		System.out.println("======  Initializing Magnetic Fields  =====");
+		System.out.println("===========================================");
+		
+		
+		_torusFullPath = fullTorusPath;
+		_solenoidFullPath = fullSolenoidPath;
+		
+		_torus = getTorus("");
+		_solenoid = getSolenoid("");
+
+		finalInit();
+	}
 
 	/**
 	 * Tries to load the magnetic fields from fieldmaps
@@ -577,7 +665,6 @@ public class MagneticFields {
 		System.out.println("===========================================");
 		System.out.println("======  Initializing Magnetic Fields  =====");
 		System.out.println("===========================================");
-		// can always make a mac test field and uniform
 		
 		if (USE_BIG_TORUS) {
 			_torus = getTorus("clas12_torus_fieldmap_binary.dat");
@@ -585,59 +672,13 @@ public class MagneticFields {
 		else {
 			_torus = getTorus("clas12_small_torus.dat");
 		}
-
-		// ditto for solenoid
-		if (_solenoidFullPath != null) {
-			System.out.println("Will try to read solenoid from ["
-					+ _solenoidFullPath + "]");
-			File file = new File(_solenoidFullPath);
-			if (file.exists()) {
-				try {
-					_solenoid = Solenoid.fromBinaryFile(file);
-					System.out.println(
-							"Read solenoid from: " + _solenoidFullPath);
-				} catch (FileNotFoundException e) {
-					System.err.println("SOLENIOD map not found in ["
-							+ _solenoidFullPath + "]");
-				}
-			}
-		}
 		
-		if (_solenoid == null) {
-			_solenoidFullPath = "../../../data/solenoid-srr.dat";
-			System.out.println("Will try to read solenoid from ["
-					+ _solenoidFullPath + "]");
-			File file = new File(_solenoidFullPath);
-			if (file.exists()) {
-				try {
-					_solenoid = Solenoid.fromBinaryFile(file);
-					System.out.println(
-							"Read solenoid from: " + _solenoidFullPath);
-				} catch (FileNotFoundException e) {
-					System.err.println("SOLENIOD map not found in ["
-							+ _solenoidFullPath + "]");
-				}
-			}
-		}
-		if (_solenoid == null) {
-			_solenoidFullPath = "data/solenoid-srr.dat";
-			System.out.println("Will try to read solenoid from ["
-					+ _solenoidFullPath + "]");
-			File file = new File(_solenoidFullPath);
-			if (file.exists()) {
-				try {
-					_solenoid = Solenoid.fromBinaryFile(file);
-					System.out.println(
-							"Read solenoid from: " + _solenoidFullPath);
-				} catch (FileNotFoundException e) {
-					System.err.println("SOLENIOD map not found in ["
-							+ _solenoidFullPath + "]");
-				}
-			}
-		}
+		_solenoid = getSolenoid("solenoid-srr.dat");
 
-
-
+		finalInit();
+	}
+	
+	private void finalInit() {
 		_compositeField = new CompositeField();
 		_rotatedCompositeField = new RotatedCompositeField();
 
@@ -653,9 +694,6 @@ public class MagneticFields {
 			_rotatedCompositeField.add(_solenoid);
 		}
 		
-
-		float result[] = new float[3];
-		_compositeField.field(27.16f, 0.f, 65.71f, result);
 
 		// set the default active field
 		_activeField = null;
@@ -1091,6 +1129,13 @@ public class MagneticFields {
 		final JFrame testFrame = new JFrame("Magnetic Field");
 		
 		final MagneticFields mf = MagneticFields.getInstance();
+		
+		//test explicit path load
+//		String tpath = "/Users/heddle/git/clas12-offline-software/common-tools/cnuphys/ced/data/clas12_torus_fieldmap_binary.dat";
+//		String spath = "/Users/heddle/git/clas12-offline-software/common-tools/cnuphys/ced/data/solenoid-srr.dat";
+//		
+//		mf.initializeMagneticFields(tpath, spath);
+		
 		mf.initializeMagneticFields();
 
 		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
