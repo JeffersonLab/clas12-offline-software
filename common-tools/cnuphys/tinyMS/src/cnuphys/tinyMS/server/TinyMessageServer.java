@@ -343,6 +343,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 
 	/**
 	 * Shutdown the server. As a courtesy, notify all the clients.
+	 * @throws IOException 
 	 */
 	public void shutdown() throws IOException {
 
@@ -528,7 +529,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	/**
 	 * Process a handshake message. This is used to verify the client.
 	 * 
-	 * @message the handshake message
+	 * @param message the handshake message
 	 */
 	@Override
 	public void processHandshakeMessage(Message message) {
