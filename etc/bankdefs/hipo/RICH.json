@@ -5,8 +5,25 @@
     "group": 1801,
     "info": "digitized bank Ring Imaging CHerenkov",
     "items": [
-       {"name":"sector",      "id":1, "type":"int8",  "info":"sector of RICH"},
-       {"name":"pmt",         "id":2, "type":"int8",  "info":"pmt id of RICH"}
+       {"name":"sector",       "id":1, "type":"int8",  "info":"sector of RICH"},
+       {"name":"pmt",          "id":2, "type":"int16",  "info":"pmt id of RICH"},
+       {"name":"pixel",        "id":3, "type":"int16", "info":"pixel id of RICH"},
+       {"name":"order",        "id":4, "type":"int8",  "info":"order of (0 - ADC)"},       
+       {"name":"ADC",          "id":5, "type":"int32", "info":"ADC value"},
+       {"name":"time",         "id":6, "type":"float", "info":"Time"},
+       {"name":"ped",          "id":7, "type":"int16", "info":"Pedestal"}
+    ]
+  },
+   {
+    "bank": "RICH::tdc",
+    "group": 1802,
+    "info": "digitized bank Ring Imaging CHerenkov",
+    "items": [
+       {"name":"sector",     "id":1, "type":"int8",  "info":"sector of RICH"},
+       {"name":"pmt",        "id":2, "type":"int16",  "info":"pmt id of RICH"},
+       {"name":"pixel",      "id":3, "type":"int16", "info":"pixel id of RICH"},
+       {"name":"TDC1",       "id":4, "type":"int32",  "info":"TDC leading edge"},
+       {"name":"TDC2",       "id":5, "type":"int32", "info":"TDC trailing edge"}
     ]
   }
 ]
