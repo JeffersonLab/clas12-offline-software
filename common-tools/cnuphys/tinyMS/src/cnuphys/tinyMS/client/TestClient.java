@@ -34,21 +34,21 @@ public class TestClient extends DefaultClient {
 	 */
 	@Override
 	public void initialize() {
-		System.err.println("TestClient initialization");
+		System.out.println("TestClient initialization");
 		subscribe("Scalars");
 		subscribe("Triggers");
 		subscribe("Alarms");
 
 		//If I'm a sender, run some tests
 		if (_sender) {
-			testIntArray();
-			testSerializedObject();
-			testStringArray();
-			testDoubleArray();
-			testString();
-			testByteArray();
-			testStreamedMessage();
-//			stressTest();
+//			testIntArray();
+//			testSerializedObject();
+//			testStringArray();
+//			testDoubleArray();
+//			testString();
+//			testByteArray();
+//			testStreamedMessage();
+			stressTest();
 		}
 	}
 	
@@ -60,9 +60,17 @@ public class TestClient extends DefaultClient {
 			@Override
 			public void run() {
 				int count = 1;
-				int len = 1000;
+				int len = 100;
+				int maxCount = 1000000;
 				
-				while (count <= 250000) {
+				System.out.println("Start stress test...");
+				while (count <= maxCount) {
+					
+					if ((count % 1000) == 0) {
+						System.out.println("Count: " + count + " of " + maxCount);
+						System.gc();
+					}
+					
 					long larray[] = new long[len];
 					
 					larray[0] = count;
@@ -81,6 +89,8 @@ public class TestClient extends DefaultClient {
 
 					count++;
 				}
+				System.out.println("Done.");
+
 			}
 
 		};
@@ -121,7 +131,7 @@ public class TestClient extends DefaultClient {
 		double array[] = { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9 };
 		message.setPayload(array);
 
-		System.err.println("Client: [" + getClientName() + "]  sending test double array");
+		System.out.println("Client: [" + getClientName() + "]  sending test double array");
 		send(message);
 	}
 
@@ -132,7 +142,7 @@ public class TestClient extends DefaultClient {
 		byte array[] = { 2, 4, 6, 8, 10, 12 };
 		message.setPayload(array);
 
-		System.err.println("Client: [" + getClientName() + "]  sending test byte array");
+		System.out.println("Client: [" + getClientName() + "]  sending test byte array");
 		send(message);
 	}
 
@@ -143,7 +153,7 @@ public class TestClient extends DefaultClient {
 
 		message.setPayload(obj);
 
-		System.err.println("Client: [" + getClientName() + "]  sending test serialized object");
+		System.out.println("Client: [" + getClientName() + "]  sending test serialized object");
 		send(message);
 	}
 
@@ -156,7 +166,7 @@ public class TestClient extends DefaultClient {
 			so.writeByte(3);
 			so.writeDouble(1234.56789);
 			so.writeLong(1234567);
-			System.err.println("Client: [" + getClientName() + "]  sending test streamed object");
+			System.out.println("Client: [" + getClientName() + "]  sending test streamed object");
 
 			message.setPayload(so);
 			send(message);
@@ -175,11 +185,11 @@ public class TestClient extends DefaultClient {
 
 			case BYTE_ARRAY:
 				byte[] barray = message.getByteArray();
-				System.err.print("\nClient: " + getClientName() + " got byte array [");
+				System.out.print("\nClient: " + getClientName() + " got byte array [");
 				for (byte b : barray) {
-					System.err.print(b + " ");
+					System.out.print(b + " ");
 				}
-				System.err.println("]");
+				System.out.println("]");
 				break;
 
 			case SHORT_ARRAY:
@@ -187,18 +197,23 @@ public class TestClient extends DefaultClient {
 
 			case INT_ARRAY:
 				int[] iarray = message.getIntArray();
-				System.err.print("\nClient: " + getClientName() + " got int array [");
+				System.out.print("\nClient: " + getClientName() + " got int array [");
 				for (int i : iarray) {
-					System.err.print(i + " ");
+					System.out.print(i + " ");
 				}
-				System.err.println("]");
+				System.out.println("]");
 				break;
 
 			case LONG_ARRAY:
 				long[] larray = message.getLongArray();
 				int len = larray.length;
-				System.err.print("\nClient: " + getClientName() + " got long array of len = " + len + 
-						" with 1st elem = " + larray[0] + " last elem = " + larray[len-1]);
+				
+				if (larray[0] != larray[len-1]) {
+					System.out.println("Bad array, 1st = " + larray[0] + "  last = " + larray[len-1]);
+					System.exit(1);
+				}
+//				System.out.print("\nClient: " + getClientName() + " got long array of len = " + len + 
+//						" with 1st elem = " + larray[0] + " last elem = " + larray[len-1]);
 				break;
 
 			case FLOAT_ARRAY:
@@ -206,40 +221,40 @@ public class TestClient extends DefaultClient {
 
 			case DOUBLE_ARRAY:
 				double[] darray = message.getDoubleArray();
-				System.err.print("\nClient: " + getClientName() + " got double array [");
+				System.out.print("\nClient: " + getClientName() + " got double array [");
 				for (double i : darray) {
-					System.err.print(i + " ");
+					System.out.print(i + " ");
 				}
-				System.err.println("]");
+				System.out.println("]");
 				break;
 
 			case STRING_ARRAY:
 				String[] sarray = message.getStringArray();
-				System.err.print("\nClient: " + getClientName() + " got string array [");
+				System.out.print("\nClient: " + getClientName() + " got string array [");
 				for (String s : sarray) {
-					System.err.print("\"" + s + "\" ");
+					System.out.print("\"" + s + "\" ");
 				}
-				System.err.println("]");
+				System.out.println("]");
 				break;
 
 			case STRING:
 				String s = message.getString();
-				System.err.print("\nClient: " + getClientName() + " got string \"" + s + "\"");
+				System.out.print("\nClient: " + getClientName() + " got string \"" + s + "\"");
 				break;
 
 			case SERIALIZED_OBJECT:
-				System.err.print("\nClient: " + getClientName() + " got serialized object\n");
+				System.out.print("\nClient: " + getClientName() + " got serialized object\n");
 				Object obj = message.getSerializedObject();
-				System.err.println(obj.toString());
+				System.out.println(obj.toString());
 				break;
 
 			case STREAMED:
-				System.err.print("\nClient: " + getClientName() + " got streamed object\n");
+				System.out.print("\nClient: " + getClientName() + " got streamed object\n");
 				StreamedInputPayload si = message.getStreamedInputPayload();
 				try {
-					System.err.println("Got byte: " + si.readByte());
-					System.err.println("Got double: " + si.readDouble());
-					System.err.println("Got long: " + si.readLong());
+					System.out.println("Got byte: " + si.readByte());
+					System.out.println("Got double: " + si.readDouble());
+					System.out.println("Got long: " + si.readLong());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

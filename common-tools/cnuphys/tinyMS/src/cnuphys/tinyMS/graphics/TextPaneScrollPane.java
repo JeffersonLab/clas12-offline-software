@@ -313,8 +313,7 @@ public class TextPaneScrollPane extends JScrollPane {
 			textPane.setCaretPosition(Math.max(0, document.getLength() - 1));
 		}
 		catch (Exception e) {
-			// System.err.println("TextPaneScrollPane exception " +
-			// e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

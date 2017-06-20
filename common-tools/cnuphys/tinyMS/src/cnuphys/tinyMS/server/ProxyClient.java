@@ -46,6 +46,9 @@ public class ProxyClient extends Messenger {
     /** number of messages arriving at server */
 	private long _messageCount = 0;
 	
+	/** the remote client's local port on the client machine */
+	private int _localPort;
+	
 	/** list of topics the client is subscribed to */
 	private Vector<String> _subscriptions = new Vector<String>();
 
@@ -287,11 +290,11 @@ public class ProxyClient extends Messenger {
 		// try to wait for outbound queue to flush
 		for (int i = 0; i < 5; i++) {
 			if (_outboundQueue.isEmpty()) {
-				System.err.println("Outbound queue for proxy is empty");
+				System.out.println("Outbound queue for proxy is empty");
 				break;
 			}
 			else {
-				System.err.println("Outbound queue for proxy not empty");
+				System.out.println("Outbound queue for proxy not empty");
 				try {
 					Thread.sleep(1000);
 				}
@@ -304,7 +307,7 @@ public class ProxyClient extends Messenger {
 		_reader.stopReader();
 		_writer.stopWriter();
 		
-		System.err.println("** CLOSING PROXYCLIENT STREAMS");
+		System.out.println("** CLOSING PROXYCLIENT STREAMS");
 		_inputStream.close();
 		_outputStream.close();
 		_socket.close();
@@ -512,6 +515,21 @@ public class ProxyClient extends Messenger {
 		_hostName = (name != null) ? name : "???";
 	}
 
+	/**
+	 * Set the local port of the remote client
+	 * @param localPort the local port
+	 */
+	public void setLocalPort(int localPort) {
+		_localPort = localPort;
+	}
+	
+	/**
+	 * Gt the local port of the remote client
+	 * @return localPort the local port
+	 */
+	public int getLocalPort() {
+		return _localPort;
+	}
 
 	/**
 	 * Convert a list of ProxyClients into an array

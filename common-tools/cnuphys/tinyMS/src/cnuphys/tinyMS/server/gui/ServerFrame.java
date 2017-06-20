@@ -293,9 +293,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	private void shutDown() {
 		if (_server != null) {
 			try {
-				System.err.println("\n===========================================");
-				System.err.println("***** Server is shutting down from the server GUI. *****");
-				System.err.println("\n===========================================");
+				System.out.println("\n===========================================");
+				System.out.println("***** Server is shutting down from the server GUI. *****");
+				System.out.println("\n===========================================");
 				_server.shutdown();
 			}
 			catch (IOException e) {
@@ -362,7 +362,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		
 		if (_server.isShutDown()) {
 			_timer.cancel();
-			System.err.println("Application GUI (Server Frame) detected server shutdown.");
+			System.out.println("Application GUI (Server Frame) detected server shutdown.");
 		}
 		
 		int n = 2;
@@ -413,7 +413,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 			_table.fireTableDataChanged();
 		}
 		else {
-			System.err.println("DID NOT FIRE TABLE DATA CHANGE (Frame)");
+			System.out.println("DID NOT FIRE TABLE DATA CHANGE (Frame)");
 		}
 	}
 	

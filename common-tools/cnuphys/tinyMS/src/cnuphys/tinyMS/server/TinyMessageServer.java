@@ -18,7 +18,7 @@ import cnuphys.tinyMS.table.ConnectionTable;
 
 public class TinyMessageServer implements IMessageProcessor, Runnable {
 	
-	private final String _version = "0.50";
+	private final String _version = "0.51";
 	
 	// the log
 	private Log _log = Log.getInstance();
@@ -81,7 +81,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			_serverSocket = startServer(port);
 		}
 		catch (BindException e) {
-			System.err.println("Port " + port + " appears to be busy.");
+			System.out.println("Port " + port + " appears to be busy.");
 		}
 
 		initialize();
@@ -107,7 +107,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				}
 			}
 			catch (BindException e) {
-				System.err.println("Port " + DEFAULT_PORTS[i] + " appears to be busy.");
+				System.out.println("Port " + DEFAULT_PORTS[i] + " appears to be busy.");
 			}
 		}
 
@@ -161,9 +161,9 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			@Override
 			public void run() {
 				_log.warning("Server is shutting down");
-				System.err.println("\n===========================================");
-				System.err.println("***** Server is shutting down from kill thread. *****");
-				System.err.println("\n===========================================");
+				System.out.println("\n===========================================");
+				System.out.println("***** Server is shutting down from kill thread. *****");
+				System.out.println("\n===========================================");
 				try {
 					shutdown();
 				}
@@ -190,11 +190,11 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		try {
 			serverSocket = new ServerSocket(port, 50, InetAddress.getLocalHost());
 			if (serverSocket != null) {
-				System.err.println("============================================");
-				System.err.println("== TinyMessageServer started ");
-				System.err.println("== Server name: " + _name);
-				System.err.println("== Server port: " + port);
-				System.err.println("============================================");
+				System.out.println("============================================");
+				System.out.println("== TinyMessageServer started ");
+				System.out.println("== Server name: " + _name);
+				System.out.println("== Server port: " + port);
+				System.out.println("============================================");
 				_port = port;
 			}
 		}
@@ -348,13 +348,13 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	public void shutdown() throws IOException {
 
 		if (_shutDown) {
-			System.err.println("Server already shut down");
+			System.out.println("Server already shut down");
 			return;
 		}
 		
-		System.err.println("\n===========================================");
-		System.err.println("***** Server is shutting down from shutdown method. *****");
-		System.err.println("\n===========================================");
+		System.out.println("\n===========================================");
+		System.out.println("***** Server is shutting down from shutdown method. *****");
+		System.out.println("\n===========================================");
 
 		_shutDown = true;
 
@@ -379,7 +379,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			_serverSocket.close();
 		}
 
-		System.err.println("Server shutdown");
+		System.out.println("Server shutdown");
 	}
 
 	/**
@@ -550,6 +550,9 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				sender.setUserName(env[1]);
 				sender.setOSName(env[2]);
 				sender.setHostName(env[3]);
+				
+				int localPort = Integer.parseInt(env[4]);
+				sender.setLocalPort(localPort);
 
 				_log.info("*********");
 				_log.info("CLIENT ID: " + sender.getId());
@@ -557,6 +560,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				_log.info("USER NAME: " + sender.getUserName());
 				_log.info("OS NAME: " + sender.getOSName());
 				_log.info("HOST NAME: " + sender.getHostName());
+				_log.info("LOCAL PORT: " + sender.getLocalPort());
 				fireTableDataChanged();
 			} catch (Exception e) {
 				_log.exception(e);
