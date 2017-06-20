@@ -114,13 +114,13 @@ public class ClientSupport {
 		// if here no server found. Might try to start one.
 		if (local && startServer) {
 			String sname = "Server started by " + clientName;
-			System.err.println("Attempting to start a local server named: " + sname);
+			System.out.println("Attempting to start a local server named: " + sname);
 			try {
 				TinyMessageServer server = new TinyMessageServer(sname);
 				return findServer(clientName, null, false);
 			}
 			catch (IOException e) {
-				System.err.println("Attempt appears to have failed.");
+				System.out.println("Attempt appears to have failed.");
 			}
 		}
 
@@ -164,7 +164,7 @@ public class ClientSupport {
 			try {
 				socket = new Socket(host, tport);
 				if (socket != null) {
-					System.err.println("Found server at " + socket.getInetAddress().getHostAddress() + " on port: "
+					System.out.println("Found server at " + socket.getInetAddress().getHostAddress() + " on port: "
 							+ socket.getPort());
 					return socket;
 				}
@@ -185,7 +185,7 @@ public class ClientSupport {
 	 */
 	public static void serverLog(DefaultClient client, Log.Level level, String logStr) {
 	    if (client.isClosed()) {
-	    	System.err.println("client is closed.");
+	    	System.out.println("client is closed.");
 	    	return;
 	    }
 		Message message = Message.createServerLogMessage(client.getId(), level, logStr);

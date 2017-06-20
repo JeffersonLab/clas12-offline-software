@@ -115,32 +115,36 @@ public class Message {
 		DataType dtype = DataType.NO_DATA;
 
 		_payload = payload;
+		
+		/*
+		 * len is ALWAYS the length in bytes, so must multiply by the size of the atoming type
+		 */
 
 		if (payload == null) {
 		} else if (payload instanceof byte[]) {
 			dtype = DataType.BYTE_ARRAY;
-			// for a byte array, len is the number of elements
+			// for a byte array, len is the length in bytes
 			len = ((byte[]) payload).length;
 		} else if (payload instanceof short[]) {
 			dtype = DataType.SHORT_ARRAY;
 			// for a short array, len is the number of elements
-			len = ((short[]) payload).length;
+			len = 2*((short[]) payload).length;
 		} else if (payload instanceof int[]) {
 			dtype = DataType.INT_ARRAY;
 			// for an int array, len is the number of elements
-			len = ((int[]) payload).length;
+			len = 4*((int[]) payload).length;
 		} else if (payload instanceof long[]) {
 			dtype = DataType.LONG_ARRAY;
 			// for a long array, len is the number of elements
-			len = ((long[]) payload).length;
+			len = 8*((long[]) payload).length;
 		} else if (payload instanceof float[]) {
 			dtype = DataType.FLOAT_ARRAY;
 			// for a float array, len is the number of elements
-			len = ((float[]) payload).length;
+			len = 4*((float[]) payload).length;
 		} else if (payload instanceof double[]) {
 			dtype = DataType.DOUBLE_ARRAY;
 			// for a double array, len is the number of elements
-			len = ((double[]) payload).length;
+			len = 8*((double[]) payload).length;
 		} else if (payload instanceof String) {
 			dtype = DataType.STRING;
 			// for a single string, len is the char length of the string
@@ -153,14 +157,14 @@ public class Message {
 			dtype = DataType.SERIALIZED_OBJECT;
 			_serializedBytes = SerialIO.serialWrite((Serializable) _payload);
 			len = _serializedBytes.length;
-			System.err.println("SENDING SERIALIZED OBJECT bytes len: " + len);
+			System.out.println("SENDING SERIALIZED OBJECT bytes len: " + len);
 		} else if (payload instanceof StreamedOutputPayload) {
 			dtype = DataType.STREAMED;
 			_serializedBytes = ((StreamedOutputPayload) payload).getBytes();
 			len = _serializedBytes.length;
-			System.err.println("SENDING STREAMED OBJECT bytes len: " + len);
+			System.out.println("SENDING STREAMED OBJECT bytes len: " + len);
 		} else {
-			System.err.println("UNKNOWN payload type in Message.setPayload");
+			System.out.println("UNKNOWN payload type in Message.setPayload");
 			_payload = null;
 		}
 
@@ -556,6 +560,12 @@ public class Message {
 	// read the payload
 	private static void readPayload(Message message, DataInputStream inputStream, DataType dtype, int len)
 			throws IOException {
+		
+		/*
+		 * len is ALWAYS the length in bytes, so must divide by the size of the atomic type
+		 * to get the array len
+		 */
+
 		switch (dtype) {
 		case BYTE_ARRAY:
 			byte bytes[] = new byte[len];
@@ -564,6 +574,7 @@ public class Message {
 			break;
 
 		case SHORT_ARRAY:
+			len /= 2;
 			short shorts[] = new short[len];
 			for (int i = 0; i < len; i++) {
 				shorts[i] = inputStream.readShort();
@@ -572,6 +583,7 @@ public class Message {
 			break;
 
 		case INT_ARRAY:
+			len /= 4;
 			int ints[] = new int[len];
 			for (int i = 0; i < len; i++) {
 				ints[i] = inputStream.readInt();
@@ -580,6 +592,7 @@ public class Message {
 			break;
 
 		case LONG_ARRAY:
+			len /= 8;
 			long longs[] = new long[len];
 			for (int i = 0; i < len; i++) {
 				longs[i] = inputStream.readLong();
@@ -588,6 +601,7 @@ public class Message {
 			break;
 
 		case FLOAT_ARRAY:
+			len /= 4;
 			float floats[] = new float[len];
 			for (int i = 0; i < len; i++) {
 				floats[i] = inputStream.readFloat();
@@ -596,6 +610,7 @@ public class Message {
 			break;
 
 		case DOUBLE_ARRAY:
+			len /= 8;
 			double doubles[] = new double[len];
 			for (int i = 0; i < len; i++) {
 				doubles[i] = inputStream.readDouble();
@@ -660,7 +675,13 @@ public class Message {
 	}
 
 	// write the payload to an output stream
+
 	private void writePayload(DataOutputStream outputStream) throws IOException {
+		
+		/*
+		 * getDataLength() is ALWAYS the length in bytes, so must divide by the size of the atomic type
+		 */
+
 		try {
 			switch (getDataType()) {
 			case BYTE_ARRAY:
@@ -669,35 +690,35 @@ public class Message {
 
 			case SHORT_ARRAY:
 				short shorts[] = (short[]) _payload;
-				for (int i = 0; i < getDataLength(); i++) {
+				for (int i = 0; i < getDataLength()/2; i++) {
 					outputStream.writeShort(shorts[i]);
 				}
 				break;
 
 			case INT_ARRAY:
 				int ints[] = (int[]) _payload;
-				for (int i = 0; i < getDataLength(); i++) {
+				for (int i = 0; i < getDataLength()/4; i++) {
 					outputStream.writeInt(ints[i]);
 				}
 				break;
 
 			case LONG_ARRAY:
 				long longs[] = (long[]) _payload;
-				for (int i = 0; i < getDataLength(); i++) {
+				for (int i = 0; i < getDataLength()/8; i++) {
 					outputStream.writeLong(longs[i]);
 				}
 				break;
 
 			case FLOAT_ARRAY:
 				float floats[] = (float[]) _payload;
-				for (int i = 0; i < getDataLength(); i++) {
+				for (int i = 0; i < getDataLength()/4; i++) {
 					outputStream.writeFloat(floats[i]);
 				}
 				break;
 
 			case DOUBLE_ARRAY:
 				double doubles[] = (double[]) _payload;
-				for (int i = 0; i < getDataLength(); i++) {
+				for (int i = 0; i < getDataLength()/8; i++) {
 					outputStream.writeDouble(doubles[i]);
 				}
 				break;
@@ -726,7 +747,7 @@ public class Message {
 
 			String ms = "Socket exception when writing a mesage payload." + 
 			"\nThe message data type is " + getDataType();
-			System.err.println(ms);
+			System.out.println(ms);
 			e.printStackTrace();
 		}
 	}

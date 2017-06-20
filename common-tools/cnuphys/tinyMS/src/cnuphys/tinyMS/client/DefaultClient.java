@@ -109,7 +109,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		}
 		_clientName = (clientName != null) ? clientName : Environment.getInstance().getUserName();
 		_socket = socket;
-
+		
 		// where to place message for transmission
 		_outboundQueue = new MessageQueue(100, 20);
 
@@ -287,10 +287,10 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		// try to wait for the message to be sent
 		for (int i = 0; i < 5; i++) {
 			if (_outboundQueue.isEmpty()) {
-				System.err.println("Outbound queue is empty");
+				System.out.println("Outbound queue is empty");
 				break;
 			} else {
-				System.err.println("Outbound queue not empty");
+				System.out.println("Outbound queue not empty");
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -299,7 +299,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		}
 
 		try {
-			System.err.println("\n------\nlogout method called for " + getClientName() + "\n-----");
+			System.out.println("\n------\nlogout method called for " + getClientName() + "\n-----");
 			close();
 		} catch (IOException e) {
 		}
@@ -319,11 +319,11 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 
 		(new Throwable()).printStackTrace();
 		
-		System.err.println("\n------\nClosing " + getClientName() + "\n-----");
+		System.out.println("\n------\nClosing " + getClientName() + "\n-----");
 		_reader.stopReader();
 		_writer.stopWriter();
 		_socket.close();
-		System.err.println("Socket closed for [Client " + getId() + "]");
+		System.out.println("Socket closed for [Client " + getId() + "]");
 	}
 
 	/**
@@ -392,6 +392,12 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		if (message != null) {
 			if (_outboundQueue != null) {
 				_outboundQueue.queue(message);
+				try {
+					Thread.sleep(1);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -410,7 +416,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	// A logout message should be from client to server
 	@Override
 	public void processLogoutMessage(Message message) {
-		System.err.println("It is rarely a good sign that a logout message arrives at a client.");
+		System.out.println("It is rarely a good sign that a logout message arrives at a client.");
 	}
 
 	// A shutdown message arriving at the client means the server is
@@ -419,7 +425,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	// as part of the server shutting down gracefully.
 	@Override
 	public void processShutdownMessage(Message message) {
-		System.err.println("!!! [" + getClientName() + "] " + " received a SHUTDOWN!");
+		System.out.println("!!! [" + getClientName() + "] " + " received a SHUTDOWN!");
 		try {
 			getOutboundQueue().setAccept(false);
 
@@ -440,16 +446,15 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	// From it I can get my Id.
 	@Override
 	public void processHandshakeMessage(Message message) {
-		System.err.println("Client Received Handshake! [Client " + getId() + "]");
 
 		if (getId() > 0) {
-			System.err.println("Already have a good Id. Should not have gotten a handshake.");
+			System.out.println("Client " + getId() + " already had a good Id. Should not have gotten a handshake.");
 			return;
 		}
 
 		// now I can learn my id
 		int id = message.getClientId();
-		System.err.println("Acquired client ID: " + id);
+		System.out.println("Client Received Handshake. Acquired client ID: " + id);
 		setId(id);
 
 		// add some environmental strings (and my user name)
@@ -476,7 +481,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 			long duration = ct - getLastPing();
 //			String pdstr = String.format("[" + getClientName() + "] " + "Time since last ping: %7.3f ms",
 //					duration / 1.0e6);
-//			System.err.println(pdstr);
+//			System.out.println(pdstr);
 		}
 
 		setLastPing(ct);
@@ -543,7 +548,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	 */
 	@Override
 	public void processServerLogMessage(Message message) {
-		System.err.println("It is rarely a good sign that a logout message arrives at a client.");
+		System.out.println("It is rarely a good sign that a logout message arrives at a client.");
 	}
 
 	/**
@@ -556,7 +561,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	public void processSubscribeMessage(Message message) {
 		String topic = message.getString();
 		topic = topic.trim().toLowerCase();
-		System.err.println(getClientName() + " subscribed to topic: " + topic);
+		System.out.println(getClientName() + " subscribed to topic: " + topic);
 
 		if (!isSubscribed(topic)) {
 			getSubscriptions().add(topic);
@@ -573,7 +578,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	public void processUnsubscribeMessage(Message message) {
 		String topic = message.getString();
 		topic = topic.trim().toLowerCase();
-		System.err.println(getClientName() + " unsubscribed to topic: " + topic);
+		System.out.println(getClientName() + " unsubscribed to topic: " + topic);
 
 		if (isSubscribed(topic)) {
 			getSubscriptions().remove(topic);
@@ -602,7 +607,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	 * @return the environment string array
 	 */
 	private String[] envStringArray() {
-		String array[] = new String[4];
+		String array[] = new String[5];
 
 		Environment env = Environment.getInstance();
 
@@ -610,6 +615,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		array[1] = env.getUserName();
 		array[2] = env.getOsName();
 		array[3] = env.getHostName();
+		array[4] = (_socket != null) ? "" + _socket.getLocalPort() : "0";
 		return array;
 	}
 

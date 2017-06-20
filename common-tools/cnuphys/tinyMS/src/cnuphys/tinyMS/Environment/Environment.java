@@ -93,7 +93,7 @@ public final class Environment {
 		// any png image writers?
 		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
-			System.err.println("no png writer");
+			System.out.println("no png writer");
 		}
 		else {
 			_pngWriter = iterator.next(); // take the first
@@ -344,7 +344,7 @@ public final class Environment {
 		}
 
 		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
-			System.err.println("No installed look and feels");
+			System.out.println("No installed look and feels");
 			return;
 		}
 

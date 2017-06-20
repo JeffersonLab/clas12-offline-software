@@ -108,20 +108,4 @@ public class DoubleFormat {
 
 	}
 
-	/**
-	 * main program for testing.
-	 * 
-	 * @param args
-	 *            command line arguments (ignored.)
-	 */
-	public static void main(String[] args) {
-		double d = 12345.67;
-
-		for (int i = 0; i < 12; i++) {
-			System.err.println(doubleFormat(d, 6, 2));
-			// System.err.println(doubleFormat(-d, 6, 3));
-			d = d / 10;
-		}
-	}
-
 }
