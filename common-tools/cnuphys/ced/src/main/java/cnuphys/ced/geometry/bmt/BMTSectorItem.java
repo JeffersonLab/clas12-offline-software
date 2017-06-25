@@ -1,6 +1,7 @@
 package cnuphys.ced.geometry.bmt;
 
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -32,11 +33,10 @@ public class BMTSectorItem extends DonutItem {
 		{LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.Z, 
 				LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.C};
 	
-	private static final String[] sectorNames = {"A", "B", "C"};
-	private static final double labelAngs[] = {225, 325, 90};
-	private static final double labelRad[] = {255, 250, 230};
-	private static final int xoff[] = {-30, 4, 0};
-
+	private static final String[] sectorNames = {"3", "1", "2"};
+	private static final double labelAngs[] = {225, 315, 90};
+	private static final double labelRad = 238;
+	
 	private static double[][] startAngle = new double[3][6];
 	private static double[][] endAngle = new double[3][6];
 	private static double[][] delAngle = new double[3][6];
@@ -178,11 +178,14 @@ public class BMTSectorItem extends DonutItem {
 			String s = sectorNames[_sector - 1];
 
 			Point2D.Double wp = new Point2D.Double();
-			wp.x = labelRad[sm1]*Math.cos(Math.toRadians(labelAngs[sm1]));
-			wp.y = labelRad[sm1]*Math.sin(Math.toRadians(labelAngs[sm1]));
+			wp.x = labelRad*Math.cos(Math.toRadians(labelAngs[sm1]));
+			wp.y = labelRad*Math.sin(Math.toRadians(labelAngs[sm1]));
 			Point pp = new Point();
 			container.worldToLocal(pp, wp);
-			g.drawString(s, pp.x+xoff[_sector-1], pp.y);
+			
+			FontMetrics fm = container.getComponent().getFontMetrics(Fonts.smallFont);
+			int sw = fm.stringWidth(s);
+			g.drawString(s, pp.x-sw/2, pp.y+fm.getAscent()/2);
 		}
 		
 		g2.setClip(oldClip);
