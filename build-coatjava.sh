@@ -7,7 +7,6 @@ mkdir -p coatjava/lib/clas
 cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
-cp external-dependencies/clas-update-1.0-SNAPSHOT.jar coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
 cp external-dependencies/KPP-Monitoring-1.0.jar coatjava/lib/utils
 cp external-dependencies/KPP-Plots-1.0.jar coatjava/lib/utils
