@@ -20,6 +20,10 @@ script:
   - ./run-unit-tests.sh
   - cd -
   - echo "finished unit tests"
+  - cd validation/advanced-tests/
+  - ./run-advanced-tests.sh
+  - cd -
+  - echo "finished advanced tests"
 
 notifications:
   emails: false
