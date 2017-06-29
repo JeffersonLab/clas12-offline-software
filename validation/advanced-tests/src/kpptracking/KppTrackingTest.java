@@ -19,15 +19,28 @@ public class KppTrackingTest {
 		HipoDataSource reader = new HipoDataSource();
 		reader.open("out_twoTrackEvents_809.hipo");
 
-		int recCount = 0;
+		int twoTrackCount = 0;
 		while(reader.hasEvent()) {
 			DataEvent event = reader.getNextEvent();
-			if(event.hasBank("REC::Particle")) recCount++;
+			if(event.hasBank("REC::Particle")) {
+				DataBank recBank = event.getBank("REC::Particle");
+				boolean foundElectron = false;
+				boolean foundCharged = false;
+				for(int k = 0; k < recBank.rows(); k++) {
+					byte charge = recBank.getByte("charge", k);
+					int pid = recBank.getInt("pid", k);
+					if(foundElectron == false && pid == 11) foundElectron = true;
+					else if(charge != 0) foundCharged = true;
+				}
+				if(foundElectron && foundCharged) twoTrackCount++;
+			}
 		}
 
 		reader.close();
 
-		assertEquals(recCount > 100, true);
+		System.out.println("2 track count: " + twoTrackCount);
+
+		assertEquals(twoTrackCount > 40, true); // this should be much stricter !
 		
 	}
 
