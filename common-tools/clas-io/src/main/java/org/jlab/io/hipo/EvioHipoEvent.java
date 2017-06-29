@@ -171,7 +171,7 @@ public class EvioHipoEvent {
                 hipoADC.setByte("sector", i, (byte) evioBank.getInt("sector",i));
                 hipoADC.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.setShort("component",  i, (short) evioBank.getInt("strip",i));
-                hipoADC.setInt("ADC",  i, (byte) evioBank.getInt("ADC",i));
+                hipoADC.setInt("ADC",  i, (int) evioBank.getInt("ADC",i));
                 hipoADC.setFloat("time",  i, (float) 0);
                 hipoADC.setShort("ped", i, (short) 0);            
             }
@@ -187,7 +187,7 @@ public class EvioHipoEvent {
                 hipoADC.setByte("sector", i, (byte) evioBank.getInt("sector",i));
                 hipoADC.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.setShort("component",  i, (short) evioBank.getInt("strip",i));
-                hipoADC.setInt("ADC",  i, (byte) evioBank.getInt("ADC",i));
+                hipoADC.setInt("ADC",  i, (int) evioBank.getInt("ADC",i));
                 hipoADC.setFloat("time",  i, (float) 0);
                 hipoADC.setShort("ped", i, (short) 0);            
             }
