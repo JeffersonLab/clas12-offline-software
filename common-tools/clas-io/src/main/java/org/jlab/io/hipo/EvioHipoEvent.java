@@ -250,26 +250,26 @@ public class EvioHipoEvent {
             for(int i = 0; i < evioBank.rows(); i++){
                 int index = i*2;
                 
-                hipoADC.setByte("sector", index,      (byte)  0);
-                hipoADC.setByte("layer",  index,      (byte)  0);
+                hipoADC.setByte("sector", index,      (byte)  1);
+                hipoADC.setByte("layer",  index,      (byte)  1);
                 hipoADC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
                 hipoADC.setByte("order", index,(byte) 0);
                 hipoADC.setInt("ADC", index, evioBank.getInt("ADCU", i));
                 
-                hipoADC.setByte("sector", index+1,      (byte)  0);
-                hipoADC.setByte("layer",  index+1,      (byte)  0);
+                hipoADC.setByte("sector", index+1,      (byte)  1);
+                hipoADC.setByte("layer",  index+1,      (byte)  1);
                 hipoADC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
                 hipoADC.setByte("order", index+1,(byte) 1);
                 hipoADC.setInt("ADC", index+1, evioBank.getInt("ADCD", i));
                 
-                hipoTDC.setByte("sector", index,      (byte)  0);
-                hipoTDC.setByte("layer",  index,      (byte)  0);
+                hipoTDC.setByte("sector", index,      (byte)  1);
+                hipoTDC.setByte("layer",  index,      (byte)  1);
                 hipoTDC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
                 hipoTDC.setByte("order", index,(byte) 2);
                 hipoTDC.setInt("TDC", index, evioBank.getInt("TDCU", i));
                 
-                hipoTDC.setByte("sector", index+1,      (byte)  0);
-                hipoTDC.setByte("layer",  index+1,      (byte)  0);
+                hipoTDC.setByte("sector", index+1,      (byte)  1);
+                hipoTDC.setByte("layer",  index+1,      (byte)  1);
                 hipoTDC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
                 hipoTDC.setByte("order", index+1,(byte) 3);
                 hipoTDC.setInt("TDC", index+1, evioBank.getInt("TDCD", i));
