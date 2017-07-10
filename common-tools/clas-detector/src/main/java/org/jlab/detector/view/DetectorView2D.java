@@ -126,7 +126,7 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
         this.colorAxis.setVertical(true);
         this.colorAxis.setAxisType(GraphicsAxis.AXISTYPE_COLOR);
         this.colorAxis.setDimension(h-20,h-120);
-        this.colorAxis.setRange(0.0, 10.0);
+        //this.colorAxis.setRange(0.0, 10.0);
         this.colorAxis.drawAxis(g2d, 10, h-20);
         
     }
@@ -206,6 +206,10 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
     public void initiateMouseEvent(int x, int y){
         //ActionEvent ac = new ActionEvent(this,1,"");
         
+    }
+
+    public GraphicsAxis getColorAxis(){
+	return this.colorAxis;
     }
     
     @Override
