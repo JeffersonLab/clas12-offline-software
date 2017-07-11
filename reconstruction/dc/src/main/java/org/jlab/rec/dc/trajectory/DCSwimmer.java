@@ -1,17 +1,12 @@
 package org.jlab.rec.dc.trajectory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
 import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
-import cnuphys.magfield.CompositeField;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.CompositeProbe;
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.RotatedCompositeField;
+import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.magfield.Solenoid;
 import cnuphys.magfield.Torus;
 import cnuphys.rk4.IStopper;
@@ -31,10 +26,10 @@ import org.jlab.utils.CLASResources;
  */
 public class DCSwimmer {
 
-    private static RotatedCompositeField rcompositeField;
-    private static CompositeField compositeField;
-    private static FieldProbe rprob;
-    private static FieldProbe prob;
+   // private static RotatedCompositeField rcompositeField;
+   // private static CompositeField compositeField;
+    private  RotatedCompositeProbe rprob;
+    private  CompositeProbe prob;
     
     private Swimmer swimmer;
 
@@ -76,9 +71,10 @@ public class DCSwimmer {
         //if(areFieldsLoaded==false)
         //    getMagneticFields();
 
-        swimmer = new Swimmer(rcompositeField);
-
-        labswimmer = new Swimmer(compositeField);
+        swimmer = new Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
+        labswimmer = new Swimmer(MagneticFields.getInstance().getCompositeField());
+        rprob = new RotatedCompositeProbe(MagneticFields.getInstance().getRotatedCompositeField());
+        prob = new CompositeProbe(MagneticFields.getInstance().getCompositeField());
     }
 
     /**
@@ -191,7 +187,7 @@ public class DCSwimmer {
                     _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 
             traj.computeBDL(rprob);
-            //traj.computeBDL(rcompositeField);
+           // traj.computeBDL(rcompositeField);
             double lastY[] = traj.lastElement();
 
             value[0] = lastY[0] * 100; // convert back to cm
@@ -463,7 +459,7 @@ public class DCSwimmer {
 
         SwimTrajectory st = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
         st.computeBDL(prob);
-       // st.computeBDL(compositeField);
+        //st.computeBDL(compositeField);
         
         double[] lastY = st.lastElement();
 
@@ -497,8 +493,8 @@ public class DCSwimmer {
     
     public void Bfield(double x_cm, double y_cm, double z_cm, float[] result) {
 
-        //rprob.field((float) x_cm, (float) y_cm, (float) z_cm, result);
-        rcompositeField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+        rprob.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+        //rcompositeField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
         result[0] =result[0]/10; 
         result[1] =result[1]/10;
         result[2] =result[2]/10;
@@ -509,29 +505,31 @@ public class DCSwimmer {
 
         float result[] = new float[3];
 
-       // prob.field((float) x_cm, (float) y_cm, (float) z_cm, result);
-        compositeField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+        prob.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+        //compositeField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
 
         return new Point3D(result[0] / 10, result[1] / 10, result[2] / 10);
 
     }
 
     public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale) {
-        if (rcompositeField.get(0) != null) {
-            ((MagneticField) rcompositeField.get(0)).setScaleFactor(TorusScale);
+        MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
+        MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
+      //  if (rcompositeField.get(0) != null) {
+       //     ((MagneticField) rcompositeField.get(0)).setScaleFactor(TorusScale);
             System.out.println("FORWARD TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
-        }
-        if (compositeField.get(0) != null) {
-            ((MagneticField) compositeField.get(0)).setScaleFactor(TorusScale);
-        }
+       // }
+       // if (compositeField.get(0) != null) {
+       //     ((MagneticField) compositeField.get(0)).setScaleFactor(TorusScale);
+       // }
 
-        if (rcompositeField.get(1) != null) {
-            ((MagneticField) rcompositeField.get(1)).setScaleFactor(SolenoidScale);
+      //  if (rcompositeField.get(1) != null) {
+      //      ((MagneticField) rcompositeField.get(1)).setScaleFactor(SolenoidScale);
             System.out.println("FORWARD TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");
-        }
-        if (compositeField.get(1) != null) {
-            ((MagneticField) compositeField.get(1)).setScaleFactor(SolenoidScale);
-        }
+     //   }
+     //   if (compositeField.get(1) != null) {
+     //       ((MagneticField) compositeField.get(1)).setScaleFactor(SolenoidScale);
+     //   }
 
         //System.out.println(" Fields at orig = "+compositeField.fieldMagnitude(0, 0, 0)+" Rotated Fields: "+rcompositeField.fieldMagnitude(0, 0, 0));
     }
@@ -553,7 +551,11 @@ public class DCSwimmer {
         String clasDictionaryPath = CLASResources.getResourcePath("etc");
 
         String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
-
+        String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
+        
+        MagneticFields.getInstance().initializeMagneticFields(torusFileName, solenoidFileName);
+        
+        /*
         File torusFile = new File(torusFileName);
         try {
             torus = Torus.fromBinaryFile(torusFile);
@@ -562,7 +564,7 @@ public class DCSwimmer {
         }
 
         //OK, see if we can create a Solenoid
-        String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
+        
         //OK, see if we can create a Torus
         //if(clasDictionaryPath == "../clasJLib")
         //	solenoidFileName = clasDictionaryPath + "/data/solenoid/v1.0/solenoid-srr.dat";
@@ -573,7 +575,8 @@ public class DCSwimmer {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        
+        */
+        /*
         rcompositeField = new RotatedCompositeField();
         compositeField = new CompositeField();
         //System.out.println("***** ****** CREATED A COMPOSITE ROTATED FIELD ****** **** ");
@@ -589,12 +592,11 @@ public class DCSwimmer {
             compositeField.add(solenoid);
 
         }
-        rprob = FieldProbe.factory(rcompositeField);
-        prob =  FieldProbe.factory(compositeField);
+        */
 
-        System.out.println("Rotated Composite "+rcompositeField.getName());
-        System.out.println("Torus "+torus.getName());
-        System.out.println("Solenoid "+solenoid.getName()+" version "+MagneticFields.getInstance().getVersion());
+        System.out.println("Rotated Composite "+MagneticFields.getInstance().getRotatedCompositeField().getName());
+       
+        System.out.println(" version "+MagneticFields.getInstance().getVersion());
         
         FieldsLoaded = true;
     }

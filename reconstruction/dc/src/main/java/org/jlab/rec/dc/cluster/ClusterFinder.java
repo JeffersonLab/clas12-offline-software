@@ -316,8 +316,8 @@ public class ClusterFinder {
         List<FittedCluster> rclusters = RecomposeClusters(fhits);
         //	System.out.println(" Clusters TimeBased Step 1");
         //     for(FittedCluster c : rclusters)
-        //    	for(FittedHit h : c)
-        //    		System.out.println(h.printInfo());
+         //   	for(FittedHit h : c)
+          //  		System.out.println(h.printInfo());
 
         for (FittedCluster clus : rclusters) {
             // clean them up

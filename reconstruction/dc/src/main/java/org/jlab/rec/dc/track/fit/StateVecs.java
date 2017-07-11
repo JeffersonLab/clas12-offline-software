@@ -17,13 +17,13 @@ public class StateVecs {
     public Map<Integer, StateVec> trackTraj = new HashMap<Integer, StateVec>();
     public Map<Integer, CovMat> trackCov = new HashMap<Integer, CovMat>();
 
-    public double stepSize = 0.2; // step size 
+    private double stepSize = 0.2; // step size 
     public StateVec StateVec;
     public CovMat CovMat;
     public Matrix F;
-    private double[] A = new double[2];
-    private double[] dA = new double[4];
-    private float[] bf = new float[3];
+    private final double[] A = new double[2];
+    private final double[] dA = new double[4];
+    private final float[] bf = new float[3];
     
     public StateVec f(int i, int f, StateVec iVec) {
 
@@ -76,7 +76,7 @@ public class StateVecs {
      //   double[] A = new double[5];
       //  double[] dA = new double[5];
         double[][] u = new double[5][5];       
-        double[][] C = new double[covMat.covMat.getRowDimension()][covMat.covMat.getColumnDimension()];
+        double[][] C = new double[5][5];
        // Matrix Cpropagated = null;
         //double[][] transpStateJacobian = null;
 
@@ -88,22 +88,22 @@ public class StateVecs {
 
         
         dcSwim.Bfield(x, y, Z[i], bf);
-        double Bmax = 2.366498 * Math.abs(Constants.getTORSCALE());
+        double Bmax = 2.366498 * Math.abs(Constants.getTORSCALE()); 
        // if (bfieldPoints.size() > 0) {
         //    double B = new Vector3D(bfieldPoints.get(bfieldPoints.size() - 1).Bx, bfieldPoints.get(bfieldPoints.size() - 1).By, bfieldPoints.get(bfieldPoints.size() - 1).Bz).mag();
-        if (Math.abs(bf[1]) > 0) {
+        if (bf!=null) {
             double B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]); 
             if (B / Bmax > 0.01) {
-                stepSize = 0.15;
+                stepSize = 0.15*4;
             }
             if (B / Bmax > 0.02) {
-                stepSize = 0.1;
+                stepSize = 0.1*3;
             }
             if (B / Bmax > 0.05) {
-                stepSize = 0.075;
+                stepSize = 0.075*2;
             }
             if (B / Bmax > 0.1) {
-                stepSize = 0.05;
+                stepSize = 0.05*2;
             }
             if (B / Bmax > 0.5) {
                 stepSize = 0.02;
@@ -112,7 +112,7 @@ public class StateVecs {
                 stepSize = 0.01;
             }
         }
-        stepSize*=4.0;
+        
         int nSteps = (int) (Math.abs((Z[i] - Z[f]) / stepSize) + 1);
 
         double s  = (Z[f] - Z[i]) / (double) nSteps;
@@ -145,13 +145,31 @@ public class StateVecs {
             double delty_delQ = speedLight * s * A[1];
 
             
-            double transpStateJacobian00=1; double transpStateJacobian01=0; double transpStateJacobian02=delx_deltx0; double transpStateJacobian03=delx_delty0; double transpStateJacobian04=delx_delQ;
-            double transpStateJacobian10=0; double transpStateJacobian11=1; double transpStateJacobian12=dely_deltx0; double transpStateJacobian13=dely_delty0; double transpStateJacobian14=dely_delQ;
-            double transpStateJacobian20=0; double transpStateJacobian21=0; double transpStateJacobian22=1; double transpStateJacobian23=deltx_delty0; double transpStateJacobian24=deltx_delQ;
-            double transpStateJacobian30=0; double transpStateJacobian31=0; double transpStateJacobian32=delty_deltx0; double transpStateJacobian33=1; double transpStateJacobian34=delty_delQ;
-            double transpStateJacobian40=0; double transpStateJacobian41=0; double transpStateJacobian42=0; double transpStateJacobian43=0; double transpStateJacobian44=1;
-            
-            
+            //double transpStateJacobian00=1; 
+            //double transpStateJacobian01=0; 
+            double transpStateJacobian02=delx_deltx0; 
+            double transpStateJacobian03=delx_delty0; 
+            double transpStateJacobian04=delx_delQ;
+            //double transpStateJacobian10=0; 
+            //double transpStateJacobian11=1; 
+            double transpStateJacobian12=dely_deltx0; 
+            double transpStateJacobian13=dely_delty0; 
+            double transpStateJacobian14=dely_delQ;
+            //double transpStateJacobian20=0; 
+            //double transpStateJacobian21=0; 
+            //double transpStateJacobian22=1; 
+            double transpStateJacobian23=deltx_delty0; 
+            double transpStateJacobian24=deltx_delQ;
+            //double transpStateJacobian30=0; 
+            //double transpStateJacobian31=0; 
+            double transpStateJacobian32=delty_deltx0; 
+            //double transpStateJacobian33=1; 
+            double transpStateJacobian34=delty_delQ;
+            //double transpStateJacobian40=0; 
+            //double transpStateJacobian41=0; 
+            //double transpStateJacobian42=0; 
+            //double transpStateJacobian43=0; 
+            //double transpStateJacobian44=1;
             
 
             //covMat = FCF^T; u = FC;

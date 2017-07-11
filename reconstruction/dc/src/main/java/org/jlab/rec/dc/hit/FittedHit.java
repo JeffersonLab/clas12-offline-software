@@ -1,8 +1,6 @@
 package org.jlab.rec.dc.hit;
 
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.CCDBConstants;
-import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
@@ -111,8 +109,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double p4 = CCDBConstants.getPAR4()[this.get_Sector() - 1][this.get_Superlayer() - 1];
             double scale = CCDBConstants.getSCAL()[this.get_Sector() - 1][this.get_Superlayer() - 1];
             err = (p1 + p2 / ((p3 + x) * (p3 + x)) + p4 * Math.pow(x, 8)) * scale * 0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
-
+            
             //}
+           // if(this.get_OutOfTimeFlag()==true)
+            //	System.out.println("OutofTimer "+this.printInfo());
         }
 
         return err;
@@ -269,10 +269,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 if (x != -1) {
                     deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
                 }
+             //   System.out.println("setting the time : fit doca = "+x+" dtime(b) = "+deltatime_beta+" intime "+this.get_Time()+" time "+(this.get_Time() + deltatime_beta));
                 this.set_Time(this.get_Time() - deltatime_beta);
-
+                if(this.get_Time()<0)
+                    this.set_Time(0);
                 d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx) / this.get_Time();
-
+            
             }
 
             //			TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
@@ -282,9 +284,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             //	if(cosTrkAngle>0.8 & cosTrkAngle<=1) // trk angle correction 
             //		d /= cosTrkAngle;
         }
+        
         double distance = d * this.get_Time();
-        //if(Constants.isSimulation==false && (distance>this.get_CellSize() ) )
-        //	distance= this.get_CellSize();
+       // if(distance>this.get_CellSize()  )
+       //     distance= this.get_CellSize();
+
         this.set_Doca(distance);
         this._TimeToDistance = distance;
     }

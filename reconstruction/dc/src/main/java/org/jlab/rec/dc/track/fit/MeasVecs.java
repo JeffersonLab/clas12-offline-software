@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.Track;
 
@@ -77,9 +78,10 @@ public class MeasVecs {
                     double X = sl1 * Z + it1;
 
                     //exclude hits that have poor segment
-                    if ((trkcand.get(c).get(s).get(h).get_X() - X) / trkcand.get(c).get(s).get(h).get_CellSize() / Math.cos(Math.toRadians(6.)) > 1.5) {
+                    if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / Math.cos(Math.toRadians(6.))) > 1.5) {
                         continue;
                     }
+                    
                     HitOnTrack hot = new HitOnTrack(slayr, X, Z);
                     double err_sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
 
@@ -87,8 +89,9 @@ public class MeasVecs {
                     double err_cov1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
 
                     hot._Unc = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
-                    hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1;
-
+                    hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
+                    if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
+                    	hot._hitError = 100000; //exclude outoftimers from fit
                     hOTS.add(hot);
 
                 }

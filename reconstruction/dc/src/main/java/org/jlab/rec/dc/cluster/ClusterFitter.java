@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.GeometryLoader;
+import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.fit.basefit.LineFitPars;
 import org.jlab.rec.dc.track.fit.basefit.LineFitter;
 
@@ -220,6 +221,14 @@ public class ClusterFitter {
         //	double bestClusx0=0;
 
         for (FittedCluster clusCand : clusters) {
+            if(isBrickWall(clusCand)) {
+                int LRSum=0;
+                for(FittedHit hit : clusCand) {
+                    LRSum+=hit.get_LeftRightAmb();
+                }
+                if(LRSum!=0)
+                    continue;
+            }
             SetFitArray(clusCand, system); // set the array of measurements according to the system used in the analysis
             // do the fit and get the chisq
             Fit(clusCand, true);
@@ -235,7 +244,7 @@ public class ClusterFitter {
             }
         }
         //SetSegmentLineParameters(bestClusx0, BestCluster) ;
-
+        
         return BestCluster;
 
     }
@@ -263,4 +272,21 @@ public class ClusterFitter {
         return new Point3D(the_slope * d + the_interc, 0, d);
     }
 
+    private boolean isBrickWall(FittedCluster clusCand) {
+        boolean isBW = true;
+        int sumWireNum = 0;
+        if(clusCand.size()!=6)
+            isBW=false;
+        
+        for(FittedHit hit : clusCand) {
+            sumWireNum+=hit.get_Wire();
+        }
+        for(FittedHit hit : clusCand) {
+            if(hit.get_Wire()*clusCand.size()!=sumWireNum)
+                isBW = false;
+        }    
+        return isBW;
+    }
+
+    
 }

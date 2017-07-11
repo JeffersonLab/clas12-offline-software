@@ -2,6 +2,7 @@ package org.jlab.rec.dc.cluster;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jlab.rec.dc.Constants;
@@ -314,8 +315,11 @@ public class ClusterCleanerUtilities {
         //	if(fClus.get_Status()[1]==notResolvedLR) {
         //		return fClus;
         //	}
+        //
+        
         int index = 0;
-        for (FittedHit hit : fClus) {
+        for(FittedHit hit: fClus) {
+    
             if (hit.get_Doca() < 0.4 * hit.get_CellSize()) {
                 hit.set_LeftRightAmb(0);
             }

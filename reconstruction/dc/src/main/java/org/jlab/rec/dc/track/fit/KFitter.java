@@ -3,8 +3,7 @@ package org.jlab.rec.dc.track.fit;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
 
-import Jama.Matrix;
-import org.jlab.rec.dc.track.fit.StateVecs;
+import Jama.Matrix; 
 
 public class KFitter {
 
@@ -29,7 +28,7 @@ public class KFitter {
         sv.init(trk, sv.Z[0], this);
     }
 
-    public int totNumIter = 5;
+    public int totNumIter = 10;
     double newChisq = Double.POSITIVE_INFINITY;
 
     public void runFitter() {
@@ -48,13 +47,17 @@ public class KFitter {
                // 		sv.trackTraj.get(k+1).z+","+sv.trackTraj.get(k+1).tx+","+sv.trackTraj.get(k+1).ty); 
                 this.filter(k + 1);
             }
-            this.calcFinalChisq();
-            if (this.chi2 < newChisq) {
-                this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
-                newChisq = this.chi2;
-            } else {
-                i = totNumIter;
-            }
+            if(i>1) {
+	            this.calcFinalChisq();
+	            if(this.chi2>10000)
+	            	i = totNumIter;
+	            if (this.chi2 < newChisq) {
+	                this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
+	                newChisq = this.chi2;
+	            } else {
+	            	i = totNumIter;
+	            }
+	        }
         }
 
     }
@@ -135,7 +138,8 @@ public class KFitter {
         }
     }
 
-    private void smooth(int k) {
+    @SuppressWarnings("unused")
+	private void smooth(int k) {
         this.chi2 = 0;
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
             sv.transport(k, 0, sv.trackTraj.get(k), sv.trackCov.get(k));
@@ -153,7 +157,7 @@ public class KFitter {
             sv.rinit(sv.Z[0], k);
             for (int k1 = 0; k1 < k; k1++) {
                 sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
-                double V = mv.measurements.get(k1 + 1).error;
+                double V = mv.measurements.get(k1 + 1).error; 
                 double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y}, (int) mv.measurements.get(k1 + 1).tilt);
 
                 chi2 += (mv.measurements.get(k1 + 1).x - h) * (mv.measurements.get(k1 + 1).x - h) / V;
@@ -173,13 +177,21 @@ public class KFitter {
     }
 
     private boolean isNonsingular(Matrix mat) {
-
+    /*
         for (int j = 0; j < mat.getColumnDimension(); j++) {
             if (mat.get(j, j) < 0.00000000001) {
                 return false;
             }
         }
         return true;
+    */
+        double matDet = mat.det();
+        if(Math.abs(matDet)< 1.e-30) {
+                return false;
+        } else {
+                return true;
+        }
     }
-
+    
+    
 }
