@@ -196,17 +196,18 @@ public class HitReader {
             }
 
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
+          // System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.set_TimeToDistance(1.0, B[i]);
-            hit.set_Doca(hit.get_TimeToDistance());
-            if (hit.get_Doca() > hit.get_CellSize()) {
+            //hit.set_Doca(hit.get_TimeToDistance());
+            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
             }
-            hit.set_DocaErr(hit.get_PosErr(B[i]));
+            hit.set_DocaErr(hit.get_PosErr(B[i]));            
             hit.set_AssociatedClusterID(clusterID[i]);
-            hit.set_AssociatedHBTrackID(trkID[i]); //System.out.println(" read "+hit.printInfo());
+            hit.set_AssociatedHBTrackID(trkID[i]); 
             hits.add(hit);
 
         }

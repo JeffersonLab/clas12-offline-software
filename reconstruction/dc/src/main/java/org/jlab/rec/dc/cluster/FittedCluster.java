@@ -46,9 +46,9 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
     private Line3D _clusLine;
     private double _fitProb = -1;
     private double _Chisq = Double.POSITIVE_INFINITY;
-    ;
+    
 	
-	private double _clusterLineFitSlope;
+    private double _clusterLineFitSlope;
     private double _clusterLineFitintercept;
     private double _clusterLineFitSlopeErr;
     private double _clusterLineFitinterceptErr;

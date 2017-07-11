@@ -39,227 +39,226 @@ import cnuphys.snr.clas12.Clas12NoiseResult;
 
 public class DCHBEngine extends ReconstructionEngine {
 
-    public DCHBEngine() {
-        super("DCHB", "ziegler", "3.0");
-    }
+	public DCHBEngine() {
+		super("DCHB","ziegler","3.0");
+	}
 
-    String FieldsConfig = "";
-    int Run = -1;
+	String FieldsConfig="";
+	int Run = -1;
+	
+	@Override
+	public boolean init() {
+		
+		// Load the Fields 
+		DCSwimmer.getMagneticFields();
+		
+		return true;
+	}
 
-    @Override
-    public boolean init() {
+	
+	@Override
+	public boolean processDataEvent(DataEvent event) {
+		setRunConditionsParameters( event) ;
+		 // init SNR 
+	    Clas12NoiseResult results = new Clas12NoiseResult(); 
+		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
 
-        // Load the Fields 
-        DCSwimmer.getMagneticFields();
+		int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
+		int[] leftShifts  = Constants.SNR_LEFTSHIFTS;
+		NoiseReductionParameters parameters = new NoiseReductionParameters (
+				2,leftShifts,
+				rightShifts);
+		//System.out.println("RUNING HITBASED_________________________________________");
+	  
+		ClusterFitter cf = new ClusterFitter();
+	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+	    
+	    List<FittedHit> fhits = new ArrayList<FittedHit>();
+		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+		List<Segment> segments = new ArrayList<Segment>();
+		List<Cross> crosses = new ArrayList<Cross>();
+		
+		List<Track> trkcands = new ArrayList<Track>();
+		
+		//instantiate bank writer
+		RecoBankWriter rbc = new RecoBankWriter();
+		
+		//if(Constants.DEBUGCROSSES)
+		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
+		
+		HitReader hitRead = new HitReader();
+		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
 
-        return true;
-    }
+		List<Hit> hits = new ArrayList<Hit>();
+		//I) get the hits
+		hits = hitRead.get_DCHits();
+		
+		//II) process the hits
+		//1) exit if hit list is empty
+		if(hits.size()==0 ) {
+			return true;
+		}
 
-    @Override
-    public boolean processDataEvent(DataEvent event) {
-        setRunConditionsParameters(event);
-        // init SNR 
-        Clas12NoiseResult results = new Clas12NoiseResult();
-        Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
+		fhits = rbc.createRawHitList(hits);
+				
+		
+		//2) find the clusters from these hits
+		ClusterFinder clusFinder = new ClusterFinder();
+		clusters = clusFinder.FindHitBasedClusters(hits, ct, cf);
+		
+		
+		if(clusters.size()==0) {				
+			rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
+			return true;
+		}
+	
+		rbc.updateListsListWithClusterInfo(fhits, clusters);
+		
+		//3) find the segments from the fitted clusters
+		SegmentFinder segFinder = new SegmentFinder();
+		segments =  segFinder.get_Segments(clusters, event);
+ 
+		if(segments.size()==0) { // need 6 segments to make a trajectory			
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
+			return true;
+		}
+		//RoadFinder
+		//
+		
+		RoadFinder pcrossLister = new RoadFinder();
+		List<Segment> pSegments =pcrossLister.findRoads(segments);
+		segments.addAll(pSegments);
+		
+		//
+		//System.out.println("nb trk segs "+pSegments.size());
+		CrossMaker crossMake = new CrossMaker();
+		crosses = crossMake.find_Crosses(segments);
+ 
+		if(crosses.size()==0 ) {			
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
+			return true;
+		}
+		
+		CrossListFinder crossLister = new CrossListFinder();
+		
+		List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
+		for(int s =0; s< 6; s++) {
+			if(CrossesInSector.get(s).size()>Constants.MAXNBCROSSES) {
+				return true;
+			}
+		}
+		
+		CrossList crosslist = crossLister.candCrossLists(crosses);
+		
+		if(crosslist.size()==0) {
+			
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
+			return true;
+		}
 
-        int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
-        int[] leftShifts = Constants.SNR_LEFTSHIFTS;
-        NoiseReductionParameters parameters = new NoiseReductionParameters(
-                2, leftShifts,
-                rightShifts);
-        //System.out.println("RUNING HITBASED_________________________________________");
+		//6) find the list of  track candidates
+		TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
+		trkcands = trkcandFinder.getTrackCands(crosslist) ;
+		 
+		if(trkcands.size()==0) {
+			
+			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+			return true;
+		}
+		// track found	
+		int trkId = 1;
+		for(Track trk: trkcands) {						
+			for(Cross c : trk) { 
+				for(FittedHit h1 : c.get_Segment1())
+					h1.set_AssociatedHBTrackID(trk.get_Id());
+			  	for(FittedHit h2 : c.get_Segment2())
+			  		h2.set_AssociatedHBTrackID(trk.get_Id());	
+			}
+			
+		}
+	  
+		trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
+		
+		for(Track trk: trkcands) {		
+			// reset the id
+			trk.set_Id(trkId);
+			for(Cross c : trk) { 
+				for(FittedHit h1 : c.get_Segment1())
+					h1.set_AssociatedHBTrackID(trk.get_Id());
+			  	for(FittedHit h2 : c.get_Segment2())
+			  		h2.set_AssociatedHBTrackID(trk.get_Id());	
+			}
+			trkId++;
+		}
+	  
+		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
 
-        ClusterFitter cf = new ClusterFitter();
-        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+		return true;
+	}
 
-        List<FittedHit> fhits = new ArrayList<FittedHit>();
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        List<Segment> segments = new ArrayList<Segment>();
-        List<Cross> crosses = new ArrayList<Cross>();
+	public void setRunConditionsParameters(DataEvent event) {
+		if(event.hasBank("RUN::config")==false) {
+			System.err.println("RUN CONDITIONS NOT READ!");
+			return;
+		}
+		boolean isMC = false;
+		boolean isCosmics = false;
+		
+	
+        DataBank bank = event.getBank("RUN::config");	
+		if(bank.getByte("type", 0)==0)
+			isMC = true;
+		if(bank.getByte("mode", 0)==1)
+			isCosmics = true;
+		// force cosmics
+		//isCosmics = true;
+		//System.out.println(bank.getInt("Event")[0]);
+		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
+		//
+		
+		
+		// Load the constants
+		//-------------------
+		int newRun = bank.getInt("run", 0);
+		boolean T2DCalc = false;
+		
+		if(Run!=newRun) {
+			if(newRun>751 && newRun<912) {
+				T2DCalc = true;
+				Constants.setT0(true);		
+				Constants.setUseMiniStagger(true);
+			}
+			if(newRun<100)
+				T2DCalc = true;
+			
+			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0()+ " use ministagger "+Constants.getUseMiniStagger());
+			CalibrationConstantsLoader.Load(newRun, "default");
+			
+			TableLoader.Fill();
+			
+			GeometryLoader.Load(newRun, "default");
+		}
+		Run = newRun;
 
-        List<Track> trkcands = new ArrayList<Track>();
-
-        //instantiate bank writer
-        RecoBankWriter rbc = new RecoBankWriter();
-
-        //if(Constants.DEBUGCROSSES)
-        //	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
-        HitReader hitRead = new HitReader();
-        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
-
-        List<Hit> hits = new ArrayList<Hit>();
-        //I) get the hits
-        hits = hitRead.get_DCHits();
-
-        //II) process the hits
-        //1) exit if hit list is empty
-        if (hits.size() == 0) {
-            return true;
-        }
-
-        fhits = rbc.createRawHitList(hits);
-
-        //2) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder();
-        clusters = clusFinder.FindHitBasedClusters(hits, ct, cf);
-
-        if (clusters.size() == 0) {
-            rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
-            return true;
-        }
-
-        rbc.updateListsListWithClusterInfo(fhits, clusters);
-
-        //3) find the segments from the fitted clusters
-        SegmentFinder segFinder = new SegmentFinder();
-        segments = segFinder.get_Segments(clusters, event);
-
-        if (segments.size() == 0) { // need 6 segments to make a trajectory			
-            rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
-            return true;
-        }
-        //RoadFinder
-        //
-
-        RoadFinder pcrossLister = new RoadFinder();
-        List<Segment> pSegments = pcrossLister.findRoads(segments);
-        segments.addAll(pSegments);
-
-        //
-        //System.out.println("nb trk segs "+pSegments.size());
-        CrossMaker crossMake = new CrossMaker();
-        crosses = crossMake.find_Crosses(segments);
-
-        if (crosses.size() == 0) {
-            rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
-            return true;
-        }
-
-        CrossListFinder crossLister = new CrossListFinder();
-
-        List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
-        for (int s = 0; s < 6; s++) {
-            if (CrossesInSector.get(s).size() > Constants.MAXNBCROSSES) {
-                return true;
-            }
-        }
-
-        CrossList crosslist = crossLister.candCrossLists(crosses);
-
-        if (crosslist.size() == 0) {
-
-            rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
-            return true;
-        }
-
-        //6) find the list of  track candidates
-        TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-        trkcands = trkcandFinder.getTrackCands(crosslist);
-
-        if (trkcands.size() == 0) {
-
-            rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
-            return true;
-        }
-        // track found	
-        int trkId = 1;
-        for (Track trk : trkcands) {
-            for (Cross c : trk) {
-                for (FittedHit h1 : c.get_Segment1()) {
-                    h1.set_AssociatedHBTrackID(trk.get_Id());
-                }
-                for (FittedHit h2 : c.get_Segment2()) {
-                    h2.set_AssociatedHBTrackID(trk.get_Id());
-                }
-            }
-
-        }
-
-        trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
-
-        for (Track trk : trkcands) {
-            // reset the id
-            trk.set_Id(trkId);
-            for (Cross c : trk) {
-                for (FittedHit h1 : c.get_Segment1()) {
-                    h1.set_AssociatedHBTrackID(trk.get_Id());
-                }
-                for (FittedHit h2 : c.get_Segment2()) {
-                    h2.set_AssociatedHBTrackID(trk.get_Id());
-                }
-            }
-            trkId++;
-        }
-
-        rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
-
-        return true;
-    }
-
-    public void setRunConditionsParameters(DataEvent event) {
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-        boolean isMC = false;
-        boolean isCosmics = false;
-
-        DataBank bank = event.getBank("RUN::config");
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-        // force cosmics
-        //isCosmics = true;
-        //System.out.println(bank.getInt("Event")[0]);
-        boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
-        //
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-        boolean T2DCalc = false;
-
-        if (Run != newRun) {
-            if (newRun > 751 && newRun < 912) {
-                T2DCalc = true;
-                Constants.setT0(true);
-                Constants.setUseMiniStagger(true);
-            }
-          //  if (newRun == 9) {
-                T2DCalc = true;
-           // }
-
-            System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = " + Constants.getT0() + " use ministagger " + Constants.getUseMiniStagger());
-            CalibrationConstantsLoader.Load(newRun, "default");
-
-            TableLoader.Fill();
-
-            GeometryLoader.Load(newRun, "default");
-        }
-        Run = newRun;
-
-        // Load the fields
-        //-----------------
-        String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0) + "TORUS" + bank.getFloat("torus", 0) + "RUN" + bank.getInt("run", 0);
-        //System.out.println(" fields "+newConfig);
-        if (FieldsConfig.equals(newConfig) == false) {
-            // Load the Constants
-            double TorScale = (double) bank.getFloat("torus", 0);
-            //TorScale = -0.5;
-
-            Constants.Load(T2DCalc, isCalib, TorScale); // set the T2D Grid for Cosmics data only so far....
-            // Load the Fields
-            //DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... 
-            DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), TorScale); // something changed in the configuration ... 
-        }
-        FieldsConfig = newConfig;
-
-    }
-
-    public static void main(String[] args) throws FileNotFoundException, EvioException {
+		
+		// Load the fields
+		//-----------------
+		String newConfig = "SOLENOID"+bank.getFloat("solenoid",0)+"TORUS"+bank.getFloat("torus",0)+"RUN"+bank.getInt("run", 0);		
+		//System.out.println(" fields "+newConfig);
+		if (FieldsConfig.equals(newConfig)==false) {
+			// Load the Constants
+			double TorScale = (double)bank.getFloat("torus",0);
+			//TorScale = -0.5;
+			
+			Constants.Load(T2DCalc, isCalib, TorScale); // set the T2D Grid for Cosmics data only so far....
+			// Load the Fields
+			//DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... 
+			DCSwimmer.setMagneticFieldsScales((double)bank.getFloat("solenoid",0), TorScale); // something changed in the configuration ... 
+		}
+		FieldsConfig = newConfig;
+		
+	}
+	public static void main(String[] args) throws FileNotFoundException, EvioException {
 
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
@@ -269,7 +268,7 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Workdir/Files/GEMC/DC/ele_S0.hipo";
+        String inputFile="/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
@@ -286,7 +285,7 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-        String outputFile="/Users/ziegler/Workdir/Files/GEMC/DC/ele_S0_rec_opti.hipo";
+        String outputFile="/Users/ziegler/Workdir/Files/GEMC/DC/KPP2trksRecDd.hipo";
        // String outputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12_rec_slow.hipo";
         writer.open(outputFile);
 
@@ -305,7 +304,7 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB   
             en2.processDataEvent(event);
             //System.out.println("  EVENT "+counter);
-            if (counter > 1000) {
+            if (counter > 9) {
                 break;
             }
             //event.show();
@@ -320,5 +319,4 @@ public class DCHBEngine extends ReconstructionEngine {
         double t = System.currentTimeMillis() - t1;
         System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
     }
-
 }

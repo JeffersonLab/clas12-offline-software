@@ -28,7 +28,7 @@ public class CallB {
             //y= 10*aRandom.nextDouble();
             //z=200+200*aRandom.nextDouble();
             x=31; y=0; z=300;
-            swim.Bfield(x, y, z, result);
+           // swim.Bfield(x, y, z, result);
             System.out.println(result[0]+", "+result[1]+" , "+result[2]+" = ? ");
             MagneticFields.getInstance().initializeMagneticFields();
             MagneticFields.getInstance().setActiveField(MagneticFields.FieldType.COMPOSITEROTATED);
