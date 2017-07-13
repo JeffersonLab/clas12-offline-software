@@ -1,0 +1,14 @@
+PROJECT: clas12
+TRACK: simulation
+JOBNAME: batSim_LUMINOSITY_ROUND
+OS: centos7
+MEMORY: 6 GB
+DISK_SPACE: 6 GB
+TIME: 720
+
+OTHER_FILES: /volatile/clas12/software_validation/single_e/clas12_LLUMINOSITY.gcard
+
+OUTPUT_DATA: sim_LLUMINOSITY_ROUND.evio
+OUTPUT_TEMPLATE: /volatile/clas12/software_validation/single_e/GEMCoutputFiles/
+
+COMMAND: source /group/clas12/gemc/environment.csh 4a.1.0 ; gemc clas12_LLUMINOSITY.gcard -OUTPUT="evio, sim_LLUMINOSITY_ROUND.evio" -RUNNO=11 -USE_GUI=0 -N=100 ; ls -lthr
