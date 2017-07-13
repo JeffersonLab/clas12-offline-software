@@ -6,9 +6,12 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.pow;
+import java.util.HashMap;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
+
 
 /**
  *
@@ -17,28 +20,30 @@ import org.jlab.detector.base.DetectorType;
 public class EBAnalyzer {
     
     private int[]  pidPositive = new int[]{  -11, 211, 321, 2212};
-    private int[]  pidNegative = new int[]{ -211,-321,-2212};
+    private int[]  pidNegative = new int[]{ 11, -211,-321,-2212};
     
     public EBAnalyzer(){
         
     }
     
-    public void processEvent(DetectorEvent event){
+    public void processEvent(DetectorEvent event) {
         if(event.getParticles().size()>0){
             DetectorParticle trigger = event.getParticle(0);
             
             //System.out.println(" trigger pid = " + trigger.getPid());
-            if(trigger.getPid()==EBConstants.TRIGGER_ID){
+            if(trigger.getPid()==11 || trigger.getPid()==-11){
                 trigger.setBeta(1.0);
                 trigger.setMass(0.0005);
                 
                 double time = 0.0;
                 double path = 0.0;
+                
                 if(trigger.hasHit(DetectorType.FTOF, 1)==true){
                    //System.out.println("There is a FTOF1A hit!!!");
                     time = trigger.getTime(DetectorType.FTOF, 1);
                     path = trigger.getPathLength(DetectorType.FTOF, 1);
                 }
+                
                 if(trigger.hasHit(DetectorType.FTOF, 2)==true){
                     //System.out.println("There is a FTOF1B hit!!!");
                     time = trigger.getTime(DetectorType.FTOF, 2);
@@ -52,18 +57,28 @@ public class EBAnalyzer {
                         + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
                 double rfcorr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
                 event.getEventHeader().setStartTime(start_time + rfcorr);
+                //System.out.println(event.getEventHeader().getRfTime() - start_time);
                 //System.out.println(rfcorr + " " + (124.25- time + tof));
-                //System.out.println(" TIME = " + t_of_f + "  time from TOF = " + time);
+                //System.out.println(" TIME = " + tof + "  time from TOF = " + time);
                 //System.out.println(" PATH = " + path + " " );
-                //System.out.println(" SET START TIME = " + start_time + "  ACTUAL TIME = " + event.getStartTime());
+                //System.out.println(" SET START TIME = " + start_time + "  ACTUAL TIME = " + event.getEventHeader().getStartTime());
+                
+                //System.out.println(start_time - event.getEventHeader().getRfTime());
+                
                 this.assignMasses(event);
                 this.assignPids(event);
-                //EBPID pid = new EBPID();
-                //pid.setEvent(event);
-                //pid.PIDAssignment();
-                //System.out.println(event.toString());
-                
+   
+
             }
+            
+            if(trigger.getPid()==0 || trigger.getPid()==22) {
+                
+                event.getEventHeader().setStartTime(124.25);
+                this.assignMasses(event);
+                this.assignPids(event);
+            
+            }
+            
         }
     }
     
@@ -119,6 +134,7 @@ public class EBAnalyzer {
             if(p.getCharge()==0) break;
             if(p.getCharge()>0){
                 for(int b = 0; b < this.pidPositive.length; b++){
+                    //System.out.println(this.pidPositive[b]);
                     pidHyp.setEvent(event);
                     pidHyp.PIDMatch(p, this.pidPositive[b]); 
                     //pidHyp.PIDQuality(p,this.pidPositive[b],event);
@@ -140,7 +156,8 @@ public class EBAnalyzer {
     }
     
 
-public class PIDHypothesis{
+
+public class PIDHypothesis {
     
         private int theoryPID = -1;
         private double PIDquality = 0.0;
@@ -157,20 +174,25 @@ public class PIDHypothesis{
         public void PIDMatch(DetectorParticle p, int pid) {
             
             double beta = p.getTheoryBeta(pid);
-            double beta_index = p.MinBetaAssociation(pid); //Associaton for the PID Candidate
-                                                               //closest speed to measured track
-            
+            double vertex_index = optimalVertexTime(p);
+                                                             
             int pidCandidate = pid;
-            boolean betaCheck = (abs(pid)==211 && beta_index==1 && p.getBeta()>0.0) || 
-                        (abs(pid)==2212 && beta_index==0 && p.getBeta()>0.0) || 
-                        (abs(pid)==321 && beta_index==2 && p.getBeta()>0.0);
+            boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
+                        (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
+                        (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
             boolean sfCheck = p.getEnergyFraction(DetectorType.EC)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
-            boolean htccSignalCheck = p.getNphe()>EBConstants.HTCC_NPHE_CUT;
+            boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
+            boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
             boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
+            boolean ltccPionThreshold = p.vector().mag()<EBConstants.LTCC_UPPER_PION_THRESHOLD 
+                    && p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
+            
+//            System.out.println(sfCheck + "  " + htccSignalCheck);
             
             switch(abs(pid)) {
                 case 11:
                     if(htccSignalCheck==true && sfCheck==true){
+                        //System.out.println("Positron detected");
                         this.finalizePID(p, pid);
                         break;
                     }
@@ -179,23 +201,33 @@ public class PIDHypothesis{
                         break;
                     }
                 case 211:
-                    if(betaCheck==true && htccSignalCheck==true && sfCheck==false 
+                    if(vertexCheck==true && htccSignalCheck==true && sfCheck==false 
                             && htccPionThreshold==true) {
                         this.finalizePID(p, pid);
                         break;
                     }
-                    if(betaCheck==false && htccSignalCheck==true && sfCheck==false 
+                    if(vertexCheck==false && htccSignalCheck==true && sfCheck==false 
                             && htccPionThreshold==true) {
                         this.finalizePID(p, pid);
                         break;
-                    }               
+                    } 
+                    if(vertexCheck==true && ltccSignalCheck==true && sfCheck==false 
+                            && ltccPionThreshold==true) {
+                        this.finalizePID(p, pid);
+                        break;
+                    }
+                    if(vertexCheck==false && ltccSignalCheck==true && sfCheck==false 
+                            && ltccPionThreshold==true) {
+                        this.finalizePID(p, pid);
+                        break;
+                    }  
                 case 321:
-                    if(betaCheck==true && sfCheck==false && htccSignalCheck==false){
+                    if(vertexCheck==true && sfCheck==false && htccSignalCheck==false){
                         this.finalizePID(p, pid);
                         break;
                     }
                 case 2212:
-                    if(betaCheck==true && sfCheck==false && htccSignalCheck==false){
+                    if(vertexCheck==true && sfCheck==false && htccSignalCheck==false){
                         this.finalizePID(p, pid);
                         break;
                     }
@@ -203,16 +235,52 @@ public class PIDHypothesis{
 
         }
         
-                
-        public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
+        public int optimalVertexTime(DetectorParticle p) {
+            int vertex_index = 0;
+            HashMap<Integer,Double> vertexDiffs = new HashMap<Integer,Double>(); 
+            double vertex_time_hypothesis = 0.0;
+            double event_start_time = event.getEventHeader().getStartTime();
             
-            return 0.0;
+            if(p.hasHit(DetectorType.FTOF,1)==true) {
+            vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 1, 2212)-event_start_time));
+            vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 1, 211)-event_start_time));
+            vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 1, 321)-event_start_time));
+            }
+            
+            if(p.hasHit(DetectorType.FTOF,2)==true) {
+            vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 2, 2212)-event_start_time));
+            vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 2, 211)-event_start_time));
+            vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 2, 321)-event_start_time));
+            }
+            
+            if(vertexDiffs.size()>0) {
+            double min = vertexDiffs.get(0);
+
+            for (int i = 0; i <= 2; i++) {
+                if (vertexDiffs.get(i) < min) {
+                min = vertexDiffs.get(i);
+                vertex_index = i;
+                }
+            }
+            }
+            return vertex_index;
         }
         
-        private void finalizePID(DetectorParticle p, int pid) {
+       
+        public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
+            double delta_t = abs(p.getVertexTime(DetectorType.FTOF, 2, pid)-event.getEventHeader().getStartTime());
+            double sigma = 0.08;
+            double q = pow((delta_t/sigma),2);
+            return q;
+        }
+
+        
+        public void finalizePID(DetectorParticle p, int pid) {
                         p.setPid(pid);
                         theoryPID = pid;
                         PIDquality = this.PIDQuality(p, pid, event);
+                        p.setPidQuality(PIDquality);
+
         }
                 
 
@@ -222,4 +290,6 @@ public class PIDHypothesis{
     }
 
 }
+
+
 
