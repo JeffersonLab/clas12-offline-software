@@ -234,7 +234,7 @@ public class RecoBankWriter {
                 index++;
             }
         }
-        bank.show();
+        //bank.show();
         return bank;
     }
 
@@ -515,7 +515,7 @@ public class RecoBankWriter {
                 index++;
             }
         }
-        bank.show();
+        //bank.show();
         return bank;
     }
 
