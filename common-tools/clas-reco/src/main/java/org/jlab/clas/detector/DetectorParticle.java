@@ -20,7 +20,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.service.eb.EBConstants;
+
 
 //import org.jlab.service.pid.PIDResult;
 
