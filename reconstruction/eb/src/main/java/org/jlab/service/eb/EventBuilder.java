@@ -231,9 +231,9 @@ public class EventBuilder {
             index = p.getCalorimeterHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
             index = p.getScintillatorHit(responsesFTOF1A, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
-            if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
+            if(index>=0){ p.addResponse(responsesFTOF1A.get(index), true); responsesFTOF1A.get(index).setAssociation(i);}
             index = p.getScintillatorHit(responsesFTOF1B, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
-            if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
+            if(index>=0){ p.addResponse(responsesFTOF1B.get(index), true); responsesFTOF1B.get(index).setAssociation(i);}
         }
         
         for(DetectorParticle p : particles){
@@ -431,4 +431,4 @@ public class EventBuilder {
              this.setCharge(1);
          }
          
-    } 
+    }  
