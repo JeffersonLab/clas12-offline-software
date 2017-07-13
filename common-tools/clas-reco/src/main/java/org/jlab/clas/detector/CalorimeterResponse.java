@@ -37,7 +37,7 @@ public class CalorimeterResponse extends DetectorResponse {
             for(int row = 0; row < nrows; row++){
                 int sector = bank.getByte("sector", row);
                 int layer = bank.getByte("layer", row);
-                CalorimeterResponse  response = new CalorimeterResponse();
+                CalorimeterResponse  response = new CalorimeterResponse(sector,layer,0);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
