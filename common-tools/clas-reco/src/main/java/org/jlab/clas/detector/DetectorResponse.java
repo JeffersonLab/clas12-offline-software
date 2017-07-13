@@ -32,10 +32,13 @@ public class DetectorResponse {
     private Double           detectorEnergy = 0.0;
     private Double           particlePath   = 0.0;
     private int              association    = -1;
+    private int              hitIndex = -1;
     
     public DetectorResponse(){
-        
+        super();
     }
+    
+
     
     public DetectorResponse(int sector, int layer, int component){
         descriptor.setSectorLayerComponent(sector, layer, component);
@@ -63,7 +66,7 @@ public class DetectorResponse {
     }
     
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
-    
+    public int getHitIndex(){return hitIndex;}
     
     public int getAssociation(){ return this.association;}
     public void setAssociation(int asc){ this.association = asc;}
@@ -123,32 +126,20 @@ public class DetectorResponse {
         }
         return responseList;
     }
-    /*
-    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type, double energyThreshold){
-        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
-        if(event.hasBank(bankName)==true){
-            DataBank bank = event.getBank(bankName);
-            int nrows = bank.rows();
-            for(int row = 0; row < nrows; row++){
-                int sector = bank.getByte("sector", row);
-                int  layer = bank.getByte("layer",  row);
-                DetectorResponse  response = new DetectorResponse(sector,layer,0);
-                response.getDescriptor().setType(type);
-                float x = bank.getFloat("x", row);
-                float y = bank.getFloat("y", row);
-                float z = bank.getFloat("z", row);
-                response.setPosition(x, y, z);
-                response.setEnergy(bank.getFloat("energy", row));
-                response.setTime(bank.getFloat("time", row));
-                if(response.getEnergy()>energyThreshold){
-                    responseList.add(response);
-                }
-            }
-        }
+
+    
+    public List<CalorimeterResponse> readCalorimeterEvent(DataEvent event, 
+            String bankName, DetectorType type) {
+        List<CalorimeterResponse> responseList = new ArrayList<CalorimeterResponse>();
         return responseList;
-    }*/
+    }
+    
+    public List<ScintillatorResponse> readScintillatorEvent(DataEvent event, 
+            String bankName, DetectorType type) {
+        List<ScintillatorResponse> responseList = new ArrayList<ScintillatorResponse>();
+        return responseList;
+    }
+    
     /**
      * Reads a HIPO event, constructs list of detector responses then returns only
      * entries with energy above given threshold.
@@ -239,3 +230,4 @@ public class DetectorResponse {
         return str.toString();
     }
 }
+
