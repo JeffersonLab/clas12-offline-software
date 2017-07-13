@@ -185,7 +185,7 @@ public class DetectorData {
 //            bank.setFloat("mass", row, (float) particles.get(row).getMass());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
             bank.setShort("status", row, (short) particles.get(row).getStatus());
-            bank.setFloat("chi2pid", row, (float) 0.0);
+            bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
         }
         return bank;
     }
@@ -481,3 +481,4 @@ public class DetectorData {
    }
    
 }
+
