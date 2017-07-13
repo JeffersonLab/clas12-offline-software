@@ -212,6 +212,10 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
 	return this.colorAxis;
     }
     
+    public Dimension1D getAxis(String layer){
+        return this.viewLayers.get(layer).axisRange;
+    }
+    
     @Override
     public void mouseDragged(MouseEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -396,7 +400,7 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
             }
             return this.axisRange;
         }
-        
+         
         public Dimension2D  getBounds(){
             return this.boundaries;
         }
@@ -458,7 +462,7 @@ public class DetectorView2D extends JPanel implements MouseMotionListener, Mouse
                 if(this.selectedDescriptor.compare(shape.getDescriptor())==true){
                     shape.drawShape(g2d, world, Color.red, Color.black);
                 } else {                 
-                    shape.drawShape(g2d, world, shapeColor, Color.black);                        
+                    shape.drawShape(g2d, world, shapeColor, Color.black);    
                 }
                 
                 //if(this.showHitMap==true){
