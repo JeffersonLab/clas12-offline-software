@@ -50,9 +50,13 @@ public class EBConstants {
     public static final double FTOF1B_TimingRes = 0.0;
     
     public static final int HTCC_NPHE_CUT = 2;
+    public static final int LTCC_NPHE_CUT = 2;
     public static final double HTCC_PION_THRESHOLD = 4.9;
+    public static final double LTCC_LOWER_PION_THRESHOLD = 3.0;
+    public static final double LTCC_UPPER_PION_THRESHOLD = 5.0;
     
     public static final int TRIGGER_ID = 11;
     
     
 }
+
