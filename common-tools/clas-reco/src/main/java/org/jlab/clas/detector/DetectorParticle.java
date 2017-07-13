@@ -919,7 +919,7 @@ public class DetectorParticle implements Comparable {
         if(this.getNphe(DetectorType.HTCC)>5){
             score = score + 1000;
         }
-        if(this.getEnergyFraction(DetectorType.EC)>EBConstants.ECAL_SAMPLINGFRACTION_CUT){
+        if(this.getEnergyFraction(DetectorType.EC)>0.218){
             score = score + 100;
         }
         if(this.hasHit(DetectorType.FTOF,1)==true || this.hasHit(DetectorType.FTOF,2)==true){
