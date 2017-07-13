@@ -268,8 +268,8 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
-        //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12.hipo";
+        //String inputFile="/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         DCHBEngine en = new DCHBEngine();
@@ -285,8 +285,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-        String outputFile="/Users/ziegler/Workdir/Files/GEMC/DC/KPP2trksRecDd.hipo";
-       // String outputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12_rec_slow.hipo";
+        //String outputFile="/Users/ziegler/Workdir/Files/GEMC/DC/KPP2trksRecDd.hipo";
+        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12_rec_slow2.hipo";
         writer.open(outputFile);
 
         long t1 = 0;

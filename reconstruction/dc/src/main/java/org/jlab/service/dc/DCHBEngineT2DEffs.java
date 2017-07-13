@@ -213,8 +213,8 @@ public class DCHBEngineT2DEffs extends ReconstructionEngine {
 		boolean timeToDistanceGridSetting=true;
 		boolean calibRun =true;
 		Constants.setLAYEREFFS(true);
-                
-                
+                Constants.setT0(true);		
+		Constants.setUseMiniStagger(true);
                 
 		// Load the fields
 		//-----------------
@@ -255,7 +255,8 @@ public class DCHBEngineT2DEffs extends ReconstructionEngine {
 		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/ele.run11.rJun7.f1.p0.th1.ph2.evio";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-3.0.1/gemc_eppippim_A0001_gen.evio";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/gemc_generated.hipo";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/DCRB_Feb1File687.hipo";
+		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/DCRB_Feb1File687.hipo";
+                String inputFile="/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
 		//String inputFile = args[0];
 		//String outputFile = args[1];
 		
