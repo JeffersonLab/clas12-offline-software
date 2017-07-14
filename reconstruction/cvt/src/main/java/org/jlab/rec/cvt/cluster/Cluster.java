@@ -168,27 +168,27 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 				
 				int strpNb = -1;
 				int strpNb0 = -1; //before LC
-				if(this.get_Detector()=="SVT")  {	
+				if(this.get_Detector().equalsIgnoreCase("SVT"))  {	
 					// for the SVT the analysis only uses the centroid
 					strpNb = thehit.get_Strip().get_Strip();
 				}
-				if(this.get_Detector()=="BMT")  {
+				if(this.get_Detector().equalsIgnoreCase("BMT"))  { 
 					// for the BMT the analysis distinguishes between C and Z type detectors
-					if(this.get_DetectorType()=="C") { // C-detectors
+					if(this.get_DetectorType().equalsIgnoreCase("C")) { // C-detectors
 						strpNb = thehit.get_Strip().get_Strip();
 						// for C detector the Z of the centroid is calculated
 						weightedZ+= strpEn*thehit.get_Strip().get_Z();
-						weightedZErrSq+= (strpEn*thehit.get_Strip().get_ZErr())*(strpEn*thehit.get_Strip().get_ZErr());
+						weightedZErrSq+= (thehit.get_Strip().get_ZErr())*(thehit.get_Strip().get_ZErr()); 
 					}
-					if(this.get_DetectorType()=="Z") { // Z-detectors
+					if(this.get_DetectorType().equalsIgnoreCase("Z")) { // Z-detectors
 						// for Z detectors Larentz-correction is applied to the strip
 						strpNb = thehit.get_Strip().get_LCStrip();
 						strpNb0 = thehit.get_Strip().get_Strip();
 						// for C detectors the phi of the centroid is calculated for the uncorrected and the Lorentz-angle-corrected centroid
 						weightedPhi+= strpEn*thehit.get_Strip().get_Phi();
-						weightedPhiErrSq+= (strpEn*thehit.get_Strip().get_PhiErr())*(strpEn*thehit.get_Strip().get_PhiErr());						
+						weightedPhiErrSq+= (thehit.get_Strip().get_PhiErr())*(thehit.get_Strip().get_PhiErr());						
 						weightedPhi0+= strpEn*thehit.get_Strip().get_Phi0();
-						weightedPhiErrSq0+= (strpEn*thehit.get_Strip().get_PhiErr0())*(strpEn*thehit.get_Strip().get_PhiErr0());
+						weightedPhiErrSq0+= (thehit.get_Strip().get_PhiErr0())*(thehit.get_Strip().get_PhiErr0());
 					}
 				}
 				
@@ -205,7 +205,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 			    if(strpEn>=Emax) {
 					Emax = strpEn;
 					seed = strpNb;
-					if(this.get_DetectorType()=="Z") 
+					if(this.get_DetectorType().equalsIgnoreCase("Z")) 
 						seed = strpNb0;
 				}
 			    
@@ -225,14 +225,17 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 			phiCent = weightedPhi/totEn;
 			phiCent0 = weightedPhi0/totEn;
 			zCent = weightedZ/totEn;
-			phiErrCent = Math.sqrt(weightedPhiErrSq)/totEn;
-			phiErrCent0 = Math.sqrt(weightedPhiErrSq0)/totEn;
-			zErrCent = Math.sqrt(weightedZErrSq)/totEn;
+			phiErrCent = Math.sqrt(weightedPhiErrSq);
+			phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
+			zErrCent = Math.sqrt(weightedZErrSq);
+			
+			//phiErrCent = Math.sqrt(weightedPhiErrSq);
+			//phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
+			//zErrCent = Math.sqrt(weightedZErrSq);
 		}
 		
 		_TotalEnergy = totEn;
 		_Centroid = stripNumCent;
-
 		if( this.get_DetectorType()=="Z") {
 			set_Centroid0(stripNumCent0);
 			_Phi = phiCent;

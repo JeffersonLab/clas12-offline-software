@@ -1,6 +1,11 @@
 package org.jlab.rec.cvt.fit;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jlab.rec.cvt.Constants;
+
 import Jama.Matrix;
 
 /** 
@@ -59,8 +64,7 @@ public class CircleFitter {
 	 * The fit returns a boolean flag of true if the fit was successful.
      *
 	 */
-	
-	public boolean fitStatus(double [] xm, double [] ym, double [] wm, int NP)
+	public boolean fitStatus(List<Double> xm, List<Double> ym, List<Double> wm, int NP)
 	{
 		double xl, yl, r2l, wt, wx, wy, wr2;  // The local point positions and weight parameters
 	
@@ -84,27 +88,32 @@ public class CircleFitter {
 		Syr2  = 0;
 		Sr2r2 = 0;
 		
-		
+		_chi2 =0;
 		// Find a point on the circle used as a local origin
 		// Use the second hit by default 
 		// 
+	//	_xx0 = xm.get(1);
+	//	_yy0 = ym.get(1);
+	
+	//	_xx0=0.0; //bug
+	//	_yy0=0.0;
+		_xx0 = xm.get(1);
+		_yy0 = ym.get(1);
 		
-		_xx0 = xm[1];
-		_yy0 = ym[1];
+		//double x = _xx0 - xm.get(0);
+		//double y = _yy0 - ym.get(0);
 		
-		//_xx0=0; //bug
-		//_yy0=0;
-		
-		double x = _xx0 - xm[0];
-		double y = _yy0 - ym[0];
+		double x = xm.get(1) - xm.get(0);
+		double y = ym.get(1) - ym.get(0);
 		
 		// Calculate the weight-sum parameters
 		for(int p = 0; p<NP; p++)
 		{
-			xl  = xm[p] - _xx0;
-			yl  = ym[p] - _yy0;
+			
+			xl  = xm.get(p) - _xx0;
+			yl  = ym.get(p) - _yy0;
 			r2l = xl*xl + yl*yl;
-			wt  = wm[p]; 
+			wt  = wm.get(p); 
 			wx  = wt*xl;
 			wy  = wt*yl;
 			wr2 = wt*r2l;
@@ -163,10 +172,8 @@ public class CircleFitter {
 	
 		// the curvature rho= 1/R ; 
 		rhoFit = 2.*kappa/Math.sqrt(1.-4.*delta*kappa);
-		
 	    // the distance of closest approach to the origin
 		docaFit = 2.*delta/(1.+Math.sqrt(1.-4.*delta*kappa));
-		
 	    // The chi2	
 		_chi2  = Sw*((1.+rhoFit*docaFit)*(1.+rhoFit*docaFit))*((Math.sin(phiFit)*Math.sin(phiFit))*Cxx+(Math.cos(phiFit)*Math.cos(phiFit))*Cyy-2.*Math.sin(phiFit)*Math.cos(phiFit)*Cxy-kappa*kappa*Cr2r2);
 		
@@ -179,7 +186,7 @@ public class CircleFitter {
 		double S_delta     = Math.sin(phiFit)*Sxr2 - Math.cos(phiFit)*Syr2;
 		double S_alphalpha = (Math.sin(phiFit)*Math.sin(phiFit))*Sxx - 2.*Math.cos(phiFit)*Math.sin(phiFit)*Sxy + (Math.cos(phiFit)*Math.cos(phiFit))*Syy;
 		
-		double invV_rhorho = 0.25*(Sr2r2/Sw) - docaFit*(S_delta -docaFit*(S_alphalpha+0.5*Sr2-docaFit*(S_alpha-0.25*docaFit*Sw)));
+		double invV_rhorho = 0.25*(Sr2r2) - docaFit*(S_delta -docaFit*(S_alphalpha+0.5*Sr2-docaFit*(S_alpha-0.25*docaFit*Sw)));
 		double invV_rhophi = -u*(0.5*(Math.cos(phiFit)*Sxr2+Math.sin(phiFit)*Syr2)-docaFit*(Sy-0.5*docaFit*S_beta));
 		double invV_phiphi = u*u*((Math.cos(phiFit)*Math.cos(phiFit))*Sxx+(Math.sin(phiFit)*Math.sin(phiFit))*Syy+Math.sin(2.*phiFit)*Sxy);
 		double invV_rhod   = rhoFit*(-0.5*S_delta+docaFit*S_alphalpha)+0.5*u*Sr2-0.5*docaFit*((2.*u+rhoFit*docaFit)*S_alpha-u*docaFit*Sw);
@@ -228,7 +235,6 @@ public class CircleFitter {
 		_chi2  = (1.+_rho*_dca)*(1.+_rho*_dca)*(1.-kappa*delta)*_chi2;
 		
 		// transformation to a new reference point
-		
 		propagatePars(_xref, _yref, x, y, Math.cos(_phi), Math.sin(_phi));
 		
 		return true;
@@ -237,10 +243,13 @@ public class CircleFitter {
 	void propagatePars(double xr, double yr, double x, double y, double cosphi, double sinphi) {
 		setrefcoords(xr,yr);
 		// evaluate the fit parameters at the reference point
-		double X = _xpca -_xref;
-		double Y = _ypca -_yref;
+		//double X = _xpca -_xref;
+		//double Y = _ypca -_yref;
+		double X = _xx0 -_xref;
+		double Y = _yy0 -_yref;
 		
-		double DeltaPerp = X*sinphi - Y*cosphi;
+		
+		double DeltaPerp = X*sinphi - Y*cosphi+_dca;
 		double DeltaParl = X*cosphi + Y*sinphi;
 		double u         = 1. + _rho*_dca;
 		double B         = _rho*X + u*sinphi;
@@ -279,17 +288,17 @@ public class CircleFitter {
         double Vp_dd     = result.get(2,2);
         
         //3. Fill the covariance matrix
+       /* 
         _covr[0] =  Vp_rhorho;
         _covr[1] =  Vp_rhophi;
         _covr[2] =  Vp_rhod;
         _covr[3] =  Vp_phiphi;
         _covr[4] =  Vp_phid;
-        _covr[5] =  Vp_dd;
-
+        _covr[5] =  Vp_dd; 
+        */
         //  new params
 		_phi = Math.atan2(B,C);
 		_dca = A/(1.+U);
-     
 		// get the correct signed curvature
 		double s = Math.cos(_phi)*x + Math.sin(_phi)*y;
 		if (s<0) {
@@ -304,7 +313,6 @@ public class CircleFitter {
 		// update parameters
 		_xpca = _xref + _dca*Math.sin(_phi);
 		_ypca = _yref - _dca*Math.cos(_phi);
-		
 	}
 	public CircleFitPars getFit() {
 		return new CircleFitPars(_xref, _yref, _rho, _phi, _dca, _chi2, _covr);
@@ -319,18 +327,48 @@ public class CircleFitter {
 		
 		return new CircleFitPars(_xref, _yref, _rho, _phi, _dca, _chi2, _covr);
 	}
-	public static void main(String arg[]){
-		CircleFitter cf = new CircleFitter();
-		cf.fitStatus(new double[]{0, 3, 4}, new double[]{1, 2, 3}, new double[]{1,1,1}, 3);
-		System.out.println(cf.getFit().doca());
-		System.out.println(cf.getFit().phi());
-		System.out.println(cf.getFit().rho());
+	
+	public static void main(String[] args) {
+		//List<Double> xm, List<Double> ym, List<Double> wm;
+		List<Double> xm = new ArrayList<Double>();
+		List<Double> ym = new ArrayList<Double>();
+		List<Double> wm = new ArrayList<Double>();
+	//	xm.add((double) 5.);
+	//	ym.add((double) 5.);
+	//	wm.add((double) 1.);
+		xm.add((double) 59.109);
+		ym.add((double) 29.104);
+		wm.add((double) 1.);
+		xm.add((double) 86.68);
+		ym.add((double) 39.06);
+		wm.add((double) 1.);
+		xm.add((double) 112.275);
+		ym.add((double) 46.82);
+		wm.add((double) 1.);
 		
-		cf = new CircleFitter();
-		cf.fitStatus(new double[]{0, -3, -4}, new double[]{1, 2, 3}, new double[]{1,1,1}, 3);
-		System.out.println(cf.getFit().doca());
-		System.out.println(cf.getFit().phi());
-		System.out.println(cf.getFit().rho());
+		List<Double> P0 = new ArrayList<Double>(2);
+		List<Double> P1 = new ArrayList<Double>(2);
+		List<Double> P2 = new ArrayList<Double>(2);
+		 // Find the intersection of the lines joining the innermost to middle and middle to outermost point
+		P0.add(xm.get(0));
+		P1.add(xm.get(1));
+		P2.add(xm.get(2));
+		P0.add(ym.get(0));
+		P1.add(ym.get(1));
+		P2.add(ym.get(2));
+		
+        double ma   = (P1.get(1)-P0.get(1))/(P1.get(0)-P0.get(0));
+        double mb   = (P2.get(1)-P1.get(1))/(P2.get(0)-P1.get(0));
+
+        double xcen = 0.5*(ma*mb*(P0.get(1)-P2.get(1)) + mb*(P0.get(0)+P1.get(0)) -ma*(P1.get(0)+P2.get(0)))/(mb-ma);
+        double ycen = (-1./mb)*(xcen - 0.5*(P1.get(0)+P2.get(0))) + 0.5*(P1.get(1)+P2.get(1));
+
+        double CircRad = Math.sqrt((P0.get(0)-xcen)*(P0.get(0)-xcen)+(P0.get(1)-ycen)*(P0.get(1)-ycen));
+        
+        System.out.println("calculated radius "+CircRad+"  --> pt="+(Constants.LIGHTVEL*5.14*CircRad));
+		
+		CircleFitter _circlefit = new CircleFitter();
+   		 boolean circlefitstatusOK = _circlefit.fitStatus(xm, ym, wm, xm.size()); 
 	}
 	
 }

@@ -2,12 +2,10 @@ package org.jlab.rec.cvt.services;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -16,15 +14,15 @@ import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cluster.ClusterFinder;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.CrossMaker;
-import org.jlab.rec.cvt.cross.HelixCrossListFinder;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.track.TrackCandListFinder;
 import org.jlab.rec.cvt.track.TrackListFinder;
+import org.jlab.rec.cvt.track.TrackSeeder;
+import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 /**
@@ -36,8 +34,17 @@ import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class CVTReconstruction extends ReconstructionEngine {
 
+
+	
+	org.jlab.rec.cvt.svt.Geometry SVTGeom ;
+    org.jlab.rec.cvt.bmt.Geometry BMTGeom ;
+    
     public CVTReconstruction() {
-    	super("CVT", "ziegler", "3.0");
+    	super("CVTTracks", "ziegler", "4.0"); 	
+    	
+    	SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
+	    BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
+	    
     }
 
     String FieldsConfig="";
@@ -45,13 +52,12 @@ public class CVTReconstruction extends ReconstructionEngine {
 	CVTRecConfig config;
 	
     @Override
-	public boolean processDataEvent(DataEvent event) {
+    public boolean processDataEvent(DataEvent event) {
     	config.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
     	
     	this.FieldsConfig=config.getFieldsConfig();
     	this.Run = config.getRun();
-		org.jlab.rec.cvt.bmt.Geometry BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
-	    org.jlab.rec.cvt.svt.Geometry SVTGeom = new org.jlab.rec.cvt.svt.Geometry( );
+		
 	    
 		ADCConvertor adcConv = new ADCConvertor();
 		
@@ -64,11 +70,11 @@ public class CVTReconstruction extends ReconstructionEngine {
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
 		List<Hit>  svt_hits = hitRead.get_SVTHits();
-		if(svt_hits.size()>0)
+		if(svt_hits!=null && svt_hits.size()>0)
 			hits.addAll(svt_hits);
 		
 		List<Hit>  bmt_hits = hitRead.get_BMTHits();
-		if(bmt_hits.size()>0)
+		if(bmt_hits!=null && bmt_hits.size()>0)
 			hits.addAll(bmt_hits);
 		
 		
@@ -97,7 +103,7 @@ public class CVTReconstruction extends ReconstructionEngine {
    			for(int i = 0; i<clusters.size(); i++) {
    				if(clusters.get(i).get_Detector()=="SVT") {
    					SVTclusters.add(clusters.get(i));
-   					SVThits.addAll(clusters.get(i)); 
+   					SVThits.addAll(clusters.get(i));
    				}
    				if(clusters.get(i).get_Detector()=="BMT") {
    					BMTclusters.add(clusters.get(i));
@@ -105,58 +111,26 @@ public class CVTReconstruction extends ReconstructionEngine {
    				}
    			}
 		}
-		//TrackSeeder seeder = new TrackSeeder();
 		
-		//seeder.findSeed(SVTclusters, SVTGeom);
-		
-		List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
-		
-		//3) find the crosses
+		List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();			
 		CrossMaker crossMake = new CrossMaker();
-
 		crosses = crossMake.findCrosses(clusters,SVTGeom);
 		
-		if(clusters.size()==0 ) {
-			
-			return true; //exiting
-		}
-		//clean up svt crosses
-		List<Cross> crossesToRm = crossMake.crossLooperCands(crosses);			
-		crosses.get(0).removeAll(crossesToRm);
+		TrackSeeder trseed  = new TrackSeeder();
+		KFitter kf;
+		List<Track> trkcands = new ArrayList<Track>();		
+		List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
 		
-		if(crosses.size()==0) {
-			// create the clusters and fitted hits banks
-			rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null);
+		for(Seed seed : seeds) {
 			
-			return true; //exiting
-		}
-		// if the looper finder kills all svt crosses save all crosses anyway
-		if(crosses.get(0).size()==0) {
-			List<ArrayList<Cross>> crosses2 = new ArrayList<ArrayList<Cross>>();
-			crosses2.add(0,(ArrayList<Cross>) crossesToRm);
-			crosses2.add(1, crosses.get(1));
-			rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses2, null);
+			kf = new KFitter(seed, SVTGeom, event);
+			kf.runFitter(SVTGeom, BMTGeom);
 			
-			return true;
+			trkcands.add(kf.OutputTrack(seed, SVTGeom));
+			
 		}
 		
-		//Find cross lists for Helix
-		//4) make list of crosses consistent with a track candidate
-		HelixCrossListFinder crossLister = new HelixCrossListFinder();
-		CrossList crosslist = crossLister.findCandidateCrossLists(crosses);
 		
-		if(crosslist.size()==0) {
-			rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
-			
-			return true;
-		}
-		
-		//5) find the list of  track candidates
-		TrackCandListFinder trkcandFinder = new TrackCandListFinder();
-		List<Track> trkcands = new ArrayList<Track>();
-		
-		trkcands = trkcandFinder.getHelicalTrack(crosslist, SVTGeom, BMTGeom); 
-			
 		if(trkcands.size()==0) {
 			rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
 			return true;
@@ -168,12 +142,25 @@ public class CVTReconstruction extends ReconstructionEngine {
 		List<Track> trks = new ArrayList<Track>();
 		trks = trkFinder.getTracks(trkcands, SVTGeom) ;
 		
+		ArrayList<Cross> crossesOntrk = new ArrayList<Cross>();	
+		for(int c = 0; c< trkcands.size(); c++) {
+			crossesOntrk.addAll(trkcands.get(c));
+			
+		}
+		crosses.get(0).removeAll(crosses.get(0));
+		crosses.get(0).addAll(crossesOntrk);
+		
+		//REMOVE THIS
+		//crosses.get(0).addAll(crosses.get(1));
+		//------------------------
 		// set index associations
 		if(trks.size()>0) {
 			// create the clusters and fitted hits banks
 			for(int k1 = 0; k1<trks.size(); k1++) {
 				trks.get(k1).set_Id(k1+1);
 				for(int k2 = 0; k2<trks.get(k1).size(); k2++) {
+					if(trks.get(k1).get(k2).get_Detector().equalsIgnoreCase("BMT"))
+						continue;
 					trks.get(k1).get(k2).set_AssociatedTrackID(trks.get(k1).get_Id()); // associate crosses
 					trks.get(k1).get(k2).get_Cluster1().set_AssociatedTrackID(trks.get(k1).get_Id()); // associate cluster1 in cross
 					trks.get(k1).get(k2).get_Cluster2().set_AssociatedTrackID(trks.get(k1).get_Id()); // associate cluster2 in cross					
@@ -186,44 +173,42 @@ public class CVTReconstruction extends ReconstructionEngine {
 				}
 			}
 			rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, trks);
-		}
+		} 
 		
 		return true;
 		
-	}
-	@Override
-	public boolean init() {
+    }
+
+
+	
+    public boolean init() {
 		
 		TrkSwimmer.getMagneticFields();
 		config = new CVTRecConfig();
 		return true;
 	}
-
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		
-		List<String> inputFiles = new ArrayList<String>();
-		inputFiles.add( "/Users/ziegler/Workdir/Files/GEMC/CVT/prot.hipo");
-		//inputFiles.add( "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/svt123_decoded_000423t.hipo");
+		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/YurisTest.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_1.1.hipo";
+		
+		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+		
 		CVTReconstruction en = new CVTReconstruction();
 		en.init();
 		
 		int counter = 0;
 		
-		 //HipoDataSource reader = new HipoDataSource();
-        // reader.open(inputFile);
+		 HipoDataSource reader = new HipoDataSource();
+         reader.open(inputFile);
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 
-         String outputFile="/Users/ziegler/Workdir/Distribution/svtVtx.hipo";
+		 String outputFile="/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_1_rec0.hipo";
 		 writer.open(outputFile);
 		
 		long t1=0;
-		for(int k = 0; k < inputFiles.size(); k++) {
-			HipoDataSource reader = new HipoDataSource();
-		    reader.open(inputFiles.get(k));
-		        
-		    while(reader.hasEvent() ){		
+		while(reader.hasEvent() ){		
 			counter++;
 		
 			DataEvent event = reader.getNextEvent();
@@ -231,31 +216,33 @@ public class CVTReconstruction extends ReconstructionEngine {
 				t1 = System.currentTimeMillis();
 			
 		
-			
+			// Processing    
 			en.processDataEvent(event);
+			writer.writeEvent(event);
 			
 			System.out.println("  EVENT "+counter);
-			if(counter>11) break;
+			/*
+			 * event.show();
+			if(event.hasBank("CVTRec::Tracks")) {
+				 HipoDataEvent de = (HipoDataEvent) event;
+				 HipoEvent dde = de.getHipoEvent();
+				 HipoGroup group = dde.getGroup("CVTRec::Tracks");
+				 dde.show();
+				 dde.removeGroup("CVTRec::Tracks");
+				 dde.show();
+				 dde.writeGroup(group);
+				 dde.show();
+			}
+			*/
+			//if(counter>3) break;
 			//event.show();
 			//if(counter%100==0)
 			//System.out.println("run "+counter+" events");
 			
-					
-			if(event.hasBank("BSTRec::Crosses") ) {
-				DataBank bnk = event.getBank("BSTRec::Crosses");
-				if(bnk.rows()>2) {
-				
-					//event.show();
-					writer.writeEvent(event); 
-					event.show();
-				}
-			}
-		    }
 		}
 		writer.close();
 		double t = System.currentTimeMillis()-t1;
 		System.out.println(t1+" TOTAL  PROCESSING TIME = "+(t/(float)counter));
 	 }
 	
-
 }

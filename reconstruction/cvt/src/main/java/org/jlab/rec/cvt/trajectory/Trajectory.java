@@ -43,7 +43,7 @@ public class Trajectory extends ArrayList<Cross> {
 	
 	// Sector for each region
 	private int[] _Sector = new int[4];      							
-	private int _Id;									   					
+	private int _Id = -1;									   					
 	private ArrayList<StateVec> _Trajectory;
 	
 	

@@ -39,12 +39,12 @@ public class Geometry {
 		
 		public Point3D getPlaneModuleOrigin(int sector, int layer) {
 			//shift the local origin to the physical orign instead of active area
-			Point3D point0 = new Point3D(transformToFrame( sector,  layer, 0, 0, 0, "lab", ""));
+			Point3D point0 = new Point3D(transformToFrame( sector,  layer, -1, 0, 0, "lab", ""));
 			return point0;
 		}
 		public Point3D getPlaneModuleEnd(int sector, int layer) {
 			//shift the local origin to the physical orign instead of active area
-			Point3D point0 = new Point3D(transformToFrame( sector,  layer, Constants.ACTIVESENWIDTH, 0, 0, "lab", ""));
+			Point3D point0 = new Point3D(transformToFrame( sector,  layer, Constants.ACTIVESENWIDTH+1, 0, 0, "lab", ""));
 			return point0;
 		}
 		
@@ -311,13 +311,14 @@ public class Geometry {
 					}	
 				}
 				s=newStrip;
+				
 				// charge sharing digitization routine in GEMC
 				/*if(sdelta>(P+z*Math.tan(alpha))/4.)
 					s= newStrip-0.5;
 				if(sdelta<-(P+z*Math.tan(alpha))/4.)
 					s= newStrip+0.5;
 				//s=(-x+b+alpha*z)/(alpha*z+P); */
-				
+				//System.out.println(" nearest strip "+s+" at ("+X+", "+Y+", "+Z+"); delta = "+delta);
 			}
 			if(layer%2==0) { 
 				 //layers 2,4,6 == top ==j ==>(2) : regular configuration
@@ -356,10 +357,13 @@ public class Geometry {
 				if(sdelta<-(P+z*Math.tan(alpha))/4.)
 					s= newStrip-0.5;
 				//s=(x+alpha*z)/(alpha*z+P); */
-				
+				//System.out.println(" nearest strip "+s+" at ("+X+", "+Y+", "+Z+"); delta = "+delta);
 			}	
-			if(s<0.5)
+			if(s<=1)
 				s=1;
+			if(s>=256)
+				s=256;
+			
 			//System.out.println(" layer "+layer+" sector "+sect+" strip "+s);
 			return s;
 		}

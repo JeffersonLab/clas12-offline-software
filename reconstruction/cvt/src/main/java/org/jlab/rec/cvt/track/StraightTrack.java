@@ -30,7 +30,7 @@ public class StraightTrack extends Trajectory {
 	 */
 	public void update_Crosses(double fit_yxslope, double fit_yzslope, Geometry geo) {
 		for(Cross c : this) {
-			if(c.get_Detector()=="SVT") //only update for the svt
+			if(c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
 				update_Cross(c, fit_yxslope, fit_yzslope, geo);
 			
 		}
@@ -54,6 +54,7 @@ public class StraightTrack extends Trajectory {
 		if(trkDir!=null) {			
 			cross.set_CrossParamsSVT(trkDir, geo);				
 		}
+		
 	}
 
 	

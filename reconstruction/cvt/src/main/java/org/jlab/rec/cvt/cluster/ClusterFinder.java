@@ -59,19 +59,16 @@ public class ClusterFinder  {
 			int si  = 0;  // strip index in the loop
 			
 			// looping over all strips
-			while(si<nstrip)
-			{
+			while(si<nstrip) {
 				// if there's a hit, it's a cluster candidate
-				if(HitArray[si][l] != null)
-				{
+				if(HitArray[si][l] != null || (si<nstrip-1 && HitArray[si+1][l] !=null) ) {
 					// vector of hits in the cluster candidate
 					ArrayList<FittedHit> hits = new ArrayList<FittedHit>();
 					
 					// adding all hits in this and all the subsequent
 					// strip until there's a strip with no hit
-					while(HitArray[si][l] != null  && si<nstrip)
-					{
-						if(HitArray[si][l].get_Status()!=-1) { // continue clustering skipping over bad hit
+					while((si<nstrip-1 && HitArray[si+1][l] !=null)  || (HitArray[si][l] != null  && si<nstrip)) {
+						if(HitArray[si][l] != null) { // continue clustering skipping over bad hit
 							FittedHit hitInCls = new FittedHit(HitArray[si][l].get_Detector(), HitArray[si][l].get_DetectorType(), HitArray[si][l].get_Sector(),HitArray[si][l].get_Layer(),HitArray[si][l].get_Strip());
 							hitInCls.set_Id(HitArray[si][l].get_Id());
 							

@@ -4,6 +4,7 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class CVTRecConfig {
@@ -42,6 +43,7 @@ public class CVTRecConfig {
 			System.out.println("  CHECK CONFIGS..............................."+FieldsConfig+" = ? "+newConfig);
 			Constants.Load(isCosmics, isSVTonly, (double)bank.getFloat("solenoid",0)); 
 			// Load the Fields
+			System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
 			TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid",0)); // something changed in the configuration
 			this.setFieldsConfig(newConfig);
 		}
@@ -53,6 +55,7 @@ public class CVTRecConfig {
 		
 		if(Run!=newRun) {
 			System.out.println(" ........................................ trying to connect to db ");
+			CCDBConstantsLoader.Load(10);
 			DatabaseConstantProvider cp = new DatabaseConstantProvider( 10, "default");
 			String ccdbPath = "/geometry/cvt/svt/";
 			cp.loadTable( ccdbPath +"svt");

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -21,10 +20,15 @@ import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.StraightTrack;
+import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackCandListFinder;
-import org.jlab.rec.cvt.trajectory.StateVec;
+import org.jlab.rec.cvt.track.TrackListFinder;
+import org.jlab.rec.cvt.track.TrackSeeder;
+import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
+import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio format
@@ -35,8 +39,17 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 public class CVTCosmicsReconstruction extends ReconstructionEngine {
 
+
+	
+	org.jlab.rec.cvt.svt.Geometry SVTGeom ;
+    org.jlab.rec.cvt.bmt.Geometry BMTGeom ;
+    
     public CVTCosmicsReconstruction() {
-    	super("CVTCosmics", "ziegler", "3.0"); 	
+    	super("CVTTracks", "ziegler", "4.0"); 	
+    	
+    	SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
+	    BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
+	    
     }
 
     String FieldsConfig="";
@@ -49,8 +62,7 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
     	
     	this.FieldsConfig=config.getFieldsConfig();
     	this.Run = config.getRun();
-		org.jlab.rec.cvt.bmt.Geometry BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
-	    org.jlab.rec.cvt.svt.Geometry SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
+		
 	    
 		ADCConvertor adcConv = new ADCConvertor();
 		
@@ -79,7 +91,6 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 			return true;
 		}
 		
-		
 		List<Cluster> clusters = new ArrayList<Cluster>();
 		List<Cluster> SVTclusters = new ArrayList<Cluster>();
 		List<Cluster> BMTclusters = new ArrayList<Cluster>();
@@ -88,6 +99,17 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 		ClusterFinder clusFinder = new ClusterFinder();
 		clusters = clusFinder.findClusters(hits);
 		
+		// test
+	/*	for(Hit h0 : hits) {
+			FittedHit h = new FittedHit(h0.get_Detector(), h0.get_DetectorType(), h0.get_Sector(),h0.get_Layer(),h0.get_Strip());
+			Cluster c = new Cluster(h.get_Detector(), h.get_DetectorType(), h.get_Sector(),h.get_Layer(), 0); 					
+			c.set_Id(0);
+			// add hits to the cluster
+			c.add(h);
+			c.calc_CentroidParams();
+			clusters.add(c);
+		
+		} */
 		if(clusters.size()==0) {
 			return true;
 		}
@@ -95,74 +117,44 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 		// fill the fitted hits list.
 		if(clusters.size()!=0) {   			
    			for(int i = 0; i<clusters.size(); i++) {
-   				if(clusters.get(i).get_Detector()=="SVT") {
+   				if(clusters.get(i).get_Detector().equalsIgnoreCase("SVT")) {
    					SVTclusters.add(clusters.get(i));
    					SVThits.addAll(clusters.get(i));
    				}
-   				if(clusters.get(i).get_Detector()=="BMT") {
+   				if(clusters.get(i).get_Detector().equalsIgnoreCase("BMT")) {
    					BMTclusters.add(clusters.get(i));
    					BMThits.addAll(clusters.get(i));
    				}
    			}
 		}
-		List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
 		
-		//3) find the crosses
+		List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();			
 		CrossMaker crossMake = new CrossMaker();
-
 		crosses = crossMake.findCrosses(clusters,SVTGeom);
-		
-		if(clusters.size()==0 ) {
-			
-			return true; //exiting
-		}
-		
-		//clean up svt crosses
-		List<Cross> crossesToRm = crossMake.crossLooperCands(crosses);		
-		crosses.get(0).removeAll(crossesToRm);
-		/*
-		for(int j =0; j< crosses.get(0).size(); j++) {
-			for(int j2 =0; j2< crossesToRm.size(); j2++) {
-				if(crosses.get(0).get(j).get_Id()==crossesToRm.get(j2).get_Id())
-					crosses.get(0).remove(j);
-				
-			}
-		}
-		*/
 		
 		if(crosses.size()==0 ) {
 			// create the clusters and fitted hits banks
 			rbc.appendCVTCosmicsBanks( event, SVThits, BMThits, SVTclusters, BMTclusters, null, null);
 			return true; //exiting
 		}
-		// if the looper finder kills all svt crosses save all crosses anyway
-		if(crosses.get(0).size()==0) {
-			List<ArrayList<Cross>> crosses2 = new ArrayList<ArrayList<Cross>>();
-			crosses2.add(0,(ArrayList<Cross>) crossesToRm);
-			crosses2.add(1, crosses.get(1));
-			rbc.appendCVTCosmicsBanks( event, SVThits, BMThits, SVTclusters, BMTclusters, crosses2, null);
-			
-			return true;
-		}
-		//Find cross lists for Cosmics
 		//4) make list of crosses consistent with a track candidate
 		StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
-		CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom);
-		
+		CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
+				BMTGeom, 3);
 		if(crosslist==null || crosslist.size()==0) {
 			// create the clusters and fitted hits banks
 			rbc.appendCVTCosmicsBanks( event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
 			
 			return true;
-		}
+		} 
 		
-		//5) find the list of  track candidates
 		List<StraightTrack> cosmics = new ArrayList<StraightTrack>();
 		
 		TrackCandListFinder trkcandFinder = new TrackCandListFinder();
-		cosmics = trkcandFinder.getStraightTracks(crosslist, crosses.get(1), SVTGeom, BMTGeom);
-		
-				
+		cosmics = trkcandFinder.getStraightTracks(crosslist, crosses.get(1), SVTGeom, BMTGeom);	
+		//REMOVE THIS
+		//crosses.get(0).addAll(crosses.get(1));
+		//------------------------
 		if(cosmics.size()==0) {
 			rbc.appendCVTCosmicsBanks( event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
 			
@@ -170,74 +162,68 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 		}
 			
 		if(cosmics.size()>0) {		
-			for(int k1 = 0; k1<cosmics.size(); k1++) {
+			for(int k1 = 0; k1<cosmics.size(); k1++) {				
 				cosmics.get(k1).set_Id(k1+1);
 				for(int k2 = 0; k2<cosmics.get(k1).size(); k2++) {
 					cosmics.get(k1).get(k2).set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate crosses
-					cosmics.get(k1).get(k2).get_Cluster1().set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate cluster1 in cross
-					cosmics.get(k1).get(k2).get_Cluster2().set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate cluster2 in cross					
-					for(int k3 = 0; k3<cosmics.get(k1).get(k2).get_Cluster1().size(); k3++) { //associate hits
-						cosmics.get(k1).get(k2).get_Cluster1().get(k3).set_AssociatedTrackID(cosmics.get(k1).get_Id());
-					}
-					for(int k4 = 0; k4<cosmics.get(k1).get(k2).get_Cluster2().size(); k4++) { //associate hits
-						cosmics.get(k1).get(k2).get_Cluster2().get(k4).set_AssociatedTrackID(cosmics.get(k1).get_Id());
-					}
+					if(cosmics.get(k1).get(k2).get_Cluster1()!=null)
+						cosmics.get(k1).get(k2).get_Cluster1().set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate cluster1 in cross
+					if(cosmics.get(k1).get(k2).get_Cluster2()!=null)
+						cosmics.get(k1).get(k2).get_Cluster2().set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate cluster2 in cross	
+					if(cosmics.get(k1).get(k2).get_Cluster1()!=null)
+						for(int k3 = 0; k3<cosmics.get(k1).get(k2).get_Cluster1().size(); k3++) { //associate hits
+							cosmics.get(k1).get(k2).get_Cluster1().get(k3).set_AssociatedTrackID(cosmics.get(k1).get_Id());
+						}
+					if(cosmics.get(k1).get(k2).get_Cluster2()!=null)
+						for(int k4 = 0; k4<cosmics.get(k1).get(k2).get_Cluster2().size(); k4++) { //associate hits
+							cosmics.get(k1).get(k2).get_Cluster2().get(k4).set_AssociatedTrackID(cosmics.get(k1).get_Id());
+						}
 				}
 				trkcandFinder.matchClusters(SVTclusters, new TrajectoryFinder(), SVTGeom, BMTGeom, true,
 						cosmics.get(k1).get_Trajectory(), k1+1);
 			}
 			
+			
 			//4)  ---  write out the banks			
 			rbc.appendCVTCosmicsBanks( event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
 		}
-		return true;
-	}
-	
-
 		
+		return true;
+		
+    }
+
 
 	
-	public boolean init() {
-		// Load the Constants
+    public boolean init() {
+		
+		TrkSwimmer.getMagneticFields();
+		TrkSwimmer.setMagneticFieldScale(0.0);
 		config = new CVTRecConfig();
 		return true;
 	}
-	
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		
-		List<String> inputFiles = new ArrayList<String>();
-		inputFiles.add( "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/svt123_decoded_000423t.hipo");
-		//inputFiles.add( "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/svt809_decoded0.hipo");
-		//inputFiles.add( "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/svt809_decoded32.hipo");
-		//inputFiles.add( "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/svt809_decoded33.hipo");
-		//inputFiles.add( "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/svt809_decoded35.hipo");
-		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";
-		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
-		//String inputFile = args[0];
-		//String outputFile = args[1];
-		
-		//System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+		//String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cosmics_cvt_skim.hipo";
+		//String inputFile = "/Users/ziegler/Workdir//Files/Data/DecodedData/CVT/CosmicRun475.hipo";
+		String inputFile = "/Users/ziegler/Workdir//Files/Data/DecodedData/CVT/474deco.hipo";
+		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 		
 		CVTCosmicsReconstruction en = new CVTCosmicsReconstruction();
 		en.init();
 		
 		int counter = 0;
 		
-		 //HipoDataSource reader = new HipoDataSource();
-        // reader.open(inputFile);
+		 HipoDataSource reader = new HipoDataSource();
+         reader.open(inputFile);
 		
          HipoDataSync writer = new HipoDataSync();
 		//Writer
-		 //String outputFile="/Users/ziegler/Workdir/Distribution/svt809_decodedRange.rec.hipo";
-         String outputFile="/Users/ziegler/Workdir/Distribution/svt123.hipo";
+		 //String outputFile="/Users/ziegler/Workdir/Files/GEMC/CVT/cosmics_cvt_skimRec2.hipo";
+         String outputFile = "/Users/ziegler/Workdir//Files/Data/CosmicRun474Rec.hipo";
 		 writer.open(outputFile);
 		
 		long t1=0;
-		for(int k = 0; k < inputFiles.size(); k++) {
-			HipoDataSource reader = new HipoDataSource();
-		    reader.open(inputFiles.get(k));
-		        
-		    while(reader.hasEvent() ){		
+		while(reader.hasEvent() ){		
 			counter++;
 		
 			DataEvent event = reader.getNextEvent();
@@ -245,36 +231,33 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 				t1 = System.currentTimeMillis();
 			
 		
-			
+			// Processing    
 			en.processDataEvent(event);
+			writer.writeEvent(event);
 			
 			System.out.println("  EVENT "+counter);
-		//	if(counter>17) break;
+			/*
+			 * event.show();
+			if(event.hasBank("CVTRec::Tracks")) {
+				 HipoDataEvent de = (HipoDataEvent) event;
+				 HipoEvent dde = de.getHipoEvent();
+				 HipoGroup group = dde.getGroup("CVTRec::Tracks");
+				 dde.show();
+				 dde.removeGroup("CVTRec::Tracks");
+				 dde.show();
+				 dde.writeGroup(group);
+				 dde.show();
+			}
+			*/
+			if(counter>200) break;
 			//event.show();
 			//if(counter%100==0)
 			//System.out.println("run "+counter+" events");
 			
-					
-			//if(event.hasBank("BSTRec::Crosses") ) {
-			//	DataBank bnk = event.getBank("BSTRec::Crosses");
-				//if(bnk.rows()>2) {
-				
-					//event.show();
-					writer.writeEvent(event); 
-					event.show();
-				//}
-			//}
-		    }
 		}
 		writer.close();
 		double t = System.currentTimeMillis()-t1;
 		System.out.println(t1+" TOTAL  PROCESSING TIME = "+(t/(float)counter));
 	 }
-	static int Sensor(int layer, int sector) {
-        int[] shift = {0, 10, 20, 34, 48, 66, 84, 108};
-        if (layer == 0 || sector == 0) {
-            return -1;
-        }
-        return sector + shift[layer - 1] - 1;
-    }
+	
 }

@@ -224,7 +224,7 @@ public class HelixCrossListFinder {
     	ave_seed_rad=ave_seed_rad/(double)trkCand.radius.length;
     	
 		double z_bmt = bmt_Ccross.get_Point().z();
-		double r_bmt = org.jlab.rec.cvt.bmt.Constants.CRCRADIUS[bmt_Ccross.get_Region()-1];
+		double r_bmt = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_Ccross.get_Region()-1];
 		double dzdr_bmt = z_bmt/r_bmt;
 		if(Math.abs(1-(dzdrsum/(double)(trkCand.size()))/((dzdrsum+dzdr_bmt)/(double)(trkCand.size()+1)))<=Constants.dzdrcut)  // add this to the track
 			pass =true;

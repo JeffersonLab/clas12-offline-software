@@ -126,16 +126,16 @@ public class TrajectoryFinder {
 			
 			int BMTRegIdx = (l - org.jlab.rec.cvt.svt.Constants.NLAYR)/2;
 			
-			if(org.jlab.rec.cvt.bmt.Constants.CRCRADIUS[BMTRegIdx]==0)
+			if(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx]==0)
 				continue; // Use the correctly defined geometry
 			
 			double R = 0;
 			
-			if(l%2==0) {
-				R = org.jlab.rec.cvt.bmt.Constants.CRZRADIUS[BMTRegIdx]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+			if(org.jlab.rec.cvt.bmt.Geometry.getZorC(l+1)==1) {
+				R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
 			}
-			if(l%2==1) {
-				R = org.jlab.rec.cvt.bmt.Constants.CRCRADIUS[BMTRegIdx]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+			if(org.jlab.rec.cvt.bmt.Geometry.getZorC(l+1)==0) {
+				R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
 			}
 			Point3D InterPoint = helix.getPointAtRadius(R);
 			Vector3D trkDir = helix.getTrackDirectionAtRadius(R);
@@ -410,7 +410,6 @@ public class TrajectoryFinder {
 	
 	public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
 			StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
-		int l = layer -1;
 		
 		if(detector=="SVT") {
 			double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(),stVec.y(), stVec.z()));
@@ -427,7 +426,7 @@ public class TrajectoryFinder {
 			}
 		}
 		if(detector=="BMT")	{
-			if( l%2==1) { //C-detector measuring z
+			if(org.jlab.rec.cvt.bmt.Geometry.getZorC(layer)==0) { //C-detector measuring z
 				for(FittedHit h1 : cluster) {
 					// calculate the hit residuals
 					double docaToTrk = stVec.z()-h1.get_Strip().get_Z();
@@ -438,11 +437,11 @@ public class TrajectoryFinder {
 						h1.set_TrkgStatus(2);
 				}
 			}
-			if(l%2==0) { //Z-detector measuring phi
+			if(org.jlab.rec.cvt.bmt.Geometry.getZorC(layer)==1) { //Z-detector measuring phi
 				// calculate the hit residuals
 				for(FittedHit h1 : cluster) {			
-					double StripX = org.jlab.rec.cvt.bmt.Constants.CRZRADIUS[(cluster.get_Layer()+1)/2-1]*Math.cos(h1.get_Strip().get_Phi());
-					double StripY = org.jlab.rec.cvt.bmt.Constants.CRZRADIUS[(cluster.get_Layer()+1)/2-1]*Math.sin(h1.get_Strip().get_Phi());
+					double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer()+1)/2-1]*Math.cos(h1.get_Strip().get_Phi());
+					double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer()+1)/2-1]*Math.sin(h1.get_Strip().get_Phi());
 					
 					double Sign = Math.signum(Math.atan2(StripY-stVec.y(),StripX-stVec.x()));
 					double docaToTrk = Sign*Math.sqrt( (StripX-stVec.x())*(StripX-stVec.x()) + (StripY-stVec.y())*(StripY-stVec.y()) );
@@ -629,10 +628,10 @@ public class TrajectoryFinder {
 		inters_bottom[3]=Double.NaN;
 		
 		double R = 0;
-		if(l%2==1)
-			R = org.jlab.rec.cvt.bmt.Constants.CRCRADIUS[l/2]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
-		if(l%2==0)
-			R = org.jlab.rec.cvt.bmt.Constants.CRZRADIUS[l/2]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+		if(org.jlab.rec.cvt.bmt.Geometry.getZorC(l+1)==0)
+			R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[l/2]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+		if(org.jlab.rec.cvt.bmt.Geometry.getZorC(l+1)==1)
+			R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[l/2]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
 	    // solve for intersection of line with cylinder of radius R
 		// x = _yxslope2*y +_yxinterc2; x^2+y^2 = R^2
 		double Delta = _yxslope2*_yxslope2*_yxinterc2*_yxinterc2 + (R*R-_yxinterc2*_yxinterc2)*(_yxslope2*_yxslope2+1);		
