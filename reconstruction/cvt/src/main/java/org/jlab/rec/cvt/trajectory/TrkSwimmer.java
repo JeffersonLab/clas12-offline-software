@@ -222,7 +222,7 @@ public class TrkSwimmer {
 		
 		
 		if (solenoid != null) {
-			
+			System.out.println("                     SOLENOID MAP LOADED                    !!! ");
 			sField = solenoid;
 		}
 		FieldsLoaded = true;

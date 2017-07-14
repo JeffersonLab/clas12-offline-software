@@ -445,15 +445,23 @@ public class RecoBankWriter {
 		if(trks.size()==0)
 			return null;
 		
-		DataBank bank =  event.createBank("CVTRec::Trajectory",20*trks.size()); // 8 SVT layer + 2 BMT layers for each hemisphere
-	
 		int k =0;
+		for(int i =0; i< trks.size(); i++) {
+			if(trks.get(i).get_Trajectory()==null)
+				continue;
+			if(trks.get(i).get_Trajectory()!=null)  		    	
+				k+=trks.get(i).get_Trajectory().size();	    		
+			
+		}
+		DataBank bank =  event.createBank("CVTRec::Trajectory",k); 
+		
+		k=0;
 		for(int i =0; i< trks.size(); i++) {
 			if(trks.get(i).get_Trajectory()==null)
 				continue;
 			for(StateVec stVec : trks.get(i).get_Trajectory())  {
 		    		
-    			bank.setInt("ID", k, stVec.get_ID()); 
+    			//bank.setInt("ID", k, stVec.get_ID()); 
     			bank.setInt("LayerTrackIntersPlane", k, stVec.get_SurfaceLayer());
     			bank.setInt("SectorTrackIntersPlane", k, stVec.get_SurfaceSector());
 				bank.setFloat("XtrackIntersPlane", k, (float) stVec.x());

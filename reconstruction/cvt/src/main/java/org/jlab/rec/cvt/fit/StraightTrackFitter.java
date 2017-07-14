@@ -1,5 +1,8 @@
 package org.jlab.rec.cvt.fit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.trajectory.Ray;
@@ -53,7 +56,7 @@ public class StraightTrackFitter {
 	     * @param errZ array j
 	     * @return
 	     */    
-	    public FitStatus fit(double[] X, double[] Y, double[] Z, double Y_prime[], double[] errRt, double[] errY_prime, double[] errZ) {    
+	    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Y_prime, List<Double> errRt, List<Double> errY_prime, List<Double> errZ) {    
 	    	
 	        //  Initialize the various fitter outputs
 	        
@@ -61,15 +64,15 @@ public class StraightTrackFitter {
 		    _linefitY_primeZ  = null;
 		    set_rayfitoutput(null);
  
-	   		 for(int j=0; j<X.length;j++){
-	   			 if(errRt[j]==0 ) {
+	   		 for(int j=0; j<errRt.size();j++){
+	   			 if(errRt.get(j)==0 ) {
 	   				 System.err.println("Point errors ill-defined --  fit exiting");
 	   				 return FitStatus.LineFitFailed;	   				
 	   			 }	   			 
 	   		 }
 	    
-	   		for(int j=0; j<Z.length;j++){
-	   			 if(errZ[j]==0 ) {
+	   		for(int j=0; j<errZ.size();j++){
+	   			 if(errZ.get(j)==0 ) {
 	   				 System.err.println("Point errors ill-defined --  fit exiting");
 	   				 return FitStatus.LineFitFailed;	   				
 	   			 }	   			 
@@ -77,15 +80,14 @@ public class StraightTrackFitter {
 	   			 
 	   		 // fit the points 
 	   		 // check the status
-	   		 
-	   		_linefitYX = new LineFitter();
 	   		
-		   	boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new double[X.length], X.length);
+	   		_linefitYX = new LineFitter();	   		
+		   	boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new ArrayList<Double>(X.size()), X.size());
 
 		     //Line fit
-		     _linefitY_primeZ = new LineFitter();
-		   	
-		   	boolean linefitstatusRZOK = _linefitY_primeZ.fitStatus(Y_prime, Z, errY_prime, errZ, Y_prime.length);
+		   
+		     _linefitY_primeZ = new LineFitter();		     
+		   	boolean linefitstatusRZOK = _linefitY_primeZ.fitStatus(Y_prime, Z, errY_prime, errZ, Y_prime.size());
 		    	
 	        if (!linefitstatusXYOK || !linefitstatusRZOK) {
 	            return FitStatus.LineFitFailed;

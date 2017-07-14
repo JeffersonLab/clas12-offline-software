@@ -280,6 +280,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		
 		Cluster inlayerclus  = this.get_Cluster1();
 		Cluster outlayerclus = this.get_Cluster2();
+		if(inlayerclus==null || outlayerclus==null)
+			return;
 		
 		double[] Params = geo.getCrossPars(outlayerclus.get_Sector(), outlayerclus.get_Layer(), 
 				inlayerclus.get_Centroid(), outlayerclus.get_Centroid(), "lab", dirAtBstPlane);
@@ -443,4 +445,15 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
   	}
   	
 	}
+
+	public boolean isInFiducial(Geometry svt_geo) {
+		boolean pass = true;
+		Point3D LC = svt_geo.transformToFrame(this.get_Sector(), this.get_Cluster1().get_Layer(), this.get_Point().x(), this.get_Point().y(),  this.get_Point().z(), "local", "");
+		if ( ( (LC.x()<-0.10 || LC.x()>Constants.ACTIVESENWIDTH+0.10) ) || 
+				((LC.z()<-1 || LC.z()>Constants.MODULELENGTH+1) ))
+			pass=false;
+		return pass;
+	}
+
+	
 }

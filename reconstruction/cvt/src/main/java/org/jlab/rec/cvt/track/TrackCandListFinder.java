@@ -10,17 +10,14 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
+import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.fit.StraightTrackFitter;
 import org.jlab.rec.cvt.hit.FittedHit;
-import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
-
-import trackfitter.fitter.LineFitPars;
-import trackfitter.fitter.LineFitter;
  
 
 /**
@@ -31,9 +28,27 @@ import trackfitter.fitter.LineFitter;
 
 public class TrackCandListFinder {
 	
-	public TrackCandListFinder() {					
+	public TrackCandListFinder() {		
+		X			= new ArrayList<Double>()  ;			
+		Y 		 	= new ArrayList<Double>()  ;	
+		Z 		 	= new ArrayList<Double>()  ;	
+		Rho		 	= new ArrayList<Double>()  ;			
+		ErrZ  		= new ArrayList<Double>()  ;		
+		ErrRho  	= new ArrayList<Double>()  ;		
+		ErrRt  		= new ArrayList<Double>()  ;		
+		Y_prime  	= new ArrayList<Double>()  ;			
+		ErrY_prime  = new ArrayList<Double>()  ;	
 	}
 
+	 private List<Double> X ;			// x coordinate array
+	 private List<Double> Y ;			// y coordinate array (same size as X array)
+	 private List<Double> Z ;			// z coordinate array
+	 private List<Double> Rho ;			// rho (= sqrt(x^2 + y^2) for SVT; detector radius for BMT) coordinate array (same size as Z array)
+	 private List<Double> ErrZ ;		// z uncertainty (same size as Z array)
+	 private List<Double> ErrRho ;		// rho uncertainty (same size as Z array)
+	 private List<Double> ErrRt ;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
+	 private List<Double> Y_prime ;			// y coordinate array 
+	 private List<Double> ErrY_prime ;	
 	/**
 	 * A class representing the measurement variables used to fit a helical track
 	 * The track fitting algorithm employs the Karimaki algorithm to determine the circle fit paramters: the doca to the z axis, the phi at the doca, the curvature;
@@ -42,21 +57,21 @@ public class TrackCandListFinder {
 	 *
 	 */
 	private class HelixMeasurements {
-		double[] _X ;			// x coordinate array
-		double[] _Y ;			// y coordinate array (same size as X array)
-		double[] _Z ;			// z coordinate array
-		double[] _Rho ;			// rho (= sqrt(x^2 + y^2) for SVT; detector radius for BMT) coordinate array (same size as Z array)
-		double[] _ErrZ ;		// z uncertainty (same size as Z array)
-		double[] _ErrRho ;		// rho uncertainty (same size as Z array)
-		double[] _ErrRt ;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
+		 List<Double> _X ;			// x coordinate array
+		 List<Double> _Y ;			// y coordinate array (same size as X array)
+		 List<Double> _Z ;			// z coordinate array
+		 List<Double> _Rho ;		// rho (= sqrt(x^2 + y^2) for SVT; detector radius for BMT) coordinate array (same size as Z array)
+		 List<Double> _ErrZ ;		// z uncertainty (same size as Z array)
+		 List<Double> _ErrRho ;		// rho uncertainty (same size as Z array)
+		 List<Double> _ErrRt ;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
 		
-		HelixMeasurements(double[] X ,
-					 double[] Y ,
-					 double[] Z ,
-					 double[] Rho ,
-					 double[] ErrZ ,
-					 double[] ErrRho ,
-					 double[] ErrRt ) {
+		HelixMeasurements(List<Double> X,
+				List<Double> Y ,
+				List<Double> Z ,
+				List<Double> Rho ,
+				List<Double> ErrZ ,
+				List<Double> ErrRho ,
+				List<Double> ErrRt ) {
             this._X = X;
             this._Y = Y;
             this._Z = Z;
@@ -73,21 +88,21 @@ public class TrackCandListFinder {
 	 *
 	 */
 	private class RayMeasurements {
-		double[] _X ;			// x coordinate array
-		double[] _Y ;			// y coordinate array (same size as X array)
-		double[] _Z ;			// z coordinate array
-		double[] _Y_prime ;		// y coordinate array (same size as Z array)
-		double[] _ErrZ ;		// z uncertainty (same size as Z array)
-		double[] _ErrY_prime ;	// y uncertainty (same size as Z array)
-		double[] _ErrRt ;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
+		List<Double> _X ;			// x coordinate array
+		List<Double> _Y ;			// y coordinate array (same size as X array)
+		List<Double> _Z ;			// z coordinate array
+		List<Double> _Y_prime ;		// y coordinate array (same size as Z array)
+		List<Double> _ErrZ ;		// z uncertainty (same size as Z array)
+		List<Double> _ErrY_prime ;	// y uncertainty (same size as Z array)
+		List<Double> _ErrRt ;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
 
-		RayMeasurements(double[] X ,
-					 double[] Y ,
-					 double[] Z ,
-					 double[] Y_prime ,
-					 double[] ErrZ ,
-					 double[] ErrY_prime ,
-					 double[] ErrRt ) {
+		RayMeasurements(List<Double> X ,
+					 List<Double> Y ,
+					 List<Double> Z ,
+					 List<Double> Y_prime ,
+					 List<Double> ErrZ ,
+					 List<Double> ErrY_prime ,
+					 List<Double> ErrRt ) {
             this._X = X;
             this._Y = Y;
             this._Z = Z;
@@ -99,10 +114,103 @@ public class TrackCandListFinder {
 	}
 	/**
 	 * 
+	 * @param list the input list of crosses
+	 * @return an array list of track candidates in the SVT
+	 */
+	public void getHelicalTrack(Seed cand, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+		X.clear();
+		Y.clear();
+		Z.clear();
+		Rho.clear();
+		ErrZ.clear();
+		ErrRho.clear();
+		ErrRt.clear();
+
+		List<Cross> list = cand.get_Crosses();
+		
+		if(list.size()==0) {
+			System.err.print("Error in estimating track candidate trajectory: less than 3 crosses found");
+			return ;
+		}
+		// instantiating the Helical Track fitter
+		HelicalTrackFitter fitTrk = new HelicalTrackFitter();
+		// sets the index according to assumption that the track comes from the origin or not
+		int shift =0;
+	//	if(org.jlab.rec.cvt.Constants.trk_comesfrmOrig)
+	//		shift =1;
+
+		// interate the fit a number of times set in the constants file
+		int Max_Number_Of_Iterations = org.jlab.rec.cvt.svt.Constants.BSTTRKINGNUMBERITERATIONS;
+		
+		// loop over the cross list and do the fits to the crosses
+		if(list.size()>=3) {
+			// for debugging purposes only sets all errors to 1
+			boolean ignoreErr = org.jlab.rec.cvt.svt.Constants.ignoreErr;
+			
+			int Number_Of_Iterations = 0;
+			// do till the number of iterations is reached			
+			while(Number_Of_Iterations<=Max_Number_Of_Iterations) {
+				Number_Of_Iterations++;
+				fitTrk = new HelicalTrackFitter();
+				// get the measuerement arrays for the helical track fit
+				HelixMeasurements MeasArrays = this.get_HelixMeasurementsArrays(list, shift, ignoreErr, false);
+				
+				X = MeasArrays._X;					
+				Y = MeasArrays._Y;
+				Z = MeasArrays._Z;
+				Rho = MeasArrays._Rho;
+				ErrZ = MeasArrays._ErrZ;
+				ErrRho = MeasArrays._ErrRho;
+				ErrRt = MeasArrays._ErrRt;
+				
+				// do the fit to X, Y taking ErrRt uncertainties into account to get the circle fit params, 
+				// and do the fit to Rho, Z taking into account the uncertainties in Rho and Z into account to get the linefit params
+				fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+				
+				// if the fit failed then use the uncorrected SVT points since the z-correction in resetting the SVT cross points sometimes fails 
+				if(fitTrk.get_helix()==null) {
+					//System.err.println("Error in Helical Track fitting -- helix not found -- trying to refit using the uncorrected crosses...");
+					MeasArrays = this.get_HelixMeasurementsArrays(list, shift, ignoreErr, true);
+					
+					X = MeasArrays._X;					
+					Y = MeasArrays._Y;
+					Z = MeasArrays._Z;
+					Rho = MeasArrays._Rho;
+					ErrZ = MeasArrays._ErrZ;
+					ErrRho = MeasArrays._ErrRho;
+					ErrRt = MeasArrays._ErrRt;
+					
+					fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+					Number_Of_Iterations=Max_Number_Of_Iterations+1;
+					//if(fitTrk.get_helix()==null) 
+						//System.err.println("Error in Helical Track fitting -- helix not found -- refit FAILED");
+				}
+				
+				// if the fit is successful
+				if(fitTrk.get_helix()!=null && fitTrk.getFit()!=null) {	
+					cand.set_Helix(fitTrk.get_helix());
+				}
+			}
+		}	
+		// remove clones
+		
+		
+	}
+
+	/**
+	 * 
 	 * @param crossList the input list of crosses
 	 * @return an array list of track candidates in the SVT
 	 */
-	public ArrayList<Track> getHelicalTrack(CrossList crossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+	public ArrayList<Track> getHelicalTracks(CrossList crossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+		
+		X.clear();
+		Y.clear();
+		Z.clear();
+		Rho.clear();
+		ErrZ.clear();
+		ErrRho.clear();
+		ErrRt.clear();
 		
 		ArrayList<Track> cands = new ArrayList<Track>();
 		
@@ -133,13 +241,13 @@ public class TrackCandListFinder {
 				// get the measuerement arrays for the helical track fit
 				HelixMeasurements MeasArrays = this.get_HelixMeasurementsArrays(crossList.get(i), shift, ignoreErr, false);
 				
-				double[] X = MeasArrays._X;					
-				double[] Y = MeasArrays._Y;
-				double[] Z = MeasArrays._Z;
-				double[] Rho = MeasArrays._Rho;
-				double[] ErrZ = MeasArrays._ErrZ;
-				double[] ErrRho = MeasArrays._ErrRho;
-				double[] ErrRt = MeasArrays._ErrRt;
+				X = MeasArrays._X;					
+				Y = MeasArrays._Y;
+				Z = MeasArrays._Z;
+				Rho = MeasArrays._Rho;
+				ErrZ = MeasArrays._ErrZ;
+				ErrRho = MeasArrays._ErrRho;
+				ErrRt = MeasArrays._ErrRt;
 				
 				// do the fit to X, Y taking ErrRt uncertainties into account to get the circle fit params, 
 				// and do the fit to Rho, Z taking into account the uncertainties in Rho and Z into account to get the linefit params
@@ -171,8 +279,8 @@ public class TrackCandListFinder {
 					//cand.set_HelicalTrack(fitTrk.get_helix());			done in Track constructor			
 					cand.update_Crosses(svt_geo);
 										
-					cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(int)(X.length-3)); // 3 fit params					
-					cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/(int)(Z.length-2)); // 2 fit params
+					cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(int)(X.size()-3)); // 3 fit params					
+					cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/(int)(Z.size()-2)); // 2 fit params
 																		
 					if(Number_Of_Iterations==Max_Number_Of_Iterations) {							
 						cands.add(cand); // dump the cand							
@@ -199,7 +307,6 @@ public class TrackCandListFinder {
 		return passedcands;
 		
 	}
-
 
 	/**
 	 * 
@@ -231,13 +338,12 @@ public class TrackCandListFinder {
 			
 			fitTrk = new StraightTrackFitter();
 			RayMeasurements MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false);
-			
-			
+
 			LineFitter linefitYX = new LineFitter();
-	  		boolean linefitresultYX = linefitYX.fitStatus(MeasArrays._Y, MeasArrays._X, MeasArrays._ErrRt, new double[MeasArrays._ErrRt.length], MeasArrays._Y.length);
+	  		boolean linefitresultYX = linefitYX.fitStatus(MeasArrays._Y, MeasArrays._X, MeasArrays._ErrRt, null, MeasArrays._Y.size());
 	  		
 	        // prelim cross corrections
-  			LineFitPars linefitparsYX = linefitYX.getFit();
+  			org.jlab.rec.cvt.fit.LineFitPars linefitparsYX = linefitYX.getFit();
   			StraightTrack cand = new StraightTrack(null);
   			cand.addAll(crossesToFit);
   			if(linefitresultYX && linefitparsYX!=null)  {
@@ -245,7 +351,7 @@ public class TrackCandListFinder {
   			}
   			// update measurements
   			MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false);
-			
+
   			
   			// fit SVt crosses
 			fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
@@ -257,7 +363,7 @@ public class TrackCandListFinder {
 			if(fitTrk.get_ray()==null) {
 				//System.err.println("Error in  Track fitting -- ray not found -- trying to refit using the uncorrected crosses...");
 				MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, true);
-				
+	  			
 				fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
 				//create the cand
 				cand = new StraightTrack(fitTrk.get_ray());
@@ -284,36 +390,52 @@ public class TrackCandListFinder {
 			// match to Micromegas
 			
 			ArrayList<Cross> crossesToFitWithBMT = new ArrayList<Cross>();
-			crossesToFitWithBMT.addAll(crossesToFit);
+			//crossesToFitWithBMT.addAll(crossesToFit);
 			
-			
-			ArrayList<Cross> BMTmatches = this.matchTrackToMM(BMTCrosses, cand, bmt_geo);
-			crossesToFitWithBMT.addAll(BMTmatches);
-			
+			//ArrayList<Cross> BMTmatches = this.matchTrackToMM(BMTCrosses, cand, bmt_geo);
+			//crossesToFitWithBMT.addAll(BMTmatches);
+			ArrayList<Cross> BMTmatches =  new ArrayList<Cross>();
+			ArrayList<Cross> SVTmatches =  new ArrayList<Cross>();
 			// reset the arrays
 			RayMeasurements NewMeasArrays = new RayMeasurements(null, null, null, null, null, null, null);
 			
 			
 			for(int iter =0; iter<11; iter++) {
 				// refit with Micromegas
-				NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);
+				crossesToFitWithBMT.clear();
+				SVTmatches.clear();
+				for(Cross c : cand) 
+					if(c.get_Detector().equalsIgnoreCase("SVT") && c.isInFiducial(svt_geo))
+						SVTmatches.add(c);
+				BMTmatches.clear();
+				BMTmatches = this.matchTrackToMM(BMTCrosses, cand, bmt_geo);
 				
+				crossesToFitWithBMT.addAll(SVTmatches);
+				crossesToFitWithBMT.addAll(BMTmatches);
+				
+				NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);				
 				fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);	
-				
 				//create the cand
+				
 				if(fitTrk.get_ray()!=null) {
 					cand = new StraightTrack(fitTrk.get_ray());
-					cand.addAll(crossesToFit);
+					cand.addAll(crossesToFitWithBMT);
 					cand.update_Crosses(cand.get_ray().get_yxslope(),cand.get_ray().get_yxinterc(),svt_geo);
-					crossesToFitWithBMT = new ArrayList<Cross>();
-					crossesToFitWithBMT.addAll(cand);
-					crossesToFitWithBMT.addAll(BMTmatches);
+					//crossesToFitWithBMT = new ArrayList<Cross>();
+					//crossesToFitWithBMT.addAll(cand);
+					//crossesToFitWithBMT.addAll(BMTmatches);
 					
+					cand.set_ndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() -4);
+					double chi2 = cand.calc_straightTrkChi2();
+					cand.set_chi2(chi2);
+					cand.set_Id(cands.size()+1);
+					cands.add(cand); // dump the cand		
 				}
 			}
+			/*
 			// reset the arrays
-			//NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);
-			//fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
+			NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);
+			fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
 			//System.out.println(" *** NEW Refit cand with mm "+cand.get_ray().get_dirVec().toString()+
 			//		" slope xy "+fitTrk.get_ray().get_yxslope()+" slope yz "+fitTrk.get_ray().get_yzslope()+
 			//		" intec xy "+fitTrk.get_ray().get_yxinterc()+" inter yz "+fitTrk.get_ray().get_yzinterc());
@@ -323,7 +445,7 @@ public class TrackCandListFinder {
 				
 				cand.addAll(crossesToFit);
 				
-				//cand.update_Crosses(fitTrk.get_ray().get_yxslope(),fitTrk.get_ray().get_yzslope(),svt_geo);
+				cand.update_Crosses(fitTrk.get_ray().get_yxslope(),fitTrk.get_ray().get_yzslope(),svt_geo);
 			
 				//System.out.println(" *** Refit cand with mm after reset SVT crosses "+cand.get_ray().get_dirVec().toString()+
 				//		" slope xy "+cand.get_ray().get_yxslope()+" slope yz "+cand.get_ray().get_yzslope()+
@@ -337,14 +459,14 @@ public class TrackCandListFinder {
 				//for(Cross c : cand)
 				//	c.set_Dir(cand.get_ray().get_dirVec());
 				//cand.set_chi2(fitTrk.get_rayfitoutput().get_chisq()[0]+fitTrk.get_rayfitoutput().get_chisq()[1]);
-				cand.set_ndf(NewMeasArrays._Y.length + NewMeasArrays._Y_prime.length -4);
+				cand.set_ndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() -4);
 				double chi2 = cand.calc_straightTrkChi2();
 				cand.set_chi2(chi2);
 				//if(cand.get_ndf()>0) {							
 					cands.add(cand); // dump the cand							
 				//}
 			
-			}
+			} */
 		}	
 		
 		ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
@@ -374,7 +496,7 @@ public class TrackCandListFinder {
 		double[][][] trajPlaneInters = trj.get_SVTIntersections();
 		ArrayList<Cross> hitsOnTrack = new ArrayList<Cross>();
 		for(Cross c : cand)
-			if(c.get_Detector()=="SVT")
+			if(c.get_Detector().equalsIgnoreCase("SVT"))
 				hitsOnTrack.add(c);
 		
   		for(int j =0; j< hitsOnTrack.size(); j++) {
@@ -407,102 +529,113 @@ public class TrackCandListFinder {
 	}
 	
 
-	private HelixMeasurements get_HelixMeasurementsArrays(ArrayList<Cross> arrayList,
+	private HelixMeasurements get_HelixMeasurementsArrays(List<Cross> list,
 			int shift, boolean ignoreErr, boolean resetSVTMeas) {
-		
-		
-		ArrayList<Cross> SVTcrossesInTrk = new ArrayList<Cross>();
-		ArrayList<Cross> BMTCdetcrossesInTrk = new ArrayList<Cross>();
-		ArrayList<Cross> BMTZdetcrossesInTrk = new ArrayList<Cross>();
+		X.clear();
+		Y.clear();
+		Z.clear();
+		Rho.clear();
+		ErrZ.clear();
+		ErrRho.clear();
+		ErrRt.clear();
+		SVTcrossesInTrk.clear();
+		BMTCdetcrossesInTrk.clear();
+		BMTZdetcrossesInTrk.clear();
 		
 		//make lists
-		for(Cross c : arrayList) {
+		for(Cross c : list) {
 			
 			if(c.get_Detector()=="SVT") 
 				SVTcrossesInTrk.add(c);
-			
 			if(c.get_Detector()=="BMT") { // Micromegas
 				if(c.get_DetectorType()=="C") {//C-detector --> only Z defined
-					BMTCdetcrossesInTrk.add(c); 
+					BMTCdetcrossesInTrk.add(c);
 				}
 				if(c.get_DetectorType()=="Z") {//Z-detector --> only phi defined
-					BMTZdetcrossesInTrk.add(c); 
+					BMTZdetcrossesInTrk.add(c);
 				}
 			}
 		}
+		
+		((ArrayList<Double>) X).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size());
+		((ArrayList<Double>) Y).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size());
+		((ArrayList<Double>) Z).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
+		((ArrayList<Double>) ErrZ).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
+		((ArrayList<Double>) ErrRt).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size());
+		((ArrayList<Double>) Rho).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
+		((ArrayList<Double>) ErrRho).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
 			
-			
-		double[] X = new double[SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()+shift];
-		double[] Y = new double[SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()+shift];
-		double[] Z = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift];
-		double[] Rho = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift];
-		double[] ErrZ = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift];
-		double[] ErrRho = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift];
-		double[] ErrRt = new double[SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()+shift];
+		((ArrayList<Double>) X).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()+shift);
+		((ArrayList<Double>) Y).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()+shift);
+		((ArrayList<Double>) Z).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift);
+		((ArrayList<Double>) Rho).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift);
+		((ArrayList<Double>) ErrZ).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift);
+		((ArrayList<Double>) ErrRho).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()+shift);
+		((ArrayList<Double>) ErrRt).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()+shift);
 		
 		if(shift ==1) {
-			X[0] = 0;
-			Y[0] = 0;
-			Z[0] = 0;
-			Rho[0] =0;
-			ErrRt[0] = org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT;
-			ErrZ[0] = org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT;		
-			ErrRho[0] = org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT;										
+			X.add(0, (double) 0);
+			Y.add(0, (double) 0);
+			Z.add(0, (double) 0);
+			Rho.add(0,(double) 0);
+			ErrRt.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
+			ErrZ.add(0, org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);		
+			ErrRho.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);										
 		}
 		
 		for(int j= shift; j<shift+SVTcrossesInTrk.size(); j++) {
 			
-			X[j] = SVTcrossesInTrk.get(j-shift).get_Point().x();
-			Y[j] = SVTcrossesInTrk.get(j-shift).get_Point().y();
-			Z[j] = SVTcrossesInTrk.get(j-shift).get_Point().z();
-			Rho[j] = Math.sqrt(SVTcrossesInTrk.get(j-shift).get_Point().x()*SVTcrossesInTrk.get(j-shift).get_Point().x() + 
-					SVTcrossesInTrk.get(j-shift).get_Point().y()*SVTcrossesInTrk.get(j-shift).get_Point().y());
-			ErrRho[j] = Math.sqrt(SVTcrossesInTrk.get(j-shift).get_PointErr().x()*SVTcrossesInTrk.get(j-shift).get_PointErr().x() + 
-					SVTcrossesInTrk.get(j-shift).get_PointErr().y()*SVTcrossesInTrk.get(j-shift).get_PointErr().y());
-			ErrRt[j] = Math.sqrt(SVTcrossesInTrk.get(j-shift).get_PointErr().x()*SVTcrossesInTrk.get(j-shift).get_PointErr().x() + 
-					SVTcrossesInTrk.get(j-shift).get_PointErr().y()*SVTcrossesInTrk.get(j-shift).get_PointErr().y());
-			ErrZ[j] = SVTcrossesInTrk.get(j-shift).get_PointErr().z();		
+			X.add(j, SVTcrossesInTrk.get(j-shift).get_Point().x());
+			Y.add(j, SVTcrossesInTrk.get(j-shift).get_Point().y());
+			Z.add(j, SVTcrossesInTrk.get(j-shift).get_Point().z());
+			Rho.add(j, Math.sqrt(SVTcrossesInTrk.get(j-shift).get_Point().x()*SVTcrossesInTrk.get(j-shift).get_Point().x() + 
+					SVTcrossesInTrk.get(j-shift).get_Point().y()*SVTcrossesInTrk.get(j-shift).get_Point().y()));
+			ErrRho.add(j, Math.sqrt(SVTcrossesInTrk.get(j-shift).get_PointErr().x()*SVTcrossesInTrk.get(j-shift).get_PointErr().x() + 
+					SVTcrossesInTrk.get(j-shift).get_PointErr().y()*SVTcrossesInTrk.get(j-shift).get_PointErr().y()));
+			ErrRt.add(j, Math.sqrt(SVTcrossesInTrk.get(j-shift).get_PointErr().x()*SVTcrossesInTrk.get(j-shift).get_PointErr().x() + 
+					SVTcrossesInTrk.get(j-shift).get_PointErr().y()*SVTcrossesInTrk.get(j-shift).get_PointErr().y()));
+			ErrZ.add(j, SVTcrossesInTrk.get(j-shift).get_PointErr().z());		
 			
 		}
 		
 		if(ignoreErr==true) 
 			for(int j= 0; j<shift+SVTcrossesInTrk.size(); j++) {	
-				ErrRt[j] = 1;
-				ErrRho[j] = 1;
-				ErrZ[j] = 1;										
+				ErrRt.add(j, (double) 1);
+				ErrRho.add(j, (double) 1);
+				ErrZ.add(j, (double) 1);										
 			}
 		int j0 = SVTcrossesInTrk.size();	
 		for(int j= shift+j0; j<shift+j0+BMTZdetcrossesInTrk.size(); j++) {						
-				X[j] = BMTZdetcrossesInTrk.get(j-shift-j0).get_Point().x();
-				Y[j] = BMTZdetcrossesInTrk.get(j-shift-j0).get_Point().y();						
-				ErrRt[j] = Math.sqrt(BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().x()*BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().x() + 
-						BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().y()*BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().y());				
+				X.add(j, BMTZdetcrossesInTrk.get(j-shift-j0).get_Point().x());
+				Y.add(j, BMTZdetcrossesInTrk.get(j-shift-j0).get_Point().y());						
+				ErrRt.add(j, Math.sqrt(BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().x()*BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().x() + 
+						BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().y()*BMTZdetcrossesInTrk.get(j-shift-j0).get_PointErr().y()));				
 		}
 		
 		if(ignoreErr==true) 
 			for(int j= shift+SVTcrossesInTrk.size(); j<shift+SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size(); j++) {						
-				X[j] = 1;
-				Y[j] = 1;						
-				ErrRt[j] = 1;				
+				X.add(j, (double) 1);
+				Y.add(j, (double) 1);						
+				ErrRt.add(j, (double) 1);				
 			}
 
 		
 		for(int j= shift+j0; j<shift+j0+BMTCdetcrossesInTrk.size(); j++) {
-			Z[j] = BMTCdetcrossesInTrk.get(j-shift-j0).get_Point().z();
-			Rho[j] = org.jlab.rec.cvt.bmt.Constants.CRCRADIUS[BMTCdetcrossesInTrk.get(j-shift-j0).get_Region()-1]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
-			ErrRho[j] = 0.01; // check this error on thickness measurement					
-			ErrZ[j] = BMTCdetcrossesInTrk.get(j-shift-j0).get_PointErr().z();		
+			Z.add(j, BMTCdetcrossesInTrk.get(j-shift-j0).get_Point().z());
+			Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j-shift-j0).get_Region()-1]+org.jlab.rec.cvt.bmt.Constants.LYRTHICKN);
+			ErrRho.add(j, 0.01); // check this error on thickness measurement					
+			ErrZ.add(j, BMTCdetcrossesInTrk.get(j-shift-j0).get_PointErr().z());		
 			
 		}
 		if(resetSVTMeas) {
 			//System.err.println("Error in Helical Track fitting -- helix not found -- trying to refit using the uncorrected crosses...");
 			for(int j= shift; j<shift+j0; j++) {
-				X[j] = SVTcrossesInTrk.get(j-shift).get_Point0().x();
-				Y[j] = SVTcrossesInTrk.get(j-shift).get_Point0().y();
-				Z[j] = SVTcrossesInTrk.get(j-shift).get_Point0().z();
-				ErrRho[j] = Math.sqrt(SVTcrossesInTrk.get(j-shift).get_PointErr().x()*SVTcrossesInTrk.get(j-shift).get_PointErr().x() + 
-						SVTcrossesInTrk.get(j-shift).get_PointErr().y()*SVTcrossesInTrk.get(j-shift).get_PointErr().y());
-				ErrZ[j] = SVTcrossesInTrk.get(j-shift).get_PointErr0().z();										
+				X.add(j, SVTcrossesInTrk.get(j-shift).get_Point0().x());
+				Y.add(j, SVTcrossesInTrk.get(j-shift).get_Point0().y());
+				Z.add(j, SVTcrossesInTrk.get(j-shift).get_Point0().z());
+				ErrRho.add(j, Math.sqrt(SVTcrossesInTrk.get(j-shift).get_PointErr().x()*SVTcrossesInTrk.get(j-shift).get_PointErr().x() + 
+						SVTcrossesInTrk.get(j-shift).get_PointErr().y()*SVTcrossesInTrk.get(j-shift).get_PointErr().y()));
+				ErrZ.add(j, SVTcrossesInTrk.get(j-shift).get_PointErr0().z());										
 			}
 		}
 	//	if(Constants.DEBUGMODE) {
@@ -517,91 +650,98 @@ public class TrackCandListFinder {
 		return MeasArray;
 	}
 
+
+	List<Cross> SVTcrossesInTrk = new ArrayList<Cross>();
+	List<Cross> BMTCdetcrossesInTrk = new ArrayList<Cross>();
+	List<Cross> BMTZdetcrossesInTrk  = new ArrayList<Cross>();
 	private RayMeasurements get_RayMeasurementsArrays(ArrayList<Cross> arrayList, boolean ignoreErr, boolean resetSVTMeas) {
 		
-		
-		ArrayList<Cross> SVTcrossesInTrk = new ArrayList<Cross>();
-		ArrayList<Cross> BMTCdetcrossesInTrk = new ArrayList<Cross>();
-		ArrayList<Cross> BMTZdetcrossesInTrk = new ArrayList<Cross>();
+		X.clear();
+		Y.clear();
+		Z.clear();
+		Y_prime.clear();
+		ErrZ.clear();
+		ErrY_prime.clear();
+		ErrRt.clear();
+		SVTcrossesInTrk.clear();
+		BMTCdetcrossesInTrk.clear();
+		BMTZdetcrossesInTrk.clear();
 		
 		//make lists
-		for(Cross c : arrayList) {
-			
-			if(c.get_Detector()=="SVT") 
+		for(Cross c : arrayList) { //System.out.println(" getting measurement arrays "+c.printInfo());
+			if(c.get_Detector().equalsIgnoreCase("SVT") )
 				SVTcrossesInTrk.add(c);
-			if(c.get_Detector()=="BMT") { // Micromegas
+			if(c.get_Detector().equalsIgnoreCase("BMT") ){ // Micromegas
 				if(c.get_DetectorType()=="C") {//C-detector --> only Z defined
 					BMTCdetcrossesInTrk.add(c);
 				}
-				if(c.get_DetectorType()=="Z") {//Z-detector --> only phi defined
+				if(c.get_DetectorType().equalsIgnoreCase("Z") ) {//Z-detector --> only phi defined
 					BMTZdetcrossesInTrk.add(c);
 				}
 			}
 		}
-			
-			
-		double[] X = new double[SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()];
-		double[] Y = new double[SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()];
-		double[] Z = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()];
-		double[] Y_prime = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()];
-		double[] ErrZ = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()];
-		double[] ErrY_prime = new double[SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size()];
-		double[] ErrRt = new double[SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size()];
-		
+		//System.out.println("................there are "+SVTcrossesInTrk.size()+" SVT crosses.....");
+		((ArrayList<Double>) X).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size());
+		((ArrayList<Double>) Y).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size());
+		((ArrayList<Double>) Z).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
+		((ArrayList<Double>) ErrZ).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
+		((ArrayList<Double>) ErrRt).ensureCapacity(SVTcrossesInTrk.size()+BMTZdetcrossesInTrk.size());
+		((ArrayList<Double>) Y_prime).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
+		((ArrayList<Double>) ErrY_prime).ensureCapacity(SVTcrossesInTrk.size()+BMTCdetcrossesInTrk.size());
 		
 		for(int j= 0; j< SVTcrossesInTrk.size(); j++) {
 			
-			X[j] = SVTcrossesInTrk.get(j).get_Point().x();
-			Y[j] = SVTcrossesInTrk.get(j).get_Point().y();
-			Z[j] = SVTcrossesInTrk.get(j).get_Point().z();
-			Y_prime[j] = SVTcrossesInTrk.get(j).get_Point().y();
-			ErrY_prime[j] = SVTcrossesInTrk.get(j).get_PointErr().y();
-			ErrRt[j] = Math.sqrt(SVTcrossesInTrk.get(j).get_PointErr().x()*SVTcrossesInTrk.get(j).get_PointErr().x() + 
-					SVTcrossesInTrk.get(j).get_PointErr().y()*SVTcrossesInTrk.get(j).get_PointErr().y());
-			ErrZ[j] = SVTcrossesInTrk.get(j).get_PointErr().z();		
+			X.add(j, SVTcrossesInTrk.get(j).get_Point().x());
+			Y.add(j, SVTcrossesInTrk.get(j).get_Point().y());
+			Z.add(j, SVTcrossesInTrk.get(j).get_Point().z());
+			Y_prime.add(j, SVTcrossesInTrk.get(j).get_Point().y());
+			ErrY_prime.add(j, SVTcrossesInTrk.get(j).get_PointErr().y());
+			ErrRt.add(j, Math.sqrt(SVTcrossesInTrk.get(j).get_PointErr().x()*SVTcrossesInTrk.get(j).get_PointErr().x() + 
+					SVTcrossesInTrk.get(j).get_PointErr().y()*SVTcrossesInTrk.get(j).get_PointErr().y()));
+			ErrZ.add(j, SVTcrossesInTrk.get(j).get_PointErr().z());		
 			
 		}
 		
 		if(ignoreErr==true) 
 			for(int j= 0; j<SVTcrossesInTrk.size(); j++) {	
-				ErrRt[j] = 1;
-				ErrY_prime[j] = 1;
-				ErrZ[j] = 1;										
+				ErrRt.add(j, (double) 1);
+				ErrY_prime.add(j, (double) 1);
+				ErrZ.add(j, (double) 1);										
 			}
 
 		int j0 = SVTcrossesInTrk.size();
 		for(int j= j0; j<j0+BMTZdetcrossesInTrk.size(); j++) {						
-				X[j] = BMTZdetcrossesInTrk.get(j-j0).get_Point().x();
-				Y[j] = BMTZdetcrossesInTrk.get(j-j0).get_Point().y();						
-				ErrRt[j] = Math.sqrt(SVTcrossesInTrk.get(j-j0).get_PointErr().x()*SVTcrossesInTrk.get(j-j0).get_PointErr().x() + 
-						SVTcrossesInTrk.get(j-j0).get_PointErr().y()*SVTcrossesInTrk.get(j-j0).get_PointErr().y());			
+				X.add(j, BMTZdetcrossesInTrk.get(j-j0).get_Point().x());
+				Y.add(j, BMTZdetcrossesInTrk.get(j-j0).get_Point().y());						
+				ErrRt.add(j, Math.sqrt(BMTZdetcrossesInTrk.get(j-j0).get_PointErr().x()*BMTZdetcrossesInTrk.get(j-j0).get_PointErr().x() + 
+						BMTZdetcrossesInTrk.get(j-j0).get_PointErr().y()*BMTZdetcrossesInTrk.get(j-j0).get_PointErr().y()));			
 		}
 		
 		if(ignoreErr==true) 
 			for(int j= j0; j<j0+BMTZdetcrossesInTrk.size(); j++) {						
-				X[j] = 1;
-				Y[j] = 1;						
-				ErrRt[j] = 1;				
+				X.add(j, (double) 1);
+				Y.add(j, (double) 1);						
+				ErrRt.add(j, (double) 1);				
 			}
 
 		for(int j= j0; j<j0+BMTCdetcrossesInTrk.size(); j++) {
-			Z[j] = BMTCdetcrossesInTrk.get(j-j0).get_Point().z();
-			Y_prime[j] = BMTCdetcrossesInTrk.get(j-j0).get_Point().y();
-			ErrY_prime[j] = 0.; 
-			ErrZ[j] = SVTcrossesInTrk.get(j-j0).get_PointErr().z();;		
+			Z.add(j, BMTCdetcrossesInTrk.get(j-j0).get_Point().z());
+			Y_prime.add(j, BMTCdetcrossesInTrk.get(j-j0).get_Point().y());
+			ErrY_prime.add(j, 0.); 
+			ErrZ.add(j, BMTCdetcrossesInTrk.get(j-j0).get_PointErr().z());		
 			
 		}
-		if(resetSVTMeas) {
+		if(resetSVTMeas) { System.out.println("resetting "+SVTcrossesInTrk.size()+" crosses.....");
 			//System.err.println("Error in Helical Track fitting -- helix not found -- trying to refit using the uncorrected crosses...");
 			for(int j= 0; j<SVTcrossesInTrk.size(); j++) {
-				X[j] = SVTcrossesInTrk.get(j).get_Point0().x();
-				Y[j] = SVTcrossesInTrk.get(j).get_Point0().y();
-				Z[j] = SVTcrossesInTrk.get(j).get_Point0().z();
-				ErrY_prime[j] = SVTcrossesInTrk.get(j).get_Point0().y();
-				ErrZ[j] = SVTcrossesInTrk.get(j).get_PointErr0().z();										
+				X.add(j, SVTcrossesInTrk.get(j).get_Point0().x());
+				Y.add(j, SVTcrossesInTrk.get(j).get_Point0().y());
+				Z.add(j, SVTcrossesInTrk.get(j).get_Point0().z());
+				ErrY_prime.add(j, SVTcrossesInTrk.get(j).get_Point0().y());
+				ErrZ.add(j, SVTcrossesInTrk.get(j).get_PointErr0().z());										
 			}
 		}
-
+		
 		RayMeasurements MeasArray = new RayMeasurements( X , Y , Z , Y_prime , ErrZ , ErrY_prime , ErrRt );
 		
 		return MeasArray;
@@ -634,25 +774,25 @@ public class TrackCandListFinder {
 			return BMTCrossList;
 		
 		
-		
-		// for now we are only linking to the region 3 BMT since the current configuration in 4 double SVT layers + 1 double BMT layers
+		// for configuration in 3 double SVT layers + 3 double BMT layers
 		//------------------------------------------------------------------------------------------------------
-		ArrayList<Cross> MatchedMMCrossZDet = this.MatchMMCrossZ(3,thecand2.get_ray(), MMCrosses, Math.toRadians(2)); // 2 degrees opening angle
-		if(MatchedMMCrossZDet.size()>0) 
-			BMTCrossList.addAll(MatchedMMCrossZDet);
-		
-		ArrayList<Cross> MatchedMMCrossCDet = this.MatchMMCrossC(3, thecand2.get_ray(), MMCrosses, matchCutOff, geo);
-		if(MatchedMMCrossCDet.size()>0) 
-			BMTCrossList.addAll(MatchedMMCrossCDet);
-		
-		
-		for(Cross Ccross : MatchedMMCrossCDet)
-			for(Cross Zcross : MatchedMMCrossZDet)
-				if( (Ccross.get_Cluster2().get_Layer()-Zcross.get_Cluster1().get_Layer())==1 && (Ccross.get_Cluster2().get_Sector()==Zcross.get_Cluster1().get_Sector())) {
-					Ccross.set_MatchedZCross(Zcross);
-					Zcross.set_MatchedCCross(Ccross);
-				}
-		
+		for(int regionIdx =0; regionIdx<3; regionIdx++) {
+			ArrayList<Cross> MatchedMMCrossZDet = this.MatchMMCrossZ(regionIdx+1,thecand2.get_ray(), MMCrosses, Math.toRadians(2)); // 2 degrees opening angle
+			if(MatchedMMCrossZDet.size()>0) 
+				BMTCrossList.addAll(MatchedMMCrossZDet);
+			
+			ArrayList<Cross> MatchedMMCrossCDet = this.MatchMMCrossC(regionIdx+1, thecand2.get_ray(), MMCrosses, matchCutOff, geo);
+			if(MatchedMMCrossCDet.size()>0) 
+				BMTCrossList.addAll(MatchedMMCrossCDet);
+			
+			
+			for(Cross Ccross : MatchedMMCrossCDet)
+				for(Cross Zcross : MatchedMMCrossZDet)
+					if( (Ccross.get_Cluster2().get_Layer()-Zcross.get_Cluster1().get_Layer())==1 && (Ccross.get_Cluster2().get_Sector()==Zcross.get_Cluster1().get_Sector())) {
+						Ccross.set_MatchedZCross(Zcross);
+						Zcross.set_MatchedCCross(Ccross);
+					}
+		}
 		return BMTCrossList;
 	}
 
@@ -660,7 +800,7 @@ public class TrackCandListFinder {
 
 		ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
 		
-		double R = org.jlab.rec.cvt.bmt.Constants.CRCRADIUS[Region-1];		     // R for C detector
+		double R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[Region-1]+org.jlab.rec.cvt.bmt.Constants.hDrift/2;		     // R for C detector
 		
 		double sx = ray.get_yxslope();
 		double ix = ray.get_yxinterc();
@@ -691,7 +831,10 @@ public class TrackCandListFinder {
 			Cross closestCross = null;
 			// match the cross z measurement closest to the calculated z
 			for(int i =0; i < MMCrosses.size(); i++) {
-				if(Double.isNaN(MMCrosses.get(i).get_Point0().z()))
+				if(MMCrosses.get(i).get_Region()!=Region)
+					continue;
+				//if(Double.isNaN(MMCrosses.get(i).get_Point0().z()))
+				if(MMCrosses.get(i).get_DetectorType().equalsIgnoreCase("Z"))
 					continue;
 				double m_z = MMCrosses.get(i).get_Point().z();
 				int sector = geo.isInSector(MMCrosses.get(i).get_Region()*2, phi);
@@ -722,7 +865,7 @@ public class TrackCandListFinder {
 
 		ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
 		
-		double R =	org.jlab.rec.cvt.bmt.Constants.CRZRADIUS[Region-1];		     // R for Z detector
+		double R =	org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Region-1]+org.jlab.rec.cvt.bmt.Constants.hDrift/2;		     // R for Z detector
 		double sx = ray.get_yxslope();
 		double ix = ray.get_yxinterc();
 		double sz = ray.get_yzslope();
@@ -750,15 +893,18 @@ public class TrackCandListFinder {
 			Cross closestCross = null;
 			
 			for(int i =0; i < MMCrosses.size(); i++) {
-				
+				if(MMCrosses.get(i).get_Region()!=Region)
+					continue;
 				// measuring phi
-				if(Double.isNaN(MMCrosses.get(i).get_Point0().x()))
+				//if(Double.isNaN(MMCrosses.get(i).get_Point0().x()))
+				if(MMCrosses.get(i).get_DetectorType().equalsIgnoreCase("C"))
 					continue;
 				double m_x = MMCrosses.get(i).get_Point().x();
 				double m_y = MMCrosses.get(i).get_Point().y();
-				
+				//System.out.println(" lookin to match "+MMCrosses.get(i).printInfo());
 				double cosAngMeasToTrk = (x*m_x+y[j]*m_y)/ Math.sqrt((x*x+y[j]*y[j])*(m_x*m_x+m_y*m_y)); // the cosine between the measured (x,y) cross coords and the (x,y) trajectory should be close to 1
 				// opening angle must be within about 11 degrees to start the search for nearest point
+				//System.out.println(" cosAngMeasToTrk "+cosAngMeasToTrk);
 				if(cosAngMeasToTrk<0.98)
 					continue;
 				
@@ -770,7 +916,8 @@ public class TrackCandListFinder {
 				} 
 			}
 			if(closestCross!=null)	{
-				if(minCosAngMeasToTrk<matchCutOff) 
+				//if(minCosAngMeasToTrk<matchCutOff) 
+			//	System.out.println("matched "+closestCross.printInfo());
 					matchedMMCrosses.add(closestCross);
 					
 			}

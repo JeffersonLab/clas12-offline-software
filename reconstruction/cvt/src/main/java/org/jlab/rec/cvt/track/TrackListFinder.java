@@ -33,9 +33,9 @@ public class TrackListFinder {
 			this.assignTrkPID(trk);
 			//KalFit kf = new KalFit(trk, geo);
 			//kf.runKalFit(trk, geo);
-			EnergyLossCorr elc = new EnergyLossCorr(trk);
+			//EnergyLossCorr elc = new EnergyLossCorr(trk);
 			//System.out.println("******* before EL "+trk.get_P());
-			elc.doCorrection(trk, geo);
+			//elc.doCorrection(trk, geo);
 			//System.out.println("*******  after EL "+trk.get_P());
 			
 			

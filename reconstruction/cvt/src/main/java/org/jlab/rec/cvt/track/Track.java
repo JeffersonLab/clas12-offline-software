@@ -24,7 +24,8 @@ public class Track extends Trajectory {
 	 */
 	public Track(Helix helix) {
 		super(helix);
-		set_HelicalTrack(helix);
+		if(helix!=null)
+			set_HelicalTrack(helix);
 	}
 
 
@@ -92,25 +93,19 @@ public class Track extends Trajectory {
 	 * Sets the track helical track parameters P, Pt, Pz
 	 * @param Helix the track helix
 	 */
-	public void set_HelicalTrack(Helix Helix) {
-		
-		set_Q(((int) Math.signum(Constants.getSolenoidscale())*Helix.get_charge()));
-		 
-		double Bz = Math.abs(this.calc_Field(0, 0, 0));
-		
-		double calcPt = Constants.LIGHTVEL*Helix.radius()*Bz;
-		
-		double calcPz =0;
-		
-	
-		calcPz = calcPt*Helix.get_tandip();
-		
-		double calcP = Math.sqrt(calcPt*calcPt+calcPz*calcPz);
-		
-		set_Pt(calcPt);
-		set_Pz(calcPz);
-		set_P(calcP);
-		
+	public void set_HelicalTrack(Helix Helix) {		
+		if(Helix!=null) {
+			set_Q(((int) Math.signum(Constants.getSolenoidscale())*Helix.get_charge())); 
+			double Bz = Math.abs(this.calc_Field(0, 0, 0));
+			double calcPt = Constants.LIGHTVEL*Helix.radius()*Bz;
+			double calcPz =0;
+			calcPz = calcPt*Helix.get_tandip();
+			double calcP = Math.sqrt(calcPt*calcPt+calcPz*calcPz);
+			
+			set_Pt(calcPt);
+			set_Pz(calcPz);
+			set_P(calcP);
+		}
 	}
 	
 
@@ -119,10 +114,11 @@ public class Track extends Trajectory {
 	 * @param geo the SVT geometry
 	 */
 	public void update_Crosses(Geometry geo) {
-		if(this.get_helix()!=null) {
+		if(this.get_helix()!=null && this.get_helix().get_curvature()!=0) {
+			
 			Helix helix = this.get_helix();
 			for (int i =0; i<this.size(); i++) {
-				if(this.get(i).get_Detector()!="SVT")
+				if(!this.get(i).get_Detector().equalsIgnoreCase("SVT"))
 					continue;
 				double R = Math.sqrt(this.get(i).get_Point().x()*this.get(i).get_Point().x()+this.get(i).get_Point().y()*this.get(i).get_Point().y());
 				Vector3D helixTanVecAtLayer = helix.getTrackDirectionAtRadius(R);
@@ -132,7 +128,11 @@ public class Track extends Trajectory {
 					double z = helix.getPointAtRadius(R).z();
 					double x = this.get(i).get_Point().x();
 					double y = this.get(i).get_Point().y();
-					this.get(i).set_Point(new Point3D(x,y,z));
+					double z1 = geo.getPlaneModuleOrigin(this.get(i).get_Cluster2().get_Sector(), this.get(i).get_Cluster2().get_Layer()).z();
+					double z2 = geo.getPlaneModuleEnd(this.get(i).get_Cluster2().get_Sector(), this.get(i).get_Cluster2().get_Layer()).z();
+					if(z-z1<z2-z1)
+						this.get(i).set_Point(new Point3D(x,y,z));
+					
 				}
 					
 			}
@@ -140,7 +140,25 @@ public class Track extends Trajectory {
 		}
 		
 	}
-  
+	public void finalUpdate_Crosses(Geometry geo) {
+		if(this.get_helix()!=null && this.get_helix().get_curvature()!=0) {
+			
+			Helix helix = this.get_helix();
+			for (int i =0; i<this.size(); i++) {
+				if(!this.get(i).get_Detector().equalsIgnoreCase("SVT"))
+					continue;
+				double R = Math.sqrt(this.get(i).get_Point().x()*this.get(i).get_Point().x()+this.get(i).get_Point().y()*this.get(i).get_Point().y());
+				Vector3D helixTanVecAtLayer = helix.getTrackDirectionAtRadius(R);
+				Point3D helixPosAtLayer = helix.getPointAtRadius(R);
+				this.get(i).set_Point(helixPosAtLayer);
+				this.get(i).set_Dir(helixTanVecAtLayer);
+				
+					
+			}
+			
+		}
+		
+	}
 	
   
 	private double _circleFitChi2PerNDF;		// the chi2 for the helical track circle fit
