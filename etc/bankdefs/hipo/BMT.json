@@ -10,7 +10,8 @@
         {"name":"strip",    "id":3, "type":"int32"   ,  "info":"hit strip"},
         {"name":"fitResidual",    "id":4, "type":"float" ,  "info":"fitted hit residual"},
         {"name":"trkingStat",    "id":5, "type":"int32"   ,  "info":"tracking status"},
-        {"name":"clusterID",    "id":6, "type":"int32"   ,  "info":"associated cluster ID"}
+        {"name":"clusterID",    "id":6, "type":"int32"   ,  "info":"associated cluster ID"},
+        {"name":"trkID",    "id":8, "type":"int32"   ,  "info":"associated track ID"}
         ]
   },
   {
@@ -32,7 +33,8 @@
             {"name":"Hit2_ID",    "id":10, "type":"int32" ,  "info":"Index of hit 2 in cluster"},
             {"name":"Hit3_ID",    "id":11, "type":"int32" ,  "info":"Index of hit 3 in cluster"},
             {"name":"Hit4_ID",    "id":12, "type":"int32" ,  "info":"Index of hit 4 in cluster"},
-            {"name":"Hit5_ID",    "id":13, "type":"int32" ,  "info":"Index of hit 5 in cluster"}
+            {"name":"Hit5_ID",    "id":13, "type":"int32" ,  "info":"Index of hit 5 in cluster"},
+            {"name":"trkID",    "id":16, "type":"int32"   ,  "info":"associated track ID"}
             ]
   },
   {
@@ -52,8 +54,9 @@
             {"name":"ux",    "id":10, "type":"float" ,  "info":"BMT cross x-direction (track unit tangent vector at the cross)"},
             {"name":"uy",    "id":11, "type":"float" ,  "info":"BMT cross y-direction (track unit tangent vector at the cross)"},
             {"name":"uz",    "id":12, "type":"float" ,  "info":"BMT cross z-direction (track unit tangent vector at the cross)"},
-            {"name":"Cluster1_ID",    "id":16, "type":"int32" ,  "info":"ID of the bottom layer cluster in the Cross"},
-            {"name":"Cluster2_ID",    "id":17, "type":"int32" ,  "info":"ID of the top layer  cluster in the Cross"}
+            {"name":"Cluster1_ID",    "id":16, "type":"int32" ,  "info":"ID of the  cluster in the Cross"},
+            {"name":"Cluster2_ID",    "id":17, "type":"int32" ,  "info":"ID of the top layer  cluster in the Cross"},
+            {"name":"trkID",    "id":15, "type":"int32"   ,  "info":"associated track ID"}
             ]
   },
   {
