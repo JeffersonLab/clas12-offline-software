@@ -33,7 +33,7 @@ The heart and soul of coatjava is the common tools, or coat-libs, the source cod
 * clas-detector: clas-utils, clas-io, clas-geometry, org.jlab.groot (http://clasweb.jlab.org/clas12maven/)
 * clas-reco: clas-io, clas-physics, clas-utils, clas-detector
 
-(Aside: It would be good to know where the source code is for all of the above dependencies. groot and hipo are currently kept in Gagik's personal github account (gavalian), but he has discussed moving them to the JeffersonLab organization in the future. From within JLab, the clas12maven repo is at /group/clas/www/clasweb/html/clas12offline/distribution/coatjava/)
+(Aside: It would be good to know where the source code is for all of the above dependencies. groot and hipo are currently kept in Gagik's personal github account (gavalian), but he has discussed moving them to the JeffersonLab organization in the future. From within JLab, the clas12maven repo is at /group/clas/www/clasweb/html/clas12maven/org/jlab/coat/)
 
 When build-coatjava.sh runs, it first goes into common-tools and uses Maven to build the coat-libs jar and then creates a new local repository (myLocalMvnRepo) and adds coat-libs to this repository for other parts of the project to use.
 
