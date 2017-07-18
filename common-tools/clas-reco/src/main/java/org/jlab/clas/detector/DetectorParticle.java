@@ -629,7 +629,7 @@ public class DetectorParticle implements Comparable {
             double distanceThreshold){
         
         Line3D   trajectory = this.detectorTrack.getLastCross();
-        System.out.println("find hit in array size = "+ hitList.size());
+        //System.out.println("find hit in array size = "+ hitList.size());
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
