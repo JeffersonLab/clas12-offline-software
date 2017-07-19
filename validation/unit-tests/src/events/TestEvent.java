@@ -123,6 +123,83 @@ public class TestEvent {
 	}
 
 
+	public static HipoDataEvent getCVTTestEvent() {
+		HipoDataSync writer = new HipoDataSync();
+		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
+		DataBank config = testEvent.createBank("RUN::config", 1);
+		DataBank SVTadc = testEvent.createBank("SVT::adc", 7);
+		
+		// this event is based on a gemc (4a.1.1 aka 4a.2.0) event with
+		// torus = -1.0 , solenoid = 1.0
+		//	<option name="BEAM_P"   value="proton, 0.91*GeV, 42.2*deg, 127.8*deg"/>
+		// <option name="SPREAD_P" value="0*GeV, 0*deg, 0*deg"/>
+		// <option name="BEAM_V" value="(0, 0, -1.39)cm"/>
+		// <option name="SPREAD_V" value="(0.0, 0.0)cm"/>
+
+		config.setInt("run", 0, (int) 11);
+		config.setInt("event", 0, (int) 1);
+		config.setInt("trigger", 0, (int) 0);
+		config.setLong("timestamp", 0, (long) 0);
+		config.setByte("type", 0, (byte) 0);
+		config.setByte("mode", 0, (byte) 0);
+		config.setFloat("torus", 0, (float) -1.0);
+		config.setFloat("solenoid", 0, (float) 1.0);
+		config.setFloat("rf", 0, (float) 0.0);
+		config.setFloat("startTime", 0, (float) 0.0);
+		
+		for(int i = 0; i < 7; i++) {
+			SVTadc.setByte("order", i, (byte) 0);
+			SVTadc.setShort("ped", i, (short) 0);
+			SVTadc.setLong("timestamp", i, (long) 0);
+		}
+
+		SVTadc.setByte("sector", 0, (byte) 5);
+		SVTadc.setByte("sector", 1, (byte) 5);
+		SVTadc.setByte("sector", 2, (byte) 7);
+		SVTadc.setByte("sector", 3, (byte) 7);
+		SVTadc.setByte("sector", 4, (byte) 7);
+		SVTadc.setByte("sector", 5, (byte) 9);
+		SVTadc.setByte("sector", 6, (byte) 9);
+		
+		SVTadc.setByte("layer", 0, (byte) 1);
+		SVTadc.setByte("layer", 1, (byte) 2);
+		SVTadc.setByte("layer", 2, (byte) 3);
+		SVTadc.setByte("layer", 3, (byte) 4);
+		SVTadc.setByte("layer", 4, (byte) 4);
+		SVTadc.setByte("layer", 5, (byte) 5);
+		SVTadc.setByte("layer", 6, (byte) 6);
+		
+		SVTadc.setShort("component", 0, (short) 109);
+		SVTadc.setShort("component", 1, (short) 77);
+		SVTadc.setShort("component", 2, (short) 52);
+		SVTadc.setShort("component", 3, (short) 137);
+		SVTadc.setShort("component", 4, (short) 138);
+		SVTadc.setShort("component", 5, (short) 1);
+		SVTadc.setShort("component", 6, (short) 190);
+		
+		SVTadc.setInt("ADC", 0, (int) 7);
+		SVTadc.setInt("ADC", 1, (int) 7);
+		SVTadc.setInt("ADC", 2, (int) 7);
+		SVTadc.setInt("ADC", 3, (int) 5);
+		SVTadc.setInt("ADC", 4, (int) 5);
+		SVTadc.setInt("ADC", 5, (int) 7);
+		SVTadc.setInt("ADC", 6, (int) 7);
+		
+		SVTadc.setFloat("time", 0, (float) 97.0);
+		SVTadc.setFloat("time", 1, (float) 201.0);
+		SVTadc.setFloat("time", 2, (float) 78.0);
+		SVTadc.setFloat("time", 3, (float) 102.0);
+		SVTadc.setFloat("time", 4, (float) 81.0);
+		SVTadc.setFloat("time", 5, (float) 91.0);
+		SVTadc.setFloat("time", 6, (float) 205.0);
+
+		testEvent.appendBank(config);
+		testEvent.appendBank(SVTadc);
+
+		return testEvent;
+	}
+
+
 	public static HipoDataEvent getECSector1PhotonEvent() {
 		HipoDataSync writer = new HipoDataSync();
 		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
