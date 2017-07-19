@@ -228,8 +228,8 @@ public class DCHBEngine extends ReconstructionEngine {
 				Constants.setT0(true);		
 				Constants.setUseMiniStagger(true);
 			}
-			if(newRun<100)
-				T2DCalc = true;
+			T2DCalc = true;	
+			Constants.setUseMiniStagger(true);
 			
 			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0()+ " use ministagger "+Constants.getUseMiniStagger());
 			CalibrationConstantsLoader.Load(newRun, "default");
