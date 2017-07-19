@@ -28,12 +28,12 @@
 	  </section>
 	  <section name="dgtz" tag="302" num="0" info="Digitized information">
             <column name="sector"  type="int32" num="1"  info="sector" />
-	    <column name="layer"  type="int32" num="1"  info="layer" />
-            <column name="component" type="int32" num="2"  info="component number" />
-            <column name="ADCL"   type="int32" num="3"  info="ADC Left" />
-            <column name="ADCR"   type="int32" num="4"  info="ADC Right" />
-            <column name="TDCL"   type="int32" num="5"  info="TDC Left" />
-            <column name="TDCR"   type="int32" num="6"  info="TDC Right" />
+	    <column name="layer"   type="int32" num="2"  info="layer" />
+            <column name="component" type="int32" num="3"  info="component number" />
+            <column name="ADCL"   type="int32" num="4"  info="ADC Left" />
+            <column name="ADCR"   type="int32" num="5"  info="ADC Right" />
+            <column name="TDCL"   type="int32" num="6"  info="TDC Left" />
+            <column name="TDCR"   type="int32" num="7"  info="TDC Right" />
             <column name="hitn"   type="int32" num="99" info="hit number" />
 	  </section>
 	</bank>
