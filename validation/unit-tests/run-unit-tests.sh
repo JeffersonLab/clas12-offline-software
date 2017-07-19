@@ -17,6 +17,9 @@ if [ $? != 0 ] ; then echo "RandomEventGenerator compilation failure" ; exit 1 ;
 javac -cp $classPath src/dc/DCReconstructionTest.java
 if [ $? != 0 ] ; then echo "DCReconstructionTest compilation failure" ; exit 1 ; fi
 
+javac -cp $classPath src/cvt/CVTReconstructionTest.java
+if [ $? != 0 ] ; then echo "CVTReconstructionTest compilation failure" ; exit 1 ; fi
+
 javac -cp $classPath src/ec/ECReconstructionTest.java
 if [ $? != 0 ] ; then echo "ECReconstructionTest compilation failure" ; exit 1 ; fi
 
@@ -24,6 +27,10 @@ if [ $? != 0 ] ; then echo "ECReconstructionTest compilation failure" ; exit 1 ;
 # run dc junit tests
 java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore dc.DCReconstructionTest
 if [ $? != 0 ] ; then echo "dc unit test failure" ; exit 1 ; else echo "dc passed unit tests" ; fi
+
+# run cvt junit tests
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore cvt.CVTReconstructionTest
+if [ $? != 0 ] ; then echo "cvt unit test failure" ; exit 1 ; else echo "cvt passed unit tests" ; fi
 
 # run ec junit tests
 java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore ec.ECReconstructionTest
