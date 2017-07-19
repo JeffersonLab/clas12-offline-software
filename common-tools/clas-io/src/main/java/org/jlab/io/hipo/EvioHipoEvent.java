@@ -291,25 +291,25 @@ public class EvioHipoEvent {
                 hipoADC.setByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
                 hipoADC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
                 hipoADC.setByte("order", index,(byte) 0);
-                hipoADC.setInt("ADC", index, evioBank.getInt("ADCD", i));
+                hipoADC.setInt("ADC", index, evioBank.getInt("ADCL", i));
                 
                 hipoADC.setByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
                 hipoADC.setByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
                 hipoADC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
                 hipoADC.setByte("order", index+1,(byte) 1);
-                hipoADC.setInt("ADC", index+1, evioBank.getInt("ADCN", i));
+                hipoADC.setInt("ADC", index+1, evioBank.getInt("ADCR", i));
                 
                 hipoTDC.setByte("sector", index,      (byte)  evioBank.getInt("sector",i));
                 hipoTDC.setByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
                 hipoTDC.setShort("component",  index, (short) evioBank.getInt("paddle",i));
                 hipoTDC.setByte("order", index,(byte) 2);
-                hipoTDC.setInt("TDC", index, evioBank.getInt("TDCD", i));
+                hipoTDC.setInt("TDC", index, evioBank.getInt("TDCL", i));
                 
                 hipoTDC.setByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
                 hipoTDC.setByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
                 hipoTDC.setShort("component",  index+1, (short) evioBank.getInt("paddle",i));
                 hipoTDC.setByte("order", index+1,(byte) 3);
-                hipoTDC.setInt("TDC", index+1, evioBank.getInt("TDCN", i));
+                hipoTDC.setInt("TDC", index+1, evioBank.getInt("TDCR", i));
                              
             }
             hipoEvent.appendBanks(hipoADC,hipoTDC);
