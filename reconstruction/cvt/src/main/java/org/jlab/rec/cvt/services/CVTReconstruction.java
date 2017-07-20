@@ -6,11 +6,15 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cluster.ClusterFinder;
 import org.jlab.rec.cvt.cross.Cross;
@@ -47,14 +51,87 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     String FieldsConfig = "";
     int Run = -1;
-    CVTRecConfig config;
+  
+    public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
+        if (event.hasBank("RUN::config") == false) {
+            System.err.println("RUN CONDITIONS NOT READ!");
+            return;
+        }
 
+        int Run = iRun;
+
+        boolean isMC = false;
+        boolean isCosmics = false;
+        DataBank bank = event.getBank("RUN::config");
+        //System.out.println(bank.getInt("Event")[0]);
+        if (bank.getByte("type", 0) == 0) {
+            isMC = true;
+        }
+        if (bank.getByte("mode", 0) == 1) {
+            isCosmics = true;
+        }
+
+        boolean isSVTonly = false;
+
+        // Load the fields
+        //-----------------
+        String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
+
+        if (FieldsConfig.equals(newConfig) == false) {
+            // Load the Constants
+            System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
+            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
+            // Load the Fields
+            System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
+            TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
+            this.setFieldsConfig(newConfig);
+        }
+        FieldsConfig = newConfig;
+
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        if (Run != newRun) {
+            System.out.println(" ........................................ trying to connect to db ");
+            CCDBConstantsLoader.Load(10);
+            DatabaseConstantProvider cp = new DatabaseConstantProvider(10, "default");
+            String ccdbPath = "/geometry/cvt/svt/";
+            cp.loadTable(ccdbPath + "svt");
+            cp.loadTable(ccdbPath + "region");
+            cp.loadTable(ccdbPath + "support");
+            cp.loadTable(ccdbPath + "fiducial");
+            //cp.loadTable( ccdbPath +"material");
+            cp.loadTable(ccdbPath + "alignment");
+            cp.disconnect();
+            this.setRun(newRun);
+
+        }
+        Run = newRun;
+        this.setRun(Run);
+    }
+
+    public int getRun() {
+        return Run;
+    }
+
+    public void setRun(int run) {
+        Run = run;
+    }
+
+    public String getFieldsConfig() {
+        return FieldsConfig;
+    }
+
+    public void setFieldsConfig(String fieldsConfig) {
+        FieldsConfig = fieldsConfig;
+    }
     @Override
     public boolean processDataEvent(DataEvent event) {
-        config.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
+        this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
 
-        this.FieldsConfig = config.getFieldsConfig();
-        this.Run = config.getRun();
+        this.FieldsConfig = this.getFieldsConfig();
+        this.Run = this.getRun();
 
         ADCConvertor adcConv = new ADCConvertor();
 
@@ -153,7 +230,7 @@ public class CVTReconstruction extends ReconstructionEngine {
                             crsSVT.set_PointErr(trkcands.get(c).get(ci).get_PointErr());
                             crsSVT.set_Dir(trkcands.get(c).get(ci).get_Dir());
                             crsSVT.set_DirErr(trkcands.get(c).get(ci).get_DirErr());
-                            crsSVT.set_AssociatedTrackID(ci + 1);
+                            crsSVT.set_AssociatedTrackID(c + 1);
                             crsSVT.get_Cluster1().set_AssociatedTrackID(c + 1);
                             for (FittedHit h : crsSVT.get_Cluster1()) {
                                 h.set_AssociatedTrackID(c + 1);
@@ -202,7 +279,6 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean init() {
 
         TrkSwimmer.getMagneticFields();
-        config = new CVTRecConfig();
         return true;
     }
 
