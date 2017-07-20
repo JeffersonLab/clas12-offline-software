@@ -288,9 +288,9 @@ public class SVTStripFactory
 	 * @param aModule an index starting from 0
 	 * @return Line3D a strip in the lab frame
 	 */
-	public Line3d getShiftedStrip( int aRegion, int aSector, int aStrip, int aModule )
+	public Line3d getShiftedStrip( int aRegion, int aSector, int aModule, int aStrip )
 	{
-		Line3d stripLine = getIdealStrip( aRegion, aSector, aStrip, aModule );
+		Line3d stripLine = getIdealStrip( aRegion, aSector, aModule, aStrip );
 		AlignmentFactory.applyShift( stripLine.origin(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( aRegion, aSector )], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
 		AlignmentFactory.applyShift( stripLine.end(),    SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( aRegion, aSector )], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
 		return stripLine;
@@ -306,9 +306,9 @@ public class SVTStripFactory
 	 * @param aModule an index starting from 0
 	 * @return Line3D a strip in the local frame
 	 */
-	public Line3d createShiftedStrip( int aRegion, int aSector, int aStrip, int aModule )
+	public Line3d createShiftedStrip( int aRegion, int aSector, int aModule, int aStrip )
 	{
-		Line3d stripLine = getShiftedStrip( aRegion, aSector, aStrip, aModule );
+		Line3d stripLine = getShiftedStrip( aRegion, aSector, aModule, aStrip );
 		
 		double r = SVTConstants.LAYERRADIUS[aRegion][aModule];
 		double z = SVTConstants.Z0ACTIVE[aRegion];
