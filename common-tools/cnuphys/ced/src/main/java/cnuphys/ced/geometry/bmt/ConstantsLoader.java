@@ -86,8 +86,8 @@ public class ConstantsLoader {
 			//double[] EDGE1	=	new double[]{Math.toRadians(Phi_min),Math.toRadians(Phi_min+240),Math.toRadians(Phi_min+120)};
 			//double[] EDGE2	=	new double[]{Math.toRadians(Phi_max),Math.toRadians(Phi_max-120),Math.toRadians(Phi_max+120)};
 			//sector clocking fix
-			double[] EDGE1	=	new double[]{Math.toRadians(Phi_min+120),Math.toRadians(Phi_min+240),Math.toRadians(Phi_min)};
-			double[] EDGE2	=	new double[]{Math.toRadians(Phi_max+120),Math.toRadians(Phi_max-120),Math.toRadians(Phi_max)};
+			double[] EDGE1	=	new double[]{Math.toRadians(Phi_min+120),Math.toRadians(Phi_min),Math.toRadians(Phi_min+240)};
+			double[] EDGE2	=	new double[]{Math.toRadians(Phi_max+120),Math.toRadians(Phi_max),Math.toRadians(Phi_max-120)};
 			spacing =0;
 			if(axis == 1) { //Z-detector
 				CRZRADIUS[region-1] = radius;
