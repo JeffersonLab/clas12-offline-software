@@ -15,12 +15,14 @@ import org.jlab.groot.data.DataVector;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.ui.TCanvas;
 import org.jlab.hipo.data.HipoEvent;
+import org.jlab.hipo.data.HipoGroup;
 import org.jlab.hipo.data.HipoNode;
 import org.jlab.hipo.data.HipoNodeBuilder;
 import org.jlab.hipo.io.HipoReader;
 import org.jlab.hipo.io.HipoWriter;
 import org.jlab.hipo.schema.Schema;
 import org.jlab.hipo.schema.SchemaFactory;
+import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
@@ -48,7 +50,7 @@ public class HipoFileUtils {
     }
     
      
-     public static void writeHipo(String outputName, int compression, String keep, List<String> files){
+     public static void writeHipo(String outputName, int compression, String keep, String filter, List<String> files){
          HipoWriter writer = new HipoWriter();
          writer.open(outputName);
          int nFiles = files.size();
@@ -85,10 +87,17 @@ public class HipoFileUtils {
              int nEvents = reader.getEventCount();
              for(int nev = 0; nev < nEvents; nev++){
                  HipoEvent    event = reader.readHipoEvent(nev);
+                 boolean flag = false;
+                 for(HipoGroup group : event.getGroups()) {
+//                     System.out.println(group.getSchema().getName());
+                     if(group.getSchema().getName().contains(filter)==true || filter.compareTo("ANY")==0) flag = true;
+                 }
+                 if(flag){
                  HipoEvent outEvent = writerFactory.getFilteredEvent(event);
                  //outEvent.show();
                  writer.writeEvent(outEvent);
                  progress.updateStatus();
+                 }
              }
          }
          writer.close();
@@ -254,16 +263,18 @@ public class HipoFileUtils {
         OptionParser parser = new OptionParser();
         parser.addRequired("-o");
         parser.addOption("-keep", "ALL", "Selection of banks to keep in the output");
+        parser.addOption("-filter", "ANY", "Write only events with the selected bank");
         parser.addOption("-c", "2","Compression algorithm (0-none, 1-gzip, 2-lz4)");
         
         parser.parse(args);
         
         String outputFile = parser.getOption("-o").stringValue();
         List<String> inputFileList = parser.getInputList();
-        int  compression = parser.getOption("-c").intValue();
-        String keepBanks = parser.getOption("-keep").stringValue();
+        int  compression    = parser.getOption("-c").intValue();
+        String keepBanks    = parser.getOption("-keep").stringValue();
+        String filterEvents = parser.getOption("-filter").stringValue();
         
-        HipoFileUtils.writeHipo(outputFile, compression, keepBanks, inputFileList);
+        HipoFileUtils.writeHipo(outputFile, compression, keepBanks, filterEvents, inputFileList);
         /*
         if(parser.getCommand().getCommand().compareTo("-lund")==0){
             String output = parser.getCommand().getAsString("-o");
