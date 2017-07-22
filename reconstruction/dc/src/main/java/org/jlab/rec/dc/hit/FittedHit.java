@@ -271,8 +271,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 }
              //   System.out.println("setting the time : fit doca = "+x+" dtime(b) = "+deltatime_beta+" intime "+this.get_Time()+" time "+(this.get_Time() + deltatime_beta));
                 this.set_Time(this.get_Time() - deltatime_beta);
-                if(this.get_Time()<0)
-                    this.set_Time(0);
+                if(this.get_Time()<=0)
+                    this.set_Time(0.01);
                 d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx) / this.get_Time();
             
             }
