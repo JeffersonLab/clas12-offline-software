@@ -8,7 +8,10 @@ COAT=$CLARA_HOME/plugins/clas12/
 classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
 # tar the local coatjava build so it can be installed with clara
-tar -zcvf coatjava-local.tar.gz ../../coatjava/
+cd ../..
+tar -zcvf coatjava-local.tar.gz coatjava
+mv coatjava-local.tar.gz validation/advanced-tests/
+cd -
 
 # install clara
 wget --no-check-certificate https://claraweb.jlab.org/clara/_downloads/install-claracre-clas.sh
