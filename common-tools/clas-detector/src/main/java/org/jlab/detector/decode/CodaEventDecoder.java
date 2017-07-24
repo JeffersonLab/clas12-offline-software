@@ -395,39 +395,31 @@ public class CodaEventDecoder {
                
                 int position = 0;
                 
-                while(position<cdatatypes.size()-4){                     
-                    Byte    slot = (Byte)     cdataitems.get(position+0);
-                    Integer trig = (Integer)  cdataitems.get(position+1);
-                    Long    time = (Long)     cdataitems.get(position+2);
-                    //EvioRawDataBank  dataBank = new EvioRawDataBank(crate, slot.intValue(),trig,time);
-                    
-                    Integer nchannels = (Integer) cdataitems.get(position+3);
-                    //System.out.println("Retrieving the data size = " + cdataitems.size()
-                    //+ "  " + cdatatypes.get(3) + " number of channels = " + nchannels);
-                    position += 4;
-                    int counter  = 0;
-                    while(counter<nchannels){
-                        
-                        Short channel   = (Short) cdataitems.get(position);
-			Integer length = (Integer) cdataitems.get(position+1);
-                        DetectorDataDgtz bank = new DetectorDataDgtz(crate,slot.intValue(),channel.intValue());
-                       
-                        short[] shortbuffer = new short[length];
-                        for(int loop = 0; loop < length; loop++){
-                            Short sample    = (Short) cdataitems.get(position+2+loop);
-			    shortbuffer[loop] = sample;
-                          
-                        }
-                        
-                        bank.addPulse(shortbuffer);
-                        bank.setTimeStamp(time);
-                        //dataBank.addData(channel.intValue(), 
-                        //            new RawData(shortbuffer));
-                        entries.add(bank);
-                        position += 2+length;
-                        counter++;
-                    }
-                }
+                while (position < cdatatypes.size() - 4) {
+					Byte slot = (Byte) cdataitems.get(position + 0);
+					Integer trig = (Integer) cdataitems.get(position + 1);
+					Long timeStamp = (Long) cdataitems.get(position + 2);
+					Integer nchannels = (Integer) cdataitems.get(position + 3);
+					position += 4;
+					int counter = 0;
+					while (counter < nchannels) {
+						Short channel = (Short) cdataitems.get(position);
+						Integer length = (Integer) cdataitems.get(position + 1);
+						short[] shortbuffer = new short[length];
+						for (short loop = 0; loop < length; loop++) {
+							Short sample = (short) ((Short) cdataitems.get(position + 2 + loop));
+							shortbuffer[loop] = sample;
+						}
+						ADCData adcData = new ADCData();
+						adcData.setTimeStamp(timeStamp);
+						adcData.setPulse(shortbuffer);
+						DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), channel.intValue());
+						bank.addADC(adcData);
+						entries.add(bank);
+						position += 2 + length;
+						counter++;
+					}
+				}
                 return entries;
                 
             } catch (EvioException ex) {
