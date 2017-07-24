@@ -257,9 +257,11 @@
        {"name":"layer",     "id":2, "type":"int8",  "info":"layer 1-6"},
        {"name":"component", "id":3, "type":"int16", "info":"strips"},
        {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},
-       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"ADC",       "id":5, "type":"int32", "info":"max ADC"},
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
-       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"},
+       {"name":"integral",  "id":8, "type":"int32", "info":"integral ADC (sum over the pulse)"},
+       {"name":"timestamp", "id":9, "type":"int64", "info":"timestamp"}
     ]
   },
  {
@@ -271,9 +273,11 @@
        {"name":"layer",     "id":2, "type":"int8",  "info":"layer 1-6"},
        {"name":"component", "id":3, "type":"int16", "info":"strips"},
        {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},
-       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"ADC",       "id":5, "type":"int32", "info":"max ADC"},
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
-       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"},
+       {"name":"integral",  "id":8, "type":"int32", "info":"integral ADC (sum over the pulse)"},
+       {"name":"timestamp", "id":9, "type":"int64", "info":"timestamp"}
     ]
   },
   {
