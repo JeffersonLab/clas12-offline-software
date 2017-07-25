@@ -970,7 +970,7 @@ public class SVTVolumeFactory
 		{
 			layerMax = aLayerMax;
 			regionMax = SVTConstants.convertLayer2RegionModule( aLayerMax )[0]+1;
-			moduleMax = SVTConstants.convertLayer2RegionModule( aLayerMax )[1]+1;
+			moduleMax = SVTConstants.convertLayer2RegionModule( aLayerMax )[1]+1-1;
 		}
 		for( int i = 0; i < SVTConstants.NREGIONS; i++ )
 		{
@@ -1010,7 +1010,7 @@ public class SVTVolumeFactory
 		
 		// 0 means use default / previous value
 		if( aRegionMin != 0 ){ regionMin = aRegionMin; }
-		if( aRegionMax != 0 ){ regionMax = aRegionMax; }
+		if( aRegionMax != 0 ){ regionMax = aRegionMax-1; }
 		for( int i = 0; i < SVTConstants.NREGIONS; i++ )
 		{
 			if( aSectorMin[i] != 0 ){ sectorMin[i] = aSectorMin[i]; }

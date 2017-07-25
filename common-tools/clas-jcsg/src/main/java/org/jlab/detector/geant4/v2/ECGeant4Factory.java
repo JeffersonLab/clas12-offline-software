@@ -61,8 +61,8 @@ public final class ECGeant4Factory extends Geant4Factory {
         thtilt = Math.toRadians(cp.getDouble("/geometry/ec/ec/thtilt", 0));
         walpha = Math.atan((Math.pow(Math.tan(thview), 2.0) - 3) / 4 / Math.tan(thview));
 
-        for (int isec = 1; isec <= nsectors; isec++) {
-            ECSector sectorVolume = new ECSector(isec);
+        for (int sec = 1; sec <= nsectors; sec++) {
+            ECSector sectorVolume = new ECSector(sec);
             sectorVolume.setMother(motherVolume);
         }
     }
@@ -232,15 +232,15 @@ public final class ECGeant4Factory extends Geant4Factory {
         private double layerPos;
         private final G4Trap sectorVolume;
 
-        public ECSector(int isector) {
+        public ECSector(int sector) {
             double height = (wUstrip + 39 * dwUstrip) * nustrips + 2 * 39 * shiftcnt;
             double halfbase = height / Math.tan(thview);
 
-            sectorVolume = new G4Trap("ec_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
+            sectorVolume = new G4Trap("ec_s" + sector, dsector / 2.0 + extrathickness, 0, 0,
                     height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0,
                     height / 2.0 + extrathickness, virtualzero, halfbase + extrathickness, 0);
 
-            double secphi = Math.toRadians(90 - (isector - 1) * 60);
+            double secphi = Math.toRadians(90 - (sector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
 
             Vector3d secPos = new Vector3d(0, 0, dist2midplane)
@@ -252,25 +252,25 @@ public final class ECGeant4Factory extends Geant4Factory {
             layerPos = -dsector / 2.0 + microgap;
             int ilayer = 1;
 
-            Layer steelVol1 = new Layer("eclid1_s" + isector, dsteel, ilayer);
+            Layer steelVol1 = new Layer("eclid1_s" + sector, dsteel, ilayer);
             steelVol1.layerVol.setMother(sectorVolume);
             layerPos = steelVol1.shiftZ(0, 0, layerPos) + microgap;
-            Layer alumVol = new Layer("eclid2_s" + isector, dfoam, ilayer);
+            Layer alumVol = new Layer("eclid2_s" + sector, dfoam, ilayer);
             alumVol.layerVol.setMother(sectorVolume);
             layerPos = alumVol.shiftZ(0, 0, layerPos) + microgap;
-            Layer steelVol2 = new Layer("eclid3_s" + isector, dsteel, ilayer);
+            Layer steelVol2 = new Layer("eclid3_s" + sector, dsteel, ilayer);
             steelVol2.layerVol.setMother(sectorVolume);
             layerPos = steelVol2.shiftZ(0, 0, layerPos) + microgap;
 
             for (int iuvw = 0; iuvw < nlayers; iuvw++) {
                 for (Layer uvwVol : new Layer[]{
-                    getULayer(iuvw, isector),
-                    getVLayer(iuvw, isector),
-                    getWLayer(iuvw, isector)}) {
+                    getULayer(iuvw, sector),
+                    getVLayer(iuvw, sector),
+                    getWLayer(iuvw, sector)}) {
 
                     if (ilayer > 1) {
                         Layer leadVol = new Layer(String.format("lead_%d_s%d_view_%d_stack_%d",
-                                ilayer, isector, (ilayer - 1) % 3 + 1, (ilayer > 15) ? 2 : 1), dlead, ilayer);
+                                ilayer, sector, (ilayer - 1) % 3 + 1, (ilayer > 15) ? 2 : 1), dlead, ilayer);
                         leadVol.layerVol.setMother(sectorVolume);
                         layerPos = leadVol.shiftZ(0, (ilayer - 1) * shiftcnt, layerPos) + microgap;
                     }

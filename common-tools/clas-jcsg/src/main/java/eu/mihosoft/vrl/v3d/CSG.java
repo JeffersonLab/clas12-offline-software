@@ -206,6 +206,19 @@ public class CSG {
                 .collect(Collectors.toList());
     }
 
+    /**
+     *
+     * @param line
+     * @return the positions of intersections of CSG with line
+     */
+    public List<Intersection> getIntersectionsAndNormals(Straight line) {
+        return polygons.stream()
+                .map(face -> face.getIntersection(line))
+                .filter(intersect -> intersect.isPresent())
+                .sorted((p2, p1) -> (int) Math.signum(p2.getParametricT() - p1.getParametricT()))
+                .collect(Collectors.toList());
+    }
+
     public List<Line3d> getCrossSection(Vector3d planePoint, Vector3d planeNormal) {
         return polygons.stream()
                 .flatMap(face -> face.getIntersection(planePoint, planeNormal).stream())

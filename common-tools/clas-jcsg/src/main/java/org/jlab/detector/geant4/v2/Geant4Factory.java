@@ -39,6 +39,12 @@ public abstract class Geant4Factory {
                 .collect(Collectors.toList());
     }
 
+    public List<Geant4Basic> getAllVolumes() {
+        return motherVolume.getChildren().stream()
+                .flatMap(child -> child.getAllVolumes().stream())
+                .collect(Collectors.toList());
+    }
+
     public List<DetHit> getIntersections(Straight line) {
         return motherVolume.getChildren().stream()
                 .flatMap(child -> child.getIntersections(line).stream())

@@ -12,6 +12,7 @@ package eu.mihosoft.vrl.v3d;
 public class Intersection {
 
     public Vector3d pos;
+    public Vector3d normal;
     private boolean exist;
     private double parametricT;
 
@@ -35,5 +36,9 @@ public class Intersection {
     
     public double getParametricT(){
         return parametricT;
+    }
+
+    public void setNormal(Vector3d normal){
+        this.normal = new Vector3d(normal);
     }
 }

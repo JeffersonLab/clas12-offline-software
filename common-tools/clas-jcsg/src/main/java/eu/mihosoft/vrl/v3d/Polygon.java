@@ -442,6 +442,7 @@ public final class Polygon {
 
             intersect = triangle.getIntersection(line);
             if (intersect.isPresent()) {
+                intersect.setNormal(triangle.normal);
                 return intersect;
             }
         }
