@@ -1,0 +1,10 @@
+/.nb-gradle/private/
+/build/
+/.nb-gradle/
+/.gradle/
+/bin/
+/.classpath
+/.gitignore
+/.project
+/.externalToolBuilders/
+/.settings/

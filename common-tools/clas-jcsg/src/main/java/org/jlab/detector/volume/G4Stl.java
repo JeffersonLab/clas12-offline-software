@@ -17,13 +17,21 @@ import org.jlab.geometry.prim.StlPrim;
  */
 public class G4Stl extends Geant4Basic {
 
+    public G4Stl(String name, String filename, double scaleFactor) throws FileNotFoundException {
+        this(name, new FileInputStream(new File(filename)), scaleFactor);
+    }
+
     public G4Stl(String name, String filename) throws FileNotFoundException {
-        this(name, new FileInputStream(new File(filename)));
+        this(name, new FileInputStream(new File(filename)), 1);
+    }
+
+    public G4Stl(String name, InputStream stlstream, double scaleFactor) {
+        super(new StlPrim(stlstream, scaleFactor));
+        setName(name);
+        setType("Stl");
     }
 
     public G4Stl(String name, InputStream stlstream) {
-        super(new StlPrim(stlstream));
-        setName(name);
-        setType("Stl");
+        this(name, stlstream, 1);
     }
 }

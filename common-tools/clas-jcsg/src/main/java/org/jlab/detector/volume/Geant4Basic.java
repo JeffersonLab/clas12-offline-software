@@ -268,6 +268,16 @@ public abstract class Geant4Basic {
                 .collect(Collectors.toList());
     }
 
+    public List<Geant4Basic> getAllVolumes() {
+        List<Geant4Basic> volList = new ArrayList<>(Arrays.asList(this));
+
+        volList.addAll(children.stream()
+                .flatMap(child -> child.getAllVolumes().stream())
+                .collect(Collectors.toList()));
+
+        return volList;
+    }
+
     //returns original component before transformation (important for STL volumes)
     //use it to export volumes to STL files before transformation for GEMC
     public Primitive getPrimitive() {

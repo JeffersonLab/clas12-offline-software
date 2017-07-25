@@ -63,8 +63,8 @@ public final class PCALGeant4Factory extends Geant4Factory {
         wheight = wmax * Math.sin(2 * thview);
         walpha = Math.atan((0.5 - 2.0 * Math.pow(Math.cos(thview), 2.0)) * wmax / wheight);
 
-        for (int isec = 1; isec <= nsectors; isec++) {
-            PCALSector sectorVolume = new PCALSector(isec);
+        for (int sec = 1; sec <= nsectors; sec++) {
+            PCALSector sectorVolume = new PCALSector(sec);
             sectorVolume.setMother(motherVolume);
             sectorVolumes.add(sectorVolume);
         }
@@ -250,12 +250,12 @@ public final class PCALGeant4Factory extends Geant4Factory {
         private final G4Trap sectorVolume;
         List<Layer> layerVolumes = new ArrayList<>();
 
-        public PCALSector(int isector) {
-            sectorVolume = new G4Trap("pcal_s" + isector, dsector / 2.0 + extrathickness, 0, 0,
+        public PCALSector(int sector) {
+            sectorVolume = new G4Trap("pcal_s" + sector, dsector / 2.0 + extrathickness, 0, 0,
                     uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0,
                     uheight / 2.0 + extrathickness, virtualzero, umax / 2.0 + extrathickness, 0);
 
-            double secphi = Math.toRadians(90 - (isector - 1) * 60);
+            double secphi = Math.toRadians(90 - (sector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
 
             Vector3d secPos = new Vector3d(0, 0, dist2midplane)
@@ -264,23 +264,23 @@ public final class PCALGeant4Factory extends Geant4Factory {
                     .rotateZ(-secphi);
             sectorVolume.translate(secPos);
 
-            this.isector = isector;
+            this.isector = sector;
             layerPos = -dsector / 2.0 + microgap;
 
             makeWindow("Front");
             int ilead = 1;
             for (int ilayer = 0; ilayer < nlayers; ilayer++) {
                 for (Layer uvwVol : new Layer[]{
-                    getULayer(ilayer, isector),
-                    getVLayer(ilayer, isector),
-                    getWLayer(ilayer, isector)}) {
+                    getULayer(ilayer, sector),
+                    getVLayer(ilayer, sector),
+                    getWLayer(ilayer, sector)}) {
 
                     uvwVol.setMother(sectorVolume);
                     layerPos = uvwVol.shiftZ(layerPos) + microgap;
                     layerVolumes.add(uvwVol);
 
                     if (ilead < 15) {
-                        Layer leadVol = new Layer("PCAL_Lead_Layer_" + (ilead++) + "_s" + isector, dlead);
+                        Layer leadVol = new Layer("PCAL_Lead_Layer_" + (ilead++) + "_s" + sector, dlead);
                         leadVol.setMother(sectorVolume);
                         layerPos = leadVol.shiftZ(layerPos) + microgap;
                     }

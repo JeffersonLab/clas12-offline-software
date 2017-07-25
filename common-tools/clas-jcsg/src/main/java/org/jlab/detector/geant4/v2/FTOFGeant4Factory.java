@@ -122,23 +122,23 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         return paddleVolumes;
     }
 
-    public G4Box getComponent(int isector, int ilayer, int ipaddle) {
-        int ivolume = (isector - 1) * 3 + ilayer - 1;
+    public G4Box getComponent(int sector, int layer, int paddle) {
+        int ivolume = (sector - 1) * 3 + layer - 1;
         G4Box volComponent = null;
 
-        if (isector >= 1 && isector <= 6
-                && ilayer >= 1 && ilayer <= 3) {
+        if (sector >= 1 && sector <= 6
+                && layer >= 1 && layer <= 3) {
 
-            List<Geant4Basic> layer = motherVolume.getChildren().get(ivolume).getChildren();
-            int npaddles = layer.size();
+            List<Geant4Basic> panel = motherVolume.getChildren().get(ivolume).getChildren();
+            int npaddles = panel.size();
 
-            if (ipaddle >= 1 && ipaddle <= npaddles) {
-                return (G4Box) layer.get(ipaddle - 1);
+            if (paddle >= 1 && paddle <= npaddles) {
+                return (G4Box) panel.get(paddle - 1);
             }
         }
 
         System.err.println("ERROR!!!");
-        System.err.println("Component: sector: " + isector + ", layer: " + ilayer + ", paddle: " + ipaddle + " doesn't exist");
+        System.err.println("Component: sector: " + sector + ", layer: " + layer + ", paddle: " + paddle + " doesn't exist");
         System.exit(111);
 
         return volComponent;
