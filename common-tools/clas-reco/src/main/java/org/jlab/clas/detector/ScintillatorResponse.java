@@ -28,16 +28,16 @@ public class ScintillatorResponse extends DetectorResponse {
     }
     
     @Override
-    public List<ScintillatorResponse>  readScintillatorEvent(DataEvent event, 
+    public List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<ScintillatorResponse> responseList = new ArrayList<ScintillatorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
                 int sector = bank.getByte("sector", row);
                 int layer = bank.getByte("layer", row);
-                ScintillatorResponse  response = new ScintillatorResponse(sector, layer, 0);
+                DetectorResponse  response = new DetectorResponse(sector,layer,0);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
@@ -48,6 +48,7 @@ public class ScintillatorResponse extends DetectorResponse {
                 responseList.add(response);
             }
         }
+   
         return responseList;
     }
 
