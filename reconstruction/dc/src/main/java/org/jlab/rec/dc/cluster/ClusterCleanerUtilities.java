@@ -578,11 +578,22 @@ public class ClusterCleanerUtilities {
                 for (int j = 0; j < hitsInLayer.size(); j++) {
                     docaSum += hitsInLayer.get(j).get_Doca();
                 }
-                double passingCut = 1.75 * hitsInLayer.get(0).get_CellSize() * Math.cos(Math.toRadians(6.));
-
-                if (docaSum < passingCut) { // reset LR to 0
+                //double passingCut = 1.75 * hitsInLayer.get(0).get_CellSize() * Math.cos(Math.toRadians(6.));
+                double passingCut = 1.5 * hitsInLayer.get(0).get_CellSize() ;
+                //if (docaSum < passingCut) { // reset LR to 0
+                //use doca ratio instead of sum
+                double hit1doca = 0;
+                double hit2doca = 0;
+                if(hitsInLayer.get(0).get_Doca()>hitsInLayer.get(1).get_Doca()) {
+                    hit1doca = hitsInLayer.get(0).get_Doca();
+                    hit2doca = hitsInLayer.get(1).get_Doca();
+                } else {
+                    hit1doca = hitsInLayer.get(1).get_Doca();
+                    hit2doca = hitsInLayer.get(0).get_Doca();
+                }
+                double passingCut2 = 0.75;
+                if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
                     for (int j = 0; j < hitsInLayer.size(); j++) {
-
                         hitsInLayer.get(j).set_LeftRightAmb(0);
                         hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B());
                     }
