@@ -27,8 +27,8 @@ public class ScintillatorResponse extends DetectorResponse {
         this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
     
-    @Override
-    public List<DetectorResponse>  readHipoEvent(DataEvent event, 
+
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
