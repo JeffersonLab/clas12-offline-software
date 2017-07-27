@@ -27,17 +27,17 @@ public class CalorimeterResponse extends DetectorResponse {
         this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
     
-    @Override
-    public List<CalorimeterResponse>  readCalorimeterEvent(DataEvent event, 
+ 
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<CalorimeterResponse> responseList = new ArrayList<CalorimeterResponse>();
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
                 int sector = bank.getByte("sector", row);
                 int layer = bank.getByte("layer", row);
-                CalorimeterResponse  response = new CalorimeterResponse(sector,layer,0);
+                DetectorResponse  response = new DetectorResponse(sector,layer,0);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
@@ -48,6 +48,7 @@ public class CalorimeterResponse extends DetectorResponse {
                 responseList.add(response);
             }
         }
+   
         return responseList;
     }
 

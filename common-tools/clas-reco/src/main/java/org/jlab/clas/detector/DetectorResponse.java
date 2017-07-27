@@ -127,18 +127,7 @@ public class DetectorResponse {
         return responseList;
     }
 
-    
-    public List<CalorimeterResponse> readCalorimeterEvent(DataEvent event, 
-            String bankName, DetectorType type) {
-        List<CalorimeterResponse> responseList = new ArrayList<CalorimeterResponse>();
-        return responseList;
-    }
-    
-    public List<ScintillatorResponse> readScintillatorEvent(DataEvent event, 
-            String bankName, DetectorType type) {
-        List<ScintillatorResponse> responseList = new ArrayList<ScintillatorResponse>();
-        return responseList;
-    }
+
     
     /**
      * Reads a HIPO event, constructs list of detector responses then returns only
@@ -151,7 +140,8 @@ public class DetectorResponse {
      */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, double minEnergy){ 
-        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
+        DetectorResponse response = new DetectorResponse();
+        List<DetectorResponse> responses = response.readHipoEvent(event, bankName, type);
         return DetectorResponse.getListByEnergy(responses, minEnergy);
     }
     
