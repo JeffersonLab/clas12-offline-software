@@ -47,14 +47,10 @@ public class EBEngine extends ReconstructionEngine {
 
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
-        
 
-        CalorimeterResponse cal = new CalorimeterResponse();
-        ScintillatorResponse sci = new ScintillatorResponse();
-        
-        List<DetectorResponse>   responseECAL = cal.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
-        List<DetectorResponse>  responseFTOF = sci.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
-        List<DetectorResponse>  responseCTOF = sci.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
+        List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
+        List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
+        List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::rec",DetectorType.LTCC);
