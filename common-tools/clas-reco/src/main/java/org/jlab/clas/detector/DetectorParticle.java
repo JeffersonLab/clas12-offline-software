@@ -305,7 +305,7 @@ public class DetectorParticle implements Comparable {
     
     public boolean hasHit(DetectorType type){
         int hits = 0;
-        for( ScintillatorResponse res : this.scintillatorStore){
+        for( DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
@@ -315,17 +315,7 @@ public class DetectorParticle implements Comparable {
     
     public boolean hasHit(DetectorType type, int layer){
         int hits = 0;
-        for( ScintillatorResponse res : this.scintillatorStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) hits++;
-        }
-        if(hits==0) return false;
-        if(hits>1) System.out.println("[Warning] Too many hits for detector type = " + type);
-        return true;
-    }
-    
-    public boolean hasECHit(DetectorType type, int layer){
-        int hits = 0;
-        for( CalorimeterResponse res : this.calorimeterStore){
+        for( DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) hits++;
         }
         if(hits==0) return false;
@@ -349,34 +339,21 @@ public class DetectorParticle implements Comparable {
         return this.scintillatorStore;
     }    
     
-    public ScintillatorResponse getHit(DetectorType type){
-        for(ScintillatorResponse res : this.scintillatorStore){
+    public DetectorResponse getHit(DetectorType type){
+        for(DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type) return res;
         }
         return null;
     }
     
-    public ScintillatorResponse getHit(DetectorType type, int layer){
-        for(ScintillatorResponse res : this.scintillatorStore){
+    public DetectorResponse getHit(DetectorType type, int layer){
+        for(DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) return res;
         }
         return null;
     }
     
-    public CalorimeterResponse getECHit(DetectorType type){
-        for(CalorimeterResponse res : this.calorimeterStore){
-            if(res.getDescriptor().getType()==type) return res;
-        }
-        return null;
-    }
-    
-    public CalorimeterResponse getECHit(DetectorType type, int layer){
-        for(CalorimeterResponse res : this.calorimeterStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) return res;
-        }
-        return null;
-    }
-    
+
 
     
     public double getBeta(){ return this.particleBeta;}
@@ -413,7 +390,7 @@ public class DetectorParticle implements Comparable {
     
     
     public double   getPathLength(DetectorType type){
-        ScintillatorResponse response = this.getHit(type);
+        DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }
@@ -437,7 +414,7 @@ public class DetectorParticle implements Comparable {
     }
     
     public double getTime(DetectorType type){
-        ScintillatorResponse response = this.getHit(type);
+        DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         return response.getTime();
     }
@@ -451,7 +428,7 @@ public class DetectorParticle implements Comparable {
     
     public double getEnergy(DetectorType type){
         double energy = 0.0;
-        for(CalorimeterResponse r : this.calorimeterStore){
+        for(DetectorResponse r : this.responseStore){
             if(r.getDescriptor().getType()==type){
                 energy += r.getEnergy();
             }
@@ -464,7 +441,7 @@ public class DetectorParticle implements Comparable {
     }
     
     public double getBeta(DetectorType type, int layer, double startTime){
-        ScintillatorResponse response = this.getHit(type,layer);
+        DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime() - startTime;
@@ -473,7 +450,7 @@ public class DetectorParticle implements Comparable {
     }
     
     public double getBeta(DetectorType type, double startTime){
-        ScintillatorResponse response = this.getHit(type);
+        DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime() - startTime;
@@ -483,7 +460,7 @@ public class DetectorParticle implements Comparable {
     
     
     public double getBeta(DetectorType type){
-        ScintillatorResponse response = this.getHit(type);
+        DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime();
@@ -583,82 +560,9 @@ public class DetectorParticle implements Comparable {
         return bestIndex;
     }
     
-        public int getScintillatorHit(List<ScintillatorResponse>  hitList, DetectorType type,
-            int detectorLayer,
-            double distanceThreshold){
-        
-        Line3D   trajectory = this.detectorTrack.getLastCross();
 
-        //System.out.println("find hit in array size = "+ hitList.size());
-        Point3D  hitPoint = new Point3D();
-        double   minimumDistance = 500.0;
-        int      bestIndex       = -1;
-        for(int loop = 0; loop < hitList.size(); loop++){
-           
-            //for(DetectorResponse response : hitList){
-            ScintillatorResponse response = hitList.get(loop);
-            
-            //System.out.println("analyzing response " + loop + " type = " + 
-            //       response.getDescriptor().getType() + " " + response.getDescriptor().getLayer() +
-            //        "  " + response.getAssociation());
-            if(response.getDescriptor().getType()==type &&
-                    response.getDescriptor().getLayer()==detectorLayer
-                    &&response.getAssociation()<0){
-                hitPoint.set(
-                        response.getPosition().x(),
-                        response.getPosition().y(),
-                        response.getPosition().z()
-                        );
-                double hitdistance = trajectory.distance(hitPoint).length();
-                //System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                if(hitdistance<distanceThreshold&&hitdistance<minimumDistance){
-                    minimumDistance = hitdistance;
-                    bestIndex       = loop;
-                }
-            } //End of FTOF Matching if statement
 
-            
-        }
-        return bestIndex;
-    }
- 
-
-        
-        public int getCalorimeterHit(List<CalorimeterResponse>  hitList, DetectorType type,
-            int detectorLayer,
-            double distanceThreshold){
-        
-        Line3D   trajectory = this.detectorTrack.getLastCross();
-        //System.out.println("find hit in array size = "+ hitList.size());
-        Point3D  hitPoint = new Point3D();
-        double   minimumDistance = 500.0;
-        int      bestIndex       = -1;
-        for(int loop = 0; loop < hitList.size(); loop++){
-           
-            //for(DetectorResponse response : hitList){
-            CalorimeterResponse response = hitList.get(loop);
-            
-            //System.out.println("analyzing response " + loop + " type = " + 
-            //       response.getDescriptor().getType() + " " + response.getDescriptor().getLayer() +
-            //        "  " + response.getAssociation());
-            if(response.getDescriptor().getType()==type&&
-                    response.getDescriptor().getLayer()==detectorLayer
-                    &&response.getAssociation()<0){
-                hitPoint.set(
-                        response.getPosition().x(),
-                        response.getPosition().y(),
-                        response.getPosition().z()
-                        );
-                double hitdistance = trajectory.distance(hitPoint).length();
-                //System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                if(hitdistance<distanceThreshold&&hitdistance<minimumDistance){
-                    minimumDistance = hitdistance;
-                    bestIndex       = loop;
-                }
-            }
-        }
-        return bestIndex;
-    }        
+   
 
     /**
      * returns DetectorResponse that matches closely with the trajectory
@@ -723,24 +627,7 @@ public class DetectorParticle implements Comparable {
         //response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
         return dist;
     }
-    
-    public Line3D  getDistance(CalorimeterResponse  response){
-        Line3D cross = this.detectorTrack.getLastCross();
-        Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
-        //Path3D trajectory = this.getTrajectory();
-        //Point3D hitPoint = new Point3D(
-        //response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
-        return dist;
-    }
-    
-    public Line3D  getDistance(ScintillatorResponse  response){
-        Line3D cross = this.detectorTrack.getLastCross();
-        Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
-        //Path3D trajectory = this.getTrajectory();
-        //Point3D hitPoint = new Point3D(
-        //response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
-        return dist;
-    }
+
     
     public void setPath(double path){
         this.particlePath = path;
@@ -774,6 +661,10 @@ public class DetectorParticle implements Comparable {
             str.append("\n");
         }
         for(CalorimeterResponse res : this.calorimeterStore){
+            str.append(res.toString());
+            str.append("\n");
+        }
+        for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");
         }
@@ -879,13 +770,13 @@ public class DetectorParticle implements Comparable {
      } 
      
      public double getTime(DetectorType type, int layer) {
-         ScintillatorResponse response = this.getHit(type,layer);
+         DetectorResponse response = this.getHit(type,layer);
          if(response==null) return -1.0;
         return response.getTime();
     }
     
     public double  getPathLength(DetectorType type, int layer){
-        ScintillatorResponse response = this.getHit(type,layer);
+        DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }  
