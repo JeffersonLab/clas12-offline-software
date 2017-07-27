@@ -17,6 +17,7 @@ import org.jlab.clas.detector.CherenkovResponse;
 /**
  *
  * @author gavalian
+ *@author jnewton
  */
 public class EBEngine extends ReconstructionEngine {
 
@@ -46,25 +47,23 @@ public class EBEngine extends ReconstructionEngine {
 
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
-        
-        // Add detector responses
-        CalorimeterResponse cal = new CalorimeterResponse();
-        ScintillatorResponse sci = new ScintillatorResponse();
-        
-        List<CalorimeterResponse>   responseECAL = cal.readCalorimeterEvent(de, "ECAL::clusters", DetectorType.EC);
-        List<ScintillatorResponse>  responseFTOF = sci.readScintillatorEvent(de, "FTOF::hits", DetectorType.FTOF);
-        List<ScintillatorResponse>  responseCTOF = sci.readScintillatorEvent(de, "CTOF::hits", DetectorType.CTOF);
+
+        List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
+        List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
+        List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::rec",DetectorType.LTCC);
         
         List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FT::particles");
         
-        eb.addScintillatorResponses(responseFTOF);
-        eb.addScintillatorResponses(responseCTOF);
-        eb.addCalorimeterResponses(responseECAL);
+        eb.addDetectorResponses(responseFTOF);
+        eb.addDetectorResponses(responseCTOF);
+        eb.addDetectorResponses(responseECAL);
         eb.addCherenkovResponses(responseHTCC);
         eb.addCherenkovResponses(responseLTCC);
+
+        
 
         
         // Add tracks
@@ -73,7 +72,7 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
         eb.addTracks(ctracks);
         
-        //System.out.println("Number of particles before matching  " + eb.getEvent().getParticles().size());
+
 
         eb.processHitMatching();
         eb.addTaggerTracks(trackFT);
@@ -86,6 +85,15 @@ public class EBEngine extends ReconstructionEngine {
         
         //System.out.println(eb.getEvent().toString());
  
+        
+//        for(int i = 0; i < eb.getEvent().getParticles().size(); i++) {
+//            System.out.println("Particle  " + i);
+//            for(int j = 0 ; j < eb.getEvent().getParticles().get(i).getDetectorResponses().size() ; j++){
+//                System.out.println("Point  " + eb.getEvent().getParticles().get(i).getDetectorResponses().get(j).getMatchedDistance());
+//            }
+//        }
+        
+        
         EBAnalyzer analyzer = new EBAnalyzer();
         //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
@@ -167,5 +175,4 @@ public class EBEngine extends ReconstructionEngine {
     }
     
 }
-
 
