@@ -1,7 +1,6 @@
 package org.jlab.rec.dc.track;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
@@ -57,8 +56,8 @@ public class TrackCandListFinder {
 			TrajectoryFinder trjFind = new TrajectoryFinder();
 			
 			Trajectory traj = trjFind.findTrajectory(crossesInTrk);
-            if(traj == null) 
-            	continue;
+                        if(traj == null) 
+                            continue;
             
 			if(crossesInTrk.size()==3) {
 					

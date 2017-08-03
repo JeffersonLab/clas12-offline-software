@@ -223,7 +223,8 @@ public class DCHBEngine extends ReconstructionEngine {
 		boolean T2DCalc = false;
 		
 		if(Run!=newRun) {
-			if(newRun>751 && newRun<912) {
+			//if(newRun>751 && newRun<912) {
+                        if(newRun>99) {
 				T2DCalc = true;
 				Constants.setT0(true);		
 				Constants.setUseMiniStagger(true);
@@ -268,8 +269,9 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        //String inputFile="/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12.hipo";
+        String inputFile="/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE3.hipo";
+        //String inputFile="/Users/ziegler/Workdir/Files/test/electron_fd_t0.8torus.hipo";
+       // String inputFile = "/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         DCHBEngine en = new DCHBEngine();
@@ -285,8 +287,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-        //String outputFile="/Users/ziegler/Workdir/Files/GEMC/DC/KPP2trksRecDd.hipo";
-        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/GEMCoutputFiles_hipo/sidis_0100_12_rec_slow2.hipo";
+       // String outputFile="/Users/ziegler/Workdir/Files/test/electron_fd_rcF3.hipo";
+        String outputFile = "/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE2.rec3.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -303,14 +305,14 @@ public class DCHBEngine extends ReconstructionEngine {
 
             // Processing TB   
             en2.processDataEvent(event);
-            //System.out.println("  EVENT "+counter);
-            if (counter > 9) {
-                break;
-            }
+            System.out.println("  EVENT "+counter);
+           // if (counter > 13) {
+            //    break;
+            //}
             //event.show();
             //if(counter%100==0)
             System.out.println("*************************************************************run " + counter + " events");
-            if(event.hasBank("HitBasedTrkg::HBTracks")) {
+            if(event.hasBank("TimeBasedTrkg::TBTracks")) {
                // event.show();
                 writer.writeEvent(event);
             }

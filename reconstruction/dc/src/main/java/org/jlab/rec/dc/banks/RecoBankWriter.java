@@ -463,7 +463,8 @@ public class RecoBankWriter {
             bank.setFloat("fitSlopeErr", i, (float) cls.get_clusterLineFitSlopeErr());
             bank.setFloat("fitInterc", i, (float) cls.get_clusterLineFitIntercept());
             bank.setFloat("fitIntercErr", i, (float) cls.get_clusterLineFitInterceptErr());
-
+            bank.setFloat("resiSum", i, (float) seglist.get(i).get_ResiSum());
+            bank.setFloat("timeSum", i, (float) seglist.get(i).get_TimeSum());
             bank.setFloat("SegEndPoint1X", i, (float) seglist.get(i).get_SegmentEndPoints()[0]);
             bank.setFloat("SegEndPoint1Z", i, (float) seglist.get(i).get_SegmentEndPoints()[1]);
             bank.setFloat("SegEndPoint2X", i, (float) seglist.get(i).get_SegmentEndPoints()[2]);
@@ -486,7 +487,7 @@ public class RecoBankWriter {
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
         }
-
+        
         return bank;
 
     }

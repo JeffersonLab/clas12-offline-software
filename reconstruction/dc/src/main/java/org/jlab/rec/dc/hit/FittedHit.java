@@ -97,7 +97,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         if (this._TrkgStatus != -1) {
             if (this.get_TimeToDistance() == 0) // if the time-to-dist is not set ... set it
             {
-                set_TimeToDistance(B, 0);
+                set_TimeToDistance(1.0, B);
             }
 
             err = Constants.CELLRESOL; // default

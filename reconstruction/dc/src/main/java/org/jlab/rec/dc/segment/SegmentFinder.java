@@ -8,6 +8,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.cluster.FittedCluster;
+import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 
 /**
@@ -129,10 +130,21 @@ public class SegmentFinder {
                     seg.set_Trajectory(trj);
                 }
             }
+            
+            double sumRes=0;
+            double sumTime=0;
+            
+            for(FittedHit h : seg) {
+                sumRes+=h.get_TimeResidual();
+                sumTime+=h.get_Time();
+            }
+            seg.set_ResiSum(sumRes);
+            seg.set_TimeSum(sumTime);
+            
             segList.add(seg);
         }
 
-//		this.setAssociatedID(segList);
+        //		this.setAssociatedID(segList);
         return segList;
 
     }

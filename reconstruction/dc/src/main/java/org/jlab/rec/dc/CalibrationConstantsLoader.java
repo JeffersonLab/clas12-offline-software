@@ -11,42 +11,7 @@ public class CalibrationConstantsLoader {
     public CalibrationConstantsLoader() {
         // TODO Auto-generated constructor stub
     }
-    /*	public static final int[] cableid = 
-	    {0,0,1,7, 13,19,25,31,37,0,0,0,0,43,49,55,61,67,73,79,
-  		 0,0,2,8, 14,20,26,32,38,0,0,0,0,44,50,56,62,68,74,80,
-		 0,0,3,9, 15,21,27,33,39,0,0,0,0,45,51,57,63,69,75,81,
-		 0,0,4,10,16,22,28,34,40,0,0,0,0,46,52,58,64,70,76,82,
-		 0,0,5,11,17,23,29,35,41,0,0,0,0,47,53,59,65,71,77,83,
-		 0,0,6,12,18,24,30,36,42,0,0,0,0,48,54,60,66,72,78,84};*/
- /*
-	// T2D
-	public static final double[][] deltanm = new double[6][6];
-	public static final double[][] v0 = new double[6][6];					    // staturated drift velocity in cm/ns
-	public static final double[][] delt_bfield_coefficient = new double[6][6]; //coefficient of the bfield part of the increase in time
-	
-	public static final double[] dmaxsuperlayer = {0.77665,0.81285,1.25065,1.32446,1.72947,1.80991};
-	public static final double[][] tmaxsuperlayer = new double[6][6];
-
-	public static final double deltatime_bfield_par1[][] = new double[6][6];
-	public static final double deltatime_bfield_par2[][] = new double[6][6];
-	public static final double deltatime_bfield_par3[][] = new double[6][6];
-	public static final double deltatime_bfield_par4[][] = new double[6][6];
-	
-	public static final double distbeta[][] = new double[6][6];
-	
-	//RMS
-	// Instantiating the constants arrays
-	public static final double[][] PAR1 			= new double[6][6];
-	public static final double[][] PAR2 			= new double[6][6];
-	public static final double[][] PAR3 			= new double[6][6];
-	public static final double[][] PAR4 			= new double[6][6];
-	public static final double[][] SCAL 			= new double[6][6];
-	
-	public static final int[][][][] STATUS 			= new int[6][6][6][112];
-	//T0s
-	public static final double[][][][] T0			= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-	public static final double[][][][] T0Err		= new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-     */
+    
     //Map of Cable ID (1, .., 6) in terms of Layer number (1, ..., 6) and localWire# (1, ..., 16)
     public static final int[][] CableID = { //[nLayer][nLocWire] => nLocWire=16, 7 groups of 16 wires in each layer
         {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 1
@@ -193,7 +158,7 @@ public class CalibrationConstantsLoader {
     }
 
     public static final synchronized void LoadDevel(int runNb, String var, String var2) {
-
+System.out.println(" LOADING DEVEL for Run "+runNb+" var "+var+" var2 "+var2);
         double[][] DELTANM = new double[6][6];
         double[][] V0 = new double[6][6];					    // staturated drift velocity in cm/ns
         double[][] DELT_BFIELD_COEFFICIENT = new double[6][6]; //coefficient of the bfield part of the increase in time
@@ -229,7 +194,7 @@ public class CalibrationConstantsLoader {
         dbprovider.loadTable("/geometry/dc/superlayer");
         //disconncect from database. Important to do this after loading tables.
         dbprovider.disconnect();
-
+        dbprovider_Test.disconnect();
         //dbprovider.show();
         // Getting DMAX
         for (int i = 0; i < dbprovider.length("/geometry/dc/superlayer/superlayer"); i++) {
@@ -260,6 +225,7 @@ public class CalibrationConstantsLoader {
         }
 
         // 2) T2D
+        
         for (int i = 0; i < dbprovider_Test.length("/calibration/dc/time_to_distance/tvsx_devel_v2/Sector"); i++) {
 
             int iSec = dbprovider_Test.getInteger("/calibration/dc/time_to_distance/tvsx_devel_v2/Sector", i);
@@ -287,8 +253,8 @@ public class CalibrationConstantsLoader {
 
             DISTBETA[iSec - 1][iSly - 1] = idistbeta;
 
-            System.out.println(" T2D Constants :  "+ " deltanm " + DELTANM[iSec - 1][iSly - 1] + "  v0 " + V0[iSec - 1][iSly - 1] + " delt_bfield_coefficient " + DELT_BFIELD_COEFFICIENT[iSec - 1][iSly - 1]
-                    + "  b1 " + DELTATIME_BFIELD_PAR1[iSec - 1][iSly - 1] + " b2 " + DELTATIME_BFIELD_PAR2[iSec - 1][iSly - 1] + " b3 " + DELTATIME_BFIELD_PAR3[iSec - 1][iSly - 1] + " b4 " + DELTATIME_BFIELD_PAR4[iSec - 1][iSly - 1]);
+            System.out.println("T2D Constants:  Sector"+iSec+" Superlayer "+ iSly+" tmax "+TMAXSUPERLAYER[iSec - 1][iSly - 1]+" deltanm " + DELTANM[iSec - 1][iSly - 1] + "  v0 " + V0[iSec - 1][iSly - 1] + " delt_bfield_coefficient " + DELT_BFIELD_COEFFICIENT[iSec - 1][iSly - 1]
+                    + "  b1 " + DELTATIME_BFIELD_PAR1[iSec - 1][iSly - 1] + " b2 " + DELTATIME_BFIELD_PAR2[iSec - 1][iSly - 1] + " b3 " + DELTATIME_BFIELD_PAR3[iSec - 1][iSly - 1] + " b4 " + DELTATIME_BFIELD_PAR4[iSec - 1][iSly - 1] +" run "+runNb);
         }
         // T0-subtraction
         for (int i = 0; i < dbprovider_Test.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
@@ -302,7 +268,7 @@ public class CalibrationConstantsLoader {
 
             T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
             T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-            System.out.println(" DC CALIBRATION CONSTANTS TO; Cable id = "+iCab+" T0 = "+t0);
+           // System.out.println(" DC CALIBRATION CONSTANTS TO; Cable id = "+iCab+" T0 = "+t0 + " for variation "+var2+" Run = "+runNb);
         }
         CCDBConstants.setDELTANM(DELTANM);
         CCDBConstants.setV0(V0);
@@ -325,6 +291,6 @@ public class CalibrationConstantsLoader {
     }
 
     public static final void main(String arg[]) {
-        CalibrationConstantsLoader.LoadDevel(790, "default", "dc_test1");
+        CalibrationConstantsLoader.LoadDevel(1142, "default", "dc_test2");
     }
 }
