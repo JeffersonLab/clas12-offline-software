@@ -12,7 +12,8 @@ public class TableLoader {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
+	//public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
+        public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][1200]; // sector slyr alpha Bfield time bins
 	static boolean T2DLOADED = false;
 	static int minBinIdxB = 0;
 	static int maxBinIdxB = 5;
@@ -73,7 +74,7 @@ public class TableLoader {
 							     
 							     if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
 							    	  maxBinIdxT[s][r][ibfield][icosalpha] = tbin; 
-							     }
+							     } //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
 							      if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
 							    	// firstbin = bin;
 							    	// bincount = 0;				    	 
@@ -122,22 +123,22 @@ public class TableLoader {
 	 */
 	public static synchronized double calc_Time(double x, double dmax, double tmax, double alpha, double bfield, int s, int r) {
 		 
-		 // Assume a functional form (time=x/v0+a*(x/dmax)**n+b*(x/dmax)**m)
-		 // for time as a function of x for theta = 30 deg.
-		 // first, calculate n
-		 double n = ( 1.+ (CCDBConstants.getDELTANM()[s][r]-1.)*Math.pow(FracDmaxAtMinVel, CCDBConstants.getDELTANM()[s][r]) )/( 1.- Math.pow(FracDmaxAtMinVel, CCDBConstants.getDELTANM()[s][r]));
-		 //now, calculate m
-		 double m = n + CCDBConstants.getDELTANM()[s][r];
-		 // determine b from the requirement that the time = tmax at dist=dmax
-		 double b = (tmax - dmax/CCDBConstants.getV0()[s][r])/(1.- m/n);
-		 // determine a from the requirement that the derivative at
-		 // d=dmax equal the derivative at d=0
-		 double a = -b*m/n;
-		 
-		 double cos30minusalpha=Math.cos(Math.toRadians(30.-alpha));
-		 double xhat = x/dmax;
-		 double dmaxalpha = dmax*cos30minusalpha;
-	     double xhatalpha = x/dmaxalpha;
+            // Assume a functional form (time=x/v0+a*(x/dmax)**n+b*(x/dmax)**m)
+            // for time as a function of x for theta = 30 deg.
+            // first, calculate n
+            double n = ( 1.+ (CCDBConstants.getDELTANM()[s][r]-1.)*Math.pow(FracDmaxAtMinVel, CCDBConstants.getDELTANM()[s][r]) )/( 1.- Math.pow(FracDmaxAtMinVel, CCDBConstants.getDELTANM()[s][r]));
+            //now, calculate m
+            double m = n + CCDBConstants.getDELTANM()[s][r];
+            // determine b from the requirement that the time = tmax at dist=dmax
+            double b = (tmax - dmax/CCDBConstants.getV0()[s][r])/(1.- m/n);
+            // determine a from the requirement that the derivative at
+            // d=dmax equal the derivative at d=0
+            double a = -b*m/n;
+
+            double cos30minusalpha=Math.cos(Math.toRadians(30.-alpha));
+            double xhat = x/dmax;
+            double dmaxalpha = dmax*cos30minusalpha;
+            double xhatalpha = x/dmaxalpha;
 	     
 	     //     now calculate the dist to time function for theta = 'alpha' deg.
 	     //     Assume a functional form with the SAME POWERS N and M and
@@ -156,21 +157,21 @@ public class TableLoader {
 		//	   a track with local angle alpha (for local angle = alpha)
 	     double deltatime_bfield = CCDBConstants.getDELT_BFIELD_COEFFICIENT()[s][r]*Math.pow(bfield,2)*tmax*(CCDBConstants.getDELTATIME_BFIELD_PAR1()[s][r]*xhatalpha+CCDBConstants.getDELTATIME_BFIELD_PAR2()[s][r]*Math.pow(xhatalpha, 2)+
 	    		 CCDBConstants.getDELTATIME_BFIELD_PAR3()[s][r]*Math.pow(xhatalpha, 3)+CCDBConstants.getDELTATIME_BFIELD_PAR4()[s][r]*Math.pow(xhatalpha, 4));
-	     
+	     // System.out.println("dB "+deltatime_bfield+" raw time "+time);
 	     //calculate the time at alpha deg. and at a non-zero bfield	          
 	     time += deltatime_bfield;
 		 
-	     
+	    
 	     return time;
 	 }
 
-	public static void main(String args[]) {
-		CalibrationConstantsLoader.Load(10, "default");
-		TableLoader tbl = new TableLoader();
-		TableLoader.Fill();
+	//public static void main(String args[]) {
+	//	CalibrationConstantsLoader.Load(10, "default");
+	//	TableLoader tbl = new TableLoader();
+	//	TableLoader.Fill();
 		//System.out.println(maxBinIdxT[1][0][0]+" "+maxBinIdxT[1][0][5]+" "+DISTFROMTIME[1][0][0][maxBinIdxT[1][0][0]]+ " "+DISTFROMTIME[1][0][5][maxBinIdxT[1][0][5]]);
 		//System.out.println(tbl.interpolateOnGrid(2.5, Math.toRadians(0.000000), 1000) );
 	  //579: B 2.5 alpha 0 d 1.3419999999999992 alpha 1 1.3474999999999997
 	   
-	}
+	//}
 }

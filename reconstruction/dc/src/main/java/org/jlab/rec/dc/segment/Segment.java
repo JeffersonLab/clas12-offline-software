@@ -59,9 +59,10 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         this._fittedCluster = _fittedCluster;
     }
 
-    private int _Sector;      							//	    sector[1...6]
-    private int _Superlayer;    	 					//	    superlayer [1,...6]
-    private int _Id;									//		cluster Id
+    private int     _Sector;      						// sector[1...6]
+    private int     _Superlayer;    	 					// superlayer [1,...6]
+    private int     _Id;							// cluster Id
+    private double  _ResiSum;                                                   // sum of residuals for hits in segment
 
     /**
      *
@@ -131,6 +132,39 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         return (this._Superlayer + 1) % 2 + 1;
     }
 
+    /**
+     * 
+     * @return sum of residuals for all hits in segment
+     */
+    public double get_ResiSum() {
+        return _ResiSum;
+    }
+
+    /**
+     * 
+     * @param _ResiSum sum of residuals for all hits in segment
+     */
+    public void set_ResiSum(double _ResiSum) {
+        this._ResiSum = _ResiSum;
+    }
+
+    /**
+     * 
+     * @return sum of the corrected (T0-subtracted) times of all hits in segment
+     */
+    public double get_TimeSum() {
+        return _TimeSum;
+    }
+
+    /**
+     * 
+     * @param _TimeSum sum of the corrected (T0-subtracted) times of all hits in segment
+     */
+    public void set_TimeSum(double _TimeSum) {
+        this._TimeSum = _TimeSum;
+    }
+    private double  _TimeSum;                                                   // sum of times for hits in segment
+    
     /**
      *
      * @param otherseg matching cluster in other superlayer in a region

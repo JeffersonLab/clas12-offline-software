@@ -220,10 +220,13 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 		// Load the constants
 		//-------------------
 		int newRun = bank.getInt("run", 0);
+                if(newRun ==0)
+                    return;
+                
 		boolean T2DCalc = false;
 		
 		if(Run!=newRun) {
-			if(newRun>751 && newRun<912) {
+			if(newRun>99) {
 				T2DCalc = true;
 				Constants.setT0(true);		
 				Constants.setUseMiniStagger(true);
@@ -261,7 +264,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 	public static void main(String[] args) throws FileNotFoundException, EvioException{
 		
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
-		String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
+		String inputFile = "/Users/ziegler/Workdir/Files/Data/clas12_001142_a00000.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/e2to6hipo.hipo";
 		// String inputFile="/Users/ziegler/Downloads/out.hipo";
 		//String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";

@@ -67,7 +67,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		ClusterFinder clusFinder = new ClusterFinder();
 		
 		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct);
-		
+                
 		if(clusters.size()==0) {
 			rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
 			return true;
