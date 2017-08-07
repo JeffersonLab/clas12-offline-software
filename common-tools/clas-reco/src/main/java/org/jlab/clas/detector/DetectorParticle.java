@@ -53,9 +53,9 @@ public class DetectorParticle implements Comparable {
     private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
 
-    private List<ScintillatorResponse>    scintillatorStore = new ArrayList<ScintillatorResponse>();
-    private List<CalorimeterResponse>  calorimeterStore = new ArrayList<CalorimeterResponse>();
-    
+//    private List<ScintillatorResponse>    scintillatorStore = new ArrayList<ScintillatorResponse>();
+//    private List<CalorimeterResponse>  calorimeterStore = new ArrayList<CalorimeterResponse>();
+   
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
     
@@ -137,7 +137,8 @@ public class DetectorParticle implements Comparable {
         track.setTrackEnd(resp.getPosition().x(),
                 resp.getPosition().y(),resp.getPosition().z());
         DetectorParticle particle = new DetectorParticle(track);
-        particle.addCalorimeterResponse(resp);
+//        particle.addCalorimeterResponse(resp);
+        particle.addResponse(resp);
         return particle;
     }
     
@@ -149,21 +150,21 @@ public class DetectorParticle implements Comparable {
         return this.cherenkovStore;
     }
     
-    public List<CalorimeterResponse> getCalorimeterResponse(){
-        return this.calorimeterStore;
-    }
+//    public List<CalorimeterResponse> getCalorimeterResponse(){
+//        return this.calorimeterStore;
+//    }
     
-    public List<ScintillatorResponse> getScintillatorResponse(){
-        return this.scintillatorStore;
-    }
+//    public List<ScintillatorResponse> getScintillatorResponse(){
+//        return this.scintillatorStore;
+//    }
     
     public void addCherenkovResponse(CherenkovResponse res){
         this.cherenkovStore.add(res);
     }
     
-        public void addCalorimeterResponse(CalorimeterResponse res){
-        this.calorimeterStore.add(res);
-    }
+//        public void addCalorimeterResponse(CalorimeterResponse res){
+//        this.calorimeterStore.add(res);
+//    }
     
     public void addResponse(DetectorResponse res, boolean match){
         this.responseStore.add(res);
@@ -183,42 +184,42 @@ public class DetectorParticle implements Comparable {
         }
     }
     
-    public void addResponse(CalorimeterResponse res, boolean match){
-        this.calorimeterStore.add(res);
-        if(match==true){
-            Line3D distance = this.getDistance(res);
-            
-            res.getMatchedPosition().setXYZ(
-                    distance.midpoint().x(),
-                    distance.midpoint().y(),distance.midpoint().z());
-            
-            /*Vector3D vec = new Vector3D(
-                    this.particleCrossPosition.x(),
-                    particleCrossPosition.y(),
-                    particleCrossPosition.z());
-            */
-            res.setPath(this.getPathLength(res.getPosition()));
-        }
-    }
-    
-    
-    public void addResponse(ScintillatorResponse res, boolean match){
-        this.scintillatorStore.add(res);
-        if(match==true){
-            Line3D distance = this.getDistance(res);
-            
-            res.getMatchedPosition().setXYZ(
-                    distance.midpoint().x(),
-                    distance.midpoint().y(),distance.midpoint().z());
-            
-            /*Vector3D vec = new Vector3D(
-                    this.particleCrossPosition.x(),
-                    particleCrossPosition.y(),
-                    particleCrossPosition.z());
-            */
-            res.setPath(this.getPathLength(res.getPosition()));
-        }
-    }
+//    public void addResponse(CalorimeterResponse res, boolean match){
+//        this.calorimeterStore.add(res);
+//        if(match==true){
+//            Line3D distance = this.getDistance(res);
+//            
+//            res.getMatchedPosition().setXYZ(
+//                    distance.midpoint().x(),
+//                    distance.midpoint().y(),distance.midpoint().z());
+//            
+//            /*Vector3D vec = new Vector3D(
+//                    this.particleCrossPosition.x(),
+//                    particleCrossPosition.y(),
+//                    particleCrossPosition.z());
+//            */
+//            res.setPath(this.getPathLength(res.getPosition()));
+//        }
+//    }
+//    
+//    
+//    public void addResponse(ScintillatorResponse res, boolean match){
+//        this.scintillatorStore.add(res);
+//        if(match==true){
+//            Line3D distance = this.getDistance(res);
+//            
+//            res.getMatchedPosition().setXYZ(
+//                    distance.midpoint().x(),
+//                    distance.midpoint().y(),distance.midpoint().z());
+//            
+//            /*Vector3D vec = new Vector3D(
+//                    this.particleCrossPosition.x(),
+//                    particleCrossPosition.y(),
+//                    particleCrossPosition.z());
+//            */
+//            res.setPath(this.getPathLength(res.getPosition()));
+//        }
+//    }
     
     public Particle getPhysicsParticle(int pid){
         Particle  particle = new Particle(pid,
@@ -331,13 +332,13 @@ public class DetectorParticle implements Comparable {
         return this.cherenkovStore;
     }
  
-    public List<CalorimeterResponse>  getCalorimeterResponses(){
-        return this.calorimeterStore;
-    }
-    
-    public List<ScintillatorResponse> getScintillatorResponses(){
-        return this.scintillatorStore;
-    }    
+//    public List<CalorimeterResponse>  getCalorimeterResponses(){
+//        return this.calorimeterStore;
+//    }
+//    
+//    public List<ScintillatorResponse> getScintillatorResponses(){
+//        return this.scintillatorStore;
+//    }    
     
     public DetectorResponse getHit(DetectorType type){
         for(DetectorResponse res : this.responseStore){
@@ -560,10 +561,6 @@ public class DetectorParticle implements Comparable {
         return bestIndex;
     }
     
-
-
-   
-
     /**
      * returns DetectorResponse that matches closely with the trajectory
      * @param responses
@@ -656,14 +653,14 @@ public class DetectorParticle implements Comparable {
         str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, htcc = %5d, beta = %6.3f, mass2 = %8.3f\n",                
                 this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.EC),
                 this.getNphe(DetectorType.HTCC),this.getBeta(),this.getMass()));
-        for(ScintillatorResponse res : this.scintillatorStore){
-            str.append(res.toString());
-            str.append("\n");
-        }
-        for(CalorimeterResponse res : this.calorimeterStore){
-            str.append(res.toString());
-            str.append("\n");
-        }
+//        for(ScintillatorResponse res : this.scintillatorStore){
+//            str.append(res.toString());
+//            str.append("\n");
+//        }
+//        for(CalorimeterResponse res : this.calorimeterStore){
+//            str.append(res.toString());
+//            str.append("\n");
+//        }
         for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");

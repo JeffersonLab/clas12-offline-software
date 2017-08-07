@@ -33,7 +33,7 @@ public class DetectorResponse {
     private Double           particlePath   = 0.0;
     private int              association    = -1;
     private int              hitIndex = -1;
-    
+
     public DetectorResponse(){
         super();
     }
@@ -67,7 +67,8 @@ public class DetectorResponse {
     
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getHitIndex(){return hitIndex;}
-    
+    public void setHitIndex(int hitIndex) {this.hitIndex = hitIndex;}
+        
     public int getAssociation(){ return this.association;}
     public void setAssociation(int asc){ this.association = asc;}
     
@@ -105,7 +106,7 @@ public class DetectorResponse {
      * @return 
      */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type){        
+        String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
 
 
@@ -114,22 +115,24 @@ public class DetectorEvent {
         return responses;
     }
     
-    public List<CalorimeterResponse>  getCalorimeterResponseList(){
+    public List<DetectorResponse>  getCalorimeterResponseList(){
         this.setAssociation();
-        List<CalorimeterResponse> responses = new ArrayList<CalorimeterResponse>();
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
-            for(CalorimeterResponse r : p.getCalorimeterResponses()){
+            for(DetectorResponse r : p.getDetectorResponses()){
+                if(r.getDescriptor().getType()==DetectorType.EC)
                 responses.add(r);
             }
         }
         return responses;
     }
     
-    public List<ScintillatorResponse>  getScintillatorResponseList(){
+    public List<DetectorResponse>  getScintillatorResponseList(){
         this.setAssociation();
-        List<ScintillatorResponse> responses = new ArrayList<ScintillatorResponse>();
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
-            for(ScintillatorResponse r : p.getScintillatorResponses()){
+            for(DetectorResponse r : p.getDetectorResponses()){
+                if(r.getDescriptor().getType()==DetectorType.FTOF)
                 responses.add(r);
             }
         }

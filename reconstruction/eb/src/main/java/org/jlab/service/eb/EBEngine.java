@@ -109,12 +109,12 @@ public class EBEngine extends ReconstructionEngine {
             de.appendBanks(bankP);
             DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
             de.appendBanks(bankEve);
-            List<CalorimeterResponse>   calorimeters = eb.getEvent().getCalorimeterResponseList();
+            List<DetectorResponse>   calorimeters = eb.getEvent().getCalorimeterResponseList();
             if(calorimeterBank!=null && calorimeters.size()>0) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
                 de.appendBanks(bankCal);
             }
-            List<ScintillatorResponse> scintillators = eb.getEvent().getScintillatorResponseList();
+            List<DetectorResponse> scintillators = eb.getEvent().getScintillatorResponseList();
             if(scintillatorBank!=null && scintillators.size()>0) {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
