@@ -29,7 +29,7 @@ public class CalorimeterResponse extends DetectorResponse {
     
  
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type){        
+        String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
@@ -38,6 +38,7 @@ public class CalorimeterResponse extends DetectorResponse {
                 int sector = bank.getByte("sector", row);
                 int layer = bank.getByte("layer", row);
                 DetectorResponse  response = new DetectorResponse(sector,layer,0);
+                response.setHitIndex(row);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);

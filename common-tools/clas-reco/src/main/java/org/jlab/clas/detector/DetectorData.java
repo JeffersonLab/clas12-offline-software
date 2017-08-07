@@ -196,10 +196,10 @@ public class DetectorData {
      * @param bank_name
      * @return 
      */
-   public static DataBank getCalorimeterResponseBank(List<CalorimeterResponse> responses, DataEvent event, String bank_name){
+   public static DataBank getCalorimeterResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
-           CalorimeterResponse r = responses.get(row);
+           DetectorResponse r = responses.get(row);
            
            bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
@@ -229,10 +229,10 @@ public class DetectorData {
        return bank;
    }
    
-      public static DataBank getScintillatorResponseBank(List<ScintillatorResponse> responses, DataEvent event, String bank_name){
+      public static DataBank getScintillatorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
-           ScintillatorResponse r = responses.get(row);
+           DetectorResponse r = responses.get(row);
            bank.setShort("index",row,(short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
