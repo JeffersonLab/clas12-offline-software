@@ -330,6 +330,14 @@ public abstract class AHit implements Comparable<AHit> {
         this._TrkPathLen = _TrkPathLen;
     }
 
+    public double get_TrkPathLenThruBar() {
+        return _PathLenThruBar;
+    }
+
+    public void set_TrkPathLenThruBar(double _PathLen) {
+        this._PathLenThruBar = _PathLen;
+    }
+
     private Point3D _Position; // Hit position
     private double _Energy; // Deposited energy in the bar
     private double _EnergyUnc; // Uncertainty in the deposited energy in the bar
@@ -375,6 +383,8 @@ public abstract class AHit implements Comparable<AHit> {
     // Guess of 500 microns ... error needs
     // to be propagated... to do
     private double _TrkPathLen; // pathlength of the track matched to the hit
+    private double _PathLenThruBar;  // pathlength of the track from the entrance 
+                                    // to the exit thru the bar
 
     public int get_ADCbankHitIdx1() {
         return _ADCbankHitIdx1;

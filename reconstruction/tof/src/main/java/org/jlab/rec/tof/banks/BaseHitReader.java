@@ -16,7 +16,7 @@ public class BaseHitReader {
         // TODO Auto-generated constructor stub
     }
 
-    class DetectorLocation {
+    public class DetectorLocation {
 
         int[] SLC = new int[3];
 

@@ -216,6 +216,9 @@ public class HitReader implements IMatchedHit {
                     hit.set_matchedTrack(trk);
                     // get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
                     double deltaPath = matchedHit.origin().distance(matchedHit.mid());
+                    double pathLenTruBar = matchedHit.origin().distance(
+                            matchedHit.end());
+                    hit.set_TrkPathLenThruBar(pathLenTruBar);
                     hit.set_TrkPathLen(paths[i] + deltaPath);
                     // get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
                     hit.set_TrkPosition(new Point3D(matchedHit.mid().x, matchedHit.mid().y, matchedHit.mid().z));

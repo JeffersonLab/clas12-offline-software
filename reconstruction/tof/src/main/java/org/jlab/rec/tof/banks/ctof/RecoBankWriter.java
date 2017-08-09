@@ -97,7 +97,11 @@ public class RecoBankWriter {
             //bank.setShort("adc_idx1",i, (short) hitlist.get(i).get_ADCbankHitIdx1()); 		
             //bank.setShort("adc_idx2",i, (short) hitlist.get(i).get_ADCbankHitIdx2()); 		
             //bank.setShort("tdc_idx1",i, (short) hitlist.get(i).get_TDCbankHitIdx1()); 		
-            //bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 		
+            //bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 
+           bank.setFloat("pathLength", i, (float) hitlist.get(i)
+                    .get_TrkPathLen());
+            bank.setFloat("pathLengthThruBar", i, (float) hitlist.get(i)
+                    .get_TrkPathLenThruBar());
         }
         //bank.show();
         return bank;
