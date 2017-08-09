@@ -24,6 +24,7 @@ import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.service.dc.DCHBEngine;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.service.dc.DCTBEngine;
 
 /**
  *
@@ -226,12 +227,13 @@ public class FTOFEngine extends ReconstructionEngine {
 
         DCHBEngine en0 = new DCHBEngine();
         en0.init();
-
+        DCTBEngine en1 = new DCTBEngine();
+        en1.init();
         FTOFEngine en = new FTOFEngine();
         en.init();
 
         int counter = 0;
-        String inputFile = "/Users/ziegler/data/hipo/dvcs_35.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/TestFTOFSchema.hipo";
         // String inputFile = args[0];
         // String outputFile = args[1];
 
@@ -242,7 +244,7 @@ public class FTOFEngine extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         // Writer
-        String outputFile = "/Users/ziegler/Workdir/Distribution/sidis.hipo";
+        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/TestFTOFSchemaRec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -257,6 +259,8 @@ public class FTOFEngine extends ReconstructionEngine {
 
             //en0.processDataEvent(event);
             //	if (counter > 3062)
+            en0.processDataEvent(event);
+            en1.processDataEvent(event);
             en.processDataEvent(event);
             System.out.println("  EVENT " + counter);
             //if (counter > 3066)
