@@ -614,7 +614,7 @@ public class CodaEventDecoder {
                         Integer fiber = ((Byte) cdataitems.get(position))&0xFF;
                         Integer channel = ((Byte) cdataitems.get(position+1))&0xFF;
                         Short rawtdc = (Short) cdataitems.get(position+2);
-System.out.println(fiber+" "+channel+" "+(fiber*192+channel));
+
                         DetectorDataDgtz bank = new DetectorDataDgtz(crate,slot.intValue(),fiber*192+channel);
                         bank.addTDC(new TDCData(rawtdc));
 
