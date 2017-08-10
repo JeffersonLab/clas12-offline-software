@@ -138,17 +138,17 @@ public class CLASDecoder {
      */
     public List<DetectorDataDgtz>  getEntriesTDC(DetectorType type, 
             List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  adc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  tdc = new ArrayList<DetectorDataDgtz>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getTDCSize()>0&&entry.getADCSize()==0){
-                    adc.add(entry);
+                    tdc.add(entry);
                 }
             }
         }
         //System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size()
         //+ "  tdc store = " + adc.size());
-        return adc;
+        return tdc;
     }
     
     
@@ -182,7 +182,7 @@ public class CLASDecoder {
         for(int i = 0; i < tdcDGTZ.size(); i++){
             tdcBANK.setByte("sector", i, (byte) tdcDGTZ.get(i).getDescriptor().getSector());
             tdcBANK.setByte("layer", i, (byte) tdcDGTZ.get(i).getDescriptor().getLayer());
-            tdcBANK.setShort("component", i, (byte) tdcDGTZ.get(i).getDescriptor().getComponent());
+            tdcBANK.setShort("component", i, (short) tdcDGTZ.get(i).getDescriptor().getComponent());
             tdcBANK.setByte("order", i, (byte) tdcDGTZ.get(i).getDescriptor().getOrder());
             tdcBANK.setInt("TDC", i, tdcDGTZ.get(i).getTDCData(0).getTime());
         }
@@ -214,7 +214,7 @@ public class CLASDecoder {
         for(int i = 0; i < tdcDGTZ.size(); i++){
             tdcBANK.setByte("crate", i, (byte) tdcDGTZ.get(i).getDescriptor().getCrate());
             tdcBANK.setByte("slot", i, (byte) tdcDGTZ.get(i).getDescriptor().getSlot());
-            tdcBANK.setShort("channel", i, (byte) tdcDGTZ.get(i).getDescriptor().getChannel());
+            tdcBANK.setShort("channel", i, (short) tdcDGTZ.get(i).getDescriptor().getChannel());
             tdcBANK.setInt("TDC", i, tdcDGTZ.get(i).getTDCData(0).getTime());
         }
         return tdcBANK;
