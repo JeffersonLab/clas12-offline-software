@@ -32,6 +32,7 @@ public class DetectorParticle implements Comparable {
     private Double  particleBeta      = 0.0;
     private Double  particleMass      = 0.0;
     private Double  particleIDQuality = 0.0;
+    private Double  particlePath      = 0.0;
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     
@@ -619,7 +620,10 @@ public class DetectorParticle implements Comparable {
         return dist;
     }
 
-    
+    public void setPath(double path){
+        this.particlePath = path;
+    }
+
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
