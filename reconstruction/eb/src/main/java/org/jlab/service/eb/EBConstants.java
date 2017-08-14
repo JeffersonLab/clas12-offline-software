@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.eb;
 
 import org.jlab.geom.prim.Vector3D;
@@ -56,7 +51,8 @@ public class EBConstants {
     public static final double LTCC_UPPER_PION_THRESHOLD = 5.0;
     
     public static final int TRIGGER_ID = 11;
-    
+   
+    public static final double GEMC_STARTTIME = 124.25;
     
 }
 

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -19,12 +14,12 @@ import org.jlab.geom.prim.Vector3D;
 public class DetectorTrack {
 
     private int     trackCharge = 0;
-    private double     trackMom = 0.0;
-    private double    trackPath = 0.0;
-    private double    taggerTime = 0.0;
-    private int       taggerID = 0;
-    private Vector3D   trackEnd = new Vector3D();
+    private double  trackMom    = 0.0;
+    private double  trackPath   = 0.0;
+    private double  taggerTime  = 0.0;
+    private int     taggerID    = 0;
     
+    private Vector3D   trackEnd = new Vector3D();
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
 //    private Point3D trackIntersect = new Point3D();
