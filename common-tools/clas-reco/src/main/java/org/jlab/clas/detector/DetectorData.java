@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -200,7 +195,6 @@ public class DetectorData {
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
            DetectorResponse r = responses.get(row);
-           
            bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
@@ -458,23 +452,23 @@ public class DetectorData {
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
-           
+
            for(int row = 0; row < nrows; row++){
                int charge = bank.getInt("q", row);
                float cx = bank.getFloat("c_x", row);
                float cy = bank.getFloat("c_y" , row);
                float cz = bank.getFloat("c_z", row);
                float energy = bank.getFloat("energy", row);
-               
+
                Vector3D pvec = new Vector3D(cx*energy,cy*energy,cz*energy);
-               
+
                DetectorTrack  track = new DetectorTrack(charge,pvec.mag());
                track.setVertex(0.0, 0.0, 0.0);
                track.setVector(cx*energy, cy*energy, cz*energy);
                track.setTime(bank.getFloat("time", row));
                track.setID(bank.getInt("id",row));
-               
-                tracks.add(track);
+
+               tracks.add(track);
            }
        }
        return tracks;

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -23,11 +18,11 @@ import org.jlab.io.base.DataEvent;
  */
 public class TaggerResponse {
     
-    private double        hitTime = 0.0;
+    private double    hitTime = 0.0;
     private int         hitID = -1;
-    private int         hitCharge = -1;
-    private double          hitEnergy = 0.0;
-    private int     association = -1;
+    private int     hitCharge = -1;
+    private double  hitEnergy = 0.0;
+    private int   association = -1;
 
     private Vector3D         hitMomentum = new Vector3D();
 
@@ -51,8 +46,6 @@ public class TaggerResponse {
         this.hitMomentum.setXYZ(px, py, pz);
     }
     
-
-    
     public static List<TaggerResponse>  readHipoEvent(DataEvent event, 
         String bankName){        
         List<TaggerResponse> responseList = new ArrayList<TaggerResponse>();
@@ -67,13 +60,12 @@ public class TaggerResponse {
                 float cz = bank.getFloat("cz",row);
                 float time = bank.getFloat("time",row);
                 float energy = bank.getFloat("energy",row);
-                    TaggerResponse ft = new TaggerResponse();
-                    ft.setCharge(charge);
-                    ft.setID(id);
-                    ft.setEnergy(energy);
-                    ft.setTime(time);
-                    ft.setMomentum(cx*energy, cy*energy, cz*energy);
-                        //System.out.println("FT Energy  " + energy);
+                TaggerResponse ft = new TaggerResponse();
+                ft.setCharge(charge);
+                ft.setID(id);
+                ft.setEnergy(energy);
+                ft.setTime(time);
+                ft.setMomentum(cx*energy, cy*energy, cz*energy);
                 responseList.add(ft);
             }
         }

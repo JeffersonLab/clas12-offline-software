@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
@@ -25,17 +20,17 @@ import org.jlab.geom.prim.Vector3D;
  * @author gavalian
  */
 public class EventBuilder {
-    
+
     private DetectorEvent              detectorEvent = new DetectorEvent();
     private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse> cherenkovResponses = new ArrayList<CherenkovResponse>();
     private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
     private int[]  TriggerList = new int[]{11,-11,0};
-    
+
     public EventBuilder(){
-        
+
     }
-    
+
     public void initEvent() {
         detectorEvent.clear();
     }
@@ -47,7 +42,7 @@ public class EventBuilder {
     public void addDetectorResponses(List<DetectorResponse> responses){
         detectorResponses.addAll(responses);
     }
-    
+
     public void addCherenkovResponses(List<CherenkovResponse> responses){
         cherenkovResponses.addAll(responses);
     }
@@ -61,9 +56,6 @@ public class EventBuilder {
      * and added to the detector event.
      * @param tracks 
      */
-    //public void addTracks(List<DetectorTrack> tracks){
-    
-        
     public void addTracks(List<DetectorTrack> tracks) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
@@ -104,9 +96,7 @@ public class EventBuilder {
         //List<DetectorResponse>  responseFTOF1A = DetectorResponse.getListByLayer(detectorResponses, DetectorType.FTOF, 1);
         //List<DetectorResponse>  responseFTOF1B = DetectorResponse.getListByLayer(detectorResponses, DetectorType.FTOF, 2); 
         
-        //System.out.println("Detector response store size = " + this.detectorResponses.size());
         int np = detectorEvent.getParticles().size();
-        //System.out.println("Number of Particles = " + np);
         for(int n = 0; n < np; n++){
             DetectorParticle  p = this.detectorEvent.getParticle(n);
 
@@ -116,10 +106,7 @@ public class EventBuilder {
              * set with a particle needed.
              */
             
-
-            
             int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
-            //System.out.println("index FTOF-1A = " + index);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -128,7 +115,6 @@ public class EventBuilder {
              * Matching tracks to FTOF layer 1B detector. Added to the particle and association is
              */
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
-            //System.out.println("index FTOF-1B = " + index);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -138,7 +124,6 @@ public class EventBuilder {
              * Matching tracks to FTOF layer 2 detector. Added to the particle and association is
              */
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
-            //System.out.println("index FTOF-1B = " + index);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -147,7 +132,6 @@ public class EventBuilder {
              * Matching tracks to CTOF detector. Added to the particle and association is
              */
             index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
-//            //System.out.println("index CTOF = " + index);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -202,8 +186,6 @@ public class EventBuilder {
     
     public void processNeutralTracks(){
         
-       
-        
         List<DetectorResponse>  responsesPCAL = this.getUnmatchedResponses((List<DetectorResponse>) detectorResponses, DetectorType.EC, 1);
         
         List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
@@ -248,7 +230,6 @@ public class EventBuilder {
         }
         
         detectorEvent.setAssociation();
-        //System.out.println(" PCAL RESPONSES = " + responsesPCAL.size());
     }
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
@@ -277,155 +258,151 @@ public class EventBuilder {
         int i = 0;
         boolean hasTrigger=false;
         while(hasTrigger==false) {
-              
-                    if(TriggerList[i]==11){
-                    ElectronTriggerOption electron = new ElectronTriggerOption();
-                    hasTrigger = electron.assignSoftwareTrigger(detectorEvent);
-                    }
-                    if(TriggerList[i]==-11){
-                    PositronTriggerOption positron = new PositronTriggerOption();
-                    hasTrigger= positron.assignSoftwareTrigger(detectorEvent);
-                    }
-                    if(TriggerList[i]==-211){
-                    NegPionTriggerOption negpion = new NegPionTriggerOption();
-                    hasTrigger = negpion.assignSoftwareTrigger(detectorEvent);
-                    }
-                    if(TriggerList[i]==211){
-                    PosPionTriggerOption pospion = new PosPionTriggerOption();
-                    hasTrigger = pospion.assignSoftwareTrigger(detectorEvent);
-                    }
-                    if(TriggerList[i]==0){
-                    hasTrigger = true;
-                    }
-                        
-               
-                i = i + 1;
+
+            if(TriggerList[i]==11){
+                ElectronTriggerOption electron = new ElectronTriggerOption();
+                hasTrigger = electron.assignSoftwareTrigger(detectorEvent);
+            }
+            if(TriggerList[i]==-11){
+                PositronTriggerOption positron = new PositronTriggerOption();
+                hasTrigger= positron.assignSoftwareTrigger(detectorEvent);
+            }
+            if(TriggerList[i]==-211){
+                NegPionTriggerOption negpion = new NegPionTriggerOption();
+                hasTrigger = negpion.assignSoftwareTrigger(detectorEvent);
+            }
+            if(TriggerList[i]==211){
+                PosPionTriggerOption pospion = new PosPionTriggerOption();
+                hasTrigger = pospion.assignSoftwareTrigger(detectorEvent);
+            }
+            if(TriggerList[i]==0){
+                hasTrigger = true;
+            }
+
+
+            i = i + 1;
         }
     }
-       
 
 
-    
     public DetectorEvent  getEvent(){return this.detectorEvent;}
-    
+
     public void show(){
 
         int np = this.detectorEvent.getParticles().size();
         System.out.println(">>>>>>>>> DETECTOR EVENT WITH PARTICLE COUNT # " + np);
         System.out.println(this.detectorEvent.toString());
-        /*
-        for(int n = 0; n < np; n++){
-            System.out.println(detectorEvent.getParticle(n));
-        }*/
+        //for(int n = 0; n < np; n++){
+        //    System.out.println(detectorEvent.getParticle(n));
+        //}
     }
 }
 
-    class TriggerOptions {
-        
-        public int id;
-        public int score_requirement;
-        public int charge;
-        
-        TriggerOptions() {
-            initID();
-        }
-        
-        public void initID() {
-            //Initialize parameters
-        }
-        
-        public void setID(int pid) {
-            this.id = pid;
-        }
-        
-        public void setScoreRequirement(int sc) {
-            this.score_requirement = sc;
-        }
-        
-        public void setCharge(int ch) {
-            this.charge = ch;
-        }
-        
-        public boolean assignSoftwareTrigger(DetectorEvent event) {
-            boolean flag = false;
-            int npart = event.getParticles().size();
-            for(int i = 0; i < npart; i++){
-                DetectorParticle p = event.getParticle(i);
-                if(p.getSoftwareTriggerScore()>=this.score_requirement) { //Possible Electron
-                    //System.out.println("The requirements is " + this.score_requirement);
-                    if(this.charge==p.getCharge()){
-                        p.setPid(this.id);
-                            }
 
+class TriggerOptions {
 
-                    }
-                }
+    public int id;
+    public int score_requirement;
+    public int charge;
 
-       
-            int    index = -1;
-            double best_p = 0.0;
-            for(int i = 0; i < npart; i++){
-                if(event.getParticle(i).getPid()==this.id){
-                    if(event.getParticle(i).vector().mag()>best_p){ //Sorting the Momentum
-                        best_p = event.getParticle(i).vector().mag();
-                        index = i;
-                    }
+    TriggerOptions() {
+        initID();
+    }
+
+    public void initID() {
+        //Initialize parameters
+    }
+
+    public void setID(int pid) {
+        this.id = pid;
+    }
+
+    public void setScoreRequirement(int sc) {
+        this.score_requirement = sc;
+    }
+
+    public void setCharge(int ch) {
+        this.charge = ch;
+    }
+
+    public boolean assignSoftwareTrigger(DetectorEvent event) {
+        boolean flag = false;
+        int npart = event.getParticles().size();
+        for(int i = 0; i < npart; i++){
+            DetectorParticle p = event.getParticle(i);
+            if(p.getSoftwareTriggerScore()>=this.score_requirement) { //Possible Electron
+                //System.out.println("The requirements is " + this.score_requirement);
+                if(this.charge==p.getCharge()){
+                    p.setPid(this.id);
                 }
             }
-       
-                if(index>0){
-                    event.moveUp(index);
-                    if(event.getParticle(0).getPid()==this.id){
-                        flag = true;
-                    }
-                }
-            
-
-                return flag;
-            }
-
         }
 
-    class ElectronTriggerOption extends TriggerOptions {
 
-         @Override
-         public void initID() {
-             this.setID(11);
-             this.setScoreRequirement(110);
-             this.setCharge(-1);
-         }
-         
-    }    
+        int    index = -1;
+        double best_p = 0.0;
+        for(int i = 0; i < npart; i++){
+            if(event.getParticle(i).getPid()==this.id){
+                if(event.getParticle(i).vector().mag()>best_p){ //Sorting the Momentum
+                    best_p = event.getParticle(i).vector().mag();
+                    index = i;
+                }
+            }
+        }
 
-    class PositronTriggerOption extends TriggerOptions {
+        if(index>0){
+            event.moveUp(index);
+            if(event.getParticle(0).getPid()==this.id){
+                flag = true;
+            }
+        }
 
-         @Override
-         public void initID() {
-             this.setID(-11);
-             this.setScoreRequirement(110);
-             this.setCharge(1);
-         }
-         
-    }  
- 
-    class NegPionTriggerOption extends TriggerOptions {
 
-         @Override
-         public void initID() {
-             this.setID(-211);
-             this.setScoreRequirement(10);
-             this.setCharge(-1);
-         }
-         
-    }    
+        return flag;
+    }
 
-    class PosPionTriggerOption extends TriggerOptions {
+}
 
-         @Override
-         public void initID() {
-             this.setID(211);
-             this.setScoreRequirement(10);
-             this.setCharge(1);
-         }
-         
-    }  
+class ElectronTriggerOption extends TriggerOptions {
+
+    @Override
+    public void initID() {
+        this.setID(11);
+        this.setScoreRequirement(110);
+        this.setCharge(-1);
+    }
+
+}    
+
+class PositronTriggerOption extends TriggerOptions {
+
+    @Override
+    public void initID() {
+        this.setID(-11);
+        this.setScoreRequirement(110);
+        this.setCharge(1);
+    }
+
+}  
+
+class NegPionTriggerOption extends TriggerOptions {
+
+    @Override
+    public void initID() {
+        this.setID(-211);
+        this.setScoreRequirement(10);
+        this.setCharge(-1);
+    }
+
+}    
+
+class PosPionTriggerOption extends TriggerOptions {
+
+    @Override
+    public void initID() {
+        this.setID(211);
+        this.setScoreRequirement(10);
+        this.setCharge(1);
+    }
+
+}  

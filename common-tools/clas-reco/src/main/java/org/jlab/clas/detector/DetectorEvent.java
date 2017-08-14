@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -11,7 +6,6 @@ import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
-
 
 
 /**
@@ -25,15 +19,9 @@ public class DetectorEvent {
     private PhysicsEvent      reconstructedEvent = new PhysicsEvent();
     private DetectorHeader           eventHeader = new DetectorHeader();
     
-//    private double            RF_OFFSET = 0.0;
-//    private double             RF_BUNCH = 2.004;
-//    private int                RF_SHIFT = 800;
-    
-    
     public DetectorEvent(){
         
     }
-    
     
     public static DetectorEvent readDetectorEvent(DataEvent event){
         return DetectorData.readDetectorEvent(event);
@@ -62,7 +50,6 @@ public class DetectorEvent {
         int index = -1;
         for(int i = 0; i < particleList.size();i++){
             if(p.charge()==particleList.get(i).getCharge()){
-            //System.out.println("index = " + i + "  compare = " + particleList.get(i).compare(p.vector().vect()));
                 if(particleList.get(i).compare(p.vector().vect())<compare){
                     compare = particleList.get(i).compare(p.vector().vect());
                     index   = i; 

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.eb;
 
 
@@ -63,47 +58,26 @@ public class EBEngine extends ReconstructionEngine {
         eb.addCherenkovResponses(responseHTCC);
         eb.addCherenkovResponses(responseLTCC);
 
-        
-
-        
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
         eb.addTracks(tracks);       
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
         eb.addTracks(ctracks);
-        
 
-
+        // Process tracks:
         eb.processHitMatching();
         eb.addTaggerTracks(trackFT);
-        eb.processNeutralTracks();        
+        eb.processNeutralTracks();
+
         eb.assignTrigger();
  
         EBRadioFrequency rf = new EBRadioFrequency();
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
-        //eb.getEvent().setRfTime(rf);
-        
-        //System.out.println(eb.getEvent().toString());
- 
-        
-//        for(int i = 0; i < eb.getEvent().getParticles().size(); i++) {
-//            System.out.println("Particle  " + i);
-//            for(int j = 0 ; j < eb.getEvent().getParticles().get(i).getDetectorResponses().size() ; j++){
-//                System.out.println("Point  " + eb.getEvent().getParticles().get(i).getDetectorResponses().get(j).getMatchedDistance());
-//            }
-//        }
-        
         
         EBAnalyzer analyzer = new EBAnalyzer();
-        //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
         
 
-        
-        //System.out.println(eb.getEvent().toString());
-        
-
-        
         if(eb.getEvent().getParticles().size()>0){
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             de.appendBanks(bankP);
