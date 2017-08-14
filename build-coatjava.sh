@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir coatjava
+mkdir -p coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
 mkdir -p coatjava/lib/clas
