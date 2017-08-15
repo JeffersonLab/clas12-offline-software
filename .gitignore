@@ -25,3 +25,6 @@ hs_err_pid*
 *.iml
 .idea
 
+# no log files:
+*.log
+
