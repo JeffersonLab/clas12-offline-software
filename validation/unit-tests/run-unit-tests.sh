@@ -1,56 +1,51 @@
 #!/bin/sh -f
 
-echo ------------------------------------
-echo run-unit-tests.sh
-echo ------------------------------------
-
 # coatjava must already be built at ../../coatjava/
 
 # set environment
 COAT="../../coatjava/"
-CLASSPATH="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
+classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
-function compileTest 
-{
-    echo TravisCompileTest $1
-    path=$1
-    stub=${path##*/}
-    stub=${stub%%.java}
-    echo javac -cp $CLASSPATH $path
-    javac -cp $CLASSPATH $path
-    if [ $? != 0 ]
-    then
-        echo "$stub compilation failure"
-        exit 1 
-    fi
-}
 
-function runTest
-{
-    echo TravisRunTest $1
-    class=$1
-    stub=${class%%.*}
-    echo java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $CLASSPATH org.junit.runner.JUnitCore $class
-    java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $CLASSPATH org.junit.runner.JUnitCore $class
-    if [ $? != 0 ]
-    then
-        echo "$stub unit test failure"
-        exit 1
-    else
-        echo "$stub passed unit tests"
-    fi
-}
+# compile codes
+javac -cp $classPath src/events/TestEvent.java
+if [ $? != 0 ] ; then echo "TestEvent compilation failure" ; exit 1 ; fi
 
-# compile codes:
-compileTest src/events/TestEvent.java
-compileTest src/dc/DCReconstructionTest.java
-compileTest src/cvt/CVTReconstructionTest.java
-compileTest src/ec/ECReconstructionTest.java
-compileTest src/eb/EBReconstructionTest.java
+javac -cp $classPath src/events/RandomEventGenerator.java
+if [ $? != 0 ] ; then echo "RandomEventGenerator compilation failure" ; exit 1 ; fi
 
-# run unit tests:
-runTest dc.DCReconstructionTest
-runTest cvt.CVTReconstructionTest
-runTest ec.ECReconstructionTest
-runTest eb.EBReconstructionTest
+javac -cp $classPath src/dc/DCReconstructionTest.java
+if [ $? != 0 ] ; then echo "DCReconstructionTest compilation failure" ; exit 1 ; fi
+
+javac -cp $classPath src/cvt/CVTReconstructionTest.java
+if [ $? != 0 ] ; then echo "CVTReconstructionTest compilation failure" ; exit 1 ; fi
+
+javac -cp $classPath src/ec/ECReconstructionTest.java
+if [ $? != 0 ] ; then echo "ECReconstructionTest compilation failure" ; exit 1 ; fi
+
+javac -cp $classPath src/eb/EBReconstructionTest.java
+if [ $? != 0 ] ; then echo "EBReconstructionTest compilation failure" ; exit 1 ; fi
+
+
+
+# run dc junit tests
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore dc.DCReconstructionTest
+if [ $? != 0 ] ; then echo "dc unit test failure" ; exit 1 ; else echo "dc passed unit tests" ; fi
+
+# run cvt junit tests
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore cvt.CVTReconstructionTest
+if [ $? != 0 ] ; then echo "cvt unit test failure" ; exit 1 ; else echo "cvt passed unit tests" ; fi
+
+# run ec junit tests
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore ec.ECReconstructionTest
+if [ $? != 0 ] ; then echo "ec unit test failure" ; exit 1 ; else echo "ec passed unit tests" ; fi
+
+# run eb junit tests
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore eb.EBReconstructionTest
+if [ $? != 0 ] ; then echo "eb unit test failure" ; exit 1 ; else echo "eb passed unit tests" ; fi
+
+
+# run event generator
+#java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath events.RandomEventGenerator
+
 
