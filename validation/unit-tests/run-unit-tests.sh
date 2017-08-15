@@ -1,5 +1,9 @@
 #!/bin/sh -f
 
+echo ------------------------------------
+echo run-unit-tests.sh
+echo ------------------------------------
+
 # coatjava must already be built at ../../coatjava/
 
 # set environment
@@ -8,9 +12,11 @@ CLASSPATH="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/
 
 function compileTest 
 {
+    echo TravisCompileTest $1
     path=$1
     stub=${path##*/}
     stub=${stub%%.java}
+    echo javac -cp $CLASSPATH $path
     javac -cp $CLASSPATH $path
     if [ $? != 0 ]
     then
@@ -21,8 +27,10 @@ function compileTest
 
 function runTest
 {
+    echo TravisRunTest $1
     class=$1
     stub=${class%%.*}
+    echo java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $CLASSPATH org.junit.runner.JUnitCore $class
     java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $CLASSPATH org.junit.runner.JUnitCore $class
     if [ $? != 0 ]
     then
