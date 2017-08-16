@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava/lib/clas/coat-libs-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava/lib/clas/JEventViewer-1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava/lib/clas/vecmath-1.3.1-2.jar"/>
+	<classpathentry kind="lib" path="/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava/lib/utils/jclara-4.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava/lib/services/cvt-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
