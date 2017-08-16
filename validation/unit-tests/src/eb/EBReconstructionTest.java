@@ -39,7 +39,6 @@ public class EBReconstructionTest {
         engineFTOF.init();
         engineFTOF.processDataEvent(ev);
 
-        // htcc has different class naming scheme, ugh.
         HTCCReconstructionService engineHTCC = new HTCCReconstructionService();
         engineHTCC.init();
         engineHTCC.processDataEvent(ev);
@@ -55,6 +54,8 @@ public class EBReconstructionTest {
         EBTBEngine engineEBTB = new EBTBEngine();
         engineEBTB.init();
         engineEBTB.processDataEvent(ev);
+        
+        ev.show();
     }
 
     @Test
@@ -62,8 +63,6 @@ public class EBReconstructionTest {
 
         DataEvent photonEvent = TestEvent.getECSector1PhotonEvent();
         processAllEngines(photonEvent);
-        //testEvent.show();
-        // check bank existence:
         assertEquals(photonEvent.hasBank("RECHB::Event"), true);
         assertEquals(photonEvent.hasBank("RECHB::Particle"), true);
         assertEquals(photonEvent.hasBank("RECHB::Calorimeter"), true);
