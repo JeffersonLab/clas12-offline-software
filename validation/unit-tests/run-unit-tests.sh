@@ -1,10 +1,5 @@
 #!/bin/sh -f
 
-# try to find out what shell travis is really using:
-ls -l /bin/sh
-ls -l /bin/bash
-ls -l /bin/dash
-
 # coatjava must already be built at ../../coatjava/
 
 # set environment

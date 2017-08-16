@@ -39,8 +39,7 @@ fi
 rm -f ${webFileStub}.hipo
 rm -f out_${webFileStub}.hipo
 
-# run decoder
-$COAT/bin/decoder -t -0.5 -s 0.0 -i ./${webFileStub}.evio -o ./${webFileStub}.hipo -c 2
+$COAT/bin/evio2hipo -o ${webFileStub}.hipo ${webFileStub}.evio
 
 # run reconstruction with clara
 echo "set inputDir $PWD/" > cook.clara
@@ -55,15 +54,14 @@ echo "run local" >> cook.clara
 echo "exit" >> cook.clara
 $CLARA_HOME/bin/clara-shell cook.clara
 
-# RUN NUMBER PROBLEM (run=0)
 
 # compile test codes
-#javac -cp $classPath src/kpptracking/KppTrackingTest.java 
-#if [ $? != 0 ] ; then echo "KppTrackingTest compilation failure" ; exit 1 ; fi
+javac -cp $classPath src/eb/EBSimpleTest.java
+if [ $? != 0 ] ; then echo "EBSimpleTest compilation failure" ; exit 1 ; fi
 
 # run KppTracking junit tests
-#java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore kpptracking.KppTrackingTest
-#if [ $? != 0 ] ; then echo "KppTracking unit test failure" ; exit 1 ; else echo "KppTracking passed unit tests" ; fi
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath org.junit.runner.JUnitCore eb.EBSimpleTest
+if [ $? != 0 ] ; then echo "EBSimpleTest unit test failure" ; exit 1 ; else echo "EBSimpleTest passed unit tests" ; fi
 
 exit 0
 
