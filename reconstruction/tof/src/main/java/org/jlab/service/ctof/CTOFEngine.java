@@ -174,7 +174,7 @@ public class CTOFEngine extends ReconstructionEngine {
     public static void main(String[] args) throws FileNotFoundException,
             EvioException {
 
-        String inputFile = "/Users/ziegler/data/hipo/sidis_0100.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Files/test/piminus_cd_0.5-2.0GeV.hipo";
         // String inputFile = args[0];
         // String outputFile = args[1];
 

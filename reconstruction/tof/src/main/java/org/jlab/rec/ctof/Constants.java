@@ -17,7 +17,7 @@ public class Constants {
     // sector
 
     public static final double[] SCBARTHICKN = new double[1]; // 3 cm
-    public static final double LSBCONVFAC = 24. / 1000.; // ns/bin
+    //public static final double LSBCONVFAC = 24. / 1000.; // ns/bin
     public static final double[] ADC_MIP = new double[1]; // From DB 800
     public static final double DEDX_MIP = 1.956; // ~2 MeV/g/cm^2
     public static final double[] PEDU = new double[1]; // L pedestal
