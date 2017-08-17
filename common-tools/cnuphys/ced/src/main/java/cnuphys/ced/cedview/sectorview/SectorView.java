@@ -26,6 +26,7 @@ import org.jlab.geom.prim.Plane3D;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.central.CentralSupport;
 import cnuphys.ced.common.CrossDrawer;
+import cnuphys.ced.common.FMTCrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
@@ -148,8 +149,11 @@ public class SectorView extends CedView implements ChangeListener {
 	private ScaleDrawer _scaleDrawer = new ScaleDrawer("cm",
 			ScaleDrawer.BOTTOMLEFT);
 
-	// reconstructed cross drawer (and feedback handler)
-	private CrossDrawer _crossDrawer;
+	// reconstructed cross drawer for DC (and feedback handler)
+	private CrossDrawer _dcCrossDrawer;
+	
+	//for fmt
+	private FMTCrossDrawer _fmtCrossDrawer;
 
 	private static Color plotColors[] = { X11Colors.getX11Color("Dark Red"),
 			X11Colors.getX11Color("Dark Blue"),
@@ -176,8 +180,12 @@ public class SectorView extends CedView implements ChangeListener {
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
-		// cross drawer
-		_crossDrawer = new CrossDrawer(this);
+		// dc cross drawer
+		_dcCrossDrawer = new CrossDrawer(this);
+		
+		// fmt cross drawer
+		_fmtCrossDrawer = new FMTCrossDrawer(this);
+
 
 		// MC hit drawer
 		_mcHitDrawer = new McHitDrawer(this);
@@ -249,7 +257,7 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
 				+ DisplayBits.DC_HB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.FTOFHITS
+				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.FTOFHITS + DisplayBits.FMTCROSSES
 				+ DisplayBits.DC_TB_RECONS_DOCA + DisplayBits.DC_HB_RECONS_SEGMENTS 
 				+ DisplayBits.DC_TB_RECONS_SEGMENTS
 				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
@@ -553,12 +561,17 @@ public class SectorView extends CedView implements ChangeListener {
 
 				// draw reconstructed dc crosses
 				if (showDChbCrosses()) {
-					_crossDrawer.setMode(CrossDrawer.HB);
-					_crossDrawer.draw(g, container);
+					_dcCrossDrawer.setMode(CrossDrawer.HB);
+					_dcCrossDrawer.draw(g, container);
 				}
 				if (showDCtbCrosses()) {
-					_crossDrawer.setMode(CrossDrawer.TB);
-					_crossDrawer.draw(g, container);
+					_dcCrossDrawer.setMode(CrossDrawer.TB);
+					_dcCrossDrawer.draw(g, container);
+				}
+				
+				//FMT Crosses
+				if (showFMTCrosses()) {
+					_fmtCrossDrawer.draw(g, container);
 				}
 
 				// scale
@@ -867,12 +880,16 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// reconstructed feedback?
 		if (showDChbCrosses()) {
-			_crossDrawer.setMode(CrossDrawer.HB);
-			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
+			_dcCrossDrawer.setMode(CrossDrawer.HB);
+			_dcCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 		if (showDCtbCrosses()) {
-			_crossDrawer.setMode(CrossDrawer.TB);
-			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
+			_dcCrossDrawer.setMode(CrossDrawer.TB);
+			_dcCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
+		}
+		
+		if (showFMTCrosses()) {
+			_fmtCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
 		if (showMcTruth()) {

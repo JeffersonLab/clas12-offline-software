@@ -90,6 +90,10 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Label for ftof reconstructed hits button */
 	private static final String FTOFRECONS_HIT_LABEL = "FTOF Hits";
 	
+	/** Label for FMT cross button */
+	private static final String FMT_CROSS_LABEL = "FMT Crosses";
+
+	
 	/** Global show HB */
 	private static final String GLOBAL_HB_LABEL = "HB Data";
 
@@ -123,6 +127,8 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls whether FTOF reconstructed hits are displayed
 	private AbstractButton _reconsFTOFHitButton;
 
+	// controls whether FMT reconstructed crosses are displayed
+	private AbstractButton _reconsFMTCrossButton;
 
 	// controls mc truth is displayed (when available)
 	private AbstractButton _mcTruthButton;
@@ -186,6 +192,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		boolean showDCtbDoca = true;
 		boolean showSVTreconsCrosses = true;
 		boolean showFTOFreconsHits = true;
+		boolean showFMTCrosses = true;
 		
 		boolean showDChbSegs = true;
 		boolean showDCtbSegs = true;
@@ -303,6 +310,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_reconsFTOFHitButton = add(FTOFRECONS_HIT_LABEL,
 					showFTOFreconsHits, true, this, _buttonColor).getCheckBox();
 		}
+		
+		// fmt crosses
+		if (Bits.checkBit(bits, DisplayBits.FMTCROSSES)) {
+			_reconsFMTCrossButton = add(FMT_CROSS_LABEL,
+					showFMTCrosses, true, this, _buttonColor).getCheckBox();
+		}
+
 
 
 	//	setBorder(new CommonBorder("Display Options"));
@@ -404,6 +418,17 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		return (_reconsFTOFHitButton != null)
 				&& _reconsFTOFHitButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method to see if we show the ftof reconstructed hits.
+	 * 
+	 * @return <code>true</code> if we are to show dc hb reconstructed hits.
+	 */
+	public boolean showFMTCrosses() {
+		return (_reconsFMTCrossButton != null)
+				&& _reconsFMTCrossButton.isSelected();
+	}
+
 	
 	/**
 	 * Convenience method global hit based display
