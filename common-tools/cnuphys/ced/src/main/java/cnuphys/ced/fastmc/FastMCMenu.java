@@ -38,6 +38,8 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	//used to pause streaming
 	private boolean _paused = false;
 	
+	//the neural net data dialog
+	private NNDataDialog _nnDataDialog;
 	
 	//hard coded acceptance definitions
 	private JCheckBoxMenuItem _eItem;
@@ -146,7 +148,10 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	
 	//generate neural net data
 	private void generateNeuralNetData() {
-		
+		if (_nnDataDialog == null) {
+			_nnDataDialog = new NNDataDialog();
+		}
+		_nnDataDialog.setVisible(true);
 	}
 	
 	//read in a separate thread
