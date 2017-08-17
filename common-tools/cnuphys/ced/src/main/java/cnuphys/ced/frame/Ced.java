@@ -52,6 +52,7 @@ import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.FMTCrosses;
 import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
@@ -109,7 +110,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.1";
+	private static final String _release = "build 0.99.999.2";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -960,6 +961,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		DC.getInstance();
 		FTOF.getInstance();
 		BMTCrosses.getInstance();
+		FMTCrosses.getInstance();
 		SVTCrosses.getInstance();
 		TBCrosses.getInstance();
 		HBCrosses.getInstance();

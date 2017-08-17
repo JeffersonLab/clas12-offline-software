@@ -29,11 +29,15 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 	//pause item
 	private JMenuItem _pauseItem;
 	
+	//generate neural net data
+	private JMenuItem _generateNNDataItem;
+	
 	//define acceptance
 	private JMenu _acceptanceMenu;
 	
 	//used to pause streaming
 	private boolean _paused = false;
+	
 	
 	//hard coded acceptance definitions
 	private JCheckBoxMenuItem _eItem;
@@ -63,13 +67,15 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 		_eItem = addCheckBoxItem("e- in 36 DC layers", AcceptanceManager.getInstance().getElectronCondition().isActive());
 		_pItem = addCheckBoxItem("p in 36 DC layers", AcceptanceManager.getInstance().getProtonCondition().isActive());
 		
-		addSeparator();
-
 		_nextItem = addItem("Next FastMC Event");
 		addSeparator();
 		_streamItem = addItem("Stream all Events");
 		_pauseItem = addItem("Pause Streaming");
 		_pauseItem.setEnabled(false);
+		
+		addSeparator();
+		_generateNNDataItem = addItem("Generate Neural Net Data...");
+
 		
 		fixMenuState();
 //		setEnabled(false);
@@ -132,7 +138,15 @@ public class FastMCMenu extends JMenu implements ActionListener, ItemListener, I
 			_paused = true;
 			_pauseItem.setEnabled(false);
 		}
+		else if (o == _generateNNDataItem) {
+			generateNeuralNetData();
+		}
 		fixMenuState();
+	}
+	
+	//generate neural net data
+	private void generateNeuralNetData() {
+		
 	}
 	
 	//read in a separate thread

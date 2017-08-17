@@ -437,6 +437,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showFTOFHits();
 	}
+	
+	/**
+	 * Convenience method to see it we show the FMT crosses.
+	 * 
+	 * @return <code>true</code> we show the the FMT crosses.
+	 */
+	public boolean showFMTCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showFMTCrosses();
+	}
+
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
