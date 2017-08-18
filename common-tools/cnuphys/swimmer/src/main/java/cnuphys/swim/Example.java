@@ -52,16 +52,17 @@ public class Example {
 		
 		FieldProbe.cache(true);
 
-		 example1();
-		 example2();
-		 example3();
-		 example4();
-		 example5();
-		 example6();
+//		 example1();
+//		 example2();
+//		 example3();
+//		 example4();
+//		 example5();
+//		 example6();
 		example7();
-		example8();
-		 example9();
-		example10();
+		example7x();
+//		example8();
+//		 example9();
+//		example10();
 
 		System.out.println("\nDONE.");
 	}
@@ -230,6 +231,30 @@ public class Example {
 							+ ztarget, traj.size(), momentum, lastY, hdata);
 			terminalPlot(traj,
 					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=275}");
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+
+	// example 7 adaptive fixed z stop
+	private static void example7x() {
+		System.out.println("\n=== EXAMPLE 7X ===");
+		System.out.println("[Adaptive] Fixed X cutoff");
+		double xtarget = 1.58; // where integration should stop
+		double accuracy = 10e-6; // 10 microns
+		double stepSize = 5e-4; // m
+		try {
+			SwimTrajectory traj = swimmer.swimFixedX(electron.getCharge(), xo, yo,
+					zo, momentum, theta, phi, xtarget, accuracy, rmax,
+					maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+			double lastY[] = traj.lastElement();
+			printSummary(
+					"\nresult from adaptive stepsize method with storage and X cutoff at "
+							+ xtarget, traj.size(), momentum, lastY, hdata);
+			terminalPlot(traj,
+					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=1.58}");
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
