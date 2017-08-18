@@ -43,12 +43,12 @@ public class EBAnalyzer {
                     path = trigger.getPathLength(DetectorType.FTOF, 2);
                 }
 
-                double tof = path/EBConstants.SPEED_OF_LIGHT;
+                double tof = path/PhysicsConstants.speedOfLight();
                 double start_time = time - tof;
                 double deltatr = - start_time + event.getEventHeader().getRfTime()
                     + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
                 //double deltatr = - start_time + event.getEventHeader().getRfTime() /* - (trigger.vertex().z() 
-                //                                                                      - (EBConstants.TARGET_POSITION))/(EBConstants.SPEED_OF_LIGHT)*/
+                //                                                                      - (EBConstants.TARGET_POSITION))/(PhysicsConstants.speedOfLight())*/
                 //    + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
                 double rfcorr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
                 event.getEventHeader().setStartTime(start_time + rfcorr);
