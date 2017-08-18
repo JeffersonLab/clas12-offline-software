@@ -196,7 +196,8 @@ public class HitReader {
             }
 
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
-          // System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
+            hit.set_B(B[i]);
+// System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.set_TimeToDistance(1.0, B[i]);
