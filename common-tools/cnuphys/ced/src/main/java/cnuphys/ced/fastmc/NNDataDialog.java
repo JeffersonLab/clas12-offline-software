@@ -21,12 +21,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.io.base.DataEvent;
+
+import bCNU3D.DoubleFormat;
 import cnuphys.bCNU.dialog.SimpleDialog;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
+import cnuphys.ced.clasio.IClasIoEventListener;
+import cnuphys.ced.event.AccumulationManager;
+import cnuphys.ced.event.IAccumulationListener;
 
-public class NNDataDialog extends SimpleDialog {
+public class NNDataDialog extends SimpleDialog implements IClasIoEventListener, IAccumulationListener {
 
 	// button names for closeout
 	private static String[] closeoutButtons = { "Close" };
@@ -53,6 +62,9 @@ public class NNDataDialog extends SimpleDialog {
 
 	public NNDataDialog() {
 		super("Create Neural Net Input Data", true, closeoutButtons);
+		ClasIoEventManager.getInstance().addClasIoEventListener(this, 2);
+		AccumulationManager.getInstance().addAccumulationListener(this);
+
 		checkButtons();
 	}
 
@@ -67,9 +79,9 @@ public class NNDataDialog extends SimpleDialog {
 		JPanel fsp = new JPanel();
 
 		fsp.setLayout(new BoxLayout(fsp, BoxLayout.Y_AXIS));
-		_momentumRange = new MinMaxPanel("momentum", "GeV", 1.0, 12.0);
-		_thetaRange = new MinMaxPanel("theta", "deg", 5, 45);
-		_phiRange = new MinMaxPanel("phi", "deg", -25, 25);
+		_momentumRange = new MinMaxPanel("momentum", "GeV", 5.0, 10.0);
+		_thetaRange = new MinMaxPanel("theta", "deg", 8, 42);
+		_phiRange = new MinMaxPanel("phi", "deg", -23, 23);
 		
 		
 		fsp.add(_momentumRange);
@@ -141,6 +153,7 @@ public class NNDataDialog extends SimpleDialog {
 		//get the count
 		int count = getCount();
 		if (count < 1) {
+			setStatus("The \"Count\" value is not valid.");
 			return false;
 		}
 		
@@ -148,13 +161,21 @@ public class NNDataDialog extends SimpleDialog {
 		
 	    File tempFile;
 		try {
-			tempFile = File.createTempFile("cedNN", null);
-		    tempFile.deleteOnExit();
+			setStatus("Creating (temp) Lund File");
+
+			tempFile = File.createTempFile("_cedNN", ".dat");
+	//	    tempFile.deleteOnExit();
 		    System.err.format("Canonical filename: %s\n", tempFile.getCanonicalFile());
 			PrintWriter printWriter = new PrintWriter(tempFile);
 
 			//write the header, most is not relevant for fast MC
-			printWriter.println("1  1.  1.  0 0 0.0   0.0   0.0   0.0  0.0");
+			
+			Random rand = new Random();
+			for (int i = 0; i < count; i++) {
+				header(printWriter);
+				randomLine(printWriter, rand);
+			}
+			
 			
 			printWriter.flush();
 			printWriter.close();
@@ -168,8 +189,43 @@ public class NNDataDialog extends SimpleDialog {
 		return true;
 	}
 	
-	private String randomLine(Random rand) {
-		return null;
+	private void header(PrintWriter writer) {
+		writer.println("1  1.  1.  0 0 0.0   0.0   0.0   0.0  0.0");
+	}
+	
+	private void randomLine(PrintWriter writer, Random rand) {
+		
+		double p  = _momentumRange.random(rand);
+		double theta = _thetaRange.random(rand);
+		double phi = _phiRange.random(rand);
+		
+//		System.err.println("p = " + DoubleFormat.doubleFormat(p, 3) +
+//				"  theta = "+ DoubleFormat.doubleFormat(theta, 3) +
+//				"  phi = "+ DoubleFormat.doubleFormat(phi, 3));
+		
+		theta = Math.toRadians(theta);
+		phi = Math.toRadians(phi);
+		
+		int index = 1;
+		int charge = -1; //electron
+		int type = 1;
+		int pid = 11; //electron
+		int parentIndex = 0;
+		int daughterIndex = 0;
+		double px = p*Math.sin(theta)*Math.cos(phi);
+		double py = p*Math.sin(theta)*Math.sin(phi);
+		double pz = p*Math.cos(theta);
+		double m = 0.000511; //electron
+		double e = Math.sqrt(p*p + m*m);
+		double vx = 0; //vertex x
+		double vy = 0; //vertex y
+		double vz = 0; //vertex z
+		
+		String s = String.format("%d %d %d %d %d %d %-9.4f %-9.4f %-9.4f %-9.4f %-11.6f %-9.4f %-9.4f %-9.4f", 
+				index, charge, type, pid, parentIndex, daughterIndex,
+				px, py, pz, e, m, vx, vy, vz);
+		System.err.println(s);
+		writer.println(s);
 	}
 
 	/**
@@ -303,6 +359,33 @@ public class NNDataDialog extends SimpleDialog {
 			dataFilePath = _outputFile.getParent();
 		} // approved file selection
 
+	}
+
+	@Override
+	public void accumulationEvent(int reason) {
+	}
+
+	@Override
+	public void newClasIoEvent(DataEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void openedNewEventFile(String path) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void changedEventSource(EventSourceType source) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void newFastMCGenEvent(PhysicsEvent event) {
+		System.err.println("HEY MAN");
 	}
 
 }
