@@ -97,7 +97,12 @@ public class MinMaxPanel extends JPanel {
 		return Math.max(_absMin, Math.min(_absMax, val));
 	}
 	
-	private double random(Random rand) {
+	/**
+	 * Generate an in range random number
+	 * @param rand the random generator
+	 * @return an in range random number
+	 */
+	public double random(Random rand) {
 		double min = getMinimum();
 		double max = getMaximum();
 		
