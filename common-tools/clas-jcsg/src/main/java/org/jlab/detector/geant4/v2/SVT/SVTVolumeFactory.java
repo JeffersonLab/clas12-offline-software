@@ -119,8 +119,8 @@ public class SVTVolumeFactory
 		setRange( 1, SVTConstants.NREGIONS, new int[]{ 1, 1, 1, 1 }, SVTConstants.NSECTORS, 1, SVTConstants.NMODULES ); // all regions, sectors, and modules
 		
 		double rmin = SVTConstants.LAYERRADIUS[0][0]*0.9;
-		double rmax = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.1;
-		double zlen = SVTConstants.SECTORLEN*1.5;
+		double rmax = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.13;
+		double zlen = SVTConstants.SECTORLEN*1.404;
 		
 		motherVol = new G4Tubs("svt", rmin*0.1, rmax*0.1, zlen/2.0*0.1, 0, 360 );
 		
