@@ -144,6 +144,7 @@ public class EBTwoTrackTest {
             if (nPosTracks>0) nTwoTrackEvents++;
 
             boolean foundElectron = false;
+            boolean foundHadron = false;
             boolean foundProton = false;
             boolean foundKaon = false;
             boolean foundPion = false;
@@ -163,10 +164,11 @@ public class EBTwoTrackTest {
                         foundElectron=true;
                     }
                     else if (sector==hadronSector) {
-                        if (pid==2212) {
-                            if (!foundProton) nHadronsSector[sector-1]++;
-                            foundProton=true;
+                        if (Math.abs(pid)==hadronPDG) {
+                            if (!foundHadron) nHadronsSector[sector-1]++;
+                            foundHadron=true;
                         }
+                        if      (pid==2212)           foundProton=true;
                         else if (Math.abs(pid)==211)  foundPion=true;
                         else if (Math.abs(pid)==321)  foundKaon=true;
                     }
@@ -187,8 +189,14 @@ public class EBTwoTrackTest {
                     if (foundKaon)   ekCount++;
                     if (foundPion)   epiCount++;
 
-                    if (!foundProton) {
-                        if (foundPion || foundKaon) nMisid++;
+                    // FIXME
+                    if ( (hadronPDG==2212 && !foundProton) ||
+                         (hadronPDG==321  && !foundKaon) ||
+                         (hadronPDG==211  && !foundPion) ) {
+
+                        if      (hadronPDG==2212 && (foundPion || foundKaon)) nMisid++;
+                        else if (hadronPDG==321 && (foundProton || foundPion)) nMisid++;
+                        else if (hadronPDG==211 && (foundProton || foundKaon)) nMisid++;
                         else {
                             nMissing++;
                             if (debug) {
