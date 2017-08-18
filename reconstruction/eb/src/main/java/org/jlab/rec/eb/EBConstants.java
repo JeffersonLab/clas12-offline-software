@@ -30,8 +30,6 @@ public class EBConstants {
     public static final double           RF_TDC2TIME = 0.0234358;
     public static final int         RF_LARGE_INTEGER = 800;
     
-    public static final double        SPEED_OF_LIGHT = 29.9792;
-    
     public static final Vector3D PCAL_hitRes = new Vector3D(0.0,0.0,0.0);
     public static final Vector3D ECIN_hitRes = new Vector3D(0.0,0.0,0.0);
     public static final Vector3D ECOUT_hitRes = new Vector3D(0.0,0.0,0.0);
