@@ -6,6 +6,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -378,4 +379,23 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 	}
      */
 
+    void set_CrossDirIntersSegWires() {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double Zref = this.get_Point().z();
+        for(int i =0; i<this.get_Segment1().size(); i++) {
+            double Dz = this.get_Segment1().get(i).get_Z()-Zref;
+            double Xs = this.get_Point().x()+this.get_Dir().x()*Dz;
+            double Ys = this.get_Point().y()+this.get_Dir().y()*Dz;
+            double Zs = this.get_Point().z()+this.get_Dir().z()*Dz;
+            this.get_Segment1().get(i).setCrossDirIntersWire(new Point3D(Xs,Ys,Zs));
+        }
+        for(int i =0; i<this.get_Segment2().size(); i++) {
+            double Dz = this.get_Segment2().get(i).get_Z()-Zref;
+            double Xs = this.get_Point().x()+this.get_Dir().x()*Dz;
+            double Ys = this.get_Point().y()+this.get_Dir().y()*Dz;
+            double Zs = this.get_Point().z()+this.get_Dir().z()*Dz;
+            this.get_Segment2().get(i).setCrossDirIntersWire(new Point3D(Xs,Ys,Zs));
+        }
+    }
+   
 }

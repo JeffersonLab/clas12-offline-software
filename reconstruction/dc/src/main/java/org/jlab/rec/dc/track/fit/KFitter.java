@@ -28,7 +28,7 @@ public class KFitter {
         sv.init(trk, sv.Z[0], this);
     }
 
-    public int totNumIter = 10;
+    public int totNumIter = 3;
     double newChisq = Double.POSITIVE_INFINITY;
 
     public void runFitter() {

@@ -120,7 +120,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		//5) make list of crosses consistent with a track candidate
 		CrossListFinder crossLister = new CrossListFinder();		
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
+		CrossList crosslist = crossLister.candCrossLists(crosses, true);
 		
 		if(crosslist.size()==0) {			
 			//System.out.println(" Failed on cross list !");

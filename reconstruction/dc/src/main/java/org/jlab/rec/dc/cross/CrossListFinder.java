@@ -8,6 +8,13 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 
 import Jama.Matrix;
+import org.jlab.rec.dc.cluster.ClusterFinder;
+import org.jlab.rec.dc.cluster.ClusterFitter;
+import org.jlab.rec.dc.cluster.FittedCluster;
+import org.jlab.rec.dc.hit.FittedHit;
+import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
 import trackfitter.fitter.LineFitter;
 
 /**
@@ -28,7 +35,7 @@ public class CrossListFinder  {
 	 */
 	private List<BaseCand> trkCnds = new ArrayList<BaseCand>();
 	
-	public CrossList candCrossLists(List<Cross> dccrosslist) {
+	public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased) {
 		//List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
 		trkCnds.clear();
 		if(dccrosslist.size()>0) {
@@ -93,7 +100,7 @@ public class CrossListFinder  {
 							if(cosTh1<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh2<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh3<Constants.TRACKDIRTOCROSSDIRCOSANGLE) 
 								continue;
 							
-								double fitchsq=0;
+							double fitchsq=0;
 							
 							if(c1.isPseudoCross==false)
 								fitchsq+=((qf1.fitResult[1][0]-c1.get_Point().y())/c1.get_PointErr().y())*((qf1.fitResult[1][0]-c1.get_Point().y())/c1.get_PointErr().y());
@@ -107,8 +114,11 @@ public class CrossListFinder  {
 							boolean linefitstatusOK = linefit.fitStatus(X, Y, errX, errY, Z.length);
 							if(!linefitstatusOK)
 								continue; // fit failed
-										
-							
+							if(TimeBased) {			
+                                                            this.updateBFittedHits(c1);
+                                                            this.updateBFittedHits(c2);
+                                                            this.updateBFittedHits(c3);
+                                                        }
 							BaseCand bCand = new BaseCand();
 							bCand.CrossesOnTrack.clear();
 							bCand.CrossesOnTrack.add(c1);
@@ -173,6 +183,32 @@ public class CrossListFinder  {
 		c1.set_DirErr(estimDirErr);
 		
 	}
+
+    private void recalcParsSegment(Segment _Segment1) {
+        //refit
+            double cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
+            // update the hits
+            for (FittedHit fhit : _Segment1.get_fittedCluster()) {
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B());
+            }
+            
+             cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
+             cf.Fit(_Segment1.get_fittedCluster(), true);
+             cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
+            
+             for (FittedHit fhit : _Segment1.get_fittedCluster()) {
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B());
+            }
+            cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
+            cf.Fit(_Segment1.get_fittedCluster(), true);
+            cf.SetResidualDerivedParams(_Segment1.get_fittedCluster(), true, false); //calcTimeResidual=false, resetLRAmbig=false 
+
+            cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
+            cf.Fit(_Segment1.get_fittedCluster(), false);
+
+            cf.SetSegmentLineParameters(_Segment1.get_fittedCluster().get(0).get_Z(), _Segment1.get_fittedCluster());
+           
+    }
 
 	private class BaseCand {
 		public double Chisq;
@@ -288,6 +324,28 @@ public class CrossListFinder  {
 		return CrossesBySectors;
 	}
 
+        private DCSwimmer swimmer = new DCSwimmer();
+        ClusterFitter cf = new ClusterFitter();
+        SegmentFinder segFinder = new SegmentFinder();
+        private void updateBFittedHits(Cross c) {
+            for(int i =0; i<c.get_Segment1().size(); i++) {
 
-	
+                Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
+                float[] result = new float[3];
+                swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
+                c.get_Segment1().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
+
+            }
+            for(int i =0; i<c.get_Segment2().size(); i++) {
+                Point3D ref =c.get_Segment2().get(i).getCrossDirIntersWire();
+                float[] result = new float[3];
+                swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
+                c.get_Segment2().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
+            }
+            this.recalcParsSegment(c.get_Segment1());
+            this.recalcParsSegment(c.get_Segment2());
+
+            //remake cross
+            c.set_CrossParams();
+        }
 }

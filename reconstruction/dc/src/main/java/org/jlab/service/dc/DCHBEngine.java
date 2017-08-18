@@ -148,7 +148,7 @@ public class DCHBEngine extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false);
 		
 		if(crosslist.size()==0) {
 			
@@ -288,7 +288,7 @@ public class DCHBEngine extends ReconstructionEngine {
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
        // String outputFile="/Users/ziegler/Workdir/Files/test/electron_fd_rcF3.hipo";
-        String outputFile = "/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE2.rec3.hipo";
+        String outputFile = "/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE2.rec3.test.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -306,9 +306,9 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB   
             en2.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-           // if (counter > 13) {
-            //    break;
-            //}
+            if (counter > 160000) {
+                break;
+            }
             //event.show();
             //if(counter%100==0)
             System.out.println("*************************************************************run " + counter + " events");
