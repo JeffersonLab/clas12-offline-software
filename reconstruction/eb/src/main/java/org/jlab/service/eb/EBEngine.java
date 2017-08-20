@@ -60,9 +60,9 @@ public class EBEngine extends ReconstructionEngine {
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
-        eb.addTracks(tracks);       
+        eb.addForwardTracks(tracks);       
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
-        eb.addTracks(ctracks);
+        eb.addCentralTracks(ctracks);
 
         // Process tracks:
         eb.processHitMatching();
