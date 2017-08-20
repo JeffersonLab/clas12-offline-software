@@ -56,7 +56,7 @@ public class EventBuilder {
      * and added to the detector event.
      * @param tracks 
      */
-    public void addTracks(List<DetectorTrack> tracks) {
+    public void addForwardTracks(List<DetectorTrack> tracks) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
@@ -64,16 +64,13 @@ public class EventBuilder {
         }
     }
     
-    /*
-    public void addTBTracks(List<DetectorTrack> tracks, List<double[]> covMatrices) {
-        detectorEvent.clear();
+    public void addCentralTracks(List<DetectorTrack> tracks) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i), covMatrices.get(i));
+            DetectorParticle particle = new DetectorParticle(tracks.get(i));
             detectorEvent.addParticle(particle);
         }
-        
-    }*/
+    }
     
     public void addTaggerTracks(List<TaggerResponse> taggers) {
         //for(DetectorTrack track : tracks){
@@ -224,7 +221,7 @@ public class EventBuilder {
                     pz*energy/EBConstants.ECAL_SAMPLINGFRACTION);
             int calorimeter_count = responsesPCAL.size() + responsesECIN.size() + responsesECOUT.size();
             int scintillator_count = responsesFTOF1A.size() + responsesFTOF1B.size() + responsesFTOF2.size();
-            if(calorimeter_count>1  && scintillator_count==0){
+            if(calorimeter_count>0  && scintillator_count==0){
                 detectorEvent.addParticle(p);
             }
         }
