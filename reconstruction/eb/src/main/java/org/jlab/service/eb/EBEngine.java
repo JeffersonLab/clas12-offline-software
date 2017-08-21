@@ -50,7 +50,7 @@ public class EBEngine extends ReconstructionEngine {
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::rec",DetectorType.LTCC);
         
-        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FT::particles");
+        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);

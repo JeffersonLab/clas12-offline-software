@@ -13,6 +13,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.TaggerResponse;
+import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -75,10 +76,8 @@ public class EventBuilder {
     public void addTaggerTracks(List<TaggerResponse> taggers) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < taggers.size(); i++){
-            int charge = taggers.get(i).getCharge();
-            int id = taggers.get(i).getID();
-            Vector3D momentum = taggers.get(i).getMomentum();
-            DetectorParticle particle = new DetectorParticle(id,charge,momentum.x(),momentum.y(),momentum.z());
+            DetectorParticle particle = new DetectorParticle(taggers.get(i));
+            particle.setStatus(100);
             detectorEvent.addParticle(particle);
         }
     }
