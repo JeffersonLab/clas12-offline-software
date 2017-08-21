@@ -29,12 +29,14 @@ public class DetectorParticle implements Comparable {
     
     private Integer particlePID       = 0;
     private Integer particleStatus    = 1;
+    private Integer particleTrackIndex = -1;
     private Double  particleBeta      = 0.0;
     private Double  particleMass      = 0.0;
     private Double  particleIDQuality = 0.0;
-    private Double  particlePath      = 0.0;
+    private Double  particlePath      = 0.0; 
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
+    
     
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
@@ -67,8 +69,8 @@ public class DetectorParticle implements Comparable {
         detectorTrack = track;
     }
     
-    public DetectorParticle(TaggerResponse taggers) {
-        taggerTrack = taggers;
+    public DetectorParticle(TaggerResponse tagger) {
+        taggerTrack = tagger;
     }
     
     public DetectorParticle(DetectorTrack track, double[] covMat) {
@@ -178,43 +180,7 @@ public class DetectorParticle implements Comparable {
             res.setPath(this.getPathLength(res.getPosition()));
         }
     }
-    
-//    public void addResponse(CalorimeterResponse res, boolean match){
-//        this.calorimeterStore.add(res);
-//        if(match==true){
-//            Line3D distance = this.getDistance(res);
-//            
-//            res.getMatchedPosition().setXYZ(
-//                    distance.midpoint().x(),
-//                    distance.midpoint().y(),distance.midpoint().z());
-//            
-//            /*Vector3D vec = new Vector3D(
-//                    this.particleCrossPosition.x(),
-//                    particleCrossPosition.y(),
-//                    particleCrossPosition.z());
-//            */
-//            res.setPath(this.getPathLength(res.getPosition()));
-//        }
-//    }
-//    
-//    
-//    public void addResponse(ScintillatorResponse res, boolean match){
-//        this.scintillatorStore.add(res);
-//        if(match==true){
-//            Line3D distance = this.getDistance(res);
-//            
-//            res.getMatchedPosition().setXYZ(
-//                    distance.midpoint().x(),
-//                    distance.midpoint().y(),distance.midpoint().z());
-//            
-//            /*Vector3D vec = new Vector3D(
-//                    this.particleCrossPosition.x(),
-//                    particleCrossPosition.y(),
-//                    particleCrossPosition.z());
-//            */
-//            res.setPath(this.getPathLength(res.getPosition()));
-//        }
-//    }
+
     
     public Particle getPhysicsParticle(int pid){
         Particle  particle = new Particle(pid,
@@ -238,6 +204,10 @@ public class DetectorParticle implements Comparable {
     
     public Line3D getLowerCross(){
         return this.driftChamberEnter;
+    }
+    
+    public int getTrackIndex() {
+        return this.detectorTrack.getTrackIndex();
     }
     
     public double[] getTBCovariantMatrix() {
@@ -353,11 +323,22 @@ public class DetectorParticle implements Comparable {
 
     
     public double getBeta(){ return this.particleBeta;}
+    public double getNDF() {return this.detectorTrack.getNDF();}
+    public double getTrackChi2() {return this.detectorTrack.getchi2();}
     public int    getStatus(){ return this.particleStatus;}
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
     public void   setPidQuality(double q) {this.particleIDQuality = q;}
+    
+    public Point3D getTaggerPosition() {return this.taggerTrack.getPosition();}
+    public Point3D getTaggerPositionWidth() {return this.taggerTrack.getPositionWidth();}
+    public double  getTaggerRadius() {return this.taggerTrack.getRadius();}
+    public double  getTaggerSize() {return this.taggerTrack.getSize();}
+    public double  getTaggerIndex() {return this.taggerTrack.getHitIndex();}
+    public double  getTaggerTime() {return this.taggerTrack.getTime();}
+    public double  getTaggerEnergy() {return this.taggerTrack.getEnergy();}
+    
     
     public Path3D getTrajectory(){
         Path3D  path = new Path3D();
