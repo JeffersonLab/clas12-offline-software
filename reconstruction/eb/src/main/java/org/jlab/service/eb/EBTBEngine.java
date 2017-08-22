@@ -22,6 +22,7 @@ public class EBTBEngine extends EBEngine {
         this.setTrackBank("REC::Track");
         this.setCrossBank("REC::TrackCross");
         this.setTrackType("TimeBasedTrkg::TBTracks");
+        this.setFTBank("REC::ForwardTagger");
     }
     
 }
