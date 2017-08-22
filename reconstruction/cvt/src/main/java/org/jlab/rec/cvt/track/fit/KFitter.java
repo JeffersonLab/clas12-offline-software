@@ -151,7 +151,12 @@ public class KFitter {
     public Track OutputTrack(Seed trk, org.jlab.rec.cvt.svt.Geometry geo) {
 
         Helix helix = sv.setTrackPars(sv.X0.size() - 1);
+       
         Track cand = new Track(helix);
+        
+        if(cand.get_P()<0.3)
+            this.setFitFailed = true;
+        
         for (Cross c : trk.get_Crosses()) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
                 continue;

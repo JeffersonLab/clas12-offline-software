@@ -7,12 +7,12 @@ import java.util.Map;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 import Jama.Matrix;
+import org.jlab.rec.cvt.svt.Constants;
 
 public class StateVecs {
 
@@ -220,9 +220,9 @@ public class StateVecs {
 
         fVec.kappa = iVec.kappa;
 
-        double[] ElossTot = new double[3];
+        double[] ElossTot = ELoss_hypo(iVec, f - i);
         for (int e = 0; e < 3; e++) {
-            ElossTot[e] = iVec.get_ELoss()[e] + ELoss_hypo(iVec, f - i)[e];
+            ElossTot[e] = iVec.get_ELoss()[e] + ElossTot[e];
         }
         fVec.set_ELoss(ElossTot);
 
@@ -290,17 +290,49 @@ public class StateVecs {
         }
     }
 
+    private double get_t_ov_X0(double radius) {
+        double value = Constants.SILICONTHICK / Constants.SILICONRADLEN;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0]) 
+            value = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[this.getBMTLayer(radius)-1];
+        return value;
+    }
+    
+    private double detMat_Z_ov_A_timesThickn(double radius) {    
+        double value = 0;
+        if(radius>=Constants.MODULERADIUS[0][0]&& radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0])
+            value = org.jlab.rec.cvt.svt.Constants.detMatZ_ov_A_timesThickn;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && this.getBMTLayer(radius)>0)
+            value = org.jlab.rec.cvt.bmt.Constants.getEFF_Z_OVER_A()[this.getBMTLayer(radius)-1];
+        return value;
+    }
+    private int getBMTLayer(double radius) {
+        int layer = 0;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && radius<org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[0])
+            layer=1;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[0] && radius<org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[1])
+            layer=2;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[1] && radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[1])
+            layer=3;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[1] && radius<org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[2])
+            layer=4;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[2] && radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[2])
+           layer=5;
+        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[2])
+           layer=6;
+       
+        return layer;
+    }
     private double[] ELoss_hypo(StateVec iVec, int dir) {
         double[] Eloss = new double[3]; //Eloss for pion, kaon, proton hypotheses
 
-        if (dir < 0) {
+        if (dir < 0  || Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)<Constants.MODULERADIUS[0][0]) {
             return Eloss;
         }
 
         Vector3D trkDir = this.P(iVec.k);
         trkDir.unit();
         double cosEntranceAngle = trkDir.z();
-        ////System.out.println(" cosTrk "+Math.toDegrees(Math.acos(trkDir.z())));
+       // System.out.println(" cosTrk "+Math.toDegrees(Math.acos(trkDir.z()))+" at state "+iVec.k+" dir "+dir);
         double pt = Math.abs(1. / iVec.kappa);
         double pz = pt * iVec.tanL;
         double p = Math.sqrt(pt * pt + pz * pz);
@@ -319,8 +351,8 @@ public class StateVecs {
             double logterm = 2. * mass * beta * beta * gamma * gamma * Wmax / (I * I);
 
             double delta = 0.;
-            double dEdx = 0.00001535 * Constants.detMatZ_ov_A_timesThickn * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta); //in GeV/mm
-
+            double dEdx = 0.00001535 * this.detMat_Z_ov_A_timesThickn(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)) * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta); //in GeV/mm
+            //System.out.println(" mass hy "+hyp+" Mat at "+Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)+"Z/A*t "+this.detMat_Z_ov_A_timesThickn(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y))+" dEdx "+dEdx);
             Eloss[hyp - 2] = dir * Math.abs(dEdx / cosEntranceAngle);
         }
         return Eloss;
@@ -336,7 +368,8 @@ public class StateVecs {
             {0, 0, 0, 0, 0}
         });
 
-        if (iVec.k % 2 == 1 && dir > 0) {
+        // if (iVec.k % 2 == 1 && dir > 0) {
+        if (dir >0 && Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)>=Constants.MODULERADIUS[0][0]) {
             Vector3D trkDir = this.P(iVec.k);
             trkDir.unit();
             double cosEntranceAngle = Math.abs(this.P(iVec.k).z());
@@ -345,20 +378,21 @@ public class StateVecs {
             double pz = pt * iVec.tanL;
             double p = Math.sqrt(pt * pt + pz * pz);
 
-            double t_ov_X0 = 2. * 0.32 / Constants.SILICONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Si radiation length = 9.36 cm
-
+            //double t_ov_X0 = 2. * 0.32 / Constants.SILICONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Si radiation length = 9.36 cm
+            double t_ov_X0 = this.get_t_ov_X0(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)); //System.out.println(Math.log(t_ov_X0)/9.+" rad "+Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)+" t/x0 "+t_ov_X0);
             double mass = MassHypothesis(2);   // assume given mass hypothesis (2=pion)
             double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
             double pathLength = t_ov_X0 / cosEntranceAngle;
+//0.0136?
 
-            double sctRMS = (0.0136 / (beta * p)) * Math.sqrt(pathLength) * (1 + 0.038 * Math.log(pathLength)); // Highland-Lynch-Dahl formula
-
+            double sctRMS = (0.00141 / (beta * p)) * Math.sqrt(pathLength) * (1 + Math.log10(pathLength)/9.); // Highland-Lynch-Dahl formula
+            
             Q = new Matrix(new double[][]{
                 {0, 0, 0, 0, 0},
-                {0, sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
-                {0, 0, sctRMS * (iVec.kappa * iVec.kappa * iVec.tanL * iVec.tanL), 0, sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL))},
+                {0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
+                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.kappa * iVec.tanL * iVec.tanL), 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL))},
                 {0, 0, 0, 0, 0},
-                {0, 0, sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
+                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
             });
         }
 
@@ -433,7 +467,8 @@ public class StateVecs {
             this.By = bf.y();
             this.Bz = bf.z();
 
-            this.alpha = 1. / (StateVecs.speedLight * bf.z());
+            this.alpha = 1. / (StateVecs.speedLight * bf.toVector3D().z());
+            //this.alpha = 1. / (5.);
         }
     }
 
@@ -486,9 +521,9 @@ public class StateVecs {
         double x = this.trackTraj.get(kf).d_rho * Math.cos(this.trackTraj.get(kf).phi0);
         double y = this.trackTraj.get(kf).d_rho * Math.sin(this.trackTraj.get(kf).phi0);
         double z = this.trackTraj.get(kf).dz;
-        double px = -Math.abs(1 / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0);
-        double py = Math.abs(1 / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0);
-        double pz = Math.abs(1 / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
+        double px = -Math.abs(1. / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0);
+        double py = Math.abs(1. / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0);
+        double pz = Math.abs(1. / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
         int q = (int) Math.signum(this.trackTraj.get(kf).kappa);
         double p_unc = Math.sqrt(px * px + py * py + pz * pz);
 
@@ -497,12 +532,12 @@ public class StateVecs {
         double h_dca = Math.sqrt(x * x + y * y);
         double h_phi0 = Math.atan2(py, px);
         double kappa = Math.signum(this.trackTraj.get(kf).kappa) / Math.sqrt(px * px + py * py);
-        double h_omega = kappa / this.trackTraj.get(kf).alpha;
+        double h_omega = kappa / this.trackTraj.get(kf).alpha; h_omega = kappa/this.trackTraj.get(0).alpha;
         double h_dz = z;
-        double h_tandip = pz / Math.sqrt(px * px + py * py);;
-
+        double h_tandip = pz / Math.sqrt(px * px + py * py);
+        
         Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, this.trackCov.get(kf).covMat);
-        //System.out.println("x "+x/10+" y "+y/10+" z "+z/10+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
+       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
 
         return trkHelix;
     }
