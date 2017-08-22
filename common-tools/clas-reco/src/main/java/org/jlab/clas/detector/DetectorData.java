@@ -309,19 +309,20 @@ public class DetectorData {
           DataBank bank = event.createBank(bank_name, rows);
           int row = 0;
           for(int i = 0 ; i < particles.size(); i++) {
+              //System.err.println(particles.size() + "  " + rows + "  " + i + "  " + row);
               DetectorParticle p = particles.get(row);
               if(p.getStatus()==1) {
-              bank.setInt("index", row, p.getTrackIndex());
-              bank.setInt("pindex", row, i);
-              bank.setInt("q", row, p.getCharge());
+              bank.setShort("index", row, (short) p.getTrackIndex());
+              bank.setShort("pindex", row, (short) i);
+              bank.setByte("q", row, (byte) p.getCharge());
               bank.setFloat("chi2", row, (float) p.getChi2());
-              bank.setFloat("ndf", row, (float) p.getNDF());
+              bank.setShort("NDF", row, (short) p.getNDF());
               bank.setFloat("px_nomm", row, (float) p.vector().x());
               bank.setFloat("py_nomm", row, (float) p.vector().y());
               bank.setFloat("pz_nomm", row, (float) p.vector().z());
               bank.setFloat("vx_nomm", row, (float) p.vertex().x());
               bank.setFloat("vy_nomm", row, (float) p.vertex().y());
-              bank.setFloat("vz_nomom", row, (float) p.vertex().z());
+              bank.setFloat("vz_nomm", row, (float) p.vertex().z());
               row = row + 1;
               }
           }
