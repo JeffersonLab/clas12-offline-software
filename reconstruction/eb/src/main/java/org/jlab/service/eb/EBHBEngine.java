@@ -22,6 +22,7 @@ public class EBHBEngine extends EBEngine {
         this.setTrackBank("RECHB::Track");
         this.setCrossBank("RECHB::TrackCross");
         this.setTrackType("HitBasedTrkg::HBTracks");
+        this.setFTBank("RECHB::ForwardTagger");
     }
     
 }

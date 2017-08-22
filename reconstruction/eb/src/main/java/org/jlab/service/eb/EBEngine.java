@@ -25,6 +25,7 @@ public class EBEngine extends ReconstructionEngine {
     String crossBank        = null;
     String matrixBank       = null;
     String trackType        = null;
+    String ftBank           = null;
 
     public EBEngine(String name){
         super(name,"gavalian","1.0");
@@ -68,7 +69,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.processHitMatching();
         eb.addTaggerTracks(trackFT);
         eb.processNeutralTracks();
-
+        //System.out.println("# of tracks " + tracks.size());
         eb.assignTrigger();
  
         EBRadioFrequency rf = new EBRadioFrequency();
@@ -77,6 +78,9 @@ public class EBEngine extends ReconstructionEngine {
         EBAnalyzer analyzer = new EBAnalyzer();
         analyzer.processEvent(eb.getEvent());
         
+        //System.out.println(eb.getEvent().toString());
+        
+
 
         if(eb.getEvent().getParticles().size()>0){
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
@@ -98,6 +102,17 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
                 de.appendBanks(bankChe);
             }
+            
+            if (ftBank!=null && trackFT.size()>0) {
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, trackBank, trackFT.size());
+                de.appendBanks(bankForwardTagger);
+            }
+            
+            if (trackBank!=null && tracks.size()>0) {
+                DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, tracks.size());
+                de.appendBanks(bankTrack);
+            }            
+            
             if(matrixBank!=null) {
                 DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
                 de.appendBanks(bankMat);
@@ -130,6 +145,10 @@ public class EBEngine extends ReconstructionEngine {
 
     public void setTrackBank(String trackBank) {
         this.trackBank = trackBank;
+    }
+    
+    public void setFTBank(String ftBank) {
+        this.ftBank = ftBank;
     }
 
     public void setCrossBank(String crossBank) {
