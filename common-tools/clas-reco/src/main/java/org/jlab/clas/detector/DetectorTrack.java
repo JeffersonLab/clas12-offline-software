@@ -13,22 +13,23 @@ import org.jlab.geom.prim.Vector3D;
  */
 public class DetectorTrack {
 
+    private int     trackAssociation = -1;
+    private int     trackIndex = -1;
     private int     trackCharge = 0;
     private double  trackMom    = 0.0;
     private double  trackPath   = 0.0;
     private double  taggerTime  = 0.0;
     private int     taggerID    = 0;
+    private double  trackchi2   = 0.0;
+    private int     ndf         = 0;
+    private int     trackStatus = 0;
     
     private Vector3D   trackEnd = new Vector3D();
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
 //    private Point3D trackIntersect = new Point3D();
     
-    
-    private double variable1 = 0.0;
-    private int variable2 = -1;
-    
-    
+
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
 //    private List<Point3D> ctofIntersects = new ArrayList<Point3D>();
     
@@ -37,14 +38,17 @@ public class DetectorTrack {
      public DetectorTrack(int charge){
         this.trackCharge = charge;
     }
-    
-    public double getVariable1() {
-        return variable1;
-    } 
+
      
     public DetectorTrack(int charge, double mom){
         this.trackMom = mom;
         this.trackCharge = charge;
+    }
+
+    public DetectorTrack(int charge, double mom, int index){
+        this.trackMom = mom;
+        this.trackCharge = charge;
+        this.trackIndex = index;
     }
     
 //        public DetectorTrack(int charge, double mom, Point3D ctofintersect){
@@ -111,20 +115,22 @@ public class DetectorTrack {
         return this;
     }
     
-//    public void setTrackIntersect(Point3D inter) {
-//        this.trackIntersect = inter;
-//    }
-    
-//    public Point3D getTrackIntersect() {
-//        return this.ctofIntersects.get(0);
-//    }
+    public void     setNDF(int x) {this.ndf = x;}
+    public void     setStatus(int x) {this.trackStatus = x;}
+    public void     setchi2(double x) {this.trackchi2 = x;}
+    public void     setAssociation(int x) {this.trackAssociation = x;}
     
     public int      getCharge()   { return trackCharge;}
-    public double   getP()        { return trackP.mag();}    
+    public int      getNDF()      {return ndf;}
+    public int      getStatus()   {return trackStatus;}
+    public double   getchi2()  {return trackchi2;}
+    public double   getP()        { return trackP.mag();} 
+    public int   getID()     {return this.taggerID;}
     public double   getPath()     { return trackPath;}
     public Vector3  getVector()   { return this.trackP;}
     public Vector3  getVertex()   { return this.trackVertex;}
     public Vector3D getTrackEnd() { return trackEnd;}
+    public int      getAssociation() {return trackAssociation;}
     
     
     public void addCross(double x, double y, double z,
@@ -151,6 +157,10 @@ public class DetectorTrack {
     
     public Line3D getFirstCross(){
         return trackCrosses.get(0);
+    }
+    
+    public int getTrackIndex() {
+        return this.trackIndex;
     }
     
     public Line3D getLastCross(){

@@ -269,23 +269,27 @@ public class DetectorData {
        return bank;
    }
       
-      public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
-       DataBank bank = event.createBank(bank_name, responses.size());
-       for(int row = 0; row < responses.size(); row++){
-           TaggerResponse ft = responses.get(row);
-           bank.setShort("index", row, (short) 0);
-           bank.setShort("pindex", row, (short) 0);
-           bank.setShort("size", row, (short) 0);
-           bank.setFloat("x", row, (float) 0.0);
-           bank.setFloat("y", row, (float) 0.0);
-           bank.setFloat("z", row, (float) 0.0);
-           bank.setFloat("dx", row, (float) 0.0);
-           bank.setFloat("dy", row, (float) 0.0);
-           bank.setFloat("radius", row, (float) 0.0);
+      public static DataBank getForwardTaggerBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows){
+       DataBank bank = event.createBank(bank_name, rows);
+       int row = 0;
+       for(int i = 0; i < particles.size(); i++){
+           if(particles.get(i).getStatus()==100) {
+           DetectorParticle p = particles.get(i);
+           bank.setShort("index", row, (short) p.getTaggerIndex());
+           bank.setShort("pindex", row, (short) i);
+           bank.setShort("size", row, (short) p.getTaggerSize());
+           bank.setFloat("x", row, (float) p.getTaggerPosition().x());
+           bank.setFloat("y", row, (float) p.getTaggerPosition().y());
+           bank.setFloat("z", row, (float) p.getTaggerPosition().z());
+           bank.setFloat("dx", row, (float) p.getTaggerPositionWidth().x());
+           bank.setFloat("dy", row, (float) p.getTaggerPositionWidth().y());
+           bank.setFloat("radius", row, (float) p.getTaggerRadius());
            bank.setFloat("path", row, (float) 0.0);
-           bank.setFloat("time", row, (float) 0.0);
-           bank.setInt("energy", row, (int) 0.0);
+           bank.setFloat("time", row, (float) p.getTaggerTime());
+           bank.setInt("energy", row, (int) p.getTaggerEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           row = row + 1;
+           }
        }
        return bank;
    }      
@@ -299,6 +303,31 @@ public class DetectorData {
            bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());     
        return bank;
    }
+      
+      
+        public static DataBank getTracksBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows) {
+          DataBank bank = event.createBank(bank_name, rows);
+          int row = 0;
+          for(int i = 0 ; i < particles.size(); i++) {
+              //System.err.println(particles.size() + "  " + rows + "  " + i + "  " + row);
+              DetectorParticle p = particles.get(row);
+              if(p.getStatus()==1) {
+              bank.setShort("index", row, (short) p.getTrackIndex());
+              bank.setShort("pindex", row, (short) i);
+              bank.setByte("q", row, (byte) p.getCharge());
+              bank.setFloat("chi2", row, (float) p.getChi2());
+              bank.setShort("NDF", row, (short) p.getNDF());
+              bank.setFloat("px_nomm", row, (float) p.vector().x());
+              bank.setFloat("py_nomm", row, (float) p.vector().y());
+              bank.setFloat("pz_nomm", row, (float) p.vector().z());
+              bank.setFloat("vx_nomm", row, (float) p.vertex().x());
+              bank.setFloat("vy_nomm", row, (float) p.vertex().y());
+              bank.setFloat("vz_nomm", row, (float) p.vertex().z());
+              row = row + 1;
+              }
+          }
+          return bank;
+      }
       
     public static DataBank getCrossBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
           DataBank bank = event.createBank(bank_name, particles.size());
@@ -388,7 +417,7 @@ public class DetectorData {
                Vector3D pvec = DetectorData.readVector(bank, row, "p0_x", "p0_y", "p0_z");
                Vector3D vertex = DetectorData.readVector(bank, row, "Vtx0_x", "Vtx0_y", "Vtx0_z");
                
-               DetectorTrack  track = new DetectorTrack(charge,pvec.mag());
+               DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row+1));
                track.setVector(pvec.x(), pvec.y(), pvec.z());
                track.setVertex(vertex.x(), vertex.y(), vertex.z());
                track.setPath(bank.getFloat("pathlength", row));
@@ -400,6 +429,10 @@ public class DetectorData {
                Vector3D hc_dir = DetectorData.readVector(bank, row, "c3_ux", "c3_uy", "c3_uz");
                track.addCross(lc_vec.x(), lc_vec.y(), lc_vec.z(), lc_dir.x(), lc_dir.y(), lc_dir.z());
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
+               
+               track.setNDF(bank.getInt("ndf",row));
+               track.setchi2(bank.getFloat("chi2",row));
+               track.setStatus(bank.getInt("status",row));
                
                tracks.add(track);
            }
@@ -447,32 +480,7 @@ public class DetectorData {
         return tracks;
     }
    
-    public static List<DetectorTrack>  readTaggerTracks(DataEvent event, String bank_name){
-       List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
-       if(event.hasBank(bank_name)==true){
-           DataBank bank = event.getBank(bank_name);
-           int nrows = bank.rows();
 
-           for(int row = 0; row < nrows; row++){
-               int charge = bank.getInt("q", row);
-               float cx = bank.getFloat("c_x", row);
-               float cy = bank.getFloat("c_y" , row);
-               float cz = bank.getFloat("c_z", row);
-               float energy = bank.getFloat("energy", row);
-
-               Vector3D pvec = new Vector3D(cx*energy,cy*energy,cz*energy);
-
-               DetectorTrack  track = new DetectorTrack(charge,pvec.mag());
-               track.setVertex(0.0, 0.0, 0.0);
-               track.setVector(cx*energy, cy*energy, cz*energy);
-               track.setTime(bank.getFloat("time", row));
-               track.setID(bank.getInt("id",row));
-
-               tracks.add(track);
-           }
-       }
-       return tracks;
-   }
    
 }
 

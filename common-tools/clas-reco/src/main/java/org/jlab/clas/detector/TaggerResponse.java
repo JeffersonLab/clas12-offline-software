@@ -18,25 +18,37 @@ import org.jlab.io.base.DataEvent;
  */
 public class TaggerResponse {
     
+
+    
+    
     private double    hitTime = 0.0;
     private int         hitID = -1;
-    private int     hitCharge = -1;
+    private int     hitSize = -1;
+    private double  hitRadius = 0.0;
     private double  hitEnergy = 0.0;
     private int   association = -1;
+    private int   hitIndex = -1;
+    private DetectorDescriptor  descriptor  = new DetectorDescriptor();
 
     private Vector3D         hitMomentum = new Vector3D();
-
-    public TaggerResponse  setTime(double time) { hitTime = time; return this;}
+    private Point3D         hitPosition = new Point3D();
+    private Point3D         hitWidth = new Point3D();
+    
     public void setID(int id){ hitID = id;}
-    public void setCharge(int q){hitCharge = q;}
+    public void setTime(double time) {hitTime = time;}
+    public void setSize(int q){hitSize = q;}
     public void  setEnergy(double energy) { hitEnergy = energy;}
     public void setAssociation(int assoc) {this.association = assoc;}
+    public void setHitIndex(int index) {this.hitIndex = index;}
+    public void setRadius(double r) {hitRadius = r;}
     
-    public int getCharge(){return hitCharge;}
+    public int getSize(){return hitSize;}
     public int getID(){return hitID;}
     public double getTime(){ return hitTime;}
     public double getEnergy(){ return hitEnergy;}
     public int getAssociation() {return this.association;}
+    public int getHitIndex() {return this.hitIndex;}
+    public double getRadius() {return this.hitRadius;}
     
     public Vector3D getMomentum(){
         return this.hitMomentum;
@@ -46,26 +58,48 @@ public class TaggerResponse {
         this.hitMomentum.setXYZ(px, py, pz);
     }
     
+    public Point3D getPosition(){
+        return this.hitPosition;
+    }
+    
+    public void setPosition(double x, double y, double z){
+        this.hitPosition.set(x, y, z);
+    }
+ 
+    public Point3D getPositionWidth(){
+        return this.hitPosition;
+    }
+    
+    public void setPositionWidth(double x, double y, double z){
+        this.hitWidth.set(x, y, z);
+    }
+
     public static List<TaggerResponse>  readHipoEvent(DataEvent event, 
-        String bankName){        
+        String bankName, DetectorType type){        
         List<TaggerResponse> responseList = new ArrayList<TaggerResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
                 int id  = bank.getInt("id", row);
-                int charge = bank.getInt("charge", row);
-                float cx = bank.getFloat("cx",row);
-                float cy = bank.getFloat("cy",row);
-                float cz = bank.getFloat("cz",row);
-                float time = bank.getFloat("time",row);
-                float energy = bank.getFloat("energy",row);
+                int size = bank.getInt("size", row);
+                double x = bank.getFloat("x",row);
+                double y = bank.getFloat("y",row);
+                double z = bank.getFloat("z",row);
+                double dx = bank.getFloat("widthX",row);
+                double dy = bank.getFloat("widthY",row);
+                double radius = bank.getFloat("radius", row);
+                double time = bank.getFloat("time",row);
+                double energy = bank.getFloat("energy",row);
                 TaggerResponse ft = new TaggerResponse();
-                ft.setCharge(charge);
+                
+                ft.setSize(size);
                 ft.setID(id);
                 ft.setEnergy(energy);
+                ft.setRadius(radius);
                 ft.setTime(time);
-                ft.setMomentum(cx*energy, cy*energy, cz*energy);
+                ft.setHitIndex(row);
+                ft.setPosition(x, y, z);
                 responseList.add(ft);
             }
         }
