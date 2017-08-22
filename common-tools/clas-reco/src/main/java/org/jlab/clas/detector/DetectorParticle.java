@@ -648,6 +648,9 @@ public class DetectorParticle implements Comparable {
 
     //Joseph's additions
 
+    /*
+     *
+     * These should not be in DetectorParticle, probably eb/rec makes sense
     public double CalculatedSF() {
         return this.getEnergy(DetectorType.EC)/this.vector().mag();
     }
@@ -668,7 +671,8 @@ public class DetectorParticle implements Comparable {
         double p = this.vector().mag();
         double sigma = 0.02468*pow(p,-0.51);
         return sigma;
-    }        
+    }
+    */
 
     public double getTheoryBeta(int id){
         double beta = 0.0;

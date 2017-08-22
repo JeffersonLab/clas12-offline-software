@@ -1,6 +1,6 @@
 package org.jlab.service.eb;
 
-
+import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
@@ -8,6 +8,7 @@ import org.jlab.clas.detector.*;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.rec.eb.EBCCDBConstants;
 
 /**
  *
@@ -31,7 +32,7 @@ public class EBEngine extends ReconstructionEngine {
         super(name,"gavalian","1.0");
         initBankNames();
     }
-    
+
     public void initBankNames() {
         //Initialize bank names
     }
@@ -163,6 +164,14 @@ public class EBEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
+       
+        /*
+         * preparing for reading from ccdb:
+        requireConstants(EBCCDBConstants.getAllTableNames());
+        this.getConstantsManager().setVariation("default");
+        EBCCDBConstants.load(10,this.getConstantsManager());
+        */
+
         System.out.println("[EB::] --> event builder is ready....");
         return true;
     }
