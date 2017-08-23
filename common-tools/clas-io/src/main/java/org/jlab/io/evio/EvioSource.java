@@ -110,7 +110,15 @@ public class EvioSource implements DataSource {
 	}
 
 	public void open(ByteBuffer buff) {
-		// TODO Auto-generated method stub
+		try {
+			evioReader = new EvioCompactReader(buff);
+			currentEvent = 1;
+			currentFileEntries = evioReader.getEventCount()+1;
+			storeByteOrder = evioReader.getFileByteOrder();
+			// System.out.println("****** opened BUFFER [] ** NEVENTS = " + currentFileEntries + " *******");
+		} catch (EvioException ex) {
+			Logger.getLogger(EvioSource.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	public void close() {
