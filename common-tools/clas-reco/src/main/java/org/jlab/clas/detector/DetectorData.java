@@ -311,13 +311,14 @@ public class DetectorData {
           for(int i = 0 ; i < particles.size(); i++) {
               //System.err.println(particles.size() + "  " + rows + "  " + i + "  " + row);
               DetectorParticle p = particles.get(row);
-              if(p.getStatus()==1) {
+              if(p.getTrackDetector()==13) {
               bank.setShort("index", row, (short) p.getTrackIndex());
               bank.setShort("pindex", row, (short) i);
               bank.setByte("q", row, (byte) p.getCharge());
               bank.setFloat("chi2", row, (float) p.getChi2());
               bank.setShort("NDF", row, (short) p.getNDF());
               bank.setFloat("px_nomm", row, (float) p.vector().x());
+              System.out.println("Px is " + p.vector().x());
               bank.setFloat("py_nomm", row, (float) p.vector().y());
               bank.setFloat("pz_nomm", row, (float) p.vector().z());
               bank.setFloat("vx_nomm", row, (float) p.vertex().x());
@@ -433,6 +434,7 @@ public class DetectorData {
                track.setNDF(bank.getInt("ndf",row));
                track.setchi2(bank.getFloat("chi2",row));
                track.setStatus(bank.getInt("status",row));
+               track.setDetectorID(13);
                
                tracks.add(track);
            }
