@@ -95,6 +95,12 @@
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-jcsg</artifactId>
+      <version>0.3.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
       <artifactId>clas-detector</artifactId>
       <version>3.0-SNAPSHOT</version>
     </dependency>
