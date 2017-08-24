@@ -74,7 +74,7 @@ public class EBReconstructionTest {
         processAllEngines(electronEvent);
         assertEquals(electronEvent.hasBank("REC::Event"), true);
         assertEquals(electronEvent.hasBank("REC::Particle"), true);
-        //assertEquals(electronEvent.hasBank("REC::Tracks"), true);
+        assertEquals(electronEvent.hasBank("REC::Track"), true);
         //assertEquals(electronEvent.hasBank("REC::Cherenkov"), true);
         //assertEquals(electronEvent.hasBank("REC::Scintillator"), true);
 
