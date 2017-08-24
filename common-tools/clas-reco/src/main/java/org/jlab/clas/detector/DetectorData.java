@@ -310,7 +310,7 @@ public class DetectorData {
           int row = 0;
           for(int i = 0 ; i < particles.size(); i++) {
               //System.err.println(particles.size() + "  " + rows + "  " + i + "  " + row);
-              DetectorParticle p = particles.get(row);
+              DetectorParticle p = particles.get(i);
               if(p.getTrackDetector()==13) {
               bank.setShort("index", row, (short) p.getTrackIndex());
               bank.setShort("pindex", row, (short) i);
