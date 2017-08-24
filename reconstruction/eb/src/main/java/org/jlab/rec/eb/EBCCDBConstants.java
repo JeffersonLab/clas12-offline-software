@@ -179,7 +179,7 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.FTOF_MATCHING_2,"ftof_matching","dx",0,0,0);
         loadVector3D(EBCCDBEnum.FTOF1A_hitRes,"ftof_matching","dx","dy","dz",0,1,0);
         loadVector3D(EBCCDBEnum.FTOF1B_hitRes,"ftof_matching","dx","dy","dz",0,2,0);
-        loadVector3D(EBCCDBEnum.FTOF2_hitRes,"ftof_matching","dx","dy","dz",0,0,0);
+        loadVector3D(EBCCDBEnum.FTOF2_hitRes,"ftof_matching","dx","dy","dz",0,3,0);
 
         loadDouble(EBCCDBEnum.HTCC_TimingRes,"htcc_matching","dt",0,0,0);
         loadDouble(EBCCDBEnum.HTCC_NPHE_CUT,"htcc_matching","nphe",0,0,0);
