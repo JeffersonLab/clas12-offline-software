@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import events.TestEvent;
 
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.service.dc.DCHBEngine;
 import org.jlab.service.dc.DCTBEngine;
@@ -58,6 +59,35 @@ public class EBReconstructionTest {
         ev.show();
     }
 
+    /**
+     *
+     * Check that index references are within valid range
+     *
+     * bankNameFrom - bank containing the index
+     * bankNameTo - bank to which the index refers
+     * idxVarName - name of the index variable
+     *
+     */
+    public boolean hasValidRefs(DataEvent ev,
+                        String bankNameFrom,
+                        String bankNameTo,
+                        String idxVarName) {
+        DataBank bFrom=ev.getBank(bankNameFrom);
+        DataBank bTo=ev.getBank(bankNameTo);
+        for (int ii=0; ii<bFrom.rows(); ii++) {
+            int ref=bFrom.getInt(idxVarName,ii);
+            if (ref>=bTo.rows() || ref<0) {
+                bFrom.show();
+                bTo.show();
+                System.err.println(String.format(
+                        "\bnhasValidRefs: failed on (%s0>%s) %d->%d\n",
+                        bankNameFrom,bankNameTo,ii,ref));
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Test
     public void testEBReconstruction() {
 
@@ -69,12 +99,14 @@ public class EBReconstructionTest {
         assertEquals(photonEvent.hasBank("REC::Event"), true);
         assertEquals(photonEvent.hasBank("REC::Particle"), true);
         assertEquals(photonEvent.hasBank("REC::Calorimeter"), true);
+        assertEquals(hasValidRefs(photonEvent,"REC::Calorimeter","REC::Particle","pindex"),true);
 
         DataEvent electronEvent = TestEvent.getDCSector1ElectronEvent();
         processAllEngines(electronEvent);
         assertEquals(electronEvent.hasBank("REC::Event"), true);
         assertEquals(electronEvent.hasBank("REC::Particle"), true);
         assertEquals(electronEvent.hasBank("REC::Track"), true);
+        assertEquals(hasValidRefs(photonEvent,"REC::Track","TimeBasedTrkg::TBTracks","index"),true);
         //assertEquals(electronEvent.hasBank("REC::Cherenkov"), true);
         //assertEquals(electronEvent.hasBank("REC::Scintillator"), true);
 
