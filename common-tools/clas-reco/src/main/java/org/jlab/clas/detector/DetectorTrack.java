@@ -23,6 +23,7 @@ public class DetectorTrack {
     private double  trackchi2   = 0.0;
     private int     ndf         = 0;
     private int     trackStatus = 0;
+    private int     trackDetectorID = -1;
     
     private Vector3D   trackEnd = new Vector3D();
     private Vector3      trackP = new Vector3();
@@ -119,6 +120,7 @@ public class DetectorTrack {
     public void     setStatus(int x) {this.trackStatus = x;}
     public void     setchi2(double x) {this.trackchi2 = x;}
     public void     setAssociation(int x) {this.trackAssociation = x;}
+    public void     setDetectorID(int id) {this.trackDetectorID = id;}
     
     public int      getCharge()   { return trackCharge;}
     public int      getNDF()      {return ndf;}
@@ -131,6 +133,7 @@ public class DetectorTrack {
     public Vector3  getVertex()   { return this.trackVertex;}
     public Vector3D getTrackEnd() { return trackEnd;}
     public int      getAssociation() {return trackAssociation;}
+    public int      getDetectorID() {return trackDetectorID;}
     
     
     public void addCross(double x, double y, double z,

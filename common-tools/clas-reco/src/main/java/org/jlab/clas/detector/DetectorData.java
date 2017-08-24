@@ -310,14 +310,16 @@ public class DetectorData {
           int row = 0;
           for(int i = 0 ; i < particles.size(); i++) {
               //System.err.println(particles.size() + "  " + rows + "  " + i + "  " + row);
-              DetectorParticle p = particles.get(row);
-              if(p.getStatus()==1) {
+              DetectorParticle p = particles.get(i);
+              if(p.getTrackDetector()==13) {
               bank.setShort("index", row, (short) p.getTrackIndex());
               bank.setShort("pindex", row, (short) i);
+              bank.setByte("detector", row, (byte) p.getTrackDetector());
               bank.setByte("q", row, (byte) p.getCharge());
               bank.setFloat("chi2", row, (float) p.getChi2());
               bank.setShort("NDF", row, (short) p.getNDF());
               bank.setFloat("px_nomm", row, (float) p.vector().x());
+              //System.out.println("Px is " + p.vector().x());
               bank.setFloat("py_nomm", row, (float) p.vector().y());
               bank.setFloat("pz_nomm", row, (float) p.vector().z());
               bank.setFloat("vx_nomm", row, (float) p.vertex().x());
@@ -417,7 +419,7 @@ public class DetectorData {
                Vector3D pvec = DetectorData.readVector(bank, row, "p0_x", "p0_y", "p0_z");
                Vector3D vertex = DetectorData.readVector(bank, row, "Vtx0_x", "Vtx0_y", "Vtx0_z");
                
-               DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row+1));
+               DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row));
                track.setVector(pvec.x(), pvec.y(), pvec.z());
                track.setVertex(vertex.x(), vertex.y(), vertex.z());
                track.setPath(bank.getFloat("pathlength", row));
@@ -433,6 +435,7 @@ public class DetectorData {
                track.setNDF(bank.getInt("ndf",row));
                track.setchi2(bank.getFloat("chi2",row));
                track.setStatus(bank.getInt("status",row));
+               track.setDetectorID(13);
                
                tracks.add(track);
            }
