@@ -25,7 +25,7 @@
      <dependency> <!-- from local repo -->
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>0.0</version>
+      <version>0.3.2</version>
       <type>jar</type>
     </dependency>  
 
