@@ -314,6 +314,7 @@ public class DetectorData {
               if(p.getTrackDetector()==13) {
               bank.setShort("index", row, (short) p.getTrackIndex());
               bank.setShort("pindex", row, (short) i);
+              bank.setByte("detector", row, (byte) p.getTrackDetector());
               bank.setByte("q", row, (byte) p.getCharge());
               bank.setFloat("chi2", row, (float) p.getChi2());
               bank.setShort("NDF", row, (short) p.getNDF());
