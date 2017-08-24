@@ -61,7 +61,7 @@ public class EventBuilder {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            particle.setStatus(1);
+            //particle.setStatus(1);
             detectorEvent.addParticle(particle);
         }
     }
