@@ -12,18 +12,31 @@ fi
 
 # last argument is input file stub:
 webFileStub="${@: -1}"
-
-# valid input file stubs:
-#webFileStub=electronproton
-#webFileStub=electronpion
-#webFileStub=electronkaon
+case $webFileStub in
+    electronproton)
+        ;;
+    electronkaon)
+        ;;
+    electronpion)
+        ;;
+    *)
+      echo Invalid input evio file:  $webFileStub
+      exit 1
+esac
 
 # set up environment
 CLARA_HOME=$PWD/clara_installation/ ; export CLARA_HOME
-COAT=$CLARA_HOME/plugins/clas12/
+
+# Do NOT use whatever clas12 libraries come with CLARA for testing:
+#COAT=$CLARA_HOME/plugins/clas12/
+
+# Use the ones in this clas12 build for testing:
+COAT=../../coatjava
+
 classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb/v0/
+    
 
 # compile test codes before anything else:
 javac -cp $classPath src/eb/EBTwoTrackTest.java
@@ -62,18 +75,21 @@ then
     # convert to hipo
     $COAT/bin/evio2hipo -o ${webFileStub}.hipo ${webFileStub}.evio
 
+    # run reconstruction without clara
+    ../../coatjava/bin/notsouseful-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
+
     # run reconstruction with clara
-    echo "set inputDir $PWD/" > cook.clara
-    echo "set outputDir $PWD/" >> cook.clara
-    echo "set threads 7" >> cook.clara
-    echo "set javaMemory 2" >> cook.clara
-    echo "set session s_cook" >> cook.clara
-    echo "set description d_cook" >> cook.clara
-    ls ${webFileStub}.hipo > files.list
-    echo "set fileList $PWD/files.list" >> cook.clara
-    echo "run local" >> cook.clara
-    echo "exit" >> cook.clara
-    $CLARA_HOME/bin/clara-shell cook.clara
+    #echo "set inputDir $PWD/" > cook.clara
+    #echo "set outputDir $PWD/" >> cook.clara
+    #echo "set threads 7" >> cook.clara
+    #echo "set javaMemory 2" >> cook.clara
+    #echo "set session s_cook" >> cook.clara
+    #echo "set description d_cook" >> cook.clara
+    #ls ${webFileStub}.hipo > files.list
+    #echo "set fileList $PWD/files.list" >> cook.clara
+    #echo "run local" >> cook.clara
+    #echo "exit" >> cook.clara
+    #$CLARA_HOME/bin/clara-shell cook.clara
 fi
 
 # run KppTracking junit tests
