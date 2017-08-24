@@ -318,7 +318,7 @@ public class DetectorData {
               bank.setFloat("chi2", row, (float) p.getChi2());
               bank.setShort("NDF", row, (short) p.getNDF());
               bank.setFloat("px_nomm", row, (float) p.vector().x());
-              System.out.println("Px is " + p.vector().x());
+              //System.out.println("Px is " + p.vector().x());
               bank.setFloat("py_nomm", row, (float) p.vector().y());
               bank.setFloat("pz_nomm", row, (float) p.vector().z());
               bank.setFloat("vx_nomm", row, (float) p.vertex().x());
@@ -418,7 +418,7 @@ public class DetectorData {
                Vector3D pvec = DetectorData.readVector(bank, row, "p0_x", "p0_y", "p0_z");
                Vector3D vertex = DetectorData.readVector(bank, row, "Vtx0_x", "Vtx0_y", "Vtx0_z");
                
-               DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row+1));
+               DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row));
                track.setVector(pvec.x(), pvec.y(), pvec.z());
                track.setVertex(vertex.x(), vertex.y(), vertex.z());
                track.setPath(bank.getFloat("pathlength", row));
