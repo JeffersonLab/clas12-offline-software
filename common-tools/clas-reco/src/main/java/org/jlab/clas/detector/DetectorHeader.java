@@ -10,7 +10,7 @@ public class DetectorHeader {
     private int         event = 0;
     private int       trigger = 0;
     private double     rfTime = 0.0;
-    private double  startTime = 0.0;
+    private double  startTime = -1000.0;
 
     public DetectorHeader() {
     }
