@@ -126,16 +126,11 @@ public class CndHitFinder {
 					//					Eup = hit_d.Eatt()/CalibrationConstantsLoader.MIPDIRECT[hit_d.Sector()-1][hit_d.Layer()-1][hit_d.Component()-1];
 					//					Edown = hit_n.Eatt()/CalibrationConstantsLoader.MIPINDIRECT[hit_d.Sector()-1][hit_d.Layer()-1][hit_d.Component()-1];
 
-					//test (first check on energy and time)
-					//					System.out.println(" hit found...... = "+" Tup "+(Tup)+" Tdown "+(Tdown)+" Ehit "+hit_d.Eatt()+" Eup "+Eup+" Edown " + Edown);
-
-					
-					
 					// For this particular combination, check whether this gives a z within the paddle length (+/- z resolution).
 					// "local" position of hit on the paddle (wrt paddle center):
 					Z_av = ((Tup-Tdown) * 10. * CalibrationConstantsLoader.EFFVEL[block-1][lay-1][hit_d.Component()-1]) / 2.;                                                      
 
-					if ( (Z_av < ((CalibrationConstantsLoader.LENGTH[lay-1] / (-2.)) - 10.*Parameters.Zres[lay-1])) || (Z_av > ((CalibrationConstantsLoader.LENGTH[lay-1] / 2.) + 10.*Parameters.Zres[lay-1])) ) continue;                                       
+					//if ( (Z_av < ((CalibrationConstantsLoader.LENGTH[lay-1] / (-2.)) - 10.*Parameters.Zres[lay-1])) || (Z_av > ((CalibrationConstantsLoader.LENGTH[lay-1] / 2.) + 10.*Parameters.Zres[lay-1])) ) continue;                                       
 					
 					// Calculate time of hit in paddle and check that it's in a physical window for the event:
 					T_hit = (Tup + Tdown - (CalibrationConstantsLoader.LENGTH[lay-1] / (10.*CalibrationConstantsLoader.EFFVEL[block-1][lay-1][hit_d.Component()-1]))) / 2.;  // time of hit in the paddle
@@ -157,18 +152,11 @@ public class CndHitFinder {
 					//					System.out.println(E2);
 
 					//second cut : the energy of the hit have to be higher than the threshold
-					// the threshold is currently 2Mev
-					if (E_hit < Parameters.EThresh) continue;
+					// the threshold is currently 0.1Mev
+					//if (E_hit < Parameters.EThresh) continue;
 					
 					// third cut (added by Pierre) : the energy of both component of the energy have to be of the same order of magnitude
-					if (Math.abs(E1-E2) > ((E1+E2)/2.)) continue;
-					
-					// test of the previous cut
-					//					System.out.println((Eup / Math.exp(-1.*(CalibrationConstantsLoader.LENGTH[lay-1]/2. + Z_av) / (10.*CalibrationConstantsLoader.ATNLEN[block-1][lay-1][hit_d.Component()-1]))));
-					//					System.out.println((Edown / Math.exp(-1.*(CalibrationConstantsLoader.LENGTH[lay-1]/2. - Z_av) / (10.*CalibrationConstantsLoader.ATNLEN[block-1][lay-1][hit_d.Component()-1]))));
-					//					System.out.println();
-					
-					
+					//	if (Math.abs(E1-E2) > ((E1+E2)/2.)) continue;
 					
 					// If you get a "good" reconstruction, calculate the rest of the details:                                                                                                                   
 
@@ -188,9 +176,6 @@ public class CndHitFinder {
 					theta_hit = Math.acos(z_hit/path) * 180./Math.PI;
 
 					totrec++;  // count number of "good" reconstructions
-
-					//test (check of the remaining hits after cuts)
-					// System.out.println("  hit found......Zav "+ Z_av +"  T up= "+Tup +"  Tdown = "+Tdown +"  T = "+T_hit+"  Theta = "+theta_hit);
 
 					// Create a new CndHit and fill it with the relevant info:
 
@@ -270,15 +255,6 @@ public class CndHitFinder {
 
 		}  // closes if halfhit array has non-zero entries...
 
-		//test (check the list of hits after the reconstruction process has ended)
-		//		System.out.println("Good hit size "+goodCndHits.size());
-		//for(CndHit hit : goodCndHits){
-		//		//System.out.println(" good hit found......"+" X "+hit.X()+" Y "+hit.Y()+" Z "+hit.Z()+" T "+hit.Time());
-		//		//System.out.println(hit.X()+" "+hit.Y()+" "+hit.Z()+" T "+hit.Time()+" layer "+hit.Layer()+" sector "+hit.Sector()+" component"+ hit.Component()+" index d "+ hit.index_d()+" index_n "+ hit.index_n());
-		//System.out.println("theta "+hit.Theta()+" phi "+hit.Phi());
-		//}
-		//		System.out.println();
-
 		return goodCndHits;
 
 	} // findHits function		
@@ -296,10 +272,19 @@ public class CndHitFinder {
 		double zi=hit.Z();
 		int lay=hit.Layer();
 		// Constants SHOULD NOT be in the code methods BUT in a parameters file or in CCDB!!!
+
+		double Rres= CalibrationConstantsLoader.THICKNESS[0]/2.; // Resolution in radius (half the thickness of the paddles)
+		double Phires= Parameters.BlockSlice/2.; // resolution in Phi (half the angle covered by a paddle)
 		double radius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay - 0.5)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
-		double incx = Math.sqrt(((xi*xi*15.*15.)/(radius*radius))+((yi*yi)*(3.75*3.75*(Math.PI/180.)*(Math.PI/180.)))); //15 is half the paddle thickness
-		double incy = Math.sqrt(((yi*yi*15.*15.)/(radius*radius))+((xi*xi)*(3.75*3.75*(Math.PI/180.)*(Math.PI/180.))));	// 3.75 is the incertainty in phi		
-		double incz = 38.4/Math.sqrt(hit.Edep());	//evaluated with the non-corrected energy
+
+		//		double incx = Math.sqrt(((xi*xi*15.*15.)/(radius*radius))+((yi*yi)*(3.75*3.75*(Math.PI/180.)*(Math.PI/180.)))); //15 is half the paddle thickness
+		//double incy = Math.sqrt(((yi*yi*15.*15.)/(radius*radius))+((xi*xi)*(3.75*3.75*(Math.PI/180.)*(Math.PI/180.))));	// 3.75 is the incertainty in phi		
+		//double incz = 38.4/Math.sqrt(hit.Edep());	//evaluated with the non-corrected energy
+
+		double incx = Math.sqrt(((xi*xi*Rres*Rres)/(radius*radius))+((yi*yi)*(Phires*Phires*(Math.PI/180.)*(Math.PI/180.)))); 
+		double incy = Math.sqrt(((yi*yi*Rres*Rres)/(radius*radius))+((xi*xi)*(Phires*Phires*(Math.PI/180.)*(Math.PI/180.))));
+		double incz = (10.*CalibrationConstantsLoader.EFFVEL[hit.Sector()-1][lay-1][hit.Component()-1]*Parameters.Tres)/Math.sqrt(hit.Edep());
+
 		//uncertainty in z is estimated using uncertainty in T_d multiplied by veff
 		hit.set_uX(incx);
 		hit.set_uY(incy);
@@ -319,53 +304,19 @@ public class CndHitFinder {
 			double phij = Math.signum(yj)*Math.acos(xj/rj)*(180./Math.PI);
 			double thetaj = Math.acos(zj/rj)*(180./Math.PI);
 
-			//test (check the extrapolated hit from cvt)
-			//System.out.println(radius);
-			//System.out.println(" cvt hit found......"+" Z "+zj+" theta "+thetaj+" phi "+phij);
-			//System.out.println(" cvt hit found......"+" X "+xj+" Y "+yj+" Z "+zj);
-			//System.out.println(" distance hits......"+ Math.sqrt((xi-xj)*(xi-xj)+(yi-yj)*(yi-yj)+(zi-zj)*(zi-zj)));
+			//	if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && Math.abs(zi-zj)<(3.*incz)) { // CUT are set to x,y,z incertainty
+			double zjAv = zj - ((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]/2.));
+			if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && zjAv>(CalibrationConstantsLoader.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && zjAv<(CalibrationConstantsLoader.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) { // CUT are set to x,y incertainty and zj in the paddle length
 
-			if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && Math.abs(zi-zj)<(3.*incz)) { // CUT are set to x,y,z incertainty
-				//matches the two points obtained above : determined if the particle is charged.
-				
-				//test (check the order of magnitude of the incertainties)
-				//System.out.println("incx "+incx+" incy "+incy+" incz "+incz);
-
-				//double entryradius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay-1)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
-				//double escaperadius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;	
-				//Point3D entryPoint=helices.get(i).get_Helix().getPointAtRadius(entryradius);
-				//Point3D escapePoint=helices.get(i).get_Helix().getPointAtRadius(escaperadius);
-				//System.out.println("inradius "+(float)entryradius+" track at radius "+entryPoint.toString());
-				//System.out.println("inradius "+(float)escaperadius+" track at radius "+escapePoint.toString()+"\n\n");
-				//test (check if the matched hits are consistent)
-				//System.out.println(" good hit found......"+" X "+hit.X()+" Y "+hit.Y()+" Z "+hit.Z());
-				//System.out.println(" cvt hit found......"+" X "+xj+" Y "+yj+" Z "+zj); 
-				// System.out.println();
-				
-				//The length of the path is set to be the length of the straight line 
-				//between the point of entry of the particle and the point where it escape the layer.
-				//in cm
-				//length = entryPoint.distance(escapePoint);
 				length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(helices.get(i).get_TrkInters().get(lay-1).get(2));
 				hit.set_AssociatedTrkId(helices.get(i).get_Id());
 				hit.set_pathlength(helices.get(i).get_TrkLengths().get(lay-1));
 				hit.set_tX(xj);
 				hit.set_tY(yj);
 				hit.set_tZ(zj);
-				// test (check the length)
-				//System.out.println("length "+length);
 			}
 		}
 
-		//adjust the deposited energy according to the travelled length in the paddle
-		double energyNCorr = hit.Edep();
-		hit.set_Edep(energyNCorr*(Math.max(length,CalibrationConstantsLoader.THICKNESS[0])/CalibrationConstantsLoader.THICKNESS[0]));
-		
-		//test (final check of this method)
-		//System.out.println(length);
-		//System.out.println("e hit ncorr "+energyNCorr);
-		//System.out.println("e hit "+hit.Edep());
-		//System.out.println();
 		return length; 
 
 	} //findLength function for charged particles
