@@ -93,7 +93,7 @@ public class EBTwoTrackTest {
 
         // some global efficiency tests:
         assertEquals(eEff>0.9,true);
-        if      (hadronPDG==2212) assertEquals(pEff>0.80,true);
+        if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
         else if (hadronPDG==321)  assertEquals(kEff>0.42,true);
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
     }
