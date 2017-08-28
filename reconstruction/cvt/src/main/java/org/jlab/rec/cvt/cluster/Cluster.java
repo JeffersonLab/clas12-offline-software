@@ -175,7 +175,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
                 }
-                if (this.get_Detector().equalsIgnoreCase("BMT")) {
+                if (this.get_Detector().equalsIgnoreCase("BMT")) { 
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_DetectorType().equalsIgnoreCase("C")) { // C-detectors
                         strpNb = thehit.get_Strip().get_Strip();
@@ -390,7 +390,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * @return cluster info. about location and number of hits contained in it
      */
     public void printInfo() {
-        String s = "cluster: Detector " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size();
+        String s = "cluster: Detector " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() +" centroid "+this.get_Centroid();
         System.out.println(s);
     }
 

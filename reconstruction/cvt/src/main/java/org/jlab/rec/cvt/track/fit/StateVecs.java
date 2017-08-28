@@ -467,7 +467,7 @@ public class StateVecs {
             this.By = bf.y();
             this.Bz = bf.z();
 
-            this.alpha = 1. / (StateVecs.speedLight * bf.toVector3D().z());
+            this.alpha = 1. / (StateVecs.speedLight * bf.toVector3D().mag());
             //this.alpha = 1. / (5.);
         }
     }

@@ -74,7 +74,7 @@ public class Constants {
         }
 
         if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-            setThetaL(Math.toRadians(25. * org.jlab.rec.cvt.Constants.getSolenoidscale())); // for 5-T field
+            setThetaL(Math.toRadians(20. * org.jlab.rec.cvt.Constants.getSolenoidscale())); // for 5-T field
         }
         areConstantsLoaded = true;
 

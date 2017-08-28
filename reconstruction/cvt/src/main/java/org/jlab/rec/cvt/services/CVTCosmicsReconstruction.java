@@ -166,8 +166,9 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters = clusFinder.findClusters(hits);
-
+        //clusters = clusFinder.findClusters(hits);
+        clusters.addAll(clusFinder.findClusters(svt_hits));
+        clusters.addAll(clusFinder.findClusters(bmt_hits)); 
         // test
         /*	for(Hit h0 : hits) {
 			FittedHit h = new FittedHit(h0.get_Detector(), h0.get_DetectorType(), h0.get_Sector(),h0.get_Layer(),h0.get_Strip());
