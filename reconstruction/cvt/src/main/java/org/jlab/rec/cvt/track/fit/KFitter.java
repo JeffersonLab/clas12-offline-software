@@ -226,7 +226,7 @@ public class KFitter {
             Matrix Ci = null;
             //this.printMatrix(new Matrix(HTGH));System.err.println("-------------------------------\n");
             if (this.isNonsingular(sv.trackCov.get(k).covMat) == false) {
-                System.err.println("Covariance Matrix is non-invertible - quit filter!");
+                //System.err.println("Covariance Matrix is non-invertible - quit filter!");
                 //this.printMatrix(sv.trackCov.get(k).covMat);
                 return;
             }
@@ -243,7 +243,7 @@ public class KFitter {
                 return;
             }
             if (Ca != null && this.isNonsingular(Ca) == false) {
-                System.err.println("Covariance Matrix is non-invertible - quit filter!");
+                //System.err.println("Covariance Matrix is non-invertible - quit filter!");
                 return;
             }
             if (Ca != null && this.isNonsingular(Ca) == true) {
