@@ -13,6 +13,7 @@ import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Plane3D;
 
 /**
  *
@@ -377,5 +378,20 @@ public final class PCALGeant4Factory extends Geant4Factory {
         }
 
         return (G4Trap) lVol.scipaddles.get(ipaddle);
+    }
+
+    public Plane3D getFrontalFace(int sector) {
+        if (sector < 1 || sector >= sectorVolumes.size()) {
+            System.err.println(String.format("Sector %d  doesn't exist", sector));
+            throw new IndexOutOfBoundsException();
+        }
+        Layer lVol = sectorVolumes.get(sector - 1).layerVolumes.get(0);
+        Geant4Basic layerVol = lVol.layerVol;
+        G4Trap padl = (G4Trap) lVol.scipaddles.get(0);
+        Vector3d point = new Vector3d(padl.getVertex(0));
+        Vector3d normal = new Vector3d(layerVol.getLineZ().diff().normalized());
+        System.out.println("color(\"red\") translate(" + point + ") sphere(2, $fn=100);");
+        System.out.println("line3d(" + point + ", "+point.plus(normal.times(20))+");");
+        return new Plane3D(point.x, point.y, point.z, normal.x, normal.y, normal.z);
     }
 }
