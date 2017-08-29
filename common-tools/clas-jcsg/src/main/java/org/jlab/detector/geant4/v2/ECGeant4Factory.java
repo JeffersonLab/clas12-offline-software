@@ -7,10 +7,12 @@ package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.units.SystemOfUnits.Length;
+import org.jlab.detector.volume.G4Box;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Plane3D;
 
 /**
  *
@@ -331,7 +333,7 @@ public final class ECGeant4Factory extends Geant4Factory {
     public G4Trap getPaddle(int isector, int ilayer, int ipaddle) {
         int iview = (ilayer - 1) % 3;
         int[] npaddles = {nustrips, nvstrips, nwstrips};
-        if (isector < 1 || isector > nsectors || ilayer < 1 || ilayer > nlayers*nviews || ipaddle < 1 || ipaddle > npaddles[iview]) {
+        if (isector < 1 || isector > nsectors || ilayer < 1 || ilayer > nlayers * nviews || ipaddle < 1 || ipaddle > npaddles[iview]) {
             System.err.println(String.format("Paddle #%d in sector %d, layer %d doesn't exist", ipaddle, isector, ilayer));
             throw new IndexOutOfBoundsException();
         }
@@ -341,4 +343,18 @@ public final class ECGeant4Factory extends Geant4Factory {
                 .getChildren().get(ipaddle - 1);
     }
 
+    public Plane3D getFrontalFace(int sector) {
+        if (sector < 1 || sector > nsectors) {
+            System.err.println(String.format("Sector %d doesn't exist", sector));
+            throw new IndexOutOfBoundsException();
+        }
+
+        Geant4Basic layerVol = motherVolume.getChildren().get(sector - 1).getChildren().get(3);
+        G4Trap padl = (G4Trap) layerVol.getChildren().get(1);
+        Vector3d point = new Vector3d(padl.getVertex(0));
+        Vector3d normal = new Vector3d(layerVol.getLineZ().diff().normalized());
+        //System.out.println("color(\"red\") translate(" + point + ") sphere(2, $fn=100);");
+        //System.out.println("line3d(" + point + ", "+point.plus(normal.times(20))+");");
+        return new Plane3D(point.x, point.y, point.z, normal.x, normal.y, normal.z);
+    }
 }
