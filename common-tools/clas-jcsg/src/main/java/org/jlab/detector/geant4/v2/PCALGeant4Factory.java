@@ -390,8 +390,8 @@ public final class PCALGeant4Factory extends Geant4Factory {
         G4Trap padl = (G4Trap) lVol.scipaddles.get(0);
         Vector3d point = new Vector3d(padl.getVertex(0));
         Vector3d normal = new Vector3d(layerVol.getLineZ().diff().normalized());
-        System.out.println("color(\"red\") translate(" + point + ") sphere(2, $fn=100);");
-        System.out.println("line3d(" + point + ", "+point.plus(normal.times(20))+");");
+//        System.out.println("color(\"red\") translate(" + point + ") sphere(2, $fn=100);");
+//        System.out.println("line3d(" + point + ", "+point.plus(normal.times(20))+");");
         return new Plane3D(point.x, point.y, point.z, normal.x, normal.y, normal.z);
     }
 }
