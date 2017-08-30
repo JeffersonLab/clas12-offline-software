@@ -5,10 +5,8 @@
  */
 package org.jlab.detector.volume;
 
-import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.units.SystemOfUnits.Length;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Box;
 import org.jlab.geometry.prim.Line3d;
 
