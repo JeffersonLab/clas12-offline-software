@@ -381,7 +381,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
     }
 
     public Plane3D getFrontalFace(int sector) {
-        if (sector < 1 || sector >= sectorVolumes.size()) {
+        if (sector < 1 || sector > sectorVolumes.size()) {
             System.err.println(String.format("Sector %d  doesn't exist", sector));
             throw new IndexOutOfBoundsException();
         }
