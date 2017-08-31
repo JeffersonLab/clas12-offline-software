@@ -98,16 +98,17 @@ public class EventBuilder {
             DetectorParticle  p = this.detectorEvent.getParticle(n);
 
             double quality = 0.0;
+
             /**
              * Matching tracks to FTOF layer 1A detector. Added to the particle and association is
              * set with a particle needed.
              */
-            
             int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
+
             /**
              * Matching tracks to FTOF layer 1B detector. Added to the particle and association is
              */
@@ -125,6 +126,7 @@ public class EventBuilder {
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
+
             /**
              * Matching tracks to CTOF detector. Added to the particle and association is
              */
@@ -133,20 +135,20 @@ public class EventBuilder {
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
+
             /**
              * Matching tracks to PCAL (first layer of ECAL) and adding to the particle if reasonable match
              * is found, and proper association is set.
              */
-
             index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 1, EBConstants.PCAL_MATCHING);
-                    
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
                 //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.PCAL_hitRes);
                 //detectorResponses.get(index).setHitQuality(quality);
             }
-            
+           
+            // Matching tracks to EC Inner:
             index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -155,6 +157,7 @@ public class EventBuilder {
                 //detectorResponses.get(index).setHitQuality(quality);
             }
             
+            // Matching tracks to EC Outer:
             index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -162,15 +165,16 @@ public class EventBuilder {
                 //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.ECOUT_hitRes);
                 //detectorResponses.get(index).setHitQuality(quality);
             }
-            
+           
+            // Matching tracks to HTCC:
             index = p.getCherenkovSignal(this.cherenkovResponses,DetectorType.HTCC);
-            //System.out.println("HTCC Matching Index " + index);
             //double = p.getCherenkovSignalQuality()
             if(index>=0){
                 p.addCherenkovResponse(cherenkovResponses.get(index));
                 cherenkovResponses.get(index).setAssociation(n);
             } 
 
+            // Matching tracks to LTCC:
             index = p.getCherenkovSignal(this.cherenkovResponses,DetectorType.LTCC);
             //double = p.getCherenkovSignalQuality()
             if(index>=0){
