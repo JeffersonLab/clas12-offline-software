@@ -29,6 +29,7 @@ public class HitReader {
     private List<Hit> _DCHits;
 
     private List<FittedHit> _HBHits; //hit-based tracking hit information
+    private List<FittedHit> _TBHits; //time-based tracking hit information
 
     /**
      *
@@ -62,6 +63,23 @@ public class HitReader {
      */
     public void set_HBHits(List<FittedHit> _HBHits) {
         this._HBHits = _HBHits;
+    }
+    
+     /**
+     *
+     * @return list of DCTB hits
+     */
+    public List<FittedHit> get_TBHits() {
+        return _TBHits;
+    }
+
+    /**
+     * sets the list of HB DC hits
+     *
+     * @param _TBHits list of DC hits
+     */
+    public void set_TBHits(List<FittedHit> _TBHits) {
+        this._TBHits = _TBHits;
     }
 
     /**
@@ -214,12 +232,81 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i]));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            hit.set_Beta(this.readBeta(event, trkID[i])); 
             hits.add(hit);
             
         }
 
         this.set_HBHits(hits);
+    }
+    public void read_TBHits(DataEvent event) {
+
+        if (event.hasBank("TimeBasedTrkg::TBHits") == false) {
+            //System.err.println("there is no HB dc bank ");
+            _TBHits = new ArrayList<FittedHit>();
+            return;
+        }
+
+        DataBank bank = event.getBank("TimeBasedTrkg::TBHits");
+        int rows = bank.rows();
+
+        int[] id = new int[rows];
+        int[] sector = new int[rows];
+        int[] slayer = new int[rows];
+        int[] layer = new int[rows];
+        int[] wire = new int[rows];
+        double[] time = new double[rows];
+        int[] LR = new int[rows];
+        double[] B = new double[rows];
+        int[] clusterID = new int[rows];
+        int[] trkID = new int[rows];
+
+        for (int i = 0; i < rows; i++) {
+            sector[i] = bank.getByte("sector", i);
+            slayer[i] = bank.getByte("superlayer", i);
+            layer[i] = bank.getByte("layer", i);
+            wire[i] = bank.getShort("wire", i);
+            time[i] = bank.getFloat("time", i);
+            id[i] = bank.getShort("id", i);
+            LR[i] = bank.getByte("LR", i);
+            B[i] = bank.getFloat("B", i);
+            clusterID[i] = bank.getShort("clusterID", i);
+            trkID[i] = bank.getByte("trkID", i);
+        }
+
+        int size = layer.length;
+
+        List<FittedHit> hits = new ArrayList<FittedHit>();
+        for (int i = 0; i < size; i++) {
+            //use only hits that have been fit to a track
+            if (clusterID[i] == -1) {
+                continue;
+            }
+
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i], 0, B[i], id[i]);
+            hit.set_B(B[i]);
+// System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
+            hit.set_LeftRightAmb(LR[i]);
+            hit.set_TrkgStatus(0);
+            hit.set_TimeToDistance(1.0, B[i]);
+            hit.set_QualityFac(0);
+            //hit.set_Doca(hit.get_TimeToDistance());
+            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
+                //this.fix_TimeToDistance(this.get_CellSize());
+                hit.set_OutOfTimeFlag(true);
+                hit.set_QualityFac(2);
+            } 
+            if(hit.get_Time()<0)
+                hit.set_QualityFac(1);
+            
+            hit.set_DocaErr(hit.get_PosErr(B[i]));            
+            hit.set_AssociatedClusterID(clusterID[i]);
+            hit.set_AssociatedTBTrackID(trkID[i]); 
+            hit.set_Beta(this.readBeta(event, trkID[i])); 
+            hits.add(hit);
+            
+        }
+
+        this.set_TBHits(hits);
     }
 
    
