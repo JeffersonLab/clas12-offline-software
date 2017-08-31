@@ -16,7 +16,7 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
-import org.jlab.rec.dc.trajectory.Vertex;
+//import org.jlab.rec.dc.trajectory.Vertex;
 
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
@@ -320,7 +320,7 @@ public class TrackCandListFinder {
                 double x_n = Math.cos(theta_n) ; 
                 double y_n = Math.sin(theta_n) ; 
 //System.out.println("sector "+sector+" xn "+x_n+" yn "+y_n);
-                double[] Vt = dcSwim.SwimToPlaneBoundary(0, new Vector3D(x_n, y_n, 0));
+                double[] Vt = dcSwim.SwimToPlaneBoundary(0, new Vector3D(x_n, y_n, 0), -1);
               //  System.out.println("Swim to fixed plane "+newVtx[0]+", "+newVtx[1]+", "+newVtx[2]+"; "+newVtx[3]+", "+newVtx[4]+", "+newVtx[5]);
                 
               /*  Vt[0]=newVtx[0];
