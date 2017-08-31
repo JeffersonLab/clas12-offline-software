@@ -148,14 +148,6 @@ public class EBCCDBConstants {
         String[] sfs={"sfs1","sfs2","sfs3","sfs4"};
         loadArray(EBCCDBEnum.ELEC_SF,"electron_sf",sf,0,0,0);
 
-        /*
-        for (EBCCDBEnum key : dbArrays.keySet()) {
-            for (Double dd : dbArrays.get(key)) {
-                System.err.println(key+" "+dd);
-            }
-        }
-        */
-
         loadArray(EBCCDBEnum.PHOT_SF,"photon_sf",  sf,0,0,0);
         loadArray(EBCCDBEnum.ELEC_SFS,"electron_sf",sfs,0,0,0);
         loadArray(EBCCDBEnum.PHOT_SFS,"photon_sf",  sfs,0,0,0);
@@ -179,7 +171,7 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.FTOF_MATCHING_2,"ftof_matching","dx",0,0,0);
         loadVector3D(EBCCDBEnum.FTOF1A_hitRes,"ftof_matching","dx","dy","dz",0,1,0);
         loadVector3D(EBCCDBEnum.FTOF1B_hitRes,"ftof_matching","dx","dy","dz",0,2,0);
-        loadVector3D(EBCCDBEnum.FTOF2_hitRes,"ftof_matching","dx","dy","dz",0,3,0);
+        loadVector3D(EBCCDBEnum.FTOF2_hitRes,"ftof_matching","dx","dy","dz",0,0,0);
 
         loadDouble(EBCCDBEnum.HTCC_TimingRes,"htcc_matching","dt",0,0,0);
         loadDouble(EBCCDBEnum.HTCC_NPHE_CUT,"htcc_matching","nphe",0,0,0);
@@ -199,23 +191,24 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.CND_DPHI,"cnd_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CND_DZ,"cnd_matching","dz",0,0,0);
 
-        //oadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
+        loadDouble(EBCCDBEnum.NEUTRON_maxBeta,"neutron_beta","neutron_beta",0,0,0);
+        
+        // FIXME:  debug why this one doesn't load
+        //loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
+    
+        //loadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_LOWER_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_UPPER_PION_THRESHOLD,
-        
-        loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
-    
+     
+        // FIXME:  pending RF CCDB tables:
         //loadDouble(EBCCDBEnum.RF_BUCKET_LENGTH,
         //loadDouble(EBCCDBEnum.RF_OFFSET,
         //loadDouble(EBCCDBEnum.RF_TDC2TIME,
-    
         //loadDouble(EBCCDBEnum.RF_CYCLES,
         //loadDouble(EBCCDBEnum.RF_ID,
         //loadDouble(EBCCDBEnum.RF_LARGE_INTEGER,
-        //
+        
         //loadDouble(EBCCDBEnum.TRIGGER_ID,
-
-        loadDouble(EBCCDBEnum.NEUTRON_maxBeta,"neutron_beta","neutron_beta",0,0,0);
 
         LOADED = true;
         setDB(DBP);
