@@ -110,7 +110,9 @@ public class EBTwoTrackTest {
             DataEvent event = reader.getNextEvent();
 
             // get banks:
-            DataBank trkBank=null,tofBank=null,recBank=null,mcBank=null;
+            DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
+            DataBank recBank=null,mcBank=null,cheBank=null;
+
             if (event.hasBank("FTOF::clusters"))
                 tofBank=event.getBank("FTOF::clusters");
             if (event.hasBank("TimeBasedTrkg::TBTracks"))
@@ -119,12 +121,37 @@ public class EBTwoTrackTest {
                 recBank = event.getBank("REC::Particle");
             if(event.hasBank("MC::Particle")) 
                 mcBank = event.getBank("MC::Particle");
+            if(event.hasBank("REC::Cherenkov")) 
+                cheBank = event.getBank("REC::Cherenkov");
+            if (event.hasBank("LTCC::clusters"))
+                ltccBank = event.getBank("LTCC::clusters");
+            if (event.hasBank("HTCC::rec"))
+                htccBank = event.getBank("HTCC::rec");
 
             //if (mcBank!=null) mcBank.show();
 
             // no tracking bank, discard event:
             if (trkBank==null) continue;
-
+/*
+            if (cheBank!=null) {
+                for (int ii=0; ii<cheBank.rows(); ii++) {
+                    if (cheBank.getInt("detector",ii)!=6) {
+                        cheBank.show();
+                        break;
+                    }
+                }
+            }
+*/
+/*
+            if (ltccBank!=null) {
+                System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                event.getBank("LTCC::clusters").show();
+                if (htccBank!=null) htccBank.show();
+                if (cheBank!=null) cheBank.show();
+                if (recBank!=null) recBank.show();
+                System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+            }
+*/
             // count number of TBTracks:
             int nPosTracks=0,nNegTracks=0;
             for (int ii=0; ii<trkBank.rows(); ii++) {
