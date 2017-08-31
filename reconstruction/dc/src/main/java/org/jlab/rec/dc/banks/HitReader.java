@@ -201,20 +201,59 @@ public class HitReader {
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.set_TimeToDistance(1.0, B[i]);
+            hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
-            }
+                hit.set_QualityFac(2);
+            } 
+            if(hit.get_Time()<0)
+                hit.set_QualityFac(1);
+            
             hit.set_DocaErr(hit.get_PosErr(B[i]));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
+            hit.set_Beta(this.readBeta(event, trkID[i])); 
             hits.add(hit);
-
+            
         }
 
         this.set_HBHits(hits);
     }
+
+   
+    private double[] betaArray = new double[3];
+    public double readBeta(DataEvent event, int trkId) {
+        double _beta =1.0;
+        betaArray[0]=-1;
+        betaArray[1]=-1;
+        betaArray[2]=-1;
+        if (event.hasBank("RUN::config") == false) 
+            return 1.0;
+        DataBank bank = event.getBank("RUN::config");
+        double startTime = bank.getFloat("startTime", 0);
+        
+        if (event.hasBank("FTOF::hits") == false) 
+            return 1.0;
+        
+        DataBank bankftof = event.getBank("FTOF::hits");
+        int rows = bank.rows();
+        for (int i = 0; i < rows; i++) {
+            if(bankftof.getShort("trackid", i)==trkId) {
+                betaArray[bankftof.getByte("layer", i)-1]= bankftof.getFloat("pathLength", i)/(bankftof.getFloat("time", i)-startTime)/30.0 ;
+            }
+        }
+        if(betaArray[0]==-1 && betaArray[1]==-1 && betaArray[2]!=-1)
+            _beta = betaArray[2];
+        if(betaArray[0]!=-1 && betaArray[1]==-1)
+            _beta = betaArray[0];
+        if(betaArray[1]!=-1)
+            _beta = betaArray[1];
+        
+        return _beta;
+    }
+    
 
     private double[] get_T0(int sector, int superlayer, int layer, int wire, boolean applyCorr) {
         double[] T0Corr = new double[2];
