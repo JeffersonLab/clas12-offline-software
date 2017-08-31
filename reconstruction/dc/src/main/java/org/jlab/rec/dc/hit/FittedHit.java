@@ -4,7 +4,6 @@ import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.geom.prim.Point3D;
 /**
  * A hit that was used in a fitted cluster. It extends the Hit class and
@@ -47,7 +46,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _ClusFitDoca = -1;
     private double _TrkFitDoca = -1;
     private double _TimeToDistance = 0;
-
+    private double _Beta = -1;
     /**
      *
      * @return the local hit x-position in the local superlayer coordinate
@@ -262,7 +261,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             if (useTimeToDistanceGrid == true) {
                 double alpha = Math.acos(cosTrkAngle);
                 double ralpha = this.reducedAngle(alpha);
-                double beta = 1;
+                double beta = this.get_Beta(); 
                 double x = this.get_ClusFitDoca();
                 TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
                 double deltatime_beta = 0;
@@ -538,5 +537,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     public void setCrossDirIntersWire(Point3D CrossDirIntersWire) {
         this.CrossDirIntersWire = CrossDirIntersWire;
+    }
+    
+    public double get_Beta() {
+        return _Beta;
+    }
+    
+    public void set_Beta(double beta) {
+        _Beta = beta;
     }
 }
