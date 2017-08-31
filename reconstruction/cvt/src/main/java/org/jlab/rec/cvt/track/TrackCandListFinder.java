@@ -807,7 +807,7 @@ public class TrackCandListFinder {
 
             for (Cross Ccross : MatchedMMCrossCDet) {
                 for (Cross Zcross : MatchedMMCrossZDet) {
-                    if ((Ccross.get_Cluster2().get_Layer() - Zcross.get_Cluster1().get_Layer()) == 1 && (Ccross.get_Cluster2().get_Sector() == Zcross.get_Cluster1().get_Sector())) {
+                    if ((Ccross.get_Cluster1().get_Layer() - Zcross.get_Cluster1().get_Layer()) == 1 && (Ccross.get_Cluster1().get_Sector() == Zcross.get_Cluster1().get_Sector())) {
                         Ccross.set_MatchedZCross(Zcross);
                         Zcross.set_MatchedCCross(Ccross);
                     }
