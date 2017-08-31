@@ -9,6 +9,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  *
@@ -50,7 +51,7 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::rec",DetectorType.LTCC);
+        List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
         
         List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
         
@@ -70,24 +71,26 @@ public class EBEngine extends ReconstructionEngine {
         eb.processHitMatching();
         eb.addTaggerTracks(trackFT);
         eb.processNeutralTracks();
-        //System.out.println("# of tracks " + tracks.size());
+
         eb.assignTrigger();
  
+        // Process RF:
         EBRadioFrequency rf = new EBRadioFrequency();
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
         
+        // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
         analyzer.processEvent(eb.getEvent());
         
-        //System.out.println(eb.getEvent().toString());
-        
-
-
+        // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
+            
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             de.appendBanks(bankP);
+            
             DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
             de.appendBanks(bankEve);
+
             List<DetectorResponse>   calorimeters = eb.getEvent().getCalorimeterResponseList();
             if(calorimeterBank!=null && calorimeters.size()>0) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
@@ -164,13 +167,16 @@ public class EBEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
-       
-        /*
-         * preparing for reading from ccdb:
+      
+        // load EB constants from CCDB:
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
+        // FIXME: check run number in processDataEvent, reload from CCDB if changed.
+        // For now we just use hard-coded run number:
         EBCCDBConstants.load(10,this.getConstantsManager());
-        */
+
+        // Example of retrieveing values from EBCCDBConstants: 
+        //Double[] t=EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
 
         System.out.println("[EB::] --> event builder is ready....");
         return true;
