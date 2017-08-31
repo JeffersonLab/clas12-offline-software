@@ -21,7 +21,7 @@ public class CherenkovResponse {
     private double  hitTime       = 0.0;
     private double  hitTheta      = 0.0;
     private double  hitPhi        = 0.0;
-    private int     hitNphe       = 0;
+    private double  hitNphe       = 0;
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
     private int     hitIndex      = -1;
@@ -39,13 +39,13 @@ public class CherenkovResponse {
     }
 
     public CherenkovResponse  setTime(double time) { hitTime = time; return this;}
-    public CherenkovResponse  setEnergy(int energy) { hitNphe = energy; return this;}
+    public CherenkovResponse  setEnergy(double energy) { hitNphe = energy; return this;}
     public void setAssociation(int assoc) {this.association = assoc;}
     public void setHitIndex(int index){this.hitIndex = index;}
 
     public double getTime(){ return hitTime;}
     public int getHitIndex(){return hitIndex;}
-    public int getEnergy(){ return hitNphe;}
+    public double getEnergy(){ return hitNphe;}
     public double getTheta() {return this.hitTheta;}
     public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
@@ -73,18 +73,10 @@ public class CherenkovResponse {
         Point3D intersection = this.getIntersection(particletrack);
         Vector3D vecRec = intersection.toVector3D();
         Vector3D vecHit = this.hitPosition.toVector3D();
-        //System.out.println(particletrack);
-        //System.out.println(this.hitPosition);
-        //System.out.println("Calculated Theta Difference (Degrees)" + Math.abs(vecHit.theta()-vecRec.theta())*57.2958);
-        //System.out.println("Expected Theta Difference (Degrees)" + this.hitDeltaTheta*57.2958);
-        //System.out.println(" ");
-        //System.out.println("Calculated Phi Difference (Degrees)" + Math.abs(vecHit.phi()-vecRec.phi())*57.2958);
-        //System.out.println("Expected Phi Difference (Degrees)" + this.hitDeltaPhi*57.2958);
-        //System.out.println(" ");
-
-        //System.out.println(Math.abs(vecHit.theta()-vecRec.theta())*57.2958 + "  " + 
-        //Math.abs(vecHit.phi()-vecRec.phi())*57.2958);
-        
+        // FIXME:
+        // 1. remove hardcoded constant (10 degrees)
+        // 2. either use both dphi and dtheta from detector bank (only
+        //    exists for HTCC), or get both from CCDB
         return (Math.abs(vecHit.theta()-vecRec.theta())<10.0/57.2958
         && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
     }
@@ -109,21 +101,50 @@ public class CherenkovResponse {
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
-                int nphe  = bank.getInt("nphe", row);
-                double theta   = bank.getFloat("theta", row);
-                double dtheta = bank.getFloat("dtheta",row);
-                double phi = bank.getFloat("phi",row);
-                double dphi = bank.getFloat("dphi",row);
+
                 double x = bank.getFloat("x",row);
                 double y = bank.getFloat("y",row);
                 double z = bank.getFloat("z",row);
                 double time = bank.getFloat("time",row);
+
+                // FIXME: unify LTCC/HTCC detector banks
+                // Here we have to treat them differently:
+                // 1.  nphe really shouldn't be an integer
+                // 2.  either add dtheta/dphi to LTCC, or ignore HTCC's and use CCDB for both
+                // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
+                //     The current convention in EB is to use only x/y/z, while theta/phi is
+                //     just propogated.
+
+                double nphe,theta=0,phi=0,dtheta=0,dphi=0;
+
+                if (type==DetectorType.HTCC) {
+                    nphe = (double)bank.getInt("nphe", row);
+                    dtheta = bank.getFloat("dtheta",row);
+                    dphi = bank.getFloat("dphi",row);
+                    theta = bank.getFloat("theta", row);
+                    phi = bank.getFloat("phi",row);
+                }
+
+                else if (type==DetectorType.LTCC) {
+                    nphe = bank.getFloat("nphe", row);
+                    // Hardcode some dtheta/dphi values for now (for matching):
+                    dtheta = 10*3.14159/180;
+                    dphi   = 10*3.14159/180;
+                    // Fill theta/phi:
+                    // Not yet.
+                }
+
+                else {
+                    throw new RuntimeException(
+                            "CherenkovResponse::readHipoEvent:  invalid DetectorType: "+type);
+                }
+
                 CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
                 che.setTime(time);
-                che.setCherenkovType(DetectorType.HTCC);
+                che.setCherenkovType(type);
 
                 responseList.add(che);
             }

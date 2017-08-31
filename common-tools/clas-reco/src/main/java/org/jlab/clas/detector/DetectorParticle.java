@@ -694,8 +694,8 @@ public class DetectorParticle implements Comparable {
         return beta;
     }   
 
-    public int getNphe(DetectorType type){
-        int nphe = 0;
+    public double getNphe(DetectorType type){
+        double nphe = 0;
         for(CherenkovResponse c : this.cherenkovStore){
             if(c.getCherenkovType()==type){
                 nphe = c.getEnergy();
@@ -716,13 +716,25 @@ public class DetectorParticle implements Comparable {
 
     public int getCherenkovSignal(List<CherenkovResponse> cherenkovs, DetectorType type){
 
+        // choose cross based on detector type:
+        Line3D cross;
+        if (type==DetectorType.HTCC) 
+            cross=this.detectorTrack.getFirstCross();
+        else if (type==DetectorType.LTCC)
+            cross=this.detectorTrack.getLastCross();
+        else throw new RuntimeException(
+                "DetectorParticle:getCheckr5noSignal:  invalid type:  "+type);
+
+        // find the best match:
         int bestIndex = -1;
         if(cherenkovs.size()>0){
             for(int loop = 0; loop < cherenkovs.size(); loop++) {
                 if(cherenkovs.get(loop).getCherenkovType()==type){
-                    boolean matchtruth = cherenkovs.get(loop).match(this.detectorTrack.getFirstCross());
+                    boolean matchtruth = cherenkovs.get(loop).match(cross);
                     if(matchtruth==true){
                         bestIndex = loop;
+                        // FIXME keep the first match!
+                        break;
                     }
                 }
             }
