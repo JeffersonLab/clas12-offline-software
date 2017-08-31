@@ -36,6 +36,11 @@ public enum DetectorType {
     SC        (114, "SC"),
     CC        (115, "CC"),
     SVT       (220, "SVT");
+
+    // FIXME add layer conventions here, e.g.:
+    // (or maybe they are defined somewhere else?)
+    // FTOF2/1A/1B = 0/1/2
+    // PCAL/Inner/Outer = 0/4/7
     
     private final int detectorId;
     private final String detectorName;
