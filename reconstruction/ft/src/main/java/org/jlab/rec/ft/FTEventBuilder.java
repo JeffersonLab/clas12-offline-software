@@ -122,7 +122,7 @@ public class FTEventBuilder{
                 track.setField(this.solenoidField);
                 track.setEnergy(responses.get(i).getEnergy());
                 track.setPosition(responses.get(i).getPosition());
-                track.setTime(responses.get(i).getTime()-responses.get(i).getPosition().mag()/297.);
+                track.setTime(responses.get(i).getTime()-responses.get(i).getPosition().mag()/299.7);
                 track.setCalorimeterIndex(i);
                 track.setHodoscopeIndex(-1);
                 track.setTrackerIndex(-1);    

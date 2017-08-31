@@ -121,6 +121,7 @@ public class FTHODOReconstruction {
                 bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
                 bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusterIndex());				
             }
+            event.appendBanks(bankHits);
         }
         // cluster bank
         if(clusters.size()!=0){

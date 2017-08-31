@@ -135,7 +135,7 @@ public class EvioHipoEvent {
                     hipoBank.setByte("sector", i, (byte) evioBank.getInt("sector",i));
                     hipoBank.setByte("layer", i, (byte) evioBank.getInt("side",i));
                     hipoBank.setShort("component", i, (short) evioBank.getInt("segment",i));
-                    hipoBank.setInt("ADC", i, evioBank.getInt("npheD", i)*100);
+                    hipoBank.setInt("ADC", i, evioBank.getInt("adc", i));
                     hipoBank.setFloat("time", i, (float) evioBank.getDouble("time",i));
                     hipoBank.setShort("ped", i, (short) 0);
                 }
@@ -481,6 +481,23 @@ public class EvioHipoEvent {
     }
     
     public void fillHipoEventGenPart(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+//        if(evioEvent.hasBank("Header::true")==true){
+//            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("Header::true");
+//            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("MC::Event", evioBank.rows());
+//            for(int i = 0; i < evioBank.rows(); i++){
+//                hipoBank.setShort("npart",     i, (short) evioBank.getDouble("nParticles", i));
+//                hipoBank.setFloat("pbeam",     i, (float) (evioBank.getDouble("beamPol", i)) );
+//                hipoBank.setShort("atarget",   i, (short) (evioBank.getDouble("nNucleons", i)) );
+//                hipoBank.setShort("ztarget",   i, (short) (evioBank.getDouble("nProtons", i)) );
+//                hipoBank.setFloat("ptarget",   i, (float) (evioBank.getDouble("targetPol", i)) );
+//                hipoBank.setShort("btype",     i, (short) (evioBank.getDouble("x", i)) );
+//                hipoBank.setFloat("ebeam",     i, (float) (evioBank.getDouble("y", i)) );
+//                hipoBank.setShort("targetid",  i, (short) (evioBank.getDouble("w", i)) );
+//                hipoBank.setShort("processid", i, (short) (evioBank.getDouble("Q2", i)) );
+//                hipoBank.setFloat("weight",    i, (float) (evioBank.getDouble("nu", i)) );
+//            }
+//            if(evioBank.rows()>0) hipoEvent.appendBanks(hipoBank);
+//        }
         if(evioEvent.hasBank("GenPart::true")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("GenPart::true");
             HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("MC::Particle", evioBank.rows());
@@ -495,6 +512,27 @@ public class EvioHipoEvent {
             }
             if(evioBank.rows()>0) hipoEvent.appendBanks(hipoBank);
         }
+//        if(evioEvent.hasBank("LundPart::true")==true){
+//            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("LundPart::true");
+//            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("MC::Lund", evioBank.rows());
+//            for(int i = 0; i < evioBank.rows(); i++){
+//                hipoBank.setByte("index",    i, (byte) evioBank.getInt("index", i));
+//                hipoBank.setByte("charge",   i, (byte) evioBank.getInt("charge", i));
+//                hipoBank.setByte("type",     i, (byte) evioBank.getInt("type", i));
+//                hipoBank.setInt("pid",       i, evioBank.getInt("pid", i));
+//                hipoBank.setByte("parent",   i, (byte) evioBank.getInt("parent", i));
+//                hipoBank.setByte("daughter", i, (byte) evioBank.getInt("daughter", i));
+//                hipoBank.setFloat("px",      i, (float) (evioBank.getDouble("px", i)/1000.0) );
+//                hipoBank.setFloat("py",      i, (float) (evioBank.getDouble("py", i)/1000.0) );
+//                hipoBank.setFloat("pz",      i, (float) (evioBank.getDouble("pz", i)/1000.0) );
+//                hipoBank.setFloat("vx",      i, (float) (evioBank.getDouble("vx", i)) );
+//                hipoBank.setFloat("vy",      i, (float) (evioBank.getDouble("vy", i)) );
+//                hipoBank.setFloat("vz",      i, (float) (evioBank.getDouble("vz", i)) );
+//                hipoBank.setFloat("energy",  i, (float) (evioBank.getDouble("energy", i)) );
+//                hipoBank.setFloat("mass",    i, (float) (evioBank.getDouble("mass", i)) );
+//            }
+//            if(evioBank.rows()>0) hipoEvent.appendBanks(hipoBank);
+//        }
     }
     
     public HipoDataBank createHeaderBank(HipoDataEvent event, int nrun, int nevent, float torus, float solenoid){
