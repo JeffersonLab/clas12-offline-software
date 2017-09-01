@@ -53,24 +53,30 @@ public class EBEngine extends ReconstructionEngine {
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
         
-        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de, "FTHODO::clusters",DetectorType.FTHODO);
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
         eb.addDetectorResponses(responseECAL);
         eb.addCherenkovResponses(responseHTCC);
         eb.addCherenkovResponses(responseLTCC);
+        eb.addTaggerResponses(responseFTCAL);
+        eb.addTaggerResponses(responseFTHODO);
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
         eb.addForwardTracks(tracks);       
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
         eb.addCentralTracks(ctracks);
+        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");
+        eb.addForwardTaggerParticles(ftparticles);
 
         // Process tracks:
         eb.processHitMatching();
-        eb.addTaggerTracks(trackFT);
+        //eb.addTaggerTracks(trackFT);
         eb.processNeutralTracks();
+        eb.forwardTaggerIDMatching();
 
         eb.assignTrigger();
  
@@ -107,8 +113,8 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankChe);
             }
             
-            if (ftBank!=null && trackFT.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, trackBank, trackFT.size());
+            if (ftBank!=null && ftparticles.size()>0) {
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, trackBank);
                 de.appendBanks(bankForwardTagger);
             }
             
