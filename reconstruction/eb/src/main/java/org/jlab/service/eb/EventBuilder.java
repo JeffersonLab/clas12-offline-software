@@ -74,12 +74,11 @@ public class EventBuilder {
         }
     }
     
-    public void addTaggerTracks(List<TaggerResponse> taggers) {
+    public void addForwardTaggerParticles(List<DetectorParticle> particles) {
         //for(DetectorTrack track : tracks){
-        for(int i = 0 ; i < taggers.size(); i++){
-            DetectorParticle particle = new DetectorParticle(taggers.get(i));
-            particle.setStatus(100);
-            detectorEvent.addParticle(particle);
+        for(int i = 0 ; i < particles.size(); i++){
+            //DetectorParticle particle = new DetectorParticle(particles.get(i));
+            detectorEvent.addParticle(particles.get(i));
         }
     }
     
@@ -182,6 +181,23 @@ public class EventBuilder {
                 cherenkovResponses.get(index).setAssociation(n);
             }             
 
+        }
+    }
+    
+    public void forwardTaggerIDMatching() {
+        int np = detectorEvent.getParticles().size();
+        for(int n = 0 ; n < np ; n++){
+            DetectorParticle p = detectorEvent.getParticles().get(n);
+            int index = p.getForwardTaggerHit(this.taggerResponses, DetectorType.FTCAL);
+            if(index>=0){
+                p.addTaggerResponse(this.taggerResponses.get(index));
+                taggerResponses.get(index).setAssociation(n);
+            }
+            index = p.getForwardTaggerHit(this.taggerResponses, DetectorType.FTHODO);
+            if(index>=0){
+                p.addTaggerResponse(this.taggerResponses.get(index));
+                taggerResponses.get(index).setAssociation(n);
+            }
         }
     }
     
