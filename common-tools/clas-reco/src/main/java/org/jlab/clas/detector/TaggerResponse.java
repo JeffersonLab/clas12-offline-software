@@ -42,6 +42,7 @@ public class TaggerResponse {
     public void setHitIndex(int index) {this.hitIndex = index;}
     public void setRadius(double r) {hitRadius = r;}
     
+    public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getSize(){return hitSize;}
     public int getID(){return hitID;}
     public double getTime(){ return hitTime;}
@@ -92,7 +93,8 @@ public class TaggerResponse {
                 double time = bank.getFloat("time",row);
                 double energy = bank.getFloat("energy",row);
                 TaggerResponse ft = new TaggerResponse();
-                
+                ft.getDescriptor().setType(type);
+               
                 ft.setSize(size);
                 ft.setID(id);
                 ft.setEnergy(energy);
