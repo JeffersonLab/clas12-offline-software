@@ -146,7 +146,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false);
 		
 		if(crosslist.size()==0) {
 			

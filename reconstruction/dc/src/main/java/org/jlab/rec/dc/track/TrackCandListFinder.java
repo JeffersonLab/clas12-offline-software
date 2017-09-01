@@ -16,7 +16,7 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
-import org.jlab.rec.dc.trajectory.Vertex;
+//import org.jlab.rec.dc.trajectory.Vertex;
 
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
@@ -303,14 +303,33 @@ public class TrackCandListFinder {
 		Point3D R3TrkMomentum = C.getCoordsInLab(pz*stateVec.tanThetaX(),pz*stateVec.tanThetaY(),pz);
 		
 		
-		dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
-		double[] VecAtTarlab0 = dcSwim.SwimToPlaneLab(0.0);
-		Vertex vtx = new Vertex();
-		double[] Bvtx = new double[]{0.0,0.0};
-		double[] Vt = vtx.VertexParams(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5], (double) cand.get_Q(), dcSwim.BfieldLab(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2]).toVector3D().mag(), Bvtx[0], Bvtx[1]);
+		//dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
+		//double[] VecAtTarlab0 = dcSwim.SwimToPlaneLab(0.0);
+		//Vertex vtx = new Vertex();
+		//double[] Bvtx = new double[]{0.0,0.0};
+		//double[] Vt = vtx.VertexParams(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5], (double) cand.get_Q(), dcSwim.BfieldLab(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2]).toVector3D().mag(), Bvtx[0], Bvtx[1]);
 		//Vt = new double[]{VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5],0};
-		int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
+		//int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
 		
+               // System.out.println("Swim to fixed z "+VecAtTarlab0[0]+", "+VecAtTarlab0[1]+", "+VecAtTarlab0[2]+"; "+VecAtTarlab0[3]+", "+VecAtTarlab0[4]+", "+VecAtTarlab0[5]);
+                dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
+		
+                // recalc new vertex using plane stopper
+                int sector = cand.get(2).get_Sector();
+                double theta_n = ((double)(sector-1))*Math.toRadians(60.);
+                double x_n = Math.cos(theta_n) ; 
+                double y_n = Math.sin(theta_n) ; 
+//System.out.println("sector "+sector+" xn "+x_n+" yn "+y_n);
+                double[] Vt = dcSwim.SwimToPlaneBoundary(0, new Vector3D(x_n, y_n, 0), -1);
+              //  System.out.println("Swim to fixed plane "+newVtx[0]+", "+newVtx[1]+", "+newVtx[2]+"; "+newVtx[3]+", "+newVtx[4]+", "+newVtx[5]);
+                
+              /*  Vt[0]=newVtx[0];
+                Vt[1]=newVtx[1];
+                Vt[2]=newVtx[2];
+                Vt[3]=newVtx[3];
+                Vt[4]=newVtx[4];
+                Vt[5]=newVtx[5]; */
+                
 		int status = 99999;
 	/*	if(sectorNearTarget==cand.get(0).get_Sector()) {
 			status = 1;
@@ -335,12 +354,13 @@ public class TrackCandListFinder {
 		double xOrFix = Vt[0];
 		double yOrFix = Vt[1];
 		double zOrFix = Vt[2];
-		double pxOrFix = Vt[3];
-		double pyOrFix = Vt[4];
-		double pzOrFix = Vt[5];
+		double pxOrFix = -Vt[3];
+		double pyOrFix = -Vt[4];
+		double pzOrFix = -Vt[5];
 		double arclen = Vt[6];
 		
-		double totPathLen = VecAtTarlab0[6] + VecAtTarOut[6] + arclen;
+		//double totPathLen = VecAtTarlab0[6] + VecAtTarOut[6] + arclen;
+                double totPathLen =  arclen;
 		cand.set_TotPathLen(totPathLen);
 		
 		cand.set_Vtx0(new Point3D(xOrFix,yOrFix, zOrFix));
@@ -366,8 +386,7 @@ public class TrackCandListFinder {
 
 
 	public void removeOverlappingTracks(List<Track> trkcands) {
-		
-		
+				
 		List<Track> selectedTracks =new ArrayList<Track>();
 		List<Track> list = new  ArrayList<Track>();
 		for(int i =0; i<trkcands.size(); i++) { 

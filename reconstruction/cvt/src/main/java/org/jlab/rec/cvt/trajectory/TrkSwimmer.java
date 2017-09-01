@@ -78,7 +78,7 @@ public class TrkSwimmer {
         _maxPathLength = maxPathLength;
         _charge = charge;
         _phi = Math.toDegrees(helix.get_phi_at_dca());
-        _theta = Math.toDegrees(Math.acos(helix.costheta()));
+        _theta = Math.toDegrees(Math.acos(helix.costheta())); 
         _pTot = p;
         _x0 = helix.xdca() / 1000;
         _y0 = helix.ydca() / 1000;
@@ -126,8 +126,8 @@ public class TrkSwimmer {
         double hdata[] = new double[3];
         double z = z_mm / 1000; // the magfield method uses meters
         double[] value = new double[8];
-        double accuracy = 20e-6; //20 microns
-        double stepSize = 1e-5; // m
+        double accuracy = 2.0e-6; //2.0 microns
+        double stepSize = 1e-6; // m
         if (_pTot < 0.05) // fiducial cut 50 MeV
         {
             return null;
@@ -141,9 +141,9 @@ public class TrkSwimmer {
             traj.computeBDL(sField);
             double[] lastY = traj.lastElement();
 
-            value[0] = lastY[0] * 1000; // convert back to mm
-            value[1] = lastY[1] * 1000; // convert back to mm
-            value[2] = lastY[2] * 1000; // convert back to mm
+            value[0] = lastY[0] * 1000.; // convert back to mm
+            value[1] = lastY[1] * 1000.; // convert back to mm
+            value[2] = lastY[2] * 1000.; // convert back to mm
             value[3] = lastY[3] * _pTot; //normalized values * p
             value[4] = lastY[4] * _pTot;
             value[5] = lastY[5] * _pTot;
@@ -198,7 +198,7 @@ public class TrkSwimmer {
 
         sField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
 
-        return new Point3D(result[0] / 10, result[1] / 10, result[2] / 10);
+        return new Point3D(result[0] / 10., result[1] / 10., result[2] / 10.);
 
     }
 

@@ -62,7 +62,7 @@ public class RecoBankWriter {
                 continue;
             }
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            bank.setShort("status", i, (short) 0);
             bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
             bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
@@ -105,7 +105,10 @@ public class RecoBankWriter {
             double chi2 = 0;
 
             bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            int status = 0;
+            if(cluslist.get(i).size()<6)
+                status = 1;
+            bank.setShort("status", i, (short) status);
             bank.setByte("superlayer", i, (byte) cluslist.get(i).get_Superlayer());
             bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
 
@@ -257,7 +260,7 @@ public class RecoBankWriter {
         for (int i = 0; i < crosslist.size(); i++) {
             if (crosslist.get(i).get_Id() != -1) {              
                 bank.setShort("id", index, (short) crosslist.get(i).get_Id());
-                bank.setShort("status", index, (short) 1);
+                bank.setShort("status", index, (short) 0);
                 bank.setByte("sector", index, (byte) crosslist.get(i).get_Sector());
                 bank.setByte("region", index, (byte) crosslist.get(i).get_Region());
                 bank.setFloat("x", index, (float) crosslist.get(i).get_Point().x());
@@ -343,7 +346,7 @@ public class RecoBankWriter {
                 continue;
             }
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            bank.setShort("status", i, (short) hitlist.get(i).get_QualityFac());
             bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
             bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
@@ -391,7 +394,10 @@ public class RecoBankWriter {
             double chi2 = 0;
 
             bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            int status =0;
+            if(cluslist.get(i).size()<6)
+                status = 1;
+            bank.setShort("status", i, (short) 0);
             bank.setByte("superlayer", i, (byte) cluslist.get(i).get_Superlayer());
             bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
 
@@ -451,7 +457,7 @@ public class RecoBankWriter {
             double chi2 = 0;
 
             bank.setShort("id", i, (short) seglist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            bank.setShort("status", i, (short) 0);
             bank.setByte("superlayer", i, (byte) seglist.get(i).get_Superlayer());
             bank.setByte("sector", i, (byte) seglist.get(i).get_Sector());
             FittedCluster cls = seglist.get(i).get_fittedCluster();

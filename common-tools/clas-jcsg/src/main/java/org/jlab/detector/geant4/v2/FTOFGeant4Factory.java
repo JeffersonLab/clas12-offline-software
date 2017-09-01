@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.detector.volume.G4Trd;
 import org.jlab.detector.volume.G4Box;
@@ -14,6 +15,8 @@ import static org.jlab.detector.hits.DetId.FTOFID;
 import static org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4World;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Plane3D;
+import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -48,7 +51,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         properties.put("date", "06/03/13");
     }
 
-    public Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
+    private Geant4Basic createPanel(ConstantProvider cp, int sector, int layer) {
         double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
         double thmin = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thmin", 0));
         double dist2edge = cp.getDouble(stringLayers[layer - 1] + "/panel/dist2edge", 0) * Length.cm;
@@ -94,7 +97,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         return panelVolume;
     }
 
-    public List<G4Box> createLayer(ConstantProvider cp, int layer) {
+    private List<G4Box> createLayer(ConstantProvider cp, int layer) {
 
         int numPaddles = cp.length(stringLayers[layer - 1] + "/paddles/paddle");
         double paddlewidth = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlewidth", 0);
@@ -124,7 +127,6 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
     public G4Box getComponent(int sector, int layer, int paddle) {
         int ivolume = (sector - 1) * 3 + layer - 1;
-        G4Box volComponent = null;
 
         if (sector >= 1 && sector <= 6
                 && layer >= 1 && layer <= 3) {
@@ -139,9 +141,25 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         System.err.println("ERROR!!!");
         System.err.println("Component: sector: " + sector + ", layer: " + layer + ", paddle: " + paddle + " doesn't exist");
-        System.exit(111);
+        throw new IndexOutOfBoundsException();
+    }
 
-        return volComponent;
+    public Plane3D getFrontalFace(int sector, int layer) {
+        if (sector < 1 || sector > 6
+                || layer < 1 || layer > 3) {
+            System.err.println("ERROR!!!");
+            System.err.println("Component: sector: " + sector + ", layer: " + layer + " doesn't exist");
+            throw new IndexOutOfBoundsException();
+        }
+
+        int ivolume = (sector - 1) * 3 + layer - 1;
+
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        G4Box padl = (G4Box) panel.getChildren().get(1);
+        Vector3d point = new Vector3d(padl.getVertex(0));
+        Vector3d normal = new Vector3d(panel.getLineY().diff().normalized());
+
+        return new Plane3D(point.x, point.y, point.z, normal.x, normal.y, normal.z);
     }
 
     public G4World getMother() {

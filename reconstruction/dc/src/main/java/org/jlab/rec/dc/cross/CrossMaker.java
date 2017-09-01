@@ -50,7 +50,7 @@ public class CrossMaker {
                                     cross.set_Segment1(seg1);
                                     cross.set_Segment2(seg2);
                                     cross.set_CrossParams();
-
+                                    
                                     Point3D CS = cross.getCoordsInSector(cross.get_Point().x(), cross.get_Point().y(), cross.get_Point().z());
 
                                     if (CS.x() > 0) {
@@ -64,6 +64,7 @@ public class CrossMaker {
                                             if (cross.isPseudoCross) {
                                                 cross.set_Id(-1);
                                             }
+                                            cross.set_CrossDirIntersSegWires();
                                             crosses.add(cross);  //insures the cross is correctly reconstructed in the sector
                                         }
                                     }

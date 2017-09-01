@@ -27,7 +27,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
 
         ClassLoader cloader = getClass().getClassLoader();
 
-        for (String name : new String[]{"sc", "lgu", "lgd"}) {
+        for (String name : new String[]{"sc", "lgd"}) {
             for (int iscint = 1; iscint <= npaddles; iscint++) {
                 CTOFpaddle component = new CTOFpaddle(String.format("%s%02d", name, iscint),
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);

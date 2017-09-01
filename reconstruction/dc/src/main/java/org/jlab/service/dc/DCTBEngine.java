@@ -36,9 +36,10 @@ public class DCTBEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
+                
 		//System.out.println(" RUNNING TIME BASED....................................");
 		ClusterFitter cf = new ClusterFitter();
-	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+                ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 	    
 		List<FittedHit> fhits = new ArrayList<FittedHit>();	
 		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -51,10 +52,15 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		HitReader hitRead = new HitReader();
 		hitRead.read_HBHits(event);
-
+                hitRead.read_TBHits(event);
 		List<FittedHit> hits = new ArrayList<FittedHit>();
 		//I) get the hits
-		hits = hitRead.get_HBHits();
+                if(hitRead.get_TBHits().size()==0) {
+                    hits = hitRead.get_HBHits();
+                    
+                } else {
+                    hits = hitRead.get_TBHits();
+                }
 		
 		//II) process the hits
 
@@ -120,7 +126,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		//5) make list of crosses consistent with a track candidate
 		CrossListFinder crossLister = new CrossListFinder();		
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
+		CrossList crosslist = crossLister.candCrossLists(crosses, true);
 		
 		if(crosslist.size()==0) {			
 			//System.out.println(" Failed on cross list !");

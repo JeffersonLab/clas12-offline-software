@@ -409,24 +409,31 @@ public class DCSwimmer {
         private double _finalPathLength = Double.NaN;
         private double _d;
         private Vector3D _n;
-
+        private double _dist2plane;
+        private int _dir;
         /**
          * A swim stopper that will stop if the boundary of a plane is crossed
          *
          * @param maxR the max radial coordinate in meters.
          */
-        private PlaneBoundarySwimStopper(double d, Vector3D n) {
+        private PlaneBoundarySwimStopper(double d, Vector3D n, int dir) {
             // DC reconstruction units are cm.  Swimmer units are m.  Hence scale by 100
             _d = d;
             _n = n;
+            _dir = dir;
         }
 
         @Override
         public boolean stopIntegration(double t, double[] y) {
-
-            double dtrk = _n.x() * y[0] * 100 + _n.y() * y[1] * 100 + _n.z() * y[2] * 100;
-
-            return (dtrk > _d);
+            double dtrk = y[0]*_n.x()+y[1]*_n.y()+y[2]*_n.z(); 
+            
+            double accuracy = 20e-6; //20 microns   
+            //System.out.println(" dist "+dtrk*100+ " state "+y[0]*100+", "+y[1]*100+" , "+y[2]*100);
+           if(_dir<0) {
+            return dtrk<_d;
+           } else {
+               return dtrk>_d;
+           }
 
         }
 
@@ -447,17 +454,14 @@ public class DCSwimmer {
         }
     }
 
-    public double[] SwimToPlane(double d, Vector3D n) {
+    public double[] SwimToPlaneBoundary(double d_cm, Vector3D n, int dir) {
 
         double[] value = new double[8];
         // using adaptive stepsize
+        double d= d_cm/100;
+        PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d,n, dir);
 
-        PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d, n);
-
-        // step size in m
-        double stepSize = 1e-4; // m
-
-        SwimTrajectory st = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
+        SwimTrajectory st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, Constants.SWIMSTEPSIZE, 0.0005);
         st.computeBDL(prob);
         //st.computeBDL(compositeField);
         

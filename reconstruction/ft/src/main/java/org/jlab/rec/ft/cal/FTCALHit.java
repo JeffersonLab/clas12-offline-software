@@ -34,11 +34,11 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		this._IDY = ((int) ICOMPONENT/22) + 1;
 		this._IDX = ICOMPONENT + 1 - (this._IDY-1)*22;
 		this._ADC = ADC;
-		this._Time = time;
 		
 		this.set_Edep(((double) this._ADC)*FTCALConstantsLoader.fadc_to_charge[0][0][ICOMPONENT-1]
 										  *FTCALConstantsLoader.mips_energy[0][0][ICOMPONENT-1]
 										  /FTCALConstantsLoader.mips_charge[0][0][ICOMPONENT-1]/1000.);
+		this.set_Time(time -(FTCALConstantsLoader.CRYS_LENGTH-FTCALConstantsLoader.depth_z)/FTCALConstantsLoader.VEFF-FTCALConstantsLoader.time_offset[0][0][ICOMPONENT-1]); 
 //		if(this.get_Edep()>0.1) System.out.println(ICOMPONENT + " " + this._TDC + " " + 
 //				FTCALConstantsLoader.TIMECONVFAC + " " + FTCALConstantsLoader.time_offset[0][0][ICOMPONENT-1] + " " +
 //				this.get_Time());
