@@ -355,7 +355,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     @Override
     public double[] LSBConversion() {
-        return new double[] {Constants.LSBCONVFAC, Constants.LSBCONVFAC};
+        return CCDBConstants.getLSBCONVFAC()[this.get_Sector() - 1][this.get_Panel() - 1][this
+                .get_Paddle() - 1];
     }
 
     @Override

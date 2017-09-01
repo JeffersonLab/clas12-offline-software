@@ -4,8 +4,7 @@ import org.jlab.rec.dc.CCDBConstants;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
-
+import org.jlab.geom.prim.Point3D;
 /**
  * A hit that was used in a fitted cluster. It extends the Hit class and
  * contains local and sector coordinate information at the MidPlane. An estimate
@@ -47,7 +46,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _ClusFitDoca = -1;
     private double _TrkFitDoca = -1;
     private double _TimeToDistance = 0;
-
+    private double _Beta = -1;
     /**
      *
      * @return the local hit x-position in the local superlayer coordinate
@@ -262,7 +261,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             if (useTimeToDistanceGrid == true) {
                 double alpha = Math.acos(cosTrkAngle);
                 double ralpha = this.reducedAngle(alpha);
-                double beta = 1;
+                double beta = this.get_Beta(); 
                 double x = this.get_ClusFitDoca();
                 TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
                 double deltatime_beta = 0;
@@ -270,10 +269,16 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                     deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
                 }
              //   System.out.println("setting the time : fit doca = "+x+" dtime(b) = "+deltatime_beta+" intime "+this.get_Time()+" time "+(this.get_Time() + deltatime_beta));
-                this.set_Time(this.get_Time() - deltatime_beta);
-                if(this.get_Time()<=0)
-                    this.set_Time(0.01);
-                d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx) / this.get_Time();
+             //   this.set_Time(this.get_Time() - deltatime_beta);
+             //   if(this.get_Time()<=0)
+             //       this.set_Time(0.01);
+             //   d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx) / this.get_Time();
+                double correctedTime = (this.get_Time() - deltatime_beta);
+                if(correctedTime<=0)
+                    correctedTime=0.01;
+                if(correctedTime>CCDBConstants.getTMAXSUPERLAYER()[secIdx][slIdx])
+                    correctedTime=CCDBConstants.getTMAXSUPERLAYER()[secIdx][slIdx];
+                d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), correctedTime, secIdx, slIdx) / this.get_Time();
             
             }
 
@@ -357,13 +362,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._Z = _Z;
     }
 
+    
     /**
      * A method to update the hit position information after the fit to the
      * local coord.sys. wire positions
      */
     public void updateHitPosition() {
-
-        DCSwimmer swimmer = new DCSwimmer();
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
@@ -389,10 +393,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this.set_X(x);
         this.set_Z(z);
 
-        float[] result = new float[3];
-        swimmer.Bfield(x, 0, z, result);
         
-        this.set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
 
     }
 
@@ -527,4 +528,22 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return _AssociatedTBTrackID;
     }
 
+    // intersection of cross direction line with the hit wire (TCS)
+    private Point3D CrossDirIntersWire;
+
+    public Point3D getCrossDirIntersWire() {
+        return CrossDirIntersWire;
+    }
+
+    public void setCrossDirIntersWire(Point3D CrossDirIntersWire) {
+        this.CrossDirIntersWire = CrossDirIntersWire;
+    }
+    
+    public double get_Beta() {
+        return _Beta;
+    }
+    
+    public void set_Beta(double beta) {
+        _Beta = beta;
+    }
 }

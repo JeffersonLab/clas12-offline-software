@@ -46,13 +46,14 @@ public class CCDBConstantsLoader {
         double[][][] PADDLE2PADDLE = new double[1][1][48];
         int[][][] STATUSU = new int[1][1][48];
         int[][][] STATUSD = new int[1][1][48];
-
+        double[][][][] LSBCONVFAC = new double[1][1][48][2];
+        
         // load table reads entire table and makes an array of variables for
         // each column in the table.
         dbprovider.loadTable("/calibration/ctof/attenuation");
         dbprovider.loadTable("/calibration/ctof/effective_velocity");
         dbprovider.loadTable("/calibration/ctof/timing_offset");
-        // dbprovider.loadTable("/calibration/ctof/time_walk");
+        dbprovider.loadTable("/calibration/ctof/tdc_conv");
         dbprovider.loadTable("/calibration/ctof/status");
         // disconncect from database. Important to do this after loading tables.
         dbprovider.disconnect();
@@ -186,7 +187,21 @@ public class CCDBConstantsLoader {
             STATUSD[iSec - 1][iPan - 1][iPad - 1] = statD;
 
         }
-
+        // Getting the TDC conversion factors
+        for (int i = 0; i < dbprovider
+                .length("/calibration/ctof/tdc_conv/sector"); i++) {
+            int iSec = dbprovider.getInteger("/calibration/ctof/tdc_conv/sector",
+                    i);
+            int iPan = dbprovider.getInteger("/calibration/ctof/tdc_conv/layer",
+                    i);
+            int iPad = dbprovider.getInteger(
+                    "/calibration/ctof/tdc_conv/component", i);
+            LSBCONVFAC[iSec - 1][iPan - 1][iPad - 1][0] = dbprovider.getDouble(
+                    "/calibration/ctof/tdc_conv/upstream", i);
+            LSBCONVFAC[iSec - 1][iPan - 1][iPad - 1][1] = dbprovider.getDouble(
+                    "/calibration/ctof/tdc_conv/downstream", i);
+        }
+        
         CCDBConstants.setYOFF(YOFF);
         CCDBConstants.setLAMBDAU(LAMBDAU);
         CCDBConstants.setLAMBDAD(LAMBDAD);
@@ -206,6 +221,7 @@ public class CCDBConstantsLoader {
         CCDBConstants.setPADDLE2PADDLE(PADDLE2PADDLE);
         CCDBConstants.setSTATUSU(STATUSU);
         CCDBConstants.setSTATUSD(STATUSD);
+        CCDBConstants.setLSBCONVFAC(LSBCONVFAC);
 
         CSTLOADED = true;
         setDB(dbprovider);

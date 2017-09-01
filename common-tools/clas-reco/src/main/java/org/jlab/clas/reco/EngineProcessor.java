@@ -69,7 +69,8 @@ public class EngineProcessor {
         String[] names = new String[]{
             "FTCAL", "FTHODO", "FTEB",
             "DCHB","DCTB","CVT",
-            "FTOF", "CTOF","EC","HTCC","LTCC",
+            "FTOF", "CTOF","CND",
+            "EC","HTCC","LTCC",
             "EBHB","EBTB"
         };
         
@@ -82,6 +83,7 @@ public class EngineProcessor {
             "org.jlab.rec.cvt.services.CVTReconstruction",
             "org.jlab.service.ftof.FTOFEngine",
             "org.jlab.service.ctof.CTOFEngine",
+            "org.jlab.service.cnd.CNDEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.ltcc.LTCCEngine",

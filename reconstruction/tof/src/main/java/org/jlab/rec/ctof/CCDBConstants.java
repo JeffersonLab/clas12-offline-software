@@ -27,7 +27,8 @@ public class CCDBConstants {
     private static double[][][] RFPAD = new double[1][1][48];
     private static int[][][] STATUSU = new int[1][1][48];
     private static int[][][] STATUSD = new int[1][1][48];
-
+    private static double[][][][] LSBCONVFAC = new double[1][1][48][2];     
+    
     public static synchronized double[][][] getYOFF() {
         return YOFF;
     }
@@ -186,6 +187,13 @@ public class CCDBConstants {
 
     public static synchronized void setSTATUSD(int[][][] sTATUSD) {
         STATUSD = sTATUSD;
+    }
+    public static synchronized double[][][][] getLSBCONVFAC() {
+        return LSBCONVFAC;
+    }
+
+    public static synchronized void setLSBCONVFAC(double[][][][] lSBCONVFAC) {
+        LSBCONVFAC = lSBCONVFAC;
     }
 
 }

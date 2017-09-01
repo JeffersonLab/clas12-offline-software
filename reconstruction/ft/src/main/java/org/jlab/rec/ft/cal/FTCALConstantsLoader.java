@@ -42,7 +42,7 @@ public class FTCALConstantsLoader {
  
         // RECONSTRUCTION CONSTANTS
         public static final double TIMECONVFAC = 100./4.;                            // conversion factor from TDC channel to time (ns^-1)
-        public static final double VEFF        = 150.;                            // conversion factor from TDC channel to time (ns^-1)
+        public static final double VEFF        = 150.;                               // speed of light in the scintillator mm/ns
     
 	// CLUSTER RECONSTRUCTION PARAMETERS
 	public static double seed_min_energy;											      // minimum cluster reconstructed energy
@@ -146,7 +146,7 @@ public class FTCALConstantsLoader {
 	        time_window        = itime;
 	        w0                 = iw0;
 	        depth_z            = idepth;
-	        if(debugMode>=1) System.out.println("cluster table: " + time_window + " " + cluster_min_energy + " " + cluster_min_size);
+	        if(debugMode>=1) System.out.println("cluster table: " + time_window + " " + cluster_min_energy + " " + cluster_min_size + " " + depth_z);
 	    }
 	    // 5) Energy Corrections : ECORR 
 	    for(int i =0; i< dbprovider.length("/calibration/ft/ftcal/ecorr/ecorr0"); i++) {
@@ -161,11 +161,16 @@ public class FTCALConstantsLoader {
 	        energy_corr[0]    = ecorr0;
 	        energy_corr[1]    = ecorr1;
 	        energy_corr[2]    = ecorr2;                     
-	        energy_corr[0]    =  0.0507040;
-	        energy_corr[1]    =  0.0782326;
-	        energy_corr[2]    = -0.00446163;
-                energy_corr[3]    =  0.000169353;
-	        energy_corr[4]    = 0;
+/*	        energy_corr[0]    =  0.0426930;
+	        energy_corr[1]    =  0.0907798;
+	        energy_corr[2]    = -0.0130983;
+                energy_corr[3]    =  0.00162423;
+	        energy_corr[4]    = -0.0000745987;*/
+	        energy_corr[0]    =  0.0587502;
+	        energy_corr[1]    =  0.0881192;
+	        energy_corr[2]    = -0.0120113;
+                energy_corr[3]    =  0.00131961;
+	        energy_corr[4]    = -0.0000550674;
 	        if(debugMode>=1) System.out.println("energy correction: " + ecorr0 + " " + ecorr1 + " " + ecorr2);
 	    }
 	    // 6) Theta Corrections : THETACORR 

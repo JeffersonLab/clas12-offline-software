@@ -167,8 +167,9 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters = clusFinder.findClusters(hits);
-
+        clusters.addAll(clusFinder.findClusters(svt_hits));
+        clusters.addAll(clusFinder.findClusters(bmt_hits)); 
+        
         if (clusters.size() == 0) {
             return true;
         }
@@ -285,7 +286,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     public static void main(String[] args) throws FileNotFoundException, EvioException {
 
         //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/YurisTest.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_1.1.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Files/cvt/neg_muons.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
@@ -299,7 +300,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_1_rec0.hipo";
+        String outputFile = "/Users/ziegler/Workdir/Files/cvt/neg_muons.NomField.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -313,8 +314,9 @@ public class CVTReconstruction extends ReconstructionEngine {
 
             // Processing    
             en.processDataEvent(event);
-            writer.writeEvent(event);
-
+            if(event.hasBank("CVTRec::Tracks")) {
+                writer.writeEvent(event);
+            }
             System.out.println("  EVENT " + counter);
             /*
 			 * event.show();
@@ -329,7 +331,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 				 dde.show();
 			}
              */
-            //if(counter>3) break;
+           // if(counter>304) break;
             //event.show();
             //if(counter%100==0)
             //System.out.println("run "+counter+" events");

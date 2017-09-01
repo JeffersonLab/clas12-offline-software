@@ -140,7 +140,7 @@ public class DCHBEngineT2DEffs extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false);
 		
 		if(crosslist.size()==0) {
 			

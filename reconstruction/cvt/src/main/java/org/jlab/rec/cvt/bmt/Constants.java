@@ -14,7 +14,7 @@ public class Constants {
    The angles are defined with theZ-axis oriented from the accelerator to the beam dump.
      */
     // THE GEOMETRY CONSTANTS
-    public static final int NREGIONS = 3;							// 3 regions of MM 
+    public static final int NREGIONS = 3;						// 3 regions of MM 
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
 
     //Z detector characteristics
@@ -38,18 +38,21 @@ public class Constants {
     private static double[] CRCZMIN = new double[NREGIONS]; 		// PCB upstream extremity mm
     private static double[] CRCZMAX = new double[NREGIONS]; 		// PCB downstream extremity mm
     private static double[] CRCOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
-    private static int[][] CRCGROUP = new int[NREGIONS][]; 			// Number of strips with same width
+    private static int[][] CRCGROUP = new int[NREGIONS][];		// Number of strips with same width
     private static double[][] CRCWIDTH = new double[NREGIONS][];	// the width of the corresponding group of strips 
     private static double[][] CRCEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
     private static double[][] CRCEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
     private static double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
+    private static double[] EFF_Z_OVER_A = new double[NREGIONS*2];      // for ELOSS
+    private static double[] T_OVER_X0 = new double[NREGIONS*2];         // for M.Scat.
 
+  
     // THE RECONSTRUCTION CONSTANTS
     public static final double SigmaDrift = 0.4; 				// Max transverse diffusion value (GEMC value)
     public static final double hDrift = 3.0; 					// Size of the drift gap
-    public static final double hStrip2Det = hDrift / 2;       	// distance between strips and the middle of the conversion gap (~half the drift gap)
+    public static final double hStrip2Det = hDrift / 2;                         // distance between strips and the middle of the conversion gap (~half the drift gap)
 
-    private static double ThetaL = 0; 							// the Lorentz angle for 5-T B-field
+    private static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
 
     //private static double w_i =25.0; 
     public static boolean areConstantsLoaded = false;
@@ -71,7 +74,7 @@ public class Constants {
         }
 
         if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-            setThetaL(Math.toRadians(25. * org.jlab.rec.cvt.Constants.getSolenoidscale())); // for 5-T field
+            setThetaL(Math.toRadians(20. * org.jlab.rec.cvt.Constants.getSolenoidscale())); // for 5-T field
         }
         areConstantsLoaded = true;
 
@@ -269,4 +272,18 @@ public class Constants {
         CRCXPOS = cRCXPOS;
     }
 
+    public static synchronized double[] getEFF_Z_OVER_A() {
+        return EFF_Z_OVER_A;
+    }
+    public static synchronized void setEFF_Z_OVER_A(double[] eFF_Z_OVER_A) {
+        EFF_Z_OVER_A = eFF_Z_OVER_A;
+    }
+    
+    public static synchronized double[] get_T_OVER_X0() {
+        return T_OVER_X0;
+    }
+    public static synchronized void set_T_OVER_X0(double[] t_OVER_X0) {
+        T_OVER_X0 = t_OVER_X0;
+    }
+    
 }

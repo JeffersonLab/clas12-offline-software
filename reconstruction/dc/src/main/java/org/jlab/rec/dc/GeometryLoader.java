@@ -41,15 +41,16 @@ public class GeometryLoader {
     }
 
     public static void main(String arg[]) throws FileNotFoundException {
-
+        Constants.setUseMiniStagger(false); 
         GeometryLoader.Load(10, "default");
-
-        Vector3d wmid0 = GeometryLoader.dcDetector.getWireMidpoint(0, 0, 0);
+       
+        Vector3d wmid0 = GeometryLoader.dcDetector.getWireMidpoint(4, 1, 1);
         Point3D ep1 = new Point3D(wmid0.x, wmid0.y, wmid0.z);
-        Vector3d wmid1 = GeometryLoader.dcDetector.getWireMidpoint(0, 1, 0);
+        Vector3d wmid1 = GeometryLoader.dcDetector.getWireMidpoint(4, 1, 2);
         Point3D ep2 = new Point3D(wmid1.x, wmid1.y, wmid1.z);
-
-        System.out.println(ep1.toString() + ", " + ep2.toString());
+        Vector3d wmid2 = GeometryLoader.dcDetector.getWireMidpoint(4, 1, 3);
+        Point3D ep3 = new Point3D(wmid2.x, wmid2.y, wmid2.z);
+        System.out.println(ep1.toString() + "\n " + ep2.toString()+ "\n" + ep3.toString());
         //pw.close();
         /*	System.out.println("dx; = "+(GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(0).getMidpoint().x()-
 				GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(1).getMidpoint().x())*Math.cos(Math.toRadians(6.)));
