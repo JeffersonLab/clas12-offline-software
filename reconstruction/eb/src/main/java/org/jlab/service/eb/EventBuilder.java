@@ -186,23 +186,31 @@ public class EventBuilder {
     }
     
     public void processNeutralTracks(){
-        
-        List<DetectorResponse>  responsesPCAL = this.getUnmatchedResponses((List<DetectorResponse>) detectorResponses, DetectorType.EC, 1);
-        
+
+        // get all unmatched calorimeter responses:
+        List<DetectorResponse>   responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 1);
+        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 4);
+        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 7);
+
+        // FIXME: is this really 1/2/3, or should it really be 1/2/0:
+        // Critical to use DetectorType for this, instead of hardcoded constants everywhere.
+        List<DetectorResponse> responsesFTOF1A = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 1);
+        List<DetectorResponse> responsesFTOF1B = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 2);
+        List<DetectorResponse>  responsesFTOF2 = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 3);
+       
+        // setup the empty list of neutral particles:
         List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
-        
+
+        // add a new neutral particle for each unmatched PCAL response:
+        // TODO:  Neutrals should not require any ECAL layer, but just one.
         for(DetectorResponse r : responsesPCAL){
             DetectorParticle p = DetectorParticle.createNeutral(r);
             particles.add(p);
         }
-        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 4);
-        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 7);
-        List<DetectorResponse> responsesFTOF1A = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 1);
-        List<DetectorResponse> responsesFTOF1B = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 2);
-        List<DetectorResponse> responsesFTOF2 = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 3);
-        
+
         for(int i = 0; i < particles.size(); i++){
             DetectorParticle p = particles.get(i);
+            // FIXME:  again, layer idices should be gotten from DetectorType
             int index = p.getDetectorHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
             index = p.getDetectorHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
