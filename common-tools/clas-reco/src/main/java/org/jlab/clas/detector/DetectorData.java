@@ -268,33 +268,30 @@ public class DetectorData {
        return bank;
    }
       
-   public static DataBank getForwardTaggerBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows){
-       DataBank bank = event.createBank(bank_name, rows);
+      public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, responses.size());
        int row = 0;
-       for(int i = 0; i < particles.size(); i++){
-           // FIXME:
-           // 1. remove this hardcoded constant 100, instead use DetectorType class
-           // 2. use REC::Particle.detector for identifying detector, NOT "status"
-           if(particles.get(i).getStatus()==100) {
-               DetectorParticle p = particles.get(i);
-               bank.setShort("index", row, (short) p.getTaggerIndex());
-               bank.setShort("pindex", row, (short) i);
-               bank.setShort("size", row, (short) p.getTaggerSize());
-               bank.setFloat("x", row, (float) p.getTaggerPosition().x());
-               bank.setFloat("y", row, (float) p.getTaggerPosition().y());
-               bank.setFloat("z", row, (float) p.getTaggerPosition().z());
-               bank.setFloat("dx", row, (float) p.getTaggerPositionWidth().x());
-               bank.setFloat("dy", row, (float) p.getTaggerPositionWidth().y());
-               bank.setFloat("radius", row, (float) p.getTaggerRadius());
-               bank.setFloat("path", row, (float) 0.0);
-               bank.setFloat("time", row, (float) p.getTaggerTime());
-               bank.setInt("energy", row, (int) p.getTaggerEnergy());
-               bank.setFloat("chi2", row, (float) 0.0);
-               row = row + 1;
-           }
+       for(int i = 0; i < responses.size(); i++){
+           TaggerResponse t  = responses.get(i);
+          
+           bank.setShort("index", row, (short) 0);
+           bank.setShort("pindex", row, (short) 0);
+           bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
+           bank.setShort("size", row, (short) t.getSize());
+           bank.setFloat("x", row, (float) t.getPosition().x());
+           bank.setFloat("y", row, (float) t.getPosition().y());
+           bank.setFloat("z", row, (float) t.getPosition().z());
+           bank.setFloat("dx", row, (float) t.getPositionWidth().x());
+           bank.setFloat("dy", row, (float) t.getPositionWidth().y());
+           bank.setFloat("radius", row, (float) t.getRadius());
+           bank.setFloat("path", row, (float) 0.0);
+           bank.setFloat("time", row, (float) t.getTime());
+           bank.setInt("energy", row, (int) t.getEnergy());
+           bank.setFloat("chi2", row, (float) 0.0);
+           row = row + 1;
        }
        return bank;
-   }      
+      }  
 
    public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
@@ -485,7 +482,35 @@ public class DetectorData {
        return tracks;
    }
    
+   public static List<DetectorParticle>  readForwardTaggerParticles(DataEvent event, String bank_name){
+        List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
+        if(event.hasBank(bank_name)==true){
+            DataBank bank = event.getBank(bank_name);
+            int nrows = bank.rows();
+           
+            for(int row = 0; row < nrows; row++){
+                int charge  = bank.getShort("charge", row);               
+                double cx    = bank.getFloat("cx",row);
+                double cy   = bank.getFloat("cy",row);
+                double cz = bank.getFloat("cz",row);
+                double energy = bank.getFloat("energy",row);
 
+                int calID = bank.getInt("calID",row);
+                int hodoID = bank.getInt("hodoID",row);
+                    
+                double px = cx*energy;
+                double py = cy*energy;
+                double pz = cz*energy;
+                
+                DetectorParticle  particle = new DetectorParticle(charge, px, py, pz);
+
+                particle.setFTCALID(calID);
+                particle.setFTHODOID(hodoID);
+                particles.add(particle);
+            }
+        }
+        return particles;
+    }
    
 }
 
