@@ -125,6 +125,19 @@ public class DetectorEvent {
         }
         return responses;
     }
+
+    public List<TaggerResponse>  getTaggerResponseList(){
+        this.setAssociation();
+        List<TaggerResponse> responses = new ArrayList<TaggerResponse>();
+        for(DetectorParticle p : this.particleList){
+            for(TaggerResponse r : p.getTaggerResponses()){
+                if(r.getDescriptor().getType()==DetectorType.FTCAL ||
+                        r.getDescriptor().getType()==DetectorType.FTHODO)
+                responses.add(r);
+            }
+        }
+        return responses;
+    }    
     
     public void moveUp(int index){
         if(index>0 && index < this.particleList.size()){
