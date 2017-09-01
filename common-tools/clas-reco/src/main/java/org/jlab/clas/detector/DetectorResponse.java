@@ -1,10 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +19,18 @@ import org.jlab.io.base.DataEvent;
 public class DetectorResponse {
     
     private DetectorDescriptor  descriptor  = new DetectorDescriptor();
-    private Vector3D             hitPosition = new Vector3D();
-    //private Point3D             hitPosition = new Vector3();
-    private Vector3D             hitPositionMatched = new Vector3D();
+    private Vector3D            hitPosition = new Vector3D();
+    //private Point3D            hitPosition = new Vector3();
+    private Vector3D     hitPositionMatched = new Vector3D();
     private Double             detectorTime = 0.0;
     private Double           detectorEnergy = 0.0;
     private Double           particlePath   = 0.0;
     private int              association    = -1;
-    private int              hitIndex = -1;
+    private int              hitIndex       = -1;
 
     public DetectorResponse(){
         super();
     }
-    
-
     
     public DetectorResponse(int sector, int layer, int component){
         descriptor.setSectorLayerComponent(sector, layer, component);
@@ -127,8 +119,6 @@ public class DetectorResponse {
         }
         return responseList;
     }
-
-
     
     /**
      * Reads a HIPO event, constructs list of detector responses then returns only

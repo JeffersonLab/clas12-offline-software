@@ -1,7 +1,7 @@
 #!/bin/bash
 
+mkdir -p coatjava
 rm -f coatjava/lib/clas/jcsg-0.3.2.jar
-mkdir coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
 mkdir -p coatjava/lib/clas
