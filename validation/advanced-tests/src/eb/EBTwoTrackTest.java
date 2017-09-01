@@ -111,7 +111,7 @@ public class EBTwoTrackTest {
 
             // get banks:
             DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
-            DataBank recBank=null,mcBank=null,cheBank=null;
+            DataBank recBank=null,mcBank=null,cheBank=null,rectrkBank=null;;
 
             if (event.hasBank("FTOF::clusters"))
                 tofBank=event.getBank("FTOF::clusters");
@@ -127,11 +127,16 @@ public class EBTwoTrackTest {
                 ltccBank = event.getBank("LTCC::clusters");
             if (event.hasBank("HTCC::rec"))
                 htccBank = event.getBank("HTCC::rec");
+            if (event.hasBank("REC::Track"))
+                rectrkBank = event.getBank("REC::Track");
 
             //if (mcBank!=null) mcBank.show();
 
             // no tracking bank, discard event:
             if (trkBank==null) continue;
+
+            //if (rectrkBank!=null) rectrkBank.show(); 
+
 /*
             if (cheBank!=null) {
                 for (int ii=0; ii<cheBank.rows(); ii++) {
