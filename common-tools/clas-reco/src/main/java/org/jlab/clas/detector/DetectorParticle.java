@@ -37,6 +37,8 @@ public class DetectorParticle implements Comparable {
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     
+    private int     calID = -1;
+    private int     hodoID = -1;
     
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
@@ -49,7 +51,8 @@ public class DetectorParticle implements Comparable {
     
     private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
-
+    private List<TaggerResponse> taggerStore = new ArrayList<TaggerResponse>();
+    
 //    private List<ScintillatorResponse>    scintillatorStore = new ArrayList<ScintillatorResponse>();
 //    private List<CalorimeterResponse>  calorimeterStore = new ArrayList<CalorimeterResponse>();
    
@@ -147,6 +150,10 @@ public class DetectorParticle implements Comparable {
         return this.cherenkovStore;
     }
     
+    public List<TaggerResponse> getTaggerResponse(){
+        return this.taggerStore;
+    }
+    
 //    public List<CalorimeterResponse> getCalorimeterResponse(){
 //        return this.calorimeterStore;
 //    }
@@ -157,6 +164,10 @@ public class DetectorParticle implements Comparable {
     
     public void addCherenkovResponse(CherenkovResponse res){
         this.cherenkovStore.add(res);
+    }
+    
+    public void addTaggerResponse(TaggerResponse res) {
+        this.taggerStore.add(res);
     }
     
 //        public void addCalorimeterResponse(CalorimeterResponse res){
@@ -296,6 +307,10 @@ public class DetectorParticle implements Comparable {
     public List<CherenkovResponse> getCherenkovResponses(){
         return this.cherenkovStore;
     }
+    
+    public List<TaggerResponse> getTaggerResponses(){
+        return this.taggerStore;
+    }
  
 //    public List<CalorimeterResponse>  getCalorimeterResponses(){
 //        return this.calorimeterStore;
@@ -340,6 +355,11 @@ public class DetectorParticle implements Comparable {
     public double  getTaggerTime() {return this.taggerTrack.getTime();}
     public double  getTaggerEnergy() {return this.taggerTrack.getEnergy();}
     
+    public int getFTCALID() {return this.calID;}
+    public int getFTHODOID() {return this.hodoID;}
+    
+    public void setFTCALID(int id) {this.calID = id;}
+    public void setFTHODOID(int id) {this.hodoID = id;}
     
     public Path3D getTrajectory(){
         Path3D  path = new Path3D();
@@ -502,6 +522,26 @@ public class DetectorParticle implements Comparable {
         this.particleCrossDirection.setXYZ(ux, uy, uz);
     }
     
+    public int getForwardTaggerHit(List<TaggerResponse> hitList, DetectorType type) {
+        int bestIndex = -1;
+        for(int loop = 0; loop < hitList.size(); loop++) {
+            if(type==DetectorType.FTCAL){
+                if(hitList.get(loop).getDescriptor().getType()==type 
+                    && hitList.get(loop).getID()==this.calID){
+               
+                    bestIndex = loop;
+                }
+            }
+            if(type==DetectorType.FTHODO){
+               if(hitList.get(loop).getDescriptor().getType()==type
+                     &&  hitList.get(loop).getID()==this.hodoID){
+                   bestIndex = loop;
+               } 
+            }
+        }
+        return bestIndex;
+    }
+    
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int detectorLayer,
             double distanceThreshold){
@@ -655,7 +695,6 @@ public class DetectorParticle implements Comparable {
     public double CalculatedSF() {
         return this.getEnergy(DetectorType.EC)/this.vector().mag();
     }
-
     public double ParametrizedSF() {
         double sf = 0.0;
         double p = this.vector().mag();
@@ -667,7 +706,6 @@ public class DetectorParticle implements Comparable {
         }
         return sf;
     }   
-
     public double ParametrizedSigma(){
         double p = this.vector().mag();
         double sigma = 0.02468*pow(p,-0.51);
@@ -798,5 +836,3 @@ public class DetectorParticle implements Comparable {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
-
-
