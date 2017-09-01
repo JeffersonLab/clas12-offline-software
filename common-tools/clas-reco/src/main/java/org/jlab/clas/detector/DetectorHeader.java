@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 /**
@@ -15,7 +10,7 @@ public class DetectorHeader {
     private int         event = 0;
     private int       trigger = 0;
     private double     rfTime = 0.0;
-    private double  startTime = 0.0;
+    private double  startTime = -1000.0;
 
     public DetectorHeader() {
     }

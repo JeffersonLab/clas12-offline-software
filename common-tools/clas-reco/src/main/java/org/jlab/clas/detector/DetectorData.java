@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -27,7 +22,6 @@ public class DetectorData {
      */
     public static List<DetectorResponse>  readDetectorResponses(DataEvent event, String bank_name){
         List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
-        //System.out.println(" RESPONESE BANK EXISTS = " + event.hasBank(bank_name));
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
 
@@ -200,7 +194,6 @@ public class DetectorData {
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
            DetectorResponse r = responses.get(row);
-           
            bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
@@ -229,7 +222,7 @@ public class DetectorData {
        return bank;
    }
    
-      public static DataBank getScintillatorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
+   public static DataBank getScintillatorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
            DetectorResponse r = responses.get(row);
@@ -253,7 +246,7 @@ public class DetectorData {
        return bank;
    }
    
-      public static DataBank getCherenkovResponseBank(List<CherenkovResponse> responses, DataEvent event, String bank_name){
+   public static DataBank getCherenkovResponseBank(List<CherenkovResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
            CherenkovResponse c = responses.get(row);
@@ -275,83 +268,115 @@ public class DetectorData {
        return bank;
    }
       
-      public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
-       DataBank bank = event.createBank(bank_name, responses.size());
-       for(int row = 0; row < responses.size(); row++){
-           TaggerResponse ft = responses.get(row);
-           bank.setShort("index", row, (short) 0);
-           bank.setShort("pindex", row, (short) 0);
-           bank.setShort("size", row, (short) 0);
-           bank.setFloat("x", row, (float) 0.0);
-           bank.setFloat("y", row, (float) 0.0);
-           bank.setFloat("z", row, (float) 0.0);
-           bank.setFloat("dx", row, (float) 0.0);
-           bank.setFloat("dy", row, (float) 0.0);
-           bank.setFloat("radius", row, (float) 0.0);
-           bank.setFloat("path", row, (float) 0.0);
-           bank.setFloat("time", row, (float) 0.0);
-           bank.setInt("energy", row, (int) 0.0);
-           bank.setFloat("chi2", row, (float) 0.0);
+   public static DataBank getForwardTaggerBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows){
+       DataBank bank = event.createBank(bank_name, rows);
+       int row = 0;
+       for(int i = 0; i < particles.size(); i++){
+           // FIXME:
+           // 1. remove this hardcoded constant 100, instead use DetectorType class
+           // 2. use REC::Particle.detector for identifying detector, NOT "status"
+           if(particles.get(i).getStatus()==100) {
+               DetectorParticle p = particles.get(i);
+               bank.setShort("index", row, (short) p.getTaggerIndex());
+               bank.setShort("pindex", row, (short) i);
+               bank.setShort("size", row, (short) p.getTaggerSize());
+               bank.setFloat("x", row, (float) p.getTaggerPosition().x());
+               bank.setFloat("y", row, (float) p.getTaggerPosition().y());
+               bank.setFloat("z", row, (float) p.getTaggerPosition().z());
+               bank.setFloat("dx", row, (float) p.getTaggerPositionWidth().x());
+               bank.setFloat("dy", row, (float) p.getTaggerPositionWidth().y());
+               bank.setFloat("radius", row, (float) p.getTaggerRadius());
+               bank.setFloat("path", row, (float) 0.0);
+               bank.setFloat("time", row, (float) p.getTaggerTime());
+               bank.setInt("energy", row, (int) p.getTaggerEnergy());
+               bank.setFloat("chi2", row, (float) 0.0);
+               row = row + 1;
+           }
        }
        return bank;
    }      
 
-      public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
+   public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-           bank.setInt("NRUN", 0, detectorEvent.getEventHeader().getRun());
-           bank.setInt("NEVENT", 0, detectorEvent.getEventHeader().getEvent());
-           bank.setInt("TRG", 0, detectorEvent.getEventHeader().getTrigger());
-           bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
-           bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());     
+       bank.setInt("NRUN", 0, detectorEvent.getEventHeader().getRun());
+       bank.setInt("NEVENT", 0, detectorEvent.getEventHeader().getEvent());
+       bank.setInt("TRG", 0, detectorEvent.getEventHeader().getTrigger());
+       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
+       bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());     
        return bank;
    }
       
-    public static DataBank getCrossBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
-          DataBank bank = event.createBank(bank_name, particles.size());
-          for(int row = 0 ; row < particles.size(); row++){
-              DetectorParticle p = particles.get(row);
-              bank.setShort("pindex", row, (short) row);
-              bank.setFloat("c_x", row, (float) p.getCross().x());
-              bank.setFloat("c_y", row, (float) p.getCross().y());
-              bank.setFloat("c_z", row, (float) p.getCross().z());
-              bank.setFloat("c_ux", row, (float) p.getCrossDir().x());
-              bank.setFloat("c_uy", row, (float) p.getCrossDir().y());
-              bank.setFloat("c_uz", row, (float) p.getCrossDir().z());
-              
-          }
-          return bank;
-      }
+   public static DataBank getTracksBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows) {
+       DataBank bank = event.createBank(bank_name, rows);
+       int row = 0;
+       for(int i = 0 ; i < particles.size(); i++) {
+           DetectorParticle p = particles.get(i);
+           // FIXME: is this supposed to work for CVT too?
+           if(p.getTrackDetector()==DetectorType.DC.getDetectorId()) {
+               bank.setShort("index", row, (short) p.getTrackIndex());
+               bank.setShort("pindex", row, (short) i);
+               bank.setByte("detector", row, (byte) p.getTrackDetector());
+               bank.setByte("q", row, (byte) p.getCharge());
+               bank.setFloat("chi2", row, (float) p.getChi2());
+               bank.setShort("NDF", row, (short) p.getNDF());
+               bank.setFloat("px_nomm", row, (float) p.vector().x());
+               bank.setFloat("py_nomm", row, (float) p.vector().y());
+               bank.setFloat("pz_nomm", row, (float) p.vector().z());
+               bank.setFloat("vx_nomm", row, (float) p.vertex().x());
+               bank.setFloat("vy_nomm", row, (float) p.vertex().y());
+               bank.setFloat("vz_nomm", row, (float) p.vertex().z());
+               row = row + 1;
+           }
+       }
+       return bank;
+   }
+      
+   public static DataBank getCrossBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
+       DataBank bank = event.createBank(bank_name, particles.size());
+       for(int row = 0 ; row < particles.size(); row++){
+           DetectorParticle p = particles.get(row);
+           bank.setShort("pindex", row, (short) row);
+           bank.setFloat("c_x", row, (float) p.getCross().x());
+           bank.setFloat("c_y", row, (float) p.getCross().y());
+           bank.setFloat("c_z", row, (float) p.getCross().z());
+           bank.setFloat("c_ux", row, (float) p.getCrossDir().x());
+           bank.setFloat("c_uy", row, (float) p.getCrossDir().y());
+           bank.setFloat("c_uz", row, (float) p.getCrossDir().z());
+
+       }
+       return bank;
+   }
       
    public static List<double[]> readTBCovMat(DataEvent event, String bank_name) {
        List<double[]> covMat = new ArrayList<double[]>();
-        if(event.hasBank(bank_name)==true){
-            DataBank bank = event.getBank(bank_name);
-            int nrows = bank.rows();
-            for(int row = 0; row < nrows; row++){
-                double[] covariance = new double[15];
-                covariance[0] = bank.getFloat("C11", row);
-                covariance[1] = bank.getFloat("C12", row);
-                covariance[2] = bank.getFloat("C13", row);
-                covariance[3] = bank.getFloat("C14", row);
-                covariance[4] = bank.getFloat("C15", row);
-                covariance[5] = bank.getFloat("C22", row);
-                covariance[6] = bank.getFloat("C23", row);
-                covariance[7] = bank.getFloat("C24", row);
-                covariance[8] = bank.getFloat("C25", row);
-                covariance[9] = bank.getFloat("C33", row);
-                covariance[10] = bank.getFloat("C34", row);
-                covariance[11] = bank.getFloat("C35", row);
-                covariance[12] = bank.getFloat("C44", row);
-                covariance[13] = bank.getFloat("C45", row);
-                covariance[14] = bank.getFloat("C55", row);
-                covMat.add(covariance);
-            }
-        }
+       if(event.hasBank(bank_name)==true){
+           DataBank bank = event.getBank(bank_name);
+           int nrows = bank.rows();
+           for(int row = 0; row < nrows; row++){
+               double[] covariance = new double[15];
+               covariance[0] = bank.getFloat("C11", row);
+               covariance[1] = bank.getFloat("C12", row);
+               covariance[2] = bank.getFloat("C13", row);
+               covariance[3] = bank.getFloat("C14", row);
+               covariance[4] = bank.getFloat("C15", row);
+               covariance[5] = bank.getFloat("C22", row);
+               covariance[6] = bank.getFloat("C23", row);
+               covariance[7] = bank.getFloat("C24", row);
+               covariance[8] = bank.getFloat("C25", row);
+               covariance[9] = bank.getFloat("C33", row);
+               covariance[10] = bank.getFloat("C34", row);
+               covariance[11] = bank.getFloat("C35", row);
+               covariance[12] = bank.getFloat("C44", row);
+               covariance[13] = bank.getFloat("C45", row);
+               covariance[14] = bank.getFloat("C55", row);
+               covMat.add(covariance);
+           }
+       }
 
        return covMat;
    }
    
-      public static DataBank getTBCovMatBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
+   public static DataBank getTBCovMatBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
        DataBank bank = event.createBank(bank_name, particles.size());
        for(int row = 0; row < particles.size(); row++){
            DetectorParticle p = particles.get(row);
@@ -387,26 +412,31 @@ public class DetectorData {
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
-           
+
            for(int row = 0; row < nrows; row++){
                int    charge = bank.getByte("q", row);
-               //System.out.println("DC charge " + bank.getByte("q",row));
                Vector3D pvec = DetectorData.readVector(bank, row, "p0_x", "p0_y", "p0_z");
                Vector3D vertex = DetectorData.readVector(bank, row, "Vtx0_x", "Vtx0_y", "Vtx0_z");
-               
-               DetectorTrack  track = new DetectorTrack(charge,pvec.mag());
+
+               DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row));
                track.setVector(pvec.x(), pvec.y(), pvec.z());
                track.setVertex(vertex.x(), vertex.y(), vertex.z());
                track.setPath(bank.getFloat("pathlength", row));
-               
+
                Vector3D lc_vec = DetectorData.readVector(bank, row, "c1_x", "c1_y", "c1_z");
                Vector3D lc_dir = DetectorData.readVector(bank, row, "c1_ux", "c1_uy", "c1_uz");
-               
+
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c3_x", "c3_y", "c3_z");
                Vector3D hc_dir = DetectorData.readVector(bank, row, "c3_ux", "c3_uy", "c3_uz");
                track.addCross(lc_vec.x(), lc_vec.y(), lc_vec.z(), lc_dir.x(), lc_dir.y(), lc_dir.z());
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
-               
+
+               track.setNDF(bank.getInt("ndf",row));
+               track.setchi2(bank.getFloat("chi2",row));
+               track.setStatus(bank.getInt("status",row));
+
+               track.setDetectorID(DetectorType.DC.getDetectorId());
+
                tracks.add(track);
            }
        }
@@ -414,71 +444,48 @@ public class DetectorData {
    }
    
    
-    public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name){
-        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
-        if(event.hasBank(bank_name)==true){
-            DataBank bank = event.getBank(bank_name);
-            int nrows = bank.rows();
-           
-            for(int row = 0; row < nrows; row++){
-                int charge  = bank.getInt("q", row);               
-                double p    = bank.getFloat("p",row);
-                double pt   = bank.getFloat("pt",row);
-                double phi0 = bank.getFloat("phi0",row);
-                double tandip = bank.getFloat("tandip", row);
-                double z0 = bank.getFloat("z0", row);
-                double d0 = bank.getFloat("d0", row);
-                
-                double pz = pt*tandip;
-                double py = pt*Math.sin(phi0);
-                double px = pt*Math.cos(phi0);
-                
-                double vx = d0*Math.cos(phi0);
-                double vy = d0*Math.sin(phi0);
-                
-                DetectorTrack  track = new DetectorTrack(charge,p);
-                track.setVector(px, py, pz);
-                track.setVertex(vx, vy, z0);
-                track.setPath(bank.getFloat("pathlength", row));
-               
-               //track.addCTOFPoint(x,y,z);
-               //System.out.println("track intersect is..." + trackIntersect);
-                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
-                Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
-                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
-
-                tracks.add(track);
-            }
-        }
-        return tracks;
-    }
-   
-    public static List<DetectorTrack>  readTaggerTracks(DataEvent event, String bank_name){
+   public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name){
        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
-           
+
            for(int row = 0; row < nrows; row++){
-               int charge = bank.getInt("q", row);
-               float cx = bank.getFloat("c_x", row);
-               float cy = bank.getFloat("c_y" , row);
-               float cz = bank.getFloat("c_z", row);
-               float energy = bank.getFloat("energy", row);
-               
-               Vector3D pvec = new Vector3D(cx*energy,cy*energy,cz*energy);
-               
-               DetectorTrack  track = new DetectorTrack(charge,pvec.mag());
-               track.setVertex(0.0, 0.0, 0.0);
-               track.setVector(cx*energy, cy*energy, cz*energy);
-               track.setTime(bank.getFloat("time", row));
-               track.setID(bank.getInt("id",row));
-               
-                tracks.add(track);
+               int charge  = bank.getInt("q", row);               
+               double p    = bank.getFloat("p",row);
+               double pt   = bank.getFloat("pt",row);
+               double phi0 = bank.getFloat("phi0",row);
+               double tandip = bank.getFloat("tandip", row);
+               double z0 = bank.getFloat("z0", row);
+               double d0 = bank.getFloat("d0", row);
+
+               double pz = pt*tandip;
+               double py = pt*Math.sin(phi0);
+               double px = pt*Math.cos(phi0);
+
+               double vx = d0*Math.cos(phi0);
+               double vy = d0*Math.sin(phi0);
+
+               DetectorTrack  track = new DetectorTrack(charge,p);
+               track.setVector(px, py, pz);
+               track.setVertex(vx, vy, z0);
+               track.setPath(bank.getFloat("pathlength", row));
+
+               //track.addCTOFPoint(x,y,z);
+               Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
+               Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
+               track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
+
+               // FIXME:  define a convetion on DetectorType for central tracks
+               track.setDetectorID(DetectorType.SVT.getDetectorId());
+
+               tracks.add(track);
            }
        }
        return tracks;
    }
+   
+
    
 }
 
