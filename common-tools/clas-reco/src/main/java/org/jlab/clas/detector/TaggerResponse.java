@@ -42,6 +42,7 @@ public class TaggerResponse {
     public void setHitIndex(int index) {this.hitIndex = index;}
     public void setRadius(double r) {hitRadius = r;}
     
+    public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getSize(){return hitSize;}
     public int getID(){return hitID;}
     public double getTime(){ return hitTime;}
@@ -92,7 +93,14 @@ public class TaggerResponse {
                 double time = bank.getFloat("time",row);
                 double energy = bank.getFloat("energy",row);
                 TaggerResponse ft = new TaggerResponse();
-                
+               
+                double z0 = 0; // FIXME vertex
+                double path = Math.sqrt(x*x+y*y+(z-z0)*(z-z0)); 
+                double cx = x / path;
+                double cy = y / path;
+                double cz = (z-z0) / path;
+                ft.setMomentum(energy*cx,energy*cy,energy*cz);
+
                 ft.setSize(size);
                 ft.setID(id);
                 ft.setEnergy(energy);
@@ -100,6 +108,9 @@ public class TaggerResponse {
                 ft.setTime(time);
                 ft.setHitIndex(row);
                 ft.setPosition(x, y, z);
+
+                ft.getDescriptor().setType(type);
+
                 responseList.add(ft);
             }
         }
