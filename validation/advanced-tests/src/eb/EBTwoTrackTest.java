@@ -44,8 +44,9 @@ public class EBTwoTrackTest {
     int nHadronsSector[]={0,0,0,0,0,0};
     int hadronPDG;
 
-    DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
-    DataBank recpartBank=null,mcBank=null,cheBank=null,rectrkBank=null;
+    DataBank mcBank=null;
+    DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null,cheBank=null;
+    DataBank recpartBank=null,rectrkBank=null,recftBank=null;
     DataBank ftcBank=null,fthBank=null,ftpartBank=null;
 
     @Test
@@ -80,31 +81,22 @@ public class EBTwoTrackTest {
     }
 
     private void getBanks(DataEvent de) {
-        trkBank=null;tofBank=null;htccBank=null;ltccBank=null;
-        recpartBank=null;mcBank=null;cheBank=null;rectrkBank=null;
+        mcBank=null;
+        trkBank=null;tofBank=null;htccBank=null;ltccBank=null;cheBank=null;
+        recpartBank=null;mcBank=null;rectrkBank=null;recftBank=null;
         ftcBank=null;fthBank=null;ftpartBank=null;
-        if (de.hasBank("FTOF::clusters"))
-            tofBank=de.getBank("FTOF::clusters");
-        if (de.hasBank("TimeBasedTrkg::TBTracks"))
-            trkBank = de.getBank("TimeBasedTrkg::TBTracks");
-        if(de.hasBank("REC::Particle")) 
-            recpartBank = de.getBank("REC::Particle");
-        if(de.hasBank("MC::Particle")) 
-            mcBank = de.getBank("MC::Particle");
-        if(de.hasBank("REC::Cherenkov")) 
-            cheBank = de.getBank("REC::Cherenkov");
-        if (de.hasBank("LTCC::clusters"))
-            ltccBank = de.getBank("LTCC::clusters");
-        if (de.hasBank("HTCC::rec"))
-            htccBank = de.getBank("HTCC::rec");
-        if (de.hasBank("REC::Track"))
-            rectrkBank = de.getBank("REC::Track");
-        if (de.hasBank("FTCAL::clusters"))
-            ftcBank = de.getBank("FTCAL::clusters");
-        if (de.hasBank("FTHODO::clusters"))
-            fthBank = de.getBank("FTHODO::clusters");
-        if (de.hasBank("FT::particles"))
-            ftpartBank = de.getBank("FT::particles");
+        if (de.hasBank("FTOF::clusters"))          tofBank=de.getBank("FTOF::clusters");
+        if (de.hasBank("TimeBasedTrkg::TBTracks")) trkBank = de.getBank("TimeBasedTrkg::TBTracks");
+        if(de.hasBank("REC::Particle"))            recpartBank = de.getBank("REC::Particle");
+        if(de.hasBank("MC::Particle"))             mcBank = de.getBank("MC::Particle");
+        if(de.hasBank("REC::Cherenkov"))           cheBank = de.getBank("REC::Cherenkov");
+        if (de.hasBank("LTCC::clusters"))          ltccBank = de.getBank("LTCC::clusters");
+        if (de.hasBank("HTCC::rec"))               htccBank = de.getBank("HTCC::rec");
+        if (de.hasBank("REC::Track"))              rectrkBank = de.getBank("REC::Track");
+        if (de.hasBank("REC::ForwardTagger"))      recftBank = de.getBank("REC::ForwardTagger");
+        if (de.hasBank("FTCAL::clusters"))         ftcBank = de.getBank("FTCAL::clusters");
+        if (de.hasBank("FTHODO::clusters"))        fthBank = de.getBank("FTHODO::clusters");
+        if (de.hasBank("FT::particles"))           ftpartBank = de.getBank("FT::particles");
     }
 
     private void checkResults() {
@@ -147,6 +139,8 @@ public class EBTwoTrackTest {
     }
     
     private void checkResultsFT() {
+
+        assertEquals(false,true);
     }
 
     private void processEventsFT(HipoDataSource reader) {
@@ -159,7 +153,10 @@ public class EBTwoTrackTest {
 
             getBanks(event);
 
+            if (mcBank!=null) mcBank.show();
             if (recpartBank!=null) recpartBank.show();
+            if (recftBank!=null) recftBank.show();
+            if (ftpartBank!=null) ftpartBank.show();
             if (ftcBank!=null) ftcBank.show();
         }
     }
