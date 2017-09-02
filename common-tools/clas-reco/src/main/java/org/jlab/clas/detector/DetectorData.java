@@ -288,8 +288,10 @@ public class DetectorData {
                bank.setFloat("radius", row, (float) p.getTaggerRadius());
                bank.setFloat("path", row, (float) 0.0);
                bank.setFloat("time", row, (float) p.getTaggerTime());
-               bank.setInt("energy", row, (int) p.getTaggerEnergy());
+               bank.setFloat("energy", row, (float) p.getTaggerEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
+               // Using FTCAL for "detector":
+               bank.setByte("detector",row,(byte)DetectorType.FTCAL.getDetectorId());
                row = row + 1;
            }
        }

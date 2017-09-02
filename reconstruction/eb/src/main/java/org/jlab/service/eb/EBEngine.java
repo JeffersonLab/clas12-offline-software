@@ -52,7 +52,8 @@ public class EBEngine extends ReconstructionEngine {
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
-        
+       
+        // FIXME We should be starting with FT::particle, not clusters
         List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
         
         eb.addDetectorResponses(responseFTOF);
@@ -108,7 +109,7 @@ public class EBEngine extends ReconstructionEngine {
             }
             
             if (ftBank!=null && trackFT.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, trackBank, trackFT.size());
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
                 de.appendBanks(bankForwardTagger);
             }
             
