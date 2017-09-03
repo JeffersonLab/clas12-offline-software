@@ -16,7 +16,8 @@ import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
-//import org.jlab.clas.pdg.PDGDatabase;
+import org.jlab.clas.pdg.PDGDatabase;
+import org.jlab.clas.pdg.PDGParticle;
 import org.jlab.clas.pdg.PhysicsConstants;
 
 //import org.jlab.service.pid.PIDResult;
@@ -68,11 +69,7 @@ public class DetectorParticle implements Comparable {
     public DetectorParticle(DetectorTrack track){
         detectorTrack = track;
     }
-    
-    public DetectorParticle(TaggerResponse tagger) {
-        taggerTrack = tagger;
-    }
-    
+   
     public DetectorParticle(DetectorTrack track, double[] covMat) {
         detectorTrack = track;
         covMAT = covMat;
@@ -138,6 +135,40 @@ public class DetectorParticle implements Comparable {
         particle.addResponse(resp);
         return particle;
     }
+    
+    public static DetectorParticle createFTparticle(TaggerResponse tagger) {
+
+        // FIXME:
+        //
+        // This "taggerTrack" naming is not good:
+        // Any "track" should be a DetectorTrack (or at least inherit from it).
+        //
+        // TaggerResponse should be based on FT::particle, not just FT::cluster
+       
+        Point3D xyz = tagger.getPosition();
+        Vector3D mom = tagger.getMomentum();
+        Vector3D dir=new Vector3D(mom);
+        dir.unit();
+
+        // copied from createNeutral / processNeutralTracks:
+        DetectorTrack track = new DetectorTrack(0,1.0);
+        track.addCross(xyz.x(), xyz.y(), xyz.z(), dir.x(),dir.y(),dir.z());
+        track.setVector(dir.x(),dir.y(),dir.z());
+        track.setVertex(0.0, 0.0, 0.0);
+        track.setPath(xyz.distance(new Point3D(0,0,0)));
+        track.setTrackEnd(xyz.x(),xyz.y(),xyz.z());
+        track.setVector(mom.x(),mom.y(),mom.z());
+        track.setP(mom.r());
+        
+        DetectorParticle particle = new DetectorParticle(track);
+        particle.taggerTrack=tagger;
+
+        // FIXME: Use FT::particle instead of FT::cluster, then stop assuming charge=0, pid=22
+        particle.setPid(22);
+
+        return particle;
+    }
+    
     
     public void clear(){
         this.responseStore.clear();
@@ -331,7 +362,8 @@ public class DetectorParticle implements Comparable {
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
     public void   setPidQuality(double q) {this.particleIDQuality = q;}
-    
+
+    public TaggerResponse getTaggerResponse(){ return this.taggerTrack; }
     public Point3D getTaggerPosition() {return this.taggerTrack.getPosition();}
     public Point3D getTaggerPositionWidth() {return this.taggerTrack.getPositionWidth();}
     public double  getTaggerRadius() {return this.taggerTrack.getRadius();}
@@ -339,7 +371,7 @@ public class DetectorParticle implements Comparable {
     public double  getTaggerIndex() {return this.taggerTrack.getHitIndex();}
     public double  getTaggerTime() {return this.taggerTrack.getTime();}
     public double  getTaggerEnergy() {return this.taggerTrack.getEnergy();}
-    
+
     
     public Path3D getTrajectory(){
         Path3D  path = new Path3D();
@@ -411,10 +443,6 @@ public class DetectorParticle implements Comparable {
                 energy += r.getEnergy();
             }
         }
-        /*
-        DetectorResponse response = this.getHit(type);
-        if(response==null) return -1.0;
-        return response.getEnergy();*/
         return energy;
     }
     
