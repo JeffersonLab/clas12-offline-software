@@ -12,7 +12,10 @@ import org.jlab.analysis.math.ClasMath;
 
 /**
  *
- * Analyze EB efficiencies based on Joseph's two-particle (e-X) FD events.
+ * Analyze EB efficiencies based on Joseph's test events.
+ *  - Two-particle (e-X) FD events
+ *  - 1-electron FT events
+ * 
  * Need to write a more general purpose one based on MC::Particle bank.
  *
  * @author baltzell
@@ -24,6 +27,8 @@ public class EBTwoTrackTest {
     // these correspond to Joseph's two-particle event generater:
     static final int electronSector=1;
     static final int hadronSector=3;
+
+    boolean isForwardTagger=false;
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
@@ -39,6 +44,11 @@ public class EBTwoTrackTest {
     int nHadronsSector[]={0,0,0,0,0,0};
     int hadronPDG;
 
+    DataBank mcBank=null;
+    DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null,cheBank=null;
+    DataBank recpartBank=null,rectrkBank=null,recftBank=null;
+    DataBank ftcBank=null,fthBank=null,ftpartBank=null;
+
     @Test
     public void main() {
         String fileName=System.getProperty("INPUTFILE");
@@ -51,12 +61,42 @@ public class EBTwoTrackTest {
         if      (fileName.indexOf("proton")>=0) hadronPDG=2212;
         else if (fileName.indexOf("pion")>0)    hadronPDG=211;
         else if (fileName.indexOf("kaon")>0)    hadronPDG=321;
+        else if (fileName.indexOf("forwardtagger")>0) isForwardTagger=true;
         else {
             System.err.println("Cannot find particle type in filename.");
             assertEquals(false, true);
         }
-        processFile(fileName);
-        checkResults();
+
+        HipoDataSource reader = new HipoDataSource();
+        reader.open(fileName);
+
+        if (isForwardTagger) {
+            processEventsFT(reader);
+            checkResultsFT();
+        }
+        else {
+            processEvents(reader);
+            checkResults();
+        }
+    }
+
+    private void getBanks(DataEvent de) {
+        mcBank=null;
+        trkBank=null;tofBank=null;htccBank=null;ltccBank=null;cheBank=null;
+        recpartBank=null;mcBank=null;rectrkBank=null;recftBank=null;
+        ftcBank=null;fthBank=null;ftpartBank=null;
+        if (de.hasBank("FTOF::clusters"))          tofBank=de.getBank("FTOF::clusters");
+        if (de.hasBank("TimeBasedTrkg::TBTracks")) trkBank = de.getBank("TimeBasedTrkg::TBTracks");
+        if(de.hasBank("REC::Particle"))            recpartBank = de.getBank("REC::Particle");
+        if(de.hasBank("MC::Particle"))             mcBank = de.getBank("MC::Particle");
+        if(de.hasBank("REC::Cherenkov"))           cheBank = de.getBank("REC::Cherenkov");
+        if (de.hasBank("LTCC::clusters"))          ltccBank = de.getBank("LTCC::clusters");
+        if (de.hasBank("HTCC::rec"))               htccBank = de.getBank("HTCC::rec");
+        if (de.hasBank("REC::Track"))              rectrkBank = de.getBank("REC::Track");
+        if (de.hasBank("REC::ForwardTagger"))      recftBank = de.getBank("REC::ForwardTagger");
+        if (de.hasBank("FTCAL::clusters"))         ftcBank = de.getBank("FTCAL::clusters");
+        if (de.hasBank("FTHODO::clusters"))        fthBank = de.getBank("FTHODO::clusters");
+        if (de.hasBank("FT::particles"))           ftpartBank = de.getBank("FT::particles");
     }
 
     private void checkResults() {
@@ -97,11 +137,31 @@ public class EBTwoTrackTest {
         else if (hadronPDG==321)  assertEquals(kEff>0.42,true);
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
     }
+    
+    private void checkResultsFT() {
 
-    private void processFile(String fileName) {
+        assertEquals(false,true);
+    }
 
-        HipoDataSource reader = new HipoDataSource();
-        reader.open(fileName);
+    private void processEventsFT(HipoDataSource reader) {
+
+        while (reader.hasEvent()) {
+
+            nEvents++;
+            
+            DataEvent event = reader.getNextEvent();
+
+            getBanks(event);
+
+            if (mcBank!=null) mcBank.show();
+            if (recpartBank!=null) recpartBank.show();
+            if (recftBank!=null) recftBank.show();
+            if (ftpartBank!=null) ftpartBank.show();
+            if (ftcBank!=null) ftcBank.show();
+        }
+    }
+
+    private void processEvents(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
             
@@ -109,26 +169,7 @@ public class EBTwoTrackTest {
             
             DataEvent event = reader.getNextEvent();
 
-            // get banks:
-            DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
-            DataBank recBank=null,mcBank=null,cheBank=null,rectrkBank=null;;
-
-            if (event.hasBank("FTOF::clusters"))
-                tofBank=event.getBank("FTOF::clusters");
-            if (event.hasBank("TimeBasedTrkg::TBTracks"))
-                trkBank = event.getBank("TimeBasedTrkg::TBTracks");
-            if(event.hasBank("REC::Particle")) 
-                recBank = event.getBank("REC::Particle");
-            if(event.hasBank("MC::Particle")) 
-                mcBank = event.getBank("MC::Particle");
-            if(event.hasBank("REC::Cherenkov")) 
-                cheBank = event.getBank("REC::Cherenkov");
-            if (event.hasBank("LTCC::clusters"))
-                ltccBank = event.getBank("LTCC::clusters");
-            if (event.hasBank("HTCC::rec"))
-                htccBank = event.getBank("HTCC::rec");
-            if (event.hasBank("REC::Track"))
-                rectrkBank = event.getBank("REC::Track");
+            getBanks(event);
 
             //if (mcBank!=null) mcBank.show();
 
@@ -153,7 +194,7 @@ public class EBTwoTrackTest {
                 event.getBank("LTCC::clusters").show();
                 if (htccBank!=null) htccBank.show();
                 if (cheBank!=null) cheBank.show();
-                if (recBank!=null) recBank.show();
+                if (recpartBank!=null) recpartBank.show();
                 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
             }
 */
@@ -182,13 +223,13 @@ public class EBTwoTrackTest {
             boolean foundPion = false;
 
             // check particle bank:
-            if (recBank!=null) {
-                for(int ii = 0; ii < recBank.rows(); ii++) {
+            if (recpartBank!=null) {
+                for(int ii = 0; ii < recpartBank.rows(); ii++) {
 
-                    final byte charge = recBank.getByte("charge", ii);
-                    final int pid = recBank.getInt("pid", ii);
-                    final double px=recBank.getFloat("px",ii);
-                    final double py=recBank.getFloat("py",ii);
+                    final byte charge = recpartBank.getByte("charge", ii);
+                    final int pid = recpartBank.getInt("pid", ii);
+                    final double px=recpartBank.getFloat("px",ii);
+                    final double py=recpartBank.getFloat("py",ii);
                     final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
 
                     if (pid==11 && sector==electronSector) {
@@ -232,7 +273,7 @@ public class EBTwoTrackTest {
                         else {
                             nMissing++;
                             if (debug) {
-                                recBank.show();
+                                recpartBank.show();
                                 tofBank.show();
                             }
                         }

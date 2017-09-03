@@ -195,6 +195,7 @@ public class EBCCDBConstants {
         
         // FIXME:  debug why this one doesn't load
         //loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
+        setDouble(EBCCDBEnum.TARGET_POSITION,0.0);
     
         //loadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_LOWER_PION_THRESHOLD,
