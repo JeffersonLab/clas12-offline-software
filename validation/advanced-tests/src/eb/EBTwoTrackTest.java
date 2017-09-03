@@ -45,8 +45,9 @@ public class EBTwoTrackTest {
     int hadronPDG;
 
     DataBank mcBank=null;
-    DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null,cheBank=null;
-    DataBank recpartBank=null,rectrkBank=null,recftBank=null;
+    DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
+    DataBank recPartBank=null,recTrkBank=null,recFtBank=null;
+    DataBank recCalBank=null,recSciBank=null,recCheBank=null;
     DataBank ftcBank=null,fthBank=null,ftpartBank=null;
 
     @Test
@@ -82,21 +83,53 @@ public class EBTwoTrackTest {
 
     private void getBanks(DataEvent de) {
         mcBank=null;
-        trkBank=null;tofBank=null;htccBank=null;ltccBank=null;cheBank=null;
-        recpartBank=null;mcBank=null;rectrkBank=null;recftBank=null;
+        trkBank=null;tofBank=null;htccBank=null;ltccBank=null;
+        recPartBank=null;mcBank=null;recTrkBank=null;recFtBank=null;
+        recCalBank=null;recSciBank=null;recCheBank=null;
         ftcBank=null;fthBank=null;ftpartBank=null;
         if (de.hasBank("FTOF::clusters"))          tofBank=de.getBank("FTOF::clusters");
         if (de.hasBank("TimeBasedTrkg::TBTracks")) trkBank = de.getBank("TimeBasedTrkg::TBTracks");
-        if(de.hasBank("REC::Particle"))            recpartBank = de.getBank("REC::Particle");
-        if(de.hasBank("MC::Particle"))             mcBank = de.getBank("MC::Particle");
-        if(de.hasBank("REC::Cherenkov"))           cheBank = de.getBank("REC::Cherenkov");
+        if (de.hasBank("REC::Particle"))           recPartBank = de.getBank("REC::Particle");
+        if (de.hasBank("MC::Particle"))            mcBank = de.getBank("MC::Particle");
+        if (de.hasBank("REC::Cherenkov"))          recCheBank = de.getBank("REC::Cherenkov");
+        if (de.hasBank("REC::Calorimeter"))        recCalBank = de.getBank("REC::Calorimeter");
+        if (de.hasBank("REC::Scintillator"))       recSciBank = de.getBank("REC::Scintillator");
         if (de.hasBank("LTCC::clusters"))          ltccBank = de.getBank("LTCC::clusters");
         if (de.hasBank("HTCC::rec"))               htccBank = de.getBank("HTCC::rec");
-        if (de.hasBank("REC::Track"))              rectrkBank = de.getBank("REC::Track");
-        if (de.hasBank("REC::ForwardTagger"))      recftBank = de.getBank("REC::ForwardTagger");
+        if (de.hasBank("REC::Track"))              recTrkBank = de.getBank("REC::Track");
+        if (de.hasBank("REC::ForwardTagger"))      recFtBank = de.getBank("REC::ForwardTagger");
         if (de.hasBank("FTCAL::clusters"))         ftcBank = de.getBank("FTCAL::clusters");
         if (de.hasBank("FTHODO::clusters"))        fthBank = de.getBank("FTHODO::clusters");
         if (de.hasBank("FT::particles"))           ftpartBank = de.getBank("FT::particles");
+    }
+    
+    /**
+     *
+     * Check that index references are within valid range
+     *
+     * bankFrom - bank containing the index
+     * bankTo - bank to which the index refers
+     * idxVarName - name of the index variable
+     *
+     */
+    public boolean hasValidRefs(DataEvent ev,
+                        DataBank bankFrom,
+                        DataBank bankTo,
+                        String idxVarName) {
+        for (int ii=0; ii<bankFrom.rows(); ii++) {
+            int ref=bankFrom.getInt(idxVarName,ii);
+            if (ref>=bankTo.rows() || ref<0) {
+                System.err.println(String.format(
+                        "\bnhasValidRefs: failed on (%s0>%s) %d->%d\n",
+                        bankFrom.getDescriptor().getName(),
+                        bankTo.getDescriptor().getName(),ii,ref));
+                ev.show();
+                bankFrom.show();
+                bankTo.show();
+                return false;
+            }
+        }
+        return true;
     }
 
     private void checkResults() {
@@ -140,24 +173,39 @@ public class EBTwoTrackTest {
     
     private void checkResultsFT() {
 
-        assertEquals(false,true);
+        final double eEff = eCount / nEvents;
+        System.out.println(String.format("\n\neEff = %.3f",eEff));
+        assertEquals(eEff>0.90,true);
     }
 
     private void processEventsFT(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
-
-            nEvents++;
             
             DataEvent event = reader.getNextEvent();
 
             getBanks(event);
-
+/*
             if (mcBank!=null) mcBank.show();
-            if (recpartBank!=null) recpartBank.show();
-            if (recftBank!=null) recftBank.show();
+            if (recPartBank!=null) recPartBank.show();
+            if (recFtBank!=null) recFtBank.show();
             if (ftpartBank!=null) ftpartBank.show();
             if (ftcBank!=null) ftcBank.show();
+*/
+
+            if (ftcBank!=null) {
+
+                nEvents++;
+           
+                if (recPartBank!=null && recFtBank!=null) {
+
+                    // check references:
+                    assertEquals(true,hasValidRefs(event,recFtBank,recPartBank,"pindex"));
+                
+                    // TODO:  add check on pid
+                    eCount++;
+                }
+            }
         }
     }
 
@@ -176,13 +224,13 @@ public class EBTwoTrackTest {
             // no tracking bank, discard event:
             if (trkBank==null) continue;
 
-            //if (rectrkBank!=null) rectrkBank.show(); 
+            //if (recTrkBank!=null) recTrkBank.show(); 
 
 /*
-            if (cheBank!=null) {
-                for (int ii=0; ii<cheBank.rows(); ii++) {
-                    if (cheBank.getInt("detector",ii)!=6) {
-                        cheBank.show();
+            if (recCheBank!=null) {
+                for (int ii=0; ii<recCheBank.rows(); ii++) {
+                    if (recCheBank.getInt("detector",ii)!=6) {
+                        recCheBank.show();
                         break;
                     }
                 }
@@ -193,8 +241,8 @@ public class EBTwoTrackTest {
                 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                 event.getBank("LTCC::clusters").show();
                 if (htccBank!=null) htccBank.show();
-                if (cheBank!=null) cheBank.show();
-                if (recpartBank!=null) recpartBank.show();
+                if (recCheBank!=null) recCheBank.show();
+                if (recPartBank!=null) recPartBank.show();
                 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
             }
 */
@@ -223,13 +271,26 @@ public class EBTwoTrackTest {
             boolean foundPion = false;
 
             // check particle bank:
-            if (recpartBank!=null) {
-                for(int ii = 0; ii < recpartBank.rows(); ii++) {
+            if (recPartBank!=null) {
 
-                    final byte charge = recpartBank.getByte("charge", ii);
-                    final int pid = recpartBank.getInt("pid", ii);
-                    final double px=recpartBank.getFloat("px",ii);
-                    final double py=recpartBank.getFloat("py",ii);
+                // check references:
+                if (recCheBank!=null)
+                    assertEquals(true,hasValidRefs(event,recCheBank,recPartBank,"pindex"));
+                if (recCalBank!=null)
+                    assertEquals(true,hasValidRefs(event,recCalBank,recPartBank,"pindex"));
+                if (recSciBank!=null)
+                    assertEquals(true,hasValidRefs(event,recSciBank,recPartBank,"pindex"));
+                if (recTrkBank!=null) {
+                    assertEquals(true,hasValidRefs(event,recTrkBank,recPartBank,"pindex"));
+                    assertEquals(true,hasValidRefs(event,recTrkBank,trkBank,"index"));
+                }
+
+                for(int ii = 0; ii < recPartBank.rows(); ii++) {
+
+                    final byte charge = recPartBank.getByte("charge", ii);
+                    final int pid = recPartBank.getInt("pid", ii);
+                    final double px=recPartBank.getFloat("px",ii);
+                    final double py=recPartBank.getFloat("py",ii);
                     final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
 
                     if (pid==11 && sector==electronSector) {
@@ -273,7 +334,7 @@ public class EBTwoTrackTest {
                         else {
                             nMissing++;
                             if (debug) {
-                                recpartBank.show();
+                                recPartBank.show();
                                 tofBank.show();
                             }
                         }
