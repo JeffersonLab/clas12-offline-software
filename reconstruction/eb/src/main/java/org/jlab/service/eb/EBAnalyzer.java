@@ -173,7 +173,7 @@ public class EBAnalyzer {
             boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
                 (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
                 (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
-            boolean sfCheck = p.getEnergyFraction(DetectorType.EC)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+            boolean sfCheck = p.getEnergyFraction(DetectorType.ECAL)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
             boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
             boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
             boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;

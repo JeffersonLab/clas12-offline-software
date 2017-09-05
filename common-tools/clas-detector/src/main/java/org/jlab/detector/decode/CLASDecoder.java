@@ -230,12 +230,12 @@ public class CLASDecoder {
         HipoDataEvent event = (HipoDataEvent) writer.createEvent();
         
         String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc",
-						    "FTCAL::adc","HTCC::adc","SVT::adc","CTOF::adc","LTCC::adc","BMT::adc","FMT::adc"};
-        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.FTCAL,
-	    DetectorType.HTCC,DetectorType.SVT,DetectorType.CTOF,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
+						    "FTCAL::adc","HTCC::adc","BST::adc","CTOF::adc","LTCC::adc","BMT::adc","FMT::adc"};
+        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,
+	    DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
         
         String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","RF::tdc"};
-        DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,
+        DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
             DetectorType.DC,DetectorType.CTOF,DetectorType.RF};
         
         for(int i = 0; i < adcBankTypes.length; i++){
