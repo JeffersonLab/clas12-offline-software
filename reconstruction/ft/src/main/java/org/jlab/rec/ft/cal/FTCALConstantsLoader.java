@@ -54,10 +54,14 @@ public class FTCALConstantsLoader {
 
 	// CONSTANTS USED IN CORRECTIONS
 	public static double[] energy_corr = new double[5] ;
-	public static double[] theta_corr = new double[4] ;
-	public static double[] phi_corr = new double[6] ;
-//    public static final int NUMBER_CRYSTALS = 4000;
-		
+	public static double[] theta_corr  = new double[4] ;
+	public static double[] phi_corr    = new double[6] ;
+        public static double[][][] c0      = new double[1][1][484];
+        public static double[][][] c1      = new double[1][1][484];
+        public static double[][][] c2      = new double[1][1][484];
+        public static double[][][] c3      = new double[1][1][484];
+        public static double[][][] c4      = new double[1][1][484];
+        
 	public static int    MAX_CLUS_RAD =3 ;                                                   // maximum radius of the cluster in # of crystals
 	public static double EN_THRES = 0.01;                                                   // energy threshold in GeV	
     // GEOMETRY PARAMETERS
@@ -81,9 +85,9 @@ public class FTCALConstantsLoader {
 	    dbprovider.loadTable("/calibration/ft/ftcal/time_offsets");
 	    dbprovider.loadTable("/calibration/ft/ftcal/status");
 	    dbprovider.loadTable("/calibration/ft/ftcal/cluster");
-	    dbprovider.loadTable("/calibration/ft/ftcal/ecorr");
 	    dbprovider.loadTable("/calibration/ft/ftcal/phicorr");
 	    dbprovider.loadTable("/calibration/ft/ftcal/thetacorr");
+	    dbprovider.loadTable("/calibration/ft/ftcal/energycorr");
 	    //disconnect from database. Important to do this after loading tables.
 	    dbprovider.disconnect(); 
 
@@ -148,32 +152,14 @@ public class FTCALConstantsLoader {
 	        depth_z            = idepth;
 	        if(debugMode>=1) System.out.println("cluster table: " + time_window + " " + cluster_min_energy + " " + cluster_min_size + " " + depth_z);
 	    }
-	    // 5) Energy Corrections : ECORR 
-	    for(int i =0; i< dbprovider.length("/calibration/ft/ftcal/ecorr/ecorr0"); i++) {
-	    	
-	    	int iSec = dbprovider.getInteger("/calibration/ft/ftcal/cluster/sector", i);	    
-	        int iLay = dbprovider.getInteger("/calibration/ft/ftcal/cluster/layer", i);
-	        int iCom = dbprovider.getInteger("/calibration/ft/ftcal/cluster/component", i);
-	        double ecorr0    = dbprovider.getDouble("/calibration/ft/ftcal/ecorr/ecorr0", i);
-	        double ecorr1    = dbprovider.getDouble("/calibration/ft/ftcal/ecorr/ecorr1", i);
-	        double ecorr2    = dbprovider.getDouble("/calibration/ft/ftcal/ecorr/ecorr2", i);
-	       
-	        energy_corr[0]    = ecorr0;
-	        energy_corr[1]    = ecorr1;
-	        energy_corr[2]    = ecorr2;                     
-/*	        energy_corr[0]    =  0.0426930;
-	        energy_corr[1]    =  0.0907798;
-	        energy_corr[2]    = -0.0130983;
-                energy_corr[3]    =  0.00162423;
-	        energy_corr[4]    = -0.0000745987;*/
+	    // 5) OLD Energy Corrections : ECORR 
 	        energy_corr[0]    =  0.0587502;
 	        energy_corr[1]    =  0.0881192;
 	        energy_corr[2]    = -0.0120113;
                 energy_corr[3]    =  0.00131961;
 	        energy_corr[4]    = -0.0000550674;
-	        if(debugMode>=1) System.out.println("energy correction: " + ecorr0 + " " + ecorr1 + " " + ecorr2);
-	    }
-	    // 6) Theta Corrections : THETACORR 
+
+                // 6) Theta Corrections : THETACORR 
 	    for(int i =0; i< dbprovider.length("/calibration/ft/ftcal/thetacorr/thetacorr0"); i++) {
 	    	
 	    	int iSec = dbprovider.getInteger("/calibration/ft/ftcal/thetacorr/sector", i);	    
@@ -209,29 +195,29 @@ public class FTCALConstantsLoader {
 	        phi_corr[3]    = phicorr3;
 	        phi_corr[4]    = phicorr4;
 	        phi_corr[5]    = phicorr5;
-	        if(debugMode>=1) System.out.println("theta correction: " + phicorr0 + " " + phicorr1 + " " + phicorr2 + " " 
-	        														 + phicorr3 + " " + phicorr4 + " " + phicorr5);	        
+	        if(debugMode>=1) System.out.println("theta correction: " + phicorr0 + " " + phicorr1 + " " + phicorr2 + " " 	        														 + phicorr3 + " " + phicorr4 + " " + phicorr5);	        
+	    }
+	    // 5) NEW Energy Corrections : ENERGYCORR 
+	    for(int i =0; i< dbprovider.length("/calibration/ft/ftcal/energycorr/c0"); i++) {
+	    	
+	    	int iSec = dbprovider.getInteger("/calibration/ft/ftcal/energycorr/sector", i);	    
+	        int iLay = dbprovider.getInteger("/calibration/ft/ftcal/energycorr/layer", i);
+	        int iCom = dbprovider.getInteger("/calibration/ft/ftcal/energycorr/component", i);
+	        double ecorr0    = dbprovider.getDouble("/calibration/ft/ftcal/energycorr/c0", i);
+	        double ecorr1    = dbprovider.getDouble("/calibration/ft/ftcal/energycorr/c1", i);
+	        double ecorr2    = dbprovider.getDouble("/calibration/ft/ftcal/energycorr/c2", i);
+	        double ecorr3    = dbprovider.getDouble("/calibration/ft/ftcal/energycorr/c3", i);
+	        double ecorr4    = dbprovider.getDouble("/calibration/ft/ftcal/energycorr/c4", i);
+	       
+                c0[iSec-1][iLay-1][iCom-1] = ecorr0;
+                c1[iSec-1][iLay-1][iCom-1] = ecorr1;
+                c2[iSec-1][iLay-1][iCom-1] = ecorr2;
+                c3[iSec-1][iLay-1][iCom-1] = ecorr3;
+                c4[iSec-1][iLay-1][iCom-1] = ecorr4;
+                
+	        if(debugMode>=1) System.out.println("energy correction: " + ecorr0 + " " + ecorr1 + " " + ecorr2 + " " + ecorr3 + " " + ecorr4);
 	    }
 
-	    /*//set values
-	ENERGY_CORR[0] = 0.05199 ;
-	ENERGY_CORR[1] = 0.07747 ;
-	ENERGY_CORR[2] =-0.005168 ;
-	
-	//set values
-	THETA_CORR[0] = 1.797 ;
-	THETA_CORR[1] =-4.485 ;
-	THETA_CORR[2] =-0.8671 ;
-	THETA_CORR[3] =-1.078 ;
-
-	//set values
-	PHI_CORR[0] = 4.918 ;
-	PHI_CORR[1] =-3.828 ;
-	PHI_CORR[2] = 3.841 ;
-	PHI_CORR[3] =-1.256 ;
-	PHI_CORR[4] = 2.874 ;
-	PHI_CORR[5] =-0.2195 ;
-	*/
 	
 	CSTLOADED = true;
         System.out.println("SUCCESSFULLY LOADED FTCAL CALIBRATION CONSTANTS....");
