@@ -290,31 +290,6 @@ public class DetectorData {
            bank.setInt("energy", row, (int) t.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
            row = row + 1;
-
-       for(int i = 0; i < particles.size(); i++){
-           // FIXME:
-           // 1. remove this hardcoded constant 100, instead use DetectorType class
-           // 2. use REC::Particle.detector for identifying detector, NOT "status"
-           if(particles.get(i).getStatus()==100) {
-               DetectorParticle p = particles.get(i);
-               bank.setShort("index", row, (short) p.getTaggerIndex());
-               bank.setShort("pindex", row, (short) i);
-               bank.setShort("size", row, (short) p.getTaggerSize());
-               bank.setFloat("x", row, (float) p.getTaggerPosition().x());
-               bank.setFloat("y", row, (float) p.getTaggerPosition().y());
-               bank.setFloat("z", row, (float) p.getTaggerPosition().z());
-               bank.setFloat("dx", row, (float) p.getTaggerPositionWidth().x());
-               bank.setFloat("dy", row, (float) p.getTaggerPositionWidth().y());
-               bank.setFloat("radius", row, (float) p.getTaggerRadius());
-               bank.setFloat("path", row, (float) 0.0);
-               bank.setFloat("time", row, (float) p.getTaggerTime());
-               bank.setFloat("energy", row, (float) p.getTaggerEnergy());
-               bank.setFloat("chi2", row, (float) 0.0);
-               // Using FTCAL for "detector":
-               bank.setByte("detector",row,(byte)DetectorType.FTCAL.getDetectorId());
-               row = row + 1;
-           }
-
        }
        return bank;
       }  
