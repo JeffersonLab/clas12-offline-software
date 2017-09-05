@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.eb;
 
 import org.jlab.geom.prim.Vector3D;
@@ -35,8 +30,6 @@ public class EBConstants {
     public static final double           RF_TDC2TIME = 0.0234358;
     public static final int         RF_LARGE_INTEGER = 800;
     
-    public static final double        SPEED_OF_LIGHT = 29.9792;
-    
     public static final Vector3D PCAL_hitRes = new Vector3D(0.0,0.0,0.0);
     public static final Vector3D ECIN_hitRes = new Vector3D(0.0,0.0,0.0);
     public static final Vector3D ECOUT_hitRes = new Vector3D(0.0,0.0,0.0);
@@ -56,7 +49,8 @@ public class EBConstants {
     public static final double LTCC_UPPER_PION_THRESHOLD = 5.0;
     
     public static final int TRIGGER_ID = 11;
-    
+   
+    public static final double GEMC_STARTTIME = 124.25;
     
 }
 

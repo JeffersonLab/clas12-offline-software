@@ -56,11 +56,18 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
         public double getFullEnergy() {
             // return energy corrected for leakage and threshold effects
             double clusterEnergy  = this.getEnergy();
-            double energyCorr = FTCALConstantsLoader.energy_corr[0] 
-                              + FTCALConstantsLoader.energy_corr[1]*clusterEnergy 
-                              + FTCALConstantsLoader.energy_corr[2]*clusterEnergy*clusterEnergy
-                              + FTCALConstantsLoader.energy_corr[3]*clusterEnergy*clusterEnergy*clusterEnergy
-                              + FTCALConstantsLoader.energy_corr[4]*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy;
+            int seedID = this.get(0).get_COMPONENT();
+//            double energyCorr = FTCALConstantsLoader.energy_corr[0] 
+//                              + FTCALConstantsLoader.energy_corr[1]*clusterEnergy 
+//                              + FTCALConstantsLoader.energy_corr[2]*clusterEnergy*clusterEnergy
+//                              + FTCALConstantsLoader.energy_corr[3]*clusterEnergy*clusterEnergy*clusterEnergy
+//                              + FTCALConstantsLoader.energy_corr[4]*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy;
+            double  energyCorr = (FTCALConstantsLoader.c0[0][0][seedID-1]
+                               +  FTCALConstantsLoader.c1[0][0][seedID-1]*clusterEnergy
+                               +  FTCALConstantsLoader.c2[0][0][seedID-1]*clusterEnergy*clusterEnergy
+                               +  FTCALConstantsLoader.c3[0][0][seedID-1]*clusterEnergy*clusterEnergy*clusterEnergy
+                               +  FTCALConstantsLoader.c4[0][0][seedID-1]*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy
+                                )/1000.;
             clusterEnergy+=energyCorr;
             return clusterEnergy;
 	}

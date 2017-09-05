@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.eb;
 
 import java.util.ArrayList;
@@ -89,7 +84,7 @@ public class EBio {
                         bank.getDouble("c1_uy", i),
                         bank.getDouble("c1_uz", i)
                 );         
-             //   System.out.println(p.getLowerCross());
+                //   System.out.println(p.getLowerCross());
                 p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
@@ -132,8 +127,6 @@ public class EBio {
     
     public static boolean isTimeBased(DataEvent de){
         boolean tb = false;
-        //System.out.println(" HAS BANK = " + de.hasBank("TimeBasedTrkg::TBHits")
-        //+ "  HB = " + de.hasBank("HitBasedTrkg::HBTracks"));
         if(de.hasBank("TimeBasedTrkg::TBHits")==true){
             //de.show();
             return true;
@@ -223,42 +216,35 @@ public class EBio {
         }
         return bank;
     }
-    
+
     public static DataBank writeCherenkovResponses(List<CherenkovResponse> responses, int type ) {
-         String bankName = "EVENTHB::particle";
-        
+        String bankName = "EVENTHB::particle";
+
         switch (type){
             case 1 : bankName = "EVENTHB::cherenkov"; break;
             case 2 : bankName = "EVENTTB::cherenkov"; break;
             default: break;
         }
         EvioDataBank  bank = EvioFactory.createBank(bankName, responses.size());
-                for(int i = 0; i < responses.size();i++){
+        for(int i = 0; i < responses.size();i++){
             bank.setInt("pindex", i,responses.get(i).getAssociation());
             bank.setInt("index", i,i);
-            
             bank.setFloat("X", i, (float) responses.get(i).getHitPosition().x());
             bank.setFloat("Y", i, (float) responses.get(i).getHitPosition().y());
             bank.setFloat("Z", i, (float) responses.get(i).getHitPosition().z());
-           
-
             bank.setFloat("time", i, (float) responses.get(i).getTime());
             bank.setFloat("nphe", i, (float) responses.get(i).getEnergy());
-            
         }
         return bank;
     }
-    
-        public static DataBank writeTrigger(DetectorEvent event){
-        String bankName = "Trigger::info";
-        
 
+    public static DataBank writeTrigger(DetectorEvent event){
+        String bankName = "Trigger::info";
         EvioDataBank  bank = EvioFactory.createBank(bankName, 1);
         //bank.setDouble("starttime", 0, event.getEventTrigger().getStartTime());
         //bank.setDouble("vertextime",0, event.getEventTrigger().getVertexTime());
         //bank.setDouble("rftime", 0, event.getEventTrigger().getRFTime());
         //bank.setInt("id",0,event.getEventTrigger().getTriggerID());
-
         return bank;
     }
     
@@ -267,7 +253,6 @@ public class EBio {
         if(event.hasBank("ECDetector::clusters")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("ECDetector::clusters");
             int nrows = bank.rows();
-            //System.out.println("*************************\n\n\n\n ECAL " + nrows);
             for(int i = 0; i < nrows; i++){
                 int sector  = bank.getInt("sector", i);
                 int layer   = bank.getInt("layer", i);
@@ -275,16 +260,13 @@ public class EBio {
                 resp.getDescriptor().setType(DetectorType.EC);
                 resp.getDescriptor().setSectorLayerComponent(sector, layer, 0);
                 resp.setPosition(
-                            bank.getDouble("X", i),bank.getDouble("Y", i),
-                            bank.getDouble("Z", i)
-                    );
-                    resp.setTime(bank.getDouble("time", i));
-                    resp.setEnergy(bank.getDouble("energy", i));
-         
-                    ecal.add(resp);
+                        bank.getDouble("X", i),bank.getDouble("Y", i),
+                        bank.getDouble("Z", i)
+                        );
+                resp.setTime(bank.getDouble("time", i));
+                resp.setEnergy(bank.getDouble("energy", i));
+                ecal.add(resp);
             }
-        } else {
-            //System.out.println("\n\n\n\n NO ECAL");
         }
         return ecal;
     }
@@ -308,7 +290,6 @@ public class EBio {
                     );
                     resp.setTime(bank.getFloat("time", i));
                     resp.setEnergy(bank.getFloat("energy", i));
-                    
                     ftof.add(resp);
                 }
             }
@@ -331,17 +312,14 @@ public class EBio {
                 double x = bank.getDouble("x",i);
                 double y = bank.getDouble("y",i);
                 double z = bank.getDouble("z",i);
-             //   System.out.println(bank.getFloat("x"));
                 double time = bank.getFloat("time",i);
-     //   System.out.println("nphe" + nphe);
-                    CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
-                    che.setHitPosition(x, y, z);
-                    che.setEnergy(nphe);
-                    che.setTime(time);
-                    che.setCherenkovType(DetectorType.HTCC);
-                   // System.out.println(che.getHitPosition());
-                    htcc.add(che);
-              
+                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                che.setHitPosition(x, y, z);
+                che.setEnergy(nphe);
+                che.setTime(time);
+                che.setCherenkovType(DetectorType.HTCC);
+                htcc.add(che);
+
             }
         }
         return htcc;

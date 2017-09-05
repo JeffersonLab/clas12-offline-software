@@ -25,7 +25,7 @@ public class PhysicsConstants {
     }
     
     public static double massElectron(){
-        return 0.0005;
+        return 0.000511;
     }
     
     public static double massPionCharged(){
