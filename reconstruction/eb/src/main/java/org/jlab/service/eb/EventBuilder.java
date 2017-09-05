@@ -79,16 +79,19 @@ public class EventBuilder {
             //DetectorParticle particle = new DetectorParticle(particles.get(i));
             detectorEvent.addParticle(particles.get(i));
 
-    public void addTaggerTracks(List<TaggerResponse> taggers) {
-        for(int i = 0 ; i < taggers.size(); i++){
-            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
-            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
-            // FIXME:  get rid of hardcoded 100
-            particle.setStatus(100);
-            detectorEvent.addParticle(particle);
-
         }
     }
+            
+//    public void addTaggerTracks(List<TaggerResponse> taggers) {
+//        for(int i = 0 ; i < taggers.size(); i++){
+//            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
+//            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
+//            // FIXME:  get rid of hardcoded 100
+//            particle.setStatus(100);
+//            detectorEvent.addParticle(particle);
+//
+//        }
+//    }
     
 
     /**
