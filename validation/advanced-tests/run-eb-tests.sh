@@ -1,7 +1,7 @@
 #!/bin/sh -f
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=v0
+webVersion=4a.2.1
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -45,7 +45,7 @@ fi
 
 classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
-# compile test codes before anything else:
+# make sure test code compiles before anything else:
 javac -cp $classPath src/eb/EBTwoTrackTest.java
 if [ $? != 0 ] ; then echo "EBTwoTrackTest compilation failure" ; exit 1 ; fi
 
