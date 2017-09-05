@@ -378,7 +378,7 @@ public class DetectorParticle implements Comparable {
     public double getPidQuality() {return this.particleIDQuality;}
     public void   setPidQuality(double q) {this.particleIDQuality = q;}
 
-    public TaggerResponse getTaggerResponse(){ return this.taggerTrack; }
+    //public TaggerResponse getTaggerResponse(){ return this.taggerTrack; }
     public Point3D getTaggerPosition() {return this.taggerTrack.getPosition();}
     public Point3D getTaggerPositionWidth() {return this.taggerTrack.getPositionWidth();}
     public double  getTaggerRadius() {return this.taggerTrack.getRadius();}
