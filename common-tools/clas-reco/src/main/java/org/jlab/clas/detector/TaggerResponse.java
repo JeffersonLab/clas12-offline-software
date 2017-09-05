@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -23,25 +18,38 @@ import org.jlab.io.base.DataEvent;
  */
 public class TaggerResponse {
     
-    private double        hitTime = 0.0;
+
+    
+    
+    private double    hitTime = 0.0;
     private int         hitID = -1;
-    private int         hitCharge = -1;
-    private double          hitEnergy = 0.0;
-    private int     association = -1;
+    private int     hitSize = -1;
+    private double  hitRadius = 0.0;
+    private double  hitEnergy = 0.0;
+    private int   association = -1;
+    private int   hitIndex = -1;
+    private DetectorDescriptor  descriptor  = new DetectorDescriptor();
 
     private Vector3D         hitMomentum = new Vector3D();
-
-    public TaggerResponse  setTime(double time) { hitTime = time; return this;}
+    private Point3D         hitPosition = new Point3D();
+    private Point3D         hitWidth = new Point3D();
+    
     public void setID(int id){ hitID = id;}
-    public void setCharge(int q){hitCharge = q;}
+    public void setTime(double time) {hitTime = time;}
+    public void setSize(int q){hitSize = q;}
     public void  setEnergy(double energy) { hitEnergy = energy;}
     public void setAssociation(int assoc) {this.association = assoc;}
+    public void setHitIndex(int index) {this.hitIndex = index;}
+    public void setRadius(double r) {hitRadius = r;}
     
-    public int getCharge(){return hitCharge;}
+    public DetectorDescriptor getDescriptor(){ return this.descriptor;}
+    public int getSize(){return hitSize;}
     public int getID(){return hitID;}
     public double getTime(){ return hitTime;}
     public double getEnergy(){ return hitEnergy;}
     public int getAssociation() {return this.association;}
+    public int getHitIndex() {return this.hitIndex;}
+    public double getRadius() {return this.hitRadius;}
     
     public Vector3D getMomentum(){
         return this.hitMomentum;
@@ -51,29 +59,58 @@ public class TaggerResponse {
         this.hitMomentum.setXYZ(px, py, pz);
     }
     
-
+    public Point3D getPosition(){
+        return this.hitPosition;
+    }
     
+    public void setPosition(double x, double y, double z){
+        this.hitPosition.set(x, y, z);
+    }
+ 
+    public Point3D getPositionWidth(){
+        return this.hitPosition;
+    }
+    
+    public void setPositionWidth(double x, double y, double z){
+        this.hitWidth.set(x, y, z);
+    }
+
     public static List<TaggerResponse>  readHipoEvent(DataEvent event, 
-        String bankName){        
+        String bankName, DetectorType type){        
         List<TaggerResponse> responseList = new ArrayList<TaggerResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
                 int id  = bank.getInt("id", row);
-                int charge = bank.getInt("charge", row);
-                float cx = bank.getFloat("cx",row);
-                float cy = bank.getFloat("cy",row);
-                float cz = bank.getFloat("cz",row);
-                float time = bank.getFloat("time",row);
-                float energy = bank.getFloat("energy",row);
-                    TaggerResponse ft = new TaggerResponse();
-                    ft.setCharge(charge);
-                    ft.setID(id);
-                    ft.setEnergy(energy);
-                    ft.setTime(time);
-                    ft.setMomentum(cx*energy, cy*energy, cz*energy);
-                        //System.out.println("FT Energy  " + energy);
+                int size = bank.getInt("size", row);
+                double x = bank.getFloat("x",row);
+                double y = bank.getFloat("y",row);
+                double z = bank.getFloat("z",row);
+                double dx = bank.getFloat("widthX",row);
+                double dy = bank.getFloat("widthY",row);
+                double radius = bank.getFloat("radius", row);
+                double time = bank.getFloat("time",row);
+                double energy = bank.getFloat("energy",row);
+                TaggerResponse ft = new TaggerResponse();
+               
+                double z0 = 0; // FIXME vertex
+                double path = Math.sqrt(x*x+y*y+(z-z0)*(z-z0)); 
+                double cx = x / path;
+                double cy = y / path;
+                double cz = (z-z0) / path;
+                ft.setMomentum(energy*cx,energy*cy,energy*cz);
+
+                ft.setSize(size);
+                ft.setID(id);
+                ft.setEnergy(energy);
+                ft.setRadius(radius);
+                ft.setTime(time);
+                ft.setHitIndex(row);
+                ft.setPosition(x, y, z);
+
+                ft.getDescriptor().setType(type);
+
                 responseList.add(ft);
             }
         }
