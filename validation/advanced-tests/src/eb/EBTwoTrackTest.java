@@ -13,9 +13,11 @@ import org.jlab.analysis.math.ClasMath;
 /**
  *
  * Analyze EB efficiencies based on Joseph's test events.
- *  - Two-particle (e-X) FD events
+ *  - Two-particle (e-hadron) FD events
  *  - 1-electron FT events
- * 
+ *
+ * Note, hadron is assumed to have positive charge.
+ *
  * Need to write a more general purpose one based on MC::Particle bank.
  *
  * @author baltzell
@@ -167,7 +169,7 @@ public class EBTwoTrackTest {
         // some global efficiency tests:
         assertEquals(eEff>0.9,true);
         if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
-        else if (hadronPDG==321)  assertEquals(kEff>0.42,true);
+        else if (hadronPDG==321)  assertEquals(kEff>0.60,true);
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
     }
     
@@ -249,12 +251,19 @@ public class EBTwoTrackTest {
             // count number of TBTracks:
             int nPosTracks=0,nNegTracks=0;
             for (int ii=0; ii<trkBank.rows(); ii++) {
-                if (trkBank.getInt("q",ii)<0 &&
-                    trkBank.getInt("sector",ii)==electronSector) nNegTracks++;
 
+                // count negative tracks in electronSector:
+                if (trkBank.getInt("sector",ii)==electronSector) {
+
+                    if (trkBank.getInt("q",ii)<0) nNegTracks++;
+                
+                }
+
+                // count positive tracks in hadronSector
                 else if (trkBank.getInt("sector",ii)==hadronSector) {
-                    if (hadronPDG==2212 && trkBank.getInt("q",ii)>0) nPosTracks++;
-                    else if (trkBank.getInt("q",ii)<0) nPosTracks++;
+
+                    if (trkBank.getInt("q",ii)>0) nPosTracks++;
+
                 }
             }
 
@@ -298,13 +307,13 @@ public class EBTwoTrackTest {
                         foundElectron=true;
                     }
                     else if (sector==hadronSector) {
-                        if (Math.abs(pid)==hadronPDG) {
+                        if (pid==hadronPDG) {
                             if (!foundHadron) nHadronsSector[sector-1]++;
                             foundHadron=true;
                         }
-                        if      (pid==2212)           foundProton=true;
-                        else if (Math.abs(pid)==211)  foundPion=true;
-                        else if (Math.abs(pid)==321)  foundKaon=true;
+                        if      (pid==2212) foundProton=true;
+                        else if (pid==211)  foundPion=true;
+                        else if (pid==321)  foundKaon=true;
                     }
 
                 }
