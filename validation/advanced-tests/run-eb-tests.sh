@@ -26,7 +26,7 @@ case $webFileStub in
         ;;
     electronpion)
         ;;
-    forwardtagger)
+    electronFTgamma)
         ;;
     *)
       echo Invalid input evio file:  $webFileStub
