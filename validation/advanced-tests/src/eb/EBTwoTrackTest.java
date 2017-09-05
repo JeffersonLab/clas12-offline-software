@@ -64,7 +64,7 @@ public class EBTwoTrackTest {
         if      (fileName.indexOf("proton")>=0) hadronPDG=2212;
         else if (fileName.indexOf("pion")>0)    hadronPDG=211;
         else if (fileName.indexOf("kaon")>0)    hadronPDG=321;
-        else if (fileName.indexOf("forwardtagger")>0) isForwardTagger=true;
+        else if (fileName.indexOf("electronFTgamma")>0) isForwardTagger=true;
         else {
             System.err.println("Cannot find particle type in filename.");
             assertEquals(false, true);
