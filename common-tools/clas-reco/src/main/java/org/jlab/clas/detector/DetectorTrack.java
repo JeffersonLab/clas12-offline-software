@@ -64,11 +64,13 @@ public class DetectorTrack {
     }
     
     public DetectorTrack(int id, int charge, double px, double py, double pz){
+        // FIXME
+        // Woah, DetectorTrack should not have a taggerID, or a taggerAnything!!!
         this.taggerID = id;
         this.trackCharge = charge;
         this.trackP.setXYZ(px, py, pz);
     }
-    
+
     public DetectorTrack(int charge, double px, double py, double pz,
             double vx, double vy, double vz){
         this.trackCharge = charge;

@@ -58,7 +58,6 @@ public class EventBuilder {
      * @param tracks 
      */
     public void addForwardTracks(List<DetectorTrack> tracks) {
-        //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
             //particle.setStatus(1);
@@ -67,18 +66,27 @@ public class EventBuilder {
     }
     
     public void addCentralTracks(List<DetectorTrack> tracks) {
-        //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
             detectorEvent.addParticle(particle);
         }
     }
     
+
     public void addForwardTaggerParticles(List<DetectorParticle> particles) {
         //for(DetectorTrack track : tracks){
         for(int i = 0 ; i < particles.size(); i++){
             //DetectorParticle particle = new DetectorParticle(particles.get(i));
             detectorEvent.addParticle(particles.get(i));
+
+    public void addTaggerTracks(List<TaggerResponse> taggers) {
+        for(int i = 0 ; i < taggers.size(); i++){
+            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
+            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
+            // FIXME:  get rid of hardcoded 100
+            particle.setStatus(100);
+            detectorEvent.addParticle(particle);
+
         }
     }
     
@@ -356,7 +364,6 @@ class TriggerOptions {
         for(int i = 0; i < npart; i++){
             DetectorParticle p = event.getParticle(i);
             if(p.getSoftwareTriggerScore()>=this.score_requirement) { //Possible Electron
-                //System.out.println("The requirements is " + this.score_requirement);
                 if(this.charge==p.getCharge()){
                     p.setPid(this.id);
                 }
