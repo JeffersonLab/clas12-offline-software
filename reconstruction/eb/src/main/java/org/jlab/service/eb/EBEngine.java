@@ -59,7 +59,7 @@ public class EBEngine extends ReconstructionEngine {
 
        
         // FIXME We should be starting with FT::particle, not clusters
-        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        //List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
 
         
         eb.addDetectorResponses(responseFTOF);
@@ -122,12 +122,14 @@ public class EBEngine extends ReconstructionEngine {
 
             if (ftBank!=null && ftparticles.size()>0) {
                 DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, trackBank);
-
-            if (ftBank!=null && trackFT.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
-
                 de.appendBanks(bankForwardTagger);
             }
+                
+//            if (ftBank!=null && trackFT.size()>0) {
+//                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
+//
+//                de.appendBanks(bankForwardTagger);
+//            }
             
             if (trackBank!=null && tracks.size()>0) {
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, tracks.size());
