@@ -479,7 +479,7 @@ public class DetectorData {
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
 
                // FIXME:  define a convetion on DetectorType for central tracks
-               track.setDetectorID(DetectorType.SVT.getDetectorId());
+               track.setDetectorID(DetectorType.BST.getDetectorId());
 
                tracks.add(track);
            }

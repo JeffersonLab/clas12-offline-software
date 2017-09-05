@@ -55,7 +55,7 @@ public class CLAS12Event {
 				short pindex = calBank.getShort("pindex", k);
 				//short detector = calBank.getShort("detector", k);
 				byte detector = calBank.getByte("detector", k);
-				if(pindex == iparticle && detector == DetectorType.EC.getDetectorId()) {
+				if(pindex == iparticle && detector == DetectorType.ECAL.getDetectorId()) {
 					byte layer = calBank.getByte("layer", k);
 					float energy = calBank.getFloat("energy", k);
 					if(layer == 1) ep += energy;

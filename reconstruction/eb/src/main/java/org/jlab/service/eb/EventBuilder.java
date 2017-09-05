@@ -139,7 +139,7 @@ public class EventBuilder {
              * Matching tracks to PCAL (first layer of ECAL) and adding to the particle if reasonable match
              * is found, and proper association is set.
              */
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 1, EBConstants.PCAL_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, EBConstants.PCAL_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -148,7 +148,7 @@ public class EventBuilder {
             }
            
             // Matching tracks to EC Inner:
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -157,7 +157,7 @@ public class EventBuilder {
             }
             
             // Matching tracks to EC Outer:
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -187,9 +187,9 @@ public class EventBuilder {
     public void processNeutralTracks(){
 
         // get all unmatched calorimeter responses:
-        List<DetectorResponse>   responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 1);
-        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 4);
-        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 7);
+        List<DetectorResponse>   responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 1);
+        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 4);
+        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 7);
 
         // FIXME: is this really 1/2/3, or should it really be 1/2/0:
         // Critical to use DetectorType for this, instead of hardcoded constants everywhere.
@@ -210,9 +210,9 @@ public class EventBuilder {
         for(int i = 0; i < particles.size(); i++){
             DetectorParticle p = particles.get(i);
             // FIXME:  again, layer idices should be gotten from DetectorType
-            int index = p.getDetectorHit(responsesECIN, DetectorType.EC, 4, EBConstants.ECIN_MATCHING);
+            int index = p.getDetectorHit(responsesECIN, DetectorType.ECAL, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
-            index = p.getDetectorHit(responsesECOUT, DetectorType.EC, 7, EBConstants.ECOUT_MATCHING);
+            index = p.getDetectorHit(responsesECOUT, DetectorType.ECAL, 7, EBConstants.ECOUT_MATCHING);
             if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
             index = p.getDetectorHit(responsesFTOF1A, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
             if(index>=0){ p.addResponse(responsesFTOF1A.get(index), true); responsesFTOF1A.get(index).setAssociation(i);}
@@ -221,7 +221,7 @@ public class EventBuilder {
         }
         
         for(DetectorParticle p : particles){
-            double energy = p.getEnergy(DetectorType.EC);
+            double energy = p.getEnergy(DetectorType.ECAL);
             double px = p.vector().x();
             double py = p.vector().y();
             double pz = p.vector().z();

@@ -297,6 +297,8 @@ public class EvioDataEvent implements DataEvent {
 		// System.out.println("looking for parent tag = " + parenttag);
 		if (bank_name.compareTo("GenPart::true") == 0 && parentNode != null)
 			return true;
+		if (bank_name.compareTo("Header::true") == 0 && parentNode != null)
+			return true;
 		if (parentNode == null)
 			return false;
 		// System.out.println("ROOT NODE IS FOUND");
@@ -322,11 +324,13 @@ public class EvioDataEvent implements DataEvent {
 			return null;
 
 		EvioNode leafNode = this.eventHandler.getChildNode(parentNode, nodetag, 0, DataType.ALSOBANK);
-		if (leafNode == null && bank_name.compareTo("GenPart::true") != 0)
+		if (leafNode == null && bank_name.compareTo("GenPart::true") != 0 && bank_name.compareTo("Header::true") != 0)
 			return null;
 
 		TreeMap<Integer, Object> dataTree = null;
 		if (bank_name.compareTo("GenPart::true") == 0) {
+			dataTree = this.eventHandler.getNodeData(parentNode);
+		} else if (bank_name.compareTo("Header::true") == 0) {
 			dataTree = this.eventHandler.getNodeData(parentNode);
 		} else {
 			dataTree = this.eventHandler.getNodeData(leafNode);

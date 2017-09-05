@@ -1,7 +1,7 @@
 [
   {
   "bank": "CND::hits",
-  "group": 311,
+  "group": 20321,
   "info": "reconstructed hit info from CND",
   "items": [
             {"name":"id",               "id":1, "type":"int16",  "info":"id of the hit"},

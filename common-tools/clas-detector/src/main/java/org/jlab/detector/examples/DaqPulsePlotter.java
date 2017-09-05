@@ -121,13 +121,13 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     public void updateDetectorView(){
         
         for(int sector = 1 ; sector < 7; sector++){
-            List<DetectorShape2D> shapesPCAL = DetectorView2D.createSector(DetectorType.EC, sector, 3, Color.yellow, 180, 10);
+            List<DetectorShape2D> shapesPCAL = DetectorView2D.createSector(DetectorType.ECAL, sector, 3, Color.yellow, 180, 10);
             for(DetectorShape2D shape : shapesPCAL) { this.detectorView.getView().addShape("CLAS12", shape);}
             
-            List<DetectorShape2D> shapesECIN = DetectorView2D.createSector(DetectorType.EC, sector, 4,6, Color.yellow, 190, 10);
+            List<DetectorShape2D> shapesECIN = DetectorView2D.createSector(DetectorType.ECAL, sector, 4,6, Color.yellow, 190, 10);
             for(DetectorShape2D shape : shapesECIN) { this.detectorView.getView().addShape("CLAS12", shape);}
             
-            List<DetectorShape2D> shapesECOUT = DetectorView2D.createSector(DetectorType.EC, sector, 7,9, Color.yellow, 200, 10);
+            List<DetectorShape2D> shapesECOUT = DetectorView2D.createSector(DetectorType.ECAL, sector, 7,9, Color.yellow, 200, 10);
             for(DetectorShape2D shape : shapesECOUT) { this.detectorView.getView().addShape("CLAS12", shape);}
             
             List<DetectorShape2D> shapesFTOF = DetectorView2D.createSector(DetectorType.FTOF, sector, 3, Color.blue, 100, 15);
