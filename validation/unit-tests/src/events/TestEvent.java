@@ -128,7 +128,7 @@ public class TestEvent {
 		HipoDataSync writer = new HipoDataSync();
 		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
 		DataBank config = testEvent.createBank("RUN::config", 1);
-		DataBank SVTadc = testEvent.createBank("SVT::adc", 7);
+		DataBank SVTadc = testEvent.createBank("BST::adc", 7);
 		
 		// this event is based on a gemc (4a.1.1 aka 4a.2.0) event with
 		// torus = -1.0 , solenoid = 1.0
