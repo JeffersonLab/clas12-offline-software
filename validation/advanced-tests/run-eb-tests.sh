@@ -19,14 +19,35 @@ fi
 
 # last argument is input file stub:
 webFileStub="${@: -1}"
+
+# sanity check on filestub name,
+# just to error with reasonable message before proceeding:
 case $webFileStub in
+    # electron in forward, hadron in forward:
     electronproton)
         ;;
     electronkaon)
         ;;
     electronpion)
         ;;
+    # electron in FT, hadron in forward:
+    electronFTproton)
+        ;;
+    electronFTkaon)
+        ;;
+    electronFTpion)
+        ;;
     electronFTgamma)
+        ;;
+    # electon in forward, gamma in FT:
+    electrongammaFT)
+        ;;
+    # electron in forward, hadron in central:
+    electronprotonC)
+        ;;
+    electronkaonC)
+        ;;
+    electronpionC)
         ;;
     *)
       echo Invalid input evio file:  $webFileStub
@@ -73,8 +94,9 @@ then
     fi
 
     # download test files
-    if ! [ -e ${webFileStub}.evio.gz ]
+    if ! [ -e ${webFileStub}.evio ]
     then
+        rm -f ${webFileStub}.evio.gz
         wget --no-check-certificate $webDir/${webFileStub}.evio.gz
         if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
         gunzip -f ${webFileStub}.evio.gz
