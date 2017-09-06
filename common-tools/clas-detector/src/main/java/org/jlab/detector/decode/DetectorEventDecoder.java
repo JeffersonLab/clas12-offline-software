@@ -75,7 +75,7 @@ public class DetectorEventDecoder {
     }
     
     public final void initDecoderDev(){
-        keysTrans = Arrays.asList(new String[]{ "HTCC","SVT"} );
+        keysTrans = Arrays.asList(new String[]{ "HTCC","BST"} );
         tablesTrans = Arrays.asList(new String[]{ "/daq/tt/clasdev/htcc","/daq/tt/clasdev/svt" });
         
         keysFitter   = Arrays.asList(new String[]{"HTCC"});
