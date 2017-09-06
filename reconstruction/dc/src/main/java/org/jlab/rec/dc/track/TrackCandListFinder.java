@@ -357,10 +357,10 @@ public class TrackCandListFinder {
 		double pxOrFix = -Vt[3];
 		double pyOrFix = -Vt[4];
 		double pzOrFix = -Vt[5];
-		double arclen = Vt[6];
+		double PathInFromR3 = Vt[6];
 		
 		//double totPathLen = VecAtTarlab0[6] + VecAtTarOut[6] + arclen;
-                double totPathLen =  arclen;
+                double totPathLen =  PathInFromR3+VecAtTarOut[6];
 		cand.set_TotPathLen(totPathLen);
 		
 		cand.set_Vtx0(new Point3D(xOrFix,yOrFix, zOrFix));
