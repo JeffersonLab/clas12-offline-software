@@ -45,7 +45,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/dc/layer");
         }
         
-        if(type==DetectorType.EC){
+        if(type==DetectorType.ECAL){
             provider.loadTable("/geometry/pcal/pcal");
             provider.loadTable("/geometry/pcal/Uview");
             provider.loadTable("/geometry/pcal/Vview");
@@ -80,7 +80,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ft/ftcal");
         }
         
-        if(type==DetectorType.SVT){
+        if(type==DetectorType.BST){
             provider.loadTable("/geometry/cvt/svt/svt");
             provider.loadTable("/geometry/cvt/svt/region");
             provider.loadTable("/geometry/cvt/svt/support");
@@ -126,7 +126,7 @@ public class GeometryFactory {
             return dc;
         }
         
-        if(type==DetectorType.EC){
+        if(type==DetectorType.ECAL){
             ECFactory factory = new ECFactory();
             Detector ec = factory.createDetectorCLAS(provider);
             return ec;

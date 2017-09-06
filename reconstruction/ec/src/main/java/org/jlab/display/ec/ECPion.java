@@ -32,7 +32,7 @@ public class ECPion {
             int nrows = ecCL.rows();
             for(int i = 0; i < nrows; i++){
                 DetectorResponse response = new DetectorResponse();
-                response.getDescriptor().setType(DetectorType.EC);
+                response.getDescriptor().setType(DetectorType.ECAL);
                 response.getDescriptor().setSectorLayerComponent(
                         ecCL.getByte("sector", i),ecCL.getByte("layer", i),0
                         );
@@ -124,7 +124,7 @@ public class ECPion {
         
         //System.out.println("--------------  EVENT -------------");
         for(DetectorParticle p : particles){
-            double energy = p.getEnergy(DetectorType.EC);
+            double energy = p.getEnergy(DetectorType.ECAL);
             //p.getPhysicsParticle(22);
             //System.out.println(" energy = " + energy);
             //System.out.println(p);
@@ -132,8 +132,8 @@ public class ECPion {
         
         Vector3 n1 = particles.get(0).getCrossDir();
         Vector3 n2 = particles.get(1).getCrossDir();
-        double  e1 = particles.get(0).getEnergy(DetectorType.EC);
-        double  e2 = particles.get(1).getEnergy(DetectorType.EC);
+        double  e1 = particles.get(0).getEnergy(DetectorType.ECAL);
+        double  e2 = particles.get(1).getEnergy(DetectorType.ECAL);
         n1.unit();
         n2.unit();
         
@@ -152,10 +152,10 @@ public class ECPion {
         GenericKinematicFitter fitter = new GenericKinematicFitter(11);
         PhysicsEvent gen = fitter.getGeneratedEvent(event);
         
-        if(particles.get(0).getResponse(DetectorType.EC, 1)!=null&&
-                particles.get(0).getResponse(DetectorType.EC, 4)!=null&&
-                particles.get(1).getResponse(DetectorType.EC, 1)!=null&&
-                particles.get(1).getResponse(DetectorType.EC, 4)!=null                
+        if(particles.get(0).getResponse(DetectorType.ECAL, 1)!=null&&
+                particles.get(0).getResponse(DetectorType.ECAL, 4)!=null&&
+                particles.get(1).getResponse(DetectorType.ECAL, 1)!=null&&
+                particles.get(1).getResponse(DetectorType.ECAL, 4)!=null                
                 ){
             /*
             System.out.println("  ENERGIES = " + (e1/0.27) + "  " + (e2/0.27));
@@ -196,13 +196,13 @@ public class ECPion {
         
         if(index_ecin>=0&&rECIN.size()>0)  g.addResponse(rECIN.get(index_ecin));
         if(index_ecout>=0&&rECOUT.size()>0) g.addResponse(rECOUT.get(index_ecout));
-        double energy = g.getEnergy(DetectorType.EC)/0.27;
+        double energy = g.getEnergy(DetectorType.ECAL)/0.27;
         
         Vector3  dir = g.getCrossDir();
         dir.unit();
         /*
         System.out.println(" INDEX = " + index_ecin + "  " + index_ecout 
-                + "  energy = " + g.getEnergy(DetectorType.EC)
+                + "  energy = " + g.getEnergy(DetectorType.ECAL)
                 + "  " + energy + "  " + String.format("%8.5f %8.5f", dir.theta()*57.29,dir.phi()*57.29));
         */
         

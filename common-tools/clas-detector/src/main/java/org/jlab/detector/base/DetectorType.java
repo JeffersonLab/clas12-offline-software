@@ -7,30 +7,31 @@ package org.jlab.detector.base;
 public enum DetectorType {
       
     UNDEFINED ( 0, "UNDEF"),
-    BST       ( 1, "BST"),    
-    BMT       ( 2, "BMT"),
+    BMT       ( 1, "BMT"),    
+    BST       ( 2, "BST"),
     CND       ( 3, "CND"),
     CTOF      ( 4, "CTOF"),
-    FMT       ( 5,"FMT"),
-    HTCC      ( 6,"HTCC"),
-    FTHODO    ( 8,"FTHODO"),
-    FTCAL     ( 9, "FTCAL"),
-    FTOF1A    (10, "FTOF1A"),
-    FTOF1B    (11, "FTOF1B"),
-    FTOF2     (12, "FTOF2"),
-    DC        (13, "DC"),
-    LTCC      (14, "LTCC"),
-    PCAL      (15, "PCAL"),
-    EC        (16, "EC"),
-    FTOF      (17, "FTOF"),
-    RF        (21,"RF"),
+    CVT       ( 5, "CVT"),
+    DC        ( 6, "DC"),
+    ECAL      ( 7, "ECAL"),
+    FMT       ( 8, "FMT"),
+    FT        ( 9, "FT"),
+    FTCAL     (10, "FTCAL"),
+    FTHODO    (11, "FTHODO"),
+    FTOF      (12, "FTOF"),
+    FTTRK     (13, "FTTRK"),
+    HTCC      (15, "HTCC"),
+    LTCC      (16, "LTCC"),
+    RF        (17, "RF"),
+    RICH      (18, "RICH"),
+    RTPC      (19, "RTPC"),
     ECIN      (110, "ECIN"),
     ECOUT     (111, "ECOUT"),
     ECTOT     (112, "ECTOT"),
     LAC       (113, "LAC"),
     SC        (114, "SC"),
-    CC        (115, "CC"),
-    SVT       (220, "SVT");
+    CC        (115, "CC");
+//    SVT       (220, "SVT");
 
     // FIXME add layer conventions here, e.g.:
     // (or maybe they are defined somewhere else?)

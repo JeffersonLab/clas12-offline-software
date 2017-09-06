@@ -63,14 +63,14 @@ public class DetectorTiming implements IDataEventListener,DetectorListener {
             EmbeddedCanvas canvas = this.canvasTab.getCanvas(name);
             canvas.clear();
             canvas.divide(1, 5);
-            List<H1F> hPCAL = this.getHistograms(dataSet, DetectorType.EC, sector, 1);
+            List<H1F> hPCAL = this.getHistograms(dataSet, DetectorType.ECAL, sector, 1);
             canvas.cd(0);
             for(H1F h : hPCAL){ 
                 h.setTitle("ADC PULSES [PCAL]");
                 canvas.draw(h, "same");
             }
             canvas.cd(1);
-            List<H1F> hECIN = this.getHistograms(dataSet, DetectorType.EC, sector, 4);
+            List<H1F> hECIN = this.getHistograms(dataSet, DetectorType.ECAL, sector, 4);
             for(H1F h : hECIN){ h.setTitle("ADC PULSES [EC]"); canvas.draw(h, "same");}
             canvas.cd(2);
             List<H1F> hFTOF1A = this.getHistograms(dataSet, DetectorType.FTOF, sector, 1);

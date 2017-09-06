@@ -75,7 +75,7 @@ public class DetectorEventDecoder {
     }
     
     public final void initDecoderDev(){
-        keysTrans = Arrays.asList(new String[]{ "HTCC","SVT"} );
+        keysTrans = Arrays.asList(new String[]{ "HTCC","BST"} );
         tablesTrans = Arrays.asList(new String[]{ "/daq/tt/clasdev/htcc","/daq/tt/clasdev/svt" });
         
         keysFitter   = Arrays.asList(new String[]{"HTCC"});
@@ -86,7 +86,7 @@ public class DetectorEventDecoder {
     
     public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
-		"FTCAL","FTHODO","LTCC","EC","FTOF","HTCC","DC","CTOF","SVT","RF","BMT","FMT"
+		"FTCAL","FTHODO","LTCC","ECAL","FTOF","HTCC","DC","CTOF","BST","RF","BMT","FMT"
         });
         
         tablesTrans = Arrays.asList(new String[]{
@@ -97,7 +97,7 @@ public class DetectorEventDecoder {
         
         translationManager.init(keysTrans,tablesTrans);
         
-        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTOF","LTCC","EC","HTCC","CTOF"});
+        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTOF","LTCC","ECAL","HTCC","CTOF"});
         tablesFitter = Arrays.asList(new String[]{
             "/daq/fadc/ftcal","/daq/fadc/ftof","/daq/fadc/ltcc","/daq/fadc/ec",
             "/daq/fadc/htcc","/daq/fadc/ctof"

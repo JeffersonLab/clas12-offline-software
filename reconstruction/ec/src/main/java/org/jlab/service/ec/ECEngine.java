@@ -276,7 +276,7 @@ public class ECEngine extends ReconstructionEngine {
         
         requireConstants(Arrays.asList(ecTables));
         
-        ecDetector =  GeometryFactory.getDetector(DetectorType.EC);
+        ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
 
 	setCalRun(2);
         setStripThresholds(10,9,8);
