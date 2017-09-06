@@ -1,8 +1,8 @@
  [
   {
-  "bank": "BMTRec::Hits",
-  "group": 20121,
-  "info": "reconstructed BMT hits on track",
+  "bank": "BSTRec::Hits",
+  "group": 20221,
+  "info": "reconstructed BST hits on track",
   "items": [
         {"name":"ID",             "id":1, "type":"int16"   ,  "info":"hit ID"},
         {"name":"sector",         "id":2, "type":"int8"    ,  "info":"hit sector"},
@@ -15,9 +15,9 @@
         ]
   },
   {
-  "bank": "BMTRec::Clusters",
-  "group": 20122,
-  "info": "reconstructed BMT clusters",
+  "bank": "BSTRec::Clusters",
+  "group": 20222,
+  "info": "reconstructed BST clusters",
   "items": [
             {"name":"ID",              "id":1, "type":"int16"   ,  "info":"ID"},
             {"name":"sector",          "id":2, "type":"int8"   ,  "info":"sector"},
@@ -38,9 +38,9 @@
             ]
   },
   {
-  "bank": "BMTRec::Crosses",
-  "group": 20125,
-  "info": "reconstructed BMT crosses",
+  "bank": "BSTRec::Crosses",
+  "group": 20225,
+  "info": "reconstructed BST crosses",
   "items": [
             {"name":"ID",          "id":1, "type":"int16"  ,  "info":"ID"},
             {"name":"sector",      "id":2, "type":"int8"   ,  "info":"sector"},
@@ -60,8 +60,8 @@
             ]
   },
   {
-  "bank": "BMTRec::LayerEffs",
-  "group": 20126,
+  "bank": "BSTRec::LayerEffs",
+  "group": 20226,
   "info": "layer efficiencies",
   "items": [
             {"name":"sector",      "id":1, "type":"int8" ,  "info":"sector"},
@@ -69,6 +69,6 @@
             {"name":"residual",    "id":3, "type":"float",  "info":"excluded layer residual of the matched cluster centroid"},
             {"name":"status",      "id":4, "type":"int8" ,  "info":"status (-1: not used, i.e. no track; 0: inefficient; 1: efficient"}
             ]
-    }
+  }
   
   ]

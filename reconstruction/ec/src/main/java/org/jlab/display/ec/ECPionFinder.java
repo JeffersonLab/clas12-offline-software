@@ -40,8 +40,8 @@ public class ECPionFinder {
     public PhysicsEvent getPhysicsEvent(){ return this.physicsEvent;}
     
     public void initEvent(DataEvent event){        
-        detectorResponse = DetectorResponse.readHipoEvent(event, "ECAL::clusters", DetectorType.EC);
-        List<DetectorResponse>  PCAL = DetectorResponse.getListByLayer(detectorResponse, DetectorType.EC, 1);
+        detectorResponse = DetectorResponse.readHipoEvent(event, "ECAL::clusters", DetectorType.ECAL);
+        List<DetectorResponse>  PCAL = DetectorResponse.getListByLayer(detectorResponse, DetectorType.ECAL, 1);
         particles.clear();
         for(DetectorResponse res : PCAL){
             DetectorParticle p = DetectorParticle.createNeutral(res);
@@ -66,7 +66,7 @@ public class ECPionFinder {
         goodParticles.clear();
         for(DetectorParticle p : particles){
             if(p.getDetectorResponses().size()>1){
-                double energy = p.getEnergy(DetectorType.EC)/0.245;
+                double energy = p.getEnergy(DetectorType.ECAL)/0.245;
                 p.vector().setMagThetaPhi(energy, p.vector().theta(), p.vector().phi());
                 goodParticles.add(p);
             }
@@ -107,11 +107,11 @@ public class ECPionFinder {
     }
     
     public void doMatching(){
-        List<DetectorResponse> ECIN = DetectorResponse.getListByLayer(detectorResponse, DetectorType.EC, 4);
+        List<DetectorResponse> ECIN = DetectorResponse.getListByLayer(detectorResponse, DetectorType.ECAL, 4);
         //System.out.println("EC INNER SIZE = " + ECIN.size() );
         int counter = 0;
         for(DetectorParticle p : particles){
-            int index = p.getDetectorHit(ECIN, DetectorType.EC, 4, 15.0);
+            int index = p.getDetectorHit(ECIN, DetectorType.ECAL, 4, 15.0);
             //System.out.println( "particle = " + counter +  " index = " + index);
             if(index>=0){
                 p.addResponse(ECIN.get(index), true);
@@ -119,9 +119,9 @@ public class ECPionFinder {
             counter++;
         }
         
-        List<DetectorResponse> ECOUT = DetectorResponse.getListByLayer(detectorResponse, DetectorType.EC, 7);
+        List<DetectorResponse> ECOUT = DetectorResponse.getListByLayer(detectorResponse, DetectorType.ECAL, 7);
         for(DetectorParticle p : particles){
-            int index = p.getDetectorHit(ECOUT, DetectorType.EC, 7, 15.0);
+            int index = p.getDetectorHit(ECOUT, DetectorType.ECAL, 7, 15.0);
             if(index>=0){
                 p.addResponse(ECOUT.get(index), true);
             }

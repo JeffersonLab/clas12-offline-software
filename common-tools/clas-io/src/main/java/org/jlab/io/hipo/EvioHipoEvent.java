@@ -36,7 +36,7 @@ public class EvioHipoEvent {
         this.fillHipoEventDC(hipoEvent, event);
         this.fillHipoEventFMT(hipoEvent, event);
         this.fillHipoEventBMT(hipoEvent, event);
-        this.fillHipoEventSVT(hipoEvent, event);
+        this.fillHipoEventBST(hipoEvent, event);
         this.fillHipoEventRTPC(hipoEvent, event);
         this.fillHipoEventCTOF(hipoEvent, event);        
         this.fillHipoEventCND(hipoEvent, event);        
@@ -45,6 +45,7 @@ public class EvioHipoEvent {
         this.fillHipoEventHTCC(hipoEvent, event);
         this.fillHipoEventRICH(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
+        this.fillHipoEventTrueInfo(hipoEvent, event);
         return hipoEvent;
     }
     
@@ -147,10 +148,10 @@ public class EvioHipoEvent {
         }
     }
     
-    public void fillHipoEventSVT(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+    public void fillHipoEventBST(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("BST::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BST::dgtz");
-            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("SVT::adc", evioBank.rows());
+            HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("BST::adc", evioBank.rows());
             for(int i = 0; i < evioBank.rows(); i++){
                 hipoADC.setByte("sector", i, (byte) evioBank.getInt("sector",i));
                 hipoADC.setByte("layer",  i, (byte) evioBank.getInt("layer",i));
@@ -535,6 +536,71 @@ public class EvioHipoEvent {
 //        }
     }
     
+   public void fillHipoEventTrueInfo(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+        
+        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC"};
+//        DetectorType[]  bankTypes = new DetectorType[]{DetectorType.BMT,
+//                                                       DetectorType.BST,
+//                                                       DetectorType.CND,
+//                                                       DetectorType.CTOF,
+//                                                       DetectorType.DC,
+//                                                       DetectorType.ECAL,
+//                                                       DetectorType.FMT,
+//                                                       DetectorType.FTCAL,
+//                                                       DetectorType.FTHODO,
+//                                                       DetectorType.FTOF,
+//                                                       DetectorType.FTTRK,
+//                                                       DetectorType.HTCC,
+//                                                       DetectorType.LTCC,
+//                                                       DetectorType.ECAL,
+//                                                       DetectorType.RICH,
+//                                                       DetectorType.RTPC};
+        int rows = 0;
+        for(int k = 0; k < bankNames.length; k++){
+            if(evioEvent.hasBank(bankNames[k]+"::true")==true){
+                EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank(bankNames[k]+"::true");
+                rows += evioBank.rows();
+            }
+        }
+        if(rows!=0) {
+            HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("MC::True", rows);
+            int irow=0;
+            for(int k = 0; k < bankNames.length; k++){
+                if(evioEvent.hasBank(bankNames[k]+"::true")==true){
+                    EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank(bankNames[k]+"::true");
+                    for(int i = 0; i < evioBank.rows(); i++){
+                        hipoBank.setByte("detector", irow, (byte)  0);//bankTypes[k].getDetectorId());
+                        hipoBank.setInt("pid",       irow,         evioBank.getInt("pid",i));
+                        hipoBank.setInt("mpid",      irow,         evioBank.getInt("mpid",i));
+                        hipoBank.setInt("tid",       irow,         evioBank.getInt("tid",i));
+                        hipoBank.setInt("mtid",      irow,         evioBank.getInt("mtid",i));
+                        hipoBank.setInt("otid",      irow,         evioBank.getInt("otid",i));
+                        hipoBank.setFloat("trackE",  irow, (float) evioBank.getDouble("trackE",i));
+                        hipoBank.setFloat("avgX",    irow, (float) evioBank.getDouble("avgX",i));
+                        hipoBank.setFloat("avgY",    irow, (float) evioBank.getDouble("avgY",i));
+                        hipoBank.setFloat("avgZ",    irow, (float) evioBank.getDouble("avgZ",i));
+                        hipoBank.setFloat("avgLx",   irow, (float) evioBank.getDouble("avgLx",i));
+                        hipoBank.setFloat("avgLy",   irow, (float) evioBank.getDouble("avgLy",i));
+                        hipoBank.setFloat("avgLz",   irow, (float) evioBank.getDouble("avgLz",i));
+                        hipoBank.setFloat("px",      irow, (float) evioBank.getDouble("px",i));
+                        hipoBank.setFloat("py",      irow, (float) evioBank.getDouble("py",i));
+                        hipoBank.setFloat("pz",      irow, (float) evioBank.getDouble("pz",i));
+                        hipoBank.setFloat("vx",      irow, (float) evioBank.getDouble("vx",i));
+                        hipoBank.setFloat("vy",      irow, (float) evioBank.getDouble("vy",i));
+                        hipoBank.setFloat("vz",      irow, (float) evioBank.getDouble("vz",i));
+                        hipoBank.setFloat("mvx",     irow, (float) evioBank.getDouble("mvx",i));
+                        hipoBank.setFloat("mvy",     irow, (float) evioBank.getDouble("mvy",i));
+                        hipoBank.setFloat("mvz",     irow, (float) evioBank.getDouble("mvz",i));
+                        hipoBank.setFloat("avgT",    irow, (float) evioBank.getDouble("avgT",i));
+                        irow++;
+                    }
+                }
+            }
+            hipoEvent.appendBanks(hipoBank);
+        }
+    }
+   
+   
     public HipoDataBank createHeaderBank(HipoDataEvent event, int nrun, int nevent, float torus, float solenoid){
         HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);        
         bank.setInt("run",        0, nrun);

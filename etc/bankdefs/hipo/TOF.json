@@ -1,7 +1,7 @@
 [ 
  {
     "bank": "FTOF::rawhits",
-    "group": 1211,
+    "group": 21220,
     "info": "reconstructed hit info from L/R FTOF PMTs",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -21,7 +21,7 @@
   },
  {
     "bank": "FTOF::hits",
-    "group": 1212,
+    "group": 21221,
     "info": "reconstructed hit info from FTOF",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -53,7 +53,7 @@
   },
  {
     "bank": "FTOF::clusters",
-    "group": 1213,
+    "group": 21222,
     "info": "reconstructed clusters from FTOF",
     "items": [
         {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -76,7 +76,7 @@
  },
  {
     "bank": "FTOF::matchedclusters",
-    "group": 1214,
+    "group": 21223,
     "info": "matched clusters from FTOF",
     "items": [
         {"name":"sector",               "id":1, "type":"int8",   "info":"sector of FTOF"},
@@ -93,7 +93,7 @@
  
   {
     "bank": "CTOF::rawhits",
-    "group": 411,
+    "group": 20420,
     "info": "reconstructed hit info from U/D CTOF PMTs",
     "items": [
        {"name":"id",               "id":1, "type":"int16",  "info":"id of the hit"},
@@ -111,7 +111,7 @@
   },
  {
     "bank": "CTOF::hits",
-    "group": 412,
+    "group": 20421,
     "info": "reconstructed hit info from CTOF",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},

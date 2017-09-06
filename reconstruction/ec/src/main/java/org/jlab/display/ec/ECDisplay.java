@@ -44,7 +44,7 @@ public class ECDisplay extends JPanel implements IDataEventListener {
         this.add(processorPane,BorderLayout.PAGE_END);   
         processorPane.addEventListener(this);
         detectorEngine.init();
-        ecDetector =  GeometryFactory.getDetector(DetectorType.EC);
+        ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
     }
      
 
@@ -63,7 +63,7 @@ public class ECDisplay extends JPanel implements IDataEventListener {
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak> ecPeaks    = ECCommon.processPeaks(ecPeaksALL);
         
-        DetectorShape2D shapeP = new DetectorShape2D(DetectorType.PCAL,0,0,0);
+        DetectorShape2D shapeP = new DetectorShape2D(DetectorType.ECAL,0,0,0);
         
         shapeP.createBarXY(900,900);
         detectorView.getView().addShape("PCAL", shapeP);
@@ -73,7 +73,7 @@ public class ECDisplay extends JPanel implements IDataEventListener {
         for(ECPeak s : ecPeaks){
             
             DetectorShape2D shape = new DetectorShape2D(
-                    DetectorType.EC,
+                    DetectorType.ECAL,
                     s.getDescriptor().getSector(),s.getDescriptor().getLayer(),
                     s.getMaxStrip());
             System.out.println(s);

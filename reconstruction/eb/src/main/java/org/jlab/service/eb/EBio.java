@@ -257,7 +257,7 @@ public class EBio {
                 int sector  = bank.getInt("sector", i);
                 int layer   = bank.getInt("layer", i);
                 DetectorResponse resp = new DetectorResponse();
-                resp.getDescriptor().setType(DetectorType.EC);
+                resp.getDescriptor().setType(DetectorType.ECAL);
                 resp.getDescriptor().setSectorLayerComponent(sector, layer, 0);
                 resp.setPosition(
                         bank.getDouble("X", i),bank.getDouble("Y", i),

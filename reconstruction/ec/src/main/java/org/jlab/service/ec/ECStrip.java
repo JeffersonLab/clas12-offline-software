@@ -17,7 +17,7 @@ import org.jlab.geom.prim.Point3D;
  */
 public class ECStrip implements Comparable {
     
-    private DetectorDescriptor  desc = new DetectorDescriptor(DetectorType.EC);
+    private DetectorDescriptor  desc = new DetectorDescriptor(DetectorType.ECAL);
     
     private int                 iADC  = 0;
     private int                 iTDC  = 0;

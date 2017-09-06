@@ -107,7 +107,7 @@ public class DetectorEvent {
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.EC)
+                if(r.getDescriptor().getType()==DetectorType.ECAL)
                 responses.add(r);
             }
         }

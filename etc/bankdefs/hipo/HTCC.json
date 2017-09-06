@@ -1,7 +1,7 @@
 [   
  {
     "bank": "HTCC::rec",
-    "group": 610,
+    "group": 21522,
     "info": "reconstructed clusters in HTCC",
     "items": [
        {"name":"id",          "id":1, "type":"int16", "info":"id of the hit"},
