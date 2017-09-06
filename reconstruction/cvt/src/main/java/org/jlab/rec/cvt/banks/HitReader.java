@@ -151,7 +151,7 @@ public class HitReader {
      */
     public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, org.jlab.rec.cvt.svt.Geometry geo) {
 
-        if (event.hasBank("SVT::adc") == false) {
+        if (event.hasBank("BST::adc") == false) {
             //System.err.println("there is no BST bank ");
             _SVTHits = new ArrayList<Hit>();
 
@@ -160,7 +160,7 @@ public class HitReader {
 
         List<Hit> hits = new ArrayList<Hit>();
 
-        DataBank bankDGTZ = event.getBank("SVT::adc");
+        DataBank bankDGTZ = event.getBank("BST::adc");
 
         int rows = bankDGTZ.rows();;
 
@@ -170,7 +170,7 @@ public class HitReader {
         int[] strip = new int[rows];
         int[] ADC = new int[rows];
 
-        if (event.hasBank("SVT::adc") == true) {
+        if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
             for (int i = 0; i < rows; i++) {
 
