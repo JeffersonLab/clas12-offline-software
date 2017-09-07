@@ -1,7 +1,7 @@
 [ 
  {
     "bank": "RUN::config",
-    "group": 10,
+    "group": 11,
     "info": "Run Configuration",
     "items": [
        {"name":"run",        "id":1,  "type":"int32", "info":"RUN number from CODA or GEMC"},
@@ -18,7 +18,7 @@
   },
   {
      "bank": "RUN::rf",
-     "group": 11,
+     "group": 12,
      "info": "RF information",
      "items": [
        {"name":"id",   "id":1, "type":"int16", "info":"id of the RF signal"},

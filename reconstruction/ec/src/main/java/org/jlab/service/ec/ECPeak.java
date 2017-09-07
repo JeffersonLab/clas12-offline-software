@@ -19,7 +19,7 @@ import org.jlab.geom.prim.Point3D;
  */
 public class ECPeak {
     
-    private DetectorDescriptor  desc       = new DetectorDescriptor(DetectorType.EC);
+    private DetectorDescriptor  desc       = new DetectorDescriptor(DetectorType.ECAL);
     private List<ECStrip>       peakStrips = new ArrayList<ECStrip>();
     private Line3D              peakLine   = new Line3D();
     private int                 indexMaxStrip = -1;

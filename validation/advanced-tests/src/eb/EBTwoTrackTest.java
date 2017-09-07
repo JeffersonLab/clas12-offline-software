@@ -14,7 +14,9 @@ import org.jlab.analysis.math.ClasMath;
  *
  * Analyze EB efficiencies based on Joseph's test events.
  *  - Two-particle (e-hadron) FD events
- *  - 1-electron FT events
+ *  - 1-electron FT event
+ *
+ * All other combos are unfinished and assert false.
  *
  * Note, hadron is assumed to have positive charge.
  *
@@ -31,6 +33,8 @@ public class EBTwoTrackTest {
     static final int hadronSector=3;
 
     boolean isForwardTagger=false;
+    boolean isCentral=false;
+    boolean udfFileType=true;
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
@@ -44,9 +48,9 @@ public class EBTwoTrackTest {
     int nMissing = 0;
     int nElectronsSector[]={0,0,0,0,0,0};
     int nHadronsSector[]={0,0,0,0,0,0};
-    int hadronPDG;
+    int hadronPDG = 0;
 
-    DataBank mcBank=null;
+    DataBank mcBank=null,ctrkBank=null;
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
     DataBank recPartBank=null,recTrkBank=null,recFtBank=null;
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
@@ -61,34 +65,92 @@ public class EBTwoTrackTest {
             assertEquals(false, true);
         }
 
-        if      (fileName.indexOf("proton")>=0) hadronPDG=2212;
-        else if (fileName.indexOf("pion")>0)    hadronPDG=211;
-        else if (fileName.indexOf("kaon")>0)    hadronPDG=321;
-        else if (fileName.indexOf("electronFTgamma")>0) isForwardTagger=true;
-        else {
-            System.err.println("Cannot find particle type in filename.");
-            assertEquals(false, true);
+        // Strip off the "out_" prefix:
+        String ss=fileName.replace("out_","");
+        
+        // Strip off the hipo suffix:
+        ss=ss.replace(".hipo","");
+        
+        // test filename to determine data type:
+        if      (ss.equals("electronproton"))  {
+            hadronPDG=2212;
+            udfFileType=false;
+        }
+        else if (ss.equals("electronpion")) {
+            hadronPDG=211;
+            udfFileType=false;
+        }
+        else if (ss.equals("electronkaon")) {
+            hadronPDG=321;
+            udfFileType=false;
+        }
+        else if (ss.equals("electronFTgamma")) {
+            isForwardTagger=true;
+            hadronPDG=22;
+            udfFileType=false;
+        }
+        else if (ss.equals("electronFTproton")) {
+            isForwardTagger=true;
+            hadronPDG=2212;
+        }
+        else if (ss.equals("electronFTkaon")) {
+            isForwardTagger=true;
+            hadronPDG=321;
+        }
+        else if (ss.equals("electronFTpion")) {
+            isForwardTagger=true;
+            hadronPDG=211;
+        }
+        else if (ss.equals("electronprotonC")) {
+            isCentral=true;
+            hadronPDG=2212;
+        }
+        else if (ss.equals("electronkaonC")) {
+            isCentral=true;
+            hadronPDG=321;
+        }
+        else if (ss.equals("electronpionC")) {
+            isCentral=true;
+            hadronPDG=211;
+        }
+        else if (ss.equals("electrongammaFT")) {
         }
 
         HipoDataSource reader = new HipoDataSource();
         reader.open(fileName);
 
-        if (isForwardTagger) {
-            processEventsFT(reader);
-            checkResultsFT();
+        if (!udfFileType) {
+            if (isForwardTagger) {
+                processEventsFT(reader);
+                checkResultsFT();
+            }
+            else if (isCentral) {
+                processEvents(reader);
+            }
+            else {
+                processEventsFD(reader);
+                checkResultsFD();
+            }
         }
+
         else {
             processEvents(reader);
-            checkResults();
+            System.out.println("");
+            System.out.println("***********************************************************");
+            System.out.println("EBTwoTrackTest does not know about this file:  "+ss);
+            System.out.println("  So we only did a bank referencing test.");
+            System.out.println("***********************************************************");
+            System.out.println("");
         }
     }
 
     private void getBanks(DataEvent de) {
-        mcBank=null;
+        mcBank=null;ctrkBank=null;
         trkBank=null;tofBank=null;htccBank=null;ltccBank=null;
         recPartBank=null;mcBank=null;recTrkBank=null;recFtBank=null;
         recCalBank=null;recSciBank=null;recCheBank=null;
         ftcBank=null;fthBank=null;ftpartBank=null;
+        if (de.hasBank("CVTRec::Tracks"))          ctrkBank=de.getBank("CVTRec::Tracks");
         if (de.hasBank("FTOF::clusters"))          tofBank=de.getBank("FTOF::clusters");
         if (de.hasBank("TimeBasedTrkg::TBTracks")) trkBank = de.getBank("TimeBasedTrkg::TBTracks");
         if (de.hasBank("REC::Particle"))           recPartBank = de.getBank("REC::Particle");
@@ -134,7 +196,36 @@ public class EBTwoTrackTest {
         return true;
     }
 
-    private void checkResults() {
+    /*
+     *
+     * Check that all from->to indices are within valid range
+     *
+     */
+    public void checkAllRefs(DataEvent ev) {
+        if (recPartBank!=null) {
+            if (recCheBank!=null)
+                assertEquals(true,hasValidRefs(ev,recCheBank,recPartBank,"pindex"));
+            if (recCalBank!=null)
+                assertEquals(true,hasValidRefs(ev,recCalBank,recPartBank,"pindex"));
+            if (recSciBank!=null)
+                assertEquals(true,hasValidRefs(ev,recSciBank,recPartBank,"pindex"));
+            if (recTrkBank!=null)
+                assertEquals(true,hasValidRefs(ev,recTrkBank,recPartBank,"pindex"));
+            if (recFtBank!=null)
+                assertEquals(true,hasValidRefs(ev,recFtBank,recPartBank,"pindex"));
+        }
+        if (recTrkBank!=null) {
+            // FIXME:  check detectorType
+            if (trkBank!=null) {
+                assertEquals(true,hasValidRefs(ev,recTrkBank,trkBank,"index"));
+            }
+//          if (ctrkBank!=null) {
+//              assertEquals(true,hasValidRefs(ev,recTrkBank,trkBank,"index"));
+//          }
+        }
+    }
+
+    private void checkResultsFD() {
 
         final double twoTrackFrac = (double)nTwoTrackEvents / nEvents;
        
@@ -180,13 +271,22 @@ public class EBTwoTrackTest {
         assertEquals(eEff>0.90,true);
     }
 
+    private void processEvents(HipoDataSource reader) {
+
+        while (reader.hasEvent()) {
+            DataEvent event = reader.getNextEvent();
+            getBanks(event);
+            checkAllRefs(event);
+        }
+    }
+
     private void processEventsFT(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
             
             DataEvent event = reader.getNextEvent();
-
             getBanks(event);
+            checkAllRefs(event);
 /*
             if (mcBank!=null) mcBank.show();
             if (recPartBank!=null) recPartBank.show();
@@ -201,8 +301,7 @@ public class EBTwoTrackTest {
            
                 if (recPartBank!=null && recFtBank!=null) {
 
-                    // check references:
-                    assertEquals(true,hasValidRefs(event,recFtBank,recPartBank,"pindex"));
+                    //assertEquals(true,hasValidRefs(event,recFtBank,recPartBank,"pindex"));
                 
                     // TODO:  add check on pid
                     eCount++;
@@ -211,15 +310,15 @@ public class EBTwoTrackTest {
         }
     }
 
-    private void processEvents(HipoDataSource reader) {
+    private void processEventsFD(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
             
             nEvents++;
             
             DataEvent event = reader.getNextEvent();
-
             getBanks(event);
+            checkAllRefs(event);
 
             //if (mcBank!=null) mcBank.show();
 
@@ -282,6 +381,7 @@ public class EBTwoTrackTest {
             // check particle bank:
             if (recPartBank!=null) {
 
+                /*
                 // check references:
                 if (recCheBank!=null)
                     assertEquals(true,hasValidRefs(event,recCheBank,recPartBank,"pindex"));
@@ -293,6 +393,7 @@ public class EBTwoTrackTest {
                     assertEquals(true,hasValidRefs(event,recTrkBank,recPartBank,"pindex"));
                     assertEquals(true,hasValidRefs(event,recTrkBank,trkBank,"index"));
                 }
+                */
 
                 for(int ii = 0; ii < recPartBank.rows(); ii++) {
 

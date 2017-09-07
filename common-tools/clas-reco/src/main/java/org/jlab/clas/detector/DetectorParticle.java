@@ -282,8 +282,8 @@ public class DetectorParticle implements Comparable {
     }
     
     public int getSector(){
-        if(this.hasHit(DetectorType.EC, 1)==true){
-            return getHit(DetectorType.EC, 1).getDescriptor().getSector();
+        if(this.hasHit(DetectorType.ECAL, 1)==true){
+            return getHit(DetectorType.ECAL, 1).getDescriptor().getSector();
         }
         return 0;
     }
@@ -696,7 +696,7 @@ public class DetectorParticle implements Comparable {
                 this.particleCrossDirection.y(),this.particleCrossDirection.z()));
         */
         str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, htcc = %5d, beta = %6.3f, mass2 = %8.3f\n",                
-                this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.EC),
+                this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.ECAL),
                 this.getNphe(DetectorType.HTCC),this.getBeta(),this.getMass()));
 //        for(ScintillatorResponse res : this.scintillatorStore){
 //            str.append(res.toString());
@@ -850,7 +850,7 @@ public class DetectorParticle implements Comparable {
         if(this.getNphe(DetectorType.HTCC)>5){
             score = score + 1000;
         }
-        if(this.getEnergyFraction(DetectorType.EC)>0.218){
+        if(this.getEnergyFraction(DetectorType.ECAL)>0.218){
             score = score + 100;
         }
         if(this.hasHit(DetectorType.FTOF,1)==true || this.hasHit(DetectorType.FTOF,2)==true){
