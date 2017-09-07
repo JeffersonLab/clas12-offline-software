@@ -27,6 +27,7 @@ public class DetectorResponse {
     private Double           particlePath   = 0.0;
     private int              association    = -1;
     private int              hitIndex       = -1;
+    private int              cvtID          = -1;
 
     public DetectorResponse(){
         super();
@@ -41,10 +42,12 @@ public class DetectorResponse {
     public void   setMatchPosition(double x, double y, double z){this.hitPositionMatched.setXYZ(x, y, z);}
     public void   setPath(double path){ this.particlePath = path;}
     public void   setEnergy(double energy) { this.detectorEnergy = energy; }
+    public void   setCVTID(int id) {this.cvtID = id;};
     
     public double getTime(){ return this.detectorTime;}
     public double getEnergy(){ return this.detectorEnergy; }
     public double getPath(){ return this.particlePath;}
+    public int    getCVTID() {return this.cvtID;}
     
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}

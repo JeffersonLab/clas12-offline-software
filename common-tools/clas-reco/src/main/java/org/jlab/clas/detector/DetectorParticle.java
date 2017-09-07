@@ -558,7 +558,6 @@ public class DetectorParticle implements Comparable {
             if(type==DetectorType.FTCAL){
                 if(hitList.get(loop).getDescriptor().getType()==type 
                     && hitList.get(loop).getID()==this.calID){
-               
                     bestIndex = loop;
                 }
             }
