@@ -212,7 +212,7 @@ public class EventBuilder {
         }
     }
     
-    public void processNeutralTracks(){
+    public void processForwardNeutralTracks(){
 
         // get all unmatched calorimeter responses:
         List<DetectorResponse>   responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.EC, 1);
@@ -266,6 +266,10 @@ public class EventBuilder {
         }
         
         detectorEvent.setAssociation();
+    }
+    
+    public void processCentralNeutralTracks(){
+        
     }
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
