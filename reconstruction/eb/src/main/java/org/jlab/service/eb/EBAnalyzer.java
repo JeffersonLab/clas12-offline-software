@@ -6,7 +6,7 @@ import java.util.HashMap;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.rec.eb.EBConstants;
+
 import org.jlab.clas.pdg.PhysicsConstants;
 
 /**
@@ -174,12 +174,12 @@ public class EBAnalyzer {
             boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
                 (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
                 (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
-            boolean sfCheck = p.getEnergyFraction(DetectorType.EC)>org.jlab.rec.eb.EBConstants.ECAL_SAMPLINGFRACTION_CUT;
-            boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>org.jlab.rec.eb.EBConstants.HTCC_NPHE_CUT;
-            boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>org.jlab.rec.eb.EBConstants.LTCC_NPHE_CUT;
-            boolean htccPionThreshold = p.vector().mag()>org.jlab.rec.eb.EBConstants.HTCC_PION_THRESHOLD;
-            boolean ltccPionThreshold = p.vector().mag()<org.jlab.rec.eb.EBConstants.LTCC_UPPER_PION_THRESHOLD 
-                && p.vector().mag()>org.jlab.rec.eb.EBConstants.LTCC_LOWER_PION_THRESHOLD;
+            boolean sfCheck = p.getEnergyFraction(DetectorType.EC)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+            boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
+            boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
+            boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
+            boolean ltccPionThreshold = p.vector().mag()<EBConstants.LTCC_UPPER_PION_THRESHOLD 
+                && p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
 
             switch(abs(pid)) {
                 case 11:

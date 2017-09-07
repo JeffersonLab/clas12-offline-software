@@ -167,6 +167,7 @@ public class DetectorData {
         DataBank bank = event.createBank(bank_name, particles.size());
         for(int row = 0; row < particles.size(); row++){
             bank.setInt("pid",row,particles.get(row).getPid());
+            //System.out.println(row + " RECPID " + particles.get(row).getPid());
             bank.setByte("charge",row, (byte) particles.get(row).getCharge());
             bank.setFloat("px", row, (float) particles.get(row).vector().x());
             bank.setFloat("py", row, (float) particles.get(row).vector().y());
@@ -271,24 +272,24 @@ public class DetectorData {
       public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        int row = 0;
-
+       //System.out.println("Forward Tagger Bank Printing");
        for(int i = 0; i < responses.size(); i++){
            TaggerResponse t  = responses.get(i);
-          
-           bank.setShort("index", row, (short) 0);
-           bank.setShort("pindex", row, (short) 0);
+           //System.out.println(i + "  " + t.getAssociation());
+           bank.setShort("index", row, (short) t.getHitIndex());
+           bank.setShort("pindex", row, (short) t.getAssociation());
            bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
-           bank.setShort("size", row, (short) t.getSize());
-           bank.setFloat("x", row, (float) t.getPosition().x());
-           bank.setFloat("y", row, (float) t.getPosition().y());
-           bank.setFloat("z", row, (float) t.getPosition().z());
-           bank.setFloat("dx", row, (float) t.getPositionWidth().x());
-           bank.setFloat("dy", row, (float) t.getPositionWidth().y());
-           bank.setFloat("radius", row, (float) t.getRadius());
-           bank.setFloat("path", row, (float) 0.0);
-           bank.setFloat("time", row, (float) t.getTime());
-           bank.setInt("energy", row, (int) t.getEnergy());
-           bank.setFloat("chi2", row, (float) 0.0);
+//           bank.setFloat("energy", row, (float) t.getEnergy());          
+//           bank.setFloat("time", row, (float) t.getTime());           
+//           bank.setFloat("path", row, (float) t.getPath()); 
+//           bank.setFloat("x", row, (float) t.getPosition().x());
+//           bank.setFloat("y", row, (float) t.getPosition().y());
+//           bank.setFloat("z", row, (float) t.getPosition().z());
+//           bank.setFloat("dx", row, (float) t.getPositionWidth().x());
+//           bank.setFloat("dy", row, (float) t.getPositionWidth().y());
+//           bank.setFloat("radius", row, (float) t.getRadius());
+//           bank.setShort("size", row, (short) t.getSize());
+//           bank.setFloat("chi2", row, (float) 0.0);
            row = row + 1;
        }
        return bank;
@@ -490,21 +491,37 @@ public class DetectorData {
             int nrows = bank.rows();
            
             for(int row = 0; row < nrows; row++){
-                int charge  = bank.getShort("charge", row);               
-                double cx    = bank.getFloat("cx",row);
+                int charge  = bank.getByte("charge", row);               
+                double cx   = bank.getFloat("cx",row);
                 double cy   = bank.getFloat("cy",row);
-                double cz = bank.getFloat("cz",row);
+                double cz   = bank.getFloat("cz",row);
                 double energy = bank.getFloat("energy",row);
 
-                int calID = bank.getInt("calID",row);
-                int hodoID = bank.getInt("hodoID",row);
-                    
+                int calID = bank.getShort("calID",row);
+                int hodoID = bank.getShort("hodoID",row);
+                int pid = -1;    
+                
                 double px = cx*energy;
                 double py = cy*energy;
                 double pz = cz*energy;
                 
-                DetectorParticle  particle = new DetectorParticle(charge, px, py, pz);
-
+                
+                DetectorTrack track = new DetectorTrack(charge, px ,py, pz);
+                track.setDetectorID(DetectorType.FTCAL.getDetectorId());
+                
+                DetectorParticle particle = new DetectorParticle(track);
+                
+                if(charge==0){
+                    pid = 22;
+                }
+                if(charge<0){
+                    pid = 11;
+                }
+                
+                
+                //System.out.println("PID " + particle.getPid());
+                
+                particle.setPid(pid);
                 particle.setFTCALID(calID);
                 particle.setFTHODOID(hodoID);
                 particles.add(particle);
@@ -514,4 +531,3 @@ public class DetectorData {
     }
    
 }
-
