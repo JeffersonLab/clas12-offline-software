@@ -49,18 +49,30 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL);
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
+        //List<DetectorResponse> responseCND = ScintillatorResponse.readHipoEvent(de, "CND::hits", DetectorType.CND);
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
+
+        
+        List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de, "FTHODO::clusters",DetectorType.FTHODO);
+
+        System.out.println("# of FTCAL clusters " + responseFTCAL.size());
+        System.out.println("# of FTHODO clusters " + responseFTHODO.size());
        
         // FIXME We should be starting with FT::particle, not clusters
-        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        //List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
+        //eb.addDetectorResponses(responseCND);
         eb.addDetectorResponses(responseECAL);
         eb.addCherenkovResponses(responseHTCC);
         eb.addCherenkovResponses(responseLTCC);
+        eb.addTaggerResponses(responseFTCAL);
+        eb.addTaggerResponses(responseFTHODO);
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
@@ -70,9 +82,8 @@ public class EBEngine extends ReconstructionEngine {
 
         // Process tracks:
         eb.processHitMatching();
-        eb.addTaggerTracks(trackFT);
-        eb.processNeutralTracks();
-
+        
+        eb.processForwardNeutralTracks();
         eb.assignTrigger();
  
         // Process RF:
@@ -82,6 +93,20 @@ public class EBEngine extends ReconstructionEngine {
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
         analyzer.processEvent(eb.getEvent());
+        
+        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");
+        eb.addForwardTaggerParticles(ftparticles);
+        eb.forwardTaggerIDMatching();
+        
+        for(int i = 0 ; i < eb.getEvent().getParticles().size() ; i++){
+            DetectorParticle p = eb.getEvent().getParticles().get(i);
+            System.out.println("Particle Index " + i + " Particle ID " + p.getPid());
+            //System.out.println("Particle CAL ID " + p.getFTCALID());
+            //System.out.println("Particle HODO ID " + p.getFTHODOID());
+            for(int j = 0 ; j < p.getTaggerResponses().size() ; j++){
+                System.out.println("Tagger Pindex " + p.getTaggerResponses().get(j).getAssociation());
+            }
+        }
         
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
@@ -108,10 +133,17 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankChe);
             }
             
-            if (ftBank!=null && trackFT.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
+            List<TaggerResponse>       taggers = eb.getEvent().getTaggerResponseList();
+            if (ftBank!=null && taggers.size()>0) {
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, trackBank);
                 de.appendBanks(bankForwardTagger);
             }
+                
+//            if (ftBank!=null && trackFT.size()>0) {
+//                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
+//
+//                de.appendBanks(bankForwardTagger);
+//            }
             
             if (trackBank!=null && tracks.size()>0) {
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, tracks.size());
@@ -184,4 +216,3 @@ public class EBEngine extends ReconstructionEngine {
     }
     
 }
-

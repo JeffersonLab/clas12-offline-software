@@ -3,7 +3,7 @@ package org.jlab.service.eb;
 import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-
+import org.jlab.rec.eb.EBConstants;
 /**
  *
  * @author devita

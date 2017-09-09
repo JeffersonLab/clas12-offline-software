@@ -72,15 +72,26 @@ public class EventBuilder {
         }
     }
     
-    public void addTaggerTracks(List<TaggerResponse> taggers) {
-        for(int i = 0 ; i < taggers.size(); i++){
-            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
-            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
-            // FIXME:  get rid of hardcoded 100
-            particle.setStatus(100);
-            detectorEvent.addParticle(particle);
+
+    public void addForwardTaggerParticles(List<DetectorParticle> particles) {
+        //for(DetectorTrack track : tracks){
+        for(int i = 0 ; i < particles.size(); i++){
+            //DetectorParticle particle = new DetectorParticle(particles.get(i));
+            detectorEvent.addParticle(particles.get(i));
+
         }
     }
+            
+//    public void addTaggerTracks(List<TaggerResponse> taggers) {
+//        for(int i = 0 ; i < taggers.size(); i++){
+//            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
+//            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
+//            // FIXME:  get rid of hardcoded 100
+//            particle.setStatus(100);
+//            detectorEvent.addParticle(particle);
+//
+//        }
+//    }
     
 
     /**
@@ -184,7 +195,24 @@ public class EventBuilder {
         }
     }
     
-    public void processNeutralTracks(){
+    public void forwardTaggerIDMatching() {
+        int np = detectorEvent.getParticles().size();
+        for(int n = 0 ; n < np ; n++){
+            DetectorParticle p = detectorEvent.getParticles().get(n);
+            int index = p.getForwardTaggerHit(this.taggerResponses, DetectorType.FTCAL);
+            if(index>=0){
+                p.addTaggerResponse(this.taggerResponses.get(index));
+                taggerResponses.get(index).setAssociation(n);
+            }
+            index = p.getForwardTaggerHit(this.taggerResponses, DetectorType.FTHODO);
+            if(index>=0){
+                p.addTaggerResponse(this.taggerResponses.get(index));
+                taggerResponses.get(index).setAssociation(n);
+            }
+        }
+    }
+    
+    public void processForwardNeutralTracks(){
 
         // get all unmatched calorimeter responses:
         List<DetectorResponse>   responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 1);
@@ -238,6 +266,10 @@ public class EventBuilder {
         }
         
         detectorEvent.setAssociation();
+    }
+    
+    public void processCentralNeutralTracks(){
+        
     }
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){

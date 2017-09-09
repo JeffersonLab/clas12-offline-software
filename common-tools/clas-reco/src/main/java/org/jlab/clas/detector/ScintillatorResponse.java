@@ -30,10 +30,14 @@ public class ScintillatorResponse extends DetectorResponse {
             for(int row = 0; row < nrows; row++){
                 int sector = bank.getByte("sector", row);
                 int layer  = bank.getByte("layer", row);
-                int paddle = bank.getShort("component", row);
+                int paddle = bank.getShort("component", row);           
                 DetectorResponse  response = new DetectorResponse(sector,layer,paddle);
                 response.setHitIndex(row);
                 response.getDescriptor().setType(type);
+                if(type==DetectorType.CND){
+                    int trkid = bank.getShort("trkID", row);
+                    response.setCVTID(trkid);
+                }
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
                 float z = bank.getFloat("z", row);

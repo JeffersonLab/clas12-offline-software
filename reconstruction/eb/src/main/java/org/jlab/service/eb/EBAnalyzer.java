@@ -128,6 +128,7 @@ public class EBAnalyzer {
     public void assignPids(DetectorEvent event) {
         int np = event.getParticles().size();
         PIDHypothesis pidHyp = new PIDHypothesis();
+
         for(int i = 1; i < np; i++){
             DetectorParticle p = event.getParticle(i);
             if(p.getCharge()==0) break;

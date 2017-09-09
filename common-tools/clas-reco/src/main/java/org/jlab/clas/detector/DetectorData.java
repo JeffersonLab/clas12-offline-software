@@ -167,6 +167,7 @@ public class DetectorData {
         DataBank bank = event.createBank(bank_name, particles.size());
         for(int row = 0; row < particles.size(); row++){
             bank.setInt("pid",row,particles.get(row).getPid());
+            //System.out.println(row + " RECPID " + particles.get(row).getPid());
             bank.setByte("charge",row, (byte) particles.get(row).getCharge());
             bank.setFloat("px", row, (float) particles.get(row).vector().x());
             bank.setFloat("py", row, (float) particles.get(row).vector().y());
@@ -268,35 +269,31 @@ public class DetectorData {
        return bank;
    }
       
-   public static DataBank getForwardTaggerBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows){
-       DataBank bank = event.createBank(bank_name, rows);
+      public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, responses.size());
        int row = 0;
-       for(int i = 0; i < particles.size(); i++){
-           // FIXME:
-           // 1. remove this hardcoded constant 100, instead use DetectorType class
-           // 2. use REC::Particle.detector for identifying detector, NOT "status"
-           if(particles.get(i).getStatus()==100) {
-               DetectorParticle p = particles.get(i);
-               bank.setShort("index", row, (short) p.getTaggerIndex());
-               bank.setShort("pindex", row, (short) i);
-               bank.setShort("size", row, (short) p.getTaggerSize());
-               bank.setFloat("x", row, (float) p.getTaggerPosition().x());
-               bank.setFloat("y", row, (float) p.getTaggerPosition().y());
-               bank.setFloat("z", row, (float) p.getTaggerPosition().z());
-               bank.setFloat("dx", row, (float) p.getTaggerPositionWidth().x());
-               bank.setFloat("dy", row, (float) p.getTaggerPositionWidth().y());
-               bank.setFloat("radius", row, (float) p.getTaggerRadius());
-               bank.setFloat("path", row, (float) 0.0);
-               bank.setFloat("time", row, (float) p.getTaggerTime());
-               bank.setFloat("energy", row, (float) p.getTaggerEnergy());
-               bank.setFloat("chi2", row, (float) 0.0);
-               // Using FTCAL for "detector":
-               bank.setByte("detector",row,(byte)DetectorType.FTCAL.getDetectorId());
-               row = row + 1;
-           }
+       //System.out.println("Forward Tagger Bank Printing");
+       for(int i = 0; i < responses.size(); i++){
+           TaggerResponse t  = responses.get(i);
+           //System.out.println(i + "  " + t.getAssociation());
+           bank.setShort("index", row, (short) t.getHitIndex());
+           bank.setShort("pindex", row, (short) t.getAssociation());
+           bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
+//           bank.setFloat("energy", row, (float) t.getEnergy());          
+//           bank.setFloat("time", row, (float) t.getTime());           
+//           bank.setFloat("path", row, (float) t.getPath()); 
+//           bank.setFloat("x", row, (float) t.getPosition().x());
+//           bank.setFloat("y", row, (float) t.getPosition().y());
+//           bank.setFloat("z", row, (float) t.getPosition().z());
+//           bank.setFloat("dx", row, (float) t.getPositionWidth().x());
+//           bank.setFloat("dy", row, (float) t.getPositionWidth().y());
+//           bank.setFloat("radius", row, (float) t.getRadius());
+//           bank.setShort("size", row, (short) t.getSize());
+//           bank.setFloat("chi2", row, (float) 0.0);
+           row = row + 1;
        }
        return bank;
-   }      
+      }  
 
    public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
@@ -487,7 +484,50 @@ public class DetectorData {
        return tracks;
    }
    
+   public static List<DetectorParticle>  readForwardTaggerParticles(DataEvent event, String bank_name){
+        List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
+        if(event.hasBank(bank_name)==true){
+            DataBank bank = event.getBank(bank_name);
+            int nrows = bank.rows();
+           
+            for(int row = 0; row < nrows; row++){
+                int charge  = bank.getByte("charge", row);               
+                double cx   = bank.getFloat("cx",row);
+                double cy   = bank.getFloat("cy",row);
+                double cz   = bank.getFloat("cz",row);
+                double energy = bank.getFloat("energy",row);
 
+                int calID = bank.getShort("calID",row);
+                int hodoID = bank.getShort("hodoID",row);
+                int pid = -1;    
+                
+                double px = cx*energy;
+                double py = cy*energy;
+                double pz = cz*energy;
+                
+                
+                DetectorTrack track = new DetectorTrack(charge, px ,py, pz);
+                track.setDetectorID(DetectorType.FTCAL.getDetectorId());
+                
+                DetectorParticle particle = new DetectorParticle(track);
+                
+                if(charge==0){
+                    pid = 22;
+                }
+                if(charge<0){
+                    pid = 11;
+                }
+                
+                
+                //System.out.println("PID " + particle.getPid());
+                
+                particle.setPid(pid);
+                particle.setFTCALID(calID);
+                particle.setFTHODOID(hodoID);
+                particles.add(particle);
+            }
+        }
+        return particles;
+    }
    
 }
-

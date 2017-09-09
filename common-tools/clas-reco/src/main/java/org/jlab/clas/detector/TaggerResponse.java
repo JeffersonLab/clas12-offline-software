@@ -21,13 +21,14 @@ public class TaggerResponse {
 
     
     
-    private double    hitTime = 0.0;
-    private int         hitID = -1;
-    private int     hitSize = -1;
-    private double  hitRadius = 0.0;
-    private double  hitEnergy = 0.0;
-    private int   association = -1;
-    private int   hitIndex = -1;
+    private Double    hitTime = 0.0;
+    private Integer         hitID = -1;
+    private Integer     hitSize = -1;
+    private Double  hitRadius = 0.0;
+    private Double  hitEnergy = 0.0;
+    private Integer   association = -1;
+    private Integer   hitIndex = -1;
+    private Double hitPath = 0.0;
     private DetectorDescriptor  descriptor  = new DetectorDescriptor();
 
     private Vector3D         hitMomentum = new Vector3D();
@@ -41,6 +42,7 @@ public class TaggerResponse {
     public void setAssociation(int assoc) {this.association = assoc;}
     public void setHitIndex(int index) {this.hitIndex = index;}
     public void setRadius(double r) {hitRadius = r;}
+    public void setPath(double path) {this.hitPath = path;}
     
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getSize(){return hitSize;}
@@ -50,6 +52,7 @@ public class TaggerResponse {
     public int getAssociation() {return this.association;}
     public int getHitIndex() {return this.hitIndex;}
     public double getRadius() {return this.hitRadius;}
+    public double getPath() {return this.hitPath;}
     
     public Vector3D getMomentum(){
         return this.hitMomentum;
@@ -82,8 +85,8 @@ public class TaggerResponse {
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
-                int id  = bank.getInt("id", row);
-                int size = bank.getInt("size", row);
+                int id  = bank.getShort("id", row);
+                int size = bank.getShort("size", row);
                 double x = bank.getFloat("x",row);
                 double y = bank.getFloat("y",row);
                 double z = bank.getFloat("z",row);
@@ -93,6 +96,10 @@ public class TaggerResponse {
                 double time = bank.getFloat("time",row);
                 double energy = bank.getFloat("energy",row);
                 TaggerResponse ft = new TaggerResponse();
+
+                ft.getDescriptor().setType(type);
+               
+
                
                 double z0 = 0; // FIXME vertex
                 double path = Math.sqrt(x*x+y*y+(z-z0)*(z-z0)); 
@@ -101,6 +108,7 @@ public class TaggerResponse {
                 double cz = (z-z0) / path;
                 ft.setMomentum(energy*cx,energy*cy,energy*cz);
 
+
                 ft.setSize(size);
                 ft.setID(id);
                 ft.setEnergy(energy);
@@ -108,6 +116,7 @@ public class TaggerResponse {
                 ft.setTime(time);
                 ft.setHitIndex(row);
                 ft.setPosition(x, y, z);
+                ft.setPath(path);
 
                 ft.getDescriptor().setType(type);
 
