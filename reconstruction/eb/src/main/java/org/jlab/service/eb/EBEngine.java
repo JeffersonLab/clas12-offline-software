@@ -1,7 +1,9 @@
 package org.jlab.service.eb;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.*;
@@ -54,7 +56,8 @@ public class EBEngine extends ReconstructionEngine {
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
        
         // FIXME We should be starting with FT::particle, not clusters
-        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        //List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
+        
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
@@ -70,7 +73,7 @@ public class EBEngine extends ReconstructionEngine {
 
         // Process tracks:
         eb.processHitMatching();
-        eb.addTaggerTracks(trackFT);
+        //eb.addTaggerTracks(trackFT);
         eb.processNeutralTracks();
 
         eb.assignTrigger();
@@ -82,6 +85,21 @@ public class EBEngine extends ReconstructionEngine {
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
         analyzer.processEvent(eb.getEvent());
+        
+
+        //The Forward Tagger Particle Creation Tagger Cluster Association
+        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
+        List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
+        List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
+        List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
+        eb.addForwardTaggerParticles(ftparticles);
+        eb.addTaggerResponses(responseFTCAL);
+        eb.addTaggerResponses(responseFTHODO);
+        eb.addFTIndices(ftIndices);
+        eb.forwardTaggerIDMatching();
+        
+
+            
         
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
@@ -108,10 +126,17 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankChe);
             }
             
-            if (ftBank!=null && trackFT.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
+            List<TaggerResponse>       taggers = eb.getEvent().getTaggerResponseList();
+            if (ftBank!=null && taggers.size()>0) {
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, ftBank);
                 de.appendBanks(bankForwardTagger);
             }
+
+            
+//            if (ftBank!=null && trackFT.size()>0) {
+//                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
+//                de.appendBanks(bankForwardTagger);
+//            }
             
             if (trackBank!=null && tracks.size()>0) {
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, tracks.size());
