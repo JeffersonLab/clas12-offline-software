@@ -93,7 +93,11 @@ public class DetectorPane2D extends JPanel implements ActionListener {
                     JCheckBox box = (JCheckBox) e.getItem();
                     if(box.isSelected()==false){
                         view2D.setHitMap(false);
-                    } else { view2D.setHitMap(true); } 
+                        view2D.repaint();
+                    } else { 
+                        view2D.setHitMap(true);
+                        view2D.repaint();
+                    } 
                 }
         }
         );
