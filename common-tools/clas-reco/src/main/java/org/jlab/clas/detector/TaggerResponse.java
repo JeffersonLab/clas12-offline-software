@@ -86,8 +86,8 @@ public class TaggerResponse {
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
-                int id  = bank.getInt("id", row);
-                int size = bank.getInt("size", row);
+                int id  = bank.getShort("id", row);
+                int size = bank.getShort("size", row);
                 double x = bank.getFloat("x",row);
                 double y = bank.getFloat("y",row);
                 double z = bank.getFloat("z",row);
