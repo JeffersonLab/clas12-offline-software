@@ -50,7 +50,7 @@ public class Parameters {
 	public static final double[] MaxTime = new double[LayNum];							      // Max time of particle hit in paddle for a good event	
 	public static final double[] MinTime = new double[LayNum];							      // Min time of particle hit in paddle for a good event	
 
-	public static double EThresh = 2. ;                                                       // Min reconstructed deposited energy threshold for a good event
+	public static double EThresh = 0.1 ;                                                       // Min reconstructed deposited energy threshold for a good event
 
 
 	public static void SetParameters() {
