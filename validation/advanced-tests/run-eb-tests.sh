@@ -1,7 +1,7 @@
 #!/bin/sh -f
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=v0
+webVersion=4a.2.1
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -19,14 +19,35 @@ fi
 
 # last argument is input file stub:
 webFileStub="${@: -1}"
+
+# sanity check on filestub name,
+# just to error with reasonable message before proceeding:
 case $webFileStub in
+    # electron in forward, hadron in forward:
     electronproton)
         ;;
     electronkaon)
         ;;
     electronpion)
         ;;
-    forwardtagger)
+    # electron in FT, hadron in forward:
+    electronFTproton)
+        ;;
+    electronFTkaon)
+        ;;
+    electronFTpion)
+        ;;
+    electronFTgamma)
+        ;;
+    # electon in forward, gamma in FT:
+    electrongammaFT)
+        ;;
+    # electron in forward, hadron in central:
+    electronprotonC)
+        ;;
+    electronkaonC)
+        ;;
+    electronpionC)
         ;;
     *)
       echo Invalid input evio file:  $webFileStub
@@ -45,7 +66,7 @@ fi
 
 classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
-# compile test codes before anything else:
+# make sure test code compiles before anything else:
 javac -cp $classPath src/eb/EBTwoTrackTest.java
 if [ $? != 0 ] ; then echo "EBTwoTrackTest compilation failure" ; exit 1 ; fi
 
@@ -73,8 +94,9 @@ then
     fi
 
     # download test files
-    if ! [ -e ${webFileStub}.evio.gz ]
+    if ! [ -e ${webFileStub}.evio ]
     then
+        rm -f ${webFileStub}.evio.gz
         wget --no-check-certificate $webDir/${webFileStub}.evio.gz
         if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
         gunzip -f ${webFileStub}.evio.gz
