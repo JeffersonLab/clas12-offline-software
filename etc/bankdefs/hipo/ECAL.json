@@ -61,7 +61,7 @@
   },
   {
     "bank": "ECAL::calib",
-    "group": 20824,
+    "group": 20724,
     "info": "Raw and recon peak energy from ECAL",
     "items": [
        {"name":"sector",      "id":1, "type":"int8",  "info":"sector of ECAL"},

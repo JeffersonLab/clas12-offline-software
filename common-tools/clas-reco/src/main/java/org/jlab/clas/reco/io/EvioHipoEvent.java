@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.io.hipo;
+package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.hipo.data.HipoEvent;
 import org.jlab.hipo.data.HipoNodeBuilder;
 import org.jlab.io.base.DataBank;
@@ -16,6 +17,9 @@ import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataBank;
+import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.utils.options.OptionParser;
 
 /**
@@ -539,22 +543,22 @@ public class EvioHipoEvent {
    public void fillHipoEventTrueInfo(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
         
         String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC"};
-//        DetectorType[]  bankTypes = new DetectorType[]{DetectorType.BMT,
-//                                                       DetectorType.BST,
-//                                                       DetectorType.CND,
-//                                                       DetectorType.CTOF,
-//                                                       DetectorType.DC,
-//                                                       DetectorType.ECAL,
-//                                                       DetectorType.FMT,
-//                                                       DetectorType.FTCAL,
-//                                                       DetectorType.FTHODO,
-//                                                       DetectorType.FTOF,
-//                                                       DetectorType.FTTRK,
-//                                                       DetectorType.HTCC,
-//                                                       DetectorType.LTCC,
-//                                                       DetectorType.ECAL,
-//                                                       DetectorType.RICH,
-//                                                       DetectorType.RTPC};
+        DetectorType[]  bankTypes = new DetectorType[]{DetectorType.BMT,
+                                                       DetectorType.BST,
+                                                       DetectorType.CND,
+                                                       DetectorType.CTOF,
+                                                       DetectorType.DC,
+                                                       DetectorType.ECAL,
+                                                       DetectorType.FMT,
+                                                       DetectorType.FTCAL,
+                                                       DetectorType.FTHODO,
+                                                       DetectorType.FTOF,
+                                                       DetectorType.FTTRK,
+                                                       DetectorType.HTCC,
+                                                       DetectorType.LTCC,
+                                                       DetectorType.ECAL,
+                                                       DetectorType.RICH,
+                                                       DetectorType.RTPC};
         int rows = 0;
         for(int k = 0; k < bankNames.length; k++){
             if(evioEvent.hasBank(bankNames[k]+"::true")==true){
@@ -569,7 +573,7 @@ public class EvioHipoEvent {
                 if(evioEvent.hasBank(bankNames[k]+"::true")==true){
                     EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank(bankNames[k]+"::true");
                     for(int i = 0; i < evioBank.rows(); i++){
-                        hipoBank.setByte("detector", irow, (byte)  0);//bankTypes[k].getDetectorId());
+                        hipoBank.setByte("detector", irow, (byte)  bankTypes[k].getDetectorId());
                         hipoBank.setInt("pid",       irow,         evioBank.getInt("pid",i));
                         hipoBank.setInt("mpid",      irow,         evioBank.getInt("mpid",i));
                         hipoBank.setInt("tid",       irow,         evioBank.getInt("tid",i));
