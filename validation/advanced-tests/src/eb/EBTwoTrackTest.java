@@ -39,17 +39,27 @@ public class EBTwoTrackTest {
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
+    
     int nEvents = 0;
+    
     int epCount = 0;
+    
     int eCount = 0;
+    
     int eposCount = 0;
     int epiCount = 0;
     int ekCount = 0;
+
+    int nFtPhotons = 0;
+    int nFtElectrons = 0;
+    
     int nMisid = 0;
     int nMissing = 0;
+
     int nElectronsSector[]={0,0,0,0,0,0};
     int nHadronsSector[]={0,0,0,0,0,0};
     int hadronPDG = 0;
+    int ftPDG = 0;
 
     DataBank mcBank=null,ctrkBank=null,calBank=null;
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
@@ -88,19 +98,23 @@ public class EBTwoTrackTest {
         else if (ss.equals("electronFTgamma")) {
             isForwardTagger=true;
             hadronPDG=22;
+            ftPDG=11;
             udfFileType=false;
         }
         else if (ss.equals("electronFTproton")) {
             isForwardTagger=true;
             hadronPDG=2212;
+            ftPDG=11;
         }
         else if (ss.equals("electronFTkaon")) {
             isForwardTagger=true;
             hadronPDG=321;
+            ftPDG=11;
         }
         else if (ss.equals("electronFTpion")) {
             isForwardTagger=true;
             hadronPDG=211;
+            ftPDG=11;
         }
         else if (ss.equals("electronprotonC")) {
             isCentral=true;
@@ -115,6 +129,9 @@ public class EBTwoTrackTest {
             hadronPDG=211;
         }
         else if (ss.equals("electrongammaFT")) {
+            isForwardTagger=true;
+            ftPDG=22;
+            udfFileType=false;
         }
 
         HipoDataSource reader = new HipoDataSource();
@@ -323,9 +340,12 @@ public class EBTwoTrackTest {
    
     private void checkResultsFT() {
 
-        final double eEff = eCount / nEvents;
+        final double eEff = (double)nFtElectrons / nEvents;
+        final double gEff = (double)nFtPhotons / nEvents;
         System.out.println(String.format("\n\neEff = %.3f",eEff));
-        assertEquals(eEff>0.90,true);
+        System.out.println(String.format("\n\ngEff = %.3f",gEff));
+        if      (ftPDG==11) assertEquals(eEff>0.90,true);
+        else if (ftPDG==22) assertEquals(gEff>0.90,true);
     }
 
     // This only tries to check pointers between banks:
@@ -358,9 +378,12 @@ public class EBTwoTrackTest {
                 nEvents++;
            
                 if (recPartBank!=null && recFtBank!=null) {
-
-                    // TODO:  add check on pid
-                    eCount++;
+                    for (int ii=0; ii<recFtBank.rows(); ii++) {
+                        int irp = recFtBank.getInt("pindex",ii);
+                        int pid = recPartBank.getInt("pid",irp);
+                        if      (pid==22) nFtPhotons++;
+                        else if (pid==11) nFtElectrons++;
+                    }
                 }
             }
         }
