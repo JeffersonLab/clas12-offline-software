@@ -276,7 +276,8 @@ public class DetectorData {
        //System.out.println("Forward Tagger Bank Printing");                                                                                    
        for(int i = 0; i < responses.size(); i++){
            TaggerResponse t  = responses.get(i);
-           //System.out.println(i + "  " + t.getAssociation());                                                                                 
+           //System.out.println(i + "  " + t.getAssociation());  
+           //System.out.println(t.getTime() + " " + t.getEnergy());
            bank.setShort("index", row, (short) t.getHitIndex());
            bank.setShort("pindex", row, (short) t.getAssociation());
            bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
@@ -506,7 +507,7 @@ public class DetectorData {
                 if(charge==0) pid = 22;
                 if(charge<0) pid = 11;
                
-                System.out.println("Particle ID " + pid);
+                //System.out.println("Particle ID " + pid);
                 
                 particle.setPid(pid);
                 particles.add(particle);
