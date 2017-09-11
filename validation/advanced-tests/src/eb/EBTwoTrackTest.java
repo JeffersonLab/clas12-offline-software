@@ -8,15 +8,16 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
+import org.jlab.detector.base.DetectorType;
+
 import org.jlab.analysis.math.ClasMath;
 
 /**
  *
  * Analyze EB efficiencies based on Joseph's test events.
  *  - Two-particle (e-hadron) FD events
- *  - 1-electron FT event
- *
- * All other combos are unfinished and assert false.
+ *  - 1-electron FT events
+ *  - etc.
  *
  * Note, hadron is assumed to have positive charge.
  *
@@ -38,19 +39,29 @@ public class EBTwoTrackTest {
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
+    
     int nEvents = 0;
+    
     int epCount = 0;
+    
     int eCount = 0;
+    
     int eposCount = 0;
     int epiCount = 0;
     int ekCount = 0;
+
+    int nFtPhotons = 0;
+    int nFtElectrons = 0;
+    
     int nMisid = 0;
     int nMissing = 0;
+
     int nElectronsSector[]={0,0,0,0,0,0};
     int nHadronsSector[]={0,0,0,0,0,0};
     int hadronPDG = 0;
+    int ftPDG = 0;
 
-    DataBank mcBank=null,ctrkBank=null;
+    DataBank mcBank=null,ctrkBank=null,calBank=null;
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
     DataBank recPartBank=null,recTrkBank=null,recFtBank=null;
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
@@ -72,7 +83,7 @@ public class EBTwoTrackTest {
         ss=ss.replace(".hipo","");
         
         // test filename to determine data type:
-        if      (ss.equals("electronproton"))  {
+        if (ss.equals("electronproton"))  {
             hadronPDG=2212;
             udfFileType=false;
         }
@@ -87,19 +98,23 @@ public class EBTwoTrackTest {
         else if (ss.equals("electronFTgamma")) {
             isForwardTagger=true;
             hadronPDG=22;
+            ftPDG=11;
             udfFileType=false;
         }
         else if (ss.equals("electronFTproton")) {
             isForwardTagger=true;
             hadronPDG=2212;
+            ftPDG=11;
         }
         else if (ss.equals("electronFTkaon")) {
             isForwardTagger=true;
             hadronPDG=321;
+            ftPDG=11;
         }
         else if (ss.equals("electronFTpion")) {
             isForwardTagger=true;
             hadronPDG=211;
+            ftPDG=11;
         }
         else if (ss.equals("electronprotonC")) {
             isCentral=true;
@@ -114,6 +129,9 @@ public class EBTwoTrackTest {
             hadronPDG=211;
         }
         else if (ss.equals("electrongammaFT")) {
+            isForwardTagger=true;
+            ftPDG=22;
+            udfFileType=false;
         }
 
         HipoDataSource reader = new HipoDataSource();
@@ -132,20 +150,16 @@ public class EBTwoTrackTest {
                 checkResultsFD();
             }
         }
-
-        else {
-            processEvents(reader);
-            System.out.println("");
-            System.out.println("***********************************************************");
-            System.out.println("EBTwoTrackTest does not know about this file:  "+ss);
-            System.out.println("  So we only did a bank referencing test.");
-            System.out.println("***********************************************************");
-            System.out.println("");
-        }
+        else processEvents(reader);
     }
 
+    /*
+     *
+     * We're keeping all banks global to this class for now.
+     *
+     */
     private void getBanks(DataEvent de) {
-        mcBank=null;ctrkBank=null;
+        mcBank=null;ctrkBank=null;calBank=null;
         trkBank=null;tofBank=null;htccBank=null;ltccBank=null;
         recPartBank=null;mcBank=null;recTrkBank=null;recFtBank=null;
         recCalBank=null;recSciBank=null;recCheBank=null;
@@ -165,6 +179,37 @@ public class EBTwoTrackTest {
         if (de.hasBank("FTCAL::clusters"))         ftcBank = de.getBank("FTCAL::clusters");
         if (de.hasBank("FTHODO::clusters"))        fthBank = de.getBank("FTHODO::clusters");
         if (de.hasBank("FT::particles"))           ftpartBank = de.getBank("FT::particles");
+        if (de.hasBank("ECAL::clusters"))          calBank = de.getBank("ECAL::clusters");
+    }
+    
+    /**
+     *
+     * Choose a referenced bank, based on "detector" from from a REC:: detector bank
+     *
+     * detId - a DetectorType id
+     *
+     */
+    public DataBank getDetectorBank(int detId) {
+        DataBank bankTo=null;
+        if (detId == DetectorType.DC.getDetectorId())
+            bankTo = trkBank;
+        else if (detId == DetectorType.CVT.getDetectorId())
+            bankTo = ctrkBank;
+        else if (detId == DetectorType.ECAL.getDetectorId())
+            bankTo = calBank;
+        else if (detId == DetectorType.FTOF.getDetectorId())
+            bankTo = tofBank;
+        else if (detId == DetectorType.HTCC.getDetectorId())
+            bankTo = htccBank;
+        else if (detId == DetectorType.LTCC.getDetectorId())
+            bankTo = ltccBank;
+        else if (detId == DetectorType.FTCAL.getDetectorId())
+            bankTo = ftcBank;
+        else if (detId == DetectorType.FTHODO.getDetectorId())
+            bankTo = fthBank;
+        else
+            throw new RuntimeException("Unkown detector Id:  "+detId);
+        return bankTo;
     }
     
     /**
@@ -176,7 +221,7 @@ public class EBTwoTrackTest {
      * idxVarName - name of the index variable
      *
      */
-    public boolean hasValidRefs(DataEvent ev,
+    public boolean hasValidRefsToREC(DataEvent ev,
                         DataBank bankFrom,
                         DataBank bankTo,
                         String idxVarName) {
@@ -196,6 +241,39 @@ public class EBTwoTrackTest {
         return true;
     }
 
+    /**
+     *
+     * Check that index references are within valid range
+     *
+     * bankFrom - bank containing the index
+     * idxVarName - name of the index variable
+     *
+     * determine bankTo based on "detector" variable, row by row, in bankFrom
+     *
+     */
+    public boolean hasValidRefsToDET(DataEvent ev,
+                        DataBank bankFrom,
+                        String idxVarName) {
+
+        for (int ii=0; ii<bankFrom.rows(); ii++) {
+            int ref=bankFrom.getInt(idxVarName,ii);
+            int det=bankFrom.getInt("detector",ii);
+            DataBank bankTo = getDetectorBank(det);
+            if (ref>=bankTo.rows() || ref<0) {
+                System.err.println(String.format(
+                        "\bnhasValidRefs: failed on det=%d/%s (%s0>%s) %d->%d\n",
+                        det,DetectorType.getType(det).getName(),
+                        bankFrom.getDescriptor().getName(),
+                        bankTo.getDescriptor().getName(),ii,ref));
+                ev.show();
+                bankFrom.show();
+                bankTo.show();
+                return false;
+            }
+        }
+        return true;
+    }
+
     /*
      *
      * Check that all from->to indices are within valid range
@@ -204,24 +282,20 @@ public class EBTwoTrackTest {
     public void checkAllRefs(DataEvent ev) {
         if (recPartBank!=null) {
             if (recCheBank!=null)
-                assertEquals(true,hasValidRefs(ev,recCheBank,recPartBank,"pindex"));
+                assertEquals(true,hasValidRefsToREC(ev,recCheBank,recPartBank,"pindex"));
             if (recCalBank!=null)
-                assertEquals(true,hasValidRefs(ev,recCalBank,recPartBank,"pindex"));
+                assertEquals(true,hasValidRefsToREC(ev,recCalBank,recPartBank,"pindex"));
             if (recSciBank!=null)
-                assertEquals(true,hasValidRefs(ev,recSciBank,recPartBank,"pindex"));
+                assertEquals(true,hasValidRefsToREC(ev,recSciBank,recPartBank,"pindex"));
             if (recTrkBank!=null)
-                assertEquals(true,hasValidRefs(ev,recTrkBank,recPartBank,"pindex"));
+                assertEquals(true,hasValidRefsToREC(ev,recTrkBank,recPartBank,"pindex"));
             if (recFtBank!=null)
-                assertEquals(true,hasValidRefs(ev,recFtBank,recPartBank,"pindex"));
+                assertEquals(true,hasValidRefsToREC(ev,recFtBank,recPartBank,"pindex"));
         }
         if (recTrkBank!=null) {
-            // FIXME:  check detectorType
             if (trkBank!=null) {
-                assertEquals(true,hasValidRefs(ev,recTrkBank,trkBank,"index"));
+                assertEquals(true,hasValidRefsToDET(ev,recTrkBank,"index"));
             }
-//          if (ctrkBank!=null) {
-//              assertEquals(true,hasValidRefs(ev,recTrkBank,trkBank,"index"));
-//          }
         }
     }
 
@@ -263,14 +337,18 @@ public class EBTwoTrackTest {
         else if (hadronPDG==321)  assertEquals(kEff>0.60,true);
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
     }
-    
+   
     private void checkResultsFT() {
 
-        final double eEff = eCount / nEvents;
+        final double eEff = (double)nFtElectrons / nEvents;
+        final double gEff = (double)nFtPhotons / nEvents;
         System.out.println(String.format("\n\neEff = %.3f",eEff));
-        assertEquals(eEff>0.90,true);
+        System.out.println(String.format("\n\ngEff = %.3f",gEff));
+        if      (ftPDG==11) assertEquals(eEff>0.90,true);
+        else if (ftPDG==22) assertEquals(gEff>0.90,true);
     }
 
+    // This only tries to check pointers between banks:
     private void processEvents(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
@@ -278,8 +356,15 @@ public class EBTwoTrackTest {
             getBanks(event);
             checkAllRefs(event);
         }
+        System.out.println("");
+        System.out.println("***********************************************************");
+        System.out.println("EBTwoTrackTest does not know about this file.");
+        System.out.println("  So we only did some bank index referencing tests.");
+        System.out.println("***********************************************************");
+        System.out.println("");
     }
 
+    // This is for Forward Tagger;
     private void processEventsFT(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
@@ -287,29 +372,24 @@ public class EBTwoTrackTest {
             DataEvent event = reader.getNextEvent();
             getBanks(event);
             checkAllRefs(event);
-/*
-            if (mcBank!=null) mcBank.show();
-            if (recPartBank!=null) recPartBank.show();
-            if (recFtBank!=null) recFtBank.show();
-            if (ftpartBank!=null) ftpartBank.show();
-            if (ftcBank!=null) ftcBank.show();
-*/
 
             if (ftcBank!=null) {
 
                 nEvents++;
            
                 if (recPartBank!=null && recFtBank!=null) {
-
-                    //assertEquals(true,hasValidRefs(event,recFtBank,recPartBank,"pindex"));
-                
-                    // TODO:  add check on pid
-                    eCount++;
+                    for (int ii=0; ii<recFtBank.rows(); ii++) {
+                        int irp = recFtBank.getInt("pindex",ii);
+                        int pid = recPartBank.getInt("pid",irp);
+                        if      (pid==22) nFtPhotons++;
+                        else if (pid==11) nFtElectrons++;
+                    }
                 }
             }
         }
     }
 
+    // This is for Forward Detectors (DC/EC/FTOF/HTCC/LTCC):
     private void processEventsFD(HipoDataSource reader) {
 
         while (reader.hasEvent()) {
