@@ -26,10 +26,10 @@ cd common-tools/coat-lib
 mvn package
 if [ $? != 0 ] ; then echo "common tools failure 2" ; exit 1 ; fi
 cd -
-cp common-tools/coat-lib/target/coat-libs*.jar coatjava/lib/clas/
+cp common-tools/coat-lib/target/coat-libs-4.0-SNAPSHOT.jar coatjava/lib/clas/
 
 ### create local mvn repo containing coat-libs and jcsg ##
-mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-3.0-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
+mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-4.0-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
 if [ $? != 0 ] ; then echo "failed to create local mvn repo" ; exit 1 ; fi
  
 ### dc (depends on jcsg) ###
