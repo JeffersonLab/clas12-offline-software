@@ -3,6 +3,7 @@ package org.jlab.service.eb;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.detector.CalorimeterResponse;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
@@ -26,6 +27,7 @@ public class EventBuilder {
     private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse> cherenkovResponses = new ArrayList<CherenkovResponse>();
     private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
+    private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,0};
 
     public EventBuilder(){
@@ -51,6 +53,10 @@ public class EventBuilder {
     public void addTaggerResponses(List<TaggerResponse> responses){
         taggerResponses.addAll(responses);
     }
+    
+    public void addFTIndices(List<Map<DetectorType, Integer>> ftindex) {
+        ftIndices.addAll(ftindex);
+    }
 
     /**
      * add tracks to the detector event class. First a particle is initialized from the track
@@ -72,13 +78,22 @@ public class EventBuilder {
         }
     }
     
-    public void addTaggerTracks(List<TaggerResponse> taggers) {
-        for(int i = 0 ; i < taggers.size(); i++){
-            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
-            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
-            // FIXME:  get rid of hardcoded 100
-            particle.setStatus(100);
-            detectorEvent.addParticle(particle);
+//    public void addTaggerTracks(List<TaggerResponse> taggers) {
+//        for(int i = 0 ; i < taggers.size(); i++){
+//            //DetectorParticle particle = new DetectorParticle(taggers.get(i));
+//            DetectorParticle particle = DetectorParticle.createFTparticle(taggers.get(i));
+//            // FIXME:  get rid of hardcoded 100
+//            //particle.setStatus(100);
+//            detectorEvent.addParticle(particle);
+//        }
+//    }
+    
+    public void addForwardTaggerParticles(List<DetectorParticle> particles) {
+        //for(DetectorTrack track : tracks){                                                                                         
+        for(int i = 0 ; i < particles.size(); i++){
+            //DetectorParticle particle = new DetectorParticle(particles.get(i));                                                    
+            detectorEvent.addParticle(particles.get(i));
+
         }
     }
     
@@ -184,6 +199,52 @@ public class EventBuilder {
         }
     }
     
+    public void forwardTaggerIDMatching() {
+        int np = this.detectorEvent.getParticles().size();
+        if(this.ftIndices.size()>0 && this.detectorEvent.getParticles().size()>0) {
+            for(int n = 0 ; n < np ; n++){
+                int counter = 0;
+                DetectorParticle p = this.detectorEvent.getParticles().get(n);
+                if(p.getTrackDetector()==DetectorType.FTCAL.getDetectorId()) {
+                    int particle_calID = this.ftIndices.get(counter).get(DetectorType.FTCAL);
+                    int index = getForwardTaggerMatch(this.taggerResponses, p, DetectorType.FTCAL, particle_calID);
+                    if(index>=0){
+                        p.addTaggerResponse(this.taggerResponses.get(index));
+                        this.taggerResponses.get(index).setAssociation(n);
+                    }
+      
+                    int particle_hodoID = this.ftIndices.get(counter).get(DetectorType.FTHODO);
+                    index = getForwardTaggerMatch(this.taggerResponses, p, DetectorType.FTHODO, particle_hodoID);
+                    if(index>=0){
+                        p.addTaggerResponse(this.taggerResponses.get(index));
+                        this.taggerResponses.get(index).setAssociation(n);
+                    }
+                    counter = counter + 1;
+                }
+        }
+        }
+    }
+    
+    public int getForwardTaggerMatch(List<TaggerResponse> hitList, DetectorParticle part, 
+            DetectorType type, int ft_id) {
+        int bestIndex = -1;
+        for(int loop = 0; loop < hitList.size(); loop++) {
+            if(type==DetectorType.FTCAL){
+                if(hitList.get(loop).getDescriptor().getType()==type
+                    && hitList.get(loop).getID()==ft_id){
+                    bestIndex = loop;
+                }
+            }
+            if(type==DetectorType.FTHODO){
+               if(hitList.get(loop).getDescriptor().getType()==type
+                     &&  hitList.get(loop).getID()==ft_id){
+                   bestIndex = loop;
+               }
+            }
+        }
+        return bestIndex;
+    }
+    
     public void processNeutralTracks(){
 
         // get all unmatched calorimeter responses:
@@ -250,17 +311,7 @@ public class EventBuilder {
         return responses;
     }
     
-    /*
-    public List<ScintillatorResponse> getUnmatchedFTOFResponses(List<ScintillatorResponse> list, DetectorType type, int layer){
-        List<ScintillatorResponse>  responses = new ArrayList<ScintillatorResponse>();
-        for(ScintillatorResponse r : list){
-            if(r.getDescriptor().getType()==type&&r.getDescriptor().getLayer()==layer&&r.getAssociation()<0){
-                responses.add(r);
-            }
-        }
-        return responses;
-    }
-    */
+
         
     public void assignTrigger()  {
         int i = 0;
