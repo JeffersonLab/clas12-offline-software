@@ -50,6 +50,7 @@ public class DetectorParticle implements Comparable {
     
     private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
+    private List<TaggerResponse>     taggerStore = new ArrayList<TaggerResponse>();
 
 //    private List<ScintillatorResponse>    scintillatorStore = new ArrayList<ScintillatorResponse>();
 //    private List<CalorimeterResponse>  calorimeterStore = new ArrayList<CalorimeterResponse>();
@@ -178,6 +179,8 @@ public class DetectorParticle implements Comparable {
         return this.cherenkovStore;
     }
     
+    
+    
 //    public List<CalorimeterResponse> getCalorimeterResponse(){
 //        return this.calorimeterStore;
 //    }
@@ -188,6 +191,10 @@ public class DetectorParticle implements Comparable {
     
     public void addCherenkovResponse(CherenkovResponse res){
         this.cherenkovStore.add(res);
+    }
+    
+    public void addTaggerResponse(TaggerResponse res) {
+        this.taggerStore.add(res);
     }
     
 //        public void addCalorimeterResponse(CalorimeterResponse res){
@@ -326,6 +333,10 @@ public class DetectorParticle implements Comparable {
     
     public List<CherenkovResponse> getCherenkovResponses(){
         return this.cherenkovStore;
+    }
+    
+    public List<TaggerResponse> getTaggerResponses() {
+        return this.taggerStore;
     }
  
 //    public List<CalorimeterResponse>  getCalorimeterResponses(){
