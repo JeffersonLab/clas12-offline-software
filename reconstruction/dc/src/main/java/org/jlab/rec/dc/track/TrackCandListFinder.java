@@ -38,6 +38,21 @@ public class TrackCandListFinder {
 		trking = stat;
 	}
 	public DCSwimmer dcSwim = new DCSwimmer();
+        public int NSuperLayerTrk  = 5;
+        public boolean PassNSuperlayerTracking(List<Cross> crossesInTrk) {
+            boolean pass = true;
+            int NbMissingSl=0;
+            for(Cross c: crossesInTrk) {
+                if(c.isPseudoCross)
+                    if(c.get_Segment1().get_Id()==-1)
+                        NbMissingSl++;
+            }
+           
+            if(NbMissingSl>6-NSuperLayerTrk) {
+                pass = false; 
+            }
+            return pass;
+        }
 	/**
 	 * 
 	 * @param crossList the input list of crosses
@@ -59,7 +74,7 @@ public class TrackCandListFinder {
                         if(traj == null) 
                             continue;
             
-			if(crossesInTrk.size()==3) {
+			if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk)==true) {
 					
 				cand.addAll(crossesInTrk);
 				
@@ -74,7 +89,7 @@ public class TrackCandListFinder {
 
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-			        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
+                                        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
 			        if(cand.get(0).get_Segment2().get_Id()==-1) 
 			        	theta1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
 			        if(cand.get(2).get_Segment2().get_Id()==-1) 
