@@ -249,7 +249,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * sets the calculated distance (in cm) from the time (in ns)
      */
 
-    public void set_TimeToDistance(double cosTrkAngle, double B) {
+    public void set_TimeToDistance(double cosTrkAngle, double B) {     
         boolean useTimeToDistanceGrid = Constants.isT2DGRID();
         double d = 0;
         int slIdx = this.get_Superlayer() - 1;
@@ -258,7 +258,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             d = Constants.TIMETODIST[this.get_Region() - 1];
 
             // chose method to get the distance from the time -- for now this is only used for cosmics so B =0
-            if (useTimeToDistanceGrid == true) {
+            if (useTimeToDistanceGrid == true) {  
                 double alpha = Math.acos(cosTrkAngle);
                 double ralpha = this.reducedAngle(alpha);
                 double beta = this.get_Beta(); 
@@ -276,8 +276,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 double correctedTime = (this.get_Time() - deltatime_beta);
                 if(correctedTime<=0)
                     correctedTime=0.01;
-                if(correctedTime>CCDBConstants.getTMAXSUPERLAYER()[secIdx][slIdx])
-                    correctedTime=CCDBConstants.getTMAXSUPERLAYER()[secIdx][slIdx];
+                //if(correctedTime>CCDBConstants.getTMAXSUPERLAYER()[secIdx][slIdx]) 
+               //     correctedTime=CCDBConstants.getTMAXSUPERLAYER()[secIdx][slIdx];
+               
                 d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), correctedTime, secIdx, slIdx) / this.get_Time();
             
             }
