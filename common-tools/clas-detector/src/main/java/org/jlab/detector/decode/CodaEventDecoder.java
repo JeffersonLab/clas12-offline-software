@@ -418,9 +418,13 @@ public class CodaEventDecoder {
                             Short sample    = (Short) cdataitems.get(position+2+loop);
                             shortbuffer[loop] = sample;
                         }
-
-                        bank.addPulse(shortbuffer);
-                        bank.setTimeStamp(time);
+                        //Added pulse fitting for MMs
+                        ADCData adcData = new ADCData();
+			adcData.setTimeStamp(timeStamp);
+			adcData.setPulse(shortbuffer);  
+                        bank.addADC(adcData);
+                        //bank.addPulse(shortbuffer);
+                        //bank.setTimeStamp(time);
                         //dataBank.addData(channel.intValue(),
                         //            new RawData(shortbuffer));
                         entries.add(bank);
