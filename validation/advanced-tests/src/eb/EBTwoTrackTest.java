@@ -42,13 +42,14 @@ public class EBTwoTrackTest {
     
     int nEvents = 0;
     
-    int epCount = 0;
-    
     int eCount = 0;
     
     int eposCount = 0;
     int epiCount = 0;
     int ekCount = 0;
+    int epCount = 0;
+    int egCount = 0;
+    int enCount = 0;
 
     int nFtPhotons = 0;
     int nFtElectrons = 0;
@@ -95,6 +96,14 @@ public class EBTwoTrackTest {
             hadronPDG=321;
             udfFileType=false;
         }
+        else if (ss.equals("electrongamma")) {
+            hadronPDG=22;
+            udfFileType=false;
+        }
+        else if (ss.equals("electronneutron")) {
+            hadronPDG=2112;
+            udfFileType=false;
+        }
         else if (ss.equals("electronFTgamma")) {
             isForwardTagger=true;
             hadronPDG=22;
@@ -127,6 +136,14 @@ public class EBTwoTrackTest {
         else if (ss.equals("electronpionC")) {
             isCentral=true;
             hadronPDG=211;
+        }
+        else if (ss.equals("electrongammaC")) {
+            isCentral=true;
+            hadronPDG=22;
+        }
+        else if (ss.equals("electronneutronC")) {
+            isCentral=true;
+            hadronPDG=2112;
         }
         else if (ss.equals("electrongammaFT")) {
             isForwardTagger=true;
@@ -307,6 +324,8 @@ public class EBTwoTrackTest {
         final double pEff = (double)epCount / eposCount;
         final double piEff = (double)epiCount / eposCount;
         final double kEff  = (double)ekCount / eposCount;
+        final double gEff  = (double)egCount / nNegTrackEvents;
+        final double nEff  = (double)enCount / nNegTrackEvents;
         
         final double epEff = (double)epCount / nTwoTrackEvents;
         final double epiEff = (double)epiCount / nTwoTrackEvents;
@@ -324,6 +343,8 @@ public class EBTwoTrackTest {
         System.out.println(String.format("pEff         = %.3f",pEff));
         System.out.println(String.format("piEff        = %.3f",piEff));
         System.out.println(String.format("kEff         = %.3f\n",kEff));
+        System.out.println(String.format("gEff         = %.3f",gEff));
+        System.out.println(String.format("nEff         = %.3f\n",nEff));
         System.out.println(String.format("epEff        = %.3f",epEff));
         System.out.println(String.format("epiEff       = %.3f",epiEff));
         System.out.println(String.format("ekEff        = %.3f\n",ekEff));
@@ -336,6 +357,7 @@ public class EBTwoTrackTest {
         if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
         else if (hadronPDG==321)  assertEquals(kEff>0.60,true);
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
+        else if (hadronPDG==22)   assertEquals(gEff>0.75,true);
     }
    
     private void checkResultsFT() {
@@ -457,6 +479,8 @@ public class EBTwoTrackTest {
             boolean foundProton = false;
             boolean foundKaon = false;
             boolean foundPion = false;
+            boolean foundPhoton = false;
+            boolean foundNeutron = false;
 
             // check particle bank:
             if (recPartBank!=null) {
@@ -495,6 +519,8 @@ public class EBTwoTrackTest {
                         if      (pid==2212) foundProton=true;
                         else if (pid==211)  foundPion=true;
                         else if (pid==321)  foundKaon=true;
+                        else if (pid==22)   foundPhoton=true;
+                        else if (pid==2112) foundNeutron=true;
                     }
 
                 }
@@ -504,6 +530,9 @@ public class EBTwoTrackTest {
             if (foundElectron) {
 
                 eCount++;
+
+                if (foundPhoton) egCount++;
+                if (foundNeutron) enCount++;
 
                 if (nPosTracks>0) {
                     
