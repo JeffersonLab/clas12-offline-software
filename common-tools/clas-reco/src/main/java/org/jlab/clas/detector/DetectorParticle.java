@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
@@ -219,6 +220,16 @@ public class DetectorParticle implements Comparable {
         }
     }
 
+    public int countResponses(DetectorType type,int layer) {
+        int nResponses=0;
+        for (int ii=0; ii<responseStore.size(); ii++) {
+            DetectorDescriptor desc=responseStore.get(ii).getDescriptor();
+            if (desc.getType()!=type) continue;
+            if (desc.getLayer()!=layer) continue;
+            nResponses++;
+        }
+        return nResponses;
+    }
     
     public Particle getPhysicsParticle(int pid){
         Particle  particle = new Particle(pid,
@@ -546,29 +557,24 @@ public class DetectorParticle implements Comparable {
             double distanceThreshold){
         
         Line3D   trajectory = this.detectorTrack.getLastCross();
-        //System.out.println("find hit in array size = "+ hitList.size());
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
+
         for(int loop = 0; loop < hitList.size(); loop++){
            
-            //for(DetectorResponse response : hitList){
             DetectorResponse response = hitList.get(loop);
             
-            //System.out.println("analyzing response " + loop + " type = " + 
-            //       response.getDescriptor().getType() + " " + response.getDescriptor().getLayer() +
-            //        "  " + response.getAssociation());
-            if(response.getDescriptor().getType()==type&&
-                    response.getDescriptor().getLayer()==detectorLayer
-                    &&response.getAssociation()<0){
+            if(response.getDescriptor().getType()==type &&
+               response.getDescriptor().getLayer()==detectorLayer &&
+               response.getAssociation()<0) {
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),
                         response.getPosition().z()
                         );
                 double hitdistance = trajectory.distance(hitPoint).length();
-                //System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                if(hitdistance<distanceThreshold&&hitdistance<minimumDistance){
+                if (hitdistance<distanceThreshold && hitdistance<minimumDistance) {
                     minimumDistance = hitdistance;
                     bestIndex       = loop;
                 }
