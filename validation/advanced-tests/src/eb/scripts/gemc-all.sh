@@ -1,9 +1,9 @@
 #!/bin/sh
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-gemc=${DIR}/gemc.sh
+gemc=${DIR}/gemc.csh
 list=${DIR}/list.txt
 
 for xx in `awk '{print$1}' $list`
 do
-    echo $gemc $xx
+    $gemc $xx
 done
