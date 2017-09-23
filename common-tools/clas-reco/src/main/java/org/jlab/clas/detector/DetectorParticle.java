@@ -725,16 +725,16 @@ public class DetectorParticle implements Comparable {
         double p    = detectorTrack.getVector().mag();
         //double mass = PDGDatabase.getParticleById(id);  // map lookup
         if(id==11 || id==-11){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massElectron(),2));//0.00051*0.00051);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massElectron(),2));
         }
         else if(id==-211 || id==211){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massPionCharged(),2));//0.13957*0.13957);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massPionCharged(),2));
         }
         else if(id==2212 || id==-2212){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massProton(),2));//0.938*0.938);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massProton(),2));
         }
         else if(id==-321 || id==321){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massKaonCharged(),2));//0.493667*0.493667);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massKaonCharged(),2));
         }
         return beta;
     }   
@@ -744,18 +744,24 @@ public class DetectorParticle implements Comparable {
         for(CherenkovResponse c : this.cherenkovStore){
             if(c.getCherenkovType()==type){
                 nphe = c.getEnergy();
+                // FIXME: this is choosing the last match 
+                // should instead either be a += or a break
             }
         }
         return nphe;
-    }    
+    }
 
     public double getVertexTime(DetectorType type, int layer){
-        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
+        double vertex_time = this.getTime(type,layer) -
+            this.getPathLength(type, layer) /
+            (this.getTheoryBeta(this.getPid())*PhysicsConstants.speedOfLight());
         return vertex_time;
     }
 
     public double getVertexTime(DetectorType type, int layer, int pid){
-        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(pid)*29.9792);
+        double vertex_time = this.getTime(type,layer) -
+            this.getPathLength(type, layer) /
+            (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
         return vertex_time;
     }
 
