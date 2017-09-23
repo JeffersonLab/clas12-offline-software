@@ -467,7 +467,7 @@ public class DetectorData {
                double vx = d0*Math.cos(phi0);
                double vy = d0*Math.sin(phi0);
 
-               DetectorTrack  track = new DetectorTrack(charge,p);
+               DetectorTrack  track = new DetectorTrack(charge,p,row);
                track.setVector(px, py, pz);
                track.setVertex(vx, vy, z0);
                track.setPath(bank.getFloat("pathlength", row));
@@ -477,8 +477,7 @@ public class DetectorData {
                Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
 
-               // FIXME:  define a convetion on DetectorType for central tracks
-               track.setDetectorID(DetectorType.FMT.getDetectorId());
+               track.setDetectorID(DetectorType.CVT.getDetectorId());
 
                tracks.add(track);
            }
