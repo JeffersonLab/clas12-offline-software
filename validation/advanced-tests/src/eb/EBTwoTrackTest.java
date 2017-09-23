@@ -2,6 +2,10 @@ package eb;
 
 import java.io.File;
 import org.junit.Test;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import static org.junit.Assert.*;
 
 import org.jlab.io.base.DataBank;
@@ -14,14 +18,9 @@ import org.jlab.analysis.math.ClasMath;
 
 /**
  *
- * Analyze EB efficiencies based on Joseph's test events.
- *  - Two-particle (e-hadron) FD events
- *  - 1-electron FT events
- *  - etc.
+ * Analyze EB efficiencies based on Joseph's 2-particle test events.
  *
- * Note, hadron is assumed to have positive charge.
- *
- * Need to write a more general purpose one based on MC::Particle bank.
+ * Need to write a more general purpose test based on MC::Particle bank.
  *
  * @author baltzell
  */
@@ -35,7 +34,6 @@ public class EBTwoTrackTest {
 
     boolean isForwardTagger=false;
     boolean isCentral=false;
-    boolean udfFileType=true;
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
@@ -68,6 +66,11 @@ public class EBTwoTrackTest {
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
     DataBank ftcBank=null,fthBank=null,ftpartBank=null;
 
+    Map <Integer,List<Integer>> recCalMap=new HashMap<Integer,List<Integer>>();
+    Map <Integer,List<Integer>> recCheMap=new HashMap<Integer,List<Integer>>();
+    Map <Integer,List<Integer>> recSciMap=new HashMap<Integer,List<Integer>>();
+    Map <Integer,List<Integer>> recTrkMap=new HashMap<Integer,List<Integer>>();
+
     @Test
     public void main() {
         String fileName=System.getProperty("INPUTFILE");
@@ -84,31 +87,26 @@ public class EBTwoTrackTest {
         ss=ss.replace(".hipo","");
         
         // test filename to determine data type:
+        boolean udfFileType=false;
         if (ss.equals("electronproton"))  {
             hadronPDG=2212;
-            udfFileType=false;
         }
         else if (ss.equals("electronpion")) {
             hadronPDG=211;
-            udfFileType=false;
         }
         else if (ss.equals("electronkaon")) {
             hadronPDG=321;
-            udfFileType=false;
         }
         else if (ss.equals("electrongamma")) {
             hadronPDG=22;
-            udfFileType=false;
         }
         else if (ss.equals("electronneutron")) {
             hadronPDG=2112;
-            udfFileType=false;
         }
         else if (ss.equals("electronFTgamma")) {
             isForwardTagger=true;
             hadronPDG=22;
             ftPDG=11;
-            udfFileType=false;
         }
         else if (ss.equals("electronFTproton")) {
             isForwardTagger=true;
@@ -148,29 +146,38 @@ public class EBTwoTrackTest {
         else if (ss.equals("electrongammaFT")) {
             isForwardTagger=true;
             ftPDG=22;
-            udfFileType=false;
         }
+        else udfFileType=true;
 
         HipoDataSource reader = new HipoDataSource();
         reader.open(fileName);
 
-        if (!udfFileType) {
-            if (isForwardTagger) {
-                processEventsFT(reader);
-                checkResultsFT();
-            }
-            else if (isCentral) {
-                processEvents(reader);
-            }
-            else {
-                processEventsFD(reader);
-                checkResultsFD();
+        while (reader.hasEvent()) {
+            DataEvent event = reader.getNextEvent();
+            getBanks(event);
+            checkAllRefs(event);
+            if (!udfFileType) {
+                if (isForwardTagger) processEventFT(event);
+                else processEvent(event);
             }
         }
-        else processEvents(reader);
+        reader.close();
+
+        if (udfFileType) {
+            System.out.println("");
+            System.out.println("***********************************************************");
+            System.out.println("EBTwoTrackTest does not know about this file.");
+            System.out.println("  So we only did some bank index referencing tests.");
+            System.out.println("***********************************************************");
+            System.out.println("");
+        }
+        else {
+            if (isForwardTagger) checkResultsFT();
+            else checkResults();
+        }
     }
 
-    /*
+    /**
      *
      * We're keeping all banks global to this class for now.
      *
@@ -197,8 +204,46 @@ public class EBTwoTrackTest {
         if (de.hasBank("FTHODO::clusters"))        fthBank = de.getBank("FTHODO::clusters");
         if (de.hasBank("FT::particles"))           ftpartBank = de.getBank("FT::particles");
         if (de.hasBank("ECAL::clusters"))          calBank = de.getBank("ECAL::clusters");
+        loadMaps();
     }
-    
+   
+    /**
+     *
+     * Load mapping between banks.
+     *
+     */
+    public void loadMap(Map<Integer,List<Integer>> map, 
+                        DataBank fromBank, 
+                        DataBank toBank, 
+                        String idxVarName) {
+        map.clear();
+        if (fromBank==null) return;
+        if (toBank==null) return;
+        for (int ii=0; ii<fromBank.rows(); ii++) {
+            final int iTo=fromBank.getInt(idxVarName,ii);
+            if (map.containsKey(iTo)) {
+                map.get(iTo).add(ii);
+            }
+            else {
+                List<Integer> iFrom=new ArrayList<Integer>();
+                map.put(iTo,iFrom);
+                map.get(iTo).add(ii);
+            }
+        }
+    }
+
+    /**
+     *
+     * Load mapping from REC::Particle to REC::"Detector".
+     *
+     */
+    public void loadMaps() {
+        loadMap(recCalMap,recCalBank,recPartBank,"pindex");
+        loadMap(recCheMap,recCheBank,recPartBank,"pindex");
+        loadMap(recSciMap,recSciBank,recPartBank,"pindex");
+        loadMap(recTrkMap,recTrkBank,recPartBank,"pindex");
+    }
+
     /**
      *
      * Choose a referenced bank, based on "detector" from from a REC:: detector bank
@@ -316,7 +361,7 @@ public class EBTwoTrackTest {
         }
     }
 
-    private void checkResultsFD() {
+    private void checkResults() {
 
         final double twoTrackFrac = (double)nTwoTrackEvents / nEvents;
        
@@ -370,203 +415,144 @@ public class EBTwoTrackTest {
         else if (ftPDG==22) assertEquals(gEff>0.90,true);
     }
 
-    // This only tries to check pointers between banks:
-    private void processEvents(HipoDataSource reader) {
-
-        while (reader.hasEvent()) {
-            DataEvent event = reader.getNextEvent();
-            getBanks(event);
-            checkAllRefs(event);
-        }
-        System.out.println("");
-        System.out.println("***********************************************************");
-        System.out.println("EBTwoTrackTest does not know about this file.");
-        System.out.println("  So we only did some bank index referencing tests.");
-        System.out.println("***********************************************************");
-        System.out.println("");
-    }
-
     // This is for Forward Tagger;
-    private void processEventsFT(HipoDataSource reader) {
+    private void processEventFT(DataEvent event) {
 
-        while (reader.hasEvent()) {
-            
-            DataEvent event = reader.getNextEvent();
-            getBanks(event);
-            checkAllRefs(event);
+        if (ftcBank!=null) {
 
-            if (ftcBank!=null) {
+            nEvents++;
 
-                nEvents++;
-           
-                if (recPartBank!=null && recFtBank!=null) {
-                    for (int ii=0; ii<recFtBank.rows(); ii++) {
-                        int irp = recFtBank.getInt("pindex",ii);
-                        int pid = recPartBank.getInt("pid",irp);
-                        if      (pid==22) nFtPhotons++;
-                        else if (pid==11) nFtElectrons++;
-                    }
+            if (recPartBank!=null && recFtBank!=null) {
+                for (int ii=0; ii<recFtBank.rows(); ii++) {
+                    int irp = recFtBank.getInt("pindex",ii);
+                    int pid = recPartBank.getInt("pid",irp);
+                    if      (pid==22) nFtPhotons++;
+                    else if (pid==11) nFtElectrons++;
                 }
             }
         }
     }
 
-    // This is for Forward Detectors (DC/EC/FTOF/HTCC/LTCC):
-    private void processEventsFD(HipoDataSource reader) {
+    private void processEvent(DataEvent event) {
 
-        while (reader.hasEvent()) {
-            
-            nEvents++;
-            
-            DataEvent event = reader.getNextEvent();
-            getBanks(event);
-            checkAllRefs(event);
+        nEvents++;
 
-            //if (mcBank!=null) mcBank.show();
+        // no tracking bank, discard event:
+        if (trkBank==null) return;
 
-            // no tracking bank, discard event:
-            if (trkBank==null) continue;
+        // count number of TBTracks:
+        int nPosTracks=0,nNegTracks=0;
+        for (int ii=0; ii<trkBank.rows(); ii++) {
 
-            //if (recTrkBank!=null) recTrkBank.show(); 
+            // count negative tracks in electronSector:
+            if (trkBank.getInt("sector",ii)==electronSector) {
 
-/*
-            if (recCheBank!=null) {
-                for (int ii=0; ii<recCheBank.rows(); ii++) {
-                    if (recCheBank.getInt("detector",ii)!=6) {
-                        recCheBank.show();
-                        break;
-                    }
-                }
-            }
-*/
-/*
-            if (ltccBank!=null) {
-                System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                event.getBank("LTCC::clusters").show();
-                if (htccBank!=null) htccBank.show();
-                if (recCheBank!=null) recCheBank.show();
-                if (recPartBank!=null) recPartBank.show();
-                System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-            }
-*/
-            // count number of TBTracks:
-            int nPosTracks=0,nNegTracks=0;
-            for (int ii=0; ii<trkBank.rows(); ii++) {
-
-                // count negative tracks in electronSector:
-                if (trkBank.getInt("sector",ii)==electronSector) {
-
-                    if (trkBank.getInt("q",ii)<0) nNegTracks++;
-                
-                }
-
-                // count positive tracks in hadronSector
-                else if (trkBank.getInt("sector",ii)==hadronSector) {
-
-                    if (trkBank.getInt("q",ii)>0) nPosTracks++;
-
-                }
+                if (trkBank.getInt("q",ii)<0) nNegTracks++;
             }
 
-            // no possible electron tracks, discard event:
-            if (nNegTracks==0) continue;
-            
-            nNegTrackEvents++;
-            if (nPosTracks>0) nTwoTrackEvents++;
+            // count positive tracks in hadronSector
+            else if (!isCentral && trkBank.getInt("sector",ii)==hadronSector) {
 
-            boolean foundElectron = false;
-            boolean foundHadron = false;
-            boolean foundProton = false;
-            boolean foundKaon = false;
-            boolean foundPion = false;
-            boolean foundPhoton = false;
-            boolean foundNeutron = false;
-
-            // check particle bank:
-            if (recPartBank!=null) {
-
-                /*
-                // check references:
-                if (recCheBank!=null)
-                    assertEquals(true,hasValidRefs(event,recCheBank,recPartBank,"pindex"));
-                if (recCalBank!=null)
-                    assertEquals(true,hasValidRefs(event,recCalBank,recPartBank,"pindex"));
-                if (recSciBank!=null)
-                    assertEquals(true,hasValidRefs(event,recSciBank,recPartBank,"pindex"));
-                if (recTrkBank!=null) {
-                    assertEquals(true,hasValidRefs(event,recTrkBank,recPartBank,"pindex"));
-                    assertEquals(true,hasValidRefs(event,recTrkBank,trkBank,"index"));
-                }
-                */
-
-                for(int ii = 0; ii < recPartBank.rows(); ii++) {
-
-                    final byte charge = recPartBank.getByte("charge", ii);
-                    final int pid = recPartBank.getInt("pid", ii);
-                    final double px=recPartBank.getFloat("px",ii);
-                    final double py=recPartBank.getFloat("py",ii);
-                    final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
-
-                    if (pid==11 && sector==electronSector) {
-                        if (!foundElectron) nElectronsSector[sector-1]++;
-                        foundElectron=true;
-                    }
-                    else if (sector==hadronSector) {
-                        if (pid==hadronPDG) {
-                            if (!foundHadron) nHadronsSector[sector-1]++;
-                            foundHadron=true;
-                        }
-                        if      (pid==2212) foundProton=true;
-                        else if (pid==211)  foundPion=true;
-                        else if (pid==321)  foundKaon=true;
-                        else if (pid==22)   foundPhoton=true;
-                        else if (pid==2112) foundNeutron=true;
-                    }
-
-                }
+                if (trkBank.getInt("q",ii)>0) nPosTracks++;
             }
-
-            // pid counting:
-            if (foundElectron) {
-
-                eCount++;
-
-                if (foundPhoton) egCount++;
-                if (foundNeutron) enCount++;
-
-                if (nPosTracks>0) {
-                    
-                    eposCount++;
-                    
-                    if (foundProton) epCount++;
-                    if (foundKaon)   ekCount++;
-                    if (foundPion)   epiCount++;
-
-                    // FIXME
-                    if ( (hadronPDG==2212 && !foundProton) ||
-                         (hadronPDG==321  && !foundKaon) ||
-                         (hadronPDG==211  && !foundPion) ) {
-
-                        if      (hadronPDG==2212 && (foundPion || foundKaon)) nMisid++;
-                        else if (hadronPDG==321 && (foundProton || foundPion)) nMisid++;
-                        else if (hadronPDG==211 && (foundProton || foundKaon)) nMisid++;
-                        else {
-                            nMissing++;
-                            if (debug) {
-                                recPartBank.show();
-                                tofBank.show();
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // CVT tracks could make this happen:
-            //if (foundProton && nPosTracks==0) {
-            //    System.err.println("WHAT");
-            //}
         }
-        reader.close();
+        
+        if (isCentral) {
+            if (ctrkBank==null) return;
+            if (ctrkBank.rows()==0) return;
+            for (int ii=0; ii<ctrkBank.rows(); ii++) {
+                if (ctrkBank.getInt("q",ii)>0) {
+                    final double phi0 = ctrkBank.getFloat("phi0",ii);
+                    final int sector = ClasMath.getSectorFromPhi(phi0);
+                    if (sector == hadronSector)
+                        nPosTracks++;
+                }
+            }
+        }
+
+
+        // no possible electron tracks, discard event:
+        if (nNegTracks==0) return;
+
+        nNegTrackEvents++;
+        if (nPosTracks>0) nTwoTrackEvents++;
+
+        boolean foundElectron = false;
+        boolean foundHadron = false;
+        boolean foundProton = false;
+        boolean foundKaon = false;
+        boolean foundPion = false;
+        boolean foundPhoton = false;
+        boolean foundNeutron = false;
+
+        // check particle bank:
+        if (recPartBank!=null) {
+
+            for (int ii = 0; ii < recPartBank.rows(); ii++) {
+                
+                final byte charge = recPartBank.getByte("charge", ii);
+                final int pid = recPartBank.getInt("pid", ii);
+                final double px=recPartBank.getFloat("px",ii);
+                final double py=recPartBank.getFloat("py",ii);
+                final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
+
+                if (pid==11 && sector==electronSector) {
+                    if (!foundElectron) nElectronsSector[sector-1]++;
+                    foundElectron=true;
+                }
+                else if (sector==hadronSector) {
+                    if (pid==hadronPDG) {
+                        if (!foundHadron) nHadronsSector[sector-1]++;
+                        foundHadron=true;
+                    }
+                    if      (pid==2212) foundProton=true;
+                    else if (pid==211)  foundPion=true;
+                    else if (pid==321)  foundKaon=true;
+                    else if (pid==22)   foundPhoton=true;
+                    else if (pid==2112) foundNeutron=true;
+                }
+            }
+        }
+
+        // pid counting:
+        if (foundElectron) {
+
+            eCount++;
+
+            if (foundPhoton) egCount++;
+            if (foundNeutron) enCount++;
+
+            if (nPosTracks>0) {
+
+                eposCount++;
+
+                if (foundProton) epCount++;
+                if (foundKaon)   ekCount++;
+                if (foundPion)   epiCount++;
+
+                // FIXME
+                if ( (hadronPDG==2212 && !foundProton) ||
+                     (hadronPDG==321  && !foundKaon) ||
+                     (hadronPDG==211  && !foundPion) ) {
+
+                    if      (hadronPDG==2212 && (foundPion || foundKaon)) nMisid++;
+                    else if (hadronPDG==321 && (foundProton || foundPion)) nMisid++;
+                    else if (hadronPDG==211 && (foundProton || foundKaon)) nMisid++;
+                    else {
+                        nMissing++;
+                        if (debug) {
+                            recPartBank.show();
+                            tofBank.show();
+                        }
+                    }
+                }
+            }
+        }
+
+        // CVT tracks could make this happen:
+        //if (foundProton && nPosTracks==0) {
+        //    System.err.println("WHAT");
+        //}
     }
 
 }
