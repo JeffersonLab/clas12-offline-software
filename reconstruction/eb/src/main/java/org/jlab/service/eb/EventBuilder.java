@@ -104,56 +104,52 @@ public class EventBuilder {
      */
     public void processHitMatching(){
         
-        //List<DetectorResponse>  responseFTOF1A = DetectorResponse.getListByLayer(detectorResponses, DetectorType.FTOF, 1);
-        //List<DetectorResponse>  responseFTOF1B = DetectorResponse.getListByLayer(detectorResponses, DetectorType.FTOF, 2); 
-        
         int np = detectorEvent.getParticles().size();
         for(int n = 0; n < np; n++){
             DetectorParticle  p = this.detectorEvent.getParticle(n);
 
             double quality = 0.0;
+            
+            // Matching tracks to detector responses, adding
+            // responses to the particle if reasonable match
+            // is found and set associations
 
-            /**
-             * Matching tracks to FTOF layer 1A detector. Added to the particle and association is
-             * set with a particle needed.
-             */
+            // Matching tracks to FTOF layer 1A detector.
             int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
 
-            /**
-             * Matching tracks to FTOF layer 1B detector. Added to the particle and association is
-             */
+            // Matching tracks to FTOF layer 1B detector.
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
 
-            /**
-             * Matching tracks to FTOF layer 2 detector. Added to the particle and association is
-             */
+            // Matching tracks to FTOF layer 2 detector.
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
 
-            /**
-             * Matching tracks to CTOF detector. Added to the particle and association is
-             */
+            // Matching tracks to CTOF detector.
             index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
 
-            /**
-             * Matching tracks to PCAL (first layer of ECAL) and adding to the particle if reasonable match
-             * is found, and proper association is set.
-             */
+            // Matching tracks to CND detector.
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.CND, 0, EBConstants.CND_Matching);
+            if(index>=0){
+                p.addResponse(detectorResponses.get(index), true);
+                detectorResponses.get(index).setAssociation(n);
+            }
+
+            // Matching tracks to PCAL:
             index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, EBConstants.PCAL_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -329,10 +325,10 @@ public class EventBuilder {
         // these have a PCAL cluster:
         List<DetectorParticle> partsPCAL = ebm.findNeutrals(1);
         
-        // these have ECIN but no PCAL:
+        // these have ECIN but no PCAL (previous line exhausted PCAL):
         List<DetectorParticle> partsECIN = ebm.findNeutrals(4);
 
-        // these have ECOUT but no PCAL nor ECIN:
+        // these have ECOUT but no PCAL nor ECIN (previous lines exhausted PCAL and ICIN):
         List<DetectorParticle> partsECOUT = ebm.findNeutrals(7);
         
         List<DetectorParticle> particles=new ArrayList<DetectorParticle>();
