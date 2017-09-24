@@ -312,8 +312,8 @@ public class DetectorData {
        int row = 0;
        for(int i = 0 ; i < particles.size(); i++) {
            DetectorParticle p = particles.get(i);
-           // FIXME: is this supposed to work for CVT too?
-           if(p.getTrackDetector()==DetectorType.DC.getDetectorId()) {
+           if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
+              p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
                bank.setShort("index", row, (short) p.getTrackIndex());
                bank.setShort("pindex", row, (short) i);
                bank.setByte("detector", row, (byte) p.getTrackDetector());
@@ -471,6 +471,8 @@ public class DetectorData {
                track.setVector(px, py, pz);
                track.setVertex(vx, vy, z0);
                track.setPath(bank.getFloat("pathlength", row));
+               // FIXME:  is this the correct chi2:
+               track.setchi2(bank.getFloat("circlefit_chi2_per_ndf",row));
 
                //track.addCTOFPoint(x,y,z);
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
