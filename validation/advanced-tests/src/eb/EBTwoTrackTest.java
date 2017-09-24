@@ -20,7 +20,9 @@ import org.jlab.analysis.math.ClasMath;
  *
  * Analyze EB efficiencies based on Joseph's 2-particle test events.
  *
- * Need to write a more general purpose test based on MC::Particle bank.
+ * TODO:  Inherit process/checkResults to subclasses for FD/CD/FT
+ *
+ * TODO:  Write a more general purpose test based on MC::Particle bank.
  *
  * @author baltzell
  */
