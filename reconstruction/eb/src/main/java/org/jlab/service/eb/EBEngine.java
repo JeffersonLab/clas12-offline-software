@@ -97,10 +97,8 @@ public class EBEngine extends ReconstructionEngine {
         eb.addTaggerResponses(responseFTHODO);
         eb.addFTIndices(ftIndices);
         eb.forwardTaggerIDMatching();
-        
 
-            
-        
+
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
             
@@ -110,7 +108,7 @@ public class EBEngine extends ReconstructionEngine {
             DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
             de.appendBanks(bankEve);
 
-            List<DetectorResponse>   calorimeters = eb.getEvent().getCalorimeterResponseList();
+            List<DetectorResponse> calorimeters = eb.getEvent().getCalorimeterResponseList();
             if(calorimeterBank!=null && calorimeters.size()>0) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
                 de.appendBanks(bankCal);
@@ -120,29 +118,24 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
             }
-            List<CherenkovResponse>       cherenkovs = eb.getEvent().getCherenkovResponseList();
+            List<CherenkovResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
             if(cherenkovBank!=null && cherenkovs.size()>0) {
                 DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
                 de.appendBanks(bankChe);
             }
             
-            List<TaggerResponse>       taggers = eb.getEvent().getTaggerResponseList();
+            List<TaggerResponse> taggers = eb.getEvent().getTaggerResponseList();
             if (ftBank!=null && taggers.size()>0) {
                 DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, ftBank);
                 de.appendBanks(bankForwardTagger);
             }
 
-            
-//            if (ftBank!=null && trackFT.size()>0) {
-//                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getParticles(), de, "REC::ForwardTagger", trackFT.size());
-//                de.appendBanks(bankForwardTagger);
-//            }
-            
-            if (trackBank!=null && tracks.size()>0) {
-                DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, tracks.size());
+            if (trackBank!=null && (tracks.size()>0 || ctracks.size()>0) ) {
+                final int ntracks = tracks.size() + ctracks.size();
+                DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);//tracks.size());
                 de.appendBanks(bankTrack);
-            }            
-            
+            }
+
             if(matrixBank!=null) {
                 DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
                 de.appendBanks(bankMat);
