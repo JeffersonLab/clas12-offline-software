@@ -139,5 +139,69 @@ public class EBMatching {
         return parts;
     }
 
+    /**
+     *
+     * Central Tracks and CTOF/CND were already matched before
+     * event builder.  Copy in.
+     *
+     */
+    /*
+    public void readCentralParticles(DataEvent de,
+                                     String ctrkBankName,
+                                     String ctofBankName,
+                                     String cndBankName) {
+
+        // Make a neutral particle for each CND hit without an
+        // associated track.
+        if (de.hasBank(cndBankName)==true) {
+            DataBank cndBank = de.getBank(cndBankName);
+            final int ncnd=cndBank.rows();
+            for (int icnd=0; icnd<ncnd; icnd++) {
+                final int trkid=cndBank.getInt("trkID",icnd);
+                if (trkid<1) {
+                    // make neutral particle
+                }
+            }
+        }
+
+        // load map from trkID to ctof hits
+        Map<Integer,ArrayList<Integer>> ctofMap = null;
+        if (de.hasBank(ctofBankName)==true) {
+            ctofMap = new HashMap<Integer,ArrayList<Integer>>();
+            DataBank ctofBank = de.getBank(ctofBankName);
+            final int nctof=ctofBank.rows();
+            for (int ictof=0; ictof<nctof; ictof++) {
+                final int trkid=ctofBank.getInt("trkID",ictof);
+                if (trkid>0) {
+                    if (!ctofMap.containsKey(trkid))
+                        ctofMap.put(trkid,new ArrayList<Integer>());
+                    ctofMap.get(trkid).add(ictof);
+                }
+            }
+        }
+
+        List<DetectorTracks> trks = new ArrayList<DetectorTrack>();
+        List<DetectorParticle> prts = new ArrayList<DetectorParticle>();
+
+        // Make a charged particle for each Central Track,
+        // associate it with CTOF hit if found matching track ID.
+        if (de.hasBank(ctrkBankName)==true) {
+            DataBank ctrkBank = de.getBank(ctrkBankName);
+            final int nctrk=ctrkBank.rows();
+            for (int ictrk=0; ictrk<nctrk; ictrk++) {
+                // make track and charged particle
+                
+                final int trkid=ctrkBank.getInt("ID",ictrk);
+                if (ctofMap!=null && ctofMap.containsKey(trkid)) {
+                    // associate the particle with a CTOF hit:
+                
+                }
+            }
+        }
+
+        eventbuilder.addCentralTracks(trks);
+    }
+    */
+
 }
 

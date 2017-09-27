@@ -76,6 +76,10 @@ public class EBEngine extends ReconstructionEngine {
         //eb.addTaggerTracks(trackFT);
         eb.processNeutralTracks();
 
+        // matching was already done for central:
+        //eb.readCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits");
+        
+
         eb.assignTrigger();
  
         // Process RF:
@@ -130,8 +134,9 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankForwardTagger);
             }
 
-            if (trackBank!=null && (tracks.size()>0 || ctracks.size()>0) ) {
-                final int ntracks = tracks.size() + ctracks.size();
+            // Omit CD tracks for now, need full CD import
+            if (trackBank!=null && (tracks.size()>0)) { // || ctracks.size()>0) ) {
+                final int ntracks = tracks.size();// + ctracks.size();
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);//tracks.size());
                 de.appendBanks(bankTrack);
             }

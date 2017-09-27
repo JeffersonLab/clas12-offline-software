@@ -135,6 +135,7 @@ public class EventBuilder {
                 detectorResponses.get(index).setAssociation(n);
             }
 
+            // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CTOF detector.
             index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
             if(index>=0){
@@ -142,12 +143,13 @@ public class EventBuilder {
                 detectorResponses.get(index).setAssociation(n);
             }
 
+            // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CND detector.
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.CND, 0, EBConstants.CND_Matching);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-            }
+            //index = p.getDetectorHit(this.detectorResponses, DetectorType.CND, 0, EBConstants.CND_Matching);
+            //if(index>=0){
+            //    p.addResponse(detectorResponses.get(index), true);
+            //    detectorResponses.get(index).setAssociation(n);
+            //}
 
             // Matching tracks to PCAL:
             index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, EBConstants.PCAL_MATCHING);
