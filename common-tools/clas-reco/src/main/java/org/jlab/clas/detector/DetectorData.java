@@ -312,8 +312,9 @@ public class DetectorData {
        int row = 0;
        for(int i = 0 ; i < particles.size(); i++) {
            DetectorParticle p = particles.get(i);
-           if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
-              p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+           if(p.getTrackDetector()==DetectorType.DC.getDetectorId()) {
+              // FIXME:  CD will probably have to be done differently, since it's already matched
+              // || p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
                bank.setShort("index", row, (short) p.getTrackIndex());
                bank.setShort("pindex", row, (short) i);
                bank.setByte("detector", row, (byte) p.getTrackDetector());

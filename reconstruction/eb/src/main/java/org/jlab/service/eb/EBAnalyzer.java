@@ -243,12 +243,13 @@ public class EBAnalyzer {
                 vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 1, 211)-event_start_time));
                 vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 1, 321)-event_start_time));
             }
+            // FIXME:  Leave this off for now, until full import of CD is done
             // else use CTOF:
-            else if(p.hasHit(DetectorType.CTOF)==true) {
-                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
-                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
-                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
-            }
+            //else if(p.hasHit(DetectorType.CTOF)==true) {
+            //    vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
+            //    vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
+            //    vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
+            //}
 
             if(vertexDiffs.size()>0) {
                 double min = vertexDiffs.get(0);
