@@ -1,7 +1,7 @@
 [ 
   {
     "bank": "ECAL::hits",
-    "group": 1611,
+    "group": 20721,
     "info": "reconstructed hits from ECAL",
     "items": [
        {"name":"id",          "id":1, "type":"int16", "info":"id of the hit"},
@@ -16,7 +16,7 @@
   },
   {
     "bank": "ECAL::peaks",
-    "group": 1612,
+    "group": 20722,
     "info": "reconstructed peaks from ECAL",
     "items": [
        {"name":"id",          "id":1,  "type":"int16", "info":"id of the hit"},
@@ -36,7 +36,7 @@
   },
   {
     "bank": "ECAL::clusters",
-    "group": 1613,
+    "group": 20723,
     "info": "reconstructed clusters in ECAL",
     "items": [
        {"name":"id",          "id":1,   "type":"int16",  "info":"id of the hit"},
@@ -61,7 +61,7 @@
   },
   {
     "bank": "ECAL::calib",
-    "group": 1614,
+    "group": 20724,
     "info": "Raw and recon peak energy from ECAL",
     "items": [
        {"name":"sector",      "id":1, "type":"int8",  "info":"sector of ECAL"},

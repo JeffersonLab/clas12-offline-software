@@ -70,7 +70,7 @@ public class GeometryManager {
 		getSVTPanels();
 
 		ConstantProvider ecDataProvider = 
-				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.EC);
+				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.ECAL);
 		ECDetector clas_Cal_Detector = (new ECFactory())
 				.createDetectorCLAS(ecDataProvider);
 

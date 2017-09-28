@@ -3,7 +3,11 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 
 import bCNU3D.Support3D;
+import cnuphys.bCNU.log.Log;
+import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.ECAL;
+import cnuphys.ced.event.data.TdcAdcHit;
+import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -65,41 +69,76 @@ public class ECViewPlane3D extends DetectorItem3D {
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-
-		int hitCount = ECAL.hitCount();
 		
-		if (hitCount > 0) {
-			int sector[] = ECAL.sector();
-			int stack[] = ECAL.stack();
-			int view[] = ECAL.view();
-			int strip[] = ECAL.strip();
-			int pid[] = ECAL.pid();
-			double avgX[] = ECAL.avgX();
-			double avgY[] = ECAL.avgY();
-			double avgZ[] = ECAL.avgZ();
+		TdcAdcHitList hits = AllEC.getInstance().getHits();
+		if ((hits != null) && !hits.isEmpty()) {
 			
 			float coords[] = new float[24];
-			for (int i = 0; i < hitCount; i++) {
-				if ((_sector == sector[i]) && (_stack == stack[i])
-						&& (_view == view[i])) {
-					ECGeometry.getStrip(_sector, _stack, _view, strip[i],
-							coords);
-					if (_cedPanel3D.showMCTruth() && (pid != null)) {
-						Color color = truthColor(pid, i);
-						drawStrip(drawable, color, coords);
-						double xcm = avgX[i] / 10;
-						double ycm = avgY[i] / 10;
-						double zcm = avgZ[i] / 10;
-						drawMCPoint(drawable, xcm, ycm, zcm, color);
 
-					} else {
-						drawStrip(drawable, dgtzColor, coords);
+			for (TdcAdcHit hit : hits) {
+				if (hit != null) {
+					try {
+						if (hit.layer > 3) {
+							int layer = hit.layer - 4; // 0..5
+
+							int stack = 1 + layer / 3; // 111/222 for inner outer
+							int view = 1 + (layer % 3); // 123123 for uvwuvw
+
+							if ((_sector == hit.sector) && (_view == view) && (_stack == stack)) {
+								int strip = hit.component;
+
+								Color color = hits.adcColor(hit, AllEC.getInstance().getMaxECALAdc());
+
+								ECGeometry.getStrip(_sector, _stack, _view, strip, coords);
+								drawStrip(drawable, color, coords);
+							}
+						}
 					}
-				}
-			} //end for loop
+					catch (Exception e) {
+						Log.getInstance().exception(e);
+					}
+				} // hit not null
+			} //hit loop
+		} // have hits
+		
 
-		} //hitCount > 0
-
+		
+		
+//
+//		int hitCount = ECAL.hitCount();
+//		
+//		if (hitCount > 0) {
+//			int sector[] = ECAL.sector();
+//			int stack[] = ECAL.stack();
+//			int view[] = ECAL.view();
+//			int strip[] = ECAL.strip();
+//			int pid[] = ECAL.pid();
+//			double avgX[] = ECAL.avgX();
+//			double avgY[] = ECAL.avgY();
+//			double avgZ[] = ECAL.avgZ();
+//			
+//			float coords[] = new float[24];
+//			for (int i = 0; i < hitCount; i++) {
+//				if ((_sector == sector[i]) && (_stack == stack[i])
+//						&& (_view == view[i])) {
+//					ECGeometry.getStrip(_sector, _stack, _view, strip[i],
+//							coords);
+//					if (_cedPanel3D.showMCTruth() && (pid != null)) {
+//						Color color = truthColor(pid, i);
+//						drawStrip(drawable, color, coords);
+//						double xcm = avgX[i] / 10;
+//						double ycm = avgY[i] / 10;
+//						double zcm = avgZ[i] / 10;
+//						drawMCPoint(drawable, xcm, ycm, zcm, color);
+//
+//					} else {
+//						drawStrip(drawable, dgtzColor, coords);
+//					}
+//				}
+//			} //end for loop
+//
+//		} //hitCount > 0
+//
 
 	}
 

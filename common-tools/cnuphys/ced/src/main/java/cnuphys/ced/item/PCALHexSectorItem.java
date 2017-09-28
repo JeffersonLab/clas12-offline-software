@@ -130,9 +130,11 @@ public class PCALHexSectorItem extends HexSectorItem {
 							g.fillPolygon(poly);
 							g.drawPolygon(poly);
 							
-							//extension
-							double fract = ((double)hit.averageADC()/(double)AllEC.getInstance().getMaxPCALAdc());
+							int adcmax = Math.max(1,  AllEC.getInstance().getMaxPCALAdc());
+							double fract = ((double)hit.averageADC()/(double)adcmax);
 							fract = Math.max(0.15, Math.min(1.0,  fract));
+							
+							//extension
 							poly = extensionPolygon(container, view0, strip0, fract);
 							g.setColor(Color.yellow);
 							g.fillPolygon(poly);

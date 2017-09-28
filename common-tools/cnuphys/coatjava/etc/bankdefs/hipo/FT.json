@@ -1,7 +1,7 @@
 [ 
  {
     "bank": "FTCAL::hits",
-    "group": 911,
+    "group": 21021,
     "info": "Reconstructed Hits in FT calorimeter",
     "items": [
               {"name":"idx",       "id":1, "type":"int8",  "info":"x id of grid"},
@@ -17,7 +17,7 @@
   },
  {
     "bank": "FTCAL::clusters",
-    "group": 912,
+    "group": 21022,
     "info": "Reconstructed Clusters in FT calorimeter",
     "items": [
               {"name":"size",      "id":1,  "type":"int16", "info":"Cluster size" },
@@ -36,7 +36,7 @@
   },
  {
     "bank": "FTHODO::hits",
-    "group": 811,
+    "group": 21121,
     "info": "Reconstructed Hits in FT hodoscope",
     "items": [
               {"name":"sector",    "id":2,  "type":"int8",  "info":"sector number"},
@@ -53,7 +53,7 @@
   },
  {
     "bank": "FTHODO::clusters",
-    "group": 812,
+    "group": 21122,
     "info": "Reconstructed clusters in FT hodoscope",
     "items": [
               {"name":"size",      "id":1,  "type":"int16", "info":"Cluster size" },
@@ -70,7 +70,7 @@
   },
  {
     "bank": "FT::particles",
-    "group": 1711,
+    "group": 20924,
     "info": "Reconstructed Particles in FT",
     "items": [
               {"name":"id",     "id":1,  "type":"int16", "info":"track ID"},

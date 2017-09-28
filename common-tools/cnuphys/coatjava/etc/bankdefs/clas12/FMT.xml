@@ -31,7 +31,8 @@
             <column name="layer"  type="int32"  num="1" info="Layer Number" />
             <column name="sector" type="int32"  num="2" info="Sector Number" />
             <column name="strip"  type="int32"  num="3" info="Strip Number" />
-            <column name="ADC"    type="int32"  num="4" info="adc" />
+            <column name="Edep"   type="float64" num="4" info="deposited energy"/>
+            <column name="ADC"    type="int32"  num="5" info="adc" />
             <column name="hitn"   type="int32"  num="99" info="Hit Number" />
         </section>
     </bank>

@@ -8,7 +8,7 @@ import org.jlab.io.base.DataEvent;
 
 public class SVT extends DetectorData {
 
-	AdcHitList _adcHits = new AdcHitList("SVT::adc");
+	AdcHitList _adcHits = new AdcHitList("BST::adc");
 
 	private static SVT _instance;
 
@@ -25,7 +25,7 @@ public class SVT extends DetectorData {
 	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
-		_adcHits = new AdcHitList("SVT::adc");
+		_adcHits = new AdcHitList("BST::adc");
 	}
 	
 	/**
@@ -33,7 +33,7 @@ public class SVT extends DetectorData {
 	 * @return the updated list
 	 */
 	public AdcHitList updateAdcList() {
-		_adcHits = new AdcHitList("SVT::adc");
+		_adcHits = new AdcHitList("BST::adc");
 		return _adcHits;
 	}
 
