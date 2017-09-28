@@ -139,6 +139,9 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		}
 	}
 
+	/**
+	 * Update the table with the new event
+	 */
 	public void update() {
 		DataEvent event = _eventManager.getCurrentEvent();
 		if (event == null) {
@@ -146,6 +149,13 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 		}
 		
 		_table.setEvent(event);
+	}
+	
+	/**
+	 * Empty table
+	 */
+	public void clear() {
+		_table.setEvent(null);
 	}
 
 	private void setup() {

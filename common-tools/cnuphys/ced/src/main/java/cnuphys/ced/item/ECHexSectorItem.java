@@ -147,8 +147,16 @@ public class ECHexSectorItem extends HexSectorItem {
 								g.drawPolygon(poly);
 								
 								//extension
-								double fract = ((double)hit.averageADC()/(double)AllEC.getInstance().getMaxECALAdc());
+																
+								
+								int adcmax = Math.max(1,  AllEC.getInstance().getMaxECALAdc());
+								double fract = ((double)hit.averageADC()/(double)adcmax);
 								fract = Math.max(0.15, Math.min(1.0,  fract));
+								
+								
+					//			System.err.println("sector: "  + hit.sector + "  layer: " + hit.layer + "  avg ADC: " + hit.averageADC() + "  " + "  MAX: " + AllEC.getInstance().getMaxECALAdc() + " fract: " + fract);
+								
+								
 								poly = extensionPolygon(container, plane, view0, strip0, fract);
 								g.setColor(Color.yellow);
 								g.fillPolygon(poly);

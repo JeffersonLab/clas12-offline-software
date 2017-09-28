@@ -33,9 +33,10 @@
 	    <column name="sector"  num = "1"   type = "int32"  info = "clas12 sector"/>
 	    <column name="side"    num = "2"   type = "int32"  info = "left or right index"/>
 	    <column name="segment" num = "3"   type = "int32"  info = "segment"/>
-	    <column name="nphe"    num = "4"   type = "int32"  info = "number of photons arrived"/>
-	    <column name="npheD"   num = "5"   type = "int32"  info = "number of photo-electrons"/>
-		  <column name="time"    num = "6"   type = "float64" info = "average time of the hit"/>
+        <column name="adc"     num = "4"   type = "int32"  info = "adc"/>
+        <column name="time"    num = "5"   type = "float64" info = "average time of the hit"/>
+	    <column name="nphe"    num = "6"   type = "int32"  info = "number of photons arrived"/>
+	    <column name="npheD"   num = "7"   type = "int32"  info = "number of photo-electrons"/>
 	    <column name="hitn"    num = "99"  type = "int32"  info = "number of hits"/>
 	  </section>
 	</bank>

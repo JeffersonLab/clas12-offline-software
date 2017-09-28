@@ -23,7 +23,7 @@ public class ECAL {
 	 * @return the pid array
 	 */
 	public static int[] pid() {
-		return ColumnData.getIntArray("EC::true.pid");
+		return ColumnData.getIntArray("ECAL::true.pid");
 	}
 	
 	/**
@@ -31,7 +31,7 @@ public class ECAL {
 	 * @return the sector array
 	 */
 	public static int[] sector() {
-		return ColumnData.getIntArray("EC::dgtz.sector");
+		return ColumnData.getIntArray("ECAL::dgtz.sector");
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class ECAL {
 	 * @return the stack array
 	 */
 	public static int[] stack() {
-		return ColumnData.getIntArray("EC::dgtz.stack");
+		return ColumnData.getIntArray("ECAL::dgtz.stack");
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class ECAL {
 	 * @return the view array
 	 */
 	public static int[] view() {
-		return ColumnData.getIntArray("EC::dgtz.view");
+		return ColumnData.getIntArray("ECAL::dgtz.view");
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class ECAL {
 	 * @return the strip array
 	 */
 	public static int[] strip() {
-		return ColumnData.getIntArray("EC::dgtz.strip");
+		return ColumnData.getIntArray("ECAL::dgtz.strip");
 	}
 	
 	/**
@@ -63,7 +63,7 @@ public class ECAL {
 	 * @return the totEdep array
 	 */
 	public static double[] totEdep() {
-		return ColumnData.getDoubleArray("EC::true.totEdep");
+		return ColumnData.getDoubleArray("ECAL::true.totEdep");
 	}
 	
 	/**
@@ -71,7 +71,7 @@ public class ECAL {
 	 * @return the avgX array
 	 */
 	public static double[] avgX() {
-		return ColumnData.getDoubleArray("EC::true.avgX");
+		return ColumnData.getDoubleArray("ECAL::true.avgX");
 	}
 	
 	/**
@@ -79,7 +79,7 @@ public class ECAL {
 	 * @return the avgY array
 	 */
 	public static double[] avgY() {
-		return ColumnData.getDoubleArray("EC::true.avgY");
+		return ColumnData.getDoubleArray("ECAL::true.avgY");
 	}
 	
 	/**
@@ -87,7 +87,7 @@ public class ECAL {
 	 * @return the avgZ array
 	 */
 	public static double[] avgZ() {
-		return ColumnData.getDoubleArray("EC::true.avgZ");
+		return ColumnData.getDoubleArray("ECAL::true.avgZ");
 	}
 	
 	/**
@@ -95,7 +95,7 @@ public class ECAL {
 	 * @return the avgLx array
 	 */
 	public static double[] avgLx() {
-		return ColumnData.getDoubleArray("EC::true.avgLx");
+		return ColumnData.getDoubleArray("ECAL::true.avgLx");
 	}
 	
 	/**
@@ -103,7 +103,7 @@ public class ECAL {
 	 * @return the avgLy array
 	 */
 	public static double[] avgLy() {
-		return ColumnData.getDoubleArray("EC::true.avgLy");
+		return ColumnData.getDoubleArray("ECAL::true.avgLy");
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class ECAL {
 	 * @return the avgLz array
 	 */
 	public static double[] avgLz() {
-		return ColumnData.getDoubleArray("EC::true.avgLz");
+		return ColumnData.getDoubleArray("ECAL::true.avgLz");
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class ECAL {
 	 * @return the hitn array
 	 */
 	public static int[] hitn() {
-		return ColumnData.getIntArray("EC::dgtz.hitn");
+		return ColumnData.getIntArray("ECAL::dgtz.hitn");
 	}
 	
 	/**
@@ -127,7 +127,7 @@ public class ECAL {
 	 * @return the ADC array
 	 */
 	public static int[] ADC() {
-		return ColumnData.getIntArray("EC::dgtz.ADC");
+		return ColumnData.getIntArray("ECAL::dgtz.ADC");
 	}
 	
 	/**
@@ -135,7 +135,7 @@ public class ECAL {
 	 * @return the TDC array
 	 */
 	public static int[] TDC() {
-		return ColumnData.getIntArray("EC::dgtz.TDC");
+		return ColumnData.getIntArray("ECAL::dgtz.TDC");
 	}
 	
 	/**

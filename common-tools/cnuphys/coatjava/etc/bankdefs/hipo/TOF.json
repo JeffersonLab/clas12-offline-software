@@ -1,7 +1,7 @@
 [ 
  {
     "bank": "FTOF::rawhits",
-    "group": 1211,
+    "group": 21220,
     "info": "reconstructed hit info from L/R FTOF PMTs",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -21,7 +21,7 @@
   },
  {
     "bank": "FTOF::hits",
-    "group": 1212,
+    "group": 21221,
     "info": "reconstructed hit info from FTOF",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -46,12 +46,14 @@
        {"name":"adc_idx1",    "id":20, "type":"int16", "info":"index of hit with ADCL in adc bank, starts at zero"},
        {"name":"adc_idx2",    "id":21, "type":"int16", "info":"index of hit with ADCR in adc bank, starts at zero"},
        {"name":"tdc_idx1",    "id":22, "type":"int16", "info":"index of hit with TDCL in tdc bank, starts at zero"},
-       {"name":"tdc_idx2",    "id":23, "type":"int16", "info":"index of hit with TDCR in tdc bank, starts at zero"}
+       {"name":"tdc_idx2",    "id":23, "type":"int16", "info":"index of hit with TDCR in tdc bank, starts at zero"},
+       {"name":"pathLength",        "id":24, "type":"float", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
+       {"name":"pathLengthThruBar", "id":25, "type":"float", "info":"pathlength of the track from the entrance point to the exit point through the hit bar "}
     ]
   },
  {
     "bank": "FTOF::clusters",
-    "group": 1213,
+    "group": 21222,
     "info": "reconstructed clusters from FTOF",
     "items": [
         {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -74,7 +76,7 @@
  },
  {
     "bank": "FTOF::matchedclusters",
-    "group": 1214,
+    "group": 21223,
     "info": "matched clusters from FTOF",
     "items": [
         {"name":"sector",               "id":1, "type":"int8",   "info":"sector of FTOF"},
@@ -91,7 +93,7 @@
  
   {
     "bank": "CTOF::rawhits",
-    "group": 411,
+    "group": 20420,
     "info": "reconstructed hit info from U/D CTOF PMTs",
     "items": [
        {"name":"id",               "id":1, "type":"int16",  "info":"id of the hit"},
@@ -109,7 +111,7 @@
   },
  {
     "bank": "CTOF::hits",
-    "group": 412,
+    "group": 20421,
     "info": "reconstructed hit info from CTOF",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -130,7 +132,10 @@
        {"name":"z_unc",       "id":16, "type":"float", "info":"Global Z coor unc (cm) of hit"},
        {"name":"tx",          "id":17, "type":"float", "info":"Global X coor (cm) of hit from CVT info -trkID index"},
        {"name":"ty",          "id":18, "type":"float", "info":"Global Y coor (cm) of hit from CVT info - trkID index"},
-       {"name":"tz",          "id":19, "type":"float", "info":"Global Z coor (cm) of hit from CVT info - trkID index"}
+       {"name":"tz",          "id":19, "type":"float", "info":"Global Z coor (cm) of hit from CVT info - trkID index"},
+       {"name":"pathLength",        "id":20, "type":"float", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
+       {"name":"pathLengthThruBar", "id":21, "type":"float", "info":"pathlength of the track from the entrance point to the exit point through the hit bar"}
+              
     ]
   }
  

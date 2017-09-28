@@ -92,7 +92,7 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 					if (inCurrent) {
 						bd.update();
 					} else {
-		//				bd.setVisible(false);
+						bd.clear();
 					}
 				}
 			}

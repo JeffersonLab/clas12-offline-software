@@ -51,7 +51,7 @@ public class Transformations {
 	// init for cal superlayer = (0,1,2) for PCAL, EC_IN, EC_OUT
 	private void initCal(int superlayer) {
 		ConstantProvider provider = 
-				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.EC);
+				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.ECAL);
 		ECFactory ecFactory = new ECFactory();
 
 		// detector in sector coordinates

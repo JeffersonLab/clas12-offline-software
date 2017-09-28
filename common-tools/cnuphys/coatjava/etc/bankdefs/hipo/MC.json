@@ -1,0 +1,90 @@
+[ 
+    {
+        "bank": "MC::Event",
+        "group": 41,
+        "info": "Head bank for the generated event",
+        "items": [
+            {"name":"npart",     "id":1,  "type":"int16", "info":"number of particles in the event"},
+            {"name":"btype",     "id":2,  "type":"int16", "info":"Beam type, electron=0, photon=1"},
+            {"name":"ebeam",     "id":3,  "type":"float", "info":"Beam energy (GeV)"},
+            {"name":"pbeam",     "id":4,  "type":"float", "info":"Beam polarization"},
+            {"name":"atarget",   "id":5,  "type":"int16", "info":"Mass number of the target"},
+            {"name":"ztarget",   "id":6,  "type":"int16", "info":"Atomic number oif the target"},
+            {"name":"ptarget",   "id":7,  "type":"float", "info":"Target polarization value, polarization direction, (1-)^n([x=1/y=2/z=3]+pt)"},
+            {"name":"targetid",  "id":8,  "type":"int16", "info":"Interacted nucleaon ID (proton=2212, neutron=2112"},
+            {"name":"processid", "id":9,  "type":"int16", "info":"Process ID"},
+            {"name":"weight",    "id":10, "type":"float", "info":"Event weight"}
+        ]
+    },
+   {
+        "bank": "MC::Particle",
+        "group": 42,
+        "info": "Generated Particle information",
+        "items": [
+            {"name":"status",   "id":1, "type":"int8",   "info":"particle status"},
+            {"name":"pid",      "id":2, "type":"int32",  "info":"particle id in LUND conventions"},
+            {"name":"parent",   "id":3, "type":"int8",   "info":"index of the parent"},
+            {"name":"daughts",  "id":4, "type":"int8",   "info":"index of the first daughter"},
+            {"name":"daughtl",  "id":5, "type":"int8",   "info":"index of the last daughter"},
+            {"name":"px",       "id":6, "type":"float",  "info":"x component of the momentum"},
+            {"name":"py",       "id":7, "type":"float",  "info":"y component of the momentum"},
+            {"name":"pz",       "id":8, "type":"float",  "info":"z component of the momentum"},
+            {"name":"vx",       "id":9, "type":"float",  "info":"x component of the vertex"},
+            {"name":"vy",       "id":10, "type":"float", "info":"y component of the vertex"},
+            {"name":"vz",       "id":11, "type":"float", "info":"z component of the vertex"},
+            {"name":"mass",     "id":12, "type":"float", "info":"mass of the particle"},
+            {"name":"ltime",    "id":13, "type":"float", "info":"particle lifetime"}
+        ]
+    },
+    {
+        "bank": "MC::Lund",
+        "group": 43,
+        "info": "Generated Particle information from Lund",
+        "items": [
+            {"name":"status",   "id":1,  "type":"int8",  "info":"particle status/type (JETSET K(1,*)"},
+            {"name":"pid",      "id":2,  "type":"int32", "info":"particle id in LUND conventions"},
+            {"name":"parent",   "id":3,  "type":"int8",  "info":"index of the parent"},
+            {"name":"daughts",  "id":4,  "type":"int8",  "info":"index of the first daughter"},
+            {"name":"daughtl",  "id":5,  "type":"int8",  "info":"index of the last daughter"},
+            {"name":"px",       "id":6,  "type":"float", "info":"x component of the momentum"},
+            {"name":"py",       "id":7,  "type":"float", "info":"y component of the momentum"},
+            {"name":"pz",       "id":8,  "type":"float", "info":"z component of the momentum"},
+            {"name":"E",        "id":9,  "type":"float", "info":"Energy of the particle"},
+            {"name":"mass",     "id":10, "type":"float", "info":"mass of the particle"},
+            {"name":"vx",       "id":11, "type":"float", "info":"x component of the vertex"},
+            {"name":"vy",       "id":12, "type":"float", "info":"y component of the vertex"},
+            {"name":"vz",       "id":13, "type":"float", "info":"z component of the vertex"},
+            {"name":"ltime",    "id":14, "type":"float", "info":"particle lifetime"}
+        ]
+    },
+    {
+        "bank": "MC::True",
+        "group": 44,
+        "info": "True detector information from GEANT4",
+        "items": [
+            {"name":"detector", "id":1,  "type":"int8",  "info":"detector ID"},
+            {"name":"pid",      "id":2,  "type":"int32", "info":"ID of the first particle entering the sensitive volume"},
+            {"name":"mpid",     "id":3,  "type":"int32", "info":"ID of the mother of the first particle entering the sensitive volume"},
+            {"name":"tid",      "id":4,  "type":"int32", "info":"Track ID of the first particle entering the sensitive volume"},
+            {"name":"mtid",     "id":5,  "type":"int32", "info":"Track ID of the mother of the first particle entering the sensitive volume"},
+            {"name":"otid",     "id":6,  "type":"int32", "info":"Track ID of the original track that generated the first particle entering the sensitive volume"},
+            {"name":"trackE",   "id":7,  "type":"float", "info":"Energy of the track"},
+            {"name":"avgX",     "id":8,  "type":"float", "info":"Average X position in global reference system"},
+            {"name":"avgY",     "id":9,  "type":"float", "info":"Average Y position in global reference system"},
+            {"name":"avgZ",     "id":10, "type":"float", "info":"Average Z position in global reference system"},
+            {"name":"avgLx",    "id":11, "type":"float", "info":"Average X position in local reference system"},
+            {"name":"avgLy",    "id":12, "type":"float", "info":"Average Y position in local reference system"},
+            {"name":"avgLz",    "id":13, "type":"float", "info":"Average Z position in local reference system"},
+            {"name":"px",       "id":14, "type":"float", "info":"x component of momentum of the particle entering the sensitive volume"},
+            {"name":"py",       "id":15, "type":"float", "info":"y component of momentum of the particle entering the sensitive volume"},
+            {"name":"pz",       "id":16, "type":"float", "info":"z component of momentum of the particle entering the sensitive volume"},
+            {"name":"vx",       "id":17, "type":"float", "info":"x component of primary vertex of the particle entering the sensitive volume"},
+            {"name":"vy",       "id":18, "type":"float", "info":"y component of primary vertex of the particle entering the sensitive volume"},
+            {"name":"vz",       "id":19, "type":"float", "info":"z component of primary vertex of the particle entering the sensitive volume"},
+            {"name":"mvx",      "id":20, "type":"float", "info":"x component of primary vertex of the mother of the particle entering the sensitive volume"},
+            {"name":"mvy",      "id":21, "type":"float", "info":"y component of primary vertex of the mother of the particle entering the sensitive volume"},
+            {"name":"mvz",      "id":22, "type":"float", "info":"z component of primary vertex of the mother of the particle entering the sensitive volume"},
+            {"name":"avgT",     "id":23, "type":"float", "info":"Average time"}
+        ]
+    }
+]
