@@ -233,16 +233,17 @@ public class ElizaOverride implements Serializable {
 				return _response;
 			}
 			
-			//snide comment?
-			double rr = Math.random();
-			System.err.println("rr = " + rr);
-			if (rr < 0.2) {
-				return snideReply();
-			}
-
 			return null;
-
+			
 		} // end switch
+
+		
+		//snide comment?
+		double rr = Math.random();
+		System.err.println("rr = " + rr);
+		if (rr < 0.2) {
+			return snideReply();
+		}
 
 		return null;
 	}
