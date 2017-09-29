@@ -1,10 +1,10 @@
 package cnuphys.ced.event.data;
 
-public class SVTCrosses extends Crosses2 {
+public class BSTCrosses extends Crosses2 {
 	
-	private static SVTCrosses _instance;
+	private static BSTCrosses _instance;
 	
-	private SVTCrosses() {
+	private BSTCrosses() {
 		super("BSTRec::Crosses");
 	}
 	
@@ -12,9 +12,9 @@ public class SVTCrosses extends Crosses2 {
 	 * Public access to the singleton
 	 * @return the singleton
 	 */
-	public static SVTCrosses getInstance() {
+	public static BSTCrosses getInstance() {
 		if (_instance == null) {
-			_instance = new SVTCrosses();
+			_instance = new BSTCrosses();
 		}
 		return _instance;
 	}

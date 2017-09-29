@@ -30,7 +30,7 @@ import cnuphys.ced.common.FMTCrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
@@ -101,7 +101,7 @@ public class SectorView extends CedView implements ChangeListener {
 			LineStyle.SOLID);
 
 	// fill color
-	private static final Color SVTHITFILL = new Color(255, 128, 0, 64);
+	private static final Color BSTHITFILL = new Color(255, 128, 0, 64);
 	// private static final Color TRANS = new Color(192, 192, 192, 128);
 
 	// HTCC Items, 8 per sector, not geometrically realistic
@@ -557,7 +557,7 @@ public class SectorView extends CedView implements ChangeListener {
 				_reconDrawer.draw(g, container);
 
 				// draw bst panels
-				drawSVTPanels(g, container);
+				drawBSTPanels(g, container);
 
 				// draw reconstructed dc crosses
 				if (showDChbCrosses()) {
@@ -1365,9 +1365,9 @@ public class SectorView extends CedView implements ChangeListener {
 		return false;
 	}
 
-	// draw the SVT panels
-	private void drawSVTPanels(Graphics g, IContainer container) {
-		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
+	// draw the BST panels
+	private void drawBSTPanels(Graphics g, IContainer container) {
+		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return;
 		}
@@ -1392,7 +1392,7 @@ public class SectorView extends CedView implements ChangeListener {
 		double sinphi = Math.sin(Math.toRadians(phi));
 
 		// set the perp distance
-		for (SVTxyPanel panel : panels) {
+		for (BSTxyPanel panel : panels) {
 			Point2D.Double avgXY = panel.getXyAverage();
 			double perp = avgXY.y * cosphi - avgXY.x * sinphi;
 			panel.setPerp(perp);
@@ -1415,18 +1415,18 @@ public class SectorView extends CedView implements ChangeListener {
 		CentralSupport.markPanelHits(this, panels);
 
 		int index = 0;
-		for (SVTxyPanel panel : panels) {
+		for (BSTxyPanel panel : panels) {
 
 			int alpha = 10 + index / 3;
 			Color col = new Color(128, 128, 128, alpha);
 			Color col2 = new Color(128, 128, 128, alpha + 40);
-			WorldPolygon poly[] = getFromSVTPanel(panel, cosphi, sinphi);
+			WorldPolygon poly[] = getFromBSTPanel(panel, cosphi, sinphi);
 
 			for (int j = 0; j < 3; j++) {
 				boolean hit = panel.hit[j];
 
 				WorldGraphicsUtilities.drawWorldPolygon(g2, container, poly[j],
-						hit ? SVTHITFILL : col, col2, 0, LineStyle.SOLID);
+						hit ? BSTHITFILL : col, col2, 0, LineStyle.SOLID);
 			}
 		}
 
@@ -1447,14 +1447,14 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param wp
 	 *            the world point
 	 */
-	private void labToWorldSVT(double x, double y, double z, Point2D.Double wp,
+	private void labToWorldBST(double x, double y, double z, Point2D.Double wp,
 			double cosphi, double sinphi) {
 		wp.x = z;
 		wp.y = x * cosphi + y * sinphi;
 
 	}
 
-	private WorldPolygon[] getFromSVTPanel(SVTxyPanel panel, double cosphi,
+	private WorldPolygon[] getFromBSTPanel(BSTxyPanel panel, double cosphi,
 			double sinphi) {
 
 		WorldPolygon polys[] = new WorldPolygon[3];
@@ -1478,19 +1478,19 @@ public class SectorView extends CedView implements ChangeListener {
 
 		Point2D.Double wp = new Point2D.Double();
 
-		labToWorldSVT(x1, y1, z0, wp, cosphi, sinphi);
+		labToWorldBST(x1, y1, z0, wp, cosphi, sinphi);
 		x[0] = wp.x;
 		y[0] = wp.y;
 
-		labToWorldSVT(x2, y2, z0, wp, cosphi, sinphi);
+		labToWorldBST(x2, y2, z0, wp, cosphi, sinphi);
 		x[1] = wp.x;
 		y[1] = wp.y;
 
-		labToWorldSVT(x2, y2, z1, wp, cosphi, sinphi);
+		labToWorldBST(x2, y2, z1, wp, cosphi, sinphi);
 		x[2] = wp.x;
 		y[2] = wp.y;
 
-		labToWorldSVT(x1, y1, z1, wp, cosphi, sinphi);
+		labToWorldBST(x1, y1, z1, wp, cosphi, sinphi);
 		x[3] = wp.x;
 		y[3] = wp.y;
 
@@ -1499,19 +1499,19 @@ public class SectorView extends CedView implements ChangeListener {
 
 		polys[0] = new WorldPolygon(x, y, 5);
 
-		labToWorldSVT(x1, y1, z2, wp, cosphi, sinphi);
+		labToWorldBST(x1, y1, z2, wp, cosphi, sinphi);
 		x[0] = wp.x;
 		y[0] = wp.y;
 
-		labToWorldSVT(x2, y2, z2, wp, cosphi, sinphi);
+		labToWorldBST(x2, y2, z2, wp, cosphi, sinphi);
 		x[1] = wp.x;
 		y[1] = wp.y;
 
-		labToWorldSVT(x2, y2, z3, wp, cosphi, sinphi);
+		labToWorldBST(x2, y2, z3, wp, cosphi, sinphi);
 		x[2] = wp.x;
 		y[2] = wp.y;
 
-		labToWorldSVT(x1, y1, z3, wp, cosphi, sinphi);
+		labToWorldBST(x1, y1, z3, wp, cosphi, sinphi);
 		x[3] = wp.x;
 		y[3] = wp.y;
 
@@ -1520,19 +1520,19 @@ public class SectorView extends CedView implements ChangeListener {
 
 		polys[1] = new WorldPolygon(x, y, 5);
 
-		labToWorldSVT(x1, y1, z4, wp, cosphi, sinphi);
+		labToWorldBST(x1, y1, z4, wp, cosphi, sinphi);
 		x[0] = wp.x;
 		y[0] = wp.y;
 
-		labToWorldSVT(x2, y2, z4, wp, cosphi, sinphi);
+		labToWorldBST(x2, y2, z4, wp, cosphi, sinphi);
 		x[1] = wp.x;
 		y[1] = wp.y;
 
-		labToWorldSVT(x2, y2, z5, wp, cosphi, sinphi);
+		labToWorldBST(x2, y2, z5, wp, cosphi, sinphi);
 		x[2] = wp.x;
 		y[2] = wp.y;
 
-		labToWorldSVT(x1, y1, z5, wp, cosphi, sinphi);
+		labToWorldBST(x1, y1, z5, wp, cosphi, sinphi);
 		x[3] = wp.x;
 		y[3] = wp.y;
 

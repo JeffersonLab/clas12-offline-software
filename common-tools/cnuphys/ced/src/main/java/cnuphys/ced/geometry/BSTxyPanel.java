@@ -3,7 +3,7 @@ package cnuphys.ced.geometry;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-public class SVTxyPanel implements Comparable<SVTxyPanel> {
+public class BSTxyPanel implements Comparable<BSTxyPanel> {
 
 	private double z0, z1, z2, z3, z4, z5;
 
@@ -25,7 +25,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	private Line2D.Double line;
 
 	/**
-	 * Create an SVTxyPanel. The panel is really just a thick line
+	 * Create an BSTxyPanel. The panel is really just a thick line
 	 * 
 	 * @param sect
 	 *            1-based
@@ -34,7 +34,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	 * @param vals
 	 *            should be an array of 10 numbers x y x y z0..z5
 	 */
-	public SVTxyPanel(int sect, int lay, double vals[]) {
+	public BSTxyPanel(int sect, int lay, double vals[]) {
 		_sector = sect;
 		layer = lay;
 		double x1 = vals[0];
@@ -225,7 +225,7 @@ public class SVTxyPanel implements Comparable<SVTxyPanel> {
 	}
 
 	@Override
-	public int compareTo(SVTxyPanel otherPanel) {
+	public int compareTo(BSTxyPanel otherPanel) {
 		return Double.compare(perp, otherPanel.perp);
 	}
 }

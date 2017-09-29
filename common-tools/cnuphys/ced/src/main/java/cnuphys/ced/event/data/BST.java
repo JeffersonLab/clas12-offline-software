@@ -6,19 +6,19 @@ import java.util.Vector;
 
 import org.jlab.io.base.DataEvent;
 
-public class SVT extends DetectorData {
+public class BST extends DetectorData {
 
 	AdcHitList _adcHits = new AdcHitList("BST::adc");
 
-	private static SVT _instance;
+	private static BST _instance;
 
 	/**
 	 * Public access to the singleton
-	 * @return the SVT singleton
+	 * @return the BST singleton
 	 */
-	public static SVT getInstance() {
+	public static BST getInstance() {
 		if (_instance == null) {
-			_instance = new SVT();
+			_instance = new BST();
 		}
 		return _instance;
 	}

@@ -24,7 +24,7 @@ public class DisplayBits {
 	public static final int DC_HB_RECONS_CROSSES = 0100;
 
 	/** bst reconstructed crosses */
-	public static final int SVTRECONS_CROSSES = 0200;
+	public static final int BSTRECONS_CROSSES = 0200;
 
 	/** dc hit based reconstructed crosses */
 	public static final int DC_TB_RECONS_CROSSES = 01000;

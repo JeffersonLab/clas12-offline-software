@@ -19,7 +19,7 @@ import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
 import cnuphys.ced.event.data.DataDrawSupport;
-import cnuphys.ced.event.data.SVTCrosses;
+import cnuphys.ced.event.data.BSTCrosses;
 
 public class CrossDrawerXY extends CentralXYViewDrawer {
 
@@ -43,6 +43,7 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
+		
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -62,7 +63,7 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
-		drawSVTCrosses(g, container);
+		drawBSTCrosses(g, container);
 		drawBMTCrosses(g, container);
 
 		g2.setStroke(oldStroke);
@@ -71,13 +72,13 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 	}
 
 	/**
-	 * Draw SVT crosses
+	 * Draw BST crosses
 	 * @param g the graphics context
 	 * @param container the drawing container
 	 */
-	public void drawSVTCrosses(Graphics g, IContainer container) {
+	public void drawBSTCrosses(Graphics g, IContainer container) {
 		
-		CrossList2 crosses = SVTCrosses.getInstance().getCrosses();
+		CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
 		
 		int len = (crosses == null) ? 0 : crosses.size();
 		
@@ -116,7 +117,7 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
 				// the circles and crosses
-				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.SVT_CROSS);
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
 
 				// fbrects for quick feedback
 				_svtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
@@ -195,7 +196,7 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
 		// svt crosses?
-		CrossList2 crosses = SVTCrosses.getInstance().getCrosses();
+		CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
 		int len = (crosses == null) ? 0 : crosses.size();
 
 

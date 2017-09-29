@@ -11,22 +11,10 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 
-public class SVTGeometry {
+public class BSTGeometry {
 
 	// use coat java or peter's
 	public static final boolean USECOATJAVA = true;
-
-	/*
-	 * The SVT Geometry is complicated. Currently from the geometry manager in
-	 * coatjava the get routines (e.g., getLine(sector, superlayer, layer) take
-	 * the three arguments <ul> <li>sector goes around a ring, the number of
-	 * sectors varies depending on the superlayer. The number of sectors are
-	 * {10, 14, 18, 24} for superlayers {0, 1, 2, 3} respectively. The first
-	 * sector is due north and the sector number increases in a clockwise
-	 * manner, <li> the four superlayers are like the rings, they are in the
-	 * range [0--3] <li> the layer is the inner and outer on each superlayer,
-	 * either 0 or 1. </ul>
-	 */
 
 	// used for coordinate transformations
 	private static DetectorTransformation _transform;
@@ -47,12 +35,12 @@ public class SVTGeometry {
 	public static final int[] sectorsPerSuperlayer = { 10, 14, 18, 24 };
 
 	/**
-	 * Initialize the SVT Geometry
+	 * Initialize the BST Geometry
 	 */
 	public static void initialize() {
 
 		System.out.println("\n=====================================");
-		System.out.println("===  SVT Geometry Initialization  ===");
+		System.out.println("===  BST Geometry Initialization  ===");
 		System.out.println("=====================================");
 
 		if (USECOATJAVA) {
@@ -100,7 +88,7 @@ public class SVTGeometry {
 			return line;
 
 		} catch (NullPointerException npe) {
-			System.err.println("SVT GetStrip " + npe.getMessage());
+			System.err.println("BST GetStrip " + npe.getMessage());
 			System.err.println("sector: " + sector);
 			System.err.println("superlayer: " + superlayer);
 			System.err.println("layer: " + layer);
@@ -149,7 +137,7 @@ public class SVTGeometry {
 		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
 		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
 		
-		int numSect = SVTGeometry.sectorsPerSuperlayer[supl];
+		int numSect = BSTGeometry.sectorsPerSuperlayer[supl];
 
 		//HACK fix mismatch reality vs. Geo database
 		sector = GeometryManager.getInstance().svtSectorHack(numSect, sector);
@@ -193,7 +181,7 @@ public class SVTGeometry {
 		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
 		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
 
-		int numSect = SVTGeometry.sectorsPerSuperlayer[supl];
+		int numSect = BSTGeometry.sectorsPerSuperlayer[supl];
 
 		//HACK fix mismatch reality vs. Geo database
 		sector = GeometryManager.getInstance().svtSectorHack(numSect, sector);
@@ -201,7 +189,7 @@ public class SVTGeometry {
 		
 		double vals[] = new double[10];
 
-		SVTGeometry.getLimitValues(sector - 1, supl, lay, vals);
+		BSTGeometry.getLimitValues(sector - 1, supl, lay, vals);
 		// covert to cm
 		for (int i = 0; i < 10; i++) {
 			vals[i] /= 10;
@@ -244,7 +232,7 @@ public class SVTGeometry {
 
 	/**
 	 * Get the points in the geometry service that were in the old file for
-	 * drawing in the SVT views
+	 * drawing in the BST views
 	 * 
 	 * @param sector
 	 *            the 0-based sector

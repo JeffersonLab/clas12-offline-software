@@ -4,7 +4,7 @@ import java.util.List;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.BSTxyPanel;
 
 public class CentralSupport {
 
@@ -14,13 +14,13 @@ public class CentralSupport {
 	 * @param panels
 	 *            the list of panels
 	 */
-	public static void markPanelHits(CedView view,  List<SVTxyPanel> panels) {
+	public static void markPanelHits(CedView view,  List<BSTxyPanel> panels) {
 		
 		if (panels == null) {
 			return;
 		}
 
-		for (SVTxyPanel panel : panels) {
+		for (BSTxyPanel panel : panels) {
 			if (panel != null) {
 				panel.hit[0] = false;
 				panel.hit[1] = false;

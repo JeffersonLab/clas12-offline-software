@@ -193,8 +193,8 @@ public class BMTSectorItem extends DonutItem {
 	
 	@Override
 	public boolean shouldDraw(Graphics g, IContainer container) {
-		boolean oldSVTGeometry = Ced.getCed().useOldSVTGeometry();
-		if (oldSVTGeometry && (_layer < 5)) {
+		boolean oldBSTGeometry = Ced.getCed().useOldBSTGeometry();
+		if (oldBSTGeometry && (_layer < 5)) {
 			return false;
 		}
 		return super.shouldDraw(g, container);
@@ -202,8 +202,8 @@ public class BMTSectorItem extends DonutItem {
 	
 	@Override
 	public boolean contains(IContainer container, Point screenPoint) {
-		boolean oldSVTGeometry = Ced.getCed().useOldSVTGeometry();
-		if (oldSVTGeometry && (_layer < 5)) {
+		boolean oldBSTGeometry = Ced.getCed().useOldBSTGeometry();
+		if (oldBSTGeometry && (_layer < 5)) {
 			return false;
 		}
 		return super.contains(container, screenPoint);

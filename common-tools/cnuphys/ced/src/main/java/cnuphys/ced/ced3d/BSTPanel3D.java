@@ -9,14 +9,14 @@ import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
-import cnuphys.ced.event.data.SVT;
-import cnuphys.ced.event.data.SVTCrosses;
-import cnuphys.ced.geometry.SVTGeometry;
+import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BSTCrosses;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.lund.X11Colors;
 
 import com.jogamp.opengl.GLAutoDrawable;
 
-public class SVTPanel3D extends DetectorItem3D {
+public class BSTPanel3D extends DetectorItem3D {
 
 	protected static final Color outlineHitColor = new Color(0, 255, 64, 24);
 
@@ -30,7 +30,7 @@ public class SVTPanel3D extends DetectorItem3D {
 	// the 1-based "biglayer" [1..8] used by the data
 	private int _layer;
 
-	public SVTPanel3D(CedPanel3D panel3D, int sector, int layer) {
+	public BSTPanel3D(CedPanel3D panel3D, int sector, int layer) {
 		super(panel3D);
 		_sector = sector;
 		_layer = layer;
@@ -40,7 +40,7 @@ public class SVTPanel3D extends DetectorItem3D {
 	public void drawShape(GLAutoDrawable drawable) {
 		float coords[] = new float[36];
 
-		SVTGeometry.getLayerQuads(_sector, _layer, coords);
+		BSTGeometry.getLayerQuads(_sector, _layer, coords);
 
 		Color color = ((_layer % 2) == 0) ? X11Colors.getX11Color("coral", getVolumeAlpha())
 			: X11Colors.getX11Color("Powder Blue", getVolumeAlpha());
@@ -55,7 +55,7 @@ public class SVTPanel3D extends DetectorItem3D {
 		boolean drawOutline = false;
 
 		
-		AdcHitList hits = SVT.getInstance().getHits();
+		AdcHitList hits = BST.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
 				if (hit != null) {
@@ -64,7 +64,7 @@ public class SVTPanel3D extends DetectorItem3D {
 					if ((_sector == sector) && (_layer == layer)) {
 						drawOutline = true;
 						int strip = hit.component;
-						SVTGeometry.getStrip(sector, layer, strip, coords6);
+						BSTGeometry.getStrip(sector, layer, strip, coords6);
 						
 						if (showHits()) {
 							Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
@@ -78,15 +78,15 @@ public class SVTPanel3D extends DetectorItem3D {
 
 
 		if (drawOutline) { // if any hits, draw it once
-			SVTGeometry.getLayerQuads(_sector, _layer, coords36);
+			BSTGeometry.getLayerQuads(_sector, _layer, coords36);
 			Support3D.drawQuads(drawable, coords36, outlineHitColor, 1f, true);
 		}
 		
 
 		// reconstructed crosses?
 		if (_cedPanel3D.showReconCrosses()) {
-			//SVT
-			CrossList2 crosses = SVTCrosses.getInstance().getCrosses();
+			//BST
+			CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
 			int len = (crosses == null) ? 0 : crosses.size();
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
@@ -144,33 +144,33 @@ public class SVTPanel3D extends DetectorItem3D {
 
 	}
 
-	// show SVT?
+	// show BST?
 	@Override
 	protected boolean show() {
 		switch (_layer) {
 		case 1:
-			return _cedPanel3D.showSVTLayer1();
+			return _cedPanel3D.showBSTLayer1();
 		case 2:
-			return _cedPanel3D.showSVTLayer2();
+			return _cedPanel3D.showBSTLayer2();
 		case 3:
-			return _cedPanel3D.showSVTLayer3();
+			return _cedPanel3D.showBSTLayer3();
 		case 4:
-			return _cedPanel3D.showSVTLayer4();
+			return _cedPanel3D.showBSTLayer4();
 		case 5:
-			return _cedPanel3D.showSVTLayer5();
+			return _cedPanel3D.showBSTLayer5();
 		case 6:
-			return _cedPanel3D.showSVTLayer6();
+			return _cedPanel3D.showBSTLayer6();
 		case 7:
-			return _cedPanel3D.showSVTLayer7();
+			return _cedPanel3D.showBSTLayer7();
 		case 8:
-			return _cedPanel3D.showSVTLayer8();
+			return _cedPanel3D.showBSTLayer8();
 		}
 		return false;
 	}
 
 	// show strip hits?
 	protected boolean showHits() {
-		return show() && _cedPanel3D.showSVTHits();
+		return show() && _cedPanel3D.showBSTHits();
 	}
 
 }

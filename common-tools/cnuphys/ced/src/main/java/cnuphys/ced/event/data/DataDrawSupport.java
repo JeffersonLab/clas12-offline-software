@@ -11,7 +11,7 @@ public class DataDrawSupport {
 	
 	public static final int HB_CROSS  = 0;
 	public static final int TB_CROSS  = 1;
-	public static final int SVT_CROSS = 2;
+	public static final int BST_CROSS = 2;
 	public static final int BMT_CROSS = 3;
 	public static final int FMT_CROSS = 4;
 	
@@ -21,7 +21,7 @@ public class DataDrawSupport {
 	private static final Color TRANSBLUE = X11Colors.getX11Color("sky blue", 250);
 
 	public static Color transColors[] = { TRANSYELLOW, TRANSORANGE, TRANSYELLOW, TRANSGREEN, TRANSBLUE };
-	public static String prefix[] = { "HB ", "TB ", "SVT ", "BMT ", "FMT "};
+	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT ", "FMT "};
 	
 
 	public static final int CROSSHALF = 6; // pixels

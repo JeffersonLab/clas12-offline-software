@@ -11,10 +11,10 @@ import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
-import cnuphys.ced.event.data.SVT;
-import cnuphys.ced.event.data.SVTCrosses;
+import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.geometry.BMTGeometry;
-import cnuphys.ced.geometry.SVTGeometry;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.bmt.Constants;
 import cnuphys.lund.X11Colors;
@@ -97,7 +97,7 @@ public class BMTLayer3D extends DetectorItem3D {
 
 //
 //		if (drawOutline) { // if any hits, draw it once
-//			SVTGeometry.getLayerQuads(_sector, _layer, coords36);
+//			BSTGeometry.getLayerQuads(_sector, _layer, coords36);
 //			Support3D.drawQuads(drawable, coords36, outlineHitColor, 1f, true);
 //		}
 		
