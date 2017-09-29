@@ -4,7 +4,7 @@ import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
-import cnuphys.ced.geometry.SVTGeometry;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.PCALGeometry;
@@ -126,11 +126,11 @@ public class CedHistoFiller implements IAccumulationListener {
 			return;
 		}
 		
-		int hits[][][] = AccumulationManager.getInstance().getAccumulatedSVTFullData();
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedBSTFullData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int row = lay0+1;
 			int supl0 = lay0/2;
-			for (int sect0 = 0; sect0 < SVTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
 				int col = sect0+1;
 				
 				PlotPanel ppan = bstGrid.getPlotPanel(row,

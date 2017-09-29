@@ -59,14 +59,14 @@ import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.HBHits;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.HTCC2;
-import cnuphys.ced.event.data.SVT;
-import cnuphys.ced.event.data.SVTCrosses;
+import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.FastMCMenu;
-import cnuphys.ced.geometry.SVTGeometry;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
@@ -174,8 +174,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//"play" dc occupancy?
 	private JCheckBoxMenuItem _playDCOccupancy;
 	
-	//use old SVT geometry
-	private JCheckBoxMenuItem _oldSVTGeometry;
+	//use old BST geometry
+	private JCheckBoxMenuItem _oldBSTGeometry;
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -441,19 +441,19 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				
 				int supl0 = (layer-1) / 2;
 				
-				int maxSector = SVTGeometry.sectorsPerSuperlayer[supl0];
+				int maxSector = BSTGeometry.sectorsPerSuperlayer[supl0];
 				if (sector > maxSector) {
 					return null;
 				}
 				
 				PlotPanel panel;
-				String title = "SVT layer_" + layer + " sector_" + sector;
+				String title = "BST layer_" + layer + " sector_" + sector;
 				panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "strip", "count", -0.5, 256-0.5, 256);
 				return panel;
 			}
 			
 		};
-		bstHistoGrid = HistoGridView.createHistoGridView("SVT Histograms", 8, 24, 300, 240, 0.7, maker);
+		bstHistoGrid = HistoGridView.createHistoGridView("BST Histograms", 8, 24, 300, 240, 0.7, maker);
 	}
 	
 	//pcal strip histogram
@@ -624,10 +624,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			}			
 		};
 		
-		_oldSVTGeometry = new JCheckBoxMenuItem("Use old (four-region) SVT"
+		_oldBSTGeometry = new JCheckBoxMenuItem("Use old (four-region) BST"
 				+ " Geometry", false);
-		_oldSVTGeometry.addActionListener(al2);
-		omenu.add(_oldSVTGeometry);
+		_oldBSTGeometry.addActionListener(al2);
+		omenu.add(_oldBSTGeometry);
 	}
 
 	/**
@@ -688,12 +688,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 	
 	/**
-	 * Flag controlling whether we use the old SVT geometry
+	 * Flag controlling whether we use the old BST geometry
 	 * @return <code>true</code> if the tone should be played
 	 */
-	public boolean useOldSVTGeometry() {
-		if (_oldSVTGeometry != null) {
-			return _oldSVTGeometry.getState();
+	public boolean useOldBSTGeometry() {
+		if (_oldBSTGeometry != null) {
+			return _oldBSTGeometry.getState();
 		}
 		return false;
 	}
@@ -962,7 +962,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		FTOF.getInstance();
 		BMTCrosses.getInstance();
 		FMTCrosses.getInstance();
-		SVTCrosses.getInstance();
+		BSTCrosses.getInstance();
 		TBCrosses.getInstance();
 		HBCrosses.getInstance();
 		TBSegments.getInstance();
@@ -973,7 +973,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		HTCC2.getInstance();
 		FTCAL.getInstance();
 		CTOF.getInstance();
-		SVT.getInstance();
+		BST.getInstance();
 		BMT.getInstance();
 		Cosmics.getInstance();
 

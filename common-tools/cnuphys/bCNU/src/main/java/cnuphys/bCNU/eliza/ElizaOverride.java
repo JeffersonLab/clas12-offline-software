@@ -46,7 +46,14 @@ public class ElizaOverride implements Serializable {
 			"You're in my way, and that's a very dangerous place to be.", 
 			"I know you think you are quite the wit. Well, you are half right.", 
 			"Have you ever listened to someone for a while and wondered 'who ties their shoelaces?'", 
-			"I'm sorry I hurt your feelings when I called you stupid. I really thought you already knew."};
+			"I'm sorry I hurt your feelings when I called you stupid. I really thought you already knew.",
+			"I really shouldn't engage in mental combat with the unarmed.",
+			"If I wanted to kill myself I'd climb your ego and jump to your IQ.",
+			"I'm blonde. What's your excuse?",
+			"I'm glad to see you're not letting your education get in the way of your ignorance.",
+			"I have neither the time nor the crayons to explain this to you.",
+			"It is kind of sad watching you attempt to squeeze all your vacabulary into one sentence."
+			};
 	
 	private static Vector<String> snideReplies = new Vector<String>();
 
@@ -73,7 +80,7 @@ public class ElizaOverride implements Serializable {
 		}
 	}
 	
-	private String snideReply() {
+	private static String snideReply() {
 		if ((snideReplies == null) || snideReplies.isEmpty()) {
 			return null;
 		}
@@ -156,6 +163,12 @@ public class ElizaOverride implements Serializable {
 				return response;
 			}
 		}
+		
+		//snide comment?
+		if (Math.random() < 0.2) {
+			return snideReply();
+		}
+
 
 		return null;
 	}
@@ -236,14 +249,6 @@ public class ElizaOverride implements Serializable {
 			return null;
 			
 		} // end switch
-
-		
-		//snide comment?
-		double rr = Math.random();
-		System.err.println("rr = " + rr);
-		if (rr < 0.2) {
-			return snideReply();
-		}
 
 		return null;
 	}

@@ -92,7 +92,7 @@ public class DrawingLegend extends JComponent {
 	//paint the legent for the central 2D views
 	private void paintCentralViewLegend(Graphics g, int x, int yc) {
 		int xo = x;
-		x = drawCross(g, x, yc, DataDrawSupport.SVT_CROSS);
+		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
 		
 		yc += 18;

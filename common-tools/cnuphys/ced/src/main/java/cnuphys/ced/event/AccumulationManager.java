@@ -9,8 +9,8 @@ import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
 import cnuphys.ced.clasio.IClasIoEventListener;
-import cnuphys.ced.geometry.SVTGeometry;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.geometry.PCALGeometry;
@@ -25,7 +25,7 @@ import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.LTCC;
-import cnuphys.ced.event.data.SVT;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 
@@ -81,13 +81,13 @@ public class AccumulationManager
 	private int _DCAccumulatedData[][][][];
 	private int _maxDCCount;
 
-	// SVT accumulated data (layer[0..7], sector[0..23])
-	private int _SVTAccumulatedData[][];
-	private int _maxSVTCount;
+	// BST accumulated data (layer[0..7], sector[0..23])
+	private int _BSTAccumulatedData[][];
+	private int _maxBSTCount;
 
-	// SVT accumulated data (layer[0..7], sector[0..23], strip [0..254])
-	private int _SVTFullAccumulatedData[][][];
-	private int _maxSVTFullCount;
+	// BST accumulated data (layer[0..7], sector[0..23], strip [0..254])
+	private int _BSTFullAccumulatedData[][][];
+	private int _maxBSTFullCount;
 	
 	//CTOF accumulated data
 	private int _CTOFAccumulatedData[];
@@ -143,19 +143,19 @@ public class AccumulationManager
 		_DCAccumulatedData = new int[GeoConstants.NUM_SECTOR][GeoConstants.NUM_SUPERLAYER][GeoConstants.NUM_LAYER][GeoConstants.NUM_WIRE];
 
 		// down to layer
-		_SVTAccumulatedData = new int[8][];
+		_BSTAccumulatedData = new int[8][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_SVTAccumulatedData[lay0] = new int[SVTGeometry.sectorsPerSuperlayer[supl0]];
+			_BSTAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]];
 		}
 
 		// _bstDgtzAccumulatedData = new int[8][24];
 
 		// down to strip
-		_SVTFullAccumulatedData = new int[8][][];
+		_BSTFullAccumulatedData = new int[8][][];
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			_SVTFullAccumulatedData[lay0] = new int[SVTGeometry.sectorsPerSuperlayer[supl0]][256];
+			_BSTFullAccumulatedData[lay0] = new int[BSTGeometry.sectorsPerSuperlayer[supl0]][256];
 		}
 		
 		//ctof storage
@@ -251,15 +251,15 @@ public class AccumulationManager
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
 			int supl0 = layer / 2;
-			for (int sector = 0; sector < SVTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
-				_SVTAccumulatedData[layer][sector] = 0;
+			for (int sector = 0; sector < BSTGeometry.sectorsPerSuperlayer[supl0]; sector++) {
+				_BSTAccumulatedData[layer][sector] = 0;
 				for (int strip = 0; strip < 256; strip++) {
-					_SVTFullAccumulatedData[layer][sector][strip] = 0;
+					_BSTFullAccumulatedData[layer][sector][strip] = 0;
 				}
 			}
 		}
-		_maxSVTCount = 0;
-		_maxSVTFullCount = 0;
+		_maxBSTCount = 0;
+		_maxBSTFullCount = 0;
 		
 		//clear CTOF data
 		for (int i = 1; i < 48; i++) {
@@ -376,8 +376,8 @@ public class AccumulationManager
 	 * 
 	 * @return the accumulated bst panel data
 	 */
-	public int[][] getAccumulatedSVTData() {
-		return _SVTAccumulatedData;
+	public int[][] getAccumulatedBSTData() {
+		return _BSTAccumulatedData;
 	}
 
 	/**
@@ -385,8 +385,8 @@ public class AccumulationManager
 	 * 
 	 * @return the accumulated bst strip data
 	 */
-	public int[][][] getAccumulatedSVTFullData() {
-		return _SVTFullAccumulatedData;
+	public int[][][] getAccumulatedBSTFullData() {
+		return _BSTFullAccumulatedData;
 	}
 	
 	public int getMaxFTCALCount() {
@@ -435,17 +435,17 @@ public class AccumulationManager
 	 * 
 	 * @return the max counts for any bst panel.
 	 */
-	public int getMaxSVTCount() {
-		return _maxSVTCount;
+	public int getMaxBSTCount() {
+		return _maxBSTCount;
 	}
 
 	/**
-	 * Get the max counts on any SVT strip
+	 * Get the max counts on any BST strip
 	 * 
-	 * @return the max counts for any SVT strip.
+	 * @return the max counts for any BST strip.
 	 */
-	public int getMaxFullSVTCount() {
-		return _maxSVTFullCount;
+	public int getMaxFullBSTCount() {
+		return _maxBSTFullCount;
 	}
 
 	/**
@@ -601,41 +601,41 @@ public class AccumulationManager
 		accumAllEC(allEClist);
 
 
-		//SVT
-		AdcHitList svtList = SVT.getInstance().updateAdcList();
-		accumSVT(svtList);
+		//BST
+		AdcHitList bstList = BST.getInstance().updateAdcList();
+		accumBST(bstList);
 
 	}
 	
-	//accumulate svt
-	private void accumSVT(AdcHitList list) {
+	//accumulate bst
+	private void accumBST(AdcHitList list) {
 		if ((list == null) || list.isEmpty()) {
 			return;
 		}
 
 		for (AdcHit hit : list) {
-			SVTxyPanel panel = CentralXYView.getPanel(hit.layer,
+			BSTxyPanel panel = CentralXYView.getPanel(hit.layer,
 					hit.sector);
 			if (panel != null) {
 				int lay0 = hit.layer - 1;
 				int sect0 = hit.sector - 1;
 				int strip0 = hit.component - 1;
 				try {
-					_SVTAccumulatedData[lay0][sect0] += 1;
-					_maxSVTCount = Math.max(
-							_SVTAccumulatedData[lay0][sect0],
-							_maxSVTCount);
+					_BSTAccumulatedData[lay0][sect0] += 1;
+					_maxBSTCount = Math.max(
+							_BSTAccumulatedData[lay0][sect0],
+							_maxBSTCount);
 
 					if (strip0 >= 0) {
-						_SVTFullAccumulatedData[lay0][sect0][strip0] += 1;
-						_maxSVTFullCount = Math.max(
-								_SVTFullAccumulatedData[lay0][sect0][strip0],
-								_maxSVTFullCount);
+						_BSTFullAccumulatedData[lay0][sect0][strip0] += 1;
+						_maxBSTFullCount = Math.max(
+								_BSTFullAccumulatedData[lay0][sect0][strip0],
+								_maxBSTFullCount);
 					}
 
 				} catch (ArrayIndexOutOfBoundsException e) {
 					String msg = String.format(
-							"Index out of bounds (SVT). Event# %d lay %d sect %d  strip %d",
+							"Index out of bounds (BST). Event# %d lay %d sect %d  strip %d",
 							_eventManager.getEventNumber(),
 							hit.layer,
 							hit.sector,

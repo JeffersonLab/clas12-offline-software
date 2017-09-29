@@ -27,9 +27,9 @@ public class GeometryManager {
 	 */
 	private static GeometryManager instance;
 
-	// SVTxy panels
-	private static Vector<SVTxyPanel> _bstXYpanels8Layers = new Vector<SVTxyPanel>(); //old
-	private static Vector<SVTxyPanel> _bstXYpanels6Layers = new Vector<SVTxyPanel>(); //new
+	// BSTxy panels
+	private static Vector<BSTxyPanel> _bstXYpanels8Layers = new Vector<BSTxyPanel>(); //old
+	private static Vector<BSTxyPanel> _bstXYpanels6Layers = new Vector<BSTxyPanel>(); //new
 
 	// cal sector 0 in clas coordinates
 	public static ECSector clas_Cal_Sector0;
@@ -65,9 +65,9 @@ public class GeometryManager {
 		// get the FTOF geometry
 		CTOFGeometry.initialize();
 
-		// get SVT data
-		SVTGeometry.initialize();
-		getSVTPanels();
+		// get BST data
+		BSTGeometry.initialize();
+		getBSTPanels();
 
 		ConstantProvider ecDataProvider = 
 				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.ECAL);
@@ -106,7 +106,7 @@ public class GeometryManager {
 	}
 
 	// read the bst geometry
-	private void getSVTPanels() {
+	private void getBSTPanels() {
 
 		// use the geometry service
 
@@ -116,21 +116,21 @@ public class GeometryManager {
 			int supl = ((bigLayer - 1) / 2); // 0, 1, 2, 3
 			int lay = ((bigLayer - 1) % 2); // 0, 1, 0, 1
 			
-			int numSect = SVTGeometry.sectorsPerSuperlayer[supl];
+			int numSect = BSTGeometry.sectorsPerSuperlayer[supl];
 
 			for (int sector = 1; sector <= numSect; sector++) {
 				
 				// public static void getLimitValues(int sector, int superlayer,
 				// int layer, double vals[]) {
-				SVTGeometry.getLimitValues(sector - 1, supl, lay, vals);
+				BSTGeometry.getLimitValues(sector - 1, supl, lay, vals);
 				int hackSector = svtSectorHack(numSect, sector);
 //				hackSector = sector;
 				
-				SVTxyPanel svtPanel= new SVTxyPanel(hackSector, bigLayer, vals);
+				BSTxyPanel svtPanel= new BSTxyPanel(hackSector, bigLayer, vals);
 				if (bigLayer < 7) {
-					_bstXYpanels6Layers.add(new SVTxyPanel(hackSector, bigLayer, vals));
+					_bstXYpanels6Layers.add(new BSTxyPanel(hackSector, bigLayer, vals));
 				}
-				_bstXYpanels8Layers.add(new SVTxyPanel(hackSector, bigLayer, vals));
+				_bstXYpanels8Layers.add(new BSTxyPanel(hackSector, bigLayer, vals));
 			}
 		}
 
@@ -225,11 +225,11 @@ public class GeometryManager {
 	}
 
 	/**
-	 * Get the list of SVT XY panels
+	 * Get the list of BST XY panels
 	 * @return the panels
 	 */
-	public static List<SVTxyPanel> getSVTxyPanels() {
-		if (Ced.getCed().useOldSVTGeometry()) {
+	public static List<BSTxyPanel> getBSTxyPanels() {
+		if (Ced.getCed().useOldBSTGeometry()) {
 			return _bstXYpanels8Layers;
 		}
 		return _bstXYpanels6Layers;
