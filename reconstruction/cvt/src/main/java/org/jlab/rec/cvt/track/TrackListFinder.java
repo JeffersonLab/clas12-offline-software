@@ -6,6 +6,9 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.trajectory.Helix;
+import org.jlab.rec.cvt.trajectory.Trajectory;
+import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class TrackListFinder {
@@ -19,24 +22,28 @@ public class TrackListFinder {
     /**
      *
      * @param cands the list of track candidates
-     * @param geo the svt geometry
+     * @param svt_geo the svt geometry
      * @return the list of selected tracks
      */
-    public List<Track> getTracks(List<Track> cands, org.jlab.rec.cvt.svt.Geometry geo) {
+    public List<Track> getTracks(List<Track> cands, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
         List<Track> tracks = new ArrayList<Track>();
         if (cands.size() == 0) {
             System.err.print("Error no tracks found");
             return cands;
         }
 
+        // remove clones
+        //ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
+        // loop over candidates and set the trajectories
+        
         for (Track trk : cands) {
 
             this.assignTrkPID(trk);
-            //KalFit kf = new KalFit(trk, geo);
-            //kf.runKalFit(trk, geo);
+            //KalFit kf = new KalFit(trk, svt_geo);
+            //kf.runKalFit(trk, svt_geo);
             //EnergyLossCorr elc = new EnergyLossCorr(trk);
             //System.out.println("******* before EL "+trk.get_P());
-            //elc.doCorrection(trk, geo);
+            //elc.doCorrection(trk, svt_geo);
             //System.out.println("*******  after EL "+trk.get_P());
 
             int charge = trk.get_Q();
@@ -48,6 +55,12 @@ public class TrackListFinder {
             trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
 
             trk.set_pathLength(bstSwim.swamPathLength);
+
+            TrajectoryFinder trjFind = new TrajectoryFinder();
+
+            Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
+
+            trk.set_Trajectory(traj.get_Trajectory());
 
             //if(trk.passCand == true)
             tracks.add(trk);
