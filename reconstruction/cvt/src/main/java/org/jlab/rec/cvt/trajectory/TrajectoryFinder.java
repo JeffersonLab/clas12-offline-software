@@ -161,7 +161,7 @@ public class TrajectoryFinder {
                     }
 
                     // calculate the hit residuals
-                    this.setHitResolParams("BMT", c.get_Cluster2().get_Sector(), c.get_Cluster2().get_Layer(), c.get_Cluster2(),
+                    this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
                             stVec, svt_geo, bmt_geo, traj.isFinal);
 
                 }
@@ -417,7 +417,7 @@ public class TrajectoryFinder {
         if (detector == "SVT") {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-            cluster.set_SeedResidual(doca2Seed);
+            cluster.set_SeedResidual(doca2Seed); 
             cluster.set_CentroidResidual(doca2Cls);
             
             for (FittedHit hit : cluster) {

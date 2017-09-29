@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.svt;
 
 //import java.io.File;
 import java.io.FileNotFoundException;
+import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -436,11 +437,12 @@ public class Geometry {
             pointOnStrip = new Point3D(b1, 0, 0);
         }
 
-        Vector3D r = LocPoint.vectorTo(pointOnStrip); //LocPoint.diff(pointOnStrip);
-
+        Vector3D r = LocPoint.vectorTo(pointOnStrip); //
         Vector3D d = r.cross(vecAlongStrip);
-
-        return d.y();
+        
+        Line3D l = new Line3D(pointOnStrip, pointOnStrip.toVector3D().add(vecAlongStrip.multiply(10)));
+   //fix for hemisphere
+        return d.y()*Math.signum(this.findBSTPlaneNormal(sector, layer).y());
 
     }
     //****

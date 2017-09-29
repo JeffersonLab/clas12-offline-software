@@ -87,7 +87,7 @@ public class RecoBankWriter {
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
-            bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual());
+            bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
 
             for (int j = 0; j < cluslist.get(i).size(); j++) {
@@ -514,8 +514,16 @@ public class RecoBankWriter {
         if (trks.size() == 0) {
             return null;
         }
+        int bankSize = 1;
+        for (int i = 0; i < trks.size(); i++) {
+            if (trks.get(i).get_Trajectory() == null) {
+                continue;
+            }
+            for (StateVec stVec : trks.get(i).get_Trajectory())
+                bankSize++;
+        }
 
-        DataBank bank = event.createBank("CVTRec::Trajectory", 10 * trks.size()); // 8 SVT layer + 2 BMT layers 
+        DataBank bank = event.createBank("CVTRec::Trajectory", bankSize); // 8 SVT layer + 2 BMT layers 
 
         int k = 0;
         for (int i = 0; i < trks.size(); i++) {
