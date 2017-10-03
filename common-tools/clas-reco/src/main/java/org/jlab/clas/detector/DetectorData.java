@@ -312,8 +312,9 @@ public class DetectorData {
        int row = 0;
        for(int i = 0 ; i < particles.size(); i++) {
            DetectorParticle p = particles.get(i);
-           // FIXME: is this supposed to work for CVT too?
            if(p.getTrackDetector()==DetectorType.DC.getDetectorId()) {
+              // FIXME:  CD will probably have to be done differently, since it's already matched
+              // || p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
                bank.setShort("index", row, (short) p.getTrackIndex());
                bank.setShort("pindex", row, (short) i);
                bank.setByte("detector", row, (byte) p.getTrackDetector());
@@ -467,18 +468,19 @@ public class DetectorData {
                double vx = d0*Math.cos(phi0);
                double vy = d0*Math.sin(phi0);
 
-               DetectorTrack  track = new DetectorTrack(charge,p);
+               DetectorTrack  track = new DetectorTrack(charge,p,row);
                track.setVector(px, py, pz);
                track.setVertex(vx, vy, z0);
                track.setPath(bank.getFloat("pathlength", row));
+               // FIXME:  is this the correct chi2:
+               track.setchi2(bank.getFloat("circlefit_chi2_per_ndf",row));
 
                //track.addCTOFPoint(x,y,z);
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
                Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
 
-               // FIXME:  define a convetion on DetectorType for central tracks
-               track.setDetectorID(DetectorType.FMT.getDetectorId());
+               track.setDetectorID(DetectorType.CVT.getDetectorId());
 
                tracks.add(track);
            }

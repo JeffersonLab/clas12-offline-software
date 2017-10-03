@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
@@ -219,6 +220,16 @@ public class DetectorParticle implements Comparable {
         }
     }
 
+    public int countResponses(DetectorType type,int layer) {
+        int nResponses=0;
+        for (int ii=0; ii<responseStore.size(); ii++) {
+            DetectorDescriptor desc=responseStore.get(ii).getDescriptor();
+            if (desc.getType()!=type) continue;
+            if (desc.getLayer()!=layer) continue;
+            nResponses++;
+        }
+        return nResponses;
+    }
     
     public Particle getPhysicsParticle(int pid){
         Particle  particle = new Particle(pid,
@@ -546,29 +557,24 @@ public class DetectorParticle implements Comparable {
             double distanceThreshold){
         
         Line3D   trajectory = this.detectorTrack.getLastCross();
-        //System.out.println("find hit in array size = "+ hitList.size());
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
+
         for(int loop = 0; loop < hitList.size(); loop++){
            
-            //for(DetectorResponse response : hitList){
             DetectorResponse response = hitList.get(loop);
             
-            //System.out.println("analyzing response " + loop + " type = " + 
-            //       response.getDescriptor().getType() + " " + response.getDescriptor().getLayer() +
-            //        "  " + response.getAssociation());
-            if(response.getDescriptor().getType()==type&&
-                    response.getDescriptor().getLayer()==detectorLayer
-                    &&response.getAssociation()<0){
+            if(response.getDescriptor().getType()==type &&
+               response.getDescriptor().getLayer()==detectorLayer &&
+               response.getAssociation()<0) {
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),
                         response.getPosition().z()
                         );
                 double hitdistance = trajectory.distance(hitPoint).length();
-                //System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                if(hitdistance<distanceThreshold&&hitdistance<minimumDistance){
+                if (hitdistance<distanceThreshold && hitdistance<minimumDistance) {
                     minimumDistance = hitdistance;
                     bestIndex       = loop;
                 }
@@ -719,16 +725,16 @@ public class DetectorParticle implements Comparable {
         double p    = detectorTrack.getVector().mag();
         //double mass = PDGDatabase.getParticleById(id);  // map lookup
         if(id==11 || id==-11){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massElectron(),2));//0.00051*0.00051);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massElectron(),2));
         }
         else if(id==-211 || id==211){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massPionCharged(),2));//0.13957*0.13957);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massPionCharged(),2));
         }
         else if(id==2212 || id==-2212){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massProton(),2));//0.938*0.938);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massProton(),2));
         }
         else if(id==-321 || id==321){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massKaonCharged(),2));//0.493667*0.493667);
+            beta = p/sqrt(p*p + pow(PhysicsConstants.massKaonCharged(),2));
         }
         return beta;
     }   
@@ -738,18 +744,24 @@ public class DetectorParticle implements Comparable {
         for(CherenkovResponse c : this.cherenkovStore){
             if(c.getCherenkovType()==type){
                 nphe = c.getEnergy();
+                // FIXME: this is choosing the last match 
+                // should instead either be a += or a break
             }
         }
         return nphe;
-    }    
+    }
 
     public double getVertexTime(DetectorType type, int layer){
-        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(this.getPid())*29.9792);
+        double vertex_time = this.getTime(type,layer) -
+            this.getPathLength(type, layer) /
+            (this.getTheoryBeta(this.getPid())*PhysicsConstants.speedOfLight());
         return vertex_time;
     }
 
     public double getVertexTime(DetectorType type, int layer, int pid){
-        double vertex_time = this.getTime(type,layer) - this.getPathLength(type, layer)/(this.getTheoryBeta(pid)*29.9792);
+        double vertex_time = this.getTime(type,layer) -
+            this.getPathLength(type, layer) /
+            (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
         return vertex_time;
     }
 
