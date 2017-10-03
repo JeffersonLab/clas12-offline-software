@@ -231,22 +231,30 @@ public class EBAnalyzer {
             double vertex_time_hypothesis = 0.0;
             double event_start_time = event.getEventHeader().getStartTime();
 
-            if(p.hasHit(DetectorType.FTOF,1)==true) {
-                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 1, 2212)-event_start_time));
-                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 1, 211)-event_start_time));
-                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 1, 321)-event_start_time));
-            }
-
+            // prefer FTOF 1B:
             if(p.hasHit(DetectorType.FTOF,2)==true) {
                 vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 2, 2212)-event_start_time));
                 vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 2, 211)-event_start_time));
                 vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 2, 321)-event_start_time));
             }
+            // else use FTOF 1A:
+            else if(p.hasHit(DetectorType.FTOF,1)==true) {
+                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 1, 2212)-event_start_time));
+                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 1, 211)-event_start_time));
+                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 1, 321)-event_start_time));
+            }
+            // FIXME:  Leave this off for now, until full import of CD is done
+            // else use CTOF:
+            //else if(p.hasHit(DetectorType.CTOF)==true) {
+            //    vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
+            //    vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
+            //    vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
+            //}
 
             if(vertexDiffs.size()>0) {
                 double min = vertexDiffs.get(0);
 
-                for (int i = 0; i <= 2; i++) {
+                for (int i = 0; i < vertexDiffs.size(); i++) {
                     if (vertexDiffs.get(i) < min) {
                         min = vertexDiffs.get(i);
                         vertex_index = i;

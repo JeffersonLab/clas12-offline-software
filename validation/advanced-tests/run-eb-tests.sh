@@ -1,7 +1,7 @@
 #!/bin/sh -f
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=4a.2.1
+webVersion=4a.2.1-fid-r10
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -30,7 +30,10 @@ case $webFileStub in
         ;;
     electronpion)
         ;;
-    # electron in FT, hadron in forward:
+    electrongamma)
+        ;;
+    electronneutron)
+        ;;
     electronFTproton)
         ;;
     electronFTkaon)
@@ -39,15 +42,17 @@ case $webFileStub in
         ;;
     electronFTgamma)
         ;;
-    # electon in forward, gamma in FT:
     electrongammaFT)
         ;;
-    # electron in forward, hadron in central:
     electronprotonC)
         ;;
     electronkaonC)
         ;;
     electronpionC)
+        ;;
+    electrongammaC)
+        ;;
+    electronneutronC)
         ;;
     *)
       echo Invalid input evio file:  $webFileStub
