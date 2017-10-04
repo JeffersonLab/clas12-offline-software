@@ -276,7 +276,8 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
     public static void main(String[] args) throws FileNotFoundException, EvioException {
 
         //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cosmics_cvt_skim.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_cosmics.1.hipo";
+        //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cosmicsSimNoShift1.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Distribution/xVeronique/out.hipo";
         //String inputFile = "/Users/ziegler/Workdir//Files/Data/DecodedData/CVT/474deco.hipo";
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
@@ -290,7 +291,7 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        String outputFile="/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_cosmics.1rec.hipo";
+        String outputFile="/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_testResSign.hipo";
         //String outputFile = "/Users/ziegler/Workdir//Files/Data/CosmicRun474Rec.hipo";
         writer.open(outputFile);
 
