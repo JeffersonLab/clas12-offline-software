@@ -218,7 +218,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
         List<Track> trks = new ArrayList<Track>();
-        trks = trkFinder.getTracks(trkcands, SVTGeom);
+        trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
 
         for (int c = 0; c < trkcands.size(); c++) {
             trkcands.get(c).set_Id(c + 1);
@@ -286,7 +286,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     public static void main(String[] args) throws FileNotFoundException, EvioException {
 
         //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/YurisTest.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/cvt/neg_muons.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Files/cvt/CVTmuons.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
@@ -300,7 +300,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        String outputFile = "/Users/ziegler/Workdir/Files/cvt/neg_muons.NomField.hipo";
+        String outputFile = "/Users/ziegler/Workdir/Files/cvt/pos_muons.rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -314,9 +314,11 @@ public class CVTReconstruction extends ReconstructionEngine {
 
             // Processing    
             en.processDataEvent(event);
+            
             if(event.hasBank("CVTRec::Tracks")) {
                 writer.writeEvent(event);
             }
+            
             System.out.println("  EVENT " + counter);
             /*
 			 * event.show();
