@@ -110,7 +110,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.36";
+	private static final String _release = "build 0.99.999.37";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -169,7 +169,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	protected HistoGridView ecHistoGrid;
 	
 	// the about string
-	private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
+	private static String _aboutString = "<html><span style=\"font-size:12px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University" + 
+	"<br><br>Download the latest version at <a href=\"https://userweb.jlab.org/~heddle/ced/builds/\">https://userweb.jlab.org/~heddle/ced/builds/</a>";
 	
 	//"play" dc occupancy?
 	private JCheckBoxMenuItem _playDCOccupancy;
