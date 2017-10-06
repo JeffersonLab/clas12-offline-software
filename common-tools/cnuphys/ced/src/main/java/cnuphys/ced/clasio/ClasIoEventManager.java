@@ -161,11 +161,12 @@ public class ClasIoEventManager {
 
 			if (isAccumulating()) {
 				AccumulationManager.getInstance().newClasIoEvent(event);
+				notifyAllDefinedPlots(event);
 			}
 			else {
 				_runData.set(_currentEvent);
 				notifyEventListeners();
-				notifyAllDefinedPlots(event);
+//				notifyAllDefinedPlots(event);
 			}
 		}
 	}

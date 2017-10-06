@@ -25,8 +25,8 @@ public class Histogram extends PlotDialog {
 	private ColumnData _columnData;
 
 	// the expression being binned (unless it is binning a column)
-	private String  _namedExpressionName;
-    private NamedExpression _namedExpression;
+	private String _namedExpressionName;
+	private NamedExpression _namedExpression;
 
 	// the histogram data
 	private HistoData _histoData;
@@ -53,23 +53,22 @@ public class Histogram extends PlotDialog {
 		_plotPanel = createPlotPanel(histoData);
 		add(_plotPanel, BorderLayout.CENTER);
 	}
-	
+
 	/**
 	 * Get the NamedExpression which might be null
+	 * 
 	 * @return the named expression
 	 */
 	public NamedExpression getNamedExpression() {
 		if (_namedExpression != null) {
 			return _namedExpression;
 		}
-		
-		_namedExpression = DefinitionManager.getInstance()
-				.getNamedExpression(_namedExpressionName);
+
+		_namedExpression = DefinitionManager.getInstance().getNamedExpression(_namedExpressionName);
 		return _namedExpression;
 	}
 
-
-	//create the plot panel
+	// create the plot panel
 	private PlotPanel createPlotPanel(HistoData h1) {
 		DataSet data;
 		try {
@@ -81,8 +80,7 @@ public class Histogram extends PlotDialog {
 
 		int numXticks = Math.min(5, h1.getNumberBins() - 1);
 
-		PlotCanvas canvas = new PlotCanvas(data, h1.getName(), h1.getName(),
-				"counts");
+		PlotCanvas canvas = new PlotCanvas(data, h1.getName(), h1.getName(), "counts");
 
 		canvas.getParameters().setNumDecimalX(1);
 		canvas.getParameters().setNumDecimalY(0);
@@ -115,12 +113,13 @@ public class Histogram extends PlotDialog {
 
 	/**
 	 * New fast mc event
-	 * @param event the generated physics event
+	 * 
+	 * @param event
+	 *            the generated physics event
 	 */
 	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
-	
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -155,7 +154,6 @@ public class Histogram extends PlotDialog {
 		return PlotDialog.HISTOGRAM;
 	}
 
-	
 	@Override
 	public void customXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
 		writeHistoData(xmlPrintStreamWriter, _histoData);

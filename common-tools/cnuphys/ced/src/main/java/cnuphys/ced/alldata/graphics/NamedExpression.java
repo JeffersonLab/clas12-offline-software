@@ -111,9 +111,9 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 			return null;
 		}
 
-		for (String token : tokens) {
-			System.err.println("TOKEN [" + token + "]");
-		}
+//		for (String token : tokens) {
+//			System.err.println("TOKEN [" + token + "]");
+//		}
 
 		// Step 3 get the variables
 		Vector<String> vv = new Vector<String>();

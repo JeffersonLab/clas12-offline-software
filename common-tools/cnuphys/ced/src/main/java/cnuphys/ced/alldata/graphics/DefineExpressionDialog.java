@@ -21,7 +21,7 @@ public class DefineExpressionDialog extends JDialog implements ActionListener {
 	private NameVariablePanel _namedVariablePanel;
 
 	public DefineExpressionDialog() {
-		setTitle("Define a 2D Histogram");
+		setTitle("Define an Expression");
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		setIconImage(ImageManager.cnuIcon.getImage());
