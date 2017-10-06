@@ -169,8 +169,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	protected HistoGridView ecHistoGrid;
 	
 	// the about string
-	private static String _aboutString = "<html><span style=\"font-size:12px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University" + 
-	"<br><br>Download the latest version at <a href=\"https://userweb.jlab.org/~heddle/ced/builds/\">https://userweb.jlab.org/~heddle/ced/builds/</a>";
+	private static String _aboutString = "<html><span style=\"font-size:12px\">ced: the cLAS eVENT dISPLAY&nbsp;&nbsp;&nbsp;&nbsp;" + _release + 
+	"<br><br>Developed by Christopher Newport University" + 
+	"<br><br>Download the latest version at <a href=\"https://userweb.jlab.org/~heddle/ced/builds/\">https://userweb.jlab.org/~heddle/ced/builds/</a>" +
+	"<br><br>Email bug reports to david.heddle@cnu.edu";
 	
 	//"play" dc occupancy?
 	private JCheckBoxMenuItem _playDCOccupancy;
