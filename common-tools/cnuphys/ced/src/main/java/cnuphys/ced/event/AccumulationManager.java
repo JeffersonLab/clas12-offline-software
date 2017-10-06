@@ -72,7 +72,6 @@ public class AccumulationManager
 	private int _LTCCAccumulatedData[][][];
 	private int _maxLTCCCount;
 
-
 	//ftcc accumulated data
 	private int _FTCALAccumulatedData[];
 	private int _maxFTCALCount;
@@ -547,6 +546,7 @@ public class AccumulationManager
 		return avgDcOccupancy[sect0][supl0];
 	}
 	
+	
 	/**
 	 * New fast mc event
 	 * @param event the generated physics event
@@ -963,5 +963,23 @@ public class AccumulationManager
 			break;
 		}
 	}
+	
+	/**
+	 * Get the prectange hit rate in the accumulated data for a given  wire
+	 * 
+	 * @param sect0 0 based sector 0..5
+	 * @param supl0 0 based superlayer 0..5
+	 * @param lay0  0 based layer 0..5
+	 * @param wire0 0 based wire 0..111
+	 * @return the occupancy
+	 */
+	public double getAccumulatedWireHitPercentage(int sect0, int supl0, int lay0, int wire0) {
+		
+		if (_eventCount < 1) {
+			return 0;
+		}
+		return 100.0*(_DCAccumulatedData[sect0][supl0][lay0][wire0]/(double)_eventCount);
+	}
+
 
 }

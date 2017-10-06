@@ -655,12 +655,17 @@ public class AllDCSuperLayer extends RectangleItem {
 	private void accumulatedFeedbackStrings(int wire, int layer,
 			List<String> feedbackStrings) {
 		
+		double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_sector-1, _superLayer-1, layer-1, wire-1);
 		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
 
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-				"accumulated event count   " + AccumulationManager.getInstance().getAccumulationEventCount());
+				"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-				"avg occupancy  " + DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
+				"avg occupancy superlayer: " + _superLayer + " is "
+				+ DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+				"hit rate layer: " + layer + ", wire: " + wire + " is "
+				+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
 
 	}
 
