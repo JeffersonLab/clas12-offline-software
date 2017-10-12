@@ -151,12 +151,17 @@ public class HitReader {
 
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
-                //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
-                Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i + 1));
-                double posError = hit.get_CellSize() / Math.sqrt(12.);
-                hit.set_DocaErr(posError);
-                hit.set_Id(i + 1);
-                hits.add(hit);
+                double T0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], Constants.getT0())[0];
+                double T0Sub = smearedTime[i] - T0;
+                double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
+                if(T0Sub>-50 && T0Sub<TMax+150) { // cut on spurious hits
+                    //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
+                    Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i + 1));
+                    double posError = hit.get_CellSize() / Math.sqrt(12.);
+                    hit.set_DocaErr(posError);
+                    hit.set_Id(i + 1);
+                    hits.add(hit);
+                }
             }
         }
 
