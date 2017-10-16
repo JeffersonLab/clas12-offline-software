@@ -145,6 +145,16 @@ public class Vector3 {
                 fZ*vect.x()-fX*vect.z(), fX*vect.y()-fY*vect.x());
         return vprod;
     }
+
+    public double theta(Vector3 vect)
+    {
+	    double res = 0;
+	     if(this.mag()!=0 && vect.mag()!=0)
+	     {
+		     res = Math.toDegrees( Math.acos(this.dot(vect)/(this.mag()*vect.mag() ) ) ) ; 
+	     }
+	     return res;
+    }
     
     public void copy(Vector3 vect)
     {
