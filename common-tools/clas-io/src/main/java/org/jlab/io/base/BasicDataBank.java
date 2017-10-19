@@ -356,6 +356,11 @@ public class BasicDataBank implements DataBank {
             if(itemdata!=null)
                 nrows = itemdata.length;
         }
+        for(Map.Entry<String,double[]> item : doubleContainer.entrySet()){
+            double[] itemdata = item.getValue();
+            if(itemdata!=null)
+                nrows = itemdata.length;
+        }
         return nrows;
     }
 
