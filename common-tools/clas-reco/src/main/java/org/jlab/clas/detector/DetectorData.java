@@ -425,8 +425,9 @@ public class DetectorData {
                track.setVertex(vertex.x(), vertex.y(), vertex.z());
                track.setPath(bank.getFloat("pathlength", row));
 
-               Vector3D lc_vec = DetectorData.readVector(bank, row, "c1_x", "c1_y", "c1_z");
-               Vector3D lc_dir = DetectorData.readVector(bank, row, "c1_ux", "c1_uy", "c1_uz");
+               // t1 = HTCC, c1 = DCR1, c3 = DCR3
+               Vector3D lc_vec = DetectorData.readVector(bank, row, "t1_x", "t1_y", "t1_z");
+               Vector3D lc_dir = DetectorData.readVector(bank, row, "t1_px", "t1_py", "t1_pz");
 
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c3_x", "c3_y", "c3_z");
                Vector3D hc_dir = DetectorData.readVector(bank, row, "c3_ux", "c3_uy", "c3_uz");
