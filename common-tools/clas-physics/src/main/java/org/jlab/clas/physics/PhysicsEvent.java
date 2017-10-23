@@ -288,6 +288,19 @@ public class PhysicsEvent {
 		 */
 	}
 
+       /* public Particle getParticleByPid(int pid, int skip) {
+                if (pid == 5000)
+                        return this.beamParticle();
+                if (pid == 5001)
+                        return this.targetParticle();
+
+                int index = this.getParticleIndex(pid, skip);
+                if (index < 0 || index >= this.count()) {
+                        return new Particle(pid, 0., 0., 0., 0., 0., 0.);
+                }
+                return eventParticles.get(index);
+        }*/
+        
 	public String toLundStringGenerated() {
 		StringBuilder str = new StringBuilder();
 		str.append(String.format("%12d %2d. %2d. %2d %2d %5.3f %7.3f %7.3f %7.3f %7.3f\n", generatedParticles.size(), (int) 1, (int) 1,
