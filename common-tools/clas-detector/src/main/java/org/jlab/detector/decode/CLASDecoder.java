@@ -190,8 +190,6 @@ public class CLASDecoder {
             tdcBANK.setShort("component", i, (short) tdcDGTZ.get(i).getDescriptor().getComponent());
             tdcBANK.setByte("order", i, (byte) tdcDGTZ.get(i).getDescriptor().getOrder());
             tdcBANK.setInt("TDC", i, tdcDGTZ.get(i).getTDCData(0).getTime());
-System.out.print("kimjava: "+tdcDGTZ.get(i).getTDCData(0).getOrder());
-System.out.println(" "+tdcDGTZ.get(i).getTDCData(0).getTime());
         }
         return tdcBANK;
     }
