@@ -190,6 +190,8 @@ public class CLASDecoder {
             tdcBANK.setShort("component", i, (short) tdcDGTZ.get(i).getDescriptor().getComponent());
             tdcBANK.setByte("order", i, (byte) tdcDGTZ.get(i).getDescriptor().getOrder());
             tdcBANK.setInt("TDC", i, tdcDGTZ.get(i).getTDCData(0).getTime());
+System.out.print("kimjava: "+tdcDGTZ.get(i).getTDCData(0).getOrder());
+System.out.println(" "+tdcDGTZ.get(i).getTDCData(0).getTime());
         }
         return tdcBANK;
     }
@@ -239,9 +241,9 @@ public class CLASDecoder {
         DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,
 	    DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
         
-        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","RF::tdc"};
+        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","RF::tdc","RICH::tdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
-            DetectorType.DC,DetectorType.CTOF,DetectorType.RF};
+            DetectorType.DC,DetectorType.CTOF,DetectorType.RF,DetectorType.RICH};
         
         for(int i = 0; i < adcBankTypes.length; i++){
             DataBank adcBank = getDataBankADC(adcBankNames[i],adcBankTypes[i]);

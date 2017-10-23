@@ -87,13 +87,13 @@ public class DetectorEventDecoder {
     
     public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
-		"FTCAL","FTHODO","LTCC","ECAL","FTOF","HTCC","DC","CTOF","BST","RF","BMT","FMT"
+		"FTCAL","FTHODO","LTCC","ECAL","FTOF","HTCC","DC","CTOF","BST","RF","BMT","FMT","RICH"
         });
         
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc","/daq/tt/ctof","/daq/tt/svt",
-            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt"
+            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/clasdev/richtest"
         });
         
         translationManager.init(keysTrans,tablesTrans);
@@ -136,7 +136,7 @@ public class DetectorEventDecoder {
             for(String table : keysTrans){
                 IndexedTable  tt = translationManager.getConstants(runNumber, table);
                 DetectorType  type = DetectorType.getType(table);
-	
+
                 if(tt.hasEntry(crate,slot,channel)==true){
                     int sector    = tt.getIntValue("sector", crate,slot,channel);
                     int layer     = tt.getIntValue("layer", crate,slot,channel);
