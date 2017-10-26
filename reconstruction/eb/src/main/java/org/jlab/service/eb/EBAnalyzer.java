@@ -60,6 +60,8 @@ public class EBAnalyzer {
                 path = trigger.getPathLength(DetectorType.FTOF, 1);
                 foundTriggerTime = true;
             }
+            
+
 
             // set startTime based on FTOF:
             if (foundTriggerTime) {
@@ -167,7 +169,7 @@ public class EBAnalyzer {
         public void PIDMatch(DetectorParticle p, int pid) {
 
             double beta = p.getTheoryBeta(pid);
-            double vertex_index = optimalVertexTime(p);
+            int vertex_index = optimalVertexTime(p);
 
             int pidCandidate = pid;
             boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
@@ -211,6 +213,11 @@ public class EBAnalyzer {
                         this.finalizePID(p, pid);
                         break;
                             }  
+                    if(vertexCheck==true && htccSignalCheck==false && sfCheck==false 
+                            && htccPionThreshold==false) {
+                        this.finalizePID(p, pid);
+                        break;
+                            }
                 case 321:
                     if(vertexCheck==true && sfCheck==false && htccSignalCheck==false){
                         this.finalizePID(p, pid);
@@ -245,11 +252,11 @@ public class EBAnalyzer {
             }
             // FIXME:  Leave this off for now, until full import of CD is done
             // else use CTOF:
-            //else if(p.hasHit(DetectorType.CTOF)==true) {
-            //    vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
-            //    vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
-            //    vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
-            //}
+            else if(p.hasHit(DetectorType.CTOF)==true) {
+                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
+                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
+                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
+            }
 
             if(vertexDiffs.size()>0) {
                 double min = vertexDiffs.get(0);
