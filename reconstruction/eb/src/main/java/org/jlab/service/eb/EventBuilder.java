@@ -2,6 +2,7 @@ package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.detector.CalorimeterResponse;
@@ -29,6 +30,7 @@ public class EventBuilder {
     private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
     private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,0};
+    private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
 
     public EventBuilder(){
 
@@ -320,7 +322,7 @@ public class EventBuilder {
      */
     public void processNeutralTracks() {
 
-        EBMatching ebm=new EBMatching(this);
+        EBCentral ebm=new EBCentral(this);
        
         // define neutrals based on unmatched ECAL clusters:
         
@@ -339,7 +341,7 @@ public class EventBuilder {
         particles.addAll(partsECOUT);
 
         // set particle kinematics:
-        for(DetectorParticle p : particles){
+        for(DetectorParticle p : particles) {
             final double energy = p.getEnergy(DetectorType.ECAL);
             final double px = p.vector().x();
             final double py = p.vector().y();
@@ -371,8 +373,12 @@ public class EventBuilder {
 
             detectorEvent.addParticle(p);
         }
-        
+        this.pindex_map.put(2, particles.size());
         detectorEvent.setAssociation();
+    }
+    
+    public HashMap<Integer, Integer> getPindexMap() {
+        return this.pindex_map;
     }
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
