@@ -44,6 +44,7 @@ public class CCDBConstantsLoader {
         double[][][] TW2D = new double[1][1][48];
         double[][][] UD = new double[1][1][48];
         double[][][] PADDLE2PADDLE = new double[1][1][48];
+        double[][][] RFPAD = new double[1][1][48];
         int[][][] STATUSU = new int[1][1][48];
         int[][][] STATUSD = new int[1][1][48];
         double[][][][] LSBCONVFAC = new double[1][1][48][2];
@@ -52,7 +53,7 @@ public class CCDBConstantsLoader {
         // each column in the table.
         dbprovider.loadTable("/calibration/ctof/attenuation");
         dbprovider.loadTable("/calibration/ctof/effective_velocity");
-        dbprovider.loadTable("/calibration/ctof/timing_offset");
+        dbprovider.loadTable("/calibration/ctof/time_offsets");
         dbprovider.loadTable("/calibration/ctof/tdc_conv");
         dbprovider.loadTable("/calibration/ctof/status");
         // disconncect from database. Important to do this after loading tables.
@@ -96,21 +97,24 @@ public class CCDBConstantsLoader {
          */
         // 2) Offsets : TIME_OFFSET = TDCU-TDCD - lupstream_downstream
         for (int i = 0; i < dbprovider
-                .length("/calibration/ctof/timing_offset/sector"); i++) {
+                .length("/calibration/ctof/time_offsets/sector"); i++) {
 
             int iSec = dbprovider.getInteger(
-                    "/calibration/ctof/timing_offset/sector", i);
+                    "/calibration/ctof/time_offsets/sector", i);
             int iPan = dbprovider.getInteger(
-                    "/calibration/ctof/timing_offset/layer", i);
+                    "/calibration/ctof/time_offsets/layer", i);
             int iPad = dbprovider.getInteger(
-                    "/calibration/ctof/timing_offset/component", i);
+                    "/calibration/ctof/time_offsets/component", i);
             double iUD = dbprovider.getDouble(
-                    "/calibration/ctof/timing_offset/upstream_downstream", i);
+                    "/calibration/ctof/time_offsets/upstream_downstream", i);
             double iPaddle2Paddle = dbprovider.getDouble(
-                    "/calibration/ctof/timing_offset/paddle2paddle", i);
+                    "/calibration/ctof/time_offsets/paddle2paddle", i);
+            double iRFpad = dbprovider.getDouble(
+                    "/calibration/ctof/time_offsets/rfpad", i);
 
             UD[iSec - 1][iPan - 1][iPad - 1] = iUD;
             PADDLE2PADDLE[iSec - 1][iPan - 1][iPad - 1] = iPaddle2Paddle;
+            RFPAD[iSec - 1][iPan - 1][iPad - 1] = iRFpad;
         }
 
         // Getting the effective velocities constants
@@ -219,6 +223,7 @@ public class CCDBConstantsLoader {
         //CCDBConstants.setTW2D(TW2D) ;
         CCDBConstants.setUD(UD);
         CCDBConstants.setPADDLE2PADDLE(PADDLE2PADDLE);
+        CCDBConstants.setRFPAD(RFPAD);
         CCDBConstants.setSTATUSU(STATUSU);
         CCDBConstants.setSTATUSD(STATUSD);
         CCDBConstants.setLSBCONVFAC(LSBCONVFAC);

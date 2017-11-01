@@ -1,39 +1,44 @@
 [ 
     {
-        "bank": "MC::Event",
-        "group": 41,
+        "bank": "MC::Header",
+        "group": 40,
         "info": "Head bank for the generated event",
         "items": [
+            {"name":"run",       "id":1,  "type":"int32",  "info":"Run number"},
+            {"name":"event",     "id":2,  "type":"int32",  "info":"Event number"},
+            {"name":"type",      "id":3,  "type":"int8",   "info":"Event type"},
+            {"name":"helicity",  "id":4,  "type":"float",  "info":"Beam helicity"}
+        ]
+    },
+    {   "bank": "MC::Event",
+        "group": 41,
+        "info": "Lund header bank for the generated event",
+        "items": [
             {"name":"npart",     "id":1,  "type":"int16", "info":"number of particles in the event"},
-            {"name":"btype",     "id":2,  "type":"int16", "info":"Beam type, electron=0, photon=1"},
-            {"name":"ebeam",     "id":3,  "type":"float", "info":"Beam energy (GeV)"},
-            {"name":"pbeam",     "id":4,  "type":"float", "info":"Beam polarization"},
-            {"name":"atarget",   "id":5,  "type":"int16", "info":"Mass number of the target"},
-            {"name":"ztarget",   "id":6,  "type":"int16", "info":"Atomic number oif the target"},
-            {"name":"ptarget",   "id":7,  "type":"float", "info":"Target polarization value, polarization direction, (1-)^n([x=1/y=2/z=3]+pt)"},
+            {"name":"atarget",   "id":2,  "type":"int16", "info":"Mass number of the target"},
+            {"name":"ztarget",   "id":3,  "type":"int16", "info":"Atomic number oif the target"},
+            {"name":"ptarget",   "id":4,  "type":"float", "info":"Target polarization"},
+            {"name":"pbeam",     "id":5,  "type":"float", "info":"Beam polarization"},
+            {"name":"btype",     "id":6,  "type":"int16", "info":"Beam type, electron=11, photon=22"},
+            {"name":"ebeam",     "id":7,  "type":"float", "info":"Beam energy (GeV)"},
             {"name":"targetid",  "id":8,  "type":"int16", "info":"Interacted nucleaon ID (proton=2212, neutron=2112"},
             {"name":"processid", "id":9,  "type":"int16", "info":"Process ID"},
             {"name":"weight",    "id":10, "type":"float", "info":"Event weight"}
         ]
     },
-   {
+    {
         "bank": "MC::Particle",
         "group": 42,
         "info": "Generated Particle information",
         "items": [
-            {"name":"status",   "id":1, "type":"int8",   "info":"particle status"},
-            {"name":"pid",      "id":2, "type":"int32",  "info":"particle id in LUND conventions"},
-            {"name":"parent",   "id":3, "type":"int8",   "info":"index of the parent"},
-            {"name":"daughts",  "id":4, "type":"int8",   "info":"index of the first daughter"},
-            {"name":"daughtl",  "id":5, "type":"int8",   "info":"index of the last daughter"},
-            {"name":"px",       "id":6, "type":"float",  "info":"x component of the momentum"},
-            {"name":"py",       "id":7, "type":"float",  "info":"y component of the momentum"},
-            {"name":"pz",       "id":8, "type":"float",  "info":"z component of the momentum"},
-            {"name":"vx",       "id":9, "type":"float",  "info":"x component of the vertex"},
-            {"name":"vy",       "id":10, "type":"float", "info":"y component of the vertex"},
-            {"name":"vz",       "id":11, "type":"float", "info":"z component of the vertex"},
-            {"name":"mass",     "id":12, "type":"float", "info":"mass of the particle"},
-            {"name":"ltime",    "id":13, "type":"float", "info":"particle lifetime"}
+            {"name":"pid",      "id":1, "type":"int32",  "info":"particle id"},
+            {"name":"px",       "id":2, "type":"float",  "info":"x component of the momentum"},
+            {"name":"py",       "id":3, "type":"float",  "info":"y component of the momentum"},
+            {"name":"pz",       "id":4, "type":"float",  "info":"z component of the momentum"},
+            {"name":"vx",       "id":5, "type":"float",  "info":"x component of the vertex"},
+            {"name":"vy",       "id":6, "type":"float",  "info":"y component of the vertex"},
+            {"name":"vz",       "id":7, "type":"float",  "info":"z component of the vertex"},
+            {"name":"vt",       "id":8, "type":"float",  "info":"vertex time"}
         ]
     },
     {
@@ -41,11 +46,11 @@
         "group": 43,
         "info": "Generated Particle information from Lund",
         "items": [
-            {"name":"status",   "id":1,  "type":"int8",  "info":"particle status/type (JETSET K(1,*)"},
-            {"name":"pid",      "id":2,  "type":"int32", "info":"particle id in LUND conventions"},
-            {"name":"parent",   "id":3,  "type":"int8",  "info":"index of the parent"},
-            {"name":"daughts",  "id":4,  "type":"int8",  "info":"index of the first daughter"},
-            {"name":"daughtl",  "id":5,  "type":"int8",  "info":"index of the last daughter"},
+            {"name":"index",    "id":1,  "type":"int8",  "info":"index of the first daughter"},
+            {"name":"type",     "id":2,  "type":"int8",  "info":"particle type (1 is active)"},
+            {"name":"pid",      "id":3,  "type":"int32", "info":"particle id"},
+            {"name":"parent",   "id":4,  "type":"int8",  "info":"index of the parent"},
+            {"name":"daughter", "id":5,  "type":"int8",  "info":"index of the first daughter"},
             {"name":"px",       "id":6,  "type":"float", "info":"x component of the momentum"},
             {"name":"py",       "id":7,  "type":"float", "info":"y component of the momentum"},
             {"name":"pz",       "id":8,  "type":"float", "info":"z component of the momentum"},
