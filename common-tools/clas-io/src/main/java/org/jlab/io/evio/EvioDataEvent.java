@@ -295,9 +295,13 @@ public class EvioDataEvent implements DataEvent {
 		// System.out.println("Looking for bank " + bank_name + " TAGS = " +
 		// parenttag + " / " + nodetag + " " + parentNode);
 		// System.out.println("looking for parent tag = " + parenttag);
+		if (bank_name.compareTo("GenPart::header") == 0 && parentNode != null)
+			return true;
 		if (bank_name.compareTo("GenPart::true") == 0 && parentNode != null)
 			return true;
-		if (bank_name.compareTo("Header::true") == 0 && parentNode != null)
+		if (bank_name.compareTo("Lund::header") == 0 && parentNode != null)
+			return true;
+		if (bank_name.compareTo("Lund::true") == 0 && parentNode != null)
 			return true;
 		if (parentNode == null)
 			return false;
@@ -324,13 +328,18 @@ public class EvioDataEvent implements DataEvent {
 			return null;
 
 		EvioNode leafNode = this.eventHandler.getChildNode(parentNode, nodetag, 0, DataType.ALSOBANK);
-		if (leafNode == null && bank_name.compareTo("GenPart::true") != 0 && bank_name.compareTo("Header::true") != 0)
+		if (leafNode == null && bank_name.compareTo("GenPart::header") != 0 && bank_name.compareTo("GenPart::true") != 0 
+                                     && bank_name.compareTo("Lund::header") != 0 && bank_name.compareTo("Lund::true") != 0)
 			return null;
 
 		TreeMap<Integer, Object> dataTree = null;
-		if (bank_name.compareTo("GenPart::true") == 0) {
+		if (bank_name.compareTo("GenPart::header") == 0) {
 			dataTree = this.eventHandler.getNodeData(parentNode);
-		} else if (bank_name.compareTo("Header::true") == 0) {
+                } else if (bank_name.compareTo("GenPart::true") == 0) {
+			dataTree = this.eventHandler.getNodeData(parentNode);
+		} else if (bank_name.compareTo("Lund::header") == 0) {
+			dataTree = this.eventHandler.getNodeData(parentNode);
+		} else if (bank_name.compareTo("Lund::true") == 0) {
 			dataTree = this.eventHandler.getNodeData(parentNode);
 		} else {
 			dataTree = this.eventHandler.getNodeData(leafNode);
@@ -338,19 +347,26 @@ public class EvioDataEvent implements DataEvent {
 
 		EvioDataBank bank = new EvioDataBank(desc);
 		String[] entries = desc.getEntryList();
-
+                
+//                if(bank_name.compareTo("Lund::particles") == 0 || bank_name.compareTo("GenPart::true") == 0) {
+//                    System.out.println("beginning " + bank.rows()+" "+bank.columns());
+//                    bank.show();
+//                }
 		for (String item : entries) {
-			// System.err.println("entry = " + item);
 			// if(item.getValue()<20){
 			int type = desc.getProperty("type", item);
 			int num = desc.getProperty("num", item);
+//			if(bank_name.compareTo("Lund::particles") == 0 || bank_name.compareTo("GenPart::true") == 0) {
+//                            System.out.println("entry = " + item);
+//                            System.out.println(type + " " + num);
+//                        }
 
-			if (DataEntryType.getType(type) == DataEntryType.INTEGER) {
-				bank.setInt(item, (int[]) dataTree.get(num));
+                        if (DataEntryType.getType(type) == DataEntryType.INTEGER) {   
+                            bank.setInt(item, (int[]) dataTree.get(num));
 			}
 
 			if (DataEntryType.getType(type) == DataEntryType.DOUBLE) {
-				bank.setDouble(item, (double[]) dataTree.get(num));
+                            bank.setDouble(item, (double[]) dataTree.get(num));
 			}
 
 			if (DataEntryType.getType(type) == DataEntryType.FLOAT) {
@@ -370,8 +386,15 @@ public class EvioDataEvent implements DataEvent {
 			// }
 			// System.out.println(item.getKey() + " " + item.getValue()
 			// + " " + desc.types.get(item.getKey()));
+//                    if(bank_name.compareTo("Lund::particles") == 0 || bank_name.compareTo("GenPart::true") == 0) {
+//                        System.out.println(bank.rows()+" "+bank.columns());
+//                        bank.show();
+//                    }
 		}
-
+//                if(bank_name.compareTo("Lund::particles") == 0 || bank_name.compareTo("GenPart::true") == 0) {
+//                    System.out.println("end " + bank.rows()+" "+bank.columns());
+//                    bank.show();
+//                }
 		return bank;
 	}
 
