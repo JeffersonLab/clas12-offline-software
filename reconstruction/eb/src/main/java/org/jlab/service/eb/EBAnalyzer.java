@@ -8,6 +8,8 @@ import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  * @author gavalian
@@ -122,6 +124,7 @@ public class EBAnalyzer {
             if(p.hasHit(DetectorType.CTOF, 0)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
                 mass = p.getMass2(DetectorType.CTOF,start_time);
+                //System.out.println("CTOF Beta" + beta);
                 p.setBeta(beta);
             }
         }
@@ -172,13 +175,33 @@ public class EBAnalyzer {
             int vertex_index = optimalVertexTime(p);
 
             int pidCandidate = pid;
+            
+            
             boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
                 (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
                 (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
-            boolean sfCheck = p.getEnergyFraction(DetectorType.ECAL)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+            
+//            Double mom = p.vector().mag();
+//            Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+//            Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
+//            double sfMean = t[0]*pow(mom,0) + t[1]*pow(mom,1) + t[2]*pow(mom,2) + t[3]*pow(mom,3);
+            
+            //System.out.println("Sampling Fraction " + sfMean);
+            
+//            double sfSigma = s[0]*pow(mom,0) + s[1]*pow(mom,1) + s[2]*pow(mom,2) + s[3]*pow(mom,3);
+            double sf = p.getEnergyFraction(DetectorType.ECAL);
+//            double sf_upper_limit = sfMean + 5*sfSigma;
+//            double sf_lower_limit = sfMean - 5*sfSigma;
+            
+            boolean sfCheck = sf>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+    
+            
             boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
+            
             boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
+            
             boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
+            
             boolean ltccPionThreshold = p.vector().mag()<EBConstants.LTCC_UPPER_PION_THRESHOLD 
                 && p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
 

@@ -213,8 +213,10 @@ public class EBEngine extends ReconstructionEngine {
         EBCCDBConstants.load(10,this.getConstantsManager());
 
         // Example of retrieveing values from EBCCDBConstants: 
-        //Double[] t=EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
-
+        //Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+        //Double pcal_match = EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
+        //Double ftof1b_match = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
+        
         System.out.println("[EB::] --> event builder is ready....");
         return true;
     }
