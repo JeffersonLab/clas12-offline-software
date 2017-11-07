@@ -212,7 +212,7 @@ public class EBCentral {
                 final int trkid=ctrkBank.getInt("ID",ictrk);
                 if (ctofMap!=null && ctofMap.containsKey(trkid)) {
                     // associate the particle with a CTOF hit:
-                    cvtParticle.addResponse(ctofMap.get(ictrk));
+                    //cvtParticle.addResponse(ctofMap.get(ictrk));
                     for(int i = 0 ; i < ctofMap.get(ictrk).size() ; i++) {
                     int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
                     int ctofIndex = ctofMap.get(ictrk).get(i);
