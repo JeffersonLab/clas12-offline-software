@@ -121,7 +121,7 @@ public class EBAnalyzer {
                 mass = p.getMass2(DetectorType.FTOF, 2,start_time);
                 p.setBeta(beta);
             }
-            if(p.hasHit(DetectorType.CTOF, 0)==true){
+            if(p.hasHit(DetectorType.CTOF)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
                 mass = p.getMass2(DetectorType.CTOF,start_time);
                 System.out.println("CTOF Beta" + beta);
@@ -286,7 +286,7 @@ public class EBAnalyzer {
 
                 for (int i = 0; i < vertexDiffs.size(); i++) {
                     if (vertexDiffs.get(i) < min) {
-                        min = vertexDiffs.get(i);
+                        min = vertexDiffs.get(i); 
                         vertex_index = i;
                     }
                 }
