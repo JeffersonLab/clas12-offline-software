@@ -483,6 +483,11 @@ public class DetectorParticle implements Comparable {
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime() - startTime;
         double beta  = cpath/ctime/PhysicsConstants.speedOfLight();//30.0;
+        if(type==DetectorType.CTOF){
+            cpath = response.getPath();
+            ctime = response.getTime()- startTime;
+            beta = cpath/ctime/PhysicsConstants.speedOfLight(); 
+        }
         return beta;
     }
     
