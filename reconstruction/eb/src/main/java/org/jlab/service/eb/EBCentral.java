@@ -211,9 +211,9 @@ public class EBCentral {
                 DetectorParticle cvtParticle = cvtParticles.get(ictrk);
                 final int trkid=ctrkBank.getInt("ID",ictrk);
                 if (ctofMap!=null && ctofMap.containsKey(trkid)) {
-                    for(int i = 0 ; i < ctofMap.get(ictrk).size() ; i++) {
+                    for(int i = 0 ; i < ctofMap.get(trkid).size() ; i++) {
                     int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
-                    int ctofIndex = ctofMap.get(ictrk).get(i);
+                    int ctofIndex = ctofMap.get(trkid).get(i);
                     cvtParticle.addResponse(ctofHits.get(ctofIndex), true);
                     ctofHits.get(ctofIndex).setAssociation(ictrk + pindex_offset);
                     }
