@@ -128,7 +128,7 @@ public class EventBuilder {
 
             // Matching tracks to FTOF layer 1B detector.
             Double ftof1b_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
-            System.out.println("FTOF Match Cut " + ftof1b_match_cut);
+            //System.out.println("FTOF Match Cut " + ftof1b_match_cut);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -145,11 +145,11 @@ public class EventBuilder {
 
             // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CTOF detector.
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-            }
+//            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
+//            if(index>=0){
+//                p.addResponse(detectorResponses.get(index), true);
+//                detectorResponses.get(index).setAssociation(n);
+//            }
 
             // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CND detector.

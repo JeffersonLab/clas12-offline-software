@@ -124,7 +124,7 @@ public class EBAnalyzer {
             if(p.hasHit(DetectorType.CTOF, 0)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
                 mass = p.getMass2(DetectorType.CTOF,start_time);
-                //System.out.println("CTOF Beta" + beta);
+                System.out.println("CTOF Beta" + beta);
                 p.setBeta(beta);
             }
         }
@@ -226,16 +226,16 @@ public class EBAnalyzer {
                         this.finalizePID(p, pid);
                         break;
                             } 
-                    if(vertexCheck==true && ltccSignalCheck==true && sfCheck==false 
-                            && ltccPionThreshold==true) {
-                        this.finalizePID(p, pid);
-                        break;
-                            }
-                    if(vertexCheck==false && ltccSignalCheck==true && sfCheck==false 
-                            && ltccPionThreshold==true) {
-                        this.finalizePID(p, pid);
-                        break;
-                            }  
+//                    if(vertexCheck==true && ltccSignalCheck==true && sfCheck==false 
+//                            && ltccPionThreshold==true) {
+//                        this.finalizePID(p, pid);
+//                        break;
+//                            }
+//                    if(vertexCheck==false && ltccSignalCheck==true && sfCheck==false 
+//                            && ltccPionThreshold==true) {
+//                        this.finalizePID(p, pid);
+//                        break;
+//                            }  
                     if(vertexCheck==true && htccSignalCheck==false && sfCheck==false 
                             && htccPionThreshold==false) {
                         this.finalizePID(p, pid);
