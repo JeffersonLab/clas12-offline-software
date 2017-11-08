@@ -79,6 +79,9 @@ public class EBEngine extends ReconstructionEngine {
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
 
+
+        
+        
         // Process tracks:
         eb.processHitMatching();
         eb.processNeutralTracks();
@@ -86,6 +89,10 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
         // matching was already done for central:
+        
+        //System.out.println("DC Tracks "  + tracks.size());
+        //System.out.println("CVT Tracks " + centralParticles.size());
+        //System.out.println("CTOF Hits " + responseCTOF.size());
         
         EBCentral ebm = new EBCentral(eb);
         

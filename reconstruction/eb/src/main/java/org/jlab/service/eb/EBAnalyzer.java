@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.detector.DetectorResponse;
 
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -124,7 +125,7 @@ public class EBAnalyzer {
             if(p.hasHit(DetectorType.CTOF)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
                 mass = p.getMass2(DetectorType.CTOF,start_time);
-                System.out.println("CTOF Beta" + beta);
+                //System.out.println("CTOF Beta" + beta);
                 p.setBeta(beta);
             }
         }
@@ -278,7 +279,8 @@ public class EBAnalyzer {
             else if(p.hasHit(DetectorType.CTOF)==true) {
                 vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
                 vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
-                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
+                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));               
+
             }
 
             if(vertexDiffs.size()>0) {
