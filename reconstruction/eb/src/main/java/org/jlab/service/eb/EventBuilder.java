@@ -2,6 +2,7 @@ package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.detector.CalorimeterResponse;
@@ -16,6 +17,8 @@ import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  *
@@ -29,6 +32,7 @@ public class EventBuilder {
     private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
     private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,0};
+    private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
 
     public EventBuilder(){
 
@@ -115,6 +119,7 @@ public class EventBuilder {
             // is found and set associations
 
             // Matching tracks to FTOF layer 1A detector.
+            Double ftof1a_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A);
             int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -122,6 +127,8 @@ public class EventBuilder {
             }
 
             // Matching tracks to FTOF layer 1B detector.
+            Double ftof1b_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
+            //System.out.println("FTOF Match Cut " + ftof1b_match_cut);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -129,6 +136,7 @@ public class EventBuilder {
             }
 
             // Matching tracks to FTOF layer 2 detector.
+            Double ftof2_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_2);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -137,11 +145,11 @@ public class EventBuilder {
 
             // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CTOF detector.
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-            }
+//            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
+//            if(index>=0){
+//                p.addResponse(detectorResponses.get(index), true);
+//                detectorResponses.get(index).setAssociation(n);
+//            }
 
             // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CND detector.
@@ -152,6 +160,7 @@ public class EventBuilder {
             //}
 
             // Matching tracks to PCAL:
+            Double pcal_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, EBConstants.PCAL_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -161,6 +170,7 @@ public class EventBuilder {
             }
            
             // Matching tracks to EC Inner:
+            Double ecin_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.ECIN_MATCHING);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 4, EBConstants.ECIN_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -170,7 +180,8 @@ public class EventBuilder {
             }
             
             // Matching tracks to EC Outer:
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 7, EBConstants.ECOUT_MATCHING);
+            Double ecout_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.ECOUT_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 7, EBConstants.ECIN_MATCHING);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -320,7 +331,7 @@ public class EventBuilder {
      */
     public void processNeutralTracks() {
 
-        EBMatching ebm=new EBMatching(this);
+        EBCentral ebm=new EBCentral(this);
        
         // define neutrals based on unmatched ECAL clusters:
         
@@ -339,7 +350,7 @@ public class EventBuilder {
         particles.addAll(partsECOUT);
 
         // set particle kinematics:
-        for(DetectorParticle p : particles){
+        for(DetectorParticle p : particles) {
             final double energy = p.getEnergy(DetectorType.ECAL);
             final double px = p.vector().x();
             final double py = p.vector().y();
@@ -371,8 +382,12 @@ public class EventBuilder {
 
             detectorEvent.addParticle(p);
         }
-        
+        this.pindex_map.put(2, particles.size());
         detectorEvent.setAssociation();
+    }
+    
+    public HashMap<Integer, Integer> getPindexMap() {
+        return this.pindex_map;
     }
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
