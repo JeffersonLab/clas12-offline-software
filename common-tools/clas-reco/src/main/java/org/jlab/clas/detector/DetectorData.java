@@ -184,6 +184,7 @@ public class DetectorData {
             bank.setShort("status", row, (short) particles.get(row).getStatus());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
         }
+        System.out.println("++++++++++++++++++++");
         return bank;
     }
     /**

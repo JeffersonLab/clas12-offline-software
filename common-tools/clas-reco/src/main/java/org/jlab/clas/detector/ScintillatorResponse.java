@@ -40,8 +40,10 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setPosition(x, y, z);
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
+                if(type==DetectorType.CTOF) {
                 response.setPath(bank.getFloat("pathLength", row)); //Needed for Central Particle ID
                 //response.setPath(bank.getDouble("pathLength", row));
+                }
                 responseList.add(response);
             }
         }
