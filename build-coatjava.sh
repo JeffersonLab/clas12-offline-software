@@ -92,6 +92,13 @@ if [ $? != 0 ] ; then echo "cnd failure" ; exit 1 ; fi
 cd -
 cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar coatjava/lib/services/
 
+### rich ###
+cd reconstruction/rich
+mvn install
+if [ $? != 0 ] ; then echo "rich failure" ; exit 1 ; fi
+cd -
+cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 ### eb ###
 cd reconstruction/eb
 mvn install
