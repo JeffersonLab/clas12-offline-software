@@ -420,7 +420,8 @@ public class CodaEventDecoder {
                         }
                         //Added pulse fitting for MMs
                         ADCData adcData = new ADCData();
-			adcData.setTimeStamp(timeStamp);
+			//adcData.setTimeStamp(timeStamp); // bug fixed
+                        adcData.setTimeStamp(time);
 			adcData.setPulse(shortbuffer);  
                         bank.addADC(adcData);
                         //bank.addPulse(shortbuffer);
