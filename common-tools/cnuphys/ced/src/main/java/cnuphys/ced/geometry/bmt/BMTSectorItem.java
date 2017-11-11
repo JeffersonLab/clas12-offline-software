@@ -33,9 +33,10 @@ public class BMTSectorItem extends DonutItem {
 		{LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.Z, 
 				LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.C};
 	
-	private static final String[] sectorNames = {"3", "1", "2"};
+	private static final String[] _sectorNames = {"3", "1", "2"};
 	private static final double labelAngs[] = {225, 315, 90};
-	private static final double labelRad = 238;
+//	private static final double labelRad = 238;
+	private static final double labelRad = 231;
 	
 	private static double[][] startAngle = new double[3][6];
 	private static double[][] endAngle = new double[3][6];
@@ -175,7 +176,7 @@ public class BMTSectorItem extends DonutItem {
 			g.setFont(Fonts.smallFont);
 			g.setColor(Color.black);
 			int sm1 = _sector -1;
-			String s = sectorNames[_sector - 1];
+			String s = _sectorNames[_sector - 1];
 
 			Point2D.Double wp = new Point2D.Double();
 			wp.x = labelRad*Math.cos(Math.toRadians(labelAngs[sm1]));
@@ -315,7 +316,7 @@ public class BMTSectorItem extends DonutItem {
 
 			feedbackStrings.add("$lawn green$" + microMegasStr + " type " + _layerType);
 			feedbackStrings.add("$lawn green$" + microMegasStr + " sector " + _sector + " = "
-					+ sectorNames[_sector - 1] + " layer " + _layer + " strip " + 
+					+ _sectorNames[_sector - 1] + " layer " + _layer + " strip " + 
 					((zstrip < 0) ? " N/A " : zstrip) );
 			
 			feedbackStrings.add("$lawn green$inner radius " + getInnerRadius() + "mm");

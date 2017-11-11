@@ -9,11 +9,13 @@ import org.jlab.geometry.prim.Line3d;
 public class CTOFGeometry {
 
 	//fake geomety
-	private static final double THETA0 = -90 - 7.5;
-//	private static final double THETA0 = -90 - 3.75;
+//	private static final double THETA0 = -90 - 7.5;
+	private static final double THETA0 = 0;
 	private static final double DTHETA = -7.5; //360/48
-	private static final double RINNER = 250.; //mm
-	private static final double ROUTER = 260.; //mm
+//	private static final double RINNER = 250.; //mm
+//	private static final double ROUTER = 260.; //mm
+	public static final double RINNER = 237.; //mm
+	public static final double ROUTER = 273.; //mm
 	
 	public static final int COUNT = 48;
 	
@@ -30,7 +32,7 @@ public class CTOFGeometry {
 	
 	//init the quads
 	private static void initQuads() {
-		_quads = new Point2D.Double[48][];
+		_quads = new Point2D.Double[COUNT][];
 		for (int i = 0; i < COUNT; i++) {
 			double theta1 = THETA0 - i*DTHETA;
 			double theta2 = theta1 - DTHETA;
