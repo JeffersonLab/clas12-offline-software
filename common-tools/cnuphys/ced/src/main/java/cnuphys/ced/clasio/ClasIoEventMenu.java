@@ -334,12 +334,16 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		_recentMenu = new JMenu("Recent Event Files");
 
 		// get the recent files from the prefs
-		Vector<String> recentFiles = Environment.getInstance()
-				.getPreferenceList(_recentFileKey);
+		Vector<String> recentFiles = Environment.getInstance().getPreferenceList(_recentFileKey);
 
 		if (recentFiles != null) {
 			for (String fn : recentFiles) {
-				addMenu(fn, false);
+
+				//make sure the file still exists
+				File file = new File(fn);
+				if (file.exists()) {
+					addMenu(fn, false);
+				}
 			}
 		}
 

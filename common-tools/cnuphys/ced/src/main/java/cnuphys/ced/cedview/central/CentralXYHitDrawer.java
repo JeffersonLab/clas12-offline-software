@@ -189,10 +189,12 @@ public class CentralXYHitDrawer implements IDrawable {
 
 				Color color = AccumulationManager.getInstance()
 						.getColor(fract);
-				g.setColor(color);
-				g.fillPolygon(poly);
-				g.setColor(Color.black);
-				g.drawPolygon(poly);
+				
+				poly.draw(g, container, index+1, color);
+//				g.setColor(color);
+//				g.fillPolygon(poly);
+//				g.setColor(Color.black);
+//				g.drawPolygon(poly);
 			}
 		}
 	}
@@ -217,10 +219,12 @@ public class CentralXYHitDrawer implements IDrawable {
 					CTOFXYPolygon poly = _view.getCTOFPolygon(hit.component);
 					if (poly != null) {
 						Color color = hits.adcColor(hit);
-						g.setColor(color);
-						g.fillPolygon(poly);
-						g.setColor(Color.black);
-						g.drawPolygon(poly);
+						poly.draw(g, container, hit.component, color);
+						
+//						g.setColor(color);
+//						g.fillPolygon(poly);
+//						g.setColor(Color.black);
+//						g.drawPolygon(poly);
 					}
 				}
 			}

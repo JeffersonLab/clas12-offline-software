@@ -46,6 +46,7 @@ import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.CTOFGeometry;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.X11Colors;
@@ -67,12 +68,13 @@ public class CentralXYView extends CedXYView {
 	private static Color _panelColors[] = { X11Colors.getX11Color("sky blue"),
 			X11Colors.getX11Color("light blue") };
 	
+	private static Color _ctofColors[] = { new Color(240, 240, 240), new Color(224, 224, 224) };
 
 	// the CND xy polygons
-	CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
+	private CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
 	
 	//the CTOF polygons
-	CTOFXYPolygon ctofPoly[] = new CTOFXYPolygon[48];
+	private CTOFXYPolygon _ctofPoly[] = new CTOFXYPolygon[48];
 	
 	//Micro megas [sector][layer]
 	private BMTSectorItem _bmtItems[][];
@@ -118,7 +120,7 @@ public class CentralXYView extends CedXYView {
 		
 		//ad the ctof polygons
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
-			ctofPoly[paddleId - 1] = new CTOFXYPolygon(paddleId);
+			_ctofPoly[paddleId - 1] = new CTOFXYPolygon(paddleId);
 		}
 
 	}
@@ -335,8 +337,8 @@ public class CentralXYView extends CedXYView {
 		
 		// CTOF Polys
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
-			if (ctofPoly[paddleId - 1] != null) {
-				ctofPoly[paddleId - 1].draw(g2, container);
+			if (_ctofPoly[paddleId - 1] != null) {
+				_ctofPoly[paddleId - 1].draw(g2, container, paddleId, _ctofColors[paddleId % 2]);
 			}
 		}
 		
@@ -535,11 +537,11 @@ public class CentralXYView extends CedXYView {
 			}
 			
 			//ctof
-			else if ((rad > 250) && (rad < 260)) {
+			else if ((rad > CTOFGeometry.RINNER) && (rad < CTOFGeometry.ROUTER)) {
 				
 	
 				for (int index = 0; index < 48; index++) {
-					if (ctofPoly[index].contains(screenPoint)) {
+					if (_ctofPoly[index].contains(screenPoint)) {
 						int paddle = index+1;
 						TdcAdcHit hit = null;
 			  		    TdcAdcHitList hits = CTOF.getInstance().getHits();
@@ -645,7 +647,7 @@ public class CentralXYView extends CedXYView {
 		if ((index0 < 0) || (index0 > 47)) {
 			return null;
 		}
-		return ctofPoly[index0];
+		return _ctofPoly[index0];
 	}
 
 	/**
