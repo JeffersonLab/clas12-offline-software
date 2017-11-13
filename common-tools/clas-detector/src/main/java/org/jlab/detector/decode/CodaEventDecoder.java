@@ -106,7 +106,6 @@ public class CodaEventDecoder {
 
         for (EvioNode node : cbranch.getNodes()) {
 //            System.out.println(" analyzing tag = " + node.getTag());
-
             if (node.getTag() == 57615) {
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
