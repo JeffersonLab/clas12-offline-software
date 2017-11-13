@@ -2,19 +2,20 @@ package org.jlab.service.ctof;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.ctof.Constants;
-import org.jlab.rec.ctof.CCDBConstantsLoader;
+import org.jlab.rec.cvt.services.CVTReconstruction;
 import org.jlab.rec.tof.banks.ctof.HitReader;
 import org.jlab.rec.tof.banks.ctof.RecoBankWriter;
 import org.jlab.rec.tof.banks.ctof.TrackReader;
@@ -22,6 +23,7 @@ import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -31,14 +33,15 @@ import org.jlab.rec.tof.hit.ctof.Hit;
 public class CTOFEngine extends ReconstructionEngine {
 
     public CTOFEngine() {
-        super("CTOFRec", "carman, ziegler", "0.4");
+        super("CTOFRec", "carman, ziegler", "0.5");
     }
 
     CTOFGeant4Factory geometry;
 
-    int Run = -1;
+    int Run = 11;
     RecoBankWriter rbc;
-
+    List<IndexedTable> CCDBTables;
+    
     @Override
     public boolean init() {
         // Load the Constants
@@ -49,6 +52,26 @@ public class CTOFEngine extends ReconstructionEngine {
         geometry = new CTOFGeant4Factory();
         // CalibrationConstantsLoader.Load();
         // }
+        String[]  ftofTables = new String[]{ 
+                    "/calibration/ctof/attenuation",
+                    "/calibration/ctof/effective_velocity",
+                    "/calibration/ctof/time_offsets",
+                    "/calibration/ctof/tdc_conv",
+                    "/calibration/ctof/status",
+                };
+        
+        requireConstants(Arrays.asList(ftofTables));
+       
+       // Get the constants for the correct variation
+        this.getConstantsManager().setVariation("default");
+        CCDBTables = new ArrayList<IndexedTable>();
+        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/attenuation"));
+        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/effective_velocity"));
+        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/time_offsets"));
+        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/tdc_conv"));
+        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/status"));
+   
+        geometry = new CTOFGeant4Factory();
         return true;
     }
 
@@ -71,7 +94,7 @@ public class CTOFEngine extends ReconstructionEngine {
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for CTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths);
+        hitRead.fetch_Hits(event, geometry, trkLines, paths, CCDBTables);
 
         // 1) get the hits
         List<Hit> CTOFHits = hitRead.get_CTOFHits();
@@ -161,41 +184,41 @@ public class CTOFEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if (Run != newRun) {
-            CCDBConstantsLoader.Load(newRun);
-            DatabaseConstantProvider db = CCDBConstantsLoader.getDB();
-
-            geometry = new CTOFGeant4Factory();
-        }
         Run = newRun;
 
     }
 
     public static void main(String[] args) throws FileNotFoundException,
-            EvioException {
+        EvioException {
 
-        String inputFile = "/Users/ziegler/Workdir/Files/test/piminus_cd_0.5-2.0GeV.hipo";
+        String inputFile  = "/Users/ziegler/Desktop/Work/Files/GEMC/CTOF/pions1degphi80degtheta.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/CTOF/pions1degphi80degthetaRECWithNewCCDB.hipo";
+        
         // String inputFile = args[0];
         // String outputFile = args[1];
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+        CVTReconstruction en0 = new CVTReconstruction();
+        en0.init();
 
         CTOFEngine en = new CTOFEngine();
         en.init();
 
         HipoDataSource reader = new HipoDataSource();
-
+        HipoDataSync writer = new HipoDataSync();
+        writer.open(outputFile);
+        
         int counter = 0;
-
         reader.open(inputFile);
         long t1 = System.currentTimeMillis();
         while (reader.hasEvent()) {
 
             counter++;
             DataEvent event = reader.getNextEvent();
+            en0.processDataEvent(event);
             en.processDataEvent(event);
-
-            if (counter > 50) {
+            writer.writeEvent(event);
+            if (counter > 3) {
                 break;
             }
             // if(counter%100==0)
@@ -204,6 +227,7 @@ public class CTOFEngine extends ReconstructionEngine {
         }
         double t = System.currentTimeMillis() - t1;
         System.out.println("TOTAL  PROCESSING TIME = " + t);
+        writer.close();
     }
 
 }
