@@ -1,34 +1,36 @@
 package org.jlab.rec.tof.hit;
 
+import org.jlab.utils.groups.IndexedTable;
+
 public interface IGetCalibrationParams {
     // the Calibration constants representing L (1) or R (2) parameters for the
     // FTOF and U (1) or D (2) parameters for the CTOF
 
-    public double TW01();
+    public double TW01(IndexedTable tab);
 
-    public double TW02();
+    public double TW02(IndexedTable tab);
 
-    public double TW11();
+    public double TW11(IndexedTable tab);
 
-    public double TW12();
+    public double TW12(IndexedTable tab);
 
-    public double lambda1();
+    public double lambda1(IndexedTable tab);
 
-    public double lambda2();
+    public double lambda2(IndexedTable tab);
 
-    public double lambda1Unc();
+    public double lambda1Unc(IndexedTable tab);
 
-    public double lambda2Unc();
+    public double lambda2Unc(IndexedTable tab);
 
-    public double yOffset();
+    public double yOffset(IndexedTable tab);
 
-    public double v1();
+    public double v1(IndexedTable tab);
 
-    public double v2();
+    public double v2(IndexedTable tab);
 
-    public double v1Unc();
+    public double v1Unc(IndexedTable tab);
 
-    public double v2Unc();
+    public double v2Unc(IndexedTable tab);
 
     public double PED1();
 
@@ -46,20 +48,24 @@ public interface IGetCalibrationParams {
 
     public double TDC2Unc();
 
-    public double PaddleToPaddle();
+    public double PaddleToPaddle(IndexedTable tab);
 
-    public double TimeOffset();
+    public double TimeOffset(IndexedTable tab);
 
-    public double[] LSBConversion();
+    public double[] LSBConversion(IndexedTable tab);
 
     public double LSBConversionUnc();
 
-    public double ADC_MIP();
+    public double ADC_MIP(IndexedTable tab);
 
-    public double ADC_MIPUnc();
+    public double ADC_MIPUnc(IndexedTable tab);
 
     public double DEDX_MIP();
 
     public double ScinBarThickn();
+    
+    public int Status1(IndexedTable tab);
+    
+    public int Status2(IndexedTable tab);
 
 }

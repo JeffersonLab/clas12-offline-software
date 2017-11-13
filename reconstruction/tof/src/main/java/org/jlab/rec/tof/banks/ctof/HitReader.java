@@ -10,11 +10,11 @@ import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.ctof.CCDBConstants;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -45,7 +45,7 @@ public class HitReader implements IMatchedHit {
      * @param geometry the CTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths) {
+            List<Line3d> trks, double[] paths, List<IndexedTable> tabs) {
         _numTrks = trks.size();
 
         BaseHitReader hitReader = new BaseHitReader();
@@ -85,10 +85,10 @@ public class HitReader implements IMatchedHit {
             TDCDIdx[i] = hitList.get(i).TDCbankHitIdx2;
 
             // get the status
-            int statusU = CCDBConstants.getSTATUSU()[0][0][paddle[i] - 1];
-            int statusD = CCDBConstants.getSTATUSD()[0][0][paddle[i] - 1];
-            String statusWord = this.set_StatusWord(statusU, statusD, ADCU[i],
-                    TDCU[i], ADCD[i], TDCD[i]);
+            //int statusU = CCDBConstants.getSTATUSU()[0][0][paddle[i] - 1];
+            //int statusD = CCDBConstants.getSTATUSD()[0][0][paddle[i] - 1];
+           // String statusWord = this.set_StatusWord(statusU, statusD, ADCU[i],
+            //        TDCU[i], ADCD[i], TDCD[i]);
 
             // create the hit object
             Hit hit = new Hit(id[i], 1, 1, paddle[i], ADCU[i], TDCU[i],
@@ -97,7 +97,8 @@ public class HitReader implements IMatchedHit {
             hit.set_ADCbankHitIdx2(ADCDIdx[i]);
             hit.set_TDCbankHitIdx1(TDCUIdx[i]);
             hit.set_TDCbankHitIdx2(TDCDIdx[i]);
-            hit.set_StatusWord(statusWord);
+            //hit.set_StatusWord(statusWord);
+            hit.set_StatusWord(this.set_StatusWord(hit.Status1(tabs.get(4)), hit.Status2(tabs.get(4)), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
             hit.setPaddleLine(geometry);
             // add this hit
             hits.add(hit);
@@ -112,7 +113,7 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             // set the layer to get the paddle position from the geometry
             // package
-            hit.set_HitParameters(1);
+            hit.set_HitParameters(1, tabs);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -186,14 +187,14 @@ public class HitReader implements IMatchedHit {
         List<Hit> hitList = new ArrayList<Hit>();
 
         for (int i = 0; i < trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
-            Line3d trk = trks.get(i);
+            Line3d trk = trks.get(i); //System.out.println(" trk line "+trk.toString());
 
             CTOFDetHit[] HitArray = new CTOFDetHit[48];
             List<DetHit> hits = ctofDetector.getIntersections(trk);
 
             if (hits != null && hits.size() > 0) {
                 for (DetHit hit : hits) {
-                    CTOFDetHit fhit = new CTOFDetHit(hit);
+                    CTOFDetHit fhit = new CTOFDetHit(hit); //System.out.println(" matched hits "+fhit.toString());
                     HitArray[fhit.getPaddle() - 1] = fhit;
                 }
             }
