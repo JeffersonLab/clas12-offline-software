@@ -104,17 +104,28 @@ public class CodaEventDecoder {
         EvioTreeBranch cbranch = this.getEventBranch(branches, crate);
         if(cbranch == null ) return null;
 
-        for(EvioNode node : cbranch.getNodes()){
-            //System.out.println(" analyzing tag = " + node.getTag());
+        for (EvioNode node : cbranch.getNodes()) {
+//            System.out.println(" analyzing tag = " + node.getTag());
 
-            if(node.getTag()==57615){
+            if (node.getTag() == 57615) {
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
                 //return this.getDataEntries_57602(crate, node, event);
                 this.readHeaderBank(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
             }
-            else if(node.getTag()==57617){
+        }
+        for(EvioNode node : cbranch.getNodes()){
+//            System.out.println(" analyzing tag = " + node.getTag());
+
+//            if(node.getTag()==57615){
+//                //  This is regular integrated pulse mode, used for FTOF
+//                // FTCAL and EC/PCAL
+//                //return this.getDataEntries_57602(crate, node, event);
+//                this.readHeaderBank(crate, node, event);
+//                //return this.getDataEntriesMode_7(crate,node, event);
+//            }
+            if(node.getTag()==57617){
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
                 //return this.getDataEntries_57602(crate, node, event);
@@ -217,7 +228,7 @@ public class CodaEventDecoder {
                 );
                 System.out.println(" EVENT BUFFER LENGTH = " + intData.length);
                 for(int i = 0; i < intData.length; i++){
-                System.out.println( i + " " + intData[i]);
+                System.out.println( i + " " + String.format("%08X", intData[i]));
                 }*/
             } catch (Exception e) {
                 this.runNumber = 10;
@@ -710,11 +721,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/gavalian/Work/Software/Release-8.0/COATJAVA/sector2_000257_mode7.evio");
+        reader.open("/Users/devita/svt12_001042.evio.0");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 1;
+        int maxEvents = 10;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){
