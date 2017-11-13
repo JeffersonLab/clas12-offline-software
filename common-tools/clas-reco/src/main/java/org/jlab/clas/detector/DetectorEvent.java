@@ -138,6 +138,16 @@ public class DetectorEvent {
         }
         return responses;
     }
+   
+   public List<DetectorParticle> getCentralParticles() {
+       List<DetectorParticle> central = new ArrayList<DetectorParticle>();
+       for(DetectorParticle p : this.particleList) {
+           if(p.getTrackDetector()==DetectorType.CVT.getDetectorId()){
+               central.add(p);
+           }
+       }
+       return central;
+   }
     
     public void moveUp(int index){
         if(index>0 && index < this.particleList.size()){
@@ -180,4 +190,3 @@ public class DetectorEvent {
         return str.toString();
     }
 }
-
