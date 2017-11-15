@@ -39,7 +39,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
 
                 if (name.equals("sc")) {
                     component.makeSensitive();
-                    component.setId(CTOFID, iscint);
+                    component.setId(CTOFID, (iscint>13) ? iscint-13 : iscint+35);
                 }
             }
         }
@@ -51,9 +51,9 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             System.err.println("CTOF Paddle #" + ipaddle + " doesn't exist");
             System.exit(111);
         }
-        int paddleId = ipaddle + 12;
-        if (ipaddle > 36) {
-            paddleId = ipaddle - 36;
+        int paddleId = ipaddle + 35;
+        if (ipaddle > 13) {
+            paddleId = ipaddle - 13;
         }
         return motherVolume.getChildren().get(paddleId - 1);
     }
