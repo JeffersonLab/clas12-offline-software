@@ -15,7 +15,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.ctof.Constants;
-import org.jlab.rec.cvt.services.CVTReconstruction;
 import org.jlab.rec.tof.banks.ctof.HitReader;
 import org.jlab.rec.tof.banks.ctof.RecoBankWriter;
 import org.jlab.rec.tof.banks.ctof.TrackReader;
@@ -198,9 +197,7 @@ public class CTOFEngine extends ReconstructionEngine {
         // String outputFile = args[1];
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
-        CVTReconstruction en0 = new CVTReconstruction();
-        en0.init();
-
+        
         CTOFEngine en = new CTOFEngine();
         en.init();
 
@@ -215,7 +212,7 @@ public class CTOFEngine extends ReconstructionEngine {
 
             counter++;
             DataEvent event = reader.getNextEvent();
-            en0.processDataEvent(event);
+           
             en.processDataEvent(event);
             writer.writeEvent(event);
             if (counter > 3) {
