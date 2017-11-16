@@ -115,13 +115,13 @@ public class FTOFEngine extends ReconstructionEngine {
 
         if(Run!=newRun) {
             CCDBTables.clear();
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/attenuation"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/effective_velocity"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/time_offsets"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/time_walk"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/status"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/gain_balance"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/tdc_conv"));      
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"));      
             Run = newRun;
 
         }

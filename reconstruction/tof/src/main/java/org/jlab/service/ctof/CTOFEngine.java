@@ -84,11 +84,11 @@ public class CTOFEngine extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0);
 
         if(Run!=newRun) {
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/attenuation"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/effective_velocity"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/time_offsets"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/tdc_conv"));
-            CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/status"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/tdc_conv"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"));
             Run = newRun;
         }
 
