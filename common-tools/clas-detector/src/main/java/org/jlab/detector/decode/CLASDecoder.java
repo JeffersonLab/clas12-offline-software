@@ -167,7 +167,7 @@ public class CLASDecoder {
             adcBANK.setFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
             adcBANK.setShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());            
             if(name == "BST::adc") adcBANK.setLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp()); // 1234 = dummy placeholder value
-            if(name.equals("BMT::adc")||name.equals("FMT::adc")){
+            if(name.equals("BMT::adc")||name.equals("FMT::adc")|| name.equals("FTTRK::adc")){
             	adcBANK.setInt("ADC", i, adcDGTZ.get(i).getADCData(0).getHeight());
             	adcBANK.setInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
             	adcBANK.setLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
@@ -234,10 +234,10 @@ public class CLASDecoder {
                 
         HipoDataEvent event = (HipoDataEvent) writer.createEvent();
         
-        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc",
-            "HTCC::adc","BST::adc","CTOF::adc","CND::adc","LTCC::adc","BMT::adc","FMT::adc"};
-        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,
-	    DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
+        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","FTHODO::adc","FTTRK::adc",
+                                                    "HTCC::adc","BST::adc","CTOF::adc","CND::adc","LTCC::adc","BMT::adc","FMT::adc"};
+        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,DetectorType.FTHODO,DetectorType.FTTRK,
+                                                          DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
         
         String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
