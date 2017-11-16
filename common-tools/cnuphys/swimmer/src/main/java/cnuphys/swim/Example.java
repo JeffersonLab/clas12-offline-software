@@ -3,6 +3,7 @@ package cnuphys.swim;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -56,10 +57,10 @@ public class Example {
 //		 example2();
 //		 example3();
 //		 example4();
-//		 example5();
-//		 example6();
-		example7();
-		example7x();
+		 example5();
+		 example6();
+//		example7();
+//		example7x();
 //		example8();
 //		 example9();
 //		example10();
@@ -167,6 +168,9 @@ public class Example {
 		DefaultSwimStopper stopper = new DefaultSwimStopper(rmax);
 		double eps = 1.0e-08;
 		double stepSize = 5e-4; // m
+		
+		IField field = MagneticFields.getInstance().getActiveField();
+
 		try {
 			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo,
 					momentum, theta, phi, stopper, listener, maxPathLength,
@@ -203,11 +207,14 @@ public class Example {
 					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE]");
 
 			// lets try getting integral |b x dl|
-			traj.computeBDL(MagneticFields.getInstance().getActiveField());
-			terminalPlot(
-					traj,
-					"Pathlength (horizontal, m) vs. Int|Bxdl| (vertical, kg-m) [ADAPTIVE] ",
-					0);
+			
+			IField field = MagneticFields.getInstance().getActiveField();
+			
+			traj.computeBDL(field);
+//			terminalPlot(
+//					traj,
+//					"Pathlength (horizontal, m) vs. Int|Bxdl| (vertical, kg-m) [ADAPTIVE] ",
+//					0);
 
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();

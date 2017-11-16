@@ -21,6 +21,7 @@ public class Torus extends MagneticField {
 	
 	/**
 	 * Instantiates a new torus.
+	 * Note q1 = phi, q2 = rho, q3 = z
 	 */
 	public Torus() {
 		setCoordinateNames("phi", "rho", "z");
@@ -389,7 +390,7 @@ public class Torus extends MagneticField {
 	 */
 	@Override
 	public String getName() {
-		return "Torus";
+		return "Torus (symmetric)";
 	}
 
 
