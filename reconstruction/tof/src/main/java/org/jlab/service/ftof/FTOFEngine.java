@@ -39,7 +39,7 @@ public class FTOFEngine extends ReconstructionEngine {
     }
 
     FTOFGeant4Factory geometry;
-    int Run = 11;
+    int Run = 0;
     RecoBankWriter rbc;
     List<IndexedTable> CCDBTables;
     
@@ -66,16 +66,9 @@ public class FTOFEngine extends ReconstructionEngine {
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
         CCDBTables = new ArrayList<IndexedTable>();
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/attenuation"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/effective_velocity"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/time_offsets"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/time_walk"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/status"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/gain_balance"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ftof/tdc_conv"));
         
         // Get the geometry
-        DatabaseConstantProvider db = new DatabaseConstantProvider( Run, "default");
+        DatabaseConstantProvider db = new DatabaseConstantProvider( 11, "default");
         // using
         // the
         // new
@@ -108,7 +101,30 @@ public class FTOFEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         // System.out.println(" PROCESSING EVENT ....");
         // Constants.DEBUGMODE = true;
-        setRunConditionsParameters(event);
+        //setRunConditionsParameters( event) ;
+        if(event.hasBank("RUN::config")==false ) {
+		System.err.println("RUN CONDITIONS NOT READ!");
+		return true;
+	}
+		
+        DataBank bank = event.getBank("RUN::config");
+		
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        if(Run!=newRun) {
+            CCDBTables.clear();
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"));      
+            Run = newRun;
+
+        }
         if (geometry == null) {
             System.err.println(" FTOF Geometry not loaded !!!");
             return false;
@@ -228,37 +244,7 @@ public class FTOFEngine extends ReconstructionEngine {
         return true;
     }
 
-    public void setRunConditionsParameters(DataEvent event) {
-
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-        boolean isMC = false;
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-        // force cosmics
-        // isCosmics = true;
-        // System.out.println(bank.getInt("Event")[0]);
-        boolean isCalib = isCosmics; // all cosmics runs are for calibration
-        // right now
-        //
-
-        // Load the constants
-        // -------------------
-        int newRun = bank.getInt("run", 0);
-
-        
-        Run = newRun;
-
-    }
+    
 
     public static void main(String arg[]) throws IOException {
 

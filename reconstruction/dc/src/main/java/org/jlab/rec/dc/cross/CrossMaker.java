@@ -2,6 +2,7 @@ package org.jlab.rec.dc.cross;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.Constants;
@@ -24,9 +25,9 @@ public class CrossMaker {
      * @param allSegments the list of segments in the event
      * @return an list of crosses obtained from the input segments
      */
-    public List<Cross> find_Crosses(List<Segment> allSegments) {
+    public List<Cross> find_Crosses(List<Segment> allSegments, DCGeant4Factory DcDetector) {
         List<Cross> crosses = new ArrayList<Cross>();
-
+        
         int rid = 0;  // rsegment id
 
         for (int s = 0; s < Constants.NSECT; s++) // loop over sectors
@@ -49,7 +50,7 @@ public class CrossMaker {
                                     cross.add(seg2);
                                     cross.set_Segment1(seg1);
                                     cross.set_Segment2(seg2);
-                                    cross.set_CrossParams();
+                                    cross.set_CrossParams(DcDetector);
                                     
                                     Point3D CS = cross.getCoordsInSector(cross.get_Point().x(), cross.get_Point().y(), cross.get_Point().z());
 
