@@ -8,13 +8,14 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 
 import Jama.Matrix;
-import org.jlab.rec.dc.cluster.ClusterFinder;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.cluster.ClusterFitter;
-import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
+import org.jlab.utils.groups.IndexedTable;
 import trackfitter.fitter.LineFitter;
 
 /**
@@ -35,7 +36,7 @@ public class CrossListFinder  {
 	 */
 	private List<BaseCand> trkCnds = new ArrayList<BaseCand>();
 	
-	public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased) {
+	public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 		//List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
 		trkCnds.clear();
 		if(dccrosslist.size()>0) {
@@ -114,11 +115,11 @@ public class CrossListFinder  {
 							boolean linefitstatusOK = linefit.fitStatus(X, Y, errX, errY, Z.length);
 							if(!linefitstatusOK)
 								continue; // fit failed
-							if(TimeBased) {			
-                                                            this.updateBFittedHits(c1);
-                                                            this.updateBFittedHits(c2);
-                                                            this.updateBFittedHits(c3);
-                                                        }
+							//if(TimeBased && tde!=null) {			
+                            this.updateBFittedHits(c1, tab, DcDetector, tde);
+                            this.updateBFittedHits(c2, tab, DcDetector, tde);
+                            this.updateBFittedHits(c3, tab, DcDetector, tde);
+							//}
 							BaseCand bCand = new BaseCand();
 							bCand.CrossesOnTrack.clear();
 							bCand.CrossesOnTrack.add(c1);
@@ -184,12 +185,12 @@ public class CrossListFinder  {
 		
 	}
 
-    private void recalcParsSegment(Segment _Segment1) {
+    private void recalcParsSegment(Segment _Segment1, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //refit
             double cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
             // update the hits
-            for (FittedHit fhit : _Segment1.get_fittedCluster()) {
-                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B());
+            for (FittedHit fhit : _Segment1.get_fittedCluster()) { 
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B(), tab, DcDetector, tde);
             }
             
              cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
@@ -197,11 +198,11 @@ public class CrossListFinder  {
              cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
             
              for (FittedHit fhit : _Segment1.get_fittedCluster()) {
-                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B());
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B(), tab, DcDetector, tde);
             }
             cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
             cf.Fit(_Segment1.get_fittedCluster(), true);
-            cf.SetResidualDerivedParams(_Segment1.get_fittedCluster(), true, false); //calcTimeResidual=false, resetLRAmbig=false 
+            cf.SetResidualDerivedParams(_Segment1.get_fittedCluster(), true, false, DcDetector); //calcTimeResidual=false, resetLRAmbig=false 
 
             cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
             cf.Fit(_Segment1.get_fittedCluster(), false);
@@ -327,13 +328,13 @@ public class CrossListFinder  {
         private DCSwimmer swimmer = new DCSwimmer();
         ClusterFitter cf = new ClusterFitter();
         SegmentFinder segFinder = new SegmentFinder();
-        private void updateBFittedHits(Cross c) {
+        private void updateBFittedHits(Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
             for(int i =0; i<c.get_Segment1().size(); i++) {
 
                 Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
                 float[] result = new float[3];
                 swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
-                c.get_Segment1().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
+                c.get_Segment1().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );  
 
             }
             for(int i =0; i<c.get_Segment2().size(); i++) {
@@ -342,10 +343,11 @@ public class CrossListFinder  {
                 swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
                 c.get_Segment2().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
             }
-            this.recalcParsSegment(c.get_Segment1());
-            this.recalcParsSegment(c.get_Segment2());
-
+            if(tde!=null) {
+            	this.recalcParsSegment(c.get_Segment1(), tab, DcDetector, tde);
+            	this.recalcParsSegment(c.get_Segment2(), tab, DcDetector, tde);
+            }
             //remake cross
-            c.set_CrossParams();
+            c.set_CrossParams(DcDetector);
         }
 }

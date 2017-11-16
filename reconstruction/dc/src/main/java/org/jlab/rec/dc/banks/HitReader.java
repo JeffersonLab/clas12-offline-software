@@ -7,13 +7,13 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
-import org.jlab.rec.dc.CCDBConstants;
-import org.jlab.rec.dc.CalibrationConstantsLoader;
-import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * A class to fill in lists of hits corresponding to DC reconstructed hits
@@ -90,7 +90,7 @@ public class HitReader {
      * @param event DataEvent
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis, NoiseReductionParameters parameters,
-            Clas12NoiseResult results) {
+            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, DCGeant4Factory DcDetector) {
 
         if (event.hasBank("DC::tdc") == false) {
             //System.err.println("there is no dc bank ");
@@ -151,12 +151,14 @@ public class HitReader {
 
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
-                double T0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], Constants.getT0())[0];
-                double T0Sub = smearedTime[i] - T0;
-                double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
+                double T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
+                double T0Sub = smearedTime[i] - T_0;
+                //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
+                double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 if(T0Sub>-50 && T0Sub<TMax+150) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
                     Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i + 1));
+                    hit.set_CellSize(DcDetector);
                     double posError = hit.get_CellSize() / Math.sqrt(12.);
                     hit.set_DocaErr(posError);
                     hit.set_Id(i + 1);
@@ -174,7 +176,7 @@ public class HitReader {
      *
      * @param event
      */
-    public void read_HBHits(DataEvent event) {
+    public void read_HBHits(DataEvent event, List<IndexedTable> tabs, double[][][][] T0, double[][][][] T0ERR, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde ) {
 
         if (event.hasBank("HitBasedTrkg::HBHits") == false) {
             //System.err.println("there is no HB dc bank ");
@@ -195,7 +197,10 @@ public class HitReader {
         double[] B = new double[rows];
         int[] clusterID = new int[rows];
         int[] trkID = new int[rows];
-
+        double[] tProp = new double[rows];
+        double[] tFlight = new double[rows];
+        double[] trkDoca = new double[rows];
+        
         for (int i = 0; i < rows; i++) {
             sector[i] = bank.getByte("sector", i);
             slayer[i] = bank.getByte("superlayer", i);
@@ -205,8 +210,11 @@ public class HitReader {
             id[i] = bank.getShort("id", i);
             LR[i] = bank.getByte("LR", i);
             B[i] = bank.getFloat("B", i);
+            trkDoca[i] = bank.getFloat("trkDoca", i);
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = bank.getByte("trkID", i);
+            tProp[i] = bank.getFloat("TProp", i);
+            tFlight[i] = bank.getFloat("TFlight", i);
         }
 
         int size = layer.length;
@@ -214,19 +222,28 @@ public class HitReader {
         List<FittedHit> hits = new ArrayList<FittedHit>();
         for (int i = 0; i < size; i++) {
             //use only hits that have been fit to a track
-            if (clusterID[i] == -1) {
+            if (trkID[i] == -1) {
                 continue;
             }
 
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
+            //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - 
+                    this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0], 
+                    0, B[i], id[i]);
+            
             hit.set_B(B[i]);
-// System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
+            hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]);
+//System.out.println("getting the hit time: tdc "+time[i]+" b "+B[i]);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
-            hit.set_TimeToDistance(1.0, B[i]);
+            hit.set_CellSize( DcDetector) ;
+            hit.set_ClusFitDoca(trkDoca[i]);
+            hit.set_TimeToDistance(1.0, B[i], tabs.get(1), tde);
+            
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
+            //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1] ) {
+            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time() > tabs.get(1).getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
@@ -234,16 +251,16 @@ public class HitReader {
             if(hit.get_Time()<0)
                 hit.set_QualityFac(1);
             
-            hit.set_DocaErr(hit.get_PosErr(B[i]));            
+            hit.set_DocaErr(hit.get_PosErr(B[i], tabs, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             hits.add(hit);
-            
+            //System.out.println(" using hit for TBT "+hit.printInfo());
         }
 
         this.set_HBHits(hits);
     }
-    public void read_TBHits(DataEvent event) {
+    public void read_TBHits(DataEvent event, List<IndexedTable> tabs, TimeToDistanceEstimator tde) {
 
         if (event.hasBank("TimeBasedTrkg::TBHits") == false) {
             //System.err.println("there is no HB dc bank ");
@@ -264,6 +281,9 @@ public class HitReader {
         double[] B = new double[rows];
         int[] clusterID = new int[rows];
         int[] trkID = new int[rows];
+        double[] tProp = new double[rows];
+        double[] tFlight = new double[rows];
+        
 
         for (int i = 0; i < rows; i++) {
             sector[i] = bank.getByte("sector", i);
@@ -276,6 +296,8 @@ public class HitReader {
             B[i] = bank.getFloat("B", i);
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = bank.getByte("trkID", i);
+            tProp[i] = bank.getFloat("TProp", i);
+            tFlight[i] = bank.getFloat("TFlight", i);
         }
 
         int size = layer.length;
@@ -283,19 +305,33 @@ public class HitReader {
         List<FittedHit> hits = new ArrayList<FittedHit>();
         for (int i = 0; i < size; i++) {
             //use only hits that have been fit to a track
-            if (clusterID[i] == -1) {
+            if (trkID[i] == -1) {
                 continue;
             }
-
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i], 0, B[i], id[i]);
+            
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i], 0, B[i], id[i]);
+            hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]);
             hit.set_B(B[i]);
 // System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
-            hit.set_TimeToDistance(1.0, B[i]);
+            
+            
+            hit.set_DocaErr(hit.get_PosErr(B[i], tabs, tde));            
+            hit.set_AssociatedClusterID(clusterID[i]);
+            hit.set_AssociatedTBTrackID(trkID[i]); 
+            hit.set_Beta(this.readBeta(event, trkID[i])); 
+            //reset the time based on new beta
+            double newtFlight = tFlight[i]/hit.get_Beta();
+            double newTime = time[i]+tFlight[i] - newtFlight;
+            hit.set_Time(newTime);
+            
+            hit.set_TimeToDistance(1.0, B[i], tabs.get(1), tde);
+            
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
+            //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
+            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>tabs.get(1).getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {   
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
@@ -303,10 +339,6 @@ public class HitReader {
             if(hit.get_Time()<0)
                 hit.set_QualityFac(1);
             
-            hit.set_DocaErr(hit.get_PosErr(B[i]));            
-            hit.set_AssociatedClusterID(clusterID[i]);
-            hit.set_AssociatedTBTrackID(trkID[i]); 
-            hit.set_Beta(this.readBeta(event, trkID[i])); 
             hits.add(hit);
             
         }
@@ -347,26 +379,18 @@ public class HitReader {
     }
     
 
-    private double[] get_T0(int sector, int superlayer, int layer, int wire, boolean applyCorr) {
+    private double[] get_T0(int sector, int superlayer, int layer, int wire, double[][][][] T0, double[][][][] T0ERR) {
         double[] T0Corr = new double[2];
 
-        if (applyCorr == false) {
-            T0Corr[0] = 0;
-            T0Corr[1] = 0;
+        int cable = this.getCableID1to6(layer, wire);
+        int slot = this.getSlotID1to7(wire);
 
-        } else {
+        double t0 = T0[sector - 1][superlayer - 1][slot - 1][cable - 1];      //nSec*nSL*nSlots*nCables
+        double t0E = T0ERR[sector - 1][superlayer - 1][slot - 1][cable - 1];
 
-            double t0 = 0;
-            double t0E = 0;
-            int cable = this.getCableID1to6(layer, wire);
-            int slot = this.getSlotID1to7(wire);
-
-            t0 = CCDBConstants.getT0()[sector - 1][superlayer - 1][slot - 1][cable - 1];      //nSec*nSL*nSlots*nCables
-            t0E = CCDBConstants.getT0ERR()[sector - 1][superlayer - 1][slot - 1][cable - 1];
-
-            T0Corr[0] = t0;
-            T0Corr[1] = t0E;
-        }
+        T0Corr[0] = t0;
+        T0Corr[1] = t0E;
+        
         //System.out.println(" t0 correction "+T0Corr[0]);
         return T0Corr;
     }
@@ -380,8 +404,17 @@ public class HitReader {
         /*96 channels are grouped into 6 groups of 16 channels and each group 
             joins with a connector & a corresponding cable (with IDs 1,2,3,4,& 6)*/
         int wire1to16 = (int) ((wire1to112 - 1) % 16 + 1);
-        int cable_id = CalibrationConstantsLoader.CableID[layer1to6 - 1][wire1to16 - 1];
+        int cable_id = this.CableID[layer1to6 - 1][wire1to16 - 1];
         return cable_id;
     }
-
+    //Map of Cable ID (1, .., 6) in terms of Layer number (1, ..., 6) and localWire# (1, ..., 16)
+    private final int[][] CableID = { //[nLayer][nLocWire] => nLocWire=16, 7 groups of 16 wires in each layer
+        {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 1
+        {1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6}, //Layer 2
+        {1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6}, //Layer 3
+        {1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6}, //Layer 4
+        {1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6}, //Layer 5
+        {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 6  
+    //===> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 (Local wire ID: 0 for 1st, 16th, 32th, 48th, 64th, 80th, 96th wires)
+    };
 }

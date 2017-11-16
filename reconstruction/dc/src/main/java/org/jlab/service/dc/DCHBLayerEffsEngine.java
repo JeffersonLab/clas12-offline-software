@@ -41,9 +41,9 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.utils.groups.IndexedTable;
 
-public class DCHBEngine extends ReconstructionEngine {
+public class DCHBLayerEffsEngine extends ReconstructionEngine {
 
-    public DCHBEngine() {
+    public DCHBLayerEffsEngine() {
             super("DCHB","ziegler","4.0");
     }
 
@@ -98,16 +98,18 @@ public class DCHBEngine extends ReconstructionEngine {
                     T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
                     T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
                 }
+            
+            Constants.setLAYEREFFS(true);
             return true;
         }
 
 	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		//setRunConditionsParameters( event) ;
+	//setRunConditionsParameters( event) ;
         if(event.hasBank("RUN::config")==false ) {
-		System.err.println("RUN CONDITIONS NOT READ!");
-		return true;
+            System.err.println("RUN CONDITIONS NOT READ!");
+            return true;
 	}
 		
         DataBank bank = event.getBank("RUN::config");
@@ -129,7 +131,7 @@ public class DCHBEngine extends ReconstructionEngine {
                     Run = newRun;
         }
 		 // init SNR
-        Clas12NoiseResult results = new Clas12NoiseResult();
+                Clas12NoiseResult results = new Clas12NoiseResult();
 		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
 
 		int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
@@ -140,7 +142,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		//System.out.println("RUNING HITBASED_________________________________________");
 	  
 		ClusterFitter cf = new ClusterFitter();
-        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+                ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 	    
                 List<FittedHit> fhits = new ArrayList<FittedHit>();
 		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -285,7 +287,7 @@ public class DCHBEngine extends ReconstructionEngine {
        // String inputFile = "/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
-        DCHBEngine en = new DCHBEngine();
+        DCHBLayerEffsEngine en = new DCHBLayerEffsEngine();
         en.init();
         DCTBEngine en2 = new DCTBEngine();
         en2.init();
