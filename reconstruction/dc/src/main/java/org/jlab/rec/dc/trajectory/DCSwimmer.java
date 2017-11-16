@@ -13,9 +13,9 @@ import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.utils.CLASResources;
 
 /**
@@ -120,13 +120,13 @@ public class DCSwimmer {
      * @param p
      * @param charge
      */
-    public void SetSwimParameters(int superlayerIdx, int layerIdx, double x0, double y0, double thx, double thy, double p, int charge) {
+    public void SetSwimParameters(int superlayerIdx, int layerIdx, double x0, double y0, double thx, double thy, double p, int charge, DCGeant4Factory DcDetector) {
         // z at a given DC plane in the tilted coordinate system
         double z0 = 0;
 
         if (superlayerIdx != -1 && layerIdx != -1) //z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
         {
-            z0 = GeometryLoader.getDcDetector().getLayerMidpoint(superlayerIdx, layerIdx).z;
+            z0 = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;
         }
 
         // x,y,z in m = swimmer units

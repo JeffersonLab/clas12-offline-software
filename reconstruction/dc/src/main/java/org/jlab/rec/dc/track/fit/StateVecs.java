@@ -10,7 +10,15 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import Jama.Matrix;
 
 public class StateVecs {
-
+    private double Bmax = 2.366498; // averaged
+    public StateVecs() {
+        //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
+        double phi = Math.toRadians(29.5); 
+        double rho = 44.0;
+        double z = 436.0;
+        Bmax = dcSwim.BfieldLab(rho*Math.cos(phi), rho*Math.sin(phi), z).toVector3D().mag() *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
+    }
+    
     final double speedLight = 0.002997924580;
     public double[] Z;
    // public List<B> bfieldPoints = new ArrayList<B>();
@@ -69,6 +77,7 @@ public class StateVecs {
 
     }
     
+    
     public void transport(int i, int f, StateVec iVec, CovMat covMat) { // s = signed step-size
         //StateVec iVec = trackTraj.get(i);
         //bfieldPoints = new ArrayList<B>();
@@ -88,7 +97,7 @@ public class StateVecs {
 
         
         dcSwim.Bfield(x, y, Z[i], bf);
-        double Bmax = 2.366498 * Math.abs(Constants.getTORSCALE()); 
+        
        // if (bfieldPoints.size() > 0) {
         //    double B = new Vector3D(bfieldPoints.get(bfieldPoints.size() - 1).Bx, bfieldPoints.get(bfieldPoints.size() - 1).By, bfieldPoints.get(bfieldPoints.size() - 1).Bz).mag();
         if (bf!=null) {
@@ -393,7 +402,7 @@ public class StateVecs {
     }
 
     public void init(Track trkcand, double z0, KFitter kf) {
-
+        
         if (trkcand.get_StateVecAtReg1MiddlePlane() != null) {
             dcSwim.SetSwimParameters(-1, trkcand.get_StateVecAtReg1MiddlePlane().x(), trkcand.get_StateVecAtReg1MiddlePlane().y(), trkcand.get(0).get_Point().z(),
                     trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX(), trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY(), trkcand.get_P(),
