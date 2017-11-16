@@ -37,7 +37,7 @@ public class CTOFEngine extends ReconstructionEngine {
 
     CTOFGeant4Factory geometry;
 
-    int Run = 11;
+    int Run = 0;
     RecoBankWriter rbc;
     List<IndexedTable> CCDBTables;
     
@@ -64,19 +64,33 @@ public class CTOFEngine extends ReconstructionEngine {
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
         CCDBTables = new ArrayList<IndexedTable>();
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/attenuation"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/effective_velocity"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/time_offsets"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/tdc_conv"));
-        CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/ctof/status"));
-   
+        
         geometry = new CTOFGeant4Factory();
         return true;
     }
 
     @Override
     public boolean processDataEvent(DataEvent event) {
-        setRunConditionsParameters(event);
+        //setRunConditionsParameters( event) ;
+        if(event.hasBank("RUN::config")==false ) {
+		System.err.println("RUN CONDITIONS NOT READ!");
+		return true;
+	}
+		
+        DataBank bank = event.getBank("RUN::config");
+		
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        if(Run!=newRun) {
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/tdc_conv"));
+            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"));
+            Run = newRun;
+        }
 
         if (geometry == null) {
             System.err.println(" CTOF Geometry not loaded !!!");
@@ -154,36 +168,6 @@ public class CTOFEngine extends ReconstructionEngine {
         //rbc.appendCTOFBanks( event, hits, clusters);
         rbc.appendCTOFBanks(event, hits, null); // json file needs clusters...
         return true;
-
-    }
-
-    public void setRunConditionsParameters(DataEvent event) {
-
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-        boolean isMC = false;
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-        // force cosmics
-        //isCosmics = true;
-        //System.out.println(bank.getInt("Event")[0]);
-        boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
-        //
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-
-        Run = newRun;
 
     }
 

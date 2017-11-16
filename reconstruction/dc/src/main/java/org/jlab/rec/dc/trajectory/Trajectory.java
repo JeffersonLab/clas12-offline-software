@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.rec.dc.cross.Cross;
+import org.jlab.rec.dc.hit.FittedHit;
 
 /**
  * The trajectory is a set of state vectors at DC wire planes along the particle path.  * A StateVec describes a cross measurement in the DC.  It is characterized by a point in the DC
@@ -68,7 +69,8 @@ public class Trajectory extends ArrayList<Cross> {
 	 * 
 	 */
 	private static final long serialVersionUID = 358913937206455870L;
-	
+
+    
 	
 
 }

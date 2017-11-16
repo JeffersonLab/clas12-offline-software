@@ -2,8 +2,8 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import org.jlab.rec.dc.Constants;
 
-import org.jlab.rec.dc.CCDBConstants;
 
 public class TimeToDistanceEstimator {
 
@@ -17,6 +17,7 @@ public class TimeToDistanceEstimator {
 			 y = ya + yb;
 		 return y;
 	 }
+         
 	 /**
 	  * 
 	  * @param B B field in T
@@ -64,7 +65,6 @@ public class TimeToDistanceEstimator {
 		
 		 if(t>t2)
 			 t=t2;
-		
 		 
 		 // interpolate in B:
 		 double f_B_alpha1_t1 = interpolateLinear(B*B, B1*B1, B2*B2, 
@@ -99,8 +99,8 @@ public class TimeToDistanceEstimator {
 						TableLoader.DISTFROMTIME[RegIdx][binhighB][binhighAlpha][this.getTimeIdx(t, RegIdx, binhighB, binhighAlpha)+1]
 								+"  --  "+f_B_alpha1_t1+"  :  "+f_B_alpha2_t1+"  :  "+f_B_alpha1_t2+"  :  "+f_B_alpha2_t2
 								+"  ---  "+f_B_alpha1_t+"  :  "+f_B_alpha2_t+" === "+f_B_alpha_t); */
-		 if(f_B_alpha_t>CCDBConstants.getDMAXSUPERLAYER()[SlyrIdx])
-			 f_B_alpha_t = CCDBConstants.getDMAXSUPERLAYER()[SlyrIdx];                                                      
+		 if(f_B_alpha_t>2*Constants.wpdist[SlyrIdx])
+			 f_B_alpha_t = 2*Constants.wpdist[SlyrIdx];                                                      
 			// System.out.println(SlyrIdx+" t "+t+" "+f_B_alpha_t+" tmax "+CalibrationConstantsLoader.dmaxsuperlayer[SlyrIdx]);
 		return f_B_alpha_t;
 	 }

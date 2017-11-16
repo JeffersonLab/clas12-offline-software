@@ -78,6 +78,10 @@ public class RecoBankWriter {
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
             bank.setFloat("B", i, (float) hitlist.get(i).get_B());
+            if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
+                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+            }
         }
 
         return bank;
@@ -356,7 +360,7 @@ public class RecoBankWriter {
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
 
-            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+            bank.setFloat("time", i, (float) hitlist.get(i).getT0SubTime());
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
@@ -366,6 +370,11 @@ public class RecoBankWriter {
             bank.setFloat("timeResidual", i, (float) hitlist.get(i).get_TimeResidual());
 
             bank.setFloat("B", i, (float) hitlist.get(i).get_B());
+            
+            if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
+                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+            }
 
         }
         //System.out.println(" Created Bank "); bank.show();

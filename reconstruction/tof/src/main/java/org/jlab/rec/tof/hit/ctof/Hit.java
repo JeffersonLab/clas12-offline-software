@@ -85,7 +85,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double lambdaD = this.lambda1(tabs.get(0));
         this.set_lambda2(lambdaD);
         this.set_lambda2Unc(this.lambda2Unc(tabs.get(0)));
-        double yOffset = this.yOffset(tabs.get(1));
+        double yOffset = this.yOffset(tabs.get(0));
         double vU = this.v1(tabs.get(1));
         double vD = this.v2(tabs.get(1));
         double vUUnc = this.v1Unc(tabs.get(1));
