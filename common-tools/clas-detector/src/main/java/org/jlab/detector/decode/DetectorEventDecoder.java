@@ -180,8 +180,7 @@ public class DetectorEventDecoder {
                     double samplingTime = (byte) daq.getDoubleValue("sampling_time", 0, 0, 0);
                     if (data.getADCSize() > 0) {
                         ADCData adc = data.getADCData(0);
-                        mvtFitter.fit(adcOffset, fineTimeStampResolution, samplingTime, adc.getPulseArray(),
-                                        adc.getTimeStamp());
+                        mvtFitter.fit(adcOffset, fineTimeStampResolution, samplingTime, adc.getPulseArray(), adc.getTimeStamp());
                         adc.setHeight((short) (mvtFitter.adcMax));
                         adc.setTime((int) (mvtFitter.timeMax));
                         adc.setIntegral((int) (mvtFitter.integral));
