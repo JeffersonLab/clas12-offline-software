@@ -87,6 +87,9 @@ public abstract class MagneticField implements IField {
 	/** The coordinate 3 name. (ced: 'z' ded: 'rho') */
 	private String _q3Name = "z";
 
+	/** the full path to the file */
+	private String _baseFileName;
+	
 	// for rotating field
 	protected static final double ROOT3OVER2 = 0.866025403784439;
 	protected static final double cosSect[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
@@ -596,6 +599,14 @@ public abstract class MagneticField implements IField {
 		float vz = v[2];
 		return (float) Math.sqrt(vx * vx + vy * vy + vz * vz);
 	}
+	
+	/**
+	 * Get the base file name
+	 * @return the base file name
+	 */
+	public String getBaseFileName() {
+		return _baseFileName;
+	}
 
 	/**
 	 * Read a magnetic field from a binary file. The file has the documented
@@ -609,6 +620,14 @@ public abstract class MagneticField implements IField {
 	@Override
 	public final void readBinaryMagneticField(File binaryFile) throws FileNotFoundException {
 
+		_baseFileName = (binaryFile == null) ? "???" : binaryFile.getName();
+		int index = _baseFileName .lastIndexOf(".");
+		if (index > 1) {
+			_baseFileName = _baseFileName.substring(0, index);
+		}
+		
+		System.out.println("**** Found map with base file name: " + _baseFileName);
+		
 		// N23 = -1;
 
 		try {
