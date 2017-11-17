@@ -30,10 +30,19 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
+	//vbersion of mag field package
 	private static String VERSION = "1.04";
-	
-//	private boolean USE_BIG_TORUS = true;
-	
+		
+	//constants for different torus grids
+    public static final int SYMMETRIC_TORUS = 0;
+    public static final int TORUS_025       = 1;
+    public static final int TORUS_050       = 2;
+    public static final int TORUS_075       = 3;
+    public static final int TORUS_100       = 4;
+    public static final int TORUS_125       = 5;
+    public static final int TORUS_150       = 6;
+    public static final int TORUS_200       = 7;
+
 	//initialize only once
 	private boolean _initialized = false;
 
@@ -737,8 +746,8 @@ private FullTorus getFullTorus(String baseName) {
 		
 		TorusMenu.addTorus(_torus);
 		
-		_fullTorus = getFullTorus("clas12TorusFull_2.00.dat");
-//		_fullTorus = getFullTorus("clas12TorusFull_0.25.dat");
+//		_fullTorus = getFullTorus("clas12TorusFull_2.00.dat");
+		_fullTorus = getFullTorus("clas12TorusFull_0.25.dat");
 		
 		TorusMenu.addTorus(_fullTorus);
 
@@ -1154,6 +1163,8 @@ private FullTorus getFullTorus(String baseName) {
 				
 				//create full field torus
 				mf.createFullTorus(0);
+				mf.createFullTorus(1);
+				mf.createFullTorus(2);
 				mf.createFullTorus(6);
 				mf.differentTorusTest(100000);
 			}
@@ -1164,7 +1175,7 @@ private FullTorus getFullTorus(String baseName) {
 	private void differentTorusTest(int num) {
 		
 		
-		double phi0 = 13.80031;  double rho0 = 253.81205;  double z0 = 599.97256; 
+//		double phi0 = 13.80031;  double rho0 = 253.81205;  double z0 = 599.97256; 
 		
 		
 		
@@ -1231,12 +1242,13 @@ private FullTorus getFullTorus(String baseName) {
 		double zsq = Math.pow(r2[2]-r1[2], 2);
 		return Math.sqrt(xsq + ysq + zsq);
 	}
+	
 
 	
 	//try to create full field torus
 	private void createFullTorus(int opt) {
 		
-		int modnum[] = {0, 2, 3,4,5,6,8};
+//		int modnum[] = {0, 2, 3,4,5,6,8};
 		String pstfix[] = {"_0.25", "_0.50", "_0.75", "_1.00", 
 				"_1.25", "_1.50", "_2.00"};
 		int nphi[] = {1441, 721, 481, 361, 289, 241, 181};
@@ -1301,7 +1313,7 @@ private FullTorus getFullTorus(String baseName) {
 				dos.writeInt(0);
 				dos.writeInt(0);
 				
-				double dPhi = 0.25;
+				double dPhi = 360.0/(nPhi-1);
 				double dRho = 2.0;
 				double dZ = 2.0;
 
@@ -1314,7 +1326,7 @@ private FullTorus getFullTorus(String baseName) {
 
 				for (int phiIndex = 0; phiIndex < nPhi; phiIndex++) {
 
-					if ((opt == 0) || ((phiIndex % modnum[opt]) == 0)) {
+//					if ((opt == 0) || ((phiIndex % modnum[opt]) == 0)) {
 
 						double phi = phiIndex * dPhi;
 						System.err.println("phi = " + phi);
@@ -1332,7 +1344,7 @@ private FullTorus getFullTorus(String baseName) {
 							}
 
 						}
-					}
+//					}
 				}
 				
 				torus.setScaleFactor(oldScale);

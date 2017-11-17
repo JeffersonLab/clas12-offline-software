@@ -8,6 +8,7 @@ import javax.swing.JMenu;
 
 public class TorusMenu extends JMenu implements ActionListener {
 	
+	
 	private static ArrayList<Torus> tori = new ArrayList<>(10);
 
 	public TorusMenu() {
