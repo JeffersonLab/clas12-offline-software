@@ -14,7 +14,7 @@ public class TableLoader {
 	}
 
 	//public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
-        public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][1200]; // sector slyr alpha Bfield time bins
+        public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][1500]; // sector slyr alpha Bfield time bins
 	static boolean T2DLOADED = false;
 	static int minBinIdxB = 0;
 	static int maxBinIdxB = 5;

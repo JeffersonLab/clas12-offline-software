@@ -66,7 +66,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
                 "/calibration/dc/time_to_distance/t2d",
-                "/calibration/dc/time_corrections/T0_correction",
+              //  "/calibration/dc/time_corrections/T0_correction",
             };
 
             requireConstants(Arrays.asList(dcTables));
@@ -120,9 +120,9 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		
 		if(Run!=newRun) {
                     CCDBTables.clear();
-                    CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/dc/signal_generation/doca_resolution"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/dc/time_to_distance/t2d"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/dc/time_corrections/T0_correction"));
+                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
+                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+                    //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
                     DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);

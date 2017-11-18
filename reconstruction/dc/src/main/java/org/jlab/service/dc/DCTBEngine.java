@@ -52,7 +52,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
                 "/calibration/dc/time_to_distance/t2d",
-                "/calibration/dc/time_corrections/T0_correction",
+            //    "/calibration/dc/time_corrections/T0_correction",
 		};
 		requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
@@ -66,23 +66,23 @@ public class DCTBEngine extends ReconstructionEngine {
       //T0s
         T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
         T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(Run, "default");
+        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
         dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
         dbprovider.disconnect();
         // T0-subtraction
-        if(Run>100)
-            for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-                int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-                int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-                int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-                int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-                double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-                double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+        
+        for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+            int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+            int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+            int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+            int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+            double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+            double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
 
-                T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
-                T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-            }
+            T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+            T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+        }
         tde = new TimeToDistanceEstimator();
 		return true;
 	}
@@ -104,9 +104,9 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(Run!=newRun) {
                     CCDBTables.clear();
-                    CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/dc/signal_generation/doca_resolution"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/dc/time_to_distance/t2d"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(Run, "/calibration/dc/time_corrections/T0_correction"));
+                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
+                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+                    //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
                     TableLoader.Fill(CCDBTables.get(1));
@@ -115,7 +115,7 @@ public class DCTBEngine extends ReconstructionEngine {
 
 		//System.out.println(" RUNNING TIME BASED....................................");
 		ClusterFitter cf = new ClusterFitter();
-        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+                ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 	    
 		List<FittedHit> fhits = new ArrayList<FittedHit>();	
 		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -128,7 +128,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		HitReader hitRead = new HitReader();
 		hitRead.read_HBHits(event, CCDBTables,T0, T0ERR, dcDetector, tde);
-        hitRead.read_TBHits(event, CCDBTables, tde);
+                hitRead.read_TBHits(event, CCDBTables, tde);
 		List<FittedHit> hits = new ArrayList<FittedHit>();
 		//I) get the hits
                 if(hitRead.get_TBHits().size()==0) {
@@ -209,7 +209,7 @@ public class DCTBEngine extends ReconstructionEngine {
 			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
-			
+		//System.out.println(" cross list "+crosslist.size());	
 		
 		//6) find the list of  track candidates
 		TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
@@ -220,7 +220,7 @@ public class DCTBEngine extends ReconstructionEngine {
 			
 			rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
-		}
+		} 
 		
 		trkcandFinder.removeOverlappingTracks(trkcands);	
 		
