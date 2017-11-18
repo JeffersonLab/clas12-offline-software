@@ -121,7 +121,7 @@ public class TrackCandListFinder {
 						
 						q*= (int)-1*Math.signum(TORSCALE);						
 							
-						double p = Math.sqrt(pxz*pxz+py*py);
+						double p = Math.sqrt(pxz*pxz+py*py); 
 						if(p>11)
 							p=11;
 						if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
@@ -141,9 +141,9 @@ public class TrackCandListFinder {
 						
 						StateVec fn = new StateVec();
 						kFit.runFitter();
-						
-						if(kFit.chi2<10000) {
-						
+						//System.out.println(" KFIT "+kFit.chi2);
+						if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+                                                    
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
 							
 							cand.set_P(1./Math.abs(kFit.finalStateVec.Q));

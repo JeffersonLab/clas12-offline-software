@@ -50,8 +50,11 @@ public class KFitter {
             }
             if(i>1) {
 	            this.calcFinalChisq();
-	            if(this.chi2>10000)
+	            if(this.chi2>1000000) {
 	            	i = totNumIter;
+                        this.setFitFailed=true;
+                        return;
+                    }
 	            if (this.chi2 < newChisq) {
 	                this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
 	                newChisq = this.chi2;

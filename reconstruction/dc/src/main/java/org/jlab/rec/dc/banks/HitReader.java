@@ -152,7 +152,7 @@ public class HitReader {
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
-                double T0Sub = smearedTime[i] - T_0;
+                double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
                 double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 if(T0Sub>-50 && T0Sub<TMax+150) { // cut on spurious hits
@@ -214,7 +214,7 @@ public class HitReader {
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = bank.getByte("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
-            tFlight[i] = bank.getFloat("TFlight", i);
+            tFlight[i] = bank.getFloat("TFlight", i); 
         }
 
         int size = layer.length;
@@ -384,14 +384,13 @@ public class HitReader {
 
         int cable = this.getCableID1to6(layer, wire);
         int slot = this.getSlotID1to7(wire);
-
+        
         double t0 = T0[sector - 1][superlayer - 1][slot - 1][cable - 1];      //nSec*nSL*nSlots*nCables
         double t0E = T0ERR[sector - 1][superlayer - 1][slot - 1][cable - 1];
-
+        
         T0Corr[0] = t0;
         T0Corr[1] = t0E;
         
-        //System.out.println(" t0 correction "+T0Corr[0]);
         return T0Corr;
     }
 
