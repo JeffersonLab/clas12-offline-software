@@ -151,7 +151,9 @@ public class HitReader {
 
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
-                double T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
+                double T_0 = 0;
+                if (event.hasBank("MC::Particle") == false)
+                    T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
                 double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
@@ -215,6 +217,10 @@ public class HitReader {
             trkID[i] = bank.getByte("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i); 
+            if (event.hasBank("MC::Particle") == true) {
+                tProp[i] = 0;
+                tFlight[i] = 0; 
+            }
         }
 
         int size = layer.length;
@@ -225,10 +231,13 @@ public class HitReader {
             if (trkID[i] == -1) {
                 continue;
             }
-
+            
+            double T_0 = 0;
+            if (event.hasBank("MC::Particle") == false)
+                T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
+            
             //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - 
-                    this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0], 
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - T_0, 
                     0, B[i], id[i]);
             
             hit.set_B(B[i]);
@@ -298,8 +307,12 @@ public class HitReader {
             trkID[i] = bank.getByte("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i);
+        
+            if (event.hasBank("MC::Particle") == true) {
+                    tProp[i] = 0;
+                    tFlight[i] = 0; 
+            }
         }
-
         int size = layer.length;
 
         List<FittedHit> hits = new ArrayList<FittedHit>();
