@@ -11,40 +11,40 @@ public class Hit implements Comparable<Hit> {
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
 
     // constructor
-    public Hit(String detector, String detectortype, int sector, int layer, Strip strip) {
-        this._Detector = detector;
-        this._DetectorType = detectortype;
+    public Hit(int detector, int detectortype, int sector, int layer, Strip strip) {
+        this._Detector = detector;                                              // 0 = SVT, 1 = BMT
+        this._DetectorType = detectortype;                                      // 0 = C, 1 = Z
         this._Sector = sector;
         this._Layer = layer;
         this._Strip = strip;
 
     }
 
-    public String get_Detector() {
+    public int get_Detector() {
         return _Detector;
     }
 
-    public void set_Detector(String _detector) {
+    public void set_Detector(int _detector) {
         this._Detector = _detector;
     }
 
-    public String get_DetectorType() {
+    public int get_DetectorType() {
         return _DetectorType;
     }
 
-    public void set_DetectorType(String _DetectorType) {
+    public void set_DetectorType(int _DetectorType) {
         this._DetectorType = _DetectorType;
     }
 
-    private String _Detector;							//     the detector SVT or BMT
-    private String _DetectorType;						//     for the BMT, either C or Z
+    private int _Detector;							//       the detector SVT or BMT
+    private int _DetectorType;                                                  //       for the BMT, either C or Z
 
     private int _Sector;      							//	   sector[1...24] for SVT, [1..3] for BMT
-    private int _Layer;    	 							//	   layer [1,...]
+    private int _Layer;    	 						//	   layer [1,...]
     private Strip _Strip;    	 						//	   Strip object
 
-    private int _Id;									//		Hit Id
-    private int _Status; 								//      Status -1 dead, 0 noisy, 1 good
+    private int _Id;								//		Hit Id
+    private int _Status; 							//      Status -1 dead, 0 noisy, 1 good
 
     /**
      *
@@ -154,7 +154,7 @@ public class Hit implements Comparable<Hit> {
     public boolean isSameAs(FittedHit otherHit) {
         FittedHit thisHit = (FittedHit) this;
         boolean cmp = false;
-        if ((thisHit.get_Detector()).equals(otherHit.get_Detector())
+        if ((thisHit.get_Detector()==otherHit.get_Detector())
                 && thisHit.get_Sector() == otherHit.get_Sector()
                 && thisHit.get_Layer() == otherHit.get_Layer()
                 && thisHit.get_Strip().get_Strip() == otherHit.get_Strip().get_Strip()

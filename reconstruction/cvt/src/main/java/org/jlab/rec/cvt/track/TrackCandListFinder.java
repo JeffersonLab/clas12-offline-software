@@ -1051,7 +1051,8 @@ public class TrackCandListFinder {
 
     public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal,
             ArrayList<StateVec> trajectory, int k) {
-
+        if(trajectory == null)
+            return;
         Collections.sort(sVTclusters);
         for (StateVec st : trajectory) {
             for (Cluster cls : sVTclusters) {

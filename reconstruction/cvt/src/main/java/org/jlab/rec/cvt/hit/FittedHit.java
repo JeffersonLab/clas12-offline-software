@@ -9,21 +9,21 @@ package org.jlab.rec.cvt.hit;
 public class FittedHit extends Hit implements Comparable<Hit> {
 
     /**
-     * @param detector SVT or BMT
+     * @param detector SVT (0) or BMT (1)
      * @param sector (1...)
      * @param layer (1...)
      * @param strip (1...)
      * @param Edep (for gemc output without digitization)
      */
-    public FittedHit(String detector, String detectortype, int sector, int layer, Strip strip) {
+    public FittedHit(int detector, int detectortype, int sector, int layer, Strip strip) {
         super(detector, detectortype, sector, layer, strip);
 
     }
 
-    private double _docaToTrk;              // 3-D distance of closest approach of the helix to the wire 
-    private double _stripResolutionAtDoca;  // position resolution at distance of closest approach of the helix to the wire 
+    private double _docaToTrk;                                                  // 3-D distance of closest approach of the helix to the wire 
+    private double _stripResolutionAtDoca;                                      // position resolution at distance of closest approach of the helix to the wire 
 
-    private int _TrkgStatus = -1;			//  TrkgStatusFlag factor (-1: no fit; 0: global helical fit; 1: KF fit)
+    private int _TrkgStatus = -1;                                               //  TrkgStatusFlag factor (-1: no fit; 0: global helical fit; 1: KF fit)
 
     public double get_docaToTrk() {
         return _docaToTrk;

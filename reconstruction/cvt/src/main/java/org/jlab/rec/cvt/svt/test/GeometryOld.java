@@ -1,8 +1,6 @@
-package org.jlab.rec.cvt.svt;
+package org.jlab.rec.cvt.svt.test;
 
 //import java.io.File;
-import eu.mihosoft.vrl.v3d.Vector3d;
-import org.jlab.rec.cvt.svt.*;
 import java.io.FileNotFoundException;
 import org.jlab.geom.prim.Line3D;
 
@@ -13,20 +11,11 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.SVT.*;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.cvt.svt.Constants;
 
-public class Geometry {
-
-    private SVTStripFactory _svtStripFactory;
-
-    public SVTStripFactory getStripFactory() {
-        return _svtStripFactory;
-    }
-
-    public void setSvtIdealStripFactory(SVTStripFactory _svtStripFactory) {
-        this._svtStripFactory = _svtStripFactory;
-    }
+public class GeometryOld {
     
-    public Geometry() {
+    public GeometryOld() {
     }
 
     // Comments on the Geometry of the BST 
@@ -51,26 +40,20 @@ public class Geometry {
     //for making bst outline fig
     public Point3D getPlaneModuleOrigin(int sector, int layer) {
         //shift the local origin to the physical orign instead of active area
-        
-        Line3d localLine = new Line3d(new Vector3d(-1-org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2,0,0),new Vector3d(-1-org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2,0,org.jlab.rec.cvt.svt.Constants.ACTIVESENLEN)) ;
-        Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1, sector-1, org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer-1][0], org.jlab.rec.cvt.svt.Constants.Z0[layer-1] ));
-        
-        return new Point3D(labFrameLine.origin().x, labFrameLine.origin().y, labFrameLine.origin().z);
+        Point3D point0 = new Point3D(transformToFrame(sector, layer, -1, 0, 0, "lab", ""));
+        return point0;
     }
 
     public Point3D getPlaneModuleEnd(int sector, int layer) {
         //shift the local origin to the physical orign instead of active area
-        
-        Line3d localLine = new Line3d(new Vector3d(1+org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2,0,0),new Vector3d(1+org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2,0,org.jlab.rec.cvt.svt.Constants.ACTIVESENLEN)) ;
-        Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1, sector-1, org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer-1][0], org.jlab.rec.cvt.svt.Constants.Z0[layer-1] ));
-        
-        return new Point3D(labFrameLine.origin().x, labFrameLine.origin().y, labFrameLine.origin().z);
+        Point3D point0 = new Point3D(transformToFrame(sector, layer, Constants.ACTIVESENWIDTH + 1, 0, 0, "lab", ""));
+        return point0;
     }
 
     //*** 
     public int findSectorFromAngle(int layer, Point3D trkPoint) {
-        int Sect = org.jlab.rec.cvt.svt.Constants.NSECT[layer - 1];
-        for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[layer - 1] - 1; s++) {
+        int Sect = Constants.NSECT[layer - 1];
+        for (int s = 0; s < Constants.NSECT[layer - 1] - 1; s++) {
             int sector = s + 1;
             Vector3D orig = new Vector3D(getPlaneModuleOrigin(sector, layer).x(), getPlaneModuleOrigin(sector, layer).y(), 0);
             Vector3D end = new Vector3D(getPlaneModuleEnd(sector, layer).x(), getPlaneModuleEnd(sector, layer).y(), 0);
@@ -92,37 +75,29 @@ public class Geometry {
 
     //***
     public Vector3D findBSTPlaneNormal(int sector, int layer) {
-        int region =  (int) (layer + 1) / 2; 
-        int myLayerIndex = 2*(region - 1);
-        int mySectorIndex = sector -1;
-        Line3d l1 = this._svtStripFactory.getStrip(myLayerIndex, mySectorIndex, 0);
-        Line3d l2 = this._svtStripFactory.getStrip(myLayerIndex, mySectorIndex, 255);
-        Vector3d u1 = l1.end().sub(l1.origin());
-        Vector3d u2 = l2.end().sub(l2.origin());
-        
-        // //double angle = 2.*Math.PI*((double)(sector-1)/(double)org.jlab.rec.cvt.svt.Constants.NSECT[layer-1]) + Math.PI/2.;
-        //double angle = 2. * Math.PI * ((double) -(sector - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer - 1];
-        //return new Vector3D(Math.cos(angle), Math.sin(angle), 0);
-        Vector3d n = u1.cross(u2).normalized();
-        return new Vector3D(n.x, n.y, 0);
+
+        //double angle = 2.*Math.PI*((double)(sector-1)/(double)Constants.NSECT[layer-1]) + Math.PI/2.;
+        double angle = 2. * Math.PI * ((double) -(sector - 1) / (double) Constants.NSECT[layer - 1]) + Constants.PHI0[layer - 1];
+
+        return new Vector3D(Math.cos(angle), Math.sin(angle), 0);
     }
     //***
 
     public double[] getLocCoord(double s1, double s2) { //2 top, 1 bottom
 
         double[] X = new double[2];
-        double ialpha1 = (s1 - 1) * org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+        double ialpha1 = (s1 - 1) * Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
         //the active area starts at the first strip 	
-        double interc1 = (s1 - 0.5) * org.jlab.rec.cvt.svt.Constants.PITCH + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
-        double ialpha2 = (s2 - 1) * org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+        double interc1 = (s1 - 0.5) * Constants.PITCH + Constants.STRIPTSTART;
+        double ialpha2 = (s2 - 1) * Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
         //the active area starts at the first strip 	
-        double interc2 = (s2 - 0.5) * org.jlab.rec.cvt.svt.Constants.PITCH + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+        double interc2 = (s2 - 0.5) * Constants.PITCH + Constants.STRIPTSTART;
 
         // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
         // -------------------------------------
         double m1 = -Math.tan(ialpha1);
         double m2 = Math.tan(ialpha2);
-        double b1 = org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH - interc1;
+        double b1 = Constants.ACTIVESENWIDTH - interc1;
         double b2 = interc2;
 
         double z = (b2 - b1) / (m1 - m2);
@@ -131,6 +106,7 @@ public class Geometry {
         X[1] = z;
 
         return X;
+
     }
 
     public double[] getLocCoordErrs(int lay1, int lay2, double s1, double s2, double z) {
@@ -161,26 +137,41 @@ public class Geometry {
     //***
 
     public Point3D transformToFrame(int sector, int layer, double x, double y, double z, String frame, String MiddlePlane) {
+
+        // global rotation angle
+        double Glob_rangl = ((double) -(sector - 1) / (double) Constants.NSECT[layer - 1]) * 2. * Math.PI + Constants.PHI0[layer - 1];
+        // angle to rotate to global frame
+        double Loc_to_Glob_rangl = Glob_rangl - Constants.LOCZAXISROTATION;
+
         double gap = 0;
         if (MiddlePlane.equals("middle")) {
             if ((layer - 1) % 2 == 0) { // for a cross take the bottom layer
-                gap = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer][sector - 1] - org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer - 1][sector - 1];
+                gap = Constants.MODULERADIUS[layer][sector - 1] - Constants.MODULERADIUS[layer - 1][sector - 1];
             }
         }
-        Point3D transf = null;
-        if (frame.equals("lab")) {
-            Line3d localLine = new Line3d(new Vector3d(x-org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2,y,z),new Vector3d(x-org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2,y,z)) ;
-            Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1, sector-1, org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer-1][0]+gap/2, org.jlab.rec.cvt.svt.Constants.Z0[layer-1] ));
+        double lTx = (Constants.MODULERADIUS[layer - 1][sector - 1] + 0.5 * gap) * Math.cos(Glob_rangl);
+        double lTy = (Constants.MODULERADIUS[layer - 1][sector - 1] + 0.5 * gap) * Math.sin(Glob_rangl);
+        double lTz = Constants.Z0[layer - 1];
 
-            transf= new Point3D(labFrameLine.origin().x, labFrameLine.origin().y, labFrameLine.origin().z);
+        //rotate and translate
+        double cosRotation = Math.cos(Loc_to_Glob_rangl);
+        double sinRotation = Math.sin(Loc_to_Glob_rangl);
+
+        double xt = 0;
+        double yt = 0;
+        double zt = 0;
+
+        if (frame.equals("lab")) {
+            xt = (x - 0.5 * Constants.ACTIVESENWIDTH) * cosRotation - y * sinRotation + lTx;
+            yt = (x - 0.5 * Constants.ACTIVESENWIDTH) * sinRotation + y * cosRotation + lTy;
+            zt = z + lTz;
         }
         if (frame.equals("local")) {
-            Line3d glLine = new Line3d(new Vector3d(x,y,z),new Vector3d(x,y,z)) ;
-            boolean flip = true;
-            Line3d localLine = glLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1, sector-1, org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer-1][0]+gap/2, org.jlab.rec.cvt.svt.Constants.Z0[layer-1] ).invert());
-            transf= new Point3D(localLine.origin().x+org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH/2, localLine.origin().y, localLine.origin().z);
+            xt = (x - lTx) * cosRotation + (y - lTy) * sinRotation + 0.5 * Constants.ACTIVESENWIDTH;
+            yt = -(x - lTx) * sinRotation + (y - lTy) * cosRotation;
+            zt = z - lTz;
         }
-        return transf;
+        return new Point3D(xt, yt, zt);
     }
     //*** point and its error
 
@@ -190,7 +181,7 @@ public class Geometry {
         // if first iteration trkDir == null
         double s2corr = s2;
         // now use track info
-        s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, org.jlab.rec.cvt.svt.Constants.MODULELENGTH);
+        s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, Constants.MODULELENGTH);
         double z = getLocCoord(s1, s2corr)[1];
         //update using the corrected z
         s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, z);
@@ -219,14 +210,14 @@ public class Geometry {
         // global rotation angle to get the error in the lab frame
         int layerIdx = upperlayer - 1;
         /*
-			double Glob_rangl = ((double) (sector-1)/(double) org.jlab.rec.cvt.svt.Constants.NSECT[layerIdx])*2.*Math.PI;
+			double Glob_rangl = ((double) (sector-1)/(double) Constants.NSECT[layerIdx])*2.*Math.PI;
 	        // angle to rotate to global frame
-	        double Loc_to_Glob_rangl = Glob_rangl-org.jlab.rec.cvt.svt.Constants.PHI0[layerIdx];
+	        double Loc_to_Glob_rangl = Glob_rangl-Constants.PHI0[layerIdx];
          */
         // global rotation angle
-        double Glob_rangl = ((double) -(sector - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layerIdx]) * 2. * Math.PI + org.jlab.rec.cvt.svt.Constants.PHI0[layerIdx];
+        double Glob_rangl = ((double) -(sector - 1) / (double) Constants.NSECT[layerIdx]) * 2. * Math.PI + Constants.PHI0[layerIdx];
         // angle to rotate to global frame
-        double Loc_to_Glob_rangl = Glob_rangl - org.jlab.rec.cvt.svt.Constants.LOCZAXISROTATION;
+        double Loc_to_Glob_rangl = Glob_rangl - Constants.LOCZAXISROTATION;
 
         double cosRotation = Math.cos(Loc_to_Glob_rangl);
         double sinRotation = Math.sin(Loc_to_Glob_rangl);
@@ -238,17 +229,17 @@ public class Geometry {
         vals[4] = yerr;
         vals[5] = LCErr_z;
 
-        if (LC_z > org.jlab.rec.cvt.svt.Constants.MODULELENGTH + org.jlab.rec.cvt.svt.Constants.interTol * 2) {
+        if (LC_z > Constants.MODULELENGTH + Constants.interTol * 2) {
             return new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
         }
         // once there is a trk, the cross should be well calculated
         //if the local cross is not in the fiducial volume it is not physical
-        if ((trkDir != null && (LC_x < 0 || LC_x > org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH + org.jlab.rec.cvt.svt.Constants.TOLTOMODULEEDGE))
-                || (trkDir != null && (LC_z < -org.jlab.rec.cvt.svt.Constants.interTol || LC_z > org.jlab.rec.cvt.svt.Constants.MODULELENGTH + org.jlab.rec.cvt.svt.Constants.interTol))) {
+        if ((trkDir != null && (LC_x < 0 || LC_x > Constants.ACTIVESENWIDTH + Constants.TOLTOMODULEEDGE))
+                || (trkDir != null && (LC_z < -Constants.interTol || LC_z > Constants.MODULELENGTH + Constants.interTol))) {
             return new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
         }
 
-        //if(vals[5]<org.jlab.rec.cvt.svt.Constants.Z0[upperlayer-1]-org.jlab.rec.cvt.svt.Constants.interTol || vals[5]>org.jlab.rec.cvt.svt.Constants.Z0[upperlayer-1]+org.jlab.rec.cvt.svt.Constants.MODULELENGTH+org.jlab.rec.cvt.svt.Constants.interTol) {	
+        //if(vals[5]<Constants.Z0[upperlayer-1]-Constants.interTol || vals[5]>Constants.Z0[upperlayer-1]+Constants.MODULELENGTH+Constants.interTol) {	
         //	return new double[] {Double.NaN,0,Double.NaN,Double.NaN, Double.NaN, Double.NaN};
         //}
         double[] values = new double[6];
@@ -291,23 +282,23 @@ public class Geometry {
         double x = LocPoint.x();
         double z = LocPoint.z();
 
-        double alpha = org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+        double alpha = Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
 
-        double b = org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH;
-        double P = org.jlab.rec.cvt.svt.Constants.PITCH;
+        double b = Constants.ACTIVESENWIDTH;
+        double P = Constants.PITCH;
 
         double s = -1;
 
         if (layer % 2 == 1) {//layers 1,3,5 == bottom ==i ==>(1) : regular configuration
             //m1,b1
-            s = (int) Math.floor((-x + b + alpha * z + 0.5 * P - org.jlab.rec.cvt.svt.Constants.STRIPTSTART) / (alpha * z + P));
+            s = (int) Math.floor((-x + b + alpha * z + 0.5 * P - Constants.STRIPTSTART) / (alpha * z + P));
 
             double delta = 99999;
             double sdelta = delta;
             double newStrip = s;
             for (int i = -1; i < 2; i++) {
                 double sp = s + (double) i;
-                double x_calc = -Math.tan((sp - 1) * alpha) * z + b - sp * P + 0.5 * P - org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+                double x_calc = -Math.tan((sp - 1) * alpha) * z + b - sp * P + 0.5 * P - Constants.STRIPTSTART;
 
                 if (Math.abs(x - x_calc) < delta) {
                     sdelta = x - x_calc;
@@ -319,7 +310,7 @@ public class Geometry {
             s = newStrip;
             for (int i = -10; i <= 10; i++) {
                 double sp = s + (double) i * 0.1;
-                double x_calc = -Math.tan((sp - 1) * alpha) * z + b - sp * P + 0.5 * P - org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+                double x_calc = -Math.tan((sp - 1) * alpha) * z + b - sp * P + 0.5 * P - Constants.STRIPTSTART;
 
                 if (Math.abs(x - x_calc) < delta) {
                     sdelta = x - x_calc;
@@ -340,14 +331,14 @@ public class Geometry {
         if (layer % 2 == 0) {
             //layers 2,4,6 == top ==j ==>(2) : regular configuration
             //m2,b2		
-            s = (int) Math.floor((x + alpha * z + 0.5 * P - org.jlab.rec.cvt.svt.Constants.STRIPTSTART) / (alpha * z + P));
+            s = (int) Math.floor((x + alpha * z + 0.5 * P - Constants.STRIPTSTART) / (alpha * z + P));
 
             double delta = 99999;
             double sdelta = delta;
             double newStrip = s;
             for (int i = -1; i < 2; i++) {
                 double sp = s + (double) i;
-                double x_calc = Math.tan((sp - 1) * alpha) * z + sp * P - 0.5 * P + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+                double x_calc = Math.tan((sp - 1) * alpha) * z + sp * P - 0.5 * P + Constants.STRIPTSTART;
 
                 if (Math.abs(x - x_calc) < delta) {
                     sdelta = x - x_calc;
@@ -359,7 +350,7 @@ public class Geometry {
             s = newStrip;
             for (int i = -10; i <= 10; i++) {
                 double sp = s + (double) i * 0.1;
-                double x_calc = Math.tan((sp - 1) * alpha) * z + sp * P - 0.5 * P + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+                double x_calc = Math.tan((sp - 1) * alpha) * z + sp * P - 0.5 * P + Constants.STRIPTSTART;
 
                 if (Math.abs(x - x_calc) < delta) {
                     sdelta = x - x_calc;
@@ -391,8 +382,8 @@ public class Geometry {
     public double getSingleStripResolution(int lay, int strip, double Z) { // as a function of local z
         double Strip = (double) strip;
         double StripUp = Strip + 1;
-        if (strip == org.jlab.rec.cvt.svt.Constants.NSTRIP) {
-            StripUp = (double) org.jlab.rec.cvt.svt.Constants.NSTRIP; //edge strip
+        if (strip == Constants.NSTRIP) {
+            StripUp = (double) Constants.NSTRIP; //edge strip
         }
         double StripDown = Strip - 1;
         if (strip == 1) {
@@ -426,15 +417,15 @@ public class Geometry {
     public double getDOCAToStrip(int sector, int layer, double centroidstrip, Point3D point0) {
 
         // local angle of  line graded from 0 to 3 deg.
-        double ialpha = (centroidstrip - 1) * org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+        double ialpha = (centroidstrip - 1) * Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
         //the active area starts at the first strip 	
-        double interc = (centroidstrip - 0.5) * org.jlab.rec.cvt.svt.Constants.PITCH + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+        double interc = (centroidstrip - 0.5) * Constants.PITCH + Constants.STRIPTSTART;
 
         // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
         // -------------------------------------
         double m1 = -Math.tan(ialpha);
         double m2 = Math.tan(ialpha);
-        double b1 = org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH - interc;
+        double b1 = Constants.ACTIVESENWIDTH - interc;
         double b2 = interc;
 
         Vector3D vecAlongStrip = new Vector3D();
@@ -464,15 +455,15 @@ public class Geometry {
     public double getXAtZ(int layer, double centroidstrip, double Z) {
         double X = 0;
         // local angle of  line graded from 0 to 3 deg.
-        double ialpha = (centroidstrip - 1) * org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+        double ialpha = (centroidstrip - 1) * Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
         //the active area starts at the first strip 	
-        double interc = (centroidstrip - 0.5) * org.jlab.rec.cvt.svt.Constants.PITCH + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+        double interc = (centroidstrip - 0.5) * Constants.PITCH + Constants.STRIPTSTART;
 
         // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
         // -------------------------------------
         double m1 = -Math.tan(ialpha);
         double m2 = Math.tan(ialpha);
-        double b1 = org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH - interc;
+        double b1 = Constants.ACTIVESENWIDTH - interc;
         double b2 = interc;
 
         if (layer % 2 == 0) { //layers 2,4,6 == top ==j ==>(2) : regular configuration
@@ -493,7 +484,7 @@ public class Geometry {
         double tx = trkDir.x();
         double ty = trkDir.y();
         Vector3D trkDir_t = new Vector3D(tx / Math.sqrt(tx * tx + ty * ty), ty / Math.sqrt(tx * tx + ty * ty), 0);
-        Vector3D n = findBSTPlaneNormal(sector, layer); 
+        Vector3D n = findBSTPlaneNormal(sector, layer);
 
         if (org.jlab.rec.cvt.Constants.isCosmicsData() && Math.acos(n.dot(trkDir_t)) > Math.PI / 2) // flip the direction of the track for y<0 for cosmics
         {
@@ -502,10 +493,10 @@ public class Geometry {
 
         double TrkToPlnNormRelatAngl = Math.acos(n.dot(trkDir_t));
         double sign = Math.signum(n.cross(trkDir_t).z());
-        // int shift = (int)((org.jlab.rec.cvt.svt.Constants.LAYRGAP*n.cross(trkDir_t).z())/org.jlab.rec.cvt.svt.Constants.PITCH);
+        // int shift = (int)((Constants.LAYRGAP*n.cross(trkDir_t).z())/Constants.PITCH);
         //
         //correction to the pitch to take into account the grading of the angle -- get the upper or lower strip depending on the trkdir
-        double pitchcorr = org.jlab.rec.cvt.svt.Constants.PITCH;
+        double pitchcorr = Constants.PITCH;
 
         if (s2 > 2 && s2 < 255) {
             double pitchToNextStrp = Math.abs(getXAtZ(layer, (double) s2 + 1, z) - getXAtZ(layer, (double) s2, z));
@@ -519,7 +510,7 @@ public class Geometry {
             pitchcorr = Math.abs(getXAtZ(layer, (double) s2 - 1, z) - getXAtZ(layer, (double) s2, z));
         }
 
-        double layerGap = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[1][0] - org.jlab.rec.cvt.svt.Constants.MODULERADIUS[0][0];
+        double layerGap = Constants.MODULERADIUS[1][0] - Constants.MODULERADIUS[0][0];
 
         double shift = sign * layerGap * Math.tan(TrkToPlnNormRelatAngl) / pitchcorr;
 
@@ -542,8 +533,8 @@ public class Geometry {
         int nstep = 1;
         double stepSize = 0.001;
 
-        double Theta = Math.atan2((org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2), org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer - 1][sector - 1]);
-        double RMin = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[layer - 1][sector - 1];
+        double Theta = Math.atan2((Constants.ACTIVESENWIDTH / 2), Constants.MODULERADIUS[layer - 1][sector - 1]);
+        double RMin = Constants.MODULERADIUS[layer - 1][sector - 1];
         double RMax = RMin / Math.cos(Theta);
         double R = RMin;
 
@@ -571,8 +562,8 @@ public class Geometry {
     }
 
     public Point3D recalcCrossFromTrajectoryIntersWithModulePlanes(int s, double s1, double s2,
-            int l1, int l2, double trajX1, double trajY1, double trajZ1,
-            double trajX2, double trajY2, double trajZ2) {
+        int l1, int l2, double trajX1, double trajY1, double trajZ1,
+        double trajX2, double trajY2, double trajZ2) {
         Point3D LocPoint1 = this.transformToFrame(s, l1, trajX1, trajY1, trajZ1, "local", "");
         Point3D LocPoint2 = this.transformToFrame(s, l2, trajX2, trajY2, trajZ2, "local", "");
         double m = (LocPoint1.x() - LocPoint2.x()) / (LocPoint1.z() - LocPoint2.z());
@@ -625,15 +616,15 @@ public class Geometry {
         // -------------------------------------
         if (slyr == 0) {
             double s1 = strip;
-            double ialpha1 = (s1 - 1) * org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+            double ialpha1 = (s1 - 1) * Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
             //the active area starts at the first strip 	
-            double interc1 = (s1 - 0.5) * org.jlab.rec.cvt.svt.Constants.PITCH + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+            double interc1 = (s1 - 0.5) * Constants.PITCH + Constants.STRIPTSTART;
             double m1 = -Math.tan(ialpha1);
-            double b1 = org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH - interc1;
+            double b1 = Constants.ACTIVESENWIDTH - interc1;
 
             z1 = 0;
             x1 = m1 * z1 + b1;
-            z2 = org.jlab.rec.cvt.svt.Constants.MODULELENGTH;
+            z2 = Constants.MODULELENGTH;
             x2 = m1 * z2 + b1;
 
             if (x2 < 0) {
@@ -644,19 +635,19 @@ public class Geometry {
 
         if (slyr == 1) {
             double s2 = strip;
-            double ialpha2 = (s2 - 1) * org.jlab.rec.cvt.svt.Constants.STEREOANGLE / (double) (org.jlab.rec.cvt.svt.Constants.NSTRIP - 1);
+            double ialpha2 = (s2 - 1) * Constants.STEREOANGLE / (double) (Constants.NSTRIP - 1);
             //the active area starts at the first strip 	
-            double interc2 = (s2 - 0.5) * org.jlab.rec.cvt.svt.Constants.PITCH + org.jlab.rec.cvt.svt.Constants.STRIPTSTART;
+            double interc2 = (s2 - 0.5) * Constants.PITCH + Constants.STRIPTSTART;
             double m2 = Math.tan(ialpha2);
             double b2 = interc2;
 
             z1 = 0;
             x1 = m2 * z1 + b2;
-            z2 = org.jlab.rec.cvt.svt.Constants.MODULELENGTH;
+            z2 = Constants.MODULELENGTH;
             x2 = m2 * z2 + b2;
 
-            if (x2 > org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH) {
-                x2 = org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH;
+            if (x2 > Constants.ACTIVESENWIDTH) {
+                x2 = Constants.ACTIVESENWIDTH;
                 z2 = (x2 - b2) / m2;
             }
         }
@@ -671,12 +662,13 @@ public class Geometry {
 
     public static void main(String arg[]) throws FileNotFoundException {
 
-        
+        Constants.Load();
+
         int s1 = 1;
         int s2 = 1;
 
-        Geometry geo = new Geometry();
-/*
+        GeometryOld geo = new GeometryOld();
+
         System.out.println("  old geom strip inter " + geo.getLocCoord(s1, s2)[0] + "," + geo.getLocCoord(s1, s2)[1]);
         //end points for the first strip in local system
         double[][] X = geo.getStripEndPoints(s1, 0); // bottom layer
@@ -692,9 +684,9 @@ public class Geometry {
         System.out.println(EP2u.toString());
         System.out.println(EP1v.toString());
         System.out.println(EP2v.toString());
-        */
+
         //System.out.println(geo.calcNearestStrip(25.66, -66.55, 1.37,2, 10) );
-        //System.out.println(geo.transformToFrame(8, 1, 66.3, 7.8, 38.6, "local", "").z()-org.jlab.rec.cvt.svt.Constants.ACTIVESENLEN*2-2*0.835-org.jlab.rec.cvt.svt.Constants.ACTIVESENLEN/2);
+        //System.out.println(geo.transformToFrame(8, 1, 66.3, 7.8, 38.6, "local", "").z()-Constants.ACTIVESENLEN*2-2*0.835-Constants.ACTIVESENLEN/2);
         /*
 	    	Line3D stripLine1 = svt.createStrip(s1-1);
 	    	Line3D stripLine2 = svt.createStrip(s2-1);	    	
@@ -726,27 +718,23 @@ public class Geometry {
  /*
 	    	int l = 1;
 	    	int s = 6;
-	    	double s10 = geo.calcNearestStrip(0., org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l-1][s-1], 0, l, s);
-	    	double s20 = geo.calcNearestStrip(0., org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l][s-1], 0, l+1, s);
+	    	double s10 = geo.calcNearestStrip(0., Constants.MODULERADIUS[l-1][s-1], 0, l, s);
+	    	double s20 = geo.calcNearestStrip(0., Constants.MODULERADIUS[l][s-1], 0, l+1, s);
 	    	
-	    	double s1 = geo.calcNearestStrip(0.5, org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l-1][s-1], 0, l, s);
-	    	double s2 = geo.calcNearestStrip(0.5, org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l][s-1], 0, l+1, s);
+	    	double s1 = geo.calcNearestStrip(0.5, Constants.MODULERADIUS[l-1][s-1], 0, l, s);
+	    	double s2 = geo.calcNearestStrip(0.5, Constants.MODULERADIUS[l][s-1], 0, l+1, s);
 	    	
 	    	
 	    	System.out.println("D "+geo.getLocCoord(s10, s20)[0]+","+geo.getLocCoord(s10, s20)[1]+"  ;  "+geo.getLocCoord(s1, s2)[0]+","+geo.getLocCoord(s1, s2)[1]);
          */
-        //SVTorg.jlab.rec.cvt.svt.Constants.VERBOSE = true;
+        //SVTConstants.VERBOSE = true;
         DatabaseConstantProvider cp = new DatabaseConstantProvider(190,"default");
         cp = SVTConstants.connect( cp );
         // create the factory
         //SVTStripFactory svtShiftedStripFactory = new SVTStripFactory( cp, true );
         SVTStripFactory svtIdealStripFactory = new SVTStripFactory( cp, false );
-        geo.setSvtIdealStripFactory(svtIdealStripFactory);
-        
-        org.jlab.rec.cvt.svt.Constants.Load();
-
         // load alignment shifts and print them out;
-        //SVTorg.jlab.rec.cvt.svt.Constants.loadAlignmentShifts( cp );
+        //SVTConstants.loadAlignmentShifts( cp );
 
         // set parameters.
         int myStrip  = 1; // pick a strip, layer, sector
@@ -767,17 +755,8 @@ public class Geometry {
         System.out.println( "myLabIdeal   = "+myCLASstriplineShifted.toString());
 
         // ideal strip in lab coordinates
-        Line3d myCLASstriplineIdeal  = svtIdealStripFactory.getStrip(myLayerIndex, mySectorIndex, myStripIndex);
+        Line3d myCLASstriplineIdeal  = svtIdealStripFactory.getIdealStrip(myLayerIndex+1, mySectorIndex, myStripIndex);
         System.out.println( "myLabIdeal     = "+myCLASstriplineIdeal.toString());
-        
-        int layer = 1;
-        int sector =10;
-        //for( sector = 1; sector<=10; sector++)
-        //    geo.getPlaneModuleEnd( sector, layer);
-        
-        Point3D test = geo.transformToFrame(sector, layer, 5, 0, 15, "lab", "middle") ;
-        
-        Point3D test2 = geo.transformToFrame(sector, layer, -6.8, -67.03, 0, "local", "") ;
     }
 
 }

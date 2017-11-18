@@ -205,7 +205,7 @@ public class CrossMaker {
 
         // Sorting by layer first:
         for (Cluster theclus : clusters) {
-            if (theclus.get_Detector() == "BMT") {
+            if (theclus.get_Detector() == 1) {
                 if (Geometry.getZorC(theclus.get_Layer()) == 1) {
                     bmt_Zlayrclus.add(theclus);
                 }
@@ -215,7 +215,7 @@ public class CrossMaker {
                 }
 
             }
-            if (theclus.get_Detector() == "SVT") {
+            if (theclus.get_Detector() == 0) {
                 if (theclus.get_Layer() % 2 == 0) {
                     svt_outerlayrclus.add(theclus);
                 }
