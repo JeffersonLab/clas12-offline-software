@@ -98,7 +98,7 @@ public class HitReader {
 
             return;
         }
-
+        
         DataBank bankDGTZ = event.getBank("DC::tdc");
 
         int rows = bankDGTZ.rows();
@@ -152,7 +152,7 @@ public class HitReader {
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
-                if (event.hasBank("MC::Particle") == false)
+                if (event.hasBank("MC::Particle") == false || event.getBank("RUN::config").getInt("run", 0)>100)
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
@@ -217,7 +217,7 @@ public class HitReader {
             trkID[i] = bank.getByte("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i); 
-            if (event.hasBank("MC::Particle") == true) {
+            if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
                 tProp[i] = 0;
                 tFlight[i] = 0; 
             }
@@ -233,7 +233,7 @@ public class HitReader {
             }
             
             double T_0 = 0;
-            if (event.hasBank("MC::Particle") == false)
+            if (event.hasBank("MC::Particle") == false || event.getBank("RUN::config").getInt("run", 0)>100)
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
             
             //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
@@ -308,7 +308,7 @@ public class HitReader {
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i);
         
-            if (event.hasBank("MC::Particle") == true) {
+            if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
                     tProp[i] = 0;
                     tFlight[i] = 0; 
             }
