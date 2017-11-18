@@ -7,6 +7,8 @@ import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
+import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -40,7 +42,8 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
-
+    SVTStripFactory svtIdealStripFactory;
+    
     public CVTReconstruction() {
         super("CVTTracks", "ziegler", "4.0");
 
@@ -79,6 +82,18 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if (FieldsConfig.equals(newConfig) == false) {
             // Load the Constants
+            System.out.println(" ........................................ trying to connect to db ");
+            CCDBConstantsLoader.Load(bank.getInt("run", 0));
+            DatabaseConstantProvider cp = new DatabaseConstantProvider(bank.getInt("run", 0), "default");
+            
+            cp = SVTConstants.connect( cp );
+            SVTConstants.loadAlignmentShifts( cp );
+            cp.disconnect();
+            // create the factory
+            //SVTStripFactory svtShiftedStripFactory = new SVTStripFactory( cp, true );
+            SVTStripFactory svtIdealStripFactory = new SVTStripFactory( cp, true );
+            SVTGeom.setSvtIdealStripFactory(svtIdealStripFactory);
+            
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
             // Load the Fields
@@ -93,17 +108,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0);
 
         if (Run != newRun) {
-            System.out.println(" ........................................ trying to connect to db ");
-            CCDBConstantsLoader.Load(10);
-            DatabaseConstantProvider cp = new DatabaseConstantProvider(10, "default");
-            String ccdbPath = "/geometry/cvt/svt/";
-            cp.loadTable(ccdbPath + "svt");
-            cp.loadTable(ccdbPath + "region");
-            cp.loadTable(ccdbPath + "support");
-            cp.loadTable(ccdbPath + "fiducial");
-            //cp.loadTable( ccdbPath +"material");
-            cp.loadTable(ccdbPath + "alignment");
-            cp.disconnect();
+            
             this.setRun(newRun);
 
         }
@@ -177,11 +182,11 @@ public class CVTReconstruction extends ReconstructionEngine {
         // fill the fitted hits list.
         if (clusters.size() != 0) {
             for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).get_Detector() == "SVT") {
+                if (clusters.get(i).get_Detector() == 0) {
                     SVTclusters.add(clusters.get(i));
                     SVThits.addAll(clusters.get(i));
                 }
-                if (clusters.get(i).get_Detector() == "BMT") {
+                if (clusters.get(i).get_Detector() == 1) {
                     BMTclusters.add(clusters.get(i));
                     BMThits.addAll(clusters.get(i));
                 }
@@ -300,7 +305,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        String outputFile = "/Users/ziegler/Workdir/Files/cvt/pos_muons.rec.hipo";
+        String outputFile = "/Users/ziegler/Workdir/Files/cvt/pos_muons.rec.newGeom.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -315,9 +320,9 @@ public class CVTReconstruction extends ReconstructionEngine {
             // Processing    
             en.processDataEvent(event);
             
-            if(event.hasBank("CVTRec::Tracks")) {
+            //if(event.hasBank("CVTRec::Tracks")) {
                 writer.writeEvent(event);
-            }
+            //}
             
             System.out.println("  EVENT " + counter);
             /*
@@ -333,7 +338,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 				 dde.show();
 			}
              */
-           // if(counter>304) break;
+            if(counter>304) break;
             //event.show();
             //if(counter%100==0)
             //System.out.println("run "+counter+" events");

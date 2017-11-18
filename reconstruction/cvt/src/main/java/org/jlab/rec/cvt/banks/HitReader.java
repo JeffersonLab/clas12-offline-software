@@ -89,50 +89,30 @@ public class HitReader {
         // fills the arrays corresponding to the hit variables
         int rows = bankDGTZ.rows();
 
-        int[] id = new int[rows];
-        int[] sector = new int[rows];
-        int[] layer = new int[rows];
-        int[] strip = new int[rows];
-        int[] ADC = new int[rows];
-
         if (event.hasBank("BMT::adc") == true) {
 
             for (int i = 0; i < rows; i++) {
 
-                id[i] = i + 1;
-                sector[i] = bankDGTZ.getInt("sector", i);
-                layer[i] = bankDGTZ.getInt("layer", i);
-                strip[i] = bankDGTZ.getInt("component", i);
-                ADC[i] = bankDGTZ.getInt("ADC", i);
-
-                if (strip[i] < 1) {
+                if (bankDGTZ.getInt("ADC", i) < 1) {
                     continue; // gemc assigns strip value -1 for inefficiencies, we only consider strips with values between 1 to the maximum strip number for a given detector
                 }
-                double ADCtoEdep = ADC[i];
+                double ADCtoEdep = bankDGTZ.getInt("ADC", i);
                 //fix for now... no adc in GEMC
                 if (ADCtoEdep < 1) {
                     continue;
                 }
                 // create the strip object for the BMT
-                Strip BmtStrip = new Strip(strip[i], ADCtoEdep);
+                Strip BmtStrip = new Strip(bankDGTZ.getInt("component", i), ADCtoEdep);
                 // calculate the strip parameters for the BMT hit
-                BmtStrip.calc_BMTStripParams(geo, sector[i], layer[i]); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                BmtStrip.calc_BMTStripParams(geo, bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
-                String detectortype = new String();
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer[i]) == 1) // Z detector
-                {
-                    detectortype = "Z";
-                }
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer[i]) == 0) // C detector
-                {
-                    detectortype = "C";
-                }
-                Hit hit = new Hit("BMT", detectortype, sector[i], layer[i], BmtStrip);
+                
+                Hit hit = new Hit(1, this.getZorC(bankDGTZ.getInt("layer", i)), bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i), BmtStrip);
                 // a place holder to set the status of the hit, for simulated data if the strip number is in range and the Edep is above threshold the hit has status 1, useable
                 hit.set_Status(1);
                 //if(BmtStrip.get_Edep()==0)
                 //	hit.set_Status(-1);
-                hit.set_Id(id[i]);
+                hit.set_Id(i+1);
                 // add this hit
                 hits.add(hit);
 
@@ -218,7 +198,7 @@ public class HitReader {
                 SvtStrip.set_StripDir(Dir);
 
                 // create the hit object
-                Hit hit = new Hit("SVT", "", sector[i], layer[i], SvtStrip);
+                Hit hit = new Hit(0, -1, sector[i], layer[i], SvtStrip);
                 // if the hit is useable in the analysis its status is 1
                 hit.set_Status(1);
                 if (SvtStrip.get_Edep() == 0) {
@@ -234,6 +214,14 @@ public class HitReader {
         // fill the list of SVT hits
         this.set_SVTHits(hits);
 
+    }
+    // moved this method from geometry here... check for duplicate usages
+    private int getZorC(int layer) { // 1=Z detector, 0=Cdetector
+        int axis = 0;
+        if (layer == 2 || layer == 3 || layer == 5) {
+            axis = 1;
+        }
+        return axis;
     }
 
 }

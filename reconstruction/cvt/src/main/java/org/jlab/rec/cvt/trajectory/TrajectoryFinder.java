@@ -222,7 +222,7 @@ public class TrajectoryFinder {
 
         for (Cross c : candCrossList) {
             if (c.get_Detector() == "SVT") {
-                SVTCrossList.add(c);
+                SVTCrossList.add(c); 
             } else {
                 BMTCrossList.add(c);
             }
@@ -266,13 +266,13 @@ public class TrajectoryFinder {
                         if (matchCrossToStateVec(c, stVec, l + 1, s + 1) == false) {
                             continue;
                         }
-
+                        
                         Cluster clsOnTrk = null;
                         if (l % 2 == 0) {
-                            clsOnTrk = c.get_Cluster1();
+                            clsOnTrk = c.get_Cluster1(); 
                         }
                         if (l % 2 == 1) {
-                            clsOnTrk = c.get_Cluster2();
+                            clsOnTrk = c.get_Cluster2(); 
                         }
 
                         if (clsOnTrk != null && clsOnTrk.get_Layer() == l + 1) {
@@ -333,7 +333,7 @@ public class TrajectoryFinder {
                             c.set_Dir(ray.get_dirVec());
                             //}
 
-                            // calculate the hit residuals
+                            // calculate the hit residuals // CHECK THIS ........
                             this.setHitResolParams("BMT", c.get_Sector(), c.get_Cluster2().get_Layer(), c.get_Cluster2(),
                                     stVec, svt_geo, bmt_geo, traj.isFinal);
 
@@ -371,15 +371,16 @@ public class TrajectoryFinder {
             int l = layer - 1;
             value = true;
             if (c.get_Region() != (int) (l / 2) + 1) {
-                value = false;	// reauire same region
+                value = false;	// require same region
             }
             if (c.get_Sector() != sector) {
                 value = false;		// same sector 
-            }
+            } 
             double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
             if (deltaXt > org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
                 value = false; // within 1/2 module width
             }
+            
         }
 
         if (c.get_Detector() == "BMT") { // BMT
