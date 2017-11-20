@@ -152,7 +152,7 @@ public class HitReader {
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
-                if (event.hasBank("MC::Particle") == false || event.getBank("RUN::config").getInt("run", 0)>100)
+                if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100)
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
@@ -164,7 +164,7 @@ public class HitReader {
                     double posError = hit.get_CellSize() / Math.sqrt(12.);
                     hit.set_DocaErr(posError);
                     hit.set_Id(i + 1);
-                    hits.add(hit);
+                    hits.add(hit); 
                 }
             }
         }
@@ -233,12 +233,12 @@ public class HitReader {
             }
             
             double T_0 = 0;
-            if (event.hasBank("MC::Particle") == false || event.getBank("RUN::config").getInt("run", 0)>100)
+            if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100)
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
             
             //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - T_0, 
-                    0, B[i], id[i]);
+                    0, B[i], id[i]); 
             
             hit.set_B(B[i]);
             hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]);
@@ -323,7 +323,7 @@ public class HitReader {
             }
             
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i], 0, B[i], id[i]);
-            hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]);
+            hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]); 
             hit.set_B(B[i]);
 // System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
             hit.set_LeftRightAmb(LR[i]);
