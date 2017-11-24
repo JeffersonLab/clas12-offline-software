@@ -8,6 +8,7 @@ package org.jlab.detector.decode;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioNode;
 import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
 import org.jlab.detector.decode.DetectorDataDgtz.TDCData;
+import org.jlab.detector.decode.DetectorDataDgtz.VTPData;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.evio.EvioTreeBranch;
@@ -33,6 +35,8 @@ public class CodaEventDecoder {
     private int eventNumber = 0;
     private long  timeStamp = 0L;
     private int triggerBits = 0;
+
+//    private int[] triggerBank = null;
 
     public CodaEventDecoder(){
 
@@ -55,11 +59,17 @@ public class CodaEventDecoder {
         }
         List<DetectorDataDgtz>  tdcEntries = this.getDataEntries_TDC(event);
         rawEntries.addAll(tdcEntries);
+        List<DetectorDataDgtz>  vtpEntries = this.getDataEntries_VTP(event);
+        rawEntries.addAll(vtpEntries);
         this.setTimeStamp(event);
 
         return rawEntries;
     }
 
+//    public int[] getTriggerBank(){
+//        return this.triggerBank;
+//    }
+    
     public int getRunNumber(){
         return this.runNumber;
     }
@@ -652,7 +662,34 @@ public class CodaEventDecoder {
         return entries;
     }
 
-
+    public List<DetectorDataDgtz> getDataEntries_VTP(EvioDataEvent event){
+        
+        List<DetectorDataDgtz> vtpEntries = new ArrayList<DetectorDataDgtz>();        
+//        this.triggerBank = null;
+        //System.out.println(" READING TRIGGER BANK");
+        List<EvioTreeBranch> branches = this.getEventBranches(event);
+        for(EvioTreeBranch branch : branches){
+            int  crate = branch.getTag();
+//            EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
+            for(EvioNode node : branch.getNodes()){
+                if(node.getTag()==57634/*&&crate==125*/){
+//                    System.out.println("TRIGGER BANK FOUND ");
+                    int[] intData =  ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
+//                    if(intData.length!=0) System.out.println(" TRIGGER BANK LENGTH = " + intData.length);
+                    for(int loop = 0; loop < intData.length; loop++){
+                        int  dataEntry = intData[loop];
+                        DetectorDataDgtz   entry = new DetectorDataDgtz(crate,0,0);
+                        entry.addVTP(new VTPData(dataEntry));
+//                        System.out.println(crate + " " + dataEntry + " " + entry.toString());
+                        vtpEntries.add(entry);
+//                        System.out.println(entry.toString());
+                    }
+                }
+            }
+        }
+//        System.out.println(vtpEntries.size());
+        return vtpEntries;
+    }
     /**
      * reads the TDC values from the bank with tag = 57607, decodes
      * them and returns a list of digitized detector object.
@@ -720,7 +757,7 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/svt12_001042.evio.0");
+        reader.open("/Users/devita/run_FTCal_FTHodo_vtp_031632.evio.0");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
@@ -733,11 +770,14 @@ public class CodaEventDecoder {
             List<DetectorDataDgtz>  dataSet = decoder.getDataEntries(event);
             detectorDecoder.translate(dataSet);
             detectorDecoder.fitPulses(dataSet);
-
-            System.out.println("---> printout EVENT # " + icounter);
-            for(DetectorDataDgtz data : dataSet){
-                System.out.println(data);
+            if(decoder.getDataEntries_VTP(event).size()!=0) {
+                for(DetectorDataDgtz entry : decoder.getDataEntries_VTP(event)) 
+                System.out.println(entry.toString());
             }
+            System.out.println("---> printout EVENT # " + icounter);
+//            for(DetectorDataDgtz data : dataSet){
+//                System.out.println(data);
+//            }
             icounter++;
         }
         System.out.println("Done...");
