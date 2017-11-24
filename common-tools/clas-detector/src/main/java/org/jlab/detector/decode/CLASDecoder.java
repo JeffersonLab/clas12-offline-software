@@ -32,7 +32,7 @@ public class CLASDecoder {
     private HipoDataEvent               hipoEvent = null;
     private int                  decoderDebugMode = 0;
     
-    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
+//    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
     
     public CLASDecoder(boolean development){
         codaDecoder = new CodaEventDecoder();
@@ -152,6 +152,31 @@ public class CLASDecoder {
     }
     
     
+    
+    public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type){
+        return getEntriesVTP(type,dataList);    
+    }
+    /**
+     * returns VTP entries from decoded data for given detector type
+     * @param type detector type
+     * @param entries digitized data list
+     * @return list of VTP's for detector type
+     */
+    public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type, 
+            List<DetectorDataDgtz> entries){
+        List<DetectorDataDgtz>  vtp = new ArrayList<DetectorDataDgtz>();
+        for(DetectorDataDgtz entry : entries){
+            if(entry.getDescriptor().getType()==type){
+                if(entry.getVTPSize()>0){
+                    vtp.add(entry);
+                }
+            }
+        }
+//        System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size() + "  vtp store = " + vtp.size());
+        return vtp;
+    }
+    
+    
     public DataBank getDataBankADC(String name, DetectorType type){
         
         List<DetectorDataDgtz> adcDGTZ = this.getEntriesADC(type);
@@ -225,6 +250,22 @@ public class CLASDecoder {
         return tdcBANK;
     }
     
+    public DataBank getDataBankUndecodedVTP(String name, DetectorType type){
+        
+        List<DetectorDataDgtz> vtpDGTZ = this.getEntriesVTP(type);
+        
+        DataBank tdcBANK = hipoEvent.createBank(name, vtpDGTZ.size());
+        if(tdcBANK==null) return null;
+        
+        for(int i = 0; i < vtpDGTZ.size(); i++){
+            tdcBANK.setByte("crate", i, (byte) vtpDGTZ.get(i).getDescriptor().getCrate());
+            tdcBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
+            tdcBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
+            tdcBANK.setInt("word", i, vtpDGTZ.get(i).getVTPData(0).getWord());
+        }
+        return tdcBANK;
+    }
+    
     public DataEvent getDataEvent(DataEvent rawEvent){
         this.initEvent(rawEvent);
         return getDataEvent();
@@ -239,9 +280,9 @@ public class CLASDecoder {
         DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,DetectorType.FTHODO,DetectorType.FTTRK,
                                                           DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
         
-        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc"};
+        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
-            DetectorType.DC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH};
+            DetectorType.DC,DetectorType.HTCC,DetectorType.LTCC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH};
         
         for(int i = 0; i < adcBankTypes.length; i++){
             DataBank adcBank = getDataBankADC(adcBankNames[i],adcBankTypes[i]);
@@ -279,6 +320,19 @@ public class CLASDecoder {
             if(tdcBankUD!=null){
                 if(tdcBankUD.rows()>0){
                     event.appendBanks(tdcBankUD);
+                }
+            } else {
+                
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            DataBank vtpBankUD = this.getDataBankUndecodedVTP("RAW::vtp", DetectorType.UNDEFINED);
+            if(vtpBankUD!=null){
+                if(vtpBankUD.rows()>0){
+                    event.appendBanks(vtpBankUD);
                 }
             } else {
                 
