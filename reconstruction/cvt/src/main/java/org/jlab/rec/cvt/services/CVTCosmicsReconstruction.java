@@ -7,6 +7,8 @@ import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
+import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -78,6 +80,22 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 
         if (FieldsConfig.equals(newConfig) == false) {
             // Load the Constants
+            System.out.println(" ........................................ trying to connect to db ");
+            CCDBConstantsLoader.Load(bank.getInt("run", 0));
+            DatabaseConstantProvider cp = new DatabaseConstantProvider(bank.getInt("run", 0), "default");
+            
+            cp = SVTConstants.connect( cp );
+            SVTConstants.loadAlignmentShifts( cp );
+            cp.disconnect();
+            // create the factory
+            //SVTStripFactory svtShiftedStripFactory = new SVTStripFactory( cp, true );
+            System.out.println(" Fiducial UX : "+ SVTConstants.FIDCUX+" Fiducial UZ : "+ SVTConstants.FIDCUZ);
+            System.out.println(" Fiducial X : "+ SVTConstants.FIDPKX+" Fiducial Z0 : "+ SVTConstants.FIDPKZ0);
+            System.out.println(" First layer radius : "+ SVTConstants.LAYERRADIUS[0][0]);
+            
+            SVTStripFactory svtIdealStripFactory = new SVTStripFactory( cp, true );
+            SVTGeom.setSvtIdealStripFactory(svtIdealStripFactory);
+            System.out.println( " Sector 1, layer 1, strip 1 line   = "+SVTGeom.getStripFactory().getIdealStrip(0, 0, 0).toString());
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
             // Load the Fields
@@ -92,17 +110,17 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0);
 
         if (Run != newRun) {
-            System.out.println(" ........................................ trying to connect to db ");
-            CCDBConstantsLoader.Load(10);
-            DatabaseConstantProvider cp = new DatabaseConstantProvider(10, "default");
-            String ccdbPath = "/geometry/cvt/svt/";
-            cp.loadTable(ccdbPath + "svt");
-            cp.loadTable(ccdbPath + "region");
-            cp.loadTable(ccdbPath + "support");
-            cp.loadTable(ccdbPath + "fiducial");
+           // System.out.println(" ........................................ trying to connect to db ");
+           // CCDBConstantsLoader.Load(10);
+           // DatabaseConstantProvider cp = new DatabaseConstantProvider(10, "default");
+           // String ccdbPath = "/geometry/cvt/svt/";
+           // cp.loadTable(ccdbPath + "svt");
+           // cp.loadTable(ccdbPath + "region");
+           // cp.loadTable(ccdbPath + "support");
+           // cp.loadTable(ccdbPath + "fiducial");
             //cp.loadTable( ccdbPath +"material");
-            cp.loadTable(ccdbPath + "alignment");
-            cp.disconnect();
+           // cp.loadTable(ccdbPath + "alignment");
+           // cp.disconnect();
             this.setRun(newRun);
 
         }
@@ -187,11 +205,11 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
         // fill the fitted hits list.
         if (clusters.size() != 0) {
             for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).get_Detector().equalsIgnoreCase("SVT")) {
+                if (clusters.get(i).get_Detector()==0) {
                     SVTclusters.add(clusters.get(i));
                     SVThits.addAll(clusters.get(i));
                 }
-                if (clusters.get(i).get_Detector().equalsIgnoreCase("BMT")) {
+                if (clusters.get(i).get_Detector()==1) {
                     BMTclusters.add(clusters.get(i));
                     BMThits.addAll(clusters.get(i));
                 }
@@ -277,8 +295,8 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 
         //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cosmics_cvt_skim.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/cosmicsSimNoShift1.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Distribution/xVeronique/out.hipo";
-        //String inputFile = "/Users/ziegler/Workdir//Files/Data/DecodedData/CVT/474deco.hipo";
+        //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/cosmicsTestCVT.hipo";
+        String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/CVT/sim-LOCAL.hipo";
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         CVTCosmicsReconstruction en = new CVTCosmicsReconstruction();
@@ -291,7 +309,7 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        String outputFile="/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_testResSign.hipo";
+        String outputFile="/Users/ziegler/Workdir/Files/GEMC/CVT/cvt_testResSign0.hipo";
         //String outputFile = "/Users/ziegler/Workdir//Files/Data/CosmicRun474Rec.hipo";
         writer.open(outputFile);
 
@@ -309,7 +327,7 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
             if(event.hasBank("CVTRec::Cosmics"))
                 writer.writeEvent(event);
 
-            System.out.println("  EVENT " + counter);
+            //System.out.println("  EVENT " + counter);
             /*
 			 * event.show();
 			if(event.hasBank("CVTRec::Tracks")) {
@@ -323,9 +341,9 @@ public class CVTCosmicsReconstruction extends ReconstructionEngine {
 				 dde.show();
 			}
              */
-            //if (counter > 200) {
+           // if (counter > 200) {
             //    break;
-            //}
+           // }
             //event.show();
             //if(counter%100==0)
             //System.out.println("run "+counter+" events");

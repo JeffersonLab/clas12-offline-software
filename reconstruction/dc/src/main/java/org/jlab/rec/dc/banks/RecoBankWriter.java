@@ -2,9 +2,12 @@ package org.jlab.rec.dc.banks;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.hipo.data.HipoEvent;
+import org.jlab.hipo.data.HipoGroup;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -78,6 +81,10 @@ public class RecoBankWriter {
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
             bank.setFloat("B", i, (float) hitlist.get(i).get_B());
+            if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
+                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+            }
         }
 
         return bank;
@@ -338,7 +345,14 @@ public class RecoBankWriter {
      *
      */
     public DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-
+        if(event.hasBank("TimeBasedTrkg::TBHits")) { // for second pass tracking
+                HipoDataEvent de = (HipoDataEvent) event;
+                HipoEvent dde = de.getHipoEvent();
+                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBHits");
+                ////event.show();
+                //group.show();
+                dde.removeGroup("TimeBasedTrkg::TBHits");
+        }
         DataBank bank = event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
@@ -356,7 +370,7 @@ public class RecoBankWriter {
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
 
-            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+            bank.setFloat("time", i, (float) hitlist.get(i).getT0SubTime());
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
@@ -366,6 +380,11 @@ public class RecoBankWriter {
             bank.setFloat("timeResidual", i, (float) hitlist.get(i).get_TimeResidual());
 
             bank.setFloat("B", i, (float) hitlist.get(i).get_B());
+            
+            if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
+                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+            }
 
         }
         //System.out.println(" Created Bank "); bank.show();
@@ -379,7 +398,14 @@ public class RecoBankWriter {
      * @return clusters bank
      */
     public DataBank fillTBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
-
+        if(event.hasBank("TimeBasedTrkg::TBClusters")) { // for second pass tracking
+                HipoDataEvent de = (HipoDataEvent) event;
+                HipoEvent dde = de.getHipoEvent();
+                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBClusters");
+                ////event.show();
+                //group.show();
+                dde.removeGroup("TimeBasedTrkg::TBClusters");
+        }
         DataBank bank = event.createBank("TimeBasedTrkg::TBClusters", cluslist.size());
 
         int[] hitIdxArray = new int[12];
@@ -440,7 +466,14 @@ public class RecoBankWriter {
      * @return segments bank
      */
     public DataBank fillTBSegmentsBank(DataEvent event, List<Segment> seglist) {
-
+        if(event.hasBank("TimeBasedTrkg::TBSegments")) { // for second pass tracking
+                HipoDataEvent de = (HipoDataEvent) event;
+                HipoEvent dde = de.getHipoEvent();
+                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegments");
+                ////event.show();
+                //group.show();
+                dde.removeGroup("TimeBasedTrkg::TBSegments");
+        }
         DataBank bank = event.createBank("TimeBasedTrkg::TBSegments", seglist.size());
 
         int[] hitIdxArray = new int[12];
@@ -504,6 +537,14 @@ public class RecoBankWriter {
      * @return segments bank
      */
     public DataBank fillTBSegmentsTrajectoryBank(DataEvent event, List<Segment> seglist) {
+        if(event.hasBank("TimeBasedTrkg::TBSegmentTrajectory")) { // for second pass tracking
+                HipoDataEvent de = (HipoDataEvent) event;
+                HipoEvent dde = de.getHipoEvent();
+                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegmentTrajectory");
+                ////event.show();
+                //group.show();
+                dde.removeGroup("TimeBasedTrkg::TBSegmentTrajectory");
+        }
         DataBank bank = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", seglist.size() * 6);
 
         int index = 0;
@@ -533,7 +574,14 @@ public class RecoBankWriter {
      */
     public DataBank fillTBCrossesBank(DataEvent event, List<Cross> crosslist) {
 
-        
+        if(event.hasBank("TimeBasedTrkg::TBCrosses")) { // for second pass tracking
+                HipoDataEvent de = (HipoDataEvent) event;
+                HipoEvent dde = de.getHipoEvent();
+                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBCrosses");
+                ////event.show();
+                //group.show();
+                dde.removeGroup("TimeBasedTrkg::TBCrosses");
+        }
         int banksize=0;
          for (int i = 0; i < crosslist.size(); i++) {
             if (crosslist.get(i).get_Id() != -1) 
@@ -575,7 +623,14 @@ public class RecoBankWriter {
      * @return segments bank
      */
     public DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
-
+        if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
+                HipoDataEvent de = (HipoDataEvent) event;
+                HipoEvent dde = de.getHipoEvent();
+                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBTracks");
+                ////event.show();
+                //group.show();
+                dde.removeGroup("TimeBasedTrkg::TBTracks");
+        }
         DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {

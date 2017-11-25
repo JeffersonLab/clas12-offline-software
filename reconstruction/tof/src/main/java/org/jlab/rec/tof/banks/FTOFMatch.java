@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.rec.ftof.CCDBConstantsLoader;
-
 public class FTOFMatch implements IMatchedHit {
 
     @Override
@@ -148,28 +144,6 @@ public class FTOFMatch implements IMatchedHit {
     }
 
     public static void main(String arg[]) throws IOException {
-        // String inputFile =
-        // "/Users/ziegler/Workdir/Files/HIPO/clasdispr_101.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/Data/DecodedData/HipoTestFile.hipo";
-        // String inputFile = args[0];
-        // String outputFile = args[1];
-
-        System.err.println(" \n[PROCESSING FILE] : " + inputFile);
-
-        HipoDataSource reader = new HipoDataSource();
-        reader.open(inputFile);
-        CCDBConstantsLoader.Load(12);
-        // int ev =0;
-        while (reader.hasEvent()) {
-            DataEvent event = reader.getNextEvent();
-            // ev++;
-            // System.out.println("Event "+ev);
-            FTOFMatch FTOFM = new FTOFMatch();
-            IMatchedHit MH = FTOFM;
-            BaseHitReader hitReader = new BaseHitReader();
-            List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH);
-
-        }
     }
 
 }

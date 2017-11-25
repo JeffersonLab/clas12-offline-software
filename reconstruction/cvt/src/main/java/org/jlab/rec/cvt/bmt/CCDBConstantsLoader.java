@@ -15,10 +15,9 @@ public class CCDBConstantsLoader {
 
     static boolean CSTLOADED = false;
 
-    // static FTOFGeant4Factory geometry ;
-    private static DatabaseConstantProvider DB;
-    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(
-            10, "default");
+   
+    //private static DatabaseConstantProvider DB;
+    
 
     public static final synchronized void Load(int runNb) {
         // initialize the constants
@@ -54,7 +53,7 @@ public class CCDBConstantsLoader {
         double[] T_OVER_X0    = new double[NREGIONS*2];
         
         // Load the tables
-        dbprovider = new DatabaseConstantProvider(runNb, "default"); // reset
+        DatabaseConstantProvider dbprovider  = new DatabaseConstantProvider(runNb, "default"); // reset
         // using
         // the
         // new
@@ -238,14 +237,14 @@ public class CCDBConstantsLoader {
         CSTLOADED = true;
         System.out
                 .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
-        setDB(dbprovider);
+     //   setDB(dbprovider);
     }
 
-    public static final synchronized DatabaseConstantProvider getDB() {
-        return DB;
-    }
+    //public static final synchronized DatabaseConstantProvider getDB() {
+    //    return DB;
+    //}
 
-    public static final synchronized void setDB(DatabaseConstantProvider dB) {
-        DB = dB;
-    }
+    //public static final synchronized void setDB(DatabaseConstantProvider dB) {
+    //    DB = dB;
+    //}
 }

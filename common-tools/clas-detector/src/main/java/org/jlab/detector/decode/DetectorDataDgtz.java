@@ -20,6 +20,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
     
     private final List<ADCData>    adcStore   = new ArrayList<ADCData>();
     private final List<TDCData>    tdcStore   = new ArrayList<TDCData>();
+    private final List<VTPData>    vtpStore   = new ArrayList<VTPData>();
     //private final List<ADCPulse>  pulseStore = new ArrayList<ADCPulse>();    
     private Long                 timeStamp = 0L;
     
@@ -48,6 +49,11 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         return this;
     }
     
+    public DetectorDataDgtz addVTP(VTPData vtp){
+        this.vtpStore.add(vtp);
+        return this;
+    }
+    
     public void setTimeStamp(long time){
         this.timeStamp = time;
     }
@@ -73,6 +79,10 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             str.append(data);
         }
         
+        for(VTPData data : this.vtpStore){
+            str.append(data);
+        }
+        
         return str.toString();
     }
 
@@ -84,12 +94,20 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         return this.tdcStore.get(index);
     }
     
+    public VTPData getVTPData(int index){
+        return this.vtpStore.get(index);
+    }
+    
     public int getADCSize(){
         return this.adcStore.size();
     }
     
     public int getTDCSize(){
         return this.tdcStore.size();
+    }
+    
+    public int getVTPSize(){
+        return this.vtpStore.size();
     }
     
     @Override
@@ -311,6 +329,33 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         }
 
         public int compareTo(TDCData o) {
+            if(this.getOrder()<o.getOrder()) return -1;
+            return 1;
+        }        
+    }
+    
+       /**
+    * a class to hold TDC data
+    */
+    
+    public static class VTPData implements Comparable<VTPData>{
+        
+        private int vtpOrder = 0;
+        private int  vtpWord = 0;
+        
+        public VTPData() {}
+        public VTPData(int word) { this.vtpWord = word;}
+        public int  getWord() { return this.vtpWord;}
+        public int getOrder() { return vtpOrder;}
+        public VTPData  setOrder(int order) { vtpOrder = order;return this;}
+        public VTPData  setWord(int   word) {  vtpWord =  word;return this;}
+        
+        @Override
+        public String toString(){
+            return String.format("VTP (%d) : %d", getOrder(),getWord());
+        }
+
+        public int compareTo(VTPData o) {
             if(this.getOrder()<o.getOrder()) return -1;
             return 1;
         }        
