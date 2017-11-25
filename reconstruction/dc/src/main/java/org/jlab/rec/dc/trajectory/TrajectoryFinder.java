@@ -2,11 +2,10 @@ package org.jlab.rec.dc.trajectory;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.cross.Cross;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.geom.prim.Vector3D;
 
 import trackfitter.fitter.LineFitter;
@@ -42,7 +41,7 @@ public class TrajectoryFinder {
 	 * @param candCrossList the input list of crosses used in determining a trajectory
 	 * @return a trajectory object
 	 */
-	public Trajectory findTrajectory(List<Cross> candCrossList) {
+	public Trajectory findTrajectory(List<Cross> candCrossList, DCGeant4Factory DcDetector) {
 		Trajectory traj = new Trajectory();
 		if(candCrossList.size()==0) {
 			System.err.print("Trajectory Error:  cross list is empty");
@@ -56,10 +55,10 @@ public class TrajectoryFinder {
 			System.err.println(" failing traj ; ch2fitprob = "+this.TrajChisqProbFitXZ);
 			return null;
 		}
-		traj.set_Trajectory(getStateVecsAlongTrajectory());
-		traj.set_IntegralBdl(integralBdl());
+		traj.set_Trajectory(getStateVecsAlongTrajectory(DcDetector));
+		traj.set_IntegralBdl(integralBdl(DcDetector));
 		
-        traj.set_PathLength(PathLength);
+                traj.set_PathLength(PathLength);
        
 		return traj;
 	}
@@ -72,17 +71,17 @@ public class TrajectoryFinder {
 	 * @return the value of the integral of the magnetic field over the path traveled by the particle as estimated from the fits to the crosses.
 	 */
 	int counter =0;
-	public double integralBdl() {
+	public double integralBdl(DCGeant4Factory DcDetector) {
 		
 		//double z1 = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(0).point().z();
 		//double z3 = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(2).point().z();
-		double z1 = GeometryLoader.getDcDetector().getRegionMidpoint(0).z;
-		double z3 = GeometryLoader.getDcDetector().getRegionMidpoint(2).z;
+		double z1 = DcDetector.getRegionMidpoint(0).z;
+		double z3 = DcDetector.getRegionMidpoint(2).z;
 		
 		double z = z1;
 
 		double intBdl = 0;
-        double pathLen =0;
+                double pathLen =0;
 		double x0 = x_fitCoeff[0]*z1*z1+x_fitCoeff[1]*z1+x_fitCoeff[2];
 		double y0 = y_fitCoeff[0]*z1*z1+y_fitCoeff[1]*z1+y_fitCoeff[2];
 		double z0 = z1;
@@ -98,7 +97,7 @@ public class TrajectoryFinder {
 
 			//Point3D bf = dcSwim.Bfield((x+x0)*0.5,(y+y0)*0.5,(z+z0)*0.5);
 			float[] result = new float[3];
-            dcSwim.Bfield((x + x0) * 0.5, (y + y0) * 0.5, (z + z0) * 0.5, result);
+                        dcSwim.Bfield((x + x0) * 0.5, (y + y0) * 0.5, (z + z0) * 0.5, result);
 			//System.out.println("bf "+bf.toString());
 			Vector3D dl = new Vector3D(x-x0,0,z-z0);
 			
@@ -107,7 +106,7 @@ public class TrajectoryFinder {
 			
 			intBdl+= dl.cross(Bf).mag();
 			
-            pathLen+= dl.mag();
+                        pathLen+= dl.mag();
 			x0 = x;
 			y0 = y;
 			z0 = z;
@@ -122,10 +121,10 @@ public class TrajectoryFinder {
 	
 
 
-	public List<StateVec> getStateVecsAlongTrajectory(double x0, double y0, double tanTheta_x, double tanTheta_y, double p, int q)
-	{
+	public List<StateVec> getStateVecsAlongTrajectory(double x0, double y0, double tanTheta_x, double tanTheta_y, double p, int q, DCGeant4Factory DcDetector) {
+                
 		//initialize at target
-		dcSwim.SetSwimParameters(-1, -1,  x0,  y0,  tanTheta_x,  tanTheta_y,  p,  q);
+		dcSwim.SetSwimParameters(-1, -1,  x0,  y0,  tanTheta_x,  tanTheta_y,  p,  q, DcDetector);
 		
 		//position array 
 		double[] X = new double[36];
@@ -135,13 +134,14 @@ public class TrajectoryFinder {
 		double[] thY = new double[36];
 		
 		//Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
-		Z[0] = GeometryLoader.getDcDetector().getLayerMidpoint(0, 0).z;
+		Z[0] = DcDetector.getLayerMidpoint(0, 0).z; 
 		double[] swamPars = dcSwim.SwimToPlane(Z[0]) ;
 		X[0] = swamPars[0];
 		Y[0] = swamPars[1];
 		thX[0] = swamPars[3]/swamPars[5];
 		thY[0] = swamPars[4]/swamPars[5];
-		
+        double pathLen = swamPars[6];
+       
 		int planeIdx = 0;
 		int lastSupLyrIdx = 0;
 		int lastLyrIdx = 0;
@@ -149,31 +149,33 @@ public class TrajectoryFinder {
 		List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
 		
 		stateVecAtPlanesList.add(new StateVec(X[0],Y[0],thX[0], thY[0]));
-		
-		for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
-			for(int layerIdx =0; layerIdx<6; layerIdx++) {
-				
-				if(planeIdx == 0) 
-					continue;
-				
-				dcSwim.SetSwimParameters(lastSupLyrIdx, lastLyrIdx,  X[planeIdx-1],  Y[planeIdx-1],  thX[planeIdx-1],  thY[planeIdx-1],  p,  q);
-				//Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
-				Z[layerIdx] = GeometryLoader.getDcDetector().getLayerMidpoint(superlayerIdx, layerIdx).z;
-				swamPars = dcSwim.SwimToPlane(Z[layerIdx]) ;
-				X[layerIdx] = swamPars[0];
-				Y[layerIdx] = swamPars[1];
-				thX[layerIdx] = swamPars[3]/swamPars[5];
-				thY[layerIdx] = swamPars[4]/swamPars[5];
-				
-
-				stateVecAtPlanesList.add(new StateVec(X[layerIdx],Y[layerIdx],thX[layerIdx], thY[layerIdx]));
-				
-				planeIdx++;
-				
-				lastSupLyrIdx = superlayerIdx;
-				lastLyrIdx = layerIdx;
-			}
-		}
+                stateVecAtPlanesList.get(stateVecAtPlanesList.size()-1).setPathLength(pathLen);
+                for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
+                        for(int layerIdx =0; layerIdx<6; layerIdx++) {
+                                planeIdx++;
+                                if(planeIdx<36){
+                                	 dcSwim.SetSwimParameters(lastSupLyrIdx, lastLyrIdx,  X[planeIdx-1],  Y[planeIdx-1],  thX[planeIdx-1],  thY[planeIdx-1],  p,  q, DcDetector);
+                                    //Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+                                    Z[planeIdx] = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z; 
+                                    
+                                    swamPars = dcSwim.SwimToPlane(Z[planeIdx]) ;
+                                    X[planeIdx] = swamPars[0];
+                                    Y[planeIdx] = swamPars[1];
+                                    thX[planeIdx] = swamPars[3]/swamPars[5];
+                                    thY[planeIdx] = swamPars[4]/swamPars[5];
+                                    pathLen+=swamPars[6];
+                                    StateVec stVec = new StateVec(X[planeIdx],Y[planeIdx],thX[planeIdx], thY[planeIdx]);
+                                    stVec.set_planeIdx(planeIdx);
+                                    stVec.setPathLength(pathLen);
+                                    stateVecAtPlanesList.add(stVec);
+                                }
+                                
+                                
+                                lastSupLyrIdx = superlayerIdx;
+                                lastLyrIdx = layerIdx;
+                        }
+                }
+                
 		return stateVecAtPlanesList;
 	}
 
@@ -182,14 +184,14 @@ public class TrajectoryFinder {
 	 *
 	 * @return the list of state vectors along the trajectory
 	 */
-	public List<StateVec> getStateVecsAlongTrajectory()
+	public List<StateVec> getStateVecsAlongTrajectory(DCGeant4Factory DcDetector)
 	{
 		List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
 		for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
 			for(int layerIdx =0; layerIdx<6; layerIdx++) {
 				
 				//double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
-				double z = GeometryLoader.getDcDetector().getLayerMidpoint(superlayerIdx, layerIdx).z;
+				double z = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;
 				double x = x_fitCoeff[0]*z*z+x_fitCoeff[1]*z+x_fitCoeff[2];
 				double y = y_fitCoeff[0]*z*z+y_fitCoeff[1]*z+y_fitCoeff[2];
 				double tanTheta_x = x_fitCoeff[0]*z+x_fitCoeff[1];
