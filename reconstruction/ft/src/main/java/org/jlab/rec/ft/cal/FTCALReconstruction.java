@@ -8,6 +8,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.utils.groups.IndexedTable;
 
 
 public class FTCALReconstruction {
@@ -18,17 +19,17 @@ public class FTCALReconstruction {
     public FTCALReconstruction() {
     }
 	
-    public List<FTCALHit> initFTCAL(DataEvent event) {
+    public List<FTCALHit> initFTCAL(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
 
-        if(debugMode>=1) System.out.println("\nAnalyzing new event");
+        if(this.debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTCALHit> allhits = null;
         
         if(event instanceof EvioDataEvent) {
-            allhits = this.readRawHits(event);
+            allhits = this.readRawHits(event,charge2Energy,timeOffsets,cluster);
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,cluster);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
@@ -63,7 +64,7 @@ public class FTCALReconstruction {
         return hits;
     }
 			
-    public List<FTCALCluster> findClusters(List<FTCALHit> hits) {
+    public List<FTCALCluster> findClusters(List<FTCALHit> hits, IndexedTable clusterTable) {
 
         List<FTCALCluster> clusters = new ArrayList();
         
@@ -73,7 +74,7 @@ public class FTCALReconstruction {
             if(hit.get_ClusIndex()==0)  {                       // this hit is not yet associated with a cluster
                 for(int jclus=0; jclus<clusters.size(); jclus++) {
                     FTCALCluster cluster = clusters.get(jclus);
-                    if(cluster.containsHit(hit)) {
+                    if(cluster.containsHit(hit, clusterTable)) {
                         hit.set_ClusIndex(cluster.getID());     // attaching hit to previous cluster 
                         cluster.add(hit);
                         if(debugMode>=1) System.out.println("Attaching hit " + ihit + " to cluster " + cluster.getID());
@@ -91,26 +92,26 @@ public class FTCALReconstruction {
         return clusters;
     }
        
-    public List<FTCALCluster> selectClusters(List<FTCALCluster> allclusters) {
+    public List<FTCALCluster> selectClusters(List<FTCALCluster> allclusters, IndexedTable clusterTable) {
 
         List<FTCALCluster> clusters = new ArrayList();
         for(int i=0; i<allclusters.size(); i++) {
-            if(allclusters.get(i).isgoodCluster()) clusters.add(allclusters.get(i));
+            if(allclusters.get(i).isgoodCluster(clusterTable)) clusters.add(allclusters.get(i));
         }
         return clusters;
     }
         
     
-    public void writeBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters){
+    public void writeBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, IndexedTable energyTable){
         if(event instanceof EvioDataEvent) {
-            writeEvioBanks(event, hits, clusters);
+            writeEvioBanks(event, hits, clusters, energyTable);
         }
         else if(event instanceof HipoDataEvent) {
-            writeHipoBanks(event, hits, clusters);
+            writeHipoBanks(event, hits, clusters, energyTable);
         }
     }
     
-    private void writeHipoBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters){
+    private void writeHipoBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, IndexedTable energyTable){
         
         // hits banks
         if(hits.size()!=0) {
@@ -149,7 +150,7 @@ public class FTCALReconstruction {
                             bankCluster.setFloat("widthY",i, (float) clusters.get(i).getWidthY());
                             bankCluster.setFloat("radius",i, (float) clusters.get(i).getRadius());
                             bankCluster.setFloat("time",i, (float) clusters.get(i).getTime());
-                            bankCluster.setFloat("energy",i, (float) clusters.get(i).getFullEnergy());
+                            bankCluster.setFloat("energy",i, (float) clusters.get(i).getFullEnergy(energyTable));
                             bankCluster.setFloat("recEnergy",i, (float) clusters.get(i).getEnergy());
                             bankCluster.setFloat("maxEnergy",i, (float) clusters.get(i).getSeedEnergy());
             }
@@ -159,7 +160,7 @@ public class FTCALReconstruction {
     
 
 
-    private void writeEvioBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters) {
+    private void writeEvioBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, IndexedTable energyTable) {
                           
         EvioDataBank bankhits  = null;
         EvioDataBank bankclust = null;
@@ -193,7 +194,7 @@ public class FTCALReconstruction {
                         bankclust.setDouble("clusSigmaY",i,clusters.get(i).getWidthY());
                         bankclust.setDouble("clusRadius",i,clusters.get(i).getRadius());
                         bankclust.setDouble("clusTime",i,clusters.get(i).getTime());
-                        bankclust.setDouble("clusEnergy",i,clusters.get(i).getFullEnergy());
+                        bankclust.setDouble("clusEnergy",i,clusters.get(i).getFullEnergy(energyTable));
                         bankclust.setDouble("clusRecEnergy",i,clusters.get(i).getEnergy());
                         bankclust.setDouble("clusMaxEnergy",i,clusters.get(i).getSeedEnergy());
                         bankclust.setDouble("clusTheta",i,clusters.get(i).getTheta());
@@ -210,7 +211,7 @@ public class FTCALReconstruction {
         }
     }
 
-    public List<FTCALHit> readRawHits(DataEvent event) {
+    public List<FTCALHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:dgtz bank");
 
@@ -225,7 +226,7 @@ public class FTCALReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 int tdc         = bankDGTZ.getInt("TDC",row);
                 if(adc!=-1 && tdc!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, tdc);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, tdc, charge2Energy, timeOffsets, cluster);
 	             hits.add(hit); 
 	        }	          
             }
@@ -233,7 +234,7 @@ public class FTCALReconstruction {
         return hits;
     }
     
-    public List<FTCALHit> readRawHitsHipo(DataEvent event) {
+    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
@@ -249,7 +250,7 @@ public class FTCALReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, cluster);
 	             hits.add(hit); 
 	        }	          
             }
