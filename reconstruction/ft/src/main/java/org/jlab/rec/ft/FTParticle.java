@@ -3,7 +3,7 @@ package org.jlab.rec.ft;
 import java.util.List;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.ft.cal.FTCALConstantsLoader;
+import org.jlab.utils.groups.IndexedTable;
 
 
 public class FTParticle {
@@ -14,11 +14,12 @@ public class FTParticle {
 	private double _Time;      			          // time of impact on the FT 
 	private double _Energy;			                  // total energy of the cluster including correction
 	private Vector3D _Position  = new Vector3D();             // position 
+	private Vector3D _Direction = new Vector3D();             // direction 
         private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
 	private int _Cross;					  // track pointer to cross information in FTTRKRec::cluster bank
         private double _field;
-	
+        	
 	// constructor
 	public FTParticle(int cid) {
 		this.set_ID(cid);
@@ -80,27 +81,35 @@ public class FTParticle {
             this._field = _field;
         }
 
+
         public Vector3D getDirection() {
+            return this._Direction;
+        }
+
+        public void setDirection() {
+            this._Direction = this.getPosition().asUnit();            
+        }
+        
+        public void setDirection(IndexedTable thetaTable, IndexedTable phiTable) {
             Vector3D direction = new Vector3D();
-            // for charged particle correct theta and phi of the impact point for the bend in the solenoid field according to the field scale
             if(this._Charge==-1) {
                 double energy    = this._Energy;
-                double thetaCorr = Math.exp(FTCALConstantsLoader.theta_corr[0]+FTCALConstantsLoader.theta_corr[1]*energy)+
-			     	   Math.exp(FTCALConstantsLoader.theta_corr[2]+FTCALConstantsLoader.theta_corr[3]*energy);
+                double thetaCorr = Math.exp(thetaTable.getDoubleValue("thetacorr0", 1,1,0)+thetaTable.getDoubleValue("thetacorr1", 1,1,0)*energy)+
+			     	   Math.exp(thetaTable.getDoubleValue("thetacorr1", 1,1,0)+thetaTable.getDoubleValue("thetacorr3", 1,1,0)*energy);
                 thetaCorr        = Math.toRadians(thetaCorr * this._field);
-		double phiCorr   = Math.exp(FTCALConstantsLoader.phi_corr[0]+FTCALConstantsLoader.phi_corr[1]*energy)+
-			     	   Math.exp(FTCALConstantsLoader.phi_corr[2]+FTCALConstantsLoader.phi_corr[3]*energy)+
-			     	   Math.exp(FTCALConstantsLoader.phi_corr[4]+FTCALConstantsLoader.phi_corr[5]*energy);
+		double phiCorr   = Math.exp(phiTable.getDoubleValue("phicorr0", 1,1,0)+phiTable.getDoubleValue("phicorr1", 1,1,0)*energy)+
+			     	   Math.exp(phiTable.getDoubleValue("phicorr2", 1,1,0)+phiTable.getDoubleValue("phicorr3", 1,1,0)*energy)+
+			     	   Math.exp(phiTable.getDoubleValue("phicorr4", 1,1,0)+phiTable.getDoubleValue("phicorr5", 1,1,0)*energy);
                 phiCorr          = Math.toRadians(phiCorr * this._field);
                 direction.setMagThetaPhi(1, this.getPosition().theta()+thetaCorr, this.getPosition().phi()-phiCorr);
             }
             else {
                 direction = this.getPosition().asUnit();
             }
-            return direction;
+            this._Direction = direction;
         }
 
-	public Line3D getLastCross() {
+        public Line3D getLastCross() {
             Line3D track = new Line3D();
             track.set(this._Position.toPoint3D(), this._Position);
             return track;

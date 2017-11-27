@@ -2,6 +2,7 @@ package org.jlab.rec.ft.cal;
 
 import java.util.ArrayList;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.utils.groups.IndexedTable;
 
 
 
@@ -53,7 +54,7 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             return clusterEnergy;
 	}
 
-        public double getFullEnergy() {
+        public double getFullEnergy(IndexedTable energyTable) {
             // return energy corrected for leakage and threshold effects
             double clusterEnergy  = this.getEnergy();
             int seedID = this.get(0).get_COMPONENT();
@@ -62,11 +63,11 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
 //                              + FTCALConstantsLoader.energy_corr[2]*clusterEnergy*clusterEnergy
 //                              + FTCALConstantsLoader.energy_corr[3]*clusterEnergy*clusterEnergy*clusterEnergy
 //                              + FTCALConstantsLoader.energy_corr[4]*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy;
-            double  energyCorr = (FTCALConstantsLoader.c0[0][0][seedID-1]
-                               +  FTCALConstantsLoader.c1[0][0][seedID-1]*clusterEnergy
-                               +  FTCALConstantsLoader.c2[0][0][seedID-1]*clusterEnergy*clusterEnergy
-                               +  FTCALConstantsLoader.c3[0][0][seedID-1]*clusterEnergy*clusterEnergy*clusterEnergy
-                               +  FTCALConstantsLoader.c4[0][0][seedID-1]*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy
+            double  energyCorr = (energyTable.getDoubleValue("c0",1,1,seedID)
+                               +  energyTable.getDoubleValue("c1",1,1,seedID)*clusterEnergy
+                               +  energyTable.getDoubleValue("c2",1,1,seedID)*clusterEnergy*clusterEnergy
+                               +  energyTable.getDoubleValue("c3",1,1,seedID)*clusterEnergy*clusterEnergy*clusterEnergy
+                               +  energyTable.getDoubleValue("c4",1,1,seedID)*clusterEnergy*clusterEnergy*clusterEnergy*clusterEnergy
                                 )/1000.;
             clusterEnergy+=energyCorr;
             return clusterEnergy;
@@ -95,7 +96,7 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             double wtot       = 0;
             double clusterX   = 0;
             double clusterY   = 0;
-            double clusterZ   = (FTCALConstantsLoader.CRYS_ZPOS+FTCALConstantsLoader.depth_z);
+            double clusterZ   = 0;
             for(int i=0; i<this.size(); i++) {
                 FTCALHit hit = this.get(i);
                 // the moments: this are calculated in a second loop because log weighting requires clusEnergy to be known
@@ -104,9 +105,11 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
                 wtot     += wi;
                 clusterX += wi*hit.get_Dx();
                 clusterY += wi*hit.get_Dy();
+                clusterZ += wi*hit.get_Dz();
             }
             clusterX /= wtot;
             clusterY /= wtot;
+            clusterZ /= wtot;
             Point3D centroid  = new Point3D(clusterX,clusterY,clusterZ);
             return centroid;            
         }    
@@ -183,9 +186,9 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             return phi;
 	}
 
-	public boolean isgoodCluster() {
-            if(this.getSize()  > FTCALConstantsLoader.cluster_min_size &&
-               this.getEnergy()>FTCALConstantsLoader.cluster_min_energy) {
+	public boolean isgoodCluster(IndexedTable clusterTable) {
+            if(this.getSize()  > clusterTable.getDoubleValue("cluster_min_size", 1,1,0) &&
+               this.getEnergy()> clusterTable.getDoubleValue("cluster_min_energy", 1,1,0)/1000) {
                     return true;
             }
             else {
@@ -197,13 +200,13 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             return Math.max(0., (3.45+Math.log(hit.get_Edep()/clusEnergy)));
         }
         
-        public boolean containsHit(FTCALHit hit) {
+        public boolean containsHit(FTCALHit hit, IndexedTable clusterTable) {
             boolean addFlag = false;
             for(int j = 0; j< this.size(); j++) {
 		double tDiff = Math.abs(hit.get_Time() - this.get(j).get_Time());
 		double xDiff = Math.abs(hit.get_IDX()  - this.get(j).get_IDX());
 		double yDiff = Math.abs(hit.get_IDY()  - this.get(j).get_IDY());
-                if(tDiff <= FTCALConstantsLoader.time_window && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;
+                if(tDiff <= clusterTable.getDoubleValue("time_window", 1,1,0) && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;
             }
             return addFlag;
         }

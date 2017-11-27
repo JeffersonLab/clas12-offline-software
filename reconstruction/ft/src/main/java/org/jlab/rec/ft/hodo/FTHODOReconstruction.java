@@ -9,6 +9,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.utils.groups.IndexedTable;
 
 public class FTHODOReconstruction {
 
@@ -18,17 +19,17 @@ public class FTHODOReconstruction {
     public FTHODOReconstruction() {
     }
 	
-    public List<FTHODOHit> initFTHODO(DataEvent event) {
+    public List<FTHODOHit> initFTHODO(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
 
         if(debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTHODOHit> allhits = null;
         
         if(event instanceof EvioDataEvent) {
-            allhits = this.readRawHits(event);
+            allhits = this.readRawHits(event,charge2Energy,timeOffsets,geometry);
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,geometry);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
@@ -195,7 +196,7 @@ public class FTHODOReconstruction {
         }
         
     }
-    public List<FTHODOHit> readRawHits(DataEvent event) {
+    public List<FTHODOHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:dgtz bank");
 
@@ -210,7 +211,7 @@ public class FTHODOReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 int tdc         = bankDGTZ.getInt("TDC",row);
                 if(adc!=-1 && tdc!=-1){
-                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, tdc);
+                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, tdc,charge2Energy,timeOffsets,geometry);
 	            hits.add(hit); 
 	        }	          
             }
@@ -218,7 +219,7 @@ public class FTHODOReconstruction {
         return hits;
     }
     
-    public List<FTHODOHit> readRawHitsHipo(DataEvent event) {
+    public List<FTHODOHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:adc bank");
 
@@ -234,7 +235,7 @@ public class FTHODOReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){
-                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, time);
+                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, time,charge2Energy,timeOffsets,geometry);
 	             hits.add(hit); 
 	        }	          
             }
