@@ -30,6 +30,7 @@ import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
+//import org.jlab.service.eb.EBHBEngine;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio
@@ -91,7 +92,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             cp.disconnect();
             // create the factory
             //SVTStripFactory svtShiftedStripFactory = new SVTStripFactory( cp, true );
-            SVTStripFactory svtIdealStripFactory = new SVTStripFactory( cp, true );
+            SVTStripFactory svtIdealStripFactory = new SVTStripFactory( cp, false );
             SVTGeom.setSvtIdealStripFactory(svtIdealStripFactory);
             
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
@@ -173,6 +174,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
         clusters.addAll(clusFinder.findClusters(svt_hits));
+        
         clusters.addAll(clusFinder.findClusters(bmt_hits)); 
         
         if (clusters.size() == 0) {
@@ -196,23 +198,22 @@ public class CVTReconstruction extends ReconstructionEngine {
         List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom);
-
+        
         TrackSeeder trseed = new TrackSeeder();
         KFitter kf;
         List<Track> trkcands = new ArrayList<Track>();
         List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
-
-        for (Seed seed : seeds) {
-
+        for (Seed seed : seeds) { 
+            
             kf = new KFitter(seed, SVTGeom, event);
             kf.runFitter(SVTGeom, BMTGeom);
 
             trkcands.add(kf.OutputTrack(seed, SVTGeom));
             if (kf.setFitFailed == false) {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
-            } else {
+           } else {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
-            }
+           }
         }
 
         if (trkcands.size() == 0) {
@@ -231,8 +232,12 @@ public class CVTReconstruction extends ReconstructionEngine {
 
                 if (crosses.get(0).size() > 0) {
                     for (Cross crsSVT : crosses.get(0)) {
-                        if (crsSVT.get_Id() == trkcands.get(c).get(ci).get_Id()) {
+                        if (crsSVT.get_Sector() == trkcands.get(c).get(ci).get_Sector() && crsSVT.get_Cluster1()!=null && crsSVT.get_Cluster2()!=null 
+                                && trkcands.get(c).get(ci).get_Cluster1()!=null && trkcands.get(c).get(ci).get_Cluster2()!=null
+                                && crsSVT.get_Cluster1().get_Id() == trkcands.get(c).get(ci).get_Cluster1().get_Id()
+                                && crsSVT.get_Cluster2().get_Id() == trkcands.get(c).get(ci).get_Cluster2().get_Id()) {  
                             crsSVT.set_Point(trkcands.get(c).get(ci).get_Point());
+                            trkcands.get(c).get(ci).set_Id(crsSVT.get_Id());
                             crsSVT.set_PointErr(trkcands.get(c).get(ci).get_PointErr());
                             crsSVT.set_Dir(trkcands.get(c).get(ci).get_Dir());
                             crsSVT.set_DirErr(trkcands.get(c).get(ci).get_DirErr());
@@ -290,14 +295,15 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     public static void main(String[] args) throws FileNotFoundException, EvioException {
 
-        //String inputFile = "/Users/ziegler/Workdir/Files/GEMC/CVT/YurisTest.hipo";
-        String inputFile = "/Users/ziegler/Workdir/Files/cvt/CVTmuons.hipo";
+       //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/CVT/1537.0.skim.positive.sol.hipo";
+       String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/CVT/CVTtracks.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         CVTReconstruction en = new CVTReconstruction();
         en.init();
-
+       //EBHBEngine eb = new EBHBEngine();
+       //eb.init();
         int counter = 0;
 
         HipoDataSource reader = new HipoDataSource();
@@ -305,12 +311,13 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        String outputFile = "/Users/ziegler/Workdir/Files/cvt/pos_muons.rec.newGeom.hipo";
+        //String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/CVT/1537.0.skim.positive.sol.rec.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/CVT/CVTtracks.rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
         while (reader.hasEvent()) {
-            counter++;
+            
 
             DataEvent event = reader.getNextEvent();
             if (counter > 0) {
@@ -319,12 +326,14 @@ public class CVTReconstruction extends ReconstructionEngine {
 
             // Processing    
             en.processDataEvent(event);
+            //eb.processDataEvent(event);
             
-            //if(event.hasBank("CVTRec::Tracks")) {
-                writer.writeEvent(event);
-            //}
+            if(event.hasBank("CVTRec::Tracks")) {
+                counter++;
+                writer.writeEvent(event); 
+            }
             
-            System.out.println("  EVENT " + counter);
+            System.out.println("  EVENT " + event.getBank("RUN::config").getInt("event",0));
             /*
 			 * event.show();
 			if(event.hasBank("CVTRec::Tracks")) {
@@ -338,7 +347,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 				 dde.show();
 			}
              */
-            if(counter>304) break;
+            //if(event.getBank("RUN::config").getInt("event",0)>=1461) break;
             //event.show();
             //if(counter%100==0)
             //System.out.println("run "+counter+" events");

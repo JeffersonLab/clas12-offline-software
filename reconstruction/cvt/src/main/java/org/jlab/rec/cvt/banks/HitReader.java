@@ -186,7 +186,7 @@ public class HitReader {
                     continue;
                 }
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i]));
+                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i])); 
                 // get the strip endPoints
                 double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
@@ -206,7 +206,6 @@ public class HitReader {
                 }
 
                 hit.set_Id(id[i]);
-
                 // add this hit
                 hits.add(hit);
             }
