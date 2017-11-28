@@ -52,7 +52,7 @@ public class StateVecs {
             if (type == 2) {
                 rm = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(Layer.get(k) - 5) / 2 - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
             }
-
+            
             double a = 0.5 * (rm * rm - r * r + xc * xc + yc * yc) / yc;
             double b = -xc / yc;
 
@@ -64,16 +64,16 @@ public class StateVecs {
             double yp = a + b * xp;
             double ym = a + b * xm;
 
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm), Math.toRadians(10)) == Sector.get(k)) {
                 X = xm;
                 Y = ym;
             }
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp), Math.toRadians(10)) == Sector.get(k)) {
                 X = xp;
                 Y = yp;
             }
             //System.out.println("R="+rm+" sector "+Sector.get(k)+" [xm, ym]= ["+xm+","+ym+"]; [xp,yp]= ["+xp+","+yp+"]; [x,y]= ["+X+","+Y+"]"+
-            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp))+"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm)));
+            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))+"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
         } else {
 
             // Find the intersection of the helix circle with the module plane projection in XY which is a line
@@ -86,10 +86,10 @@ public class StateVecs {
                 double y1 = yc + Math.sqrt(r * r - (X - xc) * (X - xc));
                 double y2 = yc - Math.sqrt(r * r - (X - xc) * (X - xc));
 
-                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y())) {
+                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
                     Y = y1;
                 } else {
-                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y())) {
+                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
                         Y = y2;
                     }
                 }
@@ -99,10 +99,10 @@ public class StateVecs {
                 double x1 = xc + Math.sqrt(r * r - (Y - yc) * (Y - yc));
                 double x2 = xc - Math.sqrt(r * r - (Y - yc) * (Y - yc));
 
-                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x())) {
+                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
                     X = x1;
                 } else {
-                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x())) {
+                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
                         X = x2;
                     }
                 }
@@ -120,20 +120,20 @@ public class StateVecs {
                 double x1 = (xc + (-d + yc) * m + Math.sqrt(del)) / (1 + m * m);
                 double x2 = (xc + (-d + yc) * m - Math.sqrt(del)) / (1 + m * m);
 
-                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x())) {
+                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
                     X = x1;
                 } else {
-                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x())) {
+                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
                         X = x2;
                     }
                 }
                 double y1 = yc + Math.sqrt(r * r - (X - xc) * (X - xc));
                 double y2 = yc - Math.sqrt(r * r - (X - xc) * (X - xc));
 
-                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y())) {
+                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
                     Y = y1;
                 } else {
-                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y())) {
+                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
                         Y = y2;
                     }
                 }
