@@ -64,14 +64,18 @@ public class Hit extends AHit implements IGetCalibrationParams {
         this._matchedTrack = _matchedTrack;
     }
 
-    public void set_HitParameters(int superlayer, List<IndexedTable> tabs) {
-
-    //IndexedTable   0 = manager.getConstants(run, /calibration/ctof/attenuation");
-    //IndexedTable   1 = manager.getConstants(run, "/calibration/ctof/effective_velocity");
-    //IndexedTable   2 = manager.getConstants(run, "/calibration/ctof/time_offsets");
-    //IndexedTable   3 = manager.getConstants(run, "/calibration/ctof/tdc_conv");
-    //IndexedTable   4 = manager.getConstants(run, "/calibration/ctof/status");
-        
+    public void set_HitParameters(int superlayer, 
+            IndexedTable constants0, 
+            IndexedTable constants1, 
+            IndexedTable constants2, 
+            IndexedTable constants3) {
+        /*
+        0: "/calibration/ctof/attenuation"),
+        1: "/calibration/ctof/effective_velocity"),
+        2: "/calibration/ctof/time_offsets"),
+        3: "/calibration/ctof/tdc_conv"),
+        4: "/calibration/ctof/status"));
+        */
         double pl = this.get_paddleLine().length();
 
         // Get all the constants used in the hit parameters calculation
@@ -79,25 +83,25 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double TW0D = this.TW02(null);
         double TW1U = this.TW11(null);
         double TW1D = this.TW12(null);
-        double lambdaU = this.lambda1(tabs.get(0));
+        double lambdaU = this.lambda1(constants0);
         this.set_lambda1(lambdaU);
-        this.set_lambda1Unc(this.lambda1Unc(tabs.get(0)));
-        double lambdaD = this.lambda1(tabs.get(0));
+        this.set_lambda1Unc(this.lambda1Unc(constants0));
+        double lambdaD = this.lambda1(constants0);
         this.set_lambda2(lambdaD);
-        this.set_lambda2Unc(this.lambda2Unc(tabs.get(0)));
-        double yOffset = this.yOffset(tabs.get(0));
-        double vU = this.v1(tabs.get(1));
-        double vD = this.v2(tabs.get(1));
-        double vUUnc = this.v1Unc(tabs.get(1));
-        double vDUnc = this.v2Unc(tabs.get(1));
+        this.set_lambda2Unc(this.lambda2Unc(constants0));
+        double yOffset = this.yOffset(constants0);
+        double vU = this.v1(constants1);
+        double vD = this.v2(constants1);
+        double vUUnc = this.v1Unc(constants1);
+        double vDUnc = this.v2Unc(constants1);
         double PEDU = this.PED1();
         double PEDD = this.PED2();
         double PEDUUnc = this.PED1Unc();
         double PEDDUnc = this.PED2Unc();
-        double paddle2paddle = this.PaddleToPaddle(tabs.get(2));
-        double RFPad = this.RFPad(tabs.get(2));
-        double timeOffset = this.TimeOffset(tabs.get(2));
-        double[] LSBConv = this.LSBConversion(tabs.get(3));
+        double paddle2paddle = this.PaddleToPaddle(constants2);
+        double RFPad = this.RFPad(constants2);
+        double timeOffset = this.TimeOffset(constants2);
+        double[] LSBConv = this.LSBConversion(constants3);
         double LSBConvErr = this.LSBConversionUnc();
         double ADCUErr = this.ADC1Unc();
         double ADCDErr = this.ADC2Unc();

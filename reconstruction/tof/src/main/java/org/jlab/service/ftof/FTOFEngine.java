@@ -25,7 +25,6 @@ import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.service.dc.DCHBEngine;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.service.dc.DCTBEngine;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -41,8 +40,7 @@ public class FTOFEngine extends ReconstructionEngine {
     FTOFGeant4Factory geometry;
     int Run = 0;
     RecoBankWriter rbc;
-    List<IndexedTable> CCDBTables;
-    
+   
     @Override
     public boolean init() {
 
@@ -65,7 +63,6 @@ public class FTOFEngine extends ReconstructionEngine {
        
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        CCDBTables = new ArrayList<IndexedTable>();
         
         // Get the geometry
         DatabaseConstantProvider db = new DatabaseConstantProvider( 11, "default");
@@ -113,18 +110,7 @@ public class FTOFEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
-            CCDBTables.clear();
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"));      
-            Run = newRun;
-
-        }
+        
         if (geometry == null) {
             System.err.println(" FTOF Geometry not loaded !!!");
             return false;
@@ -140,7 +126,14 @@ public class FTOFEngine extends ReconstructionEngine {
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for FTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths, CCDBTables);
+        hitRead.fetch_Hits(event, geometry, trkLines, paths, 
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv") );
 
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();
@@ -285,12 +278,12 @@ public class FTOFEngine extends ReconstructionEngine {
             //en0.processDataEvent(event);
             //en1.processDataEvent(event);
             en.processDataEvent(event);
-            System.out.println("  EVENT " + counter);
+            //System.out.println("  EVENT " + counter);
             //if (counter > 3066)
             //	break;
             // event.show();
             // if(counter%100==0)
-            System.out.println("run " + counter + " events");
+            //System.out.println("run " + counter + " events");
             //if (event.hasBank("HitBasedTrkg::HBTracks")) {
             //    
             //}
