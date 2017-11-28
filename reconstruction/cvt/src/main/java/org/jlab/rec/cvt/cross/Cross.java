@@ -347,7 +347,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public int get_SVTCosmicsRegion() {
 
         int theRegion = 0;
-        if (this.get_Detector() == "SVT") {
+        if (this.get_Detector().equalsIgnoreCase("SVT")) {
+            /*
             if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[6][0] + Constants.MODULERADIUS[7][0]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 8;
@@ -377,6 +378,32 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                     theRegion = 5;
                 } else {
                     theRegion = 4;
+                }
+            }
+            */
+             
+
+            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
+                if (this.get_Point0().y() > 0) {
+                    theRegion = 6;
+                } else {
+                    theRegion = 1;
+                }
+            }
+
+            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
+                if (this.get_Point0().y() > 0) {
+                    theRegion = 5;
+                } else {
+                    theRegion = 2;
+                }
+            }
+
+            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
+                if (this.get_Point0().y() > 0) {
+                    theRegion = 4;
+                } else {
+                    theRegion = 3;
                 }
             }
         }

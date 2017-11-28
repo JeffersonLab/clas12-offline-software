@@ -49,7 +49,7 @@ public class TrajectoryFinder {
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
 
         for (Cross c : candCrossList) {
-            if (c.get_Detector() == "SVT") {
+            if (c.get_Detector().equalsIgnoreCase("SVT")) {
                 SVTCrossList.add(c);
             } else {
                 BMTCrossList.add(c);
@@ -133,15 +133,15 @@ public class TrajectoryFinder {
             }
             double R = 0;
 
-            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1) == 1) {
+            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1-6) == 1) {
                 R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
             }
-            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1) == 0) {
+            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1-6) == 0) {
                 R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
             }
             Point3D InterPoint = helix.getPointAtRadius(R);
             Vector3D trkDir = helix.getTrackDirectionAtRadius(R);
-
+            
             StateVec stVec = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
                     trkDir.x(), trkDir.y(), trkDir.z());
             stVec.set_planeIdx(l);
@@ -152,7 +152,7 @@ public class TrajectoryFinder {
                 if (matchCrossToStateVec(c, stVec, l + 1, 0) == false) {
                     continue;
                 }
-                if (c.get_DetectorType() == "C") { //C-detector measuring Z
+                if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
                     double x = InterPoint.x();
                     double y = InterPoint.y();
                     if (traj.isFinal) {
@@ -165,11 +165,11 @@ public class TrajectoryFinder {
                             stVec, svt_geo, bmt_geo, traj.isFinal);
 
                 }
-                if (c.get_DetectorType() == "Z") { //Z-detector measuring phi
+                if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
                     double z = InterPoint.z();
                     if (traj.isFinal) {
                         c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), z));
-                        c.set_Dir(trkDir);
+                        c.set_Dir(trkDir); 
                     }
 
                     // calculate the hit residuals
@@ -221,7 +221,7 @@ public class TrajectoryFinder {
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
 
         for (Cross c : candCrossList) {
-            if (c.get_Detector() == "SVT") {
+            if (c.get_Detector().equalsIgnoreCase("SVT")) {
                 SVTCrossList.add(c); 
             } else {
                 BMTCrossList.add(c);
@@ -298,7 +298,7 @@ public class TrajectoryFinder {
                     double XtrackIntersSurf = BMTIntersections[l][h][0];
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
-                    int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
+                    int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];
@@ -326,7 +326,7 @@ public class TrajectoryFinder {
                         if (this.matchCrossToStateVec(c, stVec, l + 1, c.get_Sector()) == false) {
                             continue;
                         }
-                        if (c.get_DetectorType() == "C") { //C-detector measuring Z
+                        if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
                             //if(traj.isFinal) { // reset the cross only for final trajectory
 
                             c.set_Point(new Point3D(XtrackIntersSurf, YtrackIntersSurf, c.get_Point().z()));
@@ -338,7 +338,7 @@ public class TrajectoryFinder {
                                     stVec, svt_geo, bmt_geo, traj.isFinal);
 
                         }
-                        if (c.get_DetectorType() == "Z") { //Z-detector measuring phi
+                        if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
                             //if(traj.isFinal) {
 
                             c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), ZtrackIntersSurf));
@@ -367,7 +367,7 @@ public class TrajectoryFinder {
 
     private boolean matchCrossToStateVec(Cross c, StateVec stVec, int layer, int sector) {
         boolean value = false;
-        if (c.get_Detector() == "SVT") {
+        if (c.get_Detector().equalsIgnoreCase("SVT")) {
             int l = layer - 1;
             value = true;
             if (c.get_Region() != (int) (l / 2) + 1) {
@@ -383,18 +383,19 @@ public class TrajectoryFinder {
             
         }
 
-        if (c.get_Detector() == "BMT") { // BMT
+        if (c.get_Detector().equalsIgnoreCase("BMT")) { // BMT
             value = true;
-            int l = layer - 9;
+            //int l = layer - 9;
+            int l = layer - 7;
             if (c.get_Region() != (int) (l / 2) + 1) {
                 value = false;	// reauire same region
             }
-            if (c.get_DetectorType() == "C") { //C-detector measuring Z
+            if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
                 if (Math.abs(stVec.z() - c.get_Point0().z()) > Constants.interTol) {
                     value = false;
                 }
             }
-            if (c.get_DetectorType() == "Z") { //Z-detector measuring phi		
+            if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi		
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
                 if (deltaXt > Constants.interTol) {
                     value = false;
@@ -415,7 +416,7 @@ public class TrajectoryFinder {
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
             StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
 
-        if (detector == "SVT") {
+        if (detector.equalsIgnoreCase("SVT") ) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             cluster.set_SeedResidual(doca2Seed); 
@@ -431,7 +432,7 @@ public class TrajectoryFinder {
                 }
             }
         }
-        if (detector == "BMT") {
+        if (detector.equalsIgnoreCase("BMT")) {
             if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { //C-detector measuring z
                 for (FittedHit h1 : cluster) {
                     // calculate the hit residuals
