@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.track;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -11,7 +12,7 @@ import org.jlab.rec.cvt.trajectory.Helix;
  * @author ziegler
  *
  */
-public class Seed {
+public class Seed implements Comparable<Seed>{
 
     public Seed() {
         // TODO Auto-generated constructor stub
@@ -43,6 +44,26 @@ public class Seed {
 
     public void set_Crosses(List<Cross> _Crosses) {
         this._Crosses = _Crosses;
+    }
+    
+    public String get_IntIdentifier() {
+        Collections.sort(this.get_Clusters());
+        Collections.sort(this.get_Crosses());
+        
+        String id = "";
+        for(Cluster c: this.get_Clusters())
+            id+=c.get_Id();
+        for(Cross c: this.get_Crosses())
+            id+=c.get_Id();
+       
+        return id;
+    }
+
+    @Override
+    public int compareTo(Seed arg) {
+
+        return Double.parseDouble(this.get_IntIdentifier()) < Double.parseDouble(arg.get_IntIdentifier()) ? -1 : Double.parseDouble(this.get_IntIdentifier()) == Double.parseDouble(arg.get_IntIdentifier()) ? 0 : 1;
+        
     }
 
 }

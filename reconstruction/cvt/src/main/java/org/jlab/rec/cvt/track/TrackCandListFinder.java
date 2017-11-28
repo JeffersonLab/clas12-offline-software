@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
@@ -286,7 +287,7 @@ public class TrackCandListFinder {
                     Track cand = new Track(fitTrk.get_helix());
                     cand.addAll(crossList.get(i));
                     //cand.set_HelicalTrack(fitTrk.get_helix());			done in Track constructor			
-                    cand.update_Crosses(svt_geo);
+                    //cand.update_Crosses(svt_geo);
 
                     cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
                     cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
@@ -860,7 +861,7 @@ public class TrackCandListFinder {
                     continue;
                 }
                 double m_z = MMCrosses.get(i).get_Point().z();
-                int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi);
+                int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(Constants.isInSectorJitter));
 
                 if (sector != MMCrosses.get(i).get_Sector()) {
                     continue;
