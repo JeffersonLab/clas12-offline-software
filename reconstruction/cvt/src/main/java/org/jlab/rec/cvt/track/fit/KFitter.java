@@ -78,9 +78,10 @@ public class KFitter {
     double newChisq = Double.POSITIVE_INFINITY;
 
     public void runFitter(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
-        this.chi2 = 0;
+        double newchisq = Double.POSITIVE_INFINITY;
         this.NDF = sv.X0.size();
         for (int it = 0; it < totNumIter; it++) {
+            this.chi2 = 0;
             TrjPoints.clear();
             for (int k = 0; k < sv.X0.size() - 1; k++) {
                 if (sv.trackCov.get(k) == null || mv.measurements.get(k + 1) == null) {
@@ -88,7 +89,7 @@ public class KFitter {
                 }
                 //System.out.println(" transporting state ");
                 sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type);
-                //System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
+               // System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
                 //		sv.trackTraj.get(k+1).z+" p "+1./sv.trackTraj.get(k+1).kappa+" measuremt "+mv.measurements.get(k+1).type); 
                 //System.out.println("To "+(k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
                 //		sv.trackTraj.get(k+1).z+" p "+1./sv.trackTraj.get(k).kappa); 
@@ -98,11 +99,21 @@ public class KFitter {
                 //		sv.trackTraj.get(k+1).z); 
                 //System.out.println(" Energy loss \n pion "+ (float) sv.trackTraj.get(k+1).get_ELoss()[0]+"\n kaon "+ (float) sv.trackTraj.get(k+1).get_ELoss()[1]+"\n proton "+ (float) sv.trackTraj.get(k+1).get_ELoss()[2]);
             }
+            //System.out.println(" chisq = "+this.chi2);
             if (it < totNumIter - 1) {
-                this.Rinit();
+                this.Rinit(); 
+            }
+            if(this.chi2<newchisq) {
+                newchisq=this.chi2;
+                KFHelix = sv.setTrackPars(sv.X0.size() - 1);
+                this.setTrajectory();
+            } else {
+                break;
             }
         }
-        this.setTrajectory();
+        //KFHelix = sv.setTrackPars(sv.X0.size() - 1);
+        //this.setTrajectory();
+        
     }
     public List<HitOnTrack> TrjPoints = new ArrayList<HitOnTrack>();
 
@@ -147,14 +158,16 @@ public class KFitter {
 
         sv.trackCov.get(0).covMat = sv.trackCov.get(sv.X0.size() - 1).covMat;
     }
-
+    public Helix KFHelix;
+    
     public Track OutputTrack(Seed trk, org.jlab.rec.cvt.svt.Geometry geo) {
 
-        Helix helix = sv.setTrackPars(sv.X0.size() - 1);
+        //Helix helix = sv.setTrackPars(sv.X0.size() - 1);
        
-        Track cand = new Track(helix);
+        //Track cand = new Track(helix);
+        Track cand = new Track(KFHelix);
         
-        if(cand.get_P()<0.3)
+        if(cand.get_P()<0.25)
             this.setFitFailed = true;
         
         for (Cross c : trk.get_Crosses()) {
@@ -314,8 +327,9 @@ public class KFitter {
             if (mv.measurements.get(k).type == 2) {
                 f_h = mv.hZ(fVec);
             }
-            ////System.out.println(" measurement = "+mv.measurements.get(k).centroid+" state "+h +" filtered "+f_h);
 
+            if(Math.signum(sv.trackTraj.get(k).d_rho)!=Math.signum(drho_filt))
+                return;
             if ((m - f_h) * (m - f_h) / V < (m - h) * (m - h) / V) {
                 sv.trackTraj.get(k).d_rho = drho_filt;
                 sv.trackTraj.get(k).phi0 = phi0_filt;
