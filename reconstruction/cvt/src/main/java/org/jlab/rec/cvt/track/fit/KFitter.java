@@ -103,7 +103,7 @@ public class KFitter {
             if (it < totNumIter - 1) {
                 this.Rinit(); 
             }
-            if(this.chi2<newchisq) {
+            if(this.chi2<newchisq+1) {
                 newchisq=this.chi2;
                 KFHelix = sv.setTrackPars(sv.X0.size() - 1);
                 this.setTrajectory();

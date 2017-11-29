@@ -11,6 +11,7 @@ import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.cvt.Constants;
@@ -30,6 +31,8 @@ import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
+import org.jlab.service.eb.EBHBEngine;
+import org.jlab.service.eb.EBTBEngine;
 //import org.jlab.service.eb.EBHBEngine;
 
 /**
@@ -294,7 +297,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
 
     public static void main(String[] args) throws FileNotFoundException, EvioException {
-
+        /*
        //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/CVT/1537.0.skim.positive.sol.hipo";
        String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/CVT/CVTtracks.hipo";
 
@@ -334,19 +337,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             }
             
             System.out.println("  EVENT " + event.getBank("RUN::config").getInt("event",0));
-            /*
-			 * event.show();
-			if(event.hasBank("CVTRec::Tracks")) {
-				 HipoDataEvent de = (HipoDataEvent) event;
-				 HipoEvent dde = de.getHipoEvent();
-				 HipoGroup group = dde.getGroup("CVTRec::Tracks");
-				 dde.show();
-				 dde.removeGroup("CVTRec::Tracks");
-				 dde.show();
-				 dde.writeGroup(group);
-				 dde.show();
-			}
-             */
+            
             //if(event.getBank("RUN::config").getInt("event",0)>=1461) break;
             //event.show();
             //if(counter%100==0)
@@ -356,6 +347,109 @@ public class CVTReconstruction extends ReconstructionEngine {
         writer.close();
         double t = System.currentTimeMillis() - t1;
         System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
+        */
+        DataEvent testEvent = getCVTTestEvent();
+
+        CVTReconstruction CVTengine = new CVTReconstruction();
+        CVTengine.init();
+        CVTengine.processDataEvent(testEvent);
+        testEvent.show();
+        if(testEvent.hasBank("CVTRec::Tracks")) {
+            testEvent.getBank("CVTRec::Tracks").show();
+        }
+        EBHBEngine EBHBengine = new EBHBEngine();
+        EBHBengine.init();
+        EBHBengine.processDataEvent(testEvent);
+
+        EBTBEngine EBTBengine = new EBTBEngine();
+        EBTBengine.init();
+        EBTBengine.processDataEvent(testEvent);
+
+        System.out.println(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("px", 0), -0.375)+" "+
+		isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.483)
+		+" "+isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.674)
+		+" "+isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -13.9));
     }
+    public static boolean isWithinXPercent(double X, double val, double standard) {
+        if(standard >= 0 && val > (1.0 - (X/100.0))*standard && val < (1.0 + (X/100.0))*standard) return true;
+        else if(standard < 0 && val < (1.0 - (X/100.0))*standard && val > (1.0 + (X/100.0))*standard) return true;
+        return false;
+	}
+    public static HipoDataEvent getCVTTestEvent() {
+		HipoDataSync writer = new HipoDataSync();
+		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
+		DataBank config = testEvent.createBank("RUN::config", 1);
+		DataBank SVTadc = testEvent.createBank("BST::adc", 7);
+		DataBank mc = testEvent.createBank("MC::Particle", 1);
+		// this event is based on a gemc (4a.1.1 aka 4a.2.0) event with
+		// torus = -1.0 , solenoid = 1.0
+		//	<option name="BEAM_P"   value="proton, 0.91*GeV, 42.2*deg, 127.8*deg"/>
+		// <option name="SPREAD_P" value="0*GeV, 0*deg, 0*deg"/>
+		// <option name="BEAM_V" value="(0, 0, -1.39)cm"/>
+		// <option name="SPREAD_V" value="(0.0, 0.0)cm"/>
+
+		config.setInt("run", 0, (int) 11);
+		config.setInt("event", 0, (int) 1);
+		config.setInt("trigger", 0, (int) 0);
+		config.setLong("timestamp", 0, (long) 0);
+		config.setByte("type", 0, (byte) 0);
+		config.setByte("mode", 0, (byte) 0);
+		config.setFloat("torus", 0, (float) -1.0);
+		config.setFloat("solenoid", 0, (float) 1.0);
+		config.setFloat("rf", 0, (float) 0.0);
+		config.setFloat("startTime", 0, (float) 0.0);
+		
+		for(int i = 0; i < 7; i++) {
+			SVTadc.setByte("order", i, (byte) 0);
+			SVTadc.setShort("ped", i, (short) 0);
+			SVTadc.setLong("timestamp", i, (long) 0);
+		}
+
+		SVTadc.setByte("sector", 0, (byte) 5);
+		SVTadc.setByte("sector", 1, (byte) 5);
+		SVTadc.setByte("sector", 2, (byte) 7);
+		SVTadc.setByte("sector", 3, (byte) 7);
+		SVTadc.setByte("sector", 4, (byte) 7);
+		SVTadc.setByte("sector", 5, (byte) 9);
+		SVTadc.setByte("sector", 6, (byte) 9);
+		
+		SVTadc.setByte("layer", 0, (byte) 1);
+		SVTadc.setByte("layer", 1, (byte) 2);
+		SVTadc.setByte("layer", 2, (byte) 3);
+		SVTadc.setByte("layer", 3, (byte) 4);
+		SVTadc.setByte("layer", 4, (byte) 4);
+		SVTadc.setByte("layer", 5, (byte) 5);
+		SVTadc.setByte("layer", 6, (byte) 6);
+		
+		SVTadc.setShort("component", 0, (short) 109);
+		SVTadc.setShort("component", 1, (short) 77);
+		SVTadc.setShort("component", 2, (short) 52);
+		SVTadc.setShort("component", 3, (short) 137);
+		SVTadc.setShort("component", 4, (short) 138);
+		SVTadc.setShort("component", 5, (short) 1);
+		SVTadc.setShort("component", 6, (short) 190);
+		
+		SVTadc.setInt("ADC", 0, (int) 7);
+		SVTadc.setInt("ADC", 1, (int) 7);
+		SVTadc.setInt("ADC", 2, (int) 7);
+		SVTadc.setInt("ADC", 3, (int) 5);
+		SVTadc.setInt("ADC", 4, (int) 5);
+		SVTadc.setInt("ADC", 5, (int) 7);
+		SVTadc.setInt("ADC", 6, (int) 7);
+		
+		SVTadc.setFloat("time", 0, (float) 97.0);
+		SVTadc.setFloat("time", 1, (float) 201.0);
+		SVTadc.setFloat("time", 2, (float) 78.0);
+		SVTadc.setFloat("time", 3, (float) 102.0);
+		SVTadc.setFloat("time", 4, (float) 81.0);
+		SVTadc.setFloat("time", 5, (float) 91.0);
+		SVTadc.setFloat("time", 6, (float) 205.0);
+
+		testEvent.appendBank(config);
+                testEvent.appendBank(mc);
+		testEvent.appendBank(SVTadc);
+
+		return testEvent;
+	}
 
 }
