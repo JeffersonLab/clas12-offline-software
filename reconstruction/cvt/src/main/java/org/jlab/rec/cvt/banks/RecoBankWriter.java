@@ -6,7 +6,6 @@ import java.util.List;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -268,10 +267,19 @@ public class RecoBankWriter {
             bank.setFloat("err_y", index, (float) crosses.get(i).get(j).get_PointErr().y());
             bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
             bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
-            if (crosses.get(i).get(j).get_Dir() != null) {
-                bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
-                bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
-                bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
+           
+            if (crosses.get(i).get(j).get_Dir() != null ) {
+                if(crosses.get(i).get(j).get_Dir().x()==Double.NaN || 
+                        crosses.get(i).get(j).get_Dir().y()==Double.NaN || 
+                        crosses.get(i).get(j).get_Dir().z()==Double.NaN) {
+                    bank.setFloat("ux", index, (float)0);
+                    bank.setFloat("uy", index, (float)0);
+                    bank.setFloat("uz", index, (float)0);
+                } else {                 
+                    bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
+                    bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
+                    bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
+                }
             } else {
                 bank.setFloat("ux", index, 0);
                 bank.setFloat("uy", index, 0);
@@ -307,13 +315,10 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("CVTRec::Tracks", trkcands.size());
         // an array representing the ids of the crosses that belong to the track: for a helical track with the current
         // 4 regions of SVT + 1 region of BMT there can be up to 4 crosses of type SVT and 2 of type BMT (1 for the C detector and 1 for the Z detector)
-        int[] crossIdxArray = new int[4 + 2];
+        List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < trkcands.size(); i++) {
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
-                crossIdxArray[j] = -1;
-            }
             if(trkcands.get(i).passCand)
                 bank.setShort("fittingMethod", i, (short) 1);
             bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
@@ -365,26 +370,16 @@ public class RecoBankWriter {
 
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
-                if (trkcands.get(i).get(j).get_Detector() == "SVT") {
-                    crossIdxArray[trkcands.get(i).get(j).get_Region() - 1] = trkcands.get(i).get(j).get_Id();
-                }
-                if (trkcands.get(i).get(j).get_Detector() == "BMT") {
-                    if (Double.isNaN(trkcands.get(i).get(j).get_PointErr().z())) {
-                        crossIdxArray[trkcands.get(i).get(j).get_Region() - 1 + Constants.CVTCONFIGSTARTREG] = trkcands.get(i).get(j).get_Id();
-                    } else {
-                        crossIdxArray[trkcands.get(i).get(j).get_Region() + Constants.CVTCONFIGSTARTREG] = trkcands.get(i).get(j).get_Id();
-                    }
-                }
+
+                String hitStrg = "Cross";
+                hitStrg += (j + 1);
+                hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
+                bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
+                
             }
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
-                String hitStrg = "Cross";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) crossIdxArray[j]);
-            }
 
         }
         //bank.show();
@@ -410,13 +405,10 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("CVTRec::Cosmics", cosmics.size());
         // an array representing the ids of the crosses that belong to the track: for a helical track with the current
         // 4 regions of SVT + 1 region of BMT there can be up to 4*2 (*2: for each hemisphere) crosses of type SVT and 2*2 of type PSEUDOBMT (1 for the C detector and 1 for the Z detector)
-        int[] crossIdxArray = new int[8 + 4];
+        List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < cosmics.size(); i++) {
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
-                crossIdxArray[j] = -1;
-            }
 
             bank.setShort("ID", i, (short) cosmics.get(i).get_Id());
             bank.setFloat("chi2", i, (float) cosmics.get(i).get_chi2());
@@ -434,27 +426,16 @@ public class RecoBankWriter {
 
             // the array of cross ids is filled in order of the SVT cosmic region 1 to 8 starting from the bottom-most double layer
             for (int j = 0; j < cosmics.get(i).size(); j++) {
-                if (cosmics.get(i).get(j).get_Detector() == "SVT") {
-                    crossIdxArray[cosmics.get(i).get(j).get_SVTCosmicsRegion() - 1] = cosmics.get(i).get(j).get_Id();
-                }
+                crossIdxArray.add(cosmics.get(i).get(j).get_Id());
+                
             }
-            // now add the BMT cross ids
-            for (int j = 0; j < cosmics.get(i).size(); j++) {
-                if (cosmics.get(i).get(j).get_Detector() == "BMT") {
-                    if (cosmics.get(i).get(j).get_DetectorType() == "Z") {
-                        crossIdxArray[9] = cosmics.get(i).get(j).get_Id();
-                    }
-                }
-                if (cosmics.get(i).get(j).get_DetectorType() == "C") {
-                    crossIdxArray[10] = cosmics.get(i).get(j).get_Id();
-                }
-            }
+            
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
+            for (int j = 0; j < crossIdxArray.size(); j++) {
                 String hitStrg = "Cross";
                 hitStrg += (j + 1);
                 hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) crossIdxArray[j]);
+                bank.setShort(hitStrg, i, (short) crossIdxArray.get(j).shortValue());
             }
         }
         return bank;

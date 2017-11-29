@@ -45,7 +45,19 @@ public class HitReader implements IMatchedHit {
      * @param geometry the CTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths, List<IndexedTable> tabs) {
+            List<Line3d> trks, double[] paths, 
+            IndexedTable constants0, 
+            IndexedTable constants1, 
+            IndexedTable constants2, 
+            IndexedTable constants3, 
+            IndexedTable constants4) {
+        /*
+        0: "/calibration/ctof/attenuation"),
+        1: "/calibration/ctof/effective_velocity"),
+        2: "/calibration/ctof/time_offsets"),
+        3: "/calibration/ctof/tdc_conv"),
+        4: "/calibration/ctof/status"));
+        */
         _numTrks = trks.size();
 
         BaseHitReader hitReader = new BaseHitReader();
@@ -98,7 +110,7 @@ public class HitReader implements IMatchedHit {
             hit.set_TDCbankHitIdx1(TDCUIdx[i]);
             hit.set_TDCbankHitIdx2(TDCDIdx[i]);
             //hit.set_StatusWord(statusWord);
-            hit.set_StatusWord(this.set_StatusWord(hit.Status1(tabs.get(4)), hit.Status2(tabs.get(4)), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
+            hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
             hit.setPaddleLine(geometry);
             // add this hit
             hits.add(hit);
@@ -113,7 +125,10 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             // set the layer to get the paddle position from the geometry
             // package
-            hit.set_HitParameters(1, tabs);
+            hit.set_HitParameters(1,  constants0, 
+             constants1, 
+             constants2, 
+             constants3);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);

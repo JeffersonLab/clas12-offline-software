@@ -58,9 +58,9 @@ public class Geometry {
      * @return the Z strip as a function of azimuthal angle
      */
     public int getZStrip(int layer, double angle) { // the angle is the Lorentz uncorrected angle
-
+        double jitter = Math.toRadians(Constants.isInSectorJitter);
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-        int num_detector = isInDetector(layer, angle);
+        int num_detector = isInDetector(layer, angle, jitter);
         if (num_detector == -1) {
             return -1;
         }
@@ -376,15 +376,16 @@ public class Geometry {
     }
 
     // in A (index 0), B (index 1), in C (index 2)
-    public int isInDetector(int layer, double angle) {
+    public int isInDetector(int layer, double angle, double jitter) {
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         if (angle < 0) {
             angle += 2 * Math.PI; // from 0 to 2Pi
         }
+     
         double angle_i = 0; // first angular boundary init
         double angle_f = 0; // second angular boundary for detector A, B, or C init
         int num_detector = 2;
-        double jitter = Math.toRadians(Constants.isInSectorJitter);
+        //double jitter = Math.toRadians(Constants.isInSectorJitter);
         for (int i = 0; i < 3; i++) {
 
             //angle_i=Constants.getCRCEDGE1()[num_region][i]+Constants.getCRCXPOS()[num_region]/Constants.getCRCRADIUS()[num_region];
@@ -395,13 +396,14 @@ public class Geometry {
                 num_detector = i;
             }
         }
+       
         return num_detector;
     }
 
-    public int isInSector(int layer, double angle) {
-
+    public int isInSector(int layer, double angle, double jitter) {
+        //double jitter = Math.toRadians(Constants.isInSectorJitter);
         int value = -1;
-        int num_det = this.isInDetector(layer, angle);
+        int num_det = this.isInDetector(layer, angle, jitter);
         /*	if(num_det == 0)
 			value = 2;
 		if(num_det ==2)

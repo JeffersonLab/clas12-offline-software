@@ -99,14 +99,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return The approximate uncertainty on the hit position using the inverse
      * of the gemc smearing function
      */
-    public double get_PosErr(double B, List<IndexedTable> tabs, TimeToDistanceEstimator tde) {
+    public double get_PosErr(double B, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde) {
 
         double err = this.get_DocaErr();
 
         if (this._TrkgStatus != -1) {
             if (this.get_TimeToDistance() == 0) // if the time-to-dist is not set ... set it
             {
-                set_TimeToDistance(1.0, B, tabs.get(1), tde);
+                set_TimeToDistance(1.0, B, constants1, tde);
             }
 
             err = Constants.CELLRESOL; // default
@@ -116,11 +116,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             //double p3 = CCDBConstants.getPAR3()[this.get_Sector() - 1][this.get_Superlayer() - 1];
             //double p4 = CCDBConstants.getPAR4()[this.get_Sector() - 1][this.get_Superlayer() - 1];
             //double scale = CCDBConstants.getSCAL()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            double p1 = tabs.get(0).getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
-            double p2 = tabs.get(0).getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
-            double p3 = tabs.get(0).getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
-            double p4 = tabs.get(0).getDoubleValue("parameter4", this.get_Sector(),this.get_Superlayer(),0);
-            double scale = tabs.get(0).getDoubleValue("scale", this.get_Sector(),this.get_Superlayer(),0);
+            double p1 = constants0.getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
+            double p2 = constants0.getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
+            double p3 = constants0.getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
+            double p4 = constants0.getDoubleValue("parameter4", this.get_Sector(),this.get_Superlayer(),0);
+            double scale = constants0.getDoubleValue("scale", this.get_Sector(),this.get_Superlayer(),0);
             
             err = (p1 + p2 / ((p3 + x) * (p3 + x)) + p4 * Math.pow(x, 8)) * scale * 0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
             
@@ -284,7 +284,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             
             if (x != -1) {
                 //deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0);
+                deltatime_beta = (Math.sqrt(x * x + (0*tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (0*tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0);
 
             }
 
