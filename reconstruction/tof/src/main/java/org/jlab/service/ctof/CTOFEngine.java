@@ -22,7 +22,6 @@ import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -39,7 +38,6 @@ public class CTOFEngine extends ReconstructionEngine {
 
     int Run = 0;
     RecoBankWriter rbc;
-    List<IndexedTable> CCDBTables;
     
     @Override
     public boolean init() {
@@ -63,7 +61,6 @@ public class CTOFEngine extends ReconstructionEngine {
        
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        CCDBTables = new ArrayList<IndexedTable>();
         
         geometry = new CTOFGeant4Factory();
         return true;
@@ -83,15 +80,6 @@ public class CTOFEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/tdc_conv"));
-            CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"));
-            Run = newRun;
-        }
-
         if (geometry == null) {
             System.err.println(" CTOF Geometry not loaded !!!");
             return false;
@@ -107,7 +95,12 @@ public class CTOFEngine extends ReconstructionEngine {
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for CTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths, CCDBTables);
+        hitRead.fetch_Hits(event, geometry, trkLines, paths, 
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/tdc_conv"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"));
 
         // 1) get the hits
         List<Hit> CTOFHits = hitRead.get_CTOFHits();

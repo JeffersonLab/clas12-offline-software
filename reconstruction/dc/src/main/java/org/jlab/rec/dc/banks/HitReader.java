@@ -178,8 +178,11 @@ public class HitReader {
      *
      * @param event
      */
-    public void read_HBHits(DataEvent event, List<IndexedTable> tabs, double[][][][] T0, double[][][][] T0ERR, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde ) {
-
+    public void read_HBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, double[][][][] T0, double[][][][] T0ERR, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde ) {
+        /*
+        0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+        1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
+        */
         if (event.hasBank("HitBasedTrkg::HBHits") == false) {
             //System.err.println("there is no HB dc bank ");
             _HBHits = new ArrayList<FittedHit>();
@@ -247,12 +250,12 @@ public class HitReader {
             hit.set_TrkgStatus(0);
             hit.set_CellSize( DcDetector) ;
             hit.set_ClusFitDoca(trkDoca[i]);
-            hit.set_TimeToDistance(1.0, B[i], tabs.get(1), tde);
+            hit.set_TimeToDistance(1.0, B[i], constants1, tde);
             
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1] ) {
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time() > tabs.get(1).getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {
+            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time() > constants1.getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
@@ -260,7 +263,7 @@ public class HitReader {
             if(hit.get_Time()<0)
                 hit.set_QualityFac(1);
             
-            hit.set_DocaErr(hit.get_PosErr(B[i], tabs, tde));            
+            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             hits.add(hit);
@@ -269,8 +272,11 @@ public class HitReader {
 
         this.set_HBHits(hits);
     }
-    public void read_TBHits(DataEvent event, List<IndexedTable> tabs, TimeToDistanceEstimator tde) {
-
+    public void read_TBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde) {
+        /*
+        0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+        1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
+        */
         if (event.hasBank("TimeBasedTrkg::TBHits") == false) {
             //System.err.println("there is no HB dc bank ");
             _TBHits = new ArrayList<FittedHit>();
@@ -330,7 +336,7 @@ public class HitReader {
             hit.set_TrkgStatus(0);
             
             
-            hit.set_DocaErr(hit.get_PosErr(B[i], tabs, tde));            
+            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedTBTrackID(trkID[i]); 
             hit.set_Beta(this.readBeta(event, trkID[i])); 
@@ -339,12 +345,12 @@ public class HitReader {
             double newTime = time[i]+tFlight[i] - newtFlight;
             hit.set_Time(newTime);
             
-            hit.set_TimeToDistance(1.0, B[i], tabs.get(1), tde);
+            hit.set_TimeToDistance(1.0, B[i], constants1, tde);
             
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>tabs.get(1).getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {   
+            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>constants1.getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {   
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
@@ -429,4 +435,6 @@ public class HitReader {
         {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 6  
     //===> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 (Local wire ID: 0 for 1st, 16th, 32th, 48th, 64th, 80th, 96th wires)
     };
+
+    
 }

@@ -49,7 +49,6 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 
     String FieldsConfig="";
     int Run = 0;
-    List<IndexedTable> CCDBTables;
     DCGeant4Factory dcDetector;
         
     double[][][][] T0 ;
@@ -72,7 +71,6 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             requireConstants(Arrays.asList(dcTables));
             // Get the constants for the correct variation
             this.getConstantsManager().setVariation("default");
-            CCDBTables = new ArrayList<IndexedTable>();
             
             // Load the geometry
             ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
@@ -119,14 +117,10 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		int newRun = bank.getInt("run", 0);
 		
 		if(Run!=newRun) {
-                    CCDBTables.clear();
-                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
                     //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
                     DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);
-                    System.out.println(" RUN NUMBER "+newRun + " number of tables "+CCDBTables.size());
                     System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
                     Run = newRun;
         }
@@ -158,7 +152,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 		
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, CCDBTables.get(1), dcDetector);
+		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
 
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
@@ -218,7 +212,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses, false, CCDBTables.get(1), dcDetector, null);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
 		
 		if(crosslist.size()==0) {
 			

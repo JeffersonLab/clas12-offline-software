@@ -49,7 +49,6 @@ public class DCHBEngine extends ReconstructionEngine {
 
     String FieldsConfig="";
     int Run = 0;
-    List<IndexedTable> CCDBTables;
     DCGeant4Factory dcDetector;
         
     double[][][][] T0 ;
@@ -72,7 +71,6 @@ public class DCHBEngine extends ReconstructionEngine {
             requireConstants(Arrays.asList(dcTables));
             // Get the constants for the correct variation
             this.getConstantsManager().setVariation("default");
-            CCDBTables = new ArrayList<IndexedTable>();
             
             // Load the geometry
             ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
@@ -112,21 +110,19 @@ public class DCHBEngine extends ReconstructionEngine {
 		
         DataBank bank = event.getBank("RUN::config");
 		
-		// Load the constants
-		//-------------------
-		int newRun = bank.getInt("run", 0);
-		
-		if(Run!=newRun) {
-                    CCDBTables.clear();
-                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
-                    //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
-                    TORSCALE = (double)bank.getFloat("torus", 0);
-                    SOLSCALE = (double)bank.getFloat("solenoid", 0);
-                    DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);
-                    System.out.println(" RUN NUMBER "+newRun + " number of tables "+CCDBTables.size());
-                    System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
-                    Run = newRun;
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        if(Run!=newRun) {
+            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
+            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
+            TORSCALE = (double)bank.getFloat("torus", 0);
+            SOLSCALE = (double)bank.getFloat("solenoid", 0);
+            DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);
+            System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
+            Run = newRun;
         }
 		 // init SNR
         Clas12NoiseResult results = new Clas12NoiseResult();
@@ -156,7 +152,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, CCDBTables.get(1), dcDetector);
+		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
 
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
@@ -216,7 +212,7 @@ public class DCHBEngine extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses, false, CCDBTables.get(1), dcDetector, null);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
 		
 		if(crosslist.size()==0) {
 			
@@ -280,16 +276,16 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        //String inputFile="/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE4.hipo";
+        String inputFile="/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE4.hipo";
         //String inputFile="/Users/ziegler/Workdir/Files/test/electron_fd_t0.8torus.hipo";
-        String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809.hipo";
+        //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         DCHBEngine en = new DCHBEngine();
         en.init();
         DCTBEngine en2 = new DCTBEngine();
         en2.init();
-
+        
         int counter = 0;
 
         HipoDataSource reader = new HipoDataSource();
@@ -298,8 +294,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-       // String outputFile="/Users/ziegler/Workdir/Files/test/electron_fd_rcF3.hipo";
-        String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809_rec.hipo";
+        String outputFile="/Users/ziegler/Workdir/Files/test.hipo";
+        //String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809_rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;

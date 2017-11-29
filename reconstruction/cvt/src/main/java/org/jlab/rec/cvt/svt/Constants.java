@@ -25,12 +25,13 @@ public class Constants {
     // GEOMETRY PARAMETERS
     public static final int[] NSECT = new int[8];
     public static final int NSLAYR = 2;
-    public static final int NLAYR = 8;
-    public static final int NREG = 4;
+    public static final int NLAYR = 6;
+    public static final int NREG = 3;
+      //public static final int NREG = 4;
     public static final int NSTRIP = 256;
 
-    public static final int MAXNUMSECT = 24;
-
+    public static final int MAXNUMSECT = 18;
+    // public static final int MAXNUMSECT = 24;
     public static double[][] MODULERADIUS = new double[NLAYR][MAXNUMSECT]; // the radius of a BST module w.r.t. the beam axis
     public static double[] Z0 = new double[NLAYR]; // the z-position of a BST module in the lab-frame
     public static double[] PHI0 = new double[NLAYR]; // the angle of the mid plane of the hybrid sensor for the first sector
@@ -157,8 +158,8 @@ public class Constants {
         NSECT[3] = 14;
         NSECT[4] = 18;
         NSECT[5] = 18;
-        NSECT[6] = 24;
-        NSECT[7] = 24;
+       // NSECT[6] = 24;
+       // NSECT[7] = 24;
 
         // the values of the z0 position of the BST module local coordinate system
         // in the lab frame coordinate system (from gemc geometry file), for each of the regions:
@@ -178,8 +179,8 @@ public class Constants {
         Z0[3] = -180.380 + 0. * DEADZNLEN;
         Z0[4] = -141.206 + 0. * DEADZNLEN;
         Z0[5] = -141.206 + 0. * DEADZNLEN;
-        Z0[6] = -83.405 + 0. * DEADZNLEN;
-        Z0[7] = -83.405 + 0. * DEADZNLEN;
+        //Z0[6] = -83.405 + 0. * DEADZNLEN;
+        //Z0[7] = -83.405 + 0. * DEADZNLEN;
 
         //Z0[0]=-219.826; Z0[1]=Z0[0];
         //Z0[2]=-180.38;  Z0[3]=Z0[2];
@@ -192,8 +193,8 @@ public class Constants {
         PHI0[3] = Math.toRadians(90. + 180. * rotationFlag);
         PHI0[4] = Math.toRadians(90. + 180. * rotationFlag);
         PHI0[5] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[6] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[7] = Math.toRadians(90. + 180. * rotationFlag);
+       // PHI0[6] = Math.toRadians(90. + 180. * rotationFlag);
+        //PHI0[7] = Math.toRadians(90. + 180. * rotationFlag);
 
         /*
 		for(int s = 0; s <NSECT[0]; s++) {
@@ -230,9 +231,9 @@ public class Constants {
         for (int s = 0; s < NSECT[4]; s++) {
             MODULERADIUS[4][s] = 120.482 - MODULEPOSFAC * SILICONTHICK;
         }
-        for (int s = 0; s < NSECT[6]; s++) {
-            MODULERADIUS[6][s] = 161.362 - MODULEPOSFAC * SILICONTHICK;
-        }
+        //for (int s = 0; s < NSECT[6]; s++) {
+        //    MODULERADIUS[6][s] = 161.362 - MODULEPOSFAC * SILICONTHICK;
+        //}
 
         for (int s = 0; s < NSECT[1]; s++) {
             MODULERADIUS[1][s] = 65.447 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
@@ -243,9 +244,9 @@ public class Constants {
         for (int s = 0; s < NSECT[5]; s++) {
             MODULERADIUS[5][s] = 120.482 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
         }
-        for (int s = 0; s < NSECT[7]; s++) {
-            MODULERADIUS[7][s] = 161.362 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
-        }
+        //for (int s = 0; s < NSECT[7]; s++) {
+        //    MODULERADIUS[7][s] = 161.362 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+        //}
         LAYRGAP = MODULERADIUS[1][0] - MODULERADIUS[0][0];
 
         {

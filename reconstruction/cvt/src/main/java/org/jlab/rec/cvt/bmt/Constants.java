@@ -73,9 +73,10 @@ public class Constants {
             return;
         }
 
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-            setThetaL(Math.toRadians(20. * org.jlab.rec.cvt.Constants.getSolenoidscale())); // for 5-T field
-        }
+        //if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
+           setThetaL(Math.toRadians(20. * Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()))); // for 5-T field
+           //System.out.println("   LORENTZ ANGLE (radians) = "+getThetaL());
+        //}
         areConstantsLoaded = true;
 
     }

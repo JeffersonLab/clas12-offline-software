@@ -37,8 +37,7 @@ public class DCTBEngine extends ReconstructionEngine {
 
 	public DCTBEngine() {
 		super("DCTB","ziegler","4.0");
-	}
-	List<IndexedTable> CCDBTables;    
+	} 
 	int Run = 0;
 	
 	double[][][][] T0 ;
@@ -57,7 +56,6 @@ public class DCTBEngine extends ReconstructionEngine {
 		requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        CCDBTables = new ArrayList<IndexedTable>();
         
      // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
@@ -103,13 +101,10 @@ public class DCTBEngine extends ReconstructionEngine {
 		int newRun = bank.getInt("run", 0);
 		
 		if(Run!=newRun) {
-                    CCDBTables.clear();
-                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
-                    CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
                     //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
-                    TableLoader.Fill(CCDBTables.get(1));
+                    TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
                     Run = newRun;
         }
 
@@ -127,8 +122,13 @@ public class DCTBEngine extends ReconstructionEngine {
 		RecoBankWriter rbc = new RecoBankWriter();
 		
 		HitReader hitRead = new HitReader();
-		hitRead.read_HBHits(event, CCDBTables,T0, T0ERR, dcDetector, tde);
-                hitRead.read_TBHits(event, CCDBTables, tde);
+		hitRead.read_HBHits(event, 
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"),
+                    T0, T0ERR, dcDetector, tde);
+                hitRead.read_TBHits(event, 
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), tde);
 		List<FittedHit> hits = new ArrayList<FittedHit>();
 		//I) get the hits
                 if(hitRead.get_TBHits().size()==0) {
@@ -148,7 +148,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		//2) find the clusters from these hits
 		ClusterFinder clusFinder = new ClusterFinder();
 		
-		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, CCDBTables.get(1), dcDetector, tde);
+		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, tde);
                 
 		if(clusters.size()==0) {
 			rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
@@ -202,7 +202,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		//5) make list of crosses consistent with a track candidate
 		CrossListFinder crossLister = new CrossListFinder();		
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses, true, CCDBTables.get(1), dcDetector, tde);
+		CrossList crosslist = crossLister.candCrossLists(crosses, true, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, tde);
 		
 		if(crosslist.size()==0) {			
 			//System.out.println(" Failed on cross list !");
