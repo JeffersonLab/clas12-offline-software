@@ -33,7 +33,6 @@ import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 //import org.jlab.service.eb.EBHBEngine;
 //import org.jlab.service.eb.EBTBEngine;
-import org.jlab.service.eb.EBHBEngine;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio
