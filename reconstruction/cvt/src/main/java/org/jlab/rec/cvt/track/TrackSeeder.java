@@ -149,18 +149,21 @@ public class TrackSeeder {
                     } 
                     
                     for (Seed bseed : BMTmatches) {
+                        //System.out.println(" All crosses on track:");
+                        //for(Cross c : bseed.get_Crosses())
+                        //	System.out.println(c.printInfo());
                         //refit using the BMT
                         Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false);
                         if (bcand != null) {
-                            Seed mseed = new Seed();
-                            mseed.set_Clusters(seedClusters.get(s));
-                            mseed.set_Crosses(bseed.get_Crosses()); 
-                            mseed.set_Helix(bcand.get_helix());
-                            
-                            seedlist.add(mseed); 
+                            seed = new Seed();
+                            seed.set_Clusters(seedClusters.get(s));
+                            seed.set_Crosses(bseed.get_Crosses());
+                            seed.set_Helix(bcand.get_helix());
                         }
                     }
-                } else {
+
+                    seedlist.add(seed);
+                } else { // no bmt
                     seedlist.add(seed);
                 }
             }
@@ -323,7 +326,7 @@ public class TrackSeeder {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-               // cand.update_Crosses(svt_geo);
+                cand.update_Crosses(svt_geo);
                 //i=fitIter;
             }
         }
