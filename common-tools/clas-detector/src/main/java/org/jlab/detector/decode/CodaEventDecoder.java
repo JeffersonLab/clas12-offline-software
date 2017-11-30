@@ -95,7 +95,7 @@ public class CodaEventDecoder {
                     this.timeStampErrors++;
                 }
                 if(this.timeStampErrors==100) {
-                    System.out.println("Reached the maximum number of timeStamp errors");
+                    System.out.println("Reached the maximum number of timeStamp errors (100)");
                     this.timeStampErrors++;
                 }
             }
