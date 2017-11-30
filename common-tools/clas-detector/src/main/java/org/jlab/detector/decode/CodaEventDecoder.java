@@ -34,6 +34,7 @@ public class CodaEventDecoder {
     private int   runNumber = 0;
     private int eventNumber = 0;
     private long  timeStamp = 0L;
+    private int timeStampErrors = 0;
     private int triggerBits = 0;
 
 //    private int[] triggerBank = null;
@@ -87,7 +88,16 @@ public class CodaEventDecoder {
         if(tiEntries.size()>0) {
             long ts = tiEntries.get(0).getTimeStamp();
             for(int i=1; i<tiEntries.size(); i++) {
-                if(tiEntries.get(i).getTimeStamp() != ts) System.out.println("WARNING: mismatch in TI time stamps");
+                if(tiEntries.get(i).getTimeStamp() != ts && this.timeStampErrors<100) {
+                    System.out.println("WARNING: mismatch in TI time stamps: crate " 
+                                        + tiEntries.get(i).getDescriptor().getCrate() + " reports " 
+                                        + tiEntries.get(i).getTimeStamp() + " instead of " + ts);
+                    this.timeStampErrors++;
+                }
+                if(this.timeStampErrors==100) {
+                    System.out.println("Reached the maximum number of timeStamp errors");
+                    this.timeStampErrors++;
+                }
             }
             this.timeStamp = ts ;
         }
