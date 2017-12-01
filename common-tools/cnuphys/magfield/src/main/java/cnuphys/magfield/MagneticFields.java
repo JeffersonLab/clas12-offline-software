@@ -30,10 +30,19 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
+	//vbersion of mag field package
 	private static String VERSION = "1.04";
-	
-//	private boolean USE_BIG_TORUS = true;
-	
+		
+	//constants for different torus grids
+    public static final int SYMMETRIC_TORUS = 0;
+    public static final int TORUS_025       = 1;
+    public static final int TORUS_050       = 2;
+    public static final int TORUS_075       = 3;
+    public static final int TORUS_100       = 4;
+    public static final int TORUS_125       = 5;
+    public static final int TORUS_150       = 6;
+    public static final int TORUS_200       = 7;
+
 	//initialize only once
 	private boolean _initialized = false;
 
@@ -1208,6 +1217,19 @@ public class MagneticFields {
 //		return Math.sqrt(xsq + ysq + zsq);
 //	}
 //
+
+	
+	private String printVec(String name, float vec[]) {
+		return String.format(" %s [%-8.5f, %-8.5f, %-8.5f] ", name, vec[0], vec[1], vec[2]);
+	}
+	
+	private double diff(float r1[], float r2[]) {
+		double xsq = Math.pow(r2[0]-r1[0], 2);
+		double ysq = Math.pow(r2[1]-r1[1], 2);
+		double zsq = Math.pow(r2[2]-r1[2], 2);
+		return Math.sqrt(xsq + ysq + zsq);
+	}
+	
 	
 	//try to create full field torus
 	private void createFullTorus(int opt) {
