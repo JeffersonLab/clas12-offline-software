@@ -19,7 +19,7 @@ public class CCDBConstantsLoader {
     //private static DatabaseConstantProvider DB;
     
 
-    public static final synchronized void Load(int runNb) {
+    public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
         //Z detector characteristics
         int NREGIONS = 3;
@@ -53,7 +53,7 @@ public class CCDBConstantsLoader {
         double[] T_OVER_X0    = new double[NREGIONS*2];
         
         // Load the tables
-        DatabaseConstantProvider dbprovider  = new DatabaseConstantProvider(runNb, "default"); // reset
+        
         // using
         // the
         // new
@@ -234,6 +234,7 @@ public class CCDBConstantsLoader {
         Constants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
         Constants.set_T_OVER_X0(T_OVER_X0);
         
+        dbprovider.disconnect();
         CSTLOADED = true;
         System.out
                 .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
