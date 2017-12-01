@@ -89,7 +89,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 			@Override
 			public void magneticFieldChanged() {
 				_colorModel = null;
-	//			System.err.println("Magnetic Field has changed");
+				System.err.println("Magnetic Field has changed");
 				repaint();
 			}
 

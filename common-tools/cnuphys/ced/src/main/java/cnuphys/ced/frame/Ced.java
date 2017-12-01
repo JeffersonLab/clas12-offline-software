@@ -923,18 +923,18 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 						FileUtilities.setDefaultDir(arg[i]);
 					}
 				}
-				else if (arg[i].equalsIgnoreCase("-torus")) {
-					i++;
-					MagneticFields.getInstance().setTorusFullPath(arg[i]);
-					Log.getInstance().config("Torus Path: " + arg[i]);
-					System.out.println("Torus Path: " + arg[i]);
-				}
-				else if (arg[i].equalsIgnoreCase("-solenoid")) {
-					i++;
-					MagneticFields.getInstance().setSolenoidFullPath(arg[i]);
-					Log.getInstance().config("Solenoid Path: " + arg[i]);
-					System.out.println("Solenoid Path: " + arg[i]);
-				}
+//				else if (arg[i].equalsIgnoreCase("-torus")) {
+//					i++;
+//					MagneticFields.getInstance().setTorusFullPath(arg[i]);
+//					Log.getInstance().config("Torus Path: " + arg[i]);
+//					System.out.println("Torus Path: " + arg[i]);
+//				}
+//				else if (arg[i].equalsIgnoreCase("-solenoid")) {
+//					i++;
+//					MagneticFields.getInstance().setSolenoidFullPath(arg[i]);
+//					Log.getInstance().config("Solenoid Path: " + arg[i]);
+//					System.out.println("Solenoid Path: " + arg[i]);
+//				}
 				else if (arg[i].contains("NO3D")) {
 					_use3D = false;
 					System.err.println("Not using 3D");

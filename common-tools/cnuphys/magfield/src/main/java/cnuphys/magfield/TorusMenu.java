@@ -2,27 +2,60 @@ package cnuphys.magfield;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 public class TorusMenu extends JMenu implements ActionListener {
 	
-	private static ArrayList<Torus> tori = new ArrayList<>(10);
+	private static final String baseTitle = "Torus Map: ";
+	
+	//singleton
+	private static TorusMenu _instance;
+	
+	private Hashtable<JMenuItem, TorusMap> m_map = new Hashtable<JMenuItem, TorusMap>();
 
-	public TorusMenu() {
-		super("Torus");
-		System.out.println(">>>>>>>>> KNOW ABOUT " + tori.size() + "  TORI");
+	private TorusMenu() {
+		super(baseTitle);
+		
+		for (TorusMap tmap : TorusMap.values()) {
+			if (tmap.foundField()) {
+				addMenuItem(tmap);
+			}
+		}
+		
+	}
+	
+	private void addMenuItem(TorusMap tmap) {
+		JMenuItem mitem = new JMenuItem(tmap.getName());
+		m_map.put(mitem, tmap);
+		add(mitem);
+		mitem.addActionListener(this);
+	}
+	
+	public static TorusMenu getInstance() {
+		if (_instance == null) {
+			_instance = new TorusMenu();
+		}
+		return _instance;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
+		JMenuItem source = (JMenuItem)(e.getSource());
+		TorusMap tmap = m_map.get(source);
+		MagneticFields.getInstance().setTorus(tmap);
+		System.out.println("set torus map to " + tmap.getName());
+		fixTitle(tmap);
 	}
 	
-	public static void addTorus(Torus torus) {
-		if (torus != null) {
-			tori.add(torus);
+	public void fixTitle(TorusMap map) {
+		if (map == null) {
+			setText(baseTitle + "null");
+		}
+		else {
+			setText(baseTitle + map.getName());
 		}
 	}
 	
