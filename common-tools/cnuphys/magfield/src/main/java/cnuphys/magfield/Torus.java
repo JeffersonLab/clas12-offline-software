@@ -148,23 +148,6 @@ public class Torus extends MagneticField {
 	}
 
 	/**
-	 * Convert a array used as a vector to a readable string.
-	 *
-	 * @param v the vector (float array) to represent.
-	 * @return a string representation of the vector (array).
-	 */
-//	@Override
-//	protected String vectorToString(float v[]) {
-//		float vx = v[X] / 10;
-//		float vy = v[Y] / 10;
-//		float vz = v[Z] / 10;
-//		float vLen = vectorLength(v) / 10;
-//		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T", vx,
-//				vy, vz, vLen);
-//		return s;
-//	}
-
-	/**
 	 * @return the phiCoordinate
 	 */
 	public GridCoordinate getPhiCoordinate() {
@@ -390,7 +373,7 @@ public class Torus extends MagneticField {
 	 */
 	@Override
 	public String getName() {
-		return "Torus (symmetric)";
+		return "Torus";
 	}
 
 

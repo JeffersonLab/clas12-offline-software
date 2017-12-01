@@ -42,9 +42,9 @@ public class MagneticFields {
 
 	// torus field (with 12-fold symmetry)
 	private Torus _torus;
-	
-	// torus field (no assumed symmetry)
-	private FullTorus _fullTorus;
+		
+	//which torus map is loaded
+	private TorusMap _torusMap = null;
 
 	// composite field
 	private CompositeField _compositeField;
@@ -53,14 +53,11 @@ public class MagneticFields {
 	private RotatedCompositeField _rotatedCompositeField;
 
 	// optional full path to torus set by command line argument in ced
-	private String _torusPath = sysPropOrEnvVar("TORUSMAP");
+	//private String _torusPath = sysPropOrEnvVar("TORUSMAP");
 
 	// optional full path to torus set by command line argument in ced
 	private String _solenoidPath = sysPropOrEnvVar("SOLENOIDMAP");
 	
-	// optional full path to torus set by command line argument in ced
-	private String _fullTorusPath = sysPropOrEnvVar("FULLTORUSMAP");
-
 	//singleton
 	private static MagneticFields instance;
 
@@ -68,11 +65,11 @@ public class MagneticFields {
 	private IField _activeField;
 
 	//directories to look for maps
-	private String[] dataDirs;
+	private String[] _dataDirs;
 	
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD, FULLTORUS
+		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD
 	}
 
 	// List of magnetic field change listeners
@@ -82,12 +79,7 @@ public class MagneticFields {
 	private JRadioButtonMenuItem _torusItem;
 	private JRadioButtonMenuItem _solenoidItem;
 	private JRadioButtonMenuItem _bothItem;
-//	private JRadioButtonMenuItem _bothRotatedItem;
 	private JRadioButtonMenuItem _zeroItem;
-//	private JRadioButtonMenuItem _perfectSolenoidItem;
-//	private JRadioButtonMenuItem _uniformItem;
-//	private JRadioButtonMenuItem _macTestItem;
-	private JRadioButtonMenuItem _fullTorusItem;
 	
 	private TorusMenu _torusMenu;
 
@@ -100,7 +92,6 @@ public class MagneticFields {
 	
 	//private constructor for singleton
 	private MagneticFields() {
-		
 	}
 	
 	/**
@@ -182,7 +173,6 @@ public class MagneticFields {
 			_solenoidItem.setSelected(desiredFieldType == FieldType.SOLENOID);
 			_bothItem.setSelected(desiredFieldType == FieldType.COMPOSITE);
 			_zeroItem.setSelected(desiredFieldType == FieldType.ZEROFIELD);
-			_fullTorusItem.setSelected(desiredFieldType == FieldType.FULLTORUS);
 		}
 		
 		boolean changed = solenoidScaleChange || torusScaleChange || fieldChange;
@@ -207,9 +197,6 @@ public class MagneticFields {
 			}
 			else if (_activeField == _rotatedCompositeField) {
 				return FieldType.COMPOSITEROTATED;
-			}
-			else if (_activeField == _fullTorus) {
-				return FieldType.FULLTORUS;
 			}
 
 		}
@@ -257,27 +244,6 @@ public class MagneticFields {
 		return s;
 	}
 
-
-	/**
-	 * Sets the full path to the torus map. If this is set before a call to
-	 * getMagneticFields, it will look here first;
-	 * 
-	 * @param fullPath the full path to the torus field map.
-	 */
-	public void setTorusFullPath(String fullPath) {
-		_torusPath = fullPath;
-	}
-
-	/**
-	 * Sets the full path to the solenoid map. If this is set before a call to
-	 * getMagneticFields, it will look here first;
-	 * 
-	 * @param fullPath the full path to the solenoid field map.
-	 */
-	public void setSolenoidFullPath(String fullPath) {
-		_solenoidPath = fullPath;
-	}
-	
 	
 	/**
 	 * Sets the active field
@@ -298,9 +264,6 @@ public class MagneticFields {
 		switch (ftype) {
 		case TORUS:
 			_activeField = _torus;
-			break;
-		case FULLTORUS:
-			_activeField = _fullTorus;
 			break;
 		case SOLENOID:
 			_activeField = _solenoid;
@@ -381,11 +344,6 @@ public class MagneticFields {
 		case TORUS:
 			if (_torus != null); {
 				scale = _torus.getScaleFactor();
-			}
-			break;
-		case FULLTORUS:
-			if (_fullTorus != null); {
-				scale = _fullTorus.getScaleFactor();
 			}
 			break;
 		case SOLENOID:
@@ -473,9 +431,6 @@ public class MagneticFields {
 		case TORUS:
 			ifield = _torus;
 			break;
-		case FULLTORUS:
-			ifield = _fullTorus;
-			break;
 		case SOLENOID:
 			ifield = _solenoid;
 			break;
@@ -519,7 +474,7 @@ public class MagneticFields {
 			}
 		}
 		
-		for (String ds : dataDirs) {
+		for (String ds : _dataDirs) {
 			_solenoidPath = ds + "/" + baseName;
 			solenoid = readSolenoid(_solenoidPath);
 			if (solenoid != null) {
@@ -529,64 +484,7 @@ public class MagneticFields {
 		
 		return solenoid;
 	}
-	
-		
-	//try to get a torus
-	private Torus getTorus(String baseName) {
-		
-		if (_torus != null) {
-			return _torus;
-		}
-		
-		Torus torus = null;
-		
-		// first try any supplied full path
-		if (_torusPath != null) {
-			torus = readTorus(_torusPath);
-			if (torus != null) {
-				return torus;
-			}
-		}
-		
-		for (String ds : dataDirs) {
-			_torusPath = ds + "/" + baseName;
-			torus = readTorus(_torusPath);
-			if (torus != null) {
-				return torus;
-			}
-		}
-				
-		return torus;
-	}
-	
-	
-//try to get a torus
-private FullTorus getFullTorus(String baseName) {
-	
-	if (_fullTorus != null) {
-		return _fullTorus;
-	}
-		
-	FullTorus fullTorus = null;
-	
-	// first try any supplied full path
-	if (_fullTorusPath != null) {
-		fullTorus = readFullTorus(_fullTorusPath);
-		if (fullTorus != null) {
-			return fullTorus;
-		}
-	}
-	
-	for (String ds : dataDirs) {
-		_fullTorusPath = ds + "/" + baseName;
-		fullTorus = readFullTorus(_fullTorusPath);
-		if (fullTorus != null) {
-			return fullTorus;
-		}
-	}
-	
-	return fullTorus;
-}
+
 	
 	private Solenoid readSolenoid(String fullPath) {
 		File file = new File(fullPath);
@@ -633,6 +531,7 @@ private FullTorus getFullTorus(String baseName) {
 		return torus;
 	}
 	
+	//read a full torus file
 	private FullTorus readFullTorus(String fullPath) {
 		File file = new File(fullPath);
 		String cp;
@@ -655,31 +554,6 @@ private FullTorus getFullTorus(String baseName) {
 		return fullTorus;
 	}
 
-	
-//	/**
-//	 * Tries to load the magnetic fields from fieldmaps
-//	 */
-//	public void initializeMagneticFields(String torusPath, String solenoidPath) {
-//		
-//		if (_initialized) {
-//			return;
-//		}
-//		_initialized = true;
-//		
-//		System.out.println("===========================================");
-//		System.out.println("======  Initializing Magnetic Fields  =====");
-//		System.out.println("===========================================");
-//		
-//		
-//		_torusPath = torusPath;
-//		_solenoidPath = solenoidPath;
-//		_fullTorusPath = null;
-//		
-//		_torus = getTorus("");
-//		_solenoid = getSolenoid("");
-//
-//		finalInit();
-//	}
 	
 	/**
 	 * This method breaks a string into an array of tokens.
@@ -709,21 +583,38 @@ private FullTorus getFullTorus(String baseName) {
 	 * Tries to load the magnetic fields from fieldmaps
 	 */
 	public void initializeMagneticFields() {
-		initializeMagneticFields(".:./data:../../../data");
+		String homeDir = getProperty("user.home");
+		initializeMagneticFields(".:" + homeDir + "/fieldMaps:../../../data", TorusMap.SYMMETRIC);
 	} 
+	
+	/**
+	 * Convenience routine for getting a system property.
+	 * 
+	 * @param keyName
+	 *            the key name of the property
+	 * @return the property, or <code>null</null>.
+	 */
+	private String getProperty(String keyName) {
+		try {
+			return System.getProperty(keyName);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 
 	/**
 	 * Tries to load the magnetic fields from fieldmaps
 	 * A unix like colon separated path
 	 */
-	public void initializeMagneticFields(String dataPath) {
+	public void initializeMagneticFields(String dataPath, TorusMap torusMap) {
 		
 		if (_initialized) {
 			return;
 		}
 		
-		dataDirs = tokens(dataPath, ":");
-		System.out.println("Number of possible data directories = " + dataDirs.length);
+		_dataDirs = tokens(dataPath, ":");
+		System.out.println("Number of possible data directories = " + _dataDirs.length);
 		
 		
 		
@@ -733,15 +624,8 @@ private FullTorus getFullTorus(String baseName) {
 		System.out.println("======  Initializing Magnetic Fields  =====");
 		System.out.println("===========================================");
 		
-		_torus = getTorus("clas12_torus_fieldmap_binary.dat");
+		initializeTorus(torusMap);
 		
-		TorusMenu.addTorus(_torus);
-		
-		_fullTorus = getFullTorus("clas12TorusFull_2.00.dat");
-//		_fullTorus = getFullTorus("clas12TorusFull_0.25.dat");
-		
-		TorusMenu.addTorus(_fullTorus);
-
 		_solenoid = getSolenoid("solenoid-srr.dat");
 		
 		System.out.println("Torus found: " + (_torus != null));
@@ -750,8 +634,105 @@ private FullTorus getFullTorus(String baseName) {
 		finalInit();
 	}
 	
-	//final initialziation
-	private void finalInit() {
+	/**
+	 * Set the torus to a new map
+	 * @param tmap the new map
+	 */
+	public void setTorus(TorusMap tmap) {
+		
+		FieldType ftype = getActiveFieldType();
+		
+		if (tmap == null) {
+			return;
+		}
+		
+		if (tmap == _torusMap) {
+			return;
+		}
+		
+		if (!tmap.foundField()) {
+			return;
+		}
+		
+		double scaleFact = -1;
+		
+		if (_torus != null) {
+			scaleFact = _torus.getScaleFactor();
+		}
+		
+		_torusMap = tmap;
+	
+		if (_torusMap.fullField()) {
+			_torus = readFullTorus(new File(tmap.getDirName(), tmap.getFileName()).getPath());
+		} else {
+			_torus = readTorus(new File(tmap.getDirName(), tmap.getFileName()).getPath());
+		}
+		System.out.println("** USING Torus map [" + tmap.getName() + "]");
+		
+		if (_torus != null) {
+			_torus.setScaleFactor(scaleFact);
+		}
+		
+		
+		makeComposites();
+		setActiveField(ftype);
+		notifyListeners();
+	}
+	
+	//load the requested torus map
+	private void initializeTorus(TorusMap torusMap) {
+		_torusMap = null;
+		
+		//default to symmetric
+		if (torusMap == null) {
+			torusMap = TorusMap.SYMMETRIC;
+		}
+		
+		//hopefully there are data dirs to search
+		if ((_dataDirs == null) || (_dataDirs.length < 1)) {
+			_dataDirs = new String[2];
+			_dataDirs[0] = "../../../data";
+			_dataDirs[1] = "~/fieldMaps";
+		}
+		
+		//lets see which maps we find
+		
+		for (TorusMap tmap : TorusMap.values()) {
+			String fName = tmap.getFileName();
+			for (String dataDir : _dataDirs) {
+				if (tmap.foundField()) {
+					break;
+				}
+				File file = new File(dataDir, fName);
+				if (file.exists()) {
+					tmap.setFound(true);
+					tmap.setDirName(dataDir);
+					
+					System.out.println("** FOUND Torus map [" + fName + "] in directory: [" + dataDir + "]");
+				}
+
+			}
+		}
+
+		// did we find the one we want?
+
+		if (torusMap.foundField()) {
+			_torusMap = torusMap;
+			if (_torusMap.fullField()) {
+				_torus = readFullTorus(new File(_torusMap.getDirName(), _torusMap.getFileName()).getPath());
+			} else {
+				_torus = readTorus(new File(_torusMap.getDirName(), _torusMap.getFileName()).getPath());
+			}
+			TorusMenu.getInstance().fixTitle(_torusMap);
+			System.out.println("** USING Torus map [" + _torusMap.getName() + "]");
+		} else {
+			TorusMenu.getInstance().fixTitle(null);
+			System.err.println("WARNING: Did not find a map for torus field: [" + torusMap.getName() + "]");
+		}
+		
+	}
+	
+	private void makeComposites() {
 		_compositeField = new CompositeField();
 		_rotatedCompositeField = new RotatedCompositeField();
 
@@ -779,6 +760,11 @@ private FullTorus getFullTorus(String baseName) {
 		else if (_solenoid != null) {
 			_activeField = _solenoid;
 		}
+	}
+	
+	//final initialziation
+	private void finalInit() {
+		makeComposites();
 
 		System.out.println("\n***********************************");
 		System.out.println("* Magfield package version: " + VERSION );
@@ -807,7 +793,9 @@ private FullTorus getFullTorus(String baseName) {
 		// // init(); //harmless if already inited
 		JMenu menu = new JMenu("Magnetic Field");
 		
-		_torusMenu = new TorusMenu();
+		_torusMenu = TorusMenu.getInstance();
+		menu.add(_torusMenu);
+		menu.addSeparator();
 
 		// for the mutually exclusive options
 		ButtonGroup bg = new ButtonGroup();
@@ -820,13 +808,12 @@ private FullTorus getFullTorus(String baseName) {
 			}
 		};
 
-		_torusItem = createRadioMenuItem(_torus, "Torus (Symmetric)", menu, bg, al);
+		_torusItem = createRadioMenuItem(_torus, "Torus", menu, bg, al);
 		_solenoidItem = createRadioMenuItem(_solenoid, "Solenoid", menu, bg, al);
 		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
 //		_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
 
 		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
-		_fullTorusItem = createRadioMenuItem(_fullTorus, "Torus (Full)", menu, bg, al);
 
 		// interpolation related
 		menu.addSeparator();
@@ -850,22 +837,10 @@ private FullTorus getFullTorus(String baseName) {
 			menu.add(_scaleSolenoidPanel);
 		}
 
-//		if (includeTestFields) {
-//			menu.addSeparator();
-//			_uniformItem = createRadioMenuItem(_uniform, "Constant 5 Tesla Field", menu, bg, al);
-//			_perfectSolenoidItem = createRadioMenuItem(_perfectSolenoid,"Perfect 5 Tesla Solenoid", menu, bg, al);
-//			_macTestItem = createRadioMenuItem(_macTest, "Mac's 1/r Test Field", menu, bg, al);
-//		}
 
 		_torusItem.setEnabled(_torus != null);
-		_fullTorusItem.setEnabled(_fullTorus != null);
 		_solenoidItem.setEnabled(_solenoid != null);
 		_bothItem.setEnabled((_torus != null) && (_solenoid != null));
-
-//		if (_macTestItem != null) {
-//			_macTestItem.setEnabled(_macTest != null);
-//			_macTestItem.setEnabled(_uniform != null);
-//		}
 
 		return menu;
 	}
@@ -881,10 +856,6 @@ private FullTorus getFullTorus(String baseName) {
 		else if (source == _solenoidItem) {
 			_activeField = _solenoid;
 		}
-		else if (source == _fullTorusItem) {
-			_activeField = _fullTorus;
-		}
-
 		else if (source == _bothItem) {
 			_activeField = _compositeField;
 		}
@@ -1153,93 +1124,99 @@ private FullTorus getFullTorus(String baseName) {
 //				new Thread(runner).start();
 				
 				//create full field torus
-				mf.createFullTorus(0);
-				mf.createFullTorus(6);
-				mf.differentTorusTest(100000);
+//				mf.createFullTorus(0);
+//				mf.createFullTorus(1);
+//				mf.createFullTorus(2);
+//				mf.createFullTorus(3);
+//				mf.createFullTorus(4);
+//				mf.createFullTorus(5);
+//				mf.createFullTorus(6);
+//				mf.differentTorusTest(10000);
 			}
 		});
 
 	}
 	
-	private void differentTorusTest(int num) {
-		
-		
-		double phi0 = 13.80031;  double rho0 = 253.81205;  double z0 = 599.97256; 
-		
-		
-		
-		Random rand = new Random();
-		System.out.println("Starting random test");
-		
-		float r1[] = new float[3];
-		float r2[] = new float[3];
-		float r1max[] = new float[3];
-		float r2max[] = new float[3];
-		double diffMax = -1;
-		double phimax = Double.NaN;
-		double rhomax = Double.NaN;
-		double zmax = Double.NaN;
-		
-		
-		for (int i = 0; i < num; i++) {
-			double base = 60*rand.nextInt(6);
-			double phi = -30 + base + (3 + 54*rand.nextDouble());
-			
-//			double phi = -29 + 58*rand.nextDouble();
-			
-			if (phi < 0) {
-				phi += 360;
-			}
-		
-			double rho = 4 + 490*rand.nextDouble();
-			double z = 104.0 + 490*rand.nextDouble();
-			
-			
-			double x = rho*Math.cos(Math.toRadians(phi));
-			double y = rho*Math.sin(Math.toRadians(phi));
-			
-		//	System.out.println("phi = " + phi + "  rho = " + rho + "   z = " + z);
-			
-			_torus.field((float)x, (float)y, (float)z, r1);
-			_fullTorus.field((float)x, (float)y, (float)z, r2);
-			double diff = diff(r1, r2);
-			if (diff > diffMax) {
-				diffMax = diff;
-				for (int j = 0; j < 3; j++) {
-					r1max[j] = r1[j];
-					r2max[j] = r2[j];
-					
-					rhomax = rho;
-					zmax = z;
-					phimax = phi;
-				}
-			}
-		}
-		String s = String.format("MaxDiff = %-9.7f  phi = %-8.5f  rho = %-8.5f  z = %-8.5f   %s   %s", 
-				diffMax, phimax, rhomax, 
-				zmax, printVec("symm ", r1max), printVec("full ", r2max) );
-		System.out.println(s);
-	}
-	
-	private String printVec(String name, float vec[]) {
-		return String.format(" %s [%-8.5f, %-8.5f, %-8.5f] ", name, vec[0], vec[1], vec[2]);
-	}
-	
-	private double diff(float r1[], float r2[]) {
-		double xsq = Math.pow(r2[0]-r1[0], 2);
-		double ysq = Math.pow(r2[1]-r1[1], 2);
-		double zsq = Math.pow(r2[2]-r1[2], 2);
-		return Math.sqrt(xsq + ysq + zsq);
-	}
-
+//	private void differentTorusTest(int num) {
+//		
+//		
+//		double phi0 = 13.80031;  double rho0 = 253.81205;  double z0 = 599.97256; 
+//		
+//		
+//		
+//		Random rand = new Random();
+//		System.out.println("Starting random test");
+//		
+//		float r1[] = new float[3];
+//		float r2[] = new float[3];
+//		float r1max[] = new float[3];
+//		float r2max[] = new float[3];
+//		double diffMax = -1;
+//		double phimax = Double.NaN;
+//		double rhomax = Double.NaN;
+//		double zmax = Double.NaN;
+//		
+//		
+//		for (int i = 0; i < num; i++) {
+//			double base = 60*rand.nextInt(6);
+//			double phi = -30 + base + (3 + 54*rand.nextDouble());
+//			
+////			double phi = -29 + 58*rand.nextDouble();
+//			
+//			if (phi < 0) {
+//				phi += 360;
+//			}
+//		
+//			double rho = 4 + 490*rand.nextDouble();
+//			double z = 104.0 + 490*rand.nextDouble();
+//			
+//			
+//			double x = rho*Math.cos(Math.toRadians(phi));
+//			double y = rho*Math.sin(Math.toRadians(phi));
+//			
+//		//	System.out.println("phi = " + phi + "  rho = " + rho + "   z = " + z);
+//			
+//			_torus.field((float)x, (float)y, (float)z, r1);
+//			_fullTorus.field((float)x, (float)y, (float)z, r2);
+//			double diff = diff(r1, r2);
+//			if (diff > diffMax) {
+//				diffMax = diff;
+//				for (int j = 0; j < 3; j++) {
+//					r1max[j] = r1[j];
+//					r2max[j] = r2[j];
+//					
+//					rhomax = rho;
+//					zmax = z;
+//					phimax = phi;
+//				}
+//			}
+//		}
+//		String s = String.format("MaxDiff = %-9.7f  phi = %-8.5f  rho = %-8.5f  z = %-8.5f   %s   %s", 
+//				diffMax, phimax, rhomax, 
+//				zmax, printVec("symm ", r1max), printVec("full ", r2max) );
+//		System.out.println(s);
+//	}
+//	
+//	private String printVec(String name, float vec[]) {
+//		return String.format(" %s [%-8.5f, %-8.5f, %-8.5f] ", name, vec[0], vec[1], vec[2]);
+//	}
+//	
+//	private double diff(float r1[], float r2[]) {
+//		double xsq = Math.pow(r2[0]-r1[0], 2);
+//		double ysq = Math.pow(r2[1]-r1[1], 2);
+//		double zsq = Math.pow(r2[2]-r1[2], 2);
+//		return Math.sqrt(xsq + ysq + zsq);
+//	}
+//
 	
 	//try to create full field torus
 	private void createFullTorus(int opt) {
 		
-		int modnum[] = {0, 2, 3,4,5,6,8};
+//		int modnum[] = {0, 2, 3, 4, 5, 6, 8};
 		String pstfix[] = {"_0.25", "_0.50", "_0.75", "_1.00", 
 				"_1.25", "_1.50", "_2.00"};
 		int nphi[] = {1441, 721, 481, 361, 289, 241, 181};
+		double dphi[] = {0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.00};
 		
 		
 		Torus torus = MagneticFields.getInstance()._torus;
@@ -1272,6 +1249,9 @@ private FullTorus getFullTorus(String baseName) {
 				int nPhi = nphi[opt];
 				int nRho = 251;
 				int nZ = 251;
+				double dp = dphi[opt];
+				double dRho = 2.0;
+				double dZ = 2.0;
 				
 				float phimin = 0.0f;
 				float phimax = 360.0f;
@@ -1301,9 +1281,6 @@ private FullTorus getFullTorus(String baseName) {
 				dos.writeInt(0);
 				dos.writeInt(0);
 				
-				double dPhi = 0.25;
-				double dRho = 2.0;
-				double dZ = 2.0;
 
 				float result[] = new float[3];
 				
@@ -1314,9 +1291,9 @@ private FullTorus getFullTorus(String baseName) {
 
 				for (int phiIndex = 0; phiIndex < nPhi; phiIndex++) {
 
-					if ((opt == 0) || ((phiIndex % modnum[opt]) == 0)) {
+	//				if ((opt == 0) || ((phiIndex % modnum[opt]) == 0)) {
 
-						double phi = phiIndex * dPhi;
+						double phi = phiIndex * dp;
 						System.err.println("phi = " + phi);
 						for (int rhoIndex = 0; rhoIndex < nRho; rhoIndex++) {
 							double rho = rhoIndex * dRho;
@@ -1332,7 +1309,7 @@ private FullTorus getFullTorus(String baseName) {
 							}
 
 						}
-					}
+//					}
 				}
 				
 				torus.setScaleFactor(oldScale);

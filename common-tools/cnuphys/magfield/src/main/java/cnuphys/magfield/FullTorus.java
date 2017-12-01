@@ -19,17 +19,49 @@ public class FullTorus extends Torus {
 		fullTorus.readBinaryMagneticField(file);
 		return fullTorus;
 	}
+	
+
 
 	/**
-	 * Get the name of the field
-	 * 
-	 * @return the name
+	 * Get the field by trilinear interpolation.
+	 *
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	@Override
-	public String getName() {
-		return "Torus (full)";
-	}
+	public void fieldCylindrical(TorusProbe probe, double phi, double rho, double z,
+			float result[]) {
+		if (isZeroField()) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
 
+		while (phi < 0.0) {
+			phi += 360.0;
+		}
+		while (phi > 360.0) {
+			phi -= 360.0;
+		}
+
+
+		if ((probe == null) || !FieldProbe.CACHE) {
+			interpolateField(phi, rho, z, result);
+		}
+		else {
+			calculate(phi, rho, z, probe, result);
+		}
+
+
+		result[X] *= _scaleFactor;
+		result[Y] *= _scaleFactor;
+		result[Z] *= _scaleFactor;
+	}
+	
 
 	
 }

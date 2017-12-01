@@ -62,7 +62,7 @@ public class Example {
 //		example7();
 //		example7x();
 //		example8();
-//		 example9();
+		 example9();
 //		example10();
 
 		System.out.println("\nDONE.");

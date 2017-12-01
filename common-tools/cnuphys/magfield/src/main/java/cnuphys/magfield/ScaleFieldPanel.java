@@ -61,6 +61,12 @@ public class ScaleFieldPanel extends JPanel {
 	private void maybeChangeScaleFactor() {
 		try {
 			double newSF = Double.parseDouble(_textField.getText());
+			
+			if (getField() == null) {
+				_textField.setText("1.0");
+				return;
+			}
+			
 			double currentSF = getField()._scaleFactor;
 			if (Math.abs(newSF - currentSF) > 1.0e-6) {
 				getField()._scaleFactor = newSF;
