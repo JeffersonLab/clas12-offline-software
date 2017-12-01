@@ -760,7 +760,7 @@ public class CodaEventDecoder {
                         this.setTriggerBits(intData[6]);
                     }
 		    else if(node.getDataLength()==6) { // New format Dec 1 2017 (run 1701)
-			this.setTriggerBits(intData[6]<<16|intData[7];
+			this.setTriggerBits(intData[6]<<16|intData[7]);
 		    }
                 }
             }
