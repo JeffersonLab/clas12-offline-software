@@ -41,11 +41,6 @@ public class GeometryManager {
 	 * Private constructor for the singleton.
 	 */
 	private GeometryManager() {
-
-		// don't load if plugins only
-		if (Ced.pluginsOnly()) {
-			return;
-		}
 		
 		//HTCC Geometry
 		HTCCGeometry.initialize();

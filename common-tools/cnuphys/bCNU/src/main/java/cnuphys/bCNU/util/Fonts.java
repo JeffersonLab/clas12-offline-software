@@ -63,6 +63,9 @@ public class Fonts {
 
 	// common font when a tiny label is needed
 	public static Font tinyFont = commonFont(Font.PLAIN, 8);
+	
+	// normal monospaced font
+	public static Font defaultMono = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
 	// normal monospaced font
 	public static Font mono = new Font(Font.MONOSPACED, Font.PLAIN, 13);
