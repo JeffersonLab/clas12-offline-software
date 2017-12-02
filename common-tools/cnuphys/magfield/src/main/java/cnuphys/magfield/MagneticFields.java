@@ -675,6 +675,7 @@ public class MagneticFields {
 			_torus = readFullTorus(new File(tmap.getDirName(), tmap.getFileName()).getPath());
 		} else {
 			_torus = readTorus(new File(tmap.getDirName(), tmap.getFileName()).getPath());
+			System.gc();
 		}
 		System.out.println("** USING Torus map [" + tmap.getName() + "]");
 		

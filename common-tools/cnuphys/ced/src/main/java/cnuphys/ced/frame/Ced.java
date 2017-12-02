@@ -9,6 +9,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -23,6 +24,8 @@ import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
+import cnuphys.bCNU.component.TextAreaWriter;
+import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.alldata.graphics.DefinitionManager;
 import cnuphys.ced.ced3d.view.CentralView3D;
@@ -95,6 +98,7 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
@@ -110,7 +114,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.38";
+	private static final String _release = "build 0.99.999.42";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -118,12 +122,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// using 3D?
 	private static boolean _use3D = true;
 	
-	//use experimental code?
-	private static boolean _useExperimental = false;
-
-	// if plugin only, do not create initial detector views
-	private static boolean _pluginOnly;
-
 	// event menu
 	private ClasIoEventMenu _eventMenu;
 	
@@ -256,9 +254,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
 			}
 			
-			if (_useExperimental) {
-			}
-			
 			Log.getInstance().config("reset views on virtual dekstop");
 			
 			//now load configuration
@@ -298,56 +293,46 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_sectorView14=SectorView.createSectorView(DisplaySectors.SECTORS14);
 		ViewManager.getInstance().getViewMenu().addSeparator();
 
-		
 		// add monte carlo view
 		_monteCarloView = new ClasIoMonteCarloView();
 
 		// add a reconstructed tracks view
 		_reconEventView = ClasIoReconEventView.getInstance();
 
-		
-		if (!pluginsOnly()) {
+		ViewManager.getInstance().getViewMenu().addSeparator();
+
+		// add an alldc view
+		_allDCView = AllDCView.createAllDCView();
+
+		_tofView = TOFView.createTOFView();
+
+		// add a bstZView
+		_centralZView = CentralZView.createCentralZView();
+
+		// add a bstXYView
+		_centralXYView = CentralXYView.createCentralXYView();
+
+		// add a ftcalxyYView
+		_ftcalXyView = FTCalXYView.createFTCalXYView();
+
+		// add a DC XY View
+		_dcXyView = DCXYView.createDCXYView();
+
+		// projected dC view
+		_projectedDCView = ProjectedDCView.createProjectedDCView();
+
+		// add an ec view
+		_ecView = ECView.createECView();
+
+		// add an pcal view
+		_pcalView = PCALView.createPCALView();
+
+		// 3D view?
+		if (_use3D) {
 			ViewManager.getInstance().getViewMenu().addSeparator();
-
-			// add an alldc view
-			_allDCView = AllDCView.createAllDCView();
-			
-			_tofView = TOFView.createTOFView();
-
-			// add a bstZView
-			_centralZView = CentralZView.createCentralZView();
-
-			// add a bstXYView
-			_centralXYView = CentralXYView.createCentralXYView();
-
-			// add a ftcalxyYView
-			_ftcalXyView = FTCalXYView.createFTCalXYView();
-
-			// add a DC XY View
-			_dcXyView = DCXYView.createDCXYView();
-
-			
-			// projected dC view
-			_projectedDCView = ProjectedDCView.createProjectedDCView();
-			
-			// add an ec view
-			_ecView = ECView.createECView();
-
-			// add an pcal view
-			_pcalView = PCALView.createPCALView();
-
-			// 3D view?
-			if (_use3D) {
-				ViewManager.getInstance().getViewMenu().addSeparator();
-				_forward3DView = new ForwardView3D();
-				_central3DView = new CentralView3D();
-				_ftCal3DView = new FTCalView3D();
-			}
-			
-			//Any experimental views?
-			if (_useExperimental) {
-			}
-
+			_forward3DView = new ForwardView3D();
+			_central3DView = new CentralView3D();
+			_ftCal3DView = new FTCalView3D();
 		}
 
 		// add logview
@@ -542,7 +527,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// remove the option menu until I need it
 		// mmgr.removeMenu(mmgr.getOptionMenu());
-
+		
+		//add to swim menu
+        addToSwimMenu();
+		
 		// add to the file menu
 		addToFileMenu();
 
@@ -555,6 +543,26 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//FastMC
 		mmgr.addMenu(new FastMCMenu());
 	}
+	
+	//add to the file menu
+	private void addToSwimMenu() {
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				CedTests.swimTest();
+			}
+		};
+		
+		JMenuItem mitem = new JMenuItem("Run some tests");
+		SwimMenu.getInstance().addSeparator();
+		SwimMenu.getInstance().add(mitem);
+		mitem.addActionListener(al);
+	}
+	
+	
+	//private void run some swim test
 	
 	//add to the file menu
 	private void addToFileMenu() {
@@ -833,24 +841,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		return _use3D;
 	}
 	
-	/**
-	 * Check whether we use experimental code
-	 * 
-	 * @return <code>true</code> if we use experimental code
-	 */
-	public static boolean useExperimental() {
-		return _useExperimental;
-	}
-
-
-	/**
-	 * Check whether we use Plugins onlyD
-	 * 
-	 * @return <code>true</code> if we use plugins only
-	 */
-	public static boolean pluginsOnly() {
-		return _pluginOnly;
-	}
 
 	/**
 	 * Get the parent frame
@@ -938,15 +928,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				else if (arg[i].contains("NO3D")) {
 					_use3D = false;
 					System.err.println("Not using 3D");
-				}
-				else if (arg[i].contains("USEEXP")) {
-					_useExperimental = true;
-					System.err.println("Using Experimental code");
-				}
-
-				else if (arg[i].contains("PLUGINONLY")) {
-					_pluginOnly = true;
-					System.err.println("Using Plugins Only");
 				}
 
 				i++;

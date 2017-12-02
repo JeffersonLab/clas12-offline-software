@@ -401,7 +401,7 @@ public class LundTrackDialog extends JDialog {
 		theta = MagneticField.acos2Deg(pz / P);
 		phi = MagneticField.atan2Deg(py, px);
 		System.out.println(String.format(
-				"Swim backards use theta: %9.6f  phi: %9.6f", theta, phi));
+				"Swim backwards use theta: %9.6f  phi: %9.6f", theta, phi));
 
 		System.out.println("--------------------------------------\n");
 	}
