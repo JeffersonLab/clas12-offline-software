@@ -18,7 +18,7 @@ public class Constants {
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm
 
-    private static boolean isCosmicsData = false;
+    private static boolean isCosmicsData = true;
 
     private static boolean SVTOnly = false;
 
@@ -208,7 +208,7 @@ public class Constants {
         }
 
         setSolenoidscale(SolenoidScale);
-        setCosmicsData(isCosmics);
+        Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
 
         org.jlab.rec.cvt.svt.Constants.Load();
@@ -217,6 +217,8 @@ public class Constants {
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
 
+        if(SolenoidScale<0.001)
+            Constants.setCosmicsData(true);
     }
 
     public static final boolean isCosmicsData() {
