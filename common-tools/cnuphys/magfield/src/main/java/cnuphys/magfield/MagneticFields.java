@@ -644,6 +644,15 @@ public class MagneticFields {
 	}
 	
 	/**
+	 * Get the active torus map (doesn't mean active field has a torus).
+	 * It just returns the type of torus loaded (if any)
+	 * @return the type of torus loaded
+	 */
+	public TorusMap getTorusMap() {
+		return _torusMap;
+	}
+	
+	/**
 	 * Set the torus to a new map
 	 * @param tmap the new map
 	 */
