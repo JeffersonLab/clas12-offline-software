@@ -94,4 +94,53 @@ public class TrackListFinder {
             trk.set_PID("proton");
         }
     }
+    
+     
+    public void removeOverlappingTracks(List<Track> trkcands) {
+
+            List<Track> selectedTracks =new ArrayList<Track>();
+            List<Track> list = new  ArrayList<Track>();
+            for(int i =0; i<trkcands.size(); i++) { 
+                    list.clear();
+                    this.getOverlapLists(trkcands.get(i), trkcands, list);
+                    Track selectedTrk = this.FindBestTrack(list);
+                    if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
+                            selectedTracks.add(selectedTrk);
+            }
+            trkcands.removeAll(trkcands);
+            trkcands.addAll(selectedTracks);
+    }
+
+    private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) {
+            boolean isInList = false;
+            for(Track trk : selectedTracks) {
+                    if(trk.get_Id()==selectedTrk.get_Id())
+                            isInList=true;
+            }
+            return isInList;
+    }
+
+    private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
+            for(int i =0; i<trkcands.size(); i++) { 
+                    if( (track.get(0).get_Id()!=-1 && track.get(0).get_Id()==trkcands.get(i).get(0).get_Id()) || 
+                                    (track.get(1).get_Id()!=-1 && track.get(1).get_Id()==trkcands.get(i).get(1).get_Id()) || 
+                                    (track.get(2).get_Id()!=-1 && track.get(2).get_Id()==trkcands.get(i).get(2).get_Id()) ) {
+                            list.add(trkcands.get(i));
+                    }
+            }
+    }
+
+    private Track FindBestTrack(List<Track> trkList) {
+            double bestChi2 = 9999999;
+            Track bestTrk = null;
+
+            for(int i =0; i<trkList.size(); i++) {
+                    if(trkList.get(i).getChi2()/(double)trkList.get(i).getNDF()<bestChi2) {
+                            bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
+                            bestTrk = trkList.get(i);
+                    }
+            }
+            return bestTrk;
+    }
+
 }
