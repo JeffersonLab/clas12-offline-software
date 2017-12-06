@@ -17,6 +17,7 @@ import org.jlab.rec.eb.EBCCDBEnum;
  *
  * @author gavalian
  *@author jnewton
+ *@author baltzell
  */
 public class EBEngine extends ReconstructionEngine {
 
@@ -51,33 +52,52 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL);
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
+        List<DetectorResponse>  responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::hits", DetectorType.CND);
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
        
-        // FIXME We should be starting with FT::particle, not clusters
-        //List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
-        
+
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
+        eb.addDetectorResponses(responseCND);
         eb.addDetectorResponses(responseECAL);
         eb.addCherenkovResponses(responseHTCC);
         eb.addCherenkovResponses(responseLTCC);
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
-        eb.addForwardTracks(tracks);       
+        eb.addForwardTracks(tracks);      
+
+        
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
         eb.addCentralTracks(ctracks);
+        
+        
+        
+        eb.getPindexMap().put(0, tracks.size());
+        eb.getPindexMap().put(1, ctracks.size());
 
+
+        
+        
         // Process tracks:
         eb.processHitMatching();
-        //eb.addTaggerTracks(trackFT);
         eb.processNeutralTracks();
 
+        
+        List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
         // matching was already done for central:
-        //eb.readCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits");
+        
+        //System.out.println("DC Tracks "  + tracks.size());
+        //System.out.println("CVT Tracks " + centralParticles.size());
+        //System.out.println("CTOF Hits " + responseCTOF.size());
+        
+        EBCentral ebm = new EBCentral(eb);
+        
+        ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
+                                    centralParticles, responseCTOF, responseCND);
         
 
         eb.assignTrigger();
@@ -200,11 +220,12 @@ public class EBEngine extends ReconstructionEngine {
         EBCCDBConstants.load(10,this.getConstantsManager());
 
         // Example of retrieveing values from EBCCDBConstants: 
-        //Double[] t=EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
-
+        //Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+        //Double pcal_match = EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
+        //Double ftof1b_match = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
+        
         System.out.println("[EB::] --> event builder is ready....");
         return true;
     }
     
 }
-

@@ -6,8 +6,11 @@ import java.util.HashMap;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.detector.DetectorResponse;
 
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  * @author gavalian
@@ -60,6 +63,8 @@ public class EBAnalyzer {
                 path = trigger.getPathLength(DetectorType.FTOF, 1);
                 foundTriggerTime = true;
             }
+            
+
 
             // set startTime based on FTOF:
             if (foundTriggerTime) {
@@ -117,9 +122,10 @@ public class EBAnalyzer {
                 mass = p.getMass2(DetectorType.FTOF, 2,start_time);
                 p.setBeta(beta);
             }
-            if(p.hasHit(DetectorType.CTOF, 0)==true){
+            if(p.hasHit(DetectorType.CTOF)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
                 mass = p.getMass2(DetectorType.CTOF,start_time);
+                //System.out.println("CTOF Beta" + beta);
                 p.setBeta(beta);
             }
         }
@@ -167,16 +173,36 @@ public class EBAnalyzer {
         public void PIDMatch(DetectorParticle p, int pid) {
 
             double beta = p.getTheoryBeta(pid);
-            double vertex_index = optimalVertexTime(p);
+            int vertex_index = optimalVertexTime(p);
 
             int pidCandidate = pid;
+            
+            
             boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
                 (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
                 (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
-            boolean sfCheck = p.getEnergyFraction(DetectorType.ECAL)>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+            
+            Double mom = p.vector().mag();
+            Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+            Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
+            double sfMean = t[0]*pow(mom,0) + t[1]*pow(mom,-1) + t[2]*pow(mom,-2) + t[3]*pow(mom,-3);
+            double sfSigma = s[0]*pow(mom,0);
+            double sf = p.getEnergyFraction(DetectorType.ECAL);
+            double sf_upper_limit = sfMean + 5*sfSigma;
+            double sf_lower_limit = sfMean - 5*sfSigma;
+            
+            //System.out.println("Sampling Fraction Mean " + sfMean);
+            //System.out.println("Sampling Fraction Sigma" + sfSigma);
+            
+            boolean sfCheck = sf>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+            //boolean sfCheck = sf< sf_upper_limit && sf > sf_lower_limit;
+            
             boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
+            
             boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
+            
             boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
+            
             boolean ltccPionThreshold = p.vector().mag()<EBConstants.LTCC_UPPER_PION_THRESHOLD 
                 && p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
 
@@ -201,16 +227,21 @@ public class EBAnalyzer {
                         this.finalizePID(p, pid);
                         break;
                             } 
-                    if(vertexCheck==true && ltccSignalCheck==true && sfCheck==false 
-                            && ltccPionThreshold==true) {
+//                    if(vertexCheck==true && ltccSignalCheck==true && sfCheck==false 
+//                            && ltccPionThreshold==true) {
+//                        this.finalizePID(p, pid);
+//                        break;
+//                            }
+//                    if(vertexCheck==false && ltccSignalCheck==true && sfCheck==false 
+//                            && ltccPionThreshold==true) {
+//                        this.finalizePID(p, pid);
+//                        break;
+//                            }  
+                    if(vertexCheck==true && htccSignalCheck==false && sfCheck==false 
+                            && htccPionThreshold==false) {
                         this.finalizePID(p, pid);
                         break;
                             }
-                    if(vertexCheck==false && ltccSignalCheck==true && sfCheck==false 
-                            && ltccPionThreshold==true) {
-                        this.finalizePID(p, pid);
-                        break;
-                            }  
                 case 321:
                     if(vertexCheck==true && sfCheck==false && htccSignalCheck==false){
                         this.finalizePID(p, pid);
@@ -245,18 +276,19 @@ public class EBAnalyzer {
             }
             // FIXME:  Leave this off for now, until full import of CD is done
             // else use CTOF:
-            //else if(p.hasHit(DetectorType.CTOF)==true) {
-            //    vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
-            //    vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
-            //    vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));
-            //}
+            else if(p.hasHit(DetectorType.CTOF)==true) {
+                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
+                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
+                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));               
+
+            }
 
             if(vertexDiffs.size()>0) {
                 double min = vertexDiffs.get(0);
 
                 for (int i = 0; i < vertexDiffs.size(); i++) {
                     if (vertexDiffs.get(i) < min) {
-                        min = vertexDiffs.get(i);
+                        min = vertexDiffs.get(i); 
                         vertex_index = i;
                     }
                 }
