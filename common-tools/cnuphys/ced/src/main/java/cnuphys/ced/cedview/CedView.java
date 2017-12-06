@@ -603,8 +603,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void magneticFieldChanged() {
-		getContainer().refresh();
 		probe = FieldProbe.factory();
+		getContainer().refresh();
 	}
 
 	// we are hovering

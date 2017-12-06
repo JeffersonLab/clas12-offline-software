@@ -13,6 +13,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/exp4j"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/splot"/>
 	<classpathentry kind="lib" path="/coatjava/lib/clas/vecmath-1.3.1-2.jar"/>
-	<classpathentry kind="lib" path="/coatjava/lib/clas/coat-libs-4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/coatjava/lib/clas/coat-libs-5.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

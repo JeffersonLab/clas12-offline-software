@@ -31,7 +31,7 @@ import javax.swing.event.EventListenerList;
 public class MagneticFields {
 	
 	//vbersion of mag field package
-	private static String VERSION = "1.04";
+	private static String VERSION = "1.05";
 		
 	//constants for different torus grids
     public static final int SYMMETRIC_TORUS = 0;
@@ -593,7 +593,7 @@ public class MagneticFields {
 	 */
 	public void initializeMagneticFields() {
 		String homeDir = getProperty("user.home");
-		initializeMagneticFields(".:" + homeDir + "/fieldMaps:../../../data", TorusMap.SYMMETRIC);
+		initializeMagneticFields(".:" + homeDir + "/fieldMaps:../../../data:../../data:../data:data:cedbuild/data", TorusMap.SYMMETRIC);
 	} 
 	
 	/**

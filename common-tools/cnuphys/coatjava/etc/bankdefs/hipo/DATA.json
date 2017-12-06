@@ -8,9 +8,11 @@
        {"name":"layer",     "id":2, "type":"int8",  "info":"layer 1-6"},
        {"name":"component", "id":3, "type":"int16", "info":"strips"},
        {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},
-       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"ADC",       "id":5, "type":"int32", "info":"max ADC"},
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
-       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"},
+       {"name":"integral",  "id":8, "type":"int32", "info":"integral ADC (sum over the pulse)"},
+       {"name":"timestamp", "id":9, "type":"int64", "info":"timestamp"}	
     ]
   },
   {
@@ -141,7 +143,9 @@
        {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},
        {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
-       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"},
+       {"name":"integral",  "id":8, "type":"int32", "info":"integral ADC (sum over the pulse)"},
+       {"name":"timestamp", "id":9, "type":"int64", "info":"timestamp"}	
     ]
   },
    {
@@ -209,7 +213,9 @@
        {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},       
        {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
-       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"},
+       {"name":"integral",  "id":8, "type":"int32", "info":"integral ADC (sum over the pulse)"},
+       {"name":"timestamp", "id":9, "type":"int64", "info":"timestamp"}	
     ]
   },
   {
@@ -227,6 +233,18 @@
     ]
   },
   {
+    "bank": "HTCC::tdc",
+    "group": 21512,
+    "info": "digitized bank for HTCC TDC",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of HTCC"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"half sector HTCC (1 or 2)"},
+       {"name":"component", "id":3, "type":"int16", "info":"ring of HTCC (1,2,3,4)"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (2 - TDCL , 3 - TDCR)"},
+       {"name":"TDC",       "id":5, "type":"int32", "info":"TDC value (25 ps per channel)"}
+    ]
+  },
+  {
     "bank": "LTCC::adc",
     "group": 21611,
     "info": "digitized bank LTCC",
@@ -238,6 +256,18 @@
        {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
        {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
        {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+    ]
+  },
+  {
+    "bank": "LTCC::tdc",
+    "group": 21612,
+    "info": "digitized bank LTCC TDC",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of LTCC"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"half sector LTCC (1 or 2)"},
+       {"name":"component", "id":3, "type":"int16", "info":"ring of LTCC (1,2,3,4)"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},       
+       {"name":"TDC",       "id":5, "type":"int32", "info":"TDC value (25 ps per channel)"}
     ]
   }, 
   {
@@ -272,9 +302,9 @@
     "info": "digitized bank Ring Imaging CHerenkov",
     "items": [
        {"name":"sector",       "id":1, "type":"int8",  "info":"sector of RICH"},
-       {"name":"layer",        "id":2, "type":"int16", "info":"pmt id of RICH"},
-       {"name":"component",    "id":3, "type":"int16", "info":"pixel id of RICH"},
-       {"name":"order",        "id":4, "type":"int8",  "info":"order of (0 - ADC)"},       
+       {"name":"layer",        "id":2, "type":"int8", "info":"tile id of RICH"},
+       {"name":"component",    "id":3, "type":"int16", "info":"MAROC channel of RICH"},
+       {"name":"order",        "id":4, "type":"int8",  "info":"leading or trailing edge"},
        {"name":"ADC",          "id":5, "type":"int32", "info":"ADC value"},
        {"name":"time",         "id":6, "type":"float", "info":"Time"},
        {"name":"ped",          "id":7, "type":"int16", "info":"Pedestal"}
@@ -286,10 +316,10 @@
     "info": "digitized bank Ring Imaging CHerenkov",
     "items": [
        {"name":"sector",     "id":1, "type":"int8",  "info":"sector of RICH"},
-       {"name":"layer",      "id":2, "type":"int16", "info":"pmt id of RICH"},
-       {"name":"component",  "id":3, "type":"int16", "info":"pixel id of RICH"},
-       {"name":"TDC1",       "id":4, "type":"int32", "info":"TDC leading edge"},
-       {"name":"TDC2",       "id":5, "type":"int32", "info":"TDC trailing edge"}
+       {"name":"layer",      "id":2, "type":"int8",  "info":"tile id of RICH"},
+       {"name":"component",  "id":3, "type":"int16", "info":"MAROC channel of RICH"},
+       {"name":"order",      "id":4, "type":"int8",  "info":"leading or trailing edge"},
+       {"name":"TDC",        "id":5, "type":"int32", "info":"TDC value"}
     ]
   },
   {
@@ -342,6 +372,17 @@
        {"name":"slot",     "id":2, "type":"int8",  "info":"slot for TDC"},
        {"name":"channel",  "id":3, "type":"int16", "info":"channel for TDC"},
        {"name":"TDC",      "id":4, "type":"int32", "info":"TDC value"}
+    ]
+  },
+  {
+    "bank": "RAW::vtp",
+    "group": 20014,
+    "info": "digitized TDC bank for untranslated entries",
+    "items": [
+       {"name":"crate",    "id":1, "type":"int8",  "info":"crate of VTP"},
+       {"name":"slot",     "id":2, "type":"int8",  "info":"slot for VTP"},
+       {"name":"channel",  "id":3, "type":"int16", "info":"channel for VTP"},
+       {"name":"word",     "id":4, "type":"int32", "info":"vtp value"}
     ]
   }
 ]

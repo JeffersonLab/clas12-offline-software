@@ -158,6 +158,9 @@ public abstract class FieldProbe implements IField {
 	 */
 	public static FieldProbe factory(IField field) {
 		
+//		System.err.println("new probe");
+
+		
 //		if (field == null) {
 //			System.err.println("null field in probe factory");
 //		}
