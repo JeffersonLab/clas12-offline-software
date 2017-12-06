@@ -23,20 +23,13 @@ public class TrackSeeder {
     double[] phiShift = new double[]{0, 90}; // move the bin edge to handle bin boundaries
 
     public void FindSeedClusters(List<Cluster> SVTclusters) {
-        for(int i =0; i<SVTclusters.size(); i++) {
-            for(int j =0; j< SVTclusters.get(i).size(); j++){
-                SVTclusters.get(i).get(j).printInfo();
-            }
-        }
+        
         seedClusters.clear(); 
+        for(int si1 = 0; si1<seedClusters.size(); si1++)
+            seedClusters.get(si1).clear();
+
         List<ArrayList<Cluster>> phi0 = FindSeedClustersFixedBin(SVTclusters, phiShift[0]);
-        System.out.println(" phi0");
-        for(int i0 =0; i0<phi0.size(); i0++)
-            for(int i =0; i<phi0.get(i0).size(); i++) {
-                for(int j =0; j< phi0.get(i0).get(i).size(); j++){
-                    phi0.get(i0).get(i).get(j).printInfo();
-                }
-            }
+        
         List<ArrayList<Cluster>> phi90 = FindSeedClustersFixedBin(SVTclusters, phiShift[1]);
         if (phi0.size() > phi90.size()) {
             seedClusters = phi0; 
@@ -53,21 +46,15 @@ public class TrackSeeder {
                 }
             }
         }
-        for(int i =0; i<seedClusters.size(); i++) {
-            System.out.println(" Seed ");
-            for(int j =0; j< seedClusters.get(i).size(); j++){
-                seedClusters.get(i).get(j).printInfo();
-            }
-        }
     }
-
+    
     public List<ArrayList<Cluster>> FindSeedClustersFixedBin(List<Cluster> SVTclusters, double phiShift) {
         
         int NbLayers = Constants.NLAYR;
         Collections.sort(SVTclusters);
         
         int[] L = new int[6];
-        List<ArrayList<Cluster>> seedClusters = new ArrayList<ArrayList<Cluster>>();
+        List<ArrayList<Cluster>> inseedClusters = new ArrayList<ArrayList<Cluster>>();
         
         List<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
         List<ArrayList<Cluster>> inputClusters = new ArrayList<ArrayList<Cluster>>();
@@ -142,12 +129,12 @@ public class TrackSeeder {
 
                     }
                     if (hits.size() > 3) {
-                        seedClusters.add(hits);
+                        inseedClusters.add(hits);
                     }
                 }
             }
         }
-        return seedClusters;
+        return inseedClusters;
 
     }
     private List<Double> Xs = new ArrayList<Double>();
