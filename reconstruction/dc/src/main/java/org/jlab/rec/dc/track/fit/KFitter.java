@@ -34,7 +34,7 @@ public class KFitter {
 
     public void runFitter() {
         this.chi2 = 0;
-        this.NDF = sv.Z.length - 5;
+        this.NDF = mv.ndf;
 
         for (int i = 1; i <= totNumIter; i++) {
             if (i > 1) {
