@@ -277,7 +277,8 @@ public class CVTReconstruction extends ReconstructionEngine {
             TrackListFinder trkFinder = new TrackListFinder();
             List<Track> trks = new ArrayList<Track>();
             trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
-
+            trkFinder.removeOverlappingTracks(trks);
+            
             for (int c = 0; c < trkcands.size(); c++) {
                 trkcands.get(c).set_Id(c + 1);
                 for (int ci = 0; ci < trkcands.get(c).size(); ci++) {
