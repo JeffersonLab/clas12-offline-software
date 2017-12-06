@@ -5,6 +5,7 @@ import java.util.Random;
 import cnuphys.bCNU.component.TextAreaWriter;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.bCNU.util.UnicodeSupport;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.TorusMap;
@@ -15,7 +16,10 @@ import cnuphys.swim.Swimmer;
 public class CedTests {
 
 	
-	protected static void swimTest() {
+	protected static void swimTest(boolean probeCache) {
+		
+		FieldProbe.cache(false);
+		
 		TextDisplayDialog dialog = new TextDisplayDialog("Test Results");
 		dialog.setVisible(true);
 		TextAreaWriter writer = dialog.getWriter();
@@ -66,7 +70,7 @@ public class CedTests {
 		for (int i = 0; i < n; i++) {
 			
 			double base = 60*rand.nextInt(6);
-			phi[i] = -30 + base + (3 + 54*rand.nextDouble());
+			phi[i] = -30 + base + (5 + 50*rand.nextDouble());
 			while(phi[i] < 360) {
 				phi[i] += 360;
 			}
@@ -144,7 +148,8 @@ public class CedTests {
 				rMax, maxPathLen, stepSize,
 				hdata);
 		
-		
+		FieldProbe.cache(true);
+
 	}
 	
 	private static void compareField(TextAreaWriter writer, double[][] results, TorusMap tmap, int charge, double xo, double yo, double zo, 
@@ -228,6 +233,7 @@ public class CedTests {
 		
 		writer.writeln(String.format("Avg |z diff| = %-10.5f   Max |z diff| =  %-10.5f cm", zavg, zmax));
 		writer.writeln(String.format("Avg |" + UnicodeSupport.SMALL_RHO + " diff| = %-10.5f   Max |" + UnicodeSupport.SMALL_RHO + " diff| =  %-10.5f cm", rhoavg, rhomax));
+		writer.writeln(String.format("Worst case: INDEX = %d   theta = %-8.3f  phi = %-8.3f", worstIndex, theta[worstIndex], phi[worstIndex]));
 
 		
 //		cleanTrajPoint(momentum, results[worstIndex], resultQf);

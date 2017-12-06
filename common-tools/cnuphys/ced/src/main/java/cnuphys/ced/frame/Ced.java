@@ -67,8 +67,8 @@ import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.FastMCMenu;
+//import cnuphys.ced.fastmc.FastMCManager;
+//import cnuphys.ced.fastmc.FastMCMenu;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
@@ -114,7 +114,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.42";
+	private static final String _release = "build 0.99.999.44";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -541,24 +541,24 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		mmgr.addMenu(DefinitionManager.getInstance().getMenu());
 		
 		//FastMC
-		mmgr.addMenu(new FastMCMenu());
+		//mmgr.addMenu(new FastMCMenu());
 	}
 	
 	//add to the file menu
 	private void addToSwimMenu() {
-		
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				CedTests.swimTest();
-			}
-		};
-		
-		JMenuItem mitem = new JMenuItem("Run some tests");
-		SwimMenu.getInstance().addSeparator();
-		SwimMenu.getInstance().add(mitem);
-		mitem.addActionListener(al);
+//		
+//		ActionListener al = new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				CedTests.swimTest(false);
+//			}
+//		};
+//		
+//		JMenuItem mitem = new JMenuItem("Run some tests");
+//		SwimMenu.getInstance().addSeparator();
+//		SwimMenu.getInstance().add(mitem);
+//		mitem.addActionListener(al);
 	}
 	
 	
@@ -599,7 +599,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		fmenu.insertSeparator(0);
 		fmenu.add(ClasIoEventMenu.getConnectETItem(), 0);
-		fmenu.add(ClasIoEventMenu.getConnectAnyRingItem(), 0);
+//		fmenu.add(ClasIoEventMenu.getConnectAnyRingItem(), 0);
 		fmenu.insertSeparator(0);
 
 		fmenu.add(ClasIoEventMenu.getRecentEventFileMenu(), 0);
@@ -655,7 +655,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 */
 	public static void setEventNumberLabel(int num) {
 		
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+//		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+//			return;
+//		}
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 		if (num < 0) {

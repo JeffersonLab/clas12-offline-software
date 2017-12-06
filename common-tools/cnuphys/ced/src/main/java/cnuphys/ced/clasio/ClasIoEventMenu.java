@@ -203,21 +203,21 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 * Get the menu item to connect to any DAQ ring
 	 * @return the menu item to open any DAQ ring
 	 */
-	public static JMenuItem getConnectAnyRingItem() {
-		final JMenuItem item = new JMenuItem("Connect to Hipo Ring...");
-		item.setIcon(ImageManager.getInstance().loadImageIcon("images/hipo2.png"));
-
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ClasIoEventManager.getInstance().ConnectToHipoRing();
-			}
-
-		};
-		item.addActionListener(al);
-		return item;
-	}
+//	public static JMenuItem getConnectAnyRingItem() {
+//		final JMenuItem item = new JMenuItem("Connect to Hipo Ring...");
+//		item.setIcon(ImageManager.getInstance().loadImageIcon("images/hipo2.png"));
+//
+//		ActionListener al = new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				ClasIoEventManager.getInstance().ConnectToHipoRing();
+//			}
+//
+//		};
+//		item.addActionListener(al);
+//		return item;
+//	}
 	
 	public static JMenuItem getConnectETItem() {
 		final JMenuItem item = new JMenuItem("Connect to ET Ring...");
