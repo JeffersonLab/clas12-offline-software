@@ -546,19 +546,34 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//add to the file menu
 	private void addToSwimMenu() {
-//		
-//		ActionListener al = new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				CedTests.swimTest(false);
-//			}
-//		};
-//		
-//		JMenuItem mitem = new JMenuItem("Run some tests");
-//		SwimMenu.getInstance().addSeparator();
-//		SwimMenu.getInstance().add(mitem);
-//		mitem.addActionListener(al);
+		
+		final JMenuItem stitem = new JMenuItem("Run some swim tests");
+		final JMenuItem mtitem = new JMenuItem("Run magfield edge tests");
+
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+
+				if (source == stitem) {
+					CedTests.swimTest(false);
+				}
+				else if (source == mtitem) {
+					CedTests.edgeTest(false);
+				}
+
+			}
+		};
+		
+		SwimMenu.getInstance().addSeparator();
+		SwimMenu.getInstance().add(stitem);
+		stitem.addActionListener(al);
+		
+		SwimMenu.getInstance().add(mtitem);
+		mtitem.addActionListener(al);
+
 	}
 	
 	
