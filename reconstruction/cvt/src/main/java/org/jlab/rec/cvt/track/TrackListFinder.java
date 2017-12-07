@@ -36,33 +36,34 @@ public class TrackListFinder {
         // loop over candidates and set the trajectories
         
         for (Track trk : cands) {
+            if(trk.get_helix()!=null) {
+                this.assignTrkPID(trk);
+                //KalFit kf = new KalFit(trk, svt_geo);
+                //kf.runKalFit(trk, svt_geo);
+                //EnergyLossCorr elc = new EnergyLossCorr(trk);
+                //System.out.println("******* before EL "+trk.get_P());
+                //elc.doCorrection(trk, svt_geo);
+                //System.out.println("*******  after EL "+trk.get_P());
 
-            this.assignTrkPID(trk);
-            //KalFit kf = new KalFit(trk, svt_geo);
-            //kf.runKalFit(trk, svt_geo);
-            //EnergyLossCorr elc = new EnergyLossCorr(trk);
-            //System.out.println("******* before EL "+trk.get_P());
-            //elc.doCorrection(trk, svt_geo);
-            //System.out.println("*******  after EL "+trk.get_P());
+                int charge = trk.get_Q();
+                double maxPathLength = 5.0;//very loose cut 
+                bstSwim.SetSwimParameters(trk.get_helix(), maxPathLength, charge, trk.get_P());
 
-            int charge = trk.get_Q();
-            double maxPathLength = 5.0;//very loose cut 
-            bstSwim.SetSwimParameters(trk.get_helix(), maxPathLength, charge, trk.get_P());
+                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS);
+                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
 
-            double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS);
-            trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
-            trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
+                trk.set_pathLength(bstSwim.swamPathLength);
 
-            trk.set_pathLength(bstSwim.swamPathLength);
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
-            TrajectoryFinder trjFind = new TrajectoryFinder();
+                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
 
-            Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
+                trk.set_Trajectory(traj.get_Trajectory());
 
-            trk.set_Trajectory(traj.get_Trajectory());
-
-            //if(trk.passCand == true)
-            tracks.add(trk);
+                //if(trk.passCand == true)
+                tracks.add(trk);
+            }
 
         }
         return tracks;

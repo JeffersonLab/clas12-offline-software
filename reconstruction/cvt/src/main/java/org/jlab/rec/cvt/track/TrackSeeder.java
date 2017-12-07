@@ -59,7 +59,7 @@ public class TrackSeeder {
         List<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
         List<ArrayList<Cluster>> inputClusters = new ArrayList<ArrayList<Cluster>>();
         for(int l =0; l<6; l++) {
-            sortedClusters.add(new ArrayList<Cluster>() );
+            sortedClusters.add(l,new ArrayList<Cluster>() );
         }
         
         for (int i = 0; i < SVTclusters.size(); i++) {
@@ -78,17 +78,17 @@ public class TrackSeeder {
                         for(int l5 =0; l5<L[4]; l5++) 
                             for(int l6 =0; l6<L[5]; l6++) {
                                 ArrayList<Cluster> listClusters = new ArrayList<Cluster>();
-                                if(sortedClusters.get(0).get(l1)!=null)
+                                if(sortedClusters.get(0).size()>0 && sortedClusters.get(0).get(l1)!=null)
                                     listClusters.add(sortedClusters.get(0).get(l1));
-                                if(sortedClusters.get(1).get(l2)!=null)
+                                if(sortedClusters.get(1).size()>0 && sortedClusters.get(1).get(l2)!=null)
                                     listClusters.add(sortedClusters.get(1).get(l2));
-                                if(sortedClusters.get(2).get(l3)!=null)
+                                if(sortedClusters.get(2).size()>0 && sortedClusters.get(2).get(l3)!=null)
                                     listClusters.add(sortedClusters.get(2).get(l3));
-                                if(sortedClusters.get(3).get(l4)!=null)
+                                if(sortedClusters.get(3).size()>0 && sortedClusters.get(3).get(l4)!=null)
                                     listClusters.add(sortedClusters.get(3).get(l4));
-                                if(sortedClusters.get(4).get(l5)!=null)
+                                if(sortedClusters.get(4).size()>0 && sortedClusters.get(4).get(l5)!=null)
                                     listClusters.add(sortedClusters.get(4).get(l5));
-                                if(sortedClusters.get(5).get(l6)!=null)
+                                if(sortedClusters.get(5).size()>0 && sortedClusters.get(5).get(l6)!=null)
                                     listClusters.add(sortedClusters.get(5).get(l6));
                                 if(listClusters.size()>0) {
                                     inputClusters.add(listClusters);
