@@ -301,16 +301,18 @@ public class TrackCandListFinder {
         // remove clones
         ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
         // loop over candidates and set the trajectories
+        
         for (int ic = 0; ic < passedcands.size(); ic++) {
             Helix trkHelix = passedcands.get(ic).get_helix();
+            if(trkHelix!=null) {
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
-            TrajectoryFinder trjFind = new TrajectoryFinder();
+                Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
 
-            Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
+                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 
-            passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
-
-            passedcands.get(ic).set_Id(ic);
+                passedcands.get(ic).set_Id(ic);
+            }
 
         }
 
@@ -485,16 +487,17 @@ public class TrackCandListFinder {
 
         for (int ic = 0; ic < passedcands.size(); ic++) {
             Ray trkRay = passedcands.get(ic).get_ray();
+            if(trkRay!=null) {
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
-            TrajectoryFinder trjFind = new TrajectoryFinder();
+                Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
 
-            Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
+                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 
-            passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
+                passedcands.get(ic).set_Id(ic);
 
-            passedcands.get(ic).set_Id(ic);
-
-            this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
+                this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
+            }
 
         }
 
