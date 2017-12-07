@@ -318,7 +318,8 @@ public class RecoBankWriter {
         List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < trkcands.size(); i++) {
-
+            if(trkcands.get(i)==null)
+                continue;
             if(trkcands.get(i).getChi2()!=0) {
                 bank.setByte("fittingMethod", i, (byte) 2);
             } else {
@@ -503,6 +504,8 @@ public class RecoBankWriter {
         }
         int bankSize = 1;
         for (int i = 0; i < trks.size(); i++) {
+            if(trks.get(i)==null)
+                continue;
             if (trks.get(i).get_Trajectory() == null) {
                 continue;
             }
@@ -514,6 +517,8 @@ public class RecoBankWriter {
 
         int k = 0;
         for (int i = 0; i < trks.size(); i++) {
+             if(trks.get(i)==null)
+                continue;
             if (trks.get(i).get_Trajectory() == null) {
                 continue;
             }
