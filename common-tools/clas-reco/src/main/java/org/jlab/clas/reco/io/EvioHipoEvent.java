@@ -7,16 +7,17 @@ package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jlab.coda.jevio.ByteDataTransformer;
+import org.jlab.coda.jevio.EvioException;
+import org.jlab.coda.jevio.EvioNode;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.hipo.data.HipoEvent;
-import org.jlab.hipo.data.HipoNodeBuilder;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataDescriptor;
-import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.evio.EvioTreeBranch;
 import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSync;
@@ -50,6 +51,7 @@ public class EvioHipoEvent {
         this.fillHipoEventRICH(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
+        this.fillHipoEventTrigger(hipoEvent, event);
         return hipoEvent;
     }
     
@@ -616,6 +618,63 @@ public class EvioHipoEvent {
         }
     }
    
+   
+    public void fillHipoEventTrigger(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
+
+        ArrayList<Integer> crates = new ArrayList();
+        ArrayList<Integer> words  = new ArrayList();
+        //System.out.println(" READING TRIGGER BANK");
+        ArrayList<EvioTreeBranch>  branches = new ArrayList<EvioTreeBranch>();
+        try {
+            List<EvioNode>  eventNodes = evioEvent.getStructureHandler().getNodes();
+            if(eventNodes==null){
+                return;
+            }
+            for(EvioNode node : eventNodes){
+                EvioTreeBranch eBranch = new EvioTreeBranch(node.getTag(),node.getNum());
+                //branches.add(eBranch);
+                //System.out.println("  FOR DROP : " + node.getTag() + "  " + node.getNum());
+                List<EvioNode>  childNodes = node.getChildNodes();
+                if(childNodes!=null){
+                    for(EvioNode child : childNodes){
+                        eBranch.addNode(child);
+                    }
+                    branches.add(eBranch);
+                }
+            }
+
+        } catch (EvioException ex) {
+            Logger.getLogger(EvioHipoEvent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        for(EvioTreeBranch branch : branches){
+            int  crate = branch.getTag();
+            for(EvioNode node : branch.getNodes()){
+                if(node.getTag()==57634/*&&crate==125*/){
+//                    System.out.println("TRIGGER BANK FOUND ");
+                    int[] intData =  ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
+//                    if(intData.length!=0) System.out.println(" TRIGGER BANK LENGTH = " + intData.length);
+                    for(int loop = 0; loop < intData.length; loop++){
+                        crates.add(crate);
+                        words.add(intData[loop]);
+//                        System.out.println(entry.toString());
+                    }
+                }
+            }
+        }
+        if(words.size()>0) {
+            int rows = words.size();
+            HipoDataBank hipoVTP = (HipoDataBank) hipoEvent.createBank("RAW::vtp", rows);
+            for(int i = 0; i < rows; i++){
+                int crate = crates.get(i);
+                hipoVTP.setByte("sector", i,      (byte)  crate);
+                hipoVTP.setByte("layer",  i,      (byte)  0);
+                hipoVTP.setShort("component",  i, (short) 0);
+                hipoVTP.setByte("order",       i,(byte) 0);
+                hipoVTP.setInt("word", i, words.get(i));
+            }
+            hipoEvent.appendBanks(hipoVTP);
+        }
+    }
    
     public HipoDataBank createHeaderBank(HipoDataEvent event, int nrun, int nevent, float torus, float solenoid){
         HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);        

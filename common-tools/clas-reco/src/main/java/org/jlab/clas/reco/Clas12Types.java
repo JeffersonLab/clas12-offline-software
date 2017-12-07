@@ -7,7 +7,8 @@ import org.jlab.clara.engine.ClaraSerializer;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clas12.tools.MimeType;
 import org.jlab.clas12.tools.property.JPropertyList;
-import org.jlab.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.data.HipoEvent;
+
 
 public final class Clas12Types {
 

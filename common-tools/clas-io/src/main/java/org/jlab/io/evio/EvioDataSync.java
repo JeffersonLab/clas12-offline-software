@@ -17,8 +17,9 @@ import java.util.logging.Logger;
 
 import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EventBuilder;
+import org.jlab.coda.jevio.EventWriter;
 import org.jlab.coda.jevio.EvioBank;
-import org.jlab.coda.jevio.EvioCompactEventWriter;
+//import org.jlab.coda.jevio.EvioCompactEventWriter;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataEvent;
@@ -40,7 +41,7 @@ public class EvioDataSync implements DataSync {
 	private Long currentRecordsWritten = (long) 0;
 	private Boolean splitFiles = true;
 	private ByteOrder writerByteOrder = ByteOrder.LITTLE_ENDIAN;
-	private EvioCompactEventWriter evioWriter = null;
+	private EventWriter evioWriter = null;
 	private String[] CLASDetectors = new String[] { "EC", "PCAL", "FTOF1A", "FTOF1B", "FTOF2", "BST", "CND", "HTCC", "FTCAL", "CTOF" };
 
 	public EvioDataSync() {
@@ -98,7 +99,7 @@ public class EvioDataSync implements DataSync {
 		File file = new File(filename);
 		try {
 			evioWriter =
-			        new EvioCompactEventWriter(filename, null, 0, 0, 15 * 300, 2000, 8 * 1024 * 1024, writerByteOrder, dictionary, true);
+			        new EventWriter(new File(filename), dictionary, true);
 			// writerByteOrder, null, true);
 			// new EventWriter(file, 1000000, 2,
 			// ByteOrder.BIG_ENDIAN, null, null);
@@ -130,18 +131,17 @@ public class EvioDataSync implements DataSync {
 			clone.flip();
 			evioWriter.writeEvent(clone);
 			// event.getEventBuffer().flip();
-		} catch (EvioException ex) {
-			Logger.getLogger(EvioDataSync.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (IOException ex) {
-			Logger.getLogger(EvioDataSync.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		
+                } catch (Exception e){
+                    System.out.println("Something went wrong with writing");   
+                }
 	}
 
 	public void openWithDictionary(String filename, String dictionary) {
 		File file = new File(filename);
 		try {
 			evioWriter =
-			        new EvioCompactEventWriter(filename, dictionary, 0, 0, 10 * 2000, 10000, 8 * 1024 * 1024, writerByteOrder, null, true);
+                                new EventWriter(new File(filename),  null, true);
 			// new EventWriter(file, 1000000, 2,
 			// ByteOrder.BIG_ENDIAN, null, null);
 		} catch (EvioException ex) {
