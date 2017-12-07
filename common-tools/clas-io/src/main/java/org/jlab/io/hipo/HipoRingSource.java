@@ -21,11 +21,11 @@ import org.jlab.coda.xmsg.data.xMsgRegInfo;
 import org.jlab.coda.xmsg.excp.xMsgException;
 import org.jlab.coda.xmsg.net.xMsgProxyAddress;
 import org.jlab.coda.xmsg.net.xMsgRegAddress;
-import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.base.DataSourceType;
+import org.jlab.jnp.hipo.schema.SchemaFactory;
 import org.jlab.utils.options.OptionParser;
 
 /**

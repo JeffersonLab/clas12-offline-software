@@ -71,6 +71,17 @@ public class CodaEventDecoder {
 //        return this.triggerBank;
 //    }
     
+    private void printByteBuffer(ByteBuffer buffer, int max, int columns){
+        int n = max;
+        if(buffer.capacity()<max) n = buffer.capacity();
+        StringBuilder str = new StringBuilder();
+        for(int i = 0 ; i < n; i++){
+            str.append(String.format("%02X ", buffer.get(i)));
+            if( (i+1)%columns==0 ) str.append("\n");
+        }
+        System.out.println(str.toString());
+    }
+    
     public int getRunNumber(){
         return this.runNumber;
     }
@@ -239,7 +250,7 @@ public class CodaEventDecoder {
 
         if(node.getDataTypeObj()==DataType.INT32||node.getDataTypeObj()==DataType.UINT32){
             try {
-                int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(false));
+                int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
                 this.runNumber = intData[3];
                 this.eventNumber = intData[4];
                 /*System.out.println(" set run number and event nubmber = "
@@ -399,7 +410,11 @@ public class CodaEventDecoder {
                 return entries;
 
             } catch (EvioException ex) {
-                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
+                ByteBuffer     compBuffer = node.getByteData(true);
+                System.out.println("Exception in CRATE = " + crate + "  RUN = " + this.runNumber
+                + "  EVENT = " + this.eventNumber + " LENGTH = " + compBuffer.array().length);
+                this.printByteBuffer(compBuffer, 120, 20);
+//                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return entries;
@@ -716,7 +731,7 @@ public class CodaEventDecoder {
             EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
             for(EvioNode node : cbranch.getNodes()){
                 if(node.getTag()==57607){
-                    int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(false));
+                    int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
                     for(int loop = 0; loop < intData.length; loop++){
                         int  dataEntry = intData[loop];
                         int  slot      = DataUtils.getInteger(dataEntry, 27, 31 );
@@ -750,8 +765,8 @@ public class CodaEventDecoder {
             EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
             for(EvioNode node : cbranch.getNodes()){
                 if(node.getTag()==57610){
-                    long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(false));
-                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(false));
+                    long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(true));
+                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
                     DetectorDataDgtz entry = new DetectorDataDgtz(crate,0,0);
                     long tStamp = longData[2]&0x00000000ffffffff;
                     entry.setTimeStamp(tStamp);

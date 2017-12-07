@@ -3,7 +3,7 @@
 
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas12rec</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
 
@@ -11,6 +11,10 @@
     <repository>
       <id>clas12maven</id>
       <url>https://clasweb.jlab.org/clas12maven</url> 
+    </repository>
+    <repository>
+      <id>jnp-maven</id>
+      <url>https://clasweb.jlab.org/jhep/maven</url>
     </repository>
   </repositories>
 

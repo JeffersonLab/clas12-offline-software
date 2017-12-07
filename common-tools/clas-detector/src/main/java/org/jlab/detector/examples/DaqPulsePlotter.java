@@ -34,7 +34,6 @@ import org.jlab.detector.view.DetectorView2D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.IDataSet;
 import org.jlab.groot.graphics.EmbeddedCanvas;
-import org.jlab.groot.graphics.EmbeddedCanvasGroup;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -56,7 +55,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     DataSourceProcessorPane processorPane = null;
     
     //EmbeddedCanvasTabbed        canvasTab = new EmbeddedCanvasTabbed(true);
-    EmbeddedCanvasGroup        canvasTab = new EmbeddedCanvasGroup();
+    //EmbeddedCanvasGroup        canvasTab = new EmbeddedCanvasGroup();
     
     JComboBox  comboDetector = null;
     JComboBox  comboSector = null;
@@ -109,7 +108,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
         detectorView.getView().addDetectorListener(this);
         this.updateDetectorView();
         splitPane.setLeftComponent(detectorView);
-        splitPane.setRightComponent(canvasTab);
+       // splitPane.setRightComponent(canvasTab);
         
         pane.add(splitPane,BorderLayout.CENTER);
         //pane.add(canvasTab,BorderLayout.CENTER);
@@ -242,7 +241,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
                 //c.draw(h);
             }
             counter++;
-            this.canvasTab.setData(datasetList);
+            //this.canvasTab.setData(datasetList);
         }
     }
     
