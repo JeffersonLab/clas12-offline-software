@@ -22,7 +22,15 @@ public class TrackReader {
 
     private List<Line3d> _TrkLines;
     private double[] _Paths;
+    private int[] _TrkId;
 
+    public int[] getTrkId() {
+        return _TrkId;
+    }
+
+    public void setTrkId(int[] _TrkId) {
+        this._TrkId = _TrkId;
+    }
     public List<Line3d> get_TrkLines() {
         return _TrkLines;
     }
@@ -95,6 +103,7 @@ public class TrackReader {
             // fill the list of TOF hits
             this.set_TrkLines(trkLines);
             this.set_Paths(paths);
+            this.setTrkId(tid);
         }
     }
 

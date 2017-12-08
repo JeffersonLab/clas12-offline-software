@@ -90,12 +90,12 @@ public class CTOFEngine extends ReconstructionEngine {
         trkRead.fetch_Trks(event);
         List<Line3d> trkLines = trkRead.get_TrkLines();
         double[] paths = trkRead.get_Paths();
-
+        int[] ids = trkRead.getTrkId();
         List<Hit> hits = new ArrayList<Hit>(); // all hits
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for CTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths, 
+        hitRead.fetch_Hits(event, geometry, trkLines, paths, ids, 
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"),
