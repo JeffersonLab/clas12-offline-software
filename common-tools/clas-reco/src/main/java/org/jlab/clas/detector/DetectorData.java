@@ -169,7 +169,7 @@ public class DetectorData {
         DataBank bank = event.createBank(bank_name, particles.size());
         for(int row = 0; row < particles.size(); row++){
             bank.setInt("pid",row,particles.get(row).getPid());
-            System.out.println("PID = " + particles.get(row).getPid());
+            //System.out.println("PID = " + particles.get(row).getPid());
             bank.setByte("charge",row, (byte) particles.get(row).getCharge());
             bank.setFloat("px", row, (float) particles.get(row).vector().x());
             bank.setFloat("py", row, (float) particles.get(row).vector().y());
@@ -184,7 +184,7 @@ public class DetectorData {
             bank.setShort("status", row, (short) particles.get(row).getStatus());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
         }
-        System.out.println("++++++++++++++++++++");
+        //System.out.println("++++++++++++++++++++");
         return bank;
     }
     /**
