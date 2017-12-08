@@ -22,7 +22,16 @@ public class TrackReader {
 
     private List<Line3d> _TrkLines;
     private double[] _Paths;
+    private int[] _TrkId;
 
+    public int[] getTrkId() {
+        return _TrkId;
+    }
+
+    public void setTrkId(int[] _TrkId) {
+        this._TrkId = _TrkId;
+    }
+    
     public List<Line3d> get_TrkLines() {
         return _TrkLines;
     }
@@ -51,7 +60,7 @@ public class TrackReader {
 
         DataBank bank = event.getBank("CVTRec::Tracks");
         int rows = bank.rows();
-
+        int[] ids = new int[rows];
         double[] x = new double[rows]; // cross x-position in the lab at
         // the CTOF face
         double[] y = new double[rows]; // cross y-position in the lab at
@@ -77,7 +86,7 @@ public class TrackReader {
             double[] paths = new double[rows];
 
             for (int i = 0; i < rows; i++) {
-
+                ids[i] = bank.getShort("ID", i);
                 x[i] = bank.getFloat("c_x", i);
                 y[i] = bank.getFloat("c_y", i);
                 z[i] = bank.getFloat("c_z", i);
@@ -96,6 +105,7 @@ public class TrackReader {
             }
 
             // fill the list of TOF hits
+            this.setTrkId(ids);
             this.set_TrkLines(trkLines);
             this.set_Paths(paths);
         }
