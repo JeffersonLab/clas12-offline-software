@@ -263,7 +263,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		}
 	  
 		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
-event.show();
+
 		return true;
 	}
 
