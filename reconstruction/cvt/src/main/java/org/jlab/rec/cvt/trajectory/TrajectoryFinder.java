@@ -33,6 +33,8 @@ public class TrajectoryFinder {
      * @return a trajectory object
      */
     public Trajectory findTrajectory(int id, Helix helix, ArrayList<Cross> candCrossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, String isFinal) {
+        if(helix ==null)
+            return null;
         Trajectory traj = new Trajectory(helix);
         if (isFinal == "final") {
             traj.isFinal = true;
