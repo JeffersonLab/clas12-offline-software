@@ -1,6 +1,7 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.pow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +121,7 @@ public class EventBuilder {
 
             // Matching tracks to FTOF layer 1A detector.
             Double ftof1a_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A);
+            //System.out.println("FTOF1A Match Cut " + ftof1a_match_cut);
             int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, ftof1a_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -474,13 +476,41 @@ class TriggerOptions {
     public void setCharge(int ch) {
         this.charge = ch;
     }
+    
+    public int getSoftwareTriggerScore(DetectorParticle p) {
+        
+            Double ener = p.getEnergy(DetectorType.ECAL);
+            Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+            Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
+            double sfMean = t[0]*(t[1] + t[2]/ener + t[3]*pow(ener,-2));
+            double sfSigma = s[0];
+            double sf = p.getEnergyFraction(DetectorType.ECAL);
+            double sf_upper_limit = sfMean + 5*sfSigma;
+            double sf_lower_limit = sfMean - 5*sfSigma;
+        
+        
+        int score = 0;
+        if(p.getNphe(DetectorType.HTCC)>5){
+            score = score + 1000;
+        }
+        //if(p.getEnergyFraction(DetectorType.ECAL)>0.218){
+        if(sf >= sf_lower_limit) {
+            System.out.println("Sampling Fraction Success");
+            score = score + 100;
+        }
+        if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
+            score = score + 10;
+        }
+        //System.out.println(score);
+        return score;
+    }
 
     public boolean assignSoftwareTrigger(DetectorEvent event) {
         boolean flag = false;
         int npart = event.getParticles().size();
         for(int i = 0; i < npart; i++){
             DetectorParticle p = event.getParticle(i);
-            if(p.getSoftwareTriggerScore()>=this.score_requirement) { //Possible Electron
+            if(getSoftwareTriggerScore(p)>=this.score_requirement) { //Possible Electron
                 if(this.charge==p.getCharge()){
                     p.setPid(this.id);
 		    flag = true; //Software trigger found
