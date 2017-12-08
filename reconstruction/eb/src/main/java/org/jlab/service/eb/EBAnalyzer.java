@@ -182,20 +182,23 @@ public class EBAnalyzer {
                 (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
                 (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
             
-            Double mom = p.vector().mag();
+            Double ener = p.getEnergy(DetectorType.ECAL);
             Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
             Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
-            double sfMean = t[0]*pow(mom,0) + t[1]*pow(mom,-1) + t[2]*pow(mom,-2) + t[3]*pow(mom,-3);
-            double sfSigma = s[0]*pow(mom,0);
+            double sfMean = t[0]*(t[1] + t[2]/ener + t[3]*pow(ener,-2));
+            double sfSigma = s[0];
             double sf = p.getEnergyFraction(DetectorType.ECAL);
             double sf_upper_limit = sfMean + 5*sfSigma;
             double sf_lower_limit = sfMean - 5*sfSigma;
             
+
+            
             //System.out.println("Sampling Fraction Mean " + sfMean);
             //System.out.println("Sampling Fraction Sigma" + sfSigma);
             
-            boolean sfCheck = sf>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
-            //boolean sfCheck = sf< sf_upper_limit && sf > sf_lower_limit;
+            //boolean sfCheck = sf>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
+            boolean sfCheck = sf > sf_lower_limit;
+            //System.out.println(sf_lower_limit + " " + sf + " " + sf_upper_limit);
             
             boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
             
@@ -212,10 +215,7 @@ public class EBAnalyzer {
                         this.finalizePID(p, pid);
                         break;
                     }
-                    if(htccSignalCheck==true && sfCheck==true){
-                        this.finalizePID(p, pid);
-                        break;
-                    }
+
                 case 211:
                     if(vertexCheck==true && htccSignalCheck==true && sfCheck==false 
                             && htccPionThreshold==true) {
@@ -227,16 +227,6 @@ public class EBAnalyzer {
                         this.finalizePID(p, pid);
                         break;
                             } 
-//                    if(vertexCheck==true && ltccSignalCheck==true && sfCheck==false 
-//                            && ltccPionThreshold==true) {
-//                        this.finalizePID(p, pid);
-//                        break;
-//                            }
-//                    if(vertexCheck==false && ltccSignalCheck==true && sfCheck==false 
-//                            && ltccPionThreshold==true) {
-//                        this.finalizePID(p, pid);
-//                        break;
-//                            }  
                     if(vertexCheck==true && htccSignalCheck==false && sfCheck==false 
                             && htccPionThreshold==false) {
                         this.finalizePID(p, pid);
