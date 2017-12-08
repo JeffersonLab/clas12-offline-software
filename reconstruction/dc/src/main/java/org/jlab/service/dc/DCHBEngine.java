@@ -39,7 +39,7 @@ import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
-import org.jlab.utils.groups.IndexedTable;
+
 
 public class DCHBEngine extends ReconstructionEngine {
 
@@ -64,7 +64,8 @@ public class DCHBEngine extends ReconstructionEngine {
             DCSwimmer.getMagneticFields();
             String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
-                "/calibration/dc/time_to_distance/t2d",
+              //  "/calibration/dc/time_to_distance/t2d",
+                "/calibration/dc/time_to_distance/time2dist",
              //   "/calibration/dc/time_corrections/T0_correction",
             };
 
@@ -152,7 +153,8 @@ public class DCHBEngine extends ReconstructionEngine {
 		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
+		//hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
+		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
 
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
@@ -212,8 +214,9 @@ public class DCHBEngine extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
-		
+		//CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+
 		if(crosslist.size()==0) {
 			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
@@ -312,7 +315,7 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB   
             en2.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-            if (counter > 200) {
+            if (counter > 20) {
                 break;
             }
             //event.show();
