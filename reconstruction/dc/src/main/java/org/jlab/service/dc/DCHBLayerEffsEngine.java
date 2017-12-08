@@ -39,7 +39,6 @@ import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
-import org.jlab.utils.groups.IndexedTable;
 
 public class DCHBLayerEffsEngine extends ReconstructionEngine {
 
@@ -64,7 +63,8 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             DCSwimmer.getMagneticFields();
             String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
-                "/calibration/dc/time_to_distance/t2d",
+               // "/calibration/dc/time_to_distance/t2d",
+                "/calibration/dc/time_to_distance/time2dist",
               //  "/calibration/dc/time_corrections/T0_correction",
             };
 
@@ -104,13 +104,13 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-	//setRunConditionsParameters( event) ;
-        if(event.hasBank("RUN::config")==false ) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return true;
-	}
-		
-        DataBank bank = event.getBank("RUN::config");
+                //setRunConditionsParameters( event) ;
+                if(event.hasBank("RUN::config")==false ) {
+                    System.err.println("RUN CONDITIONS NOT READ!");
+                    return true;
+                }
+
+                DataBank bank = event.getBank("RUN::config");
 		
 		// Load the constants
 		//-------------------
@@ -123,7 +123,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
                     DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);
                     System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
                     Run = newRun;
-        }
+                }
 		 // init SNR
                 Clas12NoiseResult results = new Clas12NoiseResult();
 		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
@@ -152,7 +152,8 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 		
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
+		//hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
+                hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
 
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
@@ -212,7 +213,8 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
+		//CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 		
 		if(crosslist.size()==0) {
 			
@@ -261,7 +263,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		}
 	  
 		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
-
+event.show();
 		return true;
 	}
 
