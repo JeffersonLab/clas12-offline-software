@@ -16,6 +16,14 @@ public class TrackSeeder {
 
     public TrackSeeder() {
         
+        sortedClusters = new ArrayList<ArrayList<ArrayList<Cluster>>>();
+        
+        for(int b =0; b<36; b++) {
+            sortedClusters.add(b, new ArrayList<ArrayList<Cluster>>() );
+            for(int l =0; l<6; l++) {
+                sortedClusters.get(b).add(l,new ArrayList<Cluster>() );
+            }
+        }
     }
 
     private List<ArrayList<Cluster>> seedClusters = new ArrayList<ArrayList<Cluster>>();
@@ -24,9 +32,9 @@ public class TrackSeeder {
 
     public void FindSeedClusters(List<Cluster> SVTclusters) {
         
-        seedClusters.clear(); 
-        for(int si1 = 0; si1<seedClusters.size(); si1++)
-            seedClusters.get(si1).clear();
+        seedClusters.removeAll(seedClusters); 
+        //for(int si1 = 0; si1<seedClusters.size(); si1++)
+        //    seedClusters.get(si1).clear();
 
         List<ArrayList<Cluster>> phi0 = FindSeedClustersFixedBin(SVTclusters, phiShift[0]);
         
@@ -47,96 +55,74 @@ public class TrackSeeder {
             }
         }
     }
+   
+    List<ArrayList<ArrayList<Cluster>>> sortedClusters;
     
     public List<ArrayList<Cluster>> FindSeedClustersFixedBin(List<Cluster> SVTclusters, double phiShift) {
-        
-        int NbLayers = Constants.NLAYR;
-        Collections.sort(SVTclusters);
-        
-        int[] L = new int[6];
+            for(int b =0; b<36; b++) {
+                for(int l =0; l<6; l++) {
+                sortedClusters.get(b).get(l).clear();
+            }
+        }
         List<ArrayList<Cluster>> inseedClusters = new ArrayList<ArrayList<Cluster>>();
-        
-        List<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
-        List<ArrayList<Cluster>> inputClusters = new ArrayList<ArrayList<Cluster>>();
-        for(int l =0; l<6; l++) {
-            sortedClusters.add(l,new ArrayList<Cluster>() );
-        }
-        
+        int[][] LPhi = new int[36][6];
         for (int i = 0; i < SVTclusters.size(); i++) {
-            sortedClusters.get(SVTclusters.get(i).get_Layer() - 1).add(SVTclusters.get(i));
-            L[SVTclusters.get(i).get_Layer() - 1]++;
-        }
-        for(int l =0; l<6; l++) {
-            if(L[l]==0)
-                L[l]=1;
-        }
-        
-        for(int l1 =0; l1<L[0]; l1++) 
-            for(int l2 =0; l2<L[1]; l2++) 
-                for(int l3 =0; l3<L[2]; l3++) 
-                    for(int l4 =0; l4<L[3]; l4++) 
-                        for(int l5 =0; l5<L[4]; l5++) 
-                            for(int l6 =0; l6<L[5]; l6++) {
-                                ArrayList<Cluster> listClusters = new ArrayList<Cluster>();
-                                if(sortedClusters.get(0).size()>0 && sortedClusters.get(0).get(l1)!=null)
-                                    listClusters.add(sortedClusters.get(0).get(l1));
-                                if(sortedClusters.get(1).size()>0 && sortedClusters.get(1).get(l2)!=null)
-                                    listClusters.add(sortedClusters.get(1).get(l2));
-                                if(sortedClusters.get(2).size()>0 && sortedClusters.get(2).get(l3)!=null)
-                                    listClusters.add(sortedClusters.get(2).get(l3));
-                                if(sortedClusters.get(3).size()>0 && sortedClusters.get(3).get(l4)!=null)
-                                    listClusters.add(sortedClusters.get(3).get(l4));
-                                if(sortedClusters.get(4).size()>0 && sortedClusters.get(4).get(l5)!=null)
-                                    listClusters.add(sortedClusters.get(4).get(l5));
-                                if(sortedClusters.get(5).size()>0 && sortedClusters.get(5).get(l6)!=null)
-                                    listClusters.add(sortedClusters.get(5).get(l6));
-                                if(listClusters.size()>0) {
-                                    inputClusters.add(listClusters);
-                                }
-                            }
-        
-        int nphiBins = 36;
-        for(int g =0; g<inputClusters.size(); g++ ) {
-            Cluster[][]ClsArray = new Cluster[nphiBins][NbLayers];
+            double phi = Math.toDegrees(SVTclusters.get(i).get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
 
-            for (int i = 0; i < inputClusters.get(g).size(); i++) {
-                double phi = Math.toDegrees(inputClusters.get(g).get(i).get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
-
-                phi += phiShift;
-                if (phi < 0) {
-                    phi += 360;
-                }
-
-                int binIdx = (int) (phi / nphiBins);
-
-                if(ClsArray[binIdx][inputClusters.get(g).get(i).get_Layer() - 1]==null) {
-                    ClsArray[binIdx][inputClusters.get(g).get(i).get_Layer() - 1] = inputClusters.get(g).get(i);
-
-                } 
-
+            phi += phiShift;
+            if (phi < 0) {
+                phi += 360;
             }
 
-            for (int b = 0; b < nphiBins; b++) {
-
-                if (ClsArray[b] != null) {
-                    ArrayList<Cluster> hits = new ArrayList<Cluster>();
-
+            int binIdx = (int) (phi / 36);
+            sortedClusters.get(binIdx).get(SVTclusters.get(i).get_Layer() - 1).add(SVTclusters.get(i));
+            LPhi[binIdx][SVTclusters.get(i).get_Layer() - 1]++; 
+        }
+        
+        
+        for (int b = 0; b < 36; b++) {
+            int max_layers =0;
+            for (int la = 0; la < 6; la++) {
+                if(LPhi[b][la]>0)
+                    max_layers++;
+            }
+            if (sortedClusters.get(b) != null && max_layers>3) { 
+                double SumLyr=0;
+                while(LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5]>=max_layers) {
+                    if(SumLyr!=LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5]) {
+                        SumLyr = LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5];
+                    } 
+                    ArrayList<Cluster> hits = new ArrayList<Cluster>(); 
                     for (int la = 0; la < 6; la++) {
 
-                        if (ClsArray[b][la] != null) {
-                            hits.add(ClsArray[b][la]); 
+                        if (sortedClusters.get(b).get(la) != null && LPhi[b][la]>0) { 
+                            if (sortedClusters.get(b).get(la).get(LPhi[b][la]-1) != null && sortedClusters.get(b).get(la).get(LPhi[b][la]-1).size()>0) {
+                                hits.add(sortedClusters.get(b).get(la).get(LPhi[b][la]-1)); 
+                               
+                                 if(LPhi[b][la]>1)
+                                    LPhi[b][la]--; 
+                                 if(SumLyr==max_layers)
+                                     LPhi[b][la]=0; 
+                            }
                         }
 
                     }
+                   
                     if (hits.size() > 3) {
                         inseedClusters.add(hits);
                     }
+                    
                 }
+                
             }
         }
+       
         return inseedClusters;
-
     }
+
+    
+
+    
     private List<Double> Xs = new ArrayList<Double>();
     private List<Double> Ys = new ArrayList<Double>();
     private List<Double> Ws = new ArrayList<Double>();

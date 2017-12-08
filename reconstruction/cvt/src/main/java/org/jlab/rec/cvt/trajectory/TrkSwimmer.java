@@ -74,7 +74,8 @@ public class TrkSwimmer {
 
     public void SetSwimParameters(Helix helix,
             double maxPathLength, int charge, double p) {
-
+        if(helix==null)
+            return;
         _maxPathLength = maxPathLength;
         _charge = charge;
         _phi = Math.toDegrees(helix.get_phi_at_dca());
