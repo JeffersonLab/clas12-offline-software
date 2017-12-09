@@ -561,7 +561,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 					CedTests.swimTest(false);
 				}
 				else if (source == mtitem) {
-					CedTests.edgeTest(false);
+					CedTests.edgeTest(true);
 				}
 
 			}

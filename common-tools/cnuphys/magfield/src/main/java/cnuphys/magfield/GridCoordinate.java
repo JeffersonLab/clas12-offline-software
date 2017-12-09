@@ -84,7 +84,8 @@ public class GridCoordinate {
 		
 		if (_isUniform) {
 			int uindex = (int) ((val-_min)/_delta);
-			uindex = Math.max(0,  Math.min(uindex, (_numPoints - 2)));
+//			uindex = Math.max(0,  Math.min(uindex, (_numPoints - 2)));
+			uindex = Math.max(0,  Math.min(uindex, (_numPoints - 1)));
 			return uindex;
 		}
 

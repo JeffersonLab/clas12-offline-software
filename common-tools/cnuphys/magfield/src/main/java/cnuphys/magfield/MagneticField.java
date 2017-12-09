@@ -375,7 +375,7 @@ public abstract class MagneticField implements IField {
 	 *            the index in the q3 direction
 	 * @return the composite index (buffer offset)
 	 */
-	protected final int getCompositeIndex(int n1, int n2, int n3) {
+	public final int getCompositeIndex(int n1, int n2, int n3) {
 		// if (N23 < 1) { // first time
 		// N3 = q3Coordinate.getNumPoints();
 		// N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
@@ -889,11 +889,15 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the B1 at the given index.
 	 */
-	protected final float getB1(int index) {
+	public final float getB1(int index) {
 		int i = 3 * index;
 
 		try {
-			return field.get(i);
+			if (i >= field.limit()) {
+				return 0f;
+			}
+			float val = field.get(i);
+			return val;
 		}
 		catch (IndexOutOfBoundsException e) {
 			System.err.println("error in mag field index1 = " + index);
@@ -909,9 +913,13 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the B2 at the given index.
 	 */
-	protected final float getB2(int index) {
-		int i = 3 * index;
-		return field.get(i + 1);
+	public final float getB2(int index) {
+		int i = 1 + 3 * index;
+		if (i >= field.limit()) {
+			return 0f;
+		}
+		float val = field.get(i);
+		return val;
 	}
 
 	/**
@@ -921,9 +929,13 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the B3 at the given index.
 	 */
-	protected final float getB3(int index) {
-		int i = 3 * index;
-		return field.get(i + 2);
+	public final float getB3(int index) {
+		int i = 2 + 3 * index;
+		if (i >= field.limit()) {
+			return 0f;
+		}
+		float val = field.get(i);
+		return val;
 	}
 
 	/**
@@ -1212,46 +1224,5 @@ public abstract class MagneticField implements IField {
 
 	}
 	
-	 public static final class Riven {
-
-	        private static final int SIN_BITS, SIN_MASK, SIN_COUNT;
-	        private static final float radFull, radToIndex;
-	        private static final float degFull, degToIndex;
-	        private static final float[] sin, cos;
-
-	        static {
-	            SIN_BITS = 12;
-	            SIN_MASK = ~(-1 << SIN_BITS);
-	            SIN_COUNT = SIN_MASK + 1;
-
-	            radFull = (float) (Math.PI * 2.0);
-	            degFull = (float) (360.0);
-	            radToIndex = SIN_COUNT / radFull;
-	            degToIndex = SIN_COUNT / degFull;
-
-	            sin = new float[SIN_COUNT];
-	            cos = new float[SIN_COUNT];
-
-	            for (int i = 0; i < SIN_COUNT; i++) {
-	                sin[i] = (float) Math.sin((i + 0.5f) / SIN_COUNT * radFull);
-	                cos[i] = (float) Math.cos((i + 0.5f) / SIN_COUNT * radFull);
-	            }
-
-	            // Four cardinal directions (credits: Nate)                                                                                                                                                         
-	            for (int i = 0; i < 360; i += 90) {
-	                sin[(int) (i * degToIndex) & SIN_MASK] = (float) Math.sin(i * Math.PI / 180.0);
-	                cos[(int) (i * degToIndex) & SIN_MASK] = (float) Math.cos(i * Math.PI / 180.0);
-	            }
-	        }
-
-	        public static final float sin(float rad) {
-	            return sin[(int) (rad * radToIndex) & SIN_MASK];
-	        }
-
-	        public static final float cos(float rad) {
-	            return cos[(int) (rad * radToIndex) & SIN_MASK];
-	        }
-	    }
-
 
 }
