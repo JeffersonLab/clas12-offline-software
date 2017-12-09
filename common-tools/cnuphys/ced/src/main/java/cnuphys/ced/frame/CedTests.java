@@ -9,9 +9,12 @@ import cnuphys.bCNU.component.TextAreaWriter;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.GridCoordinate;
 import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.Torus;
 import cnuphys.magfield.TorusMap;
+import cnuphys.magfield.TorusProbe;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.splot.example.APlotDialog;
 import cnuphys.splot.fit.FitType;
@@ -29,30 +32,254 @@ import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
 
 public class CedTests {
+	
+	final static double RHO = 72.0;   //cm
+	final static double Z = 360.0;    //cm
+
 
 	protected static void edgeTest(boolean probeCache) {
 		System.out.println("Edge test. Using probes: " + probeCache);
 		FieldProbe.cache(probeCache);
 		
+		TextDisplayDialog dialog = new TextDisplayDialog("Some Magfield Test Results");
+		dialog.setVisible(true);
+		TextAreaWriter writer = dialog.getWriter();
 
+		//two maps used in tests
+		TorusMap tmap2 = TorusMap.FULL_025;
+		TorusMap tmap1 = TorusMap.FULL_200;
+		
 		TorusMap currentTmap = MagneticFields.getInstance().getTorusMap();
 
-		makeBPlot(TorusMap.SYMMETRIC).setVisible(true);
-		makeBPlot(TorusMap.FULL_200).setVisible(true);
+		makeBPlot(tmap1).setVisible(true);
+		makeBPlot(tmap2).setVisible(true);
 		
-		makeDiffPlot(TorusMap.SYMMETRIC, TorusMap.FULL_200).setVisible(true);
+		makeDiffPlot(tmap1, tmap2).setVisible(true);
+		
+		crossBoundary(writer, tmap1, tmap2);
 		
 		MagneticFields.getInstance().setTorus(currentTmap);
 		FieldProbe.cache(true);
 	}
 	
-	private static APlotDialog makeDiffPlot(TorusMap tmap1, TorusMap tmap2) {
+	private static void crossBoundary(TextAreaWriter writer, TorusMap tmap1, TorusMap tmap2) {
+		FieldProbe.cache(false);
+		
+		double phi0 = 29;
+		double phi1 = phi0+2;
+		int n = 101;
+		double dphi = (phi1 - phi0)/(n-1);
+
+		float[] field = new float[3];
+		double phi[] = new double[n];
+		final double b1x[] = new double[n];
+		final double b1y[] = new double[n];
+		final double b1z[] = new double[n];
+		final double b2x[] = new double[n];
+		final double b2y[] = new double[n];
+		final double b2z[] = new double[n];
+
+		final double xdiff[] = new double[n];
+		final double ydiff[] = new double[n];
+		final double zdiff[] = new double[n];
+
+		
+		for (int i = 0; i < n; i++) {
+			phi[i] = phi0 + (i*dphi);
+		}
+		
+		MagneticFields.getInstance().setTorus(tmap1);
+		double magicVal = 29.9;
+		
+		Torus torus = MagneticFields.getInstance().getTorus();
+
+		FieldProbe probe = FieldProbe.factory(torus);
+		
+		writer.writeln("-----------------");
+		probe.fieldCylindrical(29.75, 70., 358., field);
+		writer.writeln(String.format("BG0 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(29.75, 70., 360., field);
+		writer.writeln(String.format("BG1 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		
+		probe.fieldCylindrical(29.75, 72., 358., field);
+		writer.writeln(String.format("BG2 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(29.75, 72., 360., field);
+		writer.writeln(String.format("BG3 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+
+		probe.fieldCylindrical(30.0, 70., 358., field);
+		writer.writeln(String.format("BG4 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(30.0, 70., 360., field);
+		writer.writeln(String.format("BG5 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+
+		probe.fieldCylindrical(30.0, 72., 358., field);
+		writer.writeln(String.format("BG6 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(30.0, 72., 360., field);
+		writer.writeln(String.format("BG7 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(29.9, 72., 360., field);
+		writer.writeln(String.format("BT (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		
+		int index1 = 7506285;
+		writer.writeln("B1 at index " + index1 + " = " + torus.getB1(index1));
+		int index2 = 7569286;
+		writer.writeln("B1 at index " + index2 + " = " + torus.getB1(index2));
+		
+		writer.writeln("-----------------");
 		
 		
-		final double rho = 70;   //cm
-		final double z = 360;    //cm
 		
-		int n = 10000;
+		for (int i = 0; i < n; i++) {
+			probe.fieldCylindrical(phi[i], RHO, Z, field);
+			b1x[i] = field[0];
+			b1y[i] = field[1];
+			b1z[i] = field[2];
+			
+			if (Math.abs(phi[i]-magicVal) < 1.0e-8) {
+				writer.writeln("Map 1 probe at " + magicVal);
+				writer.writeln(String.format("B (%5e, %5e, %5e)", field[0], field[1], field[2]));
+				
+			
+				writeIndexInfo(writer, phi[i]);
+				
+				
+				writer.writeln(probe.toString());
+			
+			}
+		}
+		
+		MagneticFields.getInstance().setTorus(tmap2);
+		
+		torus = MagneticFields.getInstance().getTorus();
+
+		
+		probe = FieldProbe.factory(torus);
+		
+		writer.writeln("-----------------");
+		probe.fieldCylindrical(29.75, 70., 358., field);
+		writer.writeln(String.format("BG0 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(29.75, 70., 360., field);
+		writer.writeln(String.format("BG1 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		
+		probe.fieldCylindrical(29.75, 72., 358., field);
+		writer.writeln(String.format("BG2 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(29.75, 72., 360., field);
+		writer.writeln(String.format("BG3 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+
+		probe.fieldCylindrical(30.0, 70., 358., field);
+		writer.writeln(String.format("BG4 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(30.0, 70., 360., field);
+		writer.writeln(String.format("BG5 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+
+		probe.fieldCylindrical(30.0, 72., 358., field);
+		writer.writeln(String.format("BG6 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(30.0, 72., 360., field);
+		writer.writeln(String.format("BG7 (%5e, %5e, %5e)", field[0], field[1], field[2]));
+		probe.fieldCylindrical(29.9, 72., 360., field);
+		writer.writeln(String.format("BT (%5e, %5e, %5e)", field[0], field[1], field[2]));
+
+		writer.writeln("B1 at index " + index1 + " = " + torus.getB1(index1));
+		writer.writeln("B1 at index " + index2 + " = " + torus.getB1(index2));
+
+		writer.writeln("-----------------");
+
+
+		
+		for (int i = 0; i < n; i++) {
+			probe.fieldCylindrical(phi[i], RHO, Z, field);
+			b2x[i] = field[0];
+			b2y[i] = field[1];
+			b2z[i] = field[2];
+
+			if (Math.abs(phi[i]-magicVal) < 1.0e-8) {
+				writer.writeln("Map 2 probe at " + magicVal);
+				writer.writeln(String.format("B (%5e, %5e, %5e)", field[0], field[1], field[2]));
+				
+				writeIndexInfo(writer, phi[i]);
+				
+				
+				writer.writeln(probe.toString());
+			}
+			
+			xdiff[i] = safeDiff(b1x[i], b2x[i]);
+			ydiff[i] = safeDiff(b1y[i], b2y[i]);
+			zdiff[i] = safeDiff(b1z[i], b2z[i]);
+		}
+
+		
+		for (int i = 0; i < n; i++) {
+			writer.writeln(String.format("%-10.3f  %5e  %5e  %5e ", phi[i], b1x[i], b2x[i], xdiff[i]));
+		}
+
+
+	}
+	
+	private static void writeIndexInfo(TextAreaWriter writer, double phi) {
+		Torus torus = MagneticFields.getInstance().getTorus();
+		GridCoordinate phiCoordinate = torus.getPhiCoordinate();
+		GridCoordinate rhoCoordinate = torus.getRCoordinate();
+		GridCoordinate zCoordinate = torus.getZCoordinate();
+		int n0 = phiCoordinate.getIndex(phi);
+		int n1 = rhoCoordinate.getIndex(RHO);
+		int n2 = zCoordinate.getIndex(Z);
+		writer.writeln("N = [" + n0 + ", " + n1 + ", " + n2 + "]");
+		double f0 = phiCoordinate.getFraction(phi, n0);
+		double f1 = rhoCoordinate.getFraction(RHO, n1);
+		double f2 = zCoordinate.getFraction(Z, n2);
+
+		writer.writeln(String.format("F: (%-10.5f, %-10.5f, %-10.5f)", f0, f1, f2));
+		
+		//composite indices
+		
+		int i000 = torus.getCompositeIndex(n0, n1, n2);
+		int i001 = i000 + 1;
+
+		int i010 = torus.getCompositeIndex(n0, n1 + 1, n2);
+		int i011 = i010 + 1;
+
+		int i100 = torus.getCompositeIndex(n0 + 1, n1, n2);
+		int i101 = i100 + 1;
+
+		int i110 = torus.getCompositeIndex(n0 + 1, n1 + 1, n2);
+		int i111 = i110 + 1;
+		writer.writeln("COMPIDX = [" + i000 + ", " + i010 + ", " + i100 + ", " + i110 + "]");
+		
+		double b000 = torus.getB1(i000);
+		double b010 = torus.getB1(i010);
+		double b100 = torus.getB1(i100);
+		double b110 = torus.getB1(i110);
+		
+		double b001 = torus.getB1(i001);
+		double b011 = torus.getB1(i011);
+		double b101 = torus.getB1(i101);
+		double b111 = torus.getB1(i111);
+		
+		
+		writer.writeln(String.format("Bindx  (%5e, %5e, %5e, %5e)", b000/10, b010/10, b100/10, b110/10));
+		writer.writeln(String.format("Bindx+ (%5e, %5e, %5e, %5e)", b001/10, b011/10, b101/10, b111/10));
+
+//		double b001 = torus.getB1(i001);
+//		double b011 = torus.getB1(i011);
+//		double b101 = torus.getB1(i101);
+//		double b111 = torus.getB1(i111);
+
+		
+	}
+	
+	private static final double epsilon = 1.0e-8;
+	private static double safeDiff(double a, double b) {
+		double diff = b-a;
+		if (Math.abs(diff) < epsilon) {
+			return 0;
+		}
+		double big = Math.max(Math.abs(a), Math.abs(b));
+		return 100.*diff/big;
+		
+	}
+	
+	//plot the differences of the components
+	private static APlotDialog makeDiffPlot(final TorusMap tmap1, final TorusMap tmap2) {
+		
+			
+		int n = 50000;
 		double dphi = 360.0/n;
 		
 		n = n + 3;
@@ -84,23 +311,23 @@ public class CedTests {
 		MagneticFields.getInstance().setTorus(tmap1);
 
 		for (int i = 0; i < n; i++) {
-			MagneticFields.getInstance().getActiveField().fieldCylindrical(phi[i], rho, z, field);
+			MagneticFields.getInstance().getActiveField().fieldCylindrical(phi[i], RHO, Z, field);
 			b1x[i] = field[0];
 			b1y[i] = field[1];
 			b1z[i] = field[2];
 			
-			b1mag[i] = MagneticFields.getInstance().getActiveField().fieldMagnitudeCylindrical(phi[i], rho, z);
+			b1mag[i] = MagneticFields.getInstance().getActiveField().fieldMagnitudeCylindrical(phi[i], RHO, Z);
 			
 		}
 		
 		MagneticFields.getInstance().setTorus(tmap2);
 		for (int i = 0; i < n; i++) {
-			MagneticFields.getInstance().getActiveField().fieldCylindrical(phi[i], rho, z, field);
+			MagneticFields.getInstance().getActiveField().fieldCylindrical(phi[i], RHO, Z, field);
 			b2x[i] = field[0];
 			b2y[i] = field[1];
 			b2z[i] = field[2];
 			
-			b2mag[i] = MagneticFields.getInstance().getActiveField().fieldMagnitudeCylindrical(phi[i], rho, z);
+			b2mag[i] = MagneticFields.getInstance().getActiveField().fieldMagnitudeCylindrical(phi[i], RHO, Z);
 			
 		}
 
@@ -115,7 +342,7 @@ public class CedTests {
 
 			@Override
 			protected String[] getColumnNames() {
-				String cn[] = {"Phi", "Bx Diff", "By Diff", "10x(Bz Diff)", "BMag Diff"};
+				String cn[] = {"Phi", "Bx Diff", "By Diff", "100x(Bz Diff)", "BMag Diff"};
 				return cn;
 			}
 
@@ -126,12 +353,12 @@ public class CedTests {
 
 			@Override
 			protected String getYAxisLabel() {
-				return "B (kG)";
+				return "Component Diff (kG)";
 			}
 
 			@Override
 			protected String getPlotTitle() {
-				return "B Differences ";
+				return "B Diff " + tmap1.getName() + " v " + tmap2.getName();
 			}
 
 			@Override
@@ -141,7 +368,7 @@ public class CedTests {
 				for (int i = 0; i < phi.length; i++) {
 
 					try {
-						ds.add(phi[i], b1x[i]-b2x[i], b1y[i]-b2y[i], 10*(b1z[i]-b2z[i]), b1mag[i]-b2mag[i]);
+						ds.add(phi[i], b1x[i]-b2x[i], b1y[i]-b2y[i], 100*(b1z[i]-b2z[i]), b1mag[i]-b2mag[i]);
 					}
 					catch (DataSetException e) {
 						e.printStackTrace();
@@ -165,13 +392,18 @@ public class CedTests {
 				ycols.get(2).getStyle().setLineColor(Color.green);
 				
 				PlotTicks ticks = _canvas.getPlotTicks();
+				ticks.setNumMajorTickY(6);
 				ticks.setNumMajorTickX(5);
 				
 				PlotParameters params = _canvas.getParameters();
 //				params.mustIncludeXZero(true);
 //				params.mustIncludeYZero(true);
-				params.setYRange(-.01, 0.01);
-				params.setXRange(0, 360);
+				params.setYRange(-.070, .070);
+				params.setXRange(0, 180);
+				
+				params.setNumDecimalY(3);
+				params.setMinExponentX(4);
+				params.setMinExponentY(4);
 
 				params.addPlotLine(new HorizontalLine(_canvas, 0));
 //				params.addPlotLine(new HorizontalLine(_canvas, 1));
@@ -181,9 +413,9 @@ public class CedTests {
 				params.addPlotLine(new VerticalLine(_canvas, 210));
 				params.addPlotLine(new VerticalLine(_canvas, 270));
 				params.addPlotLine(new VerticalLine(_canvas, 330));
+								
 				
-				
-				params.setExtraStrings(String.format("rho = %-4.0f cm   z = %-5.0f cm", rho, z));
+				params.setExtraStrings(String.format("rho = %-4.0f cm   z = %-5.0f cm", RHO, Z));
 				params.setExtraDrawing(true);
 				
 				
@@ -196,14 +428,11 @@ public class CedTests {
 
 	}
 	
-	
+	//plot the components
 	private static APlotDialog makeBPlot(TorusMap tmap) {
 		//make a plot
 		MagneticFields.getInstance().setTorus(tmap);
 
-		final double rho = 70;   //cm
-		final double z = 360;    //cm
-		
 		int n = 10000;
 		double dphi = 360.0/n;
 		
@@ -230,12 +459,12 @@ public class CedTests {
 		final double bmag[] = new double[n];
 		
 		for (int i = 0; i < n; i++) {
-			MagneticFields.getInstance().getActiveField().fieldCylindrical(phi[i], rho, z, field);
+			MagneticFields.getInstance().getActiveField().fieldCylindrical(phi[i], RHO, Z, field);
 			bx[i] = field[0];
 			by[i] = field[1];
 			bz[i] = field[2];
 			
-			bmag[i] = MagneticFields.getInstance().getActiveField().fieldMagnitudeCylindrical(phi[i], rho, z);
+			bmag[i] = MagneticFields.getInstance().getActiveField().fieldMagnitudeCylindrical(phi[i], RHO, Z);
 			
 		}
 		
@@ -318,7 +547,7 @@ public class CedTests {
 				params.addPlotLine(new VerticalLine(_canvas, 330));
 				
 				
-				params.setExtraStrings(String.format("rho = %-4.0f cm   z = %-5.0f cm", rho, z));
+				params.setExtraStrings(String.format("rho = %-4.0f cm   z = %-5.0f cm", RHO, Z));
 				params.setExtraDrawing(true);
 				
 				

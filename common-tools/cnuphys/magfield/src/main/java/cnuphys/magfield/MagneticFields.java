@@ -11,6 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -692,6 +694,10 @@ public class MagneticFields {
 			_torus.setScaleFactor(scaleFact);
 		}
 		
+//		float B1A = _torus.getB1(7506285);
+//		float B1B = _torus.getB1(7569286);
+//		System.err.println("B1's   " + B1A + "     " + B1B);
+		
 		
 		makeComposites();
 		setActiveField(ftype);
@@ -1143,13 +1149,14 @@ public class MagneticFields {
 //				new Thread(runner).start();
 				
 				//create full field torus
-//				mf.createFullTorus(0);
-//				mf.createFullTorus(1);
-//				mf.createFullTorus(2);
-//				mf.createFullTorus(3);
-//				mf.createFullTorus(4);
-//				mf.createFullTorus(5);
-//				mf.createFullTorus(6);
+//				mf.createFullTorus(7); //experimental
+				mf.createFullTorus(0);
+				mf.createFullTorus(1);
+				mf.createFullTorus(2);
+				mf.createFullTorus(3);
+				mf.createFullTorus(4);
+				mf.createFullTorus(5);
+				mf.createFullTorus(6);
 //				mf.differentTorusTest(10000);
 			}
 		});
@@ -1246,23 +1253,28 @@ public class MagneticFields {
 		
 //		int modnum[] = {0, 2, 3, 4, 5, 6, 8};
 		String pstfix[] = {"_0.25", "_0.50", "_0.75", "_1.00", 
-				"_1.25", "_1.50", "_2.00"};
-		int nphi[] = {1441, 721, 481, 361, 289, 241, 181};
-		double dphi[] = {0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.00};
+				"_1.25", "_1.50", "_2.00", "_0.25E"};
+		int nphi[] = {1441, 721, 481, 361, 289, 241, 181, 1441};
+		double dphi[] = {0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.00, 0.25};
 		
 		
 		Torus torus = MagneticFields.getInstance()._torus;
-		
+
 		if (torus != null) {
-			String binaryFileName = "../../../data/clas12TorusFull" + pstfix[opt]+ ".dat";
-			
+			String binaryFileName = "../../../data/clas12TorusFull" + pstfix[opt] + ".dat";
+
 			File file = new File(binaryFileName);
 			if (file.exists()) {
-				try {
-					System.out.println(file.getCanonicalPath() + " already exists. Not overwriting. Delete it first if you want to remake.");
-					return;
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (opt == 7) {
+					file.delete();
+				} else {
+					try {
+						System.out.println(file.getCanonicalPath()
+								+ " already exists. Not overwriting. Delete it first if you want to remake.");
+						return;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			
@@ -1307,11 +1319,23 @@ public class MagneticFields {
 				dos.writeFloat(zmin);
 				dos.writeFloat(zmax);
 				dos.writeInt(nZ);
+				
+				//write reserved
 				dos.writeInt(0);
 				dos.writeInt(0);
 				dos.writeInt(0);
 				dos.writeInt(0);
 				dos.writeInt(0);
+				
+				int size = 3 * 4 * nPhi * nRho * nZ;
+				System.err.println("FILE SIZE = " + size + " bytes");
+
+				byte bytes[] = new byte[size];
+				
+				ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+				FloatBuffer field = byteBuffer.asFloatBuffer();
+
+				
 				
 
 				float result[] = new float[3];
@@ -1319,31 +1343,65 @@ public class MagneticFields {
 				double oldScale = torus.getScaleFactor();
 				torus.setScaleFactor(1.0);
 				
-				torus.setInterpolate(false);
+				torus.setInterpolate(true);
 
+				int index = 0;
+				int index1 = 7506285;
+				int index2 = 7569286;	
+								
+
+				
 				for (int phiIndex = 0; phiIndex < nPhi; phiIndex++) {
 
-	//				if ((opt == 0) || ((phiIndex % modnum[opt]) == 0)) {
+					// if ((opt == 0) || ((phiIndex % modnum[opt]) == 0)) {
 
-						double phi = phiIndex * dp;
+					double phi = phiIndex * dp;
+
+					if ((phiIndex % 8) == 0) {
 						System.err.println("phi = " + phi);
-						for (int rhoIndex = 0; rhoIndex < nRho; rhoIndex++) {
+					}
+					for (int rhoIndex = 0; rhoIndex < nRho; rhoIndex++) {
 							double rho = rhoIndex * dRho;
 							for (int zIndex = 0; zIndex < nZ; zIndex++) {
 								double z = zmin + zIndex * dZ;
 
 								torus.fieldCylindrical(phi, rho, z, result);
+								
+//								if ((opt == 7) && (index == index2)) {
+//									System.err.println("writing bad tagged values on purpose");
+//									result[0] = 2.22222f;
+//									result[1] = 3.33333f;
+//									result[2] = 1.11111f;
+//								}
+								
+								
+//								dos.writeFloat(result[0]);
+//								dos.writeFloat(result[1]);
+//	
+//								dos.writeFloat(result[2]);
+								
+								if ((index == index1) || (index == index2)) {
+//									torus.fieldCylindrical(phi, rho, z, result);
+									System.err.println(String.format("B at index = %d = (%5e, %5e, %5e)", index, result[0], result[1], result[2]));
+									System.err.println("Phi = " + phi + "  rho = " + rho + "   z = " + z);
+								}
+								
+							//	if (index == index2) System.exit(1);
+								
+								int xindex = 3*index;
+								field.put(xindex, result[0]);
+								field.put(xindex+1, result[1]);
+								field.put(xindex+2, result[2]);
 
-								dos.writeFloat(result[0]);
-								dos.writeFloat(result[1]);
-								dos.writeFloat(result[2]);
-
+								index++;
 							}
 
 						}
 //					}
 				}
 				
+				dos.write(bytes);
+
 				torus.setScaleFactor(oldScale);
 				torus.setInterpolate(true);
 
@@ -1356,6 +1414,13 @@ public class MagneticFields {
 			}
 
 		
+			if ((opt == 0) || (opt == 7)) {
+				setTorus(TorusMap.FULL_025);
+				float B1A = _torus.getB1(7506285);
+				float B1B = _torus.getB1(7569286);
+				System.err.println("B1's   " + B1A + "     " + B1B);
+
+			}
 		}
 		else {
 			System.err.println("\nNo torus from which to create full torus.");

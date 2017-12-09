@@ -84,7 +84,10 @@ public class Torus extends MagneticField {
 			return;
 		}
 
-		if (phi < 0.0) {
+		while (phi >= 360.0) {
+			phi -= 360.0;
+		}
+		while (phi < 0.0) {
 			phi += 360.0;
 		}
 		

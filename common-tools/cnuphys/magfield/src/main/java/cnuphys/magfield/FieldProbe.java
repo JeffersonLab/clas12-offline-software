@@ -15,6 +15,14 @@ public abstract class FieldProbe implements IField {
 	public FieldProbe(IField field) {
 		_field = field;
 	}
+	
+	/**
+	 * Get the underlying field
+	 * @return the field that backs this probe
+	 */
+	public IField getField() {
+		return _field;
+	}
 
 	/**
 	 * Turn the caching on or off globally

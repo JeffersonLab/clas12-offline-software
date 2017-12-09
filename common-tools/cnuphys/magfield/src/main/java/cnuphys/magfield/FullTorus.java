@@ -41,11 +41,11 @@ public class FullTorus extends Torus {
 			return;
 		}
 
+		while (phi >= 360.0) {
+			phi -= 360.0;
+		}
 		while (phi < 0.0) {
 			phi += 360.0;
-		}
-		while (phi > 360.0) {
-			phi -= 360.0;
 		}
 
 
