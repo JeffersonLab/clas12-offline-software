@@ -45,7 +45,7 @@ public class HitReader implements IMatchedHit {
      * @param geometry the CTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths, 
+            List<Line3d> trks, double[] paths, int[] ids,
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
@@ -115,7 +115,7 @@ public class HitReader implements IMatchedHit {
             // add this hit
             hits.add(hit);
         }
-        List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths);
+        List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths, ids);
 
         ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
         for (int j = 0; j < 3; j++) {
@@ -194,7 +194,7 @@ public class HitReader implements IMatchedHit {
         return pass;
     }
 
-    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths) {
+    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths, int[] ids) {
         if (trks == null || trks.size() == 0) {
             return CTOFhits; // no hits were matched with DC tracks
         }
@@ -249,6 +249,7 @@ public class HitReader implements IMatchedHit {
                     double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
                     // local y:
                     hit.set_yTrk(barOrigToTrkPos - Lov2);
+                    hit._AssociatedTrkId = ids[i];
                     //---------------------------------------
                     hitList.add(hit);
                 }

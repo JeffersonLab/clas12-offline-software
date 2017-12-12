@@ -5,7 +5,6 @@
  */
 package org.jlab.clas.reco;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,6 +206,7 @@ public class EngineProcessor {
         if(file.endsWith(".hipo")==true){
             HipoDataSource reader = new HipoDataSource();
             reader.open(file);
+            
             int eventCounter = 0;
             HipoDataSync   writer = new HipoDataSync();
             writer.setCompressionType(2);

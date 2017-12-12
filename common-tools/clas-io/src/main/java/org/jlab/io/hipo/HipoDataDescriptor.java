@@ -6,10 +6,10 @@
 package org.jlab.io.hipo;
 
 import java.util.List;
-import org.jlab.hipo.data.HipoNodeType;
-import org.jlab.hipo.schema.Schema;
-import org.jlab.hipo.schema.Schema.SchemaEntry;
 import org.jlab.io.base.DataDescriptor;
+import org.jlab.jnp.hipo.data.HipoNodeType;
+import org.jlab.jnp.hipo.schema.Schema;
+import org.jlab.jnp.hipo.schema.Schema.SchemaEntry;
 
 /**
  *

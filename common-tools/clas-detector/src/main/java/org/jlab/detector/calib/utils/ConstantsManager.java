@@ -82,8 +82,9 @@ public class ConstantsManager {
             try {
                 IndexedTable  table = provider.readTable(tableName);
                 desc.getMap().put(tk.get(i), table);
-                System.out.println("***** >>> adding : table " + tableName 
-                        + "  key = " + tk.get(i));
+                System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
+                //System.out.println("***** >>> adding : table " + tableName 
+                //        + "  key = " + tk.get(i));
             } catch (Exception e) {
                 System.out.println("[ConstantsManager] ---> error reading table : "
                         + tableName);

@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EventBuilder;
 import org.jlab.coda.jevio.EventWriter;
-import org.jlab.coda.jevio.EvioCompactEventWriter;
+//import org.jlab.coda.jevio.EvioCompactEventWriter;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioNode;

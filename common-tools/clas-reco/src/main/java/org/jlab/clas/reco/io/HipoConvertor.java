@@ -6,13 +6,14 @@
 package org.jlab.clas.reco.io;
 
 import java.util.List;
-import org.jlab.hipo.utils.FileUtils;
+
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.jnp.utils.file.FileUtils;
 
 /**
  *

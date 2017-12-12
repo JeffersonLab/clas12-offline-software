@@ -79,7 +79,7 @@ public class KFitter {
 
     public void runFitter(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
         double newchisq = Double.POSITIVE_INFINITY;
-        this.NDF = sv.X0.size();
+        this.NDF = sv.X0.size()-5;
         for (int it = 0; it < totNumIter; it++) {
             this.chi2 = 0;
             TrjPoints.clear();
@@ -103,6 +103,7 @@ public class KFitter {
             if (it < totNumIter - 1) {
                 this.Rinit(); 
             }
+            this.chi2=this.calc_chi2(sgeo);
             if(this.chi2<newchisq+1) {
                 newchisq=this.chi2;
                 KFHelix = sv.setTrackPars(sv.X0.size() - 1);
@@ -111,6 +112,7 @@ public class KFitter {
                 break;
             }
         }
+       
         //KFHelix = sv.setTrackPars(sv.X0.size() - 1);
         //this.setTrajectory();
         
@@ -169,6 +171,8 @@ public class KFitter {
         
         if(cand.get_P()<0.25)
             this.setFitFailed = true;
+        cand.setNDF(NDF);
+        cand.setChi2(chi2);
         
         for (Cross c : trk.get_Crosses()) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
@@ -200,6 +204,35 @@ public class KFitter {
     public double chi2 = 0;
     public int NDF = 0;
 
+    private double calc_chi2(org.jlab.rec.cvt.svt.Geometry sgeo) {
+        //get the measurement
+        double m = 0;
+        //get the projector state
+        double h = 0;
+        double chi2 =0;
+        m=0;
+        h=0;
+        for(int k = 1; k< sv.X0.size(); k++) {
+            
+            if (mv.measurements.get(k).type == 0) {
+                m = mv.measurements.get(k).centroid;
+                h = mv.h(sv.trackTraj.get(k), sgeo);
+
+            }
+            if (mv.measurements.get(k).type == 1) {
+                m = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
+                h = mv.hPhi(sv.trackTraj.get(k));
+            }
+            if (mv.measurements.get(k).type == 2) {
+                m = mv.measurements.get(k).z;
+                h = mv.hZ(sv.trackTraj.get(k));
+            }
+
+            chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
+        }   
+       return chi2;
+
+    }
     private void filter(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
@@ -337,11 +370,11 @@ public class KFitter {
                 sv.trackTraj.get(k).dz = dz_filt;
                 sv.trackTraj.get(k).tanL = tanL_filt;
                 sv.getStateVecAtModule(k, sv.trackTraj.get(k), sgeo, bgeo, mv.measurements.get(k).type);
-                chi2 += (m - f_h) * (m - f_h) / V;
+                //chi2 += (m - f_h) * (m - f_h) / V;
 
                 //	sv.trackTraj.put(k, fVec);
             } else {
-                chi2 += (m - h) * (m - h) / V;
+               // chi2 += (m - h) * (m - h) / V;
             }
             //chi2+=(mv.measurements.get(k).centroid - f_h)*(mv.measurements.get(k).centroid - f_h)/V;
 

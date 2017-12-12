@@ -28,7 +28,6 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.RoadFinder;
-import org.jlab.utils.groups.IndexedTable;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
@@ -41,16 +40,17 @@ public class DCTBEngine extends ReconstructionEngine {
 	int Run = 0;
 	
 	double[][][][] T0 ;
-    double[][][][] T0ERR ;
-    DCGeant4Factory dcDetector;
+        double[][][][] T0ERR ;
+        DCGeant4Factory dcDetector;
 
-	double TORSCALE;
-    double SOLSCALE;
+        double TORSCALE;
+        double SOLSCALE;
 	@Override
 	public boolean init() {
 		String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
-                "/calibration/dc/time_to_distance/t2d",
+               // "/calibration/dc/time_to_distance/t2d",
+                "/calibration/dc/time_to_distance/time2dist",
             //    "/calibration/dc/time_corrections/T0_correction",
 		};
 		requireConstants(Arrays.asList(dcTables));
@@ -104,7 +104,8 @@ public class DCTBEngine extends ReconstructionEngine {
                     //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
-                    TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+                    // TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+                    TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"));
                     Run = newRun;
         }
 
@@ -124,11 +125,11 @@ public class DCTBEngine extends ReconstructionEngine {
 		HitReader hitRead = new HitReader();
 		hitRead.read_HBHits(event, 
                     this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"),
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
                     T0, T0ERR, dcDetector, tde);
                 hitRead.read_TBHits(event, 
                     this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), tde);
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde);
 		List<FittedHit> hits = new ArrayList<FittedHit>();
 		//I) get the hits
                 if(hitRead.get_TBHits().size()==0) {
@@ -148,7 +149,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		//2) find the clusters from these hits
 		ClusterFinder clusFinder = new ClusterFinder();
 		
-		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, tde);
+		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
                 
 		if(clusters.size()==0) {
 			rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
@@ -202,7 +203,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		//5) make list of crosses consistent with a track candidate
 		CrossListFinder crossLister = new CrossListFinder();		
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses, true, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, tde);
+		CrossList crosslist = crossLister.candCrossLists(crosses, true, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 		
 		if(crosslist.size()==0) {			
 			//System.out.println(" Failed on cross list !");

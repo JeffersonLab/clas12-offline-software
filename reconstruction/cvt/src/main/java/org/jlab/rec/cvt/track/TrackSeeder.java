@@ -16,6 +16,14 @@ public class TrackSeeder {
 
     public TrackSeeder() {
         
+        sortedClusters = new ArrayList<ArrayList<ArrayList<Cluster>>>();
+        
+        for(int b =0; b<36; b++) {
+            sortedClusters.add(b, new ArrayList<ArrayList<Cluster>>() );
+            for(int l =0; l<6; l++) {
+                sortedClusters.get(b).add(l,new ArrayList<Cluster>() );
+            }
+        }
     }
 
     private List<ArrayList<Cluster>> seedClusters = new ArrayList<ArrayList<Cluster>>();
@@ -23,8 +31,13 @@ public class TrackSeeder {
     double[] phiShift = new double[]{0, 90}; // move the bin edge to handle bin boundaries
 
     public void FindSeedClusters(List<Cluster> SVTclusters) {
-        seedClusters.clear(); 
+        
+        seedClusters.removeAll(seedClusters); 
+        //for(int si1 = 0; si1<seedClusters.size(); si1++)
+        //    seedClusters.get(si1).clear();
+
         List<ArrayList<Cluster>> phi0 = FindSeedClustersFixedBin(SVTclusters, phiShift[0]);
+        
         List<ArrayList<Cluster>> phi90 = FindSeedClustersFixedBin(SVTclusters, phiShift[1]);
         if (phi0.size() > phi90.size()) {
             seedClusters = phi0; 
@@ -42,48 +55,74 @@ public class TrackSeeder {
             }
         }
     }
-
+   
+    List<ArrayList<ArrayList<Cluster>>> sortedClusters;
+    
     public List<ArrayList<Cluster>> FindSeedClustersFixedBin(List<Cluster> SVTclusters, double phiShift) {
-
-        int NbLayers = Constants.NLAYR;
-        Collections.sort(SVTclusters);
-        List<ArrayList<Cluster>> seedClusters = new ArrayList<ArrayList<Cluster>>();
-        int nphiBins = 36;
-        Cluster[][] ClsArray = new Cluster[nphiBins][NbLayers];
-
+            for(int b =0; b<36; b++) {
+                for(int l =0; l<6; l++) {
+                sortedClusters.get(b).get(l).clear();
+            }
+        }
+        List<ArrayList<Cluster>> inseedClusters = new ArrayList<ArrayList<Cluster>>();
+        int[][] LPhi = new int[36][6];
         for (int i = 0; i < SVTclusters.size(); i++) {
             double phi = Math.toDegrees(SVTclusters.get(i).get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
+
             phi += phiShift;
             if (phi < 0) {
                 phi += 360;
             }
 
-            int binIdx = (int) (phi / nphiBins);
-
-            ClsArray[binIdx][SVTclusters.get(i).get_Layer() - 1] = SVTclusters.get(i);
-
+            int binIdx = (int) (phi / 36);
+            sortedClusters.get(binIdx).get(SVTclusters.get(i).get_Layer() - 1).add(SVTclusters.get(i));
+            LPhi[binIdx][SVTclusters.get(i).get_Layer() - 1]++; 
         }
+        
+        
+        for (int b = 0; b < 36; b++) {
+            int max_layers =0;
+            for (int la = 0; la < 6; la++) {
+                if(LPhi[b][la]>0)
+                    max_layers++;
+            }
+            if (sortedClusters.get(b) != null && max_layers>3) { 
+                double SumLyr=0;
+                while(LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5]>=max_layers) {
+                    if(SumLyr!=LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5]) {
+                        SumLyr = LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5];
+                    } 
+                    ArrayList<Cluster> hits = new ArrayList<Cluster>(); 
+                    for (int la = 0; la < 6; la++) {
 
-        for (int b = 0; b < nphiBins; b++) {
+                        if (sortedClusters.get(b).get(la) != null && LPhi[b][la]>0) { 
+                            if (sortedClusters.get(b).get(la).get(LPhi[b][la]-1) != null && sortedClusters.get(b).get(la).get(LPhi[b][la]-1).size()>0) {
+                                hits.add(sortedClusters.get(b).get(la).get(LPhi[b][la]-1)); 
+                               
+                                 if(LPhi[b][la]>1)
+                                    LPhi[b][la]--; 
+                                 if(SumLyr==max_layers)
+                                     LPhi[b][la]=0; 
+                            }
+                        }
 
-            if (ClsArray[b] != null) {
-                ArrayList<Cluster> hits = new ArrayList<Cluster>();
-
-                for (int la = 0; la < 6; la++) {
-
-                    if (ClsArray[b][la] != null) {
-                        hits.add(ClsArray[b][la]); 
                     }
-
+                   
+                    if (hits.size() > 3) {
+                        inseedClusters.add(hits);
+                    }
+                    
                 }
-                if (hits.size() > 3) {
-                    seedClusters.add(hits);
-                }
+                
             }
         }
-        return seedClusters;
-
+       
+        return inseedClusters;
     }
+
+    
+
+    
     private List<Double> Xs = new ArrayList<Double>();
     private List<Double> Ys = new ArrayList<Double>();
     private List<Double> Ws = new ArrayList<Double>();
@@ -303,7 +342,7 @@ public class TrackSeeder {
                     Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
                     Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Region() - 1]
                             + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-
+                    
                     ErrRho.add(j, org.jlab.rec.cvt.bmt.Constants.hStrip2Det / Math.sqrt(12.));
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
@@ -312,7 +351,7 @@ public class TrackSeeder {
             Y.add((double) 0);
 
             ErrRt.add((double) 0.1);
-
+            
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
 
             if (fitTrk.get_helix() == null) {

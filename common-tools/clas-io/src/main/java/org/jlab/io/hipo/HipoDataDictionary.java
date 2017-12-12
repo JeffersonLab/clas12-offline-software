@@ -9,12 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.jlab.hipo.data.HipoNode;
-import org.jlab.hipo.schema.Schema;
-import org.jlab.hipo.schema.SchemaFactory;
+
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataDictionary;
+import org.jlab.jnp.hipo.data.HipoNode;
+import org.jlab.jnp.hipo.schema.Schema;
+import org.jlab.jnp.hipo.schema.SchemaFactory;
 
 
 /**
@@ -32,7 +33,6 @@ public class HipoDataDictionary implements DataDictionary {
         List<Schema> entries = factory.getSchemaList();
         //System.out.println(" schema size = " + entries.size());
         for(Schema sch : entries){
-
             HipoDataDescriptor desc = new HipoDataDescriptor(sch);
             descriptors.put(desc.getName(), desc);
             //System.out.println("name = " + sch.getName() + "  desc = " + desc.getName());
