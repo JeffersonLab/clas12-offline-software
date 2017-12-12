@@ -8,11 +8,12 @@ package org.jlab.io.hipo;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableModel;
-import org.jlab.hipo.data.HipoGroup;
-import org.jlab.hipo.data.HipoNode;
-import org.jlab.hipo.schema.Schema;
+
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDescriptor;
+import org.jlab.jnp.hipo.data.HipoGroup;
+import org.jlab.jnp.hipo.data.HipoNode;
+import org.jlab.jnp.hipo.schema.Schema;
 
 /**
  *

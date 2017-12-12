@@ -86,11 +86,6 @@ public class CVTReconstruction extends ReconstructionEngine {
         if (FieldsConfig.equals(newConfig) == false) {
             // Load the Constants
             
-            // create the factory
-            //SVTStripFactory svtShiftedStripFactory = new SVTStripFactory( cp, true );
-            if(bank.getFloat("solenoid",0)<0.001)
-                Constants.setCosmicsData(true);
-            
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
             // Load the Fields
@@ -282,7 +277,8 @@ public class CVTReconstruction extends ReconstructionEngine {
             TrackListFinder trkFinder = new TrackListFinder();
             List<Track> trks = new ArrayList<Track>();
             trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
-
+            //trkFinder.removeOverlappingTracks(trks);
+            
             for (int c = 0; c < trkcands.size(); c++) {
                 trkcands.get(c).set_Id(c + 1);
                 for (int ci = 0; ci < trkcands.get(c).size(); ci++) {

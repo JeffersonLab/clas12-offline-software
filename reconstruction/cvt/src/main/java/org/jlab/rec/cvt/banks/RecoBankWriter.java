@@ -52,7 +52,7 @@ public class RecoBankWriter {
             bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
         }
-
+        //bank.show();
         return bank;
 
     }
@@ -103,7 +103,7 @@ public class RecoBankWriter {
             }
 
         }
-
+        //bank.show();
         return bank;
 
     }
@@ -318,9 +318,13 @@ public class RecoBankWriter {
         List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < trkcands.size(); i++) {
-
-            if(trkcands.get(i).passCand)
-                bank.setShort("fittingMethod", i, (short) 1);
+            if(trkcands.get(i)==null)
+                continue;
+            if(trkcands.get(i).getChi2()!=0) {
+                bank.setByte("fittingMethod", i, (byte) 2);
+            } else {
+                bank.setByte("fittingMethod", i, (byte) 0);
+            }
             bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
 
             bank.setByte("q", i, (byte)trkcands.get(i).get_Q());
@@ -357,7 +361,7 @@ public class RecoBankWriter {
                 bank.setFloat("cov_phi02", i, -999);
                 bank.setFloat("cov_phi0rho", i, -999);
                 bank.setFloat("cov_rho2", i, -999);
-                bank.setFloat("cov_z02[i]", i, -999);
+                bank.setFloat("cov_z02", i, -999);
                 bank.setFloat("cov_tandip2", i, -999);
             }
             bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().x() / 10.)); // convert to cm
@@ -379,6 +383,8 @@ public class RecoBankWriter {
             }
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
+            bank.setFloat("chi2", i, (float) trkcands.get(i).getChi2());
+            bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
 
 
         }
@@ -431,13 +437,14 @@ public class RecoBankWriter {
             }
             
 
-            for (int j = 0; j < crossIdxArray.size(); j++) {
+            for (int j = 0; j < crossIdxArray.size(); j++) { 
                 String hitStrg = "Cross";
                 hitStrg += (j + 1);
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) crossIdxArray.get(j).shortValue());
             }
         }
+        //bank.show();
         return bank;
     }
 
@@ -497,6 +504,8 @@ public class RecoBankWriter {
         }
         int bankSize = 1;
         for (int i = 0; i < trks.size(); i++) {
+            if(trks.get(i)==null)
+                continue;
             if (trks.get(i).get_Trajectory() == null) {
                 continue;
             }
@@ -508,6 +517,8 @@ public class RecoBankWriter {
 
         int k = 0;
         for (int i = 0; i < trks.size(); i++) {
+             if(trks.get(i)==null)
+                continue;
             if (trks.get(i).get_Trajectory() == null) {
                 continue;
             }

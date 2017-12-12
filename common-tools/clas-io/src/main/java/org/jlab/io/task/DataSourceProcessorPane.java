@@ -43,7 +43,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     public static int  SQUARE  = 1;
     
     private DataSourceProcessor  dataProcessor = new DataSourceProcessor();
-    private String               dataFile      = "";
+    private String               dataFile      = null;
     private int                  dataPaneStyle = DataSourceProcessorPane.TOOLBAR;
     private JLabel               statusLabel   = null;    
     private java.util.Timer      processTimer  = null;
@@ -244,6 +244,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 mediaNext.setEnabled(true);
                 mediaPrev.setEnabled(true);
                 mediaPlay.setEnabled(true);
+                this.setDataFile(null);
             }
         }
         
@@ -293,6 +294,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             mediaNext.setEnabled(true);
             mediaPrev.setEnabled(true);
             mediaPlay.setEnabled(true);
+            this.setDataFile(null);
         }
         
         if(e.getActionCommand().compareTo("OpenFileHipo")==0){
@@ -317,6 +319,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 mediaNext.setEnabled(true);
                 mediaPrev.setEnabled(true);
                 mediaPlay.setEnabled(true);
+                this.setDataFile(fileName);
             } else {
                 
             }
@@ -334,7 +337,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                     return;
                 }*/
                 //System.out.println("running");
-                for (int i=1 ; i<5000 ; i++) {
+                for (int i=1 ; i<=50 ; i++) {
                     boolean status = dataProcessor.processNextEvent(eventDelay,DataEventType.EVENT_ACCUMULATE);
                     if(status==false&&hasFinished==false){
                         hasFinished = true;

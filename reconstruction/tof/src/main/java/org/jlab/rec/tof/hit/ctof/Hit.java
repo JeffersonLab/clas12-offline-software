@@ -5,7 +5,6 @@ package org.jlab.rec.tof.hit.ctof;
 
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
-import java.util.List;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
@@ -38,7 +37,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
     // FTOF hit counter
     private Line3d _matchedTrack;
 
-    public short _AssociatedTrkId;
+    public int _AssociatedTrkId = -1;
 
     public Line3D get_paddleLine() {
         return _paddleLine;

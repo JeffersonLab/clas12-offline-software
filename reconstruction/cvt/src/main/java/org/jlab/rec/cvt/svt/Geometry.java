@@ -568,7 +568,7 @@ public class Geometry {
 
     //***
     public Point3D intersectionOfHelixWithPlane(int layer, int sector, Helix helix) {
-
+        
         int[] rm  = SVTConstants.convertLayer2RegionModule(layer-1);
 
         int nstep = 1;

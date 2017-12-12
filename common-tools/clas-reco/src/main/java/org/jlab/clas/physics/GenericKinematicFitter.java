@@ -7,11 +7,12 @@ package org.jlab.clas.physics;
 
 import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
-import org.jlab.hipo.data.HipoEvent;
-import org.jlab.hipo.data.HipoNode;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.data.HipoNode;
 
 /**
  *

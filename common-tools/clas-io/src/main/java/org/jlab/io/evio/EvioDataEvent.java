@@ -347,7 +347,7 @@ public class EvioDataEvent implements DataEvent {
 
 		EvioDataBank bank = new EvioDataBank(desc);
 		String[] entries = desc.getEntryList();
-                
+
 //                if(bank_name.compareTo("Lund::particles") == 0 || bank_name.compareTo("GenPart::true") == 0) {
 //                    System.out.println("beginning " + bank.rows()+" "+bank.columns());
 //                    bank.show();
@@ -361,12 +361,12 @@ public class EvioDataEvent implements DataEvent {
 //                            System.out.println(type + " " + num);
 //                        }
 
-                        if (DataEntryType.getType(type) == DataEntryType.INTEGER) {   
-                            bank.setInt(item, (int[]) dataTree.get(num));
+			if (DataEntryType.getType(type) == DataEntryType.INTEGER) {
+				bank.setInt(item, (int[]) dataTree.get(num));
 			}
 
 			if (DataEntryType.getType(type) == DataEntryType.DOUBLE) {
-                            bank.setDouble(item, (double[]) dataTree.get(num));
+				bank.setDouble(item, (double[]) dataTree.get(num));
 			}
 
 			if (DataEntryType.getType(type) == DataEntryType.FLOAT) {

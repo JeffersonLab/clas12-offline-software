@@ -67,7 +67,7 @@ public class DataSourceDump {
         int icounter = 0;
         
         event = reader.getNextEvent();
-        
+        System.out.println(" HAS EVENTS = " + reader.hasEvent());
         while(reader.hasEvent()==true){
             
             

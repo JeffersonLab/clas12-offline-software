@@ -26,7 +26,7 @@ public class MeasVecs {
         }
 
     }
-
+    public int ndf=0;
     /**
      * The state projector - it projects the state onto the measurement
      *
@@ -99,7 +99,7 @@ public class MeasVecs {
             }
         }
         Collections.sort(hOTS); // sort the collection in order of increasing Z value (i.e. going downstream from the target)
-
+        ndf = hOTS.size()-5;
         // identify double hits and take the average position		
         for (int i = 0; i < hOTS.size(); i++) {
             if (i > 0) {
