@@ -167,7 +167,8 @@ public class TableLoader {
             // System.out.println("dB "+deltatime_bfield+" raw time "+time);
 	    //calculate the time at alpha deg. and at a non-zero bfield	          
 	    time += deltatime_bfield;
-		 
+            //added deta(T0) correction
+            time+= tab.getDoubleValue("delta_T0", s+1,r+1,0);
 	    
 	     return time;
 	 }
