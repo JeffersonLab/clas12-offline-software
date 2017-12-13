@@ -301,7 +301,7 @@ public class DetectorData {
        DataBank bank = event.createBank(bank_name, 1);
        bank.setInt("NRUN", 0, detectorEvent.getEventHeader().getRun());
        bank.setInt("NEVENT", 0, detectorEvent.getEventHeader().getEvent());
-       bank.setInt("TRG", 0, detectorEvent.getEventHeader().getTrigger());
+       bank.setLong("TRG", 0, detectorEvent.getEventHeader().getTrigger());
        bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
        bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());     
        return bank;
