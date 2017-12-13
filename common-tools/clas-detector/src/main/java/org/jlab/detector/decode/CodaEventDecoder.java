@@ -35,7 +35,7 @@ public class CodaEventDecoder {
     private int eventNumber = 0;
     private long  timeStamp = 0L;
     private int timeStampErrors = 0;
-    private int triggerBits = 0;
+    private long triggerBits = 0;
 
 //    private int[] triggerBank = null;
 
@@ -114,11 +114,11 @@ public class CodaEventDecoder {
         }
     }
 
-    public int getTriggerBits() {
+    public long getTriggerBits() {
         return triggerBits;
     }
 
-    public void setTriggerBits(int triggerBits) {
+    public void setTriggerBits(long triggerBits) {
         this.triggerBits = triggerBits;
     }
 
@@ -776,6 +776,9 @@ public class CodaEventDecoder {
                     }
 		    else if(node.getDataLength()==6) { // New format Dec 1 2017 (run 1701)
 			this.setTriggerBits(intData[6]<<16|intData[7]);
+		    }
+		    else if(node.getDataLength()==7) { // New format Dec 1 2017 (run 1701)
+			this.setTriggerBits(intData[6]|intData[7]<<32);
 		    }
                 }
             }
