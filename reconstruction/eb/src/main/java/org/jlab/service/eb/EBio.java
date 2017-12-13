@@ -26,7 +26,7 @@ public class EBio {
             DataBank bank = event.getBank("RUN::config");
             dHeader.setRun(bank.getInt("run", 0));
             dHeader.setEvent(bank.getInt("event", 0));
-            dHeader.setTrigger(bank.getInt("trigger", 0));
+            dHeader.setTrigger(bank.getLong("trigger", 0));
         }
         return dHeader;
     }
