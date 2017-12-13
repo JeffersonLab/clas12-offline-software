@@ -96,7 +96,7 @@ public class DCHBEngine extends ReconstructionEngine {
 
                 T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
                 T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-                }
+            }
             return true;
         }
 
