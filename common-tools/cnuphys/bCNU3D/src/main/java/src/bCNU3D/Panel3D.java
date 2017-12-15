@@ -112,13 +112,17 @@ public class Panel3D extends JPanel implements GLEventListener {
 		_zdist = zDist;
 
 		setLayout(new BorderLayout(0, 0));
-		glprofile = GLProfile.getDefault();
+	//	glprofile = GLProfile.getDefault();
+		
+		glprofile = GLProfile.getMaxFixedFunc(true);
+		
 		glcapabilities = new GLCapabilities(glprofile);
 		glcapabilities.setRedBits(8);
 		glcapabilities.setBlueBits(8);
 		glcapabilities.setGreenBits(8);
 		glcapabilities.setAlphaBits(8);
 		glcapabilities.setDepthBits(32);
+		
 
 		gljpanel = new GLJPanel(glcapabilities);
 		gljpanel.addGLEventListener(this);

@@ -40,7 +40,7 @@ public enum TorusMap {
 
 
 	static {
-		fileNames.put(SYMMETRIC, "clas12_torus_fieldmap_binary.dat");
+		fileNames.put(SYMMETRIC, "clas12-fieldmap-torus.dat");
 		fileNames.put(FULL_025, "clas12TorusFull_0.25.dat");
 		fileNames.put(FULL_050, "clas12TorusFull_0.50.dat");
 		fileNames.put(FULL_075, "clas12TorusFull_0.75.dat");

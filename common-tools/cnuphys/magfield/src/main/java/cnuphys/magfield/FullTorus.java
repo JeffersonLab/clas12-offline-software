@@ -8,7 +8,7 @@ public class FullTorus extends Torus {
 	
 	/**
 	 * Obtain a torus object from a binary file, probably
-	 * "clas12_torus_fieldmap_binary.dat"
+	 * "clas12-fieldmap-torus.dat"
 	 *
 	 * @param file the file to read
 	 * @return the torus object
