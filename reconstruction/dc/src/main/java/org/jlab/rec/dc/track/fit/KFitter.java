@@ -1,5 +1,6 @@
 package org.jlab.rec.dc.track.fit;
 
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
 
@@ -14,12 +15,12 @@ public class KFitter {
 
     public StateVec finalStateVec;
 
-    public KFitter(Track trk) {
-        this.init(trk);
+    public KFitter(Track trk, DCGeant4Factory DcDetector) {
+        this.init(trk, DcDetector);
     }
 
-    public void init(Track trk) {
-        mv.setMeasVecs(trk);
+    public void init(Track trk, DCGeant4Factory DcDetector) {
+        mv.setMeasVecs(trk, DcDetector);
         sv.Z = new double[mv.measurements.size()];
 
         for (int i = 0; i < mv.measurements.size(); i++) {
@@ -28,12 +29,12 @@ public class KFitter {
         sv.init(trk, sv.Z[0], this);
     }
 
-    public int totNumIter = 10;
+    public int totNumIter = 4;
     double newChisq = Double.POSITIVE_INFINITY;
 
     public void runFitter() {
         this.chi2 = 0;
-        this.NDF = sv.Z.length - 5;
+        this.NDF = mv.ndf;
 
         for (int i = 1; i <= totNumIter; i++) {
             if (i > 1) {
@@ -43,14 +44,17 @@ public class KFitter {
                 sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
                 //sv.trackTraj.add(k+1, sv.StateVec); 
                 //sv.trackCov.add(k+1, sv.CovMat);
-              //  System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
-               // 		sv.trackTraj.get(k+1).z+","+sv.trackTraj.get(k+1).tx+","+sv.trackTraj.get(k+1).ty); 
+                //System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
+                //		sv.trackTraj.get(k+1).z+","+sv.trackTraj.get(k+1).tx+","+sv.trackTraj.get(k+1).ty); 
                 this.filter(k + 1);
             }
             if(i>1) {
 	            this.calcFinalChisq();
-	            if(this.chi2>10000)
+	            if(this.chi2>1000000) {
 	            	i = totNumIter;
+                        this.setFitFailed=true;
+                        return;
+                    }
 	            if (this.chi2 < newChisq) {
 	                this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
 	                newChisq = this.chi2;

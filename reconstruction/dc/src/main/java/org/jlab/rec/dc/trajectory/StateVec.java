@@ -24,7 +24,15 @@ public class StateVec extends Matrix {
 		super(4,1);
 	}
 	
-	
+	private double _PathLength;
+
+        public double getPathLength() {
+            return _PathLength;
+        }
+
+        public void setPathLength(double _PathLength) {
+            this._PathLength = _PathLength;
+        }
 	
 	/**
 	 * Sets the.
@@ -51,8 +59,8 @@ public class StateVec extends Matrix {
 	 * Sets the wire plane index in the series of planes used in the trajectory
 	 * @param _planeIdx wire plane index in the series of planes used in the trajectory
 	 */
-	public void set_planeIdx(int _planeIdx) {
-		this._planeIdx = _planeIdx;
+	public void set_planeIdx(int planeIdx) {
+		this._planeIdx = planeIdx;
 	}
 
 	/**

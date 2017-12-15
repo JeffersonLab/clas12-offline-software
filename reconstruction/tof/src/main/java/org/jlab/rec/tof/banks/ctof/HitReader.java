@@ -10,11 +10,11 @@ import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.ctof.CCDBConstants;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -45,7 +45,19 @@ public class HitReader implements IMatchedHit {
      * @param geometry the CTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths) {
+            List<Line3d> trks, double[] paths, int[] ids,
+            IndexedTable constants0, 
+            IndexedTable constants1, 
+            IndexedTable constants2, 
+            IndexedTable constants3, 
+            IndexedTable constants4) {
+        /*
+        0: "/calibration/ctof/attenuation"),
+        1: "/calibration/ctof/effective_velocity"),
+        2: "/calibration/ctof/time_offsets"),
+        3: "/calibration/ctof/tdc_conv"),
+        4: "/calibration/ctof/status"));
+        */
         _numTrks = trks.size();
 
         BaseHitReader hitReader = new BaseHitReader();
@@ -85,10 +97,10 @@ public class HitReader implements IMatchedHit {
             TDCDIdx[i] = hitList.get(i).TDCbankHitIdx2;
 
             // get the status
-            int statusU = CCDBConstants.getSTATUSU()[0][0][paddle[i] - 1];
-            int statusD = CCDBConstants.getSTATUSD()[0][0][paddle[i] - 1];
-            String statusWord = this.set_StatusWord(statusU, statusD, ADCU[i],
-                    TDCU[i], ADCD[i], TDCD[i]);
+            //int statusU = CCDBConstants.getSTATUSU()[0][0][paddle[i] - 1];
+            //int statusD = CCDBConstants.getSTATUSD()[0][0][paddle[i] - 1];
+           // String statusWord = this.set_StatusWord(statusU, statusD, ADCU[i],
+            //        TDCU[i], ADCD[i], TDCD[i]);
 
             // create the hit object
             Hit hit = new Hit(id[i], 1, 1, paddle[i], ADCU[i], TDCU[i],
@@ -97,12 +109,13 @@ public class HitReader implements IMatchedHit {
             hit.set_ADCbankHitIdx2(ADCDIdx[i]);
             hit.set_TDCbankHitIdx1(TDCUIdx[i]);
             hit.set_TDCbankHitIdx2(TDCDIdx[i]);
-            hit.set_StatusWord(statusWord);
+            //hit.set_StatusWord(statusWord);
+            hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
             hit.setPaddleLine(geometry);
             // add this hit
             hits.add(hit);
         }
-        List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths);
+        List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths, ids);
 
         ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
         for (int j = 0; j < 3; j++) {
@@ -112,7 +125,10 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             // set the layer to get the paddle position from the geometry
             // package
-            hit.set_HitParameters(1);
+            hit.set_HitParameters(1,  constants0, 
+             constants1, 
+             constants2, 
+             constants3);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -178,7 +194,7 @@ public class HitReader implements IMatchedHit {
         return pass;
     }
 
-    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths) {
+    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths, int[] ids) {
         if (trks == null || trks.size() == 0) {
             return CTOFhits; // no hits were matched with DC tracks
         }
@@ -186,14 +202,14 @@ public class HitReader implements IMatchedHit {
         List<Hit> hitList = new ArrayList<Hit>();
 
         for (int i = 0; i < trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
-            Line3d trk = trks.get(i);
+            Line3d trk = trks.get(i); //System.out.println(" trk line "+trk.toString());
 
             CTOFDetHit[] HitArray = new CTOFDetHit[48];
             List<DetHit> hits = ctofDetector.getIntersections(trk);
 
             if (hits != null && hits.size() > 0) {
                 for (DetHit hit : hits) {
-                    CTOFDetHit fhit = new CTOFDetHit(hit);
+                    CTOFDetHit fhit = new CTOFDetHit(hit); //System.out.println(" matched hits "+fhit.toString());
                     HitArray[fhit.getPaddle() - 1] = fhit;
                 }
             }
@@ -215,7 +231,9 @@ public class HitReader implements IMatchedHit {
                     hit.set_matchedTrackHit(matchedHit);
                     hit.set_matchedTrack(trk);
                     // get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
-                    double deltaPath = matchedHit.origin().distance(matchedHit.mid());
+                    //double deltaPath = matchedHit.origin().distance(matchedHit.mid());
+                    double deltaPath = hit.get_matchedTrack().origin().distance(matchedHit.mid());
+                    
                     double pathLenTruBar = matchedHit.origin().distance(
                             matchedHit.end());
                     hit.set_TrkPathLenThruBar(pathLenTruBar);
@@ -231,6 +249,7 @@ public class HitReader implements IMatchedHit {
                     double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
                     // local y:
                     hit.set_yTrk(barOrigToTrkPos - Lov2);
+                    hit._AssociatedTrkId = ids[i];
                     //---------------------------------------
                     hitList.add(hit);
                 }

@@ -1,7 +1,7 @@
 [ 
  {
     "bank": "HitBasedTrkg::HBHits",
-    "group": 1311,
+    "group": 20621,
     "info": "reconstructed hits using DC wire positions",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -19,13 +19,15 @@
        {"name":"X",           "id":13,  "type":"float", "info":"wire x-coordinate  in tilted-sector"},
        {"name":"Z",           "id":14,  "type":"float", "info":"wire z-coordinate  in tilted-sector"},
        {"name":"B",           "id":15,  "type":"float", "info":"B-field intensity at hit position in tilted-sector system"},
-       {"name":"clusterID",   "id":16, "type":"int16", "info":"ID of associated cluster"},
-       {"name":"trkID",       "id":17, "type":"int8", "info":"ID of associated track"}
+       {"name":"TProp",       "id":16,  "type":"float", "info":"t propagation along the wire"},
+       {"name":"TFlight",     "id":17,  "type":"float", "info":"time of flight correction"},
+       {"name":"clusterID",   "id":18, "type":"int16", "info":"ID of associated cluster"},
+       {"name":"trkID",       "id":19, "type":"int8", "info":"ID of associated track"}
     ]
   },
  {
     "bank": "HitBasedTrkg::HBClusters",
-    "group": 1312,
+    "group": 20622,
     "info": "reconstructed clusters using DC wire positions",
     "items": [
        {"name":"id",           "id":1, "type":"int16",  "info":"id of the cluster"},
@@ -55,7 +57,7 @@
   },
   {
     "bank": "HitBasedTrkg::HBSegments",
-    "group": 1313,
+    "group": 20623,
     "info": "reconstructed segments using DC wire positions",
     "items": [
        {"name":"id",            "id":1, "type":"int16",  "info":"id of the segment"},
@@ -90,7 +92,7 @@
   },
  {
     "bank": "HitBasedTrkg::HBSegmentTrajectory",
-    "group": 1317,
+    "group": 20624,
     "info": "reconstructed segment trajectory from hit-based tracking",
     "items": [
        {"name":"segmentID",    "id":1, "type":"int16", "info":"id of the segment"},
@@ -103,7 +105,7 @@
   },
  {
     "bank": "HitBasedTrkg::HBCrosses",
-    "group": 1314,
+    "group": 20625,
     "info": "reconstructed segments using DC wire positions",
     "items": [
         {"name":"id",            "id":1, "type":"int16",  "info":"id of the cross"},
@@ -128,7 +130,7 @@
  },
  {
     "bank": "HitBasedTrkg::HBTracks",
-    "group": 1315,
+    "group": 20626,
     "info": "reconstructed tracks using DC wire positions",
     "items": [
         {"name":"id",            "id":1, "type":"int16",  "info":"id of the track"},
@@ -170,7 +172,7 @@
  
  {
     "bank": "TimeBasedTrkg::TBHits",
-    "group": 1321,
+    "group": 20631,
     "info": "reconstructed hits using DC timing information",
     "items": [
         {"name":"id",           "id":1, "type":"int16",  "info":"id of the hit"},
@@ -188,13 +190,15 @@
         {"name":"X",            "id":13,  "type":"float", "info":"wire x-coordinate  in tilted-sector"},
         {"name":"Z",            "id":14,  "type":"float", "info":"wire z-coordinate  in tilted-sector"},
         {"name":"B",            "id":15,  "type":"float", "info":"B-field intensity at hit position in tilted-sector system"},
-        {"name":"clusterID",    "id":16, "type":"int16", "info":"ID of associated cluster"},
-        {"name":"trkID",        "id":17, "type":"int8", "info":"ID of associated track"}
+        {"name":"TProp",        "id":16,  "type":"float", "info":"t propagation along the wire"},
+        {"name":"TFlight",      "id":17,  "type":"float", "info":"time of flight correction"},
+        {"name":"clusterID",    "id":18, "type":"int16", "info":"ID of associated cluster"},
+        {"name":"trkID",        "id":19, "type":"int8", "info":"ID of associated track"}
     ]
  },
  {
     "bank": "TimeBasedTrkg::TBClusters",
-    "group": 1322,
+    "group": 20632,
     "info": "reconstructed clusters using DC timing information",
     "items": [
         {"name":"id",           "id":1, "type":"int16",  "info":"id of the cluster"},
@@ -224,7 +228,7 @@
  },
  {
     "bank": "TimeBasedTrkg::TBSegments",
-    "group": 1323,
+    "group": 20633,
     "info": "reconstructed segments using DC timing information",
     "items": [
         {"name":"id",            "id":1, "type":"int16",  "info":"id of the segment"},
@@ -262,7 +266,7 @@
  },
  {
     "bank": "TimeBasedTrkg::TBCrosses",
-    "group": 1324,
+    "group": 20635,
     "info": "reconstructed segments using DC timing information",
     "items": [
         {"name":"id",            "id":1, "type":"int16",  "info":"id of the cross"},
@@ -287,7 +291,7 @@
  },
  {
     "bank": "TimeBasedTrkg::TBTracks",
-    "group": 1325,
+    "group": 20636,
     "info": "reconstructed tracks using DC timing information",
     "items": [
         {"name":"id",            "id":1, "type":"int16",  "info":"id of the track"},
@@ -327,25 +331,8 @@
     ]
  },
  {
-    "bank": "TimeBasedTrkg::Trajectory",
-    "group": 1327,
-    "info": "Trajectory bank",
-    "items": [
-        {"name":"tid",     "id":1, "type":"int16", "info":"id of the track"},
-        {"name":"did",     "id":2, "type":"int16", "info":"id of the detector"},
-        {"name":"x",       "id":3, "type":"float",  "info":"track x position at detector surface (cm)"},
-        {"name":"y",       "id":4, "type":"float",  "info":"track y position at detector surface (cm)"},
-        {"name":"z",       "id":5, "type":"float",  "info":"track z position at detector surface (cm)"},
-        {"name":"tx",      "id":6, "type":"float",  "info":"track unit direction vector x component at detector surface"},
-        {"name":"ty",      "id":7, "type":"float",  "info":"track unit direction vector y component at detector surface"},
-        {"name":"tz",      "id":8, "type":"float",  "info":"track unit direction vector z component at detector surface"},
-        {"name":"B",       "id":9, "type":"float",  "info":"B-field magnitude at detector surface (cm)"},
-        {"name":"L",       "id":10, "type":"float",  "info":"pathlength of the track from the DOCA to the Beamline to the detector surface (cm)"}
-    ]
- },
- {
  "bank": "TimeBasedTrkg::TBCovMat",
- "group": 1326,
+ "group": 20637,
  "info": "reconstructed track covariance matrix",
  "items": [
            {"name":"id",     "id":1, "type":"int16", "info":"id of the track"},
@@ -375,6 +362,23 @@
            {"name":"C54",    "id":25, "type":"float",  "info":"C54 covariance matrix element at last superlayer used in the fit"},
            {"name":"C55",    "id":26, "type":"float",  "info":"C55 covariance matrix element at last superlayer used in the fit"}
            ]
+ },
+ {
+    "bank": "TimeBasedTrkg::Trajectory",
+    "group": 20653,
+    "info": "Trajectory bank",
+    "items": [
+        {"name":"tid",     "id":1, "type":"int16", "info":"id of the track"},
+        {"name":"did",     "id":2, "type":"int16", "info":"id of the detector"},
+        {"name":"x",       "id":3, "type":"float",  "info":"track x position at detector surface (cm)"},
+        {"name":"y",       "id":4, "type":"float",  "info":"track y position at detector surface (cm)"},
+        {"name":"z",       "id":5, "type":"float",  "info":"track z position at detector surface (cm)"},
+        {"name":"tx",      "id":6, "type":"float",  "info":"track unit direction vector x component at detector surface"},
+        {"name":"ty",      "id":7, "type":"float",  "info":"track unit direction vector y component at detector surface"},
+        {"name":"tz",      "id":8, "type":"float",  "info":"track unit direction vector z component at detector surface"},
+        {"name":"B",       "id":9, "type":"float",  "info":"B-field magnitude at detector surface (cm)"},
+        {"name":"L",       "id":10, "type":"float",  "info":"pathlength of the track from the DOCA to the Beamline to the detector surface (cm)"}
+    ]
  }
  
 ]

@@ -3,8 +3,9 @@ package org.jlab.rec.dc.cross;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.util.FastMath;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.dc.GeometryLoader;
+import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 
 /**
@@ -239,10 +240,10 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void set_CrossParams() {
+    public void set_CrossParams(DCGeant4Factory DcDetector) {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
-        double z = GeometryLoader.getDcDetector().getRegionMidpoint(this.get_Region() - 1).z;
+        double z = DcDetector.getRegionMidpoint(this.get_Region() - 1).z;
 
         double wy_over_wx = (Math.cos(Math.toRadians(6.)) / Math.sin(Math.toRadians(6.)));
         double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
@@ -378,4 +379,27 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 	}
      */
 
+    void set_CrossDirIntersSegWires() {
+        double wy_over_wx = (Math.cos(Math.toRadians(6.)) / Math.sin(Math.toRadians(6.)));
+        double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
+        double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
+        double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();
+        double val_it2 = this._seg2.get_fittedCluster().get_clusterLineFitIntercept();
+
+        for(int i =0; i<this.get_Segment1().size(); i++) {
+            this.calc_IntersectPlaneAtZ(this.get_Segment1().get(i).get_Z(), wy_over_wx, val_sl1, val_sl2, val_it1, val_it2, this.get_Segment1().get(i));
+        }
+        for(int i =0; i<this.get_Segment2().size(); i++) {
+            this.calc_IntersectPlaneAtZ(this.get_Segment2().get(i).get_Z(), wy_over_wx, val_sl1, val_sl2, val_it1, val_it2, this.get_Segment2().get(i));
+        }
+        
+    }
+   
+    private void calc_IntersectPlaneAtZ(double z, double wy_over_wx, double val_sl1, double val_sl2, double val_it1, double val_it2, FittedHit hit) {
+       
+        double x = 0.5 * (val_it1 + val_it2) + 0.5 * z * (val_sl1 + val_sl2);
+        double y = 0.5 * wy_over_wx * (val_it2 - val_it1) + 0.5 * wy_over_wx * z * (val_sl2 - val_sl1);
+        
+        hit.setCrossDirIntersWire(new Point3D(x,y,z));
+    } 
 }

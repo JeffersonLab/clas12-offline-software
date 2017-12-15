@@ -13,9 +13,9 @@ import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.utils.CLASResources;
 
 /**
@@ -120,13 +120,13 @@ public class DCSwimmer {
      * @param p
      * @param charge
      */
-    public void SetSwimParameters(int superlayerIdx, int layerIdx, double x0, double y0, double thx, double thy, double p, int charge) {
+    public void SetSwimParameters(int superlayerIdx, int layerIdx, double x0, double y0, double thx, double thy, double p, int charge, DCGeant4Factory DcDetector) {
         // z at a given DC plane in the tilted coordinate system
         double z0 = 0;
 
         if (superlayerIdx != -1 && layerIdx != -1) //z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
         {
-            z0 = GeometryLoader.getDcDetector().getLayerMidpoint(superlayerIdx, layerIdx).z;
+            z0 = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;
         }
 
         // x,y,z in m = swimmer units
@@ -409,24 +409,31 @@ public class DCSwimmer {
         private double _finalPathLength = Double.NaN;
         private double _d;
         private Vector3D _n;
-
+        private double _dist2plane;
+        private int _dir;
         /**
          * A swim stopper that will stop if the boundary of a plane is crossed
          *
          * @param maxR the max radial coordinate in meters.
          */
-        private PlaneBoundarySwimStopper(double d, Vector3D n) {
+        private PlaneBoundarySwimStopper(double d, Vector3D n, int dir) {
             // DC reconstruction units are cm.  Swimmer units are m.  Hence scale by 100
             _d = d;
             _n = n;
+            _dir = dir;
         }
 
         @Override
         public boolean stopIntegration(double t, double[] y) {
-
-            double dtrk = _n.x() * y[0] * 100 + _n.y() * y[1] * 100 + _n.z() * y[2] * 100;
-
-            return (dtrk > _d);
+            double dtrk = y[0]*_n.x()+y[1]*_n.y()+y[2]*_n.z(); 
+            
+            double accuracy = 20e-6; //20 microns   
+            //System.out.println(" dist "+dtrk*100+ " state "+y[0]*100+", "+y[1]*100+" , "+y[2]*100);
+           if(_dir<0) {
+            return dtrk<_d;
+           } else {
+               return dtrk>_d;
+           }
 
         }
 
@@ -447,17 +454,14 @@ public class DCSwimmer {
         }
     }
 
-    public double[] SwimToPlane(double d, Vector3D n) {
+    public double[] SwimToPlaneBoundary(double d_cm, Vector3D n, int dir) {
 
         double[] value = new double[8];
         // using adaptive stepsize
+        double d= d_cm/100;
+        PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d,n, dir);
 
-        PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d, n);
-
-        // step size in m
-        double stepSize = 1e-4; // m
-
-        SwimTrajectory st = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
+        SwimTrajectory st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, Constants.SWIMSTEPSIZE, 0.0005);
         st.computeBDL(prob);
         //st.computeBDL(compositeField);
         

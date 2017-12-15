@@ -2,12 +2,14 @@ package org.jlab.rec.dc.cluster;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
+import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
+import org.jlab.utils.groups.IndexedTable;
 
 public class ClusterCleanerUtilities {
 
@@ -309,7 +311,7 @@ public class ClusterCleanerUtilities {
         return nlayers_hit;
     }
 
-    public FittedCluster LRAmbiguityResolver(FittedCluster fClus, ClusterFitter cf) {
+    public FittedCluster LRAmbiguityResolver(FittedCluster fClus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         //	int[] notResolvedLR = {0,0,0,0,0,0};
         //	if(fClus.get_Status()[1]==notResolvedLR) {
@@ -362,11 +364,12 @@ public class ClusterCleanerUtilities {
             FittedHit newhitPos = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
                     hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
             newhitPos.set_Doca(hit.get_Doca());
+            newhitPos.setT0SubTime(hit.getT0SubTime());
             newhitPos.set_Id(hit.get_Id());
             newhitPos.set_TrkgStatus(0);
-
+            newhitPos.set_CellSize(DcDetector);
             newhitPos.set_LeftRightAmb(1);
-            newhitPos.updateHitPositionWithTime(1, hit.get_B()); // assume the track angle is // to the layer, so that cosTrkAng =1
+            newhitPos.updateHitPositionWithTime(1, hit.get_B(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
 
             newhitPos.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitPos.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
@@ -374,11 +377,12 @@ public class ClusterCleanerUtilities {
             FittedHit newhitNeg = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
                     hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
             newhitNeg.set_Doca(hit.get_Doca());
+            newhitNeg.setT0SubTime(hit.getT0SubTime());
             newhitNeg.set_Id(hit.get_Id());
             newhitNeg.set_TrkgStatus(0);
-
+            newhitNeg.set_CellSize(DcDetector);
             newhitNeg.set_LeftRightAmb(-1);
-            newhitNeg.updateHitPositionWithTime(1, hit.get_B()); // assume the track angle is // to the layer
+            newhitNeg.updateHitPositionWithTime(1, hit.get_B(), tab, DcDetector, tde); // assume the track angle is // to the layer
 
             newhitNeg.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitNeg.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
@@ -537,7 +541,7 @@ public class ClusterCleanerUtilities {
 
     }
 
-    public FittedCluster SecondariesRemover(FittedCluster clus, ClusterFitter cf) {
+    public FittedCluster SecondariesRemover(FittedCluster clus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //System.out.println(" secondaries Remover :"+clus.printInfo());
         Collections.sort(clus);
 
@@ -570,7 +574,7 @@ public class ClusterCleanerUtilities {
                 baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster		
                 for (int j = 0; j < hitsInLayer.size(); j++) {
                     hitsInLayer.get(j).set_LeftRightAmb(0);
-                    hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B());
+                    hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B(), tab, DcDetector, tde);
                 }
             }
             if (hitsInLayer.size() == 2) {
@@ -595,7 +599,7 @@ public class ClusterCleanerUtilities {
                 if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
                     for (int j = 0; j < hitsInLayer.size(); j++) {
                         hitsInLayer.get(j).set_LeftRightAmb(0);
-                        hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B());
+                        hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B(), tab, DcDetector, tde);
                     }
                     hitsInSameLayerLists.add(hitsInLayer);
                 } else {

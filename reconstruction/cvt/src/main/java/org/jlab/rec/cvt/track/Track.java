@@ -255,5 +255,25 @@ public class Track extends Trajectory {
     public void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
         this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
     }
+    
+    private int _NDF;
+    private double _Chi2;
+    
+    public int getNDF() {
+        return _NDF;
+    }
+
+    public void setNDF(int _NDF) {
+        this._NDF = _NDF;
+    }
+
+    public double getChi2() {
+        return _Chi2;
+    }
+
+    public void setChi2(double _Chi2) {
+        this._Chi2 = _Chi2;
+    }
+    
 
 }

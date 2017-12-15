@@ -33,9 +33,8 @@
             <column name="TDC"        num="4" type="int32" info="TDC value"/>
             <column name="LR"         num="5" type="int32" info="Left/Right: -1 (right) if the track is between beam and the closest wire"/>
             <column name="doca"       num="6" type="float64" info="2D distance between closest track step to the wire hit"/>
-            <column name="sdoca"      num="7" type="float64" info="smeared doca"/>
-            <column name="time"       num="8" type="float64" info="doca/drif velocity in each region 53,26,36 um/ns"/>
-            <column name="stime"      num="9" type="float64" info="sdoca/drift velocity in each region"/>
+	    <column name="time"       num="8" type="float64" info="doca/drif velocity in each region 53,26,36 um/ns"/>
+	    <column name="stime"      num="9" type="float64" info="sdoca/drift velocity in each region"/>
             <column name="hitn"       num="99" type="int32" info="hit number"/>
         </section>
     </bank>

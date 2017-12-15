@@ -18,12 +18,13 @@ import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineStatus;
 import org.jlab.detector.calib.utils.ConstantsManager;
-import org.jlab.hipo.data.HipoEvent;
-import org.jlab.hipo.schema.SchemaFactory;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.schema.SchemaFactory;
 
 /**
  *
@@ -72,6 +73,7 @@ public abstract class ReconstructionEngine implements Engine {
      * @param ed
      * @return
      */
+    @Override
     public EngineData configure(EngineData ed) {
       if(constManagerMap == null)
       constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
@@ -89,6 +91,7 @@ public abstract class ReconstructionEngine implements Engine {
         return ed;
     }
 
+    @Override
     public EngineData execute(EngineData input) {
 
         EngineData output = input;
@@ -102,8 +105,10 @@ public abstract class ReconstructionEngine implements Engine {
             try {
                 //ByteBuffer bb = (ByteBuffer) input.getData();
                 HipoEvent hipoEvent = (HipoEvent) input.getData();
+                hipoEvent.setSchemaFactory(engineDictionary, false);
                 dataEventHipo = new HipoDataEvent(hipoEvent);
-                dataEventHipo.initDictionary(engineDictionary);
+                
+                //dataEventHipo.initDictionary(engineDictionary);
                 //dataEventHipo = new HipoDataEvent(bb.array(),this.engineDictionary);
             } catch (Exception e) {
                 String msg = String.format("Error reading input event%n%n%s", ClaraUtil.reportException(e));
@@ -196,11 +201,13 @@ public abstract class ReconstructionEngine implements Engine {
         */
     }
 
+    @Override
     public EngineData executeGroup(Set<EngineData> set) {
         return null;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public Set<EngineDataType> getInputDataTypes() {
         return ClaraUtil.buildDataTypes(Clas12Types.EVIO,
                 Clas12Types.HIPO,
@@ -212,6 +219,7 @@ public abstract class ReconstructionEngine implements Engine {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public Set<EngineDataType> getOutputDataTypes() {
         return ClaraUtil.buildDataTypes(Clas12Types.EVIO,
                 Clas12Types.HIPO,
@@ -223,6 +231,7 @@ public abstract class ReconstructionEngine implements Engine {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public Set<String> getStates() {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         return new HashSet<String>();
@@ -233,6 +242,7 @@ public abstract class ReconstructionEngine implements Engine {
         return this;
     }
 
+    @Override
     public String getDescription() {
         return this.engineDescription;
     }
@@ -241,20 +251,24 @@ public abstract class ReconstructionEngine implements Engine {
         return this.engineName;
     }
 
+    @Override
     public String getVersion() {
         return this.engineVersion;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public String getAuthor() {
         return this.engineAuthor;
         // new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public void reset() {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public void destroy() {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

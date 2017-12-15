@@ -3,11 +3,11 @@ package org.jlab.rec.dc.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.fit.basefit.LineFitPars;
 import org.jlab.rec.dc.track.fit.basefit.LineFitter;
@@ -63,7 +63,7 @@ public class ClusterFitter {
                 ex.add(i, (double) 0);
                 y.add(i, clus.get(i).get_X());
                 //ey[i]= clus.get(i).get_DocaErr(); //CODEFIX1
-                ey.add(i, clus.get(i).get_DocaErr() / Math.cos(Math.toRadians(6.)));
+                ey.add(i, clus.get(i).get_DocaErr() / Math.cos(Math.toRadians(6.))); 
             }
 
         }
@@ -81,7 +81,6 @@ public class ClusterFitter {
     }
 
     public void Fit(FittedCluster clus, boolean SaveFitPars) {
-
         if (FitArray != null) {
 
             LineFitter linefit = new LineFitter();
@@ -90,18 +89,20 @@ public class ClusterFitter {
             if (linefitstatusOK) //  Get the results of the fits
             {
                 FitPars = linefit.getFit();
+            } else {
+                FitPars=null;
             }
             if (SaveFitPars) {
                 this.SetClusterFitParameters(clus);
             }
         } else {
-            //System.err.println("Cluster Fit array not set!!!");
+            System.err.println("Cluster Fit array not set!!!");
         }
     }
 
     public void SetClusterFitParameters(FittedCluster clus) {
         if (FitPars != null) {
-
+            
             clus.set_clusterLineFitSlope(FitPars.slope());
             clus.set_clusterLineFitSlopeErr(FitPars.slopeErr());
             clus.set_clusterLineFitIntercept(FitPars.intercept());
@@ -139,7 +140,7 @@ public class ClusterFitter {
         }
     }
 
-    public void SetResidualDerivedParams(FittedCluster clus, boolean calcTimeResidual, boolean resetLRAmbig) {
+    public void SetResidualDerivedParams(FittedCluster clus, boolean calcTimeResidual, boolean resetLRAmbig, DCGeant4Factory DcDetector) {
 
         if (FitPars == null || FitArray == null) {
             return;
@@ -158,8 +159,8 @@ public class ClusterFitter {
             //clus.get(i).set_ClusFitDoca(FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             //double xWire = GeometryLoader.dcDetector.getSector(0).getSuperlayer(clus.get(i).get_Superlayer()-1).getLayer(clus.get(i).get_Layer()-1).getComponent(clus.get(i).get_Wire()-1).getMidpoint().x();
             //double zWire = GeometryLoader.dcDetector.getSector(0).getSuperlayer(clus.get(i).get_Superlayer()-1).getLayer(clus.get(i).get_Layer()-1).getComponent(clus.get(i).get_Wire()-1).getMidpoint().z();
-            double xWire = GeometryLoader.getDcDetector().getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).x;
-            double zWire = GeometryLoader.getDcDetector().getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).z;
+            double xWire = DcDetector.getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).x;
+            double zWire = DcDetector.getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).z;
 
             Line3D FitLine = new Line3D();
             Point3D pointOnTrk = new Point3D(FitArray.get(0).get(0), FitPars.slope() * FitArray.get(0).get(0) + FitPars.intercept(), 0);

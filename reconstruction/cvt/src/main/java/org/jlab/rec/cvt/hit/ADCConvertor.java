@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.hit;
 
 import java.util.Random;
+import org.jlab.io.base.DataEvent;
 
 import org.jlab.rec.cvt.Constants;
 
@@ -22,7 +23,7 @@ public class ADCConvertor {
      * @param adc ADC value Converts ADC values to DAQ units -- used for BST
      * test stand analysis
      */
-    public double SVTADCtoDAQ(int adc) {
+    public double SVTADCtoDAQ(int adc, DataEvent event) {
         if (adc == -5) {
             return 1; // this is for running with Geantinos.  Geantinos have adc -5
         }
@@ -43,8 +44,8 @@ public class ADCConvertor {
         int daq = returnRandomInteger(START[adc], END[adc], random);
 
         double value = (double) daq;
-        /*  
-        if(Constants.isSimulation==true) {
+         
+        if(event.hasBank("MC::Particle")==true) {
         	//This is how GEMC sets the adc:
         	// the energy deposited from a mip is 80 KeV
         	// The max value of the ADC is 2.5V
@@ -60,7 +61,8 @@ public class ADCConvertor {
         	double etoV = 0.1;
         	
         	value = ((double)(adc+0.5)*etoV*maxV/8); // center of bin to avoid zero value
-        } */
+        } 
+        
         return value;
     }
 

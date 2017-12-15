@@ -16,22 +16,22 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     private static final long serialVersionUID = 9153980362683755204L;
 
-    private String _Detector;							//      The detector SVT or BMT
-    private String _DetectorType;						//      The	detector type  for BMT C or Z
-    private int _Sector;      							//	    sector[1...]
-    private int _Layer;    	 							//	    layer [1,...]
-    private int _Id;									//		cluster Id
+    private int _Detector;							//              The detector SVT or BMT
+    private int _DetectorType;                                                  //              The detector type  for BMT C or Z
+    private int _Sector;      							//	        sector[1...]
+    private int _Layer;    	 						//	        layer [1,...]
+    private int _Id;								//		cluster Id
     private double _Centroid; 							// 		after LC (Lorentz Correction)
     private double _Centroid0; 							// 		before LC
     private double _TotalEnergy;
-    private double _Phi;  								// 		for Z-detectors
+    private double _Phi;  							// 		for Z-detectors
     private double _PhiErr;
-    private double _Phi0;  								// 		for Z-detectors before LC
+    private double _Phi0;  							// 		for Z-detectors before LC
     private double _PhiErr0;
-    private double _Z;    								// 		for C-detectors
+    private double _Z;    							// 		for C-detectors
     private double _ZErr;
 
-    public Cluster(String detector, String detectortype, int sector, int layer, int cid) {
+    public Cluster(int detector, int detectortype, int sector, int layer, int cid) {
         this._Detector = detector;
         this._DetectorType = detectortype;
         this._Sector = sector;
@@ -51,19 +51,19 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         return new Cluster(hit.get_Detector(), hit.get_DetectorType(), hit.get_Sector(), hit.get_Layer(), cid);
     }
 
-    public String get_Detector() {
+    public int get_Detector() {
         return _Detector;
     }
 
-    public void set_Detector(String _Detector) {
+    public void set_Detector(int _Detector) {
         this._Detector = _Detector;
     }
 
-    public String get_DetectorType() {
+    public int get_DetectorType() {
         return _DetectorType;
     }
 
-    public void set_DetectorType(String _DetectorType) {
+    public void set_DetectorType(int _DetectorType) {
         this._DetectorType = _DetectorType;
     }
 
@@ -140,19 +140,19 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
-        double phiCent = 0;				// cluster Lorentz-angle-corrected energy-weighted phi
+        double phiCent = 0;			// cluster Lorentz-angle-corrected energy-weighted phi
         double phiErrCent = 0;			// cluster Lorentz-angle-corrected energy-weighted phi error
         double phiCent0 = 0;			// cluster uncorrected energy-weighted phi
         double phiErrCent0 = 0;			// cluster uncorrected energy-weighted phi error
-        double zCent = 0;				// cluster energy-weighted z
+        double zCent = 0;			// cluster energy-weighted z
         double zErrCent = 0;			// cluster energy-weighted z error
-        double totEn = 0.;				// cluster total energy
+        double totEn = 0.;			// cluster total energy
         double weightedStrp = 0;		// Lorentz-angle-corrected energy-weighted strip 
         double weightedStrp0 = 0;		// uncorrected energy-weighted strip 
         double weightedPhi = 0;			// Lorentz-angle-corrected energy-weighted phi of the strip 
-        double weightedPhiErrSq = 0;	// Err^2 on Lorentz-angle-corrected energy-weighted phi of the strip 
+        double weightedPhiErrSq = 0;            // Err^2 on Lorentz-angle-corrected energy-weighted phi of the strip 
         double weightedPhi0 = 0;		// Uncorrected energy-weighted phi of the strip 
-        double weightedPhiErrSq0 = 0;	// Err^2 on uncorrected energy-weighted phi of the strip 
+        double weightedPhiErrSq0 = 0;           // Err^2 on uncorrected energy-weighted phi of the strip 
         double weightedZ = 0;			// Energy-weighted z of the strip
         double weightedZErrSq = 0;		// Err^2 on  energy-weighted z of the strip
 
@@ -171,19 +171,19 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
-                if (this.get_Detector().equalsIgnoreCase("SVT")) {
+                if (this.get_Detector()==0) {
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
                 }
-                if (this.get_Detector().equalsIgnoreCase("BMT")) {
+                if (this.get_Detector()==1) { 
                     // for the BMT the analysis distinguishes between C and Z type detectors
-                    if (this.get_DetectorType().equalsIgnoreCase("C")) { // C-detectors
+                    if (this.get_DetectorType()==0) { // C-detectors
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
                     }
-                    if (this.get_DetectorType().equalsIgnoreCase("Z")) { // Z-detectors
+                    if (this.get_DetectorType()==1) { // Z-detectors
                         // for Z detectors Larentz-correction is applied to the strip
                         strpNb = thehit.get_Strip().get_LCStrip();
                         strpNb0 = thehit.get_Strip().get_Strip();
@@ -210,7 +210,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 if (strpEn >= Emax) {
                     Emax = strpEn;
                     seed = strpNb;
-                    if (this.get_DetectorType().equalsIgnoreCase("Z")) {
+                    if (this.get_DetectorType()==1) {
                         seed = strpNb0;
                     }
                 }
@@ -242,7 +242,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         _TotalEnergy = totEn;
         _Centroid = stripNumCent;
-        if (this.get_DetectorType() == "Z") {
+        if (this.get_DetectorType() == 1) {
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
@@ -250,7 +250,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
-        if (this.get_DetectorType() == "C") {
+        if (this.get_DetectorType() == 0) {
             _Z = zCent;
             _ZErr = zErrCent;
         }
@@ -332,10 +332,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private int _MinStrip;			// the min strip number in the cluster
     private int _MaxStrip;			// the max strip number in the cluster
     private int _SeedStrip;			// the seed: the strip with largest deposited energy
-    private double _SeedEnergy;		// the deposited energy of the seed
+    private double _SeedEnergy;                 // the deposited energy of the seed
 
-    private double _SeedResidual;	// residual is doca to seed strip from trk intersection with module plane
-    private double _CentroidResidual;// residual is doca to centroid of cluster to trk inters with module plane
+    private double _SeedResidual;               // residual is doca to seed strip from trk intersection with module plane
+    private double _CentroidResidual;           // residual is doca to centroid of cluster to trk inters with module plane
 
     public int get_MinStrip() {
         return _MinStrip;
@@ -390,7 +390,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * @return cluster info. about location and number of hits contained in it
      */
     public void printInfo() {
-        String s = "cluster: Detector " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size();
+        String s = "cluster: Detector " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() +" centroid "+this.get_Centroid();
         System.out.println(s);
     }
 

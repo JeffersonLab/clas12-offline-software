@@ -1,11 +1,13 @@
 package org.jlab.rec.ft.hodo;
 
+import org.jlab.utils.groups.IndexedTable;
+
 
 public class FTHODOHit implements Comparable<FTHODOHit>{
 	// class implements Comparable interface to allow for sorting a collection of hits by Edep values
 	
 	// constructor 
-	public FTHODOHit(int i, int Sector, int Layer, int ID, int ADC, int TDC) {
+	public FTHODOHit(int i, int Sector, int Layer, int ID, int ADC, int TDC, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
 		this._Sector = Sector;
 		this._Layer = Layer;
 		this._ID    = ID;
@@ -13,31 +15,31 @@ public class FTHODOHit implements Comparable<FTHODOHit>{
 		this._TDC   = TDC;
 				
 		this.set_Edep(((double) this._ADC)*FTHODOConstantsLoader.FADC_TO_CHARGE
-				                          *FTHODOConstantsLoader.mips_energy[Sector-1][Layer-1][ID-1]
-			                         	  /FTHODOConstantsLoader.mips_charge[Sector-1][Layer-1][ID-1]);
+				                  *charge2Energy.getDoubleValue("mips_energy", Sector, Layer, ID)
+			                          /charge2Energy.getDoubleValue("mips_charge", Sector, Layer, ID));
 		this.set_Time(((double) this._TDC)/FTHODOConstantsLoader.TIMECONVFAC
-				                          -FTHODOConstantsLoader.time_offset[Sector-1][Layer-1][ID-1]); 	// Time set to gemc value
-		this.set_Dx(FTHODOConstantsLoader.px[Sector-1][Layer-1][ID-1]);
-		this.set_Dy(FTHODOConstantsLoader.py[Sector-1][Layer-1][ID-1]);
-		this.set_Dz(FTHODOConstantsLoader.pz[Sector-1][Layer-1][ID-1]);
+				                  -timeOffsets.getDoubleValue("time_offset", Sector, Layer, ID)); 	// Time set to gemc value
+		this.set_Dx(geometry.getDoubleValue("x", Sector, Layer, ID));
+		this.set_Dy(geometry.getDoubleValue("y", Sector, Layer, ID));
+		this.set_Dz(geometry.getDoubleValue("z", Sector, Layer, ID));
 		this.set_DGTZIndex(i);
 		this.set_ClusterIndex(0);
 //		System.out.println(this._Dx + " " + this._Dy);
 	}
 
-	public FTHODOHit(int i, int Sector, int Layer, int ID, int ADC, float time) {
+	public FTHODOHit(int i, int Sector, int Layer, int ID, int ADC, float time, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
 		this._Sector = Sector;
 		this._Layer = Layer;
 		this._ID    = ID;
 		this._ADC   = ADC;
-		this._Time  = time;
 				
 		this.set_Edep(((double) this._ADC)*FTHODOConstantsLoader.FADC_TO_CHARGE
-				                          *FTHODOConstantsLoader.mips_energy[Sector-1][Layer-1][ID-1]
-			                         	  /FTHODOConstantsLoader.mips_charge[Sector-1][Layer-1][ID-1]);
-		this.set_Dx(FTHODOConstantsLoader.px[Sector-1][Layer-1][ID-1]);
-		this.set_Dy(FTHODOConstantsLoader.py[Sector-1][Layer-1][ID-1]);
-		this.set_Dz(FTHODOConstantsLoader.pz[Sector-1][Layer-1][ID-1]);
+				                  *charge2Energy.getDoubleValue("mips_energy", Sector, Layer, ID)
+			                          /charge2Energy.getDoubleValue("mips_charge", Sector, Layer, ID));
+		this.set_Time(time-timeOffsets.getDoubleValue("time_offset", Sector, Layer, ID)); 	// Time set to gemc value
+		this.set_Dx(geometry.getDoubleValue("x", Sector, Layer, ID));
+		this.set_Dy(geometry.getDoubleValue("y", Sector, Layer, ID));
+		this.set_Dz(geometry.getDoubleValue("z", Sector, Layer, ID));
 		this.set_DGTZIndex(i);
 		this.set_ClusterIndex(0);
 //		System.out.println(this._Dx + " " + this._Dy);

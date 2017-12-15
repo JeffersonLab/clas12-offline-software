@@ -69,4 +69,9 @@ public abstract class Straight {
     public String toString(){
         return "Straight line from "+origin+" to "+end;
     }
+    
+    public void scale(double times) {
+        Vector3d diff = end.minus(origin).times(times);
+        end = origin.plus(diff);
+    }
 }

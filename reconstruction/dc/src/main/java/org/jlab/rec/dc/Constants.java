@@ -3,6 +3,8 @@ package org.jlab.rec.dc;
 import java.util.ArrayList;
 
 import cnuphys.snr.NoiseReductionParameters;
+import java.util.List;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Constants used in the reconstruction
@@ -12,7 +14,7 @@ public class Constants {
 	static boolean ConstantsLoaded = false;
 	// RECONSTRUCTION PARAMETERS
 	public static final int DC_MIN_NLAYERS = 4;
-
+        public static final double SPEEDLIGHT = 29.97924580;
 	// DATABASE VARIATION
 	//public static final String DBVAR = "default";
 	
@@ -27,22 +29,14 @@ public class Constants {
 	public static final  int NWIRE  = 114; //1 guard + 112 sense + 1 guard
 
 	public static final double z_extrap_to_LowFieldReg = 592.; // z in cm in the region outside of DC-R3 [used for extrapolation of the track to the outer detectors]
-	
+	public static final double[] wpdist = {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
+        
 	// CONSTANTS USED IN RECONSTRUCTION
 	//---------------------------------
 
 	public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
 
-	/**
-	 * Time to distance (from GEMC) in ns
-	 */
-	public static final double[] TIMETODIST = new double[3];    // Gemc time to distance d = t*TtoD[regionIdx]
-	/**
-	 * Drift velocity per region
-	 */
-	public static final double[] DRIFTVEL = new double[3];
-
-
+	
 	/// A region-segment contains two segments if they are in the same sector
 	/// and region and satisfy the proximity condition:
 	/// |Xwires2-Xwires1| = a*Xwires1 + b
@@ -102,11 +96,11 @@ public class Constants {
 	
 	public static final double MAXCHI2 = 10000;
 	
-	public static final boolean OUTOFTIMEFLAG = true;
+	//public static final boolean OUTOFTIMEFLAG = true;
 
-	private static boolean T2DGRID ;
-	private static boolean CALIB;
-	private static double TORSCALE;
+	//private static boolean T2DGRID ;
+	//private static boolean CALIB;
+	//private static double TORSCALE;
 	
 	private static boolean runLAYEREFFS = false;
 	
@@ -114,80 +108,51 @@ public class Constants {
 	public static final  int[] SNR_RIGHTSHIFTS = {0,1,2,2,4,4};
 	public static final  int[] SNR_LEFTSHIFTS  = {0,1,2,2,4,4};	
 	
-	public static final boolean useNoiseAlgo =false;
-
-	public static final boolean turnOnMicroMegas = false;
-
-	public static final boolean useRaster = false;
-
-	private static boolean T0 = false;
 	
-	private static boolean UseMiniStagger = false;
-	
-	//public static final boolean isCalibrationRun = false;
-	public static final boolean useTimeToDistanceGrid = true;
-	//public static final boolean DEBUGCROSSES = false;
-
 	// Arrays for combinatorial cluster compositions
-    static final int[][] CombArray1Layer = new int[][]{{0},{1}};
-    static final int[][] CombArray2Layers = new int[][]{{0,0},{1,0},{0,1},{1,1}};
-    static final int[][] CombArray3Layers = new int[][]{{0,0,0},{1,0,0},{0,1,0},{1,1,0},{0,0,1},{1,0,1},{0,1,1},{1,1,1}};
-    static final int[][] CombArray4Layers = new int[][]{{0,0,0,0},{1,0,0,0},{0,1,0,0},{1,1,0,0},{0,0,1,0},{1,0,1,0},{0,1,1,0},{1,1,1,0},{0,0,0,1},{1,0,0,1},{0,1,0,1},{1,1,0,1},{0,0,1,1},{1,0,1,1},{0,1,1,1},{1,1,1,1}};
-    static final int[][] CombArray5Layers = new int[][]{{0,0,0,0,0},{1,0,0,0,0},{0,1,0,0,0},{1,1,0,0,0},{0,0,1,0,0},{1,0,1,0,0},{0,1,1,0,0},{1,1,1,0,0},{0,0,0,1,0},{1,0,0,1,0},{0,1,0,1,0},{1,1,0,1,0},{0,0,1,1,0},{1,0,1,1,0},{0,1,1,1,0},{1,1,1,1,0},{0,0,0,0,1},{1,0,0,0,1},{0,1,0,0,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,1,0,1},{0,1,1,0,1},{1,1,1,0,1},{0,0,0,1,1},{1,0,0,1,1},{0,1,0,1,1},{1,1,0,1,1},{0,0,1,1,1},{1,0,1,1,1},{0,1,1,1,1},{1,1,1,1,1}};
-    static final int[][] CombArray6Layers = new int[][]{{0,0,0,0,0,0},{1,0,0,0,0,0},{0,1,0,0,0,0},{1,1,0,0,0,0},{0,0,1,0,0,0},{1,0,1,0,0,0},{0,1,1,0,0,0},{1,1,1,0,0,0},{0,0,0,1,0,0},{1,0,0,1,0,0},{0,1,0,1,0,0},{1,1,0,1,0,0},{0,0,1,1,0,0},{1,0,1,1,0,0},{0,1,1,1,0,0},{1,1,1,1,0,0},{0,0,0,0,1,0},{1,0,0,0,1,0},{0,1,0,0,1,0},{1,1,0,0,1,0},{0,0,1,0,1,0},{1,0,1,0,1,0},{0,1,1,0,1,0},{1,1,1,0,1,0},{0,0,0,1,1,0},{1,0,0,1,1,0},{0,1,0,1,1,0},{1,1,0,1,1,0},{0,0,1,1,1,0},{1,0,1,1,1,0},{0,1,1,1,1,0},{1,1,1,1,1,0},{0,0,0,0,0,1},{1,0,0,0,0,1},{0,1,0,0,0,1},{1,1,0,0,0,1},{0,0,1,0,0,1},{1,0,1,0,0,1},{0,1,1,0,0,1},{1,1,1,0,0,1},{0,0,0,1,0,1},{1,0,0,1,0,1},{0,1,0,1,0,1},{1,1,0,1,0,1},{0,0,1,1,0,1},{1,0,1,1,0,1},{0,1,1,1,0,1},{1,1,1,1,0,1},{0,0,0,0,1,1},{1,0,0,0,1,1},{0,1,0,0,1,1},{1,1,0,0,1,1},{0,0,1,0,1,1},{1,0,1,0,1,1},{0,1,1,0,1,1},{1,1,1,0,1,1},{0,0,0,1,1,1},{1,0,0,1,1,1},{0,1,0,1,1,1},{1,1,0,1,1,1},{0,0,1,1,1,1},{1,0,1,1,1,1},{0,1,1,1,1,1},{1,1,1,1,1,1}};
+        static final int[][] CombArray1Layer = new int[][]{{0},{1}};
+        static final int[][] CombArray2Layers = new int[][]{{0,0},{1,0},{0,1},{1,1}};
+        static final int[][] CombArray3Layers = new int[][]{{0,0,0},{1,0,0},{0,1,0},{1,1,0},{0,0,1},{1,0,1},{0,1,1},{1,1,1}};
+        static final int[][] CombArray4Layers = new int[][]{{0,0,0,0},{1,0,0,0},{0,1,0,0},{1,1,0,0},{0,0,1,0},{1,0,1,0},{0,1,1,0},{1,1,1,0},{0,0,0,1},{1,0,0,1},{0,1,0,1},{1,1,0,1},{0,0,1,1},{1,0,1,1},{0,1,1,1},{1,1,1,1}};
+        static final int[][] CombArray5Layers = new int[][]{{0,0,0,0,0},{1,0,0,0,0},{0,1,0,0,0},{1,1,0,0,0},{0,0,1,0,0},{1,0,1,0,0},{0,1,1,0,0},{1,1,1,0,0},{0,0,0,1,0},{1,0,0,1,0},{0,1,0,1,0},{1,1,0,1,0},{0,0,1,1,0},{1,0,1,1,0},{0,1,1,1,0},{1,1,1,1,0},{0,0,0,0,1},{1,0,0,0,1},{0,1,0,0,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,1,0,1},{0,1,1,0,1},{1,1,1,0,1},{0,0,0,1,1},{1,0,0,1,1},{0,1,0,1,1},{1,1,0,1,1},{0,0,1,1,1},{1,0,1,1,1},{0,1,1,1,1},{1,1,1,1,1}};
+        static final int[][] CombArray6Layers = new int[][]{{0,0,0,0,0,0},{1,0,0,0,0,0},{0,1,0,0,0,0},{1,1,0,0,0,0},{0,0,1,0,0,0},{1,0,1,0,0,0},{0,1,1,0,0,0},{1,1,1,0,0,0},{0,0,0,1,0,0},{1,0,0,1,0,0},{0,1,0,1,0,0},{1,1,0,1,0,0},{0,0,1,1,0,0},{1,0,1,1,0,0},{0,1,1,1,0,0},{1,1,1,1,0,0},{0,0,0,0,1,0},{1,0,0,0,1,0},{0,1,0,0,1,0},{1,1,0,0,1,0},{0,0,1,0,1,0},{1,0,1,0,1,0},{0,1,1,0,1,0},{1,1,1,0,1,0},{0,0,0,1,1,0},{1,0,0,1,1,0},{0,1,0,1,1,0},{1,1,0,1,1,0},{0,0,1,1,1,0},{1,0,1,1,1,0},{0,1,1,1,1,0},{1,1,1,1,1,0},{0,0,0,0,0,1},{1,0,0,0,0,1},{0,1,0,0,0,1},{1,1,0,0,0,1},{0,0,1,0,0,1},{1,0,1,0,0,1},{0,1,1,0,0,1},{1,1,1,0,0,1},{0,0,0,1,0,1},{1,0,0,1,0,1},{0,1,0,1,0,1},{1,1,0,1,0,1},{0,0,1,1,0,1},{1,0,1,1,0,1},{0,1,1,1,0,1},{1,1,1,1,0,1},{0,0,0,0,1,1},{1,0,0,0,1,1},{0,1,0,0,1,1},{1,1,0,0,1,1},{0,0,1,0,1,1},{1,0,1,0,1,1},{0,1,1,0,1,1},{1,1,1,0,1,1},{0,0,0,1,1,1},{1,0,0,1,1,1},{0,1,0,1,1,1},{1,1,0,1,1,1},{0,0,1,1,1,1},{1,0,1,1,1,1},{0,1,1,1,1,1},{1,1,1,1,1,1}};
 
 	public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
 	
-	
-	public static final synchronized void Load(boolean timeToDistanceGridSetting, boolean calibRun, double torusScale) {
-		if (ConstantsLoaded==true)
-			return;
-		CombArray.add(CombArray1Layer);
-		CombArray.add(CombArray2Layers);
-		CombArray.add(CombArray3Layers);
-		CombArray.add(CombArray4Layers);
-		CombArray.add(CombArray5Layers);
-		CombArray.add(CombArray6Layers);
-		
-		setT2DGRID(timeToDistanceGridSetting);
-		setCALIB(calibRun);
-		setTORSCALE(torusScale);
+	public static int[][] STBLOC;
+	public static final synchronized void Load() {
+            if (ConstantsLoaded==true)
+                    return;
+            CombArray.add(CombArray1Layer);
+            CombArray.add(CombArray2Layers);
+            CombArray.add(CombArray3Layers);
+            CombArray.add(CombArray4Layers);
+            CombArray.add(CombArray5Layers);
+            CombArray.add(CombArray6Layers);
+
+            STBLOC = new int[6][6];
+            for(int s =0; s<6; s++) {
+                STBLOC[s][0]=1;
+                STBLOC[s][1]=-1;
+                STBLOC[s][4]=1;
+                STBLOC[s][5]=1;
+            }
+            
+            for(int sl =2; sl<4; sl++) {
+                STBLOC[2][sl]=1;
+                STBLOC[3][sl]=1;
+                STBLOC[4][sl]=1;
+                STBLOC[0][sl]=-1;
+                STBLOC[1][sl]=-1;
+                STBLOC[5][sl]=-1;
+            }
 		
 		NoiseReductionParameters.setLookForTracks(false);
-		
-//		if(Constants.isSimulation == false ) {
-//			Constants.useNoiseAlgo = false;
-//			Constants.useTimeToDistanceGrid =true;
-//		}
-		
-		
-		TIMETODIST[0] = 0.0053;  //in cm per ns
-		TIMETODIST[1] = 0.0026;
-		TIMETODIST[2] = 0.0036;
 		
 		System.out.println("CONSTANTS LOADED!!!");
 		
 	}
 
-
-	public static final boolean isT2DGRID() {
-		return T2DGRID;
-	}
-
-
-	public static final void setT2DGRID(final boolean t2dgrid) {
-		T2DGRID = t2dgrid;
-	}
-
-
-	public static final boolean isCALIB() {
-		return CALIB;
-	}
-
-
-	public static final void setCALIB(boolean cALIB) {
-		CALIB = cALIB;
-	}
 
 	public static final boolean LAYEREFFS() {
 		return runLAYEREFFS;
@@ -199,31 +164,15 @@ public class Constants {
 	}
 
 
-	public static final double getTORSCALE() {
-		return TORSCALE;
-	}
+	//public static final double getTORSCALE() {
+	//	return TORSCALE;
+	//}
 
 
-	public static final void setTORSCALE(double tORSCALE) {
-		TORSCALE = tORSCALE;
-	}
+	//public static final void setTORSCALE(double tORSCALE) {
+	//	TORSCALE = tORSCALE;
+	//}
+        
+   
 
-
-	public static final boolean getT0() {
-		return T0;
-	}
-
-
-	public static final void setT0(boolean t0) {
-		T0 = t0;
-	}
-	
-	public static final boolean getUseMiniStagger() {
-		return UseMiniStagger;
-	}
-
-
-	public static final void setUseMiniStagger(boolean useMiniStagger) {
-		UseMiniStagger = useMiniStagger;
-	}
 }

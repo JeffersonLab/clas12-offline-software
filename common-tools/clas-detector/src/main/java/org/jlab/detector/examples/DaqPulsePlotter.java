@@ -34,7 +34,6 @@ import org.jlab.detector.view.DetectorView2D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.IDataSet;
 import org.jlab.groot.graphics.EmbeddedCanvas;
-import org.jlab.groot.graphics.EmbeddedCanvasGroup;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -56,7 +55,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     DataSourceProcessorPane processorPane = null;
     
     //EmbeddedCanvasTabbed        canvasTab = new EmbeddedCanvasTabbed(true);
-    EmbeddedCanvasGroup        canvasTab = new EmbeddedCanvasGroup();
+    //EmbeddedCanvasGroup        canvasTab = new EmbeddedCanvasGroup();
     
     JComboBox  comboDetector = null;
     JComboBox  comboSector = null;
@@ -109,7 +108,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
         detectorView.getView().addDetectorListener(this);
         this.updateDetectorView();
         splitPane.setLeftComponent(detectorView);
-        splitPane.setRightComponent(canvasTab);
+       // splitPane.setRightComponent(canvasTab);
         
         pane.add(splitPane,BorderLayout.CENTER);
         //pane.add(canvasTab,BorderLayout.CENTER);
@@ -121,13 +120,13 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
     public void updateDetectorView(){
         
         for(int sector = 1 ; sector < 7; sector++){
-            List<DetectorShape2D> shapesPCAL = DetectorView2D.createSector(DetectorType.EC, sector, 3, Color.yellow, 180, 10);
+            List<DetectorShape2D> shapesPCAL = DetectorView2D.createSector(DetectorType.ECAL, sector, 3, Color.yellow, 180, 10);
             for(DetectorShape2D shape : shapesPCAL) { this.detectorView.getView().addShape("CLAS12", shape);}
             
-            List<DetectorShape2D> shapesECIN = DetectorView2D.createSector(DetectorType.EC, sector, 4,6, Color.yellow, 190, 10);
+            List<DetectorShape2D> shapesECIN = DetectorView2D.createSector(DetectorType.ECAL, sector, 4,6, Color.yellow, 190, 10);
             for(DetectorShape2D shape : shapesECIN) { this.detectorView.getView().addShape("CLAS12", shape);}
             
-            List<DetectorShape2D> shapesECOUT = DetectorView2D.createSector(DetectorType.EC, sector, 7,9, Color.yellow, 200, 10);
+            List<DetectorShape2D> shapesECOUT = DetectorView2D.createSector(DetectorType.ECAL, sector, 7,9, Color.yellow, 200, 10);
             for(DetectorShape2D shape : shapesECOUT) { this.detectorView.getView().addShape("CLAS12", shape);}
             
             List<DetectorShape2D> shapesFTOF = DetectorView2D.createSector(DetectorType.FTOF, sector, 3, Color.blue, 100, 15);
@@ -242,7 +241,7 @@ public class DaqPulsePlotter implements IDataEventListener,DetectorListener,Acti
                 //c.draw(h);
             }
             counter++;
-            this.canvasTab.setData(datasetList);
+            //this.canvasTab.setData(datasetList);
         }
     }
     

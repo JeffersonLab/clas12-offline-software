@@ -1,0 +1,12 @@
+electronproton -pid 2212
+electronkaon -pid 321
+electronpion -pid 211
+electrongamma -pid 22
+electronneutron -pid 2112
+electronFTgamma -pid -22 -ft
+electrongammaFT -pid 22 -ft
+electronprotonC -pid 2212 -cd
+electronkaonC -pid 321 -cd
+electronpionC -pid 211 -cd
+electrongammaC -pid 22 -cd
+electronneutronC -pid 2112 -cd

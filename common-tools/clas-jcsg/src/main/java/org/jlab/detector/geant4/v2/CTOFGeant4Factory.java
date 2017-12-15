@@ -27,11 +27,11 @@ public final class CTOFGeant4Factory extends Geant4Factory {
 
         ClassLoader cloader = getClass().getClassLoader();
 
-        for (String name : new String[]{"sc", "lgu", "lgd"}) {
+        for (String name : new String[]{"sc", "lgd"}) {
             for (int iscint = 1; iscint <= npaddles; iscint++) {
                 CTOFpaddle component = new CTOFpaddle(String.format("%s%02d", name, iscint),
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);
-                component.scale(Length.mm/Length.cm);
+                component.scale(Length.mm / Length.cm);
 
                 component.rotate("zyx", 0, Math.toRadians(180), 0);
                 component.translate(0, 0, 127.327);
@@ -39,7 +39,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
 
                 if (name.equals("sc")) {
                     component.makeSensitive();
-                    component.setId(CTOFID, iscint);
+                    component.setId(CTOFID, (iscint>13) ? iscint-13 : iscint+35);
                 }
             }
         }
@@ -51,7 +51,11 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             System.err.println("CTOF Paddle #" + ipaddle + " doesn't exist");
             System.exit(111);
         }
-        return motherVolume.getChildren().get(ipaddle - 1);
+        int paddleId = ipaddle + 35;
+        if (ipaddle > 13) {
+            paddleId = ipaddle - 13;
+        }
+        return motherVolume.getChildren().get(paddleId - 1);
     }
 
     private class CTOFpaddle extends G4Stl {

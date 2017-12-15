@@ -7,6 +7,7 @@ CLARA_SERVICES=$DISTRO_DIR/lib/services; export CLARA_SERVICES
 DATAMINING=$DISTRO_DIR ; export DATAMINING
 TORUSMAP=$CLAS12DIR/etc/data/magfield/clas12-fieldmap-torus.dat ; export TORUSMAP
 SOLENOIDMAP=$CLAS12DIR/etc/data/magfield/clas12-fieldmap-solenoid.dat ; export SOLENOIDMAP
+MALLOC_ARENA_MAX=1; export MALLOC_ARENA_MAX
 
 #CLARA_HOME=`dirname $0`
 #CLARA_SERVICES=`dirname $0`
@@ -22,4 +23,5 @@ echo "LIBRARY DIRECTORY      = " $DATAMINING/lib/clas/
 
 #java -cp "$DATAMINING/lib/clas/core/*" org.jlab.coda.eventViewer.EventTreeFrame $*
 #java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.io.hipo.HipoDataSync $*
-java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.clas.reco.io.HipoFileUtils $*
+#java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.clas.reco.io.HipoFileUtils $*
+java -Xmx2048m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.jnp.hipo.utils.HipoUtilities $*

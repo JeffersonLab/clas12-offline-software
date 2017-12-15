@@ -3,18 +3,17 @@ package org.jlab.rec.tof.banks.ftof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.ftof.CCDBConstants;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -63,7 +62,22 @@ public class HitReader implements IMatchedHit {
      * @param geometry the FTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, FTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths) {
+            List<Line3d> trks, double[] paths, int[] ids, 
+            IndexedTable constants0, 
+            IndexedTable constants1, 
+            IndexedTable constants2, 
+            IndexedTable constants3, 
+            IndexedTable constants4, 
+            IndexedTable constants5, 
+            IndexedTable constants6) {/*
+        0: "/calibration/ftof/attenuation"),
+        1: "/calibration/ftof/effective_velocity"),
+        2: "/calibration/ftof/time_offsets"),
+        3: "/calibration/ftof/time_walk"),
+        4: "/calibration/ftof/status"),
+        5: "/calibration/ftof/gain_balance"),
+        6: "/calibration/ftof/tdc_conv") );
+        */
         _numTrks = trks.size();
 
         BaseHitReader hitReader = new BaseHitReader();
@@ -79,7 +93,7 @@ public class HitReader implements IMatchedHit {
 
             return;
         }
-
+        
         // Instantiates the lists of hits
         List<Hit> hits = new ArrayList<Hit>();
 
@@ -124,10 +138,11 @@ public class HitReader implements IMatchedHit {
             }
 
             // get the status
-            int statusL = CCDBConstants.getSTATUSL()[sector[i] - 1][panel[i] - 1][paddle[i] - 1];
-            int statusR = CCDBConstants.getSTATUSR()[sector[i] - 1][panel[i] - 1][paddle[i] - 1];
-            String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i],
-                    TDCL[i], ADCR[i], TDCR[i]);
+            //int statusL = CCDBConstants.getSTATUSL()[sector[i] - 1][panel[i] - 1][paddle[i] - 1];
+            //int statusR = CCDBConstants.getSTATUSR()[sector[i] - 1][panel[i] - 1][paddle[i] - 1];
+            
+            //String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i],
+            //        TDCL[i], ADCR[i], TDCR[i]);
 
             // create the hit object
             Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i],
@@ -136,12 +151,13 @@ public class HitReader implements IMatchedHit {
             hit.set_ADCbankHitIdx2(ADCRIdx[i]);
             hit.set_TDCbankHitIdx1(TDCLIdx[i]);
             hit.set_TDCbankHitIdx2(TDCRIdx[i]);
-            hit.set_StatusWord(statusWord);
+            //hit.set_StatusWord(statusWord);
+            hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCL[i], TDCL[i], ADCR[i], TDCR[i]));
             hit.setPaddleLine(geometry);
             // add this hit
             hits.add(hit);
         }
-        List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, trks, paths);
+        List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, trks, paths, ids);
 
         ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
         for (int j = 0; j < 3; j++) {
@@ -151,7 +167,13 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             // set the layer to get the paddle position from the geometry
             // package
-            hit.set_HitParameters(hit.get_Panel());
+            hit.set_HitParameters(hit.get_Panel(), 
+                constants0, 
+                constants1, 
+                constants2, 
+                constants3, 
+                constants5, 
+                constants6);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -279,7 +301,7 @@ public class HitReader implements IMatchedHit {
     }
 
     private List<Hit> matchHitsToDCTrk(List<Hit> FTOFhits,
-            FTOFGeant4Factory ftofDetector, List<Line3d> trks, double[] paths) {
+            FTOFGeant4Factory ftofDetector, List<Line3d> trks, double[] paths, int[] ids) {
         if (trks == null || trks.size() == 0) {
             return FTOFhits; // no hits were matched with DC tracks
         }
@@ -332,7 +354,9 @@ public class HitReader implements IMatchedHit {
                     // get the pathlength of the track from its origin to the
                     // mid-point between the track entrance and exit from the
                     // bar
-                    double deltaPath = matchedHit.origin().distance(
+                    //double deltaPath = matchedHit.origin().distance(
+                    //        matchedHit.mid());
+                    double deltaPath = hit.get_matchedTrack().origin().distance(
                             matchedHit.mid());
                     double pathLenTruBar = matchedHit.origin().distance(
                             matchedHit.end());
@@ -354,6 +378,7 @@ public class HitReader implements IMatchedHit {
                             .distance(trkPosinMidlBar);
                     // local y:
                     hit.set_yTrk(barOrigToTrkPos - Lov2);
+                    hit._AssociatedTrkId=ids[i];
                     // ---------------------------------------
                     hitList.add(hit); // add this hit to the output list
 

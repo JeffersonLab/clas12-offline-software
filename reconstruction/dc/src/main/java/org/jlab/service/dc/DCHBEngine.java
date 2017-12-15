@@ -10,9 +10,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
-import org.jlab.rec.dc.CalibrationConstantsLoader;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -27,7 +25,6 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
@@ -36,31 +33,100 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import java.util.Arrays;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.geom.base.ConstantProvider;
+
 
 public class DCHBEngine extends ReconstructionEngine {
 
-	public DCHBEngine() {
-		super("DCHB","ziegler","3.0");
-	}
+    public DCHBEngine() {
+            super("DCHB","ziegler","4.0");
+    }
 
-	String FieldsConfig="";
-	int Run = -1;
-	
+    String FieldsConfig="";
+    int Run = 0;
+    DCGeant4Factory dcDetector;
+        
+    double[][][][] T0 ;
+    double[][][][] T0ERR ;
+        
+    double TORSCALE;
+    double SOLSCALE;
+    
 	@Override
 	public boolean init() {
-		
-		// Load the Fields 
-		DCSwimmer.getMagneticFields();
-		
-		return true;
-	}
+            Constants.Load();
+            // Load the Fields 
+            DCSwimmer.getMagneticFields();
+            String[]  dcTables = new String[]{
+                "/calibration/dc/signal_generation/doca_resolution",
+              //  "/calibration/dc/time_to_distance/t2d",
+                "/calibration/dc/time_to_distance/time2dist",
+             //   "/calibration/dc/time_corrections/T0_correction",
+            };
+
+            requireConstants(Arrays.asList(dcTables));
+            // Get the constants for the correct variation
+            this.getConstantsManager().setVariation("default");
+            
+            // Load the geometry
+            ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
+            dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+            
+            //T0s
+            T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+            T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+            DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
+            dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+            //disconnect from database. Important to do this after loading tables.
+            dbprovider.disconnect();
+            // T0-subtraction
+           
+            for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+                int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+                int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+                int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+                int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+                double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+                double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+
+                T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+                T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+            }
+            return true;
+        }
 
 	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-		setRunConditionsParameters( event) ;
-		 // init SNR 
-	    Clas12NoiseResult results = new Clas12NoiseResult(); 
+		//setRunConditionsParameters( event) ;
+        if(event.hasBank("RUN::config")==false ) {
+		System.err.println("RUN CONDITIONS NOT READ!");
+		return true;
+	}
+		
+        DataBank bank = event.getBank("RUN::config");
+		
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        if(Run!=newRun) {
+            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
+            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
+            TORSCALE = (double)bank.getFloat("torus", 0);
+            SOLSCALE = (double)bank.getFloat("solenoid", 0);
+            DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);
+            System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
+            Run = newRun;
+        }
+		 // init SNR
+        Clas12NoiseResult results = new Clas12NoiseResult();
 		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
 
 		int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
@@ -71,9 +137,9 @@ public class DCHBEngine extends ReconstructionEngine {
 		//System.out.println("RUNING HITBASED_________________________________________");
 	  
 		ClusterFitter cf = new ClusterFitter();
-	    ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 	    
-	    List<FittedHit> fhits = new ArrayList<FittedHit>();
+                List<FittedHit> fhits = new ArrayList<FittedHit>();
 		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
 		List<Segment> segments = new ArrayList<Segment>();
 		List<Cross> crosses = new ArrayList<Cross>();
@@ -85,9 +151,10 @@ public class DCHBEngine extends ReconstructionEngine {
 		
 		//if(Constants.DEBUGCROSSES)
 		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
-		
+
 		HitReader hitRead = new HitReader();
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
+		//hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
+		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
 
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
@@ -104,8 +171,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
 		//2) find the clusters from these hits
 		ClusterFinder clusFinder = new ClusterFinder();
-		clusters = clusFinder.FindHitBasedClusters(hits, ct, cf);
-		
+		clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
 		
 		if(clusters.size()==0) {				
 			rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
@@ -116,7 +182,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		
 		//3) find the segments from the fitted clusters
 		SegmentFinder segFinder = new SegmentFinder();
-		segments =  segFinder.get_Segments(clusters, event);
+		segments =  segFinder.get_Segments(clusters, event, dcDetector);
  
 		if(segments.size()==0) { // need 6 segments to make a trajectory			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
@@ -126,19 +192,19 @@ public class DCHBEngine extends ReconstructionEngine {
 		//
 		
 		RoadFinder pcrossLister = new RoadFinder();
-		List<Segment> pSegments =pcrossLister.findRoads(segments);
+		List<Segment> pSegments =pcrossLister.findRoads(segments, dcDetector);
 		segments.addAll(pSegments);
 		
 		//
 		//System.out.println("nb trk segs "+pSegments.size());
 		CrossMaker crossMake = new CrossMaker();
-		crosses = crossMake.find_Crosses(segments);
+		crosses = crossMake.find_Crosses(segments, dcDetector);
  
 		if(crosses.size()==0 ) {			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
-		
+                
 		CrossListFinder crossLister = new CrossListFinder();
 		
 		List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
@@ -148,8 +214,9 @@ public class DCHBEngine extends ReconstructionEngine {
 			}
 		}
 		
-		CrossList crosslist = crossLister.candCrossLists(crosses);
-		
+		//CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
+		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+
 		if(crosslist.size()==0) {
 			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
@@ -158,7 +225,7 @@ public class DCHBEngine extends ReconstructionEngine {
 
 		//6) find the list of  track candidates
 		TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-		trkcands = trkcandFinder.getTrackCands(crosslist) ;
+		trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, TORSCALE) ;
 		 
 		if(trkcands.size()==0) {
 			
@@ -167,28 +234,33 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 		// track found	
 		int trkId = 1;
-		for(Track trk: trkcands) {						
-			for(Cross c : trk) { 
-				for(FittedHit h1 : c.get_Segment1())
-					h1.set_AssociatedHBTrackID(trk.get_Id());
-			  	for(FittedHit h2 : c.get_Segment2())
-			  		h2.set_AssociatedHBTrackID(trk.get_Id());	
-			}
+		for(Track trk: trkcands) {
+                    
+                    for(Cross c : trk) { 
+                            for(FittedHit h1 : c.get_Segment1())
+                                    h1.set_AssociatedHBTrackID(trk.get_Id());
+                            for(FittedHit h2 : c.get_Segment2())
+                                    h2.set_AssociatedHBTrackID(trk.get_Id());	
+                    }
 			
 		}
 	  
 		trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 		
 		for(Track trk: trkcands) {		
-			// reset the id
-			trk.set_Id(trkId);
-			for(Cross c : trk) { 
-				for(FittedHit h1 : c.get_Segment1())
-					h1.set_AssociatedHBTrackID(trk.get_Id());
-			  	for(FittedHit h2 : c.get_Segment2())
-			  		h2.set_AssociatedHBTrackID(trk.get_Id());	
-			}
-			trkId++;
+		    // reset the id
+                    trk.set_Id(trkId);
+                    trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
+                    for(Cross c : trk) { 
+                        for(FittedHit h1 : c.get_Segment1()) {
+                                h1.set_AssociatedHBTrackID(trk.get_Id());
+                                
+                        }
+                        for(FittedHit h2 : c.get_Segment2()) {
+                                h2.set_AssociatedHBTrackID(trk.get_Id());                              
+                        }
+                    }
+                    trkId++;
 		}
 	  
 		rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
@@ -196,69 +268,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		return true;
 	}
 
-	public void setRunConditionsParameters(DataEvent event) {
-		if(event.hasBank("RUN::config")==false) {
-			System.err.println("RUN CONDITIONS NOT READ!");
-			return;
-		}
-		boolean isMC = false;
-		boolean isCosmics = false;
-		
-	
-        DataBank bank = event.getBank("RUN::config");	
-		if(bank.getByte("type", 0)==0)
-			isMC = true;
-		if(bank.getByte("mode", 0)==1)
-			isCosmics = true;
-		// force cosmics
-		//isCosmics = true;
-		//System.out.println(bank.getInt("Event")[0]);
-		boolean isCalib = isCosmics;  // all cosmics runs are for calibration right now
-		//
-		
-		
-		// Load the constants
-		//-------------------
-		int newRun = bank.getInt("run", 0);
-		boolean T2DCalc = false;
-		
-		if(Run!=newRun) {
-			//if(newRun>751 && newRun<912) {
-                        if(newRun>99) {
-				T2DCalc = true;
-				Constants.setT0(true);		
-				Constants.setUseMiniStagger(true);
-			}
-			T2DCalc = true;	
-			Constants.setUseMiniStagger(true);
-			
-			System.out.println("   SETTING RUN-DEPENDENT CONSTANTS, T0 = "+Constants.getT0()+ " use ministagger "+Constants.getUseMiniStagger());
-			CalibrationConstantsLoader.Load(newRun, "default");
-			
-			TableLoader.Fill();
-			
-			GeometryLoader.Load(newRun, "default");
-		}
-		Run = newRun;
 
-		
-		// Load the fields
-		//-----------------
-		String newConfig = "SOLENOID"+bank.getFloat("solenoid",0)+"TORUS"+bank.getFloat("torus",0)+"RUN"+bank.getInt("run", 0);		
-		//System.out.println(" fields "+newConfig);
-		if (FieldsConfig.equals(newConfig)==false) {
-			// Load the Constants
-			double TorScale = (double)bank.getFloat("torus",0);
-			//TorScale = -0.5;
-			
-			Constants.Load(T2DCalc, isCalib, TorScale); // set the T2D Grid for Cosmics data only so far....
-			// Load the Fields
-			//DCSwimmer.setMagneticFieldsScales(1.0, bank.getFloat("Torus")[0]); // something changed in the configuration ... 
-			DCSwimmer.setMagneticFieldsScales((double)bank.getFloat("solenoid",0), TorScale); // something changed in the configuration ... 
-		}
-		FieldsConfig = newConfig;
-		
-	}
 	public static void main(String[] args) throws FileNotFoundException, EvioException {
 
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
@@ -269,16 +279,16 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE3.hipo";
+        String inputFile="/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE4.hipo";
         //String inputFile="/Users/ziegler/Workdir/Files/test/electron_fd_t0.8torus.hipo";
-       // String inputFile = "/Users/ziegler/Workdir/Files/Data/DecodedData/DC/big.806.pass4.2trackstdc.hipo";
+        //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         DCHBEngine en = new DCHBEngine();
         en.init();
         DCTBEngine en2 = new DCTBEngine();
         en2.init();
-
+        
         int counter = 0;
 
         HipoDataSource reader = new HipoDataSource();
@@ -287,8 +297,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-       // String outputFile="/Users/ziegler/Workdir/Files/test/electron_fd_rcF3.hipo";
-        String outputFile = "/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE2.rec3.hipo";
+        String outputFile="/Users/ziegler/Workdir/Files/test.hipo";
+        //String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809_rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -302,20 +312,19 @@ public class DCHBEngine extends ReconstructionEngine {
             }
 
             en.processDataEvent(event);
-
             // Processing TB   
             en2.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-           // if (counter > 13) {
-            //    break;
-            //}
+            if (counter > 20) {
+                break;
+            }
             //event.show();
             //if(counter%100==0)
             System.out.println("*************************************************************run " + counter + " events");
-            if(event.hasBank("TimeBasedTrkg::TBTracks")) {
+            //if(event.hasBank("TimeBasedTrkg::TBTracks")) {
                // event.show();
                 writer.writeEvent(event);
-            }
+            //}
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;

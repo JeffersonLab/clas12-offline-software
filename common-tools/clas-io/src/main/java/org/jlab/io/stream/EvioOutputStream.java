@@ -17,8 +17,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EventBuilder;
+import org.jlab.coda.jevio.EventWriter;
 import org.jlab.coda.jevio.EvioBank;
-import org.jlab.coda.jevio.EvioCompactEventWriter;
+
 import org.jlab.coda.jevio.EvioCompactStructureHandler;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioException;
@@ -174,9 +175,7 @@ public class EvioOutputStream {
     public void writeToFile(String filename){
         File file = new File(filename);
         try {
-            EvioCompactEventWriter evioWriter = new EvioCompactEventWriter(filename, null,
-                    0, 0, 
-                    4*3000, 100000, 20*1024*1024, writerByteOrder, null, true);
+            EventWriter evioWriter = new EventWriter(new File(filename), null, true);
             ByteBuffer original = structure.getByteBuffer();
             ByteBuffer clone = ByteBuffer.allocate(original.capacity());
             clone.order(original.order());

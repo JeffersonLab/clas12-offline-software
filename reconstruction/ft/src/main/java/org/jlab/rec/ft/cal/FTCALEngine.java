@@ -2,6 +2,7 @@ package org.jlab.rec.ft.cal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFrame;
 import org.jlab.clas.detector.DetectorData;
@@ -17,6 +18,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.utils.groups.IndexedTable;
 
 
 public class FTCALEngine extends ReconstructionEngine {
@@ -26,66 +28,82 @@ public class FTCALEngine extends ReconstructionEngine {
 	}
 
 	FTCALReconstruction reco;
+        IndexedTable charge2Energy;
+        IndexedTable timeOffsets;
+        IndexedTable status;
+        IndexedTable cluster;
+        IndexedTable energyCorr;
+
 	int Run = -1;
 	
 	@Override
 	public boolean init() {
 		reco = new FTCALReconstruction();
 		reco.debugMode=0;
-		return true;
+
+                String[]  tables = new String[]{ 
+                    "/calibration/ft/ftcal/charge_to_energy",
+                    "/calibration/ft/ftcal/time_offsets",
+                    "/calibration/ft/ftcal/status",
+                    "/calibration/ft/ftcal/cluster",
+                    "/calibration/ft/ftcal/energycorr"
+                };
+                requireConstants(Arrays.asList(tables));
+                this.getConstantsManager().setVariation("default");
+                return true;
 	}
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-            List<FTCALHit>     allHits          = new ArrayList();
-            List<FTCALHit>     selectedHits     = new ArrayList();
-            List<FTCALCluster> allClusters      = new ArrayList();
-            List<FTCALCluster> selectedClusters = new ArrayList();
+            List<FTCALHit>     allHits           = new ArrayList();
+            List<FTCALHit>     selectedHits      = new ArrayList();
+            List<FTCALCluster> allClusters       = new ArrayList();
+            List<FTCALCluster> selectedClusters  = new ArrayList();
+            List<FTCALCluster> correctedClusters = new ArrayList();
             
             // update calibration constants based on run number if changed
             setRunConditionsParameters(event);
             // get hits fron banks
-            allHits = reco.initFTCAL(event);
+            allHits = reco.initFTCAL(event,charge2Energy,timeOffsets,cluster);
             // select good hits and order them by energy
             selectedHits = reco.selectHits(allHits);
             // create clusters
-            allClusters = reco.findClusters(selectedHits);
+            allClusters = reco.findClusters(selectedHits, cluster);
             // select good clusters
-            selectedClusters = reco.selectClusters(allClusters);
+            selectedClusters = reco.selectClusters(allClusters, cluster);
             // write output banks
-            reco.writeBanks(event, selectedHits, selectedClusters);
+            reco.writeBanks(event, selectedHits, selectedClusters, energyCorr);
             return true;
 	}
 
     public void setRunConditionsParameters(DataEvent event) {
         if(event.hasBank("RUN::config")==false) {
-                System.err.println("RUN CONDITIONS NOT READ!");
+                System.out.println("RUN CONDITIONS NOT READ!");
         }
 
-        int newRun = Run;        
-    
         if(event instanceof EvioDataEvent) {
             EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            newRun = bank.getInt("Run")[0];
+            Run = bank.getInt("Run")[0];
         }
         else {
             DataBank bank = event.getBank("RUN::config");
-            newRun = bank.getInt("run")[0];
+            Run = bank.getInt("run")[0];
         }
 		
         // Load the constants
         //-------------------
-        if(Run!=newRun) {
-            FTCALConstantsLoader.Load(newRun,"default"); 
-            Run = newRun;
-        }
+        charge2Energy = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/charge_to_energy");
+        timeOffsets   = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/time_offsets");
+        status        = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/status");
+        cluster       = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/cluster");
+        energyCorr    = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/energycorr");
     }
 
     
     public static void main (String arg[]) throws IOException {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
-		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out.hipo";
+		String input = "/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/out.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
 //		EvioSource  reader = new EvioSource();
@@ -133,8 +151,10 @@ public class FTCALEngine extends ReconstructionEngine {
                         h2.fill(bank.getFloat("energy",i)-gen.getGeneratedParticle(0).vector().p());
                         Vector3D cluster = new Vector3D(bank.getFloat("x",i),bank.getFloat("y",i),bank.getFloat("z",i));  
                         h3.fill(Math.toDegrees(cluster.theta()-gen.getGeneratedParticle(0).theta()));
+                        System.out.println(cluster.theta() + " " + gen.getGeneratedParticle(0).theta());
+                        System.out.println(cluster.x() + " " + cluster.y() + " " + cluster.z() + " ");
                         h4.fill(Math.toDegrees(cluster.phi()-gen.getGeneratedParticle(0).phi()));
-                        h5.fill(bank.getFloat("time",i));
+                        h5.fill(bank.getFloat("time",i)-124.25);
                     }
                 }
 

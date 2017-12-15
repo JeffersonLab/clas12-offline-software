@@ -320,9 +320,7 @@ public class MeasVecs {
                 del_m_del_x * delx_deltanL + del_m_del_y * dely_deltanL + del_m_del_z * delz_deltanL
 
             };
-            for (int i = 0; i < 5; i++) {
-                System.out.println("H[" + i + "] = " + H[i]);
-            }
+            
         }
 
         return H;

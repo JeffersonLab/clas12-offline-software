@@ -19,7 +19,7 @@ import org.jlab.rec.cvt.svt.Constants;
  */
 public class HelixCrossListFinder {
 
-    public HelixCrossListFinder() {
+    public HelixCrossListFinder() { 
     }
 
     /**
@@ -28,7 +28,7 @@ public class HelixCrossListFinder {
      * @return the list of crosses determined to be consistent with belonging to
      * a track in the svt
      */
-    public CrossList findCandidateCrossLists(List<ArrayList<Cross>> crosses) {
+    public CrossList findCandidateCrossLists(List<ArrayList<Cross>> crosses) {  
         // instantiate the crosslist
         CrossList crossList = new CrossList();
         // the list of arraylists of crosses consistent with a track

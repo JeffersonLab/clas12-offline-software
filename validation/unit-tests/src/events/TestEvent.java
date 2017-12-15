@@ -21,6 +21,7 @@ public class TestEvent {
 		// (i.e. px=1.057, py=0, pz=2.266)
 		// torus = -1.0 , solenoid = 0.0
 		// updated to use non-linear t2d
+		// updated to include mini-stagger
 
 		config.setInt("run", 0, (int) 11);
 		config.setInt("event", 0, (int) 1);
@@ -36,7 +37,7 @@ public class TestEvent {
 		for(int i = 0; i < 37; i++) {
 			DCtdc.setByte("sector", i, (byte) 1);
 			DCtdc.setByte("order", i, (byte) 2);
-			if(i >= 19) DCtdc.setByte("layer", i, (byte) i);
+			if(i >= 32) DCtdc.setByte("layer", i, (byte) i);
 			else DCtdc.setByte("layer", i, (byte) (i+1));
 		}
 		
@@ -58,63 +59,63 @@ public class TestEvent {
 		DCtdc.setShort("component", 15, (short) 58);
 		DCtdc.setShort("component", 16, (short) 58);
 		DCtdc.setShort("component", 17, (short) 58);
-		DCtdc.setShort("component", 18, (short) 58);
-		DCtdc.setShort("component", 19, (short) 57);
-		DCtdc.setShort("component", 20, (short) 58);
-		DCtdc.setShort("component", 21, (short) 57);
-		DCtdc.setShort("component", 22, (short) 58);
-		DCtdc.setShort("component", 23, (short) 57);
-		DCtdc.setShort("component", 24, (short) 58);
+		DCtdc.setShort("component", 18, (short) 57);
+		DCtdc.setShort("component", 19, (short) 58);
+		DCtdc.setShort("component", 20, (short) 57);
+		DCtdc.setShort("component", 21, (short) 58);
+		DCtdc.setShort("component", 22, (short) 57);
+		DCtdc.setShort("component", 23, (short) 58);
+		DCtdc.setShort("component", 24, (short) 51);
 		DCtdc.setShort("component", 25, (short) 51);
 		DCtdc.setShort("component", 26, (short) 51);
 		DCtdc.setShort("component", 27, (short) 51);
-		DCtdc.setShort("component", 28, (short) 51);
-		DCtdc.setShort("component", 29, (short) 50);
-		DCtdc.setShort("component", 30, (short) 51);
-		DCtdc.setShort("component", 31, (short) 50);
-		DCtdc.setShort("component", 32, (short) 51);
+		DCtdc.setShort("component", 28, (short) 50);
+		DCtdc.setShort("component", 29, (short) 51);
+		DCtdc.setShort("component", 30, (short) 50);
+		DCtdc.setShort("component", 31, (short) 51);
+		DCtdc.setShort("component", 32, (short) 50);
 		DCtdc.setShort("component", 33, (short) 50);
 		DCtdc.setShort("component", 34, (short) 50);
 		DCtdc.setShort("component", 35, (short) 50);
 		DCtdc.setShort("component", 36, (short) 50);
-		
-		DCtdc.setInt("TDC", 0, (int) 77);
-		DCtdc.setInt("TDC", 1, (int) 70);
-		DCtdc.setInt("TDC", 2, (int) 77);
-		DCtdc.setInt("TDC", 3, (int) 68);
-		DCtdc.setInt("TDC", 4, (int) 69);
-		DCtdc.setInt("TDC", 5, (int) 66);
-		DCtdc.setInt("TDC", 6, (int) 30);
-		DCtdc.setInt("TDC", 7, (int) 126);
-		DCtdc.setInt("TDC", 8, (int) 30);
-		DCtdc.setInt("TDC", 9, (int) 130);
-		DCtdc.setInt("TDC", 10, (int) 31);
-		DCtdc.setInt("TDC", 11, (int) 119);
-		DCtdc.setInt("TDC", 12, (int) 5);
-		DCtdc.setInt("TDC", 13, (int) 264);
-		DCtdc.setInt("TDC", 14, (int) 53);
-		DCtdc.setInt("TDC", 15, (int) 180);
-		DCtdc.setInt("TDC", 16, (int) 113);
-		DCtdc.setInt("TDC", 17, (int) 108);
-		DCtdc.setInt("TDC", 18, (int) 360);
-		DCtdc.setInt("TDC", 19, (int) 332);
-		DCtdc.setInt("TDC", 20, (int) 39);
-		DCtdc.setInt("TDC", 21, (int) 200);
-		DCtdc.setInt("TDC", 22, (int) 110);
-		DCtdc.setInt("TDC", 23, (int) 121);
-		DCtdc.setInt("TDC", 24, (int) 200);
-		DCtdc.setInt("TDC", 25, (int) 84);
-		DCtdc.setInt("TDC", 26, (int) 269);
-		DCtdc.setInt("TDC", 27, (int) 366);
-		DCtdc.setInt("TDC", 28, (int) 28);
-		DCtdc.setInt("TDC", 29, (int) 506);
-		DCtdc.setInt("TDC", 30, (int) 168);
-		DCtdc.setInt("TDC", 31, (int) 160);
-		DCtdc.setInt("TDC", 32, (int) 578);
-		DCtdc.setInt("TDC", 33, (int) 40);
-		DCtdc.setInt("TDC", 34, (int) 353);
-		DCtdc.setInt("TDC", 35, (int) 318);
-		DCtdc.setInt("TDC", 36, (int) 63);
+
+		DCtdc.setInt("TDC", 0, (int) 54);
+		DCtdc.setInt("TDC", 1, (int) 88);
+		DCtdc.setInt("TDC", 2, (int) 58);
+		DCtdc.setInt("TDC", 3, (int) 83);
+		DCtdc.setInt("TDC", 4, (int) 53);
+		DCtdc.setInt("TDC", 5, (int) 88);
+		DCtdc.setInt("TDC", 6, (int) 42);
+		DCtdc.setInt("TDC", 7, (int) 112);
+		DCtdc.setInt("TDC", 8, (int) 41);
+		DCtdc.setInt("TDC", 9, (int) 110);
+		DCtdc.setInt("TDC", 10, (int) 46);
+		DCtdc.setInt("TDC", 11, (int) 104);
+		DCtdc.setInt("TDC", 12, (int) 32);
+		DCtdc.setInt("TDC", 13, (int) 204);
+		DCtdc.setInt("TDC", 14, (int) 83);
+		DCtdc.setInt("TDC", 15, (int) 137);
+		DCtdc.setInt("TDC", 16, (int) 151);
+		DCtdc.setInt("TDC", 17, (int) 81);
+		DCtdc.setInt("TDC", 18, (int) 276);
+		DCtdc.setInt("TDC", 19, (int) 57);
+		DCtdc.setInt("TDC", 20, (int) 167);
+		DCtdc.setInt("TDC", 21, (int) 136);
+		DCtdc.setInt("TDC", 22, (int) 94);
+		DCtdc.setInt("TDC", 23, (int) 225);
+		DCtdc.setInt("TDC", 24, (int) 110);
+		DCtdc.setInt("TDC", 25, (int) 190);
+		DCtdc.setInt("TDC", 26, (int) 334);
+		DCtdc.setInt("TDC", 27, (int) 2);
+		DCtdc.setInt("TDC", 28, (int) 354);
+		DCtdc.setInt("TDC", 29, (int) 188);
+		DCtdc.setInt("TDC", 30, (int) 158);
+		DCtdc.setInt("TDC", 31, (int) 424);
+		DCtdc.setInt("TDC", 32, (int) 679);
+		DCtdc.setInt("TDC", 33, (int) 37);
+		DCtdc.setInt("TDC", 34, (int) 312);
+		DCtdc.setInt("TDC", 35, (int) 260);
+		DCtdc.setInt("TDC", 36, (int) 68);
 		
 		testEvent.appendBank(config);
 		testEvent.appendBank(DCtdc);
@@ -127,7 +128,7 @@ public class TestEvent {
 		HipoDataSync writer = new HipoDataSync();
 		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
 		DataBank config = testEvent.createBank("RUN::config", 1);
-		DataBank SVTadc = testEvent.createBank("SVT::adc", 7);
+		DataBank SVTadc = testEvent.createBank("BST::adc", 7);
 		
 		// this event is based on a gemc (4a.1.1 aka 4a.2.0) event with
 		// torus = -1.0 , solenoid = 1.0
