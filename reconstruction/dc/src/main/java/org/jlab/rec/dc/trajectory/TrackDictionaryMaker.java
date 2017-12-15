@@ -351,7 +351,7 @@ public class TrackDictionaryMaker {
         String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
         String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
         
-        MagneticFields.getInstance().initializeMagneticFields(torusFileName, solenoidFileName);
+        MagneticFields.getInstance().initializeMagneticFields();
         MagneticFields.getInstance().getTorus().setScaleFactor(-1.0);
         MagneticFields.getInstance().getSolenoid().setScaleFactor(1.0);
         System.out.println("Rotated Composite "+MagneticFields.getInstance().getRotatedCompositeField().getName());
