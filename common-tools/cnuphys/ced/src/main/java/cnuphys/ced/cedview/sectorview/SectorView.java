@@ -819,6 +819,10 @@ public class SectorView extends CedView implements ChangeListener {
 					scaleStr += "Torus scale " + valStr(torusScale, 3) + " ";
 				}
 				if (hasSolenoid) {
+					double shiftZ = MagneticFields.getInstance().getShiftZ(FieldType.SOLENOID);
+					String shiftStr = "Solenoid Z shift " + valStr(shiftZ, 3) + " cm ";
+					feedbackStrings.add("$Lawn Green$" + shiftStr);
+					
 					double solenScale = MagneticFields.getInstance().getScaleFactor(FieldType.SOLENOID);
 					scaleStr += "Solenoid scale " + valStr(solenScale, 3) + " ";
 				}
