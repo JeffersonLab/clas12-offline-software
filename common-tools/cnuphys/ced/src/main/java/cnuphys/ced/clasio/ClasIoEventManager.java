@@ -86,7 +86,9 @@ public class ClasIoEventManager {
    
 	//ET dialog
 	//private ETDialog _etDialog;
-	private ConnectionDialog _connectionDialog;
+	//private ConnectionDialog _connectionDialog;
+	
+	ConnectETDialog _etDialog;
 	
 	// hipo ring dialog
 	//private RingDialog _ringDialog;
@@ -119,7 +121,9 @@ public class ClasIoEventManager {
 	private String _currentHIPOAddress;
 	
 	// current ip address of ET ring
-	private String _currentETAddress;
+	//private String _currentETAddress;
+	private String _currentMachine;
+	private String _currentStation;
 	
 	//current ET file
 	private String _currentETFile;
@@ -319,8 +323,11 @@ public class ClasIoEventManager {
 		else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress != null)) {
 			return "Hipo Ring " + _currentHIPOAddress;
 		}
-		else if ((_sourceType == EventSourceType.ET) && (_currentETAddress != null) && (_currentETFile != null)) {
-			return "ET " + _currentETAddress + " " + _currentETFile;
+//		else if ((_sourceType == EventSourceType.ET) && (_currentETAddress != null) && (_currentETFile != null)) {
+//			return "ET " + _currentETAddress + " " + _currentETFile;
+//		}
+		else if ((_sourceType == EventSourceType.ET) && (_currentMachine != null) && (_currentETFile != null)) {
+			return "ET " + _currentMachine + " " + _currentETFile;
 		}
 		return "(none)";
 	}
@@ -410,60 +417,114 @@ public class ClasIoEventManager {
 	 */
 	public void ConnectToETRing() {
 		
-		(new ConnectETDialog()).setVisible(true);
-		
-		
-		
-		if (_connectionDialog == null) {
-			_connectionDialog = new ConnectionDialog();
-			_connectionDialog.setTitle("Connect to ET Ring");
-			_connectionDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/et.png").getImage());
+		if (_etDialog == null) {
+			_etDialog = new ConnectETDialog();
 		}
-		_connectionDialog.setVisible(true);
+		_etDialog.setVisible(true);
 		
-		if (_connectionDialog.reason() == DialogUtilities.OK_RESPONSE) {
-			_runData.reset();
+		
+		if (_etDialog.reason() == DialogUtilities.OK_RESPONSE) {
+		_runData.reset();
 
-			_dataSource = null;
-			_currentETAddress = _connectionDialog.getIpAddress();
-			_currentETFile = _connectionDialog.getFileName();
+		_dataSource = null;
+		_currentMachine = _etDialog.getMachine();
+		_currentETFile =_etDialog.getFile();
+		_currentStation = _etDialog.getStation();
+	
+		//does the file exist?
 		
-			//does the file exist?
-			
-			Log.getInstance().info("Attempting to connect to ET ring");
-			Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
-			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
-			File file = new File(_currentETFile);
-			if (!file.exists()) {
-				Log.getInstance().error("ET Filename: ["+ _currentETFile + "] does NOT exist.  Cannot connect to ET.");
+		Log.getInstance().info("Attempting to connect to ET ring");
+		Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
+		System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
+		File file = new File(_currentETFile);
+		if (!file.exists()) {
+			Log.getInstance().error("ET Filename: ["+ _currentETFile + "] does NOT exist.  Cannot connect to ET.");
+			JOptionPane.showMessageDialog
+			(null, "The file: " + file.getAbsolutePath() + " does not exist.",
+					"ET File not Found", 
+					JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+			return;
+		}
+
+		try {
+			Log.getInstance().info("Attempting to create EvioETSource.");
+			_dataSource = new EvioETSource(_currentMachine, _currentStation);
+			if (_dataSource == null) {
+				Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
 				JOptionPane.showMessageDialog
-				(null, "The file: " + file.getAbsolutePath() + " does not exist.",
-						"ET File not Found", 
+				(null, "The ET Data Source is null, used Machine: " + _currentMachine,
+						"ET null Data Source", 
 						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				return;
 			}
+			
+			System.err.println("trying to connect using et file: " + _currentETFile);
+			setEventSourceType(EventSourceType.ET);
+			Log.getInstance().info("Attempting to open EvioETSource.");
+			_dataSource.open(_currentETFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-			try {
-				Log.getInstance().info("Attempting to create EvioETSource.");
-				_dataSource = new EvioETSource(_currentETAddress, "ced_station");
-				if (_dataSource == null) {
-					Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
-					JOptionPane.showMessageDialog
-					(null, "The ET Data Source is null, used IP: " + _currentETAddress,
-							"ET null Data Source", 
-							JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-					return;
-				}
-				
-				System.err.println("trying to connect using et file: " + _currentETFile);
-				setEventSourceType(EventSourceType.ET);
-				Log.getInstance().info("Attempting to open EvioETSource.");
-				_dataSource.open(_currentETFile);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} //end ok
+	} //end ok		
+		
+		
+		
+		
+		
+		
+		
+		
+//		if (_connectionDialog == null) {
+//			_connectionDialog = new ConnectionDialog();
+//			_connectionDialog.setTitle("Connect to ET Ring");
+//			_connectionDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/et.png").getImage());
+//		}
+//		_connectionDialog.setVisible(true);
+//		
+//		if (_connectionDialog.reason() == DialogUtilities.OK_RESPONSE) {
+//			_runData.reset();
+//
+//			_dataSource = null;
+//			_currentETAddress = _connectionDialog.getIpAddress();
+//			_currentETFile = _connectionDialog.getFileName();
+//		
+//			//does the file exist?
+//			
+//			Log.getInstance().info("Attempting to connect to ET ring");
+//			Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
+//			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
+//			File file = new File(_currentETFile);
+//			if (!file.exists()) {
+//				Log.getInstance().error("ET Filename: ["+ _currentETFile + "] does NOT exist.  Cannot connect to ET.");
+//				JOptionPane.showMessageDialog
+//				(null, "The file: " + file.getAbsolutePath() + " does not exist.",
+//						"ET File not Found", 
+//						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+//				return;
+//			}
+//
+//			try {
+//				Log.getInstance().info("Attempting to create EvioETSource.");
+//				_dataSource = new EvioETSource(_currentETAddress, "ced_station");
+//				if (_dataSource == null) {
+//					Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
+//					JOptionPane.showMessageDialog
+//					(null, "The ET Data Source is null, used IP: " + _currentETAddress,
+//							"ET null Data Source", 
+//							JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+//					return;
+//				}
+//				
+//				System.err.println("trying to connect using et file: " + _currentETFile);
+//				setEventSourceType(EventSourceType.ET);
+//				Log.getInstance().info("Attempting to open EvioETSource.");
+//				_dataSource.open(_currentETFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//
+//		} //end ok
 	}
 
 	/**
