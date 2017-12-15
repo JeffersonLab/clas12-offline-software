@@ -175,6 +175,15 @@ public abstract class MagneticField implements IField {
 	public final double getShiftZ() {
 		return _shiftZ;
 	}
+	
+	/**
+     * Is the physical magnet represented by the map misaligned?
+     * @return <code>true</code> if magnet is misaligned
+     */
+	@Override
+    public boolean isMisaligned() {
+    	return false;
+    }
 
 	/**
 	 * Checks whether the field has been set to always return zero.
