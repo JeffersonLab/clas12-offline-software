@@ -49,6 +49,14 @@ public class TextDisplayDialog extends SimpleDialog {
     }
     
     /**
+     * Set the text in the text area
+     * @param text the text
+     */
+    public void setText(String text) {
+    	_textArea.setText(text);
+    }
+    
+    /**
      * Get the Writer object that writes to the text area
      * @return the writer
      */

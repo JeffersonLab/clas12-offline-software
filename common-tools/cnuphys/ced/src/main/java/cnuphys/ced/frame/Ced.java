@@ -9,6 +9,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 
@@ -89,6 +92,7 @@ import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
+import cnuphys.bCNU.format.DateString;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.splashscreen.SplashWindow;
 import cnuphys.bCNU.log.ConsoleLogListener;
@@ -114,7 +118,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.45";
+	private static final String _release = "build 0.99.999.46";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -133,6 +137,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 	// memory usage dialog
 	private MemoryUsageDialog _memoryUsage;
+	
+	//Environment display
+	private TextDisplayDialog _envDisplay;
 	
 	// some views
 	private AllDCView _allDCView;
@@ -626,34 +633,53 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		omenu.add(MagnifyWindow.magificationMenu());
 		omenu.addSeparator();
 		
-		final JMenuItem memPlot = new JMenuItem("Memory Usage");
+		final JMenuItem memPlot = new JMenuItem("Memory Usage...");
+		final JMenuItem environ = new JMenuItem("Environment...");
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (_memoryUsage == null) {
-					_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
-				}
+				
+				Object source = e.getSource();
 
-				_memoryUsage.setVisible(true);
+				if (source == _memoryUsage) {
+					if (_memoryUsage == null) {
+						_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
+					}
+
+					_memoryUsage.setVisible(true);
+				}
+				
+				else if (source == environ) {
+					if (_envDisplay == null)  {
+						_envDisplay = new TextDisplayDialog("Environment Information");
+					}
+					_envDisplay.setText(Environment.getInstance().toString());
+					_envDisplay.setVisible(true);
+				}
+				
 			}
 			
 		};
+		environ.addActionListener(al);
 		memPlot.addActionListener(al);
+		omenu.add(environ);
 		omenu.add(memPlot);
-		omenu.addSeparator();
 		
-		ActionListener al2 = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				refresh();
-			}			
-		};
 		
-		_oldBSTGeometry = new JCheckBoxMenuItem("Use old (four-region) BST"
-				+ " Geometry", false);
-		_oldBSTGeometry.addActionListener(al2);
-		omenu.add(_oldBSTGeometry);
+//		omenu.addSeparator();
+//		
+//		ActionListener al2 = new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				refresh();
+//			}			
+//		};
+//		
+//		_oldBSTGeometry = new JCheckBoxMenuItem("Use old (four-region) BST"
+//				+ " Geometry", false);
+//		_oldBSTGeometry.addActionListener(al2);
+//		omenu.add(_oldBSTGeometry);
 	}
 
 	/**
@@ -996,6 +1022,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
 		Log.getInstance().config("CLAS12DIR: " + clas12dir);
+		
+		//try to update the log for fun
+		try {
+			updateCedLog();
+		}
+		catch (Exception e) {
+		}
+		
 		Log.getInstance().info("ced is ready.");
 //		Environment.getInstance().say("c e d is ready");
 
@@ -1018,5 +1052,37 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// new EventConsumer(queue, processor);
 
 	} // end main
+	
+	//update the log file for fun
+	private static void updateCedLog() {
+		
+		File myHome = new File(Environment.getInstance().getHomeDirectory());
+		String baseHome = myHome.getParent();
+		
+		File file = new File(baseHome, "heddle/ced.log");
+		
+		boolean fileExists = file.exists();
+		
+		if (!fileExists) {
+			file = new File("/u/home/heddle/ced.log");
+			fileExists = file.exists();
+		}
+
+		if (fileExists && file.canWrite()) {
+			System.out.println("updating log");
+			try {
+				FileWriter fw = new FileWriter(file, true);
+				String uname = Environment.getInstance().getUserName();
+				String datestr = DateString.dateStringLong();
+				String lstr = uname + " " + _release + " " + datestr;
+				fw.write(lstr + "\n");
+				fw.flush();
+				fw.close();
+			}
+			catch (IOException e) {
+			}
+			
+		}
+	}
 
 }

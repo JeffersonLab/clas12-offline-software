@@ -435,6 +435,7 @@ public class ClasIoEventManager {
 		
 		Log.getInstance().info("Attempting to connect to ET ring");
 		Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
+		Log.getInstance().info("ET Station Name: ["+ _currentStation + "]");
 		System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
 		File file = new File(_currentETFile);
 		if (!file.exists()) {
