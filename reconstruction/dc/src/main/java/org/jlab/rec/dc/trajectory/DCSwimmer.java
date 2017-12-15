@@ -13,6 +13,7 @@ import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
+import cnuphys.magfield.TorusMap;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.rec.dc.Constants;
@@ -553,13 +554,15 @@ public class DCSwimmer {
         //location relative to clasJLib. This will
         //have to be modified as appropriate.
 
+        //String clasDictionaryPath = CLASResources.getResourcePath("etc");
+
+        //String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
+        //String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
+        
+        //MagneticFields.getInstance().initializeMagneticFields();
         String clasDictionaryPath = CLASResources.getResourcePath("etc");
 
-        String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
-        String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
-        
-        MagneticFields.getInstance().initializeMagneticFields();
-        
+        MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath, TorusMap.SYMMETRIC);
         /*
         File torusFile = new File(torusFileName);
         try {
