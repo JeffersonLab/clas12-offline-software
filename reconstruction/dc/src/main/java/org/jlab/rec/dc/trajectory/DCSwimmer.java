@@ -516,9 +516,10 @@ public class DCSwimmer {
 
     }
 
-    public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale) {
+    public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale, double shift) {
         MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
         MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
+        MagneticFields.getInstance().setSolenoidShift(shift);
       //  if (rcompositeField.get(0) != null) {
        //     ((MagneticField) rcompositeField.get(0)).setScaleFactor(TorusScale);
             System.out.println("FORWARD TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
@@ -557,7 +558,7 @@ public class DCSwimmer {
         String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
         String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
         
-        MagneticFields.getInstance().initializeMagneticFields(torusFileName, solenoidFileName);
+        MagneticFields.getInstance().initializeMagneticFields();
         
         /*
         File torusFile = new File(torusFileName);

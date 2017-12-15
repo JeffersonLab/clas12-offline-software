@@ -119,7 +119,10 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
                     //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
-                    DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE);
+                    double shift =0;
+                    if(Run>1890)
+                        shift = -1.9;
+                    DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
                     System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
                     Run = newRun;
                 }
