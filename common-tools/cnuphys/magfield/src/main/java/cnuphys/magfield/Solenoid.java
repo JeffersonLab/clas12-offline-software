@@ -20,12 +20,16 @@ import java.util.StringTokenizer;
  */
 public final class Solenoid extends MagneticField {
 	
+	private static final double MISALIGNTOL = 1.0e-6; //cm
+	
 	// private constructor
 	/**
 	 * Instantiates a new solenoid.
 	 */
 	private Solenoid() {
 		setCoordinateNames("phi", "rho", "z");
+		
+//		_shiftZ = 450;
 	}
 	
 
@@ -45,6 +49,13 @@ public final class Solenoid extends MagneticField {
 		return solenoid;
 	}
 
+    /**
+     * Is the physical solenoid represented by the map misaligned?
+     * @return <code>true</code> if solenoid is misaligned
+     */
+    public boolean isMisaligned() {
+    	return (Math.abs(_shiftZ) > MISALIGNTOL);
+    }
 	
 	/**
 	 * Get the field by trilinear interpolation.
@@ -69,6 +80,12 @@ public final class Solenoid extends MagneticField {
 			result[Z] = 0f;
 			return;
 		}
+		
+		//misalignment??
+		if (isMisaligned()) {
+			z = z - _shiftZ;
+		}
+		
 
 		if (phi < 0.0) {
 			phi += 360.0;

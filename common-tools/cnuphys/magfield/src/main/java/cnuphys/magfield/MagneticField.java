@@ -90,6 +90,9 @@ public abstract class MagneticField implements IField {
 	/** the full path to the file */
 	private String _baseFileName;
 	
+	/** shift in z direction in cm (misalignment) */
+	protected double _shiftZ; //cm
+	
 	// for rotating field
 	protected static final double ROOT3OVER2 = 0.866025403784439;
 	protected static final double cosSect[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
@@ -143,6 +146,15 @@ public abstract class MagneticField implements IField {
 		_scaleFactor = scale;
 		MagneticFields.getInstance().changedScale(this);
 	}
+	
+	/**
+	 * Change the shift in the z direction
+	 * @param shiftZ the shift in cm
+	 */
+	public final void setShiftZ(double shiftZ) {
+		_shiftZ = shiftZ;
+		MagneticFields.getInstance().changedShift(this);
+	}
 
 	/**
 	 * Get the factor that scales the field. Only scale factors between 0 and 1
@@ -154,6 +166,14 @@ public abstract class MagneticField implements IField {
 	 */
 	public final double getScaleFactor() {
 		return _scaleFactor;
+	}
+	
+	/**
+	 * Get the shift in z. 
+	 * @return the z shift in cm.
+	 */
+	public final double getShiftZ() {
+		return _shiftZ;
 	}
 
 	/**

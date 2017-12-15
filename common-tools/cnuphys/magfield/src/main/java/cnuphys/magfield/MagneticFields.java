@@ -98,8 +98,12 @@ public class MagneticFields {
 	private JRadioButtonMenuItem _interpolateItem;
 	private JRadioButtonMenuItem _nearestNeighborItem;
 
+	//for scaling
 	private ScaleFieldPanel _scaleTorusPanel;
 	private ScaleFieldPanel _scaleSolenoidPanel;
+	
+	//for shifting
+	private MisplacedPanel _shiftSolenoidPanel;
 	
 	//private constructor for singleton
 	private MagneticFields() {
@@ -123,9 +127,21 @@ public class MagneticFields {
 		}
 		return instance;
 	}
+	
+	/**
+	 * Shift the solenoid along Z for misplacement. A negative shift
+	 * moved the solenoid upstream.
+	 * @param shiftZ the shift in cm
+	 */
+	public void setSolenoidShift(double shiftZ) {
+		if (_solenoid != null) {
+			_solenoid.setShiftZ(shiftZ);
+		}
+	}
 
 	/**
 	 * This programatically adjusts everything for new scale factors.
+	 * This is used when data found in the file
 	 * @param torusScale the torus scale factor
 	 * @param solenoidScale the solenoid scale facter
 	 */
@@ -372,6 +388,38 @@ public class MagneticFields {
 		}
 		
 		return scale;
+	}
+	
+	/**
+	 * Get the shift Z given the field type.
+	 * @param ftype the field type
+	 * @return the shift in z (cm) for the field type. Composite fields return NaN.
+	 */
+	public double getShiftZ(FieldType ftype) {
+		
+		double shiftz = Double.NaN;
+
+		switch (ftype) {
+		case TORUS:
+			if (_torus != null); {
+				shiftz = _torus.getShiftZ();
+			}
+			break;
+		case SOLENOID:
+			if (_solenoid != null); {
+				shiftz = _solenoid.getShiftZ();
+			}
+			break;
+		case COMPOSITE:
+			break;
+		case COMPOSITEROTATED:
+			break;
+		case ZEROFIELD:
+			shiftz = 0;
+			break;
+		}
+		
+		return shiftz;
 	}
 	
 	/**
@@ -675,9 +723,11 @@ public class MagneticFields {
 		}
 		
 		double scaleFact = -1;
+		double shiftz = 0.0;
 		
 		if (_torus != null) {
 			scaleFact = _torus.getScaleFactor();
+			shiftz = _torus.getShiftZ();
 		}
 		
 		_torusMap = tmap;
@@ -692,6 +742,7 @@ public class MagneticFields {
 		
 		if (_torus != null) {
 			_torus.setScaleFactor(scaleFact);
+			_torus.setShiftZ(shiftz);
 		}
 		
 //		float B1A = _torus.getB1(7506285);
@@ -859,7 +910,10 @@ public class MagneticFields {
 			menu.addSeparator();
 			_scaleSolenoidPanel = new ScaleFieldPanel(FieldType.SOLENOID,
 					"Solenoid", _solenoid.getScaleFactor());
+			_shiftSolenoidPanel = new MisplacedPanel(FieldType.SOLENOID,
+					"Solenoid", _solenoid.getShiftZ());
 			menu.add(_scaleSolenoidPanel);
+			menu.add(_shiftSolenoidPanel);
 		}
 
 
@@ -915,6 +969,22 @@ public class MagneticFields {
 			}
 		}
 	}
+	
+	
+	//mag field changed shift for alignment
+	protected void changedShift(MagneticField field) {
+		if (field != null) {
+			if (field == _torus) {
+			}
+			else if (field == _solenoid) {
+				if (_shiftSolenoidPanel != null) {
+					_shiftSolenoidPanel._textField.setText(String.format("%7.3f", field.getShiftZ()));
+				}
+				notifyListeners();
+			}
+		}
+	}
+	
 
 	// notify listeners of a change in the magnetic field
 	protected void notifyListeners() {

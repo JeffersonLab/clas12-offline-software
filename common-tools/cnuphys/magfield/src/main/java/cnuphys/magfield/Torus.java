@@ -64,7 +64,13 @@ public class Torus extends MagneticField {
 		return relativePhi;
 	}
 	
-
+    /**
+     * Is the physical torus represented by the map misaligned?
+     * @return <code>true</code> if torus is misaligned
+     */
+    public boolean isMisaligned() {
+    	return false;
+    }
 
 	/**
 	 * Get the field by trilinear interpolation.

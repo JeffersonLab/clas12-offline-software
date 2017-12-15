@@ -211,4 +211,11 @@ public abstract class FieldProbe implements IField {
 	}
 
 
+    /**
+     * Is the physical magnet represented by the map misaligned?
+     * @return <code>true</code> if magnet is misaligned
+     */
+    public boolean isMisaligned() {
+    	return _field.isMisaligned();
+    }
 }

@@ -137,4 +137,10 @@ public interface IField {
      * @return <code>true</code> if this field is a zero field
      */
     public boolean isZeroField();
+    
+    /**
+     * Is the physical magnet represented by the map misaligned?
+     * @return <code>true</code> if magnet is misaligned
+     */
+    public boolean isMisaligned();
 }

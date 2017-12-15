@@ -409,6 +409,11 @@ public class ClasIoEventManager {
 	 * Connect to an ET ring
 	 */
 	public void ConnectToETRing() {
+		
+		(new ConnectETDialog()).setVisible(true);
+		
+		
+		
 		if (_connectionDialog == null) {
 			_connectionDialog = new ConnectionDialog();
 			_connectionDialog.setTitle("Connect to ET Ring");
