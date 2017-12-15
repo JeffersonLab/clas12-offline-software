@@ -118,7 +118,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.46";
+	private static final String _release = "build 0.99.999.46b";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -1067,6 +1067,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			file = new File("/u/home/heddle/ced.log");
 			fileExists = file.exists();
 		}
+		
+		if (!fileExists) {
+			file = new File("home/heddle/ced.log");
+			fileExists = file.exists();
+		}
+
 
 		if (fileExists && file.canWrite()) {
 			System.out.println("updating log");

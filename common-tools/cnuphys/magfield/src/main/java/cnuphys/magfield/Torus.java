@@ -31,7 +31,7 @@ public class Torus extends MagneticField {
 
 	/**
 	 * Obtain a torus object from a binary file, probably
-	 * "clas12_torus_fieldmap_binary.dat"
+	 * "clas12-fieldmap-torus.dat"
 	 *
 	 * @param file the file to read
 	 * @return the torus object
@@ -325,7 +325,7 @@ public class Torus extends MagneticField {
 		}
 
 		if (path == null) {
-			path = "../../../data/clas12_torus_fieldmap_binary.dat";
+			path = "../../../data/clas12-fieldmap-torus.dat";
 		}
 
 		File file = new File(path);

@@ -33,7 +33,7 @@ import javax.swing.event.EventListenerList;
 public class MagneticFields {
 	
 	//vbersion of mag field package
-	private static String VERSION = "1.05";
+	private static String VERSION = "1.06";
 		
 	//constants for different torus grids
     public static final int SYMMETRIC_TORUS = 0;
@@ -685,8 +685,8 @@ public class MagneticFields {
 		
 		initializeTorus(torusMap);
 		
-		_solenoid = getSolenoid("solenoid-srr.dat");
-		
+		_solenoid = getSolenoid("clas12-fieldmap-solenoid.dat");
+				
 		System.out.println("Torus found: " + (_torus != null));
 		System.out.println("Solenoid found: " + (_solenoid != null));
 
@@ -1167,10 +1167,6 @@ public class MagneticFields {
 		final MagneticFields mf = MagneticFields.getInstance();
 		
 		//test explicit path load
-//		String tpath = "/Users/heddle/git/clas12-offline-software/common-tools/cnuphys/ced/data/clas12_torus_fieldmap_binary.dat";
-//		String spath = "/Users/heddle/git/clas12-offline-software/common-tools/cnuphys/ced/data/solenoid-srr.dat";
-//		
-//		mf.initializeMagneticFields(tpath, spath);
 		
 		mf.initializeMagneticFields();
 
