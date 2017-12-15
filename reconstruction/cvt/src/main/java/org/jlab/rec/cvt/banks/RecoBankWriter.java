@@ -6,7 +6,6 @@ import java.util.List;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -40,20 +39,20 @@ public class RecoBankWriter {
 
         for (int i = 0; i < hitlist.size(); i++) {
 
-            bank.setInt("ID", i, hitlist.get(i).get_Id());
+            bank.setShort("ID", i, (short) hitlist.get(i).get_Id());
 
-            bank.setInt("layer", i, hitlist.get(i).get_Layer());
-            bank.setInt("sector", i, hitlist.get(i).get_Sector());
+            bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
+            bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
 
             bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
             bank.setInt("trkingStat", i, hitlist.get(i).get_TrkgStatus());
 
-            bank.setInt("clusterID", i, hitlist.get(i).get_AssociatedClusterID());
-            bank.setInt("trkID", i, hitlist.get(i).get_AssociatedTrackID());
+            bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
+            bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
         }
-
+        //bank.show();
         return bank;
 
     }
@@ -78,17 +77,17 @@ public class RecoBankWriter {
             for (int j = 0; j < hitIdxArray.length; j++) {
                 hitIdxArray[j] = -1;
             }
-            bank.setInt("ID", i, cluslist.get(i).get_Id());
-            bank.setInt("sector", i, cluslist.get(i).get_Sector());
-            bank.setInt("layer", i, cluslist.get(i).get_Layer());
-            bank.setInt("size", i, cluslist.get(i).size());
+            bank.setShort("ID", i, (short) cluslist.get(i).get_Id());
+            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+            bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
+            bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
-            bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual());
-            bank.setInt("trkID", i, cluslist.get(i).get_AssociatedTrackID());
+            bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
+            bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
 
             for (int j = 0; j < cluslist.get(i).size(); j++) {
                 if (j < hitIdxArray.length) {
@@ -100,11 +99,11 @@ public class RecoBankWriter {
                 String hitStrg = "Hit";
                 hitStrg += (j + 1);
                 hitStrg += "_ID";
-                bank.setInt(hitStrg, i, hitIdxArray[j]);
+                bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
 
         }
-
+        //bank.show();
         return bank;
 
     }
@@ -127,16 +126,16 @@ public class RecoBankWriter {
         int index = 0;
         int i = 0;
         for (int j = 0; j < crosses.get(i).size(); j++) {
-            bank.setInt("ID", index, crosses.get(i).get(j).get_Id());
-            bank.setInt("sector", index, crosses.get(i).get(j).get_Sector());
-            bank.setInt("region", index, crosses.get(i).get(j).get_Region());
+            bank.setShort("ID", index, (short) crosses.get(i).get(j).get_Id());
+            bank.setByte("sector", index, (byte) crosses.get(i).get(j).get_Sector());
+            bank.setByte("region", index, (byte) crosses.get(i).get(j).get_Region());
             bank.setFloat("x", index, (float) crosses.get(i).get(j).get_Point().x());
             bank.setFloat("y", index, (float) crosses.get(i).get(j).get_Point().y());
             bank.setFloat("z", index, (float) crosses.get(i).get(j).get_Point().z());
             bank.setFloat("err_x", index, (float) crosses.get(i).get(j).get_PointErr().x());
             bank.setFloat("err_y", index, (float) crosses.get(i).get(j).get_PointErr().y());
             bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
-            bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
+            bank.setShort("trkID", index, (short) crosses.get(i).get(j).get_AssociatedTrackID());
 
             if (crosses.get(i).get(j).get_Dir() != null) {
                 bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
@@ -148,10 +147,10 @@ public class RecoBankWriter {
                 bank.setFloat("uz", index, 0);
             }
             if (crosses.get(i).get(j).get_Cluster1() != null) {
-                bank.setInt("Cluster1_ID", index, crosses.get(i).get(j).get_Cluster1().get_Id());
+                bank.setShort("Cluster1_ID", index, (short) crosses.get(i).get(j).get_Cluster1().get_Id());
             }
             if (crosses.get(i).get(j).get_Cluster2() != null) {
-                bank.setInt("Cluster2_ID", index, crosses.get(i).get(j).get_Cluster2().get_Id());
+                bank.setShort("Cluster2_ID", index, (short) crosses.get(i).get(j).get_Cluster2().get_Id());
             }
             index++;
         }
@@ -174,17 +173,17 @@ public class RecoBankWriter {
 
         for (int i = 0; i < hitlist.size(); i++) {
 
-            bank.setInt("ID", i, hitlist.get(i).get_Id());
+            bank.setShort("ID", i, (short) hitlist.get(i).get_Id());
 
-            bank.setInt("layer", i, hitlist.get(i).get_Layer());
-            bank.setInt("sector", i, hitlist.get(i).get_Sector());
+            bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
+            bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
 
             bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
             bank.setInt("trkingStat", i, hitlist.get(i).get_TrkgStatus());
 
-            bank.setInt("clusterID", i, hitlist.get(i).get_AssociatedClusterID());
-            bank.setInt("trkID", i, hitlist.get(i).get_AssociatedTrackID());
+            bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
+            bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
         }
 
@@ -212,15 +211,15 @@ public class RecoBankWriter {
             for (int j = 0; j < hitIdxArray.length; j++) {
                 hitIdxArray[j] = -1;
             }
-            bank.setInt("ID", i, cluslist.get(i).get_Id());
-            bank.setInt("sector", i, cluslist.get(i).get_Sector());
-            bank.setInt("layer", i, cluslist.get(i).get_Layer());
-            bank.setInt("size", i, cluslist.get(i).size());
+            bank.setShort("ID", i, (short) cluslist.get(i).get_Id());
+            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+            bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
+            bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
-            bank.setInt("trkID", i, cluslist.get(i).get_AssociatedTrackID());
+            bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
             for (int j = 0; j < cluslist.get(i).size(); j++) {
                 if (j < hitIdxArray.length) {
                     hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
@@ -231,7 +230,7 @@ public class RecoBankWriter {
                 String hitStrg = "Hit";
                 hitStrg += (j + 1);
                 hitStrg += "_ID";
-                bank.setInt(hitStrg, i, hitIdxArray[j]);
+                bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
 
         }
@@ -258,9 +257,9 @@ public class RecoBankWriter {
         int index = 0;
         int i = 1;
         for (int j = 0; j < crosses.get(i).size(); j++) {
-            bank.setInt("ID", index, crosses.get(i).get(j).get_Id());
-            bank.setInt("sector", index, crosses.get(i).get(j).get_Sector());
-            bank.setInt("region", index, crosses.get(i).get(j).get_Region());
+            bank.setShort("ID", index, (short) crosses.get(i).get(j).get_Id());
+            bank.setByte("sector", index, (byte) crosses.get(i).get(j).get_Sector());
+            bank.setByte("region", index, (byte) crosses.get(i).get(j).get_Region());
             bank.setFloat("x", index, (float) crosses.get(i).get(j).get_Point().x());
             bank.setFloat("y", index, (float) crosses.get(i).get(j).get_Point().y());
             bank.setFloat("z", index, (float) crosses.get(i).get(j).get_Point().z());
@@ -268,20 +267,29 @@ public class RecoBankWriter {
             bank.setFloat("err_y", index, (float) crosses.get(i).get(j).get_PointErr().y());
             bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
             bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
-            if (crosses.get(i).get(j).get_Dir() != null) {
-                bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
-                bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
-                bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
+           
+            if (crosses.get(i).get(j).get_Dir() != null ) {
+                if(crosses.get(i).get(j).get_Dir().x()==Double.NaN || 
+                        crosses.get(i).get(j).get_Dir().y()==Double.NaN || 
+                        crosses.get(i).get(j).get_Dir().z()==Double.NaN) {
+                    bank.setFloat("ux", index, (float)0);
+                    bank.setFloat("uy", index, (float)0);
+                    bank.setFloat("uz", index, (float)0);
+                } else {                 
+                    bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
+                    bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
+                    bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
+                }
             } else {
                 bank.setFloat("ux", index, 0);
                 bank.setFloat("uy", index, 0);
                 bank.setFloat("uz", index, 0);
             }
             if (crosses.get(i).get(j).get_Cluster1() != null) {
-                bank.setInt("Cluster1_ID", index, crosses.get(i).get(j).get_Cluster1().get_Id());
+                bank.setShort("Cluster1_ID", index, (short) crosses.get(i).get(j).get_Cluster1().get_Id());
             }
             if (crosses.get(i).get(j).get_Cluster2() != null) {
-                bank.setInt("Cluster2_ID", index, crosses.get(i).get(j).get_Cluster2().get_Id());
+                bank.setShort("Cluster2_ID", index, (short) crosses.get(i).get(j).get_Cluster2().get_Id());
             }
             index++;
         }
@@ -307,18 +315,19 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("CVTRec::Tracks", trkcands.size());
         // an array representing the ids of the crosses that belong to the track: for a helical track with the current
         // 4 regions of SVT + 1 region of BMT there can be up to 4 crosses of type SVT and 2 of type BMT (1 for the C detector and 1 for the Z detector)
-        int[] crossIdxArray = new int[4 + 2];
+        List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < trkcands.size(); i++) {
-
-            for (int j = 0; j < crossIdxArray.length; j++) {
-                crossIdxArray[j] = -1;
+            if(trkcands.get(i)==null)
+                continue;
+            if(trkcands.get(i).getChi2()!=0) {
+                bank.setByte("fittingMethod", i, (byte) 2);
+            } else {
+                bank.setByte("fittingMethod", i, (byte) 0);
             }
+            bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
 
-            bank.setInt("fittingMethod", i, 1);
-            bank.setInt("ID", i, trkcands.get(i).get_Id());
-
-            bank.setInt("q", i, trkcands.get(i).get_Q());
+            bank.setByte("q", i, (byte)trkcands.get(i).get_Q());
             bank.setFloat("p", i, (float) trkcands.get(i).get_P());
             bank.setFloat("pt", i, (float) trkcands.get(i).get_Pt());
             Helix helix = trkcands.get(i).get_helix();
@@ -352,7 +361,7 @@ public class RecoBankWriter {
                 bank.setFloat("cov_phi02", i, -999);
                 bank.setFloat("cov_phi0rho", i, -999);
                 bank.setFloat("cov_rho2", i, -999);
-                bank.setFloat("cov_z02[i]", i, -999);
+                bank.setFloat("cov_z02", i, -999);
                 bank.setFloat("cov_tandip2", i, -999);
             }
             bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().x() / 10.)); // convert to cm
@@ -365,26 +374,18 @@ public class RecoBankWriter {
 
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
-                if (trkcands.get(i).get(j).get_Detector() == "SVT") {
-                    crossIdxArray[trkcands.get(i).get(j).get_Region() - 1] = trkcands.get(i).get(j).get_Id();
-                }
-                if (trkcands.get(i).get(j).get_Detector() == "BMT") {
-                    if (Double.isNaN(trkcands.get(i).get(j).get_PointErr().z())) {
-                        crossIdxArray[trkcands.get(i).get(j).get_Region() - 1 + Constants.CVTCONFIGSTARTREG] = trkcands.get(i).get(j).get_Id();
-                    } else {
-                        crossIdxArray[trkcands.get(i).get(j).get_Region() + Constants.CVTCONFIGSTARTREG] = trkcands.get(i).get(j).get_Id();
-                    }
-                }
+
+                String hitStrg = "Cross";
+                hitStrg += (j + 1);
+                hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
+                bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
+                
             }
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
+            bank.setFloat("chi2", i, (float) trkcands.get(i).getChi2());
+            bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
-                String hitStrg = "Cross";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setInt(hitStrg, i, crossIdxArray[j]);
-            }
 
         }
         //bank.show();
@@ -410,17 +411,14 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("CVTRec::Cosmics", cosmics.size());
         // an array representing the ids of the crosses that belong to the track: for a helical track with the current
         // 4 regions of SVT + 1 region of BMT there can be up to 4*2 (*2: for each hemisphere) crosses of type SVT and 2*2 of type PSEUDOBMT (1 for the C detector and 1 for the Z detector)
-        int[] crossIdxArray = new int[8 + 4];
+        List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < cosmics.size(); i++) {
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
-                crossIdxArray[j] = -1;
-            }
 
-            bank.setInt("ID", i, cosmics.get(i).get_Id());
+            bank.setShort("ID", i, (short) cosmics.get(i).get_Id());
             bank.setFloat("chi2", i, (float) cosmics.get(i).get_chi2());
-            bank.setInt("ndf", i, (int) cosmics.get(i).get_ndf());
+            bank.setShort("ndf", i, (short) cosmics.get(i).get_ndf());
             bank.setFloat("trkline_yx_slope", i, (float) cosmics.get(i).get_ray().get_yxslope());
             bank.setFloat("trkline_yx_interc", i, (float) cosmics.get(i).get_ray().get_yxinterc());
             bank.setFloat("trkline_yz_slope", i, (float) cosmics.get(i).get_ray().get_yzslope());
@@ -434,29 +432,19 @@ public class RecoBankWriter {
 
             // the array of cross ids is filled in order of the SVT cosmic region 1 to 8 starting from the bottom-most double layer
             for (int j = 0; j < cosmics.get(i).size(); j++) {
-                if (cosmics.get(i).get(j).get_Detector() == "SVT") {
-                    crossIdxArray[cosmics.get(i).get(j).get_SVTCosmicsRegion() - 1] = cosmics.get(i).get(j).get_Id();
-                }
+                crossIdxArray.add(cosmics.get(i).get(j).get_Id());
+                
             }
-            // now add the BMT cross ids
-            for (int j = 0; j < cosmics.get(i).size(); j++) {
-                if (cosmics.get(i).get(j).get_Detector() == "BMT") {
-                    if (cosmics.get(i).get(j).get_DetectorType() == "Z") {
-                        crossIdxArray[9] = cosmics.get(i).get(j).get_Id();
-                    }
-                }
-                if (cosmics.get(i).get(j).get_DetectorType() == "C") {
-                    crossIdxArray[10] = cosmics.get(i).get(j).get_Id();
-                }
-            }
+            
 
-            for (int j = 0; j < crossIdxArray.length; j++) {
+            for (int j = 0; j < crossIdxArray.size(); j++) { 
                 String hitStrg = "Cross";
                 hitStrg += (j + 1);
                 hitStrg += "_ID";
-                bank.setInt(hitStrg, i, crossIdxArray[j]);
+                bank.setShort(hitStrg, i, (short) crossIdxArray.get(j).shortValue());
             }
         }
+        //bank.show();
         return bank;
     }
 
@@ -488,9 +476,9 @@ public class RecoBankWriter {
             }
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
-                //bank.setInt("ID", k, stVec.get_ID()); 
-                bank.setInt("LayerTrackIntersPlane", k, stVec.get_SurfaceLayer());
-                bank.setInt("SectorTrackIntersPlane", k, stVec.get_SurfaceSector());
+                bank.setShort("ID", k, (short) stVec.get_ID()); 
+                bank.setByte("LayerTrackIntersPlane", k, (byte) stVec.get_SurfaceLayer());
+                bank.setByte("SectorTrackIntersPlane", k, (byte) stVec.get_SurfaceSector());
                 bank.setFloat("XtrackIntersPlane", k, (float) stVec.x());
                 bank.setFloat("YtrackIntersPlane", k, (float) stVec.y());
                 bank.setFloat("ZtrackIntersPlane", k, (float) stVec.z());
@@ -514,11 +502,23 @@ public class RecoBankWriter {
         if (trks.size() == 0) {
             return null;
         }
+        int bankSize = 1;
+        for (int i = 0; i < trks.size(); i++) {
+            if(trks.get(i)==null)
+                continue;
+            if (trks.get(i).get_Trajectory() == null) {
+                continue;
+            }
+            for (StateVec stVec : trks.get(i).get_Trajectory())
+                bankSize++;
+        }
 
-        DataBank bank = event.createBank("CVTRec::Trajectory", 10 * trks.size()); // 8 SVT layer + 2 BMT layers 
+        DataBank bank = event.createBank("CVTRec::Trajectory", bankSize); // 8 SVT layer + 2 BMT layers 
 
         int k = 0;
         for (int i = 0; i < trks.size(); i++) {
+             if(trks.get(i)==null)
+                continue;
             if (trks.get(i).get_Trajectory() == null) {
                 continue;
             }

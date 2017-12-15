@@ -8,7 +8,6 @@ package org.jlab.detector.decode;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -16,6 +15,7 @@ import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.jnp.hipo.io.HipoWriter;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 
@@ -32,7 +32,7 @@ public class CLASDecoder {
     private HipoDataEvent               hipoEvent = null;
     private int                  decoderDebugMode = 0;
     
-    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
+//    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
     
     public CLASDecoder(boolean development){
         codaDecoder = new CodaEventDecoder();
@@ -152,6 +152,31 @@ public class CLASDecoder {
     }
     
     
+    
+    public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type){
+        return getEntriesVTP(type,dataList);    
+    }
+    /**
+     * returns VTP entries from decoded data for given detector type
+     * @param type detector type
+     * @param entries digitized data list
+     * @return list of VTP's for detector type
+     */
+    public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type, 
+            List<DetectorDataDgtz> entries){
+        List<DetectorDataDgtz>  vtp = new ArrayList<DetectorDataDgtz>();
+        for(DetectorDataDgtz entry : entries){
+            if(entry.getDescriptor().getType()==type){
+                if(entry.getVTPSize()>0){
+                    vtp.add(entry);
+                }
+            }
+        }
+//        System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size() + "  vtp store = " + vtp.size());
+        return vtp;
+    }
+    
+    
     public DataBank getDataBankADC(String name, DetectorType type){
         
         List<DetectorDataDgtz> adcDGTZ = this.getEntriesADC(type);
@@ -166,7 +191,12 @@ public class CLASDecoder {
             adcBANK.setInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
             adcBANK.setFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
             adcBANK.setShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());            
-            if(name == "SVT::adc") adcBANK.setLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp()); // 1234 = dummy placeholder value
+            if(name == "BST::adc") adcBANK.setLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp()); // 1234 = dummy placeholder value
+            if(name.equals("BMT::adc")||name.equals("FMT::adc")|| name.equals("FTTRK::adc")){
+            	adcBANK.setInt("ADC", i, adcDGTZ.get(i).getADCData(0).getHeight());
+            	adcBANK.setInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
+            	adcBANK.setLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
+            }	
          }
         return adcBANK;
     }
@@ -220,6 +250,22 @@ public class CLASDecoder {
         return tdcBANK;
     }
     
+    public DataBank getDataBankUndecodedVTP(String name, DetectorType type){
+        
+        List<DetectorDataDgtz> vtpDGTZ = this.getEntriesVTP(type);
+        
+        DataBank vtpBANK = hipoEvent.createBank(name, vtpDGTZ.size());
+        if(vtpBANK==null) return null;
+        
+        for(int i = 0; i < vtpDGTZ.size(); i++){
+            vtpBANK.setByte("crate", i, (byte) vtpDGTZ.get(i).getDescriptor().getCrate());
+            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
+            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
+            vtpBANK.setInt("word", i, vtpDGTZ.get(i).getVTPData(0).getWord());
+        }
+        return vtpBANK;
+    }
+    
     public DataEvent getDataEvent(DataEvent rawEvent){
         this.initEvent(rawEvent);
         return getDataEvent();
@@ -229,14 +275,14 @@ public class CLASDecoder {
                 
         HipoDataEvent event = (HipoDataEvent) writer.createEvent();
         
-        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc",
-						    "FTCAL::adc","HTCC::adc","SVT::adc","CTOF::adc","LTCC::adc","BMT::adc","FMT::adc"};
-        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,DetectorType.FTCAL,
-	    DetectorType.HTCC,DetectorType.SVT,DetectorType.CTOF,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
+        String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","FTHODO::adc","FTTRK::adc",
+                                                    "HTCC::adc","BST::adc","CTOF::adc","CND::adc","LTCC::adc","BMT::adc","FMT::adc"};
+        DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,DetectorType.FTHODO,DetectorType.FTTRK,
+                                                          DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
         
-        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","CTOF::tdc","RF::tdc"};
-        DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.EC,
-            DetectorType.DC,DetectorType.CTOF,DetectorType.RF};
+        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc"};
+        DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
+            DetectorType.DC,DetectorType.HTCC,DetectorType.LTCC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH};
         
         for(int i = 0; i < adcBankTypes.length; i++){
             DataBank adcBank = getDataBankADC(adcBankNames[i],adcBankTypes[i]);
@@ -282,6 +328,19 @@ public class CLASDecoder {
             e.printStackTrace();
         }
         
+        try {
+            DataBank vtpBankUD = this.getDataBankUndecodedVTP("RAW::vtp", DetectorType.UNDEFINED);
+            if(vtpBankUD!=null){
+                if(vtpBankUD.rows()>0){
+                    event.appendBanks(vtpBankUD);
+                }
+            } else {
+                
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
         return event;
     }
     public HipoDataBank createHeaderBank(DataEvent event, int nrun, int nevent, float torus, float solenoid){
@@ -290,7 +349,7 @@ public class CLASDecoder {
         int    localRun = this.codaDecoder.getRunNumber();
         int  localEvent = this.codaDecoder.getEventNumber();
         long  timeStamp = this.codaDecoder.getTimeStamp();
-        int triggerBits = this.codaDecoder.getTriggerBits();
+        long triggerBits = this.codaDecoder.getTriggerBits();
         
         if(nrun>0){
             localRun = nrun;
@@ -298,7 +357,7 @@ public class CLASDecoder {
         }
         bank.setInt("run",        0, localRun);
         bank.setInt("event",      0, localEvent);
-        bank.setInt("trigger",    0, triggerBits);        
+        bank.setLong("trigger",    0, triggerBits);        
         bank.setFloat("torus",    0, torus);
         bank.setFloat("solenoid", 0, solenoid);        
         bank.setLong("timestamp", 0, timeStamp);        
@@ -311,7 +370,7 @@ public class CLASDecoder {
         
         OptionParser parser = new OptionParser("decoder");
         parser.addOption("-n", "-1", "maximum number of events to process");        
-        parser.addOption("-c", "0", "compression type (0-NONE, 1-GZIP, 2-LZ4)");
+        parser.addOption("-c", "2", "compression type (0-NONE, 1-LZ4 Fast, 2-LZ4 Best, 3-GZIP)");
         parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
         parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
         parser.addRequired("-o","output.hipo");
@@ -355,9 +414,11 @@ public class CLASDecoder {
             
             decoder.setDebugMode(debug);
             
-            HipoDataSync writer = new HipoDataSync();
+            //HipoDataSync writer = new HipoDataSync();
+            System.out.println(" OUTPUT WRITER CHANGED TO JNP HIPO");
+            HipoWriter writer = new HipoWriter();
             writer.setCompressionType(compression);
-            
+            writer.appendSchemaFactoryFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
             int nrun = parser.getOption("-r").intValue();
             double torus = parser.getOption("-t").doubleValue();
             double solenoid = parser.getOption("-s").doubleValue();
@@ -381,11 +442,14 @@ public class CLASDecoder {
                     DataEvent  decodedEvent = decoder.getDataEvent(event);
                     DataBank   header = decoder.createHeaderBank(decodedEvent, nrun, counter, (float) torus, (float) solenoid);
                     decodedEvent.appendBanks(header);
-                    writer.writeEvent(decodedEvent);
+
+                    HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
+                    writer.writeEvent(dhe.getHipoEvent());
+                    
                     counter++;
                     progress.updateStatus();
                     if(nevents>0){
-                        if(counter>nevents) break;
+                        if(counter>=nevents) break;
                     }
                 }
             }

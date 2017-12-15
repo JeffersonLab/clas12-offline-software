@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jlab.rec.dc.CCDBConstants;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.Track;
 
@@ -26,7 +26,7 @@ public class MeasVecs {
         }
 
     }
-
+    public int ndf=0;
     /**
      * The state projector - it projects the state onto the measurement
      *
@@ -58,8 +58,8 @@ public class MeasVecs {
         return val;
     }
 
-    public void setMeasVecs(Track trkcand) {
-
+    public void setMeasVecs(Track trkcand, DCGeant4Factory DcDetector) {
+    	
         List<HitOnTrack> hOTS = new ArrayList<HitOnTrack>(); // the list of hits on track		
         FittedHit hitOnTrk;
         // loops over the regions (1 to 3) and the superlayers in a region (1 to 2) and obtains the hits on track
@@ -69,7 +69,8 @@ public class MeasVecs {
                     if (trkcand.get(c).get(s).get(h).get_Id() == -1) {
                         continue;
                     }
-                    hitOnTrk = trkcand.get(c).get(s).get(h);
+                    trkcand.get(c).get(s).get(h).set_CellSize(DcDetector);
+                    hitOnTrk = trkcand.get(c).get(s).get(h); 
                     int slayr = trkcand.get(c).get(s).get(h).get_Superlayer();
                     double sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlope();
                     double it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitIntercept();
@@ -90,19 +91,19 @@ public class MeasVecs {
 
                     hot._Unc = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
                     hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
-                    if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
-                    	hot._hitError = 100000; //exclude outoftimers from fit
+                    //if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
+                    //	hot._hitError = 100000; //exclude outoftimers from fit
                     hOTS.add(hot);
 
                 }
             }
         }
         Collections.sort(hOTS); // sort the collection in order of increasing Z value (i.e. going downstream from the target)
-
+        ndf = hOTS.size()-5;
         // identify double hits and take the average position		
         for (int i = 0; i < hOTS.size(); i++) {
             if (i > 0) {
-                if (hOTS.get(i - 1)._Z == hOTS.get(i)._Z) {
+                if (Math.abs(hOTS.get(i - 1)._Z - hOTS.get(i)._Z)<0.01) {
                     hOTS.get(i - 1)._X = (hOTS.get(i - 1)._X / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + hOTS.get(i)._X / (hOTS.get(i)._Unc * hOTS.get(i)._Unc)) / (1. / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + 1. / (hOTS.get(i)._Unc * hOTS.get(i)._Unc));
                     //hOTS.get(i-1)._hitError  = 1./Math.sqrt(1./(hOTS.get(i-1)._hitError*hOTS.get(i-1)._hitError) + 1./(hOTS.get(i)._hitError*hOTS.get(i)._hitError) );
                     hOTS.remove(i);
@@ -121,7 +122,6 @@ public class MeasVecs {
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
             this.measurements.add(i, meas);
-            //System.out.println(" Adding measuremnt "+i+") "+meas.x+", "+meas.z+" +/-"+meas.error+" tilt "+meas.tilt);
         }
     }
 

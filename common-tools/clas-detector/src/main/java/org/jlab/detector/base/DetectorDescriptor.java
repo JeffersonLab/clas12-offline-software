@@ -86,10 +86,12 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     
     public int getHashCode(){
         int hash = ((this.dt_SECTOR<<24)&0xFF000000)|
-                ((this.dt_LAYER<<16)&0x00FF0000)|(this.dt_COMPONENT&0x0000FFFF);
+                ((this.dt_LAYER<<16)&0x00FF0000)| ((this.dt_ORDER<<12) & 0x0000F000) |
+                (this.dt_COMPONENT&0x00000FFF);
         return hash;
     }
-      
+    
+    
     
     public void copy(DetectorDescriptor desc){
         this.hw_SLOT    = desc.hw_SLOT;

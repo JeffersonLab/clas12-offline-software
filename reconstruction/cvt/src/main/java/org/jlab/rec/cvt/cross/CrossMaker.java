@@ -89,7 +89,7 @@ public class CrossMaker {
                     this_cross.set_Cluster2(outlayerclus);
                     this_cross.set_Id(rid);
                     // sets the cross parameters (point3D and associated error) from the SVT geometry
-                    this_cross.set_CrossParamsSVT(null, svt_geo);
+                    this_cross.set_CrossParamsSVT(null, svt_geo); 
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
                     if (this_cross.get_Point0() != null) {
                         //pass the cross to the arraylist of crosses
@@ -205,7 +205,7 @@ public class CrossMaker {
 
         // Sorting by layer first:
         for (Cluster theclus : clusters) {
-            if (theclus.get_Detector() == "BMT") {
+            if (theclus.get_Detector() == 1) {
                 if (Geometry.getZorC(theclus.get_Layer()) == 1) {
                     bmt_Zlayrclus.add(theclus);
                 }
@@ -215,7 +215,7 @@ public class CrossMaker {
                 }
 
             }
-            if (theclus.get_Detector() == "SVT") {
+            if (theclus.get_Detector() == 0) {
                 if (theclus.get_Layer() % 2 == 0) {
                     svt_outerlayrclus.add(theclus);
                 }

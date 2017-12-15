@@ -1,10 +1,12 @@
 package org.jlab.rec.cvt.banks;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -89,50 +91,30 @@ public class HitReader {
         // fills the arrays corresponding to the hit variables
         int rows = bankDGTZ.rows();
 
-        int[] id = new int[rows];
-        int[] sector = new int[rows];
-        int[] layer = new int[rows];
-        int[] strip = new int[rows];
-        int[] ADC = new int[rows];
-
         if (event.hasBank("BMT::adc") == true) {
 
             for (int i = 0; i < rows; i++) {
 
-                id[i] = i + 1;
-                sector[i] = bankDGTZ.getInt("sector", i);
-                layer[i] = bankDGTZ.getInt("layer", i);
-                strip[i] = bankDGTZ.getInt("component", i);
-                ADC[i] = bankDGTZ.getInt("ADC", i);
-
-                if (strip[i] < 1) {
+                if (bankDGTZ.getInt("ADC", i) < 1) {
                     continue; // gemc assigns strip value -1 for inefficiencies, we only consider strips with values between 1 to the maximum strip number for a given detector
                 }
-                double ADCtoEdep = ADC[i];
+                double ADCtoEdep = bankDGTZ.getInt("ADC", i);
                 //fix for now... no adc in GEMC
                 if (ADCtoEdep < 1) {
                     continue;
                 }
                 // create the strip object for the BMT
-                Strip BmtStrip = new Strip(strip[i], ADCtoEdep);
+                Strip BmtStrip = new Strip(bankDGTZ.getInt("component", i), ADCtoEdep);
                 // calculate the strip parameters for the BMT hit
-                BmtStrip.calc_BMTStripParams(geo, sector[i], layer[i]); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                BmtStrip.calc_BMTStripParams(geo, bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
-                String detectortype = new String();
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer[i]) == 1) // Z detector
-                {
-                    detectortype = "Z";
-                }
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer[i]) == 0) // C detector
-                {
-                    detectortype = "C";
-                }
-                Hit hit = new Hit("BMT", detectortype, sector[i], layer[i], BmtStrip);
+                
+                Hit hit = new Hit(1, this.getZorC(bankDGTZ.getInt("layer", i)), bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i), BmtStrip);
                 // a place holder to set the status of the hit, for simulated data if the strip number is in range and the Edep is above threshold the hit has status 1, useable
                 hit.set_Status(1);
                 //if(BmtStrip.get_Edep()==0)
                 //	hit.set_Status(-1);
-                hit.set_Id(id[i]);
+                hit.set_Id(i+1);
                 // add this hit
                 hits.add(hit);
 
@@ -151,7 +133,7 @@ public class HitReader {
      */
     public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, org.jlab.rec.cvt.svt.Geometry geo) {
 
-        if (event.hasBank("SVT::adc") == false) {
+        if (event.hasBank("BST::adc") == false) {
             //System.err.println("there is no BST bank ");
             _SVTHits = new ArrayList<Hit>();
 
@@ -160,7 +142,7 @@ public class HitReader {
 
         List<Hit> hits = new ArrayList<Hit>();
 
-        DataBank bankDGTZ = event.getBank("SVT::adc");
+        DataBank bankDGTZ = event.getBank("BST::adc");
 
         int rows = bankDGTZ.rows();;
 
@@ -170,7 +152,7 @@ public class HitReader {
         int[] strip = new int[rows];
         int[] ADC = new int[rows];
 
-        if (event.hasBank("SVT::adc") == true) {
+        if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
             for (int i = 0; i < rows; i++) {
 
@@ -206,19 +188,34 @@ public class HitReader {
                     continue;
                 }
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i]));
+                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
                 // get the strip endPoints
-                double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
+                /* double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
                 Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
                 Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
                 Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
-                SvtStrip.set_ImplantPoint(EP1);
+                SvtStrip.set_ImplantPoint(EP1); */
+                // Geometry implementation using the geometry package:  Charles Platt
+                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
+
+                Vector3d o1            = shiftedStrip.origin();
+                Vector3d e1            = shiftedStrip.end();
+
+                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
+                                            ( o1.y + e1.y ) /2.,
+                                            ( o1.z + e1.z ) /2. );
+                Vector3D Dir = new Vector3D((-o1.x + e1.x ),
+                                            (-o1.y + e1.y ),
+                                            (-o1.z + e1.z )     );
+
+                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
+                SvtStrip.set_ImplantPoint(passVals);
                 SvtStrip.set_MidPoint(MP);
                 SvtStrip.set_StripDir(Dir);
 
                 // create the hit object
-                Hit hit = new Hit("SVT", "", sector[i], layer[i], SvtStrip);
+                Hit hit = new Hit(0, -1, sector[i], layer[i], SvtStrip);
                 // if the hit is useable in the analysis its status is 1
                 hit.set_Status(1);
                 if (SvtStrip.get_Edep() == 0) {
@@ -226,7 +223,6 @@ public class HitReader {
                 }
 
                 hit.set_Id(id[i]);
-
                 // add this hit
                 hits.add(hit);
             }
@@ -234,6 +230,14 @@ public class HitReader {
         // fill the list of SVT hits
         this.set_SVTHits(hits);
 
+    }
+    // moved this method from geometry here... check for duplicate usages
+    private int getZorC(int layer) { // 1=Z detector, 0=Cdetector
+        int axis = 0;
+        if (layer == 2 || layer == 3 || layer == 5) {
+            axis = 1;
+        }
+        return axis;
     }
 
 }

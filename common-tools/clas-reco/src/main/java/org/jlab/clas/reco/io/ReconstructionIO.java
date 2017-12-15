@@ -7,14 +7,15 @@ package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.hipo.io.HipoWriter;
-import org.jlab.hipo.schema.Schema;
+
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioDataSync;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.jnp.hipo.io.HipoWriter;
+import org.jlab.jnp.hipo.schema.Schema;
 import org.jlab.utils.system.ClasUtilsFile;
 
 /**

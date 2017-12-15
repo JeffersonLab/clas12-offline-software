@@ -1,6 +1,7 @@
 #!/bin/bash
 
-mkdir coatjava
+mkdir -p coatjava
+rm -f coatjava/lib/clas/jcsg-0.3.2.jar
 cp -r bin coatjava/
 cp -r etc coatjava/
 mkdir -p coatjava/lib/clas
@@ -25,20 +26,10 @@ cd common-tools/coat-lib
 mvn package
 if [ $? != 0 ] ; then echo "common tools failure 2" ; exit 1 ; fi
 cd -
-cp common-tools/coat-lib/target/coat-libs*.jar coatjava/lib/clas/
-
-### jcsg ###
-export COATJAVA=$PWD/coatjava/
-cd common-tools/clas-jcsg
-./gradlew assemble
-if [ $? != 0 ] ; then echo "jcsg failure" ; exit 1 ; fi
-cd -
-cp common-tools/clas-jcsg/build/libs/jcsg-0.3.2.jar coatjava/lib/clas/
+cp common-tools/coat-lib/target/coat-libs-5.0-SNAPSHOT.jar coatjava/lib/clas/
 
 ### create local mvn repo containing coat-libs and jcsg ##
-mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-3.0-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
-if [ $? != 0 ] ; then echo "failed to create local mvn repo" ; exit 1 ; fi
-mvn deploy:deploy-file -Dfile=./common-tools/clas-jcsg/build/libs/jcsg-0.3.2.jar -DgroupId=org.jlab.clas -DartifactId=clas-jcsg -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
+mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-5.0-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
 if [ $? != 0 ] ; then echo "failed to create local mvn repo" ; exit 1 ; fi
  
 ### dc (depends on jcsg) ###
@@ -100,6 +91,13 @@ mvn install
 if [ $? != 0 ] ; then echo "cnd failure" ; exit 1 ; fi
 cd -
 cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar coatjava/lib/services/
+
+### rich ###
+cd reconstruction/rich
+mvn install
+if [ $? != 0 ] ; then echo "rich failure" ; exit 1 ; fi
+cd -
+cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
 
 ### eb ###
 cd reconstruction/eb

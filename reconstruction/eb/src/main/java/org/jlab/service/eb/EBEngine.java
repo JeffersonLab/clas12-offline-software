@@ -1,18 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.eb;
 
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.*;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  *
@@ -30,12 +29,13 @@ public class EBEngine extends ReconstructionEngine {
     String crossBank        = null;
     String matrixBank       = null;
     String trackType        = null;
+    String ftBank           = null;
 
     public EBEngine(String name){
         super(name,"gavalian","1.0");
         initBankNames();
     }
-    
+
     public void initBankNames() {
         //Initialize bank names
     }
@@ -48,14 +48,16 @@ public class EBEngine extends ReconstructionEngine {
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
 
-        List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.EC);
+        List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL);
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::rec",DetectorType.LTCC);
+        List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
+       
+        // FIXME We should be starting with FT::particle, not clusters
+        //List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FTCAL::clusters", DetectorType.FTCAL);
         
-        List<TaggerResponse>             trackFT = TaggerResponse.readHipoEvent(de, "FT::particles");
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
@@ -63,53 +65,54 @@ public class EBEngine extends ReconstructionEngine {
         eb.addCherenkovResponses(responseHTCC);
         eb.addCherenkovResponses(responseLTCC);
 
-        
-
-        
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
-        eb.addTracks(tracks);       
+        eb.addForwardTracks(tracks);       
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
-        eb.addTracks(ctracks);
+        eb.addCentralTracks(ctracks);
+
+        // Process tracks:
+        eb.processHitMatching();
+        //eb.addTaggerTracks(trackFT);
+        eb.processNeutralTracks();
+
+        // matching was already done for central:
+        //eb.readCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits");
         
 
-
-        eb.processHitMatching();
-        eb.addTaggerTracks(trackFT);
-        eb.processNeutralTracks();        
         eb.assignTrigger();
  
+        // Process RF:
         EBRadioFrequency rf = new EBRadioFrequency();
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
-        //eb.getEvent().setRfTime(rf);
         
-        //System.out.println(eb.getEvent().toString());
- 
-        
-//        for(int i = 0; i < eb.getEvent().getParticles().size(); i++) {
-//            System.out.println("Particle  " + i);
-//            for(int j = 0 ; j < eb.getEvent().getParticles().get(i).getDetectorResponses().size() ; j++){
-//                System.out.println("Point  " + eb.getEvent().getParticles().get(i).getDetectorResponses().get(j).getMatchedDistance());
-//            }
-//        }
-        
-        
+        // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
-        //System.out.println("analyzing");
         analyzer.processEvent(eb.getEvent());
         
 
-        
-        //System.out.println(eb.getEvent().toString());
-        
+        //The Forward Tagger Particle Creation Tagger Cluster Association
+        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
+        List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
+        List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
+        List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
+        eb.addForwardTaggerParticles(ftparticles);
+        eb.addTaggerResponses(responseFTCAL);
+        eb.addTaggerResponses(responseFTHODO);
+        eb.addFTIndices(ftIndices);
+        eb.forwardTaggerIDMatching();
 
-        
+
+        // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
+            
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             de.appendBanks(bankP);
+            
             DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
             de.appendBanks(bankEve);
-            List<DetectorResponse>   calorimeters = eb.getEvent().getCalorimeterResponseList();
+
+            List<DetectorResponse> calorimeters = eb.getEvent().getCalorimeterResponseList();
             if(calorimeterBank!=null && calorimeters.size()>0) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
                 de.appendBanks(bankCal);
@@ -119,11 +122,25 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
             }
-            List<CherenkovResponse>       cherenkovs = eb.getEvent().getCherenkovResponseList();
+            List<CherenkovResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
             if(cherenkovBank!=null && cherenkovs.size()>0) {
                 DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
                 de.appendBanks(bankChe);
             }
+            
+            List<TaggerResponse> taggers = eb.getEvent().getTaggerResponseList();
+            if (ftBank!=null && taggers.size()>0) {
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, ftBank);
+                de.appendBanks(bankForwardTagger);
+            }
+
+            // Omit CD tracks for now, need full CD import
+            if (trackBank!=null && (tracks.size()>0)) { // || ctracks.size()>0) ) {
+                final int ntracks = tracks.size();// + ctracks.size();
+                DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);//tracks.size());
+                de.appendBanks(bankTrack);
+            }
+
             if(matrixBank!=null) {
                 DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
                 de.appendBanks(bankMat);
@@ -157,6 +174,10 @@ public class EBEngine extends ReconstructionEngine {
     public void setTrackBank(String trackBank) {
         this.trackBank = trackBank;
     }
+    
+    public void setFTBank(String ftBank) {
+        this.ftBank = ftBank;
+    }
 
     public void setCrossBank(String crossBank) {
         this.crossBank = crossBank;
@@ -170,6 +191,17 @@ public class EBEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
+      
+        // load EB constants from CCDB:
+        requireConstants(EBCCDBConstants.getAllTableNames());
+        this.getConstantsManager().setVariation("default");
+        // FIXME: check run number in processDataEvent, reload from CCDB if changed.
+        // For now we just use hard-coded run number:
+        EBCCDBConstants.load(10,this.getConstantsManager());
+
+        // Example of retrieveing values from EBCCDBConstants: 
+        //Double[] t=EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+
         System.out.println("[EB::] --> event builder is ready....");
         return true;
     }

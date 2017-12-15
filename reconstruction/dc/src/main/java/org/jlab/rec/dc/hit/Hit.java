@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.hit;
 
-import org.jlab.rec.dc.GeometryLoader;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
+
 
 /**
  * A DC hit characterized by superlayer, layer, sector, wire number, and time.
@@ -224,10 +225,11 @@ public class Hit implements Comparable<Hit> {
         // in old mc, layer 1 is closer to the beam than layer 2, in hardware it is the opposite
         //double  brickwallPattern = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(1).getComponent(1).getMidpoint().x()
         //		- GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getComponent(1).getMidpoint().x();
-        double brickwallPattern = GeometryLoader.getDcDetector().getWireMidpoint(0, 1, 1).x
-                - GeometryLoader.getDcDetector().getWireMidpoint(0, 0, 1).x;
+        //double brickwallPattern = GeometryLoader.getDcDetector().getWireMidpoint(0, 1, 1).x
+        //        - GeometryLoader.getDcDetector().getWireMidpoint(0, 0, 1).x;
 
-        double brickwallSign = Math.signum(brickwallPattern);
+        //double brickwallSign = Math.signum(brickwallPattern);
+        double brickwallSign = -1;
 
         //center of the cell asfcn wire num
         //double y= (double)wire*(1.+0.25*Math.sin(Math.PI/3.)/(1.+Math.sin(Math.PI/6.)));
@@ -252,30 +254,35 @@ public class Hit implements Comparable<Hit> {
     public boolean get_OutOfTimeFlag() {
         return _OutOfTimeFlag;
     }
-
+    
+    private double _cellSize;
     /**
      *
      * @return the cell size in a given superlayer
      */
     public double get_CellSize() {
+       
+        return _cellSize;
+    }
+    
+    public void set_CellSize(DCGeant4Factory DcDetector) {
         // fix cell size = w_{i+1} -w_{i}
         //double layerDiffAtMPln  = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().x()
         //             - GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(1).getMidpoint().x();
-        double layerDiffAtMPln = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 0, 0).x
-                - GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 0, 1).x;
+        double layerDiffAtMPln = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 0).x
+                - DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 1).x;
 
         //double cellSize = 0.5*Math.cos(Math.toRadians(6.)*Math.abs(layerDiffAtMPln*Math.cos(Math.toRadians(6.)));
-        double cellSize = 0.5 * Math.abs(layerDiffAtMPln);
+        _cellSize = 0.5 * Math.abs(layerDiffAtMPln);
 
-        return cellSize;
     }
 
-    public double get_B() {
+    public double get_B() {  //System.out.println("B is "+_B +" for "+this.printInfo());
         return _B;
     }
 
-    public void set_B(double _B) {
-        this._B = _B;
+    public void set_B(double B) {
+        this._B = B;
     }
 
     /**

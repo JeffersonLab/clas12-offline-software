@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
@@ -16,7 +17,7 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
-import org.jlab.rec.dc.trajectory.Vertex;
+//import org.jlab.rec.dc.trajectory.Vertex;
 
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
@@ -38,12 +39,27 @@ public class TrackCandListFinder {
 		trking = stat;
 	}
 	public DCSwimmer dcSwim = new DCSwimmer();
+        public int NSuperLayerTrk  = 5;
+        public boolean PassNSuperlayerTracking(List<Cross> crossesInTrk) {
+            boolean pass = true;
+            int NbMissingSl=0;
+            for(Cross c: crossesInTrk) {
+                if(c.isPseudoCross)
+                    if(c.get_Segment1().get_Id()==-1)
+                        NbMissingSl++;
+            }
+           
+            if(NbMissingSl>6-NSuperLayerTrk) {
+                pass = false; 
+            }
+            return pass;
+        }
 	/**
 	 * 
 	 * @param crossList the input list of crosses
 	 * @return a list of track candidates in the DC
 	 */
-	public List<Track> getTrackCands(CrossList crossList) {
+	public List<Track> getTrackCands(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE) {
 		List<Track> cands = new ArrayList<Track>();
 		if(crossList.size()==0) {
 			System.err.print("Error no tracks found");
@@ -55,11 +71,11 @@ public class TrackCandListFinder {
 			List<Cross> crossesInTrk = crossList.get(i);
 			TrajectoryFinder trjFind = new TrajectoryFinder();
 			
-			Trajectory traj = trjFind.findTrajectory(crossesInTrk);
+			Trajectory traj = trjFind.findTrajectory(crossesInTrk, DcDetector);
                         if(traj == null) 
                             continue;
             
-			if(crossesInTrk.size()==3) {
+			if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk)==true) {
 					
 				cand.addAll(crossesInTrk);
 				
@@ -74,7 +90,7 @@ public class TrackCandListFinder {
 
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-			        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
+                                        double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
 			        if(cand.get(0).get_Segment2().get_Id()==-1) 
 			        	theta1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
 			        if(cand.get(2).get_Segment2().get_Id()==-1) 
@@ -103,9 +119,9 @@ public class TrackCandListFinder {
 				        //positive charges bend outward for nominal GEMC field configuration
 						int q = (int) Math.signum(deltaTheta); 
 						
-						q*= (int)-1*Math.signum(Constants.getTORSCALE());						
+						q*= (int)-1*Math.signum(TORSCALE);						
 							
-						double p = Math.sqrt(pxz*pxz+py*py);
+						double p = Math.sqrt(pxz*pxz+py*py); 
 						if(p>11)
 							p=11;
 						if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
@@ -119,19 +135,19 @@ public class TrackCandListFinder {
 								cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z(), cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
 						cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
 						
-						KFitter kFit = new KFitter(cand);
+						KFitter kFit = new KFitter(cand, DcDetector);
 						if(this.trking.equalsIgnoreCase("TimeBased"))
 							kFit.totNumIter=30;
 						
 						StateVec fn = new StateVec();
 						kFit.runFitter();
-						
-						if(kFit.chi2<10000) {
-						
+						//System.out.println(" KFIT "+kFit.chi2);
+						if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+                                                    
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
 							
 							cand.set_P(1./Math.abs(kFit.finalStateVec.Q));
-							this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z);
+							this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector);
 													
 							cand.set_FitChi2(kFit.chi2);
 							cand.set_FitNDF(kFit.NDF);
@@ -238,7 +254,7 @@ public class TrackCandListFinder {
 		return sector;
 	}
 	
-	public void setTrackPars(Track cand, Trajectory traj, TrajectoryFinder trjFind, StateVec stateVec, double z) {
+	public void setTrackPars(Track cand, Trajectory traj, TrajectoryFinder trjFind, StateVec stateVec, double z, DCGeant4Factory getDcDetector) {
 		double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX()*stateVec.tanThetaX() + stateVec.tanThetaY()*stateVec.tanThetaY() + 1);
 		
 		//System.out.println("Setting track params for ");stateVec.printInfo();
@@ -286,9 +302,10 @@ public class TrackCandListFinder {
 		double pyOr = -VecAtTarIn[4];
 		double pzOr = -VecAtTarIn[5];
 		
-		if(traj!=null && trjFind!=null)
-			traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(xOr, yOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q()));
-		
+		if(traj!=null && trjFind!=null) {
+			traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(xOr, yOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q(), getDcDetector));
+                        cand.set_Trajectory(traj.get_Trajectory());
+                }
 		//cand.set_Vtx0_TiltedCS(trakOrigTiltSec);
 		//cand.set_pAtOrig_TiltedCS(pAtOrigTiltSec.toVector3D());
 		
@@ -303,14 +320,33 @@ public class TrackCandListFinder {
 		Point3D R3TrkMomentum = C.getCoordsInLab(pz*stateVec.tanThetaX(),pz*stateVec.tanThetaY(),pz);
 		
 		
-		dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
-		double[] VecAtTarlab0 = dcSwim.SwimToPlaneLab(0.0);
-		Vertex vtx = new Vertex();
-		double[] Bvtx = new double[]{0.0,0.0};
-		double[] Vt = vtx.VertexParams(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5], (double) cand.get_Q(), dcSwim.BfieldLab(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2]).toVector3D().mag(), Bvtx[0], Bvtx[1]);
+		//dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
+		//double[] VecAtTarlab0 = dcSwim.SwimToPlaneLab(0.0);
+		//Vertex vtx = new Vertex();
+		//double[] Bvtx = new double[]{0.0,0.0};
+		//double[] Vt = vtx.VertexParams(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5], (double) cand.get_Q(), dcSwim.BfieldLab(VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2]).toVector3D().mag(), Bvtx[0], Bvtx[1]);
 		//Vt = new double[]{VecAtTarlab0[0], VecAtTarlab0[1], VecAtTarlab0[2], -VecAtTarlab0[3], -VecAtTarlab0[4], -VecAtTarlab0[5],0};
-		int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
+		//int sectorNearTarget = this.getSector(Vt[0], Vt[1]);
 		
+               // System.out.println("Swim to fixed z "+VecAtTarlab0[0]+", "+VecAtTarlab0[1]+", "+VecAtTarlab0[2]+"; "+VecAtTarlab0[3]+", "+VecAtTarlab0[4]+", "+VecAtTarlab0[5]);
+                dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
+		
+                // recalc new vertex using plane stopper
+                int sector = cand.get(2).get_Sector();
+                double theta_n = ((double)(sector-1))*Math.toRadians(60.);
+                double x_n = Math.cos(theta_n) ; 
+                double y_n = Math.sin(theta_n) ; 
+//System.out.println("sector "+sector+" xn "+x_n+" yn "+y_n);
+                double[] Vt = dcSwim.SwimToPlaneBoundary(0, new Vector3D(x_n, y_n, 0), -1);
+              //  System.out.println("Swim to fixed plane "+newVtx[0]+", "+newVtx[1]+", "+newVtx[2]+"; "+newVtx[3]+", "+newVtx[4]+", "+newVtx[5]);
+                
+              /*  Vt[0]=newVtx[0];
+                Vt[1]=newVtx[1];
+                Vt[2]=newVtx[2];
+                Vt[3]=newVtx[3];
+                Vt[4]=newVtx[4];
+                Vt[5]=newVtx[5]; */
+                
 		int status = 99999;
 	/*	if(sectorNearTarget==cand.get(0).get_Sector()) {
 			status = 1;
@@ -335,12 +371,13 @@ public class TrackCandListFinder {
 		double xOrFix = Vt[0];
 		double yOrFix = Vt[1];
 		double zOrFix = Vt[2];
-		double pxOrFix = Vt[3];
-		double pyOrFix = Vt[4];
-		double pzOrFix = Vt[5];
-		double arclen = Vt[6];
+		double pxOrFix = -Vt[3];
+		double pyOrFix = -Vt[4];
+		double pzOrFix = -Vt[5];
+		double PathInFromR3 = Vt[6];
 		
-		double totPathLen = VecAtTarlab0[6] + VecAtTarOut[6] + arclen;
+		//double totPathLen = VecAtTarlab0[6] + VecAtTarOut[6] + arclen;
+                double totPathLen =  PathInFromR3+VecAtTarOut[6];
 		cand.set_TotPathLen(totPathLen);
 		
 		cand.set_Vtx0(new Point3D(xOrFix,yOrFix, zOrFix));
@@ -366,8 +403,7 @@ public class TrackCandListFinder {
 
 
 	public void removeOverlappingTracks(List<Track> trkcands) {
-		
-		
+				
 		List<Track> selectedTracks =new ArrayList<Track>();
 		List<Track> list = new  ArrayList<Track>();
 		for(int i =0; i<trkcands.size(); i++) { 
@@ -413,6 +449,27 @@ public class TrackCandListFinder {
 		return bestTrk;
 	}
 	
-
+    public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Factory DcDetector) {
+        int planeIdNum=0;
+        for(StateVec st : stateVecAtPlanesList) {
+            planeIdNum++;
+            for(Cross c : trk) { 
+                    for(FittedHit h1 : c.get_Segment1()) { 
+                            if(planeIdNum== (h1.get_Superlayer()-1)*6+h1.get_Layer() ) {
+                                h1.setAssociatedStateVec(st);   
+                                h1.setSignalPropagTimeAlongWire(DcDetector);
+                                h1.setSignalTimeOfFlight(); 
+                            }
+                    }
+                    for(FittedHit h2 : c.get_Segment2()) {
+                            if(planeIdNum== (h2.get_Superlayer()-1)*6+h2.get_Layer() ) {
+                                h2.setAssociatedStateVec(st);
+                                h2.setSignalPropagTimeAlongWire(DcDetector);
+                                h2.setSignalTimeOfFlight();
+                            }
+                    }
+            }
+        }
+    }
 
 }

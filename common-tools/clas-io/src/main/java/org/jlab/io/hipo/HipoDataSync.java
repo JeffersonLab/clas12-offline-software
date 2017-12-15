@@ -5,19 +5,14 @@
  */
 package org.jlab.io.hipo;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import org.jlab.hipo.data.HipoEvent;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSync;
-import org.jlab.io.evio.EvioDataDictionary;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioFactory;
-import org.jlab.io.evio.EvioSource;
-import org.jlab.hipo.io.HipoWriter;
+
+
 import org.jlab.io.base.DataBank;
 import org.jlab.io.evio.EvioDataBank;
+import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.io.HipoWriter;
 
 /**
  *
@@ -29,10 +24,14 @@ public class HipoDataSync implements DataSync {
     
     public HipoDataSync(){
         this.writer = new HipoWriter();
-        this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        this.writer.setCompressionType(2);
+        writer.appendSchemaFactoryFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        System.out.println("[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
+        //this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //this.writer.getSchemaFactory().show();
     }
     
+    @Override
     public void open(String file) {
         /*
         EvioDataDictionary  dict = EvioFactory.getDictionary();
@@ -44,6 +43,7 @@ public class HipoDataSync implements DataSync {
         this.writer.open(file);
     }
 
+    @Override
     public void writeEvent(DataEvent event) {
         //EvioDataEvent  evioEvent = (EvioDataEvent) event;
         if(event instanceof HipoDataEvent) {

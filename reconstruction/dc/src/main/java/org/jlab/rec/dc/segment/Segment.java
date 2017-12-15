@@ -1,12 +1,12 @@
 package org.jlab.rec.dc.segment;
 
 import java.util.ArrayList;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
@@ -229,17 +229,17 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
      * Sets the segment endpoints in the sector coordinate system for ced
      * display
      */
-    public void set_SegmentEndPointsSecCoordSys() {
+    public void set_SegmentEndPointsSecCoordSys(DCGeant4Factory DcDetector) {
 
         //double Z_1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().z();
-        double Z_1 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 0, 0).z;
+        double Z_1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 0).z;
         double X_1 = this.get_fittedCluster().get_clusterLineFitSlope() * Z_1 + this.get_fittedCluster().get_clusterLineFitIntercept();
 
         double x1 = Math.cos(Math.toRadians(25.)) * X_1 + Math.sin(Math.toRadians(25.)) * Z_1;
         double z1 = -Math.sin(Math.toRadians(25.)) * X_1 + Math.cos(Math.toRadians(25.)) * Z_1;
 
         //double Z_2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(5).getComponent(0).getMidpoint().z();
-        double Z_2 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 5, 0).z;
+        double Z_2 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 5, 0).z;
         double X_2 = this.get_fittedCluster().get_clusterLineFitSlope() * Z_2 + this.get_fittedCluster().get_clusterLineFitIntercept();
 
         double x2 = Math.cos(Math.toRadians(25.)) * X_2 + Math.sin(Math.toRadians(25.)) * Z_2;
@@ -257,12 +257,12 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
     /**
      * Sets the plane containing the segment fitted-line representation
      */
-    public void set_fitPlane() {
+    public void set_fitPlane(DCGeant4Factory DcDetector) {
         if (this.get_fittedCluster().get_clusLine() == null) {
-            System.err.println(" no clusterline for " + this.get_fittedCluster().printInfo());
+           // System.err.println(" no clusterline for " + this.get_fittedCluster().printInfo());
             return;
         }
-        set_SegmentEndPointsSecCoordSys();
+        this.set_SegmentEndPointsSecCoordSys(DcDetector);
         double dir_x = this.get_fittedCluster().get_clusLine().end().x() - this.get_fittedCluster().get_clusLine().origin().x();
         double dir_y = this.get_fittedCluster().get_clusLine().end().y() - this.get_fittedCluster().get_clusLine().origin().y();
         double dir_z = this.get_fittedCluster().get_clusLine().end().z() - this.get_fittedCluster().get_clusLine().origin().z();

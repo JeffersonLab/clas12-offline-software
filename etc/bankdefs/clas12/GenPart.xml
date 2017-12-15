@@ -1,4 +1,30 @@
 <evio_dictionary>
+
+<bank name="GenPart" tag="10" info="MC Header">
+    <section name="header" tag="10" num="0" info="Event Header">
+        <column name="date"        num="1"   type="string"    info="Date"/>
+        <column name="runNo"       num="2"   type="int32"     info="Run number"/>
+        <column name="evn"         num="3"   type="int32"     info="Event number"/>
+        <column name="evn_type"    num="4"   type="int32"     info="Event type (-1 MC)"/>
+        <column name="helicity"    num="5"   type="float64"   info="Beam helicity"/>
+    </section>
+</bank>
+
+<bank name="Lund" tag="11" info="Lund Header">
+    <section name="header" tag="11" num="0" info="Event Header">
+        <column name="nParticles"  num="1"   type="float64"   info="Number of particles"/>
+        <column name="nNucleons"   num="2"   type="float64"   info="Number of target nucleons"/>
+        <column name="nProtons"    num="3"   type="float64"   info="Number of target protons"/>
+        <column name="targetPol"   num="4"   type="float64"   info="Target Polarization"/>
+        <column name="beamPol"     num="5"   type="float64"   info="Beam Polarization"/>
+        <column name="beamType"    num="6"   type="float64"   info="Beam Type (electron=11, photon=22)"/>
+        <column name="beamEnergy"  num="7"   type="float64"   info="Beam Energ (GeV)"/>
+        <column name="targetID"    num="8"   type="float64"   info="Target nucleon ID"/>
+        <column name="processID"   num="9"   type="float64"   info="Process ID"/>
+        <column name="eventWeight" num="10"  type="float64"   info="Event weight/cross section"/>
+    </section>
+</bank>
+
 <bank name="GenPart" tag="20" info="Generated Particles">
    <section name="true" tag="20" num="0" info="Generated Particles">
        <column name="pid"   num="1"  type="int32"   info="ID of the particle"/>
@@ -8,13 +34,14 @@
        <column name="vx"    num="5"  type="float64"   info="x position of vertex mm"/>
        <column name="vy"    num="6"  type="float64"   info="y position of vertex mm"/>
        <column name="vz"    num="7"  type="float64"   info="z position of vertex mm"/>
+       <column name="vt"    num="8"  type="float64"   info="vertex time ns"/>
    </section>
    <section name="psummary" tag="21" num="1" info="Generated Particles">
        <column name="dname"  num="1"   type="string"    info="Detector Name"/>
        <column name="stat"   num="2"   type="int32"     info="Number of Hits in the detector"/>
        <column name="etot"   num="3"   type="float64"   info="Total Energy Deposited"/>
        <column name="t"      num="4"   type="float64"   info="Fastest Time on Detector"/>
-       <column name="nphe"   num="5"   type="float64"     info="Number of Photoelectrons"/>
+       <column name="nphe"   num="5"   type="float64"   info="Number of Photoelectrons"/>
        <column name="upx"    num="10"  type="float64"   info="unsmeared px"/>
        <column name="upy"    num="11"  type="float64"   info="unsmeared py"/>
        <column name="upz"    num="12"  type="float64"   info="unsmeared pz"/>
@@ -22,6 +49,25 @@
        <column name="spy"    num="11"  type="float64"   info="smeared py"/>
        <column name="spz"    num="12"  type="float64"   info="smeared pz"/>
    </section>
+</bank>
+
+<bank name="Lund" tag="22" info="Lund Particles">
+    <section name="true" tag="22" num="0" info="Lund Particles">
+        <column name="index"        num="1"   type="float64"   info="particle index"/>
+        <column name="ltime"        num="2"   type="float64"   info="particle life time"/>
+        <column name="type"         num="3"   type="float64"   info="particle type (1 is active)"/>
+        <column name="pid"          num="4"   type="float64"   info="ID of the particle"/>
+        <column name="parentID"     num="5"   type="float64"   info="ID of the parent particle"/>
+        <column name="daughterID"   num="6"   type="float64"   info="ID of the daughter particle"/>
+        <column name="px"           num="7"   type="float64"   info="x component of momentum Gev/c^2"/>
+        <column name="py"           num="8"   type="float64"   info="y component of momentum Gev/c^2"/>
+        <column name="pz"           num="9"   type="float64"   info="z component of momentum Gev/c^2"/>
+        <column name="E"            num="10"  type="float64"   info="Energy"/>
+        <column name="mass"         num="11"  type="float64"   info="mass"/>
+        <column name="vx"           num="12"  type="float64"   info="x position of vertex cm"/>
+        <column name="vy"           num="13"  type="float64"   info="y position of vertex cm"/>
+        <column name="vz"           num="14"  type="float64"   info="z position of vertex cm"/>
+    </section>
 </bank>
 </evio_dictionary>
 

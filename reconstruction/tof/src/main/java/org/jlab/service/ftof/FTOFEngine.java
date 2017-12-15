@@ -2,6 +2,7 @@ package org.jlab.service.ftof;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,7 +13,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
-import org.jlab.rec.ftof.CCDBConstantsLoader;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.banks.ftof.RecoBankWriter;
@@ -34,13 +34,13 @@ import org.jlab.service.dc.DCTBEngine;
 public class FTOFEngine extends ReconstructionEngine {
 
     public FTOFEngine() {
-        super("FTOFRec", "carman, ziegler", "0.4");
+        super("FTOFRec", "carman, ziegler", "0.5");
     }
 
     FTOFGeant4Factory geometry;
-    int Run = -1;
+    int Run = 0;
     RecoBankWriter rbc;
-
+   
     @Override
     public boolean init() {
 
@@ -49,6 +49,38 @@ public class FTOFEngine extends ReconstructionEngine {
         Constants.Load();
         rbc = new RecoBankWriter();
 
+        String[]  ftofTables = new String[]{ 
+                    "/calibration/ftof/attenuation",
+                    "/calibration/ftof/effective_velocity",
+                    "/calibration/ftof/time_offsets",
+                    "/calibration/ftof/time_walk",
+                    "/calibration/ftof/status",
+                    "/calibration/ftof/gain_balance",
+                    "/calibration/ftof/tdc_conv",
+                };
+        
+        requireConstants(Arrays.asList(ftofTables));
+       
+       // Get the constants for the correct variation
+        this.getConstantsManager().setVariation("default");
+        
+        // Get the geometry
+        DatabaseConstantProvider db = new DatabaseConstantProvider( 11, "default");
+        // using
+        // the
+        // new
+        // run
+        // load the geometry tables
+        db.loadTable("/geometry/ftof/panel1a/paddles");
+        db.loadTable("/geometry/ftof/panel1a/panel");
+        db.loadTable("/geometry/ftof/panel1b/paddles");
+        db.loadTable("/geometry/ftof/panel1b/panel");
+        db.loadTable("/geometry/ftof/panel2/paddles");
+        db.loadTable("/geometry/ftof/panel2/panel");
+
+        // disconncect from database. Important to do this after loading tables.
+        db.disconnect();
+        geometry = new FTOFGeant4Factory(db);
         // Load the Calibration Constants
         // if (CCDBConstantsLoader.CSTLOADED == false) {
         // DatabaseConstantProvider db = CCDBConstantsLoader.Load();
@@ -66,7 +98,19 @@ public class FTOFEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         // System.out.println(" PROCESSING EVENT ....");
         // Constants.DEBUGMODE = true;
-        setRunConditionsParameters(event);
+        //setRunConditionsParameters( event) ;
+        if(event.hasBank("RUN::config")==false ) {
+		System.err.println("RUN CONDITIONS NOT READ!");
+		return true;
+	}
+		
+        DataBank bank = event.getBank("RUN::config");
+		
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        
         if (geometry == null) {
             System.err.println(" FTOF Geometry not loaded !!!");
             return false;
@@ -77,12 +121,19 @@ public class FTOFEngine extends ReconstructionEngine {
         trkRead.fetch_Trks(event);
         List<Line3d> trkLines = trkRead.get_TrkLines();
         double[] paths = trkRead.get_Paths();
-
+        int[] ids = trkRead.getTrkId();
         List<Hit> hits = new ArrayList<Hit>(); // all hits
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for FTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths);
+        hitRead.fetch_Hits(event, geometry, trkLines, paths, ids, 
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv") );
 
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();
@@ -186,42 +237,7 @@ public class FTOFEngine extends ReconstructionEngine {
         return true;
     }
 
-    public void setRunConditionsParameters(DataEvent event) {
-
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-        boolean isMC = false;
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-        // force cosmics
-        // isCosmics = true;
-        // System.out.println(bank.getInt("Event")[0]);
-        boolean isCalib = isCosmics; // all cosmics runs are for calibration
-        // right now
-        //
-
-        // Load the constants
-        // -------------------
-        int newRun = bank.getInt("run", 0);
-
-        if (Run != newRun) {
-            CCDBConstantsLoader.Load(newRun);
-            DatabaseConstantProvider db = CCDBConstantsLoader.getDB();
-
-            geometry = new FTOFGeant4Factory(db);
-        }
-        Run = newRun;
-
-    }
+    
 
     public static void main(String arg[]) throws IOException {
 
@@ -233,7 +249,7 @@ public class FTOFEngine extends ReconstructionEngine {
         en.init();
 
         int counter = 0;
-        String inputFile = "/Users/ziegler/Workdir/Files/GEMC/TestFTOFSchema.hipo";
+        String inputFile = "/Users/ziegler/Workdir/Distribution/CLARA/CLARA_INSTALL/data/output/out_pion_smearz_gen_1.hipo";
         // String inputFile = args[0];
         // String outputFile = args[1];
 
@@ -244,7 +260,7 @@ public class FTOFEngine extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         // Writer
-        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/TestFTOFSchemaRec.hipo";
+        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/TestFTOFSchemaRec2.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -259,18 +275,19 @@ public class FTOFEngine extends ReconstructionEngine {
 
             //en0.processDataEvent(event);
             //	if (counter > 3062)
-            en0.processDataEvent(event);
-            en1.processDataEvent(event);
+            //en0.processDataEvent(event);
+            //en1.processDataEvent(event);
             en.processDataEvent(event);
-            System.out.println("  EVENT " + counter);
+            //System.out.println("  EVENT " + counter);
             //if (counter > 3066)
             //	break;
             // event.show();
             // if(counter%100==0)
-            System.out.println("run " + counter + " events");
-            if (event.hasBank("HitBasedTrkg::HBTracks")) {
-                writer.writeEvent(event);
-            }
+            //System.out.println("run " + counter + " events");
+            //if (event.hasBank("HitBasedTrkg::HBTracks")) {
+            //    
+            //}
+            writer.writeEvent(event);
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;

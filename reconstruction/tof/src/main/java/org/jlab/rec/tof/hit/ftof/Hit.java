@@ -23,7 +23,6 @@ import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.rec.ftof.CCDBConstants;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.hit.AHit;
@@ -31,6 +30,7 @@ import org.jlab.rec.tof.hit.IGetCalibrationParams;
 import org.jlab.service.ftof.FTOFEngine;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * @author ziegler
@@ -83,41 +83,53 @@ public class Hit extends AHit implements IGetCalibrationParams {
         this._matchedTrack = _matchedTrack;
     }
 
-    public void set_HitParameters(int superlayer) {
-
+    public void set_HitParameters(int superlayer, IndexedTable constants0, 
+            IndexedTable constants1, 
+            IndexedTable constants2, 
+            IndexedTable constants3, 
+            IndexedTable constants5, 
+            IndexedTable constants6) {/*
+        0: "/calibration/ftof/attenuation"),
+        1: "/calibration/ftof/effective_velocity"),
+        2: "/calibration/ftof/time_offsets"),
+        3: "/calibration/ftof/time_walk"),
+        4: "/calibration/ftof/status"),
+        5: "/calibration/ftof/gain_balance"),
+        6: "/calibration/ftof/tdc_conv") );
+        */
         double pl = this.get_paddleLine().length();
 
         // Get all the constants used in the hit parameters calculation
-        double TW0L = this.TW01();
-        double TW0R = this.TW02();
-        double TW1L = this.TW11();
-        double TW1R = this.TW12();
-        double lambdaL = this.lambda1();
+        double TW0L = this.TW01(constants3);
+        double TW0R = this.TW02(constants3);
+        double TW1L = this.TW11(constants3);
+        double TW1R = this.TW12(constants3);
+        double lambdaL = this.lambda1(constants0);
         this.set_lambda1(lambdaL);
-        this.set_lambda1Unc(this.lambda1Unc());
-        double lambdaR = this.lambda1();
+        this.set_lambda1Unc(this.lambda1Unc(constants0));
+        double lambdaR = this.lambda1(constants0);
         this.set_lambda2(lambdaR);
-        this.set_lambda2Unc(this.lambda2Unc());
-        double yOffset = this.yOffset();
-        double vL = this.v1();
-        double vR = this.v2();
-        double vLUnc = this.v1Unc();
-        double vRUnc = this.v2Unc();
+        this.set_lambda2Unc(this.lambda2Unc(constants0));
+        double yOffset = this.yOffset(constants0);
+        double vL = this.v1(constants1);
+        double vR = this.v2(constants1);
+        double vLUnc = this.v1Unc(constants1);
+        double vRUnc = this.v2Unc(constants1);
         double PEDL = this.PED1();
         double PEDR = this.PED2();
         double PEDLUnc = this.PED1Unc();
         double PEDRUnc = this.PED2Unc();
-        double paddle2paddle = this.PaddleToPaddle();
-        double RFPad = this.RFPad();
-        double timeOffset = this.TimeOffset();
-        double[] LSBConv = this.LSBConversion();
+        double paddle2paddle = this.PaddleToPaddle(constants2);
+        double RFPad = this.RFPad(constants2);
+        double timeOffset = this.TimeOffset(constants2);
+        double[] LSBConv = this.LSBConversion(constants6);
         double LSBConvErr = this.LSBConversionUnc();
         double ADCLErr = this.ADC1Unc();
         double ADCRErr = this.ADC2Unc();
         double TDCLErr = this.TDC1Unc();
         double TDCRErr = this.TDC2Unc();
-        double ADC_MIP = this.ADC_MIP();
-        double ADC_MIPErr = this.ADC_MIPUnc();
+        double ADC_MIP = this.ADC_MIP(constants5);
+        double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.ScinBarThickn();
 
@@ -209,91 +221,97 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
         return return_val;
     }
-
+   
+    
     @Override
-    public double TW01() {
-        double TW0L = CCDBConstants.getTW0L()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
-
-        return TW0L;
+    public double TW01(IndexedTable tab) {
+        //double TW0L = CCDBConstants.getTW0L()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("tw0_left", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double TW02() {
-        double TW0R = CCDBConstants.getTW0R()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
-
-        return TW0R;
+    public double TW02(IndexedTable tab) {
+        //double TW0R = CCDBConstants.getTW0R()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("tw0_right", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double TW11() {
-        double TW1L = CCDBConstants.getTW1L()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
-
-        return TW1L;
+    public double TW11(IndexedTable tab) {
+        //double TW1L = CCDBConstants.getTW1L()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("tw1_left", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double TW12() {
-        double TW1R = CCDBConstants.getTW1R()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
-
-        return TW1R;
+    public double TW12(IndexedTable tab) {
+        //double TW1R = CCDBConstants.getTW1R()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("tw1_right", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double lambda1() {
-        return CCDBConstants.getLAMBDAL()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double lambda1(IndexedTable tab) {
+        //return CCDBConstants.getLAMBDAL()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("attlen_left", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double lambda2() {
-        return CCDBConstants.getLAMBDAR()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double lambda2(IndexedTable tab) {
+        //return CCDBConstants.getLAMBDAR()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("attlen_right", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double lambda1Unc() {
-        return CCDBConstants.getLAMBDALU()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double lambda1Unc(IndexedTable tab) {
+        //return CCDBConstants.getLAMBDALU()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("attlen_left_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double lambda2Unc() {
-        return CCDBConstants.getLAMBDARU()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double lambda2Unc(IndexedTable tab) {
+        //return CCDBConstants.getLAMBDARU()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("attlen_right_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double yOffset() {
-        return CCDBConstants.getYOFF()[this.get_Sector() - 1][this.get_Panel() - 1][this
-                .get_Paddle() - 1];
+    public double yOffset(IndexedTable tab) {
+        //return CCDBConstants.getYOFF()[this.get_Sector() - 1][this.get_Panel() - 1][this
+        //        .get_Paddle() - 1];
+        return tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double v1() {
-        return CCDBConstants.getEFFVELL()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double v1(IndexedTable tab) {
+        //return CCDBConstants.getEFFVELL()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("veff_left", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double v2() {
-        return CCDBConstants.getEFFVELR()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double v2(IndexedTable tab) {
+        //return CCDBConstants.getEFFVELR()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("veff_right", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double v1Unc() {
-        return CCDBConstants.getEFFVELLU()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double v1Unc(IndexedTable tab) {
+        //return CCDBConstants.getEFFVELLU()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("veff_left_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double v2Unc() {
-        return CCDBConstants.getEFFVELRU()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double v2Unc(IndexedTable tab) {
+        //return CCDBConstants.getEFFVELRU()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("veff_right_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
@@ -337,27 +355,33 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     @Override
-    public double PaddleToPaddle() {
-        return CCDBConstants.getPADDLE2PADDLE()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+    public double PaddleToPaddle(IndexedTable tab) {
+        //return CCDBConstants.getPADDLE2PADDLE()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("paddle2paddle", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
-    private double RFPad() {
+    private double RFPad(IndexedTable tab) {
         // TODO Auto-generated method stub
-        return CCDBConstants.getRFPAD()[this.get_Sector() - 1][this
-                .get_Panel() - 1][this.get_Paddle() - 1];
+        //return CCDBConstants.getRFPAD()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getDoubleValue("rfpad", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double TimeOffset() {
-        return CCDBConstants.getLR()[this.get_Sector() - 1][this.get_Panel() - 1][this
-                .get_Paddle() - 1];
+    public double TimeOffset(IndexedTable tab) {
+        //return CCDBConstants.getLR()[this.get_Sector() - 1][this.get_Panel() - 1][this
+        //        .get_Paddle() - 1];
+        return tab.getDoubleValue("left_right", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double[] LSBConversion() {
-        return CCDBConstants.getLSBCONVFAC()[this.get_Sector() - 1][this.get_Panel() - 1][this
-                .get_Paddle() - 1];
+    public double[] LSBConversion(IndexedTable tab) {
+        //return CCDBConstants.getLSBCONVFAC()[this.get_Sector() - 1][this.get_Panel() - 1][this
+        //        .get_Paddle() - 1];
+        return new double[] {tab.getDoubleValue("left", this.get_Sector(),this.get_Panel(),this.get_Paddle()), 
+            tab.getDoubleValue("right", this.get_Sector(),this.get_Panel(),this.get_Paddle())
+        };
     }
 
     @Override
@@ -366,17 +390,19 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     @Override
-    public double ADC_MIP() {
+    public double ADC_MIP(IndexedTable tab) {
         // return Constants.ADC_MIP[this.get_Panel()-1];
-        return CCDBConstants.getMIPL()[this.get_Sector() - 1][this.get_Panel() - 1][this
-                .get_Paddle() - 1];
+        //return CCDBConstants.getMIPL()[this.get_Sector() - 1][this.get_Panel() - 1][this
+        //        .get_Paddle() - 1];
+        return tab.getDoubleValue("mipa_left", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
-    public double ADC_MIPUnc() {
+    public double ADC_MIPUnc(IndexedTable tab) {
         // return Constants.ADC_MIP_UNC[this.get_Panel()-1];
-        return CCDBConstants.getMIPLU()[this.get_Sector() - 1][this.get_Panel() - 1][this
-                .get_Paddle() - 1];
+        //return CCDBConstants.getMIPLU()[this.get_Sector() - 1][this.get_Panel() - 1][this
+        //        .get_Paddle() - 1];
+        return tab.getDoubleValue("mipa_left_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
@@ -389,6 +415,20 @@ public class Hit extends AHit implements IGetCalibrationParams {
         return Constants.SCBARTHICKN[this.get_Panel() - 1];
     }
 
+    @Override
+    public int Status1(IndexedTable tab) {
+        //return CCDBConstants.getSTATUSL()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getIntValue("stat_left", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public int Status2(IndexedTable tab) {
+        //return CCDBConstants.getSTATUSR()[this.get_Sector() - 1][this
+        //        .get_Panel() - 1][this.get_Paddle() - 1];
+        return tab.getIntValue("stat_right", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+    
     public static void main(String arg[]) throws IOException {
 
         FTOFEngine rec = new FTOFEngine();
@@ -419,8 +459,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
         FTOFGeant4Factory factory = new FTOFGeant4Factory(provider);
 
-        int statusL = CCDBConstants.getSTATUSL()[sector - 1][0][paddle - 1];
-        int statusR = CCDBConstants.getSTATUSR()[sector - 1][0][paddle - 1];
+       // int statusL = CCDBConstants.getSTATUSL()[sector - 1][0][paddle - 1];
+       // int statusR = CCDBConstants.getSTATUSR()[sector - 1][0][paddle - 1];
 
         Random rnd = new Random();
 

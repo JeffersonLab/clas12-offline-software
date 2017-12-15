@@ -15,12 +15,11 @@ public class CCDBConstantsLoader {
 
     static boolean CSTLOADED = false;
 
-    // static FTOFGeant4Factory geometry ;
-    private static DatabaseConstantProvider DB;
-    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(
-            10, "default");
+   
+    //private static DatabaseConstantProvider DB;
+    
 
-    public static final synchronized void Load(int runNb) {
+    public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
         //Z detector characteristics
         int NREGIONS = 3;
@@ -46,12 +45,15 @@ public class CCDBConstantsLoader {
         double[] CRCOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
         int[][] CRCGROUP = new int[NREGIONS][100]; 		// Number of strips with same width
         double[][] CRCWIDTH = new double[NREGIONS][100];	// the width of the corresponding group of strips 
-        double[][] CRCEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
-        double[][] CRCEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
+        double[][] CRCEDGE1 = new double[NREGIONS][3];          // the angle of the first edge of each PCB detector A, B, C
+        double[][] CRCEDGE2 = new double[NREGIONS][3];          // the angle of the second edge of each PCB detector A, B, C
         double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
 
+        double[] EFF_Z_OVER_A = new double[NREGIONS*2];
+        double[] T_OVER_X0    = new double[NREGIONS*2];
+        
         // Load the tables
-        dbprovider = new DatabaseConstantProvider(runNb, "default"); // reset
+        
         // using
         // the
         // new
@@ -64,9 +66,18 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L4");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L5");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L6");
+        
+        //load material budget:
+        dbprovider.loadTable("/test/mvt/bmt_mat_l1");
+        dbprovider.loadTable("/test/mvt/bmt_mat_l2");
+        dbprovider.loadTable("/test/mvt/bmt_mat_l3");
+        dbprovider.loadTable("/test/mvt/bmt_mat_l4");
+        dbprovider.loadTable("/test/mvt/bmt_mat_l5");
+        dbprovider.loadTable("/test/mvt/bmt_mat_l6");
+        
         dbprovider.disconnect();
 
-        // dbprovider.show();
+       //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L1/Group_size"); i++) {
@@ -149,7 +160,57 @@ public class CCDBConstantsLoader {
             }
 
         }
-
+        
+        //material budget
+        //===============
+        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l1/thickness"); i++) {
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l1/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_z", i);
+            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_a", i);
+            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/x0", i);
+            EFF_Z_OVER_A[0] += thickness*Zeff/Aeff;      
+            T_OVER_X0[0]+=thickness/X0;
+        }
+        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l2/thickness"); i++) {
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l2/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_z", i);
+            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_a", i);
+            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/x0", i);
+            EFF_Z_OVER_A[1] += thickness*Zeff/Aeff;      
+            T_OVER_X0[1]+=thickness/X0;     
+        }  
+        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l3/thickness"); i++) {
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l3/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_z", i);
+            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_a", i);
+            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/x0", i);
+            EFF_Z_OVER_A[2] += thickness*Zeff/Aeff;      
+            T_OVER_X0[2]+=thickness/X0;      
+        }
+        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l4/thickness"); i++) {
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l4/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_z", i);
+            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_a", i);
+            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/x0", i);
+            EFF_Z_OVER_A[3] += thickness*Zeff/Aeff;      
+            T_OVER_X0[3]+=thickness/X0;   
+        }
+        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l5/thickness"); i++) {
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l5/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_z", i);
+            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_a", i);
+            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/x0", i);
+            EFF_Z_OVER_A[4] += thickness*Zeff/Aeff;      
+            T_OVER_X0[4]+=thickness/X0;  
+        }
+        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l6/thickness"); i++) {
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l6/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_z", i);
+            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_a", i);
+            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/x0", i);
+            EFF_Z_OVER_A[5] += thickness*Zeff/Aeff;      
+            T_OVER_X0[5]+=thickness/X0;      
+        }
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);
@@ -170,18 +231,21 @@ public class CCDBConstantsLoader {
         Constants.setCRCGROUP(CRCGROUP);
         Constants.setCRCWIDTH(CRCWIDTH);
         Constants.setCRZWIDTH(CRZWIDTH);
-
+        Constants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
+        Constants.set_T_OVER_X0(T_OVER_X0);
+        
+        dbprovider.disconnect();
         CSTLOADED = true;
         System.out
                 .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
-        setDB(dbprovider);
+     //   setDB(dbprovider);
     }
 
-    public static final synchronized DatabaseConstantProvider getDB() {
-        return DB;
-    }
+    //public static final synchronized DatabaseConstantProvider getDB() {
+    //    return DB;
+    //}
 
-    public static final synchronized void setDB(DatabaseConstantProvider dB) {
-        DB = dB;
-    }
+    //public static final synchronized void setDB(DatabaseConstantProvider dB) {
+    //    DB = dB;
+    //}
 }

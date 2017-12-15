@@ -1,11 +1,13 @@
 package org.jlab.rec.dc.hit;
 
-import org.jlab.rec.dc.CCDBConstants;
+import eu.mihosoft.vrl.v3d.Vector3d;
+import java.util.List;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
-
+import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.dc.trajectory.StateVec;
+import org.jlab.utils.groups.IndexedTable;
 /**
  * A hit that was used in a fitted cluster. It extends the Hit class and
  * contains local and sector coordinate information at the MidPlane. An estimate
@@ -16,6 +18,8 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
  *
  */
 public class FittedHit extends Hit implements Comparable<Hit> {
+
+    
 
     /**
      *
@@ -47,7 +51,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _ClusFitDoca = -1;
     private double _TrkFitDoca = -1;
     private double _TimeToDistance = 0;
+    private double _Beta = 1.0;
+    
+    private StateVec _AssociatedStateVec;
 
+    
+    
     /**
      *
      * @return the local hit x-position in the local superlayer coordinate
@@ -90,29 +99,31 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return The approximate uncertainty on the hit position using the inverse
      * of the gemc smearing function
      */
-    public double get_PosErr(double B) {
+    public double get_PosErr(double B, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde) {
 
         double err = this.get_DocaErr();
 
         if (this._TrkgStatus != -1) {
             if (this.get_TimeToDistance() == 0) // if the time-to-dist is not set ... set it
             {
-                set_TimeToDistance(1.0, B);
+                set_TimeToDistance(1.0, B, constants1, tde);
             }
 
             err = Constants.CELLRESOL; // default
-            //if(Constants.useParametricResol==true) {
             double x = this.get_Doca() / this.get_CellSize();
-            double p1 = CCDBConstants.getPAR1()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            double p2 = CCDBConstants.getPAR2()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            double p3 = CCDBConstants.getPAR3()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            double p4 = CCDBConstants.getPAR4()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            double scale = CCDBConstants.getSCAL()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+            //double p1 = CCDBConstants.getPAR1()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+            //double p2 = CCDBConstants.getPAR2()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+            //double p3 = CCDBConstants.getPAR3()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+            //double p4 = CCDBConstants.getPAR4()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+            //double scale = CCDBConstants.getSCAL()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+            double p1 = constants0.getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
+            double p2 = constants0.getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
+            double p3 = constants0.getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
+            double p4 = constants0.getDoubleValue("parameter4", this.get_Sector(),this.get_Superlayer(),0);
+            double scale = constants0.getDoubleValue("scale", this.get_Sector(),this.get_Superlayer(),0);
+            
             err = (p1 + p2 / ((p3 + x) * (p3 + x)) + p4 * Math.pow(x, 8)) * scale * 0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
             
-            //}
-           // if(this.get_OutOfTimeFlag()==true)
-            //	System.out.println("OutofTimer "+this.printInfo());
         }
 
         return err;
@@ -246,49 +257,45 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return ralpha;
     }
 
+    public StateVec getAssociatedStateVec() {
+        return _AssociatedStateVec;
+    }
+
+    public void setAssociatedStateVec(StateVec _AssociatedStateVec) {
+        this._AssociatedStateVec = _AssociatedStateVec;
+    }
     /**
      * sets the calculated distance (in cm) from the time (in ns)
      */
 
-    public void set_TimeToDistance(double cosTrkAngle, double B) {
-        boolean useTimeToDistanceGrid = Constants.isT2DGRID();
-        double d = 0;
+    public void set_TimeToDistance(double cosTrkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
+        
+        double distance = 0;
         int slIdx = this.get_Superlayer() - 1;
         int secIdx = this.get_Sector() - 1;
         if (_TrkgStatus != -1 && this.get_Time() > 0) {
-            d = Constants.TIMETODIST[this.get_Region() - 1];
-
-            // chose method to get the distance from the time -- for now this is only used for cosmics so B =0
-            if (useTimeToDistanceGrid == true) {
-                double alpha = Math.acos(cosTrkAngle);
-                double ralpha = this.reducedAngle(alpha);
-                double beta = 1;
-                double x = this.get_ClusFitDoca();
-                TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
-                double deltatime_beta = 0;
-                if (x != -1) {
-                    deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-                }
-             //   System.out.println("setting the time : fit doca = "+x+" dtime(b) = "+deltatime_beta+" intime "+this.get_Time()+" time "+(this.get_Time() + deltatime_beta));
-                this.set_Time(this.get_Time() - deltatime_beta);
-                if(this.get_Time()<=0)
-                    this.set_Time(0.01);
-                d = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.get_Time(), secIdx, slIdx) / this.get_Time();
+           
+            double alpha = Math.acos(cosTrkAngle);
+            double ralpha = this.reducedAngle(alpha);
+            double beta = this.get_Beta(); 
+            double x = this.get_ClusFitDoca();
+            //TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
+            double deltatime_beta = 0;
             
+            if (x != -1) {
+                //deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
+                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0);
+
             }
 
-            //			TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
-            //			d = tde.interpolateOnGrid(0, Math.acos(cosTrkAngle), this.get_Time());
-            //		}
-            //		
-            //	if(cosTrkAngle>0.8 & cosTrkAngle<=1) // trk angle correction 
-            //		d /= cosTrkAngle;
+            double correctedTime = (this.get_Time() - deltatime_beta);
+            if(correctedTime<=0)
+                correctedTime=0.01;
+
+            distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), correctedTime, secIdx, slIdx) ;
+            
         }
         
-        double distance = d * this.get_Time();
-       // if(distance>this.get_CellSize()  )
-       //     distance= this.get_CellSize();
-
         this.set_Doca(distance);
         this._TimeToDistance = distance;
     }
@@ -357,24 +364,23 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._Z = _Z;
     }
 
+    
     /**
      * A method to update the hit position information after the fit to the
      * local coord.sys. wire positions
      */
-    public void updateHitPosition() {
-
-        DCSwimmer swimmer = new DCSwimmer();
+    public void updateHitPosition(DCGeant4Factory DcDetector) {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
+        double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
 
         //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
-        double z1 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
-        double z0 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 0, this.get_Wire() - 1).z;
+        double z1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
+        double z0 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, this.get_Wire() - 1).z;
         double deltaz = Math.abs(z1 - z0);
         //double xMin = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(0).getMidpoint().x();
-        double xMin = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 1, 0).x;
+        double xMin = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, 0).x;
 
         double x = xMin + (this.get_Wire() - 1) * 2 * deltaz * Math.tan(Math.PI / 6);
         if (this.get_Layer() % 2 == 1) {
@@ -383,16 +389,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         //
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-        x = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
+        x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
 
         //
         this.set_X(x);
         this.set_Z(z);
 
-        float[] result = new float[3];
-        swimmer.Bfield(x, 0, z, result);
         
-        this.set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
 
     }
 
@@ -400,18 +403,18 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * A method to update the hit position information after the fit to the wire
      * positions employing hit-based tracking algorithms has been performed.
      */
-    public void updateHitPositionWithTime(double cosTrkAngle, double B) {
+    public void updateHitPositionWithTime(double cosTrkAngle, double B, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         if (this.get_Time() > 0) {
-            this.set_TimeToDistance(cosTrkAngle, B);
+            this.set_TimeToDistance(cosTrkAngle, B, tab, tde);
         }
 
         //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
-        double z1 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
-        double z0 = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 0, this.get_Wire() - 1).z;
+        double z1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
+        double z0 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, this.get_Wire() - 1).z;
         double deltaz = Math.abs(z1 - z0);
         //double xMin = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(0).getMidpoint().x();
-        double xMin = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, 1, 0).x;
+        double xMin = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, 0).x;
 
         double x = xMin + (this.get_Wire() - 1) * 2 * deltaz * Math.tan(Math.PI / 6);
 
@@ -421,8 +424,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-        double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
-        x = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
+        double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
+        x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
 
         //this.set_X(x+this.get_LeftRightAmb()*this.get_TimeToDistance());
         double MPCorr = 1;
@@ -435,20 +438,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     }
 
-    public void projectToMidPlane(boolean Timebased) {
-        //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        //double x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-        double z = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
-        double x = GeometryLoader.getDcDetector().getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
-
-        double TB = 0;
-        if (Timebased == true) {
-            TB = 1;
-        }
-        this.set_XMP(x + TB * this.get_LeftRightAmb() * this.get_TimeToDistance() / Math.cos(Math.toRadians(6.)));
-        this.set_Z(z);
-    }
-
+    
     /**
      *
      * @param otherHit
@@ -527,4 +517,85 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return _AssociatedTBTrackID;
     }
 
+    // intersection of cross direction line with the hit wire (TCS)
+    private Point3D CrossDirIntersWire;
+
+    public Point3D getCrossDirIntersWire() {
+        return CrossDirIntersWire;
+    }
+
+    public void setCrossDirIntersWire(Point3D CrossDirIntersWire) {
+        this.CrossDirIntersWire = CrossDirIntersWire;
+    }
+    
+    public double get_Beta() {
+        return _Beta;
+    }
+    
+    public void set_Beta(double beta) {
+        _Beta = beta;
+    }
+
+    public double calc_SignalPropagAlongWire(DCGeant4Factory DcDetector) {
+        
+        Vector3d WireEnd;
+        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        if(end>0) {
+            WireEnd = DcDetector.getWireRightend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+        } else {
+            WireEnd = DcDetector.getWireLeftend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+        }
+        
+        double X = this.getCrossDirIntersWire().x();
+        double Y = this.getCrossDirIntersWire().y();
+        
+        double r2 = (X-WireEnd.x)*(X-WireEnd.x) + (Y-WireEnd.y)*(Y-WireEnd.y);
+        
+        return Math.sqrt(r2);
+    }
+    
+    private double _SignalPropagAlongWire;
+
+    public double getSignalPropagAlongWire() {
+        return _SignalPropagAlongWire;
+    }
+
+    public void setSignalPropagAlongWire(DCGeant4Factory DcDetector) {
+        this._SignalPropagAlongWire = this.calc_SignalPropagAlongWire( DcDetector);
+    }
+    
+    private double _SignalPropagTimeAlongWire;
+
+    public double getSignalPropagTimeAlongWire() {
+        return _SignalPropagTimeAlongWire;
+    }
+
+    public void setSignalPropagTimeAlongWire(DCGeant4Factory DcDetector) {
+        this.setSignalPropagAlongWire( DcDetector);
+        this._SignalPropagTimeAlongWire = this._SignalPropagAlongWire/(Constants.SPEEDLIGHT*0.7);
+    }
+
+    
+    private double _SignalTimeOfFlight;
+
+    public double getSignalTimeOfFlight() {
+        return _SignalTimeOfFlight;
+    }
+
+    public void setSignalTimeOfFlight() {
+        if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
+            this._SignalTimeOfFlight = this.getAssociatedStateVec().getPathLength()/(Constants.SPEEDLIGHT*this.get_Beta());
+    }
+    
+    private double _T0SubTime;
+
+    public double getT0SubTime() {
+        return _T0SubTime;
+    }
+
+    public void setT0SubTime(double _T0SubTime) {
+        this._T0SubTime = _T0SubTime;
+    }
+    
+    
 }

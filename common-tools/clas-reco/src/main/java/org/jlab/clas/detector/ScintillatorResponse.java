@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
@@ -18,7 +13,6 @@ import org.jlab.io.base.DataEvent;
  */
 public class ScintillatorResponse extends DetectorResponse {
     
-    
     public ScintillatorResponse(){
         super();
     }
@@ -27,7 +21,6 @@ public class ScintillatorResponse extends DetectorResponse {
         this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
     
-
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
@@ -50,9 +43,7 @@ public class ScintillatorResponse extends DetectorResponse {
                 responseList.add(response);
             }
         }
-   
         return responseList;
     }
-
     
 }

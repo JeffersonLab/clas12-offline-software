@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.jlab.clas12.detector</groupId>
+  <artifactId>clas12detector-fvt</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <repositories>
+    <repository>
+      <id>clas12maven</id>
+      <url>https://clasweb.jlab.org/clas12maven</url>
+    </repository>
+
+    <repository>
+      <id>myLocalMvnRepo</id>
+      <url>file://${basedir}/../../myLocalMvnRepo</url>
+    </repository>
+  </repositories>
+  
+  <dependencies>
+     <dependency> <!-- from local repo -->
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-jcsg</artifactId>
+      <version>0.3.2</version>
+      <type>jar</type>
+       <exclusions>
+         <exclusion>
+           <groupId>org.jlab.clas</groupId>
+           <artifactId>clas-geometry</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>org.jlab.clas</groupId>
+           <artifactId>clas-detector</artifactId>
+         </exclusion>
+       </exclusions>
+     </dependency>
+
+    <dependency>
+      <groupId>org.jlab.coda</groupId>
+      <artifactId>jclara</artifactId>
+      <version>4.3-SNAPSHOT</version>
+    </dependency>
+    <dependency> <!-- from local repo -->
+      <groupId>org.jlab.service.dc</groupId>
+      <artifactId>clas12detector-dc</artifactId>
+      <version>0.0</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.jlab.coat</groupId>
+      <artifactId>coat-libs</artifactId>
+      <version>4.0-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+ </project>

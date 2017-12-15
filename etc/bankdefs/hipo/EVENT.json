@@ -1,7 +1,7 @@
 [
     {
         "bank": "RECHB::Event",
-        "group": 20,
+        "group": 310,
         "info": "Event Header Bank",
         "items": [
                 {"name":"NRUN",     "id":1,  "type":"int32", "info":"Run Number"},
@@ -10,7 +10,7 @@
                 {"name":"TYPE",     "id":4,  "type":"int8", "info":"Event Type (Data or MC)"},
                 {"name":"EvCAT",    "id":5,  "type":"int16", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
                 {"name":"NPGP",     "id":6,  "type":"int16", "info":"Number of Final (Timed-based) Reconstructed Particles*100 + Number of Geometrically Reconstructed Particles"},
-                {"name":"TRG",      "id":7,  "type":"int32", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
+                {"name":"TRG",      "id":7,  "type":"int64", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
                 {"name":"BCG",      "id":8,  "type":"float", "info":"Beam charge, gated (Coulomb)"},
                 {"name":"LT",       "id":9,  "type":"double", "info":"Lifetime"},
                 {"name":"STTime",   "id":10, "type":"float", "info":"Event Start Time (ns)"},
@@ -21,7 +21,7 @@
     },
     {
         "bank": "RECHB::Particle",
-        "group": 21,
+        "group": 311,
         "info": "Reconstructed Particle Information",
         "items": [
             {"name":"pid",          "id":1,  "type":"int32", "info":"particle id in LUND conventions"},
@@ -39,7 +39,7 @@
     },
     {
         "bank": "RECHB::Calorimeter",
-        "group": 22,
+        "group": 312,
         "info": "Calorimeter Responses for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the hit in the specific detector bank"},
@@ -65,12 +65,13 @@
             {"name":"dw",           "id":21, "type":"float", "info":"shower width on w-side"},
             {"name":"m2u",          "id":22, "type":"float", "info":"2nd moment of the shower on U-side"},
             {"name":"m2v",          "id":23, "type":"float", "info":"2nd moment of the shower on V-side"},
-            {"name":"m2w",          "id":24, "type":"float", "info":"2nd moment of the shower on W-side"}
+            {"name":"m2w",          "id":24, "type":"float", "info":"2nd moment of the shower on W-side"},
+            {"name":"status",       "id":25, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "RECHB::Cherenkov",
-        "group": 23,
+        "group": 313,
         "info": "Cherenkov Responses for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the hit in the specific detector bank"},
@@ -87,12 +88,13 @@
             {"name":"theta",        "id":12, "type":"float", "info":"Theta of the matched hit"},
             {"name":"phi",          "id":13, "type":"float", "info":"Phi of the mathced hit"},
             {"name":"dtheta",       "id":14, "type":"float", "info":"Expected Theta Resolution"},
-            {"name":"dphi",         "id":15, "type":"float", "info":"Expected Phi Resolution"}
+            {"name":"dphi",         "id":15, "type":"float", "info":"Expected Phi Resolution"},
+            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "RECHB::ForwardTagger",
-        "group": 24,
+        "group": 314,
         "info": "Forward Tagger information for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16",  "info":"index of the cluster in the specific detector bank"},
@@ -108,12 +110,13 @@
             {"name":"dx",           "id":11, "type":"float",  "info":"Cluster width in x" },
             {"name":"dy",           "id":12, "type":"float",  "info":"Cluster width in y" },
             {"name":"radius",       "id":13, "type":"float",  "info":"Cluster radius" },
-            {"name":"size",         "id":14, "type":"int16",  "info":"size of the cluster"}
+            {"name":"size",         "id":14, "type":"int16",  "info":"size of the cluster"},
+            {"name":"status",       "id":15, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "RECHB::Scintillator",
-        "group": 25,
+        "group": 315,
         "info": "Scintillator Responses for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the hit in the specific detector bank"},
@@ -131,12 +134,13 @@
             {"name":"z",            "id":13, "type":"float", "info":"Z coordinate of the hit"},
             {"name":"hx",           "id":14, "type":"float", "info":"X coordinate of the matched hit"},
             {"name":"hy",           "id":15, "type":"float", "info":"Y coordinate of the mathced hit"},
-            {"name":"hz",           "id":16, "type":"float", "info":"Z coordinate of the matched hit"}
+            {"name":"hz",           "id":16, "type":"float", "info":"Z coordinate of the matched hit"},
+            {"name":"status",       "id":17, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "RECHB::Track",
-        "group": 26,
+        "group": 316,
         "info": "Track information for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the track in the specific detector bank"},
@@ -152,13 +156,14 @@
             {"name":"vx_nomm",      "id":11, "type":"float", "info":"x component of the vertex"},
             {"name":"vy_nomm",      "id":12, "type":"float", "info":"y component of the vertex"},
             {"name":"vz_nomm",      "id":13, "type":"float", "info":"z component of the vertex"},
-            {"name":"chi2_nomm",    "id":15, "type":"float", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "id":14, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"}
+            {"name":"chi2_nomm",    "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
+            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"},
+            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "RECHB::TrackCross",
-        "group": 27,
+        "group": 317,
         "info": "Track Cross information for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16",  "info":"index of the cross in the specific detector bank"},
@@ -171,12 +176,13 @@
             {"name":"c_z",          "id":8,  "type":"float",  "info":"Cross z-position in the lab (in cm)"},
             {"name":"c_ux",         "id":9,  "type":"float",  "info":"Cross unit x-direction vector in the lab"},
             {"name":"c_uy",         "id":10, "type":"float",  "info":"Cross unit y-direction vector in the lab"},
-            {"name":"c_uz",         "id":11, "type":"float",  "info":"Cross unit z-direction vector in the lab"}
+            {"name":"c_uz",         "id":11, "type":"float",  "info":"Cross unit z-direction vector in the lab"},
+            {"name":"status",       "id":12, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::Event",
-        "group": 30,
+        "group": 330,
         "info": "Event Header Bank",
         "items": [
                 {"name":"NRUN",     "id":1,  "type":"int32", "info":"Run Number"},
@@ -185,7 +191,7 @@
                 {"name":"TYPE",     "id":4,  "type":"int8", "info":"Event Type (Data or MC)"},
                 {"name":"EvCAT",    "id":5,  "type":"int16", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
                 {"name":"NPGP",     "id":6,  "type":"int16", "info":"Number of Final (Timed-based) Reconstructed Particles*100 + Number of Geometrically Reconstructed Particles"},
-                {"name":"TRG",      "id":7,  "type":"int32", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
+                {"name":"TRG",      "id":7,  "type":"int64", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
                 {"name":"BCG",      "id":8,  "type":"float", "info":"Faraday Cup Gated (Coulomb)"},
                 {"name":"LT",       "id":9,  "type":"double", "info":"Clock"},
                 {"name":"STTime",   "id":10, "type":"float", "info":"Event Start Time (ns)"},
@@ -196,7 +202,7 @@
     },
     {
         "bank": "REC::Particle",
-        "group": 31,
+        "group": 331,
         "info": "Reconstructed Particle Information",
         "items": [
             {"name":"pid",          "id":1,  "type":"int32", "info":"particle id in LUND conventions"},
@@ -214,7 +220,7 @@
     },
     {
         "bank": "REC::Calorimeter",
-        "group": 32,
+        "group": 332,
         "info": "Calorimeter Responses for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the hit in the specific detector bank"},
@@ -240,12 +246,13 @@
             {"name":"dw",           "id":21, "type":"float", "info":"shower width on w-side"},
             {"name":"m2u",          "id":22, "type":"float", "info":"2nd moment of the shower on U-side"},
             {"name":"m2v",          "id":23, "type":"float", "info":"2nd moment of the shower on V-side"},
-            {"name":"m2w",          "id":24, "type":"float", "info":"2nd moment of the shower on W-side"}
+            {"name":"m2w",          "id":24, "type":"float", "info":"2nd moment of the shower on W-side"},
+            {"name":"status",       "id":25, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::Cherenkov",
-        "group": 33,
+        "group": 333,
         "info": "Cherenkov Responses for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the hit in the specific detector bank"},
@@ -262,12 +269,13 @@
             {"name":"theta",        "id":12, "type":"float", "info":"Theta of the matched hit"},
             {"name":"phi",          "id":13, "type":"float", "info":"Phi of the mathced hit"},
             {"name":"dtheta",       "id":14, "type":"float", "info":"Expected Theta Resolution"},
-            {"name":"dphi",         "id":15, "type":"float", "info":"Expected Phi Resolution"}
+            {"name":"dphi",         "id":15, "type":"float", "info":"Expected Phi Resolution"},
+            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::ForwardTagger",
-        "group": 34,
+        "group": 334,
         "info": "Forward Tagger information for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16",  "info":"index of the cluster in the specific detector bank"},
@@ -283,12 +291,13 @@
             {"name":"dx",           "id":11, "type":"float",  "info":"Cluster width in x" },
             {"name":"dy",           "id":12, "type":"float",  "info":"Cluster width in y" },
             {"name":"radius",       "id":13, "type":"float",  "info":"Cluster radius" },
-            {"name":"size",         "id":14, "type":"int16",  "info":"size of the cluster"}
+            {"name":"size",         "id":14, "type":"int16",  "info":"size of the cluster"},
+            {"name":"status",       "id":15, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::Scintillator",
-        "group": 35,
+        "group": 335,
         "info": "Scintillator Responses for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the hit in the specific detector bank"},
@@ -306,12 +315,13 @@
             {"name":"z",            "id":13, "type":"float", "info":"Z coordinate of the hit"},
             {"name":"hx",           "id":14, "type":"float", "info":"X coordinate of the matched hit"},
             {"name":"hy",           "id":15, "type":"float", "info":"Y coordinate of the mathced hit"},
-            {"name":"hz",           "id":16, "type":"float", "info":"Z coordinate of the matched hit"}
+            {"name":"hz",           "id":16, "type":"float", "info":"Z coordinate of the matched hit"},
+            {"name":"status",       "id":17, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::Track",
-        "group": 36,
+        "group": 336,
         "info": "Track information for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the track in the specific detector bank"},
@@ -327,13 +337,14 @@
             {"name":"vx_nomm",      "id":11, "type":"float", "info":"x component of the vertex"},
             {"name":"vy_nomm",      "id":12, "type":"float", "info":"y component of the vertex"},
             {"name":"vz_nomm",      "id":13, "type":"float", "info":"z component of the vertex"},
-            {"name":"chi2_nomm",    "id":15, "type":"float", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "id":14, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"}
+            {"name":"chi2_nomm",    "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
+            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"},
+            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::TrackCross",
-        "group": 37,
+        "group": 337,
         "info": "Track Cross information for Particles bank",
         "items": [
             {"name":"index",        "id":1,  "type":"int16",  "info":"index of the cross in the specific detector bank"},
@@ -346,12 +357,13 @@
             {"name":"c_z",          "id":8,  "type":"float",  "info":"Cross z-position in the lab (in cm)"},
             {"name":"c_ux",         "id":9,  "type":"float",  "info":"Cross unit x-direction vector in the lab"},
             {"name":"c_uy",         "id":10, "type":"float",  "info":"Cross unit y-direction vector in the lab"},
-            {"name":"c_uz",         "id":11, "type":"float",  "info":"Cross unit z-direction vector in the lab"}
+            {"name":"c_uz",         "id":11, "type":"float",  "info":"Cross unit z-direction vector in the lab"},
+            {"name":"status",       "id":12, "type":"int16", "info":"hit status"}
         ]
     },
     {
         "bank": "REC::TBCovMat",
-        "group": 38,
+        "group": 338,
         "info": "reconstructed track covariance matrix",
         "items": [
             {"name":"index",        "id":1,  "type":"int16", "info":"index of the track in Tracks bank"},
@@ -374,27 +386,44 @@
     },
     {
         "bank": "REC::VertDoca",
-        "group": 39,
+        "group": 339,
         "info": "Track Cross information for Particles bank",
         "items": [
-            {"name":"index1",       "id":1,  "type":"int16", "info":"index of the first track in Tracks bank"},
-            {"name":"index2",       "id":2,  "type":"int16", "info":"index of the second track in Tracks bank"},
-            {"name":"x",            "id":3,  "type":"float", "info":"x-position of the common vertex"},
-            {"name":"y",            "id":4,  "type":"float", "info":"y-position of the common vertex"},
-            {"name":"z",            "id":5,  "type":"float", "info":"z-position of the common vertex"},
-            {"name":"x1",           "id":6,  "type":"float", "info":"x-position of the first track at the DOCA point"},
-            {"name":"y1",           "id":7,  "type":"float", "info":"y-position of the first track at the DOCA point"},
-            {"name":"z1",           "id":8,  "type":"float", "info":"z-position of the first track at the DOCA point"},
-            {"name":"cx1",          "id":9,  "type":"float", "info":"x-direction vector of the first track at the DOCA point"},
-            {"name":"cy1",          "id":10, "type":"float", "info":"y-direction vector of the first track at the DOCA point"},
-            {"name":"cz1",          "id":11, "type":"float", "info":"z-direction vector of the first track at the DOCA point"},
-            {"name":"x2",           "id":12, "type":"float", "info":"x-position of the second track at the DOCA point"},
-            {"name":"y2",           "id":13, "type":"float", "info":"y-position of the second track at the DOCA point"},
-            {"name":"z2",           "id":14, "type":"float", "info":"z-position of the second track at the DOCA point"},
-            {"name":"cx2",          "id":15, "type":"float", "info":"x-direction vector of the second track at the DOCA point"},
-            {"name":"cy2",          "id":16, "type":"float", "info":"y-direction vector of the second track at the DOCA point"},
-            {"name":"cz2",          "id":17, "type":"float", "info":"z-direction vector of the second track at the DOCA point"},
-            {"name":"r",            "id":18, "type":"float", "info":"The distance between two tracks"}
+           {"name":"index1",       "id":1,  "type":"int16", "info":"index of the first track in Tracks bank"},
+           {"name":"index2",       "id":2,  "type":"int16", "info":"index of the second track in Tracks bank"},
+           {"name":"x",            "id":3,  "type":"float", "info":"x-position of the common vertex"},
+           {"name":"y",            "id":4,  "type":"float", "info":"y-position of the common vertex"},
+           {"name":"z",            "id":5,  "type":"float", "info":"z-position of the common vertex"},
+           {"name":"x1",           "id":6,  "type":"float", "info":"x-position of the first track at the DOCA point"},
+           {"name":"y1",           "id":7,  "type":"float", "info":"y-position of the first track at the DOCA point"},
+           {"name":"z1",           "id":8,  "type":"float", "info":"z-position of the first track at the DOCA point"},
+           {"name":"cx1",          "id":9,  "type":"float", "info":"x-direction vector of the first track at the DOCA point"},
+           {"name":"cy1",          "id":10, "type":"float", "info":"y-direction vector of the first track at the DOCA point"},
+           {"name":"cz1",          "id":11, "type":"float", "info":"z-direction vector of the first track at the DOCA point"},
+           {"name":"x2",           "id":12, "type":"float", "info":"x-position of the second track at the DOCA point"},
+           {"name":"y2",           "id":13, "type":"float", "info":"y-position of the second track at the DOCA point"},
+           {"name":"z2",           "id":14, "type":"float", "info":"z-position of the second track at the DOCA point"},
+           {"name":"cx2",          "id":15, "type":"float", "info":"x-direction vector of the second track at the DOCA point"},
+           {"name":"cy2",          "id":16, "type":"float", "info":"y-direction vector of the second track at the DOCA point"},
+           {"name":"cz2",          "id":17, "type":"float", "info":"z-direction vector of the second track at the DOCA point"},
+           {"name":"r",            "id":18, "type":"float", "info":"The distance between two tracks"}
+        ]
+    },
+    {
+        "bank": "REC::Traj",
+        "group": 340,
+        "info": "Trajectory information for Particles bank",
+        "items": [
+            {"name":"detId",        "id":1,  "type":"int16", "info":"representative index of the detector"},
+            {"name":"trkId ",       "id":2,  "type":"int16", "info":"index of the track in Tracks bank"},
+            {"name":"q",            "id":3,  "type":"int8",  "info":"charge of the track"},
+            {"name":"x",            "id":4,  "type":"float", "info":"x-position of the track at the detector surface"},
+            {"name":"y",            "id":5,  "type":"float", "info":"y-position of the track at the detector surface"},
+            {"name":"z",            "id":6,  "type":"float", "info":"z-position of the track at the detector surface"},
+            {"name":"px",           "id":7,  "type":"float", "info":"px of the track at the detector surface"},
+            {"name":"py",           "id":8,  "type":"float", "info":"py of the track at the detector surface"},
+            {"name":"pz",           "id":9,  "type":"float", "info":"pz of the track at the detector surface"},
+            {"name":"pathlength",   "id":10, "type":"float", "info":"pathlength of the track to the detector surface from the DOCA point"}
         ]
     }
 ]

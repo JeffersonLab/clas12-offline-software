@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
@@ -286,7 +287,7 @@ public class TrackCandListFinder {
                     Track cand = new Track(fitTrk.get_helix());
                     cand.addAll(crossList.get(i));
                     //cand.set_HelicalTrack(fitTrk.get_helix());			done in Track constructor			
-                    cand.update_Crosses(svt_geo);
+                    //cand.update_Crosses(svt_geo);
 
                     cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
                     cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
@@ -300,16 +301,18 @@ public class TrackCandListFinder {
         // remove clones
         ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
         // loop over candidates and set the trajectories
+        
         for (int ic = 0; ic < passedcands.size(); ic++) {
             Helix trkHelix = passedcands.get(ic).get_helix();
+            if(trkHelix!=null) {
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
-            TrajectoryFinder trjFind = new TrajectoryFinder();
+                Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
 
-            Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
+                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 
-            passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
-
-            passedcands.get(ic).set_Id(ic);
+                passedcands.get(ic).set_Id(ic);
+            }
 
         }
 
@@ -336,7 +339,7 @@ public class TrackCandListFinder {
         for (int i = 0; i < SVTCrosses.size(); i++) {
             ArrayList<Cross> crossesToFit = new ArrayList<Cross>();
             // remove SVT regions
-            for (Cross crossInTrackToFit : SVTCrosses.get(i)) {
+            for (Cross crossInTrackToFit : SVTCrosses.get(i)) { 
                 if (crossInTrackToFit.get_Region() != org.jlab.rec.cvt.svt.Constants.BSTEXCLUDEDFITREGION) {// remove the crosses from the exluded region to fit the track
                     crossesToFit.add(crossInTrackToFit);
                 }
@@ -392,7 +395,7 @@ public class TrackCandListFinder {
 
             fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
             //create the cand
-            if (fitTrk.get_ray() != null) {
+            if (fitTrk.get_ray() != null) { 
                 cand = new StraightTrack(fitTrk.get_ray());
                 cand.addAll(crossesToFit);
             }
@@ -426,9 +429,9 @@ public class TrackCandListFinder {
                 NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);
                 fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                 //create the cand
-
+                
                 if (fitTrk.get_ray() != null) {
-                    cand = new StraightTrack(fitTrk.get_ray());
+                    cand = new StraightTrack(fitTrk.get_ray()); 
                     cand.addAll(crossesToFitWithBMT);
                     cand.update_Crosses(cand.get_ray().get_yxslope(), cand.get_ray().get_yxinterc(), svt_geo);
                     //crossesToFitWithBMT = new ArrayList<Cross>();
@@ -484,16 +487,17 @@ public class TrackCandListFinder {
 
         for (int ic = 0; ic < passedcands.size(); ic++) {
             Ray trkRay = passedcands.get(ic).get_ray();
+            if(trkRay!=null) {
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
-            TrajectoryFinder trjFind = new TrajectoryFinder();
+                Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
 
-            Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
+                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 
-            passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
+                passedcands.get(ic).set_Id(ic);
 
-            passedcands.get(ic).set_Id(ic);
-
-            this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
+                this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
+            }
 
         }
 
@@ -807,7 +811,7 @@ public class TrackCandListFinder {
 
             for (Cross Ccross : MatchedMMCrossCDet) {
                 for (Cross Zcross : MatchedMMCrossZDet) {
-                    if ((Ccross.get_Cluster2().get_Layer() - Zcross.get_Cluster1().get_Layer()) == 1 && (Ccross.get_Cluster2().get_Sector() == Zcross.get_Cluster1().get_Sector())) {
+                    if ((Ccross.get_Cluster1().get_Layer() - Zcross.get_Cluster1().get_Layer()) == 1 && (Ccross.get_Cluster1().get_Sector() == Zcross.get_Cluster1().get_Sector())) {
                         Ccross.set_MatchedZCross(Zcross);
                         Zcross.set_MatchedCCross(Ccross);
                     }
@@ -860,7 +864,7 @@ public class TrackCandListFinder {
                     continue;
                 }
                 double m_z = MMCrosses.get(i).get_Point().z();
-                int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi);
+                int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(Constants.isInSectorJitter));
 
                 if (sector != MMCrosses.get(i).get_Sector()) {
                     continue;
@@ -1051,7 +1055,8 @@ public class TrackCandListFinder {
 
     public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal,
             ArrayList<StateVec> trajectory, int k) {
-
+        if(trajectory == null)
+            return;
         Collections.sort(sVTclusters);
         for (StateVec st : trajectory) {
             for (Cluster cls : sVTclusters) {

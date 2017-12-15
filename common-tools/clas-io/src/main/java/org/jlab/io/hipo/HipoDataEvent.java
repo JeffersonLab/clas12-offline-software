@@ -10,16 +10,16 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.jlab.hipo.data.HipoEvent;
-import org.jlab.hipo.data.HipoGroup;
-import org.jlab.hipo.data.HipoNode;
-import org.jlab.hipo.schema.Schema;
-import org.jlab.hipo.schema.Schema.SchemaEntry;
-import org.jlab.hipo.schema.SchemaFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDictionary;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
+import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.data.HipoGroup;
+import org.jlab.jnp.hipo.data.HipoNode;
+import org.jlab.jnp.hipo.schema.Schema;
+import org.jlab.jnp.hipo.schema.Schema.SchemaEntry;
+import org.jlab.jnp.hipo.schema.SchemaFactory;
 
 /**
  *
@@ -44,6 +44,7 @@ public class HipoDataEvent implements DataEvent {
         this.hipoEvent.getSchemaFactory().copy(factory);
     }
     
+    @Override
     public String[] getBankList() {
         List<Schema> schemaList = hipoEvent.getSchemaFactory().getSchemaList();
         List<String> existingBanks = new ArrayList<String>();
@@ -80,7 +81,7 @@ public class HipoDataEvent implements DataEvent {
         if(bank==null) return;
         if(bank instanceof HipoDataBank){
             HipoGroup group =  ((HipoDataBank) bank).getGroup();
-            this.hipoEvent.addNodes(group.getNodes());
+            hipoEvent.writeGroup(group);
         }
     }
 
@@ -90,15 +91,18 @@ public class HipoDataEvent implements DataEvent {
         }
     }
 
+    @Override
     public boolean hasBank(String name) {
         return (this.hipoEvent.hasGroup(name));
     }
 
+    @Override
     public DataBank getBank(String bank_name) {
         if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==true){
-            Schema schema = this.hipoEvent.getSchemaFactory().getSchema(bank_name);
-            Map<Integer,HipoNode> map = this.hipoEvent.getGroup(schema.getGroup());
-            HipoDataBank bank = new HipoDataBank(map,schema);
+            //Schema schema = this.hipoEvent.getSchemaFactory().getSchema(bank_name);
+            //Map<Integer,HipoNode> map = this.hipoEvent.getGroup(schema.getGroup());
+            HipoGroup group = hipoEvent.getGroup(bank_name);
+            HipoDataBank bank = new HipoDataBank(group.getNodesMap(),group.getSchema());
             return bank;
         }        
         //HipoDataBank bank = new HipoDataBank();
@@ -245,10 +249,14 @@ public class HipoDataEvent implements DataEvent {
         this.hipoEvent.showGroupByOrder(order);
     }
     
+    @Override
     public DataBank createBank(String bank_name, int rows) {
         if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==false){
-            System.out.println(">>>>> error : descriptor not found : " + bank_name);
-            //this.hipoEvent.getSchemaFactory().show();
+            System.out.println(">>>>> error :  descriptor not found : " + bank_name);
+            System.out.println(">>>>> error : number of descriptors : " + 
+                    hipoEvent.getSchemaFactory().getSchemaList().size());
+            System.out.println();
+            this.hipoEvent.getSchemaFactory().show();
             return null;
         }
         HipoGroup group = this.hipoEvent.getSchemaFactory().getSchema(bank_name).createGroup(rows);
