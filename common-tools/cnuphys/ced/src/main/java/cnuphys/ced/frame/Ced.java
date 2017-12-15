@@ -138,6 +138,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// memory usage dialog
 	private MemoryUsageDialog _memoryUsage;
 	
+	//Environment display
+	private TextDisplayDialog _envDisplay;
+	
 	// some views
 	private AllDCView _allDCView;
 	private VirtualView _virtualView;
@@ -630,34 +633,53 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		omenu.add(MagnifyWindow.magificationMenu());
 		omenu.addSeparator();
 		
-		final JMenuItem memPlot = new JMenuItem("Memory Usage");
+		final JMenuItem memPlot = new JMenuItem("Memory Usage...");
+		final JMenuItem environ = new JMenuItem("Environment...");
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (_memoryUsage == null) {
-					_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
-				}
+				
+				Object source = e.getSource();
 
-				_memoryUsage.setVisible(true);
+				if (source == _memoryUsage) {
+					if (_memoryUsage == null) {
+						_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
+					}
+
+					_memoryUsage.setVisible(true);
+				}
+				
+				else if (source == environ) {
+					if (_envDisplay == null)  {
+						_envDisplay = new TextDisplayDialog("Environment Information");
+					}
+					_envDisplay.setText(Environment.getInstance().toString());
+					_envDisplay.setVisible(true);
+				}
+				
 			}
 			
 		};
+		environ.addActionListener(al);
 		memPlot.addActionListener(al);
+		omenu.add(environ);
 		omenu.add(memPlot);
-		omenu.addSeparator();
 		
-		ActionListener al2 = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				refresh();
-			}			
-		};
 		
-		_oldBSTGeometry = new JCheckBoxMenuItem("Use old (four-region) BST"
-				+ " Geometry", false);
-		_oldBSTGeometry.addActionListener(al2);
-		omenu.add(_oldBSTGeometry);
+//		omenu.addSeparator();
+//		
+//		ActionListener al2 = new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				refresh();
+//			}			
+//		};
+//		
+//		_oldBSTGeometry = new JCheckBoxMenuItem("Use old (four-region) BST"
+//				+ " Geometry", false);
+//		_oldBSTGeometry.addActionListener(al2);
+//		omenu.add(_oldBSTGeometry);
 	}
 
 	/**
