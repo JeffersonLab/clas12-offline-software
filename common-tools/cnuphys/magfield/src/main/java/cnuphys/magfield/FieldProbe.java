@@ -131,7 +131,8 @@ public abstract class FieldProbe implements IField {
      *            a float array holding the retrieved field in kiloGauss. The
      *            0,1 and 2 indices correspond to x, y, and z components.
      */
-     public void gradient(float x, float y, float z, float result[]) {
+     @Override
+	public void gradient(float x, float y, float z, float result[]) {
  		
   		//TODO improve
   		float[] fr1 = new float[3];
@@ -215,7 +216,8 @@ public abstract class FieldProbe implements IField {
      * Is the physical magnet represented by the map misaligned?
      * @return <code>true</code> if magnet is misaligned
      */
-    public boolean isMisaligned() {
+    @Override
+	public boolean isMisaligned() {
     	return _field.isMisaligned();
     }
 }

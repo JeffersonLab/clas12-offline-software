@@ -2,7 +2,6 @@ package cnuphys.ced.fastmc;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.util.Random;
 
 import javax.swing.BorderFactory;

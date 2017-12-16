@@ -231,7 +231,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		for (int layer = 1; layer <= 6; layer++) {
 			double r = BMTSectorItem.innerRadius[layer-1];
-			int region = (int) (layer+1)/2 - 1;
+			int region = (layer+1)/2 - 1;
 			double zmin;
 			double zmax;
 			Color color;

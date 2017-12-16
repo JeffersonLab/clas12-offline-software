@@ -331,7 +331,7 @@ public class BMTSectorItem extends DonutItem {
 	 * @return the number of strips
 	 */
 	public int getNumStrips () {
-		int region = (int) (_layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int region = (_layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 
 		if (isZLayer()) {
 			return Constants.getCRZNSTRIPS()[region];

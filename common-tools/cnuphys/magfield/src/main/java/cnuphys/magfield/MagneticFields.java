@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.Random;
 import java.util.StringTokenizer;
 
 import javax.swing.ButtonGroup;
@@ -1409,7 +1408,7 @@ public class MagneticFields {
 				double oldScale = torus.getScaleFactor();
 				torus.setScaleFactor(1.0);
 				
-				torus.setInterpolate(true);
+				MagneticField.setInterpolate(true);
 
 				int index = 0;
 				int index1 = 7506285;
@@ -1469,7 +1468,7 @@ public class MagneticFields {
 				dos.write(bytes);
 
 				torus.setScaleFactor(oldScale);
-				torus.setInterpolate(true);
+				MagneticField.setInterpolate(true);
 
 				
 				dos.close();

@@ -1,7 +1,5 @@
 package cnuphys.ced.event.data;
 
-import java.awt.Color;
-
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 
 public class AdcColorScale extends ColorScaleModel {

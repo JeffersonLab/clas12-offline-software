@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.IDrawable;
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
@@ -158,7 +156,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 				}
 				else {
-					System.err.println("Got a null panel in drawBSTAccumulatedHits.");
+//					System.err.println("Got a null panel in drawBSTAccumulatedHits.");
 				}
 			}
 		}

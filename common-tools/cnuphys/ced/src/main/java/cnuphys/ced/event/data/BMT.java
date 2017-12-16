@@ -2,8 +2,6 @@ package cnuphys.ced.event.data;
 
 import org.jlab.io.base.DataEvent;
 
-import cnuphys.ced.alldata.ColumnData;
-
 /**
  * static methods to centralize getting data arrays related to BMT
  * @author heddle
