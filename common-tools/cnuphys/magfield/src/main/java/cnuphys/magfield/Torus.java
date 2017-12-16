@@ -68,7 +68,8 @@ public class Torus extends MagneticField {
      * Is the physical torus represented by the map misaligned?
      * @return <code>true</code> if torus is misaligned
      */
-    public boolean isMisaligned() {
+    @Override
+	public boolean isMisaligned() {
     	return false;
     }
 

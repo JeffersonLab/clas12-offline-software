@@ -12,7 +12,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -23,11 +22,12 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
-import cnuphys.bCNU.component.TextAreaWriter;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.alldata.graphics.DefinitionManager;
@@ -82,6 +82,7 @@ import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.properties.PropertiesManager;
 import cnuphys.ced.training.TrainingManager;
+import cnuphys.lund.X11Colors;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFieldChangeListener;
@@ -102,11 +103,9 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
-import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
-import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 //import cnuphys.bCNU.view.XMLView;
 import cnuphys.bCNU.view.VirtualView;
@@ -118,10 +117,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.46b";
+	private static final String _release = "build 0.99.999.47";
 
 	// used for one time inits
 	private int _firstTime = 0;
+	
+	//for the event count
+	private JMenuItem _eventCountLabel;
 
 	// using 3D?
 	private static boolean _use3D = true;
@@ -155,7 +157,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private ECView _ecView;
 	private PCALView _pcalView;
 	private LogView _logView;
-	private PlotView _plotView;
 	private ForwardView3D _forward3DView;
 	private CentralView3D _central3DView;
 	private FTCalView3D _ftCal3DView;
@@ -250,7 +251,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_virtualView.moveTo(_logView, 12, VirtualView.UPPERRIGHT);
 			_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 			_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
-			_virtualView.moveTo(_plotView, 12, VirtualView.BOTTOMLEFT);
 
 			_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
 			_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
@@ -346,8 +346,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		ViewManager.getInstance().getViewMenu().addSeparator();
 		_logView = new LogView();
 
-		// plot view
-		_plotView = new PlotView();
 		
         //add histograms
 		addDcHistogram();
@@ -710,8 +708,28 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 	}
 
+	/**
+	 * Fix the event count label
+	 */
+	public void fixEventCount() {
+		int count = ClasIoEventManager.getInstance().getEventCount();
+		if (count < Integer.MAX_VALUE) {
+			_eventCountLabel.setText("Event Count: " + count);
+		}
+		else {
+			_eventCountLabel.setText("Event Count: N/A");
+		}
+	}
+	
+	
 	// add to the event menu
 	private void addToEventMenu() {
+		
+		_eventCountLabel = new JMenuItem("Event Count: N/A");
+		_eventCountLabel.setOpaque(true);
+		_eventCountLabel.setBackground(Color.white);
+		_eventCountLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
+		_eventMenu.add(_eventCountLabel);
 
 		// add the noise parameter menu item
 		ActionListener al2 = new ActionListener() {

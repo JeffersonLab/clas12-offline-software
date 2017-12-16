@@ -71,7 +71,7 @@ public class ConstantsLoader {
 		for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_layer/Layer"); i++) {
 
 			int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Layer", i);
-			int region = (int) ((layer+1)/2);
+			int region = (layer+1)/2;
 			
 			double radius = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Radius", i);
 			double Zmin = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Zmin", i);
