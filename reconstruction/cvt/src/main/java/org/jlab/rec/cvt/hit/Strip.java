@@ -137,6 +137,7 @@ public class Strip {
         }
 
         if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { // Z-detectors
+        	geo.SetLorentzAngle(layer, sector);
             double theMeasuredPhi = geo.CRZStrip_GetPhi(sector, layer, this.get_Strip());
             double theLorentzCorrectedAngle = geo.LorentzAngleCorr(theMeasuredPhi, layer);
             // set the phi 
