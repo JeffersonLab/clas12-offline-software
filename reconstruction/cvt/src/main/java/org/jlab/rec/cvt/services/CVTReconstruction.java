@@ -175,9 +175,9 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters.addAll(clusFinder.findClusters(svt_hits));
+        clusters.addAll(clusFinder.findClusters(svt_hits,BMTGeom,SVTGeom));
         
-        clusters.addAll(clusFinder.findClusters(bmt_hits)); 
+        clusters.addAll(clusFinder.findClusters(bmt_hits,BMTGeom,SVTGeom)); 
         
         if (clusters.size() == 0) {
             return true;

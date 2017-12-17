@@ -136,7 +136,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
      */
-    public void calc_CentroidParams() {
+    public void calc_CentroidParams(org.jlab.rec.cvt.bmt.Geometry geo) {
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
@@ -168,7 +168,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 FittedHit thehit = this.get(i);
                 // gets the energy value of the strip
                 double strpEn = thehit.get_Strip().get_Edep();
-
+                
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
                 if (this.get_Detector()==0) {
@@ -176,7 +176,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     strpNb = thehit.get_Strip().get_Strip();
                 }
                 if (this.get_Detector()==1) { 
-                    // for the BMT the analysis distinguishes between C and Z type detectors
+                	// for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_DetectorType()==0) { // C-detectors
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
@@ -228,31 +228,30 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             // calculates the centroid values and associated errors
             stripNumCent = weightedStrp / totEn;
             stripNumCent0 = weightedStrp0 / totEn;
-            phiCent = weightedPhi / totEn;
             phiCent0 = weightedPhi0 / totEn;
+            phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
             zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
             phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
             zErrCent = Math.sqrt(weightedZErrSq);
 
-            //phiErrCent = Math.sqrt(weightedPhiErrSq);
-            //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
-            //zErrCent = Math.sqrt(weightedZErrSq);
+            
         }
 
         _TotalEnergy = totEn;
         _Centroid = stripNumCent;
-        if (this.get_DetectorType() == 1) {
+         if (this.get_DetectorType() == 1) {
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-
+            _Centroid = _Phi;
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
         if (this.get_DetectorType() == 0) {
             _Z = zCent;
             _ZErr = zErrCent;
+            _Centroid = _Z;
         }
 
     }

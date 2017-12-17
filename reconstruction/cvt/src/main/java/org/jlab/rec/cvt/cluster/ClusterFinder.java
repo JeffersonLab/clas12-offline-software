@@ -23,7 +23,7 @@ public class ClusterFinder {
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2) // the number of strips depends on the layer 
+    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.bmt.Geometry geo_bmt, org.jlab.rec.cvt.svt.Geometry geo_svt) // the number of strips depends on the layer 
     {
         ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 
@@ -84,7 +84,7 @@ public class ClusterFinder {
                             h.set_AssociatedClusterID(this_cluster.get_Id());
                         }
 
-                        this_cluster.calc_CentroidParams();
+                        this_cluster.calc_CentroidParams(geo_bmt);
                         //make arraylist
                         clusters.add(this_cluster);
 
