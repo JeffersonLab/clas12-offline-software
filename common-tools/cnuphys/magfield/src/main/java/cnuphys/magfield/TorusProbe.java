@@ -43,7 +43,22 @@ public class TorusProbe extends FieldProbe {
 	public TorusProbe(Torus field) {
 		super(field);
 	}
-
+	
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer(1024);
+		sb.append("q1: [" + q1_min + " - " + q1_max + "]\n");
+		sb.append("q2: [" + q2_min + " - " + q2_max + "]\n");
+		sb.append("q3: [" + q3_min + " - " + q3_max + "]\n");
+		sb.append(String.format("%-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f \n", 
+				b1_000, b1_001, b1_010, b1_100, b1_011, b1_110, b1_101, b1_111));
+		sb.append(String.format("%-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f \n", 
+				b2_000, b2_001, b2_010, b2_100, b2_011, b2_110, b2_101, b2_111));
+		sb.append(String.format("%-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f \n", 
+				b3_000, b3_001, b3_010, b3_100, b3_011, b3_110, b3_101, b3_111));
+		return sb.toString();
+	}
+	
 	/**
 	 * Check whether the point is contained in this
 	 * probe. A probe corresponds to a grid cell.
@@ -57,7 +72,7 @@ public class TorusProbe extends FieldProbe {
 		if (!CACHE) {
 			return false; //will prevent caching
 		}
-		return (q1 >= q1_min && q1 <= q1_max) && (q2 >= q2_min && q2 <= q2_max) && (q3 >= q3_min && q3 <= q3_max);
+		return (q1 >= q1_min && q1 < q1_max) && (q2 >= q2_min && q2 < q2_max) && (q3 >= q3_min && q3 < q3_max);
 	}
 
 	/**

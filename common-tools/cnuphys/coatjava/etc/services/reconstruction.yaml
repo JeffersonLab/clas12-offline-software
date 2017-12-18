@@ -29,9 +29,9 @@ services:
     name: LTCC
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.service.eb.EBEngine
+  - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
-  - class: org.jlab.service.eb.EBEngine
+  - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
 configuration:
   io-services:

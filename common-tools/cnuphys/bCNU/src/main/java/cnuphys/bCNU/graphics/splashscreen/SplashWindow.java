@@ -92,6 +92,8 @@ public class SplashWindow extends JWindow {
 		sp.setBackground(Color.white);
 
 		String imageNames[] = {
+				"images/anicat.gif",
+				"images/anir2d2.gif",
 				"images/sun.gif",
 				"images/rubik80.gif",
 				"images/bee.gif",

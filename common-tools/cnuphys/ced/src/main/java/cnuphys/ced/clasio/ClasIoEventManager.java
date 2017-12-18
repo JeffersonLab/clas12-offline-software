@@ -15,7 +15,6 @@ import javax.swing.event.EventListenerList;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.detector.decode.CLASDecoder;
-import org.jlab.hipo.data.HipoEvent;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.evio.EvioDataEvent;
@@ -87,7 +86,9 @@ public class ClasIoEventManager {
    
 	//ET dialog
 	//private ETDialog _etDialog;
-	private ConnectionDialog _connectionDialog;
+	//private ConnectionDialog _connectionDialog;
+	
+	ConnectETDialog _etDialog;
 	
 	// hipo ring dialog
 	//private RingDialog _ringDialog;
@@ -120,7 +121,9 @@ public class ClasIoEventManager {
 	private String _currentHIPOAddress;
 	
 	// current ip address of ET ring
-	private String _currentETAddress;
+	//private String _currentETAddress;
+	private String _currentMachine;
+	private String _currentStation;
 	
 	//current ET file
 	private String _currentETFile;
@@ -161,11 +164,12 @@ public class ClasIoEventManager {
 
 			if (isAccumulating()) {
 				AccumulationManager.getInstance().newClasIoEvent(event);
+				notifyAllDefinedPlots(event);
 			}
 			else {
 				_runData.set(_currentEvent);
 				notifyEventListeners();
-				notifyAllDefinedPlots(event);
+//				notifyAllDefinedPlots(event);
 			}
 		}
 	}
@@ -319,8 +323,11 @@ public class ClasIoEventManager {
 		else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress != null)) {
 			return "Hipo Ring " + _currentHIPOAddress;
 		}
-		else if ((_sourceType == EventSourceType.ET) && (_currentETAddress != null) && (_currentETFile != null)) {
-			return "ET " + _currentETAddress + " " + _currentETFile;
+//		else if ((_sourceType == EventSourceType.ET) && (_currentETAddress != null) && (_currentETFile != null)) {
+//			return "ET " + _currentETAddress + " " + _currentETFile;
+//		}
+		else if ((_sourceType == EventSourceType.ET) && (_currentMachine != null) && (_currentETFile != null)) {
+			return "ET " + _currentMachine + " " + _currentETFile;
 		}
 		return "(none)";
 	}
@@ -409,96 +416,162 @@ public class ClasIoEventManager {
 	 * Connect to an ET ring
 	 */
 	public void ConnectToETRing() {
-		if (_connectionDialog == null) {
-			_connectionDialog = new ConnectionDialog();
-			_connectionDialog.setTitle("Connect to ET Ring");
-			_connectionDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/et.png").getImage());
+		
+		if (_etDialog == null) {
+			_etDialog = new ConnectETDialog();
 		}
-		_connectionDialog.setVisible(true);
+		_etDialog.setVisible(true);
 		
-		if (_connectionDialog.reason() == DialogUtilities.OK_RESPONSE) {
-			_runData.reset();
+		
+		if (_etDialog.reason() == DialogUtilities.OK_RESPONSE) {
+		_runData.reset();
 
-			_dataSource = null;
-			_currentETAddress = _connectionDialog.getIpAddress();
-			_currentETFile = _connectionDialog.getFileName();
+		_dataSource = null;
+		_currentMachine = _etDialog.getMachine();
+		_currentETFile =_etDialog.getFile();
+		_currentStation = _etDialog.getStation();
+	
+		//does the file exist?
 		
-			//does the file exist?
-			
-			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
-			File file = new File(_currentETFile);
-			if (!file.exists()) {
+		Log.getInstance().info("Attempting to connect to ET ring");
+		Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
+		Log.getInstance().info("ET Station Name: ["+ _currentStation + "]");
+		System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
+		File file = new File(_currentETFile);
+		if (!file.exists()) {
+			Log.getInstance().error("ET Filename: ["+ _currentETFile + "] does NOT exist.  Cannot connect to ET.");
+			JOptionPane.showMessageDialog
+			(null, "The file: " + file.getAbsolutePath() + " does not exist.",
+					"ET File not Found", 
+					JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+			return;
+		}
+
+		try {
+			Log.getInstance().info("Attempting to create EvioETSource.");
+			_dataSource = new EvioETSource(_currentMachine, _currentStation);
+			if (_dataSource == null) {
+				Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
 				JOptionPane.showMessageDialog
-				(null, "The file: " + file.getAbsolutePath() + " does not exist.",
-						"ET File not Found", 
+				(null, "The ET Data Source is null, used Machine: " + _currentMachine,
+						"ET null Data Source", 
 						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 				return;
 			}
+			
+			System.err.println("trying to connect using et file: " + _currentETFile);
+			setEventSourceType(EventSourceType.ET);
+			Log.getInstance().info("Attempting to open EvioETSource.");
+			_dataSource.open(_currentETFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-			try {
-				_dataSource = new EvioETSource(_currentETAddress);
-				if (_dataSource == null) {
-					JOptionPane.showMessageDialog
-					(null, "The ET Data Source is null, used IP: " + _currentETAddress,
-							"ET null Data Source", 
-							JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-					return;
-				}
-				
-				System.err.println("trying to connect using et file: " + _currentETFile);
-				setEventSourceType(EventSourceType.ET);
-				_dataSource.open(_currentETFile);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} //end ok
+	} //end ok		
+		
+		
+		
+		
+		
+		
+		
+		
+//		if (_connectionDialog == null) {
+//			_connectionDialog = new ConnectionDialog();
+//			_connectionDialog.setTitle("Connect to ET Ring");
+//			_connectionDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/et.png").getImage());
+//		}
+//		_connectionDialog.setVisible(true);
+//		
+//		if (_connectionDialog.reason() == DialogUtilities.OK_RESPONSE) {
+//			_runData.reset();
+//
+//			_dataSource = null;
+//			_currentETAddress = _connectionDialog.getIpAddress();
+//			_currentETFile = _connectionDialog.getFileName();
+//		
+//			//does the file exist?
+//			
+//			Log.getInstance().info("Attempting to connect to ET ring");
+//			Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
+//			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
+//			File file = new File(_currentETFile);
+//			if (!file.exists()) {
+//				Log.getInstance().error("ET Filename: ["+ _currentETFile + "] does NOT exist.  Cannot connect to ET.");
+//				JOptionPane.showMessageDialog
+//				(null, "The file: " + file.getAbsolutePath() + " does not exist.",
+//						"ET File not Found", 
+//						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+//				return;
+//			}
+//
+//			try {
+//				Log.getInstance().info("Attempting to create EvioETSource.");
+//				_dataSource = new EvioETSource(_currentETAddress, "ced_station");
+//				if (_dataSource == null) {
+//					Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
+//					JOptionPane.showMessageDialog
+//					(null, "The ET Data Source is null, used IP: " + _currentETAddress,
+//							"ET null Data Source", 
+//							JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
+//					return;
+//				}
+//				
+//				System.err.println("trying to connect using et file: " + _currentETFile);
+//				setEventSourceType(EventSourceType.ET);
+//				Log.getInstance().info("Attempting to open EvioETSource.");
+//				_dataSource.open(_currentETFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//
+//		} //end ok
 	}
 
 	/**
 	 * Connect to a HIPO ring
 	 */
-	public void ConnectToHipoRing() {
-		if (_hipoDialog == null) {
-			_hipoDialog = new ConnectionDialogHipo();
-			_hipoDialog.setTitle("Connect to Hipo Ring");
-		//	_hipoDialog.setIconImage(ImageManager.cnuIcon.getImage());
-			_hipoDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/hipo2.png").getImage());
-		}
-		_hipoDialog.setVisible(true);
-		if (_hipoDialog.reason() == DialogUtilities.OK_RESPONSE) {
-			_runData.reset();
-
-			_dataSource = null;
-			_currentHIPOAddress = "";
-			int connType = _hipoDialog.getConnectionType();
-
-			// let's try to connect
-			try {
-				if (connType == RingDialog.CONNECTSPECIFIC) {
-					_dataSource = new HipoRingSource();
-					_currentHIPOAddress = _hipoDialog.getIpAddress();
-					_dataSource.open(_currentHIPOAddress);
-				} else if (connType == RingDialog.CONNECTDAQ) {
-					_dataSource = HipoRingSource.createSourceDaq();
-					_currentHIPOAddress = " DAQ ";
-				}
-			} catch (Exception e) {
-				_dataSource = null;
-				_currentHIPOAddress = "";
-				Log.getInstance().warning(e.getMessage());
-			}
-
-			if (_dataSource != null) {
-				setEventSourceType(EventSourceType.HIPORING);
-				try {
-					getNextEvent();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		} //end ok
-	}
+//	public void ConnectToHipoRing() {
+//		if (_hipoDialog == null) {
+//			_hipoDialog = new ConnectionDialogHipo();
+//			_hipoDialog.setTitle("Connect to Hipo Ring");
+//		//	_hipoDialog.setIconImage(ImageManager.cnuIcon.getImage());
+//			_hipoDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/hipo2.png").getImage());
+//		}
+//		_hipoDialog.setVisible(true);
+//		if (_hipoDialog.reason() == DialogUtilities.OK_RESPONSE) {
+//			_runData.reset();
+//
+//			_dataSource = null;
+//			_currentHIPOAddress = "";
+//			int connType = _hipoDialog.getConnectionType();
+//
+//			// let's try to connect
+//			try {
+//				if (connType == RingDialog.CONNECTSPECIFIC) {
+//					_dataSource = new HipoRingSource();
+//					_currentHIPOAddress = _hipoDialog.getIpAddress();
+//					_dataSource.open(_currentHIPOAddress);
+//				} else if (connType == RingDialog.CONNECTDAQ) {
+//					_dataSource = HipoRingSource.createSourceDaq();
+//					_currentHIPOAddress = " DAQ ";
+//				}
+//			} catch (Exception e) {
+//				_dataSource = null;
+//				_currentHIPOAddress = "";
+//				Log.getInstance().warning(e.getMessage());
+//			}
+//
+//			if (_dataSource != null) {
+//				setEventSourceType(EventSourceType.HIPORING);
+//				try {
+//					getNextEvent();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		} //end ok
+//	}
 
 	/**
 	 * Get the current event source type
@@ -747,6 +820,11 @@ public class ClasIoEventManager {
 		
 
 		EventSourceType estype = getEventSourceType();
+		
+//		System.err.println("ET DEBUG: in getNextEvent estype: " + estype);
+
+		
+		
 		switch (estype) {
 		case HIPORING:
 			if (_dataSource.hasEvent()) {
@@ -769,41 +847,67 @@ public class ClasIoEventManager {
 				
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-	//				System.err.println("Decoded to HIPO");
-	//				_currentEvent.show();
-					
+//					System.err.println("Decoded to HIPO");
+//					_currentEvent.show();					
 					setNextEvent(_currentEvent);
 				}
 			} 
 
-			break;
+			break;  //end case eviofile
 
 
 		case FASTMC:
 			FastMCManager.getInstance().nextEvent();
 			break;
-			
+
 		case ET:
-//			int maxTries = 30;
+			 int maxTries = 30;
+			 int attempts = 0;
+					 
+			 _dataSource.waitForEvents();
+			 while ((attempts < maxTries) && !_dataSource.hasEvent()) {
+				 try {
+					 attempts++;
+					Thread.sleep(50);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				 _dataSource.waitForEvents();
+			 }
+			 
 			_currentEvent = null;
-			
+			boolean goodEvent = false;
+
 			if (_dataSource.hasEvent()) {
+
 				_currentEvent = _dataSource.getNextEvent();
+
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+
+					goodEvent = true;
+
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-//					System.err.println("Decoded to HIPO");
-//					_currentEvent.show();
 					setNextEvent(_currentEvent);
+//					System.err.println("ET Debug Decoded to HIPO");
+//					_currentEvent.show();
+					break;
 				}
 				else {
+//					System.err.println("ET Debug NULL or bad format event " + "   currentEvent: " + _currentEvent);
 					_currentEvent = null;
-//					Toolkit.getDefaultToolkit().beep();
 				}
+
 			}
+//			else {
+//				System.err.println("ET Debug No event waiting.");
+//			}
+
+//			System.err.println("ET DEBUG: has event: " + goodEvent);
 			
-			break;
+			break;  //end case ET
 			
-		}
+		} //end switch
 
 		
 //		
@@ -848,7 +952,9 @@ public class ClasIoEventManager {
 		case HIPORING:
 		case ET:
 		case EVIOFILE:
-			return ((_dataSource != null) && _dataSource.hasEvent());
+			boolean hasETEvent = ((_dataSource != null) && _dataSource.hasEvent());
+//			System.err.println("ET DEBUG: has event: " + hasETEvent);
+			return hasETEvent;
 		default:
 			return true;
 		}

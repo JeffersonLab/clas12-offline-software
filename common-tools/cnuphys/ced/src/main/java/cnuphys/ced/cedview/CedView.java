@@ -382,7 +382,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showSVTReconsCrosses();
+		return _controlPanel.getDisplayArray().showBSTReconsCrosses();
 	}
 
 	/**
@@ -437,6 +437,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showFTOFHits();
 	}
+	
+	/**
+	 * Convenience method to see it we show the FMT crosses.
+	 * 
+	 * @return <code>true</code> we show the the FMT crosses.
+	 */
+	public boolean showFMTCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showFMTCrosses();
+	}
+
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
@@ -590,8 +603,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void magneticFieldChanged() {
-		getContainer().refresh();
 		probe = FieldProbe.factory();
+		getContainer().refresh();
 	}
 
 	// we are hovering
@@ -836,6 +849,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
+		System.err.println("111");
 	}
 
 	/**

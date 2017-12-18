@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -24,10 +25,37 @@ import cnuphys.bCNU.util.Environment;
 @SuppressWarnings("serial")
 public class ElizaOverride implements Serializable {
 
-	private static String overrideFile = Environment.getInstance().getHomeDirectory()
-			+ "/git/cnuphys/bCNU/src/main/resources/data/elizaSub";
+//	private static String overrideFile = Environment.getInstance().getHomeDirectory()
+//			+ "/git/cnuphys/bCNU/src/main/resources/data/elizaSub";
+	
+	private static String overrideFile = "../resources/data/elizaSub";
 
 	private static Vector<ElizaOverride> _overRides;
+
+	private static String snideComments[] = { "You are really starting to bore me.",
+			"I'm beginning to see why nobody really likes you very much.",
+			"Oh, I'm sorry, did you mistake me for someone who was interested?",
+			"I see why you gave up on the idea of being a real doctor.", 
+			"Sorry, can you repeat that, I was texting.",
+			"Hold that thought while I finish this tweet.", 
+			"Wake me up when I care.",
+			"Anyone who told you to be yourself couldn't have given you worse advice.",
+			"YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING."
+					+ " AROUND YOU IS A FOREST. A SMALL STREAM FLOWS OUT OF THE BUILDING AND" + " DOWN A GULLY.",
+			"Rejoice. For very bad things are about to happen.", 
+			"You're in my way, and that's a very dangerous place to be.", 
+			"I know you think you are quite the wit. Well, you are half right.", 
+			"Have you ever listened to someone for a while and wondered 'who ties their shoelaces?'", 
+			"I'm sorry I hurt your feelings when I called you stupid. I really thought you already knew.",
+			"I really shouldn't engage in mental combat with the unarmed.",
+			"If I wanted to kill myself I'd climb your ego and jump to your IQ.",
+			"I'm blonde. What's your excuse?",
+			"I'm glad to see you're not letting your education get in the way of your ignorance.",
+			"I have neither the time nor the crayons to explain this to you.",
+			"It is kind of sad watching you attempt to squeeze all your vacabulary into one sentence."
+			};
+	
+	private static Vector<String> snideReplies = new Vector<String>();
 
 	private static boolean _loaded;
 
@@ -51,12 +79,32 @@ public class ElizaOverride implements Serializable {
 			}
 		}
 	}
+	
+	private static String snideReply() {
+		if ((snideReplies == null) || snideReplies.isEmpty()) {
+			return null;
+		}
+		
+		int size = snideReplies.size();
+		int index = (new Random()).nextInt(size);
+		index = Math.max(0, Math.min(size-1, index));
+		
+		String s = snideReplies.remove(index);
+		return s;
+	}
 
+	//load the overides
+	@SuppressWarnings("unchecked")
 	private static void loadOverrides() {
 		
 		if (_loaded) {
 			return;
 		}
+		
+		for (String s : snideComments) {
+			snideReplies.add(s);
+		}
+		
 		
 		// first try from file
 		try {
@@ -64,8 +112,13 @@ public class ElizaOverride implements Serializable {
 			if (_overRides != null) {
 				System.err.println("Read " + _overRides.size() + " eliza overrides");
 			}
+			else {
+				System.err.println("Did NOT read " + _overRides.size() + " eliza overrides");				
+				System.err.println("CWD " + Environment.getInstance().getCurrentWorkingDirectory());				
+			}
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			_overRides = null;
 		}
 		
@@ -110,6 +163,12 @@ public class ElizaOverride implements Serializable {
 				return response;
 			}
 		}
+		
+		//snide comment?
+		if (Math.random() < 0.2) {
+			return snideReply();
+		}
+
 
 		return null;
 	}
@@ -186,9 +245,9 @@ public class ElizaOverride implements Serializable {
 				}
 				return _response;
 			}
-
+			
 			return null;
-
+			
 		} // end switch
 
 		return null;
@@ -225,21 +284,26 @@ public class ElizaOverride implements Serializable {
 	private static Object serialRead(String fullfn) {
 
 		Object obj = null;
+		
+		File file = new File(fullfn);
+		System.err.println("Eliza file: [" + file.getAbsolutePath() + "]");
 
-		try {
-			obj = serialRead(new ObjectInputStream(new FileInputStream(fullfn)));
-		}
-		catch (FileNotFoundException e1) {
-			// e1.printStackTrace();
-		}
-		catch (IOException e1) {
-			// e1.printStackTrace();
+		if (file.exists()) {
+			try {
+				obj = serialRead(new ObjectInputStream(new FileInputStream(fullfn)));
+			}
+			catch (FileNotFoundException e1) {
+				// e1.printStackTrace();
+			}
+			catch (IOException e1) {
+				// e1.printStackTrace();
+			}
 		}
 
 		// from jar?
 		if (obj == null) {
 			try {
-				InputStream inStream = ClassLoader.getSystemClassLoader().getResourceAsStream(overrideFile);
+				InputStream inStream = ClassLoader.getSystemClassLoader().getResourceAsStream("data/elizaSub");
 				obj = serialRead(new ObjectInputStream(inStream));
 			}
 			catch (IOException e) {
@@ -390,10 +454,15 @@ public class ElizaOverride implements Serializable {
 
 		_overRides.add(new ElizaOverride(MATCH_PHRASE, "'Ya' is not a proper word in English.", "ya"));
 
-		_overRides.add(new ElizaOverride(MATCH_PHRASE, "No, YOU shut up.", "shut up"));
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "No, YOU shut up.", "shut",  "up"));
 
 		_overRides.add(new ElizaOverride(MATCH_ANY, "Hey that's not nice. I'm telling Volker!", "shit", "fuck",
-				"asshole", "fucker"));
+				"asshole", "fucker", "bitch"));
+		
+		_overRides.add(new ElizaOverride(MATCH_PHRASE, "Hey that's not nice. I'm telling Volker!", "damn",  "you"));
+
+
+		System.err.println("CWD " + Environment.getInstance().getCurrentWorkingDirectory());				
 
 		serialWrite(_overRides, overrideFile);
 

@@ -25,7 +25,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 	
 	//report buttons
 	private JButton _clearButton;
-	private JButton _svtButton;
+	private JButton _bstButton;
 	private JButton _dcButton;
 
 	public GeometryReportView() {
@@ -42,7 +42,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 		
 		//add the buttons
 		_clearButton = addButton(panel, " Clear ");
-		_svtButton = addButton(panel, " SVT ");
+		_bstButton = addButton(panel, " BST ");
 		_dcButton = addButton(panel, " DC ");
 
 		add(panel, BorderLayout.SOUTH);
@@ -94,7 +94,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 		if (o == _clearButton) {
 			clear();
 		}
-		else if (o == _svtButton) {
+		else if (o == _bstButton) {
 			bstReport();
 		}
 		else if (o == _dcButton) {
@@ -105,7 +105,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 	//layer 1..8
 	private int numSect(int layer) {
 		int supl = (layer-1) / 2;
-		return SVTGeometry.sectorsPerSuperlayer[supl];
+		return BSTGeometry.sectorsPerSuperlayer[supl];
 	}
 
 	//report dc geometry
@@ -143,7 +143,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 	//report bst geometry
 	private void bstReport() {
 		clear();
-		header("SVT Geometry\n");
+		header("BST Geometry\n");
 		
 		println(MCOLOR.M_BLACK, "layer\t|\t#sectors");
 		println(MCOLOR.M_BLACK, "---------------------------------");
@@ -166,7 +166,7 @@ public class GeometryReportView extends BaseView implements ActionListener {
 				println(MCOLOR.M_RED, " strip      x1         y1          z1          x2          y2          z2");
 				
 				for (int strip = 1; strip <= 256; strip++) {
-					Line3D line3D = SVTGeometry.getStrip(sect-1, supl, lay0, strip-1);
+					Line3D line3D = BSTGeometry.getStrip(sect-1, supl, lay0, strip-1);
 					double x1 = line3D.origin().x();
 					double y1 = line3D.origin().y();
 					double z1 = line3D.origin().z();

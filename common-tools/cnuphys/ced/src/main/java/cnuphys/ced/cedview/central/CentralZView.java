@@ -41,8 +41,8 @@ import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
-import cnuphys.ced.geometry.SVTGeometry;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.bmt.Constants;
 import cnuphys.ced.geometry.BMTGeometry;
@@ -115,7 +115,7 @@ public class CentralZView extends CedView implements ChangeListener {
 	}
 
 	/**
-	 * Create a SVTzView object
+	 * Create a CentralZView object
 	 * 
 	 * @return the new view
 	 */
@@ -153,7 +153,7 @@ public class CentralZView extends CedView implements ChangeListener {
 						+ ControlPanel.PHI_SLIDER_BIG + ControlPanel.FIELDLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
-						+ DisplayBits.SVTRECONS_CROSSES + DisplayBits.MCTRUTH
+						+ DisplayBits.BSTRECONS_CROSSES + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
 
@@ -197,7 +197,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 				_swimTrajectoryDrawer.draw(g, container);
 				drawGEMCHits(g, container);
-				drawSVTPanels(g, container);
+				drawBSTPanels(g, container);
 
 				// not very sophisticated
 				denoteBMT(g, container);
@@ -355,14 +355,14 @@ public class CentralZView extends CedView implements ChangeListener {
 
 
 	// draw the panels
-	private void drawSVTPanels(Graphics g, IContainer container) {
-		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
+	private void drawBSTPanels(Graphics g, IContainer container) {
+		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return;
 		}
 
 		// set the perp distance
-		for (SVTxyPanel panel : panels) {
+		for (BSTxyPanel panel : panels) {
 			Point2D.Double avgXY = panel.getXyAverage();
 			double perp = avgXY.y * _cosphi - avgXY.x * _sinphi;
 			panel.setPerp(perp);
@@ -384,7 +384,7 @@ public class CentralZView extends CedView implements ChangeListener {
 		CentralSupport.markPanelHits(this, panels);
 
 		int index = 0;
-		for (SVTxyPanel panel : panels) {
+		for (BSTxyPanel panel : panels) {
 
 			int alpha = 10 + index / 3;
 			Color col = new Color(128, 128, 128, alpha);
@@ -404,7 +404,7 @@ public class CentralZView extends CedView implements ChangeListener {
 		g2.setClip(oldClip);
 	}
 
-	private WorldPolygon[] getFromPanel(SVTxyPanel panel) {
+	private WorldPolygon[] getFromPanel(BSTxyPanel panel) {
 
 		WorldPolygon polys[] = new WorldPolygon[3];
 
@@ -818,12 +818,12 @@ public class CentralZView extends CedView implements ChangeListener {
 	 * @param layer 1-based layer 1..8
 	 * @param strip 1-based strip 1..255
 	 */
-	public void drawSVTStrip(Graphics2D g2, IContainer container, Color color,
+	public void drawBSTStrip(Graphics2D g2, IContainer container, Color color,
 			int sector, int layer, int strip) {
 
 		float coords[] = new float[6];
 
-		SVTGeometry.getStrip(sector, layer, strip, coords);
+		BSTGeometry.getStrip(sector, layer, strip, coords);
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);

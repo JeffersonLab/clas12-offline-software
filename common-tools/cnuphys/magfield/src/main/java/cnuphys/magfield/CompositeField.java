@@ -102,6 +102,19 @@ public class CompositeField extends ArrayList<IField> implements IField {
 
 		return s;
 	}
+	
+    /**
+     * Is the physical magnet represented by any of the maps misaligned?
+     * @return <code>true</code> if any magnet is misaligned
+     */
+    public boolean isMisaligned() {
+		for (IField field : this) {
+			if (field.isMisaligned()) {
+				return true;
+			}
+		}
+    	return false;
+    }
 
 	/**
 	 * Read a magnetic field from a binary file. The file has the documented

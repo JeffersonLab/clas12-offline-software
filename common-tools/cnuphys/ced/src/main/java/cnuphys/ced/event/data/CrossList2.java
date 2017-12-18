@@ -11,16 +11,15 @@ public class CrossList2 extends Vector<Cross2> {
 
 	public CrossList2(String bankName) {
 
-		int sector[] = ColumnData.getIntArray(bankName + ".sector");
+		byte sector[] = ColumnData.getByteArray(bankName + ".sector");
 		if ((sector == null) || (sector.length < 1)) {
-			
 			return;
 		}
 		
 		int length = 0;
 
-		int[] region = ColumnData.getIntArray(bankName + ".region");;
-		int[] id = ColumnData.getIntArray(bankName + ".ID");;
+		byte[] region = ColumnData.getByteArray(bankName + ".region");;
+		short[] id = ColumnData.getShortArray(bankName + ".ID");;
         float[] x = ColumnData.getFloatArray(bankName + ".x");
         float[] y = ColumnData.getFloatArray(bankName + ".y");
         float[] z = ColumnData.getFloatArray(bankName + ".z");
@@ -52,7 +51,7 @@ public class CrossList2 extends Vector<Cross2> {
 	}
 	
 	//check arrays are not null and have same length
-	private int checkArrays(int[] sector, int[] region, int[] id,
+	private int checkArrays(byte[] sector, byte[] region, short[] id,
 			float[] x, float[] y, float[] z, 
 			float[] ux, float[] uy, float[] uz, 
 			float[] err_x, float[] err_y, float[] err_z) {
@@ -114,7 +113,7 @@ public class CrossList2 extends Vector<Cross2> {
 	}
 	
 	//check for length mismatch
-	private boolean lengthMismatch(int[] sector, int[] array, String name) {
+	private boolean lengthMismatch(byte[] sector, byte[] array, String name) {
 		if (sector.length != array.length) {
 			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList2";
 			return true;
@@ -122,9 +121,17 @@ public class CrossList2 extends Vector<Cross2> {
 		return false;
 	}
 	
+	//check for length mismatch
+	private boolean lengthMismatch(byte[] sector, short[] array, String name) {
+		if (sector.length != array.length) {
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList2";
+			return true;
+		}
+		return false;
+	}
 	
 	//check for length mismatch
-	private boolean lengthMismatch(int[] sector, float[] array, String name) {
+	private boolean lengthMismatch(byte[] sector, float[] array, String name) {
 		if (sector.length != array.length) {
 			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList2";
 			return true;

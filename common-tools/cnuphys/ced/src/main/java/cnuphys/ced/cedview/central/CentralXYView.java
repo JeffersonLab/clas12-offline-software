@@ -3,7 +3,7 @@ package cnuphys.ced.cedview.central;
 import java.awt.BorderLayout;
 
 /**
- * Note this view started out as just the XY view for the SVT. But it has evolved into the xy view for 
+ * Note this view started out as just the XY view for the BST. But it has evolved into the xy view for 
  * all central detectors. 
  */
 
@@ -41,11 +41,12 @@ import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
-import cnuphys.ced.event.data.SVT;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.geometry.SVTGeometry;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.CTOFGeometry;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.X11Colors;
@@ -62,17 +63,18 @@ public class CentralXYView extends CedXYView {
 	private static final String _baseTitle = "Central XY";
 
 
-	private SVTxyPanel _closestPanel;
+	private BSTxyPanel _closestPanel;
 
 	private static Color _panelColors[] = { X11Colors.getX11Color("sky blue"),
 			X11Colors.getX11Color("light blue") };
 	
+	private static Color _ctofColors[] = { new Color(240, 240, 240), new Color(224, 224, 224) };
 
 	// the CND xy polygons
-	CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
+	private CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
 	
 	//the CTOF polygons
-	CTOFXYPolygon ctofPoly[] = new CTOFXYPolygon[48];
+	private CTOFXYPolygon _ctofPoly[] = new CTOFXYPolygon[48];
 	
 	//Micro megas [sector][layer]
 	private BMTSectorItem _bmtItems[][];
@@ -118,7 +120,7 @@ public class CentralXYView extends CedXYView {
 		
 		//ad the ctof polygons
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
-			ctofPoly[paddleId - 1] = new CTOFXYPolygon(paddleId);
+			_ctofPoly[paddleId - 1] = new CTOFXYPolygon(paddleId);
 		}
 
 	}
@@ -168,7 +170,7 @@ public class CentralXYView extends CedXYView {
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.ACCUMULATION + DisplayBits.SVTRECONS_CROSSES
+				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
 						+ DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
@@ -178,7 +180,7 @@ public class CentralXYView extends CedXYView {
 
 
 		// add quick zooms
-		view.addQuickZoom("SVT & BMT", -190, -190, 190, 190);
+		view.addQuickZoom("BST & BMT", -190, -190, 190, 190);
 		return view;
 	}
 
@@ -205,7 +207,7 @@ public class CentralXYView extends CedXYView {
 				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
 						screenRect.height);
 
-				drawSVTPanels(g, container);
+				drawBSTPanels(g, container);
 			}
 
 		};
@@ -284,14 +286,14 @@ public class CentralXYView extends CedXYView {
 	 * @param sector 1..24
 	 * @return the panel
 	 */
-	public static SVTxyPanel getPanel(int layer, int sector) {
-		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
+	public static BSTxyPanel getPanel(int layer, int sector) {
+		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return null;
 		}
 
 		synchronized (panels) {
-			for (SVTxyPanel panel : panels) {
+			for (BSTxyPanel panel : panels) {
 				if ((panel.getLayer() == layer) && (panel.getSector() == sector)) {
 					return panel;
 				}
@@ -302,11 +304,11 @@ public class CentralXYView extends CedXYView {
 	}
 
 	// draw the panels
-	private void drawSVTPanels(Graphics g, IContainer container) {
+	private void drawBSTPanels(Graphics g, IContainer container) {
 
 		Shape oldClip = g.getClip();
 
-		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
+		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return;
 		}
@@ -317,9 +319,9 @@ public class CentralXYView extends CedXYView {
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 		
 
-		// SVT panels
-		for (SVTxyPanel panel : panels) {
-			drawSVTPanel(g2, container, panel,
+		// BST panels
+		for (BSTxyPanel panel : panels) {
+			drawBSTPanel(g2, container, panel,
 					_panelColors[(panel.getSector()) % 2]);
 		}
 
@@ -335,8 +337,8 @@ public class CentralXYView extends CedXYView {
 		
 		// CTOF Polys
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
-			if (ctofPoly[paddleId - 1] != null) {
-				ctofPoly[paddleId - 1].draw(g2, container);
+			if (_ctofPoly[paddleId - 1] != null) {
+				_ctofPoly[paddleId - 1].draw(g2, container, paddleId, _ctofColors[paddleId % 2]);
 			}
 		}
 		
@@ -344,9 +346,9 @@ public class CentralXYView extends CedXYView {
 		g.setClip(oldClip);
 	}
 
-	// draw one SVT panel
-	public void drawSVTPanel(Graphics2D g2, IContainer container,
-			SVTxyPanel panel, Color color) {
+	// draw one BST panel
+	public void drawBSTPanel(Graphics2D g2, IContainer container,
+			BSTxyPanel panel, Color color) {
 		
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
@@ -394,7 +396,7 @@ public class CentralXYView extends CedXYView {
 //	 */
 	public int svtSectorHack(int layer, int sector) {
 		int superlayer = (layer-1) / 2; //zero based
-		int numSect = SVTGeometry.sectorsPerSuperlayer[superlayer];
+		int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
 		int n2 = numSect/2;
 		int hackSect = (sector + n2) % numSect;
 		if (hackSect == 0) {
@@ -472,7 +474,7 @@ public class CentralXYView extends CedXYView {
 	 * 
 	 * @return the panel closest to the mouse
 	 */
-	protected SVTxyPanel closestPanel() {
+	protected BSTxyPanel closestPanel() {
 		return _closestPanel;
 	}
 
@@ -492,7 +494,7 @@ public class CentralXYView extends CedXYView {
 				feedbackStrings);
 
 		if (!Environment.getInstance().isDragging()) {
-			SVTxyPanel newClosest = getClosest(worldPoint);
+			BSTxyPanel newClosest = getClosest(worldPoint);
 			if (newClosest != _closestPanel) {
 				_closestPanel = newClosest;
 				container.refresh();
@@ -535,11 +537,11 @@ public class CentralXYView extends CedXYView {
 			}
 			
 			//ctof
-			else if ((rad > 250) && (rad < 260)) {
+			else if ((rad > CTOFGeometry.RINNER) && (rad < CTOFGeometry.ROUTER)) {
 				
 	
 				for (int index = 0; index < 48; index++) {
-					if (ctofPoly[index].contains(screenPoint)) {
+					if (_ctofPoly[index].contains(screenPoint)) {
 						int paddle = index+1;
 						TdcAdcHit hit = null;
 			  		    TdcAdcHitList hits = CTOF.getInstance().getHits();
@@ -566,9 +568,9 @@ public class CentralXYView extends CedXYView {
 		// hits data
 
 		if (_closestPanel != null) {
-			AdcHitList hits = SVT.getInstance().getHits();
+			AdcHitList hits = BST.getInstance().getHits();
 			if ((hits != null) && !hits.isEmpty()) {
-				Vector<int[]> stripADCData = SVT.getInstance().allStripsForSectorAndLayer(_closestPanel.getSector(),
+				Vector<int[]> stripADCData = BST.getInstance().allStripsForSectorAndLayer(_closestPanel.getSector(),
 						_closestPanel.getLayer());
 				for (int sdtdat[] : stripADCData) {
 					fbString("orange", "strip  " + sdtdat[0] + " adc: " + +sdtdat[1], feedbackStrings);
@@ -605,16 +607,16 @@ public class CentralXYView extends CedXYView {
 	}
 
 	// get the panel closest to a given point
-	private SVTxyPanel getClosest(Point2D.Double wp) {
-		List<SVTxyPanel> panels = GeometryManager.getSVTxyPanels();
+	private BSTxyPanel getClosest(Point2D.Double wp) {
+		List<BSTxyPanel> panels = GeometryManager.getBSTxyPanels();
 		if (panels == null) {
 			return null;
 		}
 
-		SVTxyPanel closest = null;
+		BSTxyPanel closest = null;
 		double minDistance = Double.MAX_VALUE;
 
-		for (SVTxyPanel panel : panels) {
+		for (BSTxyPanel panel : panels) {
 			double dist = panel.pointToLineDistance(wp);
 			if (dist < minDistance) {
 				closest = panel;
@@ -645,7 +647,7 @@ public class CentralXYView extends CedXYView {
 		if ((index0 < 0) || (index0 > 47)) {
 			return null;
 		}
-		return ctofPoly[index0];
+		return _ctofPoly[index0];
 	}
 
 	/**

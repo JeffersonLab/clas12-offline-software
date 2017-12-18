@@ -27,9 +27,6 @@ import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.frame.CedColors;
 
 public class DrawingLegend extends JComponent {
-
-	private int width = 100;
-	private int height = 100;
 	
 
 	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 9);
@@ -95,7 +92,7 @@ public class DrawingLegend extends JComponent {
 	//paint the legent for the central 2D views
 	private void paintCentralViewLegend(Graphics g, int x, int yc) {
 		int xo = x;
-		x = drawCross(g, x, yc, DataDrawSupport.SVT_CROSS);
+		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
 		
 		yc += 18;
@@ -105,12 +102,14 @@ public class DrawingLegend extends JComponent {
 		quickString(g, xo+16, yc, "hit strip midpoint");
 	}
 
+	//paint the legend for sector views
 	private void paintSectorViewLegend(Graphics g, int x, int yc) {
 		
 		int xo = x;
 		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
+		x = drawCross(g, x, yc, DataDrawSupport.FMT_CROSS);
 		x = drawCircle(g, x, yc, CedColors.tbDocaLine, "TB Doca");
 		yc += 18;
 		
@@ -141,7 +140,7 @@ public class DrawingLegend extends JComponent {
 		
 		x += (2*DataDrawSupport.CROSSHALF);
 		String s = DataDrawSupport.prefix[mode] + "cross";
-		return quickString(g, x, y, s) + 18;
+		return quickString(g, x, y, s) + 14;
 	}
 	
 	private int drawCircle(Graphics g, int x, int y, Color color, String s) {

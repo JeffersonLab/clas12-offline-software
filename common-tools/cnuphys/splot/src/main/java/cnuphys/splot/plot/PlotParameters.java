@@ -100,7 +100,7 @@ public class PlotParameters {
 	 * Set the extra strings for a second legend like display
 	 * @param extraStrings the new extra strings array
 	 */
-	public void setExtraStrings(String[] extraStrings) {
+	public void setExtraStrings(String... extraStrings) {
 		System.err.println("SET EXTRA STR COUNT " + ((extraStrings == null) ? "NULL" : extraStrings.length));
 		_extraStrings = extraStrings;
 	}

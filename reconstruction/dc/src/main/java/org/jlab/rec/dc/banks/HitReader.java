@@ -157,7 +157,7 @@ public class HitReader {
                 double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
                 double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
-                if(T0Sub>-50 && T0Sub<TMax+150) { // cut on spurious hits
+                if(T0Sub>-500 && T0Sub<TMax+150) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
                     Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i + 1));
                     hit.set_CellSize(DcDetector);
@@ -241,10 +241,9 @@ public class HitReader {
             
             //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - T_0, 
-                    0, B[i], id[i]); 
-            
+                    0, B[i], id[i]);          
             hit.set_B(B[i]);
-            hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]);
+            hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
 //System.out.println("getting the hit time: tdc "+time[i]+" b "+B[i]);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
