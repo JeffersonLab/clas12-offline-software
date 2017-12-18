@@ -21,6 +21,7 @@ public class Torus extends MagneticField {
 	
 	/**
 	 * Instantiates a new torus.
+	 * Note q1 = phi, q2 = rho, q3 = z
 	 */
 	public Torus() {
 		setCoordinateNames("phi", "rho", "z");
@@ -30,7 +31,7 @@ public class Torus extends MagneticField {
 
 	/**
 	 * Obtain a torus object from a binary file, probably
-	 * "clas12_torus_fieldmap_binary.dat"
+	 * "clas12-fieldmap-torus.dat"
 	 *
 	 * @param file the file to read
 	 * @return the torus object
@@ -63,7 +64,13 @@ public class Torus extends MagneticField {
 		return relativePhi;
 	}
 	
-
+    /**
+     * Is the physical torus represented by the map misaligned?
+     * @return <code>true</code> if torus is misaligned
+     */
+    public boolean isMisaligned() {
+    	return false;
+    }
 
 	/**
 	 * Get the field by trilinear interpolation.
@@ -83,7 +90,10 @@ public class Torus extends MagneticField {
 			return;
 		}
 
-		if (phi < 0.0) {
+		while (phi >= 360.0) {
+			phi -= 360.0;
+		}
+		while (phi < 0.0) {
 			phi += 360.0;
 		}
 		
@@ -145,23 +155,6 @@ public class Torus extends MagneticField {
 			float result[]) {
 		fieldCylindrical(null, phi, rho, z, result);
 	}
-
-	/**
-	 * Convert a array used as a vector to a readable string.
-	 *
-	 * @param v the vector (float array) to represent.
-	 * @return a string representation of the vector (array).
-	 */
-//	@Override
-//	protected String vectorToString(float v[]) {
-//		float vx = v[X] / 10;
-//		float vy = v[Y] / 10;
-//		float vz = v[Z] / 10;
-//		float vLen = vectorLength(v) / 10;
-//		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T", vx,
-//				vy, vz, vLen);
-//		return s;
-//	}
 
 	/**
 	 * @return the phiCoordinate
@@ -332,7 +325,7 @@ public class Torus extends MagneticField {
 		}
 
 		if (path == null) {
-			path = "../../../data/clas12_torus_fieldmap_binary.dat";
+			path = "../../../data/clas12-fieldmap-torus.dat";
 		}
 
 		File file = new File(path);

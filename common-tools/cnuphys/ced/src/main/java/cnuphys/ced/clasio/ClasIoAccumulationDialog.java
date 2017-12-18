@@ -24,9 +24,7 @@ import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
-import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.view.ViewManager;
-import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.frame.Ced;
@@ -309,20 +307,26 @@ public class ClasIoAccumulationDialog extends JDialog {
 							}
 						}
 						
+						
 						// we are done accumulating
 						_eventManager.setAccumulating(false);
 						AccumulationManager.getInstance().notifyListeners(
 								AccumulationManager.ACCUMULATION_FINISHED);
+												
+//						//reload last event
+//						_eventManager.reloadCurrentEvent();
+//						System.err.println("CCC");
 						
-						//reload last event
-						_eventManager.reloadCurrentEvent();
-
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
 								setVisible(false);
+								//reload last event
+								_eventManager.reloadCurrentEvent();
+
 								ViewManager.getInstance()
 										.refreshAllViews();
+								
 							}
 						});
 

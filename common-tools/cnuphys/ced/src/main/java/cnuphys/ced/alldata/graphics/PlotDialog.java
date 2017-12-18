@@ -125,6 +125,8 @@ public abstract class PlotDialog extends JDialog
 
 	@Override
 	public void accumulationEvent(int reason) {
+		
+		System.err.println("Accumulation event in Plot Dialog");
 		switch (reason) {
 		case AccumulationManager.ACCUMULATION_STARTED:
 			_errorCount = 0;

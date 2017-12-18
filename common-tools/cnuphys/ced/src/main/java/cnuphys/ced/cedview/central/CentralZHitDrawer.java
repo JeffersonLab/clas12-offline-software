@@ -17,9 +17,9 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
-import cnuphys.ced.event.data.SVT;
-import cnuphys.ced.geometry.SVTGeometry;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.event.data.BST;
+import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.BSTxyPanel;
 
 public class CentralZHitDrawer implements IDrawable {
 
@@ -101,22 +101,22 @@ public class CentralZHitDrawer implements IDrawable {
 
 	// draw accumulated hits (panels)
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		drawSVTHitsAccumulatedMode(g, container);
+		drawBSTHitsAccumulatedMode(g, container);
 		drawMicroMegasHitsAccumulatedMode(g, container);
 	}
 
-	private void drawSVTHitsAccumulatedMode(Graphics g, IContainer container) {
+	private void drawBSTHitsAccumulatedMode(Graphics g, IContainer container) {
 
-		int maxHit = AccumulationManager.getInstance().getMaxFullSVTCount();
+		int maxHit = AccumulationManager.getInstance().getMaxFullBSTCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		// first index is layer 0..7, second is sector 0..23
-		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedSVTFullData();
+		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedBSTFullData();
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			for (int sect0 = 0; sect0 < SVTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
 				for (int strip0 = 0; strip0 < 255; strip0++) {
 					int hitCount = bstFullData[lay0][sect0][strip0];
 
@@ -130,7 +130,7 @@ public class CentralZHitDrawer implements IDrawable {
 						}
 
 						Color color = AccumulationManager.getInstance().getColor(fract);
-						_view.drawSVTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);
+						_view.drawBSTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);
 					}
 
 				}
@@ -143,7 +143,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
-		drawSVTHitsSingleMode(g, container);
+		drawBSTHitsSingleMode(g, container);
 		drawMicroMegasHitsSingleMode(g, container);
 	}
 
@@ -152,9 +152,9 @@ public class CentralZHitDrawer implements IDrawable {
 	}
 
 	// draw gemc simulated hits single event mode
-	private void drawSVTHitsSingleMode(Graphics g, IContainer container) {
+	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 		
-		AdcHitList hits = SVT.getInstance().getHits();
+		AdcHitList hits = BST.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			
 //			Shape oldClip = g.getClip();
@@ -166,16 +166,16 @@ public class CentralZHitDrawer implements IDrawable {
 					//TODO Undo hack when geometry fixed
 					
 					int superlayer = (hit.layer - 1) / 2;
-	                int numSect = SVTGeometry.sectorsPerSuperlayer[superlayer];
+	                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
 					int hackSect = (hit.sector + (numSect/2)) % numSect;
 					if (hackSect == 0) hackSect = numSect;
 
 					
-					SVTxyPanel panel = CentralXYView.getPanel(hit.layer, hackSect);
+					BSTxyPanel panel = CentralXYView.getPanel(hit.layer, hackSect);
 					if (panel != null) {
-						_view.drawSVTStrip(g2, container, Color.red, hit.sector, hit.layer, hit.component);					}
+						_view.drawBSTStrip(g2, container, Color.red, hit.sector, hit.layer, hit.component);					}
 					else {
-						System.err.println("null SVTZ panel");
+						System.err.println("null BSTZ panel");
 					}
 
 				}

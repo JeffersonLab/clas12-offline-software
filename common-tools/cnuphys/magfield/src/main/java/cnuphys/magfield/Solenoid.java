@@ -20,12 +20,16 @@ import java.util.StringTokenizer;
  */
 public final class Solenoid extends MagneticField {
 	
+	private static final double MISALIGNTOL = 1.0e-6; //cm
+	
 	// private constructor
 	/**
 	 * Instantiates a new solenoid.
 	 */
 	private Solenoid() {
 		setCoordinateNames("phi", "rho", "z");
+		
+//		_shiftZ = 450;
 	}
 	
 
@@ -45,6 +49,13 @@ public final class Solenoid extends MagneticField {
 		return solenoid;
 	}
 
+    /**
+     * Is the physical solenoid represented by the map misaligned?
+     * @return <code>true</code> if solenoid is misaligned
+     */
+    public boolean isMisaligned() {
+    	return (Math.abs(_shiftZ) > MISALIGNTOL);
+    }
 	
 	/**
 	 * Get the field by trilinear interpolation.
@@ -69,6 +80,12 @@ public final class Solenoid extends MagneticField {
 			result[Z] = 0f;
 			return;
 		}
+		
+		//misalignment??
+		if (isMisaligned()) {
+			z = z - _shiftZ;
+		}
+		
 
 		if (phi < 0.0) {
 			phi += 360.0;
@@ -137,37 +154,6 @@ public final class Solenoid extends MagneticField {
 	 * @param arg command line arguments
 	 */
 	public static void main(String arg[]) {
-		// String path = null;
-		//
-		// if ((arg != null) && (arg.length > 0)) {
-		// path = arg[0];
-		// }
-		//
-		// if (path == null) {
-		// path = "data/solenoid-srr.dat";
-		// }
-		//
-		// File file = new File(path);
-		//
-		// Solenoid solenoid = null;
-		// try {
-		// solenoid = fromBinaryFile(file);
-		// System.out.println("Created field object.");
-		// } catch (FileNotFoundException e) {
-		// e.printStackTrace();
-		// System.exit(1);
-		// }
-		//
-		// float x = 0.60f;
-		// float y = 0.62f;
-		// float z = 10.0f;
-		// float result[] = new float[3];
-		// solenoid.field(x, y, z, result);
-		//
-		// System.out.println("(x,y,z) = " + x + ", " + y + ", " + z);
-		//
-		// String fieldStr = solenoid.vectorToString(result);
-		// System.out.println("Field: " + fieldStr);
 
 		// covert the new ascii to binary
 		File asciiFile = new File("../../../data/clas12SolenoidFieldMap.dat.txt");
@@ -184,7 +170,7 @@ public final class Solenoid extends MagneticField {
 						fileReader);
 
 				// prepare the binary file
-				String binaryFileName = "../../../data/solenoid-srr.dat";
+				String binaryFileName = "../../../data/clas12-fieldmap-solenoid.dat";
 				// String binaryFileName = "data/solenoid-srr_V3.dat";
 				int nPhi = 1;
 				int nRho = 601;

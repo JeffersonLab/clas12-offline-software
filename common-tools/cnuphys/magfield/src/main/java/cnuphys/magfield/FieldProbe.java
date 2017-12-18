@@ -15,6 +15,14 @@ public abstract class FieldProbe implements IField {
 	public FieldProbe(IField field) {
 		_field = field;
 	}
+	
+	/**
+	 * Get the underlying field
+	 * @return the field that backs this probe
+	 */
+	public IField getField() {
+		return _field;
+	}
 
 	/**
 	 * Turn the caching on or off globally
@@ -158,6 +166,9 @@ public abstract class FieldProbe implements IField {
 	 */
 	public static FieldProbe factory(IField field) {
 		
+//		System.err.println("new probe");
+
+		
 //		if (field == null) {
 //			System.err.println("null field in probe factory");
 //		}
@@ -200,4 +211,11 @@ public abstract class FieldProbe implements IField {
 	}
 
 
+    /**
+     * Is the physical magnet represented by the map misaligned?
+     * @return <code>true</code> if magnet is misaligned
+     */
+    public boolean isMisaligned() {
+    	return _field.isMisaligned();
+    }
 }

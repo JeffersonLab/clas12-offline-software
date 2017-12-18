@@ -9,6 +9,10 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -23,6 +27,8 @@ import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
+import cnuphys.bCNU.component.TextAreaWriter;
+import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.alldata.graphics.DefinitionManager;
 import cnuphys.ced.ced3d.view.CentralView3D;
@@ -52,20 +58,21 @@ import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.FMTCrosses;
 import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.HBHits;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.HTCC2;
-import cnuphys.ced.event.data.SVT;
-import cnuphys.ced.event.data.SVTCrosses;
+import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.FastMCMenu;
-import cnuphys.ced.geometry.SVTGeometry;
+//import cnuphys.ced.fastmc.FastMCManager;
+//import cnuphys.ced.fastmc.FastMCMenu;
+import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
@@ -85,6 +92,7 @@ import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
+import cnuphys.bCNU.format.DateString;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.splashscreen.SplashWindow;
 import cnuphys.bCNU.log.ConsoleLogListener;
@@ -94,6 +102,7 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
@@ -109,7 +118,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.1";
+	private static final String _release = "build 0.99.999.46b";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -117,12 +126,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// using 3D?
 	private static boolean _use3D = true;
 	
-	//use experimental code?
-	private static boolean _useExperimental = false;
-
-	// if plugin only, do not create initial detector views
-	private static boolean _pluginOnly;
-
 	// event menu
 	private ClasIoEventMenu _eventMenu;
 	
@@ -134,6 +137,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 	// memory usage dialog
 	private MemoryUsageDialog _memoryUsage;
+	
+	//Environment display
+	private TextDisplayDialog _envDisplay;
 	
 	// some views
 	private AllDCView _allDCView;
@@ -168,13 +174,16 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	protected HistoGridView ecHistoGrid;
 	
 	// the about string
-	private static String _aboutString = "<html><span style=\"font-size:8px\">ced: the cLAS eVENT dISPLAY<br><br>Developed by Christopher Newport University";
+	private static String _aboutString = "<html><span style=\"font-size:12px\">ced: the cLAS eVENT dISPLAY&nbsp;&nbsp;&nbsp;&nbsp;" + _release + 
+	"<br><br>Developed by Christopher Newport University" + 
+	"<br><br>Download the latest version at <a href=\"https://userweb.jlab.org/~heddle/ced/builds/\">https://userweb.jlab.org/~heddle/ced/builds/</a>" +
+	"<br><br>Email bug reports to david.heddle@cnu.edu";
 	
 	//"play" dc occupancy?
 	private JCheckBoxMenuItem _playDCOccupancy;
 	
-	//use old SVT geometry
-	private JCheckBoxMenuItem _oldSVTGeometry;
+	//use old BST geometry
+	private JCheckBoxMenuItem _oldBSTGeometry;
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -252,9 +261,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
 			}
 			
-			if (_useExperimental) {
-			}
-			
 			Log.getInstance().config("reset views on virtual dekstop");
 			
 			//now load configuration
@@ -294,56 +300,46 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_sectorView14=SectorView.createSectorView(DisplaySectors.SECTORS14);
 		ViewManager.getInstance().getViewMenu().addSeparator();
 
-		
 		// add monte carlo view
 		_monteCarloView = new ClasIoMonteCarloView();
 
 		// add a reconstructed tracks view
 		_reconEventView = ClasIoReconEventView.getInstance();
 
-		
-		if (!pluginsOnly()) {
+		ViewManager.getInstance().getViewMenu().addSeparator();
+
+		// add an alldc view
+		_allDCView = AllDCView.createAllDCView();
+
+		_tofView = TOFView.createTOFView();
+
+		// add a bstZView
+		_centralZView = CentralZView.createCentralZView();
+
+		// add a bstXYView
+		_centralXYView = CentralXYView.createCentralXYView();
+
+		// add a ftcalxyYView
+		_ftcalXyView = FTCalXYView.createFTCalXYView();
+
+		// add a DC XY View
+		_dcXyView = DCXYView.createDCXYView();
+
+		// projected dC view
+		_projectedDCView = ProjectedDCView.createProjectedDCView();
+
+		// add an ec view
+		_ecView = ECView.createECView();
+
+		// add an pcal view
+		_pcalView = PCALView.createPCALView();
+
+		// 3D view?
+		if (_use3D) {
 			ViewManager.getInstance().getViewMenu().addSeparator();
-
-			// add an alldc view
-			_allDCView = AllDCView.createAllDCView();
-			
-			_tofView = TOFView.createTOFView();
-
-			// add a bstZView
-			_centralZView = CentralZView.createCentralZView();
-
-			// add a bstXYView
-			_centralXYView = CentralXYView.createCentralXYView();
-
-			// add a ftcalxyYView
-			_ftcalXyView = FTCalXYView.createFTCalXYView();
-
-			// add a DC XY View
-			_dcXyView = DCXYView.createDCXYView();
-
-			
-			// projected dC view
-			_projectedDCView = ProjectedDCView.createProjectedDCView();
-			
-			// add an ec view
-			_ecView = ECView.createECView();
-
-			// add an pcal view
-			_pcalView = PCALView.createPCALView();
-
-			// 3D view?
-			if (_use3D) {
-				ViewManager.getInstance().getViewMenu().addSeparator();
-				_forward3DView = new ForwardView3D();
-				_central3DView = new CentralView3D();
-				_ftCal3DView = new FTCalView3D();
-			}
-			
-			//Any experimental views?
-			if (_useExperimental) {
-			}
-
+			_forward3DView = new ForwardView3D();
+			_central3DView = new CentralView3D();
+			_ftCal3DView = new FTCalView3D();
 		}
 
 		// add logview
@@ -440,19 +436,19 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				
 				int supl0 = (layer-1) / 2;
 				
-				int maxSector = SVTGeometry.sectorsPerSuperlayer[supl0];
+				int maxSector = BSTGeometry.sectorsPerSuperlayer[supl0];
 				if (sector > maxSector) {
 					return null;
 				}
 				
 				PlotPanel panel;
-				String title = "SVT layer_" + layer + " sector_" + sector;
+				String title = "BST layer_" + layer + " sector_" + sector;
 				panel = HistoGridView.createHistogram(ftofHistoGrid, w, h, title, "strip", "count", -0.5, 256-0.5, 256);
 				return panel;
 			}
 			
 		};
-		bstHistoGrid = HistoGridView.createHistoGridView("SVT Histograms", 8, 24, 300, 240, 0.7, maker);
+		bstHistoGrid = HistoGridView.createHistoGridView("BST Histograms", 8, 24, 300, 240, 0.7, maker);
 	}
 	
 	//pcal strip histogram
@@ -538,7 +534,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// remove the option menu until I need it
 		// mmgr.removeMenu(mmgr.getOptionMenu());
-
+		
+		//add to swim menu
+        addToSwimMenu();
+		
 		// add to the file menu
 		addToFileMenu();
 
@@ -549,8 +548,43 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		mmgr.addMenu(DefinitionManager.getInstance().getMenu());
 		
 		//FastMC
-		mmgr.addMenu(new FastMCMenu());
+		//mmgr.addMenu(new FastMCMenu());
 	}
+	
+	//add to the file menu
+	private void addToSwimMenu() {
+		
+		final JMenuItem stitem = new JMenuItem("Run some swim tests");
+		final JMenuItem mtitem = new JMenuItem("Run magfield edge tests");
+
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+
+				if (source == stitem) {
+					CedTests.swimTest(false);
+				}
+				else if (source == mtitem) {
+					CedTests.edgeTest(true);
+				}
+
+			}
+		};
+		
+		SwimMenu.getInstance().addSeparator();
+		SwimMenu.getInstance().add(stitem);
+		stitem.addActionListener(al);
+		
+		SwimMenu.getInstance().add(mtitem);
+		mtitem.addActionListener(al);
+
+	}
+	
+	
+	//private void run some swim test
 	
 	//add to the file menu
 	private void addToFileMenu() {
@@ -587,7 +621,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		fmenu.insertSeparator(0);
 		fmenu.add(ClasIoEventMenu.getConnectETItem(), 0);
-		fmenu.add(ClasIoEventMenu.getConnectAnyRingItem(), 0);
+//		fmenu.add(ClasIoEventMenu.getConnectAnyRingItem(), 0);
 		fmenu.insertSeparator(0);
 
 		fmenu.add(ClasIoEventMenu.getRecentEventFileMenu(), 0);
@@ -599,34 +633,53 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		omenu.add(MagnifyWindow.magificationMenu());
 		omenu.addSeparator();
 		
-		final JMenuItem memPlot = new JMenuItem("Memory Usage");
+		final JMenuItem memPlot = new JMenuItem("Memory Usage...");
+		final JMenuItem environ = new JMenuItem("Environment...");
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (_memoryUsage == null) {
-					_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
-				}
+				
+				Object source = e.getSource();
 
-				_memoryUsage.setVisible(true);
+				if (source == _memoryUsage) {
+					if (_memoryUsage == null) {
+						_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
+					}
+
+					_memoryUsage.setVisible(true);
+				}
+				
+				else if (source == environ) {
+					if (_envDisplay == null)  {
+						_envDisplay = new TextDisplayDialog("Environment Information");
+					}
+					_envDisplay.setText(Environment.getInstance().toString());
+					_envDisplay.setVisible(true);
+				}
+				
 			}
 			
 		};
+		environ.addActionListener(al);
 		memPlot.addActionListener(al);
+		omenu.add(environ);
 		omenu.add(memPlot);
-		omenu.addSeparator();
 		
-		ActionListener al2 = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				refresh();
-			}			
-		};
 		
-		_oldSVTGeometry = new JCheckBoxMenuItem("Use old (four-region) SVT"
-				+ " Geometry", false);
-		_oldSVTGeometry.addActionListener(al2);
-		omenu.add(_oldSVTGeometry);
+//		omenu.addSeparator();
+//		
+//		ActionListener al2 = new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				refresh();
+//			}			
+//		};
+//		
+//		_oldBSTGeometry = new JCheckBoxMenuItem("Use old (four-region) BST"
+//				+ " Geometry", false);
+//		_oldBSTGeometry.addActionListener(al2);
+//		omenu.add(_oldBSTGeometry);
 	}
 
 	/**
@@ -643,7 +696,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 */
 	public static void setEventNumberLabel(int num) {
 		
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+//		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+//			return;
+//		}
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 		if (num < 0) {
@@ -687,12 +743,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 	
 	/**
-	 * Flag controlling whether we use the old SVT geometry
+	 * Flag controlling whether we use the old BST geometry
 	 * @return <code>true</code> if the tone should be played
 	 */
-	public boolean useOldSVTGeometry() {
-		if (_oldSVTGeometry != null) {
-			return _oldSVTGeometry.getState();
+	public boolean useOldBSTGeometry() {
+		if (_oldBSTGeometry != null) {
+			return _oldBSTGeometry.getState();
 		}
 		return false;
 	}
@@ -829,24 +885,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		return _use3D;
 	}
 	
-	/**
-	 * Check whether we use experimental code
-	 * 
-	 * @return <code>true</code> if we use experimental code
-	 */
-	public static boolean useExperimental() {
-		return _useExperimental;
-	}
-
-
-	/**
-	 * Check whether we use Plugins onlyD
-	 * 
-	 * @return <code>true</code> if we use plugins only
-	 */
-	public static boolean pluginsOnly() {
-		return _pluginOnly;
-	}
 
 	/**
 	 * Get the parent frame
@@ -919,30 +957,21 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 						FileUtilities.setDefaultDir(arg[i]);
 					}
 				}
-				else if (arg[i].equalsIgnoreCase("-torus")) {
-					i++;
-					MagneticFields.getInstance().setTorusFullPath(arg[i]);
-					Log.getInstance().config("Torus Path: " + arg[i]);
-					System.out.println("Torus Path: " + arg[i]);
-				}
-				else if (arg[i].equalsIgnoreCase("-solenoid")) {
-					i++;
-					MagneticFields.getInstance().setSolenoidFullPath(arg[i]);
-					Log.getInstance().config("Solenoid Path: " + arg[i]);
-					System.out.println("Solenoid Path: " + arg[i]);
-				}
+//				else if (arg[i].equalsIgnoreCase("-torus")) {
+//					i++;
+//					MagneticFields.getInstance().setTorusFullPath(arg[i]);
+//					Log.getInstance().config("Torus Path: " + arg[i]);
+//					System.out.println("Torus Path: " + arg[i]);
+//				}
+//				else if (arg[i].equalsIgnoreCase("-solenoid")) {
+//					i++;
+//					MagneticFields.getInstance().setSolenoidFullPath(arg[i]);
+//					Log.getInstance().config("Solenoid Path: " + arg[i]);
+//					System.out.println("Solenoid Path: " + arg[i]);
+//				}
 				else if (arg[i].contains("NO3D")) {
 					_use3D = false;
 					System.err.println("Not using 3D");
-				}
-				else if (arg[i].contains("USEEXP")) {
-					_useExperimental = true;
-					System.err.println("Using Experimental code");
-				}
-
-				else if (arg[i].contains("PLUGINONLY")) {
-					_pluginOnly = true;
-					System.err.println("Using Plugins Only");
 				}
 
 				i++;
@@ -960,7 +989,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		DC.getInstance();
 		FTOF.getInstance();
 		BMTCrosses.getInstance();
-		SVTCrosses.getInstance();
+		FMTCrosses.getInstance();
+		BSTCrosses.getInstance();
 		TBCrosses.getInstance();
 		HBCrosses.getInstance();
 		TBSegments.getInstance();
@@ -971,7 +1001,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		HTCC2.getInstance();
 		FTCAL.getInstance();
 		CTOF.getInstance();
-		SVT.getInstance();
+		BST.getInstance();
 		BMT.getInstance();
 		Cosmics.getInstance();
 
@@ -992,6 +1022,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
 		Log.getInstance().config("CLAS12DIR: " + clas12dir);
+		
+		//try to update the log for fun
+		try {
+			updateCedLog();
+		}
+		catch (Exception e) {
+		}
+		
 		Log.getInstance().info("ced is ready.");
 //		Environment.getInstance().say("c e d is ready");
 
@@ -1014,5 +1052,43 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// new EventConsumer(queue, processor);
 
 	} // end main
+	
+	//update the log file for fun
+	private static void updateCedLog() {
+		
+		File myHome = new File(Environment.getInstance().getHomeDirectory());
+		String baseHome = myHome.getParent();
+		
+		File file = new File(baseHome, "heddle/ced.log");
+		
+		boolean fileExists = file.exists();
+		
+		if (!fileExists) {
+			file = new File("/u/home/heddle/ced.log");
+			fileExists = file.exists();
+		}
+		
+		if (!fileExists) {
+			file = new File("home/heddle/ced.log");
+			fileExists = file.exists();
+		}
+
+
+		if (fileExists && file.canWrite()) {
+			System.out.println("updating log");
+			try {
+				FileWriter fw = new FileWriter(file, true);
+				String uname = Environment.getInstance().getUserName();
+				String datestr = DateString.dateStringLong();
+				String lstr = uname + " " + _release + " " + datestr;
+				fw.write(lstr + "\n");
+				fw.flush();
+				fw.close();
+			}
+			catch (IOException e) {
+			}
+			
+		}
+	}
 
 }

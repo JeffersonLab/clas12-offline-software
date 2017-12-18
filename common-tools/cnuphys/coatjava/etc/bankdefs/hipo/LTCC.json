@@ -1,7 +1,7 @@
 [ 
  {
     "bank": "LTCC::clusters",
-    "group": 1410,
+    "group": 21622,
     "info": "reconstructed clusters from the LTCC",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the cluster"},

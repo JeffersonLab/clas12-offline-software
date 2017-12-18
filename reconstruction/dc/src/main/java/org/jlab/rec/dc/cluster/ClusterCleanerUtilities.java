@@ -364,6 +364,7 @@ public class ClusterCleanerUtilities {
             FittedHit newhitPos = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
                     hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
             newhitPos.set_Doca(hit.get_Doca());
+            newhitPos.setT0SubTime(hit.getT0SubTime());
             newhitPos.set_Id(hit.get_Id());
             newhitPos.set_TrkgStatus(0);
             newhitPos.set_CellSize(DcDetector);
@@ -376,6 +377,7 @@ public class ClusterCleanerUtilities {
             FittedHit newhitNeg = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
                     hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
             newhitNeg.set_Doca(hit.get_Doca());
+            newhitNeg.setT0SubTime(hit.getT0SubTime());
             newhitNeg.set_Id(hit.get_Id());
             newhitNeg.set_TrkgStatus(0);
             newhitNeg.set_CellSize(DcDetector);

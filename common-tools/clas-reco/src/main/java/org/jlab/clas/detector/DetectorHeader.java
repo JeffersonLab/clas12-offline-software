@@ -8,7 +8,7 @@ public class DetectorHeader {
 
     private int           run = 0;
     private int         event = 0;
-    private int       trigger = 0;
+    private long      trigger = 0;
     private double     rfTime = 0.0;
     private double  startTime = -1000.0;
 
@@ -31,7 +31,7 @@ public class DetectorHeader {
         return this.startTime;
     }
 
-    public int getTrigger() {
+    public long getTrigger() {
         return trigger;
     }
 
@@ -51,7 +51,7 @@ public class DetectorHeader {
         this.startTime = starttime;
     }
 
-    public void setTrigger(int trigger) {
+    public void setTrigger(long trigger) {
         this.trigger = trigger;
     }
 }

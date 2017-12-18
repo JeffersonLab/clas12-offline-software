@@ -22,12 +22,12 @@ import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.CTOF;
-import cnuphys.ced.event.data.SVT;
+import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BMTGeometry;
-import cnuphys.ced.geometry.SVTGeometry;
-import cnuphys.ced.geometry.SVTxyPanel;
+import cnuphys.ced.geometry.BSTGeometry;
+import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 
 public class CentralXYHitDrawer implements IDrawable {
@@ -115,34 +115,34 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	// only called in single event mode
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		drawSVTAccumulatedHits(g, container);
+		drawBSTAccumulatedHits(g, container);
 	//	drawMicroMegasAccumulateHitsHits(g, container);
 		drawCTOFAccumulatedHits(g, container);
 	}
 
 	
-	// draw accumulated SVT hits (panels)
-	private void drawSVTAccumulatedHits(Graphics g, IContainer container) {
+	// draw accumulated BST hits (panels)
+	private void drawBSTAccumulatedHits(Graphics g, IContainer container) {
 		// panels
 
-		int maxHit = AccumulationManager.getInstance().getMaxSVTCount();
+		int maxHit = AccumulationManager.getInstance().getMaxBSTCount();
 		if (maxHit < 1) {
 			return;
 		}
 
 		// first index is layer 0..7, second is sector 0..23
 		int bstData[][] = AccumulationManager.getInstance()
-				.getAccumulatedSVTData();
+				.getAccumulatedBSTData();
 		
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
-			for (int sect0 = 0; sect0 < SVTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
-				SVTxyPanel panel = CentralXYView.getPanel(lay0 + 1, sect0 + 1);
+			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
+				BSTxyPanel panel = CentralXYView.getPanel(lay0 + 1, sect0 + 1);
 
 				if (panel != null) {
 					int hitCount = bstData[lay0][sect0];
 					
-//					System.err.println("SVT layer: " + (lay0+1) +  " sect: " + (sect0+0) + "   hit count " + hitCount);
+//					System.err.println("BST layer: " + (lay0+1) +  " sect: " + (sect0+0) + "   hit count " + hitCount);
 
 					double fract;
 					if (_view.isSimpleAccumulatedMode()) {
@@ -154,11 +154,11 @@ public class CentralXYHitDrawer implements IDrawable {
 
 					Color color = AccumulationManager.getInstance()
 							.getColor(fract);
-					_view.drawSVTPanel((Graphics2D) g, container, panel, color);
+					_view.drawBSTPanel((Graphics2D) g, container, panel, color);
 
 				}
 				else {
-					System.err.println("Got a null panel in drawSVTAccumulatedHits.");
+					System.err.println("Got a null panel in drawBSTAccumulatedHits.");
 				}
 			}
 		}
@@ -189,10 +189,12 @@ public class CentralXYHitDrawer implements IDrawable {
 
 				Color color = AccumulationManager.getInstance()
 						.getColor(fract);
-				g.setColor(color);
-				g.fillPolygon(poly);
-				g.setColor(Color.black);
-				g.drawPolygon(poly);
+				
+				poly.draw(g, container, index+1, color);
+//				g.setColor(color);
+//				g.fillPolygon(poly);
+//				g.setColor(Color.black);
+//				g.drawPolygon(poly);
 			}
 		}
 	}
@@ -201,7 +203,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
-		drawSVTHitsSingleMode(g, container);
+		drawBSTHitsSingleMode(g, container);
 		drawBMTHitsSingleMode(g, container);
 		drawCTOFSingleHitsMode(g, container);
 	}
@@ -217,10 +219,12 @@ public class CentralXYHitDrawer implements IDrawable {
 					CTOFXYPolygon poly = _view.getCTOFPolygon(hit.component);
 					if (poly != null) {
 						Color color = hits.adcColor(hit);
-						g.setColor(color);
-						g.fillPolygon(poly);
-						g.setColor(Color.black);
-						g.drawPolygon(poly);
+						poly.draw(g, container, hit.component, color);
+						
+//						g.setColor(color);
+//						g.fillPolygon(poly);
+//						g.setColor(Color.black);
+//						g.drawPolygon(poly);
 					}
 				}
 			}
@@ -270,10 +274,10 @@ public class CentralXYHitDrawer implements IDrawable {
 	}
 
 	
-	// draw SVT hits single event mode
-	private void drawSVTHitsSingleMode(Graphics g, IContainer container) {
+	// draw BST hits single event mode
+	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
 		
-		AdcHitList hits = SVT.getInstance().getHits();
+		AdcHitList hits = BST.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			
 //			Shape oldClip = g.getClip();
@@ -282,13 +286,13 @@ public class CentralXYHitDrawer implements IDrawable {
 			for (AdcHit hit : hits) {
 				if (hit != null) {
 					
-					SVTxyPanel panel = CentralXYView.getPanel(hit.layer,
+					BSTxyPanel panel = CentralXYView.getPanel(hit.layer,
 							hit.sector);
 					
 					if (panel != null) {
-						_view.drawSVTPanel(g2, container, panel, _baseColor);
-						_view.drawSVTPanel(g2, container, panel, hits.adcColor(hit));
-	//					_view.drawSVTPanel(g2, container, panel, Color.red);
+						_view.drawBSTPanel(g2, container, panel, _baseColor);
+						_view.drawBSTPanel(g2, container, panel, hits.adcColor(hit));
+	//					_view.drawBSTPanel(g2, container, panel, Color.red);
 					}
 
 

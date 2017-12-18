@@ -203,21 +203,21 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	 * Get the menu item to connect to any DAQ ring
 	 * @return the menu item to open any DAQ ring
 	 */
-	public static JMenuItem getConnectAnyRingItem() {
-		final JMenuItem item = new JMenuItem("Connect to Hipo Ring...");
-		item.setIcon(ImageManager.getInstance().loadImageIcon("images/hipo2.png"));
-
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ClasIoEventManager.getInstance().ConnectToHipoRing();
-			}
-
-		};
-		item.addActionListener(al);
-		return item;
-	}
+//	public static JMenuItem getConnectAnyRingItem() {
+//		final JMenuItem item = new JMenuItem("Connect to Hipo Ring...");
+//		item.setIcon(ImageManager.getInstance().loadImageIcon("images/hipo2.png"));
+//
+//		ActionListener al = new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				ClasIoEventManager.getInstance().ConnectToHipoRing();
+//			}
+//
+//		};
+//		item.addActionListener(al);
+//		return item;
+//	}
 	
 	public static JMenuItem getConnectETItem() {
 		final JMenuItem item = new JMenuItem("Connect to ET Ring...");
@@ -334,12 +334,16 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		_recentMenu = new JMenu("Recent Event Files");
 
 		// get the recent files from the prefs
-		Vector<String> recentFiles = Environment.getInstance()
-				.getPreferenceList(_recentFileKey);
+		Vector<String> recentFiles = Environment.getInstance().getPreferenceList(_recentFileKey);
 
 		if (recentFiles != null) {
 			for (String fn : recentFiles) {
-				addMenu(fn, false);
+
+				//make sure the file still exists
+				File file = new File(fn);
+				if (file.exists()) {
+					addMenu(fn, false);
+				}
 			}
 		}
 

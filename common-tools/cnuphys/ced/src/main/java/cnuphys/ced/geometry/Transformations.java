@@ -21,10 +21,10 @@ public class Transformations {
 	public Transformations(DetectorType dtype) {
 		_detectorType = dtype;
 
-		// SVT, DC, EC_INNER, EC_OUTER, FTOT, PCAL
+		// BST, DC, EC_INNER, EC_OUTER, FTOT, PCAL
 		switch (dtype) {
 
-		case SVT:
+		case BST:
 			break;
 
 		case DC:
@@ -51,7 +51,7 @@ public class Transformations {
 	// init for cal superlayer = (0,1,2) for PCAL, EC_IN, EC_OUT
 	private void initCal(int superlayer) {
 		ConstantProvider provider = 
-				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.EC);
+				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.ECAL);
 		ECFactory ecFactory = new ECFactory();
 
 		// detector in sector coordinates

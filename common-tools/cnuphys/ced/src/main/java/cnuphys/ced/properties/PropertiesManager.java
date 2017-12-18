@@ -3,6 +3,7 @@ package cnuphys.ced.properties;
 import java.io.File;
 import java.util.Properties;
 
+import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.SerialIO;
 
@@ -61,7 +62,7 @@ public class PropertiesManager {
 			}
 		} catch (Exception e) {
 			_userPref = new Properties();
-			e.printStackTrace();
+			Log.getInstance().exception(e);
 		}
 	}
 }

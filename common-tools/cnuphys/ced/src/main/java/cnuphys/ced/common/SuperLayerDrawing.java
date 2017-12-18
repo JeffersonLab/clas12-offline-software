@@ -1030,12 +1030,7 @@ public class SuperLayerDrawing {
 			//wire direction
 			String wds = "wire dir: " + VectorSupport.toString(getWireDirection(), 3);
 			feedbackStrings.add(wds);
-
-			feedbackStrings.add(DataSupport.prelimColor + "Raw Superlayer Occ "
-					+ DoubleFormat.doubleFormat(100.0 * parameters.getRawOccupancy(), 2) + "%");
-			feedbackStrings.add(DataSupport.prelimColor + "Reduced Superlayer Occ "
-					+ DoubleFormat.doubleFormat(100.0 * parameters.getNoiseReducedOccupancy(), 2) + "%");
-
+			
 			// getLayer returns a 1 based index (-1 on failure)
 			// int layer = getLayer(container, screenPoint);
 
@@ -1043,6 +1038,31 @@ public class SuperLayerDrawing {
 			getLayerAndWire(container, screenPoint, data);
 			int layer = data[0];
 			int wire = data[1];
+
+
+			if (_view.isSingleEventMode()) {
+				feedbackStrings.add(DataSupport.prelimColor + "Raw Superlayer Occ "
+						+ DoubleFormat.doubleFormat(100.0 * parameters.getRawOccupancy(), 2) + "%");
+				feedbackStrings.add(DataSupport.prelimColor + "Reduced Superlayer Occ "
+						+ DoubleFormat.doubleFormat(100.0 * parameters.getNoiseReducedOccupancy(), 2) + "%");
+
+			} 
+			else {
+				if ((layer > 0) && (wire > 0)) {
+				double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_iSupl.sector() - 1, _iSupl.superlayer() - 1, layer-1, wire-1);
+				double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_iSupl.sector() - 1, _iSupl.superlayer() - 1);
+
+				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+						"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
+				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+						"avg occupancy superlayer: " + _iSupl.superlayer() + " is "
+						+ DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
+				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+						"hit rate layer: " + layer + ", wire: " + wire + " is "
+						+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
+				}
+
+			}
 
 			DCTdcHitList hits = DC.getInstance().getHits();
 

@@ -11,15 +11,17 @@ public class DataDrawSupport {
 	
 	public static final int HB_CROSS  = 0;
 	public static final int TB_CROSS  = 1;
-	public static final int SVT_CROSS = 2;
+	public static final int BST_CROSS = 2;
 	public static final int BMT_CROSS = 3;
+	public static final int FMT_CROSS = 4;
 	
 	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
 	private static final Color TRANSORANGE = X11Colors.getX11Color("dark orange", 240);
 	private static final Color TRANSGREEN = X11Colors.getX11Color("lawn green", 250);
+	private static final Color TRANSBLUE = X11Colors.getX11Color("sky blue", 250);
 
-	public static Color transColors[] = { TRANSYELLOW, TRANSORANGE, TRANSYELLOW, TRANSGREEN };
-	public static String prefix[] = { "HB ", "TB ", "SVT ", "BMT "};
+	public static Color transColors[] = { TRANSYELLOW, TRANSORANGE, TRANSYELLOW, TRANSGREEN, TRANSBLUE };
+	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT ", "FMT "};
 	
 
 	public static final int CROSSHALF = 6; // pixels

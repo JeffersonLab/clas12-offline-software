@@ -36,7 +36,6 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	// sector 1-based 1..6
 	private int _sector;
 
-	// superlayer 1-based 1..6
 	private int _superlayer;
 
 	// cache the outline
