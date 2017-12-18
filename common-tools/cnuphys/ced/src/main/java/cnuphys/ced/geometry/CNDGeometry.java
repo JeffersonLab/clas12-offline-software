@@ -62,7 +62,13 @@ public class CNDGeometry {
 		for (int i = 0; i < cndLayers.length; i++) {
 			cndLayers[i] = cndSuperlayer.getLayer(i);
 			for (int j = 0; j < 48; j++) {
+				
+				
 				paddles[i][j] = cndLayers[i].getComponent(j);
+				
+				//rotate do to geomtry change
+				paddles[i][j].rotateZ(Math.toRadians(7.5));
+				
 			}
 		}
 
