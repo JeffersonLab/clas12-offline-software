@@ -48,11 +48,32 @@ public class Constants {
 
   
     // THE RECONSTRUCTION CONSTANTS
-    public static final double SigmaDrift = 0.4; 				// Max transverse diffusion value (GEMC value)
+    //public static final double SigmaDrift = 0.4; 				// Max transverse diffusion value (GEMC value)
+    public static final double SigmaDrift = 0.036; 				// Max transverse diffusion value (GEMC value)
+    
     public static final double hDrift = 3.0; 					// Size of the drift gap
     public static final double hStrip2Det = hDrift / 2;                         // distance between strips and the middle of the conversion gap (~half the drift gap)
 
-    private static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
+    public static double[][] Rx= new double[NREGIONS*2][3];   //Angle to rotate the det around x-axis
+    public static double[][] Ry= new double[NREGIONS*2][3];   //Angle to rotate the det around y-axis
+    public static double[][] Rz= new double[NREGIONS*2][3];   //Angle to rotate the det around z-axis
+    public static double[][] Cx= new double[NREGIONS*2][3];   //x-position of Center of detector frame
+    public static double[][] Cy= new double[NREGIONS*2][3];   //y-position of Center of detector frame
+    public static double[][] Cz= new double[NREGIONS*2][3];   //z-position of Center of detector frame
+    public static double[] ThetaL_grid = new double[405];    //Lorentz angle grid
+    public static double[] E_grid = new double[405];         //Electric field value of the grid
+    public static double[] B_grid = new double[405];        //Magnetic field value of the grid
+    public static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
+    public static double emin=0;                          //Emin of the grid
+    public static double emax=0;                          //Emax of the grid
+    public static double bmax=0;                          //Bmax of the grid
+    public static double bmin=0;                          //Bmin of the grid
+    public static int Ne=0;                               //Number of step for the electric field
+    public static int Nb=0;                               //Number of step for the magnetic field
+  
+// THE HV CONSTANT
+    public static double[][] E_DRIFT = new double[2*NREGIONS][3]; 
+    //private static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
 
     //private static double w_i =25.0; 
     public static boolean areConstantsLoaded = false;
@@ -74,7 +95,7 @@ public class Constants {
         }
 
         //if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-           setThetaL(Math.toRadians(20. * Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()))); // for 5-T field
+           //setThetaL(Math.toRadians(20. * Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()))); // for 5-T field
            //System.out.println("   LORENTZ ANGLE (radians) = "+getThetaL());
         //}
         areConstantsLoaded = true;
@@ -85,8 +106,14 @@ public class Constants {
         return ThetaL;
     }
 
-    public static synchronized void setThetaL(double thetaL) {
-        ThetaL = thetaL;
+    public static synchronized void setThetaL(int layer, int sector) {
+        if (org.jlab.rec.cvt.Constants.isCosmicsData() == true) {
+            ThetaL = 0;
+        }
+        else {
+            ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
+        }
+        if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL;
     }
 
     public static synchronized double[] getCRZRADIUS() {
@@ -287,4 +314,70 @@ public class Constants {
         T_OVER_X0 = t_OVER_X0;
     }
     
+    
+    public static synchronized void setTHETAL_grid(double[] cThetaL_grid) {
+  	ThetaL_grid  = cThetaL_grid;
+   }
+   public static synchronized void setE_grid(double[] cE_grid) {
+   	E_grid  = cE_grid;
+   }
+   public static synchronized void setB_grid(double[] cB_grid) {
+   	B_grid  = cB_grid;
+   }
+   public static synchronized void setPar_grid() {
+    double pe=0;
+    double pb=0;
+
+    for (int j=0;j<405;j++) {	
+            if(Ne==0 && Nb==0 ){
+                    emin = E_grid[j];
+                    emax = E_grid[j];
+                    bmin = B_grid[j];
+                    bmax = B_grid[j];
+                    Ne=15;
+            Nb=27;
+                            pe = E_grid[j];
+                            pb = B_grid[j];
+                            continue;
+            }	
+             // check max and minima
+           if ( E_grid[j] < emin ) emin = E_grid[j];
+           if ( E_grid[j] > emax ) emax = E_grid[j];
+           if ( B_grid[j] < bmin ) bmin = B_grid[j];
+           if ( B_grid[j] > bmax ) bmax = B_grid[j];
+
+           // count E and B
+           //if( Math.abs( pe - E_grid[j] ) > 0.0001 ) Ne++;
+           //if ( Ne==1) { if( Math.abs( pb - B_grid[j] ) > 0.0001 ) Nb++; } // only for the first Nb value
+
+
+           pe = E_grid[j] ;
+           pb = B_grid[j] ;
+        }
+   }
+   public static synchronized void setE_drift(double[][] cHV_drift) {
+   	for (int i=0; i<2*NREGIONS;i++) {
+   		for (int j=0; j<3;j++) {	
+   			E_DRIFT[i][j]  = 10*cHV_drift[i][j]/hDrift;
+   		}	
+   	}
+  }
+  public static synchronized void setRx(int layer, int sector, double cRx) {
+   	Rx[layer-1][sector-1]  = cRx;
+  }
+  public static synchronized void setRy(int layer, int sector, double cRy) {
+  		Ry[layer-1][sector-1]  = cRy;
+  }
+  public static synchronized void setRz(int layer, int sector, double cRz) {
+ 	   	Rz[layer-1][sector-1]  = cRz;
+  }
+  public static synchronized void setCx(int layer, int sector, double cCx) {
+  		Cx[layer-1][sector-1]  = cCx;
+  }
+  public static synchronized void setCy(int layer, int sector, double cCy) {
+ 		Cy[layer-1][sector-1]  = cCy;
+ }
+ public static synchronized void setCz(int layer, int sector, double cCz) {
+ 	   	Cz[layer-1][sector-1]  = cCz;
+ }
 }
