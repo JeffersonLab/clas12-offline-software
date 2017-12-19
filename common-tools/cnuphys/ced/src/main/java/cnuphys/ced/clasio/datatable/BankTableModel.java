@@ -60,11 +60,17 @@ public class BankTableModel extends DefaultTableModel {
 		if (_event == null) {
 			return 0;
 		}
+		
+		
 		ArrayList<ColumnData> cds = DataManager.getInstance().hasData(_event, _bankName);
 		int rowCount = 0;
 
 		for (ColumnData cd : cds) {
+			
 			if (cd != null) {
+				if (cd.getType() == 4) {
+					System.out.println("Hey man");
+				}
 				rowCount = Math.max(rowCount, cd.getLength(_event));
 			}
 		}
