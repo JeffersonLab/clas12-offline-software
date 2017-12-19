@@ -42,10 +42,12 @@ import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.CNDGeometry;
 import cnuphys.ced.geometry.CTOFGeometry;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.GeometryManager;
@@ -124,6 +126,7 @@ public class CentralXYView extends CedXYView {
 		}
 
 	}
+	
 	
 //	/**
 //	 * Get the Micromegas sector item
@@ -649,6 +652,51 @@ public class CentralXYView extends CedXYView {
 		}
 		return _ctofPoly[index0];
 	}
+	
+	/**
+	 * Get the CND polygon from Gagik's geometry layer and paddle
+	 * @param layer 1..3
+	 * @param paddleId 1..48
+	 * @return the CND polygon
+	 */
+	public CNDXYPolygon getCNDPolygon(int layer, int paddleId) {
+		if ((layer < 1) || (layer > 3)) {
+			return null;
+		}
+		if ((paddleId < 1) || (paddleId > 48)) {
+			return null;
+		}
+
+
+		return _cndPoly[layer-1][paddleId-1];
+	}
+	
+	/**
+	 * Get the CND polygon from "real" numbering
+	 * @param sector 1..24
+	 * @param layer 1..3
+	 * @param component 1..2
+	 * @return the CND polygon
+	 */
+	public CNDXYPolygon getCNDPolygon(int sector, int layer, int component) {
+		if ((sector < 1) || (sector > 24)) {
+			return null;
+		}
+		if ((layer < 1) || (layer > 3)) {
+			return null;
+		}
+		if ((component < 1) || (component > 2)) {
+			return null;
+		}
+
+		int real[] = {sector, layer, component};
+        int geo[] = new int[3];
+        
+        CNDGeometry.realTripletToGeoTriplet(geo, real);
+		
+		return getCNDPolygon(geo[1], geo[2]);
+	}
+
 
 	/**
 	 * Get world point from lab coordinates

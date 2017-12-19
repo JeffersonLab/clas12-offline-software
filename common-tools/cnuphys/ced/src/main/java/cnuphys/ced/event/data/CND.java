@@ -2,27 +2,28 @@ package cnuphys.ced.event.data;
 
 import org.jlab.io.base.DataEvent;
 
-public class CTOF extends DetectorData {
+public class CND extends DetectorData {
 
 	
-	TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("CTOF::tdc", "CTOF::adc");
+	TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("CND::tdc", "CND::adc");
 
-	private static CTOF _instance;
+	private static CND _instance;
+
 
 	/**
 	 * Public access to the singleton
-	 * @return the CTOF singleton
+	 * @return the CND singleton
 	 */
-	public static CTOF getInstance() {
+	public static CND getInstance() {
 		if (_instance == null) {
-			_instance = new CTOF();
+			_instance = new CND();
 		}
 		return _instance;
 	}
 	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
-		_tdcAdcHits =  new TdcAdcHitList("CTOF::tdc", "CTOF::adc");
+		_tdcAdcHits =  new TdcAdcHitList("CND::tdc", "CND::adc");
 	}
 	
 	/**
@@ -30,7 +31,7 @@ public class CTOF extends DetectorData {
 	 * @return the updated list
 	 */
 	public TdcAdcHitList updateTdcAdcList() {
-		_tdcAdcHits =  new TdcAdcHitList("CTOF::tdc", "CTOF::adc");
+		_tdcAdcHits =  new TdcAdcHitList("CND::tdc", "CND::adc");
 		return _tdcAdcHits;
 	}
 
