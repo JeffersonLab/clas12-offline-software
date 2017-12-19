@@ -217,7 +217,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
             }
             if (totEn == 0) {
-                System.err.println(" Cluster energy is null .... exit");
+                System.err.println(" Cluster energy is null .... exit "+this._Detector+" "+this._DetectorType);
                 return;
             }
 
@@ -228,8 +228,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             // calculates the centroid values and associated errors
             stripNumCent = weightedStrp / totEn;
             stripNumCent0 = weightedStrp0 / totEn;
-            //phiCent = weightedPhi / totEn;
-            phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
+            phiCent = weightedPhi / totEn;
+            //phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
             phiCent0 = weightedPhi0 / totEn;
             zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
