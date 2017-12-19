@@ -239,32 +239,38 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				if ((_svtFBRects[i] != null) && _svtFBRects[i].contains(screenPoint)) {
 
 					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+					feedbackStrings.add(
+							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
 					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+
+					if (!Double.isNaN(cross.ux)) {
+						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					}
 
 					break;
 				}
 			}
 		}
-		
-		//bmt crosses?
+
+		// bmt crosses?
 		crosses = BMTCrosses.getInstance().getCrosses();
 		len = (crosses == null) ? 0 : crosses.size();
 
-
-		if ((len > 0)  && (_bmtFBRects != null) && (_bmtFBRects.length == len)) {
+		if ((len > 0) && (_bmtFBRects != null) && (_bmtFBRects.length == len)) {
 			for (int i = 0; i < len; i++) {
 				if ((_bmtFBRects[i] != null) && _bmtFBRects[i].contains(screenPoint)) {
 
 					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+					feedbackStrings.add(
+							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
 					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					if (!Double.isNaN(cross.ux)) {
+						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					}
 
 					break;
 				}

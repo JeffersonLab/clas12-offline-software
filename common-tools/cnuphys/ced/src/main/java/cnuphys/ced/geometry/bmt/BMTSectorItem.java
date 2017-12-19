@@ -342,43 +342,45 @@ public class BMTSectorItem extends DonutItem {
 	}
 	
 	public Polygon getStripPolygon(IContainer container, int strip) {
-		Polygon poly = null;
-		if (isZLayer()) {
-			Point pp = new Point();
-			double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
-					_layer, strip);
-			
-			double phi2;
-			if (strip < (getNumStrips()/2)) {
-				phi2 = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
-						_layer, strip+1);
-			}
-			else {
-				phi2 = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
-						_layer, strip-1);
-			}
-			double delPhi = (Math.abs(phi2-phi))/2;
-			
-			double phiMin = phi - delPhi;
-			double phiMax = phi + delPhi;
-			double cmin = Math.cos(phiMin);
-			double cmax = Math.cos(phiMax);
-			double smin = Math.sin(phiMin);
-			double smax = Math.sin(phiMax);
-			
-			poly = new Polygon();
-			
-			container.worldToLocal(pp, getInnerRadius()*cmin, getInnerRadius()*smin);
-			poly.addPoint(pp.x, pp.y);
-			container.worldToLocal(pp, getOuterRadius()*cmin, getOuterRadius()*smin);
-			poly.addPoint(pp.x, pp.y);
-			container.worldToLocal(pp, getOuterRadius()*cmax, getOuterRadius()*smax);
-			poly.addPoint(pp.x, pp.y);
-			container.worldToLocal(pp, getInnerRadius()*cmax, getInnerRadius()*smax);
-			poly.addPoint(pp.x, pp.y);
-			
-		}
+//		Polygon poly = null;
+//		if (isZLayer()) {
+//			Point pp = new Point();
+//			double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
+//					_layer, strip);
+//			
+//			double phi2;
+//			if (strip < (getNumStrips()/2)) {
+//				phi2 = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
+//						_layer, strip+1);
+//			}
+//			else {
+//				phi2 = BMTGeometry.getGeometry().CRZStrip_GetPhi(_sector, 
+//						_layer, strip-1);
+//			}
+//			double delPhi = (Math.abs(phi2-phi))/2;
+//			
+//			double phiMin = phi - delPhi;
+//			double phiMax = phi + delPhi;
+//			double cmin = Math.cos(phiMin);
+//			double cmax = Math.cos(phiMax);
+//			double smin = Math.sin(phiMin);
+//			double smax = Math.sin(phiMax);
+//			
+//			poly = new Polygon();
+//			
+//			container.worldToLocal(pp, getInnerRadius()*cmin, getInnerRadius()*smin);
+//			poly.addPoint(pp.x, pp.y);
+//			container.worldToLocal(pp, getOuterRadius()*cmin, getOuterRadius()*smin);
+//			poly.addPoint(pp.x, pp.y);
+//			container.worldToLocal(pp, getOuterRadius()*cmax, getOuterRadius()*smax);
+//			poly.addPoint(pp.x, pp.y);
+//			container.worldToLocal(pp, getInnerRadius()*cmax, getInnerRadius()*smax);
+//			poly.addPoint(pp.x, pp.y);
+//			
+//		}
+//		
+//		return poly;
 		
-		return poly;
+		return this._lastDrawnPolygon;
 	}
 }

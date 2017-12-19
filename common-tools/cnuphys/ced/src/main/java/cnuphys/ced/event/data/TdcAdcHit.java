@@ -22,7 +22,7 @@ public class TdcAdcHit implements Comparable<TdcAdcHit> {
 	public float timeL = Float.NaN;
 	public float timeR = Float.NaN;
 	
-	
+	public byte order = -1;
 
 	public TdcAdcHit(byte sector, byte layer, short component) {
 		super();

@@ -199,17 +199,20 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 		CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
 		int len = (crosses == null) ? 0 : crosses.size();
 
-
-		if ((len > 0)  && (_svtFBRects != null) && (_svtFBRects.length == len)) {
+		if ((len > 0) && (_svtFBRects != null) && (_svtFBRects.length == len)) {
 			for (int i = 0; i < len; i++) {
 				if ((_svtFBRects[i] != null) && _svtFBRects[i].contains(screenPoint)) {
 
 					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+					feedbackStrings.add(
+							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
 					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+
+					if (!Double.isNaN(cross.ux)) {
+						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					}
 
 					break;
 				}
@@ -231,7 +234,10 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 
 					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
 					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					
+					if (!Double.isNaN(cross.ux)) {
+						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					}
 
 					break;
 				}
