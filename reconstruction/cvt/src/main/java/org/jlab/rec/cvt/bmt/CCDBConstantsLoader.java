@@ -52,6 +52,14 @@ public class CCDBConstantsLoader {
         double[] EFF_Z_OVER_A = new double[NREGIONS*2];
         double[] T_OVER_X0    = new double[NREGIONS*2];
         
+         int GRID_SIZE=405;
+         double[] THETA_L_grid = new double [GRID_SIZE];
+         double[] ELEC_grid = new double [GRID_SIZE];
+         double[] MAG_grid = new double [GRID_SIZE];
+         
+         // HV settings for Lorentz Angle
+         double [][] HV_DRIFT= new double [NREGIONS*2][3];
+         
         // Load the tables
         
         // using
@@ -75,6 +83,8 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/test/mvt/bmt_mat_l5");
         dbprovider.loadTable("/test/mvt/bmt_mat_l6");
         
+         //load Lorentz angle table
+        dbprovider.loadTable("/calibration/mvt/lorentz");
         dbprovider.disconnect();
 
        //  dbprovider.show();
@@ -114,11 +124,6 @@ public class CCDBConstantsLoader {
             double Phi_min = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Phi_min", i);
             double Phi_max = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Phi_max", i);
 
-            //double[] EDGE1	=	new double[]{Math.toRadians(Phi_min),Math.toRadians(Phi_min+240),Math.toRadians(Phi_min+120)};
-            //double[] EDGE2	=	new double[]{Math.toRadians(Phi_max),Math.toRadians(Phi_max-120),Math.toRadians(Phi_max+120)};
-            //sector clocking fix MC ?
-            //double[] EDGE1	=	new double[]{Math.toRadians(Phi_min+120),Math.toRadians(Phi_min+240),Math.toRadians(Phi_min)};
-            //double[] EDGE2	=	new double[]{Math.toRadians(Phi_max+120),Math.toRadians(Phi_max-120),Math.toRadians(Phi_max)};
             //sector clocking fix data
             double[] EDGE1 = new double[]{Math.toRadians(Phi_min + 120), Math.toRadians(Phi_min), Math.toRadians(Phi_min + 240)};
             double[] EDGE2 = new double[]{Math.toRadians(Phi_max + 120), Math.toRadians(Phi_max), Math.toRadians(Phi_max - 120)};
@@ -211,6 +216,22 @@ public class CCDBConstantsLoader {
             EFF_Z_OVER_A[5] += thickness*Zeff/Aeff;      
             T_OVER_X0[5]+=thickness/X0;      
         }
+        
+        if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {
+         System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
+         for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
+         	THETA_L_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/angle",i);
+         	ELEC_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Edrift",i);
+         	MAG_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Bfield",i);
+        }
+         
+        for (int i = 0; i<2*NREGIONS; i++) {
+          	for (int j=0; j<3; j++) {
+          		if (dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Axis", i)==0) HV_DRIFT[i][j]=1500;
+              		if (dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Axis", i)==1) HV_DRIFT[i][j]=1500;
+                }
+        }
+        
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);
@@ -233,7 +254,11 @@ public class CCDBConstantsLoader {
         Constants.setCRZWIDTH(CRZWIDTH);
         Constants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
         Constants.set_T_OVER_X0(T_OVER_X0);
-        
+        Constants.setTHETAL_grid(THETA_L_grid);
+        Constants.setE_grid(ELEC_grid);
+        Constants.setB_grid(MAG_grid);
+        Constants.setPar_grid();
+        Constants.setE_drift(HV_DRIFT);
         dbprovider.disconnect();
         CSTLOADED = true;
         System.out
