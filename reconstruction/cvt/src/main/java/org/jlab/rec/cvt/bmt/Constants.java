@@ -113,7 +113,7 @@ public class Constants {
         else {
             ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
         }
-        if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL;
+        if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL; 
     }
 
     public static synchronized double[] getCRZRADIUS() {

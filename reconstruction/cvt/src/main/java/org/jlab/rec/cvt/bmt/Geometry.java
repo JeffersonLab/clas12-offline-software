@@ -491,7 +491,7 @@ public class Geometry {
         return phi + (Constants.hStrip2Det * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
     }
     public void SetLorentzAngle(int layer, int sector) {
-     	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector);
+     	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector); 
     }
     // Correct strip position before clustering
     public int getLorentzCorrectedZStrip(int sector, int layer, int theMeasuredZStrip) {
