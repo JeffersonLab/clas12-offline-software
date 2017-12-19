@@ -28,7 +28,7 @@ public class HTCCReconstruction {
     private int[] sectorArray;
     private int[] ringArray;
     private int[] halfArray;
-    private int[] npheArray;
+    private double[] npheArray;
     private double[] timeArray;
     private int[] ithetaArray;
     private int[] iphiArray;
@@ -36,7 +36,7 @@ public class HTCCReconstruction {
 
     // Data about the hit in the remaining hit list with the greatest number of
     // photoelections. See findMaximumHit().
-    private int maxHitNumPhotoelectrons;
+    private double maxHitNumPhotoelectrons;
     private int maxHitRemainingIndex;
     private int maxHitRawDataIndex;
 
@@ -89,7 +89,7 @@ public class HTCCReconstruction {
         sectorArray = new int[rows];;
         ringArray = new int[rows];;
         halfArray = new int[rows];;
-        npheArray = new int[rows];;
+        npheArray = new double[rows];;
         timeArray = new double[rows];
         ithetaArray = new int[rows];
         iphiArray = new int[rows];
@@ -101,11 +101,10 @@ public class HTCCReconstruction {
             timeArray[i] = bankDGTZ.getFloat("time", i);
 
             if (sectorArray[i] > 0) {
-                npheArray[i] = (100 * (bankDGTZ.getInt("ADC", i))) / ((int) gain.getDoubleValue("gain", sectorArray[i], halfArray[i], ringArray[i]));
-                    timeArray[i] = timeArray[i] - (time.getDoubleValue("shift", sectorArray[i], halfArray[i], ringArray[i]));
-    
+                npheArray[i] = ((bankDGTZ.getInt("ADC", i))) / (gain.getDoubleValue("gain", sectorArray[i], halfArray[i], ringArray[i]));
+                timeArray[i] = timeArray[i] - (time.getDoubleValue("shift", sectorArray[i], halfArray[i], ringArray[i]));
             }
-    
+
         }
         numHits = sectorArray.length;
         // Create and fill ithetaArray and iphiArray so that the itheta and iphi
@@ -117,6 +116,7 @@ public class HTCCReconstruction {
             int iphi = 2 * Math.abs(sectorArray[hit]) + Math.abs(halfArray[hit]) - 3;
             iphi = (iphi == 0 ? iphi + 12 : iphi) - 1;
             iphiArray[hit] = iphi;
+
         }
     }
 
@@ -158,7 +158,7 @@ public class HTCCReconstruction {
         findMaximumHit(remainingHits);
 
         // If a maximum hit was found:
-        if (maxHitNumPhotoelectrons > 0) {
+        if (maxHitNumPhotoelectrons > -1) {
 
             // Remove the maximum hit from the list of remaining hits
             remainingHits.remove(maxHitRemainingIndex);
@@ -168,7 +168,7 @@ public class HTCCReconstruction {
             int itheta = ithetaArray[maxHitRawDataIndex];
             int iphi = iphiArray[maxHitRawDataIndex];
             // Numver of Photoelectrons
-            int nphe = maxHitNumPhotoelectrons;
+            double nphe = maxHitNumPhotoelectrons;
             // Hit Time
             double time = timeArray[maxHitRawDataIndex] - parameters.t0[itheta];
             // Detector Coordinates (polar)
@@ -218,12 +218,12 @@ public class HTCCReconstruction {
      * @param remainingHits the list of remaining hits
      */
     void findMaximumHit(List<Integer> remainingHits) {
-        maxHitNumPhotoelectrons = -1;
-        maxHitRemainingIndex = -1;
-        maxHitRawDataIndex = -1;
+        maxHitNumPhotoelectrons = -100;
+        maxHitRemainingIndex = -100;
+        maxHitRawDataIndex = -100;
         for (int hit = 0; hit < remainingHits.size(); ++hit) {
             int hitIndex = remainingHits.get(hit);
-            int numPhotoElectrons = npheArray[hitIndex];
+            double numPhotoElectrons = npheArray[hitIndex];
             if (numPhotoElectrons >= parameters.npheminmax
                     && numPhotoElectrons > maxHitNumPhotoelectrons) {
                 maxHitNumPhotoelectrons = numPhotoElectrons;
@@ -267,7 +267,7 @@ public class HTCCReconstruction {
                 double time = timeArray[testHit] - parameters.t0[ithetaTest];
                 double timeDiff = Math.abs(time - clusterTime);
 
-                int npheTest = npheArray[testHit];
+                double npheTest = npheArray[testHit];
                 // If the test hit is close enough in space and time
                 if ((ithetaDiff == 1 || iphiDiff == 1)
                         && (ithetaDiff + iphiDiff <= 2)
@@ -322,7 +322,7 @@ public class HTCCReconstruction {
             bankClusters.setShort("maxtheta", i, (short) cluster.getIThetaMax());
             bankClusters.setShort("minphi", i, (short) cluster.getIPhiMin());
             bankClusters.setShort("maxphi", i, (short) cluster.getIPhiMax());
-            bankClusters.setShort("nphe", i, (short) cluster.getNPheTot());
+            bankClusters.setFloat("nphe", i, (float) cluster.getNPheTot());
             bankClusters.setFloat("time", i, (float) cluster.getTime());
             bankClusters.setFloat("theta", i, (float) cluster.getTheta());
             bankClusters.setFloat("phi", i, (float) cluster.getPhi());
