@@ -221,8 +221,9 @@ public class HitReader {
                 if (SvtStrip.get_Edep() == 0) {
                     hit.set_Status(-1);
                 }
-
-                hit.set_Id(id[i]);
+                //System.out.println("SVT e "+SvtStrip.get_Edep());
+                if(SvtStrip.get_Edep()>0)      
+                    hit.set_Id(id[i]);
                 // add this hit
                 hits.add(hit);
             }
