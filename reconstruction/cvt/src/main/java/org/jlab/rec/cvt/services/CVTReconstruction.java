@@ -135,7 +135,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         FieldsConfig = fieldsConfig;
     }
     @Override
-    public boolean processDataEvent(DataEvent event) {
+ public boolean processDataEvent(DataEvent event) {
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
 
         this.FieldsConfig = this.getFieldsConfig();
@@ -168,21 +168,21 @@ public class CVTReconstruction extends ReconstructionEngine {
         if (hits.size() == 0) {
             return true;
         }
-
+       
         List<Cluster> clusters = new ArrayList<Cluster>();
         List<Cluster> SVTclusters = new ArrayList<Cluster>();
         List<Cluster> BMTclusters = new ArrayList<Cluster>();
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters.addAll(clusFinder.findClusters(svt_hits));
+        clusters.addAll(clusFinder.findClusters(svt_hits, BMTGeom));
         
-        clusters.addAll(clusFinder.findClusters(bmt_hits)); 
+        clusters.addAll(clusFinder.findClusters(bmt_hits, BMTGeom)); 
         
         if (clusters.size() == 0) {
             return true;
         }
-
+        
         // fill the fitted hits list.
         if (clusters.size() != 0) {
             for (int i = 0; i < clusters.size(); i++) {
@@ -201,7 +201,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom);
         
-        if(Constants.isCosmicsData()==true) {
+        if(Constants.isCosmicsData()==true) { 
+           
             //4) make list of crosses consistent with a track candidate
             StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
             CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
@@ -212,15 +213,17 @@ public class CVTReconstruction extends ReconstructionEngine {
 
                 return true;
             }
-
+            
             List<StraightTrack> cosmics = new ArrayList<StraightTrack>();
 
             TrackCandListFinder trkcandFinder = new TrackCandListFinder();
             cosmics = trkcandFinder.getStraightTracks(crosslist, crosses.get(1), SVTGeom, BMTGeom);
+            
             //REMOVE THIS
             //crosses.get(0).addAll(crosses.get(1));
             //------------------------
             if (cosmics.size() == 0) {
+                this.CleanupSpuriousCrosses(crosses, null) ;
                 rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
 
                 return true;
@@ -251,7 +254,7 @@ public class CVTReconstruction extends ReconstructionEngine {
                     trkcandFinder.matchClusters(SVTclusters, new TrajectoryFinder(), SVTGeom, BMTGeom, true,
                             cosmics.get(k1).get_Trajectory(), k1 + 1);
                 }
-
+                this.CleanupSpuriousCrosses(crosses, null) ;
                 //4)  ---  write out the banks			
                 rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
             }
@@ -274,6 +277,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             }
 
             if (trkcands.size() == 0) {
+                this.CleanupSpuriousCrosses(crosses, null) ;
                 rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
                 return true;
             }
@@ -329,7 +333,7 @@ public class CVTReconstruction extends ReconstructionEngine {
                     }
                 }
             }
-
+            
             //crosses.get(0).removeAll(crosses.get(0));
             //crosses.get(0).addAll(crossesOntrk);
             //REMOVE THIS
@@ -337,12 +341,47 @@ public class CVTReconstruction extends ReconstructionEngine {
             //------------------------
             // set index associations
             if (trks.size() > 0) {
-
+                this.CleanupSpuriousCrosses(crosses, trks) ;
                 rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, trks);
             }
-        }
+            //System.out.println("H");
+        } 
+        //event.show();
         return true;
 
+    }
+    private void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks) {
+        List<Cross> rmCrosses = new ArrayList<Cross>();
+        
+        for(Cross c : crosses.get(0)) {
+            double z = SVTGeom.transformToFrame(c.get_Sector(), c.get_Region()*2, c.get_Point().x(), c.get_Point().y(),c.get_Point().z(), "local", "").z();
+            if(z<-0.1 || z>SVTConstants.MODULELEN) {
+                rmCrosses.add(c);
+            }
+        }
+       
+        
+        for(int j = 0; j<crosses.get(0).size(); j++) {
+            for(Cross c : rmCrosses) {
+                if(crosses.get(0).get(j).get_Id()==c.get_Id())
+                    crosses.get(0).remove(j);
+            }
+        } 
+        
+       
+        if(trks!=null) {
+            List<Track> rmTrks = new ArrayList<Track>();
+            for(Track t:trks) {
+                boolean rmFlag=false;
+                for(Cross c: rmCrosses) {
+                    if(c.get_AssociatedTrackID()==t.get_Id())
+                        rmFlag=true;
+                }
+                if(rmFlag==true)
+                    rmTrks.add(t);
+            }
+            trks.removeAll(rmTrks);
+        }
     }
 
     public boolean init() {
@@ -370,5 +409,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     public static void main(String[] args) throws FileNotFoundException, EvioException {
        
     }
+
+    
     
 }
