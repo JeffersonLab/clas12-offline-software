@@ -791,6 +791,7 @@ public class CodaEventDecoder {
         return tiEntries;
     }
 
+
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
         reader.open("/Users/devita/clas_002143.evio.0");
