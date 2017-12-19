@@ -71,7 +71,7 @@ public class CentralXYView extends CedXYView {
 	private static Color _ctofColors[] = { new Color(240, 240, 240), new Color(224, 224, 224) };
 
 	// the CND xy polygons
-	private CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
+	private CNDXYPolygon _cndPoly[][] = new CNDXYPolygon[3][48];
 	
 	//the CTOF polygons
 	private CTOFXYPolygon _ctofPoly[] = new CTOFXYPolygon[48];
@@ -113,7 +113,7 @@ public class CentralXYView extends CedXYView {
 		// add the CND polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				cndPoly[layer - 1][paddleId - 1] = new CNDXYPolygon(layer,
+				_cndPoly[layer - 1][paddleId - 1] = new CNDXYPolygon(layer,
 						paddleId);
 			}
 		}
@@ -328,8 +328,8 @@ public class CentralXYView extends CedXYView {
 		// CND Polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				if (cndPoly[layer - 1][paddleId - 1] != null) {
-					cndPoly[layer - 1][paddleId - 1].draw(g2, container);
+				if (_cndPoly[layer - 1][paddleId - 1] != null) {
+					_cndPoly[layer - 1][paddleId - 1].draw(g2, container);
 				}
 			}
 
@@ -520,7 +520,7 @@ public class CentralXYView extends CedXYView {
 				for (int layer = 1; layer <= 3; layer++) {
 					for (int paddleId = 1; paddleId <= 48; paddleId++) {
 
-						found = cndPoly[layer - 1][paddleId - 1]
+						found = _cndPoly[layer - 1][paddleId - 1]
 								.getFeedbackStrings(container, screenPoint,
 										worldPoint, feedbackStrings);
 

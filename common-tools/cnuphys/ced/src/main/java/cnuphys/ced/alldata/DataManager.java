@@ -216,6 +216,12 @@ public class DataManager {
 					String entries[] = dd.getEntryList();
 					for (String columnName : entries) {
 						int type = dd.getProperty("type", columnName);
+						
+						if ((columnName.contains("timestamp"))) {
+							//TODO MAJOR HACK!
+							type = 4;
+							//System.err.println("HEY MAN");
+						}
 
 						if ((type < 1) || (type > 6) || (type == 24)) {
 //							Log.getInstance()
@@ -347,6 +353,33 @@ public class DataManager {
 		}
 		return array;
 	}
+	
+	/**
+	 * Obtain a long array from the current event for the given full name
+	 * @param event the given event
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public long[] getLongArray(DataEvent event, String fullName) {
+		long[] array = null;
+		ColumnData cd = getColumnData(fullName);
+		if (cd == null) {
+			//Log.getInstance().warning("In ColumnData.getIntArray, requested array for non-existent column: [" + fullName + "]");
+		}
+		else {
+			Object o = cd.getDataArray(event);
+			if (o != null) {
+				if (o instanceof long[]) {
+					array = (long[])o;
+				}
+				else {
+					//Log.getInstance().warning("In ColumnData.getIntArray, requested array for non-matching column: [" + fullName + "]");
+				}
+			}
+		}
+		return array;
+	}
+
 	
 
 	/**
