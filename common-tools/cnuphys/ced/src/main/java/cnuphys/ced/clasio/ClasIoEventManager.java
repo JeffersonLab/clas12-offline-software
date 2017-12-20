@@ -458,6 +458,7 @@ public class ClasIoEventManager {
 	//		_dataSource = new EvioETSource(_currentMachine, _currentStation);
 			_dataSource = new EvioETSource(_currentMachine);
 			
+			
 			if (_dataSource == null) {
 				Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
 				JOptionPane.showMessageDialog
