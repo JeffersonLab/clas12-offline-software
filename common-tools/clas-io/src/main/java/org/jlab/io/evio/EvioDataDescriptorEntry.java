@@ -32,6 +32,7 @@ public class EvioDataDescriptorEntry {
     private String  getType(String type){
         if(type.compareTo("CHAR8")==0) return "int8";
         if(type.compareTo("INT32")==0) return "int32";
+        if(type.compareTo("LONG64")==0) return "int64";
         return type;
     }
 }
