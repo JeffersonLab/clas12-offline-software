@@ -36,6 +36,10 @@ public interface DataEvent {
     void setInt(String path, int[] arr);
     void appendInt(String path, int[] arr);
 
+    long[] getLong(String path);
+    void setLong(String path, long[] arr);
+    void appendLong(String path, long[] arr);
+    
     short[] getShort(String path);
     void setShort(String path, short[] arr);
     void appendShort(String path, short[] arr);
