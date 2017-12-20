@@ -114,7 +114,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				case INT64:
 					//TODO MAJOR HACK
 //					long longs[] = event.getLong(_fullName)
-//					return (longs == null) ? 0 : ints.length;
+//					return (longs == null) ? 0 : longs.length;
 					
 					return 0;
 					
@@ -141,7 +141,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	
 
 	/**
-	 * Get the data array as an object. It is up tp the caller to cast it to the
+	 * Get the data array as an object. It is up to the caller to cast it to the
 	 * correct type of array.
 	 * 
 	 * @return the data array corresponding to the type
@@ -275,8 +275,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				
 			case INT64:
 				//TODO MAJOR HACK
-//				len = ((int[]) oa).length;
-//				len = len/2;
+//				len = ((long[]) oa).length;
 				len = 0;
 				break;
 
