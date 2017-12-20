@@ -37,6 +37,26 @@ public class Cross2 {
 		this.err_z = err_z;
 	}
 	
+	public boolean isFullLocationBad() {
+		return Float.isNaN(x) || Float.isNaN(y) ||
+				Float.isNaN(z);
+	}
+	
+	public boolean isXYLocationBad() {
+		return Float.isNaN(x) || Float.isNaN(y);
+	}
+
+	
+	public boolean isDirectionBad() {
+		return Float.isNaN(ux) ||
+				Float.isNaN(uy) || Float.isNaN(uz);
+	}
+
+	public boolean isErrorBad() {
+		return Float.isNaN(err_x) ||
+				Float.isNaN(err_y) || Float.isNaN(err_z);
+	}	
+	
 	public void setLocation(Point pp) {
 		_screenLocation.x = pp.x;
 		_screenLocation.y = pp.y;
