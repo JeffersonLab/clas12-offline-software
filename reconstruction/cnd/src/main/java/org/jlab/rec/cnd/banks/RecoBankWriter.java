@@ -13,7 +13,7 @@ public class RecoBankWriter {
 	public static DataBank fillCndHitBanks(DataEvent event, ArrayList<CndHit> hitlist) {
 
 		DataBank bank =  event.createBank("CND::hits", hitlist.size());
-
+		
 		if (bank == null) {
 			System.err.println("COULD NOT CREATE A CND::Hits BANK!!!!!!");
 			return null;
@@ -39,8 +39,10 @@ public class RecoBankWriter {
 			bank.setFloat("energy",i, (float) hitlist.get(i).Edep());
 			bank.setFloat("tlength",i, (float) (hitlist.get(i).tLength()/10.)); // units is cm
 			bank.setFloat("pathlength",i, (float) (hitlist.get(i).pathLength()/10.)); // units is cm
-			bank.setShort("indexL",i, (short) hitlist.get(i).indexL());
-			bank.setShort("indexR",i, (short) hitlist.get(i).indexR());
+			bank.setShort("indexLadc",i, (short) hitlist.get(i).indexLadc());
+			bank.setShort("indexRadc",i, (short) hitlist.get(i).indexRadc());
+			bank.setShort("indexLtdc",i, (short) hitlist.get(i).indexLtdc());
+			bank.setShort("indexRtdc",i, (short) hitlist.get(i).indexRtdc());
 
 		}
 		return bank;
