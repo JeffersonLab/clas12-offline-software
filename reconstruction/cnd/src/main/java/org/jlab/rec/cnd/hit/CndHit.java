@@ -32,8 +32,11 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 	private double _phi;       	          // azimuthal angle of hit (assuming hit in center of paddle width)
 	private double _theta;       	      // polar angle of hit (assuming hit in center of paddle thickness)
 	private int _sector, _layer, _component; 
-	private int _indexL;				  // index to match row adc and tdc to reconstructed hit (index L (resp.R) should be the same for adc and tdc)
-	private int _indexR;
+	private int _indexLadc;				  // index to match row adc and tdc to reconstructed hit (index L (resp.R) should be the same for adc and tdc)
+	private int _indexRadc;
+	private int _indexLtdc;				  // index to match row adc and tdc to reconstructed hit (index L (resp.R) should be the same for adc and tdc)
+	private int _indexRtdc;
+
 
 	// constructor
 	public CndHit(int padd, int padn) {
@@ -145,20 +148,36 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 		this._component = component;
 	}		
 
-	public double indexL() {
-		return _indexL;
+	public double indexLadc() {
+		return _indexLadc;
 	}
 
-	public void set_indexL(int indexL) {
-		this._indexL = indexL;
+	public void set_indexLadc(int indexLadc) {
+		this._indexLadc = indexLadc;
 	}
 
-	public double indexR() {
-		return _indexR;
+	public double indexRadc() {
+		return _indexRadc;
 	}
 
-	public void set_indexR(int indexR) {
-		this._indexR = indexR;
+	public void set_indexRadc(int indexRadc) {
+		this._indexRadc = indexRadc;
+	}
+	
+	public double indexLtdc() {
+		return _indexLtdc;
+	}
+
+	public void set_indexLtdc(int indexLtdc) {
+		this._indexLtdc = indexLtdc;
+	}
+
+	public double indexRtdc() {
+		return _indexRtdc;
+	}
+
+	public void set_indexRtdc(int indexRtdc) {
+		this._indexRtdc = indexRtdc;
 	}
 
 	public double get_tX() {
