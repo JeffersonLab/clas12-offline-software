@@ -1,7 +1,9 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.pow;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.detector.CalorimeterResponse;
@@ -16,6 +18,8 @@ import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  *
@@ -29,6 +33,7 @@ public class EventBuilder {
     private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
     private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,0};
+    private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
 
     public EventBuilder(){
 
@@ -115,21 +120,26 @@ public class EventBuilder {
             // is found and set associations
 
             // Matching tracks to FTOF layer 1A detector.
-            int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
+            Double ftof1a_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A);
+            //System.out.println("FTOF1A Match Cut " + ftof1a_match_cut);
+            int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, ftof1a_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
 
             // Matching tracks to FTOF layer 1B detector.
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
+            Double ftof1b_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
+            //System.out.println("FTOF Match Cut " + ftof1b_match_cut);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, ftof1b_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
             }
 
             // Matching tracks to FTOF layer 2 detector.
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
+            Double ftof2_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_2);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, ftof2_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -137,11 +147,11 @@ public class EventBuilder {
 
             // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CTOF detector.
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-            }
+//            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
+//            if(index>=0){
+//                p.addResponse(detectorResponses.get(index), true);
+//                detectorResponses.get(index).setAssociation(n);
+//            }
 
             // FIXME:  Remove this, CD matching should just be imported.
             // Matching tracks to CND detector.
@@ -152,7 +162,9 @@ public class EventBuilder {
             //}
 
             // Matching tracks to PCAL:
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, EBConstants.PCAL_MATCHING);
+            Double pcal_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
+            //System.out.println("PCAL MATCH CUT " + pcal_match_cut);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, pcal_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -161,7 +173,8 @@ public class EventBuilder {
             }
            
             // Matching tracks to EC Inner:
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 4, EBConstants.ECIN_MATCHING);
+            Double ecin_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.ECIN_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 4, ecin_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -170,7 +183,8 @@ public class EventBuilder {
             }
             
             // Matching tracks to EC Outer:
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 7, EBConstants.ECOUT_MATCHING);
+            Double ecout_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.ECOUT_MATCHING);
+            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 7, ecout_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
                 detectorResponses.get(index).setAssociation(n);
@@ -320,7 +334,7 @@ public class EventBuilder {
      */
     public void processNeutralTracks() {
 
-        EBMatching ebm=new EBMatching(this);
+        EBCentral ebm=new EBCentral(this);
        
         // define neutrals based on unmatched ECAL clusters:
         
@@ -339,7 +353,7 @@ public class EventBuilder {
         particles.addAll(partsECOUT);
 
         // set particle kinematics:
-        for(DetectorParticle p : particles){
+        for(DetectorParticle p : particles) {
             final double energy = p.getEnergy(DetectorType.ECAL);
             final double px = p.vector().x();
             final double py = p.vector().y();
@@ -371,8 +385,12 @@ public class EventBuilder {
 
             detectorEvent.addParticle(p);
         }
-        
+        this.pindex_map.put(2, particles.size());
         detectorEvent.setAssociation();
+    }
+    
+    public HashMap<Integer, Integer> getPindexMap() {
+        return this.pindex_map;
     }
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
@@ -458,15 +476,44 @@ class TriggerOptions {
     public void setCharge(int ch) {
         this.charge = ch;
     }
+    
+    public int getSoftwareTriggerScore(DetectorParticle p) {
+        
+            Double ener = p.getEnergy(DetectorType.ECAL);
+            Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+            Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
+            double sfMean = t[0]*(t[1] + t[2]/ener + t[3]*pow(ener,-2));
+            double sfSigma = s[0];
+            double sf = p.getEnergyFraction(DetectorType.ECAL);
+            double sf_upper_limit = sfMean + 5*sfSigma;
+            double sf_lower_limit = sfMean - 5*sfSigma;
+        
+        
+        int score = 0;
+        if(p.getNphe(DetectorType.HTCC)>5){
+            score = score + 1000;
+        }
+        //if(p.getEnergyFraction(DetectorType.ECAL)>0.218){
+        if(sf >= sf_lower_limit) {
+            System.out.println("Sampling Fraction Success");
+            score = score + 100;
+        }
+        if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
+            score = score + 10;
+        }
+        //System.out.println(score);
+        return score;
+    }
 
     public boolean assignSoftwareTrigger(DetectorEvent event) {
         boolean flag = false;
         int npart = event.getParticles().size();
         for(int i = 0; i < npart; i++){
             DetectorParticle p = event.getParticle(i);
-            if(p.getSoftwareTriggerScore()>=this.score_requirement) { //Possible Electron
+            if(getSoftwareTriggerScore(p)>=this.score_requirement) { //Possible Electron
                 if(this.charge==p.getCharge()){
                     p.setPid(this.id);
+		    flag = true; //Software trigger found
                 }
             }
         }
@@ -483,10 +530,10 @@ class TriggerOptions {
             }
         }
 
-        if(index>0){
+        if(index>=0){
             event.moveUp(index);
             if(event.getParticle(0).getPid()==this.id){
-                flag = true;
+                //flag = true;
             }
         }
 
