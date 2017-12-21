@@ -157,7 +157,15 @@ public class HitReader {
                 double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
                 double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
-                if(T0Sub>-500 && T0Sub<TMax+150) { // cut on spurious hits
+                boolean passTimingCut = false;
+                int region = (int) (superlayerNum[i] + 1) / 2;
+                if(region ==1 && T0Sub>-100 && T0Sub<500)
+                    passTimingCut=true;
+                if(region ==2 && T0Sub>-100 && T0Sub<1000)
+                    passTimingCut=true;
+                if(region ==3 && T0Sub>-100 && T0Sub<1000)
+                    passTimingCut=true;
+                if(passTimingCut) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
                     Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i + 1));
                     hit.set_CellSize(DcDetector);
@@ -392,7 +400,10 @@ public class HitReader {
             _beta = betaArray[0];
         if(betaArray[1]!=-1)
             _beta = betaArray[1];
-        
+        if(_beta<0.)
+            _beta=0.01;
+        if(_beta>1.)
+            _beta=1;
         return _beta;
     }
     
