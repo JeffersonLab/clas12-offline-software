@@ -35,9 +35,8 @@ public class CodaEventDecoder {
     private int eventNumber = 0;
     private long  timeStamp = 0L;
     private int timeStampErrors = 0;
-    private long triggerBits = 0;
-
-//    private int[] triggerBank = null;
+    private long    triggerBits = 0;
+    private List<Integer> triggerWords = new ArrayList<>(); 
 
     public CodaEventDecoder(){
 
@@ -67,9 +66,9 @@ public class CodaEventDecoder {
         return rawEntries;
     }
 
-//    public int[] getTriggerBank(){
-//        return this.triggerBank;
-//    }
+    public List<Integer> getTriggerWords(){
+        return this.triggerWords;
+    }
     
     private void printByteBuffer(ByteBuffer buffer, int max, int columns){
         int n = max;
@@ -780,6 +779,11 @@ public class CodaEventDecoder {
 		    else if(node.getDataLength()==7) { // New format Dec 1 2017 (run 1701)
 			long word = (( (long) intData[7])<<32) | (intData[6]&0xffffffffL);
 			this.setTriggerBits(word);
+                        this.triggerWords.clear();
+                        for(int i=6; i<=8; i++) {
+                            this.triggerWords.add(intData[i]);
+//                            System.out.println(this.triggerWords.get(this.triggerWords.size()-1));
+                        }
 		    }
                 }
             }
@@ -787,13 +791,14 @@ public class CodaEventDecoder {
         return tiEntries;
     }
 
+
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/run_FTCal_FTHodo_vtp_031632.evio.0");
+        reader.open("/Users/devita/clas_002143.evio.0");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 10;
+        int maxEvents = 100000;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){
@@ -803,8 +808,8 @@ public class CodaEventDecoder {
             detectorDecoder.translate(dataSet);
             detectorDecoder.fitPulses(dataSet);
             if(decoder.getDataEntries_VTP(event).size()!=0) {
-                for(DetectorDataDgtz entry : decoder.getDataEntries_VTP(event)) 
-                System.out.println(entry.toString());
+//                for(DetectorDataDgtz entry : decoder.getDataEntries_VTP(event)) 
+//                System.out.println(entry.toString());
             }
             System.out.println("---> printout EVENT # " + icounter);
 //            for(DetectorDataDgtz data : dataSet){

@@ -22,7 +22,7 @@ class HTCCCluster {
     private int iphimin;
     private int iphimax;
 
-    private int nphetot;
+    private double nphetot;
     private float x;
     private float y;
     private float z;
@@ -33,7 +33,7 @@ class HTCCCluster {
     private double dphi;
     private double time;
 
-    private final List<Integer> hitnphe;
+    private final List<Double> hitnphe;
     private final List<Integer> hititheta;
     private final List<Integer> hitiphi;
     private final Set<Integer> setitheta;
@@ -65,7 +65,7 @@ class HTCCCluster {
         dphi = 0.0;
         time = 0.0;
 
-        hitnphe = new ArrayList<Integer>();
+        hitnphe = new ArrayList<Double>();
         hititheta = new ArrayList<Integer>();
         hitiphi = new ArrayList<Integer>();
         hittheta = new ArrayList<Double>();
@@ -77,7 +77,7 @@ class HTCCCluster {
         setiphi = new HashSet<Integer>();
     }
     
-    void addHit(int itheta, int iphi, int nphe, double time, double theta, double phi, double dtheta, double dphi) {
+    void addHit(int itheta, int iphi, double nphe, double time, double theta, double phi, double dtheta, double dphi) {
         // TODO remove after testing
         if (!(0 <= itheta && itheta < 4))
             throw new IllegalArgumentException("itheta");
@@ -114,7 +114,6 @@ class HTCCCluster {
   
         double cosphi = 0.0;
         double sinphi = 0.0;
- //      System.out.println("calc sums " + nhitclust);
         for(int i=0; i<nhitclust; i++){
             if( i == 0 || hititheta.get(i) > ithetamax ) ithetamax = hititheta.get(i);
             if( i == 0 || hititheta.get(i) < ithetamin ) ithetamin = hititheta.get(i);
@@ -123,7 +122,6 @@ class HTCCCluster {
 
             nphetot += hitnphe.get(i);
             time += hittime.get(i) * hitnphe.get(i);
- //           System.out.println("theta " + theta/Math.pow( hitdtheta.get(i), -2. ) +  " hittheta " + hittheta.get(i));
             theta += hittheta.get(i) * Math.pow( hitdtheta.get(i), -2. );
             dtheta += Math.pow( hitdtheta.get(i), -2. );
 
@@ -135,7 +133,6 @@ class HTCCCluster {
         time /= nphetot; // weighted average
 
         theta /= dtheta;
-  //      System.out.println("theta final " + theta);
         cosphi /= dphi;
         sinphi /= dphi;
         for (int u = 0; u < 4; u++){
@@ -160,8 +157,8 @@ class HTCCCluster {
         nphiclust = setiphi.size();
     }
     
-    public int getNPheTot() {
-        return nphetot/100;
+    public double getNPheTot() {
+        return nphetot;
     }
     public int getNThetaClust() {
         return nthetaclust;

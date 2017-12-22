@@ -80,23 +80,23 @@ public class DCHBEngine extends ReconstructionEngine {
             //T0s
             T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
             T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-            DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
-            dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+            //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
+            //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
-            dbprovider.disconnect();
+            //dbprovider.disconnect();
             // T0-subtraction
            
-            for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-                int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-                int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-                int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-                int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-                double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-                double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+            //for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+            //    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+            //    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+            //    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+            //    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+            //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+            //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
 
-                T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-                T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-            }
+            //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+            //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+            //}
             return true;
         }
 
@@ -116,6 +116,23 @@ public class DCHBEngine extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0);
 
         if(Run!=newRun) {
+            DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
+            dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+            //disconnect from database. Important to do this after loading tables.
+            dbprovider.disconnect();
+            // T0-subtraction
+           
+            for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+                int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+                int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+                int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+                int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+                double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+                double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+
+                T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+                T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+            }
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
@@ -284,7 +301,7 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Workdir//Files/GEMC/TestDCOnlyE4.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/ENG/clas_001894.1.hipo";
         //String inputFile="/Users/ziegler/Workdir/Files/test/electron_fd_t0.8torus.hipo";
         //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
@@ -320,7 +337,7 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB   
             en2.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-            if (counter > 20) {
+            if (counter > 3) {
                 break;
             }
             //event.show();

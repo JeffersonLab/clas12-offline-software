@@ -32,9 +32,9 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 
-public class DCTBEngine extends ReconstructionEngine {
+public class DCTBEngineCalib extends ReconstructionEngine {
 
-	public DCTBEngine() {
+	public DCTBEngineCalib() {
 		super("DCTB","ziegler","4.0");
 	} 
 	int Run = 0;
@@ -55,7 +55,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		};
 		requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        this.getConstantsManager().setVariation("default");
+        this.getConstantsManager().setVariation("calib");
         
      // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
@@ -96,12 +96,12 @@ public class DCTBEngine extends ReconstructionEngine {
 		
         DataBank bank = event.getBank("RUN::config");
 		
-		// Load the constants
-		//-------------------
-		int newRun = bank.getInt("run", 0);
-		
-		if(Run!=newRun) {
-                    DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
+            // Load the constants
+            //-------------------
+            int newRun = bank.getInt("run", 0);
+
+            if(Run!=newRun) {
+                DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "calib");
                 dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
                 //disconnect from database. Important to do this after loading tables.
                 dbprovider.disconnect();
@@ -246,7 +246,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		for(Track trk: trkcands) {		
 		    // reset the id
                     trk.set_Id(trkId);
-                    trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector); 
+                    trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
                     for(Cross c : trk) { 
                         for(FittedHit h1 : c.get_Segment1()) {
                                 h1.set_AssociatedTBTrackID(trk.get_Id());

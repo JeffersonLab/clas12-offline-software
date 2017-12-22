@@ -136,7 +136,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
      */
-    public void calc_CentroidParams() {
+    public void calc_CentroidParams(org.jlab.rec.cvt.bmt.Geometry geo) {
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
@@ -217,7 +217,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
             }
             if (totEn == 0) {
-                System.err.println(" Cluster energy is null .... exit");
+                System.err.println(" Cluster energy is null .... exit "+this._Detector+" "+this._DetectorType);
                 return;
             }
 
@@ -229,6 +229,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             stripNumCent = weightedStrp / totEn;
             stripNumCent0 = weightedStrp0 / totEn;
             phiCent = weightedPhi / totEn;
+            //phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
             phiCent0 = weightedPhi0 / totEn;
             zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
