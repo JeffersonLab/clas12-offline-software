@@ -243,17 +243,20 @@ public class DCTBEngine extends ReconstructionEngine {
 		trkcandFinder.removeOverlappingTracks(trkcands);	
 		
 		int trkId = 1;
-		for(Track trk: trkcands) {
-			// reset the id
-			trk.set_Id(trkId); 
-                        trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
-			for(Cross c : trk) { 
-				for(FittedHit h1 : c.get_Segment1())
-					h1.set_AssociatedTBTrackID(trk.get_Id());
-			  	for(FittedHit h2 : c.get_Segment2())
-			  		h2.set_AssociatedTBTrackID(trk.get_Id());	
-			}
-			trkId++;
+		for(Track trk: trkcands) {		
+		    // reset the id
+                    trk.set_Id(trkId);
+                    trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector); 
+                    for(Cross c : trk) { 
+                        for(FittedHit h1 : c.get_Segment1()) {
+                                h1.set_AssociatedTBTrackID(trk.get_Id());
+                                
+                        }
+                        for(FittedHit h2 : c.get_Segment2()) {
+                                h2.set_AssociatedTBTrackID(trk.get_Id());                              
+                        }
+                    }
+                    trkId++;
 		}
 		
 		

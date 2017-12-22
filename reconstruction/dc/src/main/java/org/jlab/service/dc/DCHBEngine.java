@@ -337,7 +337,7 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB   
             en2.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-            if (counter > 20) {
+            if (counter > 3) {
                 break;
             }
             //event.show();
