@@ -495,7 +495,7 @@ class TriggerOptions {
         }
         //if(p.getEnergyFraction(DetectorType.ECAL)>0.218){
         if(sf >= sf_lower_limit) {
-            System.out.println("Sampling Fraction Success");
+//            System.out.println("Sampling Fraction Success");
             score = score + 100;
         }
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
