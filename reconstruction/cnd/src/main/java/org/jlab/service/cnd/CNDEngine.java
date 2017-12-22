@@ -11,7 +11,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
-import org.jlab.rec.cnd.costants.CalibrationConstantsLoader;
+import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
 import org.jlab.rec.cnd.banks.HitReader;
 import org.jlab.rec.cnd.banks.RecoBankWriter;
 import org.jlab.rec.cnd.hit.CndHit;
@@ -63,14 +63,14 @@ public class CNDEngine extends ReconstructionEngine {
 		
 		//2) find the CND hits from these half-hits
 		CndHitFinder hitFinder = new CndHitFinder();
-		hits = hitFinder.findHits(halfhits);
+		hits = hitFinder.findHits(halfhits,1);
 
 		CvtGetHTrack cvttry = new CvtGetHTrack();
 		cvttry.getCvtHTrack(event); // get the list of helix associated with the event
 		
 		int flag=0;
 		for (CndHit hit : hits){ // findlength for charged particles
-			double length =hitFinder.findLength(hit, cvttry.getHelices());
+			double length =hitFinder.findLength(hit, cvttry.getHelices(),1);
 			if (length!=0){
 				hit.set_tLength(length); // the path length is non zero only when there is a match with cvt track
 				if(flag==0){match++;}
@@ -135,12 +135,12 @@ public class CNDEngine extends ReconstructionEngine {
 		//String input = "/projet/nucleon/silvia/out_bis.hipo";
 		//String input = "/projet/nucleon/silvia/test.rec.hipo";
 		//String input = "/projet/nucleon/pierre/test_out3.hipo";
-		String input = "/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.0/out.rec.hipo";
+		String input = "/projet/nucleon/pierre/CND_run2052_2053/ctof_cnd_2052_2053.hipo";
 		//String input = "/projet/nucleon/silvia/test.hipo";
 		//String input = "/projet/nucleon/pierre/test.rec.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
-		String outputFile="/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.0/out.rec1.hipo";
+		String outputFile="/projet/nucleon/pierre/CND_run2052_2053/test.hipo";
 		HipoDataSync  writer = new HipoDataSync();
 		writer.open(outputFile);
 
@@ -149,11 +149,14 @@ public class CNDEngine extends ReconstructionEngine {
 			enb++;		
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			
-			event.show();
-			//event.getBank("CND::hits").show();
+			//event.show();
+			if (event.hasBank("CND::adc") && event.hasBank("CND::tdc")){
+			event.getBank("CND::adc").show();
+			event.getBank("CND::tdc").show();
+			}
 			en.processDataEvent(event);
 			writer.writeEvent(event);
-			event.getBank("CND::hits").show();
+			//event.getBank("CND::hits").show();
 			System.out.println("event nb "+enb);
 			//event.getBank("CND::hits").show();
 			//System.out.println();
