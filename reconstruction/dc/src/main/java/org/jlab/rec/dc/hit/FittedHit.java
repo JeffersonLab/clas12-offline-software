@@ -597,5 +597,24 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._T0SubTime = _T0SubTime;
     }
     
+    private double _tFlight;
+    private double _tProp;
+    
+    public double getTFlight() {
+        return _tFlight;
+    }
+
+    public void setTFlight(double tFlight) {
+        this._tFlight = tFlight;
+    }
+
+    public double getTProp() {
+        return _tProp;
+    }
+
+    public void setTProp(double tProp) {
+        this._tProp = tProp;
+    }
+ 
     
 }
