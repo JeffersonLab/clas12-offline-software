@@ -47,7 +47,8 @@ public class Geometry {
 
         //double angle=Constants.getCRZEDGE1()[num_region][num_detector]+(Constants.getCRZXPOS()[num_region]+(Constants.getCRZWIDTH()[num_region]/2.+num_strip*(Constants.getCRZWIDTH()[num_region]+Constants.getCRZSPACING()[num_region])))/Constants.getCRZRADIUS()[num_region];
         //double angle=Constants.getCRZEDGE1()[num_region][num_detector]+(0.5+num_strip)*Constants.getCRZWIDTH()[num_region]/Constants.getCRZRADIUS()[num_region];
-        double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
+        //double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
+        double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip+0.5) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
         return angle; //in rad 
     }
 
@@ -75,13 +76,13 @@ public class Geometry {
             }
         }
         //double strip_calc = ( (angle-Constants.getCRZEDGE1()[num_region][num_detector])*Constants.getCRZRADIUS()[num_region]-Constants.getCRZXPOS()[num_region]-Constants.getCRZWIDTH()[num_region]/2.)/(Constants.getCRZWIDTH()[num_region]+Constants.getCRZSPACING()[num_region]);
-        double strip_calc = ((angle - Constants.getCRZEDGE1()[num_region][num_detector]) * Constants.getCRZRADIUS()[num_region]) / (Constants.getCRZWIDTH()[num_region]);
-
+        //double strip_calc = ((angle - Constants.getCRZEDGE1()[num_region][num_detector]) * Constants.getCRZRADIUS()[num_region]) / (Constants.getCRZWIDTH()[num_region]);
+        double strip_calc = ((angle - Constants.getCRZEDGE1()[num_region][num_detector]) * Constants.getCRZRADIUS()[num_region]) / (Constants.getCRZWIDTH()[num_region])-0.5;
         strip_calc = (int) (Math.round(strip_calc * 1d) / 1d);
         int strip_num = (int) Math.floor(strip_calc);
 
-        //int value = strip_num + 1;
-        int value = strip_num;
+        int value = strip_num + 1;
+        //int value = strip_num;
 
         if (value < 1 || value > Constants.getCRZNSTRIPS()[num_region]) {
             value = -1;
@@ -158,16 +159,19 @@ public class Geometry {
         //For CR6C, this function returns the Z position of the strip center
         int group = 0;
         int limit = Constants.getCRCGROUP()[num_region][group];
-        double zc = Constants.getCRCZMIN()[num_region] + Constants.getCRCOFFSET()[num_region] + Constants.getCRCWIDTH()[num_region][group] / 2.;
-
+        //double zc = Constants.getCRCZMIN()[num_region] + Constants.getCRCOFFSET()[num_region] + Constants.getCRCWIDTH()[num_region][group] / 2.;
+        double zc = Constants.getCRCZMIN()[num_region];
+        
         if (num_strip > 0) {
             for (int j = 1; j < num_strip + 1; j++) {
-                zc += Constants.getCRCWIDTH()[num_region][group] / 2.;
+                //zc += Constants.getCRCWIDTH()[num_region][group] / 2.;
+                zc += Constants.getCRCWIDTH()[num_region][group];
                 if (j >= limit) { //test if we change the width
                     group++;
                     limit += Constants.getCRCGROUP()[num_region][group];
                 }
-                zc += Constants.getCRCWIDTH()[num_region][group] / 2. + Constants.getCRCSPACING()[num_region];
+                //zc += Constants.getCRCWIDTH()[num_region][group] / 2. + Constants.getCRCSPACING()[num_region];
+                zc += Constants.getCRCWIDTH()[num_region][group]/2.;
             }
         }
 
@@ -247,8 +251,9 @@ public class Geometry {
     public double getSigmaLongit(int layer, double x, double y) { // sigma for C-detector
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-        double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRCRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift);
-
+        //double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRCRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift);
+        double sigma = Constants.SigmaDrift * ((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / Math.cos(Constants.getThetaL()));
+  
         return sigma;
 
     }
@@ -323,7 +328,70 @@ public class Geometry {
 
         return randomNumber;
     }
-
+   
+     public double[] LabToDetFrame(int layer, int sector, double x, double y, double z) {	
+     	double[] newPos = new double[3];
+     
+     	newPos[0] = x-org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
+     	newPos[1] = y-org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
+     	newPos[2] = z-org.jlab.rec.cvt.bmt.Constants.Cz[layer-1][sector-1];
+ 	
+     	double ThetaZ=org.jlab.rec.cvt.bmt.Constants.Rz[layer-1][sector-1];	
+     	double ThetaY=org.jlab.rec.cvt.bmt.Constants.Ry[layer-1][sector-1];
+     	double ThetaX=org.jlab.rec.cvt.bmt.Constants.Rx[layer-1][sector-1];
+ 	
+     	//Rotate around z
+     	double xx=newPos[0];
+     	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
+     	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
+ 	
+     	//Rotate around x
+     	double yy=newPos[1];
+     	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
+     	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
+ 	
+     	//Rotate around Y
+     	double zz=newPos[2];
+     	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
+     	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
+ 	
+ 	return newPos;
+     }
+ 
+    public double[] DetToLabFrame(int layer, int sector, double x, double y, double z) {
+ 	
+ 	double[] newPos = new double[3];
+     
+ 	newPos[0] = x;
+ 	newPos[1] = y;
+ 	newPos[2] = z;
+ 	
+ 	double ThetaZ=-org.jlab.rec.cvt.bmt.Constants.Rz[layer-1][sector-1];
+ 	double ThetaY=-org.jlab.rec.cvt.bmt.Constants.Ry[layer-1][sector-1];
+ 	double ThetaX=-org.jlab.rec.cvt.bmt.Constants.Rx[layer-1][sector-1];
+ 	
+ 	//Rotate around z
+ 	double xx=newPos[0];
+ 	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
+ 	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
+ 	
+ 	//Rotate around x
+ 	double yy=newPos[1];
+ 	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
+ 	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
+ 	
+ 	//Rotate around Y
+ 	double zz=newPos[2];
+ 	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
+ 	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
+ 	
+ 	newPos[0] = x+org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
+ 	newPos[1] = y+org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
+ 	newPos[2] = z+org.jlab.rec.cvt.bmt.Constants.Cz[layer-1][sector-1];
+ 	
+ 	return newPos;
+    }
+ 
     /**
      *
      * @param sector
@@ -419,9 +487,12 @@ public class Geometry {
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         //return phi +( Constants.hDrift/2*Math.tan(Constants.getThetaL()) )/Constants.getCRZRADIUS()[num_region];
-        return phi + (Constants.hDrift * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
+        //return phi + (Constants.hDrift * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
+        return phi + (Constants.hStrip2Det * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
     }
-
+    public void SetLorentzAngle(int layer, int sector) {
+     	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector); 
+    }
     // Correct strip position before clustering
     public int getLorentzCorrectedZStrip(int sector, int layer, int theMeasuredZStrip) {
 

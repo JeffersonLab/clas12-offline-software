@@ -366,6 +366,16 @@ public class CLASDecoder {
         return bank;
     }
     
+    public HipoDataBank createTriggerBank(DataEvent event){
+        HipoDataBank bank = (HipoDataBank) event.createBank("RUN::trigger", this.codaDecoder.getTriggerWords().size());
+        
+        for(int i=0; i<this.codaDecoder.getTriggerWords().size(); i++) {
+            bank.setInt("id",      i, i+1);
+            bank.setInt("trigger", i, this.codaDecoder.getTriggerWords().get(i));
+        }
+        return bank;
+    }
+    
     public static void main(String[] args){
         
         OptionParser parser = new OptionParser("decoder");
@@ -441,7 +451,9 @@ public class CLASDecoder {
                     EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
                     DataEvent  decodedEvent = decoder.getDataEvent(event);
                     DataBank   header = decoder.createHeaderBank(decodedEvent, nrun, counter, (float) torus, (float) solenoid);
+                    DataBank   trigger = decoder.createTriggerBank(decodedEvent);
                     decodedEvent.appendBanks(header);
+                    decodedEvent.appendBanks(trigger);
 
                     HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
                     writer.writeEvent(dhe.getHipoEvent());

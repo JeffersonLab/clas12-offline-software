@@ -106,6 +106,7 @@ public class CherenkovResponse {
                 double y = bank.getFloat("y",row);
                 double z = bank.getFloat("z",row);
                 double time = bank.getFloat("time",row);
+                double nphe = bank.getFloat("nphe", row);
 
                 // FIXME: unify LTCC/HTCC detector banks
                 // Here we have to treat them differently:
@@ -115,10 +116,9 @@ public class CherenkovResponse {
                 //     The current convention in EB is to use only x/y/z, while theta/phi is
                 //     just propogated.
 
-                double nphe,theta=0,phi=0,dtheta=0,dphi=0;
+                double theta=0,phi=0,dtheta=0,dphi=0;
 
                 if (type==DetectorType.HTCC) {
-                    nphe = (double)bank.getInt("nphe", row);
                     dtheta = bank.getFloat("dtheta",row);
                     dphi = bank.getFloat("dphi",row);
                     theta = bank.getFloat("theta", row);
@@ -126,7 +126,6 @@ public class CherenkovResponse {
                 }
 
                 else if (type==DetectorType.LTCC) {
-                    nphe = bank.getFloat("nphe", row);
                     // Hardcode some dtheta/dphi values for now (for matching):
                     dtheta = 10*3.14159/180;
                     dphi   = 10*3.14159/180;

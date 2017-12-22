@@ -107,6 +107,10 @@ public class DetectorPane2D extends JPanel implements ActionListener {
     public DetectorView2D  getView(){
         return this.view2D;
     }
+
+    public JPanel getToolbar() {
+        return toolbarPane;
+    }
     
     public void update(){
         this.getView().repaint();

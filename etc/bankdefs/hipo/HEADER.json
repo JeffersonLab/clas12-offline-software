@@ -24,5 +24,14 @@
        {"name":"id",   "id":1, "type":"int16", "info":"id of the RF signal"},
        {"name":"time", "id":2, "type":"float", "info":"time of RF signal"}
      ]
-  }
+  },
+    {
+     "bank": "RUN::trigger",
+     "group": 13,
+     "info": "RUN trigger information",
+     "items": [
+       {"name":"id",        "id":1, "type":"int32", "info":"id"},
+       {"name":"trigger",   "id":2, "type":"int32", "info":"trigger word"}
+     ]
+}
 ]
