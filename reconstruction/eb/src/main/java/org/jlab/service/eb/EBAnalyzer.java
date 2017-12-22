@@ -191,8 +191,6 @@ public class EBAnalyzer {
             double sf_upper_limit = sfMean + 5*sfSigma;
             double sf_lower_limit = sfMean - 5*sfSigma;
             
-
-            
             //System.out.println("Sampling Fraction Mean " + sfMean);
             //System.out.println("Sampling Fraction Sigma" + sfSigma);
             
@@ -206,42 +204,52 @@ public class EBAnalyzer {
             
             boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
             
-            boolean ltccPionThreshold = p.vector().mag()<EBConstants.LTCC_UPPER_PION_THRESHOLD 
-                && p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
+            boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
+
+            boolean ltccKaonThreshold = p.vector().mag()>EBConstants.LTCC_UPPER_PION_THRESHOLD;
 
             switch(abs(pid)) {
                 case 11:
-                    if(htccSignalCheck==true && sfCheck==true){
+                    // require htcc nphe and ecal sampling fraction for electrons: 
+                    if(htccSignalCheck && sfCheck) {
                         this.finalizePID(p, pid);
-                        break;
                     }
+                    break;
 
                 case 211:
-                    if(vertexCheck==true && htccSignalCheck==true && sfCheck==false 
-                            && htccPionThreshold==true) {
-                        this.finalizePID(p, pid);
-                        break;
-                            }
-                    if(vertexCheck==false && htccSignalCheck==true && sfCheck==false 
-                            && htccPionThreshold==true) {
-                        this.finalizePID(p, pid);
-                        break;
-                            } 
-                    if(vertexCheck==true && htccSignalCheck==false && sfCheck==false 
-                            && htccPionThreshold==false) {
-                        this.finalizePID(p, pid);
-                        break;
-                            }
+                    if (vertexCheck && (!htccSignalCheck || !sfCheck)) {
+                        // pion is best timing
+                        this.finalizePID(p,pid);
+                    }
+                    else if (!sfCheck && htccSignalCheck && htccPionThreshold) {
+                        // pion is not the best timing, but htcc signal and above pion threshold:
+                        this.finalizePID(p,pid);
+                    }
+                    break;
                 case 321:
-                    if(vertexCheck==true && sfCheck==false && htccSignalCheck==false){
-                        this.finalizePID(p, pid);
-                        break;
+                    if (vertexCheck && (!htccSignalCheck || !sfCheck)) {
+                        // kaon is best timing
+                        if (ltccSignalCheck && ltccPionThreshold) {
+                            // let ltcc veto back to pion:
+                            this.finalizePID(p,(pid>0?211:-211));
+                        }
+                        else {
+                            this.finalizePID(p,pid);
+                        }
                     }
+                    break;
                 case 2212:
-                    if(vertexCheck==true && sfCheck==false && htccSignalCheck==false){
-                        this.finalizePID(p, pid);
-                        break;
+                    if (vertexCheck && (!htccSignalCheck || !sfCheck)) {
+                        // proton is best timing
+                        if (ltccSignalCheck && ltccPionThreshold) {
+                            // let ltcc veto back to pion:
+                            this.finalizePID(p,(pid>0?211:-211));
+                        }
+                        else {
+                            this.finalizePID(p,pid);
+                        }
                     }
+                    break;
             }
 
         }
