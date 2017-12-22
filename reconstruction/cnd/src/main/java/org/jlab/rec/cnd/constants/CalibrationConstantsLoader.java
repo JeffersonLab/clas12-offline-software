@@ -1,4 +1,4 @@
-package org.jlab.rec.cnd.costants;
+package org.jlab.rec.cnd.constants;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
