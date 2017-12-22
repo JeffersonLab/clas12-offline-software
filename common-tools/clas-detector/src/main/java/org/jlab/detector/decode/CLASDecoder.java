@@ -67,6 +67,10 @@ public class CLASDecoder {
     public void setRunNumber(int run){
         this.detectorDecoder.setRunNumber(run);
     }
+
+    public CodaEventDecoder getCodaEventDecoder() {
+	return codaDecoder;
+    }
     
     public void initEvent(DataEvent event){
         
