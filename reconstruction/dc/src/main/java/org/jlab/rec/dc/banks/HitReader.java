@@ -252,7 +252,8 @@ public class HitReader {
                     0, B[i], id[i]);          
             hit.set_B(B[i]);
             hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
-//System.out.println("getting the hit time: tdc "+time[i]+" b "+B[i]);
+            hit.setTProp(tProp[i]);
+            hit.setTFlight(tFlight[i]);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.set_CellSize( DcDetector) ;
@@ -337,6 +338,8 @@ public class HitReader {
             
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i], 0, B[i], id[i]);
             hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]); 
+            hit.setTFlight(tFlight[i]);
+            hit.setTProp(tProp[i]);
             hit.set_B(B[i]);
 // System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
             hit.set_LeftRightAmb(LR[i]);
@@ -349,7 +352,7 @@ public class HitReader {
             hit.set_Beta(this.readBeta(event, trkID[i])); 
             //reset the time based on new beta
             double newtFlight = tFlight[i]/hit.get_Beta();
-            double newTime = time[i]+tFlight[i] - newtFlight;
+            double newTime = time[i]-tProp[i] - newtFlight;
             hit.set_Time(newTime);
             
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
