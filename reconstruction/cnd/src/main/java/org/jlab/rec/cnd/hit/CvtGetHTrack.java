@@ -6,8 +6,8 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cnd.costants.CalibrationConstantsLoader;
-import org.jlab.rec.cnd.costants.Parameters;
+import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
+import org.jlab.rec.cnd.constants.Parameters;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 public class CvtGetHTrack { // this class is used to extract helical tracks from the cvt event bank. 
