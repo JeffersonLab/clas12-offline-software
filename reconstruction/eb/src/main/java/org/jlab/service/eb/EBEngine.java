@@ -94,7 +94,7 @@ public class EBEngine extends ReconstructionEngine {
         //System.out.println("CVT Tracks " + centralParticles.size());
         //System.out.println("CTOF Hits " + responseCTOF.size());
         
-        EBCentral ebm = new EBCentral(eb);
+        EBMatching ebm = new EBMatching(eb);
         
         ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
                                     centralParticles, responseCTOF, responseCND);
