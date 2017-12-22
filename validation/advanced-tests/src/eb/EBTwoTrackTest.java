@@ -62,11 +62,11 @@ public class EBTwoTrackTest {
     int hadronPDG = 0;
     int ftPDG = 0;
 
-    DataBank mcBank=null,ctrkBank=null,calBank=null;
+    DataBank mcBank=null,ctrkBank=null,calBank=null,ctofBank=null;
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
     DataBank recPartBank=null,recTrkBank=null,recFtBank=null;
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
-    DataBank ftcBank=null,fthBank=null,ftpartBank=null;
+    DataBank ftcBank=null,fthBank=null,ftpartBank=null,recBank=null;
 
     Map <Integer,List<Integer>> recCalMap=new HashMap<Integer,List<Integer>>();
     Map <Integer,List<Integer>> recCheMap=new HashMap<Integer,List<Integer>>();
@@ -179,33 +179,37 @@ public class EBTwoTrackTest {
         }
     }
 
+    private DataBank getBank(DataEvent de,String bankName) {
+        DataBank bank=null;
+        if (de.hasBank(bankName))
+            bank=de.getBank(bankName);
+        return bank;
+    }
+
     /**
      *
      * We're keeping all banks global to this class for now.
      *
      */
     private void getBanks(DataEvent de) {
-        mcBank=null;ctrkBank=null;calBank=null;
-        trkBank=null;tofBank=null;htccBank=null;ltccBank=null;
-        recPartBank=null;mcBank=null;recTrkBank=null;recFtBank=null;
-        recCalBank=null;recSciBank=null;recCheBank=null;
-        ftcBank=null;fthBank=null;ftpartBank=null;
-        if (de.hasBank("CVTRec::Tracks"))          ctrkBank=de.getBank("CVTRec::Tracks");
-        if (de.hasBank("FTOF::clusters"))          tofBank=de.getBank("FTOF::clusters");
-        if (de.hasBank("TimeBasedTrkg::TBTracks")) trkBank = de.getBank("TimeBasedTrkg::TBTracks");
-        if (de.hasBank("REC::Particle"))           recPartBank = de.getBank("REC::Particle");
-        if (de.hasBank("MC::Particle"))            mcBank = de.getBank("MC::Particle");
-        if (de.hasBank("REC::Cherenkov"))          recCheBank = de.getBank("REC::Cherenkov");
-        if (de.hasBank("REC::Calorimeter"))        recCalBank = de.getBank("REC::Calorimeter");
-        if (de.hasBank("REC::Scintillator"))       recSciBank = de.getBank("REC::Scintillator");
-        if (de.hasBank("LTCC::clusters"))          ltccBank = de.getBank("LTCC::clusters");
-        if (de.hasBank("HTCC::rec"))               htccBank = de.getBank("HTCC::rec");
-        if (de.hasBank("REC::Track"))              recTrkBank = de.getBank("REC::Track");
-        if (de.hasBank("REC::ForwardTagger"))      recFtBank = de.getBank("REC::ForwardTagger");
-        if (de.hasBank("FTCAL::clusters"))         ftcBank = de.getBank("FTCAL::clusters");
-        if (de.hasBank("FTHODO::clusters"))        fthBank = de.getBank("FTHODO::clusters");
-        if (de.hasBank("FT::particles"))           ftpartBank = de.getBank("FT::particles");
-        if (de.hasBank("ECAL::clusters"))          calBank = de.getBank("ECAL::clusters");
+        ctrkBank    = getBank(de,"CVTRec::Tracks");
+        tofBank     = getBank(de,"FTOF::clusters");
+        trkBank     = getBank(de,"TimeBasedTrkg::TBTracks");
+        recPartBank = getBank(de,"REC::Particle");
+        mcBank      = getBank(de,"MC::Particle");
+        recCheBank  = getBank(de,"REC::Cherenkov");
+        recCalBank  = getBank(de,"REC::Calorimeter");
+        recSciBank  = getBank(de,"REC::Scintillator");
+        ltccBank    = getBank(de,"LTCC::clusters");
+        htccBank    = getBank(de,"HTCC::rec");
+        recTrkBank  = getBank(de,"REC::Track");
+        recFtBank   = getBank(de,"REC::ForwardTagger");
+        ftcBank     = getBank(de,"FTCAL::clusters");
+        fthBank     = getBank(de,"FTHODO::clusters");
+        ftpartBank  = getBank(de,"FT::particles");
+        calBank     = getBank(de,"ECAL::clusters");
+        ctofBank    = getBank(de,"CTOF::hits");
+        recBank     = getBank(de,"REC::Event");
         loadMaps();
     }
    
@@ -425,6 +429,14 @@ public class EBTwoTrackTest {
             nEvents++;
 
             if (recPartBank!=null && recFtBank!=null) {
+
+                if (debug) {
+                    System.out.println("\n\n#############################################################\n");
+                    if (ftpartBank!=null) ftpartBank.show();
+                    recFtBank.show();
+                    recPartBank.show();
+                }
+
                 for (int ii=0; ii<recFtBank.rows(); ii++) {
                     int irp = recFtBank.getInt("pindex",ii);
                     int pid = recPartBank.getInt("pid",irp);
@@ -462,6 +474,14 @@ public class EBTwoTrackTest {
         if (isCentral) {
             if (ctrkBank==null) return;
             if (ctrkBank.rows()==0) return;
+            if (debug) {
+                System.out.println("\n\n#############################################################\n");
+                if (recBank!=null) recBank.show();
+                if (ctofBank!=null) ctofBank.show();
+                if (ctrkBank!=null) ctrkBank.show();
+                if (recPartBank!=null) recPartBank.show();
+                if (recSciBank!=null) recSciBank.show();
+            }
             for (int ii=0; ii<ctrkBank.rows(); ii++) {
                 if (ctrkBank.getInt("q",ii)>0) {
                     final double phi0 = ctrkBank.getFloat("phi0",ii);
