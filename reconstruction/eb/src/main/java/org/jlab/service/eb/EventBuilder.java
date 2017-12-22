@@ -334,7 +334,7 @@ public class EventBuilder {
      */
     public void processNeutralTracks() {
 
-        EBCentral ebm=new EBCentral(this);
+        EBMatching ebm=new EBMatching(this);
        
         // define neutrals based on unmatched ECAL clusters:
         
@@ -513,7 +513,7 @@ class TriggerOptions {
             if(getSoftwareTriggerScore(p)>=this.score_requirement) { //Possible Electron
                 if(this.charge==p.getCharge()){
                     p.setPid(this.id);
-		    flag = true; //Software trigger found
+                    flag = true; //Software trigger found
                 }
             }
         }
@@ -532,9 +532,9 @@ class TriggerOptions {
 
         if(index>=0){
             event.moveUp(index);
-            if(event.getParticle(0).getPid()==this.id){
+            //if(event.getParticle(0).getPid()==this.id){
                 //flag = true;
-            }
+            //}
         }
 
 
