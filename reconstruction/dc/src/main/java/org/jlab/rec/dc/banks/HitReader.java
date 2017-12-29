@@ -251,7 +251,8 @@ public class HitReader {
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - T_0, 
                     0, B[i], id[i]);          
             hit.set_B(B[i]);
-            hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
+            //hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
+            hit.setT0SubTime(time[i]- T_0 - tProp[i] - tFlight[i]); // Temporary fix for triple bands
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
             hit.set_LeftRightAmb(LR[i]);
@@ -337,7 +338,8 @@ public class HitReader {
             }
             
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i], 0, B[i], id[i]);
-            hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]); 
+            //hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]); 
+            hit.setT0SubTime(time[i] - tProp[i] - tFlight[i]); // Temporary fix for triple bands 
             hit.setTFlight(tFlight[i]);
             hit.setTProp(tProp[i]);
             hit.set_B(B[i]);
