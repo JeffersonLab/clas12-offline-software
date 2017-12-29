@@ -113,14 +113,8 @@ public class ColumnData implements Comparable<ColumnData> {
 					
 				case INT64:
 					//TODO MAJOR HACK
-//					long longs[] = event.getLong(_fullName)
-//					return (longs == null) ? 0 : longs.length;
-					
-					return 0;
-					
-//					int ints2[] = event.getInt(_fullName);
-//					return (ints2 == null) ? 0 : ints2.length/2;
-
+					long longs[] = event.getLong(_fullName);
+					return (longs == null) ? 0 : longs.length;
 
 				case FLOAT32:
 					float floats[] = event.getFloat(_fullName);
@@ -166,9 +160,7 @@ public class ColumnData implements Comparable<ColumnData> {
 					break;
 					
 				case INT64:
-					//TODO MAJOR HACK
-	//				oa = event.getLong(_fullName);
-					oa = null;
+					oa = event.getLong(_fullName);
 					break;
 
 				case FLOAT32:
@@ -274,9 +266,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				break;
 				
 			case INT64:
-				//TODO MAJOR HACK
-//				len = ((long[]) oa).length;
-				len = 0;
+				len = ((long[]) oa).length;
 				break;
 
 			case FLOAT32:

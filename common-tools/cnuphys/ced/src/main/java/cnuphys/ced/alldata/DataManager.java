@@ -218,9 +218,8 @@ public class DataManager {
 						int type = dd.getProperty("type", columnName);
 						
 						if ((columnName.contains("timestamp"))) {
-							//TODO MAJOR HACK!
+							//TODO MAJOR HACK (STILL NEEDED)!
 							type = 4;
-							//System.err.println("HEY MAN");
 						}
 
 						if ((type < 1) || (type > 6) || (type == 24)) {

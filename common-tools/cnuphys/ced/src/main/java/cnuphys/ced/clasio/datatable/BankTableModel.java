@@ -116,6 +116,8 @@ public class BankTableModel extends DefaultTableModel {
 			return "" + DataManager.getInstance().getShortArray(_event, fullName)[row];
 		case ColumnData.INT32:
 			return "" + DataManager.getInstance().getIntArray(_event, fullName)[row];
+		case ColumnData.INT64:
+			return "" + DataManager.getInstance().getLongArray(_event, fullName)[row];
 		case ColumnData.FLOAT32:
 			float f =  DataManager.getInstance().getFloatArray(_event, fullName)[row];;
 			return  DoubleFormat.doubleFormat(f, 5, 4);

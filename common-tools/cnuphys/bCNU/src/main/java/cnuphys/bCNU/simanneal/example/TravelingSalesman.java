@@ -44,6 +44,10 @@ public class TravelingSalesman extends Solution {
 		
 		System.arraycopy(ts.cities, 0, cities, 0, ts.count());
 	}
+	
+	public int getThermalizationCount() {
+		return 10*count();
+	}
 
 	@Override
 	public double getEnergy() {

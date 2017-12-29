@@ -11,8 +11,9 @@ public class Simulation {
 	private double _temperature;
 	
 	private double _coolRate;
-	
-	private int _thermalizationCount;
+		
+	//number of successes
+	private int _successCount;
 	
 	// Listener list for solution updates.
 	private EventListenerList _listenerList;
@@ -21,11 +22,11 @@ public class Simulation {
 	
 	private double _minTemp;
 
-	public Simulation(Solution initialSolution, double coolRate, int thermalizationCount) {
-		this(initialSolution, coolRate, thermalizationCount, -1L);
+	public Simulation(Solution initialSolution, double coolRate) {
+		this(initialSolution, coolRate,-1L);
 	}
 		
-	public Simulation(Solution initialSolution, double coolRate, int thermalizationCount, long seed) {
+	public Simulation(Solution initialSolution, double coolRate, long seed) {
 		
 		if (seed > 0) {
 			_rand = new Random(seed);
@@ -37,7 +38,6 @@ public class Simulation {
 		_temperature = 1.0;
 		_bestSolution = initialSolution;
 		_coolRate = coolRate;
-		_thermalizationCount = thermalizationCount;
 		
 		//base the min temp loosly on the coorate
 		_minTemp = Math.min(0.003, _coolRate);
@@ -52,7 +52,7 @@ public class Simulation {
 		Solution oldBest = _bestSolution.copy();
 		
 		while (_temperature > _minTemp) {
-			for (int i = 0; i < _thermalizationCount; i++) {
+			for (int i = 0; i < _bestSolution.getThermalizationCount(); i++) {
 				Solution neighbor = _bestSolution.getNeighbor();
 				double ebest = _bestSolution.getEnergy();
 				double etest = neighbor.getEnergy();
