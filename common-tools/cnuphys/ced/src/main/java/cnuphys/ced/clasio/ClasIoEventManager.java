@@ -454,10 +454,7 @@ public class ClasIoEventManager {
 		try {
 			Log.getInstance().info("Attempting to create EvioETSource.");
 			
-			//TODO restore station FIX!!!
-	//		_dataSource = new EvioETSource(_currentMachine, _currentStation);
-			_dataSource = new EvioETSource(_currentMachine);
-			
+			_dataSource = new EvioETSource(_currentMachine, _currentStation);
 			
 			if (_dataSource == null) {
 				Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
