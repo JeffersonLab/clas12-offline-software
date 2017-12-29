@@ -1,81 +1,264 @@
 package cnuphys.bCNU.simanneal;
 
+import java.util.Properties;
 import java.util.Random;
 
 import javax.swing.event.EventListenerList;
 
 public class Simulation {
 	
+	//property keys
+	public static final String RANDSEED = "randseed";
+	public static final String COOLRATE = "coolrate";
+	public static final String MINTEMP  = "mintemp";
+	public static final String THERMALCOUNT  = "thermalcount";
+	public static final String SUCCESSCOUNT  = "successcount";
+	public static final String MAXSTEPS  = "maxsteps";
+
+	//current best solution
 	private Solution _bestSolution;
 	
+	//current temperature
 	private double _temperature;
 	
-	private double _coolRate;
+	//the cooling rate used this way,
+	//tNext = (1-coolrate)*tCurrent
+	private double _coolRate = 0.1;
 		
-	//number of successes
+	//number of successes before lowering temp
 	private int _successCount;
+	
+	//number of tries before lowering temp (unless
+	//_successCount reached first
+	private int _thermalizationCount = 200;
 	
 	// Listener list for solution updates.
 	private EventListenerList _listenerList;
 	
+	//random number generator
 	private Random _rand;
 	
+	//simulation properties
+	private Properties _props;
+	
+	//the min or stopping temperature
 	private double _minTemp;
+	
+	//max steps (temp reductions) until stop (unless min temp is reached)
+	private int _maxSteps = 100;
 
-	public Simulation(Solution initialSolution, double coolRate) {
-		this(initialSolution, coolRate,-1L);
+		
+	/**
+	 * Create a Simulation
+	 * @param initialSolution the initial solution
+	 * @param props key-value properties of the simulation
+	 */
+	public Simulation(Solution initialSolution, Properties props) {
+		
+		_props = props;
+		
+		createRandomGenerator();
+		setParameters();
+		
+		_bestSolution = initialSolution;
+		
+		setInitialTemperature();
+		
 	}
+	
+	private void setInitialTemperature() {
+		//find a average energy step
 		
-	public Simulation(Solution initialSolution, double coolRate, long seed) {
+		int n = 100;
+		double e0 = _bestSolution.getEnergy();
+		double sum = 0;
 		
-		if (seed > 0) {
-			_rand = new Random(seed);
+		for (int i  = 0; i < n; i++) {
+			double e1 = _bestSolution.getNeighbor().getEnergy();
+			sum += Math.pow(e1-e0, 2);
+		}
+		
+		_temperature = 10*Math.sqrt(sum/n);
+		
+		System.out.println("Initial temperature: " + _temperature);
+	}
+	
+	//create the random generator using a seed if provided
+	private void createRandomGenerator() {
+		if (_props.containsKey(RANDSEED)) {
+			long seed = Long.parseLong(_props.getProperty(RANDSEED));
+			if (seed > 0) {
+				_rand = new Random(seed);
+			}
+			else {
+				_rand = new Random();
+			}
 		}
 		else {
 			_rand = new Random();
 		}
-		
-		_temperature = 1.0;
-		_bestSolution = initialSolution;
-		_coolRate = coolRate;
-		
-		//base the min temp loosly on the coorate
-		_minTemp = Math.min(0.003, _coolRate);
 	}
 	
+	//set parameters from what is in properties
+	private void setParameters() {
+		//coolrate
+		if (_props.containsKey(COOLRATE)) {
+			_coolRate = Double.parseDouble(_props.getProperty(COOLRATE));
+		}
+		
+		//min temp
+		if (_props.containsKey(MINTEMP)) {
+			_minTemp = Double.parseDouble(_props.getProperty(MINTEMP));
+		}
+		else {
+			_minTemp = Math.min(0.0001, _coolRate);
+		}
+
+		//thermalization count
+		if (_props.containsKey(THERMALCOUNT)) {
+			_thermalizationCount = Integer.parseInt(_props.getProperty(THERMALCOUNT));
+		}
+		
+		//success count
+		if (_props.containsKey(SUCCESSCOUNT)) {
+			_successCount = Integer.parseInt(_props.getProperty(SUCCESSCOUNT));
+		}
+		else {
+			_successCount = _thermalizationCount/10;
+		}
+		
+		//max steps
+		if (_props.containsKey(MAXSTEPS)) {
+			_maxSteps = Integer.parseInt(_props.getProperty(MAXSTEPS));
+		}
+		
+	}
+	
+	/**
+	 * Get the cool rate. It is used this way:
+	 * tNext = (1-coolrate)*tCurrent
+	 * @return the cool rate.
+	 */
+	public double getCoolRate() {
+		return _coolRate;
+	}
+	
+	/**
+	 * Set the cool rate. It is used this way:
+	 * tNext = (1-coolrate)*tCurrent
+	 * @param coolRate the new cool rate
+	 */
+	public void setCoolRate(double coolRate) {
+		_coolRate = coolRate;
+	}
+	
+	/**
+	 * Get the temperature
+	 * @return the temperature
+	 */
 	public double getTemperature() {
 		return _temperature;
 	}
 	
+	/**
+	 * Get the number of reconfigure attempts at a given temperature
+	 * @return the number of reconfigure attempts at a given temperature
+	 */
+	public int getThermalizationCount() {
+		return _thermalizationCount;
+	}
+	
+	/**
+	 * Set the number of reconfigure attempts at a given temperature
+	 * @param thermalCount the number of reconfigure attempts at a given temperature
+	 */
+	public void setThermalizationCount(int thermalCount) {
+		_thermalizationCount = thermalCount;
+	}
+
+	/**
+	 * Get the number of successful reconfigure attempts that will
+	 * short circuit the thermalization process
+	 * @return the number of successful reconfigure attempts
+	 */
+	public int getSuccessCount() {
+		return _successCount;
+	}
+	
+	/**
+	 * Set the number of successful reconfigure attempts that will
+	 * @param successCount the number of successful reconfigure attempts
+	 */
+	public void setSuccessCount(int successCount) {
+		_successCount = successCount;
+	}
+
+	
+	/**
+	 * Get the minimum or stopping temperature
+	 * @return the minimum or stopping temperature
+	 */
+	public double getMinTemperature() {
+		return _minTemp;
+	}
+	
+	/**
+	 * Set the minimum or stopping temperature
+	 * @param minTemp the minimum or stopping temperature
+	 */
+	public void setMinTemperature(double minTemp) {
+		_minTemp = minTemp;
+	}
+	
+	/**
+	 * run the simulation
+	 */
 	public void run() {
 		double factor = 1. - _coolRate;
 		Solution oldBest = _bestSolution.copy();
 		
-		while (_temperature > _minTemp) {
-			for (int i = 0; i < _bestSolution.getThermalizationCount(); i++) {
+		int step = 0;
+		
+		while ((step < _maxSteps) && (_temperature > _minTemp)) {
+			
+			int succ = 0;
+			
+			double ebest = _bestSolution.getEnergy();
+			
+			for (int i = 0; i < getThermalizationCount(); i++) {
 				Solution neighbor = _bestSolution.getNeighbor();
-				double ebest = _bestSolution.getEnergy();
 				double etest = neighbor.getEnergy();
 				
-				if (etest < ebest) {
+				if (metrop(ebest, etest)) {
 					_bestSolution = neighbor;
-				}
-				else {
-					double delE = etest - ebest; //> 0
-					double prob = Math.exp(-delE/_temperature);
-					if (_rand.nextDouble() < prob) {
-						_bestSolution = neighbor;
+					ebest = etest;
+					succ++;
+					if (succ > _successCount) {
+						break;
 					}
 				}
+							
 			}
 			
 			_temperature *= factor;
+			step++;
 			notifyListeners(_bestSolution, oldBest);
 		}
 	}
 	
+		
+	//the Metropolis test
+	private boolean metrop(double ebest, double etest) {
+		if (etest < ebest) {
+			return true;
+		}
+		double delE = etest - ebest; //> 0
+		double prob = Math.exp(-delE/_temperature);
+		return (_rand.nextDouble() < prob);
+	}
+	
 	/**
-	 * Notify listeners that a range slider (namely "this") was updated.
+	 * Notify listeners that the solution was updated
 	 */
 	protected void notifyListeners(Solution newSolution, Solution oldSolution) {
 		if (_listenerList == null) {
