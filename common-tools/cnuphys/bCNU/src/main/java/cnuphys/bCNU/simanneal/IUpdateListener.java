@@ -4,5 +4,5 @@ import java.util.EventListener;
 
 public interface IUpdateListener extends EventListener {
 
-	public void updateSolution(Solution newSolution, Solution oldSolution, double temperature);
+	public void updateSolution(Simulation simulation, Solution newSolution, Solution oldSolution);
 }

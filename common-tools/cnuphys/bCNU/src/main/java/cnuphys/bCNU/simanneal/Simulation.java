@@ -15,9 +15,9 @@ public class Simulation {
 	public static final String SUCCESSCOUNT  = "successcount";
 	public static final String MAXSTEPS  = "maxsteps";
 
-	//current best solution
-	private Solution _bestSolution;
-	
+	//current solution
+	private Solution _currentSolution;
+		
 	//current temperature
 	private double _temperature;
 	
@@ -60,21 +60,29 @@ public class Simulation {
 		createRandomGenerator();
 		setParameters();
 		
-		_bestSolution = initialSolution;
+		_currentSolution = initialSolution;
 		
 		setInitialTemperature();
 		
+	}
+	
+	/**
+	 * Get the current solution
+	 * @return the current solution
+	 */
+	public Solution currentSolution() {
+		return _currentSolution;
 	}
 	
 	private void setInitialTemperature() {
 		//find a average energy step
 		
 		int n = 100;
-		double e0 = _bestSolution.getEnergy();
+		double e0 = _currentSolution.getEnergy();
 		double sum = 0;
 		
 		for (int i  = 0; i < n; i++) {
-			double e1 = _bestSolution.getNeighbor().getEnergy();
+			double e1 = _currentSolution.getNeighbor().getEnergy();
 			sum += Math.pow(e1-e0, 2);
 		}
 		
@@ -111,7 +119,7 @@ public class Simulation {
 			_minTemp = Double.parseDouble(_props.getProperty(MINTEMP));
 		}
 		else {
-			_minTemp = Math.min(0.0001, _coolRate);
+			_minTemp = Math.min(1.0e-08, _coolRate);
 		}
 
 		//thermalization count
@@ -215,7 +223,7 @@ public class Simulation {
 	 */
 	public void run() {
 		double factor = 1. - _coolRate;
-		Solution oldBest = _bestSolution.copy();
+		Solution oldSolution = _currentSolution.copy();
 		
 		int step = 0;
 		
@@ -223,15 +231,15 @@ public class Simulation {
 			
 			int succ = 0;
 			
-			double ebest = _bestSolution.getEnergy();
+			double eCurrent = _currentSolution.getEnergy();
 			
 			for (int i = 0; i < getThermalizationCount(); i++) {
-				Solution neighbor = _bestSolution.getNeighbor();
-				double etest = neighbor.getEnergy();
+				Solution neighbor = _currentSolution.getNeighbor();
+				double eTest = neighbor.getEnergy();
 				
-				if (metrop(ebest, etest)) {
-					_bestSolution = neighbor;
-					ebest = etest;
+				if (metrop(eCurrent, eTest)) {
+					_currentSolution = neighbor;
+					eCurrent = eTest;
 					succ++;
 					if (succ > _successCount) {
 						break;
@@ -242,7 +250,7 @@ public class Simulation {
 			
 			_temperature *= factor;
 			step++;
-			notifyListeners(_bestSolution, oldBest);
+			notifyListeners(_currentSolution, oldSolution);
 		}
 	}
 	
@@ -273,7 +281,7 @@ public class Simulation {
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IUpdateListener.class) {
 				((IUpdateListener) listeners[i + 1])
-						.updateSolution(newSolution, oldSolution, _temperature);
+						.updateSolution(this, newSolution, oldSolution);
 			}
 		}
 	}

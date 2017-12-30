@@ -1,14 +1,22 @@
 package cnuphys.bCNU.simanneal.example;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import cnuphys.bCNU.simanneal.IUpdateListener;
 import cnuphys.bCNU.simanneal.Simulation;
+import cnuphys.bCNU.simanneal.SimulationPanel;
 import cnuphys.bCNU.simanneal.Solution;
 import cnuphys.splot.example.APlotDialog;
 import cnuphys.splot.fit.FitType;
@@ -24,7 +32,7 @@ import cnuphys.splot.style.SymbolType;
 public class TravelingSalesman extends Solution {
 	
 	//the array of cities
-	private City[] _cities;
+	private TSCity[] _cities;
 	
 	//random number generator
 	private static Random _rand = new Random();
@@ -37,16 +45,32 @@ public class TravelingSalesman extends Solution {
 	 * @param numCity the number of cities
 	 */
 	public TravelingSalesman(int numCity) {
-		_cities = new City[numCity];
+		_cities = new TSCity[numCity];
 		
 		for (int i = 0; i < numCity; i++) {
-			_cities[i] = new City();
+			_cities[i] = new TSCity();
 		}
 		
 		_itinerary = new int[numCity];
 		for (int i = 0; i < numCity; i++) {
 			_itinerary[i] = i;
 		}
+	}
+	
+	/**
+	 * Get the itinerary
+	 * @return the itinerary
+	 */
+	public int[] getItinerary() {
+		return _itinerary;
+	}
+	
+	/**
+	 * Get the cities
+	 * @return the cities
+	 */
+	public TSCity [] getCities() {
+		return _cities;
 	}
 	
 	/**
@@ -108,54 +132,15 @@ public class TravelingSalesman extends Solution {
 			int nn = (seg[0] - seg[1] + count() - 1) % count();  //num not in segment
 			seg[2] = seg[1] + _rand.nextInt(Math.abs(nn-1)) + 1;
 			seg[2] = seg[2] % count();
-//			System.out.println("[" + seg[0] + "-" + seg[1] + "] @ " + seg[2]);
 			transport(neighbor._itinerary, seg);
-			
-//			
-//			int idx1 = _rand.nextInt(count());
-//			int idx2 = _rand.nextInt(count());
-//			
-//			while (idx2 == idx1) {
-//				idx2 = _rand.nextInt(count());
-//			}
-//			
-//			
-//			int temp = neighbor._itinerary[idx1];
-//			neighbor._itinerary[idx1] = neighbor._itinerary[idx2];
-//			neighbor._itinerary[idx2] = temp;
 		}
 		else { //reversal
 			reverse(neighbor._itinerary, seg);
 		}
 		
-//		
-//	
-//		int idx1 = _rand.nextInt(count());
-//		int idx2 = _rand.nextInt(count());
-//		
-//		while (idx2 == idx1) {
-//			idx2 = _rand.nextInt(count());
-//		}
-//		
-//		
-//		int temp = neighbor._itinerary[idx1];
-//		neighbor._itinerary[idx1] = neighbor._itinerary[idx2];
-//		neighbor._itinerary[idx2] = temp;
 		return neighbor;
 	}
 	
-	
-
-	int oldArry[] = null;
-	
-	private boolean eqArry(int[] a1, int[] a2) {
-		for (int i = 0; i < a1.length; i++) {
-			if (a1[i] != a2[i]) {
-				return false;
-			}
-		}
-		return true;
-	}
 	
 	private void transport(int[] iArry, int[] seg) {
 		ArrayList<Integer> alist = new ArrayList<>();
@@ -208,37 +193,6 @@ public class TravelingSalesman extends Solution {
 		
 		
 		int len = iArry.length;
-//		
-//		if (oldArry == null) {
-//			oldArry = new int[len];
-//			System.arraycopy(iArry, 0, oldArry, 0, len);
-//			
-//			System.out.print("[");
-//			for (int i = 0; i < len; i++) {
-//				System.out.print(iArry[i]);
-//				if (i < (len - 1)) {
-//					System.out.print(", ");
-//				}
-//			}
-//			System.out.println("]");
-//
-//		}
-//		else {
-//			if (!eqArry(iArry, oldArry)) {
-//				System.out.print("[");
-//				for (int i = 0; i < len; i++) {
-//					System.out.print(iArry[i]);
-//					if (i < (len - 1)) {
-//						System.out.print(", ");
-//					}
-//				}
-//				System.out.println("]");
-//				System.arraycopy(iArry, 0, oldArry, 0, len);
-//
-//			}
-//		}
-
-		
 		
 		int cArry[] = new int[len];
 		System.arraycopy(iArry, 0, cArry, 0, len);
@@ -261,8 +215,6 @@ public class TravelingSalesman extends Solution {
 			idx2--;
 		}
 		
-
-
 	}
 	
 	//get the segment for reconfiguration
@@ -287,53 +239,15 @@ public class TravelingSalesman extends Solution {
 		return seg;
 	}
 	
-	
-//	@Override
-//	public Solution getNeighbor() {
-//		TravelingSalesman neighbor = (TravelingSalesman)copy();
-//	
-//		int idx1 = _rand.nextInt(count());
-//		int idx2 = _rand.nextInt(count());
-//		
-//		while (idx2 == idx1) {
-//			idx2 = _rand.nextInt(count());
-//		}
-//		
-//		
-//		City temp = neighbor.cities[idx1];
-//		neighbor.cities[idx1] = neighbor.cities[idx2];
-//		neighbor.cities[idx2] = temp;
-//		return neighbor;
-//	}
-
 
 	@Override
 	public Solution copy() {
 		return new TravelingSalesman(this);
 	}
 	
-	/**
-	 * City for traveling salesman demo
-	 * @author heddle
-	 *
-	 */
-	class City {
-		
-		public double x;
-		public double y;
-		
-		public City() {
-			x = Math.random();
-			y = Math.random();
-		}
-		
-		public double distance(City c) {
-			return Math.hypot(c.x-x, c.y-y);
-		}
-	}
 	
 	//create a temperature plot
-	private static APlotDialog makePlot(List<Double> temps, List<Double> dists) {
+	private static APlotDialog XmakePlot(List<Double> temps, List<Double> dists) {
 		
 		int len = temps.size();
 		double tArry[] = new double[len];
@@ -434,7 +348,7 @@ public class TravelingSalesman extends Solution {
 	public static void main(String arg[]) {
 		//initial solution
 		
-		int numCity = 1000;
+		int numCity = 200;
 		
 		TravelingSalesman initSol = new TravelingSalesman(numCity);
 		System.out.println("City count: " + initSol.count());
@@ -470,9 +384,10 @@ public class TravelingSalesman extends Solution {
 			
 
 			@Override
-			public void updateSolution(Solution newSolution, Solution oldSolution, double temperature) {
+			public void updateSolution(Simulation simulation, Solution newSolution, Solution oldSolution) {
 				TravelingSalesman ts = (TravelingSalesman)newSolution;
-				System.out.println(String.format("T: %-10.5f   D: %-10.5f", temperature, ts.getDistance()));
+				double temperature = simulation.getTemperature();
+				System.out.println(String.format("T: %-12.8f   D: %-10.5f", temperature, ts.getDistance()));
 				temps.add(temperature);
 				dists.add(ts.getDistance());
 
@@ -481,9 +396,41 @@ public class TravelingSalesman extends Solution {
 		};
 		
 		simulation.addUpdateListener(updater);
+		
+		final JFrame frame = new JFrame();
+
+		// set up what to do if the window is closed
+		WindowAdapter windowAdapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				System.exit(1);
+			}
+		};
+
+		frame.addWindowListener(windowAdapter);
+
+		frame.setLayout(new BorderLayout());
+		
+		TSDisplay tsd = new TSDisplay(simulation);
+		tsd.setPreferredSize(new Dimension(600, 600));
+		
+		SimulationPanel simPanel = new SimulationPanel(simulation, null, tsd, null);
+		frame.add(simPanel, BorderLayout.CENTER);
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				frame.pack();
+				frame.setVisible(true);
+				frame.setLocationRelativeTo(null);
+			}
+		});
+
+		
+		
 		simulation.run();
 		
-		makePlot(temps, dists).setVisible(true);
+//		makePlot(temps, dists).setVisible(true);
 	}
 
 }

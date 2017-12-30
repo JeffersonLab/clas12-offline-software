@@ -131,6 +131,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// event menu
 	private ClasIoEventMenu _eventMenu;
 	
+	//weird menu
+	private JMenu _weirdMenu;
+	
 	// busy panel shows working when reading file
 	private static BusyPanel _busyPanel;
 
@@ -547,6 +550,36 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		//FastMC
 		//mmgr.addMenu(new FastMCMenu());
+		
+		//weird menu
+		addWeirdMenu();
+	}
+	
+	//add some fun stuff
+	private void addWeirdMenu() {
+		String weirdTitle = "w " + "\u018e" + " i " + "\u1d19" + " d";
+		_weirdMenu = new JMenu(weirdTitle);		
+
+		// eliza!
+		final JMenuItem elizaItem = new JMenuItem("Eliza...");
+		
+		ActionListener al1 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+				
+				if (source == elizaItem) {
+				ElizaDialog.showEliza(_instance);
+				}
+			}
+		};
+		
+		
+		elizaItem.addActionListener(al1);
+		_weirdMenu.add(elizaItem, 0);
+
+		MenuManager.getInstance().addMenu(_weirdMenu);
+
 	}
 	
 	//add to the file menu
@@ -591,16 +624,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		fmenu.insertSeparator(0);
 
-		// eliza!
-		JMenuItem elizaItem = new JMenuItem("Eliza...");
-		ActionListener al1 = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ElizaDialog.showEliza(_instance);
-			}
-		};
-		elizaItem.addActionListener(al1);
-		fmenu.add(elizaItem, 0);
 
 		JMenuItem aboutItem = new JMenuItem("About ced...");
 		ActionListener al0 = new ActionListener() {
