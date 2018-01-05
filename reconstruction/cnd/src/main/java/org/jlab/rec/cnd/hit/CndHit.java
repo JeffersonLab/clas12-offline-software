@@ -2,7 +2,6 @@ package org.jlab.rec.cnd.hit;
 
 import java.util.ArrayList;
 
-import org.jlab.rec.cnd.hit.HalfHit;
 
 
 public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{

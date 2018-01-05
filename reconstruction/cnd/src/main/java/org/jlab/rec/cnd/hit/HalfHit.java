@@ -1,7 +1,6 @@
 package org.jlab.rec.cnd.hit;
 
 import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
-import org.jlab.rec.cnd.constants.Parameters;
 
 public class HalfHit {
 
