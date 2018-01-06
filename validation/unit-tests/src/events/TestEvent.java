@@ -25,14 +25,13 @@ public class TestEvent {
 
 		config.setInt("run", 0, (int) 11);
 		config.setInt("event", 0, (int) 1);
+		config.setInt("unixtime", 0, (int) 0);
 		config.setInt("trigger", 0, (int) 0);
 		config.setLong("timestamp", 0, (long) 0);
 		config.setByte("type", 0, (byte) 0);
 		config.setByte("mode", 0, (byte) 0);
 		config.setFloat("torus", 0, (float) -1.0);
 		config.setFloat("solenoid", 0, (float) 0.0);
-		config.setFloat("rf", 0, (float) 0.0);
-		config.setFloat("startTime", 0, (float) 0.0);
 		
 		for(int i = 0; i < 37; i++) {
 			DCtdc.setByte("sector", i, (byte) 1);
@@ -139,14 +138,13 @@ public class TestEvent {
 
 		config.setInt("run", 0, (int) 11);
 		config.setInt("event", 0, (int) 1);
-		config.setInt("trigger", 0, (int) 0);
+		config.setInt("unixtime", 0, (int) 0);
+                config.setInt("trigger", 0, (int) 0);
 		config.setLong("timestamp", 0, (long) 0);
 		config.setByte("type", 0, (byte) 0);
 		config.setByte("mode", 0, (byte) 0);
 		config.setFloat("torus", 0, (float) -1.0);
 		config.setFloat("solenoid", 0, (float) 1.0);
-		config.setFloat("rf", 0, (float) 0.0);
-		config.setFloat("startTime", 0, (float) 0.0);
 		
 		for(int i = 0; i < 7; i++) {
 			SVTadc.setByte("order", i, (byte) 0);
@@ -215,14 +213,13 @@ public class TestEvent {
 
 		config.setInt("run", 0, (int) 11);
 		config.setInt("event", 0, (int) 1);
-		config.setInt("trigger", 0, (int) 0);
+		config.setInt("unixtime", 0, (int) 0);
+                config.setInt("trigger", 0, (int) 0);
 		config.setLong("timestamp", 0, (long) 0);
 		config.setByte("type", 0, (byte) 0);
 		config.setByte("mode", 0, (byte) 0);
 		config.setFloat("torus", 0, (float) -1.0);
 		config.setFloat("solenoid", 0, (float) 0.0);
-		config.setFloat("rf", 0, (float) 0.0);
-		config.setFloat("startTime", 0, (float) 0.0);
 
 		for(int i = 0; i < 48; i++) {
 			ECALadc.setByte("sector", i, (byte) 1);

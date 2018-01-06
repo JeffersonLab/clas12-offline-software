@@ -162,7 +162,7 @@ public class TableLoader {
             //	   a track with local angle alpha (for local angle = alpha)
 	    // double deltatime_bfield = CCDBConstants.getDELT_BFIELD_COEFFICIENT()[s][r]*Math.pow(bfield,2)*tmax*(CCDBConstants.getDELTATIME_BFIELD_PAR1()[s][r]*xhatalpha+CCDBConstants.getDELTATIME_BFIELD_PAR2()[s][r]*Math.pow(xhatalpha, 2)+
 	    //		 CCDBConstants.getDELTATIME_BFIELD_PAR3()[s][r]*Math.pow(xhatalpha, 3)+CCDBConstants.getDELTATIME_BFIELD_PAR4()[s][r]*Math.pow(xhatalpha, 4));
-	    double deltatime_bfield = tab.getDoubleValue("delta_bfield_coefficient", s+1,r+1,0)*Math.pow(bfield,2)*tmax*(tab.getDoubleValue("b1", s+1,r+1,0)*xhatalpha+tab.getDoubleValue("b2", s+1,r+1,0)+
+	    double deltatime_bfield = tab.getDoubleValue("delta_bfield_coefficient", s+1,r+1,0)*Math.pow(bfield,2)*tmax*(tab.getDoubleValue("b1", s+1,r+1,0)*xhatalpha+tab.getDoubleValue("b2", s+1,r+1,0)*Math.pow(xhatalpha, 2)+
 	    		 tab.getDoubleValue("b3", s+1,r+1,0)*Math.pow(xhatalpha, 3)+tab.getDoubleValue("b4", s+1,r+1,0)*Math.pow(xhatalpha, 4));
             // System.out.println("dB "+deltatime_bfield+" raw time "+time);
 	    //calculate the time at alpha deg. and at a non-zero bfield	          

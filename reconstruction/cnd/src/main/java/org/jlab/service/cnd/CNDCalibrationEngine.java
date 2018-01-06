@@ -1,6 +1,5 @@
 package org.jlab.service.cnd;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -22,11 +21,11 @@ import org.jlab.rec.cnd.hit.CndHitFinder;
  *
  */
 
-public class CNDEngine extends ReconstructionEngine {
+public class CNDCalibrationEngine extends ReconstructionEngine {
 
 
-	public CNDEngine() {
-		super("CND", "sokhan", "1.0");
+	public CNDCalibrationEngine() {
+		super("CND", "chatagnon", "1.0");
 	}
 
 	int Run = -1;
@@ -37,6 +36,8 @@ public class CNDEngine extends ReconstructionEngine {
 	static int hcvt=0;
 	static int match=0;
 	static int posmatch=0;
+	static int ctof=0;
+	static int ctoftot=0;
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
@@ -58,14 +59,14 @@ public class CNDEngine extends ReconstructionEngine {
 		
 		//2) find the CND hits from these half-hits
 		CndHitFinder hitFinder = new CndHitFinder();
-		hits = hitFinder.findHits(halfhits,1);
+		hits = hitFinder.findHits(halfhits,0);
 
 		CvtGetHTrack cvttry = new CvtGetHTrack();
 		cvttry.getCvtHTrack(event); // get the list of helix associated with the event
 		
 		int flag=0;
 		for (CndHit hit : hits){ // findlength for charged particles
-			double length =hitFinder.findLength(hit, cvttry.getHelices(),1);
+			double length =hitFinder.findLength(hit, cvttry.getHelices(),0);
 			if (length!=0){
 				hit.set_tLength(length); // the path length is non zero only when there is a match with cvt track
 				if(flag==0){match++;}
@@ -88,8 +89,10 @@ public class CNDEngine extends ReconstructionEngine {
 			ecnd++;
 			if(event.hasBank("CVTRec::Tracks")){
 				posmatch++;
+				//event.getBank("MC::Particle").show();
+				//outbank.show();
 			}
-			//outbank.show();
+			
 		}
 		return true;
 	}
@@ -97,6 +100,7 @@ public class CNDEngine extends ReconstructionEngine {
 	@Override
 	public boolean init() {
 		// TODO Auto-generated method stub
+	
 		return true;
 	}
 
@@ -120,7 +124,8 @@ public class CNDEngine extends ReconstructionEngine {
 	}
 
 	public static void main (String arg[]) throws IOException {
-		CNDEngine en = new CNDEngine();
+		CNDCalibrationEngine en = new CNDCalibrationEngine();
+		
 		en.init();
 		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
 		//String input = "/projet/nucleon/silvia/test.hipo";
@@ -130,9 +135,9 @@ public class CNDEngine extends ReconstructionEngine {
 		//String input = "/projet/nucleon/silvia/out_bis.hipo";
 		//String input = "/projet/nucleon/silvia/test.rec.hipo";
 		//String input = "/projet/nucleon/pierre/test_out3.hipo";
-		String input = "/projet/nucleon/pierre/CND_run2052_2053/ctof_cnd_2052_2053.hipo";
 		//String input = "/projet/nucleon/silvia/test.hipo";
-		//String input = "/projet/nucleon/pierre/test.rec.hipo";
+		String input = "/projet/nucleon/pierre/CND_run2052_2053/ctof_cnd_2052_2053.hipo";
+		//String input = "/projet/nucleon/silvia/CLARA/out_clasdispr_small.00849.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
 		String outputFile="/projet/nucleon/pierre/CND_run2052_2053/test.hipo";
@@ -144,29 +149,35 @@ public class CNDEngine extends ReconstructionEngine {
 			enb++;		
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			
-			//event.show();
-			if (event.hasBank("CND::adc") && event.hasBank("CND::tdc")){
-			event.getBank("CND::adc").show();
-			event.getBank("CND::tdc").show();
-			}
-			en.processDataEvent(event);
-			writer.writeEvent(event);
-			//event.getBank("CND::hits").show();
 			System.out.println("event nb "+enb);
-			//event.getBank("CND::hits").show();
-			//System.out.println();
-			if(enb>1000)
-				break;
+			event.show();
+			
+			//event.getBank("MC::Particle").show();
+			//if(event.hasBank("CVTRec::Tracks")){event.getBank("CVTRec::Tracks").show();};
+			en.processDataEvent(event);
+			if(event.hasBank("CND::hits")){
+				event.show();
+				event.getBank("CND::hits").show();	
+				event.getBank("CND::adc").show();	
+				event.getBank("CND::tdc").show();	
+				}
+			writer.writeEvent(event);
+			
+			
+			if(enb==20) break;
+			
 		}		
 		writer.close();
 		
+		//some statitics on cvt/cnd matching
 		System.out.println("enb "+enb);
 		System.out.println("ecnd "+ecnd);
 		System.out.println("hcvt "+hcvt);
 		System.out.println("posmatch "+posmatch);
 		System.out.println("match "+match);
-		System.out.println("%match "+100.*match/posmatch);
+		System.out.println("%match cnd "+100.*match/posmatch);
 		System.out.println("Done");
 	}
 
 }
+
