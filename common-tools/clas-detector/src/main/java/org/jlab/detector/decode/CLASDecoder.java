@@ -352,6 +352,7 @@ public class CLASDecoder {
         
         int    localRun = this.codaDecoder.getRunNumber();
         int  localEvent = this.codaDecoder.getEventNumber();
+        int   localTime = this.codaDecoder.getUnixTime();
         long  timeStamp = this.codaDecoder.getTimeStamp();
         long triggerBits = this.codaDecoder.getTriggerBits();
         
@@ -361,7 +362,8 @@ public class CLASDecoder {
         }
         bank.setInt("run",        0, localRun);
         bank.setInt("event",      0, localEvent);
-        bank.setLong("trigger",    0, triggerBits);        
+        bank.setInt("unixtime",   0, localTime);
+        bank.setLong("trigger",   0, triggerBits);        
         bank.setFloat("torus",    0, torus);
         bank.setFloat("solenoid", 0, solenoid);        
         bank.setLong("timestamp", 0, timeStamp);        
