@@ -33,6 +33,7 @@ public class CodaEventDecoder {
 
     private int   runNumber = 0;
     private int eventNumber = 0;
+    private int    unixTime = 0;
     private long  timeStamp = 0L;
     private int timeStampErrors = 0;
     private long    triggerBits = 0;
@@ -87,6 +88,10 @@ public class CodaEventDecoder {
 
     public int getEventNumber(){
         return this.eventNumber;
+    }
+
+    public int getUnixTime(){
+        return this.unixTime;
     }
 
     public long getTimeStamp() {
@@ -252,8 +257,9 @@ public class CodaEventDecoder {
                 int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
                 this.runNumber = intData[3];
                 this.eventNumber = intData[4];
+                if(intData[5]!=0) this.unixTime  = intData[5];
                 /*System.out.println(" set run number and event nubmber = "
-                + this.runNumber + "  " + this.eventNumber
+                + this.runNumber + "  " + this.eventNumber + "  " + this.unixTime + "  " + intData[5]
                 );
                 System.out.println(" EVENT BUFFER LENGTH = " + intData.length);
                 for(int i = 0; i < intData.length; i++){
@@ -794,11 +800,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/clas_002143.evio.0");
+        reader.open("/Users/devita/clas_002219.evio.110");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 100000;
+        int maxEvents = 100;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){

@@ -10,14 +10,9 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Plane3D;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
 import org.jlab.rec.cnd.constants.Parameters;
 import org.jlab.rec.cnd.hit.CvtGetHTrack.CVTTrack;
-import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.trajectory.Helix;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class CndHitFinder {
 
@@ -365,6 +360,62 @@ public class CndHitFinder {
 		return length; 
 
 	} //findLength function for charged particles
+
+
+
+	public double findLengthNeutral(Point3D vertex, CndHit hit){
+
+		// not finished	
+
+		// if the particle is not charged, it is not detected in the cvt and we can calculate its pathlength using reconstructed vertex				
+		double length = 0.;
+
+		if( vertex!=null){
+
+			double xi = hit.X();
+			double yi = hit.Y();
+			double zi = hit.Z();
+			Point3D hitpoint = new Point3D(xi,yi,zi);
+			double energyNCorr=hit.Edep();
+			int lay = hit.Layer();
+			double entryradius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay-1)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
+			double escaperadius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;	
+			// get the length of the path as the distance between the two intersection points of 
+			// the line between the hit point and the vertex and 2 cylinders corresponding to the hit paddle.		
+
+			//set the cylinders
+			Point3D center = new Point3D(0.,0.,-1.*CalibrationConstantsLoader.LENGTH[lay-1]);
+			Point3D origin1 = new Point3D(entryradius,0.,0.);
+			Point3D origin2 = new Point3D(escaperadius,0.,0.);
+			Vector3D normal = new Vector3D(0.,0.,1.);
+			Arc3D arc1 = new Arc3D(origin1,center,normal,Math.PI*2.);
+			Arc3D arc2 = new Arc3D(origin2,center,normal,Math.PI*2.);
+			Cylindrical3D cyl1 = new Cylindrical3D(arc1,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
+			Cylindrical3D cyl2 = new Cylindrical3D(arc2,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
+			// the cylinders are biggers than the actual cnd but it is just for convenience, as the hit point is in the cnd anyway
+
+			//set the line between the vertex and the hit point
+			Line3D line = new Line3D(vertex,hitpoint);
+
+			//find intersection points
+			List<Point3D> entrypoints = new ArrayList<Point3D>();
+			List<Point3D> exitpoints = new ArrayList<Point3D>();
+			cyl1.intersectionRay(line, entrypoints);
+			cyl2.intersectionRay(line, exitpoints);
+			if(entrypoints.size()==1 && exitpoints.size()==1){
+				length=entrypoints.get(0).distance(exitpoints.get(0));
+				System.err.println("length neutral " + length);
+			}
+			else {
+				System.err.println("probleme intersection"+" entrypoints nb "+entrypoints.size()+" exitpoints nb "+exitpoints.size());}
+
+			hit.set_Edep(energyNCorr*(Math.max(length, CalibrationConstantsLoader.THICKNESS[0])/CalibrationConstantsLoader.THICKNESS[0]));
+			return length;
+		}
+		else return length;
+
+	} // fingLengthNeutral
+
 
 
 } // CndHitFinder
