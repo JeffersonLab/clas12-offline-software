@@ -217,7 +217,7 @@ public class Constants {
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
 
-        if(SolenoidScale<0.001)
+        if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
     }
 
