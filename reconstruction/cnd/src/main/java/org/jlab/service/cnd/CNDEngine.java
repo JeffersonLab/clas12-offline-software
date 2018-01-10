@@ -30,7 +30,7 @@ public class CNDEngine extends ReconstructionEngine {
 	}
 
 	int Run = -1;
-	
+	RecoBankWriter rbc;
 	//test
 	static int enb =0;
 	static int ecnd=0;
@@ -83,13 +83,17 @@ public class CNDEngine extends ReconstructionEngine {
 
 		if(hits.size()!=0){
 
-			DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
-			event.appendBank(outbank);
-			ecnd++;
-			if(event.hasBank("CVTRec::Tracks")){
-				posmatch++;
-			}
+				//          DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
+			//          event.appendBanks(outbank);
+			// event.show();
+			System.out.println("in process event ");
+			rbc.appendCNDBanks(event,hits);
+			//      ecnd++;
+			//      if(event.hasBank("CVTRec::Tracks")){
+			//              posmatch++;
+			//event.getBank("MC::Particle").show();
 			//outbank.show();
+			//      }
 		}
 		return true;
 	}
