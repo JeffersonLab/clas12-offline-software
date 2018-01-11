@@ -108,8 +108,16 @@ public class CVTReconstruction extends ReconstructionEngine {
             boolean align=false;
             if(newRun>99)
                 align = true;
-                SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
-                SVTGeom.setSvtStripFactory(svtStripFactory);
+            
+		    //SVTConstants.VERBOSE = true;
+		    DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
+		    cp = SVTConstants.connect( cp );
+		    SVTConstants.loadAlignmentShifts( cp );
+		    cp.disconnect();    
+		    this.setSVTDB(cp);
+
+            SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
+            SVTGeom.setSvtStripFactory(svtStripFactory);
 
             this.setRun(newRun);
 
@@ -386,7 +394,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     public boolean init() {
         System.out.println(" ........................................ trying to connect to db ");
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+        //CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
         
         DatabaseConstantProvider cp = new DatabaseConstantProvider(101, "default");
         cp = SVTConstants.connect( cp );
