@@ -244,6 +244,12 @@ public class Geometry {
             Line3d glLine = new Line3d(new Vector3d(x,y,z),
                                        new Vector3d(x,y,z)) ;
             boolean flip = true;
+		
+	    //gpg need to apply the reverse survey shifts here.
+	    double scaleT = 1.0, scaleR = 1.0;// scale factors used for visualization. Not relevant here.
+	    AlignmentFactory.applyInverseShift( glLine.origin(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1 )], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
+	    AlignmentFactory.applyInverseShift( glLine.end(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1 )], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
+
             Line3d localLine = glLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1,
                                                                             sector-1,
                                                                             SVTConstants.LAYERRADIUS[rm[0]][rm[1]]+gap/2, 
