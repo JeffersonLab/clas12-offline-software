@@ -298,7 +298,15 @@ public class AlignmentFactory
 	public static void applyShift( Vector3d aPoint, double[] aShift, Vector3d aCenter, double aScaleT, double aScaleR ) throws IllegalArgumentException
 	{
 		if( aShift.length != NSHIFTDATARECLEN ){ throw new IllegalArgumentException("shift array must have "+NSHIFTDATARECLEN+" elements"); }
-		
+			
+		// double[] tarray = SVTConstants.getDataAlignmentSectorShift()[0];
+		// System.out.printf("Called applyShift. Shift[0][0]  = %8.4f ******************************************\n",tarray[0]);
+		// System.out.printf("Called applyShift. Shift[0][1]  = %8.4f ******************************************\n",tarray[1]);
+		// tarray = SVTConstants.getDataAlignmentSectorShift()[10];
+		// System.out.printf("Called applyShift. Shift[0][10] = %8.4f ******************************************\n",tarray[0]);
+		// tarray = SVTConstants.getDataAlignmentSectorShift()[65];
+		// System.out.printf("Called applyShift. Shift[0][65] = %8.4f ******************************************\n",tarray[0]);
+	
 		double tx = aShift[0]; // The Java language has references but you cannot dereference the memory addresses like you can in C++.
 		double ty = aShift[1]; // The Java runtime does have pointers, but they're not accessible to the programmer. (no pointer arithmetic)
 		double tz = aShift[2];
@@ -320,6 +328,7 @@ public class AlignmentFactory
 			System.out.printf("SC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
 		}
 				
+		// do the rotation here.
 		if( !(ra < 1E-3) )
 		{			
 			aCenter.times( -1 ); // reverse translation
@@ -338,12 +347,76 @@ public class AlignmentFactory
 			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
 		}
 		
+		// do the translation here.
 		Vector3d translationVec = new Vector3d( tx, ty, tz );
 		aPoint.set( aPoint.add( translationVec ) );
 		
 		if( VERBOSE ) System.out.printf("PS: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
 	}
 	
+	
+
+	/**
+	 * Applies the inverse of the given alignment shift to the given point.  gilfoyle 12/21/17
+	 * 
+	 * @param aPoint a point in the lab frame
+	 * @param aShift a translation and axis-angle rotation of the form { tx, ty, tz, rx, ry, rz, ra }
+	 * @param aCenter a point about which to rotate the first point (for example the midpoint of the ideal fiducials)
+	 * @param aScaleT a scale factor for the translation shift
+	 * @param aScaleR a scale factor for the rotation shift
+	 * @throws IllegalArgumentException incorrect number of elements in shift array
+	 */
+	public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d aCenter, double aScaleT, double aScaleR ) throws IllegalArgumentException
+	{
+		if( aShift.length != NSHIFTDATARECLEN ){ throw new IllegalArgumentException("shift array must have "+NSHIFTDATARECLEN+" elements"); }
+		
+		double tx = aShift[0]; // The Java language has references but you cannot dereference the memory addresses like you can in C++.
+		double ty = aShift[1]; // The Java runtime does have pointers, but they're not accessible to the programmer. (no pointer arithmetic)
+		double tz = aShift[2];
+		double rx = aShift[3];
+		double ry = aShift[4];
+		double rz = aShift[5];
+		double ra = aShift[6];
+		
+		tx *= aScaleT;
+		ty *= aScaleT;
+		tz *= aScaleT;
+		ra *= aScaleR;
+		
+		if( VERBOSE )
+		{
+			System.out.printf("PN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+			System.out.printf("ST: % 8.3f % 8.3f % 8.3f\n", tx, ty, tz );
+			System.out.printf("SR: % 8.3f % 8.3f % 8.3f % 8.3f\n", rx, ry, rz, Math.toDegrees(ra) );
+			System.out.printf("SC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
+		}
+			
+		// undo the translation.
+		Vector3d translationVec = new Vector3d( -tx, -ty, -tz );
+		aPoint.set( aPoint.add( translationVec ) );
+
+		// test size of rotation - too small creates errors.
+		if( !(ra < 1E-3) )
+		{			
+			aCenter.times( -1 ); // reverse translation
+			aPoint.set( aPoint.add( aCenter ) ); // move origin to center of rotation axis
+			
+			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+			
+			Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
+			vecAxis.rotate( aPoint, -ra );
+			
+			//System.out.printf("PR: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+			
+			aCenter.times( -1 ); // reverse translation
+			aPoint.set( aPoint.add( aCenter ) );
+			
+			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+		}
+		
+		
+		if( VERBOSE ) System.out.printf("PS: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+	}
 	
 	/**
 	 * Applies the given alignment shift to the given volume.
