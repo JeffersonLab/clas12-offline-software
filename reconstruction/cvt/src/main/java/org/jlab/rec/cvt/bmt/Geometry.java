@@ -164,8 +164,8 @@ public class Geometry {
         
         if (num_strip > 0) {
             for (int j = 1; j < num_strip + 1; j++) {
-                //zc += Constants.getCRCWIDTH()[num_region][group] / 2.;
-                zc += Constants.getCRCWIDTH()[num_region][group];
+                zc += Constants.getCRCWIDTH()[num_region][group] / 2.;
+                //zc += Constants.getCRCWIDTH()[num_region][group];
                 if (j >= limit) { //test if we change the width
                     group++;
                     limit += Constants.getCRCGROUP()[num_region][group];
