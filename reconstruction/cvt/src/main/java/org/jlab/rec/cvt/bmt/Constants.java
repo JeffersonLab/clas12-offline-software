@@ -335,10 +335,10 @@ public class Constants {
                     bmin = B_grid[j];
                     bmax = B_grid[j];
                     Ne=15;
-            Nb=27;
-                            pe = E_grid[j];
-                            pb = B_grid[j];
-                            continue;
+                    Nb=27;
+                    pe = E_grid[j];
+                    pb = B_grid[j];
+                    continue;
             }	
              // check max and minima
            if ( E_grid[j] < emin ) emin = E_grid[j];

@@ -222,10 +222,11 @@ public class HitReader {
                     hit.set_Status(-1);
                 }
                 //System.out.println("SVT e "+SvtStrip.get_Edep());
-                if(SvtStrip.get_Edep()>0)      
-                    hit.set_Id(id[i]);
+                
+                hit.set_Id(id[i]);
                 // add this hit
-                hits.add(hit);
+                if(SvtStrip.get_Edep()>0)      
+                    hits.add(hit);
             }
         }
         // fill the list of SVT hits
