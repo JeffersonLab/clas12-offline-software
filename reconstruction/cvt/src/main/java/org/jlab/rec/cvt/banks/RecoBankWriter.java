@@ -137,7 +137,10 @@ public class RecoBankWriter {
             bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
             bank.setShort("trkID", index, (short) crosses.get(i).get(j).get_AssociatedTrackID());
 
-            if (crosses.get(i).get(j).get_Dir() != null) {
+            if (crosses.get(i).get(j).get_Dir() != null && 
+                    !Double.isNaN(crosses.get(i).get(j).get_Dir().x()) &&
+                    !Double.isNaN(crosses.get(i).get(j).get_Dir().y()) &&
+                    !Double.isNaN(crosses.get(i).get(j).get_Dir().z()) ) {
                 bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
                 bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
                 bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
@@ -268,18 +271,13 @@ public class RecoBankWriter {
             bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
             bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
            
-            if (crosses.get(i).get(j).get_Dir() != null ) {
-                if(crosses.get(i).get(j).get_Dir().x()==Double.NaN || 
-                        crosses.get(i).get(j).get_Dir().y()==Double.NaN || 
-                        crosses.get(i).get(j).get_Dir().z()==Double.NaN) {
-                    bank.setFloat("ux", index, (float)0);
-                    bank.setFloat("uy", index, (float)0);
-                    bank.setFloat("uz", index, (float)0);
-                } else {                 
-                    bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
-                    bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
-                    bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
-                }
+            if (crosses.get(i).get(j).get_Dir() != null && 
+                    !Double.isNaN(crosses.get(i).get(j).get_Dir().x()) &&
+                    !Double.isNaN(crosses.get(i).get(j).get_Dir().y()) &&
+                    !Double.isNaN(crosses.get(i).get(j).get_Dir().z()) ) {
+                bank.setFloat("ux", index, (float) crosses.get(i).get(j).get_Dir().x());
+                bank.setFloat("uy", index, (float) crosses.get(i).get(j).get_Dir().y());
+                bank.setFloat("uz", index, (float) crosses.get(i).get(j).get_Dir().z());
             } else {
                 bank.setFloat("ux", index, 0);
                 bank.setFloat("uy", index, 0);
@@ -513,7 +511,7 @@ public class RecoBankWriter {
                 bankSize++;
         }
 
-        DataBank bank = event.createBank("CVTRec::Trajectory", bankSize); // 8 SVT layer + 2 BMT layers 
+        DataBank bank = event.createBank("CVTRec::Trajectory", bankSize); //  SVT layers +  BMT layers 
 
         int k = 0;
         for (int i = 0; i < trks.size(); i++) {
@@ -524,7 +522,7 @@ public class RecoBankWriter {
             }
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
-                bank.setInt("ID", k, stVec.get_ID());
+                bank.setInt("ID", k, trks.get(i).get_Id());
                 bank.setInt("LayerTrackIntersPlane", k, stVec.get_SurfaceLayer());
                 bank.setInt("SectorTrackIntersPlane", k, stVec.get_SurfaceSector());
                 bank.setFloat("XtrackIntersPlane", k, (float) stVec.x());
