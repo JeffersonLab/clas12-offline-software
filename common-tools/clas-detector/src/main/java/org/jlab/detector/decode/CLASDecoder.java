@@ -71,9 +71,10 @@ public class CLASDecoder {
         }
     }
 
-    public void setRunNumber(int run, boolean fixed){
+    public void setRunNumber(int run, boolean fixed){        
         this.isRunNumberFixed = fixed;
         this.detectorDecoder.setRunNumber(run);
+        System.out.println(" SETTING RUN NUMBER TO " + run + " FIXED = " + this.isRunNumberFixed);
     }
     
     public CodaEventDecoder getCodaEventDecoder() {
@@ -92,7 +93,8 @@ public class CLASDecoder {
                     }
                 }
                 int runNumberCoda = codaDecoder.getRunNumber();
-                detectorDecoder.setRunNumber(runNumberCoda);
+                this.setRunNumber(runNumberCoda);
+                
                 detectorDecoder.translate(dataList);
                 detectorDecoder.fitPulses(dataList);
                 if(this.decoderDebugMode>0){
