@@ -1,6 +1,6 @@
 package org.jlab.rec.cvt.services;
 
-import cnuphys.magfield.MagneticFields;
+//import cnuphys.magfield.MagneticFields;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,10 +92,10 @@ public class CVTReconstruction extends ReconstructionEngine {
             // Load the Fields
             System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
             TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
-            double shift =0;
-            if(bank.getInt("run", 0)>1840)
-                shift = -1.9;
-            MagneticFields.getInstance().setSolenoidShift(shift);
+            //double shift =0;
+            //if(bank.getInt("run", 0)>1840)
+            //    shift = -1.9;
+            //MagneticFields.getInstance().setSolenoidShift(shift);
             this.setFieldsConfig(newConfig);
         }
         FieldsConfig = newConfig;
@@ -108,6 +108,12 @@ public class CVTReconstruction extends ReconstructionEngine {
             boolean align=false;
             if(newRun>99)
                 align = true;
+                // make sure the DB is loaded
+                DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
+                cp = SVTConstants.connect( cp );
+                SVTConstants.loadAlignmentShifts( cp );
+                cp.disconnect();    
+                this.setSVTDB(cp);
                 SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
                 SVTGeom.setSvtStripFactory(svtStripFactory);
 
