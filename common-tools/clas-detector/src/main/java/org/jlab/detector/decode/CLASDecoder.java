@@ -30,6 +30,7 @@ public class CLASDecoder {
     private List<DetectorDataDgtz>       dataList = new ArrayList<DetectorDataDgtz>();    
     private HipoDataSync                   writer = null;
     private HipoDataEvent               hipoEvent = null;
+    private boolean              isRunNumberFixed = false;
     private int                  decoderDebugMode = 0;
     
 //    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
@@ -65,9 +66,17 @@ public class CLASDecoder {
     }
     
     public void setRunNumber(int run){
-        this.detectorDecoder.setRunNumber(run);
+        if(this.isRunNumberFixed==false){
+            this.detectorDecoder.setRunNumber(run);
+        }
     }
 
+    public void setRunNumber(int run, boolean fixed){        
+        this.isRunNumberFixed = fixed;
+        this.detectorDecoder.setRunNumber(run);
+        System.out.println(" SETTING RUN NUMBER TO " + run + " FIXED = " + this.isRunNumberFixed);
+    }
+    
     public CodaEventDecoder getCodaEventDecoder() {
 	return codaDecoder;
     }
@@ -83,6 +92,9 @@ public class CLASDecoder {
                         System.out.println(data);
                     }
                 }
+                int runNumberCoda = codaDecoder.getRunNumber();
+                this.setRunNumber(runNumberCoda);
+                
                 detectorDecoder.translate(dataList);
                 detectorDecoder.fitPulses(dataList);
                 if(this.decoderDebugMode>0){
@@ -447,7 +459,7 @@ public class CLASDecoder {
             int counter = 0;
             
             if(nrun>0){
-                decoder.setRunNumber(nrun);
+                decoder.setRunNumber(nrun,true);
             }
             
             for(String inputFile : inputList){

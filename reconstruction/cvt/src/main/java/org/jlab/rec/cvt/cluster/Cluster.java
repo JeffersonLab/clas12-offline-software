@@ -168,7 +168,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 FittedHit thehit = this.get(i);
                 // gets the energy value of the strip
                 double strpEn = thehit.get_Strip().get_Edep();
-
+                
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
                 if (this.get_Detector()==0) {
@@ -218,6 +218,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             }
             if (totEn == 0) {
                 System.err.println(" Cluster energy is null .... exit "+this._Detector+" "+this._DetectorType);
+                
                 return;
             }
 

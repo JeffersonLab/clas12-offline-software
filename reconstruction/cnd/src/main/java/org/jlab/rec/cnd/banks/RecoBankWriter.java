@@ -49,5 +49,15 @@ public class RecoBankWriter {
 
 	}
 
+	 public void appendCNDBanks(DataEvent event,ArrayList<CndHit> hitlist) {
+		if(hitlist.size()!=0){
+			DataBank bank = this.fillCndHitBanks((DataEvent) event, hitlist);
+			//bank.show();
+			event.appendBanks(bank);
+			//event.show();
+		}
+	}
 
 }
+
+

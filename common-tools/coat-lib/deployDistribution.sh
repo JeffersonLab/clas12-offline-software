@@ -2,7 +2,7 @@
 # Script is exporting existing Jar files to repository
 #-------------------------------------------------------------------------------------------------
 #  JEVIO
-REPO="/Users/devita//NetBeansProjects/clas12-offline-software/myLocalMvnRepo"
+REPO="/Users/gavalian/Work/Software/project-3a.0.0/Distribution/clas12-offline-software/myLocalMvnRepo"
 
 mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/coat-libs-5.0-SNAPSHOT.jar \
     -DgroupId=org.jlab.coat \

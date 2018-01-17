@@ -307,11 +307,12 @@ public class TrackCandListFinder {
             if(trkHelix!=null) {
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
+                //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
+                Trajectory traj = trjFind.findTrajectory(ic+1, trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
 
                 passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 
-                passedcands.get(ic).set_Id(ic);
+                passedcands.get(ic).set_Id(ic+1);
             }
 
         }
@@ -490,11 +491,12 @@ public class TrackCandListFinder {
             if(trkRay!=null) {
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
+                //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
+                Trajectory traj = trjFind.findTrajectory(ic+1, trkRay, passedcands.get(ic), svt_geo, bmt_geo);
 
                 passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 
-                passedcands.get(ic).set_Id(ic);
+                passedcands.get(ic).set_Id(ic+1);
 
                 this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
             }
