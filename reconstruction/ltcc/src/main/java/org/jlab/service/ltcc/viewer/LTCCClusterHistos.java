@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package org.jlab.service.ltcc.viewer;
-import org.jlab.service.ltcc.viewer.LTCCHistogrammer;
+
 import org.jlab.groot.data.H1F;
 import org.jlab.service.ltcc.LTCCCluster;
 
