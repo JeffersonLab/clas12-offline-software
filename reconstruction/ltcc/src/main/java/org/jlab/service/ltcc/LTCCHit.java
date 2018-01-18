@@ -81,8 +81,8 @@ public final class LTCCHit {
     
     LTCCHit(DataBank bank, int index, IndexedTable gain, IndexedTable timing_offset) {
        this.sector = bank.getByte("sector", index);
-       this.side = bank.getByte("layer", index);
        this.segment = bank.getShort("component", index);
+       this.side = bank.getByte("order", index);
        this.adc = bank.getInt("ADC", index);
        this.rawTime = bank.getFloat("time", index);
        //this.pedestal = bank.getShort("ped", index);
