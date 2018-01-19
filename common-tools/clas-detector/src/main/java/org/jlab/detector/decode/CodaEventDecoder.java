@@ -707,6 +707,7 @@ public class CodaEventDecoder {
             for(EvioNode node : branch.getNodes()){
                 if(node.getTag()==57637){
 //                    System.out.println("TRIGGER BANK FOUND ");
+                    int num = node.getNum();
                     int[] intData =  ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
 //                    if(intData.length!=0) System.out.println(" TRIGGER BANK LENGTH = " + intData.length);
                     for(int loop = 2; loop < intData.length; loop++){
@@ -714,8 +715,9 @@ public class CodaEventDecoder {
                         SCALERData scaler = new SCALERData();
                         int helicity = DataUtils.getInteger(dataEntry, 31, 31);
                         int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
+                        int interval = DataUtils.getInteger(dataEntry, 29, 29);
                         int id       = DataUtils.getInteger(dataEntry, 24, 28);
-                        DetectorDataDgtz   entry = new DetectorDataDgtz(crate,0,id);
+                        DetectorDataDgtz   entry = new DetectorDataDgtz(crate,num,id+32*(1-interval));
                         if(id == 0 || id ==1) {
                             scaler.setHelicity((byte) helicity);
                             scaler.setQuartet((byte) quartet);
