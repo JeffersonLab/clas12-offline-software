@@ -76,18 +76,26 @@ public class TrackCandListFinder {
                             continue;
             
 			if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk)==true) {
-					
+				
 				cand.addAll(crossesInTrk);
 				
 				cand.set_Sector(crossesInTrk.get(0).get_Sector());
 				
+                                if(Math.abs(TORSCALE)<0.001) {
+				//no field --> fit straight track
+                                    this.getStraightTrack(cand);
+                                    if(cand.get_pAtOrig()!=null) {
+                                            cand.set_Id(cands.size()+1);						
+                                            cands.add(cand); 
+                                    }
+                                }	
 				//cand.set_Region3CrossPoint();
 				//cand.set_Region3CrossDir();
 				
 				cand.set_Trajectory(traj.get_Trajectory());
 				cand.set_IntegralBdl(traj.get_IntegralBdl());
 				
-
+                                
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
                                         double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
@@ -100,15 +108,7 @@ public class TrackCandListFinder {
 			       
 			        double iBdl = traj.get_IntegralBdl(); 
 			        
-			        if(iBdl == 0) {
-						//no field --> fit straight track
-			        	//System.out.println(trking+" FitChisq "+cand.get_FitChi2());	
-			        	this.getStraightTrack(cand);
-			        	if(cand.get_pAtOrig()!=null) {
-			        		cand.set_Id(cands.size()+1);						
-			        		cands.add(cand); 
-			        	}
-					}			        
+			        		        
 			        if(iBdl != 0 || (deltaTheta != 0)) {
 			        	
 				        double pxz = Math.abs(Constants.LIGHTVEL*iBdl/deltaTheta);
