@@ -106,16 +106,16 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if (Run != newRun) {
             boolean align=false;
-            if(newRun>99)
-                align = true;
-                // make sure the DB is loaded
-                DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
-                cp = SVTConstants.connect( cp );
-                SVTConstants.loadAlignmentShifts( cp );
-                cp.disconnect();    
-                this.setSVTDB(cp);
-                SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
-                SVTGeom.setSvtStripFactory(svtStripFactory);
+         //   if(newRun>99)
+          //      align = true;
+          //      // make sure the DB is loaded
+         //       DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
+          //      cp = SVTConstants.connect( cp );
+         //       SVTConstants.loadAlignmentShifts( cp );
+          //      cp.disconnect();    
+          //      this.setSVTDB(cp);
+          //      SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
+          //      SVTGeom.setSvtStripFactory(svtStripFactory);
 
             this.setRun(newRun);
 
