@@ -18,6 +18,7 @@ import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioNode;
 import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
+import org.jlab.detector.decode.DetectorDataDgtz.SCALERData;
 import org.jlab.detector.decode.DetectorDataDgtz.TDCData;
 import org.jlab.detector.decode.DetectorDataDgtz.VTPData;
 import org.jlab.io.evio.EvioDataEvent;
@@ -62,6 +63,8 @@ public class CodaEventDecoder {
         rawEntries.addAll(tdcEntries);
         List<DetectorDataDgtz>  vtpEntries = this.getDataEntries_VTP(event);
         rawEntries.addAll(vtpEntries);
+        List<DetectorDataDgtz>  scalerEntries = this.getDataEntries_Scalers(event);
+        rawEntries.addAll(scalerEntries);
         this.setTimeStamp(event);
 
         return rawEntries;
@@ -692,6 +695,44 @@ public class CodaEventDecoder {
         return entries;
     }
 
+    public List<DetectorDataDgtz> getDataEntries_Scalers(EvioDataEvent event){
+        
+        List<DetectorDataDgtz> scalerEntries = new ArrayList<DetectorDataDgtz>();        
+//        this.triggerBank = null;
+//        System.out.println(" READING SCALER BANK");
+        List<EvioTreeBranch> branches = this.getEventBranches(event);
+        for(EvioTreeBranch branch : branches){
+            int  crate = branch.getTag();
+//            EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
+            for(EvioNode node : branch.getNodes()){
+                if(node.getTag()==57637){
+//                    System.out.println("TRIGGER BANK FOUND ");
+                    int num = node.getNum();
+                    int[] intData =  ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
+//                    if(intData.length!=0) System.out.println(" TRIGGER BANK LENGTH = " + intData.length);
+                    for(int loop = 2; loop < intData.length; loop++){
+                        int  dataEntry = intData[loop];
+                        SCALERData scaler = new SCALERData();
+                        int helicity = DataUtils.getInteger(dataEntry, 31, 31);
+                        int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
+                        int interval = DataUtils.getInteger(dataEntry, 29, 29);
+                        int id       = DataUtils.getInteger(dataEntry, 24, 28);
+                        DetectorDataDgtz   entry = new DetectorDataDgtz(crate,num,id+32*(1-interval));
+                        if(id == 0 || id ==1) {
+                            scaler.setHelicity((byte) helicity);
+                            scaler.setQuartet((byte) quartet);
+                            scaler.setValue(DataUtils.getInteger(dataEntry, 0, 23));                            
+                            entry.addSCALER(scaler);
+                            scalerEntries.add(entry);
+//                            System.out.println(entry.toString());
+                        }
+                    }
+                }
+            }
+        }
+        return scalerEntries;
+    }
+
     public List<DetectorDataDgtz> getDataEntries_VTP(EvioDataEvent event){
         
         List<DetectorDataDgtz> vtpEntries = new ArrayList<DetectorDataDgtz>();        
@@ -800,11 +841,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/clas_002219.evio.110");
+        reader.open("/Users/devita/clas_002350.evio.0");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 100;
+        int maxEvents = 200;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){

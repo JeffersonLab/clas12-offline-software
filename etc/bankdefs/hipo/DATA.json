@@ -375,9 +375,22 @@
     ]
   },
   {
+    "bank": "RAW::scaler",
+    "group": 20013,
+    "info": "digitized SCALER bank for untranslated entries",
+    "items": [
+       {"name":"crate",    "id":1, "type":"int8",  "info":"crate of Helicity Scalers"},
+       {"name":"slot",     "id":2, "type":"int8",  "info":"slot for Helicity Scalers"},
+       {"name":"channel",  "id":3, "type":"int16", "info":"channel for Helicity Scalers (0/32 = FCUP, 1/33 = SLM"},
+       {"name":"helicity", "id":4, "type":"int8",  "info":"helicity"},
+       {"name":"quartet",  "id":5, "type":"int8",  "info":"quartet"},
+       {"name":"value",    "id":6, "type":"int32", "info":"scaler value"}
+    ]
+  },
+  {
     "bank": "RAW::vtp",
     "group": 20014,
-    "info": "digitized TDC bank for untranslated entries",
+    "info": "digitized VTP bank for untranslated entries",
     "items": [
        {"name":"crate",    "id":1, "type":"int8",  "info":"crate of VTP"},
        {"name":"slot",     "id":2, "type":"int8",  "info":"slot for VTP"},
