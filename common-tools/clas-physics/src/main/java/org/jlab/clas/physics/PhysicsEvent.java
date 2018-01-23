@@ -392,4 +392,14 @@ public class PhysicsEvent {
 		}
 		return plist;
 	}
+
+	public List<Particle> getParticlesByPid(int pid){
+		List<Particle> plist = new ArrayList<Particle>();
+		for(Particle part: eventParticles){
+			if(part.pid()==pid){
+				plist.add(part);
+			}
+		}
+		return plist;
+	}
 }
