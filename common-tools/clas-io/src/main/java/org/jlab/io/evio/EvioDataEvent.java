@@ -221,6 +221,20 @@ public class EvioDataEvent implements DataEvent {
 		return null;
 	}
 
+        public long[] getLong(int tag, int num) {
+		EvioNode node = this.getNodeFromTree(tag, num, DataType.LONG64);
+		if (node != null) {
+			try {
+				ByteBuffer buffer = this.eventHandler.getStructure().getData(node);
+				long[] nodedata = ByteDataTransformer.toLongArray(buffer);
+				return nodedata;
+			} catch (EvioException ex) {
+				Logger.getLogger(EvioDataEvent.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		return null;
+	}
+        
 	public void setInt(String path, int[] arr) {
 		// TODO Auto-generated method stub
 
@@ -477,10 +491,15 @@ public class EvioDataEvent implements DataEvent {
 					if (item.getTag() == tag && item.getNum() == num
 					        && (item.getDataTypeObj() == DataType.INT32 || item.getDataTypeObj() == DataType.UINT32))
 						return item;
-				} else {
-					if (item.getTag() == tag && item.getNum() == num && item.getDataTypeObj() == type)
+				} 					
+                                
+                                if(type == DataType.LONG64){
+                                    if (item.getTag() == tag && item.getNum() == num
+					        && (item.getDataTypeObj() == DataType.LONG64 || item.getDataTypeObj() == DataType.ULONG64))
 						return item;
-				}
+                                }
+                                if (item.getTag() == tag && item.getNum() == num && item.getDataTypeObj() == type)
+                                    return item;
 				/*
 				 * if(item.getTag()==tag&&item.getNum()==num&& item.getDataTypeObj()==type) return item;
 				 */
@@ -887,6 +906,27 @@ public class EvioDataEvent implements DataEvent {
 
     @Override
     public void removeBanks(String... bankNames) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public long[] getLong(String path) {
+        if (path.contains("/") == true) {
+			String[] tokens = path.split("/");
+			return this.getLong(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]));
+		} else {
+			int[] tagnum = this.getTagNum(path);
+			return this.getLong(tagnum[0], tagnum[1]);
+		}
+    }
+
+    @Override
+    public void setLong(String path, long[] arr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void appendLong(String path, long[] arr) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -98,6 +98,7 @@ public class TrajectoryFinder {
             stVec.set_CalcCentroidStrip(svt_geo.calcNearestStrip(helixInterWithBstPlane.x(), helixInterWithBstPlane.y(), helixInterWithBstPlane.z(), layer, sector));
 
             this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, trkDir, svt_geo, stVec);
+            stVec.set_ID(id);
             stateVecs.add(stVec);
 
             // loops over the crosses to get the strip resolutions
@@ -146,8 +147,9 @@ public class TrajectoryFinder {
             
             StateVec stVec = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
                     trkDir.x(), trkDir.y(), trkDir.z());
-            stVec.set_planeIdx(l);
-            stateVecs.add(stVec);
+            
+            //stVec.set_planeIdx(l);            
+            //stateVecs.add(stVec);
 
             // calculate crosses on BMT layers using track information.  These are used in the event display
             for (Cross c : BMTCrossList) {
@@ -165,7 +167,21 @@ public class TrajectoryFinder {
                     // calculate the hit residuals
                     this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
                             stVec, svt_geo, bmt_geo, traj.isFinal);
-
+                    
+                    StateVec stVecC = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
+                    trkDir.x(), trkDir.y(), trkDir.z());
+            
+                    stVecC.set_planeIdx(l);
+                    //C-detector measuring z                                       
+                    stVecC.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
+                    double phiPos = Math.atan2(stVec.y(),stVec.x());
+                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+                    stVecC.set_SurfaceSector(sector);
+                    //Layer starting at 7
+                    stVecC.set_SurfaceLayer(l+1);
+                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVecC);
+                    stVecC.set_ID(id);
+                    stateVecs.add(stVecC);
                 }
                 if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
                     double z = InterPoint.z();
@@ -177,9 +193,23 @@ public class TrajectoryFinder {
                     // calculate the hit residuals
                     this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
                             stVec, svt_geo, bmt_geo, traj.isFinal);
-
+                    StateVec stVecZ = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
+                    trkDir.x(), trkDir.y(), trkDir.z());
+                    stVecZ.set_planeIdx(l);
+                    //Z-detector measuring phi   
+                    double phiPos = Math.atan2(stVec.y(),stVec.x());
+                    stVecZ.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx+1,  phiPos));
+                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+                    stVecZ.set_SurfaceSector(sector);
+                    //Layer starting at 7
+                    stVecZ.set_SurfaceLayer(l+1);
+                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVecZ);
+                    stVecZ.set_ID(id);
+                    stateVecs.add(stVecZ);
+                    
                 }
             }
+                
         }
 
         traj.set_Trajectory(stateVecs);
@@ -188,9 +218,34 @@ public class TrajectoryFinder {
 
         return traj;
     }
-
+    private void fill_HelicalTrkAngleWRTBMTTangentPlane(Vector3D trkDir, StateVec stVec){
+        
+        // Bring the track direction vector in phi=0
+        double phiPos = Math.atan2(stVec.y(),stVec.x());
+        Vector3D trkDirRot = trkDir.clone(); 
+        trkDirRot.rotateZ(phiPos); 
+        
+        // Compute the theta angle for the track vector component normal to the Micromegas strips
+        Vector3D trkDirRotSpher = new Vector3D (trkDirRot.z(), trkDirRot.x(), trkDirRot.y()); //Change axis to go to usual spherical coordinates
+        Vector3D trkDirRotSpherProjC = new Vector3D (trkDirRotSpher.x(), 0, trkDirRotSpher.z()); //Get the track vector component normal to strips for C Micromegas layers
+        Vector3D trkDirRotSpherProjZ = new Vector3D (0, trkDirRotSpher.y(), trkDirRotSpher.z()); //Get the track vector component normal to strips for Z Micromegas layers
+        double thetaC = Math.abs(Math.toRadians(90)-Math.abs(trkDirRotSpherProjC.theta())); //Get theta angle for C Micromegas layers
+        double thetaZ = Math.abs(Math.toRadians(90)-Math.abs(trkDirRotSpherProjZ.theta())); //Get theta angle for Z Micromegas layers
+        if ( (stVec.y()>0 && trkDir.x()<0)||(stVec.y()<0 && trkDir.x()>0) ){
+            thetaZ=-thetaZ;  //Negative thetaZ if track is going to negative x for y>0 or positive x for y<0
+        }
+        
+        if (stVec.z()<0){
+            thetaC=-thetaC;  //Negative thetaC if track is going to negative z
+        }
+        
+        //Fill State Vector
+        stVec.set_TrkPhiAtSurface(thetaZ); //Call "phi" the normal angle for Z detectors
+        stVec.set_TrkThetaAtSurface(thetaC); //Call "theta" the normal angle for C detectors
+    }
+    
     private void fill_HelicalTrkAngleWRTSVTPlane(int sector, int layer,
-            Vector3D trkDir, org.jlab.rec.cvt.svt.Geometry svt_geo, StateVec stVec) {
+        Vector3D trkDir, org.jlab.rec.cvt.svt.Geometry svt_geo, StateVec stVec) {
         Vector3D n = svt_geo.findBSTPlaneNormal(sector, layer);
         Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module			
         Vector3D uj = ui.cross(n); //longitudinal vector along the local z direction of the module		    

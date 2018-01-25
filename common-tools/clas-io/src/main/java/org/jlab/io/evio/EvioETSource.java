@@ -36,6 +36,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.base.DataSourceType;
+import org.jlab.utils.options.OptionParser;
 
 
 /**
@@ -47,6 +48,8 @@ public class EvioETSource implements DataSource {
     private Boolean  connectionOK = false;
     private String   etRingHost   = "localhost";
     private Integer  etRingPort   = 11111;
+    private String   etStation    = "reader_station";
+    
     private EtSystem sys = null;
     private EtAttachment  myAttachment = null;
     private Boolean       remoteConnection = false;
@@ -66,18 +69,36 @@ public class EvioETSource implements DataSource {
         this.setRemote(true);
     }
     
-    public void setRemote(Boolean flag){
+    public EvioETSource(String host, String station){
+        this.etRingHost = host;
+        this.etRingPort = EtConstants.serverPort;
+        this.etStation  = station;
+        this.setRemote(true);
+    }
+    
+    public EvioETSource(String host, String station, int max_events){
+        this.etRingHost  = host;
+        this.etRingPort  = EtConstants.serverPort;
+        this.etStation   = station;
+        this.MAX_NEVENTS = max_events;
+        this.setRemote(true);
+    }
+    
+    public final void setRemote(Boolean flag){
         this.remoteConnection = flag;
     }
     
+    @Override
     public boolean hasEvent() {
         return (this.currentEventPosition<this.readerEvents.size());
     }
 
+    @Override
     public void open(File file) {
         
     }
-
+    
+    @Override
     public void open(String filename) {
         System.out.println("[ETSOURCE] -->>> connecting to host : [" +
                 this.etRingHost + "]  FILE [" + filename + "]  PORT [" + 
@@ -107,7 +128,7 @@ public class EvioETSource implements DataSource {
             statConfig.setUserMode(EtConstants.stationUserMulti);
             statConfig.setRestoreMode(EtConstants.stationRestoreOut);
             //EtStation station = sys.createStation(statConfig, "GRAND_CENTRAL");
-            EtStation station = sys.createStation(statConfig, "reader_station");
+            EtStation station = sys.createStation(statConfig, this.etStation);
             
             myAttachment = sys.attach(station);
             
@@ -184,7 +205,8 @@ public class EvioETSource implements DataSource {
                                 EvioDataEvent dataEvent = new EvioDataEvent(localBuffer,EvioFactory.getDictionary());
                                 this.readerEvents.add(dataEvent);                                
                             } catch (EvioException ex) {
-                                Logger.getLogger(EvioETSource.class.getName()).log(Level.SEVERE, null, ex);
+                                System.out.println("*** ERROR *** : problem reading event # " + nevent );
+                                //Logger.getLogger(EvioETSource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
                     }
@@ -211,14 +233,17 @@ public class EvioETSource implements DataSource {
         
     }
     
+    @Override
     public void open(ByteBuffer buff) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public void close() {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public int getSize() {
         if(sys.alive()==true){
             return this.readerEvents.size();
@@ -226,10 +251,12 @@ public class EvioETSource implements DataSource {
         return 0;
     }
 
+    @Override
     public DataEventList getEventList(int start, int stop) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public DataEventList getEventList(int nrecords) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -248,24 +275,82 @@ public class EvioETSource implements DataSource {
         return null;
     }
 
+    @Override
     public DataEvent getPreviousEvent() {
         return null;
     }
 
+    @Override
     public DataEvent gotoEvent(int index) {
         return null;
     }
 
+    @Override
     public void reset() {
         
     }
 
+    @Override
     public int getCurrentIndex() {
         return this.currentEventPosition;
     }
     
     public static void main(String[] args){
         
+        
+        OptionParser parser = new OptionParser("et-debug");
+        parser.addRequired("-host", "Host to connect to");
+        parser.addRequired("-f", "File name to connect to");
+        parser.addOption("-s", "reader_station", "station name to be created in the ET ring");
+        parser.addOption("-n", "30", "number of events to pull each time");
+        parser.addOption("-show", "false", "if set to true this will show the first event.");
+        
+        
+        System.out.println("[ET] PARSING ARGUMENTS");
+        parser.parse(args);
+        
+        System.out.println("[ET] STARTING DEBUG");
+        
+        String host       = parser.getOption("-host").stringValue();
+        String station    = parser.getOption("-s").stringValue();
+        String file       = parser.getOption("-f").stringValue();
+        String show       = parser.getOption("-show").stringValue();
+        int    max_events = parser.getOption("-n").intValue();
+        
+        EvioETSource reader = new EvioETSource(host,station,max_events);
+        reader.open(file);
+        
+        reader.loadEvents();
+        int cycle = 0;        
+        while(true){
+            int iteration = 0;
+
+            while(reader.hasEvent()==false){
+                reader.loadEvents();
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(EvioETSource.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                System.out.println("[ET] READING ET RING ITERATION # " + iteration);
+                iteration++;
+            }
+            System.out.println("[ET] >> LOADED EVENTS FROM ET RING. COUNT = " + reader.getSize());
+            System.out.println("[ET] >> DON'T WORRY EVERYTHING IS FINE. JUST SLEEPING FOR A WHILE. CYCLE # "
+                    + cycle + "\n");
+            for(int k = 0; k < reader.getSize(); k++){
+                DataEvent event = reader.getNextEvent();
+                if(show.compareTo("true")==0&&k==0){
+                    event.show();
+                }
+            }
+            cycle++;
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(EvioETSource.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         /*
         String ethost = "129.57.76.215";
         String file   = "/tmp/myEtRing";
