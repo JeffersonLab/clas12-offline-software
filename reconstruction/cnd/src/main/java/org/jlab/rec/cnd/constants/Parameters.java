@@ -1,4 +1,4 @@
-package org.jlab.rec.cnd.costants;
+package org.jlab.rec.cnd.constants;
 
 public class Parameters {
 

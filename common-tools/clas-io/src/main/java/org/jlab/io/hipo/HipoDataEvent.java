@@ -274,4 +274,27 @@ public class HipoDataEvent implements DataEvent {
         
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public long[] getLong(String path) {
+        HipoNode node = this.getHipoNodeByPath(path);        
+        if(node==null){
+            System.out.println("\n>>>>> error : getting node failed : " + path);
+            return new long[0];
+        }
+        int size = node.getDataSize();
+        long[] data = new long[size];
+        for(int i =0; i < data.length; i++) data[i] = node.getLong(i);
+        return data;
+    }
+
+    @Override
+    public void setLong(String path, long[] arr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void appendLong(String path, long[] arr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

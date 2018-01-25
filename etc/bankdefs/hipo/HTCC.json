@@ -6,7 +6,7 @@
     "items": [
        {"name":"id",          "id":1, "type":"int16", "info":"id of the hit"},
        {"name":"nhits",       "id":2, "type":"int16", "info":"number of hits in cluster"},
-       {"name":"nphe",        "id":3, "type":"int16", "info":"number of photoelectrons in cluster"},
+       {"name":"nphe",        "id":3, "type":"float", "info":"number of photoelectrons in cluster"},
        {"name":"ntheta",      "id":4, "type":"int16", "info":"ntheta"},
        {"name":"nphi",        "id":5, "type":"int16", "info":"nphi"},
        {"name":"mintheta",    "id":6, "type":"int16", "info":"Minimum theta angle"},

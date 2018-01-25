@@ -9,14 +9,10 @@ import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cnd.costants.CalibrationConstantsLoader;
-import org.jlab.rec.cnd.costants.Parameters;
+import org.jlab.geom.prim.Plane3D;
+import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
+import org.jlab.rec.cnd.constants.Parameters;
 import org.jlab.rec.cnd.hit.CvtGetHTrack.CVTTrack;
-import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.trajectory.Helix;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class CndHitFinder {
 
@@ -26,8 +22,10 @@ public class CndHitFinder {
 
 	// This class contains the core of the code. The findhits method reconstruct good cnd hits from raw halfhits using various cuts and matching.
 	// The following method are used to calculate the length the particle is travelling in the paddle while depositing energy.
+
+	// flag to distinguish between calibration mode 0 (loose cuts) and reconstruction mode 1 (tighter cuts)
 	
-	public ArrayList<CndHit> findHits(ArrayList<HalfHit> halfhits) 
+	public ArrayList<CndHit> findHits(ArrayList<HalfHit> halfhits,int flag) 
 	{
 
 		Parameters.SetParameters();
@@ -39,7 +37,7 @@ public class CndHitFinder {
 
 			// Loop through the half-hits array to find possible physical combinations with neighbours.
 
-			
+
 			double E1=0;//used to check that the two component of the deposited energy are roughtly the same
 			double E2=0;
 
@@ -50,8 +48,10 @@ public class CndHitFinder {
 			int pad_d = 0;       // index of the paddle with the direct signal
 			int pad_n = 0;       // index of the paddle with the indirect (neighbour) signal
 
-			int indexR=0;	 // index of the hit in the row adcR/tdcR bank
-			int indexL=0;	 // index of the hit in the row adcL/tdcL bank
+			int indexadcR=0;	 // index of the adcR in the row  bank
+			int indexadcL=0;	 // index of the adcL in the row  bank
+			int indextdcR=0;	 // index of the tdcR in the row  bank
+			int indextdcL=0;	 // index of the tdcL in the row  bank
 
 			double Tup = 0.;      // Time at upstream end of hit paddle (taken from direct signal)
 			double Tdown = 0.;    // Time at downstream end of hit paddle (taken from the neighbour signal)
@@ -66,7 +66,7 @@ public class CndHitFinder {
 			double E_hit = 0;	 // Reconstructed energy deposit of the particle in the paddle 
 			double r_hit = 0.;   // Perpendicular distance of the hit position (assuming center of paddle) from the beam-axis  
 			double path = 0.;	 // path length travelled by particle (assuming a straight line)
-			double phi_hit = 0.; // Phi angle of the hit position (assuming center of paddle) from the x-axis.
+			double phi_hit = 0.; // Phi angle of the hit position (assuming center of paddle) from the x-axis(9o'clock looking downstream)
 			double theta_hit = 0.; // Theta angle of the hit position from the z-axis;
 
 			int totrec = 0;      // counter for "good" reconstructions
@@ -119,29 +119,34 @@ public class CndHitFinder {
 					// attlen is in cm. need to convert to mm -> *10
 					Tup = hit_d.Tprop();
 					Tdown = hit_n.Tprop() - CalibrationConstantsLoader.LENGTH[lay-1]/(10.*CalibrationConstantsLoader.EFFVEL[block-1][lay-1][hit_n.Component()-1]) - CalibrationConstantsLoader.UTURNTLOSS[block-1][lay-1];
-					Eup = hit_d.Eatt()/CalibrationConstantsLoader.MIPDIRECT[block-1][lay-1][hit_d.Component()-1];
-					Edown = hit_n.Eatt()/(Math.exp(-1.*CalibrationConstantsLoader.LENGTH[lay-1]/(10.*CalibrationConstantsLoader.ATNLEN[block-1][lay-1][hit_n.Component()-1]))*CalibrationConstantsLoader.UTURNELOSS[block-1][lay-1]*CalibrationConstantsLoader.MIPDIRECT[block-1][lay-1][hit_n.Component()-1]);
+					//Eup = hit_d.Eatt()/CalibrationConstantsLoader.MIPDIRECT[block-1][lay-1][hit_d.Component()-1];
+					//Edown = hit_n.Eatt()/(Math.exp(-1.*CalibrationConstantsLoader.LENGTH[lay-1]/(10.*CalibrationConstantsLoader.ATNLEN[block-1][lay-1][hit_n.Component()-1]))*CalibrationConstantsLoader.UTURNELOSS[block-1][lay-1]*CalibrationConstantsLoader.MIPDIRECT[block-1][lay-1][hit_n.Component()-1]);
 
 					//The next two lines have to be used if want to use MIP Indirect for reconstruction
-					//					Eup = hit_d.Eatt()/CalibrationConstantsLoader.MIPDIRECT[hit_d.Sector()-1][hit_d.Layer()-1][hit_d.Component()-1];
-					//					Edown = hit_n.Eatt()/CalibrationConstantsLoader.MIPINDIRECT[hit_d.Sector()-1][hit_d.Layer()-1][hit_d.Component()-1];
+					Eup = hit_d.Eatt()/CalibrationConstantsLoader.MIPDIRECT[hit_d.Sector()-1][hit_d.Layer()-1][hit_d.Component()-1];
+					Edown = hit_n.Eatt()/CalibrationConstantsLoader.MIPINDIRECT[hit_d.Sector()-1][hit_d.Layer()-1][hit_d.Component()-1];
 
 					// For this particular combination, check whether this gives a z within the paddle length (+/- z resolution).
 					// "local" position of hit on the paddle (wrt paddle center):
 					Z_av = ((Tup-Tdown) * 10. * CalibrationConstantsLoader.EFFVEL[block-1][lay-1][hit_d.Component()-1]) / 2.;                                                      
 
-					//if ( (Z_av < ((CalibrationConstantsLoader.LENGTH[lay-1] / (-2.)) - 10.*Parameters.Zres[lay-1])) || (Z_av > ((CalibrationConstantsLoader.LENGTH[lay-1] / 2.) + 10.*Parameters.Zres[lay-1])) ) continue;                                       
-					
+					//removed for calibration
+					if(flag==1){
+						if ( (Z_av < ((CalibrationConstantsLoader.LENGTH[lay-1] / (-2.)) - 10.*Parameters.Zres[lay-1])) || (Z_av > ((CalibrationConstantsLoader.LENGTH[lay-1] / 2.) + 10.*Parameters.Zres[lay-1])) ) continue;                                       
+					}
+
 					// Calculate time of hit in paddle and check that it's in a physical window for the event:
 					T_hit = (Tup + Tdown - (CalibrationConstantsLoader.LENGTH[lay-1] / (10.*CalibrationConstantsLoader.EFFVEL[block-1][lay-1][hit_d.Component()-1]))) / 2.;  // time of hit in the paddle
-					
+
 					//test (check time of hit)
 					//System.out.println(T_hit);
 
 					//First cut : the time of hit has to be in a physical time window 
-					if ((T_hit) < Parameters.MinTime[lay-1] || (T_hit) > Parameters.MaxTime[lay-1]) continue;
+					// window set to 0-250ns for calibration	
+					if(flag==1){
+						if ((T_hit) < Parameters.MinTime[lay-1] || (T_hit) > Parameters.MaxTime[lay-1]) continue;
+					}
 
-					
 					// Calculate the deposited energy and check whether it's over the imposed threshold.			        
 					E_hit = (Eup / Math.exp(-1.*(CalibrationConstantsLoader.LENGTH[lay-1]/2. + Z_av) / (10.*CalibrationConstantsLoader.ATNLEN[block-1][lay-1][hit_d.Component()-1]))) +  (Edown / Math.exp(-1.*(CalibrationConstantsLoader.LENGTH[lay-1]/2. - Z_av) / (10.*CalibrationConstantsLoader.ATNLEN[block-1][lay-1][hit_d.Component()-1])));
 
@@ -152,16 +157,18 @@ public class CndHitFinder {
 					//					System.out.println(E2);
 
 					//second cut : the energy of the hit have to be higher than the threshold
-					// the threshold is currently 0.1Mev
-					//if (E_hit < Parameters.EThresh) continue;
-					
+					// the threshold is currently 0.1Mev for calibration
+					if(flag==1){
+						if (E_hit < Parameters.EThresh) continue;
+					}
+
 					// third cut (added by Pierre) : the energy of both component of the energy have to be of the same order of magnitude
 					//	if (Math.abs(E1-E2) > ((E1+E2)/2.)) continue;
-					
+
 					// If you get a "good" reconstruction, calculate the rest of the details:                                                                                                                   
 
-					if (hit_d.Component() == 1) phi_hit = (block-1) * Parameters.BlockSlice - 0.25*Parameters.BlockSlice;
-					else if (hit_d.Component() == 2) phi_hit = (block-1) * Parameters.BlockSlice + 0.25*Parameters.BlockSlice;
+					if (hit_d.Component() == 1) phi_hit = (block-1) * Parameters.BlockSlice + 0.25*Parameters.BlockSlice;
+					else if (hit_d.Component() == 2) phi_hit = (block-1) * Parameters.BlockSlice + 0.75*Parameters.BlockSlice;
 
 					//in mm
 					z_hit = (((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]/2.)) + Z_av);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
@@ -190,21 +197,26 @@ public class CndHitFinder {
 					GoodHit.set_Phi(phi_hit);
 					GoodHit.set_Sector(block);
 					GoodHit.set_Layer(lay);
-//					GoodHit.set_Component(hit_d.Component());			        
-					GoodHit.set_Component(1);  // set component to 1 for hits			        
+					//					GoodHit.set_Component(hit_d.Component());			        
+					GoodHit.set_Component(hit_d.Component());  // set component to 1 for hits			        
 
 					// set the index of the right and left signal for the reconstucted hit
-					// index of adc and tdc on one side (left or right) are the same. See hitreader
 					if(hit1.Component()==2){
-						indexR=hit1.BankIndex();
-						indexL=hit2.BankIndex();
+						indexadcR=hit1.Indexadc();
+						indexadcL=hit2.Indexadc();
+						indextdcR=hit1.Indextdc();
+						indextdcL=hit2.Indextdc();
 					}
 					else{
-						indexR=hit2.BankIndex();
-						indexL=hit1.BankIndex();
+						indexadcR=hit2.Indexadc();
+						indexadcL=hit1.Indexadc();
+						indextdcR=hit2.Indextdc();
+						indextdcL=hit1.Indextdc();
 					}
-					GoodHit.set_indexL(indexL);
-					GoodHit.set_indexR(indexR);
+					GoodHit.set_indexLadc(indexadcL);
+					GoodHit.set_indexLtdc(indextdcL);
+					GoodHit.set_indexRadc(indexadcR);
+					GoodHit.set_indexRtdc(indextdcR);
 
 					HitArray.add(GoodHit);
 
@@ -260,11 +272,13 @@ public class CndHitFinder {
 	} // findHits function		
 
 
-	public double findLength(CndHit hit, List<CVTTrack> helices) 
+	public double findLength(CndHit hit, List<CVTTrack> helices, int flag) 
 	{
 		// this method is used to find the length of the path followed by the detected charged particle in the cnd
 		// first we need to know if the particle is charged by matching the hit to the cvt helical tracks
 		// then we can calculate the length of the track
+
+		// flag is used to distinguish calibration mode 0 and reconstruction mode 1
 
 		double length = 0;
 		double xi=hit.X(); // retrieve cnd hit coordinates
@@ -295,28 +309,54 @@ public class CndHitFinder {
 			// the following line give the point at which the cnd hit would occur according to the cvt track
 			//Point3D hitCndfromCvt = helices.get(i).get_Helix().getPointAtRadius(radius); 
 			Point3D hitCndfromCvt = helices.get(i).get_TrkInters().get(lay-1).get(1); // middle of the counter
-			
+
 			double xj=hitCndfromCvt.x(); // retrieve CndFromCvt hit coordinates
 			double yj=hitCndfromCvt.y();
 			double zj=hitCndfromCvt.z();
-			
+
 			double rj=(Math.sqrt(xj*xj+yj*yj+zj*zj));
 			double phij = Math.signum(yj)*Math.acos(xj/rj)*(180./Math.PI);
 			double thetaj = Math.acos(zj/rj)*(180./Math.PI);
 
 			//	if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && Math.abs(zi-zj)<(3.*incz)) { // CUT are set to x,y,z incertainty
 			double zjAv = zj - ((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]/2.));
-			if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && zjAv>(CalibrationConstantsLoader.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && zjAv<(CalibrationConstantsLoader.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) { // CUT are set to x,y incertainty and zj in the paddle length
+			if((flag==0 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && zjAv>(CalibrationConstantsLoader.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && zjAv<(CalibrationConstantsLoader.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) || 
+					(flag==1 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && Math.abs(zi-zj)<(5.*incz))){ // CUT are set to x,y incertainty and zj in the paddle length
 
-				length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(helices.get(i).get_TrkInters().get(lay-1).get(2));
 				hit.set_AssociatedTrkId(helices.get(i).get_Id());
 				hit.set_pathlength(helices.get(i).get_TrkLengths().get(lay-1));
 				hit.set_tX(xj);
 				hit.set_tY(yj);
 				hit.set_tZ(zj);
+
+				// get the length travelled by the particule in the paddle. If the entry point is outside the cnd skip the event, if the escape point is outside the paddle, the escape point is the intersection of the particule path and the plane defined at the edge of the paddle, otherwise get the distance between entrypoint and escape point.
+
+				if(helices.get(i).get_TrkInters().get(lay-1).get(0).z()>((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]))) continue;
+				if(helices.get(i).get_TrkInters().get(lay-1).get(0).z()<(-1.*CalibrationConstantsLoader.ZOFFSET[lay-1])) continue;
+
+				Plane3D zmax = new Plane3D(0.0,0.0,((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1])),0.0,0.0,1.0);
+				Plane3D zmin = new Plane3D(0.0,0.0,(-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]),0.0,0.0,1.0);
+
+				if(helices.get(i).get_TrkInters().get(lay-1).get(2).z()>((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]))) {
+					Line3D ray = new Line3D(helices.get(i).get_TrkInters().get(lay-1).get(0),helices.get(i).get_TrkInters().get(lay-1).get(2));
+					Point3D inter = new Point3D();
+					if(zmax.intersection(ray,inter)!=1) continue;
+					length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(inter);
+					System.out.print("use inter + "+inter.z());			
+				} 				
+
+				if(helices.get(i).get_TrkInters().get(lay-1).get(2).z()<(-1.*CalibrationConstantsLoader.ZOFFSET[lay-1])) {
+					Line3D ray = new Line3D(helices.get(i).get_TrkInters().get(lay-1).get(0),helices.get(i).get_TrkInters().get(lay-1).get(2));
+					Point3D inter = new Point3D();
+					if(zmin.intersection(ray,inter)!=1) continue;
+					length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(inter);
+					System.out.print("use inter - "+inter.z());
+				}
+
+				else {length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(helices.get(i).get_TrkInters().get(lay-1).get(2));
+				}
 			}
 		}
-
 		return length; 
 
 	} //findLength function for charged particles

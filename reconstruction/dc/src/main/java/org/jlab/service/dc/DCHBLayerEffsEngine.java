@@ -79,23 +79,23 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             //T0s
             T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
             T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-            DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
-            dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+            //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
+            //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
-            dbprovider.disconnect();
+            //dbprovider.disconnect();
             // T0-subtraction
            
-            for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-                int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-                int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-                int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-                int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-                double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-                double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+            //for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+            //    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+            //    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+            //    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+            //    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+            //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+            //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
 
-                T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-                T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-            }
+            //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+            //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+            //}
             Constants.setLAYEREFFS(true);
             return true;
         }
@@ -116,6 +116,23 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 		int newRun = bank.getInt("run", 0);
 		
 		if(Run!=newRun) {
+                    DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
+                dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+                //disconnect from database. Important to do this after loading tables.
+                dbprovider.disconnect();
+                // T0-subtraction
+
+                for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+                    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+                    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+                    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+                    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+                    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+                    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+
+                    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+                    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+                }
                     //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);

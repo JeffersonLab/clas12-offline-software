@@ -31,10 +31,11 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.rec.dc.Constants;
 
-public class DCTBEngine extends ReconstructionEngine {
+public class DCTBLayerEffsEngine extends ReconstructionEngine {
 
-	public DCTBEngine() {
+	public DCTBLayerEffsEngine() {
 		super("DCTB","ziegler","4.0");
 	} 
 	int Run = 0;
@@ -47,6 +48,8 @@ public class DCTBEngine extends ReconstructionEngine {
         double SOLSCALE;
 	@Override
 	public boolean init() {
+            Constants.setLAYEREFFS(true);
+            
 		String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
                // "/calibration/dc/time_to_distance/t2d",
@@ -169,7 +172,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
                 
 		if(clusters.size()==0) {
-			rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
+			rbc.fillAllTBBanksCalib(event, rbc, hits, null, null, null, null);
 			return true;
 		}
 		
@@ -189,7 +192,7 @@ public class DCTBEngine extends ReconstructionEngine {
 					fhits.add(hit);						
 				}
 			}
-			rbc.fillAllTBBanks( event, rbc, fhits, clusters, null, null, null);
+			rbc.fillAllTBBanksCalib( event, rbc, fhits, clusters, null, null, null);
 			return true;
 		}
 		
@@ -213,7 +216,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(crosses.size()==0 ) {
 			
-			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
+			rbc.fillAllTBBanksCalib(event, rbc, fhits, clusters, segments, null, null);
 			return true;
 		}
 		
@@ -224,7 +227,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(crosslist.size()==0) {			
 			//System.out.println(" Failed on cross list !");
-			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null);
+			rbc.fillAllTBBanksCalib(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
 		//System.out.println(" cross list "+crosslist.size());	
@@ -236,7 +239,7 @@ public class DCTBEngine extends ReconstructionEngine {
 		
 		if(trkcands.size()==0) {
 			
-			rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+			rbc.fillAllTBBanksCalib( event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
 			return true;
 		} 
 		
@@ -271,7 +274,7 @@ public class DCTBEngine extends ReconstructionEngine {
 			}
 		} */
 		
-		rbc.fillAllTBBanks( event, rbc, fhits, clusters, segments, crosses, trkcands);
+		rbc.fillAllTBBanksCalib( event, rbc, fhits, clusters, segments, crosses, trkcands);
 
 			
 		return true;

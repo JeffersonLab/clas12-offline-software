@@ -561,8 +561,8 @@ public class DCSwimmer {
         
         //MagneticFields.getInstance().initializeMagneticFields();
         String clasDictionaryPath = CLASResources.getResourcePath("etc");
-
-        MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath, TorusMap.SYMMETRIC);
+        //System.out.println("  CLASS PATH "+clasDictionaryPath);
+        MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
         /*
         File torusFile = new File(torusFileName);
         try {

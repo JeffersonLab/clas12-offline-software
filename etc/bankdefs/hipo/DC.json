@@ -265,6 +265,19 @@
     ]
  },
  {
+ "bank": "TimeBasedTrkg::TBSegmentTrajectory",
+ "group": 20634,
+ "info": "reconstructed segment trajectory from hit-based tracking",
+ "items": [
+           {"name":"segmentID",    "id":1, "type":"int16", "info":"id of the segment"},
+           {"name":"sector",       "id":2, "type":"int8",  "info":"sector of DC"},
+           {"name":"superlayer",   "id":3, "type":"int8",  "info":"superlayer"},
+           {"name":"layer",        "id":4, "type":"int8",  "info":"layer"},
+           {"name":"matchedHitID", "id":5, "type":"int16", "info":"matched hit id"},
+           {"name":"trkDoca",      "id":6, "type":"float", "info":"calculated track doca"}
+           ]
+ },
+ {
     "bank": "TimeBasedTrkg::TBCrosses",
     "group": 20635,
     "info": "reconstructed segments using DC timing information",

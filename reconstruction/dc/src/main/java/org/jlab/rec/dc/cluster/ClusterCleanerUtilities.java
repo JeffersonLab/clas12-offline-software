@@ -365,6 +365,8 @@ public class ClusterCleanerUtilities {
                     hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
             newhitPos.set_Doca(hit.get_Doca());
             newhitPos.setT0SubTime(hit.getT0SubTime());
+            newhitPos.setTFlight(hit.getTFlight());
+            newhitPos.setTProp(hit.getTProp());
             newhitPos.set_Id(hit.get_Id());
             newhitPos.set_TrkgStatus(0);
             newhitPos.set_CellSize(DcDetector);
@@ -378,6 +380,8 @@ public class ClusterCleanerUtilities {
                     hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
             newhitNeg.set_Doca(hit.get_Doca());
             newhitNeg.setT0SubTime(hit.getT0SubTime());
+            newhitNeg.setTFlight(hit.getTFlight());
+            newhitNeg.setTProp(hit.getTProp());
             newhitNeg.set_Id(hit.get_Id());
             newhitNeg.set_TrkgStatus(0);
             newhitNeg.set_CellSize(DcDetector);

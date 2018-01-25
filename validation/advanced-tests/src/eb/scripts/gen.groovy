@@ -99,7 +99,7 @@ ParticleGenerator pgen2 = new ParticleGenerator(pid==-22?-pid:pid,
 // override #2 to be in CD:
 if (isCentral) {
     pgen2.setRange(
-       1.0,   4.5,
+       0.3,   1.1,
       50.0, 100.0,
      110.0, 130.0);
 }
