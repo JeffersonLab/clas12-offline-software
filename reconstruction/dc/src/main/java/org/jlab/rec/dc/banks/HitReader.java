@@ -113,7 +113,9 @@ public class HitReader {
             layer[i] = bankDGTZ.getByte("layer", i);
             wire[i] = bankDGTZ.getShort("component", i);
             tdc[i] = bankDGTZ.getInt("TDC", i);
+            this.swapWires(event, sector[i], layer[i], wire[i]);
         }
+        
 
         if (event.hasBank("DC::doca") == true) {
             DataBank bankD = event.getBank("DC::doca");
@@ -156,14 +158,23 @@ public class HitReader {
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 double T0Sub = smearedTime[i] - T_0; 
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
-                double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
+ //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 boolean passTimingCut = false;
                 int region = (int) (superlayerNum[i] + 1) / 2;
-                if(region ==1 && T0Sub>-100 && T0Sub<500)
+                if(region ==1 && T0Sub>-25 && T0Sub<275)
                     passTimingCut=true;
-                if(region ==2 && T0Sub>-100 && T0Sub<1000)
+                if(region ==2) {
+                    if(wire[i]>=56) {
+                        if(T0Sub>-25 && T0Sub<350+200*(float)(112-wire[i]/56))
+                            passTimingCut=true;
+                    } else {
+                        if(T0Sub>-25 && T0Sub<550+400*(float)(56-wire[i]/56))
+                            passTimingCut=true;
+                    }
+                        
                     passTimingCut=true;
-                if(region ==3 && T0Sub>-100 && T0Sub<1000)
+                }
+                if(region ==3 && T0Sub>-25 && T0Sub<750)
                     passTimingCut=true;
                 if(passTimingCut) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
@@ -384,10 +395,10 @@ public class HitReader {
         betaArray[0]=-1;
         betaArray[1]=-1;
         betaArray[2]=-1;
-        if (event.hasBank("RUN::config") == false) 
+        if (event.hasBank("RECHB::Event") == false) 
             return 1.0;
-        DataBank bank = event.getBank("RUN::config");
-        double startTime = bank.getFloat("startTime", 0);
+        DataBank bank = event.getBank("RECHB::Event");
+        double startTime = bank.getFloat("STTime", 0);
         
         if (event.hasBank("FTOF::hits") == false) 
             return 1.0;
@@ -450,6 +461,58 @@ public class HitReader {
         {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 6  
     //===> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 (Local wire ID: 0 for 1st, 16th, 32th, 48th, 64th, 80th, 96th wires)
     };
+    private final int[][] CableSwaps ={
+     //[nswaps][swap]
+        //CableSwaps[0]:from sector CableSwaps[1]: from layer(1...36) CableSwaps[2]: from wire
+        //CableSwaps[3]:  to sector CableSwaps[4]:   to layer(1...36) CableSwaps[5]:   to wire
+        {4,    18,    22,     4,    14,    25},
+        {4,    13,    22,     4,    16,    25},
+        {4,    15,    22,     4,    18,    25},
+        {4,    17,    22,     4,    13,    25},
+        {4,    14,    23,     4,    15,    25},
+        {4,    16,    23,     4,    17,    25},
+        {4,    18,    23,     4,    14,    26},
+        {4,    13,    23,     4,    16,    26},
+        {4,    15,    23,     4,    18,    26},
+        {4,    17,    23,     4,    13,    26},
+        {4,    14,    24,     4,    15,    26},
+        {4,    16,    24,     4,    17,    26},
+        {4,    18,    24,     4,    14,    27},
+        {4,    13,    24,     4,    16,    27},
+        {4,    15,    24,     4,    18,    27},
+        {4,    17,    24,     4,    13,    27},
+        {4,    14,    25,     4,    18,    22},
+        {4,    16,    25,     4,    13,    22},
+        {4,    18,    25,     4,    15,    22},
+        {4,    13,    25,     4,    17,    22},
+        {4,    15,    25,     4,    14,    23},
+        {4,    17,    25,     4,    16,    23},
+        {4,    14,    26,     4,    18,    23},
+        {4,    16,    26,     4,    13,    23},
+        {4,    18,    26,     4,    15,    23},
+        {4,    13,    26,     4,    17,    23},
+        {4,    15,    26,     4,    14,    24},
+        {4,    17,    26,     4,    16,    24},
+        {4,    14,    27,     4,    18,    24},
+        {4,    16,    27,     4,    13,    24},
+        {4,    18,    27,     4,    15,    24},
+        {4,    13,    27,     4,    17,    24},
+    };
 
-    
+    private void swapWires(DataEvent event, int sector, int layer, int wire) {
+        // don't swap in MC
+        if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
+            return ; 
+        } else {
+            for(int i = 0; i<CableSwaps.length; i++) {
+                if(CableSwaps[i][0]==sector && CableSwaps[i][1]==layer && CableSwaps[i][2]==wire) {
+                   // System.out.println(" swapped "+sector+", "+layer+", "+wire);
+                    sector = CableSwaps[i][3];
+                    layer  = CableSwaps[i][4];
+                    wire   = CableSwaps[i][5];
+                   // System.out.println("    to  "+sector+", "+layer+", "+wire);
+                }
+            }
+        }
+    }
 }
