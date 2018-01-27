@@ -7,10 +7,10 @@ import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.Cross;
 import cnuphys.ced.event.data.CrossList;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.frame.CedColors;
 import item3D.Item3D;
 
 public class CrossDrawer3D extends Item3D {
@@ -37,11 +37,11 @@ public class CrossDrawer3D extends Item3D {
 		
 		if (_cedPanel3D.showHBCross()) {
 			CrossList list = HBCrosses.getInstance().getCrosses();
-			drawCrossList(drawable, list, CedColors.HB_COLOR);
+			drawCrossList(drawable, list, DC.HB_COLOR);
 		}
 		if (_cedPanel3D.showTBCross()) {
 			CrossList list = TBCrosses.getInstance().getCrosses();
-			drawCrossList(drawable, list, CedColors.TB_COLOR);
+			drawCrossList(drawable, list, DC.TB_COLOR);
 		}
 
 	}

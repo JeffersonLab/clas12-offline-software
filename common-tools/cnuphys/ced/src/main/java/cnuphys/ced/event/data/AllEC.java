@@ -33,11 +33,16 @@ public class AllEC extends DetectorData {
 //	bank name: [ECAL::tdc] column name: [order] full name: [ECAL::tdc.order] data type: byte
 //	bank name: [ECAL::tdc] column name: [sector] full name: [ECAL::tdc.sector] data type: byte
 	
-	TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
+	//tdc adc data
+	private TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
+	
+	//clusters
+	private ClusterList _clusters = new ClusterList("ECAL::clusters");
 	
 	private int _maxPCALAdc;
 	private int _maxECALAdc;
 	
+	//singleton
 	private static AllEC _instance;
 
 	/**
@@ -51,8 +56,24 @@ public class AllEC extends DetectorData {
 		return _instance;
 	}
 	
+	/**
+	 * Get the layer name 
+	 * @param layer the 1-based layer 1..9
+	 * @return the brief layer name
+	 */
+	public String getLayerName(byte layer) {
+		if ((layer < 1) || (layer > 9)) {
+			return "" + layer;
+		}
+		else {
+			return layerNames[layer];
+		}
+	}
+
+	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
+		_clusters = new ClusterList("ECAL::clusters"); 
 		_tdcAdcHits =  new TdcAdcHitList("ECAL::tdc", "ECAL::adc");
 		computeADCMax();
 	}
@@ -112,5 +133,14 @@ public class AllEC extends DetectorData {
 		return _tdcAdcHits;
 	}
 	
+	
+	/**
+	 * Get the reconstructed cluster list
+	 * @return reconstructed list
+	 */
+	public ClusterList getClusters() {
+		return _clusters;
+	}
+
 
 }

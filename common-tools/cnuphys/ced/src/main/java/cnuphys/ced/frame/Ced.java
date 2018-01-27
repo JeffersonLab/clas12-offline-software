@@ -22,8 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.BusyPanel;
@@ -62,13 +60,11 @@ import cnuphys.ced.event.data.FMTCrosses;
 import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HBCrosses;
-import cnuphys.ced.event.data.HBHits;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
-import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
 //import cnuphys.ced.fastmc.FastMCManager;
 //import cnuphys.ced.fastmc.FastMCMenu;
@@ -117,7 +113,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.50";
+	private static final String _release = "build 0.99.999.51";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -557,7 +553,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//add some fun stuff
 	private void addWeirdMenu() {
-		String weirdTitle = "w " + "\u018e" + " i " + "\u1d19" + " d";
+		String weirdTitle = "w" + "\u018e" + "i" + "\u1d19" + "d";
 		_weirdMenu = new JMenu(weirdTitle);		
 
 		// eliza!
@@ -1036,8 +1032,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		HBCrosses.getInstance();
 		TBSegments.getInstance();
 		HBSegments.getInstance();
-		TBHits.getInstance();
-		HBHits.getInstance();
 		AllEC.getInstance();
 		HTCC2.getInstance();
 		FTCAL.getInstance();

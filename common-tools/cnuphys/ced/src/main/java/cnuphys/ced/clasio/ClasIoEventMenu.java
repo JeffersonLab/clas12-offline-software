@@ -22,8 +22,6 @@ import javax.swing.KeyStroke;
 import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 

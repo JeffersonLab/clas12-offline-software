@@ -338,6 +338,7 @@ public class ControlPanel extends JPanel {
 		if (isBig) {
 			phi_min = -180;
 			phi_max = 180;
+			phi_init = 90;
 		}
 
 		_phiSlider = new JSlider(SwingConstants.HORIZONTAL, phi_min, phi_max,

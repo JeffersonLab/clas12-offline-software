@@ -150,7 +150,7 @@ public class TOFShellItem extends PolygonItem {
 			}
 		}
 		else {
-		    TdcAdcHitList hits = FTOF.getInstance().getHits();
+		    TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 			byte sect = (byte) _sector.getSector();
 			byte layer = (byte) (_panel + 1);
 			short paddle = (short) (paddleId);

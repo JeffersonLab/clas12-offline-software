@@ -11,6 +11,7 @@ import org.jlab.io.base.DataEvent;
 public class BMT extends DetectorData {
 
 
+	//list of adc hits
 	AdcHitList _adcHits = new AdcHitList("BMT::adc");
 
 	private static BMT _instance;

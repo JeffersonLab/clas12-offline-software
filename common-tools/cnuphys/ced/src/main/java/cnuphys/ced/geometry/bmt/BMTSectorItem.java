@@ -69,9 +69,6 @@ public class BMTSectorItem extends DonutItem {
 					delAngle[sector - 1][layer - 1] += 360;
 				}
 				
-				if (layer == 1)
-				System.err.println("BMT sector " + sector + " layer " + layer + 
-						"   startAng: " + DoubleFormat.doubleFormat(beginAng, 1) + "   endAng: " + DoubleFormat.doubleFormat(endAng, 1));
 			}
 		}
 		

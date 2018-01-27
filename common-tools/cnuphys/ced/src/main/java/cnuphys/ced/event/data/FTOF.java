@@ -16,11 +16,17 @@ public class FTOF extends DetectorData {
 	public static final int PANEL_2 = 2;
 	public static final String panelNames[] = { "Panel 1A", "Panel 1B",
 			"Panel 2" };
+	private static final String briefPNames[] = { "1A", "1B",
+	"2" };
 
 	
 	//tdc adc hit list
-	TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("FTOF::tdc", "FTOF::adc");
+	private TdcAdcHitList _tdcAdcHits = new TdcAdcHitList("FTOF::tdc", "FTOF::adc");
 	
+	//reconstructed hit list
+	private Hit1List _hits;
+	
+	//singleton
 	private static FTOF _instance;
 	
 	
@@ -36,10 +42,29 @@ public class FTOF extends DetectorData {
 	}
 	
 
+	/**
+	 * Get the brief panel name 
+	 * @param layer the 1-based layer 1..3
+	 * @return the brif panel name
+	 */
+	public String getBriefPanelName(byte layer) {
+		if ((layer < 1) || (layer > 3)) {
+			return "" + layer;
+		}
+		else {
+			return briefPNames[layer-1];
+		}
+	}
 	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_tdcAdcHits =  new TdcAdcHitList("FTOF::tdc", "FTOF::adc");
+		try {
+			_hits = new Hit1List("FTOF::hits");
+		} catch (EventDataException e) {
+			_hits = null;
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -106,7 +131,18 @@ public class FTOF extends DetectorData {
 	 * Get the tdc and adc hit list
 	 * @return the tdc adc hit list
 	 */
-	public TdcAdcHitList getHits() {
+	public TdcAdcHitList getTdcAdcHits() {
 		return _tdcAdcHits;
 	}
+	
+	
+	/**
+	 * Get the reconstructed hit list
+	 * @return reconstructed hit list
+	 */
+	public Hit1List getHits() {
+		return _hits;
+	}
+
+	
 }
