@@ -113,7 +113,15 @@ public class HitReader {
             layer[i] = bankDGTZ.getByte("layer", i);
             wire[i] = bankDGTZ.getShort("component", i);
             tdc[i] = bankDGTZ.getInt("TDC", i);
+            _sector = sector[i];
+            _layer = layer[i];
+            _wire = wire[i];
+            
             this.swapWires(event, sector[i], layer[i], wire[i]);
+            sector[i] = _sector;
+            layer[i] = _layer;
+            wire[i] = _wire;
+            
         }
         
 
@@ -498,7 +506,10 @@ public class HitReader {
         {4,    18,    27,     4,    15,    24},
         {4,    13,    27,     4,    17,    24},
     };
-
+    private int _sector;
+    private int _layer;
+    private int _wire;
+    
     private void swapWires(DataEvent event, int sector, int layer, int wire) {
         // don't swap in MC
         if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
@@ -507,10 +518,10 @@ public class HitReader {
             for(int i = 0; i<CableSwaps.length; i++) {
                 if(CableSwaps[i][0]==sector && CableSwaps[i][1]==layer && CableSwaps[i][2]==wire) {
                    // System.out.println(" swapped "+sector+", "+layer+", "+wire);
-                    sector = CableSwaps[i][3];
-                    layer  = CableSwaps[i][4];
-                    wire   = CableSwaps[i][5];
-                   // System.out.println("    to  "+sector+", "+layer+", "+wire);
+                    _sector = CableSwaps[i][3];
+                    _layer  = CableSwaps[i][4];
+                    _wire   = CableSwaps[i][5];
+                  //  System.out.println("    to  "+_sector+", "+_layer+", "+_wire);
                 }
             }
         }
