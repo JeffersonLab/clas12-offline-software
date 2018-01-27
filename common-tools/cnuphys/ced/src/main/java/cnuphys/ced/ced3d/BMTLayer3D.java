@@ -80,7 +80,7 @@ public class BMTLayer3D extends DetectorItem3D {
 								BMTGeometry.getGeometry().getCRZEndPoints(sector, layer, strip, coords6);
 
 								if (!Float.isNaN(coords6[0])) {							
-									Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
+									Support3D.drawLine(drawable, coords6, dgtzColor, STRIPLINEWIDTH);
 								}
 							}
 						}

@@ -16,6 +16,9 @@ public abstract class DetectorItem3D extends Item3D {
 	protected static final float MC_POINTSIZE = 3f;
 	protected static final float CROSS_POINTSIZE = 5f;
 	protected static final Color cosmicColor = Color.lightGray;
+	
+	protected static final float STRIPLINEWIDTH = 10f;
+	protected static final float WIRELINEWIDTH = 3f;
 
 	// the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();

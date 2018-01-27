@@ -189,7 +189,7 @@ public class MagneticFields {
 		if (solenoidScaleChange) {
 			//don't change scale if we aren't using solenoid
 			if ((desiredFieldType == FieldType.SOLENOID) || (desiredFieldType == FieldType.COMPOSITE)) {
-				_solenoid.setScaleFactor(torusScale);
+				_solenoid.setScaleFactor(solenoidScale);
 			}
 			_scaleSolenoidPanel.fixText();
 		}

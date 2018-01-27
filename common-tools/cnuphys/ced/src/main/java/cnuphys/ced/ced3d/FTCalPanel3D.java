@@ -3,6 +3,8 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import java.awt.Font;
 
+import com.jogamp.opengl.GLAutoDrawable;
+
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.geometry.FTCALGeometry;
 import cnuphys.lund.X11Colors;
@@ -46,6 +48,7 @@ public class FTCalPanel3D extends CedPanel3D {
 		}
 
 	}
+	
 
 	/**
 	 * This gets the z step used by the mouse and key adapters, to see how fast

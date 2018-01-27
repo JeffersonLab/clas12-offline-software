@@ -42,7 +42,6 @@ import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -173,7 +172,7 @@ public class CentralXYView extends CedXYView {
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
+				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
 						+ DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
@@ -237,7 +236,7 @@ public class CentralXYView extends CedXYView {
 					
 					_hitDrawer.draw(g, container);
 
-					if (showReconsCrosses()) {
+					if (showCrosses()) {
 						_crossDrawer.draw(g, container);
 					}
 

@@ -212,7 +212,7 @@ public class TOFView extends CedView implements ISector {
 	
 	private void drawSingleEventData(Graphics g, IContainer container) {
 		//FTOF
-		TdcAdcHitList hits = FTOF.getInstance().getHits();
+		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			
 			Rectangle rr = new Rectangle();

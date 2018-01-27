@@ -32,16 +32,10 @@ public class AdcHitList extends Vector<AdcHit> {
 		short[] ped = ColumnData.getShortArray(adcBankName + ".ped");
 		float[] time = ColumnData.getFloatArray(adcBankName + ".time");
 		
-		boolean isbst =  (adcBankName.contains("BST"));
-		if (isbst) {
-			System.err.println("BST");
-		}
 		
 		String tstamp = adcBankName + ".timestamp";
 		long[] timestamp = ColumnData.getLongArray(tstamp);
 		
-		if (isbst) System.err.println("TIMESTAMP ARRAY Nonnull " + (timestamp != null));
-
 		length = checkArrays(sector, layer, component, order, ADC);
 		if (length < 0) {
 			Log.getInstance().warning("[" + adcBankName + "] " + _error);

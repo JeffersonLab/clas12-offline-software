@@ -253,12 +253,12 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
 				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
-				+ DisplayBits.DC_HB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_CROSSES + DisplayBits.FTOFHITS + DisplayBits.FMTCROSSES
-				+ DisplayBits.DC_TB_RECONS_DOCA + DisplayBits.DC_HB_RECONS_SEGMENTS 
-				+ DisplayBits.DC_TB_RECONS_SEGMENTS
+				+ DisplayBits.CROSSES
+				+ DisplayBits.RECONHITS 
+				+ DisplayBits.CLUSTERS
+				+ DisplayBits.DC_HITS + DisplayBits.SEGMENTS 
 				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
-				+ DisplayBits.ACCUMULATION + DisplayBits.SCALE
+				+ DisplayBits.ACCUMULATION //+ DisplayBits.SCALE
 				+ DisplayBits.MCTRUTH, 3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -557,17 +557,18 @@ public class SectorView extends CedView implements ChangeListener {
 				drawBSTPanels(g, container);
 
 				// draw reconstructed dc crosses
-				if (showDChbCrosses()) {
+				
+				if (showDCHBCrosses()) {
 					_dcCrossDrawer.setMode(CrossDrawer.HB);
 					_dcCrossDrawer.draw(g, container);
 				}
-				if (showDCtbCrosses()) {
+				if (showDCTBCrosses()) {
 					_dcCrossDrawer.setMode(CrossDrawer.TB);
 					_dcCrossDrawer.draw(g, container);
 				}
 				
-				//FMT Crosses
-				if (showFMTCrosses()) {
+				//Other (not DC) Crosses
+				if (showCrosses()) {
 					_fmtCrossDrawer.draw(g, container);
 				}
 
@@ -647,6 +648,26 @@ public class SectorView extends CedView implements ChangeListener {
 			return positive ? 3 : 6;
 		}
 		return -1;
+	}
+	
+	/**
+	 * Is the sector one of the two on this view
+	 * @param sector the sector [1..6]
+	 */
+	public boolean containsSector(byte sector) {
+		
+		switch (_displaySectors) {
+		case SECTORS14:
+			return ((sector == 1) || (sector == 4));
+
+		case SECTORS25:
+			return ((sector == 2) || (sector == 5));
+
+		case SECTORS36:
+			return ((sector == 3) || (sector == 6));
+		}
+		
+		return false;
 	}
 
 	/**
@@ -880,22 +901,25 @@ public class SectorView extends CedView implements ChangeListener {
 		feedbackStrings.add("$aqua$" + occStr);
 
 		// reconstructed feedback?
-		if (showDChbCrosses()) {
+		if (showDCHBCrosses()) {
 			_dcCrossDrawer.setMode(CrossDrawer.HB);
 			_dcCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
-		if (showDCtbCrosses()) {
+		if (showDCTBCrosses()) {
 			_dcCrossDrawer.setMode(CrossDrawer.TB);
 			_dcCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 		
-		if (showFMTCrosses()) {
+		//Other (not DC) Crosses
+		if (showCrosses()) {
 			_fmtCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
 		if (showMcTruth()) {
 			_mcHitDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
+		
+		_reconDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 
 	}
 
@@ -1545,6 +1569,26 @@ public class SectorView extends CedView implements ChangeListener {
 		return polys;
 	}
 	
+	/**
+	 * Draw a single wire. All indices are 1-based
+	 * @param g
+	 * @param container
+	 * @param fillColor
+	 * @param frameColor
+	 * @param sector
+	 * @param superlayer
+	 * @param layer
+	 * @param wire
+	 * @param trkDoca
+	 */
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte sector,
+			byte superlayer, byte layer, short wire, float trkDoca, Point location) {
+
+		SectorSuperLayer sectSL = _superLayers[(sector < 4) ? 0 : 1][superlayer-1];
+		sectSL.drawDCHit(g, container, fillColor, frameColor, 
+				layer, wire, trkDoca, location);
+		
+	}
 	
 	/**
 	 * Clone the view. 

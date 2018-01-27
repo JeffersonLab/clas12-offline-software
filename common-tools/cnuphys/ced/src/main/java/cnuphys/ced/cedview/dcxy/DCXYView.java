@@ -168,8 +168,7 @@ public class DCXYView extends HexView {
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 				+ ControlPanel.DRAWLEGEND, 
 				DisplayBits.ACCUMULATION
-				+ DisplayBits.DC_HB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_CROSSES 
+				+ DisplayBits.CROSSES
 				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
                 + DisplayBits.MCTRUTH, 3, 5);
 
@@ -236,11 +235,11 @@ public class DCXYView extends HexView {
 					drawHits(g, container);
 
 					// draw reconstructed dc crosses
-					if (showDChbCrosses()) {
+					if (showDCHBCrosses()) {
 						_crossDrawer.setMode(CrossDrawer.HB);
 						_crossDrawer.draw(g, container);
 					}
-					if (showDCtbCrosses()) {
+					if (showDCTBCrosses()) {
 						_crossDrawer.setMode(CrossDrawer.TB);
 						_crossDrawer.draw(g, container);
 					}
@@ -305,7 +304,7 @@ public class DCXYView extends HexView {
 				return;
 			}
 			
-			DCTdcHitList hits = DC.getInstance().getHits();
+			DCTdcHitList hits = DC.getInstance().getTDCHits();
 			if ((hits != null) && !hits.isEmpty()) {
 				
 				Graphics2D g2 = (Graphics2D)g;
@@ -517,11 +516,11 @@ public class DCXYView extends HexView {
 		super.getFeedbackStrings(container, pp, wp, feedbackStrings);
 
 		// reconstructed feedback?
-		if (showDChbCrosses()) {
+		if (showDCHBCrosses()) {
 			_crossDrawer.setMode(CrossDrawer.HB);
 			_crossDrawer.feedback(container, pp, wp, feedbackStrings);
 		}
-		if (showDCtbCrosses()) {
+		if (showDCTBCrosses()) {
 			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.feedback(container, pp, wp, feedbackStrings);
 		}

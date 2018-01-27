@@ -153,12 +153,14 @@ public class CentralZView extends CedView implements ChangeListener {
 						+ ControlPanel.PHI_SLIDER_BIG + ControlPanel.FIELDLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
-						+ DisplayBits.BSTRECONS_CROSSES + DisplayBits.MCTRUTH
+						+ DisplayBits.CROSSES + DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
+		
+		view.phiFromSlider();
 		return view;
 	}
 
@@ -204,7 +206,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 				_hitDrawer.draw(g, container);
 
-				if (showReconsCrosses()) {
+				if (showCrosses()) {
 					_crossDrawer.draw(g, container);
 				}
 
@@ -865,14 +867,16 @@ public class CentralZView extends CedView implements ChangeListener {
 			getContainer().refresh();
 		}
 		else if (source == _controlPanel.getPhiSlider()) {
-			_phi = _controlPanel.getPhiSlider().getValue();
-			// _cosphi = Math.cos(-Math.toRadians(_phiRelMidPlane));
-			// _sinphi = Math.sin(-Math.toRadians(_phiRelMidPlane));
-			_sinphi = Math.sin(Math.toRadians(_phi));
-			_cosphi = Math.cos(Math.toRadians(_phi));
+			phiFromSlider();
 			getContainer().setDirty(true);
 			getContainer().refresh();
 		}
+	}
+	
+	private void phiFromSlider() {
+		_phi = _controlPanel.getPhiSlider().getValue();
+		_sinphi = Math.sin(Math.toRadians(_phi));
+		_cosphi = Math.cos(Math.toRadians(_phi));
 	}
 	
 	

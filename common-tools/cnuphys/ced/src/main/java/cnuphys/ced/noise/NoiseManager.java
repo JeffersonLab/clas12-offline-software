@@ -103,7 +103,7 @@ public class NoiseManager implements IClasIoEventListener {
 		noisePackage.clear();
 		_noiseResults.clear();
 		
-		DCTdcHitList hits = DC.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
 		
 		if ((hits != null) && !hits.isEmpty()) {
 			int sector[] = hits.sectorArray();

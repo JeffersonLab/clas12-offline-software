@@ -384,7 +384,6 @@ public class NNDataDialog extends SimpleDialog implements IClasIoEventListener, 
 
 	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
-		System.err.println("HEY MAN");
 	}
 
 }

@@ -68,9 +68,6 @@ public class BankTableModel extends DefaultTableModel {
 		for (ColumnData cd : cds) {
 			
 			if (cd != null) {
-				if (cd.getType() == 4) {
-					System.out.println("Hey man");
-				}
 				rowCount = Math.max(rowCount, cd.getLength(_event));
 			}
 		}
