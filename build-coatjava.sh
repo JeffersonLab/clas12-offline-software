@@ -11,6 +11,7 @@ mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
 cp external-dependencies/KPP-Monitoring-1.0.jar coatjava/lib/utils
 cp external-dependencies/KPP-Plots-1.0.jar coatjava/lib/utils
+cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
