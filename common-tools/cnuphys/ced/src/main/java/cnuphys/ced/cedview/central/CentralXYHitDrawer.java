@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Vector;
 
 import cnuphys.bCNU.drawable.IDrawable;
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.FeedbackRect;
@@ -23,6 +21,7 @@ import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BMTGeometry;
@@ -118,6 +117,12 @@ public class CentralXYHitDrawer implements IDrawable {
 		drawBSTAccumulatedHits(g, container);
 	//	drawMicroMegasAccumulateHitsHits(g, container);
 		drawCTOFAccumulatedHits(g, container);
+		drawCNDAccumulatedHits(g, container);
+	}
+
+	// draw accumulated BST hits (panels)
+	private void drawCNDAccumulatedHits(Graphics g, IContainer container) {
+		
 	}
 
 	
@@ -158,7 +163,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 				}
 				else {
-					System.err.println("Got a null panel in drawBSTAccumulatedHits.");
+//					System.err.println("Got a null panel in drawBSTAccumulatedHits.");
 				}
 			}
 		}
@@ -206,7 +211,43 @@ public class CentralXYHitDrawer implements IDrawable {
 		drawBSTHitsSingleMode(g, container);
 		drawBMTHitsSingleMode(g, container);
 		drawCTOFSingleHitsMode(g, container);
+		drawCNDSingleHitsMode(g, container);
 	}
+	
+	// draw CTOF hits
+	private void drawCNDSingleHitsMode(Graphics g,
+			IContainer container) {
+		
+		TdcAdcHitList hits = CND.getInstance().getHits();
+
+		if ((hits != null) && !hits.isEmpty()) {
+			for (TdcAdcHit hit : hits) {
+				
+				//adcs have order = 0, 1
+				if (hit != null){
+					
+				//	System.err.println("ORDER: " + hit.order);
+					
+					int comp = 1 + (hit.order % 2);
+					
+					CNDXYPolygon poly = _view.getCNDPolygon(hit.sector, hit.layer, comp);
+					if (poly != null) {
+						
+						
+						if (hit.order < 2) {  //adc
+							Color color = hits.adcColor(hit);
+							poly.draw(g, container, color, Color.black);
+						}
+						else {
+							poly.draw(g, container, null, Color.red);
+						} //tdc
+						
+					}
+				}
+			}
+		}
+	}
+	
 	
 	// draw CTOF hits
 	private void drawCTOFSingleHitsMode(Graphics g,

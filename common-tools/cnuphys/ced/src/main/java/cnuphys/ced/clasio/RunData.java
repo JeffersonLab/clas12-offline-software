@@ -16,13 +16,12 @@ public class RunData {
 
 	public int run = -1;
 	public int event;
-	public int trigger;
+	public long trigger;
+	public long timestamp;
 	public byte type;
 	public byte mode;
 	public float solenoid;
 	public float torus;
-	public float rf;
-	public float startTime;
 	
 	public void reset() {
 		run = -1;
@@ -50,7 +49,6 @@ public class RunData {
 			
 			run = safeInt(dataEvent, "run");
 			if (run < 0) {
-
 				return false;
 			}
 			
@@ -62,22 +60,10 @@ public class RunData {
 				return false;
 			}
 			
-			trigger = safeInt(dataEvent, "trigger");
-			if (trigger < 0) {
-				return false;
-			}
-
+			trigger = safeLong(dataEvent, "trigger");	
+			timestamp = safeLong(dataEvent, "timestamp");
 			type = safeByte(dataEvent, "type");
-			if (type < 0) {
-				return false;
-			}
-
-			System.out.println("---- GETTING Run:Config.mode...");
 			mode = safeByte(dataEvent, "mode");
-			if (mode < 0) {
-				return false;
-			}
-			System.out.println("---- Done");
 			
 			solenoid = safeFloat(dataEvent, "solenoid");
 			if (Float.isNaN(solenoid)) {
@@ -88,33 +74,10 @@ public class RunData {
 			if (Float.isNaN(torus)) {
 				return false;
 			}
-			
-			rf = safeFloat(dataEvent, "rf");
-			if (Float.isNaN(rf)) {
-				return false;
-			}
-			
-			startTime = safeFloat(dataEvent, "startTime");
-			if (Float.isNaN(startTime)) {
-				return false;
-			}
-			
-			
-//			run = dm.getIntArray(dataEvent, "RUN::config.run")[0];
-//			event = dm.getIntArray(dataEvent, "RUN::config.event")[0];
-//			trigger = dm.getIntArray(dataEvent, "RUN::config.trigger")[0];
-//			type = dm.getByteArray(dataEvent, "RUN::config.type")[0];
-//			mode = dm.getByteArray(dataEvent, "RUN::config.mode")[0];
-//			solenoid = dm.getFloatArray(dataEvent, "RUN::config.solenoid")[0];
-//			torus = dm.getFloatArray(dataEvent, "RUN::config.torus")[0];
-//			rf = dm.getFloatArray(dataEvent, "RUN::config.rf")[0];
-//			startTime = dm.getFloatArray(dataEvent, "RUN::config.startTime")[0];
-			
-
-			
+						
 			if (oldRun != run) {
 				//set the mag field and menus
-				boolean changed = MagneticFields.getInstance().changeFieldsAndMenus(torus, solenoid);
+				MagneticFields.getInstance().changeFieldsAndMenus(torus, solenoid);
 			}
 			return true;
 		} catch (Exception e) {
@@ -124,6 +87,16 @@ public class RunData {
 		return false;
 	}
 	
+	
+	private long safeLong(DataEvent event, String colName) {
+		DataManager dm = DataManager.getInstance();
+	    long[] data = dm.getLongArray(event, "RUN::config." + colName);	
+	    if ((data == null) || (data.length < 1)) {
+	    	return -1;
+	    }
+	    return data[0];
+	}
+
 	private int safeInt(DataEvent event, String colName) {
 		DataManager dm = DataManager.getInstance();
 	    int[] data = dm.getIntArray(event, "RUN::config." + colName);	
@@ -162,8 +135,7 @@ public class RunData {
 		s += "\nmode: " + mode;
 		s += "\nsolenoid: " + solenoid;
 		s += "\ntorus: " + torus;
-		s += "\nrf: " + rf;
-		s += "\nstartTime: " + startTime;
+		s += "\ntimeStamp: " + timestamp;
 		return s;
 	}
 }

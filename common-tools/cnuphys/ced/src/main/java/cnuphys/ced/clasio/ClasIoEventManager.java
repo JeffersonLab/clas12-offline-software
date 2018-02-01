@@ -22,9 +22,6 @@ import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.io.hipo.HipoRingSource;
-import org.jlab.io.ui.ConnectionDialog;
-import org.jlab.io.ui.ConnectionDialogHipo;
 
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.dialog.DialogUtilities;
@@ -32,7 +29,6 @@ import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.IpField;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
-import cnuphys.bCNU.util.SerialIO;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.alldata.graphics.DefinitionManager;
@@ -71,6 +67,9 @@ public class ClasIoEventManager {
 	
 	//decode evio to hipo
 	private CLASDecoder _decoder;
+	
+	//reset everytime hipo or evio file is opened
+	private int _eventIndex;
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
@@ -88,11 +87,11 @@ public class ClasIoEventManager {
 	//private ETDialog _etDialog;
 	//private ConnectionDialog _connectionDialog;
 	
-	ConnectETDialog _etDialog;
+	private ConnectETDialog _etDialog;
 	
 	// hipo ring dialog
 	//private RingDialog _ringDialog;
-	private ConnectionDialogHipo _hipoDialog;
+	//private ConnectionDialogHipo _hipoDialog;
 
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
@@ -362,7 +361,8 @@ public class ClasIoEventManager {
 		setEventSourceType(EventSourceType.HIPOFILE);
 		
 		_runData.reset();
-
+		_currentEvent = null;
+		_eventIndex = 0;
 
 		// TODO check if I need to skip the first event
 
@@ -400,6 +400,8 @@ public class ClasIoEventManager {
 		setEventSourceType(EventSourceType.EVIOFILE);
 		
 		_runData.reset();
+		_currentEvent = null;
+		_eventIndex = 0;
 
 
 		// TODO check if I need to skip the first event
@@ -425,6 +427,8 @@ public class ClasIoEventManager {
 		
 		if (_etDialog.reason() == DialogUtilities.OK_RESPONSE) {
 		_runData.reset();
+		_currentEvent = null;
+		_eventIndex = 0;
 
 		_dataSource = null;
 		_currentMachine = _etDialog.getMachine();
@@ -449,7 +453,9 @@ public class ClasIoEventManager {
 
 		try {
 			Log.getInstance().info("Attempting to create EvioETSource.");
+			
 			_dataSource = new EvioETSource(_currentMachine, _currentStation);
+			
 			if (_dataSource == null) {
 				Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
 				JOptionPane.showMessageDialog
@@ -469,63 +475,7 @@ public class ClasIoEventManager {
 
 	} //end ok		
 		
-		
-		
-		
-		
-		
-		
-		
-//		if (_connectionDialog == null) {
-//			_connectionDialog = new ConnectionDialog();
-//			_connectionDialog.setTitle("Connect to ET Ring");
-//			_connectionDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/et.png").getImage());
-//		}
-//		_connectionDialog.setVisible(true);
-//		
-//		if (_connectionDialog.reason() == DialogUtilities.OK_RESPONSE) {
-//			_runData.reset();
-//
-//			_dataSource = null;
-//			_currentETAddress = _connectionDialog.getIpAddress();
-//			_currentETFile = _connectionDialog.getFileName();
-//		
-//			//does the file exist?
-//			
-//			Log.getInstance().info("Attempting to connect to ET ring");
-//			Log.getInstance().info("ET Filename: ["+ _currentETFile + "]");
-//			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
-//			File file = new File(_currentETFile);
-//			if (!file.exists()) {
-//				Log.getInstance().error("ET Filename: ["+ _currentETFile + "] does NOT exist.  Cannot connect to ET.");
-//				JOptionPane.showMessageDialog
-//				(null, "The file: " + file.getAbsolutePath() + " does not exist.",
-//						"ET File not Found", 
-//						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-//				return;
-//			}
-//
-//			try {
-//				Log.getInstance().info("Attempting to create EvioETSource.");
-//				_dataSource = new EvioETSource(_currentETAddress, "ced_station");
-//				if (_dataSource == null) {
-//					Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
-//					JOptionPane.showMessageDialog
-//					(null, "The ET Data Source is null, used IP: " + _currentETAddress,
-//							"ET null Data Source", 
-//							JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-//					return;
-//				}
-//				
-//				System.err.println("trying to connect using et file: " + _currentETFile);
-//				setEventSourceType(EventSourceType.ET);
-//				Log.getInstance().info("Attempting to open EvioETSource.");
-//				_dataSource.open(_currentETFile);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//
-//		} //end ok
+
 	}
 
 	/**
@@ -541,6 +491,8 @@ public class ClasIoEventManager {
 //		_hipoDialog.setVisible(true);
 //		if (_hipoDialog.reason() == DialogUtilities.OK_RESPONSE) {
 //			_runData.reset();
+	//_currentEvent = null;
+//      _eventIndex = 0;
 //
 //			_dataSource = null;
 //			_currentHIPOAddress = "";
@@ -593,6 +545,7 @@ public class ClasIoEventManager {
 			_sourceType = type;
 			notifyEventListeners(_sourceType);
 		}
+		Ced.getCed().fixEventCount();
 	}
 
 	/**
@@ -651,10 +604,10 @@ public class ClasIoEventManager {
 
 		int evcount = 0;
 		if (isSourceHipoFile()) {
-			evcount = _dataSource.getSize();
+			evcount = (_dataSource == null) ? 0 : _dataSource.getSize();
 		} 
 		else if (isSourceEvioFile()) {
-			evcount = _dataSource.getSize();
+			evcount = (_dataSource == null) ? 0 : _dataSource.getSize();
 		} 
 		else if (isSourceHipoRing()) {
 			return Integer.MAX_VALUE;
@@ -663,6 +616,7 @@ public class ClasIoEventManager {
 			return Integer.MAX_VALUE;
 		} 
 		else if (isSourceFastMC()) {
+			return Integer.MAX_VALUE;
 		}
 		return evcount;
 	}
@@ -673,17 +627,24 @@ public class ClasIoEventManager {
 	 * @return the number of the current event.
 	 */
 	public int getEventNumber() {
-		int evnum = 0;
-		if (isSourceHipoFile()) {
-			evnum = _dataSource.getCurrentIndex() - 1;
-		} 
-		else if (isSourceEvioFile()) {
-			evnum = _dataSource.getCurrentIndex();
-		} 
-		else if (isSourceFastMC()) {
-			evnum = FastMCManager.getInstance().getEventNumber();
+		if (isSourceFastMC()) {
+			return FastMCManager.getInstance().getEventNumber();
 		}
-		return evnum;
+		else {
+			return _eventIndex;
+		}
+		
+//		int evnum = 0;
+//		if (isSourceHipoFile()) {
+//			evnum = _dataSource.getCurrentIndex() - 1;
+//		} 
+//		else if (isSourceEvioFile()) {
+//			evnum = _dataSource.getCurrentIndex();
+//		} 
+//		else if (isSourceFastMC()) {
+//			evnum = FastMCManager.getInstance().getEventNumber();
+//		}
+//		return evnum;
 	}
 
 	/**
@@ -745,7 +706,7 @@ public class ClasIoEventManager {
 	 * @return <code>true</code> if any prev event control should be enabled.
 	 */
 	public boolean isPrevOK() {
-		return (isSourceHipoFile() || isSourceEvioFile()) && (getEventNumber() > 1);
+		return (isSourceHipoFile() || isSourceEvioFile()) && (_eventIndex > 1);
 	}
 
 	/**
@@ -831,12 +792,14 @@ public class ClasIoEventManager {
 				_currentEvent = _dataSource.getNextEvent();
 
 				// look for the run bank
+				_eventIndex++;
 				setNextEvent(_currentEvent);
 			}
 			break;
 		case HIPOFILE:
 			if (_dataSource.hasEvent()) {
 				_currentEvent = _dataSource.getNextEvent();
+				_eventIndex++;
 				setNextEvent(_currentEvent);
 			} 
 			break;
@@ -849,6 +812,7 @@ public class ClasIoEventManager {
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
 //					System.err.println("Decoded to HIPO");
 //					_currentEvent.show();					
+					_eventIndex++;
 					setNextEvent(_currentEvent);
 				}
 			} 
@@ -877,7 +841,7 @@ public class ClasIoEventManager {
 			 }
 			 
 			_currentEvent = null;
-			boolean goodEvent = false;
+//			boolean goodEvent = false;
 
 			if (_dataSource.hasEvent()) {
 
@@ -885,9 +849,10 @@ public class ClasIoEventManager {
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 
-					goodEvent = true;
+//					goodEvent = true;
 
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
+					_eventIndex++;
 					setNextEvent(_currentEvent);
 //					System.err.println("ET Debug Decoded to HIPO");
 //					_currentEvent.show();
@@ -967,36 +932,105 @@ public class ClasIoEventManager {
 	 */
 	public DataEvent getPreviousEvent() {
 		
-		
-		if (isSourceHipoFile()) {
-			return gotoEvent(getEventNumber()-1);
-		}
-		
-		_currentEvent = _dataSource.getPreviousEvent();
-		
-		if (isSourceEvioFile()) {
-			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+		EventSourceType estype = getEventSourceType();
+
+		switch (estype) {
+		case HIPORING:
+			_eventIndex--;
+			break;
+		case HIPOFILE:
+			_eventIndex--;
+			_currentEvent = _dataSource.getPreviousEvent();
+			break;
+			
+		case EVIOFILE:
+			_currentEvent = _dataSource.getPreviousEvent();
+	    	if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 				
 				if (_decoder == null) {
 					_decoder = new CLASDecoder();
 				}
+				_eventIndex--;
 				_currentEvent = _decoder.getDataEvent(_currentEvent);
-	//			System.err.println("Decoded to HIPO");
-				_currentEvent.show();
 			}
-		}
+			break;  //end case eviofile
 
+
+		case FASTMC:
+			break;
+
+		case ET:
+			_eventIndex--;
+			break;
+		}
+		
+		
+//		if (isSourceHipoFile()) {
+//			return gotoEvent(getEventNumber()-1);
+//		}
+//		
+//		_currentEvent = _dataSource.getPreviousEvent();
+//		
+//		if (isSourceEvioFile()) {
+//			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+//				
+//				if (_decoder == null) {
+//					_decoder = new CLASDecoder();
+//				}
+//				_currentEvent = _decoder.getDataEvent(_currentEvent);
+//	//			System.err.println("Decoded to HIPO");
+//	//			_currentEvent.show();
+//			}
+//		}
+//		else if (isSourceHipoFile()) {
+//			d
+//		} else {
+//			if ((_currentEvent == null) && (getEventNumber() > 0)) {
+//				return gotoEvent(getEventNumber() - 1);
+//			}
+//		}
+//
 		
 		// evioSource.getPreviousEvent() doesn't work at the end of the file
 		// so hack
-		if ((_currentEvent == null) && (getEventNumber() > 0)) {
-			return gotoEvent(getEventNumber() - 1);
-		}
+//		if ((_currentEvent == null) && (getEventNumber() > 0)) {
+//			return gotoEvent(getEventNumber() - 1);
+//		}
 		
 		setNextEvent(_currentEvent);
 
 //		notifyEventListeners();
 		return _currentEvent;
+	}
+	
+	private void skipEvents(int n) {
+		if (n < 1) {
+			return;
+		}
+		
+		EventSourceType estype = getEventSourceType();
+		
+
+		switch (estype) {
+		case HIPOFILE: case EVIOFILE:
+			int numRemaining = getNumRemainingEvents();
+			n = Math.min(numRemaining,  n);
+			
+			for (int i = 0; i < n; i++) {
+				if (_dataSource.hasEvent()) {
+					_dataSource.getNextEvent();
+					_eventIndex++;
+				}
+			}
+			
+			break;
+			
+			
+		case HIPORING:
+		case ET:
+		case FASTMC:
+			break;
+		}
 	}
 
 	/**
@@ -1007,28 +1041,68 @@ public class ClasIoEventManager {
 	 */
 	public DataEvent gotoEvent(int eventNumber) {
 		
-		if (isSourceHipoFile()) {
-			_dataSource.close();
-			_dataSource.open(_currentHipoFile);
+		if ((eventNumber < 1) || (eventNumber == _eventIndex) || (eventNumber > getEventCount())) {
+			return _currentEvent;
 		}
-		
-		_currentEvent = _dataSource.gotoEvent(eventNumber);
-		
-		if (isSourceEvioFile()) {
+
+		EventSourceType estype = getEventSourceType();
+		switch (estype) {
+
+		case HIPOFILE:
+			if (eventNumber > _eventIndex) {
+				int numToSkip = (eventNumber - _eventIndex) - 1;
+				skipEvents(numToSkip);
+				getNextEvent();
+			} else {
+				_dataSource.close();
+				_currentEvent = null;
+				_eventIndex = 0;
+				_dataSource.open(_currentHipoFile);
+				gotoEvent(eventNumber);
+			}
+			
+			break;
+			
+		case EVIOFILE:
+			_currentEvent = _dataSource.gotoEvent(eventNumber);
 			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-				
+
 				if (_decoder == null) {
 					_decoder = new CLASDecoder();
 				}
 				_currentEvent = _decoder.getDataEvent(_currentEvent);
-//				System.err.println("Decoded to HIPO");
-//				_currentEvent.show();
+				_eventIndex = eventNumber;
 			}
+			break;
 		}
 		
+//
+//
+//		if (isSourceHipoFile() && (eventNumber > 0) && (eventNumber < getEventCount())) {
+//
+//			if (eventNumber > _eventIndex) {
+//				int numToGo = (eventNumber = _eventIndex);
+//			}
+//
+//			_currentEvent = _dataSource.gotoEvent(eventNumber);
+//			_eventIndex = eventNumber;
+//		}
+//
+//		else if (isSourceEvioFile() && (eventNumber > 0) && (eventNumber < getEventCount())) {
+//			_currentEvent = _dataSource.gotoEvent(eventNumber);
+//			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+//
+//				if (_decoder == null) {
+//					_decoder = new CLASDecoder();
+//				}
+//				_currentEvent = _decoder.getDataEvent(_currentEvent);
+//				_eventIndex = eventNumber;
+//			}
+//		}
+
 		setNextEvent(_currentEvent);
 
-//		notifyEventListeners();
+		// notifyEventListeners();
 		return _currentEvent;
 	}
 
@@ -1064,6 +1138,7 @@ public class ClasIoEventManager {
 		if (_dataSource != null) {
 			_dataSource.close();
 			_currentEvent = null;
+			_eventIndex = 0;
 		}
 
 		for (int index = 0; index < 3; index++) {

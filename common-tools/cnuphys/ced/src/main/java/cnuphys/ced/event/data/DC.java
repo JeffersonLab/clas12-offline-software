@@ -1,17 +1,38 @@
 package cnuphys.ced.event.data;
 
+import java.awt.Color;
+
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.SoundUtils;
 import cnuphys.ced.frame.Ced;
+import cnuphys.splot.plot.X11Colors;
 
 public class DC extends DetectorData {
 
 	private static final int TOTALNUMWIRE = 24192;
 	private static final int TOTALNUMWIRESECTOR = 4032;
 	
+	
+	//colors for hb based and time based distinction
+	/** hit based color */
+	public static final Color HB_COLOR = Color.yellow;
+	
+	/** slightly transparent HB color */
+	public static final Color HB_TRANS = new Color(255, 255, 0, 240);
+	
+	/** time based color */
+	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
+	
+	/** slightly transparent TB color */
+	public static final Color TB_TRANS = X11Colors.getX11Color("dark orange", 240);
+
+	
 	//tdc adc hit list
-	DCTdcHitList _tdcHits = new DCTdcHitList();
+	private DCTdcHitList _tdcHits = new DCTdcHitList();
+	
+	//HB reconstructed hits
+	private DCHitList _hbHits;
 	
 	private static DC _instance;
 	
@@ -30,6 +51,12 @@ public class DC extends DetectorData {
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_tdcHits =  new DCTdcHitList();
+		try {
+			_hbHits = new DCHitList("HitBasedTrkg::HBHits");
+		} catch (EventDataException e) {
+			_hbHits = null;
+			e.printStackTrace();
+		}
 		if (Ced.getCed().playDCOccupancy()) {
 			playOccupancyTone(75);
 		}
@@ -48,8 +75,16 @@ public class DC extends DetectorData {
 	 * Get the tdc  hit list
 	 * @return the tdc hit list
 	 */
-	public DCTdcHitList getHits() {
+	public DCTdcHitList getTDCHits() {
 		return _tdcHits;
+	}
+	
+	/**
+	 * Get the hit based hit list
+	 * @return the hit based hit list
+	 */
+	public DCHitList getHBHits() {
+		return _hbHits;
 	}
 	
 	/**
@@ -79,10 +114,7 @@ public class DC extends DetectorData {
 	private static final int MAX_HZ = 4000;
 	private static final int UNDER_HZ = 440;
 	private static final int OVER_HZ = 5000;
-	
-	private static final double MIN_VAL = 0.0005;
-	private static final double MAX_VAL = 0.07;
-	
+		
 	public void playOccupancyTone(int  msec) {
 		SoundUtils.playData(MIN_HZ, MAX_HZ, msec, 0.0005, 0.07, totalOccupancy(), UNDER_HZ, OVER_HZ, 1.);
 	}

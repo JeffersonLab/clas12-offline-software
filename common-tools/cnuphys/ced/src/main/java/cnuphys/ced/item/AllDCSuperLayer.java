@@ -281,7 +281,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			drawMasks(g, container, parameters);
 		}
 
-		DCTdcHitList hits = DC.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
@@ -627,7 +627,7 @@ public class AllDCSuperLayer extends RectangleItem {
 								100.0 * parameters.getNoiseReducedOccupancy(),
 								2) + "%");
 		
-		DCTdcHitList hits = DC.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
 
 		DCTdcHit hit = null;
 		if ((hits != null) && !hits.isEmpty()) {

@@ -1,8 +1,5 @@
 package cnuphys.magfield;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
 public class SolenoidProbe extends FieldProbe {
 
 	double q2_min = Double.POSITIVE_INFINITY;

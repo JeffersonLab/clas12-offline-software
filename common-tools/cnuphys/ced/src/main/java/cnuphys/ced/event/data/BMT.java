@@ -2,8 +2,6 @@ package cnuphys.ced.event.data;
 
 import org.jlab.io.base.DataEvent;
 
-import cnuphys.ced.alldata.ColumnData;
-
 /**
  * static methods to centralize getting data arrays related to BMT
  * @author heddle
@@ -13,6 +11,7 @@ import cnuphys.ced.alldata.ColumnData;
 public class BMT extends DetectorData {
 
 
+	//list of adc hits
 	AdcHitList _adcHits = new AdcHitList("BMT::adc");
 
 	private static BMT _instance;

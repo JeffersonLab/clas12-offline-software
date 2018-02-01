@@ -11,7 +11,7 @@ public class CTOF extends DetectorData {
 
 	/**
 	 * Public access to the singleton
-	 * @return the FTOF singleton
+	 * @return the CTOF singleton
 	 */
 	public static CTOF getInstance() {
 		if (_instance == null) {
