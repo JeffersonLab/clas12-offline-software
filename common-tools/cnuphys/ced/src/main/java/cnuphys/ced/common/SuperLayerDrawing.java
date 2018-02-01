@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
@@ -30,15 +31,12 @@ import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.TbHbHit;
-import cnuphys.ced.event.data.TbHbHitList;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.Segment;
 import cnuphys.ced.event.data.SegmentList;
-import cnuphys.ced.event.data.TBHits;
 import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.fastmc.ParticleHits;
@@ -366,13 +364,13 @@ public class SuperLayerDrawing {
 			return;
 		}
 		
-		DCTdcHitList hits = DC.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			
 			Point pp = new Point();
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
-					drawDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.doca, hit.sdoca);
+					drawBasicDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.doca, hit.sdoca);
 					
 					//just draw the wire again
 					drawOneWire(g, container, hit.layer6, hit.wire, reallyClose, pp);
@@ -383,71 +381,12 @@ public class SuperLayerDrawing {
 
 		// draw track based hits (docas) and segments
 		drawHitBasedSegments(g, container);
-		drawTimeBasedHits(g, container);
+//		drawTimeBasedHits(g, container);
 		drawTimeBasedSegments(g, container);
 		
 
 	}
 	
-	
-	//draw time based reconstruction hits
-	private void drawTimeBasedHits(Graphics g, IContainer container) {
-		
-		TbHbHitList hits = TBHits.getInstance().getHits();
-		if ((hits != null) && !hits.isEmpty()) {
-			for (TbHbHit hit : hits) {
-
-				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
-
-					// drawDOCA(Graphics g, IContainer container, int layer,
-					// int wire, double doca2d, Color fillColor, Color
-					// lineColor) {
-
-					// note conversion to mm
-					if (_view.showDCtbDoca()) {
-						drawDOCA(g, container, hit.layer6, hit.wire, 
-								10 *hit.doca, CedColors.tbDocaFill, CedColors.tbDocaLine);
-					}
-				}
-			}
-		}
-		
-		
-//		int hitCount = DC.timeBasedTrkgHitCount();
-//
-//		if (hitCount > 0) {
-//			int sector[] = DC.timeBasedTrkgSector();
-//			int superlayer[] = DC.timeBasedTrkgSuperlayer();
-//			int layer[] = DC.timeBasedTrkgLayer();
-//			int wire[] = DC.timeBasedTrkgWire();
-//			double doca[] = DC.timeBasedTrkgDoca();
-//			
-//			for (int i = 0; i < hitCount; i++) {
-//				try {
-//					int sect1 = sector[i]; // 1 based
-//					int supl1 = superlayer[i]; // 1 based
-//
-//					if ((sect1 == _iSupl.sector()) && (supl1 == _iSupl.superlayer())) {
-//						int lay1 = layer[i]; // 1 based
-//						int wire1 = wire[i]; // 1 based
-//
-//						// drawDOCA(Graphics g, IContainer container, int layer,
-//						// int wire, double doca2d, Color fillColor, Color
-//						// lineColor) {
-//
-//						// note conversion to mm
-//						if (_view.showDCtbDoca()) {
-//							drawDOCA(g, container, lay1, wire1, 
-//									10 * doca[i], CedColors.tbDocaFill, CedColors.tbDocaLine);
-//						}
-//					}
-//				} catch (NullPointerException e) {
-//					System.err.println("null pointer in SectorSuperLayer time based hit drawing");
-//					e.printStackTrace();
-//				}
-//			} // for loop
-//		} //hit count > 0
-	}
 
 	/**
 	 * Draw a single dc hit
@@ -510,6 +449,49 @@ public class SuperLayerDrawing {
 		}
 	}
 	
+	/**
+	 * Draw a single dc hit
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param container
+	 *            the rendering container
+	 * @param layer
+	 *            1-based layer 1..6
+	 * @param wire
+	 *            1-based wire 1..112
+	 * @param noise
+	 *            is noise hit
+	 * @param pid
+	 *            gemc particle id
+	 * @param doca
+	 *            the distance of closest approach array in mm
+	 * @param sdoca
+	 *            the smeared distance of closest approach array in mm
+	 */
+	private void drawReconDCHit(Graphics g, IContainer container, Color hitFill, Color hitLine, int layer, int wire,
+			Point location) {
+
+		// get the hexagon
+		Polygon hexagon = getHexagon(container, layer, wire);
+
+		if (location != null) {
+			Rectangle r = hexagon.getBounds();
+			if (r != null) {
+				location.setLocation(r.x + r.width / 2, r.y + r.height / 2);
+			}
+		}
+
+		if (hexagon == null) {
+			return;
+		}
+
+		g.setColor(hitFill);
+		g.fillPolygon(hexagon);
+		g.setColor(hitLine);
+		g.drawPolygon(hexagon);
+	}
+
 	
 	/**
 	 * Draw a single dc hit
@@ -531,7 +513,7 @@ public class SuperLayerDrawing {
 	 * @param sdoca
 	 *            the smeared distance of closest approach array in mm
 	 */
-	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid, 
+	private void drawBasicDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid, 
 			float doca, float sdoca) {
 
 		// abort if hiding noise and this is noise
@@ -565,6 +547,50 @@ public class SuperLayerDrawing {
 		}
 
 	}
+	
+	/**
+	 * Draw a single dc hit
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param container
+	 *            the rendering container
+	 * @param layer
+	 *            1-based layer 1..6
+	 * @param wire
+	 *            1-based wire 1..112
+	 * @param noise
+	 *            is noise hit
+	 * @param pid
+	 *            gemc particle id
+	 * @param doca
+	 *            the distance of closest approach array in mm
+	 */
+	public void drawReconDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, int layer, int wire, 
+			float doca, Point location) {
+
+		
+		drawReconDCHit(g, container, fillColor, frameColor, layer, wire, location);
+
+
+		if (Float.isNaN(doca)) {
+			return;
+		}
+		if (doca < 1.0e-6) {
+			return;
+		}
+
+
+		// draw  docas?
+		
+		if (WorldGraphicsUtilities
+				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
+			drawDOCA(g, container, layer, wire, doca, CedColors.docaFill,
+					CedColors.docaLine);
+		}
+
+	}
+
 
 	/**
 	 * Obtain a crude outline of a sense wire layer
@@ -632,8 +658,8 @@ public class SuperLayerDrawing {
 	/**
 	 * Get the layer and the wire we are in
 	 * @param container holds 1-based layer and wire
-	 * @param pp
-	 * @param data
+	 * @param pp the mouse point
+	 * @param data holds results [later, wire]
 	 */
 	public void getLayerAndWire(IContainer container, Point pp, int[] data) {
 		data[0] = -1;
@@ -757,9 +783,6 @@ public class SuperLayerDrawing {
 			poly.addPoint(pp.x, pp.y);
 		}
 
-//		if ((layer == 1) && (wire == 1)) {
-//			System.err.println("\n");
-//		}
 		return poly;
 	}
 
@@ -883,7 +906,7 @@ public class SuperLayerDrawing {
 	 */
 	public void drawHitBasedSegments(Graphics g, IContainer container) {
 
-		if (!_view.showDChbSegments()) {
+		if (!_view.showDCHBSegments()) {
 			return;
 		}
 
@@ -896,13 +919,13 @@ public class SuperLayerDrawing {
 					
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
-					drawSegment(g, container, _view, wp1, wp2, CedColors.hbSegmentLine, Color.yellow);
+					drawSegment(g, container, _view, wp1, wp2, CedColors.hbSegmentLine, DC.HB_COLOR);
 
 				}
 			}
 		}
 		
-	} // drawTimeBasedSegments
+	} // drawHiteBasedSegments
 
 
 	/**
@@ -914,7 +937,7 @@ public class SuperLayerDrawing {
 	 */
 	public void drawTimeBasedSegments(Graphics g, IContainer container) {
 
-		if (!_view.showDCtbSegments()) {
+		if (!_view.showDCTBSegments()) {
 			return;
 		}
 
@@ -927,7 +950,7 @@ public class SuperLayerDrawing {
 					
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
-					drawSegment(g, container, _view, wp1, wp2, CedColors.tbSegmentLine, Color.orange);
+					drawSegment(g, container, _view, wp1, wp2, CedColors.tbSegmentLine, DC.TB_COLOR);
 
 				}
 			}
@@ -936,6 +959,7 @@ public class SuperLayerDrawing {
 	} // drawTimeBasedSegments
 	
 
+	//draw a HB or TB segement
 	private void drawSegment(Graphics g, IContainer container, CedView view, Point2D.Double sectPnt1,
 			Point2D.Double sectPnt2, Color lineColor, Color endColor) {
 
@@ -960,15 +984,6 @@ public class SuperLayerDrawing {
 
 		g2.setStroke(oldStroke);
 	}
-//
-//	private void rotatePoint(Point2D.Double wp, double phi) {
-//		double cphi = Math.cos(phi);
-//		// double sphi = Math.sin(phi);
-//
-//		// double x = wp.x*cphi + wp.y*sphi;
-//		// double y = wp.y*cphi - wp.x*sphi;
-//		wp.y = wp.y * cphi;
-//	}
 	
 	/**
 	 * Gets the wire from the world point. This only gives sensible results if
@@ -1064,7 +1079,7 @@ public class SuperLayerDrawing {
 
 			}
 
-			DCTdcHitList hits = DC.getInstance().getHits();
+			DCTdcHitList hits = DC.getInstance().getTDCHits();
 
 			if ((layer > 0) && (wire > 0)) {
 				

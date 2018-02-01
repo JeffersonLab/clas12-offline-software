@@ -54,7 +54,7 @@ public class RotatedCompositeProbe extends FieldProbe {
 //		System.out.println(" NEW: [ " + bx + ", " + by + ", " + bz + "] ");
 
 		result[0] = (float) (bx * _cos + bz * _sin);
-		result[1] = (float) (by);
+		result[1] = (by);
 		result[2] = (float) (bz * _cos - bx * _sin);
 		
 //		System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +

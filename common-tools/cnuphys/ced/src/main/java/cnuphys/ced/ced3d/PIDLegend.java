@@ -16,25 +16,19 @@ import javax.swing.JComponent;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.frame.CedColors;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.splot.plot.GraphicsUtilities;
 import cnuphys.splot.style.LineStyle;
 
+@SuppressWarnings("serial")
 public class PIDLegend extends JComponent {
 
 	// convenience reference to event manager
 	private static ClasIoEventManager _eventManager = ClasIoEventManager
 			.getInstance();
-
-	// STring used when no PIDs found (e.g., a raw event)
-//	private static final String NO_PIDS = "No Monte Carlo or reconstructed particles";
-	private static final String NO_PIDS = "";
-
-	// used to get the text in the right place
-	private static int _ytext = -1;
 
 	// used to get the text in the right place
 	private static int _fh = -1;
@@ -107,7 +101,6 @@ public class PIDLegend extends JComponent {
 			FontMetrics fm = _component.getFontMetrics(Fonts.smallFont);
 			_fh = fm.getAscent();
 			// _ytext = (b.height + fm.getHeight())/2 - 2;
-			_ytext = (b.height + _fh) / 2;
 			int yc = b.height / 2;
 
 			_yeven = yc - _fh / 2;
@@ -116,8 +109,8 @@ public class PIDLegend extends JComponent {
 
 		int x = 4;
 		int xoff = -15;
-		x += drawLineForLegend(g, x, _yeven, "HB", CedColors.HB_COLOR);
-		x += drawLineForLegend(g, x, _yodd, "TB", CedColors.TB_COLOR);
+		x += drawLineForLegend(g, x, _yeven, "HB", DC.HB_COLOR);
+		x += drawLineForLegend(g, x, _yodd, "TB", DC.TB_COLOR);
 		
 		if (numMC != 0) {
 

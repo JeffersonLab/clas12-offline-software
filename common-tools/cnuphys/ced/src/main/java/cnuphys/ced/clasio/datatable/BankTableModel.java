@@ -60,10 +60,13 @@ public class BankTableModel extends DefaultTableModel {
 		if (_event == null) {
 			return 0;
 		}
+		
+		
 		ArrayList<ColumnData> cds = DataManager.getInstance().hasData(_event, _bankName);
 		int rowCount = 0;
 
 		for (ColumnData cd : cds) {
+			
 			if (cd != null) {
 				rowCount = Math.max(rowCount, cd.getLength(_event));
 			}
@@ -110,6 +113,8 @@ public class BankTableModel extends DefaultTableModel {
 			return "" + DataManager.getInstance().getShortArray(_event, fullName)[row];
 		case ColumnData.INT32:
 			return "" + DataManager.getInstance().getIntArray(_event, fullName)[row];
+		case ColumnData.INT64:
+			return "" + DataManager.getInstance().getLongArray(_event, fullName)[row];
 		case ColumnData.FLOAT32:
 			float f =  DataManager.getInstance().getFloatArray(_event, fullName)[row];;
 			return  DoubleFormat.doubleFormat(f, 5, 4);

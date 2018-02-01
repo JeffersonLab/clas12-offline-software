@@ -23,6 +23,7 @@ import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.SectorView;
+import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.frame.CedColors;
 
@@ -65,12 +66,15 @@ public class DrawingLegend extends JComponent {
 		int x = 8;
 		pp.setLocation(x, yc);
 		DataDrawSupport.drawGemcHit(g, pp);
-		x += quickString(g, x + 6, yc, "GEMC hit ") + 20;
+		x += quickString(g, x + 6, yc, "GEMC Hit ") + 20;
 
 		// reconstructed hit
 		pp.setLocation(x, yc);
 		DataDrawSupport.drawReconHit(g, pp);
-		x += quickString(g, x + 6, yc, "Reconstructed hit ") + 20;
+		x = quickString(g, x + 6, yc, "Recon Hit ") + 20;
+		pp.setLocation(x, yc);
+		DataDrawSupport.drawReconCluster(g, pp);
+		x = quickString(g, x + 6, yc, "Recon Cluster ") + 20;
 
 		yc += 18;
 		x = 8;
@@ -110,14 +114,14 @@ public class DrawingLegend extends JComponent {
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.FMT_CROSS);
-		x = drawCircle(g, x, yc, CedColors.tbDocaLine, "TB Doca");
+		x = drawCircle(g, x, yc, CedColors.docaLine, "TB Doca");
 		yc += 18;
 		
 		
 		//segment lines
 		x = xo;
-		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, Color.yellow, "HB Segment");
-		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, Color.orange, "TB Segment");
+		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, DC.HB_COLOR, "HB Segment");
+		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, DC.TB_COLOR, "TB Segment");
 
 	}
 	
@@ -150,6 +154,7 @@ public class DrawingLegend extends JComponent {
 	}
 
 
+	//draw a string, returns the x position plus the string width
 	private int quickString(Graphics g, int x, int yc, String s) {
 		FontMetrics fm = getFontMetrics(labelFont);
 		g.setColor(Color.black);

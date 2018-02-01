@@ -5,14 +5,14 @@ import cnuphys.bCNU.util.X11Colors;
 
 public class CedColors {
 
-	// for gemc doca's
-	public static final Color docaLine = Color.lightGray;
-	public static final Color docaFill = new Color(255, 255, 255, 60);
+	// doca's
+	public static final Color docaLine = Color.gray;
+	public static final Color docaFill = new Color(0, 0, 0, 40);
 
 
-	// track fit docas
-	public static final Color tbDocaLine = Color.green;
-	public static final Color tbDocaFill = new Color(255, 255, 120, 60);
+//	// track fit docas
+//	public static final Color tbDocaLine = Color.green;
+//	public static final Color tbDocaFill = new Color(0, 0, 0, 60);
 
 	//tb segment color
 	public static final Color tbSegmentLine = X11Colors.getX11Color("Navy");
@@ -33,12 +33,5 @@ public class CedColors {
 
 	// color for wires
 	public static final Color senseWireColor = X11Colors.getX11Color("Dodger Blue");
-	
-
-	//hit based
-	public static final Color HB_COLOR = X11Colors.getX11Color("yellow");
-	
-	//track based
-	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
 
 }

@@ -79,7 +79,8 @@ public class CompositeProbe extends FieldProbe {
      *            a float array holding the retrieved field in kiloGauss. The
      *            0,1 and 2 indices correspond to x, y, and z components.
      */
-     public void gradient(float x, float y, float z, float result[]) {
+     @Override
+	public void gradient(float x, float y, float z, float result[]) {
  		float bx = 0, by = 0, bz = 0;
  		for (FieldProbe probe : probes) {
  			probe.gradient(x, y, z, result);
