@@ -12,6 +12,9 @@ import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
@@ -21,6 +24,7 @@ import org.jlab.rec.cvt.cluster.ClusterFinder;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.CrossMaker;
+import org.jlab.rec.cvt.cross.HelixCrossListFinder;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -34,6 +38,8 @@ import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
+import org.jlab.service.eb.EBHBEngine;
+import org.jlab.service.eb.EBTBEngine;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio
@@ -50,7 +56,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     
     public CVTReconstruction() {
         super("CVTTracks", "ziegler", "4.0");
-
+        org.jlab.rec.cvt.svt.Constants.Load();
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
 
@@ -106,16 +112,15 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if (Run != newRun) {
             boolean align=false;
-         //   if(newRun>99)
-          //      align = true;
-          //      // make sure the DB is loaded
-         //       DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
-          //      cp = SVTConstants.connect( cp );
-         //       SVTConstants.loadAlignmentShifts( cp );
-          //      cp.disconnect();    
-          //      this.setSVTDB(cp);
-          //      SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
-          //      SVTGeom.setSvtStripFactory(svtStripFactory);
+  //        if(newRun>99)
+  //              align = true;
+   //             DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
+   //             cp = SVTConstants.connect( cp );
+   //             SVTConstants.loadAlignmentShifts( cp );
+   //             cp.disconnect();    
+    //            this.setSVTDB(cp);
+   //             SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
+    //            SVTGeom.setSvtStripFactory(svtStripFactory);
 
             this.setRun(newRun);
 
@@ -206,7 +211,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom);
-        
+        //System.out.println(" Number of crosses "+crosses.get(0).size()+" + "+crosses.get(1).size());
         if(Constants.isCosmicsData()==true) { 
            
             //4) make list of crosses consistent with a track candidate
@@ -264,16 +269,21 @@ public class CVTReconstruction extends ReconstructionEngine {
                 //4)  ---  write out the banks			
                 rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
             }
-        } else {
+        } else {//System.out.println(" FITTING SEED......................");
             TrackSeeder trseed = new TrackSeeder();
+           
             KFitter kf;
             List<Track> trkcands = new ArrayList<Track>();
-            List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
+            HelixCrossListFinder hf = new HelixCrossListFinder();
+            
+            //List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
+            List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom);
+            
             for (Seed seed : seeds) { 
-
+                
                 kf = new KFitter(seed, SVTGeom, event);
                 kf.runFitter(SVTGeom, BMTGeom);
-
+                //System.out.println(" OUTPUT SEED......................");
                 trkcands.add(kf.OutputTrack(seed, SVTGeom));
                 if (kf.setFitFailed == false) {
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
@@ -292,7 +302,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             TrackListFinder trkFinder = new TrackListFinder();
             List<Track> trks = new ArrayList<Track>();
             trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
-            //trkFinder.removeOverlappingTracks(trks);
+            trkFinder.removeOverlappingTracks(trks);
             
             for (int c = 0; c < trkcands.size(); c++) {
                 trkcands.get(c).set_Id(c + 1);
@@ -375,12 +385,12 @@ public class CVTReconstruction extends ReconstructionEngine {
         } 
         
        
-        if(trks!=null) {
+        if(trks!=null && rmCrosses!=null) {
             List<Track> rmTrks = new ArrayList<Track>();
             for(Track t:trks) {
                 boolean rmFlag=false;
                 for(Cross c: rmCrosses) {
-                    if(c.get_AssociatedTrackID()==t.get_Id())
+                    if(c!=null && t!=null && c.get_AssociatedTrackID()==t.get_Id())
                         rmFlag=true;
                 }
                 if(rmFlag==true)
@@ -394,7 +404,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         System.out.println(" ........................................ trying to connect to db ");
         CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
         
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(101, "default");
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
         cp = SVTConstants.connect( cp );
         SVTConstants.loadAlignmentShifts( cp );
         cp.disconnect();    
@@ -412,10 +422,175 @@ public class CVTReconstruction extends ReconstructionEngine {
         return _SVTDB;
     }
 
+    
     public static void main(String[] args) throws FileNotFoundException, EvioException {
-       
-    }
+    
+       String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/central_2348_uncookedSkim.hipo";
+        //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/skim_clas_002436.evio.90.hipo";
+//String inputFile="/Users/ziegler/Desktop/Work/Files/LumiRuns/random/decoded_2341.hipo";
+        System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
-    
-    
+        CVTReconstruction en = new CVTReconstruction();
+        en.init();
+       //EBHBEngine eb = new EBHBEngine();
+       //eb.init();
+        int counter = 0;
+/*
+        HipoDataSource reader = new HipoDataSource();
+        reader.open(inputFile);
+
+        HipoDataSync writer = new HipoDataSync();
+        //Writer
+        //String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/central_2348_cookedSkim.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/recook_clas_002436.evio.90.hipo";
+        writer.open(outputFile);
+
+        long t1 = 0;
+        while (reader.hasEvent()) {
+            
+
+            DataEvent event = reader.getNextEvent();
+            System.out.println("  EVENT " + event.getBank("RUN::config").getInt("event",0)+" count "+counter);
+            
+            if (counter > 0) {
+                t1 = System.currentTimeMillis();
+            }
+            //event.show();
+            // Processing    
+            en.processDataEvent(event);
+            //eb.processDataEvent(event);
+            
+            if(event.hasBank("CVTRec::Tracks")) {
+            
+                writer.writeEvent(event); 
+            }
+            counter ++;
+            
+            if(counter>100000)
+                break;
+            //if(event.getBank("RUN::config").getInt("event",0)>=2000) break;
+            //event.show();
+            //if(counter%100==0)
+            //System.out.println("run "+counter+" events");
+
+        }
+        writer.close();
+        double t = System.currentTimeMillis() - t1;
+        //System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
+        */
+       
+        DataEvent testEvent = getCVTTestEvent();
+
+        CVTReconstruction CVTengine = new CVTReconstruction();
+        CVTengine.init();
+        CVTengine.processDataEvent(testEvent);
+        testEvent.show();
+        if(testEvent.hasBank("CVTRec::Tracks")) {
+            testEvent.getBank("CVTRec::Tracks").show();
+        }
+        
+        
+        EBHBEngine EBHBengine = new EBHBEngine();
+        EBHBengine.init();
+        EBHBengine.processDataEvent(testEvent);
+
+        EBTBEngine EBTBengine = new EBTBEngine();
+        EBTBengine.init();
+        EBTBengine.processDataEvent(testEvent);
+
+        System.out.println(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("px", 0), -0.375)+" "+
+		isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.483)
+		+" "+isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.674)
+		+" "+isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -13.9));
+        
+        
+    }
+    public static boolean isWithinXPercent(double X, double val, double standard) {
+        if(standard >= 0 && val > (1.0 - (X/100.0))*standard && val < (1.0 + (X/100.0))*standard) return true;
+        else if(standard < 0 && val < (1.0 - (X/100.0))*standard && val > (1.0 + (X/100.0))*standard) return true;
+        return false;
+    }
+    public static HipoDataEvent getCVTTestEvent() {
+		HipoDataSync writer = new HipoDataSync();
+		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
+		DataBank config = testEvent.createBank("RUN::config", 1);
+		DataBank SVTadc = testEvent.createBank("BST::adc", 8);
+		DataBank mc = testEvent.createBank("MC::Particle", 1);
+		// this event is based on a gemc (4a.1.1 aka 4a.2.0) event with
+		// torus = -1.0 , solenoid = 1.0
+		//	<option name="BEAM_P"   value="proton, 0.91*GeV, 42.2*deg, 127.8*deg"/>
+		// <option name="SPREAD_P" value="0*GeV, 0*deg, 0*deg"/>
+		// <option name="BEAM_V" value="(0, 0, -1.39)cm"/>
+		// <option name="SPREAD_V" value="(0.0, 0.0)cm"/>
+
+		config.setInt("run", 0, (int) 11);
+		config.setInt("event", 0, (int) 1);
+		config.setInt("trigger", 0, (int) 0);
+		config.setLong("timestamp", 0, (long) 0);
+		config.setByte("type", 0, (byte) 0);
+		config.setByte("mode", 0, (byte) 0);
+		config.setFloat("torus", 0, (float) -1.0);
+		config.setFloat("solenoid", 0, (float) 1.0);
+//		config.setFloat("rf", 0, (float) 0.0);
+//		config.setFloat("startTime", 0, (float) 0.0);
+		
+		for(int i = 0; i < 8; i++) {
+			SVTadc.setByte("order", i, (byte) 0);
+			SVTadc.setShort("ped", i, (short) 0);
+			SVTadc.setLong("timestamp", i, (long) 0);
+		}
+
+		SVTadc.setByte("sector", 0, (byte) 5);
+		SVTadc.setByte("sector", 1, (byte) 5);
+                SVTadc.setByte("sector", 7, (byte) 5);//
+		SVTadc.setByte("sector", 2, (byte) 7);
+		SVTadc.setByte("sector", 3, (byte) 7);
+		SVTadc.setByte("sector", 4, (byte) 7);
+		SVTadc.setByte("sector", 5, (byte) 9);
+		SVTadc.setByte("sector", 6, (byte) 9);
+		
+		SVTadc.setByte("layer", 0, (byte) 1);
+		SVTadc.setByte("layer", 1, (byte) 2);
+                SVTadc.setByte("layer", 7, (byte) 2);//
+		SVTadc.setByte("layer", 2, (byte) 3);
+		SVTadc.setByte("layer", 3, (byte) 4);
+		SVTadc.setByte("layer", 4, (byte) 4);
+		SVTadc.setByte("layer", 5, (byte) 5);
+		SVTadc.setByte("layer", 6, (byte) 6);
+		
+		SVTadc.setShort("component", 0, (short) 109);
+		SVTadc.setShort("component", 1, (short) 77);
+                SVTadc.setShort("component", 7, (short) 80);//
+		SVTadc.setShort("component", 2, (short) 52);
+		SVTadc.setShort("component", 3, (short) 137);
+		SVTadc.setShort("component", 4, (short) 138);
+		SVTadc.setShort("component", 5, (short) 1);
+		SVTadc.setShort("component", 6, (short) 190);
+		
+		SVTadc.setInt("ADC", 0, (int) 7);
+		SVTadc.setInt("ADC", 1, (int) 7);
+                SVTadc.setInt("ADC", 7, (int) 6); //
+		SVTadc.setInt("ADC", 2, (int) 7);
+		SVTadc.setInt("ADC", 3, (int) 5);
+		SVTadc.setInt("ADC", 4, (int) 5);
+		SVTadc.setInt("ADC", 5, (int) 7);
+		SVTadc.setInt("ADC", 6, (int) 7);
+		
+		SVTadc.setFloat("time", 0, (float) 97.0);
+		SVTadc.setFloat("time", 1, (float) 201.0);
+                SVTadc.setFloat("time", 7, (float) 201.0);//
+		SVTadc.setFloat("time", 2, (float) 78.0);
+		SVTadc.setFloat("time", 3, (float) 102.0);
+		SVTadc.setFloat("time", 4, (float) 81.0);
+		SVTadc.setFloat("time", 5, (float) 91.0);
+		SVTadc.setFloat("time", 6, (float) 205.0);
+
+		testEvent.appendBank(config);
+                testEvent.appendBank(mc);
+		testEvent.appendBank(SVTadc);
+                
+		return testEvent;
+                
+	}
+
 }
