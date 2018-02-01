@@ -41,7 +41,7 @@ public class HitReader {
 			int layer     = bankADC.getByte("layer",i);  
 			int order     = bankADC.getByte("order",i);
 			int component = order + 1; // get the component 1 is left 2 is right
-			int indextdc =0;
+			int indextdc = -1;
 			
 			adc = bankADC.getInt("ADC",i); 
 			boolean ignorePaddle = false; // whether to ignore or not the processing paddle (as there is already a half it in the paddle)
@@ -58,8 +58,8 @@ public class HitReader {
 			if(ignorePaddle==false){
 				for(int j=0; j<ntdc; j++){
 					int s = bankTDC.getByte("sector", j);
-                    int l = bankTDC.getByte("layer", j);
-                    int o = bankTDC.getByte("order", j);
+                   			int l = bankTDC.getByte("layer", j);
+                 			int o = bankTDC.getByte("order", j);
 
 					if(s==sector && l == layer  && o == order+2 ){
 					//System.out.println("s "+ s+" sector "+sector+" l "+l+" layer "+layer+" o "+o+" order "+order);
@@ -74,7 +74,7 @@ public class HitReader {
 			HalfHit newhit = null;
 
 			// First, carry out checks on the quality of the signals:	    	  
-			if (adc == 0 || tdc == 0 || tdc == Parameters.NullTDC) continue; // require good ADC and TDC values
+			if (adc == 0 || tdc == 0 || tdc == Parameters.NullTDC || indextdc==-1) continue; // require good ADC and TDC values
 
 			newhit = new HalfHit(sector, layer, component, adc, tdc, i,indextdc); 
 
