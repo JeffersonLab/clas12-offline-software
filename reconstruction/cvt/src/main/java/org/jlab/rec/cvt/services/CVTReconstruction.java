@@ -38,8 +38,6 @@ import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
-import org.jlab.service.eb.EBHBEngine;
-import org.jlab.service.eb.EBTBEngine;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio
@@ -478,7 +476,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         double t = System.currentTimeMillis() - t1;
         //System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
         */
-       
+       /*
         DataEvent testEvent = getCVTTestEvent();
 
         CVTReconstruction CVTengine = new CVTReconstruction();
@@ -502,7 +500,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 		isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.483)
 		+" "+isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.674)
 		+" "+isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -13.9));
-        
+        */
         
     }
     public static boolean isWithinXPercent(double X, double val, double standard) {
