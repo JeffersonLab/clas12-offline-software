@@ -159,22 +159,18 @@ public class Geometry {
         //For CR6C, this function returns the Z position of the strip center
         int group = 0;
         int limit = Constants.getCRCGROUP()[num_region][group];
-        //double zc = Constants.getCRCZMIN()[num_region] + Constants.getCRCOFFSET()[num_region] + Constants.getCRCWIDTH()[num_region][group] / 2.;
         double zc = Constants.getCRCZMIN()[num_region];
-        
+
         if (num_strip > 0) {
             for (int j = 1; j < num_strip + 1; j++) {
-                zc += Constants.getCRCWIDTH()[num_region][group] / 2.;
-                //zc += Constants.getCRCWIDTH()[num_region][group];
+                zc += Constants.getCRCWIDTH()[num_region][group];
                 if (j >= limit) { //test if we change the width
                     group++;
                     limit += Constants.getCRCGROUP()[num_region][group];
                 }
-                //zc += Constants.getCRCWIDTH()[num_region][group] / 2. + Constants.getCRCSPACING()[num_region];
-                zc += Constants.getCRCWIDTH()[num_region][group]/2.;
-            }
+              }
         }
-
+        zc += Constants.getCRCWIDTH()[num_region][group]/2.;
         return zc; //in mm
     }
 

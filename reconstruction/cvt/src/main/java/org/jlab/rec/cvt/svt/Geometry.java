@@ -1,10 +1,14 @@
 package org.jlab.rec.cvt.svt;
 
 //import java.io.File;
+import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.FileNotFoundException;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.geometry.prim.Triangle3d;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 public class Geometry {
@@ -193,7 +197,8 @@ public class Geometry {
         double LC_z = LC[1];
 
         Point3D crPoint = transformToFrame(sector, upperlayer - 1, LC_x, 0, LC_z, "lab", "middle");
-
+        // test shifts
+        //this.applyShift(crPoint, upperlayer / 2, sector);
         vals[0] = crPoint.x();
         vals[1] = crPoint.y();
         vals[2] = crPoint.z();
@@ -556,8 +561,8 @@ public class Geometry {
     }
 
     public Point3D recalcCrossFromTrajectoryIntersWithModulePlanes(int s, double s1, double s2,
-            int l1, int l2, double trajX1, double trajY1, double trajZ1,
-            double trajX2, double trajY2, double trajZ2) {
+        int l1, int l2, double trajX1, double trajY1, double trajZ1,
+        double trajX2, double trajY2, double trajZ2) {
         Point3D LocPoint1 = this.transformToFrame(s, l1, trajX1, trajY1, trajZ1, "local", "");
         Point3D LocPoint2 = this.transformToFrame(s, l2, trajX2, trajY2, trajZ2, "local", "");
         double m = (LocPoint1.x() - LocPoint2.x()) / (LocPoint1.z() - LocPoint2.z());
@@ -654,6 +659,116 @@ public class Geometry {
 
     }
 
+    public void applyShift( Point3D cross, int region, int sector ) {
+        Vector3d aPoint = new Vector3d(cross.x(), cross.y(), cross.z());
+        Vector3d Cu_m = new Vector3d( -Constants.FIDCUX, 0.0, -Constants.FIDCUZ );
+        Vector3d Cu_p = new Vector3d( Constants.FIDCUX, 0.0, -Constants.FIDCUZ );
+        Vector3d Pk = new Vector3d( Constants.FIDPKX, 0.0, Constants.FIDPKZ0 + Constants.FIDPKZ1 );
+        double fidOriginZ = SVTConstants.Z0ACTIVE[region-1] - SVTConstants.DEADZNLEN - SVTConstants.FIDORIGINZ;
+        double heatSinkTotalThk = SVTConstants.MATERIALDIMENSIONS.get("heatSink")[1];
+        double radius = SVTConstants.SUPPORTRADIUS[region-1] + heatSinkTotalThk;
+       
+        Transform labFrame = SVTConstants.getLabFrame( region-1, sector-1, radius, fidOriginZ );
+        Cu_m.transform(labFrame);
+        Cu_p.transform(labFrame);
+        Pk.transform(labFrame);
+        Triangle3d fidTri3D = new Triangle3d( Cu_m, Cu_p, Pk );
+        Vector3d aCenter = fidTri3D.center();
+        {
+                System.out.printf("PN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+
+                System.out.printf("SC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
+        }
+
+        // do the rotation here.
+        if( !(Constants.RA[region-1][sector-1] < 1E-3) ) {			
+                aCenter.times( -1 ); // reverse translation
+                aPoint.add( aCenter ) ; // move origin to center of rotation axis
+                System.out.printf("        --> before rotat : % 8.4f % 8.4f % 8.4f\n", aPoint.x, aPoint.y, aPoint.z );
+                Vector3d vecAxis = new Vector3d(Constants.RX[region-1][sector-1], Constants.RY[region-1][sector-1], Constants.RZ[region-1][sector-1] ).normalized();			
+                vecAxis.rotate( aPoint, Math.toRadians(Constants.RA[region-1][sector-1]) );
+                //aPoint.rotateZ(Math.toRadians(Constants.RA[region-1][sector-1]));
+                System.out.printf(Constants.RA[region-1][sector-1]+"        --> rotat ax : % 8.4f % 8.4f % 8.4f\n", vecAxis.x, vecAxis.y, vecAxis.z );
+                System.out.printf("        --> after rotat : % 8.4f % 8.4f % 8.4f\n", aPoint.x, aPoint.y, aPoint.z );
+                aCenter.times( -1 ); // reverse translation
+                aPoint.add( aCenter ) ;
+                System.out.printf("        --> center : % 8.4f % 8.4f % 8.4f\n", aCenter.x, aCenter.y, aCenter.z );
+                System.out.printf("        --> rotat : % 8.4f % 8.4f % 8.4f\n", aPoint.x, aPoint.y, aPoint.z );
+        }
+
+        // do the translation here.
+        Vector3d translationVec = new Vector3d( Constants.TX[region-1][sector-1], Constants.TY[region-1][sector-1], Constants.TZ[region-1][sector-1] );
+        aPoint.set( aPoint.add( translationVec ) ); 
+        //if(Math.abs(cross.x()-aPoint.x)<1 && Math.abs(cross.y()-aPoint.y)<1) {
+        System.out.println("  unshifted \n"+cross.toString()+" in sector "+sector+" region "+region);
+        cross.set(aPoint.x, aPoint.y, aPoint.z);
+        System.out.printf("        --> shifted : % 8.4f % 8.4f % 8.4f\n", aPoint.x, aPoint.y, aPoint.z );
+       // }
+    }
+
+
+
+/**
+ * Applies the inverse of the given alignment shift to the given point.  gilfoyle 12/21/17
+ * 
+ * @param aPoint a point in the lab frame
+ * @param aShift a translation and axis-angle rotation of the form { tx, ty, tz, rx, ry, rz, ra }
+ * @param aCenter a point about which to rotate the first point (for example the midpoint of the ideal fiducials)
+ * @param aScaleT a scale factor for the translation shift
+ * @param aScaleR a scale factor for the rotation shift
+ * @throws IllegalArgumentException incorrect number of elements in shift array
+ */
+public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d aCenter, double aScaleT, double aScaleR ) throws IllegalArgumentException
+{
+
+        double tx = aShift[0]; // The Java language has references but you cannot dereference the memory addresses like you can in C++.
+        double ty = aShift[1]; // The Java runtime does have pointers, but they're not accessible to the programmer. (no pointer arithmetic)
+        double tz = aShift[2];
+        double rx = aShift[3];
+        double ry = aShift[4];
+        double rz = aShift[5];
+        double ra = aShift[6];
+
+        tx *= aScaleT;
+        ty *= aScaleT;
+        tz *= aScaleT;
+        ra *= aScaleR;
+
+
+        {
+                System.out.printf("PN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+                System.out.printf("ST: % 8.3f % 8.3f % 8.3f\n", tx, ty, tz );
+                System.out.printf("SR: % 8.3f % 8.3f % 8.3f % 8.3f\n", rx, ry, rz, Math.toDegrees(ra) );
+                System.out.printf("SC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
+        }
+
+        // undo the translation.
+        Vector3d translationVec = new Vector3d( -tx, -ty, -tz );
+        aPoint.set( aPoint.add( translationVec ) );
+
+        // test size of rotation - too small creates errors.
+        if( !(ra < 1E-3) )
+        {			
+                aCenter.times( -1 ); // reverse translation
+                aPoint.set( aPoint.add( aCenter ) ); // move origin to center of rotation axis
+
+                //System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+
+                Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
+                vecAxis.rotate( aPoint, -ra );
+
+                //System.out.printf("PR: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+
+                aCenter.times( -1 ); // reverse translation
+                aPoint.set( aPoint.add( aCenter ) );
+
+                //System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+        }
+
+
+        System.out.printf("PS: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+    }
+	
     public static void main(String arg[]) throws FileNotFoundException {
 
         Constants.Load();
