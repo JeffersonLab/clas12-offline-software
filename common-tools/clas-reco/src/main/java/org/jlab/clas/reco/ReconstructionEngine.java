@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,6 +26,9 @@ import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.jnp.hipo.data.HipoEvent;
 import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import static org.json.JSONObject.quote;
 
 /**
  *
@@ -36,6 +40,8 @@ public abstract class ReconstructionEngine implements Engine {
     volatile ConcurrentMap<String,ConstantsManager> constManagerMap;
     volatile SchemaFactory                          engineDictionary;
 
+    volatile String                                 engineConfiguration = null;
+    
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
@@ -53,7 +59,7 @@ public abstract class ReconstructionEngine implements Engine {
 
     abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
-
+    
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
@@ -63,7 +69,10 @@ public abstract class ReconstructionEngine implements Engine {
         }
     }
 
-
+    public final String getEngineConfiguration(){
+        return this.engineConfiguration;
+    }
+    
     public ConstantsManager  getConstantsManager(){
         return constManagerMap.get(this.getClass().getName());
     }
@@ -75,6 +84,13 @@ public abstract class ReconstructionEngine implements Engine {
      */
     @Override
     public EngineData configure(EngineData ed) {
+        
+        if (ed.getMimeType().equals(EngineDataType.JSON.toString())) {
+            this.engineConfiguration = (String) ed.getData();            
+        } else {
+            this.engineConfiguration = "";
+        }
+        
       if(constManagerMap == null)
       constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
       if(engineDictionary == null)
@@ -91,6 +107,38 @@ public abstract class ReconstructionEngine implements Engine {
         return ed;
     }
 
+    /**
+     * Method helps to extract configuration parameters defined in the Clara YAML file.
+     *
+     * @param jsonString JSon configuration object (passed to the userInit method).
+     * @param group      config parameter group.
+     * @param key        the key of the config parameter.
+     * @return parameter: String value
+     * @throws ClasEngineException org.jlab.clara.clas engine exception
+     */
+    protected String getStringConfigParameter(String jsonString,
+                                              String group,
+                                              String key)  throws Exception {
+        Object js;
+        try {
+            JSONObject base = new JSONObject(jsonString);
+            js = base.getJSONObject(group).get(key);
+            if (js instanceof String) {
+                return (String) js;
+            } else {
+                throw new Exception("JSONObject[" +  "] not a string.");
+            }
+        } catch (JSONException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+    
+    public void setVariation(String variation){
+       for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
+           entry.getValue().setVariation(variation);
+       }
+    }
+    
     @Override
     public EngineData execute(EngineData input) {
 
