@@ -106,8 +106,10 @@ public abstract class ReconstructionEngine implements Engine {
         System.out.println("----> I am doing nothing");
         
         try {
-            String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
-            this.setVariation(variation);
+            if(engineConfiguration.length()>2){
+                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
+                this.setVariation(variation);
+            }
         } catch (Exception e){
             System.out.println("[Engine] " + getName() + " failet to set variation");
         }
