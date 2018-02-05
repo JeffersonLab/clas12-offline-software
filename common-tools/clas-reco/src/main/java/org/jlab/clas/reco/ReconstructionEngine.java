@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clara.base.ClaraUtil;
 import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
@@ -109,7 +111,8 @@ public abstract class ReconstructionEngine implements Engine {
         
         try {
             if(engineConfiguration.length()>2){
-                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
+//                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
+                String variation = this.getStringConfigParameter(engineConfiguration, "variation");
                 System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
                 this.setVariation(variation);
             } else {
@@ -121,7 +124,32 @@ public abstract class ReconstructionEngine implements Engine {
         }
         return ed;
     }
-
+    
+    
+       protected String getStringConfigParameter(String jsonString,                                             
+                                              String key)  throws Exception {
+        Object js;
+        String variation = "default";
+        try {
+            JSONObject base = new JSONObject(jsonString);
+            
+            if(base.has("variation")==true){
+                variation = base.getString("variation");
+            } else {
+                System.out.println("[JSON]" + this.getName() + " **** warning **** does not contain variation ");
+            }
+            /*
+            js = base.get(key);
+            if (js instanceof String) {
+                return (String) js;
+            } else {
+                throw new Exception("JSONObject[" +  "] not a string.");
+            }*/
+        } catch (JSONException e) {
+            throw new Exception(e.getMessage());
+        }
+        return variation;
+    }
     /**
      * Method helps to extract configuration parameters defined in the Clara YAML file.
      *
@@ -336,5 +364,50 @@ public abstract class ReconstructionEngine implements Engine {
     @Override
     public void destroy() {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    public static class Reco extends ReconstructionEngine {
+        public Reco(){
+            super("a","b","c");
+        }
+        @Override
+        public boolean processDataEvent(DataEvent event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public boolean init() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    
+}
+    public static void main(String[] args){
+        System.setProperty("CLAS12DIR", "/Users/gavalian/Work/Software/project-3a.0.0/Distribution/clas12-offline-software/coatjava");
+        try {
+            String json = "{\n" +
+                    "\"ccdb\":\n" +
+                    "{\n" +
+                    "\"run\":101,\n" +
+                    "\"variation\":\"custom\"\n" +
+                    "},\n" +
+                    "\"runmode\":\"calibration\",\n" +
+                    "\"runtype\":\"mc\",\n" +
+                    "\"magnet\":\n" +
+                    "{\n" +
+                    "\"torus\":-1,\n" +
+                    "\"solenoid\":-1\n" +
+                    "},\n" +                    
+                    "\"variation\":\"cosmic\",\n" +
+                    "\"timestamp\":333\n" +
+                    "}";
+            System.out.println(json);
+            //json = "{ \"ccdb\":{\"run\":10,\"variation\":\"default\"}, \"variation\":\"cosmic\"}";
+            Reco reco = new Reco();
+            String variation =  reco.getStringConfigParameter(json, "variation");
+            System.out.println(" Variation : " + variation);
+        } catch (Exception ex) {
+            Logger.getLogger(ReconstructionEngine.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
