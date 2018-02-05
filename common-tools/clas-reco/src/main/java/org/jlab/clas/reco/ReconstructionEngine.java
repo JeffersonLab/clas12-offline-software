@@ -87,10 +87,10 @@ public abstract class ReconstructionEngine implements Engine {
         
         if (ed.getMimeType().equals(EngineDataType.JSON.toString())) {
             this.engineConfiguration = (String) ed.getData();
-            System.out.println("[CONFIGURE] ---> JSON Data : " + this.engineConfiguration);
+            System.out.println("[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
         } else {
             this.engineConfiguration = "";
-            System.out.println("[CONFIGURE] *** WARNING *** ---> NO JSON Data provided");
+            System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
         }
         
       if(constManagerMap == null)
@@ -110,10 +110,11 @@ public abstract class ReconstructionEngine implements Engine {
         try {
             if(engineConfiguration.length()>2){
                 String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
-                System.out.println("[CONFIGURE] ---->  Setting variation : " + variation);
+                System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
                 this.setVariation(variation);
             } else {
-                System.out.println("[CONFIGURE] *** WARNING *** ---> configuration string is too short");
+                System.out.println("[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
+                 + this.engineConfiguration + ")");
             }
         } catch (Exception e){
             System.out.println("[Engine] " + getName() + " failet to set variation");
@@ -149,7 +150,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void setVariation(String variation){
        for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
-           System.out.println("[MAP MANAGER] ---> Setting " + entry.getKey() + " : variation = "
+           System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
                    + variation );
            entry.getValue().setVariation(variation);
        }
