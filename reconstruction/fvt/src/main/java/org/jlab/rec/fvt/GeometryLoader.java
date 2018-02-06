@@ -145,29 +145,4 @@ public class GeometryLoader {
 
         return new Point3D(rx,ry,rzs);
     }
-    
-    public static void main(String arg[]) throws FileNotFoundException {
-        
-        GeometryLoader.Load(10, "default");
-        GeometryLoader gl = new GeometryLoader();
-        gl.LoadSurfaces();
-        DCSwimmer.getMagneticFields();
-        DCSwimmer.setMagneticFieldsScales((double)1, (double)-1); // something changed in the configuration ... 
-        DCSwimmer dcSwim = new DCSwimmer();
-        dcSwim.SetSwimParameters(0, 0, 0, 1.15818, -0.2828, 7.83452, -1);
-        double[] trkPars;
-        for(int is =0; is<1; is++) {
-            System.out.println("s "+is+" Nb planes "+GeometryLoader.getDetectorPlanes().get(is).size());
-            for(int i = 0; i< GeometryLoader.getDetectorPlanes().get(is).size(); i++ ) {
-                System.out.println(GeometryLoader.getDetectorPlanes().get(is).get(i).get_d()+"; "+
-                        GeometryLoader.getDetectorPlanes().get(is).get(i).get_nx()+", "+
-                        GeometryLoader.getDetectorPlanes().get(is).get(i).get_ny()+", "+
-                        GeometryLoader.getDetectorPlanes().get(is).get(i).get_nz()+". ");
-                trkPars = dcSwim.SwimToPlaneBoundary(GeometryLoader.getDetectorPlanes().get(is).get(i).get_d(), new Vector3D(GeometryLoader.getDetectorPlanes().get(is).get(i).get_nx(),
-                GeometryLoader.getDetectorPlanes().get(is).get(i).get_ny(),GeometryLoader.getDetectorPlanes().get(is).get(i).get_nz()),1);
-                System.out.println(" arrived at "+trkPars[0]+" "+trkPars[1]+" "+trkPars[2]);
-            }
-        }
-       
-    }
 }
