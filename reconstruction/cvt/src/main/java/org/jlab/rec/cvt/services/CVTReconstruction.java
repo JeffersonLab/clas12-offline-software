@@ -101,6 +101,8 @@ public class CVTReconstruction extends ReconstructionEngine {
             //    shift = -1.9;
             //MagneticFields.getInstance().setSolenoidShift(shift);
             this.setFieldsConfig(newConfig);
+            
+            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
         }
         FieldsConfig = newConfig;
 
