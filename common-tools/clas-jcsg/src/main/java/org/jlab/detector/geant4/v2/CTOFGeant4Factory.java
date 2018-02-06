@@ -30,7 +30,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         for (String name : new String[]{"sc", "lgd"}) {
             for (int iscint = 1; iscint <= npaddles; iscint++) {
                 CTOFpaddle component = new CTOFpaddle(String.format("%s%02d", name, iscint),
-                        cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);
+                        cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), (iscint>13) ? iscint-13 : iscint+35);
                 component.scale(Length.mm / Length.cm);
 
                 component.rotate("zyx", 0, Math.toRadians(180), 0);
