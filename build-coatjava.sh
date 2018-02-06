@@ -100,6 +100,13 @@ if [ $? != 0 ] ; then echo "rich failure" ; exit 1 ; fi
 cd -
 cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
 
+### fvt ###
+cd reconstruction/fvt
+mvn install
+if [ $? != 0 ] ; then echo "fvt failure" ; exit 1 ; fi
+cd -
+cp reconstruction/fvt/target/clas12detector-fvt-1.0-SNAPSHOT.jar coatjava/lib/services/
+
 ### eb ###
 cd reconstruction/eb
 mvn install
