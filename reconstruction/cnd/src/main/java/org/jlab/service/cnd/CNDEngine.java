@@ -123,7 +123,7 @@ public class CNDEngine extends ReconstructionEngine {
 
 	}
 
-	public static void main (String arg[]) throws IOException {
+	public static void main (String arg[]) {
 		CNDEngine en = new CNDEngine();
 		en.init();
 		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
