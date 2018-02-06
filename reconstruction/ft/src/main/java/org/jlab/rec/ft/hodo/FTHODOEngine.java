@@ -91,7 +91,7 @@ public class FTHODOEngine extends ReconstructionEngine {
     }
 
     
-    public static void main (String arg[]) throws IOException {
+    public static void main (String arg[]) {
 		FTHODOEngine cal = new FTHODOEngine();
 		cal.init();
 //		String input = "/Users/devita/data/out_clasdispr.00.e11.000.emn0.75tmn.09.xs65.61nb.dis.1.V5.hipo";
