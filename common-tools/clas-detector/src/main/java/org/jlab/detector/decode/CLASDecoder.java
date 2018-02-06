@@ -317,6 +317,7 @@ public class CLASDecoder {
             scalerBANK.setByte("quartet", i, (byte) scalerDGTZ.get(i).getSCALERData(0).getQuartet());
             scalerBANK.setInt("value", i, scalerDGTZ.get(i).getSCALERData(0).getValue());
         }
+//        if(scalerBANK.rows()>0)scalerBANK.show();
         return scalerBANK;
     }
     
@@ -409,6 +410,13 @@ public class CLASDecoder {
         }
         return event;
     }
+
+    public long getTriggerPhase() {    	
+        long timestamp    = this.codaDecoder.getTimeStamp();
+        int  phase_offset = 1;
+        return ((timestamp%6)+phase_offset)%6; // TI derived phase correction due to TDC and FADC clock differences 
+    }
+
     public HipoDataBank createHeaderBank(DataEvent event, int nrun, int nevent, float torus, float solenoid){
         HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);
         
