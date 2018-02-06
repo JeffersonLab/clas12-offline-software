@@ -125,7 +125,7 @@ public class FTEBEngine extends ReconstructionEngine {
         this.Solenoid = Solenoid;
     }
 
-    public static void main(String arg[]) throws IOException {
+    public static void main(String arg[]){
         FTCALEngine cal = new FTCALEngine();
         cal.init();
         FTHODOEngine hodo = new FTHODOEngine();
