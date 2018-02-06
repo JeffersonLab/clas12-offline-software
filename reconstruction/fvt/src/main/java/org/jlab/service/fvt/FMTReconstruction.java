@@ -48,7 +48,7 @@ public class FMTReconstruction extends ReconstructionEngine {
         super("FMTTracks", "ziegler", "4.0");
         
         FVTGeom = new org.jlab.rec.fvt.fmt.Geometry();
-        dcSwim = new DCSwimmer();
+        
         GeometryLoader.Load(10, "default");
         GeometryLoader gl = new GeometryLoader();
         gl.LoadSurfaces();
@@ -198,6 +198,8 @@ public class FMTReconstruction extends ReconstructionEngine {
         DataBank bank = event.createBank("REC::Traj", tracks.size()*19);
         int i1=0;
         for (int i = 0; i < tracks.size(); i++) {
+            if(tracks.get(i)==null)
+                continue;
             bank.setShort("detId", i1, (short) -1);
             bank.setShort("trkId", i1, (short) tracks.get(i).get_Id());
             bank.setByte("q", i1, (byte) tracks.get(i).getQ());
@@ -258,13 +260,14 @@ public class FMTReconstruction extends ReconstructionEngine {
        crossMake = new CrossMaker();
        crosses = new ArrayList<Cross>();
        clusters = new ArrayList<Cluster>() ;
+       dcSwim = new DCSwimmer();
        return true;
     }
 
      
     public static void main(String[] args) {
 
-        String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/clas_001894.1.hipo";
+        String inputFile = "/Users/ziegler/Desktop/Work/CLARA/CLARA/data/input/Run2960.tb.skimGoodTrks.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Distribution/CLARA/CLARA_INSTALL/data/output/out_pion_smearz_gen_1.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
@@ -283,7 +286,7 @@ public class FMTReconstruction extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile = "/Users/ziegler/Workdir/Files/GEMC/out_pion_smearz_gen_1FMTrec.hipo";
-        String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/FMT_pions_rec.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/FMTtest.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -318,7 +321,7 @@ public class FMTReconstruction extends ReconstructionEngine {
 			}
              */
             if(counter>41) break;
-            //event.show();
+            event.show();
             //if(counter%100==0)
             //System.out.println("run "+counter+" events");
 
