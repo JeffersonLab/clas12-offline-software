@@ -421,7 +421,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
 
     
-    public static void main(String[] args) throws FileNotFoundException, EvioException {
+    public static void main(String[] args)  {
     
        String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/central_2348_uncookedSkim.hipo";
         //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/skim_clas_002436.evio.90.hipo";
