@@ -236,7 +236,7 @@ public class FMTReconstruction extends ReconstructionEngine {
     }
 
      
-    public static void main(String[] args) throws FileNotFoundException, EvioException {
+    public static void main(String[] args) {
 
         String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/FMT_pions.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Distribution/CLARA/CLARA_INSTALL/data/output/out_pion_smearz_gen_1.hipo";
