@@ -154,7 +154,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 	}
 
-	public static void main (String arg[]) throws IOException {
+	public static void main (String arg[]) {
 		CNDCalibrationEngine en = new CNDCalibrationEngine();
 
 		en.init();

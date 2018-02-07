@@ -34,7 +34,7 @@ public class StateVecs {
     public List<Integer> Sector;
 
     public double[] getStateVecPosAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, int type) {
-
+      
         double xc = X0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * Math.cos(kVec.phi0);
         double yc = Y0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * Math.sin(kVec.phi0);
         double r = Math.abs(kVec.alpha / kVec.kappa);

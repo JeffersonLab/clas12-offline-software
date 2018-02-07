@@ -73,7 +73,7 @@ public class HelicalTrackFitter {
         ((ArrayList<Double>) W).ensureCapacity(X.size());
 
         for (int j = 0; j < X.size(); j++) {
-
+            
             if (errRt.get(j) == 0) {
                 System.err.println("Point errors ill-defined -- helical fit exiting");
                 return FitStatus.CircleFitFailed;
@@ -87,7 +87,7 @@ public class HelicalTrackFitter {
         _circlefit = new CircleFitter();
         boolean circlefitstatusOK = _circlefit.fitStatus(X, Y, W, X.size());
 
-        if (!circlefitstatusOK) {
+        if (!circlefitstatusOK) { 
             return FitStatus.CircleFitFailed;
         }
 
@@ -145,7 +145,7 @@ public class HelicalTrackFitter {
         boolean linefitstatusOK = _linefit.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
 
         if (!linefitstatusOK) {
-            return FitStatus.LineFitFailed;
+            return FitStatus.LineFitFailed; 
         }
         //  Get the results of the fits
         _linefitpars = _linefit.getFit();

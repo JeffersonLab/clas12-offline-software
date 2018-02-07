@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
@@ -36,43 +37,28 @@ public class MeasVecs {
 
     }
 
-    public void setMeasVecs(Seed trkcand, org.jlab.rec.cvt.svt.Geometry sgeo) {
-
+        public void setMeasVecs(Seed trkcand, org.jlab.rec.cvt.svt.Geometry sgeo) {
+       // for(Cross c : trkcand.get_Crosses() ) { System.out.println(" crosses in seed passed to KF: "+c.printInfo());}System.out.println(" =========");
         measurements = new ArrayList<MeasVec>();
         MeasVec meas0 = new MeasVec();
         meas0.centroid = 0;
         meas0.error = 1;
         meas0.sector = 0;
         meas0.layer = 0;
-        measurements.add(meas0);
+        measurements.add(meas0); 
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) {
-            MeasVec meas = new MeasVec();
-            meas.centroid = trkcand.get_Clusters().get(i).get_Centroid();
-            meas.type = 0;
-            meas.error = 0;
-            for (int j = 0; j < trkcand.get_Clusters().get(i).size(); j++) {
-                double Z = Constants.ACTIVESENLEN;
-                for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
-                    if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
-                        continue;
-                    }
-                    if (trkcand.get_Crosses().get(c).get_Cluster1().get_Id() == trkcand.get_Clusters().get(i).get_Id()
-                            || trkcand.get_Crosses().get(c).get_Cluster2().get_Id() == trkcand.get_Clusters().get(i).get_Id()) {
-                        Point3D crPt = trkcand.get_Crosses().get(c).get_Point();
+            if(trkcand.get_Clusters().get(i).get_Detector()==0) {
+                MeasVec meas = new MeasVec();
+                meas.centroid = trkcand.get_Clusters().get(i).get_Centroid();
+                meas.type = 0;
+                meas.error = trkcand.get_Clusters().get(i).get_CentroidError()*trkcand.get_Clusters().get(i).get_CentroidError()*trkcand.get_Clusters().get(i).size();
 
-                        Z = sgeo.transformToFrame(trkcand.get_Clusters().get(i).get_Sector(), trkcand.get_Clusters().get(i).get_Layer(), crPt.x(), crPt.y(), crPt.z(), "local", "").z();
-                    }
-                }
-
-                double res = trkcand.get_Clusters().get(i).get_ResolutionAlongZ(Z, sgeo) / (Constants.PITCH / Math.sqrt(12.));
-                //double res = trkcand.get_Clusters().get(i).get_ResolutionAlongZ(Z, sgeo);
-
-                meas.error += res * res;
+                meas.sector = trkcand.get_Clusters().get(i).get_Sector();
+                meas.layer = trkcand.get_Clusters().get(i).get_Layer();
+                if(i>0 && measurements.get(measurements.size()-1).layer==meas.layer)
+                    continue;
+                measurements.add(meas);
             }
-            meas.sector = trkcand.get_Clusters().get(i).get_Sector();
-            meas.layer = trkcand.get_Clusters().get(i).get_Layer();
-
-            measurements.add(meas);
         }
 
         // adding the BMT
@@ -81,9 +67,10 @@ public class MeasVecs {
 
                 MeasVec meas = new MeasVec();
                 meas.sector = trkcand.get_Crosses().get(c).get_Sector();
-                meas.layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 6;
+                meas.layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
                 meas.centroid = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
-
+                if(measurements.size()>0 && measurements.get(measurements.size()-1).layer==meas.layer)
+                    continue;
                 if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("Z")) {
                     meas.x = trkcand.get_Crosses().get(c).get_Point().x();
                     meas.y = trkcand.get_Crosses().get(c).get_Point().y();
@@ -102,12 +89,10 @@ public class MeasVecs {
             }
         }
         Collections.sort(measurements);
-        for (int i = 0; i < measurements.size(); i++) {
-            measurements.get(i).k = i;
-            //System.out.println(i+") meas "+i+" sector "+measurements.get(i).sector+" layer "+measurements.get(i).layer+" cent "+measurements.get(i).centroid
-            //		+" err "+measurements.get(i).error+" x "+measurements.get(i).x+" y "+measurements.get(i).y+ " z "+measurements.get(i).z);
-        }
+        
     }
+
+    
 
     public double h(StateVec stateVec, org.jlab.rec.cvt.svt.Geometry sgeo) {
         if (stateVec == null) {

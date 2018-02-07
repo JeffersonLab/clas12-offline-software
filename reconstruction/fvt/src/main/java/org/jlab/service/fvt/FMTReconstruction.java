@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.io.base.*;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -47,7 +48,7 @@ public class FMTReconstruction extends ReconstructionEngine {
         super("FMTTracks", "ziegler", "4.0");
         
         FVTGeom = new org.jlab.rec.fvt.fmt.Geometry();
-        dcSwim = new DCSwimmer();
+        
         GeometryLoader.Load(10, "default");
         GeometryLoader gl = new GeometryLoader();
         gl.LoadSurfaces();
@@ -55,7 +56,7 @@ public class FMTReconstruction extends ReconstructionEngine {
     }
 
     String FieldsConfig = "";
-    int Run = -1;
+    private int Run = -1;
   
  public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
@@ -91,7 +92,12 @@ public class FMTReconstruction extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0);
 
         if (Run != newRun) {
-            System.out.println("new run");
+            
+            double shift =0;
+            if(Run>1890)
+                shift = -1.9;
+            DCSwimmer.setMagneticFieldsScales((double)bank.getFloat("solenoid", 0), (double)bank.getFloat("torus", 0), shift);
+            
             
         }
         Run = newRun;
@@ -121,7 +127,27 @@ public class FMTReconstruction extends ReconstructionEngine {
     
     @Override
     public boolean processDataEvent(DataEvent event) {
-        this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
+        if(event.hasBank("RUN::config")==false ) {
+		System.err.println("RUN CONDITIONS NOT READ!");
+		return true;
+	}
+		
+        DataBank bank = event.getBank("RUN::config");
+		
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+
+        if(Run!=newRun) {
+            
+            double TORSCALE = (double)bank.getFloat("torus", 0);
+            double SOLSCALE = (double)bank.getFloat("solenoid", 0);
+            double shift =0;
+            if(Run>1890)
+                shift = -1.9;
+            DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
+            Run = newRun;
+        }
         clusters.clear();
         crosses.clear();
         
@@ -169,9 +195,11 @@ public class FMTReconstruction extends ReconstructionEngine {
     }
     
     public void fillTrajectoryBank(DataEvent event, List<Track> tracks) {
-        DataBank bank = event.createBank("REC::FWTraj", tracks.size()*19);
+        DataBank bank = event.createBank("REC::Traj", tracks.size()*19);
         int i1=0;
         for (int i = 0; i < tracks.size(); i++) {
+            if(tracks.get(i)==null)
+                continue;
             bank.setShort("detId", i1, (short) -1);
             bank.setShort("trkId", i1, (short) tracks.get(i).get_Id());
             bank.setByte("q", i1, (byte) tracks.get(i).getQ());
@@ -232,13 +260,14 @@ public class FMTReconstruction extends ReconstructionEngine {
        crossMake = new CrossMaker();
        crosses = new ArrayList<Cross>();
        clusters = new ArrayList<Cluster>() ;
+       dcSwim = new DCSwimmer();
        return true;
     }
 
      
-    public static void main(String[] args) throws FileNotFoundException, EvioException {
+    public static void main(String[] args) {
 
-        String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/FMT_pions.hipo";
+        String inputFile = "/Users/ziegler/Desktop/Work/CLARA/CLARA/data/input/Run2960.tb.skimGoodTrks.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Distribution/CLARA/CLARA_INSTALL/data/output/out_pion_smearz_gen_1.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
@@ -257,7 +286,7 @@ public class FMTReconstruction extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile = "/Users/ziegler/Workdir/Files/GEMC/out_pion_smearz_gen_1FMTrec.hipo";
-        String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/FMT_pions_rec.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/FMTtest.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -292,7 +321,7 @@ public class FMTReconstruction extends ReconstructionEngine {
 			}
              */
             if(counter>41) break;
-            //event.show();
+            event.show();
             //if(counter%100==0)
             //System.out.println("run "+counter+" events");
 

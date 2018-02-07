@@ -39,6 +39,6 @@ public class RICHEBEngine extends ReconstructionEngine {
 	}
 	
         
-    public static void main (String arg[]) throws IOException {
+    public static void main (String arg[]) {
 	}
 }

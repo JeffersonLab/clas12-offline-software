@@ -98,13 +98,18 @@ public class TrackListFinder {
     
      
     public void removeOverlappingTracks(List<Track> trkcands) {
-
+            if(trkcands==null)
+                return;
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
             for(int i =0; i<trkcands.size(); i++) { 
                     list.clear();
+                    if(trkcands.get(i)==null)
+                        continue;
                     this.getOverlapLists(trkcands.get(i), trkcands, list);
                     Track selectedTrk = this.FindBestTrack(list);
+                    if(selectedTrk==null)
+                        continue;
                     if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
                             selectedTracks.add(selectedTrk);
             }

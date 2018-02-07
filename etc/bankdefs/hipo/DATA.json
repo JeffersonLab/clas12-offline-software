@@ -150,7 +150,7 @@
   },
    {
     "bank": "FTCAL::adc",
-    "group": 20911,
+    "group": 21011,
     "info": "Forward Tagger Calorimeter",
     "items": [
        {"name":"sector",    "id":1, "type":"int8",  "info":"sector of EC"},
@@ -164,7 +164,7 @@
     },
    {
     "bank": "FTHODO::adc",
-    "group": 21011,
+    "group": 21111,
     "info": "Forward Tagger Hodoscope",
     "items": [
        {"name":"sector",    "id":1, "type":"int8",  "info":"sector of EC"},
@@ -178,7 +178,7 @@
   },
   {
     "bank": "FTOF::adc",
-    "group": 21111,
+    "group": 21211,
     "info": "digitized bank Forward Time-Of-Flight",
     "items": [
        {"name":"sector",    "id":1, "type":"int8",  "info":"sector of FTOF"},
@@ -192,7 +192,7 @@
   },
  {
     "bank": "FTOF::tdc",
-    "group": 21112,
+    "group": 21212,
     "info": "digitized bank Forward Time-Of-Flight",
     "items": [
        {"name":"sector",    "id":1, "type":"int8",  "info":"sector of FTOF"},

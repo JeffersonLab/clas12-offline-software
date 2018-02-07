@@ -239,7 +239,7 @@ public class FTOFEngine extends ReconstructionEngine {
 
     
 
-    public static void main(String arg[]) throws IOException {
+    public static void main(String arg[]) {
 
         DCHBEngine en0 = new DCHBEngine();
         en0.init();
