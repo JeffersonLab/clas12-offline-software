@@ -164,8 +164,7 @@ public class CTOFEngine extends ReconstructionEngine {
 
     }
 
-    public static void main(String[] args) throws FileNotFoundException,
-        EvioException {
+    public static void main(String[] args)  {
 
         String inputFile  = "/Users/ziegler/Desktop/Work/Files/GEMC/CTOF/pions1degphi80degtheta.hipo";
         String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/CTOF/pions1degphi80degthetaRECWithNewCCDB.hipo";

@@ -33,13 +33,13 @@ public final class CTOFGeant4Factory extends Geant4Factory {
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);
                 component.scale(Length.mm / Length.cm);
 
-                component.rotate("zyx", 0, Math.toRadians(180), 0);
+                component.rotate("zyx", Math.toRadians(97.5), Math.toRadians(180), 0);
                 component.translate(0, 0, 127.327);
                 component.setMother(motherVolume);
 
                 if (name.equals("sc")) {
                     component.makeSensitive();
-                    component.setId(CTOFID, (iscint>13) ? iscint-13 : iscint+35);
+                    component.setId(CTOFID, iscint);
                 }
             }
         }
@@ -51,30 +51,25 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             System.err.println("CTOF Paddle #" + ipaddle + " doesn't exist");
             System.exit(111);
         }
-        int paddleId = ipaddle + 35;
-        if (ipaddle > 13) {
-            paddleId = ipaddle - 13;
-        }
-        return motherVolume.getChildren().get(paddleId - 1);
+        return motherVolume.getChildren().get(ipaddle - 1);
     }
 
     private class CTOFpaddle extends G4Stl {
 
-        private final int padnum;
         private Line3d centerline;
-        private final double angle0 = -3.75, dangle = 7.5;
+        private final double angle0 = 3.75, dangle = 7.5;
         private final double zmin = -54.18, zmax = 36.26;
 
         CTOFpaddle(String name, InputStream stlstream, int padnum) {
             super(name, stlstream);
-            this.padnum = padnum;
+            Vector3d cent = new Vector3d(26.62,0, 0);
+            cent.rotateZ(Math.toRadians(angle0 + (padnum - 1) * dangle));
+            centerline = new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
         }
 
         @Override
         public Line3d getLineZ() {
-            Vector3d cent = new Vector3d(0, -26.62, 0);
-            cent.rotateZ(Math.toRadians(angle0 + (padnum - 1) * dangle));
-            return new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
+            return centerline;
         }
     }
 

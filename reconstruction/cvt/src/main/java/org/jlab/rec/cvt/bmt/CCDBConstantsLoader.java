@@ -85,6 +85,8 @@ public class CCDBConstantsLoader {
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
+        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
+        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
         dbprovider.disconnect();
 
        //  dbprovider.show();
@@ -225,13 +227,18 @@ public class CCDBConstantsLoader {
          	MAG_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Bfield",i);
         }
          
-        for (int i = 0; i<2*NREGIONS; i++) {
-          	for (int j=0; j<3; j++) {
-          		if (dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Axis", i)==0) HV_DRIFT[i][j]=1500;
-              		if (dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Axis", i)==1) HV_DRIFT[i][j]=1500;
-                }
+         for (int i = 0; i<2*NREGIONS; i++) {
+        	 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
+    		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
+    		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
+        	 if (Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
+        		 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
+        		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
+        		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
+        	 }
+        	 
         }
-        
+                
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);

@@ -47,6 +47,7 @@ public class Seed implements Comparable<Seed>{
     }
     
     public String get_IntIdentifier() {
+        
         Collections.sort(this.get_Clusters());
         Collections.sort(this.get_Crosses());
         

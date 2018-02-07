@@ -1,12 +1,10 @@
 package org.jlab.rec.cvt.banks;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -161,7 +159,7 @@ public class HitReader {
                 layer[i] = bankDGTZ.getInt("layer", i);
                 strip[i] = bankDGTZ.getInt("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
-
+                
                 double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];
                 int hemisphere = (int) Math.signum(Math.sin(angle));
                 if (sector[i] == 7 && layer[i] > 6) {
