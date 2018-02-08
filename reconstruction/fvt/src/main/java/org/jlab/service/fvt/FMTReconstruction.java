@@ -1,13 +1,10 @@
 package org.jlab.service.fvt;
 
-import java.io.FileNotFoundException;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.coda.jevio.EvioException;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+
 import org.jlab.io.base.*;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -235,7 +232,7 @@ public class FMTReconstruction extends ReconstructionEngine {
                 bank.setFloat("pz", i1, (float) tracks.get(i).trajectory.get(j).getpZ());
                 bank.setFloat("pathlength", i1, (float) tracks.get(i).trajectory.get(j).getPathLen());
                 i1++;
-                    /* System.out.println(tracks.get(i).get_Id()+" "+tracks.get(i).getQ()
+                /*     System.out.println(tracks.get(i).get_Id()+" "+tracks.get(i).getQ()
                             +" ("+tracks.get(i).trajectory.get(j).getDetId()+") "
                             + tracks.get(i).trajectory.get(j).getDetName()+"] "+
                             (float)tracks.get(i).trajectory.get(j).getX()+", "+
