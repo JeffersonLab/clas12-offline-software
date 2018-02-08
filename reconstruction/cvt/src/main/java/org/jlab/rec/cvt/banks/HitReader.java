@@ -161,18 +161,19 @@ public class HitReader {
                 strip[i] = bankDGTZ.getInt("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
                 // Get bco
-                if(layer[i]==1) {
-                    long timestamp  = bankDGTZ.getLong("timestamp", i);
-                    float bco = bankDGTZ.getFloat("time", i);
-                    long b = (long) (((timestamp - trigt) / 16.0)) % 256;
-                    if (b < 0)
-                            b += 256;
-                    int bcos = (int) (bco - b);
-                    if (bcos < 0) bcos += 256;
-                    if(bcos<1 || bcos>2)
-                        continue;
+                if(event.hasBank("MC::Particle") == false) {
+                    if(layer[i]==1) {
+                        long timestamp  = bankDGTZ.getLong("timestamp", i);
+                        float bco = bankDGTZ.getFloat("time", i);
+                        long b = (long) (((timestamp - trigt) / 16.0)) % 256;
+                        if (b < 0)
+                                b += 256;
+                        int bcos = (int) (bco - b);
+                        if (bcos < 0) bcos += 256;
+                        if(bcos<1 || bcos>2)
+                            continue;
+                    }
                 }
-                
                 double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];
                 int hemisphere = (int) Math.signum(Math.sin(angle));
                 if (sector[i] == 7 && layer[i] > 6) {
