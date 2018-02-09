@@ -122,7 +122,6 @@ public class HitReader {
         }
     }
 
-    private long trigt = 979;
     /**
      * Gets the SVT hits from the BMT dgtz bank
      *
@@ -154,26 +153,13 @@ public class HitReader {
         if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
             for (int i = 0; i < rows; i++) {
-                boolean passHit = true;
+
                 id[i] = i + 1;
                 sector[i] = bankDGTZ.getInt("sector", i);
                 layer[i] = bankDGTZ.getInt("layer", i);
                 strip[i] = bankDGTZ.getInt("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
-                // Get bco
-                if(event.hasBank("MC::Particle") == false) {
-                    if(layer[i]==1) {
-                        long timestamp  = bankDGTZ.getLong("timestamp", i);
-                        float bco = bankDGTZ.getFloat("time", i);
-                        long b = (long) (((timestamp - trigt) / 16.0)) % 256;
-                        if (b < 0)
-                                b += 256;
-                        int bcos = (int) (bco - b);
-                        if (bcos < 0) bcos += 256;
-                        if(bcos<1 || bcos>2)
-                            passHit=false;
-                    }
-                }
+                
                 double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];
                 int hemisphere = (int) Math.signum(Math.sin(angle));
                 if (sector[i] == 7 && layer[i] > 6) {
@@ -184,66 +170,64 @@ public class HitReader {
                 }
                 if (omitHemisphere == -2) {
                     if (layer[i] == omitLayer) {
-                        passHit=false;
+                        continue;
                     }
                 } else {
                     if (hemisphere == omitHemisphere && layer[i] == omitLayer) {
-                        passHit=false;
+                        continue;
                     }
 
                 }
                 // if the strip is out of range skip
                 if (strip[i] < 1) {
-                    passHit=false;
+                    continue;
                 }
                 if (layer[i] > 6) {
-                    passHit=false;
+                    continue;
                 }
                 
-                if(passHit==true) {
-                    //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
-                    //    continue;
-                    // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                    Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
-                    // get the strip endPoints
-                     double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
-                    Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
-                    Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
-                    Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
-                    Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
-                    SvtStrip.set_ImplantPoint(EP1); 
-                    // Geometry implementation using the geometry package:  Charles Platt
-    //                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
-    //
-     //               Vector3d o1            = shiftedStrip.origin();
-     //               Vector3d e1            = shiftedStrip.end();
+                //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
+                //    continue;
+                // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
+                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
+                // get the strip endPoints
+                 double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
+                Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
+                Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
+                Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
+                Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
+                SvtStrip.set_ImplantPoint(EP1); 
+                // Geometry implementation using the geometry package:  Charles Platt
+//                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
+//
+ //               Vector3d o1            = shiftedStrip.origin();
+ //               Vector3d e1            = shiftedStrip.end();
 
-    //                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
-     //                                           ( o1.y + e1.y ) /2.,
-     //                                           ( o1.z + e1.z ) /2. );
-     //               Vector3D Dir = new Vector3D((-o1.x + e1.x ),
-     //                                           (-o1.y + e1.y ),
-     //                                           (-o1.z + e1.z )     );
+//                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
+ //                                           ( o1.y + e1.y ) /2.,
+ //                                           ( o1.z + e1.z ) /2. );
+ //               Vector3D Dir = new Vector3D((-o1.x + e1.x ),
+ //                                           (-o1.y + e1.y ),
+ //                                           (-o1.z + e1.z )     );
 
-    //                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
-    //                SvtStrip.set_ImplantPoint(passVals);
-                    SvtStrip.set_MidPoint(MP);
-                    SvtStrip.set_StripDir(Dir);
+//                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
+//                SvtStrip.set_ImplantPoint(passVals);
+                SvtStrip.set_MidPoint(MP);
+                SvtStrip.set_StripDir(Dir);
 
-                    // create the hit object
-                    Hit hit = new Hit(0, -1, sector[i], layer[i], SvtStrip);
-                    // if the hit is useable in the analysis its status is 1
-                    hit.set_Status(1);
-                    if (SvtStrip.get_Edep() == 0) {
-                        hit.set_Status(-1);
-                    }
-                    //System.out.println("SVT e "+SvtStrip.get_Edep());
-
-                    hit.set_Id(id[i]);
-                    // add this hit
-                    if(SvtStrip.get_Edep()>0)      
-                        hits.add(hit);
-                    }
+                // create the hit object
+                Hit hit = new Hit(0, -1, sector[i], layer[i], SvtStrip);
+                // if the hit is useable in the analysis its status is 1
+                hit.set_Status(1);
+                if (SvtStrip.get_Edep() == 0) {
+                    hit.set_Status(-1);
+                }
+                //System.out.println("SVT e "+SvtStrip.get_Edep());
+                
+                hit.set_Id(id[i]);
+                // add this hit
+                if(SvtStrip.get_Edep()>0)      
+                    hits.add(hit);
             }
         }
         // fill the list of SVT hits
