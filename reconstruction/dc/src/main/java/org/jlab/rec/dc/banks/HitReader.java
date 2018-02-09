@@ -177,13 +177,13 @@ public class HitReader {
                         if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+200*(float)(112-wire[i]/56))
                             passTimingCut=true;
                     } else {
-                        if(T0Sub>Constants.TIMEWINMINEDGE[2] && T0Sub<Constants.TIMEWINMAXEDGE[2]+Constants.TRIGJIT+400*(float)(56-wire[i]/56))
+                        if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+400*(float)(56-wire[i]/56))
                             passTimingCut=true;
                     }
                         
                     passTimingCut=true;
                 }
-                if(region ==3 && T0Sub>-25 && T0Sub<750)
+                if(region ==3 && T0Sub>Constants.TIMEWINMINEDGE[2] && T0Sub<Constants.TIMEWINMAXEDGE[2]+Constants.TRIGJIT)
                     passTimingCut=true;
                 if(passTimingCut) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
