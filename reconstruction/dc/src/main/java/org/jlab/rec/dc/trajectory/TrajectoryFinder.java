@@ -118,9 +118,17 @@ public class TrajectoryFinder {
 		return intBdl;
 	}
 
-	
-
-
+        /**
+         * 
+         * @param x0
+         * @param y0
+         * @param tanTheta_x
+         * @param tanTheta_y
+         * @param p
+         * @param q
+         * @param DcDetector
+         * @return list of state vecs along track trajectory ... used for tFlight computation
+         */
 	public List<StateVec> getStateVecsAlongTrajectory(double x0, double y0, double tanTheta_x, double tanTheta_y, double p, int q, DCGeant4Factory DcDetector) {
                 
 		//initialize at target
@@ -140,46 +148,48 @@ public class TrajectoryFinder {
 		Y[0] = swamPars[1];
 		thX[0] = swamPars[3]/swamPars[5];
 		thY[0] = swamPars[4]/swamPars[5];
-        double pathLen = swamPars[6];
+                double pathLen = swamPars[6];
        
 		int planeIdx = 0;
 		int lastSupLyrIdx = 0;
 		int lastLyrIdx = 0;
-		
 		List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
 		
 		stateVecAtPlanesList.add(new StateVec(X[0],Y[0],thX[0], thY[0]));
                 stateVecAtPlanesList.get(stateVecAtPlanesList.size()-1).setPathLength(pathLen);
                 for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
                         for(int layerIdx =0; layerIdx<6; layerIdx++) {
+                            if(superlayerIdx ==0 && layerIdx==0) {    
+                                continue;
+                            } else {
+                                
                                 planeIdx++;
-                                if(planeIdx<36){
-                                	 dcSwim.SetSwimParameters(lastSupLyrIdx, lastLyrIdx,  X[planeIdx-1],  Y[planeIdx-1],  thX[planeIdx-1],  thY[planeIdx-1],  p,  q, DcDetector);
-                                    //Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
-                                    Z[planeIdx] = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z; 
-                                    
-                                    swamPars = dcSwim.SwimToPlane(Z[planeIdx]) ;
-                                    X[planeIdx] = swamPars[0];
-                                    Y[planeIdx] = swamPars[1];
-                                    thX[planeIdx] = swamPars[3]/swamPars[5];
-                                    thY[planeIdx] = swamPars[4]/swamPars[5];
-                                    pathLen+=swamPars[6];
-                                    StateVec stVec = new StateVec(X[planeIdx],Y[planeIdx],thX[planeIdx], thY[planeIdx]);
-                                    stVec.set_planeIdx(planeIdx);
-                                    stVec.setPathLength(pathLen);
-                                    stateVecAtPlanesList.add(stVec);
-                                }
+                                dcSwim.SetSwimParameters(lastSupLyrIdx, lastLyrIdx,  X[planeIdx-1],  Y[planeIdx-1],  thX[planeIdx-1],  thY[planeIdx-1],  p,  q, DcDetector);
+                                //Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+                                Z[planeIdx] = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z; 
+
+                                swamPars = dcSwim.SwimToPlane(Z[planeIdx]) ;
+                                X[planeIdx] = swamPars[0];
+                                Y[planeIdx] = swamPars[1];
+                                thX[planeIdx] = swamPars[3]/swamPars[5];
+                                thY[planeIdx] = swamPars[4]/swamPars[5];
+                                pathLen+=swamPars[6];
+                                StateVec stVec = new StateVec(X[planeIdx],Y[planeIdx],thX[planeIdx], thY[planeIdx]);
+                                stVec.set_planeIdx(planeIdx);
+                                stVec.setPathLength(pathLen);
+                                stateVecAtPlanesList.add(stVec);
+
+                            }
                                 
-                                
-                                lastSupLyrIdx = superlayerIdx;
-                                lastLyrIdx = layerIdx;
+
+                            lastSupLyrIdx = superlayerIdx;
+                            lastLyrIdx = layerIdx;
                         }
                 }
                 
 		return stateVecAtPlanesList;
 	}
-
-
+        
 	/**
 	 *
 	 * @return the list of state vectors along the trajectory
