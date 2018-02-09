@@ -33,7 +33,11 @@ public class Constants {
         
 	// CONSTANTS USED IN RECONSTRUCTION
 	//---------------------------------
-
+        public static final double TRIGJIT = 250;
+        public static final double[] TIMEWINMINEDGE = {-25.0,-25.0,-25.0};
+        public static final double[] TIMEWINMAXEDGE = {275.0,350.0,550.0};
+        
+        
 	public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
 
 	
@@ -120,6 +124,7 @@ public class Constants {
 	public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
 	
 	public static int[][] STBLOC;
+    
 	public static final synchronized void Load() {
             if (ConstantsLoaded==true)
                     return;
