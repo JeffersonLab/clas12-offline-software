@@ -38,6 +38,8 @@ import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
+//import org.jlab.service.eb.EBHBEngine;
+//import org.jlab.service.eb.EBTBEngine;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio
@@ -302,7 +304,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             TrackListFinder trkFinder = new TrackListFinder();
             List<Track> trks = new ArrayList<Track>();
             trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
-           // trkFinder.removeOverlappingTracks(trks); //turn off until debugged
+            trkFinder.removeOverlappingTracks(trks); //turn off until debugged
             
             for (int c = 0; c < trkcands.size(); c++) {
                 trkcands.get(c).set_Id(c + 1);
@@ -424,7 +426,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     
     public static void main(String[] args)  {
-    
+    /*
        String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/central_2348_uncookedSkim.hipo";
         //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/skim_clas_002436.evio.90.hipo";
 //String inputFile="/Users/ziegler/Desktop/Work/Files/LumiRuns/random/decoded_2341.hipo";
@@ -435,7 +437,7 @@ public class CVTReconstruction extends ReconstructionEngine {
        //EBHBEngine eb = new EBHBEngine();
        //eb.init();
         int counter = 0;
-/*
+
         HipoDataSource reader = new HipoDataSource();
         reader.open(inputFile);
 
@@ -478,7 +480,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         double t = System.currentTimeMillis() - t1;
         //System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
         */
-       /*
+       
         DataEvent testEvent = getCVTTestEvent();
 
         CVTReconstruction CVTengine = new CVTReconstruction();
@@ -489,7 +491,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             testEvent.getBank("CVTRec::Tracks").show();
         }
         
-        
+       /*
         EBHBEngine EBHBengine = new EBHBEngine();
         EBHBengine.init();
         EBHBengine.processDataEvent(testEvent);
