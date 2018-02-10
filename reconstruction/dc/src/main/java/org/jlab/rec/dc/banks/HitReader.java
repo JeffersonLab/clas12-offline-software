@@ -13,6 +13,7 @@ import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -113,14 +114,14 @@ public class HitReader {
             layer[i] = bankDGTZ.getByte("layer", i);
             wire[i] = bankDGTZ.getShort("component", i);
             tdc[i] = bankDGTZ.getInt("TDC", i);
-            _sector = sector[i];
-            _layer = layer[i];
-            _wire = wire[i];
+            //_sector = sector[i];
+            //_layer = layer[i];
+            //_wire = wire[i];
             
-            this.swapWires(event, sector[i], layer[i], wire[i]);
-            sector[i] = _sector;
-            layer[i] = _layer;
-            wire[i] = _wire;
+            //this.swapWires(event, sector[i], layer[i], wire[i]);
+            //sector[i] = _sector;
+            //layer[i] = _layer;
+            //wire[i] = _wire;
             
         }
         
@@ -158,7 +159,7 @@ public class HitReader {
         noiseAnalysis.clear();
 
         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
-
+        
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
@@ -169,20 +170,20 @@ public class HitReader {
  //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 boolean passTimingCut = false;
                 int region = (int) (superlayerNum[i] + 1) / 2;
-                if(region ==1 && T0Sub>-25 && T0Sub<275)
+                if(region ==1 && T0Sub>Constants.TIMEWINMINEDGE[0] && T0Sub<Constants.TIMEWINMAXEDGE[0]+Constants.TRIGJIT)
                     passTimingCut=true;
                 if(region ==2) {
                     if(wire[i]>=56) {
-                        if(T0Sub>-25 && T0Sub<350+200*(float)(112-wire[i]/56))
+                        if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+200*(float)(112-wire[i]/56))
                             passTimingCut=true;
                     } else {
-                        if(T0Sub>-25 && T0Sub<550+400*(float)(56-wire[i]/56))
+                        if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+400*(float)(56-wire[i]/56))
                             passTimingCut=true;
                     }
                         
                     passTimingCut=true;
                 }
-                if(region ==3 && T0Sub>-25 && T0Sub<750)
+                if(region ==3 && T0Sub>Constants.TIMEWINMINEDGE[2] && T0Sub<Constants.TIMEWINMAXEDGE[2]+Constants.TRIGJIT)
                     passTimingCut=true;
                 if(passTimingCut) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
