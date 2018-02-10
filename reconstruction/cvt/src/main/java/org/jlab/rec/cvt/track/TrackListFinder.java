@@ -103,18 +103,21 @@ public class TrackListFinder {
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
             for(int i =0; i<trkcands.size(); i++) { 
-                    list.clear();
-                    if(trkcands.get(i)==null)
-                        continue;
-                    this.getOverlapLists(trkcands.get(i), trkcands, list);
-                    Track selectedTrk = this.FindBestTrack(list);
-                    if(selectedTrk==null)
-                        continue;
-                    if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
-                            selectedTracks.add(selectedTrk);
+                
+                list.clear();
+                if(trkcands.get(i)==null)
+                    continue;
+                this.getOverlapLists(trkcands.get(i), trkcands, list);
+                Track selectedTrk = this.FindBestTrack(list);
+                if(selectedTrk==null)
+                    continue;
+                if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
+                        selectedTracks.add(selectedTrk);
             }
-            trkcands.removeAll(trkcands);
-            trkcands.addAll(selectedTracks);
+            if(trkcands!=null)
+                trkcands.removeAll(trkcands);
+            if(selectedTracks!=null)
+                trkcands.addAll(selectedTracks);
     }
 
     private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) {
@@ -127,13 +130,14 @@ public class TrackListFinder {
     }
 
     private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
-            for(int i =0; i<trkcands.size(); i++) { 
-                    if( (track.get(0).get_Id()!=-1 && track.get(0).get_Id()==trkcands.get(i).get(0).get_Id()) || 
-                                    (track.get(1).get_Id()!=-1 && track.get(1).get_Id()==trkcands.get(i).get(1).get_Id()) || 
-                                    (track.get(2).get_Id()!=-1 && track.get(2).get_Id()==trkcands.get(i).get(2).get_Id()) ) {
-                            list.add(trkcands.get(i));
-                    }
-            }
+         
+        for(int i =0; i<trkcands.size(); i++) { 
+                if( (track.get(0).get_Id()!=-1 && track.get(0).get_Id()==trkcands.get(i).get(0).get_Id()) || 
+                                (track.get(1).get_Id()!=-1 && track.get(1).get_Id()==trkcands.get(i).get(1).get_Id()) || 
+                                (track.get(2).get_Id()!=-1 && track.get(2).get_Id()==trkcands.get(i).get(2).get_Id()) ) {
+                        list.add(trkcands.get(i));
+                }
+        }
     }
 
     private Track FindBestTrack(List<Track> trkList) {

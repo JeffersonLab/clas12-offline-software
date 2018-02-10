@@ -30,7 +30,7 @@ public class EBCCDBConstants {
     
     public static final String[] otherTableNames={
         "/geometry/target",
-        "/calibration/rf/offset"
+    //    "/calibration/rf/offset"
     };
 
     public static List <String> getAllTableNames() {
