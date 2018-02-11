@@ -25,6 +25,7 @@ public enum DetectorType {
     RF        (17, "RF"),
     RICH      (18, "RICH"),
     RTPC      (19, "RTPC"),
+    HEL       (20, "HEL"),
     ECIN      (110, "ECIN"),
     ECOUT     (111, "ECOUT"),
     ECTOT     (112, "ECTOT"),
