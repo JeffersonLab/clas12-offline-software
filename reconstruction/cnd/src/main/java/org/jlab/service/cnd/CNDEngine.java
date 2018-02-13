@@ -44,15 +44,15 @@ public class CNDEngine extends ReconstructionEngine {
 		ArrayList<CndHit> hits = new ArrayList<CndHit>();
 	    
 		//test
-		if(event.hasBank("CVTRec::Tracks")){
-			hcvt++;
-		}
+		//if(event.hasBank("CVTRec::Tracks")){
+		//	hcvt++;
+		//}
 
 		halfhits = HitReader.getCndHalfHits(event);		
 		//1) exit if halfhit list is empty
-		if(halfhits.size()==0 )
+		if(halfhits.size()==0 ){
 			return true;
-
+		}
 		// update calibration constants based on run number if changed
 		setRunConditionsParameters(event);
 		
@@ -63,13 +63,13 @@ public class CNDEngine extends ReconstructionEngine {
 		CvtGetHTrack cvttry = new CvtGetHTrack();
 		cvttry.getCvtHTrack(event); // get the list of helix associated with the event
 		
-		int flag=0;
+		//int flag=0;
 		for (CndHit hit : hits){ // findlength for charged particles
 			double length =hitFinder.findLength(hit, cvttry.getHelices(),1);
 			if (length!=0){
 				hit.set_tLength(length); // the path length is non zero only when there is a match with cvt track
-				if(flag==0){match++;}
-				flag=1;
+				//if(flag==0){match++;}
+				//flag=1;
 			}
 			
 		}
@@ -86,7 +86,7 @@ public class CNDEngine extends ReconstructionEngine {
 				//          DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
 			//          event.appendBanks(outbank);
 			// event.show();
-			System.out.println("in process event ");
+			//System.out.println("in process event ");
 			rbc.appendCNDBanks(event,hits);
 			//      ecnd++;
 			//      if(event.hasBank("CVTRec::Tracks")){
@@ -94,12 +94,12 @@ public class CNDEngine extends ReconstructionEngine {
 			//event.getBank("MC::Particle").show();
 			//outbank.show();
 			//      }
-		}
-		return true;
+		}	return true;
 	}
 
 	@Override
 	public boolean init() {
+		rbc = new RecoBankWriter();
 		// TODO Auto-generated method stub
 		return true;
 	}
