@@ -6,13 +6,18 @@
 
 package org.jlab.detector.calib.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import org.jlab.ccdb.Assignment;
 import org.jlab.ccdb.CcdbPackage;
@@ -39,6 +44,9 @@ public class DatabaseConstantProvider implements ConstantProvider {
     private Integer runNumber = 10;
     private Integer loadTimeErrors = 0;
     private Boolean PRINTOUT_FLAG  = false;
+    private Integer dataYear       = 118;
+    private Integer dataMonth      = 1;
+    private Date    databaseDate   = new Date();
     
     private JDBCProvider provider;
     
@@ -67,6 +75,22 @@ public class DatabaseConstantProvider implements ConstantProvider {
         String envAddress = this.getEnvironment();        
         if(envAddress!=null) address = envAddress;
         this.initialize(address);
+    }
+    
+    public DatabaseConstantProvider(int run, String var, String timestamp){
+        
+        this.loadTimeErrors = 0;
+        this.runNumber = run;
+        this.variation = var;
+        
+        String address = "mysql://clas12reader@clasdb.jlab.org/clas12";
+        
+        String envAddress = this.getEnvironment();        
+        if(envAddress!=null) address = envAddress;
+        this.initialize(address);
+        if(timestamp.length()>8){
+            this.setTimeStamp(timestamp);
+        }
     }
     
     public DatabaseConstantProvider(String address){
@@ -136,6 +160,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
             System.out.println("[DB] --->  open connection with : " + address);
             System.out.println("[DB] --->  database variation   : " + this.variation);
             System.out.println("[DB] --->  database run number  : " + this.runNumber);
+            System.out.println("[DB] --->  database time stamp  : " + databaseDate);
         }
         
         provider.connect();
@@ -147,10 +172,26 @@ public class DatabaseConstantProvider implements ConstantProvider {
         }
         
         provider.setDefaultVariation(variation);
+        provider.setDefaultDate(databaseDate);
         provider.setDefaultRun(this.runNumber);
 
         //Directory dir = provider.getDirectory("/calibration/ftof/");        
         //Assignment asgmt = provider.getData("/test/test_vars/test_table");
+    }
+    
+    public final void setTimeStamp(String timestamp){
+        String pattern = "MM/dd/yyyy";
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        
+        try {
+            databaseDate = format.parse(timestamp);
+        } catch (ParseException ex) {
+            System.out.println("\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
+            databaseDate = new Date();
+            System.out.println(" ***** TIMESTAMP WARNING ***** setting date to : " + databaseDate);
+
+        }
+        
     }
     /**
      * Reads calibration constants for given table in the database.
@@ -425,26 +466,31 @@ public class DatabaseConstantProvider implements ConstantProvider {
 
     public static void main(String[] args){
         
-        DatabaseConstantProvider provider = new DatabaseConstantProvider(10,"default");
-        IndexedTable table = provider.readTable("/test/fc/fadc");
-        //table.addConstrain(3, 0.0, 90.0);
-        provider.disconnect();
-        JFrame frame = new JFrame();
-        frame.setSize(600, 600);
+        String pattern = "MM/dd/yyyy";
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        Date dateNow = new Date();
+        System.out.println(dateNow);
         
-        /*
-        table.addRowAsDouble(new String[]{"21","7","1","0.5","0.1","0.6"});
-        table.addRowAsDouble(new String[]{"22","8","2","0.6","0.2","0.7"});
-        table.addRowAsDouble(new String[]{"23","9","3","0.7","0.3","0.8"});
-        table.addRowAsDouble(new String[]{"24","10","4","0.8","0.4","0.9"});
-        */
-        //table.readFile("/Users/gavalian/Work/Software/Release-8.0/COATJAVA/coatjava/EC.table");
-        //table.show();
-        IndexedTableViewer canvas = new IndexedTableViewer(table);
-        frame.add(canvas);
-        frame.pack();
-        frame.setVisible(true);
-        table.show();
+        try {
+            Date dateThen = format.parse("01/23/2017");
+            System.out.println(dateThen);
+            /*
+            DatabaseConstantProvider provider = new DatabaseConstantProvider(10,"default");
+            IndexedTable table = provider.readTable("/test/fc/fadc");
+            
+            provider.disconnect();
+            JFrame frame = new JFrame();
+            frame.setSize(600, 600);
+            
+            
+            IndexedTableViewer canvas = new IndexedTableViewer(table);
+            frame.add(canvas);
+            frame.pack();
+            frame.setVisible(true);
+            table.show();*/
+        } catch (ParseException ex) {
+            Logger.getLogger(DatabaseConstantProvider.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
