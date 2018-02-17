@@ -14,21 +14,9 @@
             <id>clas12maven</id>
             <url>https://clasweb.jlab.org/clas12maven</url>
         </repository>
-    
-        <repository>
-            <id>myLocalMvnRepo</id>
-            <url>file://${basedir}/../../myLocalMvnRepo</url>
-        </repository>
     </repositories>
   
     <dependencies>
-        <dependency> <!-- from local repo -->
-            <groupId>org.jlab.clas</groupId>
-            <artifactId>common-tools</artifactId>
-            <version>0.0</version>
-            <type>jar</type>
-        </dependency>
-
         <dependency>
             <groupId>org.jlab.coda</groupId>
             <artifactId>jclara</artifactId>
