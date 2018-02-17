@@ -8,8 +8,8 @@
 
   <parent>
     <groupId>org.jlab.clas</groupId>
-    <artifactId>common-tools</artifactId>
-    <relativePath>../parent/pom.xml</relativePath>
+    <artifactId>clas12rec</artifactId>
+    <relativePath>../../parent/pom.xml</relativePath>
     <version>5.0-SNAPSHOT</version>
   </parent>
 

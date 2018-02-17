@@ -24,6 +24,10 @@ script:
   - ./run-advanced-tests.sh
   - cd -
   - echo "finished advanced tests"
+  - mvn cobertura:cobertura # for codecov
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   emails: false
