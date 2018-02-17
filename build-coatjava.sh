@@ -27,7 +27,7 @@ mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces 
 # see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
 if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
 
-cd coat-lib
+cd common-tools/coat-lib
 mvn package
 if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
