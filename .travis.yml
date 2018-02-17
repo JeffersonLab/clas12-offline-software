@@ -15,21 +15,19 @@ install:
 script:
   - ls -lthra
   - which groovy
-  #- echo "starting unit tests..."
-  #- cd validation/unit-tests/
-  #- ./run-unit-tests.sh
-  #- cd -
-  #- echo "finished unit tests"
-  #- cd validation/advanced-tests/
-  #- ./run-advanced-tests.sh
-  #- cd -
-  #- echo "finished advanced tests"
-  - mvn cobertura:cobertura # for codecov
-  - echo "HEYHEY1 $?"
+  - echo "starting unit tests..."
+  - cd validation/unit-tests/
+  - ./run-unit-tests.sh
+  - cd -
+  - echo "finished unit tests"
+  - cd validation/advanced-tests/
+  - ./run-advanced-tests.sh
+  - cd -
+  - echo "finished advanced tests"
+  - mvn cobertura:cobertura &> /dev/null # for codecov
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - echo "HEYHEY2 $?"
 
 notifications:
   emails: false
