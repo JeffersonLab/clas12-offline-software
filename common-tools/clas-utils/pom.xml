@@ -6,6 +6,13 @@
   <version>5.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <parent>
+    <groupId>org.jlab.clas</groupId>
+    <artifactId>clas12rec</artifactId>
+    <relativePath>../../parent/pom.xml</relativePath>
+    <version>5.0-SNAPSHOT</version>
+  </parent>
+
   <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
   <dependencies>
     <dependency>
