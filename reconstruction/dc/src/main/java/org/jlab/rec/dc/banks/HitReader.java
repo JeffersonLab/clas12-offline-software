@@ -163,9 +163,14 @@ public class HitReader {
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
-                if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100)
+                double T_Start = 0;
+                if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
-                double T0Sub = smearedTime[i] - T_0; 
+                    T_Start = Constants.TSTARTEST;
+                }
+                double T0Sub = smearedTime[i] - T_0 - T_Start; 
+                // temporary until new ccdb constants are in
+                T0Sub+=T_Start;
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
  //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 boolean passTimingCut = false;
@@ -180,18 +185,17 @@ public class HitReader {
                         if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+400*(float)(56-wire[i]/56))
                             passTimingCut=true;
                     }
-                        
-                    passTimingCut=true;
                 }
                 if(region ==3 && T0Sub>Constants.TIMEWINMINEDGE[2] && T0Sub<Constants.TIMEWINMAXEDGE[2]+Constants.TRIGJIT)
                     passTimingCut=true;
+                
                 if(passTimingCut) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
-                    Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, (i + 1));
+                    Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
+                    hit.set_Id(i + 1);
                     hit.set_CellSize(DcDetector);
                     double posError = hit.get_CellSize() / Math.sqrt(12.);
-                    hit.set_DocaErr(posError);
-                    hit.set_Id(i + 1);
+                    hit.set_DocaErr(posError); 
                     hits.add(hit); 
                 }
             }
@@ -225,7 +229,7 @@ public class HitReader {
         int[] slayer = new int[rows];
         int[] layer = new int[rows];
         int[] wire = new int[rows];
-        double[] time = new double[rows];
+        int[] tdc = new int[rows];
         int[] LR = new int[rows];
         double[] B = new double[rows];
         int[] clusterID = new int[rows];
@@ -235,11 +239,12 @@ public class HitReader {
         double[] trkDoca = new double[rows];
         
         for (int i = 0; i < rows; i++) {
+            id[i] = bank.getShort("id", i);
             sector[i] = bank.getByte("sector", i);
             slayer[i] = bank.getByte("superlayer", i);
             layer[i] = bank.getByte("layer", i);
             wire[i] = bank.getShort("wire", i);
-            time[i] = bank.getFloat("time", i);
+            tdc[i] = bank.getInt("TDC", i);
             id[i] = bank.getShort("id", i);
             LR[i] = bank.getByte("LR", i);
             B[i] = bank.getFloat("B", i);
@@ -264,17 +269,23 @@ public class HitReader {
             }
             
             double T_0 = 0;
-            if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100)
+            double T_Start = 0;
+            if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
-            
+                T_Start = Constants.TSTARTEST;
+            }
+
             //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - T_0, 
-                    0, B[i], id[i]);          
-            hit.set_B(B[i]);
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);   
+            hit.set_Id(id[i]);
+            hit.setB(B[i]);
             //hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
-            hit.setT0SubTime(time[i]- T_0 - tProp[i] - tFlight[i]); // Temporary fix for triple bands
+            hit.setT0(T_0); 
+            hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
+            hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0);
+            //hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.set_CellSize( DcDetector) ;
@@ -295,18 +306,18 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
+            
             hits.add(hit);
-            //System.out.println(" using hit for TBT "+hit.printInfo());
         }
 
         this.set_HBHits(hits);
     }
-    public void read_TBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde) {
+    public void read_TBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde, double[][][][] T0, double[][][][] T0ERR) {
         /*
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        if (event.hasBank("TimeBasedTrkg::TBHits") == false) {
+        if (event.hasBank("TimeBasedTrkg::TBHits") == false || event.hasBank("RECHB::Event") == false) {
             //System.err.println("there is no HB dc bank ");
             _TBHits = new ArrayList<FittedHit>();
             return;
@@ -320,21 +331,24 @@ public class HitReader {
         int[] slayer = new int[rows];
         int[] layer = new int[rows];
         int[] wire = new int[rows];
-        double[] time = new double[rows];
+        int[] tdc = new int[rows];
         int[] LR = new int[rows];
         double[] B = new double[rows];
         int[] clusterID = new int[rows];
         int[] trkID = new int[rows];
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
+        double startTime = (double)event.getBank("RECHB::Event").getFloat("STTime", 0);
         
-
+        if(startTime<0)
+            return ;
+        
         for (int i = 0; i < rows; i++) {
             sector[i] = bank.getByte("sector", i);
             slayer[i] = bank.getByte("superlayer", i);
             layer[i] = bank.getByte("layer", i);
             wire[i] = bank.getShort("wire", i);
-            time[i] = bank.getFloat("time", i);
+            tdc[i] = bank.getInt("TDC", i);
             id[i] = bank.getShort("id", i);
             LR[i] = bank.getByte("LR", i);
             B[i] = bank.getFloat("B", i);
@@ -356,26 +370,25 @@ public class HitReader {
             if (trkID[i] == -1) {
                 continue;
             }
-            
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i], 0, B[i], id[i]);
-            //hit.setT0SubTime(time[i]+tProp[i]+tFlight[i]); 
-            hit.setT0SubTime(time[i] - tProp[i] - tFlight[i]); // Temporary fix for triple bands 
-            hit.setTFlight(tFlight[i]);
+            //
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);          
+            hit.setB(B[i]);
+            //hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
+            double T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
+            hit.setT0(T_0); 
+            hit.set_Beta(this.readBeta(event, trkID[i])); 
+            hit.setTStart(startTime);
             hit.setTProp(tProp[i]);
-            hit.set_B(B[i]);
-// System.out.println("getting the hit time: tdc "+time[i]+" "+Constants.getT0()+" b "+B[i]+" t0 "+this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0]);
+            //reset the time based on new beta
+            double newtFlight = tFlight[i]/hit.get_Beta();
+            hit.setTFlight(newtFlight);
+            hit.set_Time((double)tdc[i] - tProp[i] - newtFlight - T_0 - startTime);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
-            
             
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedTBTrackID(trkID[i]); 
-            hit.set_Beta(this.readBeta(event, trkID[i])); 
-            //reset the time based on new beta
-            double newtFlight = tFlight[i]/hit.get_Beta();
-            double newTime = time[i]-tProp[i] - newtFlight;
-            hit.set_Time(newTime);
             
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
             
@@ -526,5 +539,26 @@ public class HitReader {
                 }
             }
         }
+    }
+    
+    public void getTriggerBits(){
+        // Decoding Trigger Bits
+     /*   boolean[] trigger_bits = new boolean[32];
+
+        if (event.hasBank("RUN::config")) {
+            DataBank bank = event.getBank("RUN::config");
+            TriggerWord = bank.getLong("trigger",0);
+            for (int i=31; i>=0; i--) {
+                trigger_bits[i] = (TriggerWord & (1 << i)) != 0;
+            }
+        }
+
+        for (int s=1; s<7; s++) {
+           if (trigger_bits[s]) {
+               System.out.println("Trigger bit set for electron in sector "+s);
+           }
+          if (trigger_bits[31])System.out.println("Trigger bit set from random pulser");
+        }
+}   */
     }
 }
