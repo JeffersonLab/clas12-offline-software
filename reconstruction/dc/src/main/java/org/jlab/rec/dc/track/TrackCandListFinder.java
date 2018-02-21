@@ -39,17 +39,17 @@ public class TrackCandListFinder {
 		trking = stat;
 	}
 	public DCSwimmer dcSwim = new DCSwimmer();
-        public int NSuperLayerTrk  = 5;
+        
         public boolean PassNSuperlayerTracking(List<Cross> crossesInTrk) {
             boolean pass = true;
             int NbMissingSl=0;
             for(Cross c: crossesInTrk) {
                 if(c.isPseudoCross)
-                    if(c.get_Segment1().get_Id()==-1)
+                    if((c.get_Segment1().get_Id()==-1) || (c.get_Segment2().get_Id()==-1) )
                         NbMissingSl++;
             }
            
-            if(NbMissingSl>6-NSuperLayerTrk) {
+            if(NbMissingSl>6-Constants.NSUPERLAYERTRACKING) {
                 pass = false; 
             }
             return pass;
@@ -410,6 +410,8 @@ public class TrackCandListFinder {
 			list.clear();
 			this.getOverlapLists(trkcands.get(i), trkcands, list);
 			Track selectedTrk = this.FindBestTrack(list);
+                        if(selectedTrk==null)
+                            continue;
 			if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
 				selectedTracks.add(selectedTrk);
 		}
@@ -420,6 +422,8 @@ public class TrackCandListFinder {
 	private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) {
 		boolean isInList = false;
 		for(Track trk : selectedTracks) {
+                    if(trk==null)
+                        continue;
 			if(trk.get_Id()==selectedTrk.get_Id())
 				isInList=true;
 		}
