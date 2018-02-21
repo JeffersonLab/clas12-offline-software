@@ -122,7 +122,8 @@ public class DCTBEngine extends ReconstructionEngine {
                     TORSCALE = (double)bank.getFloat("torus", 0);
                     SOLSCALE = (double)bank.getFloat("solenoid", 0);
                     // TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
-                    TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"));
+                    TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
+                    
                     Run = newRun;
         }
 
@@ -146,7 +147,7 @@ public class DCTBEngine extends ReconstructionEngine {
                     T0, T0ERR, dcDetector, tde);
                 hitRead.read_TBHits(event, 
                     this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde);
+                    this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, T0, T0ERR);
 		List<FittedHit> hits = new ArrayList<FittedHit>();
 		//I) get the hits
                 if(hitRead.get_TBHits().size()==0) {

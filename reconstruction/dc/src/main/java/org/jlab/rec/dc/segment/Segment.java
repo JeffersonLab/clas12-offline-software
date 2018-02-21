@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.segment;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.geom.prim.Plane3D;
@@ -184,11 +185,30 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
 
         return value;
     }
+    
+    public boolean hasNoMatchingSegment(List<Segment> othersegs) {
+        // if superlayer%2==0 (even) check superlayer%2==1 in the same region
+        //
+        /// A region-segment contains two segments if they are in the same sector 
+        /// and region and satisfy the proximity condition: \n\n
+        /// <center><b>|Xwires<sub>2</sub>-Xwires<sub>1</sub>| = a*Xwires<sub>1</sub> + b</b></center>\n
+        /// where a and b are DC parameters set by DC_RSEG_a and DC_RSEG_B .\n\n
+        boolean value = true;
+        //System.out.println("in Segment DeltaW "+Math.abs(this.getAvgwire()-otherseg.getAvgwire() )+
+        //	" < ? "+(Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B));
+        for(Segment otherseg : othersegs) {
+            if (Math.abs(this.getAvgwire() - otherseg.getAvgwire()) < Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B) {
+                value = false; // found a matching segment
+            }
+        }
+        
+        return value;
+    }
 
     public boolean hasConsistentSlope(Segment otherseg) {
         boolean value = false;
 
-        if (this.get_fitPlane() != null && otherseg.get_fitPlane() != null) {
+        if (this.get_fitPlane() != null && otherseg.get_fitPlane() != null) { 
             if (Math.abs(Math.toDegrees(Math.acos(this.get_fitPlane().normal().dot(otherseg.get_fitPlane().normal()))) - 12.) < Constants.SEGMENTPLANESANGLE) // the angle between the plane normals is 12 degrees with some tolerance
             {
                 value = true;

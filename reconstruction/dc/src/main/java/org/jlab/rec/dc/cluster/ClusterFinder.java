@@ -259,7 +259,7 @@ public class ClusterFinder {
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
         int NbClus = -1;
         for (FittedHit hit : fhits) {
-
+            
             if (hit.get_AssociatedClusterID() == -1) {
                 continue;
             }
@@ -302,7 +302,7 @@ public class ClusterFinder {
                 // update the hits
                 for (FittedHit fhit : clus) {
                     fhit.set_TrkgStatus(0);
-                    fhit.updateHitPositionWithTime(1, fhit.get_B(), tab, DcDetector, tde);
+                    fhit.updateHitPositionWithTime(1, fhit.getB(), tab, DcDetector, tde);
                     fhit.set_AssociatedClusterID(clus.get_Id());
                     fhit.set_AssociatedHBTrackID(clus.get(0).get_AssociatedHBTrackID());
                 }
@@ -317,10 +317,10 @@ public class ClusterFinder {
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
 
         List<FittedCluster> rclusters = RecomposeClusters(fhits, tab, DcDetector, tde);
-        //	System.out.println(" Clusters TimeBased Step 1");
-        //     for(FittedCluster c : rclusters)
+        //System.out.println(" Clusters TimeBased Step 1");
+         //    for(FittedCluster c : rclusters)
          //   	for(FittedHit h : c)
-          //  		System.out.println(h.printInfo());
+         //   		System.out.println(h.printInfo());
 
         for (FittedCluster clus : rclusters) {
             // clean them up
@@ -333,9 +333,9 @@ public class ClusterFinder {
                 continue;
             }
 
-            //	System.out.println(" Clusters TimeBased Step 2ndaries rem");
-            //	for(FittedHit h : clus)
-            //		System.out.println(h.printInfo());
+           // 	System.out.println(" Clusters TimeBased Step 2ndaries rem");
+           // 	for(FittedHit h : clus)
+           // 		System.out.println(h.printInfo());
             FittedCluster LRresolvClus = ct.LRAmbiguityResolver(clus, cf, tab, DcDetector, tde);
             clus = LRresolvClus;
             if (clus == null) {
@@ -343,8 +343,8 @@ public class ClusterFinder {
             }
 
             //	System.out.println(" Clusters TimeBased Step LR res");
-            //	for(FittedHit h : clus)
-            //		System.out.println(h.printInfo());
+           // 	for(FittedHit h : clus)
+             //   	System.out.println(h.printInfo());
             // resolves segments where there are only single hits in layers thereby resulting in a two-fold LR ambiguity
             // hence there are 2 solutions to the segments
             int[] SumLn = new int[6];
@@ -364,16 +364,20 @@ public class ClusterFinder {
 
                     if (hit.get_LeftRightAmb() != 0) {
                         FittedHit newhit = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                                hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
+                                hit.get_TDC(), hit.get_Id());
                         newhit.set_Doca(hit.get_Doca());
-                        newhit.setT0SubTime(hit.getT0SubTime());
-                        newhit.setTFlight(hit.getTFlight());
+                        newhit.set_DocaErr(hit.get_DocaErr());
+                        newhit.setT0(hit.getT0()); 
+                        newhit.set_Beta(hit.get_Beta()); 
+                        newhit.setTStart(hit.getTStart());
                         newhit.setTProp(hit.getTProp());
+                        newhit.setTFlight(hit.getTFlight());
+                        newhit.set_Time(hit.get_Time());
                         newhit.set_Id(hit.get_Id());
                         newhit.set_TrkgStatus(hit.get_TrkgStatus());
                         newhit.set_LeftRightAmb(-hit.get_LeftRightAmb());
                         newhit.set_CellSize(DcDetector);
-                        newhit.updateHitPositionWithTime(1, hit.get_B(), tab, DcDetector, tde); // assume the track angle is // to the layer						
+                        newhit.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer						
                         newhit.set_AssociatedClusterID(hit.get_AssociatedClusterID());
                         newhit.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
                         Clus2.add(newhit);
@@ -399,7 +403,7 @@ public class ClusterFinder {
 
             // update the hits
             for (FittedHit fhit : clus) {
-                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
             }
             // iterate till convergence of trkAngle
             double Chi2Diff = 1;
@@ -413,7 +417,7 @@ public class ClusterFinder {
                     cosTrkAngle = 1. / Math.sqrt(1. + clus.get_clusterLineFitSlope() * clus.get_clusterLineFitSlope());
                     // update the hits
                     for (FittedHit fhit : clus) {
-                        fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B(), tab, DcDetector, tde);
+                        fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
                     }
                     cosTrkAngleFinal = cosTrkAngle;
                 }
@@ -424,7 +428,7 @@ public class ClusterFinder {
             cf.SetResidualDerivedParams(clus, false, false, DcDetector); //calcTimeResidual=false, resetLRAmbig=false 
 
             for (FittedHit fhit : clus) {
-                fhit.updateHitPositionWithTime(cosTrkAngleFinal, fhit.get_B(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(cosTrkAngleFinal, fhit.getB(), tab, DcDetector, tde);
             }
             cf.SetFitArray(clus, "TSC");
             cf.Fit(clus, true);

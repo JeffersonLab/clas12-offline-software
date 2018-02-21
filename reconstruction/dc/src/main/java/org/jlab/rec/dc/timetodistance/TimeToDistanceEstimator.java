@@ -28,8 +28,8 @@ public class TimeToDistanceEstimator {
 	  */
 	 public double interpolateOnGrid(double B, double alpha, double t,  int SecIdx, int SlyrIdx) {
 		 // for a given value of B find the bin edges in Tesla and the corresponding index:
-		// if(alpha>30)
-		//	 alpha-=30;
+		// if(alpha==30)
+		//	 alpha-=0.0001;
 		 
 		 int binlowB  = this.getBIdx(B);
 		 int binhighB = binlowB + 1; 
@@ -49,11 +49,13 @@ public class TimeToDistanceEstimator {
 		 if(binhighAlpha > TableLoader.maxBinIdxAlpha-1) {
 			 binhighAlpha = TableLoader.maxBinIdxAlpha-1;
 		 }
-		 
+		 if(binhighAlpha==binlowAlpha)
+                     binlowAlpha=binhighAlpha-1;
+                 
 		 double alpha1 = this.getAlphaFromAlphaIdx(binlowAlpha);	 
 		 double alpha2 = this.getAlphaFromAlphaIdx(binhighAlpha);
 		
-		 // get the time bin edges:
+                 // get the time bin edges:
 		 int binlowT = this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha);  
 		 int binhighT = binlowT + 1; 
 		 
