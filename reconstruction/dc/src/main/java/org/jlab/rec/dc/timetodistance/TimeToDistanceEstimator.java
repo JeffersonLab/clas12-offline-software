@@ -30,7 +30,9 @@ public class TimeToDistanceEstimator {
 		 // for a given value of B find the bin edges in Tesla and the corresponding index:
 		// if(alpha==30)
 		//	 alpha-=0.0001;
-		 
+		 //reset B:
+                 if(B>2.5)
+                     B=2.499999;
 		 int binlowB  = this.getBIdx(B);
 		 int binhighB = binlowB + 1; 
 		 
