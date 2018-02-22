@@ -118,9 +118,8 @@ public class TrackCandListFinder {
 				          
 				        //positive charges bend outward for nominal GEMC field configuration
 						int q = (int) Math.signum(deltaTheta); 
-						
 						q*= (int)-1*Math.signum(TORSCALE);						
-							
+						
 						double p = Math.sqrt(pxz*pxz+py*py); 
 						if(p>11)
 							p=11;
@@ -147,6 +146,7 @@ public class TrackCandListFinder {
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
 							
 							cand.set_P(1./Math.abs(kFit.finalStateVec.Q));
+                                                        cand.set_Q((int)Math.signum(kFit.finalStateVec.Q));
 							this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector);
 													
 							cand.set_FitChi2(kFit.chi2);
@@ -474,6 +474,32 @@ public class TrackCandListFinder {
                     }
             }
         }
+    }
+
+    private double calcCurvSign(Track cand) {
+        double P0x = cand.get(0).get_Point().z();
+        double P1x = cand.get(1).get_Point().z();
+        double P2x = cand.get(2).get_Point().z();
+        double P0y = cand.get(0).get_Point().x();
+        double P1y = cand.get(1).get_Point().x();
+        double P2y = cand.get(2).get_Point().x();
+        
+        if (Math.abs(P1x - P0x) < 1.0e-18 || Math.abs(P2x - P1x) < 1.0e-18) {
+            return 0.0;
+        }
+
+        // Find the intersection of the lines joining the innermost to middle and middle to outermost point
+        double ma = (P1y - P0y) / (P1x - P0x);
+        double mb = (P2y - P1y) / (P2x - P1x);
+
+        if (Math.abs(mb - ma) < 1.0e-18) {
+            return 0.0;
+        }
+
+        double xcen = 0.5 * (ma * mb * (P0y - P2y) + mb * (P0x + P1x) - ma * (P1x + P2x)) / (mb - ma);
+        double ycen = (-1. / mb) * (xcen - 0.5 * (P1x + P2x)) + 0.5 * (P1y + P2y);
+
+        return Math.signum(ycen);
     }
 
 }
