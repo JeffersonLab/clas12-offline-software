@@ -22,8 +22,13 @@ public class BaseHitList<T extends BaseHit> extends Vector<T> {
 	
 	//check for length mismatch
 	protected boolean lengthMismatch(byte[] sector, byte[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating list";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating list";
 			return true;
 		}
 		return false;
@@ -31,8 +36,13 @@ public class BaseHitList<T extends BaseHit> extends Vector<T> {
 	
 	//check for length mismatch
 	protected boolean lengthMismatch(byte[] sector, short[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating CrossList";
+			return true;
+		}
+		
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating list";
 			return true;
 		}
 		return false;
@@ -40,8 +50,13 @@ public class BaseHitList<T extends BaseHit> extends Vector<T> {
 	
 	//check for length mismatch
 	protected boolean lengthMismatch(byte[] sector, float[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating list";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating list";
 			return true;
 		}
 		return false;
