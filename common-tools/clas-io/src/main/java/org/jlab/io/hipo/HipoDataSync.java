@@ -13,6 +13,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.jnp.hipo.data.HipoEvent;
 import org.jlab.jnp.hipo.io.HipoWriter;
+import org.jlab.jnp.hipo.schema.SchemaFactory;
 
 /**
  *
@@ -29,6 +30,12 @@ public class HipoDataSync implements DataSync {
         System.out.println("[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
         //this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //this.writer.getSchemaFactory().show();
+    }
+    
+    public HipoDataSync(SchemaFactory factory){
+        this.writer = new HipoWriter();
+        this.writer.setCompressionType(2);
+        writer.appendSchemaFactory(factory);
     }
     
     @Override
