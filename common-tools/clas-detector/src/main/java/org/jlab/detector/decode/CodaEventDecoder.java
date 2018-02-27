@@ -67,8 +67,6 @@ public class CodaEventDecoder {
         rawEntries.addAll(scalerEntries);
         this.setTimeStamp(event);
         
-//        this.getDataEntries_Epics(event);
-//        
         return rawEntries;
     }
 
