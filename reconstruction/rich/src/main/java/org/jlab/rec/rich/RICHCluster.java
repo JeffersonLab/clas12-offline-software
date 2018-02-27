@@ -1,0 +1,253 @@
+package org.jlab.rec.rich;
+
+import java.util.ArrayList;
+import org.jlab.geom.prim.Point3D;
+
+public class RICHCluster extends ArrayList<RICHHit> {
+
+      /**
+       * A cluster in the RICH consists of an array of anodes in one PMT
+       */
+
+      private int clusid;                                       // cluster ID
+      
+      // constructor
+      public RICHCluster(int cluid) {
+            this.set_id(cluid);
+      }
+
+      public int get_id() {
+            return this.clusid;
+      }
+
+      public void set_id(int cluid) {
+            this.clusid = cluid;
+      }
+
+      public int get_size() {
+            // return number of anodes in cluster
+            return this.size();
+      }
+
+      public double get_charge() {
+            // return measured charge
+            double clusterEnergy = 0;
+            for(int i=0; i<this.size(); i++) {
+                clusterEnergy += this.get(i).get_duration();
+            }
+            return clusterEnergy;
+      }
+
+      public double get_time() {
+            return this.get(0).get_time();
+      }
+
+        public double get_x() {
+            // returns glx coordinate of first hit
+            return this.get(0).get_glx();
+      }
+
+        public double get_y() {
+            // returns gly coordinate of first hit
+            return this.get(0).get_gly();
+      }
+
+        public double get_z() {
+            // returns glz coordinate of first hit
+          if(this.get(0).get_tile()<139){
+                return 0;
+          }else{
+                return RICHConstants.COSMIC_TRACKING_Z;
+          }
+      }
+
+    // ----------------
+      public double get_wtime() {
+    // ----------------
+            // returns charge weighted time 
+            double clusterEnergy  = this.get_charge();
+            double clusterTime    = 0;
+            for(int i=0; i<this.size(); i++) {
+                RICHHit hit = this.get(i);
+                clusterTime += hit.get_duration()*hit.get_time();              
+            }
+            clusterTime /= clusterEnergy;
+            return clusterTime;
+      }
+        
+
+    // ----------------
+        public Point3D getCentroid() {
+    // ----------------
+        // returns charge weighted centroid
+        double clusc = this.get_charge();
+        double wtot       = 0;
+        double clusx   = 0;
+        double clusy   = 0;
+        double clusz   = 0;
+
+        if(this.get(0).get_tile()>138){
+                clusz   = RICHConstants.COSMIC_TRACKING_Z;
+        }
+
+        for(int i=0; i<this.size(); i++) {
+                RICHHit hit = this.get(i);
+                double wi = hit.get_duration();
+                wtot     += wi;
+                clusx += wi*hit.get_glx();
+                clusy += wi*hit.get_gly();
+        }
+        clusx /= wtot;
+        clusy /= wtot;
+        Point3D centroid  = new Point3D(clusx,clusy,clusz);
+        return centroid;            
+
+    }    
+
+
+    // ----------------
+        public double get_wx() {
+    // ----------------
+            // returns X coordinate of weigthed centroid
+            return this.getCentroid().x();
+      }
+
+      public double get_wy() {
+            // returns Y coordinate of weigthed centroid
+            return this.getCentroid().y();           
+      }
+       
+      public double get_wz() {
+            // returns Z coordinate of weigthed centroid
+            return this.getCentroid().z();           
+      }
+
+       /*
+      public double getX2() {
+            double clusEnergy = this.getEnergy();
+            double wtot       = 0;
+            double clusterXX   = 0;
+            for(int i=0; i<this.size(); i++) {
+                RICHHit hit = this.get(i);
+                // the moments: this are calculated in a second loop because log weighting requires clusEnergy to be known
+//                        double wi = hit_in_clus.get_Edep();    // de-comment for arithmetic weighting
+                double wi = Math.max(0., (3.45+Math.log(hit.get_Edep()/clusEnergy)));
+                wtot     += wi;
+                clusterXX += wi*hit.get_Dx()*hit.get_Dx();
+            }
+            clusterXX /= wtot;
+            return clusterXX;
+        }
+
+    // ----------------
+      public double getY2() {
+    // ----------------
+            double clusEnergy = this.getEnergy();
+            double wtot       = 0;
+            double clusterYY   = 0;
+            for(int i=0; i<this.size(); i++) {
+                RICHHit hit = this.get(i);
+                // the moments: this are calculated in a second loop because log weighting requires clusEnergy to be known
+//                        double wi = hit_in_clus.get_Edep();    // de-comment for arithmetic weighting
+                double wi = Math.max(0., (3.45+Math.log(hit.get_Edep()/clusEnergy)));
+                wtot     += wi;
+                clusterYY += wi*hit.get_Dy()*hit.get_Dy();
+            }
+            clusterYY /= wtot;
+            return clusterYY;
+      }
+
+    // ----------------
+      public double getWidthX() {
+    // ----------------
+            double sigmaX = Math.sqrt(this.getX2() - Math.pow(this.getX(),2.)); 
+            return sigmaX;
+      }
+
+    // ----------------
+      public double getWidthY() {
+    // ----------------
+            double sigmaY = Math.sqrt(this.getY2() - Math.pow(this.getY(),2.)); 
+            return sigmaY;
+      }
+
+    // ----------------
+      public double getRadius() {
+    // ----------------
+            double radius = Math.sqrt(this.getX2() - Math.pow(this.getX(),2.) + this.getY2() - Math.pow(this.getY(),2.));
+            return radius;
+      }
+
+      public double getTheta() {
+            double theta = Math.toDegrees(Math.atan(Math.sqrt(Math.pow(this.getX(),2.)+Math.pow(this.getY(),2.))/this.getZ()));
+            return theta;
+      }
+
+      public double getPhi() {
+            double phi = Math.toDegrees(Math.atan2(this.getY(),this.getX()));
+            return phi;
+      }
+      */
+
+    // ----------------
+    public boolean isgoodCluster() {
+    // ----------------
+        if(Math.abs(this.get_time() - RICHConstants.EVENT_TIME) < RICHConstants.CLUSTER_TIME_WINDOW &&
+            this.get_size() >= RICHConstants.CLUSTER_MIN_SIZE  && 
+            this.get_charge() >= RICHConstants.CLUSTER_MIN_CHARGE) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }      
+      
+
+    // ----------------
+    public boolean containsHit(RICHHit hit) {
+    // ----------------
+        // checks if the hit belongs to any nonet around its already associated hits
+
+        boolean addFlag = false;
+        if(this.get(0).get_pmt()!=hit.get_pmt())return addFlag;
+
+        for(int j = 0; j< this.size(); j++) {
+            double tDiff = Math.abs(hit.get_time() - this.get(j).get_time());
+            double xDiff = Math.abs(hit.get_idx()  - this.get(j).get_idx());
+            double yDiff = Math.abs(hit.get_idy()  - this.get(j).get_idy());
+            if(tDiff <= RICHConstants.CLUSTER_TIME_WINDOW && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;
+        }
+        return addFlag;
+    }
+
+
+    // ----------------
+    public int compareTo(RICHCluster ocluster) {
+    // ----------------
+        //System.out.println(" --> comp "+this.get_channel()+" "+this.get_charge()+" "+ocluster.get_channel()+" "+ocluster.get_charge());
+        if(this.get_charge() == ocluster.get_charge())return 0;
+        if(this.get_charge() > ocluster.get_charge()){
+            return 1;
+        }else{
+            return -1;
+        }
+    }
+
+       
+    // ----------------
+    public void showCluster() {
+    // ----------------
+            System.out.println("Cluster" 
+            +" ID  "+  this.clusid  
+            +" PMT "+  this.get(0).get_pmt()
+            +" Siz "+  this.get_size()  
+            +" Tim "+  this.get_time()
+            +" Chg "+  this.get_charge()
+            +" XYZ "+  this.get_x() +" "+ this.get_y() +" "+ this.get_z()
+            +" wXYZ "+  this.get_wx() +" "+ this.get_wy() +" "+ this.get_wz());
+            for(int j = 0; j< this.size(); j++) {
+                System.out.println("  --> hit # "+ j +" ID "+this.get(j).get_id()+" idx " + this.get(j).get_idx() + " idy " + this.get(j).get_idy() + " dur " + this.get(j).get_duration());
+            }
+        }
+    
+}
