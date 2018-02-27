@@ -178,9 +178,10 @@ public class DetectorEventDecoder {
                     short adcOffset = (short) daq.getDoubleValue("adc_offset", 0, 0, 0);
                     double fineTimeStampResolution = (byte) daq.getDoubleValue("dream_clock", 0, 0, 0);
                     double samplingTime = (byte) daq.getDoubleValue("sampling_time", 0, 0, 0);
+                    int sparseSample = daq.getIntValue("sparse", 0, 0 ,0);
                     if (data.getADCSize() > 0) {
                         ADCData adc = data.getADCData(0);
-                        mvtFitter.fit(adcOffset, fineTimeStampResolution, samplingTime, adc.getPulseArray(), adc.getTimeStamp());
+                        mvtFitter.fit(adcOffset, fineTimeStampResolution, samplingTime, adc.getPulseArray(), adc.getTimeStamp(), sparseSample);
                         adc.setHeight((short) (mvtFitter.adcMax));
                         adc.setTime((int) (mvtFitter.timeMax));
                         adc.setIntegral((int) (mvtFitter.integral));

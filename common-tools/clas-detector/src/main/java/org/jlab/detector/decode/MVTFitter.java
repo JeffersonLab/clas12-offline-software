@@ -8,6 +8,7 @@ package org.jlab.detector.decode;
 public class MVTFitter {
 
 	public int    binMax;   //Bin of the max ADC over the pulse
+  public int binOffset;   //Offset due to sparse sample
 	public double adcMax;   //Max value of ADC over the pulse (fitted)
 	public double timeMax;  //Time of the max ADC over the pulse (fitted)
 	public double integral; //Sum of ADCs over the pulse (not fitted)
@@ -24,8 +25,8 @@ public class MVTFitter {
 	 * @param pulseArray : pulse = array containing the ADC values
 	 * @param timeStamp : timing informations (used to make fine corrections)
 	 */
-	public void fit(short adcOffset, double fineTimeStampResolution, double samplingTime, short[] pulseArray, long timeStamp) {
-		pulseCorrection(adcOffset, samplingTime, pulseArray);
+    public void fit(short adcOffset, double fineTimeStampResolution, double samplingTime, short[] pulseArray, long timeStamp, int sparseSample) {
+    pulseCorrection(adcOffset, samplingTime, pulseArray, sparseSample);
 		fitParabolic(samplingTime);
 		fineTimeStampCorrection(timeStamp, fineTimeStampResolution);
 	}
@@ -36,7 +37,7 @@ public class MVTFitter {
 	 * @param samplingTime : time between 2 ADC bins
 	 * @param pulseArray : pulse = array containing the ADC values
 	 */
-	private void pulseCorrection(short adcOffset, double samplingTime, short[] pulseArray) {
+    private void pulseCorrection(short adcOffset, double samplingTime, short[] pulseArray, int sparseSample) {
 		binNumber = pulseArray.length;
 		binMax = 0;
 		adcMax = (short) (pulseArray[0]-adcOffset);
@@ -50,7 +51,8 @@ public class MVTFitter {
 				binMax = bin;
 			}
 		}
-		timeMax = binMax * samplingTime;
+    binOffset = sparseSample * binMax;
+    timeMax = (binMax+binOffset) * samplingTime;
 	}
 	
 	/**
@@ -62,9 +64,9 @@ public class MVTFitter {
 			int y1 = pulseArrayCorr[binMax - 1];
 			int y2 = pulseArrayCorr[binMax];
 			int y3 = pulseArrayCorr[binMax + 1];
-			int x1 = binMax - 1;
-			int x2 = binMax;
-			int x3 = binMax + 1;
+			int x1 = binMax - 1 + binOffset - 1;
+			int x2 = binMax + binOffset;
+			int x3 = binMax + 1 + binOffset + 1;
 			double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
 			double A = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
 			double B = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
