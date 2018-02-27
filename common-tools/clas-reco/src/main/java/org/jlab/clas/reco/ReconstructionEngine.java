@@ -114,7 +114,10 @@ public abstract class ReconstructionEngine implements Engine {
 //                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
                 String variation = this.getStringConfigParameter(engineConfiguration, "variation");
                 System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
-                this.setVariation(variation);
+                if(variation.length()>2) this.setVariation(variation);
+                String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
+                System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
+                if(timestamp.length()>2) this.setTimeStamp(timestamp);
             } else {
                 System.out.println("[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
                  + this.engineConfiguration + ")");
@@ -129,14 +132,14 @@ public abstract class ReconstructionEngine implements Engine {
        protected String getStringConfigParameter(String jsonString,                                             
                                               String key)  throws Exception {
         Object js;
-        String variation = "default";
+        String variation = "";
         try {
             JSONObject base = new JSONObject(jsonString);
             
-            if(base.has("variation")==true){
-                variation = base.getString("variation");
+            if(base.has(key)==true){
+                variation = base.getString(key);
             } else {
-                System.out.println("[JSON]" + this.getName() + " **** warning **** does not contain variation ");
+                System.out.println("[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
             }
             /*
             js = base.get(key);
@@ -181,6 +184,14 @@ public abstract class ReconstructionEngine implements Engine {
            System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
                    + variation );
            entry.getValue().setVariation(variation);
+       }
+    }
+    
+    public void setTimeStamp(String timestamp){
+        for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
+           System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
+                   + timestamp );
+           entry.getValue().setTimeStamp(timestamp);
        }
     }
     

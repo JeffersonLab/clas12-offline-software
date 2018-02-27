@@ -14,6 +14,7 @@ import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.base.DataSourceType;
 import org.jlab.jnp.hipo.data.HipoEvent;
 import org.jlab.jnp.hipo.io.HipoReader;
+import org.jlab.jnp.hipo.schema.SchemaFactory;
 
 /**
  *
@@ -41,7 +42,18 @@ public class HipoDataSource implements DataSource {
     public void open(File file) {
         this.open(file.getAbsolutePath());
     }
-
+    /**
+     * Creates a Writer class with Dictionary from the Reader.
+     * This method should be used when filtering the input file
+     * to ensure consistency of dictionaries and banks in the output.
+     * @return HipoDataSync object for writing an output.
+     */
+    public HipoDataSync createWriter(){
+        SchemaFactory factory = reader.getSchemaFactory();
+        HipoDataSync   writer = new HipoDataSync(factory);
+        return writer;
+    }
+    
     @Override
     public void open(String filename) {
         this.reader.open(filename);

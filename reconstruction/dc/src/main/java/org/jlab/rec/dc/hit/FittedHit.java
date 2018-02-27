@@ -27,12 +27,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param superlayer (1...6)
      * @param layer (1...6)
      * @param wire (1...112)
-     * @param time (for gemc output without digitization)
+     * @param TDC 
      */
     public FittedHit(int sector, int superlayer, int layer, int wire,
-            double time, double docaEr, double B, int id) {
-        super(sector, superlayer, layer, wire, time, docaEr, B, id);
-
+            int TDC, int id) {
+        super(sector, superlayer, layer, wire, TDC, id);
+        
         this.set_lX(layer);
         this.set_lY(layer, wire);
     }
@@ -40,9 +40,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _X;              	// X at Z in local coord. system
     private double _XMP;            	// X at the MidPlane in sector coord. system
     private double _Z;              	// Z in the sector coord. system
-    private double _lX;				// X in local coordinate system used in hit-based fit to cluster line
-    private double _lY;				// Y in local coordinate system used in hit-based fit to cluster line
-    private double _Residual;			// cluster line  to the wire position resid
+    private double _lX;			// X in local coordinate system used in hit-based fit to cluster line
+    private double _lY;			// Y in local coordinate system used in hit-based fit to cluster line
+    private double _Residual;		// cluster line  to the wire position resid
     private double _TimeResidual = 0;	// cluster line  to the wire position time-resid
     private int _LeftRightAmb;		// Left-Right Ambiguity value	-1 --> y-fit <0 --> to the left of the wire ==> y = y-_leftRight*TimeToDist
 
@@ -55,7 +55,48 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     
     private StateVec _AssociatedStateVec;
 
+    							//	   Reconstructed time, for now it is the gemc time
+    private double _Doca;							//         Reconstructed doca, for now it is using the linear parametrization that is in  gemc 
+    //private double _DocaErr;      						//	   Error on doca
+    private double _B;								// 	   B-field at hit location
+
+    public double getB() {
+        return _B;
+    }
+
+    public void setB(double _B) {
+        this._B = _B;
+    }
+
+    private int _Id;
+    /**
+     *
+     * @return the ID
+     */
+    public int get_Id() {
+        return _Id;
+    }
+
+    /**
+     * Sets the hit ID. The ID corresponds to the hit index in the EvIO column.
+     *
+     * @param _Id
+     */
+    public void set_Id(int _Id) {
+        this._Id = _Id;
+    }										//		Hit Id
+
+    public int _lr;
     
+
+    public double get_Doca() {
+        return _Doca;
+    }
+
+    public void set_Doca(double _Doca) {
+        this._Doca = _Doca;
+    }
+
     
     /**
      *
@@ -471,18 +512,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         }
     }
 
-    /**
-     * Sets the time using TOF
-     */
-    public void set_Time(double t) {
-        super.set_Time(t);
-    }
+    
 
     public String printInfo() {
         //double xr = this._X*Math.cos(Math.toRadians(25.))+this._Z*Math.sin(Math.toRadians(25.));		
         //double zr = this._Z*Math.cos(Math.toRadians(25.))-this._X*Math.sin(Math.toRadians(25.));
-        String s = "DC Fitted Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " Time " + this.get_Time()
-                + "  LR " + this.get_LeftRightAmb() + " doca " + this.get_TimeToDistance() + " updated pos  " + this._X + " clus "
+        String s = "DC Fitted Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " TDC " + this.get_TDC()+ " Time " + this.get_Time()
+                + "  LR " + this.get_LeftRightAmb() + " doca " + this.get_TimeToDistance()+ " +/- " +this.get_DocaErr() + " updated pos  " + this._X + " clus "
                 + this._AssociatedClusterID;
         return s;
     }
@@ -573,6 +609,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void setSignalPropagTimeAlongWire(DCGeant4Factory DcDetector) {
         this.setSignalPropagAlongWire( DcDetector);
         this._SignalPropagTimeAlongWire = this._SignalPropagAlongWire/(Constants.SPEEDLIGHT*0.7);
+        this._tProp= this._SignalPropagTimeAlongWire;
     }
 
     
@@ -585,20 +622,31 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void setSignalTimeOfFlight() {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
             this._SignalTimeOfFlight = this.getAssociatedStateVec().getPathLength()/(Constants.SPEEDLIGHT*this.get_Beta());
+            this._tFlight = this._SignalTimeOfFlight;
     }
     
-    private double _T0SubTime;
-
-    public double getT0SubTime() {
-        return _T0SubTime;
-    }
-
-    public void setT0SubTime(double _T0SubTime) {
-        this._T0SubTime = _T0SubTime;
-    }
     
+    private double _T0;
     private double _tFlight;
     private double _tProp;
+    private double _tStart;   // The event start time 
+    private double _Time;     //Time = TDC - tFlight - tProp - T0 - TStart
+    
+    public double getTStart() {
+        return _tStart;
+    }
+
+    public void setTStart(double tStart) {
+        this._tStart = tStart;
+    }
+    
+    public double getT0() {
+        return _T0;
+    }
+
+    public void setT0(double T0) {
+        this._T0 = T0;
+    }
     
     public double getTFlight() {
         return _tFlight;
@@ -616,5 +664,34 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._tProp = tProp;
     }
  
+    /**
+     *
+     * @return the time in ns
+     */
+    public double get_Time() {
+        return _Time;
+    }
+
+    /**
+     * Sets the time
+     *
+     * @param _Time
+     */
+    public void set_Time(double _Time) {
+        this._Time = _Time;
+    }
+  
     
+    /**
+     * identifying outoftimehits;
+     */
+    private boolean _OutOfTimeFlag;
+
+    public void set_OutOfTimeFlag(boolean b) {
+        _OutOfTimeFlag = b;
+    }
+
+    public boolean get_OutOfTimeFlag() {
+        return _OutOfTimeFlag;
+    }
 }
