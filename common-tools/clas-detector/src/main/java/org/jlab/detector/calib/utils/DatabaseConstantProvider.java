@@ -18,14 +18,15 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jlab.ccdb.CcdbPackage;
 import javax.swing.JFrame;
 import org.jlab.ccdb.Assignment;
-import org.jlab.ccdb.CcdbPackage;
+
 import org.jlab.ccdb.Directory;
 import org.jlab.ccdb.JDBCProvider;
 import org.jlab.ccdb.TypeTable;
 import org.jlab.ccdb.TypeTableColumn;
-
+import org.rcdb.RCDB;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.utils.groups.IndexedTableViewer;
@@ -48,7 +49,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     private Integer dataMonth      = 1;
     private Date    databaseDate   = new Date();
     
-    private JDBCProvider provider;
+    private org.jlab.ccdb.JDBCProvider provider;
     
     private int          debugMode = 1;
     
@@ -165,7 +166,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         provider.connect();
         
-        if(provider.getIsConnected()==true){
+        if(provider.isConnected()==true){
             if(debugMode>0) System.out.println("[DB] --->  database connection  : success");
         } else {
             System.out.println("[DB] --->  database connection  : failed");
@@ -225,8 +226,9 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         
         for(int loop = 0; loop < ncolumns; loop++){
-                Vector<String> column = asgmt.getColumnValuesString(loop);
-                tableRows.add(column);
+            String name = typecolumn.get(loop).getName();
+            Vector<String> column = asgmt.getColumnValuesString(name);
+            tableRows.add(column);
         }
         
         int nrows = tableRows.get(0).size();
@@ -290,7 +292,8 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         
         for(int loop = 0; loop < ncolumns; loop++){
-                Vector<String> column = asgmt.getColumnValuesString(loop);
+            String name = typecolumn.get(loop).getName();
+                Vector<String> column = asgmt.getColumnValuesString(name);
                 tableRows.add(column);
         }
         
@@ -335,7 +338,8 @@ public class DatabaseConstantProvider implements ConstantProvider {
                 //System.out.println("Reading column number " + loop 
                 //+ "  " + typecolumn.elementAt(loop).getCellType()
                 //+ "  " + typecolumn.elementAt(loop).getName());
-                Vector<String> row = asgmt.getColumnValuesString(loop);
+                String name = typecolumn.get(loop).getName();
+                Vector<String> row = asgmt.getColumnValuesString(name);
                 String[] values = new String[row.size()];
                 for(int el = 0; el < row.size(); el++){
                     values[el] = row.elementAt(el);
@@ -466,15 +470,8 @@ public class DatabaseConstantProvider implements ConstantProvider {
 
     public static void main(String[] args){
         
-        String pattern = "MM/dd/yyyy";
-        SimpleDateFormat format = new SimpleDateFormat(pattern);
-        Date dateNow = new Date();
-        System.out.println(dateNow);
         
-        try {
-            Date dateThen = format.parse("01/23/2017");
-            System.out.println(dateThen);
-            /*
+        
             DatabaseConstantProvider provider = new DatabaseConstantProvider(10,"default");
             IndexedTable table = provider.readTable("/test/fc/fadc");
             
@@ -487,10 +484,45 @@ public class DatabaseConstantProvider implements ConstantProvider {
             frame.add(canvas);
             frame.pack();
             frame.setVisible(true);
-            table.show();*/
+            table.show();
+         
+         
+        String pattern = "MM/dd/yyyy";
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        Date dateNow = new Date();
+        System.out.println(dateNow);
+        
+        try {
+            Date dateThen = format.parse("01/23/2017");
+            System.out.println(dateThen);            
         } catch (ParseException ex) {
             Logger.getLogger(DatabaseConstantProvider.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        org.rcdb.JDBCProvider provider_rcdb = RCDB.createProvider("mysql://rcdb@clasdb.jlab.org/rcdb");
+        provider_rcdb.connect();
+        
+        // The real database is going to be used for the example
+        // Run 31000 is used everywhere:
+        long runNumber = 2475;
+        System.out.println("Run Number = " + runNumber);
+        // get long value
+        long eventCount = provider_rcdb.getCondition(runNumber, "event_count").toLong();
+        System.out.println("event_count = " + eventCount);
+
+        // get bool value
+        boolean isValidRunEnd = provider_rcdb.getCondition(runNumber, "is_valid_run_end").toBoolean();
+        System.out.println("is_valid_run_end = " + isValidRunEnd);
+
+        // List all available condition names
+	//        Vector<ConditionType> cndTypes = provider.getConditionTypes();
+        //HashMap<String, ConditionType> cndTypeByNames = provider.getConditionTypeByNames();
+        // get double
+           double sol_scale = provider_rcdb.getCondition(runNumber, "solenoid_scale").toDouble();
+           System.out.println("solenoid_scale = " + sol_scale);
+           double tor_scale = provider_rcdb.getCondition(runNumber, "torus_scale").toDouble();
+           System.out.println("torus_scale = " + tor_scale);
+           provider_rcdb.close();
     }
 
 }
