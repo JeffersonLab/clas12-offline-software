@@ -106,7 +106,12 @@ public class SplashWindow extends JWindow {
 				"images/push.gif",
 				"images/walker.gif",
 				"images/rooftop.gif",
-				"images/bee2.gif"};
+				"images/bee2.gif",
+		        "images/stickdancer.gif",
+		        "images/cricket.gif",
+				"images/wiggly.gif"};
+		
+
 		
 		
 		int index = (new Random()).nextInt(imageNames.length);
