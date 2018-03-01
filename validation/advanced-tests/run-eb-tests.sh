@@ -71,8 +71,10 @@ fi
 
 classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
+classPath2="../../coatjava/lib/services/*:../../coatjava/lib/clas/*:../../coatjava/lib/utils/*:../lib/*:src/"
+
 # make sure test code compiles before anything else:
-javac -cp $classPath src/eb/EBTwoTrackTest.java
+javac -cp $classPath2 src/eb/EBTwoTrackTest.java
 if [ $? != 0 ] ; then echo "EBTwoTrackTest compilation failure" ; exit 1 ; fi
 
 # download and setup dependencies, run reconstruction:
@@ -133,7 +135,7 @@ then
 fi
 
 # run Event Builder tests:
-java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath -DINPUTFILE=out_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath2 -DINPUTFILE=out_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
 if [ $? != 0 ] ; then echo "EBTwoTrackTest unit test failure" ; exit 1 ; else echo "EBTwoTrackTest passed unit tests" ; fi
 
 exit 0
