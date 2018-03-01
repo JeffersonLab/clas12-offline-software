@@ -113,7 +113,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.52";
+	private static final String _release = "build 0.99.999.61";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -759,9 +759,22 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			}
 		};
 		
+		ActionListener al3 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+//				NoiseParameterDialog dialog = new NoiseParameterDialog();
+//				dialog.setVisible(true);
+			}
+		};
+
+		
 		_eventMenu.addSeparator();
 		MenuManager.addMenuItem("Noise Algorithm Parameters...", _eventMenu,
 				al2);
+		
+		MenuManager.addMenuItem("Trigger Bits...", _eventMenu,
+				al3);
+		
 		_eventMenu.addSeparator();
 
 		_playDCOccupancy = new JCheckBoxMenuItem("\"Play\" Drift Chamber Occupancy", false);
