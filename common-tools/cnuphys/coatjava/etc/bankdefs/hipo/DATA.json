@@ -351,6 +351,20 @@
     ]
   },
   {
+    "bank": "HEL::adc",
+    "group": 22011,
+    "info": "digitized bank HEL",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector =0"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"layer =0"},
+       {"name":"component", "id":3, "type":"int16", "info":"cell id"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCL , 1 - ADCR)"},
+       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+    ]
+  },
+  {
     "bank": "RAW::adc",
     "group": 20011,
     "info": "digitized bank ADC for untranslated",

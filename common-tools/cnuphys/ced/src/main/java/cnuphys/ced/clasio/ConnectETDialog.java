@@ -16,6 +16,7 @@ import cnuphys.bCNU.dialog.SimpleDialog;
 import cnuphys.bCNU.dialog.VerticalFlowLayout;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.util.Environment;
 
 public class ConnectETDialog extends SimpleDialog {
 	
@@ -76,8 +77,21 @@ public class ConnectETDialog extends SimpleDialog {
 		return _stationTF.getText();
 	}
 	
+	/**
+	 * Get the machine to connect to
+	 * @return the machine to connect to
+	 */
 	public String getMachine() {
-		return (String)(_machineCombo.getSelectedItem());
+		String machineStr = (String)(_machineCombo.getSelectedItem());
+		
+		if ((machineStr != null) && (machineStr.contains("local host"))) {
+			machineStr = localHost();
+		}
+		return machineStr;
+	}
+	
+	private String localHost() {
+		return Environment.getInstance().getHostAddress();
 	}
 	
 	/**
@@ -94,7 +108,9 @@ public class ConnectETDialog extends SimpleDialog {
 		JPanel npanel = new JPanel();
 		npanel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
 		npanel.add(new JLabel("CLON cpu: "));
-		String[] machineStrings = { "clondaq2", "clondaq3", "clondaq4", "clondaq5", "clondaq6" };
+		
+		String localHost = "local host: " + localHost();
+		String[] machineStrings = { "clondaq2", "clondaq3", "clondaq4", "clondaq5", "clondaq6", localHost };
 
 		//Create the combo box, select item at index 4.
 		//Indices start at 0, so 4 specifies the pig.
