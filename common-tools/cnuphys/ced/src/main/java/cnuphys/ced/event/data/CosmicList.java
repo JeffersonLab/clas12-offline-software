@@ -104,6 +104,11 @@ public class CosmicList extends Vector<Cosmic> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(int[] id, float[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating CosmicList";
+			return true;
+		}
+
 		if (id.length != array.length) {
 			_error = "ID length: " + id.length + " does not match " + name + " length: " + array.length + " when creating CosmicList";
 			return true;
