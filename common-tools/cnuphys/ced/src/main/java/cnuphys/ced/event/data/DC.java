@@ -34,6 +34,7 @@ public class DC extends DetectorData {
 	//HB reconstructed hits
 	private DCHitList _hbHits;
 	
+	//singleton
 	private static DC _instance;
 	
 	

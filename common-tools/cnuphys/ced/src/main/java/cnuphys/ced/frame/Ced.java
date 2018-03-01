@@ -78,6 +78,8 @@ import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.properties.PropertiesManager;
 import cnuphys.ced.training.TrainingManager;
+import cnuphys.ced.trigger.TriggerDialog;
+import cnuphys.ced.trigger.TriggerManager;
 import cnuphys.lund.X11Colors;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
@@ -762,8 +764,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		ActionListener al3 = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-//				NoiseParameterDialog dialog = new NoiseParameterDialog();
-//				dialog.setVisible(true);
+				TriggerDialog.showDialog();
 			}
 		};
 
@@ -961,6 +962,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		PropertiesManager.getInstance();
 		
 		TrainingManager.getInstance();
+		
+		//initialize the trigger manager
+		TriggerManager.getInstance();
 		
 		//for running from runnable jar (for coatjava)
 		String clas12dir = System.getProperty("CLAS12DIR");

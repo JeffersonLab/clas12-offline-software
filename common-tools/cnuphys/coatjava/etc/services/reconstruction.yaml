@@ -30,6 +30,8 @@ services:
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
     name: LTCC
+  - class: org.jlab.rec.rich.RICHEBEngine
+    name: RICH
   - class: org.jlab.service.ec.ECEngine
     name: EC
   - class: org.jlab.service.eb.EBHBEngine
