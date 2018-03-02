@@ -355,7 +355,18 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		addPcalHistogram();
 		addEcHistogram();
 		
+		//the trigger bit "view"
+		ActionListener al3 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TriggerDialog.showDialog();
+			}
+		};
 		
+		JMenuItem menuItem = new JMenuItem("Trigger Bits");
+		menuItem.addActionListener(al3);
+		ViewManager.getInstance().getViewMenu().add(menuItem, 1);
+
 
 		// log some environment info
 		Log.getInstance().config(Environment.getInstance().toString());
@@ -761,20 +772,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			}
 		};
 		
-		ActionListener al3 = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				TriggerDialog.showDialog();
-			}
-		};
-
-		
 		_eventMenu.addSeparator();
 		MenuManager.addMenuItem("Noise Algorithm Parameters...", _eventMenu,
 				al2);
 		
-		MenuManager.addMenuItem("Trigger Bits...", _eventMenu,
-				al3);
 		
 		_eventMenu.addSeparator();
 
@@ -802,6 +803,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			return _oldBSTGeometry.getState();
 		}
 		return false;
+	}
+	
+	/**
+	 * Get the virtual view
+	 * @return the virtual view
+	 */
+	public VirtualView getVirtualView() {
+		return _virtualView;
 	}
 
 

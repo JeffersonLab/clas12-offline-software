@@ -73,16 +73,17 @@ public class DialogUtilities {
 	}
 	
 	/**
-	 * Center a component.
+	 * Place a component in the upper right
 	 * 
 	 * @param component
 	 *            The Component to center.
 	 */
 	public static void upperRightComponent(Component component, int dh, int dv) {
 
-		if (component == null)
+		if (component == null) {
 			return;
-
+		}
+		
 		try {
 
 			GraphicsEnvironment env = GraphicsEnvironment

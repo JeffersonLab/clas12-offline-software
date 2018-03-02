@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -223,8 +224,12 @@ public class VirtualView extends BaseView
 		_numcol = numcol;
 		VirtualView view = null;
 		Rectangle2D.Double world = getWorld();
-		int width = numcol * 40;
-		int height = (int) ((width * world.height) / world.width);
+		
+		int cell_width = 40;
+		int cell_height = 1 + ((9*cell_width)/16);
+		int width = numcol * cell_width;
+//		int height = (int) ((width * world.height) / world.width);
+		int height = cell_height;
 
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
@@ -235,9 +240,14 @@ public class VirtualView extends BaseView
 				PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
 
 		view._offsets = new Point[_numcol];
-		view.pack();
+		//view.pack();
+		
+		
+		Insets insets = view.getInsets();
+		view.setSize(width, height + insets.top);
 		return view;
 	}
+	
 
 	/**
 	 * Get the number of columns

@@ -369,8 +369,9 @@ public class GraphicsUtilities {
 	 */
 	public static void centerComponent(Component component, int dh, int dv) {
 
-		if (component == null)
+		if (component == null) {
 			return;
+		}
 
 		try {
 
@@ -1613,12 +1614,17 @@ public class GraphicsUtilities {
 		}
 	}
 
-	public static Container getParentContainer(Component c) {
-		if (c == null) {
+	/**
+	 * Get the top level container (JFrame, window, etc) of a component
+	 * @param component the component
+	 * @return top level container (JFrame, window, etc) of the component
+	 */
+	public static Container getParentContainer(Component component) {
+		if (component == null) {
 			return null;
 		}
 
-		Container container = c.getParent();
+		Container container = component.getParent();
 		while (container != null) {
 			if (container instanceof JInternalFrame) {
 				return container;

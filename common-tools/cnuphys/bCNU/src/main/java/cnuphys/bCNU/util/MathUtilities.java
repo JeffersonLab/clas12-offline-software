@@ -6,6 +6,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class MathUtilities {
+	
+	/**
+	 * Get an int as an unsigned long
+	 * @param x the int
+	 * @return the unsigned long
+	 */
+	public static long getUnsignedInt(int x) {
+	    return x & 0x00000000ffffffffL;
+	}
 
 	/**
 	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line
