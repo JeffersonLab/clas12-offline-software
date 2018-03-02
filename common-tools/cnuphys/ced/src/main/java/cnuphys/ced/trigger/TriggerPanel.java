@@ -47,15 +47,40 @@ public class TriggerPanel extends JPanel {
 	private long _trigger;
 	private JLabel _decimalLabel;
 	
+	private JLabel _trigLabel;
+	
 	//diplay bites
 	private BitDisplay _bitDisplay;
 	
+	//to size a label
+	private static final String sizeString = " 999999999999";
+	
+	protected int _preferredWidth;
+	
+	private boolean _extended;
+	
 	public TriggerPanel() {
+		this(false);
+	}
+	
+	public TriggerPanel(boolean extended) {
+		_extended = extended;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setOpaque(false);
 		
+		_preferredWidth = 32*CELL_SIZE;
+
+		
 //		_idLabel = new JLabel("   ");
 //		_idLabel.setFont(_labelFont);
+		
+		if (extended) {
+			_trigLabel = new JLabel("trigger");
+			_trigLabel.setForeground(X11Colors.getX11Color("dark red"));
+			add(_trigLabel);
+			add(Box.createHorizontalStrut(10));			
+		}
+
 
 		_decimalLabel = new JLabel("                    ") {
 
@@ -63,7 +88,7 @@ public class TriggerPanel extends JPanel {
 			public Dimension getPreferredSize() {
 				if (dlabW < 0) {
 					FontMetrics fm = this.getFontMetrics(_labelFont);
-					dlabW = fm.stringWidth(" 999999999999");
+					dlabW = fm.stringWidth(sizeString);
 				}
 
 				Dimension s = super.getPreferredSize();
@@ -79,25 +104,41 @@ public class TriggerPanel extends JPanel {
 		Border lborder = BorderFactory.createLineBorder(Color.cyan);
 		_decimalLabel.setBorder(lborder);
 
+		_preferredWidth += _decimalLabel.getPreferredSize().width;
 		
 //		add(_idLabel);
-		add(Box.createHorizontalStrut(10));
+//		add(Box.createHorizontalStrut(10));
+		
+		
 		add(getBitsPanel());
 		add(Box.createHorizontalStrut(10));
 		add(_decimalLabel);
 		
+		//the struts
+		_preferredWidth += 10;
+		
+		//extended?
+		if (extended) {
+			_preferredWidth += _trigLabel.getPreferredSize().width;
+			_preferredWidth += 10;
+
+		}
+		
 		Border emptyBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 		setBorder(emptyBorder);
 	}
-	
+
 	@Override
 	public void paintComponent(Graphics g) {
-		Rectangle b = getBounds();
-		g.setColor(Color.gray); 
-		g.fillRect(0, 0, b.width, b.height);
+
+		if (!_extended) {
+			Rectangle b = getBounds();
+			g.setColor(Color.gray);
+			g.fillRect(0, 0, b.width, b.height);
+		}
 		super.paintComponent(g);
 	}
-	
+
 	private JPanel getBitsPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridLayout(1, 32, 1, 1));
