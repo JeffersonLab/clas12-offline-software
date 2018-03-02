@@ -57,18 +57,22 @@ public final class LTCCHit {
 
     // load a list of all good hits
     public static List<LTCCHit> loadHits(DataEvent event, ConstantsManager ccdb) {
-        int run = 11; // TODO how to get run number?\
-        IndexedTable gain = null;
+        int run = -1;
+        if (event.hasBank("RUN::config")) {
+            DataBank header = event.getBank("RUN::config");
+            run = header.getInt("run", 0);
+        }
+        IndexedTable spe = null;
         IndexedTable timing_offset = null;
-        if (ccdb != null) {
-            //gain = ccdb.getConstants(run, "/calibration/ltcc/gain");
+        if (ccdb != null && run > 0) {
+            spe = ccdb.getConstants(run, "/calibration/ltcc/spe");
             //timing_offset = ccdb.getConstants(run, "/calibration/ltcc/timing_offset");
         }
         DataBank bank = event.getBank("LTCC::adc");
         
         List<LTCCHit> hits = new LinkedList<>();
         for (int i = 0; i < bank.rows(); ++i) {
-            LTCCHit hit = new LTCCHit(bank, i, gain, timing_offset);
+            LTCCHit hit = new LTCCHit(bank, i, spe, timing_offset);
             if (hit.isGood()) {
                 hits.add(hit);
             }
@@ -79,14 +83,17 @@ public final class LTCCHit {
         return loadHits(event, null);
     }
     
-    LTCCHit(DataBank bank, int index, IndexedTable gain, IndexedTable timing_offset) {
+    LTCCHit(DataBank bank, 
+            int index, 
+            IndexedTable spe, 
+            IndexedTable timing_offset) {
        this.sector = bank.getByte("sector", index);
        this.segment = bank.getShort("component", index);
-       this.side = bank.getByte("order", index);
+       this.side = bank.getByte("order", index) + 1;
        this.adc = bank.getInt("ADC", index);
        this.rawTime = bank.getFloat("time", index);
        //this.pedestal = bank.getShort("ped", index);
-       this.nphe = calcNphe(gain);
+       this.nphe = calcNphe(spe);
        this.time = calcTime(timing_offset);
        this.iLTCCPhi = calcLTCCPhiIndex();
        this.status = calcStatus();
@@ -164,15 +171,17 @@ public final class LTCCHit {
     }
     
     
-    private double calcNphe(IndexedTable gain) {
-        // TODO: verify with Maurizio if this is indeed the format
-        //gain.getDoubleValue("gain", sector, side, segment);
-        if (gain != null) {
-            return (this.adc > 0 ? this.adc / 100 : -1); // hard-coded for now
-        } else {
-            // fallback
-            return (this.adc > 0 ? this.adc / 100 : -1);
+    private double calcNphe(IndexedTable spe) {
+        // sane default in case there is no ccdb
+        double calibration = 1. / 200.; 
+        // load value from CCDB
+        if (spe != null) {
+            calibration = spe.getDoubleValue("mean", sector, side, segment);
+            if (calibration > 0) {
+                calibration = 1 / calibration;
+            }
         }
+        return (this.adc > 0 ? this.adc * calibration : -1);
     }
     
     private double calcTime(IndexedTable timing) {
