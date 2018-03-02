@@ -80,6 +80,7 @@ import cnuphys.ced.properties.PropertiesManager;
 import cnuphys.ced.training.TrainingManager;
 import cnuphys.ced.trigger.TriggerDialog;
 import cnuphys.ced.trigger.TriggerManager;
+import cnuphys.ced.trigger.TriggerMenuPanel;
 import cnuphys.lund.X11Colors;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
@@ -560,30 +561,29 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//FastMC
 		//mmgr.addMenu(new FastMCMenu());
 		
-		//weird menu
-		addWeirdMenu();
+		// weird menu
+		//addWeirdMenu();
 	}
-	
-	//add some fun stuff
+
+	// add some fun stuff
 	private void addWeirdMenu() {
 		String weirdTitle = "w" + "\u018e" + "i" + "\u1d19" + "d";
-		_weirdMenu = new JMenu(weirdTitle);		
+		_weirdMenu = new JMenu(weirdTitle);
 
 		// eliza!
 		final JMenuItem elizaItem = new JMenuItem("Eliza...");
-		
+
 		ActionListener al1 = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Object source = e.getSource();
-				
+
 				if (source == elizaItem) {
-				ElizaDialog.showEliza(_instance);
+					ElizaDialog.showEliza(_instance);
 				}
 			}
 		};
-		
-		
+
 		elizaItem.addActionListener(al1);
 		_weirdMenu.add(elizaItem, 0);
 
@@ -632,6 +632,24 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		JMenu fmenu = mmgr.getFileMenu();
 		
 		fmenu.insertSeparator(0);
+		
+		// eliza!
+		final JMenuItem elizaItem = new JMenuItem("Eliza...");
+
+		ActionListener al1 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+
+				if (source == elizaItem) {
+					ElizaDialog.showEliza(_instance);
+				}
+			}
+		};
+
+		elizaItem.addActionListener(al1);
+		fmenu.add(elizaItem, 0);
+
 
 
 		JMenuItem aboutItem = new JMenuItem("About ced...");
@@ -830,6 +848,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_instance.placeViewsOnVirtualDesktop();
 
 			_instance.createBusyPanel();
+			_instance.createTriggerPanel();
+
 			_instance.createEventNumberLabel();
 			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
@@ -876,6 +896,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	}
 	
+	private void createTriggerPanel() {
+		getJMenuBar().add(Box.createHorizontalStrut(20));
+//		getJMenuBar().add(Box.createHorizontalGlue());
+		getJMenuBar().add(new TriggerMenuPanel());
+	}
 
 	private void createBusyPanel() {
 		getJMenuBar().add(Box.createHorizontalStrut(20));

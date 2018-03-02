@@ -16,11 +16,8 @@ import cnuphys.ced.frame.Ced;
 
 public class TriggerDialog extends JDialog  {
 	
-	private static final int NUMTODISPLAY = 1;  //1..3
+	private static final int NUMTODISPLAY = 3;  //1..3
 
-	
-	// reason the dialog was closed
-	private int _reason = DialogUtilities.CANCEL_RESPONSE;
 	
 	//singleton
 	private static TriggerDialog _instance;

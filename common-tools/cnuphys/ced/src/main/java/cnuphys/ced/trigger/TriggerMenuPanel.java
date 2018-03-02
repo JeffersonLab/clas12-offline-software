@@ -1,5 +1,7 @@
 package cnuphys.ced.trigger;
 
+import java.awt.Dimension;
+
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
@@ -8,41 +10,30 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 
-public class TriggerManager implements IClasIoEventListener{
-
-	//singleton
-	private static TriggerManager _instance;
-	
-	//the dialog for display
-	private TriggerDialog _dialog;
+public class TriggerMenuPanel extends TriggerPanel implements IClasIoEventListener {
 	
 	//the bank name
 	private static String _bankName = "RUN::trigger";
+
 	
-	
-	//the data columns in the Run::trigger bank
-	private int _id[];
-	private int _trigger[];
-	
-	
-	//private constructor for singleton
-	private TriggerManager() {
+	public TriggerMenuPanel() {
+		super(true);
 		ClasIoEventManager.getInstance().addClasIoEventListener(this, 2);
-		_dialog = TriggerDialog.getInstance();
 	}
 	
-	/**
-	 * Public access to the TriggerManager
-	 * @return the TriggerManager singleton
-	 */
-	public static TriggerManager getInstance() {
-		if (_instance == null) {
-			_instance = new TriggerManager();
-		}
-		
-		return _instance;
+	@Override
+	public Dimension getPreferredSize() {
+		Dimension d = super.getPreferredSize();
+		d.width = _preferredWidth;
+		return d;
 	}
 	
+	@Override
+	public Dimension getMaximumSize() {
+		return getPreferredSize() ;
+	}
+
+
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -50,17 +41,20 @@ public class TriggerManager implements IClasIoEventListener{
 		}
 		else {  //single event
 			System.err.println("Trigger Manager got a single event");
+			set(0,  0);
+
 			
+			int idData[] = null;
+			int triggerData[] = null;
 			
-			_id = null;
-			_trigger = null;
-			
-			_id = ColumnData.getIntArray(_bankName + ".id");
-			if (_id != null) {
-				_trigger = ColumnData.getIntArray(_bankName + ".trigger");
+			idData = ColumnData.getIntArray(_bankName + ".id");
+			if (idData != null) {
+				triggerData = ColumnData.getIntArray(_bankName + ".trigger");
+				set(idData[0], triggerData[0]);
+
 			}
 			
-			_dialog.setCurrentEvent(_id, _trigger);
+			
 		}
 	}
 
