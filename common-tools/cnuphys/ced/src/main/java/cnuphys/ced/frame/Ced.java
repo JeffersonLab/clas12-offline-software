@@ -77,7 +77,6 @@ import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.properties.PropertiesManager;
-import cnuphys.ced.training.TrainingManager;
 import cnuphys.ced.trigger.TriggerDialog;
 import cnuphys.ced.trigger.TriggerManager;
 import cnuphys.ced.trigger.TriggerMenuPanel;
@@ -116,7 +115,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.61";
+	private static final String _release = "build 0.99.999.61c";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -554,10 +553,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add to the event menu
 		addToEventMenu();
-		
-		//define menu
-		mmgr.addMenu(DefinitionManager.getInstance().getMenu());
-		
+				
 		//FastMC
 		//mmgr.addMenu(new FastMCMenu());
 		
@@ -713,6 +709,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		memPlot.addActionListener(al);
 		omenu.add(environ);
 		omenu.add(memPlot);
+		
+		//define menu
+		omenu.addSeparator();
+		omenu.add(DefinitionManager.getInstance().getMenu());
+
 		
 		
 //		omenu.addSeparator();
@@ -898,12 +899,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	private void createTriggerPanel() {
 		getJMenuBar().add(Box.createHorizontalStrut(20));
-//		getJMenuBar().add(Box.createHorizontalGlue());
+		getJMenuBar().add(Box.createHorizontalGlue());
 		getJMenuBar().add(new TriggerMenuPanel());
 	}
 
 	private void createBusyPanel() {
-		getJMenuBar().add(Box.createHorizontalStrut(20));
+		getJMenuBar().add(Box.createHorizontalStrut(15));
 		_busyPanel = new BusyPanel();
 		_busyPanel.setVisible(false);
 		getJMenuBar().add(_busyPanel);
@@ -994,8 +995,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		//read in userprefs
 		PropertiesManager.getInstance();
-		
-		TrainingManager.getInstance();
 		
 		//initialize the trigger manager
 		TriggerManager.getInstance();

@@ -1,7 +1,6 @@
 package cnuphys.ced.trigger;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -11,7 +10,6 @@ import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
-import cnuphys.bCNU.dialog.SimpleDialog;
 import cnuphys.ced.frame.Ced;
 
 public class TriggerDialog extends JDialog  {

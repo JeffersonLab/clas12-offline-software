@@ -20,7 +20,10 @@ import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.CTOF;
+import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BaseHit2;
+import cnuphys.ced.event.data.BaseHit2List;
 import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
@@ -28,6 +31,7 @@ import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
+import cnuphys.splot.plot.X11Colors;
 
 public class CentralXYHitDrawer implements IDrawable {
 	
@@ -280,34 +284,73 @@ public class CentralXYHitDrawer implements IDrawable {
 		Point pp = new Point();
 		Point2D.Double wp = new Point2D.Double();
 		
-		AdcHitList hits = BMT.getInstance().getHits();
+		AdcHitList hits = BMT.getInstance().getADCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			
 //			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
+			
+			for (AdcHit hit : hits) {
+				if (hit != null) {
+					BMTSectorItem bmtItem = _view.getBMTSectorItem(hit.sector, hit.layer);
 
+					Polygon poly = bmtItem.getStripPolygon(container, hit.component);
+					if (poly != null) {
+						g.setColor(X11Colors.getX11Color("tan"));
+						g.fillPolygon(poly);
+						g.setColor(Color.red);
+						g.drawPolygon(poly);
+					}
+				}
+			}
+		} // adc hits not empty
+
+		if (_view.showADCHits() && (hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
 				if (hit != null) {
 					BMTSectorItem bmtItem = _view.getBMTSectorItem(hit.sector, hit.layer);
 
 					if (bmtItem.isZLayer()) {
-						double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(hit.sector, 
-								hit.layer, hit.component);
-						
-						double rad = bmtItem.getInnerRadius()  + BMTSectorItem.FAKEWIDTH/2.;
-						wp.x = rad*Math.cos(phi);
-						wp.y = rad*Math.sin(phi);
-						container.worldToLocal(pp, wp);
-						
+
 						Color color = hits.adcColor(hit);
-						g.setColor(color);
-						
-						Polygon poly = bmtItem.getStripPolygon(container, hit.component);
-						if (poly != null) {
-							g.fillPolygon(poly);
+
+						double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(hit.sector, hit.layer, hit.component);
+
+						double rad = bmtItem.getInnerRadius() + BMTSectorItem.FAKEWIDTH / 2.;
+						wp.x = rad * Math.cos(phi);
+						wp.y = rad * Math.sin(phi);
+						container.worldToLocal(pp, wp);
+						hit.setLocation(pp);
+						DataDrawSupport.drawAdcHit(g, pp, color);
+
+						// SymbolDraw.drawX(g2, pp.x, pp.y, 4, Color.black);
+					}
+				}
+			}
+		} // adc hits not empty
+
+		if (_view.showReconHits()) {
+			BaseHit2List recHits = BMT.getInstance().getRecHits();
+			if (recHits != null) {
+				// System.err.println("NUM RECON BMT HITS: " +
+				// recHits.getCount());
+
+				if (recHits.count() > 0) {
+					for (BaseHit2 bhit2 : recHits) {
+						BMTSectorItem bmtItem = _view.getBMTSectorItem(bhit2.sector, bhit2.layer);
+						if (bmtItem.isZLayer()) {
+
+							double phi = BMTGeometry.getGeometry().CRZStrip_GetPhi(bhit2.sector, bhit2.layer,
+									bhit2.component);
+
+							double rad = bmtItem.getInnerRadius() + BMTSectorItem.FAKEWIDTH / 2.;
+							wp.x = rad * Math.cos(phi);
+							wp.y = rad * Math.sin(phi);
+							container.worldToLocal(pp, wp);
+
+							bhit2.setLocation(pp);
+							DataDrawSupport.drawReconHit(g, pp);
 						}
-						
-		//				SymbolDraw.drawX(g2, pp.x, pp.y, 4, Color.black);
 					}
 				}
 			}

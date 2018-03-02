@@ -207,79 +207,89 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 	 */
 	@Override
 	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+			Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		// svt crosses?
-		CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
-		int len = (crosses == null) ? 0 : crosses.size();
+		if (_view.showCrosses()) {
 
-		if ((len > 0) && (_svtFBRects != null) && (_svtFBRects.length == len)) {
-			for (int i = 0; i < len; i++) {
-				if ((_svtFBRects[i] != null) && _svtFBRects[i].contains(screenPoint)) {
+			CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
+			int len = (crosses == null) ? 0 : crosses.size();
 
-					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(
-							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+			if ((len > 0) && (_svtFBRects != null) && (_svtFBRects.length == len)) {
+				for (int i = 0; i < len; i++) {
+					if ((_svtFBRects[i] != null) && _svtFBRects[i].contains(screenPoint)) {
 
-					if (!cross.isXYLocationBad()) {
-						feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
-					} else {
-						feedbackStrings.add("cross location contains NaN");
+						Cross2 cross = crosses.elementAt(i);
+						feedbackStrings.add(
+								FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+
+						if (!cross.isXYLocationBad()) {
+							feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+						}
+						else {
+							feedbackStrings.add("cross location contains NaN");
+						}
+
+						if (!cross.isErrorBad()) {
+							feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+						}
+						else {
+							feedbackStrings.add("cross error contains NaN");
+						}
+
+						if (!cross.isDirectionBad()) {
+							feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+						}
+						else {
+							feedbackStrings.add("cross direction contains NaN");
+						}
+
+						break;
 					}
-
-					if (!cross.isErrorBad()) {
-						feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					} else {
-						feedbackStrings.add("cross error contains NaN");
-					}
-
-					if (!cross.isDirectionBad()) {
-						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
-					} else {
-						feedbackStrings.add("cross direction contains NaN");
-					}
-
-					break;
 				}
 			}
 		}
-		
-		
-		//bmt crosses?
-		crosses = BMTCrosses.getInstance().getCrosses();
-		len = (crosses == null) ? 0 : crosses.size();
 
+		// bmt crosses?
+		if (_view.showCrosses()) {
+			CrossList2 crosses = BMTCrosses.getInstance().getCrosses();
+			int len = (crosses == null) ? 0 : crosses.size();
 
-		if ((len > 0)  && (_bmtFBRects != null) && (_bmtFBRects.length == len)) {
-			for (int i = 0; i < len; i++) {
-				if ((_bmtFBRects[i] != null) && _bmtFBRects[i].contains(screenPoint)) {
+			if ((len > 0) && (_bmtFBRects != null) && (_bmtFBRects.length == len)) {
+				for (int i = 0; i < len; i++) {
+					if ((_bmtFBRects[i] != null) && _bmtFBRects[i].contains(screenPoint)) {
 
-					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+						Cross2 cross = crosses.elementAt(i);
+						feedbackStrings.add(
+								FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
-					if (!cross.isXYLocationBad()) {
-						feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
-					} else {
-						feedbackStrings.add("cross location contains NaN");
+						if (!cross.isXYLocationBad()) {
+							feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+						}
+						else {
+							feedbackStrings.add("cross location contains NaN");
+						}
+
+						if (!cross.isErrorBad()) {
+							feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+						}
+						else {
+							feedbackStrings.add("cross error contains NaN");
+						}
+
+						if (!cross.isDirectionBad()) {
+							feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+						}
+						else {
+							feedbackStrings.add("cross direction contains NaN");
+						}
+
+						break;
 					}
-
-					if (!cross.isErrorBad()) {
-						feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					} else {
-						feedbackStrings.add("cross error contains NaN");
-					}
-
-					if (!cross.isDirectionBad()) {
-						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
-					} else {
-						feedbackStrings.add("cross direction contains NaN");
-					}
-
-					break;
 				}
 			}
 		}
-		
 		
 	}
 

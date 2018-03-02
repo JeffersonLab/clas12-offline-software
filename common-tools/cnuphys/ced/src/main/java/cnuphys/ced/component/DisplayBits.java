@@ -29,7 +29,7 @@ public class DisplayBits {
 	/** mag field */
 	public static final int MAGFIELD = 0400;
 
-	/** hits FTOF Recons */
+	/** hits Recons */
 	public static final int RECONHITS = 01000;
 
 	/** Cosmic tracks */
@@ -41,6 +41,8 @@ public class DisplayBits {
 	/** global display of hb data */
 	public static final int GLOBAL_TB = 010000;
 	
+	/** adc hits */
+	public static final int ADC_HITS = 020000;
 	
 	
 	/** Distance scale */

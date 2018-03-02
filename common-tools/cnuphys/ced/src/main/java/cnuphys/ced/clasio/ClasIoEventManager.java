@@ -20,6 +20,7 @@ import org.jlab.io.base.DataSource;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
@@ -807,6 +808,9 @@ public class ClasIoEventManager {
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
+	                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
+	                _currentEvent.appendBanks(trigger);
+
 					// System.err.println("Decoded to HIPO");
 					// _currentEvent.show();
 					_eventIndex++;
@@ -848,6 +852,10 @@ public class ClasIoEventManager {
 					// goodEvent = true;
 
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
+					
+	                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
+	                _currentEvent.appendBanks(trigger);
+
 					_eventIndex++;
 					setNextEvent(_currentEvent);
 					// System.err.println("ET Debug Decoded to HIPO");
@@ -951,6 +959,9 @@ public class ClasIoEventManager {
 				}
 				_eventIndex--;
 				_currentEvent = _decoder.getDataEvent(_currentEvent);
+				
+                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
+                _currentEvent.appendBanks(trigger);
 			}
 			break; // end case eviofile
 
@@ -962,40 +973,7 @@ public class ClasIoEventManager {
 			break;
 		}
 
-		// if (isSourceHipoFile()) {
-		// return gotoEvent(getEventNumber()-1);
-		// }
-		//
-		// _currentEvent = _dataSource.getPreviousEvent();
-		//
-		// if (isSourceEvioFile()) {
-		// if ((_currentEvent != null) && (_currentEvent instanceof
-		// EvioDataEvent)) {
-		//
-		// if (_decoder == null) {
-		// _decoder = new CLASDecoder();
-		// }
-		// _currentEvent = _decoder.getDataEvent(_currentEvent);
-		// // System.err.println("Decoded to HIPO");
-		// // _currentEvent.show();
-		// }
-		// }
-		// else if (isSourceHipoFile()) {
-		// d
-		// } else {
-		// if ((_currentEvent == null) && (getEventNumber() > 0)) {
-		// return gotoEvent(getEventNumber() - 1);
-		// }
-		// }
-		//
-
-		// evioSource.getPreviousEvent() doesn't work at the end of the file
-		// so hack
-		// if ((_currentEvent == null) && (getEventNumber() > 0)) {
-		// return gotoEvent(getEventNumber() - 1);
-		// }
-
-		setNextEvent(_currentEvent);
+	setNextEvent(_currentEvent);
 
 		// notifyEventListeners();
 		return _currentEvent;

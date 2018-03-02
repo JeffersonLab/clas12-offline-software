@@ -49,8 +49,6 @@ public class TriggerManager implements IClasIoEventListener{
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 		}
 		else {  //single event
-			System.err.println("Trigger Manager got a single event");
-			
 			
 			_id = null;
 			_trigger = null;

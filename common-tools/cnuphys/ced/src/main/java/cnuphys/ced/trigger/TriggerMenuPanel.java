@@ -40,7 +40,6 @@ public class TriggerMenuPanel extends TriggerPanel implements IClasIoEventListen
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 		}
 		else {  //single event
-			System.err.println("Trigger Manager got a single event");
 			set(0,  0);
 
 			

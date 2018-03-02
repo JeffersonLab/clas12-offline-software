@@ -91,6 +91,10 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Global show TB */
 	private static final String GLOBAL_TB_LABEL = "TB Data";
 	
+	/** Global show ADC hits */
+	private static final String GLOBAL_ADC_HIT_LABEL = "ADC Hits";
+
+	
 	// controls whether any HB data displayed
 	private AbstractButton _showHBButton;
 
@@ -108,6 +112,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether reconstructed hits (not DC) are displayed
 	private AbstractButton _reconHitButton;
+	
+	// controls whether ADC hits 
+	private AbstractButton _adcHitButton;
 	
 	// controls whether reconstructed clusters are displayed
 	private AbstractButton _clusterButton;
@@ -255,6 +262,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 					true, true, this, _buttonColor).getCheckBox();
 		}
 		
+		// ADC hits
+		if (Bits.checkBit(bits, DisplayBits.ADC_HITS)) {
+			_adcHitButton = add(GLOBAL_ADC_HIT_LABEL,
+					true, true, this, _buttonColor).getCheckBox();
+		}
+
+		
 		// reconstructed clusters
 		if (Bits.checkBit(bits, DisplayBits.CLUSTERS)) {
 			_clusterButton = add(CLUSTER_LABEL,
@@ -370,6 +384,17 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		return (_reconHitButton != null)
 				&& _reconHitButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method to see if we show the ADC hits.
+	 * These are ADC hits except 
+	 * @return <code>true</code> if we are to show ADC hits.
+	 */
+	public boolean showADCHits() {
+		return (_adcHitButton != null)
+				&& _adcHitButton.isSelected();
+	}
+
 
 	/**
 	 * Convenience method global hit based display
