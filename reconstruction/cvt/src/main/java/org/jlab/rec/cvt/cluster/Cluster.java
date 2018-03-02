@@ -22,6 +22,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private int _Layer;    	 						//	        layer [1,...]
     private int _Id;								//		cluster Id
     private double _Centroid; 							// 		after LC (Lorentz Correction)
+    private double _CentroidError;
     private double _Centroid0; 							// 		before LC
     private double _TotalEnergy;
     private double _Phi;  							// 		for Z-detectors
@@ -266,7 +267,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void set_Centroid(double _Centroid) {
         this._Centroid = _Centroid;
     }
+    
+    public double get_CentroidError() {
+        return _CentroidError;
+    }
 
+    public void set_CentroidError(double _CentroidE) {
+        this._CentroidError = _CentroidE;
+    }
     public double get_Centroid0() {
         return _Centroid0;
     }
@@ -392,7 +400,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * @return cluster info. about location and number of hits contained in it
      */
     public void printInfo() {
-        String s = "cluster: Detector " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() +" centroid "+this.get_Centroid();
+        String s = " cluster: Detector " + this.get_Detector() +"  Detector Type " + this.get_DetectorType() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() +" centroid "+this.get_Centroid();
         System.out.println(s);
     }
 
@@ -436,6 +444,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     @Override
     public int compareTo(Cluster arg) {
+            
         //sort by phi of strip implant of first strip in the cluster, then by layer, then by seed strip number
         double this_phi = PhiInRange(this.get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
         double arg_phi = PhiInRange(arg.get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
@@ -448,7 +457,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         int return_val = ((CompPhi == 0) ? return_val1 : CompPhi);
 
         return return_val;
-
+        
+        
     }
 
     private double PhiInRange(double phi) {
@@ -458,4 +468,5 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         return phi;
     }
 
+    
 }

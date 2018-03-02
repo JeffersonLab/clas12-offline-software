@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Random;
@@ -24,7 +23,6 @@ import javax.swing.JTextField;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
-import bCNU3D.DoubleFormat;
 import cnuphys.bCNU.dialog.SimpleDialog;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
@@ -233,6 +231,7 @@ public class NNDataDialog extends SimpleDialog implements IClasIoEventListener, 
 	 * 
 	 * @return the component that is placed in the north
 	 */
+	@Override
 	protected Component createNorthComponent() {
 		JPanel fsp = fileSelectionPanel();
 
@@ -385,7 +384,6 @@ public class NNDataDialog extends SimpleDialog implements IClasIoEventListener, 
 
 	@Override
 	public void newFastMCGenEvent(PhysicsEvent event) {
-		System.err.println("HEY MAN");
 	}
 
 }

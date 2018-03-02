@@ -1,0 +1,15 @@
+#!/bin/sh -f
+
+SCRIPT_DIR=`dirname $0`
+DISTRO_DIR=$SCRIPT_DIR/../ ; export DISTRO_DIR
+CLAS12DIR=$SCRIPT_DIR/../ ; export CLAS12DIR
+CLARA_SERVICES=$DISTRO_DIR/lib/services; export CLARA_SERVICES
+DATAMINING=$DISTRO_DIR ; export DATAMINING
+
+java -Dsun.java2d.pmoffscreen=false -Xms1024m -Xmx2048m -cp "$DATAMINING/lib/utils/*" org.jlab.jnp.math.cli.MathCli $*
+
+#*********************************************************
+#---------------------------------------------------------
+# JHEP math CLI interface.
+#---------------------------------------------------------
+#java -cp "target/jnp-math-1.0-SNAPSHOT-jar-with-dependencies.jar" org.jlab.jnp.math.cli.MathCli $*

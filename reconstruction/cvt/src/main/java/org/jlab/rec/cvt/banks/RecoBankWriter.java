@@ -372,12 +372,12 @@ public class RecoBankWriter {
 
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
-
+                if(j<9) {
                 String hitStrg = "Cross";
                 hitStrg += (j + 1);
                 hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
                 bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
-                
+                }
             }
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());

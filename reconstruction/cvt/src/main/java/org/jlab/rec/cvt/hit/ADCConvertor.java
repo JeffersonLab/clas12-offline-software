@@ -44,7 +44,7 @@ public class ADCConvertor {
         int daq = returnRandomInteger(START[adc], END[adc], random);
 
         double value = (double) daq;
-         
+        /* 
         if(event.hasBank("MC::Particle")==true) {
         	//This is how GEMC sets the adc:
         	// the energy deposited from a mip is 80 KeV
@@ -61,8 +61,9 @@ public class ADCConvertor {
         	double etoV = 0.1;
         	
         	value = ((double)(adc+0.5)*etoV*maxV/8); // center of bin to avoid zero value
-        } 
-        
+                
+        }  */
+      
         return value;
     }
 

@@ -157,8 +157,7 @@
             {"name":"vy_nomm",      "id":12, "type":"float", "info":"y component of the vertex"},
             {"name":"vz_nomm",      "id":13, "type":"float", "info":"z component of the vertex"},
             {"name":"chi2_nomm",    "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"},
-            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
+            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"}
         ]
     },
     {
@@ -338,8 +337,7 @@
             {"name":"vy_nomm",      "id":12, "type":"float", "info":"y component of the vertex"},
             {"name":"vz_nomm",      "id":13, "type":"float", "info":"z component of the vertex"},
             {"name":"chi2_nomm",    "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"},
-            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
+            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"}
         ]
     },
     {
@@ -415,7 +413,7 @@
         "info": "Trajectory information for Particles bank",
         "items": [
             {"name":"detId",        "id":1,  "type":"int16", "info":"representative index of the detector"},
-            {"name":"trkId ",       "id":2,  "type":"int16", "info":"index of the track in Tracks bank"},
+            {"name":"trkId",        "id":2,  "type":"int16", "info":"index of the track in Tracks bank"},
             {"name":"q",            "id":3,  "type":"int8",  "info":"charge of the track"},
             {"name":"x",            "id":4,  "type":"float", "info":"x-position of the track at the detector surface"},
             {"name":"y",            "id":5,  "type":"float", "info":"y-position of the track at the detector surface"},

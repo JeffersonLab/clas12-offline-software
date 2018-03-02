@@ -22,8 +22,6 @@ import javax.swing.KeyStroke;
 import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
@@ -68,13 +66,10 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 //	public static String evioExtensions[] = { "evio", "ev", "evio.*"};
 
-	public static String hipoExtensions[] = { "hippo", "hipo" };
-
 //	private static FileNameExtensionFilter _evioEventFileFilter = new FileNameExtensionFilter(
 //			"Event Files", evioExtensions);
 
-	private static FileNameExtensionFilter _hipoEventFileFilter = new FileNameExtensionFilter(
-			"Hipo Event Files", hipoExtensions);
+	private static FileFilter _hipoEventFileFilter;
 	
 	private static EvioFileFilter _evioEventFileFilter = new EvioFileFilter();
 
@@ -93,6 +88,22 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		super("Events");
 
 		_eventManager.addClasIoEventListener(this, 1);
+		
+		if (_hipoEventFileFilter == null) {
+			_hipoEventFileFilter = new FileFilter() {
+
+				@Override
+				public boolean accept(File f) {
+					return f.getPath().endsWith(".hipo") 
+							|| f.getPath().endsWith(".hippo") || f.getPath().contains(".hipo.");
+				}
+
+				@Override
+				public String getDescription() {
+					return "Hipo Event Files";
+				}
+			};
+		}
 
 		// allows evio or hipo selction
 		if (_compositeFilter == null) {

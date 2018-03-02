@@ -37,7 +37,7 @@ public class FTCalPaddle3D extends DetectorItem3D {
 		AdcHitList hits = FTCAL.getInstance().getHits();
 		AdcHit hit = null;
 		if ((hits != null) && !hits.isEmpty()) {
-			hit = hits.get(1, 1, _id);
+			hit = hits.get(1, 0, _id);
 		}
 
 		Color color = (hit == null) ? noHitColor : hitColor;

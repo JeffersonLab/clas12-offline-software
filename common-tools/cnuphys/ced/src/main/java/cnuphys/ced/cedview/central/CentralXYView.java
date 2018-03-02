@@ -46,6 +46,7 @@ import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
+import cnuphys.ced.geometry.CNDGeometry;
 import cnuphys.ced.geometry.CTOFGeometry;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.GeometryManager;
@@ -71,7 +72,7 @@ public class CentralXYView extends CedXYView {
 	private static Color _ctofColors[] = { new Color(240, 240, 240), new Color(224, 224, 224) };
 
 	// the CND xy polygons
-	private CNDXYPolygon cndPoly[][] = new CNDXYPolygon[3][48];
+	private CNDXYPolygon _cndPoly[][] = new CNDXYPolygon[3][48];
 	
 	//the CTOF polygons
 	private CTOFXYPolygon _ctofPoly[] = new CTOFXYPolygon[48];
@@ -113,7 +114,7 @@ public class CentralXYView extends CedXYView {
 		// add the CND polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				cndPoly[layer - 1][paddleId - 1] = new CNDXYPolygon(layer,
+				_cndPoly[layer - 1][paddleId - 1] = new CNDXYPolygon(layer,
 						paddleId);
 			}
 		}
@@ -124,6 +125,7 @@ public class CentralXYView extends CedXYView {
 		}
 
 	}
+	
 	
 //	/**
 //	 * Get the Micromegas sector item
@@ -170,7 +172,7 @@ public class CentralXYView extends CedXYView {
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.ACCUMULATION + DisplayBits.BSTRECONS_CROSSES
+				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
 						+ DisplayBits.MCTRUTH
 						+ DisplayBits.COSMICS,
 				3, 5);
@@ -234,7 +236,7 @@ public class CentralXYView extends CedXYView {
 					
 					_hitDrawer.draw(g, container);
 
-					if (showReconsCrosses()) {
+					if (showCrosses()) {
 						_crossDrawer.draw(g, container);
 					}
 
@@ -328,8 +330,8 @@ public class CentralXYView extends CedXYView {
 		// CND Polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				if (cndPoly[layer - 1][paddleId - 1] != null) {
-					cndPoly[layer - 1][paddleId - 1].draw(g2, container);
+				if (_cndPoly[layer - 1][paddleId - 1] != null) {
+					_cndPoly[layer - 1][paddleId - 1].draw(g2, container);
 				}
 			}
 
@@ -520,7 +522,7 @@ public class CentralXYView extends CedXYView {
 				for (int layer = 1; layer <= 3; layer++) {
 					for (int paddleId = 1; paddleId <= 48; paddleId++) {
 
-						found = cndPoly[layer - 1][paddleId - 1]
+						found = _cndPoly[layer - 1][paddleId - 1]
 								.getFeedbackStrings(container, screenPoint,
 										worldPoint, feedbackStrings);
 
@@ -649,6 +651,51 @@ public class CentralXYView extends CedXYView {
 		}
 		return _ctofPoly[index0];
 	}
+	
+	/**
+	 * Get the CND polygon from Gagik's geometry layer and paddle
+	 * @param layer 1..3
+	 * @param paddleId 1..48
+	 * @return the CND polygon
+	 */
+	public CNDXYPolygon getCNDPolygon(int layer, int paddleId) {
+		if ((layer < 1) || (layer > 3)) {
+			return null;
+		}
+		if ((paddleId < 1) || (paddleId > 48)) {
+			return null;
+		}
+
+
+		return _cndPoly[layer-1][paddleId-1];
+	}
+	
+	/**
+	 * Get the CND polygon from "real" numbering
+	 * @param sector 1..24
+	 * @param layer 1..3
+	 * @param component 1..2
+	 * @return the CND polygon
+	 */
+	public CNDXYPolygon getCNDPolygon(int sector, int layer, int component) {
+		if ((sector < 1) || (sector > 24)) {
+			return null;
+		}
+		if ((layer < 1) || (layer > 3)) {
+			return null;
+		}
+		if ((component < 1) || (component > 2)) {
+			return null;
+		}
+
+		int real[] = {sector, layer, component};
+        int geo[] = new int[3];
+        
+        CNDGeometry.realTripletToGeoTriplet(geo, real);
+		
+		return getCNDPolygon(geo[1], geo[2]);
+	}
+
 
 	/**
 	 * Get world point from lab coordinates

@@ -67,7 +67,7 @@ public class BSTPanel3D extends DetectorItem3D {
 						BSTGeometry.getStrip(sector, layer, strip, coords6);
 						
 						if (showHits()) {
-							Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
+							Support3D.drawLine(drawable, coords6, dgtzColor, STRIPLINEWIDTH);
 						}
 
 					}  //match sector and layer

@@ -30,6 +30,7 @@ public class CLASDecoder {
     private List<DetectorDataDgtz>       dataList = new ArrayList<DetectorDataDgtz>();    
     private HipoDataSync                   writer = null;
     private HipoDataEvent               hipoEvent = null;
+    private boolean              isRunNumberFixed = false;
     private int                  decoderDebugMode = 0;
     
 //    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
@@ -65,9 +66,17 @@ public class CLASDecoder {
     }
     
     public void setRunNumber(int run){
-        this.detectorDecoder.setRunNumber(run);
+        if(this.isRunNumberFixed==false){
+            this.detectorDecoder.setRunNumber(run);
+        }
     }
 
+    public void setRunNumber(int run, boolean fixed){        
+        this.isRunNumberFixed = fixed;
+        this.detectorDecoder.setRunNumber(run);
+        System.out.println(" SETTING RUN NUMBER TO " + run + " FIXED = " + this.isRunNumberFixed);
+    }
+    
     public CodaEventDecoder getCodaEventDecoder() {
 	return codaDecoder;
     }
@@ -83,6 +92,9 @@ public class CLASDecoder {
                         System.out.println(data);
                     }
                 }
+                int runNumberCoda = codaDecoder.getRunNumber();
+                this.setRunNumber(runNumberCoda);
+                
                 detectorDecoder.translate(dataList);
                 detectorDecoder.fitPulses(dataList);
                 if(this.decoderDebugMode>0){
@@ -153,9 +165,7 @@ public class CLASDecoder {
         //System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size()
         //+ "  tdc store = " + adc.size());
         return tdc;
-    }
-    
-    
+    }    
     
     public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type){
         return getEntriesVTP(type,dataList);    
@@ -167,7 +177,7 @@ public class CLASDecoder {
      * @return list of VTP's for detector type
      */
     public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type, 
-            List<DetectorDataDgtz> entries){
+        List<DetectorDataDgtz> entries){
         List<DetectorDataDgtz>  vtp = new ArrayList<DetectorDataDgtz>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
@@ -180,6 +190,28 @@ public class CLASDecoder {
         return vtp;
     }
     
+    public List<DetectorDataDgtz>  getEntriesSCALER(DetectorType type){
+        return getEntriesSCALER(type,dataList);    
+    }
+    /**
+     * returns VTP entries from decoded data for given detector type
+     * @param type detector type
+     * @param entries digitized data list
+     * @return list of VTP's for detector type
+     */
+    public List<DetectorDataDgtz>  getEntriesSCALER(DetectorType type, 
+        List<DetectorDataDgtz> entries){
+        List<DetectorDataDgtz>  scaler = new ArrayList<DetectorDataDgtz>();
+        for(DetectorDataDgtz entry : entries){
+            if(entry.getDescriptor().getType()==type){
+                if(entry.getSCALERSize()>0){
+                    scaler.add(entry);
+                }
+            }
+        }
+//        System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size() + "  vtp store = " + vtp.size());
+        return scaler;
+    }
     
     public DataBank getDataBankADC(String name, DetectorType type){
         
@@ -270,6 +302,25 @@ public class CLASDecoder {
         return vtpBANK;
     }
     
+    public DataBank getDataBankUndecodedSCALER(String name, DetectorType type){
+        
+        List<DetectorDataDgtz> scalerDGTZ = this.getEntriesSCALER(type);
+        
+        DataBank scalerBANK = hipoEvent.createBank(name, scalerDGTZ.size());
+        if(scalerBANK==null) return null;
+        
+        for(int i = 0; i < scalerDGTZ.size(); i++){
+            scalerBANK.setByte("crate", i, (byte) scalerDGTZ.get(i).getDescriptor().getCrate());
+            scalerBANK.setByte("slot", i, (byte) scalerDGTZ.get(i).getDescriptor().getSlot());
+            scalerBANK.setShort("channel", i, (short) scalerDGTZ.get(i).getDescriptor().getChannel());
+            scalerBANK.setByte("helicity", i, (byte) scalerDGTZ.get(i).getSCALERData(0).getHelicity());
+            scalerBANK.setByte("quartet", i, (byte) scalerDGTZ.get(i).getSCALERData(0).getQuartet());
+            scalerBANK.setInt("value", i, scalerDGTZ.get(i).getSCALERData(0).getValue());
+        }
+//        if(scalerBANK.rows()>0)scalerBANK.show();
+        return scalerBANK;
+    }
+    
     public DataEvent getDataEvent(DataEvent rawEvent){
         this.initEvent(rawEvent);
         return getDataEvent();
@@ -280,9 +331,11 @@ public class CLASDecoder {
         HipoDataEvent event = (HipoDataEvent) writer.createEvent();
         
         String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","FTHODO::adc","FTTRK::adc",
-                                                    "HTCC::adc","BST::adc","CTOF::adc","CND::adc","LTCC::adc","BMT::adc","FMT::adc"};
+                                                    "HTCC::adc","BST::adc","CTOF::adc","CND::adc","LTCC::adc","BMT::adc",
+                                                    "FMT::adc","HEL::adc","RF::adc"};
         DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,DetectorType.FTHODO,DetectorType.FTTRK,
-                                                          DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,DetectorType.FMT};
+                                                          DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,
+                                                          DetectorType.FMT,DetectorType.HEL,DetectorType.RF};
         
         String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
@@ -345,8 +398,27 @@ public class CLASDecoder {
             e.printStackTrace();
         }
         
+        try {
+            DataBank scalerBankUD = this.getDataBankUndecodedSCALER("RAW::scaler", DetectorType.UNDEFINED);
+            if(scalerBankUD!=null){
+                if(scalerBankUD.rows()>0){
+                    event.appendBanks(scalerBankUD);
+                }
+            } else {
+                
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         return event;
     }
+
+    public long getTriggerPhase() {    	
+        long timestamp    = this.codaDecoder.getTimeStamp();
+        int  phase_offset = 1;
+        return ((timestamp%6)+phase_offset)%6; // TI derived phase correction due to TDC and FADC clock differences 
+    }
+
     public HipoDataBank createHeaderBank(DataEvent event, int nrun, int nevent, float torus, float solenoid){
         HipoDataBank bank = (HipoDataBank) event.createBank("RUN::config", 1);
         
@@ -447,7 +519,7 @@ public class CLASDecoder {
             int counter = 0;
             
             if(nrun>0){
-                decoder.setRunNumber(nrun);
+                decoder.setRunNumber(nrun,true);
             }
             
             for(String inputFile : inputList){

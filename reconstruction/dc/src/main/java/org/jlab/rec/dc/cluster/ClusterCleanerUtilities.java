@@ -321,7 +321,7 @@ public class ClusterCleanerUtilities {
         
         int index = 0;
         for(FittedHit hit: fClus) {
-    
+   
             if (hit.get_Doca() < 0.4 * hit.get_CellSize()) {
                 hit.set_LeftRightAmb(0);
             }
@@ -362,31 +362,39 @@ public class ClusterCleanerUtilities {
         for (FittedHit hit : notLRClus) {
 
             FittedHit newhitPos = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                    hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
+                    hit.get_TDC(), hit.get_Id());
             newhitPos.set_Doca(hit.get_Doca());
-            newhitPos.setT0SubTime(hit.getT0SubTime());
-            newhitPos.setTFlight(hit.getTFlight());
+            newhitPos.set_DocaErr(hit.get_DocaErr());
+            newhitPos.setT0(hit.getT0()); 
+            newhitPos.set_Beta(hit.get_Beta()); 
+            newhitPos.setTStart(hit.getTStart());
             newhitPos.setTProp(hit.getTProp());
+            newhitPos.setTFlight(hit.getTFlight());
+            newhitPos.set_Time(hit.get_Time());
             newhitPos.set_Id(hit.get_Id());
             newhitPos.set_TrkgStatus(0);
             newhitPos.set_CellSize(DcDetector);
             newhitPos.set_LeftRightAmb(1);
-            newhitPos.updateHitPositionWithTime(1, hit.get_B(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
+            newhitPos.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
 
             newhitPos.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitPos.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
 
             FittedHit newhitNeg = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                    hit.get_Time(), hit.get_DocaErr(), hit.get_B(), hit.get_Id());
+                    hit.get_TDC(), hit.get_Id());
             newhitNeg.set_Doca(hit.get_Doca());
-            newhitNeg.setT0SubTime(hit.getT0SubTime());
-            newhitNeg.setTFlight(hit.getTFlight());
+            newhitNeg.set_DocaErr(hit.get_DocaErr());
+            newhitNeg.setT0(hit.getT0()); 
+            newhitNeg.set_Beta(hit.get_Beta()); 
+            newhitNeg.setTStart(hit.getTStart());
             newhitNeg.setTProp(hit.getTProp());
+            newhitNeg.setTFlight(hit.getTFlight());
+            newhitNeg.set_Time(hit.get_Time());
             newhitNeg.set_Id(hit.get_Id());
             newhitNeg.set_TrkgStatus(0);
             newhitNeg.set_CellSize(DcDetector);
             newhitNeg.set_LeftRightAmb(-1);
-            newhitNeg.updateHitPositionWithTime(1, hit.get_B(), tab, DcDetector, tde); // assume the track angle is // to the layer
+            newhitNeg.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer
 
             newhitNeg.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitNeg.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
@@ -578,7 +586,7 @@ public class ClusterCleanerUtilities {
                 baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster		
                 for (int j = 0; j < hitsInLayer.size(); j++) {
                     hitsInLayer.get(j).set_LeftRightAmb(0);
-                    hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B(), tab, DcDetector, tde);
+                    hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
                 }
             }
             if (hitsInLayer.size() == 2) {
@@ -603,7 +611,7 @@ public class ClusterCleanerUtilities {
                 if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
                     for (int j = 0; j < hitsInLayer.size(); j++) {
                         hitsInLayer.get(j).set_LeftRightAmb(0);
-                        hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).get_B(), tab, DcDetector, tde);
+                        hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
                     }
                     hitsInSameLayerLists.add(hitsInLayer);
                 } else {

@@ -105,37 +105,42 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 						2 * DataDrawSupport.CROSSHALF);
 			}
 
-
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
-				_view.labToWorld(cross.x, cross.y, cross.z, wp);
 
-				// arrows
+				if (!cross.isFullLocationBad()) {
+					_view.labToWorld(cross.x, cross.y, cross.z, wp);
 
-				int pixlen = ARROWLEN;
-				double r = pixlen
-						/ WorldGraphicsUtilities.getMeanPixelDensity(container);
+					// arrows
 
-				double xa = cross.x + r * cross.ux;
-				double ya = cross.y + r * cross.uy;
-				double za = cross.z + r * cross.uz;
-				_view.labToWorld(xa, ya, za, wp2);
+					int pixlen = ARROWLEN;
+					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-				container.worldToLocal(pp, wp);
-				container.worldToLocal(pp2, wp2);
+					double xa = cross.x + r * cross.ux;
+					double ya = cross.y + r * cross.uy;
+					double za = cross.z + r * cross.uz;
+					_view.labToWorld(xa, ya, za, wp2);
 
-				g.setColor(Color.orange);
-				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
-				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
-				g.setColor(Color.darkGray);
-				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+					container.worldToLocal(pp, wp);
+					container.worldToLocal(pp2, wp2);
 
-				// the circles and crosses
-				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
+					g.setColor(Color.orange);
+					g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+					g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+					g.setColor(Color.darkGray);
+					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
-				// fbrects for quick feedback
-				_svtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
-						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
+					// the circles and crosses
+					DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BST_CROSS);
+
+					// fbrects for quick feedback
+					_svtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+							2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
+				} // !bad location
+				else {
+					_svtFBRects[i] = new Rectangle(0, 0, 0, 0);
+				}
+
 			}
 		} //len > 0
 	}
@@ -164,8 +169,7 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 			// error bars
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
-				// System.err.println("Draw Z error bars");
-				_view.labToWorld(cross.x, cross.y, cross.z, wp);
+				if (!cross.isFullLocationBad() && !Float.isNaN(cross.err_z)) {
 				_view.labToWorld(cross.x, cross.y, cross.z, wp);
 				wp3.setLocation(wp.x - cross.err_z, wp.y);
 				wp4.setLocation(wp.x + cross.err_z, wp.y);
@@ -174,32 +178,34 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				g.setColor(ERROR);
 				g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x,
 						2 * DataDrawSupport.CROSSHALF);
+				}
 			}
 
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 
-				if (!Float.isNaN(cross.x) && !Float.isNaN(cross.y) && !Float.isNaN(cross.z)) {
+				if (!cross.isFullLocationBad()) {
 					_view.labToWorld(cross.x, cross.y, cross.z, wp);
 
 					// arrows
+					if (!cross.isDirectionBad()) {
+						int pixlen = ARROWLEN;
+						double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-					int pixlen = ARROWLEN;
-					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
+						double xa = cross.x + r * cross.ux;
+						double ya = cross.y + r * cross.uy;
+						double za = cross.z + r * cross.uz;
+						_view.labToWorld(xa, ya, za, wp2);
 
-					double xa = cross.x + r * cross.ux;
-					double ya = cross.y + r * cross.uy;
-					double za = cross.z + r * cross.uz;
-					_view.labToWorld(xa, ya, za, wp2);
+						container.worldToLocal(pp, wp);
+						container.worldToLocal(pp2, wp2);
 
-					container.worldToLocal(pp, wp);
-					container.worldToLocal(pp2, wp2);
-
-					g.setColor(Color.orange);
-					g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
-					g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
-					g.setColor(Color.darkGray);
-					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+						g.setColor(Color.orange);
+						g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+						g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+						g.setColor(Color.darkGray);
+						g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+					} // !direct bad
 
 					// the circles and crosses
 					DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.BMT_CROSS);
@@ -208,6 +214,9 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 					_bmtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
 							2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 				}  // not NaN
+				else {
+					_bmtFBRects[i] = new Rectangle(0,0,0,0);
+				}
 			}
 		} //len > 0
 	}
@@ -239,32 +248,61 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				if ((_svtFBRects[i] != null) && _svtFBRects[i].contains(screenPoint)) {
 
 					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+					feedbackStrings.add(
+							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
-					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
-					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					if (!cross.isFullLocationBad()) {
+						feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+					} else {
+						feedbackStrings.add("cross location contains NaN");
+					}
+
+					if (!cross.isErrorBad()) {
+						feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+					} else {
+						feedbackStrings.add("cross error contains NaN");
+					}
+
+					if (!cross.isDirectionBad()) {
+						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					} else {
+						feedbackStrings.add("cross direction contains NaN");
+					}
 
 					break;
 				}
 			}
 		}
-		
-		//bmt crosses?
+
+		// bmt crosses?
 		crosses = BMTCrosses.getInstance().getCrosses();
 		len = (crosses == null) ? 0 : crosses.size();
 
-
-		if ((len > 0)  && (_bmtFBRects != null) && (_bmtFBRects.length == len)) {
+		if ((len > 0) && (_bmtFBRects != null) && (_bmtFBRects.length == len)) {
 			for (int i = 0; i < len; i++) {
 				if ((_bmtFBRects[i] != null) && _bmtFBRects[i].contains(screenPoint)) {
 
 					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+					feedbackStrings.add(
+							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
-					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
-					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
-					feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					if (!cross.isFullLocationBad()) {
+						feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+					} else {
+						feedbackStrings.add("cross location contains NaN");
+					}
+
+					if (!cross.isErrorBad()) {
+						feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+					} else {
+						feedbackStrings.add("cross error contains NaN");
+					}
+
+					if (!cross.isDirectionBad()) {
+						feedbackStrings.add(vecStr("cross direction", cross.ux, cross.uy, cross.uz));
+					} else {
+						feedbackStrings.add("cross direction contains NaN");
+					}
 
 					break;
 				}

@@ -38,15 +38,15 @@ public class RecoBankWriter {
 
     public void updateListsListWithClusterInfo(List<FittedHit> fhits,
             List<FittedCluster> clusters) {
+              
         for (int i = 0; i < clusters.size(); i++) {
             clusters.get(i).set_Id(i + 1);
             for (int j = 0; j < clusters.get(i).size(); j++) {
 
                 clusters.get(i).get(j).set_AssociatedClusterID(clusters.get(i).get_Id());
-
                 for (int k = 0; k < fhits.size(); k++) {
                     if (fhits.get(k).get_Id() == clusters.get(i).get(j).get_Id()) {
-                        fhits.remove(k);
+                        fhits.remove(k); 
                         fhits.add(clusters.get(i).get(j));
 
                     }
@@ -64,13 +64,14 @@ public class RecoBankWriter {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
             }
+            
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("status", i, (short) 0);
             bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
             bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
-            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+           // bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
             bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
@@ -80,7 +81,12 @@ public class RecoBankWriter {
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
-            bank.setFloat("B", i, (float) hitlist.get(i).get_B());
+            
+            bank.setInt("TDC",i,hitlist.get(i).get_TDC());
+            bank.setFloat("B", i, (float) hitlist.get(i).getB());
+            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
+            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
+
             if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
                 bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
                 bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
@@ -369,7 +375,7 @@ public class RecoBankWriter {
             bank.setFloat("X", i, (float) hitlist.get(i).get_X());
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-            bank.setFloat("time", i, (float) hitlist.get(i).getT0SubTime());
+           // bank.setFloat("time", i, (float) hitlist.get(i).getT0SubTime());
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
@@ -378,7 +384,12 @@ public class RecoBankWriter {
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedTBTrackID());
             bank.setFloat("timeResidual", i, (float) hitlist.get(i).get_TimeResidual());
 
-            bank.setFloat("B", i, (float) hitlist.get(i).get_B());
+            bank.setInt("TDC",i,hitlist.get(i).get_TDC());
+            bank.setFloat("B", i, (float) hitlist.get(i).getB());
+            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
+            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
+            bank.setFloat("T0", i, (float) hitlist.get(i).getT0());
+            bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart());
             
             if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
                 if(hitlist.get(i).getSignalPropagTimeAlongWire()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
@@ -728,11 +739,11 @@ public class RecoBankWriter {
         List<FittedHit> fhits = new ArrayList<FittedHit>();
 
         for (int i = 0; i < hits.size(); i++) {
-
             FittedHit fhit = new FittedHit(hits.get(i).get_Sector(), hits.get(i).get_Superlayer(),
-                    hits.get(i).get_Layer(), hits.get(i).get_Wire(), hits.get(i).get_Time(),
-                    hits.get(i).get_DocaErr(), hits.get(i).get_B(), hits.get(i).get_Id());
-            fhit.set_Doca(hits.get(i).get_Doca());
+                    hits.get(i).get_Layer(), hits.get(i).get_Wire(), hits.get(i).get_TDC(),
+                    hits.get(i).get_Id());
+            fhit.set_Id(hits.get(i).get_Id());
+            fhit.set_DocaErr(hits.get(i).get_DocaErr()); 
             fhits.add(fhit);
         }
         return fhits;

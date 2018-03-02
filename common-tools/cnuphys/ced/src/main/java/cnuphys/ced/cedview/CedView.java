@@ -378,11 +378,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * @return <code>true</code> if we are to show the bst reconstructed
 	 *         crosses.
 	 */
-	public boolean showReconsCrosses() {
+	public boolean showCrosses() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showBSTReconsCrosses();
+		return _controlPanel.getDisplayArray().showCrosses();
 	}
 
 	/**
@@ -392,11 +392,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * @return <code>true</code> if we are to show the dc hit-based
 	 *         reconstructed crosses.
 	 */
-	public boolean showDChbCrosses() {
+	public boolean showDCHBCrosses() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDChbCrosses();
+		return _controlPanel.getDisplayArray().showDCHBCrosses();
 	}
 	
 	
@@ -424,32 +424,33 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showTB();
 	}
 
-
 	/**
-	 * Convenience method to see it we show the the ftof reconstructed hits.
+	 * Convenience method to see it we show the the reconstructed clusters.
 	 * 
-	 * @return <code>true</code> if we are to show the the ftof reconstructed
-	 *         hits.
+	 * @return <code>true</code> if we are to show the the reconstructed
+	 *         clusters.
 	 */
-	public boolean showFTOFReconHits() {
+	public boolean showClusters() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showFTOFHits();
+		return _controlPanel.getDisplayArray().showClusters();
 	}
+
 	
 	/**
-	 * Convenience method to see it we show the FMT crosses.
+	 * Convenience method to see it we show the the reconstructed hits.
 	 * 
-	 * @return <code>true</code> we show the the FMT crosses.
+	 * @return <code>true</code> if we are to show the the reconstructed
+	 *         hits.
 	 */
-	public boolean showFMTCrosses() {
+	public boolean showReconHits() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showFMTCrosses();
+		return _controlPanel.getDisplayArray().showReconHits();
 	}
-
+	
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
@@ -458,47 +459,62 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * @return <code>true</code> if we are to show the dc time-based
 	 *         reconstructed crosses.
 	 */
-	public boolean showDCtbCrosses() {
+	public boolean showDCTBCrosses() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDCtbCrosses();
+		return _controlPanel.getDisplayArray().showDCTBCrosses();
 	}
 
 	/**
-	 * Convenience method to see it we show the dc time-based reconstructed
-	 * doca.
+	 * Convenience method to see it we show the dc hit based reconstructed
+	 * hits.
 	 * 
-	 * @return <code>true</code> if we are to show the dc time-based
-	 *         reconstructed doca.
+	 * @return <code>true</code> if we are to show the dc hit-based
+	 *         reconstructed hits.
 	 */
-	public boolean showDCtbDoca() {
+	public boolean showDCHBHits() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDCtbDoca();
+		return _controlPanel.getDisplayArray().showDCHBHits();
 	}
+	
+	/**
+	 * Convenience method to see it we show the dc time based reconstructed
+	 * hits.
+	 * 
+	 * @return <code>true</code> if we are to show the dc time-based
+	 *         reconstructed hits.
+	 */
+	public boolean showDCTBHits() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCTBHits();
+	}
+
 
 	/**
 	 * Should we draw hit based segments
 	 * @return whether we should draw hits based segments
 	 */
-	public boolean showDChbSegments() {
+	public boolean showDCHBSegments() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDChbSegments();
+		return _controlPanel.getDisplayArray().showDCHBSegments();
 	}
 
 	/**
 	 * Should we draw time based segments
 	 * @return whether we should draw time based segments
 	 */
-	public boolean showDCtbSegments() {
+	public boolean showDCTBSegments() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDCtbSegments();
+		return _controlPanel.getDisplayArray().showDCTBSegments();
 	}
 
 	/**

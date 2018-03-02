@@ -219,22 +219,14 @@ public class TrajectoryFinder {
         return traj;
     }
     private void fill_HelicalTrkAngleWRTBMTTangentPlane(Vector3D trkDir, StateVec stVec){
-        
-        // Bring the track direction vector in phi=0
         double phiPos = Math.atan2(stVec.y(),stVec.x());
-        Vector3D trkDirRot = trkDir.clone(); 
-        trkDirRot.rotateZ(phiPos); 
-        
-        // Compute the theta angle for the track vector component normal to the Micromegas strips
-        Vector3D trkDirRotSpher = new Vector3D (trkDirRot.z(), trkDirRot.x(), trkDirRot.y()); //Change axis to go to usual spherical coordinates
-        Vector3D trkDirRotSpherProjC = new Vector3D (trkDirRotSpher.x(), 0, trkDirRotSpher.z()); //Get the track vector component normal to strips for C Micromegas layers
-        Vector3D trkDirRotSpherProjZ = new Vector3D (0, trkDirRotSpher.y(), trkDirRotSpher.z()); //Get the track vector component normal to strips for Z Micromegas layers
-        double thetaC = Math.abs(Math.toRadians(90)-Math.abs(trkDirRotSpherProjC.theta())); //Get theta angle for C Micromegas layers
-        double thetaZ = Math.abs(Math.toRadians(90)-Math.abs(trkDirRotSpherProjZ.theta())); //Get theta angle for Z Micromegas layers
-        if ( (stVec.y()>0 && trkDir.x()<0)||(stVec.y()<0 && trkDir.x()>0) ){
-            thetaZ=-thetaZ;  //Negative thetaZ if track is going to negative x for y>0 or positive x for y<0
+        Vector3D trkDirRot = trkDir.clone();
+        trkDirRot.rotateZ(Math.PI/2-phiPos); // Bring the track direction vector in phi=0
+        double thetaC = Math.abs( Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y()/trkDirRot.z())) );
+        double thetaZ = Math.abs( Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y()/trkDirRot.x())) );
+        if ( (trkDirRot.y()>0 && trkDirRot.x()>0)||(trkDirRot.y()<0 && trkDirRot.x()<0) ){
+            thetaZ=-thetaZ;  //Negative thetaZ if track is going to negative phi
         }
-        
         if (stVec.z()<0){
             thetaC=-thetaC;  //Negative thetaC if track is going to negative z
         }

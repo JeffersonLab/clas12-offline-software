@@ -100,7 +100,7 @@ public class FTCALEngine extends ReconstructionEngine {
     }
 
     
-    public static void main (String arg[]) throws IOException {
+    public static void main (String arg[])  {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
 		String input = "/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/out.hipo";

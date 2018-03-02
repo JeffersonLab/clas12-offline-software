@@ -67,8 +67,12 @@ public class CrossMaker {
         //loop over the clusters
         // inner clusters
         for (Cluster inlayerclus : svt_innerlayrclus) {
+            if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+                continue;
             // outer clusters
             for (Cluster outlayerclus : svt_outerlayrclus) {
+                if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+                    continue;
                 // the diffence in layers between outer and inner is 1 for a double layer
                 if (outlayerclus.get_Layer() - inlayerclus.get_Layer() != 1) {
                     continue;
@@ -77,6 +81,8 @@ public class CrossMaker {
                 if (outlayerclus.get_Sector() != inlayerclus.get_Sector()) {
                     continue;
                 }
+                
+                    // define new cross ))
                 // a cut to avoid looping over all strips - from geometry there is a minimum (maximum) strip sum of inner and outer layers that can give a strip intersection
                 if ((inlayerclus.get_MinStrip() + outlayerclus.get_MinStrip() > Constants.sumStpNumMin)
                         && (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < Constants.sumStpNumMax)) { // the intersection is valid
@@ -95,6 +101,8 @@ public class CrossMaker {
                         //pass the cross to the arraylist of crosses
                         this_cross.set_Id(crosses.size() + 1);
                         this_cross.set_Detector("SVT");
+                        calcCentErr(this_cross, this_cross.get_Cluster1(), svt_geo);
+                        calcCentErr(this_cross, this_cross.get_Cluster2(), svt_geo);
                         crosses.add(this_cross);
                     }
 
@@ -104,6 +112,14 @@ public class CrossMaker {
         return crosses;
     }
 
+    private void calcCentErr(Cross c, Cluster Cluster1, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+        double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
+        if(Z<0)
+            Z=0;
+        if(Z>Constants.ACTIVESENLEN)
+            Z=Constants.ACTIVESENLEN;
+        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
+    }
     /**
      *
      * @param Clayrclus C layer BMT clusters
@@ -120,7 +136,7 @@ public class CrossMaker {
         // For BMT start id at 1000
         int pid = 1000;
         for (Cluster Zlayerclus : Zlayrclus) {
-            if (Zlayerclus.get_TotalEnergy() < 1) {
+            if (Zlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
                 continue;
             }
             // Z detector --> meas phi
@@ -155,7 +171,7 @@ public class CrossMaker {
         }
 
         for (Cluster Clayerclus : Clayrclus) {
-            if (Clayerclus.get_TotalEnergy() < 1) {
+            if (Clayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
                 continue;
             }
             // C detector --> meas z

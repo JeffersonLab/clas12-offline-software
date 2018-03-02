@@ -2,8 +2,6 @@ package cnuphys.ced.geometry.bmt;
 
 import java.util.Random;
 
-import org.jlab.geom.prim.Point3D;
-
 public class Geometry {
 
 	public Geometry() {
@@ -53,7 +51,7 @@ public class Geometry {
 	    //For CRZ, this function returns the angle to localize the  center of strip "num_strip" for the "num_detector"
 		int num_detector = this.getDetectorIndex(sector); 				// index of the detector (0...2)
 		//int num_strip = strip - 1;     									// index of the strip (starts at 0)
-		int num_region = (int) (layer+1)/2 - 1; 						// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; 						// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		
 		//double angle=Constants.getCRZEDGE1()[num_region][num_detector]+(Constants.getCRZXPOS()[num_region]+(Constants.getCRZWIDTH()[num_region]/2.+num_strip*(Constants.getCRZWIDTH()[num_region]+Constants.getCRZSPACING()[num_region])))/Constants.getCRZRADIUS()[num_region];
 		
@@ -71,7 +69,7 @@ public class Geometry {
 	 */
 	public int getZStrip(int layer, double angle) { // the angle is the Lorentz uncorrected angle
 		
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		int num_detector =isInDetector( layer,  angle) ;
 		if(num_detector==-1)
 			return -1;
@@ -98,14 +96,14 @@ public class Geometry {
 	}
 	
 	public double GetStartAngle(int sector, int layer) {
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		int num_detector = this.getDetectorIndex(sector); 
 		
 		return Constants.getCRCEDGE1()[num_region][num_detector];
 	}
 	
 	public double GetEndAngle(int sector, int layer) {
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		int num_detector = this.getDetectorIndex(sector); 
 		
 		return Constants.getCRCEDGE2()[num_region][num_detector];
@@ -118,7 +116,7 @@ public class Geometry {
 	 * @return the Z position of the strip center
 	 */
 	private double CRZ_GetZStrip(int layer){
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		//For CRZ, this function returns the Z position of the strip center
 		double zc=Constants.getCRZZMIN()[num_region]+Constants.getCRZOFFSET()[num_region]+Constants.getCRZLENGTH()[num_region]/2.;
 		return zc; //in mm
@@ -135,7 +133,7 @@ public class Geometry {
 	    // num_detector = 0 (region A), 1 (region B), 2, (region C)
 	    
 		int num_detector = this.getDetectorIndex(sector); 			// index of the detector (0...2)
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		
 		//For CRC, this function returns the angle to localize the beginning of the strips
 		double angle=Constants.getCRCEDGE1()[num_region][num_detector]+Constants.getCRCXPOS()[num_region]/Constants.getCRCRADIUS()[num_region];
@@ -154,7 +152,7 @@ public class Geometry {
 	    // num_detector = 0 (region A), 1 (region B), 2, (region C)
 	    
 		int num_detector = this.getDetectorIndex(sector); 			// index of the detector (0...2)
-		int num_region = (int) (layer+1)/2 - 1; 					// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; 					// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		
 		//For CRC, this function returns the angle to localize the end of the strips
 		double angle=Constants.getCRCEDGE1()[num_region][num_detector]+(Constants.getCRCXPOS()[num_region]+Constants.getCRCLENGTH()[num_region])/Constants.getCRCRADIUS()[num_region];
@@ -171,7 +169,7 @@ public class Geometry {
 	public double CRCStrip_GetZ(int layer, int strip){
 		
 		int num_strip = strip - 1;     			// index of the strip (starts at 0)
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 
 		//For CR6C, this function returns the Z position of the strip center
 		int group=0;
@@ -200,7 +198,7 @@ public class Geometry {
 	 */
 	public int getCStrip(int layer, double trk_z) { 
 		
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		int strip_group = 0;
 		int ClosestStrip =-1;
 		// get group
@@ -242,7 +240,7 @@ public class Geometry {
 	 */
 	public double getSigmaLongit(int layer, double x, double y) { // sigma for C-detector
 			
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		double sigma = Constants.SigmaMax*Math.sqrt((Math.sqrt(x*x+y*y)-Constants.getCRCRADIUS()[num_region]+Constants.hStrip2Det)/Constants.hDrift);
 		
 		return sigma;
@@ -258,7 +256,7 @@ public class Geometry {
 	 */
 	public double getSigmaAzimuth(int layer, double x, double y) { // sigma for Z-detectors
 		
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
 		double sigma = Constants.SigmaMax*Math.sqrt((Math.sqrt(x*x+y*y)-Constants.getCRZRADIUS()[num_region]+Constants.hStrip2Det)/Constants.hDrift/Math.cos(Constants.getThetaL()));
 		
 		return sigma;
@@ -278,7 +276,7 @@ public class Geometry {
 		double[] newPos = new double[3];
         Random rand = new Random();
         
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6;
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6;
 
 		double sigma =0;
 		if(layer%2==0)  {// C layer
@@ -331,7 +329,7 @@ public class Geometry {
 		
 		boolean isInFid = false;
 		
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6;
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6;
 		
 		double z_i = CRZ_GetZStrip(layer) - Constants.getCRZLENGTH()[num_region]/2.; // fiducial z-profile lower limit
 		double z_f = CRZ_GetZStrip(layer) + Constants.getCRZLENGTH()[num_region]/2.; // fiducial z-profile upper limit
@@ -370,7 +368,7 @@ public class Geometry {
 	// in A (index 0), B (index 1), in C (index 2)
 	public int isInDetector(int layer, double angle) {
 
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		if(angle<0)
 			angle+=2*Math.PI; // from 0 to 2Pi
 		double angle_pr = angle + 2*Math.PI;
@@ -406,7 +404,7 @@ public class Geometry {
 
 	public double LorentzAngleCorr(double phi, int layer) {
 
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int num_region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		
 		return phi +( Constants.hDrift/2*Math.tan(Constants.getThetaL()) )/Constants.getCRZRADIUS()[num_region];
 		
@@ -469,7 +467,7 @@ public class Geometry {
 	}
 	
 	public void getCRZEndPoints(int sector, int layer, int strip, float[] coords) {
-		int region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int region = (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 		int numStrips =  Constants.getCRZNSTRIPS()[region];
 		
 		if ((strip < 1) || (strip > numStrips)) {

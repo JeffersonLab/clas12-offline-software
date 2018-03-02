@@ -18,9 +18,10 @@ import org.jlab.utils.data.DataUtils;
  */
 public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
     
-    private final List<ADCData>    adcStore   = new ArrayList<ADCData>();
-    private final List<TDCData>    tdcStore   = new ArrayList<TDCData>();
-    private final List<VTPData>    vtpStore   = new ArrayList<VTPData>();
+    private final List<ADCData>       adcStore   = new ArrayList<ADCData>();
+    private final List<TDCData>       tdcStore   = new ArrayList<TDCData>();
+    private final List<VTPData>       vtpStore   = new ArrayList<VTPData>();
+    private final List<SCALERData> scalerStore   = new ArrayList<SCALERData>();
     //private final List<ADCPulse>  pulseStore = new ArrayList<ADCPulse>();    
     private Long                 timeStamp = 0L;
     
@@ -54,6 +55,11 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         return this;
     }
     
+    public DetectorDataDgtz addSCALER(SCALERData scaler){
+        this.scalerStore.add(scaler);
+        return this;
+    }
+    
     public void setTimeStamp(long time){
         this.timeStamp = time;
     }
@@ -83,6 +89,10 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             str.append(data);
         }
         
+        for(SCALERData data : this.scalerStore){
+            str.append(data);
+        }
+        
         return str.toString();
     }
 
@@ -98,6 +108,10 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         return this.vtpStore.get(index);
     }
     
+    public SCALERData getSCALERData(int index){
+        return this.scalerStore.get(index);
+    }
+    
     public int getADCSize(){
         return this.adcStore.size();
     }
@@ -108,6 +122,10 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
     
     public int getVTPSize(){
         return this.vtpStore.size();
+    }
+    
+    public int getSCALERSize(){
+        return this.scalerStore.size();
     }
     
     @Override
@@ -356,6 +374,59 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         }
 
         public int compareTo(VTPData o) {
+            if(this.getOrder()<o.getOrder()) return -1;
+            return 1;
+        }     
+    }
+    
+    public static class SCALERData implements Comparable<SCALERData>{
+        
+        private int  scalerOrder = 0;
+        private byte helicity    = -1;
+        private byte quartet     = -1;
+        private int  value       = 0;
+
+        
+        
+        public SCALERData() {}
+
+        public byte getHelicity() {
+            return helicity;
+        }
+
+        public byte getQuartet() {
+            return quartet;
+        }
+
+        public int getValue() {
+            return value;        
+        }
+        
+        public int getOrder() { return scalerOrder;}
+        
+        public SCALERData  setOrder(int order) { scalerOrder = order; return this;}
+
+        public SCALERData setHelicity(byte scaler) {
+            this.helicity = scaler;
+            return this;
+        }
+
+        public SCALERData setQuartet(byte quartet) {
+            this.quartet = quartet;
+            return this;
+        }
+
+        public SCALERData setValue(int value) {
+            this.value = value;
+            return this;
+        }
+        
+        @Override
+        public String toString(){
+            return String.format("SCALER (%d): %d \t %d \t %d", getOrder(),getHelicity(),getQuartet(),getValue());
+        }
+
+        public int compareTo(SCALERData o) {
             if(this.getOrder()<o.getOrder()) return -1;
             return 1;
         }        

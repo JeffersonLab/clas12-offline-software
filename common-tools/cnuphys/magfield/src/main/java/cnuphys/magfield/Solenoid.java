@@ -53,7 +53,8 @@ public final class Solenoid extends MagneticField {
      * Is the physical solenoid represented by the map misaligned?
      * @return <code>true</code> if solenoid is misaligned
      */
-    public boolean isMisaligned() {
+    @Override
+	public boolean isMisaligned() {
     	return (Math.abs(_shiftZ) > MISALIGNTOL);
     }
 	

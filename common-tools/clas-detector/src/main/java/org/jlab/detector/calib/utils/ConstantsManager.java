@@ -23,6 +23,7 @@ public class ConstantsManager {
     private DatabaseConstantsDescriptor  defaultDescriptor = new DatabaseConstantsDescriptor();
     private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
     private String   databaseVariation = "default";
+    private String   timeStamp         = "";
     
     public ConstantsManager(){
         
@@ -38,6 +39,10 @@ public class ConstantsManager {
     
     public void setVariation(String variation){
         this.databaseVariation = variation;
+    }
+    
+    public void setTimeStamp(String timestamp){
+        this.timeStamp = timestamp;
     }
     
     public synchronized void init(List<String>  tables){
@@ -70,7 +75,8 @@ public class ConstantsManager {
         System.out.println("[ConstantsManager] --->  loading table for run = " + run);
         DatabaseConstantsDescriptor desc = defaultDescriptor.getCopy(run);
         DatabaseConstantProvider provider = new DatabaseConstantProvider(run,
-                this.databaseVariation);
+                this.databaseVariation, this.timeStamp);
+        
         
         List<String>   tn = new ArrayList<String>(desc.getTableNames());
         List<String>   tk = new ArrayList<String>(desc.getTableKeys());

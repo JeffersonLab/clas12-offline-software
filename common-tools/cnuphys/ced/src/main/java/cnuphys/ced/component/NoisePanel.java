@@ -44,7 +44,7 @@ public class NoisePanel extends JPanel implements ActionListener, ItemListener {
 		ButtonGroup bg = new ButtonGroup();
 
 		_showNoiseAnalysis = ComponentSupport.makeCheckBox("Noise analysis",
-				true, true, this);
+				true, false, this);
 		_highlightNoise = ComponentSupport.makeRadioButton("Highlight noise",
 				bg, false, true, this);
 		_hideNoise = ComponentSupport.makeRadioButton("Hide noise", bg, false,

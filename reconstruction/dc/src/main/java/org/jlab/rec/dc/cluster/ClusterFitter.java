@@ -72,12 +72,6 @@ public class ClusterFitter {
         FitArray.add((ArrayList<Double>) y);
         FitArray.add((ArrayList<Double>) ey);
         
-        //fitArray[1] = x;
-        //fitArray[1] = ex;
-        //fitArray[2] = y;
-        //fitArray[3] = ey;
-
-        //this.FitArray = fitArray;
     }
 
     public void Fit(FittedCluster clus, boolean SaveFitPars) {
