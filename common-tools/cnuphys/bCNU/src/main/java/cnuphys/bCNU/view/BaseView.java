@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -272,6 +273,13 @@ public class BaseView extends JInternalFrame implements FocusListener {
 			}
 		};
 		addComponentListener(ca);
+	}
+	
+	@Override
+	public Insets getInsets() {
+		Insets def = super.getInsets();
+		return new Insets(def.top, def.left, 2,
+				def.right);
 	}
 	
 	/**

@@ -1,19 +1,23 @@
 package cnuphys.ced.trigger;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
 
+import javax.swing.JDialog;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.dialog.SimpleDialog;
+import cnuphys.ced.frame.Ced;
 
-public class TriggerDialog extends SimpleDialog  {
+public class TriggerDialog extends JDialog  {
 	
 	private static final int NUMTODISPLAY = 1;  //1..3
 
-	// button names for closeout
-	private static String[] closeoutButtons = {};
 	
 	// reason the dialog was closed
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
@@ -21,18 +25,57 @@ public class TriggerDialog extends SimpleDialog  {
 	//singleton
 	private static TriggerDialog _instance;
 	
+	//first display
+	private static boolean first = true;
+	
 	//trigger panels
 	private TriggerPanel triggerPanels[];
 	
 
 	//private constructor
 	private TriggerDialog() {
-		super("Trigger Bits", false, closeoutButtons);
-	
-		checkButtons();
+		super(Ced.getCed(), "Trigger Bits", false);
+		setLayout(new BorderLayout(0, 0));
+		add(createNorthComponent(), BorderLayout.NORTH);
+
+		
 		setAlwaysOnTop(true);
 		pack();
-		DialogUtilities.upperRightComponent(this, 2, 50);
+				
+		DialogUtilities.upperRightComponent(this, 2, 0);
+	}
+	
+	@Override
+	public Insets getInsets() {
+		Insets def = super.getInsets();
+		return new Insets(def.top + 1, def.left, def.bottom,
+				def.right);
+	}
+
+	
+	@Override
+	public void setVisible(boolean visible) {
+		if (first) {
+			Ced ced = Ced.getCed();
+			if (ced != null) {
+				
+				Insets insets = ced.getInsets();
+				int tbHeight = insets.top;
+				
+				
+				JMenuBar mb = ced.getJMenuBar();
+				
+				int mbHeight = mb.getBounds().height;
+				
+				Point loc = getLocation();
+				loc.y += (tbHeight + mbHeight);
+				setLocation(loc);
+				loc = getLocation();
+				
+			}
+			first = false;
+		}
+		super.setVisible(visible);
 	}
 	
 	public static void showDialog() {
@@ -45,21 +88,12 @@ public class TriggerDialog extends SimpleDialog  {
 		}
 		return _instance;
 	}
-	
-	/**
-	 * Check the enabled state of all the buttons. Default implementation does
-	 * nothing.
-	 */
-	@Override
-	protected void checkButtons() {
-	}
-	
+		
 	/**
 	 * Override to create the component that goes in the north.
 	 * 
 	 * @return the component that is placed in the north
 	 */
-	@Override
 	protected Component createNorthComponent() {
 		triggerPanels = new TriggerPanel[NUMTODISPLAY];
 		for (int i = 0; i < NUMTODISPLAY; i++) {
