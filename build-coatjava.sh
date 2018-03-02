@@ -11,6 +11,7 @@ mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
 cp external-dependencies/KPP-Monitoring-1.0.jar coatjava/lib/utils
 cp external-dependencies/KPP-Plots-1.0.jar coatjava/lib/utils
+cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
@@ -26,10 +27,10 @@ cd common-tools/coat-lib
 mvn package
 if [ $? != 0 ] ; then echo "common tools failure 2" ; exit 1 ; fi
 cd -
-cp common-tools/coat-lib/target/coat-libs-5.0-SNAPSHOT.jar coatjava/lib/clas/
+cp common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar coatjava/lib/clas/
 
 ### create local mvn repo containing coat-libs and jcsg ##
-mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-5.0-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
+mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
 if [ $? != 0 ] ; then echo "failed to create local mvn repo" ; exit 1 ; fi
  
 ### dc (depends on jcsg) ###
@@ -98,6 +99,13 @@ mvn install
 if [ $? != 0 ] ; then echo "rich failure" ; exit 1 ; fi
 cd -
 cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
+
+### fvt ###
+cd reconstruction/fvt
+mvn install
+if [ $? != 0 ] ; then echo "fvt failure" ; exit 1 ; fi
+cd -
+cp reconstruction/fvt/target/clas12detector-fvt-1.0-SNAPSHOT.jar coatjava/lib/services/
 
 ### eb ###
 cd reconstruction/eb

@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
-import java.io.Writer;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;

@@ -43,6 +43,13 @@ public class Cross {
 		this.err_uz = err_uz;
 	}
 	
+	public boolean isDirectionBad() {
+		return Float.isNaN(ux) ||
+				Float.isNaN(uy) || Float.isNaN(uz);
+	}
+	
+
+	
 	public void setLocation(Point pp) {
 		_screenLocation.x = pp.x;
 		_screenLocation.y = pp.y;

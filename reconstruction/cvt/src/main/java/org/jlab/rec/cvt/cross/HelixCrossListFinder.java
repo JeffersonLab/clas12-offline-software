@@ -7,6 +7,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
 
@@ -83,6 +84,7 @@ public class HelixCrossListFinder {
             }
         }
         for(Cross c : allCrossList){
+            //System.out.println(" CROSSLISTER "+c.printInfo());
             if(c.get_Detector().equalsIgnoreCase("SVT"))
                 theListsByRegion.get(c.get_Region()-1).add(c);
             if(c.get_Detector().equalsIgnoreCase("BMT") && c.get_DetectorType().equalsIgnoreCase("Z"))
@@ -105,33 +107,47 @@ public class HelixCrossListFinder {
                 for (int i4 = 0; i4 < theListsByRegion.get(3).size(); i4++) {
                     for (int i5 = 0; i5 < theListsByRegion.get(4).size(); i5++) {
                         for (int i6 = 0; i6 < theListsByRegion.get(5).size(); i6++) {
-                            Seed cand ;
+                            Seed cand ; 
+                            //System.out.println("-----");
+                            //if(theListsByRegion.get(1).get(i2)!=null) System.out.println(" 5-l "+theListsByRegion.get(1).get(i2).printInfo());
+                            //if(theListsByRegion.get(2).get(i3)!=null) System.out.println(" 5-l "+theListsByRegion.get(2).get(i3).printInfo());
+                            //if(theListsByRegion.get(3).get(i4)!=null) System.out.println(" 5-l "+theListsByRegion.get(3).get(i4).printInfo());
+                            //if(theListsByRegion.get(4).get(i5)!=null) System.out.println(" 5-l "+theListsByRegion.get(4).get(i5).printInfo());
+                            //if(theListsByRegion.get(5).get(i6)!=null) System.out.println(" 5-l "+theListsByRegion.get(5).get(i6).printInfo());
                             cand = this.isTrack5(
                                     theListsByRegion.get(1).get(i2), 
                                     theListsByRegion.get(2).get(i3), 
                                     theListsByRegion.get(3).get(i4), 
                                     theListsByRegion.get(4).get(i5),
                                     theListsByRegion.get(5).get(i6));
-                            if(cand==null) {
+                            if(cand!=null && this.ContainsSeed(CirTrks, cand)==false) {
                                 CirTrks.add(cand);
+                                continue;
                             } else {
-                                for (int l = 0; l < C4.length; l++) {
+                                for (int l = 0; l < C4.length; l++) { 
+                              //      System.out.println("0) TRAC 4 regions "+C4[l][0]+" cnt "+this.match(C4[l][0], i2, i3, i4, i5, i6));
+                              //      System.out.println("1) TRAC 4 regions "+C4[l][1]+" cnt "+this.match(C4[l][1], i2, i3, i4, i5, i6));
+                              //      System.out.println("2) TRAC 4 regions "+C4[l][2]+" cnt "+this.match(C4[l][2], i2, i3, i4, i5, i6));
+                              //      System.out.println("3) TRAC 4 regions "+C4[l][3]+" cnt "+this.match(C4[l][3], i2, i3, i4, i5, i6));
                                     cand = this.isTrack4(
                                         theListsByRegion.get(C4[l][0] - 1).get(this.match(C4[l][0], i2, i3, i4, i5, i6)),
                                         theListsByRegion.get(C4[l][1] - 1).get(this.match(C4[l][1], i2, i3, i4, i5, i6)), 
                                         theListsByRegion.get(C4[l][2] - 1).get(this.match(C4[l][2], i2, i3, i4, i5, i6)),
                                         theListsByRegion.get(C4[l][3] - 1).get(this.match(C4[l][3], i2, i3, i4, i5, i6)));
 
-                                    if(cand==null) {
-                                        CirTrks.add(cand);
+                                    if(cand!=null && this.ContainsSeed(CirTrks, cand)==false) {
+                                        CirTrks.add(cand); 
+                                        continue;
                                     } else {
                                         for(int ll = l*4; ll<((l+1)*4-1); ll++) {
                                             cand = this.isTrack3(
                                                 theListsByRegion.get(C3[ll][0] - 1).get(this.match(C3[ll][0], i2, i3, i4, i5, i6)),
                                                 theListsByRegion.get(C3[ll][1] - 1).get(this.match(C3[ll][1], i2, i3, i4, i5, i6)), 
                                                 theListsByRegion.get(C3[ll][2] - 1).get(this.match(C3[ll][2], i2, i3, i4, i5, i6)));
-                                            if(cand!=null)
-                                                CirTrks.add(cand);
+                                            if(cand!=null && this.ContainsSeed(CirTrks, cand)==false) {
+                                                CirTrks.add(cand); 
+                                                continue;
+                                            }
                                         }
                                     }
                                 }
@@ -141,34 +157,42 @@ public class HelixCrossListFinder {
                 }
             }
         }
-  
-        for(Seed s : CirTrks) {
-            this.MatchToRegion1(s, theListsByRegion.get(0), svt_geo); 
-        }
-        
-          
-        for(Seed s : CirTrks) {
+         
+        for(Seed s : CirTrks) { 
             if(s==null)
                 continue;
-            this.MathBMTC(s, theListsByRegionBMTC.get(0), svt_geo); // match the seed to each BMT region
-            this.MathBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
-            this.MathBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
+            
+            
+            //this.MatchBMTC(s, theListsByRegionBMTC.get(0), svt_geo); // match the seed to each BMT region
+            //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
+            //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
+           
             Track trk = s.seedFit.fitSeed(s, svt_geo, 3, true);
             if(trk==null)
                 continue;
+            //match to r1
+            MatchToRegion1( s, theListsByRegion.get(0), svt_geo); 
             org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
+            
             trkSeed.set_Crosses(s);
             List<Cluster> clusters = new ArrayList<Cluster>();
-            for(Cross c : s ) {
+            System.out.println(" seed crosses ");
+            for(Cross c : s ) { System.out.println(" --> "+c.printInfo());
                 if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                    c.get_Cluster1().set_CentroidError(this.calcCentErr(c, c.get_Cluster1(), svt_geo));
+                    c.get_Cluster2().set_CentroidError(this.calcCentErr(c, c.get_Cluster2(), svt_geo));
+                    
                     clusters.add(c.get_Cluster1());
                     clusters.add(c.get_Cluster2());
                 }
                 if(c.get_Detector().equalsIgnoreCase("BMT")) {
                     clusters.add(c.get_Cluster1());
+                    
                 }
             }
+            
             trkSeed.set_Clusters(clusters);
+           
             trkSeed.set_Helix(trk.get_helix());
             seedList.add(trkSeed);
         }
@@ -321,6 +345,7 @@ public class HelixCrossListFinder {
     private Seed isTrack4(Cross c1, Cross c2, Cross c3, Cross c4) {
         if(c1==null || c2==null || c3==null || c4==null)
             return null;
+        
         double phi12 = Math.abs(relPhi(c1, c2));
         if (phi12 > Constants.phi12cut) {
             return null;
@@ -389,11 +414,17 @@ public class HelixCrossListFinder {
     }
 
     private double relPhi(Cross c1, Cross c2) {
-        double cos_ZDiff = -1;
-        Vector3D bt1 = new Vector3D(c1.get_Point().x(), c1.get_Point().y(),0);
-        Vector3D bt2 = new Vector3D(c2.get_Point().x(), c2.get_Point().y(),0);
-        cos_ZDiff = bt1.asUnit().dot(bt2.asUnit());
-        return Math.toDegrees(Math.acos(cos_ZDiff));
+        //double cos_ZDiff = -1;
+        double x1 = c1.get_Point().x();
+        double y1 = c1.get_Point().y();
+        double x2 = c2.get_Point().x();
+        double y2 = c2.get_Point().y();
+        double n1 = Math.sqrt(x1*x1+y1*y1);
+        double n2 = Math.sqrt(x2*x2+y2*y2);
+        //Vector3D bt1 = new Vector3D(c1.get_Point().x(), c1.get_Point().y(),0);
+        //Vector3D bt2 = new Vector3D(c2.get_Point().x(), c2.get_Point().y(),0);
+        //cos_ZDiff = bt1.asUnit().dot(bt2.asUnit());
+        return Math.toDegrees(Math.acos((x1*x2+y1*y2)/(n1*n2)));
     }
     
     private double radCurvature(Cross c1, Cross c2, Cross c3) {
@@ -416,16 +447,19 @@ public class HelixCrossListFinder {
     }
 
     private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+        
         if(s==null)
             return;
         Track cand = s.seedFit.fitSeed(s, svt_geo, 3, true);
         if(cand==null)
             return;
+         
         Point3D trkAtR1 =cand.get_helix().getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[0][0]+org.jlab.rec.cvt.svt.Constants.LAYRGAP/2);
         List<Cross> candMatches = new ArrayList<Cross>();
         for (int i = 0; i < R1Crosses.size(); i++) {
             if(R1Crosses.get(i)==null)
                 continue;
+            
             if(Math.abs(Math.sqrt(trkAtR1.x()*trkAtR1.x()+trkAtR1.y()*trkAtR1.y()) - 
                     Math.sqrt(R1Crosses.get(i).get_Point().x()*R1Crosses.get(i).get_Point().x()+R1Crosses.get(i).get_Point().y()*R1Crosses.get(i).get_Point().y()))<2)
                 candMatches.add(R1Crosses.get(i));
@@ -440,18 +474,18 @@ public class HelixCrossListFinder {
                     +svt_geo.getDOCAToStrip(candMatches.get(i).get_Sector(), candMatches.get(i).get_Cluster2().get_Layer(), candMatches.get(i).get_Cluster2().get_Centroid(), trkAtL2);
             if(d<dMin) {
                 dMin =d;
-                cMatch = candMatches.get(i);
+                cMatch = (Cross) candMatches.get(i).clone();
             }
         }
-        if(cMatch != null)
+        if(cMatch != null) 
             s.add(cMatch);
-
+  
     }
 
-    private void MathBMTC(Seed s, ArrayList<Cross> BMTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo) {
         
         Track cand = s.seedFit.fitSeed(s, svt_geo, 3, true);
-        if(cand==null)
+        if(s==null)
             return;
         double maxChi2 = Double.POSITIVE_INFINITY;
         Cross BestMatch = null;
@@ -466,13 +500,41 @@ public class HelixCrossListFinder {
             double linechi2perndf = cand.get_lineFitChi2PerNDF();
             if(linechi2perndf<maxChi2) {
                 maxChi2 = linechi2perndf;
-                BestMatch = BMTCrosses.get(i);
+                BestMatch = (Cross) BMTCrosses.get(i).clone();
             }
             s.remove(s.size()-1);
         }
         if(BestMatch!=null)
             s.add(BestMatch);
+           
         }
+    }
+
+    private boolean ContainsSeed(List<Seed> CirTrks, Seed cand) {
+        boolean inSeed = false;
+       
+        for(int i = 0; i<CirTrks.size(); i++) {
+            int NbOverlaps =0;
+            for(Cross ci: CirTrks.get(i)) {
+                for(Cross c: cand)
+                    if(c.get_Id()==ci.get_Id())
+                        NbOverlaps++;
+            }
+            if(CirTrks.get(i).size()==NbOverlaps)
+                CirTrks.remove(i);
+            if(cand.size()==NbOverlaps)
+                inSeed=true;
+        }
+        return inSeed;
+    }
+
+    private double calcCentErr(Cross c, Cluster Cluster1, Geometry svt_geo) {
+        double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
+        if(Z<0)
+            Z=0;
+        if(Z>Constants.ACTIVESENLEN)
+            Z=Constants.ACTIVESENLEN;
+        return Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.));
     }
     /**
      * A class representing the seed object. The seed of a track is the initial

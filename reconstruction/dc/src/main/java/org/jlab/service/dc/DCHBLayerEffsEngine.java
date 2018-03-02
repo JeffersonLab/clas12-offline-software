@@ -287,7 +287,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 	}
 
 
-	public static void main(String[] args) throws FileNotFoundException, EvioException {
+	public static void main(String[] args) {
 
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
         //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";

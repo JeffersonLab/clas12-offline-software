@@ -1,6 +1,5 @@
 package cnuphys.magfield;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

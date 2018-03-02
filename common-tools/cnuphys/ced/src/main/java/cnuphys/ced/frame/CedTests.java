@@ -1,7 +1,6 @@
 package cnuphys.ced.frame;
 
 import java.awt.Color;
-import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
 
@@ -14,7 +13,6 @@ import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.Torus;
 import cnuphys.magfield.TorusMap;
-import cnuphys.magfield.TorusProbe;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.splot.example.APlotDialog;
 import cnuphys.splot.fit.FitType;

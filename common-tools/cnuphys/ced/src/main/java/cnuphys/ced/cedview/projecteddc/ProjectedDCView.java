@@ -1,6 +1,7 @@
 package cnuphys.ced.cedview.projecteddc;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -76,6 +77,9 @@ public class ProjectedDCView extends CedView implements ISector {
 
 	// for drawing MC hits
 	private McHitDrawer _mcHitDrawer;
+	
+	//reconstructed DC data drawer
+	private ReconDrawer _reconDrawer;
 
 	public ProjectedDCView(Object... keyVals) {
 		super(keyVals);
@@ -94,6 +98,9 @@ public class ProjectedDCView extends CedView implements ISector {
 		
 		// MC hit drawer
 		_mcHitDrawer = new McHitDrawer(this);
+		
+		//Reconstructed DC data
+		_reconDrawer = new ReconDrawer(this);
 	}
 	
 	/**
@@ -135,10 +142,8 @@ public class ProjectedDCView extends CedView implements ISector {
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
 				+ ControlPanel.DISPLAYARRAY 
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
-				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.DC_HB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_CROSSES
-				+ DisplayBits.DC_TB_RECONS_DOCA + DisplayBits.DC_HB_RECONS_SEGMENTS 
-				+ DisplayBits.DC_TB_RECONS_SEGMENTS
+				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.CROSSES
+				+ DisplayBits.DC_HITS + DisplayBits.SEGMENTS 
 				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
 				+ DisplayBits.ACCUMULATION
 				+ DisplayBits.MCTRUTH, 3, 5);
@@ -218,17 +223,19 @@ public class ProjectedDCView extends CedView implements ISector {
 					}
 				}
 				
-				
+				// draw reconstructed data
+				_reconDrawer.draw(g, container);
+
 				g.setClip(oldclip);
 				pview.projectionPlane = oldplane;
 				
 
 				// draw reconstructed dc crosses
-				if (showDChbCrosses()) {
+				if (showDCHBCrosses()) {
 					_crossDrawer.setMode(CrossDrawer.HB);
 					_crossDrawer.draw(g, container);
 				}
-				if (showDCtbCrosses()) {
+				if (showDCTBCrosses()) {
 					_crossDrawer.setMode(CrossDrawer.TB);
 					_crossDrawer.draw(g, container);
 				}
@@ -391,11 +398,11 @@ public class ProjectedDCView extends CedView implements ISector {
 		}
 
 		// reconstructed feedback?
-		if (showDChbCrosses()) {
+		if (showDCHBCrosses()) {
 			_crossDrawer.setMode(CrossDrawer.HB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
-		if (showDCtbCrosses()) {
+		if (showDCTBCrosses()) {
 			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
@@ -403,6 +410,9 @@ public class ProjectedDCView extends CedView implements ISector {
 		if (showMcTruth()) {
 			_mcHitDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
+
+		
+		_reconDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 
 	}
 
@@ -476,6 +486,31 @@ public class ProjectedDCView extends CedView implements ISector {
 
 		return (sector == _sector);
 	}
+	
+	/**
+	 * Draw a single wire. All indices are 1-based
+	 * @param g
+	 * @param container
+	 * @param fillColor
+	 * @param frameColor
+	 * @param sector 1-based sector
+	 * @param superlayer
+	 * @param layer
+	 * @param wire
+	 * @param trkDoca
+	 */
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte sector,
+			byte superlayer, byte layer, short wire, float trkDoca, Point location) {
+
+		if (_sector != sector) {
+			return;
+		}
+		ProjectedSuperLayer sectSL = _superLayers[superlayer-1];
+		sectSL.drawDCHit(g, container, fillColor, frameColor, 
+				layer, wire, trkDoca, location);
+		
+	}
+
 	
 	
 	/**

@@ -22,23 +22,59 @@ import org.jlab.io.hipo.HipoDataSource;
 
 public class RICHEBEngine extends ReconstructionEngine {
 
-	public RICHEBEngine() {
-		super("RICHEB", "mcontalb-kenjo", "3.0");
+    RICHEventBuilder reco;
+    int Run = -1;
+    int debugMode=0;
+    
+    // ----------------
+    public RICHEBEngine() {
+    // ----------------
+        super("RICHEB", "mcontalb-kenjo", "3.0");
+
+    }
+
+    @Override
+    // ----------------
+    public boolean init() {
+    // ----------------
+        //config = new FTConfig();
+
+	if(debugMode>=1){
+	    System.out.print("RICH Engine Initialization");
+	}
+        reco = new RICHEventBuilder();
+	reco.init();
+        reco.debugMode=0;
+
+        return true;
+
+    }
+
+
+    @Override
+    // ----------------
+    public boolean processDataEvent(DataEvent event) {
+    // ----------------
+
+	if(debugMode>=1){
+	    System.out.print("RICH Engine: Event Process");
 	}
 
-	int Run = -1;
-	
-	@Override
-	public boolean init() {
-		return true;
-	}
+	reco.ProcessRawPMTData(event);
 
-	@Override
-	public boolean processDataEvent(DataEvent event) {
-            return true;
-	}
-	
-        
-    public static void main (String arg[]) throws IOException {
-	}
+	/*
+        List<FTParticle> FTparticles = new ArrayList<FTParticle>();
+        List<FTResponse> FTresponses = new ArrayList<FTResponse>();
+
+        //Run = config.setRunConditionsParameters(event, "FTEB", Run);
+        reco.init(config.getSolenoid());
+        FTresponses = reco.addResponses(event);
+        FTparticles = reco.initFTparticles(FTresponses);
+        reco.matchToHODO(FTresponses, FTparticles);
+        reco.writeBanks(event, FTparticles);
+	*/
+        return true;
+
+    }
+    
 }

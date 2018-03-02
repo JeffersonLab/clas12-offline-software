@@ -11,11 +11,7 @@ import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
-import cnuphys.ced.event.data.BST;
-import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.geometry.BMTGeometry;
-import cnuphys.ced.geometry.BSTGeometry;
-import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.bmt.Constants;
 import cnuphys.lund.X11Colors;
 
@@ -44,7 +40,7 @@ public class BMTLayer3D extends DetectorItem3D {
 	@Override
 	public void drawShape(GLAutoDrawable drawable) {
 		float coords6[] = new float[6];
-		int region = (int) (_layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int region = (_layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 
 		Color color = (BMTGeometry.getGeometry().isZLayer(_layer) ? X11Colors.getX11Color("gray", getVolumeAlpha())
 				: X11Colors.getX11Color("light green", getVolumeAlpha()));
@@ -84,7 +80,7 @@ public class BMTLayer3D extends DetectorItem3D {
 								BMTGeometry.getGeometry().getCRZEndPoints(sector, layer, strip, coords6);
 
 								if (!Float.isNaN(coords6[0])) {							
-									Support3D.drawLine(drawable, coords6, dgtzColor, 2f);
+									Support3D.drawLine(drawable, coords6, dgtzColor, STRIPLINEWIDTH);
 								}
 							}
 						}

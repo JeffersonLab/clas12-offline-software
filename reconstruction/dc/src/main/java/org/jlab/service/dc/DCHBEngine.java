@@ -1,11 +1,9 @@
 package org.jlab.service.dc;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.coda.jevio.EvioException;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -39,7 +37,11 @@ import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 
+//import org.jlab.service.eb.EBHBEngine;
+//import org.jlab.service.eb.EBTBEngine;
+//import org.jlab.service.ftof.FTOFEngine;
 
 public class DCHBEngine extends ReconstructionEngine {
 
@@ -148,7 +150,7 @@ public class DCHBEngine extends ReconstructionEngine {
             Run = newRun;
         }
 		 // init SNR
-        Clas12NoiseResult results = new Clas12NoiseResult();
+                Clas12NoiseResult results = new Clas12NoiseResult();
 		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
 
 		int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
@@ -159,7 +161,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		//System.out.println("RUNING HITBASED_________________________________________");
 	  
 		ClusterFitter cf = new ClusterFitter();
-        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+                ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 	    
                 List<FittedHit> fhits = new ArrayList<FittedHit>();
 		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -176,7 +178,8 @@ public class DCHBEngine extends ReconstructionEngine {
 
 		HitReader hitRead = new HitReader();
 		//hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
+		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, 
+                        this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
 
 		List<Hit> hits = new ArrayList<Hit>();
 		//I) get the hits
@@ -189,8 +192,6 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 
 		fhits = rbc.createRawHitList(hits);
-				
-		
 		//2) find the clusters from these hits
 		ClusterFinder clusFinder = new ClusterFinder();
 		clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
@@ -212,16 +213,13 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
 		//RoadFinder
 		//
-		
 		RoadFinder pcrossLister = new RoadFinder();
 		List<Segment> pSegments =pcrossLister.findRoads(segments, dcDetector);
 		segments.addAll(pSegments);
 		
-		//
-		//System.out.println("nb trk segs "+pSegments.size());
 		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments, dcDetector);
- 
+                
 		if(crosses.size()==0 ) {			
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
 			return true;
@@ -259,7 +257,7 @@ public class DCHBEngine extends ReconstructionEngine {
 		for(Track trk: trkcands) {
                     
                     for(Cross c : trk) { 
-                            for(FittedHit h1 : c.get_Segment1())
+                            for(FittedHit h1 : c.get_Segment1()) 
                                     h1.set_AssociatedHBTrackID(trk.get_Id());
                             for(FittedHit h2 : c.get_Segment2())
                                     h2.set_AssociatedHBTrackID(trk.get_Id());	
@@ -291,26 +289,26 @@ public class DCHBEngine extends ReconstructionEngine {
 	}
 
 
-	public static void main(String[] args) throws FileNotFoundException, EvioException {
+	public static void main(String[] args)  {
 
-        //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas_000767_000.hipo";
-        //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/clas12_000797_a00000.hipo";
-        //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/e2to6hipo.hipo";
-        // String inputFile="/Users/ziegler/Downloads/out.hipo";
-        //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/Run758.hipo";
-        //String inputFile = "/Users/ziegler/Workdir/Distribution/coatjava-4a.0.0/old/RaffaNew.hipo";
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/ENG/clas_001894.1.hipo";
-        //String inputFile="/Users/ziegler/Workdir/Files/test/electron_fd_t0.8torus.hipo";
-        //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         DCHBEngine en = new DCHBEngine();
         en.init();
         DCTBEngine en2 = new DCTBEngine();
         en2.init();
+        //FTOFEngine en3 = new FTOFEngine();
+        //en3.init();
+        //EBHBEngine EBHBengine = new EBHBEngine();
+        //EBHBengine.init();
         
+
+        //EBTBEngine EBTBengine = new EBTBEngine();
+        //EBTBengine.init();
+       
         int counter = 0;
 
         HipoDataSource reader = new HipoDataSource();
@@ -318,35 +316,40 @@ public class DCHBEngine extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         //Writer
-        //String outputFile="/Users/ziegler/Workdir/Distribution/DCTest_797D.hipo";
-        String outputFile="/Users/ziegler/Workdir/Files/test.hipo";
-        //String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/twoTrackEvents_809_rec.hipo";
-        writer.open(outputFile);
 
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_rec.hipo";
+        writer.open(outputFile);
+        TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
         while (reader.hasEvent()) {
 
             counter++;
-
+System.out.println("*************************************************************run " + counter + " events");
             DataEvent event = reader.getNextEvent();
             if (counter > 0) {
                 t1 = System.currentTimeMillis();
             }
 
             en.processDataEvent(event);
+          //  en3.processDataEvent(event);
+          //  EBHBengine.processDataEvent(event);
             // Processing TB   
             en2.processDataEvent(event);
+            
+           // EBTBengine.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-            if (counter > 3) {
+            if (counter > 100) {
                 break;
             }
+            
+            
             //event.show();
             //if(counter%100==0)
-            System.out.println("*************************************************************run " + counter + " events");
-            //if(event.hasBank("TimeBasedTrkg::TBTracks")) {
-               // event.show();
+            
+            if(event.hasBank("HitBasedTrkg::HBTracks")) {
+                event.show();
                 writer.writeEvent(event);
-            //}
+            }
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;

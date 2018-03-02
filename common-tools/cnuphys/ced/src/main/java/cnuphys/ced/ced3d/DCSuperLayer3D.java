@@ -109,12 +109,12 @@ public class DCSuperLayer3D extends DetectorItem3D {
 		
 		float coords[] = new float[6];
 		
-		DCTdcHitList hits = DC.getInstance().getHits();
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
 					getWire(hit.layer6, hit.wire, coords);
-					Support3D.drawLine(drawable, coords, dgtzColor, 1f);
+					Support3D.drawLine(drawable, coords, dgtzColor, WIRELINEWIDTH);
 				}
 			}
 		}

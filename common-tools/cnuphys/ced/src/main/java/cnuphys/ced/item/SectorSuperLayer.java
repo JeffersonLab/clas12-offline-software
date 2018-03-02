@@ -66,6 +66,23 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 		_superlayer = superLayer;
 		_superlayerDrawer = new SuperLayerDrawing(_view, this);
 	}
+	
+	/**
+	 * Draw a single reconstructed dc hit
+	 * @param g graphics context
+	 * @param container drawing container
+	 * @param fillColor cell fill color
+	 * @param frameColor cell frame color
+	 * @param layer 1-based layer 1..6
+	 * @param wire 1-based wire 1..112
+	 * @param trkDoca doca in cm
+	 */
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte layer, short wire,
+			float trkDoca, Point location) {
+		
+		float docaMM = 10*trkDoca; //convert to mm
+		_superlayerDrawer.drawReconDCHit(g, container, fillColor, frameColor, layer, wire, docaMM, location);
+	}
 
 	/**
 	 * Custom drawer for the item.

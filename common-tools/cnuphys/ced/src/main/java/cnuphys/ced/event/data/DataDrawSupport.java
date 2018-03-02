@@ -16,25 +16,34 @@ public class DataDrawSupport {
 	public static final int FMT_CROSS = 4;
 	
 	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
-	private static final Color TRANSORANGE = X11Colors.getX11Color("dark orange", 240);
 	private static final Color TRANSGREEN = X11Colors.getX11Color("lawn green", 250);
 	private static final Color TRANSBLUE = X11Colors.getX11Color("sky blue", 250);
 
-	public static Color transColors[] = { TRANSYELLOW, TRANSORANGE, TRANSYELLOW, TRANSGREEN, TRANSBLUE };
+	public static Color transColors[] = { DC.HB_TRANS, DC.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSBLUE };
 	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT ", "FMT "};
 	
 
+	//half the size of a cross
 	public static final int CROSSHALF = 6; // pixels
 
+	//half the size of a hit
+	public static final int HITHALF = 6; // pixels
 
 
 	private static final Color gemc_hit_fillColor = new Color(255, 255, 0, 196);
 	private static final Color gemc_hit_lineColor = X11Colors
 			.getX11Color("dark red");
 
-	private static final Color rec_hit_fillColor = new Color(0, 255, 255, 196);
-	private static final Color rec_hit_lineColor = X11Colors
-			.getX11Color("dark red");
+	//reconstructed hits
+	private static final Color rec_hit_fillColor = Color.cyan;
+//	private static final Color rec_hit_lineColor = X11Colors
+//			.getX11Color("dark red");
+	private static final Color rec_hit_lineColor = Color.red;
+	
+	//reconstructed cluster
+	private static final Color cluster_fillColor = X11Colors.getX11Color("dark red");
+	private static final Color cluster_lineColor = Color.green;
+
 
 	public static final String[] EC_PLANE_NAMES = { "?", "Inner", "Outer" };
 	public static final String[] EC_VIEW_NAMES = { "?", "U", "V", "W" };
@@ -77,6 +86,26 @@ public class DataDrawSupport {
 		g.setColor(rec_hit_lineColor);
 		g.drawRect(pp.x - 3, pp.y - 3, 6, 6);
 	}
+	
+	/**
+	 * Draw a reconstructed hit at the given screen location
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param pp
+	 *            the screen location
+	 */
+	public static void drawReconCluster(Graphics g, Point pp) {
+		// now the cross
+		g.setColor(cluster_lineColor);
+		g.drawLine(pp.x - 4, pp.y - 4, pp.x + 4, pp.y + 4);
+		g.drawLine(pp.x - 4, pp.y + 4, pp.x + 4, pp.y - 4);
+		g.setColor(cluster_fillColor);
+		g.fillRect(pp.x - 3, pp.y - 3, 6, 6);
+		g.setColor(cluster_lineColor);
+		g.drawRect(pp.x - 3, pp.y - 3, 6, 6);
+	}
+
 	
 	/**
 	 * Draw a reconstructed cross

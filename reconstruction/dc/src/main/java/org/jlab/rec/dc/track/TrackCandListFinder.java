@@ -39,17 +39,17 @@ public class TrackCandListFinder {
 		trking = stat;
 	}
 	public DCSwimmer dcSwim = new DCSwimmer();
-        public int NSuperLayerTrk  = 5;
+        
         public boolean PassNSuperlayerTracking(List<Cross> crossesInTrk) {
             boolean pass = true;
             int NbMissingSl=0;
             for(Cross c: crossesInTrk) {
                 if(c.isPseudoCross)
-                    if(c.get_Segment1().get_Id()==-1)
+                    if((c.get_Segment1().get_Id()==-1) || (c.get_Segment2().get_Id()==-1) )
                         NbMissingSl++;
             }
            
-            if(NbMissingSl>6-NSuperLayerTrk) {
+            if(NbMissingSl>6-Constants.NSUPERLAYERTRACKING) {
                 pass = false; 
             }
             return pass;
@@ -76,18 +76,26 @@ public class TrackCandListFinder {
                             continue;
             
 			if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk)==true) {
-					
+				
 				cand.addAll(crossesInTrk);
 				
 				cand.set_Sector(crossesInTrk.get(0).get_Sector());
 				
+                                if(Math.abs(TORSCALE)<0.001) {
+				//no field --> fit straight track
+                                    this.getStraightTrack(cand);
+                                    if(cand.get_pAtOrig()!=null) {
+                                            cand.set_Id(cands.size()+1);						
+                                            cands.add(cand); 
+                                    }
+                                }	
 				//cand.set_Region3CrossPoint();
 				//cand.set_Region3CrossDir();
 				
 				cand.set_Trajectory(traj.get_Trajectory());
 				cand.set_IntegralBdl(traj.get_IntegralBdl());
 				
-
+                                
 				if(cand.size()==3) {
 					double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
                                         double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
@@ -100,15 +108,7 @@ public class TrackCandListFinder {
 			       
 			        double iBdl = traj.get_IntegralBdl(); 
 			        
-			        if(iBdl == 0) {
-						//no field --> fit straight track
-			        	//System.out.println(trking+" FitChisq "+cand.get_FitChi2());	
-			        	this.getStraightTrack(cand);
-			        	if(cand.get_pAtOrig()!=null) {
-			        		cand.set_Id(cands.size()+1);						
-			        		cands.add(cand); 
-			        	}
-					}			        
+			        		        
 			        if(iBdl != 0 || (deltaTheta != 0)) {
 			        	
 				        double pxz = Math.abs(Constants.LIGHTVEL*iBdl/deltaTheta);
@@ -118,9 +118,8 @@ public class TrackCandListFinder {
 				          
 				        //positive charges bend outward for nominal GEMC field configuration
 						int q = (int) Math.signum(deltaTheta); 
-						
 						q*= (int)-1*Math.signum(TORSCALE);						
-							
+						
 						double p = Math.sqrt(pxz*pxz+py*py); 
 						if(p>11)
 							p=11;
@@ -147,6 +146,7 @@ public class TrackCandListFinder {
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
 							
 							cand.set_P(1./Math.abs(kFit.finalStateVec.Q));
+                                                        cand.set_Q((int)Math.signum(kFit.finalStateVec.Q));
 							this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector);
 													
 							cand.set_FitChi2(kFit.chi2);
@@ -410,6 +410,8 @@ public class TrackCandListFinder {
 			list.clear();
 			this.getOverlapLists(trkcands.get(i), trkcands, list);
 			Track selectedTrk = this.FindBestTrack(list);
+                        if(selectedTrk==null)
+                            continue;
 			if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
 				selectedTracks.add(selectedTrk);
 		}
@@ -420,6 +422,8 @@ public class TrackCandListFinder {
 	private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) {
 		boolean isInList = false;
 		for(Track trk : selectedTracks) {
+                    if(trk==null)
+                        continue;
 			if(trk.get_Id()==selectedTrk.get_Id())
 				isInList=true;
 		}
@@ -470,6 +474,32 @@ public class TrackCandListFinder {
                     }
             }
         }
+    }
+
+    private double calcCurvSign(Track cand) {
+        double P0x = cand.get(0).get_Point().z();
+        double P1x = cand.get(1).get_Point().z();
+        double P2x = cand.get(2).get_Point().z();
+        double P0y = cand.get(0).get_Point().x();
+        double P1y = cand.get(1).get_Point().x();
+        double P2y = cand.get(2).get_Point().x();
+        
+        if (Math.abs(P1x - P0x) < 1.0e-18 || Math.abs(P2x - P1x) < 1.0e-18) {
+            return 0.0;
+        }
+
+        // Find the intersection of the lines joining the innermost to middle and middle to outermost point
+        double ma = (P1y - P0y) / (P1x - P0x);
+        double mb = (P2y - P1y) / (P2x - P1x);
+
+        if (Math.abs(mb - ma) < 1.0e-18) {
+            return 0.0;
+        }
+
+        double xcen = 0.5 * (ma * mb * (P0y - P2y) + mb * (P0x + P1x) - ma * (P1x + P2x)) / (mb - ma);
+        double ycen = (-1. / mb) * (xcen - 0.5 * (P1x + P2x)) + 0.5 * (P1y + P2y);
+
+        return Math.signum(ycen);
     }
 
 }

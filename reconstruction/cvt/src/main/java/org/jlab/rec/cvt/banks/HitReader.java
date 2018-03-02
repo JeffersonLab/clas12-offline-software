@@ -1,12 +1,10 @@
 package org.jlab.rec.cvt.banks;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -161,7 +159,7 @@ public class HitReader {
                 layer[i] = bankDGTZ.getInt("layer", i);
                 strip[i] = bankDGTZ.getInt("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
-
+                
                 double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];
                 int hemisphere = (int) Math.signum(Math.sin(angle));
                 if (sector[i] == 7 && layer[i] > 6) {
@@ -187,30 +185,33 @@ public class HitReader {
                 if (layer[i] > 6) {
                     continue;
                 }
+                
+                //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
+                //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
                 Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
                 // get the strip endPoints
-                /* double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
+                 double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
                 Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
                 Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
                 Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
-                SvtStrip.set_ImplantPoint(EP1); */
+                SvtStrip.set_ImplantPoint(EP1); 
                 // Geometry implementation using the geometry package:  Charles Platt
-                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
+//                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
+//
+ //               Vector3d o1            = shiftedStrip.origin();
+ //               Vector3d e1            = shiftedStrip.end();
 
-                Vector3d o1            = shiftedStrip.origin();
-                Vector3d e1            = shiftedStrip.end();
+//                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
+ //                                           ( o1.y + e1.y ) /2.,
+ //                                           ( o1.z + e1.z ) /2. );
+ //               Vector3D Dir = new Vector3D((-o1.x + e1.x ),
+ //                                           (-o1.y + e1.y ),
+ //                                           (-o1.z + e1.z )     );
 
-                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
-                                            ( o1.y + e1.y ) /2.,
-                                            ( o1.z + e1.z ) /2. );
-                Vector3D Dir = new Vector3D((-o1.x + e1.x ),
-                                            (-o1.y + e1.y ),
-                                            (-o1.z + e1.z )     );
-
-                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
-                SvtStrip.set_ImplantPoint(passVals);
+//                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
+//                SvtStrip.set_ImplantPoint(passVals);
                 SvtStrip.set_MidPoint(MP);
                 SvtStrip.set_StripDir(Dir);
 

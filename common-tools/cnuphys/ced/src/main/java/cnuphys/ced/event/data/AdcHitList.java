@@ -31,7 +31,11 @@ public class AdcHitList extends Vector<AdcHit> {
 		int[] ADC = ColumnData.getIntArray(adcBankName + ".ADC");
 		short[] ped = ColumnData.getShortArray(adcBankName + ".ped");
 		float[] time = ColumnData.getFloatArray(adcBankName + ".time");
-
+		
+		
+		String tstamp = adcBankName + ".timestamp";
+		long[] timestamp = ColumnData.getLongArray(tstamp);
+		
 		length = checkArrays(sector, layer, component, order, ADC);
 		if (length < 0) {
 			Log.getInstance().warning("[" + adcBankName + "] " + _error);

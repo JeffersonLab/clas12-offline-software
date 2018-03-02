@@ -62,11 +62,60 @@ public class CNDGeometry {
 		for (int i = 0; i < cndLayers.length; i++) {
 			cndLayers[i] = cndSuperlayer.getLayer(i);
 			for (int j = 0; j < 48; j++) {
+				
+				
 				paddles[i][j] = cndLayers[i].getComponent(j);
+				
+				//rotate do to geomtry change
+				paddles[i][j].rotateZ(Math.toRadians(7.5));
+				
 			}
 		}
 
 	}
+	
+	/**
+	 * Converts the numbering from Gagik's database to real. This should not
+	 * be necessary but yet it is.
+	 * @param geo the geo triplets where sect=1, layer=1..3, component = 1..48
+	 * @param real the real triplets where sector = 1..24, layer=1..3, component = 1..2
+	 */
+	public static void geoTripletToRealTriplet(int geo[], int real[]) {
+		int gS = geo[0];  //should be 1
+		int gL = geo[1];  //1..3
+		int gC = geo[2];  //1.48
+		
+		int t = 1 + (gC % 48);
+		int s = 1 + ((t-1) / 2);
+		int c = (t % 2) == 0 ? 2 : 1;
+		
+		real[0] = s;
+		real[1] = gL;
+		real[2] = c;
+	}
+	
+	/**
+	 * Converts the numbering from  real to Gagik's database to real. This should not
+	 * be necessary but yet it is.
+	 * @param geo the geo triplets where sect=1, layer=1..3, component = 1..48
+	 * @param real the real triplets where sector = 1..24, layer=1..3, component = 1..2
+	 */
+	public static void realTripletToGeoTriplet(int geo[], int real[]) {
+		int s = real[0];  //1..24
+		int l = real[1];  //1..3
+		int c = real[2];  //1..2
+		
+		int u = 2*(s-1) + c;
+		int gC = (u-1) % 48;
+		if (gC == 0) {
+			gC = 48;
+		}
+		
+		geo[0] = 1;
+		geo[1] = l;
+		geo[2] = gC;
+	}
+
 
 	/**
 	 * Get a scintillator paddle
@@ -168,45 +217,70 @@ public class CNDGeometry {
 
 	public static void main(String arg[]) {
 		initialize();
-
-		System.out.println("num sectors: " + cndDetector.getNumSectors());
-		System.out.println("num supl: " + cndSector.getNumSuperlayers());
-		System.out.println("num lay: " + cndSuperlayer.getNumLayers());
-
-		double xmax = Double.NEGATIVE_INFINITY;
-		double ymax = Double.NEGATIVE_INFINITY;
-		double zmax = Double.NEGATIVE_INFINITY;
-		double zmin = Double.POSITIVE_INFINITY;
-
-		for (int layerId = 1; layerId <= 3; layerId++) {
-			System.out.println("layer: " + layerId + " has "
-					+ cndLayers[layerId - 1].getNumComponents() + " paddles");
-
-			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				ScintillatorPaddle paddle = getPaddle(layerId, paddleId);
-				for (int i = 0; i < 8; i++) {
-					Point3D p3d = new Point3D(paddle.getVolumePoint(i));
-
-					xmax = Math.max(xmax, p3d.x());
-					ymax = Math.max(ymax, p3d.y());
-					zmax = Math.max(zmax, p3d.z());
-					zmin = Math.min(zmin, p3d.z());
+		
+		//test conversion geo to real and back
+		
+		int gS = 1;
+		int geo[] = new int[3];
+		int real[] = new int[3];
+		int geo2[] = new int[3];
+		for (int gL = 1; gL <= 3; gL++) {
+			for (int gC = 1; gC <= 48; gC++) {
+				geo[0] = gS;
+				geo[1] = gL;
+				geo[2] = gC;
+				
+				geoTripletToRealTriplet(geo, real);
+				realTripletToGeoTriplet(geo2, real);
+				
+				System.out.println(String.format("geo: [%d, %d, %d] real: [%d, %d, %d] geo2: [%d, %d, %d]", geo[0], geo[1], geo[2], real[0], real[1], real[2], geo2[0], geo2[1], geo2[2] ));
+				
+				if ((geo[0] != geo2[0]) || (geo[1] != geo2[1]) || (geo[2] != geo2[2])) {
+					System.out.println("BAD CONVERSION  ");
 				}
 			}
 		}
+		
+		
 
-		System.out.println("xmax: " + xmax);
-		System.out.println("ymax: " + ymax);
-		System.out.println("zmax: " + zmax);
-		System.out.println("zmin: " + zmin);
-
-		ScintillatorPaddle paddle = getPaddle(2, 12);
-		System.out.println("num edges: " + paddle.getNumVolumeEdges());
-
-		for (int i = 0; i < 8; i++) {
-			Point3D p3d = new Point3D(paddle.getVolumePoint(i));
-			System.out.println("Point [" + (i + 1) + "] " + p3d);
-		}
+//		System.out.println("num sectors: " + cndDetector.getNumSectors());
+//		System.out.println("num supl: " + cndSector.getNumSuperlayers());
+//		System.out.println("num lay: " + cndSuperlayer.getNumLayers());
+//
+//		double xmax = Double.NEGATIVE_INFINITY;
+//		double ymax = Double.NEGATIVE_INFINITY;
+//		double zmax = Double.NEGATIVE_INFINITY;
+//		double zmin = Double.POSITIVE_INFINITY;
+//
+//		for (int layerId = 1; layerId <= 3; layerId++) {
+//			System.out.println("layer: " + layerId + " has "
+//					+ cndLayers[layerId - 1].getNumComponents() + " paddles");
+//
+//			for (int paddleId = 1; paddleId <= 48; paddleId++) {
+//				ScintillatorPaddle paddle = getPaddle(layerId, paddleId);
+//				for (int i = 0; i < 8; i++) {
+//					Point3D p3d = new Point3D(paddle.getVolumePoint(i));
+//
+//					xmax = Math.max(xmax, p3d.x());
+//					ymax = Math.max(ymax, p3d.y());
+//					zmax = Math.max(zmax, p3d.z());
+//					zmin = Math.min(zmin, p3d.z());
+//				}
+//			}
+//		}
+//
+//		System.out.println("xmax: " + xmax);
+//		System.out.println("ymax: " + ymax);
+//		System.out.println("zmax: " + zmax);
+//		System.out.println("zmin: " + zmin);
+//
+//		ScintillatorPaddle paddle = getPaddle(2, 12);
+//		System.out.println("num edges: " + paddle.getNumVolumeEdges());
+//
+//		for (int i = 0; i < 8; i++) {
+//			Point3D p3d = new Point3D(paddle.getVolumePoint(i));
+//			System.out.println("Point [" + (i + 1) + "] " + p3d);
+//		}
 	}
 
 }

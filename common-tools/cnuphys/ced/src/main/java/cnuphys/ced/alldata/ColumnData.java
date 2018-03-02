@@ -18,6 +18,9 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	/** type is an int */
 	public static final int INT32 = 3;
+	
+	/** type is a long int */
+	public static final int INT64 = 4;
 
 	/** type is a float */
 	public static final int FLOAT32 = 5;
@@ -26,7 +29,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	public static final int FLOAT64 = 6;
 	
 	/** type names */
-	public static String[] typeNames = {"Unknown", "byte", "short", "int", "Unknown", "float", "double"};
+	public static String[] typeNames = {"Unknown", "byte", "short", "int", "long", "float", "double"};
 
 	// the bank name
 	private String _bankName;
@@ -107,6 +110,11 @@ public class ColumnData implements Comparable<ColumnData> {
 				case INT32:
 					int ints[] = event.getInt(_fullName);
 					return (ints == null) ? 0 : ints.length;
+					
+				case INT64:
+					//TODO MAJOR HACK
+					long longs[] = event.getLong(_fullName);
+					return (longs == null) ? 0 : longs.length;
 
 				case FLOAT32:
 					float floats[] = event.getFloat(_fullName);
@@ -127,7 +135,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	
 
 	/**
-	 * Get the data array as an object. It is up tp the caller to cast it to the
+	 * Get the data array as an object. It is up to the caller to cast it to the
 	 * correct type of array.
 	 * 
 	 * @return the data array corresponding to the type
@@ -149,6 +157,10 @@ public class ColumnData implements Comparable<ColumnData> {
 
 				case INT32:
 					oa = event.getInt(_fullName);
+					break;
+					
+				case INT64:
+					oa = event.getLong(_fullName);
 					break;
 
 				case FLOAT32:
@@ -252,6 +264,10 @@ public class ColumnData implements Comparable<ColumnData> {
 			case INT32:
 				len = ((int[]) oa).length;
 				break;
+				
+			case INT64:
+				len = ((long[]) oa).length;
+				break;
 
 			case FLOAT32:
 				len = ((float[]) oa).length;
@@ -350,6 +366,17 @@ public class ColumnData implements Comparable<ColumnData> {
 		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getIntArray(event, fullName);
 	}
+	
+	/**
+	 * Obtain a long array from the current event for the given full name
+	 * @param fullName the full name 
+	 * @return the array, or <code>null</code>
+	 */
+	public static long[] getLongArray(String fullName) {
+		DataEvent event = hasData(fullName);
+		return (event == null) ? null : DataManager.getInstance().getLongArray(event, fullName);
+	}
+
 
 	/**
 	 * Obtain a float array from the current event for the given full name
