@@ -2,7 +2,7 @@ package cnuphys.ced.event.data;
 
 import java.awt.Point;
 
-public class BaseHit {
+public class BaseHit2 {
 	
 	//used for mouse over feedback
 	private Point _screenLocation = new Point();
@@ -15,14 +15,14 @@ public class BaseHit {
 	public byte layer;
 	
 	/** The 1-based component */
-	public short component;
+	public int component;
 	
 	/**
 	 * @param sector the 1-based sector
 	 * @param layer the 1-based layer
 	 * @param component the 1-based component
 	 */
-	public BaseHit(byte sector, byte layer, short component) {
+	public BaseHit2(byte sector, byte layer, int component) {
 		super();
 		this.sector = sector;
 		this.layer = layer;
@@ -50,7 +50,6 @@ public class BaseHit {
 		return ((Math.abs(_screenLocation.x - pp.x) <= DataDrawSupport.HITHALF) &&
 				(Math.abs(_screenLocation.y - pp.y) <= DataDrawSupport.HITHALF));
 	}
-
 
 
 }

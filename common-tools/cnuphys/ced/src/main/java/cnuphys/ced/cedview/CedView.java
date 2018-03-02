@@ -451,6 +451,20 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showReconHits();
 	}
 	
+	/**
+	 * Convenience method to see it we show the the adc hits.
+	 * 
+	 * @return <code>true</code> if we are to show the the adc
+	 *         hits.
+	 */
+	public boolean showADCHits() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showADCHits();
+	}
+
+	
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
