@@ -866,7 +866,7 @@ public class MagneticFields {
 	public JMenu getMagneticFieldMenu(boolean incRotatedField,
 			boolean includeTestFields) {
 		// // init(); //harmless if already inited
-		JMenu menu = new JMenu("Magnetic Field");
+		JMenu menu = new JMenu("Field");
 		
 		_torusMenu = TorusMenu.getInstance();
 		menu.add(_torusMenu);
