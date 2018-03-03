@@ -1,4 +1,4 @@
-package org.jlab.service.ltcc;
+package org.jlab.service.ltcc.viewer;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
@@ -10,6 +10,9 @@ import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.groot.base.GStyle;
 import org.jlab.groot.group.DataGroup;
+import org.jlab.groot.data.H1F;
+import org.jlab.service.ltcc.LTCCCluster;
+import org.jlab.service.ltcc.LTCCHit;
 
 
 
@@ -61,25 +64,21 @@ public class LTCCViewer {
     }
     
      private void drawClusters(EmbeddedCanvas canvas) {
-        canvas.divide(3, 2);
-        DataGroup hgroup = new DataGroup(3,2);
-        hgroup.addDataSet(clusterHistos.getH1F("sector"), 0);
-        hgroup.addDataSet(clusterHistos.getH1F("segment"), 1);
-        hgroup.addDataSet(clusterHistos.getH1F("nHits"), 3);
-        hgroup.addDataSet(clusterHistos.getH1F("nphe"), 4);
-        hgroup.addDataSet(clusterHistos.getH1F("theta"), 2);
-        hgroup.addDataSet(clusterHistos.getH1F("phi"), 5);
+        canvas.divide(3, 3);
+        DataGroup hgroup = new DataGroup(3, 3);
+        int idx = 0;
+        for(H1F h : clusterHistos.getH1Fs()) {
+            hgroup.addDataSet(h, idx++);
+        }
         canvas.draw(hgroup);
     }
     private void drawHits(EmbeddedCanvas canvas) {
-        canvas.divide(3, 2);
-        DataGroup hgroup = new DataGroup(3,2);
-        hgroup.addDataSet(hitHistos.getH1F("sector"), 0);
-        hgroup.addDataSet(hitHistos.getH1F("segment"), 1);
-        hgroup.addDataSet(hitHistos.getH1F("adc"), 3);
-        hgroup.addDataSet(hitHistos.getH1F("nphe"), 4);
-        hgroup.addDataSet(hitHistos.getH1F("theta"), 2);
-        hgroup.addDataSet(hitHistos.getH1F("phi"), 5);
+        canvas.divide(3, 3);
+        DataGroup hgroup = new DataGroup(3, 3);
+        int idx = 0;
+        for(H1F h : hitHistos.getH1Fs()) {
+            hgroup.addDataSet(h, idx++);
+        }
         canvas.draw(hgroup);
     }
     
@@ -97,13 +96,17 @@ public class LTCCViewer {
      * @param args ignored
      */
     public static void main(String[] args) {
-        String inputfile = "/Users/sly2j/Dropbox/Work/JLab-CLAS12/clas12-ltcc/sylvester/rec/20170123/coatjava/rec.hipo";
+        String inputfile = "/Users/sly2j/Data/CLAS12/rg-a/filtered/ltcc_3432.hipo";
 
         DataSource reader = new HipoDataSource();
         reader.open(inputfile);
        
         LTCCViewer viewer = new LTCCViewer();
         
+        // dump the first 10 events
+        for (int i = 0; i < 1; ++i) {
+            reader.getNextEvent().getBank("LTCC::adc").show();
+        }
         while (reader.hasEvent()) {
             viewer.process(reader.getNextEvent());
         }

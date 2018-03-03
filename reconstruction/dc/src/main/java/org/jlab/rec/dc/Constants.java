@@ -3,8 +3,6 @@ package org.jlab.rec.dc;
 import java.util.ArrayList;
 
 import cnuphys.snr.NoiseReductionParameters;
-import java.util.List;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Constants used in the reconstruction
@@ -17,7 +15,8 @@ public class Constants {
         public static final double SPEEDLIGHT = 29.97924580;
 	// DATABASE VARIATION
 	//public static final String DBVAR = "default";
-	
+	public static double NSUPERLAYERTRACKING = 5;
+        public static double TSTARTEST = 560.;
 	// GEOMETRY PARAMETERS
 
 	// other CLAS12 parameters
@@ -81,7 +80,9 @@ public class Constants {
 	// ----- cut based cand select
 	
 	public static final double TRACKDIRTOCROSSDIRCOSANGLE =0.85;//= 0.95;
-
+        
+        public static double CROSSLISTSELECTQFMINCHSQ=2000;
+        
 	public static final double SEGMENTPLANESANGLE = 1.5;  // the angle between the normals to the segment fit planes is 12 degrees (6+6 for +/- stereo relative angles) + 1.5 degrees tolerance.  This number (1.5) should be optimized 
 
 	public static final double ARGONRADLEN = 14;  // radiation length in Argon is 14 cm
@@ -124,6 +125,7 @@ public class Constants {
 	public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
 	
 	public static int[][] STBLOC;
+        
     
 	public static final synchronized void Load() {
             if (ConstantsLoaded==true)

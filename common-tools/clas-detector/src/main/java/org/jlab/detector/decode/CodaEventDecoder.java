@@ -66,7 +66,7 @@ public class CodaEventDecoder {
         List<DetectorDataDgtz>  scalerEntries = this.getDataEntries_Scalers(event);
         rawEntries.addAll(scalerEntries);
         this.setTimeStamp(event);
-
+        
         return rawEntries;
     }
 
@@ -695,6 +695,27 @@ public class CodaEventDecoder {
         return entries;
     }
 
+    public List<DetectorDataDgtz> getDataEntries_Epics(EvioDataEvent event){
+        List<DetectorDataDgtz> epicsEntries = new ArrayList<DetectorDataDgtz>();
+        List<EvioTreeBranch> branches = this.getEventBranches(event);
+        for(EvioTreeBranch branch : branches){
+            int  crate = branch.getTag();
+//            EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
+            for(EvioNode node : branch.getNodes()){
+                if(node.getTag()==57620) {
+                    byte[] stringData =  ByteDataTransformer.toByteArray(node.getStructureBuffer(true));
+                    System.out.println("Found epics bank " + stringData.length);
+                    String value = new String(stringData);
+//                    System.out.println(stringData.length + " " + value);
+//                    for(int i=0; i<stringData.length; i++) {
+//                        System.out.println(stringData.length + " " + i + " " + stringData[i]);                        
+//                    }
+                }
+            }
+        }
+        return epicsEntries;
+    }
+
     public List<DetectorDataDgtz> getDataEntries_Scalers(EvioDataEvent event){
         
         List<DetectorDataDgtz> scalerEntries = new ArrayList<DetectorDataDgtz>();        
@@ -845,11 +866,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/clas_003038.evio.2");
+        reader.open("/Users/devita/clas_003290.evio.11");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 200;
+        int maxEvents = 30000;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){
