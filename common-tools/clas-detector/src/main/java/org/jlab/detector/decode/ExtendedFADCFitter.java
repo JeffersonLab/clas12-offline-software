@@ -59,7 +59,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
             int    ppos   = 0;
             // calculate pedestal means and noise
             if (pedr!=0) ped=pedr;        // use default mode 7 pedestal range (1-4)
-            if(pulse.length<p2+1) {
+            if(pulse.length<p2+1 && pedr==0) {
                 for (int bin = 0; bin < pulse.length; bin++) {
                     pedsum += pulse[bin];
                 }  

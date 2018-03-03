@@ -116,9 +116,9 @@ public class CrossListFinder  {
 							if(!linefitstatusOK)
 								continue; // fit failed
 							//if(TimeBased && tde!=null) {			
-                            this.updateBFittedHits(c1, tab, DcDetector, tde);
-                            this.updateBFittedHits(c2, tab, DcDetector, tde);
-                            this.updateBFittedHits(c3, tab, DcDetector, tde);
+                                                        this.updateBFittedHits(c1, tab, DcDetector, tde);
+                                                        this.updateBFittedHits(c2, tab, DcDetector, tde);
+                                                        this.updateBFittedHits(c3, tab, DcDetector, tde);
 							//}
 							BaseCand bCand = new BaseCand();
 							bCand.CrossesOnTrack.clear();
@@ -127,7 +127,7 @@ public class CrossListFinder  {
 							bCand.CrossesOnTrack.add(c3);
 							bCand.Chisq = fitchsq;
 							
-							if(bCand.Chisq<2000) 
+							if(bCand.Chisq<Constants.CROSSLISTSELECTQFMINCHSQ) 
 								trkCnds.add(bCand);
 								
 							
@@ -190,7 +190,7 @@ public class CrossListFinder  {
             double cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
             // update the hits
             for (FittedHit fhit : _Segment1.get_fittedCluster()) { 
-                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
             }
             
              cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
@@ -198,7 +198,7 @@ public class CrossListFinder  {
              cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
             
              for (FittedHit fhit : _Segment1.get_fittedCluster()) {
-                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.get_B(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
             }
             cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
             cf.Fit(_Segment1.get_fittedCluster(), true);
@@ -334,14 +334,14 @@ public class CrossListFinder  {
                 Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
                 float[] result = new float[3];
                 swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
-                c.get_Segment1().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );  
+                c.get_Segment1().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );  
 
             }
             for(int i =0; i<c.get_Segment2().size(); i++) {
                 Point3D ref =c.get_Segment2().get(i).getCrossDirIntersWire();
                 float[] result = new float[3];
                 swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
-                c.get_Segment2().get(i).set_B(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
+                c.get_Segment2().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
             }
             if(tde!=null) {
             	this.recalcParsSegment(c.get_Segment1(), tab, DcDetector, tde);

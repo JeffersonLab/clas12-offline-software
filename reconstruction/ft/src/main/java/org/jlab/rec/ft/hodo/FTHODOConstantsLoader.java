@@ -47,7 +47,7 @@ public class FTHODOConstantsLoader {
 
         // RECONSTRUCTION CONSTANTS
         public static double TIMECONVFAC = 100./4.;                            // conversion factor from TDC channel to time (ns^-1)
-	public static double EN_THRES = 0.5;                                                   // energy threshold in GeV	
+	public static double EN_THRES = 0.25;                                                   // energy threshold in MeV	
 	public static double FADC_TO_CHARGE = 4*0.4884/50.;
 
 	// CLUSTER RECONSTRUCTION PARAMETERS

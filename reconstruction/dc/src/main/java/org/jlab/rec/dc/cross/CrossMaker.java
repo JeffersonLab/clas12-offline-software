@@ -36,13 +36,12 @@ public class CrossMaker {
             {
                 // looping over all segments
                 for (Segment seg1 : allSegments) { // first segment
-                    if (seg1.get_Sector() == s + 1 && seg1.get_RegionSlayer() == 1 && seg1.get_Region() == r + 1) {
+                    if (seg1.get_Sector() == s + 1 && seg1.get_RegionSlayer() == 1 && seg1.get_Region() == r + 1) { 
                         for (Segment seg2 : allSegments) { //second segment
                             if (seg2.equals(seg1)) {
                                 continue;
                             }
                             if (seg2.get_Sector() == s + 1 && seg2.get_RegionSlayer() == 2 && seg2.get_Region() == r + 1) {   //wire proximity
-
                                 if (seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1)) {
                                     Cross cross = new Cross(s + 1, r + 1, rid++);
 
@@ -56,8 +55,8 @@ public class CrossMaker {
 
                                     if (CS.x() > 0) {
                                         double jitter = 2;
-                                        if (cross.isPseudoCross) {
-                                            jitter = 10;
+                                        if (cross.isPseudoCross) { 
+                                            jitter = 10;  
                                         }
                                         if (Math.abs(Math.toDegrees(Math.atan2(CS.y(), CS.x()))) < 30. + jitter) { //2 degrees jitter
 

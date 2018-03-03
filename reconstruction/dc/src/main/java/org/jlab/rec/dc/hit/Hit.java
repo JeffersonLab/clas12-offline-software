@@ -20,35 +20,24 @@ public class Hit implements Comparable<Hit> {
      * @param superlayer (1...6)
      * @param layer (1...6)
      * @param wire (1...112)
-     * @param time (for gemc output without digitization)
-     * @param timeEr the error on the time
+     * @param TDC TDC
      */
-    public Hit(int sector, int superlayer, int layer, int wire, double time, double docaEr, double B, int Id) {
+    public Hit(int sector, int superlayer, int layer, int wire, int TDC, int Id) {
         this._Sector = sector;
         this._Superlayer = superlayer;
         this._Layer = layer;
         this._Wire = wire;
-        this._Time = time;
-        this._DocaErr = docaEr;
-        this._B = B;
+        this._TDC = TDC;
         this._Id = Id;
 
     }
 
     private int _Sector;      							//	   sector[1...6]
     private int _Superlayer;    	 					//	   superlayer [1,...6]
-    private int _Layer;    	 							//	   layer [1,...6]
-    private int _Wire;    	 							//	   wire [1...112]
-
-    private double _Time;      							//	   Reconstructed time, for now it is the gemc time
-    private double _Doca;									//     Reconstructed doca, for now it is using the linear parametrization that is in  gemc 
-    private double _DocaErr;      							//	   Error on doca
-
-    private double _B;										// 	   B-field at hit location
-
-    private int _Id;										//		Hit Id
-
-    public int _lr;
+    private int _Layer;    	 						//	   layer [1,...6]
+    private int _Wire;    	 						//	   wire [1...112]
+    private int _TDC;
+    
 
     /**
      *
@@ -120,47 +109,22 @@ public class Hit implements Comparable<Hit> {
 
     /**
      *
-     * @return the time in ns
+     * @return the ID
      */
-    public double get_Time() {
-        return _Time;
+    public int get_TDC() {
+        return _TDC;
     }
 
     /**
-     * Sets the time
+     * Sets the hit ID. The ID corresponds to the hit index in the EvIO column.
      *
-     * @param _Time
+     * @param TDC
      */
-    public void set_Time(double _Time) {
-        this._Time = _Time;
+    public void set_TDC(int TDC) {
+        this._TDC = TDC;
     }
-
-    public double get_Doca() {
-        return _Doca;
-    }
-
-    public void set_Doca(double _Doca) {
-        this._Doca = _Doca;
-    }
-
-    /**
-     *
-     * @return error on the time in ns (4ns time window used by default in
-     * reconstructing simulated data)
-     */
-    public double get_DocaErr() {
-        return _DocaErr;
-    }
-
-    /**
-     * Sets the doca uncertainty
-     *
-     * @param _docaErr
-     */
-    public void set_DocaErr(double _docaErr) {
-        this._DocaErr = _docaErr;
-    }
-
+    
+    private int _Id;
     /**
      *
      * @return the ID
@@ -242,18 +206,7 @@ public class Hit implements Comparable<Hit> {
 
     }
 
-    /**
-     * identifying outoftimehits;
-     */
-    private boolean _OutOfTimeFlag;
-
-    public void set_OutOfTimeFlag(boolean b) {
-        _OutOfTimeFlag = b;
-    }
-
-    public boolean get_OutOfTimeFlag() {
-        return _OutOfTimeFlag;
-    }
+    
     
     private double _cellSize;
     /**
@@ -277,12 +230,23 @@ public class Hit implements Comparable<Hit> {
 
     }
 
-    public double get_B() {  //System.out.println("B is "+_B +" for "+this.printInfo());
-        return _B;
+    private double _DocaErr;
+    /**
+     *
+     * @return error on the time in ns (4ns time window used by default in
+     * reconstructing simulated data)
+     */
+    public double get_DocaErr() {
+        return _DocaErr;
     }
 
-    public void set_B(double B) {
-        this._B = B;
+    /**
+     * Sets the doca uncertainty
+     *
+     * @param _docaErr
+     */
+    public void set_DocaErr(double _docaErr) {
+        this._DocaErr = _docaErr;
     }
 
     /**
@@ -290,7 +254,7 @@ public class Hit implements Comparable<Hit> {
      * @return print statement with hit information
      */
     public String printInfo() {
-        String s = "DC Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " Time " + this.get_Time();
+        String s = "DC Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " TDC " + this.get_TDC();
         return s;
     }
 

@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.service.ltcc;
+package org.jlab.service.ltcc.viewer;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.function.Function;
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.util.Pair;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
@@ -39,8 +41,8 @@ public class LTCCHistogrammer<DataType> {
     private final Map<String, SmartHisto<H2F, Pair<Double, Double>>> histos2D;
     
     LTCCHistogrammer() {
-        histos1D = new HashMap();
-        histos2D = new HashMap();
+        histos1D = new LinkedHashMap();
+        histos2D = new LinkedHashMap();
     }
     
     public void add(H1F histo, Function<DataType, Double> getter) {
@@ -65,5 +67,17 @@ public class LTCCHistogrammer<DataType> {
     }
     public H2F getH2F(String name) {
         return histos2D.get(name).getHisto();
+    }
+    public List<H1F> getH1Fs() {
+        return histos1D.values()
+                .stream()
+                .map(SmartHisto::getHisto)
+                .collect(Collectors.toList());
+    }
+    public List<H2F> getH2Fs() {
+        return histos2D.values()
+                .stream()
+                .map(SmartHisto::getHisto)
+                .collect(Collectors.toList());
     }
 }

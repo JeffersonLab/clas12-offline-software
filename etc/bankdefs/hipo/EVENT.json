@@ -157,8 +157,7 @@
             {"name":"vy_nomm",      "id":12, "type":"float", "info":"y component of the vertex"},
             {"name":"vz_nomm",      "id":13, "type":"float", "info":"z component of the vertex"},
             {"name":"chi2_nomm",    "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"},
-            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
+            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"}
         ]
     },
     {
@@ -338,8 +337,7 @@
             {"name":"vy_nomm",      "id":12, "type":"float", "info":"y component of the vertex"},
             {"name":"vz_nomm",      "id":13, "type":"float", "info":"z component of the vertex"},
             {"name":"chi2_nomm",    "id":14, "type":"float", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"},
-            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
+            {"name":"NDF_nomm",     "id":15, "type":"int16", "info":"number of degrees of freedom in track fitting with no MM"}
         ]
     },
     {
