@@ -6,7 +6,6 @@
   <version>5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-
   <repositories>
     <repository>
       <id>clas12maven</id>
@@ -72,6 +71,16 @@
         <version>3.1.0-RC6</version>
         <configuration>
           <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <doctitle>coatjavadocs</doctitle>
+          <windowtitle>coatjavadocs</windowtitle>
         </configuration>
       </plugin>
     </plugins>
