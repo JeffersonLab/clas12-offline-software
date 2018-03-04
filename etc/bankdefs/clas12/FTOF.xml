@@ -30,11 +30,12 @@
             <column name = "sector"  num = "1"  type = "int32"  info = "sector number"/>
             <column name = "layer"   num = "2"  type = "int32"  info = "layer number (1-1A, 2-1B, 3-2B)"/>
             <column name = "paddle"  num = "3"  type = "int32"  info = "paddle number"/>
-            <column name = "ADCL"    num = "4"  type = "int32"  info = "ADC Left"/>
-            <column name = "ADCR"    num = "5"  type = "int32"  info = "ADC Right"/>
-            <column name = "TDCL"    num = "6"  type = "int32"  info = "TDC Left"/>
-            <column name = "TDCR"    num = "7"  type = "int32"  info = "TDC Right"/>
-            <column name = "hitn"    num = "99"  type = "int32"  info = "hit number"/>
+            <column name = "side"    num = "4"  type = "int32"  info = "PMT side (0 Left, 1 Right)"/>
+            <column name = "ADC"     num = "5"  type = "int32"  info = "ADC"/>
+            <column name = "TDC"     num = "6"  type = "int32"  info = "TDC"/>
+            <column name = "ADCu"    num = "7"  type = "int32"  info = "ADC unsmeared"/>
+            <column name = "TDCu"    num = "8"  type = "int32"  info = "TDC unsmeared"/>
+            <column name = "hitn"    num = "99" type = "int32"  info = "hit number"/>
         </section>  
     </bank>
     <bank name="FTOFRec" tag="1210" info="Reconstructed FTOF Converted Raw Output">
