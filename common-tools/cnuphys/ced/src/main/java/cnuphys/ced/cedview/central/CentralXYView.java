@@ -178,7 +178,7 @@ public class CentralXYView extends CedXYView {
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
 						+ DisplayBits.MCTRUTH + DisplayBits.RECONHITS + DisplayBits.ADC_HITS
-						+ DisplayBits.COSMICS,
+						+ DisplayBits.CVTTRACKS + DisplayBits.COSMICS,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
