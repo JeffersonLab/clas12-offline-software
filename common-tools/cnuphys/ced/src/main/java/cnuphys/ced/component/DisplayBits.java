@@ -44,6 +44,9 @@ public class DisplayBits {
 	/** adc hits */
 	public static final int ADC_HITS = 020000;
 	
+	/** cvt recon tracks */
+	public static final int CVTTRACKS = 040000;
+	
 	
 	/** Distance scale */
 	//public static final int SCALE = 04;

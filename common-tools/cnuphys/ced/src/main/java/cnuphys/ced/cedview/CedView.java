@@ -464,7 +464,17 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showADCHits();
 	}
 
-	
+	/**
+	 * Convenience method to see if we show CVT reconstructed tracks.
+	 * These are ADC hits except 
+	 * @return <code>true</code> if we are to show ADC hits.
+	 */
+	public boolean showCVTTracks() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showCVTTracks();
+	}
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
