@@ -1,6 +1,6 @@
 coverage:
   precision: 2
-  round: down
+  round: up
   range: "30...60"
 
   status:
