@@ -17,7 +17,6 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.splot.plot.GraphicsUtilities;
@@ -88,7 +87,7 @@ public class PIDLegend extends JComponent {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, b.width - 1, b.height - 1);
 
-		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (_eventManager.isAccumulating()) {
 			return;
 		}
 

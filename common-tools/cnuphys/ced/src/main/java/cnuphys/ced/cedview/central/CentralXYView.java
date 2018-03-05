@@ -178,7 +178,8 @@ public class CentralXYView extends CedXYView {
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
 						+ DisplayBits.MCTRUTH + DisplayBits.RECONHITS + DisplayBits.ADC_HITS
-						+ DisplayBits.CVTTRACKS + DisplayBits.COSMICS,
+						+ DisplayBits.CVTTRACKS + DisplayBits.COSMICS +
+						DisplayBits.GLOBAL_HB +  DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -233,6 +234,7 @@ public class CentralXYView extends CedXYView {
 			public void draw(Graphics g, IContainer container) {
 
 				if (!_eventManager.isAccumulating()) {
+					
 					_swimTrajectoryDrawer.draw(g, container);
 					if (showCosmics()) {
 						drawCosmicTracks(g, container);

@@ -2,17 +2,17 @@ package cnuphys.ced.clasio;
 
 import java.util.Vector;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.lund.TrajectoryRowData;
 import cnuphys.lund.TrajectoryTableModel;
 
+@SuppressWarnings("serial")
 public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 
 	public ClasIoMonteCarloView() {
-		super("Monte Carlo Events");
+		super("Monte Carlo Tracks");
 	}
 
 	@Override
@@ -20,27 +20,6 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 		return null;
 	}
 	
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		_trajectoryTable.clear(); // remove existing events
-
-		// now fill the table.
-		if (!_eventManager.isAccumulating()) {
-			ISwimAll allSwimmer = _eventManager.getMCSwimmer();
-			if (allSwimmer != null) {
-				TrajectoryTableModel model = _trajectoryTable
-						.getTrajectoryModel();
-				model.setData(allSwimmer.getRowData());
-				model.fireTableDataChanged();
-				_trajectoryTable.repaint();
-			}
-		}
-	}
-
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {

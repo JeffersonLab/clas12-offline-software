@@ -14,7 +14,6 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.DCGeometry;
 
 public class DCHexSectorItem extends HexSectorItem {
@@ -45,7 +44,7 @@ public class DCHexSectorItem extends HexSectorItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

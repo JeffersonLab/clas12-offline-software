@@ -3,7 +3,6 @@ package cnuphys.ced.alldata.graphics;
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
@@ -129,15 +128,6 @@ public class Histogram2D extends PlotDialog {
 		
 		return ppanel;
 	}
-
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-	}
-	
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {

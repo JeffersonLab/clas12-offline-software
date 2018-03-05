@@ -87,6 +87,37 @@ public class VirtualView extends BaseView
 
 		setBackground(_bg);
 		getContainer().getComponent().setBackground(_bg);
+		
+		
+//		MouseListener ml = new MouseListener() {
+//
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				System.err.println("ML Mouse CLICKED");
+//			}
+//
+//			@Override
+//			public void mousePressed(MouseEvent e) {
+//				System.err.println("\nML Mouse PRESSED");
+//			}
+//
+//			@Override
+//			public void mouseReleased(MouseEvent e) {
+//				System.err.println("ML Mouse RELEASED");
+//			}
+//
+//			@Override
+//			public void mouseEntered(MouseEvent e) {
+//				System.err.println("ML Mouse ENTERED");
+//			}
+//
+//			@Override
+//			public void mouseExited(MouseEvent e) {
+//				System.err.println("ML Mouse EXITED");
+//			}
+//			
+//		};
+//		getContainer().getComponent().addMouseListener(ml);
 
 		getContainer().getComponent().addMouseMotionListener(this);
 		getContainer().getComponent().addMouseListener(this);
@@ -457,6 +488,7 @@ public class VirtualView extends BaseView
 
 	@Override
 	public void mouseClicked(MouseEvent mouseEvent) {
+//		System.err.println("HEY MAN");
 		switch (mouseEvent.getButton()) {
 		case MouseEvent.BUTTON1:
 			if (mouseEvent.getClickCount() == 1) { // single click
@@ -473,7 +505,7 @@ public class VirtualView extends BaseView
 	// handle a double click
 	private void handleDoubleClick(MouseEvent mouseEvent) {
 		Point rc = getRowCol(mouseEvent.getPoint());
-		// System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
+//		 System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
 
 		int clickCol = rc.x;
 		if ((clickCol == _currentCol)) {

@@ -2,7 +2,6 @@ package cnuphys.ced.clasio;
 
 import java.util.Vector;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.log.Log;
@@ -17,7 +16,8 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	// singleton
 	private static ClasIoReconEventView instance;
 
-	private static Vector<TrajectoryRowData> data = new Vector<TrajectoryRowData>(25);
+	//one row for each reconstructed trajectory
+	private static Vector<TrajectoryRowData> _trajData = new Vector<TrajectoryRowData>(25);
 
 	private ClasIoReconEventView() {
 		super("Reconstructed Tracks");
@@ -37,34 +37,24 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 
 	@Override
 	public Vector<TrajectoryRowData> getRowData() {
-		return data;
-	}
-
-	/**
-	 * New fast mc event
-	 * 
-	 * @param event
-	 *            the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		_trajectoryTable.clear(); // remove existing events
+		return _trajData;
 	}
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_trajectoryTable.clear(); // remove existing events
-		data.clear();
+		_trajData.clear();
 
 		if (!_eventManager.isAccumulating()) {
 
 			// now fill the table.
 			TrajectoryTableModel model = _trajectoryTable.getTrajectoryModel();
 
-			addTracks(event, data, "HitBasedTrkg::HBTracks");
-			addTracks(event, data, "TimeBasedTrkg::TBTracks");
+			addTracks(event, _trajData, "HitBasedTrkg::HBTracks");
+			addTracks(event, _trajData, "TimeBasedTrkg::TBTracks");
+			addTracks(event, _trajData, "CVTRec::Tracks");
 
-			model.setData(data);
+			model.setData(_trajData);
 			model.fireTableDataChanged();
 			_trajectoryTable.repaint();
 			_trajectoryTable.repaint();
@@ -74,6 +64,12 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	//add tracks
 	private void addTracks(DataEvent event, Vector<TrajectoryRowData> data, String bankName) {
 		try {
+			
+			//treqt CVT  tracks separately
+			if (bankName.contains("CVTRec")) {
+				addCVTTracks(event, data, bankName);
+				return;
+			}
 			
 			boolean hitBased = bankName.contains("HitBased");
 			DataManager dm = DataManager.getInstance();
@@ -115,6 +111,25 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 		}
 		catch (Exception e) {
 			String warning = "[ClasIoReconEventView.addTracks] " + e.getMessage();
+			Log.getInstance().warning(warning);
+		}
+	}
+
+	// add CVT reconstructed tracks
+	private void addCVTTracks(DataEvent event, Vector<TrajectoryRowData> data, String bankName) {
+		try {
+			DataManager dm = DataManager.getInstance();
+			byte q[] = dm.getByteArray(event, bankName + "." + "q");
+			int count = (q == null) ? 0 : q.length;
+			
+			System.err.println("Number of cvt tracks found: " + count);
+			if (count > 0) {
+				float p[] = dm.getFloatArray(event, bankName + "." + "p");
+			}
+
+		}
+		catch (Exception e) {
+			String warning = "[ClasIoReconEventView.addCVTTracks] " + e.getMessage();
 			Log.getInstance().warning(warning);
 		}
 	}

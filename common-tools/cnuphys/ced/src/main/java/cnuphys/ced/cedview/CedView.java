@@ -36,8 +36,6 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
-import cnuphys.ced.fastmc.AcceptanceManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.SwimTrajectoryListener;
@@ -46,7 +44,6 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.Swimming;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -742,13 +739,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		EventSourceType estype = ClasIoEventManager.getInstance().getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-		case HIPORING:
+//		case HIPORING:
 		case ET:
 		case EVIOFILE:
 			haveEvent = (_eventManager.getCurrentEvent() != null);
-			break;
-		case FASTMC:
-			haveEvent = (FastMCManager.getInstance().getCurrentGenEvent() != null);
 			break;
 		}
 
@@ -758,13 +752,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		} else {
 			feedbackStrings.add("$orange red$" + "event " + _eventManager.getEventNumber());
 			feedbackStrings.add("$orange red$" + _eventManager.getCurrentSourceDescription());
-		}
-
-		// acceptance for fast MC
-		if (_eventManager.isSourceFastMC()) {
-			if (!FastMCManager.getInstance().isStreaming()) {
-				feedbackStrings.add("$orange red$" + AcceptanceManager.getInstance().acceptanceResult());
-			}
 		}
 
 		// get the sector
@@ -875,21 +862,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void trajectoriesChanged() {
-		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
-			//System.err.println("TRAJ CHANGE view: " + getTitle());
+		if (!_eventManager.isAccumulating()) {
 			getContainer().refresh();
 		}
-	}
-
-	/**
-	 * New fast mc event
-	 * 
-	 * @param event
-	 *            the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		System.err.println("111");
 	}
 
 	/**

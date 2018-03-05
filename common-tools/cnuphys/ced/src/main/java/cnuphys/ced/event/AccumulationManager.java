@@ -546,16 +546,6 @@ public class AccumulationManager
 		return avgDcOccupancy[sect0][supl0];
 	}
 	
-	
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		
-	}
-
 
 	/**
 	 * Here is an event, so increment the correct accumulation arrays

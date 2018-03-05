@@ -3,8 +3,6 @@ package cnuphys.ced.event.data;
 import java.awt.Point;
 import java.util.List;
 
-import cnuphys.bCNU.util.UnicodeSupport;
-
 public class DCHit {
 	
 	//used for mouse over feedback

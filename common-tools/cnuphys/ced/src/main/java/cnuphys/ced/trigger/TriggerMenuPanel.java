@@ -2,7 +2,6 @@ package cnuphys.ced.trigger;
 
 import java.awt.Dimension;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.alldata.ColumnData;
@@ -63,10 +62,6 @@ public class TriggerMenuPanel extends TriggerPanel implements IClasIoEventListen
 
 	@Override
 	public void changedEventSource(EventSourceType source) {
-	}
-
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 
 }

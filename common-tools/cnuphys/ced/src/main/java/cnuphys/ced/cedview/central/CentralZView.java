@@ -152,9 +152,10 @@ public class CentralZView extends CedView implements ChangeListener {
 						+ ControlPanel.PHISLIDER + ControlPanel.TARGETSLIDER
 						+ ControlPanel.PHI_SLIDER_BIG + ControlPanel.FIELDLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.MAGFIELD + DisplayBits.ACCUMULATION
-						+ DisplayBits.CROSSES + DisplayBits.MCTRUTH
-						+ DisplayBits.COSMICS,
+				DisplayBits.MAGFIELD | DisplayBits.ACCUMULATION
+						| DisplayBits.CROSSES | DisplayBits.MCTRUTH
+						| DisplayBits.COSMICS | DisplayBits.CVTTRACKS
+						| DisplayBits.GLOBAL_HB |  DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);

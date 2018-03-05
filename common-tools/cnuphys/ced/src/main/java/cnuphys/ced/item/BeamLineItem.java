@@ -9,7 +9,6 @@ import java.util.List;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.BaseBeamLineItem;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -41,7 +40,7 @@ public class BeamLineItem extends BaseBeamLineItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

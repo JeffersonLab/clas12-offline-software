@@ -6,10 +6,6 @@ import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
-import org.jlab.geom.DetectorHit;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
@@ -21,8 +17,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
@@ -69,7 +63,7 @@ public class FTOFPanelItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 
@@ -153,46 +147,10 @@ public class FTOFPanelItem extends PolygonItem {
 
 	}
 
-	// for fast mc events
-	private void drawFastMCSingleModeHits(Graphics g, IContainer container) {
-		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-		if ((phits == null) || phits.isEmpty()) {
-			return;
-		}
-
-		for (ParticleHits hits : phits) {
-			List<DetectorHit> ftofhits = hits.getTOFLayerHits(_sector - 1, _ftofPanel.getPanelType());
-			if (ftofhits != null) {
-				for (DetectorHit hit : ftofhits) {
-					int sect1 = hit.getSectorId() + 1;
-					int ptype = hit.getSuperlayerId(); // (0,1,2) = (1a,1b,2)
-
-					System.err.println(
-							"TOF HIT SECT: " + sect1 + "  PANEL: " + ptype + "  PADDLE: " + (hit.getComponentId() + 1));
-
-					int paddle0 = hit.getComponentId();
-					Color fc = hits.getFillColor();
-					Color lc = hits.getLineColor();
-					Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
-
-					if (wp != null) {
-						Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-						WorldGraphicsUtilities.drawPath2D(g, container, path, fc, lc, 0, LineStyle.SOLID, true);
-					}
-				}
-			}
-		}
-
-	}
 
 	// works for both showMcTruth and not
 	private void drawSingleModeHits(Graphics g, IContainer container) {
 		
-		if (ClasIoEventManager.getInstance().isSourceFastMC()) {
-			drawFastMCSingleModeHits(g, container);
-			return;
-		}
-
 		// draw tdc adc hits
 		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 		if ((hits != null) && !hits.isEmpty()) {

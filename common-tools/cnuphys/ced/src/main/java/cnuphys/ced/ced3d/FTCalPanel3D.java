@@ -3,8 +3,6 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import java.awt.Font;
 
-import com.jogamp.opengl.GLAutoDrawable;
-
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.geometry.FTCALGeometry;
 import cnuphys.lund.X11Colors;
