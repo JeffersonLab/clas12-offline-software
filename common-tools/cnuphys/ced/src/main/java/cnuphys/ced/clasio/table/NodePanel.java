@@ -22,7 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.MenuSelectionManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.format.DoubleFormat;
@@ -507,15 +506,6 @@ public class NodePanel extends JPanel implements ActionListener,
 
 
 	}
-
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-	}
-	
 
 	/**
 	 * Part of the IClasIoEventListener interface

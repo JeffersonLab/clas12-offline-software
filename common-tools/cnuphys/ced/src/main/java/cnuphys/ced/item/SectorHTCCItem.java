@@ -16,7 +16,6 @@ import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.HTCC2;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.HTCCGeometry;
 
@@ -77,7 +76,7 @@ public class SectorHTCCItem extends PolygonItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 
-		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (_eventManager.isAccumulating()) {
 			return;
 		}
 		

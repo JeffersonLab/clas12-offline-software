@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
@@ -194,12 +193,6 @@ public class TriggerPanel extends JPanel {
 			return COMP_SIZE;
 		}
 		
-//		@Override
-//		public Dimension getMinimumSize() {
-//			return COMP_SIZE;
-//		}
-		
-
 		
 		private void drawRect(Graphics g, Rectangle bounds, boolean bitIsOn) {
 		
@@ -212,10 +205,6 @@ public class TriggerPanel extends JPanel {
 			GraphicsUtilities.drawSimple3DRect(g, 0, 0, CELL_SIZE, CELL_SIZE, false);
 			
 			
-			
-//			g.setColor(Color.black);
-//			g.drawRect(0, 0, CELL_SIZE, CELL_SIZE);
-			
 			g.setFont(_smallFont);
 			FontMetrics fm = getFontMetrics(_smallFont);
 			
@@ -225,16 +214,6 @@ public class TriggerPanel extends JPanel {
 		    int xx = 1+ (CELL_SIZE-fm.stringWidth(s))/2;
 		    int yy = (CELL_SIZE + fm.getHeight())/2 - 1;
 		    g.drawString(s, xx, yy);
-
-			
-//			int xc = bounds.width/2;
-//			int sw = fm.stringWidth(s);
-//			int y = CELL_SIZE + fm.getHeight();
-//			
-//			g.setColor(Color.black);
-//			g.drawString(s, xc-sw/2, y);
-			
-			
 			
 		}
 	}

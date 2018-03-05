@@ -1,6 +1,5 @@
 package cnuphys.ced.event.data;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -23,10 +22,6 @@ public class DetectorData implements IClasIoEventListener {
 
 	@Override
 	public void changedEventSource(EventSourceType source) {
-	}
-
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 
 }

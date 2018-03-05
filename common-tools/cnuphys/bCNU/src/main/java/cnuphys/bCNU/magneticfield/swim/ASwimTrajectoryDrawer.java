@@ -192,16 +192,34 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 		LundId lid = trajectory.getTrajectory3D().getLundId();
 		int id = lid.getId();
 		
-		//FUGLY hack
-		if ((id == -99) || (id == -100) || (id == -101)) { //time based
-			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark orange"));
-			return;
-		}
+		String source  = trajectory.getSource().toLowerCase();
+	//	System.err.println("SOURCE of TRAJ: [" + source + "]");
 
-		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+		if (source.contains("hbtracks")) {
 			plainDrawSwimTrajectory(g, container, trajectory, Color.yellow);
 			return;
 		}
+		else if (source.contains("tbtracks")) {
+			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark orange"));
+			return;
+		}
+		else if (source.contains("cvtrec")) {
+			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark green"));
+			return;
+		}
+
+//		
+//		
+//		if ((id == -99) || (id == -100) || (id == -101)) { //time based
+//			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark orange"));
+//			return;
+//		}
+//
+//		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+//			plainDrawSwimTrajectory(g, container, trajectory, Color.yellow);
+//			return;
+//		}
+
 
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHints(renderHints);

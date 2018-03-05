@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.List;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundSupport;
@@ -28,7 +27,7 @@ public class TrajectoryDrawer3D extends Item3D {
 	@Override
 	public void draw(GLAutoDrawable drawable) {
 
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

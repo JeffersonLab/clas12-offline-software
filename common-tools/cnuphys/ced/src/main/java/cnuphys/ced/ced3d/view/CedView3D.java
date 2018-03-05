@@ -8,7 +8,6 @@ import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
@@ -20,7 +19,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.swim.Swimming;
 
@@ -99,16 +97,6 @@ public abstract class CedView3D extends BaseView implements
 
 		_menuBar.add(actionMenu);
 	}
-	
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		
-	}
-
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -152,7 +140,7 @@ public abstract class CedView3D extends BaseView implements
 
 	@Override
 	public void trajectoriesChanged() {
-		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
+		if (!_eventManager.isAccumulating()) {
 			_panel3D.refresh();
 		}
 	}

@@ -9,7 +9,6 @@ import java.util.List;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
@@ -35,31 +34,33 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 		
-		if (!ClasIoEventManager.getInstance().isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
+		if (!ClasIoEventManager.getInstance().isAccumulating()) {
 
 			// mc
 			if (SwimMenu.getInstance().showMonteCarloTracks()) {
-				List<SwimTrajectory> trajectories = Swimming
-						.getMCTrajectories();
-				if ((trajectories == null) || (trajectories.size() < 1)) {
-					return;
+				List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+				if ((trajectories != null) && (trajectories.size() > 0)) {
+
+					Rectangle sr = container.getInsetRectangle();
+					Graphics2D g2 = (Graphics2D) g;
+
+					Shape oldClip = g2.getClip();
+
+					g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+					super.draw(g, container);
+					g2.setClip(oldClip);
 				}
-				
-				Rectangle sr = container.getInsetRectangle();
-				Graphics2D g2 = (Graphics2D) g;
-
-				Shape oldClip = g2.getClip();
-
-				g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-				super.draw(g, container);
-				g2.setClip(oldClip);
 			}
 
 			// recon
 			if (SwimMenu.getInstance().showReconstructedTracks()) {
+				
 				List<SwimTrajectory> trajectories = Swimming
 						.getReconTrajectories();
-				if ((trajectories == null) || (trajectories.size() < 1)) {
+				
+				int count = (trajectories == null) ? 0 : trajectories.size();
+				
+				if (count < 1) {
 					return;
 				}
 
@@ -137,19 +138,18 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	@Override
 	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
-		//this is a fugly hack. Check to see if it is hit based ot time based 
-		//then check the display flags
-		LundId lid = trajectory.getTrajectory3D().getLundId();
-		int id = lid.getId();
 		
-		//FUGLY hack
-		if ((id == -99) || (id == -100) || (id == -101)) { //time based
-			return _view.showTB();
-		}
-		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+		String source  = trajectory.getSource().toLowerCase();
+
+		if (source.contains("hbtracks")) {
 			return _view.showHB();
 		}
-
+		else if (source.contains("tbtracks")) {
+			return _view.showTB();
+			}
+		else if (source.contains("cvtrec")) {
+			return _view.showCVTTracks();
+		}
 		
 		return true;
 	}

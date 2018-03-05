@@ -1,9 +1,5 @@
 package cnuphys.ced.event.data;
 
-import java.util.List;
-
-import cnuphys.bCNU.util.UnicodeSupport;
-
 public class Hit1 extends BaseHit {
 
 	/** Energy in MeV*/

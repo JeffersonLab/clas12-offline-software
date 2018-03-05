@@ -20,7 +20,6 @@ import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.Hit1;
 import cnuphys.ced.event.data.Hit1List;
-import cnuphys.ced.fastmc.FastMCManager;
 
 public class ReconDrawer extends SectorViewDrawer  {
 
@@ -35,7 +34,7 @@ public class ReconDrawer extends SectorViewDrawer  {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

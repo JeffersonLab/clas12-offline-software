@@ -19,7 +19,6 @@ import cnuphys.ced.event.data.CrossList;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.TBCrosses;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.item.HexSectorItem;
 
 public class CrossDrawer extends DCXYViewDrawer {
@@ -53,7 +52,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 	public void draw(Graphics g, IContainer container) {
 
 		
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

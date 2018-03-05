@@ -132,8 +132,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//weird menu
 	private JMenu _weirdMenu;
 	
+	//warning label that filtering is active
+	private JLabel _filterLabel;
+	
 	// busy panel shows working when reading file
-	private static BusyPanel _busyPanel;
+//	private static BusyPanel _busyPanel;
 
 	// event number label on menu bar
 	private static JLabel _eventNumberLabel;
@@ -848,7 +851,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_instance.createMenus();
 			_instance.placeViewsOnVirtualDesktop();
 
-			_instance.createBusyPanel();
+//			_instance.createBusyPanel();
 			_instance.createTriggerPanel();
 
 			_instance.createEventNumberLabel();
@@ -903,12 +906,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		getJMenuBar().add(new TriggerMenuPanel());
 	}
 
-	private void createBusyPanel() {
-		getJMenuBar().add(Box.createHorizontalStrut(15));
-		_busyPanel = new BusyPanel();
-		_busyPanel.setVisible(false);
-		getJMenuBar().add(_busyPanel);
-	}
+//	private void createBusyPanel() {
+//		getJMenuBar().add(Box.createHorizontalStrut(15));
+//		_busyPanel = new BusyPanel();
+//		_busyPanel.setVisible(false);
+//		getJMenuBar().add(_busyPanel);
+//	}
 
 	// create the event number label
 	private void createEventNumberLabel() {
@@ -958,9 +961,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * 
 	 * @return the shared progress bar
 	 */
-	public static BusyPanel getBusyPanel() {
-		return _busyPanel;
-	}
+//	public static BusyPanel getBusyPanel() {
+//		return _busyPanel;
+//	}
 
 	/**
 	 * Check whether we use 3D

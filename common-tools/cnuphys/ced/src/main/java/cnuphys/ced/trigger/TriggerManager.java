@@ -1,6 +1,5 @@
 package cnuphys.ced.trigger;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.alldata.ColumnData;
@@ -68,10 +67,6 @@ public class TriggerManager implements IClasIoEventListener{
 
 	@Override
 	public void changedEventSource(EventSourceType source) {
-	}
-
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 
 }

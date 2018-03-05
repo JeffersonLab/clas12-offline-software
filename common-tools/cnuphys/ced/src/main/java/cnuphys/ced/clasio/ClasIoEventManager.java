@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -12,8 +13,6 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
-import org.jlab.clas.physics.Particle;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
@@ -38,8 +37,8 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.PCAL;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.frame.Ced;
+import cnuphys.ced.trigger.TriggerFilter;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimMenu;
@@ -70,10 +69,15 @@ public class ClasIoEventManager {
 
 	// reset everytime hipo or evio file is opened
 	private int _eventIndex;
+	
+	// all the filters
+	private ArrayList<IEventFilter> _eventFilters = new ArrayList<>();
+
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
-		HIPOFILE, HIPORING, FASTMC, ET, EVIOFILE
+//		HIPOFILE, HIPORING, ET, EVIOFILE
+		HIPOFILE, ET, EVIOFILE
 	}
 
 	// for firing property changes
@@ -117,7 +121,7 @@ public class ClasIoEventManager {
 	private File _currentEvioFile;
 
 	// current ip address of HIPO ring
-	private String _currentHIPOAddress;
+//	private String _currentHIPOAddress;
 
 	// current ip address of ET ring
 	// private String _currentETAddress;
@@ -139,6 +143,17 @@ public class ClasIoEventManager {
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_dataSource = new HipoDataSource();
+		
+		//test trigger filter
+//		TriggerFilter testFilter = new TriggerFilter.Builder()
+//				.setType(TriggerFilter.TRIG_FILT_TYPE.EXACT)
+//				.setBits(17)
+//				.setActive(true)
+//				.setName("Test Trigger")
+//				.build();
+//		
+//		this.addEventFilter(testFilter);
+		
 	}
 
 	/**
@@ -187,47 +202,32 @@ public class ClasIoEventManager {
 
 		_uniqueLundIds = new Vector<LundId>();
 
-		if (isSourceFastMC() && !FastMCManager.getInstance().isStreaming()) {
-			PhysicsEvent event = FastMCManager.getInstance().getCurrentGenEvent();
-			if ((event != null) && (event.count() > 0)) {
-				for (int index = 0; index < event.count(); index++) {
-					Particle particle = event.getParticle(index);
-					LundId lid = LundSupport.getInstance().get(particle.pid());
-					_uniqueLundIds.remove(lid);
-					_uniqueLundIds.add(lid);
+		if (_currentEvent != null) {
+			// use any bank with a true pid column
+			// String[] knownBanks =
+			// ClasIoEventManager.getInstance().getKnownBanks();
 
-				}
-			}
-
-		}
-		else {
-			if (_currentEvent != null) {
-				// use any bank with a true pid column
-				// String[] knownBanks =
-				// ClasIoEventManager.getInstance().getKnownBanks();
-
-				String[] cbanks = _currentEvent.getBankList();
-				if (cbanks != null) {
-					for (String bankName : cbanks) {
-						if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
-							ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
-							if (cd != null) {
-								int pid[] = (int[]) (cd.getDataArray(_currentEvent));
-								if ((pid != null) && (pid.length > 0)) {
-									for (int pdgid : pid) {
-										LundId lid = LundSupport.getInstance().get(pdgid);
-										if (lid != null) {
-											_uniqueLundIds.remove(lid);
-											_uniqueLundIds.add(lid);
-										}
+			String[] cbanks = _currentEvent.getBankList();
+			if (cbanks != null) {
+				for (String bankName : cbanks) {
+					if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
+						ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
+						if (cd != null) {
+							int pid[] = (int[]) (cd.getDataArray(_currentEvent));
+							if ((pid != null) && (pid.length > 0)) {
+								for (int pdgid : pid) {
+									LundId lid = LundSupport.getInstance().get(pdgid);
+									if (lid != null) {
+										_uniqueLundIds.remove(lid);
+										_uniqueLundIds.add(lid);
 									}
 								}
 							}
 						}
 					}
 				}
-			} // currentevent != null
-		}
+			}
+		} // currentevent != null
 
 		return _uniqueLundIds;
 	}
@@ -318,16 +318,9 @@ public class ClasIoEventManager {
 		else if ((_sourceType == EventSourceType.EVIOFILE) && (_currentEvioFile != null)) {
 			return "Evio File " + _currentEvioFile.getName();
 		}
-		else if (_sourceType == EventSourceType.FASTMC) {
-			return FastMCManager.getInstance().getSourceDescription();
-		}
-		else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress != null)) {
-			return "Hipo Ring " + _currentHIPOAddress;
-		}
-		// else if ((_sourceType == EventSourceType.ET) && (_currentETAddress !=
-		// null) && (_currentETFile != null)) {
-		// return "ET " + _currentETAddress + " " + _currentETFile;
-		// }
+//		else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress != null)) {
+//			return "Hipo Ring " + _currentHIPOAddress;
+//		}
 		else if ((_sourceType == EventSourceType.ET) && (_currentMachine != null) && (_currentETFile != null)) {
 			return "ET " + _currentMachine + " " + _currentETFile;
 		}
@@ -573,9 +566,9 @@ public class ClasIoEventManager {
 	 * 
 	 * @return <code>true</code> is source type is the hippo ring.
 	 */
-	public boolean isSourceHipoRing() {
-		return getEventSourceType() == EventSourceType.HIPORING;
-	}
+//	public boolean isSourceHipoRing() {
+//		return getEventSourceType() == EventSourceType.HIPORING;
+//	}
 
 	/**
 	 * Check whether current event source type is the ET ring
@@ -584,15 +577,6 @@ public class ClasIoEventManager {
 	 */
 	public boolean isSourceET() {
 		return getEventSourceType() == EventSourceType.ET;
-	}
-
-	/**
-	 * Check whether current event source type is FastMC
-	 * 
-	 * @return <code>true</code> is source type is FASTMC.
-	 */
-	public boolean isSourceFastMC() {
-		return getEventSourceType() == EventSourceType.FASTMC;
 	}
 
 	/**
@@ -609,13 +593,10 @@ public class ClasIoEventManager {
 		else if (isSourceEvioFile()) {
 			evcount = (_dataSource == null) ? 0 : _dataSource.getSize();
 		}
-		else if (isSourceHipoRing()) {
-			return Integer.MAX_VALUE;
-		}
+//		else if (isSourceHipoRing()) {
+//			return Integer.MAX_VALUE;
+//		}
 		else if (isSourceET()) {
-			return Integer.MAX_VALUE;
-		}
-		else if (isSourceFastMC()) {
 			return Integer.MAX_VALUE;
 		}
 		return evcount;
@@ -627,24 +608,7 @@ public class ClasIoEventManager {
 	 * @return the number of the current event.
 	 */
 	public int getEventNumber() {
-		if (isSourceFastMC()) {
-			return FastMCManager.getInstance().getEventNumber();
-		}
-		else {
-			return _eventIndex;
-		}
-
-		// int evnum = 0;
-		// if (isSourceHipoFile()) {
-		// evnum = _dataSource.getCurrentIndex() - 1;
-		// }
-		// else if (isSourceEvioFile()) {
-		// evnum = _dataSource.getCurrentIndex();
-		// }
-		// else if (isSourceFastMC()) {
-		// evnum = FastMCManager.getInstance().getEventNumber();
-		// }
-		// return evnum;
+		return _eventIndex;
 	}
 
 	/**
@@ -664,12 +628,9 @@ public class ClasIoEventManager {
 		case EVIOFILE:
 			isOK = (isSourceEvioFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
 			break;
-		case HIPORING:
+//		case HIPORING:
 		case ET:
 			isOK = true;
-			break;
-		case FASTMC:
-			isOK = (FastMCManager.getInstance().getCurrentFile() != null);
 			break;
 		}
 
@@ -691,11 +652,9 @@ public class ClasIoEventManager {
 		case EVIOFILE:
 			numRemaining = getEventCount() - getEventNumber();
 			break;
-		case HIPORING:
+//		case HIPORING:
 		case ET:
 			numRemaining = Integer.MAX_VALUE;
-		case FASTMC:
-			break;
 		}
 
 		return numRemaining;
@@ -785,20 +744,20 @@ public class ClasIoEventManager {
 		// System.err.println("ET DEBUG: in getNextEvent estype: " + estype);
 
 		switch (estype) {
-		case HIPORING:
-			if (_dataSource.hasEvent()) {
-				_currentEvent = _dataSource.getNextEvent();
-
-				// look for the run bank
-				_eventIndex++;
-				setNextEvent(_currentEvent);
-			}
-			break;
+//		case HIPORING:
+//			if (_dataSource.hasEvent()) {
+//				_currentEvent = _dataSource.getNextEvent();
+//
+//				// look for the run bank
+//				_eventIndex++;
+//				ifPassSetEvent(_currentEvent, 0);
+//			}
+//			break;
 		case HIPOFILE:
 			if (_dataSource.hasEvent()) {
 				_currentEvent = _dataSource.getNextEvent();
 				_eventIndex++;
-				setNextEvent(_currentEvent);
+				ifPassSetEvent(_currentEvent, 0);
 			}
 			break;
 
@@ -814,15 +773,12 @@ public class ClasIoEventManager {
 					// System.err.println("Decoded to HIPO");
 					// _currentEvent.show();
 					_eventIndex++;
-					setNextEvent(_currentEvent);
+					ifPassSetEvent(_currentEvent, 0);
 				}
 			}
 
 			break; // end case eviofile
 
-		case FASTMC:
-			FastMCManager.getInstance().nextEvent();
-			break;
 
 		case ET:
 			int maxTries = 30;
@@ -849,48 +805,52 @@ public class ClasIoEventManager {
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 
-					// goodEvent = true;
-
+					// decode the event from evio to hipo
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
 					
+					//manually create trigger bank
 	                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
 	                _currentEvent.appendBanks(trigger);
 
 					_eventIndex++;
-					setNextEvent(_currentEvent);
-					// System.err.println("ET Debug Decoded to HIPO");
-					// _currentEvent.show();
+					ifPassSetEvent(_currentEvent, 0);
 					break;
 				}
 				else {
-					// System.err.println("ET Debug NULL or bad format event " +
-					// " currentEvent: " + _currentEvent);
 					_currentEvent = null;
 				}
 
 			}
-			// else {
-			// System.err.println("ET Debug No event waiting.");
-			// }
 
-			// System.err.println("ET DEBUG: has event: " + goodEvent);
 
 			break; // end case ET
 
 		} // end switch
 
-		//
-		//
-		// if (_currentEvent instanceof HipoDataEvent) {
-		// byte[] bytes = getEventBytesForSerializing(_currentEvent);
-		// if (bytes != null) {
-		// HipoDataEvent cloneEvent = new HipoDataEvent(new HipoEvent(bytes));
-		// System.err.println("Trying clone from bytes");
-		// _currentEvent = cloneEvent;
-		// }
-		// }
-
 		return _currentEvent;
+	}
+	
+	//set the event only if it passes filtering
+	private void ifPassSetEvent(DataEvent event, int option) {
+		if (event != null) {
+			if (passFilters(event)) {
+				setNextEvent(event);
+			}
+			else {
+				if (option == 0) {
+					getNextEvent();
+				}
+				else if (option == 1) {
+					if (_eventIndex == 0) {
+						setNextEvent(event);
+					}
+					else {
+						getPreviousEvent();
+					}
+				}
+			}
+		}
+		
 	}
 
 	/**
@@ -921,7 +881,7 @@ public class ClasIoEventManager {
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-		case HIPORING:
+//		case HIPORING:
 		case ET:
 		case EVIOFILE:
 			boolean hasETEvent = ((_dataSource != null) && _dataSource.hasEvent());
@@ -942,11 +902,12 @@ public class ClasIoEventManager {
 		EventSourceType estype = getEventSourceType();
 
 		switch (estype) {
-		case HIPORING:
-			_eventIndex--;
-			break;
+//		case HIPORING:
+//			_eventIndex--;
+//			break;
 		case HIPOFILE:
 			_eventIndex--;
+			System.err.println("EVENT INDEX: " + _eventIndex);
 			_currentEvent = _dataSource.getPreviousEvent();
 			break;
 
@@ -965,15 +926,13 @@ public class ClasIoEventManager {
 			}
 			break; // end case eviofile
 
-		case FASTMC:
-			break;
-
 		case ET:
 			_eventIndex--;
 			break;
 		}
 
-	setNextEvent(_currentEvent);
+//	setNextEvent(_currentEvent);
+		ifPassSetEvent(_currentEvent, 1);
 
 		// notifyEventListeners();
 		return _currentEvent;
@@ -1001,9 +960,8 @@ public class ClasIoEventManager {
 
 			break;
 
-		case HIPORING:
+//		case HIPORING:
 		case ET:
-		case FASTMC:
 			break;
 		}
 	}
@@ -1092,11 +1050,6 @@ public class ClasIoEventManager {
 	 */
 	public DataEvent reloadCurrentEvent() {
 
-		if (isSourceFastMC()) {
-			FastMCManager.getInstance().reloadCurrentEvent();
-			return null;
-		}
-
 		if (_currentEvent != null) {
 			notifyEventListeners();
 		}
@@ -1161,27 +1114,6 @@ public class ClasIoEventManager {
 
 	}
 
-	public void notifyListenersFastMCGenEvent(PhysicsEvent event) {
-
-		_uniqueLundIds = null;
-
-		for (int index = 0; index < 3; index++) {
-			if (_viewListenerList[index] != null) {
-				// Guaranteed to return a non-null array
-				Object[] listeners = _viewListenerList[index].getListenerList();
-
-				// This weird loop is the bullet proof way of notifying all
-				// listeners.
-				for (int i = listeners.length - 2; i >= 0; i -= 2) {
-					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1]).newFastMCGenEvent(event);
-						;
-					}
-				}
-			}
-		} // index loop
-	}
-
 	/**
 	 * Notify listeners we have a new event ready for display. All they may want
 	 * is the notification that a new event has arrived. But the event itself is
@@ -1220,7 +1152,7 @@ public class ClasIoEventManager {
 
 	// final steps
 	private void finalSteps() {
-		if (isAccumulating() || isSourceFastMC()) {
+		if (isAccumulating()) {
 			return;
 		}
 
@@ -1346,10 +1278,6 @@ public class ClasIoEventManager {
 			return false;
 		}
 
-		if (this.isSourceFastMC()) {
-			return false;
-		}
-
 		int index = Arrays.binarySearch(_currentBanks, bankName);
 		return index >= 0;
 	}
@@ -1377,6 +1305,46 @@ public class ClasIoEventManager {
 		}
 		int index = Arrays.binarySearch(allBanks, bankName);
 		return index >= 0;
+	}
+	
+	//does the event pass all the active filters?
+	private boolean passFilters(DataEvent event) {
+		if ((event != null) && !_eventFilters.isEmpty()) {
+			for (IEventFilter filter : _eventFilters) {
+				if (filter.isActive()) {
+					boolean pass = filter.pass(event);
+					if (!pass) {
+						return false;
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	/**
+	 * Add an event filter
+	 * @param filter the filter to add
+	 */
+	public void addEventFilter(IEventFilter filter) {
+		if (filter != null) {
+			_eventFilters.remove(filter);
+			_eventFilters.add(filter);
+		}
+	}
+	
+	/**
+	 * Remove an event filter
+	 * @param filter the filter to remove
+	 * @return
+	 */
+	public boolean removeEventFilter(IEventFilter filter) {
+		if (filter == null) {
+			return false;
+		}
+		return _eventFilters.remove(filter);
 	}
 
 }

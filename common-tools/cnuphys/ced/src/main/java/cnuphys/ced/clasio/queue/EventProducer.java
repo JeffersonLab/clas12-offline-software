@@ -27,15 +27,6 @@ public class EventProducer implements IClasIoEventListener {
 		_eventManager.addClasIoEventListener(this, 2);
 	}
 
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-	}
-	
-
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		if (_queue != null) {

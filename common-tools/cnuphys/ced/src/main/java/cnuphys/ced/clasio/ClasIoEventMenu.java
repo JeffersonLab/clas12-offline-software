@@ -22,7 +22,6 @@ import javax.swing.KeyStroke;
 import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.Environment;
@@ -568,15 +567,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		} else if (source == quitItem) {
 			System.exit(0);
 		}
-	}
-
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		
 	}
 
 	/**

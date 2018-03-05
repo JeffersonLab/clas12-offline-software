@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.BorderFactory;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
@@ -109,16 +108,6 @@ public class Histogram extends PlotDialog {
 		ppanel.setBorder(BorderFactory.createEtchedBorder());
 
 		return ppanel;
-	}
-
-	/**
-	 * New fast mc event
-	 * 
-	 * @param event
-	 *            the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
 	}
 
 	@Override
