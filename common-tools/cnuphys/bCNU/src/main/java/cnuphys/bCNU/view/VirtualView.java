@@ -27,6 +27,7 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
@@ -261,6 +262,10 @@ public class VirtualView extends BaseView
 		int width = numcol * cell_width;
 //		int height = (int) ((width * world.height) / world.width);
 		int height = cell_height;
+		
+		if (Environment.getInstance().isLinux()) {
+			height += 23;
+		}
 
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
