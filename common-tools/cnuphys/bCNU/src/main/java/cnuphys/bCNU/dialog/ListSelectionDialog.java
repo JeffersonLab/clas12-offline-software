@@ -10,8 +10,6 @@ import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -23,6 +21,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+
+import cnuphys.bCNU.graphics.ImageManager;
 
 /**
  * Simple dialog for selection from a list
@@ -60,11 +60,8 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
      */
 	public ListSelectionDialog(JFrame parent, boolean useId, String title, boolean modal, 
 			int selectionMode, Dimension preferredSize, List<T> items) {
-		super((parent != null) ? parent : OrionFrame.getInstance(), title, modal);
 		
-
-		setTitle(useId ? resourceBundle.getString(title) : title);
-		setModal(modal);
+		super(parent, title, modal);
 		
 		_preferredSize = preferredSize;
 		if (_preferredSize == null) {
@@ -93,7 +90,7 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
 		_jList = new JList<>(_listModel);
 		_jList.setSelectionMode(selectionMode);
 		
-        setIconImage(ImageManager.logoIcon.getImage());
+        setIconImage(ImageManager.cnuIcon.getImage());
         
         //add components
         createSouthComponent(OKSTR, CANCELSTR);
@@ -164,7 +161,7 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
 
         int lenm1 = closeout.length - 1;
         for (int index = 0; index <= lenm1; index++) {
-            JButton button = new JButton(useId ? resourceBundle.getString(closeout[index]) : closeout[index]);
+            JButton button = new JButton(closeout[index]);
             button.setName("simpleDialog" + closeout[index]);
             button.setActionCommand(closeout[index]);
             button.addActionListener(this);
