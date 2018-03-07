@@ -1,25 +1,10 @@
 package cnuphys.swim.test;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
@@ -73,6 +58,7 @@ public class GenericList<T> extends JList {
 	 * Get the underlying list model
 	 * @return the list data model
 	 */
+	@Override
 	public DefaultListModel<T> getModel() {
 		return _listModel;
 	}
@@ -97,25 +83,6 @@ public class GenericList<T> extends JList {
 
 		return _scrollPane;
 	}
-    
-    /**
-     * Get the single selected value for a single selection list
-     * or the smallest indexed selected value for a multiple selection
-     * list
-     * @return the selected value
-     */
-    public T getSelectedValue() {
-    	return getSelectedValue();
-    }
-    
-    /**
-     * Get a list of  selected values, or
-     * an empty list
-     * @return a list of  selected values
-     */
-    public List<T> getSelectedListValues() {
-    	return getSelectedValuesList();
-    }
     
     /**
      * Create a selection dialog for a list of items
