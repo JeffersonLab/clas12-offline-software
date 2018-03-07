@@ -81,5 +81,10 @@ public abstract class ASwimTest {
 		double timeMilliSec = ((double)time)/1.0e6;
 		return String.format("Approximate test time: %12.6f ms", timeMilliSec);
 	}
+	
+	@Override
+	public String toString() {
+		return getName();
+	}
 
 }
