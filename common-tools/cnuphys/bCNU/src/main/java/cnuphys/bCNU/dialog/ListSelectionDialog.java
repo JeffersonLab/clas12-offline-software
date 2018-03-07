@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -42,8 +43,7 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
     
     // convenient access to south button panel
     protected JPanel buttonPanel;
-
-
+    
     //preferred size of dialog
     private Dimension _preferredSize;
 	
@@ -51,14 +51,13 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
      * Create a selection dialog for a list of items
      * 
      * @param parent the JFrame parent. If null, Orion.getInstance() is used
-     * @param useId if <code>true</code> use internationalization
      * @param title the title of the dialog
      * @param modal whether or not the dialog is modal
      * @param selectionMode the mode should be one of the relevant constants from the ListSelectionModel class
      * @param preferredSize the preferred size selection list. If null, 300x400 used.
      * @param items the list of items
      */
-	public ListSelectionDialog(JFrame parent, boolean useId, String title, boolean modal, 
+	public ListSelectionDialog(JFrame parent, String title, boolean modal, 
 			int selectionMode, Dimension preferredSize, List<T> items) {
 		
 		super(parent, title, modal);
@@ -208,32 +207,42 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
     /**
      * Create a selection dialog for a list of items
      * @param parent the JFrame parent. If null, Orion.getInstance() is used
-     * @param useId if <code>true</code> use internationalization
      * @param title the title of the dialog
      * @param modal whether or not the dialog is modal
      * @param selectionMode the mode should be one of the relevant constants from the ListSelectionModel class
      * @param preferredSize the preferred size selection list. If null, 300x400 used.
      * @param items the items as a String array
      */
-    public static ListSelectionDialog<String> fromStringArray(JFrame parent, boolean useId, String title, boolean modal, 
+    public static ListSelectionDialog<String> fromStringArray(JFrame parent, String title, boolean modal, 
 			int selectionMode, Dimension preferredSize, String... items) {
     	
     	ArrayList<String> list = new ArrayList<>(items.length);
     	for (String s:items) {
     		list.add(s);
     	}
-    	return new ListSelectionDialog<String>(parent, useId, title, modal, selectionMode, preferredSize, list);
+    	return new ListSelectionDialog<String>(parent, title, modal, selectionMode, preferredSize, list);
     }
     
     
     public static void main(String arg[]) {
-    	final ListSelectionDialog<String> dialog =  fromStringArray(null, false, "Sample Selection", true, ListSelectionModel.SINGLE_SELECTION,
-    			new Dimension(300, 400),
-    			"Item 1", "Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8","Item 9","Item 10","Item 11",
+    	
+    	String names[] = {"Item 1", "Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8","Item 9","Item 10","Item 11",
     			"Item 12","Item 13","Item 14","Item 15","Item 16","Item 17","Item 18","Item 19","Item 20","Item 21","Item 22",
-    			"Item 23","Item 24","Item 25", "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWZYZ");
+    			"Item 23","Item 24","Item 25", "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWZYZ"};
     	
+    	ArrayList<TestObject> objects = new ArrayList<>();
+    	for (int i = 0; i < names.length; i++) {
+    		objects.add(new TestObject(names[i]));
+    	}
     	
+//    	public ListSelectionDialog(JFrame parent, String title, boolean modal, 
+//    			int selectionMode, Dimension preferredSize, List<T> items) {
+
+    	ListSelectionDialog<TestObject> dialog = new ListSelectionDialog<>(null, "Sample Selection", true, ListSelectionModel.SINGLE_SELECTION,
+    			new Dimension(300, 400), objects);
+    	
+//    	final ListSelectionDialog<TestObject> dialog =  fromStringArray(null, "Sample Selection", true, ListSelectionModel.SINGLE_SELECTION,
+//    			new Dimension(300, 400), names);
     	
 		// now make the frame visible, in the AWT thread
 		try {
@@ -241,11 +250,10 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
 
 				@Override
 				public void run() {
-					System.err.println("HEY MAN 1");
 					dialog.setVisible(true);
-					System.err.println("HEY MAN 2");
 					
 					if (dialog.getReason() == DialogUtilities.OK_RESPONSE) {
+						
 						System.err.println("Selected[" + dialog.getSelectedValue() + "]");
 					}
 					else {
@@ -265,6 +273,19 @@ public class ListSelectionDialog<T> extends JDialog implements ActionListener {
 		}
 		
 
+    }
+    
+    static class TestObject {
+    	String name;
+    	
+    	public TestObject(String name) {
+    		this.name = name;
+    	}
+    	
+    	@Override
+    	public String toString() {
+    		return name;
+    	}
     }
  
 }
