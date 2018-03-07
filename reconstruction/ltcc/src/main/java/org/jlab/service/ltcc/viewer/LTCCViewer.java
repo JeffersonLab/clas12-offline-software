@@ -96,7 +96,7 @@ public class LTCCViewer {
      * @param args ignored
      */
     public static void main(String[] args) {
-        String inputfile = "/Users/sly2j/Data/CLAS12/pass0_4/out_clas_002053.evio.1.hipo";
+        String inputfile = "/Users/sly2j/Data/CLAS12/rg-a/filtered/ltcc_3432.hipo";
 
         DataSource reader = new HipoDataSource();
         reader.open(inputfile);
