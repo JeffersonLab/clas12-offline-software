@@ -1,4 +1,4 @@
-# clas12-offline-software [![Build Status](https://travis-ci.org/JeffersonLab/clas12-offline-software.svg?branch=validation-devel2)](https://travis-ci.org/JeffersonLab/clas12-offline-software) [![codecov](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/validation-devel2/graph/badge.svg)](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/validation-devel2)
+# clas12-offline-software [![Build Status](https://travis-ci.org/JeffersonLab/clas12-offline-software.svg?branch=validation-devel2)](https://travis-ci.org/JeffersonLab/clas12-offline-software) [![codecov](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/validation-devel2/graph/badge.svg?precision=2)](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/validation-devel2)
 CLAS12 Offline Software
 
 ## Quick Start

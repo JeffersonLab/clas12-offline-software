@@ -44,5 +44,14 @@ public class ParticleTest {
 		assertEquals(p2.vz(), 0.0, 1e-6);
 	}
 
+
+	@Test
+	public void testEuclideanDistance() {
+		Particle p1 = new Particle();
+		p1.setVector(11, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		Particle p2 = new Particle(22, 0.0, 4.0, 0.0);
+		assertEquals(p1.euclideanDistance(p2), 5.0, 1e-6);
+	}
+
 }
 
