@@ -265,7 +265,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	/**
 	 * Get the final position
 	 * 
-	 * @return the final position
+	 * @return the final position in x, y, z
 	 */
 	final double[] getFinalPosition() {
 		if (isEmpty()) {
@@ -349,5 +349,6 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	public void setSource(String source) {
 		_source = new String((source == null) ? "???" : source);
 	}
+
 
 }
