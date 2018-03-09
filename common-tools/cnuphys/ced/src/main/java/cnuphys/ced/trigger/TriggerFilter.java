@@ -8,7 +8,7 @@ import cnuphys.ced.clasio.AEventFilter;
 
 public class TriggerFilter extends AEventFilter {
 
-	public enum TRIG_FILT_TYPE {EXACT, MASK};
+	public enum TRIG_FILT_TYPE {EXACT, OR, AND};
 
 	
 	//the bank name
@@ -18,7 +18,7 @@ public class TriggerFilter extends AEventFilter {
 	private int _bits;
 	
 	//the type
-	private TRIG_FILT_TYPE _type = TRIG_FILT_TYPE.EXACT;
+	private TRIG_FILT_TYPE _type = TRIG_FILT_TYPE.OR;
 	
 	public TriggerFilter() {
 		setActive(false);
@@ -30,7 +30,6 @@ public class TriggerFilter extends AEventFilter {
 		if (event == null) {
 			return false;
 		}
-		
 		
 		ColumnData cd = DataManager.getInstance().getColumnData(_columnName);
 		if (cd == null) {
@@ -53,8 +52,11 @@ public class TriggerFilter extends AEventFilter {
 
 		case EXACT:
 			return (_bits == tbits);
+			
+		case OR:
+			return (_bits | tbits) != 0;
 
-		case MASK:
+		case AND:
 			return ((_bits & tbits) == _bits);
 		}
 

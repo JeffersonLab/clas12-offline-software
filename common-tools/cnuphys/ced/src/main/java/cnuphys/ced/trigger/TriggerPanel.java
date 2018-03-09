@@ -7,7 +7,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
-
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -30,8 +31,14 @@ public class TriggerPanel extends JPanel {
 	private static Font _smallFont = Fonts.smallFont;
 	private static Font _labelFont = Fonts.mediumFont;
 	
+	//not editable
 	private static final Color offColor = new Color(224, 224, 224);
 	private static final Color onColor = X11Colors.getX11Color("dark red");
+	
+	//editable
+	private static final Color eOffColor = X11Colors.getX11Color("alice blue");
+	private static final Color eOnColor = X11Colors.getX11Color("dark blue");
+
 	
 	private static int dlabW = -1;
 	
@@ -58,12 +65,19 @@ public class TriggerPanel extends JPanel {
 	
 	private boolean _extended;
 	
+	private boolean _editable;
+	
 	public TriggerPanel() {
-		this(false);
+		this(false, false);
 	}
 	
 	public TriggerPanel(boolean extended) {
+		this(extended, false);
+	}
+	
+	public TriggerPanel(boolean extended, boolean editable) {
 		_extended = extended;
+		_editable = editable;
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setOpaque(false);
 		
@@ -73,6 +87,7 @@ public class TriggerPanel extends JPanel {
 //		_idLabel = new JLabel("   ");
 //		_idLabel.setFont(_labelFont);
 		
+		//if extended add the label for decimal value
 		if (extended) {
 			_trigLabel = new JLabel("trigger");
 			_trigLabel.setForeground(X11Colors.getX11Color("dark red"));
@@ -176,6 +191,20 @@ public class TriggerPanel extends JPanel {
 		
 		public BitDisplay(int index) {
 			this.index = index;
+			
+			if (_editable) {
+				MouseAdapter ml = new MouseAdapter() {
+
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						System.err.print("Hey Man");
+					}
+					
+				};
+				
+				addMouseListener(ml);
+			}
+			
 		}
 		
 		@Override
@@ -196,8 +225,14 @@ public class TriggerPanel extends JPanel {
 		
 		private void drawRect(Graphics g, Rectangle bounds, boolean bitIsOn) {
 		
-								
-			Color fc = bitIsOn ? onColor : offColor;
+			Color fc;
+			if (_editable) {
+				fc = bitIsOn ? eOnColor : eOffColor;
+			}
+			else {
+				fc = bitIsOn ? onColor : offColor;
+			}
+			
 			g.setColor(fc);
 			g.fillRect(0, 0, CELL_SIZE, CELL_SIZE);
 			

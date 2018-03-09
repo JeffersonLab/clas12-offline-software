@@ -1113,6 +1113,21 @@ public class ClasIoEventManager {
 		Ced.getCed().fixTitle();
 
 	}
+	
+	/**
+	 * Check if there are any active filters
+	 * @return <code>true</code> if there are any active filters
+	 */
+	public boolean isFilteringOn() {
+		if (_eventFilters != null) {
+			for (IEventFilter filter : _eventFilters) {
+				if (filter.isActive()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Notify listeners we have a new event ready for display. All they may want
@@ -1125,6 +1140,8 @@ public class ClasIoEventManager {
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();
 		_uniqueLundIds = null;
+		
+		Ced.getCed().setEventFilteringLabel(isFilteringOn());
 
 		_currentBanks = (_currentEvent == null) ? null : _currentEvent.getBankList();
 		if (_currentBanks != null) {
@@ -1309,6 +1326,7 @@ public class ClasIoEventManager {
 	
 	//does the event pass all the active filters?
 	private boolean passFilters(DataEvent event) {
+		
 		if ((event != null) && !_eventFilters.isEmpty()) {
 			for (IEventFilter filter : _eventFilters) {
 				if (filter.isActive()) {
@@ -1322,7 +1340,6 @@ public class ClasIoEventManager {
 		
 		return true;
 	}
-	
 	
 	/**
 	 * Add an event filter

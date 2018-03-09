@@ -15,7 +15,7 @@ public class RungeKutta {
 	private static final double HGROWTH = 1.5;
 
 	private static double MINSTEPSIZE = 1.0e-8;
-	private static double MAXSTEPSIZE = 0.2;
+	private static double MAXSTEPSIZE = 0.4;
 
 	// the max dimension we'll use is probably 6, for state vectors
 	// [x,y,z,vx,vy,vz].
@@ -342,6 +342,7 @@ public class RungeKutta {
 
 		return adaptiveStep(yo, to, tf, h, deriv, stopper, listener, tableau, relTolerance, hdata);
 	}
+	
 
 	/**
 	 * Integrator that uses the RungeKutta advance with a Butcher Tableau and
@@ -453,6 +454,65 @@ public class RungeKutta {
 		IAdvance advancer = new HalfStepAdvance();
 		return driver(yo, to, tf, h, deriv, stopper, listener, advancer, relTolerance, hdata);
 	}
+	
+
+	/**
+	 * Integrator that uses the RungeKutta advance with a Butcher Tableau and
+	 * adaptive stepsize
+	 * 
+	 * This version uses an IRk4Listener to notify the listener that the next
+	 * step has been advanced.
+	 * 
+	 * A very typical case is a 2nd order ODE converted to a 1st order where the
+	 * dependent variables are x, y, z, vx, vy, vz and the independent variable
+	 * is time.
+	 * 
+	 * @param yo
+	 *            initial values. Probably something like (xo, yo, zo, vxo, vyo,
+	 *            vzo).
+	 * @param yf  space for final state vector
+	 * @param to
+	 *            the initial value of the independent variable, e.g., time.
+	 * @param tf
+	 *            the maximum value of the independent variable.
+	 * @param h
+	 *            the starting steps size
+	 * @param deriv
+	 *            the derivative computer (interface). This is where the problem
+	 *            specificity resides.
+	 * @param stopper
+	 *            if not <code>null</code> will be used to exit the integration
+	 *            early because some condition has been reached.
+	 * @param tableau
+	 *            the Butcher Tableau
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used, hdata[1] is the average stepsize used, and
+	 *            hdata[2] is the max stepsize used
+	 * @return the number of steps used.
+	 * @throws RungeKuttaException
+	 */
+	public int adaptiveStep(double yo[],
+			double yf[],
+			double to,
+			double tf,
+			double h,
+			double maxH,
+			IDerivative deriv,
+			IStopper stopper,
+			ButcherTableau tableau,
+			double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
+
+		// ButcherTableauAdvance advancer = new ButcherTableauAdvance(tableau);
+		// use a simple half-step advance
+		IAdvance advancer = new HalfStepAdvance();
+		return driver(yo, yf, to, tf, h, maxH, deriv, stopper, advancer, relTolerance, hdata);
+	}
+
 
 	/**
 	 * Integrator that uses the RungeKutta advance with a Butcher Tableau and
@@ -975,6 +1035,9 @@ public class RungeKutta {
 						if ((hdata != null) && (nstep > 0)) {
 							hdata[1] = hdata[1] / nstep;
 						}
+//						System.err.println(" STOP state = " + String.format("(%9.6f, %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)",
+//								yt[0], yt[1], yt[2], yt[3], yt[4], yt[5]));
+
 						return nstep; // actual number of steps taken
 					}
 				}
@@ -993,6 +1056,159 @@ public class RungeKutta {
 		}
 		return nstep;
 	}
+	
+
+	/**
+	 * Driver that uses the RungeKutta advance with an adaptive step size
+	 * 
+	 * This version uses an IRk4Listener to notify the listener that the next
+	 * step has been advanced.
+	 * 
+	 * A very typical case is a 2nd order ODE converted to a 1st order where the
+	 * dependent variables are x, y, z, vx, vy, vz and the independent variable
+	 * is time.
+	 * 
+	 * @param uo
+	 *            initial values. Probably something like (xo, yo, zo, vxo, vyo,
+	 *            vzo).
+	 * @param uf  space to hold the final values           
+	 * @param to
+	 *            the initial value of the independent variable, e.g., time.
+	 * @param tf
+	 *            the maximum value of the independent variable.
+	 * @param h
+	 *            the step size
+	 * @param deriv
+	 *            the derivative computer (interface). This is where the problem
+	 *            specificity resides.
+	 * @param stopper
+	 *            if not <code>null</code> will be used to exit the integration
+	 *            early because some condition has been reached.
+	 * @param advancer
+	 *            takes the next step
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used, hdata[1] is the average stepsize used, and
+	 *            hdata[2] is the max stepsize used
+	 * @return the number of steps used.
+	 * @throw(new RungeKuttaException("Step size too small in Runge Kutta
+	 *            driver" ));
+	 */
+	private int driver(double uo[],
+			double uf[],
+			double to,
+			double tf,
+			double h,
+			double maxH,
+			IDerivative deriv,
+			IStopper stopper,
+			IAdvance advancer,
+			double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
+
+		// the dimensionality of the problem. E.., 6 if (x, y, z, vx, vy, vz)
+		int nDim = uo.length;
+		System.arraycopy(uo, 0, uf, 0, nDim);
+
+		// if our advancer does not compute error we can't use adaptive stepsize
+		if (!advancer.computesError()) {
+			return 0;
+		}
+
+		// capture stepsize data?
+		if (hdata != null) {
+			hdata[0] = h;
+			hdata[1] = h;
+			hdata[2] = h;
+		}
+
+
+		// yf is the current value of the state vector,
+		// typically [x, y, z, vx, vy, vz] and derivative
+		double yt[] = new double[nDim];
+		System.arraycopy(uo, 0, yt, 0, nDim);
+		double yt2[] = new double[nDim];
+		double dydt[] = new double[nDim];
+
+		// do we compute error?
+		double error[] = new double[nDim];
+
+		double t = to;
+
+		int nstep = 0;
+		while (t < tf) {
+			// use derivs at previous t
+			deriv.derivative(t, yt, dydt);
+			
+			advancer.advance(t, yt, dydt, h, deriv, yt2, error);
+
+			boolean decreaseStep = false;
+			for (int i = 0; i < nDim; i++) {
+				decreaseStep = error[i] > relTolerance[i];
+				// System.err.println("error " + error[i] + " reltol: " +
+				// relTolerance[i] + " dec: " + decreaseStep);
+				if (decreaseStep) {
+					
+					System.err.println("DECREASE H ");
+					break;
+				}
+			}
+
+			if (decreaseStep) {
+				h = h / 2;
+				if (h < MINSTEPSIZE) {
+					throw (new RungeKuttaException("Step size too small in Runge Kutta driver (A)"));
+				}
+			}
+			else { // accepted this step
+
+				if (hdata != null) {
+					hdata[0] = Math.min(hdata[0], h);
+					hdata[1] += h;
+					hdata[2] = Math.max(hdata[2], h);
+				}
+
+				System.arraycopy(yt2, 0, yt, 0, nDim);
+
+				t += h;
+
+				nstep++;
+
+				// premature termination? Skip if stopper is null.
+				if (stopper != null) {
+					stopper.setFinalT(t);
+					if (stopper.stopIntegration(t, yt)) {
+						if ((hdata != null) && (nstep > 0)) {
+							hdata[1] = hdata[1] / nstep;
+						}
+
+                        //get the last state if we are truly done
+						if (stopper.terminateIntegration(t, yt)) {
+							System.arraycopy(yt, 0, uf, 0, nDim);
+						}
+						
+						return nstep; // actual number of steps taken
+					}
+				}
+				
+				System.arraycopy(yt, 0, uf, 0, nDim);
+
+
+				h *= HGROWTH;
+				h = Math.min(h, maxH);
+
+			} // max error < tolerance
+		}
+
+		if ((hdata != null) && (nstep > 0)) {
+			hdata[1] = hdata[1] / nstep;
+		}
+		return nstep;
+	}
+
 
 	/**
 	 * Driver that uses the RungeKutta advance with an adaptive step size. This
@@ -1151,27 +1367,6 @@ public class RungeKutta {
 		return nstep;
 	}
 
-	// relative difference with no danger of dividing by zero
-	private double relativeDiff(double a, double b) {
-
-		double diff = Math.abs(a - b);
-		if (diff < 1.0e-20) {
-			return 0.;
-		}
-
-		double aabs = Math.abs(a);
-		double babs = Math.abs(b);
-
-		double denom = aabs;
-		if (denom < 1.0e-20) {
-			denom = Math.max(aabs, babs);
-		}
-
-		double err = diff / denom;
-
-		return err;
-	}
-
 	// A uniform step size advancer
 	class UniformAdvance implements IAdvance {
 
@@ -1274,6 +1469,10 @@ public class RungeKutta {
 			// compute absolute errors
 			for (int i = 0; i < ndim; i++) {
 				error[i] = Math.abs(yfull[i] - yout[i]);
+				
+//				if (error[i] > 1.0e-10) {
+//				error[i] /= Math.max(Math.abs(yfull[i]),  Math.abs(yout[i]));
+//				}
 			}
 		}
 

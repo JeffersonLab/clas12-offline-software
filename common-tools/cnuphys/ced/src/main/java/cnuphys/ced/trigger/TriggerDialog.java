@@ -5,14 +5,19 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.ced.frame.Ced;
 
-public class TriggerDialog extends JDialog  {
+public class TriggerDialog extends JDialog implements ActionListener  {
 	
 	private static final int NUMTODISPLAY = 3;  //1..3
 
@@ -26,6 +31,12 @@ public class TriggerDialog extends JDialog  {
 	//trigger panels
 	private TriggerPanel triggerPanels[];
 	
+	//is the trigger active
+	private JCheckBox _triggerActiveCB;
+	
+	//the bit editor for the filter pattern
+	
+	private BitEditor _bitEditor;
 
 	//private constructor
 	private TriggerDialog() {
@@ -33,6 +44,7 @@ public class TriggerDialog extends JDialog  {
 		setLayout(new BorderLayout(0, 0));
 		add(createNorthComponent(), BorderLayout.NORTH);
 
+		setResizable(false);
 		
 		setAlwaysOnTop(true);
 		pack();
@@ -43,8 +55,8 @@ public class TriggerDialog extends JDialog  {
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 1, def.left, def.bottom,
-				def.right);
+		return new Insets(def.top + 1, def.left+4, def.bottom+4,
+				def.right+4);
 	}
 
 	
@@ -56,7 +68,6 @@ public class TriggerDialog extends JDialog  {
 				
 				Insets insets = ced.getInsets();
 				int tbHeight = insets.top;
-				
 				
 				JMenuBar mb = ced.getJMenuBar();
 				
@@ -90,19 +101,40 @@ public class TriggerDialog extends JDialog  {
 	 * @return the component that is placed in the north
 	 */
 	protected Component createNorthComponent() {
+		JPanel nPanel = new JPanel();
+		nPanel.setLayout(new BorderLayout(0, 8));
+		
+		_triggerActiveCB = new JCheckBox("Trigger Filter Active", false);
+		_triggerActiveCB.addActionListener(this);
+		nPanel.add(_triggerActiveCB, BorderLayout.NORTH);
+		
 		triggerPanels = new TriggerPanel[NUMTODISPLAY];
 		for (int i = 0; i < NUMTODISPLAY; i++) {
 			triggerPanels[i] = new TriggerPanel();
 		}
 		
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(NUMTODISPLAY, 1, 4, 4));
+	//	panel.setLayout(new GridLayout(NUMTODISPLAY, 1, 4, 4));
 		
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		//add the editor
+		
+		_bitEditor = new BitEditor();
+		panel.add(_bitEditor);
+		panel.add(Box.createVerticalStrut(10));
 		
 		for (int i = 0; i < NUMTODISPLAY; i++) {
 			panel.add(triggerPanels[i]);
+			
+			if (i < 2) {
+				panel.add(Box.createVerticalStrut(10));
+			}
+
 		}
-		return panel;
+		
+		nPanel.add(panel, BorderLayout.CENTER);
+		return nPanel;
 	}
 
 	
@@ -127,6 +159,17 @@ public class TriggerDialog extends JDialog  {
 			}
 			
 		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object source = e.getSource();
+		
+		if (source == _triggerActiveCB) {
+			TriggerManager.getInstance().setFilterActive(_triggerActiveCB.isSelected());
+			Ced.getCed().fixEventFilteringLabel();
+		}
+		
 	}
 
 }

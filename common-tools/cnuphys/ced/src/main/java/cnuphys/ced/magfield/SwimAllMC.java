@@ -209,7 +209,7 @@ public class SwimAllMC implements ISwimAll {
 		SwimTrajectory traj;
 		try {
 			traj = swimmer.swim(lid.getCharge(), x, y,
-					z, p, theta, phi, stopper, PATHMAX, stepSize,
+					z, p, theta, phi, stopper, 0, PATHMAX, stepSize,
 					Swimmer.CLAS_Tolerance, null);
 			traj.setLundId(lid);
 			Swimming.addMCTrajectory(traj);

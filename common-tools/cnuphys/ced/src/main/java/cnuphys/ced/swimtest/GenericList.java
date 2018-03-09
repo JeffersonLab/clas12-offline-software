@@ -1,4 +1,4 @@
-package cnuphys.swim.test;
+package cnuphys.ced.swimtest;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
