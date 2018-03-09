@@ -214,7 +214,7 @@ public class EBMatching {
             for (int ictrk=0; ictrk<nctrk; ictrk++) {
                 // make track and charged particle
                 DetectorParticle cvtParticle = cvtParticles.get(ictrk);
-                final int trkid=ctrkBank.getInt("ID",ictrk) - 1;
+                final int trkid=ctrkBank.getInt("ID",ictrk);
                 //System.out.println("THe track ID from the CVT bank = " + trkid);
                 if (ctofMap!=null && ctofMap.containsKey(trkid)) {
                     for(int i = 0 ; i < ctofMap.get(trkid).size() ; i++) {
