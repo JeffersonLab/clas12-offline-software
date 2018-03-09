@@ -18,6 +18,8 @@ public class TriggerManager implements IClasIoEventListener{
 	//the bank name
 	private static String _bankName = "RUN::trigger";
 	
+	//the trigger filter
+	private static TriggerFilter _filter;
 	
 	//the data columns in the Run::trigger bank
 	private int _id[];
@@ -37,11 +39,26 @@ public class TriggerManager implements IClasIoEventListener{
 	public static TriggerManager getInstance() {
 		if (_instance == null) {
 			_instance = new TriggerManager();
+			
+			_filter = new TriggerFilter.Builder()
+					.setActive(false)
+					.setBits(Integer.MIN_VALUE)
+					.setType(TriggerFilter.TRIG_FILT_TYPE.OR)
+					.setName("Trigger Filter")
+					.build();
 		}
 		
+		ClasIoEventManager.getInstance().addEventFilter(_filter);
 		return _instance;
 	}
 	
+	/**
+	 * Set the active state of the trigger filter. Will take effect
+	 * @param active the active state of the trigger filter
+	 */
+	public void setFilterActive(boolean active) {
+		_filter.setActive(active);
+	}
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {

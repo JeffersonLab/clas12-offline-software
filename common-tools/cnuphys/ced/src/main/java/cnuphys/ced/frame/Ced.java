@@ -24,7 +24,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
-import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.ced.alldata.DataManager;
@@ -740,6 +739,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	public static void refresh() {
 		ViewManager.getInstance().refreshAllViews();
 	}
+	
+	/**
+	 * Change the label to reflect whether or not we are filtering events
+	 * @param filtering if <code>true</code> we are filtering
+	 */
+	public void setEventFilteringLabel(boolean filtering) {
+		_filterLabel.setVisible(filtering);
+	}
+	
+	/**
+	 * Change the label to reflect whether or not we are filtering events
+	 * @param filtering if <code>true</code> we are filtering
+	 */
+	public void fixEventFilteringLabel() {
+		_filterLabel.setVisible(ClasIoEventManager.getInstance().isFilteringOn());
+	}
+
 
 	/**
 	 * Set the event number label
@@ -854,6 +870,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 //			_instance.createBusyPanel();
 			_instance.createTriggerPanel();
 
+			_instance.createFilterLabel();
 			_instance.createEventNumberLabel();
 			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
@@ -883,7 +900,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		String pname = pev.getPropertyName();
 
 		if (pname.equals(ClasIoEventManager.SWIM_ALL_MC_PROP)) {
-	//		System.err.println("Curent Thread: " + Thread.currentThread().getName());
 			ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 					.getMCSwimmer();
 			if (allSwimmer != null) {
@@ -912,6 +928,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 //		_busyPanel.setVisible(false);
 //		getJMenuBar().add(_busyPanel);
 //	}
+	
+	// create the event number label
+	private void createFilterLabel() {
+		_filterLabel = new JLabel(" Event Filtering On ");
+		_filterLabel.setOpaque(true);
+		_filterLabel.setBackground(Color.white);
+		_filterLabel.setForeground(Color.red);
+		_filterLabel.setFont(new Font("Dialog", Font.BOLD, 12));
+		_filterLabel
+				.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+		
+		getJMenuBar().add(Box.createHorizontalGlue());
+		getJMenuBar().add(_filterLabel);
+		getJMenuBar().add(Box.createHorizontalStrut(5));
+		
+		setEventFilteringLabel(false);
+	}
 
 	// create the event number label
 	private void createEventNumberLabel() {
