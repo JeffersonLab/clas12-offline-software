@@ -138,6 +138,11 @@ public class TriggerDialog extends JDialog implements ActionListener  {
 	}
 
 	
+	/**
+	 * Set the data for the current event
+	 * @param id the ids from the trigger bank
+	 * @param trigger the words from the trigger bank
+	 */
 	public void setCurrentEvent(int[] id, int[] trigger) {
 		
 		if (triggerPanels == null) {
@@ -145,7 +150,7 @@ public class TriggerDialog extends JDialog implements ActionListener  {
 		}
 		
 		for (int i = 0; i < NUMTODISPLAY; i++) {
-			triggerPanels[i].set(0,  0);
+			triggerPanels[i].setBits(0,  0);
 		}
 
 	
@@ -155,7 +160,7 @@ public class TriggerDialog extends JDialog implements ActionListener  {
 			len = Math.min(len,  NUMTODISPLAY);
 			
 			for (int i = 0; i < len; i++) {
-				triggerPanels[i].set(id[i],  trigger[i]);
+				triggerPanels[i].setBits(id[i],  trigger[i]);
 			}
 			
 		}

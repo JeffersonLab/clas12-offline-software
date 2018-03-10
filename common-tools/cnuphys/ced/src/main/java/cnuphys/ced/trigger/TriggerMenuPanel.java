@@ -39,7 +39,7 @@ public class TriggerMenuPanel extends TriggerPanel implements IClasIoEventListen
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 		}
 		else {  //single event
-			set(0,  0);
+			setBits(0,  0);
 
 			
 			int idData[] = null;
@@ -48,7 +48,7 @@ public class TriggerMenuPanel extends TriggerPanel implements IClasIoEventListen
 			idData = ColumnData.getIntArray(_bankName + ".id");
 			if (idData != null) {
 				triggerData = ColumnData.getIntArray(_bankName + ".trigger");
-				set(idData[0], triggerData[0]);
+				setBits(idData[0], triggerData[0]);
 
 			}
 			

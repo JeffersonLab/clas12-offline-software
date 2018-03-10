@@ -11,10 +11,7 @@ public class TriggerManager implements IClasIoEventListener{
 
 	//singleton
 	private static TriggerManager _instance;
-	
-	//the dialog for display
-	private TriggerDialog _dialog;
-	
+		
 	//the bank name
 	private static String _bankName = "RUN::trigger";
 	
@@ -29,7 +26,6 @@ public class TriggerManager implements IClasIoEventListener{
 	//private constructor for singleton
 	private TriggerManager() {
 		ClasIoEventManager.getInstance().addClasIoEventListener(this, 2);
-		_dialog = TriggerDialog.getInstance();
 	}
 	
 	/**
@@ -42,7 +38,7 @@ public class TriggerManager implements IClasIoEventListener{
 			
 			_filter = new TriggerFilter.Builder()
 					.setActive(false)
-					.setBits(Integer.MIN_VALUE)
+					.setBits(new Long(0xFFFFFFFF).intValue())
 					.setType(TriggerFilter.TRIG_FILT_TYPE.OR)
 					.setName("Trigger Filter")
 					.build();
@@ -59,6 +55,14 @@ public class TriggerManager implements IClasIoEventListener{
 	public void setFilterActive(boolean active) {
 		_filter.setActive(active);
 	}
+	
+	/**
+	 * Get the Trigger filter
+	 * @return the trigger filter
+	 */
+	protected TriggerFilter getTriggerFilter() {
+		return _filter;
+	}
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -74,7 +78,7 @@ public class TriggerManager implements IClasIoEventListener{
 				_trigger = ColumnData.getIntArray(_bankName + ".trigger");
 			}
 			
-			_dialog.setCurrentEvent(_id, _trigger);
+			TriggerDialog.getInstance().setCurrentEvent(_id, _trigger);
 		}
 	}
 
