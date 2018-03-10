@@ -35,9 +35,8 @@ public class TriggerDialog extends JDialog implements ActionListener  {
 	private JCheckBox _triggerActiveCB;
 	
 	//the bit editor for the filter pattern
-	
 	private BitEditor _bitEditor;
-
+	
 	//private constructor
 	private TriggerDialog() {
 		super(Ced.getCed(), "Trigger Bits", false);
@@ -163,6 +162,17 @@ public class TriggerDialog extends JDialog implements ActionListener  {
 				triggerPanels[i].setBits(id[i],  trigger[i]);
 			}
 			
+		}
+	}
+	
+	public JCheckBox getTriggerActiveCheckBox() {
+		return _triggerActiveCB;
+	}
+	
+	public void fixActiveBox() {
+		boolean selected = _triggerActiveCB.isSelected();
+		if (isActive() != selected) {
+			_triggerActiveCB.setSelected(!selected);
 		}
 	}
 

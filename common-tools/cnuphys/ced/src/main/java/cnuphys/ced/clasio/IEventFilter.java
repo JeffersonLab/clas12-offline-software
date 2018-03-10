@@ -1,5 +1,7 @@
 package cnuphys.ced.clasio;
 
+import javax.swing.JComponent;
+
 import org.jlab.io.base.DataEvent;
 
 public interface IEventFilter {
@@ -34,4 +36,10 @@ public interface IEventFilter {
 	 * @return the name of the filter.
 	 */
 	public String getName();
+	
+	/**
+	 * Get the component for the event filter menu
+	 * @return the component for the event filter menu
+	 */
+	public JComponent getMenuComponent();
 }
