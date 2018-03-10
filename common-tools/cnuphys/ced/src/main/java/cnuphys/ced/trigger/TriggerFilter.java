@@ -1,5 +1,7 @@
 package cnuphys.ced.trigger;
 
+import javax.swing.JLabel;
+
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.alldata.ColumnData;
@@ -8,7 +10,6 @@ import cnuphys.ced.clasio.AEventFilter;
 
 public class TriggerFilter extends AEventFilter {
 
-	public enum TRIG_FILT_TYPE {EXACT, OR, AND};
 
 	
 	//the bank name
@@ -18,9 +19,10 @@ public class TriggerFilter extends AEventFilter {
 	private int _bits;
 	
 	//the type
-	private TRIG_FILT_TYPE _type = TRIG_FILT_TYPE.OR;
-	
+	private TriggerMatch _type = TriggerMatch.ANY;
+		
 	public TriggerFilter() {
+		super();
 		setActive(false);
 	}
 
@@ -46,24 +48,32 @@ public class TriggerFilter extends AEventFilter {
 			System.err.println("TRIG FILTER CHECKING BITS: " + triggerData[0]);
 		}
 
-		int tbits = triggerData[0];
+		int triggerWord = triggerData[0];
 
 		switch (_type) {
 
 		case EXACT:
-			return (_bits == tbits);
+			return (_bits == triggerWord);
 			
-		case OR:
-			return (_bits | tbits) != 0;
+		case ANY:
+			return (_bits & triggerWord) != 0;
 
-		case AND:
-			return ((_bits & tbits) == _bits);
+		case ALL:
+			return ((_bits & triggerWord) == _bits);
 		}
 
 		return true;
 	}
+	
+	@Override
+	protected void toggleActiveState() {
+		super.toggleActiveState();
+		TriggerDialog.getInstance().getTriggerActiveCheckBox().setSelected(isActive());
+	}
+
 
 	public void setBits(int bits) {
+		System.err.println("Trigger Filter Bits Have Changed");
 		_bits = bits;
 	}
 
@@ -71,8 +81,20 @@ public class TriggerFilter extends AEventFilter {
 		return _bits;
 	}
 	
-	public void setType(TRIG_FILT_TYPE type) {
+	/**
+	 * Set the type of trigger match
+	 * @param type the trigger match
+	 */
+	public void setType(TriggerMatch type) {
 		_type = type;
+	}
+	
+	/**
+	 * Get the pattern matching type
+	 * @return the pattern matching type
+	 */
+	public TriggerMatch getType() {
+		return _type;
 	}
 	
     /**
@@ -95,7 +117,7 @@ public class TriggerFilter extends AEventFilter {
     		return this;
     	}
     	
-    	public Builder setType(TRIG_FILT_TYPE type) {
+    	public Builder setType(TriggerMatch type) {
     		_filter.setType(type);
     		return this;
     	}

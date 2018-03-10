@@ -39,7 +39,7 @@ public class TriggerManager implements IClasIoEventListener{
 			_filter = new TriggerFilter.Builder()
 					.setActive(false)
 					.setBits(new Long(0xFFFFFFFF).intValue())
-					.setType(TriggerFilter.TRIG_FILT_TYPE.OR)
+					.setType(TriggerMatch.ANY)
 					.setName("Trigger Filter")
 					.build();
 		}

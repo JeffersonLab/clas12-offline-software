@@ -88,6 +88,7 @@ import cnuphys.magfield.MagneticField.MathLib;
 import cnuphys.splot.example.MemoryUsageDialog;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
+import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
 import cnuphys.bCNU.format.DateString;
@@ -100,6 +101,7 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
@@ -114,7 +116,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.62";
+	private static final String _release = "build 0.99.999.9" + UnicodeSupport.OVERLINE;
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -145,6 +147,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//Environment display
 	private TextDisplayDialog _envDisplay;
+	
+	//show which filters are active
+	private JMenu _eventFilterMenu;
+
 	
 	// some views
 	private AllDCView _allDCView;
@@ -791,6 +797,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 	}
 	
+	/**
+	 * Get the event filter menu
+	 * @return the event filter menu
+	 */
+	public JMenu getEventFilterMenu() {
+		return _eventFilterMenu;
+	}
 	
 	// add to the event menu
 	private void addToEventMenu() {
@@ -800,6 +813,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_eventCountLabel.setBackground(Color.white);
 		_eventCountLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
 		_eventMenu.add(_eventCountLabel);
+		
+		// add the event filter menu
+		_eventFilterMenu = new JMenu("Event Filters");
+		_eventMenu.add(_eventFilterMenu);
+		
+		
+		
 
 		// add the noise parameter menu item
 		ActionListener al2 = new ActionListener() {
@@ -868,9 +888,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_instance.placeViewsOnVirtualDesktop();
 
 //			_instance.createBusyPanel();
+			_instance.createFilterLabel();
+
 			_instance.createTriggerPanel();
 
-			_instance.createFilterLabel();
 			_instance.createEventNumberLabel();
 			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
@@ -963,7 +984,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 
 	/**
-	 * Fix the title of te main frame
+	 * Fix the title of the main frame
 	 */
 	public void fixTitle() {
 		String title = getTitle();
@@ -975,7 +996,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		title += "   [Magnetic Field (" +
 		MagneticFields.getInstance().getVersion() + ") "
 				+ MagneticFields.getInstance().getActiveFieldDescription();
-		title += "]";
+		title += "] [Swimmer (" + Swimmer.getVersion() + ")]";
 		
 		title += ("  " + ClasIoEventManager.getInstance().getCurrentSourceDescription());
 		setTitle(title);
@@ -1136,8 +1157,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				ced.setVisible(true);
 				splashWindow.writeCachedText();
 				ced.fixTitle();
+				
+				ClasIoEventManager.getInstance().setUpFilterMenu();
 				//initialize data columns
 				DataManager.getInstance();
+				System.out.println("ced version " + _release + " is ready.");
 			}
 
 		});
@@ -1154,23 +1178,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Log.getInstance().info("ced is ready.");
 //		Environment.getInstance().say("c e d is ready");
 
-		// test demo plugin
-		// new CedDemoPlugin();
-		//new BrookDemoPlugin();
-
-		// //test event queue
-		// ClasIoEventQueue queue = new ClasIoEventQueue();
-		// new EventProducer(queue);
-		// IEventProcessor processor = new IEventProcessor() {
-		//
-		// @Override
-		// public void processEvent(DataEvent event) {
-		// System.err.println("GOT EVENT TO PROCESS");
-		// }
-		//
-		// };
-		//
-		// new EventConsumer(queue, processor);
 
 	} // end main
 	

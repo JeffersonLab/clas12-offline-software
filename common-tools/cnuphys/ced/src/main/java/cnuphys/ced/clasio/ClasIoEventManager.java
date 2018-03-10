@@ -1128,6 +1128,7 @@ public class ClasIoEventManager {
 		}
 		return false;
 	}
+	
 
 	/**
 	 * Notify listeners we have a new event ready for display. All they may want
@@ -1343,25 +1344,27 @@ public class ClasIoEventManager {
 	
 	/**
 	 * Add an event filter
-	 * @param filter the filter to add
+	 * 
+	 * @param filter
+	 *            the filter to add
 	 */
 	public void addEventFilter(IEventFilter filter) {
 		if (filter != null) {
-			_eventFilters.remove(filter);
-			_eventFilters.add(filter);
+			if (!_eventFilters.contains(filter)) {
+				_eventFilters.add(filter);
+			}
 		}
 	}
 	
 	/**
-	 * Remove an event filter
-	 * @param filter the filter to remove
-	 * @return
+	 * Do this late in ced initialization
 	 */
-	public boolean removeEventFilter(IEventFilter filter) {
-		if (filter == null) {
-			return false;
+	public void setUpFilterMenu() {
+		if (_eventFilters != null) {
+			for (IEventFilter filter : _eventFilters) {
+				Ced.getCed().getEventFilterMenu().add(filter.getMenuComponent());
+			}
 		}
-		return _eventFilters.remove(filter);
 	}
 
 }
