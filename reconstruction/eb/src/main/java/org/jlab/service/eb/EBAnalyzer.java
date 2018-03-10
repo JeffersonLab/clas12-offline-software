@@ -20,7 +20,7 @@ import org.jlab.rec.eb.EBCCDBEnum;
  */
 public class EBAnalyzer {
 
-    private int[]  pidPositive = new int[]{-11,  211, 321, 2212};
+    private int[]  pidPositive = new int[]{-11,  211, 321, 2212, 45};
     private int[]  pidNegative = new int[]{ 11, -211,-321,-2212};
 
     public EBAnalyzer(){}
