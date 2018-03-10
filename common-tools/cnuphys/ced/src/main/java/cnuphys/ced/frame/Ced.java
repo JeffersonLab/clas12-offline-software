@@ -1046,7 +1046,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		FileUtilities.setDefaultDir("data");
 
 		// create a console log listener
-		Log.getInstance().addLogListener(new ConsoleLogListener());
+		//Log.getInstance().addLogListener(new ConsoleLogListener());
 		
 		
 		//splash frame

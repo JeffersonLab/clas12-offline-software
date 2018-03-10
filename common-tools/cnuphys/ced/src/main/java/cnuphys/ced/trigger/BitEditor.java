@@ -19,7 +19,7 @@ public class BitEditor extends JPanel {
 		
 		add(new JLabel("Click to create a filter pattern"), BorderLayout.NORTH);
 		add(_trigPanel, BorderLayout.CENTER);
-		
+		setBits(TriggerManager.getInstance().getTriggerFilter().getBits());
 		setBorder(new CommonBorder("Filter applies to the first trigger word"));
 	}
 	
@@ -28,6 +28,22 @@ public class BitEditor extends JPanel {
 		Insets def = super.getInsets();
 		return new Insets(def.top + 1, def.left+4, def.bottom+4,
 				def.right+4);
+	}
+	
+	/**
+	 * Set the bits
+	 * @param word the bits to use
+	 */
+	public void setBits(int word) {
+		_trigPanel.setBits(-1, word);
+	}
+	
+	/**
+	 * Set the word being displayed
+	 * @return the word being displayed
+	 */
+	public int getBits() {
+		return (_trigPanel.getBits());
 	}
 
 }

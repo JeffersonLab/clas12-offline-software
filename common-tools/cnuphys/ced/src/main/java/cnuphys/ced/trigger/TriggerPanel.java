@@ -67,14 +67,26 @@ public class TriggerPanel extends JPanel {
 	
 	private boolean _editable;
 	
+	/**
+	 * Create a trigger panel
+	 */
 	public TriggerPanel() {
 		this(false, false);
 	}
 	
+	/**
+	 * Create a trigger panel
+	 * @param extended
+	 */
 	public TriggerPanel(boolean extended) {
 		this(extended, false);
 	}
 	
+	/**
+	 * Create a trigger panel
+	 * @param extended adds extra components
+	 * @param editable can be click edited
+	 */
 	public TriggerPanel(boolean extended, boolean editable) {
 		_extended = extended;
 		_editable = editable;
@@ -83,7 +95,6 @@ public class TriggerPanel extends JPanel {
 		
 		_preferredWidth = 32*CELL_SIZE;
 
-		
 //		_idLabel = new JLabel("   ");
 //		_idLabel.setFont(_labelFont);
 		
@@ -96,6 +107,7 @@ public class TriggerPanel extends JPanel {
 		}
 
 
+		//label for the decimal value
 		_decimalLabel = new JLabel("                    ") {
 
 			@Override
@@ -153,6 +165,7 @@ public class TriggerPanel extends JPanel {
 		super.paintComponent(g);
 	}
 
+	//create the panel for all 32 bit displays
 	private JPanel getBitsPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridLayout(1, 32, 1, 1));
@@ -165,8 +178,12 @@ public class TriggerPanel extends JPanel {
 		return panel;
 	}
 	
-	
-	public void set(int id, int trigger) {
+	/**
+	 * Set the bits to reflect the trigger value
+	 * @param id the id of the trigger
+	 * @param trigger the trigger value
+	 */
+	public void setBits(int id, int trigger) {
 		_id = id;
 		_trigger = MathUtilities.getUnsignedInt(trigger);
 		
@@ -179,12 +196,34 @@ public class TriggerPanel extends JPanel {
 		
 		repaint();
 	}
+
+	/**
+	 * Get the trigger word corresponding to the display.
+	 * Note it is an int, so if the 31st but is set it will be
+	 * negative
+	 * @return the trigger word represented by the bit display
+	 */
+	public int getBits() {
+		Long trigL = new Long(_trigger);
+		
+		return trigL.intValue();
+	}
 	
 	private static boolean checkBit(long x, int k) {
         return (x & 1 << k) != 0;
     } 
-
 	
+	//some simple tests
+	public static void main(String arg[]) {
+		long x = Integer.MAX_VALUE;
+		System.out.println("long " + x + "   int " + (new Long(x)).intValue());
+		x += 1;
+		System.out.println("long " + x + "   int " + (new Long(x)).intValue());
+
+	}
+
+
+	//used to display (and possibly edit) the word
 	class BitDisplay extends JComponent {
 		
 		public int index;
@@ -252,4 +291,6 @@ public class TriggerPanel extends JPanel {
 			
 		}
 	}
+	
+	
 }
