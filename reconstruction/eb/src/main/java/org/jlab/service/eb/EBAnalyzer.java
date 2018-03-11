@@ -3,12 +3,15 @@ package org.jlab.service.eb;
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import java.util.HashMap;
+
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.DetectorResponse;
 
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.clas.pdg.PDGDatabase;
+
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 
@@ -31,18 +34,21 @@ public class EBAnalyzer {
         if (event.getParticles().size() <= 0) return;
 
         // first particle is designated as the "trigger" particle:
-        // TODO:  reference the code that actually does the sorting
         DetectorParticle trigger = event.getParticle(0);
 
         // priority is to identify a trigger time:
         boolean foundTriggerTime=false;
         double startTime=-1000;
 
-        // electron/positron is trigger particle:
-        if (trigger.getPid()==11 || trigger.getPid()==-11) {
+        // electron/positron/pion is trigger particle:
+        if (trigger.getPid()==11 || trigger.getPid()==-11 ||
+            trigger.getPid()==211 || trigger.getPid()==-211) {
 
-            trigger.setBeta(1.0);
-            trigger.setMass(PhysicsConstants.massElectron());
+            trigger.setBeta(trigger.getTheoryBeta(trigger.getPid()));
+            trigger.setMass(PDGDatabase.getParticleById(trigger.getPid()).mass());
+
+//            trigger.setBeta(1.0);
+//            trigger.setMass(PhysicsConstants.massElectron());
 
             double time = 0.0;
             double path = 0.0;
@@ -64,18 +70,16 @@ public class EBAnalyzer {
                 foundTriggerTime = true;
             }
             
-
-
             // set startTime based on FTOF:
             if (foundTriggerTime) {
-                double tof = path/PhysicsConstants.speedOfLight();
-                double start_time = time - tof;
-                double deltatr = - start_time + event.getEventHeader().getRfTime()
+                final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
+                final double start_time = time - tof;
+                final double deltatr = - start_time + event.getEventHeader().getRfTime()
                     + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
                 //double deltatr = - start_time + event.getEventHeader().getRfTime() /* - (trigger.vertex().z() 
                 //                                                                      - (EBConstants.TARGET_POSITION))/(PhysicsConstants.speedOfLight())*/
                 //    + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
-                double rfcorr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
+                final double rfcorr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
                 startTime = start_time + rfcorr;
             }
         }
@@ -84,13 +88,8 @@ public class EBAnalyzer {
         else if (trigger.getPid()==0 || trigger.getPid()==22) {
             trigger.setBeta(1.0);
             trigger.setMass(0.0);
-            // TODO:  implement full neutral trigger start time
-            //startTime = EBConstants.GEMC_STARTTIME;
+            // TODO:  implement full neutral trigger start time?
             //foundTriggerTime=true;
-        }
-
-        // trigger particle is unkown:
-        else {
         }
 
         // we found event start time, so set it and do pid:
@@ -172,16 +171,9 @@ public class EBAnalyzer {
 
         public void PIDMatch(DetectorParticle p, int pid) {
 
-            double beta = p.getTheoryBeta(pid);
-            int vertex_index = optimalVertexTime(p);
+            final int pidFromTiming = bestPidFromTiming(p);
+            final boolean pidCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
 
-            int pidCandidate = pid;
-            
-            
-            boolean vertexCheck = (abs(pid)==211 && vertex_index==1 && p.getBeta()>0.0) || 
-                (abs(pid)==2212 && vertex_index==0 && p.getBeta()>0.0) || 
-                (abs(pid)==321 && vertex_index==2 && p.getBeta()>0.0);
-            
             Double ener = p.getEnergy(DetectorType.ECAL);
             Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
             Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
@@ -191,12 +183,7 @@ public class EBAnalyzer {
             double sf_upper_limit = sfMean + 5*sfSigma;
             double sf_lower_limit = sfMean - 5*sfSigma;
             
-            //System.out.println("Sampling Fraction Mean " + sfMean);
-            //System.out.println("Sampling Fraction Sigma" + sfSigma);
-            
-            //boolean sfCheck = sf>EBConstants.ECAL_SAMPLINGFRACTION_CUT;
             boolean sfCheck = sf > sf_lower_limit;
-            //System.out.println(sf_lower_limit + " " + sf + " " + sf_upper_limit);
             
             boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
             
@@ -217,7 +204,7 @@ public class EBAnalyzer {
                     break;
 
                 case 211:
-                    if (vertexCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
                         // pion is best timing
                         this.finalizePID(p,pid);
                     }
@@ -227,7 +214,7 @@ public class EBAnalyzer {
                     }
                     break;
                 case 321:
-                    if (vertexCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
                         // kaon is best timing
                         if (ltccSignalCheck && ltccPionThreshold) {
                             // let ltcc veto back to pion:
@@ -239,7 +226,7 @@ public class EBAnalyzer {
                     }
                     break;
                 case 2212:
-                    if (vertexCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
                         // proton is best timing
                         if (ltccSignalCheck && ltccPionThreshold) {
                             // let ltcc veto back to pion:
@@ -250,11 +237,42 @@ public class EBAnalyzer {
                         }
                     }
                     break;
+                case 45:
+                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
+                        this.finalizePID(p,pid);
+                    }
+                    break;
             }
 
         }
 
+        public int bestPidFromTiming(DetectorParticle p) {
+            int[] hypotheses;
+            if      (p.getCharge()>0) hypotheses=pidPositive;
+            else if (p.getCharge()<0) hypotheses=pidNegative;
+            else throw new RuntimeException("bestPidFromTiming:  not ready for neutrals");
+            final double startTime = event.getEventHeader().getStartTime();
+            double minTimeDiff=Double.MAX_VALUE;
+            int bestPid=0;
+            for (int ii=0; ii<hypotheses.length; ii++) {
+                if (abs(hypotheses[ii])==11) continue;
+                double dt=Double.MAX_VALUE;
+                if (p.hasHit(DetectorType.FTOF,2)==true)
+                    dt = p.getVertexTime(DetectorType.FTOF,2,hypotheses[ii]) - startTime;
+                else if (p.hasHit(DetectorType.FTOF,1)==true)
+                    dt = p.getVertexTime(DetectorType.FTOF,1,hypotheses[ii]) - startTime;
+                else if (p.hasHit(DetectorType.CTOF)==true)
+                    dt = p.getVertexTime(DetectorType.CTOF,0,hypotheses[ii]) - startTime;
+                if ( abs(dt) < minTimeDiff ) {
+                    minTimeDiff=abs(dt);
+                    bestPid=hypotheses[ii];
+                }
+            }
+            return bestPid;
+        }
+/*
         public int optimalVertexTime(DetectorParticle p) {
+
             int vertex_index = 0;
             HashMap<Integer,Double> vertexDiffs = new HashMap<Integer,Double>(); 
             double vertex_time_hypothesis = 0.0;
@@ -272,7 +290,6 @@ public class EBAnalyzer {
                 vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 1, 211)-event_start_time));
                 vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 1, 321)-event_start_time));
             }
-            // FIXME:  Leave this off for now, until full import of CD is done
             // else use CTOF:
             else if(p.hasHit(DetectorType.CTOF)==true) {
                 vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
@@ -293,6 +310,7 @@ public class EBAnalyzer {
             }
             return vertex_index;
         }
+*/
 
 
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
