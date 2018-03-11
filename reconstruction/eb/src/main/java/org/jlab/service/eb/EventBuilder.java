@@ -108,7 +108,6 @@ public class EventBuilder {
 
             // Matching tracks to FTOF layer 1A detector.
             Double ftof1a_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A);
-            //System.out.println("FTOF1A Match Cut " + ftof1a_match_cut);
             int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, ftof1a_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -117,7 +116,6 @@ public class EventBuilder {
 
             // Matching tracks to FTOF layer 1B detector.
             Double ftof1b_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
-            //System.out.println("FTOF Match Cut " + ftof1b_match_cut);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, ftof1b_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);
@@ -150,7 +148,6 @@ public class EventBuilder {
 
             // Matching tracks to PCAL:
             Double pcal_match_cut = EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
-            //System.out.println("PCAL MATCH CUT " + pcal_match_cut);
             index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, pcal_match_cut);
             if(index>=0){
                 p.addResponse(detectorResponses.get(index), true);

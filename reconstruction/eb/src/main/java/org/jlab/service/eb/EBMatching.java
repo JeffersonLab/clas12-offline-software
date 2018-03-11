@@ -10,6 +10,8 @@ import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
 
 /*
  *
@@ -45,19 +47,22 @@ public class EBMatching {
             int pindex_offset = this.eventBuilder.getPindexMap().get(0)
                                 + this.eventBuilder.getPindexMap().get(1);
 
-            int index1A = part.getDetectorHit(respFTOF1A, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
+            int index1A = part.getDetectorHit(respFTOF1A, DetectorType.FTOF, 1, 
+                    EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A));
             if (index1A >= 0) {
                 part.addResponse(respFTOF1A.get(index1A), true);
                 respFTOF1A.get(index1A).setAssociation(ii + pindex_offset);
             }
-            int index1B = part.getDetectorHit(respFTOF1B, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
+            int index1B = part.getDetectorHit(respFTOF1B, DetectorType.FTOF, 2,
+                    EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B));
             if (index1B >= 0) {
                 part.addResponse(respFTOF1B.get(index1B), true);
                 respFTOF1B.get(index1B).setAssociation(ii + pindex_offset);
             }
             // only try to match with FTOF2 if not matched with 1A/1B:
             if (index1A<0 && index1B<0) {
-                int index2 = part.getDetectorHit(respFTOF2, DetectorType.FTOF, 3, EBConstants.FTOF_MATCHING_2);
+                int index2 = part.getDetectorHit(respFTOF2, DetectorType.FTOF, 3,
+                        EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_2));
                 if (index2>=0) {
                     part.addResponse(respFTOF2.get(index2), true);
                     respFTOF2.get(index2).setAssociation(ii + pindex_offset);
@@ -85,13 +90,13 @@ public class EBMatching {
                 double matching;
                 switch (layer) {
                     case (1):
-                        matching=EBConstants.PCAL_MATCHING;
+                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
                         break;
                     case (4):
-                        matching=EBConstants.ECIN_MATCHING;
+                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.ECIN_MATCHING);
                         break;
                     case (7):
-                        matching=EBConstants.ECOUT_MATCHING;
+                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.ECOUT_MATCHING);
                         break;
                     default:
                         throw new RuntimeException("Invalid ECAL Layer:  "+layer);
