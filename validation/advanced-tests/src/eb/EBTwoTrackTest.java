@@ -418,9 +418,11 @@ public class EBTwoTrackTest {
         final double eEff = (double)nFtElectrons / nEvents;
         final double gEff = (double)nFtPhotons / nEvents;
         final double hEff = (double)nFtFd / nEvents;
-        System.out.println(String.format("\n\nFT eEff = %.3f",eEff));
-        System.out.println(String.format("\n\nFT gEff = %.3f",gEff));
-        System.out.println(String.format("\n\nFD hEff = %.3f",hEff));
+        System.out.println("\n#############################################################");
+        System.out.println(String.format("\nFT eEff = %.3f",eEff));
+        System.out.println(String.format("\nFT gEff = %.3f",gEff));
+        System.out.println(String.format("\nFD hEff = %.3f",hEff));
+        System.out.println("\n#############################################################");
         if      (ftPDG==11) assertEquals(eEff>0.90,true);
         else if (ftPDG==22) assertEquals(gEff>0.90,true);
         assertEquals(hEff>0.50,true);
