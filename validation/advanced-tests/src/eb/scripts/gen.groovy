@@ -94,7 +94,7 @@ ParticleGenerator pgen1 = new ParticleGenerator(11,
       -10.0, 10.0); // phi (deg) min/max
 
 // default #2 is "pid" in FD:
-ParticleGenerator pgen2 = new ParticleGenerator(pid==-22?-pid:pid,
+ParticleGenerator pgen2 = new ParticleGenerator(pid<0?-pid:pid,
        1.0,   4.5,
       20.0,  35.0,
      110.0, 130.0);
