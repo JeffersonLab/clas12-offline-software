@@ -89,7 +89,7 @@ public class EBEngine extends ReconstructionEngine {
  
         // Process RF:
         EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));//EBConstants.RF_OFFSET);
         
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();

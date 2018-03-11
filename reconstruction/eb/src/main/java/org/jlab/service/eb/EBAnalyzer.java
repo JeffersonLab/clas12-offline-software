@@ -72,14 +72,22 @@ public class EBAnalyzer {
             
             // set startTime based on FTOF:
             if (foundTriggerTime) {
+                final double tgpos = EBCCDBConstants.getDouble(EBCCDBEnum.TARGET_POSITION);
+                final double rfOffset = EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET);
+                final double rfBucketLength = EBCCDBConstants.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
+
                 final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
                 final double start_time = time - tof;
-                final double deltatr = - start_time + event.getEventHeader().getRfTime()
-                    + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
+                final double vzCorr = (tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
+                final double deltatr = - start_time + event.getEventHeader().getRfTime() + vzCorr +
+                    + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength + rfOffset;
+                
                 //double deltatr = - start_time + event.getEventHeader().getRfTime() /* - (trigger.vertex().z() 
                 //                                                                      - (EBConstants.TARGET_POSITION))/(PhysicsConstants.speedOfLight())*/
                 //    + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
-                final double rfcorr = deltatr%EBConstants.RF_BUCKET_LENGTH - EBConstants.RF_BUCKET_LENGTH/2;//RF correction term
+                
+                final double rfcorr = deltatr % rfBucketLength - rfBucketLength/2;//RF correction term
+                
                 startTime = start_time + rfcorr;
             }
         }

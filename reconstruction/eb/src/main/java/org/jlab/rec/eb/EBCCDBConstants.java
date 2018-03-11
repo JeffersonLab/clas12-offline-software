@@ -25,7 +25,9 @@ public class EBCCDBConstants {
             "ctof_matching",
             "cnd_matching",
             "htcc_matching",
-            "ltcc_matching"
+            "ltcc_matching",
+            "rf/config",
+            "rf/offset"
     };
     
     public static final String[] otherTableNames={
@@ -193,21 +195,22 @@ public class EBCCDBConstants {
 
         loadDouble(EBCCDBEnum.NEUTRON_maxBeta,"neutron_beta","neutron_beta",0,0,0);
         
-        // FIXME:  debug why this one doesn't load
-        //loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
-        setDouble(EBCCDBEnum.TARGET_POSITION,0.0);
+        loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
     
         //loadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_LOWER_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_UPPER_PION_THRESHOLD,
-     
-        // FIXME:  pending RF CCDB tables:
-        //loadDouble(EBCCDBEnum.RF_BUCKET_LENGTH,
-        //loadDouble(EBCCDBEnum.RF_OFFSET,
-        //loadDouble(EBCCDBEnum.RF_TDC2TIME,
-        //loadDouble(EBCCDBEnum.RF_CYCLES,
-        //loadDouble(EBCCDBEnum.RF_ID,
-        //loadDouble(EBCCDBEnum.RF_LARGE_INTEGER,
+    
+        final int rfStat1=tables.get("rf/config").getIntValue("status",1,1,1);
+        final int rfStat2=tables.get("rf/config").getIntValue("status",1,1,2);
+        if (rfStat1<=0 && rfStat2<=0)
+            throw new RuntimeException("Couldn't find non-positive RF status in CCDB");
+        final int rfId = rfStat2>rfStat1 ? 2 : 1;
+        setInteger(EBCCDBEnum.RF_ID,rfId);
+        loadDouble(EBCCDBEnum.RF_BUCKET_LENGTH,"rf/config","clock",1,1,rfId);
+        loadDouble(EBCCDBEnum.RF_OFFSET,"rf/offset","offset",1,1,rfId);
+        loadDouble(EBCCDBEnum.RF_TDC2TIME,"rf/config","tdc2time",1,1,rfId);
+        loadInteger(EBCCDBEnum.RF_CYCLES,"rf/config","cycles",1,1,rfId);
         
         //loadDouble(EBCCDBEnum.TRIGGER_ID,
 
