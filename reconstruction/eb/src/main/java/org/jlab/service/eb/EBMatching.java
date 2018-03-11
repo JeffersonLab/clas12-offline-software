@@ -191,20 +191,13 @@ public class EBMatching {
             final int nctof=ctofBank.rows();
             for (int ictof=0; ictof<nctof; ictof++) {
                 final int trkid=ctofBank.getInt("trkID",ictof);
-                //System.out.println("The track ID from the CTOF bank = " + trkid);
                 if (trkid>=0) {
                     if (!ctofMap.containsKey(trkid))
                         ctofMap.put(trkid,new ArrayList<Integer>());
                     ctofMap.get(trkid).add(ictof);
-                    //System.out.println("TrkID = " + trkid + " CTOF Hit = " + ictof);
                 }
             }
         }
-
-        //System.out.println("The size of the CTOF map is " + ctofMap.size());
-            
-        //List<DetectorTrack> trks = new ArrayList<DetectorTrack>();
-        //List<DetectorParticle> prts = new ArrayList<DetectorParticle>();
 
         // Make a charged particle for each Central Track,
         // associate it with CTOF hit if found matching track ID.
@@ -215,21 +208,16 @@ public class EBMatching {
                 // make track and charged particle
                 DetectorParticle cvtParticle = cvtParticles.get(ictrk);
                 final int trkid=ctrkBank.getInt("ID",ictrk);
-                //System.out.println("THe track ID from the CVT bank = " + trkid);
                 if (ctofMap!=null && ctofMap.containsKey(trkid)) {
                     for(int i = 0 ; i < ctofMap.get(trkid).size() ; i++) {
-                    int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
-                    int ctofIndex = ctofMap.get(trkid).get(i);
-                    cvtParticle.addResponse(ctofHits.get(ctofIndex), true);
-                    ctofHits.get(ctofIndex).setAssociation(ictrk + pindex_offset);
-                    //System.out.println("A response has been added!");
+                        final int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
+                        final int ctofIndex = ctofMap.get(trkid).get(i);
+                        cvtParticle.addResponse(ctofHits.get(ctofIndex), true);
+                        ctofHits.get(ctofIndex).setAssociation(ictrk + pindex_offset);
                     }
                 }
             }
         }
-
-        //eventBuilder.addCentralTracks(trks);
     }
-    
 
 }
