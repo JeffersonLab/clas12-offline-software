@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
+import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.rec.eb.EBCCDBEnum;
+
 /**
  *
  * @author devita
@@ -26,6 +29,7 @@ public class EBRadioFrequency {
     }
     
     public void processEvent(DataEvent event) {
+        final int rfId=EBCCDBConstants.getInteger(EBCCDBEnum.RF_ID);
         // if RUN::rf bank does not exist but tdc bnk exist, reconstruct RF signals from TDC hits and save to bank
         if(event.hasBank("RF::tdc") && !event.hasBank("RUN::rf")) {
             double time = 0;
@@ -58,7 +62,7 @@ public class EBRadioFrequency {
                 if(debugMode>0) this.rfSignals.get(i).print();
             }
             event.appendBank(bankOut);
-            int index = this.hasSignal(EBConstants.RF_ID);
+            int index = this.hasSignal(rfId);
             if(index>=0) rfTime= this.rfSignals.get(index).getTime();
             if(debugMode>0) bankOut.show();
             
@@ -67,7 +71,7 @@ public class EBRadioFrequency {
             DataBank bank = event.getBank("RUN::rf");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
-                if(bank.getShort("id", i)==EBConstants.RF_ID) rfTime=bank.getFloat("time", i);
+                if(bank.getShort("id", i)==rfId) rfTime=bank.getFloat("time", i);
             }
         }
         
@@ -92,13 +96,17 @@ public class EBRadioFrequency {
         }
 
         public boolean add(int tdc) {
+            final double rfTdc2Time = EBCCDBConstants.getDouble(EBCCDBEnum.RF_TDC2TIME);
+            final int rfCycles = EBCCDBConstants.getInteger(EBCCDBEnum.RF_CYCLES);
+            final double rfOffset = EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET);
+            final double rfBucketLength = EBCCDBConstants.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
             boolean skip = false;
-            double time = (tdc*EBConstants.RF_TDC2TIME) % (EBConstants.RF_CYCLES*EBConstants.RF_BUCKET_LENGTH);
+            double time = (tdc*rfTdc2Time) % (rfCycles*rfBucketLength);
 //            time = (tdc % 6840) *EBConstants.RF_TDC2TIME;
             // check if new TDC value compared to previous one is consistent with 80*2.004 ns interval
             if(this._tdc.size()>0) {               
                 int deltaTDC = tdc - this._tdc.get(this._tdc.size()-1);
-                if(deltaTDC>((double) (EBConstants.RF_CYCLES+1)*EBConstants.RF_BUCKET_LENGTH)/EBConstants.RF_TDC2TIME) { // allow for an extra 2.004 ns
+                if(deltaTDC>((double) (rfCycles+1)*rfBucketLength)/rfTdc2Time) { // allow for an extra 2.004 ns
 //                    System.out.println("Found missing hits in RF sequence for signal ID " + this._id + ", TDC = " + tdc 
 //                            + ", DeltaTDC = " + deltaTDC  + "(" + deltaTDC*EBConstants.RF_TDC2TIME+ ")");
                     skip = true;

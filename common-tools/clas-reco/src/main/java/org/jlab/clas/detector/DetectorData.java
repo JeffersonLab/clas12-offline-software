@@ -305,7 +305,10 @@ public class DetectorData {
        bank.setInt("NEVENT", 0, detectorEvent.getEventHeader().getEvent());
        bank.setLong("TRG", 0, detectorEvent.getEventHeader().getTrigger());
        bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
-       bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());     
+       bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());
+       bank.setByte("Helic", 0, detectorEvent.getEventHeader().getHelicity());
+       bank.setFloat("BCG", 0, detectorEvent.getEventHeader().getBeamChargeGated());
+       bank.setDouble("LT", 0, detectorEvent.getEventHeader().getLivetime());
        return bank;
    }
       
