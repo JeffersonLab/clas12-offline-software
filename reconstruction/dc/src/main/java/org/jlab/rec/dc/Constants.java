@@ -15,7 +15,7 @@ public class Constants {
         public static final double SPEEDLIGHT = 29.97924580;
 	// DATABASE VARIATION
 	//public static final String DBVAR = "default";
-	public static double NSUPERLAYERTRACKING = 5;
+	public static double NSUPERLAYERTRACKING = 6;
         public static double TSTARTEST = 560.;
 	// GEOMETRY PARAMETERS
 
@@ -32,9 +32,9 @@ public class Constants {
         
 	// CONSTANTS USED IN RECONSTRUCTION
 	//---------------------------------
-        public static final double TRIGJIT = 250;
+        public static final double TRIGJIT = 20;
         public static final double[] TIMEWINMINEDGE = {-25.0,-25.0,-25.0};
-        public static final double[] TIMEWINMAXEDGE = {275.0,350.0,550.0};
+        public static final double[] TIMEWINMAXEDGE = {275.0,350.0,750.0};
         
         
 	public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
@@ -89,7 +89,7 @@ public class Constants {
 
 	public static final  double SWIMSTEPSIZE = 5.00*1.e-4; //n00 microns
 
-	public static final int MAXNBCROSSES = 30; // max num crosses persector
+	public static final int MAXNBCROSSES = 100; // max num crosses persector
 
 	public static final int MAXNBHITS = 350;
 
