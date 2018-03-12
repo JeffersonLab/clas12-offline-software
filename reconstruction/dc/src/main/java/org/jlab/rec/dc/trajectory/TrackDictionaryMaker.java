@@ -106,6 +106,61 @@ public class TrackDictionaryMaker {
         }
         return sector;
     }
+    public DCTDC ProcessTrack(int q, double px, double py, double pz, double vx, double vy, double vz, DCGeant4Factory dcDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
+        
+        double[] swimVal = new double[8];
+       
+        sw.SetSwimParameters(vx, vy, vz, px, py, pz, q);
+        swimVal = sw.SwimToPlaneLab(175.);
+
+        //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
+        Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
+        Point3D rotatedX = tw.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
+        int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
+//System.out.println(" sector in TrackDictionary "+sector);
+        List<Integer> Wi = new ArrayList<Integer>();
+        List<Integer> Di = new ArrayList<Integer>();
+        int index=0;
+        DCTDC DCtdc = new DCTDC();
+        for (int sl = 0; sl < 6; sl++) {
+            for (int l = 0; l < 6; l++) {
+                Wi.clear();
+                Di.clear();
+                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                swimtoLayer(l, sl, Wi, Di, dcDetector, sw);             
+                for(int i=0; i<Wi.size(); i++) {
+                    DCtdc.sector.add(index, (int) sector);
+                    DCtdc.layer.add(index, (int) (l+1));
+                    DCtdc.superlayer.add(index, (int) (sl+1));
+                    DCtdc.component.add(index, (int) Wi.get(i));
+                    DCtdc.TDC.add(index, (int) Di.get(i));
+                    index++;
+                }
+                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+            }
+        }
+        
+        return DCtdc;
+    }
+
+    private static void addAdjacentHits(int sl, int l, int i, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector, double wMax, double tx, double ty, double tz) {
+        eu.mihosoft.vrl.v3d.Vector3d p3dl = dcDetector.getWireLeftend(sl, l, i);
+        eu.mihosoft.vrl.v3d.Vector3d p3dr = dcDetector.getWireRightend(sl, l, i);
+        Line3D wl = new Line3D(new Point3D(p3dl.x, p3dl.y, p3dl.z), new Point3D(p3dr.x, p3dr.y, p3dr.z));
+        double min = wl.distance(new Point3D(tx, ty, tz)).length();
+        if(min<wMax*1.05) {
+            Wi.add(i + 1); //System.out.println("min "+min); ? one strip off
+            Di.add((int)min);
+        }
+    }
+    public class DCTDC  {
+        public List<Integer> sector = new ArrayList<Integer>();
+        public List<Integer> superlayer = new ArrayList<Integer>();
+        public List<Integer> layer = new ArrayList<Integer>();
+        public List<Integer> component = new ArrayList<Integer>();
+        public List<Integer> TDC = new ArrayList<Integer>();
+        
+    }
     public static void ProcessTracks(PrintWriter pw, DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
         double[] swimVal = new double[8];
         for(int i = 0; i < 2; i++) {
@@ -286,7 +341,7 @@ public class TrackDictionaryMaker {
                             }
 
                             if (min < wMax) {
-                                W.add(w + 1);
+                                W.add(w + 1 );
                             } else {
                                 W.add(0);
                             }
@@ -298,8 +353,41 @@ public class TrackDictionaryMaker {
             }
         }
     }
+    
+    public static void swimtoLayer(int l, int sl, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector,  DCSwimmer sw) {
+        //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
+        double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, l, 0).z); 
+       
+       // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
+        double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x
+                - dcDetector.getWireMidpoint(sl, 0, 1).x) / 2.;
 
-    private static void swimtoLayer(int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer sw) {
+        double min = 1000;
+        int w = -1;
+        for (int i = 0; i < 112; i++) {
+            eu.mihosoft.vrl.v3d.Vector3d p3dl = dcDetector.getWireLeftend(sl, l, i);
+            eu.mihosoft.vrl.v3d.Vector3d p3dr = dcDetector.getWireRightend(sl, l, i);
+            Line3D wl = new Line3D(new Point3D(p3dl.x, p3dl.y, p3dl.z), new Point3D(p3dr.x, p3dr.y, p3dr.z));
+            //Line3D wl = dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(i).getLine();
+           
+            if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
+                min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
+                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+            } 
+        }
+
+        if (min < wMax*1.01) {
+            Wi.add(w + 1); //System.out.println("min "+min);
+            Di.add((int)min);
+            addAdjacentHits(sl, l, w+1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
+            addAdjacentHits(sl, l, w-1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
+                
+        } else {
+            Wi.add(0);
+            Di.add((int)10000);
+        }
+    }
+    public static void swimtoLayer(int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
         double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, l, 0).z); 
        
