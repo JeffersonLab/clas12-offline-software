@@ -324,7 +324,10 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
-        if(hits>1) System.out.println("[Warning] Too many hits for detector type = " + type);
+        if(hits>1 && type!=DetectorType.CTOF){
+            // don't warn for CTOF, since it currently doesn't do clustering
+            System.out.println("[Warning] Too many hits for detector type = " + type);
+        }
         return true;
     }
     
@@ -334,7 +337,10 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) hits++;
         }
         if(hits==0) return false;
-        if(hits>1) System.out.println("[Warning] Too many hits for detector type = " + type);
+        if(hits>1 && type!=DetectorType.CTOF){
+            // don't warn for CTOF, since it currently doesn't do clustering
+            System.out.println("[Warning] Too many hits for detector type = " + type);
+        }
         return true;
     }
     
@@ -726,21 +732,9 @@ public class DetectorParticle implements Comparable {
     */
 
     public double getTheoryBeta(int id){
-        double beta = 0.0;
-        double p    = detectorTrack.getVector().mag();
-        //double mass = PDGDatabase.getParticleById(id);  // map lookup
-        if(id==11 || id==-11){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massElectron(),2));
-        }
-        else if(id==-211 || id==211){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massPionCharged(),2));
-        }
-        else if(id==2212 || id==-2212){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massProton(),2));
-        }
-        else if(id==-321 || id==321){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massKaonCharged(),2));
-        }
+        final double p    = detectorTrack.getVector().mag();
+        final double mass = PDGDatabase.getParticleById(id).mass();
+        final double beta = p/sqrt(p*p + mass*mass);
         return beta;
     }   
 
