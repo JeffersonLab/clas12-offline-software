@@ -15,7 +15,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
-import org.jlab.utils.groups.IndexedTable;
 
 
 public class FTHODOEngine extends ReconstructionEngine {
@@ -56,7 +55,7 @@ public class FTHODOEngine extends ReconstructionEngine {
                 // get hits fron banks
                 allHits = reco.initFTHODO(event,this.getConstantsManager(), run);
                 // select good hits and order them by energy
-                selectedHits = reco.selectHits(allHits);
+                selectedHits = reco.selectHits(allHits); 
                 // create clusters
                 clusters = reco.findClusters(selectedHits);
                 // write output banks
