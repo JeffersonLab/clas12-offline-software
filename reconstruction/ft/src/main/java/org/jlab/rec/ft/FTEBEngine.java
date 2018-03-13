@@ -24,7 +24,6 @@ import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.ft.cal.FTCALConstantsLoader;
 import org.jlab.rec.ft.cal.FTCALEngine;
 import org.jlab.rec.ft.hodo.FTHODOEngine;
-import org.jlab.utils.groups.IndexedTable;
 
 public class FTEBEngine extends ReconstructionEngine {
 
