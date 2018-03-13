@@ -3,6 +3,7 @@ package org.jlab.rec.ft.hodo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
@@ -19,8 +20,12 @@ public class FTHODOReconstruction {
     public FTHODOReconstruction() {
     }
 	
-    public List<FTHODOHit> initFTHODO(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
+    public List<FTHODOHit> initFTHODO(DataEvent event, ConstantsManager manager, int run) {
 
+        IndexedTable charge2Energy = manager.getConstants(run, "/calibration/ft/fthodo/charge_to_energy");
+        IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/fthodo/time_offsets");
+        IndexedTable geometry      = manager.getConstants(run, "/geometry/ft/fthodo");
+        
         if(debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTHODOHit> allhits = null;
         

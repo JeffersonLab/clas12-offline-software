@@ -89,11 +89,13 @@ public class DCTBEngine extends ReconstructionEngine {
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 		//setRunConditionsParameters( event) ;
-        if(event.hasBank("RUN::config")==false ) {
-		System.err.println("RUN CONDITIONS NOT READ!");
+        if(event.hasBank("RUN::config")==false) {
+		System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
 		return true;
 	}
-		
+	//if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
+        //    return true; // require the start time to reconstruct the tracks in the event
+        
         DataBank bank = event.getBank("RUN::config");
 		
 		// Load the constants
@@ -211,7 +213,6 @@ public class DCTBEngine extends ReconstructionEngine {
 		CrossMaker crossMake = new CrossMaker();
 		crosses = crossMake.find_Crosses(segments, dcDetector);
 		
-		
 		if(crosses.size()==0 ) {
 			
 			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
@@ -228,7 +229,6 @@ public class DCTBEngine extends ReconstructionEngine {
 			rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null);
 			return true;
 		}
-		//System.out.println(" cross list "+crosslist.size());	
 		
 		//6) find the list of  track candidates
 		TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");

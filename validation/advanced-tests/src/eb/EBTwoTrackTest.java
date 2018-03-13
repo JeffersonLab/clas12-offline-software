@@ -53,6 +53,7 @@ public class EBTwoTrackTest {
 
     int nFtPhotons = 0;
     int nFtElectrons = 0;
+    int nFtFd = 0;
     
     int nMisid = 0;
     int nMissing = 0;
@@ -148,6 +149,7 @@ public class EBTwoTrackTest {
         else if (ss.equals("electrongammaFT")) {
             isForwardTagger=true;
             ftPDG=22;
+            hadronPDG=11;
         }
         else udfFileType=true;
 
@@ -415,10 +417,15 @@ public class EBTwoTrackTest {
 
         final double eEff = (double)nFtElectrons / nEvents;
         final double gEff = (double)nFtPhotons / nEvents;
-        System.out.println(String.format("\n\neEff = %.3f",eEff));
-        System.out.println(String.format("\n\ngEff = %.3f",gEff));
+        final double hEff = (double)nFtFd / nEvents;
+        System.out.println("\n#############################################################");
+        System.out.println(String.format("\nFT eEff = %.3f",eEff));
+        System.out.println(String.format("\nFT gEff = %.3f",gEff));
+        System.out.println(String.format("\nFD hEff = %.3f",hEff));
+        System.out.println("\n#############################################################");
         if      (ftPDG==11) assertEquals(eEff>0.90,true);
         else if (ftPDG==22) assertEquals(gEff>0.90,true);
+        assertEquals(hEff>0.50,true);
     }
 
     // This is for Forward Tagger;
@@ -428,7 +435,7 @@ public class EBTwoTrackTest {
 
             nEvents++;
 
-            if (recPartBank!=null && recFtBank!=null) {
+            if (recBank!=null && recPartBank!=null && recFtBank!=null) {
 
                 if (debug) {
                     System.out.println("\n\n#############################################################\n");
@@ -437,11 +444,26 @@ public class EBTwoTrackTest {
                     recPartBank.show();
                 }
 
+                final float startTime=recBank.getFloat("STTime",0);
+
                 for (int ii=0; ii<recFtBank.rows(); ii++) {
-                    int irp = recFtBank.getInt("pindex",ii);
-                    int pid = recPartBank.getInt("pid",irp);
+                    final int irp = recFtBank.getInt("pindex",ii);
+                    final int pid = recPartBank.getInt("pid",irp);
                     if      (pid==22) nFtPhotons++;
                     else if (pid==11) nFtElectrons++;
+                }
+
+                for (int ii=0; ii<recPartBank.rows() && startTime>0; ii++) {
+                    final int pid = recPartBank.getInt("pid",ii);
+                    if (pid==hadronPDG) {
+                        final double px=recPartBank.getFloat("px",ii);
+                        final double py=recPartBank.getFloat("py",ii);
+                        final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
+                        if (sector==hadronSector) {
+                            nFtFd++;
+                            break;
+                        }
+                    }
                 }
             }
         }
