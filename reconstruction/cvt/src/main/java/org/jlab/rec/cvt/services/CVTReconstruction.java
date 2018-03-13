@@ -213,9 +213,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom);
-        //System.out.println(" Number of crosses "+crosses.get(0).size()+" + "+crosses.get(1).size());
+        
         if(Constants.isCosmicsData()==true) { 
-           
             //4) make list of crosses consistent with a track candidate
             StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
             CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
@@ -304,23 +303,23 @@ public class CVTReconstruction extends ReconstructionEngine {
             TrackListFinder trkFinder = new TrackListFinder();
             List<Track> trks = new ArrayList<Track>();
             trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
-            trkFinder.removeOverlappingTracks(trks); //turn off until debugged
+            //trkFinder.removeOverlappingTracks(trks); //turn off until debugged
             
-            for (int c = 0; c < trkcands.size(); c++) {
-                trkcands.get(c).set_Id(c + 1);
-                for (int ci = 0; ci < trkcands.get(c).size(); ci++) {
+            for (int c = 0; c < trks.size(); c++) {
+                trks.get(c).set_Id(c + 1);
+                for (int ci = 0; ci < trks.get(c).size(); ci++) {
 
                     if (crosses.get(0).size() > 0) {
                         for (Cross crsSVT : crosses.get(0)) {
-                            if (crsSVT.get_Sector() == trkcands.get(c).get(ci).get_Sector() && crsSVT.get_Cluster1()!=null && crsSVT.get_Cluster2()!=null 
-                                    && trkcands.get(c).get(ci).get_Cluster1()!=null && trkcands.get(c).get(ci).get_Cluster2()!=null
-                                    && crsSVT.get_Cluster1().get_Id() == trkcands.get(c).get(ci).get_Cluster1().get_Id()
-                                    && crsSVT.get_Cluster2().get_Id() == trkcands.get(c).get(ci).get_Cluster2().get_Id()) {  
-                                crsSVT.set_Point(trkcands.get(c).get(ci).get_Point());
-                                trkcands.get(c).get(ci).set_Id(crsSVT.get_Id());
-                                crsSVT.set_PointErr(trkcands.get(c).get(ci).get_PointErr());
-                                crsSVT.set_Dir(trkcands.get(c).get(ci).get_Dir());
-                                crsSVT.set_DirErr(trkcands.get(c).get(ci).get_DirErr());
+                            if (crsSVT.get_Sector() == trks.get(c).get(ci).get_Sector() && crsSVT.get_Cluster1()!=null && crsSVT.get_Cluster2()!=null 
+                                    && trks.get(c).get(ci).get_Cluster1()!=null && trks.get(c).get(ci).get_Cluster2()!=null
+                                    && crsSVT.get_Cluster1().get_Id() == trks.get(c).get(ci).get_Cluster1().get_Id()
+                                    && crsSVT.get_Cluster2().get_Id() == trks.get(c).get(ci).get_Cluster2().get_Id()) {  
+                                crsSVT.set_Point(trks.get(c).get(ci).get_Point());
+                                trks.get(c).get(ci).set_Id(crsSVT.get_Id());
+                                crsSVT.set_PointErr(trks.get(c).get(ci).get_PointErr());
+                                crsSVT.set_Dir(trks.get(c).get(ci).get_Dir());
+                                crsSVT.set_DirErr(trks.get(c).get(ci).get_DirErr());
                                 crsSVT.set_AssociatedTrackID(c + 1);
                                 crsSVT.get_Cluster1().set_AssociatedTrackID(c + 1);
                                 for (FittedHit h : crsSVT.get_Cluster1()) {
@@ -336,11 +335,11 @@ public class CVTReconstruction extends ReconstructionEngine {
                     }
                     if (crosses.get(1).size() > 0) {
                         for (Cross crsBMT : crosses.get(1)) {
-                            if (crsBMT.get_Id() == trkcands.get(c).get(ci).get_Id()) {
-                                crsBMT.set_Point(trkcands.get(c).get(ci).get_Point());
-                                crsBMT.set_PointErr(trkcands.get(c).get(ci).get_PointErr());
-                                crsBMT.set_Dir(trkcands.get(c).get(ci).get_Dir());
-                                crsBMT.set_DirErr(trkcands.get(c).get(ci).get_DirErr());
+                            if (crsBMT.get_Id() == trks.get(c).get(ci).get_Id()) {
+                                crsBMT.set_Point(trks.get(c).get(ci).get_Point());
+                                crsBMT.set_PointErr(trks.get(c).get(ci).get_PointErr());
+                                crsBMT.set_Dir(trks.get(c).get(ci).get_Dir());
+                                crsBMT.set_DirErr(trks.get(c).get(ci).get_DirErr());
                                 crsBMT.set_AssociatedTrackID(c + 1);
                                 crsBMT.get_Cluster1().set_AssociatedTrackID(c + 1);
                                 for (FittedHit h : crsBMT.get_Cluster1()) {
@@ -426,8 +425,8 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     
     public static void main(String[] args)  {
-    /*
-       String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/central_2348_uncookedSkim.hipo";
+    
+       String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/CVT/svt123_003582.evio.0.hipo";
         //String inputFile = "/Users/ziegler/Desktop/Work/Files/Data/skim_clas_002436.evio.90.hipo";
 //String inputFile="/Users/ziegler/Desktop/Work/Files/LumiRuns/random/decoded_2341.hipo";
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
@@ -444,7 +443,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         //String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/ENG/central_2348_cookedSkim.hipo";
-        String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/recook_clas_002436.evio.90.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/Data/DecodedData/CVT/svt123_003582.0.rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -462,13 +461,13 @@ public class CVTReconstruction extends ReconstructionEngine {
             en.processDataEvent(event);
             //eb.processDataEvent(event);
             
-            if(event.hasBank("CVTRec::Tracks")) {
+            //if(event.hasBank("CVTRec::Tracks")) {
             
                 writer.writeEvent(event); 
-            }
+            //}
             counter ++;
             
-            if(counter>100000)
+            if(counter>10000)
                 break;
             //if(event.getBank("RUN::config").getInt("event",0)>=2000) break;
             //event.show();
@@ -479,8 +478,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         writer.close();
         double t = System.currentTimeMillis() - t1;
         //System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
-        */
-       
+        
+        /*
         DataEvent testEvent = getCVTTestEvent();
 
         CVTReconstruction CVTengine = new CVTReconstruction();
@@ -490,7 +489,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         if(testEvent.hasBank("CVTRec::Tracks")) {
             testEvent.getBank("CVTRec::Tracks").show();
         }
-        
+        */
        /*
         EBHBEngine EBHBengine = new EBHBEngine();
         EBHBengine.init();
