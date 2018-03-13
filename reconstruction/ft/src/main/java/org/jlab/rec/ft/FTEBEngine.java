@@ -28,9 +28,6 @@ import org.jlab.utils.groups.IndexedTable;
 
 public class FTEBEngine extends ReconstructionEngine {
 
-    IndexedTable cluster;
-    IndexedTable thetaCorr;
-    IndexedTable phiCorr;
 
     FTEventBuilder reco;
     int Run = -1;
@@ -60,53 +57,53 @@ public class FTEBEngine extends ReconstructionEngine {
         List<FTParticle> FTparticles = new ArrayList<FTParticle>();
         List<FTResponse> FTresponses = new ArrayList<FTResponse>();
 
-        this.setRunConditionsParameters(event);
-        reco.init(this.getSolenoid());
-        FTresponses = reco.addResponses(event, cluster);
-        FTparticles = reco.initFTparticles(FTresponses);
-        reco.matchToHODO(FTresponses, FTparticles);
-        reco.correctDirection(FTparticles, thetaCorr, phiCorr);
-        reco.writeBanks(event, FTparticles);
+        int run = this.setRunConditionsParameters(event);
+        if (run>=0) {
+            reco.init(this.getSolenoid());
+            FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
+            FTparticles = reco.initFTparticles(FTresponses);
+            reco.matchToHODO(FTresponses, FTparticles);
+            reco.correctDirection(FTparticles, this.getConstantsManager(), run);
+            reco.writeBanks(event, FTparticles);
+        }
         return true;
     }
 
-    public void setRunConditionsParameters(DataEvent event) {
+    public int setRunConditionsParameters(DataEvent event) {
+        int run = -1;
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
-            return;
         }
+        else {
+            double fieldScale = 0;
 
-        double fieldScale = 0;
+            boolean isMC = false;
+            boolean isCosmics = false;
 
-        boolean isMC = false;
-        boolean isCosmics = false;
-
-        if (event instanceof EvioDataEvent) {
-            EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            if (bank.getByte("Type")[0] == 0) {
-                isMC = true;
+            if (event instanceof EvioDataEvent) {
+                EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
+                if (bank.getByte("Type")[0] == 0) {
+                    isMC = true;
+                }
+                if (bank.getByte("Mode")[0] == 1) {
+                    isCosmics = true;
+                }
+                run = bank.getInt("Run")[0];
+                fieldScale = bank.getFloat("Solenoid")[0];
+            } else {
+                DataBank bank = event.getBank("RUN::config");
+                if (bank.getByte("type")[0] == 0) {
+                    isMC = true;
+                }
+                if (bank.getByte("mode")[0] == 1) {
+                    isCosmics = true;
+                }
+                run = bank.getInt("run")[0];
+                fieldScale = bank.getFloat("solenoid")[0];
             }
-            if (bank.getByte("Mode")[0] == 1) {
-                isCosmics = true;
-            }
-            Run = bank.getInt("Run")[0];
-            fieldScale = bank.getFloat("Solenoid")[0];
-        } else {
-            DataBank bank = event.getBank("RUN::config");
-            if (bank.getByte("type")[0] == 0) {
-                isMC = true;
-            }
-            if (bank.getByte("mode")[0] == 1) {
-                isCosmics = true;
-            }
-            Run = bank.getInt("run")[0];
-            fieldScale = bank.getFloat("solenoid")[0];
+            this.setSolenoid(fieldScale);
         }
-        cluster   = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/cluster");
-        thetaCorr = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/thetacorr");
-        phiCorr   = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/phicorr");
-
-        this.setSolenoid(fieldScale);
+        return run;
     }
 
     public int getRun() {
@@ -134,7 +131,8 @@ public class FTEBEngine extends ReconstructionEngine {
         en.init();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
 //		EvioSource  reader = new EvioSource();
-        String input = "/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/out.hipo";
+        String input = "/Users/devita/NetBeansProjects/clas12-offline-software/validation/advanced-tests/electrongammaFT.hipo";
+        //"/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/electron.hipo";
 //		String input = "/Users/devita/out_gemc_10.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
@@ -200,17 +198,19 @@ public class FTEBEngine extends ReconstructionEngine {
                     DataBank bank = event.getBank("FT::particles");
                     int nrows = bank.rows();
                     for (int i = 0; i < nrows; i++) {
-                        h1.fill(bank.getFloat("energy", i));
-                        h2.fill(bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
-                        Vector3D part = new Vector3D(bank.getFloat("cx", i), bank.getFloat("cy", i), bank.getFloat("cz", i));
-                        h3.fill(Math.toDegrees(part.theta() - gen.getGeneratedParticle(0).theta()));
-                        h4.fill(Math.toDegrees(part.phi() - gen.getGeneratedParticle(0).phi()));
-                        h5.fill(bank.getFloat("time", i) - 124.25);
-                        h6.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
-                        h7.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS);
-                        h8.fill(gen.getGeneratedParticle(0).vector().p(), bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
-                        h9.fill(Math.toDegrees(gen.getGeneratedParticle(0).theta()), bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
-                        h10.fill(Math.toDegrees(gen.getGeneratedParticle(0).phi()), bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
+                        if(bank.getByte("charge", i)==0) {
+                            h1.fill(bank.getFloat("energy", i));
+                            h2.fill(bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            Vector3D part = new Vector3D(bank.getFloat("cx", i), bank.getFloat("cy", i), bank.getFloat("cz", i));
+                            h3.fill(Math.toDegrees(part.theta() - gen.getGeneratedParticle(1).theta()));
+                            h4.fill(Math.toDegrees(part.phi() - gen.getGeneratedParticle(1).phi()));
+                            h5.fill(bank.getFloat("time", i) - 124.25);
+                            h6.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            h7.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS);
+                            h8.fill(gen.getGeneratedParticle(1).vector().p(), bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            h9.fill(Math.toDegrees(gen.getGeneratedParticle(1).theta()), bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            h10.fill(Math.toDegrees(gen.getGeneratedParticle(1).phi()), bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                        }
                     }
                 }
 

@@ -2,6 +2,7 @@ package org.jlab.rec.ft;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
@@ -48,8 +49,11 @@ public class FTEventBuilder {
 //        this.FTresponses.clear();
     }
 
-    public List<FTResponse> addResponses(DataEvent event, IndexedTable cluster) {
+    public List<FTResponse> addResponses(DataEvent event, ConstantsManager manager, int run) {
         List<FTResponse> responses = new ArrayList<FTResponse>();
+        
+        IndexedTable cluster = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
+                
         if (event instanceof EvioDataEvent) {
             if (event.hasBank("FTCALRec::clusters") == true) {
                 EvioDataBank bank = (EvioDataBank) event.getBank("FTCALRec::clusters");
@@ -114,7 +118,10 @@ public class FTEventBuilder {
         return responses;
     }
 
-    public void correctDirection(List<FTParticle> particles, IndexedTable thetaCorr, IndexedTable phiCorr) {
+    public void correctDirection(List<FTParticle> particles, ConstantsManager manager, int run) {
+        
+        IndexedTable thetaCorr = manager.getConstants(run, "/calibration/ft/ftcal/thetacorr");
+        IndexedTable phiCorr   = manager.getConstants(run, "/calibration/ft/ftcal/phicorr");
         for (int i = 0; i < particles.size(); i++) {
             FTParticle particle = particles.get(i);
             particle.setDirection(thetaCorr, phiCorr);
