@@ -213,12 +213,15 @@ public class Hit implements Comparable<Hit> {
      *
      * @return the cell size in a given superlayer
      */
-    public double get_CellSize() {
-       
+    public double get_CellSize() {       
         return _cellSize;
     }
     
-    public void set_CellSize(DCGeant4Factory DcDetector) {
+    public void set_CellSize(double cellSize) {
+        _cellSize = cellSize;
+    }
+    
+    public void calc_CellSize(DCGeant4Factory DcDetector) {
         // fix cell size = w_{i+1} -w_{i}
         //double layerDiffAtMPln  = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().x()
         //             - GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(1).getMidpoint().x();

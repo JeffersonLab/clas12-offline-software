@@ -436,10 +436,13 @@ public class RecoBankWriter {
             
 
             for (int j = 0; j < crossIdxArray.size(); j++) { 
-                String hitStrg = "Cross";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) crossIdxArray.get(j).shortValue());
+                if(j<18) {
+                    //only 18 entries in bank
+                    String hitStrg = "Cross";
+                    hitStrg += (j + 1);
+                    hitStrg += "_ID";
+                    bank.setShort(hitStrg, i, (short) crossIdxArray.get(j).shortValue());
+                }
             }
         }
         //bank.show();

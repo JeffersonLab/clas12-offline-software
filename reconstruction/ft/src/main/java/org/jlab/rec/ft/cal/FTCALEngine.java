@@ -18,7 +18,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.utils.groups.IndexedTable;
 
 
 public class FTCALEngine extends ReconstructionEngine {
@@ -28,13 +27,6 @@ public class FTCALEngine extends ReconstructionEngine {
 	}
 
 	FTCALReconstruction reco;
-        IndexedTable charge2Energy;
-        IndexedTable timeOffsets;
-        IndexedTable status;
-        IndexedTable cluster;
-        IndexedTable energyCorr;
-
-	int Run = -1;
 	
 	@Override
 	public boolean init() {
@@ -62,41 +54,39 @@ public class FTCALEngine extends ReconstructionEngine {
             List<FTCALCluster> correctedClusters = new ArrayList();
             
             // update calibration constants based on run number if changed
-            setRunConditionsParameters(event);
-            // get hits fron banks
-            allHits = reco.initFTCAL(event,charge2Energy,timeOffsets,cluster);
-            // select good hits and order them by energy
-            selectedHits = reco.selectHits(allHits);
-            // create clusters
-            allClusters = reco.findClusters(selectedHits, cluster);
-            // select good clusters
-            selectedClusters = reco.selectClusters(allClusters, cluster);
-            // write output banks
-            reco.writeBanks(event, selectedHits, selectedClusters, energyCorr);
+            int run = setRunConditionsParameters(event);
+
+            if(run>=0) {
+                // get hits fron banks
+                allHits = reco.initFTCAL(event,this.getConstantsManager(), run);
+                // select good hits and order them by energy
+                selectedHits = reco.selectHits(allHits);
+                // create clusters
+                allClusters = reco.findClusters(selectedHits, this.getConstantsManager(), run);
+                // select good clusters
+                selectedClusters = reco.selectClusters(allClusters, this.getConstantsManager(), run);
+                // write output banks
+                reco.writeBanks(event, selectedHits, selectedClusters, this.getConstantsManager(), run);
+            }
             return true;
 	}
 
-    public void setRunConditionsParameters(DataEvent event) {
+    public int setRunConditionsParameters(DataEvent event) {
+        int run = -1;
         if(event.hasBank("RUN::config")==false) {
                 System.out.println("RUN CONDITIONS NOT READ!");
         }
 
         if(event instanceof EvioDataEvent) {
             EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            Run = bank.getInt("Run")[0];
+            run = bank.getInt("Run")[0];
         }
         else {
             DataBank bank = event.getBank("RUN::config");
-            Run = bank.getInt("run")[0];
+            run = bank.getInt("run")[0];
         }
-		
-        // Load the constants
-        //-------------------
-        charge2Energy = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/charge_to_energy");
-        timeOffsets   = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/time_offsets");
-        status        = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/status");
-        cluster       = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/cluster");
-        energyCorr    = this.getConstantsManager().getConstants(Run, "/calibration/ft/ftcal/energycorr");
+	
+        return run;
     }
 
     
