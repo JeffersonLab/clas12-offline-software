@@ -94,7 +94,16 @@ public class EventBuilder {
             detectorEvent.addParticle(particles.get(i));
         }
     }
-    
+   
+    /**
+     * set every particle's status
+     */
+    public void setParticleStatuses() {
+        for (DetectorParticle p : this.detectorEvent.getParticles()) {
+            p.setStatus();
+        }
+    }
+
 
     /**
      * processes all particles and associating detector responses with given cuts to each particle.
