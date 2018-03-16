@@ -1,4 +1,4 @@
-package org.jlab.service.eb;
+package org.jlab.rec.eb;
 
 import org.jlab.geom.prim.Vector3D;
 
@@ -7,7 +7,10 @@ import org.jlab.geom.prim.Vector3D;
  * @author gavalian
  */
 public class EBConstants {
-    
+   
+    public static final double ECAL_SF_NSIGMA = 5;
+    public static final double PCAL_ELEC_MINENERGY = 60;
+
     //public static final double  PCAL_MATCHING = 15.0; // matching distance in PCAL
     //public static final double  ECIN_MATCHING = 15.0; // matching distance in PCAL
     //public static final double ECOUT_MATCHING = 15.0; // matching distance in PCAL

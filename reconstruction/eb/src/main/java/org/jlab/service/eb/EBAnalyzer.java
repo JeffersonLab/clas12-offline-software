@@ -12,8 +12,10 @@ import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.pdg.PDGDatabase;
 
+import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.rec.eb.EBUtil;
 
 /**
  * @author gavalian
@@ -25,6 +27,7 @@ public class EBAnalyzer {
 
     private int[]  pidPositive = new int[]{-11,  211, 321, 2212, 45};
     private int[]  pidNegative = new int[]{ 11, -211,-321,-2212};
+    private int[]  pidNeutral = new int[]{22,2112};
 
     public EBAnalyzer(){}
 
@@ -139,27 +142,40 @@ public class EBAnalyzer {
     }
 
     public void assignPids(DetectorEvent event) {
-        int np = event.getParticles().size();
+
         PIDHypothesis pidHyp = new PIDHypothesis();
+        pidHyp.setEvent(event);
+
+        // pid for trigger particle is already chosen,
+        // just call this to set quality factor:
+        pidHyp.finalizePID(event.getParticle(0),event.getParticle(0).getPid());
+
+        // loop skips first (trigger) particle:
+        final int np = event.getParticles().size();
         for(int i = 1; i < np; i++){
+        
             DetectorParticle p = event.getParticle(i);
-            if(p.getCharge()==0) break;
-            if(p.getCharge()>0){
-                for(int b = 0; b < this.pidPositive.length; b++){
-                    pidHyp.setEvent(event);
+            
+            if (p.getCharge()>0){
+                for(int b = 0; b < this.pidPositive.length; b++) {
                     pidHyp.PIDMatch(p, this.pidPositive[b]); 
-                    //pidHyp.PIDQuality(p,this.pidPositive[b],event);
                 }
-                //p.setPid(pidHyp.get(0).getPid());
-            } else {
-                for(int b = 0; b < this.pidNegative.length; b++){
-                    pidHyp.setEvent(event);
+            } 
+            
+            else if (p.getCharge()<0) {
+                for(int b = 0; b < this.pidNegative.length; b++) {
                     pidHyp.PIDMatch(p, this.pidNegative[b]);
-                    //pidHyp.PIDQuality(p, this.pidNegative[b],event);
                 }
                 //Collections.sort(pidHyp); 
-                //p.setPid(pidHyp.get(0).getPid());
             }
+/*            
+            else {
+                for(int b = 0; b < this.pidNeutral.length; b++) {
+                    pidHyp.PIDMatch(p, this.pidNeutral[b]);
+                }
+            }
+*/
+
         }
     }
 
@@ -180,28 +196,20 @@ public class EBAnalyzer {
         public void PIDMatch(DetectorParticle p, int pid) {
 
             final int pidFromTiming = bestPidFromTiming(p);
+            
             final boolean pidCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
+            
+            final boolean sfCheck = EBUtil.getSamplingFractionNSigma(p) > -EBConstants.ECAL_SF_NSIGMA;
+            
+            final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
+            
+            final boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
+            
+            final boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
+            
+            final boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
 
-            Double ener = p.getEnergy(DetectorType.ECAL);
-            Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
-            Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
-            double sfMean = t[0]*(t[1] + t[2]/ener + t[3]*pow(ener,-2));
-            double sfSigma = s[0];
-            double sf = p.getEnergyFraction(DetectorType.ECAL);
-            double sf_upper_limit = sfMean + 5*sfSigma;
-            double sf_lower_limit = sfMean - 5*sfSigma;
-            
-            boolean sfCheck = sf > sf_lower_limit;
-            
-            boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
-            
-            boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
-            
-            boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
-            
-            boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
-
-            boolean ltccKaonThreshold = p.vector().mag()>EBConstants.LTCC_UPPER_PION_THRESHOLD;
+            final boolean ltccKaonThreshold = p.vector().mag()>EBConstants.LTCC_UPPER_PION_THRESHOLD;
 
             switch(abs(pid)) {
                 case 11:
@@ -250,10 +258,18 @@ public class EBAnalyzer {
                         this.finalizePID(p,pid);
                     }
                     break;
+
+                case 2112:
+                    break;
+                case 22:
+                    break;
             }
 
         }
 
+        /**
+         * Get the hadron hypotheses with the closest vertex time.
+         */
         public int bestPidFromTiming(DetectorParticle p) {
             int[] hypotheses;
             if      (p.getCharge()>0) hypotheses=pidPositive;
@@ -278,57 +294,46 @@ public class EBAnalyzer {
             }
             return bestPid;
         }
-/*
-        public int optimalVertexTime(DetectorParticle p) {
-
-            int vertex_index = 0;
-            HashMap<Integer,Double> vertexDiffs = new HashMap<Integer,Double>(); 
-            double vertex_time_hypothesis = 0.0;
-            double event_start_time = event.getEventHeader().getStartTime();
-
-            // prefer FTOF 1B:
-            if(p.hasHit(DetectorType.FTOF,2)==true) {
-                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 2, 2212)-event_start_time));
-                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 2, 211)-event_start_time));
-                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 2, 321)-event_start_time));
-            }
-            // else use FTOF 1A:
-            else if(p.hasHit(DetectorType.FTOF,1)==true) {
-                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.FTOF, 1, 2212)-event_start_time));
-                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.FTOF, 1, 211)-event_start_time));
-                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.FTOF, 1, 321)-event_start_time));
-            }
-            // else use CTOF:
-            else if(p.hasHit(DetectorType.CTOF)==true) {
-                vertexDiffs.put(0,abs(p.getVertexTime(DetectorType.CTOF, 0, 2212)-event_start_time));
-                vertexDiffs.put(1,abs(p.getVertexTime(DetectorType.CTOF, 0, 211)-event_start_time));
-                vertexDiffs.put(2,abs(p.getVertexTime(DetectorType.CTOF, 0, 321)-event_start_time));               
-
-            }
-
-            if(vertexDiffs.size()>0) {
-                double min = vertexDiffs.get(0);
-
-                for (int i = 0; i < vertexDiffs.size(); i++) {
-                    if (vertexDiffs.get(i) < min) {
-                        min = vertexDiffs.get(i); 
-                        vertex_index = i;
-                    }
-                }
-            }
-            return vertex_index;
-        }
-*/
 
 
+        /**
+         * Get a basic pid quality factor.
+         */
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
-            double delta_t = abs(p.getVertexTime(DetectorType.FTOF, 2, pid)-event.getEventHeader().getStartTime());
-            double sigma = 0.08;
-            double q = pow((delta_t/sigma),2);
+            double q=99999;
+
+            // electron/positron:
+            if (abs(pid)==11) {
+                q = pow(EBUtil.getSamplingFractionNSigma(p),2);
+            }
+
+            // based on timing:
+            else if (p.getCharge()!=0) {
+                final double startTime = event.getEventHeader().getStartTime();
+                final double sigma = 0.08;
+                double delta_t = 99999;
+                if (p.hasHit(DetectorType.FTOF,2)==true)
+                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 2, pid)-startTime);
+                else if (p.hasHit(DetectorType.FTOF,1)==true)
+                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 1, pid)-startTime);
+                else if (p.hasHit(DetectorType.CTOF)==true)
+                    delta_t = abs(p.getVertexTime(DetectorType.CTOF, 0, pid)-startTime);
+                else if (p.hasHit(DetectorType.FTOF,3)==true)
+                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 3, pid)-startTime);
+                q = pow((delta_t/sigma),2);
+            }
+
+            // neutrals:
+            else {
+            }
+
             return q;
         }
 
 
+        /**
+         * Set particle's pid and quality factor.
+         */
         public void finalizePID(DetectorParticle p, int pid) {
             p.setPid(pid);
             theoryPID = pid;
@@ -336,7 +341,7 @@ public class EBAnalyzer {
             p.setPidQuality(PIDquality);
 
         }
-
+        
     }
 }
 
