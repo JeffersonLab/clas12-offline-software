@@ -39,7 +39,6 @@ public class DetectorParticle implements Comparable {
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     
-    
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
     
@@ -567,6 +566,59 @@ public class DetectorParticle implements Comparable {
     public void setMass(double mass){ this.particleMass = mass;}
     public void setPid(int pid){this.particlePID = pid;}
     public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
+    
+    public void setStatus() {
+
+        final int centralStat=4000;
+        final int forwardStat=2000;
+        final int taggerStat=1000;
+
+        int status = 0;
+        int trackType = -1;
+        if (this.detectorTrack!=null) trackType = this.detectorTrack.getDetectorID();
+
+        // central:
+        if (this.hasHit(DetectorType.BMT)  ||
+            this.hasHit(DetectorType.BST)  ||
+            this.hasHit(DetectorType.CVT)  ||
+            this.hasHit(DetectorType.CTOF) ||
+            this.hasHit(DetectorType.CND)  ||
+            this.hasHit(DetectorType.RTPC)) {
+                status += centralStat;
+        }
+        else if (this.detectorTrack!=null &&
+                DetectorType.getType(trackType)==DetectorType.CVT) {
+                status += centralStat;
+        }
+
+        // forward:
+        if (this.hasHit(DetectorType.DC)     ||
+            this.hasHit(DetectorType.FMT)    ||
+            this.hasHit(DetectorType.ECAL,1) ||
+            this.hasHit(DetectorType.ECAL,4) ||
+            this.hasHit(DetectorType.ECAL,7) ||
+            this.hasHit(DetectorType.FTOF,1) ||
+            this.hasHit(DetectorType.FTOF,2) ||
+            this.hasHit(DetectorType.FTOF,3) ||
+            this.hasHit(DetectorType.HTCC)   ||
+            this.hasHit(DetectorType.LTCC)   ||
+            this.hasHit(DetectorType.RICH)) {
+            status += forwardStat;
+        }
+        else if (this.detectorTrack!=null && 
+                DetectorType.getType(trackType)==DetectorType.DC) {
+            status += forwardStat;
+        }
+
+        // tagger:
+        if (this.hasHit(DetectorType.FT)   ||
+            this.hasHit(DetectorType.FTCAL)  ||
+            this.hasHit(DetectorType.FTHODO) ||
+            this.hasHit(DetectorType.FTTRK)) {
+            status += taggerStat;
+        }
+        this.particleStatus = status;
+    }
     
     public void setCross(double x, double y, double z,
             double ux, double uy, double uz){
