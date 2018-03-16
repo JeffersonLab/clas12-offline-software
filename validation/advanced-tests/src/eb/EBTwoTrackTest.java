@@ -499,22 +499,22 @@ public class EBTwoTrackTest {
         }
         
         if (isCentral) {
-            if (ctrkBank==null) return;
-            if (ctrkBank.rows()==0) return;
-            if (debug) {
-                System.out.println("\n\n#############################################################\n");
-                if (recBank!=null) recBank.show();
-                if (ctofBank!=null) ctofBank.show();
-                if (ctrkBank!=null) ctrkBank.show();
-                if (recPartBank!=null) recPartBank.show();
-                if (recSciBank!=null) recSciBank.show();
-            }
-            for (int ii=0; ii<ctrkBank.rows(); ii++) {
-                if (ctrkBank.getInt("q",ii)>0) {
-                    final double phi0 = ctrkBank.getFloat("phi0",ii);
-                    final int sector = ClasMath.getSectorFromPhi(phi0);
-                    if (sector == hadronSector)
-                        nPosTracks++;
+            if (ctrkBank!=null && ctrkBank.rows()==0) {
+                if (debug) {
+                    System.out.println("\n\n#############################################################\n");
+                    if (recBank!=null) recBank.show();
+                    if (ctofBank!=null) ctofBank.show();
+                    if (ctrkBank!=null) ctrkBank.show();
+                    if (recPartBank!=null) recPartBank.show();
+                    if (recSciBank!=null) recSciBank.show();
+                }
+                for (int ii=0; ii<ctrkBank.rows(); ii++) {
+                    if (ctrkBank.getInt("q",ii)>0) {
+                        final double phi0 = ctrkBank.getFloat("phi0",ii);
+                        final int sector = ClasMath.getSectorFromPhi(phi0);
+                        if (sector == hadronSector)
+                            nPosTracks++;
+                    }
                 }
             }
         }
