@@ -6,20 +6,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.jlab.detector.base.DetectorType;
+
 import org.jlab.clas.detector.CalorimeterResponse;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
-import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.TaggerResponse;
+
 import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Vector3D;
+
+import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.rec.eb.EBUtil;
 
 /**
  *
@@ -461,28 +467,14 @@ class TriggerOptions {
     
     public int getSoftwareTriggerScore(DetectorParticle p) {
 
-        final Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
-        final Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
         final double npheCut = EBCCDBConstants.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
-        
-        // FIXME:  this should go in CCDB:
-        final double nSigmaSF = 5;
+        final double sfNSigma = EBUtil.getSamplingFractionNSigma(p);
 
-        final double ener = p.getEnergy(DetectorType.ECAL);
-
-        // FIXME:  this should be in a different class and a dedicated method:
-        final double sfMean = t[0]*(t[1] + t[2]/ener + t[3]*pow(ener,-2));
-        final double sfSigma = s[0];
-
-        final double sf = p.getEnergyFraction(DetectorType.ECAL);
-        final double sf_upper_limit = sfMean + nSigmaSF*sfSigma;
-        final double sf_lower_limit = sfMean - nSigmaSF*sfSigma;
-        
         int score = 0;
         if(p.getNphe(DetectorType.HTCC) > npheCut){
             score += 1000;
         }
-        if(sf >= sf_lower_limit) {
+        if(sfNSigma > -EBConstants.ECAL_SF_NSIGMA) {
             score += 100;
         }
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
