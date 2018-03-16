@@ -227,9 +227,9 @@ public class ECEngine extends ReconstructionEngine {
         
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
-            bankM.setFloat("du", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
-            bankM.setFloat("dv", c, (float) clusters.get(c).clusterPeaks.get(1).getDistanceEdge());
-            bankM.setFloat("dw", c, (float) clusters.get(c).clusterPeaks.get(2).getDistanceEdge());
+            bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
+            bankM.setFloat("distV", c, (float) clusters.get(c).clusterPeaks.get(1).getDistanceEdge());
+            bankM.setFloat("distW", c, (float) clusters.get(c).clusterPeaks.get(2).getDistanceEdge());
             bankM.setFloat("m1u", c, (float) clusters.get(c).clusterPeaks.get(0).getMoment());
             bankM.setFloat("m1v", c, (float) clusters.get(c).clusterPeaks.get(1).getMoment());
             bankM.setFloat("m1w", c, (float) clusters.get(c).clusterPeaks.get(2).getMoment());
