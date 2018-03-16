@@ -80,9 +80,9 @@
     "group": 20725,
     "info": "ECCAL bank for clusters containing distances an moments",
     "items": [
-       {"name":"du",       "id":1,  "type":"float", "info":"distance fomr u edge"},
-       {"name":"dy",       "id":2,  "type":"float", "info":"distance from v edge"},
-       {"name":"dz",       "id":3,  "type":"float", "info":"distance from w edge"},
+       {"name":"distU",       "id":1,  "type":"float", "info":"distance fomr u edge"},
+       {"name":"distV",       "id":2,  "type":"float", "info":"distance from v edge"},
+       {"name":"distW",       "id":3,  "type":"float", "info":"distance from w edge"},
        {"name":"m1u",      "id":4,  "type":"float", "info":"second moment"},
        {"name":"m1v",      "id":5,  "type":"float", "info":"second moment"},
        {"name":"m1w",      "id":6,  "type":"float", "info":"second moment"},
