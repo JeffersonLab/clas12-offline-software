@@ -106,8 +106,11 @@ public class EBEngine extends ReconstructionEngine {
         eb.addFTIndices(ftIndices);
         eb.forwardTaggerIDMatching();
 
+
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
+        
+            eb.setParticleStatuses();
             
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             de.appendBanks(bankP);

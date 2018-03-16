@@ -9,7 +9,7 @@ import org.jlab.geom.prim.Vector3D;
 public class EBConstants {
    
     public static final double ECAL_SF_NSIGMA = 5;
-    public static final double PCAL_ELEC_MINENERGY = 60;
+    public static final double PCAL_ELEC_MINENERGY = 0.060;
 
     //public static final double  PCAL_MATCHING = 15.0; // matching distance in PCAL
     //public static final double  ECIN_MATCHING = 15.0; // matching distance in PCAL
