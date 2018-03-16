@@ -30,6 +30,7 @@ public class ECStrip implements Comparable {
     private int                 peakID        = -1;
     
     private Line3D              stripLine = new Line3D();
+    private double              stripDistanceEdge = 0.0;
     
     public ECStrip(int sector, int layer, int component){
         this.desc.setSectorLayerComponent(sector, layer, component);
@@ -43,6 +44,14 @@ public class ECStrip implements Comparable {
     public ECStrip setTDC(int tdc){
         this.iTDC = tdc;
         return this;
+    }
+    
+    public void setDistanceEdge(double dist){
+        this.stripDistanceEdge = dist;
+    }
+    
+    public double getDistanceEdge(){
+        return this.stripDistanceEdge;
     }
     
     public double getEnergy(){
