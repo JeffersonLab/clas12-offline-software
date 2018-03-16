@@ -474,6 +474,17 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
     
+    public double getEnergy(DetectorType type, int layer){
+        double energy = 0.0;
+        for(DetectorResponse r : this.responseStore) {
+            if (r.getDescriptor().getType()==type &&
+               r.getDescriptor().getLayer()==layer) {
+                energy += r.getEnergy();
+            }
+        }
+        return energy;
+    }
+    
     public double getBeta(DetectorType type, int layer, double startTime){
         DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
