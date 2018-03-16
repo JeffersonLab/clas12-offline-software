@@ -13,6 +13,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.pdg.PDGDatabase;
 
 import org.jlab.analysis.math.ClasMath;
 
@@ -36,6 +37,8 @@ public class EBTwoTrackTest {
 
     boolean isForwardTagger=false;
     boolean isCentral=false;
+
+    int fdCharge = 0;
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
@@ -152,6 +155,8 @@ public class EBTwoTrackTest {
             hadronPDG=11;
         }
         else udfFileType=true;
+
+        fdCharge = PDGDatabase.getParticleById(hadronPDG).charge();
 
         HipoDataSource reader = new HipoDataSource();
         reader.open(fileName);
@@ -419,10 +424,10 @@ public class EBTwoTrackTest {
         final double gEff = (double)nFtPhotons / nEvents;
         final double hEff = (double)nFtFd / nEvents;
         System.out.println("\n#############################################################");
-        System.out.println(String.format("\nFT eEff = %.3f",eEff));
-        System.out.println(String.format("\nFT gEff = %.3f",gEff));
-        System.out.println(String.format("\nFD hEff = %.3f",hEff));
-        System.out.println("\n#############################################################");
+        System.out.println(String.format("FT eEff = %.3f",eEff));
+        System.out.println(String.format("FT gEff = %.3f",gEff));
+        System.out.println(String.format("FD hEff = %.3f",hEff));
+        System.out.println("#############################################################");
         if      (ftPDG==11) assertEquals(eEff>0.90,true);
         else if (ftPDG==22) assertEquals(gEff>0.90,true);
         assertEquals(hEff>0.50,true);
@@ -453,13 +458,13 @@ public class EBTwoTrackTest {
                     else if (pid==11) nFtElectrons++;
                 }
 
-                for (int ii=0; ii<recPartBank.rows() && startTime>0; ii++) {
+                for (int ii=0; ii<recPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
                     final int pid = recPartBank.getInt("pid",ii);
                     if (pid==hadronPDG) {
                         final double px=recPartBank.getFloat("px",ii);
                         final double py=recPartBank.getFloat("py",ii);
                         final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
-                        if (sector==hadronSector) {
+                        if (sector==hadronSector || (pid==11 && sector==electronSector)) {
                             nFtFd++;
                             break;
                         }
