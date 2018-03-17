@@ -95,7 +95,7 @@ public class EBEngine extends ReconstructionEngine {
         EBAnalyzer analyzer = new EBAnalyzer();
         analyzer.processEvent(eb.getEvent());
 
-        //The Forward Tagger Particle Creation Tagger Cluster Association
+        // Add Forward Tagger particles:
         List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
         List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
         List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
