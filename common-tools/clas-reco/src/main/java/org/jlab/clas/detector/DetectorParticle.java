@@ -749,16 +749,19 @@ public class DetectorParticle implements Comparable {
 
     public double getVertexTime(DetectorType type, int layer, int pid){
         
-        DetectorResponse res = this.getHit(type);
-        
-        double vertex_time = this.getTime(type,layer) -
-            this.getPathLength(type, layer) /
-            (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        double vertex_time = -9999;
         
         if(type==DetectorType.CTOF) {
+            DetectorResponse res = this.getHit(type);
             vertex_time = this.getTime(type) - res.getPath()/
              (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
-           }
+        }
+       
+        else {
+            vertex_time = this.getTime(type,layer) -
+                this.getPathLength(type, layer) /
+                (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        }
         
         return vertex_time;
     }
