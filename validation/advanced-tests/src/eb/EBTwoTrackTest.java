@@ -22,9 +22,9 @@ import org.jlab.analysis.math.ClasMath;
  * Analyze EB efficiencies based on Joseph's 2-particle test events.
  *
  * TODO:  Inherit process/checkResults to subclasses for FD/CD/FT
- *
  * TODO:  Write a more general purpose test based on MC::Particle bank.
- *
+ * TODO:  Rewrite this from scratch.  Meanwhile, can't live without it.
+ * 
  * @author baltzell
  */
 public class EBTwoTrackTest {
@@ -499,7 +499,7 @@ public class EBTwoTrackTest {
         }
         
         if (isCentral) {
-            if (ctrkBank!=null && ctrkBank.rows()==0) {
+            if (ctrkBank!=null && ctrkBank.rows()!=0) {
                 if (debug) {
                     System.out.println("\n\n#############################################################\n");
                     if (recBank!=null) recBank.show();
