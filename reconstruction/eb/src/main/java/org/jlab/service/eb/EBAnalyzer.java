@@ -50,15 +50,9 @@ public class EBAnalyzer {
             trigger.setBeta(trigger.getTheoryBeta(trigger.getPid()));
             trigger.setMass(PDGDatabase.getParticleById(trigger.getPid()).mass());
 
-//            trigger.setBeta(1.0);
-//            trigger.setMass(PhysicsConstants.massElectron());
-
             double time = 0.0;
             double path = 0.0;
 
-            // TODO:  get these hardcoded FTOF "layer" 1/2/3 constants out of here.
-            // Should be from DetectorType instead, and similarly for for ECAL/PCAL's 1/4/7 (e.g. in EBCCDB)
-            
             // prefer FTOF Panel 1B:
             if (trigger.hasHit(DetectorType.FTOF, 2)==true){
                 time = trigger.getTime(DetectorType.FTOF, 2);
@@ -80,18 +74,14 @@ public class EBAnalyzer {
                 final double rfBucketLength = EBCCDBConstants.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
 
                 final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
-                final double start_time = time - tof;
+                final double vertexTime = time - tof;
                 final double vzCorr = (tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
-                final double deltatr = - start_time + event.getEventHeader().getRfTime() - vzCorr +
+                final double deltatr = - vertexTime + event.getEventHeader().getRfTime() - vzCorr +
                     + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength + rfOffset;
                 
-                //double deltatr = - start_time + event.getEventHeader().getRfTime() /* - (trigger.vertex().z() 
-                //                                                                      - (EBConstants.TARGET_POSITION))/(PhysicsConstants.speedOfLight())*/
-                //    + (EBConstants.RF_LARGE_INTEGER+0.5)*EBConstants.RF_BUCKET_LENGTH + EBConstants.RF_OFFSET;
+                final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
                 
-                final double rfcorr = deltatr % rfBucketLength - rfBucketLength/2;//RF correction term
-                
-                startTime = start_time + rfcorr;
+                startTime = vertexTime + rfCorr;
             }
         }
 
@@ -135,7 +125,6 @@ public class EBAnalyzer {
             if(p.hasHit(DetectorType.CTOF)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
                 mass = p.getMass2(DetectorType.CTOF,start_time);
-                //System.out.println("CTOF Beta" + beta);
                 p.setBeta(beta);
             }
         }
@@ -187,9 +176,7 @@ public class EBAnalyzer {
         private double PIDquality = 0.0;
         private DetectorEvent event;
 
-        public PIDHypothesis() {
-
-        }
+        public PIDHypothesis() {}
 
         public void setEvent(DetectorEvent e) {event = e;}
 
@@ -202,14 +189,11 @@ public class EBAnalyzer {
             final boolean sfCheck = EBUtil.getSamplingFractionNSigma(p) > -EBConstants.ECAL_SF_NSIGMA;
             
             final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
-            
             final boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
             
             final boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
-            
-            final boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_LOWER_PION_THRESHOLD;
-
-            final boolean ltccKaonThreshold = p.vector().mag()>EBConstants.LTCC_UPPER_PION_THRESHOLD;
+            final boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_PION_THRESHOLD;
+            final boolean ltccKaonThreshold = p.vector().mag()>EBConstants.LTCC_KAON_THRESHOLD;
 
             switch(abs(pid)) {
                 case 11:

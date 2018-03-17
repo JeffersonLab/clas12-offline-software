@@ -9,6 +9,10 @@ import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.geom.prim.Vector3D;
 
+/**
+ *
+ * @author baltzell
+ */
 public class EBCCDBConstants {
 
     public static boolean LOADED = false;
@@ -32,7 +36,6 @@ public class EBCCDBConstants {
     
     public static final String[] otherTableNames={
         "/geometry/target",
-    //    "/calibration/rf/offset"
     };
 
     public static List <String> getAllTableNames() {
@@ -198,8 +201,8 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
     
         //loadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
-        //loadDouble(EBCCDBEnum.LTCC_LOWER_PION_THRESHOLD,
-        //loadDouble(EBCCDBEnum.LTCC_UPPER_PION_THRESHOLD,
+        //loadDouble(EBCCDBEnum.LTCC_PION_THRESHOLD,
+        //loadDouble(EBCCDBEnum.LTCC_KAON_THRESHOLD,
     
         final int rfStat1=tables.get("rf/config").getIntValue("status",1,1,1);
         final int rfStat2=tables.get("rf/config").getIntValue("status",1,1,2);
@@ -216,6 +219,8 @@ public class EBCCDBConstants {
 
         LOADED = true;
         setDB(DBP);
+
+        System.out.println("EBCCDBConstants:  loaded run "+run);
     }
     
     private static EBDatabaseConstantProvider DB;

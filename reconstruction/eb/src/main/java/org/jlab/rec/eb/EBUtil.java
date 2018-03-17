@@ -39,9 +39,8 @@ public class EBUtil {
      /**
      * Perform a basic true/false identification for electrons.
      */
-    public static boolean isElectron(DetectorParticle p) {
+    public static boolean isSimpleElectron(DetectorParticle p) {
         
-        final double ener = p.getEnergy(DetectorType.ECAL);
         final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
         final double nphe = p.getNphe(DetectorType.HTCC);
         final double sfNSigma = getSamplingFractionNSigma(p);

@@ -30,6 +30,7 @@ import org.jlab.rec.eb.EBUtil;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class EventBuilder {
 
@@ -256,80 +257,9 @@ public class EventBuilder {
         return bestIndex;
     }
 
-    /*
-     * processNeutralTracks
-     * - original version, requires PCAL for all neutrals
-     *
-    public void processNeutralTracks(){
-
-        // get all unmatched calorimeter responses:
-        List<DetectorResponse>   responsesPCAL = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 1);
-        List<DetectorResponse>   responsesECIN = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 4);
-        List<DetectorResponse>  responsesECOUT = this.getUnmatchedResponses(detectorResponses, DetectorType.ECAL, 7);
-
-        // Critical to use DetectorType for this, instead of hardcoded constants everywhere.
-        List<DetectorResponse> responsesFTOF1A = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 1);
-        List<DetectorResponse> responsesFTOF1B = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 2);
-        List<DetectorResponse>  responsesFTOF2 = this.getUnmatchedResponses(detectorResponses, DetectorType.FTOF, 3);
-       
-        // setup the empty list of neutral particles:
-        List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
-
-        // add a new neutral particle for each unmatched PCAL response:
-        for(DetectorResponse r : responsesPCAL){
-            DetectorParticle p = DetectorParticle.createNeutral(r);
-            particles.add(p);
-        }
-
-        for(int i = 0; i < particles.size(); i++){
-            DetectorParticle p = particles.get(i);
-            int index = p.getDetectorHit(responsesECIN, DetectorType.ECAL, 4, EBConstants.ECIN_MATCHING);
-            if(index>=0){ p.addResponse(responsesECIN.get(index), true); responsesECIN.get(index).setAssociation(i);}
-            index = p.getDetectorHit(responsesECOUT, DetectorType.ECAL, 7, EBConstants.ECOUT_MATCHING);
-            if(index>=0){ p.addResponse(responsesECOUT.get(index), true); responsesECOUT.get(index).setAssociation(i);}
-            index = p.getDetectorHit(responsesFTOF1A, DetectorType.FTOF, 1, EBConstants.FTOF_MATCHING_1A);
-            if(index>=0){ p.addResponse(responsesFTOF1A.get(index), true); responsesFTOF1A.get(index).setAssociation(i);}
-            index = p.getDetectorHit(responsesFTOF1B, DetectorType.FTOF, 2, EBConstants.FTOF_MATCHING_1B);
-            if(index>=0){ p.addResponse(responsesFTOF1B.get(index), true); responsesFTOF1B.get(index).setAssociation(i);}
-        }
-        
-        for(DetectorParticle p : particles){
-            double energy = p.getEnergy(DetectorType.ECAL);
-            double px = p.vector().x();
-            double py = p.vector().y();
-            double pz = p.vector().z();
-            p.setPid(22);
-            p.setCharge(0);
-            p.vector().setXYZ(px*energy/EBConstants.ECAL_SAMPLINGFRACTION, 
-                    py*energy/EBConstants.ECAL_SAMPLINGFRACTION,
-                    pz*energy/EBConstants.ECAL_SAMPLINGFRACTION);
-
-            // WRONG:
-            //int calorimeter_count = responsesPCAL.size() + responsesECIN.size() + responsesECOUT.size();
-            //int scintillator_count = responsesFTOF1A.size() + responsesFTOF1B.size() + responsesFTOF2.size();
-            //if (calorimeter_count>0  && scintillator_count==0)
-            //    detectorEvent.addParticle(p);
-
-            // RIGHTER:
-            int caloCount = p.countResponses(DetectorType.ECAL,1) +
-                            p.countResponses(DetectorType.ECAL,4) +
-                            p.countResponses(DetectorType.ECAL,7);
-            int ftofCount = p.countResponses(DetectorType.FTOF,1) +
-                            p.countResponses(DetectorType.FTOF,2) +
-                            p.countResponses(DetectorType.FTOF,3);
-            if (caloCount>0 && ftofCount==0)
-                detectorEvent.addParticle(p);
-        }
-        
-        detectorEvent.setAssociation();
-    }
-     */
 
     /*
      * processNeutralTracks
-     * - new version, does not require PCAL for all neutrals
-     *
-     * FIXME:  get layer index-constants from somewhere else
      */
     public void processNeutralTracks() {
 
@@ -353,14 +283,15 @@ public class EventBuilder {
 
         // set particle kinematics:
         for(DetectorParticle p : particles) {
+            
             final double energy = p.getEnergy(DetectorType.ECAL);
             final double px = p.vector().x();
             final double py = p.vector().y();
             final double pz = p.vector().z();
+            final double sf = EBUtil.getExpectedSamplingFraction(energy);
+            
             p.setCharge(0);
-            p.vector().setXYZ(px*energy/EBConstants.ECAL_SAMPLINGFRACTION, 
-                    py*energy/EBConstants.ECAL_SAMPLINGFRACTION,
-                    pz*energy/EBConstants.ECAL_SAMPLINGFRACTION);
+            p.vector().setXYZ(px*energy/sf,py*energy/sf,pz*energy/sf);
 
             final int pcalCount = p.countResponses(DetectorType.ECAL,1);
             final int caloCount = pcalCount + 
@@ -441,9 +372,6 @@ public class EventBuilder {
         int np = this.detectorEvent.getParticles().size();
         System.out.println(">>>>>>>>> DETECTOR EVENT WITH PARTICLE COUNT # " + np);
         System.out.println(this.detectorEvent.toString());
-        //for(int n = 0; n < np; n++){
-        //    System.out.println(detectorEvent.getParticle(n));
-        //}
     }
 }
 
@@ -519,6 +447,8 @@ class TriggerOptions {
                 }
             }
         }
+
+        // move the trigger particle to the first row:
         if (index>=0) event.moveUp(index);
 
         return flag;
