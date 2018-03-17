@@ -18,6 +18,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -29,17 +30,22 @@ public class ECCommon {
     public static int[]  stripThreshold = new int[3];
     public static int[]   peakThreshold = new int[3]; 
     public static float[]  clusterError = new float[3];
+	public static float[] clusterDeltaT = new float[3];
     public static Boolean         debug = false;
     public static Boolean   singleEvent = false;
     public static String      variation = "default";
-
+    
+    public static IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
+    
     private static double[] AtoE  = {15,10,10};    // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
     
     //public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
-        
+    static float             tps =  (float) 0.02345;
+    public static float TOFFSET = 125; 
+    
     public static void initHistos() {
         /*
         for (int is=1; is<7; is++){
@@ -61,6 +67,7 @@ public class ECCommon {
     }
     
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
+    	
         if (singleEvent) resetHistos();        
         
         List<ECStrip>  ecStrips = null;
@@ -79,8 +86,9 @@ public class ECCommon {
         
         manager.setVariation(variation);
         
-        IndexedTable   atten  = manager.getConstants(run, "/calibration/ec/attenuation");
-        IndexedTable    gain  = manager.getConstants(run, "/calibration/ec/gain");
+        IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
+        IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
+		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
         
         for(ECStrip strip : ecStrips){
             int sector    = strip.getDescriptor().getSector();
@@ -99,28 +107,70 @@ public class ECCommon {
                                   atten.getDoubleValue("B", sector,layer,component),
                                   atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component));            
+            strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
+                            time.getDoubleValue("a1", sector, layer, component),
+                            time.getDoubleValue("a2", sector, layer, component),
+                            time.getDoubleValue("a3", sector, layer, component),
+                            time.getDoubleValue("a4", sector, layer, component));
         }
         return ecStrips;
     }
         
-    public static List<ECStrip>  readStripsHipo(DataEvent event){        
+    public static List<ECStrip>  readStripsHipo(DataEvent event){   
+    	
         List<ECStrip>  strips = new ArrayList<ECStrip>();
+        tdcs.clear();
+        
+        if(event.hasBank("ECAL::tdc")==true){
+            DataBank  bank = event.getBank("ECAL::tdc");            
+            for(int i = 0; i < bank.rows(); i++){
+                int  is = bank.getByte("sector",i);
+                int  il = bank.getByte("layer",i);
+                int  ip = bank.getShort("component",i);               
+                int tdc = bank.getInt("TDC",i);
+                if(tdc>0) {                       
+                    if(!tdcs.hasItem(is,il,ip)) tdcs.add(new ArrayList<Integer>(),is,il,ip);
+                        tdcs.getItem(is,il,ip).add(tdc);       
+                }
+            }
+        }        
+        
         if(event.hasBank("ECAL::adc")==true){
             DataBank bank = event.getBank("ECAL::adc");
-            int rows = bank.rows();
-            for(int loop = 0; loop < rows; loop++){
-                int sector    = bank.getByte("sector", loop);
-                int layer     = bank.getByte("layer", loop);
-                int component = bank.getShort("component", loop);
-                ECStrip  strip = new ECStrip(sector, layer, component);
-                strip.setADC(bank.getInt("ADC", loop));
-                strip.setTDC(0);
-                double sca = (sector==5)?AtoE5[ind[layer-1]]:AtoE[ind[layer-1]]; 
+            for(int i = 0; i < bank.rows(); i++){
+                int  is = bank.getByte("sector", i);
+                int  il = bank.getByte("layer", i);
+                int  ip = bank.getShort("component", i);
+                int adc = bank.getInt("ADC", i);
+                float t = bank.getFloat("time", i);
+                ECStrip  strip = new ECStrip(is, il, ip);
+                strip.setADC(adc);
+                double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
                 if (variation=="clas6") sca = 1.0;
-                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);
+                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip);
+                
+                Integer[] tdcc; float  tmax = 1000; int tdc =1000;
+                
+                if (tdcs.hasItem(is,il,ip)) {
+                    List<Integer> list = new ArrayList<Integer>();
+                    list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
+                    for (int ii=0; ii<tdcc.length; ii++) {
+                    	    float tdif = (tps*tdcc[ii]-TOFFSET)-t; 
+                    	    System.out.println(ii+" "+tdif);
+                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = (int) tdif;}
+                    }
+                    System.out.println("tdc = "+tdc);
+                   
+                    strip.setTDC(tdc); 
+                }              
+
             }
         }
+                
         return strips;
+        
+        
+        
     }
     /**
      * Read Strips from PCAL and EC and return all strips
