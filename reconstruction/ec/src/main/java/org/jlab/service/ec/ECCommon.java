@@ -102,7 +102,11 @@ public class ECCommon {
             */
             Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer);
             ScintillatorPaddle paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
+            ScintillatorPaddle firstPaddle = (ScintillatorPaddle) detLayer.getComponent(0);
+            
             strip.getLine().copy(paddle.getLine());
+            double distance = paddle.getLine().origin().distance(firstPaddle.getLine().origin());
+            strip.setDistanceEdge(distance);
             strip.setAttenuation( atten.getDoubleValue("A", sector,layer,component),
                                   atten.getDoubleValue("B", sector,layer,component),
                                   atten.getDoubleValue("C", sector,layer,component));
