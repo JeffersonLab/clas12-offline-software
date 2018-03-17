@@ -49,13 +49,13 @@ public class EBEngine extends ReconstructionEngine {
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
 
-        List<DetectorResponse>   responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL);
+        List<DetectorResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL);
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         List<DetectorResponse>  responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::hits", DetectorType.CND);
         
-        List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
+        List<CherenkovResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
+        List<CherenkovResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
@@ -204,12 +204,6 @@ public class EBEngine extends ReconstructionEngine {
         // FIXME: check run number in processDataEvent, reload from CCDB if changed.
         // For now we just use hard-coded run number:
         EBCCDBConstants.load(10,this.getConstantsManager());
-
-        // Example of retrieveing values from EBCCDBConstants: 
-        //Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
-        //Double pcal_match = EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
-        //Double ftof1b_match = EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
-        
         System.out.println("[EB::] --> event builder is ready....");
         return true;
     }
