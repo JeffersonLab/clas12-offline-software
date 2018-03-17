@@ -323,7 +323,20 @@ public class ECCommon {
                             //H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
                                 //H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
-                                clusters.add(cluster);
+								double tU = cluster.getTime(0);
+								double tV = cluster.getTime(1);
+								double tW = cluster.getTime(2);
+								double eU = cluster.getEnergy(0)*1e3;
+								double eV = cluster.getEnergy(1)*1e3;
+								double eW = cluster.getEnergy(2)*1e3;
+								//System.out.printf("U %4.1f V %4.1f W %4.1f%n",tU,tV,tW);
+								//System.out.printf("U %4.1f V %4.1f W %4.1f%n%n",eU,eV,eW);
+								//System.out.printf("U %4.1f V %4.1f W %4.1f%n",tU,tV,tW);
+								//System.out.printf("U %4.1f V %4.1f W %4.1f%n%n",eU,eV,eW);
+								clusters.add(cluster);
+								//if ((Math.abs(tU - tV) < ECCommon.clusterDeltaT[ind[startLayer - 1]]) &&
+								 //   (Math.abs(tU - tW) < ECCommon.clusterDeltaT[ind[startLayer - 1]]) &&
+								 //   (Math.abs(tV - tW) < ECCommon.clusterDeltaT[ind[startLayer - 1]])) clusters.add(cluster);
                             }
                         }
                     }
@@ -333,10 +346,9 @@ public class ECCommon {
         
         for(int i = 0 ; i < clusters.size(); i++){
             clusters.get(i).setEnergy(
-                    clusters.get(i).getEnergy(0) + 
-                    clusters.get(i).getEnergy(1) +
-                    clusters.get(i).getEnergy(2)
-            );
+            clusters.get(i).getEnergy(0) + 
+            clusters.get(i).getEnergy(1) +
+            clusters.get(i).getEnergy(2));      
         }  
         
         return clusters;
