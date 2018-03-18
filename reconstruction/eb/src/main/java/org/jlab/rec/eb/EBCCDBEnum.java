@@ -37,6 +37,7 @@ public enum EBCCDBEnum {
     FTOF1B_hitRes,
     FTOF2_hitRes,
     NEUTRON_maxBeta,
+    CTOF_TimingRes,
     CTOF_DR,
     CTOF_DPHI,
     CTOF_DZ,

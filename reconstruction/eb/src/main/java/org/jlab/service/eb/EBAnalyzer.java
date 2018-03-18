@@ -284,7 +284,7 @@ public class EBAnalyzer {
          * Get a basic pid quality factor.
          */
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
-            double q=99999;
+            double q=999;
 
             // electron/positron:
             if (abs(pid)==11) {
@@ -294,17 +294,25 @@ public class EBAnalyzer {
             // based on timing:
             else if (p.getCharge()!=0) {
                 final double startTime = event.getEventHeader().getStartTime();
-                final double sigma = 0.08;
+                double sigma = -1;
                 double delta_t = 99999;
-                if (p.hasHit(DetectorType.FTOF,2)==true)
+                if (p.hasHit(DetectorType.FTOF,2)==true) {
+                    sigma = 0.085; //EBUtil.getTimingResolution(p,DetectorType.FTOF,2);
                     delta_t = abs(p.getVertexTime(DetectorType.FTOF, 2, pid)-startTime);
-                else if (p.hasHit(DetectorType.FTOF,1)==true)
+                }
+                else if (p.hasHit(DetectorType.FTOF,1)==true) {
+                    sigma = 0.125; //EBUtil.getTimingResolution(p,DetectorType.FTOF,1);
                     delta_t = abs(p.getVertexTime(DetectorType.FTOF, 1, pid)-startTime);
-                else if (p.hasHit(DetectorType.CTOF)==true)
+                }
+                else if (p.hasHit(DetectorType.CTOF)==true) {
+                    sigma = 0.065; //EBUtil.getTimingResolution(p,DetectorType.CTOF,0);
                     delta_t = abs(p.getVertexTime(DetectorType.CTOF, 0, pid)-startTime);
-                else if (p.hasHit(DetectorType.FTOF,3)==true)
+                }
+                else if (p.hasHit(DetectorType.FTOF,3)==true) {
+                    sigma = 0.152; //EBUtil.getTimingResolution(p,DetectorType.FTOF,3);
                     delta_t = abs(p.getVertexTime(DetectorType.FTOF, 3, pid)-startTime);
-                q = pow((delta_t/sigma),2);
+                }
+                if (sigma>0) q = pow((delta_t/sigma),2);
             }
 
             // neutrals:

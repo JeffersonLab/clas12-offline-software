@@ -17,9 +17,9 @@ public class EBCCDBConstants {
 
     public static boolean LOADED = false;
     
-    public static final String ebTablePrefix="/calibration/eb/";
+    private static final String ebTablePrefix="/calibration/eb/";
 
-    public static final String[] ebTableNames={
+    private static final String[] ebTableNames={
             "electron_sf",
             "photon_sf",
             "neutron_beta",
@@ -34,7 +34,7 @@ public class EBCCDBConstants {
             "rf/offset"
     };
     
-    public static final String[] otherTableNames={
+    private static final String[] otherTableNames={
         "/geometry/target",
     };
 
@@ -51,19 +51,19 @@ public class EBCCDBConstants {
     private static Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<EBCCDBEnum,Vector3D>();
     private static Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<EBCCDBEnum,Double[]>();
 
-    static EBDatabaseConstantProvider DBP = new EBDatabaseConstantProvider(10,"default");
+    private static EBDatabaseConstantProvider DBP = new EBDatabaseConstantProvider(10,"default");
 
     // fill maps:
-    public static synchronized void setDouble(EBCCDBEnum key,Double value) {
+    private static synchronized void setDouble(EBCCDBEnum key,Double value) {
         dbDoubles.put(key,value);
     }
-    public static synchronized void setVector3D(EBCCDBEnum key,Vector3D value) {
+    private static synchronized void setVector3D(EBCCDBEnum key,Vector3D value) {
         dbVector3Ds.put(key,value);
     }
-    public static synchronized void setInteger(EBCCDBEnum key,int value) {
+    private static synchronized void setInteger(EBCCDBEnum key,int value) {
         dbIntegers.put(key,value);
     }
-    public static synchronized void setArray(EBCCDBEnum key,Double[] value) {
+    private static synchronized void setArray(EBCCDBEnum key,Double[] value) {
         dbArrays.put(key,value);
     }
     
@@ -167,7 +167,7 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.ECIN_TimingRes,"ecal_matching","dt",0,4,0);
         loadDouble(EBCCDBEnum.ECOUT_TimingRes,"ecal_matching","dt",0,7,0);
 
-        String[] ts={"t1","t2","t3","t4"};
+        final String[] ts={"t1","t2","t3","t4"};
         loadArray(EBCCDBEnum.FTOF1A_TimingRes,"ftof_matching",ts,0,1,0);
         loadArray(EBCCDBEnum.FTOF1B_TimingRes,"ftof_matching",ts,0,2,0);
         loadArray(EBCCDBEnum.FTOF2_TimingRes,"ftof_matching",ts,0,0,0);
@@ -183,6 +183,7 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.HTCC_DTHETA,"htcc_matching","dtheta",0,0,0);
         loadDouble(EBCCDBEnum.HTCC_DPHI,"htcc_matching","dphi",0,0,0);
 
+        loadArray(EBCCDBEnum.CTOF_TimingRes,"ctof_matching",ts,0,0,0);
         loadDouble(EBCCDBEnum.LTCC_TimingRes,"ltcc_matching","dt",0,0,0);
         loadDouble(EBCCDBEnum.LTCC_NPHE_CUT,"ltcc_matching","nphe",0,0,0);
         loadDouble(EBCCDBEnum.LTCC_DTHETA,"ltcc_matching","dtheta",0,0,0);
