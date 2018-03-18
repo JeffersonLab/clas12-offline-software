@@ -59,5 +59,25 @@ public class EBUtil {
         return isElectron;
     }
 
+    /**
+     * Calculate timing resolution:
+     */
+    public static double geDettTimingResolution(DetectorParticle p, DetectorType type, int layer) {
+        Double[] pars;
+        if (type==DetectorType.FTOF) {
+            if (layer==1) pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF1A_TimingRes);
+            if (layer==2) pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF1B_TimingRes);
+            else          pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF2_TimingRes);
+        }
+        else if (type==DetectorType.CTOF) {
+            pars=EBCCDBConstants.getArray(EBCCDBEnum.CTOF_TimingRes);
+        }
+        else throw new RuntimeException("not ready for non-TOF");
+        final double mom=p.vector().mag();
+        double res=0;
+        for (int ii=0; ii<pars.length; ii++) res += pars[ii]*pow(mom,ii);
+        return res;
+    }
+
 }
 
