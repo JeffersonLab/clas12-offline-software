@@ -75,10 +75,11 @@ public class EBAnalyzer {
 
                 final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
                 final double vertexTime = time - tof;
+
                 final double vzCorr = (tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
+
                 final double deltatr = - vertexTime + event.getEventHeader().getRfTime() - vzCorr +
                     + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength + rfOffset;
-                
                 final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
                 
                 startTime = vertexTime + rfCorr;
@@ -96,37 +97,33 @@ public class EBAnalyzer {
         // we found event start time, so set it and do pid:
         if (foundTriggerTime) {
             event.getEventHeader().setStartTime(startTime);
-            this.assignMasses(event);
+            this.assignBetas(event);
             this.assignPids(event);
         }
 
     }
 
 
-    public void assignMasses(DetectorEvent event){
+    public void assignBetas(DetectorEvent event){
 
+        final double start_time  = event.getEventHeader().getStartTime();
         int np = event.getParticles().size();
         for(int i = 1; i < np; i++) {
             DetectorParticle p = event.getParticle(i);
-            double start_time  = event.getEventHeader().getStartTime();
             double beta = 0.0;
-            double mass = 0.0;
-
             if(p.hasHit(DetectorType.FTOF, 1)==true){
                 beta = p.getBeta(DetectorType.FTOF,1, start_time);
-                mass = p.getMass2(DetectorType.FTOF,1, start_time);
-                p.setBeta(beta);
             }
-            if(p.hasHit(DetectorType.FTOF, 2)==true){
+            else if(p.hasHit(DetectorType.FTOF, 2)==true){
                 beta = p.getBeta(DetectorType.FTOF, 2,start_time);
-                mass = p.getMass2(DetectorType.FTOF, 2,start_time);
-                p.setBeta(beta);
             }
-            if(p.hasHit(DetectorType.CTOF)==true){
+            else if(p.hasHit(DetectorType.CTOF)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
-                mass = p.getMass2(DetectorType.CTOF,start_time);
-                p.setBeta(beta);
             }
+            else if(p.hasHit(DetectorType.FTOF, 3)==true){
+                beta = p.getBeta(DetectorType.FTOF, 3,start_time);
+            }
+            p.setBeta(beta);
         }
     }
 
@@ -184,9 +181,9 @@ public class EBAnalyzer {
 
             final int pidFromTiming = bestPidFromTiming(p);
             
-            final boolean pidCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
+            final boolean pidFromTimingCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
             
-            final boolean sfCheck = EBUtil.getSamplingFractionNSigma(p) > -EBConstants.ECAL_SF_NSIGMA;
+            final boolean isElectron = EBUtil.isSimpleElectron(p);
             
             final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
             final boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
@@ -198,23 +195,23 @@ public class EBAnalyzer {
             switch(abs(pid)) {
                 case 11:
                     // require htcc nphe and ecal sampling fraction for electrons: 
-                    if(htccSignalCheck && sfCheck) {
+                    if(isElectron) {
                         this.finalizePID(p, pid);
                     }
                     break;
 
                 case 211:
-                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidFromTimingCheck && !isElectron) {
                         // pion is best timing
                         this.finalizePID(p,pid);
                     }
-                    else if (!sfCheck && htccSignalCheck && htccPionThreshold) {
+                    else if (!isElectron && htccSignalCheck && htccPionThreshold) {
                         // pion is not the best timing, but htcc signal and above pion threshold:
                         this.finalizePID(p,pid);
                     }
                     break;
                 case 321:
-                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidFromTimingCheck && !isElectron) {
                         // kaon is best timing
                         if (ltccSignalCheck && ltccPionThreshold) {
                             // let ltcc veto back to pion:
@@ -226,7 +223,7 @@ public class EBAnalyzer {
                     }
                     break;
                 case 2212:
-                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidFromTimingCheck && !isElectron) {
                         // proton is best timing
                         if (ltccSignalCheck && ltccPionThreshold) {
                             // let ltcc veto back to pion:
@@ -238,7 +235,7 @@ public class EBAnalyzer {
                     }
                     break;
                 case 45:
-                    if (pidCheck && (!htccSignalCheck || !sfCheck)) {
+                    if (pidFromTimingCheck && !isElectron) {
                         this.finalizePID(p,pid);
                     }
                     break;
