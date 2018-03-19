@@ -140,6 +140,24 @@ public class EBCCDBConstants {
             vals[ii]=tables.get(tableName).getDoubleValue(colNames[ii],sector,layer,component);
         setArray(key,vals);
     }
+    
+    public static synchronized void show() {
+        System.out.println("EBCCDBConstants:  show()");
+        for (EBCCDBEnum ii : dbIntegers.keySet()) {
+            System.out.println(String.format("%-30s: %d",ii,dbIntegers.get(ii)));
+        }
+        for (EBCCDBEnum ii : dbDoubles.keySet()) {
+            System.out.println(String.format("%-30s: %f",ii,dbDoubles.get(ii)));
+        }
+        for (EBCCDBEnum ii : dbArrays.keySet()) {
+            System.out.print(String.format("%-30s: ",ii));
+            for (double xx : dbArrays.get(ii)) System.out.print(xx+" , ");
+            System.out.println();
+        }
+        for (EBCCDBEnum ii : dbVector3Ds.keySet()) {
+           System.out.println(String.format("%-30s",ii)+": "+dbVector3Ds.get(ii));
+        }
+    }
 
     public static final synchronized void load(int run,ConstantsManager manager) {
 
