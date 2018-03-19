@@ -226,6 +226,16 @@ public class DetectorParticle implements Comparable {
         return nResponses;
     }
     
+    public int countResponses(DetectorType type) {
+        int nResponses=0;
+        for (int ii=0; ii<responseStore.size(); ii++) {
+            DetectorDescriptor desc=responseStore.get(ii).getDescriptor();
+            if (desc.getType()!=type) continue;
+            nResponses++;
+        }
+        return nResponses;
+    }
+    
     public Particle getPhysicsParticle(int pid){
         Particle  particle = new Particle(pid,
                 this.vector().x(),this.vector().y(),this.vector().z(),
@@ -564,10 +574,13 @@ public class DetectorParticle implements Comparable {
     public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
     
     public void setStatus() {
-
+        
         final int centralStat=4000;
         final int forwardStat=2000;
         final int taggerStat=1000;
+        final int scintillatorStat=100;
+        final int calorimeterStat=10;
+        final int cherenkovStat=1;
 
         int status = 0;
         int trackType = -1;
@@ -607,12 +620,34 @@ public class DetectorParticle implements Comparable {
         }
 
         // tagger:
+        // need to fix broken response classes inheritance
+        /*
         if (this.hasHit(DetectorType.FT)   ||
             this.hasHit(DetectorType.FTCAL)  ||
             this.hasHit(DetectorType.FTHODO) ||
             this.hasHit(DetectorType.FTTRK)) {
             status += taggerStat;
         }
+        */
+        if (this.taggerStore.size()>0) status += taggerStat;
+
+
+        // scintillators:
+        status += scintillatorStat*this.countResponses(DetectorType.FTOF);
+        status += scintillatorStat*this.countResponses(DetectorType.CTOF);
+        status += scintillatorStat*this.countResponses(DetectorType.FTHODO);
+
+        // calorimeters:
+        status +=  calorimeterStat*this.countResponses(DetectorType.CND);
+        status +=  calorimeterStat*this.countResponses(DetectorType.ECAL);
+        status +=  calorimeterStat*this.countResponses(DetectorType.FTCAL);
+
+        // cherenkovs:
+        //status +=   cherenkovStat*this.countResponses(DetectorType.LTCC);
+        //status +=   cherenkovStat*this.countResponses(DetectorType.HTCC);
+        //status +=   cherenkovStat*this.countResponses(DetectorType.RICH);
+        status += cherenkovStat * cherenkovStore.size();
+
         this.particleStatus = status;
     }
     
