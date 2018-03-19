@@ -44,7 +44,7 @@ public class EBEngine extends ReconstructionEngine {
 
     public boolean processDataEvent(DataEvent de) {
         
-        DetectorHeader head = head = EBio.readHeader(de);
+        DetectorHeader head = EBio.readHeader(de);
 
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
@@ -89,7 +89,7 @@ public class EBEngine extends ReconstructionEngine {
  
         // Process RF:
         EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));//EBConstants.RF_OFFSET);
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
         
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
@@ -111,10 +111,11 @@ public class EBEngine extends ReconstructionEngine {
         if(eb.getEvent().getParticles().size()>0){
         
             eb.setParticleStatuses();
+            //eb.setEventStatuses();
             
             DataBank bankP = DetectorData.getDetectorParticleBank(eb.getEvent().getParticles(), de, particleBank);
             de.appendBanks(bankP);
-            
+          
             DataBank bankEve = DetectorData.getEventBank(eb.getEvent(), de, eventBank);
             de.appendBanks(bankEve);
 
@@ -140,10 +141,9 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankForwardTagger);
             }
 
-            // Omit CD tracks for now, need full CD import
-            if (trackBank!=null && (tracks.size()>0)) { // || ctracks.size()>0) ) {
-                final int ntracks = tracks.size();// + ctracks.size();
-                DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);//tracks.size());
+            if (trackBank!=null && (tracks.size()>0 || ctracks.size()>0) ) {
+                final int ntracks = tracks.size() + ctracks.size();
+                DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);
                 de.appendBanks(bankTrack);
             }
 
