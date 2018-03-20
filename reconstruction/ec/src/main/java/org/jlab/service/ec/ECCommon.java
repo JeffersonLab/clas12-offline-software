@@ -44,7 +44,8 @@ public class ECCommon {
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float             tps =  (float) 0.02345;
-    public static float TOFFSET = 125; 
+//    public static float TOFFSET = 125; 
+    public static float TOFFSET = 436; 
     
     public static void initHistos() {
         /*
@@ -153,17 +154,17 @@ public class ECCommon {
                 if (variation=="clas6") sca = 1.0;
                 if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip);
                 
-                Integer[] tdcc; float  tmax = 1000; int tdc =1000;
+                Integer[] tdcc; float  tmax = 1000; int tdc = 1000;
                 
                 if (tdcs.hasItem(is,il,ip)) {
                     List<Integer> list = new ArrayList<Integer>();
                     list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
                     for (int ii=0; ii<tdcc.length; ii++) {
                     	    float tdif = (tps*tdcc[ii]-TOFFSET)-t; 
-                    	    System.out.println(ii+" "+tdif);
-                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = (int) tdif;}
+//                    	    System.out.println(ii+" "+tps*tdcc[ii]+" "+t+" "+tdif);
+                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
                     }
-                    System.out.println("tdc = "+tdc);
+//                    System.out.println("tdc = "+tdc);
                    
                     strip.setTDC(tdc); 
                 }              
@@ -299,7 +300,6 @@ public class ECCommon {
             peaks.get(p).setOrder(p+1);
         }
 
-
         for(int sector = 1; sector <= 6; sector++){
 
             List<ECPeak>  pU = ECCommon.getPeaks(sector, startLayer, peaks);
@@ -323,16 +323,14 @@ public class ECCommon {
                             //H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
                                 //H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
-								double tU = cluster.getTime(0);
-								double tV = cluster.getTime(1);
-								double tW = cluster.getTime(2);
-								double eU = cluster.getEnergy(0)*1e3;
-								double eV = cluster.getEnergy(1)*1e3;
-								double eW = cluster.getEnergy(2)*1e3;
-								//System.out.printf("U %4.1f V %4.1f W %4.1f%n",tU,tV,tW);
-								//System.out.printf("U %4.1f V %4.1f W %4.1f%n%n",eU,eV,eW);
-								//System.out.printf("U %4.1f V %4.1f W %4.1f%n",tU,tV,tW);
-								//System.out.printf("U %4.1f V %4.1f W %4.1f%n%n",eU,eV,eW);
+//								double tU = cluster.getTime(0);
+//								double tV = cluster.getTime(1);
+//								double tW = cluster.getTime(2);
+//								double eU = cluster.getEnergy(0)*1e3;
+//								double eV = cluster.getEnergy(1)*1e3;
+//								double eW = cluster.getEnergy(2)*1e3;								
+//								System.out.printf("U %4.1f V %4.1f W %4.1f%n",tU,tV,tW);
+//								System.out.printf("U %4.1f V %4.1f W %4.1f%n%n",eU,eV,eW);
 								clusters.add(cluster);
 								//if ((Math.abs(tU - tV) < ECCommon.clusterDeltaT[ind[startLayer - 1]]) &&
 								 //   (Math.abs(tU - tW) < ECCommon.clusterDeltaT[ind[startLayer - 1]]) &&
