@@ -3,6 +3,7 @@ package org.jlab.rec.ft.cal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
@@ -19,7 +20,11 @@ public class FTCALReconstruction {
     public FTCALReconstruction() {
     }
 	
-    public List<FTCALHit> initFTCAL(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
+    public List<FTCALHit> initFTCAL(DataEvent event, ConstantsManager manager, int run) {
+
+        IndexedTable charge2Energy = manager.getConstants(run, "/calibration/ft/ftcal/charge_to_energy");
+        IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/ftcal/time_offsets");
+        IndexedTable cluster       = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
 
         if(this.debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTCALHit> allhits = null;
@@ -64,9 +69,11 @@ public class FTCALReconstruction {
         return hits;
     }
 			
-    public List<FTCALCluster> findClusters(List<FTCALHit> hits, IndexedTable clusterTable) {
+    public List<FTCALCluster> findClusters(List<FTCALHit> hits, ConstantsManager manager, int run) {
 
         List<FTCALCluster> clusters = new ArrayList();
+        
+        IndexedTable   clusterTable = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
         
         if(debugMode>=1) System.out.println("\nBuilding clusters");
         for(int ihit=0; ihit<hits.size(); ihit++) {
@@ -92,8 +99,10 @@ public class FTCALReconstruction {
         return clusters;
     }
        
-    public List<FTCALCluster> selectClusters(List<FTCALCluster> allclusters, IndexedTable clusterTable) {
+    public List<FTCALCluster> selectClusters(List<FTCALCluster> allclusters, ConstantsManager manager, int run) {
 
+        IndexedTable   clusterTable = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
+        
         List<FTCALCluster> clusters = new ArrayList();
         for(int i=0; i<allclusters.size(); i++) {
             if(allclusters.get(i).isgoodCluster(clusterTable)) clusters.add(allclusters.get(i));
@@ -102,7 +111,10 @@ public class FTCALReconstruction {
     }
         
     
-    public void writeBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, IndexedTable energyTable){
+    public void writeBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, ConstantsManager manager, int run){
+
+        IndexedTable   energyTable = manager.getConstants(run, "/calibration/ft/ftcal/energycorr");
+
         if(event instanceof EvioDataEvent) {
             writeEvioBanks(event, hits, clusters, energyTable);
         }

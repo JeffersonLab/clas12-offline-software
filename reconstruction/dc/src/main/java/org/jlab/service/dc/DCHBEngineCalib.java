@@ -210,15 +210,26 @@ public class DCHBEngineCalib extends ReconstructionEngine {
                     rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
                     return true;
             }
+            List<Segment> rmSegs = new ArrayList<Segment>();
+            // clean up hit-based segments
+            for(Segment se : segments) {
+                double trkDocOverCellSize =0;
+
+                for(FittedHit fh : se.get_fittedCluster()) {
+
+                    trkDocOverCellSize+=fh.get_ClusFitDoca()/fh.get_CellSize();
+                }
+
+                if(trkDocOverCellSize/(float)se.size()>1.1)
+                    rmSegs.add(se);
+            }
+            segments.removeAll(rmSegs);
             //RoadFinder
             //
-
             RoadFinder pcrossLister = new RoadFinder();
             List<Segment> pSegments =pcrossLister.findRoads(segments, dcDetector);
             segments.addAll(pSegments);
 
-            //
-            //System.out.println("nb trk segs "+pSegments.size());
             CrossMaker crossMake = new CrossMaker();
             crosses = crossMake.find_Crosses(segments, dcDetector);
 
@@ -230,10 +241,11 @@ public class DCHBEngineCalib extends ReconstructionEngine {
             CrossListFinder crossLister = new CrossListFinder();
 
             List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
+            crosses.clear();
             for(int s =0; s< 6; s++) {
-                    if(CrossesInSector.get(s).size()>Constants.MAXNBCROSSES) {
-                            return true;
-                    }
+                if(CrossesInSector.get(s).size()<Constants.MAXNBCROSSES) {
+                        crosses.addAll(CrossesInSector.get(s));
+                }
             }
 
             //CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);

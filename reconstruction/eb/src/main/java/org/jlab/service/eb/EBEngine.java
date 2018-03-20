@@ -56,8 +56,6 @@ public class EBEngine extends ReconstructionEngine {
         
         List<CherenkovResponse>     responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<CherenkovResponse>     responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
-       
-
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
@@ -69,47 +67,33 @@ public class EBEngine extends ReconstructionEngine {
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
         eb.addForwardTracks(tracks);      
-
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
         eb.addCentralTracks(ctracks);
         
-        
-        
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
-
-
-        
         
         // Process tracks:
         eb.processHitMatching();
         eb.processNeutralTracks();
-
         
         List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
-        // matching was already done for central:
-        
-        //System.out.println("DC Tracks "  + tracks.size());
-        //System.out.println("CVT Tracks " + centralParticles.size());
-        //System.out.println("CTOF Hits " + responseCTOF.size());
         
         EBMatching ebm = new EBMatching(eb);
         
         ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
                                     centralParticles, responseCTOF, responseCND);
         
-
         eb.assignTrigger();
  
         // Process RF:
         EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBConstants.RF_OFFSET);
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));//EBConstants.RF_OFFSET);
         
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
         analyzer.processEvent(eb.getEvent());
-        
 
         //The Forward Tagger Particle Creation Tagger Cluster Association
         List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
@@ -121,7 +105,6 @@ public class EBEngine extends ReconstructionEngine {
         eb.addTaggerResponses(responseFTHODO);
         eb.addFTIndices(ftIndices);
         eb.forwardTaggerIDMatching();
-
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){

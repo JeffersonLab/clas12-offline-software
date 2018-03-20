@@ -151,7 +151,7 @@ public class RoadFinder  {
 	        		int calcWire = segTrj.getWireOnTrajectory(slyr, layer, trkX, DcDetector) ;
 	        		FittedHit pseudoHit = new FittedHit(segList.get(0).get_Sector(),slyr, layer, calcWire,
 	        				0, -1); 
-                                pseudoHit.set_CellSize(DcDetector);
+                                pseudoHit.calc_CellSize(DcDetector);
 	        		pseudoHit.set_DocaErr(pseudoHit.get_CellSize()/Math.sqrt(12.));
                                 
 	        		pseudoHit.updateHitPosition(DcDetector);
