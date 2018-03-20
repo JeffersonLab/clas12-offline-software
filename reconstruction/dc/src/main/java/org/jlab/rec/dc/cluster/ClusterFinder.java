@@ -376,7 +376,7 @@ public class ClusterFinder {
                         newhit.set_Id(hit.get_Id());
                         newhit.set_TrkgStatus(hit.get_TrkgStatus());
                         newhit.set_LeftRightAmb(-hit.get_LeftRightAmb());
-                        newhit.set_CellSize(DcDetector);
+                        newhit.calc_CellSize(DcDetector);
                         newhit.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer						
                         newhit.set_AssociatedClusterID(hit.get_AssociatedClusterID());
                         newhit.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
