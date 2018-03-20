@@ -105,6 +105,15 @@ public class EventBuilder {
         }
     }
 
+    /**
+     * set event statuses
+     */
+    //public void setEventStatuses() {
+    //    int status=0;
+    //    DetectorParticle pTrig = this.detectorEvent.getParticle(0);
+    //    DetectorTrack tTrig = pTrig.getTrack();
+    //}
+
 
     /**
      * processes all particles and associating detector responses with given cuts to each particle.
@@ -411,7 +420,8 @@ class TriggerOptions {
         if(p.getNphe(DetectorType.HTCC) > npheCut){
             score += 1000;
         }
-        if(sfNSigma > -EBConstants.ECAL_SF_NSIGMA) {
+        if(abs(sfNSigma) < EBConstants.ECAL_SF_NSIGMA &&
+            p.getEnergy(DetectorType.ECAL,1) > EBConstants.PCAL_ELEC_MINENERGY) {
             score += 100;
         }
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
@@ -425,24 +435,29 @@ class TriggerOptions {
         final int npart = event.getParticles().size();
         
         // search for candidates:
+        int maxScore = 0;
         boolean flag = false;
-        for(int i = 0; i < npart; i++){
+        for (int i=0; i<npart; i++) {
             DetectorParticle p = event.getParticle(i);
-            if(getSoftwareTriggerScore(p)>=this.score_requirement) {
-                if(this.charge==p.getCharge()){
+            final int score = getSoftwareTriggerScore(p);
+            if(score >= this.score_requirement) {
+                if (this.charge==p.getCharge()) {
                     p.setPid(this.id);
+                    p.setScore(score);
                     flag = true; // candidate found
+                    if (score > maxScore) maxScore=score;
                 }
             }
         }
 
-        // choose candidate with max momentum:
+        // of those candidates with max score, choose the one with max momentum:
         int    index = -1;
-        double best_p = 0.0;
+        double maxMom = 0.0;
         for(int i = 0; i < npart; i++){
-            if(event.getParticle(i).getPid()==this.id){
-                if(event.getParticle(i).vector().mag()>best_p){
-                    best_p = event.getParticle(i).vector().mag();
+            if(event.getParticle(i).getPid()==this.id ){
+                if(event.getParticle(i).getScore() >= maxScore &&
+                   event.getParticle(i).vector().mag() > maxMom){
+                    maxMom = event.getParticle(i).vector().mag();
                     index = i;
                 }
             }
@@ -461,7 +476,7 @@ class ElectronTriggerOption extends TriggerOptions {
     @Override
     public void initID() {
         this.setID(11);
-        this.setScoreRequirement(110);
+        this.setScoreRequirement(1110);
         this.setCharge(-1);
     }
 
@@ -472,7 +487,7 @@ class PositronTriggerOption extends TriggerOptions {
     @Override
     public void initID() {
         this.setID(-11);
-        this.setScoreRequirement(110);
+        this.setScoreRequirement(1110);
         this.setCharge(1);
     }
 
