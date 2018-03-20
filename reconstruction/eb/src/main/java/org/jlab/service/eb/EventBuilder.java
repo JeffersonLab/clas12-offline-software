@@ -418,7 +418,7 @@ class TriggerOptions {
 
         int score = 0;
         if(p.getNphe(DetectorType.HTCC) > npheCut){
-            score += 1000;
+            score += 100;
         }
         if(abs(sfNSigma) < EBConstants.ECAL_SF_NSIGMA &&
             p.getEnergy(DetectorType.ECAL,1) > EBConstants.PCAL_ELEC_MINENERGY) {
@@ -427,6 +427,9 @@ class TriggerOptions {
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
             score += 10;
         }
+
+        if (score>=200) score+=1000;
+
         return score;
     }
 
@@ -476,7 +479,7 @@ class ElectronTriggerOption extends TriggerOptions {
     @Override
     public void initID() {
         this.setID(11);
-        this.setScoreRequirement(1110);
+        this.setScoreRequirement(110);
         this.setCharge(-1);
     }
 
@@ -487,7 +490,7 @@ class PositronTriggerOption extends TriggerOptions {
     @Override
     public void initID() {
         this.setID(-11);
-        this.setScoreRequirement(1110);
+        this.setScoreRequirement(110);
         this.setCharge(1);
     }
 
