@@ -39,7 +39,7 @@ public class ECStrip implements Comparable {
 	private double              iTimingA2 = 0; // this is the time-walk factor (time_ns = time_ns + a2/sqrt(adc))
 	private double              iTimingA3 = 0; // 0
 	private double              iTimingA4 = 0; // 0
-	private double              veff = 160.; // Effective velocity of scintillator light (mm/ns)
+	private double              veff = 16.; // Effective velocity of scintillator light (cm/ns)
 	private int                 peakID        = -1;
     
     private Line3D              stripLine = new Line3D();
