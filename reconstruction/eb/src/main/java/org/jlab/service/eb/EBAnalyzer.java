@@ -111,11 +111,11 @@ public class EBAnalyzer {
         for(int i = 1; i < np; i++) {
             DetectorParticle p = event.getParticle(i);
             double beta = 0.0;
-            if(p.hasHit(DetectorType.FTOF, 1)==true){
-                beta = p.getBeta(DetectorType.FTOF,1, start_time);
+            if(p.hasHit(DetectorType.FTOF, 2)==true){
+                beta = p.getBeta(DetectorType.FTOF,2, start_time);
             }
-            else if(p.hasHit(DetectorType.FTOF, 2)==true){
-                beta = p.getBeta(DetectorType.FTOF, 2,start_time);
+            else if(p.hasHit(DetectorType.FTOF, 1)==true){
+                beta = p.getBeta(DetectorType.FTOF, 1,start_time);
             }
             else if(p.hasHit(DetectorType.CTOF)==true){
                 beta = p.getBeta(DetectorType.CTOF ,start_time);
@@ -268,6 +268,8 @@ public class EBAnalyzer {
                     dt = p.getVertexTime(DetectorType.FTOF,1,hypotheses[ii]) - startTime;
                 else if (p.hasHit(DetectorType.CTOF)==true)
                     dt = p.getVertexTime(DetectorType.CTOF,0,hypotheses[ii]) - startTime;
+                else if (p.hasHit(DetectorType.FTOF,3)==true)
+                    dt = p.getVertexTime(DetectorType.FTOF,3,hypotheses[ii]) - startTime;
                 if ( abs(dt) < minTimeDiff ) {
                     minTimeDiff=abs(dt);
                     bestPid=hypotheses[ii];
