@@ -44,8 +44,8 @@ public class ECCommon {
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float             tps =  (float) 0.02345;
-//    public static float TOFFSET = 125; 
-    public static float TOFFSET = 436; 
+    public static float TOFFSET = 125; 
+//    public static float TOFFSET = 436; 
     
     public static void initHistos() {
         /*
