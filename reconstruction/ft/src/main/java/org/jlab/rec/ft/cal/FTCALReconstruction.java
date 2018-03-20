@@ -250,6 +250,13 @@ public class FTCALReconstruction {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
+        float triggerPhase = 0;
+        int   phase_offset = 1;
+        if(event.hasBank("RUN::config")) {
+            DataBank recConfig = event.getBank("RUN::config");
+            long timestamp = recConfig.getLong("timestamp",0);    
+            triggerPhase=((timestamp%6)+phase_offset)%6; // TI derived phase correction due to TDC and FADC clock differences
+        }
         List<FTCALHit>  hits = new ArrayList<FTCALHit>();
 	if(event.hasBank("FTCAL::adc")==true) {
             DataBank bankDGTZ = event.getBank("FTCAL::adc");
@@ -261,8 +268,9 @@ public class FTCALReconstruction {
                 int iorder      = bankDGTZ.getInt("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
+                float timec     = time + triggerPhase*4;
                 if(adc!=-1 && time!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, cluster);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, timec, charge2Energy, timeOffsets, cluster);
 	             hits.add(hit); 
 	        }	          
             }
