@@ -13,6 +13,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.pdg.PDGDatabase;
 
 import org.jlab.analysis.math.ClasMath;
 
@@ -21,9 +22,9 @@ import org.jlab.analysis.math.ClasMath;
  * Analyze EB efficiencies based on Joseph's 2-particle test events.
  *
  * TODO:  Inherit process/checkResults to subclasses for FD/CD/FT
- *
  * TODO:  Write a more general purpose test based on MC::Particle bank.
- *
+ * TODO:  Rewrite this from scratch.  Meanwhile, can't live without it.
+ * 
  * @author baltzell
  */
 public class EBTwoTrackTest {
@@ -36,6 +37,8 @@ public class EBTwoTrackTest {
 
     boolean isForwardTagger=false;
     boolean isCentral=false;
+
+    int fdCharge = 0;
 
     int nNegTrackEvents = 0;
     int nTwoTrackEvents = 0;
@@ -152,6 +155,8 @@ public class EBTwoTrackTest {
             hadronPDG=11;
         }
         else udfFileType=true;
+
+        fdCharge = PDGDatabase.getParticleById(hadronPDG).charge();
 
         HipoDataSource reader = new HipoDataSource();
         reader.open(fileName);
@@ -408,7 +413,10 @@ public class EBTwoTrackTest {
         // some global efficiency tests:
         assertEquals(eEff>0.9,true);
         if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
-        else if (hadronPDG==321)  assertEquals(kEff>0.60,true);
+        else if (hadronPDG==321)  {
+            if (isCentral) assertEquals(kEff>0.55,true);
+            else           assertEquals(kEff>0.60,true);
+        }
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
         else if (hadronPDG==22)   assertEquals(gEff>0.75,true);
     }
@@ -419,10 +427,10 @@ public class EBTwoTrackTest {
         final double gEff = (double)nFtPhotons / nEvents;
         final double hEff = (double)nFtFd / nEvents;
         System.out.println("\n#############################################################");
-        System.out.println(String.format("\nFT eEff = %.3f",eEff));
-        System.out.println(String.format("\nFT gEff = %.3f",gEff));
-        System.out.println(String.format("\nFD hEff = %.3f",hEff));
-        System.out.println("\n#############################################################");
+        System.out.println(String.format("FT eEff = %.3f",eEff));
+        System.out.println(String.format("FT gEff = %.3f",gEff));
+        System.out.println(String.format("FD hEff = %.3f",hEff));
+        System.out.println("#############################################################");
         if      (ftPDG==11) assertEquals(eEff>0.90,true);
         else if (ftPDG==22) assertEquals(gEff>0.90,true);
         assertEquals(hEff>0.50,true);
@@ -453,13 +461,13 @@ public class EBTwoTrackTest {
                     else if (pid==11) nFtElectrons++;
                 }
 
-                for (int ii=0; ii<recPartBank.rows() && startTime>0; ii++) {
+                for (int ii=0; ii<recPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
                     final int pid = recPartBank.getInt("pid",ii);
                     if (pid==hadronPDG) {
                         final double px=recPartBank.getFloat("px",ii);
                         final double py=recPartBank.getFloat("py",ii);
                         final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
-                        if (sector==hadronSector) {
+                        if (sector==hadronSector || (pid==11 && sector==electronSector)) {
                             nFtFd++;
                             break;
                         }
@@ -494,22 +502,22 @@ public class EBTwoTrackTest {
         }
         
         if (isCentral) {
-            if (ctrkBank==null) return;
-            if (ctrkBank.rows()==0) return;
-            if (debug) {
-                System.out.println("\n\n#############################################################\n");
-                if (recBank!=null) recBank.show();
-                if (ctofBank!=null) ctofBank.show();
-                if (ctrkBank!=null) ctrkBank.show();
-                if (recPartBank!=null) recPartBank.show();
-                if (recSciBank!=null) recSciBank.show();
-            }
-            for (int ii=0; ii<ctrkBank.rows(); ii++) {
-                if (ctrkBank.getInt("q",ii)>0) {
-                    final double phi0 = ctrkBank.getFloat("phi0",ii);
-                    final int sector = ClasMath.getSectorFromPhi(phi0);
-                    if (sector == hadronSector)
-                        nPosTracks++;
+            if (ctrkBank!=null && ctrkBank.rows()!=0) {
+                if (debug) {
+                    System.out.println("\n\n#############################################################\n");
+                    if (recBank!=null) recBank.show();
+                    if (ctofBank!=null) ctofBank.show();
+                    if (ctrkBank!=null) ctrkBank.show();
+                    if (recPartBank!=null) recPartBank.show();
+                    if (recSciBank!=null) recSciBank.show();
+                }
+                for (int ii=0; ii<ctrkBank.rows(); ii++) {
+                    if (ctrkBank.getInt("q",ii)>0) {
+                        final double phi0 = ctrkBank.getFloat("phi0",ii);
+                        final int sector = ClasMath.getSectorFromPhi(phi0);
+                        if (sector == hadronSector)
+                            nPosTracks++;
+                    }
                 }
             }
         }

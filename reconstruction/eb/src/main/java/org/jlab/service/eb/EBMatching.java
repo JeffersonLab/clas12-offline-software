@@ -188,41 +188,44 @@ public class EBMatching {
             this.eventBuilder.getPindexMap().put(3,cnd_count);
         }
 
-        // load map from trkID to ctof hits
-        Map<Integer,ArrayList<Integer>> ctofMap = null;
-        if (de.hasBank(ctofBankName)==true) {
-            ctofMap = new HashMap<Integer,ArrayList<Integer>>();
-            DataBank ctofBank = de.getBank(ctofBankName);
-            final int nctof=ctofBank.rows();
-            for (int ictof=0; ictof<nctof; ictof++) {
-                final int trkid=ctofBank.getInt("trkID",ictof);
-                if (trkid>=0) {
-                    if (!ctofMap.containsKey(trkid))
-                        ctofMap.put(trkid,new ArrayList<Integer>());
-                    ctofMap.get(trkid).add(ictof);
+        // Add CTOF responses to charged CVT particles:
+        if (de.hasBank(ctrkBankName)==true) {
+            
+            // Load map from CVT trkID to CTOF hits:
+            DataBank ctofBank = null;
+            Map<Integer,ArrayList<Integer>> ctofMap = null;
+            if (de.hasBank(ctofBankName)==true) {
+                ctofMap = new HashMap<Integer,ArrayList<Integer>>();
+                ctofBank = de.getBank(ctofBankName);
+                final int nctof=ctofBank.rows();
+                for (int ictof=0; ictof<nctof; ictof++) {
+                    final int trkid=ctofBank.getInt("trkID",ictof);
+                    if (trkid>=0) {
+                        if (!ctofMap.containsKey(trkid))
+                            ctofMap.put(trkid,new ArrayList<Integer>());
+                        ctofMap.get(trkid).add(ictof);
+                    }
                 }
             }
-        }
 
-        // Make a charged particle for each Central Track,
-        // associate it with CTOF hit if found matching track ID.
-        if (de.hasBank(ctrkBankName)==true) {
+            // Associate CTOF hit with particles:
+            final int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
             DataBank ctrkBank = de.getBank(ctrkBankName);
             final int nctrk=ctrkBank.rows();
             for (int ictrk=0; ictrk<nctrk; ictrk++) {
-                // make track and charged particle
                 DetectorParticle cvtParticle = cvtParticles.get(ictrk);
                 final int trkid=ctrkBank.getInt("ID",ictrk);
                 if (ctofMap!=null && ctofMap.containsKey(trkid)) {
                     for(int i = 0 ; i < ctofMap.get(trkid).size() ; i++) {
-                        final int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
                         final int ctofIndex = ctofMap.get(trkid).get(i);
                         cvtParticle.addResponse(ctofHits.get(ctofIndex), true);
+                        ctofHits.get(ctofIndex).setPath(ctofBank.getFloat("pathLength",ctofIndex));
                         ctofHits.get(ctofIndex).setAssociation(ictrk + pindex_offset);
                     }
                 }
             }
         }
+
     }
 
 }
