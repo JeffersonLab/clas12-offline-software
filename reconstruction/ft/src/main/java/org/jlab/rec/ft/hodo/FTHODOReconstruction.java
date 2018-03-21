@@ -228,6 +228,14 @@ public class FTHODOReconstruction {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:adc bank");
 
+        float triggerPhase = 0;
+        int   phase_offset = 1;
+        if(event.hasBank("RUN::config")) {
+            DataBank recConfig = event.getBank("RUN::config");
+            long timestamp = recConfig.getLong("timestamp",0);    
+            triggerPhase=((timestamp%6)+phase_offset)%6; // TI derived phase correction due to TDC and FADC clock differences
+        }
+
         List<FTHODOHit>  hits = new ArrayList<FTHODOHit>();
 	if(event.hasBank("FTHODO::adc")==true) {
             DataBank bankDGTZ = event.getBank("FTHODO::adc");
@@ -239,8 +247,9 @@ public class FTHODOReconstruction {
                 int iorder      = bankDGTZ.getInt("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
+                float timec     = time + triggerPhase*4;	          
                 if(adc!=-1 && time!=-1){
-                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, time,charge2Energy,timeOffsets,geometry);
+                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, timec,charge2Energy,timeOffsets,geometry);
 	             hits.add(hit); 
 	        }	          
             }
