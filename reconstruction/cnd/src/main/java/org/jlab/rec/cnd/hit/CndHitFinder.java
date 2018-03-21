@@ -342,7 +342,7 @@ public class CndHitFinder {
 					Point3D inter = new Point3D();
 					if(zmax.intersection(ray,inter)!=1) continue;
 					length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(inter);
-					System.out.print("use inter + "+inter.z());			
+					//System.out.print("use inter + "+inter.z());			
 				} 				
 
 				if(helices.get(i).get_TrkInters().get(lay-1).get(2).z()<(-1.*CalibrationConstantsLoader.ZOFFSET[lay-1])) {
@@ -350,7 +350,7 @@ public class CndHitFinder {
 					Point3D inter = new Point3D();
 					if(zmin.intersection(ray,inter)!=1) continue;
 					length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(inter);
-					System.out.print("use inter - "+inter.z());
+					//System.out.print("use inter - "+inter.z());
 				}
 
 				else {length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(helices.get(i).get_TrkInters().get(lay-1).get(2));

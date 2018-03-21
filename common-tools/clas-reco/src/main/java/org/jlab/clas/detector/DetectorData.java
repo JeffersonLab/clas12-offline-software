@@ -266,7 +266,7 @@ public class DetectorData {
            bank.setFloat("dphi", row, (float) c.getDeltaPhi());
            bank.setFloat("path", row, (float) 0.0);
            bank.setFloat("time", row, (float) c.getTime());
-           bank.setInt("nphe", row, (int) c.getEnergy());
+           bank.setFloat("nphe", row, (float) c.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
        }
        return bank;
@@ -309,6 +309,7 @@ public class DetectorData {
        bank.setByte("Helic", 0, detectorEvent.getEventHeader().getHelicity());
        bank.setFloat("BCG", 0, detectorEvent.getEventHeader().getBeamChargeGated());
        bank.setDouble("LT", 0, detectorEvent.getEventHeader().getLivetime());
+       bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategory());
        return bank;
    }
       
@@ -317,9 +318,8 @@ public class DetectorData {
        int row = 0;
        for(int i = 0 ; i < particles.size(); i++) {
            DetectorParticle p = particles.get(i);
-           if(p.getTrackDetector()==DetectorType.DC.getDetectorId()) {
-              // FIXME:  CD will probably have to be done differently, since it's already matched
-              // || p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+           if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
+              p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
                bank.setShort("index", row, (short) p.getTrackIndex());
                bank.setShort("pindex", row, (short) i);
                bank.setByte("detector", row, (byte) p.getTrackDetector());
@@ -478,6 +478,7 @@ public class DetectorData {
                track.setVector(px, py, pz);
                track.setVertex(vx, vy, z0);
                track.setPath(bank.getFloat("pathlength", row));
+               track.setNDF(bank.getInt("ndf",row));
                // FIXME:  is this the correct chi2:
                track.setchi2(bank.getFloat("circlefit_chi2_per_ndf",row));
 
