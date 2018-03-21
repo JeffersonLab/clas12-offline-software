@@ -17,7 +17,15 @@ public class HalfHit {
 		
 		//first step of the adc and tdc processing
 		this._Eatt = (double)adc  * ((0.1956*CalibrationConstantsLoader.THICKNESS[0])/(2.)); // the 2 accounts for the splitting of the deposited energy along the two coupled paddles
-		this._Tprop = ((double)tdc * CalibrationConstantsLoader.TDCTOTIMESLOPE[sector-1][layer-1][component-1])+ CalibrationConstantsLoader.TDCTOTIMEOFFSET[sector-1][layer-1][component-1] + CalibrationConstantsLoader.TIMEOFFSETSECT[sector-1][layer-1] + CalibrationConstantsLoader.TIMEOFFSETSLR[sector-1][layer-1] ; // And other constants!
+		
+		if(component==2){
+                        this._Tprop = ((double)tdc * CalibrationConstantsLoader.TDCTOTIMESLOPE[sector-1][layer-1][component-1]) - CalibrationConstantsLoader.TIMEOFFSETSECT[sector-1][layer-1] - CalibrationConstantsLoader.TIMEOFFSETSLR[sector-1][layer-1] ;
+                }
+
+                if(component==1){
+                        this._Tprop = ((double)tdc * CalibrationConstantsLoader.TDCTOTIMESLOPE[sector-1][layer-1][component-1]) - CalibrationConstantsLoader.TIMEOFFSETSECT[sector-1][layer-1];
+                }
+
 	}
 
 	private double _Eatt;      // Attenuated energy (MeV) at the upstream end of the paddle 
