@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.service.ltcc;
+package org.jlab.service.ltcc.viewer;
+import org.jlab.service.ltcc.viewer.LTCCHistogrammer;
 import org.jlab.groot.data.H1F;
+import org.jlab.service.ltcc.LTCCHit;
 
 
 /**
@@ -23,7 +25,7 @@ public class LTCCHitHistos extends LTCCHistogrammer<LTCCHit> {
         hsegment.setFillColor(34);
         this.add(hsegment, hit -> (double) hit.getSegment());
         
-        H1F hside = new H1F("side", "side", "#", 2, 0, 2);
+        H1F hside = new H1F("side", "side", "#", 5, 0, 5);
         hside.setFillColor(37);
         this.add(hside, hit -> (double) hit.getSide());
         

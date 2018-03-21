@@ -11,6 +11,10 @@ public class DetectorHeader {
     private long      trigger = 0;
     private double     rfTime = 0.0;
     private double  startTime = -1000.0;
+    private byte     helicity = -99;
+    private float beamChargeGated = 0;
+    private float    livetime = -1;
+    private short eventCategory = 0;
 
     public DetectorHeader() {
     }
@@ -35,6 +39,22 @@ public class DetectorHeader {
         return trigger;
     }
 
+    public byte getHelicity() {
+	 return helicity;
+    }
+
+    public float getLivetime() {
+        return livetime;
+    }
+
+    public float getBeamChargeGated() {
+	    return beamChargeGated;
+    }
+    
+    public short getEventCategory() {
+        return eventCategory;
+    }
+
     public void setEvent(int event) {
         this.event = event;
     }
@@ -53,5 +73,21 @@ public class DetectorHeader {
 
     public void setTrigger(long trigger) {
         this.trigger = trigger;
+    }
+
+    public void setHelicity(byte helicity) {
+        this.helicity = helicity;
+    }
+
+    public void setBeamChargeGated(float bcg) {
+	 this.beamChargeGated = bcg;   
+    }
+
+    public void setLiveTime(float livetime) {
+	 this.livetime = livetime;
+    }
+
+    public void setEventCategory(short evcat) {
+        this.eventCategory = evcat;
     }
 }

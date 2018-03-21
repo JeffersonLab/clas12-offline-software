@@ -28,6 +28,34 @@ public class EBio {
             dHeader.setEvent(bank.getInt("event", 0));
             dHeader.setTrigger(bank.getLong("trigger", 0));
         }
+        // helicity:
+        if(event.hasBank("HEL::adc")) {
+            final int helComponent=1;
+            final int helHalf=2000;
+            DataBank bank = event.getBank("HEL::adc");
+            for (int ii=0; ii<bank.rows(); ii++) {
+                if (bank.getInt("component",ii)==helComponent) {
+                    byte helicity=0;
+                    if (bank.getInt("ped",ii)>helHalf) helicity=1;
+                    dHeader.setHelicity(helicity);
+                    break;
+                }
+            }
+        }
+        /*
+        // fcup:
+        if(event.hasBank("RAW::scaler")){
+            DataBank bank = event.getBank("RAW::scaler");
+            for(int k=0;k<bank.rows(); k++){
+                if(bank.getInt("channel",k)==0 && bank.getInt("slot",k)==0){
+                    int FCscaler = bank.getInt("value",k);
+                    // 30 Hz minus 0.5 ms dead for Helicity
+                    float trueFreq = FCscaler / (0.03333f - 0.0005f);
+                    //float beamCurrent = (trueFreq-100f)/906.2f;
+                }   
+            }   
+        }
+        */
         return dHeader;
     }
     

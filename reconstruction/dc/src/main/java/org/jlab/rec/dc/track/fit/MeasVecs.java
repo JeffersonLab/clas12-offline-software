@@ -69,7 +69,7 @@ public class MeasVecs {
                     if (trkcand.get(c).get(s).get(h).get_Id() == -1) {
                         continue;
                     }
-                    trkcand.get(c).get(s).get(h).set_CellSize(DcDetector);
+                    trkcand.get(c).get(s).get(h).calc_CellSize(DcDetector);
                     hitOnTrk = trkcand.get(c).get(s).get(h); 
                     int slayr = trkcand.get(c).get(s).get(h).get_Superlayer();
                     double sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlope();

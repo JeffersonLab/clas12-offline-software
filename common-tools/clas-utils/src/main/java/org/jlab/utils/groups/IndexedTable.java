@@ -36,6 +36,7 @@ public class IndexedTable extends DefaultTableModel {
     
     private Map<Integer,List<RowConstraint>>  constrains = new HashMap<Integer,List<RowConstraint>>(); 
     
+    private int DEBUG_MODE = 0;
     
     public IndexedTable(int indexCount){
         entries = new IndexedList<IndexedEntry>(indexCount);
@@ -110,10 +111,10 @@ public class IndexedTable extends DefaultTableModel {
      
     public  void setIntValue(Integer value, String item, int... index){
         if(this.entries.hasItem(index)==false){
-            System.out.println( "[IndexedTable] ---> error.. entry does not exist");
+            if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not exist");
         } else {
             if(this.entryMap.containsKey(item)==false){
-                System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
+              if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
             } else {
                 Integer mapIndex = this.entryMap.get(item);
                 this.entries.getItem(index).setValue(mapIndex, value);
@@ -123,10 +124,10 @@ public class IndexedTable extends DefaultTableModel {
     
     public  void setDoubleValue(Double value, String item, int... index){
         if(this.entries.hasItem(index)==false){
-            System.out.println( "[IndexedTable] ---> error.. entry does not exist");
+            if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not exist");
         } else {
             if(this.entryMap.containsKey(item)==false){
-                System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
+               if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
             } else {
                 Integer mapIndex = this.entryMap.get(item);
                 this.entries.getItem(index).setValue(mapIndex, value);
@@ -136,10 +137,10 @@ public class IndexedTable extends DefaultTableModel {
     
     public int  getIntValue(String item, int... index){
         if(this.entries.hasItem(index)==false){
-            System.out.println( "[IndexedTable] ---> error.. entry does not exist");
+            if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not exist");
         } else {
             if(this.entryMap.containsKey(item)==false){
-                System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
+               if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
             } else {
                 Integer mapIndex = this.entryMap.get(item);
                 return this.entries.getItem(index).getValue(mapIndex).intValue();
@@ -150,10 +151,10 @@ public class IndexedTable extends DefaultTableModel {
     
     public double  getDoubleValue(String item, int... index){
         if(this.entries.hasItem(index)==false){
-            System.out.println( "[IndexedTable] ---> error.. entry does not exist");
+            if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not exist");
         } else {
             if(this.entryMap.containsKey(item)==false){
-                System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
+                if(DEBUG_MODE>0) System.out.println( "[IndexedTable] ---> error.. entry does not have item = " + item);
             } else {
                 Integer mapIndex = this.entryMap.get(item);
                 return this.entries.getItem(index).getValue(mapIndex).doubleValue();

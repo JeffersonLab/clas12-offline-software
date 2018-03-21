@@ -74,5 +74,24 @@
        {"name":"recEV",       "id":8, "type":"float", "info":"recon V peak energy"},
        {"name":"recEW",       "id":9, "type":"float", "info":"recon W peak energy"}
     ]
+  },
+  { 
+    "bank": "ECAL::moments",
+    "group": 20725,
+    "info": "ECCAL bank for clusters containing distances an moments",
+    "items": [
+       {"name":"distU",       "id":1,  "type":"float", "info":"distance fomr u edge"},
+       {"name":"distV",       "id":2,  "type":"float", "info":"distance from v edge"},
+       {"name":"distW",       "id":3,  "type":"float", "info":"distance from w edge"},
+       {"name":"m1u",      "id":4,  "type":"float", "info":"second moment"},
+       {"name":"m1v",      "id":5,  "type":"float", "info":"second moment"},
+       {"name":"m1w",      "id":6,  "type":"float", "info":"second moment"},
+       {"name":"m2u",      "id":7,  "type":"float", "info":"second moment"},
+       {"name":"m2v",      "id":8,  "type":"float", "info":"second moment"},
+       {"name":"m2w",      "id":9,  "type":"float", "info":"second moment"},
+       {"name":"m3u",      "id":10, "type":"float", "info":"third moment"},
+       {"name":"m3v",      "id":11, "type":"float", "info":"third moment"},
+       {"name":"m3w",      "id":12, "type":"float", "info":"third moment"}
+    ]
   }
 ]

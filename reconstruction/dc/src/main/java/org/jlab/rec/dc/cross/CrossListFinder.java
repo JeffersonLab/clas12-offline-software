@@ -39,6 +39,7 @@ public class CrossListFinder  {
 	public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 		//List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
 		trkCnds.clear();
+                
 		if(dccrosslist.size()>0) {
 
 			List<Cross> dccrosslistRg1 = new ArrayList<Cross>();
@@ -319,7 +320,8 @@ public class CrossListFinder  {
 		for (int s =0; s<6; s++) {
 			CrossesBySectors.add(s, new ArrayList<Cross>());
 		}
-		for(Cross cross : crosses) {
+		for(Cross cross : crosses) { 
+                    //if(cross.isPseudoCross==false)
 			CrossesBySectors.get(cross.get_Sector()-1).add(cross);
 		}
 		return CrossesBySectors;

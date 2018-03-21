@@ -70,6 +70,9 @@ switch (pid) {
     case -22:
         fileStub+="gamma";
         break;
+    case -211:
+        fileStub+="pion";
+        break;
     default:
         throw new RuntimeException("Invalid PID:  "+pid);
         break;
@@ -91,7 +94,7 @@ ParticleGenerator pgen1 = new ParticleGenerator(11,
       -10.0, 10.0); // phi (deg) min/max
 
 // default #2 is "pid" in FD:
-ParticleGenerator pgen2 = new ParticleGenerator(pid==-22?-pid:pid,
+ParticleGenerator pgen2 = new ParticleGenerator(pid<0?-pid:pid,
        1.0,   4.5,
       20.0,  35.0,
      110.0, 130.0);
@@ -111,9 +114,9 @@ if (isForwardTagger) {
         pgen2.setRange(
         3.0,  8.0,
         2.5,  4.5,
-      -10.0, 10.0);
-        
-    } else if (pid==-22) {
+      -10.0, 10.0);   
+    }
+    else if (pid==-22 || pid==-211) {
         // electron in FT
         pgen1.setRange(
         3.0,  8.0,

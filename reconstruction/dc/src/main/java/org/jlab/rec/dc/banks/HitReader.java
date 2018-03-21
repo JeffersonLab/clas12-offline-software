@@ -163,14 +163,11 @@ public class HitReader {
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
-                double T_Start = 0;
                 if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
-                    T_Start = Constants.TSTARTEST;
                 }
-                double T0Sub = smearedTime[i] - T_0 - T_Start; 
+                double T0Sub = smearedTime[i] - T_0 ;//- Constants.TSTARTEST; 
                 // temporary until new ccdb constants are in
-                T0Sub+=T_Start;
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
  //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 boolean passTimingCut = false;
@@ -193,7 +190,7 @@ public class HitReader {
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
                     Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
                     hit.set_Id(i + 1);
-                    hit.set_CellSize(DcDetector);
+                    hit.calc_CellSize(DcDetector);
                     double posError = hit.get_CellSize() / Math.sqrt(12.);
                     hit.set_DocaErr(posError); 
                     hits.add(hit); 
@@ -272,7 +269,8 @@ public class HitReader {
             double T_Start = 0;
             if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
-                T_Start = Constants.TSTARTEST;
+                if(event.hasBank("RECHB::Event")==true)
+                    T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
             }
 
             //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
@@ -284,11 +282,12 @@ public class HitReader {
             hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
+            
             hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0);
             //hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
-            hit.set_CellSize( DcDetector) ;
+            hit.calc_CellSize( DcDetector) ;
             hit.set_ClusFitDoca(trkDoca[i]);
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
             
@@ -306,10 +305,9 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            
             hits.add(hit);
         }
-
+        
         this.set_HBHits(hits);
     }
     public void read_TBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde, double[][][][] T0, double[][][][] T0ERR) {
@@ -338,7 +336,7 @@ public class HitReader {
         int[] trkID = new int[rows];
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
-        double startTime = (double)event.getBank("RECHB::Event").getFloat("STTime", 0);
+        double startTime = (double)event.getBank("REC::Event").getFloat("STTime", 0);
         
         if(startTime<0)
             return ;

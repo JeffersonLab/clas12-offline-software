@@ -39,9 +39,6 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 
-//import org.jlab.service.eb.EBHBEngine;
-//import org.jlab.service.eb.EBTBEngine;
-//import org.jlab.service.ftof.FTOFEngine;
 
 public class DCHBEngine extends ReconstructionEngine {
 
@@ -107,7 +104,7 @@ public class DCHBEngine extends ReconstructionEngine {
 	public boolean processDataEvent(DataEvent event) {
 		//setRunConditionsParameters( event) ;
         if(event.hasBank("RUN::config")==false ) {
-		System.err.println("RUN CONDITIONS NOT READ!");
+		System.err.println("RUN CONDITIONS NOT READ at HITBASED LEVEL!");
 		return true;
 	}
 		
@@ -211,6 +208,20 @@ public class DCHBEngine extends ReconstructionEngine {
 			rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
 			return true;
 		}
+                List<Segment> rmSegs = new ArrayList<Segment>();
+                // clean up hit-based segments
+                for(Segment se : segments) {
+                    double trkDocOverCellSize =0;
+                    
+                    for(FittedHit fh : se.get_fittedCluster()) {
+                       
+                        trkDocOverCellSize+=fh.get_ClusFitDoca()/fh.get_CellSize();
+                    }
+                   
+                    if(trkDocOverCellSize/(float)se.size()>1.1)
+                        rmSegs.add(se);
+                }
+                segments.removeAll(rmSegs);
 		//RoadFinder
 		//
 		RoadFinder pcrossLister = new RoadFinder();
@@ -226,12 +237,13 @@ public class DCHBEngine extends ReconstructionEngine {
 		}
                 
 		CrossListFinder crossLister = new CrossListFinder();
-		
+		int crossesSize = crosses.size();
 		List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
+                crosses.clear();
 		for(int s =0; s< 6; s++) {
-			if(CrossesInSector.get(s).size()>Constants.MAXNBCROSSES) {
-				return true;
-			}
+                    if(CrossesInSector.get(s).size()<Constants.MAXNBCROSSES) {
+                            crosses.addAll(CrossesInSector.get(s));
+                    } 
 		}
 		
 		//CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
@@ -300,14 +312,7 @@ public class DCHBEngine extends ReconstructionEngine {
         en.init();
         DCTBEngine en2 = new DCTBEngine();
         en2.init();
-        //FTOFEngine en3 = new FTOFEngine();
-        //en3.init();
-        //EBHBEngine EBHBengine = new EBHBEngine();
-        //EBHBengine.init();
-        
-
-        //EBTBEngine EBTBengine = new EBTBEngine();
-        //EBTBengine.init();
+       
        
         int counter = 0;
 
@@ -324,32 +329,30 @@ public class DCHBEngine extends ReconstructionEngine {
         while (reader.hasEvent()) {
 
             counter++;
-System.out.println("*************************************************************run " + counter + " events");
+            System.out.println("*************************************************************run " + counter + " events");
             DataEvent event = reader.getNextEvent();
             if (counter > 0) {
                 t1 = System.currentTimeMillis();
             }
 
             en.processDataEvent(event);
-          //  en3.processDataEvent(event);
-          //  EBHBengine.processDataEvent(event);
+            //event.show();
             // Processing TB   
             en2.processDataEvent(event);
             
-           // EBTBengine.processDataEvent(event);
             System.out.println("  EVENT "+counter);
-            if (counter > 100) {
+            if (counter > 300) {
                 break;
             }
             
             
-            //event.show();
+           // event.show();
             //if(counter%100==0)
             
-            if(event.hasBank("HitBasedTrkg::HBTracks")) {
-                event.show();
+            //if(event.hasBank("HitBasedTrkg::HBTracks")) {
+            //    event.show();
                 writer.writeEvent(event);
-            }
+            //}
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;
