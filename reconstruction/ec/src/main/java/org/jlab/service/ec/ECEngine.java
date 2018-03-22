@@ -32,6 +32,7 @@ public class ECEngine extends ReconstructionEngine {
     Detector        ecDetector = null;
     public Boolean       debug = false;
     public Boolean singleEvent = false;
+    public Boolean        isMC = false;
     int                 calrun = 2;
     
     public ECEngine(){
@@ -64,6 +65,7 @@ public class ECEngine extends ReconstructionEngine {
         
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak>    ecPeaks = ECCommon.processPeaks(ecPeaksALL);
+        
         for(ECPeak p : ecPeaks) p.redoPeakLine();
         
         /*for(ECPeak peak : ecPeaks){
@@ -202,9 +204,7 @@ public class ECEngine extends ReconstructionEngine {
             bankP.setFloat("time",   p, (float) peaks.get(p).getTime());
         }   
         
-        DataBank bankC = de.createBank("ECAL::clusters", clusters.size());
-                
-        
+        DataBank bankC = de.createBank("ECAL::clusters", clusters.size());        
         for(int c = 0; c < clusters.size(); c++){
             bankC.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
@@ -254,12 +254,19 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setFloat("recEW",  c, (float) clusters.get(c).getEnergy(2));            
         }
          
-        de.appendBanks(bankS,bankP,bankC,bankD,bankM);
+         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
+
     }
     
     public void setCalRun(int runno) {
+        System.out.println("ECEngine: Calibration Run Number = "+runno);
         this.calrun = runno;
     }
+    
+    public void setVariation(String variation) {
+        System.out.println("ECEngine: Variation = "+variation);
+        ECCommon.variation = variation;
+    }  
     
     public void setStripThresholds(int thr0, int thr1, int thr2) {
         System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
@@ -288,16 +295,18 @@ public class ECEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
+    	
         String[]  ecTables = new String[]{
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
+            "/calibration/ec/timing"     
         };
         
         requireConstants(Arrays.asList(ecTables));
         
         ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
 
-	setCalRun(2);
+        setCalRun(2);
         setStripThresholds(10,9,8);
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
