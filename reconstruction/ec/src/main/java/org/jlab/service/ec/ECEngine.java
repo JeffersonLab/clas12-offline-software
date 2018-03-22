@@ -32,6 +32,7 @@ public class ECEngine extends ReconstructionEngine {
     Detector        ecDetector = null;
     public Boolean       debug = false;
     public Boolean singleEvent = false;
+    public Boolean        isMC = false;
     int                 calrun = 2;
     
     public ECEngine(){
@@ -64,6 +65,7 @@ public class ECEngine extends ReconstructionEngine {
         
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak>    ecPeaks = ECCommon.processPeaks(ecPeaksALL);
+        
         for(ECPeak p : ecPeaks) p.redoPeakLine();
         
         /*for(ECPeak peak : ecPeaks){
@@ -202,7 +204,7 @@ public class ECEngine extends ReconstructionEngine {
             bankP.setFloat("time",   p, (float) peaks.get(p).getTime());
         }   
         
-        DataBank bankC = de.createBank("ECAL::clusters", clusters.size());      
+        DataBank bankC = de.createBank("ECAL::clusters", clusters.size());        
         for(int c = 0; c < clusters.size(); c++){
             bankC.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
@@ -220,8 +222,25 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordU",   c,         clusters.get(c).getPeak(0).getCoord());
             bankC.setInt("coordV",   c,         clusters.get(c).getPeak(1).getCoord());
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
+  
         }
-               
+        
+        DataBank bankM = de.createBank("ECAL::moments", clusters.size());
+        for(int c = 0; c < clusters.size(); c++){
+            bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
+            bankM.setFloat("distV", c, (float) clusters.get(c).clusterPeaks.get(1).getDistanceEdge());
+            bankM.setFloat("distW", c, (float) clusters.get(c).clusterPeaks.get(2).getDistanceEdge());
+            bankM.setFloat("m1u", c, (float) clusters.get(c).clusterPeaks.get(0).getMoment());
+            bankM.setFloat("m1v", c, (float) clusters.get(c).clusterPeaks.get(1).getMoment());
+            bankM.setFloat("m1w", c, (float) clusters.get(c).clusterPeaks.get(2).getMoment());
+            bankM.setFloat("m2u", c, (float) clusters.get(c).clusterPeaks.get(0).getMoment2());
+            bankM.setFloat("m2v", c, (float) clusters.get(c).clusterPeaks.get(1).getMoment2());
+            bankM.setFloat("m2w", c, (float) clusters.get(c).clusterPeaks.get(2).getMoment2());
+            bankM.setFloat("m3u", c, (float) clusters.get(c).clusterPeaks.get(0).getMoment3());
+            bankM.setFloat("m3v", c, (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
+            bankM.setFloat("m3w", c, (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
+        }
+        
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
@@ -235,12 +254,19 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setFloat("recEW",  c, (float) clusters.get(c).getEnergy(2));            
         }
          
-        de.appendBanks(bankS,bankP,bankC,bankD);        
+         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
+
     }
     
     public void setCalRun(int runno) {
+        System.out.println("ECEngine: Calibration Run Number = "+runno);
         this.calrun = runno;
     }
+    
+    public void setVariation(String variation) {
+        System.out.println("ECEngine: Variation = "+variation);
+        ECCommon.variation = variation;
+    }  
     
     public void setStripThresholds(int thr0, int thr1, int thr2) {
         System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
@@ -269,16 +295,18 @@ public class ECEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
+    	
         String[]  ecTables = new String[]{
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
+            "/calibration/ec/timing"     
         };
         
         requireConstants(Arrays.asList(ecTables));
         
         ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
 
-	setCalRun(2);
+        setCalRun(2);
         setStripThresholds(10,9,8);
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);

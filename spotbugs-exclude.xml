@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+	<!-- Include only serious bugs (rank 1 to 16) -->
+	<Match>
+		<!--<Rank value="17" />-->
+		<Rank value="3" />
+	</Match>
+</FindBugsFilter>

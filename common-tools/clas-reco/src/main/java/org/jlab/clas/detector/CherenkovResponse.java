@@ -110,7 +110,6 @@ public class CherenkovResponse {
 
                 // FIXME: unify LTCC/HTCC detector banks
                 // Here we have to treat them differently:
-                // 1.  nphe really shouldn't be an integer
                 // 2.  either add dtheta/dphi to LTCC, or ignore HTCC's and use CCDB for both
                 // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
                 //     The current convention in EB is to use only x/y/z, while theta/phi is

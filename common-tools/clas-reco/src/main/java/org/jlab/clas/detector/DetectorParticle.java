@@ -21,8 +21,6 @@ import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.pdg.PDGParticle;
 import org.jlab.clas.pdg.PhysicsConstants;
 
-//import org.jlab.service.pid.PIDResult;
-
 /**
  *
  * @author gavalian
@@ -38,7 +36,6 @@ public class DetectorParticle implements Comparable {
     private Double  particlePath      = 0.0; 
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
-    
     
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
@@ -58,8 +55,6 @@ public class DetectorParticle implements Comparable {
    
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
-    
-    //private PIDResult pidresult = new PIDResult();
     
     private DetectorTrack detectorTrack = null;
     private TaggerResponse taggerTrack = null;
@@ -231,6 +226,16 @@ public class DetectorParticle implements Comparable {
         return nResponses;
     }
     
+    public int countResponses(DetectorType type) {
+        int nResponses=0;
+        for (int ii=0; ii<responseStore.size(); ii++) {
+            DetectorDescriptor desc=responseStore.get(ii).getDescriptor();
+            if (desc.getType()!=type) continue;
+            nResponses++;
+        }
+        return nResponses;
+    }
+    
     public Particle getPhysicsParticle(int pid){
         Particle  particle = new Particle(pid,
                 this.vector().x(),this.vector().y(),this.vector().z(),
@@ -324,7 +329,10 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
-        if(hits>1) System.out.println("[Warning] Too many hits for detector type = " + type);
+        if(hits>1 && type!=DetectorType.CTOF){
+            // don't warn for CTOF, since it currently doesn't do clustering
+            System.out.println("[Warning] Too many hits for detector type = " + type);
+        }
         return true;
     }
     
@@ -334,7 +342,10 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) hits++;
         }
         if(hits==0) return false;
-        if(hits>1) System.out.println("[Warning] Too many hits for detector type = " + type);
+        if(hits>1 && type!=DetectorType.CTOF){
+            // don't warn for CTOF, since it currently doesn't do clustering
+            System.out.println("[Warning] Too many hits for detector type = " + type);
+        }
         return true;
     }
     
@@ -468,6 +479,17 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
     
+    public double getEnergy(DetectorType type, int layer){
+        double energy = 0.0;
+        for(DetectorResponse r : this.responseStore) {
+            if (r.getDescriptor().getType()==type &&
+               r.getDescriptor().getLayer()==layer) {
+                energy += r.getEnergy();
+            }
+        }
+        return energy;
+    }
+    
     public double getBeta(DetectorType type, int layer, double startTime){
         DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
@@ -550,6 +572,84 @@ public class DetectorParticle implements Comparable {
     public void setMass(double mass){ this.particleMass = mass;}
     public void setPid(int pid){this.particlePID = pid;}
     public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
+    
+    public void setStatus() {
+        
+        final int centralStat=4000;
+        final int forwardStat=2000;
+        final int taggerStat=1000;
+        final int scintillatorStat=100;
+        final int calorimeterStat=10;
+        final int cherenkovStat=1;
+
+        int status = 0;
+        int trackType = -1;
+        if (this.detectorTrack!=null) trackType = this.detectorTrack.getDetectorID();
+
+        // central:
+        if (this.hasHit(DetectorType.BMT)  ||
+            this.hasHit(DetectorType.BST)  ||
+            this.hasHit(DetectorType.CVT)  ||
+            this.hasHit(DetectorType.CTOF) ||
+            this.hasHit(DetectorType.CND)  ||
+            this.hasHit(DetectorType.RTPC)) {
+                status += centralStat;
+        }
+        else if (this.detectorTrack!=null &&
+                DetectorType.getType(trackType)==DetectorType.CVT) {
+                status += centralStat;
+        }
+
+        // forward:
+        if (this.hasHit(DetectorType.DC)     ||
+            this.hasHit(DetectorType.FMT)    ||
+            this.hasHit(DetectorType.ECAL,1) ||
+            this.hasHit(DetectorType.ECAL,4) ||
+            this.hasHit(DetectorType.ECAL,7) ||
+            this.hasHit(DetectorType.FTOF,1) ||
+            this.hasHit(DetectorType.FTOF,2) ||
+            this.hasHit(DetectorType.FTOF,3) ||
+            this.hasHit(DetectorType.HTCC)   ||
+            this.hasHit(DetectorType.LTCC)   ||
+            this.hasHit(DetectorType.RICH)) {
+            status += forwardStat;
+        }
+        else if (this.detectorTrack!=null && 
+                DetectorType.getType(trackType)==DetectorType.DC) {
+            status += forwardStat;
+        }
+
+        // tagger:
+        // need to fix broken response classes inheritance
+        /*
+        if (this.hasHit(DetectorType.FT)   ||
+            this.hasHit(DetectorType.FTCAL)  ||
+            this.hasHit(DetectorType.FTHODO) ||
+            this.hasHit(DetectorType.FTTRK)) {
+            status += taggerStat;
+        }
+        */
+        if (this.taggerStore.size()>0) status += taggerStat;
+
+
+        // scintillators:
+        status += scintillatorStat*this.countResponses(DetectorType.FTOF);
+        status += scintillatorStat*this.countResponses(DetectorType.CTOF);
+        status += scintillatorStat*this.countResponses(DetectorType.FTHODO);
+
+        // calorimeters:
+        status +=  calorimeterStat*this.countResponses(DetectorType.CND);
+        status +=  calorimeterStat*this.countResponses(DetectorType.ECAL);
+        status +=  calorimeterStat*this.countResponses(DetectorType.FTCAL);
+
+        // cherenkovs:
+        //status +=   cherenkovStat*this.countResponses(DetectorType.LTCC);
+        //status +=   cherenkovStat*this.countResponses(DetectorType.HTCC);
+        //status +=   cherenkovStat*this.countResponses(DetectorType.RICH);
+        status += cherenkovStat * cherenkovStore.size();
+
+        this.particleStatus = status;
+    }
     
     public void setCross(double x, double y, double z,
             double ux, double uy, double uz){
@@ -656,91 +756,10 @@ public class DetectorParticle implements Comparable {
         this.particlePath = path;
     }
 
-    @Override
-    public String toString(){
-        StringBuilder str = new StringBuilder();
-        /*
-        str.append(String.format("status = %4d  charge = %3d [pid/beta/mass] %5d %8.4f %8.4f",                 
-                this.particleStatus,
-                this.particleCharge,
-                this.particlePID,
-                this.particleBeta,this.particleMass));
-        str.append(String.format("  P [ %8.4f %8.4f %8.4f ]  V [ %8.4f %8.4f %8.4f ] ",
-                this.particleMomenta.x(),this.particleMomenta.y(),
-                this.particleMomenta.z(),
-                this.particleVertex.x(),this.particleVertex.y(),
-                this.particleVertex.z()));
-        str.append("\n");
-        str.append(String.format("\t\t\t CROSS [%8.4f %8.4f %8.4f]  DIRECTION [%8.4f %8.4f %8.4f]\n",
-                this.particleCrossPosition.x(),this.particleCrossPosition.y(),
-                this.particleCrossPosition.z(),this.particleCrossDirection.x(),
-                this.particleCrossDirection.y(),this.particleCrossDirection.z()));
-        */
-        str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, htcc = %5d, beta = %6.3f, mass2 = %8.3f\n",                
-                this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.ECAL),
-                this.getNphe(DetectorType.HTCC),this.getBeta(),this.getMass()));
-//        for(ScintillatorResponse res : this.scintillatorStore){
-//            str.append(res.toString());
-//            str.append("\n");
-//        }
-//        for(CalorimeterResponse res : this.calorimeterStore){
-//            str.append(res.toString());
-//            str.append("\n");
-//        }
-        for(DetectorResponse res : this.responseStore){
-            str.append(res.toString());
-            str.append("\n");
-        }
-
-
-        
-        return str.toString();
-    }
-
-    //Joseph's additions
-
-    /*
-     *
-     * These should not be in DetectorParticle, probably eb/rec makes sense
-    public double CalculatedSF() {
-        return this.getEnergy(DetectorType.EC)/this.vector().mag();
-    }
-
-    public double ParametrizedSF() {
-        double sf = 0.0;
-        double p = this.vector().mag();
-        if (p <= 3) {
-            sf = -0.0035*pow(p,4) + 0.0271*pow(p,3) - 0.077*pow(p,2) + 0.0985*pow(p,1) + 0.2241;
-        }
-        else {
-            sf = 0.0004*p + 0.2738;
-        }
-        return sf;
-    }   
-
-    public double ParametrizedSigma(){
-        double p = this.vector().mag();
-        double sigma = 0.02468*pow(p,-0.51);
-        return sigma;
-    }
-    */
-
     public double getTheoryBeta(int id){
-        double beta = 0.0;
-        double p    = detectorTrack.getVector().mag();
-        //double mass = PDGDatabase.getParticleById(id);  // map lookup
-        if(id==11 || id==-11){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massElectron(),2));
-        }
-        else if(id==-211 || id==211){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massPionCharged(),2));
-        }
-        else if(id==2212 || id==-2212){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massProton(),2));
-        }
-        else if(id==-321 || id==321){
-            beta = p/sqrt(p*p + pow(PhysicsConstants.massKaonCharged(),2));
-        }
+        final double p    = detectorTrack.getVector().mag();
+        final double mass = PDGDatabase.getParticleById(id).mass();
+        final double beta = p/sqrt(p*p + mass*mass);
         return beta;
     }   
 
@@ -765,16 +784,19 @@ public class DetectorParticle implements Comparable {
 
     public double getVertexTime(DetectorType type, int layer, int pid){
         
-        DetectorResponse res = this.getHit(type);
-        
-        double vertex_time = this.getTime(type,layer) -
-            this.getPathLength(type, layer) /
-            (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        double vertex_time = -9999;
         
         if(type==DetectorType.CTOF) {
+            DetectorResponse res = this.getHit(type);
             vertex_time = this.getTime(type) - res.getPath()/
              (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
-           }
+        }
+       
+        else {
+            vertex_time = this.getTime(type,layer) -
+                this.getPathLength(type, layer) /
+                (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        }
         
         return vertex_time;
     }
@@ -818,50 +840,48 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }  
-    /*
-    public void setPIDResult(PIDResult pid){
-        this.pidresult = pid;
-    }
     
-    public PIDResult getPIDResult(){
-        return this.pidresult;
-    }*/
-    
-    public int MinBetaAssociation(int pid) {
-            HashMap<Integer,Double> betaDiffs = new HashMap<Integer,Double>(); //Beta Differences
-            betaDiffs.put(0,abs(this.getTheoryBeta(2212) - this.getBeta()));//How close is track beta to a pion's?
-            betaDiffs.put(1,abs(this.getTheoryBeta(211) - this.getBeta()));//How close is track beta to a kaon's?
-            betaDiffs.put(2,abs(this.getTheoryBeta(321) - this.getBeta()));//How close is track beta to a proton's?
-            double min = betaDiffs.get(0);
-            int beta_index = 0;
-            for (int i = 0; i <= 2; i++) {
-                if (betaDiffs.get(i) < min) {
-                min = betaDiffs.get(i);
-                beta_index = i;
-                }
-            }
-            return beta_index;
-        }
-    
-    public int getSoftwareTriggerScore() {
-        int score = 0;
-        if(this.getNphe(DetectorType.HTCC)>5){
-            score = score + 1000;
-        }
-        if(this.getEnergyFraction(DetectorType.ECAL)>0.218){
-            score = score + 100;
-        }
-        if(this.hasHit(DetectorType.FTOF,1)==true || this.hasHit(DetectorType.FTOF,2)==true){
-            score = score + 10;
-        }
-        //System.out.println(score);
-        return score;
-    }
-    
-     
     public int compareTo(Object o) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public String toString(){
+        StringBuilder str = new StringBuilder();
+        /*
+        str.append(String.format("status = %4d  charge = %3d [pid/beta/mass] %5d %8.4f %8.4f",                 
+                this.particleStatus,
+                this.particleCharge,
+                this.particlePID,
+                this.particleBeta,this.particleMass));
+        str.append(String.format("  P [ %8.4f %8.4f %8.4f ]  V [ %8.4f %8.4f %8.4f ] ",
+                this.particleMomenta.x(),this.particleMomenta.y(),
+                this.particleMomenta.z(),
+                this.particleVertex.x(),this.particleVertex.y(),
+                this.particleVertex.z()));
+        str.append("\n");
+        str.append(String.format("\t\t\t CROSS [%8.4f %8.4f %8.4f]  DIRECTION [%8.4f %8.4f %8.4f]\n",
+                this.particleCrossPosition.x(),this.particleCrossPosition.y(),
+                this.particleCrossPosition.z(),this.particleCrossDirection.x(),
+                this.particleCrossDirection.y(),this.particleCrossDirection.z()));
+        */
+        str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, htcc = %5d, beta = %6.3f, mass2 = %8.3f\n",                
+                this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.ECAL),
+                this.getNphe(DetectorType.HTCC),this.getBeta(),this.getMass()));
+//        for(ScintillatorResponse res : this.scintillatorStore){
+//            str.append(res.toString());
+//            str.append("\n");
+//        }
+//        for(CalorimeterResponse res : this.calorimeterStore){
+//            str.append(res.toString());
+//            str.append("\n");
+//        }
+        for(DetectorResponse res : this.responseStore){
+            str.append(res.toString());
+            str.append("\n");
+        }
+
+        return str.toString();
+    }
+
 }
-
-

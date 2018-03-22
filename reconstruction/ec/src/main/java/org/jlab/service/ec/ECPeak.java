@@ -24,7 +24,10 @@ public class ECPeak {
     private Line3D              peakLine   = new Line3D();
     private int                 indexMaxStrip = -1;
     private int                 peakOrder     = -1;
-
+    private double              peakDistanceEdge = 0.0;
+    private double              peakMoment       = 0.0;
+    private double              peakMoment2      = 0.0;
+    private double              peakMoment3      = 0.0;
     //private int                 peakID        = -1;
     
     public ECPeak(ECStrip strip){
@@ -72,7 +75,13 @@ public class ECPeak {
         return energy;
     }
     
-    
+	public double getTime(Point3D point) {
+		if (this.indexMaxStrip >= 0 && this.indexMaxStrip < this.peakStrips.size()) {
+			return this.peakStrips.get(indexMaxStrip).getTime(point);
+		}
+		return 0.0;
+	}
+	
     public DetectorDescriptor getDescriptor(){
         return this.desc;
     }
@@ -104,8 +113,14 @@ public class ECPeak {
     }
     
     public void redoPeakLine(){
+        
         Point3D pointOrigin = new Point3D(0.0,0.0,0.0);
         Point3D pointEnd    = new Point3D(0.0,0.0,0.0);
+        this.peakDistanceEdge = 0.0;
+        this.peakMoment       = 0.0;
+        this.peakMoment2      = 0.0;
+        this.peakMoment3      = 0.0;
+        
         double logSumm = 0.0;
         for(int i = 0; i < this.peakStrips.size(); i++){
             Line3D line = this.peakStrips.get(i).getLine();
@@ -113,7 +128,11 @@ public class ECPeak {
             double energy = this.peakStrips.get(i).getEnergy();
 //            double     le = Math.log(energy);
             double     le = energy;
-                       
+            
+            this.peakDistanceEdge += 
+                    peakStrips.get(i).getDistanceEdge() + 
+                    peakStrips.get(i).getDistanceEdge()*le;
+            
             pointOrigin.setX(pointOrigin.x()+line.origin().x()*le);
             pointOrigin.setY(pointOrigin.y()+line.origin().y()*le);
             pointOrigin.setZ(pointOrigin.z()+line.origin().z()*le);
@@ -125,6 +144,7 @@ public class ECPeak {
             logSumm += le;
         }
         
+        this.peakDistanceEdge = this.peakDistanceEdge/logSumm;
         //System.out.println(" LOG SUMM = " + logSumm);
         
         this.peakLine.set(
@@ -135,6 +155,34 @@ public class ECPeak {
                 pointEnd.y()/logSumm,
                 pointEnd.z()/logSumm
         );
+        
+        for(int i = 0; i < this.peakStrips.size(); i++){            
+            Line3D line = this.peakStrips.get(i).getLine();
+            double dist   = line.origin().distance(this.peakLine.origin());
+            double energy = this.peakStrips.get(i).getEnergy();
+            this.peakMoment  += energy*dist;
+            this.peakMoment2 += energy*dist*dist;
+            this.peakMoment3 += energy*dist*dist*dist;            
+        }
+        this.peakMoment = this.peakMoment/logSumm;
+        this.peakMoment2 = this.peakMoment2/logSumm;
+        this.peakMoment3 = this.peakMoment3/logSumm;
+    }
+    
+    public double getDistanceEdge(){
+        return this.peakDistanceEdge;
+    }
+    
+    public double getMoment(){
+        return this.peakMoment;
+    }
+    
+    public double getMoment2(){
+        return this.peakMoment2;
+    }
+    
+    public double getMoment3(){
+        return this.peakMoment3;
     }
     
     public int getMultiplicity(){

@@ -15,7 +15,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
-import org.jlab.utils.groups.IndexedTable;
 
 
 public class FTHODOEngine extends ReconstructionEngine {
@@ -25,12 +24,6 @@ public class FTHODOEngine extends ReconstructionEngine {
 	}
 
 	FTHODOReconstruction reco;
-        IndexedTable charge2Energy;
-        IndexedTable timeOffsets;
-        IndexedTable status;
-        IndexedTable geometry;
-
-        int Run = -1;
 	
 	@Override
 	public boolean init() {
@@ -56,38 +49,36 @@ public class FTHODOEngine extends ReconstructionEngine {
             List<FTHODOCluster> clusters = new ArrayList();
             
             // update calibration constants based on run number if changed
-            setRunConditionsParameters(event);
-            // get hits fron banks
-            allHits = reco.initFTHODO(event,charge2Energy,timeOffsets,geometry);
-            // select good hits and order them by energy
-            selectedHits = reco.selectHits(allHits);
-            // create clusters
-            clusters = reco.findClusters(selectedHits);
-            // write output banks
-            reco.writeBanks(event, selectedHits, clusters);
+            int run = setRunConditionsParameters(event);
+            
+            if(run>=0) {
+                // get hits fron banks
+                allHits = reco.initFTHODO(event,this.getConstantsManager(), run);
+                // select good hits and order them by energy
+                selectedHits = reco.selectHits(allHits); 
+                // create clusters
+                clusters = reco.findClusters(selectedHits);
+                // write output banks
+                reco.writeBanks(event, selectedHits, clusters);
+            }
             return true;
 	}
 
-    public void setRunConditionsParameters(DataEvent event) {
+    public int setRunConditionsParameters(DataEvent event) {
+        int run = -1;
         if(event.hasBank("RUN::config")==false) {
                 System.out.println("RUN CONDITIONS NOT READ!");
         }       
     
         if(event instanceof EvioDataEvent) {
             EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            Run = bank.getInt("Run")[0];
+            run = bank.getInt("Run")[0];
         }
         else {
             DataBank bank = event.getBank("RUN::config");
-            Run = bank.getInt("run")[0];
+            run = bank.getInt("run")[0];
         }
-		
-        // Load the constants
-        //-------------------
-        charge2Energy = this.getConstantsManager().getConstants(Run, "/calibration/ft/fthodo/charge_to_energy");
-        timeOffsets   = this.getConstantsManager().getConstants(Run, "/calibration/ft/fthodo/time_offsets");
-        status        = this.getConstantsManager().getConstants(Run, "/calibration/ft/fthodo/status");
-        geometry      = this.getConstantsManager().getConstants(Run, "/geometry/ft/fthodo");
+	return run;	
     }
 
     
