@@ -197,7 +197,7 @@ public class DetectorData {
    public static DataBank getCalorimeterResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
-           DetectorResponse r = responses.get(row);
+           CalorimeterResponse r = (CalorimeterResponse)responses.get(row);
            bank.setShort("index", row, (short) r.getHitIndex());
            bank.setShort("pindex", row, (short) r.getAssociation());
            bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
@@ -209,15 +209,15 @@ public class DetectorData {
            bank.setFloat("hx", row, (float) r.getMatchedPosition().x());
            bank.setFloat("hy", row, (float) r.getMatchedPosition().y());
            bank.setFloat("hz", row, (float) r.getMatchedPosition().z());
-           bank.setFloat("lu", row, (float) 0.0);
-           bank.setFloat("lv", row, (float) 0.0);
-           bank.setFloat("lw", row, (float) 0.0);
-           bank.setFloat("du", row, (float) 0.0);
-           bank.setFloat("dv", row, (float) 0.0);
-           bank.setFloat("dw", row, (float) 0.0);
-           bank.setFloat("m2u", row, (float) 0.0);
-           bank.setFloat("m2v", row, (float) 0.0);
-           bank.setFloat("m2w", row, (float) 0.0);
+           bank.setFloat("lu", row, (float) r.getCoordUVW().x()); 
+           bank.setFloat("lv", row, (float) r.getCoordUVW().y()); 
+           bank.setFloat("lw", row, (float) r.getCoordUVW().z()); 
+           bank.setFloat("du", row, (float) r.getWidthUVW().x()); 
+           bank.setFloat("dv", row, (float) r.getWidthUVW().y()); 
+           bank.setFloat("dw", row, (float) r.getWidthUVW().z()); 
+           bank.setFloat("m2u", row, (float) r.getSecondMomentUVW().x()); 
+           bank.setFloat("m2v", row, (float) r.getSecondMomentUVW().y()); 
+           bank.setFloat("m2w", row, (float) r.getSecondMomentUVW().z()); 
            bank.setFloat("path", row, (float) r.getPath());
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
