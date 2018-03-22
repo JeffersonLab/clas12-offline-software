@@ -300,7 +300,6 @@ public class ElizaMain {
 	}
 
 	private BufferedReader bufferedReaderFromResource() {
-		System.err.println(Environment.getInstance().getClassPath());
 		InputStream inStream = getClass().getClassLoader().getResourceAsStream(
 				"data/elizaScript");
 		return new BufferedReader(new InputStreamReader(inStream));

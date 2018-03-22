@@ -211,7 +211,18 @@ public class ClasIoEventManager {
 			if (cbanks != null) {
 				for (String bankName : cbanks) {
 					if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
+						
+//						boolean hasBank = _currentEvent.hasBank(bankName);
+//						
+//						
+//						boolean hasData = (DataManager.getInstance().hasData(_currentEvent, bankName) != null);
+//						System.out.println("****** BANK NAME [" + bankName + "]  + hasData: " + hasData + "   hasBank: " + hasBank);
+						
+						
 						ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
+						
+	//					System.out.println("****** pid column null: " + (cd == null));
+
 						if (cd != null) {
 							int pid[] = (int[]) (cd.getDataArray(_currentEvent));
 							if ((pid != null) && (pid.length > 0)) {

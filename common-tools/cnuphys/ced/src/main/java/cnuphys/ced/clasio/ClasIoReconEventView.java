@@ -65,7 +65,14 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	private void addTracks(DataEvent event, Vector<TrajectoryRowData> data, String bankName) {
 		try {
 			
-			//treqt CVT  tracks separately
+			//do we have any data?
+			boolean hasBank = event.hasBank(bankName);
+			if (!hasBank) {
+				return;
+			}
+
+			
+			//treat CVT  tracks separately
 			if (bankName.contains("CVTRec")) {
 				addCVTTracks(event, data, bankName);
 				return;
@@ -142,7 +149,7 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 	 * Change the event source type
 	 * 
 	 * @param source
-	 *            the new source: File, ET, FastMC
+	 *            the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {

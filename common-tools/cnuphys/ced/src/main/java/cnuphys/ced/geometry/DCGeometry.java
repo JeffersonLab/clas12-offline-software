@@ -34,19 +34,6 @@ public class DCGeometry {
 	private static double minWireZ;
 	private static double maxWireZ;
 
-	/**
-	 * Get the list of detector hits (a la FastMC, not evio)
-	 * 
-	 * @param path
-	 *            the path generated from a swim trajectory
-	 * @return the list of hits FastMC geometry only.
-	 */
-	public static List<DetectorHit> getHits(Path3D path) {
-		if (path == null) {
-			return null;
-		}
-		return _dcDetector.getHits(path);
-	}
 
 	/**
 	 * These are the drift chamber wires from the geometry service. The indices
@@ -86,14 +73,6 @@ public class DCGeometry {
 			for (int lay = 0; lay < 6; lay++) {
 				DCLayer dcLayer = sl.getLayer(lay);
 
-				// if (suplay == 5) {
-				// Shape3D shape = dcLayer.getBoundary(); // 2 faces
-				// for (int i = 0; i < 2; i++) {
-				// System.err.println("layer: " + (lay+1) + " face: [" + (i +
-				// 1) + "] "
-				// + shape.face(i));
-				// }
-				// }
 
 				for (int w = 0; w < 112; w++) {
 					DriftChamberWire dcw = dcLayer.getComponent(w);
@@ -661,6 +640,12 @@ public class DCGeometry {
 
 		ext.x = p0.x + (p0.x - p1.x);
 		ext.y = p0.y + (p0.y - p1.y);
+	}
+	
+	
+	public static void main(String arg[]) {
+		initialize();
+		System.out.println(wires[0][0][0].getLine().origin() + "   " + wires[0][0][0].getLine().end() + "  MID: " + wires[0][0][0].getMidpoint());
 	}
 
 }

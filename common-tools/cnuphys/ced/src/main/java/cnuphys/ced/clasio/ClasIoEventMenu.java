@@ -597,7 +597,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	
 	/**
 	 * Change the event source type
-	 * @param source the new source: File, ET, FastMC
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {

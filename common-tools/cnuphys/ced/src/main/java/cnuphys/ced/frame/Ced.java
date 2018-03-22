@@ -65,8 +65,6 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBSegments;
-//import cnuphys.ced.fastmc.FastMCManager;
-//import cnuphys.ced.fastmc.FastMCMenu;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
@@ -92,6 +90,7 @@ import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
 import cnuphys.bCNU.format.DateString;
+import cnuphys.bCNU.fortune.FortuneManager;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.splashscreen.SplashWindow;
 import cnuphys.bCNU.log.ConsoleLogListener;
@@ -562,20 +561,16 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// add to the event menu
 		addToEventMenu();
 				
-		//FastMC
-		//mmgr.addMenu(new FastMCMenu());
-		
-		// weird menu
-		//addWeirdMenu();
 	}
 
 	// add some fun stuff
-	private void addWeirdMenu() {
+	private void addWeirdMenu(JMenu menu) {
 		String weirdTitle = "w" + "\u018e" + "i" + "\u1d19" + "d";
 		_weirdMenu = new JMenu(weirdTitle);
 
 		// eliza!
 		final JMenuItem elizaItem = new JMenuItem("Eliza...");
+		final JMenuItem fortuneItem = new JMenuItem("Fortune...");
 
 		ActionListener al1 = new ActionListener() {
 			@Override
@@ -585,13 +580,18 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				if (source == elizaItem) {
 					ElizaDialog.showEliza(_instance);
 				}
+				else if (source == fortuneItem) {
+					FortuneManager.getInstance().showDialog();
+				}
 			}
 		};
 
 		elizaItem.addActionListener(al1);
-		_weirdMenu.add(elizaItem, 0);
-
-		MenuManager.getInstance().addMenu(_weirdMenu);
+		fortuneItem.addActionListener(al1);
+		_weirdMenu.add(elizaItem);
+		_weirdMenu.add(fortuneItem);
+		
+		menu.add(_weirdMenu, 0);
 
 	}
 	
@@ -638,21 +638,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		fmenu.insertSeparator(0);
 		
 		// eliza!
-		final JMenuItem elizaItem = new JMenuItem("Eliza...");
-
-		ActionListener al1 = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Object source = e.getSource();
-
-				if (source == elizaItem) {
-					ElizaDialog.showEliza(_instance);
-				}
-			}
-		};
-
-		elizaItem.addActionListener(al1);
-		fmenu.add(elizaItem, 0);
+//		final JMenuItem elizaItem = new JMenuItem("Eliza...");
+//
+//		ActionListener al1 = new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				Object source = e.getSource();
+//
+//				if (source == elizaItem) {
+//					ElizaDialog.showEliza(_instance);
+//				}
+//			}
+//		};
+//
+//		elizaItem.addActionListener(al1);
+//		fmenu.add(elizaItem, 0);
+		
+		addWeirdMenu(fmenu);
 
 
 
@@ -770,9 +772,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 */
 	public static void setEventNumberLabel(int num) {
 		
-//		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
-//			return;
-//		}
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -1072,6 +1071,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		//splash frame
 		final SplashWindowCED splashWindow = new SplashWindowCED("ced", null, 920, "images/cnu.png", _release);
+
+//		final SplashWindow splashWindow = new SplashWindow("ced", null, 920, "images/cnu.png", _release);
 		// now make the frame visible, in the AWT thread
 		try {
 			EventQueue.invokeAndWait(new Runnable() {
