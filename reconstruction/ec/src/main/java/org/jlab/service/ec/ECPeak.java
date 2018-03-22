@@ -75,7 +75,13 @@ public class ECPeak {
         return energy;
     }
     
-    
+	public double getTime(Point3D point) {
+		if (this.indexMaxStrip >= 0 && this.indexMaxStrip < this.peakStrips.size()) {
+			return this.peakStrips.get(indexMaxStrip).getTime(point);
+		}
+		return 0.0;
+	}
+	
     public DetectorDescriptor getDescriptor(){
         return this.desc;
     }
