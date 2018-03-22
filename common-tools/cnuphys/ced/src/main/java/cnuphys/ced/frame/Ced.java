@@ -116,7 +116,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.9" + UnicodeSupport.OVERLINE;
+	private static final String _release = "build 1.0 + " + UnicodeSupport.SMALL_EPSILON;
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -1071,7 +1071,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		
 		//splash frame
-		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png", _release);
+		final SplashWindowCED splashWindow = new SplashWindowCED("ced", null, 920, "images/cnu.png", _release);
 		// now make the frame visible, in the AWT thread
 		try {
 			EventQueue.invokeAndWait(new Runnable() {
@@ -1155,7 +1155,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				Ced ced = getInstance();
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
-				splashWindow.writeCachedText();
+	//			splashWindow.writeCachedText();
 				ced.fixTitle();
 				
 				ClasIoEventManager.getInstance().setUpFilterMenu();

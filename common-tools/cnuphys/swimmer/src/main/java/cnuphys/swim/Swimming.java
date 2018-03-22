@@ -337,44 +337,44 @@ public class Swimming {
 		testSwim2(1);
 		testSwim3(1);
 
-//		for (int i = 0; i < 100; i++) {
-//			testSwim(0);
-//		}
-//
-//		long time = System.currentTimeMillis();
-//		for (int i = 0; i < 10000; i++) {
-//			testSwim(0);
-//		}
-//		time = System.currentTimeMillis() - time;
-//		testSwim(1);
-//
-//		System.out.println("\n*** TIME SWIMMER 1: " + time);
-//		
-//		for (int i = 0; i < 100; i++) {
-//			testSwim2(0);
-//		}
-//
-//		time = System.currentTimeMillis();
-//		for (int i = 0; i < 10000; i++) {
-//			testSwim2(0);
-//		}
-//		time = System.currentTimeMillis() - time;
-//		testSwim2(1);
-//
-//		System.out.println("\n*** TIME SWIMMER 2: " + time);
-//		
-//		for (int i = 0; i < 100; i++) {
-//			testSwim3(0);
-//		}
-//
-//		time = System.currentTimeMillis();
-//		for (int i = 0; i < 10000; i++) {
-//			testSwim3(0);
-//		}
-//		time = System.currentTimeMillis() - time;
-//		testSwim3(1);
-//
-//		System.out.println("\n*** TIME SWIMMER 3: " + time);
+		for (int i = 0; i < 100; i++) {
+			testSwim(0);
+		}
+
+		long time = System.currentTimeMillis();
+		for (int i = 0; i < 10000; i++) {
+			testSwim(0);
+		}
+		time = System.currentTimeMillis() - time;
+		testSwim(1);
+
+		System.out.println("\n*** TIME SWIMMER 1: " + time);
+		
+		for (int i = 0; i < 100; i++) {
+			testSwim2(0);
+		}
+
+		time = System.currentTimeMillis();
+		for (int i = 0; i < 10000; i++) {
+			testSwim2(0);
+		}
+		time = System.currentTimeMillis() - time;
+		testSwim2(1);
+
+		System.out.println("\n*** TIME SWIMMER 2: " + time);
+		
+		for (int i = 0; i < 100; i++) {
+			testSwim3(0);
+		}
+
+		time = System.currentTimeMillis();
+		for (int i = 0; i < 10000; i++) {
+			testSwim3(0);
+		}
+		time = System.currentTimeMillis() - time;
+		testSwim3(1);
+
+		System.out.println("\n*** TIME SWIMMER 3: " + time);
 
 	}
 

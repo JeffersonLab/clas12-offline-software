@@ -20,6 +20,7 @@ import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.MagneticFields.FieldType;
 
 /**
  * This is a magnetic field item. It is restricted to live only on sector views.
@@ -256,8 +257,6 @@ public class MagFieldItem extends AItem {
 			boolean hasTorus,
 			boolean hasSolenoid) {
 
-		// get the boundary
-		Rectangle fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
 
 		// get a probe
 		FieldProbe probe = FieldProbe.factory();
@@ -265,6 +264,20 @@ public class MagFieldItem extends AItem {
 		Rectangle bounds = container.getComponent().getBounds();
 		bounds.x = 0;
 		bounds.y = 0;
+	
+		
+		
+		// get the boundary
+	    Rectangle fieldRect;
+		
+		boolean isUniform = MagneticFields.getInstance().getActiveFieldType() == FieldType.UNIFORM;
+		if (isUniform) {
+			fieldRect = new Rectangle(0, 0, bounds.width, bounds.height);
+		}
+		else {
+			fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
+		}
+
 
 		Rectangle updateRect = bounds.intersection(fieldRect);
 
