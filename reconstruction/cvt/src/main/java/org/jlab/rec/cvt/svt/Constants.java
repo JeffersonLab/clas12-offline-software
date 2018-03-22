@@ -22,7 +22,7 @@ public class Constants {
     // RECONSTRUCTION CONSTANTS
     public static final double RHOVTXCONSTRAINT = 1. / Math.sqrt(12.);//0.1;
     public static final double ZVTXCONSTRAINT = 50. / Math.sqrt(12);//5cm
-    public static double ETOTCUT = 100.0;
+    public static double ETOTCUT = 10.0;
     // GEOMETRY PARAMETERS
     public static final int[] NSECT = new int[8];
     public static final int NSLAYR = 2;

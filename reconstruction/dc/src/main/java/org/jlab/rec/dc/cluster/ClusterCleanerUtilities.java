@@ -312,7 +312,6 @@ public class ClusterCleanerUtilities {
     }
 
     public FittedCluster LRAmbiguityResolver(FittedCluster fClus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
-
         //	int[] notResolvedLR = {0,0,0,0,0,0};
         //	if(fClus.get_Status()[1]==notResolvedLR) {
         //		return fClus;
@@ -373,7 +372,7 @@ public class ClusterCleanerUtilities {
             newhitPos.set_Time(hit.get_Time());
             newhitPos.set_Id(hit.get_Id());
             newhitPos.set_TrkgStatus(0);
-            newhitPos.set_CellSize(DcDetector);
+            newhitPos.calc_CellSize(DcDetector);
             newhitPos.set_LeftRightAmb(1);
             newhitPos.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
 
@@ -392,7 +391,7 @@ public class ClusterCleanerUtilities {
             newhitNeg.set_Time(hit.get_Time());
             newhitNeg.set_Id(hit.get_Id());
             newhitNeg.set_TrkgStatus(0);
-            newhitNeg.set_CellSize(DcDetector);
+            newhitNeg.calc_CellSize(DcDetector);
             newhitNeg.set_LeftRightAmb(-1);
             newhitNeg.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer
 
