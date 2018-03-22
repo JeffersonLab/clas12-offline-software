@@ -11,21 +11,46 @@ public class DefaultZStopper implements IStopper {
 	private double _accuracy;
 	private double _currentZ = Double.NaN;
 	
+	
+	public DefaultZStopper() {
+	}
+	
+	
 	/**
 	 * Z stopper that doesn't check pathlength (does check max R)
 	 * @param s0 starting path length in meters
 	 * @param sMax maximal path length in meters
-	 * @param fixedZ stopping Z in meters
+	 * @param targetZ stopping Z in meters
 	 * @param normalDirection <code></code> if going smaller to larger z
 	 */
-	public DefaultZStopper(double s0, double sMax, double fixedZ, double accuracy, boolean normalDirection) {
-		_targetZ = fixedZ;
+	public DefaultZStopper(double s0, double sMax, double targetZ, double accuracy, boolean normalDirection) {
+		_targetZ = targetZ;
 		_totalPathLength = s0;
 		_maxS = sMax;
 		_normalDirection = normalDirection;
 		_accuracy = accuracy;
 	}
 	
+	
+	public void setS0(double s0) {
+		_totalPathLength = s0;
+	}
+	
+	public void setSMax(double sMax) {
+		_maxS = sMax;
+	}
+	
+	public void setTargetZ(double targetZ) {
+		_targetZ = targetZ;
+	}
+	
+	public void setAccuracy(double accuracy) {
+		_accuracy = accuracy;
+	}
+	
+	public void setNormalDirection(boolean normalDirection) {
+		_normalDirection = normalDirection;
+	}
 
 	@Override
 	public boolean stopIntegration(double s, double[] y) {

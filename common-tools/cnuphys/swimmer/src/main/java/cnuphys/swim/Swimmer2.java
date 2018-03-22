@@ -1,5 +1,6 @@
 package cnuphys.swim;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 import cnuphys.magfield.FieldProbe;
@@ -16,6 +17,16 @@ public class Swimmer2 {
 	
 	// We have different tableaus we can use for RK integration
 	public static final ButcherTableau _defaultTableau = ButcherTableau.DORMAND_PRINCE;
+	
+	
+	//object cache
+	private ArrayDeque<double[]> _hdataCache = new ArrayDeque<>();
+	
+	//object cache
+	private ArrayDeque<DefaultZStopper> _zstopperCache = new ArrayDeque<>();
+	
+	//object cache
+	private ArrayDeque<DefaultDerivative> _derivCache = new ArrayDeque<>();
 
 	// Field getter.
 	// NOTE: the method of interest in IField takes a position in cm
@@ -215,13 +226,32 @@ public class Swimmer2 {
 			return 0;
 		}
 
-		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
+		DefaultDerivative deriv;
+		if (_derivCache.isEmpty()) {
+			deriv = new DefaultDerivative(charge, momentum, _field);
+		}
+		else {
+			deriv = _derivCache.pop();
+			deriv.set(charge, momentum, _field);
+		}
 
 		// normally we swim from small z to a larger z cutoff.
 		// but we can handle either
 		final boolean normalDirection = (zTarget > zo);
 		
-		IStopper stopper = new DefaultZStopper(0, sMax, zTarget, accuracy, normalDirection);
+		DefaultZStopper stopper;
+		if (_zstopperCache.isEmpty()) {
+			stopper = new DefaultZStopper(0, sMax, zTarget, accuracy, normalDirection);
+		}
+		else {
+			stopper = _zstopperCache.pop();
+			stopper.setS0(0);
+			stopper.setSMax(sMax);
+			stopper.setTargetZ(zTarget);
+			stopper.setAccuracy(accuracy);
+			stopper.setNormalDirection(normalDirection);
+		}
+
 
 		nStep += swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0, sMax, stepSize, maxStepSize, relTolerance, hdata, uf);
 
@@ -241,7 +271,15 @@ public class Swimmer2 {
 
 		// have to deal with the fact that the hdata array will reset so save
 		// current values
-		double oldHdata[] = new double[3];
+		
+		double oldHdata[];
+		if (_hdataCache.isEmpty()) {
+			oldHdata = new double[3];
+		}
+		else {
+			oldHdata = _hdataCache.pop();
+		}
+
 		oldHdata[0] = hdata[0];
 		oldHdata[1] = hdata[1] * nStep; // back to sum, not average
 		oldHdata[2] = hdata[2];
@@ -272,7 +310,12 @@ public class Swimmer2 {
 			count++;
 			stepSize /= 2;
 		} // while
-
+		
+		
+		_hdataCache.push(oldHdata);
+		_zstopperCache.push(stopper);
+		_derivCache.push(deriv);
+		
 		// now can get overall avg stepsize
 		hdata[1] = hdata[1] / nStep;
 		return nStep;
@@ -400,11 +443,21 @@ public class Swimmer2 {
 		double uo[] = initialState(xo, yo, zo, theta, phi);
 
 		// the derivative
-		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
+		
+		DefaultDerivative deriv;
+		if (_derivCache.isEmpty()) {
+			deriv = new DefaultDerivative(charge, momentum, _field);
+		}
+		else {
+			deriv = _derivCache.pop();
+			deriv.set(charge, momentum, _field);
+		}
 
 		// integrate
 		int nStep = _rungeKutta.adaptiveStep(uo, uf, s0, sMax, stepSize, maxStepSize, deriv, stopper, _defaultTableau,
 				relTolerance, hdata);
+		
+		_derivCache.push(deriv);
 
 		return nStep;
 	}

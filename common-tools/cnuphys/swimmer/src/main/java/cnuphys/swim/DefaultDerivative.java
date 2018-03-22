@@ -33,6 +33,13 @@ public class DefaultDerivative implements IDerivative {
 //units of this  alpha are 1/(T*m)
 		_alpha = 1.0e-9 * charge * Swimmer.C / _momentum;
 	}
+	
+	public void set(int charge, double momentum, IField field) {
+		_field = field;
+		_momentum = momentum;
+//units of this  alpha are 1/(T*m)
+		_alpha = 1.0e-9 * charge * Swimmer.C / _momentum;		
+	}
 
 	/**
 	 * Compute the derivatives given the value of s (path length) and the values
