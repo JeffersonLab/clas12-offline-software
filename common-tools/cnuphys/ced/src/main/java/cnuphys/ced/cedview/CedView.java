@@ -932,7 +932,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * Change the event source type
 	 * 
 	 * @param source
-	 *            the new source: File, ET, FastMC
+	 *            the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {

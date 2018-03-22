@@ -32,7 +32,7 @@ import javax.swing.event.EventListenerList;
 public class MagneticFields {
 	
 	//vbersion of mag field package
-	private static String VERSION = "1.07";
+	private static String VERSION = "1.07b";
 		
 	//constants for different torus grids
     public static final int SYMMETRIC_TORUS = 0;

@@ -45,6 +45,13 @@ public class SwimAllMC implements ISwimAll {
 		if (event == null) {
 			return null;
 		}
+		
+		boolean hasBank = event.hasBank("MC::Particle");
+		if (!hasBank) {
+			return null;
+		}
+		
+		
 		DataManager dm = DataManager.getInstance();
 
 		int pid[] = dm.getIntArray(event, "MC::Particle.pid");
@@ -127,6 +134,11 @@ public class SwimAllMC implements ISwimAll {
 			return;
 		}
 		
+		boolean hasBank = event.hasBank("MC::Particle");
+		if (!hasBank) {
+			return;
+		}
+
 		
 //		if (ClasIoEventManager.getInstance().isSourceEvioFile()) {
 //			System.err.println("not swimming for evio file");
