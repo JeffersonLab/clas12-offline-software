@@ -141,8 +141,8 @@ public class TrackCandListFinder {
 						StateVec fn = new StateVec();
 						kFit.runFitter();
 						//System.out.println(" KFIT "+kFit.chi2);
-                                                if(this.trking.equalsIgnoreCase("HitBased") && kFit.chi2>Constants.HBTCHI2CUT)
-                                                    continue;
+                                                //if(this.trking.equalsIgnoreCase("HitBased") && kFit.chi2>Constants.HBTCHI2CUT)
+                                                //    continue;
 						if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
                                                     
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
