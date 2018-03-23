@@ -565,7 +565,52 @@ public final class Swimmer {
 		return traj;
 	}
 	
+	/**
+	 * Swims a charged particle. This is for the trajectory mode, where you want
+	 * to cache steps along the path. Uses an adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param stopper
+	 *            an optional object that can terminate the swimming based on
+	 *            some condition
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of steps based on
+	 *            the step size. If a stopper is used, the integration might
+	 *            terminate before all the steps are taken. A reasonable value
+	 *            for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
 
+	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			IStopper stopper, double sMax, double stepSize, double relTolerance[], double hdata[])
+					throws RungeKuttaException {
+		return swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0.0, sMax, stepSize,relTolerance, hdata);
+	}
 
 	/**
 	 * Swims a charged particle. This is for the trajectory mode, where you want

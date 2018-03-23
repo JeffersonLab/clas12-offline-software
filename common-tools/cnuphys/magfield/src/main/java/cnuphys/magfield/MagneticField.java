@@ -19,7 +19,7 @@ public abstract class MagneticField implements IField {
 
 	/** Which atan2, etc. algorithms to use */
 	public enum MathLib {
-		DEFAULT, FAST;
+		DEFAULT, FAST, SUPERFAST;
 	}
 
 	// controls which algorithms to use
@@ -303,7 +303,7 @@ public abstract class MagneticField implements IField {
 	public static double atan2Deg(double y, double x) {
 
 		switch (_mathLib) {
-		case FAST:
+		case FAST: case SUPERFAST:
 			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
 			return Math.toDegrees(phirad);
 		default:
@@ -331,7 +331,7 @@ public abstract class MagneticField implements IField {
 	public static double acos(double x) {
 
 		switch (_mathLib) {
-		case FAST:
+		case FAST: case SUPERFAST:
 			return org.apache.commons.math3.util.FastMath.acos(x);
 		default:
 			return Math.acos(x);
