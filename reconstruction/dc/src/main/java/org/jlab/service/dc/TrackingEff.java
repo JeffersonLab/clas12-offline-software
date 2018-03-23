@@ -111,360 +111,364 @@ public class TrackingEff extends ReconstructionEngine {
 	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-                //setRunConditionsParameters( event) ;
-                if(event.hasBank("RUN::config")==false ) {
-                    System.err.println("RUN CONDITIONS NOT READ!");
-                    return true;
-                }
-                double passedCand=0;
-                double genCand=0;
-                
-                //double p = 2.5+6*Math.random();
-                //double theta = 10.+30*Math.random();
-                //double phi = 360*Math.random();
-                //double vz =0;
-                
-                double p = 2.0;
-                double theta = 32.0;
-                double phi = 300.0;
-                double vz = 0;
-                //p=3.170735;
-                //theta=35.868;
-                //phi=-166.516;
-                
-                DataBank bank = event.getBank("RUN::config");
-		
-		// Load the constants
-		//-------------------
-		int newRun = bank.getInt("run", 0);
-		
-		if(Run!=newRun) {
-                    //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
-                    TORSCALE = (double)bank.getFloat("torus", 0);
-                    SOLSCALE = (double)bank.getFloat("solenoid", 0);
-                    double shift =0;
-                   // if(Run>1890)
-                   //     shift = -1.9;
-                    DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
-                    
-                    System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
-                    Run = newRun;
-                }
-                
-                DCSwimmer sw = new DCSwimmer();
-                TrackDictionaryMaker.DCTDC TDCSignalTrk = trMk.ProcessTrack(-1, 
-                        p*Math.sin(Math.toRadians(theta))*Math.cos(Math.toRadians(phi)), 
-                        p*Math.sin(Math.toRadians(theta))*Math.sin(Math.toRadians(phi)), 
-                        p*Math.cos(Math.toRadians(theta)), 0., 0., vz, dcDetector, trMk, sw);
-		
-                // init SNR
-                Clas12NoiseResult results = new Clas12NoiseResult();
-		Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
+            //setRunConditionsParameters( event) ;
+            if(event.hasBank("RUN::config")==false ) {
+                System.err.println("RUN CONDITIONS NOT READ!");
+                return true;
+            }
+            double passedCand=0;
+            double genCand=0;
 
-		int[] rightShifts = Constants.SNR_RIGHTSHIFTS;		
-		int[] leftShifts  = Constants.SNR_LEFTSHIFTS;
-		NoiseReductionParameters parameters = new NoiseReductionParameters (
-				2,leftShifts,
-				rightShifts);
-		//System.out.println("RUNING HITBASED_________________________________________");
-	  
-		ClusterFitter cf = new ClusterFitter();
-                ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
-	    
-                List<FittedHit> fhits = new ArrayList<FittedHit>();
-		List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-		List<Segment> segments = new ArrayList<Segment>();
-		List<Cross> crosses = new ArrayList<Cross>();
-		
-		List<Track> trkcands = new ArrayList<Track>();
-		List<Track> trkcandsTM = new ArrayList<Track>(); // truth matched
-		//instantiate bank writer
-		RecoBankWriter rbc = new RecoBankWriter();
-		
-		//if(Constants.DEBUGCROSSES)
-		//	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
+            //double p = 2.5+6*Math.random();
+            //double theta = 10.+30*Math.random();
+            //double phi = 360*Math.random();
+            //double vz =0;
 
-		HitReader hitRead = new HitReader();
-		//hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
-		hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
+            double p = 2.0;
+            double theta = 32.0;
+            double phi = 300.0;
+            double vz = 0;
+            //p=3.170735;
+            //theta=35.868;
+            //phi=-166.516;
 
-		List<Hit> hits = new ArrayList<Hit>();
-                List<Hit> sighits = new ArrayList<Hit>();
-		//I) get the hits
-		List<Hit> allhits = hitRead.get_DCHits();
-                
-                // add signal hits
-                
-                // use only hits in same sector as fastMC track
-                for(Hit h : allhits) {
-                    if(h.get_Sector()==TDCSignalTrk.sector.get(0))
-                        hits.add(h);
-                }
-                Random rng = new Random();
-                
-                //// miss 1 layer out of every superlayer
-                //double[]excl = new double[6];
-                //for(int e = 0; e<6; e++) {
-                //    excl[e]=1+rng.nextInt(6);
-                //}
-                //int exclsL = 1+rng.nextInt(6);
-                boolean isAccepted = true;
-                for(int ii=0; ii<TDCSignalTrk.sector.size(); ii++) {
-                    if(TDCSignalTrk.component.get(ii)>=1 && TDCSignalTrk.component.get(ii)<=112) {
-                        Hit hit = new Hit(TDCSignalTrk.sector.get(ii), TDCSignalTrk.superlayer.get(ii), TDCSignalTrk.layer.get(ii), TDCSignalTrk.component.get(ii), 100, (ii + hits.size()));
+            DataBank bank = event.getBank("RUN::config");
 
-                        hit.calc_CellSize(dcDetector);
-                        double posError = hit.get_CellSize() / Math.sqrt(12.);
-                        hit.set_DocaErr(posError);
-                        hit.set_Id(ii + hits.size());
-                        
-                        if(hit.get_Wire()!=0 ) {
-                            sighits.add(hit);
-                            //System.out.println(" FastMC "+hit.printInfo());
-                            hits.add(hit);
-                        }
-                    } else {
-                        isAccepted=false;
+            // Load the constants
+            //-------------------
+            int newRun = bank.getInt("run", 0);
+
+            if(Run!=newRun) {
+                //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
+                TORSCALE = (double)bank.getFloat("torus", 0);
+                SOLSCALE = (double)bank.getFloat("solenoid", 0);
+                double shift =0;
+               // if(Run>1890)
+               //     shift = -1.9;
+                DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
+
+                System.out.println(" Got the correct geometry "+dcDetector.getWireMidpoint(0, 0, 0));
+                Run = newRun;
+            }
+
+            DCSwimmer sw = new DCSwimmer();
+            TrackDictionaryMaker.DCTDC TDCSignalTrk = trMk.ProcessTrack(-1, 
+                    p*Math.sin(Math.toRadians(theta))*Math.cos(Math.toRadians(phi)), 
+                    p*Math.sin(Math.toRadians(theta))*Math.sin(Math.toRadians(phi)), 
+                    p*Math.cos(Math.toRadians(theta)), 0., 0., vz, dcDetector, trMk, sw);
+
+            // init SNR
+            Clas12NoiseResult results = new Clas12NoiseResult();
+            Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
+
+            int[] rightShifts = Constants.SNR_RIGHTSHIFTS;		
+            int[] leftShifts  = Constants.SNR_LEFTSHIFTS;
+            NoiseReductionParameters parameters = new NoiseReductionParameters (
+                            2,leftShifts,
+                            rightShifts);
+            //System.out.println("RUNING HITBASED_________________________________________");
+
+            ClusterFitter cf = new ClusterFitter();
+            ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+
+            List<FittedHit> fhits = new ArrayList<FittedHit>();
+            List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+            List<Segment> segments = new ArrayList<Segment>();
+            List<Cross> crosses = new ArrayList<Cross>();
+
+            List<Track> trkcands = new ArrayList<Track>();
+            List<Track> trkcandsTM = new ArrayList<Track>(); // truth matched
+            //instantiate bank writer
+            RecoBankWriter rbc = new RecoBankWriter();
+
+            //if(Constants.DEBUGCROSSES)
+            //	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
+
+            HitReader hitRead = new HitReader();
+            //hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
+            hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
+
+            List<Hit> hits = new ArrayList<Hit>();
+            List<Hit> sighits = new ArrayList<Hit>();
+            //I) get the hits
+            List<Hit> allhits = hitRead.get_DCHits();
+
+            // add signal hits
+
+            // use only hits in same sector as fastMC track
+            for(Hit h : allhits) {
+                if(h.get_Sector()==TDCSignalTrk.sector.get(0))
+                    hits.add(h);
+            }
+            Random rng = new Random();
+
+            //// miss 1 layer out of every superlayer
+            //double[]excl = new double[6];
+            //for(int e = 0; e<6; e++) {
+            //    excl[e]=1+rng.nextInt(6);
+            //}
+            //int exclsL = 1+rng.nextInt(6);
+            boolean isAccepted = true;
+            for(int ii=0; ii<TDCSignalTrk.sector.size(); ii++) {
+                if(TDCSignalTrk.component.get(ii)>=1 && TDCSignalTrk.component.get(ii)<=112) {
+                    Hit hit = new Hit(TDCSignalTrk.sector.get(ii), TDCSignalTrk.superlayer.get(ii), TDCSignalTrk.layer.get(ii), TDCSignalTrk.component.get(ii), 100, (ii + hits.size()));
+
+                    hit.calc_CellSize(dcDetector);
+                    double posError = hit.get_CellSize() / Math.sqrt(12.);
+                    hit.set_DocaErr(posError);
+                    hit.set_Id(ii + hits.size());
+
+                    if(hit.get_Wire()!=0 ) {
+                        sighits.add(hit);
+                        //System.out.println(" FastMC "+hit.printInfo());
+                        hits.add(hit);
                     }
-                }
-                
-                /*
-                if(sighits.size()<36) {
-                    this.skipEvent=true;
                 } else {
-                    this.skipEvent=false;    
+                    isAccepted=false;
                 }
-		//II) process the hits
-		//1) exit if hit list is empty
-		if(hits.size()==0 ) {
-			return true;
-		}
-                */
-                if(isAccepted==false) {
-                    return true;
-                } else {
-                    genCand++;
-                }
-		fhits = rbc.createRawHitList(hits);
-				
-		
-		//2) find the clusters from these hits
-		ClusterFinder clusFinder = new ClusterFinder();
-		clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
-		
-		if(clusters.size()==0) {				
-		//	rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
-			//return true;
-		}
-	
-		rbc.updateListsListWithClusterInfo(fhits, clusters);
-		
-		//3) find the segments from the fitted clusters
-		SegmentFinder segFinder = new SegmentFinder();
-		segments =  segFinder.get_Segments(clusters, event, dcDetector);
+            }
 
-		if(segments.size()==0) { // need 6 segments to make a trajectory			
-		//	rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
-			//return true;
-		}
-                List<Segment> rmSegs = new ArrayList<Segment>();
-                // clean up hit-based segments
-                for(Segment se : segments) {
-                    double trkDocOverCellSize =0;
-                    
-                    for(FittedHit fh : se.get_fittedCluster()) {
-                       
-                        trkDocOverCellSize+=fh.get_ClusFitDoca()/fh.get_CellSize();
-                    }
-                   
-                    if(trkDocOverCellSize/(float)se.size()>1.1)
-                        rmSegs.add(se);
+            /*
+            if(sighits.size()<36) {
+                this.skipEvent=true;
+            } else {
+                this.skipEvent=false;    
+            }
+            //II) process the hits
+            //1) exit if hit list is empty
+            if(hits.size()==0 ) {
+                    return true;
+            }
+            */
+            if(isAccepted==false) {
+                return true;
+            } else {
+                genCand++;
+            }
+            fhits = rbc.createRawHitList(hits);
+
+
+            //2) find the clusters from these hits
+            ClusterFinder clusFinder = new ClusterFinder();
+            clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
+
+
+            rbc.updateListsListWithClusterInfo(fhits, clusters);
+
+            //3) find the segments from the fitted clusters
+            SegmentFinder segFinder = new SegmentFinder();
+            segments =  segFinder.get_Segments(clusters, event, dcDetector);
+
+            List<Segment> rmSegs = new ArrayList<Segment>();
+            // clean up hit-based segments
+            for(Segment se : segments) {
+                double trkDocOverCellSize =0;
+
+                for(FittedHit fh : se.get_fittedCluster()) {
+
+                    trkDocOverCellSize+=fh.get_ClusFitDoca()/fh.get_CellSize();
                 }
-                segments.removeAll(rmSegs);
-		//RoadFinder
-		//
-		RoadFinder pcrossLister = new RoadFinder();
-		List<Segment> pSegments =pcrossLister.findRoads(segments, dcDetector);
-		segments.addAll(pSegments);
-		
-		CrossMaker crossMake = new CrossMaker();
-		crosses = crossMake.find_Crosses(segments, dcDetector);
-                
-		if(crosses.size()==0 ) {			
-			rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, null, null);
-			return true;
-		}
-                
-		CrossListFinder crossLister = new CrossListFinder();
-		
-		List<List<Cross>> CrossesInSector = crossLister.get_CrossesInSectors(crosses);
-                crosses.clear();
-		for(int s =0; s< 6; s++) {
-                    if(CrossesInSector.get(s).size()<Constants.MAXNBCROSSES) {
-                            crosses.addAll(CrossesInSector.get(s));
-                    } 
-		}
+
+                if(trkDocOverCellSize/(float)se.size()>1.1)
+                    rmSegs.add(se);
+            }
+            segments.removeAll(rmSegs);
+            //
                
-                
-		//CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector, null);
-		CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+            CrossMaker crossMake = new CrossMaker();
+            crosses = crossMake.find_Crosses(segments, dcDetector);
 
-		if(crosslist.size()==0) {
-			
-			//rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null);
-			//return true;
-		}
+            CrossListFinder crossLister = new CrossListFinder();
+            CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 
-		//6) find the list of  track candidates
-		TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-		trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, TORSCALE) ;
-		 
-		if(trkcands.size()==0) {
-			//rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
-			//return true;
-		}
-                
-                
-		// track found	
-                boolean foundTrk = false;
-                for(Track trk: trkcands) { 
-                    int trkNHOTS =0;
-                    for(Cross c : trk) { 
-                            for(FittedHit h1 : c.get_Segment1())
-                                if(h1.get_TDC()==100)
-                                    trkNHOTS++;
-                            for(FittedHit h2 : c.get_Segment2())
-                                    if(h2.get_TDC()==100)
-                                        trkNHOTS++;
-                    }
-                    
-                    if(trkNHOTS>=30) {
-                        //passedCand++;
-                        trkcandsTM.add(trk);
-                    }
-                    double px = trk.get_pAtOrig().x();
-                    double py = trk.get_pAtOrig().y();
-                    double pz = trk.get_pAtOrig().z();
-                    double rec_p = Math.sqrt(px*px+py*py+pz*pz);
-                    double rec_theta = Math.toDegrees(Math.acos(pz/rec_p));
-                    double rec_phi = Math.toDegrees(Math.atan2(py,px));
-                    
-                    if( trkNHOTS>=30 && (Math.abs(rec_p-p)/p)<0.50 && Math.abs(rec_theta-theta)<10 && Math.abs(rec_phi-phi)<10) {
-                       
-                       foundTrk=true;
-                       //System.out.println(passedCand+" gen P "+p+" Theta "+theta+" Phi "+phi 
-                    //+" rec P "+rec_p+" Theta "+rec_theta+" Phi "+rec_phi +" gen nb "+genCand);
-                    }
-		}
-		if(foundTrk)
-                    passedCand++; 
-                int trkId = 1;
-		for(Track trk: trkcandsTM) {
-                    
-                    for(Cross c : trk) { 
-                            for(FittedHit h1 : c.get_Segment1()) 
-                                    h1.set_AssociatedHBTrackID(trk.get_Id());
-                            for(FittedHit h2 : c.get_Segment2())
-                                    h2.set_AssociatedHBTrackID(trk.get_Id());	
-                    }
-			
-		}
-	  
-		trkcandFinder.removeOverlappingTracks(trkcandsTM);		// remove overlaps
-		
-		for(Track trk: trkcandsTM) {		
-		    // reset the id
+            //6) find the list of  track candidates
+            TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
+            trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, TORSCALE) ;
+
+
+            // track found	
+            int trkId = 1;
+
+            if(trkcands.size()>0) {
+                trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
+
+                for(Track trk: trkcands) {
+
+                    // reset the id
                     trk.set_Id(trkId);
                     trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
                     for(Cross c : trk) { 
-                        for(FittedHit h1 : c.get_Segment1()) {
+                        c.get_Segment1().isOnTrack=true;
+                        c.get_Segment2().isOnTrack=true;
+
+                        for(FittedHit h1 : c.get_Segment1()) { 
                                 h1.set_AssociatedHBTrackID(trk.get_Id());
-                                
+
                         }
                         for(FittedHit h2 : c.get_Segment2()) {
                                 h2.set_AssociatedHBTrackID(trk.get_Id());                              
                         }
                     }
                     trkId++;
-		}
-                
-		//rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcandsTM);
-                DataBank bankMC = event.createBank("MC::Particle", 1);
-                bankMC.setInt("pid", 0, (int) 11);
-                bankMC.setFloat("px", 0, (float) ((float) p*Math.sin(Math.toRadians(theta))*Math.cos(Math.toRadians(phi))));
-                bankMC.setFloat("py", 0, (float) ((float) p*Math.sin(Math.toRadians(theta))*Math.sin(Math.toRadians(phi))));
-                bankMC.setFloat("pz", 0, (float) ((float) p*Math.cos(Math.toRadians(theta))));
-                bankMC.setFloat("vx", 0, (float) 0);
-                bankMC.setFloat("vy", 0, (float) 0);
-                bankMC.setFloat("vz", 0, (float) vz);
-                bankMC.setFloat("vt", 0, (float) 0); 
-                
-                DataBank bankHits = event.createBank("HitBasedTrkg::HBHits", fhits.size()) ;
-                for(int i = 0; i<fhits.size(); i++) {
-                    if(fhits.get(i).get_AssociatedClusterID()==-1 && fhits.get(i).get_ClusFitDoca()< fhits.get(i).get_CellSize()*1.1)
-                        continue;
-                    bankHits.setShort("id", i, (short) fhits.get(i).get_Id());
-                    bankHits.setShort("status", i, (short) 0);
-                    bankHits.setByte("superlayer", i, (byte) fhits.get(i).get_Superlayer());
-                    bankHits.setByte("layer", i, (byte) fhits.get(i).get_Layer());
-                    bankHits.setByte("sector", i, (byte) fhits.get(i).get_Sector());
-                    bankHits.setShort("wire", i, (short) fhits.get(i).get_Wire());
-                    //bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
-                    bankHits.setFloat("docaError", i, (float) fhits.get(i).get_DocaErr());
-                    bankHits.setFloat("trkDoca", i, (float) fhits.get(i).get_ClusFitDoca());
-                    bankHits.setFloat("LocX", i, (float) fhits.get(i).get_lX());
-                    bankHits.setFloat("LocY", i, (float) fhits.get(i).get_lY());
-                    bankHits.setFloat("X", i, (float) fhits.get(i).get_X());
-                    bankHits.setFloat("Z", i, (float) fhits.get(i).get_Z());
-                    bankHits.setByte("LR", i, (byte) fhits.get(i).get_LeftRightAmb());
-                    bankHits.setShort("clusterID", i, (short) fhits.get(i).get_AssociatedClusterID());
-                    bankHits.setByte("trkID", i, (byte) fhits.get(i).get_AssociatedHBTrackID());
-                    bankHits.setFloat("B", i, (float) fhits.get(i).getB());
-                } 
-               
-                DataBank bankRec = event.createBank("HitBasedTrkg::HBTracks", trkcandsTM.size());
-                for (int i = 0; i < trkcandsTM.size(); i++) {
-                    bankRec.setShort("id", i, (short) trkcandsTM.get(i).get_Id());
-                    bankRec.setByte("sector", i, (byte) trkcandsTM.get(i).get_Sector());
-                    bankRec.setByte("q", i, (byte) trkcandsTM.get(i).get_Q());
-                    //bank.setFloat("p", i, (float) candlist.get(i).get_P());
-                    bankRec.setFloat("c1_x", i, (float) trkcandsTM.get(i).get_PreRegion1CrossPoint().x());
-                    bankRec.setFloat("c1_y", i, (float) trkcandsTM.get(i).get_PreRegion1CrossPoint().y());
-                    bankRec.setFloat("c1_z", i, (float) trkcandsTM.get(i).get_PreRegion1CrossPoint().z());
-                    bankRec.setFloat("c1_ux", i, (float) trkcandsTM.get(i).get_PreRegion1CrossDir().x());
-                    bankRec.setFloat("c1_uy", i, (float) trkcandsTM.get(i).get_PreRegion1CrossDir().y());
-                    bankRec.setFloat("c1_uz", i, (float) trkcandsTM.get(i).get_PreRegion1CrossDir().z());
-                    bankRec.setFloat("c3_x", i, (float) trkcandsTM.get(i).get_PostRegion3CrossPoint().x());
-                    bankRec.setFloat("c3_y", i, (float) trkcandsTM.get(i).get_PostRegion3CrossPoint().y());
-                    bankRec.setFloat("c3_z", i, (float) trkcandsTM.get(i).get_PostRegion3CrossPoint().z());
-                    bankRec.setFloat("c3_ux", i, (float) trkcandsTM.get(i).get_PostRegion3CrossDir().x());
-                    bankRec.setFloat("c3_uy", i, (float) trkcandsTM.get(i).get_PostRegion3CrossDir().y());
-                    bankRec.setFloat("c3_uz", i, (float) trkcandsTM.get(i).get_PostRegion3CrossDir().z());
-                    bankRec.setFloat("t1_x", i, (float) trkcandsTM.get(i).get_Region1TrackX().x());
-                    bankRec.setFloat("t1_y", i, (float) trkcandsTM.get(i).get_Region1TrackX().y());
-                    bankRec.setFloat("t1_z", i, (float) trkcandsTM.get(i).get_Region1TrackX().z());
-                    bankRec.setFloat("t1_px", i, (float) trkcandsTM.get(i).get_Region1TrackP().x());
-                    bankRec.setFloat("t1_py", i, (float) trkcandsTM.get(i).get_Region1TrackP().y());
-                    bankRec.setFloat("t1_pz", i, (float) trkcandsTM.get(i).get_Region1TrackP().z());
-                    bankRec.setFloat("pathlength", i, (float) trkcandsTM.get(i).get_TotPathLen());
-                    bankRec.setFloat("Vtx0_x", i, (float) trkcandsTM.get(i).get_Vtx0().x());
-                    bankRec.setFloat("Vtx0_y", i, (float) trkcandsTM.get(i).get_Vtx0().y());
-                    bankRec.setFloat("Vtx0_z", i, (float) trkcandsTM.get(i).get_Vtx0().z());
-                    bankRec.setFloat("p0_x", i, (float) trkcandsTM.get(i).get_pAtOrig().x());
-                    bankRec.setFloat("p0_y", i, (float) trkcandsTM.get(i).get_pAtOrig().y());
-                    bankRec.setFloat("p0_z", i, (float) trkcandsTM.get(i).get_pAtOrig().z());
-                    bankRec.setShort("Cross1_ID", i, (short) trkcandsTM.get(i).get(0).get_Id());
-                    bankRec.setShort("Cross2_ID", i, (short) trkcandsTM.get(i).get(1).get_Id());
-                    bankRec.setShort("Cross3_ID", i, (short) trkcandsTM.get(i).get(2).get_Id());
-                    bankRec.setShort("status", i, (short) trkcandsTM.get(i).status);
-                    bankRec.setFloat("chi2", i, (float) trkcandsTM.get(i).get_FitChi2());
-                    bankRec.setShort("ndf", i, (short) trkcandsTM.get(i).get_FitNDF());
                 }
-                event.appendBanks(bankMC, bankHits, bankRec);
-                
-                
-                //this.vz = -0.25+0.5*Math.random();
-		return true;
+            }    
+            RoadFinder pcrossLister = new RoadFinder();
+            List<Segment> pSegments =pcrossLister.findPseudoSegList(segments, dcDetector);
+
+            segments.addAll(pSegments);
+
+            List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
+
+            CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+
+            List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, TORSCALE);
+            if(mistrkcands.size()>0) {    
+                trkcandFinder.removeOverlappingTracks(mistrkcands);		// remove overlaps
+
+                for(Track trk: mistrkcands) {
+
+                    // reset the id
+                    trk.set_Id(trkId);
+                    trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
+                    for(Cross c : trk) { 
+                        for(FittedHit h1 : c.get_Segment1()) { 
+                                h1.set_AssociatedHBTrackID(trk.get_Id());
+
+                        }
+                        for(FittedHit h2 : c.get_Segment2()) {
+                                h2.set_AssociatedHBTrackID(trk.get_Id());                              
+                        }
+                    }
+                    trkId++;
+                }
+            }
+            trkcands.addAll(mistrkcands) ;
+
+            // track found	
+            boolean foundTrk = false;
+            for(Track trk: trkcands) { 
+                int trkNHOTS =0;
+                for(Cross c : trk) { 
+                        for(FittedHit h1 : c.get_Segment1())
+                            if(h1.get_TDC()==100)
+                                trkNHOTS++;
+                        for(FittedHit h2 : c.get_Segment2())
+                                if(h2.get_TDC()==100)
+                                    trkNHOTS++;
+                }
+
+                if(trkNHOTS>=30) {
+                    //passedCand++;
+                    trkcandsTM.add(trk);
+                }
+                double px = trk.get_pAtOrig().x();
+                double py = trk.get_pAtOrig().y();
+                double pz = trk.get_pAtOrig().z();
+                double rec_p = Math.sqrt(px*px+py*py+pz*pz);
+                double rec_theta = Math.toDegrees(Math.acos(pz/rec_p));
+                double rec_phi = Math.toDegrees(Math.atan2(py,px));
+
+                if( trkNHOTS>=30 && (Math.abs(rec_p-p)/p)<0.50 && Math.abs(rec_theta-theta)<10 && Math.abs(rec_phi-phi)<10) {
+
+                   foundTrk=true;
+                   //System.out.println(passedCand+" gen P "+p+" Theta "+theta+" Phi "+phi 
+                //+" rec P "+rec_p+" Theta "+rec_theta+" Phi "+rec_phi +" gen nb "+genCand);
+                }
+            }
+            int trkIdm=1;
+            for(Track trk: trkcandsTM) {		
+                // reset the id
+                trk.set_Id(trkIdm);
+                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
+                for(Cross c : trk) { 
+                    for(FittedHit h1 : c.get_Segment1()) {
+                            h1.set_AssociatedHBTrackID(trk.get_Id());
+
+                    }
+                    for(FittedHit h2 : c.get_Segment2()) {
+                            h2.set_AssociatedHBTrackID(trk.get_Id());                              
+                    }
+                }
+                trkIdm++;
+            }
+
+            //rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcandsTM);
+            DataBank bankMC = event.createBank("MC::Particle", 1);
+            bankMC.setInt("pid", 0, (int) 11);
+            bankMC.setFloat("px", 0, (float) ((float) p*Math.sin(Math.toRadians(theta))*Math.cos(Math.toRadians(phi))));
+            bankMC.setFloat("py", 0, (float) ((float) p*Math.sin(Math.toRadians(theta))*Math.sin(Math.toRadians(phi))));
+            bankMC.setFloat("pz", 0, (float) ((float) p*Math.cos(Math.toRadians(theta))));
+            bankMC.setFloat("vx", 0, (float) 0);
+            bankMC.setFloat("vy", 0, (float) 0);
+            bankMC.setFloat("vz", 0, (float) vz);
+            bankMC.setFloat("vt", 0, (float) 0); 
+
+            DataBank bankHits = event.createBank("HitBasedTrkg::HBHits", fhits.size()) ;
+            for(int i = 0; i<fhits.size(); i++) {
+                if(fhits.get(i).get_AssociatedClusterID()==-1 && fhits.get(i).get_ClusFitDoca()< fhits.get(i).get_CellSize()*1.1)
+                    continue;
+                bankHits.setShort("id", i, (short) fhits.get(i).get_Id());
+                bankHits.setShort("status", i, (short) 0);
+                bankHits.setByte("superlayer", i, (byte) fhits.get(i).get_Superlayer());
+                bankHits.setByte("layer", i, (byte) fhits.get(i).get_Layer());
+                bankHits.setByte("sector", i, (byte) fhits.get(i).get_Sector());
+                bankHits.setShort("wire", i, (short) fhits.get(i).get_Wire());
+                //bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+                bankHits.setFloat("docaError", i, (float) fhits.get(i).get_DocaErr());
+                bankHits.setFloat("trkDoca", i, (float) fhits.get(i).get_ClusFitDoca());
+                bankHits.setFloat("LocX", i, (float) fhits.get(i).get_lX());
+                bankHits.setFloat("LocY", i, (float) fhits.get(i).get_lY());
+                bankHits.setFloat("X", i, (float) fhits.get(i).get_X());
+                bankHits.setFloat("Z", i, (float) fhits.get(i).get_Z());
+                bankHits.setByte("LR", i, (byte) fhits.get(i).get_LeftRightAmb());
+                bankHits.setShort("clusterID", i, (short) fhits.get(i).get_AssociatedClusterID());
+                bankHits.setByte("trkID", i, (byte) fhits.get(i).get_AssociatedHBTrackID());
+                bankHits.setFloat("B", i, (float) fhits.get(i).getB());
+            } 
+
+            DataBank bankRec = event.createBank("HitBasedTrkg::HBTracks", trkcandsTM.size());
+            for (int i = 0; i < trkcandsTM.size(); i++) {
+                bankRec.setShort("id", i, (short) trkcandsTM.get(i).get_Id());
+                bankRec.setByte("sector", i, (byte) trkcandsTM.get(i).get_Sector());
+                bankRec.setByte("q", i, (byte) trkcandsTM.get(i).get_Q());
+                //bank.setFloat("p", i, (float) candlist.get(i).get_P());
+                bankRec.setFloat("c1_x", i, (float) trkcandsTM.get(i).get_PreRegion1CrossPoint().x());
+                bankRec.setFloat("c1_y", i, (float) trkcandsTM.get(i).get_PreRegion1CrossPoint().y());
+                bankRec.setFloat("c1_z", i, (float) trkcandsTM.get(i).get_PreRegion1CrossPoint().z());
+                bankRec.setFloat("c1_ux", i, (float) trkcandsTM.get(i).get_PreRegion1CrossDir().x());
+                bankRec.setFloat("c1_uy", i, (float) trkcandsTM.get(i).get_PreRegion1CrossDir().y());
+                bankRec.setFloat("c1_uz", i, (float) trkcandsTM.get(i).get_PreRegion1CrossDir().z());
+                bankRec.setFloat("c3_x", i, (float) trkcandsTM.get(i).get_PostRegion3CrossPoint().x());
+                bankRec.setFloat("c3_y", i, (float) trkcandsTM.get(i).get_PostRegion3CrossPoint().y());
+                bankRec.setFloat("c3_z", i, (float) trkcandsTM.get(i).get_PostRegion3CrossPoint().z());
+                bankRec.setFloat("c3_ux", i, (float) trkcandsTM.get(i).get_PostRegion3CrossDir().x());
+                bankRec.setFloat("c3_uy", i, (float) trkcandsTM.get(i).get_PostRegion3CrossDir().y());
+                bankRec.setFloat("c3_uz", i, (float) trkcandsTM.get(i).get_PostRegion3CrossDir().z());
+                bankRec.setFloat("t1_x", i, (float) trkcandsTM.get(i).get_Region1TrackX().x());
+                bankRec.setFloat("t1_y", i, (float) trkcandsTM.get(i).get_Region1TrackX().y());
+                bankRec.setFloat("t1_z", i, (float) trkcandsTM.get(i).get_Region1TrackX().z());
+                bankRec.setFloat("t1_px", i, (float) trkcandsTM.get(i).get_Region1TrackP().x());
+                bankRec.setFloat("t1_py", i, (float) trkcandsTM.get(i).get_Region1TrackP().y());
+                bankRec.setFloat("t1_pz", i, (float) trkcandsTM.get(i).get_Region1TrackP().z());
+                bankRec.setFloat("pathlength", i, (float) trkcandsTM.get(i).get_TotPathLen());
+                bankRec.setFloat("Vtx0_x", i, (float) trkcandsTM.get(i).get_Vtx0().x());
+                bankRec.setFloat("Vtx0_y", i, (float) trkcandsTM.get(i).get_Vtx0().y());
+                bankRec.setFloat("Vtx0_z", i, (float) trkcandsTM.get(i).get_Vtx0().z());
+                bankRec.setFloat("p0_x", i, (float) trkcandsTM.get(i).get_pAtOrig().x());
+                bankRec.setFloat("p0_y", i, (float) trkcandsTM.get(i).get_pAtOrig().y());
+                bankRec.setFloat("p0_z", i, (float) trkcandsTM.get(i).get_pAtOrig().z());
+                bankRec.setShort("Cross1_ID", i, (short) trkcandsTM.get(i).get(0).get_Id());
+                bankRec.setShort("Cross2_ID", i, (short) trkcandsTM.get(i).get(1).get_Id());
+                bankRec.setShort("Cross3_ID", i, (short) trkcandsTM.get(i).get(2).get_Id());
+                bankRec.setShort("status", i, (short) trkcandsTM.get(i).status);
+                bankRec.setFloat("chi2", i, (float) trkcandsTM.get(i).get_FitChi2());
+                bankRec.setShort("ndf", i, (short) trkcandsTM.get(i).get_FitNDF());
+            }
+            event.appendBanks(bankMC, bankHits, bankRec);
+
+
+            //this.vz = -0.25+0.5*Math.random();
+            return true;
 	}
 
        

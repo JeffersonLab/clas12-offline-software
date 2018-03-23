@@ -1,7 +1,6 @@
 package org.jlab.rec.dc.hit;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
-import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
@@ -19,24 +18,7 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class FittedHit extends Hit implements Comparable<Hit> {
 
-    
-
-    /**
-     *
-     * @param sector (1...6)
-     * @param superlayer (1...6)
-     * @param layer (1...6)
-     * @param wire (1...112)
-     * @param TDC 
-     */
-    public FittedHit(int sector, int superlayer, int layer, int wire,
-            int TDC, int id) {
-        super(sector, superlayer, layer, wire, TDC, id);
-        
-        this.set_lX(layer);
-        this.set_lY(layer, wire);
-    }
-
+  
     private double _X;              	// X at Z in local coord. system
     private double _XMP;            	// X at the MidPlane in sector coord. system
     private double _Z;              	// Z in the sector coord. system
@@ -52,23 +34,62 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _TrkFitDoca = -1;
     private double _TimeToDistance = 0;
     private double _Beta = 1.0;
-    
+   
     private StateVec _AssociatedStateVec;
-
-    							//	   Reconstructed time, for now it is the gemc time
     private double _Doca;							//         Reconstructed doca, for now it is using the linear parametrization that is in  gemc 
     //private double _DocaErr;      						//	   Error on doca
     private double _B;								// 	   B-field at hit location
+    private int _Id;
+    public int _lr;
+    private int _AssociatedClusterID = -1;
+    public boolean RemoveFlag = false;
+    private int _AssociatedHBTrackID =-1;
+    private int _AssociatedTBTrackID;
+    // intersection of cross direction line with the hit wire (TCS)
+    private Point3D CrossDirIntersWire;
+    private double _SignalPropagAlongWire;
+    private double _SignalPropagTimeAlongWire;
+    private double _SignalTimeOfFlight;
+    private double _T0;
+    private double _tFlight;
+    private double _tProp;
+    private double _tStart;   // The event start time
+    private double _Time;     //Time = TDC - tFlight - tProp - T0 - TStart
+    /**
+     * identifying outoftimehits;
+     */
+    private boolean _OutOfTimeFlag;
+    /**
+     *
+     * @param sector (1...6)
+     * @param superlayer (1...6)
+     * @param layer (1...6)
+     * @param wire (1...112)
+     * @param TDC
+     */
+    public FittedHit(int sector, int superlayer, int layer, int wire,
+            int TDC, int id) {
+        super(sector, superlayer, layer, wire, TDC, id);
+        
+        this.set_lX(layer);
+        this.set_lY(layer, wire);
+    }
 
+    /**
+     * 
+     * @return B at location along wire
+     */
     public double getB() {
         return _B;
     }
-
+    /**
+     * 
+     * @param _B B field intensity in T
+     */
     public void setB(double _B) {
         this._B = _B;
     }
 
-    private int _Id;
     /**
      *
      * @return the ID
@@ -85,14 +106,18 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void set_Id(int _Id) {
         this._Id = _Id;
     }										//		Hit Id
-
-    public int _lr;
     
-
+    /**
+     * 
+     * @return calc doca in cm 
+     */
     public double get_Doca() {
         return _Doca;
     }
-
+    /**
+     * 
+     * @param _Doca doca in cm
+     */
     public void set_Doca(double _Doca) {
         this._Doca = _Doca;
     }
@@ -152,11 +177,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
             err = Constants.CELLRESOL; // default
             double x = this.get_Doca() / this.get_CellSize();
-            //double p1 = CCDBConstants.getPAR1()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            //double p2 = CCDBConstants.getPAR2()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            //double p3 = CCDBConstants.getPAR3()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            //double p4 = CCDBConstants.getPAR4()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-            //double scale = CCDBConstants.getSCAL()[this.get_Sector() - 1][this.get_Superlayer() - 1];
             double p1 = constants0.getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
             double p2 = constants0.getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
             double p3 = constants0.getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
@@ -297,18 +317,23 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
         return ralpha;
     }
-
+    /**
+     * 
+     * @return state vector associated with the hit
+     */
     public StateVec getAssociatedStateVec() {
         return _AssociatedStateVec;
     }
-
+    /**
+     * 
+     * @param _AssociatedStateVec state vector (x,y,tx,ty,q/p) associated with the hit
+     */
     public void setAssociatedStateVec(StateVec _AssociatedStateVec) {
         this._AssociatedStateVec = _AssociatedStateVec;
     }
     /**
      * sets the calculated distance (in cm) from the time (in ns)
      */
-
     public void set_TimeToDistance(double cosTrkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
         
         double distance = 0;
@@ -340,23 +365,40 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this.set_Doca(distance);
         this._TimeToDistance = distance;
     }
-
+    /**
+     * 
+     * @return doca to cluster fit line (cm)
+     */
     public double get_ClusFitDoca() {
         return _ClusFitDoca;
     }
-
+    /**
+     * 
+     * @param _ClusFitDoca doca to cluster fit line (cm)
+     */
     public void set_ClusFitDoca(double _ClusFitDoca) {
         this._ClusFitDoca = _ClusFitDoca;
     }
-
+    
+    /**
+     * 
+     * @return doca to track trajectory at hit layer plane (cm)
+     */
     public double get_TrkFitDoca() {
         return _TrkFitDoca;
     }
-
+    /**
+     * 
+     * @param _TrkFitDoca doca to track trajectory at hit layer plane (cm)
+     */
     public void set_TrkFitDoca(double _TrkFitDoca) {
         this._TrkFitDoca = _TrkFitDoca;
     }
-
+    
+    /**
+     * 
+     * @param cellSize the cell size in cm
+     */
     public void fix_TimeToDistance(double cellSize) {
         this._TimeToDistance = cellSize;
     }
@@ -435,9 +477,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         //
         this.set_X(x);
         this.set_Z(z);
-
-        
-
     }
 
     /**
@@ -513,7 +552,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     }
 
     
-
+    /**
+     * 
+     * @return string with hit output 
+     */
     public String printInfo() {
         //double xr = this._X*Math.cos(Math.toRadians(25.))+this._Z*Math.sin(Math.toRadians(25.));		
         //double zr = this._Z*Math.cos(Math.toRadians(25.))-this._X*Math.sin(Math.toRadians(25.));
@@ -523,39 +565,53 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return s;
     }
 
-    private int _AssociatedClusterID = -1;
-    public boolean RemoveFlag = false;
-
+    /**
+     * 
+     * @return  cluster ID associated with the hit
+     */
     public int get_AssociatedClusterID() {
         return _AssociatedClusterID;
     }
-
+    /**
+     * 
+     * @param _AssociatedClusterID associated cluster ID
+     */
     public void set_AssociatedClusterID(int _AssociatedClusterID) {
         this._AssociatedClusterID = _AssociatedClusterID;
     }
 
-    private int _AssociatedHBTrackID =-1;
-
+    /**
+     * 
+     * @param _id associated track id for Hit-Based tracking
+     */
     public void set_AssociatedHBTrackID(int _id) {
         _AssociatedHBTrackID = _id;
     }
-
+    /**
+     * 
+     * @return track id associated with the hit for Hit-Based tracking
+     */
     public int get_AssociatedHBTrackID() {
         return _AssociatedHBTrackID;
     }
-    private int _AssociatedTBTrackID;
-
+    /**
+     * 
+     * @param _id associated track id for Time-Based tracking
+     */
     public void set_AssociatedTBTrackID(int _id) {
         _AssociatedTBTrackID = _id;
     }
-
+    /**
+     * 
+     * @return track id associated with the hit for Time-Based tracking
+     */
     public int get_AssociatedTBTrackID() {
         return _AssociatedTBTrackID;
     }
-
-    // intersection of cross direction line with the hit wire (TCS)
-    private Point3D CrossDirIntersWire;
-
+    /**
+     * 
+     * @return 
+     */
     public Point3D getCrossDirIntersWire() {
         return CrossDirIntersWire;
     }
@@ -563,15 +619,25 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void setCrossDirIntersWire(Point3D CrossDirIntersWire) {
         this.CrossDirIntersWire = CrossDirIntersWire;
     }
-    
+    /**
+     * 
+     * @return beta of track at the hit location 
+     */
     public double get_Beta() {
         return _Beta;
     }
-    
+    /**
+     * 
+     * @param beta beta of the track at the hit location (position of the track closest to the wire)
+     */
     public void set_Beta(double beta) {
         _Beta = beta;
     }
-
+    /**
+     * 
+     * @param DcDetector detector geometry
+     * @return signal propagation time along the wire in ns
+     */
     public double calc_SignalPropagAlongWire(DCGeant4Factory DcDetector) {
         
         Vector3d WireEnd;
@@ -590,35 +656,48 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return Math.sqrt(r2);
     }
     
-    private double _SignalPropagAlongWire;
-
+    /**
+     * 
+     * @return signal propagation time along the wire in ns
+     */
     public double getSignalPropagAlongWire() {
         return _SignalPropagAlongWire;
     }
-
+    /**
+     * 
+     * @param DcDetector DC detector geometry
+     */
     public void setSignalPropagAlongWire(DCGeant4Factory DcDetector) {
         this._SignalPropagAlongWire = this.calc_SignalPropagAlongWire( DcDetector);
     }
     
-    private double _SignalPropagTimeAlongWire;
-
+    /**
+     * 
+     * @return signal propagation time along the wire in ns
+     */
     public double getSignalPropagTimeAlongWire() {
         return _SignalPropagTimeAlongWire;
     }
-
+    /**
+     * 
+     * @param DcDetector DC detector geometry
+     */
     public void setSignalPropagTimeAlongWire(DCGeant4Factory DcDetector) {
         this.setSignalPropagAlongWire( DcDetector);
         this._SignalPropagTimeAlongWire = this._SignalPropagAlongWire/(Constants.SPEEDLIGHT*0.7);
         this._tProp= this._SignalPropagTimeAlongWire;
     }
 
-    
-    private double _SignalTimeOfFlight;
-
+    /**
+     * 
+     * @return signal time of flight to the track doca to the hit wire in ns
+     */
     public double getSignalTimeOfFlight() {
         return _SignalTimeOfFlight;
     }
-
+    /**
+     * sets signal time of flight to the track doca to the hit wire in ns
+     */
     public void setSignalTimeOfFlight() {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
             this._SignalTimeOfFlight = this.getAssociatedStateVec().getPathLength()/(Constants.SPEEDLIGHT*this.get_Beta());
@@ -626,40 +705,61 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     }
     
     
-    private double _T0;
-    private double _tFlight;
-    private double _tProp;
-    private double _tStart;   // The event start time 
-    private double _Time;     //Time = TDC - tFlight - tProp - T0 - TStart
-    
+    /**
+     * 
+     * @return start time from EB bank (ns)
+     */
     public double getTStart() {
         return _tStart;
     }
-
+    /**
+     * 
+     * @param tStart start time in ns
+     */
     public void setTStart(double tStart) {
         this._tStart = tStart;
     }
     
+    /**
+     * 
+     * @return T0 calibration constant in ns
+     */
     public double getT0() {
         return _T0;
     }
-
+    /**
+     * 
+     * @param T0 calibration constant in ns
+     */
     public void setT0(double T0) {
         this._T0 = T0;
     }
     
+    /**
+     * 
+     * @return Flight time to the track's closest point to the hit wire in ns
+     */
     public double getTFlight() {
         return _tFlight;
     }
-
+    /**
+     * 
+     * @param tFlight Flight time to the track's closest point to the hit wire in ns
+     */
     public void setTFlight(double tFlight) {
         this._tFlight = tFlight;
     }
-
+    /**
+     * 
+     * @return propagation time along the wire in ns
+     */
     public double getTProp() {
         return _tProp;
     }
-
+    /**
+     * 
+     * @param tProp propagation time along the wire in ns
+     */
     public void setTProp(double tProp) {
         this._tProp = tProp;
     }
@@ -683,14 +783,16 @@ public class FittedHit extends Hit implements Comparable<Hit> {
   
     
     /**
-     * identifying outoftimehits;
+     * 
+     * @param b boolean to flag out-of-time hits
      */
-    private boolean _OutOfTimeFlag;
-
     public void set_OutOfTimeFlag(boolean b) {
         _OutOfTimeFlag = b;
     }
-
+    /**
+     * 
+     * @return boolean to flag out-of-time hits
+     */
     public boolean get_OutOfTimeFlag() {
         return _OutOfTimeFlag;
     }

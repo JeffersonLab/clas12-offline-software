@@ -32,7 +32,6 @@ public class SegmentFinder {
                 continue;
             }
             if (fClus.get_TrkgStatus() == -1) {
-                System.err.print("Error -- the clusters must be fit prior to making segments");
                 return segList;
             }
 

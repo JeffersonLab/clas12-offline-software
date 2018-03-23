@@ -62,7 +62,7 @@ public class TrackCandListFinder {
 	public List<Track> getTrackCands(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE) {
 		List<Track> cands = new ArrayList<Track>();
 		if(crossList.size()==0) {
-			System.err.print("Error no tracks found");
+			//System.err.print("Error no tracks found");
 			return cands;
 		}
 		
@@ -141,6 +141,8 @@ public class TrackCandListFinder {
 						StateVec fn = new StateVec();
 						kFit.runFitter();
 						//System.out.println(" KFIT "+kFit.chi2);
+                                                if(this.trking.equalsIgnoreCase("HitBased") && kFit.chi2>Constants.HBTCHI2CUT)
+                                                    continue;
 						if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
                                                     
 							fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
@@ -406,16 +408,19 @@ public class TrackCandListFinder {
 				
 		List<Track> selectedTracks =new ArrayList<Track>();
 		List<Track> list = new  ArrayList<Track>();
-		for(int i =0; i<trkcands.size(); i++) { 
+                int size = trkcands.size();
+		for(int i =0; i<size; i++) { 
 			list.clear();
 			this.getOverlapLists(trkcands.get(i), trkcands, list);
+                        trkcands.removeAll(list);
+                        size-=list.size();
 			Track selectedTrk = this.FindBestTrack(list);
                         if(selectedTrk==null)
                             continue;
-			if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
+			//if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
 				selectedTracks.add(selectedTrk);
 		}
-		trkcands.removeAll(trkcands);
+		//trkcands.removeAll(trkcands);
 		trkcands.addAll(selectedTracks);
 	}
 
@@ -431,12 +436,14 @@ public class TrackCandListFinder {
 	}
 
 	private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
+             
 		for(int i =0; i<trkcands.size(); i++) { 
 			if( (track.get(0).get_Id()!=-1 && track.get(0).get_Id()==trkcands.get(i).get(0).get_Id()) || 
 					(track.get(1).get_Id()!=-1 && track.get(1).get_Id()==trkcands.get(i).get(1).get_Id()) || 
 					(track.get(2).get_Id()!=-1 && track.get(2).get_Id()==trkcands.get(i).get(2).get_Id()) ) {
 				list.add(trkcands.get(i));
-			}
+                                
+                        }
 		}
 	}
 
@@ -452,6 +459,8 @@ public class TrackCandListFinder {
 		}
 		return bestTrk;
 	}
+        
+        
 	
     public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Factory DcDetector) {
         int planeIdNum=0;

@@ -232,14 +232,14 @@ public class ClusterCleanerUtilities {
         }
 
         int splitclusId = 1;
-        if (selectedClusList.size() != 0) {
+        if (!selectedClusList.isEmpty()) {
             for (FittedCluster cl : selectedClusList) {
                 cl.set_Id(clus.get_Id() * 1000 + splitclusId);
                 splitclusId++;
             }
         }
 
-        if (selectedClusList.size() == 0) {
+        if (selectedClusList.isEmpty()) {
             selectedClusList.add(clus); // if the splitting fails, then return the original cluster
         }
         return selectedClusList;
@@ -311,13 +311,17 @@ public class ClusterCleanerUtilities {
         return nlayers_hit;
     }
 
+    /**
+     * 
+     * @param fClus fitted cluster
+     * @param cf fitter utility
+     * @param tab table of calibration constants
+     * @param DcDetector DC detector geometry
+     * @param tde time-to-distance utility
+     * @return a fitted cluster with the left-right ambiguity resolved for each hit in the cluster
+     */
     public FittedCluster LRAmbiguityResolver(FittedCluster fClus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
-        //	int[] notResolvedLR = {0,0,0,0,0,0};
-        //	if(fClus.get_Status()[1]==notResolvedLR) {
-        //		return fClus;
-        //	}
-        //
-        
+       
         int index = 0;
         for(FittedHit hit: fClus) {
    
@@ -551,7 +555,15 @@ public class ClusterCleanerUtilities {
         return cf.BestClusterSelector(arrayOfClus, "TSC");
 
     }
-
+    /**
+     * 
+     * @param clus fitted cluster
+     * @param cf fitter utility
+     * @param tab table of calibration constants
+     * @param DcDetector DC detector geometry
+     * @param tde time-to-distance utility
+     * @return a fitted cluster with hits flagged as belonging to a secondary track removed from it
+     */
     public FittedCluster SecondariesRemover(FittedCluster clus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //System.out.println(" secondaries Remover :"+clus.printInfo());
         Collections.sort(clus);
@@ -578,7 +590,7 @@ public class ClusterCleanerUtilities {
             //for(int j =0; j<hitsInLayer.size(); j++) {
             //	System.out.println("*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
             //}
-            if (hitsInLayer.size() == 0) {
+            if (hitsInLayer.isEmpty()) {
                 continue;
             }
             if (hitsInLayer.size() == 1) {
@@ -790,7 +802,7 @@ public class ClusterCleanerUtilities {
 
     /**
      *
-     * @param clus
+     * @param clus fitted cluster
      * @return a new cluster that is contiguous
      */
     public FittedCluster IsolatedHitsPruner(FittedCluster clus) {
@@ -851,6 +863,11 @@ public class ClusterCleanerUtilities {
         return fcluster;
     }
 
+    /**
+     * 
+     * @param fClus fitted cluster
+     * @param removeHit boolean to remove hits flagged as out-of-time
+     */
     public void outOfTimersRemover(FittedCluster fClus, boolean removeHit) {
         // remove out of time hits
         for (int i = 0; i < fClus.size(); i++) {
