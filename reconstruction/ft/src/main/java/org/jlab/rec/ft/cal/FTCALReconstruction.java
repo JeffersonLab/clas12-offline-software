@@ -255,7 +255,7 @@ public class FTCALReconstruction {
         if(event.hasBank("RUN::config")) {
             DataBank recConfig = event.getBank("RUN::config");
             long timestamp = recConfig.getLong("timestamp",0);    
-            triggerPhase=((timestamp%6)+phase_offset)%6; // TI derived phase correction due to TDC and FADC clock differences
+            if(timestamp!=0) triggerPhase=((timestamp%6)+phase_offset)%6; // TI derived phase correction due to TDC and FADC clock differences
         }
         List<FTCALHit>  hits = new ArrayList<FTCALHit>();
 	if(event.hasBank("FTCAL::adc")==true) {
