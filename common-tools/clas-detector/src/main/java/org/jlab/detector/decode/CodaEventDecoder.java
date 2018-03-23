@@ -66,7 +66,7 @@ public class CodaEventDecoder {
         List<DetectorDataDgtz>  scalerEntries = this.getDataEntries_Scalers(event);
         rawEntries.addAll(scalerEntries);
         this.setTimeStamp(event);
-        
+//        this.getDataEntries_Epics(event);
         return rawEntries;
     }
 
@@ -704,7 +704,7 @@ public class CodaEventDecoder {
             for(EvioNode node : branch.getNodes()){
                 if(node.getTag()==57620) {
                     byte[] stringData =  ByteDataTransformer.toByteArray(node.getStructureBuffer(true));
-                    System.out.println("Found epics bank " + stringData.length);
+//                    System.out.println("Found epics bank " + stringData.length);
                     String value = new String(stringData);
 //                    System.out.println(stringData.length + " " + value);
 //                    for(int i=0; i<stringData.length; i++) {
@@ -733,24 +733,35 @@ public class CodaEventDecoder {
 //                    if(intData.length!=0) System.out.println(" TRIGGER BANK LENGTH = " + intData.length);
                     for(int loop = 2; loop < intData.length; loop++){
                         int  dataEntry = intData[loop];
-                        SCALERData scaler = new SCALERData();
-                        int helicity = DataUtils.getInteger(dataEntry, 31, 31);
-                        int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
-                        int interval = DataUtils.getInteger(dataEntry, 29, 29);
-                        int id       = DataUtils.getInteger(dataEntry, 24, 28);
-                        int value    = DataUtils.getInteger(dataEntry,  0, 23);
-                        DetectorDataDgtz   entry = new DetectorDataDgtz(crate,num,id+32*interval);
-                        if(node.getTag()==57637 && id < 3) {
-                            scaler.setHelicity((byte) helicity);
-                            scaler.setQuartet((byte) quartet);
-                            scaler.setValue(value);                            
-                            entry.addSCALER(scaler);
-                            scalerEntries.add(entry);
+                        if(node.getTag()==57637) {
+                            int helicity = DataUtils.getInteger(dataEntry, 31, 31);
+                            int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
+                            int interval = DataUtils.getInteger(dataEntry, 29, 29);
+                            int id       = DataUtils.getInteger(dataEntry, 24, 28);
+                            int value    = DataUtils.getInteger(dataEntry,  0, 23);
+                            if(id < 3) {
+                                DetectorDataDgtz entry = new DetectorDataDgtz(crate,num,id+32*interval);
+                                SCALERData scaler = new SCALERData();
+                                scaler.setHelicity((byte) helicity);
+                                scaler.setQuartet((byte) quartet);
+                                scaler.setValue(value);                            
+                                entry.addSCALER(scaler);
+                                scalerEntries.add(entry);
+                            }
 //                            System.out.println(entry.toString());
                         }
-//                        else if(node.getTag()==57621) {
-//                            System.out.println(helicity + quartet+ interval+ " " + id + " " + value);
-//                        }
+                        else if(node.getTag()==57621 && loop>=5) {
+                            int id   = (loop-5)%16;
+                            int slot = (loop-5)/16;
+                            if(id<3 && slot<4) {
+                                DetectorDataDgtz entry = new DetectorDataDgtz(crate,num,loop-5);
+                                SCALERData scaler = new SCALERData();
+                                scaler.setValue(dataEntry);                            
+                                entry.addSCALER(scaler);
+                                scalerEntries.add(entry);
+//                                System.out.println(loop + " " + crate + " " + slot + " " + id + " " + dataEntry);
+                            }
+                        }
                     }
                 }
             }
@@ -866,7 +877,7 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/clas_003290.evio.11");
+        reader.open("/Users/devita/clas_003050.evio.1");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
@@ -883,7 +894,7 @@ public class CodaEventDecoder {
 //                for(DetectorDataDgtz entry : decoder.getDataEntries_VTP(event)) 
 //                System.out.println(entry.toString());
             }
-            System.out.println("---> printout EVENT # " + icounter);
+//            System.out.println("---> printout EVENT # " + icounter);
 //            for(DetectorDataDgtz data : dataSet){
 //                System.out.println(data);
 //            }
