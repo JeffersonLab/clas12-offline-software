@@ -18,26 +18,6 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
 
     private static final long serialVersionUID = 7240609802152999866L;
 
-    /**
-     *
-     * @param rawCluster a Cluster fit using hit-based tracking information
-     */
-    public FittedCluster(Cluster rawCluster) {
-        this._Sector = rawCluster.get_Sector();
-        this._Superlayer = rawCluster.get_Superlayer();
-        this._Id = rawCluster.get_Id();
-
-        // adding the hits to the defined cluster
-        for (int i = 0; i < rawCluster.size(); i++) {
-            FittedHit fhit = new FittedHit(rawCluster.get(i).get_Sector(), rawCluster.get(i).get_Superlayer(),
-                    rawCluster.get(i).get_Layer(), rawCluster.get(i).get_Wire(), rawCluster.get(i).get_TDC(),
-                    rawCluster.get(i).get_Id());
-            fhit.set_DocaErr(rawCluster.get(i).get_DocaErr());
-            fhit.set_CellSize(rawCluster.get(i).get_CellSize());
-            fhit.set_Id(rawCluster.get(i).get_Id());
-            this.add(fhit);
-        }
-    }
 
     private int _Sector;      							//	    sector[1...6]
     private int _Superlayer;    	 					//	    superlayer [1,...6]
@@ -60,6 +40,27 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
     private double _clusterLineFitInterceptErrMP;
 
     private int[][] _Status;
+    Line3D _clusLineErr;
+    /**
+     *
+     * @param rawCluster a Cluster fit using hit-based tracking information
+     */
+    public FittedCluster(Cluster rawCluster) {
+        this._Sector = rawCluster.get_Sector();
+        this._Superlayer = rawCluster.get_Superlayer();
+        this._Id = rawCluster.get_Id();
+        
+        // adding the hits to the defined cluster
+        for (int i = 0; i < rawCluster.size(); i++) {
+            FittedHit fhit = new FittedHit(rawCluster.get(i).get_Sector(), rawCluster.get(i).get_Superlayer(),
+                    rawCluster.get(i).get_Layer(), rawCluster.get(i).get_Wire(), rawCluster.get(i).get_TDC(),
+                    rawCluster.get(i).get_Id());
+            fhit.set_DocaErr(rawCluster.get(i).get_DocaErr());
+            fhit.set_CellSize(rawCluster.get(i).get_CellSize());
+            fhit.set_Id(rawCluster.get(i).get_Id());
+            this.add(fhit);
+        }
+    }
 
     /**
      *
@@ -139,7 +140,6 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
         this._clusLine = _clusLine;
     }
 
-    Line3D _clusLineErr;
 
     /**
      *
@@ -201,7 +201,7 @@ public class FittedCluster extends ArrayList<FittedHit> implements Comparable<Fi
      * @return region (1...3)
      */
     public int get_Region() {
-        return (int) (this._Superlayer + 1) / 2;
+        return (this._Superlayer + 1) / 2;
     }
 
     /**

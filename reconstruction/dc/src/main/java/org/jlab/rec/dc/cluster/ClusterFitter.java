@@ -17,17 +17,12 @@ import org.jlab.rec.dc.track.fit.basefit.LineFitter;
 
 public class ClusterFitter {
 
-    public ClusterFitter() {
-        // TODO Auto-generated constructor stub
-    }
 
     /**
      * Fits a cluster to a line
      *
      */
     private LineFitPars FitPars;
-    //private double[][] FitArray;
-    
     private List<ArrayList<Double>> FitArray = new ArrayList<ArrayList<Double>>(); 
     private List<Double> x = new ArrayList<Double>();
     private List<Double> y = new ArrayList<Double>();
@@ -35,6 +30,9 @@ public class ClusterFitter {
     private List<Double> ey = new ArrayList<Double>();
     
     private String CoordinateSystem; // LC= local, TSC = tilted Sector
+    public ClusterFitter() {
+        // TODO Auto-generated constructor stub
+    }
 
     public void SetFitArray(FittedCluster clus, String system) {
 
@@ -73,7 +71,11 @@ public class ClusterFitter {
         FitArray.add((ArrayList<Double>) ey);
         
     }
-
+    /**
+     * 
+     * @param clus fitted cluster
+     * @param SaveFitPars boolean to save the fit parameters
+     */
     public void Fit(FittedCluster clus, boolean SaveFitPars) {
         if (FitArray != null) {
 
@@ -90,10 +92,13 @@ public class ClusterFitter {
                 this.SetClusterFitParameters(clus);
             }
         } else {
-            System.err.println("Cluster Fit array not set!!!");
         }
     }
 
+    /**
+     * 
+     * @param clus fitted cluster
+     */
     public void SetClusterFitParameters(FittedCluster clus) {
         if (FitPars != null) {
             
@@ -110,6 +115,11 @@ public class ClusterFitter {
         }
     }
 
+    /**
+     * 
+     * @param x0 local x in the tilted sector coordinate system (in cm)
+     * @param clus fitted cluster
+     */
     public void SetSegmentLineParameters(double x0, FittedCluster clus) {
 
         if (FitPars != null) {
@@ -134,6 +144,13 @@ public class ClusterFitter {
         }
     }
 
+    /**
+     * 
+     * @param clus fitted cluster
+     * @param calcTimeResidual boolean to compute the time residuals (in cm) 
+     * @param resetLRAmbig boolean to reset the LR ambiguity 
+     * @param DcDetector DC detector geometry
+     */
     public void SetResidualDerivedParams(FittedCluster clus, boolean calcTimeResidual, boolean resetLRAmbig, DCGeant4Factory DcDetector) {
 
         if (FitPars == null || FitArray == null) {
@@ -209,6 +226,12 @@ public class ClusterFitter {
         clus.set_Status(statusArray);
     }
 
+    /**
+     * 
+     * @param clusters fitted cluster
+     * @param system coordinate system in which the fit is performed
+     * @return the fitted cluster with the best fit chi2
+     */
     public FittedCluster BestClusterSelector(List<FittedCluster> clusters, String system) {
         //init
         FittedCluster BestCluster = null;
@@ -267,6 +290,11 @@ public class ClusterFitter {
         return new Point3D(the_slope * d + the_interc, 0, d);
     }
 
+    /**
+     * 
+     * @param clusCand fitted cluster
+     * @return wire pattern in the cluster 
+     */
     private boolean isBrickWall(FittedCluster clusCand) {
         boolean isBW = true;
         int sumWireNum = 0;

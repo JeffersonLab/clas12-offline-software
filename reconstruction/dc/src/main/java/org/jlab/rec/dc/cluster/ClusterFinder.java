@@ -31,9 +31,6 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class ClusterFinder {
 
-    public ClusterFinder() {
-
-    }
 
     // cluster finding algorithm
     // the loop is done over sector and superlayers
@@ -46,6 +43,9 @@ public class ClusterFinder {
     int nwire = Constants.NWIRE;
 
     private Hit[][][] HitArray = new Hit[nsect * nslay][nwire][nlayr];
+    public ClusterFinder() {
+        
+    }
 
     /**
      *
@@ -140,7 +140,7 @@ public class ClusterFinder {
                     if (ct.count_nlayers_in_cluster(hits) >= Constants.DC_MIN_NLAYERS) {
 
                         // cluster constructor DCCluster(hit.sector,hit.superlayer, cid)
-                        Cluster this_cluster = new Cluster((int) (ssl / nsect) + 1, (int) (ssl % nsect) + 1, cid++);
+                        Cluster this_cluster = new Cluster((ssl / nsect) + 1, (ssl % nsect) + 1, cid++);
                         //System.out.println(" created cluster "+this_cluster.printInfo());
                         this_cluster.addAll(hits);
 
@@ -183,12 +183,14 @@ public class ClusterFinder {
 
             //System.out.println(" I passed this cluster "+clus.printInfo());
             FittedCluster fclus = new FittedCluster(clus);
-            FittedCluster fClus = ct.IsolatedHitsPruner(fclus);
+            FittedCluster fClus = fclus;
+                    // rm isolated hit pruner
+                    //ct.IsolatedHitsPruner(fclus);
             // Flag out-of-timers
             //if(Constants.isSimulation==true) {
-            ct.outOfTimersRemover(fClus, true); // remove outoftimers
+        //    ct.outOfTimersRemover(fClus, true); // remove outoftimers
             //} else {
-            //	ct.outOfTimersRemover(fClus, false); // correct outoftimers
+            	ct.outOfTimersRemover(fClus, false); // correct outoftimers
             //}
             // add cluster
             selectedClusList.add(fClus); 
@@ -253,7 +255,14 @@ public class ClusterFinder {
         return refittedClusList;
 
     }
-
+    /**
+     * 
+     * @param fhits list of hits
+     * @param tab table of calibration constants
+     * @param DcDetector detector geometry
+     * @param tde time-to-distance class
+     * @return list of clusters recomposed from hits previously associated with a HB cluster
+     */
     private List<FittedCluster> RecomposeClusters(List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -311,7 +320,14 @@ public class ClusterFinder {
 
         return clusters;
     }
-
+    /**
+     * 
+     * @param fhits list of hits
+     * @param tab table of calibration constants
+     * @param DcDetector detector geometry
+     * @param tde time-to-distance class
+     * @return list of clusters recomposed from hits previously associated with a TB cluster
+     */
     public List<FittedCluster> FindTimeBasedClusters(List<FittedHit> fhits, ClusterFitter cf, ClusterCleanerUtilities ct, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -455,6 +471,15 @@ public class ClusterFinder {
         return true;
     }
 
+    /**
+     * 
+     * @param fclusters list of clusters
+     * @param allhits list of hits
+     * @param ct cleaner utility
+     * @param cf fitter utility
+     * @param event hipo event
+     * @return hipo bank containing the result of the layer efficiency analysis
+     */
     public EvioDataBank getLayerEfficiencies(List<FittedCluster> fclusters, List<Hit> allhits, ClusterCleanerUtilities ct, ClusterFitter cf, EvioDataEvent event) {
 
         ArrayList<Hit> clusteredHits = new ArrayList<Hit>();

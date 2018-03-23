@@ -2,7 +2,6 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.List;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -12,16 +11,15 @@ public class TableLoader {
 	public TableLoader() {
 		// TODO Auto-generated constructor stub
 	}
-
 	//public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
-        public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][1500]; // sector slyr alpha Bfield time bins
+        public static double[][][][][] DISTFROMTIME = new double[6][6][8][6][1800]; // sector slyr alpha Bfield time bins
 	static boolean T2DLOADED = false;
 	static int minBinIdxB = 0;
-	static int maxBinIdxB = 5;
+	static int maxBinIdxB = 7;
 	static int minBinIdxAlpha = 0;
 	static int maxBinIdxAlpha = 6;
 	static int minBinIdxT  = 0;
-	static int[][][][] maxBinIdxT  = new int[6][6][6][6];
+	static int[][][][] maxBinIdxT  = new int[6][6][8][6];
 	
 	public static double FracDmaxAtMinVel = 0.615;		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
 	
@@ -29,24 +27,24 @@ public class TableLoader {
 	 * 
 	 */
         public void test(){
-            TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
-            for(int s = 0; s<1; s++ ){ // loop over sectors
-				for(int r = 2; r<3; r++ ){ //loop over slys
-					for(int ibfield =0; ibfield<6; ibfield++) {
-						for(int icosalpha =0; icosalpha<6; icosalpha++) {
-							for (int tb = 0; tb< maxBinIdxT[s][r][ibfield][icosalpha]; tb++) {
-                                                            double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
-                                                            double Xtime=(2*tb+1);
-                                                            double Xdoca=tde.interpolateOnGrid((double) ibfield*0.5, Xalpha, Xtime, s, r);
-								System.out.println("s "+(s+1)+" sl "+(r+1)+" time "+(2*tb+1)
-                                                                        +" icosalpha "+icosalpha+" Xalpha "+Xalpha+" B "+ ibfield*0.5 + " dis "+ (float)DISTFROMTIME[s][r][ibfield][icosalpha][tb] +" "+
-                                                                      (float) Xdoca );
-                                                        }
-					    	
-						}
-					}
-				}
-			} 
+                TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
+                for(int s = 0; s<1; s++ ){ // loop over sectors
+                        for(int r = 2; r<3; r++ ){ //loop over slys
+                                for(int ibfield =0; ibfield<8; ibfield++) {
+                                        for(int icosalpha =0; icosalpha<6; icosalpha++) {
+                                                for (int tb = 0; tb< maxBinIdxT[s][r][ibfield][icosalpha]; tb++) {
+                                                    double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
+                                                    double Xtime=(2*tb+1);
+                                                    double Xdoca=tde.interpolateOnGrid((double) ibfield*0.5, Xalpha, Xtime, s, r);
+                                                        System.out.println("s "+(s+1)+" sl "+(r+1)+" time "+(2*tb+1)
+                                                                +" icosalpha "+icosalpha+" Xalpha "+Xalpha+" B "+ ibfield*0.5 + " dis "+ (float)DISTFROMTIME[s][r][ibfield][icosalpha][tb] +" "+
+                                                              (float) Xdoca );
+                                                }
+
+                                        }
+                                }
+                        }
+                }
         }
 	 
 	public static synchronized void Fill(IndexedTable tab) {
@@ -65,7 +63,7 @@ public class TableLoader {
                             //double tmax = CCDBConstants.getTMAXSUPERLAYER()[s][r];
                             double tmax = tab.getDoubleValue("tmax", s+1,r+1,0);
                             
-                            for(int ibfield =0; ibfield<6; ibfield++) {
+                            for(int ibfield =0; ibfield<8; ibfield++) {
                                 double bfield = (double)ibfield*0.5;
 
                                 double maxdist =0;
