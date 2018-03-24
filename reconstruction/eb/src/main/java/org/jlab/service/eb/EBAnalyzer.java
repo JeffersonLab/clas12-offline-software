@@ -111,17 +111,22 @@ public class EBAnalyzer {
         for(int i = 1; i < np; i++) {
             DetectorParticle p = event.getParticle(i);
             double beta = 0.0;
-            if(p.hasHit(DetectorType.FTOF, 2)==true){
-                beta = p.getBeta(DetectorType.FTOF,2, start_time);
+            if (p.getCharge()==0) {
+                beta = EBUtil.getNeutralBetaECAL(p,start_time);
             }
-            else if(p.hasHit(DetectorType.FTOF, 1)==true){
-                beta = p.getBeta(DetectorType.FTOF, 1,start_time);
-            }
-            else if(p.hasHit(DetectorType.CTOF)==true){
-                beta = p.getBeta(DetectorType.CTOF ,start_time);
-            }
-            else if(p.hasHit(DetectorType.FTOF, 3)==true){
-                beta = p.getBeta(DetectorType.FTOF, 3,start_time);
+            else {
+                if (p.hasHit(DetectorType.FTOF, 2)==true){
+                    beta = p.getBeta(DetectorType.FTOF,2, start_time);
+                }
+                else if(p.hasHit(DetectorType.FTOF, 1)==true){
+                    beta = p.getBeta(DetectorType.FTOF, 1,start_time);
+                }
+                else if(p.hasHit(DetectorType.CTOF)==true){
+                    beta = p.getBeta(DetectorType.CTOF ,start_time);
+                }
+                else if(p.hasHit(DetectorType.FTOF, 3)==true){
+                    beta = p.getBeta(DetectorType.FTOF, 3,start_time);
+                }
             }
             p.setBeta(beta);
         }
@@ -154,13 +159,11 @@ public class EBAnalyzer {
                 }
                 //Collections.sort(pidHyp); 
             }
-/*            
             else {
                 for(int b = 0; b < this.pidNeutral.length; b++) {
                     pidHyp.PIDMatch(p, this.pidNeutral[b]);
                 }
             }
-*/
 
         }
     }
@@ -182,7 +185,7 @@ public class EBAnalyzer {
             final int pidFromTiming = bestPidFromTiming(p);
             
             final boolean pidFromTimingCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
-            
+           
             final boolean isElectron = EBUtil.isSimpleElectron(p);
             
             final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
@@ -241,8 +244,14 @@ public class EBAnalyzer {
                     break;
 
                 case 2112:
+                    if (pidFromTimingCheck) {
+                        this.finalizePID(p,pid);
+                    }
                     break;
                 case 22:
+                    if (pidFromTimingCheck) {
+                        this.finalizePID(p,pid);
+                    }
                     break;
             }
 
@@ -252,27 +261,36 @@ public class EBAnalyzer {
          * Get the hadron hypotheses with the closest vertex time.
          */
         public int bestPidFromTiming(DetectorParticle p) {
-            int[] hypotheses;
-            if      (p.getCharge()>0) hypotheses=pidPositive;
-            else if (p.getCharge()<0) hypotheses=pidNegative;
-            else throw new RuntimeException("bestPidFromTiming:  not ready for neutrals");
-            final double startTime = event.getEventHeader().getStartTime();
-            double minTimeDiff=Double.MAX_VALUE;
             int bestPid=0;
-            for (int ii=0; ii<hypotheses.length; ii++) {
-                if (abs(hypotheses[ii])==11) continue;
-                double dt=Double.MAX_VALUE;
-                if (p.hasHit(DetectorType.FTOF,2)==true)
-                    dt = p.getVertexTime(DetectorType.FTOF,2,hypotheses[ii]) - startTime;
-                else if (p.hasHit(DetectorType.FTOF,1)==true)
-                    dt = p.getVertexTime(DetectorType.FTOF,1,hypotheses[ii]) - startTime;
-                else if (p.hasHit(DetectorType.CTOF)==true)
-                    dt = p.getVertexTime(DetectorType.CTOF,0,hypotheses[ii]) - startTime;
-                else if (p.hasHit(DetectorType.FTOF,3)==true)
-                    dt = p.getVertexTime(DetectorType.FTOF,3,hypotheses[ii]) - startTime;
-                if ( abs(dt) < minTimeDiff ) {
-                    minTimeDiff=abs(dt);
-                    bestPid=hypotheses[ii];
+            if (p.getCharge() == 0) {
+                if (p.getBeta() < EBCCDBConstants.getDouble(EBCCDBEnum.NEUTRON_maxBeta)) {
+                    bestPid=2112;
+                }
+                else {
+                    bestPid=22;
+                }
+            }
+            else {
+                int[] hypotheses;
+                if      (p.getCharge()>0) hypotheses=pidPositive;
+                else                      hypotheses=pidNegative;
+                final double startTime = event.getEventHeader().getStartTime();
+                double minTimeDiff=Double.MAX_VALUE;
+                for (int ii=0; ii<hypotheses.length; ii++) {
+                    if (abs(hypotheses[ii])==11) continue;
+                    double dt=Double.MAX_VALUE;
+                    if (p.hasHit(DetectorType.FTOF,2)==true)
+                        dt = p.getVertexTime(DetectorType.FTOF,2,hypotheses[ii]) - startTime;
+                    else if (p.hasHit(DetectorType.FTOF,1)==true)
+                        dt = p.getVertexTime(DetectorType.FTOF,1,hypotheses[ii]) - startTime;
+                    else if (p.hasHit(DetectorType.CTOF)==true)
+                        dt = p.getVertexTime(DetectorType.CTOF,0,hypotheses[ii]) - startTime;
+                    else if (p.hasHit(DetectorType.FTOF,3)==true)
+                        dt = p.getVertexTime(DetectorType.FTOF,3,hypotheses[ii]) - startTime;
+                    if ( abs(dt) < minTimeDiff ) {
+                        minTimeDiff=abs(dt);
+                        bestPid=hypotheses[ii];
+                    }
                 }
             }
             return bestPid;
