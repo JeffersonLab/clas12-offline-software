@@ -3,7 +3,6 @@ package org.jlab.rec.dc.track.fit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.Track;
@@ -12,20 +11,6 @@ public class MeasVecs {
 
     public List<MeasVec> measurements = new ArrayList<MeasVec>();
 
-    public class MeasVec {
-
-        final int k;
-        public double z;
-        public double x;
-        public double unc;
-        public int tilt;
-        public double error;
-
-        MeasVec(int k) {
-            this.k = k;
-        }
-
-    }
     public int ndf=0;
     /**
      * The state projector - it projects the state onto the measurement
@@ -124,6 +109,20 @@ public class MeasVecs {
             this.measurements.add(i, meas);
         }
     }
+    public class MeasVec {
+        
+        final int k;
+        public double z;
+        public double x;
+        public double unc;
+        public int tilt;
+        public double error;
+        
+        MeasVec(int k) {
+            this.k = k;
+        }
+        
+    }
 
     private class HitOnTrack implements Comparable<HitOnTrack> {
 
@@ -133,7 +132,7 @@ public class MeasVecs {
         private double _Unc;
         private int _tilt;
 
-        public HitOnTrack(int superlayer, double X, double Z) {
+        HitOnTrack(int superlayer, double X, double Z) {
             _X = X;
             _Z = Z;
             int s = (int) (superlayer) % 2;

@@ -1,23 +1,14 @@
 package org.jlab.rec.dc.track.fit;
 
+import Jama.Matrix;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 
-import Jama.Matrix;
-
 public class StateVecs {
     private double Bmax = 2.366498; // averaged
-    public StateVecs() {
-        //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
-        double phi = Math.toRadians(29.5); 
-        double rho = 44.0;
-        double z = 436.0;
-        Bmax = dcSwim.BfieldLab(rho*Math.cos(phi), rho*Math.sin(phi), z).toVector3D().mag() *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
-    }
     
     final double speedLight = 0.002997924580;
     public double[] Z;
@@ -32,7 +23,27 @@ public class StateVecs {
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
+    DCSwimmer dcSwim = new DCSwimmer();
     
+    /**
+     * State vector representing the track in the sector coordinate system at the measurement layer
+     */
+    public StateVecs() {
+        //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
+        // get the maximum value of the B field
+        double phi = Math.toRadians(29.5);
+        double rho = 44.0;
+        double z = 436.0;
+        Bmax = dcSwim.BfieldLab(rho*Math.cos(phi), rho*Math.sin(phi), z).toVector3D().mag() *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
+    }
+    
+    /**
+     * 
+     * @param i initial state index
+     * @param f final state index
+     * @param iVec state vector at the initial state index
+     * @return state vector at the final state index
+     */
     public StateVec f(int i, int f, StateVec iVec) {
 
         double x = iVec.x;
@@ -53,7 +64,7 @@ public class StateVecs {
                 s = Math.signum(Z[f] - Z[i]) * Math.abs(z - Z[f]);
             }
 
-           
+           // propagate the state vector a next step
             dcSwim.Bfield(x, y, z, bf);
             A(tx, ty, bf[0], bf[1], bf[2], A);
             // transport stateVec
@@ -77,7 +88,13 @@ public class StateVecs {
 
     }
     
-    
+    /**
+     * 
+     * @param i initial state vector index
+     * @param f final state vector index
+     * @param iVec state vector at the initial index
+     * @param covMat state covariance matrix at the initial index
+     */
     public void transport(int i, int f, StateVec iVec, CovMat covMat) { // s = signed step-size
         //StateVec iVec = trackTraj.get(i);
         //bfieldPoints = new ArrayList<B>();
@@ -95,12 +112,12 @@ public class StateVecs {
         double ty = iVec.ty;
         double Q = iVec.Q;
 
-        
+        // B-field components at state vector coordinates
         dcSwim.Bfield(x, y, Z[i], bf);
         
        // if (bfieldPoints.size() > 0) {
         //    double B = new Vector3D(bfieldPoints.get(bfieldPoints.size() - 1).Bx, bfieldPoints.get(bfieldPoints.size() - 1).By, bfieldPoints.get(bfieldPoints.size() - 1).Bz).mag();
-        if (bf!=null) {
+        if (bf!=null) { // get the step size used in swimming as a function of the field intensity in the region traversed
             double B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]); 
             if (B / Bmax > 0.01) {
                 stepSize = 0.15*4;
@@ -129,7 +146,7 @@ public class StateVecs {
 
        
         for (int j = 0; j < nSteps; j++) {
-
+            // get the sign of the step
             if (j == nSteps - 1) {
                 s = Math.signum(Z[f] - Z[i]) * Math.abs(z - Z[f]);
             }
@@ -198,7 +215,7 @@ public class StateVecs {
                 C[i1][4] = u[i1][4];
             }
 
-            // Q	
+            // Q  process noise matrix estimate	
             double p = Math.abs(1. / Q);
             double pz = p / Math.sqrt(1 + tx * tx + ty * ty);
             double px = tx * pz;
@@ -262,34 +279,6 @@ public class StateVecs {
         }
     }
 
-    public class StateVec {
-
-        final int k;
-        public double z;
-        public double x;
-        public double y;
-        public double tx;
-        public double ty;
-        public double Q;
-
-        StateVec(int k) {
-            this.k = k;
-        }
-
-    }
-
-    public class CovMat {
-
-        final int k;
-        public Matrix covMat;
-
-        CovMat(int k) {
-            this.k = k;
-        }
-
-    }
-
-    DCSwimmer dcSwim = new DCSwimmer();
 
     /*
     public class B {
@@ -373,8 +362,11 @@ public class StateVecs {
         }
     }
     
-    
-
+    /**
+     * 
+     * @param z0 the value at which the state vector needs to be reinitialized
+     * @param kf the final state measurement index
+     */
     public void rinit(double z0, int kf) {
         if (this.trackTraj.get(kf) != null) {
             double x = this.trackTraj.get(kf).x;
@@ -388,8 +380,9 @@ public class StateVecs {
             dcSwim.SetSwimParameters(-1, x, y, z, tx, ty, p, q);
             double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
             StateVec initSV = new StateVec(0);
-            if(VecAtFirstMeasSite==null)
+            if(VecAtFirstMeasSite==null) {
                 return;
+            }
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];
             initSV.z = VecAtFirstMeasSite[2];
@@ -400,7 +393,13 @@ public class StateVecs {
         } else {
         }
     }
-
+    
+    /**
+     * 
+     * @param trkcand the track candidate
+     * @param z0 the value in z to which the track is swam back to
+     * @param kf the final state measurement index
+     */
     public void init(Track trkcand, double z0, KFitter kf) {
         
         if (trkcand.get_StateVecAtReg1MiddlePlane() != null) {
@@ -451,7 +450,36 @@ public class StateVecs {
 
     public void printMatrix(Matrix C) {
         for (int k = 0; k < 5; k++) {
-            System.out.println(C.get(k, 0) + "	" + C.get(k, 1) + "	" + C.get(k, 2) + "	" + C.get(k, 3) + "	" + C.get(k, 4));
         }
+    }
+    /**
+     * The state vector representing the track at a given measurement site
+     */
+    public class StateVec {
+        
+        final int k;        //index
+        public double z;    //z (fixed measurement planes)
+        public double x;    //track x in the tilted sector coordinate system at z
+        public double y;    //track y in the tilted sector coordinate system at z
+        public double tx;   //track px/pz in the tilted sector coordinate system at z
+        public double ty;   //track py/pz in the tilted sector coordinate system at z
+        public double Q;    //track q/p
+        
+        StateVec(int k) {
+            this.k = k;
+        }
+    }
+    /**
+     * The track covariance matrix
+     */
+    public class CovMat {
+        
+        final int k;
+        public Matrix covMat;
+        
+        CovMat(int k) {
+            this.k = k;
+        }
+        
     }
 }

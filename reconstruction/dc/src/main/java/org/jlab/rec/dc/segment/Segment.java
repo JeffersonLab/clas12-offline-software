@@ -3,7 +3,6 @@ package org.jlab.rec.dc.segment;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -332,18 +331,32 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         return fitPlane;
     }
 
+    /**
+     * 
+     * @return segment trajectory
+     */
     public SegmentTrajectory get_Trajectory() {
         return _Trajectory;
     }
-
+    /**
+     * 
+     * @param _Trajectory segment trajectory
+     */
     public void set_Trajectory(SegmentTrajectory _Trajectory) {
         this._Trajectory = _Trajectory;
     }
-
+    
+    /**
+     * 
+     * @return word describing segment status (not yet used)
+     */
     public int get_Status() {
         return _Status;
     }
-
+    /**
+     * 
+     * @param _Status segment status word
+     */
     public void set_Status(int _Status) {
         this._Status = _Status;
     }
