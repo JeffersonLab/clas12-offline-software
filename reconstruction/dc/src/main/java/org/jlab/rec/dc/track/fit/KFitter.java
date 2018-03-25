@@ -1,10 +1,9 @@
 package org.jlab.rec.dc.track.fit;
 
+import Jama.Matrix;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
-
-import Jama.Matrix; 
 
 public class KFitter {
 
@@ -15,10 +14,15 @@ public class KFitter {
 
     public StateVec finalStateVec;
 
+
+    public int totNumIter = 4;
+    double newChisq = Double.POSITIVE_INFINITY;
+
+    public double chi2 = 0;
+    public int NDF = 0;
     public KFitter(Track trk, DCGeant4Factory DcDetector) {
         this.init(trk, DcDetector);
     }
-
     public void init(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecs(trk, DcDetector);
         sv.Z = new double[mv.measurements.size()];
@@ -28,10 +32,6 @@ public class KFitter {
         }
         sv.init(trk, sv.Z[0], this);
     }
-
-    public int totNumIter = 4;
-    double newChisq = Double.POSITIVE_INFINITY;
-
     public void runFitter() {
         this.chi2 = 0;
         this.NDF = mv.ndf;
@@ -44,29 +44,27 @@ public class KFitter {
                 sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
                 //sv.trackTraj.add(k+1, sv.StateVec); 
                 //sv.trackCov.add(k+1, sv.CovMat);
-               // System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
+                // System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
                 //		sv.trackTraj.get(k+1).z+","+sv.trackTraj.get(k+1).tx+","+sv.trackTraj.get(k+1).ty+" "+sv.trackTraj.get(k+1).Q); 
                 this.filter(k + 1);
             }
             if(i>1) {
-	            this.calcFinalChisq();
-	            if(this.chi2>1000000) {
-	            	i = totNumIter;
-                        this.setFitFailed=true;
-                        return;
-                    }
-	            if (this.chi2 < newChisq) {
-	                this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
-	                newChisq = this.chi2;
-	            } else {
-	            	i = totNumIter;
-	            }
-	        }
+                this.calcFinalChisq();
+                if(this.chi2>1000000) {
+                    i = totNumIter;
+                    this.setFitFailed=true;
+                    return;
+                }
+                if (this.chi2 < newChisq) {
+                    this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
+                    newChisq = this.chi2;
+                } else {
+                    i = totNumIter;
+                }
+            }
         }
 
     }
-    public double chi2 = 0;
-    public int NDF = 0;
 
     private void filter(int k) {
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null && k < sv.Z.length) {
@@ -176,26 +174,12 @@ public class KFitter {
      */
     public void printMatrix(Matrix C) {
         for (int k = 0; k < 5; k++) {
-            System.out.println(C.get(k, 0) + "	" + C.get(k, 1) + "	" + C.get(k, 2) + "	" + C.get(k, 3) + "	" + C.get(k, 4));
         }
     }
 
     private boolean isNonsingular(Matrix mat) {
-    /*
-        for (int j = 0; j < mat.getColumnDimension(); j++) {
-            if (mat.get(j, j) < 0.00000000001) {
-                return false;
-            }
-        }
-        return true;
-    */
         double matDet = mat.det();
-        if(Math.abs(matDet)< 1.e-30) {
-                return false;
-        } else {
-                return true;
-        }
+        return Math.abs(matDet) >= 1.e-30;
     }
-    
     
 }
