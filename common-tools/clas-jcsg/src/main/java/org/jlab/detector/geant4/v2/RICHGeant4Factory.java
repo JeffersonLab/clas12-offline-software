@@ -6,177 +6,194 @@
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
-import java.io.InputStream;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
+import org.jlab.geom.prim.Point3D;
+
+
 import org.jlab.detector.volume.G4Box;
-import org.jlab.detector.volume.G4Trap;
 
 /**
- *
- * @author Goodwill
+ * Building the RICH PMTs
+ * @author Goodwill, kenjo
+ * modfied by gangel
  */
 public final class RICHGeant4Factory extends Geant4Factory {
+    
     //to be  stored in database, from hashmap of perl script for gemc, all dimensions in mm
     private final int PMT_rows = 23, sector = 4;
-    private int nPMTs = 0;
     
-    private final double RichBox_x = 0 * Length.mm,
-                         RichBox_y = 1706.145* Length.mm,
-                         RichBox_z = 5705.13* Length.mm,
-                         RichBox_the = 25,    // position of box
-                         RichBox_y_offset = 284.31* Length.mm,
-
-                         PMTCase_dx = 26* Length.mm, 
-                         PMTCase_dy = 26* Length.mm,       //dimensions of PMT
-                         PMTCase_dz = 13.5* Length.mm,
-                         
-                         PMTSeparation = 1* Length.mm,
-                         PMTFirstRow_y = -1931.23* Length.mm,  //Position of PMT in box
-                         PMTFirstRow_z = 474.10* Length.mm;
-                            
-    private double PMTCase_x =0 * Length.mm,
-                   PMTCase_y = PMTFirstRow_y;
-                   
+    private final double RICHpanel_y = 1706.145 * Length.mm,
+    RICHpanel_z = 5705.13 * Length.mm,
+    RICHpanel_y_offset = 284.31 * Length.mm;
     
-    private final double PMTCase_z =PMTFirstRow_z;
-
+    private final double RICH_thtilt = 25;
+    
+    private final double MAPMT_dx = 26 * Length.mm,
+    MAPMT_dy = 26 * Length.mm, //dimensions of PMT
+    MAPMT_dz = 13.5 * Length.mm;
+    
+    private final double MAPMTgap = 1 * Length.mm,
+    MAPMTFirstRow_y = -1931.23 * Length.mm, //Position of PMT in box
+    MAPMTFirstRow_z = 474.10 * Length.mm;
+    
+    private final double MAPMTWall_thickness = 1.0 * Length.mm;
+    private final double MAPMTWindow_thickness = 1.5 * Length.mm;
+    private final double MAPMTPhotocathode_side = 49 * Length.mm,
+    MAPMTPhotocathode_thickness = 0.1 * Length.mm;
+    private final double MAPMTSocket_thickness = 2.7 * Length.mm;
+    
+    private final double offset = 0.5 * Length.mm;
+    
+    // list containing the pmts - photocathode and G4Stl files
+    private List<G4Box> pmts = new ArrayList<G4Box>();
+    private List<G4Box> photocatodes = new ArrayList<G4Box>();
+    private List<G4Stl> stlvolumes = new ArrayList<G4Stl>();
+    
+    
     public RICHGeant4Factory() {
-            motherVolume = new G4World("fc");
-            //import the 5 mesh files
+        
+        motherVolume = new G4World("fc");
+        //import the 5 mesh files
+        
+        ClassLoader cloader = getClass().getClassLoader();
+        G4Stl gasVolume = new G4Stl("OpticalGasVolume", cloader.getResourceAsStream("rich/cad/OpticalGasVolume.stl"), Length.mm / Length.cm);
+        gasVolume.setMother(motherVolume);
+        stlvolumes.add(gasVolume);
+        
+        for (String name : new String[]{"AerogelTiles", "Aluminum", "CFRP", "MirrorBack1","MirrorBack2", "TedlarWrapping"}) {
+            G4Stl component = new G4Stl(String.format("%s", name),
+                                        cloader.getResourceAsStream(String.format("rich/cad/%s.stl", name)),
+                                        Length.mm / Length.cm);
             
-            ClassLoader cloader = getClass().getClassLoader();
-            for (String name : new String[]{"AerogelTiles", "Aluminum", "CFRP","Glass","TedlarWrapping"}) {
-                G4Stl component = new G4Stl(String.format("%s", name),
-                        cloader.getResourceAsStream(String.format("rich/cad/%s.stl",name)));
+            component.setMother(gasVolume);
+            stlvolumes.add(component);
+            
+            //System.out.println(component.toCSG().getBounds().getCenter().toString());
+            //System.out.println("From the array");
+            // System.out.println(stlvolumes.get(1).toCSG().getBounds().getCenter().toStlString());
+        }
+        
+        
+        
+        
+        
+        //place the PMTs in the trapezoidal box
+        for (int irow = 0; irow < PMT_rows; irow++) {
+            //define number of PMTs in this row
+            int nPMTInARow = 6 + irow;
+            
+            //define the y position of the row
+            double MAPMT_ylocal = MAPMTFirstRow_y + (MAPMTgap + 2.0 * MAPMT_dy) * irow;
+            
+            for (int ipmt = 0; ipmt < nPMTInARow; ipmt++) {
+                //define the x position of the volume
+                double MAPMT_xlocal = (nPMTInARow - 1) * (MAPMT_dx + MAPMTgap / 2) - (MAPMT_dx * 2 + MAPMTgap) * ipmt;
                 
-                component.scale(Length.mm/Length.cm);
-                component.setMother(motherVolume);
+                //build the PMT
+                G4Box PMT = buildMAPMT(String.format("MAPMT_%d_%d", irow, ipmt));
+                PMT.setMother(gasVolume);
+                
+                PMT.translate(MAPMT_xlocal, MAPMT_ylocal, MAPMTFirstRow_z);
+                
+                PMT.rotate("xzy", Math.toRadians(RICH_thtilt), Math.toRadians(90.0 - (sector - 1) * 60.0), 0);
+                Vector3d position = new Vector3d(0, RICHpanel_y + RICHpanel_y_offset, RICHpanel_z);
+                PMT.translate(position.rotateZ(-Math.toRadians(90.0 - (sector - 1) * 60.0)));
+                pmts.add(PMT);
+                
+                
+                
             }
-            
-            //calculate the position of the rich box where PMTs will be placed              
-            Vector3d position = RichBoxPos.getpos(sector, RichBox_x, RichBox_y, RichBox_y_offset, RichBox_z);
-            //calculate the rotation of the box
-            Vector3d rotation = RichBoxPos.getrot(sector,RichBox_the);
-            
-            //place the PMTs in the trapezoidal box
-            for(int irow=0; irow<PMT_rows ; irow++){
-                
-		//define the y position of the volume
-                PMTCase_y=PMTFirstRow_y;
-                
-                PMTCase_y += (PMTSeparation+2.0*PMTCase_dy)*irow;
-                //System.out.println(PMTCase_y);
-                
-                //define number of PMTs in this row
-		int nPMTInARow = 6 + irow;
-                        
-		//define the xoffset for this row
-		double PMTOffset_x = (nPMTInARow -1)*(PMTCase_dx+PMTSeparation/2);
-			
-                for(int ipmt=0; ipmt < nPMTInARow; ipmt++){
-                    //increment count of PMT
-                    nPMTs+=1;
-                    //define the x position of the volume
-                    PMTCase_x = PMTOffset_x - (2*PMTCase_dx +PMTSeparation)*ipmt;
-                    //build the PMT
-                    G4Box PMT = PMTBuilder.buildPMTVolume(nPMTs,irow,PMTCase_dx, PMTCase_dy, PMTCase_dz);
-                    PMT.setMother(motherVolume);
-                    PMT.translate(PMTCase_x, PMTCase_y, PMTCase_z);
-                    PMT.rotate("xzy", rotation.x, rotation.y, rotation.z);
-                    PMT.translate(position.x,position.y, position.z);
-                }
-            }
+        }
         
     }
     
-    static private class RichBoxPos{
-        
-        static Vector3d getpos(int sector, double RichBox_x, double RichBox_y, double RichBox_y_offset, double RichBox_z){
-        //calculate position of the box
-            double phi = (sector-1)*60;
-            double RichBox_y_real = RichBox_y + RichBox_y_offset;
-            double r = Math.sqrt(RichBox_x * RichBox_x + RichBox_y_real*RichBox_y_real);
-            double x= r*Math.cos(Math.toRadians(phi));
-            double y = r*Math.sin(Math.toRadians(phi));
-            double z = RichBox_z;
-            
-            Vector3d position = new Vector3d(x,y,z);
-            return position;
-        }
-        
-        static Vector3d getrot(int sector, double RichBox_the){
-            double tilt = RichBox_the;
-            double zrot = -(sector -1)*60 + 90;
-            
-            Vector3d rotation = new Vector3d(Math.toRadians(tilt),Math.toRadians(zrot),0);
-            return rotation;
-        }
+    //function that generates the PMT with all the volumes in it
+    
+    private G4Box buildMAPMT(String mapmtName) {
         
         
-            
-    }
-
-    static private class PMTBuilder {
-        //function that generates the PMT with all the volumes in it 
-        static G4Box buildPMTVolume(int nPMTs, int irow, double PMTCase_dx, double PMTCase_dy, double PMTCase_dz) {
-            
-            G4Box PMTVolume = new G4Box(String.format("PMTRow_%d_n%d", irow,nPMTs), PMTCase_dx, PMTCase_dy, PMTCase_dz);
-            
-            double PMTCase_width = 1.0 * Length.mm;
-            
-            //Aluminum
-            G4Box AluminumLeft = new G4Box(String.format("AlLeft_%d_n%d", irow, nPMTs), PMTCase_width/2,PMTCase_dy-PMTCase_width,PMTCase_dz);
-            AluminumLeft.translate(PMTCase_dx-PMTCase_width/2,0,0);
-            AluminumLeft.setMother(PMTVolume);
-            
-            G4Box AluminumRight = new G4Box(String.format("AlRight_%d_n%d", irow, nPMTs), PMTCase_width/2,PMTCase_dy-PMTCase_width,PMTCase_dz);
-            AluminumRight.translate(-PMTCase_dx+PMTCase_width/2,0,0);
-            AluminumRight.setMother(PMTVolume);
-            
-            G4Box AluminumTop = new G4Box(String.format("AlTop_%d_n%d", irow, nPMTs),PMTCase_dx, PMTCase_width/2,PMTCase_dz);
-            AluminumTop.translate(0,PMTCase_dy-PMTCase_width/2,0);
-            AluminumTop.setMother(PMTVolume);
-            
-            G4Box AluminumBottom = new G4Box(String.format("AlBottom_%d_n%d", irow, nPMTs),PMTCase_dx, PMTCase_width/2,PMTCase_dz);
-            AluminumBottom.translate(0,-PMTCase_dy+PMTCase_width/2,0);
-            AluminumBottom.setMother(PMTVolume);
-           
-            
-            //window
-            double PMTWindow_dz = 0.75 * Length.mm,
-                   PMTWindow_dx = PMTCase_dx - PMTCase_width,
-                   PMTWindow_dy = PMTCase_dy - PMTCase_width; 
-            double PMTWindow_z = -PMTCase_dz + PMTWindow_dz;
-            G4Box Window = new G4Box(String.format("Window_%d_n%d", irow, nPMTs), PMTWindow_dx, PMTWindow_dy, PMTWindow_dz);
-            Window.translate(0,0,PMTWindow_z);
-            Window.setMother(PMTVolume);
-            
-            
-            //photocathode
-            double PMTPhotocathode_dx = 24.5 * Length.mm,
-                   PMTPhotocathode_dy = 24.5 * Length.mm,
-                   PMTPhotocathode_dz = 0.5 * Length.mm;
-            double PMTPhotocathode_z = -PMTCase_dz + 2*PMTWindow_dz + PMTPhotocathode_dz;
-            G4Box Photocathode = new G4Box(String.format("Photocathode_%d_n%d", irow, nPMTs),PMTPhotocathode_dx,PMTPhotocathode_dy,PMTPhotocathode_dz);
-            Photocathode.translate(0,0,PMTPhotocathode_z);
-            Photocathode.setMother(PMTVolume);
-            
-            //socket
-            double PMTSocket_dx = PMTCase_dx - PMTCase_width,
-                    PMTSocket_dy = PMTCase_dy - PMTCase_width,
-                    PMTSocket_dz = 1.35 * Length.mm;
-            double PMTSocketZShift = 1.0 * Length.mm;
-            double PMTSocket_z = PMTCase_dz - PMTSocket_dz;
-            G4Box Socket = new G4Box(String.format("Socket_%d_n%d", irow, nPMTs),PMTSocket_dx,PMTSocket_dy,PMTSocket_dz);
-            Socket.translate(0,0,PMTSocket_z);
-            Socket.setMother(PMTVolume);
-            
-            return PMTVolume;   
-        }
+        G4Box MAPMTVolume = new G4Box(mapmtName, MAPMT_dx, MAPMT_dy, MAPMT_dz);
+        
+        //Aluminum walls of MAPMT
+        G4Box AluminumLeft = new G4Box("AlLeft_" + mapmtName, MAPMTWall_thickness / 2, MAPMT_dy - MAPMTWall_thickness, MAPMT_dz);
+        AluminumLeft.translate(MAPMT_dx - MAPMTWall_thickness / 2, 0, 0);
+        AluminumLeft.setMother(MAPMTVolume);
+        
+        G4Box AluminumRight = new G4Box("AlRight_" + mapmtName, MAPMTWall_thickness / 2, MAPMT_dy - MAPMTWall_thickness, MAPMT_dz);
+        AluminumRight.translate(-MAPMT_dx + MAPMTWall_thickness / 2, 0, 0);
+        AluminumRight.setMother(MAPMTVolume);
+        
+        G4Box AluminumTop = new G4Box("AlTop_" + mapmtName, MAPMT_dx, MAPMTWall_thickness / 2, MAPMT_dz);
+        AluminumTop.translate(0, MAPMT_dy - MAPMTWall_thickness / 2, 0);
+        AluminumTop.setMother(MAPMTVolume);
+        
+        G4Box AluminumBottom = new G4Box("AlBottom_" + mapmtName, MAPMT_dx, MAPMTWall_thickness / 2, MAPMT_dz);
+        AluminumBottom.translate(0, -MAPMT_dy + MAPMTWall_thickness / 2, 0);
+        AluminumBottom.setMother(MAPMTVolume);
+        
+        //window
+        G4Box Window = new G4Box("Window_" + mapmtName, MAPMT_dx - MAPMTWall_thickness, MAPMT_dy - MAPMTWall_thickness, MAPMTWindow_thickness / 2);
+        Window.translate(0, 0, -MAPMT_dz + MAPMTWindow_thickness / 2);
+        Window.setMother(MAPMTVolume);
+        
+        //photocathode
+        double PMTPhotocathode_z = -MAPMT_dz + 2 * MAPMTWindow_thickness / 2 + MAPMTPhotocathode_thickness / 2 + offset;
+        G4Box Photocathode = new G4Box("Photocathode_" + mapmtName, MAPMTPhotocathode_side / 2, MAPMTPhotocathode_side / 2, MAPMTPhotocathode_thickness / 2);
+        Photocathode.translate(0, 0, -MAPMT_dz + MAPMTWindow_thickness + MAPMTPhotocathode_thickness / 2);
+        Photocathode.setMother(MAPMTVolume);
+        // add the photocatodes to the list
+        photocatodes.add(Photocathode);
+        
+        //socket
+        G4Box Socket = new G4Box("Socket_" + mapmtName, MAPMT_dx - MAPMTWall_thickness, MAPMT_dy - MAPMTWall_thickness, MAPMTSocket_thickness / 2);
+        Socket.translate(0, 0, MAPMT_dz - MAPMTSocket_thickness / 2);
+        Socket.setMother(MAPMTVolume);
+        
+        return MAPMTVolume;
     }
     
+    /**
+     * @author: gangel
+     * @param i the nr of the PMT
+     * @return: PMT volume as a G4Box
+     */
+    public G4Box GetPMT(int i)
+    {
+        
+        return    pmts.get(i-1);
+        
+        // Object[] pmtArray = pmts.toArray();
+        //return (G4Box) pmtArray[i];
+    }
+    
+    /**
+     * @author: gangel
+     * @param i the nr of the PMT
+     * @return: the Photocatodes volumes inside the PMT
+     */
+    public G4Box GetPhotocatode(int i)
+    {
+        
+        return    photocatodes.get(i-1);
+        
+        
+    }
+    /**
+     * @author: gangel
+     * @param i the STL volume
+     * 0 OpticalGasVolume - 1 AerogelTiles,2 Aluminum,3 CFRP,4 Glass,5 TedlarWrapping
+     * @return: the Photocatodes volumes inside the PMT
+     */
+    public G4Stl GetStl(int i)
+    {
+        return  stlvolumes.get(i-1);
+    }
 }
 
 
