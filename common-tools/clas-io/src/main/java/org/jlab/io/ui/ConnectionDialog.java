@@ -115,12 +115,13 @@ public class ConnectionDialog extends BasicDialog {
         
         JLabel label = new JLabel(" File: ");
         _fileName = new JTextField(30);
-        _fileName.setText("/tmp/et_sys_clasprod");
+        _fileName.setText("/et/clasprod");
         subpanel2.add(label);
         subpanel2.add(_fileName);
         //List<String>  etFiles = FileUtils.filesInFolder(null, reason);
         try {
-            List<String> etFiles = FileUtils.dirListStartsWith("/tmp", "et_sys");
+            List<String> etFiles = FileUtils.dirListStartsWith("/et", "");
+            //List<String> etFiles = FileUtils.dirListStartsWith("/tmp", "et_sys");
             //List<String> etFiles = FileUtils.dirListStartsWith("/Users/gavalian/Work", "d");
             for(String f : etFiles){
                 System.out.println(" -----> " + f);
