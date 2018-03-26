@@ -195,5 +195,3 @@ public final class RICHGeant4Factory extends Geant4Factory {
         return  stlvolumes.get(i-1);
     }
 }
-
-
