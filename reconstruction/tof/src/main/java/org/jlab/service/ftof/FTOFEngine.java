@@ -109,7 +109,10 @@ public class FTOFEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-
+        if (newRun<=0) {
+            System.err.println("FTOFEngine:  got run <= 0 in RUN::config, skipping event.");
+            return false;
+        }
         
         if (geometry == null) {
             System.err.println(" FTOF Geometry not loaded !!!");
