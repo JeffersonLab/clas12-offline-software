@@ -35,8 +35,6 @@ public class ECCommon {
     public static Boolean   singleEvent = false;
     public static String      variation = "default";
     
-    public static IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
-    
     private static double[] AtoE  = {15,10,10};    // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
     
@@ -124,7 +122,7 @@ public class ECCommon {
     public static List<ECStrip>  readStripsHipo(DataEvent event){   
     	
         List<ECStrip>  strips = new ArrayList<ECStrip>();
-        tdcs.clear();
+        IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
         if(event.hasBank("ECAL::tdc")==true){
             DataBank  bank = event.getBank("ECAL::tdc");            
