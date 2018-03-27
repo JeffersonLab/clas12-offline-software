@@ -70,15 +70,19 @@ public class CTOFEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
         if(event.hasBank("RUN::config")==false ) {
-		System.err.println("RUN CONDITIONS NOT READ!");
-		return true;
-	}
-		
+            System.err.println("RUN CONDITIONS NOT READ!");
+            return true;
+        }
+
         DataBank bank = event.getBank("RUN::config");
 		
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        final int newRun = bank.getInt("run", 0);
+        if (newRun<=0) {
+            System.err.println("CTOFEngine:  got run <= 0 in RUN::config, skipping event.");
+            return false;
+        }
 
         if (geometry == null) {
             System.err.println(" CTOF Geometry not loaded !!!");
