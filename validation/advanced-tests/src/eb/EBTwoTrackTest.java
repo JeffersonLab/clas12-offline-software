@@ -418,7 +418,8 @@ public class EBTwoTrackTest {
             else           assertEquals(kEff>0.60,true);
         }
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
-        else if (hadronPDG==22)   assertEquals(gEff>0.75,true);
+        else if (hadronPDG==22)   assertEquals(gEff>0.85,true);
+        else if (hadronPDG==2112) assertEquals(nEff>0.55,true);
     }
    
     private void checkResultsFT() {
