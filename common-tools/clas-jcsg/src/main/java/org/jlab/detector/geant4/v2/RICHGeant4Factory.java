@@ -23,7 +23,6 @@ import org.jlab.detector.volume.G4Box;
  * @author Goodwill, kenjo
  * modfied by gangel
  */
- */
 public final class RICHGeant4Factory extends Geant4Factory {
 
     //to be  stored in database, from hashmap of perl script for gemc, all dimensions in mm
