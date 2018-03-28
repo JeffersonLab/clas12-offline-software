@@ -33,5 +33,23 @@ public interface IStopper {
 	 *            meters)
 	 */
 	public void setFinalT(double finalT);
+	
 
+	/**
+	 * Generally this is the same as stop integration. So most
+	 * will just return stopIntegration(). But sometimes
+	 * stop just means we reset and integrate more. For example, with a 
+	 * fixed Z integrator we "stop" when we cross the z boundary however
+	 * we are not done unless we are within tolerance. If we are within
+	 * tolerance (on either side) we are really done! 
+	 * @param t
+	 *            the current value of the independent variable (typically
+	 *            pathlength)
+	 * @param y
+	 *            the current state vector (typically [x, y, z, vx, vy, vz])
+	 * @return <code>true</code> if we should stop now.
+	 */
+	default boolean terminateIntegration(double t, double y[]) {
+		return stopIntegration(t, y);
+	}
 }

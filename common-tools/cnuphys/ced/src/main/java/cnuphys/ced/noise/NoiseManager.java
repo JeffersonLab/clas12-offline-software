@@ -2,7 +2,6 @@ package cnuphys.ced.noise;
 
 import java.awt.Color;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -10,8 +9,6 @@ import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.NoiseData;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -77,26 +74,6 @@ public class NoiseManager implements IClasIoEventListener {
 		return noisePackage.getParameters(sect0, supl0);
 	}
 	
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		noisePackage.clear();
-		_noiseResults.clear();
-		
-		NoiseData noiseData = FastMCManager.getInstance().getNoiseData();
-		
-		if ((noiseData != null) && (noiseData.count > 0)) {
-			noisePackage.findNoise(toIntArray(noiseData.sector),
-					toIntArray(noiseData.superlayer), 
-					toIntArray(noiseData.layer),
-					toIntArray(noiseData.wire), 
-					_noiseResults);
-		}
-	}
-	
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -155,7 +132,7 @@ public class NoiseManager implements IClasIoEventListener {
 	
 	/**
 	 * Change the event source type
-	 * @param source the new source: File, ET, FastMC
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {

@@ -48,19 +48,7 @@ public class FTOFGeometry {
 	public static FTOFPanel[] getFtofPanel() {
 		return _ftofPanel;
 	}
-	
-	/**
-	 * Get the list of detector hits (a la FastMC, not evio)
-	 * @param path the path generated from a swim trajectory for the full detector
-	 * @return the list of hits FastMC geometry only.
-	 */
-	public static List<DetectorHit> getHits(Path3D path) {
-		if (path == null) {
-			return null;
-		}
-		return _ftofDetector.getHits(path);
-	}
-	
+		
 	/**
 	 * Get the layer hits
 	 * @param sect0 the 0-based sector 0..5

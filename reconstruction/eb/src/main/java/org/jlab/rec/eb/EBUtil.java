@@ -2,8 +2,10 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
+import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 public class EBUtil {
 
@@ -62,7 +64,7 @@ public class EBUtil {
     /**
      * Calculate timing resolution:
      */
-    public static double geDettTimingResolution(DetectorParticle p, DetectorType type, int layer) {
+    public static double getDetTimingResolution(DetectorParticle p, DetectorType type, int layer) {
         Double[] pars;
         if (type==DetectorType.FTOF) {
             if (layer==1) pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF1A_TimingRes);
@@ -78,6 +80,24 @@ public class EBUtil {
         for (int ii=0; ii<pars.length; ii++) res += pars[ii]*pow(mom,ii);
         return res;
     }
+
+    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int layer,double startTime) {
+        double beta=-1;
+        DetectorResponse resp = p.getResponse(type,layer);
+        if (resp!=null) {
+            beta = resp.getPosition().mag() / 
+                (resp.getTime()-startTime) / 
+                PhysicsConstants.speedOfLight(); 
+        }
+        return beta;
+    }
+    public static double getNeutralBetaECAL(DetectorParticle p, double startTime) {
+        double      beta = getNeutralBeta(p,DetectorType.ECAL,1,startTime);
+        if (beta<0) beta = getNeutralBeta(p,DetectorType.ECAL,4,startTime);
+        if (beta<0) beta = getNeutralBeta(p,DetectorType.ECAL,7,startTime);
+        return beta;
+    }
+
 
 }
 

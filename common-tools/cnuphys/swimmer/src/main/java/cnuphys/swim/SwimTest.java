@@ -43,7 +43,7 @@ public class SwimTest {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
-		MagneticField.setMathLib(MagneticField.MathLib.SUPERFAST);
+		MagneticField.setMathLib(MagneticField.MathLib.FAST);
 		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
 		FieldProbe.cache(true);
 		int numTest = 10000;

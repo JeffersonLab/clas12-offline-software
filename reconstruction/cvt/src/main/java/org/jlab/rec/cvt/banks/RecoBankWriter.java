@@ -129,12 +129,12 @@ public class RecoBankWriter {
             bank.setShort("ID", index, (short) crosses.get(i).get(j).get_Id());
             bank.setByte("sector", index, (byte) crosses.get(i).get(j).get_Sector());
             bank.setByte("region", index, (byte) crosses.get(i).get(j).get_Region());
-            bank.setFloat("x", index, (float) crosses.get(i).get(j).get_Point().x());
-            bank.setFloat("y", index, (float) crosses.get(i).get(j).get_Point().y());
-            bank.setFloat("z", index, (float) crosses.get(i).get(j).get_Point().z());
-            bank.setFloat("err_x", index, (float) crosses.get(i).get(j).get_PointErr().x());
-            bank.setFloat("err_y", index, (float) crosses.get(i).get(j).get_PointErr().y());
-            bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
+            bank.setFloat("x", index, (float) (crosses.get(i).get(j).get_Point().x()/10.));
+            bank.setFloat("y", index, (float) (crosses.get(i).get(j).get_Point().y()/10.));
+            bank.setFloat("z", index, (float) (crosses.get(i).get(j).get_Point().z()/10.));
+            bank.setFloat("err_x", index, (float) (crosses.get(i).get(j).get_PointErr().x()/10.));
+            bank.setFloat("err_y", index, (float) (crosses.get(i).get(j).get_PointErr().y()/10.));
+            bank.setFloat("err_z", index, (float) (crosses.get(i).get(j).get_PointErr().z()/10.));
             bank.setShort("trkID", index, (short) crosses.get(i).get(j).get_AssociatedTrackID());
 
             if (crosses.get(i).get(j).get_Dir() != null && 
@@ -263,12 +263,12 @@ public class RecoBankWriter {
             bank.setShort("ID", index, (short) crosses.get(i).get(j).get_Id());
             bank.setByte("sector", index, (byte) crosses.get(i).get(j).get_Sector());
             bank.setByte("region", index, (byte) crosses.get(i).get(j).get_Region());
-            bank.setFloat("x", index, (float) crosses.get(i).get(j).get_Point().x());
-            bank.setFloat("y", index, (float) crosses.get(i).get(j).get_Point().y());
-            bank.setFloat("z", index, (float) crosses.get(i).get(j).get_Point().z());
-            bank.setFloat("err_x", index, (float) crosses.get(i).get(j).get_PointErr().x());
-            bank.setFloat("err_y", index, (float) crosses.get(i).get(j).get_PointErr().y());
-            bank.setFloat("err_z", index, (float) crosses.get(i).get(j).get_PointErr().z());
+            bank.setFloat("x", index, (float) (crosses.get(i).get(j).get_Point().x()/10.));
+            bank.setFloat("y", index, (float) (crosses.get(i).get(j).get_Point().y()/10.));
+            bank.setFloat("z", index, (float) (crosses.get(i).get(j).get_Point().z()/10.));
+            bank.setFloat("err_x", index, (float) (crosses.get(i).get(j).get_PointErr().x()/10.));
+            bank.setFloat("err_y", index, (float) (crosses.get(i).get(j).get_PointErr().y()/10.));
+            bank.setFloat("err_z", index, (float) (crosses.get(i).get(j).get_PointErr().z()/10.));
             bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
            
             if (crosses.get(i).get(j).get_Dir() != null && 
@@ -332,8 +332,8 @@ public class RecoBankWriter {
 
             bank.setFloat("phi0", i, (float) helix.get_phi_at_dca());
             bank.setFloat("tandip", i, (float) helix.get_tandip());
-            bank.setFloat("z0", i, (float) helix.get_Z0());
-            bank.setFloat("d0", i, (float) helix.get_dca());
+            bank.setFloat("z0", i, (float) (helix.get_Z0()/10.));
+            bank.setFloat("d0", i, (float) (helix.get_dca()/10.));
 
             // this is the format of the covariance matrix for helical tracks
             // cov matrix = 
@@ -368,7 +368,7 @@ public class RecoBankWriter {
             bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().x());
             bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().y());
             bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
-            bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10)); // conversion to cm
+            bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10.)); // conversion to cm
 
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
@@ -418,9 +418,9 @@ public class RecoBankWriter {
             bank.setFloat("chi2", i, (float) cosmics.get(i).get_chi2());
             bank.setShort("ndf", i, (short) cosmics.get(i).get_ndf());
             bank.setFloat("trkline_yx_slope", i, (float) cosmics.get(i).get_ray().get_yxslope());
-            bank.setFloat("trkline_yx_interc", i, (float) cosmics.get(i).get_ray().get_yxinterc());
+            bank.setFloat("trkline_yx_interc", i, (float) (cosmics.get(i).get_ray().get_yxinterc()/10.));
             bank.setFloat("trkline_yz_slope", i, (float) cosmics.get(i).get_ray().get_yzslope());
-            bank.setFloat("trkline_yz_interc", i, (float) cosmics.get(i).get_ray().get_yzinterc());
+            bank.setFloat("trkline_yz_interc", i, (float) (cosmics.get(i).get_ray().get_yzinterc()/10.));
 
             // get the cosmics ray unit direction vector
             Vector3D u = new Vector3D(cosmics.get(i).get_ray().get_yxslope(), 1, cosmics.get(i).get_ray().get_yzslope()).asUnit();
@@ -480,9 +480,9 @@ public class RecoBankWriter {
                 bank.setShort("ID", k, (short) stVec.get_ID()); 
                 bank.setByte("LayerTrackIntersPlane", k, (byte) stVec.get_SurfaceLayer());
                 bank.setByte("SectorTrackIntersPlane", k, (byte) stVec.get_SurfaceSector());
-                bank.setFloat("XtrackIntersPlane", k, (float) stVec.x());
-                bank.setFloat("YtrackIntersPlane", k, (float) stVec.y());
-                bank.setFloat("ZtrackIntersPlane", k, (float) stVec.z());
+                bank.setFloat("XtrackIntersPlane", k, (float) (stVec.x()/10.));
+                bank.setFloat("YtrackIntersPlane", k, (float) (stVec.y()/10.));
+                bank.setFloat("ZtrackIntersPlane", k, (float) (stVec.z()/10.));
                 bank.setFloat("PhiTrackIntersPlane", k, (float) stVec.get_TrkPhiAtSurface());
                 bank.setFloat("ThetaTrackIntersPlane", k, (float) stVec.get_TrkThetaAtSurface());
                 bank.setFloat("trkToMPlnAngl", k, (float) stVec.get_TrkToModuleAngle());
@@ -528,9 +528,9 @@ public class RecoBankWriter {
                 bank.setInt("ID", k, trks.get(i).get_Id());
                 bank.setInt("LayerTrackIntersPlane", k, stVec.get_SurfaceLayer());
                 bank.setInt("SectorTrackIntersPlane", k, stVec.get_SurfaceSector());
-                bank.setFloat("XtrackIntersPlane", k, (float) stVec.x());
-                bank.setFloat("YtrackIntersPlane", k, (float) stVec.y());
-                bank.setFloat("ZtrackIntersPlane", k, (float) stVec.z());
+                bank.setFloat("XtrackIntersPlane", k, (float) (stVec.x()/10.));
+                bank.setFloat("YtrackIntersPlane", k, (float) (stVec.y()/10.));
+                bank.setFloat("ZtrackIntersPlane", k, (float) (stVec.z()/10.));
                 bank.setFloat("PhiTrackIntersPlane", k, (float) stVec.get_TrkPhiAtSurface());
                 bank.setFloat("ThetaTrackIntersPlane", k, (float) stVec.get_TrkThetaAtSurface());
                 bank.setFloat("trkToMPlnAngl", k, (float) stVec.get_TrkToModuleAngle());

@@ -29,6 +29,7 @@ public class BMTSectorItem extends DonutItem {
 	public static final Color cColor = new Color(220, 255, 220);
 	public static final Color zColor = new Color(240, 240, 240);
 	
+	//the layervtypes, note from inside out they go C, Z, Z, C, Z, C
 	private static LAYERTYPE[] layerTypes = 
 		{LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.Z, 
 				LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.C};

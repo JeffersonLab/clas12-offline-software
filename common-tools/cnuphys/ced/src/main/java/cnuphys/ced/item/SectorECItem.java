@@ -18,7 +18,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 
 public class SectorECItem extends PolygonItem {
@@ -86,7 +85,7 @@ public class SectorECItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

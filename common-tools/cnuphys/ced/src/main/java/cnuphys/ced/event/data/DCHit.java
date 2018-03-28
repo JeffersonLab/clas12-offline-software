@@ -3,8 +3,6 @@ package cnuphys.ced.event.data;
 import java.awt.Point;
 import java.util.List;
 
-import cnuphys.bCNU.util.UnicodeSupport;
-
 public class DCHit {
 	
 	//used for mouse over feedback
@@ -33,7 +31,7 @@ public class DCHit {
 	public byte lr; 
 	
 	/** Time */
-	public float time;  //energy in MeV
+	public int tdc;
 	
 	/** Track DOCA in cm */
 	public float trkDoca;
@@ -44,7 +42,7 @@ public class DCHit {
 	 * @param layer the 1-based layer 1..6
 	 * @param wire the 1-based wire
 	 */
-	public DCHit(byte sector, byte superlayer, byte layer, short wire, short id, short status, byte lr, float time, float doca) {
+	public DCHit(byte sector, byte superlayer, byte layer, short wire, short id, short status, byte lr, int tdc, float doca) {
 		this.sector = sector;
 		this.superlayer = superlayer;
 		this.layer = layer;
@@ -52,7 +50,7 @@ public class DCHit {
 		this.id = id;
 		this.status = status;
 		this.lr = lr;
-		this.time = time;
+		this.tdc = tdc;
 		this.trkDoca = doca;
 	}
 	
@@ -72,10 +70,10 @@ public class DCHit {
 		
 		String hitStr2;
 		if (trkDoca < 0.) {
-			hitStr2 = String.format("status %d  lr %d  (no doca)", status, lr);
+			hitStr2 = String.format("status %d  lr %d  tdc %d  (no doca)", status, lr, tdc);
 		}
 		else {
-			hitStr2 = String.format("status %d  lr %d  doca %6.2f mm", status, lr, 10*trkDoca);
+			hitStr2 = String.format("status %d  lr %d  tdc %d  doca %6.2f mm", status, lr, tdc, 10*trkDoca);
 		}
 		v.add("$red$" + hitStr2);
 	}

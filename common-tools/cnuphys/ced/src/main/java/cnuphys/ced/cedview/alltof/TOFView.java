@@ -31,7 +31,6 @@ import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.FTOFGeometry;
 
 public class TOFView extends CedView implements ISector {
@@ -193,7 +192,7 @@ public class TOFView extends CedView implements ISector {
 			@Override
 			public void draw(Graphics g, IContainer container) {
 				
-				if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+				if (ClasIoEventManager.getInstance().isAccumulating()) {
 					return;
 				}
 

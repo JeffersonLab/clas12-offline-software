@@ -18,7 +18,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.splot.plot.X11Colors;
@@ -51,7 +50,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

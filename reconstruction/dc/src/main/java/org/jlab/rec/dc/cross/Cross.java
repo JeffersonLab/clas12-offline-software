@@ -21,7 +21,27 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      * serial id
      */
     private static final long serialVersionUID = 5317526429163382618L;
+    /**
+     *
+     * @return serialVersionUID
+     */
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
 
+    private int _Sector;      							//	sector[1...6]
+    private int _Region;    		 					//	region[1,...3]
+    private int _Id;								//	cross Id
+
+    // point parameters:
+    private Point3D _Point;
+    private Point3D _PointErr;
+    private Point3D _Dir;
+    private Point3D _DirErr;
+    private Segment _seg1;
+    private Segment _seg2;
+    public boolean isPseudoCross = false;
+    public int recalc;
     /**
      *
      * @param sector the sector (1...6)
@@ -34,16 +54,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         this._Region = region;
         this._Id = rid;
     }
-
-    private int _Sector;      							//	sector[1...6]
-    private int _Region;    		 					//	region[1,...3]
-    private int _Id;								//	cross Id
-
-    // point parameters:
-    private Point3D _Point;
-    private Point3D _PointErr;
-    private Point3D _Dir;
-    private Point3D _DirErr;
 
     /**
      *
@@ -168,13 +178,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         this._DirErr = _DirErr;
     }
 
-    /**
-     *
-     * @return serialVersionUID
-     */
-    public static long getSerialversionuid() {
-        return serialVersionUID;
-    }
 
     /**
      * Sorts crosses by azimuth angle values
@@ -193,10 +196,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         }
     }
 
-    private Segment _seg1;
-    private Segment _seg2;
-    public boolean isPseudoCross = false;
-    public int recalc;
 
     /**
      * Set the first segment (corresponding to the first superlayer in a region)
@@ -266,7 +265,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         this.set_Dir(dirVec);
 
         if (this.get_Dir().z() == 0) {
-            System.err.print("Error in tangent to trajectory calculation");
             return;
         }
 

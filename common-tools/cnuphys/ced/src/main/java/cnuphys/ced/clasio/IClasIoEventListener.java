@@ -2,7 +2,6 @@ package cnuphys.ced.clasio;
 
 import java.util.EventListener;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 public interface IClasIoEventListener extends EventListener {
@@ -28,10 +27,4 @@ public interface IClasIoEventListener extends EventListener {
 	 */
 	public void changedEventSource(ClasIoEventManager.EventSourceType source);
 	
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	public void newFastMCGenEvent(PhysicsEvent event);
-
 }

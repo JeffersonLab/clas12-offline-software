@@ -7,9 +7,6 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
-import java.util.Vector;
-
-import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
@@ -23,8 +20,6 @@ import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.noise.NoiseManager;
@@ -164,7 +159,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 
-		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (_eventManager.isAccumulating()) {
 			return;
 		}
 
@@ -204,54 +199,6 @@ public class AllDCSuperLayer extends RectangleItem {
 		g.drawPolygon(_lastDrawnPolygon);
 	}
 	
-	
-	//draw a fast MC even rather than an evio event
-	private void fastMCDraw(Graphics g, IContainer container) {
-		if (FastMCManager.getInstance().isStreaming()) {
-			return;
-		}
-		
-		//don't draw if streaming
-		if (FastMCManager.getInstance().isStreaming()) {
-			return;
-		}
-		
-		// draw results of noise reduction? If so will need the parameters
-		// (which have the results)
-		NoiseReductionParameters parameters = _noiseManager.getParameters(
-				_sector - 1, _superLayer - 1);
-		// NoiseReductionParameters parameters =
-		// NoiseEventListener.getInstance()
-		// .getNoiseParameters(_sector - 1, _superLayer - 1);
-
-		// show the noise segment masks?
-		if (_view.showMasks()) {
-			drawMasks(g, container, parameters);
-		}
-
-		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-		if ((phits == null) || phits.isEmpty()) {
-			return;
-		}
-		
-		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
-
-		for (ParticleHits hits : phits) {
-			List<DetectorHit> dchits = hits.getDCHits();
-			if (dchits != null) {
-				for (DetectorHit hit : dchits) {
-					int sect1 = hit.getSectorId() + 1;
-					int supl1 = hit.getSuperlayerId() + 1;
-					if ((sect1 == _sector) && (supl1 == _superLayer)) {
-						int lay1 = hit.getLayerId() + 1;
-						int wire1 = hit.getComponentId() + 1;
-						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), wr);
-
-					}
-				}
-			}
-		}
-	}
 
 	/**
 	 * Draw in single event mode
@@ -262,13 +209,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	 *            the rendering container
 	 */
 	private void singleEventDrawItem(Graphics g, IContainer container) {
-		
-		//reroute for fast MC
-		if (_eventManager.isSourceFastMC()) {
-			fastMCDraw(g, container);
-			return;
-		}
-		
+				
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 
 		// draw results of noise reduction? If so will need the parameters

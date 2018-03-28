@@ -3,7 +3,6 @@ package org.jlab.rec.dc.segment;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
@@ -32,7 +31,6 @@ public class SegmentFinder {
                 continue;
             }
             if (fClus.get_TrkgStatus() == -1) {
-                System.err.print("Error -- the clusters must be fit prior to making segments");
                 return segList;
             }
 
@@ -149,6 +147,11 @@ public class SegmentFinder {
 
     }
 
+    /**
+     * 
+     * @param clusters list of fitted clusters
+     * @return list of time-based fitted clusters
+     */
     public List<FittedCluster> selectTimeBasedSegments(
             List<FittedCluster> clusters) {
         List<FittedCluster> selTimeBasedSegments = new ArrayList<FittedCluster>();

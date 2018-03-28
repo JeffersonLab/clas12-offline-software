@@ -11,9 +11,18 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
  *
  */
 public class Hit implements Comparable<Hit> {
-    // class implements Comparable interface to allow for sorting a collection of hits by wire number values
 
-    // constructors 
+    private int _Sector;      							//	   sector[1...6]
+    private int _Superlayer;    	 					//	   superlayer [1,...6]
+    private int _Layer;    	 						//	   layer [1,...6]
+    private int _Wire;    	 						//	   wire [1...112]
+    private int _TDC;
+    private int _Id;
+    private double _cellSize;
+    private double _DocaErr;
+    // class implements Comparable interface to allow for sorting a collection of hits by wire number values
+    
+    // constructors
     /**
      *
      * @param sector (1...6)
@@ -31,12 +40,6 @@ public class Hit implements Comparable<Hit> {
         this._Id = Id;
 
     }
-
-    private int _Sector;      							//	   sector[1...6]
-    private int _Superlayer;    	 					//	   superlayer [1,...6]
-    private int _Layer;    	 						//	   layer [1,...6]
-    private int _Wire;    	 						//	   wire [1...112]
-    private int _TDC;
     
 
     /**
@@ -124,7 +127,6 @@ public class Hit implements Comparable<Hit> {
         this._TDC = TDC;
     }
     
-    private int _Id;
     /**
      *
      * @return the ID
@@ -147,7 +149,7 @@ public class Hit implements Comparable<Hit> {
      * @return region (1...3)
      */
     public int get_Region() {
-        return (int) (this._Superlayer + 1) / 2;
+        return (this._Superlayer + 1) / 2;
     }
 
     /**
@@ -200,7 +202,7 @@ public class Hit implements Comparable<Hit> {
         double y = (double) wire * 2 * Math.tan(Math.PI / 6.);
         if (layer % 2 == 1) {
             //y = y-brickwallSign*Math.sin(Math.PI/3.)/(1.+Math.sin(Math.PI/6.));
-            y = y - brickwallSign * Math.tan(Math.PI / 6.);
+            y -= brickwallSign * Math.tan(Math.PI / 6.);
         }
         return y;
 
@@ -208,7 +210,6 @@ public class Hit implements Comparable<Hit> {
 
     
     
-    private double _cellSize;
     /**
      *
      * @return the cell size in a given superlayer
@@ -233,7 +234,6 @@ public class Hit implements Comparable<Hit> {
 
     }
 
-    private double _DocaErr;
     /**
      *
      * @return error on the time in ns (4ns time window used by default in

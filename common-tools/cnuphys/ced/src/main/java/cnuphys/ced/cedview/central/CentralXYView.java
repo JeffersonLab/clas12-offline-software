@@ -36,12 +36,16 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
+import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BaseHit2;
+import cnuphys.ced.event.data.BaseHit2List;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -173,8 +177,9 @@ public class CentralXYView extends CedXYView {
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
-						+ DisplayBits.MCTRUTH
-						+ DisplayBits.COSMICS,
+						+ DisplayBits.MCTRUTH + DisplayBits.RECONHITS + DisplayBits.ADC_HITS
+						+ DisplayBits.CVTTRACKS + DisplayBits.COSMICS +
+						DisplayBits.GLOBAL_HB +  DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -229,6 +234,7 @@ public class CentralXYView extends CedXYView {
 			public void draw(Graphics g, IContainer container) {
 
 				if (!_eventManager.isAccumulating()) {
+					
 					_swimTrajectoryDrawer.draw(g, container);
 					if (showCosmics()) {
 						drawCosmicTracks(g, container);
@@ -575,11 +581,37 @@ public class CentralXYView extends CedXYView {
 				Vector<int[]> stripADCData = BST.getInstance().allStripsForSectorAndLayer(_closestPanel.getSector(),
 						_closestPanel.getLayer());
 				for (int sdtdat[] : stripADCData) {
-					fbString("orange", "strip  " + sdtdat[0] + " adc: " + +sdtdat[1], feedbackStrings);
+					fbString("orange", "strip  " + sdtdat[0] + " adc " + +sdtdat[1], feedbackStrings);
+				}
+			}
+		}
+		
+		//BMT?
+		
+		if (showADCHits()) {
+			AdcHitList adcHits = BMT.getInstance().getADCHits();
+			if ((adcHits != null) && !adcHits.isEmpty()) {
+				for (AdcHit adcHit : adcHits) {
+					if (adcHit.contains(screenPoint)) {
+						adcHit.tdcAdcFeedback("layer", "strip", feedbackStrings);
+						break;
+					}
 				}
 			}
 		}
 
+		if (showReconHits()) {
+			BaseHit2List reconHits = BMT.getInstance().getRecHits();
+			if ((reconHits != null) && !reconHits.isEmpty()) {
+				for (BaseHit2 bhit2 : reconHits) {
+					if (bhit2.contains(screenPoint)) {
+						fbString("orange", "BMT recon hit sector  " + bhit2.sector + " layer " + bhit2.layer + " strip "
+								+ bhit2.component, feedbackStrings);
+						break;
+					}
+				}
+			}
+		}
 		
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);

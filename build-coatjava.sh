@@ -1,5 +1,29 @@
 #!/bin/bash
 
+OPTIONS=n
+LONGOPTIONS=nospotbugs
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+eval set -- "$PARSED"
+
+runSpotBugs="yes"
+
+while true; do
+    case "$1" in
+        -n|--nospotbugs)
+            runSpotBugs="no"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Programming error"
+            exit 3
+            ;;
+    esac
+done
+
 rm -rf coatjava
 mkdir -p coatjava
 cp -r bin coatjava/
@@ -21,11 +45,13 @@ rm -rf ~/.m2/repository/org/jlab
 mvn install # also runs unit tests
 if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
 
-mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
-# mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
-# the spotbugsXml.xml file is easiest read in a web browser
-# see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
-if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
+if [ $runSpotBugs == "yes" ]; then
+	mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
+	# mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
+	# the spotbugsXml.xml file is easiest read in a web browser
+	# see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
+	if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
+fi
 
 cd common-tools/coat-lib
 mvn package

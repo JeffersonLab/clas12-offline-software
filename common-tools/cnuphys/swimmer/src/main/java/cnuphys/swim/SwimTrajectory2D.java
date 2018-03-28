@@ -36,6 +36,7 @@ public class SwimTrajectory2D {
 	
 	//sector with the most points
 	private byte _dominantSector = -1;
+	
 
 	/**
 	 * Create a 2D trajectory from the 3D trajectory
@@ -348,5 +349,14 @@ public class SwimTrajectory2D {
 		// intersection on line
 		return pintersect.distance(wp);
 	}
+	
+	/**
+	 * Get the source of the trajectory, e.g., hbtracking
+	 * @return the source of the trajectory
+	 */
+	public String getSource() {
+		return ((_trajectory3D == null) ? "???" : _trajectory3D.getSource());
+	}
+
 
 }

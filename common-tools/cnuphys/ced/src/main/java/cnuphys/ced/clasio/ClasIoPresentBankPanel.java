@@ -11,14 +11,12 @@ import java.util.Hashtable;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.component.ActionLabel;
 import cnuphys.ced.clasio.table.NodeTable;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
-import cnuphys.ced.fastmc.FastMCManager;
 
 /**
  * Panel that shows which banks are present in an event
@@ -162,16 +160,6 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 		// _nodeTable.makeNameVisible(ae.getActionCommand());
 	}
 
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		if (!FastMCManager.getInstance().isStreaming()) {
-			update();
-		}
-	}
 	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -201,7 +189,7 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	
 	/**
 	 * Change the event source type
-	 * @param source the new source: File, ET, FastMC
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
