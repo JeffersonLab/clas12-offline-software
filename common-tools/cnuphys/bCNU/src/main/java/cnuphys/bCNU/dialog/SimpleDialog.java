@@ -157,7 +157,8 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	 *         implementation creates a row of closeout buttons.
 	 */
 	protected Component createSouthComponent() {
-		if (_closeout != null) {
+		
+		if ((_closeout != null) || (_closeout.length < 1)) {
 			buttonPanel = new JPanel();
 			buttonPanel.setLayout(new BoxLayout(buttonPanel,
 					BoxLayout.LINE_AXIS));

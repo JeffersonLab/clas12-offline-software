@@ -38,20 +38,18 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
 			// mc
 			if (SwimMenu.getInstance().showMonteCarloTracks()) {
-				List<SwimTrajectory> trajectories = Swimming
-						.getMCTrajectories();
-				if ((trajectories == null) || (trajectories.size() < 1)) {
-					return;
+				List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+				if ((trajectories != null) && (trajectories.size() > 0)) {
+
+					Rectangle sr = container.getInsetRectangle();
+					Graphics2D g2 = (Graphics2D) g;
+
+					Shape oldClip = g2.getClip();
+
+					g2.clipRect(sr.x, sr.y, sr.width, sr.height);
+					super.draw(g, container);
+					g2.setClip(oldClip);
 				}
-
-				Rectangle sr = container.getInsetRectangle();
-				Graphics2D g2 = (Graphics2D) g;
-
-				Shape oldClip = g2.getClip();
-
-				g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-				super.draw(g, container);
-				g2.setClip(oldClip);
 			}
 
 			// recon

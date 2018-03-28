@@ -18,7 +18,6 @@ import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC;
 import cnuphys.ced.event.data.PCAL;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 
 public abstract class AMcHitDrawer extends CedViewDrawer {
@@ -35,7 +34,7 @@ public abstract class AMcHitDrawer extends CedViewDrawer {
 
 		_fbRects.clear();
 
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

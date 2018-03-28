@@ -5,6 +5,12 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.lund.SwimTrajectoryListener;
+import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.rk4.RungeKutta;
+import cnuphys.rk4.RungeKuttaException;
 
 public class Swimming {
 
@@ -176,11 +182,200 @@ public class Swimming {
 		}
 		System.out
 				.println(String
-						.format("R = [%8.5f, %8.5f, %8.5f] |R| = %7.4f m\nP = [%7.4e, %7.4e, %7.4e] |P| =  %9.6e GeV/c",
+						.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
 								Q[0], Q[1], Q[2], R, P * Q[3], P * Q[4], P
 										* Q[5], P));
 		System.out.println("norm (should be 1): " + norm);
 		System.out.println("--------------------------------------\n");
+	}
+	
+	
+	
+	public static SwimTrajectory testSwim(int opt) {
+		int charge = -1;
+		
+		//positions in METERS
+		double xo = 0;
+		double yo = 0;
+		double zo = 0;
+		double momentum = 1.0;
+		double theta = 30;
+		double phi = 0;
+		double accuracy = 1.0e-5;  //ten microns
+		double rMax = 7.0;
+		double stepSize = 5e-3; // m
+		double maxPathLen = 8.0; // m
+		double hdata[] = new double[3];
+		double ztarget = 5.0; //meters
+
+		
+		if (opt == 1) {
+			System.out.println("\nSWIMMER 1");
+		}
+		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+
+		SwimTrajectory traj = null;
+		try {
+			traj = swimmer.swim(charge, xo, yo, zo, momentum, theta, phi, ztarget, accuracy, rMax, maxPathLen, stepSize,
+					Swimmer.CLAS_Tolerance, hdata);
+
+			if (opt > 0) {
+				double lastY[] = traj.lastElement();
+				printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
+						traj.size(), momentum, lastY, hdata);
+			}
+
+		}
+		catch (RungeKuttaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return traj;
+	}
+	
+	public static SwimTrajectory testSwim2(int opt) {
+		int charge = -1;
+		
+		//positions in METERS
+		double xo = 0;
+		double yo = 0;
+		double zo = 0;
+		double momentum = 1.0;
+		double theta = 30;
+		double phi = 0;
+		double accuracy = 1.0e-5;  //ten microns
+		double stepSize = 5e-3; // m
+		double maxPathLen = 8.0; // m
+		double hdata[] = new double[3];
+		double ztarget = 5.0; //meters
+
+		
+		if (opt == 1) {
+			System.out.println("\nSWIMMER 2");
+		}
+		Swimmer2 swimmer = new Swimmer2(MagneticFields.getInstance().getActiveField());
+
+		SwimTrajectory traj = null;
+		try {
+			traj = swimmer.swim(charge, xo, yo, zo, momentum, theta, phi, ztarget, accuracy, maxPathLen, stepSize,
+					Swimmer.CLAS_Tolerance, hdata);
+
+			if (opt > 0) {
+				double lastY[] = traj.lastElement();
+				printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
+						traj.size(), momentum, lastY, hdata);
+			}
+
+		}
+		catch (RungeKuttaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return traj;
+	}
+
+	public static int testSwim3(int opt) {
+		int charge = -1;
+		
+		//positions in METERS
+		double xo = 0;
+		double yo = 0;
+		double zo = 0;
+		double momentum = 1.0;
+		double theta = 30;
+		double phi = 0;
+		double accuracy = 1.0e-5;  //ten microns
+		double stepSize = 5e-3; // m
+		double maxPathLen = 8.0; // m
+		double hdata[] = new double[3];
+		double ztarget = 5.0; //meters
+		
+		
+		double maxStepSize = 0.4; //meters
+
+		double finalState[] = new double[6];
+		
+		if (opt == 1) {
+			System.out.println("\nSWIMMER 3");
+		}
+		Swimmer2 swimmer = new Swimmer2(MagneticFields.getInstance().getActiveField());
+
+		int nStep= 0;
+		
+		try {
+			nStep = swimmer.swim(charge, xo, yo, zo, momentum, theta, phi, ztarget, accuracy, maxPathLen, stepSize,
+					maxStepSize, Swimmer.CLAS_Tolerance, hdata, finalState);
+
+			if (opt > 0) {
+				printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
+						nStep, momentum, finalState, hdata);
+			}
+
+		}
+		catch (RungeKuttaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return nStep;
+	}
+	public static void main(String arg[]) {
+		
+		MagneticFields.getInstance().initializeMagneticFields();
+		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
+		// swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+
+		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
+
+		MagneticField.setMathLib(MagneticField.MathLib.FAST);
+		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
+		FieldProbe.cache(true);
+
+		testSwim(1);
+		testSwim2(1);
+		testSwim3(1);
+
+		for (int i = 0; i < 100; i++) {
+			testSwim(0);
+		}
+
+		long time = System.currentTimeMillis();
+		for (int i = 0; i < 10000; i++) {
+			testSwim(0);
+		}
+		time = System.currentTimeMillis() - time;
+		testSwim(1);
+
+		System.out.println("\n*** TIME SWIMMER 1: " + time);
+		
+		for (int i = 0; i < 100; i++) {
+			testSwim2(0);
+		}
+
+		time = System.currentTimeMillis();
+		for (int i = 0; i < 10000; i++) {
+			testSwim2(0);
+		}
+		time = System.currentTimeMillis() - time;
+		testSwim2(1);
+
+		System.out.println("\n*** TIME SWIMMER 2: " + time);
+		
+		for (int i = 0; i < 100; i++) {
+			testSwim3(0);
+		}
+
+		time = System.currentTimeMillis();
+		for (int i = 0; i < 10000; i++) {
+			testSwim3(0);
+		}
+		time = System.currentTimeMillis() - time;
+		testSwim3(1);
+
+		System.out.println("\n*** TIME SWIMMER 3: " + time);
+
 	}
 
 }

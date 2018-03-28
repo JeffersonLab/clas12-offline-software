@@ -24,7 +24,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
-import cnuphys.bCNU.component.BusyPanel;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.ced.alldata.DataManager;
@@ -66,8 +65,6 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.BSTCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBSegments;
-//import cnuphys.ced.fastmc.FastMCManager;
-//import cnuphys.ced.fastmc.FastMCMenu;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
@@ -77,7 +74,9 @@ import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
 import cnuphys.ced.properties.PropertiesManager;
-import cnuphys.ced.training.TrainingManager;
+import cnuphys.ced.trigger.TriggerDialog;
+import cnuphys.ced.trigger.TriggerManager;
+import cnuphys.ced.trigger.TriggerMenuPanel;
 import cnuphys.lund.X11Colors;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
@@ -87,9 +86,11 @@ import cnuphys.magfield.MagneticField.MathLib;
 import cnuphys.splot.example.MemoryUsageDialog;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
+import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
 import cnuphys.bCNU.format.DateString;
+import cnuphys.bCNU.fortune.FortuneManager;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.splashscreen.SplashWindow;
 import cnuphys.bCNU.log.ConsoleLogListener;
@@ -99,6 +100,7 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
@@ -113,7 +115,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 0.99.999.51";
+	private static final String _release = "build 1.0 + " + UnicodeSupport.SMALL_EPSILON;
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -130,8 +132,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//weird menu
 	private JMenu _weirdMenu;
 	
+	//warning label that filtering is active
+	private JLabel _filterLabel;
+	
 	// busy panel shows working when reading file
-	private static BusyPanel _busyPanel;
+//	private static BusyPanel _busyPanel;
 
 	// event number label on menu bar
 	private static JLabel _eventNumberLabel;
@@ -141,6 +146,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//Environment display
 	private TextDisplayDialog _envDisplay;
+	
+	//show which filters are active
+	private JMenu _eventFilterMenu;
+
 	
 	// some views
 	private AllDCView _allDCView;
@@ -353,7 +362,18 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		addPcalHistogram();
 		addEcHistogram();
 		
+		//the trigger bit "view"
+		ActionListener al3 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TriggerDialog.showDialog();
+			}
+		};
 		
+		JMenuItem menuItem = new JMenuItem("Trigger Bits");
+		menuItem.addActionListener(al3);
+		ViewManager.getInstance().getViewMenu().add(menuItem, 1);
+
 
 		// log some environment info
 		Log.getInstance().config(Environment.getInstance().toString());
@@ -540,41 +560,38 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add to the event menu
 		addToEventMenu();
-		
-		//define menu
-		mmgr.addMenu(DefinitionManager.getInstance().getMenu());
-		
-		//FastMC
-		//mmgr.addMenu(new FastMCMenu());
-		
-		//weird menu
-		addWeirdMenu();
+				
 	}
-	
-	//add some fun stuff
-	private void addWeirdMenu() {
+
+	// add some fun stuff
+	private void addWeirdMenu(JMenu menu) {
 		String weirdTitle = "w" + "\u018e" + "i" + "\u1d19" + "d";
-		_weirdMenu = new JMenu(weirdTitle);		
+		_weirdMenu = new JMenu(weirdTitle);
 
 		// eliza!
 		final JMenuItem elizaItem = new JMenuItem("Eliza...");
-		
+		final JMenuItem fortuneItem = new JMenuItem("Fortune...");
+
 		ActionListener al1 = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Object source = e.getSource();
-				
+
 				if (source == elizaItem) {
-				ElizaDialog.showEliza(_instance);
+					ElizaDialog.showEliza(_instance);
+				}
+				else if (source == fortuneItem) {
+					FortuneManager.getInstance().showDialog();
 				}
 			}
 		};
-		
-		
-		elizaItem.addActionListener(al1);
-		_weirdMenu.add(elizaItem, 0);
 
-		MenuManager.getInstance().addMenu(_weirdMenu);
+		elizaItem.addActionListener(al1);
+		fortuneItem.addActionListener(al1);
+		_weirdMenu.add(elizaItem);
+		_weirdMenu.add(fortuneItem);
+		
+		menu.add(_weirdMenu, 0);
 
 	}
 	
@@ -619,6 +636,26 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		JMenu fmenu = mmgr.getFileMenu();
 		
 		fmenu.insertSeparator(0);
+		
+		// eliza!
+//		final JMenuItem elizaItem = new JMenuItem("Eliza...");
+//
+//		ActionListener al1 = new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				Object source = e.getSource();
+//
+//				if (source == elizaItem) {
+//					ElizaDialog.showEliza(_instance);
+//				}
+//			}
+//		};
+//
+//		elizaItem.addActionListener(al1);
+//		fmenu.add(elizaItem, 0);
+		
+		addWeirdMenu(fmenu);
+
 
 
 		JMenuItem aboutItem = new JMenuItem("About ced...");
@@ -683,6 +720,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		omenu.add(environ);
 		omenu.add(memPlot);
 		
+		//define menu
+		omenu.addSeparator();
+		omenu.add(DefinitionManager.getInstance().getMenu());
+
+		
 		
 //		omenu.addSeparator();
 //		
@@ -705,6 +747,23 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	public static void refresh() {
 		ViewManager.getInstance().refreshAllViews();
 	}
+	
+	/**
+	 * Change the label to reflect whether or not we are filtering events
+	 * @param filtering if <code>true</code> we are filtering
+	 */
+	public void setEventFilteringLabel(boolean filtering) {
+		_filterLabel.setVisible(filtering);
+	}
+	
+	/**
+	 * Change the label to reflect whether or not we are filtering events
+	 * @param filtering if <code>true</code> we are filtering
+	 */
+	public void fixEventFilteringLabel() {
+		_filterLabel.setVisible(ClasIoEventManager.getInstance().isFilteringOn());
+	}
+
 
 	/**
 	 * Set the event number label
@@ -713,9 +772,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 */
 	public static void setEventNumberLabel(int num) {
 		
-//		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
-//			return;
-//		}
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -740,6 +796,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 	}
 	
+	/**
+	 * Get the event filter menu
+	 * @return the event filter menu
+	 */
+	public JMenu getEventFilterMenu() {
+		return _eventFilterMenu;
+	}
 	
 	// add to the event menu
 	private void addToEventMenu() {
@@ -749,6 +812,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_eventCountLabel.setBackground(Color.white);
 		_eventCountLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
 		_eventMenu.add(_eventCountLabel);
+		
+		// add the event filter menu
+		_eventFilterMenu = new JMenu("Event Filters");
+		_eventMenu.add(_eventFilterMenu);
+		
+		
+		
 
 		// add the noise parameter menu item
 		ActionListener al2 = new ActionListener() {
@@ -762,6 +832,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_eventMenu.addSeparator();
 		MenuManager.addMenuItem("Noise Algorithm Parameters...", _eventMenu,
 				al2);
+		
+		
 		_eventMenu.addSeparator();
 
 		_playDCOccupancy = new JCheckBoxMenuItem("\"Play\" Drift Chamber Occupancy", false);
@@ -789,6 +861,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		}
 		return false;
 	}
+	
+	/**
+	 * Get the virtual view
+	 * @return the virtual view
+	 */
+	public VirtualView getVirtualView() {
+		return _virtualView;
+	}
 
 
 	/**
@@ -806,7 +886,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 			_instance.createMenus();
 			_instance.placeViewsOnVirtualDesktop();
 
-			_instance.createBusyPanel();
+//			_instance.createBusyPanel();
+			_instance.createFilterLabel();
+
+			_instance.createTriggerPanel();
+
 			_instance.createEventNumberLabel();
 			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
@@ -836,7 +920,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		String pname = pev.getPropertyName();
 
 		if (pname.equals(ClasIoEventManager.SWIM_ALL_MC_PROP)) {
-	//		System.err.println("Curent Thread: " + Thread.currentThread().getName());
 			ISwimAll allSwimmer = ClasIoEventManager.getInstance()
 					.getMCSwimmer();
 			if (allSwimmer != null) {
@@ -853,12 +936,34 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	}
 	
-
-	private void createBusyPanel() {
+	private void createTriggerPanel() {
 		getJMenuBar().add(Box.createHorizontalStrut(20));
-		_busyPanel = new BusyPanel();
-		_busyPanel.setVisible(false);
-		getJMenuBar().add(_busyPanel);
+		getJMenuBar().add(Box.createHorizontalGlue());
+		getJMenuBar().add(new TriggerMenuPanel());
+	}
+
+//	private void createBusyPanel() {
+//		getJMenuBar().add(Box.createHorizontalStrut(15));
+//		_busyPanel = new BusyPanel();
+//		_busyPanel.setVisible(false);
+//		getJMenuBar().add(_busyPanel);
+//	}
+	
+	// create the event number label
+	private void createFilterLabel() {
+		_filterLabel = new JLabel(" Event Filtering On ");
+		_filterLabel.setOpaque(true);
+		_filterLabel.setBackground(Color.white);
+		_filterLabel.setForeground(Color.red);
+		_filterLabel.setFont(new Font("Dialog", Font.BOLD, 12));
+		_filterLabel
+				.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+		
+		getJMenuBar().add(Box.createHorizontalGlue());
+		getJMenuBar().add(_filterLabel);
+		getJMenuBar().add(Box.createHorizontalStrut(5));
+		
+		setEventFilteringLabel(false);
 	}
 
 	// create the event number label
@@ -878,7 +983,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	}
 
 	/**
-	 * Fix the title of te main frame
+	 * Fix the title of the main frame
 	 */
 	public void fixTitle() {
 		String title = getTitle();
@@ -890,7 +995,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		title += "   [Magnetic Field (" +
 		MagneticFields.getInstance().getVersion() + ") "
 				+ MagneticFields.getInstance().getActiveFieldDescription();
-		title += "]";
+		title += "] [Swimmer (" + Swimmer.getVersion() + ")]";
 		
 		title += ("  " + ClasIoEventManager.getInstance().getCurrentSourceDescription());
 		setTitle(title);
@@ -909,9 +1014,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * 
 	 * @return the shared progress bar
 	 */
-	public static BusyPanel getBusyPanel() {
-		return _busyPanel;
-	}
+//	public static BusyPanel getBusyPanel() {
+//		return _busyPanel;
+//	}
 
 	/**
 	 * Check whether we use 3D
@@ -947,7 +1052,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//read in userprefs
 		PropertiesManager.getInstance();
 		
-		TrainingManager.getInstance();
+		//initialize the trigger manager
+		TriggerManager.getInstance();
 		
 		//for running from runnable jar (for coatjava)
 		String clas12dir = System.getProperty("CLAS12DIR");
@@ -960,11 +1066,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		FileUtilities.setDefaultDir("data");
 
 		// create a console log listener
-		Log.getInstance().addLogListener(new ConsoleLogListener());
+		//Log.getInstance().addLogListener(new ConsoleLogListener());
 		
 		
 		//splash frame
-		final SplashWindow splashWindow = new SplashWindow("ced", null, 800, "images/cnu.png", _release);
+		final SplashWindowCED splashWindow = new SplashWindowCED("ced", null, 920, "images/cnu.png", _release);
+
+//		final SplashWindow splashWindow = new SplashWindow("ced", null, 920, "images/cnu.png", _release);
 		// now make the frame visible, in the AWT thread
 		try {
 			EventQueue.invokeAndWait(new Runnable() {
@@ -1048,10 +1156,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				Ced ced = getInstance();
 				splashWindow.setVisible(false);
 				ced.setVisible(true);
-				splashWindow.writeCachedText();
+	//			splashWindow.writeCachedText();
 				ced.fixTitle();
+				
+				ClasIoEventManager.getInstance().setUpFilterMenu();
 				//initialize data columns
 				DataManager.getInstance();
+				System.out.println("ced version " + _release + " is ready.");
 			}
 
 		});
@@ -1068,23 +1179,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Log.getInstance().info("ced is ready.");
 //		Environment.getInstance().say("c e d is ready");
 
-		// test demo plugin
-		// new CedDemoPlugin();
-		//new BrookDemoPlugin();
-
-		// //test event queue
-		// ClasIoEventQueue queue = new ClasIoEventQueue();
-		// new EventProducer(queue);
-		// IEventProcessor processor = new IEventProcessor() {
-		//
-		// @Override
-		// public void processEvent(DataEvent event) {
-		// System.err.println("GOT EVENT TO PROCESS");
-		// }
-		//
-		// };
-		//
-		// new EventConsumer(queue, processor);
 
 	} // end main
 	

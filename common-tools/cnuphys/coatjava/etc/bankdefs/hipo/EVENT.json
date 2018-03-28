@@ -415,7 +415,7 @@
         "info": "Trajectory information for Particles bank",
         "items": [
             {"name":"detId",        "id":1,  "type":"int16", "info":"representative index of the detector"},
-            {"name":"trkId ",       "id":2,  "type":"int16", "info":"index of the track in Tracks bank"},
+            {"name":"trkId",        "id":2,  "type":"int16", "info":"index of the track in Tracks bank"},
             {"name":"q",            "id":3,  "type":"int8",  "info":"charge of the track"},
             {"name":"x",            "id":4,  "type":"float", "info":"x-position of the track at the detector surface"},
             {"name":"y",            "id":5,  "type":"float", "info":"y-position of the track at the detector surface"},

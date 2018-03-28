@@ -66,6 +66,7 @@ public class SwimAllRecon implements ISwimAll {
 
 		for (TrajectoryRowData trd : data) {
 			LundId lid = LundSupport.getInstance().get(trd.getId());
+		
 
 			if (lid != null) {
 				SwimTrajectory traj;
@@ -73,9 +74,10 @@ public class SwimAllRecon implements ISwimAll {
 					traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
 							trd.getYo() / 100, trd.getZo() / 100,
 							trd.getMomentum() / 1000, trd.getTheta(),
-							trd.getPhi(), stopper, PATHMAX, stepSize,
+							trd.getPhi(), stopper, 0, PATHMAX, stepSize,
 							Swimmer.CLAS_Tolerance, null);
 					traj.setLundId(lid);
+					traj.setSource(trd.getSource());
 					Swimming.addReconTrajectory(traj);
 				} catch (RungeKuttaException e) {
 					e.printStackTrace();

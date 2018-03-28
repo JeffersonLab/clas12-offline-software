@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -26,6 +27,7 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
@@ -86,6 +88,37 @@ public class VirtualView extends BaseView
 
 		setBackground(_bg);
 		getContainer().getComponent().setBackground(_bg);
+		
+		
+//		MouseListener ml = new MouseListener() {
+//
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				System.err.println("ML Mouse CLICKED");
+//			}
+//
+//			@Override
+//			public void mousePressed(MouseEvent e) {
+//				System.err.println("\nML Mouse PRESSED");
+//			}
+//
+//			@Override
+//			public void mouseReleased(MouseEvent e) {
+//				System.err.println("ML Mouse RELEASED");
+//			}
+//
+//			@Override
+//			public void mouseEntered(MouseEvent e) {
+//				System.err.println("ML Mouse ENTERED");
+//			}
+//
+//			@Override
+//			public void mouseExited(MouseEvent e) {
+//				System.err.println("ML Mouse EXITED");
+//			}
+//			
+//		};
+//		getContainer().getComponent().addMouseListener(ml);
 
 		getContainer().getComponent().addMouseMotionListener(this);
 		getContainer().getComponent().addMouseListener(this);
@@ -223,8 +256,16 @@ public class VirtualView extends BaseView
 		_numcol = numcol;
 		VirtualView view = null;
 		Rectangle2D.Double world = getWorld();
-		int width = numcol * 40;
-		int height = (int) ((width * world.height) / world.width);
+		
+		int cell_width = 40;
+		int cell_height = 1 + ((9*cell_width)/16);
+		int width = numcol * cell_width;
+//		int height = (int) ((width * world.height) / world.width);
+		int height = cell_height;
+		
+		if (Environment.getInstance().isLinux()) {
+			height += 23;
+		}
 
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
@@ -235,9 +276,14 @@ public class VirtualView extends BaseView
 				PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
 
 		view._offsets = new Point[_numcol];
-		view.pack();
+		//view.pack();
+		
+		
+		Insets insets = view.getInsets();
+		view.setSize(width, height + insets.top);
 		return view;
 	}
+	
 
 	/**
 	 * Get the number of columns
@@ -447,6 +493,7 @@ public class VirtualView extends BaseView
 
 	@Override
 	public void mouseClicked(MouseEvent mouseEvent) {
+//		System.err.println("HEY MAN");
 		switch (mouseEvent.getButton()) {
 		case MouseEvent.BUTTON1:
 			if (mouseEvent.getClickCount() == 1) { // single click
@@ -463,7 +510,7 @@ public class VirtualView extends BaseView
 	// handle a double click
 	private void handleDoubleClick(MouseEvent mouseEvent) {
 		Point rc = getRowCol(mouseEvent.getPoint());
-		// System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
+//		 System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
 
 		int clickCol = rc.x;
 		if ((clickCol == _currentCol)) {

@@ -32,7 +32,7 @@ import javax.swing.event.EventListenerList;
 public class MagneticFields {
 	
 	//vbersion of mag field package
-	private static String VERSION = "1.06";
+	private static String VERSION = "1.07b";
 		
 	//constants for different torus grids
     public static final int SYMMETRIC_TORUS = 0;
@@ -52,6 +52,9 @@ public class MagneticFields {
 
 	// torus field (with 12-fold symmetry)
 	private Torus _torus;
+	
+	//uniform field
+	private Uniform _uniform;
 		
 	//which torus map is loaded
 	private TorusMap _torusMap = null;
@@ -79,7 +82,7 @@ public class MagneticFields {
 	
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD
+		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD, UNIFORM
 	}
 
 	// List of magnetic field change listeners
@@ -90,6 +93,7 @@ public class MagneticFields {
 	private JRadioButtonMenuItem _solenoidItem;
 	private JRadioButtonMenuItem _bothItem;
 	private JRadioButtonMenuItem _zeroItem;
+	private JRadioButtonMenuItem _uniformItem;
 	
 	private TorusMenu _torusMenu;
 
@@ -199,6 +203,7 @@ public class MagneticFields {
 			_solenoidItem.setSelected(desiredFieldType == FieldType.SOLENOID);
 			_bothItem.setSelected(desiredFieldType == FieldType.COMPOSITE);
 			_zeroItem.setSelected(desiredFieldType == FieldType.ZEROFIELD);
+			_uniformItem.setSelected(desiredFieldType == FieldType.UNIFORM);
 		}
 		
 		boolean changed = solenoidScaleChange || torusScaleChange || fieldChange;
@@ -223,6 +228,9 @@ public class MagneticFields {
 			}
 			else if (_activeField == _rotatedCompositeField) {
 				return FieldType.COMPOSITEROTATED;
+			}
+			else if (_activeField == _uniform) {
+				return FieldType.UNIFORM;
 			}
 
 		}
@@ -294,6 +302,9 @@ public class MagneticFields {
 		case SOLENOID:
 			_activeField = _solenoid;
 			break;
+		case UNIFORM:
+			_activeField = _uniform;
+			break;
 		case COMPOSITE:
 			_activeField = _compositeField;
 			break;
@@ -343,6 +354,9 @@ public class MagneticFields {
 		case SOLENOID:
 			ifield = _solenoid;
 			break;
+		case UNIFORM:
+			ifield = _uniform;
+			break;
 		case COMPOSITE:
 			ifield = _compositeField;
 			break;
@@ -381,6 +395,9 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			break;
+		case UNIFORM:
+			scale = 1.;
+			break;
 		case ZEROFIELD:
 			scale = 0;
 			break;
@@ -413,6 +430,7 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			break;
+		case UNIFORM:
 		case ZEROFIELD:
 			shiftz = 0;
 			break;
@@ -501,6 +519,9 @@ public class MagneticFields {
 		case COMPOSITEROTATED:
 			ifield = _rotatedCompositeField;
 			break;
+		case UNIFORM:
+			ifield = _uniform;
+			break;
 		default:
 			break;
 		}
@@ -543,7 +564,7 @@ public class MagneticFields {
 		return solenoid;
 	}
 
-	
+	//read the solenoidal field
 	private Solenoid readSolenoid(String fullPath) {
 		File file = new File(fullPath);
 		String cp;
@@ -567,6 +588,7 @@ public class MagneticFields {
 	}
 
 	
+	//read the torus field
 	private Torus readTorus(String fullPath) {
 		File file = new File(fullPath);
 		String cp;
@@ -688,6 +710,8 @@ public class MagneticFields {
 				
 		System.out.println("Torus found: " + (_torus != null));
 		System.out.println("Solenoid found: " + (_solenoid != null));
+		
+		_uniform = new Uniform(2, 0, 0);
 
 		finalInit();
 	}
@@ -843,7 +867,8 @@ public class MagneticFields {
 
 		System.out.println("\n***********************************");
 		System.out.println("* Magfield package version: " + VERSION );
-		System.out.println("***********************************");
+		System.out.println("* contact: david.heddle@cnu.edu" );
+		System.out.println("***********************************\n");
 	}
 
 
@@ -866,7 +891,7 @@ public class MagneticFields {
 	public JMenu getMagneticFieldMenu(boolean incRotatedField,
 			boolean includeTestFields) {
 		// // init(); //harmless if already inited
-		JMenu menu = new JMenu("Magnetic Field");
+		JMenu menu = new JMenu("Field");
 		
 		_torusMenu = TorusMenu.getInstance();
 		menu.add(_torusMenu);
@@ -888,6 +913,7 @@ public class MagneticFields {
 		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
 //		_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
 
+		_uniformItem = createRadioMenuItem(null, "Uniform", menu, bg, al);
 		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
 
 		// interpolation related
@@ -919,6 +945,7 @@ public class MagneticFields {
 		_torusItem.setEnabled(_torus != null);
 		_solenoidItem.setEnabled(_solenoid != null);
 		_bothItem.setEnabled((_torus != null) && (_solenoid != null));
+		_uniformItem.setEnabled(_uniform != null);
 
 		return menu;
 	}
@@ -939,6 +966,9 @@ public class MagneticFields {
 		}
 		else if (source == _zeroItem) {
 			_activeField = null;
+		}
+		else if (source == _uniformItem) {
+			_activeField = _uniform;
 		}
 		else if (source == _interpolateItem) {
 			MagneticField.setInterpolate(true);

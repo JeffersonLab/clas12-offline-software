@@ -11,7 +11,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.event.data.DCHitList;
-import cnuphys.ced.fastmc.FastMCManager;
 
 public class ReconDrawer extends ProjectedViewDrawer {
 
@@ -27,7 +26,7 @@ public class ReconDrawer extends ProjectedViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

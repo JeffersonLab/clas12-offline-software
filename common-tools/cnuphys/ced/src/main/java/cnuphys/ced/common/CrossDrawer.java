@@ -19,7 +19,6 @@ import cnuphys.ced.event.data.CrossList;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.TBCrosses;
-import cnuphys.ced.fastmc.FastMCManager;
 
 public class CrossDrawer extends CedViewDrawer  {
 
@@ -60,7 +59,7 @@ public class CrossDrawer extends CedViewDrawer  {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 

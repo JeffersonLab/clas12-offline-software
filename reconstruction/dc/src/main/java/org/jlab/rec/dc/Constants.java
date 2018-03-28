@@ -15,7 +15,7 @@ public class Constants {
         public static final double SPEEDLIGHT = 29.97924580;
 	// DATABASE VARIATION
 	//public static final String DBVAR = "default";
-	public static double NSUPERLAYERTRACKING = 6;
+	public static double NSUPERLAYERTRACKING = 5;
         public static double TSTARTEST = 560.;
 	// GEOMETRY PARAMETERS
 
@@ -100,6 +100,8 @@ public class Constants {
 	public static final int MAXCLUSSIZE = 14;
 	
 	public static final double MAXCHI2 = 10000;
+        
+        public static double HBTCHI2CUT = 10000;
 	
 	//public static final boolean OUTOFTIMEFLAG = true;
 
@@ -125,6 +127,7 @@ public class Constants {
 	public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
 	
 	public static int[][] STBLOC;
+    
         
     
 	public static final synchronized void Load() {

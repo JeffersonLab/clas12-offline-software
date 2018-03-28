@@ -54,6 +54,9 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 	/** user object */
 	public Object userObject;
+	
+	/** The source of the trajectory e.g. hbtracking */
+	private String _source = "???";
 
 	/**
 	 * Create a one point trajectory. Used hrn the initial momentum is lower
@@ -262,7 +265,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	/**
 	 * Get the final position
 	 * 
-	 * @return the final position
+	 * @return the final position in x, y, z
 	 */
 	final double[] getFinalPosition() {
 		if (isEmpty()) {
@@ -329,4 +332,23 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	public boolean isBDLComputed() {
 		return _computedBDL;
 	}
+	
+	
+	/**
+	 * Get the source of the trajectory e.g. hbtracking
+	 * @return the source of the trajectory
+	 */
+	public String getSource() {
+		return _source;
+	}
+	
+	/**
+	 * Set the source of the trajectory e.g. hbtracking
+	 * @param source the source of the trajectory
+	 */
+	public void setSource(String source) {
+		_source = new String((source == null) ? "???" : source);
+	}
+
+
 }

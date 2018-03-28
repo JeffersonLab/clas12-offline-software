@@ -16,7 +16,7 @@ public class EventProducer implements IClasIoEventListener {
 
 	/**
 	 * Create an EventProducer. This is basically an IClasIoEventListener that
-	 * queues any event it receieves.
+	 * queues any event it receives.
 	 * 
 	 * @param queue
 	 *            the event queue
@@ -26,15 +26,6 @@ public class EventProducer implements IClasIoEventListener {
 		_queue = queue;
 		_eventManager.addClasIoEventListener(this, 2);
 	}
-
-	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-	}
-	
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -53,7 +44,7 @@ public class EventProducer implements IClasIoEventListener {
 	 * Change the event source type
 	 * 
 	 * @param source
-	 *            the new source: File, ET, FastMC
+	 *            the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {

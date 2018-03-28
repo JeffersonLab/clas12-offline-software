@@ -263,7 +263,7 @@ public class LundTrackDialog extends JDialog {
 					if (_standardCutoff.isSelected()) {
 						SwimTrajectory traj = swimmer.swim(lid.getCharge(), xo,
 								yo, zo, momentum, theta, phi, stopper,
-								maxPathLen, stepSize, Swimmer.CLAS_Tolerance,
+								0, maxPathLen, stepSize, Swimmer.CLAS_Tolerance,
 								hdata);
 						traj.setLundId(lid);
 
@@ -565,6 +565,7 @@ public class LundTrackDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				_maxR.setEnabled(_standardCutoff.isSelected());
+				_accuracy.setEnabled(_fixedZCutoff.isSelected());
 				_fixedZ.setEnabled(_fixedZCutoff.isSelected());
 				_swimZ.setEnabled(_fixedZCutoff.isSelected());
 

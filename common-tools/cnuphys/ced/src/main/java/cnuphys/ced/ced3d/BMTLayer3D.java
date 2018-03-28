@@ -65,7 +65,7 @@ public class BMTLayer3D extends DetectorItem3D {
 //		boolean drawOutline = false;
 
 		
-		AdcHitList hits = BMT.getInstance().getHits();
+		AdcHitList hits = BMT.getInstance().getADCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
 				if (hit != null) {

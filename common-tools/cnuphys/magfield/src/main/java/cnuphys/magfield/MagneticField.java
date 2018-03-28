@@ -19,11 +19,11 @@ public abstract class MagneticField implements IField {
 
 	/** Which atan2, etc. algorithms to use */
 	public enum MathLib {
-		DEFAULT, FAST, SUPERFAST
+		DEFAULT, FAST, SUPERFAST;
 	}
 
 	// controls which algorithms to use
-	private static MathLib _mathLib = MathLib.SUPERFAST;
+	private static MathLib _mathLib = MathLib.FAST;
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -303,12 +303,8 @@ public abstract class MagneticField implements IField {
 	public static double atan2Deg(double y, double x) {
 
 		switch (_mathLib) {
-		case FAST:
+		case FAST: case SUPERFAST:
 			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
-			return Math.toDegrees(phirad);
-		case SUPERFAST:
-			phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
-	//		phirad = Icecore.atan2((float) y, (float) x);
 			return Math.toDegrees(phirad);
 		default:
 			return Math.toDegrees(Math.atan2(y, x));
@@ -335,9 +331,7 @@ public abstract class MagneticField implements IField {
 	public static double acos(double x) {
 
 		switch (_mathLib) {
-		case FAST:
-			return org.apache.commons.math3.util.FastMath.acos(x);
-		case SUPERFAST:
+		case FAST: case SUPERFAST:
 			return org.apache.commons.math3.util.FastMath.acos(x);
 		default:
 			return Math.acos(x);
@@ -346,9 +340,9 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * 
-	 * @param x
-	 * @return
+	 * Arc cosine returned in degrees
+	 * @param x the cosine value
+	 * @return acos in degrees
 	 */
 	public static double acos2Deg(double x) {
 		return Math.toDegrees(acos(x));

@@ -18,7 +18,7 @@ public class Fonts {
 	private static String commonFamily;
 
 	// the target or desired family
-	private static String targetFamily = "Lucida Sans";
+	private static String targetFamily = "Lucida Grande";
 
 	// the bulletproof backup if the target is not found
 	private static String backupFamily = "SansSerif";
@@ -33,6 +33,9 @@ public class Fonts {
 	
 	// common font used for components
 	public static Font defaultFont = commonFont(Font.PLAIN, 12);
+	
+	// common font used for components
+	public static Font defaultLargeFont = commonFont(Font.BOLD, 14);
 	
 	// common font used for components
 	public static Font defaultBoldFont = commonFont(Font.BOLD, 12);

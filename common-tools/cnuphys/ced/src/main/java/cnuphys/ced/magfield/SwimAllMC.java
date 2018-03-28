@@ -2,16 +2,12 @@ package cnuphys.ced.magfield;
 
 import java.util.Vector;
 
-import org.jlab.clas.physics.Particle;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.StreamTimer;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
@@ -34,36 +30,6 @@ public class SwimAllMC implements ISwimAll {
 	private static final double RMAX = 10.0;
 	private static final double PATHMAX = 10.0;
 
-	//get row data from FastMC event 
-	private Vector<TrajectoryRowData> getRowDataFastMC() {
-		PhysicsEvent event = FastMCManager.getInstance().getCurrentGenEvent();
-		if ((event == null) || (event.count() < 1)) {
-			return null;
-		}
-		
-		Vector<TrajectoryRowData> v = new Vector<TrajectoryRowData>(event.count());
-		
-		for (int index = 0; index < event.count();  index++) {
-			Particle particle = event.getParticle(index);
-			LundId lid = LundSupport.getInstance().get(particle.pid());
-			double pxo = particle.px()*1000.; //convert to MeV
-			double pyo = particle.py()*1000.; //convert to MeV
-			double pzo = particle.pz()*1000.; //convert to MeV
-
-			// note conversions from mm to cm
-			double x = particle.vertex().x(); //leave in cm
-			double y = particle.vertex().y(); //leave in cm
-			double z = particle.vertex().z(); //leave in cm
-
-			double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
-			double theta = Math.toDegrees(Math.acos(pzo / p));
-			double phi = Math.toDegrees(Math.atan2(pyo, pxo));
-
-			v.add(new TrajectoryRowData(index, lid, x, y, z, p, theta, phi, 0, "LUND File"));
-		}
-
-		return v;
-	}
 	
 	/**
 	 * Get all the row data so the trajectory dialog can be updated.
@@ -79,11 +45,14 @@ public class SwimAllMC implements ISwimAll {
 		if (event == null) {
 			return null;
 		}
-		DataManager dm = DataManager.getInstance();
-
-		if (ClasIoEventManager.getInstance().isSourceFastMC()) {
-			return getRowDataFastMC();
+		
+		boolean hasBank = event.hasBank("MC::Particle");
+		if (!hasBank) {
+			return null;
 		}
+		
+		
+		DataManager dm = DataManager.getInstance();
 
 		int pid[] = dm.getIntArray(event, "MC::Particle.pid");
 
@@ -141,29 +110,6 @@ public class SwimAllMC implements ISwimAll {
 		return v;
 	}
 
-	private void SwimAllFastMC() {
-		Swimming.clearMCTrajectories(); // clear all existing trajectories
-		PhysicsEvent event = FastMCManager.getInstance().getCurrentGenEvent();
-		if ((event == null) || (event.count() < 1)) {
-			return;
-		}
-
-		for (int index = 0; index < event.count();  index++) {
-			Particle particle = event.getParticle(index);
-			LundId lid = LundSupport.getInstance().get(particle.pid());
-			double pxo = particle.px(); //leave in GeV
-			double pyo = particle.py(); //leave in GeV
-			double pzo = particle.pz(); //leave in GeV
-
-			// note conversions from mm to cm
-			double x = particle.vertex().x()/100.; //cm to meters
-			double y = particle.vertex().y()/100.; //cm to meters
-			double z = particle.vertex().z()/100.; //cm to meters
-
-			StreamTimer st = FastMCManager.getInstance().getTimer();
-			swim(lid, pxo, pyo, pzo, x, y, z);
-		}
-	}
 	
 	/**
 	 * Swim all Monte Carlo particles
@@ -174,12 +120,6 @@ public class SwimAllMC implements ISwimAll {
 	@Override
 	public void swimAll() {
 		
-		if (ClasIoEventManager.getInstance().isSourceFastMC()) {
-			SwimAllFastMC();
-			return;
-		}
-
-
 		// System.err.println("SWIM ALL MC");
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
@@ -194,6 +134,11 @@ public class SwimAllMC implements ISwimAll {
 			return;
 		}
 		
+		boolean hasBank = event.hasBank("MC::Particle");
+		if (!hasBank) {
+			return;
+		}
+
 		
 //		if (ClasIoEventManager.getInstance().isSourceEvioFile()) {
 //			System.err.println("not swimming for evio file");
@@ -276,7 +221,7 @@ public class SwimAllMC implements ISwimAll {
 		SwimTrajectory traj;
 		try {
 			traj = swimmer.swim(lid.getCharge(), x, y,
-					z, p, theta, phi, stopper, PATHMAX, stepSize,
+					z, p, theta, phi, stopper, 0, PATHMAX, stepSize,
 					Swimmer.CLAS_Tolerance, null);
 			traj.setLundId(lid);
 			Swimming.addMCTrajectory(traj);

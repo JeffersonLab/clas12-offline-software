@@ -182,6 +182,9 @@ public abstract class FieldProbe implements IField {
 			else if (field instanceof Solenoid) {
 				return new SolenoidProbe((Solenoid)field);
 			}
+			else if (field instanceof Uniform) {
+				return new UniformProbe((Uniform)field);
+			}
 			else if (field instanceof RotatedCompositeField) {
 				return new RotatedCompositeProbe((RotatedCompositeField)field);
 			}

@@ -24,13 +24,13 @@ public class TbHbHitList extends Vector<TbHbHit> {
         short[] wire = ColumnData.getShortArray(bankName + ".wire");
         short[] id = ColumnData.getShortArray(bankName + ".id");
         short[] status = ColumnData.getShortArray(bankName + ".status");
-        float[] time = ColumnData.getFloatArray(bankName + ".time");
+        int[] TDC = ColumnData.getIntArray(bankName + ".TDC");
         
         //complication.. for HB doca will be null
         float[] doca = ColumnData.getFloatArray(bankName + ".doca");
         float[] trkDoca = ColumnData.getFloatArray(bankName + ".trkDoca");
 
-		length = checkArrays(sector, superlayer, layer6, wire, id, status, time, doca, trkDoca);
+		length = checkArrays(sector, superlayer, layer6, wire, id, status, doca, trkDoca);
 		if (length < 0) {
 			Log.getInstance().warning("[" + bankName + "] " + _error);
 			return;
@@ -38,8 +38,11 @@ public class TbHbHitList extends Vector<TbHbHit> {
 
         
         for (int i = 0; i < length; i++) {
-        	float fdoca = (doca == null) ? -1f : doca[i];
-        	add(new TbHbHit(sector[i], superlayer[i], layer6[i], wire[i], id[i], status[i], time[i], fdoca, trkDoca[i]));
+        	float fdoca = DataSupport.safeValue(doca, i, -1f);
+           	float trkdoca = DataSupport.safeValue(trkDoca, i, -1f);
+			int tdc = DataSupport.safeValue(TDC, i, -1);
+
+        	add(new TbHbHit(sector[i], superlayer[i], layer6[i], wire[i], id[i], status[i], tdc, fdoca, trkdoca));
         }
         
 		if (size() > 1) {
@@ -51,7 +54,7 @@ public class TbHbHitList extends Vector<TbHbHit> {
 	
 	//check arrays are not null and have same length
 	private int checkArrays(byte[] sector, byte[] superlayer, byte[] layer6, short[] wire, short[] id,
-			short[] status, float[] time, float[] doca, float[] trkDoca) {
+			short[] status, float[] doca, float[] trkDoca) {
 		
 		//docak might be null so exclude
 		if ((sector == null) || (superlayer == null) || (layer6 == null) ||
@@ -60,8 +63,7 @@ public class TbHbHitList extends Vector<TbHbHit> {
 				
 			_error = "Unexpected null array when creating DCHitList: " + "sector = null: " + (sector == null)
 					+ " superlayer == null: " + (superlayer == null) + " layer == null: " + (layer6 == null) +
-					" wire == null: " + (wire == null) + " id == null: " + (id == null) + " status == null: " + (status == null) +
-					" time == null: " + (time == null);
+					" wire == null: " + (wire == null) + " id == null: " + (id == null) + " status == null: " + (status == null);
 					
 			return -1;
 		}
@@ -71,32 +73,32 @@ public class TbHbHitList extends Vector<TbHbHit> {
 			return -1;
 		}
 		
-		if (lengthMismatch(sector, superlayer, "region")) {
+		if (lengthMismatch(sector, superlayer, "superlayer")) {
 			return -1;
 		}
-		if (lengthMismatch(sector, layer6, "id")) {
+		if (lengthMismatch(sector, layer6, "layer6")) {
 			return -1;
 		}
-		if (lengthMismatch(sector, wire, "x")) {
+		if (lengthMismatch(sector, wire, "wire")) {
 			return -1;
 		}
-		if (lengthMismatch(sector, id, "y")) {
+		if (lengthMismatch(sector, id, "id")) {
 			return -1;
 		}
-		if (lengthMismatch(sector, status, "z")) {
+		if (lengthMismatch(sector, status, "status")) {
 			return -1;
 		}
-		if (lengthMismatch(sector, time, "ux")) {
-			return -1;
-		}
+//		if (lengthMismatch(sector, TDC, "TDC")) {
+//			return -1;
+//		}
 		
 		if (doca != null) {  //null for hit based
-			if (lengthMismatch(sector, doca, "uy")) {
+			if (lengthMismatch(sector, doca, "doca")) {
 				return -1;
 			}
 		}
 		
-		if (lengthMismatch(sector, trkDoca, "uz")) {
+		if (lengthMismatch(sector, trkDoca, "trkDoca")) {
 			return -1;
 		}
 	
@@ -144,8 +146,13 @@ public class TbHbHitList extends Vector<TbHbHit> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, byte[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating TbHbHitList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating DCHitList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating TbHbHitList";
 			return true;
 		}
 		return false;
@@ -153,8 +160,13 @@ public class TbHbHitList extends Vector<TbHbHit> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, short[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating TbHbHitList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating DCHitList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating TbHbHitList";
 			return true;
 		}
 		return false;
@@ -162,11 +174,31 @@ public class TbHbHitList extends Vector<TbHbHit> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, float[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating TbHbHitList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating DCHitList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating TbHbHitList";
 			return true;
 		}
 		return false;
 	}
+	
+//	//check for length mismatch
+//	private boolean lengthMismatch(byte[] sector, int[] array, String name) {
+//		if (array == null) {
+//			_error = "null " + name + " array when creating TbHbHitList";
+//			return true;
+//		}
+//
+//		if (sector.length != array.length) {
+//			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating TbHbHitList";
+//			return true;
+//		}
+//		return false;
+//	}
+
 	
 }
