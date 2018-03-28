@@ -21,6 +21,8 @@ import org.jlab.detector.volume.G4Box;
 /**
  * Building the RICH PMTs
  * @author Goodwill, kenjo
+ * modfied by gangel
+ */
  */
 public final class RICHGeant4Factory extends Geant4Factory {
 
@@ -52,6 +54,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
     // list containing the pmts
     private List<G4Box> pmts = new ArrayList<G4Box>();
     private List<G4Box> photocatodes = new ArrayList<G4Box>();
+    private List<G4Stl> stlvolumes = new ArrayList<G4Stl>();
     
 
     public RICHGeant4Factory() {
@@ -62,6 +65,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
         ClassLoader cloader = getClass().getClassLoader();
         G4Stl gasVolume = new G4Stl("OpticalGasVolume", cloader.getResourceAsStream("rich/cad/OpticalGasVolume.stl"), Length.mm / Length.cm);
         gasVolume.setMother(motherVolume);
+        stlvolumes.add(gasVolume);
 
         for (String name : new String[]{"AerogelTiles", "Aluminum", "CFRP", "Glass", "TedlarWrapping"}) {
             G4Stl component = new G4Stl(String.format("%s", name),
@@ -69,6 +73,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
                     Length.mm / Length.cm);
 
             component.setMother(gasVolume);
+            stlvolumes.add(component);
         }
 
      
@@ -174,5 +179,15 @@ public final class RICHGeant4Factory extends Geant4Factory {
     return	photocatodes.get(i-1);
     
    
+    }
+    /**
+     * @author: gangel
+     * @param i the STL volume
+     * 0 OpticalGasVolume - 1 AerogelTiles,2 Aluminum,3 CFRP,4 Glass,5 TedlarWrapping
+     * @return: the Photocatodes volumes inside the PMT
+     */
+    public G4Stl GetStl(int i)
+    {
+        return  stlvolumes.get(i-1);
     }
 }
