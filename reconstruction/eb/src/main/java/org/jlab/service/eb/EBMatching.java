@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
@@ -145,8 +146,13 @@ public class EBMatching {
         List<DetectorResponse> responsesECAL =
             eventBuilder.getUnmatchedResponses(null, DetectorType.ECAL, ecalLayer);
 
+        Vector3 vertex = new Vector3(0,0,0);
+        if (eventBuilder.getEvent().getParticles().size()>0) {
+            vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
+        }
+
         for (DetectorResponse r : responsesECAL)
-            parts.add(DetectorParticle.createNeutral(r));
+            parts.add(DetectorParticle.createNeutral(r,vertex));
         
         // add other responses:
         this.addResponsesECAL(parts,otherEcalLayers);
@@ -170,6 +176,11 @@ public class EBMatching {
                                      List<DetectorResponse> ctofHits,
                                      List<DetectorResponse> cndHits) {
 
+        Vector3 vertex = new Vector3(0,0,0);
+        if (eventBuilder.getEvent().getParticles().size()>0) {
+            vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
+        }
+
         // Make a neutral particle for each CND hit without an
         // associated track.
         if (de.hasBank(cndBankName)==true) {
@@ -180,7 +191,7 @@ public class EBMatching {
                 final int trkid=cndBank.getInt("trkID",icnd);
                 if (trkid==-1) {
                     // make neutral particle
-                    DetectorParticle p = DetectorParticle.createNeutral(cndHits.get(icnd));
+                    DetectorParticle p = DetectorParticle.createNeutral(cndHits.get(icnd),vertex);
                     this.eventBuilder.getEvent().addParticle(p);
                     cnd_count = cnd_count + 1;
                 }
