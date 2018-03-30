@@ -293,15 +293,18 @@ public class EventBuilder {
         // set particle kinematics:
         for(DetectorParticle p : particles) {
             
-            final double energy = p.getEnergy(DetectorType.ECAL);
-            final double px = p.vector().x();
-            final double py = p.vector().y();
-            final double pz = p.vector().z();
-            final double sf = EBUtil.getExpectedSamplingFraction(energy);
+            final double visEnergy = p.getEnergy(DetectorType.ECAL);
+            final double sampFract = EBUtil.getExpectedSamplingFraction(visEnergy);
+            final double corEnergy = visEnergy / sampFract;
+
+            // direction cosines:
+            final double cx = p.vector().x();
+            final double cy = p.vector().y();
+            final double cz = p.vector().z();
             
             p.setCharge(0);
-            p.vector().setXYZ(px*energy/sf,py*energy/sf,pz*energy/sf);
-
+            p.vector().setXYZ(cx*corEnergy,cy*corEnergy,cz*corEnergy);
+                    
             final int pcalCount = p.countResponses(DetectorType.ECAL,1);
             final int caloCount = pcalCount + 
                                   p.countResponses(DetectorType.ECAL,4) +

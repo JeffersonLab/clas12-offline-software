@@ -49,6 +49,12 @@ public class EBEngine extends ReconstructionEngine {
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
 
+        EBMatching ebm = new EBMatching(eb);
+        
+        // Process RF:
+        EBRadioFrequency rf = new EBRadioFrequency();
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
+        
         List<DetectorResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
@@ -74,22 +80,20 @@ public class EBEngine extends ReconstructionEngine {
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
         
-        // Process tracks:
+        // Process tracks-hit matching:
         eb.processHitMatching();
+
+        // Assign trigger/startTime particle: 
+        eb.assignTrigger();
+ 
+        // Create neutrals:
+        // (after assigning trigger particle, to get vertex/momentum right):
         eb.processNeutralTracks();
         
         List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
         
-        EBMatching ebm = new EBMatching(eb);
-        
         ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
                                     centralParticles, responseCTOF, responseCND);
-        
-        eb.assignTrigger();
- 
-        // Process RF:
-        EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
         
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
