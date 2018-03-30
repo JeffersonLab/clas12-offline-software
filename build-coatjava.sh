@@ -1,28 +1,38 @@
 #!/bin/bash
 
-OPTIONS=n
-LONGOPTIONS=nospotbugs
-PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
-eval set -- "$PARSED"
-
 runSpotBugs="yes"
-
-while true; do
-    case "$1" in
-        -n|--nospotbugs)
-            runSpotBugs="no"
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "Programming error"
-            exit 3
-            ;;
-    esac
+for xx in $@
+do
+    if [ "$xx" == "--nospotbugs" ]
+    then
+        runSpotBugs="no"
+    elif [ "$xx" == "-n" ]
+    then
+        runSpotBugs="no"
+    fi
 done
+
+# this doesn't work on some systems:
+#OPTIONS=n
+#LONGOPTIONS=nospotbugs
+#PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+#eval set -- "$PARSED"
+#while true; do
+#    case "$1" in
+#        -n|--nospotbugs)
+#            runSpotBugs="no"
+#            shift
+#            ;;
+#        --)
+#            shift
+#            break
+#            ;;
+#        *)
+#            echo "Programming error"
+#            exit 3
+#            ;;
+#    esac
+#done
 
 rm -rf coatjava
 mkdir -p coatjava
