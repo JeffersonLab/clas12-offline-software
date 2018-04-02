@@ -43,7 +43,20 @@ public class EBEngine extends ReconstructionEngine {
     
 
     public boolean processDataEvent(DataEvent de) {
-        
+
+        // check run number, get constants from CCDB:
+        int run=-1;
+        if (de.hasBank("RUN::config")) {
+            run=de.getBank("RUN::config").getInt("run",0);
+        }
+        if (run>0 && run!=EBCCDBConstants.getRunNumber()) {
+            EBCCDBConstants.load(run,this.getConstantsManager());
+        }
+        if (!EBCCDBConstants.isLoaded()) {
+            System.out.println("EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
+            return false;
+        }
+
         DetectorHeader head = EBio.readHeader(de);
 
         EventBuilder eb = new EventBuilder();
@@ -201,14 +214,15 @@ public class EBEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
-      
-        // load EB constants from CCDB:
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
-        // FIXME: check run number in processDataEvent, reload from CCDB if changed.
-        // For now we just use hard-coded run number:
-        EBCCDBConstants.load(10,this.getConstantsManager());
         System.out.println("[EB::] --> event builder is ready....");
+        return true;
+    }
+
+    public boolean init(int run) {
+        this.init();
+        EBCCDBConstants.load(run,this.getConstantsManager());
         return true;
     }
     
