@@ -172,7 +172,7 @@ public class HitReader {
                 }
                 double T0Sub = smearedTime[i] - T_0 ;//- Constants.TSTARTEST; 
                 if(T_0<0) {
-                    T0Sub-=- Constants.TSTARTEST; 
+                    T0Sub-= Constants.TSTARTEST; 
                 }
                 // temporary until new ccdb constants are in
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
