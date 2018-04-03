@@ -48,13 +48,18 @@ public class TrackCandListFinder {
      * @param crossesInTrk the list of crosses on track
      * @return the number of superlayers used in the fit
      */
-    public boolean PassNSuperlayerTracking(List<Cross> crossesInTrk) {
+    public boolean PassNSuperlayerTracking(List<Cross> crossesInTrk, Track cand) {
         boolean pass = true;
         int NbMissingSl=0; // find the missing superlayers from the pseudo-crosses
         for(Cross c: crossesInTrk) {
-            if(c.isPseudoCross)
+            if(c.isPseudoCross) {
                 if((c.get_Segment1().get_Id()==-1) || (c.get_Segment2().get_Id()==-1) )
                     NbMissingSl++;
+                if(c.get_Segment1().get_Id()==-1)
+                    cand.set_MissingSuperlayer(c.get_Segment1().get_Superlayer());
+                if(c.get_Segment2().get_Id()==-1)
+                    cand.set_MissingSuperlayer(c.get_Segment2().get_Superlayer());
+            }
         }
         // if more superlayers are missing than the required number in the analysis - skip the track
         if(NbMissingSl>6-Constants.NSUPERLAYERTRACKING) {
@@ -83,7 +88,7 @@ public class TrackCandListFinder {
             if(traj == null) 
                 continue;
 
-            if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk)==true) {
+            if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk, cand)==true) {
                 cand.addAll(crossesInTrk);
                 cand.set_Sector(crossesInTrk.get(0).get_Sector());
 
@@ -101,7 +106,7 @@ public class TrackCandListFinder {
                 cand.set_IntegralBdl(traj.get_IntegralBdl());
 
                 //require 3 crosses to make a track (allows for 1 pseudo-cross)
-                if(cand.size()==3) {
+                if(cand.size()==3) { 
                     double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
                     double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
                     if(cand.get(0).get_Segment2().get_Id()==-1) 
@@ -126,9 +131,9 @@ public class TrackCandListFinder {
 
                         double p = Math.sqrt(pxz*pxz+py*py); 
                         if(p>11)
-                                p=11;
-                        if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
-                                continue;
+                            p=11;
+                        //if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
+                          //  continue;
 
                         cand.set_Q(q);
                         // momentum correction using the swam trajectory iBdl
@@ -141,12 +146,14 @@ public class TrackCandListFinder {
                         KFitter kFit = new KFitter(cand, DcDetector);
                         if(this.trking.equalsIgnoreCase("TimeBased"))
                             kFit.totNumIter=30;
+                       
                         // initialize the state vector corresponding to the last measurement site
                         StateVec fn = new StateVec();
                         kFit.runFitter();
                         //System.out.println(" KFIT "+kFit.chi2);
                         //if(this.trking.equalsIgnoreCase("HitBased") && kFit.chi2>Constants.HBTCHI2CUT)
                         //    continue;
+                        
                         if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
                             // set the state vector at the last measurement site
                             fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
@@ -157,7 +164,9 @@ public class TrackCandListFinder {
                             // candidate parameters are set from the state vector
                             cand.set_FitChi2(kFit.chi2);
                             cand.set_FitNDF(kFit.NDF);
+                            cand.set_FitConvergenceStatus(kFit.ConvStatus);
                             cand.set_Id(cands.size()+1);
+                            cand.set_CovMat(kFit.finalCovMat.covMat);
                             // add candidate to list of tracks
                             cands.add(cand); 
                         }
@@ -166,7 +175,7 @@ public class TrackCandListFinder {
             }
         }
         //this.setAssociatedIDs(cands);
-            return cands;
+        return cands;
     }
 
     /**
@@ -240,7 +249,7 @@ public class TrackCandListFinder {
                 cand.set_PostRegion3CrossDir(new Point3D(trkDir.x(), trkDir.y(), trkDir.z()));
                 cand.set_Region1TrackX(trkR1X);
                 cand.set_Region1TrackP(new Point3D(trkDir.x(), trkDir.y(), trkDir.z()));
-                cand.status = 0;
+                
                 cand.set_PathLength(trkR3X.distance(trkVtx));
             }
         }
@@ -394,7 +403,6 @@ public class TrackCandListFinder {
         cand.set_PreRegion1CrossPoint(new Point3D(xInner,yInner,zInner));
         cand.set_PreRegion1CrossDir(new Point3D(uxInner,uyInner,uzInner));
 
-        cand.status = status;
         cand.fit_Successful=true;
         cand.set_TrackingInfoString(trking);
     }

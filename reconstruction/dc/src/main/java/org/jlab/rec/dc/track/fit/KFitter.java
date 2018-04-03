@@ -3,6 +3,7 @@ package org.jlab.rec.dc.track.fit;
 import Jama.Matrix;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
+import org.jlab.rec.dc.track.fit.StateVecs.CovMat;
 import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
 
 public class KFitter {
@@ -13,13 +14,14 @@ public class KFitter {
     MeasVecs mv = new MeasVecs();
 
     public StateVec finalStateVec;
-
+    public CovMat finalCovMat;
 
     public int totNumIter = 4;
     double newChisq = Double.POSITIVE_INFINITY;
 
     public double chi2 = 0;
     public int NDF = 0;
+    public int ConvStatus = 0;
     public KFitter(Track trk, DCGeant4Factory DcDetector) {
         this.init(trk, DcDetector);
     }
@@ -50,14 +52,21 @@ public class KFitter {
             }
             if(i>1) {
                 this.calcFinalChisq();
-                if(this.chi2>1000000) {
+                if(this.chi2>10000 && i>50) {// if after 50 iterations, the fit is still poor exit
                     i = totNumIter;
                     this.setFitFailed=true;
                     return;
                 }
+                double deltaChi2 = Math.abs(this.chi2 - newChisq);
                 if (this.chi2 < newChisq) {
                     this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
-                    newChisq = this.chi2;
+                    this.finalCovMat = sv.trackCov.get(sv.Z.length - 1);
+                    //System.out.println("newChisq "+newChisq+" this.chi2 "+this.chi2+" iter "+i);
+                    newChisq = this.chi2; 
+                    if(deltaChi2<0.5)
+                        i = totNumIter;
+                    if(deltaChi2<1)
+                        this.ConvStatus=1;
                 } else {
                     i = totNumIter;
                 }

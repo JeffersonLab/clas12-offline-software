@@ -11,6 +11,8 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.hit.FittedHit;
+import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -239,7 +241,12 @@ public class ClusterFinder {
                 cf.SetFitArray(clus, "TSC");
                 cf.Fit(clus, false);
                 cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
-
+                
+                //RecoverMissingHits(clus, DcDetector, allhits);
+                //cf.SetFitArray(clus, "TSC");
+                //cf.Fit(clus, false);
+                //cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
+                
                 if (clus != null) {
                     refittedClusList.add(clus);
                 }
@@ -298,7 +305,6 @@ public class ClusterFinder {
                 }
             }
             if (hitlist.size() > 0) {
-
                 Cluster cluster = new Cluster(hitlist.get(0).get_Sector(), hitlist.get(0).get_Superlayer(), c);
                 FittedCluster fcluster = new FittedCluster(cluster);
                 fcluster.addAll(hitlist);
@@ -563,4 +569,56 @@ public class ClusterFinder {
         return bank;
 
     }
+
+   public void RecoverMissingHits(FittedCluster seg, DCGeant4Factory DcDetector, List<Hit> missingHits) {
+        if(missingHits==null)
+            return;
+        if (seg!=null) {
+            // get all the hits to obtain layer efficiency
+            if (missingHits.isEmpty()==false) {
+                // Get the Segment Trajectory
+                SegmentTrajectory trj = new SegmentTrajectory();
+                trj.set_SegmentId(seg.get_Id());
+                trj.set_Superlayer(seg.get_Superlayer());
+                trj.set_Sector(seg.get_Sector());
+
+                for (int l = 0; l < 6; l++) {
+                    double z = DcDetector.getWireMidpoint(seg.get_Superlayer() - 1, l, 0).z;
+                    double trkXMP = seg.get_clusterLineFitSlopeMP() * z + seg.get_clusterLineFitInterceptMP();
+                    double trkX = seg.get_clusterLineFitSlope() * z + seg.get_clusterLineFitIntercept();
+
+                    if (trkX == 0) {
+                        continue; // should always get a cluster fit
+                    }
+                    int trjWire = trj.getWireOnTrajectory(seg.get_Superlayer(), l + 1, trkXMP, DcDetector);
+                    
+                    double x = DcDetector.getWireMidpoint(seg.get_Superlayer() - 1, l, trjWire - 1).x;
+                    double cosTrkAngle = Math.cos(Math.toRadians(6.)) * Math.sqrt(1. + seg.get_clusterLineFitSlope() * seg.get_clusterLineFitSlope());
+                    double calc_doca = (x - trkX) * cosTrkAngle;
+                    
+                    for (int j = 0; j < missingHits.size(); j++) {
+                        if (missingHits.get(j).get_Sector() == seg.get_Sector() && missingHits.get(j).get_Superlayer() == seg.get_Superlayer()) {
+                            if (missingHits.get(j).get_Layer() == l + 1) {
+                                for (int wo = 0; wo < 2; wo++) {
+                                    if (Math.abs(trjWire - missingHits.get(j).get_Wire()) == wo) {
+                                        //add hit to segment
+                                        FittedHit fhit = new FittedHit(missingHits.get(j).get_Sector(), missingHits.get(j).get_Superlayer(),
+                                                missingHits.get(j).get_Layer(), missingHits.get(j).get_Wire(), missingHits.get(j).get_TDC(),
+                                                missingHits.get(j).get_Id());
+                                        fhit.set_DocaErr(missingHits.get(j).get_DocaErr());
+                                        fhit.set_CellSize(missingHits.get(j).get_CellSize());
+                                        fhit.set_Id(missingHits.get(j).get_Id());
+                                        fhit.set_ClusFitDoca(calc_doca);
+                                        fhit.set_AssociatedClusterID(seg.get_Id());
+                                        seg.add(fhit);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }    
+   
 }

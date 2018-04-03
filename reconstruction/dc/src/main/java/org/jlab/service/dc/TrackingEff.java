@@ -460,7 +460,7 @@ public class TrackingEff extends ReconstructionEngine {
                 bankRec.setShort("Cross1_ID", i, (short) trkcandsTM.get(i).get(0).get_Id());
                 bankRec.setShort("Cross2_ID", i, (short) trkcandsTM.get(i).get(1).get_Id());
                 bankRec.setShort("Cross3_ID", i, (short) trkcandsTM.get(i).get(2).get_Id());
-                bankRec.setShort("status", i, (short) trkcandsTM.get(i).status);
+                bank.setShort("status", i, (short) (100+trkcandsTM.get(i).get_FitConvergenceStatus()*10+trkcandsTM.get(i).get_MissingSuperlayer()));
                 bankRec.setFloat("chi2", i, (float) trkcandsTM.get(i).get_FitChi2());
                 bankRec.setShort("ndf", i, (short) trkcandsTM.get(i).get_FitNDF());
             }

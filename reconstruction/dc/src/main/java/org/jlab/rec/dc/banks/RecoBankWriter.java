@@ -306,7 +306,7 @@ public class RecoBankWriter {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
-            //bank.setFloat("p", i, (float) candlist.get(i).get_P());
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_FitConvergenceStatus()*10+candlist.get(i).get_MissingSuperlayer()));
             bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
             bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
             bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
@@ -335,16 +335,23 @@ public class RecoBankWriter {
             bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
             bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
-            bank.setShort("status", i, (short) candlist.get(i).status);
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
         }
         //bank.show();
         return bank;
-
     }
 
-    /**
+    public DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist) {
+        
+        DataBank bank = event.createBank("TimeBasedTrkg::TBCovMat", candlist.size());
+        
+        for (int i = 0; i < candlist.size(); i++) {
+            bank.setShort("id", i, (short) candlist.get(i).get_Id());
+        }
+        return bank;
+    }
+     /**
      *
      * @param event the EvioEvent
      * @return hits bank
@@ -375,7 +382,7 @@ public class RecoBankWriter {
             bank.setFloat("X", i, (float) hitlist.get(i).get_X());
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-           // bank.setFloat("time", i, (float) hitlist.get(i).getT0SubTime());
+            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
@@ -653,7 +660,7 @@ public class RecoBankWriter {
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_FitConvergenceStatus()*10+candlist.get(i).get_MissingSuperlayer()));
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
             //bank.setFloat("p", i, (float) candlist.get(i).get_P());
@@ -687,49 +694,7 @@ public class RecoBankWriter {
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
-
-            // save to a separate bank
-            /*
-			Matrix covMat = new Matrix(5,5);
-			if(candlist.get(i).get_CovMat()!=null)
-				covMat = candlist.get(i).get_CovMat();
-			
-			double[][] c = new double[covMat.getRowDimension()][covMat.getColumnDimension()];		
-			
-			for(int rw = 0; rw< covMat.getRowDimension(); rw++) {
-				for(int cl = 0; cl< covMat.getColumnDimension(); cl++) {
-					c[rw][cl] = covMat.get(rw, cl);
-				}	
-			}
-			bank.setFloat("C11", i, (float) c[0][0]);
-			bank.setFloat("C12", i, (float) c[0][1]);
-			bank.setFloat("C13", i, (float) c[0][2]);
-			bank.setFloat("C14", i, (float) c[0][3]);
-			bank.setFloat("C15", i, (float) c[0][4]);
-			bank.setFloat("C21", i, (float) c[1][0]);
-			bank.setFloat("C22", i, (float) c[1][1]);
-			bank.setFloat("C23", i, (float) c[1][2]);
-			bank.setFloat("C24", i, (float) c[1][3]);
-			bank.setFloat("C25", i, (float) c[1][4]);
-			bank.setFloat("C31", i, (float) c[2][0]);
-			bank.setFloat("C32", i, (float) c[2][1]);
-			bank.setFloat("C33", i, (float) c[2][2]);
-			bank.setFloat("C34", i, (float) c[2][3]);
-			bank.setFloat("C35", i, (float) c[2][4]);
-			bank.setFloat("C41", i, (float) c[3][0]);
-			bank.setFloat("C42", i, (float) c[3][1]);
-			bank.setFloat("C43", i, (float) c[3][2]);
-			bank.setFloat("C44", i, (float) c[3][3]);
-			bank.setFloat("C45", i, (float) c[3][4]);
-			bank.setFloat("C51", i, (float) c[4][0]);
-			bank.setFloat("C52", i, (float) c[4][1]);
-			bank.setFloat("C53", i, (float) c[4][2]);
-			bank.setFloat("C54", i, (float) c[4][3]);
-			bank.setFloat("C55", i, (float) c[4][4]);
-             */
-            //bank.setFloat("fitChisq", i, (float) candlist.get(i).get_FitChi2());
         }
-        //bank.show();
         return bank;
 
     }

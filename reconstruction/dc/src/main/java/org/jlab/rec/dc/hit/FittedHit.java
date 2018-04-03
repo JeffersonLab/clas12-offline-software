@@ -5,6 +5,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.utils.groups.IndexedTable;
 /**
@@ -43,8 +44,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public int _lr;
     private int _AssociatedClusterID = -1;
     public boolean RemoveFlag = false;
-    private int _AssociatedHBTrackID =-1;
-    private int _AssociatedTBTrackID;
+    private int _AssociatedHBTrackID = -1;
+    private int _AssociatedTBTrackID = -1;
+    
+    
     // intersection of cross direction line with the hit wire (TCS)
     private Point3D CrossDirIntersWire;
     private double _SignalPropagAlongWire;
@@ -579,7 +582,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void set_AssociatedClusterID(int _AssociatedClusterID) {
         this._AssociatedClusterID = _AssociatedClusterID;
     }
-
+ 
     /**
      * 
      * @param _id associated track id for Hit-Based tracking

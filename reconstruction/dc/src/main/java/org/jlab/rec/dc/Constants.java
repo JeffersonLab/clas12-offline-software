@@ -81,7 +81,7 @@ public class Constants {
 	
 	public static final double TRACKDIRTOCROSSDIRCOSANGLE =0.85;//= 0.95;
         
-        public static double CROSSLISTSELECTQFMINCHSQ=2000;
+        public static double CROSSLISTSELECTQFMINCHSQ=2000; //was 2000
         
 	public static final double SEGMENTPLANESANGLE = 1.5;  // the angle between the normals to the segment fit planes is 12 degrees (6+6 for +/- stereo relative angles) + 1.5 degrees tolerance.  This number (1.5) should be optimized 
 
@@ -102,6 +102,8 @@ public class Constants {
 	public static final double MAXCHI2 = 10000;
         
         public static double HBTCHI2CUT = 10000;
+        
+        public static double SEGSUMRESIDCUT = 0.9;
 	
 	//public static final boolean OUTOFTIMEFLAG = true;
 
@@ -127,6 +129,7 @@ public class Constants {
 	public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
 	
 	public static int[][] STBLOC;
+        
     
         
     

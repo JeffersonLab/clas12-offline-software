@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.Track;
 
@@ -57,6 +58,7 @@ public class MeasVecs {
                     trkcand.get(c).get(s).get(h).calc_CellSize(DcDetector);
                     hitOnTrk = trkcand.get(c).get(s).get(h); 
                     int slayr = trkcand.get(c).get(s).get(h).get_Superlayer();
+                    
                     double sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlope();
                     double it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitIntercept();
 
@@ -64,7 +66,8 @@ public class MeasVecs {
                     double X = sl1 * Z + it1;
 
                     //exclude hits that have poor segment
-                    if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / Math.cos(Math.toRadians(6.))) > 1.5) {
+                    //if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / Math.cos(Math.toRadians(6.))) > 1.5) {
+                    if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())>1) {   
                         continue;
                     }
                     

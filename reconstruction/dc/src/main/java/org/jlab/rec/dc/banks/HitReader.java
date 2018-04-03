@@ -13,7 +13,10 @@ import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.track.Track;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -162,11 +165,15 @@ public class HitReader {
         
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+            //if (wire[i] != -1 && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
                 if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 }
                 double T0Sub = smearedTime[i] - T_0 ;//- Constants.TSTARTEST; 
+                if(T_0<0) {
+                    T0Sub-=- Constants.TSTARTEST; 
+                }
                 // temporary until new ccdb constants are in
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
  //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
@@ -217,7 +224,7 @@ public class HitReader {
             _HBHits = new ArrayList<FittedHit>();
             return;
         }
-
+        
         DataBank bank = event.getBank("HitBasedTrkg::HBHits");
         int rows = bank.rows();
 
@@ -283,8 +290,8 @@ public class HitReader {
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
             
-            hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0);
-            //hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
+            //hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0);
+            hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.calc_CellSize( DcDetector) ;

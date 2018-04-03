@@ -9,6 +9,8 @@ import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.banks.HitReader;
@@ -126,7 +128,7 @@ public class DCTBEngine extends ReconstructionEngine {
                 Run = newRun;
         }
 
-        //System.out.println(" RUNNING TIME BASED....................................");
+        System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
@@ -168,8 +170,8 @@ public class DCTBEngine extends ReconstructionEngine {
         clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
         if(clusters.isEmpty()) {
-                rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
-                return true;
+            rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
+            return true;
         }
 
         //3) find the segments from the fitted clusters
@@ -204,8 +206,32 @@ public class DCTBEngine extends ReconstructionEngine {
             rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
             return true;
         }
-
-
+        /*
+        //
+        // also need Track bank
+        if (event.hasBank("HitBasedTrkg::HBTracks") == false) {
+            return true;
+        }
+        
+        DataBank trkbank = event.getBank("HitBasedTrkg::HBTracks");
+        int trkrows = trkbank.rows();
+        Track[] TrackArray = new Track[trkrows];
+        for (int i = 0; i < trkrows; i++) {
+            Track HBtrk = new Track();
+            HBtrk.set_Id(trkbank.getShort("id", i));
+            HBtrk.set_Sector(trkbank.getByte("sector", i));
+            HBtrk.set_Q(trkbank.getByte("q", i));
+            HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
+            HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("Vtx0_x", i), trkbank.getFloat("Vtx0_y", i), trkbank.getFloat("Vtx0_z", i)));
+            TrackArray[HBtrk.get_Id()-1] = HBtrk; 
+        }
+        
+        for(Segment seg : segments) {
+            TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg);
+        }
+        
+        */
+        //
         CrossListFinder crossLister = new CrossListFinder();
         CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 

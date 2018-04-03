@@ -187,8 +187,8 @@ public class DCHBEngine extends ReconstructionEngine {
        clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
 
        if(clusters.isEmpty()) {				
-               rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
-               return true;
+            rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
+            return true;
        }
 
        rbc.updateListsListWithClusterInfo(fhits, clusters);
@@ -198,8 +198,8 @@ public class DCHBEngine extends ReconstructionEngine {
        segments =  segFinder.get_Segments(clusters, event, dcDetector);
 
        if(segments.isEmpty()) { // need 6 segments to make a trajectory			
-               rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
-               return true;
+            rbc.fillAllHBBanks(event, rbc, fhits, clusters, null, null, null);
+            return true;
        }
        List<Segment> rmSegs = new ArrayList<Segment>();
        // clean up hit-based segments
@@ -240,7 +240,6 @@ public class DCHBEngine extends ReconstructionEngine {
             trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
             for(Track trk: trkcands) {
-
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
@@ -281,7 +280,6 @@ public class DCHBEngine extends ReconstructionEngine {
                 for(Cross c : trk) { 
                     for(FittedHit h1 : c.get_Segment1()) { 
                             h1.set_AssociatedHBTrackID(trk.get_Id());
-
                     }
                     for(FittedHit h2 : c.get_Segment2()) {
                             h2.set_AssociatedHBTrackID(trk.get_Id());                              
@@ -342,7 +340,7 @@ public class DCHBEngine extends ReconstructionEngine {
             en2.processDataEvent(event);
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
-            if (counter > 101) {
+            if (event.getBank("RUN::config").getInt("event", 0) > 200) {
                 break;
             }
             
