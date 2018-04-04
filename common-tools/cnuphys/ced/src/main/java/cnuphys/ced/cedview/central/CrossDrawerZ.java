@@ -95,9 +95,11 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				// System.err.println("Draw Z error bars");
-				_view.labToWorld(cross.x, cross.y, cross.z, wp);
-				wp3.setLocation(wp.x - cross.err_z, wp.y);
-				wp4.setLocation(wp.x + cross.err_z, wp.y);
+				
+				//convert to mm
+				_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
+				wp3.setLocation(wp.x - 10*cross.err_z, wp.y);
+				wp4.setLocation(wp.x + 10*cross.err_z, wp.y);
 				container.worldToLocal(pp, wp3);
 				container.worldToLocal(pp2, wp4);
 				g.setColor(ERROR);
@@ -109,16 +111,17 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				Cross2 cross = crosses.elementAt(i);
 
 				if (!cross.isFullLocationBad()) {
-					_view.labToWorld(cross.x, cross.y, cross.z, wp);
+					//convert to mm
+				_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
 
 					// arrows
 
 					int pixlen = ARROWLEN;
 					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-					double xa = cross.x + r * cross.ux;
-					double ya = cross.y + r * cross.uy;
-					double za = cross.z + r * cross.uz;
+					double xa = 10*cross.x + r * cross.ux;
+					double ya = 10*cross.y + r * cross.uy;
+					double za = 10*cross.z + r * cross.uz;
 					_view.labToWorld(xa, ya, za, wp2);
 
 					container.worldToLocal(pp, wp);
@@ -170,9 +173,10 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				if (!cross.isFullLocationBad() && !Float.isNaN(cross.err_z)) {
-				_view.labToWorld(cross.x, cross.y, cross.z, wp);
-				wp3.setLocation(wp.x - cross.err_z, wp.y);
-				wp4.setLocation(wp.x + cross.err_z, wp.y);
+					//convert to mm
+				_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
+				wp3.setLocation(wp.x - 10*cross.err_z, wp.y);
+				wp4.setLocation(wp.x + 10*cross.err_z, wp.y);
 				container.worldToLocal(pp, wp3);
 				container.worldToLocal(pp2, wp4);
 				g.setColor(ERROR);
@@ -185,16 +189,17 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				Cross2 cross = crosses.elementAt(i);
 
 				if (!cross.isFullLocationBad()) {
-					_view.labToWorld(cross.x, cross.y, cross.z, wp);
+					//convert to mm
+					_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
 
 					// arrows
 					if (!cross.isDirectionBad()) {
 						int pixlen = ARROWLEN;
 						double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-						double xa = cross.x + r * cross.ux;
-						double ya = cross.y + r * cross.uy;
-						double za = cross.z + r * cross.uz;
+						double xa = 10*cross.x + r * cross.ux;
+						double ya = 10*cross.y + r * cross.uy;
+						double za = 10*cross.z + r * cross.uz;
 						_view.labToWorld(xa, ya, za, wp2);
 
 						container.worldToLocal(pp, wp);
@@ -252,13 +257,13 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					if (!cross.isFullLocationBad()) {
-						feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+						feedbackStrings.add(vecStr("cross loc (lab)", 10*cross.x, 10*cross.y, 10*cross.z));
 					} else {
 						feedbackStrings.add("cross location contains NaN");
 					}
 
 					if (!cross.isErrorBad()) {
-						feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+						feedbackStrings.add(vecStr("cross error", 10*cross.err_x, 10*cross.err_y, 10*cross.err_z));
 					} else {
 						feedbackStrings.add("cross error contains NaN");
 					}
@@ -287,13 +292,13 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					if (!cross.isFullLocationBad()) {
-						feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+						feedbackStrings.add(vecStr("cross loc (lab)", 10*cross.x, 10*cross.y, 10*cross.z));
 					} else {
 						feedbackStrings.add("cross location contains NaN");
 					}
 
 					if (!cross.isErrorBad()) {
-						feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+						feedbackStrings.add(vecStr("cross error", 10*cross.err_x, 10*cross.err_y, 10*cross.err_z));
 					} else {
 						feedbackStrings.add("cross error contains NaN");
 					}
