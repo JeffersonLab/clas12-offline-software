@@ -1,6 +1,7 @@
 package basic;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
@@ -53,7 +54,7 @@ public class BasicPanel3D extends GLJPanel implements GLEventListener {
 		float x2[] = {0.5f, -0.5f, 0.5f};
 		float y2[] = {-0.5f, -0.5f, -0.5f};
 		float z2[] = {0f, 0f, 0f};
-		BasicLineDrawing.drawLines(drawable, x1, y1, z1, x2, y2, z2);
+		BasicLineDrawing.drawLines(drawable, x1, y1, z1, x2, y2, z2, Color.yellow);
 	}
 
 	@Override

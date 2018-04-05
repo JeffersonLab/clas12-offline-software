@@ -1,5 +1,7 @@
 package basic;
 
+import java.awt.Color;
+
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -47,12 +49,15 @@ public class BasicLineDrawing {
 	 * @param z2 z coordinates of end of line
 	 */
 	public static void drawLines(GLAutoDrawable drawable, float x1[], float y1[], float z1[], float x2[], float y2[],
-			float z2[]) {
+			float z2[], Color color) {
 
 		int len = (x1 != null) ? x1.length : 0;
 
 		if (len != 0) {
 			GL2 gl2 = drawable.getGL().getGL2();
+			
+			BasicColorSupport3D.setColor(gl2, color);
+			
 			gl2.glBegin(GL2.GL_LINES);
 
 			for (int i = 0; i < len; i++) {
