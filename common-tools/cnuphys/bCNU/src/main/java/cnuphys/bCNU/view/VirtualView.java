@@ -606,6 +606,24 @@ public class VirtualView extends BaseView
 
 		moveTo(view, col, 0, 0);
 	}
+	
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
+	 * @param dh
+	 *            additional horizontal offset
+	 * @param dv
+	 *            additional vertical offset
+	 */
+	public void moveToStart(BaseView view, int col, int constraint) {
+		Point start = view.getStartingLocation();
+		moveTo(view, col, start.x, start.y, constraint);
+	}
+	
 
 	/**
 	 * Move a view to a specific virtual cell
@@ -719,6 +737,25 @@ public class VirtualView extends BaseView
 	 *            constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int constraint) {
+		moveTo(view, col, 0, 0, constraint);
+
+	}
+	
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
+	 * @param delh
+	 *            additional horizontal offset
+	 * @param delv
+	 *            additional vertical offset
+	 * @param constraint
+	 *            constraint constant
+	 */
+	public void moveTo(BaseView view, int col, int delh, int delv, int constraint) {
 
 		if (constraint == CENTER) {
 			moveTo(view, col);
@@ -789,8 +826,9 @@ public class VirtualView extends BaseView
 			dv = yf - y0;
 		}
 
-		view.offset(dh, dv);
+		view.offset(dh + delh, dv + delv);
 	}
+
 
 	/**
 	 * Activates the view's cell so that it is visible

@@ -115,7 +115,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.0 + " + UnicodeSupport.SMALL_EPSILON;
+	private static final String _release = "build 1.001";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -238,44 +238,58 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		if (_firstTime == 1) {
 			// rearrange some views in virtual space
 			_virtualView.reconfigure();
-						
-			_virtualView.moveTo(dcHistoGrid, 13);
-			_virtualView.moveTo(ftofHistoGrid, 14);
-			_virtualView.moveTo(bstHistoGrid, 15);
-			_virtualView.moveTo(pcalHistoGrid, 16);
-			_virtualView.moveTo(ecHistoGrid, 17);
-			
-	    	_virtualView.moveTo(_allDCView, 3);
-			_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
-			_virtualView.moveTo(_centralXYView, 2, VirtualView.BOTTOMLEFT);
-			_virtualView.moveTo(_centralZView, 2, VirtualView.UPPERRIGHT);
-
-			// note no constraint means "center"
-			_virtualView.moveTo(_dcXyView, 7);
-			_virtualView.moveTo(_projectedDCView, 8);
-
-			_virtualView.moveTo(_pcalView, 4);
-			_virtualView.moveTo(_ecView, 5);
-			_virtualView.moveTo(_logView, 12, VirtualView.UPPERRIGHT);
-			_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
-			_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
-
-			_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
-			_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
-
-			if (_use3D) {
-				_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
-				_virtualView.moveTo(_central3DView, 10, VirtualView.BOTTOMLEFT);
-				_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
-			}
-			
-			Log.getInstance().config("reset views on virtual dekstop");
+			restoreDefaultViewLocations();
 			
 			//now load configuration
 			Desktop.getInstance().loadConfigurationFile();
 			Desktop.getInstance().configureViews();
 		}
 		_firstTime++;
+	}
+	
+	/**
+	 * Restore the default locations of the default views.
+	 * Cloned views are unaffected.
+	 */
+	private void restoreDefaultViewLocations() {
+		
+		_virtualView.moveToStart(_sectorView14, 0, VirtualView.UPPERLEFT);
+		_virtualView.moveToStart(_sectorView25, 0, VirtualView.UPPERLEFT);
+		_virtualView.moveToStart(_sectorView36, 0, VirtualView.UPPERLEFT);
+		
+		
+		_virtualView.moveTo(dcHistoGrid, 13);
+		_virtualView.moveTo(ftofHistoGrid, 14);
+		_virtualView.moveTo(bstHistoGrid, 15);
+		_virtualView.moveTo(pcalHistoGrid, 16);
+		_virtualView.moveTo(ecHistoGrid, 17);
+		
+    	_virtualView.moveTo(_allDCView, 3);
+		_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
+		_virtualView.moveTo(_centralXYView, 2, VirtualView.BOTTOMLEFT);
+		_virtualView.moveTo(_centralZView, 2, VirtualView.UPPERRIGHT);
+
+		// note no constraint means "center"
+		_virtualView.moveTo(_dcXyView, 7);
+		_virtualView.moveTo(_projectedDCView, 8);
+
+		_virtualView.moveTo(_pcalView, 4);
+		_virtualView.moveTo(_ecView, 5);
+		_virtualView.moveTo(_logView, 12, VirtualView.UPPERRIGHT);
+		_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
+		_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
+
+		_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
+		_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
+
+		if (_use3D) {
+			_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
+			_virtualView.moveTo(_central3DView, 10, VirtualView.BOTTOMLEFT);
+			_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
+		}
+		
+		Log.getInstance().config("reset views on virtual dekstop");
+		
 	}
 
 	/**
@@ -637,22 +651,25 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		fmenu.insertSeparator(0);
 		
-		// eliza!
-//		final JMenuItem elizaItem = new JMenuItem("Eliza...");
-//
-//		ActionListener al1 = new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				Object source = e.getSource();
-//
-//				if (source == elizaItem) {
-//					ElizaDialog.showEliza(_instance);
-//				}
-//			}
-//		};
-//
-//		elizaItem.addActionListener(al1);
-//		fmenu.add(elizaItem, 0);
+		// restore default config
+		final JMenuItem defConItem = new JMenuItem("Restore Default Configuration");
+
+		ActionListener al1 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+
+				if (source == defConItem) {
+					restoreDefaultViewLocations();
+//					System.err.println("HEY MAN");
+					refresh();
+				}
+			}
+		};
+
+		defConItem.addActionListener(al1);
+//		fmenu.add(defConItem, 6);
+		fmenu.add(defConItem, 0);
 		
 		addWeirdMenu(fmenu);
 
@@ -1147,22 +1164,25 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		BST.getInstance();
 		BMT.getInstance();
 		Cosmics.getInstance();
+		DataManager.getInstance();
+
+	    getInstance();  //creates ced frame
+
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
-				Ced ced = getInstance();
+//			    getInstance();
 				splashWindow.setVisible(false);
-				ced.setVisible(true);
-	//			splashWindow.writeCachedText();
-				ced.fixTitle();
+				getCed().setVisible(true);
+				getCed().fixTitle();
 				
 				ClasIoEventManager.getInstance().setUpFilterMenu();
 				//initialize data columns
-				DataManager.getInstance();
-				System.out.println("ced version " + _release + " is ready.");
+//				DataManager.getInstance();
+				System.out.println("ced  " + _release + " is ready.");
 			}
 
 		});
@@ -1170,54 +1190,54 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Log.getInstance().config("CLAS12DIR: " + clas12dir);
 		
 		//try to update the log for fun
-		try {
-			updateCedLog();
-		}
-		catch (Exception e) {
-		}
+//		try {
+//			updateCedLog();
+//		}
+//		catch (Exception e) {
+//		}
 		
 		Log.getInstance().info("ced is ready.");
 //		Environment.getInstance().say("c e d is ready");
 
 
 	} // end main
-	
-	//update the log file for fun
-	private static void updateCedLog() {
-		
-		File myHome = new File(Environment.getInstance().getHomeDirectory());
-		String baseHome = myHome.getParent();
-		
-		File file = new File(baseHome, "heddle/ced.log");
-		
-		boolean fileExists = file.exists();
-		
-		if (!fileExists) {
-			file = new File("/u/home/heddle/ced.log");
-			fileExists = file.exists();
-		}
-		
-		if (!fileExists) {
-			file = new File("home/heddle/ced.log");
-			fileExists = file.exists();
-		}
-
-
-		if (fileExists && file.canWrite()) {
-			System.out.println("updating log");
-			try {
-				FileWriter fw = new FileWriter(file, true);
-				String uname = Environment.getInstance().getUserName();
-				String datestr = DateString.dateStringLong();
-				String lstr = uname + " " + _release + " " + datestr;
-				fw.write(lstr + "\n");
-				fw.flush();
-				fw.close();
-			}
-			catch (IOException e) {
-			}
-			
-		}
-	}
+//	
+//	//update the log file for fun
+//	private static void updateCedLog() {
+//		
+//		File myHome = new File(Environment.getInstance().getHomeDirectory());
+//		String baseHome = myHome.getParent();
+//		
+//		File file = new File(baseHome, "heddle/ced.log");
+//		
+//		boolean fileExists = file.exists();
+//		
+//		if (!fileExists) {
+//			file = new File("/u/home/heddle/ced.log");
+//			fileExists = file.exists();
+//		}
+//		
+//		if (!fileExists) {
+//			file = new File("home/heddle/ced.log");
+//			fileExists = file.exists();
+//		}
+//
+//
+//		if (fileExists && file.canWrite()) {
+//			System.out.println("updating log");
+//			try {
+//				FileWriter fw = new FileWriter(file, true);
+//				String uname = Environment.getInstance().getUserName();
+//				String datestr = DateString.dateStringLong();
+//				String lstr = uname + " " + _release + " " + datestr;
+//				fw.write(lstr + "\n");
+//				fw.flush();
+//				fw.close();
+//			}
+//			catch (IOException e) {
+//			}
+//			
+//		}
+//	}
 
 }

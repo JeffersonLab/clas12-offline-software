@@ -67,36 +67,36 @@ public class SplashWindowCED extends JWindow {
     @Override
     public void setVisible(boolean vis) {
         super.setVisible(vis);
-        if (vis) {
-            stdErr = System.err;
-            errBaos = new ByteArrayOutputStream();
-            PrintStream errps = new PrintStream(errBaos);
-            System.setErr(errps);
-
-        } else {
-            System.setErr(stdErr);
-
-            String errBuffer = errBaos.toString();
-            try {
-                errBaos.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            if (errBuffer.contains("Exception")) {
-                //prevent the orion frame from showing up
-                Ced.getCed().setVisible(false);
-
-                //print the err to the log (for customer) and the system err (for devs)
-                Log.getInstance().error(errBuffer);
-                System.err.println(errBuffer);
-
-                //Alert about error
-                JOptionPane.showMessageDialog(null, "Startup Error",
-                        "ced did not start properly.", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }
-        }
+//        if (vis) {
+//            stdErr = System.err;
+//            errBaos = new ByteArrayOutputStream();
+//            PrintStream errps = new PrintStream(errBaos);
+//            System.setErr(errps);
+//
+//        } else {
+//            System.setErr(stdErr);
+//
+//            String errBuffer = errBaos.toString();
+//            try {
+//                errBaos.close();
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//            }
+//
+//            if (errBuffer.contains("Exception")) {
+//                //prevent the orion frame from showing up
+//                Ced.getCed().setVisible(false);
+//
+//                //print the err to the log (for customer) and the system err (for devs)
+//                Log.getInstance().error(errBuffer);
+//                System.err.println(errBuffer);
+//
+//                //Alert about error
+//                JOptionPane.showMessageDialog(null, "Startup Error",
+//                        "ced did not start properly.", JOptionPane.ERROR_MESSAGE);
+//                System.exit(1);
+//            }
+//        }
     }
 
     private void addNorth(String title, String version) {

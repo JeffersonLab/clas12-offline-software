@@ -78,6 +78,9 @@ public class BaseView extends JInternalFrame implements FocusListener {
 	
 	//optional scrollpane
 	private JScrollPane _scrollPane;
+	
+    //starting location
+	private Point _startingLocation = new Point();
 
 	/**
 	 * Constructor
@@ -224,6 +227,8 @@ public class BaseView extends JInternalFrame implements FocusListener {
 				setLocation(left, top);
 			}
 		}
+		
+		_startingLocation.setLocation(left, top);
 
 		// add to the desktop
 		if (_desktop != null) {
@@ -273,6 +278,14 @@ public class BaseView extends JInternalFrame implements FocusListener {
 			}
 		};
 		addComponentListener(ca);
+	}
+	
+	/**
+	 * Get the starting upper-left of the view
+	 * @return the starting upper-left of the view
+	 */
+	public Point getStartingLocation() {
+		return _startingLocation;
 	}
 	
 	@Override
