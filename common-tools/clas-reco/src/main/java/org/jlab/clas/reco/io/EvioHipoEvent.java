@@ -566,6 +566,7 @@ public class EvioHipoEvent {
                         hipoBank.setInt("mtid",      irow,         evioBank.getInt("mtid",i));
                         hipoBank.setInt("otid",      irow,         evioBank.getInt("otid",i));
                         hipoBank.setFloat("trackE",  irow, (float) evioBank.getDouble("trackE",i));
+                        hipoBank.setFloat("totEdep", irow, (float) evioBank.getDouble("totEdep",i));
                         hipoBank.setFloat("avgX",    irow, (float) evioBank.getDouble("avgX",i));
                         hipoBank.setFloat("avgY",    irow, (float) evioBank.getDouble("avgY",i));
                         hipoBank.setFloat("avgZ",    irow, (float) evioBank.getDouble("avgZ",i));
@@ -582,6 +583,7 @@ public class EvioHipoEvent {
                         hipoBank.setFloat("mvy",     irow, (float) evioBank.getDouble("mvy",i));
                         hipoBank.setFloat("mvz",     irow, (float) evioBank.getDouble("mvz",i));
                         hipoBank.setFloat("avgT",    irow, (float) evioBank.getDouble("avgT",i));
+                        hipoBank.setInt("hitn",      irow,         evioBank.getInt("hitn",i));
                         irow++;
                     }
                 }
