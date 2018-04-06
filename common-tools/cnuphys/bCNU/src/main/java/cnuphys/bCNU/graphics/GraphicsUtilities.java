@@ -356,6 +356,48 @@ public class GraphicsUtilities {
 	public static void centerComponent(Component component) {
 		centerComponent(component, 0, 0);
 	}
+	
+	//get the best screen for launching
+	private static Rectangle boundsOfMainScreen() {
+				
+		//main screen should have bounds.x = 0
+		
+		GraphicsEnvironment env = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice[] allScreens = env.getScreenDevices();
+
+		if (allScreens != null) {
+			for (GraphicsDevice screen : allScreens) {
+				GraphicsConfiguration gc = screen.getDefaultConfiguration();
+				Rectangle b = gc.getBounds();
+				if (b.x == 0) {
+					return b;
+				}
+			}
+		}
+		
+		//if null, get bounds of biggest screen
+		
+		GraphicsDevice bigScreen = null;
+		int maxWidth = -1;
+		
+		if (allScreens != null) {
+			for (GraphicsDevice screen : allScreens) {
+				GraphicsConfiguration gc = screen.getDefaultConfiguration();
+				Rectangle b = gc.getBounds();
+				if (b.width > maxWidth) {
+					maxWidth = b.width;
+					bigScreen = screen;
+				}
+			}
+		}
+		
+		if (bigScreen != null) {
+			GraphicsConfiguration gc = bigScreen.getDefaultConfiguration();
+			return gc.getBounds();
+		}
+		return null;
+	}
 
 	/**
 	 * Center a component.
@@ -375,12 +417,17 @@ public class GraphicsUtilities {
 
 		try {
 
-			GraphicsEnvironment env = GraphicsEnvironment
-					.getLocalGraphicsEnvironment();
-			GraphicsDevice[] allScreens = env.getScreenDevices();
-			GraphicsConfiguration gc = allScreens[0].getDefaultConfiguration();
-
-			Rectangle bounds = gc.getBounds();
+//			GraphicsEnvironment env = GraphicsEnvironment
+//					.getLocalGraphicsEnvironment();
+//			GraphicsDevice[] allScreens = env.getScreenDevices();
+//			
+//			
+//			
+//			GraphicsConfiguration gc = allScreens[0].getDefaultConfiguration();
+//
+//			Rectangle bounds = gc.getBounds();
+			
+			Rectangle bounds = boundsOfMainScreen();
 			Dimension componentSize = component.getSize();
 			if (componentSize.height > bounds.height) {
 				componentSize.height = bounds.height;

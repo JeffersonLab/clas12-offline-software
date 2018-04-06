@@ -1,6 +1,9 @@
 package cnuphys.bCNU.util;
 
 import java.awt.Color;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -625,6 +628,13 @@ public final class Environment {
 		// cp = FileUtilities.fixPathSeparator(cp);
 		return FileUtilities.tokens(cp, File.pathSeparator);
 	}
+	
+	public GraphicsDevice[] getGraphicsDevices() {
+		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] devices = g.getScreenDevices();
+
+		return devices;
+	}
 
 	/**
 	 * Convert to a string representation.
@@ -669,6 +679,18 @@ public final class Environment {
 		sb.append("Resolution Scale Factor: " + DoubleFormat.doubleFormat(getResolutionScaleFactor(), 2) + "\n");
 		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter) + "\n");
 
+		sb.append("Monitors:\n");
+		GraphicsDevice[] devices = getGraphicsDevices();
+		if (devices != null) {
+			for (GraphicsDevice device : devices) {
+				Rectangle bounds = device.getDefaultConfiguration().getBounds();
+				int width = device.getDisplayMode().getWidth();
+				int height = device.getDisplayMode().getWidth();
+				sb.append("   [W, H] = [" + width + ", " + height + "] bounds: " + bounds + "\n");
+			}
+		}
+
+
 		sb.append("\n" + memoryReport(null));
 		return sb.toString();
 	}
@@ -681,7 +703,7 @@ public final class Environment {
 	 */
 	public static void main(String arg[]) {
 		Environment env = Environment.getInstance();
-		env.say("Hello " + env.getUserName() + ", this is the bCNU Environment test.");
+//		env.say("Hello " + env.getUserName() + ", this is the bCNU Environment test.");
 		System.out.println(env);
 		System.out.println("Done.");
 

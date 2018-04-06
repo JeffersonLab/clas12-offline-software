@@ -5,25 +5,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
-import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Fonts;
 
 
@@ -37,9 +33,6 @@ public class SplashWindowCED extends JWindow {
     private Dimension _tileSize;
 
     private JButton closeButton;
-
-    private PrintStream stdErr;
-    private ByteArrayOutputStream errBaos;
 
     public SplashWindowCED(String title, Color bg, int width, String backgroundImage, String version) {
 
@@ -58,49 +51,29 @@ public class SplashWindowCED extends JWindow {
         }
 
         addCenter(bg, width);
-        addSouth(width);
         addNorth(title, version);
         pack();
         GraphicsUtilities.centerComponent(this);
     }
 
-    @Override
-    public void setVisible(boolean vis) {
-        super.setVisible(vis);
-//        if (vis) {
-//            stdErr = System.err;
-//            errBaos = new ByteArrayOutputStream();
-//            PrintStream errps = new PrintStream(errBaos);
-//            System.setErr(errps);
-//
-//        } else {
-//            System.setErr(stdErr);
-//
-//            String errBuffer = errBaos.toString();
-//            try {
-//                errBaos.close();
-//            } catch (Exception ex) {
-//                ex.printStackTrace();
-//            }
-//
-//            if (errBuffer.contains("Exception")) {
-//                //prevent the orion frame from showing up
-//                Ced.getCed().setVisible(false);
-//
-//                //print the err to the log (for customer) and the system err (for devs)
-//                Log.getInstance().error(errBuffer);
-//                System.err.println(errBuffer);
-//
-//                //Alert about error
-//                JOptionPane.showMessageDialog(null, "Startup Error",
-//                        "ced did not start properly.", JOptionPane.ERROR_MESSAGE);
-//                System.exit(1);
-//            }
-//        }
-    }
-
     private void addNorth(String title, String version) {
-        JPanel sp = new JPanel();
+        JPanel sp = new JPanel() {
+//        	@Override
+//        	public Dimension getPreferredSize() {
+//        		Dimension d = super.getPreferredSize();
+//        		d.height += 50;
+//        		return d;
+//        	}
+        	
+        	@Override
+        	public Insets getInsets() {
+        		Insets def = super.getInsets();
+        		return new Insets(def.top + 4, def.left + 4, def.bottom + 4,
+        				def.right + 4);
+        	}
+
+        };
+        
         sp.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 0));
 		sp.setBackground(Color.white);
 
@@ -151,6 +124,7 @@ public class SplashWindowCED extends JWindow {
         label.setFont(Fonts.defaultBoldFont);        
         sp.add(label);
 
+        //close button
         closeButton = new JButton("Close") {
             @Override
             public Dimension getPreferredSize() {
@@ -222,16 +196,4 @@ public class SplashWindowCED extends JWindow {
 
     }
 
-    private void addSouth(final int width) {
-        JProgressBar loading = new JProgressBar() {
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                d.width = width;
-                return d;
-            }
-        };
-        loading.setIndeterminate(true);
-        add(loading, BorderLayout.SOUTH);
-    }
 }
