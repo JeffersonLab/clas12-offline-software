@@ -29,7 +29,14 @@ import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.PlotTicks;
 import cnuphys.splot.style.SymbolType;
 
-public class TravelingSalesman extends Solution {
+public class TravelingSalesperson extends Solution {
+	
+	//singleton
+	private static TravelingSalesperson _instance;
+	
+	//min and max cities
+	private static final int MIN_CITY = 10;
+	private static final int MAX_CITY = 2000;
 	
 	//the array of cities
 	private TSCity[] _cities;
@@ -40,21 +47,51 @@ public class TravelingSalesman extends Solution {
 	//the itinerary
 	private int[] _itinerary;
 	
+	//the river "penalty"
+	private River _river;
+	
+	//number of cities
+	private int _numCity;
+	
 	/**
 	 * A Solution with randomly located cities
 	 * @param numCity the number of cities
 	 */
-	public TravelingSalesman(int numCity) {
-		_cities = new TSCity[numCity];
+	private TravelingSalesperson(int numCity, River river) {
+		reset(numCity, river);
+	}
+	
+	public static TravelingSalesperson getInstance() {
+		if (_instance == null) {
+			_instance = new TravelingSalesperson(200, River.NORIVER);
+		}
+		return _instance;
+	}
+	
+	/**
+	 * Reset the simulation
+	 * @param numCity the number of cities
+	 * @param the river "penalty"
+	 */
+	public void reset(int numCity, River river) {
 		
-		for (int i = 0; i < numCity; i++) {
+		_numCity = Math.max(MIN_CITY, Math.min(MAX_CITY, numCity));
+		
+		_cities = new TSCity[_numCity];
+		_river = river;
+		
+		for (int i = 0; i < _numCity; i++) {
 			_cities[i] = new TSCity();
 		}
 		
-		_itinerary = new int[numCity];
-		for (int i = 0; i < numCity; i++) {
+		_itinerary = new int[_numCity];
+		for (int i = 0; i < _numCity; i++) {
 			_itinerary[i] = i;
 		}
+	}
+	
+	public int getCityCount() {
+		return _numCity;
 	}
 	
 	/**
@@ -85,7 +122,7 @@ public class TravelingSalesman extends Solution {
 	 * Copy constructor
 	 * @param ts the solution to copy
 	 */
-	public TravelingSalesman(TravelingSalesman ts) {
+	public TravelingSalesperson(TravelingSalesperson ts) {
 		//cities are immutable and shared
 		_cities = ts._cities;
 		
@@ -104,6 +141,7 @@ public class TravelingSalesman extends Solution {
 		return getDistance();
 	}
 	
+	//get the "distance" which includes river penalties or bonuses
 	public double getDistance() {
 		int len = count();
 		double distance = 0;
@@ -123,7 +161,7 @@ public class TravelingSalesman extends Solution {
 	@Override
 	public Solution getNeighbor() {
 		
-		TravelingSalesman neighbor = (TravelingSalesman)copy();
+		TravelingSalesperson neighbor = (TravelingSalesperson)copy();
 
 		int seg[] = getSegment(count());
 		
@@ -242,7 +280,7 @@ public class TravelingSalesman extends Solution {
 
 	@Override
 	public Solution copy() {
-		return new TravelingSalesman(this);
+		return new TravelingSalesperson(this);
 	}
 	
 	
@@ -348,13 +386,16 @@ public class TravelingSalesman extends Solution {
 	public static void main(String arg[]) {
 		//initial solution
 		
-		int numCity = 200;
+		int numCity = 400;
+		River river = River.NORIVER;
 		
-		TravelingSalesman initSol = new TravelingSalesman(numCity);
+		TravelingSalesperson initSol = getInstance();
+		initSol.reset(numCity, river);
+		
 		System.out.println("City count: " + initSol.count());
 		System.out.println("Initial distance: " + initSol.getDistance());
 		System.out.println("Initial energy: " + initSol.getEnergy());
-		TravelingSalesman neighbor = (TravelingSalesman) initSol.getNeighbor();
+		TravelingSalesperson neighbor = (TravelingSalesperson) initSol.getNeighbor();
 		System.out.println("Initial distance: " + initSol.getDistance());
 		System.out.println("Initial energy: " + initSol.getEnergy());
 		System.out.println("Neighbor distance: " + neighbor.getDistance());
@@ -385,7 +426,7 @@ public class TravelingSalesman extends Solution {
 
 			@Override
 			public void updateSolution(Simulation simulation, Solution newSolution, Solution oldSolution) {
-				TravelingSalesman ts = (TravelingSalesman)newSolution;
+				TravelingSalesperson ts = (TravelingSalesperson)newSolution;
 				double temperature = simulation.getTemperature();
 				System.out.println(String.format("T: %-12.8f   D: %-10.5f", temperature, ts.getDistance()));
 				temps.add(temperature);

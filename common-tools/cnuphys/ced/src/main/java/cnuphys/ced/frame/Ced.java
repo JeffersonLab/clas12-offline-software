@@ -9,9 +9,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -89,18 +86,14 @@ import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
-import cnuphys.bCNU.format.DateString;
 import cnuphys.bCNU.fortune.FortuneManager;
 import cnuphys.bCNU.graphics.ImageManager;
-import cnuphys.bCNU.graphics.splashscreen.SplashWindow;
-import cnuphys.bCNU.log.ConsoleLogListener;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
-import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
@@ -1087,9 +1080,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		
 		
 		//splash frame
-		final SplashWindowCED splashWindow = new SplashWindowCED("ced", null, 920, "images/cnu.png", _release);
+		final SplashWindowCED splashWindow = new SplashWindowCED("ced", null, 920, _release);
 
-//		final SplashWindow splashWindow = new SplashWindow("ced", null, 920, "images/cnu.png", _release);
 		// now make the frame visible, in the AWT thread
 		try {
 			EventQueue.invokeAndWait(new Runnable() {

@@ -45,6 +45,10 @@ public class SimulationPanel extends JPanel implements IUpdateListener {
 		
 	}
 	
+	/**
+	 * Set the simulation for this panel
+	 * @param simulation the simulation
+	 */
 	public void setSimulation(Simulation simulation) {
 		
 		if (_simulation == simulation) {
