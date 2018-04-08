@@ -4,103 +4,172 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JWindow;
+import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
-import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.splot.plot.X11Colors;
 
 
 @SuppressWarnings("serial")
 public class SplashWindowCED extends JWindow {
 
-    private JComponent _center;
-
-    boolean tile;
-    private ImageIcon _icon;
+    private ImageIcon _cnu2;
     private Dimension _tileSize;
 
-    private JButton closeButton;
+    //close (and kill the startup)
+    private JButton _closeButton;
 
-    private PrintStream stdErr;
-    private ByteArrayOutputStream errBaos;
+    //swing timer to bring in spme pics
+    private Timer _timer;
+    
+    //for random pics
+    private String _cedPics[] = {
+			"images/cedSS1.png",
+			"images/cedSS2.png",
+			"images/cedSS3.png",
+			"images/cedSS4.png",
+			"images/cedSS5.png",
+			"images/cedSS6.png",
+			"images/cedSS7.png",
+			"images/cedSS8.png",
+			"images/cedSS9.png",
+			"images/cedSS10.png",
+			"images/cedSS11.png",
+			"images/cedSS12.png",
+   		
+    };
+    private int _picIndex = (int)(Integer.MAX_VALUE*Math.random()) %  _cedPics.length;
+    private ImageIcon _cedImage;
+    private JLabel _cedLabel;
+    
+    /**
+     * Create the ced splash window
+     * @param title
+     * @param bg
+     * @param width
+     * @param backgroundImage
+     * @param version
+     */
+    public SplashWindowCED(String title, Color bg, int width, String version) {
 
-    public SplashWindowCED(String title, Color bg, int width, String backgroundImage, String version) {
+		setLayout(new BorderLayout(2, 2));
 
-        setLayout(new BorderLayout(2, 2));
+		for (int i = 0; i < 30; i++) {
+			int r1 = ThreadLocalRandom.current().nextInt(0, _cedPics.length);
+			int r2 = ThreadLocalRandom.current().nextInt(0, _cedPics.length);
 
-        if (backgroundImage != null) {
-            _icon = ImageManager.getInstance().loadImageIcon(backgroundImage);
-            if (_icon != null) {
-                tile = true;
-                _tileSize = new Dimension(_icon.getIconWidth(),
-                        _icon.getIconHeight());
-                if ((_tileSize.width < 2) || (_tileSize.height < 2)) {
-                    tile = false;
-                }
-            }
-        }
+			if (r1 != r2) {
+				String temp = _cedPics[r1];
+				_cedPics[r1] = _cedPics[r2];
+				_cedPics[r2] = temp;
+			}
+		}
+        
+        addTimer(2500);
 
-        addCenter(bg, width);
-        addSouth(width);
+        addSouth();
+        addCenter(bg, (_cnu2 != null) ? _cnu2.getIconWidth() : width);
         addNorth(title, version);
         pack();
         GraphicsUtilities.centerComponent(this);
     }
-
+    
     @Override
     public void setVisible(boolean vis) {
-        super.setVisible(vis);
-        if (vis) {
-            stdErr = System.err;
-            errBaos = new ByteArrayOutputStream();
-            PrintStream errps = new PrintStream(errBaos);
-            System.setErr(errps);
+    	if ((_timer != null) && !vis) {
+    		System.err.println("Stopping splashscreen timer"); {
+    			_timer.stop();
+    		}
+    	}
 
-        } else {
-            System.setErr(stdErr);
+		super.setVisible(vis);
+	}
 
-            String errBuffer = errBaos.toString();
-            try {
-                errBaos.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+	// add a timer to swap pics
+	private void addTimer(int millis) {
+		ActionListener taskPerformer = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				setImage();
+			}
+		};
+		_timer = new Timer(0, taskPerformer);
+		_timer.setDelay(millis);
 
-            if (errBuffer.contains("Exception")) {
-                //prevent the orion frame from showing up
-                Ced.getCed().setVisible(false);
+		_timer.start();
+	}
 
-                //print the err to the log (for customer) and the system err (for devs)
-                Log.getInstance().error(errBuffer);
-                System.err.println(errBuffer);
-
-                //Alert about error
-                JOptionPane.showMessageDialog(null, "Startup Error",
-                        "ced did not start properly.", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }
-        }
+	private void setImage() {
+    	_cedImage = ImageManager.getInstance().loadImageIcon(_cedPics[_picIndex]);
+    	_picIndex = (_picIndex + 1) % _cedPics.length;
+    	
+    	if (_cedLabel != null) {
+    		_cedLabel.setIcon(_cedImage);
+    	}
     }
+    
+    private void addSouth() {
+    	_cnu2 = ImageManager.cnu2;
+    	if (_cnu2 == null) {
+    		return;
+    	}
+    	
+    	final Dimension size = new Dimension(_cnu2.getIconWidth()+20, _cnu2.getIconHeight()+20);
+     	
+    	JLabel label = new JLabel("") {
+    		
+//        	@Override
+//        	public Insets getInsets() {
+//        		Insets def = super.getInsets();
+//        		return new Insets(def.top + 4, def.left + 4, def.bottom + 4,
+//        				def.right + 4);
+//        	}
 
+           	@Override
+        		public Dimension getPreferredSize() {
+        			return size;
+        		}
+    	};
+    	label.setIcon(_cnu2);
+    	Border outerBorder = BorderFactory.createEtchedBorder();
+    	Border emptyBorder = new EmptyBorder(10, 10, 10, 10); // top, left, bot, right
+		label.setBorder(BorderFactory.createCompoundBorder(outerBorder, emptyBorder));
+		
+		label.setOpaque(true);
+		label.setBackground(X11Colors.getX11Color("alice blue"));
+    	
+    	add(label, BorderLayout.SOUTH);
+     }
+
+    //add the north with the little animations
     private void addNorth(String title, String version) {
-        JPanel sp = new JPanel();
+        JPanel sp = new JPanel() {
+        	
+        	@Override
+        	public Insets getInsets() {
+        		Insets def = super.getInsets();
+        		return new Insets(def.top + 4, def.left + 4, def.bottom + 4,
+        				def.right + 4);
+        	}
+
+        };
+        
         sp.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 0));
 		sp.setBackground(Color.white);
 
@@ -151,7 +220,8 @@ public class SplashWindowCED extends JWindow {
         label.setFont(Fonts.defaultBoldFont);        
         sp.add(label);
 
-        closeButton = new JButton("Close") {
+        //close button
+        _closeButton = new JButton("Close") {
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
@@ -170,68 +240,33 @@ public class SplashWindowCED extends JWindow {
 			}
         };
         
-        closeButton.addActionListener(al);
-        sp.add(closeButton);
+        _closeButton.addActionListener(al);
+        sp.add(_closeButton);
 
         add(sp, BorderLayout.NORTH);
     }
 
     private void addCenter(final Color bg, final int width) {
-        _center = new JComponent() {
-
-            private int prefH = (_icon == null) ? 300 : _icon.getIconHeight();
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(width, prefH);
-            }
-
-            @Override
-            public void paintComponent(Graphics g) {
-
-                if (_icon == null) {
-                    Rectangle b = getBounds();
-                    g.setColor(getBackground());
-                    g.fillRect(b.x, b.y, b.width, b.height);
-                } else {
-                    tile(g);
-                }
-
-            }
-
-            private void tile(Graphics g) {
-
-                Rectangle bounds = getBounds();
-                int ncol = bounds.width / _tileSize.width + 1;
-                int nrow = bounds.height / _tileSize.height + 1;
-
-                for (int i = 0; i < ncol; i++) {
-                    int x = i * _tileSize.width;
-                    for (int j = 0; j < nrow; j++) {
-                        int y = j * _tileSize.height;
-                        g.drawImage(_icon.getImage(), x, y, this);
-                    }
-                }
-
-            }
-
-        };
-
-        _center.setSize(new Dimension(width, 300));
-        add(_center, BorderLayout.CENTER);
-
+    	
+      	
+    	_cedLabel = new JLabel("") {
+ 
+           	@Override
+        		public Dimension getPreferredSize() {
+        			return new Dimension(670, 420);
+        		}
+    	};
+    	
+    	setImage();
+    	_cedLabel.setIcon(_cedImage);
+    	Border outerBorder = BorderFactory.createEtchedBorder();
+    	Border emptyBorder = new EmptyBorder(10, 10, 10, 10); // top, left, bot, right
+    	_cedLabel.setBorder(BorderFactory.createCompoundBorder(outerBorder, emptyBorder));
+		
+    	_cedLabel.setOpaque(true);
+    	_cedLabel.setBackground(X11Colors.getX11Color("dark gray"));
+    	
+    	add(_cedLabel, BorderLayout.CENTER);
     }
 
-    private void addSouth(final int width) {
-        JProgressBar loading = new JProgressBar() {
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                d.width = width;
-                return d;
-            }
-        };
-        loading.setIndeterminate(true);
-        add(loading, BorderLayout.SOUTH);
-    }
 }

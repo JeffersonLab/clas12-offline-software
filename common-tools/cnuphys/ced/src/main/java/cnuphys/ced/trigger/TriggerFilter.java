@@ -73,7 +73,7 @@ public class TriggerFilter extends AEventFilter {
 
 
 	public void setBits(int bits) {
-		System.err.println("Trigger Filter Bits Have Changed");
+//		System.err.println("Trigger Filter Bits Have Changed");
 		_bits = bits;
 	}
 

@@ -109,6 +109,13 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	}
 
+	/**
+	 * Mouse over feedback
+	 * @param container
+	 * @param screenPoint
+	 * @param worldPoint
+	 * @param feedbackStrings
+	 */
 	public void feedback(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 		for (FeedbackRect rr : _fbRects) {
