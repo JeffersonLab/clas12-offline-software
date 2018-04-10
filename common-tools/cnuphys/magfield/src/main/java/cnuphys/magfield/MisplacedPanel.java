@@ -20,7 +20,8 @@ public class MisplacedPanel extends JPanel {
 	public MisplacedPanel(final MagneticFields.FieldType type,
 			final String name, double defaultVal) {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
-//		setBackground(Color.white);
+		setOpaque(false);
+		setBackground(null);
 		_fieldType = type;
 
 		// label

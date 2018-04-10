@@ -52,7 +52,11 @@ public class SplashWindowCED extends JWindow {
 			"images/cedSS10.png",
 			"images/cedSS11.png",
 			"images/cedSS12.png",
-   		
+			"images/cedSS13.png",
+			"images/cedSS14.png",
+			"images/cedSS15.png",
+			"images/cedSS16.png",
+  		
     };
     private int _picIndex = (int)(Integer.MAX_VALUE*Math.random()) %  _cedPics.length;
     private ImageIcon _cedImage;
@@ -217,7 +221,7 @@ public class SplashWindowCED extends JWindow {
             labelText += " " + version;
         }
         final JLabel label = new JLabel(labelText);
-        label.setFont(Fonts.defaultBoldFont);        
+        label.setFont(Fonts.defaultLargeFont);        
         sp.add(label);
 
         //close button
