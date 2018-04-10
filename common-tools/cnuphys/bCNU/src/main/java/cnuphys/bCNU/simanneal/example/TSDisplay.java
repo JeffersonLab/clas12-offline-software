@@ -15,11 +15,16 @@ import cnuphys.splot.plot.X11Colors;
 
 public class TSDisplay extends JComponent implements IUpdateListener {
 	
-	private Simulation _simulation;
+	//for converting to screen coordinates
+	private final double vmin = -0.05;
+	private final double vmax = 1.1;
+
 	
-	public TSDisplay(Simulation simulation) {
-		_simulation = simulation;
-		simulation.addUpdateListener(this);
+	//the simulation
+	private TravelingSalesperson _travPerson;
+	
+	public TSDisplay(TravelingSalesperson travPerson) {
+		_travPerson = travPerson;
 		setOpaque(false);
 	}
 	
@@ -31,7 +36,7 @@ public class TSDisplay extends JComponent implements IUpdateListener {
 		g.setColor(X11Colors.getX11Color("Dark Blue"));
 		g.drawRect(b.x, b.y, b.width-1, b.height-1);
 		
-		TravelingSalesperson ts = (TravelingSalesperson)(_simulation.currentSolution());
+		TravelingSalesperson ts = _travPerson.getCurrentSolution();
 		TSCity cities[] = ts.getCities();
 		int itinerary[] = ts.getItinerary();
 		int len = itinerary.length;
@@ -59,8 +64,6 @@ public class TSDisplay extends JComponent implements IUpdateListener {
 	}
 	
 	
-	private final double vmin = -0.05;
-	private final double vmax = 1.1;
 	private void cityToLocal(Point pp, TSCity city) {
 		Rectangle b = getBounds();
 		double x = city.x;
