@@ -127,11 +127,12 @@ public class TestEvent {
 		HipoDataSync writer = new HipoDataSync();
 		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
 		DataBank config = testEvent.createBank("RUN::config", 1);
-		DataBank SVTadc = testEvent.createBank("BST::adc", 7);
+		DataBank BSTadc = testEvent.createBank("BST::adc", 8);
+		DataBank BMTadc = testEvent.createBank("BMT::adc", 50);
 		
-		// this event is based on a gemc (4a.1.1 aka 4a.2.0) event with
+		// this event is based on a gemc (4a.2.3) event with
 		// torus = -1.0 , solenoid = 1.0
-		//	<option name="BEAM_P"   value="proton, 0.91*GeV, 42.2*deg, 127.8*deg"/>
+		// <option name="BEAM_P"   value="proton, 0.91*GeV, 42.2*deg, 127.8*deg"/>
 		// <option name="SPREAD_P" value="0*GeV, 0*deg, 0*deg"/>
 		// <option name="BEAM_V" value="(0, 0, -1.39)cm"/>
 		// <option name="SPREAD_V" value="(0.0, 0.0)cm"/>
@@ -139,61 +140,229 @@ public class TestEvent {
 		config.setInt("run", 0, (int) 11);
 		config.setInt("event", 0, (int) 1);
 		config.setInt("unixtime", 0, (int) 0);
-                config.setInt("trigger", 0, (int) 0);
+		config.setInt("trigger", 0, (int) 0);
 		config.setLong("timestamp", 0, (long) 0);
 		config.setByte("type", 0, (byte) 0);
 		config.setByte("mode", 0, (byte) 0);
 		config.setFloat("torus", 0, (float) -1.0);
 		config.setFloat("solenoid", 0, (float) 1.0);
 		
-		for(int i = 0; i < 7; i++) {
-			SVTadc.setByte("order", i, (byte) 0);
-			SVTadc.setShort("ped", i, (short) 0);
-			SVTadc.setLong("timestamp", i, (long) 0);
+		for(int i = 0; i < 8; i++) {
+			BSTadc.setByte("order", i, (byte) 0);
+			BSTadc.setShort("ped", i, (short) 0);
+			BSTadc.setLong("timestamp", i, (long) 0);
 		}
 
-		SVTadc.setByte("sector", 0, (byte) 5);
-		SVTadc.setByte("sector", 1, (byte) 5);
-		SVTadc.setByte("sector", 2, (byte) 7);
-		SVTadc.setByte("sector", 3, (byte) 7);
-		SVTadc.setByte("sector", 4, (byte) 7);
-		SVTadc.setByte("sector", 5, (byte) 9);
-		SVTadc.setByte("sector", 6, (byte) 9);
+		BSTadc.setByte("sector", 0, (byte) 5);
+		BSTadc.setByte("sector", 1, (byte) 5);
+		BSTadc.setByte("sector", 2, (byte) 5);
+		BSTadc.setByte("sector", 3, (byte) 5);
+		BSTadc.setByte("sector", 4, (byte) 7);
+		BSTadc.setByte("sector", 5, (byte) 7);
+		BSTadc.setByte("sector", 6, (byte) 9);
+		BSTadc.setByte("sector", 7, (byte) 9);
 		
-		SVTadc.setByte("layer", 0, (byte) 1);
-		SVTadc.setByte("layer", 1, (byte) 2);
-		SVTadc.setByte("layer", 2, (byte) 3);
-		SVTadc.setByte("layer", 3, (byte) 4);
-		SVTadc.setByte("layer", 4, (byte) 4);
-		SVTadc.setByte("layer", 5, (byte) 5);
-		SVTadc.setByte("layer", 6, (byte) 6);
+		BSTadc.setByte("layer", 0, (byte) 1);
+		BSTadc.setByte("layer", 1, (byte) 1);
+		BSTadc.setByte("layer", 2, (byte) 2);
+		BSTadc.setByte("layer", 3, (byte) 2);
+		BSTadc.setByte("layer", 4, (byte) 3);
+		BSTadc.setByte("layer", 5, (byte) 4);
+		BSTadc.setByte("layer", 6, (byte) 5);
+		BSTadc.setByte("layer", 7, (byte) 6);
 		
-		SVTadc.setShort("component", 0, (short) 109);
-		SVTadc.setShort("component", 1, (short) 77);
-		SVTadc.setShort("component", 2, (short) 52);
-		SVTadc.setShort("component", 3, (short) 137);
-		SVTadc.setShort("component", 4, (short) 138);
-		SVTadc.setShort("component", 5, (short) 1);
-		SVTadc.setShort("component", 6, (short) 190);
+		BSTadc.setShort("component", 0, (short) 110);
+		BSTadc.setShort("component", 1, (short) 109);
+		BSTadc.setShort("component", 2, (short) 76);
+		BSTadc.setShort("component", 3, (short) 77);
+		BSTadc.setShort("component", 4, (short) 53);
+		BSTadc.setShort("component", 5, (short) 136);
+		BSTadc.setShort("component", 6, (short) 3);
+		BSTadc.setShort("component", 7, (short) 188);
 		
-		SVTadc.setInt("ADC", 0, (int) 7);
-		SVTadc.setInt("ADC", 1, (int) 7);
-		SVTadc.setInt("ADC", 2, (int) 7);
-		SVTadc.setInt("ADC", 3, (int) 5);
-		SVTadc.setInt("ADC", 4, (int) 5);
-		SVTadc.setInt("ADC", 5, (int) 7);
-		SVTadc.setInt("ADC", 6, (int) 7);
+		BSTadc.setInt("ADC", 0, (int) 6);
+		BSTadc.setInt("ADC", 1, (int) 6);
+		BSTadc.setInt("ADC", 2, (int) 6);
+		BSTadc.setInt("ADC", 3, (int) 6);
+		BSTadc.setInt("ADC", 4, (int) 7);
+		BSTadc.setInt("ADC", 5, (int) 7);
+		BSTadc.setInt("ADC", 6, (int) 7);
+		BSTadc.setInt("ADC", 7, (int) 7);
 		
-		SVTadc.setFloat("time", 0, (float) 97.0);
-		SVTadc.setFloat("time", 1, (float) 201.0);
-		SVTadc.setFloat("time", 2, (float) 78.0);
-		SVTadc.setFloat("time", 3, (float) 102.0);
-		SVTadc.setFloat("time", 4, (float) 81.0);
-		SVTadc.setFloat("time", 5, (float) 91.0);
-		SVTadc.setFloat("time", 6, (float) 205.0);
+		BSTadc.setFloat("time", 0, (float) 30.0);
+		BSTadc.setFloat("time", 1, (float) 246.0);
+		BSTadc.setFloat("time", 2, (float) 60.0);
+		BSTadc.setFloat("time", 3, (float) 44.0);
+		BSTadc.setFloat("time", 4, (float) 54.0);
+		BSTadc.setFloat("time", 5, (float) 205.0);
+		BSTadc.setFloat("time", 6, (float) 100.0);
+		BSTadc.setFloat("time", 7, (float) 236.0);
+
+		for(int i = 0; i < 50; i++) {
+			BMTadc.setByte("sector", i, (byte) 2);
+			BMTadc.setByte("order", i, (byte) 0);
+			BMTadc.setFloat("time", i, (float) 0.0);
+			BMTadc.setShort("ped", i, (short) 0);
+			BMTadc.setInt("integral", i, (int) 0);
+			BMTadc.setLong("timestamp", i, (long) 0);
+		}
+
+		BMTadc.setByte("layer", 0, (byte) 1);
+		BMTadc.setByte("layer", 1, (byte) 1);
+		BMTadc.setByte("layer", 2, (byte) 1);
+		BMTadc.setByte("layer", 3, (byte) 1);
+		BMTadc.setByte("layer", 4, (byte) 1);
+		BMTadc.setByte("layer", 5, (byte) 1);
+		BMTadc.setByte("layer", 6, (byte) 1);
+		BMTadc.setByte("layer", 7, (byte) 1);
+		BMTadc.setByte("layer", 8, (byte) 1);
+		BMTadc.setByte("layer", 9, (byte) 1);
+		BMTadc.setByte("layer", 10, (byte) 2);
+		BMTadc.setByte("layer", 11, (byte) 2);
+		BMTadc.setByte("layer", 12, (byte) 2);
+		BMTadc.setByte("layer", 13, (byte) 2);
+		BMTadc.setByte("layer", 14, (byte) 2);
+		BMTadc.setByte("layer", 15, (byte) 2);
+		BMTadc.setByte("layer", 16, (byte) 2);
+		BMTadc.setByte("layer", 17, (byte) 2);
+		BMTadc.setByte("layer", 18, (byte) 3);
+		BMTadc.setByte("layer", 19, (byte) 3);
+		BMTadc.setByte("layer", 20, (byte) 3);
+		BMTadc.setByte("layer", 21, (byte) 3);
+		BMTadc.setByte("layer", 22, (byte) 3);
+		BMTadc.setByte("layer", 23, (byte) 3);
+		BMTadc.setByte("layer", 24, (byte) 3);
+		BMTadc.setByte("layer", 25, (byte) 3);
+		BMTadc.setByte("layer", 26, (byte) 4);
+		BMTadc.setByte("layer", 27, (byte) 4);
+		BMTadc.setByte("layer", 28, (byte) 4);
+		BMTadc.setByte("layer", 29, (byte) 4);
+		BMTadc.setByte("layer", 30, (byte) 4);
+		BMTadc.setByte("layer", 31, (byte) 4);
+		BMTadc.setByte("layer", 32, (byte) 4);
+		BMTadc.setByte("layer", 33, (byte) 4);
+		BMTadc.setByte("layer", 34, (byte) 4);
+		BMTadc.setByte("layer", 35, (byte) 5);
+		BMTadc.setByte("layer", 36, (byte) 5);
+		BMTadc.setByte("layer", 37, (byte) 5);
+		BMTadc.setByte("layer", 38, (byte) 5);
+		BMTadc.setByte("layer", 39, (byte) 5);
+		BMTadc.setByte("layer", 40, (byte) 5);
+		BMTadc.setByte("layer", 41, (byte) 6);
+		BMTadc.setByte("layer", 42, (byte) 6);
+		BMTadc.setByte("layer", 43, (byte) 6);
+		BMTadc.setByte("layer", 44, (byte) 6);
+		BMTadc.setByte("layer", 45, (byte) 6);
+		BMTadc.setByte("layer", 46, (byte) 6);
+		BMTadc.setByte("layer", 47, (byte) 6);
+		BMTadc.setByte("layer", 48, (byte) 6);
+		BMTadc.setByte("layer", 49, (byte) 6);
+
+		BMTadc.setShort("component", 0, (short) 759);
+		BMTadc.setShort("component", 1, (short) 760);
+		BMTadc.setShort("component", 2, (short) -1);
+		BMTadc.setShort("component", 3, (short) 761);
+		BMTadc.setShort("component", 4, (short) 762);
+		BMTadc.setShort("component", 5, (short) 763);
+		BMTadc.setShort("component", 6, (short) 764);
+		BMTadc.setShort("component", 7, (short) 765);
+		BMTadc.setShort("component", 8, (short) 766);
+		BMTadc.setShort("component", 9, (short) 767);
+		BMTadc.setShort("component", 10, (short) 472);
+		BMTadc.setShort("component", 11, (short) 471);
+		BMTadc.setShort("component", 12, (short) 470);
+		BMTadc.setShort("component", 13, (short) -1);
+		BMTadc.setShort("component", 14, (short) 469);
+		BMTadc.setShort("component", 15, (short) 468);
+		BMTadc.setShort("component", 16, (short) 467);
+		BMTadc.setShort("component", 17, (short) 466);
+		BMTadc.setShort("component", 18, (short) 465);
+		BMTadc.setShort("component", 19, (short) 464);
+		BMTadc.setShort("component", 20, (short) 463);
+		BMTadc.setShort("component", 21, (short) -1);
+		BMTadc.setShort("component", 22, (short) 462);
+		BMTadc.setShort("component", 23, (short) 461);
+		BMTadc.setShort("component", 24, (short) 460);
+		BMTadc.setShort("component", 25, (short) 459);
+		BMTadc.setShort("component", 26, (short) 919);
+		BMTadc.setShort("component", 27, (short) -1);
+		BMTadc.setShort("component", 28, (short) 920);
+		BMTadc.setShort("component", 29, (short) 921);
+		BMTadc.setShort("component", 30, (short) 922);
+		BMTadc.setShort("component", 31, (short) 923);
+		BMTadc.setShort("component", 32, (short) 924);
+		BMTadc.setShort("component", 33, (short) 925);
+		BMTadc.setShort("component", 34, (short) 926);
+		BMTadc.setShort("component", 35, (short) 540);
+		BMTadc.setShort("component", 36, (short) 539);
+		BMTadc.setShort("component", 37, (short) 538);
+		BMTadc.setShort("component", 38, (short) 537);
+		BMTadc.setShort("component", 39, (short) 536);
+		BMTadc.setShort("component", 40, (short) 535);
+		BMTadc.setShort("component", 41, (short) 1087);
+		BMTadc.setShort("component", 42, (short) 1088);
+		BMTadc.setShort("component", 43, (short) 1089);
+		BMTadc.setShort("component", 44, (short) -1);
+		BMTadc.setShort("component", 45, (short) 1090);
+		BMTadc.setShort("component", 46, (short) 1091);
+		BMTadc.setShort("component", 47, (short) 1092);
+		BMTadc.setShort("component", 48, (short) 1093);
+		BMTadc.setShort("component", 49, (short) 1094);
+
+		BMTadc.setInt("ADC", 0, (int) 42);
+		BMTadc.setInt("ADC", 1, (int) 4);
+		BMTadc.setInt("ADC", 2, (int) 0);
+		BMTadc.setInt("ADC", 3, (int) 10);
+		BMTadc.setInt("ADC", 4, (int) 9);
+		BMTadc.setInt("ADC", 5, (int) 7);
+		BMTadc.setInt("ADC", 6, (int) 8);
+		BMTadc.setInt("ADC", 7, (int) 20);
+		BMTadc.setInt("ADC", 8, (int) 0);
+		BMTadc.setInt("ADC", 9, (int) 0);
+		BMTadc.setInt("ADC", 10, (int) 6);
+		BMTadc.setInt("ADC", 11, (int) 8);
+		BMTadc.setInt("ADC", 12, (int) 5);
+		BMTadc.setInt("ADC", 13, (int) 0);
+		BMTadc.setInt("ADC", 14, (int) 4);
+		BMTadc.setInt("ADC", 15, (int) 5);
+		BMTadc.setInt("ADC", 16, (int) 0);
+		BMTadc.setInt("ADC", 17, (int) 0);
+		BMTadc.setInt("ADC", 18, (int) 4);
+		BMTadc.setInt("ADC", 19, (int) 17);
+		BMTadc.setInt("ADC", 20, (int) 2);
+		BMTadc.setInt("ADC", 21, (int) 0);
+		BMTadc.setInt("ADC", 22, (int) 5);
+		BMTadc.setInt("ADC", 23, (int) 10);
+		BMTadc.setInt("ADC", 24, (int) 2);
+		BMTadc.setInt("ADC", 25, (int) 0);
+		BMTadc.setInt("ADC", 26, (int) 3);
+		BMTadc.setInt("ADC", 27, (int) 0);
+		BMTadc.setInt("ADC", 28, (int) 30);
+		BMTadc.setInt("ADC", 29, (int) 12);
+		BMTadc.setInt("ADC", 30, (int) 9);
+		BMTadc.setInt("ADC", 31, (int) 8);
+		BMTadc.setInt("ADC", 32, (int) 1);
+		BMTadc.setInt("ADC", 33, (int) 0);
+		BMTadc.setInt("ADC", 34, (int) 0);
+		BMTadc.setInt("ADC", 35, (int) 8);
+		BMTadc.setInt("ADC", 36, (int) 19);
+		BMTadc.setInt("ADC", 37, (int) 9);
+		BMTadc.setInt("ADC", 38, (int) 4);
+		BMTadc.setInt("ADC", 39, (int) 259);
+		BMTadc.setInt("ADC", 40, (int) 10);
+		BMTadc.setInt("ADC", 41, (int) 14);
+		BMTadc.setInt("ADC", 42, (int) 15);
+		BMTadc.setInt("ADC", 43, (int) 5);
+		BMTadc.setInt("ADC", 44, (int) 0);
+		BMTadc.setInt("ADC", 45, (int) 5);
+		BMTadc.setInt("ADC", 46, (int) 1);
+		BMTadc.setInt("ADC", 47, (int) 6);
+		BMTadc.setInt("ADC", 48, (int) 0);
+		BMTadc.setInt("ADC", 49, (int) 0);
 
 		testEvent.appendBank(config);
-		testEvent.appendBank(SVTadc);
+		testEvent.appendBank(BSTadc);
+		testEvent.appendBank(BMTadc);
 
 		return testEvent;
 	}
