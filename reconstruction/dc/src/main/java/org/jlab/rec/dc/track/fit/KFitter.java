@@ -16,14 +16,34 @@ public class KFitter {
     public StateVec finalStateVec;
     public CovMat finalCovMat;
 
-    public int totNumIter = 4;
+    public int totNumIter = 30;
     double newChisq = Double.POSITIVE_INFINITY;
 
     public double chi2 = 0;
+    public double chi2kf = 0;
     public int NDF = 0;
-    public int ConvStatus = 0;
-    public KFitter(Track trk, DCGeant4Factory DcDetector) {
-        this.init(trk, DcDetector);
+    public int ConvStatus = 1;
+    
+    public KFitter(Track trk, DCGeant4Factory DcDetector, boolean TimeBasedUsingHBtrack) { 
+        if(TimeBasedUsingHBtrack==true) {
+            this.initFromHB(trk, DcDetector); 
+        } else {
+            this.init(trk, DcDetector);
+        }
+    }
+    public void initFromHB(Track trk, DCGeant4Factory DcDetector) {
+        mv.setMeasVecsFromHB(trk, DcDetector);
+        sv.Z = new double[mv.measurements.size()];
+
+        for (int i = 0; i < mv.measurements.size(); i++) {
+            sv.Z[i] = mv.measurements.get(i).z; 
+        } 
+       // if(sv.Z.length<20) { // quit no enough measurements
+        //    totNumIter=0;
+        //    this.setFitFailed=true;
+        //    return;
+        //}
+        sv.initFromHB(trk, sv.Z[0], this);
     }
     public void init(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecs(trk, DcDetector);
@@ -34,11 +54,13 @@ public class KFitter {
         }
         sv.init(trk, sv.Z[0], this);
     }
+    public boolean useFilter =true;
     public void runFitter() {
         this.chi2 = 0;
         this.NDF = mv.ndf;
 
         for (int i = 1; i <= totNumIter; i++) {
+            this.chi2kf = 0;
             if (i > 1) {
                 sv.transport(sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1)); //get new state vec at 1st measurement after propagating back from the last filtered state
             }
@@ -46,40 +68,49 @@ public class KFitter {
                 sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
                 //sv.trackTraj.add(k+1, sv.StateVec); 
                 //sv.trackCov.add(k+1, sv.CovMat);
-                // System.out.println((k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
-                //		sv.trackTraj.get(k+1).z+","+sv.trackTraj.get(k+1).tx+","+sv.trackTraj.get(k+1).ty+" "+sv.trackTraj.get(k+1).Q); 
-                this.filter(k + 1);
+                // System.out.println((k)+"] trans "+sv.trackTraj.get(k).x+","+sv.trackTraj.get(k).y+","+
+                //		sv.trackTraj.get(k).z+","+sv.trackTraj.get(k).tx+","+sv.trackTraj.get(k).ty+" "+1./sv.trackTraj.get(k).Q); 
+                if(useFilter)
+                    this.filter(k + 1);
             }
             if(i>1) {
-                this.calcFinalChisq();
-                if(this.chi2>10000 && i>50) {// if after 50 iterations, the fit is still poor exit
-                    i = totNumIter;
-                    this.setFitFailed=true;
-                    return;
-                }
-                double deltaChi2 = Math.abs(this.chi2 - newChisq);
-                if (this.chi2 < newChisq) {
+                //this.calcFinalChisq();
+                //if(this.chi2>1000000) {
+                //    i = totNumIter;
+                //    this.setFitFailed=true;
+                //}
+                
+                double deltaChi2 = Math.abs(this.chi2kf - newChisq);
+                if (this.chi2kf < newChisq) {
                     this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
                     this.finalCovMat = sv.trackCov.get(sv.Z.length - 1);
-                    //System.out.println("newChisq "+newChisq+" this.chi2 "+this.chi2+" iter "+i);
-                    newChisq = this.chi2; 
-                    if(deltaChi2<0.5)
+                    //System.out.println("newChisq "+newChisq+" this.chi2 "+this.chi2kf+" iter "+i);
+                    
+                    //if(deltaChi2<0.5)
+                    //    i = totNumIter;
+                    //if(deltaChi2<0.01) 
+                      //  i = totNumIter;
+                    
+                     if(deltaChi2<0.1 ) {
+                        this.ConvStatus=0;
                         i = totNumIter;
-                    if(deltaChi2<1)
-                        this.ConvStatus=1;
-                } else {
-                    i = totNumIter;
+                     }
+                     
+                    newChisq = this.chi2kf; 
+                } else { 
+                    this.ConvStatus=1;
                 }
             }
         }
+        this.calcFinalChisq();
 
     }
 
     private void filter(int k) {
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null && k < sv.Z.length) {
             double[] K = new double[5];
-            double V = mv.measurements.get(k).unc;
-            double[] H = mv.H(mv.measurements.get(k).tilt);
+            double V = Math.abs(mv.measurements.get(k).unc);
+            double[] H = mv.H(sv.trackTraj.get(k).y, mv.measurements.get(k).tilt, mv.measurements.get(k).wireMaxSag, mv.measurements.get(k).wireLen);
 
             double[][] HTGH = new double[][]{
                 {H[0] * H[0] / V, H[0] * H[1] / V, 0, 0, 0},
@@ -128,8 +159,10 @@ public class KFitter {
                 K[j] = (H[0] * sv.trackCov.get(k).covMat.get(j, 0) + H[1] * sv.trackCov.get(k).covMat.get(j, 1)) / V;
             }
 
-            double h = mv.h(new double[]{sv.trackTraj.get(k).x, sv.trackTraj.get(k).y}, (int) mv.measurements.get(k).tilt);
+            double h = mv.h(new double[]{sv.trackTraj.get(k).x, sv.trackTraj.get(k).y}, 
+                    (int) mv.measurements.get(k).tilt, mv.measurements.get(k).wireMaxSag, mv.measurements.get(k).wireLen);
             //double c2 = ((1 - (H[0]*K[0] + H[1]*K[1]))*(1 - (H[0]*K[0] + H[1]*K[1]))*(mv.measurements.get(k).x - h)*(mv.measurements.get(k).x - h)/V);
+            double c2 = ((mv.measurements.get(k).x - h)*(mv.measurements.get(k).x - h)/V);
 
             double x_filt = sv.trackTraj.get(k).x + K[0] * (mv.measurements.get(k).x - h);
             double y_filt = sv.trackTraj.get(k).y + K[1] * (mv.measurements.get(k).x - h);
@@ -137,7 +170,8 @@ public class KFitter {
             double ty_filt = sv.trackTraj.get(k).ty + K[3] * (mv.measurements.get(k).x - h);
             double Q_filt = sv.trackTraj.get(k).Q + K[4] * (mv.measurements.get(k).x - h);
 
-            //chi2 += c2; System.out.println("KFchi2 "+chi2);
+            chi2kf += c2; 
+            //System.out.println("KFchi2 "+chi2);
             //if(chi2<10) { 
             sv.trackTraj.get(k).x = x_filt;
             sv.trackTraj.get(k).y = y_filt;
@@ -169,7 +203,8 @@ public class KFitter {
             for (int k1 = 0; k1 < k; k1++) {
                 sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
                 double V = mv.measurements.get(k1 + 1).error; 
-                double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y}, (int) mv.measurements.get(k1 + 1).tilt);
+                double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y}, 
+                        (int) mv.measurements.get(k1 + 1).tilt,  mv.measurements.get(k1 + 1).wireMaxSag,  mv.measurements.get(k1 + 1).wireLen);
 
                 chi2 += (mv.measurements.get(k1 + 1).x - h) * (mv.measurements.get(k1 + 1).x - h) / V;
             }
