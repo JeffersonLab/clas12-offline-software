@@ -56,15 +56,15 @@ public class RoadFinder  {
                 //}
             }
         }
-        for (int sec = 0; sec<6; sec++) {
+        for (int sec = 0; sec<6; sec++) { 
             for (int j = 0; j<2; j++) {
                 for (int i1 = 0; i1<superLayerLists.get(sec).get(0+j).size(); i1++) {
-                    Segment s1 = superLayerLists.get(sec).get(0+j).get(i1);
+                    Segment s1 = superLayerLists.get(sec).get(0+j).get(i1); 
                     for (int i2 = 0; i2<superLayerLists.get(sec).get(2+j).size(); i2++) {
-                        Segment s2 = superLayerLists.get(sec).get(2+j).get(i2);
+                        Segment s2 = superLayerLists.get(sec).get(2+j).get(i2); 
                         for (int i3 = 0; i3<superLayerLists.get(sec).get(4+j).size(); i3++) {
-                            Segment s3 = superLayerLists.get(sec).get(4+j).get(i3);
-                            ArrayList<Segment> sLyr = new ArrayList<Segment>();
+                            Segment s3 = superLayerLists.get(sec).get(4+j).get(i3); 
+                            ArrayList<Segment> sLyr = new ArrayList<Segment>(); 
                             if(s1.get_Id()!=-10) {
                                 sLyr.add(s1);
                             }
@@ -73,17 +73,19 @@ public class RoadFinder  {
                             }
                             if(s3.get_Id()!=-10) {
                                 sLyr.add(s3);
-                            }
+                            } 
                             if (this.fitRoad(sLyr, qf, DcDetector)==true) {
-                                if(sLyr.size()==3 && qf.chi2<100) { // road is good --> pass w.out looking for missing segment
+                                if(sLyr.size()==3 && qf.chi2<100 && qf.chi2!=0 && superLayerLists.get(sec).get(0+j).size()==1 
+                                        && superLayerLists.get(sec).get(2+j).size()==1 
+                                        && superLayerLists.get(sec).get(4+j).size()==1) { // road is good --> pass w.out looking for missing segment
                                     s1.set_Id(-10);
                                     s2.set_Id(-10);
                                     s3.set_Id(-10);
                                 }
-                                if (sLyr.size()>1 && sLyr.size()<3 && qf.chi2<100) {
+                                if (sLyr.size()>1 && sLyr.size()<3 && qf.chi2<100 && qf.chi2!=0) {
                                     Segment pseudoSeg = this.findRoads(sLyr, qf, DcDetector);
                                     if (pseudoSeg!=null) {
-                                        Roads.add(pseudoSeg);
+                                        Roads.add(pseudoSeg); 
                                     }
                                 }
                             }
@@ -154,8 +156,6 @@ public class RoadFinder  {
 
             Cluster pseudoCluster = new Cluster(segList.get(0).get_Sector(),pseudoSeg.get_Superlayer(),-1);
             FittedCluster fpseudoCluster = new FittedCluster(pseudoCluster);
-
-            System.out.println(segList.size()+" pseudoSeg "+pseudoSeg.printInfo()+"   "+pseudoSeg.get(0).get_Wire());
 
             for(int l = 0; l<6; l++) {
             int layer = l+1;
