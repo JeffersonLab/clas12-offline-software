@@ -1,5 +1,6 @@
 package org.jlab.service.dc;
 
+import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -20,8 +22,6 @@ import org.jlab.rec.dc.cluster.ClusterFinder;
 import org.jlab.rec.dc.cluster.ClusterFitter;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
-import org.jlab.rec.dc.cross.CrossList;
-import org.jlab.rec.dc.cross.CrossListFinder;
 import org.jlab.rec.dc.cross.CrossMaker;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
@@ -30,7 +30,11 @@ import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.trajectory.RoadFinder;
+import org.jlab.rec.dc.track.fit.KFitter;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
+import org.jlab.rec.dc.trajectory.StateVec;
+import org.jlab.rec.dc.trajectory.Trajectory;
+import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 
 public class DCTBEngine extends ReconstructionEngine {
 
@@ -194,19 +198,19 @@ public class DCTBEngine extends ReconstructionEngine {
         }
 
         for(Segment seg : segments) {					
-            for(FittedHit hit : seg.get_fittedCluster()) {	
+            for(FittedHit hit : seg.get_fittedCluster()) {
                 fhits.add(hit);						
             }
         }
 
         CrossMaker crossMake = new CrossMaker();
-        crosses = crossMake.find_Crosses(segments, dcDetector);
+        //crosses = crossMake.find_Crosses(segments, dcDetector);
 
-        if(crosses.isEmpty() ) {			
-            rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
-            return true;
-        }
-        /*
+        //if(crosses.isEmpty() ) {			
+        //    rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
+        //    return true;
+        //}
+        
         //
         // also need Track bank
         if (event.hasBank("HitBasedTrkg::HBTracks") == false) {
@@ -214,7 +218,11 @@ public class DCTBEngine extends ReconstructionEngine {
         }
         
         DataBank trkbank = event.getBank("HitBasedTrkg::HBTracks");
+        DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
         int trkrows = trkbank.rows();
+        if(trkbank.rows()!=trkcovbank.rows()) {
+            return true; // HB tracks not saved correctly
+        }
         Track[] TrackArray = new Track[trkrows];
         for (int i = 0; i < trkrows; i++) {
             Track HBtrk = new Track();
@@ -223,28 +231,63 @@ public class DCTBEngine extends ReconstructionEngine {
             HBtrk.set_Q(trkbank.getByte("q", i));
             HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
             HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("Vtx0_x", i), trkbank.getFloat("Vtx0_y", i), trkbank.getFloat("Vtx0_z", i)));
+            HBtrk.set_FitChi2(trkbank.getFloat("chi2", i));
+            Matrix initCMatrix = new Matrix(new double[][]{
+            {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
+            {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
+            {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},
+            {trkcovbank.getFloat("C41", i), trkcovbank.getFloat("C42", i), trkcovbank.getFloat("C43", i), trkcovbank.getFloat("C44", i), trkcovbank.getFloat("C45", i)},
+            {trkcovbank.getFloat("C51", i), trkcovbank.getFloat("C52", i), trkcovbank.getFloat("C53", i), trkcovbank.getFloat("C54", i), trkcovbank.getFloat("C55", i)}
+            });
+            HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
         }
         
         for(Segment seg : segments) {
             TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg);
+            
         }
-        
-        */
-        //
-        CrossListFinder crossLister = new CrossListFinder();
-        CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
-
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
-        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, TORSCALE) ;
-
-
+        TrajectoryFinder trjFind = new TrajectoryFinder();
+        for(int i = 0; i < TrackArray.length; i++) {
+            TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
+            crosses.addAll(TrackArray[i]);
+            //if(TrackArray[i].get_FitChi2()>200) {
+            //    resetTrackParams(TrackArray[i], new DCSwimmer());
+            //}
+            KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
+            //kFit.totNumIter=30;
+            kFit.useFilter = true;
+            StateVec fn = new StateVec();
+            kFit.runFitter();
+            
+            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+                // set the state vector at the last measurement site
+                fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
+                //set the track parameters if the filter does not fail
+                TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
+                TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
+                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, kFit.finalStateVec.z, dcDetector);
+                // candidate parameters are set from the state vector
+                TrackArray[i].set_FitChi2(kFit.chi2); 
+                TrackArray[i].set_FitNDF(kFit.NDF);
+                TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
+                TrackArray[i].set_Id(TrackArray[i].size()+1);
+                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
+                trkcands.add(TrackArray[i]);
+            }
+        }
+        
+        
+        for(int i = 0; i < crosses.size(); i++) {
+            crosses.get(i).set_Id(i+1);
+        }
         // track found	
         int trkId = 1;
 
         if(trkcands.size()>0) {
-            trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
+            //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
             for(Track trk: trkcands) {
                 // reset the id
@@ -265,39 +308,7 @@ public class DCTBEngine extends ReconstructionEngine {
                 trkId++;
             }
         }    
-        RoadFinder pcrossLister = new RoadFinder();
-        List<Segment> pSegments =pcrossLister.findPseudoSegList(segments, dcDetector);
-
-        segments.addAll(pSegments);
-
-        List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
-
-        //
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
-
-        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, TORSCALE);
-        
-        if(mistrkcands.size()>0) {    
-            trkcandFinder.removeOverlappingTracks(mistrkcands);		// remove overlaps
-
-            for(Track trk: mistrkcands) {
-                // reset the id
-                trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
-                for(Cross c : trk) { 
-                    for(FittedHit h1 : c.get_Segment1()) { 
-                        h1.set_AssociatedTBTrackID(trk.get_Id());
-
-                    }
-                    for(FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedTBTrackID(trk.get_Id());                              
-                    }
-                }
-                trkId++;
-            }
-        }
-        trkcands.addAll(mistrkcands) ;
-
+       
         if(trkcands.isEmpty()) {
 
             rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
@@ -308,4 +319,36 @@ public class DCTBEngine extends ReconstructionEngine {
         return true;
     }
 
+    private void resetTrackParams(Track track, DCSwimmer dcSwim) {
+        if(track.get_ListOfHBSegments().size()<Constants.NSUPERLAYERTRACKING) {
+            //System.err.println(" not enough segments ");
+            return;
+        }
+        double theta3 = track.get_ListOfHBSegments().get(track.get_ListOfHBSegments().size()-1).get_fittedCluster().get_clusterLineFitSlope();
+        double theta1 = track.get_ListOfHBSegments().get(0).get_fittedCluster().get_clusterLineFitSlope();
+        double deltaTheta = theta3-theta1;
+       
+        double thX = (track.get(0).get_Dir().x()/track.get(0).get_Dir().z());
+        double thY = (track.get(0).get_Dir().y()/track.get(0).get_Dir().z());
+
+        //positive charges bend outward for nominal GEMC field configuration
+        int q = (int) Math.signum(deltaTheta); 
+        q*= (int)-1*Math.signum(TORSCALE); // flip the charge according to the field scale						
+
+        double p = track.get_pAtOrig().mag(); 
+        
+        double pz = p / Math.sqrt(thX*thX + thY*thY + 1);
+
+        //System.out.println("Setting track params for ");stateVec.printInfo();
+        dcSwim.SetSwimParameters(track.get(0).get_Point().x(), track.get(0).get_Point().y(), track.get(0).get_Point().z(),
+                    -pz*thX, -pz*thY, -pz,
+                     -q);
+        
+        double[] Vt = dcSwim.SwimToPlane(100);
+
+        track.set_pAtOrig(new Vector3D(-Vt[3], -Vt[4], -Vt[5]));
+        track.set_Vtx0(new Point3D(Vt[0], Vt[1], Vt[2]));
+    }
+    
+   
 }
