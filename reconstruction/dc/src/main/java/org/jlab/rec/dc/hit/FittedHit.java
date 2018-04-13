@@ -5,7 +5,6 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.utils.groups.IndexedTable;
 /**
@@ -459,7 +458,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
-
+/*
         //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
         double z1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
@@ -475,8 +474,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         //
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-        x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
-
+ */
+        double x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
+        this.calc_GeomCorr(DcDetector, 0, x);
         //
         this.set_X(x);
         this.set_Z(z);
@@ -490,7 +490,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         if (this.get_Time() > 0) {
             this.set_TimeToDistance(cosTrkAngle, B, tab, tde);
         }
-
+    /*
         //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
         double z1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
@@ -507,9 +507,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-        double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
-        x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
-
+    */
+        double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;        
+        double x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
+        this.calc_GeomCorr(DcDetector, 0, x);
         //this.set_X(x+this.get_LeftRightAmb()*this.get_TimeToDistance());
         double MPCorr = 1;
         if (cosTrkAngle > 0.8 & cosTrkAngle <= 1) {
@@ -520,7 +521,106 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this.set_Z(z);
 
     }
+    
+    private double _WireLength;
 
+    public double get_WireLength() {
+        return _WireLength;
+    }
+
+    public void set_WireLength(double _WireLength) {
+        this._WireLength = _WireLength;
+    }
+
+    private double _WireMaxSag;
+    
+    public double get_WireMaxSag() {
+        return _WireMaxSag;
+    }
+
+    public void set_WireMaxSag(double _WireMaxSag) {
+        this._WireMaxSag = _WireMaxSag;
+    }
+    
+    
+    private void calc_GeomCorr(DCGeant4Factory DcDetector, double y, double hitX) {
+        
+        double xL = DcDetector.getWireLeftend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+        double xR = DcDetector.getWireRightend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+        double yL = DcDetector.getWireLeftend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
+        double yR = DcDetector.getWireRightend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
+        
+        double DL = Constants.MAXENDPLTDEFLEC[this.get_Region()-1][this.get_Sector()-1][0];
+        double DR = Constants.MAXENDPLTDEFLEC[this.get_Region()-1][this.get_Sector()-1][1];
+        
+        double wire = this.get_Wire();
+        double normW = (double) wire/112.;
+        
+        xL-=DL*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
+        xR-=DR*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
+        
+        double x = xR -(yR-y)*((xR-xL)/(yR-yL));
+        
+        double wireLen = Math.sqrt((xL-xR)*(xL-xR)+(yL-yR)*(yL-yR));
+        int sector = this.get_Sector();
+        int A = 0;
+        double C = 0;
+        double ConvFac = 1000000;
+        switch (sector) {
+            case (1):
+                A=0;
+                break;
+            case (2):
+                A=-1;
+                break;
+             case (3):
+                A=-1;
+                break;
+            case (4):
+                A=0;
+                break;
+            case (5):
+                A=1;
+                break;
+            case (6):
+                A=1;
+                break;
+            default:
+                throw new RuntimeException("invalid sector");
+        }
+        int region = this.get_Region();
+        switch (region) {
+            case (1):
+                C=2.0/ConvFac;
+                break;
+            case (2):
+                C=4.95/ConvFac;
+                break;
+             case (3):
+                if(wire<69)
+                    C=12.5/ConvFac;
+                if(wire>68 && wire<92)
+                    C=7.49/ConvFac;
+                if(wire>91)
+                    C=5.98/ConvFac;
+                break;
+            default:
+                throw new RuntimeException("invalid region");
+        }    
+        
+        double MaxSag = A*C*wire*wire*Math.cos(25.)*Math.cos(30.);
+        
+        double delta_x = MaxSag*(1.-y/(0.5*wireLen))*(1.-y/(0.5*wireLen));
+        
+        x+=delta_x;
+        
+        this.set_WireLength(wireLen);
+        this.set_WireMaxSag(MaxSag);
+        
+        hitX =x;
+        //System.out.println(this.printInfo()+ "x0 "+ DcDetector.getWireMidpoint(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x
+        //+" x "+x);
+    }
     
     /**
      *
