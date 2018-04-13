@@ -233,7 +233,7 @@ public class Hit implements Comparable<Hit> {
         _cellSize = 0.5 * Math.abs(layerDiffAtMPln);
 
     }
-
+    
     /**
      *
      * @return error on the time in ns (4ns time window used by default in

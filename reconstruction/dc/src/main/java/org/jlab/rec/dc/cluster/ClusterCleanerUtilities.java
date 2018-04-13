@@ -789,7 +789,7 @@ public class ClusterCleanerUtilities {
                             for (int si = 0; si < insublist.size(); si++) {
 
                                 Hit hitToRmv = HitArray[ssl][insublist.get(si).get_Wire() - 1][la];
-                                hits.remove(hitToRmv);
+                                hits.remove(hitToRmv); 
                                 HitArray[ssl][insublist.get(si).get_Wire() - 1][la] = null;
                             }
                         }
@@ -857,12 +857,11 @@ public class ClusterCleanerUtilities {
                     fcluster.add(clus.get(i));
                 }
             }
-
         }
-
         return fcluster;
     }
 
+    
     /**
      * 
      * @param fClus fitted cluster

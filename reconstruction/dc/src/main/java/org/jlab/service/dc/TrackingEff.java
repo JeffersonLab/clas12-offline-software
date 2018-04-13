@@ -478,7 +478,7 @@ public class TrackingEff extends ReconstructionEngine {
         String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/OldSchema/decoded_2326.hipo";
         TrackingEff en = new TrackingEff();
         en.init();
-        DCTBEngine en2 = new DCTBEngine();
+        DCTBEngineOld en2 = new DCTBEngineOld();
         en2.init();
         int counter = 0;
         int num  = 0;

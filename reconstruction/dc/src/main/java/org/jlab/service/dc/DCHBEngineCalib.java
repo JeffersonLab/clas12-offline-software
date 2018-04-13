@@ -311,7 +311,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
         
         DCHBEngine en = new DCHBEngine();
         en.init();
-        DCTBEngine en2 = new DCTBEngine();
+        DCTBEngineOld en2 = new DCTBEngineOld();
         en2.init();
         
         

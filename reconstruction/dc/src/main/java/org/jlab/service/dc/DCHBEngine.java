@@ -258,6 +258,7 @@ public class DCHBEngine extends ReconstructionEngine {
                 trkId++;
             }
         }    
+        
         RoadFinder pcrossLister = new RoadFinder();
         List<Segment> pSegments =pcrossLister.findPseudoSegList(segments, dcDetector);
 
@@ -309,10 +310,10 @@ public class DCHBEngine extends ReconstructionEngine {
         
         DCHBEngine en = new DCHBEngine();
         en.init();
+        
         DCTBEngine en2 = new DCTBEngine();
         en2.init();
-        
-        
+             
         int counter = 0;
         
         HipoDataSource reader = new HipoDataSource();
@@ -321,7 +322,7 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_rec.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
@@ -340,7 +341,7 @@ public class DCHBEngine extends ReconstructionEngine {
             en2.processDataEvent(event);
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
-            if (event.getBank("RUN::config").getInt("event", 0) > 200) {
+            if (event.getBank("RUN::config").getInt("event", 0) > 100) {
                 break;
             }
             

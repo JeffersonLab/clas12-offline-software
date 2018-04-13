@@ -1,8 +1,6 @@
 package org.jlab.service.dc;
 
-import cnuphys.snr.NoiseReductionParameters;
-import cnuphys.snr.clas12.Clas12NoiseAnalysis;
-import cnuphys.snr.clas12.Clas12NoiseResult;
+import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,11 +10,10 @@ import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.io.hipo.HipoDataSync;
-import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -28,43 +25,37 @@ import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.cross.CrossListFinder;
 import org.jlab.rec.dc.cross.CrossMaker;
 import org.jlab.rec.dc.hit.FittedHit;
-import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 
+public class DCTBEngineOld extends ReconstructionEngine {
 
-public class DCHBLayerEffsEngine extends ReconstructionEngine {
-    
-    String FieldsConfig="";
     int Run = 0;
-    DCGeant4Factory dcDetector;
-        
+
     double[][][][] T0 ;
     double[][][][] T0ERR ;
-        
+    DCGeant4Factory dcDetector;
+
     double TORSCALE;
     double SOLSCALE;
-    public DCHBLayerEffsEngine() {
-        super("DCHB","ziegler","4.0");
+
+    private TimeToDistanceEstimator tde;
+    public DCTBEngineOld() {
+        super("DCTB","ziegler","4.0");
     }
-    
     @Override
     public boolean init() {
-        Constants.Load();
-        // Load the Fields 
-        DCSwimmer.getMagneticFields();
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
-          //  "/calibration/dc/time_to_distance/t2d",
+            // "/calibration/dc/time_to_distance/t2d",
             "/calibration/dc/time_to_distance/time2dist",
-         //   "/calibration/dc/time_corrections/T0_correction",
+            //    "/calibration/dc/time_corrections/T0_correction",
         };
-
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
@@ -90,23 +81,23 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
         //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
         //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
 
-        //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+        //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
         //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
         //}
-        Constants.setLAYEREFFS(true); 
+        tde = new TimeToDistanceEstimator();
         return true;
     }
-
-	
     @Override
     public boolean processDataEvent(DataEvent event) {
-            //setRunConditionsParameters( event) ;
-        if(event.hasBank("RUN::config")==false ) {
-                return true;
+        //setRunConditionsParameters( event) ;
+        if(event.hasBank("RUN::config")==false) {
+            System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
+            return true;
         }
+        //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
+        //    return true; // require the start time to reconstruct the tracks in the event
 
         DataBank bank = event.getBank("RUN::config");
-
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
@@ -129,119 +120,109 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
                 T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
                 T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
             }
-            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
-            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
-            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
-            TORSCALE = bank.getFloat("torus", 0);
-            SOLSCALE = bank.getFloat("solenoid", 0);
-            double shift =0;
-            if(Run>1890) {
-                shift = -1.9;
-            }
-            DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
-            Run = newRun;
+                //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
+                TORSCALE = (double)bank.getFloat("torus", 0);
+                SOLSCALE = (double)bank.getFloat("solenoid", 0);
+                // TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
+                TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
+
+                Run = newRun;
         }
-        // init SNR
-       Clas12NoiseResult results = new Clas12NoiseResult();
-       Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
 
-       int[] rightShifts = Constants.SNR_RIGHTSHIFTS;
-       int[] leftShifts  = Constants.SNR_LEFTSHIFTS;
-       NoiseReductionParameters parameters = new NoiseReductionParameters (
-                       2,leftShifts,
-                       rightShifts);
-       //System.out.println("RUNING HITBASED_________________________________________");
+        System.out.println(" RUNNING TIME BASED....................................");
+        ClusterFitter cf = new ClusterFitter();
+        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
-       ClusterFitter cf = new ClusterFitter();
-       ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+        List<FittedHit> fhits = new ArrayList<FittedHit>();	
+        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+        List<Segment> segments = new ArrayList<Segment>();
+        List<Cross> crosses = new ArrayList<Cross>();
+        List<Track> trkcands = new ArrayList<Track>();
 
-       List<FittedHit> fhits = new ArrayList<FittedHit>();
-       List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-       List<Segment> segments = new ArrayList<Segment>();
-       List<Cross> crosses = new ArrayList<Cross>();
+        //instantiate bank writer
+        RecoBankWriter rbc = new RecoBankWriter();
 
-       List<Track> trkcands = new ArrayList<Track>();
+        HitReader hitRead = new HitReader();
+        hitRead.read_HBHits(event, 
+            this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
+            T0, T0ERR, dcDetector, tde);
+        hitRead.read_TBHits(event, 
+            this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, T0, T0ERR);
+        List<FittedHit> hits = new ArrayList<FittedHit>();
+        //I) get the hits
+        if(hitRead.get_TBHits().isEmpty()) {
+            hits = hitRead.get_HBHits();
 
-       //instantiate bank writer
-       RecoBankWriter rbc = new RecoBankWriter();
+        } else {
+            hits = hitRead.get_TBHits();
+        }
 
-       //if(Constants.DEBUGCROSSES)
-       //	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
+        //II) process the hits
+        //1) exit if hit list is empty
+        if(hits.isEmpty() ) {
+                return true;
+        }
 
-       HitReader hitRead = new HitReader();
-       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, 
-               this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
+        //2) find the clusters from these hits
+        ClusterFinder clusFinder = new ClusterFinder();
 
-       List<Hit> hits = new ArrayList<Hit>();
-       //I) get the hits
-       hits = hitRead.get_DCHits();
+        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
-       //II) process the hits
-       //1) exit if hit list is empty
-       if(hits.isEmpty() ) {
-               return true;
-       }
+        if(clusters.isEmpty()) {
+            rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
+            return true;
+        }
 
-       fhits = rbc.createRawHitList(hits);
-       //2) find the clusters from these hits
-       ClusterFinder clusFinder = new ClusterFinder();
-       clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
+        //3) find the segments from the fitted clusters
+        SegmentFinder segFinder = new SegmentFinder();
 
-       if(clusters.isEmpty()) {				
-               rbc.fillAllHBBanksCalib(event, rbc, fhits, null, null, null, null);
-               return true;
-       }
+        List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-       rbc.updateListsListWithClusterInfo(fhits, clusters);
+        segments =  segFinder.get_Segments(pclusters, event, dcDetector);
 
-       //3) find the segments from the fitted clusters
-       SegmentFinder segFinder = new SegmentFinder();
-       segments =  segFinder.get_Segments(clusters, event, dcDetector);
+        if(segments.isEmpty()) { // need 6 segments to make a trajectory
+            for(FittedCluster c : clusters) {					
+                for(FittedHit hit : c) {		
+                    hit.set_AssociatedClusterID(c.get_Id());
+                    hit.set_AssociatedHBTrackID(c.get(0).get_AssociatedHBTrackID());
+                    fhits.add(hit);						
+                }
+            }
+            rbc.fillAllTBBanks( event, rbc, fhits, clusters, null, null, null);
+            return true;
+        }
 
-       if(segments.isEmpty()) { // need 6 segments to make a trajectory			
-               rbc.fillAllHBBanksCalib(event, rbc, fhits, clusters, null, null, null);
-               return true;
-       }
-       List<Segment> rmSegs = new ArrayList<Segment>();
-       // clean up hit-based segments
-       for(Segment se : segments) {
-           double trkDocOverCellSize =0;
-
-           for(FittedHit fh : se.get_fittedCluster()) {
-               trkDocOverCellSize+=fh.get_ClusFitDoca()/fh.get_CellSize();
-           }
-
-           if(trkDocOverCellSize/se.size()>1.1) {
-               rmSegs.add(se);
+        for(Segment seg : segments) {					
+            for(FittedHit hit : seg.get_fittedCluster()) {	
+                fhits.add(hit);						
             }
         }
-        segments.removeAll(rmSegs);
 
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.find_Crosses(segments, dcDetector);
 
         if(crosses.isEmpty() ) {			
-                rbc.fillAllHBBanksCalib(event, rbc, fhits, clusters, segments, null, null);
-                return true;
+            rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, null, null);
+            return true;
         }
-
-
+        
         CrossListFinder crossLister = new CrossListFinder();
         CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 
         //6) find the list of  track candidates
-        TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
+        TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, TORSCALE) ;
 
 
         // track found	
         int trkId = 1;
-                
+
         if(trkcands.size()>0) {
             trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
             for(Track trk: trkcands) {
-
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
@@ -250,11 +231,11 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
                     c.get_Segment2().isOnTrack=true;
 
                     for(FittedHit h1 : c.get_Segment1()) { 
-                            h1.set_AssociatedHBTrackID(trk.get_Id());
+                        h1.set_AssociatedTBTrackID(trk.get_Id());
 
                     }
                     for(FittedHit h2 : c.get_Segment2()) {
-                            h2.set_AssociatedHBTrackID(trk.get_Id());                              
+                        h2.set_AssociatedTBTrackID(trk.get_Id());                              
                     }
                 }
                 trkId++;
@@ -271,21 +252,21 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
         CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 
         List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, TORSCALE);
+        
         if(mistrkcands.size()>0) {    
             trkcandFinder.removeOverlappingTracks(mistrkcands);		// remove overlaps
 
             for(Track trk: mistrkcands) {
-
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
                 for(Cross c : trk) { 
                     for(FittedHit h1 : c.get_Segment1()) { 
-                            h1.set_AssociatedHBTrackID(trk.get_Id());
+                        h1.set_AssociatedTBTrackID(trk.get_Id());
 
                     }
                     for(FittedHit h2 : c.get_Segment2()) {
-                            h2.set_AssociatedHBTrackID(trk.get_Id());                              
+                        h2.set_AssociatedTBTrackID(trk.get_Id());                              
                     }
                 }
                 trkId++;
@@ -295,70 +276,12 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
 
         if(trkcands.isEmpty()) {
 
-                rbc.fillAllHBBanksCalib(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
-                return true;
+            rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+            return true;
         }
-        rbc.fillAllHBBanksCalib(event, rbc, fhits, clusters, segments, crosses, trkcands);
+        rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
 
         return true;
-    }
-
-    public static void main(String[] args)  {
-        
-        //String inputFile = args[0];
-        //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
-        //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
-        
-        DCHBEngine en = new DCHBEngine();
-        en.init();
-        DCTBEngineOld en2 = new DCTBEngineOld();
-        en2.init();
-        
-        
-        int counter = 0;
-        
-        HipoDataSource reader = new HipoDataSource();
-        reader.open(inputFile);
-        
-        HipoDataSync writer = new HipoDataSync();
-        //Writer
-        
-        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_rec.hipo";
-        writer.open(outputFile);
-        TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
-        long t1 = 0;
-        while (reader.hasEvent()) {
-            
-            counter++;
-            System.out.println("*************************************************************run " + counter + " events");
-            DataEvent event = reader.getNextEvent();
-            if (counter > 0) {
-                t1 = System.currentTimeMillis();
-            }
-            
-            en.processDataEvent(event);
-            //event.show();
-            // Processing TB
-            en2.processDataEvent(event);
-            writer.writeEvent(event);
-            System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
-            if (counter > 101) {
-                break;
-            }
-            
-            
-            // event.show();
-            //if(counter%100==0)
-            
-            //if(event.hasBank("HitBasedTrkg::HBTracks")) {
-            //    event.show();
-            
-            //}
-        }
-        writer.close();
-        double t = System.currentTimeMillis() - t1;
-        System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
     }
 
 }
