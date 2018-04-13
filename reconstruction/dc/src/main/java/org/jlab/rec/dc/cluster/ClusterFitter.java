@@ -211,7 +211,7 @@ public class ClusterFitter {
             }
 
             if (calcTimeResidual == true) {
-                double timeResidual = Math.abs(FitPars.slope() * FitArray.get(0).get(i) + FitPars.intercept()) - Math.abs(FitArray.get(2).get(i));
+                double timeResidual = Math.abs(FitPars.slope() * FitArray.get(0).get(i) + FitPars.intercept()-xWire) - Math.abs(FitArray.get(2).get(i)-xWire);
                 clus.get(i).set_TimeResidual(timeResidual);
             }
         }
