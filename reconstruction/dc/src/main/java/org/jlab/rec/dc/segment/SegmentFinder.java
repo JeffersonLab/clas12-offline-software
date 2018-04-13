@@ -169,10 +169,10 @@ public class SegmentFinder {
                 AveDoca += clusters.get(i).get(j).get_Doca();
                 AveCelSz += clusters.get(i).get(j).get_CellSize();
             }
-            if (AveDoca < AveCelSz) {
+            if (AveDoca < AveCelSz*1.2) {
                 selTimeBasedSegments.add(clusters.get(i));
             }
-
+            
         }
         return selTimeBasedSegments;
     }
