@@ -67,6 +67,96 @@ public class TrackCandListFinder {
         }
         return pass;
     }
+    
+    public double getHitBasedFitChi2ToCrosses(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, 
+        double p, int q, double x, double y, double z, double tanThX, double tanThY) {
+        double pz = p / Math.sqrt(tanThX*tanThX + tanThY*tanThY + 1);
+
+        dcSwim.SetSwimParameters(x,y,z,
+                        -pz*tanThX,-pz*tanThY,-pz,
+                         -q);
+        double chi2 = 0; // assume err =1 on points 
+        double[] R = dcSwim.SwimToPlane(z3);
+        chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
+        dcSwim.SetSwimParameters(R[0],R[1],R[2],
+                        R[3],R[4],R[5],
+                         -q);
+        R = dcSwim.SwimToPlane(z2);
+        dcSwim.SetSwimParameters(R[0],R[1],R[2],
+                        R[3],R[4],R[5],
+                         -q);
+        chi2+= (R[0] - x2)*(R[0] - x2) + (R[1] - y2)*(R[1] - y2);
+        dcSwim.SetSwimParameters(R[0],R[1],R[2],
+                        R[3],R[4],R[5],
+                         -q);
+        R = dcSwim.SwimToPlane(z1);
+        chi2+= (R[0] - x1)*(R[0] - x1) + (R[1] - y1)*(R[1] - y1);
+        
+        return chi2;
+    }
+    
+    private double[] getTrackInitFit(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3,
+            double ux, double uy, double uz, double thX, double thY, 
+            double theta1, double theta3, 
+            double iBdl, double TORSCALE) {
+        if(theta1<-998 || theta3<-998) {
+            return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+        }
+        double[] pars = new double[2];
+        
+        double chi2 = 0; // assume err =1 on points 
+        double intBdl =0;
+        
+        double p = calcInitTrkP(ux, uy, uz, thX, thY, 
+             theta1, theta3, 
+             iBdl, TORSCALE);
+        double p_x = ux*p;
+        double p_y = uy*p;
+        double p_z = uz*p;
+        
+        int q= calcInitTrkQ(theta1, theta3,TORSCALE);
+        
+        dcSwim.SetSwimParameters(x1,y1,z1,p_x, p_y, p_z, q);
+        double[] R = dcSwim.SwimToPlane(z2);
+        chi2+= (R[0] - x2)*(R[0] - x2) + (R[1] - y2)*(R[1] - y2);
+        intBdl+=R[7];
+        dcSwim.SetSwimParameters(R[0],R[1],R[2],
+                        R[3],R[4],R[5],
+                         q);
+        R = dcSwim.SwimToPlane(z3);
+        chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
+        intBdl+=R[7];
+        
+        pars[0]= chi2;
+        pars[1]= intBdl;
+        
+        return pars;
+    }
+    
+    private double calcInitTrkP(double ux, double uy, double uz, double thX, double thY, 
+            double theta1, double theta3, 
+            double iBdl, double TORSCALE) {
+        double deltaTheta = theta3-theta1; 
+        if(deltaTheta==0)
+            return Double.POSITIVE_INFINITY;
+        
+        // momentum estimate if Bdl is non zero and the track has curvature    
+        double pxz = Math.abs(Constants.LIGHTVEL*iBdl/deltaTheta);
+        double py = Math.sqrt( (thX*thX+thY*thY+1)/(thX*thX+1) - 1 )*pxz;
+
+        double p = Math.sqrt(pxz*pxz+py*py);
+        return p;
+    }
+    private int calcInitTrkQ(double theta1, double theta3, 
+            double TORSCALE) {
+        double deltaTheta = theta3-theta1; 
+       
+        //positive charges bend outward for nominal GEMC field configuration
+        int q = (int) Math.signum(deltaTheta); 
+        q*= (int)-1*Math.signum(TORSCALE); // flip the charge according to the field scale						
+        
+        return q;
+    }
     /**
      * 
      * @param crossList the input list of crosses
@@ -87,7 +177,7 @@ public class TrackCandListFinder {
             Trajectory traj = trjFind.findTrajectory(crossesInTrk, DcDetector);
             if(traj == null) 
                 continue;
-
+            
             if(crossesInTrk.size()==3 && this.PassNSuperlayerTracking(crossesInTrk, cand)==true) {
                 cand.addAll(crossesInTrk);
                 cand.set_Sector(crossesInTrk.get(0).get_Sector());
@@ -107,29 +197,113 @@ public class TrackCandListFinder {
 
                 //require 3 crosses to make a track (allows for 1 pseudo-cross)
                 if(cand.size()==3) { 
-                    double theta3 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-                    double theta1 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
-                    if(cand.get(0).get_Segment2().get_Id()==-1) 
-                        theta1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
-                    if(cand.get(2).get_Segment2().get_Id()==-1) 
-                        theta3 = Math.atan(cand.get(2).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
+                    //System.out.println("---- cand in sector "+crossesInTrk.get(0).get_Sector());
+                    //System.out.println(crossesInTrk.get(0).printInfo());
+                    //System.out.println(crossesInTrk.get(1).printInfo());
+                    //System.out.println(crossesInTrk.get(2).printInfo());
+                    //System.out.println("---------------");
+                    double x1 = crossesInTrk.get(0).get_Point().x();
+                    double y1 = crossesInTrk.get(0).get_Point().y();
+                    double z1 = crossesInTrk.get(0).get_Point().z();
+                    double x2 = crossesInTrk.get(1).get_Point().x();
+                    double y2 = crossesInTrk.get(1).get_Point().y();
+                    double z2 = crossesInTrk.get(1).get_Point().z();
+                    double x3 = crossesInTrk.get(2).get_Point().x();
+                    double y3 = crossesInTrk.get(2).get_Point().y();
+                    double z3 = crossesInTrk.get(2).get_Point().z();
+                    double ux = crossesInTrk.get(0).get_Dir().x();
+                    double uy = crossesInTrk.get(0).get_Dir().y();
+                    double uz = crossesInTrk.get(0).get_Dir().z();
+                    double thX = ux/uz;
+                    double thY = uy/uz;
+                    double theta3s2 = Math.atan(cand.get(2).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
+                    double theta1s2 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
+                    double theta3s1 = Math.atan(cand.get(2).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
+                    double theta1s1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
+                    
+                    if(cand.get(0).get_Segment2().get_Id()==-1 ) 
+                        //theta1s2=theta1s1; //do not use
+                        theta1s2=-999; //do not use
+                    if(cand.get(0).get_Segment1().get_Id()==-1 ) 
+                        //theta1s1=theta1s2;
+                        theta1s1=-999;
+                    if(cand.get(2).get_Segment2().get_Id()==-1 ) 
+                        //theta3s2=theta3s1;
+                        theta3s2=-999;
+                    if(cand.get(2).get_Segment1().get_Id()==-1 ) 
+                        //theta3s1=theta3s2;
+                        theta3s1=-999;
+                    double theta3=0;
+                    double theta1=0;
+                    
+                    double chisq = Double.POSITIVE_INFINITY;
+                    double chi2 = 0;
+                    double iBdl = traj.get_IntegralBdl();
+                    double[] pars;
+                    
+                    pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                     ux,  uy,  uz,  thX,  thY, 
+                     theta1s1,  theta3s1, 
+                     traj.get_IntegralBdl(),  TORSCALE);
+                    chi2 = pars[0];
+                    if(chi2<chisq) {
+                        chisq = chi2;
+                        theta1 = theta1s1;
+                        theta3 = theta3s1;
+                        iBdl = pars[1];
+                    }
+                    
+                    pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                     ux,  uy,  uz,  thX,  thY, 
+                     theta1s1,  theta3s2, 
+                     traj.get_IntegralBdl(),  TORSCALE);
+                    chi2 = pars[0];
+                    if(chi2<chisq) {
+                        chisq = chi2;
+                        theta1 = theta1s1;
+                        theta3 = theta3s2;
+                        iBdl = pars[1];
+                    }
+                    
+                    pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                     ux,  uy,  uz,  thX,  thY, 
+                     theta1s2,  theta3s1, 
+                     traj.get_IntegralBdl(),  TORSCALE);
+                    chi2 = pars[0];
+                    if(chi2<chisq) {
+                        chisq = chi2;
+                        theta1 = theta1s2;
+                        theta3 = theta3s1;
+                        iBdl = pars[1];
+                    }
+                    
+                    pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                     ux,  uy,  uz,  thX,  thY, 
+                     theta1s2,  theta3s2, 
+                     traj.get_IntegralBdl(),  TORSCALE);
+                    chi2 = pars[0];
+                    if(chi2<chisq) {
+                        chisq = chi2;
+                        theta1 = theta1s2;
+                        theta3 = theta3s2;
+                        iBdl = pars[1];
+                    }
+                    //System.out.println(" intial sel c2 "+chi2);
+                    if(chi2>2000)
+                        continue;
+                    
                     // compute delta theta using the non-pseudo segments in region 1 and 3
-                    double deltaTheta = theta3-theta1; 
+                    
                     // get integral Bdl from the swimmer trajectory
-                    double iBdl = traj.get_IntegralBdl(); 
-
-                    if(iBdl != 0 || (deltaTheta != 0)) {
-                        // momentum estimate if Bdl is non zero and the track has curvature    
-                        double pxz = Math.abs(Constants.LIGHTVEL*iBdl/deltaTheta);
-                        double thX = (cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z());
-                        double thY = (cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
-                        double py = Math.sqrt( (thX*thX+thY*thY+1)/(thX*thX+1) - 1 )*pxz;
-
-                        //positive charges bend outward for nominal GEMC field configuration
-                        int q = (int) Math.signum(deltaTheta); 
-                        q*= (int)-1*Math.signum(TORSCALE); // flip the charge according to the field scale						
-
-                        double p = Math.sqrt(pxz*pxz+py*py); 
+                    //double iBdl = traj.get_IntegralBdl(); 
+                    
+                    if(iBdl != 0) {
+                        // momentum estimate if Bdl is non zero and the track has curvature  
+                        double p = calcInitTrkP(ux, uy, uz, thX, thY, 
+                                             theta1, theta3, 
+                                            iBdl, TORSCALE);
+                        int q = calcInitTrkQ(theta1, theta3, TORSCALE);
+                       
                         if(p>11)
                             p=11;
                         //if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
@@ -137,23 +311,44 @@ public class TrackCandListFinder {
 
                         cand.set_Q(q);
                         // momentum correction using the swam trajectory iBdl
-                        cand.set_P(p);
+                        cand.set_P(p); 
                         // the state vector at the region 1 cross
                         StateVec VecAtReg1MiddlePlane = new StateVec(cand.get(0).get_Point().x(),cand.get(0).get_Point().y(),
                                         cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z(), cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
                         cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
                         // initialize the fitter with the candidate track
-                        KFitter kFit = new KFitter(cand, DcDetector);
+                        KFitter kFit = new KFitter(cand, DcDetector, false);
                         if(this.trking.equalsIgnoreCase("TimeBased"))
                             kFit.totNumIter=30;
                        
                         // initialize the state vector corresponding to the last measurement site
                         StateVec fn = new StateVec();
                         kFit.runFitter();
-                        //System.out.println(" KFIT "+kFit.chi2);
-                        //if(this.trking.equalsIgnoreCase("HitBased") && kFit.chi2>Constants.HBTCHI2CUT)
-                        //    continue;
-                        
+                        if(kFit.finalStateVec==null)
+                            continue;
+                        if(this.trking.equalsIgnoreCase("HitBased")) { 
+                        /*    System.out.println("x1 "+x1);
+                            System.out.println("y1 "+y1);
+                            System.out.println("z1 "+z1);
+                            System.out.println("x2 "+x2);
+                            System.out.println("y2 "+y2);
+                            System.out.println("z2 "+z2);
+                            System.out.println("x3 "+x3);
+                            System.out.println("y3 "+y3);
+                            System.out.println("z3 "+z3);
+                            System.out.println("x "+ kFit.finalStateVec.x);
+                            System.out.println("y "+ kFit.finalStateVec.y);
+                            System.out.println("z "+ kFit.finalStateVec.z); */
+                            double HBc2 = getHitBasedFitChi2ToCrosses( x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3, 
+                            1./Math.abs(kFit.finalStateVec.Q), (int)Math.signum(kFit.finalStateVec.Q),
+                                     kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.z, kFit.finalStateVec.tx, kFit.finalStateVec.ty);
+                            //System.out.println(cand.get(0).get_Sector()+" HB fit to crosses c2 "+HBc2);
+                            if(HBc2>1000) {
+                                kFit.setFitFailed=true;
+                                //System.out.println("failing  PR chi2= "+HBc2);
+                            }
+                        }
+                        //System.out.println(" fit failed due to chi2 "+kFit.setFitFailed+" p "+1./Math.abs(kFit.finalStateVec.Q));
                         if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
                             // set the state vector at the last measurement site
                             fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
@@ -169,6 +364,7 @@ public class TrackCandListFinder {
                             cand.set_CovMat(kFit.finalCovMat.covMat);
                             // add candidate to list of tracks
                             cands.add(cand); 
+                            
                         }
                     }
                 }
@@ -303,7 +499,8 @@ public class TrackCandListFinder {
         double uxOuter = VecAtTarOut[3]/cand.get_P();
         double uyOuter = VecAtTarOut[4]/cand.get_P();
         double uzOuter = VecAtTarOut[5]/cand.get_P();
-        Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+        //Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+        Cross crossR = new Cross(cand.get(cand.size()-1).get_Sector(), cand.get(cand.size()-1).get_Region(), -1);
         Point3D xOuterExtp = crossR.getCoordsInLab(xOuter, yOuter, zOuter);
         Point3D uOuterExtp = crossR.getCoordsInLab(uxOuter, uyOuter, uzOuter);
 
@@ -342,8 +539,9 @@ public class TrackCandListFinder {
         //cand.set_Vtx0_TiltedCS(trakOrigTiltSec);
         //cand.set_pAtOrig_TiltedCS(pAtOrigTiltSec.toVector3D());
 
-        Cross C = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
-
+        //Cross C = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+        Cross C = new Cross(cand.get(cand.size()-1).get_Sector(), cand.get(cand.size()-1).get_Region(), -1);
+        
         Point3D trkR1X = C.getCoordsInLab(xOr,yOr,zOr);
         Point3D trkR1P = C.getCoordsInLab(pxOr,pyOr,pzOr);
         cand.set_Region1TrackX(new Point3D(trkR1X.x(), trkR1X.y(), trkR1X.z()));
@@ -354,7 +552,8 @@ public class TrackCandListFinder {
         dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(), R3TrkPoint.z(), -R3TrkMomentum.x(), -R3TrkMomentum.y(), -R3TrkMomentum.z(), -cand.get_Q());
 
         // recalc new vertex using plane stopper
-        int sector = cand.get(2).get_Sector();
+        //int sector = cand.get(2).get_Sector();
+        int sector = cand.get(cand.size()-1).get_Sector();
         double theta_n = ((double)(sector-1))*Math.toRadians(60.);
         double x_n = Math.cos(theta_n) ; 
         double y_n = Math.sin(theta_n) ; 
@@ -484,7 +683,11 @@ public class TrackCandListFinder {
 
 public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Factory DcDetector) {
     int planeIdNum=0;
+    if(stateVecAtPlanesList==null)
+        return;
     for(StateVec st : stateVecAtPlanesList) {
+        if(st==null)
+            return;
         planeIdNum++;
         for(Cross c : trk) { 
                 for(FittedHit h1 : c.get_Segment1()) { 
