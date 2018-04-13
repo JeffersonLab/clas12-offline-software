@@ -13,10 +13,7 @@ import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.track.Track;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -171,7 +168,7 @@ public class HitReader {
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 }
                 double T0Sub = smearedTime[i] - T_0 ;//- Constants.TSTARTEST; 
-                if(T_0<0) {
+                if(Constants.isUSETSTART()==true) { 
                     T0Sub-= Constants.TSTARTEST; 
                 }
                 // temporary until new ccdb constants are in
@@ -290,8 +287,13 @@ public class HitReader {
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
             
-            //hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0);
-            hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
+            double T0Sub = (double) (tdc[i] - tProp[i] - tFlight[i] - T_0);
+            
+            if(Constants.isUSETSTART()==true) { 
+                T0Sub-= T_Start; 
+            }
+            hit.set_Time(T0Sub);
+           // hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.calc_CellSize( DcDetector) ;
