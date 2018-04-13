@@ -11,7 +11,6 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.hit.FittedHit;
-import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -129,8 +128,8 @@ public class ClusterFinder {
                         for (int la = 0; la < nlayr; la++) {
 
                             if (HitArray[ssl][wi][la] != null) {
-
-                                hits.add(HitArray[ssl][wi][la]);
+                                if(this.NotIsolatedHit(hits, HitArray[ssl][wi][la]))
+                                    hits.add(HitArray[ssl][wi][la]);
                                 //System.out.println(" adding hit "+HitArray[ssl][wi][la].printInfo()+" to cid "+cid);
                             }
                         }
@@ -176,8 +175,8 @@ public class ClusterFinder {
         List<Cluster> clusters = this.findClumps(allhits, ct);
         //System.out.println(" Clusters Step 1");
         //for(Cluster c : clusters)
-        //	for(Hit h : c)
-        //		System.out.println(h.printInfo());
+        //    for(Hit h : c)
+        //        System.out.println(h.printInfo());
         // create cluster list to be fitted
         List<FittedCluster> selectedClusList = new ArrayList<FittedCluster>();
 
@@ -186,8 +185,8 @@ public class ClusterFinder {
             //System.out.println(" I passed this cluster "+clus.printInfo());
             FittedCluster fclus = new FittedCluster(clus);
             FittedCluster fClus = fclus;
-                    // rm isolated hit pruner
-                    //ct.IsolatedHitsPruner(fclus);
+            // rm isolated hit pruner
+            //ct.IsolatedHitsPruner(fclus);
             // Flag out-of-timers
             //if(Constants.isSimulation==true) {
         //    ct.outOfTimersRemover(fClus, true); // remove outoftimers
@@ -620,5 +619,39 @@ public class ClusterFinder {
             }
         }
     }    
+
+    private boolean NotIsolatedHit(List<Hit> hits, Hit hit) {
+        boolean pass =true;
+        if(hits.size()<4)
+            return pass;
+        //if(this.NotIsolatedHit(la, hits, HitArray[ssl][wi][la]))| Templates.
+        // a Hit Array is used to identify clusters
+        int[][] hitArray = new int[nwire][nlayr];
+
+        // initializing non-zero Hit Array entries
+        // with valid hits
+        for(Hit h : hits) {
+            if(h.get_Layer()!=hit.get_Layer())
+                continue;
+            
+            int wi = h.get_Wire() - 1;
+            int l = h.get_Layer() - 1;
+
+            if (wi >= 0 && wi < nwire) {
+                hitArray[wi][l] = h.get_Id();
+            }
+            
+        }
+        int deltaMin =nwire;
+        for(int w =0; w<nwire; w++) {
+            if(hitArray[w][hit.get_Layer()-1]!=0 && Math.abs(w-hit.get_Wire()+1)<deltaMin) {
+                deltaMin = Math.abs(w-hit.get_Wire()+1);
+            }
+        }
+        if(deltaMin>1 && deltaMin<nwire)
+            pass = false;
+        
+        return pass;
+    }
    
 }
