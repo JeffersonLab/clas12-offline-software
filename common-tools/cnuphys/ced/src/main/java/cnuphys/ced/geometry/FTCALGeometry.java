@@ -37,7 +37,7 @@ public class FTCALGeometry {
 	private static short goodIds[];
 
 	/**
-	 * Initialize the FTCAL Geometry by loading all the wires
+	 * Initialize the FTCAL Geometry
 	 */
 	public static void initialize() {
 
