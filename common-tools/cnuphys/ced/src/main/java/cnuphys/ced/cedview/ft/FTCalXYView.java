@@ -118,6 +118,8 @@ public class FTCalXYView extends CedXYView {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
+				
+				
 				Component component = container.getComponent();
 				Rectangle b = component.getBounds();
 
@@ -130,11 +132,54 @@ public class FTCalXYView extends CedXYView {
 				g.setColor(Color.white);
 				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
 						screenRect.height);
+				
+				drawGrid(g, container);
+
 
 				for (FTCalXYPolygon poly : ftCalPoly) {
 					poly.draw(g, container);
 				}
 
+			}
+			
+			private void drawGrid(Graphics g, IContainer container) {
+				
+				g.setColor(Color.lightGray);
+				
+				double range[] = new double[2];
+				Point p0 = new Point();
+				Point p1 = new Point();
+				double vmax = FTCALGeometry.getMaxAbsXYExtent();
+				
+				for (int ix = -11; ix <= 11; ix++) {
+					if ((ix < -3) || (ix > 4)) {
+						FTCALGeometry.indexToRange(ix, range);
+						container.worldToLocal(p0, range[0], -vmax);
+						container.worldToLocal(p1, range[0], vmax);		
+						g.drawLine(p0.x, p0.y, p1.x, p1.y);
+						
+						if (ix == 11) {
+							container.worldToLocal(p0, range[1], -vmax);
+							container.worldToLocal(p1, range[1], vmax);		
+							g.drawLine(p0.x, p0.y, p1.x, p1.y);							
+						}
+						
+						for (int iy = -11; iy <= 11; iy++) {
+							if ((iy < -3) || (iy > 4)) {
+								FTCALGeometry.indexToRange(iy, range);
+								container.worldToLocal(p0, -vmax, range[0]);
+								container.worldToLocal(p1, vmax, range[0]);		
+								g.drawLine(p0.x, p0.y, p1.x, p1.y);
+								
+								if (iy == 11) {
+									container.worldToLocal(p0, -vmax, range[1]);
+									container.worldToLocal(p1, vmax, range[1]);		
+									g.drawLine(p0.x, p0.y, p1.x, p1.y);							
+								}
+							}
+						}
+					}
+				}
 			}
 
 		};
@@ -276,38 +321,41 @@ public class FTCalXYView extends CedXYView {
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
 		basicFeedback(container, screenPoint, worldPoint, "cm", feedbackStrings);
+		
+		int xindex = FTCALGeometry.valToIndex(worldPoint.x);
+		if (xindex != 0) {
+			int yindex = FTCALGeometry.valToIndex(worldPoint.y);
+		    if (yindex != 0) {
 
-		double rad = Math.hypot(worldPoint.x, worldPoint.y);
-		boolean found = false;
+				boolean found = false;
 
-		if ((rad > 4.6) && (rad < 18)) {
+				for (int index = 0; index < ftCalPoly.length; index++) {
+					FTCalXYPolygon poly = ftCalPoly[index];
+					found = poly.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
 
-			for (int index = 0; index < ftCalPoly.length; index++) {
-				FTCalXYPolygon poly = ftCalPoly[index];
-				found = poly.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
+					if (found) {
 
-				if (found) {
-					
-					AdcHitList hits = FTCAL.getInstance().getHits();
-					if ((hits != null) && !hits.isEmpty()) {
-						short component = FTCALGeometry.getGoodId(index);
-						AdcHit hit = hits.get(1, 1, component);
-						
-						//hack
-						if (hit == null) {
-							hit = hits.get(0, 0, component);
+						AdcHitList hits = FTCAL.getInstance().getHits();
+						if ((hits != null) && !hits.isEmpty()) {
+							short component = FTCALGeometry.getGoodId(index);
+							AdcHit hit = hits.get(1, 1, component);
+
+							// hack
+							if (hit == null) {
+								hit = hits.get(0, 0, component);
+							}
+							if (hit != null) {
+								hit.tdcAdcFeedback(feedbackStrings);
+							}
 						}
-						if (hit != null) {
-							hit.tdcAdcFeedback(feedbackStrings);
-						}
+
+						break;
 					}
-					
-					
-					break;
-				}
-			}
-
+				} //end for index
+		    
+		    }
 		}
+
 
 
 	}

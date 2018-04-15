@@ -108,7 +108,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.002";
+	private static final String _release = "build 1.003";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -1158,7 +1158,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Cosmics.getInstance();
 		DataManager.getInstance();
 
-	    getInstance();  //creates ced frame
+//	    getInstance();  //creates ced frame
 
 
 		// now make the frame visible, in the AWT thread
@@ -1166,7 +1166,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			@Override
 			public void run() {
-//			    getInstance();
+			    getInstance();
 				splashWindow.setVisible(false);
 				getCed().setVisible(true);
 				getCed().fixTitle();

@@ -32,7 +32,7 @@ import javax.swing.event.EventListenerList;
 public class MagneticFields {
 	
 	//vbersion of mag field package
-	private static String VERSION = "1.07b";
+	private static String VERSION = "1.08";
 		
 	//constants for different torus grids
     public static final int SYMMETRIC_TORUS = 0;
@@ -66,9 +66,9 @@ public class MagneticFields {
 	private RotatedCompositeField _rotatedCompositeField;
 
 	// optional full path to torus set by command line argument in ced
-	//private String _torusPath = sysPropOrEnvVar("TORUSMAP");
+	private String _torusPath = sysPropOrEnvVar("TORUSMAP");
 
-	// optional full path to torus set by command line argument in ced
+	// optional full path to solenoid set by command line argument in ced
 	private String _solenoidPath = sysPropOrEnvVar("SOLENOIDMAP");
 	
 	//singleton
@@ -267,6 +267,7 @@ public class MagneticFields {
 
 
 	//get a property or environment variable
+	//the property takes precedence
 	private String sysPropOrEnvVar(String key) {
 		String s = System.getProperty(key);
 		if (s == null) {
@@ -546,6 +547,7 @@ public class MagneticFields {
 		
 		Solenoid solenoid = null;
 
+		//try env variable first
 		if (_solenoidPath != null) {
 			solenoid = readSolenoid(_solenoidPath);
 			if (solenoid != null) {
@@ -663,8 +665,46 @@ public class MagneticFields {
 	 * Tries to load the magnetic fields from fieldmaps
 	 */
 	public void initializeMagneticFields() {
+		
+		//create a dir path to look for the fields
+		//these is a dir path, has nothing to do with the name of the field
+		
 		String homeDir = getProperty("user.home");
-		initializeMagneticFields(".:" + homeDir + "/fieldMaps:../../../data:../../data:../data:data:cedbuild/data", TorusMap.SYMMETRIC);
+		String cwd = getProperty("user.dir");
+		
+		String olswDir = null;
+		try {
+			olswDir = (new File(cwd + "/../../../../../..")).getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//build up dir path
+		StringBuffer sb = new StringBuffer(1024);
+		sb.append(".");
+		
+		if (olswDir != null) {
+			File dfile = new File(olswDir, "/etc/data/magfield");
+			if (dfile.exists()) {
+				sb.append(":" + dfile.getPath());
+			}
+		}
+		
+		sb.append(":" + homeDir + "/fieldMaps");
+		sb.append(":" + homeDir + "/magfield");
+		sb.append(":cedbuild/magfield");
+		sb.append(":../../../data");
+		sb.append(":../../data");
+		sb.append(":../data");
+		sb.append(":data");
+		sb.append(":../../../magfield");
+		sb.append(":../../magfield");
+		sb.append(":../magfield");
+		sb.append(":magfield");
+		
+		String dirPath = sb.toString();
+		
+		initializeMagneticFields(dirPath, TorusMap.SYMMETRIC);
 	} 
 	
 	/**
@@ -706,6 +746,7 @@ public class MagneticFields {
 		
 		initializeTorus(torusMap);
 		
+		//will actually try env variable first
 		_solenoid = getSolenoid("clas12-fieldmap-solenoid.dat");
 				
 		System.out.println("Torus found: " + (_torus != null));
@@ -803,6 +844,14 @@ public class MagneticFields {
 					break;
 				}
 				File file = new File(dataDir, fName);
+				
+//				try {
+//					System.err.println("SEARCHING FOR TORUS IN [" + file.getCanonicalPath() + "]");
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+				
 				if (file.exists()) {
 					tmap.setFound(true);
 					tmap.setDirName(dataDir);

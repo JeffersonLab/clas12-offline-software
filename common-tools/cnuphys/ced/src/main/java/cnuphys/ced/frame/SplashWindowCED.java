@@ -247,6 +247,8 @@ public class SplashWindowCED extends JWindow {
         _closeButton.addActionListener(al);
         sp.add(_closeButton);
 
+        sp.setBorder(BorderFactory.createEtchedBorder());
+        
         add(sp, BorderLayout.NORTH);
     }
 

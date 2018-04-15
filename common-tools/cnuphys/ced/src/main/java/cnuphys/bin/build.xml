@@ -6,6 +6,7 @@
 		<echo>${user.dir}</echo>
 		<property name="destdir" value="${user.home}/cedbuild"/>
 		<property name="cnudir" value="../../../.."/>
+		<property name="etcdata" value="../../../../../../etc/data"/>
 		
 		<!-- for making classpath -->
 		<property name="coat" value="coatjava/lib/clas/coat-libs-5.1-SNAPSHOT.jar"/>
@@ -31,7 +32,7 @@
 		
 		<!-- copy data (field maps)-->
 		<copy todir="${destdir}">
-			<fileset includes="data/*" excludes="**/.project" dir="${cnudir}/ced" />
+			<fileset includes="magfield/*" excludes="**/.project" dir="${etcdata}" />
 		</copy>
 		
 		<!-- copy jogl from home dir-->

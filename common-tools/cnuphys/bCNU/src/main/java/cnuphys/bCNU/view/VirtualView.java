@@ -266,6 +266,10 @@ public class VirtualView extends BaseView
 		if (Environment.getInstance().isLinux()) {
 			height += 23;
 		}
+		if (Environment.getInstance().isWindows()) {
+			height += 23;
+		}
+
 
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
