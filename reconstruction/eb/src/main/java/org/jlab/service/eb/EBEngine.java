@@ -21,6 +21,9 @@ import org.jlab.rec.eb.EBCCDBEnum;
  */
 public class EBEngine extends ReconstructionEngine {
 
+    boolean dropBanks = false;
+    boolean alreadyDroppedBanks = false;
+
     String eventBank        = null;
     String particleBank     = null;
     String calorimeterBank  = null;
@@ -43,6 +46,8 @@ public class EBEngine extends ReconstructionEngine {
     
 
     public boolean processDataEvent(DataEvent de) {
+
+        if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
         int run=-1;
@@ -210,8 +215,21 @@ public class EBEngine extends ReconstructionEngine {
         this.trackType = trackType;
     }
 
+    public void dropBanks(DataEvent de) {
+        if (this.alreadyDroppedBanks==false) {
+            System.out.println("\nEBEngine:  dropping REC banks!\n");
+            this.alreadyDroppedBanks=true;
+        }
+        de.removeBank(eventBank);
+        de.removeBank(particleBank);
+        de.removeBank(calorimeterBank);
+        de.removeBank(scintillatorBank);
+        de.removeBank(cherenkovBank);
+        de.removeBank(trackBank);
+        de.removeBank(crossBank);
+        de.removeBank(ftBank);
+    }
 
-    
     @Override
     public boolean init() {
         requireConstants(EBCCDBConstants.getAllTableNames());
