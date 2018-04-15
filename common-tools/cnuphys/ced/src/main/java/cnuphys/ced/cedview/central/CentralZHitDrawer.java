@@ -122,12 +122,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 					if (hitCount > 1) {
 
-						double fract;
-						if (_view.isSimpleAccumulatedMode()) {
-							fract = ((double) hitCount) / maxHit;
-						} else {
-							fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
-						}
+						double fract = ((double) hitCount) / maxHit;
 
 						Color color = AccumulationManager.getInstance().getColor(fract);
 						_view.drawBSTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);

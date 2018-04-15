@@ -75,7 +75,7 @@ public class Converter {
 	// we have to sort by this
 	private static int getNValue(String name) {
 		String vname = name.replaceAll("[^\\d]", "");
-//		System.out.println("vname = [" + vname + "]");
+		// System.out.println("vname = [" + vname + "]");
 		return Integer.parseInt(vname);
 	}
 
@@ -86,10 +86,95 @@ public class Converter {
 
 	private static final double TINY = 1.0e-12;
 
+	// test that the grid sems to be right
+	static float oldZ = -99f;
+	static float oldRho = -99f;
+	static float oldPhi = -999f;
+
+	private static void checkAllFiles(ArrayList<File> files) throws IOException {
+		if (!files.isEmpty()) {
+			System.out.println("Found " + files.size() + " files.");
+
+			int zIndex = 0;
+			oldZ = -99f;
+			oldRho = -99f;
+			oldPhi = -999f;
+			float tiny = 0.1f;
+
+			for (File file : files) {
+				System.out.println(" PROCESSING FILE [" + file.getName() + "] zindex =  " + zIndex + "  ");
+
+				if (zIndex == 1) break;
+				
+				try {
+
+					AsciiReader ar = new AsciiReader(file, zIndex) {
+						int count = 0;
+
+						@Override
+						protected void processLine(String line) {
+							String tokens[] = AsciiReadSupport.tokens(line);
+							if ((tokens != null) && (tokens.length == 7)) {
+
+								double newX = Double.parseDouble(tokens[0]);
+								double newY = Double.parseDouble(tokens[1]);
+								float newZ = Float.parseFloat(tokens[2]);
+								
+								float newRho = (float) Math.hypot(newX, newY);
+								float newPhi = (float) Math.toDegrees(Math.atan2(newY, newX));
+								if (newPhi < -.0001) newPhi += 360;
+							
+								if (oldPhi > 1) {
+									if (newPhi < 1) {
+										System.out.println("phi = " + newPhi + "  x = " + newX/10 + "  y = " + newY/10);
+									}
+								}
+								
+
+								if (Math.abs(newPhi - oldPhi) > tiny) {
+									System.out.println("    new Phi = " + newPhi);
+									oldPhi = newPhi;
+								}
+								
+//								if (Math.abs(newRho - oldRho) > tiny) {
+//									System.out.println("  new Rho = " + newRho/10); //mm to cm
+//									oldRho = newRho;
+//								}
+
+								
+								if (Math.abs(newZ - oldZ) > tiny) {
+									System.out.println("new Z = " + newZ/10); //mm to cm
+									oldZ = newZ;
+								}
+								count++;
+							}
+						}
+
+						@Override
+						public void done() {
+							System.out.println(" processed " + count + " lines");
+						}
+
+					};
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+
+				zIndex++;
+			} // end file loop
+
+		} else {
+			System.err.println("No files!");
+		}
+	}
+
+	// process all the files
 	private static void processAllFiles(ArrayList<File> files) throws IOException {
 		if (!files.isEmpty()) {
 
-			DataOutputStream dos = new DataOutputStream(new FileOutputStream(new File(getDataDir(), "torus.binary")));
+			File bfile = new File(getDataDir(), "torus.binary");
+			DataOutputStream dos = new DataOutputStream(new FileOutputStream(bfile));
 
 			int nPhi = 181;
 			int nRho = 251;
@@ -129,8 +214,7 @@ public class Converter {
 			System.err.println("FILE SIZE = " + size + " bytes");
 
 			int zIndex = 0;
-			
-		
+
 			FloatVect[][][] bvals = new FloatVect[181][251][251];
 
 			for (File file : files) {
@@ -150,11 +234,11 @@ public class Converter {
 								int rhoIndex = count % 251;
 								int phiIndex = count / 251;
 
-//note t to kG
+								// note t to kG
 								float Bx = Float.parseFloat(tokens[3]) * 10;
 								float By = Float.parseFloat(tokens[4]) * 10;
-								float Bz = Float.parseFloat(tokens[5]) * 10; 
-								
+								float Bz = Float.parseFloat(tokens[5]) * 10;
+
 								bvals[phiIndex][rhoIndex][iVal] = new FloatVect(Bx, By, Bz);
 
 								count++;
@@ -175,7 +259,7 @@ public class Converter {
 				zIndex++;
 
 			} // end for loop
-			
+
 			for (int iPHI = 0; iPHI < 181; iPHI++) {
 				System.out.println("iPHI = " + iPHI);
 				for (int iRHO = 0; iRHO < 251; iRHO++) {
@@ -187,23 +271,32 @@ public class Converter {
 					}
 				}
 			}
-			
+
 			dos.flush();
 			dos.close();
+			
+			System.out.println("Binary file: " + bfile.getCanonicalPath());
+
 		}
+		
 	}
 
 	public static void main(String arg[]) {
 		String dataDir = getDataDir();
 		System.out.println("data dir = [" + dataDir + "]");
 
-		try {
-			processAllFiles(dataFiles(dataDir));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			checkAllFiles(dataFiles(dataDir));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+
+		 try {
+		 processAllFiles(dataFiles(dataDir));
+		 } catch (IOException e) {
+		 e.printStackTrace();
+		 }
 		System.out.println("done");
 	}
-	
-	
+
 }

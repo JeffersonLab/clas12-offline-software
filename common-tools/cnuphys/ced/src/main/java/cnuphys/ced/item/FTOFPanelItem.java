@@ -126,13 +126,9 @@ public class FTOFPanelItem extends PolygonItem {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
-				int hit = hits[sect0][paddle0];
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
+				int hitCount = hits[sect0][paddle0];
+				double fract = ((double) hitCount) / maxHit;
+
 
 				Color fc = AccumulationManager.getInstance().getColor(fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
@@ -171,47 +167,7 @@ public class FTOFPanelItem extends PolygonItem {
 			}
 		}
 
-//		int panelType = _ftofPanel.getPanelType();
-//
-//		int hitCount = FTOF.getInstance().hitCount(panelType);
-//
-//		if (hitCount < 1) {
-//			return;
-//		}
-//		int pid[] = FTOF.getInstance().pid(panelType);
-//		int sector[] = FTOF.getInstance().sector(panelType);
-//		int paddles[] = FTOF.getInstance().paddle(panelType);
-//
-//		if (!_view.showMcTruth()) {
-//			pid = null;
-//		}
-//
-//		if ((sector == null) || (paddles == null)) {
-//			return;
-//		}
-//
-//		Color default_fc = Color.red;
-//
-//		for (int i = 0; i < hitCount; i++) {
-//			if (sector[i] == _sector) {
-//				Color fc = default_fc;
-//				if (pid != null) {
-//					LundId lid = LundSupport.getInstance().get(pid[i]);
-//					if (lid != null) {
-//						fc = lid.getStyle().getFillColor();
-//					}
-//				}
-//
-//				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
-//
-//				if (wp != null) {
-//					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-//					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
-//							true);
-//				}
-//
-//			}
-//		}
+
 
 	}
 

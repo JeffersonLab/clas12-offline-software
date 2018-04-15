@@ -156,8 +156,8 @@ public class PCALHexSectorItem extends HexSectorItem {
 	//draw accumulated hits
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		
-		int maxHit = AccumulationManager.getInstance().getMaxPCALCount();
-		if (maxHit < 1) {
+		int medianHit = AccumulationManager.getInstance().getMedianPCALCount();
+		if (medianHit < 1) {
 			return;
 		}
 		
@@ -171,16 +171,9 @@ public class PCALHexSectorItem extends HexSectorItem {
 				if (_pcalView.showStrips(view0)) {
 					Polygon poly = stripPolygon(container, view0, strip0);
 
-					int hit = hits[sect0][view0][strip0];
-					if (hit > 0) {
-						double fract;
-						if (_pcalView.isSimpleAccumulatedMode()) {
-							fract = ((double) hit) / maxHit;
-						}
-						else {
-							fract = Math.log(hit + 1.)
-									/ Math.log(maxHit + 1.);
-						}
+					int hitCount = hits[sect0][view0][strip0];
+					if (hitCount > 0) {
+						double fract = AccumulationManager.MED_FRACT*(((double) hitCount) / medianHit);
 
 						Color color = AccumulationManager.colorScaleModel
 								.getAlphaColor(fract, 128);

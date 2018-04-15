@@ -176,14 +176,9 @@ public class SectorHTCCItem extends PolygonItem {
 
 		int hits[][][] = AccumulationManager.getInstance().getAccumulatedHTCCData();
 
-		int hit = hits[_sector - 1][_ring - 1][_half - 1];
+		int hitCount = hits[_sector - 1][_ring - 1][_half - 1];
 
-		double fract;
-		if (_view.isSimpleAccumulatedMode()) {
-			fract = ((double) hit) / maxHit;
-		} else {
-			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-		}
+		double fract = ((double) hitCount) / maxHit;
 
 		Color color = AccumulationManager.getInstance().getColor(fract);
 

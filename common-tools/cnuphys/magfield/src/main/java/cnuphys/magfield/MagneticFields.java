@@ -1245,8 +1245,12 @@ public class MagneticFields {
 		final MagneticFields mf = MagneticFields.getInstance();
 		
 		//test explicit path load
+		//mf.initializeMagneticFields();
 		
-		mf.initializeMagneticFields();
+		//test specific load
+		File mfdir = new File(System.getProperty("user.home"), "magfield");
+		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
+		mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
 
 		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
 		// drawing canvas
@@ -1294,13 +1298,13 @@ public class MagneticFields {
 				
 				//create full field torus
 //				mf.createFullTorus(7); //experimental
-				mf.createFullTorus(0);
-				mf.createFullTorus(1);
-				mf.createFullTorus(2);
-				mf.createFullTorus(3);
-				mf.createFullTorus(4);
-				mf.createFullTorus(5);
-				mf.createFullTorus(6);
+//				mf.createFullTorus(0);
+//				mf.createFullTorus(1);
+//				mf.createFullTorus(2);
+//				mf.createFullTorus(3);
+//				mf.createFullTorus(4);
+//				mf.createFullTorus(5);
+//				mf.createFullTorus(6);
 //				mf.differentTorusTest(10000);
 			}
 		});

@@ -272,13 +272,7 @@ public class TOFView extends CedView implements ISector {
 			int hitCount = ctofData[index];
 			shells[ALL_CTOF].getStripRectangle(container, index, rr);
 		
-			double fract;
-			if (isSimpleAccumulatedMode()) {
-				fract = ((double) hitCount) / maxHit;
-			}
-			else {
-				fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
-			}
+			double fract = ((double) hitCount) / maxHit;
 
 			Color color = AccumulationManager.getInstance()
 					.getColor(fract);
@@ -316,12 +310,7 @@ public class TOFView extends CedView implements ISector {
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
 				int hit = hits[sect0][paddle0];
-				double fract;
-				if (isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
+				double fract = ((double) hit) / maxHit;
 
 				Color color = AccumulationManager.getInstance().getColor(fract);
 				

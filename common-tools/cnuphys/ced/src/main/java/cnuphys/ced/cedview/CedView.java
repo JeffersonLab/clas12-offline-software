@@ -57,7 +57,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
-		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
+		SINGLE_EVENT, SIMPLEACCUMULATED
 	};
 	
 	//field probe for fast retrieval of mag field
@@ -809,14 +809,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return (_mode == Mode.SIMPLEACCUMULATED);
 	}
 
-	/**
-	 * See if we are in log accumulation event mode
-	 * 
-	 * @return <code>true</code> if we are in accumulation mode
-	 */
-	public boolean isLogAccumulatedMode() {
-		return (_mode == Mode.LOGACCUMULATED);
-	}
 
 	/**
 	 * Set the mode for this view.

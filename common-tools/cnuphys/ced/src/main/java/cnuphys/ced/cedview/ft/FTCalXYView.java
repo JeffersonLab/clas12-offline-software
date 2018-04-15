@@ -241,28 +241,6 @@ public class FTCalXYView extends CedXYView {
 	//accumulated hits drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		
-//		int maxHit = AccumulationManager.getInstance().getMaxDgtzHTCCCount();
-//		if (maxHit < 1) {
-//			return;
-//		}
-//
-//		int hits[][][] = AccumulationManager.getInstance().getAccumulatedDgtzHTCCData();
-//
-//		int hit = hits[_sector - 1][_ring - 1][_half - 1];
-//
-//		double fract;
-//		if (_view.isSimpleAccumulatedMode()) {
-//			fract = ((double) hit) / maxHit;
-//		} else {
-//			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-//		}
-//
-		// Color color = AccumulationManager.getInstance().getColor(fract);
-		//
-		// g.setColor(color);
-		// g.fillPolygon(_lastDrawnPolygon);l
-		// g.setColor(Color.black);
-		// g.drawPolygon(_lastDrawnPolygon);
 
 		int maxHit = AccumulationManager.getInstance().getMaxFTCALCount();
 		if (maxHit < 1) {
@@ -274,12 +252,7 @@ public class FTCalXYView extends CedXYView {
 				int index = indices[i];
 				if (index >= 0) {
 					FTCalXYPolygon poly = ftCalPoly[index];
-					double fract;
-					if (isSimpleAccumulatedMode()) {
-						fract = ((double) acchits[i]) / maxHit;
-					} else {
-						fract = Math.log(acchits[i] + 1.) / Math.log(maxHit + 1.);
-					}
+					double fract = ((double) acchits[i]) / maxHit;
 
 					Color color = AccumulationManager.getInstance().getColor(fract);
 					g.setColor(color);

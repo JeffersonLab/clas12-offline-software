@@ -180,8 +180,8 @@ public class ECHexSectorItem extends HexSectorItem {
 	private void drawAccumulatedHits(Graphics g, IContainer container,
 			int plane) {
 
-		int maxHit = AccumulationManager.getInstance().getMaxECALCount();
-		if (maxHit < 1) {
+		int medianHit = AccumulationManager.getInstance().getMedianECALCount(plane);
+		if (medianHit < 1) {
 			return;
 		}
 
@@ -196,16 +196,9 @@ public class ECHexSectorItem extends HexSectorItem {
 					Polygon poly = stripPolygon(container, plane, view0,
 							strip0);
 
-					int hit = hits[sect0][plane][view0][strip0];
-					if (hit > 0) {
-						double fract;
-						if (_ecView.isSimpleAccumulatedMode()) {
-							fract = ((double) hit) / maxHit;
-						}
-						else {
-							fract = Math.log(hit + 1.)
-									/ Math.log(maxHit + 1.);
-						}
+					int hitCount = hits[sect0][plane][view0][strip0];
+					if (hitCount > 0) {
+						double fract = AccumulationManager.MED_FRACT * (((double) hitCount) / medianHit);
 
 						Color color = AccumulationManager.colorScaleModel
 								.getAlphaColor(fract, 128);

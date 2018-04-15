@@ -12,7 +12,7 @@ public interface IClasIoEventListener extends EventListener {
 	 *            the new event.
 	 */
 	public void newClasIoEvent(final DataEvent event);
-
+	
 	/**
 	 * Opened a new event file
 	 * 

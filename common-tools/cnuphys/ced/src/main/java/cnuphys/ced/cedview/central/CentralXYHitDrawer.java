@@ -160,14 +160,7 @@ public class CentralXYHitDrawer implements IDrawable {
 					
 //					System.err.println("BST layer: " + (lay0+1) +  " sect: " + (sect0+0) + "   hit count " + hitCount);
 
-					double fract;
-					if (_view.isSimpleAccumulatedMode()) {
-						fract = ((double) hitCount) / maxHit;
-					}
-					else {
-						fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
-					}
-
+					double fract = ((double) hitCount) / maxHit;
 					Color color = AccumulationManager.getInstance()
 							.getColor(fract);
 					_view.drawBSTPanel((Graphics2D) g, container, panel, color);
@@ -195,13 +188,7 @@ public class CentralXYHitDrawer implements IDrawable {
 			if (poly != null) {
 				int hitCount = ctofData[index];
 				
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hitCount) / maxHit;
-				}
-				else {
-					fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
-				}
+				double fract = ((double) hitCount) / maxHit;
 
 				Color color = AccumulationManager.getInstance()
 						.getColor(fract);

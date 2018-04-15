@@ -452,25 +452,23 @@ public class AllDCSuperLayer extends RectangleItem {
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
 				.getAccumulatedDCData();
-		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
-		if (maxHit < 1) {
+		
+		int medianHit = AccumulationManager.getInstance().getMedianDCCount(_superLayer-1);
+		if (medianHit < 1) {
 			return;
 		}
+		
+//		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
+//		if (maxHit < 1) {
+//			return;
+//		}
 
 		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 			for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
 				
-				//test log drawing to remove hotspots
-				
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hitCount) / maxHit;
-				}
-				else {
-					fract = Math.log(hitCount+1.)/Math.log(maxHit+1.);
-				}
+				double fract = AccumulationManager.MED_FRACT*(((double) hitCount) / medianHit);
 				
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getInstance().getColor(fract);
@@ -596,9 +594,14 @@ public class AllDCSuperLayer extends RectangleItem {
 	private void accumulatedFeedbackStrings(int wire, int layer,
 			List<String> feedbackStrings) {
 		
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
+				.getAccumulatedDCData();
+
 		double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_sector-1, _superLayer-1, layer-1, wire-1);
 		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
 
+		int hitCount = hitCount = dcAccumulatedData[_sector-1][_superLayer-1][layer-1][wire-1];
+		
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 				"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
@@ -607,6 +610,9 @@ public class AllDCSuperLayer extends RectangleItem {
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 				"hit rate layer: " + layer + ", wire: " + wire + " is "
 				+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+				"hit count layer: " + layer + ", wire: " + wire + " is "
+				+ hitCount);
 
 	}
 

@@ -1,10 +1,14 @@
 package cnuphys.ced.event;
 
 import java.awt.Color;
+import java.util.Collections;
+import java.util.Vector;
+
 import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;
@@ -29,7 +33,6 @@ import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 /**
@@ -41,6 +44,9 @@ import org.jlab.io.base.DataEvent;
 public class AccumulationManager
 		implements IAccumulator, IClasIoEventListener, IAccumulationListener {
 
+	//where on a color scale the medium hit count
+	public static final double MED_FRACT = 0.25;
+	
 	/** Indicates hat accumulation has started */
 	public static final int ACCUMULATION_STARTED = 0;
 
@@ -62,6 +68,8 @@ public class AccumulationManager
 
 //	private static final Color NULLCOLOR = new Color(128, 128, 128);
 	private static final Color NULLCOLOR = Color.black;
+	
+	private static final Color HOTCOLOR = X11Colors.getX11Color("red");
 
 	// HTCC accumulated accumulated data indices are sector, ring, half
 	private int _HTCCAccumulatedData[][][];
@@ -78,7 +86,7 @@ public class AccumulationManager
 	
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _DCAccumulatedData[][][][];
-	private int _maxDCCount;
+//	private int _maxDCCount;
 
 	// BST accumulated data (layer[0..7], sector[0..23])
 	private int _BSTAccumulatedData[][];
@@ -100,11 +108,9 @@ public class AccumulationManager
 
 	// EC [sector, stack (inner, outer), view (uvw), strip]
 	private int _ECALAccumulatedData[][][][];
-	private int _maxECALCount;
 
 	// PCAL [sector, view (uvw), strip]
 	private int _PCALAccumulatedData[][][];
-	private int _maxPCALCount;
 
 	// overall event count
 	private long _eventCount;
@@ -223,7 +229,7 @@ public class AccumulationManager
 				}
 			}
 		}
-		_maxDCCount = 0;
+//		_maxDCCount = 0;
 
 		// clear ecal data
 		for (int sector = 0; sector < 6; sector++) {
@@ -235,7 +241,6 @@ public class AccumulationManager
 				}
 			}
 		}
-		_maxECALCount = 0;
 
 		// clear pcal data
 		for (int sector = 0; sector < 6; sector++) {
@@ -245,7 +250,6 @@ public class AccumulationManager
 				}
 			}
 		}
-		_maxPCALCount = 0;
 
 		// clear bst panel accumulation
 		for (int layer = 0; layer < 8; layer++) {
@@ -360,14 +364,87 @@ public class AccumulationManager
 	public int[][][][] getAccumulatedDCData() {
 		return _DCAccumulatedData;
 	}
+	
+//	// EC [sector, stack (inner, outer), view (uvw), strip]
+//	private int _ECALAccumulatedData[][][][];
+//
+//	// PCAL [sector, view (uvw), strip]
+//	private int _PCALAccumulatedData[][][];
+
+//	_PCALAccumulatedData = new int[6][3][];
+//	for (int sect0 = 0; sect0 < 6; sect0++) {
+//		for (int view0 = 0; view0 < 3; view0++) {
+//			_PCALAccumulatedData[sect0][view0] = new int[PCALGeometry.PCAL_NUMSTRIP[view0]];
+//		}
+//	}
+
+	public int getMedianPCALCount() {
+		Vector<Integer> v = new Vector<>(2000, 100);
+		for (int sect = 0; sect < 6; sect++) {
+			for (int view = 0; view < 3; view++) {
+				for (int strip = 0; strip < PCALGeometry.PCAL_NUMSTRIP[view]; strip++) {
+					int count = _PCALAccumulatedData[sect][view][strip];
+					v.add(count);
+				}
+			}
+		}
+		
+		Collections.sort(v);;
+		
+		int size = v.size();
+		if (size == 0) {
+			return 0;
+		}
+		return v.get(size/2);
+	}
+	
+	//_ECALAccumulatedData = new int[6][2][3][36];
+
+	public int getMedianECALCount(int plane) {
+		Vector<Integer> v = new Vector<>(2000, 100);
+		for (int sect = 0; sect < 6; sect++) {
+			for (int view = 0; view < 3; view++) {
+				for (int strip = 0; strip < 36; strip++) {
+					int count = _ECALAccumulatedData[sect][plane][view][strip];
+					v.add(count);
+				}
+			}
+		}
+		
+		Collections.sort(v);;
+		
+		int size = v.size();
+		if (size == 0) {
+			return 0;
+		}
+		return v.get(size/2);
+		
+	}
 
 	/**
-	 * Get the max counts on any wire
-	 * 
-	 * @return the max counts for any DC wire.
+	 * Get the median count for a given superlayer across all sectors
+	 * @param suplay the superlayer 0..5
+	 * @return the median count for a given superlayer across all sectors
 	 */
-	public int getMaxDCCount() {
-		return _maxDCCount;
+	public int getMedianDCCount(int suplay) {
+		Vector<Integer> v = new Vector<>(24192);
+
+		for (int sect = 0; sect < 6; sect++) {
+			for (int lay = 0; lay < 6; lay++) {
+				for (int wire = 0; wire < 12; wire++) {
+					int count = _DCAccumulatedData[sect][suplay][lay][wire];
+					v.add(count);
+				}
+			}
+		}
+		
+		Collections.sort(v);;
+		
+		int size = v.size();
+		if (size == 0) {
+			return 0;
+		}
+		return v.get(size/2);
 	}
 
 	/**
@@ -392,14 +469,6 @@ public class AccumulationManager
 		return _maxFTCALCount;
 	}
 
-	/**
-	 * Get the max counts for ec strips
-	 * 
-	 * @return the max counts for ec strips.
-	 */
-	public int getMaxECALCount() {
-		return _maxECALCount;
-	}
 
 	/**
 	 * Get the max counts for HTCC
@@ -417,16 +486,6 @@ public class AccumulationManager
 	 */
 	public int getMaxLTCCCount() {
 		return _maxLTCCCount;
-	}
-
-
-	/**
-	 * Get the max counts for pcal strips
-	 * 
-	 * @return the max counts for pcal strips.
-	 */
-	public int getMaxPCALCount() {
-		return _maxPCALCount;
 	}
 
 	/**
@@ -509,6 +568,9 @@ public class AccumulationManager
 	public Color getColor(double fract) {
 		if (fract < 1.0e-6) {
 			return NULLCOLOR;
+		}
+		else if (fract > 1.0) {
+			return HOTCOLOR;
 		}
 		return colorScaleModel.getColor(fract);
 	}
@@ -726,8 +788,6 @@ public class AccumulationManager
 					if (layer < 4) { // pcal
 						int view0 = layer - 1;
 						_PCALAccumulatedData[sect0][view0][strip0] += 1;
-
-						_maxPCALCount = Math.max(_PCALAccumulatedData[sect0][view0][strip0], _maxPCALCount);
 					} else { // ec
 						layer -= 4; // convert to 0..5
 						int stack0 = layer / 3; // 000,111
@@ -735,8 +795,6 @@ public class AccumulationManager
 
 						_ECALAccumulatedData[sect0][stack0][view0][strip0] += 1;
 
-						_maxECALCount = Math.max(_ECALAccumulatedData[sect0][stack0][view0][strip0],
-								_maxECALCount);
 
 					}
 					
@@ -762,9 +820,9 @@ public class AccumulationManager
 			if (hit.inRange()) {
 				_DCAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1] += 1;
 
-				_maxDCCount = Math.max(
-						_DCAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1],
-						_maxDCCount);
+//				_maxDCCount = Math.max(
+//						_DCAccumulatedData[hit.sector - 1][hit.superlayer - 1][hit.layer6 - 1][hit.wire - 1],
+//						_maxDCCount);
 			} else {
 				Log.getInstance().warning("In accumulation, DC hit has bad indices: " + hit);
 			}
