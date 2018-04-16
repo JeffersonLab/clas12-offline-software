@@ -195,5 +195,14 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 	}
 
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
+
 
 }

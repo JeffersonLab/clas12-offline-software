@@ -568,5 +568,15 @@ public class NodePanel extends JPanel implements ActionListener,
 			break;
 		}
 	}
+	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
+
 
 }

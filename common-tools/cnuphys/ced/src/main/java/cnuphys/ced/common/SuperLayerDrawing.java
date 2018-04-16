@@ -279,16 +279,12 @@ public class SuperLayerDrawing {
 		int sect0 = _iSupl.sector() - 1;
 		int supl0 = _iSupl.superlayer() - 1;
 		int medianHit = AccumulationManager.getInstance().getMedianDCCount(supl0);
-		if (medianHit < 1) {
-			return;
-		}
-
 
 		for (int lay0 = 0; lay0 < 6; lay0++) {
 			for (int wire0 = 0; wire0 < 112; wire0++) {
 
 				int hit = dcAccumulatedData[sect0][supl0][lay0][wire0];
-				double fract = AccumulationManager.MED_FRACT*(((double) hit) / medianHit);
+				double fract = _view.getMedianSetting()*(((double) hit) / (1 + medianHit));
 				Color color = AccumulationManager.getInstance().getColor(fract);
 
 				g.setColor(color);
@@ -1019,7 +1015,7 @@ public class SuperLayerDrawing {
 				int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
 						.getAccumulatedDCData();
 
-				int hitCount = dcAccumulatedData[_iSupl.sector() - 1][_iSupl.superlayer()][layer-1][wire-1];
+				int hitCount = dcAccumulatedData[_iSupl.sector() - 1][_iSupl.superlayer()-1][layer-1][wire-1];
 
 
 				feedbackStrings.add(AccumulationManager.accumulationFBColor + 

@@ -187,15 +187,12 @@ public class SectorPCALItem extends PolygonItem {
 	//accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int medianHit = AccumulationManager.getInstance().getMedianPCALCount();
-		if (medianHit < 1) {
-			return;
-		}
 
 		int hits[][][] = AccumulationManager.getInstance()
 				.getAccumulatedPCALData();
 		for (int strip0 = 0; strip0 < _stripCounts[_stripType]; strip0++) {
 			int hitCount = hits[_sector - 1][_stripType][strip0];
-			double fract = AccumulationManager.MED_FRACT*(((double) hitCount) / medianHit);
+			double fract = _view.getMedianSetting()*(((double) hitCount) /(1 +  medianHit));
 			
 			Point2D.Double wp[] = getStrip(strip0);
 

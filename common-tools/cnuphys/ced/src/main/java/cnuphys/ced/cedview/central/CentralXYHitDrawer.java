@@ -141,10 +141,7 @@ public class CentralXYHitDrawer implements IDrawable {
 	private void drawBSTAccumulatedHits(Graphics g, IContainer container) {
 		// panels
 
-		int maxHit = AccumulationManager.getInstance().getMaxBSTCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianBSTCount();
 
 		// first index is layer 0..7, second is sector 0..23
 		int bstData[][] = AccumulationManager.getInstance()
@@ -160,7 +157,7 @@ public class CentralXYHitDrawer implements IDrawable {
 					
 //					System.err.println("BST layer: " + (lay0+1) +  " sect: " + (sect0+0) + "   hit count " + hitCount);
 
-					double fract = ((double) hitCount) / maxHit;
+					double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 					Color color = AccumulationManager.getInstance()
 							.getColor(fract);
 					_view.drawBSTPanel((Graphics2D) g, container, panel, color);
@@ -175,10 +172,7 @@ public class CentralXYHitDrawer implements IDrawable {
 	
 	// draw CTOF accumulated hits
 	private void drawCTOFAccumulatedHits(Graphics g, IContainer container) {
-		int maxHit = AccumulationManager.getInstance().getMaxCTOFCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianCTOFCount();
 
 		int ctofData[] = AccumulationManager.getInstance()
 				.getAccumulatedCTOFData();
@@ -188,16 +182,12 @@ public class CentralXYHitDrawer implements IDrawable {
 			if (poly != null) {
 				int hitCount = ctofData[index];
 				
-				double fract = ((double) hitCount) / maxHit;
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 				Color color = AccumulationManager.getInstance()
 						.getColor(fract);
 				
 				poly.draw(g, container, index+1, color);
-//				g.setColor(color);
-//				g.fillPolygon(poly);
-//				g.setColor(Color.black);
-//				g.drawPolygon(poly);
 			}
 		}
 	}

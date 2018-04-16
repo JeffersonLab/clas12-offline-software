@@ -245,7 +245,6 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 					@Override
 					public void run() {
-						AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_STARTED);
 						_eventManager.setAccumulating(true);
 
 						int modCount = Math.max(2, fcount / 100);
@@ -313,9 +312,6 @@ public class ClasIoAccumulationDialog extends JDialog {
 						AccumulationManager.getInstance().notifyListeners(
 								AccumulationManager.ACCUMULATION_FINISHED);
 												
-//						//reload last event
-//						_eventManager.reloadCurrentEvent();
-//						System.err.println("CCC");
 						
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
@@ -332,6 +328,8 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 					}
 				};
+
+				AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_STARTED);
 
 				(new Thread(runnable)).start();
 

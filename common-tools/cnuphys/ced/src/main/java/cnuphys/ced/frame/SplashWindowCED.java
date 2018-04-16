@@ -97,9 +97,7 @@ public class SplashWindowCED extends JWindow {
     @Override
     public void setVisible(boolean vis) {
     	if ((_timer != null) && !vis) {
-    		System.err.println("Stopping splashscreen timer"); {
-    			_timer.stop();
-    		}
+			_timer.stop();
     	}
 
 		super.setVisible(vis);

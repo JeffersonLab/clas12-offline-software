@@ -181,9 +181,6 @@ public class ECHexSectorItem extends HexSectorItem {
 			int plane) {
 
 		int medianHit = AccumulationManager.getInstance().getMedianECALCount(plane);
-		if (medianHit < 1) {
-			return;
-		}
 
 		int hits[][][][] = AccumulationManager.getInstance()
 				.getAccumulatedECALData();
@@ -198,7 +195,7 @@ public class ECHexSectorItem extends HexSectorItem {
 
 					int hitCount = hits[sect0][plane][view0][strip0];
 					if (hitCount > 0) {
-						double fract = AccumulationManager.MED_FRACT * (((double) hitCount) / medianHit);
+						double fract = _ecView.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
 						Color color = AccumulationManager.colorScaleModel
 								.getAlphaColor(fract, 128);

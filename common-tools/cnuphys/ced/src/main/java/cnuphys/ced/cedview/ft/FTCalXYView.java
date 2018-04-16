@@ -242,17 +242,15 @@ public class FTCalXYView extends CedXYView {
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		
 
-		int maxHit = AccumulationManager.getInstance().getMaxFTCALCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianFTCALCount();
+
 		int acchits[] = AccumulationManager.getInstance().getAccumulatedFTCALData();
 		for (int i = 0; i < acchits.length; i++) {
 			if (acchits[i] > 0) {
 				int index = indices[i];
 				if (index >= 0) {
 					FTCalXYPolygon poly = ftCalPoly[index];
-					double fract = ((double) acchits[i]) / maxHit;
+					double fract = getMedianSetting()*(((double) acchits[i]) / (1 + medianHit));
 
 					Color color = AccumulationManager.getInstance().getColor(fract);
 					g.setColor(color);

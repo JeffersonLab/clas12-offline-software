@@ -107,27 +107,32 @@ public class FTOFPanelItem extends PolygonItem {
 
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int hits[][] = null;
-		int maxHit = AccumulationManager.getInstance().getMaxFTOFCount();
 
+		int medianHit = 0;
+		
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
 		case FTOF.PANEL_1A:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1ACount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1AData();
 			break;
 		case FTOF.PANEL_1B:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1BCount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1BData();
 			break;
 		case FTOF.PANEL_2:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF2Count();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF2Data();
 			break;
 		}
 
+		
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
 				int hitCount = hits[sect0][paddle0];
-				double fract = ((double) hitCount) / maxHit;
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 
 				Color fc = AccumulationManager.getInstance().getColor(fract);

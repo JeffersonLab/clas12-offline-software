@@ -39,7 +39,7 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 
 public class AllDCSuperLayer extends RectangleItem {
-
+	
 	// convenient access to the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
@@ -454,21 +454,13 @@ public class AllDCSuperLayer extends RectangleItem {
 				.getAccumulatedDCData();
 		
 		int medianHit = AccumulationManager.getInstance().getMedianDCCount(_superLayer-1);
-		if (medianHit < 1) {
-			return;
-		}
-		
-//		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
-//		if (maxHit < 1) {
-//			return;
-//		}
 
 		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 			for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
 				
-				double fract = AccumulationManager.MED_FRACT*(((double) hitCount) / medianHit);
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 				
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getInstance().getColor(fract);
