@@ -68,7 +68,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	// distance in front of the screen
 	private float _zdist;
 
-	// x and y translation
+	// x and y translation     
 	private float _xdist;
 	private float _ydist;
 

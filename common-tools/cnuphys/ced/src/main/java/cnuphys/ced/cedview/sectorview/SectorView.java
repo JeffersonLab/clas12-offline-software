@@ -86,7 +86,7 @@ public class SectorView extends CedView implements ChangeListener {
 	// offset left and right
 	private static int LEFT = 140;
 	private static int DELTAH = 80;
-	private static int TOP = 30;
+	private static int TOP = 40;
 	private static int DELTAV = 30;
 
 	// for tilted axis

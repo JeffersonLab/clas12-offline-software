@@ -91,10 +91,10 @@ public class BSTPanel3D extends DetectorItem3D {
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				if (cross != null) {
-					//convert to cm
-					float x1 = cross.x / 10;
-					float y1 = cross.y / 10;
-					float z1 = cross.z / 10;
+					// should now be in cm after v 1.0
+					float x1 = cross.x;
+					float y1 = cross.y;
+					float z1 = cross.z;
 
 					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
 							cross.uy, cross.uz, CROSS_LEN,
@@ -124,12 +124,14 @@ public class BSTPanel3D extends DetectorItem3D {
 					float z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
 					float z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
 					
-					x1 /= 10;
-					x2 /= 10;
-					y1 /= 10;
-					y2 /= 10;
-					z1 /= 10;
-					z2 /= 10;
+					//no longer have to convert to cm?
+					
+//					x1 /= 10;
+//					x2 /= 10;
+//					y1 /= 10;
+//					y2 /= 10;
+//					z1 /= 10;
+//					z2 /= 10;
 					
 					Support3D.drawLine(drawable, x1, y1, z1, x2, y2, z2, Color.red, 1f);
 

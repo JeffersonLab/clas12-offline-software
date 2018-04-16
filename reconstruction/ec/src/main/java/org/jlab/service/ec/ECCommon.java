@@ -122,10 +122,8 @@ public class ECCommon {
         
     public static List<ECStrip>  readStripsHipo(DataEvent event){   
     	
-        IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
-        
         List<ECStrip>  strips = new ArrayList<ECStrip>();
-        tdcs.clear();
+        IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
         if(event.hasBank("ECAL::tdc")==true){
             DataBank  bank = event.getBank("ECAL::tdc");            

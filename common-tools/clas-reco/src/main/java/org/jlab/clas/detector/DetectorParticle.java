@@ -85,50 +85,49 @@ public class DetectorParticle implements Comparable {
         detectorTrack = new DetectorTrack(charge,px,py,pz,vx,vy,vz);
     }
     
-    public static DetectorParticle createNeutral(double x, double y, double z){
-        Vector3D dir = new Vector3D(x,y,z);
+    public static DetectorParticle createNeutral(
+            double x,  double y,  double z,
+            double vx, double vy, double vz){
+        
+        Vector3D dir = new Vector3D(x-vx,y-vy,z-vz);
         dir.unit();
+        
         DetectorTrack track = new DetectorTrack(0,1.0);
+        
         track.addCross(x, y, z, dir.x(),dir.y(),dir.z());
+        
         track.setVector(dir.x(), dir.y(), dir.z());
-        track.setPath(Math.sqrt(x*x+y*y+z*z));
+        
+        track.setVertex(vx,vy,vz);
+        
+        track.setPath(Math.sqrt(Math.pow(x-vx,2)+Math.pow(y-vy,2)+Math.pow(z-vz,2)));
+        
         track.setTrackEnd(x, y, z);
+        
         return new DetectorParticle(track);
     }
     
+    public static DetectorParticle createNeutral(double x, double y, double z){
+        return createNeutral(x,y,z,0,0,0);
+    }
+    
     public static DetectorParticle createNeutral(DetectorResponse resp){
-        Vector3D dir = new Vector3D(resp.getPosition().x(),
-                resp.getPosition().y(),resp.getPosition().z());
-        dir.unit();
-        DetectorTrack track = new DetectorTrack(0,1.0);
-        track.addCross(resp.getPosition().x(),
-                resp.getPosition().y(),resp.getPosition().z(),
-                dir.x(),dir.y(),dir.z());
-        track.setVector(dir.x(), dir.y(), dir.z());
-        track.setVertex(0.0, 0.0, 0.0);
-        track.setPath(resp.getPosition().mag());
-        track.setTrackEnd(resp.getPosition().x(),
-                resp.getPosition().y(),resp.getPosition().z());
-        DetectorParticle particle = new DetectorParticle(track);
+        DetectorParticle particle = createNeutral(
+                resp.getPosition().x(),
+                resp.getPosition().y(),
+                resp.getPosition().z());
         particle.addResponse(resp);
         return particle;
     }
-
-    public static DetectorParticle createNeutral(CalorimeterResponse resp){
-        Vector3D dir = new Vector3D(resp.getPosition().x(),
-                resp.getPosition().y(),resp.getPosition().z());
-        dir.unit();
-        DetectorTrack track = new DetectorTrack(0,1.0);
-        track.addCross(resp.getPosition().x(),
-                resp.getPosition().y(),resp.getPosition().z(),
-                dir.x(),dir.y(),dir.z());
-        track.setVector(dir.x(), dir.y(), dir.z());
-        track.setVertex(0.0, 0.0, 0.0);
-        track.setPath(resp.getPosition().mag());
-        track.setTrackEnd(resp.getPosition().x(),
-                resp.getPosition().y(),resp.getPosition().z());
-        DetectorParticle particle = new DetectorParticle(track);
-//        particle.addCalorimeterResponse(resp);
+    
+    public static DetectorParticle createNeutral(DetectorResponse resp,Vector3 vertex){
+        DetectorParticle particle = createNeutral(
+                resp.getPosition().x(),
+                resp.getPosition().y(),
+                resp.getPosition().z(),
+                vertex.x(),
+                vertex.y(),
+                vertex.z());
         particle.addResponse(resp);
         return particle;
     }
@@ -175,16 +174,6 @@ public class DetectorParticle implements Comparable {
         return this.cherenkovStore;
     }
     
-    
-    
-//    public List<CalorimeterResponse> getCalorimeterResponse(){
-//        return this.calorimeterStore;
-//    }
-    
-//    public List<ScintillatorResponse> getScintillatorResponse(){
-//        return this.scintillatorStore;
-//    }
-    
     public void addCherenkovResponse(CherenkovResponse res){
         this.cherenkovStore.add(res);
     }
@@ -192,10 +181,6 @@ public class DetectorParticle implements Comparable {
     public void addTaggerResponse(TaggerResponse res) {
         this.taggerStore.add(res);
     }
-    
-//        public void addCalorimeterResponse(CalorimeterResponse res){
-//        this.calorimeterStore.add(res);
-//    }
     
     public void addResponse(DetectorResponse res, boolean match){
         this.responseStore.add(res);

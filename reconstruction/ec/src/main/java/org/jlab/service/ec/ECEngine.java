@@ -38,7 +38,7 @@ public class ECEngine extends ReconstructionEngine {
     List<ECStrip>   ecStrips = new ArrayList<ECStrip>();
     List<ECPeak>     ecPeaks = new ArrayList<ECPeak>();
     List<ECCluster>      cEC = new ArrayList<ECCluster>();
-    
+
     public ECEngine(){
         super("EC","gavalian","1.0");
     }
@@ -48,12 +48,15 @@ public class ECEngine extends ReconstructionEngine {
            
         ECCommon.debug       = this.debug;
         ECCommon.singleEvent = this.singleEvent;
+
         int runNo = 10;
-        //System.out.println(" PROCESSING EC EVENT ");
         if(de.hasBank("RUN::config")==true){
             DataBank bank = de.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
-            //System.out.println("------- The bank exists. run = " + runNo );
+            if (runNo<=0) {
+                System.err.println("ECEngine:  got run <= 0 in RUN::config, skipping event.");
+                return false;
+            }
         }
     
         ecStrips.clear(); ecPeaks.clear(); cEC.clear();
