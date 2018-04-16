@@ -323,9 +323,9 @@ public class ClasIoEventManager {
 	public String getCurrentSourceDescription() {
 
 		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
-			return "Hipo File " + _currentHipoFile.getName();
+			return "Hipo " + _currentHipoFile.getName();
 		} else if ((_sourceType == EventSourceType.EVIOFILE) && (_currentEvioFile != null)) {
-			return "Evio File " + _currentEvioFile.getName();
+			return "Evio " + _currentEvioFile.getName();
 		}
 		// else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress !=
 		// null)) {

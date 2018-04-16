@@ -237,7 +237,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 					_reason = DialogUtilities.CANCEL_RESPONSE;
 				} else {
 					count = Math.min(count, MAXACCUMULATIONCOUNT);
-					count = Math.min(count, _numRemaining);
+					count = Math.min(count, _numRemaining-1);
 				}
 				final int fcount = count;
 
@@ -256,6 +256,8 @@ public class ClasIoAccumulationDialog extends JDialog {
 								DataEvent event = _eventManager.getNextEvent();
 								if (event ==  null) {
 									try {
+										
+										System.err.println("SLEEP count = " + count + "/" + fcount);
 										Thread.sleep(30);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
