@@ -35,6 +35,10 @@ public class ECEngine extends ReconstructionEngine {
     public Boolean        isMC = false;
     int                 calrun = 2;
     
+    List<ECStrip>   ecStrips = new ArrayList<ECStrip>();
+    List<ECPeak>     ecPeaks = new ArrayList<ECPeak>();
+    List<ECCluster>      cEC = new ArrayList<ECCluster>();
+    
     public ECEngine(){
         super("EC","gavalian","1.0");
     }
@@ -52,8 +56,8 @@ public class ECEngine extends ReconstructionEngine {
             //System.out.println("------- The bank exists. run = " + runNo );
         }
     
-        
-        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), runNo);
+        ecStrips.clear(); ecPeaks.clear(); cEC.clear();
+        ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), runNo);
         
         //System.out.println(" EC STRIPS ARRAY SIZE = " + ecStrips.size());
         /*for(ECStrip strip : ecStrips){
@@ -64,7 +68,7 @@ public class ECEngine extends ReconstructionEngine {
         */
         
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
-        List<ECPeak>    ecPeaks = ECCommon.processPeaks(ecPeaksALL);
+        ecPeaks = ECCommon.processPeaks(ecPeaksALL);
         
         for(ECPeak p : ecPeaks) p.redoPeakLine();
         
@@ -82,7 +86,7 @@ public class ECEngine extends ReconstructionEngine {
         List<ECCluster>  cECIN  = ECCommon.createClusters(ecPeaks,4);
         List<ECCluster>  cECOUT = ECCommon.createClusters(ecPeaks,7);
         
-        List<ECCluster>     cEC = new ArrayList<ECCluster>();
+        cEC = new ArrayList<ECCluster>();
         
         cEC.addAll(cPCAL); cEC.addAll(cECIN); cEC.addAll(cECOUT);
         
@@ -103,10 +107,21 @@ public class ECEngine extends ReconstructionEngine {
         } else {
             this.writeEvioBanks(de,ecStrips,ecPeaks,cEC);            
         }  
-        //writeBanks(de,ecStrips,ecPeaks,cEC);        
         
         return true;
     }
+    
+    public List<ECStrip> getStrips() {
+	    return this.ecStrips;
+    }
+    
+    public List<ECPeak> getPeaks() {
+	    return this.ecPeaks;    
+    }
+    
+    public List<ECCluster> getClusters() {
+	    return this.cEC;    
+    }    
     
     public void writeEvioBanks(DataEvent de, 
                            List<ECStrip>   strips, 
@@ -171,6 +186,9 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setDouble("recEU", c, clusters.get(c).getEnergy(0));
             bankD.setDouble("recEV", c, clusters.get(c).getEnergy(1));
             bankD.setDouble("recEW", c, clusters.get(c).getEnergy(2));            
+//            bankD.setDouble("recTU", c, clusters.get(c).getTime(0));
+//            bankD.setDouble("recTV", c, clusters.get(c).getTime(1));
+//            bankD.setDouble("recTW", c, clusters.get(c).getTime(2));            
         }
         
         de.appendBanks(bankS,bankP,bankC,bankD);       
@@ -224,7 +242,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
   
         }
-        
+/*        
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -240,7 +258,7 @@ public class ECEngine extends ReconstructionEngine {
             bankM.setFloat("m3v", c, (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
             bankM.setFloat("m3w", c, (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
         }
-        
+*/        
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
@@ -254,7 +272,8 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setFloat("recEW",  c, (float) clusters.get(c).getEnergy(2));            
         }
          
-         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
+//         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
+         de.appendBanks(bankS,bankP,bankC,bankD);
 
     }
     

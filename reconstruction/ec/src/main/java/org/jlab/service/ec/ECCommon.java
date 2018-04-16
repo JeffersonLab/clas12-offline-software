@@ -35,8 +35,6 @@ public class ECCommon {
     public static Boolean   singleEvent = false;
     public static String      variation = "default";
     
-    public static IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
-    
     private static double[] AtoE  = {15,10,10};    // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
     
@@ -111,7 +109,8 @@ public class ECCommon {
             strip.setAttenuation( atten.getDoubleValue("A", sector,layer,component),
                                   atten.getDoubleValue("B", sector,layer,component),
                                   atten.getDoubleValue("C", sector,layer,component));
-            strip.setGain(gain.getDoubleValue("gain", sector,layer,component));            
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
+            strip.setVeff(16);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
                             time.getDoubleValue("a2", sector, layer, component),
@@ -123,6 +122,8 @@ public class ECCommon {
         
     public static List<ECStrip>  readStripsHipo(DataEvent event){   
     	
+        IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
+        
         List<ECStrip>  strips = new ArrayList<ECStrip>();
         tdcs.clear();
         
@@ -148,11 +149,12 @@ public class ECCommon {
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
                 float t = bank.getFloat("time", i);
-                ECStrip  strip = new ECStrip(is, il, ip);
-                strip.setADC(adc);
+                
+                ECStrip  strip = new ECStrip(is, il, ip); strip.setADC(adc);
+                
                 double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
-                if (variation=="clas6") sca = 1.0;
-                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip);
+                if (variation=="clas6") sca = 1.0;               
+                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
                 
                 Integer[] tdcc; float  tmax = 1000; int tdc = 1000;
                 
@@ -328,9 +330,12 @@ public class ECCommon {
 //								double tW = cluster.getTime(2);
 //								double eU = cluster.getEnergy(0)*1e3;
 //								double eV = cluster.getEnergy(1)*1e3;
-//								double eW = cluster.getEnergy(2)*1e3;								
+//								double eW = cluster.getEnergy(2)*1e3;	
+//								if (sector==2) {
 //								System.out.printf("U %4.1f V %4.1f W %4.1f%n",tU,tV,tW);
 //								System.out.printf("U %4.1f V %4.1f W %4.1f%n%n",eU,eV,eW);
+//                            	    System.out.println(cluster.toString());
+//								}
 								clusters.add(cluster);
 								//if ((Math.abs(tU - tV) < ECCommon.clusterDeltaT[ind[startLayer - 1]]) &&
 								 //   (Math.abs(tU - tW) < ECCommon.clusterDeltaT[ind[startLayer - 1]]) &&

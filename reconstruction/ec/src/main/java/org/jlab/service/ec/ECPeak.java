@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.ec;
 
 import java.util.ArrayList;
@@ -38,25 +33,16 @@ public class ECPeak {
         this.indexMaxStrip = 0;
     }
     
-    public Line3D  getLine(){
-        return this.peakLine;
-    }
+    public Line3D  getLine() {return this.peakLine;}
     
-    public void setOrder(int order){ this.peakOrder = order; }
+    public void setOrder(int order) { this.peakOrder = order;}
     
-    public int  getOrder(){ return this.peakOrder;}
+    public int  getOrder() { return this.peakOrder;}
     
     public void setPeakId(int id){
         for(ECStrip strip : this.peakStrips){
             strip.setPeakId(id);
         }
-    }
-    
-    public double getTime(){
-        if(this.indexMaxStrip>0&&this.indexMaxStrip<this.peakStrips.size()-1){
-            return this.peakStrips.get(indexMaxStrip).getTime();
-        }
-            return 0.0;
     }
     
     public double getEnergy(){
@@ -74,8 +60,15 @@ public class ECPeak {
         }
         return energy;
     }
-    
-	public double getTime(Point3D point) {
+        
+    public double getTime(){
+        if(this.indexMaxStrip>0 && this.indexMaxStrip < this.peakStrips.size()-1){
+            return this.peakStrips.get(indexMaxStrip).getTime();
+        }
+            return 0.0;
+    }
+
+    public double getTime(Point3D point) {
 		if (this.indexMaxStrip >= 0 && this.indexMaxStrip < this.peakStrips.size()) {
 			return this.peakStrips.get(indexMaxStrip).getTime(point);
 		}
@@ -84,6 +77,10 @@ public class ECPeak {
 	
     public DetectorDescriptor getDescriptor(){
         return this.desc;
+    }
+    
+    public ECStrip getMaxECStrip() {
+    	    return this.peakStrips.get(this.indexMaxStrip);
     }
     
     public int      getMaxStrip(){

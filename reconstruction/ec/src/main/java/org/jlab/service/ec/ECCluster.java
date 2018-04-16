@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.ec;
 
 import java.util.ArrayList;
@@ -13,6 +8,8 @@ import org.jlab.geom.prim.Point3D;
 /**
  *
  * @author gavalian
+ * @author lcsmith
+ * 
  */
 public class ECCluster {
     
@@ -22,10 +19,10 @@ public class ECCluster {
     Point3D        clusterHitPosition  = new Point3D();
     double         clusterHitPositionError = 1000.0;
     
+    public         double clusterEnergy = 0.0;    
     public         int UVIEW_ID = -1;
     public         int VVIEW_ID = -1;
     public         int WVIEW_ID = -1;
-    public         double clusterEnergy = 0.0;
        
     public ECCluster(ECPeak u, ECPeak v, ECPeak w){
         
@@ -43,20 +40,58 @@ public class ECCluster {
         this.intersection();
     }
     
-    public ECPeak  getPeak(int index){
-        return this.clusterPeaks.get(index);
+    public ECPeak getPeak(int view){
+        return this.clusterPeaks.get(view);
     }
     
     public int getMultiplicity(){
         return this.clusterMultiplicity;
     }
     
-    public double getEnergy(){
-//        return getEnergy(0)+getEnergy(1)+getEnergy(2);
-        return this.clusterEnergy;   }
+    public double getRawEnergy(){
+        return getRawEnergy(0)+getRawEnergy(1)+getRawEnergy(2);
+    }
+    
+    public double getRawEnergy(int view){
+        return  this.clusterPeaks.get(view).getEnergy();
+    }  
     
     public void setEnergy(double energy){
         this.clusterEnergy = energy;
+    }  
+    
+    public double getEnergy(){
+//        return getEnergy(0)+getEnergy(1)+getEnergy(2);
+        return this.clusterEnergy;       
+    }
+ 
+    public double getEnergy(int view){
+        return this.clusterPeaks.get(view).getEnergy(clusterHitPosition);
+    }  
+    
+	public double getTime() {
+		// For cluster time use timing from U,V,W peak with largest energy		
+		if ((this.getEnergy(0) > this.getEnergy(1)) && 
+			(this.getEnergy(0) > this.getEnergy(2))) return this.getTime(0);
+		else if ((this.getEnergy(1) > this.getEnergy(0)) && 
+				 (this.getEnergy(1) > this.getEnergy(2))) return this.getTime(1);
+		else return this.getTime(2);
+	}  
+	
+    public double getTime(int view){
+        return this.clusterPeaks.get(view).getTime(clusterHitPosition);
+    }	
+    
+//    public double getTime(){
+//        return this.clusterPeaks.get(0).getTime();
+//    }
+   
+    public Point3D getHitPosition(){
+        return this.clusterHitPosition;
+    }
+    
+    public double getHitPositionError(){
+        return this.clusterHitPositionError;
     }
     
     public static void shareEnergy(ECCluster cluster1, ECCluster cluster2, int view){
@@ -124,36 +159,7 @@ public class ECCluster {
         }
         return -1;
     }  
-    
-    public double getEnergy(int view){
-        return this.clusterPeaks.get(view).getEnergy(clusterHitPosition);
-    }  
-    
-	public double getTime() {
-		// For cluster time use timing from U,V,W peak with largest energy		
-		if ((this.getEnergy(0) > this.getEnergy(1)) && 
-			(this.getEnergy(0) > this.getEnergy(2))) return this.getTime(0);
-		else if ((this.getEnergy(1) > this.getEnergy(0)) && 
-				 (this.getEnergy(1) > this.getEnergy(2))) return this.getTime(1);
-		else return this.getTime(2);
-	}  
-	
-    public double getTime(int view){
-        return this.clusterPeaks.get(view).getTime(clusterHitPosition);
-    }	
-    
-//    public double getTime(){
-//        return this.clusterPeaks.get(0).getTime();
-//    }
-    
-    public double getRawEnergy(){
-        return getRawEnergy(0)+getRawEnergy(1)+getRawEnergy(2);
-    }
-    
-    public double getRawEnergy(int view){
-        return  this.clusterPeaks.get(view).getEnergy();
-    } 
-    
+   
     public final void   intersection(){
         Line3D uLine  = this.clusterPeaks.get(0).getLine();
         Line3D vLine  = this.clusterPeaks.get(1).getLine();
@@ -164,18 +170,10 @@ public class ECCluster {
         this.clusterHitPositionError = uvDistTo_w.length();
     }
     
-    public Point3D getHitPosition(){
-        return this.clusterHitPosition;
-    }
-    
-    public double getHitPositionError(){
-        return this.clusterHitPositionError;
-    }
-    
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
-        str.append(String.format("[****] CLUSTER >>>>> RE = %12.5f E = %12.5f    >>> ",this.getRawEnergy(),this.getEnergy()));
+        str.append(String.format("[****] CLUSTER >>>>> RE = %12.5f E = %12.5f  T=%12.5f    >>> ",this.getRawEnergy(),this.getEnergy(),this.getTime()));
         str.append(this.clusterHitPosition.toString());
         str.append(String.format("  error = %12.5f\n",this.clusterHitPositionError));
         for(int view = 0; view < 3; view++){
