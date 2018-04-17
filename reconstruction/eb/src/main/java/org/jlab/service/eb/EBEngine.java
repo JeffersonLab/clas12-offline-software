@@ -21,6 +21,9 @@ import org.jlab.rec.eb.EBCCDBEnum;
  */
 public class EBEngine extends ReconstructionEngine {
 
+    boolean dropBanks = false;
+    boolean alreadyDroppedBanks = false;
+
     String eventBank        = null;
     String particleBank     = null;
     String calorimeterBank  = null;
@@ -43,12 +46,33 @@ public class EBEngine extends ReconstructionEngine {
     
 
     public boolean processDataEvent(DataEvent de) {
-        
+
+        if (this.dropBanks==true) this.dropBanks(de);
+
+        // check run number, get constants from CCDB:
+        int run=-1;
+        if (de.hasBank("RUN::config")) {
+            run=de.getBank("RUN::config").getInt("run",0);
+        }
+        if (run>0 && run!=EBCCDBConstants.getRunNumber()) {
+            EBCCDBConstants.load(run,this.getConstantsManager());
+        }
+        if (!EBCCDBConstants.isLoaded()) {
+            System.out.println("EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
+            return false;
+        }
+
         DetectorHeader head = EBio.readHeader(de);
 
         EventBuilder eb = new EventBuilder();
         eb.initEvent(head); // clear particles
 
+        EBMatching ebm = new EBMatching(eb);
+        
+        // Process RF:
+        EBRadioFrequency rf = new EBRadioFrequency();
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
+        
         List<DetectorResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
@@ -74,22 +98,20 @@ public class EBEngine extends ReconstructionEngine {
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
         
-        // Process tracks:
+        // Process tracks-hit matching:
         eb.processHitMatching();
+
+        // Assign trigger/startTime particle: 
+        eb.assignTrigger();
+ 
+        // Create neutrals:
+        // (after assigning trigger particle, to get vertex/momentum right):
         eb.processNeutralTracks();
         
         List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
         
-        EBMatching ebm = new EBMatching(eb);
-        
         ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
                                     centralParticles, responseCTOF, responseCND);
-        
-        eb.assignTrigger();
- 
-        // Process RF:
-        EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
         
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer();
@@ -193,18 +215,32 @@ public class EBEngine extends ReconstructionEngine {
         this.trackType = trackType;
     }
 
+    public void dropBanks(DataEvent de) {
+        if (this.alreadyDroppedBanks==false) {
+            System.out.println("\nEBEngine:  dropping REC banks!\n");
+            this.alreadyDroppedBanks=true;
+        }
+        de.removeBank(eventBank);
+        de.removeBank(particleBank);
+        de.removeBank(calorimeterBank);
+        de.removeBank(scintillatorBank);
+        de.removeBank(cherenkovBank);
+        de.removeBank(trackBank);
+        de.removeBank(crossBank);
+        de.removeBank(ftBank);
+    }
 
-    
     @Override
     public boolean init() {
-      
-        // load EB constants from CCDB:
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
-        // FIXME: check run number in processDataEvent, reload from CCDB if changed.
-        // For now we just use hard-coded run number:
-        EBCCDBConstants.load(10,this.getConstantsManager());
         System.out.println("[EB::] --> event builder is ready....");
+        return true;
+    }
+
+    public boolean init(int run) {
+        this.init();
+        EBCCDBConstants.load(run,this.getConstantsManager());
         return true;
     }
     

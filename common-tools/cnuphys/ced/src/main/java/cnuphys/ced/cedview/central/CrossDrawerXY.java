@@ -99,7 +99,9 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 				Cross2 cross = crosses.elementAt(i);
 
 				if (!cross.isXYLocationBad()) {
-					wp.setLocation(cross.x, cross.y);
+					
+					//version 1.0 must convert cm to mm
+					wp.setLocation(10.0*cross.x, 10.0*cross.y);
 					// arrows
 
 					if (!cross.isDirectionBad()) {
@@ -161,7 +163,8 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
-				wp.setLocation(cross.x, cross.y);
+				//version 1.0 must convert cm to mm
+				wp.setLocation(10.0*cross.x, 10.0*cross.y);
 				// arrows
 
 				int pixlen = ARROWLEN;
@@ -225,14 +228,16 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 								FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 						if (!cross.isXYLocationBad()) {
-							feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+							//to mm
+							feedbackStrings.add(vecStr("cross loc (lab)", 10*cross.x, 10*cross.y, 10*cross.z));
 						}
 						else {
 							feedbackStrings.add("cross location contains NaN");
 						}
 
 						if (!cross.isErrorBad()) {
-							feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+							//to mm
+							feedbackStrings.add(vecStr("cross error", 10*cross.err_x, 10*cross.err_y, 10*cross.err_z));
 						}
 						else {
 							feedbackStrings.add("cross error contains NaN");
@@ -265,14 +270,15 @@ public class CrossDrawerXY extends CentralXYViewDrawer {
 								FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 						if (!cross.isXYLocationBad()) {
-							feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
+							//to mm
+							feedbackStrings.add(vecStr("cross loc (lab)", 10*cross.x, 10*cross.y, 10*cross.z));
 						}
 						else {
 							feedbackStrings.add("cross location contains NaN");
 						}
 
 						if (!cross.isErrorBad()) {
-							feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
+							feedbackStrings.add(vecStr("cross error", 10*cross.err_x, 10*cross.err_y, 10*cross.err_z));
 						}
 						else {
 							feedbackStrings.add("cross error contains NaN");

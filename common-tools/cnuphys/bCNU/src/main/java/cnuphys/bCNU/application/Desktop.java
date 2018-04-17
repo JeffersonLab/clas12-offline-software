@@ -73,7 +73,7 @@ public final class Desktop extends JDesktopPane {
 	 *            into a jar file, such as "images/background.png".
 	 */
 	private Desktop(Color background, String backgroundImage) {
-		initializeLookAndFeel();
+//		initializeLookAndFeel();
 
 		setDragMode(JDesktopPane.OUTLINE_DRAG_MODE); // faster
 		setDoubleBuffered(true);
@@ -342,51 +342,51 @@ public final class Desktop extends JDesktopPane {
 	 * Initialize the look and feel.
 	 */
 
-	public void initializeLookAndFeel() {
-
-		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
-
-		String preferredLnF[];
-		
-		if (Environment.getInstance().isWindows()) {
-			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus", 
-					UIManager.getCrossPlatformLookAndFeelClassName() };
-			preferredLnF = arry;
-		}
-		else {
-			String arry[] = { UIManager.getSystemLookAndFeelClassName(),
-					"Windows", UIManager.getCrossPlatformLookAndFeelClassName() };
-			preferredLnF = arry;
-		}
-		
-		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
-			System.err.println("No installed look and feels");
-			return;
-		}
-//		else {
-//			for (LookAndFeelInfo linfo : lnfinfo) {
-//				System.err.println(" ****** [" + linfo.getName() + "]");
-//			}
+//	public void initializeLookAndFeel() {
+//
+//		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
+//
+//		String preferredLnF[];
+//		
+//		if (Environment.getInstance().isWindows()) {
+//			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus", 
+//					UIManager.getCrossPlatformLookAndFeelClassName() };
+//			preferredLnF = arry;
 //		}
-
-		for (String targetLnF : preferredLnF) {
-			for (int i = 0; i < lnfinfo.length; i++) {
-				String linfoName = lnfinfo[i].getClassName();
-				if (linfoName.indexOf(targetLnF) >= 0) {
-					try {
-						UIManager.setLookAndFeel(lnfinfo[i].getClassName());
-						UIDefaults defaults = UIManager.getDefaults();
-
-						defaults.put("RadioButtonMenuItem.checkIcon",
-								MetalIconFactory.getRadioButtonMenuItemIcon());
-						return;
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		} //end for
-	}
+//		else {
+//			String arry[] = { UIManager.getSystemLookAndFeelClassName(),
+//					"Windows", UIManager.getCrossPlatformLookAndFeelClassName() };
+//			preferredLnF = arry;
+//		}
+//		
+//		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
+//			System.err.println("No installed look and feels");
+//			return;
+//		}
+////		else {
+////			for (LookAndFeelInfo linfo : lnfinfo) {
+////				System.err.println(" ****** [" + linfo.getName() + "]");
+////			}
+////		}
+//
+//		for (String targetLnF : preferredLnF) {
+//			for (int i = 0; i < lnfinfo.length; i++) {
+//				String linfoName = lnfinfo[i].getClassName();
+//				if (linfoName.indexOf(targetLnF) >= 0) {
+//					try {
+//						UIManager.setLookAndFeel(lnfinfo[i].getClassName());
+//						UIDefaults defaults = UIManager.getDefaults();
+//
+//						defaults.put("RadioButtonMenuItem.checkIcon",
+//								MetalIconFactory.getRadioButtonMenuItemIcon());
+//						return;
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		} //end for
+//	}
 
 	/**
 	 * Checks whether all views are ready for display.

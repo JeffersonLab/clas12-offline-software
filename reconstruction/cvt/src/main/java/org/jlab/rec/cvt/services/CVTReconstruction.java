@@ -35,6 +35,7 @@ import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackCandListFinder;
 import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
+import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
@@ -271,7 +272,8 @@ public class CVTReconstruction extends ReconstructionEngine {
                 rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
             }
         } else {//System.out.println(" FITTING SEED......................");
-            TrackSeeder trseed = new TrackSeeder();
+//            TrackSeeder trseed = new TrackSeeder();
+            TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
            
             KFitter kf;
             List<Track> trkcands = new ArrayList<Track>();

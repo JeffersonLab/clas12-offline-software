@@ -115,7 +115,7 @@ public class ConnectETDialog extends SimpleDialog {
 		//Create the combo box, select item at index 4.
 		//Indices start at 0, so 4 specifies the pig.
 		_machineCombo = new JComboBox(machineStrings);
-		_machineCombo.setSelectedIndex(1);
+		_machineCombo.setSelectedIndex(4);
 		npanel.add(_machineCombo);
 		
 		JPanel cpanel = new JPanel();
@@ -129,7 +129,7 @@ public class ConnectETDialog extends SimpleDialog {
 		spanel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));		
 		spanel.add(new JLabel("File: "));
 		_fileTF = new JTextField(20);
-		_fileTF.setText("/tmp/et_sys_clasprod");
+		_fileTF.setText("/et/clasprod");
 		spanel.add(_fileTF);
 		
 		panel.add(npanel);

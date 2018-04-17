@@ -164,6 +164,10 @@ public class DetectorEvent {
             for(DetectorResponse r : responses){
                 r.setAssociation(index);
             }
+            List<CherenkovResponse> cresponses = particleList.get(index).getCherenkovResponses();
+            for(CherenkovResponse r : cresponses){
+                r.setAssociation(index);
+            }
         }
     }
     

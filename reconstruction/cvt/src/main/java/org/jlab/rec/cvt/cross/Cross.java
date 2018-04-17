@@ -53,6 +53,20 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     private Vector3D _Dir;
     private Vector3D _DirErr;
 
+    @Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Cross other = (Cross) obj;
+		if (_Id != other._Id)
+			return false;
+		return true;
+	}
+    
     public String get_Detector() {
         return _Detector;
     }
@@ -335,6 +349,19 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         //	System.out.println("                              dirAtBstPlane "+dirAtBstPlane.toString());
     }
 
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + _Id;
+		return result;
+	}
+    
+    @Override
+    public String toString() {
+    	return this.printInfo();
+    }
+    
     public String printInfo() {
         String s = " cross:  " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Region " + this.get_Region()
                 + " Point " + this.get_Point().toString();
@@ -425,7 +452,11 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
         if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
+        	org.jlab.rec.cvt.bmt.Geometry bgeom = new org.jlab.rec.cvt.bmt.Geometry();
+        	int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
+        	int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
+            int RegComp = thisreg < argreg ? -1 : thisreg == argreg ? 0 : 1;
+//            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
             int PhiComp = this.get_Point0().toVector3D().phi() < arg.get_Point0().toVector3D().phi() ? -1 : this.get_Point0().toVector3D().phi() == arg.get_Point0().toVector3D().phi() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? PhiComp : RegComp);

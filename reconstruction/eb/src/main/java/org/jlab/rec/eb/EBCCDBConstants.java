@@ -15,7 +15,8 @@ import org.jlab.geom.prim.Vector3D;
  */
 public class EBCCDBConstants {
 
-    public static boolean LOADED = false;
+    private static int currentRun = -1;
+    private static boolean isLoaded = false;
     
     private static final String ebTablePrefix="/calibration/eb/";
 
@@ -36,6 +37,8 @@ public class EBCCDBConstants {
     
     private static final String[] otherTableNames={
         "/geometry/target",
+        "/calibration/ftof/tres",
+        //"/calibration/ctof/tres"
     };
 
     public static List <String> getAllTableNames() {
@@ -50,8 +53,6 @@ public class EBCCDBConstants {
     private static Map <EBCCDBEnum,Integer> dbIntegers = new HashMap<EBCCDBEnum,Integer>();
     private static Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<EBCCDBEnum,Vector3D>();
     private static Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<EBCCDBEnum,Double[]>();
-
-    private static EBDatabaseConstantProvider DBP = new EBDatabaseConstantProvider(10,"default");
 
     // fill maps:
     private static synchronized void setDouble(EBCCDBEnum key,Double value) {
@@ -87,6 +88,11 @@ public class EBCCDBConstants {
         if (!dbArrays.containsKey(key)) 
             throw new RuntimeException("Missing Integer Key:  "+key);
         return dbArrays.get(key);
+    }
+
+    public static synchronized IndexedTable getTable(String tableName) {
+        if (tables.containsKey(tableName)) return tables.get(tableName);
+        else return null;
     }
 
     // read ccdb tables:
@@ -236,13 +242,13 @@ public class EBCCDBConstants {
         
         //loadDouble(EBCCDBEnum.TRIGGER_ID,
 
-        LOADED = true;
-        setDB(DBP);
+        currentRun = run;
+        isLoaded = true;
+        //setDB(DBP);
 
         System.out.println("EBCCDBConstants:  loaded run "+run);
     }
     
-    private static EBDatabaseConstantProvider DB;
-    public static final EBDatabaseConstantProvider getDB() { return DB; }
-    public static final void setDB(EBDatabaseConstantProvider db) { DB=db; }
+    public static synchronized boolean isLoaded() { return isLoaded; }
+    public static synchronized int getRunNumber() { return currentRun; }
 }
