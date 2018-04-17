@@ -227,25 +227,27 @@ public class EvioHipoEvent {
         if(evioEvent.hasBank("RTPC::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RTPC::dgtz");
             HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("RTPC::adc", evioBank.rows());
-            HipoDataBank hipoPOS = (HipoDataBank) hipoEvent.createBank("RTPC::pos", evioBank.rows());            
+//            HipoDataBank hipoPOS = (HipoDataBank) hipoEvent.createBank("RTPC::pos", evioBank.rows());            
             for(int i = 0; i < evioBank.rows(); i++){
                 hipoADC.setByte("sector", i, (byte) 1);
                 hipoADC.setByte("layer",  i, (byte) 1);
                 hipoADC.setShort("component",  i, (short) evioBank.getInt("CellID",i));
                 hipoADC.setByte("order", i, (byte) 0);
                 hipoADC.setInt("ADC", i, (int) evioBank.getDouble("ADC", i));
-                double tdc = evioBank.getDouble("TDC", i);
-                hipoADC.setFloat("time", i, (float) tdc);
-                hipoADC.setShort("ped", i, (short) 0);
-                hipoPOS.setInt("step", i, (byte) evioBank.getInt("step", i));
-                hipoPOS.setFloat("time", i, (float) tdc);
-                hipoPOS.setFloat("energy", i, (float) evioBank.getDouble("EDep", i));
-                hipoPOS.setFloat("posx", i, (float) evioBank.getDouble("PosX", i));
-                hipoPOS.setFloat("posy", i, (float) evioBank.getDouble("PosY", i));
-                hipoPOS.setFloat("posz", i, (float) evioBank.getDouble("PosZ", i));
-                hipoPOS.setFloat("phi", i, (float) evioBank.getDouble("phiRad", i));
+                hipoADC.setFloat("time", i, (float) evioBank.getDouble("Time", i));
+//                double tdc = evioBank.getDouble("TDC", i);
+//                hipoADC.setFloat("time", i, (float) tdc);
+//                hipoADC.setShort("ped", i, (short) 0);
+//                hipoPOS.setInt("step", i, (byte) evioBank.getInt("step", i));
+//                hipoPOS.setFloat("time", i, (float) tdc);
+//                hipoPOS.setFloat("energy", i, (float) evioBank.getDouble("EDep", i));
+//                hipoPOS.setFloat("posx", i, (float) evioBank.getDouble("PosX", i));
+//                hipoPOS.setFloat("posy", i, (float) evioBank.getDouble("PosY", i));
+//                hipoPOS.setFloat("posz", i, (float) evioBank.getDouble("PosZ", i));
+//                hipoPOS.setFloat("phi", i, (float) evioBank.getDouble("phiRad", i));
             }
-            hipoEvent.appendBanks(hipoADC,hipoPOS);
+//            hipoEvent.appendBanks(hipoADC,hipoPOS);
+            hipoEvent.appendBanks(hipoADC);
         }
     }
     
@@ -583,6 +585,8 @@ public class EvioHipoEvent {
                         hipoBank.setFloat("mvy",     irow, (float) evioBank.getDouble("mvy",i));
                         hipoBank.setFloat("mvz",     irow, (float) evioBank.getDouble("mvz",i));
                         hipoBank.setFloat("avgT",    irow, (float) evioBank.getDouble("avgT",i));
+                        hipoBank.setInt("nsteps",    irow,         evioBank.getInt("nsteps",i));
+                        hipoBank.setInt("procID",    irow,         evioBank.getInt("procID",i));
                         hipoBank.setInt("hitn",      irow,         evioBank.getInt("hitn",i));
                         irow++;
                     }
