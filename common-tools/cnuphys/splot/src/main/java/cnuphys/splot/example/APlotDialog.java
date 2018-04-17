@@ -1,13 +1,14 @@
 package cnuphys.splot.example;
 
 import java.awt.BorderLayout;
+import java.awt.Insets;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
-import cnuphys.splot.plot.Environment;
 import cnuphys.splot.plot.GraphicsUtilities;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
@@ -23,15 +24,22 @@ public abstract class APlotDialog extends JDialog {
 
 	public APlotDialog(JFrame owner, String title, boolean modal) {
 		super(owner, title, modal);
+		
+		setLayout(new BorderLayout(4, 4));
 
 		// Initialize look and feel
 		GraphicsUtilities.initializeLookAndFeel();
 
-		System.out.println("Environment: " + Environment.getInstance());
+	//	System.out.println("Environment: " + Environment.getInstance());
 
 		try {
-			_canvas = new PlotCanvas(createDataSet(), getPlotTitle(),
-					getXAxisLabel(), getYAxisLabel());
+			
+			DataSet dataSet = createDataSet();
+			String plotTitle = getPlotTitle();
+			String xLabel = getXAxisLabel();
+			String yLabel = getYAxisLabel();
+			_canvas = new PlotCanvas(dataSet, plotTitle,
+					xLabel, yLabel);
 		} catch (DataSetException e) {
 			e.printStackTrace();
 			return;
@@ -49,11 +57,50 @@ public abstract class APlotDialog extends JDialog {
 
 		add(ppanel, BorderLayout.CENTER);
 
-		// add a curve panel
+		// add user compoenents
+		addNorth();
+		addSouth();
 		addEast();
+		addWest();
+		
 		pack();
 		GraphicsUtilities.centerComponent(this);
 	}
+	
+	/**
+	 * Add a north component
+	 */
+	protected void addNorth() {
+	}
+	
+	/**
+	 * Add a south component
+	 */
+	protected void addSouth() {
+	}
+
+	
+	/**
+	 * Add an east component
+	 */
+	protected void addEast() {
+	}
+
+	
+	/**
+	 * Add a west component
+	 */
+	protected void addWest() {
+	}
+
+
+	@Override
+	public Insets getInsets() {
+		Insets def = super.getInsets();
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
+				def.right + 2);
+	}
+
 
 	/**
 	 * Get the plot canvas
@@ -64,11 +111,6 @@ public abstract class APlotDialog extends JDialog {
 		return _canvas;
 	}
 
-	// add the east component
-	private void addEast() {
-		// _curveEditor = new CurveEditorPanel(_canvas);
-		// add(_curveEditor, BorderLayout.EAST);
-	}
 
 	protected abstract DataSet createDataSet() throws DataSetException;
 

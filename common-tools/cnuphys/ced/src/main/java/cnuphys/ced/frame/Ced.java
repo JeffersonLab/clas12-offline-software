@@ -67,6 +67,7 @@ import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
+import cnuphys.ced.magfield.PlotFieldDialog;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
@@ -143,6 +144,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//show which filters are active
 	private JMenu _eventFilterMenu;
 
+	//for plotting the field
+	private  PlotFieldDialog _plotFieldDialog;
 	
 	// some views
 	private AllDCView _allDCView;
@@ -550,7 +553,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// create the mag field menu
 		MagneticFields.getInstance().setActiveField(MagneticFields.FieldType.TORUS);
-		mmgr.addMenu(MagneticFields.getInstance().getMagneticFieldMenu());
+		addToMagneticFieldMenu();
+		
 
 		// the swimmer menu
 		mmgr.addMenu(SwimMenu.getInstance());
@@ -568,6 +572,33 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// add to the event menu
 		addToEventMenu();
 				
+	}
+	
+	//add items to the basic mag field menu
+	private void addToMagneticFieldMenu() {
+		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
+		
+		magMenu.addSeparator();
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if (_plotFieldDialog == null) {
+					_plotFieldDialog = new PlotFieldDialog(getCed(), false);
+				}
+				
+				_plotFieldDialog.setVisible(true);
+
+			}
+		};
+		
+		JMenuItem mitem = new JMenuItem("Plot the Field...");
+		mitem.addActionListener(al);
+		magMenu.add(mitem);
+		
+		MenuManager.getInstance().addMenu(magMenu);
 	}
 
 	// add some fun stuff
@@ -604,34 +635,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//add to the file menu
 	private void addToSwimMenu() {
-		
-		final JMenuItem stitem = new JMenuItem("Run some swim tests");
-		final JMenuItem mtitem = new JMenuItem("Run magfield edge tests");
-
-		
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Object source = e.getSource();
-
-				if (source == stitem) {
-					CedTests.swimTest(false);
-				}
-				else if (source == mtitem) {
-					CedTests.edgeTest(true);
-				}
-
-			}
-		};
-		
-		SwimMenu.getInstance().addSeparator();
-		SwimMenu.getInstance().add(stitem);
-		stitem.addActionListener(al);
-		
-		SwimMenu.getInstance().add(mtitem);
-		mtitem.addActionListener(al);
-
 	}
 	
 	
