@@ -217,6 +217,8 @@ public class FTCalXYView extends CedXYView {
 	private void drawSingleEventHits(Graphics g, IContainer container) {
 		
 		AdcHitList hits = FTCAL.getInstance().getHits();
+		
+		System.err.println("DRAWING FTCAL HITS count " + ((hits == null) ? 0 : hits.size()));
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
 				if (hit != null) {
@@ -259,7 +261,7 @@ public class FTCalXYView extends CedXYView {
 					g.drawPolygon(poly);
 				}
 				else {
-					System.err.println("indexing problem in FT");
+					System.err.println("indexing problem in FTCAL");
 				}
 			}
 		}

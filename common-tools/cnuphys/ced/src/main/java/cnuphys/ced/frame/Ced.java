@@ -110,7 +110,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.003";
+	private static final String _release = "build 1.003b";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -283,8 +283,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 		_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
 
-		_virtualView.moveTo(_ftcalXyView, 12, VirtualView.CENTER);
 		_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
+
+		_virtualView.moveTo(_ftcalXyView, 12, VirtualView.CENTER);
 
 		if (_use3D) {
 			_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);

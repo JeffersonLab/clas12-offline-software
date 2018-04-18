@@ -8,7 +8,10 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -26,8 +29,21 @@ import javax.swing.event.EventListenerList;
  */
 public class MagneticFields {
 	
+	/**
+	 * A formatter to get the time in down to seconds (no day info).
+	 */
+	private static SimpleDateFormat formatterlong;
+
+	static {
+		TimeZone tz = TimeZone.getDefault();
+		
+		formatterlong = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		formatterlong.setTimeZone(tz);
+	}
+
+	
 	//vbersion of mag field package
-	private static String VERSION = "1.08";
+	private static String VERSION = "1.09";
 	//constants for different torus grids
     public static final int SYMMETRIC_TORUS = 0;
     public static final int TORUS_025       = 1;
@@ -651,7 +667,7 @@ public class MagneticFields {
 	
 	/**
 	 * Attempts to initialize the magnetic fields using the property or environment variables
-	 * TORUSMAP and SOLENIODMAP as full paths to the torus and solenoid
+	 * TORUSMAP and SOLENOIDMAP as full paths to the torus and solenoid
 	 * @throws MagneticFieldInitializationException if either environment variable is not found
 	 * @throws FileNotFoundException if either file is not found
 	 */
@@ -1224,71 +1240,6 @@ public class MagneticFields {
 	public RotatedCompositeField getRotatedCompositeField() {
 		return _rotatedCompositeField;
 	}
-	
-	/**
-	 * For testing and also as an example
-	 * 
-	 * @param arg command line arguments
-	 */
-	public static void main(String arg[]) {
-		final JFrame testFrame = new JFrame("Magnetic Field");
-		
-		final MagneticFields mf = MagneticFields.getInstance();
-		
-		//test explicit path load
-		//mf.initializeMagneticFields();
-		
-		//test specific load
-		File mfdir = new File(System.getProperty("user.home"), "magfield");
-		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
-//		mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
-		try {
-			mf.initializeMagneticFieldsFromEnv();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (MagneticFieldInitializationException e) {
-			e.printStackTrace();
-			System.exit(1);
-		};
-
-		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
-		// drawing canvas
-		final MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(-50, -350,
-				650, 700., MagneticFieldCanvas.CSType.XZ);
-		JPanel magPanel1 = canvas1.getPanelWithStatus(500, 465);
-		final MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(-50, -350,
-				650, 700., MagneticFieldCanvas.CSType.YZ);
-		JPanel magPanel2 = canvas2.getPanelWithStatus(500, 465);
-
-		// set up what to do if the window is closed
-		WindowAdapter windowAdapter = new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent event) {
-				System.err.println("Done");
-				System.exit(1);
-			}
-		};
-
-		// add the menu
-		JMenuBar mb = new JMenuBar();
-		testFrame.setJMenuBar(mb);
-		mb.add(mf.getMagneticFieldMenu(true, true));
-
-		testFrame.add(magPanel1);
-		testFrame.add(magPanel2);
-
-		testFrame.addWindowListener(windowAdapter);
-		testFrame.pack();
-
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				testFrame.setVisible(true);
-			}
-		});
-
-	}
 
 
 	/**
@@ -1356,5 +1307,104 @@ public class MagneticFields {
 		}
 		return s;
 	}
+	
+	/**
+	 * Returns the time as a string.
+	 * 
+	 * @param longtime
+	 *            the time in millis.
+	 * @return a string representation of the current time, down to seconds.
+	 */
+	public static String dateStringLong(long longtime) {
+		return formatterlong.format(longtime);
+	}
+	
+	
+	/**
+	 * For testing and also as an example
+	 * 
+	 * @param arg command line arguments
+	 */
+	public static void main(String arg[]) {
+		final JFrame testFrame = new JFrame("Magnetic Field");
+		
+		final MagneticFields mf = MagneticFields.getInstance();
+		
+		//test explicit path load
+		//mf.initializeMagneticFields();
+		
+		//test specific load
+		File mfdir = new File(System.getProperty("user.home"), "magfield");
+		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
+//		mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
+		try {
+			mf.initializeMagneticFieldsFromEnv();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} catch (MagneticFieldInitializationException e) {
+			e.printStackTrace();
+			System.exit(1);
+		};
+
+		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
+		// drawing canvas
+		final MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(-50, -350,
+				650, 700., MagneticFieldCanvas.CSType.XZ);
+		JPanel magPanel1 = canvas1.getPanelWithStatus(500, 465);
+		final MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(-50, -350,
+				650, 700., MagneticFieldCanvas.CSType.YZ);
+		JPanel magPanel2 = canvas2.getPanelWithStatus(500, 465);
+
+		// set up what to do if the window is closed
+		WindowAdapter windowAdapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				System.err.println("Done");
+				System.exit(1);
+			}
+		};
+
+		// add the menu
+		JMenuBar mb = new JMenuBar();
+		testFrame.setJMenuBar(mb);
+		mb.add(mf.getMagneticFieldMenu(true, true));
+
+		testFrame.add(magPanel1);
+		testFrame.add(magPanel2);
+
+		testFrame.addWindowListener(windowAdapter);
+		testFrame.pack();
+
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				testFrame.setVisible(true);
+			}
+		});
+		
+//		//test time 
+//		
+//		long unixTime = System.currentTimeMillis();
+//		
+//		int high = (int)(unixTime >> 32);
+//		int low = (int)(unixTime);
+//		long dlow = low & 0x00000000ffffffffL;
+//		
+////		long time = (high << 32) | (dlow & 0xffffffffL);
+//		long time = ((long)high << 32) | (dlow & 0xffffffffL);
+//		
+//		System.err.println("HIGH: " + high);
+//		System.err.println(" LOW: " + low);
+//		System.err.println(" DLOW: " + dlow);
+//		System.err.println("UNIX: " + unixTime);
+//		System.err.println("TIME: " + time);
+//		System.err.println("UNIX STR: " + dateStringLong(unixTime));
+//		System.err.println("TIME STR: " + dateStringLong(time));
+//
+
+	}
+
+
 
 }

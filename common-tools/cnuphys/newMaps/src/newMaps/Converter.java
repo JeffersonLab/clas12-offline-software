@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.StringTokenizer;
 
 /**
@@ -203,9 +204,15 @@ public class Converter {
 			dos.writeFloat(zmax);
 			dos.writeInt(nZ);
 
+			long unixTime = System.currentTimeMillis();
+			
+			int high = (int)(unixTime >> 32);
+			int low = (int)unixTime;
+			
+			
 			// write reserved
-			dos.writeInt(0);
-			dos.writeInt(0);
+			dos.writeInt(high);  //first word of unix time
+			dos.writeInt(low);  //second word of unix time
 			dos.writeInt(0);
 			dos.writeInt(0);
 			dos.writeInt(0);

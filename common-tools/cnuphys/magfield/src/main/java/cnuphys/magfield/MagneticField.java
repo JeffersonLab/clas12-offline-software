@@ -63,11 +63,11 @@ public abstract class MagneticField implements IField {
 	/** holds the field in a float buffer. */
 	protected FloatBuffer field;
 
-	/** reserved word */
-	protected int reserved1;
+	/** high word of unix creation time */
+	protected int highTime;
 
-	/** reserved word */
-	protected int reserved2;
+	/** low word of unix creation time */
+	protected int lowTime;
 
 	/** reserved word */
 	protected int reserved3;
@@ -291,6 +291,21 @@ public abstract class MagneticField implements IField {
     }
 
 
+	/**
+	 * Get the creation date
+	 * @return the creation date as a string
+	 */
+	public String getCreationDate() {
+		
+		long dlow = lowTime & 0x00000000ffffffffL;
+		long time = ((long)highTime << 32) | (dlow & 0xffffffffL);
+		
+		if (time < 1) {
+			return "unknown";
+		}
+
+        return MagneticFields.dateStringLong(time);
+	}
 
 
 	/**
@@ -529,6 +544,7 @@ public abstract class MagneticField implements IField {
 	public final String toString() {
 		StringBuffer sb = new StringBuffer(1024);
 		sb.append("\n");
+		sb.append("Created: " + getCreationDate() + "\n");
 		sb.append(q1Coordinate.toString());
 		sb.append("\n");
 		sb.append(q2Coordinate.toString());
@@ -695,8 +711,8 @@ public abstract class MagneticField implements IField {
 			numFieldPoints = nQ1 * nQ2 * nQ3;
 
 			// last five reserved
-			reserved1 = dos.readInt();
-			reserved2 = dos.readInt();
+			highTime = dos.readInt();
+			lowTime = dos.readInt();
 			reserved3 = dos.readInt();
 			reserved4 = dos.readInt();
 			reserved5 = dos.readInt();

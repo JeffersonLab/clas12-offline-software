@@ -61,6 +61,8 @@ public class VirtualView extends BaseView
 	public static final int TOPCENTER = 4;
 	public static final int BOTTOMCENTER = 5;
 	public static final int CENTER = 6;
+	public static final int CENTERLEFT = 7;
+	public static final int CENTERRIGHT = 8;
 
 	// for public access
 	private static VirtualView _instance;
@@ -828,6 +830,16 @@ public class VirtualView extends BaseView
 			int yf = (int) (bottom - bounds.height - 7 * slop);
 			dh = xf - x0;
 			dv = yf - y0;
+		}
+		else if (constraint == CENTERLEFT) {
+			int xf = (int) (left + slop);
+			dh = xf - x0;
+			System.err.println("CENTERLEFT DV, DELV = " + dv + "," + delv);
+		}
+		else if (constraint == CENTERRIGHT) {
+			int xf = (int) (right - bounds.width - 2 * slop);
+			dh = xf - x0;
+			System.err.println("CENTERRIGHT DV, DELV = " + dv + "," + delv);
 		}
 
 		view.offset(dh + delh, dv + delv);
