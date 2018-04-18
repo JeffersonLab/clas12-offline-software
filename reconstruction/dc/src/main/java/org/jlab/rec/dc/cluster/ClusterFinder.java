@@ -11,7 +11,6 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.hit.FittedHit;
-import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -32,6 +31,9 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class ClusterFinder {
 
+    public ClusterFinder() {
+
+    }
 
     // cluster finding algorithm
     // the loop is done over sector and superlayers
@@ -44,9 +46,6 @@ public class ClusterFinder {
     int nwire = Constants.NWIRE;
 
     private Hit[][][] HitArray = new Hit[nsect * nslay][nwire][nlayr];
-    public ClusterFinder() {
-        
-    }
 
     /**
      *
@@ -128,8 +127,8 @@ public class ClusterFinder {
                         for (int la = 0; la < nlayr; la++) {
 
                             if (HitArray[ssl][wi][la] != null) {
-                                if(this.NotIsolatedHit(hits, HitArray[ssl][wi][la]))
-                                    hits.add(HitArray[ssl][wi][la]);
+
+                                hits.add(HitArray[ssl][wi][la]);
                                 //System.out.println(" adding hit "+HitArray[ssl][wi][la].printInfo()+" to cid "+cid);
                             }
                         }
@@ -141,7 +140,7 @@ public class ClusterFinder {
                     if (ct.count_nlayers_in_cluster(hits) >= Constants.DC_MIN_NLAYERS) {
 
                         // cluster constructor DCCluster(hit.sector,hit.superlayer, cid)
-                        Cluster this_cluster = new Cluster((ssl / nsect) + 1, (ssl % nsect) + 1, cid++);
+                        Cluster this_cluster = new Cluster((int) (ssl / nsect) + 1, (int) (ssl % nsect) + 1, cid++);
                         //System.out.println(" created cluster "+this_cluster.printInfo());
                         this_cluster.addAll(hits);
 
@@ -167,33 +166,40 @@ public class ClusterFinder {
 
         //fill array of hit
         this.fillHitArray(allhits, 0);
-
         //prune noise
-        ct.HitListPruner(allhits, HitArray);
-
-        //find clumps of hits
+        //ct.HitListPruner(allhits, HitArray);
+        //find clumps of hits init
         List<Cluster> clusters = this.findClumps(allhits, ct);
-        //System.out.println(" Clusters Step 1");
-        //for(Cluster c : clusters)
-        //    for(Hit h : c)
-        //        System.out.println(h.printInfo());
+       
+        allhits.clear();
+        
+        for (Cluster clus : clusters) {
+            Collections.sort(clus);
+            allhits.addAll(ct.HitListPruner(clus));
+        }
+        
+        this.fillHitArray(allhits, 0);
+        clusters.clear();
+        clusters = this.findClumps(allhits, ct);
+        
         // create cluster list to be fitted
         List<FittedCluster> selectedClusList = new ArrayList<FittedCluster>();
 
         for (Cluster clus : clusters) {
-
+            if(clus.size()<Constants.DC_MIN_NLAYERS)
+                continue;
             //System.out.println(" I passed this cluster "+clus.printInfo());
-            FittedCluster fclus = new FittedCluster(clus);
-            FittedCluster fClus = fclus;
-            // rm isolated hit pruner
-            //ct.IsolatedHitsPruner(fclus);
+            FittedCluster fClus = new FittedCluster(clus);
+            //FittedCluster fClus = ct.IsolatedHitsPruner(fclus);
             // Flag out-of-timers
             //if(Constants.isSimulation==true) {
-        //    ct.outOfTimersRemover(fClus, true); // remove outoftimers
+            ct.outOfTimersRemover(fClus, true); // remove outoftimers
             //} else {
-            	ct.outOfTimersRemover(fClus, false); // correct outoftimers
+            //	ct.outOfTimersRemover(fClus, false); // correct outoftimers
             //}
             // add cluster
+            if(fClus.size()<Constants.DC_MIN_NLAYERS)
+                continue;
             selectedClusList.add(fClus); 
         }
 
@@ -210,22 +216,16 @@ public class ClusterFinder {
             cf.SetFitArray(clus, "LC"); 
             cf.Fit(clus, true);
 
-            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {
-                fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits
-                
-            } else {
-                //System.out.println(" I am trying to split this cluster  "+clus.printInfo());
+            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {            
+                fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits                
+            } else {          
                 List<FittedCluster> splitClus = ct.ClusterSplitter(clus, selectedClusList.size(), cf);
-
-                fittedClusList.addAll(splitClus);
-                //System.out.println(" After trying to split the cluster I get  "+splitClus.size()+" clusters : ");
-                //for(FittedCluster cl : splitClus)
-                //	System.out.println(cl.printInfo());
+                fittedClusList.addAll(splitClus);              
             }
         }
 
         for (FittedCluster clus : fittedClusList) {
-            if (clus != null && clus.size() > 3) {
+            if (clus != null && clus.size() > 3 ) {
 
                 // update the hits
                 for (FittedHit fhit : clus) {
@@ -240,12 +240,7 @@ public class ClusterFinder {
                 cf.SetFitArray(clus, "TSC");
                 cf.Fit(clus, false);
                 cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
-                
-                //RecoverMissingHits(clus, DcDetector, allhits);
-                //cf.SetFitArray(clus, "TSC");
-                //cf.Fit(clus, false);
-                //cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
-                
+
                 if (clus != null) {
                     refittedClusList.add(clus);
                 }
@@ -261,14 +256,7 @@ public class ClusterFinder {
         return refittedClusList;
 
     }
-    /**
-     * 
-     * @param fhits list of hits
-     * @param tab table of calibration constants
-     * @param DcDetector detector geometry
-     * @param tde time-to-distance class
-     * @return list of clusters recomposed from hits previously associated with a HB cluster
-     */
+
     private List<FittedCluster> RecomposeClusters(List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -304,6 +292,7 @@ public class ClusterFinder {
                 }
             }
             if (hitlist.size() > 0) {
+
                 Cluster cluster = new Cluster(hitlist.get(0).get_Sector(), hitlist.get(0).get_Superlayer(), c);
                 FittedCluster fcluster = new FittedCluster(cluster);
                 fcluster.addAll(hitlist);
@@ -325,14 +314,7 @@ public class ClusterFinder {
 
         return clusters;
     }
-    /**
-     * 
-     * @param fhits list of hits
-     * @param tab table of calibration constants
-     * @param DcDetector detector geometry
-     * @param tde time-to-distance class
-     * @return list of clusters recomposed from hits previously associated with a TB cluster
-     */
+
     public List<FittedCluster> FindTimeBasedClusters(List<FittedHit> fhits, ClusterFitter cf, ClusterCleanerUtilities ct, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -476,15 +458,6 @@ public class ClusterFinder {
         return true;
     }
 
-    /**
-     * 
-     * @param fclusters list of clusters
-     * @param allhits list of hits
-     * @param ct cleaner utility
-     * @param cf fitter utility
-     * @param event hipo event
-     * @return hipo bank containing the result of the layer efficiency analysis
-     */
     public EvioDataBank getLayerEfficiencies(List<FittedCluster> fclusters, List<Hit> allhits, ClusterCleanerUtilities ct, ClusterFitter cf, EvioDataEvent event) {
 
         ArrayList<Hit> clusteredHits = new ArrayList<Hit>();
@@ -568,90 +541,4 @@ public class ClusterFinder {
         return bank;
 
     }
-
-   public void RecoverMissingHits(FittedCluster seg, DCGeant4Factory DcDetector, List<Hit> missingHits) {
-        if(missingHits==null)
-            return;
-        if (seg!=null) {
-            // get all the hits to obtain layer efficiency
-            if (missingHits.isEmpty()==false) {
-                // Get the Segment Trajectory
-                SegmentTrajectory trj = new SegmentTrajectory();
-                trj.set_SegmentId(seg.get_Id());
-                trj.set_Superlayer(seg.get_Superlayer());
-                trj.set_Sector(seg.get_Sector());
-
-                for (int l = 0; l < 6; l++) {
-                    double z = DcDetector.getWireMidpoint(seg.get_Superlayer() - 1, l, 0).z;
-                    double trkXMP = seg.get_clusterLineFitSlopeMP() * z + seg.get_clusterLineFitInterceptMP();
-                    double trkX = seg.get_clusterLineFitSlope() * z + seg.get_clusterLineFitIntercept();
-
-                    if (trkX == 0) {
-                        continue; // should always get a cluster fit
-                    }
-                    int trjWire = trj.getWireOnTrajectory(seg.get_Superlayer(), l + 1, trkXMP, DcDetector);
-                    
-                    double x = DcDetector.getWireMidpoint(seg.get_Superlayer() - 1, l, trjWire - 1).x;
-                    double cosTrkAngle = Math.cos(Math.toRadians(6.)) * Math.sqrt(1. + seg.get_clusterLineFitSlope() * seg.get_clusterLineFitSlope());
-                    double calc_doca = (x - trkX) * cosTrkAngle;
-                    
-                    for (int j = 0; j < missingHits.size(); j++) {
-                        if (missingHits.get(j).get_Sector() == seg.get_Sector() && missingHits.get(j).get_Superlayer() == seg.get_Superlayer()) {
-                            if (missingHits.get(j).get_Layer() == l + 1) {
-                                for (int wo = 0; wo < 2; wo++) {
-                                    if (Math.abs(trjWire - missingHits.get(j).get_Wire()) == wo) {
-                                        //add hit to segment
-                                        FittedHit fhit = new FittedHit(missingHits.get(j).get_Sector(), missingHits.get(j).get_Superlayer(),
-                                                missingHits.get(j).get_Layer(), missingHits.get(j).get_Wire(), missingHits.get(j).get_TDC(),
-                                                missingHits.get(j).get_Id());
-                                        fhit.set_DocaErr(missingHits.get(j).get_DocaErr());
-                                        fhit.set_CellSize(missingHits.get(j).get_CellSize());
-                                        fhit.set_Id(missingHits.get(j).get_Id());
-                                        fhit.set_ClusFitDoca(calc_doca);
-                                        fhit.set_AssociatedClusterID(seg.get_Id());
-                                        seg.add(fhit);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }    
-
-    private boolean NotIsolatedHit(List<Hit> hits, Hit hit) {
-        boolean pass =true;
-        if(hits.size()<4)
-            return pass;
-        //if(this.NotIsolatedHit(la, hits, HitArray[ssl][wi][la]))| Templates.
-        // a Hit Array is used to identify clusters
-        int[][] hitArray = new int[nwire][nlayr];
-
-        // initializing non-zero Hit Array entries
-        // with valid hits
-        for(Hit h : hits) {
-            if(h.get_Layer()!=hit.get_Layer())
-                continue;
-            
-            int wi = h.get_Wire() - 1;
-            int l = h.get_Layer() - 1;
-
-            if (wi >= 0 && wi < nwire) {
-                hitArray[wi][l] = h.get_Id();
-            }
-            
-        }
-        int deltaMin =nwire;
-        for(int w =0; w<nwire; w++) {
-            if(hitArray[w][hit.get_Layer()-1]!=0 && Math.abs(w-hit.get_Wire()+1)<deltaMin) {
-                deltaMin = Math.abs(w-hit.get_Wire()+1);
-            }
-        }
-        if(deltaMin>1 && deltaMin<nwire)
-            pass = false;
-        
-        return pass;
-    }
-   
 }

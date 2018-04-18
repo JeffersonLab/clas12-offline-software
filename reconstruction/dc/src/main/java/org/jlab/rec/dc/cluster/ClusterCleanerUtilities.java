@@ -14,9 +14,13 @@ import org.jlab.utils.groups.IndexedTable;
 public class ClusterCleanerUtilities {
 
     public ClusterCleanerUtilities() {
-        // TODO Auto-generated constructor stub
+        List<ArrayList<Hit>> sortdHits = new ArrayList<ArrayList<Hit>>();
+        for(int l = 0; l < 6; l++) {
+            sortdHits.add(new ArrayList<Hit>());
+        }
+        sortedHits = sortdHits;
     }
-
+    private List<ArrayList<Hit>> sortedHits;
     /**
      *
      * Pattern Recognition step for identifying clusters in a clump: Find the
@@ -232,14 +236,14 @@ public class ClusterCleanerUtilities {
         }
 
         int splitclusId = 1;
-        if (!selectedClusList.isEmpty()) {
+        if (selectedClusList.size() != 0) {
             for (FittedCluster cl : selectedClusList) {
                 cl.set_Id(clus.get_Id() * 1000 + splitclusId);
                 splitclusId++;
             }
         }
 
-        if (selectedClusList.isEmpty()) {
+        if (selectedClusList.size() == 0) {
             selectedClusList.add(clus); // if the splitting fails, then return the original cluster
         }
         return selectedClusList;
@@ -311,17 +315,13 @@ public class ClusterCleanerUtilities {
         return nlayers_hit;
     }
 
-    /**
-     * 
-     * @param fClus fitted cluster
-     * @param cf fitter utility
-     * @param tab table of calibration constants
-     * @param DcDetector DC detector geometry
-     * @param tde time-to-distance utility
-     * @return a fitted cluster with the left-right ambiguity resolved for each hit in the cluster
-     */
     public FittedCluster LRAmbiguityResolver(FittedCluster fClus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
-       
+        //	int[] notResolvedLR = {0,0,0,0,0,0};
+        //	if(fClus.get_Status()[1]==notResolvedLR) {
+        //		return fClus;
+        //	}
+        //
+        
         int index = 0;
         for(FittedHit hit: fClus) {
    
@@ -555,15 +555,7 @@ public class ClusterCleanerUtilities {
         return cf.BestClusterSelector(arrayOfClus, "TSC");
 
     }
-    /**
-     * 
-     * @param clus fitted cluster
-     * @param cf fitter utility
-     * @param tab table of calibration constants
-     * @param DcDetector DC detector geometry
-     * @param tde time-to-distance utility
-     * @return a fitted cluster with hits flagged as belonging to a secondary track removed from it
-     */
+
     public FittedCluster SecondariesRemover(FittedCluster clus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //System.out.println(" secondaries Remover :"+clus.printInfo());
         Collections.sort(clus);
@@ -590,7 +582,7 @@ public class ClusterCleanerUtilities {
             //for(int j =0; j<hitsInLayer.size(); j++) {
             //	System.out.println("*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
             //}
-            if (hitsInLayer.isEmpty()) {
+            if (hitsInLayer.size() == 0) {
                 continue;
             }
             if (hitsInLayer.size() == 1) {
@@ -723,8 +715,7 @@ public class ClusterCleanerUtilities {
         return overlapingClusters.get(0);
 
     }
-
-    /**
+/**
      * Prunes the input hit list to remove noise candidates; the algorithm finds
      * contiguous hits in a layer (column) and removes hits according to the
      * number (Nc) of such contiguous hits in a given layer. If Nc=3, keep only
@@ -734,75 +725,51 @@ public class ClusterCleanerUtilities {
      *
      * @param hits the unfitted hits
      */
-    public void HitListPruner(List<Hit> hits, Hit[][][] HitArray) {
-
-        int nsect = Constants.NSECT;
-        int nslay = Constants.NSLAY;
-        int nlayr = Constants.NLAYR;
-        int nwire = Constants.NWIRE;
-
-        for (int ssl = 0; ssl < nsect * nslay; ssl++) {
-            // for each ssl, a loop over the wires
-            // is done to define clusters
-            for (int la = 0; la < nlayr; la++) {
-                int wi = 0;  // wire index in the loop
-
-                // looping over all wires
-                while (wi < nwire) {
-                    // if there's a hit, it's a potential column of hits in a layer
-                    if (HitArray[ssl][wi][la] != null) {
-                        // vector of hits in the cluster candidate
-                        List<Hit> hitsInLayer = new ArrayList<Hit>();
-
-                        // adding all hits in this and all the subsequent
-                        // strip until there's a strip with no hit
-                        while (HitArray[ssl][wi][la] != null && wi < nwire) {
-                            hitsInLayer.add(HitArray[ssl][wi][la]);
-
-                            wi++;
-                        }
-
-                        Collections.sort(hitsInLayer);
-
-                        // for 3 hits in layer, keep only the middle one
-                        if (hitsInLayer.size() == 3) {
-                            hits.remove(hitsInLayer.get(0));
-                            HitArray[ssl][hitsInLayer.get(0).get_Wire() - 1][la] = null;
-                            hits.remove(hitsInLayer.get(2));
-                            HitArray[ssl][hitsInLayer.get(2).get_Wire() - 1][la] = null;
-                        }
-                        if (hitsInLayer.size() > 3) {
-                            //int NbEndCells2Keep = 1;
-                            int NbEndCells2Keep = Constants.DEFAULTNBENDCELLSTOKEEP;
-                            if (hitsInLayer.size() > 4) {
-                                NbEndCells2Keep = Constants.NBENDCELLSTOKEEPMORETHAN4HITSINCOLUMN; //possible tracks crossing
-                            }
-                            if (hitsInLayer.size() > 10) {
-                                NbEndCells2Keep = 0; //kill all hits
-                            }
-                            List<Hit> insublist = new ArrayList<Hit>();
-                            for (int si = NbEndCells2Keep; si < hitsInLayer.size() - NbEndCells2Keep; si++) {
-                                insublist.add(hitsInLayer.get(si));
-                            }
-
-                            //remove the bad hits from hit list
-                            for (int si = 0; si < insublist.size(); si++) {
-
-                                Hit hitToRmv = HitArray[ssl][insublist.get(si).get_Wire() - 1][la];
-                                hits.remove(hitToRmv); 
-                                HitArray[ssl][insublist.get(si).get_Wire() - 1][la] = null;
-                            }
-                        }
-                    }
-                    wi++;
-                }
-            }
+    public List<Hit> HitListPruner(List<Hit> hits) {
+        //Collections.sort(hits);
+        
+        for(int l = 0; l < 6; l++) {
+            sortedHits.get(l).clear();
         }
+        
+        for(int i = 0; i < hits.size() ; i++) {
+            sortedHits.get(hits.get(i).get_Layer()-1).add(hits.get(i));
+        }
+        for(int l = 0; l < 6; l++) {
+            
+            if(sortedHits.get(l).size()>2 && sortedHits.get(l).size()<5) {
+                ArrayList<Hit> rmHits = (ArrayList<Hit>) sortedHits.get(l).clone();
+                ArrayList<Hit> kHits = new ArrayList<Hit>();
+                kHits.add(sortedHits.get(l).get(0));
+                kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-1));
+                rmHits.removeAll(kHits);
+                sortedHits.get(l).removeAll(rmHits);
+            }
+            if(sortedHits.get(l).size()>4 && sortedHits.get(l).size()<10) {
+                ArrayList<Hit> rmHits = (ArrayList<Hit>) sortedHits.get(l).clone();
+                ArrayList<Hit> kHits = new ArrayList<Hit>();
+                kHits.add(sortedHits.get(l).get(0));
+                kHits.add(sortedHits.get(l).get(1));
+                kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-1));
+                kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-2));
+                rmHits.removeAll(kHits);
+                sortedHits.get(l).removeAll(rmHits); 
+            }
+            if(sortedHits.get(l).size()==10) 
+                sortedHits.get(l).removeAll(sortedHits.get(l));
+             
+        }
+        hits.clear();
+        for(int l = 0; l < 6; l++) {
+            if(sortedHits.get(l).size()>0)
+                hits.addAll(sortedHits.get(l));
+        }
+        return hits;
     }
-
+    
     /**
      *
-     * @param clus fitted cluster
+     * @param clus
      * @return a new cluster that is contiguous
      */
     public FittedCluster IsolatedHitsPruner(FittedCluster clus) {
@@ -857,16 +824,12 @@ public class ClusterCleanerUtilities {
                     fcluster.add(clus.get(i));
                 }
             }
+
         }
+
         return fcluster;
     }
 
-    
-    /**
-     * 
-     * @param fClus fitted cluster
-     * @param removeHit boolean to remove hits flagged as out-of-time
-     */
     public void outOfTimersRemover(FittedCluster fClus, boolean removeHit) {
         // remove out of time hits
         for (int i = 0; i < fClus.size(); i++) {
