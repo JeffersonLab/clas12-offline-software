@@ -541,11 +541,11 @@ public class DCSwimmer {
         //System.out.println(" Fields at orig = "+compositeField.fieldMagnitude(0, 0, 0)+" Rotated Fields: "+rcompositeField.fieldMagnitude(0, 0, 0));
     }
 
-    static boolean FieldsLoaded = false;
+    private static boolean FieldsLoaded = false;
     //tries to get the magnetic fields 
 
-    public static synchronized void getMagneticFields() {
-        if (FieldsLoaded) {
+    public static synchronized void getMagneticFields(int runNb) {
+        if (isFieldsLoaded()) {
             return;
         }
 
@@ -563,7 +563,11 @@ public class DCSwimmer {
         //MagneticFields.getInstance().initializeMagneticFields();
         String clasDictionaryPath = CLASResources.getResourcePath("etc");
         //System.out.println("  CLASS PATH "+clasDictionaryPath);
-        MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+        if(runNb<1000) {
+            MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+        } else {
+            MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+        }
         /*
         File torusFile = new File(torusFileName);
         try {
@@ -607,7 +611,7 @@ public class DCSwimmer {
        
         System.out.println(" version "+MagneticFields.getInstance().getVersion());
         
-        FieldsLoaded = true;
+        setFieldsLoaded(true);
     }
 
     public double get_x0() {
@@ -684,6 +688,20 @@ public class DCSwimmer {
                 Q[0], Q[1], Q[2], R, P * Q[3], P * Q[4], P * Q[5], P));
         System.out.println("norm (should be 1): " + norm);
         System.out.println("--------------------------------------\n");
+    }
+
+    /**
+     * @return the FieldsLoaded
+     */
+    public static boolean isFieldsLoaded() {
+        return FieldsLoaded;
+    }
+
+    /**
+     * @param aFieldsLoaded the FieldsLoaded to set
+     */
+    public static void setFieldsLoaded(boolean aFieldsLoaded) {
+        FieldsLoaded = aFieldsLoaded;
     }
 
 }

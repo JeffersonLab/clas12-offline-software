@@ -42,7 +42,17 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 public class DCHBLayerEffsEngine extends ReconstructionEngine {
     
     String FieldsConfig="";
-    int Run = 0;
+    
+    private static int Run = 0;
+
+    public static int getRun() {
+        return Run;
+    }
+
+    public static void setRun(int Run) {
+        DCHBLayerEffsEngine.Run = Run;
+    }
+    
     DCGeant4Factory dcDetector;
         
     double[][][][] T0 ;
@@ -58,7 +68,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
     public boolean init() {
         Constants.Load();
         // Load the Fields 
-        DCSwimmer.getMagneticFields();
+        //DCSwimmer.getMagneticFields();
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
           //  "/calibration/dc/time_to_distance/t2d",
@@ -112,7 +122,10 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
+        if(DCHBLayerEffsEngine.getRun()!=newRun) {
+           // Load the Fields 
+            DCSwimmer.getMagneticFields(newRun);
+            // Load the constants
             DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
             dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
@@ -136,11 +149,11 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             TORSCALE = bank.getFloat("torus", 0);
             SOLSCALE = bank.getFloat("solenoid", 0);
             double shift =0;
-            if(Run>1890) {
+            if(DCHBLayerEffsEngine.getRun()>1890) {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
-            Run = newRun;
+            DCHBLayerEffsEngine.setRun(newRun);
         }
         // init SNR
        Clas12NoiseResult results = new Clas12NoiseResult();

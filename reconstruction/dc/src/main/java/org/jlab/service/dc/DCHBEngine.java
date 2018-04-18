@@ -42,7 +42,17 @@ import org.jlab.rec.dc.trajectory.Road;
 public class DCHBEngine extends ReconstructionEngine {
     
     String FieldsConfig="";
-    int Run = 0;
+    
+    private static int Run = 0;
+
+    public static int getRun() {
+        return Run;
+    }
+
+    public static void setRun(int Run) {
+        DCHBEngine.Run = Run;
+    }
+    
     DCGeant4Factory dcDetector;
         
     double[][][][] T0 ;
@@ -57,9 +67,7 @@ public class DCHBEngine extends ReconstructionEngine {
     @Override
     public boolean init() {
         Constants.Load();
-        // Load the Fields 
         
-        DCSwimmer.getMagneticFields();
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
           //  "/calibration/dc/time_to_distance/t2d",
@@ -112,8 +120,11 @@ public class DCHBEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-
-        if(Run!=newRun) {
+        
+        if(DCHBEngine.getRun()!=newRun) {
+            // Load the Fields 
+            DCSwimmer.getMagneticFields(newRun);
+            // Load the constants
             DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
             dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
@@ -137,11 +148,11 @@ public class DCHBEngine extends ReconstructionEngine {
             TORSCALE = bank.getFloat("torus", 0);
             SOLSCALE = bank.getFloat("solenoid", 0);
             double shift =0;
-            if(Run>1890) {
+            if(DCHBEngine.getRun()>1890) {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
-            Run = newRun;
+            DCHBEngine.setRun(newRun);
             if(event.hasBank("MC::Particle")==true)
                 Constants.setMCDIST(0);
         }
@@ -370,8 +381,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_testFM.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.rec_test10.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
@@ -392,7 +403,7 @@ public class DCHBEngine extends ReconstructionEngine {
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            if (event.getBank("RUN::config").getInt("event", 0) > 10001) {
+            if (event.getBank("RUN::config").getInt("event", 0) > 10) {
                 break;
             }
             
