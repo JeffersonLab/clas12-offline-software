@@ -170,11 +170,13 @@ public class Hit implements Comparable<Hit> {
     public int compareTo(Hit arg) {
         int return_val = 0;
         int CompSec = this.get_Sector() < arg.get_Sector() ? -1 : this.get_Sector() == arg.get_Sector() ? 0 : 1;
-        int CompPan = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-        int CompPad = this.get_Wire() < arg.get_Wire() ? -1 : this.get_Wire() == arg.get_Wire() ? 0 : 1;
+        int CompSly = this.get_Superlayer() < arg.get_Superlayer() ? -1 : this.get_Superlayer() == arg.get_Superlayer() ? 0 : 1;
+        int CompLay = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
+        int CompWir = this.get_Wire() < arg.get_Wire() ? -1 : this.get_Wire() == arg.get_Wire() ? 0 : 1;
 
-        int return_val1 = ((CompPan == 0) ? CompPad : CompPan);
-        return_val = ((CompSec == 0) ? return_val1 : CompSec);
+        int return_val1 = ((CompLay == 0) ? CompWir : CompLay);
+        int return_val2 = ((CompSly == 0) ? return_val1 : CompSly);
+        return_val = ((CompSec == 0) ? return_val2 : CompSec);
 
         return return_val;
 

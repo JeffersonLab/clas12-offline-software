@@ -132,7 +132,7 @@ public class DCTBEngine extends ReconstructionEngine {
                 Run = newRun;
         }
 
-        System.out.println(" RUNNING TIME BASED....................................");
+        //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
@@ -252,6 +252,8 @@ public class DCTBEngine extends ReconstructionEngine {
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
             TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
+            if(TrackArray[i].size()<1)
+                continue;
             crosses.addAll(TrackArray[i]);
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());

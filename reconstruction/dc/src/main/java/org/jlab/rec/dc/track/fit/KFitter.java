@@ -91,9 +91,9 @@ public class KFitter {
                     //if(deltaChi2<0.01) 
                       //  i = totNumIter;
                     
-                     if(deltaChi2<0.1 ) {
+                     if(deltaChi2<0.01 ) {
                         this.ConvStatus=0;
-                        i = totNumIter;
+                       // i = totNumIter;
                      }
                      
                     newChisq = this.chi2kf; 

@@ -50,8 +50,6 @@ public class Constants {
     public static final double PASSINGHITRESIDUAL = 2.0;  //  refine later
 
     public static final double CELLRESOL = 0.0300; //300 microns = 300 * 10^-4 cm
-
-
     /**
      * The minimum chi2 prob. for the fit to the hit-based tracking clusters.
      * This value has been optimized for the local coordinate system used in hit-based tracking.
@@ -138,6 +136,16 @@ public class Constants {
 
     public static final synchronized void setUSETSTART(boolean USETSTART) {
         Constants.USETSTART = USETSTART;
+    }
+    
+    private static double MCDIST = 1.0;
+
+    public static final synchronized double getMCDIST() {
+        return MCDIST;
+    }
+
+    public static final synchronized void setMCDIST(double d) {
+        Constants.MCDIST = d;
     }
     
     public static double[][][] MAXENDPLTDEFLEC = new double[3][6][2];

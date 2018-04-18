@@ -91,7 +91,7 @@ public class HitReader {
      * @param event DataEvent
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis, NoiseReductionParameters parameters,
-            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, DCGeant4Factory DcDetector) {
+            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, IndexedTable tab2, DCGeant4Factory DcDetector) {
 
         if (event.hasBank("DC::tdc") == false) {
             //System.err.println("there is no dc bank ");
@@ -162,32 +162,67 @@ public class HitReader {
         
         for (int i = 0; i < size; i++) {
             if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+                
+                double tStart = 0;
+                double timeCutMin = 0;
+                double timeCutMax = 0;
+                double timeCutLC = 0;
+                
+                int region = (int) ( (superlayerNum[i]+1)/2 );
+                
+                switch (region) {
+                    case 1:
+                        tStart = tab2.getIntValue("TStart", 0, region ,0);
+                        timeCutMin = tab2.getIntValue("MinEdge", 0, region ,0);
+                        timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,0);
+                        break;
+                    case 2:
+                        if(wire[i]<=56) {
+                            tStart = tab2.getIntValue("TStart", 0, region ,1);  
+                            timeCutLC = tab2.getIntValue("LinearCoeff", 0, region ,1); 
+                            timeCutMin = tab2.getIntValue("MinEdge", 0, region ,1);
+                            timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,1);
+                        }
+                        if(wire[i]>56) {
+                            tStart = tab2.getIntValue("TStart", 0, region ,56); 
+                            timeCutLC = tab2.getIntValue("LinearCoeff", 0, region ,56); 
+                            timeCutMin = tab2.getIntValue("MinEdge", 0, region ,56);
+                            timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,56);
+                        }
+                        break;
+                    case 3:
+                        tStart = tab2.getIntValue("TStart", 0, region ,0);
+                        timeCutMin = tab2.getIntValue("MinEdge", 0, region ,0);
+                        timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,0);
+                        break;
+                }
+                
             //if (wire[i] != -1 && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 double T_0 = 0;
                 if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
                     T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
                 }
                 double T0Sub = smearedTime[i] - T_0 ;//- Constants.TSTARTEST; 
-                if(Constants.isUSETSTART()==true) { 
-                    T0Sub-= Constants.TSTARTEST; 
+                if(Constants.isUSETSTART()==true && event.hasBank("MC::Particle") == false) { 
+                    T0Sub-= tStart; 
                 }
                 // temporary until new ccdb constants are in
                 //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
  //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 boolean passTimingCut = false;
-                int region = (int) (superlayerNum[i] + 1) / 2;
-                if(region ==1 && T0Sub>Constants.TIMEWINMINEDGE[0] && T0Sub<Constants.TIMEWINMAXEDGE[0]+Constants.TRIGJIT)
+                
+                if(region ==1 && T0Sub>timeCutMin && T0Sub<timeCutMax)
                     passTimingCut=true;
                 if(region ==2) {
                     if(wire[i]>=56) {
-                        if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+200*(float)(112-wire[i]/56))
+                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(112-wire[i]/56))
                             passTimingCut=true;
                     } else {
-                        if(T0Sub>Constants.TIMEWINMINEDGE[1] && T0Sub<Constants.TIMEWINMAXEDGE[1]+Constants.TRIGJIT+400*(float)(56-wire[i]/56))
+                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(56-wire[i]/56))
                             passTimingCut=true;
                     }
                 }
-                if(region ==3 && T0Sub>Constants.TIMEWINMINEDGE[2] && T0Sub<Constants.TIMEWINMAXEDGE[2]+Constants.TRIGJIT)
+                if(region ==3 && T0Sub>timeCutMin && T0Sub<timeCutMax)
                     passTimingCut=true;
                 
                 if(passTimingCut) { // cut on spurious hits

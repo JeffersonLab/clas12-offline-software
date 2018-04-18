@@ -421,7 +421,7 @@ public class RecoBankWriter {
             bank.setFloat("X", i, (float) hitlist.get(i).get_X());
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+        //    bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());

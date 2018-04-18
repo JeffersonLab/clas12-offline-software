@@ -22,7 +22,6 @@ public class MeasVecs {
      */
     public double[] H(double y, int s, double w, double l) {
         double[] hMatrix = new double[2];
-
         hMatrix[0] = 1;
         hMatrix[1] = -Math.tan((Math.toRadians(s * 6.)));
         // add geometric corrections

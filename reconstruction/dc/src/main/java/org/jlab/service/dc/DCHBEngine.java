@@ -36,6 +36,7 @@ import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
+import org.jlab.rec.dc.trajectory.Road;
 
 
 public class DCHBEngine extends ReconstructionEngine {
@@ -57,12 +58,14 @@ public class DCHBEngine extends ReconstructionEngine {
     public boolean init() {
         Constants.Load();
         // Load the Fields 
+        
         DCSwimmer.getMagneticFields();
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
           //  "/calibration/dc/time_to_distance/t2d",
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
+            "/calibration/dc/time_corrections/timingcuts",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -139,6 +142,8 @@ public class DCHBEngine extends ReconstructionEngine {
             }
             DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
             Run = newRun;
+            if(event.hasBank("MC::Particle")==true)
+                Constants.setMCDIST(0);
         }
         // init SNR
        Clas12NoiseResult results = new Clas12NoiseResult();
@@ -149,6 +154,7 @@ public class DCHBEngine extends ReconstructionEngine {
        NoiseReductionParameters parameters = new NoiseReductionParameters (
                        2,leftShifts,
                        rightShifts);
+       
        //System.out.println("RUNING HITBASED_________________________________________");
 
        ClusterFitter cf = new ClusterFitter();
@@ -169,7 +175,8 @@ public class DCHBEngine extends ReconstructionEngine {
 
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, 
-               this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
+               this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits
@@ -181,16 +188,16 @@ public class DCHBEngine extends ReconstructionEngine {
                return true;
        }
 
-       fhits = rbc.createRawHitList(hits);
+       //
        //2) find the clusters from these hits
        ClusterFinder clusFinder = new ClusterFinder();
        clusters = clusFinder.FindHitBasedClusters(hits, ct, cf, dcDetector);
 
        if(clusters.isEmpty()) {				
-            rbc.fillAllHBBanks(event, rbc, fhits, null, null, null, null);
+            //rbc.fillAllHBBanks(event, rbc, hits, null, null, null, null);
             return true;
        }
-
+       fhits = rbc.createRawHitList(hits);
        rbc.updateListsListWithClusterInfo(fhits, clusters);
 
        //3) find the segments from the fitted clusters
@@ -259,10 +266,49 @@ public class DCHBEngine extends ReconstructionEngine {
             }
         }    
         
-        RoadFinder pcrossLister = new RoadFinder();
-        List<Segment> pSegments =pcrossLister.findPseudoSegList(segments, dcDetector);
+        List<Segment> crossSegsNotOnTrack = new ArrayList<Segment>();
+        List<Segment> psegments = new ArrayList<Segment>();
+        for(Cross c : crosses) { 
+            if(c.get_Segment1().isOnTrack==false)
+                crossSegsNotOnTrack.add(c.get_Segment1());
+            if(c.get_Segment2().isOnTrack==false)
+                crossSegsNotOnTrack.add(c.get_Segment2());
+        }
+        
+        RoadFinder rf = new RoadFinder();
+        List<Road> allRoads =rf.findRoads(segments, dcDetector);
+        
+        for(Road r : allRoads) {
+            List<Segment> Segs2Road = new ArrayList<Segment>(); 
+            int missingSL = -1;
+            for(int ri = 0; ri<3; ri++) { 
+                if(r.get(ri).associatedCrossId==-1) {
+                    if(r.get(ri).get_Superlayer()%2==1) {
+                        missingSL = r.get(ri).get_Superlayer()+1;
+                    } else {
+                        missingSL = r.get(ri).get_Superlayer()-1;
+                    }
+                }
+            }
+            for(int ri = 0; ri<3; ri++) { 
+                for(Segment s : crossSegsNotOnTrack) { 
+                    if(s.get_Sector()==r.get(ri).get_Sector() && s.get_Region()==r.get(ri).get_Region() 
+                            && s.associatedCrossId==r.get(ri).associatedCrossId && r.get(ri).associatedCrossId!=-1) {
+                        if(s.get_Superlayer()%2==missingSL%2)
+                            Segs2Road.add(s);
+                    }
+                }
+            }
 
-        segments.addAll(pSegments);
+            if(Segs2Road.size()==2) {
+                Segment pSegment = rf.findRoadMissingSegment(Segs2Road, dcDetector, r.a) ;
+                if(pSegment!=null)
+                    psegments.add(pSegment);
+            }
+        }
+        
+        
+        segments.addAll(psegments);
 
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
 
@@ -305,7 +351,9 @@ public class DCHBEngine extends ReconstructionEngine {
         
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
         DCHBEngine en = new DCHBEngine();
@@ -322,26 +370,29 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
         while (reader.hasEvent()) {
             
             counter++;
-            System.out.println("*************************************************************run " + counter + " events");
+            System.out.println("************************************************************* ");
             DataEvent event = reader.getNextEvent();
             if (counter > 0) {
                 t1 = System.currentTimeMillis();
             }
-            
+            //if(event.getBank("RUN::config").getInt("event", 0) <50)
+             //   continue;
             en.processDataEvent(event);
             //event.show();
             // Processing TB
             en2.processDataEvent(event);
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
-            if (event.getBank("RUN::config").getInt("event", 0) > 100) {
+           // event.show();
+            if (event.getBank("RUN::config").getInt("event", 0) > 10001) {
                 break;
             }
             
