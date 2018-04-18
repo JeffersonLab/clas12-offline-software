@@ -222,17 +222,17 @@ public class TrackCandListFinder {
                     double theta1s1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
                     
                     if(cand.get(0).get_Segment2().get_Id()==-1 ) 
-                        //theta1s2=theta1s1; //do not use
-                        theta1s2=-999; //do not use
+                        theta1s2=theta1s1; //do not use
+                        //theta1s2=-999; //do not use
                     if(cand.get(0).get_Segment1().get_Id()==-1 ) 
-                        //theta1s1=theta1s2;
-                        theta1s1=-999;
+                        theta1s1=theta1s2;
+                        //theta1s1=-999;
                     if(cand.get(2).get_Segment2().get_Id()==-1 ) 
-                        //theta3s2=theta3s1;
-                        theta3s2=-999;
+                        theta3s2=theta3s1;
+                        //theta3s2=-999;
                     if(cand.get(2).get_Segment1().get_Id()==-1 ) 
-                        //theta3s1=theta3s2;
-                        theta3s1=-999;
+                        theta3s1=theta3s2;
+                        //theta3s1=-999;
                     double theta3=0;
                     double theta1=0;
                     
@@ -288,8 +288,8 @@ public class TrackCandListFinder {
                         theta3 = theta3s2;
                         iBdl = pars[1];
                     }
-                    //System.out.println(" intial sel c2 "+chi2);
-                    if(chi2>2000)
+                    
+                    if(chi2>2500)
                         continue;
                     
                     // compute delta theta using the non-pseudo segments in region 1 and 3
@@ -345,7 +345,6 @@ public class TrackCandListFinder {
                             //System.out.println(cand.get(0).get_Sector()+" HB fit to crosses c2 "+HBc2);
                             if(HBc2>1000) {
                                 kFit.setFitFailed=true;
-                                //System.out.println("failing  PR chi2= "+HBc2);
                             }
                         }
                         //System.out.println(" fit failed due to chi2 "+kFit.setFitFailed+" p "+1./Math.abs(kFit.finalStateVec.Q));
