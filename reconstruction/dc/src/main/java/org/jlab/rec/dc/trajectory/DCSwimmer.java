@@ -518,6 +518,7 @@ public class DCSwimmer {
     }
 
     public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale, double shift) {
+        
         MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
         MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
         MagneticFields.getInstance().setSolenoidShift(shift);
