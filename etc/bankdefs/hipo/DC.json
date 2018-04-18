@@ -164,9 +164,9 @@
         {"name":"Cross2_ID",     "id":29, "type":"int16",  "info":"id of second cross on track"},
         {"name":"Cross3_ID",     "id":30, "type":"int16",  "info":"id of third cross on track"},
         {"name":"q",        	 "id":31, "type":"int8",   "info":"charge of the track"},
-        {"name":"pathlength",    "id":32, "type":"float",   "info":"pathlength of the track"},
-        {"name":"chi2",          "id":33, "type":"float",   "info":"fit chi2 of the track"},
-        {"name":"ndf",           "id":34, "type":"int16",   "info":"fit ndf of the track"}
+        {"name":"pathlength",    "id":32, "type":"float",  "info":"pathlength of the track"},
+        {"name":"chi2",          "id":33, "type":"float",  "info":"fit chi2 of the track"},
+        {"name":"ndf",           "id":34, "type":"int16",  "info":"fit ndf of the track"}
     ]
  },
  
@@ -195,7 +195,8 @@
         {"name":"T0",           "id":18,  "type":"float", "info":"T0 (ns)"},
         {"name":"TStart",       "id":19,  "type":"float", "info":"event start time used (ns)"},
         {"name":"clusterID",    "id":20, "type":"int16", "info":"ID of associated cluster"},
-        {"name":"trkID",        "id":21, "type":"int8", "info":"ID of associated track"}
+        {"name":"trkID",        "id":21, "type":"int8", "info":"ID of associated track"},
+        {"name":"time",         "id":22, "type":"float", "info":"time used in tracking (ns)"}
     ]
  },
  {
