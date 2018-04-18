@@ -35,6 +35,7 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
+import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 
 
@@ -169,7 +170,8 @@ public class DCHBEngineCalib extends ReconstructionEngine {
 
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, 
-               this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector);
+               this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits
@@ -233,14 +235,13 @@ public class DCHBEngineCalib extends ReconstructionEngine {
         trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, TORSCALE) ;
 
 
-        // track found	
+// track found	
         int trkId = 1;
                 
         if(trkcands.size()>0) {
             trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
             for(Track trk: trkcands) {
-
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
@@ -259,10 +260,49 @@ public class DCHBEngineCalib extends ReconstructionEngine {
                 trkId++;
             }
         }    
-        RoadFinder pcrossLister = new RoadFinder();
-        List<Segment> pSegments =pcrossLister.findPseudoSegList(segments, dcDetector);
+        
+        List<Segment> crossSegsNotOnTrack = new ArrayList<Segment>();
+        List<Segment> psegments = new ArrayList<Segment>();
+        for(Cross c : crosses) { 
+            if(c.get_Segment1().isOnTrack==false)
+                crossSegsNotOnTrack.add(c.get_Segment1());
+            if(c.get_Segment2().isOnTrack==false)
+                crossSegsNotOnTrack.add(c.get_Segment2());
+        }
+        
+        RoadFinder rf = new RoadFinder();
+        List<Road> allRoads =rf.findRoads(segments, dcDetector);
+        
+        for(Road r : allRoads) {
+            List<Segment> Segs2Road = new ArrayList<Segment>(); 
+            int missingSL = -1;
+            for(int ri = 0; ri<3; ri++) { 
+                if(r.get(ri).associatedCrossId==-1) {
+                    if(r.get(ri).get_Superlayer()%2==1) {
+                        missingSL = r.get(ri).get_Superlayer()+1;
+                    } else {
+                        missingSL = r.get(ri).get_Superlayer()-1;
+                    }
+                }
+            }
+            for(int ri = 0; ri<3; ri++) { 
+                for(Segment s : crossSegsNotOnTrack) { 
+                    if(s.get_Sector()==r.get(ri).get_Sector() && s.get_Region()==r.get(ri).get_Region() 
+                            && s.associatedCrossId==r.get(ri).associatedCrossId && r.get(ri).associatedCrossId!=-1) {
+                        if(s.get_Superlayer()%2==missingSL%2)
+                            Segs2Road.add(s);
+                    }
+                }
+            }
 
-        segments.addAll(pSegments);
+            if(Segs2Road.size()==2) {
+                Segment pSegment = rf.findRoadMissingSegment(Segs2Road, dcDetector, r.a) ;
+                psegments.add(pSegment);
+            }
+        }
+        
+        
+        segments.addAll(psegments);
 
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
 
@@ -281,7 +321,6 @@ public class DCHBEngineCalib extends ReconstructionEngine {
                 for(Cross c : trk) { 
                     for(FittedHit h1 : c.get_Segment1()) { 
                             h1.set_AssociatedHBTrackID(trk.get_Id());
-
                     }
                     for(FittedHit h2 : c.get_Segment2()) {
                             h2.set_AssociatedHBTrackID(trk.get_Id());                              
@@ -291,6 +330,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
             }
         }
         trkcands.addAll(mistrkcands) ;
+
 
         if(trkcands.isEmpty()) {
 

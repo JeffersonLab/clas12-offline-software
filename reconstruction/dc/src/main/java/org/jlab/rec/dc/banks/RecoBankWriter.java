@@ -306,25 +306,31 @@ public class RecoBankWriter {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
-            //bank.setFloat("p", i, (float) candlist.get(i).get_P());
-            bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
-            bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
-            bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
-            bank.setFloat("c1_ux", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
-            bank.setFloat("c1_uy", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
-            bank.setFloat("c1_uz", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
-            bank.setFloat("c3_x", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
-            bank.setFloat("c3_y", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
-            bank.setFloat("c3_z", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
-            bank.setFloat("c3_ux", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
-            bank.setFloat("c3_uy", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
-            bank.setFloat("c3_uz", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
-            bank.setFloat("t1_x", i, (float) candlist.get(i).get_Region1TrackX().x());
-            bank.setFloat("t1_y", i, (float) candlist.get(i).get_Region1TrackX().y());
-            bank.setFloat("t1_z", i, (float) candlist.get(i).get_Region1TrackX().z());
-            bank.setFloat("t1_px", i, (float) candlist.get(i).get_Region1TrackP().x());
-            bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
-            bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_FitConvergenceStatus()*10+candlist.get(i).get_MissingSuperlayer()));
+            if(candlist.get(i).get_PreRegion1CrossPoint()!=null) {
+                bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
+                bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
+                bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
+                bank.setFloat("c1_ux", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
+                bank.setFloat("c1_uy", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
+                bank.setFloat("c1_uz", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
+            }
+            if(candlist.get(i).get_PostRegion3CrossPoint()!=null) {
+                bank.setFloat("c3_x", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
+                bank.setFloat("c3_y", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
+                bank.setFloat("c3_z", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
+                bank.setFloat("c3_ux", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
+                bank.setFloat("c3_uy", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
+                bank.setFloat("c3_uz", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
+            }
+            if(candlist.get(i).get_Region1TrackX()!=null) {
+                bank.setFloat("t1_x", i, (float) candlist.get(i).get_Region1TrackX().x());
+                bank.setFloat("t1_y", i, (float) candlist.get(i).get_Region1TrackX().y());
+                bank.setFloat("t1_z", i, (float) candlist.get(i).get_Region1TrackX().z());
+                bank.setFloat("t1_px", i, (float) candlist.get(i).get_Region1TrackP().x());
+                bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
+                bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
+            }
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());
             bank.setFloat("Vtx0_x", i, (float) candlist.get(i).get_Vtx0().x());
             bank.setFloat("Vtx0_y", i, (float) candlist.get(i).get_Vtx0().y());
@@ -335,16 +341,56 @@ public class RecoBankWriter {
             bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
             bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
-            bank.setShort("status", i, (short) candlist.get(i).status);
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
         }
         //bank.show();
         return bank;
-
     }
-
     /**
+     * 
+     * @param event hipo event
+     * @param candlist tracks
+     * @return covariance matrix from HB fits to be used for starting TB tracking
+     */
+    public DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist) {
+        
+        DataBank bank = event.createBank("TimeBasedTrkg::TBCovMat", candlist.size());
+        
+        for (int i = 0; i < candlist.size(); i++) {
+            bank.setShort("id", i, (short) candlist.get(i).get_Id());
+            if(candlist.get(i).get_CovMat()!=null) {
+                bank.setFloat("C11", i, (float) candlist.get(i).get_CovMat().get(0, 0));
+                bank.setFloat("C12", i, (float) candlist.get(i).get_CovMat().get(0, 1));
+                bank.setFloat("C13", i, (float) candlist.get(i).get_CovMat().get(0, 2));
+                bank.setFloat("C14", i, (float) candlist.get(i).get_CovMat().get(0, 3));
+                bank.setFloat("C15", i, (float) candlist.get(i).get_CovMat().get(0, 4));
+                bank.setFloat("C21", i, (float) candlist.get(i).get_CovMat().get(1, 0));
+                bank.setFloat("C22", i, (float) candlist.get(i).get_CovMat().get(1, 1));
+                bank.setFloat("C23", i, (float) candlist.get(i).get_CovMat().get(1, 2));
+                bank.setFloat("C24", i, (float) candlist.get(i).get_CovMat().get(1, 3));
+                bank.setFloat("C25", i, (float) candlist.get(i).get_CovMat().get(1, 4));
+                bank.setFloat("C31", i, (float) candlist.get(i).get_CovMat().get(2, 0));
+                bank.setFloat("C32", i, (float) candlist.get(i).get_CovMat().get(2, 1));
+                bank.setFloat("C33", i, (float) candlist.get(i).get_CovMat().get(2, 2));
+                bank.setFloat("C34", i, (float) candlist.get(i).get_CovMat().get(2, 3));
+                bank.setFloat("C35", i, (float) candlist.get(i).get_CovMat().get(2, 4));
+                bank.setFloat("C41", i, (float) candlist.get(i).get_CovMat().get(3, 0));
+                bank.setFloat("C42", i, (float) candlist.get(i).get_CovMat().get(3, 1));
+                bank.setFloat("C43", i, (float) candlist.get(i).get_CovMat().get(3, 2));
+                bank.setFloat("C44", i, (float) candlist.get(i).get_CovMat().get(3, 3));
+                bank.setFloat("C45", i, (float) candlist.get(i).get_CovMat().get(3, 4));
+                bank.setFloat("C51", i, (float) candlist.get(i).get_CovMat().get(4, 0));
+                bank.setFloat("C52", i, (float) candlist.get(i).get_CovMat().get(4, 1));
+                bank.setFloat("C53", i, (float) candlist.get(i).get_CovMat().get(4, 2));
+                bank.setFloat("C54", i, (float) candlist.get(i).get_CovMat().get(4, 3));
+                bank.setFloat("C55", i, (float) candlist.get(i).get_CovMat().get(4, 4));
+            }               
+        }
+        //bank.show();
+        return bank;
+    }
+     /**
      *
      * @param event the EvioEvent
      * @return hits bank
@@ -375,7 +421,7 @@ public class RecoBankWriter {
             bank.setFloat("X", i, (float) hitlist.get(i).get_X());
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-           // bank.setFloat("time", i, (float) hitlist.get(i).getT0SubTime());
+        //    bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
@@ -652,29 +698,36 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
+            if(candlist.get(i).get_PreRegion1CrossPoint()==null)
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
-            bank.setShort("status", i, (short) 1);
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_FitConvergenceStatus()*10+candlist.get(i).get_MissingSuperlayer()));
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
             //bank.setFloat("p", i, (float) candlist.get(i).get_P());
-            bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
-            bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
-            bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
-            bank.setFloat("c1_ux", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
-            bank.setFloat("c1_uy", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
-            bank.setFloat("c1_uz", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
-            bank.setFloat("c3_x", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
-            bank.setFloat("c3_y", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
-            bank.setFloat("c3_z", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
-            bank.setFloat("c3_ux", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
-            bank.setFloat("c3_uy", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
-            bank.setFloat("c3_uz", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
-            bank.setFloat("t1_x", i, (float) candlist.get(i).get_Region1TrackX().x());
-            bank.setFloat("t1_y", i, (float) candlist.get(i).get_Region1TrackX().y());
-            bank.setFloat("t1_z", i, (float) candlist.get(i).get_Region1TrackX().z());
-            bank.setFloat("t1_px", i, (float) candlist.get(i).get_Region1TrackP().x());
-            bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
-            bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
+            if(candlist.get(i).get_PreRegion1CrossPoint()!=null) {
+                bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
+                bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
+                bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
+                bank.setFloat("c1_ux", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
+                bank.setFloat("c1_uy", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
+                bank.setFloat("c1_uz", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
+            }
+            if(candlist.get(i).get_PostRegion3CrossPoint()!=null) {
+                bank.setFloat("c3_x", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
+                bank.setFloat("c3_y", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
+                bank.setFloat("c3_z", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
+                bank.setFloat("c3_ux", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
+                bank.setFloat("c3_uy", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
+                bank.setFloat("c3_uz", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
+            }
+            if(candlist.get(i).get_Region1TrackX()!=null) {
+                bank.setFloat("t1_x", i, (float) candlist.get(i).get_Region1TrackX().x());
+                bank.setFloat("t1_y", i, (float) candlist.get(i).get_Region1TrackX().y());
+                bank.setFloat("t1_z", i, (float) candlist.get(i).get_Region1TrackX().z());
+                bank.setFloat("t1_px", i, (float) candlist.get(i).get_Region1TrackP().x());
+                bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
+                bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
+            }
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());
             bank.setFloat("Vtx0_x", i, (float) candlist.get(i).get_Vtx0().x());
             bank.setFloat("Vtx0_y", i, (float) candlist.get(i).get_Vtx0().y());
@@ -682,54 +735,12 @@ public class RecoBankWriter {
             bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
             bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
-            bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
-            bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
-            bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
+            //bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
+            //bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
+            //bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
-
-            // save to a separate bank
-            /*
-			Matrix covMat = new Matrix(5,5);
-			if(candlist.get(i).get_CovMat()!=null)
-				covMat = candlist.get(i).get_CovMat();
-			
-			double[][] c = new double[covMat.getRowDimension()][covMat.getColumnDimension()];		
-			
-			for(int rw = 0; rw< covMat.getRowDimension(); rw++) {
-				for(int cl = 0; cl< covMat.getColumnDimension(); cl++) {
-					c[rw][cl] = covMat.get(rw, cl);
-				}	
-			}
-			bank.setFloat("C11", i, (float) c[0][0]);
-			bank.setFloat("C12", i, (float) c[0][1]);
-			bank.setFloat("C13", i, (float) c[0][2]);
-			bank.setFloat("C14", i, (float) c[0][3]);
-			bank.setFloat("C15", i, (float) c[0][4]);
-			bank.setFloat("C21", i, (float) c[1][0]);
-			bank.setFloat("C22", i, (float) c[1][1]);
-			bank.setFloat("C23", i, (float) c[1][2]);
-			bank.setFloat("C24", i, (float) c[1][3]);
-			bank.setFloat("C25", i, (float) c[1][4]);
-			bank.setFloat("C31", i, (float) c[2][0]);
-			bank.setFloat("C32", i, (float) c[2][1]);
-			bank.setFloat("C33", i, (float) c[2][2]);
-			bank.setFloat("C34", i, (float) c[2][3]);
-			bank.setFloat("C35", i, (float) c[2][4]);
-			bank.setFloat("C41", i, (float) c[3][0]);
-			bank.setFloat("C42", i, (float) c[3][1]);
-			bank.setFloat("C43", i, (float) c[3][2]);
-			bank.setFloat("C44", i, (float) c[3][3]);
-			bank.setFloat("C45", i, (float) c[3][4]);
-			bank.setFloat("C51", i, (float) c[4][0]);
-			bank.setFloat("C52", i, (float) c[4][1]);
-			bank.setFloat("C53", i, (float) c[4][2]);
-			bank.setFloat("C54", i, (float) c[4][3]);
-			bank.setFloat("C55", i, (float) c[4][4]);
-             */
-            //bank.setFloat("fitChisq", i, (float) candlist.get(i).get_FitChi2());
         }
-        //bank.show();
         return bank;
 
     }
@@ -762,7 +773,8 @@ public class RecoBankWriter {
                     rbc.fillHBClustersBank(event, clusters),
                     rbc.fillHBSegmentsBank(event, segments),
                     rbc.fillHBCrossesBank(event, crosses),
-                    rbc.fillHBTracksBank(event, trkcands)
+                    rbc.fillHBTracksBank(event, trkcands),
+                    rbc.fillTrackCovMatBank(event, trkcands)
             );
 
         }
@@ -843,7 +855,8 @@ public class RecoBankWriter {
                     rbc.fillHBSegmentsBank(event, segments),
                     rbc.fillHBSegmentsTrajectoryBank(event, segments),
                     rbc.fillHBCrossesBank(event, crosses),
-                    rbc.fillHBTracksBank(event, trkcands)
+                    rbc.fillHBTracksBank(event, trkcands),
+                    rbc.fillTrackCovMatBank(event, trkcands)
             );
 
         }

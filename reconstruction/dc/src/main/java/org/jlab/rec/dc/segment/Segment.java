@@ -37,6 +37,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
     private SegmentTrajectory _Trajectory;
     private int _Status = 1;
     private double[] _SegmentEndPoints;
+    public int associatedCrossId = -1;
     /**
      * Construct the segment from the fitted cluster.
      *
@@ -184,7 +185,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         if (Math.abs(this.getAvgwire() - otherseg.getAvgwire()) < Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B) {
             value = true;
         }
-
+        
         return value;
     }
     
