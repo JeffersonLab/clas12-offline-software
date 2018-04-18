@@ -282,7 +282,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	}
 
 	/**
-	 * Compute the integral Bdotdl. This will cause the state vector arrays to
+	 * Compute the integral B cross dl. This will cause the state vector arrays to
 	 * expand by two, becoming [x, y, z, px/p, py/p, pz/p, l, bdl] where the 7th
 	 * entry l is cumulative pathlength in m and the eighth entry bdl is the
 	 * cumulative integral bdl in kG-m.

@@ -12,6 +12,9 @@ import javax.swing.KeyStroke;
 
 import cnuphys.splot.edit.CurveEditorDialog;
 import cnuphys.splot.edit.DialogUtilities;
+import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.DataSetException;
+import cnuphys.splot.pdata.DataSetType;
 
 public class SplotMenus implements ActionListener {
 
@@ -76,8 +79,8 @@ public class SplotMenus implements ActionListener {
 		_prefItem = addMenuItem("Preferences...", 'P', _editMenu);
 //		_dataItem = addMenuItem("Data...", 'D', _editMenu);
 		_curveItem = addMenuItem("Curves...", 'C', _editMenu);
-//		_editMenu.addSeparator();
-//		_clearItem = addMenuItem("Clear Data", '\0', _editMenu);
+		_editMenu.addSeparator();
+		_clearItem = addMenuItem("Clear Data", '\0', _editMenu);
 		container.add(_editMenu);
 	}
 
@@ -130,7 +133,21 @@ public class SplotMenus implements ActionListener {
 			cd.setVisible(true);
 		}
 		else if (source == _clearItem) {
+			DataSet ds = _plotCanvas.getDataSet();
+			DataSetType dsType = null;
+			if (ds != null) {
+				dsType = ds.getType();
+			}
 			_plotCanvas.clearPlot();
+			
+			if (dsType != null) {
+				try {
+					ds = new DataSet(dsType);
+					_plotCanvas.setDataSet(ds);
+				} catch (DataSetException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 

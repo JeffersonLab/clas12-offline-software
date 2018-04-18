@@ -30,6 +30,7 @@ import cnuphys.ced.common.FMTCrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
@@ -1226,7 +1227,7 @@ public class SectorView extends CedView implements ChangeListener {
 						_controlPanel.getPhiSlider().setValue((int) sliderPhi);
 						getContainer().refresh();
 					} else if (source == integralItem) {
-						PlotView pview = ViewManager.getInstance()
+						PlotView pview = Ced.getCed()
 								.getPlotView();
 						if (pview != null) {
 							PlotCanvas canvas = pview.getPlotCanvas();

@@ -98,6 +98,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
+import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 //import cnuphys.bCNU.view.XMLView;
 import cnuphys.bCNU.view.VirtualView;
@@ -178,6 +179,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	protected HistoGridView pcalHistoGrid;
 	protected HistoGridView ecHistoGrid;
 	
+	//plot view
+	private PlotView _plotView;
+
+	
 	// the about string
 	private static String _aboutString = "<html><span style=\"font-size:12px\">ced: the cLAS eVENT dISPLAY&nbsp;&nbsp;&nbsp;&nbsp;" + _release + 
 	"<br><br>Developed by Christopher Newport University" + 
@@ -189,6 +194,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//use old BST geometry
 	private JCheckBoxMenuItem _oldBSTGeometry;
+	
+	
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -253,6 +260,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_virtualView.moveToStart(_sectorView25, 0, VirtualView.UPPERLEFT);
 		_virtualView.moveToStart(_sectorView36, 0, VirtualView.UPPERLEFT);
 		
+		_virtualView.moveTo(_plotView, 0, VirtualView.CENTER);
 		
 		_virtualView.moveTo(dcHistoGrid, 13);
 		_virtualView.moveTo(ftofHistoGrid, 14);
@@ -275,7 +283,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 		_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
 
-		_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
+		_virtualView.moveTo(_ftcalXyView, 12, VirtualView.CENTER);
 		_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
 
 		if (_use3D) {
@@ -320,6 +328,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add monte carlo view
 		_monteCarloView = new ClasIoMonteCarloView();
+		
 
 		// add a reconstructed tracks view
 		_reconEventView = ClasIoReconEventView.getInstance();
@@ -362,6 +371,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add logview
 		ViewManager.getInstance().getViewMenu().addSeparator();
+		//plot view
+		_plotView = new PlotView();
+
 		_logView = new LogView();
 
 		
@@ -993,6 +1005,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		getJMenuBar().add(Box.createHorizontalGlue());
 		getJMenuBar().add(_eventNumberLabel);
 		getJMenuBar().add(Box.createHorizontalStrut(5));
+	}
+	
+	/**
+	 * Get the plot view
+	 * @return the plot voew;
+	 */
+	public PlotView getPlotView() {
+		return _plotView;
 	}
 
 	/**
