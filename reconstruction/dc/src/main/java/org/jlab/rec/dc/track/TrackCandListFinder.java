@@ -589,7 +589,7 @@ public class TrackCandListFinder {
         cand.set_Vtx0(new Point3D(xOrFix,yOrFix, zOrFix));
         cand.set_pAtOrig(new Vector3D(pxOrFix, pyOrFix, pzOrFix));
 
-        double[] VecAtHtccSurf = dcSwim.SwimToSphere(20);
+        double[] VecAtHtccSurf = dcSwim.SwimToSphere(175);
         double xInner  = VecAtHtccSurf[0];
         double yInner  = VecAtHtccSurf[1];
         double zInner  = VecAtHtccSurf[2];
