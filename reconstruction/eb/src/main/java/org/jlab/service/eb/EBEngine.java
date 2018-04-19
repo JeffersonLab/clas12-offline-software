@@ -34,6 +34,8 @@ public class EBEngine extends ReconstructionEngine {
     String matrixBank       = null;
     String trackType        = null;
     String ftBank           = null;
+    String trajectoryType   = null;
+    String trajectoryBank   = null;
 
     public EBEngine(String name){
         super(name,"gavalian","1.0");
@@ -88,7 +90,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.addCherenkovResponses(responseLTCC);
 
         // Add tracks
-        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
+        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType);
         eb.addForwardTracks(tracks);      
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
@@ -166,6 +168,8 @@ public class EBEngine extends ReconstructionEngine {
                 final int ntracks = tracks.size() + ctracks.size();
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);
                 de.appendBanks(bankTrack);
+                DataBank bankTraj  = DetectorData.getTrajectoriesBank(eb.getEvent().getParticles(), de, trajectoryBank);
+                if (bankTraj != null) de.appendBanks(bankTraj);
             }
 
             if(matrixBank!=null) {
@@ -212,6 +216,14 @@ public class EBEngine extends ReconstructionEngine {
 
     public void setTrackType(String trackType) {
         this.trackType = trackType;
+    }
+
+    public void setTrajectoryBank(String trajectoryBank) {
+        this.trajectoryBank = trajectoryBank;
+    }
+    
+    public void setTrajectoryType(String trajectoryType) {
+        this.trajectoryType = trajectoryType;
     }
 
     public void dropBanks(DataEvent de) {

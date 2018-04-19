@@ -164,7 +164,10 @@ public class DetectorParticle implements Comparable {
 
         return particle;
     }
-    
+   
+    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+        return detectorTrack.getTrajectory();
+    }
     
     public void clear(){
         this.responseStore.clear();
