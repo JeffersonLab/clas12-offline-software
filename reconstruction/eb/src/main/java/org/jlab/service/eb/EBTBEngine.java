@@ -25,7 +25,7 @@ public class EBTBEngine extends EBEngine {
         this.setFTBank("REC::ForwardTagger");
 
         this.setTrackType("TimeBasedTrkg::TBTracks");
-        this.setTrajectoryType("TimeBasedTrkg::Traj");
+        this.setTrajectoryType("TimeBasedTrkg::Trajectory");
     }
     
 }

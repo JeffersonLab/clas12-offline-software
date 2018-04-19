@@ -10,6 +10,7 @@ import org.jlab.geom.prim.Vector3D;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class DetectorTrack {
 
@@ -99,8 +100,13 @@ public class DetectorTrack {
         this.trajectory.add(tPoint);
     }
 
-    public TrajectoryPoint getTrajectoryPoint(int row) {
-        return this.trajectory.get(row);
+    public Line3D getTrajectoryPoint(int detId) {
+        for (TrajectoryPoint tp : trajectory) {
+            if (tp.getDetId() == detId) {
+                return tp.getCross();
+            }
+        }
+        return null;
     }
     
     public List<TrajectoryPoint> getTrajectory() {
@@ -177,13 +183,7 @@ public class DetectorTrack {
         this.trackCrosses.add(line);
     }
     
-//    public void addCTOFPoint(double x, double y, double z){
-//        Point3D line = new Point3D(x,y,z);
-//        this.ctofIntersects.add(line);
-//    }
-    
     public int getCrossCount(){ return this.trackCrosses.size();}
-//    public int getCTOFCount() {return this.ctofIntersects.size();}
     
     public Line3D getCross(int index){
         return this.trackCrosses.get(index);

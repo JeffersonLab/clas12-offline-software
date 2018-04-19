@@ -349,7 +349,7 @@ public class DetectorData {
            int nrows = 0;
            for(int i = 0 ; i < particles.size(); i++) {
                if(particles.get(i).getTrackDetector()==DetectorType.DC.getDetectorId() ||
-                       particles.get(i).getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+                  particles.get(i).getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
                    nrows += particles.get(i).getTrackTrajectory().size();
                }
            }
@@ -359,7 +359,7 @@ public class DetectorData {
            for(int i = 0 ; i < particles.size(); i++) {
                DetectorParticle p = particles.get(i);
                if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
-                       p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+                  p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
                    List <DetectorTrack.TrajectoryPoint> traj=p.getTrackTrajectory();
                    for (int ii=0; ii<traj.size(); ii++) {
                        bank.setShort("index", row, (short) p.getTrackIndex());
@@ -495,6 +495,7 @@ public class DetectorData {
 
                int trkId=bank.getInt("id",row);
 
+               // this could be optimized:
                if (trajBank!=null) {
                    for (int ii=0; ii<trajBank.rows(); ii++) {
                        if (trajBank.getInt("tid",ii) ==  trkId) {
