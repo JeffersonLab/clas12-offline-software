@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.ec;
 
 import java.util.ArrayList;
@@ -10,34 +5,35 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.detector.base.DetectorCollection;
+import org.jlab.clas.reco.io.EvioHipoEvent;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.geom.base.ConstantProvider;
+import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.geom.base.Detector;
-import org.jlab.groot.data.H1F;
-import org.jlab.groot.data.H2F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.io.hipo.HipoDataSync;
 /**
  *
  * @author gavalian
  */
 public class ECEngine extends ReconstructionEngine {
 
+    EvioHipoEvent convertor = new EvioHipoEvent();            
+    HipoDataSync     writer = new HipoDataSync();
+    CLASDecoder     decoder = new CLASDecoder();
+    
     Detector        ecDetector = null;
     public Boolean       debug = false;
     public Boolean singleEvent = false;
     public Boolean        isMC = false;
     int                 calrun = 2;
     
-    List<ECStrip>   ecStrips = new ArrayList<ECStrip>();
-    List<ECPeak>     ecPeaks = new ArrayList<ECPeak>();
-    List<ECCluster>      cEC = new ArrayList<ECCluster>();
+    List<ECStrip>     ecStrips = new ArrayList<ECStrip>();
+    List<ECPeak>       ecPeaks = new ArrayList<ECPeak>();
+    List<ECCluster> ecClusters = new ArrayList<ECCluster>();
 
     public ECEngine(){
         super("EC","gavalian","1.0");
@@ -50,6 +46,7 @@ public class ECEngine extends ReconstructionEngine {
         ECCommon.singleEvent = this.singleEvent;
 
         int runNo = 10;
+        
         if(de.hasBank("RUN::config")==true){
             DataBank bank = de.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
@@ -58,58 +55,40 @@ public class ECEngine extends ReconstructionEngine {
                 return false;
             }
         }
-    
-        ecStrips.clear(); ecPeaks.clear(); cEC.clear();
-        ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), runNo);
         
-        //System.out.println(" EC STRIPS ARRAY SIZE = " + ecStrips.size());
-        /*for(ECStrip strip : ecStrips){
-            System.out.println(strip);
-        }*/
-        /*
-        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, this.getConstantsManager(), calrun);        
-        */
+        ecStrips.clear(); ecPeaks.clear(); ecClusters.clear();
         
-        List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
-        ecPeaks = ECCommon.processPeaks(ecPeaksALL);
+        if(de instanceof EvioDataEvent) { //For use with raw data stream
+            HipoDataEvent dec = null;
+            if (isMC) {
+                dec = (HipoDataEvent) writer.createEvent();
+                convertor.fillHipoEventECAL(dec, (EvioDataEvent) de);
+            } else {
+                dec = (HipoDataEvent) decoder.getDataEvent(de);      
+            }
+            ecStrips = ECCommon.initEC(dec, ecDetector, this.getConstantsManager(), calrun);        
+        } else {
+            ecStrips = ECCommon.initEC(de,  ecDetector, this.getConstantsManager(), runNo); // thresholds, ADC/TDC match        
+        }  
         
-        for(ECPeak p : ecPeaks) p.redoPeakLine();
+        ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines  
         
-        /*for(ECPeak peak : ecPeaks){
-            System.out.println(peak);
-        }*/
+        ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
+        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner
+        ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
         
-        int       peaksOriginal = ecPeaks.size();
-        
-        ECPeakAnalysis.splitPeaks(ecPeaks);
-        int peaksOriginalSplit = ecPeaks.size();
-        
-                
-        List<ECCluster>  cPCAL  = ECCommon.createClusters(ecPeaks,1);
-        List<ECCluster>  cECIN  = ECCommon.createClusters(ecPeaks,4);
-        List<ECCluster>  cECOUT = ECCommon.createClusters(ecPeaks,7);
-        
-        cEC = new ArrayList<ECCluster>();
-        
-        cEC.addAll(cPCAL); cEC.addAll(cECIN); cEC.addAll(cECOUT);
-        
-        ECCommon.shareClustersEnergy(cEC);  
+        ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
         
         if (debug) {
             System.out.println(" STRIPS SIZE = " + ecStrips.size());
             for(ECStrip strip : ecStrips) System.out.println(strip);
-            System.out.println(" ORIGINAL PEAKS  SIZE = " + ecPeaksALL.size());
-            for(ECPeak p : ecPeaksALL) System.out.println(p);
-            System.out.println(String.format("SPLIT PROCEDURE %8d %8d",peaksOriginal,peaksOriginalSplit));
-            System.out.println("\n\n\n\n\nEC CLUSTERS SIZE = " + cEC.size());
-            if(cEC.size()==2) {for(ECCluster c : cEC) System.out.println(c);}
+            System.out.println(" PEAKS  SIZE = " + ecPeaks.size());
+            for(ECPeak p : ecPeaks) System.out.println(p);
+            System.out.println("\n\n\n\n\nEC CLUSTERS SIZE = " + ecClusters.size());
+            if(ecClusters.size()==2) {for(ECCluster c : ecClusters) System.out.println(c);}
         }
 	    
-        if(de instanceof HipoDataEvent){
-            this.writeHipoBanks(de,ecStrips,ecPeaks,cEC);
-        } else {
-            this.writeEvioBanks(de,ecStrips,ecPeaks,cEC);            
-        }  
+        if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
         
         return true;
     }
@@ -123,79 +102,9 @@ public class ECEngine extends ReconstructionEngine {
     }
     
     public List<ECCluster> getClusters() {
-	    return this.cEC;    
+	    return this.ecClusters;    
     }    
     
-    public void writeEvioBanks(DataEvent de, 
-                           List<ECStrip>   strips, 
-                           List<ECPeak>    peaks, 
-                           List<ECCluster> clusters) {
-
-        EvioDataBank bankS = (EvioDataBank) EvioFactory.createBank("ECDetector::hits", strips.size());
-        for(int h = 0; h < strips.size(); h++){
-            bankS.setInt("sector",h, strips.get(h).getDescriptor().getSector());
-            bankS.setInt("layer",h,strips.get(h).getDescriptor().getLayer());
-            bankS.setInt("strip",h,strips.get(h).getDescriptor().getComponent());
-            bankS.setInt("peakid",h,strips.get(h).getPeakId());
-            bankS.setDouble("energy", h, strips.get(h).getEnergy());
-            bankS.setDouble("time", h, strips.get(h).getTime());                
-        }
-        
-        EvioDataBank  bankP =  (EvioDataBank) EvioFactory.createBank("ECDetector::peaks", peaks.size());
-        for(int p = 0; p < peaks.size(); p++){
-            bankP.setInt("sector",p,peaks.get(p).getDescriptor().getSector());
-            bankP.setInt("layer", p,peaks.get(p).getDescriptor().getLayer());
-            bankP.setDouble("Xo", p,peaks.get(p).getLine().origin().x());
-            bankP.setDouble("Yo", p,peaks.get(p).getLine().origin().y());
-            bankP.setDouble("Zo", p,peaks.get(p).getLine().origin().z());
-            bankP.setDouble("Xe", p,peaks.get(p).getLine().end().x());
-            bankP.setDouble("Ye", p,peaks.get(p).getLine().end().y());
-            bankP.setDouble("Ze", p,peaks.get(p).getLine().end().z());
-            bankP.setDouble("energy",p,peaks.get(p).getEnergy());
-            bankP.setDouble("time",p,peaks.get(p).getTime());
-        }
-        
-        EvioDataBank  bankC =  (EvioDataBank) EvioFactory.createBank("ECDetector::clusters", clusters.size());
-        for(int c = 0; c < clusters.size(); c++){
-            bankC.setInt("sector", c, clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
-            bankC.setInt("layer", c, clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
-            bankC.setDouble("energy", c, clusters.get(c).getEnergy());
-            bankC.setDouble("time", c, clusters.get(c).getTime());
-            bankC.setInt("uid", c, clusters.get(c).UVIEW_ID);
-            bankC.setInt("vid", c, clusters.get(c).VVIEW_ID);
-            bankC.setInt("wid", c, clusters.get(c).WVIEW_ID);
-            bankC.setDouble("X", c, clusters.get(c).getHitPosition().x());
-            bankC.setDouble("Y", c, clusters.get(c).getHitPosition().y());
-            bankC.setDouble("Z", c, clusters.get(c).getHitPosition().z());
-            bankC.setDouble("dX", c, clusters.get(c).getHitPositionError());
-            bankC.setDouble("dY", c, clusters.get(c).getHitPositionError());
-            bankC.setDouble("dZ", c, clusters.get(c).getHitPositionError());
-            bankC.setDouble("widthU", c, clusters.get(c).getPeak(0).getMultiplicity());
-            bankC.setDouble("widthV", c, clusters.get(c).getPeak(1).getMultiplicity());
-            bankC.setDouble("widthW", c, clusters.get(c).getPeak(2).getMultiplicity());
-            bankC.setInt("coordU", c, clusters.get(c).getPeak(0).getCoord());
-            bankC.setInt("coordV", c, clusters.get(c).getPeak(1).getCoord());
-            bankC.setInt("coordW", c, clusters.get(c).getPeak(2).getCoord());
-        }
-       
-        EvioDataBank  bankD =  (EvioDataBank) EvioFactory.createBank("ECDetector::calib", clusters.size());
-        for(int c = 0; c < clusters.size(); c++){
-            bankD.setInt("sector", c, clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
-            bankD.setInt("layer", c, clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
-            bankD.setDouble("energy", c, clusters.get(c).getEnergy());
-            bankD.setDouble("rawEU", c, clusters.get(c).getRawEnergy(0));
-            bankD.setDouble("rawEV", c, clusters.get(c).getRawEnergy(1));
-            bankD.setDouble("rawEW", c, clusters.get(c).getRawEnergy(2));
-            bankD.setDouble("recEU", c, clusters.get(c).getEnergy(0));
-            bankD.setDouble("recEV", c, clusters.get(c).getEnergy(1));
-            bankD.setDouble("recEW", c, clusters.get(c).getEnergy(2));            
-//            bankD.setDouble("recTU", c, clusters.get(c).getTime(0));
-//            bankD.setDouble("recTV", c, clusters.get(c).getTime(1));
-//            bankD.setDouble("recTW", c, clusters.get(c).getTime(2));            
-        }
-        
-        de.appendBanks(bankS,bankP,bankC,bankD);       
-    }
     private void writeHipoBanks(DataEvent de, 
                                 List<ECStrip>   strips, 
                                 List<ECPeak>    peaks, 

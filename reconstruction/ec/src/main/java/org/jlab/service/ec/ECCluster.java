@@ -11,15 +11,16 @@ import org.jlab.geom.prim.Point3D;
  * @author lcsmith
  * 
  */
+
 public class ECCluster {
     
-    List<ECPeak>   clusterPeaks = new ArrayList<ECPeak>();
+    List<ECPeak>   clusterPeaks = new ArrayList<ECPeak>(); // shareEnergy does not update this !!
     
     int            clusterMultiplicity = 0;
     Point3D        clusterHitPosition  = new Point3D();
-    double         clusterHitPositionError = 1000.0;
+    double         clusterHitPositionError = 1000.0;    
+    double         clusterEnergy = 0.0;                    // shareEnergy can update this !!
     
-    public         double clusterEnergy = 0.0;    
     public         int UVIEW_ID = -1;
     public         int VVIEW_ID = -1;
     public         int WVIEW_ID = -1;
@@ -61,7 +62,6 @@ public class ECCluster {
     }  
     
     public double getEnergy(){
-//        return getEnergy(0)+getEnergy(1)+getEnergy(2);
         return this.clusterEnergy;       
     }
  
@@ -81,10 +81,6 @@ public class ECCluster {
     public double getTime(int view){
         return this.clusterPeaks.get(view).getTime(clusterHitPosition);
     }	
-    
-//    public double getTime(){
-//        return this.clusterPeaks.get(0).getTime();
-//    }
    
     public Point3D getHitPosition(){
         return this.clusterHitPosition;

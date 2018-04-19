@@ -12,6 +12,7 @@ import org.jlab.geom.prim.Point3D;
  *
  * @author gavalian
  */
+
 public class ECPeak {
     
     private DetectorDescriptor  desc       = new DetectorDescriptor(DetectorType.ECAL);

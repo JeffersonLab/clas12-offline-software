@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.ec;
 
 import java.util.ArrayList;
@@ -15,8 +10,6 @@ import org.jlab.geom.base.Layer;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
@@ -25,6 +18,7 @@ import org.jlab.utils.groups.IndexedTable;
  *
  * @author gavalian
  */
+
 public class ECCommon {
     
     public static int[]  stripThreshold = new int[3];
@@ -35,7 +29,7 @@ public class ECCommon {
     public static Boolean   singleEvent = false;
     public static String      variation = "default";
     
-    private static double[] AtoE  = {15,10,10};    // SCALED ADC to Energy in MeV
+    private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
     
     //public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
@@ -71,10 +65,6 @@ public class ECCommon {
         
         List<ECStrip>  ecStrips = null;
         
-        if(event instanceof EvioDataEvent) {
-            ecStrips = ECCommon.readStripsEvio(event);
-        }
-        
         if(event instanceof HipoDataEvent) {
             ecStrips = ECCommon.readStripsHipo(event);
         }
@@ -100,7 +90,7 @@ public class ECCommon {
                     + "  LAYER = " + layer);
             */
             Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer);
-            ScintillatorPaddle paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
+            ScintillatorPaddle      paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
             ScintillatorPaddle firstPaddle = (ScintillatorPaddle) detLayer.getComponent(0);
             
             strip.getLine().copy(paddle.getLine());
@@ -110,7 +100,7 @@ public class ECCommon {
                                   atten.getDoubleValue("B", sector,layer,component),
                                   atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
-            strip.setVeff(16);
+            strip.setVeff(18.1);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
                             time.getDoubleValue("a2", sector, layer, component),
@@ -148,7 +138,9 @@ public class ECCommon {
                 int adc = bank.getInt("ADC", i);
                 float t = bank.getFloat("time", i);
                 
-                ECStrip  strip = new ECStrip(is, il, ip); strip.setADC(adc);
+                ECStrip  strip = new ECStrip(is, il, ip); 
+                
+                strip.setADC(adc);
                 
                 double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
                 if (variation=="clas6") sca = 1.0;               
@@ -161,58 +153,14 @@ public class ECCommon {
                     list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
                     for (int ii=0; ii<tdcc.length; ii++) {
                     	    float tdif = (tps*tdcc[ii]-TOFFSET)-t; 
-//                    	    System.out.println(ii+" "+tps*tdcc[ii]+" "+t+" "+tdif);
                     	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
                     }
-//                    System.out.println("tdc = "+tdc);
-                   
                     strip.setTDC(tdc); 
                 }              
-
             }
-        }
-                
-        return strips;
+        }  
         
-        
-        
-    }
-    /**
-     * Read Strips from PCAL and EC and return all strips
-     * @param event
-     * @return 
-     */
-    public static List<ECStrip> readStripsEvio(DataEvent event){
-        List<ECStrip>  strips = new ArrayList<ECStrip>();
-        strips.addAll(ECCommon.readEvioEvent("PCAL",event));
-        strips.addAll(ECCommon.readEvioEvent("EC",event));
-        return strips;
-    }
-    
-    /**
-     * Read event data from calorimeters
-     * @param det
-     * @param event
-     * @return 
-     */
-    public static List<ECStrip>  readEvioEvent(String det, DataEvent event){
-        List<ECStrip>  strips = new ArrayList<ECStrip>();
-         if(event.hasBank(det+"::dgtz")==true){
-            EvioDataBank bank = (EvioDataBank) event.getBank(det+"::dgtz");
-            int nrows = bank.rows();
-            for(int row = 0; row < nrows; row++){
-                int     sector = bank.getInt("sector", row);
-                int      stack = det.equals("PCAL") ? 0:bank.getInt("stack", row);
-                int       view = bank.getInt("view", row);
-                int  component = bank.getInt("strip", row);
-                int      layer = stack*3 + view;
-                ECStrip  strip = new ECStrip(sector, layer, component);
-                strip.setADC(bank.getInt("ADC", row));
-                strip.setTDC(0);
-                if(strip.getADC()>ECCommon.stripThreshold[ind[layer-1]]) strips.add(strip);                       
-            }
-         }
-        return strips;
+        return strips;     
     }
     
     public static List<ECPeak>  createPeaks(List<ECStrip> stripList){
@@ -237,10 +185,12 @@ public class ECCommon {
             peakList.get(loop).setPeakId(loop+1);
         }
         return peakList;
-    }
+    }   
     
     public static List<ECPeak>  processPeaks(List<ECPeak> peaks){
+    	
         List<ECPeak> ecPeaks = new ArrayList<ECPeak>();
+        
         for(ECPeak p : peaks){
             int adc = p.getADC();
             int lay = p.getDescriptor().getLayer();
@@ -249,16 +199,13 @@ public class ECCommon {
             if (variation=="clas6") sca = 1.0;
             if(adc>sca*ECCommon.peakThreshold[ind[lay-1]]) ecPeaks.add(p);
         }
+        
+        ECPeakAnalysis.splitPeaks(ecPeaks);
+        for(ECPeak p : ecPeaks) p.redoPeakLine();
+                
         return ecPeaks;
     }
     
-    /**
-     * returns a list of peaks for given sector and layer
-     * @param sector
-     * @param layer
-     * @param peaks
-     * @return 
-     */
     public static List<ECPeak>   getPeaks(int sector, int layer, List<ECPeak> peaks){
         List<ECPeak>  selected = new ArrayList<ECPeak>();
         for(ECPeak peak : peaks){
@@ -302,7 +249,7 @@ public class ECCommon {
 
         for(int sector = 1; sector <= 6; sector++){
 
-            List<ECPeak>  pU = ECCommon.getPeaks(sector, startLayer, peaks);
+            List<ECPeak>  pU = ECCommon.getPeaks(sector, startLayer,   peaks);
             List<ECPeak>  pV = ECCommon.getPeaks(sector, startLayer+1, peaks);
             List<ECPeak>  pW = ECCommon.getPeaks(sector, startLayer+2, peaks);
             /*System.out.println("-------->  peaks are found " +

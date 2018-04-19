@@ -1,10 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.ec;
-
 
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
@@ -15,6 +9,7 @@ import org.jlab.geom.prim.Point3D;
  *
  * @author gavalian
  */
+
 public class ECStrip implements Comparable {
     
 	/*This is the time to consider two nearby strips (same detector view!) in time. 
@@ -34,9 +29,9 @@ public class ECStrip implements Comparable {
     private double              iAttenLengthA = 1.0;
     private double              iAttenLengthB = 50000.0;
     private double              iAttenLengthC = 0.0;
-	private double              iTimingA0 = 0; // this is an offset in ns (before applying a1)
-	private double              iTimingA1 = 1; // this is the ns -> TDC conv. factor (TDC = ns/a1)
-	private double              iTimingA2 = 0; // this is the time-walk factor (time_ns = time_ns + a2/sqrt(adc))
+	private double              iTimingA0 = 0; // Offset in ns (before applying a1)
+	private double              iTimingA1 = 1; // ns -> TDC conv. factor (TDC = ns/a1)
+	private double              iTimingA2 = 0; // time-walk factor (time_ns = time_ns + a2/sqrt(adc))
 	private double              iTimingA3 = 0; // 0
 	private double              iTimingA4 = 0; // 0
 	private double              veff      = 18.1; // Effective velocity of scintillator light (cm/ns)
@@ -48,6 +43,8 @@ public class ECStrip implements Comparable {
     private Line3D              stripLine = new Line3D();
     private double              stripDistanceEdge = 0.0;
     
+    private double              time = 0;
+       
     public ECStrip(int sector, int layer, int component){
         this.desc.setSectorLayerComponent(sector, layer, component);
     }
@@ -150,8 +147,13 @@ public class ECStrip implements Comparable {
     
 	public double getTime(Point3D point) {		
 		tdist = point.distance(this.stripLine.end());
-		return this.getTime() - tdist / veff;
-	}  
+		time =  getTime() - tdist/veff;
+		return time;
+	} 
+	
+	public double getPointTime() {
+		return this.time;
+	}
 	
 	public double getEdist() {return this.edist;}
 	
