@@ -148,23 +148,22 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     private Point3D calc_hitPosition() {
         Point3D hitPosition = new Point3D();
-        Vector3D dir = new Vector3D(this.get_paddleLine().end().x()
-                - this.get_paddleLine().origin().x(), this.get_paddleLine()
-                .end().y()
-                - this.get_paddleLine().origin().y(), this.get_paddleLine()
-                .end().z()
-                - this.get_paddleLine().origin().z());
-        dir.unit();
+//        Vector3D dir = new Vector3D(this.get_paddleLine().end().x()
+//                - this.get_paddleLine().origin().x(), this.get_paddleLine()
+//                .end().y()
+//                - this.get_paddleLine().origin().y(), this.get_paddleLine()
+//                .end().z()
+//                - this.get_paddleLine().origin().z());
+//        dir.unit();
         Point3D startpoint = this.get_paddleLine().origin();
         // double L_2 = this.get_paddleLine().length()/2;
         // hitPosition.setX(startpoint.x() + (L_2+this.get_y())*dir.x());
         // hitPosition.setY(startpoint.y() + (L_2+this.get_y())*dir.y());
         // hitPosition.setZ(startpoint.z() + (L_2+this.get_y())*dir.z());
-        hitPosition.setX(startpoint.x() + Constants.SCBARTHICKN[0] / 2
-                * dir.x());
-        hitPosition.setY(startpoint.y() + Constants.SCBARTHICKN[0] / 2
-                * dir.y());
+        hitPosition.setX(startpoint.x());
+        hitPosition.setY(startpoint.y());
         hitPosition.setZ(this.get_y());
+//        System.out.println(hitPosition.x() + " " + hitPosition.y() + " " +hitPosition.z() + " " + Constants.SCBARTHICKN[0]);
 
         return hitPosition;
     }
@@ -273,13 +272,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
     public double yOffset(IndexedTable tab) {
         //double ccdbOffset = CCDBConstants.getYOFF()[this.get_Sector() - 1][this
         //        .get_Panel() - 1][this.get_Paddle() - 1];
-        double ccdbOffset =  tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
-        double shift = Constants.DYHL;
-        if (this.get_Paddle() % 2 == 1) {
-            shift = 0;
-        }
-        double paddleCenteringOffset = Constants.PCO;
-        return ccdbOffset - shift + paddleCenteringOffset;
+//        double ccdbOffset =  tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+//        double shift = Constants.DYHL;
+//        if (this.get_Paddle() % 2 == 1) {
+//            shift = 0;
+//        }
+//        double paddleCenteringOffset = Constants.PCO;
+//        return ccdbOffset - shift + paddleCenteringOffset;
+        return -(this.get_paddleLine().origin().z()+this.get_paddleLine().end().z())/2;
     }
 
     @Override

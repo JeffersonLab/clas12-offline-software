@@ -58,13 +58,21 @@ public final class CTOFGeant4Factory extends Geant4Factory {
 
         private Line3d centerline;
         private final double angle0 = 3.75, dangle = 7.5;
-        private final double zmin = -54.18, zmax = 36.26;
+        private final double radius = 25.11;
+        private final double thickness = 3.0266;
+        private final double lengthOdd = 88.9328;
+        private final double offsetOdd = -8.9935;
+        private final double lengthEven = 88.0467;
+        private final double offsetEven = -8.2111;
+        
+//        private final double zmin = -54.18, zmax = 36.26;
 
         CTOFpaddle(String name, InputStream stlstream, int padnum) {
             super(name, stlstream);
-            Vector3d cent = new Vector3d(26.62,0, 0);
+            Vector3d cent = new Vector3d(radius+thickness/2.,0, 0);
             cent.rotateZ(Math.toRadians(angle0 + (padnum - 1) * dangle));
-            centerline = new Line3d(new Vector3d(cent.x, cent.y, zmin), new Vector3d(cent.x, cent.y, zmax));
+            if(padnum%2==0) centerline = new Line3d(new Vector3d(cent.x, cent.y, -lengthEven/2+offsetEven), new Vector3d(cent.x, cent.y, lengthEven/2+offsetEven));
+            else            centerline = new Line3d(new Vector3d(cent.x, cent.y, -lengthOdd/2+offsetOdd), new Vector3d(cent.x, cent.y, lengthOdd/2+offsetOdd));
         }
 
         @Override
