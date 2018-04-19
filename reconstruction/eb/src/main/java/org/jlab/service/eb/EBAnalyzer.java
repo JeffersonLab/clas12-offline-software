@@ -25,11 +25,15 @@ import org.jlab.rec.eb.EBUtil;
  */
 public class EBAnalyzer {
 
+    private EBCCDBConstants ccdb;
+
     private int[]  pidPositive = new int[]{-11,  211, 321, 2212, 45};
     private int[]  pidNegative = new int[]{ 11, -211,-321,-2212};
     private int[]  pidNeutral = new int[]{22,2112};
 
-    public EBAnalyzer(){}
+    public EBAnalyzer(EBCCDBConstants ccdb) {
+        this.ccdb=ccdb;
+    }
 
     public void processEvent(DetectorEvent event) {
 
@@ -69,9 +73,9 @@ public class EBAnalyzer {
             
             // set startTime based on FTOF:
             if (foundTriggerTime) {
-                final double tgpos = EBCCDBConstants.getDouble(EBCCDBEnum.TARGET_POSITION);
-                final double rfOffset = EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET);
-                final double rfBucketLength = EBCCDBConstants.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
+                final double tgpos = ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
+                final double rfOffset = ccdb.getDouble(EBCCDBEnum.RF_OFFSET);
+                final double rfBucketLength = ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
 
                 final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
                 final double vertexTime = time - tof;
@@ -186,7 +190,7 @@ public class EBAnalyzer {
             
             final boolean pidFromTimingCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
            
-            final boolean isElectron = EBUtil.isSimpleElectron(p);
+            final boolean isElectron = EBUtil.isSimpleElectron(p,ccdb);
             
             final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
             final boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
@@ -263,7 +267,7 @@ public class EBAnalyzer {
         public int bestPidFromTiming(DetectorParticle p) {
             int bestPid=0;
             if (p.getCharge() == 0) {
-                if (p.getBeta() < EBCCDBConstants.getDouble(EBCCDBEnum.NEUTRON_maxBeta)) {
+                if (p.getBeta() < ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta)) {
                     bestPid=2112;
                 }
                 else {
@@ -305,7 +309,7 @@ public class EBAnalyzer {
 
             // electron/positron:
             if (abs(pid)==11) {
-                q = pow(EBUtil.getSamplingFractionNSigma(p),2);
+                q = pow(EBUtil.getSamplingFractionNSigma(p,ccdb),2);
             }
 
             // based on timing:

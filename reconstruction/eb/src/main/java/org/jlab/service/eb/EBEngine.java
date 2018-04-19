@@ -46,7 +46,7 @@ public class EBEngine extends ReconstructionEngine {
     
 
     public boolean processDataEvent(DataEvent de) {
-
+        
         if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
@@ -54,24 +54,23 @@ public class EBEngine extends ReconstructionEngine {
         if (de.hasBank("RUN::config")) {
             run=de.getBank("RUN::config").getInt("run",0);
         }
-        if (run>0 && run!=EBCCDBConstants.getRunNumber()) {
-            EBCCDBConstants.load(run,this.getConstantsManager());
-        }
-        if (!EBCCDBConstants.isLoaded()) {
+        if (run<=0) {
             System.out.println("EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
             return false;
         }
 
+        EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
+
         DetectorHeader head = EBio.readHeader(de);
 
-        EventBuilder eb = new EventBuilder();
+        EventBuilder eb = new EventBuilder(ccdb);
         eb.initEvent(head); // clear particles
 
         EBMatching ebm = new EBMatching(eb);
         
         // Process RF:
-        EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
+        EBRadioFrequency rf = new EBRadioFrequency(ccdb);
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
         List<DetectorResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
@@ -114,7 +113,7 @@ public class EBEngine extends ReconstructionEngine {
                                     centralParticles, responseCTOF, responseCND);
         
         // Do PID etc:
-        EBAnalyzer analyzer = new EBAnalyzer();
+        EBAnalyzer analyzer = new EBAnalyzer(ccdb);
         analyzer.processEvent(eb.getEvent());
 
         // Add Forward Tagger particles:
@@ -234,14 +233,16 @@ public class EBEngine extends ReconstructionEngine {
     public boolean init() {
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
-        System.out.println("[EB::] --> event builder is ready....");
+        System.out.println("["+this.getName()+"] --> event builder is ready....");
         return true;
     }
-
+/*
     public boolean init(int run) {
+        System.out.println("["+this.getName()+"] --> manually initting with run "+run+" ...");
         this.init();
-        EBCCDBConstants.load(run,this.getConstantsManager());
+        ccdb.load(run,this.getConstantsManager());
         return true;
     }
+*/
     
 }
