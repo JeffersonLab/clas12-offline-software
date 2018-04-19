@@ -39,7 +39,15 @@ import org.jlab.rec.fvt.track.fit.KFitter;
 public class FMTReconstruction extends ReconstructionEngine {
 
     org.jlab.rec.fvt.fmt.Geometry FVTGeom;
-   
+    private static int Run = 0;
+
+    public static int getRun() {
+        return Run;
+    }
+
+    public static void setRun(int Run) {
+        FMTReconstruction.Run = Run;
+    }
     DCSwimmer dcSwim;
     public FMTReconstruction() {
         super("FMTTracks", "ziegler", "4.0");
@@ -53,61 +61,6 @@ public class FMTReconstruction extends ReconstructionEngine {
     }
 
     String FieldsConfig = "";
-    private int Run = -1;
-  
- public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-
-        int Run = iRun;
-
-        boolean isMC = false;
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-        //System.out.println(bank.getInt("Event")[0]);
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-
-
-       // Load the fields
-	//-----------------
-//String newConfig = "SOLENOID"+bank.getFloat("solenoid",0)+"TORUS"+bank.getFloat("torus",0)+"RUN"+bank.getInt("run", 0);		
-		//System.out.println(" fields "+newConfig);
-//if (FieldsConfig.equals(newConfig)==false) {			
-       // DCSwimmer.setMagneticFieldsScales((double)bank.getFloat("solenoid",0), (double)bank.getFloat("torus",0)); // something changed in the configuration ... 
-//}
-//FieldsConfig = newConfig;
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-
-        if (Run != newRun) {
-            
-            double shift =0;
-            if(Run>1890)
-                shift = -1.9;
-            DCSwimmer.setMagneticFieldsScales((double)bank.getFloat("solenoid", 0), (double)bank.getFloat("torus", 0), shift);
-            
-            
-        }
-        Run = newRun;
-        this.setRun(Run);
-    }
-
-    public int getRun() {
-        return Run;
-    }
-
-    public void setRun(int run) {
-        Run = run;
-    }
 
     public String getFieldsConfig() {
         return FieldsConfig;
@@ -129,21 +82,24 @@ public class FMTReconstruction extends ReconstructionEngine {
 		return true;
 	}
 		
-        DataBank bank = event.getBank("RUN::config");
-		
+        DataBank bank = event.getBank("RUN::config");	
+        
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
-            
-            double TORSCALE = (double)bank.getFloat("torus", 0);
-            double SOLSCALE = (double)bank.getFloat("solenoid", 0);
+        if(FMTReconstruction.getRun()!=newRun) {
+           // Load the Fields 
+            DCSwimmer.getMagneticFields(newRun);
+            double TORSCALE = bank.getFloat("torus", 0);
+            double SOLSCALE = bank.getFloat("solenoid", 0);
             double shift =0;
-            if(Run>1890)
+            if(FMTReconstruction.getRun()>1890) {
                 shift = -1.9;
+            }
             DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
-            Run = newRun;
+            FMTReconstruction.setRun(newRun);
+            
         }
         clusters.clear();
         crosses.clear();
@@ -250,7 +206,6 @@ public class FMTReconstruction extends ReconstructionEngine {
     }
     @Override
     public boolean init() {
-       DCSwimmer.getMagneticFields();
        Constants.Load();
        ir = new InputBanksReader();
        clusFinder = new ClusterFinder();
