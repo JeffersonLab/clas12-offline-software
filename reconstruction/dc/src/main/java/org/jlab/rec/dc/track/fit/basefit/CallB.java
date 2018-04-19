@@ -39,7 +39,7 @@ public class CallB {
     }
     public static void main(String[] args)  {
 
-        DCSwimmer.getMagneticFields();
+        DCSwimmer.getMagneticFields(11);
         DCSwimmer.setMagneticFieldsScales(0.0, -1.0, 0);
         DCSwimmer swim2 = new DCSwimmer();
         swim2.SetSwimParameters(0, 0, 0, 2*Math.sin(Math.toRadians(20.-25.)), 0, 2*Math.cos(Math.toRadians(20.-25)), -1);

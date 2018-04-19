@@ -65,7 +65,7 @@ public class TrackingEff extends ReconstructionEngine {
 	public boolean init() {
             Constants.Load();
             // Load the Fields 
-            DCSwimmer.getMagneticFields();
+            DCSwimmer.getMagneticFields(11);
             String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
                // "/calibration/dc/time_to_distance/t2d",
