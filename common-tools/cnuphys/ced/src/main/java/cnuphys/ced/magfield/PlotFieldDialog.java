@@ -21,6 +21,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import bCNU3D.DoubleFormat;
+import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.magfield.IField;
@@ -64,6 +65,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	// generate the plot
 	private JButton _plotButton;
 
+	//hold the variable changing fields
 	private VariablePanel _varPanels[];
 
 	// the variable toggle buttons
@@ -72,8 +74,14 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	// plot parameters
 	private PlotParameters _parameters;
 
+	/**
+	 * Create the dialog for ploting the field
+	 * @param parent the parent  dialog
+	 * @param modal the usual meaning
+	 */
 	public PlotFieldDialog(JFrame parent, boolean modal) {
 		super(parent, "Magnetic Field Plotter", modal);
+		setIconImage(ImageManager.cnuIcon.getImage());
 		_canvas.setPreferredSize(new Dimension(600, 600));
 		pack();
 	}

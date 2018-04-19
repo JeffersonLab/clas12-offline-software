@@ -110,7 +110,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.003b";
+	private static final String _release = "build 1.003c";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -587,30 +587,37 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				
 	}
 	
-	//add items to the basic mag field menu
+	// add items to the basic mag field menu
 	private void addToMagneticFieldMenu() {
 		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
-		
+		final JMenuItem plotItem = new JMenuItem("Plot the Field...");
+		final JMenuItem loadItem = new JMenuItem("Load a different torus...");
+
 		magMenu.addSeparator();
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				if (_plotFieldDialog == null) {
-					_plotFieldDialog = new PlotFieldDialog(getCed(), false);
-				}
-				
-				_plotFieldDialog.setVisible(true);
 
+				if (e.getSource() == plotItem) {
+					if (_plotFieldDialog == null) {
+						_plotFieldDialog = new PlotFieldDialog(getCed(), false);
+					}
+
+					_plotFieldDialog.setVisible(true);
+
+				} else if (e.getSource() == loadItem) {
+					MagneticFields.getInstance().openNewTorus();
+				}
 			}
 		};
-		
-		JMenuItem mitem = new JMenuItem("Plot the Field...");
-		mitem.addActionListener(al);
-		magMenu.add(mitem);
-		
+
+		loadItem.addActionListener(al);
+		plotItem.addActionListener(al);
+		magMenu.add(loadItem);
+		magMenu.add(plotItem);
+
 		MenuManager.getInstance().addMenu(magMenu);
 	}
 
