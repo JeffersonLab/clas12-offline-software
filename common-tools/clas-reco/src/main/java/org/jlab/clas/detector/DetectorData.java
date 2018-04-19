@@ -218,6 +218,9 @@ public class DetectorData {
            bank.setFloat("m2u", row, (float) r.getSecondMomentUVW().x()); 
            bank.setFloat("m2v", row, (float) r.getSecondMomentUVW().y()); 
            bank.setFloat("m2w", row, (float) r.getSecondMomentUVW().z()); 
+           bank.setFloat("m3u", row, (float) r.getThirdMomentUVW().x()); 
+           bank.setFloat("m3v", row, (float) r.getThirdMomentUVW().y()); 
+           bank.setFloat("m3w", row, (float) r.getThirdMomentUVW().z()); 
            bank.setFloat("path", row, (float) r.getPath());
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());

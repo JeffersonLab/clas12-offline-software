@@ -66,7 +66,10 @@
             {"name":"m2u",          "id":22, "type":"float", "info":"2nd moment of the shower on U-side"},
             {"name":"m2v",          "id":23, "type":"float", "info":"2nd moment of the shower on V-side"},
             {"name":"m2w",          "id":24, "type":"float", "info":"2nd moment of the shower on W-side"},
-            {"name":"status",       "id":25, "type":"int16", "info":"hit status"}
+            {"name":"m3u",          "id":25, "type":"float", "info":"3rd moment of the shower on U-side"},
+            {"name":"m3v",          "id":26, "type":"float", "info":"3rd moment of the shower on V-side"},
+            {"name":"m3w",          "id":27, "type":"float", "info":"3rd moment of the shower on W-side"},
+            {"name":"status",       "id":28, "type":"int16", "info":"hit status"}
         ]
     },
     {
@@ -246,7 +249,10 @@
             {"name":"m2u",          "id":22, "type":"float", "info":"2nd moment of the shower on U-side"},
             {"name":"m2v",          "id":23, "type":"float", "info":"2nd moment of the shower on V-side"},
             {"name":"m2w",          "id":24, "type":"float", "info":"2nd moment of the shower on W-side"},
-            {"name":"status",       "id":25, "type":"int16", "info":"hit status"}
+            {"name":"m3u",          "id":25, "type":"float", "info":"3rd moment of the shower on U-side"},
+            {"name":"m3v",          "id":26, "type":"float", "info":"3rd moment of the shower on V-side"},
+            {"name":"m3w",          "id":27, "type":"float", "info":"3rd moment of the shower on W-side"},
+            {"name":"status",       "id":28, "type":"int16", "info":"hit status"}
         ]
     },
     {
