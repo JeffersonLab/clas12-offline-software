@@ -12,14 +12,16 @@ import org.jlab.rec.eb.EBCCDBEnum;
  * @author devita
  */
 public class EBRadioFrequency {
- 
+
+    private EBCCDBConstants ccdb;
     private int debugMode = 0;
     
     private ArrayList<rfSignal> rfSignals = new ArrayList<rfSignal>();
     private double rfTime = -100;
     
     
-    public EBRadioFrequency() {
+    public EBRadioFrequency(EBCCDBConstants ccdb) {
+        this.ccdb=ccdb;
     }
 
     
@@ -29,7 +31,7 @@ public class EBRadioFrequency {
     }
     
     public void processEvent(DataEvent event) {
-        final int rfId=EBCCDBConstants.getInteger(EBCCDBEnum.RF_ID);
+        final int rfId=ccdb.getInteger(EBCCDBEnum.RF_ID);
         // if RUN::rf bank does not exist but tdc bnk exist, reconstruct RF signals from TDC hits and save to bank
         if(event.hasBank("RF::tdc") && !event.hasBank("RUN::rf")) {
             double time = 0;
@@ -96,10 +98,10 @@ public class EBRadioFrequency {
         }
 
         public boolean add(int tdc) {
-            final double rfTdc2Time = EBCCDBConstants.getDouble(EBCCDBEnum.RF_TDC2TIME);
-            final int rfCycles = EBCCDBConstants.getInteger(EBCCDBEnum.RF_CYCLES);
-            final double rfOffset = EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET);
-            final double rfBucketLength = EBCCDBConstants.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
+            final double rfTdc2Time = ccdb.getDouble(EBCCDBEnum.RF_TDC2TIME);
+            final int rfCycles = ccdb.getInteger(EBCCDBEnum.RF_CYCLES);
+            final double rfOffset = ccdb.getDouble(EBCCDBEnum.RF_OFFSET);
+            final double rfBucketLength = ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
             boolean skip = false;
             double time = (tdc*rfTdc2Time) % (rfCycles*rfBucketLength);
 //            time = (tdc % 6840) *EBConstants.RF_TDC2TIME;
