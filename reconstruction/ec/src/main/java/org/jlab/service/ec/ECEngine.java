@@ -31,9 +31,9 @@ public class ECEngine extends ReconstructionEngine {
     public Boolean        isMC = false;
     int                 calrun = 2;
     
-    List<ECStrip>     ecStrips = new ArrayList<ECStrip>();
-    List<ECPeak>       ecPeaks = new ArrayList<ECPeak>();
-    List<ECCluster> ecClusters = new ArrayList<ECCluster>();
+    List<ECStrip>     myStrips = new ArrayList<ECStrip>();
+    List<ECPeak>       myPeaks = new ArrayList<ECPeak>();
+    List<ECCluster> myClusters = new ArrayList<ECCluster>();
 
     public ECEngine(){
         super("EC","gavalian","1.0");
@@ -55,30 +55,16 @@ public class ECEngine extends ReconstructionEngine {
                 return false;
             }
         }
-        
-        ecStrips.clear(); ecPeaks.clear(); ecClusters.clear();
-        
-        if(de instanceof EvioDataEvent) { //For use with raw data stream
-            HipoDataEvent dec = null;
-            if (isMC) {
-                dec = (HipoDataEvent) writer.createEvent();
-                convertor.fillHipoEventECAL(dec, (EvioDataEvent) de);
-            } else {
-                dec = (HipoDataEvent) decoder.getDataEvent(de);      
-            }
-            ecStrips = ECCommon.initEC(dec, ecDetector, this.getConstantsManager(), calrun);        
-        } else {
-            ecStrips = ECCommon.initEC(de,  ecDetector, this.getConstantsManager(), runNo); // thresholds, ADC/TDC match        
-        }  
-        
-        ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines  
-        
+                
+        List<ECStrip>     ecStrips = ECCommon.initEC(de,  ecDetector, this.getConstantsManager(), runNo); // thresholds, ADC/TDC match        
+        List<ECPeak>      ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
+        List<ECCluster> ecClusters = new ArrayList<ECCluster>();
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
-        
+       
         if (debug) {
             System.out.println(" STRIPS SIZE = " + ecStrips.size());
             for(ECStrip strip : ecStrips) System.out.println(strip);
@@ -90,21 +76,25 @@ public class ECEngine extends ReconstructionEngine {
 	    
         if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
         
+        myStrips.clear();   myStrips.addAll(ecStrips);
+        myPeaks.clear();    myPeaks.addAll(ecPeaks);
+        myClusters.clear(); myClusters.addAll(ecClusters);
+        
         return true;
     }
     
     public List<ECStrip> getStrips() {
-	    return this.ecStrips;
+	    return this.myStrips;
     }
     
     public List<ECPeak> getPeaks() {
-	    return this.ecPeaks;    
+	    return this.myPeaks;    
     }
     
     public List<ECCluster> getClusters() {
-	    return this.ecClusters;    
+	    return this.myClusters;    
     }    
-    
+        
     private void writeHipoBanks(DataEvent de, 
                                 List<ECStrip>   strips, 
                                 List<ECPeak>    peaks, 
