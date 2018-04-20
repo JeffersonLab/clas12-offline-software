@@ -306,7 +306,7 @@ public class RecoBankWriter {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
-            bank.setShort("status", i, (short) (100+candlist.get(i).get_FitConvergenceStatus()*10+candlist.get(i).get_MissingSuperlayer()));
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
             if(candlist.get(i).get_PreRegion1CrossPoint()!=null) {
                 bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
                 bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
@@ -554,7 +554,7 @@ public class RecoBankWriter {
             double chi2 = 0;
 
             bank.setShort("id", i, (short) seglist.get(i).get_Id());
-            bank.setShort("status", i, (short) 0);
+            bank.setShort("status", i, (short) seglist.get(i).get_Status());
             bank.setByte("superlayer", i, (byte) seglist.get(i).get_Superlayer());
             bank.setByte("sector", i, (byte) seglist.get(i).get_Sector());
             FittedCluster cls = seglist.get(i).get_fittedCluster();
@@ -656,7 +656,7 @@ public class RecoBankWriter {
         for (int i = 0; i < crosslist.size(); i++) {
             if (crosslist.get(i).get_Id() != -1) {              
                 bank.setShort("id", index, (short) crosslist.get(i).get_Id());
-                bank.setShort("status", index, (short) crosslist.get(i).get_Id());
+                bank.setShort("status", index, (short) (crosslist.get(i).get_Segment1().get_Status()+crosslist.get(i).get_Segment2().get_Status()));
                 bank.setByte("sector", index, (byte) crosslist.get(i).get_Sector());
                 bank.setByte("region", index, (byte) crosslist.get(i).get_Region());
                 bank.setFloat("x", index, (float) crosslist.get(i).get_Point().x());
@@ -698,9 +698,8 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
-            if(candlist.get(i).get_PreRegion1CrossPoint()==null)
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
-            bank.setShort("status", i, (short) (100+candlist.get(i).get_FitConvergenceStatus()*10+candlist.get(i).get_MissingSuperlayer()));
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
             //bank.setFloat("p", i, (float) candlist.get(i).get_P());
@@ -735,9 +734,21 @@ public class RecoBankWriter {
             bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
             bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
-            //bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
-            //bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
-            //bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
+            if(candlist.get(i).size()==3) {
+                bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
+                bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
+                bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
+            }
+            if(candlist.get(i).size()==2) {
+                bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
+                bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
+                bank.setShort("Cross3_ID", i, (short) -1);
+            }
+            if(candlist.get(i).size()==1) {
+                bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
+                bank.setShort("Cross2_ID", i, (short) -1);
+                bank.setShort("Cross3_ID", i, (short) -1);
+            }
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
         }

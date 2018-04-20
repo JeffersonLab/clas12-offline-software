@@ -64,6 +64,17 @@ public class Track extends Trajectory implements Comparable<Track>{
     public void set_MissingSuperlayer(int missingSuperlayer) {
         this._missingSuperlayer = missingSuperlayer;
     }
+    
+    private int _Status=0;
+
+    public int get_Status() {
+        return _Status;
+    }
+
+    public void set_Status(int _Status) {
+        this._Status = _Status;
+    }
+    
     /**
      * 
      * @return id of the track
