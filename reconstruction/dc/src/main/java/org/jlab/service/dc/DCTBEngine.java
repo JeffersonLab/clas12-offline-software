@@ -257,16 +257,20 @@ public class DCTBEngine extends ReconstructionEngine {
             });
             HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
+            TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
         
         for(Segment seg : segments) {
-            TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg);
-            
+            TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
+            if(seg.get_Status()==1)
+                TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
         }
+        
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
+            TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
             TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
             if(TrackArray[i].size()<1)
                 continue;
@@ -330,7 +334,7 @@ public class DCTBEngine extends ReconstructionEngine {
                 for(Cross c : trk) { 
                     c.get_Segment1().isOnTrack=true;
                     c.get_Segment2().isOnTrack=true;
-
+                    
                     for(FittedHit h1 : c.get_Segment1()) { 
                         h1.set_AssociatedTBTrackID(trk.get_Id());
 
@@ -382,6 +386,20 @@ public class DCTBEngine extends ReconstructionEngine {
 
         track.set_pAtOrig(new Vector3D(-Vt[3], -Vt[4], -Vt[5]));
         track.set_Vtx0(new Point3D(Vt[0], Vt[1], Vt[2]));
+    }
+
+    private int get_Status(Track track) {
+        int miss = 0;    
+        
+        int L[] = new int[6];
+        for(int l = 0; l<track.get_ListOfHBSegments().size(); l++) {
+            L[track.get_ListOfHBSegments().get(l).get_Superlayer()-1]++;
+        }
+        for(int l = 0; l<6; l++) {
+            if(L[l]==0)
+                miss=l+1;
+        }
+        return miss;
     }
     
    
