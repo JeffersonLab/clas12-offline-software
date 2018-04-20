@@ -71,7 +71,6 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
-            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
             bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
@@ -406,7 +405,7 @@ public class RecoBankWriter {
                 dde.removeGroup("TimeBasedTrkg::TBHits");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
-
+        
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
@@ -421,7 +420,12 @@ public class RecoBankWriter {
             bank.setFloat("X", i, (float) hitlist.get(i).get_X());
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-        //    bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+            
+            // checks the existing schema to fill the time
+            //System.out.println(" has entry "+bank.getDescriptor().hasEntry("time"));
+            if(bank.getDescriptor().hasEntry("time")==true){
+               bank.setFloat("time", i, (float) hitlist.get(i).get_Time());      
+            }
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
