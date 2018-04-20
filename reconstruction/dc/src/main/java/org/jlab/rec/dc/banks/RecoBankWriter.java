@@ -71,7 +71,7 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
-           // bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+            bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
             bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
