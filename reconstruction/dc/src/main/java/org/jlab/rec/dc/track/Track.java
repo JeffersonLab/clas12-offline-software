@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
@@ -47,6 +46,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     public boolean fit_Successful;
     private int _missingSuperlayer;
     private int _fitConvergenceStatus;
+    
     
     public Track() {
     }

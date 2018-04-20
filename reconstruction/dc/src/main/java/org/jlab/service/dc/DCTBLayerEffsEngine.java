@@ -33,7 +33,7 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 
 public class DCTBLayerEffsEngine extends ReconstructionEngine {
 
-    int Run = 0;
+    int Run;
 
     double[][][][] T0 ;
     double[][][][] T0ERR ;
@@ -48,6 +48,7 @@ public class DCTBLayerEffsEngine extends ReconstructionEngine {
     }
     @Override
     public boolean init() {
+        Run =0;
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
             // "/calibration/dc/time_to_distance/t2d",
@@ -100,7 +101,8 @@ public class DCTBLayerEffsEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
+        if(Run==0 || (Run!=0 && Run!=newRun)) {
+            
             DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
             dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
