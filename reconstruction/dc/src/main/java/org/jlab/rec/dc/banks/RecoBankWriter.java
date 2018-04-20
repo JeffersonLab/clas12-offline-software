@@ -745,6 +745,34 @@ public class RecoBankWriter {
 
     }
 
+    public DataBank fillTrajectoryBank(DataEvent event, List<Track> tracks) {
+        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", tracks.size()*19);
+        int i1=0;
+        for (int i = 0; i < tracks.size(); i++) {
+            if(tracks.get(i)==null)
+                continue;
+            if(tracks.get(i).trajectory==null)
+                continue;
+            
+            for(int j = 0; j< tracks.get(i).trajectory.size(); j++) {
+                if(tracks.get(i).trajectory.get(j).getDetName().startsWith("DC") && (j-6)%6!=0)
+                    continue;  // save the last layer in a superlayer
+               
+                bank.setShort("did", i1, (short) tracks.get(i).trajectory.get(j).getDetId());
+                bank.setShort("tid", i1, (short) tracks.get(i).get_Id());
+                bank.setFloat("x", i1, (float) tracks.get(i).trajectory.get(j).getX());
+                bank.setFloat("y", i1, (float) tracks.get(i).trajectory.get(j).getY());
+                bank.setFloat("z", i1, (float) tracks.get(i).trajectory.get(j).getZ());
+                bank.setFloat("tx", i1, (float) ((float) tracks.get(i).trajectory.get(j).getpX()/tracks.get(i).get_P()));
+                bank.setFloat("ty", i1, (float) ((float) tracks.get(i).trajectory.get(j).getpY()/tracks.get(i).get_P()));
+                bank.setFloat("tz", i1, (float) ((float) tracks.get(i).trajectory.get(j).getpZ()/tracks.get(i).get_P()));
+                bank.setFloat("L", i1, (float) tracks.get(i).trajectory.get(j).getPathLen());
+                i1++;
+            }
+        }
+        return bank;
+    }
+    
     public List<FittedHit> createRawHitList(List<Hit> hits) {
 
         List<FittedHit> fhits = new ArrayList<FittedHit>();
@@ -816,7 +844,8 @@ public class RecoBankWriter {
                     rbc.fillTBClustersBank(event, clusters),
                     rbc.fillTBSegmentsBank(event, segments),
                     rbc.fillTBCrossesBank(event, crosses),
-                    rbc.fillTBTracksBank(event, trkcands));
+                    rbc.fillTBTracksBank(event, trkcands), 
+                    rbc.fillTrajectoryBank(event, trkcands));
 
         }
         if (crosses != null && trkcands == null) {
