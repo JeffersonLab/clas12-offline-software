@@ -1,5 +1,7 @@
 package org.jlab.service.dc;
 
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -37,14 +39,15 @@ import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
+import org.jlab.utils.CLASResources;
 
 
 public class DCHBEngine extends ReconstructionEngine {
     
     String FieldsConfig="";
-    int Run = 0;
+    int Run;
     DCGeant4Factory dcDetector;
-        
+      
     double[][][][] T0 ;
     double[][][][] T0ERR ;
         
@@ -53,13 +56,13 @@ public class DCHBEngine extends ReconstructionEngine {
     public DCHBEngine() {
         super("DCHB","ziegler","4.0");
     }
-    
+    String clasDictionaryPath ;
     @Override
     public boolean init() {
         Constants.Load();
         // Load the Fields 
-        
-        DCSwimmer.getMagneticFields();
+        Run =0;
+        clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
           //  "/calibration/dc/time_to_distance/t2d",
@@ -75,7 +78,7 @@ public class DCHBEngine extends ReconstructionEngine {
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
-
+        
         //T0s
         T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
         T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
@@ -112,8 +115,13 @@ public class DCHBEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-
-        if(Run!=newRun) {
+          
+        if(Run==0 || (Run!=0 && Run!=newRun)) {
+            if(newRun>1000) {
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+            } else {
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+            }
             DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
             dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
@@ -137,7 +145,7 @@ public class DCHBEngine extends ReconstructionEngine {
             TORSCALE = bank.getFloat("torus", 0);
             SOLSCALE = bank.getFloat("solenoid", 0);
             double shift =0;
-            if(Run>1890) {
+            if(newRun>1890) {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
@@ -392,7 +400,7 @@ public class DCHBEngine extends ReconstructionEngine {
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            if (event.getBank("RUN::config").getInt("event", 0) > 10001) {
+            if (event.getBank("RUN::config").getInt("event", 0) > 16) {
                 break;
             }
             

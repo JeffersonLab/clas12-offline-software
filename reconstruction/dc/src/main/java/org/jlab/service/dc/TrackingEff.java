@@ -1,5 +1,7 @@
 package org.jlab.service.dc;
 
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.TorusMap;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,7 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.TrackDictionaryMaker; //import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
 import org.jlab.rec.dc.trajectory.TrackDictionaryMaker.DCTDC;
+import org.jlab.utils.CLASResources;
 
 public class TrackingEff extends ReconstructionEngine {
 
@@ -52,20 +55,21 @@ public class TrackingEff extends ReconstructionEngine {
     }
 
     String FieldsConfig="";
-    int Run = 0;
+    int Run;
     DCGeant4Factory dcDetector;
     TrackDictionaryMaker trMk;    
     double[][][][] T0 ;
     double[][][][] T0ERR ;
-        
+    String clasDictionaryPath ;   
     double TORSCALE;
     double SOLSCALE;
     
 	@Override
 	public boolean init() {
+            Run =0;
             Constants.Load();
             // Load the Fields 
-            DCSwimmer.getMagneticFields();
+            clasDictionaryPath= CLASResources.getResourcePath("etc");
             String[]  dcTables = new String[]{
                 "/calibration/dc/signal_generation/doca_resolution",
                // "/calibration/dc/time_to_distance/t2d",
@@ -139,7 +143,12 @@ public class TrackingEff extends ReconstructionEngine {
             //-------------------
             int newRun = bank.getInt("run", 0);
 
-            if(Run!=newRun) {
+            if(Run==0 || (Run!=0 && Run!=newRun)) {
+                if(newRun>1000) {
+                    MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+                } else {
+                    MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+                }
                 //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
                 TORSCALE = (double)bank.getFloat("torus", 0);
                 SOLSCALE = (double)bank.getFloat("solenoid", 0);

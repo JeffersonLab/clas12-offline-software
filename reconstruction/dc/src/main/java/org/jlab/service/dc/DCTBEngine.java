@@ -9,6 +9,9 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.detector.geant4.v2.ECGeant4Factory;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -35,15 +38,19 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
+import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 
 public class DCTBEngine extends ReconstructionEngine {
 
-    int Run = 0;
+    int Run;
 
     double[][][][] T0 ;
     double[][][][] T0ERR ;
     DCGeant4Factory dcDetector;
-
+    FTOFGeant4Factory ftofDetector;
+    ECGeant4Factory ecDetector;
+    PCALGeant4Factory pcalDetector; 
+    TrajectorySurfaces tSurf;
     double TORSCALE;
     double SOLSCALE;
 
@@ -62,11 +69,20 @@ public class DCTBEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-
+        Run = 0;
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
-
+        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
+        ftofDetector = new FTOFGeant4Factory(providerFTOF);
+        
+        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
+        ecDetector = new ECGeant4Factory(providerEC);
+        pcalDetector = new PCALGeant4Factory(providerEC);
+        System.out.println(" -- Det Geometry constants are Loaded " );
+        // create the surfaces
+        tSurf = new TrajectorySurfaces();
+        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
         //T0s
         T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
         T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
@@ -105,7 +121,7 @@ public class DCTBEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
+        if(Run==0 || (Run!=0 && Run!=newRun)) {
             DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
             dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
@@ -277,6 +293,8 @@ public class DCTBEngine extends ReconstructionEngine {
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
                 TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
+                if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
+                    continue;
                 trkcands.add(TrackArray[i]);
             }
         }
@@ -295,6 +313,20 @@ public class DCTBEngine extends ReconstructionEngine {
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
+                trk.calcTrajectory(trkId, trkcandFinder.dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), ftofDetector, tSurf);
+//                for(int j = 0; j< trk.trajectory.size(); j++) {
+//                System.out.println(trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
+//                            trk.trajectory.get(j).getDetName()+"] "+
+//                            (float)trk.trajectory.get(j).getX()/trk.get_P()+", "+
+//                            (float)trk.trajectory.get(j).getY()/trk.get_P()+", "+
+//                            (float)trk.trajectory.get(j).getZ()/trk.get_P()+", "+
+//                            (float)trk.trajectory.get(j).getpX()/trk.get_P()+", "+
+//                            (float)trk.trajectory.get(j).getpY()/trk.get_P()+", "+
+//                            (float)trk.trajectory.get(j).getpZ()/trk.get_P()+", "+
+//                            (float)trk.trajectory.get(j).getPathLen()+" "
+//                            );               
+//                }
+ 
                 for(Cross c : trk) { 
                     c.get_Segment1().isOnTrack=true;
                     c.get_Segment2().isOnTrack=true;

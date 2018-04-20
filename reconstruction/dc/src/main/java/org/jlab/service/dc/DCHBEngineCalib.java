@@ -1,5 +1,7 @@
 package org.jlab.service.dc;
 
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -37,14 +39,15 @@ import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.RoadFinder;
+import org.jlab.utils.CLASResources;
 
 
 public class DCHBEngineCalib extends ReconstructionEngine {
     
     String FieldsConfig="";
-    int Run = 0;
+    int Run;
     DCGeant4Factory dcDetector;
-        
+    String clasDictionaryPath ;     
     double[][][][] T0 ;
     double[][][][] T0ERR ;
         
@@ -57,8 +60,8 @@ public class DCHBEngineCalib extends ReconstructionEngine {
     @Override
     public boolean init() {
         Constants.Load();
-        // Load the Fields 
-        DCSwimmer.getMagneticFields();
+        Run =0;
+        clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
           //  "/calibration/dc/time_to_distance/t2d",
@@ -111,7 +114,12 @@ public class DCHBEngineCalib extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
 
-        if(Run!=newRun) {
+        if(Run==0 || (Run!=0 && Run!=newRun)) {
+            if(newRun>1000) {
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+            } else {
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+            }
             DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
             dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
             //disconnect from database. Important to do this after loading tables.
@@ -135,7 +143,7 @@ public class DCHBEngineCalib extends ReconstructionEngine {
             TORSCALE = bank.getFloat("torus", 0);
             SOLSCALE = bank.getFloat("solenoid", 0);
             double shift =0;
-            if(Run>1890) {
+            if(newRun>1890) {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(SOLSCALE, TORSCALE, shift);
