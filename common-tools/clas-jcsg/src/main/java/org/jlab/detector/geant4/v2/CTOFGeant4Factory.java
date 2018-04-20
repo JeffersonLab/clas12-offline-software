@@ -61,9 +61,9 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         private final double radius = 25.11;
         private final double thickness = 3.0266;
         private final double lengthOdd = 88.9328;
-        private final double offsetOdd = -8.9935;
+        private final double offsetOdd = -8.9874;
         private final double lengthEven = 88.0467;
-        private final double offsetEven = -8.2111;
+        private final double offsetEven = -8.5031;
         
 //        private final double zmin = -54.18, zmax = 36.26;
 
