@@ -175,7 +175,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 0));
 
-		_plotButton = new JButton("plot");
+		_plotButton = new JButton(" Plot ");
 		_plotButton.addActionListener(this);
 
 		panel.add(_plotButton);

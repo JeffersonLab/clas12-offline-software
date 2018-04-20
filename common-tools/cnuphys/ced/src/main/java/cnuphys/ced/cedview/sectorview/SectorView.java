@@ -1197,6 +1197,7 @@ public class SectorView extends CedView implements ChangeListener {
 		if (pixlen < 25.0) {
 			final SwimTrajectory2D traj2D = _swimTrajectoryDrawer
 					.getClosestTrajectory();
+			
 			if (traj2D == null) {
 				return false;
 			}

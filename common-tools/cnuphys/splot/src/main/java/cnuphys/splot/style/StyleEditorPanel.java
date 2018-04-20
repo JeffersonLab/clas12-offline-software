@@ -11,12 +11,14 @@ import javax.swing.JPanel;
 import cnuphys.splot.edit.ColorLabel;
 import cnuphys.splot.pdata.DataSetType;
 import cnuphys.splot.plot.CommonBorder;
+import cnuphys.splot.plot.DoubleFormat;
 import cnuphys.splot.plot.Environment;
 import cnuphys.splot.plot.TextFieldSlider;
 
 public class StyleEditorPanel extends JPanel {
 
 	public static final String SYMBOLSIZEPROP = "Symbol Size";
+	public static final String LINEWIDTHPROP = "Line Width";
 
 	private static final Font _font = Environment.getInstance()
 			.getCommonFont(10);
@@ -35,6 +37,10 @@ public class StyleEditorPanel extends JPanel {
 
 	// symbol size
 	protected TextFieldSlider _symbolSizeSelector;
+	
+	// line size
+	protected TextFieldSlider _lineSizeSelector;
+
 
 	/**
 	 * Create the stye editing panel.
@@ -105,6 +111,36 @@ public class StyleEditorPanel extends JPanel {
 
 			};
 		}
+		
+		//line size 
+		String szLabels[] = { "0", "2", "4", "6", "8", "10", "12" };
+		_lineSizeSelector = new TextFieldSlider(0, 24, 1, _font, 1,
+				szLabels, 180, 40, "Line Width") {
+		
+
+			@Override
+			public double sliderValueToRealValue() {
+				return getValue()/2.;
+			}
+
+			@Override
+			public int realValueToSliderValue(double val) {
+				return (int) (2*val);
+			}
+
+			@Override
+			public String valueString(double val) {
+				double dval = sliderValueToRealValue();
+				return DoubleFormat.doubleFormat(dval, 1);
+			}
+
+			@Override
+			public void valueChanged() {
+				firePropertyChange(LINEWIDTHPROP, -1,
+						_lineSizeSelector.getValue());
+			}
+
+		};
 
 		if (symPan != null) {
 			add(symPan);
@@ -113,6 +149,7 @@ public class StyleEditorPanel extends JPanel {
 		if (type != DataSetType.H1D) {
 			add(_symbolSizeSelector);
 		}
+		add(_lineSizeSelector);
 
 	}
 
@@ -142,6 +179,9 @@ public class StyleEditorPanel extends JPanel {
 		}
 		if (_symbolSizeSelector != null) {
 			_symbolSizeSelector.setEnabled(enabled);
+		}
+		if (_lineSizeSelector != null) {
+			_lineSizeSelector.setEnabled(enabled);
 		}
 	}
 
@@ -179,6 +219,16 @@ public class StyleEditorPanel extends JPanel {
 	public TextFieldSlider getSymbolSizeSelector() {
 		return _symbolSizeSelector;
 	}
+	
+	/**
+	 * Get the line width slider
+	 * 
+	 * @return line width slider
+	 */
+	public TextFieldSlider getLineWidthSelector() {
+		return _lineSizeSelector;
+	}
+
 
 	/**
 	 * Get the symbol selector
