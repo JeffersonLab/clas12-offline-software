@@ -80,7 +80,15 @@ public class CherenkovResponse {
         return (Math.abs(vecHit.theta()-vecRec.theta())<10.0/57.2958
         && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
     }
-    
+   
+    public boolean matchToPoint(Line3D trackPoint) {
+        if (trackPoint==null) return false;
+        Vector3D vecTrk = trackPoint.origin().toVector3D();
+        Vector3D vecHit = this.hitPosition.toVector3D();
+        return (Math.abs(vecHit.theta()-vecTrk.theta())<10.0/57.2958
+                && Math.abs(vecHit.phi()-vecTrk.phi())<this.hitDeltaPhi);
+    }
+
     public double getDistance(Line3D line){
         
         return -1000.0;

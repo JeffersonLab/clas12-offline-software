@@ -80,7 +80,7 @@ public class EBAnalyzer {
                 final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
                 final double vertexTime = time - tof;
 
-                final double vzCorr = (tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
+                final double vzCorr = 0;//(tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
 
                 final double deltatr = - vertexTime + event.getEventHeader().getRfTime() - vzCorr +
                     + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength + rfOffset;

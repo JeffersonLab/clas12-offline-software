@@ -10,9 +10,30 @@ import org.jlab.geom.prim.Vector3D;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class DetectorTrack {
 
+    public class TrajectoryPoint {
+        private int trackId = -1;
+        private int detId = -1;
+        private Line3D traj=null;
+        private float bField = 0;
+        private float pathLength = -1;
+        public TrajectoryPoint(int trackId,int detId,Line3D traj,float bField,float pathLength) {
+            this.trackId=trackId;
+            this.detId=detId;
+            this.traj=traj;
+            this.bField=bField;
+            this.pathLength=pathLength;
+        }
+        public int getTrackId() { return trackId; }
+        public int getDetId() { return detId; }
+        public Line3D getCross() { return traj; }
+        public float getBField() { return bField; }
+        public float getPathLength() { return pathLength; }
+    }
+    
     private int     trackAssociation = -1;
     private int     trackIndex = -1;
     private int     trackCharge = 0;
@@ -28,19 +49,21 @@ public class DetectorTrack {
     private Vector3D   trackEnd = new Vector3D();
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
-//    private Point3D trackIntersect = new Point3D();
-    
 
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
-//    private List<Point3D> ctofIntersects = new ArrayList<Point3D>();
+   
+    private List<TrajectoryPoint> trajectory = new ArrayList<TrajectoryPoint>();
     
-    private double    MAX_LINE_LENGTH = 1500.0;
+    private double MAX_LINE_LENGTH = 1500.0;
+
+    public double getMaxLineLength() {
+        return MAX_LINE_LENGTH;
+    }
     
      public DetectorTrack(int charge){
         this.trackCharge = charge;
     }
-
-     
+    
     public DetectorTrack(int charge, double mom){
         this.trackMom = mom;
         this.trackCharge = charge;
@@ -52,12 +75,6 @@ public class DetectorTrack {
         this.trackIndex = index;
     }
     
-//        public DetectorTrack(int charge, double mom, Point3D ctofintersect){
-//        this.trackMom = mom;
-//        this.trackCharge = charge;
-//        this.trackIntersect = ctofintersect;
-//    }
-
     public DetectorTrack(int charge, double px, double py, double pz){
         this.trackCharge = charge;
         this.trackP.setXYZ(px, py, pz);
@@ -76,6 +93,24 @@ public class DetectorTrack {
         this.trackCharge = charge;
         this.trackP.setXYZ(px, py, pz);
         this.trackVertex.setXYZ(vx, vy, vz);
+    }
+
+    public void addTrajectoryPoint(int trackId,int detId,Line3D traj,float bField,float pathLength) {
+        TrajectoryPoint tPoint = new TrajectoryPoint(trackId,detId,traj,bField,pathLength);
+        this.trajectory.add(tPoint);
+    }
+
+    public Line3D getTrajectoryPoint(int detId) {
+        for (TrajectoryPoint tp : trajectory) {
+            if (tp.getDetId() == detId) {
+                return tp.getCross();
+            }
+        }
+        return null;
+    }
+    
+    public List<TrajectoryPoint> getTrajectory() {
+        return this.trajectory;
     }
     
     public DetectorTrack setCharge(int charge){
@@ -148,13 +183,7 @@ public class DetectorTrack {
         this.trackCrosses.add(line);
     }
     
-//    public void addCTOFPoint(double x, double y, double z){
-//        Point3D line = new Point3D(x,y,z);
-//        this.ctofIntersects.add(line);
-//    }
-    
     public int getCrossCount(){ return this.trackCrosses.size();}
-//    public int getCTOFCount() {return this.ctofIntersects.size();}
     
     public Line3D getCross(int index){
         return this.trackCrosses.get(index);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.jlab.clas.physics.Particle;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -218,6 +219,9 @@ public class DetectorData {
            bank.setFloat("m2u", row, (float) r.getSecondMomentUVW().x()); 
            bank.setFloat("m2v", row, (float) r.getSecondMomentUVW().y()); 
            bank.setFloat("m2w", row, (float) r.getSecondMomentUVW().z()); 
+           bank.setFloat("m3u", row, (float) r.getThirdMomentUVW().x()); 
+           bank.setFloat("m3v", row, (float) r.getThirdMomentUVW().y()); 
+           bank.setFloat("m3w", row, (float) r.getThirdMomentUVW().z()); 
            bank.setFloat("path", row, (float) r.getPath());
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
@@ -337,7 +341,45 @@ public class DetectorData {
        }
        return bank;
    }
-      
+     
+   public static DataBank getTrajectoriesBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
+
+       DataBank bank=null;
+       if (bank_name!=null) {
+           int nrows = 0;
+           for(int i = 0 ; i < particles.size(); i++) {
+               if(particles.get(i).getTrackDetector()==DetectorType.DC.getDetectorId() ||
+                  particles.get(i).getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+                   nrows += particles.get(i).getTrackTrajectory().size();
+               }
+           }
+
+           bank = event.createBank(bank_name, nrows);
+           int row = 0;
+           for(int i = 0 ; i < particles.size(); i++) {
+               DetectorParticle p = particles.get(i);
+               if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
+                  p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+                   List <DetectorTrack.TrajectoryPoint> traj=p.getTrackTrajectory();
+                   for (int ii=0; ii<traj.size(); ii++) {
+                       bank.setShort("index", row, (short) p.getTrackIndex());
+                       bank.setShort("pindex", row, (short) i);
+                       bank.setShort("detId", row, (byte) traj.get(ii).getDetId());
+                       bank.setFloat("pathlength",row, traj.get(ii).getPathLength());
+                       bank.setFloat("x",row, (float)traj.get(ii).getCross().origin().x());
+                       bank.setFloat("y",row, (float)traj.get(ii).getCross().origin().y());
+                       bank.setFloat("z",row, (float)traj.get(ii).getCross().origin().z());
+                       bank.setFloat("cx",row, (float)traj.get(ii).getCross().direction().x());
+                       bank.setFloat("cy",row, (float)traj.get(ii).getCross().direction().x());
+                       bank.setFloat("cz",row, (float)traj.get(ii).getCross().direction().x());
+                       row = row + 1;
+                   }
+               }
+           }
+       }
+       return bank;
+   }
+
    public static DataBank getCrossBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
        DataBank bank = event.createBank(bank_name, particles.size());
        for(int row = 0 ; row < particles.size(); row++){
@@ -414,11 +456,17 @@ public class DetectorData {
        return vec;
    }
    
-   public static List<DetectorTrack>  readDetectorTracks(DataEvent event, String bank_name){
+   public static List<DetectorTrack>  readDetectorTracks(DataEvent event, String bank_name, String traj_bank_name){
+       
        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
+
+           DataBank trajBank = null;
+           if (traj_bank_name!=null && event.hasBank(traj_bank_name)) {
+               trajBank=event.getBank(traj_bank_name);
+           }
 
            for(int row = 0; row < nrows; row++){
                int    charge = bank.getByte("q", row);
@@ -444,6 +492,27 @@ public class DetectorData {
                track.setStatus(bank.getInt("status",row));
 
                track.setDetectorID(DetectorType.DC.getDetectorId());
+
+               int trkId=bank.getInt("id",row);
+
+               // this could be optimized:
+               if (trajBank!=null) {
+                   for (int ii=0; ii<trajBank.rows(); ii++) {
+                       if (trajBank.getInt("tid",ii) ==  trkId) {
+                           int detId=trajBank.getInt("did",ii);
+                           float bField=trajBank.getFloat("B",ii);
+                           float pathLength=trajBank.getFloat("L",ii);
+                           float xx=trajBank.getFloat("x",ii);
+                           float yy=trajBank.getFloat("y",ii);
+                           float zz=trajBank.getFloat("z",ii);
+                           Line3D traj=new Line3D(xx,yy,zz,
+                                   xx+track.getMaxLineLength()*trajBank.getFloat("tx",ii),
+                                   yy+track.getMaxLineLength()*trajBank.getFloat("ty",ii),
+                                   zz+track.getMaxLineLength()*trajBank.getFloat("tz",ii));
+                           track.addTrajectoryPoint(trkId,detId,traj,bField,pathLength);
+                       }
+                   }
+               }
 
                tracks.add(track);
            }
