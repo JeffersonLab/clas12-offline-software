@@ -181,12 +181,44 @@ public class MagneticFields {
 		
 		boolean torusFull = FullTorus.isFieldmapFullField(path);
 
-
+		Torus oldTorus = _torus;
+		boolean activeFieldWasTorus = (_activeField == oldTorus);
+		
 		// load the torus
 		if (torusFull) {
 			_torus = readFullTorus(path);
 		} else {
 			_torus = readTorus(path);
+		}
+
+		if (activeFieldWasTorus) {
+			_activeField = _torus;
+		}
+
+		if (_torus != null) {
+			if (_compositeField != null) {
+				if (oldTorus != null) {
+					_compositeField.remove(oldTorus);
+				}
+				if (_torus != null) {
+					_compositeField.add(_torus);
+				}
+			}
+
+			if (_rotatedCompositeField != null) {
+				if (oldTorus != null) {
+					_rotatedCompositeField.remove(oldTorus);
+				}
+				if (_torus != null) {
+					_rotatedCompositeField.add(_torus);
+				}
+			}
+		}
+
+
+		
+		if (_compositeField != null) {
+			
 		}
 
 		System.out.println(_torus);

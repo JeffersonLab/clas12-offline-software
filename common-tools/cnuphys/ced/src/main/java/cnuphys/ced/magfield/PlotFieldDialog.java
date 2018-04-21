@@ -1,6 +1,7 @@
 package cnuphys.ced.magfield;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
@@ -34,11 +35,19 @@ import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.DataSetType;
 import cnuphys.splot.plot.PlotParameters;
+import cnuphys.splot.plot.X11Colors;
 import cnuphys.splot.style.SymbolType;
 
 public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	private static int _numPlotPoints = 50000;
+	
+	private static Color[] _curveColors = {Color.black,
+			X11Colors.getX11Color("dark red"),
+			X11Colors.getX11Color("dark blue"),
+			Color.red,
+			Color.green,
+			Color.blue};
 
 	private static final int Z = 0;
 	private static final int RHO = 1;
@@ -48,9 +57,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	private static int _whichVaries = Z;
 
 	// the default fixed values and ranges
-	private static double _fixedValues[] = { 375, 50, 0 };
-	private static double _minValues[] = { 200, 0, -20 };
-	private static double _maxValues[] = { 500, 250, 20 };
+	
 
 	private static String sPHI = UnicodeSupport.SMALL_PHI;
 	private static String sRHO = UnicodeSupport.SMALL_RHO;
@@ -62,8 +69,12 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	// the toggle button labels
 	private static String tbLabels[] = { " z ", " " + sRHO + " ", " " + sPHI + " " };
 
-	// generate the plot
+	// generate a new plot
 	private JButton _plotButton;
+	
+	// clear all plots
+	private JButton _clearButton;
+
 
 	//hold the variable changing fields
 	private VariablePanel _varPanels[];
@@ -95,6 +106,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		if (curve != null) {
 			curve.getFit().setFitType(FitType.CONNECT);
 			curve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
+			curve.getStyle().setLineColor(_curveColors[0]);
 		}
 
 		return ds;
@@ -102,7 +114,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	@Override
 	protected String[] getColumnNames() {
-		String labels[] = { "Component", "B" };
+		String labels[] = { "Component", "|B| (1)" };
 		return labels;
 	}
 
@@ -174,10 +186,15 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	private JPanel makeButtonPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 0));
+		
+		_clearButton = new JButton(" Clear ");
+		_clearButton.addActionListener(this);
+
 
 		_plotButton = new JButton(" Plot ");
 		_plotButton.addActionListener(this);
 
+		panel.add(_clearButton);
 		panel.add(_plotButton);
 		return panel;
 	}
@@ -211,7 +228,11 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 		if (source == _plotButton) {
 			doPlot();
-		} else {
+		} 
+		else if (source == _clearButton) {
+			doClear();
+		}
+		else {
 			for (int var = 0; var < 3; var++) {
 				if (source == _vButtons[var]) {
 
@@ -226,8 +247,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 					_parameters.setXLabel(_xLabels[var]);
 					fixExtraStrings();
-					System.err.println("CHANGED VARIABLE");
-					_canvas.getDataSet().clear();
+	//				System.err.println("CHANGED VARIABLE");
+	//				_canvas.getDataSet().clear();
 					break;
 				}
 
@@ -243,22 +264,22 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		String s2 = "";
 		switch (_whichVaries) {
 		case Z:
-			String pV = DoubleFormat.doubleFormat(_fixedValues[PHI], 1);
-			String rV = DoubleFormat.doubleFormat(_fixedValues[RHO], 1);
+			String pV = DoubleFormat.doubleFormat(_varPanels[PHI].getFixedValue(), 1);
+			String rV = DoubleFormat.doubleFormat(_varPanels[RHO].getFixedValue(), 1);
 			s1 = sPHI + " = " + pV + sDEG;
 			s2 = sRHO + " = " + rV + "cm";
 			break;
 
 		case RHO:
-			pV = DoubleFormat.doubleFormat(_fixedValues[PHI], 1);
-			String zV = DoubleFormat.doubleFormat(_fixedValues[Z], 1);
+			pV = DoubleFormat.doubleFormat(_varPanels[PHI].getFixedValue(), 1);
+			String zV = DoubleFormat.doubleFormat(_varPanels[Z].getFixedValue(), 1);
 			s1 = sPHI + " = " + pV + sDEG;
 			s2 = "z  = " + zV + "cm";
 			break;
 
 		case PHI:
-			rV = DoubleFormat.doubleFormat(_fixedValues[RHO], 1);
-			zV = DoubleFormat.doubleFormat(_fixedValues[Z], 1);
+			rV = DoubleFormat.doubleFormat(_varPanels[RHO].getFixedValue(), 1);
+			zV = DoubleFormat.doubleFormat(_varPanels[Z].getFixedValue(), 1);
 			s1 = sRHO + " = " + rV + "cm";
 			s2 = "z  = " + zV + "cm";
 			break;
@@ -268,10 +289,41 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	}
 
+	//clear all the plots
+	private void doClear() {
+		try {
+			_canvas.setDataSet(createDataSet());
+		} catch (DataSetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		_canvas.repaint();
+	}
+	
 	// create the plot
 	private void doPlot() {
-		_canvas.getDataSet().clear();
-		fixExtraStrings();
+//		_canvas.getDataSet().clear();
+		
+		//see if I have any curve slots avaiable
+	    int curveCount = _canvas.getDataSet().getCurveCount();
+	    System.err.println("NUM CURVE: " + curveCount);
+	    
+	    int hotIndex = -1;
+	    for (int i = 0; i < curveCount; i++) {
+	    	DataColumn curve = _canvas.getDataSet().getCurve(i);
+	    	if (curve.size() == 0) {
+	    		hotIndex = i;
+	    		break;
+	    	}
+	    }
+    	System.err.println("Hot INDEX: " + hotIndex);
+    	if (hotIndex < 0) {
+    		hotIndex = curveCount;
+    		DataColumn newCurve = _canvas.getDataSet().addCurve("Component", "|B| (" + (hotIndex + 1) + ")");
+    		newCurve.getFit().setFitType(FitType.CONNECT);
+    		newCurve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
+			newCurve.getStyle().setLineColor(_curveColors[hotIndex % _curveColors.length]);
+   	}
 
 		IField ifield = MagneticFields.getInstance().getActiveField();
 
@@ -301,13 +353,14 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 			mag = mag / 10; // to tesla
 			try {
-				_canvas.getDataSet().add(val, mag);
+				_canvas.getDataSet().addToCurve(hotIndex, val, mag);
 			} catch (DataSetException e) {
 				e.printStackTrace();
 				break;
 			}
 		}
 
+		fixExtraStrings();
 		_canvas.repaint();
 	}
 
@@ -349,6 +402,11 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		private JTextField _fixedTF;
 		private JTextField _minTF;
 		private JTextField _maxTF;
+		
+		private double fixedValues[] = { 375, 50, 0 };
+		private double minValues[] = { 200, 0, -20 };
+		private double maxValues[] = { 500, 250, 20 };
+
 
 		private int _varIndex;
 
@@ -356,17 +414,17 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 			_varIndex = var;
 			setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
-			_fixedTF = new JTextField(DoubleFormat.doubleFormat(_fixedValues[var], 2), 8);
+			_fixedTF = new JTextField(DoubleFormat.doubleFormat(fixedValues[var], 2), 8);
 
 			add(new JLabel(fwString(_xLabels[var], "  X (XXX) ")));
 			add(_fixedTF);
 
 			add(new JLabel(" min "));
-			_minTF = new JTextField(DoubleFormat.doubleFormat(_minValues[var], 2), 8);
+			_minTF = new JTextField(DoubleFormat.doubleFormat(minValues[var], 2), 8);
 			add(_minTF);
 
 			add(new JLabel(" max "));
-			_maxTF = new JTextField(DoubleFormat.doubleFormat(_maxValues[var], 2), 8);
+			_maxTF = new JTextField(DoubleFormat.doubleFormat(maxValues[var], 2), 8);
 			add(_maxTF);
 
 			setEnabled();
@@ -384,7 +442,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			try {
 				return Double.parseDouble(_minTF.getText());
 			} catch (Exception e) {
-				return _minValues[_varIndex];
+				return minValues[_varIndex];
 			}
 		}
 
@@ -392,7 +450,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			try {
 				return Double.parseDouble(_maxTF.getText());
 			} catch (Exception e) {
-				return _maxValues[_varIndex];
+				return maxValues[_varIndex];
 			}
 		}
 
@@ -400,7 +458,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			try {
 				return Double.parseDouble(_fixedTF.getText());
 			} catch (Exception e) {
-				return _fixedValues[_varIndex];
+				return fixedValues[_varIndex];
 			}
 		}
 
