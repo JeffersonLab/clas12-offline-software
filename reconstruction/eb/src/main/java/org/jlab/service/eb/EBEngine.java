@@ -24,6 +24,7 @@ public class EBEngine extends ReconstructionEngine {
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
 
+    // output banks:
     String eventBank        = null;
     String particleBank     = null;
     String calorimeterBank  = null;
@@ -31,12 +32,15 @@ public class EBEngine extends ReconstructionEngine {
     String cherenkovBank    = null;
     String trackBank        = null;
     String crossBank        = null;
-    String matrixBank       = null;
-    String trackType        = null;
     String ftBank           = null;
-    String trajectoryType   = null;
     String trajectoryBank   = null;
+    String covMatrixBank    = null;
 
+    // inputs banks:
+    String trackType        = null;
+    String trajectoryType   = null;
+    String covMatrixType    = null;
+    
     public EBEngine(String name){
         super(name,"gavalian","1.0");
         initBankNames();
@@ -90,7 +94,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.addCherenkovResponses(responseLTCC);
 
         // Add tracks
-        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType);
+        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
         eb.addForwardTracks(tracks);      
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
@@ -170,11 +174,8 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankTrack);
                 DataBank bankTraj  = DetectorData.getTrajectoriesBank(eb.getEvent().getParticles(), de, trajectoryBank);
                 if (bankTraj != null) de.appendBanks(bankTraj);
-            }
-
-            if(matrixBank!=null) {
-                DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
-                de.appendBanks(bankMat);
+                DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
+                if (bankCovMat != null) de.appendBanks(bankCovMat);
             }
         
         }
@@ -214,14 +215,22 @@ public class EBEngine extends ReconstructionEngine {
         this.crossBank = crossBank;
     }
 
-    public void setTrackType(String trackType) {
-        this.trackType = trackType;
-    }
-
     public void setTrajectoryBank(String trajectoryBank) {
         this.trajectoryBank = trajectoryBank;
     }
     
+    public void setCovMatrixBank(String covMatrixBank) {
+        this.covMatrixBank = covMatrixBank;
+    }
+    
+    public void setTrackType(String trackType) {
+        this.trackType = trackType;
+    }
+
+    public void setCovMatrixType(String covMatrixType) {
+        this.covMatrixType = covMatrixType;
+    }
+
     public void setTrajectoryType(String trajectoryType) {
         this.trajectoryType = trajectoryType;
     }

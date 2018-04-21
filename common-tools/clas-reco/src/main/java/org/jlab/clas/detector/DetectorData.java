@@ -15,6 +15,7 @@ import org.jlab.io.base.DataEvent;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class DetectorData {
     /**
@@ -379,6 +380,38 @@ public class DetectorData {
        }
        return bank;
    }
+   
+   public static DataBank getCovMatrixBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
+
+       DataBank bank=null;
+       if (bank_name!=null) {
+           int nrows = 0;
+           for(int i = 0 ; i < particles.size(); i++) {
+               if(particles.get(i).getTrackDetector()==DetectorType.DC.getDetectorId() ||
+                  particles.get(i).getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
+                   nrows += 1;
+               }
+           }
+
+           bank = event.createBank(bank_name, nrows);
+           int row = 0;
+           for(int i = 0 ; i < particles.size(); i++) {
+               DetectorParticle p = particles.get(i);
+               if (p.getTrackDetector()!=DetectorType.DC.getDetectorId() &&
+                   p.getTrackDetector()!=DetectorType.CVT.getDetectorId() ) continue;
+               bank.setShort("index",i,(short)p.getTrackIndex());
+               bank.setShort("pindex",i,(short)i);
+               for (int ii=0; ii<5; ii++) {
+                   for (int jj=0; jj<5; jj++) {
+                       String varName = String.format("C%d%d",ii+1,jj+1);
+                       if (bank.getDescriptor().hasEntry(varName)!=true) continue;
+                       bank.setFloat(varName,i,p.getCovMatrix(ii,jj));
+                   }
+               }
+           }
+       }
+       return bank;
+   }
 
    public static DataBank getCrossBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
        DataBank bank = event.createBank(bank_name, particles.size());
@@ -396,67 +429,13 @@ public class DetectorData {
        return bank;
    }
       
-   public static List<double[]> readTBCovMat(DataEvent event, String bank_name) {
-       List<double[]> covMat = new ArrayList<double[]>();
-       if(event.hasBank(bank_name)==true){
-           DataBank bank = event.getBank(bank_name);
-           int nrows = bank.rows();
-           for(int row = 0; row < nrows; row++){
-               double[] covariance = new double[15];
-               covariance[0] = bank.getFloat("C11", row);
-               covariance[1] = bank.getFloat("C12", row);
-               covariance[2] = bank.getFloat("C13", row);
-               covariance[3] = bank.getFloat("C14", row);
-               covariance[4] = bank.getFloat("C15", row);
-               covariance[5] = bank.getFloat("C22", row);
-               covariance[6] = bank.getFloat("C23", row);
-               covariance[7] = bank.getFloat("C24", row);
-               covariance[8] = bank.getFloat("C25", row);
-               covariance[9] = bank.getFloat("C33", row);
-               covariance[10] = bank.getFloat("C34", row);
-               covariance[11] = bank.getFloat("C35", row);
-               covariance[12] = bank.getFloat("C44", row);
-               covariance[13] = bank.getFloat("C45", row);
-               covariance[14] = bank.getFloat("C55", row);
-               covMat.add(covariance);
-           }
-       }
-
-       return covMat;
-   }
-   
-   public static DataBank getTBCovMatBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
-       DataBank bank = event.createBank(bank_name, particles.size());
-       for(int row = 0; row < particles.size(); row++){
-           DetectorParticle p = particles.get(row);
-           double[] matrix =  p.getTBCovariantMatrix();
-           bank.setShort("pindex", row, (short) row);
-           bank.setShort("C11", row, (short) matrix[0]);
-           bank.setShort("C12", row, (short) matrix[1]);
-           bank.setShort("C13", row, (short) matrix[2]);
-           bank.setShort("C14", row, (short) matrix[3]);
-           bank.setShort("C15", row, (short) matrix[4]);
-           bank.setShort("C22", row, (short) matrix[5]);
-           bank.setShort("C23", row, (short) matrix[6]);
-           bank.setShort("C24", row, (short) matrix[7]);
-           bank.setShort("C25", row, (short) matrix[8]);
-           bank.setShort("C33", row, (short) matrix[9]);
-           bank.setShort("C34", row, (short) matrix[10]);
-           bank.setShort("C35", row, (short) matrix[11]);
-           bank.setShort("C44", row, (short) matrix[12]);
-           bank.setShort("C45", row, (short) matrix[13]);
-           bank.setShort("C55", row, (short) matrix[14]);
-       }
-       return bank;
-   }
-   
    public static Vector3D  readVector(DataBank bank, int row, String xc, String yc, String zc){
        Vector3D vec = new Vector3D();
        vec.setXYZ(bank.getFloat(xc, row), bank.getFloat(yc, row),bank.getFloat(zc, row));
        return vec;
    }
    
-   public static List<DetectorTrack>  readDetectorTracks(DataEvent event, String bank_name, String traj_bank_name){
+   public static List<DetectorTrack>  readDetectorTracks(DataEvent event, String bank_name, String traj_bank_name, String cov_bank_name){
        
        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
        if(event.hasBank(bank_name)==true){
@@ -466,6 +445,10 @@ public class DetectorData {
            DataBank trajBank = null;
            if (traj_bank_name!=null && event.hasBank(traj_bank_name)) {
                trajBank=event.getBank(traj_bank_name);
+           }
+           DataBank covBank = null;
+           if (cov_bank_name!=null && event.hasBank(cov_bank_name)) {
+               covBank=event.getBank(cov_bank_name);
            }
 
            for(int row = 0; row < nrows; row++){
@@ -493,23 +476,33 @@ public class DetectorData {
 
                track.setDetectorID(DetectorType.DC.getDetectorId());
 
-               int trkId=bank.getInt("id",row);
+               final int trkId=bank.getInt("id",row);
 
                // this could be optimized:
                if (trajBank!=null) {
                    for (int ii=0; ii<trajBank.rows(); ii++) {
-                       if (trajBank.getInt("tid",ii) ==  trkId) {
-                           int detId=trajBank.getInt("did",ii);
-                           float bField=trajBank.getFloat("B",ii);
-                           float pathLength=trajBank.getFloat("L",ii);
-                           float xx=trajBank.getFloat("x",ii);
-                           float yy=trajBank.getFloat("y",ii);
-                           float zz=trajBank.getFloat("z",ii);
-                           Line3D traj=new Line3D(xx,yy,zz,
-                                   xx+track.getMaxLineLength()*trajBank.getFloat("tx",ii),
-                                   yy+track.getMaxLineLength()*trajBank.getFloat("ty",ii),
-                                   zz+track.getMaxLineLength()*trajBank.getFloat("tz",ii));
-                           track.addTrajectoryPoint(trkId,detId,traj,bField,pathLength);
+                       if (trajBank.getInt("tid",ii) !=  trkId) continue;
+                       int detId=trajBank.getInt("did",ii);
+                       float bField=trajBank.getFloat("B",ii);
+                       float pathLength=trajBank.getFloat("L",ii);
+                       float xx=trajBank.getFloat("x",ii);
+                       float yy=trajBank.getFloat("y",ii);
+                       float zz=trajBank.getFloat("z",ii);
+                       Line3D traj=new Line3D(xx,yy,zz,
+                               xx+track.getMaxLineLength()*trajBank.getFloat("tx",ii),
+                               yy+track.getMaxLineLength()*trajBank.getFloat("ty",ii),
+                               zz+track.getMaxLineLength()*trajBank.getFloat("tz",ii));
+                       track.addTrajectoryPoint(trkId,detId,traj,bField,pathLength);
+                   }
+               }
+               if (covBank!=null) {
+                   for (int ii=0; ii<covBank.rows(); ii++) {
+                       if (covBank.getInt("id",ii) !=  trkId) continue;
+                       for (int jj=1; jj<=5; jj++) {
+                           for (int kk=1; kk<5; kk++) {
+                               float ele=covBank.getFloat(String.format("C%d%d",jj,kk),ii);
+                               track.setCovMatrix(jj-1,kk-1,ele);
+                           }
                        }
                    }
                }

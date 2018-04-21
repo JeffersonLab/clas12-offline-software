@@ -43,8 +43,6 @@ public class DetectorParticle implements Comparable {
     
     private Line3D  driftChamberEnter = new Line3D();
     
-    private double[]  covMAT = new double[15];
-    
     private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
     private List<TaggerResponse>     taggerStore = new ArrayList<TaggerResponse>();
@@ -63,11 +61,6 @@ public class DetectorParticle implements Comparable {
         detectorTrack = track;
     }
    
-    public DetectorParticle(DetectorTrack track, double[] covMat) {
-        detectorTrack = track;
-        covMAT = covMat;
-    }
-    
     public DetectorParticle(int charge, double px, double py, double pz){
         detectorTrack = new DetectorTrack(charge,px,py,pz);
     }
@@ -247,12 +240,15 @@ public class DetectorParticle implements Comparable {
     public int getTrackIndex() {
         return this.detectorTrack.getTrackIndex();
     }
-    
-    public double[] getTBCovariantMatrix() {
-        return this.covMAT;
+
+    public float[][] getCovMatrix() {
+        return this.detectorTrack.getCovMatrix();
     }
-    
-    
+
+    public float getCovMatrix(int ii, int jj) {
+        return this.detectorTrack.getCovMatrix(ii,jj);
+    }
+
     /**
      * Particle score combined number that represents which detectors were hit
      * HTCC - 1000, FTOF - 100, EC - 10
