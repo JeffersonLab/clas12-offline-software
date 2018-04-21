@@ -591,7 +591,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private void addToMagneticFieldMenu() {
 		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
 		final JMenuItem plotItem = new JMenuItem("Plot the Field...");
-		final JMenuItem loadItem = new JMenuItem("Load a different torus...");
+		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
 
 		magMenu.addSeparator();
 
