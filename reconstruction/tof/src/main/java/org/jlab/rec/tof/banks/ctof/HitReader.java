@@ -50,7 +50,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
-            IndexedTable constants4) {
+            IndexedTable constants4, 
+            IndexedTable constants5) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -128,7 +129,8 @@ public class HitReader implements IMatchedHit {
             hit.set_HitParameters(1,  constants0, 
              constants1, 
              constants2, 
-             constants3);
+             constants3, 
+             constants5);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);

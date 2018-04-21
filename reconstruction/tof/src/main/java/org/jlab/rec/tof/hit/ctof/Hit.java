@@ -29,7 +29,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     private Line3D _paddleLine; // paddle line
-
+    
     private CTOFDetHit _matchedTrackHit; // matched hit information from
     // tracking; this contains the
     // information of the entrance and
@@ -67,7 +67,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
-            IndexedTable constants3) {
+            IndexedTable constants3, 
+            IndexedTable constants5) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -106,8 +107,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADCDErr = this.ADC2Unc();
         double TDCUErr = this.TDC1Unc();
         double TDCDErr = this.TDC2Unc();
-        double ADC_MIP = this.ADC_MIP(null);
-        double ADC_MIPErr = this.ADC_MIPUnc(null);
+        double ADC_MIP = this.ADC_MIP(constants5);
+        double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.ScinBarThickn();
 
@@ -386,12 +387,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     @Override
     public double ADC_MIP(IndexedTable tab) {
-        return Constants.ADC_MIP[this.get_Panel() - 1];
+//        return Constants.ADC_MIP[this.get_Panel() - 1];
+        return tab.getDoubleValue("mipa_upstream", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
     public double ADC_MIPUnc(IndexedTable tab) {
-        return Constants.ADC_MIP_UNC[this.get_Panel() - 1];
+//        return Constants.ADC_MIP_UNC[this.get_Panel() - 1];
+        return tab.getDoubleValue("mipa_upstream_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
