@@ -50,11 +50,25 @@ public class DetectorTrack {
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
 
+    private float[][] covMatrix = new float[5][5];
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
    
     private List<TrajectoryPoint> trajectory = new ArrayList<TrajectoryPoint>();
     
     private double MAX_LINE_LENGTH = 1500.0;
+
+    public void setCovMatrix(int ii,int jj,float val) {
+        covMatrix[ii][jj] = val;
+    }
+    public void setCovMatrix(float[][] matrix) {
+        covMatrix = matrix;
+    }
+    public float getCovMatrix(int ii, int jj) {
+        return covMatrix[ii][jj];
+    }
+    public float[][] getCovMatrix() {
+        return covMatrix;
+    }
 
     public double getMaxLineLength() {
         return MAX_LINE_LENGTH;
