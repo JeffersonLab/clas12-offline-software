@@ -242,6 +242,22 @@ public class Constants {
     //	TORSCALE = tORSCALE;
     //}
 
+
+    private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+    private static double[][][][] _T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+    public static synchronized void setT0(double[][][][] T0) {
+        _T0 = T0;
+    }
+
+    public static synchronized void setT0Err(double[][][][] T0ERR) {
+        _T0ERR = T0ERR;
+    }
+    public static synchronized double[][][][] getT0() {
+        return _T0;
+    }
+    public static synchronized double[][][][] getT0Err() {
+        return _T0ERR;
+    }
    
 
 }
