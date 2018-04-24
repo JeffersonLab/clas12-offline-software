@@ -37,6 +37,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
     private SegmentTrajectory _Trajectory;
     private int _Status = 1;
     private double[] _SegmentEndPoints;
+    public int associatedCrossId = -1;
     /**
      * Construct the segment from the fitted cluster.
      *
@@ -50,8 +51,23 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         this._Sector = fCluster.get_Sector();
         this._Superlayer = fCluster.get_Superlayer();
         this._Id = fCluster.get_Id();
-
+        this.set_Status(Status());
     }
+    
+    public int Status() {
+        int stat = 0;    
+        
+        int L[] = new int[6];
+        for(int l = 0; l<this.size(); l++) {
+            L[this.get(l).get_Layer()-1]++;
+        }
+        for(int l = 0; l<6; l++) {
+            if(L[l]==0 || L[l]>2)
+                stat=1;
+        }
+        return stat;
+    }
+    
     /**
      *
      * @return the fitted cluster
@@ -184,7 +200,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         if (Math.abs(this.getAvgwire() - otherseg.getAvgwire()) < Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B) {
             value = true;
         }
-
+        
         return value;
     }
     

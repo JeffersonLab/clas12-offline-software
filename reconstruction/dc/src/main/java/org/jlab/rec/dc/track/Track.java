@@ -1,8 +1,11 @@
 package org.jlab.rec.dc.track;
 
 import Jama.Matrix;
+import java.util.ArrayList;
+import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 
@@ -41,9 +44,35 @@ public class Track extends Trajectory implements Comparable<Track>{
     private int _FitNDF;
     private double _fitChisq;
     public boolean fit_Successful;
-    public int status;
+    private int _missingSuperlayer;
+    private int _fitConvergenceStatus;
+    
     
     public Track() {
+    }
+    /**
+     * 
+     * @return missing superlayer of the track
+     */
+    public int get_MissingSuperlayer() {
+        return _missingSuperlayer;
+    }
+    /**
+     * 
+     * @param missingSuperlayer track missing superlayer
+     */
+    public void set_MissingSuperlayer(int missingSuperlayer) {
+        this._missingSuperlayer = missingSuperlayer;
+    }
+    
+    private int _Status=0;
+
+    public int get_Status() {
+        return _Status;
+    }
+
+    public void set_Status(int _Status) {
+        this._Status = _Status;
     }
     
     /**
@@ -271,6 +300,21 @@ public class Track extends Trajectory implements Comparable<Track>{
     public void set_CovMat(Matrix _CovMat) {
         this._CovMat = _CovMat;
     }
+    
+    /**
+     * 
+     * @param fitConvergenceStatus fit convergence status 0 if OK, 1 if the fit exits before converging
+     */
+    public void set_FitConvergenceStatus(int fitConvergenceStatus) {
+        this._fitConvergenceStatus = fitConvergenceStatus;
+    }
+    /**
+     * 
+     * @return fit convergence status (0 if OK, 1 if the fit exits before converging)
+     */
+    public int get_FitConvergenceStatus() {
+        return _fitConvergenceStatus;
+    }
     /**
      * 
      * @return the state vector in the tilted sector coordinate system at the mid-plane between the 2 superlayers in region 1
@@ -285,6 +329,33 @@ public class Track extends Trajectory implements Comparable<Track>{
     public void set_StateVecAtReg1MiddlePlane(StateVec _StateVecAtReg1MiddlePlane) {
         this._StateVecAtReg1MiddlePlane = _StateVecAtReg1MiddlePlane;
     }
+    
+    private Track _AssociatedHBTrack;
+    /**
+     * 
+     * @param _trk associated track for Hit-Based tracking
+     */
+    public void set_AssociatedHBTrack(Track _trk) {
+        _AssociatedHBTrack = _trk;
+    }
+    /**
+     * 
+     * @return track associated with the hit for Hit-Based tracking
+     */
+    public Track get_AssociatedHBTrack() {
+        return _AssociatedHBTrack;
+    }
+    
+    private List<Segment> _ListOfHBSegments = new ArrayList<Segment>();
+
+    public List<Segment> get_ListOfHBSegments() {
+        return _ListOfHBSegments;
+    }
+
+    public void set_ListOfHBSegments(List<Segment> _listOfHBSegments) {
+        this._ListOfHBSegments = _listOfHBSegments;
+    }
+    
     /**
      * Basic track info
      */
@@ -336,5 +407,7 @@ public class Track extends Trajectory implements Comparable<Track>{
 
             return ((returnSec ==0) ? return_val_a6 : returnSec);
     }
+
+   
 
 }
