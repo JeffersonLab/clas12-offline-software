@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -97,7 +99,7 @@ public class Converter {
 	static double oldPhi = -999f;
 
 	static boolean checkrho = true;
-	private static GridData[] checkAllFiles(ArrayList<File> files) throws IOException {
+	private static GridData[] preProcess(ArrayList<File> files) throws IOException {
 		
 		if (!files.isEmpty()) {
 			System.out.println("Found " + files.size() + " files.");
@@ -325,14 +327,84 @@ public class Converter {
 		}
 		
 	}
+	
+	public static void convertToBinary(ArrayList<File> files, GridData gdata[]) {
+		if (gdata != null) {
+			try {
+				processAllFiles(files, gdata);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void convertToGemc(ArrayList<File> files, GridData gdata[]) {
+		if (gdata != null) {
+			File file = new File(getDataDir(), "gemc.txt");
+			
+			boolean assumedSymmetric = gdata[PHI].max < 100;
+			System.out.println("In GEMC Converter assumed symmetric: " + assumedSymmetric);
+			
+			if (file.exists()) {
+				file.delete();
+			}
 
+				
+			try {
+				PrintWriter writer = new PrintWriter(new FileOutputStream(file));
+				
+				//write the header
+				
+				int indentLevel = 0;
+				writeln(writer, indentLevel, "<mfield>");
+				indentLevel++;
+				
+				
+				writeln(writer, indentLevel, "<map>");
+				indentLevel++;
+				
+				writeln(writer, indentLevel, "<coordinate>");
+				indentLevel++;
+
+				indentLevel--;
+				writeln(writer, indentLevel, "</coordinate>");
+
+
+				indentLevel--;
+				writeln(writer, indentLevel, "</map>");
+
+				
+				
+				writeln(writer, indentLevel, "</mfield>");
+				
+				writer.flush();
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static String spaces = "     ";
+
+	private static void writeln(PrintWriter writer, int indentLevel, String line) {
+		for (int i = 0; i < indentLevel; i++) {
+			writer.print(spaces);
+		}
+		writer.println(line);
+	}
+	
+	
 	public static void main(String arg[]) {
 		String dataDir = getDataDir();
-		System.out.println("data dir = [" + dataDir + "]");
+		
+		ArrayList<File> files = dataFiles(dataDir);
+		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
 
+		//preprocess to get the grid data
 		GridData gdata[] = null;
 		try {
-			gdata = checkAllFiles(dataFiles(dataDir));
+			gdata = preProcess(files);
 			System.out.println("PHI: " + gdata[PHI]);
 			System.out.println("RHO: " + gdata[RHO]);
 			System.out.println("Z: " + gdata[Z]);
@@ -340,14 +412,10 @@ public class Converter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+//		convertToBinary(files, gdata);
+		convertToGemc(files, gdata);
 
-		if (gdata != null) {
-			try {
-				processAllFiles(dataFiles(dataDir), gdata);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		System.out.println("done");
 	}
 	

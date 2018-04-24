@@ -545,6 +545,14 @@ public abstract class MagneticField implements IField {
 		StringBuffer sb = new StringBuffer(1024);
 		sb.append("\n");
 		sb.append("Created: " + getCreationDate() + "\n");
+		
+		if (this instanceof Torus) {
+			sb.append("Reduced torus with assumed symmetry\n");
+		}
+		else if (this instanceof FullTorus) {
+			sb.append("Full torus with no assumed symmetry\n");
+		}
+		
 		sb.append(q1Coordinate.toString());
 		sb.append("\n");
 		sb.append(q2Coordinate.toString());
