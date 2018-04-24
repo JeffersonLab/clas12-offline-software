@@ -112,7 +112,7 @@ public class DCHBEngine extends ReconstructionEngine {
         	return true;
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
             if(newRun>1000) {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
             } else {
                 MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
             }
