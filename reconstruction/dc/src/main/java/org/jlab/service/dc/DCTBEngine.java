@@ -7,7 +7,6 @@ import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
@@ -29,7 +28,6 @@ import org.jlab.rec.dc.cross.CrossMaker;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
@@ -42,18 +40,12 @@ import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 
 public class DCTBEngine extends ReconstructionEngine {
 
-    int Run;
-
-    double[][][][] T0 ;
-    double[][][][] T0ERR ;
     DCGeant4Factory dcDetector;
     FTOFGeant4Factory ftofDetector;
     ECGeant4Factory ecDetector;
     PCALGeant4Factory pcalDetector; 
     TrajectorySurfaces tSurf;
-    double TORSCALE;
-    double SOLSCALE;
-
+    
     private TimeToDistanceEstimator tde;
     public DCTBEngine() {
         super("DCTB","ziegler","4.0");
@@ -69,7 +61,7 @@ public class DCTBEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        Run = 0;
+        
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
@@ -83,9 +75,7 @@ public class DCTBEngine extends ReconstructionEngine {
         // create the surfaces
         tSurf = new TrajectorySurfaces();
         tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
-        //T0s
-        T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-        T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+        
         //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
         //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
@@ -103,9 +93,11 @@ public class DCTBEngine extends ReconstructionEngine {
         //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
         //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
         //}
+        //TableLoader.Fill(this.getConstantsManager().getConstants(1000, "/calibration/dc/time_to_distance/time2dist")); 
         tde = new TimeToDistanceEstimator();
         return true;
     }
+    
     @Override
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
@@ -115,38 +107,11 @@ public class DCTBEngine extends ReconstructionEngine {
         }
         //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
-
+        
         DataBank bank = event.getBank("RUN::config");
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-
-        if(Run==0 || (Run!=0 && Run!=newRun)) {
-            DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(newRun, "default");
-            dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-            //disconnect from database. Important to do this after loading tables.
-            dbprovider.disconnect();
-            // T0-subtraction
-
-            for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-                int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-                int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-                int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-                int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-                double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-                double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-
-                T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-                T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-            }
-                //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
-                TORSCALE = (double)bank.getFloat("torus", 0);
-                SOLSCALE = (double)bank.getFloat("solenoid", 0);
-                // TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
-                TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
-
-                Run = newRun;
-        }
 
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
@@ -165,10 +130,10 @@ public class DCTBEngine extends ReconstructionEngine {
         hitRead.read_HBHits(event, 
             this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
-            T0, T0ERR, dcDetector, tde);
+            Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
         hitRead.read_TBHits(event, 
             this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, T0, T0ERR);
+            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         if(hitRead.get_TBHits().isEmpty()) {
@@ -371,7 +336,7 @@ public class DCTBEngine extends ReconstructionEngine {
 
         //positive charges bend outward for nominal GEMC field configuration
         int q = (int) Math.signum(deltaTheta); 
-        q*= (int)-1*Math.signum(TORSCALE); // flip the charge according to the field scale						
+        q*= (int)-1*Math.signum(DCSwimmer.getTorScale()); // flip the charge according to the field scale						
 
         double p = track.get_pAtOrig().mag(); 
         

@@ -516,12 +516,32 @@ public class DCSwimmer {
         return new Point3D(result[0] / 10, result[1] / 10, result[2] / 10);
 
     }
-
+    private static double SOLSCALE = -1;
+    private static double TORSCALE = -1;
+    
+    public static synchronized void setSolScale(double s) {
+        SOLSCALE = s;
+    }
+    public static synchronized void setTorScale(double s) {
+        TORSCALE = s;
+    }
+    public static synchronized double getSolScale() {
+        return SOLSCALE;
+    }
+    public static synchronized double getTorScale() {
+        return TORSCALE;
+    }
+    
     public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale, double shift) {
-        
+        if (FieldsLoaded) {
+            return;
+        }
         MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
         MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
         MagneticFields.getInstance().setSolenoidShift(shift);
+        setSolScale(SolenoidScale);
+        setTorScale(TorusScale);
+        FieldsLoaded = true;
       //  if (rcompositeField.get(0) != null) {
        //     ((MagneticField) rcompositeField.get(0)).setScaleFactor(TorusScale);
             System.out.println("FORWARD TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");

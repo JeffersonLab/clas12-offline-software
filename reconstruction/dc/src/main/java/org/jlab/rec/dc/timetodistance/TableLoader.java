@@ -2,6 +2,7 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -14,6 +15,7 @@ public class TableLoader {
     //public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
     public static double[][][][][] DISTFROMTIME = new double[6][6][8][6][1800]; // sector slyr alpha Bfield time bins
     static boolean T2DLOADED = false;
+    static boolean T0LOADED = false;
     static int minBinIdxB = 0;
     static int maxBinIdxB = 7;
     static int minBinIdxAlpha = 0;
@@ -47,12 +49,41 @@ public class TableLoader {
             }
     }
 
+    public static synchronized void FillT0Tables(int run) {
+        if (T0LOADED) return;
+        System.out.println(" T0 TABLE FILLED.....");
+        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, "default");
+        dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+        //disconnect from database. Important to do this after loading tables.
+        dbprovider.disconnect();
+        // T0-subtraction
+        double[][][][] T0 ;
+        double[][][][] T0ERR ;
+        //T0s
+        T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+        T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+        for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+            int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+            int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+            int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+            int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+            double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+            double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+
+            T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+            T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+            Constants.setT0(T0);
+            Constants.setT0Err(T0ERR);
+            
+        }
+        T0LOADED = true;
+    }
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
         //CCDBTables 2 =  "/calibration/dc/time_corrections/T0_correction";	
         if (T2DLOADED) return;
-
+        System.out.println(" T2D TABLE FILLED.....");
         double stepSize = 0.0010;
         DecimalFormat df = new DecimalFormat("#");
         df.setRoundingMode(RoundingMode.CEILING);
