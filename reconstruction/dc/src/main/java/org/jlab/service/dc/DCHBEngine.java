@@ -74,7 +74,7 @@ public class DCHBEngine extends ReconstructionEngine {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
-        
+        MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
         //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
         //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
@@ -108,13 +108,14 @@ public class DCHBEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-       
+        if(newRun==0)
+        	return true;
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
-            if(newRun>1000) {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
-            } else {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-            }
+            //if(newRun>1000) {
+            //    MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+            //} else {
+            //    MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+            //}
             
             TableLoader.FillT0Tables(newRun);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 

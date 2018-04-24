@@ -112,6 +112,8 @@ public class DCTBEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
+        if(newRun==0)
+        	return true;
 
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
