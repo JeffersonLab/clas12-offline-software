@@ -108,7 +108,8 @@ public class DCHBEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-       
+        if(newRun==0)
+        	return true;
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
             if(newRun>1000) {
                 MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
