@@ -116,7 +116,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             if(newRun>1000) {
                 MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
             } else {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC_TORUS);
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
             }
             
             TableLoader.FillT0Tables(newRun);
