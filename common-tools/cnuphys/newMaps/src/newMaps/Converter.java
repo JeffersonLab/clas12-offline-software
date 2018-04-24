@@ -25,6 +25,10 @@ public class Converter {
 	private static int PHI = 0;
 	private static int RHO = 1;
 	private static int Z = 2;
+	
+	private static String gemcName[] = {"\"azimuthal\"", "\"transverse\"", "\"longitudinal\""};
+	private static String ordinal[] = {"first", "second", "third"};
+	private static String units[] = {"\"deg\"", "\"cm\"", "\"cm\""};
 
 	private static String _homeDir = System.getProperty("user.home");
 
@@ -105,7 +109,7 @@ public class Converter {
 			System.out.println("Found " + files.size() + " files.");
 			GridData gdata[] = new GridData[3];
 			for (int i = 0; i < 3; i++) {
-				gdata[i] = (new Converter()).new GridData();
+				gdata[i] = (new Converter()).new GridData(i);
 			}
 
 			int zIndex = 0;
@@ -214,7 +218,7 @@ public class Converter {
 	private static void processAllFiles(ArrayList<File> files, GridData gdata[]) throws IOException {
 		if (!files.isEmpty()) {
 
-			File bfile = new File(getDataDir(), "torus.binary");
+			File bfile = new File(getDataDir(), "torus.dat");
 			DataOutputStream dos = new DataOutputStream(new FileOutputStream(bfile));
 
 			int nPhi = gdata[PHI].n;
@@ -340,42 +344,129 @@ public class Converter {
 	
 	public static void convertToGemc(ArrayList<File> files, GridData gdata[]) {
 		if (gdata != null) {
-			File file = new File(getDataDir(), "gemc.txt");
+			File afile = new File(getDataDir(), "gemc_torus.txt");
 			
 			boolean assumedSymmetric = gdata[PHI].max < 100;
 			System.out.println("In GEMC Converter assumed symmetric: " + assumedSymmetric);
 			
-			if (file.exists()) {
-				file.delete();
+			if (afile.exists()) {
+				afile.delete();
 			}
-
 				
 			try {
-				PrintWriter writer = new PrintWriter(new FileOutputStream(file));
+				PrintWriter writer = new PrintWriter(new FileOutputStream(afile));
 				
 				//write the header
 				
 				int indentLevel = 0;
-				writeln(writer, indentLevel, "<mfield>");
+				writeln(writer, indentLevel, false, "<mfield>");
 				indentLevel++;
 				
+				writeln(writer, indentLevel, true, "description name=\""
+						+ afile.getName() + "\" factory=\"ASCII\" comment=\"clas12 superconducting torus\"");
 				
-				writeln(writer, indentLevel, "<map>");
+				writeln(writer, indentLevel, true, "symmetry type=\"" + 
+						(assumedSymmetric ? "phi-segmented\"" : "none\"") +
+						" format=\"map\" integration=\"ClassicalRK4\" minStep=\"1*mm\"");
+				
+				writeln(writer, indentLevel, false, "<map>");
 				indentLevel++;
 				
-				writeln(writer, indentLevel, "<coordinate>");
+				writeln(writer, indentLevel, false, "<coordinate>");
 				indentLevel++;
+				
+				for (GridData gd : gdata) {
+					writeln(writer, indentLevel, true, gd.forGEMC());
+				}
 
 				indentLevel--;
-				writeln(writer, indentLevel, "</coordinate>");
+				writeln(writer, indentLevel, false, "</coordinate>");
 
+				writeln(writer, indentLevel, true, "field unit=\"kilogauss\"");
+				writeln(writer, indentLevel, true, "interpolation type=\"none\"");
 
 				indentLevel--;
-				writeln(writer, indentLevel, "</map>");
+				writeln(writer, indentLevel, false, "</map>");
 
 				
 				
-				writeln(writer, indentLevel, "</mfield>");
+				indentLevel--;
+		    	writeln(writer, indentLevel, false, "</mfield>");
+		    	
+		    	//OK now the data
+		    	
+				int nPhi = gdata[PHI].n;
+				int nRho = gdata[RHO].n;
+				int nZ = gdata[Z].n;
+
+				int zIndex = 0;
+				FloatVect[][][] bvals = new FloatVect[nPhi][nRho][nZ];
+
+				for (File file : files) {
+
+					System.out.print(" PROCESSING FILE [" + file.getName() + "] zindex =  " + zIndex + "  ");
+
+					try {
+
+						AsciiReader ar = new AsciiReader(file, zIndex) {
+							int count = 0;
+
+							@Override
+							protected void processLine(String line) {
+								String tokens[] = AsciiReadSupport.tokens(line);
+								if ((tokens != null) && (tokens.length == 7)) {
+
+									int rhoIndex = count % nRho;
+									int phiIndex = count / nRho;
+
+									// note T to kG
+									float Bx = Float.parseFloat(tokens[3]) * 10;
+									float By = Float.parseFloat(tokens[4]) * 10;
+									float Bz = Float.parseFloat(tokens[5]) * 10;
+
+									bvals[phiIndex][rhoIndex][iVal] = new FloatVect(Bx, By, Bz);
+
+									count++;
+								}
+							}
+
+							@Override
+							public void done() {
+								System.out.println(" processed " + count + " lines");
+							}
+
+						};
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+						System.exit(1);
+					}
+
+					zIndex++;
+
+				} // end for loop	
+				
+				
+				//now write them back out
+				for (int iPhi= 0; iPhi < nPhi; iPhi++) {
+					double phi = gdata[PHI].min + iPhi*gdata[PHI].del();
+					for (int iRho= 0; iRho < nRho; iRho++) {
+						double rho = gdata[RHO].min + iRho*gdata[RHO].del();
+						for (int iZ= 0; iZ < nZ; iZ++) {
+							double z = gdata[Z].min + iZ*gdata[Z].del();
+							FloatVect fv = bvals[iPhi][iRho][iZ];
+							writeln(writer, 0, false, String.format("%-5.1f  %-5.1f   %-5.1f   % 11.5E   % 11.5E   % 11.5E", phi, rho, z, fv.x, fv.y, fv.z));
+							
+//							if (iZ == 10) {
+//								writer.flush();
+//								writer.close();
+//								return;
+//							}
+						}
+						
+					}
+					
+				}
+				
 				
 				writer.flush();
 				writer.close();
@@ -384,17 +475,22 @@ public class Converter {
 			}
 		}
 	}
-	
-	private static String spaces = "     ";
 
-	private static void writeln(PrintWriter writer, int indentLevel, String line) {
+	private static String spaces = "    ";
+
+	private static void writeln(PrintWriter writer, int indentLevel, boolean brackets, String line) {
 		for (int i = 0; i < indentLevel; i++) {
 			writer.print(spaces);
 		}
-		writer.println(line);
+		if (brackets) {
+			writer.print("<");
+			writer.print(line);
+			writer.println("/>");
+		} else {
+			writer.println(line);
+		}
 	}
-	
-	
+
 	public static void main(String arg[]) {
 		String dataDir = getDataDir();
 		
@@ -413,21 +509,35 @@ public class Converter {
 			e.printStackTrace();
 		}
 		
-//		convertToBinary(files, gdata);
+	//	convertToBinary(files, gdata);
 		convertToGemc(files, gdata);
 
 		System.out.println("done");
 	}
 	
 	class GridData {
+		public int index = -1;
 		public int n = 0;
 		public double min = Double.POSITIVE_INFINITY;
 		public double max = Double.NEGATIVE_INFINITY;
+		
+		public GridData(int index) {
+			this.index = index;
+		}
+		
+		public String forGEMC() {
+			return String.format("%-6s name=%-14s npoints=\"%d\" min=\"%d\" max=\"%d\" units=%s", ordinal[index], gemcName[index], n, (int)min, (int)max, units[index]);
+		}
 		
 		@Override
 		public String toString() {
 			return String.format("N = %d   min = %12.5f  max = %12.5f", n, min, max);
 		}
+		
+		public double del() {
+			return (max-min)/(n-1);
+		}
+		
 	}
 
 }
