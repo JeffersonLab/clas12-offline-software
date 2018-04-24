@@ -42,20 +42,22 @@ public class MagneticFields {
 		formatterlong.setTimeZone(tz);
 	}
 
-	// vbersion of mag field package
+	
+	//version of mag field package
 	private static String VERSION = "1.09";
-	// constants for different torus grids
-	public static final int SYMMETRIC_TORUS = 0;
-	public static final int TORUS_025 = 1;
-	public static final int TORUS_050 = 2;
-	public static final int TORUS_075 = 3;
-	public static final int TORUS_100 = 4;
-	public static final int TORUS_125 = 5;
-	public static final int TORUS_150 = 6;
-	public static final int TORUS_200 = 7;
+		
+	//constants for different torus grids
+    public static final int SYMMETRIC_TORUS = 0;
+    public static final int TORUS_025       = 1;
+    public static final int TORUS_050       = 2;
+    public static final int TORUS_075       = 3;
+    public static final int TORUS_100       = 4;
+    public static final int TORUS_125       = 5;
+    public static final int TORUS_150       = 6;
+    public static final int TORUS_200       = 7;
 
-	// initialize only once
-	private boolean _initialized = false;
+	//initialize only once
+	private static boolean _initialized = false;
 
 	// solenoidal field
 	private Solenoid _solenoid;
@@ -912,8 +914,8 @@ public class MagneticFields {
 	 * Tries to load the magnetic fields from fieldmaps A unix like colon separated
 	 * path
 	 */
-	public void initializeMagneticFields(String dataPath, TorusMap torusMap) {
-
+	public synchronized void initializeMagneticFields(String dataPath, TorusMap torusMap) {
+		
 		if (_initialized) {
 			return;
 		}
