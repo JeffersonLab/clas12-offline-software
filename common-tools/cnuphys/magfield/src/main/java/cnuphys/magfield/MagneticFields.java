@@ -45,7 +45,7 @@ public class MagneticFields {
     public static final int TORUS_200       = 7;
 
 	//initialize only once
-	private boolean _initialized = false;
+	private static boolean _initialized = false;
 
 	// solenoidal field
 	private Solenoid _solenoid;
@@ -687,7 +687,7 @@ public class MagneticFields {
 	 * Tries to load the magnetic fields from fieldmaps
 	 * A unix like colon separated path
 	 */
-	public void initializeMagneticFields(String dataPath, TorusMap torusMap) {
+	public synchronized void initializeMagneticFields(String dataPath, TorusMap torusMap) {
 		
 		if (_initialized) {
 			return;
