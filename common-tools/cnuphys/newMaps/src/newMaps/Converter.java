@@ -19,6 +19,10 @@ import java.util.StringTokenizer;
  *
  */
 public class Converter {
+	
+	private static int PHI = 0;
+	private static int RHO = 1;
+	private static int Z = 2;
 
 	private static String _homeDir = System.getProperty("user.home");
 
@@ -88,13 +92,19 @@ public class Converter {
 	private static final double TINY = 1.0e-12;
 
 	// test that the grid sems to be right
-	static float oldZ = -99f;
-	static float oldRho = -99f;
-	static float oldPhi = -999f;
+	static double oldZ = -99f;
+	static double oldRho = -99f;
+	static double oldPhi = -999f;
 
-	private static void checkAllFiles(ArrayList<File> files) throws IOException {
+	static boolean checkrho = true;
+	private static GridData[] checkAllFiles(ArrayList<File> files) throws IOException {
+		
 		if (!files.isEmpty()) {
 			System.out.println("Found " + files.size() + " files.");
+			GridData gdata[] = new GridData[3];
+			for (int i = 0; i < 3; i++) {
+				gdata[i] = (new Converter()).new GridData();
+			}
 
 			int zIndex = 0;
 			oldZ = -99f;
@@ -105,7 +115,13 @@ public class Converter {
 			for (File file : files) {
 				System.out.println(" PROCESSING FILE [" + file.getName() + "] zindex =  " + zIndex + "  ");
 
-				if (zIndex == 1) break;
+				boolean first = (zIndex == 0);
+				
+//				boolean last = (zIndex == (files.size()-1));
+				
+				gdata[Z].n = files.size();
+				
+	//			if (zIndex == 1) break;
 				
 				try {
 
@@ -117,34 +133,54 @@ public class Converter {
 							String tokens[] = AsciiReadSupport.tokens(line);
 							if ((tokens != null) && (tokens.length == 7)) {
 
-								double newX = Double.parseDouble(tokens[0]);
-								double newY = Double.parseDouble(tokens[1]);
-								float newZ = Float.parseFloat(tokens[2]);
-								
-								float newRho = (float) Math.hypot(newX, newY);
-								float newPhi = (float) Math.toDegrees(Math.atan2(newY, newX));
+								double newX = Double.parseDouble(tokens[0])/10;
+								double newY = Double.parseDouble(tokens[1])/10;
+								double newZ = Float.parseFloat(tokens[2])/10;
+								double newRho = Math.hypot(newX, newY);
+								double newPhi = Math.toDegrees(Math.atan2(newY, newX));
 								if (newPhi < -.0001) newPhi += 360;
 							
-								if (oldPhi > 1) {
-									if (newPhi < 1) {
-										System.out.println("phi = " + newPhi + "  x = " + newX/10 + "  y = " + newY/10);
-									}
-								}
+								gdata[PHI].min = Math.min(gdata[PHI].min, newPhi);
+								gdata[PHI].max = Math.max(gdata[PHI].max, newPhi);
+								gdata[RHO].min = Math.min(gdata[RHO].min, newRho);
+								gdata[RHO].max = Math.max(gdata[RHO].max, newRho);
+								gdata[Z].min = Math.min(gdata[Z].min, newZ);
+								gdata[Z].max = Math.max(gdata[Z].max, newZ);
+								
+							
+//								if (oldPhi > 1) {
+//									if (newPhi < 1) {
+//										System.out.println("phi = " + newPhi + "  x = " + newX/10 + "  y = " + newY/10);
+//									}
+//								}
 								
 
 								if (Math.abs(newPhi - oldPhi) > tiny) {
-									System.out.println("    new Phi = " + newPhi);
+									if (first && (newPhi > oldPhi)) {
+										System.out.println("    new Phi = " + newPhi);
+										gdata[PHI].n += 1;
+									}
 									oldPhi = newPhi;
+									
 								}
 								
-//								if (Math.abs(newRho - oldRho) > tiny) {
-//									System.out.println("  new Rho = " + newRho/10); //mm to cm
-//									oldRho = newRho;
-//								}
+								if (Math.abs(newRho - oldRho) > tiny) {
+	//								System.out.println("  new Rho = " + newRho/10); //mm to cm
+									
+									if (checkrho && (newRho < oldRho)) {
+										checkrho = false;
+									}
+									if (checkrho &&  (newRho > oldRho)) {
+										gdata[RHO].n += 1;
+									}
+			     					oldRho = newRho;
+									
+
+								}
 
 								
 								if (Math.abs(newZ - oldZ) > tiny) {
-									System.out.println("new Z = " + newZ/10); //mm to cm
+	//								System.out.println("new Z = " + newZ/10); //mm to cm
 									oldZ = newZ;
 								}
 								count++;
@@ -165,28 +201,30 @@ public class Converter {
 				zIndex++;
 			} // end file loop
 
+			return gdata;
 		} else {
 			System.err.println("No files!");
+			return null;
 		}
 	}
 
 	// process all the files
-	private static void processAllFiles(ArrayList<File> files) throws IOException {
+	private static void processAllFiles(ArrayList<File> files, GridData gdata[]) throws IOException {
 		if (!files.isEmpty()) {
 
 			File bfile = new File(getDataDir(), "torus.binary");
 			DataOutputStream dos = new DataOutputStream(new FileOutputStream(bfile));
 
-			int nPhi = 181;
-			int nRho = 251;
-			int nZ = 251;
+			int nPhi = gdata[PHI].n;
+			int nRho = gdata[RHO].n;
+			int nZ = gdata[Z].n;
 
-			float phimin = 0.0f;
-			float phimax = 360.0f;
-			float rhomin = 0.0f;
-			float rhomax = 500.0f;
-			float zmin = 100.0f;
-			float zmax = 600.0f;
+			float phimin = (float) gdata[PHI].min;
+			float phimax = (float) gdata[PHI].max;
+			float rhomin = (float) gdata[RHO].min;
+			float rhomax = (float) gdata[RHO].max;
+			float zmin = (float) gdata[Z].min;
+			float zmax = (float) gdata[Z].max;
 
 			dos.writeInt(0xced);
 			dos.writeInt(0);
@@ -222,7 +260,7 @@ public class Converter {
 
 			int zIndex = 0;
 
-			FloatVect[][][] bvals = new FloatVect[181][251][251];
+			FloatVect[][][] bvals = new FloatVect[nPhi][nRho][nZ];
 
 			for (File file : files) {
 
@@ -238,8 +276,8 @@ public class Converter {
 							String tokens[] = AsciiReadSupport.tokens(line);
 							if ((tokens != null) && (tokens.length == 7)) {
 
-								int rhoIndex = count % 251;
-								int phiIndex = count / 251;
+								int rhoIndex = count % nRho;
+								int phiIndex = count / nRho;
 
 								// note t to kG
 								float Bx = Float.parseFloat(tokens[3]) * 10;
@@ -267,10 +305,10 @@ public class Converter {
 
 			} // end for loop
 
-			for (int iPHI = 0; iPHI < 181; iPHI++) {
+			for (int iPHI = 0; iPHI < nPhi; iPHI++) {
 				System.out.println("iPHI = " + iPHI);
-				for (int iRHO = 0; iRHO < 251; iRHO++) {
-					for (int iZ = 0; iZ < 251; iZ++) {
+				for (int iRHO = 0; iRHO < nRho; iRHO++) {
+					for (int iZ = 0; iZ < nZ; iZ++) {
 						FloatVect fcv = bvals[iPHI][iRHO][iZ];
 						dos.writeFloat(fcv.x);
 						dos.writeFloat(fcv.y);
@@ -292,18 +330,36 @@ public class Converter {
 		String dataDir = getDataDir();
 		System.out.println("data dir = [" + dataDir + "]");
 
-//		try {
-//			checkAllFiles(dataFiles(dataDir));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		GridData gdata[] = null;
+		try {
+			gdata = checkAllFiles(dataFiles(dataDir));
+			System.out.println("PHI: " + gdata[PHI]);
+			System.out.println("RHO: " + gdata[RHO]);
+			System.out.println("Z: " + gdata[Z]);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-		 try {
-		 processAllFiles(dataFiles(dataDir));
-		 } catch (IOException e) {
-		 e.printStackTrace();
-		 }
+		if (gdata != null) {
+			try {
+				processAllFiles(dataFiles(dataDir), gdata);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		System.out.println("done");
+	}
+	
+	class GridData {
+		public int n = 0;
+		public double min = Double.POSITIVE_INFINITY;
+		public double max = Double.NEGATIVE_INFINITY;
+		
+		@Override
+		public String toString() {
+			return String.format("N = %d   min = %12.5f  max = %12.5f", n, min, max);
+		}
 	}
 
 }
