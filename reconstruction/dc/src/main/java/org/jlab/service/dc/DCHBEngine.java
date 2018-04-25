@@ -58,10 +58,11 @@ public class DCHBEngine extends ReconstructionEngine {
     
     /**
      * 
-     * determine torus map name from yaml, else env, else crash
+     * determine torus and solenoid map name from yaml, else env, else crash
      */
     private void initializeMagneticFields() {
         String torusMap=this.getEngineConfigString("torusMap");
+        String solenoidMap=this.getEngineConfigString("solenoidMap");
         if (torusMap!=null) {
             System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
         }
@@ -72,11 +73,27 @@ public class DCHBEngine extends ReconstructionEngine {
             }
         }
         if (torusMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map in yaml or env.");
+            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
+        }
+        if (solenoidMap!=null) {
+            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
+        }
+        else {
+            solenoidMap = System.getenv("SOLENOIDMAP");
+            if (solenoidMap!=null) {
+                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
+            }
+        }
+        if (solenoidMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
         }
         String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
-        // pending updates from Dave:
-        //MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap);
+        try {
+            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -140,11 +157,11 @@ public class DCHBEngine extends ReconstructionEngine {
         if(newRun==0)
         	return true;
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
-            if(newRun>1000) {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-            } else {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-            }
+//            if(newRun>1000) {
+//                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+//            } else {
+//                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+//            }
             
             TableLoader.FillT0Tables(newRun);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
